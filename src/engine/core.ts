@@ -44,8 +44,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     } else if (newAndRepeatedKeys.has("LEFT")) {
       draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, -1), hasActed: true };
     } else if (newKeys.has("A")) {
-      draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0 };
-      monPic = openMonPic(draftScreen.hasActed);
+      monPic = openMonPic(draftScreen.hasActed, draftScreen.hasOpenedMonPic);
+      draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0, hasOpenedMonPic: true };
     }
   } else if (isMonPicInputReady(monPic)) {
     // Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT: only reachable once

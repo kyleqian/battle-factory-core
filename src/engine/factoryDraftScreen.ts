@@ -75,6 +75,8 @@ export interface DraftScreenState {
   monPic: MonPicState;
   /** Has any LEFT/RIGHT/UP/DOWN been processed yet - see monPic.ts's variant-selection comment. */
   hasActed: boolean;
+  /** Has any ball-open happened yet this session - see monPic.ts's `blended` doc. */
+  hasOpenedMonPic: boolean;
 }
 
 /** Select_UpdateBallCursorPosition: wraps at both ends of the 6 slots. */
@@ -188,4 +190,5 @@ export const ANCHOR_DRAFT_SCREEN_STATE: DraftScreenState = {
   message: "Select the first POKéMON.",
   monPic: INITIAL_MON_PIC_STATE,
   hasActed: false,
+  hasOpenedMonPic: false,
 };

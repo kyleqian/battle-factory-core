@@ -9,42 +9,48 @@
 //
 // The per-tick window-growth/flash-width sequence does NOT follow a single
 // clean "one step every frame" model. Dense oracle probing (bin/oracle run,
-// captureFrames every tick) of both open/close transitions in
-// tools/compare/traces/draft-menu.json (2 slots, 2 open+close cycles) found
-// TWO distinct timings:
+// captureFrames every tick) of open/close transitions in
+// tools/compare/traces/draft-menu.json (2 slots, 2 open+close cycles) and
+// draft-menu-slot6.json (1 slot, every frame 0-65) found THREE distinct
+// open timings (close only needs two so far):
 //   - "A" variant: triggered right after a stretch of pure idle (no LEFT/
 //     RIGHT/UP/DOWN yet processed this screen) - has a duplicate-hold tick
 //     and a doubled window-growth step partway through.
 //   - "B" variant: triggered after at least one LEFT/RIGHT/UP/DOWN has
-//     already been processed - a clean one-step-per-tick sequence, but with
-//     one extra held tick at full flash width before the window starts
-//     growing.
-// Cycle 1 of draft-menu.json (open fresh from the anchor) hits variant A;
-// its close (after 3 DOWN presses) and cycle 2's open (after 3 RIGHT
-// presses) both hit variant B. This is very likely a GPU-register-latch or
-// task-scheduling artifact of interaction with reference/pokeemerald's
-// incremental text-printer (RunTextPrinters, still draining glyphs for a
-// few frames after the most recent redraw) - not re-derived from first
-// principles, just pinned from the oracle. Whichever LEFT/RIGHT/UP/DOWN
-// last fired before OpenMonPic/CloseMonPic is what the real game keys off
-// of; we approximate it with "has any such input ever fired yet", which is
-// exact for every committed trace but may not generalize to an arbitrary
-// interleaving - see ISSUES.md if a future trace exposes a gap.
+//     already been processed, AND at least one ball has opened before this
+//     one - a clean one-step-per-tick sequence, but with one extra held
+//     tick at full flash width before the window starts growing.
+//   - "C" variant: triggered after at least one LEFT/RIGHT/UP/DOWN has
+//     already been processed, but this is still the session's very first
+//     ball-open (draft-menu-slot6.json: LEFT then A) - same flash-phase
+//     shape as A, but the window-growth hold/skip sit at different ticks
+//     than either A or B (hold right at the start, skip right after).
+// This is very likely a GPU-register-latch or task-scheduling artifact of
+// interaction with reference/pokeemerald's incremental text-printer
+// (RunTextPrinters, still draining glyphs for a few frames after the most
+// recent redraw) - not re-derived from first principles, just pinned from
+// the oracle per variant. Whichever LEFT/RIGHT/UP/DOWN last fired before
+// OpenMonPic/CloseMonPic is what the real game keys off of; we approximate
+// it with "has any such input ever fired yet", which is exact for every
+// committed trace but may not generalize to an arbitrary interleaving - see
+// ISSUES.md if a future trace exposes a gap.
 //
-// Separately, the flash bar's color is only the ball's flat native color
-// (214,255,239) for the very first ball-open of the screen. Every
-// subsequent flash (that same close, and every later open/close) instead
-// renders as that color alpha-blended with whatever's underneath (ball OBJ
-// or BG1) at the same EVA=11/EVB=4 ratio as the window - because the flash
-// sprite's OAM entry is objMode=ST_OAM_OBJ_BLEND (forces it to participate
-// in blending whenever BLDCNT's effect is active), and Task_OpenMonPic's
-// case1 configures BLDCNT/BLDALPHA once and never resets them, so it stays
-// configured for the rest of the screen's life once the first open reaches
-// that point. Tracked independently of the timing variant above via
-// `blendFlash` (false only until the very first open configures BLDCNT).
+// Separately (MonPicState.blended, NOT coupled to the A/B/C variant above):
+// the flash bar's color is only the ball's flat native color (214,255,239)
+// during the session's very first ball-open. Every flash after that
+// (including the rest of that first open's own close, and every later
+// open/close) instead renders as that color alpha-blended with whatever's
+// underneath (ball OBJ or BG1) at the same EVA=11/EVB=4 ratio as the window
+// - because the flash sprite's OAM entry is objMode=ST_OAM_OBJ_BLEND
+// (forces it to participate in blending whenever BLDCNT's effect is
+// active), and Task_OpenMonPic's case1 configures BLDCNT/BLDALPHA once and
+// never resets them, so it stays configured for the rest of the screen's
+// life once the first open reaches that point. draft-menu-slot6.json proved
+// this is independent of the timing variant: its open is "C" (hasActed) but
+// still unblended (still the session's first-ever open).
 
 export type MonPicPhase = "closed" | "opening" | "open" | "closing";
-type Variant = "A" | "B";
+type Variant = "A" | "B" | "C";
 
 export interface MonPicState {
   phase: MonPicPhase;
@@ -52,6 +58,17 @@ export interface MonPicState {
   elapsed: number;
   /** Which measured timing table this opening/closing run follows (meaningless for "closed"/"open"). */
   variant: Variant;
+  /**
+   * Whether the flash sprite blends against its background this run (see
+   * module comment). Captured once at open/close time, independent of
+   * `variant`: it tracks Task_OpenMonPic's case1 (BLDCNT/BLDALPHA setup,
+   * which runs once per open but whose *effect* - the flash sprite's
+   * objMode=ST_OAM_OBJ_BLEND participating in blending - only becomes
+   * observable once BLDCNT's blend effect has been configured at least once
+   * this session, and then stays configured forever). False only during the
+   * flash phase of the session's very first-ever open.
+   */
+  blended: boolean;
 }
 
 export interface MonPicVisual {
@@ -155,6 +172,46 @@ const OPEN_TABLE_B: MonPicVisual[] = [
   OPEN_STEADY,
 ];
 
+// Variant C: hasActed (a cursor move already fired) but this is still the
+// session's very first ball-open - oracle-measured from
+// draft-menu-slot6.json (dense every-frame capture). Same flash-phase shape
+// as variant A (12 flash ticks, un-blended - see MonPicState.blended), but a
+// differently-positioned window-growth hold/skip than either A or B: the
+// hold comes right at the start (two ticks at top=60) and the skip comes
+// right after (top=52, skipping 56), rather than A's hold-in-the-middle or
+// B's extra pre-window flash hold. Not re-derived from first principles
+// (same GPU-register-latch/task-scheduling caveat as A/B - see module
+// comment); pinned from the oracle.
+const OPEN_TABLE_C: MonPicVisual[] = [
+  HIDDEN,
+  HIDDEN,
+  HIDDEN,
+  flash(1, false),
+  flash(1, false),
+  flash(4, false),
+  flash(4, false),
+  flash(8, false),
+  flash(8, false),
+  flash(16, false),
+  flash(16, false),
+  flash(32, false),
+  flash(32, false),
+  flash(64, false),
+  flash(64, false),
+  win(60, 69),
+  win(60, 69), // oracle-measured duplicate hold
+  win(52, 77), // oracle-measured skip (top=56 never renders)
+  win(48, 81),
+  win(44, 85),
+  win(40, 89),
+  win(36, 93),
+  win(36, 93), // oracle-measured duplicate hold
+  win(32, 96),
+  win(32, 96),
+  { ...win(32, 96), spriteVisible: true, menuTextVisible: true },
+  OPEN_STEADY,
+];
+
 // idx = ticks since the tick JOY_NEW(B) fired (idx0 = that same tick's
 // render - CloseMonPic's immediate sprite-free/popup-erase effects only
 // become visible starting idx1).
@@ -204,29 +261,46 @@ const CLOSE_TABLE_B: MonPicVisual[] = [
   flash(1, true),
 ];
 
-export const INITIAL_MON_PIC_STATE: MonPicState = { phase: "closed", elapsed: 0, variant: "A" };
+export const INITIAL_MON_PIC_STATE: MonPicState = { phase: "closed", elapsed: 0, variant: "A", blended: false };
 
-/** OpenMonPic: called the same tick JOY_NEW(A) is handled. `hasActed` = has any LEFT/RIGHT/UP/DOWN been processed yet this screen. */
-export function openMonPic(hasActed: boolean): MonPicState {
-  return { phase: "opening", elapsed: 0, variant: hasActed ? "B" : "A" };
+function openTableFor(variant: Variant): MonPicVisual[] {
+  if (variant === "A") return OPEN_TABLE_A;
+  if (variant === "C") return OPEN_TABLE_C;
+  return OPEN_TABLE_B;
 }
 
-/** CloseMonPic: called the same tick JOY_NEW(B) (or A-on-OTHERS) is handled. */
+/**
+ * OpenMonPic: called the same tick JOY_NEW(A) is handled. `hasActed` = has
+ * any LEFT/RIGHT/UP/DOWN been processed yet this screen (picks the
+ * window-growth timing table). `hasOpenedBefore` = has any ball-open
+ * happened yet this session (picks the flash blend color - see
+ * MonPicState.blended doc).
+ */
+export function openMonPic(hasActed: boolean, hasOpenedBefore: boolean): MonPicState {
+  const variant: Variant = !hasActed ? "A" : hasOpenedBefore ? "B" : "C";
+  return { phase: "opening", elapsed: 0, variant, blended: hasOpenedBefore };
+}
+
+/** CloseMonPic: called the same tick JOY_NEW(B) (or A-on-OTHERS) is handled. Always blended: a close can only follow an open, which always configures BLDCNT first. */
 export function closeMonPic(hasActed: boolean): MonPicState {
-  return { phase: "closing", elapsed: 0, variant: hasActed ? "B" : "A" };
+  return { phase: "closing", elapsed: 0, variant: hasActed ? "B" : "A", blended: true };
 }
 
 /** Advance by one tick; call before applying this tick's input (open/closeMonPic override the result). */
 export function advanceMonPic(state: MonPicState): MonPicState {
   if (state.phase === "opening") {
-    const table = state.variant === "A" ? OPEN_TABLE_A : OPEN_TABLE_B;
+    const table = openTableFor(state.variant);
     const next = state.elapsed + 1;
-    return next >= table.length ? { phase: "open", elapsed: 0, variant: state.variant } : { ...state, elapsed: next };
+    return next >= table.length
+      ? { phase: "open", elapsed: 0, variant: state.variant, blended: state.blended }
+      : { ...state, elapsed: next };
   }
   if (state.phase === "closing") {
     const table = state.variant === "A" ? CLOSE_TABLE_A : CLOSE_TABLE_B;
     const next = state.elapsed + 1;
-    return next >= table.length ? { phase: "closed", elapsed: 0, variant: state.variant } : { ...state, elapsed: next };
+    return next >= table.length
+      ? { phase: "closed", elapsed: 0, variant: state.variant, blended: state.blended }
+      : { ...state, elapsed: next };
   }
   return state;
 }
@@ -237,10 +311,14 @@ export function getMonPicVisual(state: MonPicState): MonPicVisual {
       return HIDDEN;
     case "open":
       return OPEN_STEADY;
-    case "opening":
-      return (state.variant === "A" ? OPEN_TABLE_A : OPEN_TABLE_B)[state.elapsed] ?? OPEN_STEADY;
-    case "closing":
-      return (state.variant === "A" ? CLOSE_TABLE_A : CLOSE_TABLE_B)[state.elapsed] ?? HIDDEN;
+    case "opening": {
+      const visual = openTableFor(state.variant)[state.elapsed] ?? OPEN_STEADY;
+      return visual.flashWidth > 0 ? { ...visual, flashBlended: state.blended } : visual;
+    }
+    case "closing": {
+      const visual = (state.variant === "A" ? CLOSE_TABLE_A : CLOSE_TABLE_B)[state.elapsed] ?? HIDDEN;
+      return visual.flashWidth > 0 ? { ...visual, flashBlended: state.blended } : visual;
+    }
   }
 }
 
