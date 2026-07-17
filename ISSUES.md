@@ -6,18 +6,23 @@ one, **delete the entry** in the same docs commit that records the fix in
 symptom, what's confirmed from the reference/oracle, and any leads.
 
 ## #7 — `ballAnimStall`'s LEFT/RIGHT branch is wrong once 2+ balls are
-  simultaneously active (RAM-DISPROVEN three more hypotheses across two
-  sessions - see "fourth worker update" then "fifth worker update": neither
-  active-ball count, "first cursor move only", NOR "entering slot's species
-  alone" predicts the data - the species-only table the supervisor
-  user-delegated-sanctioned this session was ITSELF RAM-DISPROVEN by a clean
-  counterexample (HAUNTER stalls at one count/direction/origin, does NOT
-  stall at another) - fix not yet implemented, no per-species table was
-  coded. Blocks `rent-3picks.json`. The separate post-confirm
-  cursor-input-drop bug this entry previously flagged is FIXED
-  (`isCursorInputReady`, see PROGRESS); a fresh repro just needs any dwell
-  `>= 20 ticks` after a confirm's press-tick before the next cursor move
-  (`isCursorInputReady`'s own RAM-verified minimum) to avoid it entirely.
+  simultaneously active (**sixth worker update: the "contradiction" that
+  drove the fifth update's stop was ITSELF a measurement artifact - the
+  fourth update's own P_STALL data point (HAUNTER, count3/RIGHT/origin3,
+  "stalls") is RAM-DISPROVEN AS A VALID READ: completing a 3rd rent
+  irreversibly exits cursor mode into the YES/NO confirm screen on the SAME
+  tick, so a count=3 LEFT/RIGHT move is impossible in the real game - R5's
+  cursor never actually reached slot4. With that point discarded, the
+  species-only table is RESURRECTED with a corrected 2-species safe-list**
+  {BAYLEEF, HAUNTER} never stall; {MAGBY, BUTTERFREE, ONIX, QUILAVA} always
+  stall - fits every remaining valid data point (counts 1-2, both
+  directions, multiple origins). Fix not yet implemented (this was a
+  probe-only step); no per-species table was coded. Blocks
+  `rent-3picks.json`. The separate post-confirm cursor-input-drop bug this
+  entry previously flagged is FIXED (`isCursorInputReady`, see PROGRESS); a
+  fresh repro just needs any dwell `>= 20 ticks` after a confirm's
+  press-tick before the next cursor move (`isCursorInputReady`'s own
+  RAM-verified minimum) to avoid it entirely.
 
 **Symptom:** building the 3-pick dense trace (rent slot1 → RIGHT → rent
 slot2 → RIGHT → rent slot3, each rent = `A`(2f) idle28f `DOWN`(2f) idle4f
@@ -440,6 +445,173 @@ is now the *second* consecutive sanctioned/confirmed rule RAM-disproven by
 the following session - worth flagging to whoever owns the user-delegated
 policy decision for #7, per entry 26's DECISIONS block, that empirical-table
 modeling has not yet produced a rule that survives a fresh probe).
+
+**Sixth worker update (supervisor-mandated minimal-pair probes, per PROGRESS
+entry 27's "Supervisor ruling for the next session"): PROBE A (mandated,
+count differs from P_STALL only) reads clean and decisive as
+NO STALL; PROBE B (mandated, count=3/LEFT/origin5) turned out to be
+IMPOSSIBLE TO CONSTRUCT - and re-deriving *why* directly invalidates
+P_STALL itself as a data point. Full writeup below.**
+
+**Method:** same corrected `struct Sprite` offsets as the third/fourth/fifth
+updates (`animNum` u8@0x2A, `animCmdIndex` u8@0x2B, `data[0]` s16@0x2E,
+`animEnded` bit 0x10 of u16@0x3E), `ballSpriteId` read from
+`sFactorySelectScreen->mons[i].ballSpriteId`, `cursorPos` read from
+`sFactorySelectScreen->cursorPos` (struct field order confirmed against
+`reference/pokeemerald/src/battle_factory_screen.c:102-123`: offset 3).
+Cadence-transition method as before (`MOVING_CMDS`' 4/8/32-tick durations are
+RNG-independent so an observed `duration+1` gap unambiguously means one
+stall), refined this session with a second signal: `data[0]` itself is the
+real hardware's REST COUNTDOWN (set to 32 the instant a SUCCESS roll fires at
+a cycle's start, held constant through the entire 128-tick moving cycle,
+then counted down 32→0 tick-by-tick once the cycle's own cadence exhausts +
+a fixed `REST_INTERNAL_OFFSET`(2) delay - matches `ballAnim.ts`'s existing
+model exactly); a stall shows up directly as a *repeated* `data[0]` value
+across two consecutive ticks during that countdown - a cleaner, more direct
+signal than inferring it from `animCmdIndex` transition gaps alone, and used
+below to cross-calibrate an otherwise-ambiguous read (see BUTTERFREE, PROBE
+A). Scratch scripts under `/tmp/issues7probe/` (not committed): `common.py`
+(shared oracle setup + tick recorder), `probe_a.py`, `probe_b.py`, `probe_c.py`
+(bonus), plus two diagnostic replications.
+
+**PROBE A** (HAUNTER entered at slot4 via count=1/RIGHT/origin=slot3 -
+differs from P_STALL in count ONLY): rent slot0 (ONIX, `RENT_SLOT1` shape,
+confirm press-tick 37 - cross-checked bit-exact against `ballAnim.test.ts`'s
+own frame-39 SUCCESS-roll checkpoint, `data0` 0→32 at tick 39 in this probe
+too), then 40-tick dwells + RIGHT×4 (slots 0→1→2→3→4). Action ticks (RAM,
+`cursorPos` changes): R1=79, R2=121, R3=163, **R4(decisive)=205**.
+
+| move | count/dir/origin | prior data | this probe |
+|---|---|---|---|
+| R1: 0→1 MAGBY | count1/RIGHT/origin0 | known **stall** (calibration) | **stall** (gap 72→105 = 33 = 32+1) |
+| R2: 1→2 BAYLEEF | count1/RIGHT/origin1 | known **no-stall** (calibration) | **no-stall** (gap 113→121 = 8, clean) |
+| R3: 2→3 BUTTERFREE | count1/RIGHT/origin2 | count2/RIGHT/origin2 (3rd/4th updates): **stall** | **stall** - see cross-calibration note below (this read alone lands on the cmdIndex16-exhaustion→rest-wrap boundary, ambiguous on its own; resolved via Probe B's independent RENT-confirm calibration of the same wrap shape, see Probe B section) |
+| **R4 (DECISIVE): 3→4 HAUNTER** | **count1/RIGHT/origin3** | P_STALL: count3/RIGHT/origin3 **stalls** | **NO STALL** (clean, unambiguous: window 203→207, gap 4, exactly matching `MOVING_CMDS[0]`'s duration, landing entirely *after* the wrap has already resolved - cross-checked against 6+ other clean duration-4/8/32 gaps in the same run) |
+
+**PROBE B** (mandated shape: rent slots 0,2,3, navigate to slot5, dwell,
+LEFT 5→4 - HAUNTER count3/LEFT/origin5, differing from P_NOSTALL in count
+ONLY and from P_STALL in {direction+origin} ONLY): **could not be completed
+as specified.** After the 3rd rent (slot3, confirm press-tick 319 in this
+script), `cursorPos` froze at 3 for the remaining 300+ ticks of the run
+despite three further RIGHT/RIGHT/LEFT presses - none registered. RAM read
+of `sFactorySelectScreen->selectingMonsState` after the 3rd rent: **4**
+(not 3). Screenshot at that point shows the "Are these three POKéMON OK?"
+YES/NO confirmation screen, not the draft cursor screen.
+
+**Root cause (reference-confirmed):** `selectingMonsState` initializes to
+**1**, not 0 (so a mon's `selectedId` - set to the *pre-increment* value of
+`selectingMonsState` - is never confused with 0/unselected;
+`Select_HandleMonSelectionChange`, `battle_factory_screen.c:1432-1436`). It
+increments by 1 on every successful rent. `Select_OptionRentDeselect`
+(`battle_factory_screen.c:1949-1968`) checks
+`if (sFactorySelectScreen->selectingMonsState > FRONTIER_PARTY_SIZE) return
+SELECT_CONFIRM_MONS;` **on the very same tick the rent's own confirm
+completes** (`FRONTIER_PARTY_SIZE` = 3, `include/constants/global.h:35`) -
+after exactly 3 successful rents, `selectingMonsState` is 1+3 = 4, `4 > 3` is
+true, and the screen hands off to `Select_Task_HandleYesNo` immediately,
+with **no intervening tick** where "3 balls active AND cursor mode still
+responds to LEFT/RIGHT" exists. This is a hard, structural impossibility,
+not a probe-script bug - confirmed independently via a fresh probe (this
+session's Probe B) AND via an **exact tick-for-tick re-replication of the
+fourth worker update's own original R5 script** (rent0 → R1(0→1) →
+R2(1→2) → rent2 → R3(2→3) → L1(3→2) → R4(2→3) → rent3 → **R5(3→4)**):
+`cursorPos` after the R5 RIGHT press is still **3**, never reaches 4;
+`selectingMonsState` reads 4; the screenshot again shows the YES/NO prompt.
+
+**This directly invalidates P_STALL.** The fourth worker update's R5
+("HAUNTER, count3/RIGHT/origin3, active-before {0,2,3}, stalls") was not a
+genuine `ballAnimStall` LEFT/RIGHT-branch observation - the cursor never
+moved from slot3 to slot4 in the real game at that point in that script; the
+screen had already handed off to the YES/NO confirm. Whatever cadence
+anomaly the fourth update attributed to "entering HAUNTER" was measured
+against an already-exited screen state and is not evidence of anything
+`ballAnimStall`-related. **Every historical count=3 LEFT/RIGHT data point in
+this issue's history is void** (R5 is the only one that was ever claimed;
+no other entry reports a count=3 LEFT/RIGHT read) - count=3 is simply
+unreachable via a legal LEFT/RIGHT cursor move in the real game, full stop.
+
+Bonus data captured by Probe B before hitting the wall (same calibration +
+one new confirmation, all cross-checked against 6+ clean neighboring gaps):
+
+| move | count/dir/origin | prior data | this probe |
+|---|---|---|---|
+| 0→1 MAGBY | count1/RIGHT/origin0 | known stall | **stall** (calibration, matches) |
+| 1→2 BAYLEEF | count1/RIGHT/origin1 | known no-stall | **no-stall** (calibration, matches) |
+| 2→3 BUTTERFREE | count2/RIGHT/origin2, active{0,2} | 3rd/4th updates: stall | **stall** (ball0 gap 33=32+1 AND ball2 gap 33=32+1, both independently confirm) |
+| slot2 RENT-confirm (press-tick 199) | RENT/DESELECT, active{0} | known: always stalls other active balls | **stall** (directly visible: ball0's `data0` frozen at value 2 across BOTH ticks 199 and 200 - the cleanest possible stall signature, used to calibrate the wrap-window baseline and resolve Probe A's ambiguous BUTTERFREE (R3) read above as **stall**, consistent with prior BUTTERFREE data) |
+
+**PROBE C (bonus, added given Probe B's finding):** since count=3 is
+unreachable, re-tested HAUNTER at **count=2** (a legitimately reachable
+state) to check it isn't a fluke of count=1: rent slot0 → R1(0→1 MAGBY,
+stall) → R2(1→2 BAYLEEF, no-stall) → R3(2→3 BUTTERFREE, stall) → rent slot3
+→ **RIGHT (3→4 HAUNTER, count2/RIGHT/origin3, active-before {0,3}, action
+tick 283)**. Result: **NO STALL**, doubly confirmed - ball0's window
+(276→284, gap 8, clean) AND ball3's window (275→307, gap 32, clean) both
+show zero extra ticks.
+
+**Decision-matrix verdict:** this doesn't map cleanly onto the four rows
+sketched going in (all of which assumed Probe B would return a stall/no-stall
+verdict), but it resolves to the closest one: **"P_STALL is the only odd
+point; re-replicate the fourth update's R5 script exactly to check whether
+P_STALL itself was a misread"** - done, and it WAS a misread, for a more
+fundamental reason than a mistimed cadence read (the cursor move behind it
+never happened at all). With P_STALL discarded, HAUNTER now shows **NO
+STALL at every legitimately-tested condition**: count1/RIGHT/origin3 (Probe
+A, this session), count1/LEFT/origin5 (fifth update's P_NOSTALL),
+count2/RIGHT/origin3 (Probe C, this session) - fully consistent with being a
+second "safe" species alongside BAYLEEF, not a contradiction of anything.
+
+**Full keyed data table (every valid LEFT/RIGHT data point across all
+sessions, count=3 entries excluded as unreachable):**
+
+| species | count | dir | origin | stalled? | source |
+|---|---|---|---|---|---|
+| BAYLEEF | 1 | RIGHT | 1 | no | 5th update, this session's R2/Probe A & B |
+| BAYLEEF | 1 | LEFT | 3 | no | 5th update |
+| BAYLEEF | 2 | RIGHT | 1 | no | 3rd/4th update |
+| BAYLEEF | 2 | LEFT | 3 | no | 4th update |
+| HAUNTER | 1 | RIGHT | 3 | **no** | **this session, Probe A (decisive)** |
+| HAUNTER | 1 | LEFT | 5 | no | 5th update (P_NOSTALL) |
+| HAUNTER | 2 | RIGHT | 3 | **no** | **this session, Probe C** |
+| MAGBY | 1 | RIGHT | 0 | yes | 4th update, this session's R1 ×3 |
+| BUTTERFREE | 1 | RIGHT | 2 | yes | this session, Probe A/C (calibrated via Probe B) |
+| BUTTERFREE | 2 | RIGHT | 2 | yes | 3rd/4th update, this session's Probe B |
+| ONIX | 1 | LEFT | 1 | yes | 5th update |
+| QUILAVA | 1 | LEFT | 0(wrap) | yes | 5th update |
+
+**Every row is explained by one variable: the entering slot's species.**
+{BAYLEEF, HAUNTER} never stall (6 occurrences, both directions, 3 origins,
+counts 1-2); {MAGBY, BUTTERFREE, ONIX, QUILAVA} always stall (6
+occurrences). No count, direction, or origin dependence survives once the
+sole count=3 data point (P_STALL/R5) is recognized as void. **The
+species-only table (PROGRESS entry 26's original sanctioned approach) is
+resurrected, with a corrected safe-list of 2 species instead of 1** -
+BAYLEEF's specialness wasn't unique; HAUNTER shares it. RENT/DESELECT
+confirms remain confirmed count/species-independent (always stall every
+other active ball - third update, re-confirmed again this session).
+
+**Not attempted this session (per the ~5-6 probe budget and the brief's
+"report major news and stop" clause):** re-testing ONIX/MAGBY/QUILAVA at a
+second count, or testing a 7th/8th species outside this anchor's fixed pool
+(none exists - only 6 rental slots). Given the clean 12/12 fit above, further
+probing would be confirmatory rather than discriminating.
+
+**Next session:** (1) get sign-off on implementing the corrected 2-species
+safe-list table (`ballAnimStall`'s LEFT/RIGHT branch: skip the stall for
+every active ball when the entering species is BAYLEEF or HAUNTER, keep the
+existing "stall everyone active" formula otherwise), pinned with a Tier-1
+test asserting both safe species' cadence stays clean against this session's
+own RAM-dumped checkpoints; (2) `rent-3picks.json` can then be
+attempted, BUT note Probe B's finding means the exact trace this issue was
+originally chasing (3 simultaneous active balls, a further LEFT/RIGHT move)
+is **impossible in the real game** - `rent-3picks.json`'s own design (per
+PROGRESS-archive #21's spec) should be re-checked against this constraint
+before building it, since any dense capture window assuming a post-3rd-rent
+cursor move would itself be testing an unreachable game state; (3) if a
+per-species table feels uncomfortably ad hoc even with 12/12 fit, the
+render-cost-race theory (`GetStringRightAlignXOffset`) remains a live
+fallback per PROGRESS entry 27's ruling, but is no longer obviously needed
+given the clean fit above.
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
