@@ -5,13 +5,13 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #7 — multi-ball `ballAnimStall` model still wrong once a ball accumulates
-  several stall events: ball tile mismatches appear during pure-idle dwell
-  with 2-3 balls rented, unrelated to ISSUES #5's popup-close window (blocks
-  `rent-3picks.json`). The separate post-confirm cursor-input-drop bug this
-  entry previously flagged is FIXED (`isCursorInputReady`, see PROGRESS) -
-  it was NOT the cause of this issue's own mismatches (RAM-confirmed, see
-  "second worker update" below); a fresh repro just needs any dwell
+## #7 — `ballAnimStall`'s LEFT/RIGHT branch over-stalls once 2+ balls are
+  simultaneously active (RAM-DISPROVEN: a RIGHT cursor move with 2 active
+  balls costs neither of them a tick, but the current code still stalls
+  both) - root cause and exact mechanism identified (see "third worker
+  update"), fix not yet implemented. Blocks `rent-3picks.json`. The separate
+  post-confirm cursor-input-drop bug this entry previously flagged is FIXED
+  (`isCursorInputReady`, see PROGRESS); a fresh repro just needs any dwell
   `>= 20 ticks` after a confirm's press-tick before the next cursor move
   (`isCursorInputReady`'s own RAM-verified minimum) to avoid it entirely.
 
@@ -163,16 +163,109 @@ countdown has itself been stalled multiple times by other balls' triggers
 along the way, but this was not root-caused this session - RAM data stops
 at tick 204's discovery, not yet enough to derive the correct formula.
 
-**Status:** the two/three-*simultaneous*-stall question (this issue's
-original title) is answered and needs no fix. The remaining open bug is
-narrower: a ball's *own* internal reroll timer desyncs by (at least) 1 tick
-after accumulating several stall events over its lifetime. Next session:
-dump `gSprites[0]` densely from tick ~195-210 in both RAM and engine (only a
-few ticks needed, not a fresh 200-tick probe) to see exactly which internal
-counter (`timer`/`pendingRest` in `ballAnim.ts`'s model) is off and by how
-much, then re-verify `ballAnim.test.ts`/`ballAnimMultiBall.test.ts` still
-pass unchanged before pinning a new test. `rent-3picks.json` and its
-`gRngValue` Tier-1 pin remain blocked on this.
+**Status (superseded again - see "third worker update" below):** the
+tick-204 mystery is now fully explained and the actual wrong rule is
+identified precisely - it is NOT a "4th accumulated stall composes wrong"
+internal-counter bug, it's that `ballAnimStall`'s LEFT/RIGHT branch
+over-applies once 2+ balls are simultaneously active. No fix has been
+implemented yet (ran out of session time deriving *why*, see below) -
+next session can likely go straight to a fix with the evidence already in
+hand.
+
+**Third worker update: found and fixed a bystander bug in every prior
+session's own RAM-probe methodology (wrong `struct Sprite` offsets), then
+used the corrected probe to fully resolve the tick-204 mystery - the ball
+DOES desync, but not from an internal-counter composition error: `ballAnimStall`'s
+"stall everyone active" rule is RAM-DISPROVEN for LEFT/RIGHT triggers once
+2+ balls are simultaneously active (RENT/DESELECT-confirm triggers are
+unaffected and still correct). This directly contradicts the "second worker
+update"'s own "RAM-CONFIRMED CORRECT" verdict above - that verdict was
+built on a probe using the same wrong offsets fixed here, and/or a sample
+window too narrow (37 ticks right around the trigger) to reach the ~30-tick-
+later transition where the missing stall would first become visible.**
+
+**The offset bug:** every prior session's RAM probe (this entry's own text
+above, `PROGRESS.md`/`PROGRESS-archive.md`) cited `struct Sprite` offsets
+`animNum`=0x2B, `animCmdIndex`=0x2E (as a `u8`), `data[0]`=0x2A. Direct
+read of `reference/pokeemerald/include/sprite.h:194-242` (ground truth,
+should have been consulted from the start instead of re-deriving offsets by
+feel) shows the real layout is `animNum` **u8 @0x2A**, `animCmdIndex`
+**u8 @0x2B**, `data[8]` **s16 array @0x2E** (so `data[0]` is a **2-byte
+signed** read at 0x2E, not a `u8`), `animEnded` bit `0x10` of the u16 at
+0x3E (that part was already right). All three non-`animEnded` fields were
+mislabeled/mistyped relative to each other. This doesn't invalidate the
+`gRngValue`-only findings (a separate, unambiguous global address, untouched
+by this bug) but does invalidate any claim in this entry's history that
+reasoned about which *sprite field* moved when.
+
+**Corrected repro + method:** rebuilt entry 21/23's exact original script
+(confirms landing at press-ticks 37/113/189, 36-tick dwells before each
+RIGHT - `A`×2/idle×28/`DOWN`×2/idle×4/`A`×2 per rent, `RIGHT`×2/idle×36
+between rents) against a fresh dev-time RAM probe (`EmeraldOracle`,
+corrected offsets above, dumping `animNum`/`animCmdIndex`/`data[0]` for
+`gSprites[0..2]` + `gRngValue` + `sFactorySelectScreen->cursorPos` every
+tick from an early anchor point through tick ~230; scratch script, not
+committed). Cross-referenced every `MOVING_CMDS`-cadence transition
+(4-or-8-or-32-tick steps, exact durations from `ballAnim.ts`'s own table)
+against its *naive* (zero-stall) expected tick to read off, per ball, per
+trigger, whether that specific trigger's stall-consumption tick (one tick
+after the trigger's own action tick) actually shifted the following
+transition by +1:
+
+| trigger (action tick) | balls active-before-action | ball0 shifted? | ball1 shifted? |
+|---|---|---|---|
+| RIGHT #1 (tick 75) | {0} | **yes** (+1) | n/a (not rented yet) |
+| RENT-confirm #2 (tick 113) | {0} (excl. acted slot 1) | **yes** (+1) | n/a (is the acted slot) |
+| RIGHT #2 (tick 151) | {0, 1} | **no** (+0) | **no** (+0) |
+| RENT-confirm #3 (tick 189) | {0, 1} (excl. acted slot 2) | **yes** (+1) | **yes** (+1) |
+
+`cursorPos` was independently confirmed to move 0→1 and 1→2 on both RIGHT
+presses (not gate-dropped), so RIGHT #2 is a genuine, accepted cursor move
+that simply doesn't cost anyone a tick - unlike RIGHT #1. Ball 0's total by
+tick 204: RIGHT#1 + confirm#2 + confirm#3 = **3** real stalls (not the
+previously-assumed 4, since RIGHT#2 contributes zero) - which lands its
+2nd roll (a FAILURE, same as the single-ball baseline's own frame-201
+FAILURE roll, RAM-pinned in `tests/ballAnim.test.ts`) at exactly
+201 + 3 = **tick 204**, bit-exact with RAM. The current `ballAnimStall`
+code computes a **4th** spurious stall (it still stalls both balls on
+RIGHT #2), predicting the roll one tick later than RAM - exactly matching
+entry 23's own observation ("the engine has neither transition fire - both
+stay parked one tick behind"). Mystery fully closed: this was never an
+internal-counter composition bug, it's this one over-stall.
+
+**Not yet root-caused:** *why* LEFT/RIGHT stops costing anyone a tick once
+2+ balls are active, while RENT/DESELECT-confirm keeps costing every
+non-acted-on active ball a tick regardless of count. Both call the same
+shaped `AddTextPrinterParameterized`+`CopyWindowToVram` pair
+(`Select_PrintMonCategory`+`Select_PrintMonSpecies` vs
+`Select_PrintSelectMonString`), so the mechanism entry 20 proposed (a
+same-tick text-print call stealing the *next* tick's `AnimateSprites()` for
+every other sprite) can't be the whole story as stated - something about
+LEFT/RIGHT specifically must stop applying past 1 active ball. Only 2 RIGHT
+presses were probed (both with disjoint ball-counts: 1-active and
+2-active) - not enough data points to tell "stalls only when exactly 1 ball
+active" from "stalls only the *first-ever* RIGHT" from some other rule
+(e.g. LEFT vs RIGHT parity, or something about which slot the cursor is
+leaving/entering). **Do not guess/hardcode either of these without one more
+RAM data point** - the cheapest next probe is a 3rd RIGHT press (slot2→
+slot?, 3 balls active - wraps to slot0 or needs a 4th rental slot) to see if
+it also costs zero, which would support the simple "count > 1" rule; a
+LEFT-instead-of-RIGHT variant with 2 active balls would rule out
+directional asymmetry.
+
+**Next session:** with the table above, the fix is likely a small,
+well-targeted change to `core.ts`'s LEFT/RIGHT branch (narrowing when
+`ballAnimStall = activeSlotsBeforeAction` applies) - but get the one more
+RAM data point above first so the fix is a proven rule, not a fit to two
+data points. HARD CONSTRAINT unchanged: `ballAnim.test.ts`/
+`ballAnimMultiBall.test.ts` stay green (verified this session's finding
+doesn't conflict with either - `ballAnimMultiBall.test.ts`'s own "two-ball
+scenario" never exercises a RIGHT/LEFT trigger with 2+ balls already
+active, only RENT-confirm triggers with 2+ active, which this session
+confirms are unaffected). Once fixed: RAM-verify pixels at the original
+repro's frames 124/155/163, add a Tier-1 test for the RIGHT-with-2+-active
+rule (including the tick-204 checkpoint), then `rent-3picks.json` per the
+brief's spec.
 
 ## #5 — mon-pic close animation: WIN0V catch-up jitter is real hardware
   cycle-timing, not a modelable game-state bug (root-caused, NOT fixable at

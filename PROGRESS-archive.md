@@ -5,6 +5,60 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 21 — S5 slice 2 (worker, capped): STOPPED before writing rent-3picks.json — found a SECOND, distinct multi-ball model gap (ISSUES #7): ball-tile pixel mismatches once a trigger stalls TWO already-active balls at once, a scenario ISSUES #6's fix never RAM-verified
+
+- **State:** unchanged from entry 20 — `npm test` **261/261**, `npm run
+  build` green, all 7 existing traces untouched at prior counts
+  (`rent-slot1.json` still **125/139**, file byte-identical). **No
+  `src/`/`tests/` changes this session** and **no `rent-3picks.json`
+  committed** — the investigation below found a real, unattributable model
+  gap that blocks building that trace correctly (same "stop and report
+  precisely" outcome as entry 19).
+- **Did:** Built a candidate 3-pick dense trace (rent slot1 → `RIGHT` → rent
+  slot2 → `RIGHT` → rent slot3, each rent = `A`(2f)/idle28f/`DOWN`(2f)/
+  idle4f/`A`(2f) confirm, matching `rent-slot1.json`'s own shape; confirms
+  land at press-ticks 37/113/189) and ran it through `npm run compare`
+  (scratch, not committed). Found `DIFF`s at **ball OBJ positions** during
+  plain idle dwell — outside ISSUES #5's popup-close window (`x88-151`)
+  entirely. Root-caused *which tile* is objectively correct per mismatched
+  frame via a RAM-free method: overlay each of a ball's 3 candidate anim
+  tiles directly onto a clone of the **oracle's own PNG** (same `drawSprite`
+  call the renderer uses) — the correct tile is the one whose overlay is a
+  pixel-exact no-op against the untouched oracle frame. Confirmed 3
+  mismatches this way (frame 124 ball-index-1 true=32/engine=0; frame 155
+  ball-index-0 true=32/engine=0; frame 163 same ball true=0/engine=32 — not
+  a constant offset, oscillates ahead/behind). Traced the likely mechanism:
+  by frame ~145 the trace's *second* `RIGHT` (slot1→slot2) stalls **two**
+  simultaneously-active balls (index 0 and 1) from one trigger —
+  `tests/ballAnimMultiBall.test.ts`'s only multi-ball RAM-pinned case never
+  reaches this shape (its trigger always stalls exactly **one** already-
+  active ball, never two at once). Ball 0 by frame 163 has accumulated
+  three stall-worthy triggers total (the first `RIGHT`, the slot-2 confirm,
+  and the second `RIGHT` shared with ball 1) — full details, evidence, and
+  the exact repro script are in **ISSUES #7** (new).
+- **Next:** ISSUES #7 needs a dev-time RAM probe of the same caliber as
+  ISSUES #6's own (`gSprites[ballSpriteId].data[0]`/`animNum`/`animEnded` per
+  ball, tick-by-tick) but for a 3-ball scenario with **two sequential**
+  cursor moves, to determine whether real hardware stalls both
+  simultaneously-active balls per trigger, only one, or something else —
+  do not guess/patch `ballAnimStall` without that data (a wrong guess would
+  silently re-break the already-verified two-ball case). Once resolved,
+  `rent-3picks.json` (dense captures through all 3 picks, ending at "Are
+  these three POKéMON OK?" — the exact endpoint tick before ANY reveal-chain
+  change was worked out this session: the 3rd confirm's own resulting frame,
+  since even the popup-preview close counts as part of the reveal chain per
+  `docs/confirm-flow-notes.md` §0) and the accompanying 3-ball `gRngValue`
+  Tier-1 RAM-pin are both unblocked and ready to build.
+- **Notes:** No `src/` edits were made (the investigation stayed read-only:
+  scratch TS probes comparing oracle/app PNGs directly, deleted before
+  finishing per instructions; the candidate trace file was likewise deleted
+  rather than committed broken, matching entry 19's own precedent of not
+  writing the trace when blocked). PAPERCUT: none beyond the usual
+  oracle-round-trip overhead (~6 `npm run compare`/probe round-trips this
+  session).
+
+---
+
 ## 20 — ISSUES #6 root-caused and fixed: multi-ball `SpriteCB_Pokeball` stall was never about mon-pic open/close — it's `Select_Print*` text-printer calls (cursor move + RENT/DESELECT confirm) stealing a tick from every OTHER rented ball; two-ball RNG stream now exact, ISSUES #6 DELETED
 
 - **Supervisor addendum (same day):** verified (208/208 → then merged the
