@@ -8,7 +8,11 @@ symptom, what's confirmed from the reference/oracle, and any leads.
 ## #7 — multi-ball `ballAnimStall` model still wrong once a THIRD ball enters
   the picture: ball tile mismatches appear during pure-idle dwell with 2
   balls rented, unrelated to ISSUES #5's popup-close window (blocks
-  `rent-3picks.json`)
+  `rent-3picks.json`); a SEPARATE, newly-found bug (cursor input accepted too
+  soon after a RENT-confirm's popup close, real hardware drops it) can
+  silently contaminate any repro script that doesn't dwell long enough
+  before a post-confirm cursor move - see "worker update" below before
+  building a new repro
 
 **Symptom:** building the 3-pick dense trace (rent slot1 → RIGHT → rent
 slot2 → RIGHT → rent slot3, each rent = `A`(2f) idle28f `DOWN`(2f) idle4f
@@ -78,6 +82,61 @@ and a wrong guess here would silently re-break that.
 assert ball-rock churn per the S5 brief) and the accompanying 3-ball
 `gRngValue` Tier-1 RAM-pin (would either pin a known-wrong stream or require
 fixing this first) - neither was committed this session; see `PROGRESS.md`.
+
+**Worker update (new session, RAM probe attempted, root cause of the
+two-simultaneous-stall question still NOT resolved - see why below):**
+built a 3-ball repro (`RENT_SLOT1`-shaped confirms for slots 0/1/2, a `RIGHT`
+between each) via the `tools/extract/inspect-anchor.py`-pattern RAM probe
+(dumping `gSprites[ballSpriteId].data[0]`/`animNum`/`animCmdIndex`/
+`animEnded` + `gRngValue` tick-by-tick, cross-checked against a matching
+engine replay of the identical button script). First attempt used a **10-tick
+dwell** between RENT_SLOT1's confirm and the following `RIGHT` (shorter than
+`ballAnimMultiBall.test.ts`'s own proven `DWELL_TO_SLOT2` = 40 ticks) and hit
+a **separate, previously-unknown bug** that invalidated the probe before it
+ever reached the intended two-simultaneous-active-balls trigger:
+- **Symptom:** RAM-verified directly (`sFactorySelectScreen->cursorPos`,
+  offset 3 in the struct, and `mons[i].selectedId`, offset 4): the `RIGHT`
+  press sent 10 ticks after RENT_SLOT1's confirm **never moved the cursor**
+  (`cursorPos` stayed 0 through tick118, confirmed by direct memory read) -
+  real hardware silently dropped it. The next `A` press (intended as "confirm
+  slot 1") landed on the STILL-cursored slot 0 instead and **deselected
+  it** (`mons[0].selectedId` flips 1→0 at tick97) rather than selecting slot
+  1. This engine's own replay of the identical button script does NOT
+  reproduce the drop - `core.ts`'s "cursor" mode branch
+  (`newAndRepeatedKeys.has("RIGHT")`) has no gate analogous to
+  `isMonPicInputReady()` (which DOES gate "menu"-mode input on the popup
+  finishing its open animation) - so the engine moves the cursor immediately
+  once `mode` flips back to `"cursor"`, even if real hardware is still mid
+  popup-close and would drop the input. This produced a completely
+  spurious-looking "ball tile mismatch" (ball 0's sprite fields reset at
+  tick99, matching a DESELECT's palette-driven `StartSpriteAnimIfDifferent(sprite,
+  0)` call, not any `ballAnimStall` effect) that has NOTHING to do with the
+  two-simultaneous-stall question this issue is actually about - it was a
+  contaminated repro, not a `ballAnimStall` finding. (Instrumentation itself
+  was cross-checked first via a single-ball control probe replaying
+  `RENT_SLOT1` alone to tick300: `animCmdIndex` progresses 0→16 exactly on
+  schedule, `animEnded` flips at tick168, `data[0]` decrements 32→31→30...
+  from tick169 - bit-exact match to the already-pinned model, so the probe's
+  own field offsets are correct; the drop is real, not a probe artifact.)
+- **Not yet known:** the actual minimum safe dwell before a post-confirm
+  cursor move (10 ticks is NOT enough; 40 ticks, per the existing pinned
+  test's `DWELL_TO_SLOT2`, is known-safe since that test passes exactly, but
+  the true threshold in between is unmeasured), and whether this drop is
+  specific to "cursor move right after a RENT/DESELECT confirm's close" or
+  is a broader "cursor mode input needs the popup fully closed" rule (would
+  mirror `isMonPicInputReady`'s existing "menu mode needs popup fully open"
+  gate as its close-side counterpart). Filed as a hazard for whoever builds
+  the next repro, not yet root-caused or fixed - out of scope for this
+  session's remaining time.
+- **The original two-simultaneous-stall question (this issue's primary
+  subject) is UNCHANGED and still fully open** - no valid RAM evidence was
+  gathered for it this session (the one probe attempt was contaminated by
+  the drop above before reaching the discriminating trigger). Next session:
+  rebuild the repro using a `DWELL_TO_SLOT2`-length (≥40-tick) dwell before
+  EVERY cursor move (not just the first), then apply the same
+  `gSprites[]`/`gRngValue` dump-and-diff method (fast to redo - the control
+  probe alone took under 2 minutes end-to-end) to the point where a second
+  `RIGHT` has two already-active balls to stall.
 
 ## #5 — mon-pic close animation: WIN0V catch-up jitter is real hardware
   cycle-timing, not a modelable game-state bug (root-caused, NOT fixable at

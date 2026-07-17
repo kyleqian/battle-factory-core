@@ -5,6 +5,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 22 — S5 slice 2 (worker, capped): STOPPED before resolving ISSUES #7 — RAM probe hit a SEPARATE, previously-unknown bug (dropped cursor input after a RENT-confirm close) that contaminated the discriminating scenario before it was reached; #7's own two-simultaneous-stall question is still unresolved
+
+- **State:** unchanged from entry 21 — `npm test` **261/261**, `npm run
+  build` green, all 7 traces untouched at prior counts. **No `src/`/`tests/`
+  changes this session, no `rent-3picks.json` committed.** ISSUES #7 was
+  NOT deleted — its root cause is still not proven.
+- **Did:** Built a 3-ball RAM probe (`tools/extract/inspect-anchor.py`
+  pattern, dumping `gSprites[ballSpriteId].data[0]`/`animNum`/`animCmdIndex`/
+  `animEnded` + `gRngValue` tick-by-tick; cross-checked instrumentation via a
+  single-ball control probe that reproduces the already-pinned model
+  bit-exact through frame 300 — offsets are correct, not a probe artifact).
+  First attempt used a 10-tick dwell before the second cursor `RIGHT`
+  (shorter than `ballAnimMultiBall.test.ts`'s proven 40-tick
+  `DWELL_TO_SLOT2`) and RAM-confirmed (direct reads of
+  `sFactorySelectScreen->cursorPos` and `mons[i].selectedId`) that **real
+  hardware silently dropped that `RIGHT`** — cursor never left slot 0, and
+  the next `A` press deselected slot 0 instead of selecting slot 1. This
+  engine's own replay does NOT reproduce the drop: `core.ts`'s "cursor" mode
+  branch has no gate analogous to `isMonPicInputReady()` for input arriving
+  too soon after a RENT confirm's popup-close. The resulting "mismatch" I
+  was chasing (ball 0's sprite fields resetting at tick 99) was just this
+  deselect's palette swap, not a `ballAnimStall` effect — a contaminated
+  repro, not new evidence about ISSUES #7's real question. Full writeup +
+  exact evidence in ISSUES #7's "Worker update" section.
+- **Next:** Rebuild the ISSUES #7 repro with a ≥40-tick dwell before **every**
+  cursor move (not just the first), then rerun the same dump-and-diff method
+  to actually reach the two-simultaneous-active-balls trigger. The probe
+  infrastructure is fast (~2 min end-to-end for the control probe) and the
+  method is proven — this should be quick for the next session. Separately
+  worth a look: whether "cursor" mode needs its own `isMonPicInputReady`-style
+  gate on popup-close completion (currently ungated), since any repro script
+  with too-short a post-confirm dwell will silently desync the same way mine
+  did.
+- **Notes:** No `src/` edits made (probe-only, scratch scripts under `/tmp`,
+  not committed). PAPERCUT: none beyond the usual oracle round-trip overhead;
+  the wasted probe cycle here was a scripting judgment call (dwell too
+  short), not tooling friction.
+
+---
+
 ## 21 — S5 slice 2 (worker, capped): STOPPED before writing rent-3picks.json — found a SECOND, distinct multi-ball model gap (ISSUES #7): ball-tile pixel mismatches once a trigger stalls TWO already-active balls at once, a scenario ISSUES #6's fix never RAM-verified
 
 - **State:** unchanged from entry 20 — `npm test` **261/261**, `npm run
@@ -139,72 +179,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 19 — S5 slice 2 (worker, capped): STOPPED before writing rent-3picks.json — found a real, RAM-confirmed multi-ball throttling effect that breaks the "fully independent per-ball RNG" assumption; species-name-breathe rule fully pinned instead (no code changes this session)
-
-- **State:** unchanged from entry 18 — `npm test` **203/203**, `npm run
-  build` green, all 7 traces at their prior counts (`rent-slot1.json` still
-  125/139, untouched). **No `src/`/`tests/` changes**: the investigation
-  below found a real modeling gap that blocks building `rent-3picks.json`
-  correctly, so nothing was written that would need reverting. This is a
-  "stop and report precisely" session per the brief's own contingency.
-- **Did (species-name breathe — fully resolved, no code needed):** Read
-  `Select_Task_FadeSpeciesName`/`fadeSpeciesNameActive` (`battle_factory_screen.c:2277-2330`,
-  set at :1611/:1636/:1682/:1689/:1714/:1556/:1567) and confirmed with 3
-  oracle probes: the fade coefficient only advances while
-  `fadeSpeciesNameActive` is true, which is **exactly `mode === "cursor"`
-  (no popup open)** — opening a ball's popup (A-press tick) freezes it
-  instantly, closing it (B/OTHERS/RENT-continue tick) resumes it, and
-  **the underlying counters are never reset, only paused** (probe: idle 95
-  active ticks → open popup → sit 100+ ticks inside it, zero pixel diffs the
-  entire time → close popup → breathe resumes and trips within ~10 ticks,
-  not a fresh ~105-tick cycle). Pure-idle-from-anchor threshold measured
-  exactly: **first visible pixel diff at tick 105**, repeating every 7
-  ticks thereafter. Rule for future trace-building: sum only the
-  cursor-mode (no-popup) ticks since screen init; keep that cumulative sum
-  under 105 and the breathe never becomes visible — no engine model needed.
-- **Did (multi-ball RNG — blocked, real finding):** `core.ts`'s tick() loop
-  already iterates all 6 `ballAnims` slots unconditionally in slot order
-  every tick (written in slice 1) — structurally already "N-ball capable"
-  and was assumed independent per dossier Risk 2. RAM-verified this
-  assumption directly: dumped `gSprites[ballSpriteId]`'s `data[0]`/`animNum`/
-  `animEnded` + `gRngValue` tick-by-tick for (a) a single rented ball idling
-  220 ticks, vs (b) the same ball PLUS a second ball rented via a RIGHT +
-  open-popup + DOWN + RENT-confirm sequence inserted while the first ball's
-  128-tick "moving" cycle is in flight. **Result: ball 0's own moving-cycle
-  completion (the `animEnded` flip) lands at tick 168 in scenario (a) but
-  tick 170 in scenario (b) — a reproducible 2-tick delay**, which cascades
-  into its resting countdown and next roll (tick 201 vs tick 203). This
-  directly contradicts `SpriteCB_Pokeball`'s own source reading (`data[0]`
-  is plainly per-sprite with no shared state) and the module comment in
-  `ballAnim.ts` — yet the RAM shows a real divergence correlated with the
-  second ball's own popup open/close (2 mon-pic transitions ≈ 2 stalled
-  ticks for the *other* ball; not yet proven to be exactly 1 tick/transition,
-  only observed as a net +2 over that window). Cross-checked the JS engine
-  against the single-ball probe (exact match) and the two-ball probe
-  (5 tick-level RNG-value mismatches, all clustered exactly at the two
-  delayed transitions) via a throwaway node harness — confirms this is a
-  gap in the model, not a probe artifact.
-- **Next:** Do **not** attempt `rent-3picks.json` (or extend `ballAnim.ts`
-  to N balls) until this throttling mechanism is identified precisely —
-  building the trace now would either desync RNG-dependent state silently
-  or require guessing at the mechanism, which risks landing something that
-  merely *looks* pixel-clean at sparse sample points. Concrete next step for
-  whoever picks this up: read `OpenMonPic`/`CloseMonPic` (battle_factory_screen.c,
-  the mon-pic-bg palette/tile setup they do) for anything that could cost
-  *other* sprites' `AnimateSprites()` a frame — e.g. a blocking VRAM/tile
-  allocation call — then RAM-confirm with a probe that inserts exactly ONE
-  mon-pic open (no close) vs one open+close to see if the delay is
-  per-transition (1 tick each) or a flat per-popup-session cost. ISSUES.md
-  #6 has the full data (probe scripts summarized, not committed per
-  instructions — recipe is `tools/extract/inspect-anchor.py`'s pattern
-  adapted to read `gSprites[]`/`gRngValue` on a custom button script; scratch
-  files lived under `/tmp`, not committed).
-- **Notes:** Work items 3-4 from the brief (jitter-clean close-window
-  probing, the committed `rent-3picks.json` trace) were not reached — they
-  depend on item 1 (multi-ball RNG) being solid first, since the trace's
-  own churn windows would otherwise assert against an unverified RNG
-  stream. PAPERCUT: none beyond the usual RAM-probe/oracle round-trip
-  overhead (~3-5s/probe × ~6 probes this session, not a blocker).
-
----
 
