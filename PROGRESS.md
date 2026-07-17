@@ -5,6 +5,60 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 14 — S4 slice 1 (worker, capped): B-exit fade fixed, ISSUES #4 closed; summary-info-onix.json now 0 diff through settle — S4 stays [~] (MAGBY trace still open)
+
+- **State:** `npm test` **159/159** (152→159, +7 new), `npm run build`
+  green. `anchor`/`draft-cursor`/`draft-menu`/`draft-menu-slot6` re-verified
+  0 diff. `tools/compare/traces/summary-info-onix.json` extended from 64
+  captures (entry+settle only) to **122 dense captures, every frame,
+  covering SUMMARY-press through the full B-exit (fade-out/black-hold/
+  fade-in) back to the resettled draft screen** → **0 diff, all 122
+  frames**. `ISSUES.md` #4 deleted (fixed, not worked around).
+- **Did:** Per the brief's method: ran a fresh, isolated dense oracle probe
+  of the B-exit only (not layered on the entry trace). First probe attempt
+  (B pressed at the settled Info page's own press-tick+62, well inside the
+  documented pixel-stable window) found B silently did nothing for ~50
+  frames — a real gotcha, now in `ROADMAP.md`'s Domain notes: input-ready
+  lags visual-stable by a few ticks here (`Task_HandleInput`'s
+  `!gPaletteFade.active` guard isn't true yet even though the screen looks
+  settled); B first reliably registers at absolute press-tick+63 (a
+  parameter sweep confirmed +62 fails, +63 works). With a probe that
+  actually triggered the fade, derived the true curve pixel-for-pixel
+  (component 90 and 255 samples, matching `paletteFade.test.ts`'s existing
+  oracle-pinned values exactly) — the exit fade-out/fade-in curves and
+  their `elapsed+1` offset were **already correct** in `core.ts`'s
+  `render()`; the actual bug was the black-hold phase: the entry direction
+  had a special "hold's own last tick already shows fade-in's first step"
+  branch, but the exit direction fell through to always-pure-black instead
+  of getting the same treatment — the exit's black hold has the identical
+  quirk (oracle-confirmed: the true last hold tick, not pure black, matches
+  `bgFadeY(0, FADE_IN)`/`objFadeY(0, FADE_IN)` composited on the *draft*
+  screen, symmetric with the entry composing onto the *Info* page).
+  Rewrote `render()`'s black-hold branch to apply the peek uniformly by
+  direction instead of hardcoding it entry-only. New
+  `tests/summaryScreenRender.test.ts` hermetically pins the render()
+  *dispatch* itself (which curve/offset/black-hold-quirk applies to which
+  phase × direction) — the layer this bug actually lived in, distinct from
+  `paletteFade.test.ts`'s already-correct low-level curve math.
+- **Next:** `summary-info-magby.json` (stretch, not reached this session —
+  probe MAGBY's own stable window first, don't assume ONIX's press-tick+59
+  transfers) is the last piece of S4 slice 1's brief before S4's "≥2
+  different slots" acceptance criterion is met. After that: S4's remaining
+  scope (page navigation RIGHT/LEFT, mon-switching UP/DOWN, move-select) or
+  move on to S5 per supervisor call.
+- **Notes:** The debugging path here is a good template for future
+  fade/dispatch bugs on this screen: (1) isolated dense probe of *only*
+  the interaction in question, (2) sanity-check the probe actually
+  triggered the intended state transition (don't assume a "stable-looking"
+  press registered — verify pixels actually start changing where expected
+  before trusting the rest of the derivation), (3) compare the app's
+  actual rendered pixels against the oracle's directly (not against a
+  hand-derived formula) to localize which specific composited region
+  disagrees, since that pinpoints the dispatch bug far faster than
+  re-deriving curve math that was already right.
+
+---
+
 ## 13 — S4 slice 1 (worker, capped): Info-page renderer built and wired; entry+settle trace 0 diff; B-exit gap found — S4 stays [~]
 
 - **State:** `npm test` **152/152** (146→152, +6 new), `npm run build`
@@ -132,28 +186,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   more source grep), not a wide-open scouting problem. `PAPERCUT`: none
   new this session — the RAM-inspection recipe for a single save flag
   (national dex) was fast once `inspect-anchor.py`'s pattern was reused.
-
----
-
-## 11 — Supervisor: S5 scout merged (rent-flow dossier)
-
-- **State:** `docs/rent-flow-notes.md` merged; main tree `npm test`
-  **138/138**, build green, all traces 0 diff. ROADMAP updated: S6 scope
-  note + rented-ball RNG domain note (committed).
-- **Did:** Verified + merged the S5 scout. Corrections vs prior
-  assumptions: RENT is instant (no per-pick confirm; only yes/no is the
-  final "Are these three POKeMON OK?"); OTHERS = cancel; DESELECT is
-  RENT's relabel on a rented ball. Load-bearing finds: battle 1's opponent
-  generated BEFORE frame 0 (anchor constant); rented ball sprites roll
-  `Random()%5` per ~32f cooldown per ball (must be modeled from S5 on).
-  S5→S6 boundary pinned: the "Right this way, please!" hold.
-- **Next:** S4 slice-1 finisher (see entry 10's blocker list): extract
-  Info-page data (type/dex/ability text/gender), render the static Info
-  page, commit summary-info traces captured inside the stable +59..+64
-  window, 0 diff. Then S5 implementation.
-- **Notes:** Ledger hygiene: entry 8 was pre-archived by a worker while
-  still live here; dropped it from the ledger without re-appending.
-
----
 
 ---

@@ -73,13 +73,15 @@ extracted and tested (`src/data/gen/summary-info.json`,
 (`src/engine/summaryInfoPage.ts`) is built and wired into `core.ts`'s
 `EngineState`/`tick`/`render` (A on SUMMARY opens it, B closes it, fades
 render via `src/engine/fadeRender.ts`). `tools/compare/traces/
-summary-info-onix.json` (dense, SUMMARY-press through the settled Info
-page) is **0 diff**. **Still not done:** the B-exit (Info → draft) fade
-renders with severely wrong pixels from a couple ticks in — a real,
-un-guessed bug distinct from the entry-fade timing fix, needs its own dense
-oracle probe (see `PROGRESS.md` entry 13 for the exact repro/frame
-numbers) — so `summary-info-onix.json` does not yet cover the return trip,
-and `summary-info-magby.json` (stretch) doesn't exist yet either. Page
+summary-info-onix.json` (dense, 122 captures, SUMMARY-press through the
+settled Info page, the full B-exit fade-out/black-hold/fade-in, back to
+the resettled draft screen) is **0 diff** — the B-exit render bug
+(ISSUES #4) is fixed: the exit's black-hold phase shares the entry's
+"last tick peeks at fade-in's first step" quirk (`core.ts`'s `render()`),
+which the original implementation only wired for the entry direction.
+**Still not done:** `summary-info-magby.json` (stretch — probe MAGBY's own
+stable window first, don't assume ONIX's +59..+64 transfers) doesn't exist
+yet, so the "≥2 different slots" acceptance criterion is still open. Page
 navigation, mon-switching, and move-select remain fully out of scope per
 the brief.
 
@@ -171,6 +173,18 @@ is `[x]` or its remainder is explicitly re-scoped here by the supervisor.
   `Select_Task_FadeSpeciesName` starts a perpetual palette breathe on the
   species name text (not yet modeled); keep traces under that or model
   it explicitly.
+- **Input-ready lags visual-stable by a few ticks on the summary Info
+  page** (S4 slice-1 B-exit fix, ISSUES #4 investigation): the settled
+  Info page's pixels are sha-stable from press-tick+59 (see the S4 entry
+  above), but a `B` pressed at +62 (absolute frame press-tick+62, still
+  well inside that stable window) is silently dropped — `Task_HandleInput`'s
+  `!gPaletteFade.active` guard isn't actually true that early despite the
+  screen looking settled. `B` first registers at +63 (one tick later still
+  failed in one probe, +63 is the earliest confirmed working offset from
+  the anchor's own SUMMARY-open trigger tick 42, i.e. absolute frame 105).
+  Dense-probing any interaction gated on "looks stable" on this screen
+  should confirm the input actually registers (check for the expected
+  pixel change a few ticks later), not just trust the pixel-stable window.
 - **Rented-ball sprites consume RNG** (S5 scout): `SpriteCB_Pokeball`
   (`battle_factory_screen.c:1059-1090`) rolls `Random() % 5` on a ~32-frame
   cooldown per rented ball for as long as the sprite exists — so once pick 1

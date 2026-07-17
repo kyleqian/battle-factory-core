@@ -5,6 +5,27 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 11 — Supervisor: S5 scout merged (rent-flow dossier)
+
+- **State:** `docs/rent-flow-notes.md` merged; main tree `npm test`
+  **138/138**, build green, all traces 0 diff. ROADMAP updated: S6 scope
+  note + rented-ball RNG domain note (committed).
+- **Did:** Verified + merged the S5 scout. Corrections vs prior
+  assumptions: RENT is instant (no per-pick confirm; only yes/no is the
+  final "Are these three POKeMON OK?"); OTHERS = cancel; DESELECT is
+  RENT's relabel on a rented ball. Load-bearing finds: battle 1's opponent
+  generated BEFORE frame 0 (anchor constant); rented ball sprites roll
+  `Random()%5` per ~32f cooldown per ball (must be modeled from S5 on).
+  S5→S6 boundary pinned: the "Right this way, please!" hold.
+- **Next:** S4 slice-1 finisher (see entry 10's blocker list): extract
+  Info-page data (type/dex/ability text/gender), render the static Info
+  page, commit summary-info traces captured inside the stable +59..+64
+  window, 0 diff. Then S5 implementation.
+- **Notes:** Ledger hygiene: entry 8 was pre-archived by a worker while
+  still live here; dropped it from the ledger without re-appending.
+
+---
+
 ## 10 — S4 slice 1 (worker, capped): fade math + state machine landed; Info-page rendering NOT reached — S4 stays [~]
 
 - **State:** `npm test` **138/138** (115→138), `npm run build` green.
