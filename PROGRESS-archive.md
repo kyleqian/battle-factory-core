@@ -5,6 +5,51 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 16 — S4 slice 1 (worker, capped): summary-info-magby.json lands 0 diff — "≥2 different slots" acceptance met, no app changes needed
+
+- **State:** `npm test` **159/159** unchanged, `npm run build` green.
+  `tools/compare/traces/summary-info-magby.json` (new, 132 every-frame
+  captures 45-176, menu-open through entry fade + a settled-window slice +
+  full B-exit fade-out/black-hold/fade-in to the resettled draft-with-menu
+  state) → **0 diff, 132/132**. `anchor` (1/1), `summary-info-onix`
+  (122/122), `draft-cursor` (13/13), `draft-menu` (38/38),
+  `draft-menu-slot6` (66/66) all re-verified 0 diff. **No `src/` changes
+  were needed** — the existing generic renderer/state machine already
+  handled MAGBY's data (name/types/gender-none/hFlip'd sprite) correctly.
+- **Did:** Per the brief's method, probed MAGBY's own timing with `bin/
+  oracle run` before writing the trace (did not reuse ONIX's offsets
+  blind). Found the RIGHT-cursor-move (+4 settle) and menu-open (+40
+  settle) timings are generic/species-independent as expected. The Info
+  page's fade-settle timing is **also** generic: MAGBY's Info page goes
+  sha-stable at SUMMARY-press-tick **+59**, and `B` first registers at
+  **+63** — pixel-identical offsets to ONIX's already-documented ones, now
+  empirically confirmed rather than assumed. The real MAGBY-specific find:
+  its sha-stable window is only **6 ticks wide (+59..+64)**, not ONIX's
+  ~100+, because `PokemonSummaryDoMonAnimation`'s per-species
+  `sMonAnimationDelayTable`/front-sprite-bounce-and-cry (`pokemon.c:6858`)
+  fires almost immediately for MAGBY (starts at +65) — this is "the mon
+  idle animation" PROGRESS #15 already flagged as unscoped/undone. Built
+  the trace to press `B` at exactly +63 (relative to the SUMMARY press),
+  the last tick inside the stable window before that animation would
+  intrude — so the committed trace never exercises those not-yet-modeled
+  frames at all, by construction, not by luck.
+- **Next:** S4's "≥2 different slots" acceptance criterion is now met.
+  **Supervisor decision (this session): S4 slice 1 closed; the remainder
+  (page nav + scroll-wipe, UP/DOWN switching, move-select, mon idle
+  animation) is explicitly deferred behind S5 — recorded in ROADMAP.md's
+  S4 section. Main lane proceeds to S5 (docs/rent-flow-notes.md);
+  worktree lane is extracting moves/exp/items data in parallel.**
+- **Notes:** Debugging template from #14 worked well again: isolated dense
+  oracle probe of the new interaction first, sanity-checked pixels
+  actually changed after the "trigger" input rather than trusting a
+  stable-looking window. `sMonAnimationDelayTable`/`PokemonSummaryDoMonAnimation`
+  (`pokemon.c:6858`, `pokemon_summary_screen.c:3994`) is the concrete
+  source location for whoever picks up the idle-animation item — it's a
+  per-species (`species - 1` indexed) delay-then-bounce-and-cry, gated on
+  `!gPaletteFade.active`, same guard family as the input-ready-lag quirk.
+
+---
+
 ## 15 — Supervisor wind-down: session end 2026-07-17 ~05:50
 
 - **State (verified this minute):** `npm test` **159/159**, `npm run build`

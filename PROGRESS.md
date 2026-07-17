@@ -5,6 +5,75 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 19 — S5 slice 2 (worker, capped): STOPPED before writing rent-3picks.json — found a real, RAM-confirmed multi-ball throttling effect that breaks the "fully independent per-ball RNG" assumption; species-name-breathe rule fully pinned instead (no code changes this session)
+
+- **State:** unchanged from entry 18 — `npm test` **203/203**, `npm run
+  build` green, all 7 traces at their prior counts (`rent-slot1.json` still
+  125/139, untouched). **No `src/`/`tests/` changes**: the investigation
+  below found a real modeling gap that blocks building `rent-3picks.json`
+  correctly, so nothing was written that would need reverting. This is a
+  "stop and report precisely" session per the brief's own contingency.
+- **Did (species-name breathe — fully resolved, no code needed):** Read
+  `Select_Task_FadeSpeciesName`/`fadeSpeciesNameActive` (`battle_factory_screen.c:2277-2330`,
+  set at :1611/:1636/:1682/:1689/:1714/:1556/:1567) and confirmed with 3
+  oracle probes: the fade coefficient only advances while
+  `fadeSpeciesNameActive` is true, which is **exactly `mode === "cursor"`
+  (no popup open)** — opening a ball's popup (A-press tick) freezes it
+  instantly, closing it (B/OTHERS/RENT-continue tick) resumes it, and
+  **the underlying counters are never reset, only paused** (probe: idle 95
+  active ticks → open popup → sit 100+ ticks inside it, zero pixel diffs the
+  entire time → close popup → breathe resumes and trips within ~10 ticks,
+  not a fresh ~105-tick cycle). Pure-idle-from-anchor threshold measured
+  exactly: **first visible pixel diff at tick 105**, repeating every 7
+  ticks thereafter. Rule for future trace-building: sum only the
+  cursor-mode (no-popup) ticks since screen init; keep that cumulative sum
+  under 105 and the breathe never becomes visible — no engine model needed.
+- **Did (multi-ball RNG — blocked, real finding):** `core.ts`'s tick() loop
+  already iterates all 6 `ballAnims` slots unconditionally in slot order
+  every tick (written in slice 1) — structurally already "N-ball capable"
+  and was assumed independent per dossier Risk 2. RAM-verified this
+  assumption directly: dumped `gSprites[ballSpriteId]`'s `data[0]`/`animNum`/
+  `animEnded` + `gRngValue` tick-by-tick for (a) a single rented ball idling
+  220 ticks, vs (b) the same ball PLUS a second ball rented via a RIGHT +
+  open-popup + DOWN + RENT-confirm sequence inserted while the first ball's
+  128-tick "moving" cycle is in flight. **Result: ball 0's own moving-cycle
+  completion (the `animEnded` flip) lands at tick 168 in scenario (a) but
+  tick 170 in scenario (b) — a reproducible 2-tick delay**, which cascades
+  into its resting countdown and next roll (tick 201 vs tick 203). This
+  directly contradicts `SpriteCB_Pokeball`'s own source reading (`data[0]`
+  is plainly per-sprite with no shared state) and the module comment in
+  `ballAnim.ts` — yet the RAM shows a real divergence correlated with the
+  second ball's own popup open/close (2 mon-pic transitions ≈ 2 stalled
+  ticks for the *other* ball; not yet proven to be exactly 1 tick/transition,
+  only observed as a net +2 over that window). Cross-checked the JS engine
+  against the single-ball probe (exact match) and the two-ball probe
+  (5 tick-level RNG-value mismatches, all clustered exactly at the two
+  delayed transitions) via a throwaway node harness — confirms this is a
+  gap in the model, not a probe artifact.
+- **Next:** Do **not** attempt `rent-3picks.json` (or extend `ballAnim.ts`
+  to N balls) until this throttling mechanism is identified precisely —
+  building the trace now would either desync RNG-dependent state silently
+  or require guessing at the mechanism, which risks landing something that
+  merely *looks* pixel-clean at sparse sample points. Concrete next step for
+  whoever picks this up: read `OpenMonPic`/`CloseMonPic` (battle_factory_screen.c,
+  the mon-pic-bg palette/tile setup they do) for anything that could cost
+  *other* sprites' `AnimateSprites()` a frame — e.g. a blocking VRAM/tile
+  allocation call — then RAM-confirm with a probe that inserts exactly ONE
+  mon-pic open (no close) vs one open+close to see if the delay is
+  per-transition (1 tick each) or a flat per-popup-session cost. ISSUES.md
+  #6 has the full data (probe scripts summarized, not committed per
+  instructions — recipe is `tools/extract/inspect-anchor.py`'s pattern
+  adapted to read `gSprites[]`/`gRngValue` on a custom button script; scratch
+  files lived under `/tmp`, not committed).
+- **Notes:** Work items 3-4 from the brief (jitter-clean close-window
+  probing, the committed `rent-3picks.json` trace) were not reached — they
+  depend on item 1 (multi-ball RNG) being solid first, since the trace's
+  own churn windows would otherwise assert against an unverified RNG
+  stream. PAPERCUT: none beyond the usual RAM-probe/oracle round-trip
+  overhead (~3-5s/probe × ~6 probes this session, not a blocker).
+
+---
+
 ## 18 — ISSUES #5 root-caused via direct RAM/IO inspection: confirmed genuine GBA cycle-timing jitter, NOT fixable at this engine's tick/state level — no code change, rent-slot1.json stays 125/139
 
 - **State:** unchanged from entry 17 — `npm test` **203/203**, `npm run
@@ -144,50 +213,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   turned a confusing pixel-only investigation into an exact tick-by-tick
   state trace, which is what let SETTLE_TICKS/the Moving cmd table/the
   2-stage display lag all get pinned correctly on the first real attempt.
-
----
-
-## 16 — S4 slice 1 (worker, capped): summary-info-magby.json lands 0 diff — "≥2 different slots" acceptance met, no app changes needed
-
-- **State:** `npm test` **159/159** unchanged, `npm run build` green.
-  `tools/compare/traces/summary-info-magby.json` (new, 132 every-frame
-  captures 45-176, menu-open through entry fade + a settled-window slice +
-  full B-exit fade-out/black-hold/fade-in to the resettled draft-with-menu
-  state) → **0 diff, 132/132**. `anchor` (1/1), `summary-info-onix`
-  (122/122), `draft-cursor` (13/13), `draft-menu` (38/38),
-  `draft-menu-slot6` (66/66) all re-verified 0 diff. **No `src/` changes
-  were needed** — the existing generic renderer/state machine already
-  handled MAGBY's data (name/types/gender-none/hFlip'd sprite) correctly.
-- **Did:** Per the brief's method, probed MAGBY's own timing with `bin/
-  oracle run` before writing the trace (did not reuse ONIX's offsets
-  blind). Found the RIGHT-cursor-move (+4 settle) and menu-open (+40
-  settle) timings are generic/species-independent as expected. The Info
-  page's fade-settle timing is **also** generic: MAGBY's Info page goes
-  sha-stable at SUMMARY-press-tick **+59**, and `B` first registers at
-  **+63** — pixel-identical offsets to ONIX's already-documented ones, now
-  empirically confirmed rather than assumed. The real MAGBY-specific find:
-  its sha-stable window is only **6 ticks wide (+59..+64)**, not ONIX's
-  ~100+, because `PokemonSummaryDoMonAnimation`'s per-species
-  `sMonAnimationDelayTable`/front-sprite-bounce-and-cry (`pokemon.c:6858`)
-  fires almost immediately for MAGBY (starts at +65) — this is "the mon
-  idle animation" PROGRESS #15 already flagged as unscoped/undone. Built
-  the trace to press `B` at exactly +63 (relative to the SUMMARY press),
-  the last tick inside the stable window before that animation would
-  intrude — so the committed trace never exercises those not-yet-modeled
-  frames at all, by construction, not by luck.
-- **Next:** S4's "≥2 different slots" acceptance criterion is now met.
-  **Supervisor decision (this session): S4 slice 1 closed; the remainder
-  (page nav + scroll-wipe, UP/DOWN switching, move-select, mon idle
-  animation) is explicitly deferred behind S5 — recorded in ROADMAP.md's
-  S4 section. Main lane proceeds to S5 (docs/rent-flow-notes.md);
-  worktree lane is extracting moves/exp/items data in parallel.**
-- **Notes:** Debugging template from #14 worked well again: isolated dense
-  oracle probe of the new interaction first, sanity-checked pixels
-  actually changed after the "trigger" input rather than trusting a
-  stable-looking window. `sMonAnimationDelayTable`/`PokemonSummaryDoMonAnimation`
-  (`pokemon.c:6858`, `pokemon_summary_screen.c:3994`) is the concrete
-  source location for whoever picks up the idle-animation item — it's a
-  per-species (`species - 1` indexed) delay-then-bounce-and-cry, gated on
-  `!gPaletteFade.active`, same guard family as the input-ready-lag quirk.
 
 ---
