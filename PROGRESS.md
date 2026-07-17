@@ -45,6 +45,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   tick granularity) and ship without `rent-3picks.json`. Whoever holds
   entry 26's user-delegated authority for #7 should pick before the next
   worker spends more budget here.
+- **Supervisor ruling for the next session (user-delegated authority,
+  2026-07-17 ~15:50 — binding unless the user overrides):** take entry
+  27's option (a), with a required method change: **minimal-pair probe
+  design only** — every new probe must differ from a known data point in
+  exactly ONE variable (species, direction, origin slot, active-ball
+  count, ball phase). Start from HAUNTER's contradiction pair
+  (count3/RIGHT/origin3 = stall vs count1/LEFT/origin5 = no-stall):
+  probe (count1, RIGHT, origin3-equivalent), then (count3, LEFT), etc.,
+  until the second variable is isolated; then key the empirical stall
+  table on the surviving factor set and proceed per entry 26's decision
+  2 (implementation + Tier-1 pins + rent-3picks.json). Both prior rule
+  collapses came from multi-variable probe jumps, not from the empirical
+  approach. If the factor set still resists after ~5-6 minimal pairs,
+  fall back to entry 27's option (b) (probe the render-cost determinant
+  directly in RAM) before any thought of (c) — (c) would leave the RNG
+  stream unpredictable after any cursor-move-with-rented-ball, which
+  effectively blocks S5's exit trace and is a mission-level concession
+  the user should make explicitly, not a default.
 - **Notes:** all probing was scratch Python/TS under `/tmp` (not committed,
   per instructions) - no `src/` edits were ever at risk. This is the last
   worker of today's session; state is resume-ready via this entry + ISSUES
