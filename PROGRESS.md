@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 11 — Supervisor: S5 scout merged (rent-flow dossier)
+
+- **State:** `docs/rent-flow-notes.md` merged; main tree `npm test`
+  **138/138**, build green, all traces 0 diff. ROADMAP updated: S6 scope
+  note + rented-ball RNG domain note (committed).
+- **Did:** Verified + merged the S5 scout. Corrections vs prior
+  assumptions: RENT is instant (no per-pick confirm; only yes/no is the
+  final "Are these three POKeMON OK?"); OTHERS = cancel; DESELECT is
+  RENT's relabel on a rented ball. Load-bearing finds: battle 1's opponent
+  generated BEFORE frame 0 (anchor constant); rented ball sprites roll
+  `Random()%5` per ~32f cooldown per ball (must be modeled from S5 on).
+  S5→S6 boundary pinned: the "Right this way, please!" hold.
+- **Next:** S4 slice-1 finisher (see entry 10's blocker list): extract
+  Info-page data (type/dex/ability text/gender), render the static Info
+  page, commit summary-info traces captured inside the stable +59..+64
+  window, 0 diff. Then S5 implementation.
+- **Notes:** Ledger hygiene: entry 8 was pre-archived by a worker while
+  still live here; dropped it from the ledger without re-appending.
+
+---
+
 ## 10 — S4 slice 1 (worker, capped): fade math + state machine landed; Info-page rendering NOT reached — S4 stays [~]
 
 - **State:** `npm test` **138/138** (115→138), `npm run build` green.
@@ -80,40 +101,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `CB2_InitSelectScreen` (fresh init, `fromSummaryScreen=TRUE`,
   `gLastViewedMonIndex` can move the cursor) — treat exit traces as
   first-class acceptance, not an afterthought.
-
----
-
-## 8 — ISSUES #3 closed: slot6 every-frame trace 58/66 → 66/66; S2 COMPLETE
-
-- **State:** `npm test` **115/115**, `npm run build` green. Compares:
-  `anchor.json` 1/1, `draft-cursor.json` 13/13, `draft-menu.json` 38/38,
-  `draft-menu-slot6.json` **66/66** — all 0 diff, no regressions. `ISSUES.md`
-  #3 deleted (fixed). S2 ticked `[x]` in `ROADMAP.md`.
-- **Did:** Root-caused and fixed the 3 remaining redraw-scheduling clusters
-  via single-purpose dense oracle probes (LEFT-only, DOWN-only, and B-only
-  from a settled state), all traced to `CB2_SelectScreen`'s
-  `AnimateSprites`/`BuildOamBuffer`/`RunTextPrinters`/`UpdatePaletteFade`/
-  `RunTasks` ordering (RunTasks runs last, so any OAM change it makes isn't
-  picked up until the *next* frame's `BuildOamBuffer`, while window/text
-  copies land same-tick): (1) LEFT/RIGHT cursor moves reveal category text,
-  species text, then the arrow sprite on 3 successive ticks, not atomically
-  — new `CursorRedrawState` in `factoryDraftScreen.ts`; (2) UP/DOWN menu nav
-  keeps the highlight bar on the old row for 2 full ticks before jumping to
-  the new one (no piecemeal reveal, single OAM move) — new
-  `MenuHighlightRedrawState`; (3) `monPic.ts`'s close tables were missing
-  the same front-sprite/highlight-bar 1-tick OAM lag the open tables already
-  modeled, and (surprise, oracle-verified against both draft-menu.json's own
-  first close and draft-menu-slot6.json's) the close's window-shrink shape
-  does NOT mirror hasActed-at-close or the open variant letter — only an
-  open that was variant C gets the skip+duplicate shape; A and B both close
-  clean. Added Tier-1 tests for all three (monPic.test.ts 15→20,
-  draftScreen.test.ts 12→16).
-- **Next:** S4 — summary screen parity (draft's SUMMARY view, page
-  navigation, return to draft). See `ROADMAP.md` S4 acceptance criteria.
-- **Notes:** The "mirror the open variant" hypothesis for the close table
-  seemed elegant but was empirically wrong — always re-verify against a
-  fresh dense probe of the *specific* trace in question rather than
-  generalizing from one data point, even when the generalization is
-  structurally tempting.
 
 ---
