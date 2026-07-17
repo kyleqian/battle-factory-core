@@ -5,58 +5,97 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #5 — mon-pic close animation: window/blend content wrong for ~15 absolute ticks in a periodic bad window
+## #5 — mon-pic close animation: WIN0V catch-up jitter is real hardware
+  cycle-timing, not a modelable game-state bug (root-caused, NOT fixable at
+  this engine's tick/state granularity - see "why this can't be fixed" below)
 
-**Symptom:** `renderFactoryDraftScreenFaded`/`renderFactoryDraftScreen`'s mon-pic
-close animation (`monPic.ts` CLOSE_TABLE_B, driving `monPicRender.ts`'s WIN0
-window blend) renders the wrong pixels inside the window (`x88-151`, the
-central mon-pic-bg blend box) for several ticks of *some* closes but not
-others - confirmed **independent of RENT/DESELECT** (S5): a bare `A` (open,
-no DOWN) then `B` (close) with nothing else touched reproduces it too, so
-this is not new code from S5's slice.
+**Symptom:** the mon-pic close animation (`monPic.ts` CLOSE_TABLE_B, driving
+`monPicRender.ts`'s WIN0 window blend) renders the wrong pixels inside the
+window (`x88-151`) for several ticks of *some* closes but not others -
+confirmed independent of RENT/DESELECT (a bare `A` open then `B` close with
+nothing else touched reproduces it too).
 
-**Confirmed (dense oracle probing, `bin/oracle run`):**
-- A popup opened at press-tick 0 then closed (`B`) at press-tick 30 is
-  **0 diff** (`/tmp/s5-scout/bclose-check2.json`-style trace, not committed).
-- The *same* open, closed at press-tick 31, is also 0 diff.
-- Closed at press-tick 32 through roughly 46, the window's blended content
-  diverges from the oracle for several ticks after the close starts (magnitude
-  up to ~512px, always confined to the `x88-151` window box, shrinking as the
-  window itself shrinks toward the end of the close sequence).
-- Closed at press-tick 47+ (and separately confirmed at 50, 55), it's 0 diff
-  again. `tools/compare/traces/draft-menu.json`'s own first close (3 DOWNs
-  then B, landing well past press-tick 47) is unaffected by luck, not design
-  - that's why this was never caught before.
-- Ruled out: it's not about the DOWN press itself (a same-absolute-tick close
-  with no DOWN at all reproduces the identical diff), not about
-  `hasActed`/close-table variant (both the working and broken cases use
-  variant A -> CLOSE_TABLE_B), and it's not a fixed function of ticks-since-
-  close-started (the same `elapsed` value is fine at one absolute tick and
-  broken at another).
+**Root cause, confirmed via direct RAM/IO-register inspection** (dev-time
+recipe, `EmeraldOracle.core.memory.u16[...]`, scratch scripts not committed -
+methodology below so this is reproducible):
 
-**Leading suspicion (not confirmed):** `monPicBg` (the mon-pic-bg tileset
-sampled by `monPicRender.ts`'s `bg3Color`) is rendered as a static tileset,
-but its visible content is a striped/shimmer pattern that real hardware may
-animate (palette cycling or similar) - `bg3Color` has no time/frame input at
-all right now. A periodic ~15-tick "bad window" recurring every ~16-20 ticks
-is consistent with an un-modeled cycling effect whose phase this code never
-accounts for. Needs a dedicated dense probe of `monPicBg`'s own palette/tiles
-in isolation (steady-state OPEN_STEADY window, no close in flight) across
-~60+ frames to check whether anything there is changing frame-to-frame at
-all before chasing the close-table interaction further.
+1. `Task_CloseMonPic` (`reference/pokeemerald/src/battle_factory_screen.c:4250-4292`)
+   is a completely clean, deterministic state machine: `data[5]`/`data[8]`
+   (`tWinTop`/`tWinBottom`) step by exactly ±4 every single tick with **zero**
+   periodicity or absolute-tick dependence - confirmed by dumping
+   `gTasks[2]`'s raw `data[]` words tick-by-tick for both a clean close
+   (press-tick 30) and a bad one (press-tick 36): the *internal* state is
+   bit-for-bit identical between the two runs, just time-shifted by 6 ticks.
+   `RunTasks`'s priority-linked-list shape (`gTasks[]` `prev`/`next`/`priority`
+   fields, `reference/pokeemerald/src/task.c`) is also identical between the
+   two runs, ruling out task-scheduling/insertion-order as a factor.
+2. The *visible* WIN0V register is NOT the task's raw state - GBA's
+   `SetGpuReg` (`reference/pokeemerald/src/gpu_regs.c:66-98`) always writes
+   the new value into a shadow buffer (`sGpuRegBuffer`) immediately, but only
+   copies it to the real hardware register **now** if `REG_VCOUNT` is
+   currently inside vblank (161-225); otherwise it's queued
+   (`sGpuRegWaitingList`) and only reaches hardware on the *next* vblank
+   flush. This is a genuine, permanent 1-tick render lag, and
+   `monPic.ts`'s existing `CLOSE_TABLE_B`/`CLOSE_TABLE_A` already correctly
+   encode it (each table index N holds the task's internal value from tick
+   N-1) - **this part was never the bug**.
+3. The actual jitter: on some ticks, `Task_CloseMonPic`'s `SetGpuReg(WIN0V,
+   ...)` call happens to execute *after* `REG_VCOUNT` has already crossed
+   into vblank that frame (instead of before, which is the normal case),
+   so the write lands on hardware immediately instead of being queued -
+   collapsing the usual 1-tick lag and producing a "catch-up" (a skipped
+   window-growth step, or a duplicated one on the next tick to resync).
+   `REG_VCOUNT`'s value at the moment this one `SetGpuReg` call executes
+   depends on the **total CPU cycle cost of everything else that ran earlier
+   in the same frame** (`AnimateSprites`/`BuildOamBuffer`/`RunTextPrinters`/
+   `UpdatePaletteFade`/all of `RunTasks`, per `CB2_SelectScreen`) - a
+   cycle-accurate hardware race, not game *state*.
 
-**Impact on S5:** `tools/compare/traces/rent-slot1.json` cannot reach 0 diff
-while its RENT confirm's close animation happens to land in a bad window
-(confirmed unavoidable within the species-name-breathe budget - shifting the
-confirm later to dodge one bad window landed in a *different* one further
-out). The trace is committed anyway (dense, every-frame, 125/139 matching)
-because the RENT/DESELECT state machine, palette swap, message-swap timing,
-and the ball's idle/rocking animation's RNG stream are all independently
-verified: the state machine and RNG stream via RAM-dumped `gRngValue`
-checkpoints in `tests/rentSelect.test.ts`/`tests/ballAnim.test.ts` (hermetic,
-no pixels, unaffected by this bug), and the ball animation's own pixels are
-confirmed exact via the trace's frames 58-138 (fully outside any close
-window). Picking a rent-slot1 press-tick that avoids the bad window (rather
-than fixing the root cause) is the likely quick unblock for a future slice,
-once the periodic pattern is pinned precisely enough to predict "safe" ticks
-in general (not just by trial and error per trace).
+**Confirmed NOT reducible to any state this engine tracks** (the decisive
+test): replaying `tools/compare/traces/rent-slot1.json`'s exact button
+sequence with 0/3/7/10/17 idle frames prepended (shifting every absolute
+tick but preserving every *relative* offset - ticks-since-open,
+ticks-since-RENT-confirm, close-table variant, all unchanged) produces a
+**different** WIN0V catch-up pattern each time. So the jitter is a function
+of absolute session tick (ultimately: total emulated CPU cycles since boot,
+via `RunTextPrinters`/sprite-processing/etc. cost on nearby ticks) with no
+proxy available in this engine's tick-level `EngineState` - only a
+cycle-accurate CPU emulation would reproduce it exactly, which is out of
+scope for a tick/state-machine reimplementation.
+
+**Ruled out along the way** (leads from the previous investigation,
+superseded by the above): `monPicBg`'s tileset/palette is genuinely static
+across the close (RAM-dumped, no change) - the earlier "un-modeled
+shimmer/palette-cycle" suspicion was wrong. It's also not about the DOWN
+press, not about `hasActed`/close-table variant (clean and broken closes use
+the identical variant), and not a fixed function of ticks-since-close-started.
+
+**Confirmed scope of the visible damage:** for `rent-slot1.json` specifically,
+`npm run compare` shows `DIFF` on frames 37-47 (the window-growth phase,
+up to 3343px/8.71%) tapering down through frames 49-57 (1-64px, halving
+roughly in step with the post-window flash-bar's own width table) - i.e. the
+same one jitter event also perturbs the flash-shrink phase that immediately
+follows, since it's driven by the same task's tick sequence. Frames 58-138
+(fully past the close) are unaffected and independently RAM-verified exact
+(RNG stream, state machine - see PROGRESS #17).
+
+**Why this can't be fixed at this engine's level:** a correct fix would
+require modeling per-frame CPU cycle cost across unrelated subsystems
+(text printer drain state, sprite count, palette fade activity) precisely
+enough to predict which side of the vblank boundary `REG_VCOUNT` lands on
+for one specific `SetGpuReg` call - i.e. cycle-accurate CPU emulation. That
+is a different order of engineering than this codebase's tick/state-machine
+architecture and is not proposed here.
+
+**Remaining work / options for a future slice (none attempted - would each
+need explicit sign-off since they lean away from "model the real mechanism"):**
+- Re-time `rent-slot1.json`'s RENT-confirm press so its close lands in a
+  tick range empirically confirmed clean for *that exact* trace (not a
+  general rule - the shift-test above proves no general rule exists). This
+  is the "dodge" option the current brief explicitly ruled out, but may be
+  the only practical unblock short of cycle-accurate emulation.
+- Accept `rent-slot1.json` at 125/139 permanently and document the gap
+  inline (its RENT/DESELECT-specific behavior is already independently
+  RAM-verified via `tests/rentSelect.test.ts`/`tests/ballAnim.test.ts`, so
+  the uncovered pixels are 100% attributable to this pre-existing,
+  RENT-independent close-animation jitter, not to unverified S5 logic).

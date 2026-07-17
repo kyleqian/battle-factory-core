@@ -5,6 +5,33 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 15 — Supervisor wind-down: session end 2026-07-17 ~05:50
+
+- **State (verified this minute):** `npm test` **159/159**, `npm run build`
+  green, all five compare traces 0 diff (`anchor` 1/1, `draft-cursor`
+  13/13, `draft-menu` 38/38, `draft-menu-slot6` 66/66 every-frame,
+  `summary-info-onix` **122/122** every-frame incl. full B-exit).
+  `ISSUES.md` empty. Working tree clean. ROADMAP: **S1 [x] S2 [x] S3 [x]
+  S4 [~] S5-S9 [ ]** — S4's remainder: MAGBY Info-page trace (probe its
+  own stable window), the 3 other pages + scroll-wipe, UP/DOWN
+  mon-switching, move-select, the mon idle animation.
+- **Session summary (supervised, ~01:00-05:50):** 9 worker steps + 1 merge
+  lane. Landed: staged roadmap (iteration 0); S1 pixel-exact anchor +
+  compare loop + extraction pipeline; S2 draft interactions frame-exact
+  incl. every-frame transients; S3 RNG core + 882 rentals extracted +
+  anchor RAM dump (six mons pinned to recomputed stats); S4 fade math,
+  Info-page data + renderer, entry+exit fades pixel-exact; scout dossiers
+  for S4 (summary-screen-notes.md) and S5 (rent-flow-notes.md). Key
+  domain finds in ROADMAP notes: anchor RNG seed, ball-sprite RNG
+  consumption, battle-1 opponent is an anchor constant, statics-via-nm
+  recipe, fade elapsed+1 + black-hold quirks.
+- **Next:** S4 remainder (start with summary-info-magby.json), then S5
+  implementation off docs/rent-flow-notes.md. All prerequisites committed.
+- **Notes:** Every worker ended at a green commit; no usage-limit events;
+  two PAPERCUTS entries total (see file).
+
+---
+
 ## 14 — S4 slice 1 (worker, capped): B-exit fade fixed, ISSUES #4 closed; summary-info-onix.json now 0 diff through settle — S4 stays [~] (MAGBY trace still open)
 
 - **State:** `npm test` **159/159** (152→159, +7 new), `npm run build`
