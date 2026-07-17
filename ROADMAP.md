@@ -67,18 +67,21 @@ paging through every reachable page, and backing out pass compare with 0
 diff on dense captures; Tier-1 tests pin the summary state machine.
 **Slice 1 progress:** entry/exit palette-fade math and the fade-phase state
 machine are oracle-pinned and hermetically tested (`src/engine/
-paletteFade.ts`, `src/engine/summaryScreen.ts`); Info-page species data
-(types/National-Dex-number/genderRatio/ability text) is now extracted and
-tested (`src/data/gen/summary-info.json`, `src/engine/monGender.ts`) — the
-extraction blocker from slice 1 is closed. **Still not done:** the Info-page
-renderer itself, wiring `summaryScreen.ts`+`paletteFade.ts` into
-`core.ts`'s `EngineState`/`tick`/`render`, and both compare traces
-(`summary-info-onix.json`/`-magby.json`). `docs/summary-screen-notes.md` §7
-is a fully-resolved implementation spec (window pixel geometry, text colors,
-sprite positions/priorities, BG-layering reasoning, a flagged nature-memo
-two-tone-color gap, an unverified ball-type/hFlip/markings-frame assumption
-list) written specifically so the next slice can implement directly without
-re-scouting. No compare traces for this stage exist yet.
+paletteFade.ts`, `src/engine/summaryScreen.ts`); Info-page species data is
+extracted and tested (`src/data/gen/summary-info.json`,
+`src/engine/monGender.ts`); the static Info-page renderer
+(`src/engine/summaryInfoPage.ts`) is built and wired into `core.ts`'s
+`EngineState`/`tick`/`render` (A on SUMMARY opens it, B closes it, fades
+render via `src/engine/fadeRender.ts`). `tools/compare/traces/
+summary-info-onix.json` (dense, SUMMARY-press through the settled Info
+page) is **0 diff**. **Still not done:** the B-exit (Info → draft) fade
+renders with severely wrong pixels from a couple ticks in — a real,
+un-guessed bug distinct from the entry-fade timing fix, needs its own dense
+oracle probe (see `PROGRESS.md` entry 13 for the exact repro/frame
+numbers) — so `summary-info-onix.json` does not yet cover the return trip,
+and `summary-info-magby.json` (stretch) doesn't exist yet either. Page
+navigation, mon-switching, and move-select remain fully out of scope per
+the brief.
 
 ### [ ] S5 — Complete the draft: rent 3, confirmations, exit sequence
 RENT/OTHERS flows, ball palette change on selection, the 2nd/3rd-pick

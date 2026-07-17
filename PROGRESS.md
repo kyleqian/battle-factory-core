@@ -5,6 +5,83 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 13 — S4 slice 1 (worker, capped): Info-page renderer built and wired; entry+settle trace 0 diff; B-exit gap found — S4 stays [~]
+
+- **State:** `npm test` **152/152** (146→152, +6 new), `npm run build`
+  green. `anchor`/`draft-cursor`/`draft-menu`/`draft-menu-slot6` all
+  re-verified 0 diff this session (untouched code paths, but re-ran given
+  how much of `src/engine/` this slice touched). **New:**
+  `tools/compare/traces/summary-info-onix.json` (dense, every frame from
+  the SUMMARY press through the settled Info page's stable window, 64
+  captures) → **0 diff**. `ROADMAP.md` still `[~]` — see gap below.
+- **Did:** Built `src/engine/summaryInfoPage.ts` (the static Info-page
+  compositor: BG3 tilemap, type/markings/ball/mon sprites, all text
+  windows, per `docs/summary-screen-notes.md` §7) and wired
+  `summaryScreen.ts`+`paletteFade.ts` into `core.ts` (`EngineState` gains
+  `summaryScreen`; `tick()` routes A-on-SUMMARY/B-on-Info-page; `render()`
+  dispatches flat/faded draft or Info-page rendering by transition phase).
+  Then debugged the render pixel-exact against dense oracle captures
+  (iterating `npm run compare`'s diff PNGs, per the brief) until the ONIX
+  settled Info page and the full entry-fade sequence hit 0 diff. Real bugs
+  found and fixed along the way (all still applicable, see commit
+  `ec234e9` for the settled-frame set and `5729950` for the fade-timing
+  set): `sTextColors` colorId0/1 were transposed (hid/blackened most text);
+  the A-button icon is colored by its **window's** palette, not its source
+  PNG's; `PositionStatusSlidingWindow`'s on-load reset lands on a flat
+  fill, not a redraw of `page_info.bin`'s stale default; `{NO}`/`{LV}` are
+  single-glyph control codes with ligature bitmaps already sitting in
+  `font-normal.json` at raw codes 264/52 (bypass the charmap, which only
+  covers quoted single-char entries); and — the big one — `render()`'s fade
+  curves need `bgFadeY(t.elapsed + 1, timing)`/`objFadeY(t.elapsed + 1,
+  timing)`, not `t.elapsed` directly (`BeginNormalPaletteFade`'s first
+  blend step lands within its own trigger tick), plus the black-hold
+  phase's own **last** tick already shows the fade-in's first step (BG
+  only — OBJ is a further tick behind even there), which needed its own
+  branch instead of always rendering solid black. Extraction: new
+  `src/engine/fadeRender.ts` (fading variants of the `drawTileBg`/
+  `drawSprite`/`drawText` primitives, `y<=0` reproduces the originals
+  exactly — used for both the summary Info page and a new
+  `renderFactoryDraftScreenFaded`), `drawSprite` gained an `hFlip` param
+  (all 6 anchor species render hFlip'd on this screen, confirmed from
+  `species_info.h`'s `noFlip` field — opposite of the draft-screen pic),
+  and `src/assets/gen/summary-ball.json` (the summary screen's caught-ball
+  icon is a **different** asset than the draft screen's rental-ball
+  sprite, `graphics/balls/poke.png` not `factory_screen/pokeball.png` —
+  confirmed every rental defaults to `ITEM_POKE_BALL` via
+  `pokemon.c:2261`).
+- **Next:** **The B-exit (Info page → draft screen) path is unresolved.**
+  The state machine's phase/tick bookkeeping looks structurally right
+  (settles at the expected tick, `onInfoPage` flips back correctly), but
+  the *rendered pixels* diverge severely starting ~2 ticks into the exit
+  fade-out and get progressively more wrong (SSIM trending toward 0, not a
+  small residual) — this does **not** fit the same "+1" pattern that fixed
+  entry, so applying it blindly would likely be wrong. Exact repro: trace
+  `2×A, wait 40, 2×A, wait 60, 2×B, wait N`, dense-capture frames 104-165;
+  104-106 match, first divergence at 107 (2 ticks after the B press
+  registers). Needs a **fresh dense oracle probe of the exit fade
+  specifically** (isolated, not layered on the entry trace) before
+  guessing further — do not reuse the entry "+1" fix without re-deriving
+  it from oracle pixels for this direction. Once that's resolved: extend
+  `summary-info-onix.json` to cover the B-exit back to the settled draft
+  screen (per the original brief), then `summary-info-magby.json` (stretch
+  — probe MAGBY's own stable window first, don't assume ONIX's +59..+64
+  transfers).
+- **Notes:** `docs/summary-screen-notes.md` §7's spec was excellent — the
+  BG-layering/composition-order/window-geometry reasoning all held up
+  against oracle pixels with zero corrections needed. Every bug found this
+  session was in territory the spec explicitly flagged as unresolved (text
+  colors, ball asset, hFlip) or genuinely out of scope for a static-page
+  spec (the fade-timing "+1", the black-hold boundary tick, the
+  `{NO}`/`{LV}` control codes) — a good sign the extraction-then-implement
+  split this run's been using is working. `PAPERCUT`: the `bin/oracle
+  run`-vs-`npm run compare` frame-numbering question (are "press-tick N"
+  labels from a direct oracle probe always directly comparable to
+  `appTrace.ts`'s frame counter?) came up twice this session and cost real
+  time both times — worth a `bin/oracle info`/`ROADMAP.md` Domain-notes
+  clarification for the next worker who dense-probes a fresh interaction.
+
+---
+
 ## 12 — S4 slice 1 (worker, capped): Info-page extraction landed; renderer/traces still NOT reached — S4 stays [~]
 
 - **State:** `npm test` **146/146** (138→146, +8 new), `npm run build`
@@ -78,61 +155,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   still live here; dropped it from the ledger without re-appending.
 
 ---
-
-## 10 — S4 slice 1 (worker, capped): fade math + state machine landed; Info-page rendering NOT reached — S4 stays [~]
-
-- **State:** `npm test` **138/138** (115→138), `npm run build` green.
-  Existing 4 compare traces (`anchor`, `draft-cursor`, `draft-menu`,
-  `draft-menu-slot6`) still all 0 diff (untouched this slice). **No new
-  compare traces committed** — `summary-info-onix.json`/`-magby.json` from
-  the step brief were NOT produced; the Info page has no renderer yet, so
-  there was nothing to capture against. `ROADMAP.md` S4 stays `[ ]`
-  (unstarted rendering-wise; foundation only).
-- **Did:** Landed the hard, reusable half of S4 first: dense oracle
-  probing (fresh, this session — not just reading the scout's dossier) of
-  all 4 `BeginNormalPaletteFade(PALETTES_ALL, 0, ..., RGB_BLACK)` calls
-  (entry fade-out/in, exit fade-out/in) fully pinned the per-frame 5-bit
-  blend curve and the BG/OBJ 1-tick stagger (`objPaletteToggle`) —
-  `src/engine/paletteFade.ts`, self-consistent with the dossier's
-  press-tick+59/+53 settle points (20+24+15=59, 18+20+15=53 ticks exactly).
-  Wired those tick counts into a summary-screen entry/exit state machine
-  (`src/engine/summaryScreen.ts`: transition direction/phase/elapsed,
-  selectedSlot, page id) mirroring `Select_Task_OpenSummaryScreen`'s
-  3-state machine. 23 new hermetic Tier-1 tests, all pinned against literal
-  oracle pixel values (no oracle/pixels at test time). Also confirmed the
-  brief's requested number: **first mon idle-animation churn frame is
-  press-tick+65** (slot 1/ONIX; settled Info page is stable from +59
-  through +64, every frame differs from +65 onward through +151 with no
-  further stable window found) — MAGBY (slot 2) not independently probed.
-  Addendum written to `docs/summary-screen-notes.md` §6 with full detail.
-  Neither module is wired into `core.ts`/render yet.
-- **Next:** The Info page renderer itself, blocked on missing extraction
-  (found while scoping, not yet done): `species-stats.json` has no
-  type/dex-number fields; no ability name/description text table; no
-  gender-ratio table. Next slice: (1) extract those (types + dex numbers
-  likely cheap additions to `extract-species-header.ts`'s source files;
-  ability names/descriptions from `gAbilityNames`/
-  `gAbilityDescriptionPointers` need a small new extractor); (2) build the
-  Info-page renderer (BG3 tilemap from already-extracted
-  `summary-bg.json`, the window/text fields per the dossier's §2/§3, type
-  icons from `summary-type-icons.json`) for a **static** frame (mon
-  idle-anim can stay a documented remainder, captures must stay ≤
-  press-tick+64 per the churn frame above); (3) wire
-  `summaryScreen.ts`+`paletteFade.ts` into `core.ts`'s tick/render,
-  blending the draft-screen framebuffer during entry-out/exit-in and the
-  new Info-page framebuffer during entry-in/exit-out; (4) only then are
-  `summary-info-onix.json`/`-magby.json` (dense through the fades, ≤4-frame
-  elsewhere) achievable — build and commit those to actually close S4
-  slice 1's acceptance criteria, which this session did not reach.
-- **Notes:** This slice hit its 50-minute cap on research + the (large,
-  now-done-once) fade-curve derivation before rendering could start —
-  flagging per `AGENTS.md`'s "stop at a green commit, report exact
-  frames/pixels" guidance rather than shipping a rushed/unverified
-  renderer. The fade math is the part most likely to have been gotten
-  subtly wrong by guessing (5-bit space, BG/OBJ stagger, per-transition
-  dead-frame delays all differ from naive assumptions) — glad it's now
-  oracle-pinned and covered, since every future summary-screen fade (S4
-  paging is a redraw not a fade, but S5's draft-exit fade and S6's battle
-  transition likely reuse this exact mechanism).
 
 ---
