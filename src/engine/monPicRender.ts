@@ -100,19 +100,28 @@ function bg1Color(x: number, y: number): RgbColor | null {
   return subpalette[ci] ?? null;
 }
 
+/** Per-slot ball palette/tile-frame, so the window blend's target2 source (below) reads a rented ball's actual appearance, not always the gray Still tile. */
+export interface BallVisual {
+  palette: RgbColor[];
+  firstTileRow: number;
+}
+
+const GRAY_BALL_VISUAL: BallVisual = { palette: pokeball.grayPalette, firstTileRow: 0 };
+
 // The 6 rental balls (CreateSprite(..., 35*i + 32, 64, 1)), 32x32, drawn
 // center-anchored - see factoryDraftScreen.ts's identical layout constants.
-function ballColor(x: number, y: number): RgbColor | null {
+function ballColor(x: number, y: number, balls: readonly BallVisual[]): RgbColor | null {
   for (let i = 0; i < 6; i += 1) {
     const ox = 35 * i + 32 - 16;
     const oy = 64 - 16;
     if (x < ox || x >= ox + 32 || y < oy || y >= oy + 32) continue;
     const lx = x - ox;
     const ly = y - oy;
-    const tileIndex = Math.floor(ly / 8) * pokeball.tileset.columns + Math.floor(lx / 8);
+    const { palette, firstTileRow } = balls[i] ?? GRAY_BALL_VISUAL;
+    const tileIndex = (firstTileRow + Math.floor(ly / 8)) * pokeball.tileset.columns + Math.floor(lx / 8);
     const ci = sampleTile(pokeball.tileset, tileIndex, lx % 8, ly % 8, false, false);
     if (ci === 0) continue;
-    return pokeball.grayPalette[ci] ?? null;
+    return palette[ci] ?? null;
   }
   return null;
 }
@@ -131,8 +140,8 @@ function arrowColor(x: number, y: number, cursorCenterX: number): RgbColor | nul
   return arrow.palette[ci] ?? null;
 }
 
-function target2Color(x: number, y: number, cursorCenterX: number): RgbColor | null {
-  return arrowColor(x, y, cursorCenterX) ?? ballColor(x, y) ?? bg1Color(x, y);
+function target2Color(x: number, y: number, cursorCenterX: number, balls: readonly BallVisual[]): RgbColor | null {
+  return arrowColor(x, y, cursorCenterX) ?? ballColor(x, y, balls) ?? bg1Color(x, y);
 }
 
 function blend8(c1: RgbColor, c2: RgbColor | null): RgbColor {
@@ -144,7 +153,13 @@ function blend8(c1: RgbColor, c2: RgbColor | null): RgbColor {
   };
 }
 
-export function drawMonPic(fb: Uint8Array, visual: MonPicVisual, species: string, cursorCenterX: number): void {
+export function drawMonPic(
+  fb: Uint8Array,
+  visual: MonPicVisual,
+  species: string,
+  cursorCenterX: number,
+  balls: readonly BallVisual[] = [],
+): void {
   if (visual.flashWidth > 0) {
     const left = FLASH_CENTER_X - Math.floor(visual.flashWidth / 2);
     // sOam_Select_MonPicBgAnim is objMode=ST_OAM_OBJ_BLEND: once BLDCNT is
@@ -162,7 +177,7 @@ export function drawMonPic(fb: Uint8Array, visual: MonPicVisual, species: string
     for (let y = top; y < bottom; y += 1) {
       for (let x = WINDOW_LEFT; x < WINDOW_RIGHT; x += 1) {
         const bg3 = bg3Color(x, y);
-        const t2 = target2Color(x, y, cursorCenterX);
+        const t2 = target2Color(x, y, cursorCenterX, balls);
         const color = bg3 ? blend8(bg3, t2) : (t2 ?? BLACK);
         setPixel(fb, x, y, color.r, color.g, color.b);
       }
@@ -194,6 +209,7 @@ export function drawMonPicFaded(
   cursorCenterX: number,
   bgY: number,
   objY: number,
+  balls: readonly BallVisual[] = [],
 ): void {
   if (visual.flashWidth > 0) {
     const left = FLASH_CENTER_X - Math.floor(visual.flashWidth / 2);
@@ -209,7 +225,7 @@ export function drawMonPicFaded(
       for (let x = WINDOW_LEFT; x < WINDOW_RIGHT; x += 1) {
         const bg3 = bg3Color(x, y);
         const arrow = arrowColor(x, y, cursorCenterX);
-        const ball = arrow ? null : ballColor(x, y);
+        const ball = arrow ? null : ballColor(x, y, balls);
         const objSource = arrow ?? ball;
         const t2Raw = objSource ?? bg1Color(x, y);
         const t2 = t2Raw ? fadeColor(t2Raw, objSource ? objY : bgY) : null;

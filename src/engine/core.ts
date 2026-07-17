@@ -7,17 +7,24 @@ import type { GbaButton } from "../input.ts";
 import {
   ANCHOR_DRAFT_SCREEN_STATE,
   MENU_OPTION_OTHERS,
+  MENU_OPTION_RENT,
   MENU_OPTION_SUMMARY,
   advanceCursorRedraw,
   advanceMenuHighlightRedraw,
+  advanceRentConfirmRedraw,
+  applyDeselect,
+  applySelect,
   moveCursor,
   moveMenuCursor,
   renderFactoryDraftScreen,
   renderFactoryDraftScreenFaded,
+  selectMonMessage,
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 import { advanceMonPic, closeMonPic, isMonPicInputReady, openMonPic } from "./monPic.ts";
+import { advanceBallAnim, initialBallAnimState } from "./ballAnim.ts";
+import { ANCHOR_RNG_VALUE, advanceRngValue } from "./rng.ts";
 import { createFramebuffer, fillFramebuffer } from "./framebuffer.ts";
 import {
   bgFadeY,
@@ -44,6 +51,8 @@ export interface EngineState {
   draftScreen: DraftScreenState;
   keyRepeat: KeyRepeatState;
   summaryScreen: SummaryScreenState;
+  /** gRngValue (src/random.c) - advances once per VBlank always (main.c:366); see rng.ts. */
+  rngValue: number;
 }
 
 export function createInitialState(): EngineState {
@@ -52,6 +61,7 @@ export function createInitialState(): EngineState {
     draftScreen: ANCHOR_DRAFT_SCREEN_STATE,
     keyRepeat: INITIAL_KEY_REPEAT_STATE,
     summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
+    rngValue: ANCHOR_RNG_VALUE,
   };
 }
 
@@ -68,6 +78,9 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   const { newKeys, newAndRepeatedKeys, next: keyRepeat } = readKeys(buttons, state.keyRepeat);
   let draftScreen = state.draftScreen;
   let summaryScreen = advanceSummaryScreen(state.summaryScreen);
+  // main.c:366 - Random() advances once per VBlank unconditionally outside
+  // frontier battles, so this always happens before any ball-roll draw below.
+  let rngValue = advanceRngValue(state.rngValue);
 
   if (summaryScreen.transition) {
     // Select_Task_OpenSummaryScreen's STATE_SUMMARY_FADE/CLEAN/SHOW (and the
@@ -83,6 +96,19 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let monPic = advanceMonPic(draftScreen.monPic);
     let cursorRedraw = advanceCursorRedraw(draftScreen.cursorRedraw);
     let menuHighlightRedraw = advanceMenuHighlightRedraw(draftScreen.menuHighlightRedraw);
+    let rentConfirmRedraw = advanceRentConfirmRedraw(draftScreen.rentConfirmRedraw);
+
+    // SpriteCB_Pokeball (ballAnim.ts): every currently-rented ball's idle/
+    // rocking anim advances every tick regardless of menu state, each
+    // potentially consuming a further Random() draw this tick.
+    const ballAnims = draftScreen.ballAnims.slice();
+    for (let i = 0; i < ballAnims.length; i += 1) {
+      const anim = ballAnims[i];
+      if (!anim) continue;
+      const result = advanceBallAnim(anim, rngValue);
+      ballAnims[i] = result.state;
+      rngValue = result.rngValue;
+    }
 
     if (draftScreen.mode === "cursor") {
       if (newAndRepeatedKeys.has("RIGHT")) {
@@ -109,18 +135,36 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         monPic = closeMonPic(monPic.variant);
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_SUMMARY) {
         summaryScreen = openSummaryScreen(draftScreen.cursorPos);
+      } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_RENT) {
+        // Select_OptionRentDeselect (:1949-1970): RENT/DESELECT share this one
+        // slot/handler, context-sensitive on the cursored ball's selectedId.
+        const slot = draftScreen.cursorPos;
+        const isSelected = draftScreen.selectedIds[slot] !== 0;
+        const { selectedIds, selectingMonsState } = isSelected
+          ? applyDeselect(draftScreen.selectedIds, draftScreen.selectingMonsState, slot)
+          : applySelect(draftScreen.selectedIds, draftScreen.selectingMonsState, slot);
+        ballAnims[slot] = isSelected ? null : initialBallAnimState();
+        rentConfirmRedraw = { fromMessage: draftScreen.message, fromSelected: isSelected, elapsed: 0 };
+        draftScreen = {
+          ...draftScreen,
+          mode: "cursor",
+          selectedIds,
+          selectingMonsState,
+          message: selectMonMessage(selectingMonsState),
+        };
+        monPic = closeMonPic(monPic.variant);
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_OTHERS) {
         // Select_OptionOthers: closes the popup with no selection change,
-        // identical to B (RENT is S5, out of scope here).
+        // identical to B.
         draftScreen = { ...draftScreen, mode: "cursor" };
         monPic = closeMonPic(monPic.variant);
       }
     }
 
-    draftScreen = { ...draftScreen, monPic, cursorRedraw, menuHighlightRedraw };
+    draftScreen = { ...draftScreen, monPic, cursorRedraw, menuHighlightRedraw, ballAnims, rentConfirmRedraw };
   }
 
-  return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen };
+  return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, rngValue };
 }
 
 function blackFrame(): Uint8Array {

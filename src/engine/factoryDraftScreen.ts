@@ -14,6 +14,7 @@ import type { RgbColor } from "./bg.ts";
 import { getMonPicVisual, INITIAL_MON_PIC_STATE, type MonPicState } from "./monPic.ts";
 import { drawMonPic, drawMonPicFaded } from "./monPicRender.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts";
+import { ballAnimTile, type BallAnimState } from "./ballAnim.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -66,7 +67,61 @@ export type DraftScreenMode = "cursor" | "menu";
 /** Select_MenuOptionFuncs order: SUMMARY, RENT/DESELECT, OTHERS. */
 export const MENU_OPTION_COUNT = 3;
 export const MENU_OPTION_SUMMARY = 0;
+export const MENU_OPTION_RENT = 1;
 export const MENU_OPTION_OTHERS = 2;
+
+/** FRONTIER_PARTY_SIZE (include/constants/global.h:35). */
+const FRONTIER_PARTY_SIZE = 3;
+
+const SELECT_MON_MESSAGES = [
+  "",
+  "Select the first POKéMON.",
+  "Select the second POKéMON.",
+  "Select the third POKéMON.",
+];
+const CONFIRM_MONS_MESSAGE = "Are these three POKéMON OK?";
+
+/** Select_PrintSelectMonString (battle_factory_screen.c:1893-1909). */
+export function selectMonMessage(selectingMonsState: number): string {
+  return SELECT_MON_MESSAGES[selectingMonsState] ?? CONFIRM_MONS_MESSAGE;
+}
+
+/**
+ * Select_OptionRentDeselect's select branch (:1949-1970,
+ * Select_HandleMonSelectionChange :1415-1433): stamps the next pick number
+ * into the cursored slot and advances the counter.
+ */
+export function applySelect(
+  selectedIds: readonly number[],
+  selectingMonsState: number,
+  slotIndex: number,
+): { selectedIds: number[]; selectingMonsState: number } {
+  const nextIds = selectedIds.slice();
+  nextIds[slotIndex] = selectingMonsState;
+  return { selectedIds: nextIds, selectingMonsState: selectingMonsState + 1 };
+}
+
+/**
+ * Select_OptionRentDeselect's deselect branch (Select_HandleMonSelectionChange
+ * :1415-1433): clears the cursored slot's pick number. Renumbering special
+ * case (:1418-1430): deselecting the *first* pick while exactly two mons are
+ * currently selected renumbers the 2nd pick down to 1, keeping the remaining
+ * pick(s) numbered contiguously from 1.
+ */
+export function applyDeselect(
+  selectedIds: readonly number[],
+  selectingMonsState: number,
+  slotIndex: number,
+): { selectedIds: number[]; selectingMonsState: number } {
+  const nextIds = selectedIds.slice();
+  const deselectedRank = nextIds[slotIndex]!;
+  nextIds[slotIndex] = 0;
+  if (deselectedRank === 1 && selectingMonsState === FRONTIER_PARTY_SIZE) {
+    const otherIndex = nextIds.findIndex((id) => id === FRONTIER_PARTY_SIZE - 1);
+    if (otherIndex !== -1) nextIds[otherIndex] = 1;
+  }
+  return { selectedIds: nextIds, selectingMonsState: selectingMonsState - 1 };
+}
 
 /**
  * Select_UpdateBallCursorPosition/Select_PrintMonCategory/Select_PrintMonSpecies
@@ -101,6 +156,22 @@ export interface MenuHighlightRedrawState {
   elapsed: number;
 }
 
+/**
+ * Select_OptionRentDeselect's own redraw scheduling: `Select_HandleMonSelectionChange`'s
+ * ball palette swap is immediate (same tick), but the info-window message
+ * text (Select_PrintSelectMonString) and the popup's own RENT/DESELECT label
+ * lag - dense oracle probing (rent-slot1.json) found the info window still
+ * shows the *previous* pick's message through this tick and the next
+ * (elapsed 0-1), only catching up on elapsed 2; the popup itself is already
+ * erased (monPic.ts's close animation) by elapsed 1, so the label only ever
+ * needs `fromSelected` for elapsed 0.
+ */
+export interface RentConfirmRedrawState {
+  fromMessage: string;
+  fromSelected: boolean;
+  elapsed: number;
+}
+
 export interface DraftScreenState {
   mode: DraftScreenMode;
   cursorPos: number;
@@ -116,6 +187,14 @@ export interface DraftScreenState {
   cursorRedraw: CursorRedrawState | null;
   /** In-flight menu-highlight redraw (see `MenuHighlightRedrawState`); null once settled. */
   menuHighlightRedraw: MenuHighlightRedrawState | null;
+  /** mons[i].selectedId (:1415-1433): 0 = not rented, else this ball's 1-based pick number. */
+  selectedIds: number[];
+  /** Which pick we're on next (init 1); also the value stamped on select - see applySelect. */
+  selectingMonsState: number;
+  /** SpriteCB_Pokeball state per rented ball (ballAnim.ts); null for unselected slots. */
+  ballAnims: (BallAnimState | null)[];
+  /** In-flight RENT/DESELECT confirm redraw (see `RentConfirmRedrawState`); null once settled. */
+  rentConfirmRedraw: RentConfirmRedrawState | null;
 }
 
 /** Select_UpdateBallCursorPosition: wraps at both ends of the 6 slots. */
@@ -148,8 +227,48 @@ export function advanceMenuHighlightRedraw(state: MenuHighlightRedrawState | nul
   return elapsed >= 2 ? null : { ...state, elapsed };
 }
 
+/** Advance an in-flight RENT/DESELECT confirm redraw by one tick; call before applying this tick's input. */
+export function advanceRentConfirmRedraw(state: RentConfirmRedrawState | null): RentConfirmRedrawState | null {
+  if (!state) return null;
+  const elapsed = state.elapsed + 1;
+  return elapsed >= 2 ? null : { ...state, elapsed };
+}
+
 const BALL_SHEET: SpriteSheet = { tileset: pokeball.tileset };
 const ARROW_SHEET: SpriteSheet = { tileset: arrow.tileset };
+
+/** pokeball.json's 3 extracted 32x32 animation frames, tile 0/16/32 -> firstTileRow 0/frameHeightInTiles/2*frameHeightInTiles. */
+function ballFirstTileRow(tile: number): number {
+  return (tile / 16) * pokeball.frameHeightInTiles;
+}
+
+/** Per-slot palette/tile-frame for both the OBJ ball loop and monPicRender's window-blend target2 source (must agree). */
+function ballVisuals(state: DraftScreenState): { palette: RgbColor[]; firstTileRow: number }[] {
+  return state.slots.map((_, i) => {
+    const selected = state.selectedIds[i] !== 0;
+    const anim = state.ballAnims[i];
+    return {
+      palette: selected ? pokeball.selectedPalette : pokeball.grayPalette,
+      firstTileRow: selected && anim ? ballFirstTileRow(ballAnimTile(anim)) : 0,
+    };
+  });
+}
+
+/** Select_PrintMenuOptions (:1918-1932): row 1 is RENT/DESELECT for the currently-cursored ball, SUMMARY/OTHERS never change. */
+function menuOptionLabel(state: DraftScreenState, index: number): string {
+  if (index === MENU_OPTION_RENT) {
+    const redraw = state.rentConfirmRedraw;
+    const selected = redraw && redraw.elapsed < 1 ? redraw.fromSelected : state.selectedIds[state.cursorPos] !== 0;
+    return selected ? "DESELECT" : "RENT";
+  }
+  return MENU_OPTION_LABELS[index]!;
+}
+
+/** Select_PrintSelectMonString's own window-redraw lag - see RentConfirmRedrawState doc. */
+function currentMessage(state: DraftScreenState): string {
+  const redraw = state.rentConfirmRedraw;
+  return redraw && redraw.elapsed < 2 ? redraw.fromMessage : state.message;
+}
 
 export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
   const fb = createFramebuffer();
@@ -182,13 +301,15 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
     drawText(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, textPalette, SPECIES_TEXT_COLORS);
   }
 
-  drawText(fb, font, charmap, state.message, WIN_INFO.x + 2, WIN_INFO.y + 5, textPalette, DEFAULT_TEXT_COLORS);
+  drawText(fb, font, charmap, currentMessage(state), WIN_INFO.x + 2, WIN_INFO.y + 5, textPalette, DEFAULT_TEXT_COLORS);
 
   // OBJ: 6 rental balls (CreateSprite(..., 35*i + 32, 64, 1)) then the slot
   // cursor arrow (CreateSprite(..., ball[cursorPos].x, 88, 0)).
+  const balls = ballVisuals(state);
   for (let i = 0; i < 6; i += 1) {
     const centerX = 35 * i + 32;
-    drawSprite(fb, BALL_SHEET, pokeball.grayPalette, centerX, 64, 4, 4, 0);
+    const { palette, firstTileRow } = balls[i]!;
+    drawSprite(fb, BALL_SHEET, palette, centerX, 64, 4, 4, firstTileRow);
   }
   const cursorCenterX = 35 * state.cursorPos + 32;
   drawSprite(fb, ARROW_SHEET, arrow.palette, 35 * arrowPos + 32, 88, 2, 2, 0);
@@ -236,7 +357,7 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
         fb,
         font,
         charmap,
-        MENU_OPTION_LABELS[i]!,
+        menuOptionLabel(state, i),
         WIN_OPTIONS.x + 7,
         WIN_OPTIONS.y + 1 + i * 16,
         textPalette,
@@ -245,7 +366,7 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
     }
   }
 
-  if (slot) drawMonPic(fb, monPicVisual, slot.species, cursorCenterX);
+  if (slot) drawMonPic(fb, monPicVisual, slot.species, cursorCenterX, balls);
 
   return fb;
 }
@@ -283,11 +404,13 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
     drawTextFaded(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, textPalette, SPECIES_TEXT_COLORS, bgY);
   }
 
-  drawTextFaded(fb, font, charmap, state.message, WIN_INFO.x + 2, WIN_INFO.y + 5, textPalette, DEFAULT_TEXT_COLORS, bgY);
+  drawTextFaded(fb, font, charmap, currentMessage(state), WIN_INFO.x + 2, WIN_INFO.y + 5, textPalette, DEFAULT_TEXT_COLORS, bgY);
 
+  const balls = ballVisuals(state);
   for (let i = 0; i < 6; i += 1) {
     const centerX = 35 * i + 32;
-    drawSpriteFaded(fb, BALL_SHEET, pokeball.grayPalette, centerX, 64, 4, 4, 0, objY);
+    const { palette, firstTileRow } = balls[i]!;
+    drawSpriteFaded(fb, BALL_SHEET, palette, centerX, 64, 4, 4, firstTileRow, objY);
   }
   const cursorCenterX = 35 * state.cursorPos + 32;
   drawSpriteFaded(fb, ARROW_SHEET, arrow.palette, 35 * arrowPos + 32, 88, 2, 2, 0, objY);
@@ -307,7 +430,7 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
         fb,
         font,
         charmap,
-        MENU_OPTION_LABELS[i]!,
+        menuOptionLabel(state, i),
         WIN_OPTIONS.x + 7,
         WIN_OPTIONS.y + 1 + i * 16,
         textPalette,
@@ -317,7 +440,7 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
     }
   }
 
-  if (slot) drawMonPicFaded(fb, monPicVisual, slot.species, cursorCenterX, bgY, objY);
+  if (slot) drawMonPicFaded(fb, monPicVisual, slot.species, cursorCenterX, bgY, objY, balls);
 
   return fb;
 }
@@ -335,4 +458,8 @@ export const ANCHOR_DRAFT_SCREEN_STATE: DraftScreenState = {
   hasOpenedMonPic: false,
   cursorRedraw: null,
   menuHighlightRedraw: null,
+  selectedIds: [0, 0, 0, 0, 0, 0],
+  selectingMonsState: 1,
+  ballAnims: [null, null, null, null, null, null],
+  rentConfirmRedraw: null,
 };

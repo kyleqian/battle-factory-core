@@ -5,6 +5,76 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 17 — S5 slice 1 (worker, capped): RENT/DESELECT + ball-rock RNG stream implemented and RAM-verified; pixel trace 125/139 — blocked short of 0 diff by a newly-found pre-existing rendering bug (ISSUES #5), not by anything in this slice's own code
+
+- **State:** `npm test` **173/173** (159→173, +14 new), `npm run build`
+  green. All 6 pre-existing traces re-verified 0 diff (`anchor` 1/1,
+  `draft-cursor` 13/13, `draft-menu` 38/38, `draft-menu-slot6` 66/66,
+  `summary-info-onix` 122/122, `summary-info-magby` 132/132) — **no
+  regressions**. New `tools/compare/traces/rent-slot1.json` (dense,
+  every-frame, popup-open → RENT confirm → 100-tick dwell) → **125/139
+  matched, NOT 0 diff** (see Notes — acceptance criterion not met this
+  session). New Tier-1 tests **are** fully green and RAM-verified:
+  `tests/rentSelect.test.ts` (9 tests, state machine + renumbering) and
+  `tests/ballAnim.test.ts` (5 tests, engine `rngValue` pinned against
+  RAM-dumped `gRngValue` at frames 0/36/37/39/201 — includes both a
+  SUCCESS and a FAILURE roll).
+- **Did:** Implemented `src/engine/ballAnim.ts` (new — the
+  `SpriteCB_Pokeball` idle/rock state machine + RNG roll, RAM-verified
+  timings: first roll-eligibility lands 2 ticks after selection, a 17-step
+  Moving cmd table matching `sAnim_Select_Pokeball_Moving` exactly, a
+  32-tick rest after a successful roll, immediate reroll after a failed
+  one; a `displayTile`/`pendingDisplayTile` 2-stage shift register
+  reproduces an oracle-verified 2-tick render lag between the internal
+  state transition and the visible tile, kept structurally separate from
+  the RNG-critical internal timing). Wired RNG into `EngineState`
+  (`rngValue`, seeded `ANCHOR_RNG_VALUE`, advances once/tick unconditionally
+  per `main.c:366`, ball rolls consume a *second* step the same tick,
+  RAM-confirmed ordering: standard tick first, roll second). Implemented
+  RENT/DESELECT in `factoryDraftScreen.ts` (`applySelect`/`applyDeselect`
+  pure reducers, the renumbering special case, `selectMonMessage`,
+  context-sensitive row-1 label) and wired the confirm path into
+  `core.ts`'s `tick()`. Found and fixed two real render bugs along the way:
+  (1) the info-window message and popup label lag the palette swap by 2
+  ticks (`RentConfirmRedrawState`, same redraw-scheduling pattern as
+  `CursorRedrawState`); (2) `monPicRender.ts`'s `ballColor()` helper (used
+  for the mon-pic window's blend target2 source) was hardcoded to the gray
+  palette/tile 0 for *every* ball regardless of selection state — fixed via
+  a shared `ballVisuals()`/`BallVisual` threaded into both `drawMonPic` and
+  the OBJ ball loop so they can't drift apart again.
+- **Next:** ISSUES #5 (a pre-existing, RENT-independent mon-pic-close
+  rendering bug, confirmed via a bare `A`+`B` reproduction with zero RENT
+  code involved) is what's between this trace and 0 diff — see that entry
+  for the full probe log and a lead (likely an un-modeled palette-cycle/
+  shimmer in `monPicBg`). A future slice should either root-cause it
+  directly, or re-time `rent-slot1.json`'s RENT-confirm press to land in a
+  confirmed-clean window once the periodic pattern is pinned precisely
+  enough to predict one reliably (trial-and-error this session found good
+  windows at ~31 and ~47+ ticks after open, but shifting into the second one
+  just moved a *different* set of diffs into frames outside this trace's
+  species-name-breathe budget — see Notes).
+- **Notes:** **This is the "STOP and report precisely" case the brief
+  anticipated**, just triggered by a different collision than the one it
+  named (species-name breathe) — ISSUES #5 instead. Confirmed root-cause
+  separation carefully before stopping: (1) reverted the RENT-specific
+  trace to a bare `A`-open+`B`-close with no selection/RNG code touched at
+  all, and it reproduces the identical diff at the identical relative
+  offset — proves this is not a bug in this slice's new code; (2) all of
+  this slice's *own* new behavior — palette swap, message/label redraw
+  timing, the ball's idle/rock tile sequence, and the RNG stream through
+  both a SUCCESS and a FAILURE roll — is independently confirmed exact via
+  RAM-dumped `gRngValue` checkpoints (hermetic, unaffected by any pixel
+  bug) plus the trace's own frames 58-138, which sit entirely outside every
+  close-animation window and are 100% clean. The RAM-inspection recipe
+  (`tools/extract/inspect-anchor.py`'s pattern, scratch script not
+  committed) was essential here: a per-frame dump of `gSprites[ballId]`'s
+  `data[0]`/`animEnded`/`animNum`/`animCmdIndex` alongside `gRngValue`
+  turned a confusing pixel-only investigation into an exact tick-by-tick
+  state trace, which is what let SETTLE_TICKS/the Moving cmd table/the
+  2-stage display lag all get pinned correctly on the first real attempt.
+
+---
+
 ## 16 — S4 slice 1 (worker, capped): summary-info-magby.json lands 0 diff — "≥2 different slots" acceptance met, no app changes needed
 
 - **State:** `npm test` **159/159** unchanged, `npm run build` green.
@@ -74,59 +144,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   implementation off docs/rent-flow-notes.md. All prerequisites committed.
 - **Notes:** Every worker ended at a green commit; no usage-limit events;
   two PAPERCUTS entries total (see file).
-
----
-
-## 14 — S4 slice 1 (worker, capped): B-exit fade fixed, ISSUES #4 closed; summary-info-onix.json now 0 diff through settle — S4 stays [~] (MAGBY trace still open)
-
-- **State:** `npm test` **159/159** (152→159, +7 new), `npm run build`
-  green. `anchor`/`draft-cursor`/`draft-menu`/`draft-menu-slot6` re-verified
-  0 diff. `tools/compare/traces/summary-info-onix.json` extended from 64
-  captures (entry+settle only) to **122 dense captures, every frame,
-  covering SUMMARY-press through the full B-exit (fade-out/black-hold/
-  fade-in) back to the resettled draft screen** → **0 diff, all 122
-  frames**. `ISSUES.md` #4 deleted (fixed, not worked around).
-- **Did:** Per the brief's method: ran a fresh, isolated dense oracle probe
-  of the B-exit only (not layered on the entry trace). First probe attempt
-  (B pressed at the settled Info page's own press-tick+62, well inside the
-  documented pixel-stable window) found B silently did nothing for ~50
-  frames — a real gotcha, now in `ROADMAP.md`'s Domain notes: input-ready
-  lags visual-stable by a few ticks here (`Task_HandleInput`'s
-  `!gPaletteFade.active` guard isn't true yet even though the screen looks
-  settled); B first reliably registers at absolute press-tick+63 (a
-  parameter sweep confirmed +62 fails, +63 works). With a probe that
-  actually triggered the fade, derived the true curve pixel-for-pixel
-  (component 90 and 255 samples, matching `paletteFade.test.ts`'s existing
-  oracle-pinned values exactly) — the exit fade-out/fade-in curves and
-  their `elapsed+1` offset were **already correct** in `core.ts`'s
-  `render()`; the actual bug was the black-hold phase: the entry direction
-  had a special "hold's own last tick already shows fade-in's first step"
-  branch, but the exit direction fell through to always-pure-black instead
-  of getting the same treatment — the exit's black hold has the identical
-  quirk (oracle-confirmed: the true last hold tick, not pure black, matches
-  `bgFadeY(0, FADE_IN)`/`objFadeY(0, FADE_IN)` composited on the *draft*
-  screen, symmetric with the entry composing onto the *Info* page).
-  Rewrote `render()`'s black-hold branch to apply the peek uniformly by
-  direction instead of hardcoding it entry-only. New
-  `tests/summaryScreenRender.test.ts` hermetically pins the render()
-  *dispatch* itself (which curve/offset/black-hold-quirk applies to which
-  phase × direction) — the layer this bug actually lived in, distinct from
-  `paletteFade.test.ts`'s already-correct low-level curve math.
-- **Next:** `summary-info-magby.json` (stretch, not reached this session —
-  probe MAGBY's own stable window first, don't assume ONIX's press-tick+59
-  transfers) is the last piece of S4 slice 1's brief before S4's "≥2
-  different slots" acceptance criterion is met. After that: S4's remaining
-  scope (page navigation RIGHT/LEFT, mon-switching UP/DOWN, move-select) or
-  move on to S5 per supervisor call.
-- **Notes:** The debugging path here is a good template for future
-  fade/dispatch bugs on this screen: (1) isolated dense probe of *only*
-  the interaction in question, (2) sanity-check the probe actually
-  triggered the intended state transition (don't assume a "stable-looking"
-  press registered — verify pixels actually start changing where expected
-  before trusting the rest of the derivation), (3) compare the app's
-  actual rendered pixels against the oracle's directly (not against a
-  hand-derived formula) to localize which specific composited region
-  disagrees, since that pinpoints the dispatch bug far faster than
-  re-deriving curve math that was already right.
 
 ---

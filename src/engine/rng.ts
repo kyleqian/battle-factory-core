@@ -44,3 +44,6 @@ export class GbaRng {
 export const RNG_MULTIPLIER = Number(MULTIPLIER);
 export const RNG_INCREMENT = Number(INCREMENT);
 export const RNG_MASK32 = Number(MASK32);
+
+/** RAM-verified gRngValue at the anchor draft screen's frame 0 (ROADMAP.md Domain notes). */
+export const ANCHOR_RNG_VALUE = 0xd2ddeec8;
