@@ -79,11 +79,18 @@ the resettled draft screen) is **0 diff** — the B-exit render bug
 (ISSUES #4) is fixed: the exit's black-hold phase shares the entry's
 "last tick peeks at fade-in's first step" quirk (`core.ts`'s `render()`),
 which the original implementation only wired for the entry direction.
-**Still not done:** `summary-info-magby.json` (stretch — probe MAGBY's own
-stable window first, don't assume ONIX's +59..+64 transfers) doesn't exist
-yet, so the "≥2 different slots" acceptance criterion is still open. Page
-navigation, mon-switching, and move-select remain fully out of scope per
-the brief.
+`tools/compare/traces/summary-info-magby.json` (132 every-frame captures,
+slot 2, own timing probed) is also **0 diff** — the "≥2 different slots"
+criterion is met for the Info page.
+**Supervisor re-scope (2026-07-17, second session):** S4 slice 1 (Info
+page on 2 slots, entry/exit fades, pinned by the two traces above) is
+complete; the remainder — page navigation RIGHT/LEFT + scroll-wipe,
+UP/DOWN mon-switching, move-select, and the per-species front-sprite
+idle animation (`sMonAnimationDelayTable`, fires at SUMMARY-press+65 for
+MAGBY) — is explicitly deferred behind S5 per the "re-scoped by the
+supervisor" rule below. Rationale: S5→S8 is the mission's critical path;
+the data the deferred pages need (moves/exp/items) is being extracted in
+parallel. S5 may begin.
 
 ### [ ] S5 — Complete the draft: rent 3, confirmations, exit sequence
 RENT/OTHERS flows, ball palette change on selection, the 2nd/3rd-pick

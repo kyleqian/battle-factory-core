@@ -34,11 +34,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   intrude — so the committed trace never exercises those not-yet-modeled
   frames at all, by construction, not by luck.
 - **Next:** S4's "≥2 different slots" acceptance criterion is now met.
-  Remaining S4 scope (unchanged from #15): the mon idle
-  animation/front-sprite-bounce-and-cry (now root-caused, see Did), page
-  navigation RIGHT/LEFT + scroll-wipe, UP/DOWN mon-switching, move-select.
-  Supervisor call on whether to close S4 slice 1 here and move to S5, or
-  pick up one of those next.
+  **Supervisor decision (this session): S4 slice 1 closed; the remainder
+  (page nav + scroll-wipe, UP/DOWN switching, move-select, mon idle
+  animation) is explicitly deferred behind S5 — recorded in ROADMAP.md's
+  S4 section. Main lane proceeds to S5 (docs/rent-flow-notes.md);
+  worktree lane is extracting moves/exp/items data in parallel.**
 - **Notes:** Debugging template from #14 worked well again: isolated dense
   oracle probe of the new interaction first, sanity-checked pixels
   actually changed after the "trigger" input rather than trusting a
