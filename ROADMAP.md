@@ -111,7 +111,14 @@ Groundwork banked: pre-battle-room scene fully extracted and composite-
 verified 0/38400 px vs oracle (`docs/prebattle-room-notes.md`,
 `prebattle-room-*.json` gen files); moves/exp/items data extracted for the
 Skills/Moves pages and S6/S7 (`moves.json`, `exp-tables.json`,
-`item-names.json`).
+`item-names.json`); confirm flow fully scouted
+(`docs/confirm-flow-notes.md`).
+**Slice 2 status (2026-07-17 PM):** post-confirm cursor-input gate fixed
+(`isCursorInputReady`); species-name-breathe rule pinned (keep cumulative
+cursor-mode ticks < 105, no model needed); multi-ball ball-rock stall
+model blocked on ISSUES #7 (evidence points to an ISSUES-#5-class
+render-cost hardware race — user decision pending before more budget);
+`rent-3picks.json` blocked on #7, spec ready in PROGRESS-archive #21.
 
 ### [ ] S6 — Battle bring-up: transition → first action menu, opponent exact
 Battle transition effect, battle scene init (backgrounds, healthboxes,

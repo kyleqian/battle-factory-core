@@ -5,6 +5,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 26 — Supervisor wind-down: session end 2026-07-17 ~15:20
+
+- **State (verified this minute):** `npm test` **264/264**, `npm run build`
+  green, working tree clean. Traces: `anchor` 1/1, `draft-cursor` 13/13,
+  `draft-menu` 38/38, `draft-menu-slot6` 66/66, `summary-info-onix`
+  122/122, `summary-info-magby` 132/132 — all 0 diff — and `rent-slot1`
+  125/139 (gap 100% attributed to ISSUES #5). ROADMAP: S1-S3 [x], S4 [~]
+  (slice 1 closed, remainder deferred behind S5 by supervisor re-scope),
+  S5 [~], S6-S9 [ ] with heavy groundwork banked.
+- **Session summary (supervised, ~10:54-15:20):** 9 main-lane worker steps
+  + 7 worktree-lane steps, all verified. Landed: MAGBY summary trace (S4
+  "≥2 slots" met); RENT/DESELECT + single-ball rock/idle RNG-exact
+  (`rent-slot1.json`); ISSUES #5 root-caused (WIN0V cycle jitter,
+  unmodelable at tick level — POLICY QUESTION TO USER, still open);
+  multi-ball stall model (ISSUES #6 fixed: text-print stall) + two latent
+  ballAnim timing bugs; post-confirm cursor-input gate fixed
+  (`isCursorInputReady`); species-name-breathe rule pinned (no model
+  needed under 105 cursor-mode ticks). Groundwork merged: moves/exp/items
+  data, pre-battle-room scene (composite-verified 0/38400px), S6
+  battle-bringup dossier + battle-1 assets + all 12 transition variants,
+  S5 confirm-flow dossier, S7 turn-1 ground truth (RAM-truthed damage/
+  order/HP-drain). Two PAPERCUTS entries added.
+- **OPEN QUESTIONS FOR THE USER (blocking further S5 pixel-trace work):**
+  (1) ISSUES #5 policy — accept documented cycle-jitter frames vs re-time
+  traces into clean windows (supervisor recommendation: re-time where
+  feasible, accept individually-attributed frames otherwise). (2) ISSUES
+  #7 sign-off — the multi-ball stall now looks like the same hardware
+  cycle-race class as #5 (species-name render cost); next step is either
+  new investigative tooling (RAM-read the race determinant directly) or
+  closing it as a #5-style documented gap. Entries 24-25 + ISSUES #7 have
+  the full evidence; two sessions in a row overturned the prior
+  "confirmed" rule, so no more budget should go in without a decision.
+- **Next (once decided):** rent-3picks.json + 3-ball RNG pin (spec ready
+  in entry 21), then confirm-flow implementation
+  (docs/confirm-flow-notes.md), then exit sequence
+  (docs/prebattle-room-notes.md), then S6 off its dossier + assets.
+- **Notes:** every worker ended at a green commit; no usage-limit events;
+  parallel worktree lane ran 6 extraction/scout steps concurrently with
+  zero merge conflicts.
+
+---
+
 ## 25 — S5 slice 2 (worker, capped, LAST of this supervised session): STOPPED before implementing a fix — ISSUES #7's "count-dependent" AND "first-event-only" stall hypotheses BOTH RAM-DISPROVEN this session with clean counterexamples; best remaining evidence points to a species-render-cost-dependent race (same class as ISSUES #5), not a clean state rule
 
 - **State:** unchanged from entry 24 — `npm test` **264/264**, `npm run
@@ -106,62 +148,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   offsets) — worth flagging for future RAM-probe work: verify struct
   offsets against the actual header before reusing offsets cited in prior
   session notes.
-
----
-
-## 23 — S5 slice 2 (worker, capped): Priority 1 (post-confirm cursor-input gate) FIXED and Tier-1-pinned; Priority 2's two/three-simultaneous-stall question RAM-CONFIRMED CORRECT with no fix needed, but a narrower, different bug found and left open — ISSUES #7 updated, not deleted
-
-- **State:** `npm test` **264/264** (261→264: +2 `cursorInputGate.test.ts`,
-  +1 `monPic.test.ts`), `npm run build` green. All 7 existing traces
-  untouched (`rent-slot1.json` still 125/139). One commit landed
-  (`isCursorInputReady` fix + tests); no `ballAnimStall` code change this
-  session (root cause of the narrower remaining bug not yet found - see
-  ISSUES #7).
-- **Did (Priority 1 - DONE):** Found the exact gate:
-  `Select_Task_HandleChooseMons` (`battle_factory_screen.c:1671-1673`)
-  early-returns - dropping LEFT/RIGHT/A-open alike, not just cursor moves -
-  for as long as `sFactorySelectScreen->monPicAnimating` is TRUE (set the
-  instant `CloseMonPic` fires, cleared only once the flash-shrink sprite's
-  affine anim ends). RAM-verified the exact tick boundary (direct
-  `monPicAnimating` reads, empirically-found struct offset 672): replaying
-  `RENT_SLOT1` (confirm press-tick 37), a `RIGHT` at tick 56 is dropped,
-  tick 57 (where `monPicAnimating` first reads FALSE) is accepted - exactly
-  matches `MonPicState.phase` flipping `"closing"`→`"closed"`. Added
-  `isCursorInputReady` (`monPic.ts`, mirrors `isMonPicInputReady`'s open-side
-  gate) and gated `core.ts`'s cursor-mode branch on it. Pinned with
-  `tests/cursorInputGate.test.ts` + a `monPic.test.ts` unit case.
-- **Did (Priority 2 - partially resolved, real remaining bug found):** Built
-  a fresh 3-ball RAM probe (`≥40`-tick dwell before every cursor move, per
-  the brief) covering rent slot0 → `RIGHT` → rent slot1 (2 balls active) →
-  `RIGHT` (the critical 2-simultaneously-active-ball trigger) → rent slot2
-  (3 balls active). **Result: `gRngValue` matches bit-exact between RAM and
-  engine on all 37 sampled ticks around that trigger** - `ballAnimStall`'s
-  existing `activeSlotsBeforeAction` formula (stall *every* active ball, not
-  just one) was already correct; no model change needed. A further probe
-  step (pressing `RIGHT` a 4th time, past the 3rd/final rent) showed a real
-  divergence, but that's `Select_OptionRentDeselect` handing off to the
-  YES/NO reveal screen once all 3 picks are made - out of scope per the
-  brief, not a `ballAnimStall` bug. Then reproduced ISSUES #7's *original*
-  pixel symptom directly (entry 21's own repro shape, `npm run compare` on a
-  scratch trace): frames 124/155/163 **still mismatch** - so the fix above
-  doesn't resolve this issue. Cross-referencing the same script's RAM vs
-  engine `gRngValue`: the two streams match bit-exact through tick 203
-  (spanning every frame the pixel mismatches land on) and diverge for the
-  first time at **tick 204** - ball 0 (which has accumulated 4 cumulative
-  stall events by then, more than any existing pinned test reaches) misses a
-  resting→moving reroll transition that RAM shows firing on schedule. Ran
-  out of session time before isolating which `ballAnim.ts` internal counter
-  is off. Full evidence and next steps: ISSUES #7 (updated, not deleted -
-  per the brief's own instruction not to guess a stall model without RAM
-  proof).
-- **Next:** dump `gSprites[0]` densely from tick ~195-210 (RAM + engine) to
-  find the exact `ballAnim.ts` counter desync, fix, re-verify
-  `ballAnim.test.ts`/`ballAnimMultiBall.test.ts` stay green unchanged, pin a
-  new Tier-1 test, then delete ISSUES #7 and build `rent-3picks.json`.
-- **Notes:** Stretch (`rent-3picks.json`) not attempted - Priority 2 took
-  the full remaining budget. PAPERCUT: none beyond the usual oracle
-  round-trip overhead (~6 oracle/RAM-probe round-trips this session, plus 2
-  `npm run compare` runs on scratch traces, none committed).
 
 ---
 
