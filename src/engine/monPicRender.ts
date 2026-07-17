@@ -17,6 +17,7 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { drawSprite, type SpriteSheet } from "./sprites.ts";
+import { drawSpriteFaded, fadeColor } from "./fadeRender.ts";
 import type { MonPicVisual } from "./monPic.ts";
 
 import monPicBgData from "../assets/gen/mon-pic-bg.json" with { type: "json" };
@@ -172,6 +173,56 @@ export function drawMonPic(fb: Uint8Array, visual: MonPicVisual, species: string
     const sprite = frontSprites[species];
     if (sprite) {
       drawSprite(fb, { tileset: sprite.tileset } as SpriteSheet, sprite.palette, 120, 64, 8, 8, 0);
+    }
+  }
+}
+
+/**
+ * S4 summary-screen entry/exit fade variant of drawMonPic: the WIN0 window's
+ * blend8(bg3, target2) mix can't be faded by re-fading the already-composited
+ * pixel (BG3 always fades on `bgY`, but target2 is BG1(bgY)-or-OBJ(objY)
+ * depending on source per-pixel), so this fades each blend input separately
+ * (matching real hardware: BeginNormalPaletteFade rewrites palette RAM, and
+ * the blend hardware reads already-faded palette colors) before blending -
+ * see paletteFade.ts's module doc for the BG/OBJ tick-lag this implements.
+ * y=0 for both reproduces drawMonPic's output exactly.
+ */
+export function drawMonPicFaded(
+  fb: Uint8Array,
+  visual: MonPicVisual,
+  species: string,
+  cursorCenterX: number,
+  bgY: number,
+  objY: number,
+): void {
+  if (visual.flashWidth > 0) {
+    const left = FLASH_CENTER_X - Math.floor(visual.flashWidth / 2);
+    const color = fadeColor(visual.flashBlended ? FLASH_BLENDED_COLOR : FLASH_COLOR, objY);
+    for (let i = 0; i < visual.flashWidth; i += 1) {
+      setPixel(fb, left + i, FLASH_Y, color.r, color.g, color.b);
+    }
+  }
+
+  if (visual.window) {
+    const { top, bottom } = visual.window;
+    for (let y = top; y < bottom; y += 1) {
+      for (let x = WINDOW_LEFT; x < WINDOW_RIGHT; x += 1) {
+        const bg3 = bg3Color(x, y);
+        const arrow = arrowColor(x, y, cursorCenterX);
+        const ball = arrow ? null : ballColor(x, y);
+        const objSource = arrow ?? ball;
+        const t2Raw = objSource ?? bg1Color(x, y);
+        const t2 = t2Raw ? fadeColor(t2Raw, objSource ? objY : bgY) : null;
+        const color = bg3 ? blend8(fadeColor(bg3, bgY), t2) : (t2 ?? BLACK);
+        setPixel(fb, x, y, color.r, color.g, color.b);
+      }
+    }
+  }
+
+  if (visual.spriteVisible) {
+    const sprite = frontSprites[species];
+    if (sprite) {
+      drawSpriteFaded(fb, { tileset: sprite.tileset } as SpriteSheet, sprite.palette, 120, 64, 8, 8, 0, objY);
     }
   }
 }

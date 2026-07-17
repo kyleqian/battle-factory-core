@@ -12,7 +12,8 @@ import { drawSprite, type SpriteSheet } from "./sprites.ts";
 import { drawText, rightAlignXOffset, type FontData } from "./font.ts";
 import type { RgbColor } from "./bg.ts";
 import { getMonPicVisual, INITIAL_MON_PIC_STATE, type MonPicState } from "./monPic.ts";
-import { drawMonPic } from "./monPicRender.ts";
+import { drawMonPic, drawMonPicFaded } from "./monPicRender.ts";
+import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -64,6 +65,7 @@ export type DraftScreenMode = "cursor" | "menu";
 
 /** Select_MenuOptionFuncs order: SUMMARY, RENT/DESELECT, OTHERS. */
 export const MENU_OPTION_COUNT = 3;
+export const MENU_OPTION_SUMMARY = 0;
 export const MENU_OPTION_OTHERS = 2;
 
 /**
@@ -244,6 +246,78 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
   }
 
   if (slot) drawMonPic(fb, monPicVisual, slot.species, cursorCenterX);
+
+  return fb;
+}
+
+/**
+ * S4 entry/exit fade variant of renderFactoryDraftScreen: identical
+ * composition (see that function), but BG1 chrome + all BG0 text fade on
+ * `bgY` while the OBJ layer (balls, cursor arrow, menu highlight, monPic's
+ * sprite/OBJ portion of its blend window) fades on `objY` - see
+ * fadeRender.ts/monPicRender.ts's drawMonPicFaded for why these can't share
+ * one curve. bgY=objY=0 reproduces renderFactoryDraftScreen exactly.
+ */
+export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: number, objY: number): Uint8Array {
+  const fb = createFramebuffer();
+
+  drawTileBgFaded(fb, menuBg, bgY, 0, 0);
+
+  drawTextFaded(fb, font, charmap, "RENTAL POKéMON", WIN_TITLE.x + 2, WIN_TITLE.y + 1, textPalette, DEFAULT_TEXT_COLORS, bgY);
+
+  const redraw = state.cursorRedraw;
+  const categoryPos = !redraw || redraw.elapsed >= 1 ? state.cursorPos : redraw.fromCursorPos;
+  const speciesPos = !redraw || redraw.elapsed >= 2 ? state.cursorPos : redraw.fromCursorPos;
+  const arrowPos = redraw ? redraw.fromCursorPos : state.cursorPos;
+
+  const slot = state.slots[state.cursorPos];
+  const categorySlot = state.slots[categoryPos];
+  if (categorySlot) {
+    const categoryText = `${categorySlot.category} POKéMON`;
+    const categoryX = WIN_MON_CATEGORY.x + rightAlignXOffset(font, charmap, categoryText, 118);
+    drawTextFaded(fb, font, charmap, categoryText, categoryX, WIN_MON_CATEGORY.y + 1, textPalette, DEFAULT_TEXT_COLORS, bgY);
+  }
+  const speciesSlot = state.slots[speciesPos];
+  if (speciesSlot) {
+    const speciesX = WIN_SPECIES.x + rightAlignXOffset(font, charmap, speciesSlot.species, 86);
+    drawTextFaded(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, textPalette, SPECIES_TEXT_COLORS, bgY);
+  }
+
+  drawTextFaded(fb, font, charmap, state.message, WIN_INFO.x + 2, WIN_INFO.y + 5, textPalette, DEFAULT_TEXT_COLORS, bgY);
+
+  for (let i = 0; i < 6; i += 1) {
+    const centerX = 35 * i + 32;
+    drawSpriteFaded(fb, BALL_SHEET, pokeball.grayPalette, centerX, 64, 4, 4, 0, objY);
+  }
+  const cursorCenterX = 35 * state.cursorPos + 32;
+  drawSpriteFaded(fb, ARROW_SHEET, arrow.palette, 35 * arrowPos + 32, 88, 2, 2, 0, objY);
+
+  const monPicVisual = getMonPicVisual(state.monPic);
+  if (monPicVisual.menuHighlightVisible) {
+    const highlightMenuCursorPos = state.menuHighlightRedraw
+      ? state.menuHighlightRedraw.fromMenuCursorPos
+      : state.menuCursorPos;
+    const highlightY = highlightMenuCursorPos * 16 + 112;
+    drawSpriteFaded(fb, { tileset: menuHighlight.left.tileset }, menuHighlight.palette, 176 + 16, highlightY + 8, 4, 2, 0, objY);
+    drawSpriteFaded(fb, { tileset: menuHighlight.right.tileset }, menuHighlight.palette, 208 + 16, highlightY + 8, 4, 2, 0, objY);
+  }
+  if (monPicVisual.menuTextVisible) {
+    for (let i = 0; i < MENU_OPTION_LABELS.length; i += 1) {
+      drawTextFaded(
+        fb,
+        font,
+        charmap,
+        MENU_OPTION_LABELS[i]!,
+        WIN_OPTIONS.x + 7,
+        WIN_OPTIONS.y + 1 + i * 16,
+        textPalette,
+        MENU_TEXT_COLORS,
+        bgY,
+      );
+    }
+  }
+
+  if (slot) drawMonPicFaded(fb, monPicVisual, slot.species, cursorCenterX, bgY, objY);
 
   return fb;
 }

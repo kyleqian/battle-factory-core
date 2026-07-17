@@ -154,4 +154,22 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- Caught-ball icon (pokemon_summary_screen.c:4069-4077 CreateCaughtBallSprite
+// -> ItemIdToBallId(MON_DATA_POKEBALL) -> gBallSpriteTemplates[ball] from
+// pokeball.c's gBallSpriteSheets/gBallGfx_Poke = graphics/balls/poke.png, NOT
+// the factory-screen pokeball.json already extracted for the draft-screen
+// rental balls (a different asset). Every factory rental is created with
+// MON_DATA_POKEBALL left at CreateBoxMon's hardcoded default, ITEM_POKE_BALL
+// (pokemon.c:2261) - so only BALL_POKE is needed. The sprite's callback is
+// SpriteCallbackDummy (no animation), so only the sheet's first frame (top
+// 16x16px = 2x2 tiles of the 16x48px 3-frame send-out sheet) ever renders.
+{
+  const image = decodeIndexedPng(join(REF, "graphics", "balls", "poke.png"));
+  const { columns, rows, tiles } = sliceTiles(image);
+  writeJson(join(ASSETS_GEN, "summary-ball.json"), {
+    tileset: { columns, rows, tiles: tiles.map((t) => [...t.pixels]) },
+    palette: image.palette,
+  });
+}
+
 console.log("extraction complete");

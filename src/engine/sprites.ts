@@ -23,6 +23,7 @@ export function drawSprite(
   widthInTiles: number,
   heightInTiles: number,
   firstTileRow = 0,
+  hFlip = false,
 ): void {
   const pixelWidth = widthInTiles * 8;
   const pixelHeight = heightInTiles * 8;
@@ -30,12 +31,14 @@ export function drawSprite(
   const originY = centerY - Math.floor(pixelHeight / 2);
   for (let ty = 0; ty < heightInTiles; ty += 1) {
     for (let tx = 0; tx < widthInTiles; tx += 1) {
-      const tileIndex = (firstTileRow + ty) * sheet.tileset.columns + tx;
+      const srcTx = hFlip ? widthInTiles - 1 - tx : tx;
+      const tileIndex = (firstTileRow + ty) * sheet.tileset.columns + srcTx;
       const tile = sheet.tileset.tiles[tileIndex];
       if (!tile) continue;
       for (let y = 0; y < 8; y += 1) {
         for (let x = 0; x < 8; x += 1) {
-          const colorIndex = tile[y * 8 + x]!;
+          const sx = hFlip ? 7 - x : x;
+          const colorIndex = tile[y * 8 + sx]!;
           if (colorIndex === 0) continue; // transparent
           const color = palette[colorIndex];
           if (!color) continue;
