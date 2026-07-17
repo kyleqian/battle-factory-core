@@ -247,10 +247,9 @@ needed — at press-tick 42):
   runs.
 - First visible fade pixel change: **frame 47** (press-tick+5).
 - Fully faded to black, screen sha stable: **frames 62-85** (press-tick+20
-  through +43) — this ~24-frame black hold is `CB2_InitSelectScreen`→...
-  wait, corrected: this is `CB2_InitSummaryScreen`/`LoadGraphics`'s many
-  `gMain.state` steps (decompression, sprite/BG setup) running behind the
-  black screen.
+  through +43) — this ~24-frame black hold is `CB2_InitSummaryScreen`/
+  `LoadGraphics`'s many `gMain.state` steps (decompression, sprite/BG setup)
+  running behind the black screen.
 - Fade-in complete, Info page fully drawn and momentarily stable:
   **frames 101-106** (press-tick+59 to +64).
 - **From frame 107 onward the screen never re-stabilizes** — see Risk (a).
