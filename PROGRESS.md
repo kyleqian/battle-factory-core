@@ -5,6 +5,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 15 — Supervisor wind-down: session end 2026-07-17 ~05:50
+
+- **State (verified this minute):** `npm test` **159/159**, `npm run build`
+  green, all five compare traces 0 diff (`anchor` 1/1, `draft-cursor`
+  13/13, `draft-menu` 38/38, `draft-menu-slot6` 66/66 every-frame,
+  `summary-info-onix` **122/122** every-frame incl. full B-exit).
+  `ISSUES.md` empty. Working tree clean. ROADMAP: **S1 [x] S2 [x] S3 [x]
+  S4 [~] S5-S9 [ ]** — S4's remainder: MAGBY Info-page trace (probe its
+  own stable window), the 3 other pages + scroll-wipe, UP/DOWN
+  mon-switching, move-select, the mon idle animation.
+- **Session summary (supervised, ~01:00-05:50):** 9 worker steps + 1 merge
+  lane. Landed: staged roadmap (iteration 0); S1 pixel-exact anchor +
+  compare loop + extraction pipeline; S2 draft interactions frame-exact
+  incl. every-frame transients; S3 RNG core + 882 rentals extracted +
+  anchor RAM dump (six mons pinned to recomputed stats); S4 fade math,
+  Info-page data + renderer, entry+exit fades pixel-exact; scout dossiers
+  for S4 (summary-screen-notes.md) and S5 (rent-flow-notes.md). Key
+  domain finds in ROADMAP notes: anchor RNG seed, ball-sprite RNG
+  consumption, battle-1 opponent is an anchor constant, statics-via-nm
+  recipe, fade elapsed+1 + black-hold quirks.
+- **Next:** S4 remainder (start with summary-info-magby.json), then S5
+  implementation off docs/rent-flow-notes.md. All prerequisites committed.
+- **Notes:** Every worker ended at a green commit; no usage-limit events;
+  two PAPERCUTS entries total (see file).
+
+---
+
 ## 14 — S4 slice 1 (worker, capped): B-exit fade fixed, ISSUES #4 closed; summary-info-onix.json now 0 diff through settle — S4 stays [~] (MAGBY trace still open)
 
 - **State:** `npm test` **159/159** (152→159, +7 new), `npm run build`
@@ -133,58 +160,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `appTrace.ts`'s frame counter?) came up twice this session and cost real
   time both times — worth a `bin/oracle info`/`ROADMAP.md` Domain-notes
   clarification for the next worker who dense-probes a fresh interaction.
-
----
-
-## 12 — S4 slice 1 (worker, capped): Info-page extraction landed; renderer/traces still NOT reached — S4 stays [~]
-
-- **State:** `npm test` **146/146** (138→146, +8 new), `npm run build`
-  green. Existing traces (`anchor`, `draft-cursor`, `draft-menu`,
-  `draft-menu-slot6`) untouched, still 0 diff (not re-run this session but
-  no shared code was touched). **`summary-info-onix.json`/`-magby.json`
-  were NOT produced** — no Info-page renderer exists yet, so there is
-  nothing to capture against. `ROADMAP.md` S4 stays `[~]`.
-- **Did:** Closed the slice-1 blocker the brief asked for first:
-  `tools/extract/extract-summary-info.ts` extracts, for the 6 anchor
-  species, National Dex number (RAM-probed `FLAG_SYS_NATIONAL_DEX` at the
-  anchor to confirm National — not Hoenn — numbering applies, bit read
-  back `1`/TRUE), types, and `genderRatio` from `species_info.h`, plus
-  ability name+description text for every ability the pool uses, into
-  `src/data/gen/summary-info.json`. Added `src/engine/monGender.ts`
-  (pure port of `GetGenderFromSpeciesAndPersonality`). Both pinned in
-  `tests/summaryInfo.test.ts` (8 new tests) against the anchor's real
-  personality values (e.g. confirms ONIX shows male, MAGBY female).
-  Then spent the remainder of the session's budget researching the
-  renderer itself (window pixel geometry, text-color tables, sprite
-  positions/priorities/anchoring, BG-layer reasoning, a nature-memo
-  two-tone-color-code gap in `font.ts`, a few unresolved assumptions) and
-  wrote it all up as `docs/summary-screen-notes.md` §7 rather than ship
-  unverified rendering code with no oracle pixels behind it — building the
-  actual `summaryInfoPage.ts` renderer, wiring `summaryScreen.ts`+
-  `paletteFade.ts` into `core.ts` (confirmed **zero existing call sites**
-  for either), and capturing/debugging the two dense traces against the
-  oracle is real multi-hour work that didn't fit in what was left of this
-  session's cap after the research above.
-- **Next:** Follow `docs/summary-screen-notes.md` §7 directly — it's a
-  resolved implementation spec, not a scouting task: (1) build
-  `src/engine/summaryInfoPage.ts` (BG3 tilemap via `drawTileBg` + all
-  text windows via `drawText` + type icon/markings/ball/mon-front sprites
-  via `drawSprite`); (2) resolve the 4 flagged open items before trusting
-  pixels — nature-memo two-tone color codes (§7's caveat), mon-sprite
-  `hFlip` table membership for the 6 species, rental-mon caught-ball item
-  (assumed but unverified `ITEM_POKE_BALL`), and markings anim-frame-0
-  appearance; (3) wire `summaryScreen.ts`+`paletteFade.ts` into
-  `core.ts`'s `EngineState`/`tick()`/`render()` per §7's exact branch
-  points; (4) only then capture `summary-info-onix.json`/`-magby.json`
-  (dense through both fades + the settled +59..+64 window; probe MAGBY's
-  own stable window independently, don't assume ONIX's) and iterate to 0
-  diff.
-- **Notes:** This is the same "stop rather than ship a guessed renderer"
-  call the prior slice made for the fade math — the difference this time
-  is the blocker (extraction) is actually closed, and the open unknowns
-  left for next time are few, named, and cheap to resolve (each is one
-  more source grep), not a wide-open scouting problem. `PAPERCUT`: none
-  new this session — the RAM-inspection recipe for a single save flag
-  (national dex) was fast once `inspect-anchor.py`'s pattern was reused.
 
 ---
