@@ -6,12 +6,14 @@ one, **delete the entry** in the same docs commit that records the fix in
 symptom, what's confirmed from the reference/oracle, and any leads.
 
 ## #7 — `ballAnimStall`'s LEFT/RIGHT branch is wrong once 2+ balls are
-  simultaneously active (RAM-DISPROVEN two more hypotheses this session -
-  see "fourth worker update": neither active-ball count nor "first cursor
-  move only" predicts the data; current best evidence points to a
-  species-name-render-cost-dependent race on the ENTERING slot, the same
-  *class* of bug as ISSUES #5, not yet proven down to a fixable rule) - fix
-  not yet implemented. Blocks `rent-3picks.json`. The separate post-confirm
+  simultaneously active (RAM-DISPROVEN three more hypotheses across two
+  sessions - see "fourth worker update" then "fifth worker update": neither
+  active-ball count, "first cursor move only", NOR "entering slot's species
+  alone" predicts the data - the species-only table the supervisor
+  user-delegated-sanctioned this session was ITSELF RAM-DISPROVEN by a clean
+  counterexample (HAUNTER stalls at one count/direction/origin, does NOT
+  stall at another) - fix not yet implemented, no per-species table was
+  coded. Blocks `rent-3picks.json`. The separate post-confirm
   cursor-input-drop bug this entry previously flagged is FIXED
   (`isCursorInputReady`, see PROGRESS); a fresh repro just needs any dwell
   `>= 20 ticks` after a confirm's press-tick before the next cursor move
@@ -352,6 +354,92 @@ found the prior session's "confirmed" rule wrong on closer data - this
 issue has proven expensive to chase further without new investigative
 tooling (RAM access to the actual race-determining register/variable, not
 just its downstream effect on sprite state).
+
+**Fifth worker update: the supervisor-sanctioned "species-only" table (PROGRESS
+entry 26's DECISIONS block, user-delegated) is RAM-DISPROVEN by a clean
+counterexample this session, per the SANCTIONED APPROACH's own explicit stop
+condition ("if ANY probe contradicts the species-only rule, STOP... do not
+implement"). No `ballAnimStall` code change was made; `rent-3picks.json`
+remains blocked.**
+
+**Method:** same corrected `struct Sprite` offsets as the third/fourth
+updates (`animNum` u8@0x2A, `animCmdIndex` u8@0x2B, `data[0]` s16@0x2E,
+`animEnded` bit 0x10 of u16@0x3E), `ballSpriteId` read directly from
+`sFactorySelectScreen->mons[i].ballSpriteId` (not assumed `== i`) rather than
+inferred from stall outcomes. Two fresh scripts (scratch Python under `/tmp`,
+`EmeraldOracle`, not committed), each with **exactly one active ball**
+throughout (so `activeSlotsBeforeAction` is trivially `[observer]` for every
+LEFT/RIGHT - no multi-ball composition to disentangle) and 40-tick dwells
+between moves:
+- **Script A** (observer = ball0, ONIX, rented via the exact `RENT_SLOT1`
+  shape - confirm action-tick 37, cross-verified bit-exact against
+  `ballAnim.test.ts`'s own frame-39 SUCCESS-roll checkpoint, `data[0]`
+  0→32 at tick 39 in this probe too): four consecutive LEFT moves,
+  slot0→5 (QUILAVA)→4 (HAUNTER)→3 (BUTTERFREE)→2 (BAYLEEF).
+- **Script B** (observer = ball1, MAGBY, rented at slot1): one LEFT move,
+  slot1→0 (ONIX).
+
+Per-move attribution used the same cadence-transition method as the third/
+fourth updates (`MOVING_CMDS`' 4-or-8-or-32-tick durations are RNG-
+independent when no rest/reroll boundary is crossed, so an observed
+transition gap of `duration+1` unambiguously means one stall landed in that
+window), cross-checked at every step against 6-8 *clean, unaffected*
+neighboring gaps in the same run (all matching their table duration exactly,
+confirming the method's calibration before trusting any single reading):
+
+| move | count/dir/origin | prior data for this species | this probe |
+|---|---|---|---|
+| ONIX (script B, slot1→0) | count1/LEFT/origin1 | none (first data point) | **stalls** (gap 73→106 = 33 = 32+1, window contains the only move) |
+| QUILAVA (script A, slot0→5) | count1/LEFT/origin0(wrap) | none (first data point) | **stalls** (gap 72→105 = 33 = 32+1) |
+| HAUNTER (script A, slot5→4) | count1/LEFT/origin5 | count3/RIGHT/origin3 (fourth update, R5): **stalls** | **no stall** (gap 121→129 = 8, exactly matching the unstalled `MOVING_CMDS[11].duration`, flanked by six other clean duration-8/duration-4 gaps in the same run with zero drift) |
+| BUTTERFREE (script A, slot4→3) | count1/LEFT/origin4 | count2/RIGHT/origin2 ×2 (third/fourth updates): **stalls** | inconclusive - lands on the cmdIndex16-exhaustion→resting boundary, whose true unstalled RAM gap isn't independently calibrated in this session's data (observed 171 vs a naive 169; a generic "+1 visible-lag" pattern seen elsewhere in this same probe, e.g. the settling→moving `animNum` flip landing 1 tick after the roll itself, would predict 170 clean or 171 stalled - most consistent with **stalls**, matching prior data, but not as clean a read as the HAUNTER point) |
+| BAYLEEF (script A, slot3→2) | count1/LEFT/origin3 | count1/RIGHT/origin1, count2/RIGHT/origin1, count2/LEFT/origin3 (all): **no stall** | **no stall** (gap 203→207 = 4, clean) - consistent, 4/4 |
+
+`cursorPos` was independently read at every sampled tick (both scripts) and
+confirms every move landed on the intended slot - not a script/gate bug.
+
+**The contradiction:** HAUNTER stalls at (count3, RIGHT, origin=slot3) but
+does *not* stall at (count1, LEFT, origin=slot5) - the entering species
+(HAUNTER, identical both times) is the same, yet the outcome differs. This
+directly falsifies "the entering slot's species alone determines the stall"
+- the SANCTIONED APPROACH this session was asked to complete and implement.
+Combined with ONIX/QUILAVA both cleanly joining the "stalls" set as
+first-time data points (no contradiction there) and BAYLEEF's clean 4/4
+no-stall record, the shape of the data now looks like: BAYLEEF is genuinely
+special (never stalls regardless of anything tried - 4/4 across both
+directions, three different origins, two counts), but the *other* species
+aren't a clean fixed set - something about HAUNTER's specific move context
+(direction, origin/leaving-species, or count) flips its outcome. This
+resurrects the pre-simplification "fourth worker update" theory (a genuine
+render-cost/cycle-timing race, not a clean per-species lookup) rather than
+supporting the simpler table the supervisor's width-check reasoning
+(PROGRESS entry 26) proposed - that reasoning correctly killed the
+character-count/pixel-width theories, but "BAYLEEF is uniquely cheap to
+render" doesn't imply "every other species is uniformly expensive
+regardless of context."
+
+**Not attempted this session:** re-testing HAUNTER a third time (e.g. at
+count1/RIGHT/origin3, isolating direction from the count/origin change
+already made) to see whether direction, origin, or count is the actual
+missing variable - ran out of session budget after finding the
+contradiction, per the brief's explicit stop condition.
+
+**Next session:** do not resume "species-only table" implementation as
+scoped. Options, in rough order of promise: (1) get renewed sign-off on
+whether to chase the finer variable (direction/origin/count in combination
+with species) with a few more targeted single-ball isolated probes (this
+session's method - one active ball, cadence-transition gaps - is cheap and
+reliable, ~15-20 min per targeted re-test); (2) revisit the "fourth worker
+update"'s harder-to-implement render-cost-race theory (`GetStringRightAlignXOffset`
+pixel-width-dependent timing) now that it's no longer superseded by a working
+simpler alternative; (3) if neither converges, treat like ISSUES #5 - root-
+caused as a race, not modelable at this tick granularity, document and ship
+`rent-3picks.json` un-built (or move it out of scope) rather than keep
+re-deriving "confirmed" rules that keep breaking on the next data point (this
+is now the *second* consecutive sanctioned/confirmed rule RAM-disproven by
+the following session - worth flagging to whoever owns the user-delegated
+policy decision for #7, per entry 26's DECISIONS block, that empirical-table
+modeling has not yet produced a rule that survives a fresh probe).
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean

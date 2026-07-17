@@ -5,6 +5,63 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 24 — S5 slice 2 (worker, capped): STOPPED before implementing a fix — ISSUES #7's tick-204 mystery fully root-caused (RAM-DISPROVEN: `ballAnimStall`'s LEFT/RIGHT branch over-stalls once 2+ balls are active), but the exact replacement rule needs one more RAM data point before it's safe to code
+
+- **State:** unchanged from entry 23 — `npm test` **264/264**, `npm run
+  build` green, all traces untouched. **No `src/`/`tests/` changes this
+  session, no commits** — per the brief's own fallback ("if the rule
+  resists within the cap, commit nothing half-wired, update ISSUES #7,
+  stop"), since the corrected rule isn't yet pinned down to more than 2
+  data points (see ISSUES #7).
+- **Did:** Found a bug in every prior session's own RAM-probe methodology:
+  the `struct Sprite` offsets cited for `animNum`/`animCmdIndex`/`data[0]`
+  (this entry's own history, `ISSUES.md` #7) don't match
+  `reference/pokeemerald/include/sprite.h:194-242` — `animNum`/
+  `animCmdIndex` were swapped and `data[0]` was read as a `u8` instead of a
+  2-byte `s16`. Rebuilt the RAM probe (`EmeraldOracle`, corrected offsets)
+  against entry 21/23's own exact original repro (confirms at press-ticks
+  37/113/189) and cross-referenced every `MOVING_CMDS`-cadence transition
+  against its zero-stall-expected tick, per ball, per trigger. Result: the
+  tick-204 divergence is fully explained — ball 0's 2nd roll (a FAILURE,
+  same shape as the single-ball baseline's own frame-201 FAILURE,
+  `tests/ballAnim.test.ts`) lands at exactly 201 + (3 real stalls) = 204,
+  bit-exact with RAM. But only **3** of ball 0's 4 previously-assumed
+  triggers actually cost it a tick: `RIGHT`#1 (1 ball active) and both
+  RENT-confirms (#2, #3) do; `RIGHT`#2 — pressed once 2 balls (0 and 1) are
+  already active — costs **neither** ball a tick, independently confirmed
+  via `cursorPos` genuinely moving (not gate-dropped). The current code
+  still stalls both on `RIGHT`#2 (a spurious 4th stall), landing its
+  predicted roll one tick late — exactly matching entry 23's own
+  observation. This directly overturns entry 23's "RAM-CONFIRMED CORRECT"
+  verdict for the 2-simultaneous-stall LEFT/RIGHT case; that verdict was
+  built on the same wrong offsets and/or too narrow a sample window to
+  reach the ~30-tick-later transition where the missing stall becomes
+  visible.
+- **Next:** one more RAM data point before coding a fix (only 2 RIGHT
+  presses were probed, at 1-active and 2-active — not enough to distinguish
+  "stalls only when exactly 1 ball active" from "only the first-ever RIGHT
+  ever costs a tick" from a directional LEFT/RIGHT asymmetry): probe a 3rd
+  RIGHT press (3 balls active) and/or a LEFT press with 2 active. Then a
+  likely-small `core.ts` change narrowing the LEFT/RIGHT branch's
+  `ballAnimStall` assignment, re-verify `ballAnim.test.ts`/
+  `ballAnimMultiBall.test.ts` stay green unchanged (confirmed this session
+  they don't already cover — and so can't already contradict — a
+  RIGHT/LEFT-with-2+-active-balls scenario), pin a new Tier-1 test
+  (including the tick-204 checkpoint), RAM-verify pixels at frames
+  124/155/163, then build `rent-3picks.json` per the brief.
+- **Notes:** Full evidence table (per-trigger, per-ball shift/no-shift) is
+  in ISSUES #7. All probing was scratch Python under `/tmp` (mGBA/
+  `EmeraldOracle` recipe, not committed, per instructions) — no `src/`
+  edits were at risk of being lost. PAPERCUT: none beyond the usual
+  oracle-round-trip overhead; the offset-mislabeling bug cost real time
+  this session (~15 min chasing a nonsensical decrementing "animCmdIndex"
+  before checking `sprite.h` directly instead of trusting inherited
+  offsets) — worth flagging for future RAM-probe work: verify struct
+  offsets against the actual header before reusing offsets cited in prior
+  session notes.
+
+---
+
 ## 23 — S5 slice 2 (worker, capped): Priority 1 (post-confirm cursor-input gate) FIXED and Tier-1-pinned; Priority 2's two/three-simultaneous-stall question RAM-CONFIRMED CORRECT with no fix needed, but a narrower, different bug found and left open — ISSUES #7 updated, not deleted
 
 - **State:** `npm test` **264/264** (261→264: +2 `cursorInputGate.test.ts`,

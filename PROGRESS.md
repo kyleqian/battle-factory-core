@@ -5,6 +5,61 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 27 — S5 slice (worker, capped, LAST of today): STOPPED before implementing — the supervisor-sanctioned ISSUES #7 species-only stall table was RAM-DISPROVEN by a clean counterexample (HAUNTER stalls at one count/direction/origin, does not at another); no code change made, per the brief's own explicit stop condition
+
+- **State:** unchanged from entry 26 — `npm test` **264/264**, `npm run
+  build` green, working tree clean before this docs-only commit. No
+  `src/`/`tests/` changes this session. All 8 traces (incl. `rent-slot1.json`
+  125/139) untouched; `rent-3picks.json` still not built (remains blocked).
+- **Did:** Followed the brief exactly through step 1 (probe before
+  implementing). RAM-probed the two previously-unprobed species (ONIX,
+  QUILAVA - both now confirmed **stall**, first-time data) and re-validated
+  BAYLEEF (4th confirmation, still **no stall**) and HAUNTER at a new count/
+  direction/origin than previously probed. Method: `EmeraldOracle` +
+  corrected `struct Sprite` offsets (same as ISSUES #7's third/fourth
+  updates), `ballSpriteId` read directly from
+  `sFactorySelectScreen->mons[i].ballSpriteId` rather than assumed, two
+  scripts each with exactly **one** active ball throughout (removes all
+  multi-ball composition ambiguity), cadence-transition gaps cross-checked
+  against 6-8 clean neighboring transitions per run before trusting any
+  single reading. **Result: HAUNTER stalls at (count3, RIGHT, origin slot3 -
+  prior data) but does NOT stall at (count1, LEFT, origin slot5 - this
+  session's fresh probe)** - same entering species, opposite outcome,
+  directly falsifying "the entering slot's species alone determines the
+  stall." Per the SANCTIONED APPROACH's own explicit instruction ("if ANY
+  probe contradicts the species-only rule, STOP, write the contradiction
+  into ISSUES #7, do not implement"), stopped immediately - no
+  `ballAnimStall` code change, no per-species table, no Tier-1 test, no
+  `rent-3picks.json` work attempted. Full evidence table and reasoning:
+  ISSUES #7 ("fifth worker update").
+- **Next:** ISSUES #7 needs a fresh policy decision before more session time
+  goes into it - this is now the *second* consecutive sanctioned/"confirmed"
+  rule for this issue that broke on the next data point (species-only
+  table, then this). Options queued in ISSUES #7's "Next session" note:
+  (a) one more round of targeted single-ball isolated probes (cheap, ~15-20
+  min each, this session's method) to find the actual missing variable
+  (direction/origin/count in combination with species); (b) revisit the
+  pre-simplification "fourth worker update" render-cost-race theory
+  (`GetStringRightAlignXOffset` pixel-width timing); (c) accept it as an
+  ISSUES #5-class permanent gap (root-caused, not fixable at this engine's
+  tick granularity) and ship without `rent-3picks.json`. Whoever holds
+  entry 26's user-delegated authority for #7 should pick before the next
+  worker spends more budget here.
+- **Notes:** all probing was scratch Python/TS under `/tmp` (not committed,
+  per instructions) - no `src/` edits were ever at risk. This is the last
+  worker of today's session; state is resume-ready via this entry + ISSUES
+  #7's "fifth worker update". PAPERCUT: none beyond the usual oracle
+  round-trip overhead; worth noting for future RAM-probe sessions that a
+  pure-`gRngValue`-only comparison (no sprite-field reads) is a trap for
+  this specific kind of test - a 1-tick stall only shows up in `gRngValue`
+  at the exact tick a decision-point (`Random()`) draw lands on, not in a
+  cumulative/far-future sample, so sparse `gRngValue`-only sampling silently
+  under-detects stalls; the sprite-cadence method (direct `animCmdIndex`
+  transition gaps) used by prior sessions is the reliable one and should be
+  the default, not a fallback.
+
+---
+
 ## 26 — Supervisor wind-down: session end 2026-07-17 ~15:20
 
 - **State (verified this minute):** `npm test` **264/264**, `npm run build`
@@ -98,63 +153,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   being lost. This is the last worker of this supervised session; state is
   resume-ready via this entry + ISSUES #7's "fourth worker update."
   PAPERCUT: none beyond the usual oracle round-trip overhead.
-
----
-
-## 24 — S5 slice 2 (worker, capped): STOPPED before implementing a fix — ISSUES #7's tick-204 mystery fully root-caused (RAM-DISPROVEN: `ballAnimStall`'s LEFT/RIGHT branch over-stalls once 2+ balls are active), but the exact replacement rule needs one more RAM data point before it's safe to code
-
-- **State:** unchanged from entry 23 — `npm test` **264/264**, `npm run
-  build` green, all traces untouched. **No `src/`/`tests/` changes this
-  session, no commits** — per the brief's own fallback ("if the rule
-  resists within the cap, commit nothing half-wired, update ISSUES #7,
-  stop"), since the corrected rule isn't yet pinned down to more than 2
-  data points (see ISSUES #7).
-- **Did:** Found a bug in every prior session's own RAM-probe methodology:
-  the `struct Sprite` offsets cited for `animNum`/`animCmdIndex`/`data[0]`
-  (this entry's own history, `ISSUES.md` #7) don't match
-  `reference/pokeemerald/include/sprite.h:194-242` — `animNum`/
-  `animCmdIndex` were swapped and `data[0]` was read as a `u8` instead of a
-  2-byte `s16`. Rebuilt the RAM probe (`EmeraldOracle`, corrected offsets)
-  against entry 21/23's own exact original repro (confirms at press-ticks
-  37/113/189) and cross-referenced every `MOVING_CMDS`-cadence transition
-  against its zero-stall-expected tick, per ball, per trigger. Result: the
-  tick-204 divergence is fully explained — ball 0's 2nd roll (a FAILURE,
-  same shape as the single-ball baseline's own frame-201 FAILURE,
-  `tests/ballAnim.test.ts`) lands at exactly 201 + (3 real stalls) = 204,
-  bit-exact with RAM. But only **3** of ball 0's 4 previously-assumed
-  triggers actually cost it a tick: `RIGHT`#1 (1 ball active) and both
-  RENT-confirms (#2, #3) do; `RIGHT`#2 — pressed once 2 balls (0 and 1) are
-  already active — costs **neither** ball a tick, independently confirmed
-  via `cursorPos` genuinely moving (not gate-dropped). The current code
-  still stalls both on `RIGHT`#2 (a spurious 4th stall), landing its
-  predicted roll one tick late — exactly matching entry 23's own
-  observation. This directly overturns entry 23's "RAM-CONFIRMED CORRECT"
-  verdict for the 2-simultaneous-stall LEFT/RIGHT case; that verdict was
-  built on the same wrong offsets and/or too narrow a sample window to
-  reach the ~30-tick-later transition where the missing stall becomes
-  visible.
-- **Next:** one more RAM data point before coding a fix (only 2 RIGHT
-  presses were probed, at 1-active and 2-active — not enough to distinguish
-  "stalls only when exactly 1 ball active" from "only the first-ever RIGHT
-  ever costs a tick" from a directional LEFT/RIGHT asymmetry): probe a 3rd
-  RIGHT press (3 balls active) and/or a LEFT press with 2 active. Then a
-  likely-small `core.ts` change narrowing the LEFT/RIGHT branch's
-  `ballAnimStall` assignment, re-verify `ballAnim.test.ts`/
-  `ballAnimMultiBall.test.ts` stay green unchanged (confirmed this session
-  they don't already cover — and so can't already contradict — a
-  RIGHT/LEFT-with-2+-active-balls scenario), pin a new Tier-1 test
-  (including the tick-204 checkpoint), RAM-verify pixels at frames
-  124/155/163, then build `rent-3picks.json` per the brief.
-- **Notes:** Full evidence table (per-trigger, per-ball shift/no-shift) is
-  in ISSUES #7. All probing was scratch Python under `/tmp` (mGBA/
-  `EmeraldOracle` recipe, not committed, per instructions) — no `src/`
-  edits were at risk of being lost. PAPERCUT: none beyond the usual
-  oracle-round-trip overhead; the offset-mislabeling bug cost real time
-  this session (~15 min chasing a nonsensical decrementing "animCmdIndex"
-  before checking `sprite.h` directly instead of trusting inherited
-  offsets) — worth flagging for future RAM-probe work: verify struct
-  offsets against the actual header before reusing offsets cited in prior
-  session notes.
 
 ---
 
