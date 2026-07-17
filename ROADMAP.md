@@ -21,7 +21,7 @@ Verification commands used below, all runnable today:
 - Dev-time RAM inspection (ground truth for hidden state — see recipe in
   Domain notes): pins constants that Tier-1 tests then assert.
 
-### [ ] S1 — Close the comparison loop: pixel-exact static anchor frame
+### [x] S1 — Close the comparison loop: pixel-exact static anchor frame
 Engine skeleton with a pure tick/render split (`src/engine/`: no DOM, no
 timers, no `Math.random`; browser shell and `tools/compare/appTrace.ts` both
 drive the same core). Dev-time extractors under `tools/extract/` writing

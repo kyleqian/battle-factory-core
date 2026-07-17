@@ -5,6 +5,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 3 — S1 worker: font glyph fix closes the anchor compare — S1 COMPLETE
+
+- **State:** S1 acceptance fully met. `npm run compare -- tools/compare/
+  traces/anchor.json` → **1/1 frames matched, 0 diff, ssimMean=1.0000, exit
+  0** (was 2161/38400px, 5.63%). `npm test` 22/22 green, `npm run build`
+  green, `npm run dev` serves (curl 200 on `/` and `/src/main.ts`; still no
+  real-browser check — no headless browser available in this session
+  either).
+- **Did:** Fixed `ISSUES.md` #1 (now deleted). Two distinct bugs in
+  `src/engine/font.ts`, both pinned against `reference/pokeemerald/src/
+  text.c`: (1) the raw-glyph-pixel → color role mapping was wrong — traced
+  `sFontHalfRowOffsets`/`GenerateFontHalfRowLookupTable` (text.c:41-51,
+  363-511) by hand and confirmed it is **not** a blend of adjacent source
+  pixels (contra the ISSUES.md lead) but a per-pixel remap table (raw 0-3 →
+  role bg/fg/shadow, raw 3 folds back onto role 0/bg) vectorized 4-at-a-time
+  for GBA speed; also ported `GLYPH_COPY`'s "skip writing when the resolved
+  color index is literal 0" transparency rule (text.c:585), replacing the
+  old "raw===0 is always transparent" logic. Verified empirically against
+  oracle pixel colors (text.pal index1=black=bgColor, index2=white=fgColor
+  matches the observed title-text look) before committing. (2)
+  `DecompressGlyph_Normal` (text.c:1883) hardcodes `gCurGlyph.height = 15`
+  for Latin glyphs regardless of the 16px cell size — our render loop used
+  the full `cellSize` and leaked stray bgColor pixels into the row directly
+  below the title text. Added `glyphHeight` to `font-normal.json`/`FontData`
+  and capped the row loop to it; re-ran the extractor (only `font-normal.
+  json` changed). Updated the pinned hash in `tests/anchorRender.test.ts`
+  and the `FontData` test fixture in `tests/font.test.ts`. Ticked S1 `[x]`
+  in `ROADMAP.md`.
+- **Next:** S2 — draft-screen interaction parity (cursor movement, header
+  text, A → ball-open + SUMMARY/RENT/OTHERS menu, B/close, message-box
+  updates). See `ROADMAP.md` S2 acceptance criteria. S3 (rental data/RNG)
+  is running in a parallel worktree per the supervisor's scoping — don't
+  touch `src/engine/rng.ts` or `src/data/gen/rental*`.
+- **Notes:** No headless browser tooling (playwright/puppeteer) is
+  installed in this run; `npm run dev` has only ever been curl-smoke-tested,
+  not visually verified. Worth adding if a future stage needs real DOM/
+  canvas verification.
+
+---
+
 ## 2 — S1 worker: extraction + engine skeleton, anchor frame 94% pixel-exact
 
 - **State:** `npm test` 22/22 green, `npm run build` green, `npm run dev`
@@ -65,18 +105,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   anchor.json` to 0 diff.
 - **Notes:** RAM-inspection quirks (mGBA log spam on stdout, benign exit-139
   teardown segfault) are documented in ROADMAP.md Domain notes.
-
----
-
-## 0 — Run initialized
-
-- **State:** Fresh run from the harness template. `npm test` and
-  `npm run build` green on the skeleton; engine not started.
-- **Did:** Template stamped by `initialize-run.sh` (see `.run.json` for the
-  pinned reference revision, ROM SHA-1, and oracle bootstrap version).
-- **Next:** Supervisor iteration 0 — bootstrap the plan: probe the oracle,
-  survey the reference, replace `ROADMAP.md`'s PLAN PENDING section with
-  staged, command-backed acceptance criteria (`SUPERVISOR.md` § "Fresh
-  run"), and commit it before any implementation brief.
-- **Notes:** The oracle contract and canonical-state description are in
-  `bin/oracle info`. Read `AGENTS.md` before anything else.
