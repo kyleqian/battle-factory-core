@@ -5,7 +5,12 @@
 
 import { describe, expect, it } from "vitest";
 import { createInitialState, tick } from "../src/engine/core.ts";
-import { moveCursor, moveMenuCursor } from "../src/engine/factoryDraftScreen.ts";
+import {
+  advanceCursorRedraw,
+  advanceMenuHighlightRedraw,
+  moveCursor,
+  moveMenuCursor,
+} from "../src/engine/factoryDraftScreen.ts";
 import type { GbaButton } from "../src/input.ts";
 
 function tap(state: ReturnType<typeof createInitialState>, button: GbaButton, holdFrames = 2) {
@@ -68,6 +73,46 @@ describe("draft screen cursor mode", () => {
   });
 });
 
+// Select_Task_HandleChooseMons applies a LEFT/RIGHT move (cursorPos, both
+// text windows) atomically on the input tick, but CB2_SelectScreen runs
+// BuildOamBuffer()/RunTextPrinters() *before* RunTasks() each frame, so the
+// visible redraw lands piecemeal over the next 3 ticks - oracle-measured
+// (dense single-purpose LEFT-only trace from the anchor): category text
+// catches up 1 tick after the move, species text 2 ticks after, the arrow
+// sprite (OAM, gated behind the window copies) 3 ticks after. See
+// factoryDraftScreen.ts's CursorRedrawState doc and
+// tools/compare/traces/draft-menu-slot6.json's former f1-f3 cluster.
+describe("draft screen cursor-move redraw scheduling", () => {
+  it("advanceCursorRedraw passes null through and clears after 3 ticks", () => {
+    expect(advanceCursorRedraw(null)).toBeNull();
+    // elapsed:0 is the shape set on the move's own tick (see below); advance
+    // 3 times (ticks T+1, T+2, T+3) to reach the settled/cleared state.
+    let redraw: ReturnType<typeof advanceCursorRedraw> = { fromCursorPos: 0, elapsed: 0 };
+    redraw = advanceCursorRedraw(redraw);
+    expect(redraw).toEqual({ fromCursorPos: 0, elapsed: 1 });
+    redraw = advanceCursorRedraw(redraw);
+    expect(redraw).toEqual({ fromCursorPos: 0, elapsed: 2 });
+    redraw = advanceCursorRedraw(redraw);
+    expect(redraw).toBeNull();
+  });
+
+  it("a LEFT/RIGHT move starts a redraw pipeline from the old slot, settling 3 ticks later", () => {
+    let state = createInitialState();
+    expect(state.draftScreen.cursorRedraw).toBeNull();
+
+    state = tick(state, new Set(["RIGHT"])); // 0 -> 1
+    expect(state.draftScreen.cursorPos).toBe(1);
+    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 0 });
+
+    state = tick(state, new Set());
+    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 1 });
+    state = tick(state, new Set());
+    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 2 });
+    state = tick(state, new Set());
+    expect(state.draftScreen.cursorRedraw).toBeNull(); // settled
+  });
+});
+
 describe("draft screen menu mode", () => {
   // Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT (UP/DOWN/A/B) is only
   // reachable once the mon pic finishes opening - idle well past that
@@ -127,5 +172,40 @@ describe("draft screen menu mode", () => {
     let state = openMenu();
     state = tick(state, new Set(["A"])); // SUMMARY
     expect(state.draftScreen.mode).toBe("menu");
+  });
+
+  // Select_UpdateMenuCursorPosition moves the highlight sprite (a single
+  // OAM position, no text windows involved) atomically on the input tick,
+  // but - unlike the cursor-move case above, which has a piecemeal 3-tick
+  // reveal across two text windows and a sprite - there's nothing to stage:
+  // dense oracle probing (single-purpose DOWN-only trace from a settled
+  // open menu) found the old row rendered for 2 full ticks after the input
+  // before jumping straight to the new one. See MenuHighlightRedrawState's
+  // doc and draft-menu-slot6.json's former f37-f38 cluster.
+  describe("menu-highlight redraw scheduling", () => {
+    it("advanceMenuHighlightRedraw passes null through and clears after 2 ticks", () => {
+      expect(advanceMenuHighlightRedraw(null)).toBeNull();
+      // elapsed:0 is the shape set on the move's own tick; advance twice
+      // (ticks T+1, T+2) to reach the settled/cleared state.
+      let redraw: ReturnType<typeof advanceMenuHighlightRedraw> = { fromMenuCursorPos: 0, elapsed: 0 };
+      redraw = advanceMenuHighlightRedraw(redraw);
+      expect(redraw).toEqual({ fromMenuCursorPos: 0, elapsed: 1 });
+      redraw = advanceMenuHighlightRedraw(redraw);
+      expect(redraw).toBeNull();
+    });
+
+    it("a DOWN/UP move starts a redraw pipeline from the old row, settling 2 ticks later", () => {
+      let state = openMenu();
+      expect(state.draftScreen.menuHighlightRedraw).toBeNull();
+
+      state = tick(state, new Set(["DOWN"])); // 0 -> 1
+      expect(state.draftScreen.menuCursorPos).toBe(1);
+      expect(state.draftScreen.menuHighlightRedraw).toEqual({ fromMenuCursorPos: 0, elapsed: 0 });
+
+      state = tick(state, new Set());
+      expect(state.draftScreen.menuHighlightRedraw).toEqual({ fromMenuCursorPos: 0, elapsed: 1 });
+      state = tick(state, new Set());
+      expect(state.draftScreen.menuHighlightRedraw).toBeNull(); // settled
+    });
   });
 });

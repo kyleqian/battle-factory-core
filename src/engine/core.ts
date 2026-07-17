@@ -4,7 +4,16 @@
 // and tools/compare/appTrace.ts both drive this same core.
 
 import type { GbaButton } from "../input.ts";
-import { ANCHOR_DRAFT_SCREEN_STATE, MENU_OPTION_OTHERS, moveCursor, moveMenuCursor, renderFactoryDraftScreen, type DraftScreenState } from "./factoryDraftScreen.ts";
+import {
+  ANCHOR_DRAFT_SCREEN_STATE,
+  MENU_OPTION_OTHERS,
+  advanceCursorRedraw,
+  advanceMenuHighlightRedraw,
+  moveCursor,
+  moveMenuCursor,
+  renderFactoryDraftScreen,
+  type DraftScreenState,
+} from "./factoryDraftScreen.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 import { advanceMonPic, closeMonPic, isMonPicInputReady, openMonPic } from "./monPic.ts";
 
@@ -37,11 +46,15 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   const { newKeys, newAndRepeatedKeys, next: keyRepeat } = readKeys(buttons, state.keyRepeat);
   let draftScreen = state.draftScreen;
   let monPic = advanceMonPic(draftScreen.monPic);
+  let cursorRedraw = advanceCursorRedraw(draftScreen.cursorRedraw);
+  let menuHighlightRedraw = advanceMenuHighlightRedraw(draftScreen.menuHighlightRedraw);
 
   if (draftScreen.mode === "cursor") {
     if (newAndRepeatedKeys.has("RIGHT")) {
+      cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0 };
       draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, 1), hasActed: true };
     } else if (newAndRepeatedKeys.has("LEFT")) {
+      cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0 };
       draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, -1), hasActed: true };
     } else if (newKeys.has("A")) {
       monPic = openMonPic(draftScreen.hasActed, draftScreen.hasOpenedMonPic);
@@ -51,21 +64,23 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT: only reachable once
     // the mon pic finishes opening (see monPic.ts).
     if (newAndRepeatedKeys.has("DOWN")) {
+      menuHighlightRedraw = { fromMenuCursorPos: draftScreen.menuCursorPos, elapsed: 0 };
       draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, 1), hasActed: true };
     } else if (newAndRepeatedKeys.has("UP")) {
+      menuHighlightRedraw = { fromMenuCursorPos: draftScreen.menuCursorPos, elapsed: 0 };
       draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, -1), hasActed: true };
     } else if (newKeys.has("B")) {
       draftScreen = { ...draftScreen, mode: "cursor" };
-      monPic = closeMonPic(draftScreen.hasActed);
+      monPic = closeMonPic(monPic.variant);
     } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_OTHERS) {
       // Select_OptionOthers: closes the popup with no selection change,
       // identical to B (SUMMARY/RENT are S4/S5, out of scope here).
       draftScreen = { ...draftScreen, mode: "cursor" };
-      monPic = closeMonPic(draftScreen.hasActed);
+      monPic = closeMonPic(monPic.variant);
     }
   }
 
-  draftScreen = { ...draftScreen, monPic };
+  draftScreen = { ...draftScreen, monPic, cursorRedraw, menuHighlightRedraw };
   return { ...state, frame: state.frame + 1, draftScreen, keyRepeat };
 }
 

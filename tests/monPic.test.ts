@@ -183,8 +183,8 @@ describe("monPic: opening (variant C - after LEFT/RIGHT/UP/DOWN already used, bu
 });
 
 describe("monPic: closing (variant B - the common case, e.g. after menu navigation)", () => {
-  it("keeps showing the sprite/popup for one tick after B, then hides both and starts shrinking the window", () => {
-    let state = closeMonPic(true);
+  it("clears text immediately on B, but the front sprite and highlight bar (both OAM) linger one more tick before hiding", () => {
+    let state = closeMonPic("B");
     let visual = getMonPicVisual(state);
     expect(visual.spriteVisible).toBe(true);
     expect(visual.menuTextVisible).toBe(true);
@@ -192,14 +192,24 @@ describe("monPic: closing (variant B - the common case, e.g. after menu navigati
 
     state = advanceMonPic(state);
     visual = getMonPicVisual(state);
-    expect(visual.spriteVisible).toBe(false);
+    // Select_ErasePopupMenu/CloseMonPic clear the text and destroy/hide the
+    // sprites in the same tick, but (like the arrow sprite's own OAM lag
+    // during opening) any OAM change lags 1 extra tick behind a window
+    // copy - oracle-measured: the front sprite and the highlight bar are
+    // both still visible here, with no text.
+    expect(visual.spriteVisible).toBe(true);
     expect(visual.menuTextVisible).toBe(false);
-    expect(visual.menuHighlightVisible).toBe(false);
+    expect(visual.menuHighlightVisible).toBe(true);
     expect(visual.window).toEqual({ top: 36, bottom: 92 });
+
+    state = advanceMonPic(state);
+    visual = getMonPicVisual(state);
+    expect(visual.spriteVisible).toBe(false);
+    expect(visual.menuHighlightVisible).toBe(false);
   });
 
   it("shrinks the window by 4px/tick down to a 1px sliver, then a blank gap tick, then the flash bar shrinks 32,16,8,4,1 (each held 2 ticks)", () => {
-    let state = run(closeMonPic(true), 1);
+    let state = run(closeMonPic("B"), 1);
     const windows: Array<{ top: number; bottom: number } | null> = [];
     for (let i = 0; i < 8; i += 1) {
       windows.push(getMonPicVisual(state).window);
@@ -227,13 +237,34 @@ describe("monPic: closing (variant B - the common case, e.g. after menu navigati
   });
 
   it("returns to phase 'closed' (nothing visible) once the sequence finishes", () => {
-    const state = run(closeMonPic(true), 20);
+    const state = run(closeMonPic("B"), 20);
     expect(state.phase).toBe("closed");
     expect(getMonPicVisual(state)).toEqual(getMonPicVisual(INITIAL_MON_PIC_STATE));
   });
 
-  it("variant A (closing fresh from idle) has a doubled window step and a duplicate-hold instead of the clean cadence", () => {
-    let state = run(closeMonPic(false), 1);
+  it("variant A (closing an open that had hasActed=FALSE) is clean too - not a mirror of the open variant letter", () => {
+    // Oracle-measured (a dedicated dense probe of draft-menu.json's own
+    // first close: A opens with no prior move, 3 DOWNs, then B): despite
+    // hasActed being true by the time B fires, this close's window shrink
+    // is the same clean 4px/tick cadence as variant B's, not the
+    // skip+duplicate one below. hasActed-at-close does not predict the
+    // shape; only the open having been variant C does (see variant C test).
+    const variantA = run(closeMonPic("A"), 1);
+    const variantB = run(closeMonPic("B"), 1);
+    const windowsFor = (start: MonPicState) => {
+      let state = start;
+      const windows: Array<{ top: number; bottom: number } | null> = [];
+      for (let i = 0; i < 8; i += 1) {
+        windows.push(getMonPicVisual(state).window);
+        state = advanceMonPic(state);
+      }
+      return windows;
+    };
+    expect(windowsFor(variantA)).toEqual(windowsFor(variantB));
+  });
+
+  it("variant C (closing the session's first-ever open, which had hasActed=true) is the one with the doubled window step and duplicate-hold - oracle-measured from draft-menu-slot6.json", () => {
+    let state = run(closeMonPic("C"), 1);
     const windows: Array<{ top: number; bottom: number } | null> = [];
     for (let i = 0; i < 8; i += 1) {
       windows.push(getMonPicVisual(state).window);

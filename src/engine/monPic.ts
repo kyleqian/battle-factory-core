@@ -215,9 +215,20 @@ const OPEN_TABLE_C: MonPicVisual[] = [
 // idx = ticks since the tick JOY_NEW(B) fired (idx0 = that same tick's
 // render - CloseMonPic's immediate sprite-free/popup-erase effects only
 // become visible starting idx1).
+//
+// idx1 in every table below overrides spriteVisible/menuHighlightVisible
+// back to true: CloseMonPic destroys the front-sprite object and
+// Select_ErasePopupMenu sets the highlight sprites' `invisible` flag in the
+// same tick, and both clear the SUMMARY/RENT/OTHERS *text* (window copy,
+// immediate) - but (same BuildOamBuffer-before-RunTasks ordering as the
+// open tables' spriteVisible/menuTextVisible split, one tick apart) any
+// *OAM* change (sprite destruction, `invisible` flag) lags 1 extra tick
+// behind a window copy: oracle-measured (draft-menu-slot6.json dense
+// probe), both the front sprite and the RENT/DESELECT row's highlight bar
+// are still visible with no text at idx1, gone by idx2.
 const CLOSE_TABLE_A: MonPicVisual[] = [
   OPEN_STEADY,
-  win(36, 92),
+  { ...win(36, 92), spriteVisible: true, menuHighlightVisible: true },
   win(40, 88),
   win(44, 84),
   win(52, 76), // oracle-measured double step (top=48/bottom=80 never renders)
@@ -240,7 +251,7 @@ const CLOSE_TABLE_A: MonPicVisual[] = [
 
 const CLOSE_TABLE_B: MonPicVisual[] = [
   OPEN_STEADY,
-  win(36, 92),
+  { ...win(36, 92), spriteVisible: true, menuHighlightVisible: true },
   win(40, 88),
   win(44, 84),
   win(48, 80),
@@ -269,6 +280,20 @@ function openTableFor(variant: Variant): MonPicVisual[] {
   return OPEN_TABLE_B;
 }
 
+// Close only needs two window-shrink shapes, but NOT a simple mirror of the
+// open variant: dense-probing both draft-menu.json's first close (open
+// variant A: hasActed was FALSE at open time, 3 DOWNs before the close) and
+// draft-menu-slot6.json's close (open variant C: hasActed was true at open
+// time, but still the session's first-ever open) found variant A's close
+// uses the CLEAN shape (matching CLOSE_TABLE_B digit-for-digit, despite
+// hasActed being true by the time either close fires - hasActed-at-close
+// does NOT predict this), while variant C's close is the one that needs the
+// skip+duplicate shape (CLOSE_TABLE_A). Variant B (already established) is
+// clean too. So only variant C is special; A and B share CLOSE_TABLE_B.
+function closeTableFor(variant: Variant): MonPicVisual[] {
+  return variant === "C" ? CLOSE_TABLE_A : CLOSE_TABLE_B;
+}
+
 /**
  * OpenMonPic: called the same tick JOY_NEW(A) is handled. `hasActed` = has
  * any LEFT/RIGHT/UP/DOWN been processed yet this screen (picks the
@@ -281,9 +306,17 @@ export function openMonPic(hasActed: boolean, hasOpenedBefore: boolean): MonPicS
   return { phase: "opening", elapsed: 0, variant, blended: hasOpenedBefore };
 }
 
-/** CloseMonPic: called the same tick JOY_NEW(B) (or A-on-OTHERS) is handled. Always blended: a close can only follow an open, which always configures BLDCNT first. */
-export function closeMonPic(hasActed: boolean): MonPicState {
-  return { phase: "closing", elapsed: 0, variant: hasActed ? "B" : "A", blended: true };
+/**
+ * CloseMonPic: called the same tick JOY_NEW(B) (or A-on-OTHERS) is handled.
+ * `variant` is the preserved `MonPicState.variant` from the matching open
+ * (not re-derived from `hasActed`): a close's timing follows whichever
+ * animation shape its open used (see closeTableFor), since the underlying
+ * quirk tracks screen/session history, not the close action itself. Always
+ * blended: a close can only follow an open, which always configures BLDCNT
+ * first.
+ */
+export function closeMonPic(variant: Variant): MonPicState {
+  return { phase: "closing", elapsed: 0, variant, blended: true };
 }
 
 /** Advance by one tick; call before applying this tick's input (open/closeMonPic override the result). */
@@ -296,7 +329,7 @@ export function advanceMonPic(state: MonPicState): MonPicState {
       : { ...state, elapsed: next };
   }
   if (state.phase === "closing") {
-    const table = state.variant === "A" ? CLOSE_TABLE_A : CLOSE_TABLE_B;
+    const table = closeTableFor(state.variant);
     const next = state.elapsed + 1;
     return next >= table.length
       ? { phase: "closed", elapsed: 0, variant: state.variant, blended: state.blended }
@@ -316,7 +349,7 @@ export function getMonPicVisual(state: MonPicState): MonPicVisual {
       return visual.flashWidth > 0 ? { ...visual, flashBlended: state.blended } : visual;
     }
     case "closing": {
-      const visual = (state.variant === "A" ? CLOSE_TABLE_A : CLOSE_TABLE_B)[state.elapsed] ?? HIDDEN;
+      const visual = closeTableFor(state.variant)[state.elapsed] ?? HIDDEN;
       return visual.flashWidth > 0 ? { ...visual, flashBlended: state.blended } : visual;
     }
   }
