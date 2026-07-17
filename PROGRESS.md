@@ -7,6 +7,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 20 — ISSUES #6 root-caused and fixed: multi-ball `SpriteCB_Pokeball` stall was never about mon-pic open/close — it's `Select_Print*` text-printer calls (cursor move + RENT/DESELECT confirm) stealing a tick from every OTHER rented ball; two-ball RNG stream now exact, ISSUES #6 DELETED
 
+- **Supervisor addendum (same day):** verified (208/208 → then merged the
+  three parked worktree branches: battle-1 assets, confirm-flow dossier,
+  battle-transition assets) — `npm test` now **261/261**, build green,
+  worktrees cleaned. S6 static-asset groundwork is complete
+  (mon/trainer pics, bg, healthbox, window/font, all 12 transition
+  variants) and S5's confirm flow is fully scouted
+  (`docs/confirm-flow-notes.md`). ISSUES #5 policy question still awaiting
+  the user (asked ~12:35; headless fallback active). Next: rent-3picks
+  trace worker (multi-ball model now exact), then confirm-flow
+  implementation.
 - **State:** `npm test` **208/208** (203→208, +5 new in
   `tests/ballAnimMultiBall.test.ts`), `npm run build` green. All 7 traces
   re-verified at their prior counts, files unchanged (`anchor` 1/1,

@@ -140,6 +140,12 @@ battle transition is a RANDOM 12-way pick
 (`GetSpecialBattleTransition(B_TRANSITION_GROUP_B_FACTORY)`,
 `battle_setup.c:864-909`) — reproducing which transition plays requires
 the RNG stream to be exact from the anchor all the way to the trigger.
+**Groundwork banked (2026-07-17):** battle-1 static assets extracted and
+mostly oracle-cross-checked (mon front/back pics + coord tables, trainer
+pics, battle bg, healthbox family, battle window/font —
+`extract-battle-*.ts`) and all 12 frontier transition variants' assets +
+parameter tables extracted source-verified
+(`extract-battle-transition-frontier.ts`).
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain
