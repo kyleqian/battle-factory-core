@@ -41,18 +41,10 @@ windows.
 directions, captures every ≤4 frames) and `draft-menu.json` (open/navigate/
 close on ≥2 slots) pass compare with 0 diff; Tier-1 tests pin the draft
 state machine (cursor index, menu open/close, input repeat).
-**Status (worker, 2026-07-17):** cursor half DONE — `draft-cursor.json`
-0-diff (13/13), key-repeat timing ported exactly from `main.c` `ReadKeys()`
-(pinned by `tests/keyRepeat.test.ts`), full header text extracted for all 6
-anchor species. Menu half PARTIAL — the SUMMARY/RENT/OTHERS state machine
-(open/close incl. the `OTHERS` cancel path, cursor nav + wrap) is
-implemented and Tier-1 tested, but the ball-open reveal (mon-pic-bg window/
-blend + front sprite) isn't rendered yet, so `draft-menu.json` is NOT 0-diff
-(10/38 frames match; diff confined to the ~64x64 mon-pic region — see
-`ISSUES.md` #2 for the full reverse-engineered mechanism, timing, and
-extraction leads).
+**Remainder:** the ball-open reveal (mon-pic window/blend + front sprite)
+— see `ISSUES.md` #2; cursor sweep and menu state machine are 0-diff.
 
-### [ ] S3 — Rental data, RNG core, anchor mons pinned
+### [x] S3 — Rental data, RNG core, anchor mons pinned
 Gen-3 LCG (constants verified from `reference/pokeemerald/src/random.c`)
 with the per-frame VBlank advance rule (see Domain notes); extract
 `gBattleFrontierMons` + species/moves/nature tables; RAM-dump the anchor's
@@ -154,6 +146,13 @@ is `[x]` or its remainder is explicitly re-scoped here by the supervisor.
   `Select_Task_FadeSpeciesName` starts a perpetual palette breathe on the
   species name text (see `ISSUES.md` #2); keep traces under that or model
   it explicitly.
+- **Draft candidates live in `sFactorySelectScreen`** (S3, RAM-verified):
+  fully-instantiated `struct Pokemon` objects at the file-static
+  `sFactorySelectScreen->mons[i].monData` (statics aren't in the linker map —
+  resolved via `nm` on the pinned ELF, `0x0300127c`; recipe documented in
+  `tools/extract/inspect-anchor.py`). `gSaveBlock2Ptr->frontier.rentalMons[]`
+  carries only `monId` pre-pick; its personality/IVs/ability fields are
+  stale until a pick commits.
 - **Oracle limits:** maxFrames 20000, maxCaptures 256; long traces ~10-15s;
   service serializes runs (parallel workers safe).
 - **Reference geography:** draft/swap UI `src/battle_factory_screen.c`
