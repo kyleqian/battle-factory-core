@@ -5,6 +5,46 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 22 — S5 slice 2 (worker, capped): STOPPED before resolving ISSUES #7 — RAM probe hit a SEPARATE, previously-unknown bug (dropped cursor input after a RENT-confirm close) that contaminated the discriminating scenario before it was reached; #7's own two-simultaneous-stall question is still unresolved
+
+- **State:** unchanged from entry 21 — `npm test` **261/261**, `npm run
+  build` green, all 7 traces untouched at prior counts. **No `src/`/`tests/`
+  changes this session, no `rent-3picks.json` committed.** ISSUES #7 was
+  NOT deleted — its root cause is still not proven.
+- **Did:** Built a 3-ball RAM probe (`tools/extract/inspect-anchor.py`
+  pattern, dumping `gSprites[ballSpriteId].data[0]`/`animNum`/`animCmdIndex`/
+  `animEnded` + `gRngValue` tick-by-tick; cross-checked instrumentation via a
+  single-ball control probe that reproduces the already-pinned model
+  bit-exact through frame 300 — offsets are correct, not a probe artifact).
+  First attempt used a 10-tick dwell before the second cursor `RIGHT`
+  (shorter than `ballAnimMultiBall.test.ts`'s proven 40-tick
+  `DWELL_TO_SLOT2`) and RAM-confirmed (direct reads of
+  `sFactorySelectScreen->cursorPos` and `mons[i].selectedId`) that **real
+  hardware silently dropped that `RIGHT`** — cursor never left slot 0, and
+  the next `A` press deselected slot 0 instead of selecting slot 1. This
+  engine's own replay does NOT reproduce the drop: `core.ts`'s "cursor" mode
+  branch has no gate analogous to `isMonPicInputReady()` for input arriving
+  too soon after a RENT confirm's popup-close. The resulting "mismatch" I
+  was chasing (ball 0's sprite fields resetting at tick 99) was just this
+  deselect's palette swap, not a `ballAnimStall` effect — a contaminated
+  repro, not new evidence about ISSUES #7's real question. Full writeup +
+  exact evidence in ISSUES #7's "Worker update" section.
+- **Next:** Rebuild the ISSUES #7 repro with a ≥40-tick dwell before **every**
+  cursor move (not just the first), then rerun the same dump-and-diff method
+  to actually reach the two-simultaneous-active-balls trigger. The probe
+  infrastructure is fast (~2 min end-to-end for the control probe) and the
+  method is proven — this should be quick for the next session. Separately
+  worth a look: whether "cursor" mode needs its own `isMonPicInputReady`-style
+  gate on popup-close completion (currently ungated), since any repro script
+  with too-short a post-confirm dwell will silently desync the same way mine
+  did.
+- **Notes:** No `src/` edits made (probe-only, scratch scripts under `/tmp`,
+  not committed). PAPERCUT: none beyond the usual oracle round-trip overhead;
+  the wasted probe cycle here was a scripting judgment call (dwell too
+  short), not tooling friction.
+
+---
+
 ## 21 — S5 slice 2 (worker, capped): STOPPED before writing rent-3picks.json — found a SECOND, distinct multi-ball model gap (ISSUES #7): ball-tile pixel mismatches once a trigger stalls TWO already-active balls at once, a scenario ISSUES #6's fix never RAM-verified
 
 - **State:** unchanged from entry 20 — `npm test` **261/261**, `npm run

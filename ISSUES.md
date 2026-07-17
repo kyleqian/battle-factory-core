@@ -5,12 +5,14 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #7 — `ballAnimStall`'s LEFT/RIGHT branch over-stalls once 2+ balls are
-  simultaneously active (RAM-DISPROVEN: a RIGHT cursor move with 2 active
-  balls costs neither of them a tick, but the current code still stalls
-  both) - root cause and exact mechanism identified (see "third worker
-  update"), fix not yet implemented. Blocks `rent-3picks.json`. The separate
-  post-confirm cursor-input-drop bug this entry previously flagged is FIXED
+## #7 — `ballAnimStall`'s LEFT/RIGHT branch is wrong once 2+ balls are
+  simultaneously active (RAM-DISPROVEN two more hypotheses this session -
+  see "fourth worker update": neither active-ball count nor "first cursor
+  move only" predicts the data; current best evidence points to a
+  species-name-render-cost-dependent race on the ENTERING slot, the same
+  *class* of bug as ISSUES #5, not yet proven down to a fixable rule) - fix
+  not yet implemented. Blocks `rent-3picks.json`. The separate post-confirm
+  cursor-input-drop bug this entry previously flagged is FIXED
   (`isCursorInputReady`, see PROGRESS); a fresh repro just needs any dwell
   `>= 20 ticks` after a confirm's press-tick before the next cursor move
   (`isCursorInputReady`'s own RAM-verified minimum) to avoid it entirely.
@@ -241,31 +243,115 @@ shaped `AddTextPrinterParameterized`+`CopyWindowToVram` pair
 `Select_PrintSelectMonString`), so the mechanism entry 20 proposed (a
 same-tick text-print call stealing the *next* tick's `AnimateSprites()` for
 every other sprite) can't be the whole story as stated - something about
-LEFT/RIGHT specifically must stop applying past 1 active ball. Only 2 RIGHT
-presses were probed (both with disjoint ball-counts: 1-active and
-2-active) - not enough data points to tell "stalls only when exactly 1 ball
-active" from "stalls only the *first-ever* RIGHT" from some other rule
-(e.g. LEFT vs RIGHT parity, or something about which slot the cursor is
-leaving/entering). **Do not guess/hardcode either of these without one more
-RAM data point** - the cheapest next probe is a 3rd RIGHT press (slot2→
-slot?, 3 balls active - wraps to slot0 or needs a 4th rental slot) to see if
-it also costs zero, which would support the simple "count > 1" rule; a
-LEFT-instead-of-RIGHT variant with 2 active balls would rule out
-directional asymmetry.
+LEFT/RIGHT specifically must stop applying past 1 active ball.
 
-**Next session:** with the table above, the fix is likely a small,
-well-targeted change to `core.ts`'s LEFT/RIGHT branch (narrowing when
-`ballAnimStall = activeSlotsBeforeAction` applies) - but get the one more
-RAM data point above first so the fix is a proven rule, not a fit to two
-data points. HARD CONSTRAINT unchanged: `ballAnim.test.ts`/
-`ballAnimMultiBall.test.ts` stay green (verified this session's finding
-doesn't conflict with either - `ballAnimMultiBall.test.ts`'s own "two-ball
-scenario" never exercises a RIGHT/LEFT trigger with 2+ balls already
-active, only RENT-confirm triggers with 2+ active, which this session
-confirms are unaffected). Once fixed: RAM-verify pixels at the original
-repro's frames 124/155/163, add a Tier-1 test for the RIGHT-with-2+-active
-rule (including the tick-204 checkpoint), then `rent-3picks.json` per the
-brief's spec.
+**Fourth worker update: both the "count-dependent" and "first-event-only"
+hypotheses above are now RAM-DISPROVEN with clean counterexamples (fresh
+probes, same corrected offsets as the third update). Neither active-ball
+count, cursor direction, nor "is this the first-ever cursor move" predicts
+the data; the actual determinant looks like the ENTERING slot's species
+name (a render-cost-dependent race, same *class* of bug as ISSUES #5's
+WIN0V jitter) - not proven down to the exact mechanism, and not fixed. Do
+not hardcode a guess; see "Status" below for what's needed next.**
+
+Built two RAM probes (same `EmeraldOracle` recipe + corrected `struct
+Sprite` offsets as the third update, scratch scripts under `/tmp`, not
+committed): (1) a fresh 4-rent/6-cursor-move trace (slots 0→1→2→3→4,
+40-tick dwells throughout, plus a deliberate **consecutive** RIGHT at
+1-active - two cursor moves in a row with no rent between them, both at the
+same active count - to directly test "count==1 always stalls" against
+"only the very first-ever cursor move stalls"); (2) an exact independent
+re-derivation of entry 21/23/24's own original repro shape (36-tick dwells,
+confirms landing at press-ticks 37/113/189) to cross-check RIGHT#2 rather
+than trust the prior write-up at face value. Both used the cadence-
+transition method (MOVING_CMDS' fixed 4/8/32-tick durations are
+RNG-independent, so any *observed* gap of `duration+1` unambiguously means
+exactly one stall landed in that window - no RNG replay needed).
+
+Results (`t=action tick`, cursor move is `cursorPosBefore → cursorPosAfter`,
+species per the anchor's pinned pool ONIX/MAGBY/BAYLEEF/BUTTERFREE/
+HAUNTER/QUILAVA at slots 0-5):
+
+| trigger | move | active-before | entering species | stalled? |
+|---|---|---|---|---|
+| RIGHT#1 (entry24 repro, t=75) | 0→1 | {0} | MAGBY | **yes** |
+| RIGHT#2 (entry24 repro, t=151) | 1→2 | {0,1} | BAYLEEF | **no** |
+| R1 (fresh probe, t=79) | 0→1 | {0} | MAGBY | **yes** |
+| R2 (fresh probe, t=121, consecutive w/ R1, still 1 active) | 1→2 | {0} | BAYLEEF | **no** |
+| R3 (fresh probe, t=241) | 2→3 | {0,2} | BUTTERFREE | **yes** |
+| L1 (fresh probe, t=283) | 3→2 | {0,2} | BAYLEEF | **no** |
+| R4 (fresh probe, t=325) | 2→3 | {0,2} | BUTTERFREE | **yes** |
+| R5 (fresh probe, t=445) | 3→4 | {0,2,3} | HAUNTER | **yes** |
+
+This kills both remaining hypotheses cleanly:
+- **"count==1 stalls, count>1 doesn't" (H1) is disproven by R2**: exactly 1
+  ball active (only ball 0, same as R1), immediately consecutive with no
+  rent in between, yet **no** stall - count alone doesn't determine it.
+- **"only the first-ever cursor move stalls" (H2) is disproven by R3/R4/R5**:
+  each is the 3rd/5th/6th cursor move of the session (never the first), yet
+  **all** stall.
+- **Directional asymmetry is ruled out**: L1 (a LEFT) and R2/RIGHT#2 (RIGHTs)
+  all enter BAYLEEF and all show *no* stall regardless of direction or which
+  slot was left (R2/RIGHT#2 leave slot 1, L1 leaves slot 3 - different
+  origins, same destination, same (null) result).
+- **"leaving an occupied slot" was a promising 6/6 fit against the fresh
+  probe alone but is directly falsified by RIGHT#2**: it leaves slot 1,
+  freshly rented one confirm earlier (structurally identical timing to R3's
+  own setup, which *does* stall) - same shape, opposite outcome.
+
+What DOES fit all 8 points with zero exceptions: **the ENTERING slot's
+species**. Every move landing on BAYLEEF (3 independent occurrences: R2,
+RIGHT#2, L1 - two different origins, both directions) shows no stall; every
+move landing on MAGBY/BUTTERFREE/HAUNTER (5 occurrences) stalls. Plain
+string length doesn't explain it either (BAYLEEF and HAUNTER are both 7
+characters but land on opposite sides) - `Select_PrintMonSpecies`
+(`battle_factory_screen.c:1879-1891`) computes `x =
+GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 86)`, a **variable-
+width font** pixel-width calculation, so the render/CPU cost genuinely
+depends on which glyphs are in the name, not just its length - a plausible
+mechanism for a cycle-timing race landing on one side of some boundary
+depending on that cost, structurally the same *kind* of bug as ISSUES #5
+(WIN0V register race depending on unrelated per-frame CPU cost), just in a
+different subsystem. `Select_PrintSelectMonString` (the RENT/DESELECT-
+confirm path) prints one of 4 *fixed* strings unrelated to species, which
+would explain why that trigger's stall is count-independent and always
+fires - consistent with every RENT/DESELECT data point gathered so far
+(third update's table + this session's R3/R4 confirms, all still stall
+every non-acted active ball at every count tried).
+
+**Status:** root cause narrowed to "likely a species-name-render-width-
+dependent race on the ENTERING slot," analogous in kind to ISSUES #5 - but
+not proven down to the exact GBA font-metric mechanism, and NOT fixed.
+Implementing it exactly would mean porting `FONT_NORMAL`'s per-glyph pixel
+widths and replicating `GetStringRightAlignXOffset`'s cost model well
+enough to predict which side of the race a given species name lands on -
+a materially bigger lift than the state-machine-level fixes this issue
+has taken so far, and per ISSUES #5's own precedent this class of bug may
+not be modelable at this engine's tick/state granularity at all (as opposed
+to a clean formula that was simply hard to spot). **Do not hardcode a
+per-slot lookup keyed to this one anchor's fixed rental pool as a
+substitute for a real rule** - it would silently break for any other
+species/anchor and isn't asked for. Per this run's own brief: the rule
+still resists a clean derivation, so no `ballAnimStall` code change was
+made this session; `rent-3picks.json` remains blocked.
+
+**Next session, in order:** (1) determine whether the species-render-width
+theory is even testable further without a font-metric port - e.g. RAM-read
+`GetStringRightAlignXOffset`'s actual computed `x` value or the raw
+`REG_VCOUNT` at the `SetGpuReg`-equivalent moment (if any single register
+write is the actual race point here, analogous to ISSUES #5's investigation
+method) directly, rather than inferring it from stall/no-stall outcomes;
+(2) if that confirms a genuine sub-tick hardware race with no tick-level
+proxy (as ISSUES #5 concluded for its own case), close this out the same
+way ISSUES #5 was closed - root-caused, not fixable at this granularity,
+document and move on; (3) if it turns out to reduce to something simpler
+after all (e.g. a specific glyph or byte value, not full font-metric
+simulation), that's the fix. Either way, get sign-off before spending
+further session budget here given two consecutive sessions have now each
+found the prior session's "confirmed" rule wrong on closer data - this
+issue has proven expensive to chase further without new investigative
+tooling (RAM access to the actual race-determining register/variable, not
+just its downstream effect on sprite state).
 
 ## #5 — mon-pic close animation: WIN0V catch-up jitter is real hardware
   cycle-timing, not a modelable game-state bug (root-caused, NOT fixable at

@@ -5,6 +5,53 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 25 — S5 slice 2 (worker, capped, LAST of this supervised session): STOPPED before implementing a fix — ISSUES #7's "count-dependent" AND "first-event-only" stall hypotheses BOTH RAM-DISPROVEN this session with clean counterexamples; best remaining evidence points to a species-render-cost-dependent race (same class as ISSUES #5), not a clean state rule
+
+- **State:** unchanged from entry 24 — `npm test` **264/264**, `npm run
+  build` green, all traces untouched. **No `src/`/`tests/` changes this
+  session, no commits to code** (docs-only commit for this entry + ISSUES
+  update) — per the brief's own fallback ("if the rule STILL resists,
+  commit nothing half-wired, update ISSUES #7, stop").
+- **Did:** Ran the discriminating RAM probes entry 24 asked for (corrected
+  `struct Sprite` offsets, cadence-transition method - `MOVING_CMDS`'
+  4/8/32-tick durations are RNG-independent so an observed `duration+1` gap
+  unambiguously means one stall landed there): a fresh 4-rent/6-cursor-move
+  trace including a **consecutive** RIGHT at the same 1-active-ball count
+  (no rent in between), plus an independent re-derivation of entry 24's own
+  original repro shape to cross-check its RIGHT#2 finding rather than trust
+  it at face value. Result: the consecutive-RIGHT data point disproves
+  "count==1 always stalls" (2nd RIGHT at count=1, no rent between, does
+  NOT stall); three later cursor moves (3rd/5th/6th of the session) DO
+  stall, disproving "only the first-ever cursor move stalls." What fits all
+  8 data points with zero exceptions instead: whether the cursor's
+  **entering** slot's species is BAYLEEF (never stalls, 3/3 independent
+  occurrences, both directions, two different origin slots) vs
+  MAGBY/BUTTERFREE/HAUNTER (always stalls, 5/5). Plain string length
+  doesn't explain it (BAYLEEF/HAUNTER are both 7 chars, opposite outcomes) -
+  `Select_PrintMonSpecies` computes a variable-width-font pixel offset
+  (`GetStringRightAlignXOffset`), a plausible render-cost-dependent hardware
+  race, the same *class* of bug as ISSUES #5's WIN0V jitter (also
+  root-caused, also not fixed at this engine's tick granularity) rather
+  than a game-state formula. Full evidence table and reasoning: ISSUES #7
+  ("fourth worker update").
+- **Next:** per ISSUES #7's own "Status": determine whether this is
+  actually testable further (RAM-read the render-cost-determining register/
+  variable directly rather than inferring it from stall outcomes) or
+  whether it's unmodelable like ISSUES #5 and should be closed out the same
+  way (root-caused, documented, not fixed). Get sign-off before spending
+  more session budget here - two consecutive sessions have now each found
+  the prior session's "confirmed" rule wrong on closer data, so this issue
+  needs either new investigative tooling or an explicit decision to accept
+  it as an ISSUES #5-style permanent gap. Do NOT hardcode a per-species
+  lookup as a substitute fix. `rent-3picks.json` remains blocked.
+- **Notes:** All probing was scratch Python under `/tmp` (mGBA/
+  `EmeraldOracle` recipe, not committed) - no `src/` edits were at risk of
+  being lost. This is the last worker of this supervised session; state is
+  resume-ready via this entry + ISSUES #7's "fourth worker update."
+  PAPERCUT: none beyond the usual oracle round-trip overhead.
+
+---
+
 ## 24 — S5 slice 2 (worker, capped): STOPPED before implementing a fix — ISSUES #7's tick-204 mystery fully root-caused (RAM-DISPROVEN: `ballAnimStall`'s LEFT/RIGHT branch over-stalls once 2+ balls are active), but the exact replacement rule needs one more RAM data point before it's safe to code
 
 - **State:** unchanged from entry 23 — `npm test` **264/264**, `npm run
@@ -115,46 +162,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the full remaining budget. PAPERCUT: none beyond the usual oracle
   round-trip overhead (~6 oracle/RAM-probe round-trips this session, plus 2
   `npm run compare` runs on scratch traces, none committed).
-
----
-
-## 22 — S5 slice 2 (worker, capped): STOPPED before resolving ISSUES #7 — RAM probe hit a SEPARATE, previously-unknown bug (dropped cursor input after a RENT-confirm close) that contaminated the discriminating scenario before it was reached; #7's own two-simultaneous-stall question is still unresolved
-
-- **State:** unchanged from entry 21 — `npm test` **261/261**, `npm run
-  build` green, all 7 traces untouched at prior counts. **No `src/`/`tests/`
-  changes this session, no `rent-3picks.json` committed.** ISSUES #7 was
-  NOT deleted — its root cause is still not proven.
-- **Did:** Built a 3-ball RAM probe (`tools/extract/inspect-anchor.py`
-  pattern, dumping `gSprites[ballSpriteId].data[0]`/`animNum`/`animCmdIndex`/
-  `animEnded` + `gRngValue` tick-by-tick; cross-checked instrumentation via a
-  single-ball control probe that reproduces the already-pinned model
-  bit-exact through frame 300 — offsets are correct, not a probe artifact).
-  First attempt used a 10-tick dwell before the second cursor `RIGHT`
-  (shorter than `ballAnimMultiBall.test.ts`'s proven 40-tick
-  `DWELL_TO_SLOT2`) and RAM-confirmed (direct reads of
-  `sFactorySelectScreen->cursorPos` and `mons[i].selectedId`) that **real
-  hardware silently dropped that `RIGHT`** — cursor never left slot 0, and
-  the next `A` press deselected slot 0 instead of selecting slot 1. This
-  engine's own replay does NOT reproduce the drop: `core.ts`'s "cursor" mode
-  branch has no gate analogous to `isMonPicInputReady()` for input arriving
-  too soon after a RENT confirm's popup-close. The resulting "mismatch" I
-  was chasing (ball 0's sprite fields resetting at tick 99) was just this
-  deselect's palette swap, not a `ballAnimStall` effect — a contaminated
-  repro, not new evidence about ISSUES #7's real question. Full writeup +
-  exact evidence in ISSUES #7's "Worker update" section.
-- **Next:** Rebuild the ISSUES #7 repro with a ≥40-tick dwell before **every**
-  cursor move (not just the first), then rerun the same dump-and-diff method
-  to actually reach the two-simultaneous-active-balls trigger. The probe
-  infrastructure is fast (~2 min end-to-end for the control probe) and the
-  method is proven — this should be quick for the next session. Separately
-  worth a look: whether "cursor" mode needs its own `isMonPicInputReady`-style
-  gate on popup-close completion (currently ungated), since any repro script
-  with too-short a post-confirm dwell will silently desync the same way mine
-  did.
-- **Notes:** No `src/` edits made (probe-only, scratch scripts under `/tmp`,
-  not committed). PAPERCUT: none beyond the usual oracle round-trip overhead;
-  the wasted probe cycle here was a scripting judgment call (dwell too
-  short), not tooling friction.
 
 ---
 
