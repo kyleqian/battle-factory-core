@@ -204,7 +204,11 @@ function compose(fb: Uint8Array, selectedSlot: number, bgY: number, objY: number
   const cancelText = "CANCEL";
   const cancelStringX = WIN_PROMPT_CANCEL.x + rightAlignXOffset(font, charmap, cancelText, 62);
   const cancelIconX = Math.max(0, cancelStringX - 16);
-  sprite(A_BUTTON_SHEET, summaryBg.subpalettes[PAL7]!, cancelIconX + 8, WIN_PROMPT_CANCEL.y + 8, 2, 2, 0);
+  // PrintAOrBButtonIcon blits into the window's own tile data (BG0, not an
+  // OBJ sprite - see the palette comment above), so it fades on `bgY`, not
+  // `objY` (oracle-verified: the two curves land on visibly different y
+  // during the entry fade-in and only bgY matches).
+  drawSpriteFaded(fb, A_BUTTON_SHEET, summaryBg.subpalettes[PAL7]!, cancelIconX + 8, WIN_PROMPT_CANCEL.y + 8, 2, 2, 0, bgY);
   text(cancelText, cancelStringX, WIN_PROMPT_CANCEL.y + 1, COLOR_0, PAL7);
 
   text("RENTAL POKéMON", WIN_RENTAL.x, WIN_RENTAL.y + 1, COLOR_1, PAL6);

@@ -19,7 +19,15 @@ import {
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 import { advanceMonPic, closeMonPic, isMonPicInputReady, openMonPic } from "./monPic.ts";
 import { createFramebuffer, fillFramebuffer } from "./framebuffer.ts";
-import { bgFadeY, EXIT_FADE_OUT, ENTRY_FADE_OUT, FADE_IN, objFadeY } from "./paletteFade.ts";
+import {
+  bgFadeY,
+  ENTRY_BLACK_HOLD_TICKS,
+  ENTRY_FADE_OUT,
+  EXIT_BLACK_HOLD_TICKS,
+  EXIT_FADE_OUT,
+  FADE_IN,
+  objFadeY,
+} from "./paletteFade.ts";
 import {
   CLOSED_SUMMARY_SCREEN_STATE,
   advanceSummaryScreen,
@@ -127,11 +135,30 @@ export function render(state: EngineState): Uint8Array {
   if (!t) {
     return summary.onInfoPage ? renderSummaryInfoPage(summary.selectedSlot) : renderFactoryDraftScreen(state.draftScreen);
   }
-  if (t.phase === "black") return blackFrame();
+  if (t.phase === "black") {
+    // Same +1 as below: the black hold's own last tick already shows the
+    // following fade-in's first step in practice (oracle-verified dense
+    // capture - the hold is one tick shorter than ENTRY/EXIT_BLACK_HOLD_TICKS
+    // makes it look), not pure black.
+    const holdTicks = t.direction === "toSummary" ? ENTRY_BLACK_HOLD_TICKS : EXIT_BLACK_HOLD_TICKS;
+    if (t.elapsed + 1 < holdTicks) return blackFrame();
+    const bgY = bgFadeY(0, FADE_IN);
+    const objY = objFadeY(0, FADE_IN);
+    return t.direction === "toSummary"
+      ? renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY)
+      : renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY);
+  }
 
   const timing = t.phase === "fadingIn" ? FADE_IN : t.direction === "toSummary" ? ENTRY_FADE_OUT : EXIT_FADE_OUT;
-  const bgY = bgFadeY(t.elapsed, timing);
-  const objY = objFadeY(t.elapsed, timing);
+  // +1: BeginNormalPaletteFade's own UpdateNormalPaletteFade call (palette.c)
+  // applies its first blend step within the same tick the fade is triggered
+  // - `elapsed` (0 = the trigger tick itself) is one tick "behind" the ticks
+  // argument these curves expect (0 = one VBlank of fade already applied);
+  // oracle-verified empirically (dense capture diverges exactly one tick
+  // earlier than `bgFadeY(t.elapsed, timing)` alone predicts - see
+  // PROGRESS.md).
+  const bgY = bgFadeY(t.elapsed + 1, timing);
+  const objY = objFadeY(t.elapsed + 1, timing);
   const showingDraft = (t.direction === "toSummary") === (t.phase === "fadingOut");
   return showingDraft
     ? renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY)
