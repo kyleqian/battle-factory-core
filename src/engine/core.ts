@@ -4,28 +4,57 @@
 // and tools/compare/appTrace.ts both drive this same core.
 
 import type { GbaButton } from "../input.ts";
-import { ANCHOR_DRAFT_SCREEN_STATE, renderFactoryDraftScreen, type DraftScreenState } from "./factoryDraftScreen.ts";
+import { ANCHOR_DRAFT_SCREEN_STATE, moveCursor, moveMenuCursor, renderFactoryDraftScreen, type DraftScreenState } from "./factoryDraftScreen.ts";
+import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
 export interface EngineState {
   frame: number;
   draftScreen: DraftScreenState;
+  keyRepeat: KeyRepeatState;
 }
 
 export function createInitialState(): EngineState {
   return {
     frame: 0,
     draftScreen: ANCHOR_DRAFT_SCREEN_STATE,
+    keyRepeat: INITIAL_KEY_REPEAT_STATE,
   };
 }
 
 /**
- * Advance the engine by one frame. Stage S1 renders only the static anchor
- * frame - cursor movement, menus, and everything else interactive is S2+.
+ * Advance the engine by one frame, reproducing battle_factory_screen.c's
+ * Select_Task_HandleChooseMons (cursor mode) / Select_Task_HandleMenu (menu
+ * mode) input handling: JOY_REPEAT(LEFT/RIGHT) moves the slot cursor (with
+ * wrap), JOY_NEW(A) opens the SUMMARY/RENT/OTHERS menu, JOY_REPEAT(UP/DOWN)
+ * moves the menu cursor (with wrap), JOY_NEW(B) closes it back to cursor
+ * mode. Ball-open animation timing and SUMMARY/RENT selection are out of
+ * scope for this stage (S4/S5).
  */
-export function tick(state: EngineState, _buttons: ReadonlySet<GbaButton>): EngineState {
-  return { ...state, frame: state.frame + 1 };
+export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
+  const { newKeys, newAndRepeatedKeys, next: keyRepeat } = readKeys(buttons, state.keyRepeat);
+  let draftScreen = state.draftScreen;
+
+  if (draftScreen.mode === "cursor") {
+    if (newAndRepeatedKeys.has("RIGHT")) {
+      draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, 1) };
+    } else if (newAndRepeatedKeys.has("LEFT")) {
+      draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, -1) };
+    } else if (newKeys.has("A")) {
+      draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0 };
+    }
+  } else {
+    if (newAndRepeatedKeys.has("DOWN")) {
+      draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, 1) };
+    } else if (newAndRepeatedKeys.has("UP")) {
+      draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, -1) };
+    } else if (newKeys.has("B")) {
+      draftScreen = { ...draftScreen, mode: "cursor" };
+    }
+  }
+
+  return { ...state, frame: state.frame + 1, draftScreen, keyRepeat };
 }
 
 export function render(state: EngineState): Uint8Array {

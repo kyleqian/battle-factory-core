@@ -101,6 +101,31 @@ function writeJson(path: string, data: unknown): void {
   writeJson(join(ASSETS_GEN, "unused-pokeball-source.json"), {
     tileset: { columns: unusedBallTiles.columns, rows: unusedBallTiles.rows, tiles: unusedBallTiles.tiles.map((t) => [...t.pixels]) },
   });
+
+  // sSpriteTemplate_Select_MenuHighlightLeft/Right (SELECT_WIN_OPTIONS/
+  // YES_NO's 2-sprite selection highlight bar, PALTAG_INTERFACE).
+  const highlightLeftImage = decodeIndexedPng(join(factoryScreenDir, "menu_highlight_left.png"));
+  const highlightLeftTiles = sliceTiles(highlightLeftImage);
+  const highlightRightImage = decodeIndexedPng(join(factoryScreenDir, "menu_highlight_right.png"));
+  const highlightRightTiles = sliceTiles(highlightRightImage);
+  writeJson(join(ASSETS_GEN, "menu-highlight.json"), {
+    left: {
+      tileset: {
+        columns: highlightLeftTiles.columns,
+        rows: highlightLeftTiles.rows,
+        tiles: highlightLeftTiles.tiles.map((t) => [...t.pixels]),
+      },
+    },
+    right: {
+      tileset: {
+        columns: highlightRightTiles.columns,
+        rows: highlightRightTiles.rows,
+        tiles: highlightRightTiles.tiles.map((t) => [...t.pixels]),
+      },
+    },
+    // Shares OBJ palette slot 0 of interface.pal with the arrow sprite.
+    palette: interfacePal.slice(0, 16),
+  });
 }
 
 // --- Text palette ------------------------------------------------------------

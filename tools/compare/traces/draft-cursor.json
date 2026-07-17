@@ -1,0 +1,21 @@
+{
+  "segments": [
+    {"frames": 2, "buttons": ["RIGHT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["RIGHT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["RIGHT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["RIGHT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["RIGHT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["RIGHT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["LEFT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["LEFT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["LEFT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["LEFT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["LEFT"]}, {"frames": 2, "buttons": []},
+    {"frames": 2, "buttons": ["LEFT"]}, {"frames": 2, "buttons": []}
+  ],
+  "captureFrames": [
+    0,
+    4, 8, 12, 16, 20, 24,
+    28, 32, 36, 40, 44, 48
+  ]
+}
