@@ -5,6 +5,64 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 10 — S4 slice 1 (worker, capped): fade math + state machine landed; Info-page rendering NOT reached — S4 stays [~]
+
+- **State:** `npm test` **138/138** (115→138), `npm run build` green.
+  Existing 4 compare traces (`anchor`, `draft-cursor`, `draft-menu`,
+  `draft-menu-slot6`) still all 0 diff (untouched this slice). **No new
+  compare traces committed** — `summary-info-onix.json`/`-magby.json` from
+  the step brief were NOT produced; the Info page has no renderer yet, so
+  there was nothing to capture against. `ROADMAP.md` S4 stays `[ ]`
+  (unstarted rendering-wise; foundation only).
+- **Did:** Landed the hard, reusable half of S4 first: dense oracle
+  probing (fresh, this session — not just reading the scout's dossier) of
+  all 4 `BeginNormalPaletteFade(PALETTES_ALL, 0, ..., RGB_BLACK)` calls
+  (entry fade-out/in, exit fade-out/in) fully pinned the per-frame 5-bit
+  blend curve and the BG/OBJ 1-tick stagger (`objPaletteToggle`) —
+  `src/engine/paletteFade.ts`, self-consistent with the dossier's
+  press-tick+59/+53 settle points (20+24+15=59, 18+20+15=53 ticks exactly).
+  Wired those tick counts into a summary-screen entry/exit state machine
+  (`src/engine/summaryScreen.ts`: transition direction/phase/elapsed,
+  selectedSlot, page id) mirroring `Select_Task_OpenSummaryScreen`'s
+  3-state machine. 23 new hermetic Tier-1 tests, all pinned against literal
+  oracle pixel values (no oracle/pixels at test time). Also confirmed the
+  brief's requested number: **first mon idle-animation churn frame is
+  press-tick+65** (slot 1/ONIX; settled Info page is stable from +59
+  through +64, every frame differs from +65 onward through +151 with no
+  further stable window found) — MAGBY (slot 2) not independently probed.
+  Addendum written to `docs/summary-screen-notes.md` §6 with full detail.
+  Neither module is wired into `core.ts`/render yet.
+- **Next:** The Info page renderer itself, blocked on missing extraction
+  (found while scoping, not yet done): `species-stats.json` has no
+  type/dex-number fields; no ability name/description text table; no
+  gender-ratio table. Next slice: (1) extract those (types + dex numbers
+  likely cheap additions to `extract-species-header.ts`'s source files;
+  ability names/descriptions from `gAbilityNames`/
+  `gAbilityDescriptionPointers` need a small new extractor); (2) build the
+  Info-page renderer (BG3 tilemap from already-extracted
+  `summary-bg.json`, the window/text fields per the dossier's §2/§3, type
+  icons from `summary-type-icons.json`) for a **static** frame (mon
+  idle-anim can stay a documented remainder, captures must stay ≤
+  press-tick+64 per the churn frame above); (3) wire
+  `summaryScreen.ts`+`paletteFade.ts` into `core.ts`'s tick/render,
+  blending the draft-screen framebuffer during entry-out/exit-in and the
+  new Info-page framebuffer during entry-in/exit-out; (4) only then are
+  `summary-info-onix.json`/`-magby.json` (dense through the fades, ≤4-frame
+  elsewhere) achievable — build and commit those to actually close S4
+  slice 1's acceptance criteria, which this session did not reach.
+- **Notes:** This slice hit its 50-minute cap on research + the (large,
+  now-done-once) fade-curve derivation before rendering could start —
+  flagging per `AGENTS.md`'s "stop at a green commit, report exact
+  frames/pixels" guidance rather than shipping a rushed/unverified
+  renderer. The fade math is the part most likely to have been gotten
+  subtly wrong by guessing (5-bit space, BG/OBJ stagger, per-transition
+  dead-frame delays all differ from naive assumptions) — glad it's now
+  oracle-pinned and covered, since every future summary-screen fade (S4
+  paging is a redraw not a fade, but S5's draft-exit fade and S6's battle
+  transition likely reuse this exact mechanism).
+
+---
+
 ## 9 — Supervisor: S4 scout merged; S2 verified complete
 
 - **State:** Scout branch `worker/wt-20260717-032349` merged: summary-screen
@@ -57,33 +115,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fresh dense probe of the *specific* trace in question rather than
   generalizing from one data point, even when the generalization is
   structurally tempting.
-
----
-
-## 7 — ISSUES #3 partial: slot6 every-frame trace 40/66 → 58/66
-
-- **State:** `npm test` **110/110**, `npm run build` green. Compares:
-  `anchor.json` 1/1, `draft-cursor.json` 13/13, `draft-menu.json` 38/38 —
-  still all 0 diff (no regressions). `draft-menu-slot6.json` (every-frame
-  0-65) **58/66** (was 40/66). S2 stays `[~]` — 8 frames still differ, all
-  redraw-scheduling transients (see `ISSUES.md` #3, trimmed to just these).
-- **Did:** Root-caused and fixed the two clusters inside the mon-pic
-  sub-state machine (`src/engine/monPic.ts`): (1) the ball-open flash bar's
-  flat-vs-blended color was wrongly tied to the hasActed timing variant —
-  it actually tracks a separate, session-persistent "has BLDCNT ever been
-  configured" flag, now `MonPicState.blended`; (2) that same
-  first-ever-open-after-a-cursor-move case needs its own window-growth
-  timing table ("variant C"), pinned from dense oracle probing of
-  draft-menu-slot6.json. Added 4 new hermetic Tier-1 tests (15→19) pinning
-  variant C and the blend/variant decoupling.
-- **Next:** Fix the remaining 3 clusters (all `Select_Task_Handle*`'s
-  redraw scheduling, not mon-pic): f1-f3 cursor-move header/arrow redraw,
-  f37-f38 menu-highlight redraw (likely same mechanism as f1-f3), f44/47-48
-  close-phase transients. `ISSUES.md` #3 has a dedicated probing plan for
-  each (isolate with single-purpose dense traces before fixing against the
-  combined slot6 trace). Then tick S2 `[x]`, then S4.
-- **Notes:** The end-states are already exact — only 8/66 frames differ,
-  all transient (settle within 2-4 ticks); this is scheduling/timing, not
-  missing mechanisms.
 
 ---

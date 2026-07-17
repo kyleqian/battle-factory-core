@@ -349,6 +349,57 @@ same ball-open blend state) when the summary's mon-cursor wasn't moved.
    running, non-settling animation (like Risk 1) that any trace dwelling in
    move-select mode must reproduce tick-exactly rather than treat as static.
 
+## 6. S4 slice-1 addendum: fade math pinned exactly, first churn frame confirmed
+
+Dense every-frame oracle probes (fresh dense captures, all 4 sha-pixel-level)
+of all four `BeginNormalPaletteFade(PALETTES_ALL, 0, ..., RGB_BLACK)` calls
+(entry fade-out `battle_factory_screen.c:1465`, entry fade-in
+`pokemon_summary_screen.c:1290`, exit fade-out
+`pokemon_summary_screen.c:1510`, exit fade-in `battle_factory_screen.c:1217`)
+fully pinned the per-frame blend curve — see `src/engine/paletteFade.ts`'s
+module doc for the derivation and `tests/paletteFade.test.ts` for the
+oracle-literal pixel values. Summary:
+
+- **Blend formula**: `util.c:264`'s `BlendPalette` runs in 5-bit GBA color
+  space; for `blendColor=RGB_BLACK` this reduces to
+  `faded5 = floor(c5 * (16-y) / 16)`, `c5 = c8 >> 3` (exactly invertible from
+  our already-8-bit-expanded assets), re-expanded via the same `(c5<<3)|
+  (c5>>2)` as the rest of the color pipeline.
+- **BG/OBJ stagger**: `palette.c:406`'s `UpdateNormalPaletteFade` alternates
+  BG-palette and OBJ-palette blending on successive calls
+  (`objPaletteToggle`), so the OBJ layer's `y` always lags the BG layer's `y`
+  by exactly 1 tick — confirmed pixel-for-pixel (a red OBJ sample vs. a BG
+  chrome sample) through the entry fade-out.
+- **Per-transition tick constants** (ticks relative to each transition's own
+  trigger tick; `y` steps by 2 every 2 ticks after an initial task-dispatch
+  `startDelay`): entry fade-out `startDelay=5`, settles black (both layers)
+  at **tick 20**; entry black hold **24 ticks**; fade-in (shared shape by
+  both directions) `startDelay=0`, settles at **tick 15**; exit fade-out
+  `startDelay=3`, settles black at **tick 18**; exit black hold **20
+  ticks**. Totals: entry **20+24+15=59** ticks, exit **18+20+15=53** ticks —
+  both match §4's press-tick+59/+53 exactly, cross-validating both scouting
+  sessions' independent probes.
+- **First mon idle-animation churn frame (Risk 1), confirmed**: freshly
+  probed (dense captures press-tick+54 through +151 of an A-on-SUMMARY-slot1
+  trace) — the settled Info page is sha-stable for frames press-tick+59
+  through **+64** (6 frames), then the **first churn frame is
+  press-tick+65**, after which every single subsequent frame differs
+  (continuous churn, no further stable window found through +151). This is
+  for **slot 1 (ONIX)**; slot 2 (MAGBY) was not independently probed this
+  session — assume the same ~65-tick lead-in until verified, and keep any
+  committed trace's dense-capture window within `[settle, +64]` to stay
+  clear of it (per the S4 brief, captures should stay legitimately dense up
+  to the first churn frame, not thinned to dodge it).
+
+**Not implemented this slice**: the state machine above
+(`src/engine/summaryScreen.ts`) is not wired into `core.ts`/render, and the
+static Info page itself has no renderer yet. Blocking gaps found while
+scoping that work: `src/data/gen/species-stats.json` has no per-species type
+or dex-number fields, and no ability name/description text table or gender
+ratio table has been extracted yet (`anchor-state.json` only carries the
+ability *enum id*, not display text). See `PROGRESS.md` for the full
+next-slice punch list.
+
 ## Extraction
 
 `tools/extract/extract-summary-screen.ts` (run via

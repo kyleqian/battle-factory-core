@@ -58,13 +58,20 @@ extracted data and match the committed RAM dump exactly; a Tier-1 test pins
 gRngValue evolution over N idle frames (anchor seed `0xd2ddeec8`); `npm
 test` green.
 
-### [ ] S4 — Summary screen parity (draft's SUMMARY view)
+### [~] S4 — Summary screen parity (draft's SUMMARY view)
 The summary screen as invoked from the draft menu (confirm exact mode/pages
 from `battle_factory_screen.c`), including page navigation and return to the
 draft.
 **Acceptance:** committed trace(s) opening SUMMARY on ≥2 different slots,
 paging through every reachable page, and backing out pass compare with 0
 diff on dense captures; Tier-1 tests pin the summary state machine.
+**Slice 1 progress:** entry/exit palette-fade math and the fade-phase state
+machine are oracle-pinned and hermetically tested (`src/engine/
+paletteFade.ts`, `src/engine/summaryScreen.ts`) but not yet wired into
+render; the static Info page has no renderer yet (blocked on missing
+type/dex-number/ability-text/gender extraction — see `PROGRESS.md` #10 and
+`docs/summary-screen-notes.md` §6). No compare traces for this stage exist
+yet.
 
 ### [ ] S5 — Complete the draft: rent 3, confirmations, exit sequence
 RENT/OTHERS flows, ball palette change on selection, the 2nd/3rd-pick
