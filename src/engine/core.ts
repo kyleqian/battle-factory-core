@@ -135,31 +135,39 @@ export function render(state: EngineState): Uint8Array {
   if (!t) {
     return summary.onInfoPage ? renderSummaryInfoPage(summary.selectedSlot) : renderFactoryDraftScreen(state.draftScreen);
   }
+  const isEntry = t.direction === "toSummary";
   if (t.phase === "black") {
-    // Same +1 as below: the black hold's own last tick already shows the
-    // following fade-in's first step in practice (oracle-verified dense
-    // capture - the hold is one tick shorter than ENTRY/EXIT_BLACK_HOLD_TICKS
-    // makes it look), not pure black.
-    const holdTicks = t.direction === "toSummary" ? ENTRY_BLACK_HOLD_TICKS : EXIT_BLACK_HOLD_TICKS;
+    // Both directions' black hold shares the same quirk (oracle-verified
+    // fresh dense B-exit probe, ISSUES #4 - this does NOT depend on
+    // direction): the hold's own last tick already shows the following
+    // fade-in's first step, not pure black.
+    const holdTicks = isEntry ? ENTRY_BLACK_HOLD_TICKS : EXIT_BLACK_HOLD_TICKS;
     if (t.elapsed + 1 < holdTicks) return blackFrame();
     const bgY = bgFadeY(0, FADE_IN);
     const objY = objFadeY(0, FADE_IN);
-    return t.direction === "toSummary"
+    return isEntry
       ? renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY)
       : renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY);
   }
 
-  const timing = t.phase === "fadingIn" ? FADE_IN : t.direction === "toSummary" ? ENTRY_FADE_OUT : EXIT_FADE_OUT;
+  const timing = t.phase === "fadingIn" ? FADE_IN : isEntry ? ENTRY_FADE_OUT : EXIT_FADE_OUT;
   // +1: BeginNormalPaletteFade's own UpdateNormalPaletteFade call (palette.c)
   // applies its first blend step within the same tick the fade is triggered
   // - `elapsed` (0 = the trigger tick itself) is one tick "behind" the ticks
   // argument these curves expect (0 = one VBlank of fade already applied);
-  // oracle-verified empirically (dense capture diverges exactly one tick
-  // earlier than `bgFadeY(t.elapsed, timing)` alone predicts - see
-  // PROGRESS.md).
-  const bgY = bgFadeY(t.elapsed + 1, timing);
-  const objY = objFadeY(t.elapsed + 1, timing);
-  const showingDraft = (t.direction === "toSummary") === (t.phase === "fadingOut");
+  // oracle-verified empirically for BOTH directions (dense capture diverges
+  // exactly one tick earlier than `bgFadeY(t.elapsed, timing)` alone
+  // predicts) - a fresh isolated B-exit probe (ISSUES #4) confirmed the same
+  // +1 applies on the exit path too, once the exit's own dense probe is
+  // pressed strictly inside the settled Info page's stable pixel window
+  // (press-tick 105/106 register; 104 is silently dropped - Task_HandleInput
+  // / gPaletteFade.active isn't actually ready that early despite the pixels
+  // already looking stable, a real gotcha worth remembering for future
+  // probes of this screen).
+  const ticks = t.elapsed + 1;
+  const bgY = bgFadeY(ticks, timing);
+  const objY = objFadeY(ticks, timing);
+  const showingDraft = isEntry === (t.phase === "fadingOut");
   return showingDraft
     ? renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY)
     : renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY);
