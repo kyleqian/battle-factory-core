@@ -32,7 +32,7 @@ on screen). Render the anchor draft screen exactly; wire `appTrace.ts`.
 (committed, 1 frame) → 0 diff; `npm test` and `npm run build` green;
 `npm run dev` shows the same screen at 240×160 under `?pokebench=1`.
 
-### [ ] S2 — Draft-screen interaction parity: cursor, header, menu, timing
+### [~] S2 — Draft-screen interaction parity: cursor, header, menu, timing
 Cursor movement across the 6 slots (incl. wrap + held-button repeat), per-
 slot header text, A → ball-open animation + mon sprite + SUMMARY/RENT/OTHERS
 menu, B/close paths, message-box updates — frame-exact against dense capture
@@ -41,6 +41,16 @@ windows.
 directions, captures every ≤4 frames) and `draft-menu.json` (open/navigate/
 close on ≥2 slots) pass compare with 0 diff; Tier-1 tests pin the draft
 state machine (cursor index, menu open/close, input repeat).
+**Status (worker, 2026-07-17):** cursor half DONE — `draft-cursor.json`
+0-diff (13/13), key-repeat timing ported exactly from `main.c` `ReadKeys()`
+(pinned by `tests/keyRepeat.test.ts`), full header text extracted for all 6
+anchor species. Menu half PARTIAL — the SUMMARY/RENT/OTHERS state machine
+(open/close incl. the `OTHERS` cancel path, cursor nav + wrap) is
+implemented and Tier-1 tested, but the ball-open reveal (mon-pic-bg window/
+blend + front sprite) isn't rendered yet, so `draft-menu.json` is NOT 0-diff
+(10/38 frames match; diff confined to the ~64x64 mon-pic region — see
+`ISSUES.md` #2 for the full reverse-engineered mechanism, timing, and
+extraction leads).
 
 ### [ ] S3 — Rental data, RNG core, anchor mons pinned
 Gen-3 LCG (constants verified from `reference/pokeemerald/src/random.c`)
@@ -130,9 +140,20 @@ is `[x]` or its remainder is explicitly re-scoped here by the supervisor.
   log lines to stdout (write JSON results to a file, don't parse stdout) and
   the interpreter segfaults at teardown AFTER results are written (exit 139
   is benign — check the output file, not the exit code).
-- **Draft-screen timings observed:** RIGHT (held 2f from f1) → header/cursor
-  updated by f8; A on a slot → ball opens, mon sprite + SUMMARY/RENT/OTHERS
-  menu settled by ~f45; idle screens are pixel-stable.
+- **Draft-screen timings observed:** RIGHT/LEFT (held 2f) → cursor+header
+  fully settled by input-frame+4 (transient partial-redraw frames at +2/+3 -
+  avoid capturing those, or match them exactly); this holds for a bare
+  `JOY_NEW` tap AND for each `JOY_REPEAT` pulse alike. Key-repeat timing is
+  `main.c`'s exactly: first repeat 40 ticks after the press tick, then every
+  5 ticks (`gKeyRepeatStartDelay=40`, `gKeyRepeatContinueDelay=5`, one shared
+  counter across all buttons, reset on any change to the held combination).
+  A on a slot → ball-open settled by input-frame+~30 (not the `~f45` guessed
+  in iteration 0); B-close settled by input-frame+~20-24. Menu cursor
+  (UP/DOWN) reposition settles in ~2-3 frames, same as the slot cursor.
+  **Idle screens are pixel-stable only up to ~104 frames** — past that,
+  `Select_Task_FadeSpeciesName` starts a perpetual palette breathe on the
+  species name text (see `ISSUES.md` #2); keep traces under that or model
+  it explicitly.
 - **Oracle limits:** maxFrames 20000, maxCaptures 256; long traces ~10-15s;
   service serializes runs (parallel workers safe).
 - **Reference geography:** draft/swap UI `src/battle_factory_screen.c`

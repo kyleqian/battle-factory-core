@@ -5,6 +5,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 4 — S2 worker: cursor sweep 0-diff; menu state machine done, ball-open art not yet — S2 PARTIAL
+
+- **State:** `npm test` 39/39 green, `npm run build` green.
+  `tools/compare/traces/anchor.json` still **1/1, 0 diff** (no regression).
+  `tools/compare/traces/draft-cursor.json` (new, committed) → **13/13
+  frames matched, 0 diff** — full RIGHT sweep across all 6 slots with wrap,
+  full LEFT sweep back with wrap. `tools/compare/traces/draft-menu.json`
+  (new, committed) → **10/38 matched** — every frame outside the ball-open
+  "mon pic" window is exact; diff is confined to a ~64x64px region (see
+  `ISSUES.md` #2 for the full diagnosis). S2 is therefore only partially
+  done; see `ROADMAP.md`'s `[~]` status line for the precise breakdown.
+- **Did:** Ported `reference/pokeemerald/src/main.c`'s `ReadKeys()` JOY_NEW/
+  JOY_REPEAT model exactly (`src/engine/keyRepeat.ts`: one shared repeat
+  counter, 40-tick start delay, 5-tick continue delay, reset on any change
+  to the held combination) - pinned against a hand-derived tick sequence in
+  `tests/keyRepeat.test.ts` (fires at ticks 1, 41, 46, 51...). Wired the
+  draft screen's cursor mode (`LEFT`/`RIGHT` with wrap,
+  `Select_UpdateBallCursorPosition`) and menu mode (`A` opens SUMMARY/RENT/
+  OTHERS with `menuCursorPos=0`, `UP`/`DOWN` navigate with wrap, `B` OR `A`
+  on OTHERS closes back to cursor mode - `Select_OptionOthers` is a no-op
+  cancel, confirmed from source) into `src/engine/core.ts`'s `tick()`, all
+  pinned by 12 new hermetic tests in `tests/draftScreen.test.ts`. Extracted
+  the 6 anchor rental-pool species' header text (species name + Pokedex
+  category) via a new `tools/extract/extract-species-header.ts` reading
+  `species_names.h` + `pokedex_entries.h`, replacing S1's placeholder empty
+  slots 2-6 (`src/data/gen/draft-pool-header.json`). Extracted the menu
+  highlight sprite pair (`menu_highlight_left/right.png`) and render the
+  SUMMARY/RENT/OTHERS popup text + highlight bar when the menu is open.
+  Reverse-engineered (and probed against the oracle) the exact settle
+  timing for cursor moves, key-repeat, menu nav, and menu open/close - see
+  `ROADMAP.md` Domain notes; also discovered idle screens only stay
+  pixel-stable for ~104 frames before a previously-unknown species-name
+  color pulse (`Select_Task_FadeSpeciesName`) kicks in, and kept both new
+  traces safely under that.
+- **Next:** The ball-open reveal (`Task_OpenMonPic`/`Task_CloseMonPic`'s
+  WIN0 growth + `BG3`/`BG1`/`OBJ` alpha blend, plus the front-sprite
+  extraction for ONIX/MAGBY/BAYLEEF/BUTTERFREE/HAUNTER/QUILAVA) is the one
+  remaining piece for S2 - `ISSUES.md` #2 has the full mechanism, register
+  values, and timing already reverse-engineered; re-run
+  `draft-menu.json` (already committed with dense captures over both
+  transitions, on 2 different slots) to check progress once implemented.
+  After that: S3 is proceeding in a parallel worktree (rental data/RNG) -
+  don't touch `src/engine/rng.ts` or `src/data/gen/rental*`/`anchor-state.json`.
+- **Notes:** PAPERCUT: none this session - the oracle's dense-capture probing
+  loop (`bin/oracle run <trace> -o <dir>` + comparing manifest sha256s) was
+  fast and effective for reverse-engineering exact frame timing; no friction.
+
+---
+
 ## 3 — S1 worker: font glyph fix closes the anchor compare — S1 COMPLETE
 
 - **State:** S1 acceptance fully met. `npm run compare -- tools/compare/
@@ -85,23 +134,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** `npm run dev` checked via `curl` against the Vite dev server
   (200 on `/` and `/src/main.ts`), not a real browser — no headless browser
   was available in this session; worth a real visual check next session.
-
----
-
-## 1 — Iteration 0: staged plan authored (supervisor)
-
-- **State:** Baseline green (`npm test` 3/3, `npm run build` OK, oracle
-  answering). `ROADMAP.md` now carries the staged plan S1–S9; no engine code
-  yet. `tools/compare/traces/anchor.json` committed.
-- **Did:** Verified skeleton baseline; probed the oracle (anchor = Lv-50
-  single draft screen, ONIX slot 1; RIGHT/A semantics + timings observed);
-  pinned the color expansion `(c<<3)|(c>>2)` against all 22 anchor colors;
-  verified the dev-time RAM-inspection recipe (replay matches canonical sha
-  byte-exactly; anchor `gRngValue = 0xd2ddeec8`); confirmed the per-frame
-  VBlank `Random()` rule (`main.c:366`); authored ROADMAP.md stages S1–S9
-  with command-backed acceptance criteria.
-- **Next:** S1 via worker briefs — extraction pipeline + engine skeleton +
-  `appTrace.ts` wiring, driving `npm run compare -- tools/compare/traces/
-  anchor.json` to 0 diff.
-- **Notes:** RAM-inspection quirks (mGBA log spam on stdout, benign exit-139
-  teardown segfault) are documented in ROADMAP.md Domain notes.

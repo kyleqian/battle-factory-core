@@ -62,6 +62,7 @@ export type DraftScreenMode = "cursor" | "menu";
 
 /** Select_MenuOptionFuncs order: SUMMARY, RENT/DESELECT, OTHERS. */
 export const MENU_OPTION_COUNT = 3;
+export const MENU_OPTION_OTHERS = 2;
 
 export interface DraftScreenState {
   mode: DraftScreenMode;

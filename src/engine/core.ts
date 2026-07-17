@@ -4,7 +4,7 @@
 // and tools/compare/appTrace.ts both drive this same core.
 
 import type { GbaButton } from "../input.ts";
-import { ANCHOR_DRAFT_SCREEN_STATE, moveCursor, moveMenuCursor, renderFactoryDraftScreen, type DraftScreenState } from "./factoryDraftScreen.ts";
+import { ANCHOR_DRAFT_SCREEN_STATE, MENU_OPTION_OTHERS, moveCursor, moveMenuCursor, renderFactoryDraftScreen, type DraftScreenState } from "./factoryDraftScreen.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
@@ -50,6 +50,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     } else if (newAndRepeatedKeys.has("UP")) {
       draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, -1) };
     } else if (newKeys.has("B")) {
+      draftScreen = { ...draftScreen, mode: "cursor" };
+    } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_OTHERS) {
+      // Select_OptionOthers: closes the popup with no selection change,
+      // identical to B (SUMMARY/RENT are S4/S5, out of scope here).
       draftScreen = { ...draftScreen, mode: "cursor" };
     }
   }

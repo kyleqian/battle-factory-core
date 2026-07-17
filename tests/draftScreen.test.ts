@@ -108,4 +108,19 @@ describe("draft screen menu mode", () => {
     expect(state.draftScreen.cursorPos).toBe(0);
     expect(state.draftScreen.mode).toBe("menu");
   });
+
+  it("A on OTHERS (Select_OptionOthers) cancels back to cursor mode, same as B", () => {
+    let state = openMenu();
+    state = tap(state, "DOWN"); // RENT
+    state = tap(state, "DOWN"); // OTHERS
+    expect(state.draftScreen.menuCursorPos).toBe(2);
+    state = tick(state, new Set(["A"]));
+    expect(state.draftScreen.mode).toBe("cursor");
+  });
+
+  it("A on SUMMARY/RENT does not close the menu (S4/S5, out of scope)", () => {
+    let state = openMenu();
+    state = tick(state, new Set(["A"])); // SUMMARY
+    expect(state.draftScreen.mode).toBe("menu");
+  });
 });
