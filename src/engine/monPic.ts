@@ -359,3 +359,23 @@ export function getMonPicVisual(state: MonPicState): MonPicVisual {
 export function isMonPicInputReady(state: MonPicState): boolean {
   return state.phase === "open";
 }
+
+/**
+ * Select_Task_HandleChooseMons (battle_factory_screen.c:1671-1673) early-
+ * returns - dropping LEFT/RIGHT AND a fresh A-to-open alike, not just cursor
+ * moves - for as long as `sFactorySelectScreen->monPicAnimating` is TRUE.
+ * That flag is set the instant CloseMonPic fires (same tick as the
+ * RENT/DESELECT confirm or B/OTHERS close) and only clears once
+ * SpriteCB_CloseMonPic's flash-shrink affine anim ends - i.e. for this
+ * engine's modeling, exactly the whole "closing" phase (RAM-verified via
+ * direct `monPicAnimating` reads: replaying RENT_SLOT1 - confirm A at tick
+ * 37 - a RIGHT sent tick 56 is silently dropped, cursorPos stays 0; sent
+ * tick 57 (the tick `monPicAnimating` first reads FALSE, matching
+ * `phase` flipping "closing"->"closed") it's accepted, cursorPos moves; see
+ * tests/cursorInputGate.test.ts). Symmetric to isMonPicInputReady's
+ * "opening" gate, just for the close side and the cursor-mode task instead
+ * of the menu-mode one.
+ */
+export function isCursorInputReady(state: MonPicState): boolean {
+  return state.phase === "closed";
+}

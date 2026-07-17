@@ -22,7 +22,7 @@ import {
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
-import { advanceMonPic, closeMonPic, isMonPicInputReady, openMonPic } from "./monPic.ts";
+import { advanceMonPic, closeMonPic, isCursorInputReady, isMonPicInputReady, openMonPic } from "./monPic.ts";
 import { advanceBallAnim, initialBallAnimState } from "./ballAnim.ts";
 import { ANCHOR_RNG_VALUE, advanceRngValue } from "./rng.ts";
 import { createFramebuffer, fillFramebuffer } from "./framebuffer.ts";
@@ -123,7 +123,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     }, []);
     let ballAnimStall: readonly number[] = [];
 
-    if (draftScreen.mode === "cursor") {
+    // Select_Task_HandleChooseMons (battle_factory_screen.c:1671-1673) early-
+    // returns while sFactorySelectScreen->monPicAnimating is TRUE, dropping
+    // LEFT/RIGHT/A-open alike - see isCursorInputReady's doc for the
+    // RAM-verified gate window.
+    if (draftScreen.mode === "cursor" && isCursorInputReady(monPic)) {
       if (newAndRepeatedKeys.has("RIGHT")) {
         cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0 };
         draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, 1), hasActed: true };

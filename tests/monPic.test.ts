@@ -10,6 +10,7 @@ import {
   closeMonPic,
   getMonPicVisual,
   INITIAL_MON_PIC_STATE,
+  isCursorInputReady,
   isMonPicInputReady,
   openMonPic,
   type MonPicState,
@@ -43,6 +44,13 @@ describe("monPic: closed/open steady states", () => {
     expect(isMonPicInputReady(openMonPic(false, false))).toBe(false);
     expect(isMonPicInputReady({ phase: "open", elapsed: 0, variant: "A", blended: false })).toBe(true);
     expect(isMonPicInputReady({ phase: "closing", elapsed: 0, variant: "A", blended: false })).toBe(false);
+  });
+
+  it("isCursorInputReady (Select_Task_HandleChooseMons's monPicAnimating gate) is true only once fully closed", () => {
+    expect(isCursorInputReady(INITIAL_MON_PIC_STATE)).toBe(true);
+    expect(isCursorInputReady(closeMonPic("A"))).toBe(false);
+    expect(isCursorInputReady({ phase: "closing", elapsed: 19, variant: "A", blended: true })).toBe(false);
+    expect(isCursorInputReady({ phase: "open", elapsed: 0, variant: "A", blended: false })).toBe(false);
   });
 });
 
