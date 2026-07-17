@@ -353,7 +353,16 @@ issue has proven expensive to chase further without new investigative
 tooling (RAM access to the actual race-determining register/variable, not
 just its downstream effect on sprite state).
 
-## #5 — mon-pic close animation: WIN0V catch-up jitter is real hardware
+## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
+  jitter: 0-diff stays the bar; re-time trace interactions into clean
+  windows where feasible; otherwise ship with each non-matching frame
+  individually attributed to this entry's pattern (x88-151 close-window
+  confinement). No further fix attempts. rent-slot1.json: next worker in
+  that area should attempt a clean-window re-time (candidates ~31/47+
+  per PROGRESS-archive #17). Mechanism summary below is kept for
+  attribution evidence; this is no longer an open work item.
+
+## (mechanism record) mon-pic close animation: WIN0V catch-up jitter is real hardware
   cycle-timing, not a modelable game-state bug (root-caused, NOT fixable at
   this engine's tick/state granularity - see "why this can't be fixed" below)
 

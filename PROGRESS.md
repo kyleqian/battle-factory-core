@@ -27,20 +27,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   battle-bringup dossier + battle-1 assets + all 12 transition variants,
   S5 confirm-flow dossier, S7 turn-1 ground truth (RAM-truthed damage/
   order/HP-drain). Two PAPERCUTS entries added.
-- **OPEN QUESTIONS FOR THE USER (blocking further S5 pixel-trace work):**
-  (1) ISSUES #5 policy — accept documented cycle-jitter frames vs re-time
-  traces into clean windows (supervisor recommendation: re-time where
-  feasible, accept individually-attributed frames otherwise). (2) ISSUES
-  #7 sign-off — the multi-ball stall now looks like the same hardware
-  cycle-race class as #5 (species-name render cost); next step is either
-  new investigative tooling (RAM-read the race determinant directly) or
-  closing it as a #5-style documented gap. Entries 24-25 + ISSUES #7 have
-  the full evidence; two sessions in a row overturned the prior
-  "confirmed" rule, so no more budget should go in without a decision.
-- **Next (once decided):** rent-3picks.json + 3-ball RNG pin (spec ready
-  in entry 21), then confirm-flow implementation
-  (docs/confirm-flow-notes.md), then exit sequence
-  (docs/prebattle-room-notes.md), then S6 off its dossier + assets.
+- **DECISIONS (user delegated to supervisor, 2026-07-17 ~15:10):**
+  (1) ISSUES #5 policy: 0-diff stays the bar; re-time committed traces
+  into jitter-clean windows where feasible; otherwise ship with every
+  non-matching frame individually attributed to #5's documented pattern.
+  #5 is now a settled policy note, not an open bug. (2) ISSUES #7:
+  continue as DATA-DRIVEN empirical modeling (per-species stall table,
+  context-validated via RAM probes) — the "no per-species lookup" guard
+  is overruled because this race perturbs the RNG stream (unlike #5's
+  pixel-only jitter) and must be exact for the S5-exit→transition path;
+  an oracle-derived table has the same epistemic status as the engine's
+  other pinned empirical constants. Supervisor's own width check
+  sharpened this: ALL uppercase glyphs are 6px in font-normal, so
+  name/category pixel-width and char-count theories are ALL dead
+  (BAYLEEF total 11 chars sits between stalling HAUNTER 10 and MAGBY
+  14); and every "count-dependent" data point is species-confounded
+  (each non-stalling move entered BAYLEEF) — species alone may be the
+  entire cursor-move rule.
+- **Next:** worker in flight implementing the per-species stall table +
+  rent-3picks.json; then confirm-flow implementation
+  (docs/confirm-flow-notes.md), exit sequence
+  (docs/prebattle-room-notes.md), S6 off its dossier + assets.
 - **Notes:** every worker ended at a green commit; no usage-limit events;
   parallel worktree lane ran 6 extraction/scout steps concurrently with
   zero merge conflicts.
