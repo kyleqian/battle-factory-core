@@ -1,0 +1,300 @@
+{
+  "canonicalScreenSha256": "9c89c74113f29e7d4595571c3aceb728417c4fe441b644ec0022fb498463f297",
+  "gRngValue": 3537759944,
+  "rentals": [
+    {
+      "frontierMonIndex": 156,
+      "personality": 1205102525,
+      "otId": 416049562,
+      "species": "SPECIES_ONIX",
+      "nature": "NATURE_HARDY",
+      "isEgg": false,
+      "abilityNum": 1,
+      "ability": "ABILITY_STURDY",
+      "ivs": {
+        "hp": 3,
+        "attack": 3,
+        "defense": 3,
+        "speed": 3,
+        "spAttack": 3,
+        "spDefense": 3
+      },
+      "evs": {
+        "hp": 170,
+        "attack": 0,
+        "defense": 170,
+        "speed": 0,
+        "spAttack": 0,
+        "spDefense": 170
+      },
+      "moves": [
+        "MOVE_ROCK_SLIDE",
+        "MOVE_BIND",
+        "MOVE_DRAGON_BREATH",
+        "MOVE_SANDSTORM"
+      ],
+      "pp": [
+        10,
+        20,
+        20,
+        10
+      ],
+      "level": 50,
+      "status": 0,
+      "stats": {
+        "hp": 117,
+        "maxHp": 117,
+        "attack": 51,
+        "defense": 187,
+        "speed": 76,
+        "spAttack": 36,
+        "spDefense": 72
+      }
+    },
+    {
+      "frontierMonIndex": 149,
+      "personality": 1534575931,
+      "otId": 416049562,
+      "species": "SPECIES_MAGBY",
+      "nature": "NATURE_DOCILE",
+      "isEgg": false,
+      "abilityNum": 0,
+      "ability": "ABILITY_FLAME_BODY",
+      "ivs": {
+        "hp": 3,
+        "attack": 3,
+        "defense": 3,
+        "speed": 3,
+        "spAttack": 3,
+        "spDefense": 3
+      },
+      "evs": {
+        "hp": 255,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 255,
+        "spDefense": 0
+      },
+      "moves": [
+        "MOVE_FIRE_PUNCH",
+        "MOVE_SMOKESCREEN",
+        "MOVE_CONFUSE_RAY",
+        "MOVE_SMOG"
+      ],
+      "pp": [
+        15,
+        20,
+        10,
+        20
+      ],
+      "level": 50,
+      "status": 0,
+      "stats": {
+        "hp": 138,
+        "maxHp": 138,
+        "attack": 81,
+        "defense": 43,
+        "speed": 89,
+        "spAttack": 108,
+        "spDefense": 61
+      }
+    },
+    {
+      "frontierMonIndex": 180,
+      "personality": 1550278706,
+      "otId": 416049562,
+      "species": "SPECIES_BAYLEEF",
+      "nature": "NATURE_DOCILE",
+      "isEgg": false,
+      "abilityNum": 0,
+      "ability": "ABILITY_OVERGROW",
+      "ivs": {
+        "hp": 3,
+        "attack": 3,
+        "defense": 3,
+        "speed": 3,
+        "spAttack": 3,
+        "spDefense": 3
+      },
+      "evs": {
+        "hp": 255,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 255,
+        "spDefense": 0
+      },
+      "moves": [
+        "MOVE_RAZOR_LEAF",
+        "MOVE_TOXIC",
+        "MOVE_SAFEGUARD",
+        "MOVE_LIGHT_SCREEN"
+      ],
+      "pp": [
+        25,
+        10,
+        25,
+        30
+      ],
+      "level": 50,
+      "status": 0,
+      "stats": {
+        "hp": 153,
+        "maxHp": 153,
+        "attack": 68,
+        "defense": 86,
+        "speed": 66,
+        "spAttack": 101,
+        "spDefense": 86
+      }
+    },
+    {
+      "frontierMonIndex": 153,
+      "personality": 2653995674,
+      "otId": 416049562,
+      "species": "SPECIES_BUTTERFREE",
+      "nature": "NATURE_QUIRKY",
+      "isEgg": false,
+      "abilityNum": 0,
+      "ability": "ABILITY_COMPOUND_EYES",
+      "ivs": {
+        "hp": 3,
+        "attack": 3,
+        "defense": 3,
+        "speed": 3,
+        "spAttack": 3,
+        "spDefense": 3
+      },
+      "evs": {
+        "hp": 255,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 255,
+        "spDefense": 0
+      },
+      "moves": [
+        "MOVE_SILVER_WIND",
+        "MOVE_PSYBEAM",
+        "MOVE_TOXIC",
+        "MOVE_WHIRLWIND"
+      ],
+      "pp": [
+        5,
+        20,
+        10,
+        20
+      ],
+      "level": 50,
+      "status": 0,
+      "stats": {
+        "hp": 153,
+        "maxHp": 153,
+        "attack": 51,
+        "defense": 56,
+        "speed": 76,
+        "spAttack": 118,
+        "spDefense": 86
+      }
+    },
+    {
+      "frontierMonIndex": 179,
+      "personality": 1206438594,
+      "otId": 416049562,
+      "species": "SPECIES_HAUNTER",
+      "nature": "NATURE_RASH",
+      "isEgg": false,
+      "abilityNum": 0,
+      "ability": "ABILITY_LEVITATE",
+      "ivs": {
+        "hp": 3,
+        "attack": 3,
+        "defense": 3,
+        "speed": 3,
+        "spAttack": 3,
+        "spDefense": 3
+      },
+      "evs": {
+        "hp": 255,
+        "attack": 255,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 0,
+        "spDefense": 0
+      },
+      "moves": [
+        "MOVE_SHADOW_PUNCH",
+        "MOVE_CONFUSE_RAY",
+        "MOVE_SPITE",
+        "MOVE_GRUDGE"
+      ],
+      "pp": [
+        20,
+        10,
+        10,
+        5
+      ],
+      "level": 50,
+      "status": 0,
+      "stats": {
+        "hp": 138,
+        "maxHp": 138,
+        "attack": 88,
+        "defense": 51,
+        "speed": 101,
+        "spAttack": 133,
+        "spDefense": 54
+      }
+    },
+    {
+      "frontierMonIndex": 181,
+      "personality": 2355253556,
+      "otId": 416049562,
+      "species": "SPECIES_QUILAVA",
+      "nature": "NATURE_DOCILE",
+      "isEgg": false,
+      "abilityNum": 0,
+      "ability": "ABILITY_BLAZE",
+      "ivs": {
+        "hp": 3,
+        "attack": 3,
+        "defense": 3,
+        "speed": 3,
+        "spAttack": 3,
+        "spDefense": 3
+      },
+      "evs": {
+        "hp": 255,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 255,
+        "spDefense": 0
+      },
+      "moves": [
+        "MOVE_FLAME_WHEEL",
+        "MOVE_FURY_SWIPES",
+        "MOVE_SWIFT",
+        "MOVE_SMOKESCREEN"
+      ],
+      "pp": [
+        25,
+        15,
+        20,
+        20
+      ],
+      "level": 50,
+      "status": 0,
+      "stats": {
+        "hp": 151,
+        "maxHp": 151,
+        "attack": 70,
+        "defense": 64,
+        "speed": 86,
+        "spAttack": 118,
+        "spDefense": 71
+      }
+    }
+  ]
+}
