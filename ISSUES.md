@@ -5,6 +5,80 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #7 — multi-ball `ballAnimStall` model still wrong once a THIRD ball enters
+  the picture: ball tile mismatches appear during pure-idle dwell with 2
+  balls rented, unrelated to ISSUES #5's popup-close window (blocks
+  `rent-3picks.json`)
+
+**Symptom:** building the 3-pick dense trace (rent slot1 → RIGHT → rent
+slot2 → RIGHT → rent slot3, each rent = `A`(2f) idle28f `DOWN`(2f) idle4f
+`A`(2f), same shape as the committed `rent-slot1.json`, confirms landing at
+press-ticks 37/113/189) surfaces `npm run compare` diffs at **ball OBJ
+positions** (bbox e.g. x57-77/y54-73 = slot index 1's ball, x22-42/y54-73 =
+slot index 0's ball) during plain idle dwell with no button held - i.e. well
+outside any `CloseMonPic` popup-close window (which is confined to the
+`x88-151` mon-pic-bg blend region per ISSUES #5's own scope). This is
+exactly the "diffs at ball positions outside close windows" case the S5
+worker brief calls out as "a model bug, investigate, don't attribute."
+
+**Root-cause method (evidence, reproducible):** rather than trusting
+`ballAnimTile()`'s own internal state, cloned the *oracle's own PNG* for a
+mismatched frame and overlaid each of the ball's 3 candidate anim tiles
+(0/16/32, `pokeball.selectedPalette`) directly onto it via `drawSprite`
+(same call the renderer uses) - the **correct** tile is the one whose
+overlay produces **zero residual diff** against the untouched oracle frame
+(a same-bitmap-on-itself no-op; any other tile leaves nonzero diff both from
+its own different pixels AND stale edge pixels from the ball graphic
+underneath). This cleanly separates "which tile is objectively correct" from
+this engine's (possibly wrong) internal state, with no RAM access needed.
+Results for the specific trace above:
+- **frame 124, ball index 1** (rented at confirm-2, press-tick 113 - only 11
+  ticks earlier): true tile = **32**; engine's `ballAnimTile` = **0**.
+- **frame 155, ball index 0** (rented at confirm-1, press-tick 37, 118 ticks
+  earlier - well past `ballAnimMultiBall.test.ts`'s scenarios, which only
+  probe to frame ~260 total but only under a SINGLE cross-ball stall event
+  at a time): true tile = **32**; engine = **0**.
+- **frame 163, same ball 0**: true tile = **0**; engine = **32** (i.e. the
+  engine is sometimes *behind* and sometimes *ahead* of the correct phase by
+  this point - not a constant offset).
+
+**Why this looks like a genuinely untested scenario, not a regression of the
+ISSUES #6 fix:** by frame ~145 this trace has moved the cursor with `RIGHT`
+a *second* time (slot 1 → slot 2) while **two** balls (index 0 and 1) are
+simultaneously rented - i.e. one trigger's `ballAnimStall` must stall *two*
+already-active balls at once. `tests/ballAnimMultiBall.test.ts`'s own
+"two-ball scenario" (the only multi-ball RAM-pinned case) never reaches this
+shape: it only ever has a trigger stall exactly **one** already-active ball
+(ball 0, from either the slot-2 `RIGHT` move or the slot-2 `RENT`-confirm,
+never both at once). Ball 0 in the new repro above has accumulated **three**
+stall-worthy trigger events by frame 163 (the `RIGHT` to slot 2, the slot-2
+`RENT`-confirm, and the `RIGHT` to slot 3 - the last one shared
+simultaneously with ball 1) - the two-simultaneous-stall case is completely
+unverified. Separately, ball 1's own frame-124 mismatch (only 11 ticks after
+its *own* confirm, before any second `RIGHT` exists yet) hints there may be
+a second, independent gap in how a freshly-rented ball's settle/roll timeline
+interacts with a same-tick stall applied to some *other* ball - these two
+sub-symptoms were not disentangled this session.
+
+**Not attributable to ISSUES #5:** confirmed by bbox location alone (ball
+OBJ tiles, not the `x88-151` mon-pic window) - independently cross-checked by
+the overlay method above, which needs no popup/window state at all.
+
+**Status:** root cause not isolated - this needs the same caliber of
+dev-time RAM probe ISSUES #6 used (`gSprites[ballSpriteId].data[0]`/`animNum`/
+`animEnded` per rented ball, dumped tick-by-tick) but for a **3-ball**
+scenario with **two sequential cursor moves**, to see whether: real hardware
+only stalls *one* of the two simultaneously-active balls per trigger (not
+both), stalls both but by a different amount, or something else entirely.
+Do not guess at a fix without that data - the current `ballAnimStall` model
+scored the two-ball case exactly right by being precise about the mechanism,
+and a wrong guess here would silently re-break that.
+
+**Blocks:** `rent-3picks.json` (needs a 2-ball-then-3-ball dwell window to
+assert ball-rock churn per the S5 brief) and the accompanying 3-ball
+`gRngValue` Tier-1 RAM-pin (would either pin a known-wrong stream or require
+fixing this first) - neither was committed this session; see `PROGRESS.md`.
+
 ## #5 — mon-pic close animation: WIN0V catch-up jitter is real hardware
   cycle-timing, not a modelable game-state bug (root-caused, NOT fixable at
   this engine's tick/state granularity - see "why this can't be fixed" below)

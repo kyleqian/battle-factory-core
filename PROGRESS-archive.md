@@ -5,6 +5,70 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 18 — ISSUES #5 root-caused via direct RAM/IO inspection: confirmed genuine GBA cycle-timing jitter, NOT fixable at this engine's tick/state level — no code change, rent-slot1.json stays 125/139
+
+- **State:** unchanged from entry 17 — `npm test` **203/203**, `npm run
+  build` green, all 6 pre-existing traces still 0 diff. `rent-slot1.json`
+  still **125/139** (not re-timed, not touched — trace file has zero diff
+  from what entry 17 committed). No `src/` changes this session: the
+  investigation conclusively found there is nothing at this engine's
+  modeling granularity left to fix (see below), so no code was written.
+- **Did:** Followed the assigned method exactly — read
+  `battle_factory_screen.c`'s mon-pic construction (`Task_CloseMonPic`,
+  `SpriteCB_*MonPic`, the `sSpriteTemplate_*_MonPicBgAnim` affine sprite),
+  then did dense dev-time RAM/IO inspection (scratch scripts using
+  `EmeraldOracle.core.memory.u16[...]`, not committed) of `WIN0V`,
+  `BLDCNT`/`BLDALPHA`/`BLDY`, `BG3HOFS/VOFS`, the mon-pic-bg palette, and
+  `gTasks[]`'s raw state (`0x03005E00`, struct layout from `task.h`) across
+  a clean close (press-tick 30) and a bad one (press-tick 36), then swept
+  press-tick 20-60 to map the WIN0V sequence exactly. Traced the divergence
+  all the way to its true source: `Task_CloseMonPic`'s internal
+  `tWinTop`/`tWinBottom` state is **provably clean** (identical, purely
+  time-shifted, between the clean and bad runs) — the bug is entirely in
+  *when the already-correct value becomes visible*, via GBA's real
+  `SetGpuReg` double-buffer (`gpu_regs.c:66-98`): writes queue for the next
+  vblank flush unless `REG_VCOUNT` has already crossed into vblank at the
+  exact moment `SetGpuReg` executes, which depends on the total CPU cycle
+  cost of everything else that ran earlier that frame. Proved this isn't
+  reducible to any state this engine tracks: replaying `rent-slot1.json`
+  with 0/3/7/10/17 idle frames prepended (preserving every *relative*
+  timing this engine models, shifting only absolute session tick) produces
+  a **different** catch-up pattern each time — conclusive evidence the
+  jitter depends on absolute emulated-cycle count, not on open-variant,
+  dwell time, or RENT-flow-local state. Full writeup with file:line
+  references, the ruled-out leads (monPicBg static palette confirmed
+  unchanged — the earlier "shimmer" suspicion was wrong; task-list
+  insertion order confirmed identical between clean/bad — not a
+  scheduling-order bug either), and the remaining options is in ISSUES #5
+  (kept open, not deleted, per the brief's stop condition).
+- **Next:** This exact acceptance criterion (`rent-slot1.json` 0/139
+  *without* re-timing) cannot be met without cycle-accurate CPU emulation,
+  which is out of scope for this engine's architecture. A future
+  supervisor decision is needed on ISSUES #5's two remaining options
+  (re-time the RENT-confirm press to a trace-specific clean tick, or accept
+  125/139 permanently with the gap documented as attributable to this
+  issue) — do not re-attempt a "general fix" without new information (e.g.
+  a way to cheaply approximate per-frame cycle cost) that changes the
+  tractability conclusion above.
+- **Supervisor addendum (same day):** S6 scout dossier merged
+  (`docs/battle-bringup-notes.md`, 595 lines; ROADMAP S6 corrections
+  folded in: RNG advances per-VBlank until battle proper, transition is a
+  random 12-way pick, opponent personalities rolled at battle start;
+  battle-1 identities RAM-pinned: trainer 50 DESTIN, Grovyle/Murkrow/
+  Pidgeotto vs Onix/Magby/Bayleef). 203/203 + build green post-merge.
+  **ISSUES #5 policy question escalated to the user** (0-diff bar vs
+  cycle-jitter windows — see the ISSUES entry for the two options);
+  battle-1 asset extraction in flight on the worktree lane.
+- **Notes:** No commit was needed for `src/`/`tests/` (nothing changed);
+  this commit is docs-only (`ISSUES.md` rewritten with the confirmed root
+  cause, this entry). Time was spent entirely on RAM-inspection
+  investigation per the brief's explicit method — the conclusion is a
+  negative result (root cause found, fix infeasible at this level), which
+  the brief anticipated as an acceptable outcome ("stop and report
+  precisely").
+
+---
+
 ## 17 — S5 slice 1 (worker, capped): RENT/DESELECT + ball-rock RNG stream implemented and RAM-verified; pixel trace 125/139 — blocked short of 0 diff by a newly-found pre-existing rendering bug (ISSUES #5), not by anything in this slice's own code
 
 - **State:** `npm test` **173/173** (159→173, +14 new), `npm run build`
