@@ -1,0 +1,110 @@
+// Dev-time extractor: reads reference/pokeemerald's mon-pic art battle 1's
+// bring-up needs that isn't already covered by extract-front-sprites.ts
+// (which only holds FRONT pics of the 6 anchor rental species, used by the
+// draft/summary screens - never shown in battle). A battle shows:
+//   - the player's own party from BEHIND (back.png), for whichever of the 6
+//     anchors got rented - this run's pinned S5 trace rents ONIX/MAGBY/
+//     BAYLEEF (docs/battle-bringup-notes.md S5), so those 3 back pics.
+//   - the opponent's active party from the FRONT (front.png) - battle 1's
+//     opponent (Bug Catcher DESTIN, docs/battle-bringup-notes.md S5) fields
+//     GROVYLE/MURKROW/PIDGEOTTO, none of which are anchor-pool species.
+// Also extracts gMonBackPicCoords/gMonFrontPicCoords in full: both are
+// naturally all-species tables (one struct literal per SPECIES_* constant,
+// not per-species art), so extracting only a handful of entries would just
+// mean re-parsing the same source file again next time another species'
+// coords are needed - the table itself, unlike the 386 sets of pixel art,
+// is cheap (two numbers per species).
+// Run with:
+//   node --experimental-strip-types tools/extract/extract-battle-mon-pics.ts
+//
+// Never imported at runtime - the production build only reads its JSON output.
+
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { decodeIndexedPng } from "./indexedPng.ts";
+import { sliceTiles } from "./tiles.ts";
+import { loadJascPal } from "./jascPal.ts";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const RUN_ROOT = join(HERE, "..", "..");
+const REF = join(RUN_ROOT, "reference", "pokeemerald");
+const ASSETS_GEN = join(RUN_ROOT, "src", "assets", "gen");
+const DATA_GEN = join(RUN_ROOT, "src", "data", "gen");
+
+mkdirSync(ASSETS_GEN, { recursive: true });
+mkdirSync(DATA_GEN, { recursive: true });
+
+function writeJson(path: string, data: unknown): void {
+  writeFileSync(path, `${JSON.stringify(data)}\n`);
+  console.log(`wrote ${path}`);
+}
+
+interface Sprite {
+  tileset: { columns: number; rows: number; tiles: number[][] };
+  palette: { r: number; g: number; b: number }[];
+}
+
+function loadPic(speciesDir: string, picFile: "front.png" | "back.png"): Sprite {
+  const image = decodeIndexedPng(join(speciesDir, picFile));
+  if (image.width !== 64 || image.height !== 64) {
+    throw new Error(`${speciesDir}/${picFile}: expected a 64x64 pic, got ${image.width}x${image.height}`);
+  }
+  const { columns, rows, tiles } = sliceTiles(image);
+  const palette = loadJascPal(join(speciesDir, "normal.pal"));
+  return { tileset: { columns, rows, tiles: tiles.map((t) => [...t.pixels]) }, palette };
+}
+
+// species display name -> reference/pokeemerald's graphics/pokemon/<dir>/ name.
+const BACK_SPECIES: Record<string, string> = {
+  ONIX: "onix",
+  MAGBY: "magby",
+  BAYLEEF: "bayleef",
+};
+const FRONT_SPECIES: Record<string, string> = {
+  GROVYLE: "grovyle",
+  MURKROW: "murkrow",
+  PIDGEOTTO: "pidgeotto",
+};
+
+const backSprites: Record<string, Sprite> = {};
+for (const [species, dir] of Object.entries(BACK_SPECIES)) {
+  backSprites[species] = loadPic(join(REF, "graphics", "pokemon", dir), "back.png");
+}
+writeJson(join(ASSETS_GEN, "battle-back-sprites.json"), backSprites);
+
+const opponentFrontSprites: Record<string, Sprite> = {};
+for (const [species, dir] of Object.entries(FRONT_SPECIES)) {
+  opponentFrontSprites[species] = loadPic(join(REF, "graphics", "pokemon", dir), "front.png");
+}
+writeJson(join(ASSETS_GEN, "battle-opponent-front-sprites.json"), opponentFrontSprites);
+
+// --- gMonBackPicCoords / gMonFrontPicCoords, in full -------------------------
+// Struct literal: [SPECIES_X] = { .size = MON_COORDS_SIZE(w, h), .y_offset = N },
+// where MON_COORDS_SIZE packs DIV_ROUND_UP(w,8)<<4 | DIV_ROUND_UP(h,8) - decoded
+// back out to pixel width/height here so consumers don't need the macro.
+function parseCoordsTable(path: string): Record<string, { width: number; height: number; yOffset: number }> {
+  const text = readFileSync(path, "utf8");
+  const re = /\[SPECIES_([A-Z0-9_]+)\]\s*=\s*\{\s*\.size\s*=\s*MON_COORDS_SIZE\((\d+),\s*(\d+)\),\s*\.y_offset\s*=\s*(-?\d+)\s*\}/g;
+  const out: Record<string, { width: number; height: number; yOffset: number }> = {};
+  let m: RegExpExecArray | null;
+  let count = 0;
+  while ((m = re.exec(text))) {
+    out[m[1]!] = { width: Number(m[2]), height: Number(m[3]), yOffset: Number(m[4]) };
+    count += 1;
+  }
+  if (count < 400) throw new Error(`${path}: only parsed ${count} entries, expected 400+`);
+  return out;
+}
+
+const backCoords = parseCoordsTable(join(REF, "src", "data", "pokemon_graphics", "back_pic_coordinates.h"));
+const frontCoords = parseCoordsTable(join(REF, "src", "data", "pokemon_graphics", "front_pic_coordinates.h"));
+
+for (const species of Object.keys(BACK_SPECIES)) {
+  if (!backCoords[species]) throw new Error(`gMonBackPicCoords missing SPECIES_${species}`);
+}
+for (const species of Object.keys(FRONT_SPECIES)) {
+  if (!frontCoords[species]) throw new Error(`gMonFrontPicCoords missing SPECIES_${species}`);
+}
+
+writeJson(join(DATA_GEN, "mon-pic-coords.json"), { back: backCoords, front: frontCoords });
