@@ -5,6 +5,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 8 — ISSUES #3 closed: slot6 every-frame trace 58/66 → 66/66; S2 COMPLETE
+
+- **State:** `npm test` **115/115**, `npm run build` green. Compares:
+  `anchor.json` 1/1, `draft-cursor.json` 13/13, `draft-menu.json` 38/38,
+  `draft-menu-slot6.json` **66/66** — all 0 diff, no regressions. `ISSUES.md`
+  #3 deleted (fixed). S2 ticked `[x]` in `ROADMAP.md`.
+- **Did:** Root-caused and fixed the 3 remaining redraw-scheduling clusters
+  via single-purpose dense oracle probes (LEFT-only, DOWN-only, and B-only
+  from a settled state), all traced to `CB2_SelectScreen`'s
+  `AnimateSprites`/`BuildOamBuffer`/`RunTextPrinters`/`UpdatePaletteFade`/
+  `RunTasks` ordering (RunTasks runs last, so any OAM change it makes isn't
+  picked up until the *next* frame's `BuildOamBuffer`, while window/text
+  copies land same-tick): (1) LEFT/RIGHT cursor moves reveal category text,
+  species text, then the arrow sprite on 3 successive ticks, not atomically
+  — new `CursorRedrawState` in `factoryDraftScreen.ts`; (2) UP/DOWN menu nav
+  keeps the highlight bar on the old row for 2 full ticks before jumping to
+  the new one (no piecemeal reveal, single OAM move) — new
+  `MenuHighlightRedrawState`; (3) `monPic.ts`'s close tables were missing
+  the same front-sprite/highlight-bar 1-tick OAM lag the open tables already
+  modeled, and (surprise, oracle-verified against both draft-menu.json's own
+  first close and draft-menu-slot6.json's) the close's window-shrink shape
+  does NOT mirror hasActed-at-close or the open variant letter — only an
+  open that was variant C gets the skip+duplicate shape; A and B both close
+  clean. Added Tier-1 tests for all three (monPic.test.ts 15→20,
+  draftScreen.test.ts 12→16).
+- **Next:** S4 — summary screen parity (draft's SUMMARY view, page
+  navigation, return to draft). See `ROADMAP.md` S4 acceptance criteria.
+- **Notes:** The "mirror the open variant" hypothesis for the close table
+  seemed elegant but was empirically wrong — always re-verify against a
+  fresh dense probe of the *specific* trace in question rather than
+  generalizing from one data point, even when the generalization is
+  structurally tempting.
+
+---
+
 ## 7 — ISSUES #3 partial: slot6 every-frame trace 40/66 → 58/66
 
 - **State:** `npm test` **110/110**, `npm run build` green. Compares:
@@ -51,23 +86,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   S2 `[x]`. Then S4 (summary screen).
 - **Notes:** Transient mechanisms are all in battle_factory_screen.c
   (affine open anim, redraw scheduling, close-phase sprite visibility).
-
----
-
-## 5 — Supervisor: S3 merged from worktree lane — S3 COMPLETE
-
-- **State:** Merged `worker/wt-20260717-012856` (S3: RNG core, rental data,
-  anchor RAM dump) into master; on the merged tree `npm test` **91/91**
-  green, `npm run build` green, `anchor.json` 1/1 and `draft-cursor.json`
-  13/13 still 0 diff. Worktree + branch cleaned up. S3 ticked `[x]` in
-  ROADMAP; S2 remains `[~]` with `ISSUES.md` #2 (ball-open reveal) open.
-- **Did:** Verified S3 in the worktree (74/74 there; LCG constants checked
-  against `random.c`; dump spot-checked: `gRngValue 0xd2ddeec8`, six
-  species in pinned order with RAM-read Lv50 stats). Added the
-  `sFactorySelectScreen` finding to ROADMAP Domain notes.
-- **Next:** Finish S2 via `ISSUES.md` #2 (mon-pic window growth + GBA
-  5-bit-space alpha blend + 6 front-sprite extraction), then S4.
-- **Notes:** Statics aren't in the linker map — `nm` on the pinned ELF
-  resolves them (recipe in `tools/extract/inspect-anchor.py`).
 
 ---

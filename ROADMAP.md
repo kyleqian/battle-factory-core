@@ -32,7 +32,7 @@ on screen). Render the anchor draft screen exactly; wire `appTrace.ts`.
 (committed, 1 frame) → 0 diff; `npm test` and `npm run build` green;
 `npm run dev` shows the same screen at 240×160 under `?pokebench=1`.
 
-### [~] S2 — Draft-screen interaction parity: cursor, header, menu, timing
+### [x] S2 — Draft-screen interaction parity: cursor, header, menu, timing
 Cursor movement across the 6 slots (incl. wrap + held-button repeat), per-
 slot header text, A → ball-open animation + mon sprite + SUMMARY/RENT/OTHERS
 menu, B/close paths, message-box updates — frame-exact against dense capture
@@ -40,12 +40,12 @@ windows.
 **Acceptance:** committed traces `draft-cursor.json` (full sweep both
 directions, captures every ≤4 frames) and `draft-menu.json` (open/navigate/
 close on ≥2 slots) pass compare with 0 diff; Tier-1 tests pin the draft
-state machine (cursor index, menu open/close, input repeat).
-**Remainder:** every-frame capture (`draft-menu-slot6.json`) is 58/66 (was
-40/66) — see `ISSUES.md` #3 for the 3 still-failing redraw-scheduling
-transients (cursor-move header/arrow redraw, menu-highlight redraw,
-close-phase). The sparser committed traces (draft-cursor.json,
-draft-menu.json) that skip those exact transient frames are 0-diff.
+state machine (cursor index, menu open/close, input repeat). Also holds
+under every-frame capture: `draft-menu-slot6.json` (0-65, every tick) is
+66/66 — the redraw-scheduling transients formerly tracked in `ISSUES.md` #3
+(cursor-move header/arrow redraw, menu-highlight redraw, close-phase OAM
+lag) are all pinned (`CursorRedrawState`/`MenuHighlightRedrawState` in
+`factoryDraftScreen.ts`, close-table fixes in `monPic.ts`).
 
 ### [x] S3 — Rental data, RNG core, anchor mons pinned
 Gen-3 LCG (constants verified from `reference/pokeemerald/src/random.c`)
@@ -147,7 +147,7 @@ is `[x]` or its remainder is explicitly re-scoped here by the supervisor.
   (UP/DOWN) reposition settles in ~2-3 frames, same as the slot cursor.
   **Idle screens are pixel-stable only up to ~104 frames** — past that,
   `Select_Task_FadeSpeciesName` starts a perpetual palette breathe on the
-  species name text (see `ISSUES.md` #2); keep traces under that or model
+  species name text (not yet modeled); keep traces under that or model
   it explicitly.
 - **Draft candidates live in `sFactorySelectScreen`** (S3, RAM-verified):
   fully-instantiated `struct Pokemon` objects at the file-static

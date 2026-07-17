@@ -166,3 +166,21 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 5 — Supervisor: S3 merged from worktree lane — S3 COMPLETE
+
+- **State:** Merged `worker/wt-20260717-012856` (S3: RNG core, rental data,
+  anchor RAM dump) into master; on the merged tree `npm test` **91/91**
+  green, `npm run build` green, `anchor.json` 1/1 and `draft-cursor.json`
+  13/13 still 0 diff. Worktree + branch cleaned up. S3 ticked `[x]` in
+  ROADMAP; S2 remains `[~]` with `ISSUES.md` #2 (ball-open reveal) open.
+- **Did:** Verified S3 in the worktree (74/74 there; LCG constants checked
+  against `random.c`; dump spot-checked: `gRngValue 0xd2ddeec8`, six
+  species in pinned order with RAM-read Lv50 stats). Added the
+  `sFactorySelectScreen` finding to ROADMAP Domain notes.
+- **Next:** Finish S2 via `ISSUES.md` #2 (mon-pic window growth + GBA
+  5-bit-space alpha blend + 6 front-sprite extraction), then S4.
+- **Notes:** Statics aren't in the linker map — `nm` on the pinned ELF
+  resolves them (recipe in `tools/extract/inspect-anchor.py`).
+
+---
+
