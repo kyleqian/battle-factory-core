@@ -53,6 +53,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   windows at ~31 and ~47+ ticks after open, but shifting into the second one
   just moved a *different* set of diffs into frames outside this trace's
   species-name-breathe budget — see Notes).
+- **Supervisor addendum (same day):** verified independently (tests,
+  build, 125/139 + no regressions reproduced). Both parallel-lane
+  extraction branches merged on top: moves/exp/items data (19 tests) and
+  the pre-battle-room scene incl. `docs/prebattle-room-notes.md`
+  (11 tests, composite-verified 0/38400 px vs oracle) — `npm test` now
+  **203/203**, build green, worktrees cleaned up. ROADMAP S5 marked [~]
+  with slice-1 note. Next: root-cause ISSUES #5 (main lane); S6 scout
+  dossier in flight on the worktree lane.
 - **Notes:** **This is the "STOP and report precisely" case the brief
   anticipated**, just triggered by a different collision than the one it
   named (species-name breathe) — ISSUES #5 instead. Confirmed root-cause

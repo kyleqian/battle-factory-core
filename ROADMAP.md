@@ -92,7 +92,7 @@ supervisor" rule below. Rationale: S5→S8 is the mission's critical path;
 the data the deferred pages need (moves/exp/items) is being extracted in
 parallel. S5 may begin.
 
-### [ ] S5 — Complete the draft: rent 3, confirmations, exit sequence
+### [~] S5 — Complete the draft: rent 3, confirmations, exit sequence
 RENT/OTHERS flows, ball palette change on selection, the 2nd/3rd-pick
 message variants, deselection/cancel paths, final party confirmation, fade
 out to the pre-battle room and the attendant dialogue up to the battle
@@ -100,6 +100,18 @@ transition trigger.
 **Acceptance:** committed trace drafting slots 1/2/3 through the fade into
 the pre-battle room passes compare with 0 diff on dense captures (including
 the fade frames); Tier-1 tests pin the pick/cancel state machine.
+**Slice 1 progress (2026-07-17):** RENT/DESELECT state machine (numbering +
+renumbering rule), ball palette swap, message variants, and the rented
+ball's idle/rock animation + its `Random()%5` stream are implemented and
+RAM-verified (`src/engine/ballAnim.ts`, `tests/ballAnim.test.ts` pins the
+engine RNG against dumped `gRngValue` incl. SUCCESS and FAILURE rolls).
+`rent-slot1.json` is committed at 125/139 — blocked short of 0 diff only by
+pre-existing ISSUES #5 (mon-pic close bad-window render bug, not S5 code).
+Groundwork banked: pre-battle-room scene fully extracted and composite-
+verified 0/38400 px vs oracle (`docs/prebattle-room-notes.md`,
+`prebattle-room-*.json` gen files); moves/exp/items data extracted for the
+Skills/Moves pages and S6/S7 (`moves.json`, `exp-tables.json`,
+`item-names.json`).
 
 ### [ ] S6 — Battle bring-up: transition → first action menu, opponent exact
 Battle transition effect, battle scene init (backgrounds, healthboxes,
@@ -197,7 +209,12 @@ is `[x]` or its remainder is explicitly re-scoped here by the supervisor.
   cooldown per rented ball for as long as the sprite exists — so once pick 1
   lands, draft-screen RNG consumption is no longer exactly 1/frame. Model
   these calls exactly or later RNG-dependent outcomes drift. Details +
-  timings in `docs/rent-flow-notes.md`.
+  timings in `docs/rent-flow-notes.md`. Now implemented + RAM-confirmed
+  (S5 slice 1, `ballAnim.ts`): within a tick the standard VBlank advance
+  happens first, the ball roll second; first roll-eligibility is 2 ticks
+  after selection; a successful roll rests 32 ticks, a failed one rerolls
+  when the short idle anim ends; the visible ball tile lags internal anim
+  state by 2 ticks (2-stage shift register).
 - **Draft candidates live in `sFactorySelectScreen`** (S3, RAM-verified):
   fully-instantiated `struct Pokemon` objects at the file-static
   `sFactorySelectScreen->mons[i].monData` (statics aren't in the linker map —
