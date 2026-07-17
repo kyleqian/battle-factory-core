@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 9 — Supervisor: S4 scout merged; S2 verified complete
+
+- **State:** Scout branch `worker/wt-20260717-032349` merged: summary-screen
+  art extracted (`src/assets/gen/summary-*.json`) + implementation dossier
+  `docs/summary-screen-notes.md` (entry `SUMMARY_MODE_LOCK_MOVES`, all 4
+  pages + UP/DOWN mon-switching reachable, OT suppressed for rentals,
+  ranked frame-exactness risks). Merged tree: `npm test` **115/115**,
+  build green, all four compare traces 0 diff. Worktree cleaned up.
+- **Did:** Verified the #3 fix (66/66) and the scout deliverables myself;
+  merged; re-ran the full battery on the merged tree.
+- **Next:** S4 implementation slice 1 — entry fade → static Info page →
+  B-exit restore, dense-capture traces 0-diff (dossier §1/§2 is the map;
+  keep traces clear of the looping mon idle anim per dossier risk #1).
+- **Notes:** Dossier flags the return path re-entering the draft via
+  `CB2_InitSelectScreen` (fresh init, `fromSummaryScreen=TRUE`,
+  `gLastViewedMonIndex` can move the cursor) — treat exit traces as
+  first-class acceptance, not an afterthought.
+
+---
+
 ## 8 — ISSUES #3 closed: slot6 every-frame trace 58/66 → 66/66; S2 COMPLETE
 
 - **State:** `npm test` **115/115**, `npm run build` green. Compares:
@@ -65,26 +85,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** The end-states are already exact — only 8/66 frames differ,
   all transient (settle within 2-4 ticks); this is scheduling/timing, not
   missing mechanisms.
-
----
-
-## 6 — Ball-open reveal landed (38/38); every-frame capture exposes transients
-
-- **State:** `npm test` **106/106**, `npm run build` green. Compares:
-  `anchor.json` 1/1, `draft-cursor.json` 13/13, `draft-menu.json` **38/38**
-  — all 0 diff. NEW `draft-menu-slot6.json` (every-frame captures 0-65)
-  → **40/66**: the ≤4-frame-spaced traces skip transient frames that are
-  not yet exact. S2 stays `[~]`; remainder is `ISSUES.md` #3 (clusters +
-  diff forensics there). ISSUES #2 deleted (fixed: reveal + blend + 6 front
-  sprites, monPic sub-state Tier-1-pinned).
-- **Did:** Worker landed the mon-pic reveal (WIN0 growth, 5-bit-space
-  blend, front-sprite extraction for all 6 species) + 15 hermetic tests;
-  hit its 50-min cap while building the slot-6 trace. Supervisor verified
-  all compares/tests, ran the unfinished trace, inspected diff PNGs,
-  filed #3 with per-cluster diagnosis, committed the trace.
-- **Next:** Fix `ISSUES.md` #3 → `draft-menu-slot6.json` 66/66, then tick
-  S2 `[x]`. Then S4 (summary screen).
-- **Notes:** Transient mechanisms are all in battle_factory_screen.c
-  (affine open anim, redraw scheduling, close-phase sprite visibility).
 
 ---
