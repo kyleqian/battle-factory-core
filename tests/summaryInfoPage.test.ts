@@ -51,6 +51,6 @@ describe("summary Info page render", () => {
   it("pins slot 0 (ONIX)'s current render byte-for-byte (update deliberately, not accidentally)", () => {
     const fb = renderSummaryInfoPage(0);
     const hash = createHash("sha256").update(fb).digest("hex");
-    expect(hash).toBe("d97c84cf4ba2f8f8a174103e8521cda012ef44d279546c21d73496fbf62dd421");
+    expect(hash).toBe("b9d8ab9c6363ea204a036a11e73e78dd084a9ece300ccd69b1f67093b23f76a3");
   });
 });

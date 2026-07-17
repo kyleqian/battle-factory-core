@@ -154,6 +154,23 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- Status-condition sliding window's REVEALED graphic (pokemon_summary_
+// screen.c:370-378 sStatusSlidingWindow1/2, gfx = sStatusTilemap =
+// graphics/summary_screen/status_tilemap.bin, 10x2 tiles) - what
+// CopyNColumnsToTilemap blits in as the window slides open to show a status
+// condition. NOT used by this slice's renderer: every anchor rental has
+// status 0 (no ailment), and tracing PositionStatusSlidingWindow(0, 0xFF)'s
+// exact call chain (see summaryInfoPage.ts's STATUS_WINDOW_CLOSED_TILEMAP
+// comment) shows the Info page's unconditional on-load reset actually lands
+// on the *closed* state instead - a flat single-tile fill, not this graphic.
+// Extracted anyway (cheap, deterministic) for whenever status-icon display
+// becomes in scope.
+{
+  const buf = readFileSync(join(SUMMARY_DIR, "status_tilemap.bin"));
+  const tilemap = parseTilemap(buf, 10, 2);
+  writeJson(join(ASSETS_GEN, "summary-status-window.json"), { left: 0, top: 18, tilemap });
+}
+
 // --- Caught-ball icon (pokemon_summary_screen.c:4069-4077 CreateCaughtBallSprite
 // -> ItemIdToBallId(MON_DATA_POKEBALL) -> gBallSpriteTemplates[ball] from
 // pokeball.c's gBallSpriteSheets/gBallGfx_Poke = graphics/balls/poke.png, NOT

@@ -46,6 +46,43 @@ export function drawTileBgFaded(fb: Uint8Array, bg: TileBg, y: number, scrollX =
   }
 }
 
+/**
+ * Blits a small tilemap patch (e.g. a runtime CopyNColumnsToTilemap
+ * overwrite of part of a larger BG tilemap buffer - see summaryInfoPage.ts's
+ * status-sliding-window patch) at a fixed pixel origin, faded on `y`.
+ */
+export function drawTilePatchFaded(
+  fb: Uint8Array,
+  tileset: { columns: number; tiles: number[][] },
+  subpalettes: RgbColor[][],
+  tilemap: { width: number; height: number; entries: Array<{ tile: number; hFlip: boolean; vFlip: boolean; palette: number }> },
+  originX: number,
+  originY: number,
+  y: number,
+): void {
+  for (let row = 0; row < tilemap.height; row += 1) {
+    for (let col = 0; col < tilemap.width; col += 1) {
+      const entry = tilemap.entries[row * tilemap.width + col];
+      if (!entry) continue;
+      const tile = tileset.tiles[entry.tile];
+      if (!tile) continue;
+      const subpalette = subpalettes[entry.palette] ?? subpalettes[0]!;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          const sx = entry.hFlip ? 7 - px : px;
+          const sy = entry.vFlip ? 7 - py : py;
+          const colorIndex = tile[sy * 8 + sx]!;
+          if (colorIndex === 0) continue;
+          const color = subpalette[colorIndex];
+          if (!color) continue;
+          const faded = fadeColor(color, y);
+          setPixel(fb, originX + col * 8 + px, originY + row * 8 + py, faded.r, faded.g, faded.b);
+        }
+      }
+    }
+  }
+}
+
 export function drawSpriteFaded(
   fb: Uint8Array,
   sheet: SpriteSheet,
