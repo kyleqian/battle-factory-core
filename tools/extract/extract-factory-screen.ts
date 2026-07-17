@@ -149,6 +149,10 @@ function writeJson(path: string, data: unknown): void {
     rows,
     // FONT_NORMAL, from sFontInfos in reference/pokeemerald/src/text.c.
     maxLetterHeight: 16,
+    // DecompressGlyph_Normal (text.c:1883) hardcodes gCurGlyph.height = 15
+    // for the Latin glyph path regardless of maxLetterHeight - GLYPH_COPY
+    // never blits the glyph cell's 16th row, so it must be excluded here too.
+    glyphHeight: 15,
     letterSpacing: 0,
     lineSpacing: 0,
     defaultFgColor: 2,

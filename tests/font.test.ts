@@ -11,6 +11,7 @@ const font: FontData = {
   cellSize: 4,
   columns: 1,
   rows: 3,
+  glyphHeight: 4,
   letterSpacing: 1,
   widths: [3, 5, 2],
   glyphs: [[], [], []],

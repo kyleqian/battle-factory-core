@@ -41,10 +41,10 @@ describe("anchor draft screen render", () => {
   it("pins the current render byte-for-byte (update deliberately, not accidentally)", () => {
     const fb = render(createInitialState());
     const hash = createHash("sha256").update(fb).digest("hex");
-    // Not yet pixel-exact against the oracle (see PROGRESS.md / ISSUES.md for
-    // the known font half-row decompression gap) - this pins the current
-    // deterministic output so unrelated changes don't silently shift it.
-    expect(hash).toBe("e6b63b424799f44b5295db820b941372b42af62a92a44108b12bc8753a8327d0");
+    // Pixel-exact against the oracle (npm run compare -- tools/compare/
+    // traces/anchor.json -> 0 diff) - this pins that exact render so
+    // unrelated changes don't silently shift it.
+    expect(hash).toBe("53baf7044898a69d9c4ca832045d1b0264d27f5722336c8e5206234b62981641");
   });
 
   it("tick() only advances the frame counter (S1 renders a static anchor frame)", () => {
