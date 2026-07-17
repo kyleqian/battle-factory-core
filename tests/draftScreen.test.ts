@@ -69,9 +69,14 @@ describe("draft screen cursor mode", () => {
 });
 
 describe("draft screen menu mode", () => {
+  // Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT (UP/DOWN/A/B) is only
+  // reachable once the mon pic finishes opening - idle well past that
+  // (monPic.test.ts pins the exact settle tick) before exercising menu input.
   function openMenu() {
     let state = createInitialState();
     state = tick(state, new Set(["A"]));
+    for (let i = 0; i < 30; i += 1) state = tick(state, new Set());
+    expect(state.draftScreen.monPic.phase).toBe("open");
     return state;
   }
 

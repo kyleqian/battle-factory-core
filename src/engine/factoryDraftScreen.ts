@@ -11,6 +11,8 @@ import { drawTileBg, type TileBg } from "./bg.ts";
 import { drawSprite, type SpriteSheet } from "./sprites.ts";
 import { drawText, rightAlignXOffset, type FontData } from "./font.ts";
 import type { RgbColor } from "./bg.ts";
+import { getMonPicVisual, INITIAL_MON_PIC_STATE, type MonPicState } from "./monPic.ts";
+import { drawMonPic } from "./monPicRender.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -70,6 +72,9 @@ export interface DraftScreenState {
   menuCursorPos: number;
   slots: RentalSlot[];
   message: string;
+  monPic: MonPicState;
+  /** Has any LEFT/RIGHT/UP/DOWN been processed yet - see monPic.ts's variant-selection comment. */
+  hasActed: boolean;
 }
 
 /** Select_UpdateBallCursorPosition: wraps at both ends of the 6 slots. */
@@ -124,20 +129,13 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
 
   // Select_ShowMenuOptions: SELECT_WIN_OPTIONS text (SUMMARY/RENT/OTHERS) +
   // the 2-sprite highlight bar (menuCursor1 left half, menuCursor2 right
-  // half), both at the same row (menuCursorPos * 16 + 112).
-  if (state.mode === "menu") {
-    for (let i = 0; i < MENU_OPTION_LABELS.length; i += 1) {
-      drawText(
-        fb,
-        font,
-        charmap,
-        MENU_OPTION_LABELS[i]!,
-        WIN_OPTIONS.x + 7,
-        WIN_OPTIONS.y + 1 + i * 16,
-        textPalette,
-        MENU_TEXT_COLORS,
-      );
-    }
+  // half), both at the same row (menuCursorPos * 16 + 112). Gated on the
+  // mon-pic reveal, not directly on `mode` - Select_Task_HandleMenu's
+  // STATE_MENU_SHOW_OPTIONS delays this until OpenMonPic's animation ends,
+  // and CloseMonPic's Select_ErasePopupMenu erases it a tick before `mode`
+  // itself flips back to "cursor" - see monPic.ts.
+  const monPicVisual = getMonPicVisual(state.monPic);
+  if (monPicVisual.menuHighlightVisible) {
     const highlightY = state.menuCursorPos * 16 + 112;
     drawSprite(
       fb,
@@ -160,6 +158,22 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
       0,
     );
   }
+  if (monPicVisual.menuTextVisible) {
+    for (let i = 0; i < MENU_OPTION_LABELS.length; i += 1) {
+      drawText(
+        fb,
+        font,
+        charmap,
+        MENU_OPTION_LABELS[i]!,
+        WIN_OPTIONS.x + 7,
+        WIN_OPTIONS.y + 1 + i * 16,
+        textPalette,
+        MENU_TEXT_COLORS,
+      );
+    }
+  }
+
+  if (slot) drawMonPic(fb, monPicVisual, slot.species, cursorCenterX);
 
   return fb;
 }
@@ -172,4 +186,6 @@ export const ANCHOR_DRAFT_SCREEN_STATE: DraftScreenState = {
   menuCursorPos: 0,
   slots: draftPool,
   message: "Select the first POKéMON.",
+  monPic: INITIAL_MON_PIC_STATE,
+  hasActed: false,
 };

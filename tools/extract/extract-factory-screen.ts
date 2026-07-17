@@ -50,16 +50,19 @@ function writeJson(path: string, data: unknown): void {
     subpalettes,
   });
 
-  // mon_pic_bg.* - loaded by the draft screen only when opened from the
-  // summary screen (BG3, not shown on the plain draft anchor); extracted
-  // for completeness per the roadmap brief, unused by the anchor render.
+  // mon_pic_bg.* - BG3, the ball-open reveal window's background pattern
+  // (battle_factory_screen.c Task_OpenMonPic/Task_CloseMonPic). The .bin is
+  // laid out 8 wide x 16 tall but Select_InitBgs only ever
+  // CopyToBgTilemapBufferRect's the first 8x8 block (the other 8 rows are
+  // unused padding, all zero) - keep just that block, parsed like BG1's.
   const monPicBgImage = decodeIndexedPng(join(factoryScreenDir, "mon_pic_bg.png"));
   const monPicTiles = sliceTiles(monPicBgImage);
   const monPicTilemapBuf = readFileSync(join(factoryScreenDir, "mon_pic_bg.bin"));
+  const monPicTilemapFull = parseTilemap(monPicTilemapBuf, 8, 16);
   writeJson(join(ASSETS_GEN, "mon-pic-bg.json"), {
     tileset: { columns: monPicTiles.columns, rows: monPicTiles.rows, tiles: monPicTiles.tiles.map((t) => [...t.pixels]) },
     palette: monPicBgImage.palette,
-    rawTilemapBytes: [...monPicTilemapBuf],
+    tilemap: { width: 8, height: 8, entries: monPicTilemapFull.entries.slice(0, 64) },
   });
 }
 

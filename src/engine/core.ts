@@ -6,6 +6,7 @@
 import type { GbaButton } from "../input.ts";
 import { ANCHOR_DRAFT_SCREEN_STATE, MENU_OPTION_OTHERS, moveCursor, moveMenuCursor, renderFactoryDraftScreen, type DraftScreenState } from "./factoryDraftScreen.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
+import { advanceMonPic, closeMonPic, isMonPicInputReady, openMonPic } from "./monPic.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -35,29 +36,36 @@ export function createInitialState(): EngineState {
 export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
   const { newKeys, newAndRepeatedKeys, next: keyRepeat } = readKeys(buttons, state.keyRepeat);
   let draftScreen = state.draftScreen;
+  let monPic = advanceMonPic(draftScreen.monPic);
 
   if (draftScreen.mode === "cursor") {
     if (newAndRepeatedKeys.has("RIGHT")) {
-      draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, 1) };
+      draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, 1), hasActed: true };
     } else if (newAndRepeatedKeys.has("LEFT")) {
-      draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, -1) };
+      draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, -1), hasActed: true };
     } else if (newKeys.has("A")) {
       draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0 };
+      monPic = openMonPic(draftScreen.hasActed);
     }
-  } else {
+  } else if (isMonPicInputReady(monPic)) {
+    // Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT: only reachable once
+    // the mon pic finishes opening (see monPic.ts).
     if (newAndRepeatedKeys.has("DOWN")) {
-      draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, 1) };
+      draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, 1), hasActed: true };
     } else if (newAndRepeatedKeys.has("UP")) {
-      draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, -1) };
+      draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, -1), hasActed: true };
     } else if (newKeys.has("B")) {
       draftScreen = { ...draftScreen, mode: "cursor" };
+      monPic = closeMonPic(draftScreen.hasActed);
     } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_OTHERS) {
       // Select_OptionOthers: closes the popup with no selection change,
       // identical to B (SUMMARY/RENT are S4/S5, out of scope here).
       draftScreen = { ...draftScreen, mode: "cursor" };
+      monPic = closeMonPic(draftScreen.hasActed);
     }
   }
 
+  draftScreen = { ...draftScreen, monPic };
   return { ...state, frame: state.frame + 1, draftScreen, keyRepeat };
 }
 
