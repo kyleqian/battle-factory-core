@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""Thin client for the pokeemerald-factory oracle (local HTTP service).
+
+Start the service first:  ./run-oracle.sh   (listens on 127.0.0.1:8012)
+Then:                     bin/oracle info
+                          bin/oracle example > /tmp/trace.json
+                          bin/oracle run /tmp/trace.json -o /tmp/ref-frames
+                          bin/oracle symbols gSaveBlock1Ptr gMain
+                          bin/oracle symbols --prefix gPlayer
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import os
+from pathlib import Path
+import urllib.error
+import urllib.parse
+import urllib.request
+
+
+BASE_URL = os.environ.get("POKEBENCH_ORACLE_URL", "http://127.0.0.1:8012").rstrip("/")
+
+
+def request(method: str, path: str, value: object | None = None) -> object:
+    body = None if value is None else json.dumps(value).encode()
+    req = urllib.request.Request(
+        f"{BASE_URL}{path}",
+        data=body,
+        method=method,
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=600) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as error:
+        message = error.read().decode(errors="replace")
+        raise SystemExit(f"oracle: HTTP {error.code}: {message}") from error
+    except urllib.error.URLError as error:
+        raise SystemExit(
+            f"oracle: service unavailable at {BASE_URL} "
+            f"(is `./run-oracle.sh` running?): {error}"
+        ) from error
+
+
+def command_info(_: argparse.Namespace) -> None:
+    print(json.dumps(request("GET", "/v1/info"), indent=2))
+
+
+def command_run(args: argparse.Namespace) -> None:
+    trace_path = Path(args.trace)
+    try:
+        trace = json.loads(trace_path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise SystemExit(f"oracle: cannot read trace {trace_path}: {error}") from error
+    result = request("POST", "/v1/run", trace)
+    output = Path(args.output)
+    output.mkdir(parents=True, exist_ok=True)
+    manifest = {key: value for key, value in result.items() if key != "captures"}
+    manifest["captures"] = []
+    for capture in result["captures"]:
+        filename = f"frame-{capture['frame']:05d}.png"
+        (output / filename).write_bytes(base64.b64decode(capture["pngBase64"]))
+        manifest["captures"].append(
+            {key: value for key, value in capture.items() if key != "pngBase64"} | {"file": filename}
+        )
+    (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    print(json.dumps(manifest, indent=2))
+
+
+def command_symbols(args: argparse.Namespace) -> None:
+    if args.prefix:
+        query = urllib.parse.urlencode({"prefix": args.prefix, "limit": args.limit})
+    elif args.names:
+        query = urllib.parse.urlencode([("name", name) for name in args.names])
+    else:
+        raise SystemExit("oracle: pass symbol names or --prefix")
+    print(json.dumps(request("GET", f"/v1/symbols?{query}"), indent=2))
+
+
+def command_example(_: argparse.Namespace) -> None:
+    print(
+        json.dumps(
+            {
+                "segments": [
+                    {"frames": 1, "buttons": []},
+                    {"frames": 5, "buttons": ["START"]},
+                    {"frames": 30, "buttons": []},
+                ],
+                "captureFrames": [0, 6, 36],
+            },
+            indent=2,
+        )
+    )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        prog="oracle",
+        description="Query the deterministic pokeemerald-factory reference.",
+    )
+    commands = parser.add_subparsers(dest="command", required=True)
+    info = commands.add_parser("info", help="show the oracle contract")
+    info.set_defaults(function=command_info)
+    run = commands.add_parser("run", help="run a JSON input trace from the canonical state")
+    run.add_argument("trace", help="trace JSON file")
+    run.add_argument("--output", "-o", default="oracle-output", help="directory for PNG captures")
+    run.set_defaults(function=command_run)
+    symbols = commands.add_parser("symbols", help="look up linker-map symbol addresses")
+    symbols.add_argument("names", nargs="*", help="exact symbol names")
+    symbols.add_argument("--prefix", help="prefix search instead of exact names")
+    symbols.add_argument("--limit", type=int, default=100, help="max prefix matches (default 100)")
+    symbols.set_defaults(function=command_symbols)
+    example = commands.add_parser("example", help="print an example trace")
+    example.set_defaults(function=command_example)
+    args = parser.parse_args()
+    args.function(args)
+
+
+if __name__ == "__main__":
+    main()

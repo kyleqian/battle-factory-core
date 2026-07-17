@@ -1,0 +1,10 @@
+/node_modules/
+/dist/
+/coverage/
+/test-results/
+/reference/
+/oracle-output/
+/tools/compare/out/
+/.worktrees/
+.env
+.DS_Store

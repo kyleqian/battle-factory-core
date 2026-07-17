@@ -1,0 +1,8 @@
+{
+  "segments": [
+    { "frames": 30, "buttons": [] },
+    { "frames": 16, "buttons": ["LEFT"] },
+    { "frames": 30, "buttons": [] }
+  ],
+  "captureFrames": [0, 30, 46, 76]
+}
