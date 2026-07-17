@@ -5,6 +5,76 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 20 — ISSUES #6 root-caused and fixed: multi-ball `SpriteCB_Pokeball` stall was never about mon-pic open/close — it's `Select_Print*` text-printer calls (cursor move + RENT/DESELECT confirm) stealing a tick from every OTHER rented ball; two-ball RNG stream now exact, ISSUES #6 DELETED
+
+- **State:** `npm test` **208/208** (203→208, +5 new in
+  `tests/ballAnimMultiBall.test.ts`), `npm run build` green. All 7 traces
+  re-verified at their prior counts, files unchanged (`anchor` 1/1,
+  `draft-cursor` 13/13, `draft-menu` 38/38, `draft-menu-slot6` 66/66,
+  `summary-info-onix` 122/122, `summary-info-magby` 132/132,
+  `rent-slot1.json` still **125/139**, gap still 100% attributable to
+  ISSUES #5 per entry 18, untouched here).
+- **Did:** Overturned the prior session's own working theory (entry 19
+  suspected `OpenMonPic`/`CloseMonPic`). RAM-probed (dev-time
+  `EmeraldOracle` harness, scratch scripts under `/tmp`, not committed)
+  four isolated variants against the pinned single-ball baseline
+  (animEnded-equivalent flip at frame 168): a plain cursor **RIGHT move
+  with NO popup at all** costs ball 0 a tick (flip→169) — proving the
+  effect has nothing to do with mon-pic mechanics; opening a ball's **own**
+  popup costs nothing (flip stays 168, answers the brief's self-stall
+  question: no); opening a second ball's popup and closing it via **B**
+  costs the same single tick as leaving it open (flip→169 either way —
+  closing via B/OTHERS adds nothing); only closing via **RENT/DESELECT
+  confirm** adds a second, independent tick (flip→170, matching ISSUES #6's
+  own cited number exactly). Traced both triggers to source:
+  `Select_Task_HandleChooseMons`'s LEFT/RIGHT branch
+  (`battle_factory_screen.c` STATE_CHOOSE_MONS_HANDLE_INPUT) calls
+  `Select_PrintMonCategory`/`Select_PrintMonSpecies`, and
+  `Select_OptionRentDeselect` (:1949-1970) calls `Select_PrintSelectMonString`
+  (:1893-1909) — both call `AddTextPrinterParameterized[3]` +
+  `CopyWindowToVram(..., COPYWIN_GFX)`; B/OTHERS-close and self-open call
+  neither. The stall lands the tick *after* the trigger, matching
+  `CB2_SelectScreen`'s `AnimateSprites()`-before-`RunTasks()` ordering
+  (:1092-1099) — a same-tick `RunTasks()` text-print can only affect the
+  *next* tick's `AnimateSprites()` pass. Modeled as `DraftScreenState.
+  ballAnimStall` (`factoryDraftScreen.ts`): a snapshot of which ball slots
+  were active *before* this tick's action, consumed to skip exactly those
+  slots' `advanceBallAnim` call next tick — LEFT/RIGHT stalls everyone
+  active; RENT/DESELECT stalls everyone active *except* the acted-on slot
+  (RAM-confirmed via a second ball's own settle timer landing unstalled by
+  its own trigger). Along the way, an exhaustive per-frame `gRngValue` diff
+  (RAM vs engine, all 260 frames of the two-ball repro, not just
+  checkpoints) surfaced two more latent, pre-existing `ballAnim.ts` bugs
+  invisible to the single-ball suite (which never sampled a frame in the
+  affected gap): the "resting→moving" reroll after a SUCCESS actually lands
+  2 ticks later than the naive `REST_TICKS` countdown implied (now
+  `REST_INTERNAL_OFFSET`), and a moving cycle ending on a FAILURE (no
+  queued rest, immediate reroll) actually rerolls 1 tick later than
+  same-tick (now `FAILURE_REROLL_DELAY`) — the latter caught via ball 1's
+  own first-ever full cycle (a FAILURE, previously never RAM-tested this
+  deep). Both fixes are single-ball-invisible (re-verified 0 mismatches
+  across a fresh 400-frame single-ball RAM diff) but required for
+  multi-ball interleaving exactness.
+- **Next:** S5 slice 2's `rent-3picks.json` is now unblocked (stretch item
+  from this session's brief, not attempted — see Notes). ISSUES #6 deleted
+  per the fix; ISSUES #5 (real hardware jitter, entry 18) remains the only
+  open item blocking `rent-slot1.json`'s last 14 frames — do not re-attempt
+  without new information per that entry's own conclusion.
+- **Notes:** Only the primary goal was attempted this session (mechanism
+  root-cause + engine fix + tests); the stretch goal (RENT-confirm-timing
+  jitter probing + committing `rent-3picks.json`) was not reached — ran out
+  of session time after the RAM-probe-heavy primary investigation (~15
+  oracle round-trips total: 4 discriminating-variant probes, several dense
+  per-tick dumps, and one 260-frame exhaustive diff). Whoever picks up
+  `rent-3picks.json` next inherits a RNG-exact 2-ball model to build on;
+  the two-ball scenario's exhaustive 260-frame diff (0 mismatches) is
+  stronger evidence than the checkpoint-only pinning in
+  `tests/ballAnimMultiBall.test.ts`, but that full diff isn't itself
+  committed (per instructions) — re-run it if extending to 3 balls turns up
+  anything suspicious.
+
+---
+
 ## 19 — S5 slice 2 (worker, capped): STOPPED before writing rent-3picks.json — found a real, RAM-confirmed multi-ball throttling effect that breaks the "fully independent per-ball RNG" assumption; species-name-breathe rule fully pinned instead (no code changes this session)
 
 - **State:** unchanged from entry 18 — `npm test` **203/203**, `npm run
@@ -138,80 +208,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 17 — S5 slice 1 (worker, capped): RENT/DESELECT + ball-rock RNG stream implemented and RAM-verified; pixel trace 125/139 — blocked short of 0 diff by a newly-found pre-existing rendering bug (ISSUES #5), not by anything in this slice's own code
-
-- **State:** `npm test` **173/173** (159→173, +14 new), `npm run build`
-  green. All 6 pre-existing traces re-verified 0 diff (`anchor` 1/1,
-  `draft-cursor` 13/13, `draft-menu` 38/38, `draft-menu-slot6` 66/66,
-  `summary-info-onix` 122/122, `summary-info-magby` 132/132) — **no
-  regressions**. New `tools/compare/traces/rent-slot1.json` (dense,
-  every-frame, popup-open → RENT confirm → 100-tick dwell) → **125/139
-  matched, NOT 0 diff** (see Notes — acceptance criterion not met this
-  session). New Tier-1 tests **are** fully green and RAM-verified:
-  `tests/rentSelect.test.ts` (9 tests, state machine + renumbering) and
-  `tests/ballAnim.test.ts` (5 tests, engine `rngValue` pinned against
-  RAM-dumped `gRngValue` at frames 0/36/37/39/201 — includes both a
-  SUCCESS and a FAILURE roll).
-- **Did:** Implemented `src/engine/ballAnim.ts` (new — the
-  `SpriteCB_Pokeball` idle/rock state machine + RNG roll, RAM-verified
-  timings: first roll-eligibility lands 2 ticks after selection, a 17-step
-  Moving cmd table matching `sAnim_Select_Pokeball_Moving` exactly, a
-  32-tick rest after a successful roll, immediate reroll after a failed
-  one; a `displayTile`/`pendingDisplayTile` 2-stage shift register
-  reproduces an oracle-verified 2-tick render lag between the internal
-  state transition and the visible tile, kept structurally separate from
-  the RNG-critical internal timing). Wired RNG into `EngineState`
-  (`rngValue`, seeded `ANCHOR_RNG_VALUE`, advances once/tick unconditionally
-  per `main.c:366`, ball rolls consume a *second* step the same tick,
-  RAM-confirmed ordering: standard tick first, roll second). Implemented
-  RENT/DESELECT in `factoryDraftScreen.ts` (`applySelect`/`applyDeselect`
-  pure reducers, the renumbering special case, `selectMonMessage`,
-  context-sensitive row-1 label) and wired the confirm path into
-  `core.ts`'s `tick()`. Found and fixed two real render bugs along the way:
-  (1) the info-window message and popup label lag the palette swap by 2
-  ticks (`RentConfirmRedrawState`, same redraw-scheduling pattern as
-  `CursorRedrawState`); (2) `monPicRender.ts`'s `ballColor()` helper (used
-  for the mon-pic window's blend target2 source) was hardcoded to the gray
-  palette/tile 0 for *every* ball regardless of selection state — fixed via
-  a shared `ballVisuals()`/`BallVisual` threaded into both `drawMonPic` and
-  the OBJ ball loop so they can't drift apart again.
-- **Next:** ISSUES #5 (a pre-existing, RENT-independent mon-pic-close
-  rendering bug, confirmed via a bare `A`+`B` reproduction with zero RENT
-  code involved) is what's between this trace and 0 diff — see that entry
-  for the full probe log and a lead (likely an un-modeled palette-cycle/
-  shimmer in `monPicBg`). A future slice should either root-cause it
-  directly, or re-time `rent-slot1.json`'s RENT-confirm press to land in a
-  confirmed-clean window once the periodic pattern is pinned precisely
-  enough to predict one reliably (trial-and-error this session found good
-  windows at ~31 and ~47+ ticks after open, but shifting into the second one
-  just moved a *different* set of diffs into frames outside this trace's
-  species-name-breathe budget — see Notes).
-- **Supervisor addendum (same day):** verified independently (tests,
-  build, 125/139 + no regressions reproduced). Both parallel-lane
-  extraction branches merged on top: moves/exp/items data (19 tests) and
-  the pre-battle-room scene incl. `docs/prebattle-room-notes.md`
-  (11 tests, composite-verified 0/38400 px vs oracle) — `npm test` now
-  **203/203**, build green, worktrees cleaned up. ROADMAP S5 marked [~]
-  with slice-1 note. Next: root-cause ISSUES #5 (main lane); S6 scout
-  dossier in flight on the worktree lane.
-- **Notes:** **This is the "STOP and report precisely" case the brief
-  anticipated**, just triggered by a different collision than the one it
-  named (species-name breathe) — ISSUES #5 instead. Confirmed root-cause
-  separation carefully before stopping: (1) reverted the RENT-specific
-  trace to a bare `A`-open+`B`-close with no selection/RNG code touched at
-  all, and it reproduces the identical diff at the identical relative
-  offset — proves this is not a bug in this slice's new code; (2) all of
-  this slice's *own* new behavior — palette swap, message/label redraw
-  timing, the ball's idle/rock tile sequence, and the RNG stream through
-  both a SUCCESS and a FAILURE roll — is independently confirmed exact via
-  RAM-dumped `gRngValue` checkpoints (hermetic, unaffected by any pixel
-  bug) plus the trace's own frames 58-138, which sit entirely outside every
-  close-animation window and are 100% clean. The RAM-inspection recipe
-  (`tools/extract/inspect-anchor.py`'s pattern, scratch script not
-  committed) was essential here: a per-frame dump of `gSprites[ballId]`'s
-  `data[0]`/`animEnded`/`animNum`/`animCmdIndex` alongside `gRngValue`
-  turned a confusing pixel-only investigation into an exact tick-by-tick
-  state trace, which is what let SETTLE_TICKS/the Moving cmd table/the
-  2-stage display lag all get pinned correctly on the first real attempt.
-
----

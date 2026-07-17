@@ -5,58 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #6 — multi-ball `SpriteCB_Pokeball` timing: a rented ball's own animation
-  is measurably delayed (~2 ticks) by a SECOND ball's popup open/close,
-  contradicting the "fully independent per-sprite `data[0]`" assumption
-  (S5 scout dossier Risk 2, `ballAnim.ts` module comment) — root cause NOT
-  yet found, blocks modeling ≥2 simultaneously-rented balls RNG-exactly.
-
-**Symptom:** RAM-dumped (`gSprites[ballSpriteId]`'s `data[0]`/`animNum`/
-`animEnded`, `EmeraldOracle` recipe per `tools/extract/inspect-anchor.py`,
-scratch scripts not committed) tick-by-tick comparison of two scenarios that
-should be identical for ball 0 (its own FSM is purely elapsed-tick-driven
-per source, `battle_factory_screen.c:1059-1090`, no dependency on other
-sprites):
-  - (a) rent slot 1 only, idle 220 ticks: ball 0's 128-tick "moving" cycle
-    ends (`animEnded` flips true) at **tick 168**; its 32-tick resting
-    countdown reaches 0 and rolls (FAILURE) at **tick 201** — matches
-    `tests/ballAnim.test.ts`'s existing RAM-pinned checkpoint exactly.
-  - (b) rent slot 1, dwell 40 ticks, then RIGHT + open slot 2's popup + DOWN
-    + RENT-confirm slot 2 (ticks ~79-124, all while ball 0's moving cycle is
-    still in flight), then idle: ball 0's `animEnded` flip lands at
-    **tick 170** (+2), its roll at **tick 203** (+2) — a reproducible,
-    RAM-confirmed 2-tick delay purely from a second ball's popup
-    opening+closing nearby, with **zero code difference in ball 0's own
-    selection/timing**.
-  - Cross-checked against the current TS engine (`core.ts`'s tick() loop,
-    which already iterates all `ballAnims` slots unconditionally in slot
-    order — structurally N-ball-capable since slice 1): matches scenario
-    (a) exactly, diverges from scenario (b) at exactly the two delayed
-    transitions (5 tick-level `gRngValue` mismatches, all at ticks
-    199-203 and 253 — the roll events nearest the delay).
-
-**Ruled out:** not a probe artifact (single-ball probe independently
-reproduces the pre-existing RAM-pinned `tests/ballAnim.test.ts` checkpoints
-exactly); not explained by `SpriteCB_Pokeball`'s own source, which reads
-`sprite->data[0]` with no shared/global state (`battle_factory_screen.c:1059-1090`);
-not `AnimateSprites()` being conditionally skipped, since `CB2_SelectScreen`
-calls it unconditionally every frame (`battle_factory_screen.c:1092-1099`).
-
-**Leads (not investigated further — ran out of session time):** the delay
-correlates with slot 2's own `OpenMonPic`/`CloseMonPic` calls (2 mon-pic
-transitions during the window ≈ the observed 2-tick total delay to ball 0,
-suggestive of ~1 tick stolen per transition, but only one data point — not
-confirmed to be per-transition vs a flat per-popup-session cost). Next
-probe: isolate a single open-only vs open+close to distinguish. Candidate
-mechanism: something `OpenMonPic`/`CloseMonPic` does (VRAM/tile buffer
-setup for the popup's own mon-pic sprite) may cost a frame that effectively
-delays `RunTasks()`/sprite processing for unrelated sprites that frame -
-not yet read from source.
-
-**Practical impact:** blocks S5 slice 2's `rent-3picks.json` (needs the
-RNG stream exact through 2-3 simultaneously-rented balls) until this is
-pinned. Single-ball RNG (S5 slice 1, `rent-slot1.json`) is unaffected.
-
 ## #5 — mon-pic close animation: WIN0V catch-up jitter is real hardware
   cycle-timing, not a modelable game-state bug (root-caused, NOT fixable at
   this engine's tick/state granularity - see "why this can't be fixed" below)

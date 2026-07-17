@@ -100,23 +100,38 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
 
     // SpriteCB_Pokeball (ballAnim.ts): every currently-rented ball's idle/
     // rocking anim advances every tick regardless of menu state, each
-    // potentially consuming a further Random() draw this tick.
+    // potentially consuming a further Random() draw this tick - EXCEPT a
+    // ball listed in `ballAnimStall` (ISSUES #6: a cursor move or RENT/
+    // DESELECT confirm on the previous tick stalls it exactly one tick -
+    // see DraftScreenState.ballAnimStall doc).
     const ballAnims = draftScreen.ballAnims.slice();
+    const stalledSlots = draftScreen.ballAnimStall;
     for (let i = 0; i < ballAnims.length; i += 1) {
       const anim = ballAnims[i];
       if (!anim) continue;
+      if (stalledSlots.includes(i)) continue;
       const result = advanceBallAnim(anim, rngValue);
       ballAnims[i] = result.state;
       rngValue = result.rngValue;
     }
+    // Slots active *before* this tick's own action mutates ballAnims - what
+    // a LEFT/RIGHT move or RENT/DESELECT confirm below (if either fires)
+    // stalls starting next tick.
+    const activeSlotsBeforeAction = ballAnims.reduce<number[]>((acc, a, i) => {
+      if (a) acc.push(i);
+      return acc;
+    }, []);
+    let ballAnimStall: readonly number[] = [];
 
     if (draftScreen.mode === "cursor") {
       if (newAndRepeatedKeys.has("RIGHT")) {
         cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0 };
         draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, 1), hasActed: true };
+        ballAnimStall = activeSlotsBeforeAction;
       } else if (newAndRepeatedKeys.has("LEFT")) {
         cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0 };
         draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, -1), hasActed: true };
+        ballAnimStall = activeSlotsBeforeAction;
       } else if (newKeys.has("A")) {
         monPic = openMonPic(draftScreen.hasActed, draftScreen.hasOpenedMonPic);
         draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0, hasOpenedMonPic: true };
@@ -145,6 +160,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
           : applySelect(draftScreen.selectedIds, draftScreen.selectingMonsState, slot);
         ballAnims[slot] = isSelected ? null : initialBallAnimState();
         rentConfirmRedraw = { fromMessage: draftScreen.message, fromSelected: isSelected, elapsed: 0 };
+        ballAnimStall = activeSlotsBeforeAction.filter((i) => i !== slot);
         draftScreen = {
           ...draftScreen,
           mode: "cursor",
@@ -161,7 +177,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       }
     }
 
-    draftScreen = { ...draftScreen, monPic, cursorRedraw, menuHighlightRedraw, ballAnims, rentConfirmRedraw };
+    draftScreen = { ...draftScreen, monPic, cursorRedraw, menuHighlightRedraw, ballAnims, rentConfirmRedraw, ballAnimStall };
   }
 
   return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, rngValue };

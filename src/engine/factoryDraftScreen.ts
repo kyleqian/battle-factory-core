@@ -195,6 +195,27 @@ export interface DraftScreenState {
   ballAnims: (BallAnimState | null)[];
   /** In-flight RENT/DESELECT confirm redraw (see `RentConfirmRedrawState`); null once settled. */
   rentConfirmRedraw: RentConfirmRedrawState | null;
+  /**
+   * Ball slots whose SpriteCB_Pokeball advance must be skipped THIS tick
+   * (ISSUES #6, RAM-confirmed): a LEFT/RIGHT cursor move or a RENT/DESELECT
+   * confirm on the *previous* tick calls a text-printer function
+   * (Select_PrintMonCategory/Select_PrintMonSpecies for the cursor move,
+   * Select_PrintSelectMonString for RENT/DESELECT via
+   * Select_OptionRentDeselect) whose knock-on cost delays every OTHER
+   * currently-rented ball's own AnimateSprite() advance by exactly one tick,
+   * landing on the tick *after* the trigger (CB2_SelectScreen runs
+   * AnimateSprites() before RunTasks() each frame, so a text-print call
+   * processed this tick's RunTasks() can only affect next tick's
+   * AnimateSprites() pass). RAM-confirmed NOT triggered by: opening/closing
+   * a popup (Task_OpenMonPic/Task_CloseMonPic - no text print involved),
+   * B/OTHERS-close, SUMMARY-open, or the popup's own internal DOWN/UP menu
+   * move. The ball just rented/deselected THIS action is excluded (its own
+   * settle timer isn't stalled by its own trigger - RAM-confirmed via a
+   * second ball's fresh selection landing its first roll exactly
+   * SETTLE_TICKS after its own selection tick, unaffected). Empty when no
+   * trigger fired last tick.
+   */
+  ballAnimStall: readonly number[];
 }
 
 /** Select_UpdateBallCursorPosition: wraps at both ends of the 6 slots. */
@@ -462,4 +483,5 @@ export const ANCHOR_DRAFT_SCREEN_STATE: DraftScreenState = {
   selectingMonsState: 1,
   ballAnims: [null, null, null, null, null, null],
   rentConfirmRedraw: null,
+  ballAnimStall: [],
 };

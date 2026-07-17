@@ -49,8 +49,32 @@ const MOVING_CMDS: MovingCmd[] = [
 ];
 
 // Random() % 5 == 0 success holds the ball still ("data[0] = 32") for this
-// many further ticks once its rocking cycle finishes.
+// many further ticks once its rocking cycle finishes - matches RAM's data[0]
+// exactly (rollRest below stores this as `pendingRest`, RAM-pinned at 32 by
+// tests/ballAnim.test.ts's frame-39 checkpoint), so keep this the literal
+// RAM-visible cooldown value.
 const REST_TICKS = 32;
+// RAM-confirmed (single ball AND two-ball probes, ISSUES #6): data[0] counts
+// REST_TICKS -> 0 one tick each, then the NEXT roll's Random() draw happens
+// on the FOLLOWING tick - a (REST_TICKS + 1)-tick span from the success tick
+// to the next roll. This model's "resting" phase begins one internal tick
+// *before* that RAM-visible success tick (the same pre-existing internal/RAM
+// offset the settling->moving transition also has - harmless there since
+// nothing ever samples a frame between the two), so the resting phase's
+// internal timer needs REST_TICKS + 2 (not just +1) to land the next roll's
+// draw on the exact same absolute tick RAM does. Applied only at the
+// resting-phase transition below, kept separate from `pendingRest`'s own
+// RAM-accurate value (used as the displayed/tested cooldown), so this offset
+// never leaks into anything RAM-observable - only the internal Random()-draw
+// timing changes. Single-ball behavior is unaffected either way (nothing
+// samples a frame in that 2-tick gap there), but a second ball's own
+// interleaved draws made during that gap desync without this.
+const REST_INTERNAL_OFFSET = 2;
+// RAM-confirmed (ISSUES #6, two-ball probe): a moving cycle that ends on a
+// FAILURE (pendingRest 0, no rest queued) doesn't reroll on the same tick
+// its last cmd exhausts - the reroll's Random() draw lands exactly one tick
+// later. See the "moving" phase's pendingRest===0 branch below.
+const FAILURE_REROLL_DELAY = 1;
 // A freshly-selected ball's first roll check lands 2 ticks after selection.
 const SETTLE_TICKS = 2;
 
@@ -139,9 +163,22 @@ function advanceBallAnimCore(state: BallAnimCore, rngValue: number): { state: Ba
       return { state: { ...state, cmdIndex: nextCmdIndex, timer: MOVING_CMDS[nextCmdIndex]!.duration }, rngValue };
     }
     if (state.pendingRest > 0) {
-      return { state: { phase: "resting", timer: state.pendingRest, cmdIndex: state.cmdIndex, pendingRest: 0 }, rngValue };
+      return {
+        state: { phase: "resting", timer: state.pendingRest + REST_INTERNAL_OFFSET, cmdIndex: state.cmdIndex, pendingRest: 0 },
+        rngValue,
+      };
     }
-    return beginMoving(rngValue);
+    // A moving cycle that ends on a FAILURE (no queued rest) rerolls
+    // immediately - but RAM-confirmed (ISSUES #6, two-ball probe: ball1's
+    // own first cycle failed, then finished its 128-tick cycle at tick249,
+    // yet its reroll's Random() draw and cmdIndex reset don't land until
+    // tick250) that reroll's draw lands one tick after the cycle-exhaustion
+    // tick, not the same tick - reuse the "resting" phase's own
+    // timer-expiry-calls-beginMoving mechanism with timer=1 for exactly that
+    // one-tick delay (no visible tile change in between - internalTile()
+    // returns the same "still" tile 0 for both "moving" cmdIndex 16 and
+    // "resting", so this is unobservable beyond the RNG-draw timing it fixes).
+    return { state: { phase: "resting", timer: FAILURE_REROLL_DELAY, cmdIndex: state.cmdIndex, pendingRest: 0 }, rngValue };
   }
   // resting
   if (state.timer > 1) return { state: { ...state, timer: state.timer - 1 }, rngValue };
