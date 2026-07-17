@@ -213,9 +213,32 @@ export interface DraftScreenState {
    * settle timer isn't stalled by its own trigger - RAM-confirmed via a
    * second ball's fresh selection landing its first roll exactly
    * SETTLE_TICKS after its own selection tick, unaffected). Empty when no
-   * trigger fired last tick.
+   * trigger fired last tick. A LEFT/RIGHT move additionally only stalls
+   * anyone when the entering slot's species isn't in
+   * CURSOR_MOVE_STALL_SAFE_SPECIES (ISSUES #7, sixth update) - RENT/DESELECT
+   * confirms have no such exception, always stalling every other active
+   * ball regardless of species.
    */
   ballAnimStall: readonly number[];
+}
+
+/**
+ * ISSUES #7 (sixth worker update, RAM-derived, 12/12 data points across all
+ * counts/directions/origins tried, zero exceptions): a LEFT/RIGHT cursor
+ * move only stalls every other currently-active ball when the ENTERING
+ * slot's species is NOT in this safe set - Select_PrintMonSpecies's
+ * variable-width render cost for BAYLEEF/HAUNTER apparently stays under
+ * whatever threshold steals the next tick's AnimateSprites() pass, unlike
+ * MAGBY/BUTTERFREE/ONIX/QUILAVA. RENT/DESELECT confirms are unaffected by
+ * this set (Select_PrintSelectMonString prints one of 4 fixed, species-
+ * independent strings - see the RENT/DESELECT branch below, which keeps the
+ * unconditional stall).
+ */
+const CURSOR_MOVE_STALL_SAFE_SPECIES = new Set(["BAYLEEF", "HAUNTER"]);
+
+/** Whether a LEFT/RIGHT cursor move landing on this species stalls every other active ball - see CURSOR_MOVE_STALL_SAFE_SPECIES's doc. */
+export function cursorMoveStallsBalls(enteringSpecies: string): boolean {
+  return !CURSOR_MOVE_STALL_SAFE_SPECIES.has(enteringSpecies);
 }
 
 /** Select_UpdateBallCursorPosition: wraps at both ends of the 6 slots. */

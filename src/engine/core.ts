@@ -14,6 +14,7 @@ import {
   advanceRentConfirmRedraw,
   applyDeselect,
   applySelect,
+  cursorMoveStallsBalls,
   moveCursor,
   moveMenuCursor,
   renderFactoryDraftScreen,
@@ -129,13 +130,15 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // RAM-verified gate window.
     if (draftScreen.mode === "cursor" && isCursorInputReady(monPic)) {
       if (newAndRepeatedKeys.has("RIGHT")) {
+        const nextCursorPos = moveCursor(draftScreen.cursorPos, 1);
         cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0 };
-        draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, 1), hasActed: true };
-        ballAnimStall = activeSlotsBeforeAction;
+        if (cursorMoveStallsBalls(draftScreen.slots[nextCursorPos]!.species)) ballAnimStall = activeSlotsBeforeAction;
+        draftScreen = { ...draftScreen, cursorPos: nextCursorPos, hasActed: true };
       } else if (newAndRepeatedKeys.has("LEFT")) {
+        const nextCursorPos = moveCursor(draftScreen.cursorPos, -1);
         cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0 };
-        draftScreen = { ...draftScreen, cursorPos: moveCursor(draftScreen.cursorPos, -1), hasActed: true };
-        ballAnimStall = activeSlotsBeforeAction;
+        if (cursorMoveStallsBalls(draftScreen.slots[nextCursorPos]!.species)) ballAnimStall = activeSlotsBeforeAction;
+        draftScreen = { ...draftScreen, cursorPos: nextCursorPos, hasActed: true };
       } else if (newKeys.has("A")) {
         monPic = openMonPic(draftScreen.hasActed, draftScreen.hasOpenedMonPic);
         draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0, hasOpenedMonPic: true };
