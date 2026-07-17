@@ -1,0 +1,101 @@
+// S4 slice-1 summary-screen state machine: entry (A on the draft menu's
+// SUMMARY option) through the settled static Info page, and B-exit back to
+// the draft screen. Reproduces battle_factory_screen.c's
+// Select_Task_OpenSummaryScreen (STATE_SUMMARY_FADE/CLEAN/SHOW, :1456-1493)
+// and pokemon_summary_screen.c's fade-in/close tasks as three fixed-length
+// phases per direction, using paletteFade.ts's oracle-pinned tick counts -
+// see docs/summary-screen-notes.md §1/§4 and paletteFade.ts's module doc.
+//
+// Rendering the destination screens (draft chrome during the entry
+// fade-out/exit fade-in, the static Info page during the entry fade-in/exit
+// fade-out) is NOT wired up yet - this module only pins the mode/phase/tick
+// state machine and the selected-slot/page bookkeeping that S4's next slice
+// renders against. See PROGRESS.md for the exact reported remainder.
+
+import {
+  ENTRY_BLACK_HOLD_TICKS,
+  ENTRY_FADE_OUT_TICKS,
+  EXIT_BLACK_HOLD_TICKS,
+  EXIT_FADE_OUT_TICKS,
+  FADE_IN_TICKS,
+} from "./paletteFade.ts";
+
+export type SummaryPhase = "fadingOut" | "black" | "fadingIn";
+
+/** SUMMARY_MODE_LOCK_MOVES's reachable pages (pokemon_summary_screen.c:1121); only "info" renders this slice. */
+export type SummaryPage = "info" | "skills" | "battleMoves" | "contestMoves";
+
+export interface SummaryTransition {
+  direction: "toSummary" | "toDraft";
+  phase: SummaryPhase;
+  /** Ticks since this phase started (0 = the tick the phase became active). */
+  elapsed: number;
+}
+
+export interface SummaryScreenState {
+  /** null once settled on the draft screen (factoryDraftScreen.ts owns rendering); a transition is in flight otherwise. */
+  transition: SummaryTransition | null;
+  /** True once the entry transition has fully settled on the static Info page. */
+  onInfoPage: boolean;
+  /** SELECTABLE_MONS_COUNT - 1 = 5 max; the draft cursor slot the summary opened on / is currently viewing. */
+  selectedSlot: number;
+  page: SummaryPage;
+}
+
+export const CLOSED_SUMMARY_SCREEN_STATE: SummaryScreenState = {
+  transition: null,
+  onInfoPage: false,
+  selectedSlot: 0,
+  page: "info",
+};
+
+function fadeOutTicks(direction: SummaryTransition["direction"]): number {
+  return direction === "toSummary" ? ENTRY_FADE_OUT_TICKS : EXIT_FADE_OUT_TICKS;
+}
+
+function blackHoldTicks(direction: SummaryTransition["direction"]): number {
+  return direction === "toSummary" ? ENTRY_BLACK_HOLD_TICKS : EXIT_BLACK_HOLD_TICKS;
+}
+
+/** Select_Task_OpenSummaryScreen's STATE_SUMMARY_FADE, triggered by A on the draft menu's SUMMARY option. `cursorPos` is the draft screen's currMonId (battle_factory_screen.c:1491). */
+export function openSummaryScreen(cursorPos: number): SummaryScreenState {
+  return {
+    transition: { direction: "toSummary", phase: "fadingOut", elapsed: 0 },
+    onInfoPage: false,
+    selectedSlot: cursorPos,
+    page: "info",
+  };
+}
+
+/** pokemon_summary_screen.c's close path, triggered by B on the (unlocked, per SUMMARY_MODE_LOCK_MOVES) Info page. */
+export function requestSummaryScreenExit(state: SummaryScreenState): SummaryScreenState {
+  if (!state.onInfoPage) return state;
+  return { ...state, transition: { direction: "toDraft", phase: "fadingOut", elapsed: 0 }, onInfoPage: false };
+}
+
+/** Advance the transition state machine by one tick; no-op once settled (transition === null). Call every engine tick. */
+export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenState {
+  const t = state.transition;
+  if (!t) return state;
+  const elapsed = t.elapsed + 1;
+
+  if (t.phase === "fadingOut") {
+    if (elapsed >= fadeOutTicks(t.direction)) {
+      return { ...state, transition: { direction: t.direction, phase: "black", elapsed: 0 } };
+    }
+    return { ...state, transition: { ...t, elapsed } };
+  }
+
+  if (t.phase === "black") {
+    if (elapsed >= blackHoldTicks(t.direction)) {
+      return { ...state, transition: { direction: t.direction, phase: "fadingIn", elapsed: 0 } };
+    }
+    return { ...state, transition: { ...t, elapsed } };
+  }
+
+  // fadingIn
+  if (elapsed >= FADE_IN_TICKS) {
+    return { ...state, transition: null, onInfoPage: t.direction === "toSummary" };
+  }
+  return { ...state, transition: { ...t, elapsed } };
+}
