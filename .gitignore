@@ -6,5 +6,6 @@
 /oracle-output/
 /tools/compare/out/
 /.worktrees/
+tsconfig.tsbuildinfo
 .env
 .DS_Store
