@@ -428,3 +428,182 @@ session (flagged for the next worker, all cheap/mechanical once needed):
 corner icons — raw flat tile-entry arrays, exact placement rectangle not
 determined), and the move-selector cursor art (`move_select.png`, inert in
 this mode per §1 but drawn once on entering move-select mode).
+
+## 7. S4 slice-1 continuation: Info-page render spec (extraction done, renderer NOT built this session)
+
+This session closed the extraction blocker (`tools/extract/extract-summary-info.ts`
+→ `src/data/gen/summary-info.json`: National Dex number, types, genderRatio
+per anchor species; ability name+description text for every ability the
+pool uses; `src/engine/monGender.ts` ports `GetGenderFromSpeciesAndPersonality`,
+both pinned against the real anchor personality values in
+`tests/summaryInfo.test.ts`). **Ran out of session budget before writing the
+renderer itself or any compare trace** — this section is the resolved spec so
+the next slice can go straight to implementation with no re-scouting.
+
+**Dex number source, resolved (not assumed):** RAM-probed
+`gSaveBlock1Ptr->flags` bit for `FLAG_SYS_NATIONAL_DEX` (`SYSTEM_FLAGS+0x36
+= 0x896`, byte `save1+0x1270+274` bit 6) at the anchor — **read back `1`
+(TRUE)**. Combined with `IsNationalPokedexEnabled()`'s other two conditions
+being save-init invariants on any legitimately-booted save
+(`event_data.c:74`), the anchor uses the **National Dex** numbering
+(`SpeciesToPokedexNum` → `SpeciesToNationalPokedexNum`, `pokemon.c:6396`),
+matching `summary-info.json`'s `dexNumber` field exactly (Onix 95, Magby
+240, Bayleef 153, Butterfree 12, Haunter 93, Quilava 156 — the standard,
+familiar National Dex numbers). Scratch probe not committed (ephemeral
+one-off, `/tmp/s4-probe/`); rerun via the sanctioned RAM-inspection recipe
+(`AGENTS.md`/`ROADMAP.md` Domain notes) if this ever needs re-confirming.
+
+**Window pixel geometry** (`sSummaryTemplate`/`sPageInfoTemplate`,
+`pokemon_summary_screen.c:409-629` — tile coords confirmed to source this
+session, matching §2's table exactly; pixel origin = `tilemapLeft*8,
+tilemapTop*8`, then the `PrintTextOnWindow(windowId, str, x, y, ...)` call's
+own `x,y` are added on top in pixels):
+| window | tile pos | pixel pos | text call | local x,y | colorId |
+|---|---|---|---|---|---|
+| POKEMON_INFO_TITLE | 0,0 | 0,0 | `gText_PkmnInfo` ("POKéMON INFO") | 2,1 | 1 |
+| PROMPT_CANCEL | 22,0 | 176,0 | A-button icon (`summary-buttons.json.a`, 16×16px) at `iconX,0` + `gText_Cancel2` ("CANCEL") right-aligned into a 62px field | iconX = rightAlignX(“CANCEL”,62)-16 (clamped ≥0), textX = rightAlignX(“CANCEL”,62) | 0 |
+| POKEMON_INFO_RENTAL | 11,4 | 88,32 | `gText_RentalPkmn` ("RENTAL POKéMON") | 0,1 | 1 |
+| POKEMON_INFO_TYPE | 11,6 | 88,48 | `gText_TypeSlash` ("TYPE/") | 0,1 | 0 |
+| PORTRAIT_DEX_NUMBER | 1,2 | 8,16 | "No." + 3-digit zero-padded dex number | 0,1 | 1 |
+| PORTRAIT_NICKNAME | 1,12 | 8,96 | nickname (= species name string, rentals have none) | 0,1 | 1 |
+| PORTRAIT_SPECIES | 1,14 | 8,112 | "Lv"+level (left-aligned decimal, NOT zero-padded) | 24,17 | 1 |
+| PORTRAIT_SPECIES | 1,14 | 8,112 | "/"+SPECIES NAME | 0,1 | 1 |
+| PORTRAIT_SPECIES | 1,14 | 8,112 | gender symbol (♂/♀; skipped entirely if genderless) | 57,17 | 3 (♂) / 4 (♀) |
+| (dynamic) ABILITY | 11,9 | 88,72 | ability name | 0,1 | 1 |
+| (dynamic) ABILITY | 11,9 | 88,72 | ability description | 0,17 | 0 |
+| (dynamic) MEMO | 11,14 | 88,112 | nature memo (see color-code caveat below) | 0,1 | 0 |
+
+`ORIGINAL_TRAINER`/`ID` windows are never allocated in Battle Factory
+(`PrintMonOTName`/`PrintMonOTID` early-return, §3) — skip entirely, not just
+hide.
+
+**Text color table** (`sTextColors[][3]`, `pokemon_summary_screen.c:708+`,
+each row is `{bgIdx, fgIdx, shadowIdx}` — these index **directly** into the
+window's assigned palette slot (`paletteNum` 6 or 7 above), which is exactly
+`summary-bg.json.subpalettes[6]`/`[7]` (the shared `gSummaryScreen_Pal`
+loads across BG palette slots 0-7, one-to-one with the 8 extracted
+subpalettes) — i.e. `TextColors` for `font.ts`'s `drawText` is literally
+`{bg: row[0], fg: row[1], shadow: row[2]}` with `palette =
+subpalettes[paletteNum]`, no further translation needed:
+`colorId 0 = {0,1,2}`, `1 = {0,3,4}`, `3 = {0,7,8}`, `4 = {0,9,10}` (the four
+used above).
+
+**Gender symbol**: `PrintGenderSymbol` (:2804-2818) — genderless species
+print nothing (no symbol, no space reserved); Nidoran♂/♀ are special-cased
+to never print a symbol at all (irrelevant to this pool). Both `♂`/`♀`
+glyphs already exist in `charmap.json` (codes 181/182) and have non-empty
+bitmaps in `font-normal.json` — no font work needed.
+
+**Nature memo — color-code caveat (unresolved, flag for implementer):**
+`gText_XNature` is `"{DYNAMIC 0}{DYNAMIC 2}{DYNAMIC 1}{DYNAMIC 5} nature"`
+(`strings.c:522`, **no trailing period** — the dossier's §3 paraphrase was
+approximate), where `{DYNAMIC 0}` expands to
+`sMemoNatureTextColor = "{COLOR LIGHT_RED}{SHADOW GREEN}"`, `{DYNAMIC 2}`
+the nature name, `{DYNAMIC 1}` to `sMemoMiscTextColor = "{COLOR WHITE}
+{SHADOW DARK_GRAY}"`, `{DYNAMIC 5}` empty — i.e. the rendered string is
+**two-tone**: the nature name in one color/shadow pair, then `" nature"` in
+another, switched via inline `{COLOR}`/`{SHADOW}` control codes mid-string.
+`src/engine/font.ts`'s `drawText` takes one flat `TextColors` for the whole
+call — it has **no support for inline control-code color switches**. Either
+extend `drawText`/add a small control-code-aware variant (only 2 spans ever
+needed on this screen), or split the memo print into two `drawText` calls
+(nature name, then `" nature"`) with the two different `TextColors` — the
+latter is simpler and sufficient here. `{COLOR LIGHT_RED}`/`{SHADOW GREEN}`/
+`{COLOR WHITE}`/`{SHADOW DARK_GRAY}` are **not** the same as the `sTextColors`
+palette-slot indices above — they're named-color control codes with their
+own lookup (`text.c`'s `sTextColorTable`-equivalent) not yet resolved this
+session; needs its own quick source check before implementing.
+
+**Sprites** (`pokemon_summary_screen.c:3776-4098`; all `CreateSprite(...,
+x, y, subpriority)` calls use **center-anchored** `x,y`, matching
+`sprites.ts`'s `drawSprite` convention exactly):
+- **Mon front sprite**: `CreateMonSprite` (:3975) — `CreateSprite(&gMultiuseSpriteTemplate,
+  40, 64, 5)`, `oam.priority = 0`. Reuse `front-sprites.json[species]` +
+  `drawSprite(fb, {tileset}, palette, 40, 64, 8, 8, 0)` exactly like
+  `monPicRender.ts` already does for the draft screen (same asset, same
+  8×8-tile block, first frame = static idle-anim frame 0 — churn itself
+  stays out of scope). **hFlip**: `IsMonSpriteNotFlipped(species)` gates a
+  mirror flip; **not resolved this session** whether any of the 6 anchor
+  species are in that (small, exceptional) flip list, and `drawSprite`/
+  `SpriteSheet` have no flip parameter today — check
+  `IsMonSpriteNotFlipped`'s table (`pokemon_summary_screen.c`, search near
+  `CreateMonSprite`) before assuming unflipped for all 6.
+- **Type icon(s)**: `SetMonTypeIcons` (:3818+) — `SetTypeSpritePosAndPal(type,
+  120, 48, ...)` for type 1, `(160, 48, ...)` for type 2 if different from
+  type 1 (mono-type species show only one icon; `SetTypeSpritePosAndPal`
+  itself adds `+16,+8` to reach the sprite's true center from the passed
+  `x,y`, i.e. **true centers are (136,56) and (176,56)**). Source:
+  `summary-type-icons.json.types[TYPE_NAME]`, one 4×2-tile (32×16px) sheet
+  per type — confirm the icon's own natural size against `drawSprite`'s
+  `widthInTiles/heightInTiles` args (probably 4×2, unverified this session).
+- **Caught-ball icon**: `CreateCaughtBallSprite` (:4069) — `CreateSprite(...,
+  16, 136, 0)`, `oam.priority = 3` (backmost), ball type from
+  `ItemIdToBallId(GetMonData(mon, MON_DATA_POKEBALL))`. **Not verified**
+  what ball item factory-rental mons are created with — check
+  `battle_factory.c`'s mon-creation call (`CreateMonWithEVSpreadNatureOTID`
+  or similar) for whether it sets `MON_DATA_POKEBALL` explicitly or leaves
+  the engine default (`ITEM_POKE_BALL`, ball index 0); if unset, confirm the
+  default is actually `POKE_BALL` before assuming that sprite/palette.
+- **Markings sprite**: `CreateMonMarkingsSprite` (:4048) — anchor `x=60,
+  y=26`, `oam.priority=1`, anim frame = `GetMonData(mon, MON_DATA_MARKINGS)`
+  (0 for all 6 fresh rentals — no markings set). **Not resolved**: whether
+  `CreateSprite`'s anchor here is center- or top-left-relative for this
+  particular sprite template (unlike the other three above, whose call
+  sites plainly use `CreateSprite` directly), and what frame-0 of
+  `summary-markings.json`'s sheet actually looks like (in-game, an unmarked
+  mon shows 4 small unfilled/gray diamond outlines, not a blank tile — do
+  not assume blank without checking the extracted tile data for anim-frame
+  boundaries, which aren't recorded in the current extraction).
+- **Status condition icon**: skippable for all 6 anchors — `status: 0` in
+  `anchor-state.json` for every rental, and `CreateSetStatusSprite`
+  (:4079-4091) sets the sprite invisible whenever `GetMonAilment() == 0`.
+- **A/B button icons** (title-bar "A Cancel" prompt): not sprites — blitted
+  directly into the `PROMPT_CANCEL` window's tile data
+  (`PrintAOrBButtonIcon`, :2821-2830); `summary-buttons.json.a` (16×16px) is
+  the source bitmap. No BG/OBJ blend involved, just another rect to stamp
+  into the framebuffer at the window's pixel position.
+
+**BG layering — reasoned, not oracle-confirmed this session:** `InitBGs`
+(:1302-1309) points BG1←Battle-Moves tilemap, BG2←Skills tilemap, BG3←Info
+tilemap **all at once**, but GBA priority order draws BG3 (priority 3) first
+and BG1 (priority 1) last among backgrounds, i.e. BG1/BG2 would visually sit
+**above** BG3 wherever they have opaque tiles — which would corrupt the
+Info page if BG1/BG2 covered the same screen area. Since real gameplay
+never shows Battle-Moves/Skills art bleeding into the Info page, the
+resolution must be that BG1/BG2's content sits **X-scrolled out of the
+240px visible window** while Info is the active page (the same double-wide,
+64×32-tile screen-block mechanism `LimitEggSummaryPageDisplay` uses for the
+egg toggle, §2) — reached only during the page-change wipe. **For a
+static, page-change-free Info render this means BG1/BG2 can be safely
+ignored entirely** — render only BG3 (`summary-bg.json.pages.info` via
+`drawTileBg`) + BG0 (the windows above). This reasoning is not yet
+oracle-verified (no probe isolated BG1/BG2's resting X-scroll value this
+session) — flagged in case a future dense capture disagrees.
+
+**Composition order** (back to front, reasoned from OBJ/BG priority values
+above, not yet oracle-verified pixel-for-pixel): BG3 info tilemap → type
+icon sprite(s) → markings sprite → ball icon sprite → mon front sprite →
+all BG0 text windows (topmost). Mon front sprite and markings sprite's
+bounding boxes are close but likely non-overlapping (Onix: sprite spans
+roughly x8-72,y32-96 at 64×64px centered on 40,64; markings anchor 60,26 is
+above that) — re-check per-species once real front-sprite dimensions are in
+hand, particularly for larger sprites like Bayleef/Butterfree.
+
+**Wiring into `core.ts`** (per the S4/S5 scout's Explore-agent findings,
+2026-07-17): `EngineState` has no "current screen" field yet — only
+`draftScreen`. Add `summaryScreen: SummaryScreenState` (from
+`summaryScreen.ts`, already built) as a sibling field, call
+`advanceSummaryScreen` unconditionally each tick, branch `tick()`'s A-on-menu
+handling to call `openSummaryScreen(draftScreen.cursorPos)` when the menu
+cursor is on SUMMARY (index 0, currently unhandled — see the Explore
+report's exact call-site read), and `requestSummaryScreenExit` on B while
+`onInfoPage`. Branch `render()` on `state.summaryScreen.transition`/
+`onInfoPage`: draft-screen chrome (existing `renderFactoryDraftScreen`)
+whenever closed, blended via `paletteFade.ts`'s `bgFadeY`/`objFadeY`/
+`blendComponentToBlack` during `fadingOut`(toSummary)/`fadingIn`(toDraft);
+the new Info-page framebuffer analogously during `fadingIn`(toSummary)/
+`fadingOut`(toDraft) and flat once `onInfoPage`. **`paletteFade.ts`'s three
+functions have zero call sites anywhere outside their own test file today**
+— this is genuinely first-time wiring, not an extension of existing
+plumbing; budget real time for it. Black-hold phases (`phase === "black"`)
+render a solid black frame, no compositing needed.

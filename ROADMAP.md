@@ -67,11 +67,18 @@ paging through every reachable page, and backing out pass compare with 0
 diff on dense captures; Tier-1 tests pin the summary state machine.
 **Slice 1 progress:** entry/exit palette-fade math and the fade-phase state
 machine are oracle-pinned and hermetically tested (`src/engine/
-paletteFade.ts`, `src/engine/summaryScreen.ts`) but not yet wired into
-render; the static Info page has no renderer yet (blocked on missing
-type/dex-number/ability-text/gender extraction — see `PROGRESS.md` #10 and
-`docs/summary-screen-notes.md` §6). No compare traces for this stage exist
-yet.
+paletteFade.ts`, `src/engine/summaryScreen.ts`); Info-page species data
+(types/National-Dex-number/genderRatio/ability text) is now extracted and
+tested (`src/data/gen/summary-info.json`, `src/engine/monGender.ts`) — the
+extraction blocker from slice 1 is closed. **Still not done:** the Info-page
+renderer itself, wiring `summaryScreen.ts`+`paletteFade.ts` into
+`core.ts`'s `EngineState`/`tick`/`render`, and both compare traces
+(`summary-info-onix.json`/`-magby.json`). `docs/summary-screen-notes.md` §7
+is a fully-resolved implementation spec (window pixel geometry, text colors,
+sprite positions/priorities, BG-layering reasoning, a flagged nature-memo
+two-tone-color gap, an unverified ball-type/hFlip/markings-frame assumption
+list) written specifically so the next slice can implement directly without
+re-scouting. No compare traces for this stage exist yet.
 
 ### [ ] S5 — Complete the draft: rent 3, confirmations, exit sequence
 RENT/OTHERS flows, ball palette change on selection, the 2nd/3rd-pick
