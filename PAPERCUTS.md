@@ -13,3 +13,13 @@ Per entry:
 - **Workaround:** the current dodge, if any.
 
 *(none yet)*
+
+## Oracle-probe vs appTrace frame numbering ambiguity (~2x time cost, 2026-07-17)
+
+Two S4 workers independently lost time reconciling "press-tick N" labels
+from direct `bin/oracle run` probes with `tools/compare/appTrace.ts`'s
+frame counter when building dense traces of a fresh interaction. Worth a
+one-paragraph clarification (worked example: a 2-frame press at trace
+position K and which captureFrames index shows its first visible effect)
+in ROADMAP.md Domain notes or a doc both cite. Flagged by the S4 renderer
+worker (PROGRESS entry 13).
