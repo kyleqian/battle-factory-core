@@ -92,6 +92,11 @@ intro text pixels and a RAM dump of the same trace).
 battle until the first action menu passes compare with 0 diff on dense
 captures; Tier-1 test pins the generated opponent (trainer id, mon set) vs
 the RAM dump.
+**Scope note (S5 scout, 2026-07-17):** battle 1's opponent + team are
+generated in `EventScript_EnterRoom` BEFORE the draft screen opens — i.e.
+before frame 0, baked into the anchor like the rental pool. So for battle 1
+they are constants (RAM-dump the anchor); trace-dependent opponent
+generation first matters for battles 2-7 (S8). See `docs/rent-flow-notes.md`.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain
@@ -156,6 +161,12 @@ is `[x]` or its remainder is explicitly re-scoped here by the supervisor.
   `Select_Task_FadeSpeciesName` starts a perpetual palette breathe on the
   species name text (not yet modeled); keep traces under that or model
   it explicitly.
+- **Rented-ball sprites consume RNG** (S5 scout): `SpriteCB_Pokeball`
+  (`battle_factory_screen.c:1059-1090`) rolls `Random() % 5` on a ~32-frame
+  cooldown per rented ball for as long as the sprite exists — so once pick 1
+  lands, draft-screen RNG consumption is no longer exactly 1/frame. Model
+  these calls exactly or later RNG-dependent outcomes drift. Details +
+  timings in `docs/rent-flow-notes.md`.
 - **Draft candidates live in `sFactorySelectScreen`** (S3, RAM-verified):
   fully-instantiated `struct Pokemon` objects at the file-static
   `sFactorySelectScreen->mons[i].monData` (statics aren't in the linker map —
