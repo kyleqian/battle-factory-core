@@ -50,6 +50,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   issue) — do not re-attempt a "general fix" without new information (e.g.
   a way to cheaply approximate per-frame cycle cost) that changes the
   tractability conclusion above.
+- **Supervisor addendum (same day):** S6 scout dossier merged
+  (`docs/battle-bringup-notes.md`, 595 lines; ROADMAP S6 corrections
+  folded in: RNG advances per-VBlank until battle proper, transition is a
+  random 12-way pick, opponent personalities rolled at battle start;
+  battle-1 identities RAM-pinned: trainer 50 DESTIN, Grovyle/Murkrow/
+  Pidgeotto vs Onix/Magby/Bayleef). 203/203 + build green post-merge.
+  **ISSUES #5 policy question escalated to the user** (0-diff bar vs
+  cycle-jitter windows — see the ISSUES entry for the two options);
+  battle-1 asset extraction in flight on the worktree lane.
 - **Notes:** No commit was needed for `src/`/`tests/` (nothing changed);
   this commit is docs-only (`ISSUES.md` rewritten with the confirmed root
   cause, this entry). Time was spent entirely on RAM-inspection

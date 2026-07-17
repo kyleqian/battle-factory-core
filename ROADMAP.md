@@ -128,6 +128,18 @@ generated in `EventScript_EnterRoom` BEFORE the draft screen opens — i.e.
 before frame 0, baked into the anchor like the rental pool. So for battle 1
 they are constants (RAM-dump the anchor); trace-dependent opponent
 generation first matters for battles 2-7 (S8). See `docs/rent-flow-notes.md`.
+**Corrections (S6 scout, 2026-07-17, `docs/battle-bringup-notes.md`):**
+(1) only opponent *identity* is pre-anchor — RAM-dumped: trainer 50
+DESTIN (Bug Catcher), team Grovyle/Murkrow/Pidgeotto vs player
+Onix/Magby/Bayleef; the opponent mons' *personalities* are rolled fresh
+inside `DoSpecialTrainerBattle` via a variable-length `Random32()`
+rejection loop at battle start. (2) `Random()` keeps advancing once per
+VBlank through the entire walk/warp/dialogue/transition window — the
+"no per-frame RNG" rule applies only once actually in battle. (3) The
+battle transition is a RANDOM 12-way pick
+(`GetSpecialBattleTransition(B_TRANSITION_GROUP_B_FACTORY)`,
+`battle_setup.c:864-909`) — reproducing which transition plays requires
+the RNG stream to be exact from the anchor all the way to the trigger.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain
