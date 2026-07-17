@@ -56,6 +56,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   overhead; worth noting for future sessions that `selectingMonsState`
   starting at 1 (not 0) is a real gotcha for anyone scripting a 3rd rent
   and expecting cursor mode to still be live afterward.
+- **Supervisor addendum (same day, ~16:45):** the #7 finding is
+  independently verified — reference source
+  (`battle_factory_screen.c:1298` init-to-1, `:1965-1966` same-call
+  handoff) confirms the structural impossibility; the R5-replication
+  screenshot shows the YES/NO screen on-screen; probe scripts/logs under
+  `/tmp/issues7probe/` inspected. In parallel, a worktree-lane worker
+  attempted ISSUES #5's sanctioned `rent-slot1.json` clean-window re-time:
+  8 candidates (confirm press-ticks 29-35 + DOWN-tick variations) were ALL
+  worse than the committed baseline (15-27 diffs vs 14) — re-time is
+  infeasible near the current timing; #5's rent-slot1 note resolves to the
+  attribution fallback (125/139 ships permanently, see ISSUES #5; that
+  lane's branch had no commits and was removed). Next step (worker
+  launching now): implement the 2-species safe-list in `ballAnimStall` +
+  Tier-1 pins + `rent-3picks.json` per entry 26 decision 2 — the entry-27
+  ruling's precondition (factor isolated) is met, so no fresh user
+  sign-off is required.
 
 ---
 

@@ -617,10 +617,18 @@ given the clean fit above.
   jitter: 0-diff stays the bar; re-time trace interactions into clean
   windows where feasible; otherwise ship with each non-matching frame
   individually attributed to this entry's pattern (x88-151 close-window
-  confinement). No further fix attempts. rent-slot1.json: next worker in
-  that area should attempt a clean-window re-time (candidates ~31/47+
-  per PROGRESS-archive #17). Mechanism summary below is kept for
-  attribution evidence; this is no longer an open work item.
+  confinement). No further fix attempts. rent-slot1.json: RESOLVED to the
+  attribution fallback (supervisor, 2026-07-17 ~16:20) — a worktree worker
+  swept 8 re-time candidates around the archived "~31" window (confirm
+  press-ticks 29-35, incl. DOWN-tick variations; ~47+ stays excluded, it
+  blows the species-name-breathe budget): EVERY candidate was worse than
+  the committed baseline (15-27 diffs vs baseline's 14), no exploitable
+  pattern — consistent with the chaotic cycle-cost root cause below.
+  rent-slot1.json ships at 125/139 permanently, all 14 frames attributed
+  to this entry's pattern; no further re-time attempts unless a future
+  session sweeps the untried ~40-60 tick range with a breathe-budget
+  workaround. Mechanism summary below is kept for attribution evidence;
+  this is no longer an open work item.
 
 ## (mechanism record) mon-pic close animation: WIN0V catch-up jitter is real hardware
   cycle-timing, not a modelable game-state bug (root-caused, NOT fixable at
