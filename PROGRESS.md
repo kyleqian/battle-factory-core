@@ -5,6 +5,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 7 — ISSUES #3 partial: slot6 every-frame trace 40/66 → 58/66
+
+- **State:** `npm test` **110/110**, `npm run build` green. Compares:
+  `anchor.json` 1/1, `draft-cursor.json` 13/13, `draft-menu.json` 38/38 —
+  still all 0 diff (no regressions). `draft-menu-slot6.json` (every-frame
+  0-65) **58/66** (was 40/66). S2 stays `[~]` — 8 frames still differ, all
+  redraw-scheduling transients (see `ISSUES.md` #3, trimmed to just these).
+- **Did:** Root-caused and fixed the two clusters inside the mon-pic
+  sub-state machine (`src/engine/monPic.ts`): (1) the ball-open flash bar's
+  flat-vs-blended color was wrongly tied to the hasActed timing variant —
+  it actually tracks a separate, session-persistent "has BLDCNT ever been
+  configured" flag, now `MonPicState.blended`; (2) that same
+  first-ever-open-after-a-cursor-move case needs its own window-growth
+  timing table ("variant C"), pinned from dense oracle probing of
+  draft-menu-slot6.json. Added 4 new hermetic Tier-1 tests (15→19) pinning
+  variant C and the blend/variant decoupling.
+- **Next:** Fix the remaining 3 clusters (all `Select_Task_Handle*`'s
+  redraw scheduling, not mon-pic): f1-f3 cursor-move header/arrow redraw,
+  f37-f38 menu-highlight redraw (likely same mechanism as f1-f3), f44/47-48
+  close-phase transients. `ISSUES.md` #3 has a dedicated probing plan for
+  each (isolate with single-purpose dense traces before fixing against the
+  combined slot6 trace). Then tick S2 `[x]`, then S4.
+- **Notes:** The end-states are already exact — only 8/66 frames differ,
+  all transient (settle within 2-4 ticks); this is scheduling/timing, not
+  missing mechanisms.
+
+---
+
 ## 6 — Ball-open reveal landed (38/38); every-frame capture exposes transients
 
 - **State:** `npm test` **106/106**, `npm run build` green. Compares:

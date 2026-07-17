@@ -41,8 +41,11 @@ windows.
 directions, captures every ≤4 frames) and `draft-menu.json` (open/navigate/
 close on ≥2 slots) pass compare with 0 diff; Tier-1 tests pin the draft
 state machine (cursor index, menu open/close, input repeat).
-**Remainder:** the ball-open reveal (mon-pic window/blend + front sprite)
-— see `ISSUES.md` #2; cursor sweep and menu state machine are 0-diff.
+**Remainder:** every-frame capture (`draft-menu-slot6.json`) is 58/66 (was
+40/66) — see `ISSUES.md` #3 for the 3 still-failing redraw-scheduling
+transients (cursor-move header/arrow redraw, menu-highlight redraw,
+close-phase). The sparser committed traces (draft-cursor.json,
+draft-menu.json) that skip those exact transient frames are 0-diff.
 
 ### [x] S3 — Rental data, RNG core, anchor mons pinned
 Gen-3 LCG (constants verified from `reference/pokeemerald/src/random.c`)
