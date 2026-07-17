@@ -5,14 +5,15 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #7 — multi-ball `ballAnimStall` model still wrong once a THIRD ball enters
-  the picture: ball tile mismatches appear during pure-idle dwell with 2
-  balls rented, unrelated to ISSUES #5's popup-close window (blocks
-  `rent-3picks.json`); a SEPARATE, newly-found bug (cursor input accepted too
-  soon after a RENT-confirm's popup close, real hardware drops it) can
-  silently contaminate any repro script that doesn't dwell long enough
-  before a post-confirm cursor move - see "worker update" below before
-  building a new repro
+## #7 — multi-ball `ballAnimStall` model still wrong once a ball accumulates
+  several stall events: ball tile mismatches appear during pure-idle dwell
+  with 2-3 balls rented, unrelated to ISSUES #5's popup-close window (blocks
+  `rent-3picks.json`). The separate post-confirm cursor-input-drop bug this
+  entry previously flagged is FIXED (`isCursorInputReady`, see PROGRESS) -
+  it was NOT the cause of this issue's own mismatches (RAM-confirmed, see
+  "second worker update" below); a fresh repro just needs any dwell
+  `>= 20 ticks` after a confirm's press-tick before the next cursor move
+  (`isCursorInputReady`'s own RAM-verified minimum) to avoid it entirely.
 
 **Symptom:** building the 3-pick dense trace (rent slot1 → RIGHT → rent
 slot2 → RIGHT → rent slot3, each rent = `A`(2f) idle28f `DOWN`(2f) idle4f
@@ -68,75 +69,110 @@ sub-symptoms were not disentangled this session.
 OBJ tiles, not the `x88-151` mon-pic window) - independently cross-checked by
 the overlay method above, which needs no popup/window state at all.
 
-**Status:** root cause not isolated - this needs the same caliber of
-dev-time RAM probe ISSUES #6 used (`gSprites[ballSpriteId].data[0]`/`animNum`/
-`animEnded` per rented ball, dumped tick-by-tick) but for a **3-ball**
-scenario with **two sequential cursor moves**, to see whether: real hardware
-only stalls *one* of the two simultaneously-active balls per trigger (not
-both), stalls both but by a different amount, or something else entirely.
-Do not guess at a fix without that data - the current `ballAnimStall` model
-scored the two-ball case exactly right by being precise about the mechanism,
-and a wrong guess here would silently re-break that.
+**Status (superseded by the "second worker update" below - kept for the
+original evidence trail):** the two/three-simultaneous-stall question this
+section raises is now answered (see below): real hardware stalls *every*
+simultaneously-active ball per trigger, exactly matching `ballAnimStall`'s
+existing `activeSlotsBeforeAction` formula - no fix needed there. The
+frame 124/155/163 pixel mismatches are real but traced to something more
+specific (a ball's own reroll-timer desync after 4+ accumulated stalls, RAM
+evidence starts at tick 204) - see "Status" at the end of this entry for the
+current next-step.
 
 **Blocks:** `rent-3picks.json` (needs a 2-ball-then-3-ball dwell window to
 assert ball-rock churn per the S5 brief) and the accompanying 3-ball
 `gRngValue` Tier-1 RAM-pin (would either pin a known-wrong stream or require
 fixing this first) - neither was committed this session; see `PROGRESS.md`.
 
-**Worker update (new session, RAM probe attempted, root cause of the
-two-simultaneous-stall question still NOT resolved - see why below):**
-built a 3-ball repro (`RENT_SLOT1`-shaped confirms for slots 0/1/2, a `RIGHT`
-between each) via the `tools/extract/inspect-anchor.py`-pattern RAM probe
-(dumping `gSprites[ballSpriteId].data[0]`/`animNum`/`animCmdIndex`/
-`animEnded` + `gRngValue` tick-by-tick, cross-checked against a matching
-engine replay of the identical button script). First attempt used a **10-tick
-dwell** between RENT_SLOT1's confirm and the following `RIGHT` (shorter than
-`ballAnimMultiBall.test.ts`'s own proven `DWELL_TO_SLOT2` = 40 ticks) and hit
-a **separate, previously-unknown bug** that invalidated the probe before it
-ever reached the intended two-simultaneous-active-balls trigger:
-- **Symptom:** RAM-verified directly (`sFactorySelectScreen->cursorPos`,
-  offset 3 in the struct, and `mons[i].selectedId`, offset 4): the `RIGHT`
-  press sent 10 ticks after RENT_SLOT1's confirm **never moved the cursor**
-  (`cursorPos` stayed 0 through tick118, confirmed by direct memory read) -
-  real hardware silently dropped it. The next `A` press (intended as "confirm
-  slot 1") landed on the STILL-cursored slot 0 instead and **deselected
-  it** (`mons[0].selectedId` flips 1→0 at tick97) rather than selecting slot
-  1. This engine's own replay of the identical button script does NOT
-  reproduce the drop - `core.ts`'s "cursor" mode branch
-  (`newAndRepeatedKeys.has("RIGHT")`) has no gate analogous to
-  `isMonPicInputReady()` (which DOES gate "menu"-mode input on the popup
-  finishing its open animation) - so the engine moves the cursor immediately
-  once `mode` flips back to `"cursor"`, even if real hardware is still mid
-  popup-close and would drop the input. This produced a completely
-  spurious-looking "ball tile mismatch" (ball 0's sprite fields reset at
-  tick99, matching a DESELECT's palette-driven `StartSpriteAnimIfDifferent(sprite,
-  0)` call, not any `ballAnimStall` effect) that has NOTHING to do with the
-  two-simultaneous-stall question this issue is actually about - it was a
-  contaminated repro, not a `ballAnimStall` finding. (Instrumentation itself
-  was cross-checked first via a single-ball control probe replaying
-  `RENT_SLOT1` alone to tick300: `animCmdIndex` progresses 0→16 exactly on
-  schedule, `animEnded` flips at tick168, `data[0]` decrements 32→31→30...
-  from tick169 - bit-exact match to the already-pinned model, so the probe's
-  own field offsets are correct; the drop is real, not a probe artifact.)
-- **Not yet known:** the actual minimum safe dwell before a post-confirm
-  cursor move (10 ticks is NOT enough; 40 ticks, per the existing pinned
-  test's `DWELL_TO_SLOT2`, is known-safe since that test passes exactly, but
-  the true threshold in between is unmeasured), and whether this drop is
-  specific to "cursor move right after a RENT/DESELECT confirm's close" or
-  is a broader "cursor mode input needs the popup fully closed" rule (would
-  mirror `isMonPicInputReady`'s existing "menu mode needs popup fully open"
-  gate as its close-side counterpart). Filed as a hazard for whoever builds
-  the next repro, not yet root-caused or fixed - out of scope for this
-  session's remaining time.
-- **The original two-simultaneous-stall question (this issue's primary
-  subject) is UNCHANGED and still fully open** - no valid RAM evidence was
-  gathered for it this session (the one probe attempt was contaminated by
-  the drop above before reaching the discriminating trigger). Next session:
-  rebuild the repro using a `DWELL_TO_SLOT2`-length (≥40-tick) dwell before
-  EVERY cursor move (not just the first), then apply the same
-  `gSprites[]`/`gRngValue` dump-and-diff method (fast to redo - the control
-  probe alone took under 2 minutes end-to-end) to the point where a second
-  `RIGHT` has two already-active balls to stall.
+**First worker update (superseded - the cursor-input-drop bug it found is
+now fixed):** a prior session's 10-tick-dwell probe hit a *separate* bug -
+real hardware drops a post-RENT-confirm cursor move sent too soon - and
+never reached this issue's own question. That bug is now root-caused, fixed,
+and Tier-1-pinned: `isCursorInputReady` (`src/engine/monPic.ts`), gating
+`core.ts`'s cursor-mode branch on `monPic.phase === "closed"` (mirrors
+`isMonPicInputReady`'s open-side gate). RAM-verified exact boundary
+(`sFactorySelectScreen->monPicAnimating`, empirically-found struct offset
+672 - NOT the naive `12 + 108*6 + 3*2 = 666` computed from the struct's
+declared field sizes, so something in that layout has an unaccounted 6
+bytes; re-derive by byte-scanning if this offset is ever needed again):
+replaying `RENT_SLOT1` (confirm A press-tick 37), a `RIGHT` sent tick 56 is
+dropped (`cursorPos` stays 0); tick 57 (the tick `monPicAnimating` first
+reads FALSE) is accepted. See `tests/cursorInputGate.test.ts`.
+
+**Second worker update (same session, after the fix above): the
+two/three-simultaneous-stall rule itself is CONFIRMED CORRECT as already
+implemented - `ballAnimStall`'s existing `activeSlotsBeforeAction` formula
+(stall *every* currently-active ball, not just one) generalizes exactly
+right up to a `cursorPos`-desync boundary that turned out to be OUT OF
+SCOPE. The real, still-open bug is narrower and different: a ball that has
+accumulated several stall events develops a 1-tick internal desync in its
+own resting→moving reroll schedule, first observed at tick 204 of the repro
+below. Do not guess a fix for this narrower bug without further RAM data -
+see "Status" below.**
+
+Built a fresh 3-ball repro (RAM probe, `tools/extract/inspect-anchor.py`
+pattern, dumping `gSprites[ballSpriteId].data[0]`/`animNum`/`animCmdIndex`/
+`animEnded` (empirically-verified struct-Sprite offsets `0x2A`/`0x2B`/`0x2E`/
+`0x3F` bit `0x10`, `sizeof(struct Sprite)` = `0x44`) + `gRngValue`
+tick-by-tick, cross-checked against a matching engine replay of the
+identical button script) using a **≥40-tick dwell before every cursor
+move** (well past the 20-tick gate above): rent slot0 → dwell40 → `RIGHT` →
+rent slot1 (now 2 balls simultaneously active) → dwell40 → `RIGHT` (the
+critical trigger: 2 already-active balls) → rent slot2 (3 balls active).
+**Result: `gRngValue` matches bit-exact between RAM and engine on every one
+of 37 sampled ticks spanning both the pre-trigger and post-trigger window
+around the 2-active-ball `RIGHT`** - i.e. `ballAnimStall`'s current
+"stall everyone active" formula already handles 2 (and, per the 3-ball
+window sampled after slot2's rent, 3) simultaneously-active balls exactly
+right. (A further probe tick pressing `RIGHT` a 3rd time, past the 3rd/final
+rent, showed a real `cursorPos` divergence at that point - but this is
+`Select_OptionRentDeselect` returning `SELECT_CONFIRM_MONS` and handing off
+to `Select_Task_HandleYesNo` once all `FRONTIER_PARTY_SIZE` picks are made
+(:1949-1970, :1615-1619) - the reveal/YES-NO screen this run's brief
+explicitly keeps out of scope, not a `ballAnimStall` bug. No further cursor
+input is legal after the 3rd confirm in the real game either.)
+
+**Then reproduced ISSUES #7's original pixel symptom directly**, using a
+script shaped like entry 21's own repro (36-tick dwells, confirms landing at
+press-ticks 37/113/189 - `npm run compare` on a scratch trace, deleted after,
+not committed): frame 124 (173px DIFF), frame 155 (173px), and frame 163
+(173px) all still mismatch - so this issue is NOT resolved by the
+cursor-input-gate fix alone; the pixel symptom is real. Cross-referencing
+against the RAM/engine `gRngValue` dump of the *same* button script (a
+different script than the clean-generalization repro above - this one keeps
+the original 36-tick dwells rather than 40): **the two streams match
+bit-exact for all 204 ticks from frame 1 through 203** (spanning both
+cursor-move triggers and the 3rd rent, i.e. everywhere the pixel-mismatch
+frames 124/155/163 themselves land - so those specific pixel diffs are
+NOT yet explained by any `gRngValue`-visible state divergence at that point;
+they may be a rendering-only lag/offset rather than a stall-count error, or
+the divergence found below may propagate backward into earlier frames'
+*rendering* without yet showing in gRngValue - not disentangled this
+session). The streams then diverge for the first time at **tick 204**:
+RAM shows ball 0 completing a resting→moving reroll this tick
+(`animCmdIndex` 16→0, `animEnded` 1→0) and ball 1 advancing its moving cycle
+normally (`animCmdIndex` 11→12); the engine has **neither** transition fire
+- both stay parked one tick behind where RAM already is, only catching up
+the following tick. By tick 204, ball 0 has accumulated **4** cumulative
+stall events (the first `RIGHT`, confirm2, the second `RIGHT` shared with
+ball 1, and confirm3 shared with ball 1 again) - more than
+`ballAnimMultiBall.test.ts`'s own pinned cases ever reach (max 2). This
+looks like the `REST_INTERNAL_OFFSET`/`FAILURE_REROLL_DELAY` internal-timing
+machinery (`ballAnim.ts`) not composing correctly once a ball's rest-timer
+countdown has itself been stalled multiple times by other balls' triggers
+along the way, but this was not root-caused this session - RAM data stops
+at tick 204's discovery, not yet enough to derive the correct formula.
+
+**Status:** the two/three-*simultaneous*-stall question (this issue's
+original title) is answered and needs no fix. The remaining open bug is
+narrower: a ball's *own* internal reroll timer desyncs by (at least) 1 tick
+after accumulating several stall events over its lifetime. Next session:
+dump `gSprites[0]` densely from tick ~195-210 in both RAM and engine (only a
+few ticks needed, not a fresh 200-tick probe) to see exactly which internal
+counter (`timer`/`pendingRest` in `ballAnim.ts`'s model) is off and by how
+much, then re-verify `ballAnim.test.ts`/`ballAnimMultiBall.test.ts` still
+pass unchanged before pinning a new test. `rent-3picks.json` and its
+`gRngValue` Tier-1 pin remain blocked on this.
 
 ## #5 — mon-pic close animation: WIN0V catch-up jitter is real hardware
   cycle-timing, not a modelable game-state bug (root-caused, NOT fixable at
