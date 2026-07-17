@@ -8,6 +8,9 @@
 # autonomously, but when it needs a decision it notifies you and asks in the
 # terminal. A watchdog still hard-caps the session (default 6h) as the safety
 # net — SUPERVISOR.md tells it to wind down cleanly before the deadline.
+# Interactive sessions start with Remote Control on, so you can follow and
+# steer them from claude.ai/code or the Claude mobile app; --headless print
+# mode has no remote bridge.
 # --headless runs it unattended like run-agent.sh.
 #
 # Usage:
@@ -104,7 +107,9 @@ else
   # Scripts run without job control, so this '&' child stays in our process
   # group and can still own the terminal for its TUI — backgrounding it only
   # serves to hold its pid for the watchdog (exec would lose the cap).
-  POKEBENCH_ROLE=supervisor claude --model "$MODEL" --dangerously-skip-permissions "$PROMPT" &
+  POKEBENCH_ROLE=supervisor claude --remote-control \
+    --remote-control-session-name-prefix emerald-factory \
+    --model "$MODEL" --dangerously-skip-permissions "$PROMPT" &
 fi
 agent_pid=$!
 ( sleep "$CAP_SECONDS"
