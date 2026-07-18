@@ -63,8 +63,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (tick 1229, player bar 22px off — next probe on record: what
   structurally differs between the player widget's creation tick 1228
   and the opponent's 1231, both via `CreatePartyStatusSummarySprites`).
-  Attempted this session as an optional stretch but not reached within
-  the cap — carries forward unchanged. After that: send-out engine slice
+  Not attempted this session (optional stretch, time went to fully
+  closing GAP A instead) — carries forward unchanged. After that:
+  send-out engine slice
   1300-1560 (`battle-scene-notes.md` §7) and player send-out + menu
   1560-1810 (`battle-menu-notes.md`) — groundwork complete, assets
   ready, per #65's plan.
