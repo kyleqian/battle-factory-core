@@ -137,10 +137,25 @@ export function applyDeselect(
  * gated an extra tick behind the window copies) 3 ticks later, at which
  * point it's fully settled and matches an instant apply. `elapsed` counts
  * ticks since the move (0 = the move's own tick).
+ *
+ * `fast` (ISSUES #7 remainder, oracle-verified via a dense 3-pick trace's
+ * PNG captures - `rent-3picks.json`): when 2+ balls are already rented at
+ * the move tick, the whole pipeline lands 1 tick sooner - species text
+ * catches up alongside category (both `elapsed>=1`, not staggered) and the
+ * arrow settles at `elapsed>=2` instead of `elapsed>=3`. Confirmed
+ * NOT triggered by a single rented ball (a RIGHT move with exactly 1 ball
+ * rented reproduces the original 3-tick-staggered timing exactly, byte-for-
+ * byte against the oracle - see the app-vs-oracle species-text/arrow-position
+ * crops from that investigation). Likely the extra rented ball's own
+ * `ballAnimStall`-adjacent text/OAM cost shifts where in the frame the
+ * cursor-move's own text printers finish relative to `BuildOamBuffer`, but
+ * not re-derived from first principles - pinned from the oracle like this
+ * screen's other redraw-timing quirks.
  */
 export interface CursorRedrawState {
   fromCursorPos: number;
   elapsed: number;
+  fast: boolean;
 }
 
 /**
@@ -261,7 +276,8 @@ export function moveMenuCursor(menuCursorPos: number, direction: 1 | -1): number
 export function advanceCursorRedraw(state: CursorRedrawState | null): CursorRedrawState | null {
   if (!state) return null;
   const elapsed = state.elapsed + 1;
-  return elapsed >= 3 ? null : { ...state, elapsed };
+  const settleTicks = state.fast ? 2 : 3;
+  return elapsed >= settleTicks ? null : { ...state, elapsed };
 }
 
 /** Advance an in-flight menu-highlight redraw by one tick; call before applying this tick's input (a new move overrides the result). */
@@ -329,7 +345,8 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
   // on their own tick during an in-flight move.
   const redraw = state.cursorRedraw;
   const categoryPos = !redraw || redraw.elapsed >= 1 ? state.cursorPos : redraw.fromCursorPos;
-  const speciesPos = !redraw || redraw.elapsed >= 2 ? state.cursorPos : redraw.fromCursorPos;
+  const speciesPos =
+    !redraw || redraw.elapsed >= (redraw.fast ? 1 : 2) ? state.cursorPos : redraw.fromCursorPos;
   const arrowPos = redraw ? redraw.fromCursorPos : state.cursorPos;
 
   const slot = state.slots[state.cursorPos];
@@ -432,7 +449,8 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
 
   const redraw = state.cursorRedraw;
   const categoryPos = !redraw || redraw.elapsed >= 1 ? state.cursorPos : redraw.fromCursorPos;
-  const speciesPos = !redraw || redraw.elapsed >= 2 ? state.cursorPos : redraw.fromCursorPos;
+  const speciesPos =
+    !redraw || redraw.elapsed >= (redraw.fast ? 1 : 2) ? state.cursorPos : redraw.fromCursorPos;
   const arrowPos = redraw ? redraw.fromCursorPos : state.cursorPos;
 
   const slot = state.slots[state.cursorPos];

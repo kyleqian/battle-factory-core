@@ -158,7 +158,16 @@ const OPEN_TABLE_B: MonPicVisual[] = [
   flash(32, true),
   flash(64, true),
   flash(64, true),
-  flash(64, true), // oracle-measured extra hold (variant A has only two flash(64) ticks)
+  // ISSUES #7 remainder (oracle-verified via a dense 3-pick trace's PNG
+  // captures, direct DISPCNT/WIN0V register probe): the "extra hold" tick is
+  // NOT a third flat flash(64) - the flash sprite is already gone here and
+  // Task_OpenMonPic's WIN0-on/BG3-shown case0/case1 pair has already fired
+  // (RAM-confirmed: DISPCNT's WIN0 bit sets the tick before this one, its
+  // BG3 bit sets on this tick), so this tick shows the degenerate 1px-tall
+  // window (top=64,bottom=65, matching case0's initial WIN0V before case2's
+  // growth loop starts the next tick) blended per the window path below, not
+  // the flat flash color.
+  win(64, 65),
   win(60, 69),
   win(56, 73),
   win(52, 77),

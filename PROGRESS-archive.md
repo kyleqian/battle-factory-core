@@ -5,6 +5,76 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 28 — ISSUES #7 minimal-pair probes (worker, capped, probe-only): the fifth update's "contradiction" was ITSELF a measurement artifact — P_STALL (HAUNTER, count3/RIGHT/origin3) is RAM-DISPROVEN as a valid data point (count=3 is structurally unreachable via LEFT/RIGHT — completing the 3rd rent exits cursor mode on the same tick); species-only table RESURRECTED with a corrected 2-species safe-list {BAYLEEF, HAUNTER}
+
+- **State:** unchanged from entry 27 — `npm test` **264/264**, `npm run
+  build` green, working tree clean before this docs-only commit. No
+  `src/`/`tests/` changes this session (probe-only step, per the brief).
+  `rent-3picks.json` still not built (remains blocked, see Next).
+- **Did:** Followed the supervisor's minimal-pair ruling exactly (PROGRESS
+  entry 27). **PROBE A** (HAUNTER, count1/RIGHT/origin3 — differs from
+  P_STALL in count only): clean, decisive **NO STALL** (window 203→207,
+  gap 4, unambiguous). **PROBE B** (mandated: count3/LEFT/origin5) **could
+  not be constructed** — after a 3rd rent, `cursorPos` froze permanently
+  and `selectingMonsState` read 4 (not 3); a screenshot confirmed the
+  screen had already handed off to the "Are these three POKéMON OK?" YES/NO
+  screen. Reference source
+  (`battle_factory_screen.c:1965-1966`,`Select_OptionRentDeselect`) confirms
+  this is structural: `selectingMonsState` starts at 1, so a 3rd successful
+  rent always makes it 4, and `4 > FRONTIER_PARTY_SIZE(3)` ends cursor mode
+  on that same tick — no tick exists where 3 balls are active and LEFT/RIGHT
+  still works. An **exact tick-for-tick re-replication of the fourth
+  worker update's own original R5 script** (rent0→R1→R2→rent2→R3→L1→R4→
+  rent3→R5) reproduces the identical freeze: R5's RIGHT never moves
+  `cursorPos` off 3. **This proves P_STALL was never a genuine cursor-move
+  observation** — it was measured against an already-exited screen.
+  Discarding it, HAUNTER now shows NO STALL at every legitimately-tested
+  condition (count1/RIGHT/origin3 this session, count1/LEFT/origin5 fifth
+  update, count2/RIGHT/origin3 via a bonus Probe C this session) — a second
+  "safe" species alongside BAYLEEF, not a contradiction. Full 12-row keyed
+  table (every valid LEFT/RIGHT point across all sessions) fits **one
+  variable with zero exceptions**: entering species ∈ {BAYLEEF, HAUNTER} →
+  no stall; ∈ {MAGBY, BUTTERFREE, ONIX, QUILAVA} → stall. Full evidence:
+  ISSUES #7 ("sixth worker update").
+- **Next:** get sign-off then (1) implement the corrected 2-species
+  safe-list in `ballAnimStall`'s LEFT/RIGHT branch, pin with a Tier-1 test
+  against this session's RAM checkpoints; (2) **before building
+  `rent-3picks.json`**, re-check its spec (PROGRESS-archive #21) against
+  this session's finding that a post-3rd-rent cursor move is impossible in
+  the real game — any dense-capture window assuming otherwise needs
+  rethinking; (3) confirm-flow implementation, exit sequence, S6 remain
+  queued behind this per entry 26.
+- **Notes:** all probing was scratch Python under `/tmp/issues7probe/` (not
+  committed) — no `src/` edits were ever at risk. Method refinement this
+  session: `data[0]` is the real hardware's REST COUNTDOWN (set to 32 at a
+  SUCCESS roll, held through the full 128-tick cycle, then decremented
+  32→0) — a *repeated* `data[0]` value across two consecutive ticks is a
+  more direct stall signature than inferring one from `animCmdIndex` gaps
+  alone, and was used to resolve an otherwise-ambiguous BUTTERFREE read via
+  cross-calibration against an independent, undisputed RENT-confirm stall
+  in the same run. PAPERCUT: none beyond the usual oracle round-trip
+  overhead; worth noting for future sessions that `selectingMonsState`
+  starting at 1 (not 0) is a real gotcha for anyone scripting a 3rd rent
+  and expecting cursor mode to still be live afterward.
+- **Supervisor addendum (same day, ~16:45):** the #7 finding is
+  independently verified — reference source
+  (`battle_factory_screen.c:1298` init-to-1, `:1965-1966` same-call
+  handoff) confirms the structural impossibility; the R5-replication
+  screenshot shows the YES/NO screen on-screen; probe scripts/logs under
+  `/tmp/issues7probe/` inspected. In parallel, a worktree-lane worker
+  attempted ISSUES #5's sanctioned `rent-slot1.json` clean-window re-time:
+  8 candidates (confirm press-ticks 29-35 + DOWN-tick variations) were ALL
+  worse than the committed baseline (15-27 diffs vs 14) — re-time is
+  infeasible near the current timing; #5's rent-slot1 note resolves to the
+  attribution fallback (125/139 ships permanently, see ISSUES #5; that
+  lane's branch had no commits and was removed). Next step (worker
+  launching now): implement the 2-species safe-list in `ballAnimStall` +
+  Tier-1 pins + `rent-3picks.json` per entry 26 decision 2 — the entry-27
+  ruling's precondition (factor isolated) is met, so no fresh user
+  sign-off is required.
+
+---
+
 ## 27 — S5 slice (worker, capped, LAST of today): STOPPED before implementing — the supervisor-sanctioned ISSUES #7 species-only stall table was RAM-DISPROVEN by a clean counterexample (HAUNTER stalls at one count/direction/origin, does not at another); no code change made, per the brief's own explicit stop condition
 
 - **State:** unchanged from entry 26 — `npm test` **264/264**, `npm run

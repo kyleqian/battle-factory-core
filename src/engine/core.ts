@@ -136,12 +136,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     if (draftScreen.mode === "cursor" && isCursorInputReady(monPic)) {
       if (newAndRepeatedKeys.has("RIGHT")) {
         const nextCursorPos = moveCursor(draftScreen.cursorPos, 1);
-        cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0 };
+        cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0, fast: activeSlotsBeforeAction.length >= 2 };
         if (cursorMoveStallsBalls(draftScreen.slots[nextCursorPos]!.species)) ballAnimStall = activeSlotsBeforeAction;
         draftScreen = { ...draftScreen, cursorPos: nextCursorPos, hasActed: true };
       } else if (newAndRepeatedKeys.has("LEFT")) {
         const nextCursorPos = moveCursor(draftScreen.cursorPos, -1);
-        cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0 };
+        cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0, fast: activeSlotsBeforeAction.length >= 2 };
         if (cursorMoveStallsBalls(draftScreen.slots[nextCursorPos]!.species)) ballAnimStall = activeSlotsBeforeAction;
         draftScreen = { ...draftScreen, cursorPos: nextCursorPos, hasActed: true };
       } else if (newKeys.has("A")) {

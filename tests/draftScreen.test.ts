@@ -19,6 +19,21 @@ function tap(state: ReturnType<typeof createInitialState>, button: GbaButton, ho
   return state;
 }
 
+function idle(state: ReturnType<typeof createInitialState>, frames: number) {
+  for (let i = 0; i < frames; i += 1) state = tick(state, new Set());
+  return state;
+}
+
+/** Rent the currently-cursored slot: open its popup, navigate to RENT, confirm. */
+function rentCurrentSlot(state: ReturnType<typeof createInitialState>) {
+  state = tap(state, "A"); // open popup
+  state = idle(state, 28);
+  state = tap(state, "DOWN"); // menu cursor -> RENT row
+  state = idle(state, 4);
+  state = tap(state, "A"); // confirm RENT
+  return state;
+}
+
 describe("draft screen cursor mode", () => {
   it("moveCursor wraps at both ends of the 6 slots", () => {
     expect(moveCursor(0, -1)).toBe(5);
@@ -83,33 +98,67 @@ describe("draft screen cursor mode", () => {
 // factoryDraftScreen.ts's CursorRedrawState doc and
 // tools/compare/traces/draft-menu-slot6.json's former f1-f3 cluster.
 describe("draft screen cursor-move redraw scheduling", () => {
-  it("advanceCursorRedraw passes null through and clears after 3 ticks", () => {
+  it("advanceCursorRedraw passes null through and clears after 3 ticks (non-fast)", () => {
     expect(advanceCursorRedraw(null)).toBeNull();
     // elapsed:0 is the shape set on the move's own tick (see below); advance
     // 3 times (ticks T+1, T+2, T+3) to reach the settled/cleared state.
-    let redraw: ReturnType<typeof advanceCursorRedraw> = { fromCursorPos: 0, elapsed: 0 };
+    let redraw: ReturnType<typeof advanceCursorRedraw> = { fromCursorPos: 0, elapsed: 0, fast: false };
     redraw = advanceCursorRedraw(redraw);
-    expect(redraw).toEqual({ fromCursorPos: 0, elapsed: 1 });
+    expect(redraw).toEqual({ fromCursorPos: 0, elapsed: 1, fast: false });
     redraw = advanceCursorRedraw(redraw);
-    expect(redraw).toEqual({ fromCursorPos: 0, elapsed: 2 });
+    expect(redraw).toEqual({ fromCursorPos: 0, elapsed: 2, fast: false });
     redraw = advanceCursorRedraw(redraw);
     expect(redraw).toBeNull();
   });
 
-  it("a LEFT/RIGHT move starts a redraw pipeline from the old slot, settling 3 ticks later", () => {
+  it("advanceCursorRedraw clears after only 2 ticks when fast (ISSUES #7 remainder, 2+ rented balls)", () => {
+    let redraw: ReturnType<typeof advanceCursorRedraw> = { fromCursorPos: 0, elapsed: 0, fast: true };
+    redraw = advanceCursorRedraw(redraw);
+    expect(redraw).toEqual({ fromCursorPos: 0, elapsed: 1, fast: true });
+    redraw = advanceCursorRedraw(redraw);
+    expect(redraw).toBeNull();
+  });
+
+  it("a LEFT/RIGHT move starts a redraw pipeline from the old slot, settling 3 ticks later (0/1 rented balls)", () => {
     let state = createInitialState();
     expect(state.draftScreen.cursorRedraw).toBeNull();
 
     state = tick(state, new Set(["RIGHT"])); // 0 -> 1
     expect(state.draftScreen.cursorPos).toBe(1);
-    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 0 });
+    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 0, fast: false });
 
     state = tick(state, new Set());
-    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 1 });
+    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 1, fast: false });
     state = tick(state, new Set());
-    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 2 });
+    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 2, fast: false });
     state = tick(state, new Set());
     expect(state.draftScreen.cursorRedraw).toBeNull(); // settled
+  });
+
+  // ISSUES #7 remainder: oracle-verified via a dense 3-pick trace's PNG
+  // captures (rent slot0, RIGHT into slot1 with only 1 ball rented, rent
+  // slot1, RIGHT into slot2 with 2 balls rented). The 1-ball RIGHT's own
+  // +1/+2 redraw frames matched the oracle byte-for-byte (standard timing);
+  // the 2-ball RIGHT's species text and cursor arrow were already showing
+  // the *new* slot 1 and 2 ticks earlier respectively than the standard
+  // timing predicts - see factoryDraftScreen.ts's CursorRedrawState.fast doc.
+  it("a RIGHT move with only 1 ball rented uses the standard (non-fast) timing", () => {
+    let state = createInitialState();
+    state = rentCurrentSlot(state); // rent slot 0 - exactly 1 active ball
+    state = idle(state, 36);
+    state = tick(state, new Set(["RIGHT"])); // slot 0 -> slot 1
+    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 0, elapsed: 0, fast: false });
+  });
+
+  it("a RIGHT move with 2 balls already rented uses the fast timing", () => {
+    let state = createInitialState();
+    state = rentCurrentSlot(state); // rent slot 0
+    state = idle(state, 36);
+    state = tap(state, "RIGHT"); // slot 0 -> slot 1
+    state = rentCurrentSlot(state); // rent slot 1 - now 2 active balls
+    state = idle(state, 36);
+    state = tick(state, new Set(["RIGHT"])); // slot 1 -> slot 2
+    expect(state.draftScreen.cursorRedraw).toEqual({ fromCursorPos: 1, elapsed: 0, fast: true });
   });
 });
 

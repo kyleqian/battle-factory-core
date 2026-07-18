@@ -112,13 +112,14 @@ describe("monPic: opening (variant A - fresh from idle, oracle-measured anomaly)
 });
 
 describe("monPic: opening (variant B - after LEFT/RIGHT/UP/DOWN already used, not the first-ever open, clean cadence)", () => {
-  it("holds the full-width flash bar for 3 ticks (one more than variant A) before the window starts growing", () => {
+  it("holds the full-width flash bar for 2 ticks, then a degenerate 1px window (not a 3rd flash tick - ISSUES #7 remainder, oracle/RAM-verified) before the window starts growing", () => {
     let state = run(openMonPic(true, true), 13);
     expect(getMonPicVisual(state).flashWidth).toBe(64);
     state = advanceMonPic(state);
     expect(getMonPicVisual(state).flashWidth).toBe(64);
     state = advanceMonPic(state);
-    expect(getMonPicVisual(state).flashWidth).toBe(64);
+    expect(getMonPicVisual(state).flashWidth).toBe(0);
+    expect(getMonPicVisual(state).window).toEqual({ top: 64, bottom: 65 });
     state = advanceMonPic(state);
     expect(getMonPicVisual(state).window).toEqual({ top: 60, bottom: 69 });
   });
