@@ -5,6 +5,90 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 62 — S6 scene-assembly: fixed the extractor "palette bank 4 missing" misdiagnosis from #60; the color-compositing rule it was blocking on is now also correctly understood but not yet wired — `scene-assembly.json` still 40/256 (unchanged), but both open gaps are narrower and more precisely named
+
+- **State:** `npm test` **425/425** (423→425, +2 in `battleBg.test.ts`),
+  `npm run build` green. `npm run compare -- tools/compare/traces/scene-
+  assembly.json` → still **40/256** (rendering logic unchanged this
+  session — see below for why). `transition.json` re-verified **206/206**
+  (battle-bg.json is its dependency too, per the brief's caution). All 17
+  other traces re-verified at their exact prior counts (anchor 1/1,
+  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example
+  4/4, summary-info-onix 122/122, summary-info-magby 132/132,
+  confirm-decline 67/67, accept-prebattle 137/137, walk-warpout 125/125,
+  room-entry 110/110, room-npcs 98/98, room-msgbox 142/142, rent-slot1
+  125/139, rent-3picks 157/190, confirm-flow 79/95) — zero regressions.
+- **Did — gap 1 (BG1 streak content), extraction fixed and RAM-confirmed:**
+  #60's "entrySlide references palette bank 4, which the extractor never
+  captured" was a misdiagnosis, not a real gap. RAM-probed
+  `gPlttBufferFaded` at hardware palette bank 4 directly (ticks 1073-1886):
+  its 16 live colors are bit-exact equal to `battle-bg.json`'s existing
+  local subpalette 2. Source explains why: `DrawMainBattleBackground` loads
+  the Frontier palette at `BG_PLTT_ID(2)` for 3 subpalettes (hardware slots
+  2/3/4) before the intro slide runs, and `DrawBattleEntryBackground`'s
+  `BATTLE_TYPE_FRONTIER` branch never reloads palette RAM — so
+  `entrySlide`'s raw nibble 4 is hardware-absolute, same `+2` base as the
+  static tilemap, and normalizing it the same way (now done in
+  `extract-battle-bg.ts`) lands on the already-captured local index 2. No
+  new palette data was ever needed. `entrySlide` now has usable content.
+  **But** wiring it into `battleScene.ts` surfaced a SECOND, independent
+  bug in the existing fallback: GBA alpha blend only engages where the
+  actual topmost non-transparent layer at a pixel is TGT1-flagged (BG1
+  only, per RAM-confirmed `BLDCNT`); `entrySlide`'s tilemap is a sparse
+  diagonal-streak pattern over a mostly-transparent grid, so most pixels
+  in the window have BG1 transparent — meaning BG3/OBJ must draw at RAW
+  unscaled color there, not the uniform `evb/16`-scaled brightness the
+  existing `drawSlideScene` fallback applies everywhere. Confirmed by
+  direct oracle pixel inspection (tick 1090, columns clear of both trainer
+  sprites: observed colors are exact *unscaled* palette matches, not
+  scaled). This alone would have kept the trace non-exact even with gap 1
+  "fixed" naively. Did NOT wire the corrected compositing rule in, because
+  the BG3/BG1 shift-sign convention needed to know *which* pixels are
+  BG1-transparent wasn't nailed down: a single isolated point matched
+  `shift=-240` (opposite sign from the existing `shiftTop`/`shiftBottom`)
+  exactly, but a whole-scanline brute-force pixel search was inconclusive
+  — the static bg tileset reuses ~5-6 sky colors across many tiles, so
+  candidate shifts alias to similar match counts and a plain per-pixel-
+  count fit can't be trusted. Left `drawSlideScene` unchanged (still the
+  confirmed-wrong fallback) rather than commit a half-verified rule.
+- **Did — gap 2 (widget entrance), narrowed but not resolved:** the
+  brief's "tile-index swap" framing doesn't match what
+  `SpriteCB_StatusSummaryBalls_Enter` actually does — read it directly,
+  and it never touches `oam.tileNum` (only `x2` and delay counters). Tried
+  a blanket 1-tick shift on the `x2` lookup tables (a plausible off-by-one
+  given creation-tick vs first-callback-tick semantics): it fixed frames
+  1230/1232-1235 but broke 1228/1229/1231, proving the tables aren't
+  uniformly off — reverted rather than commit an unverified guess (tree is
+  clean, `git status` confirms no leftover diff). Direct pixel diffing
+  (frame 1285, opponent ball-icon slot 0 at its RAM-exact settled corner)
+  shows our model already drawing that icon's final "Empty" ring tile
+  there, while the oracle shows the same 16 ring-outline pixels as pure
+  background — i.e. the icon is positionally settled early but stays
+  invisible (or on a blank tile) until some later trigger, unrelated to
+  the `x2` slide.
+- **Next:** gap 1 needs a direct RAM read of the actual DMA'd
+  `gScanlineEffectRegBuffers` content (not just `gTasks[0].data[2]`'s
+  value, which is already confirmed) to settle the shift-sign question,
+  paying attention to the `dmaSrcBuffers[i] = ...+1` indexing trick in
+  `scanline_effect.c` (buffer-index-to-scanline mapping may be off by one
+  from a naive reading) — then apply the "raw-unless-BG1-opaque" blend
+  rule this session confirmed. Gap 2 needs `gSprites[id].{invisible,
+  oam.tileNum}` RAM-probed per tick for the 14 widget sprites across
+  1228-1292 (sprite-identification method already banked from #60) to find
+  what actually gates visibility. Both are additive, narrower asks than
+  what #60 left open — see `battleScene.ts`'s module doc and
+  `docs/battle-scene-notes.md` §2's new correction block for the full
+  account either can be picked up from cold.
+- **Notes:** PAPERCUT: none new. Two full sessions in a row have now hit
+  the same wall on gap 1 (color) via pixel-fitting alone — the pattern
+  holds: RAM ground truth for *values* (BLDCNT, `data[2]`, `gBattle_BG1_X`)
+  has been reliable, but inferring the *sign/indexing convention* those
+  values are applied with by brute-forcing pixels against a repetitive
+  tileset is not. A future session should probe the DMA buffer's literal
+  written content, not just the C-level source variable.
+
+---
+
 ## 61 — S6 RNG-exactness step (parallel worktree lane, merged): battle-1 opponent personality gen + transition select implemented as pure logic, Tier-1-pinned bit-exact vs the RAM dump
 
 - **State:** merge of `worker/wt-20260718-123140` (single commit

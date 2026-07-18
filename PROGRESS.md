@@ -5,6 +5,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 65 — Supervisor wind-down: session end 2026-07-18 ~14:30; S6 engine parity anchor→tick 1040 byte-exact, scene assembly 104/256 (one named gap), ALL S6 groundwork + RNG criterion banked
+
+- **State (verified this minute):** `npm test` **425/425**, `npm run
+  build` green, tree clean at `b4faa7a` + this docs commit. 18 committed
+  parity traces: anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
+  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+  room-msgbox 142/142, transition 206/206 — all byte-exact — plus
+  scene-assembly **104/256** (sole in-progress slice, see #64/#63) and
+  the three ISSUES-#5-policy traces (rent-slot1 125/139, rent-3picks
+  157/190, confirm-flow 79/95). Engine covers the anchor through tick
+  1040 of the 1886-tick battle-1 bring-up byte-exact; 1040-1295 partial.
+- **Session summary (supervised, ~09:10-14:30, 20 worker steps, 2 lanes):**
+  engine slices landed: walk+warp 400-519 (125/125), room entry 520-624
+  (110/110), scientists+opponent 624-717 (98/98), speech msgbox 718-843
+  (142/142), CIRCLES_MEET transition 843-1040 (206/206), scene assembly
+  1040-1295 through 4 convergent iterations (42→104/256; systemic
+  one-tick render lag discovered, #63); RNG criterion satisfied
+  (`opponentGen.ts` bit-exact vs RAM dump, #61); ISSUES #15 root-caused
+  + fixed (to5Bit palette-convention bug, #48). Parallel lane banked ALL
+  remaining S6 groundwork: transition id RAM-confirmed (CIRCLES_MEET,
+  #47), no-heal-icon correction + 843-1031 pinned (#53), scene-assembly
+  mechanism (#55), send-out window (#59), menu window (#59), and every
+  flagged asset extracted byte-exact (battle room #49, interface widgets
+  #57, sendout anim assets #59). Suite 341→425 Tier-1 tests; traces
+  13→19 (+4 dense groundtruth). Zero regressions at every one of 20
+  verified steps; every worker ended at a green commit.
+- **Next:** (1) scene-assembly GAP A residual — the streak window's
+  blend arithmetic; exact next RAM probe in #63/`battleScene.ts` module
+  doc; **user decision on record: keep iterating, no re-scope** (also in
+  ROADMAP S6). (2) Then send-out engine slice 1300-1560
+  (`battle-scene-notes.md` §7) and player send-out + menu 1560-1810
+  (`battle-menu-notes.md`) — groundwork complete, assets ready. (3) The
+  22px tick-1229 widget residual (#64) rides along with GAP A.
+- **Notes:** PAPERCUTS.md gained the stale `tools/compare/out/` PNG
+  entry (GAP-B worker's flag). No usage-limit events. Escalation
+  mid-session (2 consecutive scene-assembly misses) was answered by the
+  user in-terminal: keep iterating. One supervisor error caught+fixed:
+  a double-rotated archive entry (#55, dedup commit `029c01f`).
+
+---
+
 ## 64 — S6 scene-assembly GAP B (widget entrance) resolved: same one-tick render lag GAP A found (#63) applies to the widget sprites too, plus the opponent icon x2 tables were missing their per-icon flat-delay prefix since #60/#62 — `scene-assembly.json` 104/256 (was 41/256), 0 regressions. GAP A (streak blend-arithmetic) untouched, as scoped.
 
 - **State:** `npm test` **425/425**, `npm run build` green. `npm run
@@ -148,86 +191,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   broke the two-session stall; worth reusing whenever a RAM-confirmed
   value still doesn't reproduce pixels.
 
+
 ---
 
-## 62 — S6 scene-assembly: fixed the extractor "palette bank 4 missing" misdiagnosis from #60; the color-compositing rule it was blocking on is now also correctly understood but not yet wired — `scene-assembly.json` still 40/256 (unchanged), but both open gaps are narrower and more precisely named
-
-- **State:** `npm test` **425/425** (423→425, +2 in `battleBg.test.ts`),
-  `npm run build` green. `npm run compare -- tools/compare/traces/scene-
-  assembly.json` → still **40/256** (rendering logic unchanged this
-  session — see below for why). `transition.json` re-verified **206/206**
-  (battle-bg.json is its dependency too, per the brief's caution). All 17
-  other traces re-verified at their exact prior counts (anchor 1/1,
-  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example
-  4/4, summary-info-onix 122/122, summary-info-magby 132/132,
-  confirm-decline 67/67, accept-prebattle 137/137, walk-warpout 125/125,
-  room-entry 110/110, room-npcs 98/98, room-msgbox 142/142, rent-slot1
-  125/139, rent-3picks 157/190, confirm-flow 79/95) — zero regressions.
-- **Did — gap 1 (BG1 streak content), extraction fixed and RAM-confirmed:**
-  #60's "entrySlide references palette bank 4, which the extractor never
-  captured" was a misdiagnosis, not a real gap. RAM-probed
-  `gPlttBufferFaded` at hardware palette bank 4 directly (ticks 1073-1886):
-  its 16 live colors are bit-exact equal to `battle-bg.json`'s existing
-  local subpalette 2. Source explains why: `DrawMainBattleBackground` loads
-  the Frontier palette at `BG_PLTT_ID(2)` for 3 subpalettes (hardware slots
-  2/3/4) before the intro slide runs, and `DrawBattleEntryBackground`'s
-  `BATTLE_TYPE_FRONTIER` branch never reloads palette RAM — so
-  `entrySlide`'s raw nibble 4 is hardware-absolute, same `+2` base as the
-  static tilemap, and normalizing it the same way (now done in
-  `extract-battle-bg.ts`) lands on the already-captured local index 2. No
-  new palette data was ever needed. `entrySlide` now has usable content.
-  **But** wiring it into `battleScene.ts` surfaced a SECOND, independent
-  bug in the existing fallback: GBA alpha blend only engages where the
-  actual topmost non-transparent layer at a pixel is TGT1-flagged (BG1
-  only, per RAM-confirmed `BLDCNT`); `entrySlide`'s tilemap is a sparse
-  diagonal-streak pattern over a mostly-transparent grid, so most pixels
-  in the window have BG1 transparent — meaning BG3/OBJ must draw at RAW
-  unscaled color there, not the uniform `evb/16`-scaled brightness the
-  existing `drawSlideScene` fallback applies everywhere. Confirmed by
-  direct oracle pixel inspection (tick 1090, columns clear of both trainer
-  sprites: observed colors are exact *unscaled* palette matches, not
-  scaled). This alone would have kept the trace non-exact even with gap 1
-  "fixed" naively. Did NOT wire the corrected compositing rule in, because
-  the BG3/BG1 shift-sign convention needed to know *which* pixels are
-  BG1-transparent wasn't nailed down: a single isolated point matched
-  `shift=-240` (opposite sign from the existing `shiftTop`/`shiftBottom`)
-  exactly, but a whole-scanline brute-force pixel search was inconclusive
-  — the static bg tileset reuses ~5-6 sky colors across many tiles, so
-  candidate shifts alias to similar match counts and a plain per-pixel-
-  count fit can't be trusted. Left `drawSlideScene` unchanged (still the
-  confirmed-wrong fallback) rather than commit a half-verified rule.
-- **Did — gap 2 (widget entrance), narrowed but not resolved:** the
-  brief's "tile-index swap" framing doesn't match what
-  `SpriteCB_StatusSummaryBalls_Enter` actually does — read it directly,
-  and it never touches `oam.tileNum` (only `x2` and delay counters). Tried
-  a blanket 1-tick shift on the `x2` lookup tables (a plausible off-by-one
-  given creation-tick vs first-callback-tick semantics): it fixed frames
-  1230/1232-1235 but broke 1228/1229/1231, proving the tables aren't
-  uniformly off — reverted rather than commit an unverified guess (tree is
-  clean, `git status` confirms no leftover diff). Direct pixel diffing
-  (frame 1285, opponent ball-icon slot 0 at its RAM-exact settled corner)
-  shows our model already drawing that icon's final "Empty" ring tile
-  there, while the oracle shows the same 16 ring-outline pixels as pure
-  background — i.e. the icon is positionally settled early but stays
-  invisible (or on a blank tile) until some later trigger, unrelated to
-  the `x2` slide.
-- **Next:** gap 1 needs a direct RAM read of the actual DMA'd
-  `gScanlineEffectRegBuffers` content (not just `gTasks[0].data[2]`'s
-  value, which is already confirmed) to settle the shift-sign question,
-  paying attention to the `dmaSrcBuffers[i] = ...+1` indexing trick in
-  `scanline_effect.c` (buffer-index-to-scanline mapping may be off by one
-  from a naive reading) — then apply the "raw-unless-BG1-opaque" blend
-  rule this session confirmed. Gap 2 needs `gSprites[id].{invisible,
-  oam.tileNum}` RAM-probed per tick for the 14 widget sprites across
-  1228-1292 (sprite-identification method already banked from #60) to find
-  what actually gates visibility. Both are additive, narrower asks than
-  what #60 left open — see `battleScene.ts`'s module doc and
-  `docs/battle-scene-notes.md` §2's new correction block for the full
-  account either can be picked up from cold.
-- **Notes:** PAPERCUT: none new. Two full sessions in a row have now hit
-  the same wall on gap 1 (color) via pixel-fitting alone — the pattern
-  holds: RAM ground truth for *values* (BLDCNT, `data[2]`, `gBattle_BG1_X`)
-  has been reliable, but inferring the *sign/indexing convention* those
-  values are applied with by brute-forcing pixels against a repetitive
-  tileset is not. A future session should probe the DMA buffer's literal
-  written content, not just the C-level source variable.

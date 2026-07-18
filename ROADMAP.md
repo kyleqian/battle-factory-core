@@ -254,15 +254,40 @@ open window: scene assembly (1031-1300+), off `docs/battle-scene-notes.md`
 tick 1030, exactly where that slice takes over. Out of scope for both:
 RNG-modeling which of the 12 transition variants plays (a separate step
 owns RNG-exactness) and the other 11 variants' own pixel behavior.
-**Scene-assembly slice partial (2026-07-18, PROGRESS #58):** `src/engine/battleScene.ts`
-implements the 1040-1295 window; black hold + the settled composite
-(bg+both trainer pics+window frame, byte-exact) + text/cursor/ball-widget
-final positions (byte-exact) are done, but the `BattleIntroSlide3`
-streak (1075-1226) and the ball-widget entrance slide (1230-1291) are
-NOT byte-exact - `tools/compare/traces/scene-assembly.json` scores
-42/256, not the required 256/256. BLOCKED, next action recorded in
-PROGRESS #58 (RAM-probe the streak window directly rather than
-pixel-fit blind).
+**Scene-assembly slice in progress (2026-07-18, PROGRESS #58→#64, four
+iterations):** `src/engine/battleScene.ts` implements the 1040-1295
+window; `tools/compare/traces/scene-assembly.json` is at **104/256**
+(42→40→41→104 across iterations — each converged the problem to a
+strictly smaller named gap). Byte-exact so far: black hold, the settled
+composite from 1227 (bg + both trainer pics + window frame), text print,
+wait-cursor bob, and (as of #64) the full ball-widget entrance 1230-1291
+minus one 22px single-tick residual. Load-bearing discoveries along the
+way: a **systemic one-tick render lag** on every intro-task-driven
+register (#63, also resolved #62's widget-invisibility mystery in #64);
+BG3 (not BG1) carries the per-scanline shift; neither trainer sprite is
+visible during the reveal; the "missing palette bank 4" was a tilemap
+normalization bug (#62, extractor fixed). **Sole remaining gap (GAP A
+residual):** the streak window 1075-1226's blend arithmetic — one
+specific pixel class is numerically unreachable under the modeled
+BLDALPHA ramp; exact next RAM probe recorded in PROGRESS #63 and
+`battleScene.ts`'s module doc. **User decision (2026-07-18, interactive):
+keep iterating with fresh targeted briefs until 256/256 — no re-scope,
+no skip-ahead; each iteration must keep naming a strictly smaller gap.**
+**RNG-exactness criterion satisfied (2026-07-18, PROGRESS #61):**
+`src/engine/opponentGen.ts` + `tests/opponentGen.test.ts` pin battle 1's
+personality rejection loops, `Random32()` word order, and the 12-way
+transition pick bit-exact against the RAM dump (28/16/95 iterations, all
+3 personalities/natures, draw 22624 → CIRCLES_MEET), with the inter-loop
+ambient VBlank draws (11/7/8) modeled as an explicit parameter.
+**Groundwork status: COMPLETE for all of S6** — dense every-frame ground
+truth now covers the full 1886-tick bring-up (battle1-intro +
+transition/scene/sendout/menu dense traces, 969 captures total across 4
+committed groundtruth traces) and every flagged asset is extracted
+byte-exact (battle room, interface widgets, send-out particles/ball-open/
+materialize tables). Remaining engine slices after scene assembly:
+send-out window 1300-1560 (`docs/battle-scene-notes.md` §7) and player
+send-out + action menu 1560-1810 (`docs/battle-menu-notes.md`), then the
+S6 acceptance trace end-to-end.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain

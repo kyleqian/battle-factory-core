@@ -54,3 +54,20 @@ one-paragraph clarification (worked example: a 2-frame press at trace
 position K and which captureFrames index shows its first visible effect)
 in ROADMAP.md Domain notes or a doc both cite. Flagged by the S4 renderer
 worker (PROGRESS entry 13).
+
+## Stale `tools/compare/out/` PNGs mislead cross-session debugging (2026-07-18)
+
+The GAP-B worker (PROGRESS #64) initially reasoned from cached diff
+images under `tools/compare/out/` that no longer matched the current
+code — the directory persists between sessions and `out/latest` only
+reflects the most recent `npm run compare` invocation for *whatever
+trace* ran last. Cost: a chunk of a 24-min session until a fresh
+compare run exposed the staleness.
+- **Hits:** 1 (plus unknown silent near-misses; several sessions have
+  consulted `out/latest` this week).
+- **Workaround:** always re-run `npm run compare` before reading any
+  diff PNG; treat `out/` as scratch, never as evidence.
+- **Real fix candidate:** have the compare tool write a
+  `manifest.json` (trace name, git SHA, timestamp) next to the PNGs
+  and/or clear `out/latest` at the start of each run, so stale
+  artifacts are self-identifying.
