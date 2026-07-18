@@ -593,3 +593,254 @@ sha-diffed.
   window). `round3` ends at frame 5769, past the first action menu.
 - These are session-scratch per the run's contract (not committed); the
   next worker should re-probe rather than assume these files still exist.
+
+## Slice-0 ground truth, 2026-07-18
+
+S6 slice 0 (pure ground-truth pinning, no engine code): a committed dense
+oracle trace, RNG/transition/personality checkpoints, and this section.
+Committed: `tools/compare/traces-groundtruth/battle1-intro.json` (40
+segments, **1886 frames**, 254 captures) + its README (ground truth, not
+an `npm run compare` parity fixture). Script: `accept-prebattle.json`'s own
+392-frame prefix (rent 1/2/3 + YES-accept, verified 137/137 byte-exact)
+followed by idle-to-tick-400, then 3 more A-presses. **All frame numbers
+below are this new trace's own absolute frame indices** (0-indexed) — they
+do **not** share `rent-flow-notes.md`/this file's §6 numbering, which came
+from an *unrelated, separately-hand-tuned* scratch script (§6's own
+press-tick deltas do not reproduce against `accept-prebattle.json`'s
+segments — checked by direct arithmetic on the committed file, not
+assumed: e.g. §6 cites the 3rd-RENT-confirm press at tick 202, but
+`accept-prebattle.json`'s own segments place it at tick 188). Treat §6's
+frame numbers as approximate deltas only, never as absolute ticks to
+target in a new trace.
+
+### 1. Canonical script + why tick 400
+
+**A-press #1 at tick 400** closes "Right this way, please!" (any tick in
+`accept-prebattle.json`'s own confirmed 361-391 stable window, and
+onward, works — chosen here, per the step brief's own suggestion, rather
+than the earliest legal tick, for margin against the input-drop gate
+pattern already seen on other screens, e.g. S4's summary-page `B`-drop).
+Two more player-paced gates follow, each pressed only after its message
+is confirmed pixel-stable for several ticks (not at the instant of
+completion, same margin-for-safety rationale): **A-press #2 at tick 838**
+(closes the opponent's overworld speech, "IT'S WAY TOO / HOT HERE") and
+**A-press #3 at tick 1420** (advances past "BUG CATCHER DESTIN would like
+to battle!♥"). Total trace: 1886 frames, ending well inside the settled
+first-action-menu idle window (see §4).
+
+### 2. Frame boundaries (dense-capture-verified, not sampled)
+
+Every boundary below was pinned by **every-frame** capture density in
+its local window (not the 6-14-frame sampling this file's §6 used), via
+two chained oracle runs: a sparse (6-frame-stride) locator pass, then the
+committed trace's own dense windows around each located boundary.
+sha256 = first 8 hex chars unless spot-cited in full.
+
+- **A-press #1 registration**: tick 400-402 still shows "Right this way,
+  please!" byte-identical (`5e8a5333`, full:
+  `5e8a53338048580102ec0a5ab86d5cfa85ac7413625b44544ceb2b51a9b8b16e`);
+  first visibly-changed frame is **403** (`1ecfabf2`,
+  `1ecfabf2b5e8b35f0cc4bfaf243de4860e1948daffe6cfa43d7300773ac25ebb`) —
+  message-close + walk-start register 3 ticks after the press's first
+  frame (2-frame pulse at 400-401, +1 more tick before the engine acts on
+  it, consistent with the 1-tick input-registration lag pattern seen
+  elsewhere in this codebase, e.g. `confirmReveal`'s own closing-tick
+  lag).
+- **Walk to battle room**: continuous per-frame pixel change 403-500 (own
+  dense capture, every frame in this range distinct).
+- **Warp fade (black) start/end**: solid black (`d8b44303`, full
+  `d8b443032200e143b1c49820b6d78c32d519553a3f63a38f48e8bc31da084f0a`)
+  from tick **501 through 519** (19 frames), room-visible first frame
+  **520** (`436c0643`).
+- **Room-entry walk / scientists / opponent walk-in**: continuous change
+  520-~740 (dense-sampled at stride 3 in this window; no repeated shas
+  observed).
+- **Opponent overworld speech settled**: "IT'S WAY TOO / HOT HERE"
+  byte-identical (`e93719bf`) from tick **~740 through 838** (98+ frames
+  confirmed stable, well past the A-press #2 gate) — screenshot-confirmed
+  matching this file's §1 finding verbatim.
+- **A-press #2 registration**: message-closing visual change confirmed by
+  tick 843 (`a15c8dc2`) — the opponent-speech box is gone.
+- **Transition start (screen goes solid black)**: tick **1031** through
+  **1073** (43 frames), same sha as the warp-fade black
+  (`d8b44303`/`d8b443032200e143b1c49820b6d78c32d519553a3f63a38f48e8bc31da084f0a`
+  — confirmed byte-identical to frame 501's capture, i.e. a genuinely flat
+  black framebuffer both times, not merely similar).
+- **First transition visual (post-black)**: tick **1077**
+  (`b6f921fd19044324c787d408950956814e47400a6786b2a2650c27c7fd331b95`) — a
+  horizontal streak/line-wipe pattern (screenshot-confirmed), continuous
+  per-frame change through at least tick 1197 (stride-4 dense sample, no
+  two consecutive samples equal).
+- **Transition end / trainer assembly**: **not resolved to single-frame
+  precision this session** (time-budget tradeoff, flagged as a risk
+  below) — tick 1200 (`a0933fc2`) still shows the trainer mid-slide over
+  transition-remnant background with an empty message box; by tick 1290
+  (`17e1960c500fe5bea9491ad5b8cf81899190c66029f66b03ec648b17433aae11`)
+  "BUG CATCHER DESTIN would like to battle!♥" is fully printed with the
+  heart glyph, party-ball icons visible both sides, screenshot-confirmed.
+  A future dense pass over 1197-1290 (currently sampled at stride 3-15)
+  would tighten this.
+- **Intro text milestone — opponent send-out**: "BUG CATCHER DESTIN sent
+  out" mid-print at tick 1450 (screenshot); "...GROVYLE!" fully printed +
+  opponent healthbox (Lv50, green HP bar) settled by tick **1522**
+  (`6cb7ab1eb59438f1759e28779b0889c234bc9435edefcbe5ada43ed6e1e0b9f7`).
+- **Intro text milestone — player send-out**: "Go! ONIX!" + player
+  healthbox showing **117/117** HP (matching this file's §5 RAM-dumped
+  player table exactly) settled by tick **1696**, byte-identical through
+  at least 1741 (`6d2e0945440e9458d6fcab92a9f6019b7358a33c3ac2687a4ef0df9aa6a6db20`
+  at both 1696 and 1741 — confirmed via direct sha comparison, not
+  assumed).
+- **First action menu fully settled (pixel-stable)**: message-box clears
+  ticks 1742-1749 (several short-lived transitional frames, screenshot:
+  tick 1742 shows a blank message box); **"What will ONIX do?" +
+  FIGHT/BAG/POKéMON/RUN, cursor on FIGHT, is fully drawn by tick 1750**
+  (`fd778a4bb67c314116e902d9d30abff50cc4526f0ba5776f20acf1b4312b960c`,
+  screenshot-confirmed) and stays pixel-stable in a repeating **4-phase,
+  36-frame-period idle cycle** from there through the trace's end at tick
+  1885 (`d223d98a2da991439b96b110023841dbea049342e3d5a6c199a5fab74db28303`)
+  — confirmed by direct sha comparison across the whole tail, not
+  estimated; consistent with this file's own §6 "steady ~28-frame-period
+  4-value sha cycle" observation (the period discrepancy, 36 vs ~28, is
+  fully explained by that session's coarser 6-frame sampling grid
+  aliasing the true period, not a real difference).
+
+### 3. RNG checkpoints (RAM-probed, `tools/probe/ram-probe.py`)
+
+Watched `gRngValue` (u32, `0x3005d80`) and `gBattleTypeFlags` (u32,
+`0x2022fec`) every tick from 395 onward, plus `gEnemyParty[0..2]`'s
+`personality` field (`gEnemyParty` = `0x2024744`, `sizeof(struct
+Pokemon)` = 100 bytes/`0x64`, confirmed via `nm -S` on the pinned ELF —
+`gEnemyParty` symbol size `0x258` / 6 slots = `0x64` — not assumed from
+the struct literal alone, matching this file's own §5 gotcha about
+verifying RAM layout independently).
+
+- **1/VBlank cadence** (`gRngValue = 1103515245*gRngValue + 24691`,
+  confirmed against `reference/pokeemerald/src/random.c` +
+  `include/random.h`) holds from the A-press (tick 400) through tick
+  **1044** — with legitimate multi-step bursts super-imposed on top of
+  the baseline single-step-per-tick pattern at ticks 509→511 (3-4 extra
+  steps, source not identified this session — likely an overworld
+  sprite/NPC-movement RNG consumer, out of scope to chase further this
+  slice) and the battle-setup bursts in §3.1 below.
+  cadence at (a) A-press: `gRngValue`@400 = 3164754381 (recorded as of
+  tick 395 onward; 400 itself sits inside the normal 1-step cadence). (b)
+  message close (tick 403): mid-cadence, no special value. (c) transition
+  start (tick 1031, first black frame): mid-cadence — the RNG-heavy work
+  (§3.1) already **completed by tick 869**, well before the black screen;
+  this is a **correction to this file's §4 point 3**, which assumed the
+  nature-rerolls + transition-select "happen instantaneously on this same
+  frame" as the black-screen transition start. RAM evidence: they instead
+  run **during the heal-icon animation**, ~162-190 ticks *before* the
+  screen goes black (see §3.1).
+- **Cadence stops** (auto-advance ends) after tick **1044→1045**: `gRngValue`
+  frozen at 870742024 for ticks 1045-1065 (21 ticks, still *before* any
+  transition visual — the transition's own line-wipe effect doesn't start
+  until tick 1077, §2). One explicit single `Random()` draw fires at tick
+  **1065→1066** (1 LCG step) — matches this file's §4 point 5's first
+  entry, `gRandomTurnNumber = Random()` at `BattleStartClearSetData`, by
+  position (right as the battle-init state machine would be running).
+  Then a **675-tick freeze** (1066-1740, `gRngValue` = 803466203
+  throughout) — the genuine "no per-frame RNG in battle" window, spanning
+  the entire transition visual + intro text + both send-outs.
+- **In-battle first action menu** (tick 1750, settled): `gRngValue` =
+  3485459011 (frozen since tick 1747, see next point).
+- **Correction to this file's §4 point 5** (documented precisely per the
+  step brief's instruction, not asserted from a guess): the dossier
+  claims exactly **two** explicit draws survive the per-frame freeze
+  (`BattleStartClearSetData` + `TryDoEventsBeforeFirstTurn`). RAM shows
+  **four** distinct draw events after the main freeze: tick 1065→1066 (1
+  step), tick 1740→1741 (1 step), tick 1744→1745 (2 steps), and tick
+  1746→1747 (5 steps) — 9 total `Random()` calls, not 2. The last (5
+  steps, ending 3 ticks before the menu settles at 1750) positionally
+  matches `TryDoEventsBeforeFirstTurn`'s draw "immediately before the
+  action menu is emitted." The two *middle* draws (1741, 1745, both
+  inside the message-box-clearing window §2) are **unaccounted for** by
+  this file's source read — worth a source re-check before any Tier-1
+  test hard-codes "exactly 2 post-freeze draws."
+
+**3.1. Opponent personality rolls + transition pick** (all embedded in
+the **heal-icon animation window**, ticks 840-1030 — NOT at the
+transition's black-screen tick as §4 point 3 assumed; see correction
+above):
+
+| mon | tick (rejection loop completes) | total LCG steps this tick | rejection iterations | `personality` | `personality % 25` (nature) | expected nature (§5 table) |
+|---|---|---|---|---|---|---|
+| Grovyle (slot 1) | 842→**843** | 57 (=1 baseline + 28×2) | 28 | 1094072807 | 7 = RELAXED | RELAXED ✓ |
+| Murkrow (slot 2) | 853→**854** | 33 (=1 baseline + 16×2) | 16 | 3475344024 | 24 = QUIRKY | QUIRKY ✓ |
+| Pidgeotto (slot 3) | 860→**861**\* | 191 (=1 baseline + 95×2) | 95 | 3971699699 | 24 = QUIRKY | QUIRKY ✓ |
+
+\*Pidgeotto's `gRngValue` jump lands on tick 861, but the RAM write of
+`gEnemyParty[2].personality` is observed one tick later (862) — a 1-tick
+write-lag not seen for the other two mons, unresolved this session (low
+risk: the *value* is confirmed correct via the nature cross-check).
+
+All three nature values are **exact cross-checks against this file's §5
+table** (independently-sourced expected natures), giving high confidence
+in both the offset math (`gEnemyParty[i]` stride 100 bytes, personality
+at offset 0) and the RNG-consumption model (`Random32()` = 2×`Random()`
+combined per `include/random.h`). Total: 28+16+95 = **139 rejection
+iterations** (278 `Random()` calls) across the 3 mons for this specific
+trace — a huge, real range (16 to 95) illustrating why this is
+genuinely session-RNG-dependent, not a fixed constant, exactly as this
+file's §0/§7 risk 2 already warned.
+
+**Transition selection**: one explicit `Random()` at tick **868→869** (2
+total LCG steps that tick = 1 baseline + 1 select), immediately after the
+3rd mon's rejection loop finishes (tick 862) — confirms this file's §4
+point 3's *ordering* claim (transition-select immediately follows the 3
+nature loops) even though the *timing* (relative to the black screen) was
+wrong. **Unresolved**: because RAM sampling is once-per-emulated-frame,
+the tick's 2 LCG applications can't be individually attributed to
+"baseline VBlank draw" vs. "transition-select draw" by order — both
+candidates were computed:
+- if the select call is the tick's **2nd** (final) LCG application:
+  `Random() % 12` = 22624 % 12 = **4 = `B_TRANSITION_FRONTIER_CIRCLES_MEET`**
+- if it's the **1st**: 9646 % 12 = **10 =
+  `B_TRANSITION_FRONTIER_CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ`**
+
+Neither candidate was visually confirmed against the captured transition
+frames (1077-1197 show a horizontal streak/line-wipe pattern, screenshot-
+confirmed — not obviously the "3 sprites converge on fixed points"
+mechanism `battle_transition_frontier.c`'s circles family describes, per
+this file's §2). **Flagged exactly as this file's own §7 risk 3 already
+predicted**: this session confirms only that *a* transition plays and
+narrows it to 2 of 12 candidates via RNG math cross-checked three-for-
+three against the personality natures (high confidence in the *math*),
+but does not close the loop against the pixels (unresolved, needs a
+frame-by-frame read of `Task_FrontierCirclesMeet`/`SpriteCB_LogoCircleSlide`
+vs. these exact captures — out of scope for this slice's time budget).
+
+`gBattleTypeFlags`: `0x80008` (`BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY`)
+already set by tick 1015 (confirms §0's "set before the transition even
+starts" claim), gains `BATTLE_TYPE_IS_MASTER` (`0x4`) at tick **1047** —
+2 ticks after the per-frame RNG freeze begins (1045); noted as a
+corroborating timestamp, not claimed as the freeze's direct cause (that's
+`gMain.inBattle`, a different field, not probed this session).
+
+### 4. Risk / follow-up notes for this slice
+
+1. Transition-visual identification is narrowed to 2 of 12 candidates via
+   RNG math (both nature-cross-validated indirectly, not directly) but
+   not pixel-confirmed — see §3.1. A future session should either probe
+   `gBattleTransitionType`/the equivalent RAM state a source read
+   identifies, or capture a frame-by-frame window of frames 1077-1200
+   against the two candidate source functions.
+2. Transition-end (trainer/background fully assembled) is bounded to
+   ticks 1200-1290, not resolved tighter — §2.
+3. The 2 unexplained extra post-freeze RNG draws (ticks 1741, 1745, §3)
+   need a source re-read of what runs between the message-box clearing
+   and `TryDoEventsBeforeFirstTurn`.
+4. The ~509-511 and any other small pre-battle RNG bursts outside the
+   documented heal-icon window were not individually chased (out of
+   scope for this slice — flagged, not silently dropped).
+5. This trace's specific transition/personality values are **this
+   script's own**, not universal constants (§0's already-established
+   point) — a differently-paced trace (different idle-frame counts before
+   each of the 3 A-presses) will draw a different transition and
+   different personalities, though the same *natures* (fixed by the
+   rejection loop's exit condition) and the same *species/moveset/IVs*.
+
+**Papercut retired**: `PAPERCUTS.md`'s "No committed oracle trace for the
+battle-1 bring-up path" entry is superseded by
+`tools/compare/traces-groundtruth/battle1-intro.json` — the supervisor
+owns deleting that entry.

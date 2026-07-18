@@ -5,6 +5,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 44 — S6 slice 0: ground-truth bring-up pinning complete — battle1-intro.json (1886f/254 captures) committed, RNG/transition/personality checkpoints RAM-verified, dossier extended; NO ENGINE CODE
+
+- **State:** `npm test` **341/341** (unchanged, no engine touched), `npm run
+  build` green. `tools/compare/traces-groundtruth/battle1-intro.json`
+  (new dir, +README) committed: 1886 frames (`accept-prebattle.json`'s
+  verified 392-frame prefix + A-press@400 + 2 more player-paced A-presses
+  + idle through transition/intro/both send-outs), 254 dense captures.
+  `bin/oracle run` on it verified green; spot-checked anchor (1/1) and
+  confirm-decline (67/67) still exact — zero regressions.
+- **Did:** Two chained oracle probe passes (sparse locator, then a dense
+  final pass around each located boundary) pinned every frame boundary
+  the step asked for (message-close, warp-fade black window, transition
+  start/first-visual, both send-out text settles, first-action-menu
+  settle at tick 1750 with its 36-frame idle cycle) — see
+  `docs/battle-bringup-notes.md`'s new "Slice-0 ground truth, 2026-07-18"
+  section for the full sha256-cited list. `tools/probe/ram-probe.py`
+  (gRngValue + gBattleTypeFlags + gEnemyParty[0..2].personality, every
+  tick from 395) then pinned: the 1/VBlank cadence and its exact freeze
+  tick (1044→1045, then one explicit draw at 1066, then a 675-tick true
+  battle freeze 1066-1740); all 3 opponent personality rolls (28/16/95
+  rejection iterations for Grovyle/Murkrow/Pidgeotto respectively,
+  cross-validated 3-for-3 against this file's own expected-nature table
+  via `personality % 25`); and the transition-select roll (tick 868→869,
+  narrowed to 2 of 12 candidates — see below). **Two corrections to the
+  existing dossier filed with full RAM evidence** (not re-probing what
+  was already trusted — these surfaced from this session's own new data):
+  (1) the 3 nature-rerolls + transition-select happen during the
+  **heal-icon animation** (ticks 842-869), roughly 160-200 ticks *before*
+  the transition's black screen (1031) — not "the same frame" as the
+  transition start, as previously assumed; (2) **4** explicit `Random()`
+  draws survive the per-frame freeze, not the previously-documented 2 —
+  two of them (ticks 1741, 1745) are unexplained, flagged for a future
+  source re-read.
+- **Next:** S6 slice 1+ (actual engine implementation: battle transition
+  effect, scene init, intro text, first action menu) can now build against
+  this committed ground truth instead of re-scouting it. Two loose ends
+  flagged in the dossier's §4: (a) the transition-visual identification
+  is narrowed to `CIRCLES_MEET` or `CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ` (2
+  of 12) via RNG math but not pixel-confirmed — a future session should
+  either find the right RAM field for the resolved transition id or do a
+  frame-by-frame source cross-check; (b) transition-end (trainer/bg fully
+  assembled) is bounded to ticks 1200-1290, not resolved tighter.
+  Suggested `ROADMAP.md` S6 wording (not edited here, worker convention):
+  append under S6 "**Groundwork banked (2026-07-18):**
+  `tools/compare/traces-groundtruth/battle1-intro.json` (1886f, 254
+  captures) pins the full A-press-through-first-action-menu window with
+  sha256-cited frame boundaries and RAM-verified RNG/personality/
+  transition-candidate checkpoints (`docs/battle-bringup-notes.md`
+  'Slice-0 ground truth'); engine slices can now implement against fixed
+  targets instead of re-scouting timings."
+- **Notes:** PAPERCUT retired (not fixed by me, supervisor's file):
+  `PAPERCUTS.md`'s "No committed oracle trace for the battle-1 bring-up
+  path" entry is superseded by this commit. No new papercuts this
+  session. All scratch work (`/tmp/s6-worker/`: probe scripts, sparse/
+  dense locator trace JSONs, ram-probe spec/output) is scratch per
+  convention, not committed. `src/engine/`, `src/assets/`, `src/data/`,
+  and `tools/extract/` were **not touched** — confirmed via `git status`
+  before both commits.
+
+
 ## 43 — ISSUES #14 root-caused and fixed (two distinct bugs, both the same "accept's own extra-work-free path renders early" mechanism family); `accept-prebattle.json` 123/137 → **137/137**, entry DELETED
 
 - **State:** `npm test` **341/341** (337→341, +4 `tests/prebattleRoomFlow.test.ts`),
@@ -149,79 +209,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   before extending it (e.g. to a 2nd map's message box) elsewhere. ~20 min
   lost this session on that specific investigation before the baking
   shortcut was chosen.
-
----
-
-## 41 — ISSUES #12 root cause #2 fixed + ISSUES #13 root-caused and fixed; `confirm-decline.json` 54/67 → **67/67**, both entries DELETED
-
-- **State:** `npm test` **328/328** (325→328, +3 in `tests/confirmDecline.test.ts`;
-  the 324→325 en route was the #12 pin), `npm run build` green. All 10
-  pre-existing traces re-verified at their exact prior counts (anchor 1/1,
-  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
-  rent-slot1 125/139, rent-3picks 157/190, summary-info-magby 132/132,
-  summary-info-onix 122/122, confirm-flow 79/95) — zero regressions.
-  `confirm-decline.json`: **54/67 → 67/67, byte-exact on every frame.**
-  Both ISSUES #12 and #13 DELETED.
-- **Did (Part 1, ISSUES #12 root cause #2):** Dense per-tick pixel diff of
-  oracle vs app in the WIN_OPTIONS box (x176-224/y112-144, fresh
-  `npm run compare` capture into `tools/compare/out/confirm-decline`)
-  showed the YES/NO glyph text is already fully erased (replaced by plain
-  window-background pixels) at closing `elapsed===1` — one tick before the
-  old `elapsed<2` model — while the cursor-highlight sprite's own red
-  pixels stay visible through `elapsed===2`, one tick *after* the old
-  `cursorVisible` cutoff, only gone at `elapsed===3`. Fixed in
-  `confirmReveal.ts`'s closing branch: `yesNoVisible` now only true at
-  `elapsed===0`; `cursorVisible` true through `elapsed<=2`. Pinned
-  (`confirmDecline.test.ts`, new ISSUES #12 describe block asserting all 4
-  boundary ticks). This alone took `confirm-decline.json` to 55/67 (254
-  byte-exact, 255 down from 973px to a 45px residual in the ball-grid area
-  — see Part 2).
-- **Did (Part 2, ISSUES #13):** RAM-probed `gSprites[]` (position-scanned
-  the 6 ball sprites by their known screen centers, `35*i+32,64` —
-  confirmed indices 0-5 = grid slots 0-5 exactly) and cross-checked
-  `animCmdIndex`/`animNum` tick-by-tick against this engine's own predicted
-  `ballAnims[]` state (scratch Python probe via the mgba-venv interpreter +
-  a scratch Node replay of `core.ts`, both deleted after use) plus direct
-  oracle-vs-app pixel sampling at each ball's grid position. Ground truth:
-  starting at the closing phase's `elapsed 0->1` boundary, every
-  still-active ball (slots 0/1; slot 2 is already null from the decline
-  itself) needs exactly one more internal tick of stall on top of the
-  decline's own already-modeled `Select_PrintSelectMonString` stall — a
-  **permanent** one-tick downstream shift (proven by diffs recurring on
-  every subsequent `MOVING_CMDS` transition all the way to frame 302, long
-  after `confirmReveal` itself goes null — only explainable by a genuine
-  internal-timer stall via the existing `ballAnimStall` skip-a-tick
-  mechanism, ISSUES #6's family, not a brief display-only lag like
-  `isRevealStallActive` which self-corrects and can't cascade). Fixed:
-  `core.ts` now sets `ballAnimStall = activeSlotsBeforeAction` on the same
-  `wasClosingAtZero`-derived tick the speciesNameFade activation already
-  fires on. This alone closed 10 of the remaining 11 #13-listed frames plus
-  255's residual (66/67). The 12th residual, frame 273 (3px at the 3
-  `REVEAL_FLASH_CENTERS`, y=64, exact `FLASH_BLENDED_COLOR` value): the
-  closing zoom-out's own final width-1 flash pixel outlives `confirmReveal`
-  going null by exactly 1 tick — a pure OAM-teardown render lag, kept
-  deliberately separate from (and NOT changing) `confirmReveal`'s own
-  already-RAM-verified 20-tick un-reveal duration that gates cursor-input
-  readiness. Fixed via a new `DraftScreenState.closingFlashResidual`
-  boolean (same shape as this codebase's other post-hoc trailing-render
-  fields, e.g. `rentConfirmRedraw`), set for exactly the tick
-  `confirmReveal` transitions "closing"->null, consumed by
-  `drawConfirmReveal`'s now-non-early-returning null branch. **67/67.**
-  Both fixes pinned (`confirmDecline.test.ts`, 3 new describe blocks: the
-  #12 boundary timing, the #13 `ballAnimStall` extension + frozen-state
-  equality check, and the `closingFlashResidual` one-tick pulse).
-- **Next:** ISSUES.md backlog is now EMPTY. S5's last piece: the YES-press
-  accept path (exit fade → pre-battle room, `docs/prebattle-room-notes.md`).
-  Then S6 off its banked dossier.
-- **Notes:** all RAM probing (`tools/probe/ram-probe.py` for the ball-sprite
-  position scan + `animCmdIndex` watch, addresses derived from
-  `gSprites`'s linker symbol + `sizeof(struct Sprite)=0x44` from
-  `reference/pokeemerald/include/sprite.h`) and pixel sampling (scratch
-  Python/PIL over `tools/compare/out/confirm-decline`'s fresh captures) was
-  scratch, deleted before finishing - nothing uncommitted beyond the
-  intended `src/engine/{confirmReveal,core,factoryDraftScreen}.ts` +
-  `tests/confirmDecline.test.ts` + `ISSUES.md`/`PROGRESS.md`. No new
-  papercuts — `tools/probe/ram-probe.py` and the position-scan method from
-  PROGRESS-archive #35 both worked as documented.
 
 ---
