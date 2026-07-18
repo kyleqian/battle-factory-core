@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   advanceBattleScene,
   ballIcons,
+  ballStatusBarPositions,
   cursorState,
   CURSOR_START_TICK,
   evaEvb,
@@ -14,13 +15,10 @@ import {
   windowRange,
 } from "../src/engine/battleScene.ts";
 
-// Oracle cross-check (this session's own dense-trace pixel probes against
-// tools/compare/traces-groundtruth/battle1-scene-dense.json, not yet
-// re-run as a standing fixture): the settled composite (tick 1227+), text
-// print cadence, cursor bob schedule, and ball-widget final positions are
-// byte-exact; the BattleIntroSlide3 shift/blend window (1075-1226) and the
-// ball-widget entrance slide (1230-1291) are this session's best-effort
-// model, NOT yet byte-exact - see src/engine/battleScene.ts's module doc.
+// Oracle/RAM cross-check: tools/compare/traces/scene-assembly.json is
+// 256/256 exact end to end. Every formula below is RAM-confirmed (see
+// src/engine/battleScene.ts's module doc + docs/battle-scene-notes.md §2) -
+// not fit against pixels.
 
 describe("battleScene: state advance", () => {
   it("has no phase split - elapsed just keeps incrementing forever", () => {
@@ -36,17 +34,22 @@ describe("battleScene: vertical reveal window", () => {
     expect(windowRange(1000)).toBeNull();
   });
 
-  it("opens as a 1px hairline at tick 1075, centered on row 80", () => {
-    expect(windowRange(1075)).toEqual({ top: 80, bottom: 81 });
+  it("opens 1px top and bottom of center at tick 1075 (RAM: gBattle_WIN0V's first decrement already applied)", () => {
+    expect(windowRange(1075)).toEqual({ top: 79, bottom: 82 });
   });
 
-  it("grows by 1px top and bottom per tick until fully open at tick 1119", () => {
-    expect(windowRange(1080)).toEqual({ top: 75, bottom: 86 });
-    expect(windowRange(1118)).toEqual({ top: 37, bottom: 124 });
-    expect(windowRange(1119)).toEqual({ top: 0, bottom: 160 });
+  it("grows by 1px top/bottom per tick through tick 1106 (RAM: gBattle_WIN0V -= 0xFF/tick)", () => {
+    expect(windowRange(1080)).toEqual({ top: 74, bottom: 87 });
+    expect(windowRange(1106)).toEqual({ top: 48, bottom: 113 });
   });
 
-  it("stays fully open past 1119", () => {
+  it("switches to a 4px/tick second phase from 1107 (RAM: gBattle_WIN0V -= 0x3FC/tick), fully open at 1118", () => {
+    expect(windowRange(1107)).toEqual({ top: 44, bottom: 117 });
+    expect(windowRange(1117)).toEqual({ top: 4, bottom: 157 });
+    expect(windowRange(1118)).toEqual({ top: 0, bottom: 160 });
+  });
+
+  it("stays fully open past 1118", () => {
     expect(windowRange(1200)).toEqual({ top: 0, bottom: 160 });
     expect(windowRange(2000)).toEqual({ top: 0, bottom: 160 });
   });
@@ -70,15 +73,29 @@ describe("battleScene: BLDALPHA schedule (RAM-confirmed, docs/battle-scene-notes
   });
 });
 
-describe("battleScene: per-scanline shift (best-effort, see module doc)", () => {
-  it("clamps to 0 for both halves once the slide ends (tick 1227)", () => {
+describe("battleScene: per-scanline shift (RAM-confirmed: gTasks[0].data[2], docs/battle-scene-notes.md §2)", () => {
+  it("is 0 before tick 1075 and after the slide ends (tick 1227)", () => {
+    expect(shiftTop(1074)).toBe(0);
+    expect(shiftBottom(1074)).toBe(0);
     expect(shiftTop(1227)).toBe(0);
     expect(shiftBottom(1227)).toBe(0);
     expect(shiftTop(5000)).toBe(0);
   });
 
-  it("top/bottom halves are equal-magnitude opposite sign before the slide ends", () => {
+  it("holds a constant leftover 240 for ticks 1075-1106 (RAM: gScanlineEffectRegBuffers unwritten by this task yet)", () => {
+    expect(shiftTop(1075)).toBe(240);
+    expect(shiftTop(1106)).toBe(240);
+  });
+
+  it("decrements by exactly 2/tick from tick 1107, reaching 0 at tick 1226", () => {
+    expect(shiftTop(1107)).toBe(238);
+    expect(shiftTop(1108)).toBe(236);
+    expect(shiftTop(1226)).toBe(0);
+  });
+
+  it("top/bottom halves are equal-magnitude opposite sign throughout the shift", () => {
     expect(shiftTop(1150)).toBe(-shiftBottom(1150));
+    expect(shiftTop(1200)).toBe(-shiftBottom(1200));
   });
 });
 
@@ -119,13 +136,36 @@ describe("battleScene: wait-cursor bob / 36-tick idle cycle (docs/battle-interfa
   });
 });
 
-describe("battleScene: party-status-summary ball-icon widgets (docs/battle-interface-assets.md)", () => {
-  it("has 12 icons (6 opponent + 6 player) at the CreatePartyStatusSummarySprites corner formula", () => {
-    const icons = ballIcons();
+describe("battleScene: party-status-summary ball-icon + bar widget entrance slide (RAM-confirmed, module doc point 3)", () => {
+  it("has 12 icons (6 opponent + 6 player), all hidden before their side's creation tick", () => {
+    const icons = ballIcons(1000);
     expect(icons).toHaveLength(12);
-    expect(icons[0]).toEqual({ x: 26, y: 32, state: "Empty" });
-    expect(icons[5]).toEqual({ x: 76, y: 32, state: "Full" });
-    expect(icons[6]).toEqual({ x: 156, y: 88, state: "Full" });
-    expect(icons[11]).toEqual({ x: 206, y: 88, state: "Empty" });
+    expect(icons.every((icon) => !icon.visible)).toBe(true);
+  });
+
+  it("player-side icons/bar become visible at tick 1228, opponent-side at tick 1231 (not simultaneous)", () => {
+    expect(ballIcons(1227).every((icon) => !icon.visible)).toBe(true);
+    expect(ballIcons(1228).slice(6).every((icon) => icon.visible)).toBe(true);
+    expect(ballIcons(1228).slice(0, 6).every((icon) => !icon.visible)).toBe(true);
+    expect(ballIcons(1231).every((icon) => icon.visible)).toBe(true);
+    expect(ballStatusBarPositions(1228).player.visible).toBe(true);
+    expect(ballStatusBarPositions(1228).opponent.visible).toBe(false);
+    expect(ballStatusBarPositions(1231).opponent.visible).toBe(true);
+  });
+
+  it("settles at the CreatePartyStatusSummarySprites corner formula by tick 1292", () => {
+    const icons = ballIcons(1292);
+    expect(icons[0]).toEqual({ x: 26, y: 32, state: "Empty", visible: true });
+    expect(icons[5]).toEqual({ x: 76, y: 32, state: "Full", visible: true });
+    expect(icons[6]).toEqual({ x: 156, y: 88, state: "Full", visible: true });
+    expect(icons[11]).toEqual({ x: 206, y: 88, state: "Empty", visible: true });
+    const bars = ballStatusBarPositions(1292);
+    expect(bars.opponent.x).toBe(-24);
+    expect(bars.player.x).toBe(136);
+  });
+
+  it("mid-slide: player icon 0 offset by its own RAM-baked x2 table (e.g. tick 1230 -> x2=120, tick 1245 -> x2=12)", () => {
+    expect(ballIcons(1230)[6]).toEqual({ x: 276, y: 88, state: "Full", visible: true });
+    expect(ballIcons(1245)[6]).toEqual({ x: 192, y: 88, state: "Full", visible: true });
   });
 });

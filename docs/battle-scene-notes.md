@@ -93,6 +93,22 @@ value below is a plain tick-count formula, not sampled-and-guessed):
    1px taller (both edges) each tick, so only a hairline is visible at
    first. Loop exits when the top byte hits `0x30` (tick 1106,
    `WIN0V=0x3071`) — exactly 32 ticks, `(0x50-0x30)`.
+
+   **CORRECTION (PROGRESS.md #60, RAM-reconfirmed):** the window is **NOT**
+   fully open at tick 1106 — `WIN0V=0x3071` means top=48, bottom=113, still
+   a 65px-tall slit, not the full 160. This doc's phrasing above ("Loop
+   exits") is true only of *this specific decrement loop* (the `-0xFF`,
+   1px/tick one); `BattleIntroSlide3`'s tState-3 body (`battle_intro.c:381`)
+   *also* touches `gBattle_WIN0V` every tick — `if (gBattle_WIN0V & 0xFF00)
+   gBattle_WIN0V -= 0x3FC;` — a **second, 4x-faster growth phase** (top
+   edge -4px/tick, bottom +4px/tick) that runs ticks 1107-1118 until the
+   top byte hits 0, at which point the window is finally fully open. An
+   implementation that stops growing the window at tick 1106 (as an
+   earlier attempt at this engine slice did, PROGRESS.md #58) renders
+   roughly half the screen solid black through tick ~1118 that the real
+   game already shows. RAM-confirmed exact values: top/bottom by tick —
+   1106: 48/113, 1110: 32/129, 1114: 16/145, 1118: 0/161 (clamps to full
+   0-160 from here).
 4. **ticks 1106-1226** (tState 3, 121 ticks, the main assembly loop — every
    value below is the RAM-read `data[]` table, tick-exact):
    - `data[2]` (the horizontal scanline-shift magnitude) starts at
@@ -130,6 +146,31 @@ value below is a plain tick-count formula, not sampled-and-guessed):
      literal cause of the pixel plateau starting at 1227 (task destroyed
      one tick later, 1228, confirmed via `gTasks[0].func` reverting to
      `TaskDummy`).
+
+**CORRECTION (PROGRESS.md #60, RAM-reconfirmed)**: two refinements to the
+above, both RAM-confirmed against `gScanlineEffectRegBuffers` directly
+(not inferred from `data[2]` alone as this doc originally did):
+1. **Timing off-by-one**: `data[2]` is *set* to 240 at tick 1106 but the
+   scanline-shift *buffer itself* still holds a constant leftover 240 for
+   every tick 1075-1106 (whatever `CB2_InitBattleInternal` left there,
+   unrelated to this task) — the buffer doesn't start reflecting `data[2]`'s
+   own countdown until tick 1107 (238), decrementing by 2/tick from there,
+   0 at tick 1226. Numerically this doesn't change the *shape* of the
+   ramp described above, just which tick the "240" plateau vs. the "-2/tick"
+   ramp actually begins.
+2. **TGT1 (BG1) content is still unresolved, not "blank"**: this doc's
+   "color cross-fade (BG1 → BG3+OBJ)" phrasing implicitly assumed BG1 is a
+   uniform/blank source. `gBattle_BG1_X += 8` every tick (confirmed above)
+   is BG1's own horizontal-scroll register (`REG_BG1HOFS`,
+   `battle_main.c:2092`) — a real background IS scrolling underneath the
+   blend, not a static color. `battle-bg.json`'s `entrySlide` tileset (same
+   file, extracted alongside `static`, previously assumed "unrelated art")
+   is the leading candidate for BG1's actual content, but its tilemap
+   entries reference **palette bank 4**, which `extract-battle-interface`/
+   `extract-battle-bg` never captured (`battle-bg.json`'s `palette` array
+   only has banks 0-2) — so this hypothesis is untested, not ruled out.
+   Treating BG1 as contributing black (this session's fallback in
+   `battleScene.ts`) is a placeholder, not a confirmed mechanism.
 
 Net: an engine slice can bake this **exactly** as a lookup table
 (tick-offset-from-task-start → `{bg1X, scanlineShift, blendEVA, blendEVB}`),

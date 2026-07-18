@@ -136,7 +136,10 @@ dwelling 9 ticks per value, 36-tick period — a dense per-tick sweep of the
 full 1284-1420 window confirms this exactly, with the first full dwell
 block starting at tick 1301 and a clean block boundary at 1328 (offset 0)
 usable as a phase anchor. This reproduces byte-exact when modeled as
-`destY = 135 + offset` with `offset` cycling `[0, 1, 2, 1]` (9 ticks each)
+**`destY = 137 - offset`** (corrected in a later session, PROGRESS.md #60 -
+this doc's own arithmetic previously said `135 + offset`, which is
+numerically different, not just a sign-convention rephrasing, and does not
+match the oracle) with `offset` cycling `[0, 1, 2, 1]` (9 ticks each)
 and a **fixed** source sample (row 0 of the decoded 8×48 bitmap, i.e. the
 shape's own natural position) — **not** as literally read off the
 `BlitBitmapRectToWindow` call site's parameter order (source Y varies,
@@ -153,7 +156,7 @@ is left for whichever engine slice actually wires up text-printer waiting —
 flagging it explicitly rather than asserting an unverified formula.
 
 Full-window sweep, all 137 captured ticks (1284-1420), fixed `destX=123`,
-`destY=135+offset(tick)` per the additive rule above, `srcY=0`: **4773/4773
+`destY=137-offset(tick)` per the additive rule above, `srcY=0`: **4773/4773
 px exact** (37 non-transparent px/frame × 129 ticks from 1292 — the window
 brief asked to treat as settled — onward; 1284-1291 excluded only because
 the *ball icons'* entrance slide hadn't finished, the cursor itself is

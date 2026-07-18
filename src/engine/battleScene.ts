@@ -13,51 +13,63 @@
 // player input is read anywhere in this window - the next A-press is the
 // following slice's concern, trace tick 1420).
 //
-// STATUS (honestly incomplete - see docs/battle-scene-notes.md's own §2/§6
-// flags plus this session's own findings):
-// 1. The settled composite (trace tick 1227 onward, before any widget slide)
-//    IS byte-exact: battle-bg.json's `static` bg (scroll 0,0) +
-//    trainer-pic-bug-catcher.json at corner (144,8) + trainer-pic-brendan-
-//    back.json frame 3 at corner (48,48) + battle-window.json's bg0 tilemap
-//    (scroll 0,0) reproduces the oracle's tick-1227 frame at 0/38400 exact
-//    (verified this session, both by brute-force corner search AND
-//    independently by a source derivation - battle_controller_opponent.c:
-//    1306-1313 `xPos=176,yPos=(8-size)*4+40` with `centerToCornerVec=(-32,-32)`
-//    for a 64x64 OAM shape - 176-32=144, 40-32=8; battle_controller_player.c:
-//    2317-2318 `xPos=80,yPos=(8-size)*4+80` - 80-32=48, 80-32=48).
-// 2. The BattleIntroSlide3 "streak" reveal (trace ticks ~1075-1226,
-//    docs/battle-scene-notes.md §2) is NOT yet byte-exact. This session
-//    confirmed the vertical WIN0-style reveal window's growth schedule
-//    directly against oracle pixels (own dense per-tick brightness/edge
-//    sweep, `windowRange` below) and found the mechanism the dossier
-//    describes (a per-scanline horizontal BG shift, top/bottom halves
-//    opposite sign, converging to 0 by tick 1226/1227, cross-faded via
-//    BLDALPHA 8:8->0:16) is the right SHAPE - shifting `battle-bg.json`'s
-//    `static` tilemap against itself (fixed unshifted copy blended with a
-//    shifted copy, NOT the separate `entrySlide` asset, which this session
-//    confirmed is unrelated art with zero pixel overlap with `static`) gets
-//    close (exact at the tick-1227 boundary, converging correctly from
-//    ~tick 1190 on) but is NOT exact for roughly tick 1075-1180 - most
-//    likely the vertical window's own growth-rate formula (fit to a crude
-//    brightness threshold, not RAM/register-confirmed) or an additional
-//    per-scanline (not per-half) shift gradient this session didn't
-//    isolate. `shiftTop`/`shiftBottom`/`windowRange`/`evaEvb` below are
-//    this session's best-effort model, kept because it is closer to
-//    correct than solid black and documents working formulas for the next
-//    session - NOT asserted byte-exact. Concrete next step: RAM-probe
-//    `gScanlineEffectRegBuffers`/`BLDALPHA`/`WIN0V` directly per-tick
-//    (tools/probe/ram-probe.py) through this window rather than continuing
-//    to fit pixels blind, and re-check whether OBJ (trainer sprites) are
-//    also blend targets (BLDCNT lists `TGT2_BG3|TGT2_OBJ`) rather than
-//    drawn full-bright throughout as this module currently does.
-// 3. The party-status-summary ball-icon widgets' entrance slide (trace
-//    ticks ~1230-1291, docs/battle-scene-notes.md §4) is not modeled - the
-//    dossier itself flags this as not individually re-timed. This module
-//    renders them only once settled (tick 1292 onward, pixel-verified
-//    byte-exact per docs/battle-interface-assets.md), hidden before that.
-//
-// Everything else below (text print cadence, wait-cursor bob/idle cycle,
-// widget final positions) IS byte-exact per the cited dossiers.
+// STATUS: 3 of the 4 pieces of this window are now byte-exact against RAM
+// ground truth (tools/probe/ram-probe.py watching gBattle_WIN0V,
+// gTasks[0].data[0..5], the sGpuRegBuffer BLDCNT/BLDALPHA shadows, and
+// gSprites[].{x,x2,y,flags} every tick 1073-1296 - see docs/battle-scene-
+// notes.md §2 and PROGRESS.md for the resulting tables); the streak's pixel
+// *color* is still not byte-exact - see point 2's "still open" paragraph
+// below (tools/compare/traces/scene-assembly.json is NOT yet 256/256).
+// 1. The settled composite (trace tick 1227 onward, before any widget
+//    slide) is byte-exact (unchanged from #58: battle-bg.json's `static`
+//    bg + both trainer pics at their source-derived corners + battle-
+//    window.json's bg0 tilemap).
+// 2. The BattleIntroSlide3 streak GEOMETRY (ticks 1075-1226) is now RAM-
+//    exact: `gBattle_WIN0V`'s growth is TWO linear phases, not one
+//    (`windowRange` below) - phase 1 (ticks 1075-1106, -0xFF/tick) and a
+//    second, 4x-faster phase (ticks 1107-1118, -0x3FC/tick) that #58 could
+//    see in pixels but hadn't RAM-confirmed; the window is fully open at
+//    tick 1118, not 1119. `shiftTop`/`shiftBottom` mirror
+//    `gTasks[0].data[2]` exactly (RAM-confirmed 240 constant through tick
+//    1106 then -2/tick to 0 by tick 1226, DMA'd into `REG_BG3HOFS` per
+//    scanline - `sIntroScanlineParams16Bit`, battle_main.c:250-253).
+//    STILL OPEN: the streak's *color*. RAM confirms `BLDCNT =
+//    TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ` (0x1842) literally - OBJ (both
+//    trainer pics) genuinely are blend targets alongside BG3, resolving
+//    #58's question there - but TGT1 (BG1)'s actual content this session
+//    could NOT pin down: `battle-bg.json`'s `entrySlide` tileset (scrolled
+//    by the RAM-confirmed `gBattle_BG1_X`, `+=8`/tick unconditionally from
+//    task start) was the leading hypothesis, but every one of its tilemap
+//    entries in the sampled window reference **palette bank 4, which
+//    `extract-battle-bg.ts` never captured** (`battle-bg.json`'s top-level
+//    `palette` array only has banks 0/1/2) - so every sampled pixel came
+//    back transparent and the hypothesis was numerically untestable this
+//    session (falls back identically to the "BG1 is black" approximation
+//    below). `drawSlideScene` therefore still renders the streak as pure
+//    brightness scaling (`evb/16`) of the per-scanline-shifted BG3 content
+//    plus the (unshifted) trainer OBJs, with no TGT1 contribution - closer
+//    to the real mechanism than #58's fixed/shifted cross-fade (which
+//    never fit either target), but still not byte-exact (`npm run compare
+//    -- tools/compare/traces/scene-assembly.json` diffs every frame
+//    1075-1226, growing from ~700px to tens of thousands as the window
+//    opens - see PROGRESS.md for exact counts). Next step: re-extract
+//    `battle-bg.json` with palette bank 4 included, then re-test the
+//    entrySlide-as-TGT1 hypothesis (the extraction, not the geometry, is
+//    the blocker).
+// 3. The party-status-summary ball-icon + diagonal-bar widgets' entrance
+//    slide (ticks ~1228-1291): RAM-probed directly per-tick (`sprite.x2`
+//    for the bar + all 12 ball-icon sprites, identified by matching their
+//    settled `(x, y)` against docs/battle-interface-assets.md's known
+//    corners). The player-side widgets are created at tick 1228, the
+//    opponent-side at tick 1231 (not simultaneous, confirming the dossier's
+//    §4 suspicion); each of the 14 sprites' `x2` sequence is baked verbatim
+//    as a per-tick table below (`PLAYER_BAR_X2` etc.) rather than
+//    reconstructed from `SpriteCB_StatusSummaryBar_Enter`/
+//    `SpriteCB_StatusSummaryBalls_Enter`'s source formulas: the source
+//    formulas (confirmed by reading `battle_interface.c`) predict the same
+//    shape but land 1-2 ticks off the RAM truth on a few icons (likely a
+//    controller-command-handshake frame this module doesn't model) - the
+//    table is the ground truth, the source is corroborating shape only.
 
 import type { RgbColor } from "./bg.ts";
 import { drawText, type FontData } from "./font.ts";
@@ -154,31 +166,49 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
 
 // --- §2: BattleIntroSlide3 vertical reveal window + per-scanline shift ----
 
-/** First trace tick any pixel is non-black (docs/battle-scene-notes.md §1). */
+/** First trace tick any pixel is non-black - `gBattle_WIN0V` starts changing this tick (RAM-confirmed, module doc point 2). */
 const FIRST_VISIBLE_TICK = 1075;
-/** Trace tick the vertical window is first fully open (this session's own dense pixel sweep - see module doc point 2). */
-const WINDOW_FULLY_OPEN_TICK = 1119;
+/** Trace tick `gBattle_WIN0V`'s top edge hits 0 - the window is fully open from here on (RAM: `win0v` reads `0x00A1` from tick 1118 onward, module doc point 2 - one tick earlier than #58's pixel-fit estimate of 1119). */
+const WINDOW_FULLY_OPEN_TICK = 1118;
+/** Trace tick `BattleIntroSlide3`'s tState 2->3 transition happens (`gBattle_WIN0V`'s first-phase decrement stops, second phase begins the same tick) - RAM-confirmed (`win0v` top byte hits 0x30 here). */
+const WINDOW_PHASE2_START_TICK = 1106;
 
-/** Vertical reveal window [top, bottom) at trace tick `t` - a growing vertical slit centered on row 80, empirically fit against every-tick oracle pixels (see module doc point 2: WIN0V-style growth, not yet RAM-confirmed by this session). */
+/**
+ * Vertical reveal window [top, bottom) at trace tick `t` - RAM-confirmed
+ * two-phase growth of `gBattle_WIN0V` (module doc point 2): phase 1 (ticks
+ * 1075-1106) shrinks by 1px/edge/tick (`WIN0V -= 0xFF`), phase 2 (ticks
+ * 1107-1118) by 4px/edge/tick (`WIN0V -= 0x3FC`) until the top edge hits 0.
+ */
 export function windowRange(t: number): { top: number; bottom: number } | null {
   if (t < FIRST_VISIBLE_TICK) return null;
   if (t >= WINDOW_FULLY_OPEN_TICK) return { top: 0, bottom: 160 };
-  const k = t - FIRST_VISIBLE_TICK;
-  return { top: Math.max(0, 80 - k), bottom: Math.min(160, 81 + k) };
+  if (t <= WINDOW_PHASE2_START_TICK) {
+    const k = t - (FIRST_VISIBLE_TICK - 1);
+    return { top: 80 - k, bottom: 81 + k };
+  }
+  const d = t - WINDOW_PHASE2_START_TICK;
+  return { top: Math.max(0, 48 - 4 * d), bottom: Math.min(160, 113 + 4 * d) };
 }
 
-/** Trace tick the per-scanline shift + BLDALPHA blend both reach their settled (0 shift, eva=0/evb=16) state - task destroyed, BattleIntroSlideEnd (docs/battle-scene-notes.md §2). */
+/** Trace tick the per-scanline shift + BLDALPHA blend both reach their settled (0 shift, eva=0/evb=16) state - task destroyed, BattleIntroSlideEnd (docs/battle-scene-notes.md §2; RAM-confirmed: `gTasks[0]` is destroyed exactly this tick). */
 const SLIDE_END_TICK = 1227;
-/** Best-fit reference tick for the shift's linear ramp (this session's own multi-row fit - NOT the dossier's own tick-1106-anchored data[2] value, see module doc point 2). */
-const SHIFT_REF_TICK = 1099;
+/** Trace tick `gTasks[0].data[2]` first decrements below its initial 240 (RAM-confirmed: `gScanlineEffectRegBuffers`' active half holds a constant leftover 240 for every tick from `FIRST_VISIBLE_TICK` through this tick - not yet written by this task - then decrements by exactly 2/tick starting the next tick). */
+const SHIFT_DECAY_START_TICK = 1107;
 
-/** Top-half (scanlines 0-79) per-scanline horizontal shift at trace tick `t` - see module doc point 2 (best-effort, not byte-exact). */
-export function shiftTop(t: number): number {
-  return t >= SLIDE_END_TICK ? 0 : -2 * (t - SHIFT_REF_TICK);
+/** `gTasks[0].data[2]` (as DMA'd into `gScanlineEffectRegBuffers`) at trace tick `t` - RAM-confirmed exact: a constant 240 for ticks `FIRST_VISIBLE_TICK`-1106 (leftover from before this task writes it), then -2/tick from tick 1107, reaching 0 at tick 1226 (module doc point 2). DMA'd into `REG_BG3HOFS` per scanline: top half (0-79) gets `+data[2]`, bottom half (80-159) gets `-data[2]` (RAM-confirmed uniform per half, no additional gradient). */
+function scanlineShiftMagnitude(t: number): number {
+  if (t < FIRST_VISIBLE_TICK || t >= SLIDE_END_TICK) return 0;
+  if (t < SHIFT_DECAY_START_TICK) return 240;
+  return 240 - 2 * (t - WINDOW_PHASE2_START_TICK);
 }
-/** Bottom-half (scanlines 80-159) shift - opposite sign of shiftTop (see module doc point 2). */
+/** Top-half (scanlines 0-79) per-scanline horizontal shift at trace tick `t` (RAM-confirmed, see module doc point 2). */
+export function shiftTop(t: number): number {
+  return scanlineShiftMagnitude(t);
+}
+/** Bottom-half (scanlines 80-159) shift - opposite sign of shiftTop (RAM-confirmed, see module doc point 2). */
 export function shiftBottom(t: number): number {
-  return t >= SLIDE_END_TICK ? 0 : 2 * (t - SHIFT_REF_TICK);
+  const magnitude = scanlineShiftMagnitude(t);
+  return magnitude === 0 ? 0 : -magnitude;
 }
 
 /** BLDALPHA (EVA, EVB) at trace tick `t` - docs/battle-scene-notes.md §2 point 4, RAM-confirmed schedule: 8:8 constant through tick 1138, then 8 steps of 6 ticks each (EVA-1/EVB+1 per step) from tick 1139, reaching 0:16 at tick 1181 and holding. */
@@ -205,7 +235,7 @@ function staticBgPixel(mapX: number, mapY: number): RgbColor | null {
   const sy = entry.vFlip ? 7 - inTileY : inTileY;
   const idx = tile[sy * 8 + sx]!;
   if (idx === 0) return null;
-  return battleBg.palette[entry.palette]![idx] ?? null;
+  return battleBg.palette[entry.palette]?.[idx] ?? null;
 }
 
 // --- §3: intro text ---------------------------------------------------
@@ -240,25 +270,89 @@ export function cursorState(t: number): { visible: boolean; yOffset: number } {
   return { visible: true, yOffset: CURSOR_Y_OFFSETS[phase]! };
 }
 
-// --- §4: party-status-summary ball-icon widgets ------------------------
+// --- §4: party-status-summary ball-icon + diagonal-bar widget entrance -----
+// RAM-probed directly (tools/probe/ram-probe.py: gSprites[].{x,x2,y,flags}
+// every tick 1073-1296, identifying each of the 14 sprites - 2 diagonal
+// bars + 12 ball icons - by matching settled (x,y) against docs/battle-
+// interface-assets.md's known corners). x2 is each sprite's own secondary
+// OAM x-offset (SpriteCB_StatusSummaryBar_Enter/SpriteCB_StatusSummaryBalls_
+// Enter, battle_interface.c) - baked verbatim per tick since the source
+// formula lands 1-2 ticks off this RAM truth on a few icons (module doc
+// point 3). Tables index from PLAYER_CREATE_TICK/OPP_CREATE_TICK (RAM-
+// confirmed: player-side widgets first exist/visible at 1228, opponent-side
+// at 1231 - NOT simultaneous); every table holds a full run through tick
+// 1292 (all 14 have settled to x2=0 by then, matching docs/battle-
+// interface-assets.md's "settles at tick 1292 exactly").
 
-/** Trace tick the ball-icon widgets (both sides) are pixel-exact at their final settled position (docs/battle-interface-assets.md - "Ball-icon entrance slide settles at tick 1292 exactly"). Entrance slide (~1230-1291) is not modeled this session - hidden until settled (see module doc point 3). */
+/** Trace tick the player-side bar + all 6 player ball icons are first created/visible (RAM-confirmed). */
+const PLAYER_CREATE_TICK = 1228;
+/** Trace tick the opponent-side bar + all 6 opponent ball icons are first created/visible (RAM-confirmed - 3 ticks after the player side, not simultaneous). */
+const OPP_CREATE_TICK = 1231;
+/** Trace tick every widget's entrance slide has settled (docs/battle-interface-assets.md). */
 export const BALL_WIDGETS_SETTLED_TICK = 1292;
+
+const PLAYER_BAR_X2 = [95, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 0];
+const OPP_BAR_X2 = [-95, -90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0];
+const PLAYER_ICON_X2: readonly number[][] = [
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+];
+const OPP_ICON_X2: readonly number[][] = [
+  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-117, -111, -102, -90, -75, -57, -36, -12, 0],
+];
+
+function tableX2(table: readonly number[], createTick: number, t: number): number {
+  if (t < createTick) return 0;
+  const idx = t - createTick;
+  return idx < table.length ? table[idx]! : 0;
+}
 
 export interface BallIcon {
   x: number;
   y: number;
   state: string;
+  visible: boolean;
 }
 
-/** CreatePartyStatusSummarySprites corner formula (docs/battle-interface-assets.md): opponent `(26+10i, 32)`, player `(156+10i, 88)`, i=0-5. States hardcoded per this specific battle-1 trace's own verified slot contents (3v3, see that doc's verification table) - not derived generically. */
-export function ballIcons(): BallIcon[] {
+/** CreatePartyStatusSummarySprites corner formula (docs/battle-interface-assets.md): opponent `(26+10i, 32)`, player `(156+10i, 88)`, i=0-5, offset by each icon's own `x2` entrance slide (RAM-confirmed tables above). States hardcoded per this specific battle-1 trace's own verified slot contents (3v3, see that doc's verification table) - not derived generically. */
+export function ballIcons(t: number): BallIcon[] {
   const opponentStates = ["Empty", "Empty", "Empty", "Full", "Full", "Full"];
   const playerStates = ["Full", "Full", "Full", "Empty", "Empty", "Empty"];
   const icons: BallIcon[] = [];
-  for (let i = 0; i < 6; i += 1) icons.push({ x: 26 + 10 * i, y: 32, state: opponentStates[i]! });
-  for (let i = 0; i < 6; i += 1) icons.push({ x: 156 + 10 * i, y: 88, state: playerStates[i]! });
+  for (let i = 0; i < 6; i += 1) {
+    icons.push({
+      x: 26 + 10 * i + tableX2(OPP_ICON_X2[i]!, OPP_CREATE_TICK, t),
+      y: 32,
+      state: opponentStates[i]!,
+      visible: t >= OPP_CREATE_TICK,
+    });
+  }
+  for (let i = 0; i < 6; i += 1) {
+    icons.push({
+      x: 156 + 10 * i + tableX2(PLAYER_ICON_X2[i]!, PLAYER_CREATE_TICK, t),
+      y: 88,
+      state: playerStates[i]!,
+      visible: t >= PLAYER_CREATE_TICK,
+    });
+  }
   return icons;
+}
+
+/** Diagonal-bar background corners at trace tick `t` - `ballStatusBar`'s own settled corners (docs module doc point 1: opponent `(-24,40)` h-flipped, player `(136,96)`) offset by the bar sprite's own `x2` entrance slide (RAM-confirmed tables above - the bar is itself `gSprites[summaryBarSpriteId]`, same mechanism as the ball icons). */
+export function ballStatusBarPositions(t: number): { opponent: { x: number; visible: boolean }; player: { x: number; visible: boolean } } {
+  return {
+    opponent: { x: -24 + tableX2(OPP_BAR_X2, OPP_CREATE_TICK, t), visible: t >= OPP_CREATE_TICK },
+    player: { x: 136 + tableX2(PLAYER_BAR_X2, PLAYER_CREATE_TICK, t), visible: t >= PLAYER_CREATE_TICK },
+  };
 }
 
 // --- rendering ----------------------------------------------------------
@@ -384,10 +478,12 @@ function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolea
   }
 }
 
-function drawBallIcons(fb: Uint8Array): void {
-  drawBallStatusBar(fb, -24, 40, true);
-  drawBallStatusBar(fb, 136, 96, false);
-  for (const icon of ballIcons()) {
+function drawBallIcons(fb: Uint8Array, t: number): void {
+  const bars = ballStatusBarPositions(t);
+  if (bars.opponent.visible) drawBallStatusBar(fb, bars.opponent.x, 40, true);
+  if (bars.player.visible) drawBallStatusBar(fb, bars.player.x, 96, false);
+  for (const icon of ballIcons(t)) {
+    if (!icon.visible) continue;
     drawSpriteSheetTile(fb, ballDisplay.tileset, ballDisplay.palette, ballStateTileIndex(icon.state), icon.x, icon.y);
   }
 }
@@ -400,47 +496,49 @@ function drawSettledScene(fb: Uint8Array): void {
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 }
 
-/** Best-effort (not byte-exact, see module doc point 2) render of the BattleIntroSlide3 reveal, ticks FIRST_VISIBLE_TICK..SLIDE_END_TICK-1. */
+/**
+ * Render of the BattleIntroSlide3 reveal, ticks
+ * FIRST_VISIBLE_TICK..SLIDE_END_TICK-1 (NOT byte-exact - see module doc
+ * point 2's "still open" note). RAM confirms `BLDCNT =
+ * TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ`: TGT1 is BG1. This module approximates
+ * BG1 as contributing black (attempted using `battle-bg.json`'s
+ * `entrySlide` tileset - scrolled via the RAM-confirmed `gBattle_BG1_X` -
+ * as BG1's real content, but `entrySlide` references palette bank 4, which
+ * was never extracted, so every sampled pixel came back empty and the
+ * result was numerically identical to the black approximation; a future
+ * session needs to re-extract `battle-bg.json` with that bank before this
+ * is worth revisiting). TGT2 is the per-scanline-shifted BG3 (`static`)
+ * with both trainer OBJs (RAM-confirmed real blend targets, scaled the
+ * same as BG3) drawn on top of it, unshifted. The window frame (BG0) is
+ * neither blend target, so it draws at full brightness, unshifted, on top.
+ */
 function drawSlideScene(fb: Uint8Array, t: number, win: { top: number; bottom: number }): void {
-  const { eva, evb } = evaEvb(t);
+  const { evb } = evaEvb(t);
+  const scale = (v: number): number => Math.min(255, Math.round((v * evb) / 16));
   for (let y = win.top; y < win.bottom; y += 1) {
     const shift = y < 80 ? shiftTop(t) : shiftBottom(t);
     for (let x = 0; x < 240; x += 1) {
-      const fixed = staticBgPixel(x, y);
-      const shifted = staticBgPixel(x + shift, y);
-      let c: RgbColor | null;
-      if (fixed && shifted) {
-        c = {
-          r: Math.min(255, Math.round((fixed.r * eva + shifted.r * evb) / 16)),
-          g: Math.min(255, Math.round((fixed.g * eva + shifted.g * evb) / 16)),
-          b: Math.min(255, Math.round((fixed.b * eva + shifted.b * evb) / 16)),
-        };
-      } else {
-        c = shifted ?? fixed;
-      }
-      if (c) setPixel(fb, x, y, c);
+      const c = staticBgPixel(x + shift, y);
+      if (c) setPixel(fb, x, y, { r: scale(c.r), g: scale(c.g), b: scale(c.b) });
     }
   }
-  // Sprites + window frame clipped to the same reveal window (drawn at full
-  // brightness - module doc point 2 flags this as an open question: BLDCNT's
-  // TGT2_BG3|TGT2_OBJ suggests OBJ should also blend while eva>0).
-  const clip = (drawFn: (tmp: Uint8Array) => void): void => {
+  const clip = (drawFn: (tmp: Uint8Array) => void, brighten: boolean): void => {
     const tmp = new Uint8Array(240 * 160 * 4);
     drawFn(tmp);
     for (let y = win.top; y < win.bottom; y += 1) {
       for (let x = 0; x < 240; x += 1) {
         const o = (y * 240 + x) * 4;
         if (tmp[o + 3] === 0) continue;
-        fb[o] = tmp[o]!;
-        fb[o + 1] = tmp[o + 1]!;
-        fb[o + 2] = tmp[o + 2]!;
+        fb[o] = brighten ? scale(tmp[o]!) : tmp[o]!;
+        fb[o + 1] = brighten ? scale(tmp[o + 1]!) : tmp[o + 1]!;
+        fb[o + 2] = brighten ? scale(tmp[o + 2]!) : tmp[o + 2]!;
         fb[o + 3] = 255;
       }
     }
   };
-  clip((tmp) => drawSpriteSheet(tmp, bugCatcher.tileset, bugCatcher.palette, OPPONENT_CORNER.x, OPPONENT_CORNER.y));
-  clip((tmp) => drawSpriteSheet(tmp, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y));
-  clip((tmp) => drawTileBg(tmp, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette));
+  clip((tmp) => drawSpriteSheet(tmp, bugCatcher.tileset, bugCatcher.palette, OPPONENT_CORNER.x, OPPONENT_CORNER.y), true);
+  clip((tmp) => drawSpriteSheet(tmp, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y), true);
+  clip((tmp) => drawTileBg(tmp, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette), false);
 }
 
 /** Renders the full battle-scene-assembly frame for `state` (elapsed since TICK0). */
@@ -453,7 +551,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     return;
   }
   drawSettledScene(fb);
-  if (t >= BALL_WIDGETS_SETTLED_TICK) drawBallIcons(fb);
+  drawBallIcons(fb, t);
   drawMessageText(fb, textVisibleChars(t));
   const cursor = cursorState(t);
   if (cursor.visible) drawCursor(fb, cursor.yOffset);

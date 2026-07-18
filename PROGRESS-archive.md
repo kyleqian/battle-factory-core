@@ -5,6 +5,38 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 57 — S6 groundwork (parallel worktree lane, merged): battle-interface assets extracted byte-exact (ball_display + down_arrow wait-cursor); new files only
+
+- **State:** merge of `worker/wt-20260718-110943` (single commit `29f7840`)
+  on top of #56; `npm test` **390/390** + `npm run build` green on the
+  merged result. New: `tools/extract/extract-battle-interface.ts`,
+  `src/assets/gen/battle-interface-ball-display.json` +
+  `battle-interface-down-arrow.json`,
+  `tools/compare/traces-groundtruth/battle-interface-assets.json` (137
+  captures, ticks 1284-1420), `docs/battle-interface-assets.md`.
+- **Did (worker, supervisor-verified):** (1) ball_display.png (party-
+  status ball icons, Full/Empty/Fainted/Statused) extracted with its own
+  embedded palette; screen positions derived from
+  `CreatePartyStatusSummarySprites`' formulas + the sprite
+  center-to-corner (-4,-4) convention; **1590/1590 px exact** across 12
+  icons × 5 ticks; entrance slide settles at tick 1292 exactly. (2) the
+  wait cursor: real path is `graphics/fonts/down_arrow_alt.png` (the
+  brief's guessed battle_interface path doesn't exist) via `text.c`'s
+  `sDarkDownArrowTiles`; a plain triangle that *renders* heart-shaped
+  through `gBattleTextboxPalette` bank 0 (already in
+  `battle-window.json` palette[0] — no new palette); bob =
+  `sDownArrowYCoords={0,1,2,1}` at 9 ticks/phase (the 36-tick cycle);
+  **4773/4773 px exact** across all 137 probe ticks. Honestly flagged:
+  the source-row-vs-dest-row axis attribution of the bob is empirical —
+  the engine slice should treat the additive dest-Y rule as the pinned
+  behavior, not the hand-traced address math.
+- **Next:** scene-assembly engine slice (1040-1300) briefed on the main
+  lane now — all its assets and mechanism tables are banked (#55 + this).
+  Send-out scout (1300-1560) in flight on the worktree lane (worker M).
+- **Notes:** worktree removed + branch deleted post-merge.
+
+---
+
 ## 56 — S6 transition engine slice: CIRCLES_MEET battle transition (ticks 843-1040) implemented, oracle-pinned; `transition.json` committed 206/206
 
 - **State:** `npm test` **390/390** (377→390, +13 in new
