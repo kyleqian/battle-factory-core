@@ -111,7 +111,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       const anim = ballAnims[i];
       if (!anim) continue;
       if (stalledSlots.includes(i)) continue;
-      const result = advanceBallAnim(anim, rngValue);
+      // ISSUES #7 remainder: slot 0's own internal cmdIndex model runs 1
+      // tick early vs RAM (pre-existing, RAM-confirmed), so it alone needs
+      // the 2-tick display delay; every other slot's cmdIndex matches RAM
+      // exactly and only needs the real hardware's 1-tick OAM lag - see
+      // ballAnim.ts's BallAnimState.displayTile doc.
+      const result = advanceBallAnim(anim, rngValue, i === 0 ? 2 : 1);
       ballAnims[i] = result.state;
       rngValue = result.rngValue;
     }

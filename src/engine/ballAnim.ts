@@ -92,17 +92,29 @@ interface BallAnimCore {
 
 export interface BallAnimState extends BallAnimCore {
   /**
-   * The tile actually shown on screen this tick - always TWO ticks behind
-   * `phase`/`cmdIndex`'s own internal transition (oracle-verified dense
-   * compare: every phase/cmdIndex transition's pixels land exactly 2 ticks
-   * later than the RAM-dumped internal transition itself - OAM double-
-   * buffering plus this sprite callback's own StartSpriteAnim-vs-
-   * StartSpriteAnimIfDifferent one-tick quirk stack; not re-derived from
-   * first principles, just pinned from the oracle same as this screen's
-   * other render-lag quirks, e.g. monPic.ts's spriteVisible split). Kept
-   * separate from `phase`/`cmdIndex` so the RNG-critical internal timing
-   * (RAM-pinned, tests/ballAnim.test.ts) stays undisturbed by this purely-
-   * visual delay - `pendingDisplayTile` is the 1-tick stage in between.
+   * The tile actually shown on screen this tick - lags `phase`/`cmdIndex`'s
+   * own internal transition by `displayLagTicks` ticks (2 for slot 0, 1 for
+   * every other slot - see `advanceBallAnim`'s `displayLagTicks` param).
+   * RAM-dumped ground truth (ISSUES #7 remainder, dev-time RAM probe: direct
+   * `struct Sprite` reads of `animCmdIndex` cross-correlated tick-by-tick
+   * against raw framebuffer diffs, ~80 transitions across both balls of a
+   * 2-rent dwell) found the real hardware's OWN OAM-buffer display lag from
+   * its *own* animCmdIndex is a uniform 1 tick for every ball - the apparent
+   * "2" for slot 0 is this engine's own settling-phase internal cmdIndex
+   * running exactly 1 tick EARLY vs the real hardware's animCmdIndex (a
+   * pre-existing quirk this file's `REST_INTERNAL_OFFSET` comment already
+   * flagged as present but "harmless" for single-ball; confirmed via a
+   * scratch engine-state dump: this engine's ball 0 hits cmdIndex 9 at tick
+   * 103/single-ball or 104/2-ball dwell, one tick before RAM's 104/105 - see
+   * ISSUES #7), so slot 0 needs a 2-tick display delay to land on the
+   * correct absolute tick while every other slot (RAM-verified: engine
+   * cmdIndex matches RAM exactly, no offset) only needs the real 1-tick OAM
+   * lag. Not re-derived from first principles beyond that, just pinned from
+   * the oracle same as this screen's other render-lag quirks, e.g.
+   * monPic.ts's spriteVisible split. Kept separate from `phase`/`cmdIndex`
+   * so the RNG-critical internal timing (RAM-pinned, tests/ballAnim.test.ts)
+   * stays undisturbed by this purely-visual delay - `pendingDisplayTile` is
+   * the 1-tick stage in between (only meaningful for slot 0's 2-tick path).
    */
   displayTile: number;
   pendingDisplayTile: number;
@@ -143,12 +155,20 @@ function beginMoving(rngValue: number): { state: BallAnimCore; rngValue: number 
  * ball-index order (matches the sprite-array iteration order
  * AnimateSprites() uses, per-VBlank consumption already applied by the
  * caller before this runs - see core.ts).
+ *
+ * `displayLagTicks` (2 for slot 0, 1 for every other slot - see
+ * `BallAnimState.displayTile`'s doc, ISSUES #7 remainder): display-only,
+ * does not affect `rngValue` or any field `advanceBallAnimCore` returns.
  */
-export function advanceBallAnim(state: BallAnimState, rngValue: number): { state: BallAnimState; rngValue: number } {
-  const pendingDisplayTile = internalTile(state);
-  const displayTile = state.pendingDisplayTile;
+export function advanceBallAnim(
+  state: BallAnimState,
+  rngValue: number,
+  displayLagTicks: 1 | 2 = 2,
+): { state: BallAnimState; rngValue: number } {
+  const currentInternalTile = internalTile(state);
+  const displayTile = displayLagTicks === 2 ? state.pendingDisplayTile : currentInternalTile;
   const result = advanceBallAnimCore(state, rngValue);
-  return { state: { ...result.state, displayTile, pendingDisplayTile }, rngValue: result.rngValue };
+  return { state: { ...result.state, displayTile, pendingDisplayTile: currentInternalTile }, rngValue: result.rngValue };
 }
 
 function advanceBallAnimCore(state: BallAnimCore, rngValue: number): { state: BallAnimCore; rngValue: number } {
