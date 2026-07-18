@@ -5,6 +5,82 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 35 — ISSUES #9's ball-anim drift root-caused and fixed (2 independent display-lag bugs, both RAM-verified); `confirm-flow.json` STILL not committed — the fix cleared every ball-OBJ diff but exposed a 5th, unrelated gap in confirmReveal's own flash-bar timing, filed as new ISSUES #10
+
+- **State:** `npm test` **296/296** (292→296, +4), `npm run build` green.
+  All 9 committed traces re-verified at their exact prior counts (anchor
+  1/1, draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example
+  4/4, rent-slot1 125/139, rent-3picks 157/190, summary-info-magby 132/132,
+  summary-info-onix 122/122) — zero regressions. `confirm-flow.json` **not
+  committed** (see below).
+- **Did:** RAM-probed all 3 ball slots simultaneously (`gSprites[]` located
+  by known screen position, `animCmdIndex`/`animNum`/`data[0]` every tick)
+  across confirm-flow.json's exact button script (rent-3picks.json's 19
+  segments + 90-tick idle, 280 ticks) and cross-correlated tick-by-tick
+  against `ballAnim.ts`'s internal state for the same replay (scratch Python/
+  TS dump scripts, not committed). Found two independent, clean,
+  state-derivable causes, both display-only (RNG-critical internal state
+  untouched): (1) slot 0's `displayLagTicks=2` (ISSUES #7) was permanent,
+  but RAM-proved to apply only during its *first* moving cycle -
+  `REST_INTERNAL_OFFSET`'s own extra tick already resyncs slot 0's internal
+  `cmdIndex` with RAM the moment it first enters "resting" (RAM-confirmed:
+  slot 0's *second* moving cycle matches RAM's own `animCmdIndex` exactly,
+  transition for transition, zero drift) - added `BallAnimState.hasRested`,
+  slot 0 now uses lag 2 only while `!hasRested`, lag 1 after (matching every
+  other slot always). (2) A previously-unmodeled 4th stall source -
+  `Select_CreateChosenMonsSprites()`'s own per-frame cost, same shape as the
+  already-modeled LEFT/RIGHT/RENT-confirm text-print stalls
+  (`ballAnimMultiBall.test.ts`'s root cause) - adds 1 more display-lag tick
+  to every currently-active ball, landing near the reveal's
+  window-fully-grown hold (RAM-confirmed via all 3 slots' own next
+  `cmdIndex`-transition boundary after that point, all consistent with one
+  shared, screen-level event, empirically bounded to a 4-tick window given
+  this trace's own granularity) - added `confirmReveal.ts`'s
+  `isRevealStallActive` predicate, read by `core.ts`'s ball-anim loop.
+  Exhaustive cross-check: **0 `displayTile` mismatches across all 3 slots
+  for the full 280-tick window** (down from 15 pre-fix). Pinned with 4 new
+  Tier-1 tests (`ballAnimDisplayLag.test.ts`). Committed
+  (`src/engine/ballAnim.ts`/`confirmReveal.ts`/`core.ts` +
+  `tests/ballAnimDisplayLag.test.ts`).
+  **Trace rebuild (not committed):** rebuilt `confirm-flow.json` (same
+  recipe as before) and ran `npm run compare`: frames 223-279 (the entire
+  window-hold + shown/YES-NO-dwell portion, where every prior ball-OBJ diff
+  lived) are now **byte-exact**. Frames 189-209 remain diffing but match
+  ISSUES #5's own already-accepted pattern exactly (tapering 189→199 then a
+  halving tail 199/201/.../209 - 32/16/8/4/3/1px - the 3rd pick's own
+  popup-close catch-up). Frames 210-222 (confirmReveal's own `flash` phase)
+  still diff, but pixel-sampled and confirmed **not** ISSUES #5 (a clean,
+  deterministic, always-same-direction 1-tick-early shift on *every*
+  `FLASH_WIDTHS` doubling step, not a chaotic absolute-tick-dependent
+  hardware race) - a genuinely new, unrelated gap in the reveal's own
+  flash-bar tick bookkeeping, filed as **ISSUES #10** with the full
+  pixel-level evidence. Per the brief's stop condition (residual diff not
+  attributable to #5), did not commit the trace.
+- **Next:** ISSUES #10 (RAM/register-probe `confirmReveal.ts`'s flash-phase
+  tick bookkeeping - likely one more hold tick, same family as this file's
+  already-fixed `WINDOW_STEPS` gap, or an `elapsed`-offset bug rather than
+  the shared table's values), then rebuild and commit `confirm-flow.json`
+  clean modulo ISSUES #5's frames 189-209. One unrelated, pre-existing,
+  out-of-window gap also surfaced at absolute tick 114 (a `ballAnimStall`/
+  display-lag-chain interaction during slot 0's first cycle, outside
+  confirm-flow.json's captured range, already baked into rent-3picks.json's
+  long-standing 157/190 count) - not chased, no evidence yet of a clean
+  rule. After #10: the decline path (stretch goal, still open), then the
+  YES-press exit fade + pre-battle room (`docs/prebattle-room-notes.md`),
+  S6.
+- **Notes:** all RAM probing (position-scanned `gSprites[]`, same recipe as
+  ISSUES #6/#7's own) and the trial `confirm-flow.json` were scratch -
+  deleted before finishing, nothing uncommitted left in the tree beyond the
+  intended `src/engine/ballAnim.ts`/`confirmReveal.ts`/`core.ts` +
+  `tests/ballAnimDisplayLag.test.ts` changes and the `ISSUES.md`/
+  `PROGRESS.md` docs. PAPERCUT: none beyond the usual RAM-probe setup cost
+  (mgba-venv interpreter segfaults at teardown, exit 139, benign, already
+  documented).
+
+---
+
+---
+
 ## 34 — ISSUES #8 CLOSED: all 3 remaining render gaps root-caused and fixed (gap 1 reattributed to #5, gap 2 was a 1-tick-early phase transition not a per-slot stagger, gap 3 was a highlight/text draw-order bug plus a real font.ts glyph-overrun bug); `confirm-flow.json` still NOT committed — rebuilding it surfaced a 4th, distinct gap, filed as new ISSUES #9
 
 - **State:** `npm test` **292/292** (291→292, +1), `npm run build` green.
