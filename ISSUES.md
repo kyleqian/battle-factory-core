@@ -5,6 +5,27 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #16 — Opponent healthbox INTERNAL tile-assembly still unimplemented — the
+  S6 send-out slice ships a pixel-harvested static content block instead
+
+**Symptom/debt (recorded by the supervisor at #73, 2026-07-18):** the
+send-out slice renders the opponent healthbox from
+`src/assets/gen/sendout-healthbox-opponent.json` — a flat 100×28 RGB
+rectangle pixel-harvested from the oracle's own settled tick-1555 capture
+(GROVYLE/male/Lv50/full-HP/no-status only). The REAL content-assembly
+pipeline (subsprite tables, per-column HP-bar-fill VRAM copies,
+FONT_SMALL/FONT_BOLD text into the healthbox tiles) is unimplemented;
+`extract-battle-healthbox.ts`'s own extractor comment flags the tile
+remap as unsolved, and #73 re-confirmed the blocker is real (best
+brute-force raster placement still mismatches 728/2574 opaque px).
+**Why it matters later, not now:** fine for S6 (HP never changes before
+the first action menu; this trace's one content is byte-exact incl. the
+23-step slide). S7's HP-bar drain, status icons, and battles 2-7's other
+opponents all need the real assembly. **Leads:** `battle_interface.c`
+(`UpdateHpTextInHealthbox`, `MoveBattleBarGraphically`), the healthbox
+subsprite tables in `data/battle_interface.c`-adjacent sources, and the
+existing extracted healthbox family assets (docs/battle-interface-assets.md).
+
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
   windows where feasible; otherwise ship with each non-matching frame
