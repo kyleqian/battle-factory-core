@@ -15,10 +15,15 @@ import {
   windowRange,
 } from "../src/engine/battleScene.ts";
 
-// Oracle/RAM cross-check: tools/compare/traces/scene-assembly.json is
-// 256/256 exact end to end. Every formula below is RAM-confirmed (see
-// src/engine/battleScene.ts's module doc + docs/battle-scene-notes.md §2) -
-// not fit against pixels.
+// Oracle/RAM cross-check: tools/compare/traces/scene-assembly.json is NOT
+// yet 256/256 (see PROGRESS.md for the current count and the open gap).
+// The window/shift schedules below were re-derived this session by scanning
+// the oracle's own captured frames (unambiguous ground truth: everything
+// outside the window is pure black) - one tick later throughout than the
+// naive RAM-tick reading, a consistent "task writes this tick, display
+// shows it next tick" lag also confirmed directly via `ram-probe.py` for
+// `gBattle_BG1_X` and the scanline buffers (see src/engine/battleScene.ts's
+// module doc + docs/battle-scene-notes.md §2).
 
 describe("battleScene: state advance", () => {
   it("has no phase split - elapsed just keeps incrementing forever", () => {
@@ -34,22 +39,23 @@ describe("battleScene: vertical reveal window", () => {
     expect(windowRange(1000)).toBeNull();
   });
 
-  it("opens 1px top and bottom of center at tick 1075 (RAM: gBattle_WIN0V's first decrement already applied)", () => {
-    expect(windowRange(1075)).toEqual({ top: 79, bottom: 82 });
+  it("opens exactly 1px (row 80 only) at tick 1075 (pixel-ground-truthed - the oracle's own capture, not the naive RAM-tick reading)", () => {
+    expect(windowRange(1075)).toEqual({ top: 80, bottom: 81 });
   });
 
-  it("grows by 1px top/bottom per tick through tick 1106 (RAM: gBattle_WIN0V -= 0xFF/tick)", () => {
-    expect(windowRange(1080)).toEqual({ top: 74, bottom: 87 });
-    expect(windowRange(1106)).toEqual({ top: 48, bottom: 113 });
+  it("grows by 1px top/bottom per tick through tick 1107 (RAM: gBattle_WIN0V -= 0xFF/tick, one tick later than the raw RAM value)", () => {
+    expect(windowRange(1080)).toEqual({ top: 75, bottom: 86 });
+    expect(windowRange(1106)).toEqual({ top: 49, bottom: 112 });
+    expect(windowRange(1107)).toEqual({ top: 48, bottom: 113 });
   });
 
-  it("switches to a 4px/tick second phase from 1107 (RAM: gBattle_WIN0V -= 0x3FC/tick), fully open at 1118", () => {
-    expect(windowRange(1107)).toEqual({ top: 44, bottom: 117 });
-    expect(windowRange(1117)).toEqual({ top: 4, bottom: 157 });
-    expect(windowRange(1118)).toEqual({ top: 0, bottom: 160 });
+  it("switches to a 4px/tick second phase from 1108 (RAM: gBattle_WIN0V -= 0x3FC/tick), fully open at 1119", () => {
+    expect(windowRange(1108)).toEqual({ top: 44, bottom: 117 });
+    expect(windowRange(1118)).toEqual({ top: 4, bottom: 157 });
+    expect(windowRange(1119)).toEqual({ top: 0, bottom: 160 });
   });
 
-  it("stays fully open past 1118", () => {
+  it("stays fully open past 1119", () => {
     expect(windowRange(1200)).toEqual({ top: 0, bottom: 160 });
     expect(windowRange(2000)).toEqual({ top: 0, bottom: 160 });
   });
@@ -82,15 +88,15 @@ describe("battleScene: per-scanline shift (RAM-confirmed: gTasks[0].data[2], doc
     expect(shiftTop(5000)).toBe(0);
   });
 
-  it("holds a constant leftover 240 for ticks 1075-1106 (RAM: gScanlineEffectRegBuffers unwritten by this task yet)", () => {
+  it("holds a constant leftover 240 for ticks 1075-1107 (RAM: gScanlineEffectRegBuffers unwritten by this task yet, one tick later than the raw RAM-tick reading)", () => {
     expect(shiftTop(1075)).toBe(240);
-    expect(shiftTop(1106)).toBe(240);
+    expect(shiftTop(1107)).toBe(240);
   });
 
-  it("decrements by exactly 2/tick from tick 1107, reaching 0 at tick 1226", () => {
-    expect(shiftTop(1107)).toBe(238);
-    expect(shiftTop(1108)).toBe(236);
-    expect(shiftTop(1226)).toBe(0);
+  it("decrements by exactly 2/tick from tick 1108, reaching 2 at tick 1226 (RAM-confirmed via the actual DMA'd buffer content, not just data[2]'s own value)", () => {
+    expect(shiftTop(1108)).toBe(238);
+    expect(shiftTop(1109)).toBe(236);
+    expect(shiftTop(1226)).toBe(2);
   });
 
   it("top/bottom halves are equal-magnitude opposite sign throughout the shift", () => {

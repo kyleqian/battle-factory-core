@@ -210,6 +210,24 @@ wrong too:
   one from a naive reading) - see `battleScene.ts`'s module doc point 2 for
   the full account.
 
+**CORRECTION (PROGRESS.md #63)**: the sign was never wrong - `sIntroScanlineParams16Bit`
+is a literal source constant, `{&REG_BG3HOFS, ...}` (`battle_main.c:250-253`),
+so BG3 (not BG1) is unambiguously the per-scanline-shifted layer, same `+top
+half / -bottom half` convention `shiftTop`/`shiftBottom` already used - no
+sign flip needed. What made the earlier brute-force search "inconclusive"
+was a **systemic one-tick render lag**, not sign ambiguity: the frame
+captured for trace tick `t` reflects every one of this task's registers
+(`gBattle_WIN0V`, the scanline-shift buffer, `gBattle_BG1_X`) as of tick
+`t-1`, not `t` - confirmed three independent ways this session (see
+`battleScene.ts`'s module doc point 2). Applying that lag made the window
+range and BG3 shift pixel-exact and the BG1/BG3/OBJ layer model (BG1
+topmost, OBJ never actually visible during the reveal) RAM/pixel-confirmed.
+One narrower gap remains: a pixel confirmed to need BG1 content (tick 1150,
+x=11/y=40) is numerically unreachable under the modeled `BLDALPHA` ramp
+against a white backdrop - see `battleScene.ts`'s module doc point 2 for the
+exact numbers and the next action (RAM-probe the literal `BLDALPHA` register,
+not the derived schedule).
+
 Net: an engine slice can bake this **exactly** as a lookup table
 (tick-offset-from-task-start → `{bg1X, scanlineShift, blendEVA, blendEVB}`),
 no RNG, no oracle-fitting — every number above is either a literal source

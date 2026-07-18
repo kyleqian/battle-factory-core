@@ -13,74 +13,68 @@
 // player input is read anywhere in this window - the next A-press is the
 // following slice's concern, trace tick 1420).
 //
-// STATUS: 3 of the 4 pieces of this window are now byte-exact against RAM
-// ground truth (tools/probe/ram-probe.py watching gBattle_WIN0V,
-// gTasks[0].data[0..5], the sGpuRegBuffer BLDCNT/BLDALPHA shadows, and
-// gSprites[].{x,x2,y,flags} every tick 1073-1296 - see docs/battle-scene-
-// notes.md §2 and PROGRESS.md for the resulting tables); the streak's pixel
-// *color* is still not byte-exact - see point 2's "still open" paragraph
-// below (tools/compare/traces/scene-assembly.json is NOT yet 256/256).
+// STATUS (updated this session - see PROGRESS.md #63): the streak window's
+// GEOMETRY and LAYER MODEL are now both RAM/pixel-exact (a real regression
+// fix over #58-#62's fallback); a specific, narrower BLEND-ARITHMETIC gap
+// remains and is the named next step. tools/compare/traces/scene-
+// assembly.json is NOT yet 256/256.
 // 1. The settled composite (trace tick 1227 onward, before any widget
 //    slide) is byte-exact (unchanged from #58: battle-bg.json's `static`
 //    bg + both trainer pics at their source-derived corners + battle-
 //    window.json's bg0 tilemap).
-// 2. The BattleIntroSlide3 streak GEOMETRY (ticks 1075-1226) is now RAM-
-//    exact: `gBattle_WIN0V`'s growth is TWO linear phases, not one
-//    (`windowRange` below) - phase 1 (ticks 1075-1106, -0xFF/tick) and a
-//    second, 4x-faster phase (ticks 1107-1118, -0x3FC/tick) that #58 could
-//    see in pixels but hadn't RAM-confirmed; the window is fully open at
-//    tick 1118, not 1119. `shiftTop`/`shiftBottom` mirror
-//    `gTasks[0].data[2]` exactly (RAM-confirmed 240 constant through tick
-//    1106 then -2/tick to 0 by tick 1226, DMA'd into `REG_BG3HOFS` per
-//    scanline - `sIntroScanlineParams16Bit`, battle_main.c:250-253).
-//    STILL OPEN: the streak's *color*. RAM confirms `BLDCNT =
-//    TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ` (0x1842) literally - OBJ (both
-//    trainer pics) genuinely are blend targets alongside BG3, resolving
-//    #58's question there.
-//    This session (#62) resolved the "palette bank 4 missing" blocker: it
-//    was a misdiagnosis, not a real gap - `entrySlide`'s raw palette nibble
-//    4 is hardware-absolute (same +2 base as the static tilemap), and
-//    normalizing it the same way lands on local subpalette 2, which was
-//    already extracted (RAM-confirmed bit-exact against `gPlttBufferFaded`
-//    @ hardware bank 4 - see extract-battle-bg.ts's header and
-//    battleBg.test.ts). `battle-bg.json`'s `entrySlide` now has usable
-//    content + palette.
-//    But wiring it up surfaced that the OLD fallback model (uniform
-//    `evb/16` brightness scaling of BG3+OBJ across the whole window) is
-//    ALSO categorically wrong, independent of BG1's missing content: GBA
-//    alpha blend only engages where the actual topmost non-transparent
-//    layer at a pixel is flagged TGT1 (here, only BG1) - wherever BG1's
-//    tile is transparent (index 0, the common case; the entrySlide tilemap
-//    is a sparse ~12-tile diagonal streak pattern over a mostly-blank 32x32
-//    grid), BG3/OBJ must draw at their RAW unscaled color, not blended at
-//    all. Direct pixel reverse-engineering against the oracle (tick 1090,
-//    columns clear of both trainer sprites) confirms this exactly: e.g.
-//    (x=230,y=70) is oracle-exact `rgb(247,247,255)` - `battle-bg.json`'s
-//    own local subpalette 0/1 index 15, an UNSCALED color, not `198,198,181`
-//    (bank 2, the static tile my shift formula predicted) scaled by 8/16.
-//    What remains unresolved: the exact BG3-per-scanline-shift sign/
-//    magnitude convention (`shiftTop`/`shiftBottom` below) and BG1's own
-//    `gBattle_BG1_X` scroll-direction convention, needed to know exactly
-//    WHICH pixels are BG1-transparent vs streak-covered before applying the
-//    rule above. A single sample point matched `shift=-240` (not the
-//    existing model's `+240`) exactly, but a wider brute-force pixel search
-//    across a whole scanline was inconclusive - the static bg's tileset is
-//    periodic/repetitive enough (many tiles share the same 5-6 sky colors)
-//    that many candidate shifts alias to similar match counts, so a plain
-//    per-pixel-count fit can't be trusted here. Next step: RAM-probe the
-//    actual DMA'd `gScanlineEffectRegBuffers` content directly (not just
-//    `gTasks[0].data[2]`'s value, which is confirmed, but its literal
-//    sign as written into the buffer + which buffer half the HBlank DMA
-//    reads for which scanline - the `dmaSrcBuffers[i] = ...+1` indexing
-//    trick in `scanline_effect.c` means the buffer-index-to-scanline
-//    mapping may be off by one from a naive reading) - that removes the
-//    sign-guessing this session couldn't fully resolve by pixel fitting
-//    alone. `drawSlideScene` is UNCHANGED this session (still the old,
-//    now-confirmed-wrong, uniform-brightness-scaling fallback) - the
-//    extraction fix above is real and committed, but wiring the corrected
-//    compositing rule needs the RAM trace above first, not more pixel
-//    guessing (`npm run compare -- tools/compare/traces/scene-assembly.json`
-//    is still NOT byte-exact for 1075-1226; unchanged at 40/256 overall).
+// 2. The BattleIntroSlide3 streak (ticks 1075-1226): GEOMETRY is now pixel-
+//    exact. This session found a systemic ONE-TICK RENDER LAG affecting
+//    every internal register this task drives - the frame captured for
+//    trace tick `t` reflects the task's own state as of tick `t-1`, not `t`
+//    (task writes registers this tick; HBlank DMA/VBlank copy shows them to
+//    the display next tick). Confirmed three independent ways: (a)
+//    `windowRange` - scanning the oracle's own captures tick-by-tick for
+//    the first/last non-black row (unambiguous ground truth, no pixel
+//    aliasing possible) shows the window is exactly 1px (row 80 only) at
+//    tick 1075, one tick's growth *behind* the naive `gBattle_WIN0V` RAM
+//    reading; the phase-1/phase-2 boundary and full-open tick are each one
+//    later too (1107/1108/1119, not 1106/1107/1118 - see the corrected
+//    constants below). (b) `scanlineShiftMagnitude` - the actual DMA'd
+//    `gScanlineEffectRegBuffers` row-0 content (RAM-probed directly, not
+//    just `data[2]`'s own value) is 2px larger at a fixed tick than the
+//    naive-pivot formula predicted, exactly matching the same one-tick-
+//    later pivot. (c) `bg1X` - `gBattle_BG1_X` (RAM-probed) at tick `t-1`
+//    is what a fixed-column pixel search matches, not tick `t`'s own value.
+//    LAYER MODEL (also resolved this session, was previously entirely
+//    unmodeled): `BLDCNT = TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ` (0x1842,
+//    RAM-confirmed) with BG1 = `entrySlide` (source: `DrawBattleEntryBackground`'s
+//    Frontier branch loads it to `BG_CHAR_ADDR(1)`/`BG_SCREEN_ADDR(28)`,
+//    matching BG1's own `gBattleBgTemplates` charBase/mapBase) and BG3 =
+//    `static` (mapBase 26, matching `DrawMainBattleBackground`). BG1 sits at
+//    OAM-scale priority 0 (frontmost), BG3 at priority 3 (backmost), both
+//    trainer OBJs at priority 2 (`gOamData_BattleSprite{Player,Opponent}Side`,
+//    `battle_main.c:274-301`) - so BG1 is always the topmost layer wherever
+//    opaque. Pixel-sampling proved **neither trainer OBJ is ever actually
+//    visible during the reveal** (both settled-corner rects show plain
+//    background at every sampled tick 1075-1220, only becoming the real
+//    trainer pics at the tick-1227 settle) - so TGT2 in practice is BG3
+//    alone; `BLDCNT`'s `TGT2_OBJ` bit is real but never engages here. BG3
+//    gets the per-scanline HOFS shift (`sIntroScanlineParams16Bit` targets
+//    `&REG_BG3HOFS` literally, `battle_main.c:250-253` - not BG1); BG1
+//    scrolls uniformly via the ordinary whole-frame `gBattle_BG1_X` write.
+//    Blend only engages where BG1 (TGT1) is opaque; elsewhere BG3 draws raw.
+//    STILL OPEN, next step: at a pixel confirmed to need BG1 content (tick
+//    1150, x=11, y=40 - oracle shows a warm/skin-tone streak color where
+//    this model still shows plain white BG3), the math is inconsistent:
+//    with the modeled `evaEvb(1150)` = {eva:6, evb:10} and a white (255)
+//    backdrop, NO valid BG1 color (r,g,b in [0,255]) can blend down to the
+//    observed ~123/90/82 - the minimum reachable value is `255*evb/16` ≈
+//    159, already above the target. Either the BLDALPHA ramp's tick anchor
+//    (1139) needs the same one-tick-later correction as the window/shift
+//    above (untested), or `entrySlide`'s mapping to this exact pixel is
+//    still wrong (the extracted tilemap's only non-blank tiles are at tile-
+//    rows 8-13 / mapY 64-111, nowhere near mapY=40, under the current
+//    `bg1X` - so either BG1_Y isn't really pinned at 0 the way RAM suggested,
+//    or this specific pixel comes from something this module doesn't model
+//    yet). Next action: RAM-probe the literal `BLDALPHA` register value
+//    (not the derived `evaEvb` schedule) alongside `gScanlineEffectRegBuffers`
+//    for a handful of ticks in 1140-1180, cross-checked against the exact
+//    pixel this paragraph names, before touching the ramp constants again.
 // 3. The party-status-summary ball-icon + diagonal-bar widgets' entrance
 //    slide (ticks ~1228-1291): RAM-probed directly per-tick (`sprite.x2`
 //    for the bar + all 12 ball-icon sprites, identified by matching their
@@ -218,38 +212,41 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
 
 /** First trace tick any pixel is non-black - `gBattle_WIN0V` starts changing this tick (RAM-confirmed, module doc point 2). */
 const FIRST_VISIBLE_TICK = 1075;
-/** Trace tick `gBattle_WIN0V`'s top edge hits 0 - the window is fully open from here on (RAM: `win0v` reads `0x00A1` from tick 1118 onward, module doc point 2 - one tick earlier than #58's pixel-fit estimate of 1119). */
-const WINDOW_FULLY_OPEN_TICK = 1118;
-/** Trace tick `BattleIntroSlide3`'s tState 2->3 transition happens (`gBattle_WIN0V`'s first-phase decrement stops, second phase begins the same tick) - RAM-confirmed (`win0v` top byte hits 0x30 here). */
-const WINDOW_PHASE2_START_TICK = 1106;
+/** Trace tick the top edge hits 0 - the window is fully open from here on (pixel-ground-truthed this session by scanning the oracle's own captures for the first/last non-black row per tick - see PROGRESS.md: the prior #58/#60 estimates of 1118/1119-via-RAM were each one tick off from what the CAPTURED FRAME actually shows, a render-vs-task-tick lag distinct from the RAM value's own tick). */
+const WINDOW_FULLY_OPEN_TICK = 1119;
+/** Last trace tick still using the phase-1 (1px/edge/tick) formula - pixel-ground-truthed (see `WINDOW_FULLY_OPEN_TICK`'s note): captures show top/bottom = 48/113 at this tick (still exactly phase-1's rate), then 44/117 the next tick (phase-2's 4px/edge/tick rate). */
+const WINDOW_PHASE1_LAST_TICK = 1107;
 
 /**
- * Vertical reveal window [top, bottom) at trace tick `t` - RAM-confirmed
- * two-phase growth of `gBattle_WIN0V` (module doc point 2): phase 1 (ticks
- * 1075-1106) shrinks by 1px/edge/tick (`WIN0V -= 0xFF`), phase 2 (ticks
- * 1107-1118) by 4px/edge/tick (`WIN0V -= 0x3FC`) until the top edge hits 0.
+ * Vertical reveal window [top, bottom) at trace tick `t` - two-phase growth
+ * of `gBattle_WIN0V` (module doc point 2), phase boundaries pixel-ground-
+ * truthed this session (see `WINDOW_FULLY_OPEN_TICK`'s note - the RAM-tick
+ * values from #60 were each one capture-frame later than the task's own
+ * tick, a render lag, not a wrong mechanism): phase 1 (ticks 1075-1107)
+ * shrinks by 1px/edge/tick, phase 2 (ticks 1108-1118) by 4px/edge/tick until
+ * the top edge hits 0 at tick 1119.
  */
 export function windowRange(t: number): { top: number; bottom: number } | null {
   if (t < FIRST_VISIBLE_TICK) return null;
   if (t >= WINDOW_FULLY_OPEN_TICK) return { top: 0, bottom: 160 };
-  if (t <= WINDOW_PHASE2_START_TICK) {
-    const k = t - (FIRST_VISIBLE_TICK - 1);
+  if (t <= WINDOW_PHASE1_LAST_TICK) {
+    const k = t - FIRST_VISIBLE_TICK;
     return { top: 80 - k, bottom: 81 + k };
   }
-  const d = t - WINDOW_PHASE2_START_TICK;
+  const d = t - WINDOW_PHASE1_LAST_TICK;
   return { top: Math.max(0, 48 - 4 * d), bottom: Math.min(160, 113 + 4 * d) };
 }
 
 /** Trace tick the per-scanline shift + BLDALPHA blend both reach their settled (0 shift, eva=0/evb=16) state - task destroyed, BattleIntroSlideEnd (docs/battle-scene-notes.md §2; RAM-confirmed: `gTasks[0]` is destroyed exactly this tick). */
 const SLIDE_END_TICK = 1227;
-/** Trace tick `gTasks[0].data[2]` first decrements below its initial 240 (RAM-confirmed: `gScanlineEffectRegBuffers`' active half holds a constant leftover 240 for every tick from `FIRST_VISIBLE_TICK` through this tick - not yet written by this task - then decrements by exactly 2/tick starting the next tick). */
-const SHIFT_DECAY_START_TICK = 1107;
+/** Trace tick `gTasks[0].data[2]` first decrements below its initial 240 (pixel-ground-truthed this session, same one-tick-later-than-#60's-RAM-tick lag as `WINDOW_PHASE1_LAST_TICK` - a column at trace tick 1150 was 2px off from the oracle with the naive RAM-tick pivot (1106), exactly matching a 1-tick-later pivot). */
+const SHIFT_DECAY_START_TICK = 1108;
 
-/** `gTasks[0].data[2]` (as DMA'd into `gScanlineEffectRegBuffers`) at trace tick `t` - RAM-confirmed exact: a constant 240 for ticks `FIRST_VISIBLE_TICK`-1106 (leftover from before this task writes it), then -2/tick from tick 1107, reaching 0 at tick 1226 (module doc point 2). DMA'd into `REG_BG3HOFS` per scanline: top half (0-79) gets `+data[2]`, bottom half (80-159) gets `-data[2]` (RAM-confirmed uniform per half, no additional gradient). */
+/** `gTasks[0].data[2]` (as DMA'd into `gScanlineEffectRegBuffers`) at trace tick `t`: a constant 240 for ticks `FIRST_VISIBLE_TICK`-1107, then -2/tick from tick 1108 (pixel-ground-truthed pivot, see `SHIFT_DECAY_START_TICK`'s note - one tick later than #60's RAM-read value, the same capture-vs-task-tick lag as the window edges). DMA'd into `REG_BG3HOFS` per scanline: top half (0-79) gets `+data[2]`, bottom half (80-159) gets `-data[2]` (RAM-confirmed uniform per half, no additional gradient). */
 function scanlineShiftMagnitude(t: number): number {
   if (t < FIRST_VISIBLE_TICK || t >= SLIDE_END_TICK) return 0;
   if (t < SHIFT_DECAY_START_TICK) return 240;
-  return 240 - 2 * (t - WINDOW_PHASE2_START_TICK);
+  return 240 - 2 * (t - 1107);
 }
 /** Top-half (scanlines 0-79) per-scanline horizontal shift at trace tick `t` (RAM-confirmed, see module doc point 2). */
 export function shiftTop(t: number): number {
@@ -286,6 +283,51 @@ function staticBgPixel(mapX: number, mapY: number): RgbColor | null {
   const idx = tile[sy * 8 + sx]!;
   if (idx === 0) return null;
   return battleBg.palette[entry.palette]?.[idx] ?? null;
+}
+
+/** BG1's own period (`entrySlide` is a 32x32-tile screen block, same 256px period as BG3's `static` - both are `BGCNT_TXT256x512`-shaped per source, `battle_bg.c`'s `gBattleBgTemplates`). */
+const BG1_PERIOD = battleBg.entrySlide.tilemap.width * 8;
+
+/** `entrySlide` (BG1) pixel at map coords - same lookup shape as `staticBgPixel`, no vertical wrap needed since `gBattle_BG1_Y` never moves from 0 in this window (source-confirmed: `DrawBattleEntryBackground`'s Frontier branch never touches it). */
+function entrySlidePixel(mapX: number, mapY: number): RgbColor | null {
+  const tilemap = battleBg.entrySlide.tilemap;
+  const tileRow = Math.floor(mapY / 8);
+  if (tileRow < 0 || tileRow >= tilemap.height) return null;
+  const inTileY = ((mapY % 8) + 8) % 8;
+  const wrappedX = (((mapX % BG1_PERIOD) + BG1_PERIOD) % BG1_PERIOD);
+  const tileCol = Math.floor(wrappedX / 8);
+  const inTileX = wrappedX % 8;
+  const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+  if (!entry) return null;
+  const tile = battleBg.entrySlide.tileset.tiles[entry.tile];
+  if (!tile) return null;
+  const sx = entry.hFlip ? 7 - inTileX : inTileX;
+  const sy = entry.vFlip ? 7 - inTileY : inTileY;
+  const idx = tile[sy * 8 + sx]!;
+  if (idx === 0) return null;
+  return battleBg.palette[entry.palette]?.[idx] ?? null;
+}
+
+/** Trace tick `gBattle_BG1_X` starts incrementing (RAM-confirmed this session, `tools/probe/ram-probe.py` on `gBattle_BG1_X`: reads 0 through tick 1072, 8 at tick 1073, +8/tick after - matches `battle_intro.c`'s unconditional `gBattle_BG1_X += 8` in `BattleIntroSlide3`, task first alive this tick per module doc). */
+const BG1_X_START_TICK = 1073;
+/**
+ * `gBattle_BG1_X` as it actually affects the RENDERED frame at trace tick
+ * `t` - RAM-confirmed this session (`ram-probe.py`) that the value the
+ * oracle displays for tick `t` is the register as of tick `t-1`, not `t`:
+ * e.g. `bg1x` reads 616 at RAM-tick 1149 and the tick-1150 CAPTURE's pixels
+ * are only explained by *that* value, not tick-1150's own 624 (same one-
+ * tick render lag also confirmed for `WINDOW_FULLY_OPEN_TICK` and
+ * `SHIFT_DECAY_START_TICK` above - a consistent "task writes registers this
+ * tick, HBlank DMA/VBlank copy shows them next tick" pattern, not a
+ * per-mechanism coincidence).
+ */
+function bg1X(t: number): number {
+  return 8 * (t - BG1_X_START_TICK);
+}
+
+/** GBA alpha-blend of one channel: `(tgt1*eva + tgt2*evb) / 16`, clamped (BLDALPHA hardware formula, `battle_intro.c`'s `BLDALPHA_BLEND` writes). */
+function blendChannel(tgt1: number, tgt2: number, eva: number, evb: number): number {
+  return Math.min(255, Math.round((tgt1 * eva + tgt2 * evb) / 16));
 }
 
 // --- §3: intro text ---------------------------------------------------
@@ -548,52 +590,72 @@ function drawSettledScene(fb: Uint8Array): void {
 
 /**
  * Render of the BattleIntroSlide3 reveal, ticks
- * FIRST_VISIBLE_TICK..SLIDE_END_TICK-1 (NOT byte-exact - see module doc
- * point 2's "still open" note). RAM confirms `BLDCNT =
- * TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ`: TGT1 is BG1. `battle-bg.json`'s
- * `entrySlide` now has real content + a correctly-normalized palette (#62 -
- * the earlier "palette bank 4 missing" diagnosis was wrong, see module doc
- * point 2), but this function does NOT yet consume it: #62 also found the
- * uniform-`evb/16`-brightness-scaling approach below is itself the wrong
- * compositing rule (confirmed against real oracle pixels - GBA alpha blend
- * only engages where the topmost non-transparent layer is TGT1-flagged;
- * wherever BG1 is transparent, BG3/OBJ must draw at raw unscaled color, not
- * scaled), and the BG3/BG1 shift-sign convention needed to know which
- * pixels those are wasn't nailed down by pixel brute force alone (see
- * module doc point 2's "next step"). Left as the prior (now confirmed
- * inexact) approximation rather than wire in a half-verified compositing
- * rule. TGT2 is the per-scanline-shifted BG3 (`static`) with both trainer
- * OBJs (RAM-confirmed real blend targets, scaled the same as BG3) drawn on
- * top of it, unshifted. The window frame (BG0) is neither blend target, so
- * it draws at full brightness, unshifted, on top.
+ * FIRST_VISIBLE_TICK..SLIDE_END_TICK-1. RAM/source-confirmed compositing
+ * (module doc point 2, resolved this session): `BLDCNT =
+ * TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ`, BG1 (`entrySlide`) is TGT1. Pixel-
+ * ground-truthed this session (sampling both trainer sprites' settled-
+ * corner rectangles at many ticks through the whole reveal window - see
+ * PROGRESS.md): **neither trainer OBJ is ever visible during the reveal
+ * itself** - both spots show plain background (BG1/BG3 blend) at every
+ * sampled tick, only becoming the actual trainer pics at
+ * `drawSettledScene`'s tick 1227 handoff. So TGT2_OBJ in `BLDCNT` never
+ * actually engages here (no OBJ pixel is ever the topmost opaque one to
+ * blend under BG1) - TGT2 is BG3 alone. BG3 (`static`) gets the per-
+ * scanline HOFS shift (`sIntroScanlineParams16Bit` targets `&REG_BG3HOFS`
+ * literally, `battle_main.c:250-253` - BG1 is NOT part of that DMA); BG1
+ * instead scrolls uniformly via the ordinary whole-frame `gBattle_BG1_X`
+ * write (`bg1X` above). Per real GBA alpha-blend semantics, blending only
+ * happens where the actual topmost opaque pixel is TGT1-flagged: wherever
+ * `entrySlide` is transparent, BG3 draws raw, unblended (confirmed against
+ * oracle pixels - PROGRESS.md #62). The window frame (BG0) is not a blend
+ * target, so it draws at full brightness, unshifted, on top of everything.
  */
 function drawSlideScene(fb: Uint8Array, t: number, win: { top: number; bottom: number }): void {
-  const { evb } = evaEvb(t);
-  const scale = (v: number): number => Math.min(255, Math.round((v * evb) / 16));
+  const { eva, evb } = evaEvb(t);
+  const bg1Shift = bg1X(t);
+
+  // TGT2: per-scanline-shifted BG3 (`static`) alone - no OBJ, see module doc above.
+  const tgt2 = new Uint8Array(240 * 160 * 4);
   for (let y = win.top; y < win.bottom; y += 1) {
     const shift = y < 80 ? shiftTop(t) : shiftBottom(t);
     for (let x = 0; x < 240; x += 1) {
       const c = staticBgPixel(x + shift, y);
-      if (c) setPixel(fb, x, y, { r: scale(c.r), g: scale(c.g), b: scale(c.b) });
+      if (c) setPixel(tgt2, x, y, c);
     }
   }
-  const clip = (drawFn: (tmp: Uint8Array) => void, brighten: boolean): void => {
-    const tmp = new Uint8Array(240 * 160 * 4);
-    drawFn(tmp);
-    for (let y = win.top; y < win.bottom; y += 1) {
-      for (let x = 0; x < 240; x += 1) {
-        const o = (y * 240 + x) * 4;
-        if (tmp[o + 3] === 0) continue;
-        fb[o] = brighten ? scale(tmp[o]!) : tmp[o]!;
-        fb[o + 1] = brighten ? scale(tmp[o + 1]!) : tmp[o + 1]!;
-        fb[o + 2] = brighten ? scale(tmp[o + 2]!) : tmp[o + 2]!;
+
+  // TGT1: BG1 (`entrySlide`), uniformly shifted. Blend where opaque, else raw TGT2.
+  for (let y = win.top; y < win.bottom; y += 1) {
+    for (let x = 0; x < 240; x += 1) {
+      const o = (y * 240 + x) * 4;
+      const bg1c = entrySlidePixel(x + bg1Shift, y);
+      if (bg1c) {
+        fb[o] = blendChannel(bg1c.r, tgt2[o]!, eva, evb);
+        fb[o + 1] = blendChannel(bg1c.g, tgt2[o + 1]!, eva, evb);
+        fb[o + 2] = blendChannel(bg1c.b, tgt2[o + 2]!, eva, evb);
+        fb[o + 3] = 255;
+      } else if (tgt2[o + 3] !== 0) {
+        fb[o] = tgt2[o]!;
+        fb[o + 1] = tgt2[o + 1]!;
+        fb[o + 2] = tgt2[o + 2]!;
         fb[o + 3] = 255;
       }
     }
-  };
-  clip((tmp) => drawSpriteSheet(tmp, bugCatcher.tileset, bugCatcher.palette, OPPONENT_CORNER.x, OPPONENT_CORNER.y), true);
-  clip((tmp) => drawSpriteSheet(tmp, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y), true);
-  clip((tmp) => drawTileBg(tmp, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette), false);
+  }
+
+  // BG0 (window frame): not a blend target, drawn raw on top, unshifted.
+  const windowTmp = new Uint8Array(240 * 160 * 4);
+  drawTileBg(windowTmp, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  for (let y = win.top; y < win.bottom; y += 1) {
+    for (let x = 0; x < 240; x += 1) {
+      const o = (y * 240 + x) * 4;
+      if (windowTmp[o + 3] === 0) continue;
+      fb[o] = windowTmp[o]!;
+      fb[o + 1] = windowTmp[o + 1]!;
+      fb[o + 2] = windowTmp[o + 2]!;
+      fb[o + 3] = 255;
+    }
+  }
 }
 
 /** Renders the full battle-scene-assembly frame for `state` (elapsed since TICK0). */
