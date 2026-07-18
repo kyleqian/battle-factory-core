@@ -14,6 +14,7 @@ import {
   advanceRentConfirmRedraw,
   applyDeselect,
   applySelect,
+  chosenMonSpecies,
   cursorMoveStallsBalls,
   isMonsConfirmed,
   moveCursor,
@@ -23,7 +24,13 @@ import {
   selectMonMessage,
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
-import { advanceConfirmReveal, INITIAL_CONFIRM_REVEAL_STATE, isRevealStallActive } from "./confirmReveal.ts";
+import {
+  advanceConfirmReveal,
+  INITIAL_CONFIRM_REVEAL_STATE,
+  INITIAL_YES_NO_CURSOR_POS,
+  isRevealStallActive,
+  toggleYesNoCursor,
+} from "./confirmReveal.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 import { advanceMonPic, closeMonPic, isCursorInputReady, isMonPicInputReady, openMonPic } from "./monPic.ts";
 import { advanceBallAnim, initialBallAnimState } from "./ballAnim.ts";
@@ -100,6 +107,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let cursorRedraw = advanceCursorRedraw(draftScreen.cursorRedraw);
     let menuHighlightRedraw = advanceMenuHighlightRedraw(draftScreen.menuHighlightRedraw);
     let rentConfirmRedraw = advanceRentConfirmRedraw(draftScreen.rentConfirmRedraw);
+    let yesNoCursorRedraw = advanceMenuHighlightRedraw(draftScreen.yesNoCursorRedraw);
 
     // SpriteCB_Pokeball (ballAnim.ts): every currently-rented ball's idle/
     // rocking anim advances every tick regardless of menu state, each
@@ -144,16 +152,58 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let confirmReveal = advanceConfirmReveal(draftScreen.confirmReveal);
     if (confirmed && !confirmReveal && monPic.phase === "closed") {
       confirmReveal = INITIAL_CONFIRM_REVEAL_STATE;
+      // Select_ShowYesNoOptions resets yesNoCursorPos to YES every time the
+      // popup (re)shows - relevant once a decline lets the 3rd pick re-open.
+      draftScreen = { ...draftScreen, yesNoCursorPos: INITIAL_YES_NO_CURSOR_POS };
     }
 
     // Select_Task_HandleChooseMons (battle_factory_screen.c:1671-1673) early-
     // returns while sFactorySelectScreen->monPicAnimating is TRUE, dropping
     // LEFT/RIGHT/A-open alike - see isCursorInputReady's doc for the
     // RAM-verified gate window.
-    if (confirmed) {
-      // No input is processed here this slice - YES-press/decline (B/NO) are
-      // out of scope (see docs/confirm-flow-notes.md's decline-path stretch
-      // goal and ROADMAP.md's S5 slice boundary).
+    if (confirmReveal) {
+      // A reveal/YES-NO/un-reveal is in flight - only STATE_YESNO_SHOW_OPTIONS
+      // (confirmReveal.phase === "shown") ever reads input; the flash/window/
+      // closing sub-phases are all animation-only, matching monPicAnimating's
+      // own blanket lockout (see isCursorInputReady's doc, same family).
+      if (confirmReveal.phase === "shown") {
+        if (newAndRepeatedKeys.has("UP") || newAndRepeatedKeys.has("DOWN")) {
+          // Select_UpdateYesNoCursorPosition (:1390-1409): JOY_REPEAT-gated
+          // 0<->1 toggle (see confirmReveal.ts's toggleYesNoCursor doc).
+          yesNoCursorRedraw = { fromMenuCursorPos: draftScreen.yesNoCursorPos, elapsed: 0 };
+          draftScreen = { ...draftScreen, yesNoCursorPos: toggleYesNoCursor(draftScreen.yesNoCursorPos) };
+        } else if (newKeys.has("B") || (newKeys.has("A") && draftScreen.yesNoCursorPos === 1)) {
+          // docs/confirm-flow-notes.md §3: B-anywhere-in-YES/NO and A-on-NO
+          // are source-identical decline paths - both erase the popup, drop
+          // the 3rd pick (same slot RENT put it in - cursorPos never moved),
+          // and start the 20-tick un-reveal (confirmReveal.ts's "closing").
+          const slot = draftScreen.cursorPos;
+          const decliningSpecies = chosenMonSpecies(draftScreen);
+          const { selectedIds, selectingMonsState } = applyDeselect(draftScreen.selectedIds, draftScreen.selectingMonsState, slot);
+          ballAnims[slot] = null;
+          // Select_PrintSelectMonString is the same text-printer function
+          // RENT/DESELECT's own confirm uses - same knock-on stall for every
+          // OTHER currently-rented ball (see DraftScreenState.ballAnimStall doc).
+          ballAnimStall = activeSlotsBeforeAction.filter((i) => i !== slot);
+          // Select_PrintSelectMonString's own redraw lag applies here too -
+          // reuse RentConfirmRedrawState's exact fromMessage/elapsed<2 hold
+          // (see RentConfirmRedrawState doc; fromSelected is inert here since
+          // the RENT/DESELECT popup label it also covers isn't on screen).
+          rentConfirmRedraw = { fromMessage: draftScreen.message, fromSelected: true, elapsed: 0 };
+          draftScreen = {
+            ...draftScreen,
+            selectedIds,
+            selectingMonsState,
+            message: selectMonMessage(selectingMonsState),
+          };
+          confirmReveal = { phase: "closing", elapsed: 0, decliningSpecies };
+        }
+        // A-on-YES (accept): out of scope this slice (the exit-fade path) -
+        // no-op for now, see docs/confirm-flow-notes.md.
+      }
+    } else if (confirmed) {
+      // Still waiting for the 3rd confirm's own popup close (monPic) to
+      // finish before the reveal can start - no input processed either way.
     } else if (draftScreen.mode === "cursor" && isCursorInputReady(monPic)) {
       if (newAndRepeatedKeys.has("RIGHT")) {
         const nextCursorPos = moveCursor(draftScreen.cursorPos, 1);
@@ -219,6 +269,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       rentConfirmRedraw,
       ballAnimStall,
       confirmReveal,
+      yesNoCursorRedraw,
     };
   }
 

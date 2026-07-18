@@ -248,8 +248,10 @@ export interface DraftScreenState {
   ballAnimStall: readonly number[];
   /** Select_Task_HandleYesNo's reveal sub-machine (docs/confirm-flow-notes.md); null until the 3rd confirm's own popup close finishes - see confirmReveal.ts. */
   confirmReveal: ConfirmRevealState | null;
-  /** Select_ShowYesNoOptions's yesNoCursorPos; meaningless until confirmReveal.phase === "shown". */
+  /** Select_ShowYesNoOptions's yesNoCursorPos; meaningless until confirmReveal.phase === "shown"/"closing". */
   yesNoCursorPos: number;
+  /** In-flight YES/NO cursor-move redraw (Select_UpdateYesNoCursorPosition - same OAM-move shape as MenuHighlightRedrawState); null once settled. */
+  yesNoCursorRedraw: MenuHighlightRedrawState | null;
 }
 
 /** Select_OptionRentDeselect (:1965-1966): the 3rd confirm's own selectingMonsState++ crosses this - cursor/menu input never resumes past this point (see core.ts). */
@@ -399,8 +401,9 @@ function drawConfirmReveal(
     }
   }
 
-  if (visual.monsAndYesNoVisible) {
-    chosenMonSpecies(state).forEach((species, i) => drawChosenMonPic(fb, species, REVEAL_MON_CENTERS_X[i]!, REVEAL_MON_CENTER_Y));
+  if (visual.monsVisible) {
+    const species = visual.monsSpeciesOverride ?? chosenMonSpecies(state);
+    species.forEach((s, i) => drawChosenMonPic(fb, s, REVEAL_MON_CENTERS_X[i]!, REVEAL_MON_CENTER_Y));
   }
   // Highlight sprite drawn BEFORE the text (same order as the RENT/SUMMARY/
   // OTHERS menu above): the highlight is an OAM sprite under the BG0 text
@@ -408,11 +411,15 @@ function drawConfirmReveal(
   // the sprite after the text (as an earlier version of this function did)
   // blotted out "YES"'s own letters whenever the cursor sat on that row.
   if (visual.cursorVisible) {
-    const highlightY = state.yesNoCursorPos * 16 + 112;
+    // yesNoCursorRedraw (see DraftScreenState doc): same old-row-then-jump
+    // lag as MenuHighlightRedrawState, reusing its shape/advance function.
+    const redraw = state.yesNoCursorRedraw;
+    const cursorPos = redraw ? redraw.fromMenuCursorPos : state.yesNoCursorPos;
+    const highlightY = cursorPos * 16 + 112;
     drawSprite(fb, { tileset: menuHighlight.left.tileset }, menuHighlight.palette, 176 + 16, highlightY + 8, 4, 2, 0);
     drawSprite(fb, { tileset: menuHighlight.right.tileset }, menuHighlight.palette, 208 + 16, highlightY + 8, 4, 2, 0);
   }
-  if (visual.monsAndYesNoVisible) {
+  if (visual.yesNoVisible) {
     for (let i = 0; i < YES_NO_LABELS.length; i += 1) {
       drawText(fb, font, charmap, YES_NO_LABELS[i]!, WIN_OPTIONS.x + 7, WIN_OPTIONS.y + 1 + i * 16, textPalette, MENU_TEXT_COLORS);
     }
@@ -617,4 +624,5 @@ export const ANCHOR_DRAFT_SCREEN_STATE: DraftScreenState = {
   ballAnimStall: [],
   confirmReveal: null,
   yesNoCursorPos: INITIAL_YES_NO_CURSOR_POS,
+  yesNoCursorRedraw: null,
 };

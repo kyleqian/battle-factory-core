@@ -29,12 +29,21 @@
 // 8 more ticks to (32,96), holds 2 more ticks, then the 3 mon pics + YES/NO
 // box appear together.
 
-export type ConfirmRevealPhase = "flash" | "window" | "shown";
+export type ConfirmRevealPhase = "flash" | "window" | "shown" | "closing";
 
 export interface ConfirmRevealState {
   phase: ConfirmRevealPhase;
   /** Ticks since this phase started; -1 and 0 during the 2-tick OAM-creation lag before the flash's first pixel is visible (ISSUES #10 - see FLASH_WIDTHS' own doc). */
   elapsed: number;
+  /**
+   * "closing" only: the 3 chosen species, snapshotted at decline time - the
+   * 3rd pick's `selectedIds` entry is already cleared same-tick as decline
+   * (RAM-verified, docs/confirm-flow-notes.md §3), but the mon pics
+   * themselves stay visually up through elapsed 0-2 (see UNREVEAL doc) -
+   * `chosenMonSpecies` can't be re-derived from live state during that hold
+   * since the 3rd slot no longer resolves to a pick rank.
+   */
+  decliningSpecies?: readonly string[];
 }
 
 /**
@@ -104,6 +113,56 @@ const WINDOW_STEPS: { top: number; bottom: number }[] = [
   { top: 32, bottom: 96 },
 ];
 
+/**
+ * Select_DeclineChosenMons/Select_HideChosenMons (docs/confirm-flow-notes.md §3,
+ * dense oracle-diff this slice - `tools/compare/traces/confirm-decline.json`):
+ * B-anywhere-in-YES/NO or A-on-NO both run this exact 20-tick un-reveal (RAM-
+ * verified total, monPicAnimating flips 0->1 on the decline press tick and back
+ * 1->0 twenty ticks later), source-identical either way (:1551-1570) - core.ts
+ * models both as the same transition. Shape, oracle-pinned tick by tick:
+ *  - elapsed 0-1: still renders the settled "shown" visual unchanged (2-tick
+ *    render lag before ANY visible effect - same family as this screen's other
+ *    same-tick-state/lagged-render splits, e.g. RentConfirmRedrawState).
+ *  - elapsed 2: the YES/NO popup + its cursor highlight are gone and the info
+ *    text has reverted to "Select the third POKéMON." (Select_ErasePopupMenu +
+ *    Select_PrintSelectMonString, both immediate per source) - but the 3 mon
+ *    pics + wide window are still fully shown (Select_HideChosenMons hasn't
+ *    reached its own close task yet).
+ *  - elapsed 3-9 (7 ticks): the wide window shrinks - UNREVEAL_WINDOW_STEPS
+ *    below (top/bottom only, oracle-verified NOT a clean mirror of WINDOW_STEPS
+ *    read backwards: the growth table's first shrink step is skipped/collapsed
+ *    into elapsed2's still-open hold, landing directly on the 2nd growth step's
+ *    value - same "duplicate hold/skip" shape this screen's other window tables
+ *    already show, e.g. monPic.ts's OPEN_TABLE_A/C). The 3 mon pics are gone
+ *    (Select_HideChosenMons destroys them before this task starts) - the plain
+ *    6-ball grid + cursor arrow show through the shrinking window.
+ *  - elapsed 10: window fully collapsed AND invisible for exactly 1 tick
+ *    (matching monPic.ts CLOSE_TABLE_B's own idx9 HIDDEN tick between its
+ *    window and flash portions - same border-sprite-teardown gap).
+ *  - elapsed 11-19 (9 ticks): the 3 border-deco sprites' own
+ *    sAffineAnim_Select_MonPicBg_Closing zoom-out anim, rendered as flash bars
+ *    at the same REVEAL_FLASH_CENTERS as the open direction - UNREVEAL_FLASH_
+ *    WIDTHS below, reusing monPic.ts's own CLOSE_TABLE_B flash-shrink sequence
+ *    (32,32,16,16,8,8,4,4,1 - the same "SAME closing anim" the brief pointed
+ *    at) with its final duplicate hold dropped to fit this budget's 9 slots
+ *    (20 total ticks is 2 shorter than CLOSE_TABLE_B's single-popup 20-entry
+ *    table despite sharing the same anim, because this table has no separate
+ *    OPEN_STEADY baseline entry and one less flash hold - both budgeted into
+ *    the extra elapsed0-2 hold/erase ticks above instead).
+ */
+const UNREVEAL_WINDOW_STEPS: { top: number; bottom: number }[] = [
+  { top: 36, bottom: 92 },
+  { top: 40, bottom: 88 },
+  { top: 44, bottom: 84 },
+  { top: 48, bottom: 80 },
+  { top: 52, bottom: 76 },
+  { top: 56, bottom: 72 },
+  { top: 60, bottom: 68 },
+  { top: 64, bottom: 65 },
+];
+const UNREVEAL_FLASH_WIDTHS = [32, 32, 16, 16, 8, 8, 4, 4, 1];
+const UNREVEAL_TOTAL_TICKS = 20;
+
 export const WIDE_WINDOW_LEFT = 16;
 export const WIDE_WINDOW_RIGHT = 224;
 /** Select_ShowChosenMons/Select_CreateChosenMonsSprites: border-deco centers 44/120/196, front-sprite centers 48/120/192 (corner i*72+16,32 + half-size 32,32). */
@@ -127,22 +186,40 @@ export function advanceConfirmReveal(state: ConfirmRevealState | null): ConfirmR
     if (elapsed >= FLASH_WIDTHS.length + 1) return { phase: "window", elapsed: 0 };
     return { phase: "flash", elapsed };
   }
-  if (elapsed >= WINDOW_STEPS.length) return { phase: "shown", elapsed: 0 };
-  return { phase: "window", elapsed };
+  if (state.phase === "window") {
+    if (elapsed >= WINDOW_STEPS.length) return { phase: "shown", elapsed: 0 };
+    return { phase: "window", elapsed };
+  }
+  // "closing": UNREVEAL_TOTAL_TICKS ticks total (RAM-verified, docs/confirm-flow-notes.md
+  // §3); once elapsed reaches that, the un-reveal is done and confirmReveal itself goes
+  // away (null) - core.ts's normal cursor-mode input resumes the very same tick.
+  if (elapsed >= UNREVEAL_TOTAL_TICKS) return null;
+  return { phase: "closing", elapsed, decliningSpecies: state.decliningSpecies };
 }
 
 export interface ConfirmRevealVisual {
-  /** Border-deco flash bar widths at REVEAL_FLASH_CENTERS (parallel array); null outside the flash phase. */
+  /** Border-deco flash bar widths at REVEAL_FLASH_CENTERS (parallel array); null outside a flash sub-phase. */
   flashWidths: readonly number[] | null;
-  /** Wide WIN0 window (WIDE_WINDOW_LEFT/RIGHT x this range), bottom exclusive; null when not yet open. */
+  /** Wide WIN0 window (WIDE_WINDOW_LEFT/RIGHT x this range), bottom exclusive; null when not shown. */
   window: { top: number; bottom: number } | null;
-  /** The 3 real mon-pic sprites + YES/NO text (Select_CreateChosenMonsSprites/Select_ShowYesNoOptions - see dossier's "same tick" note). */
-  monsAndYesNoVisible: boolean;
-  /** The YES/NO cursor highlight bar (OAM), oracle-measured 1 tick behind monsAndYesNoVisible - same window-copy-vs-OAM lag as every other popup in this screen. */
+  /** The 3 real mon-pic sprites (Select_CreateChosenMonsSprites/Select_HideChosenMons). */
+  monsVisible: boolean;
+  /** Non-null only during "closing"'s early hold (see ConfirmRevealState.decliningSpecies doc) - overrides chosenMonSpecies(state) for that window since live selectedIds no longer resolves the 3rd pick. */
+  monsSpeciesOverride: readonly string[] | null;
+  /** The YES/NO text itself (Select_ShowYesNoOptions/Select_ErasePopupMenu) - erased immediately on decline, 2 ticks before monsVisible follows (see UNREVEAL doc). */
+  yesNoVisible: boolean;
+  /** The YES/NO cursor highlight bar (OAM), oracle-measured 1 tick behind yesNoVisible on the way in - same window-copy-vs-OAM lag as every other popup in this screen. */
   cursorVisible: boolean;
 }
 
-const HIDDEN_REVEAL: ConfirmRevealVisual = { flashWidths: null, window: null, monsAndYesNoVisible: false, cursorVisible: false };
+const HIDDEN_REVEAL: ConfirmRevealVisual = {
+  flashWidths: null,
+  window: null,
+  monsVisible: false,
+  monsSpeciesOverride: null,
+  yesNoVisible: false,
+  cursorVisible: false,
+};
 
 export function getConfirmRevealVisual(state: ConfirmRevealState | null): ConfirmRevealVisual {
   if (!state) return HIDDEN_REVEAL;
@@ -150,17 +227,57 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
     // elapsed -1 (OAM creation) and 0 (ISSUES #10's 2nd hidden tick) are both hidden.
     if (state.elapsed < 1) return HIDDEN_REVEAL;
     const w = FLASH_WIDTHS[state.elapsed - 1] ?? FLASH_WIDTHS[FLASH_WIDTHS.length - 1]!;
-    return { flashWidths: [w, w, w], window: null, monsAndYesNoVisible: false, cursorVisible: false };
+    return { ...HIDDEN_REVEAL, flashWidths: [w, w, w] };
   }
   if (state.phase === "window") {
     const step = WINDOW_STEPS[state.elapsed] ?? WINDOW_STEPS[WINDOW_STEPS.length - 1]!;
-    return { flashWidths: null, window: step, monsAndYesNoVisible: false, cursorVisible: false };
+    return { ...HIDDEN_REVEAL, window: step };
   }
-  return { flashWidths: null, window: { top: 32, bottom: 96 }, monsAndYesNoVisible: true, cursorVisible: state.elapsed >= 1 };
+  if (state.phase === "shown") {
+    return { ...HIDDEN_REVEAL, window: { top: 32, bottom: 96 }, monsVisible: true, yesNoVisible: true, cursorVisible: state.elapsed >= 1 };
+  }
+  // "closing" (the un-reveal, see UNREVEAL_WINDOW_STEPS/UNREVEAL_FLASH_WIDTHS doc).
+  const decliningSpecies = state.decliningSpecies ?? null;
+  if (state.elapsed < 2) {
+    return {
+      ...HIDDEN_REVEAL,
+      window: { top: 32, bottom: 96 },
+      monsVisible: true,
+      monsSpeciesOverride: decliningSpecies,
+      yesNoVisible: true,
+      cursorVisible: true,
+    };
+  }
+  if (state.elapsed === 2) {
+    // YES/NO erased + message reverted (immediate, core.ts), but the 3 mon
+    // pics are still up for exactly this one more tick while the window
+    // takes its first shrink step (oracle-pixel-verified: NOT a duplicate
+    // hold of the full-open window like the reveal-in direction's own
+    // ISSUES #10 gap - the shrink starts the same tick the mons vanish).
+    return {
+      ...HIDDEN_REVEAL,
+      window: UNREVEAL_WINDOW_STEPS[0]!,
+      monsVisible: true,
+      monsSpeciesOverride: decliningSpecies,
+    };
+  }
+  const windowIdx = state.elapsed - 2;
+  if (windowIdx < UNREVEAL_WINDOW_STEPS.length) {
+    return { ...HIDDEN_REVEAL, window: UNREVEAL_WINDOW_STEPS[windowIdx]! };
+  }
+  const flashIdx = windowIdx - UNREVEAL_WINDOW_STEPS.length - 1;
+  if (flashIdx < 0 || flashIdx >= UNREVEAL_FLASH_WIDTHS.length) return HIDDEN_REVEAL;
+  const w = UNREVEAL_FLASH_WIDTHS[flashIdx]!;
+  return { ...HIDDEN_REVEAL, flashWidths: [w, w, w] };
 }
 
-/** Select_ShowYesNoOptions: default cursor position is YES (row 0). UP/DOWN toggle + YES/decline presses are out of scope this slice (see docs/confirm-flow-notes.md's decline-path stretch goal). */
+/** Select_ShowYesNoOptions: default cursor position is YES (row 0), re-applied every time the popup shows (see core.ts's reveal-start trigger). */
 export const INITIAL_YES_NO_CURSOR_POS = 0;
+
+/** Select_UpdateYesNoCursorPosition (:1390-1409): a simple 2-state toggle, not a wrap-around list - UP/DOWN both just flip between the only two positions. */
+export function toggleYesNoCursor(pos: number): number {
+  return pos === 0 ? 1 : 0;
+}
 
 /**
  * ISSUES #9 (RAM-probed: all 3 ball slots simultaneously, dense confirm-flow-

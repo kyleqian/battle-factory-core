@@ -126,23 +126,23 @@ describe("confirmReveal state machine (hermetic, no core.ts)", () => {
   it("window grows to (32,96) over 8 ticks total (from the degenerate start), then holds before mons/YES-NO appear", () => {
     const grown = run(14 + 8);
     expect(getConfirmRevealVisual(grown).window).toEqual({ top: 32, bottom: 96 });
-    expect(getConfirmRevealVisual(grown).monsAndYesNoVisible).toBe(false);
+    expect(getConfirmRevealVisual(grown).monsVisible).toBe(false);
   });
 
   it("holds the fully-grown (32,96) window 2 more ticks than the growth alone needs (oracle-pixel-verified, ISSUES #8 gap 2: 3 consecutive identical-window frames before mons/YES-NO appear, not 1)", () => {
     const stillHeld1 = run(14 + 9);
     expect(getConfirmRevealVisual(stillHeld1).window).toEqual({ top: 32, bottom: 96 });
-    expect(getConfirmRevealVisual(stillHeld1).monsAndYesNoVisible).toBe(false);
+    expect(getConfirmRevealVisual(stillHeld1).monsVisible).toBe(false);
     const stillHeld2 = run(14 + 10);
     expect(getConfirmRevealVisual(stillHeld2).window).toEqual({ top: 32, bottom: 96 });
-    expect(getConfirmRevealVisual(stillHeld2).monsAndYesNoVisible).toBe(false);
+    expect(getConfirmRevealVisual(stillHeld2).monsVisible).toBe(false);
   });
 
   it("reaches 'shown' (mons + YES/NO visible) after the window's hold ticks, cursor highlight lagging 1 more tick", () => {
     const shownState = run(14 + 11);
     expect(shownState!.phase).toBe("shown");
     const justShown = getConfirmRevealVisual(shownState);
-    expect(justShown.monsAndYesNoVisible).toBe(true);
+    expect(justShown.monsVisible).toBe(true);
     expect(justShown.cursorVisible).toBe(false);
     const oneMore = getConfirmRevealVisual(run(14 + 11 + 1));
     expect(oneMore.cursorVisible).toBe(true);
