@@ -264,11 +264,13 @@ composite checks above are against the final, regenerated files).
 4. **Rows y=90-114 of the settled scene are unchecked** - almost certainly
    fine (it's the same floor/scientist-leg content the y<90 check already
    validates elsewhere), but not literally diffed this session.
-5. **The message box art/geometry for the opponent-speech box is out of
-   scope** - it differs from the pre-battle room's box (shorter, top edge at
-   y=115 not y=96) and was not extracted; the S6 engine slice needs its own
-   pass for this (plus possibly a second message-box variant asset,
-   distinct from `prebattle-room-msgbox.json`).
+5. **RESOLVED (S6 slice 2c groundwork), §8**: the "shorter variant, y=115
+   not y=96" read was a within-tile artifact, not a different box - the
+   opponent-speech box is the literal same `message_box.png` frame/window
+   as the pre-battle room's (same script macro, same window 0, same
+   `sStandardTextBox_WindowTemplates[0]` geometry), reusing
+   `prebattle-room-msgbox.json` verbatim. No new extractor/asset needed.
+   See §8.1 for the byte-exact evidence and the y=115 reconciliation.
 6. **`initialCameraOriginPx`'s underlying claim** ("nothing moves before
    tick ~536") rests on the zero-frame-to-frame-diff observation at ticks
    536-542, which is consistent but not itself proof the walk hasn't
@@ -289,3 +291,176 @@ composite checks above are against the final, regenerated files).
 
 All three verified byte-identical (md5) across two consecutive extractor
 runs.
+
+## 8. Opponent-speech message box ground truth (S6 slice 2c groundwork)
+
+Extraction-only, following this file's own convention: no engine code, no
+parity fixtures. Own scratch probes (not committed, per convention):
+`/tmp/s6msgbox/probe1.json` (852-frame prefix of `tools/compare/
+traces-groundtruth/battle1-intro.json`'s own segments, dense
+`captureFrames` every tick 690-760 and 838-851, plus spot samples at
+745/780/800/820) run via `bin/oracle run ... -o /tmp/s6msgbox/out1`, and
+one-off Node scripts (`verify_frame.js`, `diag2.js`, `rendercheck.js`,
+`full_verify.js`) that composite `prebattle-room-msgbox.json` +
+`src/data/gen/font-normal.json` + `src/data/gen/charmap.json` exactly as
+`src/engine/prebattleRoomRender.ts`'s `drawMessageBoxFrame`/`drawText`
+already do, and diff against the oracle PNGs pixel-by-pixel.
+
+### 8.1. Frame art/window identity: same asset, not a variant
+
+Source proof the two messages share one code path, not map-specific
+windows: `EnterBattleRoom`'s "Right this way, please!" (pre-battle room)
+and `EventScript_BattleOpponent`'s `palace_getopponentintro`-buffered
+speech (battle room, this section) are **both** issued as
+`msgbox <text>, MSGBOX_DEFAULT` (`asm/macros/event.inc:1936-1939`, `MSGBOX_DEFAULT=4`).
+`callstd 4` runs `gStdScripts[4]` = `Std_MsgboxDefault`
+(`data/event_scripts.s:101`) = `data/scripts/std_msgbox.inc:16-19`:
+`message NULL` / `waitmessage` / `waitbuttonpress` - `message NULL` is
+`ScrCmd_message` -> `ShowFieldMessage` (`src/scrcmd.c:1264-1272`) ->
+`Task_DrawFieldMessage` -> `DrawDialogueFrame(0, TRUE)`
+(`src/field_message_box.c:23-45`) -> `WindowFunc_DrawDialogueFrame`
+(`src/menu.c:216-218,319`) against **window 0**, whose template is the
+fixed literal `sStandardTextBox_WindowTemplates[0]`
+(`src/menu.c:83-91`): `{bg:0, tilemapLeft:2, tilemapTop:15, width:27,
+height:4, paletteNum:15}` - no map/script conditional anywhere in this
+chain. `AddTextPrinterForMessage` (`src/menu.c:191-196`) also always
+targets window 0 with `FONT_NORMAL`. I.e. **every** `MSGBOX_DEFAULT`
+message in the game, including both of this run's, draws the identical
+`message_box.png` frame at the identical screen position - already
+extracted as `prebattle-room-msgbox.json`, no new extractor/asset needed
+(the brief's NEW-file directive for a variant is moot: there is no
+variant).
+
+Border/interior-fill origin in screen space: `(tilemapLeft-2)*8=0,
+(tilemapTop-1)*8=112` -> **`BOX_ORIGIN=(0,112)`**, `width=27`/`height=4`
+tiles -> `BOX_COLS=30`/`BOX_ROWS=6` - the exact same constants
+`prebattleRoomRender.ts` already uses.
+
+**Reconciling this session's own "y=115 not y=96, shorter variant" read**
+(the previous session's §5/§6 entries, now corrected): `message_box.png`'s
+`TOP_EDGE` tile (tile index 4 in `prebattle-room-msgbox.json`, drawn at
+the top border row `BOX_ORIGIN.y=112`) is itself **not** a flat-colored
+8px row - its own pixel rows are `[0,0,0,13,13,11,12,12]` (transparent,
+transparent, transparent, teal(idx13={0,255,156}), teal, near-white(idx11),
+white(idx12), white). A column scan for "first non-transparent/non-floor
+pixel" at that tile therefore reports **y=115** (teal, row-relative 3) and
+"white interior" at **y=118** (row-relative 6) - both correctly measured,
+both *inside* the same border tile row that starts at y=112 per source.
+Confirmed pixel-for-pixel: sampling `prebattle-room-msgbox.json` tile 4's
+rows against the oracle capture at `(60,115)`/`(60,118)` matches exactly
+(teal / white). Not a different, shorter box - the same box's own border
+art has a 3px transparent margin before its teal accent line, which is
+what the earlier scan surfaced. (The pre-battle room's own separately-
+reported "y=96" figure was a different scan of a different screen and is
+not re-litigated here - out of this step's scope/ownership - but by this
+same source proof its box uses this identical window too.)
+
+**Byte-exact verification** (`bin/oracle`, ticks in the 740-838 settled
+window plus 738 - see §8.2 for why 738 is the true settle boundary):
+- Border rows (y=112-119, y=152-159, full 240px width) + interior
+  left/right edge columns (x=0-15, x=224-239, y=120-151) - the region
+  guaranteed free of message text - checked against
+  `prebattle-room-msgbox.json` rendered at `BOX_ORIGIN=(0,112)`:
+  **3292/3292 px match, 0 mismatches**, independently at ticks 738, 740,
+  760, 780, 800, 820, 838.
+- Full frame+fill+text composite (frame border/fill tiles unioned with
+  both text lines rendered via `font-normal.json`/`charmap.json`, using
+  `prebattle-room-msgbox.json`'s palette indices 2/3 as fg/shadow, same
+  convention as `prebattleRoomRender.ts`'s `MESSAGE_PALETTE`): **9948/9948
+  non-transparent px match, 0 mismatches**, at ticks 738, 760, 800, 838 -
+  9948 is the same total non-transparent-pixel count PROGRESS.md #48 cites
+  for the pre-battle room's own box, because it's the identical asset;
+  text pixels overwrite existing interior-fill coordinates rather than
+  adding new ones, so the count doesn't change with the text content.
+
+### 8.2. Print cadence + appear choreography (dense every-frame, ticks 690-760)
+
+Rendered text, pixel+charmap-confirmed byte-exact (not transliterated from
+the easy-chat constant names): **`"IT’S WAY TOO"`** (line 1, note the
+charmap's right-single-quote glyph U+2019/`’`, charmap code 180 - the
+plain ASCII `'` is not in `charmap.json` and would mis-render) and
+**`"HOT HERE"`** (line 2). Origins: line 1 at `(16,121)`, line 2 at
+`(16,137)` - both `x=16` (`tilemapLeft*8`, same as the pre-battle room's
+single-line message), 16px line pitch (`font.cellSize`). Found by brute-
+force search over candidate y-origins against the oracle capture; the
+match is exact (0/655 mismatches) at exactly one origin pair, so this
+isn't a guess.
+
+Tick-by-tick (sha256 prefixes from the dense capture; full byte-exact
+composite cross-checks the endpoints):
+
+- **Ticks ≤711**: continuous per-frame change (room entry/scientist-turn/
+  opponent-walk-in animation still running - this window is `docs/
+  battle-room-notes.md` §3's own territory, not re-derived here beyond
+  this boundary finding).
+- **Ticks 712-717**: static, **full-framebuffer byte-identical**
+  (`a15c8dc2...`) to the post-close state found in §8.3 below - the room
+  scene (opponent + scientists + decoy, all settled) reaches its final
+  static pose with **no message box present** by tick 712, 6 ticks before
+  the box appears. This refines this file's §3 "ticks 740-838 fully
+  settled" bound down to its true earlier edge.
+- **Tick 718 - box-appear tick, atomic**: border (3292/3292) and the
+  entire interior fill (6656/6656 px, pure white, zero text) both appear
+  **fully formed in this single frame** - tick 717 has zero box pixels
+  (byte-identical to the "no box" state), tick 718 has the complete
+  frame+fill and nothing else. Frame and fill are not staged relative to
+  each other, and neither fades in.
+- **Tick 719 - first glyph**: exactly one tick after the box appears.
+- **Per-tick print cadence - exactly 1 tick per character, including
+  invisible space ticks** (derived from each character's known pixel
+  column span, cross-checked against the measured rightmost-lit-column
+  per tick):
+
+  | tick | char | tick | char | tick | char |
+  |---|---|---|---|---|---|
+  | 719 | I | 726 | Y | 733 | T |
+  | 720 | T | 727 | (space) | 734 | (space) |
+  | 721 | ’ | 728 | T | 735 | H |
+  | 722 | S | 729 | O | 736 | E |
+  | 723 | (space) | 730 | O *(line 1 complete)* | 737 | R |
+  | 724 | W | 731 | H | 738 | E *(line 2 complete)* |
+  | 725 | A | 732 | O | | |
+
+- **Line-2 start: tick 731**, immediately the tick after line 1's last
+  character (730) - no extra inter-line delay tick.
+- **Print-complete tick: 738.** This is also the **true settle boundary**:
+  tick 738's full-framebuffer sha (`e93719bf...`) is already the same one
+  this file's/`battle-bringup-notes.md`'s "~740" figure cites, confirmed
+  byte-identical at 738, 740, 745, 760, 780, 800, 820, 838 - i.e. settled
+  starts 2 ticks earlier than the previous "~740" approximation, not a
+  contradiction (that figure was always flagged approximate).
+
+### 8.3. Close choreography (dense every-frame, ticks 838-851)
+
+A-press #2 is a 2-frame pulse at ticks 838-839 (`battle1-intro.json`'s own
+segment). The screen stays byte-identical to the settled `e93719bf...`
+state through ticks 838-842 (5 ticks of no visible response, consistent
+with this file's own input-registration-lag pattern noted for A-press #1).
+At **tick 843**, the box (frame, fill, and both text lines) vanishes
+**completely in a single tick** - no partial/staged frame observed at this
+capture's per-tick granularity - and the result is not merely "text gone,
+frame still there" or vice versa: the **full 240x160 framebuffer at tick
+843 is byte-identical to tick 717** (the pre-appear, fully-settled-room-
+no-box state from §8.2), confirmed via direct sha comparison, and stays
+byte-identical through tick 851 (every tick checked). So the close is
+atomic (frame+fill+text together, not staged) and reveals exactly the
+same static scene that existed before the box ever appeared - no lingering
+animation or partial redraw in this window.
+
+### 8.4. Summary of ticks pinned this section
+
+| event | tick |
+|---|---|
+| room scene fully settled (no box yet) | 712 |
+| box border+fill appear (atomic) | 718 |
+| first glyph ("I") | 719 |
+| line 1 complete ("...TOO") | 730 |
+| line 2 starts ("H") | 731 |
+| line 2 complete / print-complete / true settle start | 738 |
+| A-press #2 pulse | 838-839 |
+| box closes (atomic, byte-identical to tick 717) | 843 |
+
+Not reached this session: no new extractor/asset (none needed, see §8.1);
+the heal-icon overlay mentioned in `docs/battle-bringup-notes.md` §1/§3.1
+(ticks ~840-1030) was not probed - out of this step's scope (post-close,
+not part of the msgbox choreography).
