@@ -5,6 +5,41 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 59 — Three parallel groundwork branches merged (send-out 1300-1560, menu 1560-1810, anim assets): ground truth for battle1-intro's FULL 1886 ticks is now complete
+
+- **State:** merges of `worker/wt-20260718-113043` (M: send-out window
+  dossier §7 + `battle1-sendout-dense.json`, 256 captures),
+  `worker/wt-20260718-115156` (O: new `docs/battle-menu-notes.md` +
+  `battle1-menu-dense.json`, 251 captures), and
+  `worker/wt-20260718-121034` (P: `extract-battle-anim-assets.ts` +
+  particle-burst/ball-open/materialize-table gen assets +
+  `docs/battle-anim-assets.md`) on top of #58. `npm test` **407/407** +
+  `npm run build` green on the merged result. All three supervisor-
+  verified in their worktrees (traces re-run green: 256 + 251 PNGs;
+  diff scopes exactly as contracted).
+- **Highlights (workers, supervisor-verified):** M pinned the opponent
+  send-out (trainer-exit slide 1463→~1497, ball spawn 1464 with **no
+  throw arc** on the opponent side, pink tint = `gBallOpenFadeColors
+  [BALL_POKE]` pixel-exact, healthbox 23-tick slide, settle = exactly
+  1522) with 2 small asset gaps → P then extracted those byte-exact
+  (particles 38/38 px, ball-open 122/122 px; materialize tables
+  timing-verified, flagged as such). O pinned the tail window (player
+  send-out DOES arc per source, "Go! ONIX!" 1-tick/char, settle
+  **1693** not 1696, message-clear = one steady 6-tick blank 1742-1747,
+  menu atomic at **1748** not 1750, idle cycle driven by TWO regions —
+  ONIX sprite + healthbox boundary — NOT the wait-cursor/ball-icons as
+  previously assumed; driver function honestly left open).
+- **Next:** follow-up worker on #58's blocker (streak window 1075-1226 +
+  widget entrance 1230-1291) via direct RAM ground truth
+  (`gScanlineEffectRegBuffers` + BLD register shadows + widget sprite
+  coords per tick) instead of pixel fitting — brief going out now. Then
+  (next session): send-out engine slice 1300-1560, menu slice 1560-1810,
+  RNG-exactness Tier-1 step (nature rolls/transition select vs the
+  RAM-dumped table), S6 acceptance trace.
+- **Notes:** all three worktrees removed + branches deleted post-merge.
+
+---
+
 ## 58 — S6 scene-assembly engine slice: settled scene/text/cursor/ball-widgets byte-exact; BattleIntroSlide3 streak (1075-1226) and ball-widget entrance slide (1230-1291) BLOCKED, not byte-exact — partial deliverable, honestly reported
 
 - **State:** `npm test` **407/407** (390→407, +17 `tests/battleScene.test.ts`),
