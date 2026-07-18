@@ -5,6 +5,72 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 30 — ISSUES #7 remainder: RAM-pinned + fixed the second-ball display-tile lag (Parts 1-2 landed, committed); Part 3 (`rent-3picks.json`) built a clean candidate but STOPPED short of committing per the brief's own stop condition — more diff frames than expected, though all classify as pre-existing/benign on inspection
+
+- **State:** `npm test` **273/273** (270→273, +3 in
+  `tests/ballAnimDisplayLag.test.ts`), `npm run build` green, working tree
+  clean except this docs commit. `rent-slot1.json` re-verified unchanged at
+  **125/139**. `rent-3picks.json` **still not committed** (see below - not
+  blocked by a known bug, just short of a final verification pass).
+- **Did:** **Part 1 (RAM probe, committed with Part 2):** wrote a scratch
+  `EmeraldOracle` probe (direct `struct Sprite` reads: `animCmdIndex` @0x2B,
+  OAM `tileNum` = attr2 bits0-9 @0x04, cross-derived `sFactorySelectScreen`
+  base via a pointer DEREF that a first attempt missed) dumping both balls'
+  `animCmdIndex` and raw-framebuffer diffs tick-by-tick across a long dwell
+  after 2 plain rents (~80 cadence transitions total). Finding: real
+  hardware's own display lag from *its own* `animCmdIndex` is a uniform 1
+  tick for **every** ball, always (both balls, ~40 transitions each, one
+  exception at the full-cycle-restart/reroll boundary which needs+1 more -
+  not exercised before tick 189, so out of scope here). Cross-checked
+  against the engine's own modeled `cmdIndex` via a throwaway vitest dump:
+  slot 0's internal `cmdIndex` runs exactly 1 tick EARLY vs RAM (engine hits
+  cmdIndex9 at tick104 in a 2-ball dwell; RAM hits it at tick105) - a
+  pre-existing quirk `REST_INTERNAL_OFFSET`'s own comment already flagged as
+  present-but-harmless for single-ball; slot 1's matches RAM exactly, no
+  offset. This fully explains the old "flat 2" model: it was only ever
+  correct for slot 0's own miscalibration, not a real 2-tick hardware lag.
+  **Part 2 (committed, `2a29750`):** `advanceBallAnim` now takes a
+  `displayLagTicks` param (2 for slot0, 1 for every other slot, wired from
+  `core.ts`'s ball-index loop) - purely additive to the shift-register
+  logic, `advanceBallAnimCore` (cmdIndex/timer/pendingRest/RNG) untouched,
+  so every pre-existing RNG-pinned test passed unmodified. Pinned 3 new
+  Tier-1 tests against the RAM checkpoints. Confirmed via `npm run compare`
+  against a scratch 2-rent trace that frames 180/188 (the originally-
+  reported 176px ball-OBJ-position diffs) are now **0 diff**.
+  **Part 3 (not committed):** rebuilt the exact PROGRESS-archive #21 3-pick
+  shape (confirms@37/113/189, dense captures 0-189) and ran `npm run
+  compare`. Frames 180/188 confirmed clean. But found MORE diff frames than
+  the brief's stated expectation ("168-170 and 189 only"): frames 37-57 and
+  113-133 (bbox/pixel-count byte-identical to `rent-slot1.json`'s own
+  already-committed 14-diff ISSUES #5 pattern, recurring once per rent) and
+  frames 152-153 (new location, x196-236/y20-28 then x59-109/y80-92, right
+  after the 2nd RIGHT move - the first plausibly matches ROADMAP's
+  already-documented "species-name palette breathe, not yet modeled" gap,
+  the second unidentified). None are at a ball's OBJ position in a way
+  that isn't already independently accepted. Per the brief's own stop
+  condition ("any other diff -> STOP, do not commit, document"), did not
+  commit the trace despite this analysis suggesting it's likely shippable -
+  full breakdown in ISSUES #7.
+- **Next:** a future session should (1) identify frame 153's bbox
+  (x59-109/y80-92) via RAM/overlay, (2) re-run the exact compare above to
+  reconfirm the diff set is stable, (3) if clean, commit
+  `rent-3picks.json` with per-frame attributions and delete ISSUES #7.
+  Confirm-flow implementation (`docs/confirm-flow-notes.md`), exit sequence
+  (`docs/prebattle-room-notes.md`), and S6 remain queued behind this per
+  entry 26.
+- **Notes:** all oracle probing this session was scratch (Python scripts +
+  a throwaway vitest test file under `tests/_scratch_displaylag.test.ts`,
+  deleted before finishing; trace JSONs under `/tmp`) - nothing uncommitted
+  left in the tree. PAPERCUT: ~10 min lost to a pointer-dereference bug in
+  my own probe script (`sFactorySelectScreen` is `struct X *`, not `struct
+  X` - reading fields directly off its own address instead of dereferencing
+  first silently returned plausible-looking-but-wrong zeros for slots 1-4);
+  `inspect-anchor.py`'s existing `oracle.read_u32(SFACTORY_SELECT_SCREEN_ADDR)`
+  pattern already does this correctly and is worth grep'ing for before
+  hand-deriving struct offsets fresh next time.
+
+---
+
 ## 29 — ISSUES #7 Part 1 landed (species-keyed LEFT/RIGHT stall, sanctioned per entries 26-28): fixed, tested, committed; Part 2 (`rent-3picks.json`) STOPPED per the brief's own explicit stop condition — a SECOND, narrower ball-render bug (unrelated to the stall rule) surfaced once the trace was actually built
 
 - **State:** `npm test` **270/270** (264→270, +6 in

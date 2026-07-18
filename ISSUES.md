@@ -5,50 +5,112 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #8 — confirm-flow reveal render: wide-window BG3 content is only approximated (tiled), and its state-machine tick boundaries are pixel-diff-derived, not RAM-verified
+## #8 — confirm-flow reveal render: real diffs remain past the wide-window's opening, root cause not yet identified (BG3 content + tick boundaries now RAM-verified; a 3rd, different-shaped gap remains)
 
-**Symptom:** `docs/confirm-flow-notes.md`'s reveal (3rd RENT confirm → 3-mon
-reveal → YES/NO idle, implemented S5 slice 3, `src/engine/confirmReveal.ts`)
-is state-machine-complete and RNG-exact, but a candidate `confirm-flow.json`
-trace (rent-3picks.json's exact button prefix + idle through the reveal)
-does **not** reach 0-diff-modulo-ISSUES-#5: starting around the wide WIN0
-window's opening (~confirm+34) through the settled YES/NO idle, `npm run
-compare` shows 1000-5000px diffs (2-14% of frame) — an order of magnitude
-bigger than, and at a different location than, ISSUES #5's own
-x88-151-confinement pattern. Not attributable to that policy; the trace was
-**not committed** per the brief's stop condition.
+**Symptom (narrowed this session):** the two leads this issue originally
+opened with are now **closed** (see Confirmed below) — `bg3ColorTiled`'s
+tiled approximation is replaced with real VRAM-extracted content, and
+`confirmReveal.ts`'s window-hold boundary got a RAM-verified fix. Rebuilding
+`confirm-flow.json` (rent-3picks.json's exact button prefix + idle to frame
+279) and running `npm run compare` shows the diff magnitude drop sharply
+(was 1000-5000px/2-14% starting ~confirm+34; now mostly 30-950px/0.1-2.5%,
+with two outlier frames still in the old range) — real, substantial
+progress, but **not yet 0-diff-modulo-ISSUES-#5**, so the trace was again
+**not committed** per the brief's stop condition. Frames 185-188 (dense
+continuity with rent-3picks.json's own 0-189 coverage) match exactly; every
+frame from 189 (the confirm tick itself) onward through 279 (last capture)
+has a nonzero diff. Bboxes/samples (`tools/compare/out/latest`, this
+session, not committed):
+- frame 189: 107px, small — plausibly a 1-tick boundary nuance right at the
+  confirm tick itself, not investigated further.
+- frame 190: 949px, bbox x88-223/y32-156 — app renders bright yellow
+  `(255,222,0)` at e.g. (89,32) where oracle shows `(210,230,164)`; this is
+  **during the flash phase** (confirm+1), and y=32 is nowhere near the flash
+  bar's own y=64 row, so this looks like a *different*, likely pre-existing
+  code path (the 3rd pick's own `monPic` close-window rendering, which
+  `rent-3picks.json` never exercised past its own frame 189) — not
+  diagnosed further this session.
+- frame 191: 2922px, bbox x88-239/y36-143 — same yellow-vs-oracle mismatch,
+  larger.
+- frame 233 (the "shown" transition tick under the corrected model): 4058px,
+  bbox x21-218/y34-140 — app shows grayscale-ish tones (e.g. `(132,123,123)`
+  at (51,34)) where oracle shows `(210,230,164)`; likely related to the
+  1-2 tick stagger this session's RAM probe found between real hardware's 3
+  chosen-mon sprites (slot0 appears 2 ticks before, slots1-2 one tick
+  before, this engine's single `monsAndYesNoVisible` flag flips) - not yet
+  modeled, see Confirmed.
+- frame 249 (steady YES/NO dwell): 81px, bbox x158-199/y116-139 — app shows
+  red `(255,0,0)` where oracle shows white `(255,255,255)`, near the YES/NO
+  box's own text/cursor area — unrelated in location/color to either of the
+  above, a 3rd distinct gap.
+- **Ruled out:** none of these match ISSUES #5's own signature (x88-151
+  confinement, 512px/frame-scale window-growth jitter) — different bboxes,
+  different magnitudes, different (non-jitter-like: solid wrong colors, not
+  partial-window blends) failure shape. Not attributable to that policy.
 
-**Confirmed:** `Select_ShowChosenMons`/`Select_Task_OpenChosenMonPics`
-(`battle_factory_screen.c:2119-2244`) create 3
-`sSpriteTemplate_Select_MonPicBgAnim` sprites (x=44/120/196) — the *same*
-sprite template/affine-anim table `monPic.ts`'s single-popup flash already
-models — so the flash-zoom phase reuses that module's own oracle-pinned
-widths (1/1/4/4/8/8/16/16/32/32/64/64) at 3 positions, oracle-cross-checked
-this slice. The wide window (x16-224 vs the single popup's x88-152) growing
-(64,65)→(32,96) is the same 4px/tick pattern too. What's **not** verified:
-(1) the wide window's BG3 pixel content — `src/assets/gen/mon-pic-bg.json`'s
-tilemap is only 8x8 tiles (extracted for the narrow single-popup window
-pre-this-slice); `monPicRender.ts`'s new `bg3ColorTiled` approximates the
-wide window by tiling that same 8x8 pattern every 64px, which oracle
-sampling (this slice, scratch) shows is close in shape (near-uniform wash,
-consistent with a mostly-solid-fill BG3 tile) but not exact; (2)
-`confirmReveal.ts`'s exact phase-boundary tick counts (13 flash incl. 1-tick
-creation lag, 8 window-growth + 3 hold, +1 cursor lag) were derived from one
-dense oracle pixel-diff pass this slice, not independently RAM-verified
-byte-level like `monPic.ts`'s own `OPEN_TABLE_*`/`CLOSE_TABLE_*`.
+**Confirmed this session (leads 1-2 from the prior write-up, both closed):**
+1. **BG3 wide-window content, RAM/VRAM-verified and fixed.**
+   `Select_InitBgs` (`battle_factory_screen.c:1202-1206`) calls
+   `CopyToBgTilemapBufferRect(3, sMonPicBg_Tilemap, X, 4, 8, 8)` for
+   `X ∈ {11, 2, 20}` — i.e. it copies the *same* already-extracted 8x8
+   tile block to 3 disjoint tile-column anchors (x=16/88/160) **once at
+   screen init**, unconditionally; two 8px gaps (x80-88, x152-160) are never
+   written and stay transparent (`AllocZeroed`). Direct VRAM dump (scratch
+   probe, mapBaseIndex 27 → VRAM 0x0600D800, rows 4-11) confirmed this
+   tile-for-tile, byte-for-byte. Fixed: `extract-factory-screen.ts` now
+   emits a `wideTilemap` field (26x8) in `mon-pic-bg.json` with the real
+   3-block+2-gap geometry; `monPicRender.ts`'s `bg3ColorTiled` (continuous
+   64px-period tiling, anchored wrong) is replaced with `bg3ColorWide`
+   (reads the real wideTilemap).
+2. **`confirmReveal.ts`'s window-hold boundary, RAM-verified and fixed.**
+   Direct `REG_DISPCNT`/`REG_WIN0V` + `gSprites[]` reads (scratch probe,
+   sprites located by known screen position, not struct-offset guessing)
+   across the whole reveal found `Select_Task_OpenChosenMonPics`' case0
+   (WIN0 on, degenerate 64,65 window) and case1 (`ShowBg(3)`/`BLDCNT` setup,
+   no window change) are **2 separate ticks**, not 1 as originally modeled
+   — real hardware holds the degenerate window for 2 ticks before the
+   8-tick growth starts, one tick later than previously implemented.
+   `WINDOW_STEPS` gained an extra `{64,65}` entry (old→new: `[64/65,
+   60/69, 56/73, 52/77, 48/81, 44/85, 40/89, 36/93, 32/96, 32/96, 32/96]`
+   → `[64/65, 64/65, 60/69, 56/73, 52/77, 48/81, 44/85, 40/89, 36/93,
+   32/96, 32/96]`, same 11-entry length so the flash→window→shown overall
+   tick budget is unchanged, only the content of indices 1/8/9/10 shifted).
+   The flash-phase boundary (13 ticks incl. 1-tick creation lag) was
+   independently re-confirmed exact (sprite creation at confirm+19, all 3
+   border sprites' `affineAnimEnded` simultaneously true at confirm+31,
+   matching the existing 12-entry `FLASH_WIDTHS` table with no change
+   needed).
+3. **New, not-yet-modeled real behavior found along the way:** the 3 chosen
+   mon sprites do **not** all appear on the same tick real hardware-side —
+   `Select_CreateChosenMonsSprites()`'s sprite-creation loop shows slot0 (x16)
+   one tick *before* slots1-2 (x88/x160) in the RAM probe (confirm+41 vs
+   confirm+42) — `confirmReveal.ts`'s single `monsAndYesNoVisible` boolean
+   collapses this to one tick (matching slots1-2, not slot0). Mechanism not
+   diagnosed (plausibly a `RunTasks`/sprite-creation-loop ordering artifact,
+   same family as other 1-tick OAM-vs-window lags already documented
+   elsewhere in this codebase) — likely contributor to frame 233's diff.
+4. The BG3 wash was confirmed (pixel-sampled, several frames through
+   confirm+69) to stay visible **permanently** through the settled YES/NO
+   idle, not just during the window's growth — `confirmReveal.ts`'s
+   existing "shown"-phase `window` field (already non-null) already models
+   this correctly; no change needed there.
 
-**Leads:**
-1. RAM/VRAM-dump BG3's actual tile/palette content during the wide window
-   (not just infer it from pixel diffs) — the existing
-   `tools/extract/inspect-anchor.py`-style recipe should extend to pull a
-   wider tilemap region than the narrow window ever needed.
-2. RAM-verify `confirmReveal.ts`'s tick boundaries the way `monPic.ts`'s
-   tables are pinned (direct task/sprite-state struct reads across several
-   checkpoint ticks, not just "the pixels changed here").
-3. Once (1)/(2) land, rebuild `confirm-flow.json` against the exact
-   rent-3picks.json prefix and re-run `npm run compare`; commit if clean
-   modulo ISSUES #5's own already-accepted pattern.
-4. The decline path (B/NO back to cursor mode, `docs/confirm-flow-notes.md`
+**Leads (renumbered):**
+1. Diagnose frame 190/191's yellow-pixel mismatch — likely in the 3rd
+   pick's own `monPic` close-window rendering during ticks confirm+1/+2,
+   territory `rent-3picks.json` never reached (it stops at frame 189).
+   Cross-check against `monPic.ts`'s `CLOSE_TABLE_B` + `monPicRender.ts`'s
+   narrow-window `drawMonPic` path with a dense oracle capture of exactly
+   these ticks.
+2. Model the slot0-vs-slots1/2 1-tick creation stagger found in Confirmed
+   item 3 (RAM-verify the exact mechanism first, not just the offset) and
+   re-check frame 233.
+3. Diagnose frame 249's red-vs-white mismatch near the YES/NO box — likely
+   an unrelated, 3rd bug (different bbox, different failure shape from
+   1/2 above).
+4. Once 1-3 land, rebuild `confirm-flow.json` and re-run `npm run compare`;
+   commit if clean modulo ISSUES #5's own already-accepted pattern.
+5. The decline path (B/NO back to cursor mode, `docs/confirm-flow-notes.md`
    §3) is still unimplemented — explicitly a stretch goal, not attempted
    this slice.
 
