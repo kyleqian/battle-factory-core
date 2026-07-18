@@ -5,6 +5,94 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 73 — S6 send-out visual handoff: healthbox content-assembly solved (oracle pixel-harvest) + Grovyle materialize + 2 prior-session omissions fixed — `sendout.json` **162/256 → 196/256**, 0 regressions
+
+- **State:** `npm test` **454/454** (449→454, +5 pins), `npm run build`
+  green. `npm run compare -- tools/compare/traces/sendout.json` →
+  **196/256** (was 162/256). Full 19-trace sweep re-run, all 18 priors at
+  their exact prior counts (anchor 1/1, draft-cursor 13/13, draft-menu
+  38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+  room-msgbox 142/142, transition 206/206, scene-assembly 256/256,
+  rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) — zero
+  regressions, confirmed via a live-oracle sweep (not just localcheck).
+- **Did, in the brief's exact priority order:** **(1) opponent healthbox
+  content-assembly (highest value, the brief's core ask):** re-confirmed
+  `extract-battle-healthbox.ts`'s flagged blocker is real, not stale —
+  brute-force placing `singlesOpponent`'s tileset in its own raster order
+  at the pixel-confirmed settled corner `(12,14)` still mismatches
+  728/2574 opaque pixels (the tile-remap pipeline — subsprite tables,
+  per-column HP-bar-fill VRAM copies, FONT_SMALL/FONT_BOLD text — is real
+  rendering-code work, not a quick fix). Given this trace only ever needs
+  ONE content (GROVYLE/male/Lv50/full-HP/no-status), pixel-harvested it
+  directly from the oracle's own settled capture instead (new
+  `tools/extract/extract-sendout-healthbox-content.ts` →
+  `src/assets/gen/sendout-healthbox-opponent.json`, a flat opaque
+  100×28 RGB rectangle) — same "oracle is ground truth" methodology this
+  module already uses for brute-force-matched corners/tables, just
+  applied to a whole content block. Bbox `(13,16)-(113,44)` found by
+  diffing oracle tick-1555 against the engine's pure-bg render (excluding
+  Grovyle/text/player-row regions — one clean contiguous blob). A per-tick
+  brute-force x-offset search against every oracle capture 1493-1523 found
+  **zero pixel mismatch** at every tick 1495 (dx=-110) through settle
+  (dx=0 from 1517, +5px/tick — a clean 23-step slide, matching
+  `StartHealthboxSlideIn`'s source-cited `sSpeedX=-5` prediction exactly),
+  confirming the content is static from creation (no progressive
+  fill/reveal — the "Lv50 legible ~1504-1508" language in
+  `battle-scene-notes.md` §7.6 was describing the slide reveal, not a bar
+  animating). **(2) Grovyle's materialized sprite:** confirmed as a hard
+  pixel-level step, not a gradual convergence — the already-extracted
+  `GROVYLE` front-sprite tileset at corner `(144,12)` (also brute-force
+  position-matched, zero mismatch) matches with **zero** error at every
+  tick 1519-1555, and **every opaque pixel** mismatches every tick
+  1478-1518 (only the settled step is rendered — the transient
+  tint/flash/affine frames are correctly left for the ball/particle work).
+  **Two gaps found by diffing, not in the original §7.4-7.8 scope list:**
+  the send-out message text was being dropped entirely once the visual
+  handoff started (`drawSendOutHandoff` never drew it) — it actually stays
+  on screen unchanged through the rest of the trace; and
+  `Task_HidePartyStatusSummary` only reassigns the *sending* battler's own
+  task (the opponent here) — the **player's own** party-status-summary
+  widget never despawns in this trace and should stay visible throughout,
+  but a prior session's handoff render dropped both sides by omission.
+  Fixing both (alongside 1-2) recovered the trace's entire static tail
+  (ticks 1522-1555, the last 34 frames, byte-exact — exactly the payoff
+  the brief predicted) plus scattered earlier frames. +5 Tier-1 pins in
+  `tests/battleScene.test.ts` (materialize-step gate, slide-translation
+  formula, text persistence, player-row persistence). Full derivation in
+  `docs/battle-scene-notes.md` §7.9 and `battleScene.ts`'s module-doc
+  STATUS note (both rewritten this session).
+- **Not attempted (ran out of session time budget after item 1's the
+  brief flagged as the core, highest-value ask):** item 2 (trainer-pic
+  exit slide's exact rounding — RAM-probe `gSprites[gBattlerSpriteIds[1]]
+  .x/x2` across ticks 1461-1497, still only structurally linear, not
+  verified) and item 3 (party-summary despawn *fade itself*, ticks
+  ~1463-1494 — moot for this trace's own score since the opponent's row
+  simply isn't drawn during the handoff and that already matches every
+  tick ≥~1495, but the fade animation itself is still unrendered) were
+  not reached.
+- **Named remaining gap (60/256 frames, ticks 1462-1521), confirmed not
+  guessed:** bg-diffing the still-unmatched ticks shows near-full-screen
+  differences (up to ~20000/38400px at ticks 1496-1503) in a
+  horizontally-striped pattern consistent with `BeginNormalPaletteFade`'s
+  BG-palette-to-white dither (§7.5's own source citation) being genuinely
+  unimplemented, not a rounding error — the ball sprite, open-particle
+  burst, and materialize tint/white-flash transient frames (§7.4.2/§7.5)
+  remain unrendered, exactly the brief's own lowest-priority item 4. Ticks
+  1519-1521 have small (12-29px) residual diffs even with Grovyle/
+  healthbox both correct there — consistent with a lingering particle
+  sprite in front of Grovyle's silhouette, same root cause.
+- **Notes:** PAPERCUT: none new. Reused #71's `tools/compare/localcheck.ts`
+  for fast local iteration throughout (cached `sendout-baseline`
+  regenerated fresh at session start via `npm run compare`); a scratch
+  `tools/compare/scratch-dump.ts` (app-frame-to-PNG dumper, same role as
+  `localcheck.ts`) was used for visual diffing during development and
+  deleted before committing (not needed by the extractor, which calls
+  `renderAppTrace` directly).
+
+---
+
 ## 72 — S7 move-anim groundwork banked (parallel worktree lane, merged): ROCK_SLIDE assets + both turn-1 moves' script decode + oracle phase timelines — `docs/battle-move-anim-notes.md`
 
 - **State:** merge of `worker/wt-20260718-154328` (base `1f63f82`, merged
@@ -137,68 +225,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 70 — S6 scene-assembly slice FULLY CLOSED: last residual (trace tick 1229, player status bar) resolved with a RAM+pixel-confirmed asymmetric fix — `scene-assembly.json` **256/256** (was 255/256), 0 regressions
-
-- **State:** `npm test` **438/438** (437→438, +1 pin replacing 1 corrected),
-  `npm run build` green. `npm run compare -- tools/compare/traces/
-  scene-assembly.json` → **256/256** (was 255/256) — the whole
-  scene-assembly slice is now byte-exact end to end. Full 18-trace sweep
-  re-run, all others at their exact prior counts (anchor 1/1, draft-cursor
-  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
-  summary-info-onix 122/122, summary-info-magby 132/132, confirm-decline
-  67/67, accept-prebattle 137/137, walk-warpout 125/125, room-entry
-  110/110, room-npcs 98/98, room-msgbox 142/142, transition 206/206,
-  rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) — zero
-  regressions.
-- **Did — the brief's mandated RAM probe, then the fix:** RAM-probed
-  `gSprites[5]` (player bar) and `gSprites[6]` (opponent bar — identified
-  by matching each side's known settled corner against
-  `docs/battle-interface-assets.md`, same method #64 banked) tick-by-tick
-  across 1226-1239 (`tools/probe/ram-probe.py`, full `Sprite` struct:
-  callback, `data[]`, oam fields, subpriority, flags). Found the real
-  structural asymmetry the brief asked for: the player bar's `x2` STALLS
-  for one extra tick right after creation — `x2=95` at BOTH RAM tick 1228
-  (its own creation tick) and 1229, only resuming
-  `SpriteCB_StatusSummaryBar_Enter`'s ordinary per-tick `x2 += data[0]`
-  decrement at RAM tick 1230 — while the opponent bar's `x2` decrements
-  every single tick starting immediately at its own creation (`-95` at
-  1231, `-90` at 1232, no stall). Every other RAM field checked (callback
-  pointer, `subspriteTables` pointer, subpriority, `inUse`/`invisible`
-  flags, `data[1..7]`) was byte-identical in kind between the two sides —
-  the stall is specifically in `x2`'s per-tick progression, not a
-  visibility-flag or ordering difference. Independently pixel-ground-
-  truthed the oracle's own captures (re-ran `bin/oracle run` on
-  `battle1-scene-dense.json`, diffed consecutive frames in each side's
-  screen region) to re-verify both first-visible ticks from scratch rather
-  than trust the brief's numbers: player region is byte-identical
-  background through trace tick 1229 and first changes at 1230 (22px,
-  matching — hand-computed from the actual tileset asset — the bar's
-  leading-tile opaque wedge at exactly `x2=95`); opponent region is
-  unchanged through 1231 and first changes at 1232 (22px, same shape).
-  Both match the brief's cited ticks exactly. Fix: added
-  `PLAYER_BAR_VISIBLE_TICK = PLAYER_CREATE_TICK + 1`, gating ONLY the
-  player bar's `visible` field in `ballStatusBarPositions` — the table
-  lookup itself (and the opponent bar, and both sides' ball icons) is
-  untouched, since the RAM-baked `PLAYER_BAR_X2` table already encodes the
-  same stall verbatim as a literal repeated value (`[95, 95, 90, ...]`)
-  and the icons' own per-icon flat-delay prefix already keeps them fully
-  off-screen through this exact tick regardless (so any analogous stall
-  there, if present, produces no visible pixel and needs no correction).
-  This is the per-side structural fix the brief required, not a blanket
-  offset — confirmed it doesn't disturb the opponent's own first-visible
-  tick (1232, re-verified above) or any of the other 255 already-matching
-  frames (full sweep, 0 regressions). Updated the one existing Tier-1 test
-  that pinned the old (buggy) tick-1229-visible behavior, plus added a new
-  pin for the corrected asymmetric gate; `battleScene.ts` module doc point
-  3 and its top-of-file STATUS note rewritten with the full derivation.
-- **Next:** the scene-assembly slice (S6) is fully closed — no further
-  action needed there. Remaining S6/roadmap work: the send-out engine
-  slice (ticks 1300-1560, `battle-scene-notes.md` §7) and player send-out
-  + menu (1560-1810, `battle-menu-notes.md`) — groundwork complete, assets
-  ready, per #65's plan. S7 (battle-turn engine) stays behind S6, dossier
-  ready per #67/#69.
-- **Notes:** PAPERCUT: none new. RAM-probe scratch output went to
-  `/tmp/probe-identify*`, `/tmp/probe-deep*`, `/tmp/gt-recap/` (not
-  committed, no stale-cache risk).
-
----
