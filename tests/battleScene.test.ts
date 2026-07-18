@@ -149,14 +149,14 @@ describe("battleScene: party-status-summary ball-icon + bar widget entrance slid
     expect(icons.every((icon) => !icon.visible)).toBe(true);
   });
 
-  it("player-side icons/bar become visible at tick 1228, opponent-side at tick 1231 (not simultaneous)", () => {
-    expect(ballIcons(1227).every((icon) => !icon.visible)).toBe(true);
-    expect(ballIcons(1228).slice(6).every((icon) => icon.visible)).toBe(true);
-    expect(ballIcons(1228).slice(0, 6).every((icon) => !icon.visible)).toBe(true);
-    expect(ballIcons(1231).every((icon) => icon.visible)).toBe(true);
-    expect(ballStatusBarPositions(1228).player.visible).toBe(true);
-    expect(ballStatusBarPositions(1228).opponent.visible).toBe(false);
-    expect(ballStatusBarPositions(1231).opponent.visible).toBe(true);
+  it("player-side icons/bar become visible at tick 1229, opponent-side at tick 1232 (not simultaneous - one tick later than their own RAM creation tick, the same render lag GAP A found)", () => {
+    expect(ballIcons(1228).every((icon) => !icon.visible)).toBe(true);
+    expect(ballIcons(1229).slice(6).every((icon) => icon.visible)).toBe(true);
+    expect(ballIcons(1229).slice(0, 6).every((icon) => !icon.visible)).toBe(true);
+    expect(ballIcons(1232).every((icon) => icon.visible)).toBe(true);
+    expect(ballStatusBarPositions(1229).player.visible).toBe(true);
+    expect(ballStatusBarPositions(1229).opponent.visible).toBe(false);
+    expect(ballStatusBarPositions(1232).opponent.visible).toBe(true);
   });
 
   it("settles at the CreatePartyStatusSummarySprites corner formula by tick 1292", () => {
@@ -170,8 +170,8 @@ describe("battleScene: party-status-summary ball-icon + bar widget entrance slid
     expect(bars.player.x).toBe(136);
   });
 
-  it("mid-slide: player icon 0 offset by its own RAM-baked x2 table (e.g. tick 1230 -> x2=120, tick 1245 -> x2=12)", () => {
+  it("mid-slide: player icon 0 offset by its own RAM-baked x2 table (e.g. tick 1230 -> x2=120, tick 1245 -> x2=57)", () => {
     expect(ballIcons(1230)[6]).toEqual({ x: 276, y: 88, state: "Full", visible: true });
-    expect(ballIcons(1245)[6]).toEqual({ x: 192, y: 88, state: "Full", visible: true });
+    expect(ballIcons(1245)[6]).toEqual({ x: 213, y: 88, state: "Full", visible: true });
   });
 });

@@ -13,11 +13,18 @@
 // player input is read anywhere in this window - the next A-press is the
 // following slice's concern, trace tick 1420).
 //
-// STATUS (updated this session - see PROGRESS.md #63): the streak window's
-// GEOMETRY and LAYER MODEL are now both RAM/pixel-exact (a real regression
-// fix over #58-#62's fallback); a specific, narrower BLEND-ARITHMETIC gap
-// remains and is the named next step. tools/compare/traces/scene-
-// assembly.json is NOT yet 256/256.
+// STATUS (updated this session - see PROGRESS.md #64): GAP B (the widget
+// entrance window, point 3 below) is now resolved - the same systemic
+// one-tick render lag GAP A found (#63) turned out to apply here too, plus
+// the opponent-side x2 tables had been missing each icon's own flat-delay
+// prefix since #60/#62 (see point 3). scene-assembly.json 104/256 (was
+// 41/256). Two named gaps remain, both untouched this session: GAP A (the
+// streak window's blend-arithmetic residual, ticks 1075-1226, #63's next
+// probe) and one narrow 22px residual at trace tick 1229 specifically
+// (point 3's own note - a further one-tick visibility delay fixes 1229 but
+// breaks the opponent side's tick 1232 the same way, so it isn't a shared
+// per-side correction; not chased further this session). tools/compare/
+// traces/scene-assembly.json is NOT yet 256/256.
 // 1. The settled composite (trace tick 1227 onward, before any widget
 //    slide) is byte-exact (unchanged from #58: battle-bg.json's `static`
 //    bg + both trainer pics at their source-derived corners + battle-
@@ -76,44 +83,45 @@
 //    for a handful of ticks in 1140-1180, cross-checked against the exact
 //    pixel this paragraph names, before touching the ramp constants again.
 // 3. The party-status-summary ball-icon + diagonal-bar widgets' entrance
-//    slide (ticks ~1228-1291): RAM-probed directly per-tick (`sprite.x2`
-//    for the bar + all 12 ball-icon sprites, identified by matching their
-//    settled `(x, y)` against docs/battle-interface-assets.md's known
-//    corners). The player-side widgets are created at tick 1228, the
-//    opponent-side at tick 1231 (not simultaneous, confirming the dossier's
-//    §4 suspicion); each of the 14 sprites' `x2` sequence is baked verbatim
-//    as a per-tick table below (`PLAYER_BAR_X2` etc.) rather than
-//    reconstructed from `SpriteCB_StatusSummaryBar_Enter`/
-//    `SpriteCB_StatusSummaryBalls_Enter`'s source formulas: the source
-//    formulas (confirmed by reading `battle_interface.c`) predict the same
-//    shape but land 1-2 ticks off the RAM truth on a few icons (likely a
-//    controller-command-handshake frame this module doesn't model) - the
-//    table is the ground truth, the source is corroborating shape only.
-//    STILL NOT byte-exact (16-300px/frame per `npm run compare`, unchanged
-//    this session - #62 confirmed the brief's "tile-index swap" theory is
-//    the wrong shape for at least PART of this gap, see below; a blanket
-//    1-tick index shift on `tableX2` was tried and rejected - it fixed some
-//    frames (e.g. 1230, 1232-1235) but broke others (1228/1229/1231),
-//    proving the x2 *tables themselves* aren't uniformly off-by-one, so it
-//    was reverted rather than committed as an unverified guess). Direct
-//    pixel diffing (frame 1285, opponent ball-icon slot 0, corner (26,32))
-//    shows our model already drawing that icon's SETTLED tile (the "Empty"
-//    hollow-ring shape, since `x2` has reached 0 in our table by then) at
-//    exactly the right position, while the oracle shows those same 16 ring-
-//    outline pixels as pure background (fully invisible) - i.e. the icon is
-//    positionally settled early but the real game keeps it invisible (or on
-//    a different, blank tile) until some LATER trigger swaps it to its
-//    state tile, separate from the `x2` slide entirely. `oam.tileNum` is
-//    NOT touched anywhere in `SpriteCB_StatusSummaryBalls_Enter` (checked
-//    directly - only `x2` and `data[]` counters change), so the swap this
-//    module still needs to model is either a `sprite.invisible` toggle or a
-//    tileNum write happening in a DIFFERENT function (a settle/finalize
-//    callback, or the switch to `SpriteCallbackDummy` itself gating
-//    visibility elsewhere) - not chased down this session for lack of time.
-//    Next step: RAM-probe `gSprites[id].{invisible, oam.tileNum}` per tick
-//    for the 14 widget sprites across 1228-1292 directly (the x/x2 probe
-//    already has the sprite-identification method banked from #60) rather
-//    than reasoning from the entrance-callback source alone.
+//    slide (ticks ~1228-1291): RESOLVED this session (#64; #60/#62/#63 each
+//    left this open - see PROGRESS.md for the full account). Two independent
+//    bugs, both found by RAM-probing `gSprites[].{invisible, x2, oam.attr2}`
+//    directly per tick for the 14 identified sprite indices (2 bars + 12
+//    icons; identification method: match settled `(x, y)` against docs/
+//    battle-interface-assets.md's known corners, same as #60/#62 banked):
+//    (a) `invisible` and `oam.attr2` (tileNum) never actually change after
+//    creation for any of the 14 sprites - #62's "tile swap" and "invisible
+//    toggle" theories were both wrong shapes, there is no separate
+//    visibility trigger to find. (b) the real cause is the SAME systemic
+//    one-tick render lag GAP A found (point 2 above): pixel-ground-truthing
+//    the oracle's own captures directly (not just trusting the RAM-baked
+//    `x2` tables at face value) shows the displayed frame at trace tick `t`
+//    reflects each sprite's `x2` as of RAM tick `t-1`, confirmed exactly at
+//    the player bar (tick 1230's oracle edge matches the table's tick-1229
+//    value, not 1230's own). `ballIcons`/`ballStatusBarPositions` now render
+//    at `t - 1` uniformly (both the table lookup AND the visibility gate -
+//    #62's blanket-shift attempt broke on exactly this: it shifted only the
+//    table index while leaving the create-tick comparison unshifted,
+//    desyncing the two). Separately, the OPP_ICON_X2 tables themselves
+//    (baked in #60/#62) had been built from only the sliding tail of each
+//    icon's RAM `x2` history, missing the per-icon flat-delay prefix
+//    (`SpriteCB_StatusSummaryBalls_Enter`'s `data[1]` countdown, `data[1] =
+//    (6-i)*7+10` per source) before the slide starts - every opponent icon
+//    was starting its slide 10-54 ticks too early. Rebuilt all 14 tables
+//    directly from RAM (`tools/probe/ram-probe.py`, full flat prefix
+//    included) rather than reconstructing from the source formula (same
+//    "RAM table is ground truth, source is shape-only corroboration"
+//    convention #60 established). Net: scene-assembly.json 41/256 -> 104/256.
+//    One narrow residual remains, NOT resolved: trace tick 1229 (player bar)
+//    is 22px off - the oracle is still background there a tick after our
+//    model shows the bar's first frame. A further one-tick-later `visible`
+//    gate fixes 1229 but then breaks the opponent side's own first-visible
+//    tick (1232) the same way (pixel-confirmed), so the two sides do not
+//    share one extra-tick correction and this wasn't chased further within
+//    this session's cap - next step is RAM-probing exactly what's
+//    structurally different between the player and opponent widgets' first
+//    visible tick (both created via the same `CreatePartyStatusSummarySprites`,
+//    3 ticks apart) rather than guessing another blanket offset.
 
 import type { RgbColor } from "./bg.ts";
 import { drawText, type FontData } from "./font.ts";
@@ -385,21 +393,30 @@ export const BALL_WIDGETS_SETTLED_TICK = 1292;
 
 const PLAYER_BAR_X2 = [95, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 0];
 const OPP_BAR_X2 = [-95, -90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0];
+/**
+ * Re-probed this session (PROGRESS.md #64): the previous tables above only
+ * captured each icon's SLIDING tail, not the per-icon flat delay prefix
+ * (`SpriteCB_StatusSummaryBalls_Enter`'s `data[1]` countdown, source
+ * `data[1] = i*7+10` per icon) before the slide starts - the missing lead-in
+ * made every icon (worst on the opponent side) start sliding 10-50+ ticks
+ * too early. Rebuilt directly from `gSprites[].x2` RAM history per icon
+ * (`tools/probe/ram-probe.py`, ticks 1225-1295), full lead-in included.
+ */
 const PLAYER_ICON_X2: readonly number[][] = [
   [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
-  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
   [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
-  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
-  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
-  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
+  [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
 ];
 const OPP_ICON_X2: readonly number[][] = [
-  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
-  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
-  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
-  [-120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
-  [-120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
-  [-117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
+  [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
 ];
 
 function tableX2(table: readonly number[], createTick: number, t: number): number {
@@ -415,35 +432,64 @@ export interface BallIcon {
   visible: boolean;
 }
 
-/** CreatePartyStatusSummarySprites corner formula (docs/battle-interface-assets.md): opponent `(26+10i, 32)`, player `(156+10i, 88)`, i=0-5, offset by each icon's own `x2` entrance slide (RAM-confirmed tables above). States hardcoded per this specific battle-1 trace's own verified slot contents (3v3, see that doc's verification table) - not derived generically. */
+/**
+ * CreatePartyStatusSummarySprites corner formula (docs/battle-interface-assets.md):
+ * opponent `(26+10i, 32)`, player `(156+10i, 88)`, i=0-5, offset by each icon's
+ * own `x2` entrance slide (RAM-confirmed tables above). States hardcoded per
+ * this specific battle-1 trace's own verified slot contents (3v3, see that
+ * doc's verification table) - not derived generically.
+ *
+ * Renders at `t - 1` (module doc point 3 / GAP B): RAM-probed
+ * `gSprites[].{invisible, oam.attr2}` directly per tick (`tools/probe/ram-probe.py`,
+ * PROGRESS.md #64) shows neither field ever changes after creation - the
+ * widget sprites are never actually "invisible", so there is no separate
+ * visibility trigger to model. Pixel-ground-truthing the same systemic
+ * one-tick render lag GAP A found (module doc point 2) against the oracle's
+ * own captures instead confirms it directly: at trace tick 1230 the oracle's
+ * player-bar edge sits at the table's tick-1229 position (`x2=95`), not
+ * tick-1230's own (`x2=90`) - same "task writes this tick, display shows it
+ * next tick" lag as every other register this window drives. A prior session
+ * tried shifting only the table *index* while leaving the create-tick
+ * comparison unshifted (PROGRESS.md #62) - that desyncs the two and produces
+ * exactly the "fixes some frames, breaks others" result it saw. Shifting the
+ * whole render tick uniformly (both the table lookup and the visibility
+ * gate) is what the lag actually requires. One narrow residual remains at
+ * trace tick 1229 specifically (player bar shows one tick early, 22px) -
+ * a `visible` gate delayed one tick further fixes 1229 but then breaks the
+ * opponent side's own first-visible tick (1232) the same way, so the two
+ * sides don't share a single extra-tick correction; left as-is rather than
+ * chase an unverified per-side special case (PROGRESS.md #64).
+ */
 export function ballIcons(t: number): BallIcon[] {
+  const rt = t - 1;
   const opponentStates = ["Empty", "Empty", "Empty", "Full", "Full", "Full"];
   const playerStates = ["Full", "Full", "Full", "Empty", "Empty", "Empty"];
   const icons: BallIcon[] = [];
   for (let i = 0; i < 6; i += 1) {
     icons.push({
-      x: 26 + 10 * i + tableX2(OPP_ICON_X2[i]!, OPP_CREATE_TICK, t),
+      x: 26 + 10 * i + tableX2(OPP_ICON_X2[i]!, OPP_CREATE_TICK, rt),
       y: 32,
       state: opponentStates[i]!,
-      visible: t >= OPP_CREATE_TICK,
+      visible: rt >= OPP_CREATE_TICK,
     });
   }
   for (let i = 0; i < 6; i += 1) {
     icons.push({
-      x: 156 + 10 * i + tableX2(PLAYER_ICON_X2[i]!, PLAYER_CREATE_TICK, t),
+      x: 156 + 10 * i + tableX2(PLAYER_ICON_X2[i]!, PLAYER_CREATE_TICK, rt),
       y: 88,
       state: playerStates[i]!,
-      visible: t >= PLAYER_CREATE_TICK,
+      visible: rt >= PLAYER_CREATE_TICK,
     });
   }
   return icons;
 }
 
-/** Diagonal-bar background corners at trace tick `t` - `ballStatusBar`'s own settled corners (docs module doc point 1: opponent `(-24,40)` h-flipped, player `(136,96)`) offset by the bar sprite's own `x2` entrance slide (RAM-confirmed tables above - the bar is itself `gSprites[summaryBarSpriteId]`, same mechanism as the ball icons). */
+/** Diagonal-bar background corners at trace tick `t` - `ballStatusBar`'s own settled corners (docs module doc point 1: opponent `(-24,40)` h-flipped, player `(136,96)`) offset by the bar sprite's own `x2` entrance slide (RAM-confirmed tables above - the bar is itself `gSprites[summaryBarSpriteId]`, same mechanism as the ball icons). Renders at `t - 1`, same render-lag rationale as `ballIcons` above. */
 export function ballStatusBarPositions(t: number): { opponent: { x: number; visible: boolean }; player: { x: number; visible: boolean } } {
+  const rt = t - 1;
   return {
-    opponent: { x: -24 + tableX2(OPP_BAR_X2, OPP_CREATE_TICK, t), visible: t >= OPP_CREATE_TICK },
-    player: { x: 136 + tableX2(PLAYER_BAR_X2, PLAYER_CREATE_TICK, t), visible: t >= PLAYER_CREATE_TICK },
+    opponent: { x: -24 + tableX2(OPP_BAR_X2, OPP_CREATE_TICK, rt), visible: rt >= OPP_CREATE_TICK },
+    player: { x: 136 + tableX2(PLAYER_BAR_X2, PLAYER_CREATE_TICK, rt), visible: rt >= PLAYER_CREATE_TICK },
   };
 }
 

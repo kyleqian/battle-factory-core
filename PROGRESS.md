@@ -5,6 +5,69 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 64 — S6 scene-assembly GAP B (widget entrance) resolved: same one-tick render lag GAP A found (#63) applies to the widget sprites too, plus the opponent icon x2 tables were missing their per-icon flat-delay prefix since #60/#62 — `scene-assembly.json` 104/256 (was 41/256), 0 regressions. GAP A (streak blend-arithmetic) untouched, as scoped.
+
+- **State:** `npm test` **425/425**, `npm run build` green. `npm run
+  compare -- tools/compare/traces/scene-assembly.json` → **104/256** (was
+  41/256 — net +63, close to the brief's ~105 estimate). Full 18-trace
+  sweep re-run, all others at their exact prior counts (anchor 1/1,
+  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example
+  4/4, summary-info-onix 122/122, summary-info-magby 132/132,
+  confirm-decline 67/67, accept-prebattle 137/137, walk-warpout 125/125,
+  room-entry 110/110, room-npcs 98/98, room-msgbox 142/142, transition
+  206/206, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) —
+  zero regressions.
+- **Did — GAP B (widget invisibility), per the brief's method:**
+  RAM-probed `gSprites[].{invisible, x2, oam.attr0/1/2}` directly per tick
+  for all 14 widget sprites (2 diagonal bars + 12 ball icons; identified
+  by matching settled `(x,y)` against known corners, same method #60/#62
+  banked) across ticks 1225-1295. Two independent findings, both real bugs
+  fixed (not the brief's "tile-index swap" theory, which #62 had already
+  ruled out): **(1)** `invisible` and `oam.attr2` (tileNum) never change
+  after creation for any of the 14 sprites — there is no separate
+  visibility trigger, confirming #62's suspicion the wrong shape was being
+  chased. **(2)** pixel-ground-truthing the oracle's own captures directly
+  (cross-referencing the RAM-baked `x2` tables against actual pixel
+  content, not trusting the table at face value) shows the SAME systemic
+  one-tick render lag #63 found for GAP A also governs these sprites: the
+  player bar's oracle edge at trace tick 1230 matches the table's
+  tick-1229 value, not 1230's own. Wired `ballIcons`/`ballStatusBarPositions`
+  to render at `t-1` uniformly (both the table lookup and the visibility
+  gate together — #62's own attempt shifted only the table index and left
+  the create-tick comparison alone, which desyncs the two and is exactly
+  why it "fixed some frames, broke others"). Separately, RAM-probing full
+  per-icon `x2` histories (not just the sliding portion) revealed the
+  OPP_ICON_X2 tables baked by #60/#62 had been built ONLY from each icon's
+  sliding tail, omitting the per-icon flat-delay prefix
+  (`SpriteCB_StatusSummaryBalls_Enter`'s `data[1]` countdown before the
+  slide starts) — every opponent icon was sliding in 10-54 ticks too early
+  regardless of the lag fix. Rebuilt all 14 tables directly from RAM
+  ground truth (full prefix included) rather than reconstructing from the
+  source formula, per this run's established convention.
+- **Still open, narrow:** trace tick 1229 (player bar only) is 22px off —
+  the oracle is still plain background there, one tick after our model's
+  first drawn frame. A further one-tick-later `visible` gate fixes 1229
+  but then breaks the opponent side's own first-visible tick (1232) the
+  identical way (pixel-verified both directions) — the two sides do not
+  share one extra-tick correction, so this wasn't force-fitted. Full
+  account + the concrete next probe (what structurally differs between the
+  player and opponent widgets' first visible tick) in `battleScene.ts`'s
+  module doc point 3.
+- **Next:** GAP A (streak window blend-arithmetic, ticks 1075-1226) is
+  untouched this session, exactly as #63 left it — its own next probe
+  (literal `BLDALPHA` register vs `gScanlineEffectRegBuffers`, ticks
+  1140-1180) is still the right next step there. For GAP B's own residual,
+  RAM-probe what's structurally different between the player (tick 1228
+  creation, needs the extra tick) and opponent (tick 1231 creation,
+  doesn't) widget setup before guessing another blanket offset.
+- **Notes:** PAPERCUT: none new. `tools/compare/out/<trace>/` can go stale
+  between sessions (its `app-*.png` reflected code from before this
+  session's own edits) — always re-run `npm run compare` fresh before
+  reasoning from cached PNGs there, don't trust the last run's output as
+  current.
+
+---
+
 ## 63 — S6 scene-assembly GAP A (streak window): found and fixed a systemic one-tick render lag that was the real blocker behind #60/#62's "sign ambiguity" — geometry + layer model now pixel/RAM-exact, one narrower blend-arithmetic gap remains; `scene-assembly.json` 41/256 (was 40/256), 0 regressions. GAP B (widget invisibility) not started — out of time this session.
 
 - **State:** `npm test` **425/425**, `npm run build` green.
@@ -168,36 +231,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   values are applied with by brute-forcing pixels against a repetitive
   tileset is not. A future session should probe the DMA buffer's literal
   written content, not just the C-level source variable.
-
----
-
-## 61 — S6 RNG-exactness step (parallel worktree lane, merged): battle-1 opponent personality gen + transition select implemented as pure logic, Tier-1-pinned bit-exact vs the RAM dump
-
-- **State:** merge of `worker/wt-20260718-123140` (single commit
-  `365e1ab`, exactly 2 new files: `src/engine/opponentGen.ts`,
-  `tests/opponentGen.test.ts`) on top of #60; `npm test` **423/423** +
-  `npm run build` green on the merged result.
-- **Did (worker, supervisor-verified):** the exact
-  `CreateMonWithEVSpreadNatureOTID` rejection loop, `Random32()`
-  low/high word order (empirically confirmed vs the RAM dump), the
-  12-entry `RANDOM_TRANSITION` frontier pick, and a chained
-  battle-1 generator — 9 Tier-1 tests pin all RAM-dumped values
-  bit-exact (28/16/95 iterations, all 3 personalities, natures, raw
-  transition draw 22624 → index 4 → id 34 CIRCLES_MEET). **New ground
-  truth found, not fudged:** the three loops are separated by exactly
-  11/7/8 ambient `Random()` draws — matching the dossier's own tick
-  gaps 1:1 (one per-VBlank baseline draw per tick between
-  loop-completion ticks; the supervisor folded this into
-  `docs/battle-bringup-notes.md` §3.1 this commit). Modeled as an
-  explicit `ambientGapSteps` parameter, defaulting to the pure source
-  algorithm.
-- **Next:** see #60 — the one named scene-assembly gap (BG1 `entrySlide`
-  content + palette bank 4 extraction) is the current critical-path
-  step; a targeted worker is being launched and the two-consecutive-
-  misses escalation is going to the user in parallel.
-- **Notes:** worktree removed + branch deleted post-merge. S6 roadmap
-  acceptance criterion "Tier-1 test pins the generated opponent vs the
-  RAM dump" is now satisfied on the personality/transition side
-  (trainer id + mon set were already pinned pre-anchor per §0).
-
----

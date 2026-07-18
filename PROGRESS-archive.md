@@ -5,6 +5,37 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 61 — S6 RNG-exactness step (parallel worktree lane, merged): battle-1 opponent personality gen + transition select implemented as pure logic, Tier-1-pinned bit-exact vs the RAM dump
+
+- **State:** merge of `worker/wt-20260718-123140` (single commit
+  `365e1ab`, exactly 2 new files: `src/engine/opponentGen.ts`,
+  `tests/opponentGen.test.ts`) on top of #60; `npm test` **423/423** +
+  `npm run build` green on the merged result.
+- **Did (worker, supervisor-verified):** the exact
+  `CreateMonWithEVSpreadNatureOTID` rejection loop, `Random32()`
+  low/high word order (empirically confirmed vs the RAM dump), the
+  12-entry `RANDOM_TRANSITION` frontier pick, and a chained
+  battle-1 generator — 9 Tier-1 tests pin all RAM-dumped values
+  bit-exact (28/16/95 iterations, all 3 personalities, natures, raw
+  transition draw 22624 → index 4 → id 34 CIRCLES_MEET). **New ground
+  truth found, not fudged:** the three loops are separated by exactly
+  11/7/8 ambient `Random()` draws — matching the dossier's own tick
+  gaps 1:1 (one per-VBlank baseline draw per tick between
+  loop-completion ticks; the supervisor folded this into
+  `docs/battle-bringup-notes.md` §3.1 this commit). Modeled as an
+  explicit `ambientGapSteps` parameter, defaulting to the pure source
+  algorithm.
+- **Next:** see #60 — the one named scene-assembly gap (BG1 `entrySlide`
+  content + palette bank 4 extraction) is the current critical-path
+  step; a targeted worker is being launched and the two-consecutive-
+  misses escalation is going to the user in parallel.
+- **Notes:** worktree removed + branch deleted post-merge. S6 roadmap
+  acceptance criterion "Tier-1 test pins the generated opponent vs the
+  RAM dump" is now satisfied on the personality/transition side
+  (trainer id + mon set were already pinned pre-anchor per §0).
+
+---
+
 ## 60 — S6 scene-assembly follow-up: RAM-probed the streak window + ball-widget entrance directly; geometry now RAM-exact, streak color still open — `scene-assembly.json` 40/256 (was 42/256; see below for why the raw count didn't move despite real progress), 0 regressions
 
 - **State:** `npm test` **413/413** (407→413, +6 net in `tests/battleScene.test.ts`
