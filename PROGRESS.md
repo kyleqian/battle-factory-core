@@ -5,6 +5,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 67 — S7 groundwork banked (parallel worktree lane, merged): committed dense turn-1 trace + RAM dump + damage/type data extraction + `docs/battle-turn-notes.md` dossier — S7 engine slices now have fixed targets
+
+- **State:** merge of `worker/wt-20260718-143156` (base `3ac0303`, merged
+  onto #66's `19f12bb`): `npm test` **428/428**, `npm run build` green,
+  post-merge spot-checks anchor 1/1 + summary-info-onix 122/122 (the
+  regenerated `moves.json` with its new fields disturbs nothing).
+- **Did (worktree lane, supervisor-verified in the worktree pre-merge):**
+  (1) `tools/compare/traces-groundtruth/battle1-turn1.json` — 2620 frames,
+  223 dense captures, extends `battle1-intro.json`'s exact button script
+  with FIGHT→ROCK_SLIDE; twice-run 0 sha mismatches, and the supervisor's
+  own independent replay reconfirmed the dossier's cited shas
+  (`d223d98a2da9`@1884, `64857bf16c67`@2323, `70f4821905ff`@2345).
+  (2) `src/data/gen/battle1-turn1-ram-dump.json` — 741 per-tick rows
+  (gRngValue/HP/bar internals/turn order/damage) + two committed probe
+  scripts, re-run and byte-diffed 0 vs the committed dump. (3) Data:
+  `extract-moves.ts` now pulls effect/secondaryChance/target/priority/
+  flags; new `extract-battle-formula-data.ts` → `type-effectiveness.json`
+  (111 matchups) + `damage-formula-constants.json`. (4) `docs/
+  battle-turn-notes.md` — frame boundaries with shas, 12-step RNG ledger
+  (turn total: 0 for the AI's DOUBLE_TEAM + 4 for ROCK_SLIDE + 8-step
+  unattributed turn-end cluster), damage math hand-verified to the dumped
+  42 (supervisor re-derived it independently: base 30 → STAB 45 → spread
+  [38,45]), HP-drain rule reconfirmed (1 HP/tick; hp updates 1 tick after
+  the bar's done sentinel).
+- **Next:** S7 remains behind S6 — this is groundwork only, no engine
+  code. Open items carried in the dossier §7: the 8-9-step turn-end RNG
+  cluster is still unmapped to a call site (AI-scoring hypothesis
+  reinforced by a second independent stream, not proven);
+  `gBattleControllerExecFlags` bit semantics undecoded; move-animation
+  assets deliberately NOT extracted (listed as needs).
+- **Notes:** worktree removed, branch `worker/wt-20260718-143156` deleted
+  after merge. No PAPERCUT flagged.
+
+---
+
 ## 66 — S6 scene-assembly GAP A (streak blend arithmetic) root-caused and substantially fixed: two real bugs the RAM/brief hadn't suspected (trainer OBJ layer omitted; BG3's real hardware width is 512px not 256), plus a genuine blend-precision fix — `scene-assembly.json` 151/256 (was 104/256), 0 regressions. One narrower residual named, next probe on record.
 
 - **State:** `npm test` **428/428** (425→428, +3 pins), `npm run build`
@@ -120,68 +155,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   mid-session (2 consecutive scene-assembly misses) was answered by the
   user in-terminal: keep iterating. One supervisor error caught+fixed:
   a double-rotated archive entry (#55, dedup commit `029c01f`).
-
----
-
-## 64 — S6 scene-assembly GAP B (widget entrance) resolved: same one-tick render lag GAP A found (#63) applies to the widget sprites too, plus the opponent icon x2 tables were missing their per-icon flat-delay prefix since #60/#62 — `scene-assembly.json` 104/256 (was 41/256), 0 regressions. GAP A (streak blend-arithmetic) untouched, as scoped.
-
-- **State:** `npm test` **425/425**, `npm run build` green. `npm run
-  compare -- tools/compare/traces/scene-assembly.json` → **104/256** (was
-  41/256 — net +63, close to the brief's ~105 estimate). Full 18-trace
-  sweep re-run, all others at their exact prior counts (anchor 1/1,
-  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example
-  4/4, summary-info-onix 122/122, summary-info-magby 132/132,
-  confirm-decline 67/67, accept-prebattle 137/137, walk-warpout 125/125,
-  room-entry 110/110, room-npcs 98/98, room-msgbox 142/142, transition
-  206/206, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) —
-  zero regressions.
-- **Did — GAP B (widget invisibility), per the brief's method:**
-  RAM-probed `gSprites[].{invisible, x2, oam.attr0/1/2}` directly per tick
-  for all 14 widget sprites (2 diagonal bars + 12 ball icons; identified
-  by matching settled `(x,y)` against known corners, same method #60/#62
-  banked) across ticks 1225-1295. Two independent findings, both real bugs
-  fixed (not the brief's "tile-index swap" theory, which #62 had already
-  ruled out): **(1)** `invisible` and `oam.attr2` (tileNum) never change
-  after creation for any of the 14 sprites — there is no separate
-  visibility trigger, confirming #62's suspicion the wrong shape was being
-  chased. **(2)** pixel-ground-truthing the oracle's own captures directly
-  (cross-referencing the RAM-baked `x2` tables against actual pixel
-  content, not trusting the table at face value) shows the SAME systemic
-  one-tick render lag #63 found for GAP A also governs these sprites: the
-  player bar's oracle edge at trace tick 1230 matches the table's
-  tick-1229 value, not 1230's own. Wired `ballIcons`/`ballStatusBarPositions`
-  to render at `t-1` uniformly (both the table lookup and the visibility
-  gate together — #62's own attempt shifted only the table index and left
-  the create-tick comparison alone, which desyncs the two and is exactly
-  why it "fixed some frames, broke others"). Separately, RAM-probing full
-  per-icon `x2` histories (not just the sliding portion) revealed the
-  OPP_ICON_X2 tables baked by #60/#62 had been built ONLY from each icon's
-  sliding tail, omitting the per-icon flat-delay prefix
-  (`SpriteCB_StatusSummaryBalls_Enter`'s `data[1]` countdown before the
-  slide starts) — every opponent icon was sliding in 10-54 ticks too early
-  regardless of the lag fix. Rebuilt all 14 tables directly from RAM
-  ground truth (full prefix included) rather than reconstructing from the
-  source formula, per this run's established convention.
-- **Still open, narrow:** trace tick 1229 (player bar only) is 22px off —
-  the oracle is still plain background there, one tick after our model's
-  first drawn frame. A further one-tick-later `visible` gate fixes 1229
-  but then breaks the opponent side's own first-visible tick (1232) the
-  identical way (pixel-verified both directions) — the two sides do not
-  share one extra-tick correction, so this wasn't force-fitted. Full
-  account + the concrete next probe (what structurally differs between the
-  player and opponent widgets' first visible tick) in `battleScene.ts`'s
-  module doc point 3.
-- **Next:** GAP A (streak window blend-arithmetic, ticks 1075-1226) is
-  untouched this session, exactly as #63 left it — its own next probe
-  (literal `BLDALPHA` register vs `gScanlineEffectRegBuffers`, ticks
-  1140-1180) is still the right next step there. For GAP B's own residual,
-  RAM-probe what's structurally different between the player (tick 1228
-  creation, needs the extra tick) and opponent (tick 1231 creation,
-  doesn't) widget setup before guessing another blanket offset.
-- **Notes:** PAPERCUT: none new. `tools/compare/out/<trace>/` can go stale
-  between sessions (its `app-*.png` reflected code from before this
-  session's own edits) — always re-run `npm run compare` fresh before
-  reasoning from cached PNGs there, don't trust the last run's output as
-  current.
 
 ---
