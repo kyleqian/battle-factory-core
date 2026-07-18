@@ -401,14 +401,21 @@ function drawConfirmReveal(
 
   if (visual.monsAndYesNoVisible) {
     chosenMonSpecies(state).forEach((species, i) => drawChosenMonPic(fb, species, REVEAL_MON_CENTERS_X[i]!, REVEAL_MON_CENTER_Y));
-    for (let i = 0; i < YES_NO_LABELS.length; i += 1) {
-      drawText(fb, font, charmap, YES_NO_LABELS[i]!, WIN_OPTIONS.x + 7, WIN_OPTIONS.y + 1 + i * 16, textPalette, MENU_TEXT_COLORS);
-    }
   }
+  // Highlight sprite drawn BEFORE the text (same order as the RENT/SUMMARY/
+  // OTHERS menu above): the highlight is an OAM sprite under the BG0 text
+  // layer, so "YES"/"NO" must stay legible over a highlighted row - drawing
+  // the sprite after the text (as an earlier version of this function did)
+  // blotted out "YES"'s own letters whenever the cursor sat on that row.
   if (visual.cursorVisible) {
     const highlightY = state.yesNoCursorPos * 16 + 112;
     drawSprite(fb, { tileset: menuHighlight.left.tileset }, menuHighlight.palette, 176 + 16, highlightY + 8, 4, 2, 0);
     drawSprite(fb, { tileset: menuHighlight.right.tileset }, menuHighlight.palette, 208 + 16, highlightY + 8, 4, 2, 0);
+  }
+  if (visual.monsAndYesNoVisible) {
+    for (let i = 0; i < YES_NO_LABELS.length; i += 1) {
+      drawText(fb, font, charmap, YES_NO_LABELS[i]!, WIN_OPTIONS.x + 7, WIN_OPTIONS.y + 1 + i * 16, textPalette, MENU_TEXT_COLORS);
+    }
   }
 }
 

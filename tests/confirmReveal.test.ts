@@ -123,18 +123,24 @@ describe("confirmReveal state machine (hermetic, no core.ts)", () => {
     expect(getConfirmRevealVisual(grown).monsAndYesNoVisible).toBe(false);
   });
 
+  it("holds the fully-grown (32,96) window 1 more tick than the growth alone needs (oracle-pixel-verified, ISSUES #8 gap 2: 3 consecutive identical-window frames before mons/YES-NO appear, not 2)", () => {
+    const stillHeld = run(13 + 10);
+    expect(getConfirmRevealVisual(stillHeld).window).toEqual({ top: 32, bottom: 96 });
+    expect(getConfirmRevealVisual(stillHeld).monsAndYesNoVisible).toBe(false);
+  });
+
   it("reaches 'shown' (mons + YES/NO visible) after the window's hold ticks, cursor highlight lagging 1 more tick", () => {
-    const shownState = run(13 + 11);
+    const shownState = run(13 + 12);
     expect(shownState!.phase).toBe("shown");
     const justShown = getConfirmRevealVisual(shownState);
     expect(justShown.monsAndYesNoVisible).toBe(true);
     expect(justShown.cursorVisible).toBe(false);
-    const oneMore = getConfirmRevealVisual(run(13 + 11 + 1));
+    const oneMore = getConfirmRevealVisual(run(13 + 12 + 1));
     expect(oneMore.cursorVisible).toBe(true);
   });
 
   it("'shown' is a steady state - further ticks are a no-op once the cursor has caught up", () => {
-    const shownState = run(13 + 11 + 5);
+    const shownState = run(13 + 12 + 5);
     expect(advanceConfirmReveal(shownState)).toEqual(shownState);
   });
 });

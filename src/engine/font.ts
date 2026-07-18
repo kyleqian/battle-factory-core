@@ -66,8 +66,19 @@ export function drawText(
     }
     const bitmap = font.glyphs[code];
     if (bitmap) {
+      // text.c:608-609 (DecompressAndCopyTileToWindow): glyphWidth is clamped
+      // to gCurGlyph.width (this glyph's own proportional advance, ==
+      // font.widths[code]) before GLYPH_COPY runs - real hardware never
+      // copies the template cell's trailing padding columns. Every glyph's
+      // bitmap has literal 0s (bg role) out to font.cellSize past its own
+      // width; drawing those unconditionally (as an earlier version of this
+      // loop did) paints a solid bg-color block past the last character of
+      // any bg!=0 string, invisible until it overlaps something that isn't
+      // already that color (ISSUES #8 gap 3: the info window's yellow
+      // border, 2px right of "?" in "Are these three POKéMON OK?").
+      const glyphWidth = font.widths[code] ?? font.cellSize;
       for (let gy = 0; gy < font.glyphHeight; gy += 1) {
-        for (let gx = 0; gx < font.cellSize; gx += 1) {
+        for (let gx = 0; gx < glyphWidth; gx += 1) {
           const raw = bitmap[gy * font.cellSize + gx]!;
           const role = raw === 3 ? 0 : raw;
           const colorIndex = role === 0 ? colors.bg : role === 1 ? colors.fg : colors.shadow;

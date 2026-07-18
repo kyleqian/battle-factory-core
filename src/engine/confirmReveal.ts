@@ -44,9 +44,22 @@ const FLASH_WIDTHS = [1, 1, 4, 4, 8, 8, 16, 16, 32, 32, 64, 64];
  * change (1 tick - RAM/register-verified this slice via direct DISPCNT/WIN0V
  * reads, ISSUES #8: BG3's DISPCNT bit lands one tick after WIN0's own, a
  * separate case/tick from case0, not simultaneous as originally modeled),
- * THEN case2's -4/+4-per-tick growth (8 ticks) to (32,96), holding there 1
- * more tick (idx9/idx10 below) while Select_CreateChosenMonsSprites's own
- * sprite-creation lag catches up.
+ * THEN case2's -4/+4-per-tick growth (8 ticks) to (32,96), holding there 2
+ * more ticks (idx9/idx10/idx11 below) while Select_CreateChosenMonsSprites's
+ * own sprite-creation lag catches up. The hold length (2, not 1) is
+ * oracle-pixel-verified (ISSUES #8 gap 2): dense captures of
+ * confirm-flow.json show the fully-grown (32,96) window rendered unchanged
+ * for 3 consecutive frames (idx9-11) before the 3 mon pics + YES/NO box
+ * appear on the 4th - a plain RAM read of gSprites[] (the probe this
+ * boundary's fix originally shipped with) had suggested the 3 chosen-mon
+ * sprites are created 1-2 ticks apart (slot0 before slots1/2), but the
+ * ACTUAL RENDERED PIXELS (re-verified directly against the oracle's own
+ * PNGs, not just RAM) show all 3 appearing together on one frame, one tick
+ * later than this table previously modeled - the RAM-level creation-order
+ * stagger exists but is fully absorbed by the BuildOamBuffer-before-RunTasks
+ * lag (same family as OPEN_TABLE_B's own creation lag, monPic.ts) and never
+ * reaches the screen as a visible per-slot stagger, so `monsAndYesNoVisible`
+ * staying a single flag (not 3 per-slot flags) is correct as modeled.
  */
 const WINDOW_STEPS: { top: number; bottom: number }[] = [
   { top: 64, bottom: 65 },
@@ -58,6 +71,7 @@ const WINDOW_STEPS: { top: number; bottom: number }[] = [
   { top: 44, bottom: 85 },
   { top: 40, bottom: 89 },
   { top: 36, bottom: 93 },
+  { top: 32, bottom: 96 },
   { top: 32, bottom: 96 },
   { top: 32, bottom: 96 },
 ];
