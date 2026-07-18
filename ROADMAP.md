@@ -123,9 +123,19 @@ path with 2+ rented balls, OPEN_TABLE_B degenerate-window tick — all
 Tier-1-pinned (suite at 276). `rent-3picks.json` committed at **157/190**
 with every diff frame individually attributed to ISSUES #5's settled-policy
 pattern (the amended 0-diff bar per that entry's user-delegated decision);
-ISSUES #7 closed and deleted. Remaining for S5: the confirm flow (3-mon
-reveal + YES/NO, `docs/confirm-flow-notes.md`), the decline path, and the
-exit fade into the pre-battle room + attendant dialogue
+ISSUES #7 closed and deleted.
+**Slice 3 complete (2026-07-17 night, supervisor-verified):** the confirm
+flow from the 3rd RENT confirm through the settled YES/NO idle is
+implemented (`src/engine/confirmReveal.ts` + reveal render paths) and
+trace-pinned: `confirm-flow.json` committed at **79/95** — frames 210-279
+(flash, wide window, 3 chosen-mon sprites, YES/NO box, long 3-ball idle)
+byte-exact; the 16 diff frames are all ISSUES #5's settled pattern (the
+3rd pick's own popup close). RNG stream RAM-pinned through the whole
+window. Along the way five distinct render/timing bugs were root-caused
+and fixed (ISSUES #8/#9/#10, all closed and deleted), including a real
+`font.ts` glyph-width bug. Suite: 297 Tier-1 tests, 9 committed traces.
+Remaining for S5: the decline path (B/NO back to cursor mode), and the
+YES-press exit fade into the pre-battle room + attendant dialogue
 (`docs/prebattle-room-notes.md`).
 
 ### [ ] S6 — Battle bring-up: transition → first action menu, opponent exact

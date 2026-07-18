@@ -5,6 +5,83 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 34 — ISSUES #8 CLOSED: all 3 remaining render gaps root-caused and fixed (gap 1 reattributed to #5, gap 2 was a 1-tick-early phase transition not a per-slot stagger, gap 3 was a highlight/text draw-order bug plus a real font.ts glyph-overrun bug); `confirm-flow.json` still NOT committed — rebuilding it surfaced a 4th, distinct gap, filed as new ISSUES #9
+
+- **State:** `npm test` **292/292** (291→292, +1), `npm run build` green.
+  All 9 committed traces re-verified at their exact prior counts (anchor
+  1/1, draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66,
+  example 4/4, rent-slot1 125/139, rent-3picks 157/190, summary-info-magby
+  132/132, summary-info-onix 122/122) — zero regressions. `confirm-flow.json`
+  **not committed** (see below).
+- **Did:** Rebuilt `confirm-flow.json` (rent-3picks.json's exact prefix +
+  90-tick idle, dense captures 185-279) and diagnosed each of #8's 3 gaps
+  in priority order. **Gap 1 (frames 190/191, up to 2922px):** cross-checked
+  against this same trace's own ball1/ball2 closes (frames 38/39, 114/115 -
+  plain deselect closes, unrelated to the reveal) and found byte-for-byte
+  identical bbox/magnitude/failure shape, matching ISSUES #5's own
+  mechanism record verbatim ("up to 3343px/8.71%"). The 3rd pick's popup
+  close is the same `CloseMonPic` path every RENT/DESELECT confirm uses
+  (`core.ts`'s RENT branch, unconditional) — never a confirmReveal bug, just
+  #5's already-accepted WIN0V hardware-cycle race hitting this instance
+  harder. The prior session's "ruled out" call compared only against #5's
+  steady 512px frames, not its own documented peak transient frames. No
+  code change; #8 updated instead of "fixed" for this lead. **Gap 2 (frame
+  233, 4058px):** a fresh RAM probe (`gSprites[]` scanned by screen
+  position, same recipe as before) confirmed the previously-recorded slot0-
+  vs-slots1/2 sprite-creation stagger is real *in RAM* — but diffing
+  consecutive oracle PNGs across the transition shows all 3 front sprites'
+  actual pixels appear on the exact same rendered frame, one tick later
+  than this engine modeled. The RAM-level stagger is fully absorbed by the
+  same BuildOamBuffer-before-RunTasks lag documented elsewhere in this
+  codebase and never reaches the screen — modeling 3 per-slot flags would
+  have been wrong. Fixed by adding one more hold tick to `WINDOW_STEPS`
+  (11→12 entries); `monsAndYesNoVisible` stays a single flag.
+  **Gap 3 (frame 249, 81px):** two bundled causes. (a) `drawConfirmReveal`
+  drew the YES/NO text *before* the cursor-highlight sprite, opposite the
+  working RENT/SUMMARY/OTHERS menu's order in the same file — the highlight
+  blotted out "YES"'s own letters when the cursor sat on that row; fixed by
+  reordering. (b) A real `font.ts` bug, unrelated to confirmReveal: `drawText`
+  painted every glyph's full 16px template cell with the background color
+  when `colors.bg != 0`, not just the glyph's own proportional advance width
+  — invisible everywhere else (always landing on already-matching
+  background) except the last character of the one message long enough to
+  reach a border ("Are these three POKéMON OK?"'s "?", 2px short of the info
+  window's own yellow frame). Cross-checked against
+  `reference/pokeemerald/src/text.c:608-609` (glyphWidth clamped to the
+  glyph's own width before `GLYPH_COPY`) and this font's own extracted
+  bitmap data (every glyph's ink is confined to columns 0..width-1) —
+  confirmed the clamp is safe for every character. Fixed by bounding the
+  fill loop to `font.widths[code]`. Frame 189 (107px) re-checked last per
+  the brief: unchanged, byte-identical to rent-3picks.json's own already-
+  #5-attributed frame 189 — not a 4th gap. **New finding (ISSUES #9):**
+  with all 3 of #8's gaps fixed, `confirm-flow.json` still isn't clean
+  modulo #5 — periodic small diffs (36-180px) appear in individual rented
+  balls' own 32x32 OBJ regions (all 3 slots implicated at different times)
+  scattered through both the reveal window and the ~90-tick settled dwell.
+  Confirmed pre-existing (byte-identical bboxes already present in the
+  *pre-fix* compare run, just +30px from the now-fixed font bug) and
+  confirmed NOT ISSUES #5 (wrong region/shape) — it's `ballAnim.ts`'s model
+  being exercised, for the first time in any committed trace, by a long
+  undisturbed 3-ball idle with zero cursor/menu input to ever resync it
+  (`ballAnimStall` stays `[]` the whole window). Filed as ISSUES #9 with
+  full bbox/frame evidence rather than folded into #8's now-resolved scope.
+- **Next:** ISSUES #9 (RAM-probe `gSprites[]`/`ballAnim.ts`'s internal state
+  across a dense 3-ball idle window, same recipe as the now-closed #6/#7),
+  then rebuild and commit `confirm-flow.json`. After that: the decline path
+  (stretch goal, still open), the YES-press exit fade + pre-battle room
+  (`docs/prebattle-room-notes.md`), S6.
+- **Notes:** all RAM probing (`gSprites[]` position-scan, per the last
+  worker's papercut note) and the trial `confirm-flow.json` were scratch —
+  deleted before finishing, nothing uncommitted left in the tree beyond the
+  intended `src/engine/confirmReveal.ts`/`factoryDraftScreen.ts`/`font.ts` +
+  `tests/confirmReveal.test.ts` changes. PAPERCUT: none this session beyond
+  the usual RAM-probe setup cost (mgba-venv interpreter segfaults at
+  teardown, exit 139, benign — already documented in
+  `tools/extract/inspect-anchor.py`'s own docstring, cost a few minutes to
+  remember before checking stdout instead of the exit code).
+
+---
+
 ## 33 — ISSUES #8 leads 1-2 CLOSED (real BG3 wide-window content + RAM-verified window-hold fix, both committed); lead 3 (`confirm-flow.json`) STOPPED short of commit per the brief's stop condition — diffs shrank by ~4-10x but a 3rd, unrelated-looking gap remains
 
 - **State:** `npm test` **291/291** (290→291, +1 net in
