@@ -90,9 +90,11 @@ idle animation (`sMonAnimationDelayTable`, fires at SUMMARY-press+65 for
 MAGBY) — is explicitly deferred behind S5 per the "re-scoped by the
 supervisor" rule below. Rationale: S5→S8 is the mission's critical path;
 the data the deferred pages need (moves/exp/items) is being extracted in
-parallel. S5 may begin.
+parallel. S5 may begin. **(Supervisor, 2026-07-18, at S5 completion: the
+same recorded rationale extends this deferral behind the S5→S8 critical
+path — S6 may begin with S4's remainder still open.)**
 
-### [~] S5 — Complete the draft: rent 3, confirmations, exit sequence
+### [x] S5 — Complete the draft: rent 3, confirmations, exit sequence
 RENT/OTHERS flows, ball palette change on selection, the 2nd/3rd-pick
 message variants, deselection/cancel paths, final party confirmation, fade
 out to the pre-battle room and the attendant dialogue up to the battle
@@ -134,9 +136,19 @@ byte-exact; the 16 diff frames are all ISSUES #5's settled pattern (the
 window. Along the way five distinct render/timing bugs were root-caused
 and fixed (ISSUES #8/#9/#10, all closed and deleted), including a real
 `font.ts` glyph-width bug. Suite: 297 Tier-1 tests, 9 committed traces.
-Remaining for S5: the decline path (B/NO back to cursor mode), and the
-YES-press exit fade into the pre-battle room + attendant dialogue
-(`docs/prebattle-room-notes.md`).
+**Stage complete (2026-07-18, supervisor-verified):** the decline path
+(YES/NO cursor, B/A-on-NO, 20-tick un-reveal, species-name breathe model,
+post-decline ball stalls) is pinned by `confirm-decline.json` at **67/67
+byte-exact**; the accept path (YES-press, exit fade, pre-battle room,
+"Right this way, please!" fully printed + idle) by `accept-prebattle.json`
+at **137/137 byte-exact** (fade frames included), with RNG continuity
+RAM-verified across the scene switch. ISSUES #8-#14 all root-caused,
+fixed, and deleted along the way. The three older traces carrying
+ISSUES #5-attributed frames (rent-slot1 125/139, rent-3picks 157/190,
+confirm-flow 79/95) ship under that entry's user-delegated settled
+policy; sole open debt is ISSUES #15 (baked msgbox frame asset,
+non-blocking). Suite at stage close: 341 Tier-1 tests, 12 committed
+traces.
 
 ### [ ] S6 — Battle bring-up: transition → first action menu, opponent exact
 Battle transition effect, battle scene init (backgrounds, healthboxes,
