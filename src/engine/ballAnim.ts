@@ -90,39 +90,53 @@ interface BallAnimCore {
   pendingRest: number;
 }
 
+/** internalTile() display-lag history depth this file ever needs (see BallAnimState.tileHistory's doc): slot 0 pre-rest (2) + the ISSUES #9 reveal-stall bump (+1) = 3 max, so 2 history entries (index 0/1) cover every case with a spare. */
+const TILE_HISTORY_LENGTH = 2;
+
 export interface BallAnimState extends BallAnimCore {
   /**
    * The tile actually shown on screen this tick - lags `phase`/`cmdIndex`'s
-   * own internal transition by `displayLagTicks` ticks (2 for slot 0, 1 for
-   * every other slot - see `advanceBallAnim`'s `displayLagTicks` param).
-   * RAM-dumped ground truth (ISSUES #7 remainder, dev-time RAM probe: direct
-   * `struct Sprite` reads of `animCmdIndex` cross-correlated tick-by-tick
-   * against raw framebuffer diffs, ~80 transitions across both balls of a
-   * 2-rent dwell) found the real hardware's OWN OAM-buffer display lag from
-   * its *own* animCmdIndex is a uniform 1 tick for every ball - the apparent
-   * "2" for slot 0 is this engine's own settling-phase internal cmdIndex
-   * running exactly 1 tick EARLY vs the real hardware's animCmdIndex (a
-   * pre-existing quirk this file's `REST_INTERNAL_OFFSET` comment already
-   * flagged as present but "harmless" for single-ball; confirmed via a
-   * scratch engine-state dump: this engine's ball 0 hits cmdIndex 9 at tick
-   * 103/single-ball or 104/2-ball dwell, one tick before RAM's 104/105 - see
-   * ISSUES #7), so slot 0 needs a 2-tick display delay to land on the
-   * correct absolute tick while every other slot (RAM-verified: engine
-   * cmdIndex matches RAM exactly, no offset) only needs the real 1-tick OAM
-   * lag. Not re-derived from first principles beyond that, just pinned from
-   * the oracle same as this screen's other render-lag quirks, e.g.
-   * monPic.ts's spriteVisible split. Kept separate from `phase`/`cmdIndex`
-   * so the RNG-critical internal timing (RAM-pinned, tests/ballAnim.test.ts)
-   * stays undisturbed by this purely-visual delay - `pendingDisplayTile` is
-   * the 1-tick stage in between (only meaningful for slot 0's 2-tick path).
+   * own internal transition by a per-tick, per-slot number of ticks (see
+   * `advanceBallAnim`'s `lag` computation). RAM-dumped ground truth (ISSUES
+   * #7 remainder, dev-time RAM probe: direct `struct Sprite` reads of
+   * `animCmdIndex` cross-correlated tick-by-tick against raw framebuffer
+   * diffs, ~80 transitions across both balls of a 2-rent dwell) found the
+   * real hardware's OWN OAM-buffer display lag from its *own* animCmdIndex is
+   * a uniform 1 tick for every ball - the apparent "2" for slot 0 is this
+   * engine's own settling-phase internal cmdIndex running exactly 1 tick
+   * EARLY vs the real hardware's animCmdIndex for slot 0's *first* moving
+   * cycle only (a pre-existing quirk this file's `REST_INTERNAL_OFFSET`
+   * comment already flagged as present but "harmless" for single-ball).
+   * ISSUES #9 (RAM-probed: all 3 ball slots simultaneously across a long
+   * undisturbed 3-ball idle, cross-correlated tick-by-tick against this
+   * file's internal cmdIndex): that 1-tick-early quirk is NOT a permanent
+   * shift - `REST_INTERNAL_OFFSET`'s own extra tick self-corrects it the
+   * moment slot 0 first passes through "resting" (RAM-confirmed: slot 0's
+   * *second* moving cycle matches RAM's own animCmdIndex exactly, transition
+   * for transition, with no offset), so the 2-tick delay is only correct
+   * while `hasRested` is still false; once true, slot 0 needs only the same
+   * 1-tick lag every other slot always has. Separately, ALL 3 slots drift 1
+   * tick early again starting right around the reveal's window-fully-grown
+   * hold (RAM-confirmed via each slot's own next cmdIndex-transition boundary
+   * after that point, all consistent with one shared, screen-level 1-tick
+   * cost - see confirmReveal.ts's `isRevealStallActive` doc) - modeled as a
+   * flat +1 on top of the per-slot base lag once that predicate is true.
+   * These two adjustments are captured in `hasRested` (data) and
+   * `isRevealStallActive` (computed from `confirmReveal.ts`, passed in by
+   * `core.ts`), kept entirely separate from `phase`/`cmdIndex` so the
+   * RNG-critical internal timing (RAM-pinned, tests/ballAnim.test.ts) stays
+   * undisturbed by this purely-visual delay.
    */
   displayTile: number;
-  pendingDisplayTile: number;
+  /** internalTile() history, most recent first - tileHistory[0] is the internalTile() value `advanceBallAnim` computed on the immediately-preceding call, tileHistory[1] the one before that. Sized by TILE_HISTORY_LENGTH; only indices needed for `lag - 2` are ever read. */
+  tileHistory: readonly number[];
+  /** Whether this ball has ever completed a full moving cycle (entered "resting" at least once) - see `displayTile`'s doc. */
+  hasRested: boolean;
 }
 
 /** A ball's anim state the instant Select_HandleMonSelectionChange selects it - still shows the Still tile. */
 export function initialBallAnimState(): BallAnimState {
-  return { phase: "settling", timer: SETTLE_TICKS, cmdIndex: 0, pendingRest: 0, displayTile: 0, pendingDisplayTile: 0 };
+  return { phase: "settling", timer: SETTLE_TICKS, cmdIndex: 0, pendingRest: 0, displayTile: 0, tileHistory: [], hasRested: false };
 }
 
 function internalTile(state: BallAnimCore): number {
@@ -156,19 +170,23 @@ function beginMoving(rngValue: number): { state: BallAnimCore; rngValue: number 
  * AnimateSprites() uses, per-VBlank consumption already applied by the
  * caller before this runs - see core.ts).
  *
- * `displayLagTicks` (2 for slot 0, 1 for every other slot - see
- * `BallAnimState.displayTile`'s doc, ISSUES #7 remainder): display-only,
- * does not affect `rngValue` or any field `advanceBallAnimCore` returns.
+ * `isSlot0`/`revealStallActive`: display-only lag inputs (see
+ * `BallAnimState.displayTile`'s doc, ISSUES #7/#9) - neither affects
+ * `rngValue` or any field `advanceBallAnimCore` returns.
  */
 export function advanceBallAnim(
   state: BallAnimState,
   rngValue: number,
-  displayLagTicks: 1 | 2 = 2,
+  isSlot0: boolean,
+  revealStallActive: boolean,
 ): { state: BallAnimState; rngValue: number } {
   const currentInternalTile = internalTile(state);
-  const displayTile = displayLagTicks === 2 ? state.pendingDisplayTile : currentInternalTile;
+  const lag = (isSlot0 && !state.hasRested ? 2 : 1) + (revealStallActive ? 1 : 0);
+  const displayTile = lag <= 1 ? currentInternalTile : (state.tileHistory[lag - 2] ?? 0);
   const result = advanceBallAnimCore(state, rngValue);
-  return { state: { ...result.state, displayTile, pendingDisplayTile: currentInternalTile }, rngValue: result.rngValue };
+  const hasRested = state.hasRested || result.state.phase === "resting";
+  const tileHistory = [currentInternalTile, ...state.tileHistory].slice(0, TILE_HISTORY_LENGTH);
+  return { state: { ...result.state, displayTile, tileHistory, hasRested }, rngValue: result.rngValue };
 }
 
 function advanceBallAnimCore(state: BallAnimCore, rngValue: number): { state: BallAnimCore; rngValue: number } {

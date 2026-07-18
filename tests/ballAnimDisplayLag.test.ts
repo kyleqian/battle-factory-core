@@ -78,3 +78,53 @@ describe("ISSUES #7 remainder - per-slot displayTile lag (slot 0: 2 ticks, other
     expect(ballAnimTile(at188)).toBe(0); // new (cmdIndex 10) tile, now visible - was wrongly 16 pre-fix
   });
 });
+
+// ISSUES #9: rent-3picks.json's full 3-pick prefix (confirms at ticks 37/113/
+// 189) plus a long undisturbed idle, dense RAM-probed (all 3 ball slots
+// simultaneously, cross-correlated tick-by-tick against this file's own
+// internal cmdIndex - scratch probe script, not committed). Checkpoints below
+// are exact RAM-verified displayTile values.
+const RENT_3PICKS_IDLE: Segment[] = [...RENT_SLOT, DWELL_36, RIGHT_2F, ...RENT_SLOT, DWELL_36, RIGHT_2F, ...RENT_SLOT, [90, null]];
+
+describe("ISSUES #9 - slot 0's 2-tick lag only applies to its first moving cycle (RAM: resyncs after its first 'resting' phase)", () => {
+  it("slot 0's SECOND moving cycle (post-rest, cmdIndex0->1 transition at engine tick 204/208) matches RAM with only the real 1-tick lag - the old permanent 2-tick lag would show 16 a tick late here", () => {
+    const at204 = replayTo(RENT_3PICKS_IDLE, 204).draftScreen.ballAnims[0]!;
+    expect(at204.cmdIndex).toBe(0);
+    expect(at204.hasRested).toBe(true);
+    expect(ballAnimTile(at204)).toBe(0);
+    const at205 = replayTo(RENT_3PICKS_IDLE, 205).draftScreen.ballAnims[0]!;
+    expect(ballAnimTile(at205)).toBe(16); // new (cmdIndex 0's tile) visible 1 tick later, not 2
+  });
+});
+
+describe("ISSUES #9 - Select_CreateChosenMonsSprites's own per-frame cost adds 1 more display-lag tick to every active ball, near the reveal's window-fully-grown hold", () => {
+  it("slot 0's cmdIndex6->7 transition (engine tick 232, post-hasRested so base lag 1) is held an extra tick by the reveal stall: displayTile stays 32 through tick 233, only flips to 0 at tick 234", () => {
+    const at232 = replayTo(RENT_3PICKS_IDLE, 232).draftScreen.ballAnims[0]!;
+    expect(at232.cmdIndex).toBe(7);
+    expect(ballAnimTile(at232)).toBe(32); // still showing cmdIndex 6's tile
+    const at233 = replayTo(RENT_3PICKS_IDLE, 233).draftScreen.ballAnims[0]!;
+    expect(ballAnimTile(at233)).toBe(32); // extra-held a 2nd tick by the reveal stall
+    const at234 = replayTo(RENT_3PICKS_IDLE, 234).draftScreen.ballAnims[0]!;
+    expect(ballAnimTile(at234)).toBe(0); // new (cmdIndex 7) tile, now visible
+  });
+
+  it("slot 1's cmdIndex15->16 transition (engine tick 236) is likewise held an extra tick: displayTile stays 32 through tick 237, only flips to 0 at tick 238", () => {
+    const at236 = replayTo(RENT_3PICKS_IDLE, 236).draftScreen.ballAnims[1]!;
+    expect(at236.cmdIndex).toBe(16);
+    expect(ballAnimTile(at236)).toBe(32);
+    const at237 = replayTo(RENT_3PICKS_IDLE, 237).draftScreen.ballAnims[1]!;
+    expect(ballAnimTile(at237)).toBe(32);
+    const at238 = replayTo(RENT_3PICKS_IDLE, 238).draftScreen.ballAnims[1]!;
+    expect(ballAnimTile(at238)).toBe(0);
+  });
+
+  it("slot 2's cmdIndex8->9 transition (engine tick 255) is likewise held an extra tick: displayTile stays 0 through tick 256, only flips to 16 at tick 257", () => {
+    const at255 = replayTo(RENT_3PICKS_IDLE, 255).draftScreen.ballAnims[2]!;
+    expect(at255.cmdIndex).toBe(9);
+    expect(ballAnimTile(at255)).toBe(0);
+    const at256 = replayTo(RENT_3PICKS_IDLE, 256).draftScreen.ballAnims[2]!;
+    expect(ballAnimTile(at256)).toBe(0);
+    const at257 = replayTo(RENT_3PICKS_IDLE, 257).draftScreen.ballAnims[2]!;
+    expect(ballAnimTile(at257)).toBe(16);
+  });
+});

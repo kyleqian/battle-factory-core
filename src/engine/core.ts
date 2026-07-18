@@ -23,7 +23,7 @@ import {
   selectMonMessage,
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
-import { advanceConfirmReveal, INITIAL_CONFIRM_REVEAL_STATE } from "./confirmReveal.ts";
+import { advanceConfirmReveal, INITIAL_CONFIRM_REVEAL_STATE, isRevealStallActive } from "./confirmReveal.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 import { advanceMonPic, closeMonPic, isCursorInputReady, isMonPicInputReady, openMonPic } from "./monPic.ts";
 import { advanceBallAnim, initialBallAnimState } from "./ballAnim.ts";
@@ -109,16 +109,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // see DraftScreenState.ballAnimStall doc).
     const ballAnims = draftScreen.ballAnims.slice();
     const stalledSlots = draftScreen.ballAnimStall;
+    // ISSUES #9: Select_CreateChosenMonsSprites's own per-frame cost stalls
+    // every active ball's display by 1 more tick, near the reveal's
+    // window-fully-grown hold - see confirmReveal.ts's isRevealStallActive
+    // doc and ballAnim.ts's BallAnimState.displayTile doc.
+    const revealStallActive = isRevealStallActive(draftScreen.confirmReveal);
     for (let i = 0; i < ballAnims.length; i += 1) {
       const anim = ballAnims[i];
       if (!anim) continue;
       if (stalledSlots.includes(i)) continue;
-      // ISSUES #7 remainder: slot 0's own internal cmdIndex model runs 1
-      // tick early vs RAM (pre-existing, RAM-confirmed), so it alone needs
-      // the 2-tick display delay; every other slot's cmdIndex matches RAM
-      // exactly and only needs the real hardware's 1-tick OAM lag - see
-      // ballAnim.ts's BallAnimState.displayTile doc.
-      const result = advanceBallAnim(anim, rngValue, i === 0 ? 2 : 1);
+      // ISSUES #7/#9: slot 0's own internal cmdIndex model runs 1 tick early
+      // vs RAM only during its first moving cycle (pre-existing, RAM-
+      // confirmed); every other slot's cmdIndex matches RAM exactly and only
+      // needs the real hardware's 1-tick OAM lag - see ballAnim.ts's
+      // BallAnimState.displayTile doc.
+      const result = advanceBallAnim(anim, rngValue, i === 0, revealStallActive);
       ballAnims[i] = result.state;
       rngValue = result.rngValue;
     }

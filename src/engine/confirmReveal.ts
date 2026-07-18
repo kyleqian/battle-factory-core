@@ -130,3 +130,27 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
 
 /** Select_ShowYesNoOptions: default cursor position is YES (row 0). UP/DOWN toggle + YES/decline presses are out of scope this slice (see docs/confirm-flow-notes.md's decline-path stretch goal). */
 export const INITIAL_YES_NO_CURSOR_POS = 0;
+
+/**
+ * ISSUES #9 (RAM-probed: all 3 ball slots simultaneously, dense confirm-flow-
+ * shaped idle window, cross-correlated tick-by-tick against ballAnim.ts's
+ * internal cmdIndex): `Select_CreateChosenMonsSprites()`'s own per-frame cost
+ * (creating the 3 real front-sprite mon pics, clearing `monPicAnimating`) - a
+ * RunTasks()-side cost, same shape as `Select_PrintMonCategory`/`Select_
+ * PrintSelectMonString`'s already-modeled text-print cost (ballAnimMultiBall.
+ * test.ts's root cause) - lands 1 tick on every currently-active ball's own
+ * `SpriteCB_Pokeball` advance, near the reveal's own window-fully-grown hold
+ * (empirically bounded to a 4-tick window around here by this session's probe
+ * script; not narrower without a finer-grained trace). Modeled as a
+ * DISPLAY-ONLY correction (ballAnim.ts's `displayTile` chain) rather than an
+ * actual `ballAnimStall` entry: no ball's own RNG-roll boundary falls in this
+ * window for any committed/probed trace, so whether the underlying mechanism
+ * also nudges internal roll timing is unobserved and, per this slice's brief,
+ * out of scope to guess at - only the visible symptom (ball OBJ pixels) is
+ * fixed here, and the RNG-critical `advanceBallAnimCore` stays untouched.
+ */
+export function isRevealStallActive(state: ConfirmRevealState | null): boolean {
+  if (!state) return false;
+  if (state.phase === "shown") return true;
+  return state.phase === "window" && state.elapsed >= WINDOW_STEPS.length - 3;
+}
