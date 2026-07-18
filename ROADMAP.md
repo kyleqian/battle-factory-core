@@ -205,6 +205,14 @@ walk (attendant + player, camera scroll, attendant set_invisible) → warp
 fade-to-black window (ticks 400-519) is engine-implemented and RAM/pixel-
 pinned; `tools/compare/traces/walk-warpout.json` (125/125, 0 diff). Battle-
 room entry (frame 520+) and everything after is still open.
+**Battle-room groundwork banked (2026-07-18, supervisor-verified):** the
+warp-destination room's scene assets are extracted and composite-verified
+(`extract-battle-room.ts`; tick 624 full-frame 0/38400, ticks 740-838
+0/21600 on y<90 — residual exactly the not-yet-extracted opponent-speech
+msgbox), `docs/battle-room-notes.md`. Camera pans tracking the invisible
+real player; opponent walk-in gfx = `OBJ_EVENT_GFX_BUG_CATCHER`. Open for
+the engine slices: camera sub-tile timing, the 520-535 fade-in curve,
+walk/turn transient frames (extracted, pixel-unverified), msgbox variant.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain
