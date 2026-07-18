@@ -5,6 +5,37 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 69 — S7 data needs closed (parallel worktree lane, merged): battle-message TEMPLATE system extracted + pixel-cross-checked, DOUBLE_TEAM evasion stage RAM-pinned, held-item damage-path inventory exhaustive
+
+- **State:** merge of `worker/wt-20260718-151756` (base `d1072d3`, merged
+  onto #68's `a515081`): `npm test` **437/437** (429+8), `npm run build`
+  green, anchor 1/1 post-merge.
+- **Did (worktree lane, supervisor-verified in the worktree pre-merge):**
+  (1) `extract-battle-messages.ts` → `battle-message-templates.json`
+  (365/369 `gBattleStringsTable` entries as structured segments +
+  `STRINGID_USEDMOVE` + 52 `B_TXT_*` placeholders + stat-name/
+  MULTISTRING sub-tables) and `extract-species-names.ts` →
+  `species-names.json` (412) — a real pre-existing gap. Pixel-cross-
+  checked against `battle1-turn1.json` captures at ticks 1960/2270
+  (supervisor re-inspected both PNGs): "Foe GROVYLE used / DOUBLE TEAM!"
+  and "ONIX used / ROCK SLIDE!" — including the "Foe " prefix the
+  dossier's prose had dropped (corrected in place). +5 template tests.
+  (2) `gBattleMons[1].statStages[EVASION]` flips 6→7 at tick 1959, holds
+  to trace end, nothing else moves (probe spec committed, twice-run
+  byte-identical) — closes dossier §8 risk 5. (3) BRIGHT_POWDER/
+  LAX_INCENSE (`HOLD_EFFECT_EVASION_UP`, params 10/5) and WHITE_HERB
+  (`RESTORE_STATS`) each have exactly ONE engine call site, neither in
+  `CalculateBaseDamage` — EVASION_UP is accuracy-only (live for
+  ROCK_SLIDE's roll vs Grovyle), line-cited in the dossier; full 70-item
+  `item-hold-effects.json` extracted + pinned (+3 tests).
+- **Next:** S7 stays behind S6. Remaining dossier needs: move-animation
+  assets (§7 item 5), turn-end RNG cluster attribution,
+  `gBattleControllerExecFlags` decoding.
+- **Notes:** worktree removed, branch deleted after merge. No PAPERCUT.
+
+---
+---
+
 ## 68 — S6 scene-assembly GAP A FULLY RESOLVED: blend precision runs in 8-bit space not 5-bit (mathematically proven, not curve-fit), plus evaEvb's own one-tick render lag — `scene-assembly.json` 255/256 (was 151/256), whole 1075-1226 window byte-exact, 0 regressions
 
 - **State:** `npm test` **429/429** (428→429, +1 pin, 2 corrected), `npm
