@@ -1,17 +1,21 @@
-# Battle scene notes (S6 groundwork: BATTLE-SCENE ASSEMBLY window, ticks 1031-1300)
+# Battle scene notes (S6 groundwork: BATTLE-SCENE ASSEMBLY + SEND-OUT windows, ticks 1031-1560)
 
 Worktree-lane groundwork dossier for the window between the transition's
 black outro and the settled first-action-menu idle: solid black (from
 tick 1031, already pinned) → the "streak" scene-assembly frames → trainer
 slide settles → "BUG CATCHER DESTIN would like to battle!♥" prints → the
-settled 4-phase idle. **Ground-truth pinning + source/RAM decode only — no
-engine code, no `tools/compare/traces/` fixtures.** Cross-references
-`docs/battle-bringup-notes.md`'s "Slice-0 ground truth" section (frame
-boundaries at coarser stride, this doc's task) and `docs/battle-room-notes.md`
-(structure template). All frame numbers are `battle1-intro.json`'s own
-absolute tick indices (same script, same RNG stream — see that file's
-"Slice-0 ground truth" §0 for why). sha256 = first 8 hex chars unless
-spot-cited in full.
+settled 4-phase idle → (§7, a later session) A-press #3 → "...sent out
+GROVYLE!" → opponent healthbox settle. **Ground-truth pinning + source/RAM
+decode only — no engine code, no `tools/compare/traces/` fixtures.**
+Cross-references `docs/battle-bringup-notes.md`'s "Slice-0 ground truth"
+section (frame boundaries at coarser stride, this doc's task) and
+`docs/battle-room-notes.md` (structure template). All frame numbers are
+`battle1-intro.json`'s own absolute tick indices (same script, same RNG
+stream — see that file's "Slice-0 ground truth" §0 for why). sha256 = first
+8 hex chars unless spot-cited in full.
+
+**§§0-6 below (ticks 1031-1300) are a prior session's work** (PROGRESS.md
+#55); **§7 (ticks 1300-1560) is this session's addition.**
 
 ## 0. Ground truth: the dense trace
 
@@ -330,3 +334,308 @@ widget):
    engine slice implementing it should re-verify the derived table against
    `battle1-scene-dense.json`'s captures directly (0 diff expected if the
    table above is transcribed correctly).
+
+## 7. Send-out window (1300-1560): A-press #3 → "...sent out GROVYLE!" → opponent healthbox settle
+
+New session, continuing directly off §§0-6. Covers the A-PRESS-#3 +
+OPPONENT SEND-OUT window per this step's brief: the idle "would like to
+battle!♥" hold → A-press #3 (tick 1420, `battle1-intro.json` segment 35) →
+message clears → "BUG CATCHER DESTIN sent out GROVYLE!" prints → trainer-pic
+exit + party-status-summary despawn + ball-throw/materialization + opponent
+healthbox slide-in → full settle. **No engine code, no `tools/compare/
+traces/` fixtures** — ground-truth pinning + source/RAM-adjacent decode only
+(this session used source + pixel cross-validation; no `ram-probe.py` run
+was needed — every mechanism below was resolved from source constants and
+independently cross-validated against the dense trace's pixels, tighter
+confirmation than a RAM probe alone would give).
+
+### 7.0. Ground truth: the dense trace
+
+Committed: `tools/compare/traces-groundtruth/battle1-sendout-dense.json` —
+**identical 40-segment button script** to `battle1-intro.json` (same tick
+numbering, same RNG/personality stream), `captureFrames` = every tick
+**1300-1555 inclusive** (256 captures, the oracle's `maxCaptures` limit).
+Verified green via `bin/oracle run` (256 PNGs, manifest sha-checked). Segment
+35 (`battle1-intro.json`'s own data) is the 2-frame `["A"]` pulse at ticks
+1420-1421 — A-press #3; segments 36-39 (144+180+60+80 = 464 frames of no
+input) cover the rest of this window and well beyond it, so nothing in
+1300-1555 is input-gated except that one press.
+
+### 7.1. Pre-press idle: the established 4-phase/36-tick cycle continues unbroken
+
+Ticks 1300-1418 replay the same down-arrow-cursor idle cycle §3.3 already
+decoded (`TextPrinterDrawDownArrow`, 9-tick-per-phase, `sDownArrowYCoords=
+{0,1,2,1}`): sha transitions land at ticks 1301, 1310, 1319, 1328, 1337,
+1346, 1355, ..., 1418 — **every single one exactly 9 ticks apart**, no
+drift, confirmed by direct arithmetic over all 14 transitions in this
+window (not sampled). The 3 distinct shas cycle `→446ea38f→cb0e9fd4→
+446ea38f→19ccf0c6→` (idx1/idx3 sharing a sha, exactly as §3.3 predicted).
+Screen is otherwise byte-identical tick-to-tick in this range — confirms
+the "would like to battle!♥" hold is genuinely input-gated with no other
+background animation, right up to the press.
+
+### 7.2. A-press #3 registration: 5-tick lag, same pattern as press #2
+
+Screen stays on the idle cycle's current phase (`cb0e9fd4...`) through tick
+**1424**, unbroken by the press itself (ticks 1420-1421) — confirms input
+registration lag, not press-frame-exact response. First visibly-changed
+frame is tick **1425** (`c8645d83...`, message box cleared to blank). That's
+a **5-tick lag from press start** (1420→1425), matching press **#2**'s own
+lag exactly (838→843, `battle-bringup-notes.md` §2) rather than press #1's
+3-tick lag (400→403) — both prior presses' lags are reproduced faithfully
+by different presses in this same trace, i.e. **lag is not a fixed
+constant** across all gated messages (open question already flagged
+upstream; this session adds a 3rd data point, doesn't resolve it).
+
+### 7.3. Text cadence: "BUG CATCHER DESTIN sent\nout GROVYLE!" — exact arithmetic match, same mechanism as §3.2
+
+Source (`battle_message.c:388`): `sText_Trainer1SentOutPkmn =
+"{B_TRAINER1_CLASS} {B_TRAINER1_NAME} sent\nout {B_OPPONENT_MON1_NAME}!"`,
+dispatched by `BattleIntroPrintOpponentSendsOut` (`battle_main.c:3583-3607`,
+`STRINGID_INTROSENDOUT`) once `BattleIntroPrintTrainerWantsToBattle`'s own
+controller exec clears (i.e. the tick after the A-press registers). Resolves
+to **"BUG CATCHER DESTIN sent\nout GROVYLE!"** — line 1 "BUG CATCHER DESTIN
+sent" (23 chars, 3 spaces), line 2 "out GROVYLE!" (12 chars, 1 space), 35
+printable chars total, `\n` free (same rule §3.2 already established).
+
+Pixel evidence: the message-box region changes on **every tick from 1425
+through 1459** except **4 holds**: ticks **1428, 1436, 1443, 1451** (found
+by direct sha comparison, not assumed), then static (`3a8129cc...`) through
+at least 1461. That's **35 ticks (1425-1459 inclusive) for 35 printable
+characters** — i.e. **char index 0 ('B') prints the same tick as the
+box-clear (tick 1425)**, one tick earlier in the cycle than §3.2's "wants to
+battle" line (where the clear and char-0 were on separate ticks) — a small,
+real difference between the two message transitions, not an inconsistency:
+predicted hold ticks from the string's own space positions (indices 3, 11,
+18, 26, accounting for the free `\n` at index 23) are `1425+3=1428`,
+`1425+11=1436`, `1425+18=1443`, `1425+26=1451` — **all 4 match exactly**.
+Same 1-tick/char-including-spaces mechanism as §3.2 and
+`battle-room-notes.md`'s field msgbox, now confirmed on a 3rd independent
+string.
+
+### 7.4. Post-text handoff (tick ~1462): three things start the same tick
+
+`BattleIntroOpponent1SendsOutMonAnimation` (`battle_main.c:3642-3683`) fires
+once the text-print controller-exec clears, and unconditionally does two
+things via `BtlController_EmitIntroTrainerBallThrow` →
+`OpponentHandleIntroTrainerBallThrow` (`battle_controller_opponent.c:
+1867-1888`) — pixel-confirmed first joint effect at tick **1462**
+(`c146733e...`, 3-tick lag past the 1459-1461 static hold, consistent with
+this codebase's general handoff-lag pattern):
+
+1. **Trainer-pic slide-out**: `gSprites[...].data[0]=35` (duration),
+   `data[2]=280` (target x — off the 240px-wide screen entirely), `data[4] =
+   sprite->y` (no vertical move), `callback = StartAnimLinearTranslation`
+   (`battle_anim_mons.c:1093-1100` → `AnimTranslateLinear_WithFollowup`,
+   :1140-1143: decrements `data[0]` to 0 over exactly **35 frames**, linear
+   in 8.8 fixed-point, then `SetCallbackToStoredInData6` invokes
+   `SpriteCB_FreeOpponentSprite` — `FreeTrainerFrontPicPalette` +
+   `DestroySprite`). Predicted destroy tick: 1462+35 = **1497**.
+   Pixel-confirmed: isolating a trainer-only crop (x210-239,y20-60, clear of
+   the ball/healthbox regions) shows continuous per-tick change starting
+   **1463** (1-tick render lag) growing in magnitude as the sprite's trailing
+   edge crosses the crop window, then fading to zero by **~1489-1493** as it
+   exits the 240px screen — consistent with a constant ~2.97px/tick slide
+   ((280-176)/35) reaching x=239 (off the visible screen) around tick
+   1462+21≈1483 and being fully destroyed at the predicted 1497. (§4's
+   settle-position xPos=176 for singles, already pinned, is the slide's
+   start point.)
+2. **Ball spawn**: `Task_StartSendOutAnim` (`:1897-1924`, created same tick,
+   priority 5 — runs the same or next task-scheduler pass) → `StartSendOutAnim`
+   (`:1168-1198`) → `gBattleControllerData[battler] =
+   CreateInvisibleSpriteWithCallback(SpriteCB_WaitForBattlerBallReleaseAnim)`
+   creates a poké-ball sprite immediately (not thrown — no arc; this is
+   `POKEBALL_OPPONENT_SENDOUT`, which places the ball directly at
+   `GetBattlerSpriteCoord(battler, BATTLER_COORD_X)`,
+   `GetBattlerSpriteCoord(battler, BATTLER_COORD_Y)+24` per
+   `pokeball.c:389-395` — the "unused throw arc" code path at :409-419 only
+   runs for the `default` `kindOfThrow` case, **not** this one). Ball's own
+   `callback = SpriteCB_OpponentMonSendOut` (`pokeball.c:991-1003`) idles for
+   **16 ticks** (`data[0]++ > 15`) before releasing. Pixel-confirmed: first
+   ball pixel at tick **1464** (2-tick lag).
+3. **Party-status-summary widget despawn**: `if (...partyStatusSummaryShown)
+   gTasks[gBattlerStatusSummaryTaskId[gActiveBattler]].func =
+   Task_HidePartyStatusSummary` (`battle_interface.c:1671-1725`) — **not** a
+   slide, a combined **alpha-blend fade + per-icon staggered exit-slide**:
+   sets `BLDCNT`/`BLDALPHA=16:0` once, then (battle-start path)
+   `Task_HidePartyStatusSummary_BattleStart_1` (:1727-1738) decrements
+   `tBlend` from 16 **every other tick** (`data[11]++ % 2==0` gate — ~32
+   ticks to reach 0) while each ball icon gets `SpriteCB_StatusSummaryBalls_Exit`
+   with a **7-tick-per-index stagger** (`data[1] = 7*i`, reverse index order
+   for the opponent side) and the bar sprite gets
+   `SpriteCB_StatusSummaryBar_Exit`. Pixel-confirmed (isolated crop
+   x40-150,y28-42, clear of ball/trainer/healthbox): **continuous per-tick
+   change from 1463 through 1493** (alternating large/small diff magnitudes
+   tick-to-tick — exactly the signature of a value that changes every-other-
+   tick, i.e. `BLDALPHA`, superimposed on per-tick icon-position changes),
+   fully gone (region byte-identical to background) by tick **1495** — the
+   32-tick blend prediction (1463+32=1495) lands exactly on the
+   observed vanish tick.
+
+### 7.5. Ball release → materialization flash → Grovyle reveal (ticks ~1478-1518)
+
+`SpriteCB_OpponentMonSendOut`'s 16-tick wait (from ball-spawn ~1462) ends
+**~1478**, calling `SpriteCB_ReleaseMonFromBall` (`pokeball.c:750-824`),
+which starts several concurrent effects:
+
+- `AnimateBallOpenParticles(..., 1, 28, BALL_POKE)` (`battle_anim_throw.c:
+  1577-1591` → `PokeBallOpenParticleAnimation`) spawns up to 16 small star/
+  particle sprites from `gBattleAnimSpriteGfx_Particles`
+  (`graphics/battle_anims/sprites/particles.png`, `graphics.c:467`) — the
+  yellow "sparkle" specks visible around the ball from ~tick 1490 onward in
+  the oracle captures (screenshot-confirmed, e.g. frame 1500/1508).
+- `BlendPalette(OBJ_PLTT_ID(spritePalNum), 16, 16, gBallOpenFadeColors[BALL_POKE])`
+  (`LaunchBallFadeMonTask(TRUE, battler, 14, ballId)`,
+  `battle_anim_throw.c:2033-2058`) — **instantly** blends the mon sprite's
+  OBJ palette 100% to `gBallOpenFadeColors[BALL_POKE] = RGB(31,22,30)`
+  (:371-374, a pink) — this **is** the pink silhouette (not a generic
+  "flash white", a ball-specific tint): pixel-sampled directly from the
+  oracle capture at tick 1486, the dominant non-background color in the
+  silhouette's bounding box is **`(255,181,247)`**, which is `RGB(31,22,30)`
+  under this codebase's actual `component × 255 / 31` GBA-to-RGB888
+  expansion (31×255/31=255, 22×255/31≈181, 30×255/31≈247 — **exact match**,
+  a useful confirmed data point for the harness's own color-conversion
+  convention, not just a per-doc note).
+- Simultaneously, `BeginNormalPaletteFade(selectedPalettes=14, 0, 0, 16,
+  RGB_WHITE)` fades **BG palette banks 1-3 only** (`PALETTES_BG=0x0000FFFF`,
+  bit pattern `14 = 0b1110` → banks 1,2,3; bank 0 and all OBJ banks
+  untouched) to white — this is the screen-wide "materialization flash",
+  and it explains why it hits background pixels but not, e.g., black
+  outlines (bank 0) or sprite colors (OBJ banks, separately controlled by
+  the `BlendPalette` above). Pixel-confirmed: a background sample far from
+  the mon/ball (x10-30,y90-100, near the player's back sprite) reads
+  `(248.6,248.6,255)` through tick 1495, **pure `(255,255,255)` from 1496
+  through 1503** (8-tick plateau), back to `(248.6,248.6,255)` by **1504**.
+  16-step fade-in landing at 1496 (release-trigger 1478 + ~18) is roughly
+  consistent with a 2-tick-per-step "normal" palette fade; the fade-out
+  (1496→1504, 8 ticks) fits a faster per-step rate — the exact
+  `gPaletteFade` step-rate arithmetic was **not** RAM-probed this session
+  (flagged §7.7) since the source citations + this tick-level cross-check
+  already pin every visually-relevant boundary.
+- `StartSpriteAffineAnim(monSprite, BATTLER_AFFINE_EMERGE)`
+  (`sAffineAnim_Battler_Emerge`, `data.c:144-149`: scale +0x28 instant, then
+  +0x12/frame × 12 frames) grows the sprite's OAM affine matrix from
+  near-zero to full size over ~12-13 frames from the release trigger
+  (~1478) — i.e. affine-complete **~1490-1491**.
+- `Task_FadeMon_ToBallColor` (`:2060-2076`) then runs a **17-tick loop**
+  (`tTimer` 0..16) blending the OBJ palette back down from the ball-color
+  tint (16) toward 0 (true colors), one step per tick, then — once
+  `!gPaletteFade.active` — kicks off `Task_FadeMon_ToNormal`/`_Step`
+  (`:2078-2089+`) which fades the white BG overlay back out. Pixel-confirmed
+  net effect: Grovyle's silhouette is still visibly pink/off-color as late
+  as tick 1508 (screenshot), reads as fully normal green/blue by **~1516-1518**.
+
+`ballAnimActive` (gates the healthbox slide, §7.6) clears once **both** the
+ball sprite's own open/close anim (`sprite->animEnded`) and the mon's affine
+emerge (`affineAnimEnded`) finish (`HandleBallAnimEnd`, `pokeball.c:845-884`)
+— consistent with the healthbox's own first pixel appearing at 1496-1497
+(§7.6), a few ticks after the ~1490-1491 affine-complete estimate above.
+
+### 7.6. Opponent healthbox slide-in + full settle (ticks ~1496-1522)
+
+`Intro_TryShinyAnimShowHealthbox` (`battle_controller_opponent.c:292-333`)
+polls every tick once installed (right after `Task_StartSendOutAnim`, §7.4);
+once `ballAnimActive` clears for both this battler and (n/a here, singles)
+its partner, and `healthboxSlideInStarted` is false, it calls
+`UpdateHealthboxAttribute(..., HEALTHBOX_ALL)` (draws the name/level/HP-bar
+content into the healthbox sprite, initially fully off-screen) then
+`StartHealthboxSlideIn` (`pokeball.c:1241-1260`): for the opponent side,
+`x2 = -0x73` (**-115px** initial offset) and `sSpeedX = -5`, stepped by
+`SpriteCB_HealthboxSlideIn` (`:1272-1278`: `x2 -= sSpeedX`, i.e. **+5px/tick**
+toward 0) — a clean **23-tick** linear slide (`ceil(115/5)`) to rest.
+
+Pixel-confirmed: first healthbox sliver (bottom-left corner of the
+nameplate box) at tick **1496-1497**; "Lv50" fully legible by **~1504-1508**;
+green HP bar fully drawn by **~1512-1516**; last pixel change in the entire
+256-frame capture is tick **1522**
+(`6cb7ab1eb59438f1759e28779b0889c234bc9435edefcbe5ada43ed6e1e0b9f7` — an
+**exact match** to the pre-existing coarse pin in `battle-bringup-notes.md`
+§2, now confirmed byte-static through the rest of this trace, ticks
+1523-1555, 33 further ticks with zero change). The 23-tick slide formula
+predicts settle at ~1497+23=1520, 2 ticks before the observed final-change
+tick 1522 — within the render-lag noise already characteristic of this
+window (1-3 ticks throughout).
+
+### 7.7. Asset coverage verdict for this window
+
+Per-element, extracted-where or MISSING-what (no new extraction performed
+this session — gaps are small and precisely scoped, listed rather than
+extracted per this step's own scope note):
+
+1. **Trainer-pic exit frames (Bug Catcher)**: **no gap** —
+   `trainer-pic-bug-catcher.json` already has the full sprite; the slide-out
+   is a pure linear translation of the existing static sprite (§7.4.1), no
+   new art needed.
+2. **Thrown/opening ball sprite**: **partial gap**. `graphics/balls/poke.png`
+   (`gBallGfx_Poke`, a 16×48px, 3-frame-tall sheet per
+   `extract-summary-screen.ts`'s own comment) is only **partially**
+   extracted: `summary-ball.json` pulls **frame 1 only** (top 16×16, the
+   static caught-ball icon used by the summary screen). This window's ball
+   sprite uses **frame 2** (the "open" pose, `StartSpriteAnim(sprite,1)` in
+   `SpriteCB_ReleaseMonFromBall`) which is **not** extracted anywhere.
+   Small, clean gap — a future extractor pass just needs the sheet's other
+   2 frames (or the whole 16×48 sheet, superseding `summary-ball.json`).
+3. **Open-flash/particle art**: **MISSING entirely**.
+   `graphics/battle_anims/sprites/particles.png` (`gBattleAnimSpriteGfx_Particles`,
+   `graphics.c:467`, the shared star/sparkle sheet used by
+   `AnimateBallOpenParticles` for every ball type) has **no committed
+   extraction** in any `src/assets/gen/*.json` (confirmed: no extractor
+   references `particles.png` or `battle_anims/sprites`). Needed before an
+   engine slice can draw the sparkle particles visible ~1490+.
+4. **Grovyle front sprite + palette flash**: **no gap for the sprite** —
+   `battle-opponent-front-sprites.json` already has a `GROVYLE` entry (this
+   session confirmed the key exists). The **palette-flash tint itself**
+   is not asset data at all — it's the source constant
+   `gBallOpenFadeColors[BALL_POKE] = RGB(31,22,30)` (§7.5), a single 15-bit
+   color to transcribe, not an extraction gap — flagging its existence and
+   exact value here so an engine slice doesn't need to re-derive it.
+5. **Healthbox parts, Lv text, HP bar fill**: **no gap** —
+   `battle-healthbox.json`'s existing `singlesOpponent`/`hpbar`/`status`/
+   `misc` keys already cover the frame + bar-fill art (confirmed against
+   `extract-battle-healthbox.ts`'s own header comment); level/HP numerals
+   use `FONT_BOLD` at render time (same comment, :46-49), not separate digit
+   art — nothing to extract.
+6. **Party-status-summary ball icons**: unchanged from §4/§5's existing
+   finding — `ball_display.png` + its palette are still not extracted
+   (flagged by the prior session, not re-flagged as new here; this
+   session's own finding is about the widget's *exit mechanism* (§7.4.3),
+   not its asset, which was already known-missing).
+
+**Net new gap count this session: 2** (particle sheet, fully missing; the
+send-out ball sprite's frames 2-3, partially missing) — both small, clean,
+single-PNG extractor additions whenever an engine slice needs them; neither
+was extracted this session per the step brief's "list, don't extract unless
+small and clean" allowance (both *are* small and clean, but extraction was
+out of scope for a groundwork-only step — flagging precisely rather than
+guessing which future slice should own them).
+
+### 7.8. Risks / follow-ups for the engine slice
+
+1. The exact `gPaletteFade` step-rate/coefficient schedule (§7.5) was cross-
+   validated against pixels at its start/plateau/end ticks only, not
+   RAM-probed tick-by-tick — an engine slice should either re-derive the
+   standard "normal palette fade" speed constant from `palette.c` directly
+   or RAM-probe `gPaletteFade.y`/`.delayCounter` (bitfields, `0x2037fd4`,
+   `include/palette.h:35-51`) across ticks 1478-1504 before hand-writing a
+   per-tick table.
+2. The A-press lag inconsistency (3 vs. 5 ticks across the trace's 3 presses,
+   §7.2) remains unresolved — now 2 of 3 presses agree on 5, but the
+   mechanism (why press #1 differs) is still open, flagged upstream in
+   `battle-bringup-notes.md` too.
+3. §7.4.2's 16-tick ball-sit wait and §7.5's 12-13 tick affine-emerge and
+   17-tick fade-to-ballcolor loop are all **source-exact constants**
+   (not fitted), but their *sum* against the observed tick offsets carries
+   1-4 ticks of accumulated render/task-scheduler lag at each handoff —
+   consistent with every other multi-stage handoff already documented in
+   this file (§2, §3), not a new kind of uncertainty, but worth a literal
+   RAM-probed cross-check (`gTasks[]`/`gSprites[].data[]` per §7.7 risk 1)
+   before an engine slice trusts the exact tick sums over the pixel-pinned
+   milestones above.
+4. Player send-out (`Go! ONIX!`, ticks ~1566-1750 per
+   `battle-bringup-notes.md` §2's coarse pin) is structurally the same
+   mechanism (`battle_controller_player.c`'s equivalent functions) but was
+   **not** re-derived this session — out of this step's assigned window
+   (1300-1560) — flagging as the natural next groundwork slice rather than
+   assuming it's identical (the player-side ball position/coords and
+   `POKEBALL_PLAYER_SENDOUT`'s arc-vs-no-arc behavior differ from the
+   opponent's, per `pokeball.c:383-388` — worth its own pass, not a copy-paste).
