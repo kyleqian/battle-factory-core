@@ -113,12 +113,20 @@ verified 0/38400 px vs oracle (`docs/prebattle-room-notes.md`,
 Skills/Moves pages and S6/S7 (`moves.json`, `exp-tables.json`,
 `item-names.json`); confirm flow fully scouted
 (`docs/confirm-flow-notes.md`).
-**Slice 2 status (2026-07-17 PM):** post-confirm cursor-input gate fixed
-(`isCursorInputReady`); species-name-breathe rule pinned (keep cumulative
-cursor-mode ticks < 105, no model needed); multi-ball ball-rock stall
-model blocked on ISSUES #7 (evidence points to an ISSUES-#5-class
-render-cost hardware race — user decision pending before more budget);
-`rent-3picks.json` blocked on #7, spec ready in PROGRESS-archive #21.
+**Slice 2 complete (2026-07-17 evening, supervisor-verified):**
+post-confirm cursor-input gate (`isCursorInputReady`); species-name-breathe
+rule pinned (keep cumulative cursor-mode ticks < 105, no model needed);
+multi-ball model finished — LEFT/RIGHT stall keyed to the entering slot's
+species ({BAYLEEF, HAUNTER} safe-list, RAM-pinned 12/12 data points),
+per-slot displayTile lag (slot 0: 2 ticks, others: 1), cursor-redraw fast
+path with 2+ rented balls, OPEN_TABLE_B degenerate-window tick — all
+Tier-1-pinned (suite at 276). `rent-3picks.json` committed at **157/190**
+with every diff frame individually attributed to ISSUES #5's settled-policy
+pattern (the amended 0-diff bar per that entry's user-delegated decision);
+ISSUES #7 closed and deleted. Remaining for S5: the confirm flow (3-mon
+reveal + YES/NO, `docs/confirm-flow-notes.md`), the decline path, and the
+exit fade into the pre-battle room + attendant dialogue
+(`docs/prebattle-room-notes.md`).
 
 ### [ ] S6 — Battle bring-up: transition → first action menu, opponent exact
 Battle transition effect, battle scene init (backgrounds, healthboxes,
