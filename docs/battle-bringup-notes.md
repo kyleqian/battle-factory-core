@@ -1011,14 +1011,186 @@ corroborating timestamp, not claimed as the freeze's direct cause (that's
    source-ruled-out as its origin; would need a PC-level single-step
    trace. See §3.
 4. The ~509-511 and any other small pre-battle RNG bursts outside the
-   documented heal-icon window were not individually chased (out of
-   scope for this slice — flagged, not silently dropped).
+   documented nature-reroll/transition-select window (843-869, **not**
+   a heal-icon window — see §5 below, S6 slice 1c) were not individually
+   chased (out of scope for this slice — flagged, not silently dropped).
 5. This trace's specific transition/personality values are **this
    script's own**, not universal constants (§0's already-established
    point) — a differently-paced trace (different idle-frame counts before
    each of the 3 A-presses) will draw a different transition and
    different personalities, though the same *natures* (fixed by the
    rejection loop's exit condition) and the same *species/moveset/IVs*.
+
+### 5. Heal-icon + transition-to-black ground truth (S6 slice 1c, 2026-07-18)
+
+Dense (every-frame) ground truth for ticks 843-1031 — the window from the
+opponent-speech box vanishing to the transition's solid-black frame — a
+worktree-lane extraction/pinning-only step (no engine code). Committed:
+`tools/compare/traces-groundtruth/battle1-transition-dense.json` (the same
+30-segment prefix as `battle1-intro.json` through the A-press #2
+registration at cumulative frame 840, then one continuation segment to
+frame 1040; 206 every-frame captures, ticks 835-1040, under the 256-capture
+cap — re-run twice for determinism, byte-identical both times). This fills
+the gap `battle1-intro.json`'s own sparser `captureFrames` left in this
+window (stride-6 to tick 898, then nothing until 1015).
+
+**(a)/(b) No visible heal-icon overlay exists — corrects §1/§6's framing**:
+the screen is **pixel-byte-identical** (sha `a15c8dc2...`) for all 28
+ticks from **843 through 870** — the entire span this file's own §3.1
+previously labeled "the heal-icon animation window" (842-869, a label
+chosen because that's when the RNG-heavy nature rerolls complete, not
+because a visible icon was independently confirmed there). A screenshot at
+tick 843 (full battle-room scene: ring floor, player, opponent, 6
+scientists) shows **no heal icon anywhere on screen**, including the
+top-left region §6's own coarse (6-14-frame-sampled, different-RNG-stream
+scratch trace) cited ("icon visible top-left at frame 1750" in that
+trace's own, unrelated numbering). Source-confirmed root cause:
+`HealPlayerParty` (`src/script_pokemon_util.c:30-59`) is a **pure data
+function** — it loops `gPlayerParty` writing HP/PP/status via
+`SetMonData`, with **zero** `CreateSprite`/`CreateTask`/graphics calls of
+any kind; the field script itself
+(`data/maps/BattleFrontier_BattleFactoryBattleRoom/scripts.inc:81-85`) has
+nothing but a data-only `frontier_set` between `closemessage` and `special
+DoSpecialTrainerBattle`. **Conclusion: `HealPlayerParty` has no visual
+effect in this or any context — §1's "a visible heal-icon overlay plays"
+and §6's "heal-icon/overlay animation" were a mislabeling of the
+transition's own gray-flicker + circle-convergence visuals**, which start
+soon after the msgbox closes in any trace and coincidentally resemble a
+"heal animation" under coarse sampling. **No heal-icon asset exists to
+extract** (task 2 is closed by this correction, not by an extraction —
+nothing was reused either, since nothing is drawn).
+
+**(c) Gray-flicker cycles, 869-918 — pixel vs. RAM**: RAM (§3.1, already
+pinned by slice 1b, not re-probed this slice) shows
+`Task_BattleTransition_Intro`'s shared intro flicker toggling `tState`
+every 8 ticks from 869 through 917 (3 fade-to-gray/fade-from-gray cycles ×
+16 ticks = 48). Pixel-wise, this dense pass finds the **visible** cycle
+lagging RAM by a consistent **1 tick**: baseline `a15c8dc2` (identical to
+the pre-869 static frame) holds through 870, then a smooth 15-frame
+palette-blend ramp 871→885 (`0fc83af2`→...→peak `ec073b9c` at 878→...→
+`0fc83af2` at 885, a mirror-symmetric ramp), back to baseline `a15c8dc2`
+at 886; the pattern repeats identically at 887-901 (peak `ec073b9c` at
+894, baseline at 902) and 903-917 (peak at 910, baseline at 918) — three
+clean 16-tick cycles, pixel troughs at 886/902/918 vs. RAM's tState-toggle
+ticks 869/885/901/917, each 1 tick later. Consistent with this file's
+existing "1-tick input-registration lag" pattern (§2).
+
+**(d) Circle-sprite entry + per-tick positions, 918-970 (RAM-probed,
+`tools/probe/ram-probe.py`)**: extended §3.1's task-slot probe with
+sprite-level addresses — `gSprites` base `0x2020630` (`bin/oracle symbols
+gSprites`), `struct Sprite` stride `0x44` (`include/sprite.h:194-242`),
+`x`/`y` fields at `+0x20`/`+0x22` (s16 each); task slot 7
+(`Task_FrontierCirclesMeet`) at `gTasks+7*0x28 = 0x3005F18`,
+`tState`=`data[0]`@+8, `tCircle{1,2,3}SpriteId`=`data[{4,5,6}]`@
++0x10/+0x12/+0x14. Findings, cross-checked tick-for-tick against
+`CreateSlidingLogoCircleSprite`'s constants
+(`battle_transition_frontier.c:435-437`): `tState` reads 0 from tick
+**918** (`Circles_Init`'s 1-tick `tTimer` wait at 918-919), chains
+straight into `CirclesMeet_CreateSprites` at tick **920** (`tState`→2
+same tick) — **sprite ids 10/11/12 created at tick 920** at their exact
+off-screen source starting coordinates: "top" (120,-51), "left" (-7,193),
+"right" (247,193). Every following tick moves each sprite by its fixed
+per-tick delta (`sSpeedX/Y`, `delayX/Y=0` so every tick moves) — top
+(0,+2)/tick, left (+2,-2)/tick, right (-2,-2)/tick — RAM-confirmed exactly
+on the arithmetic-progression value at every sampled checkpoint (921, 925,
+930, 940, 950, 960, 965-970; e.g. tick 940 = tick 920 + 20 ticks: top
+(120,-51+40)=(120,-11) ✓, left (-7+40,193-40)=(33,153) ✓, right
+(247-40,193-40)=(207,153) ✓). All three reach their fixed targets — top
+(120,45), left (89,97), right (151,97) — simultaneously at tick **968**
+(48 ticks after creation, matching `(45-(-51))/2=48`); `WaitForLogoCirclesAnim`'s
+own `tState`→3 transition lands 2 ticks later, tick **970**
+(`IsLogoCirclesAnimFinished` polling lag). **Pixel cross-check**: at tick
+968 (sprites at target, BG0 still off — a clean single-layer frame),
+cropping the framebuffer at each sprite's target-center minus an
+empirically-found corner offset (top (-32,-34), left (-34,-30), right
+(-30,-30) from center — found by brute-force offset search this slice,
+**not** hand-derived from `sCenterToCornerVecTable`/`CalcCenterToCornerVec`
+symbolically, so treat as an empirical fit, not a proven formula)
+reproduces the extracted `circleSprites.{top,left,right}` tile+palette
+data **0 mismatches / 3216 non-placeholder pixels each** (verification
+script: scratch Python, not committed). A screenshot at tick 960
+independently confirms 3 large blue ring sprites converging from the top
+edge and both bottom corners toward center, matching the RAM positions at
+that tick (top (120,29), left (73,113), right (167,113)) by inspection.
+
+**(e) Center-logo blend milestones, 970-1017 (RAM-probed + pixel-confirmed)**:
+`tState`=3 (`FadeInCenterLogoCircle`) from tick 970; `tBlend` climbs
++1/tick from 0 (tick 970) to 16 (tick **986**, 16 ticks, linear, RAM-exact
+— BG0 is turned on the same tick `tBlend` first reads 0, per source's
+`if (tBlend==0) SetGpuRegBits(BG0_ON)`, but the first **pixel**-visible
+change lands tick 971, a 1-tick render lag matching (c)'s pattern);
+`tFadeTimer` then counts 0→31 over ticks 987-1017 while `tBlend` holds at
+16 — pixel-stable the whole plateau, sha `3fe5dda8...` from **986 through
+1019** inclusive (34 ticks, direct sha comparison), with RAM's own
+`tState`→4 (`CirclesMeet_End`, triggering `BeginNormalPaletteFade`)
+landing at tick 1018 **inside** this pixel-stable window (1-2 ticks
+before any visible fade starts, per (f)). **Pixel cross-check of the
+assembled logo**: at tick 1000 (deep in the `tFadeTimer` plateau), the
+*non-transparent* pixels of the extracted `centerBg` tileset+tilemap+
+palette — rendered with BG0's own Y-scroll, `ChangeBgY(0, 0x500, SUB)` =
+**-5px**, the exact constant `Circles_Init` sets
+(`battle_transition_frontier.c:383`) — reproduce the framebuffer **0
+mismatches / 6028 pixels**; the *transparent* (palette-index-0) pixels of
+`centerBg` correctly show the still-visible battle-room scene underneath
+(BG0 is alpha-blended over BG1-3/sprites per
+`BLDCNT_TGT1_BG0|BLDCNT_TGT2_ALL`, not opaque) — confirming both the
+asset's correctness and the blend-target model. A screenshot at tick 990
+shows the assembled Frontier-logo shape (a ring/eye icon) mid-converge,
+matching `centerBg`'s decoded appearance.
+
+**(f) Fade-to-black curve, 1018-1031 (pixel-sampled, same method as slice
+1a's warp fade)**: the framebuffer stays pixel-identical to the pre-fade
+plateau (`3fe5dda8...`) through tick **1019** (1 tick past RAM's
+`CirclesMeet_End`/`BeginNormalPaletteFade` trigger at 1018 — the same
+1-2-tick render lag as elsewhere in this window), then steps down in a
+clean 2-ticks-per-level ramp. Sampled at 3 reference pixels (center
+`(120,80)`, quarter `(60,40)`, a background-edge pixel `(5,5)`, already
+black throughout): `255→206→156→107→57→8→0` — six ~50-unit steps, each
+held exactly 2 ticks (1020-21, 1022-23, 1024-25, 1026-27, 1028-29),
+reaching pure black `(0,0,0)` at tick **1030**, held through the trace's
+committed end at tick **1040** (sha `d8b44303...84f0a` from 1031 onward —
+byte-identical to the already-known warp-fade black sha, i.e. a genuinely
+flat framebuffer both times). A uniform per-channel linear fade (R=G=B at
+every sampled tick, consistent with `BeginNormalPaletteFade(...,
+RGB_BLACK)`), but stepping every 2 ticks rather than every tick — a
+coarser cadence than slice 1a's warp fade; not explained from source this
+slice (candidate: `UpdatePaletteFade`'s own frame-skip logic, unread this
+session).
+
+**Coverage check (task 3) — `battle-transition-frontier-circles.json`
+fully covers the CIRCLES_MEET path, YES with evidence**:
+`circleSprites.{top,left,right}` (the 3 64×64 sprite sheets) and
+`centerBg.{tileset,tilemap,palette}` (the assembled-logo BG0 backdrop) are
+both present and **byte-exact-verified** against this window's actual
+pixels, per (d)/(e) above. **`battle-transition-frontier-logo.json` is
+not used by CIRCLES_MEET at all**, despite the brief's framing grouping it
+with `circles.json` as "already-extracted transition assets" to check —
+despite the similar filename, `logo.json` holds `frontier_logo.png`/`.bin`
+(`sFrontierLogo_*`), the *different* graphic used only by the
+`LOGO_WIGGLE`/`LOGO_WAVE` variants (`battle_transition.c:4238-4313`); the
+CIRCLES_MEET-relevant "center logo" graphic (`sLogoCenter_Gfx`/
+`_Tilemap`) is a third, separate source file
+(`frontier_logo_center.png`/`.bin`) already embedded as `circles.json`'s
+own `centerBg` field (confirmed directly in
+`tools/extract/extract-battle-transition-frontier.ts`'s own citations,
+lines 182-223). Flagging this precisely per the brief's own instruction,
+not editing either asset file. **No gap found in either committed asset
+for the CIRCLES_MEET path.**
+
+**Still missing for an eventual transition engine slice** (flagged, not
+this step's job — no engine code was written): (i) the exact GBA OAM
+corner-vector convention for the circle sprites was empirically resolved
+by offset search in (d), not derived symbolically from
+`sCenterToCornerVecTable`/`CalcCenterToCornerVec` — an engine slice should
+re-derive it from source rather than reuse the brute-forced numbers; (ii)
+the fade-to-black's 2-ticks-per-step cadence (f) isn't source-explained;
+(iii) the `BLDALPHA` blend-formula details (GBA hardware semantics:
+per-channel `min(31, target1*EVA/16 + target2*EVB/16)`) were verified only
+at the `tBlend=16` endpoint (e), not at intermediate values (971-985);
+(iv) this is still only 1 of 12 Factory transition variants pixel-verified
+end-to-end — §7 risk 3 from the original dossier stands for the other 11,
+though `battle-transitions-frontier.json`'s metadata table (already
+extracted, unaffected by this slice) covers all 12 structurally.
 
 **Papercut retired**: `PAPERCUTS.md`'s "No committed oracle trace for the
 battle-1 bring-up path" entry is superseded by
