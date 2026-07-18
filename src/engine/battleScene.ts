@@ -1,20 +1,47 @@
-// S6 scene-assembly engine slice: the BATTLE-SCENE ASSEMBLY window
-// (tools/compare/traces-groundtruth/battle1-scene-dense.json, trace ticks
-// 1040-1295) - docs/battle-scene-notes.md's full dossier. Picks up where
-// battleTransition.ts's exit-to-black fade holds solid black indefinitely
-// (past trace tick ~1030); this module owns the screen from trace tick 1040
-// through the settled first-action-menu-adjacent idle state, and must keep
-// rendering correctly if ticked arbitrarily far past 1295 (the next slice's
-// window starts mid-idle-cycle).
+// S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
+// window (tools/compare/traces-groundtruth/battle1-scene-dense.json, trace
+// ticks 1040-1295) plus the SEND-OUT window (battle1-sendout-dense.json,
+// ticks 1300-1560, docs/battle-scene-notes.md §7) - both windows' full
+// dossier lives in that same doc. Picks up where battleTransition.ts's
+// exit-to-black fade holds solid black indefinitely (past trace tick
+// ~1030); this module owns the screen from trace tick 1040 onward
+// indefinitely.
 //
 // Pure state: `elapsed` (0 = trace tick 1040, matching this window's own
-// ground-truth trace) - every visual below is a pure function of the
-// corresponding trace tick (`TICK0 + elapsed`), no phase enum needed (no
-// player input is read anywhere in this window - the next A-press is the
-// following slice's concern, trace tick 1420).
+// ground-truth trace) - every visual through tick ~1418 is a pure function
+// of the corresponding trace tick (`TICK0 + elapsed`), no phase enum
+// needed. The send-out window adds exactly one piece of input-dependent
+// state, `sendOutPressElapsed` (§7, below) - the elapsed value of
+// A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
+// state rather than a phase enum (see the field's own doc comment).
 //
-// STATUS (updated this session - see PROGRESS.md #70): the whole
-// scene-assembly slice is now FULLY RESOLVED - tools/compare/traces/
+// STATUS (this session - the send-out slice, PROGRESS.md - see current top
+// entry): `tools/compare/traces/sendout.json` is **162/256** (was N/A, new
+// trace this session) - the idle-hold continuation + A-press-#3
+// registration (5-tick lag, matching press #2) + "BUG CATCHER DESTIN sent
+// / out GROVYLE!" text cadence (§7.1-7.3) are byte-exact end to end
+// (oracle sha-transitions re-extracted directly from the dense groundtruth
+// trace's own captures this session and matched exactly against every
+// tick the dossier cites - see `sendOutTextVisibleChars`/
+// `sendOutPressEligible`). The post-text visual handoff (§7.4-7.6:
+// trainer-pic exit slide, ball spawn/open/particle-burst/materialize
+// flash, party-status-summary despawn fade, opponent healthbox slide-in -
+// ticks ~1462-1522) is NOT yet pixel-exact: `drawSendOutHandoff` renders
+// the trainer-pic exit slide structurally (linear over the source-exact
+// 35-tick duration, this module's established one-tick render lag) but its
+// exact per-tick fixed-point rounding was not RAM/pixel-verified this
+// session (a quick bg-diff pixel probe of the trainer's own right edge
+// showed roughly the expected ~3px/tick growth but with enough noise from
+// overlapping ball/particle pixels in the same crop to not trust it to
+// pixel-exactness without a cleaner probe); the ball/particles/materialize/
+// party-summary-despawn/healthbox are not yet rendered at all (§7.4.2,
+// §7.4.3, §7.5, §7.6 - all fully documented in the dossier, including the
+// two previously-flagged asset gaps now closed - just not yet composed
+// here). This leaves ticks ~1462-1555 (94 of 256 frames) unmatched - a
+// precisely bounded, named gap for the next session, not a guess (see
+// PROGRESS.md's current top entry for the exact count and evidence).
+// scene-assembly's own STATUS (prior session, unaffected by this one): the
+// whole scene-assembly slice is now FULLY RESOLVED - tools/compare/traces/
 // scene-assembly.json is **256/256** (was 255/256). This session closed the
 // last residual (point 3's tick-1229 gap, GAP B) with an asymmetric,
 // RAM+pixel-confirmed fix to the player bar's own visibility gate - see
@@ -322,12 +349,31 @@ export const TICK0 = 1040;
 export interface BattleSceneState {
   /** Ticks since trace tick 1040. No phase split - every visual is a pure function of `TICK0 + elapsed` (see module doc); this must keep advancing (and rendering correctly) indefinitely past tick 1295, since the next slice's window starts mid-idle-cycle. */
   elapsed: number;
+  /**
+   * `elapsed` value of the A-PRESS-#3 tick (docs/battle-scene-notes.md §7.2)
+   * once registered (`TICK0 + sendOutPressElapsed` is the actual trace
+   * tick), `null` before. Set once and never changes after - core.ts sets
+   * it directly the same tick `newKeys.has("A")` fires while
+   * `cursorState(t).visible` (the idle "would like to battle!♥" hold is
+   * showing), mirroring every other press-gated window's "created directly,
+   * same tick already reflects it" idiom (see e.g. prebattleRoom.ts's
+   * `messageClosing`) - except this module has no phase enum, so the press
+   * is folded into the existing flat `elapsed` state instead of a phase
+   * transition. `elapsed` itself keeps incrementing unconditionally every
+   * tick regardless (it's a pure `t - TICK0` counter, not phase-relative).
+   */
+  sendOutPressElapsed: number | null;
 }
 
-export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = { elapsed: 0 };
+export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = { elapsed: 0, sendOutPressElapsed: null };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
-  return { elapsed: state.elapsed + 1 };
+  return { elapsed: state.elapsed + 1, sendOutPressElapsed: state.sendOutPressElapsed };
+}
+
+/** Trace tick `t` is eligible to register the send-out A-press (docs/battle-scene-notes.md §7.2) - the idle wait-cursor must actually be showing, same "message settled" gate every other press-gated window in this codebase uses. */
+export function sendOutPressEligible(t: number): boolean {
+  return cursorState(t).visible;
 }
 
 // --- §2: BattleIntroSlide3 vertical reveal window + per-scanline shift ----
@@ -668,6 +714,52 @@ export function ballStatusBarPositions(t: number): { opponent: { x: number; visi
   };
 }
 
+// --- §7: send-out window (A-press #3 -> "...sent out GROVYLE!" -> settle) --
+// docs/battle-scene-notes.md §7. Oracle-confirmed this session (sha
+// transitions extracted from tools/compare/traces-groundtruth/
+// battle1-sendout-dense.json's own oracle captures) exactly matching every
+// tick the dossier cites: idle sha transitions every 9 ticks unbroken
+// through 1418, frozen through 1424 (5-tick registration lag off the
+// 1420 press, same lag as press #2), message-box clear + char-0 at 1425,
+// 4 space-holds at 1428/1436/1443/1451, last text change 1459, static
+// through 1461, first post-text-handoff change 1462.
+
+/** §7.2: registration lag from A-press to first visible effect (message-box clear + char 0 the same tick) - matches press #2's own lag, not press #1's (open question, not re-derived here, see dossier). */
+const SENDOUT_TEXT_LAG = 5;
+/** §7.3: "BUG CATCHER DESTIN sent" (23 printable chars, 3 spaces) / "out GROVYLE!" (12 printable chars, 1 space) - sText_Trainer1SentOutPkmn, battle_message.c:388. */
+const SENDOUT_LINE1 = "BUG CATCHER DESTIN sent";
+const SENDOUT_LINE2 = "out GROVYLE!";
+const SENDOUT_TEXT_TOTAL = SENDOUT_LINE1.length + SENDOUT_LINE2.length;
+/** §7.4: 3-tick lag from text-complete to the post-text handoff (trainer-pic exit / ball spawn / party-summary despawn all start the same tick). */
+const SENDOUT_HANDOFF_LAG = 3;
+
+function sendOutTextStartTick(pressTick: number): number {
+  return pressTick + SENDOUT_TEXT_LAG;
+}
+function sendOutHandoffTick(pressTick: number): number {
+  return sendOutTextStartTick(pressTick) + SENDOUT_TEXT_TOTAL - 1 + SENDOUT_HANDOFF_LAG;
+}
+
+/** Visible character count (0..35) of the "sent\nout GROVYLE!" message at trace tick `t`, given the press tick. Same 1-tick/char mechanism as `textVisibleChars` (§3.2/§7.3). */
+export function sendOutTextVisibleChars(t: number, pressTick: number): number {
+  const start = sendOutTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(SENDOUT_TEXT_TOTAL, t - start + 1);
+}
+
+/** §7.4.1: trainer-pic exit slide duration (`AnimTranslateLinear_WithFollowup`, 35 frames), destroyed (`SpriteCB_FreeOpponentSprite`) once complete. */
+const TRAINER_EXIT_DURATION = 35;
+/** §7.4.1: total px translation (target x=280, off the 240px screen, minus the settled center x=176) - applied identically to the top-left corner used for compositing (`OPPONENT_CORNER.x`), since it's a pure translation delta. NOT yet pixel-verified tick-by-tick (module doc STATUS note) - linear over the duration, one-tick render lag matching this module's established convention (`evaEvb`/`bg1X` etc). */
+const TRAINER_EXIT_DELTA = 280 - 176;
+
+/** Opponent trainer-pic's top-left x at trace tick `t` during the exit slide, or `null` once destroyed (handoff+1+35 and beyond). */
+function trainerExitX(t: number, handoffTick: number): number | null {
+  const et = t - 1 - handoffTick;
+  if (et < 0) return OPPONENT_CORNER.x;
+  if (et >= TRAINER_EXIT_DURATION) return null;
+  return OPPONENT_CORNER.x + Math.round((TRAINER_EXIT_DELTA * et) / TRAINER_EXIT_DURATION);
+}
+
 // --- rendering ----------------------------------------------------------
 
 function setPixel(fb: Uint8Array, x: number, y: number, c: RgbColor): void {
@@ -772,14 +864,18 @@ const MESSAGE_TEXT_COLORS = { fg: 1, bg: 15, shadow: 6 };
 const LINE1_ORIGIN = { x: 16, y: 121 };
 const LINE2_ORIGIN = { x: 16, y: 137 };
 
-function drawMessageText(fb: Uint8Array, chars: number): void {
+function drawMessageTextLines(fb: Uint8Array, line1: string, line2: string, chars: number): void {
   if (chars <= 0) return;
-  const line1 = LINE1.slice(0, Math.min(chars, LINE1.length));
-  drawText(fb, font, charmap, line1, LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
-  if (chars > LINE1.length) {
-    const line2 = LINE2.slice(0, chars - LINE1.length);
-    drawText(fb, font, charmap, line2, LINE2_ORIGIN.x, LINE2_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+  const l1 = line1.slice(0, Math.min(chars, line1.length));
+  drawText(fb, font, charmap, l1, LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+  if (chars > line1.length) {
+    const l2 = line2.slice(0, chars - line1.length);
+    drawText(fb, font, charmap, l2, LINE2_ORIGIN.x, LINE2_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
   }
+}
+
+function drawMessageText(fb: Uint8Array, chars: number): void {
+  drawMessageTextLines(fb, LINE1, LINE2, chars);
 }
 
 function drawCursor(fb: Uint8Array, yOffset: number): void {
@@ -836,6 +932,31 @@ function drawSettledScene(fb: Uint8Array): void {
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   drawSpriteSheet(fb, bugCatcher.tileset, bugCatcher.palette, OPPONENT_CORNER.x, OPPONENT_CORNER.y);
   drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+}
+
+/**
+ * §7.4-7.6: post-text visual handoff - trainer-pic exit, ball spawn/open/
+ * materialize, party-summary despawn, opponent healthbox slide-in.
+ * `handoffTick` = `sendOutHandoffTick(pressTick)`.
+ *
+ * STATUS (this session): NOT YET pixel-exact - see module doc STATUS note
+ * and PROGRESS.md for the precise named residual. Renders the trainer-pic
+ * exit slide (§7.4.1, linear over 35 ticks from the handoff, one-tick
+ * render lag matching this module's established convention) and the
+ * settled bg/player pic/window frame; does not yet render the ball spawn/
+ * open/particle burst/materialize flash (§7.4.2/§7.5) or the opponent
+ * healthbox slide-in (§7.6) or the party-summary despawn fade (§7.4.3) -
+ * those remain the next worker session's concern (dossier + this module's
+ * own §7 constants are ready; only the render composition is outstanding).
+ */
+function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): void {
+  drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+  drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
+  const trainerX = trainerExitX(t, handoffTick);
+  if (trainerX !== null) {
+    drawSpriteSheet(fb, bugCatcher.tileset, bugCatcher.palette, trainerX, OPPONENT_CORNER.y);
+  }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 }
 
@@ -940,9 +1061,26 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     drawSlideScene(fb, t, win);
     return;
   }
-  drawSettledScene(fb);
-  drawBallIcons(fb, t);
-  drawMessageText(fb, textVisibleChars(t));
-  const cursor = cursorState(t);
-  if (cursor.visible) drawCursor(fb, cursor.yOffset);
+  const pressTick = state.sendOutPressElapsed === null ? null : TICK0 + state.sendOutPressElapsed;
+  if (pressTick === null || t < sendOutTextStartTick(pressTick)) {
+    // Idle "would like to battle!♥" hold - unaffected by the press until its
+    // own registration lag elapses (§7.2: screen stays frozen on whatever
+    // the idle cycle shows through pressTick+4, oracle-confirmed unbroken).
+    drawSettledScene(fb);
+    drawBallIcons(fb, t);
+    drawMessageText(fb, textVisibleChars(t));
+    const cursor = cursorState(t);
+    if (cursor.visible) drawCursor(fb, cursor.yOffset);
+    return;
+  }
+  const handoffTick = sendOutHandoffTick(pressTick);
+  if (t < handoffTick) {
+    // §7.3: message box cleared, "BUG CATCHER DESTIN sent\nout GROVYLE!"
+    // printing - ball icons still at their settled position, no cursor.
+    drawSettledScene(fb);
+    drawBallIcons(fb, t);
+    drawMessageTextLines(fb, SENDOUT_LINE1, SENDOUT_LINE2, sendOutTextVisibleChars(t, pressTick));
+    return;
+  }
+  drawSendOutHandoff(fb, t, handoffTick);
 }

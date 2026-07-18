@@ -82,6 +82,7 @@ import {
   advanceBattleScene,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
+  sendOutPressEligible,
   TICK0 as SCENE_TICK0,
   type BattleSceneState,
 } from "./battleScene.ts";
@@ -140,9 +141,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleScene: BattleSceneState | null = state.battleScene;
 
   if (battleScene) {
-    // S6 scene-assembly slice: no player input is read anywhere in this
-    // window (battleScene.ts module doc) - the next A-press (trace tick
-    // 1420) is the following slice's concern.
+    // S6 send-out slice: the only input this window ever reads is A-press
+    // #3 (trace tick 1420, docs/battle-scene-notes.md §7.2) during the idle
+    // "would like to battle!♥" hold - captured directly into the flat
+    // `elapsed` state (battleScene.ts module doc), not a phase transition.
+    if (battleScene.sendOutPressElapsed === null && newKeys.has("A") && sendOutPressEligible(SCENE_TICK0 + battleScene.elapsed)) {
+      battleScene = { ...battleScene, sendOutPressElapsed: battleScene.elapsed };
+    }
     battleScene = advanceBattleScene(battleScene);
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
   }

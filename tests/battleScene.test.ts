@@ -8,6 +8,8 @@ import {
   evaEvb,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
+  sendOutPressEligible,
+  sendOutTextVisibleChars,
   shiftBottom,
   shiftTop,
   TEXT_START_TICK,
@@ -15,11 +17,12 @@ import {
   textVisibleChars,
   TICK0,
   windowRange,
+  type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0 });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -206,5 +209,29 @@ describe("battleScene: party-status-summary ball-icon + bar widget entrance slid
   it("mid-slide: player icon 0 offset by its own RAM-baked x2 table (e.g. tick 1230 -> x2=120, tick 1245 -> x2=57)", () => {
     expect(ballIcons(1230)[6]).toEqual({ x: 276, y: 88, state: "Full", visible: true });
     expect(ballIcons(1245)[6]).toEqual({ x: 213, y: 88, state: "Full", visible: true });
+  });
+});
+
+describe("battleScene: send-out A-press #3 registration + text cadence (docs/battle-scene-notes.md §7.2/§7.3, oracle sha-transitions re-verified this session)", () => {
+  it("the idle wait-cursor must be visible before the press is eligible - not before CURSOR_START_TICK", () => {
+    expect(sendOutPressEligible(CURSOR_START_TICK - 1)).toBe(false);
+    expect(sendOutPressEligible(CURSOR_START_TICK)).toBe(true);
+    expect(sendOutPressEligible(1420)).toBe(true);
+  });
+
+  it("no visible chars before pressTick+5 (the 5-tick registration lag, matching press #2's own lag)", () => {
+    expect(sendOutTextVisibleChars(1424, 1420)).toBe(0);
+    expect(sendOutTextVisibleChars(1425, 1420)).toBe(1);
+  });
+
+  it("35 total printable chars ('BUG CATCHER DESTIN sent' + 'out GROVYLE!'), 1 tick/char, last change at pressTick+39", () => {
+    expect(sendOutTextVisibleChars(1459, 1420)).toBe(35);
+    expect(sendOutTextVisibleChars(1460, 1420)).toBe(35);
+  });
+
+  it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
+    let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
+    state = advanceBattleScene(state);
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380 });
   });
 });
