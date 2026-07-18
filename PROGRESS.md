@@ -5,6 +5,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 51 — S6 slice 2c groundwork (parallel worktree lane, merged): opponent-speech msgbox = same asset as pre-battle box (source-proofed); print cadence + appear/close choreography fully pinned; docs-only
+
+- **State:** merge of `worker/wt-20260718-100953` (single docs commit
+  `161f0ae`) on top of #50; `npm test` **357/357** + `npm run build` green
+  on the merged result. Docs-only — `docs/battle-room-notes.md` §8 added
+  (+180/−5).
+- **Did (worker, supervisor-verified):** (1) **no new msgbox asset
+  needed** — both "Right this way, please!" and the opponent speech are
+  `msgbox X, MSGBOX_DEFAULT` → `Std_MsgboxDefault` → window 0 =
+  `sStandardTextBox_WindowTemplates[0]` (27×4 at (2,15)), the literal
+  same `message_box.png` frame already derived as
+  `prebattle-room-msgbox.json`; byte-exact verified (border 3292/3292 px
+  over 7 ticks, frame+fill+text 9948/9948 over 4 ticks). The prior
+  "shorter variant, y=115" read was a within-tile gradient artifact —
+  corrected in place. (2) print cadence pinned: room settled (no box) by
+  712; box+full-white fill appear **atomically at 718**; first glyph 719;
+  **exactly 1 tick/character incl. space ticks** (full tick→char table in
+  §8.2); line 2 starts 731; print-complete/settle **738**. Rendered
+  string confirmed pixel+charmap-exact: `IT'S WAY TOO` / `HOT HERE` with
+  the curly apostrophe (charmap 180 — ASCII `'` isn't in the charmap).
+  (3) close pinned: A-press #2 pulse 838-839, no visible change through
+  842, box vanishes **atomically at 843** — full framebuffer
+  byte-identical to tick 717's pre-appear state, static through 851.
+- **Next:** S6 slice 2b (scientists turn + opponent walk-in, 624-739,
+  main lane — brief going out now), then 2c (speech box) directly off
+  this section. Heal-icon + transition-to-black groundwork (843-1031) in
+  flight on the worktree lane (worker G).
+- **Notes:** worktree removed + branch deleted post-merge.
+
+---
+
 ## 50 — S6 slice 2a: battle-room ENTRY window (ticks 520-624) implemented, oracle-pinned; `room-entry.json` committed 110/110
 
 - **State:** `npm test` **357/357** (349→357, +8 in new `tests/battleRoom.test.ts`,
@@ -88,51 +119,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   yet extracted (deliberately deferred behind #48's derivation fix).
 - **Notes:** worktree removed + branch deleted post-merge.
 
----
-
-## 48 — ISSUES #15 root-caused and fixed: pre-battle msgbox frame now derived from `prebattle-room-msgbox.json`, baked asset deleted
-
-- **State:** `npm test` **349/349** (+2 regression tests), `npm run build`
-  green, working tree clean. Full 13-trace sweep at exact prior counts —
-  **accept-prebattle 137/137**, **walk-warpout 125/125** (acceptance bar),
-  anchor 1/1, draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66,
-  example 4/4, summary-info-onix 122/122, summary-info-magby 132/132,
-  confirm-decline 67/67, rent-slot1 125/139, rent-3picks 157/190,
-  confirm-flow 79/95 — zero regressions. ISSUES.md: **#15 deleted**.
-- **Did:** Root-caused the "one-GBA-step" color offset that made the accept
-  worker bake `prebattle-msgbox-frame.json` from a literal oracle capture
-  instead of deriving it: `tools/extract/gbaColor.ts`'s `to5Bit()` assumed
-  every reference PNG/pal 8-bit value approximates its true 5-bit GBA
-  channel via `floor(c5*255/31)` (true for this map's own tileset/NPC
-  sprites, verified by direct PLTE-byte inspection), but
-  `graphics/text_window/message_box.png`'s embedded palette instead stores
-  exact `c5*8` values (a different, plainer export convention) - the old
-  formula silently rounded those down one GBA step (e.g. raw 248 -> 5-bit
-  30 instead of 31 -> 247 not 255). Fixed by recovering the 5-bit value via
-  `v8>>3` (top 5 bits), the correct general inverse regardless of which
-  forward convention produced the reference byte - verified against both
-  conventions' full value ranges before changing it, and confirmed
-  byte-identical regeneration for every *other* extracted asset (tileset,
-  layout, NPCs - only `prebattle-room-msgbox.json` actually changed when
-  re-extracted). Once fixed, that asset's own palette contains the oracle-
-  exact interior white (idx1) *and* the message text's fg/shadow colors
-  (idx2/idx3) exactly - the old "two-asset rule" (docs/prebattle-room-
-  notes.md §3) was itself an artifact of the same bug, not a real asset-
-  boundary. Reverse-engineered `prebattleRoomRender.ts`'s new
-  `drawMessageBoxFrame` from the real source
-  (`WindowFunc_DrawDialogueFrame`, `reference/pokeemerald/src/menu.c:319-
-  402`, the standard width=27/height=4 field window) rather than pixel-
-  matching by hand, then byte-exact verified it against the (now-deleted)
-  baked capture before deleting it: all 9948 non-transparent frame pixels
-  matched exactly, 0 mismatches. Pinned the root cause with two Tier-1
-  regressions (`tests/extract.test.ts`: `to5Bit(248)===31`,
-  `gbaRoundTrip(248)===255`; `tests/prebattleRoom.test.ts`: msgbox palette
-  idx1/2/3 now exactly white/fg/shadow).
-- **Next:** S6 slice 1b+ (battle-room entry, heal-icon/transition window) -
-  unaffected by this step, per its scope. No open ISSUES entries.
-- **Notes:** no papercuts. Scratch verification (pixel sampling, brute-force
-  tile-match scripts used to derive/confirm the tile-placement algorithm)
-  was all inline `node -e`, nothing committed.
 
 ---
 

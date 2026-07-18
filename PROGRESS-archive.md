@@ -5,6 +5,52 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 48 — ISSUES #15 root-caused and fixed: pre-battle msgbox frame now derived from `prebattle-room-msgbox.json`, baked asset deleted
+
+- **State:** `npm test` **349/349** (+2 regression tests), `npm run build`
+  green, working tree clean. Full 13-trace sweep at exact prior counts —
+  **accept-prebattle 137/137**, **walk-warpout 125/125** (acceptance bar),
+  anchor 1/1, draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66,
+  example 4/4, summary-info-onix 122/122, summary-info-magby 132/132,
+  confirm-decline 67/67, rent-slot1 125/139, rent-3picks 157/190,
+  confirm-flow 79/95 — zero regressions. ISSUES.md: **#15 deleted**.
+- **Did:** Root-caused the "one-GBA-step" color offset that made the accept
+  worker bake `prebattle-msgbox-frame.json` from a literal oracle capture
+  instead of deriving it: `tools/extract/gbaColor.ts`'s `to5Bit()` assumed
+  every reference PNG/pal 8-bit value approximates its true 5-bit GBA
+  channel via `floor(c5*255/31)` (true for this map's own tileset/NPC
+  sprites, verified by direct PLTE-byte inspection), but
+  `graphics/text_window/message_box.png`'s embedded palette instead stores
+  exact `c5*8` values (a different, plainer export convention) - the old
+  formula silently rounded those down one GBA step (e.g. raw 248 -> 5-bit
+  30 instead of 31 -> 247 not 255). Fixed by recovering the 5-bit value via
+  `v8>>3` (top 5 bits), the correct general inverse regardless of which
+  forward convention produced the reference byte - verified against both
+  conventions' full value ranges before changing it, and confirmed
+  byte-identical regeneration for every *other* extracted asset (tileset,
+  layout, NPCs - only `prebattle-room-msgbox.json` actually changed when
+  re-extracted). Once fixed, that asset's own palette contains the oracle-
+  exact interior white (idx1) *and* the message text's fg/shadow colors
+  (idx2/idx3) exactly - the old "two-asset rule" (docs/prebattle-room-
+  notes.md §3) was itself an artifact of the same bug, not a real asset-
+  boundary. Reverse-engineered `prebattleRoomRender.ts`'s new
+  `drawMessageBoxFrame` from the real source
+  (`WindowFunc_DrawDialogueFrame`, `reference/pokeemerald/src/menu.c:319-
+  402`, the standard width=27/height=4 field window) rather than pixel-
+  matching by hand, then byte-exact verified it against the (now-deleted)
+  baked capture before deleting it: all 9948 non-transparent frame pixels
+  matched exactly, 0 mismatches. Pinned the root cause with two Tier-1
+  regressions (`tests/extract.test.ts`: `to5Bit(248)===31`,
+  `gbaRoundTrip(248)===255`; `tests/prebattleRoom.test.ts`: msgbox palette
+  idx1/2/3 now exactly white/fg/shadow).
+- **Next:** S6 slice 1b+ (battle-room entry, heal-icon/transition window) -
+  unaffected by this step, per its scope. No open ISSUES entries.
+- **Notes:** no papercuts. Scratch verification (pixel sampling, brute-force
+  tile-match scripts used to derive/confirm the tile-placement algorithm)
+  was all inline `node -e`, nothing committed.
+
+---
+
 ## 47 — S6 slice 1b (parallel worktree lane, merged): slice-0 §4 loose ends resolved — transition = CIRCLES_MEET (RAM-confirmed), transition-end = tick 1227, post-freeze draws re-attributed; docs-only
 
 - **State:** merge `a004db2` (branch `worker/wt-20260718-091648`, single
