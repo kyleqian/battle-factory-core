@@ -7,13 +7,22 @@ import {
   CURSOR_START_TICK,
   evaEvb,
   INITIAL_BATTLE_SCENE_STATE,
+  renderBattleScene,
   shiftBottom,
   shiftTop,
   TEXT_START_TICK,
   TEXT_TOTAL_CHARS,
   textVisibleChars,
+  TICK0,
   windowRange,
 } from "../src/engine/battleScene.ts";
+
+function pixelAt(t: number, x: number, y: number): [number, number, number] {
+  const fb = new Uint8Array(240 * 160 * 4);
+  renderBattleScene(fb, { elapsed: t - TICK0 });
+  const o = (y * 240 + x) * 4;
+  return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+}
 
 // Oracle/RAM cross-check: tools/compare/traces/scene-assembly.json is NOT
 // yet 256/256 (see PROGRESS.md for the current count and the open gap).
@@ -139,6 +148,20 @@ describe("battleScene: wait-cursor bob / 36-tick idle cycle (docs/battle-interfa
   it("keeps cycling correctly indefinitely past this window (36-tick period)", () => {
     expect(cursorState(1274 + 36)).toEqual(cursorState(1274));
     expect(cursorState(1300 + 36 * 5)).toEqual(cursorState(1300));
+  });
+});
+
+describe("battleScene: GAP A streak-window trainer OBJ + BG3 512px-width fixes (module doc point 2, oracle-pinned)", () => {
+  it("draws the opponent trainer OBJ's own raw color during the slide (tick 1150, x=11/y=40) - the pixel GAP A's blend arithmetic was numerically unreachable for, root-caused as a missing OBJ layer, not a blend-ramp bug", () => {
+    expect(pixelAt(1150, 11, 40)).toEqual([123, 90, 82]);
+  });
+
+  it("draws the player trainer OBJ's own raw color mid-slide too (tick 1180, x=88/y=53)", () => {
+    expect(pixelAt(1180, 88, 53)).toEqual([156, 140, 74]);
+  });
+
+  it("does not show BG3's sky-gradient tile block a second time past its true 256px-wide screen block (tick 1150, x=230/y=55) - static's real hardware width is 512px (screenSize=1, two side-by-side blocks), wrapping at 256 aliased the gradient's own leading tiles back into view here", () => {
+    expect(pixelAt(1150, 230, 55)).toEqual([247, 247, 255]);
   });
 });
 

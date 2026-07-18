@@ -228,6 +228,27 @@ against a white backdrop - see `battleScene.ts`'s module doc point 2 for the
 exact numbers and the next action (RAM-probe the literal `BLDALPHA` register,
 not the derived schedule).
 
+**CORRECTION (PROGRESS.md #66)**: the mandated `BLDALPHA`/`BLDCNT`/`gBattle_
+BG1_Y` RAM probe (io regs `0x04000052`/`0x04000050`) came back exactly as
+this doc's own model predicted - `eva=6,evb=10` at tick 1150, `BG1_Y=0`
+always - so the "numerically unreachable" pixel was never a blend-ramp bug.
+Root cause: **"OBJ never actually visible during the reveal" (this section's
+own prior paragraph) was a misdiagnosis** - it only sampled each trainer's
+settled corner rect. RAM-probing `gSprites[gBattlerSpriteIds[0/1]]` directly
+shows both trainer OBJs are `invisible=0` from creation (tick 1074) onward,
+sliding in via their own OAM `x2` at the exact same magnitude as `gTasks[0]
+.data[2]` (opposite sign per side) - the pixel this section named is the
+opponent trainer's own raw color, not a BG1/BG3 blend at all. Separately,
+`static` (BG3)'s real hardware width is 512px (`gBattleBgTemplates[3]
+.screenSize = 1`, two side-by-side screen blocks), not the 256px this
+section assumed throughout - `extract-battle-bg.ts`'s JSON already has the
+second block's (blank) data at tile-rows 32-63, `staticBgPixel` just never
+read it, wrapping back into block 1's own gradient tiles instead whenever
+the shift pushed past 256px. Both fixed in `battleScene.ts` (`scene-
+assembly.json` 104/256 -> 151/256); full account in that file's module doc
+point 2, including the next narrower residual (a still-unexplained mismatch
+within BG1's own confirmed content zone, tick 1150 x=120/y=84).
+
 Net: an engine slice can bake this **exactly** as a lookup table
 (tick-offset-from-task-start → `{bg1X, scanlineShift, blendEVA, blendEVB}`),
 no RNG, no oracle-fitting — every number above is either a literal source

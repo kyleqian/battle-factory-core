@@ -13,17 +13,27 @@
 // player input is read anywhere in this window - the next A-press is the
 // following slice's concern, trace tick 1420).
 //
-// STATUS (updated this session - see PROGRESS.md #64): GAP B (the widget
-// entrance window, point 3 below) is now resolved - the same systemic
-// one-tick render lag GAP A found (#63) turned out to apply here too, plus
-// the opponent-side x2 tables had been missing each icon's own flat-delay
-// prefix since #60/#62 (see point 3). scene-assembly.json 104/256 (was
-// 41/256). Two named gaps remain, both untouched this session: GAP A (the
-// streak window's blend-arithmetic residual, ticks 1075-1226, #63's next
-// probe) and one narrow 22px residual at trace tick 1229 specifically
-// (point 3's own note - a further one-tick visibility delay fixes 1229 but
-// breaks the opponent side's tick 1232 the same way, so it isn't a shared
-// per-side correction; not chased further this session). tools/compare/
+// STATUS (updated this session - see PROGRESS.md #66): GAP A (the streak
+// window's "numerically unreachable" blend residual, point 2 below) is
+// substantially narrowed - three real bugs found and fixed by RAM-probing
+// past the blend-ramp math the brief suspected (which was already correct):
+// (a) both trainer OBJs are genuinely visible throughout the reveal, sliding
+// in via their own `x2` at the exact same magnitude as the BG3 scanline
+// shift - a prior session's "neither OBJ is ever visible" conclusion (#63)
+// only sampled each trainer's *settled* corner, missing this; (b) the GBA
+// alpha-blend hardware formula operates in 5-bit color space with floor
+// division, not round-in-8-bit; (c) BG3 (`static`)'s real hardware width is
+// 512px (`screenSize=1`, two side-by-side blocks - the extractor's own JSON
+// already has block 2's data at tile-rows 32-63, just never read), not the
+// 256px this module assumed, so per-scanline shifts past 256px were
+// wrapping back into block 1's own content instead of showing block 2's
+// (blank, in this scene). scene-assembly.json 104/256 -> **151/256** (0
+// regressions, full 18-trace sweep re-verified). GAP A is NOT fully closed -
+// a narrower residual remains within the entrySlide (BG1) content zone
+// itself (mapY 64-111); see point 2's own "STILL OPEN" for the exact pixel
+// and the brute-force evidence it isn't explained by shift/eva/evb alone.
+// GAP B's own narrow residual (point 3, trace tick 1229 specifically) is
+// untouched this session, out of this step's scope. tools/compare/
 // traces/scene-assembly.json is NOT yet 256/256.
 // 1. The settled composite (trace tick 1227 onward, before any widget
 //    slide) is byte-exact (unchanged from #58: battle-bg.json's `static`
@@ -47,8 +57,7 @@
 //    naive-pivot formula predicted, exactly matching the same one-tick-
 //    later pivot. (c) `bg1X` - `gBattle_BG1_X` (RAM-probed) at tick `t-1`
 //    is what a fixed-column pixel search matches, not tick `t`'s own value.
-//    LAYER MODEL (also resolved this session, was previously entirely
-//    unmodeled): `BLDCNT = TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ` (0x1842,
+//    LAYER MODEL: `BLDCNT = TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ` (0x1842,
 //    RAM-confirmed) with BG1 = `entrySlide` (source: `DrawBattleEntryBackground`'s
 //    Frontier branch loads it to `BG_CHAR_ADDR(1)`/`BG_SCREEN_ADDR(28)`,
 //    matching BG1's own `gBattleBgTemplates` charBase/mapBase) and BG3 =
@@ -56,32 +65,72 @@
 //    OAM-scale priority 0 (frontmost), BG3 at priority 3 (backmost), both
 //    trainer OBJs at priority 2 (`gOamData_BattleSprite{Player,Opponent}Side`,
 //    `battle_main.c:274-301`) - so BG1 is always the topmost layer wherever
-//    opaque. Pixel-sampling proved **neither trainer OBJ is ever actually
-//    visible during the reveal** (both settled-corner rects show plain
-//    background at every sampled tick 1075-1220, only becoming the real
-//    trainer pics at the tick-1227 settle) - so TGT2 in practice is BG3
-//    alone; `BLDCNT`'s `TGT2_OBJ` bit is real but never engages here. BG3
+//    opaque, and OBJ is BG3's own topmost neighbor (in front of it, behind
+//    BG1). **CORRECTION this session (PROGRESS.md #66): the prior "neither
+//    trainer OBJ is ever actually visible during the reveal" conclusion
+//    (#63) was a misdiagnosis** - it only pixel-sampled each trainer's
+//    *settled* corner rect (which is genuinely blank until the tick-1227
+//    settle), never checking whether the OBJ appears elsewhere first. RAM-
+//    probing `gSprites[gBattlerSpriteIds[0/1]]` (indices 3=player, 4=
+//    opponent) directly (`tools/probe/ram-probe.py`, ticks 1073-1240) shows
+//    both are `inUse=1`/`invisible=0` from creation (tick 1074) onward, with
+//    constant `oam.tileNum`/`paletteNum` (369/7 opponent, 305/0 player) -
+//    i.e. they're their full final artwork the whole time, not a
+//    placeholder - and each slides in via its own OAM `x2` secondary offset
+//    at the EXACT SAME per-tick magnitude as `gTasks[0].data[2]` (the BG3
+//    scanline-shift value), opposite sign per side (opponent `x2=-data[2]`,
+//    player `x2=+data[2]`, both reaching 0 at the shared tick-1226 settle) -
+//    same underlying register driving both mechanisms, so `objShift(t)`
+//    below just reuses the already-validated `scanlineShiftMagnitude`
+//    rather than a new table. `WININ` includes `WIN0_OBJ`, so the OBJ is
+//    window-clipped identically to BG3 (`drawSpriteSheetWindowed`). BG3
 //    gets the per-scanline HOFS shift (`sIntroScanlineParams16Bit` targets
 //    `&REG_BG3HOFS` literally, `battle_main.c:250-253` - not BG1); BG1
 //    scrolls uniformly via the ordinary whole-frame `gBattle_BG1_X` write.
-//    Blend only engages where BG1 (TGT1) is opaque; elsewhere BG3 draws raw.
-//    STILL OPEN, next step: at a pixel confirmed to need BG1 content (tick
-//    1150, x=11, y=40 - oracle shows a warm/skin-tone streak color where
-//    this model still shows plain white BG3), the math is inconsistent:
-//    with the modeled `evaEvb(1150)` = {eva:6, evb:10} and a white (255)
-//    backdrop, NO valid BG1 color (r,g,b in [0,255]) can blend down to the
-//    observed ~123/90/82 - the minimum reachable value is `255*evb/16` ≈
-//    159, already above the target. Either the BLDALPHA ramp's tick anchor
-//    (1139) needs the same one-tick-later correction as the window/shift
-//    above (untested), or `entrySlide`'s mapping to this exact pixel is
-//    still wrong (the extracted tilemap's only non-blank tiles are at tile-
-//    rows 8-13 / mapY 64-111, nowhere near mapY=40, under the current
-//    `bg1X` - so either BG1_Y isn't really pinned at 0 the way RAM suggested,
-//    or this specific pixel comes from something this module doesn't model
-//    yet). Next action: RAM-probe the literal `BLDALPHA` register value
-//    (not the derived `evaEvb` schedule) alongside `gScanlineEffectRegBuffers`
-//    for a handful of ticks in 1140-1180, cross-checked against the exact
-//    pixel this paragraph names, before touching the ramp constants again.
+//    Blend only engages where BG1 (TGT1) is opaque; elsewhere the next-
+//    topmost opaque layer (OBJ if present, else BG3) draws raw.
+//    BLEND PRECISION (also fixed this session): the GBA `BLDALPHA` hardware
+//    formula runs in **5-bit-per-channel color space with floor (integer
+//    `>>4`) division**, not round-in-8-bit - the same convention this
+//    codebase's other blend, `paletteFade.ts`'s `blendComponentToBlack`,
+//    already documents. Blending the already-8-bit-expanded palette values
+//    directly with `Math.round` (this module's prior version) is off by 1
+//    on roughly a third of blended pixels, because the 5-bit quantization
+//    and the `(c5<<3)|(c5>>2)` re-expansion are not linear.
+//    BG3 WIDTH (also fixed this session, the biggest single contributor):
+//    `gBattleBgTemplates[3].screenSize = 1` (`battle_bg.c:152-160`) means
+//    `static`'s real hardware width is **512px** (two side-by-side 32x32
+//    screen blocks), not 256. `extract-battle-bg.ts`'s vertical
+//    recomposition of `map.bin` already stores VRAM screen block 2 as tile-
+//    rows 32-63 of the JSON - `staticBgPixel` just never read it, instead
+//    wrapping `mapX` back into block 1 at every 256px. Since the shift
+//    magnitude reaches into the hundreds well before the slide settles, this
+//    wrapped BG3's own sky-gradient tiles (block 1, tile-row 6, cols 15-29)
+//    back into view at the wrong screen column whenever the true position
+//    should have shown block 2 (uniformly blank in this indoor scene, RAM/
+//    JSON-confirmed for every row this 160px-tall screen ever reaches).
+//    Net across these three fixes: scene-assembly.json 104/256 -> 151/256,
+//    0 regressions (see PROGRESS.md #66).
+//    STILL OPEN, narrower: a pixel within entrySlide's own confirmed
+//    content zone (tick 1150, x=120/y=84, tileRow 10 - `entrySlidePixel`
+//    returns a real opaque color there) doesn't match the oracle's
+//    (242,246,252) under ANY combination this session brute-forced: every
+//    `bg1Shift` (0-255) x `bg3Shift` (0-255) pair at the RAM-confirmed
+//    `evaEvb(1150)={eva:6,evb:10}` (65536 combinations, 30-60 sample points
+//    per row) scores at most a handful of incidental matches, and relaxing
+//    `eva`/`evb` too (full 17x17 sweep) still tops out at 5/59 - i.e. this
+//    isn't a shift-offset or rounding problem, something this module
+//    doesn't model is contributing there (a third layer, or `entrySlide`'s
+//    own width/wrap needs the same `screenSize` re-check BG3 just got -
+//    `gBattleBgTemplates[1].screenSize = 2` reads as 256px/vertically-
+//    stacked, unlike BG3, but that reading hasn't been RAM-cross-checked
+//    the way BG3's now has). Confirmed NOT a third sprite: RAM-probing all
+//    65 `gSprites[]` slots' `inUse`/`invisible` at tick 1150 shows only
+//    indices 3/4 (the two trainers already modeled) active. Next action:
+//    RAM-probe the literal VRAM screen-block bytes at BG1's `BG_SCREEN_ADDR
+//    (28)` directly (not just the extracted JSON) for this pixel's tile,
+//    cross-checked against the oracle's own (242,246,252) - same "RAM vs.
+//    extracted-asset" cross-check discipline that found the BG3 width bug.
 // 3. The party-status-summary ball-icon + diagonal-bar widgets' entrance
 //    slide (ticks ~1228-1291): RESOLVED this session (#64; #60/#62/#63 each
 //    left this open - see PROGRESS.md for the full account). Two independent
@@ -273,15 +322,38 @@ export function evaEvb(t: number): { eva: number; evb: number } {
   return { eva: 8 - step, evb: 8 + step };
 }
 
-const BG_PERIOD = battleBg.static.tilemap.width * 8;
+/**
+ * BG3 (`static`)'s real hardware width: `gBattleBgTemplates[3].screenSize = 1`
+ * (`BGCNT_TXT512x256`, `battle_bg.c:152-160`) - **512px wide** (two
+ * horizontally-adjacent 32x32 screen blocks), not 256. The extractor's
+ * vertical recomposition of `map.bin` into a single 32-wide/64-tall JSON
+ * (see `extract-battle-bg.ts`'s header note) stores VRAM screen block 2
+ * (the real hardware's right-hand 256px half) as tile-rows 32-63 - so the
+ * correct horizontal wrap is `mapX mod 512`, reading tile-ROW `+32` for the
+ * upper half `[256,512)`, not wrapping `mapX` back into block 1's columns.
+ * Confirmed by direct inspection of the extracted JSON: block 2's content
+ * (rows 32-51, the only rows this 160px-tall screen ever reaches) is
+ * uniformly blank - this is an indoor scene, the sky/gradient art only
+ * spans the left 256px. Using a naive 256px period (this module's bug
+ * through PROGRESS.md #65) wrapped BG3's per-scanline-shifted sampling back
+ * into block 1's own gradient tiles whenever the shift pushed `mapX` past
+ * 256, producing a phantom duplicate of that gradient at the wrong screen
+ * column instead of the true blank block 2 (pixel-confirmed: trace tick
+ * 1150, row 55, screen x 222-239 - oracle is flat white, matching block 2,
+ * the old 256-period model showed the gradient's own leading tiles instead).
+ */
+const BG_PERIOD = battleBg.static.tilemap.width * 16;
 
 function staticBgPixel(mapX: number, mapY: number): RgbColor | null {
   const tilemap = battleBg.static.tilemap;
-  const tileRow = Math.floor(mapY / 8);
   const inTileY = ((mapY % 8) + 8) % 8;
   const wrappedX = (((mapX % BG_PERIOD) + BG_PERIOD) % BG_PERIOD);
-  const tileCol = Math.floor(wrappedX / 8);
-  const inTileX = wrappedX % 8;
+  const blockWidth = battleBg.static.tilemap.width * 8;
+  const block = wrappedX >= blockWidth ? 1 : 0;
+  const localX = wrappedX % blockWidth;
+  const tileRow = Math.floor(mapY / 8) + block * 32;
+  const tileCol = Math.floor(localX / 8);
+  const inTileX = localX % 8;
   const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
   if (!entry) return null;
   const tile = battleBg.static.tileset.tiles[entry.tile];
@@ -293,7 +365,7 @@ function staticBgPixel(mapX: number, mapY: number): RgbColor | null {
   return battleBg.palette[entry.palette]?.[idx] ?? null;
 }
 
-/** BG1's own period (`entrySlide` is a 32x32-tile screen block, same 256px period as BG3's `static` - both are `BGCNT_TXT256x512`-shaped per source, `battle_bg.c`'s `gBattleBgTemplates`). */
+/** BG1's own period: `entrySlide`'s `gBattleBgTemplates[1].screenSize = 2` (`BGCNT_TXT256x512`, vertically-stacked blocks) - genuinely 256px wide, unlike BG3's `static` above (`screenSize = 1`, 512px). `entrySlide`'s own JSON is a single 32x32 block (one screen block, per `extract-battle-bg.ts`'s header note), so no second-block row offset is needed here. */
 const BG1_PERIOD = battleBg.entrySlide.tilemap.width * 8;
 
 /** `entrySlide` (BG1) pixel at map coords - same lookup shape as `staticBgPixel`, no vertical wrap needed since `gBattle_BG1_Y` never moves from 0 in this window (source-confirmed: `DrawBattleEntryBackground`'s Frontier branch never touches it). */
@@ -333,9 +405,21 @@ function bg1X(t: number): number {
   return 8 * (t - BG1_X_START_TICK);
 }
 
-/** GBA alpha-blend of one channel: `(tgt1*eva + tgt2*evb) / 16`, clamped (BLDALPHA hardware formula, `battle_intro.c`'s `BLDALPHA_BLEND` writes). */
+/**
+ * GBA alpha-blend of one channel, done in 5-bit hardware color space like
+ * every other blend in this codebase (`paletteFade.ts`'s module doc point
+ * 1): `min(31, (tgt1_5*eva + tgt2_5*evb) >> 4)` - integer floor division,
+ * not round, and on the 5-bit value, not the already-expanded 8-bit one.
+ * Doing the round in 8-bit space (a prior version of this function) is off
+ * by 1 on roughly a third of blended pixels in this window - the 5-bit
+ * quantization and the `(c5<<3)|(c5>>2)` re-expansion are not linear, so
+ * blend-then-expand and expand-then-blend-in-8-bit disagree.
+ */
 function blendChannel(tgt1: number, tgt2: number, eva: number, evb: number): number {
-  return Math.min(255, Math.round((tgt1 * eva + tgt2 * evb) / 16));
+  const c1 = tgt1 >> 3;
+  const c2 = tgt2 >> 3;
+  const blended5 = Math.min(31, Math.floor((c1 * eva + c2 * evb) / 16));
+  return (blended5 << 3) | (blended5 >> 2);
 }
 
 // --- §3: intro text ---------------------------------------------------
@@ -526,6 +610,36 @@ function drawSpriteSheet(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], 
   }
 }
 
+/** Same as `drawSpriteSheet`, but clipped to the WIN0 vertical range (`WININ` includes `WIN0_OBJ` - OBJs are windowed too, module doc point 2). */
+function drawSpriteSheetWindowed(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  win: { top: number; bottom: number },
+): void {
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    const rowY = oy + ty * 8;
+    if (rowY + 8 <= win.top || rowY >= win.bottom) continue;
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        const y = rowY + py;
+        if (y < win.top || y >= win.bottom) continue;
+        for (let px = 0; px < 8; px += 1) {
+          const idx = tile[py * 8 + px]!;
+          if (idx === 0) continue;
+          const c = palette[idx];
+          if (!c) continue;
+          setPixel(fb, ox + tx * 8 + px, y, c);
+        }
+      }
+    }
+  }
+}
+
 function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): void {
   for (let screenY = 0; screenY < 160; screenY += 1) {
     const tileRow = Math.floor(screenY / 8);
@@ -637,30 +751,50 @@ function drawSettledScene(fb: Uint8Array): void {
 /**
  * Render of the BattleIntroSlide3 reveal, ticks
  * FIRST_VISIBLE_TICK..SLIDE_END_TICK-1. RAM/source-confirmed compositing
- * (module doc point 2, resolved this session): `BLDCNT =
- * TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ`, BG1 (`entrySlide`) is TGT1. Pixel-
- * ground-truthed this session (sampling both trainer sprites' settled-
- * corner rectangles at many ticks through the whole reveal window - see
- * PROGRESS.md): **neither trainer OBJ is ever visible during the reveal
- * itself** - both spots show plain background (BG1/BG3 blend) at every
- * sampled tick, only becoming the actual trainer pics at
- * `drawSettledScene`'s tick 1227 handoff. So TGT2_OBJ in `BLDCNT` never
- * actually engages here (no OBJ pixel is ever the topmost opaque one to
- * blend under BG1) - TGT2 is BG3 alone. BG3 (`static`) gets the per-
- * scanline HOFS shift (`sIntroScanlineParams16Bit` targets `&REG_BG3HOFS`
- * literally, `battle_main.c:250-253` - BG1 is NOT part of that DMA); BG1
- * instead scrolls uniformly via the ordinary whole-frame `gBattle_BG1_X`
- * write (`bg1X` above). Per real GBA alpha-blend semantics, blending only
- * happens where the actual topmost opaque pixel is TGT1-flagged: wherever
- * `entrySlide` is transparent, BG3 draws raw, unblended (confirmed against
- * oracle pixels - PROGRESS.md #62). The window frame (BG0) is not a blend
- * target, so it draws at full brightness, unshifted, on top of everything.
+ * (module doc point 2, GAP A resolved this session): `BLDCNT =
+ * TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ`, BG1 (`entrySlide`) is TGT1. A prior
+ * session's "neither trainer OBJ is ever visible during the reveal"
+ * conclusion (PROGRESS.md #63) was a real misdiagnosis - it only sampled
+ * each trainer's *settled* corner rect, but both trainer OBJs are actually
+ * `invisible=FALSE`/in-use from the moment they're created (RAM-confirmed,
+ * `gSprites[gBattlerSpriteIds[0/1]]`, ticks 1074-1886: `invisible` and
+ * `oam.tileNum`/`paletteNum` never change) and slide in via their OWN
+ * `x2` OAM offset, entirely independent of BG1 - `x2` tracks the exact
+ * same magnitude as `gTasks[0].data[2]` (the BG3 scanline-shift value)
+ * every single tick, opposite sign per side (opponent `x2 = -data[2]`,
+ * player `x2 = +data[2]`), reaching 0 at the same tick-1226 settle. Since
+ * that's numerically identical to the already-validated
+ * `scanlineShiftMagnitude` schedule (same RAM register drives both), no
+ * new constant table is needed - `objShift(t)` below just reuses it. OBJ
+ * sits at priority 2 (`gOamData_BattleSprite{Player,Opponent}Side`,
+ * `battle_main.c:274-301`), strictly between BG1 (priority 0, frontmost)
+ * and BG3 (priority 3, backmost), so it's TGT2's *other* real occupant:
+ * wherever it's opaque, it draws in front of BG3 (raw, unblended, exactly
+ * like BG3 draws raw where BG1 is transparent - see below) and BEHIND BG1
+ * (so BG1, where opaque, blends against the OBJ color there, not BG3's).
+ * `WININ` includes `WIN0_OBJ`, so the OBJ is window-clipped too
+ * (`drawSpriteSheetWindowed`). Both trainer sprites' tile/palette are
+ * constant throughout (RAM-confirmed) - the same art `drawSettledScene`
+ * uses, just at a sliding corner instead of the settled one. BG3
+ * (`static`) gets the per-scanline HOFS shift (`sIntroScanlineParams16Bit`
+ * targets `&REG_BG3HOFS` literally, `battle_main.c:250-253` - BG1 is NOT
+ * part of that DMA); BG1 instead scrolls uniformly via the ordinary
+ * whole-frame `gBattle_BG1_X` write (`bg1X` above). Per real GBA
+ * alpha-blend semantics, blending only happens where the actual topmost
+ * opaque pixel is TGT1-flagged: wherever `entrySlide` is transparent, the
+ * next-topmost opaque layer (OBJ if present there, else BG3) draws raw,
+ * unblended (confirmed against oracle pixels - PROGRESS.md #62/#65). The
+ * window frame (BG0) is not a blend target, so it draws at full
+ * brightness, unshifted, on top of everything.
  */
 function drawSlideScene(fb: Uint8Array, t: number, win: { top: number; bottom: number }): void {
   const { eva, evb } = evaEvb(t);
   const bg1Shift = bg1X(t);
+  const objShift = scanlineShiftMagnitude(t);
 
-  // TGT2: per-scanline-shifted BG3 (`static`) alone - no OBJ, see module doc above.
+  // TGT2: per-scanline-shifted BG3 (`static`), with both trainer OBJs
+  // (priority 2, in front of BG3) drawn raw on top wherever opaque - see
+  // module doc above.
   const tgt2 = new Uint8Array(240 * 160 * 4);
   for (let y = win.top; y < win.bottom; y += 1) {
     const shift = y < 80 ? shiftTop(t) : shiftBottom(t);
@@ -669,6 +803,8 @@ function drawSlideScene(fb: Uint8Array, t: number, win: { top: number; bottom: n
       if (c) setPixel(tgt2, x, y, c);
     }
   }
+  drawSpriteSheetWindowed(tgt2, bugCatcher.tileset, bugCatcher.palette, OPPONENT_CORNER.x - objShift, OPPONENT_CORNER.y, win);
+  drawSpriteSheetWindowed(tgt2, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x + objShift, PLAYER_CORNER.y, win);
 
   // TGT1: BG1 (`entrySlide`), uniformly shifted. Blend where opaque, else raw TGT2.
   for (let y = win.top; y < win.bottom; y += 1) {
