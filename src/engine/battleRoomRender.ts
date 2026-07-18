@@ -29,7 +29,8 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { type EntryStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { type EntryStep, type MsgboxVisual, MSGBOX_LINE1, MSGBOX_LINE2, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { drawMessageBoxFrame, drawMessageBoxText } from "./prebattleRoomRender.ts";
 
 import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
 import tileset from "../assets/gen/battle-room-tileset.json" with { type: "json" };
@@ -191,6 +192,28 @@ const decoyScreenPos = tileScreenPos(DECOY_POS, INITIAL_ORIGIN);
 const opponentScreenX = tileScreenPos(roomLayout.objects.opponent.settleTile, INITIAL_ORIGIN).x;
 
 /**
+ * S6 slice 2c: the opponent-speech box - literal same box asset/geometry as
+ * the pre-battle room's own (docs/battle-room-notes.md §8.1), reusing
+ * prebattleRoomRender.ts's drawMessageBoxFrame/drawMessageBoxText verbatim
+ * rather than duplicating the tile-compositing logic. Origins pixel-derived
+ * (§8.2): both lines share x=16 (tilemapLeft*8), 16px line pitch.
+ */
+const MSGBOX_LINE1_ORIGIN = { x: 16, y: 121 };
+const MSGBOX_LINE2_ORIGIN = { x: 16, y: 137 };
+
+function drawOpponentMsgbox(fb: Uint8Array, msgbox: MsgboxVisual): void {
+  if (!msgbox.visible) return;
+  drawMessageBoxFrame(fb);
+  if (msgbox.chars <= 0) return;
+  const line1 = MSGBOX_LINE1.slice(0, Math.min(msgbox.chars, MSGBOX_LINE1.length));
+  drawMessageBoxText(fb, line1, MSGBOX_LINE1_ORIGIN.x, MSGBOX_LINE1_ORIGIN.y);
+  if (msgbox.chars > MSGBOX_LINE1.length) {
+    const line2 = MSGBOX_LINE2.slice(0, msgbox.chars - MSGBOX_LINE1.length);
+    drawMessageBoxText(fb, line2, MSGBOX_LINE2_ORIGIN.x, MSGBOX_LINE2_ORIGIN.y);
+  }
+}
+
+/**
  * Renders the battle-room ENTRY window's scene at a given camera pan amount
  * (0 = initial/warp-landing origin, 80 = settled), decoy frame/facing, and
  * optional BG/OBJ fade coefficients (paletteFade.ts convention - 0 = no
@@ -198,9 +221,18 @@ const opponentScreenX = tileScreenPos(roomLayout.objects.opponent.settleTile, IN
  * `elapsed` (S6 slice 2b) additionally drives the scientists' turn-in-place
  * and the opponent's walk-in, both settled/no-op for elapsed <=103 (the
  * slice 2a ENTRY window) - see battleRoom.ts's scientistTurnFrame/
- * opponentStep for the oracle-pinned per-tick schedule.
+ * opponentStep for the oracle-pinned per-tick schedule. `msgbox` (S6 slice
+ * 2c) draws the opponent-speech box on top of everything else, once visible
+ * - see battleRoom.ts's msgboxVisual for the per-phase derivation.
  */
-export function renderBattleRoomEntryScene(fb: Uint8Array, step: EntryStep, elapsed: number, bgFadeY = 0, objFadeY = 0): void {
+export function renderBattleRoomEntryScene(
+  fb: Uint8Array,
+  step: EntryStep,
+  elapsed: number,
+  bgFadeY = 0,
+  objFadeY = 0,
+  msgbox: MsgboxVisual = { visible: false, chars: 0 },
+): void {
   const origin = { x: roomLayout.initialCameraOriginPx.x, y: roomLayout.initialCameraOriginPx.y - step.camPanY };
   drawRoomTiles(fb, origin, bgFadeY);
   const turn = scientistTurnFrame(elapsed);
@@ -214,4 +246,5 @@ export function renderBattleRoomEntryScene(fb: Uint8Array, step: EntryStep, elap
   if (opponent.visible) {
     drawNpcFrame(fb, roomNpcs.opponent, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
   }
+  drawOpponentMsgbox(fb, msgbox);
 }

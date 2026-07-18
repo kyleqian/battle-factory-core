@@ -270,7 +270,7 @@ function drawMsgboxTile(fb: Uint8Array, tileId: number, screenX: number, screenY
  * predecessor baked-pixel asset before its deletion (ISSUES #15 fix; see
  * module doc).
  */
-function drawMessageBoxFrame(fb: Uint8Array): void {
+export function drawMessageBoxFrame(fb: Uint8Array): void {
   for (let bx = 0; bx < BOX_COLS; bx += 1) {
     drawMsgboxTile(fb, borderTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y, false);
   }
@@ -291,10 +291,15 @@ const MESSAGE_TEXT_ORIGIN = { x: 16, y: 121 };
 const MESSAGE_PALETTE: RgbColor[] = [{ r: 0, g: 0, b: 0 }, msgboxPalette[2]!, msgboxPalette[3]!];
 const MESSAGE_TEXT_COLORS = { fg: 1, bg: 0, shadow: 2 };
 
+/** Draws `text` at the given screen position using the message box's own fg/shadow palette (msgboxPalette indices 2/3) - shared with battleRoomRender.ts's opponent-speech box, which reuses this literal same box asset (docs/battle-room-notes.md §8.1). */
+export function drawMessageBoxText(fb: Uint8Array, text: string, x: number, y: number): void {
+  drawText(fb, font, charmap, text, x, y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+}
+
 /** Draws the message box (frame + interior) and the first `visibleChars` characters of MESSAGE_TEXT. */
 export function drawMessageBox(fb: Uint8Array, visibleChars: number): void {
   drawMessageBoxFrame(fb);
   if (visibleChars <= 0) return;
   const text = MESSAGE_TEXT.slice(0, visibleChars);
-  drawText(fb, font, charmap, text, MESSAGE_TEXT_ORIGIN.x, MESSAGE_TEXT_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+  drawMessageBoxText(fb, text, MESSAGE_TEXT_ORIGIN.x, MESSAGE_TEXT_ORIGIN.y);
 }

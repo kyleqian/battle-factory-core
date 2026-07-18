@@ -2,19 +2,27 @@
 // machine (src/engine/battleRoom.ts) and its core.ts wiring - pixel parity
 // itself lives in tools/compare/traces/room-entry.json (110/110).
 import { describe, expect, it } from "vitest";
-import { createInitialState, tick } from "../src/engine/core.ts";
+import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 import {
   advanceBattleRoom,
   ENTRY_SETTLE_ELAPSED,
   FADE_IN,
   INITIAL_BATTLE_ROOM_STATE,
+  MSGBOX_APPEAR_ELAPSED,
+  MSGBOX_CLOSE_TICKS,
+  MSGBOX_LINE1,
+  MSGBOX_LINE2,
+  MSGBOX_PRINT_COMPLETE_ELAPSED,
+  MSGBOX_PRINT_TICKS,
   OPPONENT_ADD_ELAPSED,
   OPPONENT_SETTLED_SCREEN_Y,
   OPPONENT_WALK_END_ELAPSED,
   WARP_FADE_TO_ROOM_ELAPSED,
   entryStep,
+  msgboxVisual,
   opponentStep,
   scientistTurnFrame,
+  type BattleRoomState,
 } from "../src/engine/battleRoom.ts";
 import { EXIT_TO_ROOM_BLACK_HOLD_TICKS, MESSAGE_CLOSING_TICKS, MESSAGE_PRINT_TICKS, ROOM_HOLD_TICKS, WALK_TICKS } from "../src/engine/prebattleRoom.ts";
 import { EXIT_FADE_OUT_TICKS, FADE_IN_TICKS, bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
@@ -195,5 +203,127 @@ describe("core.ts render dispatch: battle-room entry fade (S6 slice 2a)", () => 
     expect(bgFadeY(14, FADE_IN)).toBe(0);
     expect(objFadeY(0, FADE_IN)).toBe(16);
     expect(objFadeY(1, FADE_IN)).toBe(14);
+  });
+});
+
+describe("battleRoom.ts: msgboxVisual - appear + print cadence (S6 slice 2c, oracle-pinned, docs/battle-room-notes.md §8.2)", () => {
+  it("pins the exact printed strings (curly apostrophe, charmap code 180 - ASCII \"'\" isn't in the charmap)", () => {
+    expect(MSGBOX_LINE1).toBe("IT’S WAY TOO");
+    expect(MSGBOX_LINE2).toBe("HOT HERE");
+  });
+
+  it("MSGBOX_PRINT_TICKS/MSGBOX_PRINT_COMPLETE_ELAPSED are derived from both lines' lengths, not separately-pinned magic numbers", () => {
+    expect(MSGBOX_LINE1.length).toBe(12);
+    expect(MSGBOX_LINE2.length).toBe(8);
+    expect(MSGBOX_PRINT_TICKS).toBe(20);
+    expect(MSGBOX_APPEAR_ELAPSED).toBe(198);
+    expect(MSGBOX_PRINT_COMPLETE_ELAPSED).toBe(218);
+  });
+
+  it("is hidden through elapsed 197 (MSGBOX_APPEAR_ELAPSED - 1)", () => {
+    expect(msgboxVisual({ phase: "entering", elapsed: 0 })).toEqual({ visible: false, chars: 0 });
+    expect(msgboxVisual({ phase: "entering", elapsed: 197 })).toEqual({ visible: false, chars: 0 });
+  });
+
+  it("appears atomically at elapsed 198 (tick 718) - border+fill visible, zero characters printed yet", () => {
+    expect(msgboxVisual({ phase: "entering", elapsed: 198 })).toEqual({ visible: true, chars: 0 });
+  });
+
+  it("prints exactly 1 character/tick, including space ticks, both lines back-to-back with no inter-line delay", () => {
+    // First glyph at elapsed 199 (tick 719); line 1 (12 chars, incl. 2 space
+    // ticks) completes at elapsed 210 (tick 730, "...TOO").
+    for (let i = 1; i <= MSGBOX_LINE1.length; i += 1) {
+      expect(msgboxVisual({ phase: "entering", elapsed: MSGBOX_APPEAR_ELAPSED + i })).toEqual({ visible: true, chars: i });
+    }
+    // Line 2 starts the very next tick (elapsed 211 / tick 731, "H") -
+    // no extra tick between lines - and completes at elapsed 218.
+    for (let i = 1; i <= MSGBOX_LINE2.length; i += 1) {
+      expect(msgboxVisual({ phase: "entering", elapsed: MSGBOX_APPEAR_ELAPSED + MSGBOX_LINE1.length + i })).toEqual({
+        visible: true,
+        chars: MSGBOX_LINE1.length + i,
+      });
+    }
+  });
+
+  it("shows the box fully printed (all 20 chars) for both msgboxIdle and msgboxClosing, regardless of their own local elapsed", () => {
+    expect(msgboxVisual({ phase: "msgboxIdle", elapsed: 0 })).toEqual({ visible: true, chars: MSGBOX_PRINT_TICKS });
+    expect(msgboxVisual({ phase: "msgboxIdle", elapsed: 500 })).toEqual({ visible: true, chars: MSGBOX_PRINT_TICKS });
+    expect(msgboxVisual({ phase: "msgboxClosing", elapsed: 2 })).toEqual({ visible: true, chars: MSGBOX_PRINT_TICKS });
+  });
+
+  it("is hidden once settled (post-close)", () => {
+    expect(msgboxVisual({ phase: "settled", elapsed: 0 })).toEqual({ visible: false, chars: 0 });
+    expect(msgboxVisual({ phase: "settled", elapsed: 999 })).toEqual({ visible: false, chars: 0 });
+  });
+});
+
+describe("battleRoom.ts: advanceBattleRoom - entering -> msgboxIdle -> msgboxClosing -> settled", () => {
+  it("stays 'entering' through elapsed 217, then switches to msgboxIdle at 218 with a fresh phase-relative elapsed", () => {
+    let state: BattleRoomState = { phase: "entering", elapsed: MSGBOX_PRINT_COMPLETE_ELAPSED - 2 };
+    state = advanceBattleRoom(state);
+    expect(state).toEqual({ phase: "entering", elapsed: MSGBOX_PRINT_COMPLETE_ELAPSED - 1 });
+    state = advanceBattleRoom(state);
+    expect(state).toEqual({ phase: "msgboxIdle", elapsed: 0 });
+  });
+
+  it("msgboxIdle holds state unchanged under advanceBattleRoom - core.ts's own A-press gate (tested below) is what transitions it out", () => {
+    const state: BattleRoomState = { phase: "msgboxIdle", elapsed: 0 };
+    expect(advanceBattleRoom(state)).toBe(state);
+    expect(advanceBattleRoom(advanceBattleRoom(state))).toBe(state);
+  });
+
+  it("closes exactly MSGBOX_CLOSE_TICKS ticks after msgboxClosing starts, then holds 'settled' indefinitely (docs §8.3 close-latency derivation)", () => {
+    expect(MSGBOX_CLOSE_TICKS).toBe(4);
+    let state: BattleRoomState = { phase: "msgboxClosing", elapsed: 0 };
+    for (let i = 1; i < MSGBOX_CLOSE_TICKS; i += 1) {
+      state = advanceBattleRoom(state);
+      expect(state).toEqual({ phase: "msgboxClosing", elapsed: i });
+    }
+    state = advanceBattleRoom(state);
+    expect(state).toEqual({ phase: "settled", elapsed: 0 });
+    for (let i = 0; i < 50; i += 1) state = advanceBattleRoom(state);
+    expect(state.phase).toBe("settled");
+  });
+});
+
+describe("core.ts wiring: msgboxIdle's A-press gate (S6 slice 2c - the only input this window reads)", () => {
+  it("ignores A everywhere except msgboxIdle - holding it through the whole print window causes no early close", () => {
+    let state: EngineState = { ...createInitialState(), battleRoom: { phase: "entering", elapsed: 0 } };
+    for (let i = 0; i < MSGBOX_PRINT_COMPLETE_ELAPSED - 1; i += 1) state = tick(state, new Set(["A"]));
+    expect(state.battleRoom).toEqual({ phase: "entering", elapsed: MSGBOX_PRINT_COMPLETE_ELAPSED - 1 });
+  });
+
+  it("starts the 4-tick close the exact tick A registers, once idle; vanishes after MSGBOX_CLOSE_TICKS and holds settled thereafter (reproduces battle1-intro.json's segment 29 press -> oracle tick 843, room-msgbox.json 142/142)", () => {
+    let state: EngineState = { ...createInitialState(), battleRoom: { phase: "msgboxIdle", elapsed: 0 } };
+    // No press yet - holds idle byte-identically.
+    state = tick(state, new Set());
+    expect(state.battleRoom).toEqual({ phase: "msgboxIdle", elapsed: 0 });
+
+    // A registers this tick (edge-triggered, keyRepeat.ts) - msgboxClosing
+    // starts the SAME tick (matches the ground-truth trace's segment 29:
+    // a 2-frame A hold, newKeys fires once on the first frame).
+    state = tick(state, new Set(["A"]));
+    expect(state.battleRoom).toEqual({ phase: "msgboxClosing", elapsed: 0 });
+    expect(msgboxVisual(state.battleRoom!)).toEqual({ visible: true, chars: MSGBOX_PRINT_TICKS });
+
+    // Held for the pulse's second frame - already registered, no re-trigger, just a normal advance.
+    state = tick(state, new Set(["A"]));
+    expect(state.battleRoom).toEqual({ phase: "msgboxClosing", elapsed: 1 });
+
+    state = tick(state, new Set());
+    expect(state.battleRoom).toEqual({ phase: "msgboxClosing", elapsed: 2 });
+    state = tick(state, new Set());
+    expect(state.battleRoom).toEqual({ phase: "msgboxClosing", elapsed: 3 });
+    expect(msgboxVisual(state.battleRoom!)).toEqual({ visible: true, chars: MSGBOX_PRINT_TICKS });
+
+    // 4th tick after the press - box vanishes (oracle tick 843, byte-identical to tick 717).
+    state = tick(state, new Set());
+    expect(state.battleRoom).toEqual({ phase: "settled", elapsed: 0 });
+    expect(msgboxVisual(state.battleRoom!)).toEqual({ visible: false, chars: 0 });
+
+    // Holds settled indefinitely, reading no further input.
+    for (let i = 0; i < 100; i += 1) state = tick(state, new Set(["A"]));
+    expect(state.battleRoom!.phase).toBe("settled");
+    expect(msgboxVisual(state.battleRoom!)).toEqual({ visible: false, chars: 0 });
   });
 });

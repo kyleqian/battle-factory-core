@@ -5,6 +5,68 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 54 — S6 slice 2c: OPPONENT-SPEECH MSGBOX window (ticks 718-843) implemented, oracle-pinned; `room-msgbox.json` committed 142/142
+
+- **State:** `npm test` **377/377** (365→377, +12 in `tests/battleRoom.test.ts`),
+  `npm run build` green. New trace `tools/compare/traces/room-msgbox.json`
+  (851 frames, captures 710-851) passes `npm run compare` **142/142, 0
+  diff** (first try). All 15 pre-existing traces re-verified at their exact
+  prior counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
+  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+  rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) — zero
+  regressions.
+- **Did:** extended `battleRoom.ts`'s state machine off #51's groundwork
+  (BattleRoomPhase gains `msgboxIdle`/`msgboxClosing`/`settled` alongside
+  the existing `entering`) rather than rebuilding: "entering" stays a pure
+  function of the same global `elapsed` through print-complete (msgbox
+  appear/print folded in exactly like scientistTurnFrame/opponentStep —
+  `msgboxVisual(elapsed)`, appear atomic at elapsed 198/tick 718, 1
+  char/tick incl. spaces, print-complete at elapsed 218/tick 738 — both
+  values derived from `MSGBOX_LINE1.length + MSGBOX_LINE2.length`, not
+  separately-pinned magic numbers), then hands off to `msgboxIdle` (static,
+  matches prebattleRoom.ts's own "idle" no-op-under-advance convention).
+  core.ts's tick() gates the SAME idiom prebattleRoom.ts's A-press already
+  established: `msgboxIdle && newKeys.has("A")` creates `msgboxClosing`
+  directly on the press tick; **the close latency (`MSGBOX_CLOSE_TICKS=4`)
+  was derived analytically, not guessed** — battle1-intro.json's own
+  committed segment 29 (`["A"], frames:2`, right after 838 no-input frames)
+  makes readKeys.ts's edge-triggered newKeys fire exactly once, on the
+  tick() call producing captured frame 839 (frame 840's call sees A already
+  held); working backward from the pinned "static through 842, vanished by
+  843" pixels, 4 is the only tick count consistent with both the segment
+  data and the pixels — independently re-confirmed via a fresh oracle probe
+  before writing any code (frame 717 sha == frame 843's sha, frames
+  838-842 == frame 738's "print-complete" sha). Reused
+  `prebattleRoomRender.ts`'s box compositor rather than duplicating it —
+  exported `drawMessageBoxFrame` (was private) and factored a new
+  `drawMessageBoxText` helper (also used by that module's own single-line
+  `drawMessageBox` now, a small dedup); `battleRoomRender.ts` calls both
+  twice for the two lines (`IT’S WAY TOO` / `HOT HERE`, curly apostrophe
+  charmap 180, #51-pinned). No new extractor/asset — confirms #51's own
+  finding that this is the literal same `prebattle-room-msgbox.json` box.
+  The one pre-existing test needing no change at all: `battleRoom.test.ts`'s
+  "holds A for 200 ticks -> elapsed 200" assertion (written for slice 2a)
+  turned out to still hold byte-for-byte, since 200 < the print-complete
+  boundary (218) — holding A during "entering" is a no-op by construction
+  (only `msgboxIdle` reads input), so no existing assertion needed editing.
+- **Next:** the transition-to-black engine slice (tick 843+, gray flicker
+  871-918 → circle sprites → center-logo blend → fade to black by 1031),
+  off #53's own groundwork (RAM-pinned 8-tick gray-flicker toggle, circle-
+  sprite linear-slide constants, centerBg asset byte-exact, 6-step
+  2-ticks/step fade cadence). `docs/battle-scene-notes.md` scene-assembly
+  scout (1031-1300) may also be ready by then per #53's "Notes".
+- **Notes:** assumption flagged (not oracle-exercised this session, per the
+  brief's own allowance): only the one pinned idle-phase press (well after
+  print-complete) is verified; an earlier press right at print-complete is
+  modeled as behaving identically (same 4-tick close, no idle-duration
+  dependency) — the simplest mechanism consistent with the single pinned
+  data point, matching `prebattleRoom.ts`'s own "idle" convention (no
+  timeout/duration-sensitivity there either). No papercuts.
+
+---
+
 ## 53 — S6 transition groundwork (parallel worktree lane, merged): NO heal-icon overlay exists; ticks 843-1031 fully pinned; CIRCLES_MEET assets confirmed byte-exact; docs + ground-truth trace only
 
 - **State:** merge of `worker/wt-20260718-102848` (single commit `9ca09a6`)
@@ -92,38 +154,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   lane.
 - **Notes:** no papercuts. Scratch RAM-probe script (`/tmp/s6b/probe.py`)
   removed after use, nothing committed beyond the deliverables.
-
----
-
-## 51 — S6 slice 2c groundwork (parallel worktree lane, merged): opponent-speech msgbox = same asset as pre-battle box (source-proofed); print cadence + appear/close choreography fully pinned; docs-only
-
-- **State:** merge of `worker/wt-20260718-100953` (single docs commit
-  `161f0ae`) on top of #50; `npm test` **357/357** + `npm run build` green
-  on the merged result. Docs-only — `docs/battle-room-notes.md` §8 added
-  (+180/−5).
-- **Did (worker, supervisor-verified):** (1) **no new msgbox asset
-  needed** — both "Right this way, please!" and the opponent speech are
-  `msgbox X, MSGBOX_DEFAULT` → `Std_MsgboxDefault` → window 0 =
-  `sStandardTextBox_WindowTemplates[0]` (27×4 at (2,15)), the literal
-  same `message_box.png` frame already derived as
-  `prebattle-room-msgbox.json`; byte-exact verified (border 3292/3292 px
-  over 7 ticks, frame+fill+text 9948/9948 over 4 ticks). The prior
-  "shorter variant, y=115" read was a within-tile gradient artifact —
-  corrected in place. (2) print cadence pinned: room settled (no box) by
-  712; box+full-white fill appear **atomically at 718**; first glyph 719;
-  **exactly 1 tick/character incl. space ticks** (full tick→char table in
-  §8.2); line 2 starts 731; print-complete/settle **738**. Rendered
-  string confirmed pixel+charmap-exact: `IT'S WAY TOO` / `HOT HERE` with
-  the curly apostrophe (charmap 180 — ASCII `'` isn't in the charmap).
-  (3) close pinned: A-press #2 pulse 838-839, no visible change through
-  842, box vanishes **atomically at 843** — full framebuffer
-  byte-identical to tick 717's pre-appear state, static through 851.
-- **Next:** S6 slice 2b (scientists turn + opponent walk-in, 624-739,
-  main lane — brief going out now), then 2c (speech box) directly off
-  this section. Heal-icon + transition-to-black groundwork (843-1031) in
-  flight on the worktree lane (worker G).
-- **Notes:** worktree removed + branch deleted post-merge.
-
 
 ---
 

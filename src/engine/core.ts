@@ -71,6 +71,8 @@ import {
   advanceBattleRoom,
   entryStep,
   INITIAL_BATTLE_ROOM_STATE,
+  msgboxVisual,
+  SETTLED_SCENE_ELAPSED,
   WARP_FADE_TO_ROOM_ELAPSED,
   type BattleRoomState,
 } from "./battleRoom.ts";
@@ -123,10 +125,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleRoom: BattleRoomState | null = state.battleRoom;
 
   if (battleRoom) {
-    // S6 slice 2a: the ENTRY window reads no input (docs/battle-bringup-
-    // notes.md - the next A-press gate is tick 838, past this slice's
-    // scope) - just free-run the per-tick table (battleRoom.ts).
-    battleRoom = advanceBattleRoom(battleRoom);
+    // S6 slice 2c: msgboxIdle's own A-press gate - the only input this
+    // window ever reads (ticks 520-717 are input-free, see battleRoom.ts's
+    // own "entering" phase doc). Same idiom as prebattleRoom.ts's own
+    // "idle" -> "messageClosing" gate: created directly (not via
+    // advanceBattleRoom) so this same tick already reflects it - see
+    // battleRoom.ts's §8.3 doc for the close-latency derivation.
+    if (battleRoom.phase === "msgboxIdle" && newKeys.has("A")) {
+      battleRoom = { phase: "msgboxClosing", elapsed: 0 };
+    } else {
+      battleRoom = advanceBattleRoom(battleRoom);
+    }
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, rngValue };
   }
 
@@ -445,14 +454,25 @@ function blackFrame(): Uint8Array {
   return fb;
 }
 
-/** S6 slice 2a: bgFadeY/objFadeY called with `elapsed` directly (NOT elapsed+1) - see battleRoom.ts module doc point 1, oracle-verified against a dense per-frame brightness probe. */
+/**
+ * S6 slice 2a: bgFadeY/objFadeY called with `elapsed` directly (NOT
+ * elapsed+1) - see battleRoom.ts module doc point 1, oracle-verified
+ * against a dense per-frame brightness probe. S6 slice 2c: once past
+ * "entering", the scene itself (camera/scientists/opponent/fade) is fully
+ * settled - SETTLED_SCENE_ELAPSED feeds entryStep/scientistTurnFrame/
+ * opponentStep/bgFadeY/objFadeY a value past every one of their own clamp
+ * thresholds (battleRoom.ts's SETTLED_SCENE_ELAPSED doc) since `elapsed`
+ * itself is phase-relative (small) in the msgbox phases, not the original
+ * ticks-since-tick-520 count.
+ */
 function renderBattleRoomState(state: EngineState): Uint8Array {
   const b = state.battleRoom!;
-  const step = entryStep(b.elapsed);
-  const bgY = bgFadeY(b.elapsed, FADE_IN);
-  const objY = objFadeY(b.elapsed, FADE_IN);
+  const sceneElapsed = b.phase === "entering" ? b.elapsed : SETTLED_SCENE_ELAPSED;
+  const step = entryStep(sceneElapsed);
+  const bgY = bgFadeY(sceneElapsed, FADE_IN);
+  const objY = objFadeY(sceneElapsed, FADE_IN);
   const fb = createFramebuffer();
-  renderBattleRoomEntryScene(fb, step, b.elapsed, bgY, objY);
+  renderBattleRoomEntryScene(fb, step, sceneElapsed, bgY, objY, msgboxVisual(b));
   return fb;
 }
 

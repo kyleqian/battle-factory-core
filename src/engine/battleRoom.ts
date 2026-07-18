@@ -67,7 +67,7 @@
 
 import { FADE_IN } from "./paletteFade.ts";
 
-export type BattleRoomPhase = "entering";
+export type BattleRoomPhase = "entering" | "msgboxIdle" | "msgboxClosing" | "settled";
 
 export interface BattleRoomState {
   phase: BattleRoomPhase;
@@ -87,8 +87,33 @@ export const INITIAL_BATTLE_ROOM_STATE: BattleRoomState = { phase: "entering", e
  */
 export const WARP_FADE_TO_ROOM_ELAPSED = 37;
 
+/**
+ * "entering" covers every deterministic tick (camera pan, scientists' turn,
+ * opponent walk-in, msgbox appear+print - all pure functions of `elapsed`,
+ * see below) through print-complete (MSGBOX_PRINT_COMPLETE_ELAPSED); from
+ * there the msgbox phases take over (see that section's doc for why they're
+ * split out - the close is player-paced, unlike everything above).
+ */
 export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
-  return { phase: state.phase, elapsed: state.elapsed + 1 };
+  switch (state.phase) {
+    case "entering": {
+      const elapsed = state.elapsed + 1;
+      if (elapsed >= MSGBOX_PRINT_COMPLETE_ELAPSED) return { phase: "msgboxIdle", elapsed: 0 };
+      return { phase: "entering", elapsed };
+    }
+    case "msgboxIdle":
+      // MSGBOX_DEFAULT blocks on player A - core.ts detects the press and
+      // starts "msgboxClosing" directly (see that section's doc); this case
+      // only covers ticks with no press yet, holding byte-identical.
+      return state;
+    case "msgboxClosing": {
+      const elapsed = state.elapsed + 1;
+      if (elapsed >= MSGBOX_CLOSE_TICKS) return { phase: "settled", elapsed: 0 };
+      return { phase: "msgboxClosing", elapsed };
+    }
+    case "settled":
+      return { phase: "settled", elapsed: state.elapsed + 1 };
+  }
 }
 
 /**
@@ -337,6 +362,109 @@ export function opponentStep(elapsed: number): OpponentStep {
   const cyclePos = Math.floor((elapsed - OPPONENT_ADD_ELAPSED) / 8) % 4;
   const frame = [3, 0, 4, 0][cyclePos]!;
   return { visible: true, frame, screenY };
+}
+
+// S6 slice 2c: OPPONENT-SPEECH MSGBOX window (trace ticks 718-843 - elapsed
+// 198-323, this module's own `elapsed` = trace tick - 520, same convention
+// as slices 2a/2b above).
+//
+// Ground truth: docs/battle-room-notes.md §8 (dense every-frame oracle
+// captures, ticks 690-760 and 838-851 - independently re-confirmed this
+// session via a fresh oracle probe, /tmp/s6c/probe.json, truncating this
+// run's own committed tools/compare/traces-groundtruth/battle1-intro.json
+// at 851 frames with every-frame captureFrames 710-851). §8.1: the box is
+// the literal same asset/window as the pre-battle room's own
+// ("Right this way, please!") - MSGBOX_DEFAULT always draws window 0's
+// fixed template, no map-specific variant - so this slice reuses
+// prebattleRoomRender.ts's drawMessageBoxFrame/drawMessageBoxText verbatim
+// rather than re-deriving box compositing.
+//
+// §8.2 (appear + print, RAM/pixel-pinned, re-confirmed by this session's own
+// probe: frame 717 sha a15c8dc2... == frame 843's, frame 718 sha 488bb636...
+// distinct, frame 738 sha e93719bf... == frames 739-842's): box+fill appear
+// atomically at elapsed 198 (tick 718), zero characters; first glyph at
+// elapsed 199 (tick 719); exactly 1 tick per character including space
+// ticks (§8.2's tick->char table); line 2 starts at elapsed 211 (tick 731);
+// print-complete/settle at elapsed 218 (tick 738) - MSGBOX_PRINT_COMPLETE_ELAPSED
+// is exactly MSGBOX_APPEAR_ELAPSED + (line1.length + line2.length), i.e. the
+// 20-character total is the print duration, not a separately-pinned magic
+// number.
+//
+// §8.3 (close): the ground-truth trace's own button script (battle1-
+// intro.json's segment 29, `["A"], frames:2`, immediately after 100 frames
+// of no input following segment 28) holds A for the two tick() calls that
+// produce captured frames 839 and 840. readKeys.ts's edge-triggered newKeys
+// therefore fires exactly once - on the call producing frame 839 (frame
+// 840's call sees A already held, so it's not "new"). Reusing prebattleRoom.
+// ts's own "idle -> closing phase, created directly on the press tick"
+// idiom (its own A-press-gate doc), the pinned "box static through 842,
+// vanished by 843" resolves to a clean MSGBOX_CLOSE_TICKS=4: created at
+// frame 839 (elapsed 0, box still fully printed/visible - indistinguishable
+// from idle), elapsed 1/2/3 at frames 840/841/842 (still visible), then
+// elapsed 4 at frame 843 hits the >=MSGBOX_CLOSE_TICKS transition to
+// "settled" (no box) - this is the only tick count consistent with both the
+// committed segment data and the pinned pixels, not a hardcoded
+// "vanish = press+5" guess. This is a DIFFERENT constant from
+// prebattleRoom.ts's own MESSAGE_CLOSING_TICKS (2) - a different call
+// site/window, not reused.
+//
+// Assumption flagged per the brief: only this one idle-phase press (at
+// elapsed 121 relative to msgboxIdle's own start, i.e. well after print-
+// complete) is oracle-exercised; whether an EARLIER press - e.g. right at
+// print-complete itself - would behave identically (same 4-tick close) is
+// not probed this session. Modeled as "any A press while msgboxIdle starts
+// the same 4-tick close, regardless of how long idle has been held" - the
+// simplest mechanism consistent with the one pinned data point, matching
+// this codebase's established MSGBOX_DEFAULT convention (prebattleRoom.ts's
+// own "idle" case never itself times out or varies by hold duration).
+
+/** First elapsed tick the box (border+fill) is on screen - trace tick 718. */
+export const MSGBOX_APPEAR_ELAPSED = 198;
+/** BattleFrontier_BattleFactoryBattleRoom_EventScript_BattleOpponent's palace_getopponentintro-buffered speech (docs/battle-room-notes.md §8.2) - the curly apostrophe is charmap code 180, the plain ASCII "'" isn't in the charmap. */
+export const MSGBOX_LINE1 = "IT’S WAY TOO";
+export const MSGBOX_LINE2 = "HOT HERE";
+/** Total printable characters across both lines - the print's own duration in ticks (1 tick/char, including space ticks). */
+export const MSGBOX_PRINT_TICKS = MSGBOX_LINE1.length + MSGBOX_LINE2.length;
+/** First elapsed tick of "msgboxIdle" (fully printed, static) - trace tick 738. */
+export const MSGBOX_PRINT_COMPLETE_ELAPSED = MSGBOX_APPEAR_ELAPSED + MSGBOX_PRINT_TICKS;
+/** Ticks from the A-press registering to the box vanishing (see §8.3 derivation above). */
+export const MSGBOX_CLOSE_TICKS = 4;
+
+/**
+ * Scene `elapsed` to feed entryStep/scientistTurnFrame/opponentStep once
+ * past "entering" - those three are all clamped/settled by elapsed 192 (see
+ * their own docs above), so any value at or past that works identically;
+ * reuses MSGBOX_PRINT_COMPLETE_ELAPSED since it's already past every clamp
+ * threshold and already computed.
+ */
+export const SETTLED_SCENE_ELAPSED = MSGBOX_PRINT_COMPLETE_ELAPSED;
+
+export interface MsgboxVisual {
+  visible: boolean;
+  /** Characters visible across both lines combined (0..MSGBOX_PRINT_TICKS) - battleRoomRender.ts splits this across MSGBOX_LINE1/LINE2. */
+  chars: number;
+}
+
+const MSGBOX_HIDDEN: MsgboxVisual = { visible: false, chars: 0 };
+const MSGBOX_FULL: MsgboxVisual = { visible: true, chars: MSGBOX_PRINT_TICKS };
+
+/** "entering" phase's own msgbox visual - a pure function of the (still-global) elapsed counter, matching scientistTurnFrame/opponentStep's own convention. */
+function enteringMsgboxVisual(elapsed: number): MsgboxVisual {
+  if (elapsed < MSGBOX_APPEAR_ELAPSED) return MSGBOX_HIDDEN;
+  return { visible: true, chars: elapsed - MSGBOX_APPEAR_ELAPSED };
+}
+
+/** Per-phase message-box visual (battleRoomRender.ts/core.ts consume this directly - see module doc for the per-phase derivation). */
+export function msgboxVisual(state: BattleRoomState): MsgboxVisual {
+  switch (state.phase) {
+    case "entering":
+      return enteringMsgboxVisual(state.elapsed);
+    case "msgboxIdle":
+    case "msgboxClosing":
+      return MSGBOX_FULL;
+    case "settled":
+      return MSGBOX_HIDDEN;
+  }
 }
 
 export { FADE_IN };

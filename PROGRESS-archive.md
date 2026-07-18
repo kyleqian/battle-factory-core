@@ -5,6 +5,37 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 51 — S6 slice 2c groundwork (parallel worktree lane, merged): opponent-speech msgbox = same asset as pre-battle box (source-proofed); print cadence + appear/close choreography fully pinned; docs-only
+
+- **State:** merge of `worker/wt-20260718-100953` (single docs commit
+  `161f0ae`) on top of #50; `npm test` **357/357** + `npm run build` green
+  on the merged result. Docs-only — `docs/battle-room-notes.md` §8 added
+  (+180/−5).
+- **Did (worker, supervisor-verified):** (1) **no new msgbox asset
+  needed** — both "Right this way, please!" and the opponent speech are
+  `msgbox X, MSGBOX_DEFAULT` → `Std_MsgboxDefault` → window 0 =
+  `sStandardTextBox_WindowTemplates[0]` (27×4 at (2,15)), the literal
+  same `message_box.png` frame already derived as
+  `prebattle-room-msgbox.json`; byte-exact verified (border 3292/3292 px
+  over 7 ticks, frame+fill+text 9948/9948 over 4 ticks). The prior
+  "shorter variant, y=115" read was a within-tile gradient artifact —
+  corrected in place. (2) print cadence pinned: room settled (no box) by
+  712; box+full-white fill appear **atomically at 718**; first glyph 719;
+  **exactly 1 tick/character incl. space ticks** (full tick→char table in
+  §8.2); line 2 starts 731; print-complete/settle **738**. Rendered
+  string confirmed pixel+charmap-exact: `IT'S WAY TOO` / `HOT HERE` with
+  the curly apostrophe (charmap 180 — ASCII `'` isn't in the charmap).
+  (3) close pinned: A-press #2 pulse 838-839, no visible change through
+  842, box vanishes **atomically at 843** — full framebuffer
+  byte-identical to tick 717's pre-appear state, static through 851.
+- **Next:** S6 slice 2b (scientists turn + opponent walk-in, 624-739,
+  main lane — brief going out now), then 2c (speech box) directly off
+  this section. Heal-icon + transition-to-black groundwork (843-1031) in
+  flight on the worktree lane (worker G).
+- **Notes:** worktree removed + branch deleted post-merge.
+
+---
+
 ## 50 — S6 slice 2a: battle-room ENTRY window (ticks 520-624) implemented, oracle-pinned; `room-entry.json` committed 110/110
 
 - **State:** `npm test` **357/357** (349→357, +8 in new `tests/battleRoom.test.ts`,

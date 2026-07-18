@@ -235,6 +235,15 @@ movement-step calls, not frames); the opponent is added and takes its
 first walk step within the same engine tick; its walk screenY is a clean
 1px/tick ramp (no sub-tile easing), same convention as the entry camera
 pan. The opponent-speech msgbox (718-843) is still open for slice 2c.
+**Slice 2c complete (2026-07-18):** the OPPONENT-SPEECH MSGBOX window
+(ticks 718-843) is engine-implemented and oracle-pinned (`battleRoom.ts`
+gains `msgboxIdle`/`msgboxClosing`/`settled` phases; `battleRoomRender.ts`
+reuses `prebattleRoomRender.ts`'s box compositor, now exported/factored
+rather than duplicated); `tools/compare/traces/room-msgbox.json` (142/142,
+0 diff). The close latency (press-to-vanish) was derived analytically from
+the ground-truth trace's own committed button segment + readKeys.ts's
+edge-triggered newKeys semantics, not guessed. S6's remaining open window:
+the transition-to-black (843-1031), off #53's own groundwork.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain
