@@ -5,6 +5,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 69 — S7 data needs closed (parallel worktree lane, merged): battle-message TEMPLATE system extracted + pixel-cross-checked, DOUBLE_TEAM evasion stage RAM-pinned, held-item damage-path inventory exhaustive
+
+- **State:** merge of `worker/wt-20260718-151756` (base `d1072d3`, merged
+  onto #68's `a515081`): `npm test` **437/437** (429+8), `npm run build`
+  green, anchor 1/1 post-merge.
+- **Did (worktree lane, supervisor-verified in the worktree pre-merge):**
+  (1) `extract-battle-messages.ts` → `battle-message-templates.json`
+  (365/369 `gBattleStringsTable` entries as structured segments +
+  `STRINGID_USEDMOVE` + 52 `B_TXT_*` placeholders + stat-name/
+  MULTISTRING sub-tables) and `extract-species-names.ts` →
+  `species-names.json` (412) — a real pre-existing gap. Pixel-cross-
+  checked against `battle1-turn1.json` captures at ticks 1960/2270
+  (supervisor re-inspected both PNGs): "Foe GROVYLE used / DOUBLE TEAM!"
+  and "ONIX used / ROCK SLIDE!" — including the "Foe " prefix the
+  dossier's prose had dropped (corrected in place). +5 template tests.
+  (2) `gBattleMons[1].statStages[EVASION]` flips 6→7 at tick 1959, holds
+  to trace end, nothing else moves (probe spec committed, twice-run
+  byte-identical) — closes dossier §8 risk 5. (3) BRIGHT_POWDER/
+  LAX_INCENSE (`HOLD_EFFECT_EVASION_UP`, params 10/5) and WHITE_HERB
+  (`RESTORE_STATS`) each have exactly ONE engine call site, neither in
+  `CalculateBaseDamage` — EVASION_UP is accuracy-only (live for
+  ROCK_SLIDE's roll vs Grovyle), line-cited in the dossier; full 70-item
+  `item-hold-effects.json` extracted + pinned (+3 tests).
+- **Next:** S7 stays behind S6. Remaining dossier needs: move-animation
+  assets (§7 item 5), turn-end RNG cluster attribution,
+  `gBattleControllerExecFlags` decoding.
+- **Notes:** worktree removed, branch deleted after merge. No PAPERCUT.
+
+---
+
 ## 68 — S6 scene-assembly GAP A FULLY RESOLVED: blend precision runs in 8-bit space not 5-bit (mathematically proven, not curve-fit), plus evaEvb's own one-tick render lag — `scene-assembly.json` 255/256 (was 151/256), whole 1075-1226 window byte-exact, 0 regressions
 
 - **State:** `npm test` **429/429** (428→429, +1 pin, 2 corrected), `npm
@@ -110,77 +140,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   after merge. No PAPERCUT flagged.
 
 ---
-
-## 66 — S6 scene-assembly GAP A (streak blend arithmetic) root-caused and substantially fixed: two real bugs the RAM/brief hadn't suspected (trainer OBJ layer omitted; BG3's real hardware width is 512px not 256), plus a genuine blend-precision fix — `scene-assembly.json` 151/256 (was 104/256), 0 regressions. One narrower residual named, next probe on record.
-
-- **State:** `npm test` **428/428** (425→428, +3 pins), `npm run build`
-  green. `npm run compare -- tools/compare/traces/scene-assembly.json` →
-  **151/256** (was 104/256). Full 18-trace sweep re-run, all others at
-  their exact prior counts (anchor 1/1, draft-cursor 13/13, draft-menu
-  38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
-  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
-  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
-  room-msgbox 142/142, transition 206/206, rent-slot1 125/139, rent-3picks
-  157/190, confirm-flow 79/95) — zero regressions.
-- **Did — the brief's mandated RAM probe, then two bugs it didn't predict:**
-  ran `tools/probe/ram-probe.py` on the literal `BLDALPHA`/`BLDCNT` I/O
-  registers (`0x04000052`/`0x04000050`) and `gBattle_BG1_Y` across ticks
-  1130-1155 as instructed. Result: **the brief's own leading hypothesis was
-  wrong** — `BLDALPHA` already reads `eva=6,evb=10` at trace tick 1150 with
-  or without a one-tick lag correction (the plateau spans RAM ticks
-  1146-1151 either way), and `gBattle_BG1_Y=0` was confirmed exactly as
-  RAM always suggested. So the "numerically unreachable ~123 vs min-159"
-  problem wasn't the blend ramp at all. Root-caused instead by RAM-probing
-  `gSprites[gBattlerSpriteIds[0/1]]` (indices 3=player, 4=opponent) per
-  tick: **both trainer OBJs are `invisible=0`/`inUse=1` from creation
-  (tick 1074) onward**, sliding in via their own OAM `x2` at the exact same
-  per-tick magnitude as `gTasks[0].data[2]` (the already-validated BG3
-  scanline-shift value), opposite sign per side. #63's "neither trainer OBJ
-  is ever visible during the reveal" was a real misdiagnosis — it only
-  sampled each trainer's *settled* corner rect, never the sliding position.
-  Wired `drawSlideScene` to draw both OBJs raw into the TGT2 buffer
-  (in front of BG3, per their OAM priority) before BG1 blends on top;
-  exact pixel match confirmed at the brief's own named pixel (tick 1150,
-  x=11/y=40 → the opponent trainer's own raw skin-tone color, no blend
-  needed there since BG1 is genuinely transparent at that mapY). Separately
-  fixed `blendChannel` to run in 5-bit GBA color space with floor division
-  (`paletteFade.ts`'s already-established convention for GBA blends, not
-  round-in-8-bit) — off by 1 on roughly a third of blended pixels
-  previously. **Biggest single contributor**, found while chasing a
-  post-OBJ-fix residual (a phantom duplicate of BG3's sky-gradient tiles
-  appearing 200+px away from their real position): `gBattleBgTemplates[3]
-  .screenSize = 1` (`battle_bg.c:152-160`) means BG3 (`static`)'s real
-  hardware width is **512px** (two side-by-side screen blocks), not 256 —
-  `extract-battle-bg.ts`'s existing JSON already has block 2's data at
-  tile-rows 32-63 (confirmed uniformly blank for every row this screen
-  reaches), `staticBgPixel` just never read it, wrapping `mapX` back into
-  block 1 at every 256px instead and re-showing its gradient tiles at the
-  wrong column. Fixed the period/block-select math; net alone was 149→151
-  (small locally, but it's what unblocked seeing the OBJ fix's true effect
-  clearly — many frames' diffs shrank by thousands of px even where the
-  match count didn't move). Added 3 Tier-1 pins in `tests/battleScene.test.ts`
-  (oracle-verified pixel values) for all three fixes.
-- **Still open, narrower than today's:** a pixel within `entrySlide` (BG1)'s
-  own confirmed content zone (tick 1150, x=120/y=84) doesn't match the
-  oracle under ANY combination brute-forced this session — every
-  `bg1Shift`×`bg3Shift` pair (65536 combos) at the RAM-true `eva=6,evb=10`,
-  and separately every `eva`×`evb` pair (17×17) with `bg1Shift` free, tops
-  out at a handful of incidental matches. Ruled out a third sprite (RAM-
-  probed all 65 `gSprites[]` slots' `inUse`/`invisible` at tick 1150 - only
-  the two already-modeled trainers are active). Full account + the next
-  probe (literal VRAM screen-block bytes at BG1's `BG_SCREEN_ADDR(28)`,
-  cross-checked against this exact pixel) in `battleScene.ts`'s module doc
-  point 2.
-- **Next:** the point-2 VRAM probe above is the concrete next step for
-  GAP A's remaining residual. GAP B's own narrow tick-1229 residual
-  (point 3) is untouched, exactly as #64 left it — out of this step's
-  scope.
-- **Notes:** PAPERCUT: none new. This step's RAM probe disproved its own
-  brief's leading hypothesis (BLDALPHA lag) within minutes — worth noting
-  that the "probe first" discipline paid off by quickly ruling out a wrong
-  turn rather than sinking time into it; the actual bugs were found by
-  extending the same RAM-cross-check method (`gSprites[]`, `screenSize`)
-  to structures the brief hadn't named. `bin/oracle run` scratch output
-  went to `/tmp/scene-oracle` (not committed, not `tools/compare/out/` -
-  no stale-cache risk left behind).
-
