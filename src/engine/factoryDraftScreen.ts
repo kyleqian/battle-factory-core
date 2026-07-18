@@ -25,7 +25,7 @@ import {
   WIDE_WINDOW_RIGHT,
   type ConfirmRevealState,
 } from "./confirmReveal.ts";
-import { bg3ColorTiled, blend8, FLASH_BLENDED_COLOR, target2Color } from "./monPicRender.ts";
+import { bg3ColorWide, blend8, FLASH_BLENDED_COLOR, target2Color } from "./monPicRender.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -391,7 +391,7 @@ function drawConfirmReveal(
     const { top, bottom } = visual.window;
     for (let y = top; y < bottom; y += 1) {
       for (let x = WIDE_WINDOW_LEFT; x < WIDE_WINDOW_RIGHT; x += 1) {
-        const bg3 = bg3ColorTiled(x, y);
+        const bg3 = bg3ColorWide(x, y);
         const t2 = target2Color(x, y, cursorCenterX, balls);
         const color = bg3 ? blend8(bg3, t2) : (t2 ?? { r: 0, g: 0, b: 0 });
         setPixel(fb, x, y, color.r, color.g, color.b);

@@ -112,8 +112,13 @@ describe("confirmReveal state machine (hermetic, no core.ts)", () => {
     expect(getConfirmRevealVisual(atFlashEnd).window).toEqual({ top: 64, bottom: 65 });
   });
 
-  it("window grows to (32,96) over 8 more ticks, then holds before mons/YES-NO appear", () => {
-    const grown = run(13 + 8);
+  it("holds the degenerate (64,65) window 1 extra tick (BG3 ShowBg's own tick) before growth starts", () => {
+    const held = run(13 + 1);
+    expect(getConfirmRevealVisual(held).window).toEqual({ top: 64, bottom: 65 });
+  });
+
+  it("window grows to (32,96) over 8 more ticks (starting after the extra hold), then holds before mons/YES-NO appear", () => {
+    const grown = run(13 + 9);
     expect(getConfirmRevealVisual(grown).window).toEqual({ top: 32, bottom: 96 });
     expect(getConfirmRevealVisual(grown).monsAndYesNoVisible).toBe(false);
   });

@@ -42,6 +42,7 @@ const monPicBg = monPicBgData as unknown as {
   tileset: TileGrid;
   palette: RgbColor[];
   tilemap: { width: number; height: number; entries: TilemapEntry[] };
+  wideTilemap: { width: number; height: number; entries: TilemapEntry[] };
 };
 const menuBg = menuBgData as unknown as {
   tileset: TileGrid;
@@ -89,22 +90,29 @@ function bg3Color(x: number, y: number): RgbColor | null {
   return monPicBg.palette[ci] ?? null;
 }
 
+const WIDE_WINDOW_LEFT = 16;
+
 /**
- * confirmReveal.ts's wide (WIDE_WINDOW_LEFT/RIGHT, 208px) YES/NO-reveal window
- * needs BG3 content well beyond the single-popup window's own 8-tile (64px)
- * extraction (mon-pic-bg.json's tilemap is only 8x8 tiles - only ever needed
- * for the narrow window before this slice). Not independently re-extracted
- * this slice (out of scope's asset-extraction budget) - approximated by
- * tiling the same 8x8 pattern every 64px, anchored so the middle repeat
- * (x=88-151) matches the already-verified single-popup window exactly.
- * Oracle-sampled (this slice's own dense probe) as a reasonable match for
- * the observed near-uniform wash outside ball positions - see ISSUES.md if a
- * committed trace exposes a gap here.
+ * confirmReveal.ts's wide (x16-224) YES/NO-reveal window's BG3 content,
+ * RAM/VRAM-verified (ISSUES #8): Select_InitBgs copies the SAME 8x8
+ * mon-pic-bg tile pattern to 3 disjoint anchors (x=16/88/160) once at screen
+ * init, unconditionally - see extract-factory-screen.ts's wideTilemap
+ * comment for the source citation and the extractor that builds this data
+ * (identical tileset/palette to the narrow window, just laid out with the
+ * real 3-block-plus-2-transparent-gap geometry instead of a continuous
+ * tiling approximation).
  */
-export function bg3ColorTiled(x: number, y: number): RgbColor | null {
-  const period = WINDOW_RIGHT - WINDOW_LEFT;
-  const wrapped = WINDOW_LEFT + (((x - WINDOW_LEFT) % period) + period) % period;
-  return bg3Color(wrapped, y);
+export function bg3ColorWide(x: number, y: number): RgbColor | null {
+  const lx = x - WIDE_WINDOW_LEFT;
+  const ly = y - 32;
+  const tc = Math.floor(lx / 8);
+  const tr = Math.floor(ly / 8);
+  if (tc < 0 || tc >= monPicBg.wideTilemap.width || tr < 0 || tr >= monPicBg.wideTilemap.height) return null;
+  const entry = monPicBg.wideTilemap.entries[tr * monPicBg.wideTilemap.width + tc];
+  if (!entry) return null;
+  const ci = sampleTile(monPicBg.tileset, entry.tile, lx % 8, ly % 8, entry.hFlip, entry.vFlip);
+  if (ci === 0) return null;
+  return monPicBg.palette[ci] ?? null;
 }
 
 function bg1Color(x: number, y: number): RgbColor | null {

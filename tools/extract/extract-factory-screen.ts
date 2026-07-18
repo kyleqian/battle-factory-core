@@ -59,10 +59,37 @@ function writeJson(path: string, data: unknown): void {
   const monPicTiles = sliceTiles(monPicBgImage);
   const monPicTilemapBuf = readFileSync(join(factoryScreenDir, "mon_pic_bg.bin"));
   const monPicTilemapFull = parseTilemap(monPicTilemapBuf, 8, 16);
+  const narrowEntries = monPicTilemapFull.entries.slice(0, 64);
+
+  // Wide reveal window (confirmReveal.ts's WIDE_WINDOW_LEFT/RIGHT, x16-224):
+  // Select_InitBgs (battle_factory_screen.c:1202-1206) copies this SAME 8x8
+  // sMonPicBg_Tilemap block to 3 disjoint tile-column anchors (dest columns
+  // 2, 11, 20 - i.e. x=16/88/160) into BG3's tilemap once at screen init,
+  // unconditionally - the narrow single-popup window only ever exposes the
+  // middle block (columns 11-18, x88-152); the wide reveal window exposes
+  // all 3 blocks plus 2 columns (10, 19 - x80-88/x152-160) that
+  // CopyToBgTilemapBufferRect never writes, left as AllocZeroed's blank tile
+  // 0 (transparent). VRAM-verified (scratch RAM/VRAM probe, ISSUES #8):
+  // dumped BG3's actual screen-block tilemap (mapBaseIndex 27 -> VRAM
+  // 0x0600D800) for rows 4-11 and confirmed exactly this 3-block+2-gap
+  // pattern, tile-for-tile identical to the narrow window's own data.
+  const WIDE_TILEMAP_WIDTH = 26; // tile columns 2-27 (x16-224)
+  const WIDE_BLOCK_COLUMN_OFFSETS = [0, 9, 18]; // dest columns 2/11/20, minus the grid's own column-2 origin
+  const blankEntry = { tile: 0, hFlip: false, vFlip: false, palette: 0 };
+  const wideEntries = Array.from({ length: WIDE_TILEMAP_WIDTH * 8 }, () => blankEntry);
+  for (const colOffset of WIDE_BLOCK_COLUMN_OFFSETS) {
+    for (let r = 0; r < 8; r += 1) {
+      for (let c = 0; c < 8; c += 1) {
+        wideEntries[r * WIDE_TILEMAP_WIDTH + colOffset + c] = narrowEntries[r * 8 + c]!;
+      }
+    }
+  }
+
   writeJson(join(ASSETS_GEN, "mon-pic-bg.json"), {
     tileset: { columns: monPicTiles.columns, rows: monPicTiles.rows, tiles: monPicTiles.tiles.map((t) => [...t.pixels]) },
     palette: monPicBgImage.palette,
-    tilemap: { width: 8, height: 8, entries: monPicTilemapFull.entries.slice(0, 64) },
+    tilemap: { width: 8, height: 8, entries: narrowEntries },
+    wideTilemap: { width: WIDE_TILEMAP_WIDTH, height: 8, entries: wideEntries },
   });
 }
 

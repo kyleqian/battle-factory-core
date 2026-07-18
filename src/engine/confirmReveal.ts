@@ -16,13 +16,16 @@
 // monPicAnimating - Select_Task_HandleYesNo's own gate (STATE_YESNO_SHOW_
 // OPTIONS) then shows the YES/NO box next tick.
 //
-// Oracle-probed this slice (dense capture, rent-3picks.json's exact button
-// prefix + idle tail): close settles into the plain grid at confirm-tick+20
-// (matching monPic.ts's existing 20-tick CLOSE_TABLE_B exactly, no new close
-// timing needed), the flash phase's first visible pixel lands 1 tick later
-// (OAM-creation lag, same pattern as every other sprite-visibility split in
-// this screen), the wide window fully opens ~8 ticks after the flash ends,
-// holds ~2-3 ticks, then the 3 mon pics + YES/NO box appear together.
+// RAM/register-verified (ISSUES #8: direct REG_DISPCNT/REG_WIN0V reads +
+// gSprites[] located by known screen position, not struct-offset guessing):
+// close settles into the plain grid at confirm-tick+20 (matching monPic.ts's
+// existing 20-tick CLOSE_TABLE_B exactly, no new close timing needed), the
+// flash phase's first visible pixel lands 1 tick later (OAM-creation lag,
+// same pattern as every other sprite-visibility split in this screen), the
+// wide window holds its degenerate (64,65) state for 2 ticks (WIN0-on and
+// BG3-ShowBg are separate task states/ticks, not simultaneous) before
+// growing over 8 more ticks to (32,96), holds 1 more tick, then the 3 mon
+// pics + YES/NO box appear together.
 
 export type ConfirmRevealPhase = "flash" | "window" | "shown";
 
@@ -35,8 +38,18 @@ export interface ConfirmRevealState {
 /** sAffineAnim_Select_MonPicBg_Opening, same table monPic.ts's flash entries already pin (1/1/4/4/8/8/16/16/32/32/64/64). */
 const FLASH_WIDTHS = [1, 1, 4, 4, 8, 8, 16, 16, 32, 32, 64, 64];
 
-/** Select_Task_OpenChosenMonPics case2: degenerate (64,65) hold, then -4/+4 per tick to (32,96), then holds while Select_CreateChosenMonsSprites's own OAM lag catches up (oracle-measured, ~2 ticks). */
+/**
+ * Select_Task_OpenChosenMonPics: case0 sets the degenerate (64,65) window +
+ * DISPCNT_WIN0_ON (1 tick), case1 does ShowBg(3)/BLDCNT setup with NO window
+ * change (1 tick - RAM/register-verified this slice via direct DISPCNT/WIN0V
+ * reads, ISSUES #8: BG3's DISPCNT bit lands one tick after WIN0's own, a
+ * separate case/tick from case0, not simultaneous as originally modeled),
+ * THEN case2's -4/+4-per-tick growth (8 ticks) to (32,96), holding there 1
+ * more tick (idx9/idx10 below) while Select_CreateChosenMonsSprites's own
+ * sprite-creation lag catches up.
+ */
 const WINDOW_STEPS: { top: number; bottom: number }[] = [
+  { top: 64, bottom: 65 },
   { top: 64, bottom: 65 },
   { top: 60, bottom: 69 },
   { top: 56, bottom: 73 },
@@ -45,7 +58,6 @@ const WINDOW_STEPS: { top: number; bottom: number }[] = [
   { top: 44, bottom: 85 },
   { top: 40, bottom: 89 },
   { top: 36, bottom: 93 },
-  { top: 32, bottom: 96 },
   { top: 32, bottom: 96 },
   { top: 32, bottom: 96 },
 ];
