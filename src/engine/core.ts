@@ -67,6 +67,14 @@ import {
   type PrebattleRoomState,
 } from "./prebattleRoom.ts";
 import { drawMessageBox, renderPrebattleRoomScene, renderPrebattleRoomWalkScene } from "./prebattleRoomRender.ts";
+import {
+  advanceBattleRoom,
+  entryStep,
+  INITIAL_BATTLE_ROOM_STATE,
+  WARP_FADE_TO_ROOM_ELAPSED,
+  type BattleRoomState,
+} from "./battleRoom.ts";
+import { renderBattleRoomEntryScene } from "./battleRoomRender.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -77,6 +85,8 @@ export interface EngineState {
   summaryScreen: SummaryScreenState;
   /** null until A-on-YES (S5 final slice); see prebattleRoom.ts. Once set, no input is processed and this owns rendering exclusively - draftScreen still advances its ball anims through the "fadingOut" phase (see tick()'s prebattleRoom branch) since the real sprites aren't torn down until the fade completes. */
   prebattleRoom: PrebattleRoomState | null;
+  /** null until prebattleRoom's "warpFade" phase hands off (S6 slice 2a); see battleRoom.ts. Once set, no input is processed and this owns rendering exclusively. */
+  battleRoom: BattleRoomState | null;
   /** gRngValue (src/random.c) - advances once per VBlank always (main.c:366); see rng.ts. */
   rngValue: number;
 }
@@ -88,6 +98,7 @@ export function createInitialState(): EngineState {
     keyRepeat: INITIAL_KEY_REPEAT_STATE,
     summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
     prebattleRoom: null,
+    battleRoom: null,
     rngValue: ANCHOR_RNG_VALUE,
   };
 }
@@ -109,6 +120,15 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   // frontier battles, so this always happens before any ball-roll draw below.
   let rngValue = advanceRngValue(state.rngValue);
   let prebattleRoom: PrebattleRoomState | null = state.prebattleRoom;
+  let battleRoom: BattleRoomState | null = state.battleRoom;
+
+  if (battleRoom) {
+    // S6 slice 2a: the ENTRY window reads no input (docs/battle-bringup-
+    // notes.md - the next A-press gate is tick 838, past this slice's
+    // scope) - just free-run the per-tick table (battleRoom.ts).
+    battleRoom = advanceBattleRoom(battleRoom);
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, rngValue };
+  }
 
   if (prebattleRoom) {
     // Select_Task_Exit's fade + CB2_ReturnToFieldContinueScript's field-script
@@ -141,8 +161,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       prebattleRoom = { phase: "messageClosing", elapsed: 0 };
     } else {
       prebattleRoom = advancePrebattleRoom(prebattleRoom);
+      // S6 slice 2a handoff (battleRoom.ts doc): the warp fade holds solid
+      // black indefinitely on its own (WARP_FADE_OUT clamps once fully
+      // faded) - this is the one fixed elapsed count at which the
+      // ground-truth trace's room actually becomes visible again.
+      if (prebattleRoom?.phase === "warpFade" && prebattleRoom.elapsed === WARP_FADE_TO_ROOM_ELAPSED) {
+        prebattleRoom = null;
+        battleRoom = INITIAL_BATTLE_ROOM_STATE;
+      }
     }
-    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, rngValue };
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, rngValue };
   }
 
   if (summaryScreen.transition) {
@@ -417,6 +445,17 @@ function blackFrame(): Uint8Array {
   return fb;
 }
 
+/** S6 slice 2a: bgFadeY/objFadeY called with `elapsed` directly (NOT elapsed+1) - see battleRoom.ts module doc point 1, oracle-verified against a dense per-frame brightness probe. */
+function renderBattleRoomState(state: EngineState): Uint8Array {
+  const b = state.battleRoom!;
+  const step = entryStep(b.elapsed);
+  const bgY = bgFadeY(b.elapsed, FADE_IN);
+  const objY = objFadeY(b.elapsed, FADE_IN);
+  const fb = createFramebuffer();
+  renderBattleRoomEntryScene(fb, step, bgY, objY);
+  return fb;
+}
+
 function renderPrebattleRoomState(state: EngineState): Uint8Array {
   const p = state.prebattleRoom!;
   if (p.phase === "fadingOut") {
@@ -481,6 +520,7 @@ function renderPrebattleRoomState(state: EngineState): Uint8Array {
 }
 
 export function render(state: EngineState): Uint8Array {
+  if (state.battleRoom) return renderBattleRoomState(state);
   if (state.prebattleRoom) return renderPrebattleRoomState(state);
   const summary = state.summaryScreen;
   const t = summary.transition;

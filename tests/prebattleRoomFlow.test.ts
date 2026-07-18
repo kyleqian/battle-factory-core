@@ -20,6 +20,7 @@ import {
 } from "../src/engine/prebattleRoom.ts";
 import { EXIT_FADE_OUT_TICKS, FADE_IN_TICKS, WARP_FADE_OUT, bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 import { getConfirmRevealVisual } from "../src/engine/confirmReveal.ts";
+import { WARP_FADE_TO_ROOM_ELAPSED } from "../src/engine/battleRoom.ts";
 import type { GbaButton } from "../src/input.ts";
 
 type Segment = [number, GbaButton | null];
@@ -185,10 +186,18 @@ describe("core.ts wiring: A-on-YES accept path", () => {
     state = tick(state, new Set());
     expect(state.prebattleRoom).toEqual({ phase: "warpFade", elapsed: 0 });
 
-    // warpFade holds forever (out of this slice's scope past the solid-
-    // black window), never transitioning further.
-    for (let i = 0; i < 40; i += 1) state = tick(state, new Set());
-    expect(state.prebattleRoom).toEqual({ phase: "warpFade", elapsed: 40 });
+    // warpFade holds through its own solid-black window, then (S6 slice 2a)
+    // hands off to battleRoom at WARP_FADE_TO_ROOM_ELAPSED (37) - matching
+    // the ground truth's frame 520, the first visible room frame.
+    for (let i = 0; i < WARP_FADE_TO_ROOM_ELAPSED - 1; i += 1) state = tick(state, new Set());
+    expect(state.prebattleRoom).toEqual({ phase: "warpFade", elapsed: WARP_FADE_TO_ROOM_ELAPSED - 1 });
+
+    state = tick(state, new Set());
+    expect(state.prebattleRoom).toBeNull();
+    expect(state.battleRoom).toEqual({ phase: "entering", elapsed: 0 });
+
+    for (let i = 0; i < 3; i += 1) state = tick(state, new Set());
+    expect(state.battleRoom).toEqual({ phase: "entering", elapsed: 3 });
   });
 });
 

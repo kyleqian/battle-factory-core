@@ -213,6 +213,16 @@ msgbox), `docs/battle-room-notes.md`. Camera pans tracking the invisible
 real player; opponent walk-in gfx = `OBJ_EVENT_GFX_BUG_CATCHER`. Open for
 the engine slices: camera sub-tile timing, the 520-535 fade-in curve,
 walk/turn transient frames (extracted, pixel-unverified), msgbox variant.
+**Slice 2a complete (2026-07-18):** the room ENTRY window (warp fade-in +
+camera pan + decoy walk to settle, ticks 520-624) is engine-implemented and
+RAM/pixel-pinned (`src/engine/battleRoom.ts` + `battleRoomRender.ts`);
+`tools/compare/traces/room-entry.json` (110/110, 0 diff). Resolved: the
+fade-in is `paletteFade.ts`'s `FADE_IN` (indexed by `elapsed` directly, not
+`elapsed+1`); the camera pans a clean 1px/tick, no sub-tile curve; the
+decoy is screen-fixed the whole window (walks in exact lockstep with the
+camera pan) - only its walk-cycle frame changes. Scientists turn + opponent
+walk-in (624-739) and the opponent-speech msgbox (739-843) are still open
+for slices 2b/2c.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain

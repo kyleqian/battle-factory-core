@@ -5,6 +5,57 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 50 — S6 slice 2a: battle-room ENTRY window (ticks 520-624) implemented, oracle-pinned; `room-entry.json` committed 110/110
+
+- **State:** `npm test` **357/357** (349→357, +8 in new `tests/battleRoom.test.ts`,
+  1 existing test in `tests/prebattleRoomFlow.test.ts` updated for the new
+  handoff behavior), `npm run build` green. New trace
+  `tools/compare/traces/room-entry.json` (624 frames, captures 515-624)
+  passes `npm run compare` **110/110, 0 diff**. All 13 pre-existing traces
+  re-verified at their exact prior counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, rent-slot1 125/139,
+  rent-3picks 157/190, confirm-flow 79/95) — zero regressions.
+- **Did:** consumed #49's assets unchanged (no re-extraction needed —
+  walk-cycle/turn frames turned out pixel-exact on first try). RAM-probed
+  ticks 510-629 directly (custom script mirroring `tools/probe/ram-probe.py`'s
+  conventions, struct offsets for `Sprite`/`ObjectEvent` from
+  `include/sprite.h`/`include/global.fieldmap.h`, not committed — scratch
+  under `/tmp/s6entry/`), cross-checked against a dense oracle pixel probe
+  (every frame 515-545) for the fade curve. New `src/engine/battleRoom.ts`
+  (state machine + oracle-pinned per-tick table) and
+  `src/engine/battleRoomRender.ts` (tilemap+border+sprite compositor under
+  a panning camera), wired into `core.ts` as a third top-level scene mode
+  (`battleRoom`) that `prebattleRoom`'s `warpFade` phase hands off to at a
+  fixed elapsed count (`WARP_FADE_TO_ROOM_ELAPSED`) matching the
+  ground-truth trace's own first visible-room frame. Findings, all resolving
+  #49's SS6 open items for this sub-window: (1) **fade-in reuses
+  `paletteFade.ts`'s `FADE_IN` exactly** (same shape as the pre-battle
+  room's own fade-in) but the call site indexes it by `elapsed` directly,
+  not `elapsed+1` like every other fade call site in this codebase —
+  pixel-sampled and algebraically confirmed, 0 mismatches. (2) **the camera
+  pans a clean 1px/tick**, resolving #49's "may not be a clean 1px/tick"
+  open question — `gTotalCameraPixelOffsetY` read directly is static then
+  increments by exactly 1 every tick for 80 ticks, no sub-tile curve. (3)
+  **the decoy is screen-fixed the whole window** (a finding, not assumed):
+  it walks in exact lockstep with the camera pan (both driven by the shared
+  `waitmovement`), so net screen position is constant — only its
+  `sAnim_GoNorth` walk-cycle frame changes; this contradicts the natural
+  first guess (that its raw RAM `sprite.y` directly gives screen position)
+  and cost the first `npm run compare` attempt (216-425px/frame diff,
+  root-caused and fixed same session). (4) the 6 scientists are static
+  (face-south, pre-turn) the whole window, confirmed by RAM, and shift on
+  screen via the same tile-camera formula as the room tiles.
+- **Next:** S6 slice 2b — scientists turn + opponent walk-in (ticks
+  624-739). Open for that slice: opponent walk-in gfx already extracted
+  (#49, `OBJ_EVENT_GFX_BUG_CATCHER`), scientist turn-in-place transient
+  frames extracted but still pixel-unverified (#49 SS6 risk 3).
+- **Notes:** no papercuts. Scratch RAM-probe script and oracle fade-curve
+  probe both inline/`/tmp`, nothing committed beyond the deliverables.
+
+---
+
 ## 49 — S6 groundwork (parallel worktree lane, merged): Battle Factory BATTLE ROOM scene extracted, composite-verified 0/38400 at tick 624; NO ENGINE CODE
 
 - **State:** merge of `worker/wt-20260718-094141` (single commit `f943df7`,
@@ -82,47 +133,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no papercuts. Scratch verification (pixel sampling, brute-force
   tile-match scripts used to derive/confirm the tile-placement algorithm)
   was all inline `node -e`, nothing committed.
-
----
-
-## 47 — S6 slice 1b (parallel worktree lane, merged): slice-0 §4 loose ends resolved — transition = CIRCLES_MEET (RAM-confirmed), transition-end = tick 1227, post-freeze draws re-attributed; docs-only
-
-- **State:** merge `a004db2` (branch `worker/wt-20260718-091648`, single
-  docs commit `c005d87`) on top of #46; `npm test` **348/348** + `npm run
-  build` green on the merged result. Docs-only — `docs/battle-bringup-notes.md`
-  +227/−47, no engine/asset/fixture changes.
-- **Did (worker, supervisor-verified):** (1) transition variant **RESOLVED**:
-  `gTasks[6].data[1]` (`tTransitionId`) reads **34 =
-  `B_TRANSITION_FRONTIER_CIRCLES_MEET`** from tick 869 — enum ordinal
-  independently re-counted by the supervisor against
-  `include/battle_transition.h`; corroborated by `gTasks[7].func` becoming
-  `Task_FrontierCirclesMeet` (its state machine matching source math
-  tick-for-tick) and screenshots (3 circles converging, ticks 960-990).
-  The 1077-1197 "streak" frames are **not** the transition — all
-  transition tasks are destroyed by `CB2_InitBattleInternal`'s
-  `ResetTasks()` at tick 1044 (same tick as the independently-pinned RNG
-  freeze); they're `BeginBattleIntro`'s scene assembly. (2)
-  transition-end **pinned**: scene settled (modulo text) tick **1227**
-  (plateau through 1229); text milestones "would like to battle!"
-  no-heart 1272-1273, ♥ at 1274, true steady state from 1292 = the same
-  4-phase/36-tick idle cycle as the action menu (the old "1290 stable"
-  claim was a 6-frame transient — corrected in place). (3) post-freeze
-  RNG draws re-attributed: **1741 is `TryDoEventsBeforeFirstTurn`'s draw**
-  (RAM-confirmed via the `gBattleMainFunc` handoff; the old attribution
-  to 1747 was a proximity guess); 1745 (2-step) plausibly opponent-AI
-  switch heuristics (`AI_TrySwitchOrUseItem`, bracketed by controller
-  busy-bits, not single-stepped); 1747 (5-step) genuinely unpinned
-  (AI chain, player controller, TryDoEvents all source-ruled-out) — an
-  S7 concern, flagged in the dossier, not an S6 blocker.
-- **Next:** S6 slice 2 — battle-room entry scene (frames 520-838). A
-  parallel extraction worker (battle-room map/NPCs/opponent overworld
-  sprite, new files only) is in flight on the worktree lane as of this
-  entry.
-- **Notes:** worktree removed + branch deleted post-merge. Worker A's
-  ROADMAP slice-1a note was worker-written (convention is propose-only) —
-  ratified as accurate; the slice-1b roadmap note is the supervisor's own,
-  this commit.
-
 
 ---
 
