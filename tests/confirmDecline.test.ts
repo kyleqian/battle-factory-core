@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { isMonsConfirmed } from "../src/engine/factoryDraftScreen.ts";
+import { getConfirmRevealVisual } from "../src/engine/confirmReveal.ts";
 import type { GbaButton } from "../src/input.ts";
 
 type Segment = [number, GbaButton | null];
@@ -96,6 +97,25 @@ describe("decline: B anywhere in YES/NO", () => {
     expect(before.draftScreen.ballAnims[2]).not.toBeNull();
     const declined = replay([...shownState(), [1, "B"]]);
     expect(declined.draftScreen.ballAnims[2]).toBeNull();
+  });
+
+  it("ISSUES #12: the declined slot's pre-decline ballAnim is snapshotted onto confirmReveal, exposed through elapsed 0-2, and gone by elapsed 3 (oracle-pixel-verified: the window's ball-grid layer keeps rendering it selected/frozen for exactly that hold)", () => {
+    const before = replay(shownState());
+    const preDeclineAnim = before.draftScreen.ballAnims[2];
+    expect(preDeclineAnim).not.toBeNull();
+
+    const at0 = replay([...shownState(), [1, "B"]]);
+    expect(at0.draftScreen.confirmReveal?.decliningBallAnim).toEqual(preDeclineAnim);
+    expect(getConfirmRevealVisual(at0.draftScreen.confirmReveal).decliningBallAnim).toEqual(preDeclineAnim);
+
+    const at1 = replay([...shownState(), [1, "B"], [1, null]]);
+    expect(getConfirmRevealVisual(at1.draftScreen.confirmReveal).decliningBallAnim).toEqual(preDeclineAnim);
+
+    const at2 = replay([...shownState(), [1, "B"], [2, null]]);
+    expect(getConfirmRevealVisual(at2.draftScreen.confirmReveal).decliningBallAnim).toEqual(preDeclineAnim);
+
+    const at3 = replay([...shownState(), [1, "B"], [3, null]]);
+    expect(getConfirmRevealVisual(at3.draftScreen.confirmReveal).decliningBallAnim).toBeNull();
   });
 
   it("info text reverts to 'Select the third POKéMON.' (after the redraw lag settles)", () => {

@@ -5,6 +5,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 40 — ISSUES #12: hypothesis disproven + real root cause #1 found/fixed (declined-ball window-render hold); root cause #2 characterized, still open; `confirm-decline.json` 53/67 → 54/67
+
+- **State:** `npm test` **324/324** (323→324, +1
+  `tests/confirmDecline.test.ts`), `npm run build` green. All 10
+  pre-existing traces re-verified at their exact prior counts (anchor 1/1,
+  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
+  rent-slot1 125/139, rent-3picks 157/190, summary-info-magby 132/132,
+  summary-info-onix 122/122, confirm-flow 79/95) — zero regressions.
+  `confirm-decline.json`: **53/67 → 54/67**; **frame 253 now byte-exact**
+  (was 156px); frame 254 251px→95px, frame 255 1129px→973px (both
+  shrunk, not yet closed). Step brief's acceptance bar (all of 253-255
+  fixed, >=56/67) **not fully met** — see Notes for why this is the right
+  stop point rather than a rushed table.
+- **Did:** RAM-probed (`tools/probe/ram-probe.py`, scratch spec/output not
+  committed) `confirm-decline.json`'s actual decline tick-by-tick and
+  **disproved** the prior worker's "decline branch fires 1 tick early"
+  hypothesis: `selectingMonsState`/`mons[2].selectedId`/`monPicAnimating`
+  all flip together at the exact tick this engine's decline branch already
+  fires — timing was already correct. `fadeSpeciesNameActive`'s real
+  1-tick-later flip (and its existing `wasClosingAtZero` compensation) is
+  confirmed correct and kept; comment updated to record the disproof.
+  Pixel-diffed oracle vs app at frames 253-255 (`tools/compare/out/latest`)
+  and found the REAL root cause: the un-reveal's "still-shown" hold already
+  freezes the 3 front-sprite mon pics via `decliningSpecies`, but the wide
+  window's *background ball-grid layer* did not get the same treatment,
+  reading live (already-deselected) ball state instead. Verified exactly
+  via `blend8` math against `pokeball.selectedPalette`/`grayPalette` (matches
+  oracle's declined-ball RGB byte-for-byte with `selectedPalette`, confirmed
+  frozen/non-animating across all 3 oracle frames, switching to gray only at
+  frame 256). Fixed: new `ConfirmRevealState.decliningBallAnim` snapshot
+  (`core.ts`, same hold window as `decliningSpecies`), consumed by
+  `factoryDraftScreen.ts`'s `drawConfirmReveal` to override the window's
+  ball array for the declined slot. 1 new Tier-1 test pinning the snapshot's
+  elapsed-0-through-2 lifetime. Characterized (not fixed) a SECOND, separate
+  residual now isolated at frames 254/255: the YES/NO box text + cursor
+  highlight (`WIN_OPTIONS`, y112-144 — outside the mon-pic window's y32-96
+  clip, unrelated to the window-shrink table) actually starts a multi-tick
+  erase transition one tick earlier than modeled and the highlight persists
+  one tick later than modeled; full evidence + probe plan filed in ISSUES
+  #12 (re-scoped, not deleted). Full trail in the ISSUES #12 entry and
+  commit history.
+- **Next (supervisor-set, per the original brief):** ISSUES #12's remaining
+  YES/NO box erase-transition timing (evidence + a concrete RAM-probe plan
+  already filed), then ISSUES #13 (stretch, untouched this session — no
+  cap time left after #12), then S5's last piece: the YES-press accept path
+  (exit fade → pre-battle room, `docs/prebattle-room-notes.md`). Then S6.
+- **Notes:** stopped here rather than push into #12's second sub-bug because
+  the erase-transition timing needs its own dense probe (sprite-invisible
+  RAM read + per-tick pixel scan) to avoid guessing a wrong table under time
+  pressure — a disproven hypothesis + a real, tested, committed partial fix
+  is the honest stopping point per the brief's own instruction ("a clean
+  disproof + re-filed entry is an acceptable outcome, a silent workaround is
+  not"). All scratch RAM-probe specs/outputs and one scratch pixel-math
+  script were deleted before finishing; nothing uncommitted beyond the
+  intended `src/engine/{confirmReveal,core,factoryDraftScreen}.ts` +
+  `tests/confirmDecline.test.ts` + `ISSUES.md`/`PROGRESS.md`. No new
+  papercuts — `tools/probe/ram-probe.py` (committed last session) worked
+  as documented, first try.
+
+---
+
 ## 39 — ISSUES #11 fixed: species-name breathe (`Select_Task_FadeSpeciesName`) modeled exactly, RAM-pinned; `confirm-decline.json` 13/67 → 53/67
 
 - **State:** `npm test` **323/323** (310→323, +13
@@ -124,48 +185,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `sFactorySelectScreen+0x2A0` for `monPicAnimating`) would have cut this
   significantly; worth banking as a real tool next time this kind of
   RAM-verified-dossier-to-pixel-exact-implementation gap comes up.
-
----
-
-## 37 — Supervisor wind-down: session end 2026-07-17 ~21:00
-
-- **State (verified this minute):** `npm test` **297/297**, `npm run build`
-  green, working tree clean. Traces (all re-run by the supervisor at
-  wind-down): `anchor` 1/1, `draft-cursor` 13/13, `draft-menu` 38/38,
-  `draft-menu-slot6` 66/66, `summary-info-onix` 122/122,
-  `summary-info-magby` 132/132 — all 0 diff — plus `rent-slot1` 125/139,
-  `rent-3picks` **157/190** (new this session), `confirm-flow` **79/95**
-  (new this session), every diff frame in all three individually
-  attributed to ISSUES #5's settled pattern. ISSUES.md backlog is EMPTY
-  of open bugs (only the #5 settled-policy note + mechanism record
-  remain). ROADMAP: S5 slices 1-3 complete; S5 remainder = decline path
-  (B/NO) + YES-press exit fade into the pre-battle room
-  (`docs/prebattle-room-notes.md`).
-- **Session summary (supervised, ~16:08-21:00):** 8 worker steps (7 main
-  lane + 1 worktree lane), all supervisor-verified. Landed: (1) ISSUES #7
-  resolved after a multi-session saga — the minimal-pair probe step proved
-  the HAUNTER "contradiction" was a measurement artifact (a 3rd rent exits
-  cursor mode same-tick, so the lone count=3 data point never happened),
-  the species-keyed stall safe-list {BAYLEEF, HAUNTER} landed RAM-pinned;
-  (2) per-slot displayTile lag fix; (3) cursor-redraw fast path with 2+
-  rented balls + OPEN_TABLE_B degenerate-window fix, shipping
-  `rent-3picks.json`; (4) confirm-flow state machine + reveal render
-  (`confirmReveal.ts`), with five further render/timing bugs root-caused
-  across ISSUES #8/#9/#10 (incl. a real `font.ts` glyph-width bug and a
-  previously-unmodeled 4th stall source), shipping `confirm-flow.json`;
-  (5) ISSUES #5's rent-slot1 re-time question closed empirically (8
-  candidates all worse — attribution fallback is now policy). ISSUES
-  #7/#8/#9/#10 all closed and deleted.
-- **Next:** S5 remainder, in order: the decline path (B/NO,
-  `docs/confirm-flow-notes.md` §3), then the YES-press exit fade +
-  pre-battle room + attendant dialogue (`docs/prebattle-room-notes.md`,
-  scene already extracted + composite-verified). Then S6 off its banked
-  dossier (`docs/battle-bringup-notes.md`) + battle-1 assets.
-- **Notes:** every worker ended at a green commit; no usage-limit events;
-  the one worktree-lane step (rent-slot1 re-time sweep) produced a clean
-  negative result and its branch was removed unmerged (no commits). The
-  user's own `run-supervisor.sh` remote-control edit was committed on
-  request (`c52d42a`).
 
 ---
 

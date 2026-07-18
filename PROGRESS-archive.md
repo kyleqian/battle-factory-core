@@ -5,6 +5,48 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 37 — Supervisor wind-down: session end 2026-07-17 ~21:00
+
+- **State (verified this minute):** `npm test` **297/297**, `npm run build`
+  green, working tree clean. Traces (all re-run by the supervisor at
+  wind-down): `anchor` 1/1, `draft-cursor` 13/13, `draft-menu` 38/38,
+  `draft-menu-slot6` 66/66, `summary-info-onix` 122/122,
+  `summary-info-magby` 132/132 — all 0 diff — plus `rent-slot1` 125/139,
+  `rent-3picks` **157/190** (new this session), `confirm-flow` **79/95**
+  (new this session), every diff frame in all three individually
+  attributed to ISSUES #5's settled pattern. ISSUES.md backlog is EMPTY
+  of open bugs (only the #5 settled-policy note + mechanism record
+  remain). ROADMAP: S5 slices 1-3 complete; S5 remainder = decline path
+  (B/NO) + YES-press exit fade into the pre-battle room
+  (`docs/prebattle-room-notes.md`).
+- **Session summary (supervised, ~16:08-21:00):** 8 worker steps (7 main
+  lane + 1 worktree lane), all supervisor-verified. Landed: (1) ISSUES #7
+  resolved after a multi-session saga — the minimal-pair probe step proved
+  the HAUNTER "contradiction" was a measurement artifact (a 3rd rent exits
+  cursor mode same-tick, so the lone count=3 data point never happened),
+  the species-keyed stall safe-list {BAYLEEF, HAUNTER} landed RAM-pinned;
+  (2) per-slot displayTile lag fix; (3) cursor-redraw fast path with 2+
+  rented balls + OPEN_TABLE_B degenerate-window fix, shipping
+  `rent-3picks.json`; (4) confirm-flow state machine + reveal render
+  (`confirmReveal.ts`), with five further render/timing bugs root-caused
+  across ISSUES #8/#9/#10 (incl. a real `font.ts` glyph-width bug and a
+  previously-unmodeled 4th stall source), shipping `confirm-flow.json`;
+  (5) ISSUES #5's rent-slot1 re-time question closed empirically (8
+  candidates all worse — attribution fallback is now policy). ISSUES
+  #7/#8/#9/#10 all closed and deleted.
+- **Next:** S5 remainder, in order: the decline path (B/NO,
+  `docs/confirm-flow-notes.md` §3), then the YES-press exit fade +
+  pre-battle room + attendant dialogue (`docs/prebattle-room-notes.md`,
+  scene already extracted + composite-verified). Then S6 off its banked
+  dossier (`docs/battle-bringup-notes.md`) + battle-1 assets.
+- **Notes:** every worker ended at a green commit; no usage-limit events;
+  the one worktree-lane step (rent-slot1 re-time sweep) produced a clean
+  negative result and its branch was removed unmerged (no commits). The
+  user's own `run-supervisor.sh` remote-control edit was committed on
+  request (`c52d42a`).
+
+---
+
 ## 36 — ISSUES #10 root-caused and fixed (RAM/oracle-pixel-verified); `confirm-flow.json` COMMITTED — S5's confirm-reveal render surface is now trace-pinned; ISSUES #9 and #10 both deleted
 
 - **State:** `npm test` **297/297** (296→297, +1 net in

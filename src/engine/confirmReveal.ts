@@ -29,6 +29,8 @@
 // 8 more ticks to (32,96), holds 2 more ticks, then the 3 mon pics + YES/NO
 // box appear together.
 
+import type { BallAnimState } from "./ballAnim.ts";
+
 export type ConfirmRevealPhase = "flash" | "window" | "shown" | "closing";
 
 export interface ConfirmRevealState {
@@ -44,6 +46,18 @@ export interface ConfirmRevealState {
    * since the 3rd slot no longer resolves to a pick rank.
    */
   decliningSpecies?: readonly string[];
+  /**
+   * "closing" only: the declined slot's own `BallAnimState`, snapshotted the
+   * tick before decline (ISSUES #12 - the same window-blend the 6-ball grid
+   * shows through the reveal window keeps rendering this ball as still-
+   * selected, frozen on its last live animation frame, through elapsed 0-2 -
+   * oracle-pixel-verified exact match via `blend8` against `pokeball.
+   * selectedPalette` for all 3 hold ticks, switching to the live (gray,
+   * `ballAnims[slot] === null`) rendering only at elapsed 3 - same hold
+   * window as `decliningSpecies` above, just for the background ball layer
+   * instead of the front-sprite mon pic).
+   */
+  decliningBallAnim?: BallAnimState | null;
 }
 
 /**
@@ -194,7 +208,7 @@ export function advanceConfirmReveal(state: ConfirmRevealState | null): ConfirmR
   // §3); once elapsed reaches that, the un-reveal is done and confirmReveal itself goes
   // away (null) - core.ts's normal cursor-mode input resumes the very same tick.
   if (elapsed >= UNREVEAL_TOTAL_TICKS) return null;
-  return { phase: "closing", elapsed, decliningSpecies: state.decliningSpecies };
+  return { phase: "closing", elapsed, decliningSpecies: state.decliningSpecies, decliningBallAnim: state.decliningBallAnim };
 }
 
 export interface ConfirmRevealVisual {
@@ -206,6 +220,8 @@ export interface ConfirmRevealVisual {
   monsVisible: boolean;
   /** Non-null only during "closing"'s early hold (see ConfirmRevealState.decliningSpecies doc) - overrides chosenMonSpecies(state) for that window since live selectedIds no longer resolves the 3rd pick. */
   monsSpeciesOverride: readonly string[] | null;
+  /** Non-null only during the same "closing" hold as `monsSpeciesOverride` (see ConfirmRevealState.decliningBallAnim doc) - overrides the declined slot's ball rendering in the window's background ball-grid layer, which otherwise reads the live (already-deselected) state. */
+  decliningBallAnim: BallAnimState | null;
   /** The YES/NO text itself (Select_ShowYesNoOptions/Select_ErasePopupMenu) - erased immediately on decline, 2 ticks before monsVisible follows (see UNREVEAL doc). */
   yesNoVisible: boolean;
   /** The YES/NO cursor highlight bar (OAM), oracle-measured 1 tick behind yesNoVisible on the way in - same window-copy-vs-OAM lag as every other popup in this screen. */
@@ -217,6 +233,7 @@ const HIDDEN_REVEAL: ConfirmRevealVisual = {
   window: null,
   monsVisible: false,
   monsSpeciesOverride: null,
+  decliningBallAnim: null,
   yesNoVisible: false,
   cursorVisible: false,
 };
@@ -238,12 +255,14 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
   }
   // "closing" (the un-reveal, see UNREVEAL_WINDOW_STEPS/UNREVEAL_FLASH_WIDTHS doc).
   const decliningSpecies = state.decliningSpecies ?? null;
+  const decliningBallAnim = state.decliningBallAnim ?? null;
   if (state.elapsed < 2) {
     return {
       ...HIDDEN_REVEAL,
       window: { top: 32, bottom: 96 },
       monsVisible: true,
       monsSpeciesOverride: decliningSpecies,
+      decliningBallAnim,
       yesNoVisible: true,
       cursorVisible: true,
     };
@@ -254,11 +273,15 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
     // takes its first shrink step (oracle-pixel-verified: NOT a duplicate
     // hold of the full-open window like the reveal-in direction's own
     // ISSUES #10 gap - the shrink starts the same tick the mons vanish).
+    // The declined slot's own ball rendering shares this exact hold too
+    // (ISSUES #12, oracle-pixel-verified): still selected/frozen through
+    // this tick, switching to the live (gray) ball only starting elapsed 3.
     return {
       ...HIDDEN_REVEAL,
       window: UNREVEAL_WINDOW_STEPS[0]!,
       monsVisible: true,
       monsSpeciesOverride: decliningSpecies,
+      decliningBallAnim,
     };
   }
   const windowIdx = state.elapsed - 2;

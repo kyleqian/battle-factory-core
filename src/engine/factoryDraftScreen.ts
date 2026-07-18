@@ -408,11 +408,23 @@ function drawConfirmReveal(
   }
 
   if (visual.window) {
+    // ISSUES #12: during the same decliningSpecies hold above, the window's
+    // background ball-grid layer keeps showing the declined slot as still-
+    // selected (frozen on its last live frame) too - live `balls` already
+    // reflects this tick's deselect, so swap in the frozen snapshot just for
+    // this draw (see ConfirmRevealState.decliningBallAnim's doc).
+    const windowBalls = visual.decliningBallAnim
+      ? balls.map((b, i) =>
+          i === state.cursorPos
+            ? { palette: pokeball.selectedPalette, firstTileRow: ballFirstTileRow(ballAnimTile(visual.decliningBallAnim!)) }
+            : b,
+        )
+      : balls;
     const { top, bottom } = visual.window;
     for (let y = top; y < bottom; y += 1) {
       for (let x = WIDE_WINDOW_LEFT; x < WIDE_WINDOW_RIGHT; x += 1) {
         const bg3 = bg3ColorWide(x, y);
-        const t2 = target2Color(x, y, cursorCenterX, balls);
+        const t2 = target2Color(x, y, cursorCenterX, windowBalls);
         const color = bg3 ? blend8(bg3, t2) : (t2 ?? { r: 0, g: 0, b: 0 });
         setPixel(fb, x, y, color.r, color.g, color.b);
       }

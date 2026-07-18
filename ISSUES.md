@@ -5,37 +5,80 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #12 — un-reveal first-ticks residual: `confirm-decline.json` frames
-  253-255 (156/251/1129px) not root-caused
+## #12 — un-reveal YES/NO box+highlight erase-transition residual:
+  `confirm-decline.json` frames 254/255 (95/973px, was 251/1129px before
+  this session's ball-render fix) not root-caused
 
-**Symptom:** small diffs in the un-reveal's first 1-3 visible ticks
-(`Select_Task_CloseChosenMonPics` window, right where the YES/NO box +
-mon pics tear down).
+**Prior hypothesis DISPROVEN this session (2026-07-17), with fresh RAM
+evidence:** the "decline branch fires 1 tick early" theory from the last
+worker's note was tested directly (`tools/probe/ram-probe.py`, watching
+`selectingMonsState`/`mons[2].selectedId`/`monPicAnimating`/
+`fadeSpeciesNameActive` tick-by-tick across `confirm-decline.json`'s exact
+replay). Result: `selectingMonsState`/`mons[2].selectedId`/`monPicAnimating`
+all flip together at the SAME tick this engine's decline branch (`core.ts`)
+fires — i.e. the branch's timing is already correct, matching the oracle
+exactly. `fadeSpeciesNameActive` genuinely flips one RAM-tick later than the
+other three (reproduced exactly, same offsets as before) despite being the
+same source statement — a real one-tick hardware/task-ordering quirk, not a
+this-engine bug. **`speciesNameFade`'s `wasClosingAtZero` +1 compensation is
+CORRECT and was kept as-is** (comment updated to record the disproof rather
+than the old speculative root-cause note).
 
-**Status:** NOT attributable to ISSUES #5 (different task than
-`CloseMonPic`; no cycle-jitter evidence gathered — the decline worker noted
-"same character" but did not probe). History warns against premature
-jitter attribution: ISSUES #8/#9/#10 all looked like this and were all
-real, fixable modeling bugs. Needs a RAM/pixel chase (the #9/#10 recipe:
-dense captures + direct RGB row-scans + `gSprites`/task-state probes).
+**Real root cause #1 (FOUND + FIXED this session):** the un-reveal's
+"still-shown" hold (`confirmReveal.ts`'s `elapsed < 2` / `elapsed === 2`
+branches) already freezes the front-sprite mon pics via `decliningSpecies`,
+but the WIDE WINDOW's *background ball-grid layer* (drawn through the same
+window, `monPicRender.ts`'s `target2Color`/`ballColor`) did not get the same
+treatment — it read live `state.selectedIds`/`state.ballAnims`, already
+mutated to deselected/null on the decline tick. Oracle-pixel-verified exact
+(`blend8(bg3, pokeball.selectedPalette)` matches the oracle's frame
+253/254/255 RGB values at the declined ball's position exactly, byte-for-
+byte, where the app rendered `blend8(bg3, grayPalette)` instead; the ball
+region is pixel-IDENTICAL across oracle frames 253/254/255 - frozen, not
+still animating - and switches to the live/gray ball starting frame 256).
+Fixed: `core.ts` now snapshots the declined slot's pre-decline `BallAnimState`
+onto the new `ConfirmRevealState.decliningBallAnim` field (mirroring
+`decliningSpecies`'s existing pattern exactly, same elapsed-0-to-2 hold
+window); `factoryDraftScreen.ts`'s `drawConfirmReveal` substitutes it into
+the window's ball array for that hold. Tier-1-pinned
+(`tests/confirmDecline.test.ts`, new `ISSUES #12` describe block). This
+alone fixed frame 253 to a byte-exact match and materially shrank 254
+(251px→95px) and 255 (1129px→973px).
 
-**New evidence (2026-07-17, ISSUES #11 worker, `tools/probe/ram-probe.py`):**
-RAM-probing `confirm-decline.json`'s actual decline tick-by-tick
-(`fadeSpeciesNameActive` at `sFactorySelectScreen+0x2A2`) shows the real
-flag flips TRUE exactly **one tick after** this engine's own decline branch
-(`core.ts`, `newKeys.has("B") || (A && yesNoCursorPos===1)`) fires its other
-same-tick effects (`selectedIds`/`message`/`confirmReveal`→"closing") — even
-though in the source, `Select_DeclineChosenMons()` and
-`fadeSpeciesNameActive = TRUE` are the same synchronous call
-(`battle_factory_screen.c:1556`/`1567`), so they can't really be 1 tick
-apart in the real game. The likely explanation: this engine's decline
-branch itself fires 1 tick early relative to the oracle for *all* its
-effects, not just this one — a plausible root cause for this entry's
-253-255 residual (frames right at that same boundary). Not chased further
-(out of scope for that step); the speciesNameFade wiring compensates with
-an explicit +1 tick delay on its own activation only (`core.ts`, see the
-comment at the `wasClosingAtZero` check) rather than touching the existing
-(possibly off-by-one) decline branch itself.
+**Real root cause #2 (characterized, NOT yet fixed — residual scope
+narrowed to this):** the YES/NO box's text ("YES"/"NO" glyphs, `WIN_OPTIONS`
+x176-224/y112-144) and its cursor-highlight sprite are modeled as fully
+unchanged through `elapsed < 2` then hidden from `elapsed === 2` on
+(`yesNoVisible`/`cursorVisible` in `getConfirmRevealVisual`). Fresh pixel
+evidence contradicts BOTH ends of that: (a) the oracle's own WIN_OPTIONS
+pixels at frame 254 (elapsed 1) already differ from frame 253 (elapsed 0) -
+specific glyph-shaped clusters at x183-199/y116-124 and y132-140 change from
+white text to dark tones between those two ticks, even though this engine
+renders frame 253/254 pixel-identical there (a genuine multi-tick erase
+transition starting one tick earlier than modeled, not an instant
+"unchanged then gone" toggle); (b) the highlight sprite's own red pixels
+(`menuHighlight.palette[2] = {255,0,0}`, sampled directly e.g. oracle
+(220,143)/(190,129)) are still visible in the oracle through frame 255
+(elapsed 2), one tick later than this engine's `cursorVisible` cutoff, only
+disappearing at frame 256 (elapsed 3) — note WIN_OPTIONS/the highlight sit
+at y112-144, entirely outside the mon-pic reveal window's y32-96 clip range,
+so this is unrelated to the window-shrink table and needs its own
+timing/erase-progression model, not a copy of `decliningSpecies`'s
+mon-pic-pic hold. Source: `Select_ErasePopupMenu(SELECT_WIN_YES_NO)`
+(`battle_factory_screen.c:1863-1870`) sets the highlight sprites' `invisible`
+flag, fills the window pixel buffer, and clears the window tilemap all
+synchronously on the decline tick (253) — yet none of that is visible until
+1-3 ticks later, so (like `fadeSpeciesNameActive`) at least one of those
+three sub-effects has its own real hardware/VRAM-copy lag; which one(s),
+and the exact per-tick text-erase pixel progression, was not isolated this
+session. **Probe:** RAM-read `gSprites[menuCursor1/2SpriteId].invisible`
+tick-by-tick alongside a dense oracle pixel scan of the WIN_OPTIONS glyph
+region for frames 253-256 to separate the sprite-hide lag from the
+window/text-erase lag; likely needs a small per-tick "erase table" (in the
+same family as `CLOSE_TABLE_B`) rather than a single boolean flip.
+`confirm-decline.json` is at **54/67** as of this session (was 53/67);
+frame 253 now matches exactly, 254/255 remain (all other frames unaffected,
+zero regressions across all 10 other committed traces).
 
 ## #13 — periodic ball-area bumps during the post-decline window (11
   frames: 259/263/267/270/271/273/275/278/286/294/302, mostly +173-176px

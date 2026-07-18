@@ -155,16 +155,18 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let confirmReveal = advanceConfirmReveal(draftScreen.confirmReveal);
     if (wasClosingAtZero && confirmReveal?.phase === "closing" && confirmReveal.elapsed === 1) {
       // battle_factory_screen.c:1556/1567: a decline sets fadeSpeciesNameActive
-      // TRUE the same tick as Select_DeclineChosenMons - but RAM-probing
-      // confirm-decline.json's actual decline (tools/probe/ram-probe.py)
-      // shows the real `active` flag only flips one tick after this engine's
-      // own decline branch (below) fires its other same-tick effects
-      // (selectedIds/message/confirmReveal). ISSUES #12 already tracks an
-      // unexplained 1-tick-scale residual right at this same boundary
-      // (frames 253-255) - most likely this engine's decline branch is
-      // itself firing one tick early relative to the real game, and this is
-      // the matching compensation so the *later* (RAM/pixel-confirmed)
-      // ticks land right; see ISSUES #12 for the evidence trail.
+      // TRUE the same *source* statement as Select_DeclineChosenMons, but
+      // RAM-probing confirm-decline.json's actual decline (tools/probe/
+      // ram-probe.py) shows the real `active` flag flips one tick after
+      // monPicAnimating/selectingMonsState/mons[2].selectedId - all 3 of
+      // which flip in lockstep with THIS engine's own decline branch below,
+      // at the same tick the A/B press registers. So this engine's decline
+      // branch is NOT firing early (ISSUES #12's prior hypothesis, disproven
+      // this session - ISSUES #12 has the full evidence trail and the
+      // separate real root cause of the 253-255 residual, a ball-render
+      // hold gap, unrelated to this timing): this +1 IS the correct, real
+      // compensation for a genuine one-tick-later flip of this one flag,
+      // kept as-is.
       speciesNameFade = activateSpeciesNameFade(speciesNameFade);
     }
     if (confirmed && !confirmReveal && monPic.phase === "closed") {
@@ -196,6 +198,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
           // and start the 20-tick un-reveal (confirmReveal.ts's "closing").
           const slot = draftScreen.cursorPos;
           const decliningSpecies = chosenMonSpecies(draftScreen);
+          // ISSUES #12: the window's background ball-grid layer keeps
+          // rendering this slot as still-selected (frozen on its last live
+          // frame) through the same elapsed 0-2 hold decliningSpecies covers
+          // above - see ConfirmRevealState.decliningBallAnim's doc.
+          const decliningBallAnim = draftScreen.ballAnims[slot];
           const { selectedIds, selectingMonsState } = applyDeselect(draftScreen.selectedIds, draftScreen.selectingMonsState, slot);
           ballAnims[slot] = null;
           // Select_PrintSelectMonString is the same text-printer function
@@ -213,7 +220,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             selectingMonsState,
             message: selectMonMessage(selectingMonsState),
           };
-          confirmReveal = { phase: "closing", elapsed: 0, decliningSpecies };
+          confirmReveal = { phase: "closing", elapsed: 0, decliningSpecies, decliningBallAnim };
         }
         // A-on-YES (accept): out of scope this slice (the exit-fade path) -
         // no-op for now, see docs/confirm-flow-notes.md.
