@@ -5,6 +5,94 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 42 — S5 COMPLETE: YES-press accept path (exit fade → pre-battle room → fully-printed "Right this way, please!") implemented, oracle-pinned; `accept-prebattle.json` committed at 123/137, ISSUES #14 filed for the residual
+
+- **State:** `npm test` **337/337** (329→337, +8 `tests/prebattleRoomFlow.test.ts`,
+  +2 rewritten in `tests/confirmDecline.test.ts`), `npm run build` green. All
+  11 pre-existing traces re-verified at their exact prior counts (anchor
+  1/1, draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example
+  4/4, rent-slot1 125/139, rent-3picks 157/190, summary-info-magby 132/132,
+  summary-info-onix 122/122, confirm-flow 79/95, confirm-decline 67/67) —
+  zero regressions. New trace `tools/compare/traces/accept-prebattle.json`
+  (dense, 137 captures spanning the YES press through the fully-printed,
+  settled idle message) committed at **123/137**, all 14 non-matching
+  frames individually attributed to a new, precisely-evidenced entry
+  (ISSUES #14).
+- **Did:** Implemented S5's last piece end-to-end: new `src/engine/
+  prebattleRoom.ts` (scene-mode state machine: fadingOut → black → fadingIn
+  → roomHold → printing → idle) and `src/engine/prebattleRoomRender.ts`
+  (static room composite reusing the already-dossier-verified 17x14-block +
+  NPC-sprite assets, plus the message box), wired into `core.ts`'s
+  `EngineState`/`tick`/`render` via a new top-level `prebattleRoom` field
+  (same shape as `summaryScreen.transition`'s own exclusive-ownership
+  pattern). Dense oracle probes this session (own dense captures, not
+  reused from prior scratch) pinned: (1) the exit fade-out reuses
+  `paletteFade.ts`'s existing `EXIT_FADE_OUT` timing verbatim (same
+  `BeginNormalPaletteFade(PALETTES_ALL,0,0,16,RGB_BLACK)` call, source-
+  confirmed) but only *starts* once the 20-tick closing/un-reveal
+  (`Select_HideChosenMons()`, the SAME function decline calls) finishes -
+  not at the button press itself; (2) a new, distinct 14-tick black hold
+  (`EXIT_TO_ROOM_BLACK_HOLD_TICKS`, NOT the summary screen's 20); (3) the
+  room fade-in reuses `FADE_IN` verbatim; (4) an 8-tick settled-room hold
+  before the message box appears (`ROOM_HOLD_TICKS`); (5) the message box
+  frame+interior appears fully-formed in one tick (no grow animation) -
+  baked directly from an oracle capture into a new asset
+  (`src/assets/gen/prebattle-msgbox-frame.json`) after this session's own
+  tile/palette brute-force match against `prebattle-room-msgbox.json`
+  turned up unexplained ~1-GBA-step color mismatches (PAPERCUT, see below);
+  (6) text prints exactly 1 character/tick linearly (no pauses - the
+  dossier's own sha-diff-only pass had mistaken 3 space-character ticks for
+  timing stalls), glyph origin (16,121) and colors pixel-derived this
+  session (corrects `docs/prebattle-room-notes.md` §3's own Risk 1/2 - see
+  `prebattleRoomRender.ts`'s module doc for the corrected box geometry,
+  y112-159 not y96-159). Root-caused and fixed two real accept-vs-decline
+  source divergences along the way (both source-grepped, not guessed):
+  `Select_ErasePopupMenu(SELECT_WIN_YES_NO)` is decline-only (accept's
+  YES/NO box + cursor highlight stay visible through the whole closing AND
+  the exit fade, new `drawYesNoOverlayFaded` export); and the 3 mon pics
+  vanish one tick earlier on accept than decline's own cutoff (decline's
+  extra same-tick `Select_HandleMonSelectionChange`/`Select_
+  PrintSelectMonString` work delays that frame's render, same "extra work
+  costs a tick" family as ISSUES #9/#13). RNG continuity (ROADMAP S6's
+  correction note) verified two ways: a hermetic hold-yourself test proving
+  `rngValue` advances every single tick with no gaps through the whole
+  window, and a `tools/probe/ram-probe.py` cross-check pinning the exact
+  `gRngValue` at the fully-printed idle tick (bit-exact match, both new
+  Tier-1 tests in `tests/prebattleRoomFlow.test.ts`). Ball anims (and their
+  RNG rolls) keep advancing through "fadingOut" specifically (source-
+  confirmed: `Select_DestroyAllSprites` only runs once the fade completes,
+  `battle_factory_screen.c:1512-1519`), then stop for good.
+- **Next:** S5 is now fully `[x]`-ready per its own acceptance criteria
+  (supervisor to confirm and tick `ROADMAP.md`, per protocol this worker
+  doesn't edit it). A future session should pick up ISSUES #14 (the
+  window-edge residual below) opportunistically, or move straight to S6
+  (battle bring-up) off its already-banked groundwork
+  (`docs/battle-bringup-notes.md`).
+- **Notes:** **ISSUES #14 filed, not fixed:** a 4-row band at the shrinking
+  reveal window's current top/bottom edge shows a wrong color for 8 frames
+  of the accept-path closing animation, tapering to 0 by the time the
+  window fully collapses (same halving-tapering shape as ISSUES #5's flash-
+  bar family) - full pixel evidence + what was ruled out (not a window-
+  bounds/table-timing bug, `bg3ColorWide` is flat there, `target2Color`'s
+  `bg1Color` fallback is the likely site) is in the entry itself. Chased for
+  a meaningful chunk of this session's budget before stopping to bank the
+  two *confirmed* source-level bugs instead of guessing further at this
+  third one. PAPERCUT: `prebattle-room-msgbox.json`'s own tile/palette data
+  didn't reproduce the oracle's box art byte-for-byte when composited per
+  the standard `DrawDialogueFrame` tile-index algorithm (source-read
+  correctly, cross-checked against the extracted JSON) - colors were
+  consistently one GBA 5-bit step brighter than the palette's own entries
+  at several positions (border edges, text shadow), not yet root-caused.
+  Worked around by baking the exact oracle pixels for the box's pre-text
+  frame directly into a new asset instead of re-deriving from tiles/
+  palette - functionally correct (0 diff on the box itself) but a future
+  session should figure out why the tile-based derivation didn't match
+  before extending it (e.g. to a 2nd map's message box) elsewhere. ~20 min
+  lost this session on that specific investigation before the baking
+  shortcut was chosen.
+
+---
+
 ## 41 — ISSUES #12 root cause #2 fixed + ISSUES #13 root-caused and fixed; `confirm-decline.json` 54/67 → **67/67**, both entries DELETED
 
 - **State:** `npm test` **328/328** (325→328, +3 in `tests/confirmDecline.test.ts`;
@@ -137,80 +225,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `tests/confirmDecline.test.ts` + `ISSUES.md`/`PROGRESS.md`. No new
   papercuts — `tools/probe/ram-probe.py` (committed last session) worked
   as documented, first try.
-
----
-
-## 39 — ISSUES #11 fixed: species-name breathe (`Select_Task_FadeSpeciesName`) modeled exactly, RAM-pinned; `confirm-decline.json` 13/67 → 53/67
-
-- **State:** `npm test` **323/323** (310→323, +13
-  `tests/speciesNameFade.test.ts`), `npm run build` green. All 10
-  pre-existing traces re-verified at their exact prior counts (anchor 1/1,
-  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
-  rent-slot1 125/139, rent-3picks 157/190, summary-info-magby 132/132,
-  summary-info-onix 122/122, confirm-flow 79/95) — zero regressions, the
-  breathe never fires within any of their action budgets.
-  `confirm-decline.json`: **13/67 → 53/67** (one short of the step brief's
-  "exactly 54/67" target - see Notes for why, and why that's the right stop
-  point rather than a sign the model is wrong).
-- **Did:** Built `tools/probe/ram-probe.py` (generic, reusable per-tick
-  RAM-probe over a button-segment script; committed per `PAPERCUTS.md`) and
-  used it to pin `fadeSpeciesNameActive`/`fadeOut`/`coeffDelay`/`coeff`/
-  `faceSpeciesNameDelay` tick-by-tick (`sFactorySelectScreen+0x2A2..0x2A9`,
-  cross-verified against the already-RAM-confirmed `monPicAnimating` at
-  `+0x2A0`) from both the anchor (idle) and `confirm-decline.json`'s actual
-  decline. Confirmed the state machine matches `Select_Task_FadeSpeciesName`
-  exactly, including a subtle quirk: `FADESTATE_RUN`'s `coeff === 0` check is
-  unconditional, so the pre-onset ramp bounces through six 16-tick
-  `FADESTATE_DELAY` pauses (1 RUN tick each) before `coeff` ever leaves 0 -
-  103 ticks of active time, matching ROADMAP.md's empirically-observed
-  "~104 cumulative cursor-mode ticks" idle-stable budget exactly (was never
-  explained before). Cross-checked `BlendPalette` (reusing
-  `paletteFade.ts`'s already-verified `blendComponentToBlack`) against a
-  direct pixel probe: reproduces ISSUES #11's oracle sample (coeff 5 → RGB
-  173,0,0) exactly, plus the full table (0..6 → 255,239,222,206,189,173,156).
-  Found a genuine GBA render lag (RAM `coeff` steps at tick T, the rendered
-  pixel only changes at T+1) - modeled via a `renderCoeff` field, same shape
-  as this codebase's other queued-write lags (ISSUES #5, `paletteFade.ts`).
-  New `src/engine/speciesNameFade.ts` (state + advance + activate/
-  deactivate + `speciesNameColor`), wired into `core.ts`: deactivates on
-  cursor-mode A (popup open), reactivates on B-close/OTHERS/non-confirming
-  RENT-DESELECT directly, and on decline with an extra RAM-required 1-tick
-  delay (see Notes and ISSUES #12's update). `factoryDraftScreen.ts` now
-  renders WIN_SPECIES through a per-tick-blended palette instead of the
-  fixed one. 13 new Tier-1 tests (`tests/speciesNameFade.test.ts`): waveform
-  boundaries (7-tick cadence, peak-6 flip, 16-tick pause), the blend table,
-  the anchor-onset tick, pause/resume (not reset) semantics, and the
-  core.ts wiring. Full mechanics + evidence trail in commit `2013459`.
-- **Next (supervisor-set, per the original brief):** ISSUES #12/#13 chases
-  (both got new evidence this session, see below - still open, out of
-  scope for this step), then S5's last piece: the YES-press accept path
-  (exit fade → pre-battle room, `docs/prebattle-room-notes.md`). Then S6.
-- **Notes:** **why 53/67, not the brief's "exactly 54/67":** with #11's
-  constant baseline gone, an **11th** ball-area frame surfaced - **273**
-  (3px, `x=44/120/196,y=64`), the same y54-73 ball-region family as ISSUES
-  #13's already-documented 10 frames but much smaller and previously
-  invisible under the uniform ~129px species-color diff that used to cover
-  256-306. Verified this can't be caused by this session's change (`git
-  diff` of the speciesNameFade commit touches only `drawText`'s palette
-  argument for the WIN_SPECIES window - zero lines touching `ballAnims`,
-  `drawSprite`, or `drawConfirmReveal`), so it's a pre-existing #13-pattern
-  gap the original characterization simply didn't enumerate, not a
-  regression. Documented as new evidence in ISSUES #13 (not fixed - out of
-  scope for this step) rather than chased further. Also appended new
-  evidence to ISSUES #12: RAM shows `fadeSpeciesNameActive` truly flips one
-  tick after this engine's OTHER decline effects, even though they're the
-  same synchronous C statement in the source - likely evidence the existing
-  decline branch itself fires 1 tick early (a candidate root cause for #12's
-  253-255 residual), compensated here only for this module's own activation
-  timing, not fixed at the source. All RAM/pixel probing beyond the
-  committed `tools/probe/ram-probe.py` script itself (its one-off spec
-  JSONs, a scratch pixel-cross-check script) was scratch, deleted before
-  finishing. PAPERCUT: building the per-tick RAM-probe harness from scratch
-  (symbol/pointer-deref plumbing, mGBA's exit-139/stdout-spew quirks) ate
-  a large fraction of this session before any engine code was written -
-  now moot for future sessions since `tools/probe/ram-probe.py` is
-  committed and reusable (usage note in its own docstring), but worth
-  flagging: ~25-30 min lost this session to (re)deriving it.
 
 ---
 

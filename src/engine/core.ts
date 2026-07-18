@@ -19,6 +19,7 @@ import {
   isMonsConfirmed,
   moveCursor,
   moveMenuCursor,
+  drawYesNoOverlayFaded,
   renderFactoryDraftScreen,
   renderFactoryDraftScreenFaded,
   selectMonMessage,
@@ -54,6 +55,15 @@ import {
   type SummaryScreenState,
 } from "./summaryScreen.ts";
 import { renderSummaryInfoPage, renderSummaryInfoPageFaded } from "./summaryInfoPage.ts";
+import {
+  advancePrebattleRoom,
+  INITIAL_PREBATTLE_ROOM_STATE,
+  messageBoxVisible,
+  visiblePrintedChars,
+  EXIT_TO_ROOM_BLACK_HOLD_TICKS,
+  type PrebattleRoomState,
+} from "./prebattleRoom.ts";
+import { drawMessageBox, renderPrebattleRoomScene } from "./prebattleRoomRender.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -62,6 +72,8 @@ export interface EngineState {
   draftScreen: DraftScreenState;
   keyRepeat: KeyRepeatState;
   summaryScreen: SummaryScreenState;
+  /** null until A-on-YES (S5 final slice); see prebattleRoom.ts. Once set, no input is processed and this owns rendering exclusively - draftScreen still advances its ball anims through the "fadingOut" phase (see tick()'s prebattleRoom branch) since the real sprites aren't torn down until the fade completes. */
+  prebattleRoom: PrebattleRoomState | null;
   /** gRngValue (src/random.c) - advances once per VBlank always (main.c:366); see rng.ts. */
   rngValue: number;
 }
@@ -72,6 +84,7 @@ export function createInitialState(): EngineState {
     draftScreen: ANCHOR_DRAFT_SCREEN_STATE,
     keyRepeat: INITIAL_KEY_REPEAT_STATE,
     summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
+    prebattleRoom: null,
     rngValue: ANCHOR_RNG_VALUE,
   };
 }
@@ -92,6 +105,33 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   // main.c:366 - Random() advances once per VBlank unconditionally outside
   // frontier battles, so this always happens before any ball-roll draw below.
   let rngValue = advanceRngValue(state.rngValue);
+  let prebattleRoom: PrebattleRoomState | null = state.prebattleRoom;
+
+  if (prebattleRoom) {
+    // Select_Task_Exit's fade + CB2_ReturnToFieldContinueScript's field-script
+    // resume own the screen exclusively from here - no input is processed.
+    // But Select_DestroyAllSprites/DestroyTask(fadeSpeciesNameTaskId) etc.
+    // (battle_factory_screen.c:1512-1519) only run once the fade itself
+    // completes (`if (!UpdatePaletteFade())`, state 1) - so every ball still
+    // rented keeps its SpriteCB_Pokeball idle/rock anim (and RNG roll) alive
+    // through the whole "fadingOut" phase, oracle-confirmed this session
+    // (dense diff against a frozen-draftScreen render left ~1-14% of the
+    // frame wrong on every fadingOut tick; advancing ballAnims here closed
+    // it). Once the fade reaches "black", the sprites are gone for good.
+    if (prebattleRoom.phase === "fadingOut") {
+      const ballAnims = draftScreen.ballAnims.slice();
+      for (let i = 0; i < ballAnims.length; i += 1) {
+        const anim = ballAnims[i];
+        if (!anim) continue;
+        const result = advanceBallAnim(anim, rngValue, i === 0, false);
+        ballAnims[i] = result.state;
+        rngValue = result.rngValue;
+      }
+      draftScreen = { ...draftScreen, ballAnims };
+    }
+    prebattleRoom = advancePrebattleRoom(prebattleRoom);
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, rngValue };
+  }
 
   if (summaryScreen.transition) {
     // Select_Task_OpenSummaryScreen's STATE_SUMMARY_FADE/CLEAN/SHOW (and the
@@ -158,6 +198,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // the closing zoom-out's own final width-1 flash pixel is still visible
     // on screen the one tick confirmReveal itself goes null.
     const closingFlashResidual = wasClosing && confirmReveal === null;
+    // S5 final slice: the accept path's closing/un-reveal (same 20-tick
+    // teardown as decline, see prebattleRoom.ts's module doc) just finished -
+    // hand off to the exit fade instead of resuming cursor-mode input.
+    const wasAccepting = draftScreen.confirmReveal?.phase === "closing" && draftScreen.confirmReveal.accepting === true;
+    if (wasAccepting && confirmReveal === null) {
+      prebattleRoom = INITIAL_PREBATTLE_ROOM_STATE;
+    }
     if (wasClosingAtZero && confirmReveal?.phase === "closing" && confirmReveal.elapsed === 1) {
       // battle_factory_screen.c:1556/1567: a decline sets fadeSpeciesNameActive
       // TRUE the same *source* statement as Select_DeclineChosenMons, but
@@ -172,7 +219,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // hold gap, unrelated to this timing): this +1 IS the correct, real
       // compensation for a genuine one-tick-later flip of this one flag,
       // kept as-is.
-      speciesNameFade = activateSpeciesNameFade(speciesNameFade);
+      // battle_factory_screen.c:1547-1549: A-on-YES does NOT set
+      // fadeSpeciesNameActive (only the decline/B branches do) - the whole
+      // species-name window is being torn down anyway as part of the exit,
+      // so this only matters if a future trace needs the fade's internal
+      // state, not for any pixel this slice renders.
+      if (!draftScreen.confirmReveal?.accepting) {
+        speciesNameFade = activateSpeciesNameFade(speciesNameFade);
+      }
       // ISSUES #13: Select_Task_CloseChosenMonPics's own per-frame creation
       // cost (same family as Select_CreateChosenMonsSprites's reveal-side
       // cost, ISSUES #9) stalls every still-active ball's own internal
@@ -193,7 +247,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // naturally excludes it, no filter needed.
       ballAnimStall = activeSlotsBeforeAction;
     }
-    if (confirmed && !confirmReveal && monPic.phase === "closed") {
+    if (confirmed && !confirmReveal && monPic.phase === "closed" && !wasAccepting) {
       confirmReveal = INITIAL_CONFIRM_REVEAL_STATE;
       // Select_ShowYesNoOptions resets yesNoCursorPos to YES every time the
       // popup (re)shows - relevant once a decline lets the 3rd pick re-open.
@@ -245,9 +299,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             message: selectMonMessage(selectingMonsState),
           };
           confirmReveal = { phase: "closing", elapsed: 0, decliningSpecies, decliningBallAnim };
+        } else if (newKeys.has("A") && draftScreen.yesNoCursorPos === 0) {
+          // battle_factory_screen.c:1544-1550: A-on-YES calls the SAME
+          // Select_HideChosenMons() decline uses (see prebattleRoom.ts's
+          // module doc) - the identical 20-tick closing/un-reveal, just with
+          // no deselection (nothing about the 3 picks changes, so no
+          // decliningSpecies/decliningBallAnim snapshot is needed - the ball
+          // grid behind the shrinking window keeps reading live state, which
+          // stays valid throughout).
+          confirmReveal = { phase: "closing", elapsed: 0, accepting: true };
         }
-        // A-on-YES (accept): out of scope this slice (the exit-fade path) -
-        // no-op for now, see docs/confirm-flow-notes.md.
       }
     } else if (confirmed) {
       // Still waiting for the 3rd confirm's own popup close (monPic) to
@@ -333,7 +394,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     };
   }
 
-  return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, rngValue };
+  return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, rngValue };
 }
 
 function blackFrame(): Uint8Array {
@@ -342,7 +403,42 @@ function blackFrame(): Uint8Array {
   return fb;
 }
 
+function renderPrebattleRoomState(state: EngineState): Uint8Array {
+  const p = state.prebattleRoom!;
+  if (p.phase === "fadingOut") {
+    const ticks = p.elapsed + 1;
+    const bgY = bgFadeY(ticks, EXIT_FADE_OUT);
+    const objY = objFadeY(ticks, EXIT_FADE_OUT);
+    const fb = renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY);
+    // Select_ErasePopupMenu(SELECT_WIN_YES_NO) is never called on the accept
+    // path (see drawYesNoOverlayFaded's doc) - the YES/NO box + cursor stay
+    // on screen, fading with everything else, until fully black.
+    drawYesNoOverlayFaded(fb, state.draftScreen, bgY, objY);
+    return fb;
+  }
+  if (p.phase === "black") {
+    // Same quirk as the summary screen's own black hold (see render()'s
+    // comment below): the hold's last tick already peeks at the room fade-
+    // in's first step.
+    if (p.elapsed + 1 < EXIT_TO_ROOM_BLACK_HOLD_TICKS) return blackFrame();
+    const fb = createFramebuffer();
+    renderPrebattleRoomScene(fb, bgFadeY(0, FADE_IN), objFadeY(0, FADE_IN));
+    return fb;
+  }
+  if (p.phase === "fadingIn") {
+    const ticks = p.elapsed + 1;
+    const fb = createFramebuffer();
+    renderPrebattleRoomScene(fb, bgFadeY(ticks, FADE_IN), objFadeY(ticks, FADE_IN));
+    return fb;
+  }
+  const fb = createFramebuffer();
+  renderPrebattleRoomScene(fb);
+  if (messageBoxVisible(p)) drawMessageBox(fb, visiblePrintedChars(p));
+  return fb;
+}
+
 export function render(state: EngineState): Uint8Array {
+  if (state.prebattleRoom) return renderPrebattleRoomState(state);
   const summary = state.summaryScreen;
   const t = summary.transition;
   if (!t) {

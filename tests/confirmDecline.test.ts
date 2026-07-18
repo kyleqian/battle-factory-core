@@ -154,12 +154,28 @@ describe("decline: A while the cursor is on NO - source-identical to B", () => {
   });
 });
 
-describe("A while the cursor is on YES: accept path is out of scope this slice - a no-op", () => {
-  it("does not decline and does not start the un-reveal", () => {
+describe("A while the cursor is on YES: accept path (S5 final slice, see prebattleRoom.ts)", () => {
+  it("starts the same 20-tick closing/un-reveal as decline, but with accepting:true and no deselection", () => {
     const state = replay([...shownState(), [1, "A"]]);
-    expect(state.draftScreen.confirmReveal?.phase).toBe("shown");
+    expect(state.draftScreen.confirmReveal?.phase).toBe("closing");
+    expect(state.draftScreen.confirmReveal?.elapsed).toBe(0);
+    expect((state.draftScreen.confirmReveal as { accepting?: boolean })?.accepting).toBe(true);
+    // Unlike decline: nothing about the 3 picks changes.
     expect(state.draftScreen.selectingMonsState).toBe(4);
     expect(state.draftScreen.selectedIds).toEqual([1, 2, 3, 0, 0, 0]);
+  });
+
+  it("hands off to prebattleRoom (fadingOut) the same tick the closing animation completes, without re-opening confirmReveal", () => {
+    const at19 = replay([...shownState(), [1, "A"], [19, null]]);
+    expect(at19.prebattleRoom).toBeNull();
+    expect(at19.draftScreen.confirmReveal?.phase).toBe("closing");
+
+    const at20 = replay([...shownState(), [1, "A"], [20, null]]);
+    expect(at20.prebattleRoom).toEqual({ phase: "fadingOut", elapsed: 0 });
+    expect(at20.draftScreen.confirmReveal).toBeNull();
+
+    const at21 = replay([...shownState(), [1, "A"], [21, null]]);
+    expect(at21.prebattleRoom).toEqual({ phase: "fadingOut", elapsed: 1 });
   });
 });
 

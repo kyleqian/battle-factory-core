@@ -478,6 +478,27 @@ function drawConfirmReveal(
   }
 }
 
+/**
+ * S5 final slice: A-on-YES never calls Select_ErasePopupMenu(SELECT_WIN_YES_NO)
+ * (source-confirmed, see confirmReveal.ts's "accepting" doc) - so the YES/NO
+ * box + cursor highlight stay drawn (fading with everything else) all the way
+ * through Select_Task_Exit's own palette fade, past the point confirmReveal
+ * itself has gone null (prebattleRoom.ts's "fadingOut" phase). core.ts calls
+ * this unconditionally during that phase - draftScreen state at the fade's
+ * start always came from an accept (the only way prebattleRoom exists), so no
+ * visibility flag is needed here.
+ */
+export function drawYesNoOverlayFaded(fb: Uint8Array, state: DraftScreenState, bgY: number, objY: number): void {
+  const redraw = state.yesNoCursorRedraw;
+  const cursorPos = redraw ? redraw.fromMenuCursorPos : state.yesNoCursorPos;
+  const highlightY = cursorPos * 16 + 112;
+  drawSpriteFaded(fb, { tileset: menuHighlight.left.tileset }, menuHighlight.palette, 176 + 16, highlightY + 8, 4, 2, 0, objY);
+  drawSpriteFaded(fb, { tileset: menuHighlight.right.tileset }, menuHighlight.palette, 208 + 16, highlightY + 8, 4, 2, 0, objY);
+  for (let i = 0; i < YES_NO_LABELS.length; i += 1) {
+    drawTextFaded(fb, font, charmap, YES_NO_LABELS[i]!, WIN_OPTIONS.x + 7, WIN_OPTIONS.y + 1 + i * 16, textPalette, MENU_TEXT_COLORS, bgY);
+  }
+}
+
 export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
   const fb = createFramebuffer();
 

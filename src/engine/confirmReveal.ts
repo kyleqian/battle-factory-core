@@ -58,6 +58,17 @@ export interface ConfirmRevealState {
    * instead of the front-sprite mon pic).
    */
   decliningBallAnim?: BallAnimState | null;
+  /**
+   * "closing" only: true when this teardown was triggered by A-on-YES
+   * (battle_factory_screen.c:1547, Select_HideChosenMons() called directly
+   * from Select_Task_HandleYesNo) rather than decline
+   * (Select_DeclineChosenMons, which also calls Select_HideChosenMons() -
+   * the SAME 20-tick teardown either way, docs/rent-flow-notes.md §2). core.ts
+   * reads this once the phase reaches null to decide whether to resume
+   * cursor-mode input (decline) or start the exit fade into the pre-battle
+   * room (accept, see prebattleRoom.ts).
+   */
+  accepting?: boolean;
 }
 
 /**
@@ -224,7 +235,13 @@ export function advanceConfirmReveal(state: ConfirmRevealState | null): ConfirmR
   // §3); once elapsed reaches that, the un-reveal is done and confirmReveal itself goes
   // away (null) - core.ts's normal cursor-mode input resumes the very same tick.
   if (elapsed >= UNREVEAL_TOTAL_TICKS) return null;
-  return { phase: "closing", elapsed, decliningSpecies: state.decliningSpecies, decliningBallAnim: state.decliningBallAnim };
+  return {
+    phase: "closing",
+    elapsed,
+    decliningSpecies: state.decliningSpecies,
+    decliningBallAnim: state.decliningBallAnim,
+    accepting: state.accepting,
+  };
 }
 
 export interface ConfirmRevealVisual {
@@ -272,6 +289,18 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
   // "closing" (the un-reveal, see UNREVEAL_WINDOW_STEPS/UNREVEAL_FLASH_WIDTHS doc).
   const decliningSpecies = state.decliningSpecies ?? null;
   const decliningBallAnim = state.decliningBallAnim ?? null;
+  // battle_factory_screen.c:1544-1550 vs :1556-1557: A-on-YES calls
+  // Select_HideChosenMons() directly and NEVER calls
+  // Select_ErasePopupMenu(SELECT_WIN_YES_NO) (that call is decline-only,
+  // source-confirmed - accept has no equivalent anywhere in
+  // Select_Task_HandleYesNo/Select_Task_Exit). So unlike decline, the YES/NO
+  // box + cursor highlight are NOT erased mid-closing for accept - they stay
+  // fully drawn for the entire 20-tick closing window and only disappear
+  // once the whole-screen exit fade (prebattleRoom.ts's "fadingOut") covers
+  // them, same as everything else on screen. Oracle-confirmed this session
+  // (accept-prebattle.json dense probe): the YES/NO text and highlight are
+  // still visible well past decline's elapsed-1/elapsed-3 erase points.
+  const accepting = state.accepting === true;
   if (state.elapsed <= 2) {
     // elapsed 0: fully unchanged "shown" visual. elapsed 1: the YES/NO TEXT
     // is already erased (ISSUES #12 root cause #2a) while the window, the 3
@@ -284,24 +313,35 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
     // cursor highlight (ISSUES #12 root cause #2b) all still hold through
     // this tick too: the highlight sprite trails the window-text erase by a
     // full tick, only gone starting elapsed 3.
+    // Accept-only (oracle-pixel-verified this session, accept-prebattle.json):
+    // the 3 mon pics disappear a full tick earlier than decline's own elapsed-3
+    // cutoff - decline's extra same-tick work (Select_HandleMonSelectionChange
+    // + Select_PrintSelectMonString, both absent from the accept branch)
+    // delays when FreeAndDestroyMonPicSprite's effect reaches that frame's
+    // render, same family as ISSUES #9/#13's "extra per-frame work costs a
+    // tick" pattern - accept has none of that extra work, so its mon pics
+    // vanish on schedule instead of one tick late.
+    const monsVisible = accepting ? state.elapsed <= 1 : true;
     return {
       ...HIDDEN_REVEAL,
       window: state.elapsed < 2 ? { top: 32, bottom: 96 } : UNREVEAL_WINDOW_STEPS[0]!,
-      monsVisible: true,
+      monsVisible,
       monsSpeciesOverride: decliningSpecies,
       decliningBallAnim,
-      yesNoVisible: state.elapsed === 0,
+      yesNoVisible: accepting || state.elapsed === 0,
       cursorVisible: true,
     };
   }
   const windowIdx = state.elapsed - 2;
   if (windowIdx < UNREVEAL_WINDOW_STEPS.length) {
-    return { ...HIDDEN_REVEAL, window: UNREVEAL_WINDOW_STEPS[windowIdx]! };
+    return { ...HIDDEN_REVEAL, window: UNREVEAL_WINDOW_STEPS[windowIdx]!, yesNoVisible: accepting, cursorVisible: accepting };
   }
   const flashIdx = windowIdx - UNREVEAL_WINDOW_STEPS.length - 1;
-  if (flashIdx < 0 || flashIdx >= UNREVEAL_FLASH_WIDTHS.length) return HIDDEN_REVEAL;
+  if (flashIdx < 0 || flashIdx >= UNREVEAL_FLASH_WIDTHS.length) {
+    return accepting ? { ...HIDDEN_REVEAL, yesNoVisible: true, cursorVisible: true } : HIDDEN_REVEAL;
+  }
   const w = UNREVEAL_FLASH_WIDTHS[flashIdx]!;
-  return { ...HIDDEN_REVEAL, flashWidths: [w, w, w] };
+  return { ...HIDDEN_REVEAL, flashWidths: [w, w, w], yesNoVisible: accepting, cursorVisible: accepting };
 }
 
 /** Select_ShowYesNoOptions: default cursor position is YES (row 0), re-applied every time the popup shows (see core.ts's reveal-start trigger). */

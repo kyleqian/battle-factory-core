@@ -5,6 +5,80 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 39 — ISSUES #11 fixed: species-name breathe (`Select_Task_FadeSpeciesName`) modeled exactly, RAM-pinned; `confirm-decline.json` 13/67 → 53/67
+
+- **State:** `npm test` **323/323** (310→323, +13
+  `tests/speciesNameFade.test.ts`), `npm run build` green. All 10
+  pre-existing traces re-verified at their exact prior counts (anchor 1/1,
+  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
+  rent-slot1 125/139, rent-3picks 157/190, summary-info-magby 132/132,
+  summary-info-onix 122/122, confirm-flow 79/95) — zero regressions, the
+  breathe never fires within any of their action budgets.
+  `confirm-decline.json`: **13/67 → 53/67** (one short of the step brief's
+  "exactly 54/67" target - see Notes for why, and why that's the right stop
+  point rather than a sign the model is wrong).
+- **Did:** Built `tools/probe/ram-probe.py` (generic, reusable per-tick
+  RAM-probe over a button-segment script; committed per `PAPERCUTS.md`) and
+  used it to pin `fadeSpeciesNameActive`/`fadeOut`/`coeffDelay`/`coeff`/
+  `faceSpeciesNameDelay` tick-by-tick (`sFactorySelectScreen+0x2A2..0x2A9`,
+  cross-verified against the already-RAM-confirmed `monPicAnimating` at
+  `+0x2A0`) from both the anchor (idle) and `confirm-decline.json`'s actual
+  decline. Confirmed the state machine matches `Select_Task_FadeSpeciesName`
+  exactly, including a subtle quirk: `FADESTATE_RUN`'s `coeff === 0` check is
+  unconditional, so the pre-onset ramp bounces through six 16-tick
+  `FADESTATE_DELAY` pauses (1 RUN tick each) before `coeff` ever leaves 0 -
+  103 ticks of active time, matching ROADMAP.md's empirically-observed
+  "~104 cumulative cursor-mode ticks" idle-stable budget exactly (was never
+  explained before). Cross-checked `BlendPalette` (reusing
+  `paletteFade.ts`'s already-verified `blendComponentToBlack`) against a
+  direct pixel probe: reproduces ISSUES #11's oracle sample (coeff 5 → RGB
+  173,0,0) exactly, plus the full table (0..6 → 255,239,222,206,189,173,156).
+  Found a genuine GBA render lag (RAM `coeff` steps at tick T, the rendered
+  pixel only changes at T+1) - modeled via a `renderCoeff` field, same shape
+  as this codebase's other queued-write lags (ISSUES #5, `paletteFade.ts`).
+  New `src/engine/speciesNameFade.ts` (state + advance + activate/
+  deactivate + `speciesNameColor`), wired into `core.ts`: deactivates on
+  cursor-mode A (popup open), reactivates on B-close/OTHERS/non-confirming
+  RENT-DESELECT directly, and on decline with an extra RAM-required 1-tick
+  delay (see Notes and ISSUES #12's update). `factoryDraftScreen.ts` now
+  renders WIN_SPECIES through a per-tick-blended palette instead of the
+  fixed one. 13 new Tier-1 tests (`tests/speciesNameFade.test.ts`): waveform
+  boundaries (7-tick cadence, peak-6 flip, 16-tick pause), the blend table,
+  the anchor-onset tick, pause/resume (not reset) semantics, and the
+  core.ts wiring. Full mechanics + evidence trail in commit `2013459`.
+- **Next (supervisor-set, per the original brief):** ISSUES #12/#13 chases
+  (both got new evidence this session, see below - still open, out of
+  scope for this step), then S5's last piece: the YES-press accept path
+  (exit fade → pre-battle room, `docs/prebattle-room-notes.md`). Then S6.
+- **Notes:** **why 53/67, not the brief's "exactly 54/67":** with #11's
+  constant baseline gone, an **11th** ball-area frame surfaced - **273**
+  (3px, `x=44/120/196,y=64`), the same y54-73 ball-region family as ISSUES
+  #13's already-documented 10 frames but much smaller and previously
+  invisible under the uniform ~129px species-color diff that used to cover
+  256-306. Verified this can't be caused by this session's change (`git
+  diff` of the speciesNameFade commit touches only `drawText`'s palette
+  argument for the WIN_SPECIES window - zero lines touching `ballAnims`,
+  `drawSprite`, or `drawConfirmReveal`), so it's a pre-existing #13-pattern
+  gap the original characterization simply didn't enumerate, not a
+  regression. Documented as new evidence in ISSUES #13 (not fixed - out of
+  scope for this step) rather than chased further. Also appended new
+  evidence to ISSUES #12: RAM shows `fadeSpeciesNameActive` truly flips one
+  tick after this engine's OTHER decline effects, even though they're the
+  same synchronous C statement in the source - likely evidence the existing
+  decline branch itself fires 1 tick early (a candidate root cause for #12's
+  253-255 residual), compensated here only for this module's own activation
+  timing, not fixed at the source. All RAM/pixel probing beyond the
+  committed `tools/probe/ram-probe.py` script itself (its one-off spec
+  JSONs, a scratch pixel-cross-check script) was scratch, deleted before
+  finishing. PAPERCUT: building the per-tick RAM-probe harness from scratch
+  (symbol/pointer-deref plumbing, mGBA's exit-139/stdout-spew quirks) ate
+  a large fraction of this session before any engine code was written -
+  now moot for future sessions since `tools/probe/ram-probe.py` is
+  committed and reusable (usage note in its own docstring), but worth
+  flagging: ~25-30 min lost this session to (re)deriving it.
+
+---
+
 ## 38 — S5 decline path landed: YES/NO cursor UP/DOWN + B/A-on-NO decline + 20-tick un-reveal, oracle-pinned; `confirm-decline.json` committed at 13/67 (54 frames individually attributed, none new/unexplained)
 
 - **State:** `npm test` **310/310** (297→310, +13), `npm run build` green. All
