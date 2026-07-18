@@ -13,28 +13,37 @@
 // player input is read anywhere in this window - the next A-press is the
 // following slice's concern, trace tick 1420).
 //
-// STATUS (updated this session - see PROGRESS.md #66): GAP A (the streak
-// window's "numerically unreachable" blend residual, point 2 below) is
-// substantially narrowed - three real bugs found and fixed by RAM-probing
-// past the blend-ramp math the brief suspected (which was already correct):
-// (a) both trainer OBJs are genuinely visible throughout the reveal, sliding
-// in via their own `x2` at the exact same magnitude as the BG3 scanline
-// shift - a prior session's "neither OBJ is ever visible" conclusion (#63)
-// only sampled each trainer's *settled* corner, missing this; (b) the GBA
-// alpha-blend hardware formula operates in 5-bit color space with floor
-// division, not round-in-8-bit; (c) BG3 (`static`)'s real hardware width is
-// 512px (`screenSize=1`, two side-by-side blocks - the extractor's own JSON
-// already has block 2's data at tile-rows 32-63, just never read), not the
-// 256px this module assumed, so per-scanline shifts past 256px were
-// wrapping back into block 1's own content instead of showing block 2's
-// (blank, in this scene). scene-assembly.json 104/256 -> **151/256** (0
-// regressions, full 18-trace sweep re-verified). GAP A is NOT fully closed -
-// a narrower residual remains within the entrySlide (BG1) content zone
-// itself (mapY 64-111); see point 2's own "STILL OPEN" for the exact pixel
-// and the brute-force evidence it isn't explained by shift/eva/evb alone.
-// GAP B's own narrow residual (point 3, trace tick 1229 specifically) is
-// untouched this session, out of this step's scope. tools/compare/
-// traces/scene-assembly.json is NOT yet 256/256.
+// STATUS (updated this session - see PROGRESS.md #68): GAP A is now FULLY
+// RESOLVED - the whole BattleIntroSlide3 streak window (ticks 1075-1226) is
+// byte-exact. Building on #66's three fixes (trainer OBJ layer, BG3's real
+// 512px width, floor-not-round blending), this session closed the last
+// named residual (point 2's "STILL OPEN" pixel, tick 1150 x=120/y=84) with
+// two more fixes: (a) the GBA alpha-blend formula matches the oracle when
+// run in **8-bit-expanded color space with floor division** directly on the
+// source colors, NOT #66's 5-bit-quantize-then-reexpand convention -
+// proven both negatively (the oracle's exact pixel value is mathematically
+// UNREACHABLE by any 5-bit blend of any two palette colors under any
+// eva/evb, since `(c5<<3)|(c5>>2)` only ever produces one of 32 fixed
+// values per channel) and positively (the 8-bit-domain formula hits all
+// three channels exactly, using the very same source colors #66 already
+// validated); (b) `evaEvb` needed the identical one-tick render lag every
+// other register in this task already has - found via 8 leftover
+// boundary-tick mismatches (one per 6-tick BLDALPHA step) after fix (a).
+// scene-assembly.json 151/256 -> **255/256** (0 regressions, full 18-trace
+// sweep + groundtruth traces re-verified; battle1-intro.json even improved
+// 141->167/254 as a side effect, same fix, different trace). The mandated
+// VRAM probe (`ram-probe.py` on BG1CNT, BLDCNT/BLDALPHA, the literal tile
+// entry at `BG_SCREEN_ADDR(28)` for this pixel, its palette-RAM and
+// char-VRAM bytes) came back clean on every axis this doc had flagged
+// unverified - BG1's `screenSize=2` reads 256px-wide exactly as assumed (no
+// bug), the tile/palette/char bytes match the extracted JSON exactly (the
+// JSON's palette-bank numbers are a local remap of VRAM's raw bank
+// indices, a labeling difference, not a data bug) - so the fix was purely
+// the blend-precision domain, not a geometry/extraction problem. Full
+// derivation in point 2 below. The ONLY remaining gap in this whole module
+// is GAP B's own pre-existing, narrower, out-of-scope residual (point 3,
+// trace tick 1229 specifically, untouched this session). tools/compare/
+// traces/scene-assembly.json is 255/256 (was 151/256).
 // 1. The settled composite (trace tick 1227 onward, before any widget
 //    slide) is byte-exact (unchanged from #58: battle-bg.json's `static`
 //    bg + both trainer pics at their source-derived corners + battle-
@@ -89,48 +98,75 @@
 //    scrolls uniformly via the ordinary whole-frame `gBattle_BG1_X` write.
 //    Blend only engages where BG1 (TGT1) is opaque; elsewhere the next-
 //    topmost opaque layer (OBJ if present, else BG3) draws raw.
-//    BLEND PRECISION (also fixed this session): the GBA `BLDALPHA` hardware
-//    formula runs in **5-bit-per-channel color space with floor (integer
-//    `>>4`) division**, not round-in-8-bit - the same convention this
-//    codebase's other blend, `paletteFade.ts`'s `blendComponentToBlack`,
-//    already documents. Blending the already-8-bit-expanded palette values
-//    directly with `Math.round` (this module's prior version) is off by 1
-//    on roughly a third of blended pixels, because the 5-bit quantization
-//    and the `(c5<<3)|(c5>>2)` re-expansion are not linear.
-//    BG3 WIDTH (also fixed this session, the biggest single contributor):
-//    `gBattleBgTemplates[3].screenSize = 1` (`battle_bg.c:152-160`) means
-//    `static`'s real hardware width is **512px** (two side-by-side 32x32
-//    screen blocks), not 256. `extract-battle-bg.ts`'s vertical
-//    recomposition of `map.bin` already stores VRAM screen block 2 as tile-
-//    rows 32-63 of the JSON - `staticBgPixel` just never read it, instead
-//    wrapping `mapX` back into block 1 at every 256px. Since the shift
-//    magnitude reaches into the hundreds well before the slide settles, this
-//    wrapped BG3's own sky-gradient tiles (block 1, tile-row 6, cols 15-29)
-//    back into view at the wrong screen column whenever the true position
-//    should have shown block 2 (uniformly blank in this indoor scene, RAM/
-//    JSON-confirmed for every row this 160px-tall screen ever reaches).
-//    Net across these three fixes: scene-assembly.json 104/256 -> 151/256,
-//    0 regressions (see PROGRESS.md #66).
-//    STILL OPEN, narrower: a pixel within entrySlide's own confirmed
-//    content zone (tick 1150, x=120/y=84, tileRow 10 - `entrySlidePixel`
-//    returns a real opaque color there) doesn't match the oracle's
-//    (242,246,252) under ANY combination this session brute-forced: every
-//    `bg1Shift` (0-255) x `bg3Shift` (0-255) pair at the RAM-confirmed
-//    `evaEvb(1150)={eva:6,evb:10}` (65536 combinations, 30-60 sample points
-//    per row) scores at most a handful of incidental matches, and relaxing
-//    `eva`/`evb` too (full 17x17 sweep) still tops out at 5/59 - i.e. this
-//    isn't a shift-offset or rounding problem, something this module
-//    doesn't model is contributing there (a third layer, or `entrySlide`'s
-//    own width/wrap needs the same `screenSize` re-check BG3 just got -
-//    `gBattleBgTemplates[1].screenSize = 2` reads as 256px/vertically-
-//    stacked, unlike BG3, but that reading hasn't been RAM-cross-checked
-//    the way BG3's now has). Confirmed NOT a third sprite: RAM-probing all
-//    65 `gSprites[]` slots' `inUse`/`invisible` at tick 1150 shows only
-//    indices 3/4 (the two trainers already modeled) active. Next action:
-//    RAM-probe the literal VRAM screen-block bytes at BG1's `BG_SCREEN_ADDR
-//    (28)` directly (not just the extracted JSON) for this pixel's tile,
-//    cross-checked against the oracle's own (242,246,252) - same "RAM vs.
-//    extracted-asset" cross-check discipline that found the BG3 width bug.
+//    BLEND PRECISION, corrected again this session (PROGRESS.md #68 - see
+//    `blendChannel`): the formula that actually matches the oracle runs in
+//    **8-bit-expanded color space with floor division directly on the
+//    source colors** (`floor((tgt1*eva+tgt2*evb)/16)`, no 5-bit
+//    quantize-then-reexpand step) - NOT the 5-bit-floor convention #66
+//    landed on (itself a fix over round-in-8-bit, but the wrong precision
+//    domain). Proven two ways at the pixel #66 left open (tick 1150,
+//    x=120/y=84, entrySlide content, `entrySlidePixel` returns a real
+//    opaque color there): (a) NEGATIVELY - the oracle's own pixel there,
+//    (242,246,252), is mathematically UNREACHABLE by 5-bit blending, full
+//    stop - `(c5<<3)|(c5>>2)` only ever produces one of 32 fixed values per
+//    channel regardless of which two palette colors or which `eva`/`evb`
+//    pair feed it, and none of 242/246/252 are among them (brute-forced
+//    exhaustively, not just sampled); this holds even changing which tile
+//    the blend reads, since ANY GBA palette color is itself one of those
+//    same 32 values. (b) POSITIVELY - the 8-bit-domain formula, run on the
+//    exact same operands #66 already validated (`entrySlide` tile 8's
+//    (222,231,247) blended with `static`'s white (255,255,255) at
+//    `eva=6,evb=10`), hits the oracle's value exactly on all three
+//    channels: R `floor((222*6+255*10)/16)=242`, G `floor((231*6+255*10)
+//    /16)=246`, B `floor((247*6+255*10)/16)=252`. Since `blendChannel` is
+//    local to this file (only caller is `drawSlideScene` below), this fix
+//    is scoped to this window alone - `paletteFade.ts`'s own blend is a
+//    separate function, unaffected, still 5-bit floor for its own (already
+//    oracle-validated) use case; apparently mGBA's own blend implementation
+//    operates in its native 8bpp framebuffer domain rather than re-deriving
+//    5-bit hardware precision, a real emulator characteristic worth
+//    matching since the oracle - not idealized hardware semantics - is
+//    ground truth (`AGENTS.md`).
+//    EVA/EVB RENDER LAG (found immediately after the fix above, same
+//    session): switching the blend formula took scene-assembly.json from
+//    151/256 to 247/256, leaving exactly 8 residual mismatches - trace
+//    ticks 1139/1145/1151/1157/1163/1169/1175/1181, precisely the 6-tick
+//    BLDALPHA step boundaries. `evaEvb` was reading `gTasks[0].data[4]`'s
+//    effective tick directly (no lag), unlike every other register this
+//    task drives (`bg1X`, the window edges, the scanline shift, all
+//    corrected for the same one-tick task-writes/display-shows-next-tick
+//    lag in this module already) - adding the identical `t-1` lag to
+//    `evaEvb` fixed all 8, landing on 255/256 (only GAP B's own
+//    already-known point-3 residual, tick 1229, remains - see below).
+//    VRAM PROBE (the brief's mandated first step, run this session
+//    alongside the above): `ram-probe.py` on BG1CNT (`0x0400000A`),
+//    BLDCNT/BLDALPHA (`0x04000050`/`0x04000052`), the literal tilemap entry
+//    at `BG_SCREEN_ADDR(28)` for tick-1150 x=120/y=84's tile (tileRow 10,
+//    tileCol 28), that tile's char data at `BG_CHAR_ADDR(1)`, and its
+//    palette RAM bytes - all came back clean, closing out both items this
+//    doc had flagged unverified: BG1CNT decodes to `charBase=1,
+//    colorMode=0(4bpp), screenBase=28, screenSize=2` byte-for-byte matching
+//    `gBattleBgTemplates[1]` and this module's existing 256px-wide
+//    assumption (no bug - screenSize=2 was never actually in question,
+//    just never RAM-cross-checked until now); the tile entry decodes to
+//    `tileId=8/hFlip=0/vFlip=0`, and its char data (`0x5555 0x5555`, i.e.
+//    palette index 5 for all 8 pixels of tile row 4) matches the extracted
+//    JSON exactly; the entry's raw palette nibble is hardware bank **4**,
+//    not the JSON's bank **2** - but VRAM palette bank 4 index 5 reads
+//    BGR555 `0x7B9B` = RGB(222,231,247), byte-identical to the JSON's own
+//    bank 2 index 5 - `extract-battle-bg.ts` locally renumbers only the
+//    palette banks a tileset actually references rather than preserving
+//    raw VRAM bank indices, a labeling convention confirmed harmless here,
+//    not a bug. So the true fix was purely the blend-precision domain
+//    above, not a geometry/palette/extraction problem.
+//    Net across all fixes to date: scene-assembly.json 104/256 -> 151/256
+//    (#66) -> **255/256** (#68), 0 regressions at either step (full
+//    18-trace sweep + groundtruth traces re-verified both times).
+//    GAP A IS NOW FULLY RESOLVED: every captured tick across the whole
+//    1075-1226 streak+settle-adjacent window is byte-exact. The one
+//    remaining scene-assembly.json mismatch (trace tick 1229) is GAP B's
+//    own pre-existing, separate, narrower residual - see point 3 below,
+//    untouched this session, out of GAP A's scope.
 // 3. The party-status-summary ball-icon + diagonal-bar widgets' entrance
 //    slide (ticks ~1228-1291): RESOLVED this session (#64; #60/#62/#63 each
 //    left this open - see PROGRESS.md for the full account). Two independent
@@ -315,10 +351,11 @@ export function shiftBottom(t: number): number {
   return magnitude === 0 ? 0 : -magnitude;
 }
 
-/** BLDALPHA (EVA, EVB) at trace tick `t` - docs/battle-scene-notes.md §2 point 4, RAM-confirmed schedule: 8:8 constant through tick 1138, then 8 steps of 6 ticks each (EVA-1/EVB+1 per step) from tick 1139, reaching 0:16 at tick 1181 and holding. */
+/** BLDALPHA (EVA, EVB) as it actually affects the RENDERED frame at trace tick `t` - docs/battle-scene-notes.md §2 point 4, RAM-confirmed schedule: 8:8 constant through the task's own tick 1138, then 8 steps of 6 ticks each (EVA-1/EVB+1 per step), reaching 0:16 and holding. `et = t - 1` bakes in the same one-tick render lag as `bg1X`/the window edges/the scanline shift (module doc point 2, PROGRESS.md #68) - the display at trace tick `t` shows the register as the task left it as of tick `t-1`, not `t`'s own write; found by 8 leftover boundary-tick mismatches (one per step) after the blend-precision fix, all resolved by this lag. */
 export function evaEvb(t: number): { eva: number; evb: number } {
-  if (t < 1139) return { eva: 8, evb: 8 };
-  const step = Math.min(8, Math.floor((t - 1139) / 6) + 1);
+  const et = t - 1;
+  if (et < 1139) return { eva: 8, evb: 8 };
+  const step = Math.min(8, Math.floor((et - 1139) / 6) + 1);
   return { eva: 8 - step, evb: 8 + step };
 }
 
@@ -406,20 +443,21 @@ function bg1X(t: number): number {
 }
 
 /**
- * GBA alpha-blend of one channel, done in 5-bit hardware color space like
- * every other blend in this codebase (`paletteFade.ts`'s module doc point
- * 1): `min(31, (tgt1_5*eva + tgt2_5*evb) >> 4)` - integer floor division,
- * not round, and on the 5-bit value, not the already-expanded 8-bit one.
- * Doing the round in 8-bit space (a prior version of this function) is off
- * by 1 on roughly a third of blended pixels in this window - the 5-bit
- * quantization and the `(c5<<3)|(c5>>2)` re-expansion are not linear, so
- * blend-then-expand and expand-then-blend-in-8-bit disagree.
+ * GBA alpha-blend of one channel, matching the oracle's own blend precision
+ * (module doc point 2, PROGRESS.md #68): floor division run directly on the
+ * already-8-bit-expanded source colors, `floor((tgt1*eva+tgt2*evb)/16)` -
+ * NOT `paletteFade.ts`'s 5-bit-quantize-then-reexpand convention (a prior
+ * version of this function, #66's fix over round-in-8-bit, was still the
+ * wrong precision domain: oracle-pinned pixels exist - tick 1150, x=120/y=84
+ * - whose exact color is mathematically unreachable by any 5-bit blend of
+ * any two palette colors under any eva/evb, since `(c5<<3)|(c5>>2)` only
+ * ever produces one of 32 fixed values per channel). This function is local
+ * to this file (`drawSlideScene` is its only caller), so the domain choice
+ * is scoped to this window alone - it does not affect `paletteFade.ts`'s
+ * own (separately oracle-validated) blend elsewhere in the codebase.
  */
 function blendChannel(tgt1: number, tgt2: number, eva: number, evb: number): number {
-  const c1 = tgt1 >> 3;
-  const c2 = tgt2 >> 3;
-  const blended5 = Math.min(31, Math.floor((c1 * eva + c2 * evb) / 16));
-  return (blended5 << 3) | (blended5 >> 2);
+  return Math.min(255, Math.floor((tgt1 * eva + tgt2 * evb) / 16));
 }
 
 // --- §3: intro text ---------------------------------------------------

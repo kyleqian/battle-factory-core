@@ -70,20 +70,22 @@ describe("battleScene: vertical reveal window", () => {
   });
 });
 
-describe("battleScene: BLDALPHA schedule (RAM-confirmed, docs/battle-scene-notes.md §2)", () => {
-  it("holds 8:8 before tick 1139", () => {
+describe("battleScene: BLDALPHA schedule (RAM-confirmed, docs/battle-scene-notes.md §2; render-lagged by 1 tick, module doc point 2's GAP A resolution)", () => {
+  it("holds 8:8 before tick 1139, including tick 1139 itself (the write lands in RAM at 1139 but only shows on the tick-1140 capture, the same one-tick render lag as bg1X/window edges/shift decay)", () => {
     expect(evaEvb(1000)).toEqual({ eva: 8, evb: 8 });
     expect(evaEvb(1138)).toEqual({ eva: 8, evb: 8 });
+    expect(evaEvb(1139)).toEqual({ eva: 8, evb: 8 });
   });
 
-  it("steps EVA down / EVB up by 1 every 6 ticks from 1139", () => {
-    expect(evaEvb(1139)).toEqual({ eva: 7, evb: 9 });
-    expect(evaEvb(1144)).toEqual({ eva: 7, evb: 9 });
-    expect(evaEvb(1145)).toEqual({ eva: 6, evb: 10 });
+  it("steps EVA down / EVB up by 1 every 6 ticks, first showing at tick 1140 (one tick after the RAM write)", () => {
+    expect(evaEvb(1140)).toEqual({ eva: 7, evb: 9 });
+    expect(evaEvb(1145)).toEqual({ eva: 7, evb: 9 });
+    expect(evaEvb(1146)).toEqual({ eva: 6, evb: 10 });
   });
 
-  it("reaches 0:16 at tick 1181 and holds", () => {
-    expect(evaEvb(1181)).toEqual({ eva: 0, evb: 16 });
+  it("reaches 0:16 at tick 1182 (one tick later than the naive RAM-tick pivot) and holds", () => {
+    expect(evaEvb(1181)).toEqual({ eva: 1, evb: 15 });
+    expect(evaEvb(1182)).toEqual({ eva: 0, evb: 16 });
     expect(evaEvb(1226)).toEqual({ eva: 0, evb: 16 });
   });
 });
@@ -162,6 +164,10 @@ describe("battleScene: GAP A streak-window trainer OBJ + BG3 512px-width fixes (
 
   it("does not show BG3's sky-gradient tile block a second time past its true 256px-wide screen block (tick 1150, x=230/y=55) - static's real hardware width is 512px (screenSize=1, two side-by-side blocks), wrapping at 256 aliased the gradient's own leading tiles back into view here", () => {
     expect(pixelAt(1150, 230, 55)).toEqual([247, 247, 255]);
+  });
+
+  it("blends BG1 opaque pixels in 8-bit-expanded space, not 5-bit-then-reexpand (module doc point 2's GAP A residual, root-caused this session): tick 1150, x=120/y=84 - oracle (242,246,252) is mathematically unreachable by ANY blend of two 5-bit GBA palette colors (blended5 = floor((c1*eva+c2*evb)/16) can only ever produce one of 32 fixed (c5<<3)|(c5>>2) values per channel, none of which are 242/246/252 - brute-forced exhaustively), but is hit exactly by floor((tgt1_8bit*eva+tgt2_8bit*evb)/16) on the already-8-bit-expanded source colors (entrySlide's (222,231,247) blended with static's white (255,255,255) at eva=6/evb=10) - mGBA's own blend implementation evidently operates in its native 8bpp framebuffer domain rather than re-deriving 5-bit hardware precision", () => {
+    expect(pixelAt(1150, 120, 84)).toEqual([242, 246, 252]);
   });
 });
 

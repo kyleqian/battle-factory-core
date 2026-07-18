@@ -249,6 +249,34 @@ assembly.json` 104/256 -> 151/256); full account in that file's module doc
 point 2, including the next narrower residual (a still-unexplained mismatch
 within BG1's own confirmed content zone, tick 1150 x=120/y=84).
 
+**RESOLVED (PROGRESS.md #68)**: the tick-1150 x=120/y=84 residual - GAP A's
+last named gap - is fixed, closing the 1075-1226 window byte-exact
+(`scene-assembly.json` 151/256 -> **255/256**, only the unrelated GAP B
+tick-1229 residual, point 3, remains). The mandated `ram-probe.py` VRAM
+sweep (BG1CNT, the BLDCNT/BLDALPHA registers, the literal tilemap entry at
+`BG_SCREEN_ADDR(28)` for this pixel's tile, and its palette-RAM/char-VRAM
+bytes) came back **clean on every axis this section flagged as unverified**:
+BG1CNT decodes to `screenSize=2` exactly as `gBattleBgTemplates[1]` claims
+(256px wide, matching this module's existing assumption - no bug), the tile
+entry is `tileId=8/hFlip=0/vFlip=0` matching the extracted JSON, and its
+palette RAM (hardware bank 4) is byte-identical to the JSON's own
+(renumbered) bank 2 - `extract-battle-bg.ts` locally compacts only the
+banks a tileset actually uses, a labeling convention, not a bug. The actual
+cause was the blend arithmetic's precision **domain**: oracle's
+`(242,246,252)` is mathematically unreachable by blending any two GBA
+palette colors in 5-bit space (the previous "fix" in #66) - the output of
+`floor((c1*eva+c2*evb)/16)` re-expanded via `(c5<<3)|(c5>>2)` can only ever
+land on one of 32 fixed values per channel, and none of the three oracle
+values are among them, for ANY tile/eva/evb choice, which is what made the
+brute force top out - but the exact same formula run on the already-8-bit-
+expanded source colors directly (`floor((tgt1_8bit*eva+tgt2_8bit*evb)/16)`,
+no re-quantize to 5-bit first) hits all three channels exactly. A second,
+smaller fix rode in on the same full-sweep re-test: `evaEvb` needed the
+identical one-tick render lag every other register in this task already
+has (found via 8 remaining boundary-tick mismatches after the blend fix,
+one at each 6-tick BLDALPHA step). Full derivation in `battleScene.ts`'s
+module doc point 2.
+
 Net: an engine slice can bake this **exactly** as a lookup table
 (tick-offset-from-task-start → `{bg1X, scanlineShift, blendEVA, blendEVB}`),
 no RNG, no oracle-fitting — every number above is either a literal source
