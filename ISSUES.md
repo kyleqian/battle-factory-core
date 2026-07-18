@@ -5,81 +5,87 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #7 — `rent-3picks.json` still blocked: a SECOND, narrower ball-render bug
-  (a second active ball's own display-tile lags real hardware by 1 tick
-  around its cmdIndex8→9→10 moving-cadence transition), unrelated to the
-  LEFT/RIGHT stall rule this entry used to be about.
+## #7 — `rent-3picks.json` still not committed: the display-lag bug that
+  blocked it is FIXED and RAM-pinned; a future session should re-run the
+  compare below, classify the (already-analyzed-as-likely-benign) extra
+  diff frames precisely, and ship the trace.
 
-**The LEFT/RIGHT stall rule itself is FIXED** (worker, this session):
-`ballAnimStall`'s cursor-move branch now stalls every active ball only when
-the entering slot's species is outside `{BAYLEEF, HAUNTER}`
-(`cursorMoveStallsBalls`, `factoryDraftScreen.ts`) - the corrected 2-species
-safe-list from the prior "sixth worker update" (12/12 RAM data points, zero
-exceptions; full evidence table was in this entry's history, now pruned -
-see git log for `factoryDraftScreen.ts`/this file around 2026-07-17 if
-needed). Pinned with `tests/ballAnimSpeciesStall.test.ts` (6 tests) against
-the RAM-derived checkpoints (Probe A: action ticks 79/121/163/205, decisive
-HAUNTER-no-stall window 203→207; Probe C: count=2 HAUNTER-no-stall windows
-276→284 and 275→307). RENT/DESELECT confirms are unchanged (always stall
-every other active ball, species-independent). `npm test` 270/270, build
-green, `rent-slot1.json` re-verified still 125/139 (no regression).
+**Both the LEFT/RIGHT stall rule AND the second-ball display-tile lag are
+now FIXED.** `ballAnimStall`'s cursor-move branch stalls every active ball
+only when the entering slot's species is outside `{BAYLEEF, HAUNTER}`
+(`cursorMoveStallsBalls`, `factoryDraftScreen.ts`; 12/12 RAM data points,
+zero exceptions - full evidence table pruned from this entry, see git log
+around 2026-07-17). `advanceBallAnim` (`ballAnim.ts`) now takes a per-slot
+`displayLagTicks` (2 for slot 0, 1 for every other slot, wired from
+`core.ts`'s ball-index loop) instead of a flat 2 - RAM-probed (dev-time
+EmeraldOracle, scratch scripts, ~80 cadence transitions across both balls
+of a 2-rent dwell): real hardware's own OAM-buffer display lag from *its
+own* `animCmdIndex` is a uniform 1 tick for every ball, always; the old
+flat "2" was only ever correct for slot 0 because slot 0's *own*
+settling-phase internal `cmdIndex` model runs exactly 1 tick EARLY vs real
+hardware's `animCmdIndex` (confirmed via engine-state dump: this engine's
+ball 0 hits `cmdIndex` 9 at tick 104 in a two-ball dwell, one tick before
+RAM's tick 105 - a pre-existing quirk the `REST_INTERNAL_OFFSET` comment
+already flagged as present-but-harmless for single-ball). Slot 1's internal
+`cmdIndex` has no such offset (matches RAM tick-for-tick), so it only needs
+the real 1-tick lag. Pinned in `tests/ballAnimDisplayLag.test.ts` (3 tests)
+against the RAM checkpoints (slot 0's cmdIndex8->9 transition at engine
+tick 104, display update at 106; slot 1's at engine tick 179->display 180
+and 187->display 188 - the exact two originally-reported bad frames).
+Confirmed via `npm run compare` against a scratch reconstruction of the
+3-pick shape that **frames 180 and 188 (previously 176px diffs at
+ball-index-1's own OBJ position) now match exactly** - the reported bug is
+gone. `npm test` 273/273, build green, `tools/compare/traces/rent-slot1.json`
+re-verified unchanged at 125/139 (slot 0's own path is untouched).
 
-**But `rent-3picks.json` still can't ship clean** - building the exact
-PROGRESS-archive #21 trace (rent slot0 → dwell36 → RIGHT into MAGBY (stalls,
-action tick 75) → rent slot1 → dwell36 → RIGHT into BAYLEEF (no stall, action
-tick 151, now correctly modeled) → rent slot2, confirm press-tick 189) and
-running `npm run compare` (scratch trace, captures 0-245, not committed)
-surfaces:
+**`rent-3picks.json` itself is still not committed** - not because of any
+remaining known bug, but because a scratch reconstruction of the trace
+(rent slot0 confirm@37 -> dwell36 -> RIGHT into MAGBY action-tick75 -> rent
+slot1 confirm@113 -> dwell36 -> RIGHT into BAYLEEF action-tick151 -> rent
+slot2 confirm@189, dense captures 0-189) surfaced **more diff frames than
+this step's brief anticipated** ("168-170 and 189 only"), and the step's
+own stop condition ("any other diff -> STOP, do not commit, document")
+applied literally, so nothing was committed even though every extra diff
+frame appears benign on inspection:
 
-- **Frames 168-170, 189: DIFF confined to x88-151** (the mon-pic-bg blend
-  window) - matches ISSUES #5's already-accepted WIN0V-jitter pattern
-  exactly (same bbox, same class), fine per #5's settled policy.
-- **Frames 180 and 188: DIFF at x56-76/y54-73 (176px each) - OUTSIDE
-  x88-151, at ball-index-1's (MAGBY) own OBJ position.** This is the
-  brief's explicit stop condition ("diff at ball OBJ positions or otherwise
-  outside a close window means the stall model is still wrong").
-- **Frames ≥190: diff explodes immediately** (949px at 190, growing to
-  13271px by 234+, bbox spreading up to x239/y32-156) - the "Are these three
-  POKéMON OK?" YES/NO reveal chain (unimplemented screen, out of scope per
-  entry 26) starts diverging essentially the very next tick after the 3rd
-  confirm, not gradually - confirms the trace's own captures must end
-  strictly at or before tick 189 (189 itself is clean/#5-attributable; 190+
-  is not).
+- **Frames 37-57 (14 frames, 190px->3343px->1px tapering) and 113-133 (16
+  frames, same tapering shape)**: bbox-identical, pixel-count-identical to
+  `rent-slot1.json`'s own **already-committed, already-accepted** 14-diff
+  ISSUES #5 pattern (window-growth/flash-bar WIN0V jitter after a RENT
+  confirm) - these are the SAME mon-pic-close jitter recurring once per
+  rent (rent slot0's own close =37-57, rent slot1's own close =113-133,
+  each offset from its own confirm tick identically to the single-ball
+  baseline). Not new, not ball-OBJ-position bugs (frame 37/113's own
+  190px sub-frame IS at each ball's OBJ x-range, but is byte-identical to
+  the already-shipped `rent-slot1.json` frame 37, so pre-existing/accepted,
+  not a new regression).
+- **Frames 152-153 (127px at x196-236/y20-28, then 240px at x59-109/y80-92)**:
+  land right after the second RIGHT move (action tick 151, into BAYLEEF).
+  Bbox 152 (x196-236/y20-28) is in the species-name-text region, plausibly
+  ROADMAP's already-documented, out-of-scope `Select_Task_FadeSpeciesName`
+  "perpetual palette breathe... past ~104 [idle] frames... not yet modeled"
+  gap (Domain notes) triggered by the species-name redraw the RIGHT move
+  causes. Bbox 153 (x59-109/y80-92) is below the ball row (y64), not
+  identified this session - needs its own bbox/overlay check before
+  attribution.
+- **Frames 168-170 (x88-151) and 189 (x93-110/y55-68, 107px)**: match the
+  brief's own expectation, #5-attributable per the established pattern.
+- **Frames 180 and 188: now CLEAN (0 diff)** - the bug this entry tracked
+  is fixed.
 
-**Root-caused the 180/188 diff, confirmed NOT a stall-model bug:**
-cross-checked via `git worktree` against the pre-this-session commit (before
-the species-key fix landed) - the 176px diff at 180/188 is **byte-identical
-before and after the fix**, so it isn't caused by (or fixable via) the
-LEFT/RIGHT stall rule at all. Ball 1 (MAGBY, rented at confirm press-tick
-113) experiences zero stall triggers between its own selection and tick 188
-(RIGHT into BAYLEEF at tick 151 is correctly a no-stall event for it too,
-confirmed identical before/after the fix) - pure zero-stall arithmetic from
-`MOVING_CMDS`' fixed durations independently predicts its internal `cmdIndex`
-reaches 9 at tick 179 exactly, which **matches the engine's actual internal
-state** (verified via a scratch replay). The bug is specifically in the
-**display tile**, not the internal/RNG-critical cmdIndex: overlaying each
-candidate ball tile (0/16/32) onto the oracle's own frame-180 PNG (same
-zero-residual-diff method as this entry's original "second worker update")
-shows the oracle displays tile **16** at frame 180 and tile **0** at frame
-188, while the engine (per `ballAnimTile`'s documented 2-tick display lag)
-still shows the *previous* tile at each of those frames, catching up exactly
-1 tick late (engine shows tile 16 starting frame 181, not 180; tile 0
-starting frame 189, not 188). So `ballAnimState.displayTile`'s "always
-exactly 2 ticks behind" constant (`ballAnim.ts` header doc) isn't exactly 2
-for this transition on a second simultaneously-active ball - it's 1. Not
-root-caused further this session (why the lag varies is unknown - possibly
-the same class of composition gap this entry originally suspected before
-being redirected to the LEFT/RIGHT stall question).
-
-**Do not guess a fix.** This is a different, narrower bug than the one this
-entry spent its history on - the LEFT/RIGHT species-stall rule is correct
-and shipped. `rent-3picks.json` remains blocked until a future session
-RAM-probes the display-lag mechanism for a second active ball directly (same
-recipe as this entry's prior sessions: `EmeraldOracle` + corrected `struct
-Sprite` offsets, dump `animCmdIndex`/`data[0]` tick-by-tick for
-`gSprites[1]` across a 2-ball dwell with no cursor moves at all - the bug
-reproduces with just 2 plain rents, no RIGHT/LEFT needed, since it's tied to
-ball 1's *own* cmdIndex8→9→10 transition timing, not to any stall trigger).
+None of the extra frames are at a ball's OBJ position in a way that isn't
+already independently accepted (`rent-slot1.json`'s own committed 14-diff
+list matches the 37-57 cluster exactly), so this is very likely shippable
+as-is - but per the brief's explicit stop condition, it wasn't committed
+without a fresh verification pass. **Next session:** (1) confirm frame
+153's bbox against the species-name/message-text redraw hypothesis (RAM
+probe or overlay method); (2) re-run `npm run compare` against the scratch
+trace shape above (segments: 2A/28idle/2DOWN/4idle/2A confirm@37, 36idle,
+2RIGHT, 2A/28idle/2DOWN/4idle/2A confirm@113, 36idle, 2RIGHT, 2A/28idle/
+2DOWN/4idle/2A confirm@189, dense captures 0-189) to reconfirm the exact
+diff set is stable; (3) if clean, commit `rent-3picks.json` with the
+per-frame attributions in the message, delete this entry, and re-run
+`npm run compare -- rent-slot1.json` (must stay 125/139).
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean

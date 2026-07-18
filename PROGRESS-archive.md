@@ -5,6 +5,80 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 27 — S5 slice (worker, capped, LAST of today): STOPPED before implementing — the supervisor-sanctioned ISSUES #7 species-only stall table was RAM-DISPROVEN by a clean counterexample (HAUNTER stalls at one count/direction/origin, does not at another); no code change made, per the brief's own explicit stop condition
+
+- **State:** unchanged from entry 26 — `npm test` **264/264**, `npm run
+  build` green, working tree clean before this docs-only commit. No
+  `src/`/`tests/` changes this session. All 8 traces (incl. `rent-slot1.json`
+  125/139) untouched; `rent-3picks.json` still not built (remains blocked).
+- **Did:** Followed the brief exactly through step 1 (probe before
+  implementing). RAM-probed the two previously-unprobed species (ONIX,
+  QUILAVA - both now confirmed **stall**, first-time data) and re-validated
+  BAYLEEF (4th confirmation, still **no stall**) and HAUNTER at a new count/
+  direction/origin than previously probed. Method: `EmeraldOracle` +
+  corrected `struct Sprite` offsets (same as ISSUES #7's third/fourth
+  updates), `ballSpriteId` read directly from
+  `sFactorySelectScreen->mons[i].ballSpriteId` rather than assumed, two
+  scripts each with exactly **one** active ball throughout (removes all
+  multi-ball composition ambiguity), cadence-transition gaps cross-checked
+  against 6-8 clean neighboring transitions per run before trusting any
+  single reading. **Result: HAUNTER stalls at (count3, RIGHT, origin slot3 -
+  prior data) but does NOT stall at (count1, LEFT, origin slot5 - this
+  session's fresh probe)** - same entering species, opposite outcome,
+  directly falsifying "the entering slot's species alone determines the
+  stall." Per the SANCTIONED APPROACH's own explicit instruction ("if ANY
+  probe contradicts the species-only rule, STOP, write the contradiction
+  into ISSUES #7, do not implement"), stopped immediately - no
+  `ballAnimStall` code change, no per-species table, no Tier-1 test, no
+  `rent-3picks.json` work attempted. Full evidence table and reasoning:
+  ISSUES #7 ("fifth worker update").
+- **Next:** ISSUES #7 needs a fresh policy decision before more session time
+  goes into it - this is now the *second* consecutive sanctioned/"confirmed"
+  rule for this issue that broke on the next data point (species-only
+  table, then this). Options queued in ISSUES #7's "Next session" note:
+  (a) one more round of targeted single-ball isolated probes (cheap, ~15-20
+  min each, this session's method) to find the actual missing variable
+  (direction/origin/count in combination with species); (b) revisit the
+  pre-simplification "fourth worker update" render-cost-race theory
+  (`GetStringRightAlignXOffset` pixel-width timing); (c) accept it as an
+  ISSUES #5-class permanent gap (root-caused, not fixable at this engine's
+  tick granularity) and ship without `rent-3picks.json`. Whoever holds
+  entry 26's user-delegated authority for #7 should pick before the next
+  worker spends more budget here.
+- **Supervisor ruling for the next session (user-delegated authority,
+  2026-07-17 ~15:50 — binding unless the user overrides):** take entry
+  27's option (a), with a required method change: **minimal-pair probe
+  design only** — every new probe must differ from a known data point in
+  exactly ONE variable (species, direction, origin slot, active-ball
+  count, ball phase). Start from HAUNTER's contradiction pair
+  (count3/RIGHT/origin3 = stall vs count1/LEFT/origin5 = no-stall):
+  probe (count1, RIGHT, origin3-equivalent), then (count3, LEFT), etc.,
+  until the second variable is isolated; then key the empirical stall
+  table on the surviving factor set and proceed per entry 26's decision
+  2 (implementation + Tier-1 pins + rent-3picks.json). Both prior rule
+  collapses came from multi-variable probe jumps, not from the empirical
+  approach. If the factor set still resists after ~5-6 minimal pairs,
+  fall back to entry 27's option (b) (probe the render-cost determinant
+  directly in RAM) before any thought of (c) — (c) would leave the RNG
+  stream unpredictable after any cursor-move-with-rented-ball, which
+  effectively blocks S5's exit trace and is a mission-level concession
+  the user should make explicitly, not a default.
+- **Notes:** all probing was scratch Python/TS under `/tmp` (not committed,
+  per instructions) - no `src/` edits were ever at risk. This is the last
+  worker of today's session; state is resume-ready via this entry + ISSUES
+  #7's "fifth worker update". PAPERCUT: none beyond the usual oracle
+  round-trip overhead; worth noting for future RAM-probe sessions that a
+  pure-`gRngValue`-only comparison (no sprite-field reads) is a trap for
+  this specific kind of test - a 1-tick stall only shows up in `gRngValue`
+  at the exact tick a decision-point (`Random()`) draw lands on, not in a
+  cumulative/far-future sample, so sparse `gRngValue`-only sampling silently
+  under-detects stalls; the sprite-cadence method (direct `animCmdIndex`
+  transition gaps) used by prior sessions is the reliable one and should be
+  the default, not a fallback.
+
+---
+
+
 ## 26 — Supervisor wind-down: session end 2026-07-17 ~15:20
 
 - **State (verified this minute):** `npm test` **264/264**, `npm run build`
