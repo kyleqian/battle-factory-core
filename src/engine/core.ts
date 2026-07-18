@@ -306,8 +306,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
           // no deselection (nothing about the 3 picks changes, so no
           // decliningSpecies/decliningBallAnim snapshot is needed - the ball
           // grid behind the shrinking window keeps reading live state, which
-          // stays valid throughout).
-          confirmReveal = { phase: "closing", elapsed: 0, accepting: true };
+          // stays valid throughout). ISSUES #14: preCloseBallAnims snapshots
+          // every ball's pre-tick state so the window's very next render
+          // (elapsed 1) can freeze it for one tick - see that field's doc.
+          confirmReveal = { phase: "closing", elapsed: 0, accepting: true, preCloseBallAnims: draftScreen.ballAnims };
         }
       }
     } else if (confirmed) {

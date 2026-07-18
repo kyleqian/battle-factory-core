@@ -1,7 +1,7 @@
 // S5 final slice: Tier-1 tests for the YES-press accept path's scene-mode
 // state machine (src/engine/prebattleRoom.ts) and its core.ts wiring -
 // pixel parity itself lives in tools/compare/traces/accept-prebattle.json
-// (see ISSUES #14 for the one remaining, individually-attributed residual).
+// (137/137, ISSUES #14 DELETED).
 import { describe, expect, it } from "vitest";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import {
@@ -15,6 +15,7 @@ import {
   visiblePrintedChars,
 } from "../src/engine/prebattleRoom.ts";
 import { EXIT_FADE_OUT_TICKS, FADE_IN_TICKS } from "../src/engine/paletteFade.ts";
+import { getConfirmRevealVisual } from "../src/engine/confirmReveal.ts";
 import type { GbaButton } from "../src/input.ts";
 
 type Segment = [number, GbaButton | null];
@@ -115,12 +116,17 @@ describe("core.ts wiring: A-on-YES accept path", () => {
     // elapsed 1 on THROUGH_YES's final tick).
     const shown = replay(THROUGH_YES);
     expect(shown.prebattleRoom).toBeNull();
+    // preCloseBallAnims snapshots ballAnims as of the tick before the A press
+    // (ISSUES #14) - fetch it the same way confirmDecline.test.ts does for
+    // decliningBallAnim, rather than hardcoding the array.
+    const before = replay(THROUGH_YES.slice(0, -1));
     expect(shown.draftScreen.confirmReveal).toEqual({
       phase: "closing",
       elapsed: 1,
       decliningSpecies: undefined,
       decliningBallAnim: undefined,
       accepting: true,
+      preCloseBallAnims: before.draftScreen.ballAnims,
     });
   });
 
@@ -143,6 +149,62 @@ describe("core.ts wiring: A-on-YES accept path", () => {
     // A held afterward changes nothing this slice (closemessage/warp are S6).
     const stillIdle = tick(settled, new Set(["A"]));
     expect(stillIdle.prebattleRoom?.phase).toBe("idle");
+  });
+});
+
+describe("ISSUES #14: accept-path closing window/flash table reads one tick early, ball snapshot fixes the one-tick-lag residual", () => {
+  // Decline reference, same PICK prefix as THROUGH_YES but B instead of
+  // A-on-YES, same 2-tick pulse shape (so it also lands on elapsed 1, not 0 -
+  // see THROUGH_YES's own doc) - used as the "un-shifted" ground truth the
+  // window/flash table was already independently verified against
+  // (confirm-decline.json 67/67).
+  const THROUGH_DECLINE: Segment[] = [...PICK(), [36, null], [2, "RIGHT"], ...PICK(), [36, null], [2, "RIGHT"], ...PICK(), [70, null], [2, "B"]];
+
+  function closingVisualAt(base: Segment[], extraTicks: number) {
+    const state = replay(extraTicks > 0 ? [...base, [extraTicks, null]] : base);
+    const reveal = state.draftScreen.confirmReveal;
+    return { elapsed: reveal?.elapsed, visual: getConfirmRevealVisual(reveal) };
+  }
+
+  it("accept's window/flashWidths at elapsed E equal decline's own at elapsed E+1, for every tick up to the clamp", () => {
+    for (let e = 1; e <= 18; e += 1) {
+      const accept = closingVisualAt(THROUGH_YES, e - 1);
+      const decline = closingVisualAt(THROUGH_DECLINE, e);
+      expect(accept.elapsed).toBe(e);
+      expect(decline.elapsed).toBe(e + 1);
+      expect(accept.visual.window).toEqual(decline.visual.window);
+      expect(accept.visual.flashWidths).toEqual(decline.visual.flashWidths);
+    }
+  });
+
+  it("clamps at the last tick: accept elapsed 19 matches decline's own elapsed 19 (not a hypothetical, out-of-table 20)", () => {
+    const accept = closingVisualAt(THROUGH_YES, 18);
+    const declineLast = closingVisualAt(THROUGH_DECLINE, 18);
+    expect(accept.elapsed).toBe(19);
+    expect(declineLast.elapsed).toBe(19);
+    expect(accept.visual.window).toEqual(declineLast.visual.window);
+    expect(accept.visual.flashWidths).toEqual(declineLast.visual.flashWidths);
+  });
+
+  it("ballAnimOverride is set only on accept's elapsed 1 (the one tick preCloseBallAnims covers), null everywhere else", () => {
+    const before = replay(THROUGH_YES.slice(0, -1));
+    const atElapsed0 = replay([...THROUGH_YES.slice(0, -1), [1, "A"]]);
+    expect(atElapsed0.draftScreen.confirmReveal?.elapsed).toBe(0);
+    expect(getConfirmRevealVisual(atElapsed0.draftScreen.confirmReveal).ballAnimOverride).toBeNull();
+
+    const atElapsed1 = replay(THROUGH_YES);
+    expect(atElapsed1.draftScreen.confirmReveal?.elapsed).toBe(1);
+    expect(getConfirmRevealVisual(atElapsed1.draftScreen.confirmReveal).ballAnimOverride).toEqual(before.draftScreen.ballAnims);
+
+    const atElapsed2 = replay([...THROUGH_YES, [1, null]]);
+    expect(atElapsed2.draftScreen.confirmReveal?.elapsed).toBe(2);
+    expect(getConfirmRevealVisual(atElapsed2.draftScreen.confirmReveal).ballAnimOverride).toBeNull();
+  });
+
+  it("decline's own closing path never sets ballAnimOverride (accept-only mechanism)", () => {
+    const declined = replay(THROUGH_DECLINE);
+    expect(declined.draftScreen.confirmReveal?.elapsed).toBe(1);
+    expect(getConfirmRevealVisual(declined.draftScreen.confirmReveal).ballAnimOverride).toBeNull();
   });
 });
 

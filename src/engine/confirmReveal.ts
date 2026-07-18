@@ -69,6 +69,25 @@ export interface ConfirmRevealState {
    * room (accept, see prebattleRoom.ts).
    */
   accepting?: boolean;
+  /**
+   * "closing" only, accept path: every active ball's `BallAnimState` as of
+   * the tick closing started (before that tick's own advance) - ISSUES #14.
+   * `Select_Task_CloseChosenMonPics`'s own per-frame creation cost (already
+   * known to permanently stall every active ball's internal `cmdIndex`
+   * starting the NEXT tick, core.ts's `ballAnimStall = activeSlotsBeforeAction`
+   * at `wasClosingAtZero`) ALSO delays that first tick's own render by one
+   * tick - same family as `isRevealStallActive`'s reveal-open case, but here
+   * the very next tick freezes via `ballAnimStall` before a live re-read
+   * could self-correct, so a display-only lag (this file's usual fix for
+   * this family) would leave the wrong tile frozen for the stall's whole
+   * duration instead of correcting for one tick. Used only to override the
+   * window's background ball-grid layer's rendering for elapsed 1 (oracle-
+   * pixel-verified via `accept-prebattle.json` frame 262: the one ball whose
+   * internal `cmdIndex` happened to cross a tile boundary that exact tick
+   * showed a 36px diff, gone once the window reads this frozen snapshot
+   * instead of the already-advanced live state for that one render).
+   */
+  preCloseBallAnims?: readonly (BallAnimState | null)[];
 }
 
 /**
@@ -241,6 +260,7 @@ export function advanceConfirmReveal(state: ConfirmRevealState | null): ConfirmR
     decliningSpecies: state.decliningSpecies,
     decliningBallAnim: state.decliningBallAnim,
     accepting: state.accepting,
+    preCloseBallAnims: state.preCloseBallAnims,
   };
 }
 
@@ -255,6 +275,8 @@ export interface ConfirmRevealVisual {
   monsSpeciesOverride: readonly string[] | null;
   /** Non-null only during the same "closing" hold as `monsSpeciesOverride` (see ConfirmRevealState.decliningBallAnim doc) - overrides the declined slot's ball rendering in the window's background ball-grid layer, which otherwise reads the live (already-deselected) state. */
   decliningBallAnim: BallAnimState | null;
+  /** Non-null only on "closing"'s accept-path elapsed 1 (see ConfirmRevealState.preCloseBallAnims doc) - overrides EVERY active slot's ball rendering in the window's background ball-grid layer with their pre-closing snapshot, for that one tick only. */
+  ballAnimOverride: readonly (BallAnimState | null)[] | null;
   /** The YES/NO text itself (Select_ShowYesNoOptions/Select_ErasePopupMenu) - erased immediately on decline, 2 ticks before monsVisible follows (see UNREVEAL doc). */
   yesNoVisible: boolean;
   /** The YES/NO cursor highlight bar (OAM), oracle-measured 1 tick behind yesNoVisible on the way in - same window-copy-vs-OAM lag as every other popup in this screen. */
@@ -267,9 +289,27 @@ const HIDDEN_REVEAL: ConfirmRevealVisual = {
   monsVisible: false,
   monsSpeciesOverride: null,
   decliningBallAnim: null,
+  ballAnimOverride: null,
   yesNoVisible: false,
   cursorVisible: false,
 };
+
+/**
+ * Pure tick->shape lookup for the "closing" un-reveal's window/flash portion
+ * (UNREVEAL_WINDOW_STEPS then UNREVEAL_FLASH_WIDTHS, see their own docs) -
+ * factored out so both decline (real elapsed) and accept (elapsed shifted
+ * one tick early, see getConfirmRevealVisual's ISSUES #14 note) read the
+ * SAME table via the same tick->shape mapping.
+ */
+function closingWindowStep(tick: number): { window: { top: number; bottom: number } | null; flashWidths: readonly number[] | null } {
+  if (tick < 2) return { window: { top: 32, bottom: 96 }, flashWidths: null };
+  const windowIdx = tick - 2;
+  if (windowIdx < UNREVEAL_WINDOW_STEPS.length) return { window: UNREVEAL_WINDOW_STEPS[windowIdx]!, flashWidths: null };
+  const flashIdx = windowIdx - UNREVEAL_WINDOW_STEPS.length - 1;
+  if (flashIdx < 0 || flashIdx >= UNREVEAL_FLASH_WIDTHS.length) return { window: null, flashWidths: null };
+  const w = UNREVEAL_FLASH_WIDTHS[flashIdx]!;
+  return { window: null, flashWidths: [w, w, w] };
+}
 
 export function getConfirmRevealVisual(state: ConfirmRevealState | null): ConfirmRevealVisual {
   if (!state) return HIDDEN_REVEAL;
@@ -301,7 +341,30 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
   // (accept-prebattle.json dense probe): the YES/NO text and highlight are
   // still visible well past decline's elapsed-1/elapsed-3 erase points.
   const accepting = state.accepting === true;
-  if (state.elapsed <= 2) {
+  // ISSUES #14 (RAM/pixel-verified this session, accept-prebattle.json dense
+  // per-tick diff cross-referenced against a scratch engine replay): the
+  // window-shrink/flash-shrink TABLE ITSELF (UNREVEAL_WINDOW_STEPS then
+  // UNREVEAL_FLASH_WIDTHS) also lands one tick earlier on accept than on
+  // decline - the exact same "decline's extra same-tick work delays the
+  // render by a tick" mechanism as `monsVisible` above (ISSUES #9/#13
+  // family), just not previously applied to this table. Confirmed by
+  // reproducing every one of the residual's diff-pixel counts exactly: e.g.
+  // frame 273's 48px = (UNREVEAL_FLASH_WIDTHS[1]-UNREVEAL_FLASH_WIDTHS[2])*3
+  // flash centers = (32-16)*3, frame 275's 24px = (16-8)*3, 277's 12px =
+  // (8-4)*3, 279's 9px = (4-1)*3 - a clean one-tick-ahead table read, not
+  // hardware jitter. The clamp at the table's last tick (19, not 20) matches
+  // decline's own tail behavior: decline's final flash tick (elapsed 19,
+  // width 1) is immediately followed by the closingFlashResidual's own
+  // width-1 draw (core.ts, ISSUES #13) once confirmReveal goes null - i.e.
+  // decline already HOLDS its last table value for 2 real ticks at the tail,
+  // so accept's shifted read lands on that same held value rather than
+  // running off the end of the table.
+  const windowTick = accepting ? Math.min(state.elapsed + 1, UNREVEAL_TOTAL_TICKS - 1) : state.elapsed;
+  const { window, flashWidths } = closingWindowStep(windowTick);
+  return {
+    ...HIDDEN_REVEAL,
+    window,
+    flashWidths,
     // elapsed 0: fully unchanged "shown" visual. elapsed 1: the YES/NO TEXT
     // is already erased (ISSUES #12 root cause #2a) while the window, the 3
     // mon pics, and the cursor highlight all stay open. elapsed 2: the
@@ -321,27 +384,17 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
     // render, same family as ISSUES #9/#13's "extra per-frame work costs a
     // tick" pattern - accept has none of that extra work, so its mon pics
     // vanish on schedule instead of one tick late.
-    const monsVisible = accepting ? state.elapsed <= 1 : true;
-    return {
-      ...HIDDEN_REVEAL,
-      window: state.elapsed < 2 ? { top: 32, bottom: 96 } : UNREVEAL_WINDOW_STEPS[0]!,
-      monsVisible,
-      monsSpeciesOverride: decliningSpecies,
-      decliningBallAnim,
-      yesNoVisible: accepting || state.elapsed === 0,
-      cursorVisible: true,
-    };
-  }
-  const windowIdx = state.elapsed - 2;
-  if (windowIdx < UNREVEAL_WINDOW_STEPS.length) {
-    return { ...HIDDEN_REVEAL, window: UNREVEAL_WINDOW_STEPS[windowIdx]!, yesNoVisible: accepting, cursorVisible: accepting };
-  }
-  const flashIdx = windowIdx - UNREVEAL_WINDOW_STEPS.length - 1;
-  if (flashIdx < 0 || flashIdx >= UNREVEAL_FLASH_WIDTHS.length) {
-    return accepting ? { ...HIDDEN_REVEAL, yesNoVisible: true, cursorVisible: true } : HIDDEN_REVEAL;
-  }
-  const w = UNREVEAL_FLASH_WIDTHS[flashIdx]!;
-  return { ...HIDDEN_REVEAL, flashWidths: [w, w, w], yesNoVisible: accepting, cursorVisible: accepting };
+    monsVisible: state.elapsed <= 2 && (accepting ? state.elapsed <= 1 : true),
+    monsSpeciesOverride: state.elapsed <= 2 ? decliningSpecies : null,
+    decliningBallAnim: state.elapsed <= 2 ? decliningBallAnim : null,
+    // ISSUES #14: only accept's own elapsed 1 render needs the pre-closing
+    // ball snapshot (see ConfirmRevealState.preCloseBallAnims doc) - by
+    // elapsed 2 the window reads UNREVEAL_WINDOW_STEPS' own shrink (a
+    // different tick entirely) and every ball's live state is correct again.
+    ballAnimOverride: accepting && state.elapsed === 1 ? (state.preCloseBallAnims ?? null) : null,
+    yesNoVisible: accepting || state.elapsed === 0,
+    cursorVisible: accepting || state.elapsed <= 2,
+  };
 }
 
 /** Select_ShowYesNoOptions: default cursor position is YES (row 0), re-applied every time the popup shows (see core.ts's reveal-start trigger). */

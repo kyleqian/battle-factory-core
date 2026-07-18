@@ -435,13 +435,21 @@ function drawConfirmReveal(
     // selected (frozen on its last live frame) too - live `balls` already
     // reflects this tick's deselect, so swap in the frozen snapshot just for
     // this draw (see ConfirmRevealState.decliningBallAnim's doc).
+    // ISSUES #14: accept's own elapsed-1 render needs EVERY active slot's
+    // pre-closing snapshot instead (see ConfirmRevealState.preCloseBallAnims
+    // doc) - mutually exclusive with decliningBallAnim (decline-only).
     const windowBalls = visual.decliningBallAnim
       ? balls.map((b, i) =>
           i === state.cursorPos
             ? { palette: pokeball.selectedPalette, firstTileRow: ballFirstTileRow(ballAnimTile(visual.decliningBallAnim!)) }
             : b,
         )
-      : balls;
+      : visual.ballAnimOverride
+        ? balls.map((b, i) => {
+            const anim = visual.ballAnimOverride![i];
+            return anim ? { palette: b.palette, firstTileRow: ballFirstTileRow(ballAnimTile(anim)) } : b;
+          })
+        : balls;
     const { top, bottom } = visual.window;
     for (let y = top; y < bottom; y += 1) {
       for (let x = WIDE_WINDOW_LEFT; x < WIDE_WINDOW_RIGHT; x += 1) {
