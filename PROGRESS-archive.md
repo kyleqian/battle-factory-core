@@ -5,6 +5,49 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 65 — Supervisor wind-down: session end 2026-07-18 ~14:30; S6 engine parity anchor→tick 1040 byte-exact, scene assembly 104/256 (one named gap), ALL S6 groundwork + RNG criterion banked
+
+- **State (verified this minute):** `npm test` **425/425**, `npm run
+  build` green, tree clean at `b4faa7a` + this docs commit. 18 committed
+  parity traces: anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
+  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+  room-msgbox 142/142, transition 206/206 — all byte-exact — plus
+  scene-assembly **104/256** (sole in-progress slice, see #64/#63) and
+  the three ISSUES-#5-policy traces (rent-slot1 125/139, rent-3picks
+  157/190, confirm-flow 79/95). Engine covers the anchor through tick
+  1040 of the 1886-tick battle-1 bring-up byte-exact; 1040-1295 partial.
+- **Session summary (supervised, ~09:10-14:30, 20 worker steps, 2 lanes):**
+  engine slices landed: walk+warp 400-519 (125/125), room entry 520-624
+  (110/110), scientists+opponent 624-717 (98/98), speech msgbox 718-843
+  (142/142), CIRCLES_MEET transition 843-1040 (206/206), scene assembly
+  1040-1295 through 4 convergent iterations (42→104/256; systemic
+  one-tick render lag discovered, #63); RNG criterion satisfied
+  (`opponentGen.ts` bit-exact vs RAM dump, #61); ISSUES #15 root-caused
+  + fixed (to5Bit palette-convention bug, #48). Parallel lane banked ALL
+  remaining S6 groundwork: transition id RAM-confirmed (CIRCLES_MEET,
+  #47), no-heal-icon correction + 843-1031 pinned (#53), scene-assembly
+  mechanism (#55), send-out window (#59), menu window (#59), and every
+  flagged asset extracted byte-exact (battle room #49, interface widgets
+  #57, sendout anim assets #59). Suite 341→425 Tier-1 tests; traces
+  13→19 (+4 dense groundtruth). Zero regressions at every one of 20
+  verified steps; every worker ended at a green commit.
+- **Next:** (1) scene-assembly GAP A residual — the streak window's
+  blend arithmetic; exact next RAM probe in #63/`battleScene.ts` module
+  doc; **user decision on record: keep iterating, no re-scope** (also in
+  ROADMAP S6). (2) Then send-out engine slice 1300-1560
+  (`battle-scene-notes.md` §7) and player send-out + menu 1560-1810
+  (`battle-menu-notes.md`) — groundwork complete, assets ready. (3) The
+  22px tick-1229 widget residual (#64) rides along with GAP A.
+- **Notes:** PAPERCUTS.md gained the stale `tools/compare/out/` PNG
+  entry (GAP-B worker's flag). No usage-limit events. Escalation
+  mid-session (2 consecutive scene-assembly misses) was answered by the
+  user in-terminal: keep iterating. One supervisor error caught+fixed:
+  a double-rotated archive entry (#55, dedup commit `029c01f`).
+
+---
+
 ## 64 — S6 scene-assembly GAP B (widget entrance) resolved: same one-tick render lag GAP A found (#63) applies to the widget sprites too, plus the opponent icon x2 tables were missing their per-icon flat-delay prefix since #60/#62 — `scene-assembly.json` 104/256 (was 41/256), 0 regressions. GAP A (streak blend-arithmetic) untouched, as scoped.
 
 - **State:** `npm test` **425/425**, `npm run build` green. `npm run

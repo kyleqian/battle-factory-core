@@ -5,6 +5,76 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 68 — S6 scene-assembly GAP A FULLY RESOLVED: blend precision runs in 8-bit space not 5-bit (mathematically proven, not curve-fit), plus evaEvb's own one-tick render lag — `scene-assembly.json` 255/256 (was 151/256), whole 1075-1226 window byte-exact, 0 regressions
+
+- **State:** `npm test` **429/429** (428→429, +1 pin, 2 corrected), `npm
+  run build` green. `npm run compare -- tools/compare/traces/
+  scene-assembly.json` → **255/256** (was 151/256). Full 18-trace sweep
+  re-run, all others at their exact prior counts (anchor 1/1,
+  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example
+  4/4, summary-info-onix 122/122, summary-info-magby 132/132,
+  confirm-decline 67/67, accept-prebattle 137/137, walk-warpout 125/125,
+  room-entry 110/110, room-npcs 98/98, room-msgbox 142/142, transition
+  206/206, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) —
+  zero regressions. Bonus: groundtruth trace `battle1-intro.json` also
+  improved 141→167/254 (same fix, different trace, not required).
+- **Did — the brief's mandated VRAM probe, then the real fix:** ran
+  `tools/probe/ram-probe.py` on BG1CNT (`0x0400000A`), BLDCNT/BLDALPHA
+  (`0x04000050`/`0x04000052`), the literal tilemap entry at
+  `BG_SCREEN_ADDR(28)` for GAP A's named pixel (tick 1150, x=120/y=84,
+  tileRow 10/tileCol 28), that tile's char (`BG_CHAR_ADDR(1)`) and
+  palette-RAM bytes — every axis the brief flagged unverified came back
+  **clean**: BG1CNT decodes to `screenSize=2` (256px-wide) exactly as
+  `gBattleBgTemplates[1]` and this module already assumed (no bug); the
+  tile entry (`tileId=8/hFlip=0/vFlip=0`) and its char data match the
+  extracted JSON exactly; the entry's raw palette nibble is hardware
+  bank 4 (JSON stores it locally as bank 2) but both read the identical
+  RGB(222,231,247) — `extract-battle-bg.ts` renumbers only the banks a
+  tileset references, a labeling convention, not a data bug. So the
+  residual wasn't geometry/extraction. Root cause, found by hand-solving
+  the blend equation: oracle's own pixel value there, (242,246,252), is
+  **mathematically unreachable** by blending any two GBA palette colors
+  in 5-bit space under any `eva`/`evb` — `(c5<<3)|(c5>>2)` only ever
+  yields one of 32 fixed values per channel, and none of the three
+  oracle values are among them (this holds regardless of which tile is
+  blended, since every palette color is itself one of those 32 values —
+  a freestanding proof, not a brute-force sample). The same operands run
+  through `floor((tgt1_8bit*eva+tgt2_8bit*evb)/16)` **directly on the
+  8-bit-expanded colors** (no 5-bit requantize) hit the oracle's value
+  exactly on all three channels — apparently mGBA's own blend
+  implementation runs in its native 8bpp domain rather than re-deriving
+  5-bit hardware precision, and the oracle (not idealized hardware) is
+  ground truth. `blendChannel` is local to `battleScene.ts` (only
+  caller: `drawSlideScene`), so this only affects this window —
+  `paletteFade.ts`'s own blend, used elsewhere, is untouched and still
+  5-bit (already oracle-validated there). Fixing the domain took
+  151→247/256, leaving exactly 8 mismatches at trace ticks
+  1139/1145/1151/.../1181 — precisely the 6-tick BLDALPHA step
+  boundaries. `evaEvb` was the one register in this task's model still
+  missing the one-tick render lag every other register here already has
+  (`bg1X`, the window edges, the scanline shift) — adding `et = t - 1`
+  fixed all 8, landing on 255/256. The one remaining mismatch (tick
+  1229) is GAP B's own separate, pre-existing, narrower residual (module
+  doc point 3, untouched — out of GAP A's scope). Added 1 new Tier-1 pin
+  at the exact previously-impossible pixel and corrected 2 stale evaEvb
+  schedule pins to their render-lagged boundary ticks.
+- **Next:** GAP A is closed — no further action needed on the streak
+  window. Remaining scene-assembly work is GAP B's own point-3 residual
+  (tick 1229, player bar 22px off — next probe on record: what
+  structurally differs between the player widget's creation tick 1228
+  and the opponent's 1231, both via `CreatePartyStatusSummarySprites`).
+  Attempted this session as an optional stretch but not reached within
+  the cap — carries forward unchanged. After that: send-out engine slice
+  1300-1560 (`battle-scene-notes.md` §7) and player send-out + menu
+  1560-1810 (`battle-menu-notes.md`) — groundwork complete, assets
+  ready, per #65's plan.
+- **Notes:** PAPERCUT: none new. `bin/oracle run`/`ram-probe.py` scratch
+  output went to `/tmp/probe-gapA-*` (not committed, no stale-cache
+  risk). Both `docs/battle-scene-notes.md` and `battleScene.ts`'s module
+  doc point 2 updated with the full derivation.
+
+---
+
 ## 67 — S7 groundwork banked (parallel worktree lane, merged): committed dense turn-1 trace + RAM dump + damage/type data extraction + `docs/battle-turn-notes.md` dossier — S7 engine slices now have fixed targets
 
 - **State:** merge of `worker/wt-20260718-143156` (base `3ac0303`, merged
@@ -113,47 +183,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   went to `/tmp/scene-oracle` (not committed, not `tools/compare/out/` -
   no stale-cache risk left behind).
 
----
-
-## 65 — Supervisor wind-down: session end 2026-07-18 ~14:30; S6 engine parity anchor→tick 1040 byte-exact, scene assembly 104/256 (one named gap), ALL S6 groundwork + RNG criterion banked
-
-- **State (verified this minute):** `npm test` **425/425**, `npm run
-  build` green, tree clean at `b4faa7a` + this docs commit. 18 committed
-  parity traces: anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
-  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
-  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
-  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
-  room-msgbox 142/142, transition 206/206 — all byte-exact — plus
-  scene-assembly **104/256** (sole in-progress slice, see #64/#63) and
-  the three ISSUES-#5-policy traces (rent-slot1 125/139, rent-3picks
-  157/190, confirm-flow 79/95). Engine covers the anchor through tick
-  1040 of the 1886-tick battle-1 bring-up byte-exact; 1040-1295 partial.
-- **Session summary (supervised, ~09:10-14:30, 20 worker steps, 2 lanes):**
-  engine slices landed: walk+warp 400-519 (125/125), room entry 520-624
-  (110/110), scientists+opponent 624-717 (98/98), speech msgbox 718-843
-  (142/142), CIRCLES_MEET transition 843-1040 (206/206), scene assembly
-  1040-1295 through 4 convergent iterations (42→104/256; systemic
-  one-tick render lag discovered, #63); RNG criterion satisfied
-  (`opponentGen.ts` bit-exact vs RAM dump, #61); ISSUES #15 root-caused
-  + fixed (to5Bit palette-convention bug, #48). Parallel lane banked ALL
-  remaining S6 groundwork: transition id RAM-confirmed (CIRCLES_MEET,
-  #47), no-heal-icon correction + 843-1031 pinned (#53), scene-assembly
-  mechanism (#55), send-out window (#59), menu window (#59), and every
-  flagged asset extracted byte-exact (battle room #49, interface widgets
-  #57, sendout anim assets #59). Suite 341→425 Tier-1 tests; traces
-  13→19 (+4 dense groundtruth). Zero regressions at every one of 20
-  verified steps; every worker ended at a green commit.
-- **Next:** (1) scene-assembly GAP A residual — the streak window's
-  blend arithmetic; exact next RAM probe in #63/`battleScene.ts` module
-  doc; **user decision on record: keep iterating, no re-scope** (also in
-  ROADMAP S6). (2) Then send-out engine slice 1300-1560
-  (`battle-scene-notes.md` §7) and player send-out + menu 1560-1810
-  (`battle-menu-notes.md`) — groundwork complete, assets ready. (3) The
-  22px tick-1229 widget residual (#64) rides along with GAP A.
-- **Notes:** PAPERCUTS.md gained the stale `tools/compare/out/` PNG
-  entry (GAP-B worker's flag). No usage-limit events. Escalation
-  mid-session (2 consecutive scene-assembly misses) was answered by the
-  user in-terminal: keep iterating. One supervisor error caught+fixed:
-  a double-rotated archive entry (#55, dedup commit `029c01f`).
-
----
