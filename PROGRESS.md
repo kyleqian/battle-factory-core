@@ -5,6 +5,68 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 36 — ISSUES #10 root-caused and fixed (RAM/oracle-pixel-verified); `confirm-flow.json` COMMITTED — S5's confirm-reveal render surface is now trace-pinned; ISSUES #9 and #10 both deleted
+
+- **State:** `npm test` **297/297** (296→297, +1 net in
+  `tests/confirmReveal.test.ts`), `npm run build` green. All 9 pre-existing
+  traces re-verified at their exact prior counts (anchor 1/1, draft-cursor
+  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, rent-slot1
+  125/139, rent-3picks 157/190, summary-info-magby 132/132, summary-info-onix
+  122/122) — zero regressions. **`confirm-flow.json` committed** at 79/95
+  frames matched, the 16 non-matching frames individually attributed below.
+- **Did:** Built a scratch oracle trace (`rent-3picks.json`'s 19 segments +
+  90-tick idle, dense `captureFrames` 195-230) and sampled RGB directly at
+  the 2 flash-bar centers unshared with any other on-screen element (x=44,
+  x=196 - x=120 was ruled out, it sits under an unrelated always-present
+  element that coincidentally shares `FLASH_BLENDED_COLOR`) plus a clean
+  edge probe at x=8-20 (bar1's own left edge vs the wide window's fixed
+  `WIDE_WINDOW_LEFT=16` - a value no flash-bar width can ever produce, the
+  one unambiguous discriminator between "bar still on screen" and "window
+  opened"). Found: the true flash-width sequence
+  (`1,1,4,4,8,8,16,16,32,32,64,64` - unchanged, every value and the doubling
+  cadence pixel-confirmed exact) starts exactly 1 tick later than modeled -
+  the engine's `elapsed=-1` (existing 1-tick OAM-creation lag) needed a
+  *second* hidden tick before `FLASH_WIDTHS[0]` applies, matching the shape
+  `monPic.ts`'s own `OPEN_TABLE_*` already models (multiple hidden ticks
+  before its first `flash(1)`). Cross-verified against the window-growth
+  boundary too: with the extra hidden tick, `WINDOW_STEPS`' previously-added
+  2nd `{64,65}` degenerate hold (PROGRESS #33) becomes redundant - dropping
+  it (12→11 entries) is the exact 1-tick compensation needed to keep the
+  total confirm-to-"shown" duration unchanged, so every already-RAM-verified
+  downstream absolute tick (ISSUES #9's ball-anim/stall timing) stays where
+  it was; row-scanned BG3 wash content at x=120 for frames 222-226 confirmed
+  the growth step (60,69) lands exactly 1 tick after the single degenerate
+  hold, not 2. Fixed in `confirmReveal.ts` (`FLASH_WIDTHS` now indexed
+  `elapsed-1`, hidden below `elapsed<1`; `WINDOW_STEPS` lost its duplicate
+  hold; `advanceConfirmReveal`'s flash→window transition threshold bumped by
+  1 to match) and re-pinned in `tests/confirmReveal.test.ts` (boundary
+  ticks shifted, 1 test added for the new 2nd hidden tick). Rebuilt
+  `confirm-flow.json` (same recipe, `captureFrames` 185-279) and ran
+  `npm run compare`: frames 210-279 (the entire flash + window + shown/
+  YES-NO-dwell portion, where every ISSUES #9/#10 diff lived) are now
+  **byte-exact**. The only remaining diffs, frames 189/190/191/192/193/194/
+  195/196/197/198/199/201/203/205/207/209 (107/949/2892/512/512/512/512/512/
+  448/64/32/16/8/4/3/1px), exactly reproduce ISSUES #5's own pre-documented
+  pattern (tapering 189→199 then the halving tail 199/201/203/205/207/209 -
+  32/16/8/4/3/1px, verbatim-matching PROGRESS #35's own prior characterization
+  of this same window) - the 3rd pick's own popup-close catch-up, unrelated
+  to this session's fix (untouched code path). Committed the trace with each
+  attributed frame listed in the commit message. Full 9-trace suite +
+  `confirm-flow.json` + `npm test` + `npm run build` all green (counts
+  above); ISSUES #9 and #10 both deleted (git keeps history).
+- **Next:** S5's confirm-reveal render surface is now fully trace-pinned
+  modulo ISSUES #5 (policy-settled, no further fix attempts). S5's remainder:
+  the decline path (stretch goal, still open), the YES-press exit fade +
+  pre-battle room (`docs/prebattle-room-notes.md`), then S6.
+- **Notes:** all RAM/pixel probing (`bin/oracle run` + direct RGB sampling
+  via a scratch Node script, `/tmp/issue10/`) was scratch, deleted before
+  finishing - nothing uncommitted left beyond the intended
+  `src/engine/confirmReveal.ts` + `tests/confirmReveal.test.ts` +
+  `tools/compare/traces/confirm-flow.json` + docs changes. PAPERCUT: none
+  this session.
+
+---
+
 ## 35 — ISSUES #9's ball-anim drift root-caused and fixed (2 independent display-lag bugs, both RAM-verified); `confirm-flow.json` STILL not committed — the fix cleared every ball-OBJ diff but exposed a 5th, unrelated gap in confirmReveal's own flash-bar timing, filed as new ISSUES #10
 
 - **State:** `npm test` **296/296** (292→296, +4), `npm run build` green.
@@ -155,82 +217,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   remember before checking stdout instead of the exit code).
 
 ---
-
-## 33 — ISSUES #8 leads 1-2 CLOSED (real BG3 wide-window content + RAM-verified window-hold fix, both committed); lead 3 (`confirm-flow.json`) STOPPED short of commit per the brief's stop condition — diffs shrank by ~4-10x but a 3rd, unrelated-looking gap remains
-
-- **State:** `npm test` **291/291** (290→291, +1 net in
-  `tests/confirmReveal.test.ts` — one test split into two to cover the new
-  boundary), `npm run build` green. All 9 committed traces re-verified at
-  their exact prior counts (anchor 1/1, draft-cursor 13/13, draft-menu
-  38/38, draft-menu-slot6 66/66, example 4/4, rent-slot1 125/139,
-  rent-3picks 157/190, summary-info-magby 132/132, summary-info-onix
-  122/122) — zero regressions. `confirm-flow.json` **not committed** (see
-  below).
-- **Did:** **Part 1 (BG3 ground truth):** RAM/VRAM-dumped BG3's actual
-  tilemap (mapBaseIndex 27 → VRAM 0x0600D800, rows 4-11) during the wide
-  reveal window. Found (and cross-confirmed against source,
-  `Select_InitBgs`, `battle_factory_screen.c:1202-1206`) that the wide
-  window's content is literally 3 copies of the *already-extracted* narrow
-  8x8 `mon-pic-bg.json` tile block, placed at 3 disjoint tile-column anchors
-  (x=16/88/160) with 2 transparent 8px gaps (x80-88, x152-160) — not a
-  continuous 64px-period tiling as the prior slice's `bg3ColorTiled`
-  approximated (which was also mis-anchored, wrapping relative to the
-  narrow window's own x88 origin instead of the wide window's x16). **Part
-  2 (tick boundaries):** RAM-verified `confirmReveal.ts`'s phase boundaries
-  via direct `REG_DISPCNT`/`REG_WIN0V` reads plus `gSprites[]` located by
-  known screen position (robust against `FactorySelectScreen` struct-offset
-  guessing, which a first attempt got wrong by 2-6 bytes). Flash phase (13
-  ticks incl. 1-tick creation lag) confirmed exact, no change. Window phase:
-  found `Select_Task_OpenChosenMonPics`' case0 (WIN0 on) and case1 (`ShowBg
-  (3)`) are 2 separate ticks with NO window movement between them, not 1 as
-  implemented — real hardware holds the degenerate (64,65) window for 2
-  ticks before the 8-tick growth to (32,96) starts. Fixed: `WINDOW_STEPS`
-  gained an extra `{64,65}` hold entry (11 entries total, same as before —
-  only the content of indices 1/8/9/10 shifted, so the overall
-  flash→window→shown tick budget is unchanged). Also independently
-  confirmed the BG3 wash stays visible **permanently** through the settled
-  YES/NO idle (pixel-sampled several frames), not just during window
-  growth — `confirmReveal.ts`'s existing "shown"-phase window field already
-  modeled this correctly, no change needed. **Extractor + render (both
-  committed):** `extract-factory-screen.ts` now emits a `wideTilemap`
-  (26x8) field in `mon-pic-bg.json`; `monPicRender.ts`'s `bg3ColorTiled` is
-  replaced with `bg3ColorWide` (reads the real geometry, no more tiling
-  approximation). Narrow single-popup path (`bg3Color`, `mon-pic-bg.json`'s
-  original `tilemap` field) untouched. **Part 3 (trace, not committed):**
-  rebuilt `confirm-flow.json` (rent-3picks.json's exact button prefix +
-  idle to frame 279) and ran `npm run compare`: diffs dropped sharply (was
-  1000-5000px/2-14% starting ~confirm+34; now mostly 30-950px/0.1-2.5%,
-  frames 185-188 clean) but two frames (191: 2922px, 233: 4058px) are still
-  in the old magnitude range, and none of the remaining diffs match ISSUES
-  #5's own x88-151-confinement signature (different bboxes, solid-wrong-color
-  failure shape rather than partial-window jitter) — not attributable to
-  that policy. Bboxed and sampled 5 representative frames (189/190/191/233/
-  249); found what looks like 3 *different* gaps (a yellow-pixel mismatch
-  early in the flash phase, likely in the 3rd pick's own un-exercised
-  post-frame-189 `monPic` close rendering; a probable contributor at the
-  "shown" transition tied to a newly-found 1-tick sprite-creation stagger
-  between chosen-mon slot0 and slots1-2 that this engine's single
-  `monsAndYesNoVisible` boolean doesn't model; and an unrelated red-vs-white
-  mismatch near the YES/NO box in the steady dwell). Per the brief's stop
-  condition, did not commit the trace; ISSUES #8 rewritten with the full
-  bbox/sample evidence and a renumbered lead list for whichever of the 3 a
-  future session tackles first.
-- **Next:** ISSUES #8's 3 remaining leads (frame 190/191's yellow mismatch,
-  the slot0 sprite-creation stagger, frame 249's red-vs-white mismatch) —
-  tackle independently, since evidence suggests 3 unrelated bugs, not one.
-  Once clean, commit `confirm-flow.json` and delete ISSUES #8. After that:
-  the decline path (stretch goal, still open), then the YES-press exit fade
-  + pre-battle room (`docs/prebattle-room-notes.md`), S6.
-- **Notes:** all RAM/VRAM probing was scratch (`/tmp/confirm_probe*.py`,
-  deleted before finishing); the trial `confirm-flow.json` was written then
-  removed (not committed) once compare showed remaining diffs — nothing
-  uncommitted left in the tree beyond the intended engine/extractor/test
-  changes. PAPERCUT: ~15 min lost chasing `FactorySelectScreen`'s struct
-  offsets by hand (computed `monPics[]`/`monPicAnimating` byte positions
-  from the C struct definition directly, got them wrong by 2-6 bytes twice)
-  before switching to a struct-offset-independent approach (scan `gSprites[]`
-  for sprites at known screen positions instead) — worth reaching for the
-  position-scan method first next time a sprite/task needs locating, rather
-  than hand-deriving struct byte offsets from source.
 
 ---

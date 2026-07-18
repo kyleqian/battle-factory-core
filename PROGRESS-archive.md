@@ -5,6 +5,85 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 33 — ISSUES #8 leads 1-2 CLOSED (real BG3 wide-window content + RAM-verified window-hold fix, both committed); lead 3 (`confirm-flow.json`) STOPPED short of commit per the brief's stop condition — diffs shrank by ~4-10x but a 3rd, unrelated-looking gap remains
+
+- **State:** `npm test` **291/291** (290→291, +1 net in
+  `tests/confirmReveal.test.ts` — one test split into two to cover the new
+  boundary), `npm run build` green. All 9 committed traces re-verified at
+  their exact prior counts (anchor 1/1, draft-cursor 13/13, draft-menu
+  38/38, draft-menu-slot6 66/66, example 4/4, rent-slot1 125/139,
+  rent-3picks 157/190, summary-info-magby 132/132, summary-info-onix
+  122/122) — zero regressions. `confirm-flow.json` **not committed** (see
+  below).
+- **Did:** **Part 1 (BG3 ground truth):** RAM/VRAM-dumped BG3's actual
+  tilemap (mapBaseIndex 27 → VRAM 0x0600D800, rows 4-11) during the wide
+  reveal window. Found (and cross-confirmed against source,
+  `Select_InitBgs`, `battle_factory_screen.c:1202-1206`) that the wide
+  window's content is literally 3 copies of the *already-extracted* narrow
+  8x8 `mon-pic-bg.json` tile block, placed at 3 disjoint tile-column anchors
+  (x=16/88/160) with 2 transparent 8px gaps (x80-88, x152-160) — not a
+  continuous 64px-period tiling as the prior slice's `bg3ColorTiled`
+  approximated (which was also mis-anchored, wrapping relative to the
+  narrow window's own x88 origin instead of the wide window's x16). **Part
+  2 (tick boundaries):** RAM-verified `confirmReveal.ts`'s phase boundaries
+  via direct `REG_DISPCNT`/`REG_WIN0V` reads plus `gSprites[]` located by
+  known screen position (robust against `FactorySelectScreen` struct-offset
+  guessing, which a first attempt got wrong by 2-6 bytes). Flash phase (13
+  ticks incl. 1-tick creation lag) confirmed exact, no change. Window phase:
+  found `Select_Task_OpenChosenMonPics`' case0 (WIN0 on) and case1 (`ShowBg
+  (3)`) are 2 separate ticks with NO window movement between them, not 1 as
+  implemented — real hardware holds the degenerate (64,65) window for 2
+  ticks before the 8-tick growth to (32,96) starts. Fixed: `WINDOW_STEPS`
+  gained an extra `{64,65}` hold entry (11 entries total, same as before —
+  only the content of indices 1/8/9/10 shifted, so the overall
+  flash→window→shown tick budget is unchanged). Also independently
+  confirmed the BG3 wash stays visible **permanently** through the settled
+  YES/NO idle (pixel-sampled several frames), not just during window
+  growth — `confirmReveal.ts`'s existing "shown"-phase window field already
+  modeled this correctly, no change needed. **Extractor + render (both
+  committed):** `extract-factory-screen.ts` now emits a `wideTilemap`
+  (26x8) field in `mon-pic-bg.json`; `monPicRender.ts`'s `bg3ColorTiled` is
+  replaced with `bg3ColorWide` (reads the real geometry, no more tiling
+  approximation). Narrow single-popup path (`bg3Color`, `mon-pic-bg.json`'s
+  original `tilemap` field) untouched. **Part 3 (trace, not committed):**
+  rebuilt `confirm-flow.json` (rent-3picks.json's exact button prefix +
+  idle to frame 279) and ran `npm run compare`: diffs dropped sharply (was
+  1000-5000px/2-14% starting ~confirm+34; now mostly 30-950px/0.1-2.5%,
+  frames 185-188 clean) but two frames (191: 2922px, 233: 4058px) are still
+  in the old magnitude range, and none of the remaining diffs match ISSUES
+  #5's own x88-151-confinement signature (different bboxes, solid-wrong-color
+  failure shape rather than partial-window jitter) — not attributable to
+  that policy. Bboxed and sampled 5 representative frames (189/190/191/233/
+  249); found what looks like 3 *different* gaps (a yellow-pixel mismatch
+  early in the flash phase, likely in the 3rd pick's own un-exercised
+  post-frame-189 `monPic` close rendering; a probable contributor at the
+  "shown" transition tied to a newly-found 1-tick sprite-creation stagger
+  between chosen-mon slot0 and slots1-2 that this engine's single
+  `monsAndYesNoVisible` boolean doesn't model; and an unrelated red-vs-white
+  mismatch near the YES/NO box in the steady dwell). Per the brief's stop
+  condition, did not commit the trace; ISSUES #8 rewritten with the full
+  bbox/sample evidence and a renumbered lead list for whichever of the 3 a
+  future session tackles first.
+- **Next:** ISSUES #8's 3 remaining leads (frame 190/191's yellow mismatch,
+  the slot0 sprite-creation stagger, frame 249's red-vs-white mismatch) —
+  tackle independently, since evidence suggests 3 unrelated bugs, not one.
+  Once clean, commit `confirm-flow.json` and delete ISSUES #8. After that:
+  the decline path (stretch goal, still open), then the YES-press exit fade
+  + pre-battle room (`docs/prebattle-room-notes.md`), S6.
+- **Notes:** all RAM/VRAM probing was scratch (`/tmp/confirm_probe*.py`,
+  deleted before finishing); the trial `confirm-flow.json` was written then
+  removed (not committed) once compare showed remaining diffs — nothing
+  uncommitted left in the tree beyond the intended engine/extractor/test
+  changes. PAPERCUT: ~15 min lost chasing `FactorySelectScreen`'s struct
+  offsets by hand (computed `monPics[]`/`monPicAnimating` byte positions
+  from the C struct definition directly, got them wrong by 2-6 bytes twice)
+  before switching to a struct-offset-independent approach (scan `gSprites[]`
+  for sprites at known screen positions instead) — worth reaching for the
+  position-scan method first next time a sprite/task needs locating, rather
+  than hand-deriving struct byte offsets from source.
+
+---
+
 ## 32 — S5 slice 3 (confirm flow): state machine + RNG landed and Tier-1-pinned; render/trace STOPPED short of commit per the brief's own stop condition (wide-window pixel content not verified) — new ISSUES #8
 
 - **State:** `npm test` **290/290** (276→290, +14 in new
