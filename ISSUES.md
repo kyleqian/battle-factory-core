@@ -5,6 +5,57 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #11 — species-name breathe (`Select_Task_FadeSpeciesName`) must now be
+  modeled — the decline path re-activates it immediately
+
+**Symptom:** `confirm-decline.json` frames 256-306 carry a constant 129px
+color-only diff confined to the WIN_SPECIES text box (x196-236, y20-28):
+same glyphs, app renders the static red (255,0,0), oracle ~(173,0,0) —
+RGB-sampled by the decline worker (2026-07-17, commit `9a8e96b`).
+
+**Confirmed:** the decline handler sets `fadeSpeciesNameActive = TRUE` on
+re-entry to cursor mode (`battle_factory_screen.c` :1551-1570,
+`docs/confirm-flow-notes.md` §3), so the breathe starts within a few ticks
+of the decline press — the old "keep cumulative cursor-mode ticks < 105"
+budget rule (slice 2) cannot dodge it. This blocks `confirm-decline.json`
+(and any future decline/post-decline trace) from the trace bar.
+
+**Leads:** `Select_Task_FadeSpeciesName` (`battle_factory_screen.c`) is the
+waveform source; pin period + per-tick palette values via dense RGB
+sampling over ≥2 full periods; onset rules to pin: (a) post-decline onset
+tick (empirically first diff at trace frame 256; decline press ~250), (b)
+normal cursor-mode onset at cumulative ~104-105 ticks (budget known, exact
+onset tick + phase never pinned). Constraint: all 10 pre-existing traces
+stay under the budget and must remain byte-identical.
+
+## #12 — un-reveal first-ticks residual: `confirm-decline.json` frames
+  253-255 (156/251/1129px) not root-caused
+
+**Symptom:** small diffs in the un-reveal's first 1-3 visible ticks
+(`Select_Task_CloseChosenMonPics` window, right where the YES/NO box +
+mon pics tear down).
+
+**Status:** NOT attributable to ISSUES #5 (different task than
+`CloseMonPic`; no cycle-jitter evidence gathered — the decline worker noted
+"same character" but did not probe). History warns against premature
+jitter attribution: ISSUES #8/#9/#10 all looked like this and were all
+real, fixable modeling bugs. Needs a RAM/pixel chase (the #9/#10 recipe:
+dense captures + direct RGB row-scans + `gSprites`/task-state probes).
+
+## #13 — periodic ball-area bumps during the post-decline window (10
+  frames: 259/263/267/270/271/275/278/286/294/302, +173-176px, y54-73)
+
+**Symptom:** on top of #11's constant baseline, the ball-rendering area
+diffs on a rough ball-anim cadence while the un-reveal plays out and after.
+
+**Lead:** a display-lag/stall analogue of `isRevealStallActive` on the
+un-reveal side (decline's own print call is already modeled as a 1-tick
+`ballAnimStall`; something near `Select_Task_CloseChosenMonPics` — or the
+`Select_CreateChosenMonsSprites` teardown mirror — may add more).
+RAM-probe balls' `animCmdIndex`/`displayTile` across the decline window
+with ISSUES #9's method. Fix likely lands in `ballAnim.ts`/`core.ts` as
+one more stall predicate.
+
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
   windows where feasible; otherwise ship with each non-matching frame

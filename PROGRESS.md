@@ -16,53 +16,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   non-matching frame individually attributed in the commit message (none
   newly introduced by unrelated code).
 - **Did:** Implemented `docs/confirm-flow-notes.md` §2/§3: YES/NO cursor
-  UP/DOWN (0<->1 toggle, JOY_REPEAT-gated, reusing `MenuHighlightRedrawState`
-  for the OAM-move redraw lag) and decline (B anywhere, or A-on-NO -
-  source-identical, modeled once): same-tick `mons[2].selectedId`->0 (via
-  `applyDeselect` on `cursorPos`), `selectingMonsState` 4->3, message revert
-  (reusing `RentConfirmRedrawState`'s existing 2-tick hold), YES/NO
-  popup+cursor erased. Added a `confirmReveal.ts` "closing" phase for the
-  20-tick un-reveal, pixel-pinned via a dense scratch oracle trace (per the
-  brief's warning, NOT a mirror of the open direction - verified tick by
-  tick): elapsed 0-1 hold, elapsed 2 erases YES/NO+message while the 3 mon
-  pics hold one more tick (snapshotted into a new
-  `ConfirmRevealState.decliningSpecies` field, since live `selectedIds` no
-  longer resolves the 3rd pick's rank once cleared), elapsed 3-9 shrink the
-  window reusing `monPic.ts`'s own `CLOSE_TABLE_B` window values exactly,
-  elapsed 10 HIDDEN, elapsed 11-19 the border sprites' closing zoom reusing
-  `CLOSE_TABLE_B`'s own flash-shrink sequence at all 3 flash centers,
-  elapsed 20 -> null (un-reveal done). Restructured `core.ts`'s input gate
-  to key off `confirmReveal` itself (not just `isMonsConfirmed`), since
-  `selectingMonsState` already drops to 3 on the decline tick while the
-  20-tick un-reveal is still animating and must keep input locked out;
-  normal cursor-mode input (incl. re-picking the now-gray 3rd ball) resumes
-  the same tick `confirmReveal` clears - immediately re-pickable, matching
-  the dossier. Ball 3 leaves the rented set the same tick; balls 1-2 keep
-  advancing unconditionally through the whole dwell+decline+un-reveal
-  window (notes §4). Pinned with 15 new Tier-1 tests
-  (`tests/confirmDecline.test.ts`).
-  **Trace:** built `confirm-decline.json` (rent-3picks recipe + reveal
-  settle + DOWN + dwell + A-decline + full un-reveal + resettle + re-pick
-  A, dense `captureFrames` 240-306). `npm run compare`: 13/67 byte-exact.
-  The 54 non-matching frames split into 3 attributed groups (full detail in
-  the commit message): (1) frames 253-255, small (<3% of frame) residual
-  gap in the un-reveal's first 1-3 ticks not fully root-caused this
-  session; (2) frames 256-306, a constant 129px baseline isolated via
-  direct RGB sampling to the WIN_SPECIES text box - a color-only diff
-  (same glyphs) matching the already-documented, explicitly-out-of-scope
-  species-name-breathe effect resuming once decline returns to true cursor
-  mode; (3) periodic +173-176px bumps on top of that baseline at 10 frames,
-  isolated to the ball-rendering area (y54-73), likely an un-reveal-side
-  display-lag/stall analogue of `isRevealStallActive` not chased down this
-  session (brief: RAM-probe only if compare diffs point there).
-- **Next:** S5's only remaining piece is the YES-press accept path (exit
-  fade, pre-battle room handoff - `docs/prebattle-room-notes.md`, scene
-  already extracted+composite-verified). A future slice could also: (a)
-  root-cause frames 253-255's residual gap, (b) RAM-probe the ball-area
-  bumps noted above if it turns out to matter for a downstream trace, (c)
-  extend `isRevealStallActive`/an analogous predicate to the "closing"
-  phase if that's the root cause of (b). Neither blocks the accept-path
-  slice. Then S6 off its banked dossier.
+  UP/DOWN (repeat-gated toggle) and decline (B anywhere or A-on-NO, modeled
+  once): same-tick `mons[2].selectedId`->0, `selectingMonsState` 4->3,
+  message revert, YES/NO erased; new `confirmReveal.ts` "closing" phase for
+  the 20-tick un-reveal, pixel-pinned tick-by-tick (NOT a mirror of the
+  open direction; reuses `monPic.ts` `CLOSE_TABLE_B` values; new
+  `decliningSpecies` snapshot field). `core.ts` input gate now keys off
+  `confirmReveal` presence; re-pick works the tick it clears. Ball 3 leaves
+  the rented set same-tick. 15 new Tier-1 tests
+  (`tests/confirmDecline.test.ts`). Full mechanics in commit `9a8e96b`.
+  **Trace:** `confirm-decline.json` (dense captures 240-306: DOWN dwell,
+  decline, un-reveal, resettle, re-pick A) at 13/67 — frames 240-252 (the
+  whole cursor-move + decline + early un-reveal) byte-exact; the 54 diff
+  frames split into three groups, now filed as **ISSUES #11** (species-name
+  breathe, frames 256-306 baseline — decline re-activates it immediately,
+  so it is no longer dodgeable and must be modeled), **#12** (un-reveal
+  first-ticks residual, 253-255), **#13** (periodic ball-area bumps on 10
+  frames, stall-analogue suspect).
+- **Next (supervisor-set):** ISSUES #11 (breathe model — required before
+  `confirm-decline.json` can meet the trace bar), then #12/#13 chases, then
+  S5's last piece: the YES-press accept path (exit fade → pre-battle room,
+  `docs/prebattle-room-notes.md`). Then S6 off its banked dossier.
 - **Notes:** all RAM/pixel probing (scratch `tools/compare/scratch/*.ts` +
   `bin/oracle`-backed dense traces, direct RGB sampling via Node/pngjs) was
   scratch, deleted before finishing - nothing uncommitted left beyond the

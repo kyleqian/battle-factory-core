@@ -38,14 +38,24 @@ Per entry:
   and "Right this way" at 338-361 are in `docs/rent-flow-notes.md` §4,
   onward boundaries in `docs/battle-bringup-notes.md` §6.
 
-## `sFactorySelectScreen` struct offsets rediscovered per session (2026-07-17)
+## `sFactorySelectScreen` struct offsets rediscovered per session / no
+  reusable RAM-probe harness (2026-07-17)
 
 - **What:** only the `mons[]`/`selectedId` region is documented (in
   `tools/extract/inspect-anchor.py`); other fields (e.g. `monPicAnimating`)
-  get re-located by byte-diffing each time a RAM probe needs them.
-- **Hits:** 1 (confirm-flow scout, ~10 min).
+  get re-located by byte-diffing each time a RAM probe needs them. Broader
+  form (decline worker, 2026-07-17): every RAM-verified investigation
+  rebuilds its probe script (replay + read loop + JSON dump) from scratch;
+  the decline worker had no probe at all and did screenshot-only
+  archaeology, "a large fraction of the session's budget".
+- **Hits:** 2 (confirm-flow scout ~10 min; decline worker, large fraction
+  of a 32-min session).
 - **Workaround:** when a new field is derived, add its offset as a comment
   in `inspect-anchor.py` — treat that file as the struct-layout registry.
+  Real fix: bank a committed `tools/probe/` script (replay a trace's
+  segments via `EmeraldOracle`, dump named symbols/offsets per tick to
+  JSON) next time a RAM chase happens — ISSUES #12/#13 are natural
+  occasions.
 
 ## Oracle-probe vs appTrace frame numbering ambiguity (~2x time cost, 2026-07-17)
 
