@@ -885,6 +885,20 @@ trace — a huge, real range (16 to 95) illustrating why this is
 genuinely session-RNG-dependent, not a fixed constant, exactly as this
 file's §0/§7 risk 2 already warned.
 
+**Inter-loop ambient draws (S6 RNG step, 2026-07-18, LCG-inverted +
+bit-exact cross-validated in `tests/opponentGen.test.ts`):** the three
+rejection loops are NOT back-to-back in the LCG stream — exactly **11**
+extra `Random()` calls land between Grovyle's and Murkrow's loops, **7**
+between Murkrow's and Pidgeotto's, and **8** between Pidgeotto's and the
+transition-select draw. These match this section's own tick table
+exactly (854−843=11, 861−854=7, 869−861=8): they are simply the
+per-VBlank baseline draw firing once per tick while `gMain.inBattle` is
+still false — i.e. the loops complete on different ticks and the
+baseline cadence fills the gaps. `src/engine/opponentGen.ts` models them
+as an explicit `ambientGapSteps` parameter (the pure source algorithm
+has zero calls between mons); any full-stream integration must supply
+the per-tick baseline, not bake 11/7/8 as constants.
+
 **Transition selection**: one explicit `Random()` at tick **868→869** (2
 total LCG steps that tick = 1 baseline + 1 select), immediately after the
 3rd mon's rejection loop finishes (tick 862) — confirms this file's §4
