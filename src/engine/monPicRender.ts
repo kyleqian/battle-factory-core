@@ -54,14 +54,14 @@ const frontSprites = frontSpritesData as unknown as Record<string, { tileset: Ti
 
 const WINDOW_LEFT = 88;
 const WINDOW_RIGHT = 152; // exclusive
-const FLASH_COLOR: RgbColor = { r: 214, g: 255, b: 239 };
+export const FLASH_COLOR: RgbColor = { r: 214, g: 255, b: 239 };
 // Oracle-measured: once blended (see flashBlended below), the flash bar is a
 // UNIFORM color across its whole width regardless of what's underneath it
 // (balls, gaps, arrow) - not a true per-pixel blend against target2. Exactly
 // blend8(FLASH_COLOR, (189,231,247)) - matches every sampled pixel across
 // every width/position in both draft-menu.json cycles; not re-derived
 // further (see monPic.ts's module comment for the objMode/BLDCNT mechanism).
-const FLASH_BLENDED_COLOR: RgbColor = { r: 194, g: 233, b: 226 };
+export const FLASH_BLENDED_COLOR: RgbColor = { r: 194, g: 233, b: 226 };
 const FLASH_Y = 64;
 const FLASH_CENTER_X = 120;
 const BLEND_EVA = 11;
@@ -87,6 +87,24 @@ function bg3Color(x: number, y: number): RgbColor | null {
   const ci = sampleTile(monPicBg.tileset, entry.tile, lx % 8, ly % 8, entry.hFlip, entry.vFlip);
   if (ci === 0) return null;
   return monPicBg.palette[ci] ?? null;
+}
+
+/**
+ * confirmReveal.ts's wide (WIDE_WINDOW_LEFT/RIGHT, 208px) YES/NO-reveal window
+ * needs BG3 content well beyond the single-popup window's own 8-tile (64px)
+ * extraction (mon-pic-bg.json's tilemap is only 8x8 tiles - only ever needed
+ * for the narrow window before this slice). Not independently re-extracted
+ * this slice (out of scope's asset-extraction budget) - approximated by
+ * tiling the same 8x8 pattern every 64px, anchored so the middle repeat
+ * (x=88-151) matches the already-verified single-popup window exactly.
+ * Oracle-sampled (this slice's own dense probe) as a reasonable match for
+ * the observed near-uniform wash outside ball positions - see ISSUES.md if a
+ * committed trace exposes a gap here.
+ */
+export function bg3ColorTiled(x: number, y: number): RgbColor | null {
+  const period = WINDOW_RIGHT - WINDOW_LEFT;
+  const wrapped = WINDOW_LEFT + (((x - WINDOW_LEFT) % period) + period) % period;
+  return bg3Color(wrapped, y);
 }
 
 function bg1Color(x: number, y: number): RgbColor | null {
@@ -140,17 +158,24 @@ function arrowColor(x: number, y: number, cursorCenterX: number): RgbColor | nul
   return arrow.palette[ci] ?? null;
 }
 
-function target2Color(x: number, y: number, cursorCenterX: number, balls: readonly BallVisual[]): RgbColor | null {
+export function target2Color(x: number, y: number, cursorCenterX: number, balls: readonly BallVisual[]): RgbColor | null {
   return arrowColor(x, y, cursorCenterX) ?? ballColor(x, y, balls) ?? bg1Color(x, y);
 }
 
-function blend8(c1: RgbColor, c2: RgbColor | null): RgbColor {
+export function blend8(c1: RgbColor, c2: RgbColor | null): RgbColor {
   const b = c2 ?? BLACK;
   return {
     r: Math.min(255, Math.floor((c1.r * BLEND_EVA + b.r * BLEND_EVB) / 16)),
     g: Math.min(255, Math.floor((c1.g * BLEND_EVA + b.g * BLEND_EVB) / 16)),
     b: Math.min(255, Math.floor((c1.b * BLEND_EVA + b.b * BLEND_EVB) / 16)),
   };
+}
+
+/** Select_CreateChosenMonsSprites: a chosen mon's front-pic sprite at an arbitrary center (the reveal's 3 positions, not the single-popup's fixed x=120,y=64). */
+export function drawChosenMonPic(fb: Uint8Array, species: string, centerX: number, centerY: number): void {
+  const sprite = frontSprites[species];
+  if (!sprite) return;
+  drawSprite(fb, { tileset: sprite.tileset } as SpriteSheet, sprite.palette, centerX, centerY, 8, 8, 0);
 }
 
 export function drawMonPic(

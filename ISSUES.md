@@ -5,6 +5,53 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #8 — confirm-flow reveal render: wide-window BG3 content is only approximated (tiled), and its state-machine tick boundaries are pixel-diff-derived, not RAM-verified
+
+**Symptom:** `docs/confirm-flow-notes.md`'s reveal (3rd RENT confirm → 3-mon
+reveal → YES/NO idle, implemented S5 slice 3, `src/engine/confirmReveal.ts`)
+is state-machine-complete and RNG-exact, but a candidate `confirm-flow.json`
+trace (rent-3picks.json's exact button prefix + idle through the reveal)
+does **not** reach 0-diff-modulo-ISSUES-#5: starting around the wide WIN0
+window's opening (~confirm+34) through the settled YES/NO idle, `npm run
+compare` shows 1000-5000px diffs (2-14% of frame) — an order of magnitude
+bigger than, and at a different location than, ISSUES #5's own
+x88-151-confinement pattern. Not attributable to that policy; the trace was
+**not committed** per the brief's stop condition.
+
+**Confirmed:** `Select_ShowChosenMons`/`Select_Task_OpenChosenMonPics`
+(`battle_factory_screen.c:2119-2244`) create 3
+`sSpriteTemplate_Select_MonPicBgAnim` sprites (x=44/120/196) — the *same*
+sprite template/affine-anim table `monPic.ts`'s single-popup flash already
+models — so the flash-zoom phase reuses that module's own oracle-pinned
+widths (1/1/4/4/8/8/16/16/32/32/64/64) at 3 positions, oracle-cross-checked
+this slice. The wide window (x16-224 vs the single popup's x88-152) growing
+(64,65)→(32,96) is the same 4px/tick pattern too. What's **not** verified:
+(1) the wide window's BG3 pixel content — `src/assets/gen/mon-pic-bg.json`'s
+tilemap is only 8x8 tiles (extracted for the narrow single-popup window
+pre-this-slice); `monPicRender.ts`'s new `bg3ColorTiled` approximates the
+wide window by tiling that same 8x8 pattern every 64px, which oracle
+sampling (this slice, scratch) shows is close in shape (near-uniform wash,
+consistent with a mostly-solid-fill BG3 tile) but not exact; (2)
+`confirmReveal.ts`'s exact phase-boundary tick counts (13 flash incl. 1-tick
+creation lag, 8 window-growth + 3 hold, +1 cursor lag) were derived from one
+dense oracle pixel-diff pass this slice, not independently RAM-verified
+byte-level like `monPic.ts`'s own `OPEN_TABLE_*`/`CLOSE_TABLE_*`.
+
+**Leads:**
+1. RAM/VRAM-dump BG3's actual tile/palette content during the wide window
+   (not just infer it from pixel diffs) — the existing
+   `tools/extract/inspect-anchor.py`-style recipe should extend to pull a
+   wider tilemap region than the narrow window ever needed.
+2. RAM-verify `confirmReveal.ts`'s tick boundaries the way `monPic.ts`'s
+   tables are pinned (direct task/sprite-state struct reads across several
+   checkpoint ticks, not just "the pixels changed here").
+3. Once (1)/(2) land, rebuild `confirm-flow.json` against the exact
+   rent-3picks.json prefix and re-run `npm run compare`; commit if clean
+   modulo ISSUES #5's own already-accepted pattern.
+4. The decline path (B/NO back to cursor mode, `docs/confirm-flow-notes.md`
+   §3) is still unimplemented — explicitly a stretch goal, not attempted
+   this slice.
+
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
   windows where feasible; otherwise ship with each non-matching frame

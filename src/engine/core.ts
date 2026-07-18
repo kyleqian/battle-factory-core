@@ -15,6 +15,7 @@ import {
   applyDeselect,
   applySelect,
   cursorMoveStallsBalls,
+  isMonsConfirmed,
   moveCursor,
   moveMenuCursor,
   renderFactoryDraftScreen,
@@ -22,6 +23,7 @@ import {
   selectMonMessage,
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
+import { advanceConfirmReveal, INITIAL_CONFIRM_REVEAL_STATE } from "./confirmReveal.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 import { advanceMonPic, closeMonPic, isCursorInputReady, isMonPicInputReady, openMonPic } from "./monPic.ts";
 import { advanceBallAnim, initialBallAnimState } from "./ballAnim.ts";
@@ -129,11 +131,25 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     }, []);
     let ballAnimStall: readonly number[] = [];
 
+    // docs/confirm-flow-notes.md: the 3rd RENT confirm's own selectingMonsState++
+    // (applied on a prior tick, below) ends cursor/menu input permanently -
+    // Select_Task_HandleYesNo takes over once the confirm's own popup close
+    // (monPic, unchanged) finishes. See confirmReveal.ts.
+    const confirmed = isMonsConfirmed(draftScreen.selectingMonsState);
+    let confirmReveal = advanceConfirmReveal(draftScreen.confirmReveal);
+    if (confirmed && !confirmReveal && monPic.phase === "closed") {
+      confirmReveal = INITIAL_CONFIRM_REVEAL_STATE;
+    }
+
     // Select_Task_HandleChooseMons (battle_factory_screen.c:1671-1673) early-
     // returns while sFactorySelectScreen->monPicAnimating is TRUE, dropping
     // LEFT/RIGHT/A-open alike - see isCursorInputReady's doc for the
     // RAM-verified gate window.
-    if (draftScreen.mode === "cursor" && isCursorInputReady(monPic)) {
+    if (confirmed) {
+      // No input is processed here this slice - YES-press/decline (B/NO) are
+      // out of scope (see docs/confirm-flow-notes.md's decline-path stretch
+      // goal and ROADMAP.md's S5 slice boundary).
+    } else if (draftScreen.mode === "cursor" && isCursorInputReady(monPic)) {
       if (newAndRepeatedKeys.has("RIGHT")) {
         const nextCursorPos = moveCursor(draftScreen.cursorPos, 1);
         cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0, fast: activeSlotsBeforeAction.length >= 2 };
@@ -189,7 +205,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       }
     }
 
-    draftScreen = { ...draftScreen, monPic, cursorRedraw, menuHighlightRedraw, ballAnims, rentConfirmRedraw, ballAnimStall };
+    draftScreen = {
+      ...draftScreen,
+      monPic,
+      cursorRedraw,
+      menuHighlightRedraw,
+      ballAnims,
+      rentConfirmRedraw,
+      ballAnimStall,
+      confirmReveal,
+    };
   }
 
   return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, rngValue };

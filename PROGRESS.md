@@ -5,6 +5,84 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 32 — S5 slice 3 (confirm flow): state machine + RNG landed and Tier-1-pinned; render/trace STOPPED short of commit per the brief's own stop condition (wide-window pixel content not verified) — new ISSUES #8
+
+- **State:** `npm test` **290/290** (276→290, +14 in new
+  `tests/confirmReveal.test.ts`), `npm run build` green. All 9 committed
+  traces re-verified at their exact prior counts (anchor 1/1, draft-cursor
+  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, rent-slot1
+  125/139, rent-3picks **157/190**, summary-info-magby 132/132,
+  summary-info-onix 122/122) — zero regressions. `confirm-flow.json` **not
+  committed** (see below).
+- **Did:** Implemented the 3rd-RENT-confirm → reveal → settled YES/NO idle
+  state machine (`src/engine/confirmReveal.ts`, wired into `core.ts`/
+  `factoryDraftScreen.ts`): cursor/menu input permanently locks out once
+  `isMonsConfirmed` (`selectingMonsState > FRONTIER_PARTY_SIZE`, same tick as
+  every other confirm — no new logic needed there); the 3rd pick's own
+  popup close reuses `monPic.ts`'s existing `CLOSE_TABLE_B` unchanged; once
+  `monPic.phase === "closed"`, a new `ConfirmRevealState` machine runs the
+  border-sprite flash-zoom at 3 positions (x=44/120/196, reusing the exact
+  same 1/1/4/4/8/8/16/16/32/32/64/64 affine-anim widths `monPic.ts`'s own
+  flash already pins — verified via source read,
+  `sSpriteTemplate_Select_MonPicBgAnim` is literally the same sprite
+  template/anim table used by both), then a full-width WIN0 window
+  (x16-224, vs the single popup's x88-152) growing (64,65)→(32,96), then
+  the 3 chosen-mon front sprites (ordered by `selectedId`, not slot) +
+  YES/NO box appear together, cursor highlight 1 tick later (same
+  window-copy-vs-OAM lag pattern as everywhere else in this screen).
+  Exact tick counts (13 flash incl. 1-tick creation lag, 8 window-growth +
+  3 hold, cursor +1) were oracle-probed this slice (dense capture diffing,
+  scratch, not committed) against `rent-3picks.json`'s own button prefix
+  extended with idle — close settles at confirm+~20 (unchanged), reveal
+  settles around confirm+45, matching `docs/confirm-flow-notes.md`'s
+  tick+43/44/45 pinning closely. **RNG (mission-critical per the brief):
+  zero new logic** — the ball-anim loop in `core.ts` was already
+  unconditional (runs regardless of cursor/menu/confirmed state) and this
+  slice's confirmed-gate deliberately wraps only the cursor/menu *input*
+  branch, not the ball-roll loop, so the existing RAM-verified RNG stream
+  (`ballAnim.ts`, untouched) continues exactly through the whole window by
+  construction — pinned with a Tier-1 regression test asserting the stream
+  never merely advances 1/tick (proving ball-roll draws keep firing) and
+  stays fully deterministic. 14 new Tier-1 tests in
+  `tests/confirmReveal.test.ts` pin: `isMonsConfirmed`'s threshold, input
+  lockout, the `confirmReveal` trigger tick, the full phase-boundary
+  sequence (flash widths, window steps, shown/cursor timing), pick-order
+  species, and the two RNG properties above.
+  **Render/trace (not committed):** built a candidate `confirm-flow.json`
+  (rent-3picks.json's exact button prefix + idle to ~280) and ran `npm run
+  compare` — diverges hard (1000-5000px, 2-14%) starting at the wide
+  window's opening (~frame 223) through the settled YES/NO idle, **well
+  outside ISSUES #5's x88-151-confinement pattern** — not attributable to
+  that policy. Root cause: `mon-pic-bg.json`'s extracted tilemap is only
+  8x8 tiles (scoped for the single-popup window before this slice); the
+  reveal's 208px window is approximated by tiling that same pattern every
+  64px (`monPicRender.ts`'s new `bg3ColorTiled`), which doesn't match the
+  real wide-window BG3 content. Per the brief's stop condition, did not
+  commit the trace; filed **ISSUES #8** with the specifics. Decline path
+  (B/NO) is unimplemented — explicitly a stretch goal per the brief, and
+  time ran out before reaching it.
+- **Next:** ISSUES #8: RAM/VRAM-dump the wide-window BG3 content directly
+  (not tiled-approximated) and independently RAM-verify `confirmReveal.ts`'s
+  tick boundaries (byte-level, like `monPic.ts`'s tables), then rebuild
+  `confirm-flow.json` and commit once clean. After that: the decline path
+  (stretch goal, still open), then the YES-press exit fade + pre-battle room
+  (`docs/prebattle-room-notes.md`, explicitly next slice per the brief), S6.
+- **Notes:** all oracle probing this session was scratch (`/tmp/confirm_probe*`,
+  deleted before finishing) — nothing uncommitted left in the tree beyond
+  the intended `src/engine/confirmReveal.ts` + `tests/confirmReveal.test.ts`
+  + small exports added to `monPicRender.ts`/`factoryDraftScreen.ts`.
+  PAPERCUT: spent a long time re-deriving the reveal's exact source
+  mechanics (two chained tasks, shared `MonPicBgAnim` sprite template
+  between the single-popup and 3-mon-reveal paths) from
+  `battle_factory_screen.c` directly before writing any code — worth doing
+  again for future slices (the dossier's own prose was occasionally
+  ambiguous about which task owns which window/sprite), but it ate most of
+  the session's budget and left too little time to also nail the wide
+  window's exact pixel content; a future session should budget oracle
+  RAM-probing time for the render layer *before* implementation, not after.
+
+---
+
 ## 31 — ISSUES #7 remainder CLOSED: frames 152/153 root-caused and fixed (cursor-redraw catch-up accelerates with 2+ rented balls), plus a second bug found+fixed along the way (frame 92/168: `OPEN_TABLE_B`'s "extra hold" tick was a wrong flash frame, should be a degenerate 1px window); `rent-3picks.json` committed at 157/190, every remaining diff frame individually attributed to ISSUES #5
 
 - **State:** `npm test` **276/276** (273→276, +3), `npm run build` green.
@@ -148,65 +226,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `inspect-anchor.py`'s existing `oracle.read_u32(SFACTORY_SELECT_SCREEN_ADDR)`
   pattern already does this correctly and is worth grep'ing for before
   hand-deriving struct offsets fresh next time.
-
----
-
-## 29 — ISSUES #7 Part 1 landed (species-keyed LEFT/RIGHT stall, sanctioned per entries 26-28): fixed, tested, committed; Part 2 (`rent-3picks.json`) STOPPED per the brief's own explicit stop condition — a SECOND, narrower ball-render bug (unrelated to the stall rule) surfaced once the trace was actually built
-
-- **State:** `npm test` **270/270** (264→270, +6 in
-  `tests/ballAnimSpeciesStall.test.ts`), `npm run build` green, working tree
-  clean. `rent-slot1.json` re-verified still **125/139** (no regression).
-  `rent-3picks.json` **still not built** (blocked by a newly-found, different
-  bug - see below and ISSUES #7).
-- **Did:** **Part 1 (committed, `e3f712e`):** implemented the corrected
-  2-species safe-list in `ballAnimStall`'s LEFT/RIGHT branch
-  (`cursorMoveStallsBalls`, `factoryDraftScreen.ts`) - stalls every active
-  ball only when the entering slot's species is outside `{BAYLEEF,
-  HAUNTER}`, keyed by the engine's existing draft-pool species string (not
-  slot index). Pinned with 6 new Tier-1 tests against ISSUES #7's
-  RAM-derived checkpoints (Probe A: action ticks 79/121/163/205 reproduced,
-  decisive HAUNTER-no-stall window 203→207 not 208; Probe C: count=2
-  HAUNTER-no-stall windows 276→284/275→307 not 285/308) - every expected
-  value hand-derived from documented RAM facts via `MOVING_CMDS`' fixed
-  durations, then cross-checked against the implementation before
-  committing to the numbers (not the other way around). No existing test
-  had pinned the old always-stall behavior, so nothing needed updating.
-  **Part 2 (not committed):** rebuilt PROGRESS-archive #21's exact 3-pick
-  trace (confirms at press-ticks 37/113/189) and ran `npm run compare`
-  (scratch, captures 0-245). First checked the brief's required amendment
-  (probe for the first YES/NO-hand-off pixel after tick 189): frame 189
-  itself is still clean/#5-attributable, but frames ≥190 diverge
-  immediately and explode fast (949px→13271px by 234+, spreading to
-  x239/y32-156) - confirms the trace must end at/before 189. Then found
-  frames 180 and 188 show a 176px diff at **x56-76/y54-73, outside the
-  x88-151 mon-pic window, at ball-index-1's (MAGBY) own OBJ position** -
-  the brief's explicit stop condition. Root-caused enough to rule out the
-  stall rule as the cause (byte-identical diff before/after Part 1's fix,
-  confirmed via `git worktree` against the pre-fix commit; ball 1's
-  internal `cmdIndex` timing independently matches pure zero-stall
-  arithmetic exactly) and pinned it precisely: the engine's `displayTile`
-  lags the oracle by 1 tick at this transition, not the documented-as-2-tick
-  constant. Per the brief, stopped without guessing a fix - did not commit
-  `rent-3picks.json`, wrote the full finding into ISSUES #7 (trimmed to this
-  remainder, historical species-stall investigation trail removed - git
-  history has it if ever needed) instead of re-litigating the now-fixed
-  stall rule.
-- **Next:** a future session should RAM-probe the display-lag mechanism for
-  a second active ball directly - the bug reproduces with just 2 plain
-  rents and a long-enough dwell, no cursor moves needed (ball 1's own
-  cmdIndex8→9→10 transition around tick 179-188). Once that's fixed,
-  `rent-3picks.json` should build cleanly against the same trace shape
-  already validated here. Confirm-flow implementation
-  (`docs/confirm-flow-notes.md`), exit sequence
-  (`docs/prebattle-room-notes.md`), and S6 remain queued behind this per
-  entry 26.
-- **Notes:** all oracle probing this session was scratch (trace JSON files
-  under `/tmp`, a throwaway `git worktree` for the before/after comparison,
-  a throwaway TS script overlaying candidate ball tiles onto the oracle's
-  own PNG per this issue's established zero-residual-diff method) - nothing
-  uncommitted left in the tree, worktree removed. PAPERCUT: none beyond the
-  usual oracle round-trip overhead; the `git worktree add HEAD~1` +
-  symlink-node_modules/reference trick to run `npm run compare` against a
-  prior commit without disturbing the working tree is worth remembering for
-  future before/after regression checks.
-

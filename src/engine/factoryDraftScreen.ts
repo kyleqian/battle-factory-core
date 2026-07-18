@@ -6,15 +6,26 @@
 // directly from sSelect_WindowTemplates and the CreateSprite call sites in
 // battle_factory_screen.c, not eyeballed from pixels.
 
-import { createFramebuffer } from "./framebuffer.ts";
+import { createFramebuffer, setPixel } from "./framebuffer.ts";
 import { drawTileBg, type TileBg } from "./bg.ts";
 import { drawSprite, type SpriteSheet } from "./sprites.ts";
 import { drawText, rightAlignXOffset, type FontData } from "./font.ts";
 import type { RgbColor } from "./bg.ts";
 import { getMonPicVisual, INITIAL_MON_PIC_STATE, type MonPicState } from "./monPic.ts";
-import { drawMonPic, drawMonPicFaded } from "./monPicRender.ts";
+import { drawChosenMonPic, drawMonPic, drawMonPicFaded } from "./monPicRender.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts";
 import { ballAnimTile, type BallAnimState } from "./ballAnim.ts";
+import {
+  getConfirmRevealVisual,
+  INITIAL_YES_NO_CURSOR_POS,
+  REVEAL_FLASH_CENTERS,
+  REVEAL_MON_CENTER_Y,
+  REVEAL_MON_CENTERS_X,
+  WIDE_WINDOW_LEFT,
+  WIDE_WINDOW_RIGHT,
+  type ConfirmRevealState,
+} from "./confirmReveal.ts";
+import { bg3ColorTiled, blend8, FLASH_BLENDED_COLOR, target2Color } from "./monPicRender.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -71,7 +82,7 @@ export const MENU_OPTION_RENT = 1;
 export const MENU_OPTION_OTHERS = 2;
 
 /** FRONTIER_PARTY_SIZE (include/constants/global.h:35). */
-const FRONTIER_PARTY_SIZE = 3;
+export const FRONTIER_PARTY_SIZE = 3;
 
 const SELECT_MON_MESSAGES = [
   "",
@@ -235,6 +246,29 @@ export interface DraftScreenState {
    * ball regardless of species.
    */
   ballAnimStall: readonly number[];
+  /** Select_Task_HandleYesNo's reveal sub-machine (docs/confirm-flow-notes.md); null until the 3rd confirm's own popup close finishes - see confirmReveal.ts. */
+  confirmReveal: ConfirmRevealState | null;
+  /** Select_ShowYesNoOptions's yesNoCursorPos; meaningless until confirmReveal.phase === "shown". */
+  yesNoCursorPos: number;
+}
+
+/** Select_OptionRentDeselect (:1965-1966): the 3rd confirm's own selectingMonsState++ crosses this - cursor/menu input never resumes past this point (see core.ts). */
+export function isMonsConfirmed(selectingMonsState: number): boolean {
+  return selectingMonsState > FRONTIER_PARTY_SIZE;
+}
+
+/** Select_CreateChosenMonsSprites: the 3 chosen mons in PICK order (selectedId 1/2/3), not slot order. */
+export function chosenMonSpecies(state: DraftScreenState): string[] {
+  const bySlot = new Map<number, string>();
+  state.selectedIds.forEach((id, i) => {
+    if (id > 0) bySlot.set(id, state.slots[i]!.species);
+  });
+  const result: string[] = [];
+  for (let rank = 1; rank <= FRONTIER_PARTY_SIZE; rank += 1) {
+    const species = bySlot.get(rank);
+    if (species) result.push(species);
+  }
+  return result;
 }
 
 /**
@@ -328,6 +362,54 @@ function menuOptionLabel(state: DraftScreenState, index: number): string {
 function currentMessage(state: DraftScreenState): string {
   const redraw = state.rentConfirmRedraw;
   return redraw && redraw.elapsed < 2 ? redraw.fromMessage : state.message;
+}
+
+const YES_NO_LABELS = ["YES", "NO"];
+
+/** confirmReveal.ts's flash bars / wide window / 3 mon pics / YES-NO box, drawn on top of the base draft screen once the 3rd confirm's own popup close finishes. */
+function drawConfirmReveal(
+  fb: Uint8Array,
+  state: DraftScreenState,
+  cursorCenterX: number,
+  balls: readonly { palette: RgbColor[]; firstTileRow: number }[],
+): void {
+  const reveal = state.confirmReveal;
+  if (!reveal) return;
+  const visual = getConfirmRevealVisual(reveal);
+
+  if (visual.flashWidths) {
+    for (let i = 0; i < REVEAL_FLASH_CENTERS.length; i += 1) {
+      const width = visual.flashWidths[i]!;
+      const left = REVEAL_FLASH_CENTERS[i]! - Math.floor(width / 2);
+      for (let dx = 0; dx < width; dx += 1) {
+        setPixel(fb, left + dx, 64, FLASH_BLENDED_COLOR.r, FLASH_BLENDED_COLOR.g, FLASH_BLENDED_COLOR.b);
+      }
+    }
+  }
+
+  if (visual.window) {
+    const { top, bottom } = visual.window;
+    for (let y = top; y < bottom; y += 1) {
+      for (let x = WIDE_WINDOW_LEFT; x < WIDE_WINDOW_RIGHT; x += 1) {
+        const bg3 = bg3ColorTiled(x, y);
+        const t2 = target2Color(x, y, cursorCenterX, balls);
+        const color = bg3 ? blend8(bg3, t2) : (t2 ?? { r: 0, g: 0, b: 0 });
+        setPixel(fb, x, y, color.r, color.g, color.b);
+      }
+    }
+  }
+
+  if (visual.monsAndYesNoVisible) {
+    chosenMonSpecies(state).forEach((species, i) => drawChosenMonPic(fb, species, REVEAL_MON_CENTERS_X[i]!, REVEAL_MON_CENTER_Y));
+    for (let i = 0; i < YES_NO_LABELS.length; i += 1) {
+      drawText(fb, font, charmap, YES_NO_LABELS[i]!, WIN_OPTIONS.x + 7, WIN_OPTIONS.y + 1 + i * 16, textPalette, MENU_TEXT_COLORS);
+    }
+  }
+  if (visual.cursorVisible) {
+    const highlightY = state.yesNoCursorPos * 16 + 112;
+    drawSprite(fb, { tileset: menuHighlight.left.tileset }, menuHighlight.palette, 176 + 16, highlightY + 8, 4, 2, 0);
+    drawSprite(fb, { tileset: menuHighlight.right.tileset }, menuHighlight.palette, 208 + 16, highlightY + 8, 4, 2, 0);
+  }
 }
 
 export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
@@ -428,6 +510,7 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
   }
 
   if (slot) drawMonPic(fb, monPicVisual, slot.species, cursorCenterX, balls);
+  drawConfirmReveal(fb, state, cursorCenterX, balls);
 
   return fb;
 }
@@ -525,4 +608,6 @@ export const ANCHOR_DRAFT_SCREEN_STATE: DraftScreenState = {
   ballAnims: [null, null, null, null, null, null],
   rentConfirmRedraw: null,
   ballAnimStall: [],
+  confirmReveal: null,
+  yesNoCursorPos: INITIAL_YES_NO_CURSOR_POS,
 };

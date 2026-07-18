@@ -5,6 +5,65 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 29 — ISSUES #7 Part 1 landed (species-keyed LEFT/RIGHT stall, sanctioned per entries 26-28): fixed, tested, committed; Part 2 (`rent-3picks.json`) STOPPED per the brief's own explicit stop condition — a SECOND, narrower ball-render bug (unrelated to the stall rule) surfaced once the trace was actually built
+
+- **State:** `npm test` **270/270** (264→270, +6 in
+  `tests/ballAnimSpeciesStall.test.ts`), `npm run build` green, working tree
+  clean. `rent-slot1.json` re-verified still **125/139** (no regression).
+  `rent-3picks.json` **still not built** (blocked by a newly-found, different
+  bug - see below and ISSUES #7).
+- **Did:** **Part 1 (committed, `e3f712e`):** implemented the corrected
+  2-species safe-list in `ballAnimStall`'s LEFT/RIGHT branch
+  (`cursorMoveStallsBalls`, `factoryDraftScreen.ts`) - stalls every active
+  ball only when the entering slot's species is outside `{BAYLEEF,
+  HAUNTER}`, keyed by the engine's existing draft-pool species string (not
+  slot index). Pinned with 6 new Tier-1 tests against ISSUES #7's
+  RAM-derived checkpoints (Probe A: action ticks 79/121/163/205 reproduced,
+  decisive HAUNTER-no-stall window 203→207 not 208; Probe C: count=2
+  HAUNTER-no-stall windows 276→284/275→307 not 285/308) - every expected
+  value hand-derived from documented RAM facts via `MOVING_CMDS`' fixed
+  durations, then cross-checked against the implementation before
+  committing to the numbers (not the other way around). No existing test
+  had pinned the old always-stall behavior, so nothing needed updating.
+  **Part 2 (not committed):** rebuilt PROGRESS-archive #21's exact 3-pick
+  trace (confirms at press-ticks 37/113/189) and ran `npm run compare`
+  (scratch, captures 0-245). First checked the brief's required amendment
+  (probe for the first YES/NO-hand-off pixel after tick 189): frame 189
+  itself is still clean/#5-attributable, but frames ≥190 diverge
+  immediately and explode fast (949px→13271px by 234+, spreading to
+  x239/y32-156) - confirms the trace must end at/before 189. Then found
+  frames 180 and 188 show a 176px diff at **x56-76/y54-73, outside the
+  x88-151 mon-pic window, at ball-index-1's (MAGBY) own OBJ position** -
+  the brief's explicit stop condition. Root-caused enough to rule out the
+  stall rule as the cause (byte-identical diff before/after Part 1's fix,
+  confirmed via `git worktree` against the pre-fix commit; ball 1's
+  internal `cmdIndex` timing independently matches pure zero-stall
+  arithmetic exactly) and pinned it precisely: the engine's `displayTile`
+  lags the oracle by 1 tick at this transition, not the documented-as-2-tick
+  constant. Per the brief, stopped without guessing a fix - did not commit
+  `rent-3picks.json`, wrote the full finding into ISSUES #7 (trimmed to this
+  remainder, historical species-stall investigation trail removed - git
+  history has it if ever needed) instead of re-litigating the now-fixed
+  stall rule.
+- **Next:** a future session should RAM-probe the display-lag mechanism for
+  a second active ball directly - the bug reproduces with just 2 plain
+  rents and a long-enough dwell, no cursor moves needed (ball 1's own
+  cmdIndex8→9→10 transition around tick 179-188). Once that's fixed,
+  `rent-3picks.json` should build cleanly against the same trace shape
+  already validated here. Confirm-flow implementation
+  (`docs/confirm-flow-notes.md`), exit sequence
+  (`docs/prebattle-room-notes.md`), and S6 remain queued behind this per
+  entry 26.
+- **Notes:** all oracle probing this session was scratch (trace JSON files
+  under `/tmp`, a throwaway `git worktree` for the before/after comparison,
+  a throwaway TS script overlaying candidate ball tiles onto the oracle's
+  own PNG per this issue's established zero-residual-diff method) - nothing
+  uncommitted left in the tree, worktree removed. PAPERCUT: none beyond the
+  usual oracle round-trip overhead; the `git worktree add HEAD~1` +
+  symlink-node_modules/reference trick to run `npm run compare` against a
+  prior commit without disturbing the working tree is worth remembering for
+  future before/after regression checks.
+
 ## 28 — ISSUES #7 minimal-pair probes (worker, capped, probe-only): the fifth update's "contradiction" was ITSELF a measurement artifact — P_STALL (HAUNTER, count3/RIGHT/origin3) is RAM-DISPROVEN as a valid data point (count=3 is structurally unreachable via LEFT/RIGHT — completing the 3rd rent exits cursor mode on the same tick); species-only table RESURRECTED with a corrected 2-species safe-list {BAYLEEF, HAUNTER}
 
 - **State:** unchanged from entry 27 — `npm test` **264/264**, `npm run
