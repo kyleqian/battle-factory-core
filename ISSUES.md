@@ -28,60 +28,6 @@ against `docs/prebattle-room-notes.md` §3's two-asset rule (frame art vs
 corrected re-extraction), delete the baked asset, and re-verify
 `accept-prebattle.json` at its exact then-current count.
 
-## #14 — accept-path closing/un-reveal: 4-row window-edge color band wrong,
-  8 frames, tapering (`accept-prebattle.json`)
-
-**Symptom:** during the A-on-YES closing/un-reveal (`confirmReveal.ts`'s
-"closing" phase with `accepting: true`, S5 final slice), a 4-row band at the
-shrinking wide window's CURRENT top edge (`window.top`..`window.top+3`) and
-current bottom edge (`window.bottom-4`..`window.bottom-1`) renders the wrong
-color for `accept-prebattle.json` frames 262-269 (every frame, ~1536px/4% of
-the screen) then every-other-frame through 279 (192→96→48→24→12→9px, halving
-each capture - same tapering shape as ISSUES #5's flash-bar family), reaching
-0 diff at frame 280 once the window fully collapses (`UNREVEAL_WINDOW_STEPS`
-exhausted). Confirmed pixel-exact everywhere else in the whole exit sequence
-(YES press through settled, fully-printed message + idle - see PROGRESS.md).
-
-**Confirmed NOT the same bug as the two real fixes made this session** (both
-kept, both root-caused from source, not guessed): (1) A-on-YES never calls
-`Select_ErasePopupMenu(SELECT_WIN_YES_NO)` (`battle_factory_screen.c:1544-
-1550` vs the decline branch's `:1556-1557` - grepped directly), so the YES/NO
-box + cursor highlight stay visible through the whole closing AND the
-subsequent exit fade, unlike decline - fixed in `confirmReveal.ts`
-(`accepting` flag) + a new `factoryDraftScreen.ts` export
-(`drawYesNoOverlayFaded`) called from `core.ts`'s `fadingOut` render branch.
-(2) the 3 mon pics disappear one tick earlier for accept than decline's own
-elapsed-3 cutoff (decline's extra same-tick work,
-`Select_HandleMonSelectionChange`/`Select_PrintSelectMonString`, delays when
-`FreeAndDestroyMonPicSprite`'s effect reaches that frame's render - same
-"extra per-frame work costs a tick" family as ISSUES #9/#13) - fixed via a
-per-`accepting` `monsVisible` cutoff in `getConfirmRevealVisual`. Both fixes
-are pinned by `tests/confirmDecline.test.ts`'s new accept-path describe block
-and re-verified against `confirm-decline.json` (still 67/67, zero regression).
-
-**This entry is what's left after those fixes.** Confirmed NOT a window-
-bounds or table-timing bug: `UNREVEAL_WINDOW_STEPS`'s top/bottom values
-themselves are oracle-pixel-correct at this tick (the window's overall shape/
-position matches oracle exactly - `bg3ColorWide(120, y)` returns a flat,
-uniform `(214,255,239)` across y32-44 regardless of the window's current
-top, so it isn't scrolling/repositioning content). The mismatch is
-specifically in `target2Color`'s `bg1Color` fallback layer (the BG1 menu-
-chrome content shown through the window where no ball/arrow is present) at
-rows adjacent to the window's moving edge - not reproduced on the decline
-path (`confirm-decline.json` stays 67/67 with the identical window-shrink
-table), so it's specific to *something* about the accept-path's screen state
-at those rows, not a shared rendering bug. Root cause not found this session
-- deprioritized once the two real bugs above were fixed and the residual
-shrank from ~14% of the frame to a bounded, tapering 4%, given the time
-budget for this step. A future session should RAM-probe `REG_WIN0V`/BG1
-tilemap content during this exact window (reuse `tools/probe/ram-probe.py`)
-rather than guess further at `bg1Color`'s inputs.
-
-**Scope:** `accept-prebattle.json` ships at 123/137 with all 14 non-matching
-frames (262-269, 270/271/273/275/277/279) individually attributed to this
-entry - same discipline as ISSUES #5's precedent (supervisor-sanctioned
-attribution fallback, not a silent workaround).
-
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
   windows where feasible; otherwise ship with each non-matching frame
