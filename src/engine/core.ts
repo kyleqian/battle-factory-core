@@ -78,6 +78,13 @@ import {
 } from "./battleRoom.ts";
 import { renderBattleRoomEntryScene } from "./battleRoomRender.ts";
 import { applyBattleTransitionOverlay, exitFadeY } from "./battleTransition.ts";
+import {
+  advanceBattleScene,
+  INITIAL_BATTLE_SCENE_STATE,
+  renderBattleScene,
+  TICK0 as SCENE_TICK0,
+  type BattleSceneState,
+} from "./battleScene.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -90,9 +97,14 @@ export interface EngineState {
   prebattleRoom: PrebattleRoomState | null;
   /** null until prebattleRoom's "warpFade" phase hands off (S6 slice 2a); see battleRoom.ts. Once set, no input is processed and this owns rendering exclusively. */
   battleRoom: BattleRoomState | null;
+  /** null until battleRoom's "settled" phase (the CIRCLES_MEET transition's own indefinite post-fade black hold) reaches BATTLE_SCENE_HANDOFF_ELAPSED (S6 scene-assembly slice); see battleScene.ts. Once set, no input is processed and this owns rendering exclusively. */
+  battleScene: BattleSceneState | null;
   /** gRngValue (src/random.c) - advances once per VBlank always (main.c:366); see rng.ts. */
   rngValue: number;
 }
+
+/** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
+const BATTLE_SCENE_HANDOFF_ELAPSED = SCENE_TICK0 - 843;
 
 export function createInitialState(): EngineState {
   return {
@@ -102,6 +114,7 @@ export function createInitialState(): EngineState {
     summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
     prebattleRoom: null,
     battleRoom: null,
+    battleScene: null,
     rngValue: ANCHOR_RNG_VALUE,
   };
 }
@@ -124,6 +137,15 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let rngValue = advanceRngValue(state.rngValue);
   let prebattleRoom: PrebattleRoomState | null = state.prebattleRoom;
   let battleRoom: BattleRoomState | null = state.battleRoom;
+  let battleScene: BattleSceneState | null = state.battleScene;
+
+  if (battleScene) {
+    // S6 scene-assembly slice: no player input is read anywhere in this
+    // window (battleScene.ts module doc) - the next A-press (trace tick
+    // 1420) is the following slice's concern.
+    battleScene = advanceBattleScene(battleScene);
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
+  }
 
   if (battleRoom) {
     // S6 slice 2c: msgboxIdle's own A-press gate - the only input this
@@ -136,8 +158,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       battleRoom = { phase: "msgboxClosing", elapsed: 0 };
     } else {
       battleRoom = advanceBattleRoom(battleRoom);
+      // S6 scene-assembly handoff (battleScene.ts doc): the CIRCLES_MEET
+      // transition's own post-fade black hold ("settled" phase) is
+      // indefinite on its own - this is the fixed elapsed count matching
+      // the ground-truth trace's own window start (trace tick 1040).
+      if (battleRoom?.phase === "settled" && battleRoom.elapsed === BATTLE_SCENE_HANDOFF_ELAPSED) {
+        battleRoom = null;
+        battleScene = INITIAL_BATTLE_SCENE_STATE;
+      }
     }
-    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, rngValue };
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
   }
 
   if (prebattleRoom) {
@@ -180,7 +210,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         battleRoom = INITIAL_BATTLE_ROOM_STATE;
       }
     }
-    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, rngValue };
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
   }
 
   if (summaryScreen.transition) {
@@ -554,6 +584,11 @@ function renderPrebattleRoomState(state: EngineState): Uint8Array {
 }
 
 export function render(state: EngineState): Uint8Array {
+  if (state.battleScene) {
+    const fb = createFramebuffer();
+    renderBattleScene(fb, state.battleScene);
+    return fb;
+  }
   if (state.battleRoom) return renderBattleRoomState(state);
   if (state.prebattleRoom) return renderPrebattleRoomState(state);
   const summary = state.summaryScreen;

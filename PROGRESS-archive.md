@@ -5,6 +5,42 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 55 — S6 scene-assembly groundwork (parallel worktree lane, merged): BATTLE-SCENE ASSEMBLY window (1031-1300) mechanism fully decoded; docs + dense ground-truth trace; one missing asset identified
+
+- **State:** merge of `worker/wt-20260718-104713` (commits `9d58839` +
+  `503efe0`) on top of #54; `npm test` **377/377** + `npm run build` green
+  on the merged result. New: `docs/battle-scene-notes.md` (332 lines,
+  sha-cited) + `tools/compare/traces-groundtruth/battle1-scene-dense.json`
+  (256 every-frame captures, ticks 1040-1295 — supervisor sanity-ran it
+  green, 256 PNGs).
+- **Did (worker, supervisor-verified):** (1) first non-black frame
+  **corrected to 1075** (prior 1077 was stride-4 aliasing); all
+  streak-phase boundaries + the 1227 settle (3-tick plateau) + first
+  text glyph 1234 pinned with shas. (2) mechanism decoded: the
+  "streaks" are `BattleIntroSlide3` (`battle_intro.c`) — a deterministic
+  per-scanline horizontal BG shift (top/bottom halves converge ±240→0
+  over 120 ticks) crossfaded via BLDALPHA 8:8→0:16 over 48 ticks; every
+  value a plain tick formula, RAM-probed (`gTasks[0].data[]` vs
+  `gBattle_BG1_X`/`WIN0V`) and cross-validated against pixel shas; task
+  created 1073, destroyed 1227→1228. NO RNG anywhere in the window. (3)
+  battle text = `B_WIN_MSG` window, `FONT_NORMAL`, same 1-tick/char
+  cadence as the field box (all 5 space-hold ticks arithmetic-exact);
+  the "♥" is NOT a charmap glyph — it's `down_arrow_alt.png`, the
+  standard `\p` wait-cursor (a heart-shaped asset), whose 4-phase/
+  36-tick bob explains the idle-cycle signature seen at 1292+ AND at the
+  action menu. (4) party-ball icons identified
+  (`CreatePartyStatusSummarySprites`); **missing asset flagged:**
+  `graphics/battle_interface/ball_display.png` + pal not extracted
+  (extraction worker K in flight); down-arrow cursor also unextracted;
+  full settled-scene compositor honestly NOT-REACHED (needs trainer-pic
+  placement coords).
+- **Next:** transition engine slice (843-1031) briefed on the main lane
+  now, off #53's §5; then scene assembly (1031-1300) off this entry once
+  worker K's assets merge.
+- **Notes:** worktree removed + branch deleted post-merge.
+
+---
+
 ## 54 — S6 slice 2c: OPPONENT-SPEECH MSGBOX window (ticks 718-843) implemented, oracle-pinned; `room-msgbox.json` committed 142/142
 
 - **State:** `npm test` **377/377** (365→377, +12 in `tests/battleRoom.test.ts`),

@@ -254,6 +254,15 @@ open window: scene assembly (1031-1300+), off `docs/battle-scene-notes.md`
 tick 1030, exactly where that slice takes over. Out of scope for both:
 RNG-modeling which of the 12 transition variants plays (a separate step
 owns RNG-exactness) and the other 11 variants' own pixel behavior.
+**Scene-assembly slice partial (2026-07-18, PROGRESS #58):** `src/engine/battleScene.ts`
+implements the 1040-1295 window; black hold + the settled composite
+(bg+both trainer pics+window frame, byte-exact) + text/cursor/ball-widget
+final positions (byte-exact) are done, but the `BattleIntroSlide3`
+streak (1075-1226) and the ball-widget entrance slide (1230-1291) are
+NOT byte-exact - `tools/compare/traces/scene-assembly.json` scores
+42/256, not the required 256/256. BLOCKED, next action recorded in
+PROGRESS #58 (RAM-probe the streak window directly rather than
+pixel-fit blind).
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain
