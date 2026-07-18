@@ -5,6 +5,64 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 52 — S6 slice 2b: SCIENTISTS-TURN + OPPONENT WALK-IN window (ticks 624-717) implemented, oracle-pinned; `room-npcs.json` committed 98/98
+
+- **State:** `npm test` **365/365** (357→365, +8 in `tests/battleRoom.test.ts`),
+  `npm run build` green. New trace `tools/compare/traces/room-npcs.json`
+  (717 frames, captures 620-717) passes `npm run compare` **98/98, 0 diff**
+  (first try — no fix-up needed). All 14 pre-existing traces re-verified at
+  their exact prior counts (anchor 1/1, draft-cursor 13/13, draft-menu
+  38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+  137/137, walk-warpout 125/125, room-entry 110/110, rent-slot1 125/139,
+  rent-3picks 157/190, confirm-flow 79/95) — zero regressions.
+- **Did:** chose slice-boundary option (a) from the brief — implemented
+  through the settled no-box scene and ended the trace at **tick 717**
+  (the 713-717 tail is static, matching #51's own §8.2 finding that the
+  room settles by 712); the msgbox print window (718+) stays slice 2c's,
+  untouched. RAM-probed all 16 `gObjectEvents` slots + their `gSprites`
+  every tick 600-745 (custom script, same struct-offset conventions as
+  #50, scratch under `/tmp/s6b/`), cross-checked against source
+  (`scripts.inc`'s `EventScript_ScientistsFaceBattle` +
+  `EventScript_EnterRoom`'s remove/setxy/add sequence,
+  `event_object_movement.c`'s `MovementAction_WalkInPlaceFasterRight/Left`
+  + `InitMoveInPlace`, `object_event_anims.h`'s `sAnimTable_Standard`).
+  Extended `src/engine/battleRoom.ts` with `scientistTurnFrame(elapsed)`
+  and `opponentStep(elapsed)`, wired into `battleRoomRender.ts`/`core.ts`
+  (no extractor/asset changes needed — #49's `battle-room-layout.json`
+  already carried the scientists' turn directions + opponent spawn/settle
+  tiles). Findings: (1) **the scientists' turn is 2 visually-distinct
+  ticks, not 4** — the RAM `duration=4` passed to `InitMoveInPlace` counts
+  movement-step calls, but the anim's own frame duration is 2 ticks/entry
+  and `SetStepAnimHandleAlternation` starts already at cmdIndex 2 (same
+  precedent as #50's decoy walk starting at a non-zero cmdIdx); net effect
+  is pre-turn (elapsed ≤105) → transient frame 8 (106-107) → settled turned
+  frame 2 (≥108), all 6 scientists in exact lockstep (one shared
+  `waitmovement`). (2) **the opponent is added and takes its first walk
+  step within the same engine tick** — RAM shows it fully hidden through
+  elapsed 111, then active *and already one sub-pixel step into its walk*
+  at elapsed 112 (screenY -23, not the formula spawn of -24). (3) its walk
+  screenY is a **clean 1px/tick ramp with no sub-tile easing** (same
+  convention as #50's camera pan), `screenY(elapsed) = elapsed - 135`
+  from elapsed 112 to the settle at 191 (screenY 56, independently
+  cross-checked against the proven `tileScreenPos` tile-formula since the
+  opponent is static there) — screen X never moves and is drawn via that
+  same tile formula, sidestepping the raw-sprite-x encoding entirely. (4)
+  the walk's picture-frame cycle is `sAnim_GoSouth` (`[3,0,4,0]`, 8
+  ticks/frame, matching this game's established 1px/tick object-movement
+  speed — 5 tiles × 16 ticks/tile = 80 ticks, elapsed 112-191 exactly);
+  settle switches to frame 2 (`sAnim_GoWest` cmdIndex 1) — face west, per
+  `Movement_OpponentEnter`'s trailing `face_left`.
+- **Next:** S6 slice 2c — the opponent-speech msgbox (ticks 718-843),
+  fully groundwork-pinned already (#51: print cadence, appear/close
+  choreography, byte-exact frame asset = `prebattle-room-msgbox.json`).
+  Then 740+ (heal icon, transition-to-black) per the parallel scouting
+  lane.
+- **Notes:** no papercuts. Scratch RAM-probe script (`/tmp/s6b/probe.py`)
+  removed after use, nothing committed beyond the deliverables.
+
+---
+
 ## 51 — S6 slice 2c groundwork (parallel worktree lane, merged): opponent-speech msgbox = same asset as pre-battle box (source-proofed); print cadence + appear/close choreography fully pinned; docs-only
 
 - **State:** merge of `worker/wt-20260718-100953` (single docs commit
