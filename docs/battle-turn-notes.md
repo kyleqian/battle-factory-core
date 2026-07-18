@@ -95,9 +95,9 @@ programmatically).
 | 2206 | 1 | `2176095973` | Onix's **crit** roll (`Cmd_critcalc`, `critChance=0` → 1-in-16, `gCritMultiplier` read back as **1** — not a crit) |
 | 2209 | 1 | `435971572` | Onix's **damage-spread** roll (`ApplyRandomDmgMultiplier`, `100-(Random()%16)`); `gBattleMoveDamage` locks to 42 this same tick |
 | 2330 | 1 | `3326091607` | Onix's **secondary-effect** roll (ROCK_SLIDE's 30% `EFFECT_FLINCH_HIT` chance) — fires *after* the HP-bar drain/animation window, not immediately after the damage roll |
-| 2340 | 1 | `3552646270` | unattributed (turn-end cluster, see §7 risk 1) |
-| 2345 | 2 | `1572843288` | unattributed (turn-end cluster) |
-| 2347 | 5 | `4098214719` | unattributed (turn-end cluster); `gRngValue` goes flat here through the trace's end (tick 2620) |
+| 2340 | 1 | `3552646270` | **RESOLVED (S7 worktree lane follow-up)** — `BattleTurnPassed`'s `gRandomTurnNumber = Random();` (`battle_main.c:4013`), the turn-transition bookkeeping step right after `HandleEndTurn_ContinueBattle` clears the turn's flags and before `gBattleMainFunc = HandleTurnActionSelectionState` takes over |
+| 2345 | 2 | `1572843288` | **RESOLVED (S7 worktree lane follow-up)** — `AI_TrySwitchOrUseItem`'s `ShouldSwitch()` (`battle_ai_switch_items.c:429-526`, dispatched from `OpponentHandleChooseAction`, `battle_controller_opponent.c:1540-1544`, DESTIN's first controller call for turn 2's action): exactly 2 `Random()` calls for this exact state, both LCG-value-verified (§7 risk 1 below) |
+| 2347 | 5 | `4098214719` | **RESOLVED (S7 worktree lane follow-up)** — `OpponentHandleChooseMove` -> `BattleAI_SetupAIData`'s `simulatedRNG[i] = 100 - (Random()%16)` loop (`battle_ai_script_commands.c:341`, 4 calls, one per move slot, unconditional regardless of move legality) + `ChooseMoveOrAction_Singles`'s final `Random() % numOfBestMoves` tie-break (`:445`, 1 call) = 5; `gRngValue` goes flat here through the trace's end (tick 2620) because this is Grovyle's *next*-turn move choice and the trace ends before turn 2 plays out |
 
 **Total: 12 `Random()` calls this turn** (0 for Grovyle's DOUBLE_TEAM + 4 for
 Onix's ROCK_SLIDE + 8 unattributed turn-end cluster). Cross-session
@@ -449,16 +449,93 @@ battle-frontier-mons.json` (pre-existing, opponent movesets/items/natures).
 
 ## 8. Open questions / risk list for the engine slices
 
-1. **The turn-end 8-step (this session) / 9-step (`turn-resolution-notes.md`)
-   RNG cluster is still not mapped to an exact call site.** Both sessions'
-   own tail ends in a "...2-step, then 5-step" LCG signature regardless of
-   which moves were used this turn — a stronger cross-session hint toward
-   `turn-resolution-notes.md` Risk #2's "opponent AI scoring its next
-   move" hypothesis than either session alone provided, but still not
-   confirmed via source-level tracing. **Probe:** a source-level
-   breakpoint/trace (or selectively no-op'ing `battle_ai_script_commands.c`
-   RNG call sites in a scratch ROM patch) before any Tier-1 test asserts an
-   exact RNG-step-count invariant for a full turn.
+1. ~~**The turn-end 8-step (this session) / 9-step (`turn-resolution-notes.md`)
+   RNG cluster is still not mapped to an exact call site.**~~ **RESOLVED
+   (S7 worktree lane follow-up session)** — confirms
+   `turn-resolution-notes.md` Risk #2's hypothesis exactly right, and pins
+   every one of the 8 calls to a source line, with the two multi-step
+   groups (2 and 5) individually **LCG-value-verified** against this
+   dossier's own committed `gRngValue` samples (not just call-counted):
+
+   - **tick 2340 (1 step)**: `BattleTurnPassed`'s `gRandomTurnNumber =
+     Random();` (`battle_main.c:4013`) — unconditional, once per turn,
+     independent of what happened during the turn.
+   - **tick 2345 (2 steps)** = `HandleTurnActionSelectionState` dispatching
+     DESTIN's first controller call for turn 2's action,
+     `OpponentHandleChooseAction` -> `AI_TrySwitchOrUseItem` (both
+     `battle_controller_opponent.c:1540-1544`/
+     `battle_ai_switch_items.c:528-603`) -> `ShouldSwitch()`
+     (`:429-526`). Traced call-by-call for this exact state (Grovyle
+     101/143 hp, evasion stage 7, moveset FURY_CUTTER/ENDEAVOR/
+     BRICK_BREAK/DOUBLE_TEAM, vs full-hp Onix ROCK/GROUND):
+     `ShouldSwitchIfPerishSong()`/`ShouldSwitchIfWonderGuard()` = 0 calls
+     (neither condition applies); `FindMonThatAbsorbsOpponentsMove()`
+     (`:119-216`) = **1 call** (`Random() % 3` at `:128`, result `54504 %
+     3 == 0` so the `&&` short-circuits false and the function keeps
+     going, but `gLastLandedMoves[1]` = ROCK_SLIDE, type ROCK, matches
+     none of `TYPE_FIRE`/`TYPE_WATER`/`TYPE_ELECTRIC` at `:151-158`, so it
+     hits the `else return FALSE;` at `:158` before its own second
+     `Random()` call at `:206` is ever reached); `ShouldSwitchIfNaturalCure()`
+     = 0 calls (Grovyle isn't asleep, returns `FALSE` at the first check,
+     `:220`); `HasSuperEffectiveMoveAgainstOpponents(FALSE)` (`:258-312`,
+     called directly from `ShouldSwitch()` at `:517`) = **1 call**
+     (BRICK_BREAK is fighting-type, 2x vs Onix's ROCK/GROUND typing, hits
+     `Random() % 10 != 0` at `:282`, result `23999 % 10 == 9 != 0` so
+     returns `TRUE` immediately, and `ShouldSwitch()` returns `FALSE` at
+     `:517-518` — DESTIN doesn't switch, matching the observed turn
+     (Grovyle used DOUBLE_TEAM)). `ShouldUseItem()` (`:808-...`) = 0 calls
+     (no `Random()` anywhere in that function; Battle Factory trainers
+     carry no mid-battle items in `battleHistory->trainerItems` here).
+     Total: **exactly 2**, matching the observed step count. **LCG-value
+     match**: applying the LCG twice to the tick-2340 post-value
+     (`3552646270`) gives `3572006425` then `1572843288` — the *exact*
+     value this dossier's own ledger records at tick 2345 (§3) — i.e. this
+     isn't just "2 calls happen to occur somewhere in here", the specific
+     branch outcomes above are the ones that actually fired.
+   - **tick 2347 (5 steps)** = the very next controller call,
+     `OpponentHandleChooseMove` (`battle_controller_opponent.c:1551-1567`)
+     -> `BattleAI_SetupAIData(ALL_MOVES_MASK)` -> `BattleAI_ChooseMoveOrAction`
+     -> `ChooseMoveOrAction_Singles`. **Crucially, no AI-script scoring
+     runs at all here**: `GetAiScriptsInBattleFactory()`
+     (`battle_factory.c:889-908`) returns AI script flags gated on
+     `challengeNum = factoryWinStreaks[...] / FRONTIER_STAGES_PER_CHALLENGE`
+     — for battle 1 of a fresh challenge (`challengeNum < 2`, DESTIN isn't
+     `TRAINER_FRONTIER_BRAIN`) it returns **`0`**, RAM-confirmed directly
+     (`tools/probe/dump-ai-and-hitmarker.py`'s `aiFlags` column reads `0`
+     at every sampled tick 2330-2350) — so `ChooseMoveOrAction_Singles`'s
+     `while (AI_THINKING_STRUCT->aiFlags != 0)` loop never calls
+     `BattleAI_DoAIProcessing()` even once; `AI_CheckBadMove`/
+     `AI_TryToFaint`/`AI_CheckViability` (hand-traced against all 4 of
+     Grovyle's actual moves for this state — every branch is deterministic
+     type/ability/HP/stat-stage comparisons for this exact matchup)
+     contribute **zero** `Random()` calls. The 5 calls are entirely
+     `BattleAI_SetupAIData`'s own `simulatedRNG[i] = 100 - (Random()%16)`
+     loop (`battle_ai_script_commands.c:341`, **4 calls**, unconditional
+     for all `MAX_MON_MOVES` slots regardless of legality) plus
+     `ChooseMoveOrAction_Singles`'s final tie-break,
+     `consideredMoveArray[Random() % numOfBestMoves]` (`:445`, **1
+     call**) — since `aiFlags == 0` left every move's score at its
+     initial `100` (all 4 tied), `numOfBestMoves == 4`. **LCG-value
+     match**: applying the LCG 5 more times to the tick-2345 post-value
+     (`1572843288`) lands on `4098214719` exactly, this dossier's own
+     recorded tick-2347 value (§3). Bonus, falsifiable prediction for a
+     future session: the tie-break's `Random()%4` result is `1`, i.e.
+     `consideredMoveArray[1]` = Grovyle's move **slot 1** — if the
+     dossier's own moveset order (FURY_CUTTER/ENDEAVOR/BRICK_BREAK/
+     DOUBLE_TEAM, `battle-turn-notes.md` §1) is the literal slot order,
+     this predicts Grovyle uses **ENDEAVOR** on turn 2, checkable by
+     extending the committed trace past tick 2620.
+   - **Total: 1 + 2 + 5 = 8**, matching the observed cluster exactly, with
+     every step tied to a cited source line and the two multi-step groups
+     additionally confirmed bit-for-bit against the LCG rather than just
+     call-counted. New committed probe:
+     `tools/probe/dump-ai-and-hitmarker.py` (double-derefs
+     `gBattleResources->ai` for the `AI_ThinkingStruct` fields, plus
+     `gHitMarker`/`gSaveBlock2Ptr->optionsBattleSceneOff` for
+     `docs/battle-move-anim-notes.md`'s companion root-cause finding — see
+     that doc's §6), re-run twice, byte-identical, and independently
+     cross-checked against a from-scratch scratch probe of the same
+     addresses before the script was written.
 2. **Only 3 of battle 1's 8 distinct moves have any RAM ground truth**
    across both this dossier and `turn-resolution-notes.md`: ROCK_SLIDE
    (this session, 4 rolls, no crit, 42 dmg — and the earlier session, same
