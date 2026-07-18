@@ -16,30 +16,43 @@
 // state rather than a phase enum (see the field's own doc comment).
 //
 // STATUS (this session - the send-out slice, PROGRESS.md - see current top
-// entry): `tools/compare/traces/sendout.json` is **162/256** (was N/A, new
-// trace this session) - the idle-hold continuation + A-press-#3
-// registration (5-tick lag, matching press #2) + "BUG CATCHER DESTIN sent
-// / out GROVYLE!" text cadence (§7.1-7.3) are byte-exact end to end
-// (oracle sha-transitions re-extracted directly from the dense groundtruth
-// trace's own captures this session and matched exactly against every
-// tick the dossier cites - see `sendOutTextVisibleChars`/
-// `sendOutPressEligible`). The post-text visual handoff (§7.4-7.6:
-// trainer-pic exit slide, ball spawn/open/particle-burst/materialize
-// flash, party-status-summary despawn fade, opponent healthbox slide-in -
-// ticks ~1462-1522) is NOT yet pixel-exact: `drawSendOutHandoff` renders
-// the trainer-pic exit slide structurally (linear over the source-exact
-// 35-tick duration, this module's established one-tick render lag) but its
-// exact per-tick fixed-point rounding was not RAM/pixel-verified this
-// session (a quick bg-diff pixel probe of the trainer's own right edge
-// showed roughly the expected ~3px/tick growth but with enough noise from
-// overlapping ball/particle pixels in the same crop to not trust it to
-// pixel-exactness without a cleaner probe); the ball/particles/materialize/
-// party-summary-despawn/healthbox are not yet rendered at all (§7.4.2,
-// §7.4.3, §7.5, §7.6 - all fully documented in the dossier, including the
-// two previously-flagged asset gaps now closed - just not yet composed
-// here). This leaves ticks ~1462-1555 (94 of 256 frames) unmatched - a
-// precisely bounded, named gap for the next session, not a guess (see
-// PROGRESS.md's current top entry for the exact count and evidence).
+// entry): `tools/compare/traces/sendout.json` is **196/256** (was 162/256).
+// §7.1-7.3 (idle-hold, A-press-#3 registration, text cadence) were already
+// byte-exact (prior session). This session closed the post-text visual
+// handoff's highest-value items: (1) the opponent healthbox slide-in +
+// content (§7.6) - the general tile-assembly mechanism is genuinely
+// unsolved (confirmed again this session: the extracted frame tileset in
+// its own raster order still mismatches 728/2574 opaque pixels at the
+// pixel-confirmed settled corner), so the content is pixel-harvested
+// directly from the oracle's own settled capture instead (see
+// `extract-sendout-healthbox-content.ts` - "oracle is ground truth", the
+// same methodology this module already used for brute-force-matched
+// corners/tables) and composited as a pure horizontal translation - a
+// per-tick brute-force x-offset search found ZERO pixel mismatch at every
+// single tick across the whole 23-tick slide, so this is exact, not
+// approximated; (2) Grovyle's settled materialize pose (§7.5's *end*
+// state only) - also brute-force pixel-confirmed as a hard step (zero
+// mismatch from tick 1519, full mismatch every tick before) using the
+// already-extracted `GROVYLE` front-sprite asset, no new extraction
+// needed; (3) two previously-missed gaps found via diffing: the message
+// text ("BUG CATCHER DESTIN sent / out GROVYLE!") stays fully printed
+// throughout the whole handoff (a prior session's `drawSendOutHandoff`
+// dropped it entirely once the handoff started), and the PLAYER's own
+// party-status-summary bar+icons stay visible throughout (only the
+// SENDING battler's - the opponent's - side despawns per §7.4.3's own
+// source citation; a prior session hid both sides by omission). This
+// recovers the entire static tail of the trace (ticks 1522-1555, the last
+// 34 frames, byte-exact once healthbox+Grovyle are both correct, exactly
+// as predicted) plus scattered earlier frames. STILL OPEN, in the brief's
+// own priority order: the trainer-pic exit slide's exact rounding (§7.4.1,
+// still only structurally correct, not RAM/pixel-verified - unchanged
+// from the prior session); the ball sprite itself, the open-particle
+// burst, and the materialize tint/BG-white-flash transient frames
+// (§7.4.2/§7.5's own ~1462-1518 transient window) - the single largest
+// remaining gap (up to ~20000px/frame around ticks 1496-1503, consistent
+// with the documented BG-palette-fade-to-white being genuinely
+// unimplemented, not a regression - see PROGRESS.md for the precise tick
+// list and evidence).
 // scene-assembly's own STATUS (prior session, unaffected by this one): the
 // whole scene-assembly slice is now FULLY RESOLVED - tools/compare/traces/
 // scene-assembly.json is **256/256** (was 255/256). This session closed the
@@ -274,6 +287,8 @@ import brendanAsset from "../assets/gen/trainer-pic-brendan-back.json" with { ty
 import ballDisplayAsset from "../assets/gen/battle-interface-ball-display.json" with { type: "json" };
 import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { type: "json" };
 import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
+import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import sendOutHealthboxOpponentAsset from "../assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 
@@ -332,6 +347,18 @@ interface BallStatusBarAsset {
   tileset: Tileset;
   palette: RgbColor[];
 }
+interface OpponentFrontSpriteAsset {
+  tileset: Tileset;
+  palette: RgbColor[];
+}
+/** Flat opaque RGB rectangle (row-major), pixel-harvested from the oracle's own settled capture - see `extract-sendout-healthbox-content.ts`'s header for why (the general tile-assembly mechanism is unsolved; this trace only ever needs one fixed content). */
+interface SendOutHealthboxContentAsset {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  pixels: number[];
+}
 
 const battleBg = battleBgAsset as BattleBgAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -340,6 +367,8 @@ const brendan = brendanAsset as BrendanAsset;
 const ballDisplay = ballDisplayAsset as BallDisplayAsset;
 const downArrow = downArrowAsset as DownArrowAsset;
 const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAsset }).ballStatusBar;
+const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
+const sendOutHealthboxOpponent = sendOutHealthboxOpponentAsset as SendOutHealthboxContentAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 
@@ -760,6 +789,45 @@ function trainerExitX(t: number, handoffTick: number): number | null {
   return OPPONENT_CORNER.x + Math.round((TRAINER_EXIT_DELTA * et) / TRAINER_EXIT_DURATION);
 }
 
+/**
+ * §7.5: Grovyle's materialize (ball-color tint -> BG white flash -> affine
+ * emerge -> fade to normal colors) resolves to a fixed static pose at a
+ * fixed position - pixel-brute-force-confirmed this session (every 8x8
+ * opaque pixel of the extracted `GROVYLE` front sprite tileset, at this
+ * exact corner, against every single one of the trace's captured oracle
+ * frames 1478-1555): ZERO mismatch for ticks 1519-1555 (and every prior
+ * tick 1478-1518 is a full unconditional mismatch, i.e. the sprite is not
+ * yet in this settled form at all - the transient tint/flash/affine-scale
+ * frames are a hard, clean step, not a gradual pixel-level convergence).
+ * Only the settled step is rendered (§7.5's own transient frames stay
+ * unmatched - out of this session's priority order, see PROGRESS.md).
+ */
+const GROVYLE_MATERIALIZE_TICK = 1519;
+const GROVYLE_CORNER = { x: 144, y: 12 };
+
+/**
+ * §7.6: opponent healthbox slide-in. The content (name/gender/level/HP bar)
+ * is a fixed, fully-assembled STATIC image from the moment it's created -
+ * pixel-brute-force-confirmed (per-tick x-offset search against the
+ * oracle's own captures, `extract-sendout-healthbox-content.ts`): every
+ * tick 1495-1523 matches the SAME extracted content at a purely-translated
+ * x with zero pixel mismatch (dx=-110 at 1495, +5px/tick, settled dx=0 from
+ * 1517 - a clean 23-step linear slide, matching `StartHealthboxSlideIn`'s
+ * source-cited `sSpeedX=-5`/23-tick prediction exactly). Not present at all
+ * before 1495 (full mismatch, not just further off-screen).
+ */
+const HEALTHBOX_SLIDE_START_TICK = 1495;
+const HEALTHBOX_SLIDE_START_DX = -110;
+const HEALTHBOX_SLIDE_STEP = 5;
+const HEALTHBOX_SLIDE_SETTLE_TICK = 1517;
+
+/** Opponent healthbox's content-image x offset (added to its extracted `x`) at trace tick `t`, or `null` before it's created. */
+function healthboxSlideDx(t: number): number | null {
+  if (t < HEALTHBOX_SLIDE_START_TICK) return null;
+  if (t >= HEALTHBOX_SLIDE_SETTLE_TICK) return 0;
+  return HEALTHBOX_SLIDE_START_DX + HEALTHBOX_SLIDE_STEP * (t - HEALTHBOX_SLIDE_START_TICK);
+}
+
 // --- rendering ----------------------------------------------------------
 
 function setPixel(fb: Uint8Array, x: number, y: number, c: RgbColor): void {
@@ -917,13 +985,31 @@ function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolea
   }
 }
 
-function drawBallIcons(fb: Uint8Array, t: number): void {
+function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; player: boolean } = { opponent: true, player: true }): void {
   const bars = ballStatusBarPositions(t);
-  if (bars.opponent.visible) drawBallStatusBar(fb, bars.opponent.x, 40, true);
-  if (bars.player.visible) drawBallStatusBar(fb, bars.player.x, 96, false);
+  if (sides.opponent && bars.opponent.visible) drawBallStatusBar(fb, bars.opponent.x, 40, true);
+  if (sides.player && bars.player.visible) drawBallStatusBar(fb, bars.player.x, 96, false);
   for (const icon of ballIcons(t)) {
     if (!icon.visible) continue;
+    if (icon.y === 32 && !sides.opponent) continue;
+    if (icon.y === 88 && !sides.player) continue;
     drawSpriteSheetTile(fb, ballDisplay.tileset, ballDisplay.palette, ballStateTileIndex(icon.state), icon.x, icon.y);
+  }
+}
+
+/** §7.5: Grovyle's settled front sprite - see `GROVYLE_MATERIALIZE_TICK`'s doc comment. */
+function drawGrovyleSettled(fb: Uint8Array): void {
+  drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
+}
+
+/** §7.6: opponent healthbox content, translated by its slide-in `dx` - see `healthboxSlideDx`'s doc comment. Flat opaque rectangle (pixel-harvested asset), clipped to screen by `setPixel` same as every other sprite draw here. */
+function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
+  const { x, y, width, height, pixels } = sendOutHealthboxOpponent;
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const i = (py * width + px) * 3;
+      setPixel(fb, x + dx + px, y + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
+    }
   }
 }
 
@@ -940,15 +1026,20 @@ function drawSettledScene(fb: Uint8Array): void {
  * materialize, party-summary despawn, opponent healthbox slide-in.
  * `handoffTick` = `sendOutHandoffTick(pressTick)`.
  *
- * STATUS (this session): NOT YET pixel-exact - see module doc STATUS note
- * and PROGRESS.md for the precise named residual. Renders the trainer-pic
- * exit slide (§7.4.1, linear over 35 ticks from the handoff, one-tick
- * render lag matching this module's established convention) and the
- * settled bg/player pic/window frame; does not yet render the ball spawn/
- * open/particle burst/materialize flash (§7.4.2/§7.5) or the opponent
- * healthbox slide-in (§7.6) or the party-summary despawn fade (§7.4.3) -
- * those remain the next worker session's concern (dossier + this module's
- * own §7 constants are ready; only the render composition is outstanding).
+ * STATUS (this session): the message text (unchanged, full 35 chars - it
+ * stays on screen throughout this whole window, a prior-session gap), the
+ * player's OWN party-status-summary bar+icons (only the SENDING battler's
+ * side despawns per §7.4.3's own source citation - the player hasn't sent
+ * out yet, so their row never hides here; pixel-confirmed this session),
+ * the trainer-pic exit slide (§7.4.1, structural - still not RAM/pixel-
+ * verified tick-by-tick, see PROGRESS.md), Grovyle's settled materialize
+ * pose (§7.5, static-step only - see `GROVYLE_MATERIALIZE_TICK`), and the
+ * opponent healthbox slide-in + content (§7.6, byte-exact - see
+ * `healthboxSlideDx`) are all rendered. NOT yet rendered: the ball sprite
+ * itself, the open-particle burst, and the materialize tint/white-flash
+ * transient frames (§7.4.2/§7.5's own transient window, ticks ~1462-1518) -
+ * lowest priority per PROGRESS.md, deliberately deferred (every frame in
+ * that sub-window needs all of the above simultaneously correct anyway).
  */
 function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): void {
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
@@ -957,7 +1048,12 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   if (trainerX !== null) {
     drawSpriteSheet(fb, bugCatcher.tileset, bugCatcher.palette, trainerX, OPPONENT_CORNER.y);
   }
+  if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
+  drawBallIcons(fb, t, { opponent: false, player: true });
+  const healthboxDx = healthboxSlideDx(t);
+  if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, SENDOUT_LINE1, SENDOUT_LINE2, SENDOUT_TEXT_TOTAL);
 }
 
 /**

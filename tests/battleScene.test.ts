@@ -19,6 +19,8 @@ import {
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
+import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import sendOutHealthboxOpponentAsset from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -26,6 +28,21 @@ function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
+
+/** Same as `pixelAt`, but with the send-out A-press already registered at trace tick 1420 (`sendOutPressElapsed = 380`, matching the §7.2/§7.3 tests above). */
+function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
+  const fb = new Uint8Array(240 * 160 * 4);
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380 });
+  const o = (y * 240 + x) * 4;
+  return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+}
+
+const grovyleFront = (grovyleFrontSpritesAsset as Record<string, { tileset: { columns: number; tiles: number[][] }; palette: { r: number; g: number; b: number }[] }>).GROVYLE!;
+/** GROVYLE_CORNER-relative (31,7) - the sprite's own first opaque pixel in raster order (tile 3, pixel (7,7)), used to pin the materialize-gate tick without hardcoding a color by hand. */
+const GROVYLE_FIRST_OPAQUE_OFFSET = { x: 31, y: 7 };
+const grovyleFirstOpaquePixel = grovyleFront.palette[grovyleFront.tileset.tiles[3]![63]!]!;
+
+const healthboxContent = sendOutHealthboxOpponentAsset as { x: number; y: number; width: number; height: number; pixels: number[] };
 
 // Oracle/RAM cross-check: tools/compare/traces/scene-assembly.json is NOT
 // yet 256/256 (see PROGRESS.md for the current count and the open gap).
@@ -233,5 +250,62 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
     expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380 });
+  });
+});
+
+describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.4-7.6, pixel-brute-force-confirmed this session against tools/compare/traces/sendout.json)", () => {
+  const GROVYLE_CORNER = { x: 144, y: 12 };
+  const HEALTHBOX = { x: healthboxContent.x, y: healthboxContent.y, w: healthboxContent.width, h: healthboxContent.height };
+
+  it("Grovyle's settled materialize pose appears as a hard step at tick 1519, not before (§7.5)", () => {
+    const before = pixelAtSentOut(1518, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    const after = pixelAtSentOut(1519, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    expect(after).toEqual([grovyleFirstOpaquePixel.r, grovyleFirstOpaquePixel.g, grovyleFirstOpaquePixel.b]);
+    expect(before).not.toEqual(after);
+  });
+
+  it("Grovyle's settled pose is static (no further change) through the end of the trace", () => {
+    const at1519 = pixelAtSentOut(1519, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    const at1555 = pixelAtSentOut(1555, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    expect(at1555).toEqual(at1519);
+  });
+
+  it("opponent healthbox is entirely absent before tick 1495, then slides in at +5px/tick, settling (dx=0) from tick 1517 (§7.6)", () => {
+    // A distinctive interior pixel (the nameplate's own beige border, local
+    // (30,5) - not one that happens to coincide with the plain background).
+    const cx = 30;
+    const cy = 5;
+    const i = (cy * HEALTHBOX.w + cx) * 3;
+    const contentColor = healthboxContent.pixels.slice(i, i + 3);
+    expect(contentColor).not.toEqual([255, 255, 255]);
+
+    // Not created yet at tick 1494: this pixel's settled screen position
+    // is still plain background.
+    const before = pixelAtSentOut(1494, HEALTHBOX.x + cx, HEALTHBOX.y + cy);
+    expect(before).not.toEqual(contentColor);
+
+    // Settled (dx=0) from tick 1517 on: the content sits exactly at its
+    // extracted (x,y).
+    const at1517 = pixelAtSentOut(1517, HEALTHBOX.x + cx, HEALTHBOX.y + cy);
+    expect(at1517).toEqual(contentColor);
+
+    // One tick earlier (dx=-5): the same content pixel is 5px further left
+    // on screen - confirming the pure-translation slide formula (not a
+    // re-assembly / redraw of different content per tick).
+    const at1516 = pixelAtSentOut(1516, HEALTHBOX.x + cx - 5, HEALTHBOX.y + cy);
+    expect(at1516).toEqual(contentColor);
+  });
+
+  it("message text stays fully printed (all 35 chars) throughout the visual handoff, past its own completion tick", () => {
+    const chars35Pixel = pixelAtSentOut(1462, 16, 121);
+    const laterPixel = pixelAtSentOut(1555, 16, 121);
+    expect(laterPixel).toEqual(chars35Pixel);
+  });
+
+  it("the player's own party-status-summary bar stays visible through the handoff - only the sending (opponent) battler's side despawns (§7.4.3)", () => {
+    const playerBar = ballStatusBarPositions(1500);
+    const atBar = pixelAtSentOut(1500, playerBar.player.x + 4, 96 + 4);
+    const stillIdle = pixelAt(1300, playerBar.player.x + 4, 96 + 4);
+    expect(atBar).toEqual(stillIdle);
   });
 });

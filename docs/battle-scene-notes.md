@@ -785,3 +785,80 @@ guessing which future slice should own them).
    assuming it's identical (the player-side ball position/coords and
    `POKEBALL_PLAYER_SENDOUT`'s arc-vs-no-arc behavior differ from the
    opponent's, per `pokeball.c:383-388` — worth its own pass, not a copy-paste).
+
+### 7.9. Engine-slice session: healthbox content solved by oracle pixel-harvest, Grovyle materialize as a hard step, two prior-session omissions found (`sendout.json` 162/256 → 196/256)
+
+`extract-battle-healthbox.ts`'s own flagged blocker (§0/intro, "the real
+sprite is assembled from a HP/EXP-fill-level-dependent subset of each
+sheet's tiles in a different on-screen arrangement") was re-confirmed, not
+just trusted: brute-force placing `singlesOpponent`'s tileset in its own
+raster order at the pixel-confirmed settled corner `(12,14)` (itself an
+exact match of `InitBattlerHealthboxCoords`'s source-cited `x=44,y=30` minus
+the sprite's own 32x16 half-extent) still mismatches **728/2574** opaque
+pixels — the tile-remap pipeline (subsprite tables, per-column HP-bar-fill
+VRAM copies, `FONT_SMALL` name text, `FONT_BOLD` level digits) is real work,
+not a quick fix. Given this trace only ever needs ONE healthbox content
+(GROVYLE, male, Lv50, full HP, no status), the engine slice instead
+pixel-harvests the oracle's own already-assembled content directly — the
+same "oracle is ground truth" methodology already used throughout this
+module for brute-force-matched corners/tables, just applied to a whole
+rectangular content block instead of a single swatch
+(`extract-sendout-healthbox-content.ts`, → `sendout-healthbox-opponent.json`).
+Bounding box `(13,16)-(113,44)` was found by diffing the oracle's tick-1555
+capture against the engine's own pure-background render, excluding the
+(separately-solved) Grovyle/text/player-ball-row regions — one clean
+contiguous blob, no manual guessing. A per-tick brute-force x-offset search
+against every oracle capture 1493-1523 found **zero pixel mismatch** at
+every tick from 1495 (dx=-110) through settle (dx=0 from tick 1517,
++5px/tick, a clean 23-step slide — matches `StartHealthboxSlideIn`'s
+source-cited `sSpeedX=-5` prediction exactly) — confirming the content is a
+static, fully-assembled image from the moment it's created (the
+"Lv50 fully legible ~1504-1508" language in §7.6 above describes the reveal
+becoming visible as the box slides on-screen, not the HP bar's own fill
+level animating — it's already 100% green from creation, Grovyle being
+undamaged). Grovyle's settled front sprite (§7.5's *end* state) was
+similarly confirmed as a **hard step**, not a gradual convergence: the
+already-extracted `GROVYLE` tileset at corner `(144,12)` (also
+brute-force-found, zero mismatch) matches with **zero** pixel error at
+every tick 1519-1555, and **every single opaque pixel mismatches** at every
+tick 1478-1518 — i.e. the transient tint/flash/affine-emerge frames never
+partially resemble the settled pose at the pixel level, so only the
+settled step is rendered this session (the transient frames stay
+unmatched, as expected — that sub-window still needs the ball/particle
+work below).
+
+Two gaps were found that were NOT in §7.4-7.8's original scope list, both
+by diffing rather than re-reading source: (1) the message text ("BUG
+CATCHER DESTIN sent / out GROVYLE!") was being dropped entirely once
+`drawSendOutHandoff` took over rendering — it actually stays on screen,
+unchanged, through the *entire* rest of the trace (confirmed: pixel-static
+from tick 1462 through 1555); (2) `Task_HidePartyStatusSummary` (§7.4.3)
+only reassigns the *sending* battler's own task — for this trace that's
+the opponent (`gActiveBattler`), so the **player's own** party-status-
+summary bar+icons (their own remaining-team indicator, unrelated to the
+opponent sending out) never despawn here at all and should stay visible
+throughout; a prior session's `drawSendOutHandoff` dropped both sides by
+simply never calling `drawBallIcons`. Fixing both (plus the healthbox +
+Grovyle above) recovered the trace's entire static tail (ticks 1522-1555,
+the last 34 frames, byte-exact) plus scattered earlier frames: **196/256**
+overall (was 162/256), zero regressions across the other 18 committed
+traces (full sweep re-run).
+
+**Still open, in the brief's stated priority order:** (1) the trainer-pic
+exit slide's exact rounding (§7.4.1) — still only structurally correct
+(linear-over-35-ticks), not RAM/pixel-verified tick-by-tick, unchanged from
+the prior session; (2) the party-summary despawn *fade itself* (§7.4.3) —
+moot for this trace's own scoring in isolation (the opponent's row is
+simply never drawn during the handoff, which happens to already match
+every tick from ~1495 on per the original dossier's own "fully gone by
+1495" finding — but the *fade animation itself*, ticks ~1463-1494, is still
+unrendered); (3) the ball sprite, the open-particle burst, and the
+materialize tint/BG-white-flash transient frames (§7.4.2/§7.5's own
+~1462-1518 transient window) — confirmed this session to be a real,
+substantial gap, not a rounding error: bg-diffing the still-unmatched
+ticks shows near-full-screen differences (up to ~20000/38400px at ticks
+1496-1503) in a horizontally-striped pattern consistent with
+`BeginNormalPaletteFade`'s BG-palette-to-white dither (§7.5's own citation)
+being genuinely unimplemented — this remains the hardest, lowest-priority
+item exactly as scoped, and is now the sole remaining blocker for
+256/256 (60 frames, ticks 1462-1521).
