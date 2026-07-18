@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 57 — S6 groundwork (parallel worktree lane, merged): battle-interface assets extracted byte-exact (ball_display + down_arrow wait-cursor); new files only
+
+- **State:** merge of `worker/wt-20260718-110943` (single commit `29f7840`)
+  on top of #56; `npm test` **390/390** + `npm run build` green on the
+  merged result. New: `tools/extract/extract-battle-interface.ts`,
+  `src/assets/gen/battle-interface-ball-display.json` +
+  `battle-interface-down-arrow.json`,
+  `tools/compare/traces-groundtruth/battle-interface-assets.json` (137
+  captures, ticks 1284-1420), `docs/battle-interface-assets.md`.
+- **Did (worker, supervisor-verified):** (1) ball_display.png (party-
+  status ball icons, Full/Empty/Fainted/Statused) extracted with its own
+  embedded palette; screen positions derived from
+  `CreatePartyStatusSummarySprites`' formulas + the sprite
+  center-to-corner (-4,-4) convention; **1590/1590 px exact** across 12
+  icons × 5 ticks; entrance slide settles at tick 1292 exactly. (2) the
+  wait cursor: real path is `graphics/fonts/down_arrow_alt.png` (the
+  brief's guessed battle_interface path doesn't exist) via `text.c`'s
+  `sDarkDownArrowTiles`; a plain triangle that *renders* heart-shaped
+  through `gBattleTextboxPalette` bank 0 (already in
+  `battle-window.json` palette[0] — no new palette); bob =
+  `sDownArrowYCoords={0,1,2,1}` at 9 ticks/phase (the 36-tick cycle);
+  **4773/4773 px exact** across all 137 probe ticks. Honestly flagged:
+  the source-row-vs-dest-row axis attribution of the bob is empirical —
+  the engine slice should treat the additive dest-Y rule as the pinned
+  behavior, not the hand-traced address math.
+- **Next:** scene-assembly engine slice (1040-1300) briefed on the main
+  lane now — all its assets and mechanism tables are banked (#55 + this).
+  Send-out scout (1300-1560) in flight on the worktree lane (worker M).
+- **Notes:** worktree removed + branch deleted post-merge.
+
+---
+
 ## 56 — S6 transition engine slice: CIRCLES_MEET battle transition (ticks 843-1040) implemented, oracle-pinned; `transition.json` committed 206/206
 
 - **State:** `npm test` **390/390** (377→390, +13 in new
@@ -96,68 +128,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   worker K's assets merge.
 - **Notes:** worktree removed + branch deleted post-merge.
 
----
-
-## 54 — S6 slice 2c: OPPONENT-SPEECH MSGBOX window (ticks 718-843) implemented, oracle-pinned; `room-msgbox.json` committed 142/142
-
-- **State:** `npm test` **377/377** (365→377, +12 in `tests/battleRoom.test.ts`),
-  `npm run build` green. New trace `tools/compare/traces/room-msgbox.json`
-  (851 frames, captures 710-851) passes `npm run compare` **142/142, 0
-  diff** (first try). All 15 pre-existing traces re-verified at their exact
-  prior counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
-  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
-  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
-  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
-  rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) — zero
-  regressions.
-- **Did:** extended `battleRoom.ts`'s state machine off #51's groundwork
-  (BattleRoomPhase gains `msgboxIdle`/`msgboxClosing`/`settled` alongside
-  the existing `entering`) rather than rebuilding: "entering" stays a pure
-  function of the same global `elapsed` through print-complete (msgbox
-  appear/print folded in exactly like scientistTurnFrame/opponentStep —
-  `msgboxVisual(elapsed)`, appear atomic at elapsed 198/tick 718, 1
-  char/tick incl. spaces, print-complete at elapsed 218/tick 738 — both
-  values derived from `MSGBOX_LINE1.length + MSGBOX_LINE2.length`, not
-  separately-pinned magic numbers), then hands off to `msgboxIdle` (static,
-  matches prebattleRoom.ts's own "idle" no-op-under-advance convention).
-  core.ts's tick() gates the SAME idiom prebattleRoom.ts's A-press already
-  established: `msgboxIdle && newKeys.has("A")` creates `msgboxClosing`
-  directly on the press tick; **the close latency (`MSGBOX_CLOSE_TICKS=4`)
-  was derived analytically, not guessed** — battle1-intro.json's own
-  committed segment 29 (`["A"], frames:2`, right after 838 no-input frames)
-  makes readKeys.ts's edge-triggered newKeys fire exactly once, on the
-  tick() call producing captured frame 839 (frame 840's call sees A already
-  held); working backward from the pinned "static through 842, vanished by
-  843" pixels, 4 is the only tick count consistent with both the segment
-  data and the pixels — independently re-confirmed via a fresh oracle probe
-  before writing any code (frame 717 sha == frame 843's sha, frames
-  838-842 == frame 738's "print-complete" sha). Reused
-  `prebattleRoomRender.ts`'s box compositor rather than duplicating it —
-  exported `drawMessageBoxFrame` (was private) and factored a new
-  `drawMessageBoxText` helper (also used by that module's own single-line
-  `drawMessageBox` now, a small dedup); `battleRoomRender.ts` calls both
-  twice for the two lines (`IT’S WAY TOO` / `HOT HERE`, curly apostrophe
-  charmap 180, #51-pinned). No new extractor/asset — confirms #51's own
-  finding that this is the literal same `prebattle-room-msgbox.json` box.
-  The one pre-existing test needing no change at all: `battleRoom.test.ts`'s
-  "holds A for 200 ticks -> elapsed 200" assertion (written for slice 2a)
-  turned out to still hold byte-for-byte, since 200 < the print-complete
-  boundary (218) — holding A during "entering" is a no-op by construction
-  (only `msgboxIdle` reads input), so no existing assertion needed editing.
-- **Next:** the transition-to-black engine slice (tick 843+, gray flicker
-  871-918 → circle sprites → center-logo blend → fade to black by 1031),
-  off #53's own groundwork (RAM-pinned 8-tick gray-flicker toggle, circle-
-  sprite linear-slide constants, centerBg asset byte-exact, 6-step
-  2-ticks/step fade cadence). `docs/battle-scene-notes.md` scene-assembly
-  scout (1031-1300) may also be ready by then per #53's "Notes".
-- **Notes:** assumption flagged (not oracle-exercised this session, per the
-  brief's own allowance): only the one pinned idle-phase press (well after
-  print-complete) is verified; an earlier press right at print-complete is
-  modeled as behaving identically (same 4-tick close, no idle-duration
-  dependency) — the simplest mechanism consistent with the single pinned
-  data point, matching `prebattleRoom.ts`'s own "idle" convention (no
-  timeout/duration-sensitivity there either). No papercuts.
 
 ---
-
 
