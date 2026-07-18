@@ -77,6 +77,7 @@ import {
   type BattleRoomState,
 } from "./battleRoom.ts";
 import { renderBattleRoomEntryScene } from "./battleRoomRender.ts";
+import { applyBattleTransitionOverlay, exitFadeY } from "./battleTransition.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -469,10 +470,23 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
   const b = state.battleRoom!;
   const sceneElapsed = b.phase === "entering" ? b.elapsed : SETTLED_SCENE_ELAPSED;
   const step = entryStep(sceneElapsed);
-  const bgY = bgFadeY(sceneElapsed, FADE_IN);
-  const objY = objFadeY(sceneElapsed, FADE_IN);
+  let bgY = bgFadeY(sceneElapsed, FADE_IN);
+  let objY = objFadeY(sceneElapsed, FADE_IN);
+  // S6 transition slice: "settled" holds the static no-box scene (tick 843)
+  // then, still keyed by the SAME elapsed counter, plays the CIRCLES_MEET
+  // transition (battleTransition.ts). The room scene's own share of that
+  // transition's exit-to-black fade (room tiles + NPCs) reuses
+  // renderBattleRoomEntryScene's existing bgFadeY/objFadeY params (see
+  // battleTransition.ts's exitFadeY doc for the BG/OBJ 1-tick-lag split);
+  // everything else (gray flicker, circle sprites, center-logo blend) is a
+  // post-process overlay, no new phase needed.
+  if (b.phase === "settled") {
+    bgY = exitFadeY(b.elapsed);
+    objY = exitFadeY(b.elapsed - 1);
+  }
   const fb = createFramebuffer();
   renderBattleRoomEntryScene(fb, step, sceneElapsed, bgY, objY, msgboxVisual(b));
+  if (b.phase === "settled") applyBattleTransitionOverlay(fb, b.elapsed);
   return fb;
 }
 

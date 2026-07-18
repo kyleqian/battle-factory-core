@@ -5,6 +5,38 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 53 — S6 transition groundwork (parallel worktree lane, merged): NO heal-icon overlay exists; ticks 843-1031 fully pinned; CIRCLES_MEET assets confirmed byte-exact; docs + ground-truth trace only
+
+- **State:** merge of `worker/wt-20260718-102848` (single commit `9ca09a6`)
+  on top of #52; `npm test` **365/365** + `npm run build` green on the
+  merged result. New: `tools/compare/traces-groundtruth/
+  battle1-transition-dense.json` (206 every-frame captures, ticks
+  835-1040 — supervisor sanity-ran it green, 206 PNGs);
+  `docs/battle-bringup-notes.md` gains §5 under Slice-0 ground truth.
+- **Did (worker, supervisor-verified):** (1) **the "heal-icon overlay"
+  does not exist** — screen byte-identical for all of 843-870;
+  `HealPlayerParty` (`script_pokemon_util.c:30-59`) is pure stat
+  restoration, zero graphics calls; the earlier dossier claim was a
+  coarse-sampling mislabel of the transition's own visuals (corrected).
+  (2) full pixel pinning: gray flicker 871-918 matches the RAM-pinned
+  8-tick toggle with consistent 1-tick render lag; circle-sprite
+  positions at checkpoints 920-970 match source's linear-slide constants,
+  pixel-verified 0/3216 per piece; center-logo blend 970-1017 pinned,
+  centerBg asset 0/6028; fade-to-black 1018-1031 is a clean 6-step,
+  2-ticks-per-step linear fade, black by 1030. (3) coverage: `battle-
+  transition-frontier-circles.json` fully covers CIRCLES_MEET
+  (`...-logo.json` is only for LOGO_WIGGLE/WAVE — a different source
+  image; no gap). Flagged for the engine slice: OAM corner-vector
+  convention found empirically; BLDALPHA checked only at tBlend=16;
+  fade cadence not source-explained.
+- **Next:** main lane slice 2c (speech box 718-843) briefed now off
+  PROGRESS #51's groundwork; then the transition engine slice (843-1031)
+  directly off this entry's §5. Scene-assembly scout (1031-1300, new
+  docs/battle-scene-notes.md) in flight on the worktree lane (worker I).
+- **Notes:** worktree removed + branch deleted post-merge.
+
+---
+
 ## 52 — S6 slice 2b: SCIENTISTS-TURN + OPPONENT WALK-IN window (ticks 624-717) implemented, oracle-pinned; `room-npcs.json` committed 98/98
 
 - **State:** `npm test` **365/365** (357→365, +8 in `tests/battleRoom.test.ts`),

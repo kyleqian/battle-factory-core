@@ -242,8 +242,18 @@ reuses `prebattleRoomRender.ts`'s box compositor, now exported/factored
 rather than duplicated); `tools/compare/traces/room-msgbox.json` (142/142,
 0 diff). The close latency (press-to-vanish) was derived analytically from
 the ground-truth trace's own committed button segment + readKeys.ts's
-edge-triggered newKeys semantics, not guessed. S6's remaining open window:
-the transition-to-black (843-1031), off #53's own groundwork.
+edge-triggered newKeys semantics, not guessed.
+**Transition slice complete (2026-07-18):** the CIRCLES_MEET battle
+transition (ticks 843-1040: static hold → gray flicker → circle-sprite
+slide+meet → center-logo BLDALPHA blend → fade to black → hold black) is
+engine-implemented (`src/engine/battleTransition.ts`, wired into
+`battleRoom.ts`'s existing "settled" phase - no new phase needed);
+`tools/compare/traces/transition.json` (206/206, 0 diff). S6's remaining
+open window: scene assembly (1031-1300+), off `docs/battle-scene-notes.md`
+(PROGRESS #55) - the transition now holds solid black indefinitely past
+tick 1030, exactly where that slice takes over. Out of scope for both:
+RNG-modeling which of the 12 transition variants plays (a separate step
+owns RNG-exactness) and the other 11 variants' own pixel behavior.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain

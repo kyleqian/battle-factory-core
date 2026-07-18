@@ -5,6 +5,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 56 — S6 transition engine slice: CIRCLES_MEET battle transition (ticks 843-1040) implemented, oracle-pinned; `transition.json` committed 206/206
+
+- **State:** `npm test` **390/390** (377→390, +13 in new
+  `tests/battleTransition.test.ts`), `npm run build` green. New trace
+  `tools/compare/traces/transition.json` (identical to the groundtruth
+  dense trace: 1040 frames, 206 every-frame captures 835-1040) passes
+  `npm run compare` **206/206, 0 diff**. All 16 pre-existing traces
+  re-verified at their exact prior counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
+  room-npcs 98/98, room-msgbox 142/142, rent-slot1 125/139, rent-3picks
+  157/190, confirm-flow 79/95) — zero regressions.
+- **Did:** new module `src/engine/battleTransition.ts`, wired into
+  `core.ts`'s `renderBattleRoomState` as a pure post-process over
+  `battleRoom.ts`'s existing "settled" phase — **no new `BattleRoomPhase`
+  needed**, every stage (gray flicker, circle-sprite slide, center-logo
+  BLDALPHA blend, exit-to-black fade) is a pure function of that phase's
+  own `elapsed` counter (`te`, 0 = trace tick 843). Built from source
+  (`battle_transition.c`'s `Task_BattleTransition_Intro`,
+  `battle_transition_frontier.c`'s `Task_FrontierCirclesMeet`) then
+  iterated against `battle1-transition-dense.json`'s 206 real PNGs
+  (scratch Python, brute-force + formula cross-checks, not committed)
+  until byte-exact — **two corrections to #53's own flagged-as-empirical
+  groundwork**, both now source-derived: (1) the circle sprites' OAM
+  placement is the plain symmetric `center-32/-32` corner
+  (`sCenterToCornerVecTable[square][SPRITE_SIZE(64x64)]`), not a
+  per-piece offset — #53's brute-forced asymmetric numbers were fitting
+  the ring artwork's own transparent padding within its 64x64 tile, not
+  the true OAM corner; (2) the sprites' creation/anchor tick is trace tick
+  **921** (not 920), re-derived by brute-forcing against real pixels
+  rather than RAM-tick arithmetic alone. Three distinct blend mechanisms
+  pixel-verified independently (module doc has the full derivation): gray
+  flicker uses the standard 5-bit `BlendPalette` formula (target
+  RGB(11,11,11), no BG/OBJ split — `BlendPalettes` touches every palette
+  in one call); the center-logo BLDALPHA ramp empirically matches mGBA's
+  output only in **8-bit** space (`floor((c1*EVA+c2*EVB)/16)`), not the
+  5-bit formula the other two mechanisms use; the exit-to-black fade
+  reuses `paletteFade.ts`'s `blendComponentToBlack` at a **3-per-2-ticks**
+  cadence (not the usual 2) and **does** carry the same BG/OBJ 1-tick lag
+  `paletteFade.ts` documents elsewhere (re-confirmed here, contra an
+  early false lead where a fused blend+fade pass was accidentally
+  re-quantizing an already-8-bit value through `blendComponentToBlack`'s
+  unconditional 5-bit round-trip at y=0 — fixed by skipping that call
+  outright when there's no fade yet). The room scene's own share of the
+  exit fade (tiles + NPCs) reuses `renderBattleRoomEntryScene`'s existing
+  `bgFadeY`/`objFadeY` params from `core.ts` rather than a redundant
+  overlay pass.
+- **Next:** scene assembly (1031-1300), off `docs/battle-scene-notes.md`
+  (PROGRESS #55) — the transition now holds solid black indefinitely past
+  tick 1030, which is exactly where that slice needs to take over.
+- **Notes:** no papercuts. RNG modeling (transition-variant selection) and
+  the other 11 Factory transition variants remain explicitly out of scope
+  per the brief — this slice covers CIRCLES_MEET only.
+
+---
+
 ## 55 — S6 scene-assembly groundwork (parallel worktree lane, merged): BATTLE-SCENE ASSEMBLY window (1031-1300) mechanism fully decoded; docs + dense ground-truth trace; one missing asset identified
 
 - **State:** merge of `worker/wt-20260718-104713` (commits `9d58839` +
@@ -103,36 +160,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 53 — S6 transition groundwork (parallel worktree lane, merged): NO heal-icon overlay exists; ticks 843-1031 fully pinned; CIRCLES_MEET assets confirmed byte-exact; docs + ground-truth trace only
-
-- **State:** merge of `worker/wt-20260718-102848` (single commit `9ca09a6`)
-  on top of #52; `npm test` **365/365** + `npm run build` green on the
-  merged result. New: `tools/compare/traces-groundtruth/
-  battle1-transition-dense.json` (206 every-frame captures, ticks
-  835-1040 — supervisor sanity-ran it green, 206 PNGs);
-  `docs/battle-bringup-notes.md` gains §5 under Slice-0 ground truth.
-- **Did (worker, supervisor-verified):** (1) **the "heal-icon overlay"
-  does not exist** — screen byte-identical for all of 843-870;
-  `HealPlayerParty` (`script_pokemon_util.c:30-59`) is pure stat
-  restoration, zero graphics calls; the earlier dossier claim was a
-  coarse-sampling mislabel of the transition's own visuals (corrected).
-  (2) full pixel pinning: gray flicker 871-918 matches the RAM-pinned
-  8-tick toggle with consistent 1-tick render lag; circle-sprite
-  positions at checkpoints 920-970 match source's linear-slide constants,
-  pixel-verified 0/3216 per piece; center-logo blend 970-1017 pinned,
-  centerBg asset 0/6028; fade-to-black 1018-1031 is a clean 6-step,
-  2-ticks-per-step linear fade, black by 1030. (3) coverage: `battle-
-  transition-frontier-circles.json` fully covers CIRCLES_MEET
-  (`...-logo.json` is only for LOGO_WIGGLE/WAVE — a different source
-  image; no gap). Flagged for the engine slice: OAM corner-vector
-  convention found empirically; BLDALPHA checked only at tBlend=16;
-  fade cadence not source-explained.
-- **Next:** main lane slice 2c (speech box 718-843) briefed now off
-  PROGRESS #51's groundwork; then the transition engine slice (843-1031)
-  directly off this entry's §5. Scene-assembly scout (1031-1300, new
-  docs/battle-scene-notes.md) in flight on the worktree lane (worker I).
-- **Notes:** worktree removed + branch deleted post-merge.
-
-
----
 
