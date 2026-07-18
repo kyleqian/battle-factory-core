@@ -255,6 +255,18 @@ export interface DraftScreenState {
   yesNoCursorRedraw: MenuHighlightRedrawState | null;
   /** Select_Task_FadeSpeciesName's perpetual species-name breathe (speciesNameFade.ts). */
   speciesNameFade: SpeciesNameFadeState;
+  /**
+   * True for exactly the one tick right after `confirmReveal`'s "closing"
+   * phase ends (ISSUES #13 residual, oracle-pixel-verified via
+   * `confirm-decline.json` frame 273): the 3 border-deco sprites' own
+   * closing zoom-out anim's final width-1 flash pixel
+   * (`FLASH_BLENDED_COLOR` at all 3 `REVEAL_FLASH_CENTERS`, y=64) is still
+   * visible on screen one tick after `confirmReveal` itself goes null -
+   * a pure OAM-teardown render lag, unrelated to (and NOT changing)
+   * `confirmReveal`'s own already-RAM-verified 20-tick un-reveal duration
+   * that gates cursor-input readiness. See `drawConfirmReveal`'s doc.
+   */
+  closingFlashResidual: boolean;
 }
 
 /** Select_OptionRentDeselect (:1965-1966): the 3rd confirm's own selectingMonsState++ crosses this - cursor/menu input never resumes past this point (see core.ts). */
@@ -394,7 +406,17 @@ function drawConfirmReveal(
   balls: readonly { palette: RgbColor[]; firstTileRow: number }[],
 ): void {
   const reveal = state.confirmReveal;
-  if (!reveal) return;
+  if (!reveal) {
+    // ISSUES #13 residual (see DraftScreenState.closingFlashResidual's doc):
+    // the closing zoom-out's final width-1 flash pixel outlives confirmReveal
+    // itself by exactly 1 tick.
+    if (state.closingFlashResidual) {
+      for (const cx of REVEAL_FLASH_CENTERS) {
+        setPixel(fb, cx, REVEAL_MON_CENTER_Y, FLASH_BLENDED_COLOR.r, FLASH_BLENDED_COLOR.g, FLASH_BLENDED_COLOR.b);
+      }
+    }
+    return;
+  }
   const visual = getConfirmRevealVisual(reveal);
 
   if (visual.flashWidths) {
@@ -656,4 +678,5 @@ export const ANCHOR_DRAFT_SCREEN_STATE: DraftScreenState = {
   yesNoCursorPos: INITIAL_YES_NO_CURSOR_POS,
   yesNoCursorRedraw: null,
   speciesNameFade: ANCHOR_SPECIES_NAME_FADE_STATE,
+  closingFlashResidual: false,
 };

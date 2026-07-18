@@ -134,14 +134,30 @@ const WINDOW_STEPS: { top: number; bottom: number }[] = [
  * verified total, monPicAnimating flips 0->1 on the decline press tick and back
  * 1->0 twenty ticks later), source-identical either way (:1551-1570) - core.ts
  * models both as the same transition. Shape, oracle-pinned tick by tick:
- *  - elapsed 0-1: still renders the settled "shown" visual unchanged (2-tick
+ *  - elapsed 0: still renders the settled "shown" visual unchanged (2-tick
  *    render lag before ANY visible effect - same family as this screen's other
  *    same-tick-state/lagged-render splits, e.g. RentConfirmRedrawState).
- *  - elapsed 2: the YES/NO popup + its cursor highlight are gone and the info
- *    text has reverted to "Select the third POKéMON." (Select_ErasePopupMenu +
- *    Select_PrintSelectMonString, both immediate per source) - but the 3 mon
- *    pics + wide window are still fully shown (Select_HideChosenMons hasn't
- *    reached its own close task yet).
+ *  - elapsed 1 (ISSUES #12 root cause #2a, oracle-pixel-verified via dense
+ *    per-tick capture + region diff of `confirm-decline.json` frames 253-256,
+ *    WIN_OPTIONS glyph clusters x183-199/y116-124+y132-140): the YES/NO
+ *    TEXT is already gone - `FillWindowPixelBuffer`+`CopyWindowToVram`'s
+ *    erase reaches the screen one tick earlier than the cursor-highlight
+ *    sprite's own `invisible` flag does (a real split between the two sub-
+ *    effects of `Select_ErasePopupMenu`, not a single instant toggle) - but
+ *    the highlight itself, the wide window, and the 3 mon pics are all still
+ *    fully shown.
+ *  - elapsed 2: the info text has reverted to "Select the third POKéMON."
+ *    (Select_PrintSelectMonString, immediate per source) and the wide window
+ *    takes its first shrink step, but the cursor-highlight sprite is
+ *    STILL visible here too (ISSUES #12 root cause #2b, same evidence as
+ *    2a: oracle's highlight-red pixels, e.g. (220,143)/(190,129), persist
+ *    through this tick) - one tick later than the old model's cutoff - and
+ *    the 3 mon pics + wide window are still fully shown (Select_HideChosenMons
+ *    hasn't reached its own close task yet).
+ *  - elapsed 3: the cursor-highlight sprite is finally gone too (matching
+ *    `gSprites[menuCursorSpriteId].invisible`'s own 1-tick-later OAM lag
+ *    behind the window-buffer erase, same "sprite trails the window by one
+ *    tick" family as this screen's other OAM/BG splits, e.g. ISSUES #10).
  *  - elapsed 3-9 (7 ticks): the wide window shrinks - UNREVEAL_WINDOW_STEPS
  *    below (top/bottom only, oracle-verified NOT a clean mirror of WINDOW_STEPS
  *    read backwards: the growth table's first shrink step is skipped/collapsed
@@ -256,32 +272,26 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
   // "closing" (the un-reveal, see UNREVEAL_WINDOW_STEPS/UNREVEAL_FLASH_WIDTHS doc).
   const decliningSpecies = state.decliningSpecies ?? null;
   const decliningBallAnim = state.decliningBallAnim ?? null;
-  if (state.elapsed < 2) {
+  if (state.elapsed <= 2) {
+    // elapsed 0: fully unchanged "shown" visual. elapsed 1: the YES/NO TEXT
+    // is already erased (ISSUES #12 root cause #2a) while the window, the 3
+    // mon pics, and the cursor highlight all stay open. elapsed 2: the
+    // window takes its first shrink step and the mon-select message reverts
+    // (immediate, core.ts) - oracle-pixel-verified NOT a duplicate hold of
+    // the full-open window like the reveal-in direction's own ISSUES #10
+    // gap, the shrink starts the same tick the text-erase already landed -
+    // but the 3 mon pics, the declined slot's frozen ball snapshot, AND the
+    // cursor highlight (ISSUES #12 root cause #2b) all still hold through
+    // this tick too: the highlight sprite trails the window-text erase by a
+    // full tick, only gone starting elapsed 3.
     return {
       ...HIDDEN_REVEAL,
-      window: { top: 32, bottom: 96 },
+      window: state.elapsed < 2 ? { top: 32, bottom: 96 } : UNREVEAL_WINDOW_STEPS[0]!,
       monsVisible: true,
       monsSpeciesOverride: decliningSpecies,
       decliningBallAnim,
-      yesNoVisible: true,
+      yesNoVisible: state.elapsed === 0,
       cursorVisible: true,
-    };
-  }
-  if (state.elapsed === 2) {
-    // YES/NO erased + message reverted (immediate, core.ts), but the 3 mon
-    // pics are still up for exactly this one more tick while the window
-    // takes its first shrink step (oracle-pixel-verified: NOT a duplicate
-    // hold of the full-open window like the reveal-in direction's own
-    // ISSUES #10 gap - the shrink starts the same tick the mons vanish).
-    // The declined slot's own ball rendering shares this exact hold too
-    // (ISSUES #12, oracle-pixel-verified): still selected/frozen through
-    // this tick, switching to the live (gray) ball only starting elapsed 3.
-    return {
-      ...HIDDEN_REVEAL,
-      window: UNREVEAL_WINDOW_STEPS[0]!,
-      monsVisible: true,
-      monsSpeciesOverride: decliningSpecies,
-      decliningBallAnim,
     };
   }
   const windowIdx = state.elapsed - 2;

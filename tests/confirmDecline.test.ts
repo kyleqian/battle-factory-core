@@ -122,6 +122,24 @@ describe("decline: B anywhere in YES/NO", () => {
     const declined = replay([...shownState(), [1, "B"], [3, null]]);
     expect(declined.draftScreen.message).toBe("Select the third POKéMON.");
   });
+
+  it("ISSUES #12 root cause #2: YES/NO text erases at elapsed 1 (one tick before the old elapsed===2 cutoff), the cursor highlight lags a further tick behind and only erases at elapsed 3 (oracle-pixel-verified: confirm-decline.json frames 253-256, WIN_OPTIONS glyph clusters + highlight red pixels)", () => {
+    const at0 = getConfirmRevealVisual(replay([...shownState(), [1, "B"]]).draftScreen.confirmReveal);
+    expect(at0.yesNoVisible).toBe(true);
+    expect(at0.cursorVisible).toBe(true);
+
+    const at1 = getConfirmRevealVisual(replay([...shownState(), [1, "B"], [1, null]]).draftScreen.confirmReveal);
+    expect(at1.yesNoVisible).toBe(false);
+    expect(at1.cursorVisible).toBe(true);
+
+    const at2 = getConfirmRevealVisual(replay([...shownState(), [1, "B"], [2, null]]).draftScreen.confirmReveal);
+    expect(at2.yesNoVisible).toBe(false);
+    expect(at2.cursorVisible).toBe(true);
+
+    const at3 = getConfirmRevealVisual(replay([...shownState(), [1, "B"], [3, null]]).draftScreen.confirmReveal);
+    expect(at3.yesNoVisible).toBe(false);
+    expect(at3.cursorVisible).toBe(false);
+  });
 });
 
 describe("decline: A while the cursor is on NO - source-identical to B", () => {
@@ -182,5 +200,44 @@ describe("balls 1-2 keep rocking/rolling through the decline dwell and the un-re
     expect(mid.draftScreen.ballAnims[1]).not.toBeNull();
     expect(after.draftScreen.ballAnims[0]).not.toBeNull();
     expect(after.draftScreen.ballAnims[1]).not.toBeNull();
+  });
+});
+
+describe("ISSUES #13: Select_Task_CloseChosenMonPics's own per-frame creation cost stalls the still-active balls' own internal cmdIndex advance by exactly 1 more tick (RAM/pixel-verified: confirm-decline.json's grid-slot ball icons ran 1 tick early on every subsequent MOVING_CMDS transition, a permanent downstream shift, until this stall landed)", () => {
+  it("ballAnimStall lists every still-active slot (0/1, not the already-null declined slot 2) on BOTH the decline tick itself (Select_PrintSelectMonString's own knock-on cost, ISSUES #6) AND the very next tick (this session's new stall), then goes empty again", () => {
+    const at0 = replay([...shownState(), [1, "B"]]);
+    expect(at0.draftScreen.ballAnimStall).toEqual([0, 1]);
+
+    const at1 = replay([...shownState(), [1, "B"], [1, null]]);
+    expect(at1.draftScreen.ballAnimStall).toEqual([0, 1]);
+
+    const at2 = replay([...shownState(), [1, "B"], [2, null]]);
+    expect(at2.draftScreen.ballAnimStall).toEqual([]);
+  });
+
+  it("the stalled slots' own advanceBallAnim call is skipped entirely for both stalled ticks (cmdIndex/timer/displayTile all frozen through elapsed 2, resuming only at elapsed 3)", () => {
+    const at0 = replay([...shownState(), [1, "B"]]).draftScreen.ballAnims[0];
+    const at1 = replay([...shownState(), [1, "B"], [1, null]]).draftScreen.ballAnims[0];
+    const at2 = replay([...shownState(), [1, "B"], [2, null]]).draftScreen.ballAnims[0];
+    const at3 = replay([...shownState(), [1, "B"], [3, null]]).draftScreen.ballAnims[0];
+    expect(at1).toEqual(at0);
+    expect(at2).toEqual(at0);
+    expect(at3).not.toEqual(at0);
+  });
+});
+
+describe("ISSUES #13 residual: the closing zoom-out's own final width-1 flash pixel outlives confirmReveal by exactly 1 tick (oracle-pixel-verified: confirm-decline.json frame 273)", () => {
+  it("closingFlashResidual is true for exactly the tick confirmReveal goes null at the end of the 20-tick un-reveal, then false again", () => {
+    const at19 = replay([...shownState(), [1, "B"], [19, null]]);
+    expect(at19.draftScreen.confirmReveal?.elapsed).toBe(19);
+    expect(at19.draftScreen.closingFlashResidual).toBe(false);
+
+    const at20 = replay([...shownState(), [1, "B"], [20, null]]);
+    expect(at20.draftScreen.confirmReveal).toBeNull();
+    expect(at20.draftScreen.closingFlashResidual).toBe(true);
+
+    const at21 = replay([...shownState(), [1, "B"], [21, null]]);
+    expect(at21.draftScreen.confirmReveal).toBeNull();
+    expect(at21.draftScreen.closingFlashResidual).toBe(false);
   });
 });

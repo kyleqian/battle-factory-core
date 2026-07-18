@@ -152,7 +152,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // (monPic, unchanged) finishes. See confirmReveal.ts.
     const confirmed = isMonsConfirmed(draftScreen.selectingMonsState);
     const wasClosingAtZero = draftScreen.confirmReveal?.phase === "closing" && draftScreen.confirmReveal.elapsed === 0;
+    const wasClosing = draftScreen.confirmReveal?.phase === "closing";
     let confirmReveal = advanceConfirmReveal(draftScreen.confirmReveal);
+    // ISSUES #13 residual (see DraftScreenState.closingFlashResidual's doc):
+    // the closing zoom-out's own final width-1 flash pixel is still visible
+    // on screen the one tick confirmReveal itself goes null.
+    const closingFlashResidual = wasClosing && confirmReveal === null;
     if (wasClosingAtZero && confirmReveal?.phase === "closing" && confirmReveal.elapsed === 1) {
       // battle_factory_screen.c:1556/1567: a decline sets fadeSpeciesNameActive
       // TRUE the same *source* statement as Select_DeclineChosenMons, but
@@ -168,6 +173,25 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // compensation for a genuine one-tick-later flip of this one flag,
       // kept as-is.
       speciesNameFade = activateSpeciesNameFade(speciesNameFade);
+      // ISSUES #13: Select_Task_CloseChosenMonPics's own per-frame creation
+      // cost (same family as Select_CreateChosenMonsSprites's reveal-side
+      // cost, ISSUES #9) stalls every still-active ball's own internal
+      // cmdIndex advance by exactly 1 more tick, landing here (closing
+      // elapsed 0->1, the same tick the un-reveal's window-shrink task
+      // itself gets created). RAM/pixel-verified via confirm-decline.json's
+      // grid-slot ball icons (slot0 at x16-48/y48-80, slot1 at x51-83/
+      // y48-80): the app rendered every subsequent MOVING_CMDS tile
+      // transition exactly 1 tick before the oracle, for the REST of the
+      // trace (including frames well past confirmReveal going null, e.g.
+      // 286/294/302) - a permanent downstream shift only explainable by a
+      // genuine one-tick internal stall (not a brief display-only lag like
+      // isRevealStallActive, which self-corrects and can't cascade past its
+      // own active window). Reuses the exact ballAnimStall mechanism
+      // ISSUES #6 already established for cursor moves/RENT confirms (skip
+      // advanceBallAnim entirely for these slots on the next tick) - the
+      // declined slot is already null by this point so activeSlotsBeforeAction
+      // naturally excludes it, no filter needed.
+      ballAnimStall = activeSlotsBeforeAction;
     }
     if (confirmed && !confirmReveal && monPic.phase === "closed") {
       confirmReveal = INITIAL_CONFIRM_REVEAL_STATE;
@@ -305,6 +329,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       confirmReveal,
       yesNoCursorRedraw,
       speciesNameFade,
+      closingFlashResidual,
     };
   }
 

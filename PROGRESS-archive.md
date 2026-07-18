@@ -5,6 +5,54 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 38 — S5 decline path landed: YES/NO cursor UP/DOWN + B/A-on-NO decline + 20-tick un-reveal, oracle-pinned; `confirm-decline.json` committed at 13/67 (54 frames individually attributed, none new/unexplained)
+
+- **State:** `npm test` **310/310** (297→310, +13), `npm run build` green. All
+  10 pre-existing traces re-verified at their exact prior counts (anchor
+  1/1, draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example
+  4/4, rent-slot1 125/139, rent-3picks 157/190, summary-info-magby 132/132,
+  summary-info-onix 122/122, confirm-flow 79/95) — zero regressions.
+  `confirm-decline.json` **committed** at 13/67 frames byte-exact; every
+  non-matching frame individually attributed in the commit message (none
+  newly introduced by unrelated code).
+- **Did:** Implemented `docs/confirm-flow-notes.md` §2/§3: YES/NO cursor
+  UP/DOWN (repeat-gated toggle) and decline (B anywhere or A-on-NO, modeled
+  once): same-tick `mons[2].selectedId`->0, `selectingMonsState` 4->3,
+  message revert, YES/NO erased; new `confirmReveal.ts` "closing" phase for
+  the 20-tick un-reveal, pixel-pinned tick-by-tick (NOT a mirror of the
+  open direction; reuses `monPic.ts` `CLOSE_TABLE_B` values; new
+  `decliningSpecies` snapshot field). `core.ts` input gate now keys off
+  `confirmReveal` presence; re-pick works the tick it clears. Ball 3 leaves
+  the rented set same-tick. 15 new Tier-1 tests
+  (`tests/confirmDecline.test.ts`). Full mechanics in commit `9a8e96b`.
+  **Trace:** `confirm-decline.json` (dense captures 240-306: DOWN dwell,
+  decline, un-reveal, resettle, re-pick A) at 13/67 — frames 240-252 (the
+  whole cursor-move + decline + early un-reveal) byte-exact; the 54 diff
+  frames split into three groups, now filed as **ISSUES #11** (species-name
+  breathe, frames 256-306 baseline — decline re-activates it immediately,
+  so it is no longer dodgeable and must be modeled), **#12** (un-reveal
+  first-ticks residual, 253-255), **#13** (periodic ball-area bumps on 10
+  frames, stall-analogue suspect).
+- **Next (supervisor-set):** ISSUES #11 (breathe model — required before
+  `confirm-decline.json` can meet the trace bar), then #12/#13 chases, then
+  S5's last piece: the YES-press accept path (exit fade → pre-battle room,
+  `docs/prebattle-room-notes.md`). Then S6 off its banked dossier.
+- **Notes:** all RAM/pixel probing (scratch `tools/compare/scratch/*.ts` +
+  `bin/oracle`-backed dense traces, direct RGB sampling via Node/pngjs) was
+  scratch, deleted before finishing - nothing uncommitted left beyond the
+  intended `src/engine/{confirmReveal,core,factoryDraftScreen}.ts` +
+  `tests/confirmDecline.test.ts` + `tests/confirmReveal.test.ts` (renamed
+  field) + `tools/compare/traces/confirm-decline.json` + docs changes.
+  PAPERCUT: pixel-archaeology on a brand-new state transition (no RAM-probe
+  harness available this session, oracle screenshots only) ate a large
+  fraction of the session's budget - a reusable RAM-probe script (the
+  dossier mentions one built ad hoc last session at
+  `sFactorySelectScreen+0x2A0` for `monPicAnimating`) would have cut this
+  significantly; worth banking as a real tool next time this kind of
+  RAM-verified-dossier-to-pixel-exact-implementation gap comes up.
+
+---
+
 ## 37 — Supervisor wind-down: session end 2026-07-17 ~21:00
 
 - **State (verified this minute):** `npm test` **297/297**, `npm run build`
