@@ -183,6 +183,16 @@ pics, battle bg, healthbox family, battle window/font —
 `extract-battle-*.ts`) and all 12 frontier transition variants' assets +
 parameter tables extracted source-verified
 (`extract-battle-transition-frontier.ts`).
+**Slice 0 complete (2026-07-18, supervisor-verified):**
+`tools/compare/traces-groundtruth/battle1-intro.json` (1886 frames, 254
+captures) pins the full A-press-through-first-action-menu window with
+sha256-cited frame boundaries and RAM-verified RNG/personality/
+transition checkpoints (`docs/battle-bringup-notes.md` "Slice-0 ground
+truth" — incl. two evidence-filed corrections to the earlier dossier);
+engine slices now implement against fixed targets. Open from that
+section's §4: transition-end bound (ticks 1200-1290) needs tightening;
+transition variant narrowed to 2 of 12 candidates, pixel-confirmation
+pending; 2 of the 4 post-freeze explicit `Random()` draws unexplained.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain

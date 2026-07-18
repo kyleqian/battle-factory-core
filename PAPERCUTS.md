@@ -26,18 +26,6 @@ Per entry:
   independent list (e.g. `battle-frontier-mons.json`'s species/items)
   rather than trusting block counts.
 
-## No committed oracle trace for the battle-1 bring-up path (2026-07-17)
-
-- **What:** every session needing "rent 3 → walk → warp → transition →
-  intro → first action menu" hand-tunes the button sequence from scratch.
-- **Hits:** 1 (battle-asset extraction worker, ~20 min incl. two wrong
-  assumptions caught only by pixel cross-check).
-- **Workaround:** none yet — commit a reusable
-  `tools/compare/traces/battle1-intro.json` (or a probe-trace variant under
-  `tools/compare/`) once S6 engine work starts; press ticks through YES=264
-  and "Right this way" at 338-361 are in `docs/rent-flow-notes.md` §4,
-  onward boundaries in `docs/battle-bringup-notes.md` §6.
-
 ## `sFactorySelectScreen` struct offsets rediscovered per session / no
   reusable RAM-probe harness (2026-07-17)
 
