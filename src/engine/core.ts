@@ -33,6 +33,7 @@ import {
 } from "./confirmReveal.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 import { advanceMonPic, closeMonPic, isCursorInputReady, isMonPicInputReady, openMonPic } from "./monPic.ts";
+import { activateSpeciesNameFade, advanceSpeciesNameFade, deactivateSpeciesNameFade } from "./speciesNameFade.ts";
 import { advanceBallAnim, initialBallAnimState } from "./ballAnim.ts";
 import { ANCHOR_RNG_VALUE, advanceRngValue } from "./rng.ts";
 import { createFramebuffer, fillFramebuffer } from "./framebuffer.ts";
@@ -108,6 +109,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let menuHighlightRedraw = advanceMenuHighlightRedraw(draftScreen.menuHighlightRedraw);
     let rentConfirmRedraw = advanceRentConfirmRedraw(draftScreen.rentConfirmRedraw);
     let yesNoCursorRedraw = advanceMenuHighlightRedraw(draftScreen.yesNoCursorRedraw);
+    let speciesNameFade = advanceSpeciesNameFade(draftScreen.speciesNameFade);
 
     // SpriteCB_Pokeball (ballAnim.ts): every currently-rented ball's idle/
     // rocking anim advances every tick regardless of menu state, each
@@ -149,7 +151,22 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // Select_Task_HandleYesNo takes over once the confirm's own popup close
     // (monPic, unchanged) finishes. See confirmReveal.ts.
     const confirmed = isMonsConfirmed(draftScreen.selectingMonsState);
+    const wasClosingAtZero = draftScreen.confirmReveal?.phase === "closing" && draftScreen.confirmReveal.elapsed === 0;
     let confirmReveal = advanceConfirmReveal(draftScreen.confirmReveal);
+    if (wasClosingAtZero && confirmReveal?.phase === "closing" && confirmReveal.elapsed === 1) {
+      // battle_factory_screen.c:1556/1567: a decline sets fadeSpeciesNameActive
+      // TRUE the same tick as Select_DeclineChosenMons - but RAM-probing
+      // confirm-decline.json's actual decline (tools/probe/ram-probe.py)
+      // shows the real `active` flag only flips one tick after this engine's
+      // own decline branch (below) fires its other same-tick effects
+      // (selectedIds/message/confirmReveal). ISSUES #12 already tracks an
+      // unexplained 1-tick-scale residual right at this same boundary
+      // (frames 253-255) - most likely this engine's decline branch is
+      // itself firing one tick early relative to the real game, and this is
+      // the matching compensation so the *later* (RAM/pixel-confirmed)
+      // ticks land right; see ISSUES #12 for the evidence trail.
+      speciesNameFade = activateSpeciesNameFade(speciesNameFade);
+    }
     if (confirmed && !confirmReveal && monPic.phase === "closed") {
       confirmReveal = INITIAL_CONFIRM_REVEAL_STATE;
       // Select_ShowYesNoOptions resets yesNoCursorPos to YES every time the
@@ -218,6 +235,9 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       } else if (newKeys.has("A")) {
         monPic = openMonPic(draftScreen.hasActed, draftScreen.hasOpenedMonPic);
         draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0, hasOpenedMonPic: true };
+        // battle_factory_screen.c:1689 - opening the popup pauses the breathe
+        // (frozen, not reset - see speciesNameFade.ts doc).
+        speciesNameFade = deactivateSpeciesNameFade(speciesNameFade);
       }
     } else if (isMonPicInputReady(monPic)) {
       // Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT: only reachable once
@@ -231,6 +251,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       } else if (newKeys.has("B")) {
         draftScreen = { ...draftScreen, mode: "cursor" };
         monPic = closeMonPic(monPic.variant);
+        // battle_factory_screen.c:1636 - B-close resumes the breathe.
+        speciesNameFade = activateSpeciesNameFade(speciesNameFade);
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_SUMMARY) {
         summaryScreen = openSummaryScreen(draftScreen.cursorPos);
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_RENT) {
@@ -252,11 +274,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
           message: selectMonMessage(selectingMonsState),
         };
         monPic = closeMonPic(monPic.variant);
+        // battle_factory_screen.c:1965-1969/1611 - RENT/DESELECT resumes the
+        // breathe UNLESS this was the confirming 3rd pick (SELECT_CONFIRM_MONS
+        // skips straight to the YES/NO task without touching `active`).
+        if (!isMonsConfirmed(selectingMonsState)) speciesNameFade = activateSpeciesNameFade(speciesNameFade);
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_OTHERS) {
         // Select_OptionOthers: closes the popup with no selection change,
         // identical to B.
         draftScreen = { ...draftScreen, mode: "cursor" };
         monPic = closeMonPic(monPic.variant);
+        speciesNameFade = activateSpeciesNameFade(speciesNameFade);
       }
     }
 
@@ -270,6 +297,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       ballAnimStall,
       confirmReveal,
       yesNoCursorRedraw,
+      speciesNameFade,
     };
   }
 

@@ -26,6 +26,7 @@ import {
   type ConfirmRevealState,
 } from "./confirmReveal.ts";
 import { bg3ColorWide, blend8, FLASH_BLENDED_COLOR, target2Color } from "./monPicRender.ts";
+import { ANCHOR_SPECIES_NAME_FADE_STATE, speciesNameColor, type SpeciesNameFadeState } from "./speciesNameFade.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -252,6 +253,8 @@ export interface DraftScreenState {
   yesNoCursorPos: number;
   /** In-flight YES/NO cursor-move redraw (Select_UpdateYesNoCursorPosition - same OAM-move shape as MenuHighlightRedrawState); null once settled. */
   yesNoCursorRedraw: MenuHighlightRedrawState | null;
+  /** Select_Task_FadeSpeciesName's perpetual species-name breathe (speciesNameFade.ts). */
+  speciesNameFade: SpeciesNameFadeState;
 }
 
 /** Select_OptionRentDeselect (:1965-1966): the 3rd confirm's own selectingMonsState++ crosses this - cursor/menu input never resumes past this point (see core.ts). */
@@ -366,6 +369,21 @@ function currentMessage(state: DraftScreenState): string {
   return redraw && redraw.elapsed < 2 ? redraw.fromMessage : state.message;
 }
 
+/**
+ * Select_Task_FadeSpeciesName's BlendPalettes(1 << PALNUM_FADE_TEXT, coeff, 0)
+ * (speciesNameFade.ts doc): blends every entry of the species-name text
+ * palette bank uniformly toward black - only entry 4 (TEXT_COLOR_RED, the
+ * only non-transparent color `sSpeciesNameTextColors` ever selects) is ever
+ * visible, but the real BlendPalette call touches the whole bank, so this
+ * mirrors that rather than special-casing index 4.
+ */
+function speciesTextPalette(renderCoeff: number): RgbColor[] {
+  if (renderCoeff === 0) return textPalette;
+  const faded = textPalette.slice();
+  faded[4] = speciesNameColor(renderCoeff);
+  return faded;
+}
+
 const YES_NO_LABELS = ["YES", "NO"];
 
 /** confirmReveal.ts's flash bars / wide window / 3 mon pics / YES-NO box, drawn on top of the base draft screen once the 3rd confirm's own popup close finishes. */
@@ -455,7 +473,7 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
   const speciesSlot = state.slots[speciesPos];
   if (speciesSlot) {
     const speciesX = WIN_SPECIES.x + rightAlignXOffset(font, charmap, speciesSlot.species, 86);
-    drawText(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, textPalette, SPECIES_TEXT_COLORS);
+    drawText(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, speciesTextPalette(state.speciesNameFade.renderCoeff), SPECIES_TEXT_COLORS);
   }
 
   drawText(fb, font, charmap, currentMessage(state), WIN_INFO.x + 2, WIN_INFO.y + 5, textPalette, DEFAULT_TEXT_COLORS);
@@ -560,7 +578,7 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
   const speciesSlot = state.slots[speciesPos];
   if (speciesSlot) {
     const speciesX = WIN_SPECIES.x + rightAlignXOffset(font, charmap, speciesSlot.species, 86);
-    drawTextFaded(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, textPalette, SPECIES_TEXT_COLORS, bgY);
+    drawTextFaded(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, speciesTextPalette(state.speciesNameFade.renderCoeff), SPECIES_TEXT_COLORS, bgY);
   }
 
   drawTextFaded(fb, font, charmap, currentMessage(state), WIN_INFO.x + 2, WIN_INFO.y + 5, textPalette, DEFAULT_TEXT_COLORS, bgY);
@@ -625,4 +643,5 @@ export const ANCHOR_DRAFT_SCREEN_STATE: DraftScreenState = {
   confirmReveal: null,
   yesNoCursorPos: INITIAL_YES_NO_CURSOR_POS,
   yesNoCursorRedraw: null,
+  speciesNameFade: ANCHOR_SPECIES_NAME_FADE_STATE,
 };
