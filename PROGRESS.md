@@ -12,16 +12,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   every tick 1300-1555, 256 captures, mirrors
   `traces-groundtruth/battle1-sendout-dense.json`'s own segments/captures
   exactly) → **162/256** via `npm run compare -- tools/compare/traces/
-  sendout.json`. Regression check: `scene-assembly.json` re-verified
-  **256/256** (unaffected - the new input-handling branch only executes
-  once `battleScene` is non-null and only changes behavior from the first
-  A-press onward, which no other committed trace's button script reaches
-  within its own captured range). Did not re-run the full 19-trace sweep
-  this session (time went to the send-out slice itself per the brief) -
-  the change surface (one new field on `BattleSceneState`, one new branch
-  in `core.ts`'s existing `if (battleScene)` block) is provably inert for
-  every trace that never presses A after entering this phase; the next
-  session should still re-confirm the full sweep before further claims.
+  sendout.json`. Full 19-trace sweep re-run (all 18 prior + this new one),
+  every prior trace at its exact prior count (anchor 1/1, draft-cursor
+  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
+  summary-info-onix 122/122, summary-info-magby 132/132, confirm-decline
+  67/67, accept-prebattle 137/137, walk-warpout 125/125, room-entry
+  110/110, room-npcs 98/98, room-msgbox 142/142, transition 206/206,
+  scene-assembly 256/256, rent-slot1 125/139, rent-3picks 157/190,
+  confirm-flow 79/95) — zero regressions, confirmed not just argued (the
+  change surface is one new field on `BattleSceneState` and one new branch
+  in `core.ts`'s existing `if (battleScene)` block, inert for every trace
+  that never presses A after entering this phase - but re-run rather than
+  trusted).
 - **Did:** Implemented `docs/battle-scene-notes.md` §7.1-7.3 exactly
   against the dossier's own cited evidence, independently re-verified this
   session (not just trusted) by re-extracting sha256 transitions directly
