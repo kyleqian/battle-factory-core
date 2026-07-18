@@ -201,6 +201,13 @@ originating from that session).
   tool) + `tools/probe/specs/battle1-turn1-watch.json` (this session's
   watch list — copy `battle1-turn1.json`'s own `segments` array into the
   spec's `"segments"` key before running, per the spec's own comment).
+  `tools/probe/specs/battle1-turn1-statstages-watch.json` (S7 worktree
+  lane follow-up, §7 point 2) is the same convention, with the trace's
+  `segments` baked in directly (`ram-probe.py`'s single-`+` offset
+  parser can't take a multi-term expression, so the struct-offset math
+  is folded into one literal hex offset per watch entry, e.g.
+  `gBattleMons+0x77` for battler 1's `STAT_EVASION`) — re-run twice this
+  session, byte-identical output both times.
 - `tools/probe/dump-battle-bars.py` (new, committed) — the HP-bar's
   **double**-indirection read (`gBattleSpritesDataPtr` is itself a pointer
   variable; deref once for the sprite-data struct, read its `+0xC` field
@@ -254,7 +261,31 @@ battle-frontier-mons.json` (pre-existing, opponent movesets/items/natures).
    stage math) — DOUBLE_TEAM this turn only *changed* battler 1's evasion
    stage; this dossier did not RAM-read `gBattleMons[1].statStages[]`
    before/after to confirm the stage actually moved (an obvious, cheap
-   follow-up this session ran out of time for).
+   follow-up this session ran out of time for). **CONFIRMED (S7 worktree
+   lane, follow-up session)**: watched all 8 of `gBattleMons[1]
+   .statStages[]` (struct offset `+0x18` within the 0x58-byte
+   `struct BattlePokemon`, i.e. `gBattleMons+0x70`..`+0x77` for battler 1;
+   `include/pokemon.h:277`) plus battler 0's `STAT_ACC`/`STAT_EVASION`
+   entries as a control, every tick 1880-2620 of `battle1-turn1.json`
+   (`tools/probe/ram-probe.py` +
+   `tools/probe/specs/battle1-turn1-statstages-watch.json`, output
+   byte-identical across two independent runs — exit 139 both times is
+   the tool's documented benign teardown segfault, not a failure).
+   Result: **every stage stays at `DEFAULT_STAT_STAGE=6`
+   (`include/constants/pokemon.h:90`) for the entire trace except
+   `gBattleMons[1].statStages[STAT_EVASION]` (index 7), which flips
+   `6→7` at tick 1959 and holds at 7 through tick 2620** (the trace's
+   end) — i.e. exactly one `EFFECT_EVASION_UP` stage step, matching
+   DOUBLE_TEAM's move data (`moves.json`'s `EFFECT_EVASION_UP`, no
+   `stat`/`stages` multiplier beyond +1) and the "GROVYLE's evasiveness
+   rose!" text this turn actually prints. No other stat/stage on either
+   battler moves this turn. Tick 1959 lands inside §2's own
+   1928-2173 "move choice / Grovyle's animation" window (well before
+   `gLastMoves[1]` itself is written to 104, which per the committed RAM
+   dump doesn't happen until later in that same window — the stage
+   write and the `gLastMoves[]` bookkeeping write are evidently two
+   separate script-command effects, not simultaneous). This closes §8
+   risk 5.
 3. **Multi-turn/secondary-effect mechanics**: BIND's turn-count roll,
    DRAGON_BREATH's paralysis chance, SANDSTORM's weather-turn-counter and
    per-turn chip damage, ENDEAVOR's HP-equalizing formula (not the normal
@@ -317,10 +348,10 @@ battle-frontier-mons.json` (pre-existing, opponent movesets/items/natures).
    deterministic trace, cross-checked probe tooling, worked-by-hand damage
    math) rather than breadth. A second trace (e.g. Onix's BIND, or
    continuing turn 2) is the natural next groundwork step.
-5. **Status-stage RAM verification gap** (§7 point 2) — DOUBLE_TEAM's
-   actual evasion-stage change was not read from `gBattleMons[1].statStages[]`
-   this session, only inferred from the move's `effect` field. Cheap
-   follow-up, not done due to time budget.
+5. ~~**Status-stage RAM verification gap**~~ **CLOSED (S7 worktree lane
+   follow-up)** — `gBattleMons[1].statStages[STAT_EVASION]` RAM-confirmed
+   `6→7` at tick 1959, all other stages/battlers flat at 6 all trace; see
+   §7 point 2 for the full finding and probe tooling.
 6. **HP-bar / stat-update lag (§5) is now confirmed 3 times across 2
    sessions, always in the `maxHP >= 48` branch** — still no battle-1 mon
    exercises the alternate `maxHP < 48` Q24.8 branch (all are level 50);
