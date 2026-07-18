@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 53 — S6 transition groundwork (parallel worktree lane, merged): NO heal-icon overlay exists; ticks 843-1031 fully pinned; CIRCLES_MEET assets confirmed byte-exact; docs + ground-truth trace only
+
+- **State:** merge of `worker/wt-20260718-102848` (single commit `9ca09a6`)
+  on top of #52; `npm test` **365/365** + `npm run build` green on the
+  merged result. New: `tools/compare/traces-groundtruth/
+  battle1-transition-dense.json` (206 every-frame captures, ticks
+  835-1040 — supervisor sanity-ran it green, 206 PNGs);
+  `docs/battle-bringup-notes.md` gains §5 under Slice-0 ground truth.
+- **Did (worker, supervisor-verified):** (1) **the "heal-icon overlay"
+  does not exist** — screen byte-identical for all of 843-870;
+  `HealPlayerParty` (`script_pokemon_util.c:30-59`) is pure stat
+  restoration, zero graphics calls; the earlier dossier claim was a
+  coarse-sampling mislabel of the transition's own visuals (corrected).
+  (2) full pixel pinning: gray flicker 871-918 matches the RAM-pinned
+  8-tick toggle with consistent 1-tick render lag; circle-sprite
+  positions at checkpoints 920-970 match source's linear-slide constants,
+  pixel-verified 0/3216 per piece; center-logo blend 970-1017 pinned,
+  centerBg asset 0/6028; fade-to-black 1018-1031 is a clean 6-step,
+  2-ticks-per-step linear fade, black by 1030. (3) coverage: `battle-
+  transition-frontier-circles.json` fully covers CIRCLES_MEET
+  (`...-logo.json` is only for LOGO_WIGGLE/WAVE — a different source
+  image; no gap). Flagged for the engine slice: OAM corner-vector
+  convention found empirically; BLDALPHA checked only at tBlend=16;
+  fade cadence not source-explained.
+- **Next:** main lane slice 2c (speech box 718-843) briefed now off
+  PROGRESS #51's groundwork; then the transition engine slice (843-1031)
+  directly off this entry's §5. Scene-assembly scout (1031-1300, new
+  docs/battle-scene-notes.md) in flight on the worktree lane (worker I).
+- **Notes:** worktree removed + branch deleted post-merge.
+
+---
+
 ## 52 — S6 slice 2b: SCIENTISTS-TURN + OPPONENT WALK-IN window (ticks 624-717) implemented, oracle-pinned; `room-npcs.json` committed 98/98
 
 - **State:** `npm test` **365/365** (357→365, +8 in `tests/battleRoom.test.ts`),
@@ -92,54 +124,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   flight on the worktree lane (worker G).
 - **Notes:** worktree removed + branch deleted post-merge.
 
+
 ---
-
-## 50 — S6 slice 2a: battle-room ENTRY window (ticks 520-624) implemented, oracle-pinned; `room-entry.json` committed 110/110
-
-- **State:** `npm test` **357/357** (349→357, +8 in new `tests/battleRoom.test.ts`,
-  1 existing test in `tests/prebattleRoomFlow.test.ts` updated for the new
-  handoff behavior), `npm run build` green. New trace
-  `tools/compare/traces/room-entry.json` (624 frames, captures 515-624)
-  passes `npm run compare` **110/110, 0 diff**. All 13 pre-existing traces
-  re-verified at their exact prior counts (anchor 1/1, draft-cursor 13/13,
-  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
-  122/122, summary-info-magby 132/132, confirm-decline 67/67,
-  accept-prebattle 137/137, walk-warpout 125/125, rent-slot1 125/139,
-  rent-3picks 157/190, confirm-flow 79/95) — zero regressions.
-- **Did:** consumed #49's assets unchanged (no re-extraction needed —
-  walk-cycle/turn frames turned out pixel-exact on first try). RAM-probed
-  ticks 510-629 directly (custom script mirroring `tools/probe/ram-probe.py`'s
-  conventions, struct offsets for `Sprite`/`ObjectEvent` from
-  `include/sprite.h`/`include/global.fieldmap.h`, not committed — scratch
-  under `/tmp/s6entry/`), cross-checked against a dense oracle pixel probe
-  (every frame 515-545) for the fade curve. New `src/engine/battleRoom.ts`
-  (state machine + oracle-pinned per-tick table) and
-  `src/engine/battleRoomRender.ts` (tilemap+border+sprite compositor under
-  a panning camera), wired into `core.ts` as a third top-level scene mode
-  (`battleRoom`) that `prebattleRoom`'s `warpFade` phase hands off to at a
-  fixed elapsed count (`WARP_FADE_TO_ROOM_ELAPSED`) matching the
-  ground-truth trace's own first visible-room frame. Findings, all resolving
-  #49's SS6 open items for this sub-window: (1) **fade-in reuses
-  `paletteFade.ts`'s `FADE_IN` exactly** (same shape as the pre-battle
-  room's own fade-in) but the call site indexes it by `elapsed` directly,
-  not `elapsed+1` like every other fade call site in this codebase —
-  pixel-sampled and algebraically confirmed, 0 mismatches. (2) **the camera
-  pans a clean 1px/tick**, resolving #49's "may not be a clean 1px/tick"
-  open question — `gTotalCameraPixelOffsetY` read directly is static then
-  increments by exactly 1 every tick for 80 ticks, no sub-tile curve. (3)
-  **the decoy is screen-fixed the whole window** (a finding, not assumed):
-  it walks in exact lockstep with the camera pan (both driven by the shared
-  `waitmovement`), so net screen position is constant — only its
-  `sAnim_GoNorth` walk-cycle frame changes; this contradicts the natural
-  first guess (that its raw RAM `sprite.y` directly gives screen position)
-  and cost the first `npm run compare` attempt (216-425px/frame diff,
-  root-caused and fixed same session). (4) the 6 scientists are static
-  (face-south, pre-turn) the whole window, confirmed by RAM, and shift on
-  screen via the same tile-camera formula as the room tiles.
-- **Next:** S6 slice 2b — scientists turn + opponent walk-in (ticks
-  624-739). Open for that slice: opponent walk-in gfx already extracted
-  (#49, `OBJ_EVENT_GFX_BUG_CATCHER`), scientist turn-in-place transient
-  frames extracted but still pixel-unverified (#49 SS6 risk 3).
-- **Notes:** no papercuts. Scratch RAM-probe script and oracle fade-curve
-  probe both inline/`/tmp`, nothing committed beyond the deliverables.
 

@@ -5,6 +5,57 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 50 — S6 slice 2a: battle-room ENTRY window (ticks 520-624) implemented, oracle-pinned; `room-entry.json` committed 110/110
+
+- **State:** `npm test` **357/357** (349→357, +8 in new `tests/battleRoom.test.ts`,
+  1 existing test in `tests/prebattleRoomFlow.test.ts` updated for the new
+  handoff behavior), `npm run build` green. New trace
+  `tools/compare/traces/room-entry.json` (624 frames, captures 515-624)
+  passes `npm run compare` **110/110, 0 diff**. All 13 pre-existing traces
+  re-verified at their exact prior counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, rent-slot1 125/139,
+  rent-3picks 157/190, confirm-flow 79/95) — zero regressions.
+- **Did:** consumed #49's assets unchanged (no re-extraction needed —
+  walk-cycle/turn frames turned out pixel-exact on first try). RAM-probed
+  ticks 510-629 directly (custom script mirroring `tools/probe/ram-probe.py`'s
+  conventions, struct offsets for `Sprite`/`ObjectEvent` from
+  `include/sprite.h`/`include/global.fieldmap.h`, not committed — scratch
+  under `/tmp/s6entry/`), cross-checked against a dense oracle pixel probe
+  (every frame 515-545) for the fade curve. New `src/engine/battleRoom.ts`
+  (state machine + oracle-pinned per-tick table) and
+  `src/engine/battleRoomRender.ts` (tilemap+border+sprite compositor under
+  a panning camera), wired into `core.ts` as a third top-level scene mode
+  (`battleRoom`) that `prebattleRoom`'s `warpFade` phase hands off to at a
+  fixed elapsed count (`WARP_FADE_TO_ROOM_ELAPSED`) matching the
+  ground-truth trace's own first visible-room frame. Findings, all resolving
+  #49's SS6 open items for this sub-window: (1) **fade-in reuses
+  `paletteFade.ts`'s `FADE_IN` exactly** (same shape as the pre-battle
+  room's own fade-in) but the call site indexes it by `elapsed` directly,
+  not `elapsed+1` like every other fade call site in this codebase —
+  pixel-sampled and algebraically confirmed, 0 mismatches. (2) **the camera
+  pans a clean 1px/tick**, resolving #49's "may not be a clean 1px/tick"
+  open question — `gTotalCameraPixelOffsetY` read directly is static then
+  increments by exactly 1 every tick for 80 ticks, no sub-tile curve. (3)
+  **the decoy is screen-fixed the whole window** (a finding, not assumed):
+  it walks in exact lockstep with the camera pan (both driven by the shared
+  `waitmovement`), so net screen position is constant — only its
+  `sAnim_GoNorth` walk-cycle frame changes; this contradicts the natural
+  first guess (that its raw RAM `sprite.y` directly gives screen position)
+  and cost the first `npm run compare` attempt (216-425px/frame diff,
+  root-caused and fixed same session). (4) the 6 scientists are static
+  (face-south, pre-turn) the whole window, confirmed by RAM, and shift on
+  screen via the same tile-camera formula as the room tiles.
+- **Next:** S6 slice 2b — scientists turn + opponent walk-in (ticks
+  624-739). Open for that slice: opponent walk-in gfx already extracted
+  (#49, `OBJ_EVENT_GFX_BUG_CATCHER`), scientist turn-in-place transient
+  frames extracted but still pixel-unverified (#49 SS6 risk 3).
+- **Notes:** no papercuts. Scratch RAM-probe script and oracle fade-curve
+  probe both inline/`/tmp`, nothing committed beyond the deliverables.
+
+---
+
 ## 49 — S6 groundwork (parallel worktree lane, merged): Battle Factory BATTLE ROOM scene extracted, composite-verified 0/38400 at tick 624; NO ENGINE CODE
 
 - **State:** merge of `worker/wt-20260718-094141` (single commit `f943df7`,
