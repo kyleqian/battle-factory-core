@@ -97,11 +97,14 @@ describe("prebattle-room-msgbox.json", () => {
     expect(msgbox.tileset.rows).toBe(2);
     expect(msgbox.tileset.tiles).toHaveLength(14);
     expect(msgbox.palette).toHaveLength(16);
-    // Off-white, NOT the oracle's pure-white (255,255,255) box interior - see
-    // docs/prebattle-room-notes.md: the flat interior is filled separately
-    // from the text palette (text-palette.json[2], exact 255/255/255), not
-    // from message_box.png's own palette (this asset supplies only the
-    // decorative border tiles' colors).
-    expect(msgbox.palette[1]).toEqual({ r: 247, g: 247, b: 247 });
+    // Pure white (255,255,255), matching the oracle's box-interior fill
+    // exactly (ISSUES #15 fix: gbaColor.ts's to5Bit() previously rounded
+    // this raw-multiple-of-8 PNG palette entry down by one GBA step -
+    // 248 -> 30/31 - producing an off-white 247; see gbaColor.ts's module
+    // doc). Index 2/3 (below) likewise now match the message text's
+    // fg/shadow colors exactly - no separate baked/hardcoded asset needed.
+    expect(msgbox.palette[1]).toEqual({ r: 255, g: 255, b: 255 });
+    expect(msgbox.palette[2]).toEqual({ r: 99, g: 99, b: 99 });
+    expect(msgbox.palette[3]).toEqual({ r: 214, g: 214, b: 206 });
   });
 });

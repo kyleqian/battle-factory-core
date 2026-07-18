@@ -5,6 +5,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 48 — ISSUES #15 root-caused and fixed: pre-battle msgbox frame now derived from `prebattle-room-msgbox.json`, baked asset deleted
+
+- **State:** `npm test` **349/349** (+2 regression tests), `npm run build`
+  green, working tree clean. Full 13-trace sweep at exact prior counts —
+  **accept-prebattle 137/137**, **walk-warpout 125/125** (acceptance bar),
+  anchor 1/1, draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66,
+  example 4/4, summary-info-onix 122/122, summary-info-magby 132/132,
+  confirm-decline 67/67, rent-slot1 125/139, rent-3picks 157/190,
+  confirm-flow 79/95 — zero regressions. ISSUES.md: **#15 deleted**.
+- **Did:** Root-caused the "one-GBA-step" color offset that made the accept
+  worker bake `prebattle-msgbox-frame.json` from a literal oracle capture
+  instead of deriving it: `tools/extract/gbaColor.ts`'s `to5Bit()` assumed
+  every reference PNG/pal 8-bit value approximates its true 5-bit GBA
+  channel via `floor(c5*255/31)` (true for this map's own tileset/NPC
+  sprites, verified by direct PLTE-byte inspection), but
+  `graphics/text_window/message_box.png`'s embedded palette instead stores
+  exact `c5*8` values (a different, plainer export convention) - the old
+  formula silently rounded those down one GBA step (e.g. raw 248 -> 5-bit
+  30 instead of 31 -> 247 not 255). Fixed by recovering the 5-bit value via
+  `v8>>3` (top 5 bits), the correct general inverse regardless of which
+  forward convention produced the reference byte - verified against both
+  conventions' full value ranges before changing it, and confirmed
+  byte-identical regeneration for every *other* extracted asset (tileset,
+  layout, NPCs - only `prebattle-room-msgbox.json` actually changed when
+  re-extracted). Once fixed, that asset's own palette contains the oracle-
+  exact interior white (idx1) *and* the message text's fg/shadow colors
+  (idx2/idx3) exactly - the old "two-asset rule" (docs/prebattle-room-
+  notes.md §3) was itself an artifact of the same bug, not a real asset-
+  boundary. Reverse-engineered `prebattleRoomRender.ts`'s new
+  `drawMessageBoxFrame` from the real source
+  (`WindowFunc_DrawDialogueFrame`, `reference/pokeemerald/src/menu.c:319-
+  402`, the standard width=27/height=4 field window) rather than pixel-
+  matching by hand, then byte-exact verified it against the (now-deleted)
+  baked capture before deleting it: all 9948 non-transparent frame pixels
+  matched exactly, 0 mismatches. Pinned the root cause with two Tier-1
+  regressions (`tests/extract.test.ts`: `to5Bit(248)===31`,
+  `gbaRoundTrip(248)===255`; `tests/prebattleRoom.test.ts`: msgbox palette
+  idx1/2/3 now exactly white/fg/shadow).
+- **Next:** S6 slice 1b+ (battle-room entry, heal-icon/transition window) -
+  unaffected by this step, per its scope. No open ISSUES entries.
+- **Notes:** no papercuts. Scratch verification (pixel sampling, brute-force
+  tile-match scripts used to derive/confirm the tile-placement algorithm)
+  was all inline `node -e`, nothing committed.
+
+---
+
 ## 47 — S6 slice 1b (parallel worktree lane, merged): slice-0 §4 loose ends resolved — transition = CIRCLES_MEET (RAM-confirmed), transition-end = tick 1227, post-freeze draws re-attributed; docs-only
 
 - **State:** merge `a004db2` (branch `worker/wt-20260718-091648`, single
@@ -104,48 +150,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `tools/compare/traces/walk-warpout.json` (the final byte-exact parity
   trace) and the engine/asset/test diffs are. `docs/battle-bringup-notes.md`
   was read but **not edited**, per the step brief.
-
----
-
-## 45 — Supervisor wind-down: session end 2026-07-18 ~01:20; S5 COMPLETE [x], S6 slice 0 banked
-
-- **State (verified this minute):** `npm test` **341/341**, `npm run build`
-  green, working tree clean. All 12 parity traces verified this session at
-  final counts: anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
-  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
-  summary-info-magby 132/132, **confirm-decline 67/67** (new),
-  **accept-prebattle 137/137** (new) — plus rent-slot1 125/139, rent-3picks
-  157/190, confirm-flow 79/95 (all three ISSUES #5 settled policy).
-  Ground-truth trace `traces-groundtruth/battle1-intro.json` committed.
-  ISSUES backlog: only **#15** (baked msgbox frame asset, non-blocking
-  debt). ROADMAP: **S5 marked [x]**; S4 remainder deferral extended behind
-  the S5→S8 critical path (recorded decision); S6 slice 0 done.
-- **Session summary (supervised, ~21:20-01:20):** 7 worker steps, all
-  supervisor-verified green, zero trace regressions at every step:
-  (1) S5 decline path landed (confirm-decline.json first cut 13/67;
-  ISSUES #11/#12/#13 filed from its attributions); (2) ISSUES #11
-  species-name breathe modeled exactly, 53/67 (`tools/probe/ram-probe.py`
-  banked, papercut retired); (3) ISSUES #12 partial — prior hypothesis
-  RAM-disproven, ball-grid snapshot fix, 54/67; (4) ISSUES #12 rc2 +
-  #13 fixed → **67/67**; (5) S5 accept path (exit fade → pre-battle room →
-  message print), 123/137, ISSUES #14 filed + #15 debt filed;
-  (6) ISSUES #14 fixed → **137/137** → S5 [x]; (7) S6 slice 0
-  ground-truth pinning (battle1-intro.json + dossier corrections).
-  Suite 297→341 Tier-1 tests; traces 10→12 parity + 1 ground truth.
-- **Next:** S6 slice 1 — engine implementation against
-  battle1-intro.json's pinned targets, suggested order: message A-press +
-  closemessage + warp fade (extends S5 scene machinery), then the
-  heal-icon window (nature-reroll/transition-select ticks 842-869), then
-  the transition itself. Early in slice 1 resolve the dossier §4 loose
-  ends: transition-end bound (1200-1290), transition-variant pixel
-  confirmation (2 of 12 candidates), the 2 unexplained post-freeze
-  `Random()` draws (ticks 1741/1745). ISSUES #15 whenever convenient.
-- **Notes:** every worker ended at a green commit; no usage-limit events;
-  no parallel-lane use this session (all 7 steps serial in the main tree).
-  One supervisor error: the ISSUES #15 filing clobbered #14's heading
-  line (worker caught + restored it, `ba6ff0d`). PAPERCUTS: battle1-intro
-  ground-truth entry retired this commit (trace now committed).
-
-
----
-

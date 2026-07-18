@@ -5,39 +5,41 @@
 // composited, no BG-layer split needed for this room's on-screen blocks) at
 // camera origin (16,56), attendant + player 16x32 sprites on top.
 //
-// The message box is NOT part of that dossier's verified asset set - its own
-// geometry claim (docs/prebattle-room-notes.md §3: "y=96-159, full 64px")
-// turned out wrong when this session pixel-scanned it directly (see
-// prebattleRoom.ts's module doc point 5): the real box is y112-159 (48px,
-// 6 tile-rows, still screen-bottom-anchored) and does not start flush at
-// x=0 (a 1px column of room floor peeks through at the far left/right before
-// the border art's own edge). This session also found the border-tile
-// colors don't exactly match src/assets/gen/prebattle-room-msgbox.json's
-// extracted palette at every index (e.g. observed (0,255,156)/(0,206,189) on
-// the left/right edge vs the closest palette entries (0,247,148)/(0,198,181)
-// - a consistent one-GBA-step-brighter offset not yet root-caused - so
-// rather than guess at a wrong tile/palette mapping under this session's time
-// budget, the box's pre-text frame (border art + interior fill) is baked
-// directly from an oracle capture (frame 340 of this session's own dense
-// probe, box fully formed, zero characters printed yet) into
-// src/assets/gen/prebattle-msgbox-frame.json - a flat 240x48 palette-indexed
-// image, PAPERCUT-flagged in PROGRESS.md for a future session to replace with
-// a proper tile-based derivation once the palette mismatch is root-caused.
-// The interior white IS confirmed flat (255,255,255) matching text-
-// palette.json's index 2, per prebattle-room-notes.md §3's original finding
-// (independently re-confirmed this session by direct pixel sampling).
+// The message box frame (border + interior fill) is derived directly from
+// src/assets/gen/prebattle-room-msgbox.json's extracted tile/palette data,
+// composited using the real game's own tile-placement algorithm
+// (WindowFunc_DrawDialogueFrame, reference/pokeemerald/src/menu.c:319-402,
+// called for the standard width=27/height=4 field message window - see
+// drawMessageBoxFrame below for the exact column/tile mapping this encodes).
+// ISSUES #15: an earlier session found this same tile/palette data produced
+// a consistent one-GBA-step color offset vs the oracle when rendered, and
+// baked the frame from a literal oracle capture instead
+// (src/assets/gen/prebattle-msgbox-frame.json) rather than root-cause it.
+// The actual bug was upstream, in tools/extract/gbaColor.ts's to5Bit(): it
+// assumed every reference PNG/pal file's 8-bit RGB approximates a 5-bit GBA
+// channel via floor(c5*255/31) (true for most extracted assets, e.g. this
+// map's own tileset/NPC sprites), but message_box.png's embedded palette
+// instead stores exact c5*8 values (a different, plainer convention) -
+// floor()-based rounding silently recovered the wrong 5-bit value for those
+// (e.g. 248 -> 30 instead of 31, one GBA step darker). Fixed by recovering
+// the 5-bit value via v8>>3 (the top 5 bits - correct regardless of which
+// forward convention produced the reference value; see gbaColor.ts's module
+// doc). Once fixed, prebattle-room-msgbox.json's own palette contains the
+// oracle-exact interior white (idx1, 255,255,255) and matches this file's
+// message-text fg/shadow colors exactly (idx2/idx3) - no companion asset or
+// hardcoded fudge-color needed. The baked asset is deleted; this file now
+// renders the frame tile-by-tile, skipping each tile's transparent (index 0)
+// pixels so the already-drawn room scene shows through the border art's own
+// notched corners exactly as the real hardware compositing would (byte-exact
+// verified against the now-deleted baked capture before deletion: all 9948
+// non-transparent frame pixels matched exactly, 0 mismatches).
 //
 // Text (§3, cadence pinned in prebattleRoom.ts): glyph origin (16,121) -
 // pixel-derived this session (Risk 2 in the dossier flagged the original
 // x6-19/y98-111 sample as corner-art-contaminated; this session's own sample
 // was against the corrected y112-159 box and cross-matched against the 'R'
 // glyph bitmap's own leading blank rows to back out the true origin, 0
-// mismatches once aligned). Colors: fg exactly matches prebattle-room-
-// msgbox.json's palette[2] (99,99,99); the shadow color (214,214,206) does
-// NOT match that palette's own idx3 (206,206,198) - same one-step-brighter
-// pattern as the border art above, so it's pinned as its own literal
-// constant (MESSAGE_SHADOW_COLOR) rather than indexed, pending the same
-// future root-cause pass.
+// mismatches once aligned).
 
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
@@ -47,7 +49,7 @@ import { drawText, type FontData } from "./font.ts";
 import layout from "../data/gen/prebattle-room-layout.json" with { type: "json" };
 import tileset from "../assets/gen/prebattle-room-tileset.json" with { type: "json" };
 import npcs from "../assets/gen/prebattle-room-npcs.json" with { type: "json" };
-import msgboxFrame from "../assets/gen/prebattle-msgbox-frame.json" with { type: "json" };
+import msgbox from "../assets/gen/prebattle-room-msgbox.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import { MESSAGE_TEXT } from "./prebattleRoom.ts";
@@ -199,34 +201,94 @@ export function renderPrebattleRoomWalkScene(
   drawNpcFrame(fb, roomNpcs.player, playerFrameIndex, PLAYER_POS, objFadeY);
 }
 
-interface MsgboxFrameAsset {
-  originX: number;
-  originY: number;
-  width: number;
-  height: number;
-  colors: [number, number, number][];
-  pixels: number[][];
+interface MsgboxAsset {
+  tileset: { columns: number; rows: number; tiles: number[][] };
+  palette: RgbColor[];
 }
-const boxFrame = msgboxFrame as MsgboxFrameAsset;
+const msgboxAsset = msgbox as MsgboxAsset;
+const msgboxTiles = msgboxAsset.tileset.tiles;
+const msgboxPalette = msgboxAsset.palette;
 
-/** src/assets/gen/prebattle-msgbox-frame.json: baked oracle pixels for the box's frame art + white interior (see module doc - not yet re-derived from the tile assets). */
-function drawMessageBoxFrame(fb: Uint8Array): void {
-  for (let y = 0; y < boxFrame.height; y += 1) {
-    const row = boxFrame.pixels[y]!;
-    for (let x = 0; x < boxFrame.width; x += 1) {
-      const [r, g, b] = boxFrame.colors[row[x]!]!;
-      setPixel(fb, boxFrame.originX + x, boxFrame.originY + y, r, g, b);
+/** Screen origin of the box's top-left border tile (bottom-of-screen field message box). */
+const BOX_ORIGIN = { x: 0, y: 112 };
+/** WindowFunc_DrawDialogueFrame's own width/height params for this standard field window (reference/pokeemerald/src/menu.c). */
+const BOX_WIDTH_TILES = 27;
+const BOX_HEIGHT_TILES = 4;
+/** Total on-screen tile-column/row span: the border's own 3 extra columns (tilemapLeft-2..tilemapLeft+width) and 2 extra rows (top border row, and a bottom border row that overwrites what would otherwise be the interior fill's own 5th row - see drawMessageBoxFrame). */
+const BOX_COLS = BOX_WIDTH_TILES + 3;
+const BOX_ROWS = BOX_HEIGHT_TILES + 2;
+
+// message_box.png's own 14 tiles (7 cols x 2 rows, row-major) - the exact
+// indices WindowFunc_DrawDialogueFrame's DLG_WINDOW_BASE_TILE_NUM+N offsets
+// resolve to once its 56x16 art is loaded as a flat sequential tile array.
+const TILE_TOP_LEFT_FLOURISH = 1;
+const TILE_TOP_NEAR_CORNER = 3;
+const TILE_TOP_EDGE = 4;
+const TILE_TOP_FAR_CORNER = 5;
+const TILE_TOP_RIGHT_FLOURISH = 6;
+const TILE_LEFT_EDGE = 7;
+const TILE_INTERIOR_FILL = 9;
+const TILE_RIGHT_EDGE = 10;
+
+/** Top/bottom border row tile per column (bx 0..BOX_COLS-1) - the bottom row reuses the same tiles v-flipped (BG_TILE_V_FLIP in the source). */
+function borderTileForCol(bx: number): number {
+  if (bx === 0) return TILE_TOP_LEFT_FLOURISH;
+  if (bx === 1) return TILE_TOP_NEAR_CORNER;
+  if (bx === BOX_COLS - 2) return TILE_TOP_FAR_CORNER;
+  if (bx === BOX_COLS - 1) return TILE_TOP_RIGHT_FLOURISH;
+  return TILE_TOP_EDGE;
+}
+
+/** Interior rows' tile per column - left/right edge art, flat fill everywhere between. */
+function interiorTileForCol(bx: number): number {
+  if (bx === 0) return TILE_LEFT_EDGE;
+  if (bx === BOX_COLS - 1) return TILE_RIGHT_EDGE;
+  return TILE_INTERIOR_FILL;
+}
+
+/** One 8x8 message-box tile; transparent (index 0) pixels are skipped so the already-drawn room scene shows through the border art's own notched corners, exactly like the real hardware's BG compositing. */
+function drawMsgboxTile(fb: Uint8Array, tileId: number, screenX: number, screenY: number, vFlip: boolean): void {
+  const tile = msgboxTiles[tileId]!;
+  for (let py = 0; py < 8; py += 1) {
+    const sy = vFlip ? 7 - py : py;
+    for (let px = 0; px < 8; px += 1) {
+      const colorIndex = tile[sy * 8 + px]!;
+      if (colorIndex === 0) continue;
+      const color = msgboxPalette[colorIndex]!;
+      setPixel(fb, screenX + px, screenY + py, color.r, color.g, color.b);
     }
   }
 }
 
-/** Pixel-derived this session (see module doc) - not present in prebattle-room-msgbox.json's own palette. */
-const MESSAGE_FG_COLOR: RgbColor = { r: 99, g: 99, b: 99 };
-const MESSAGE_SHADOW_COLOR: RgbColor = { r: 214, g: 214, b: 206 };
+/**
+ * Composites the standard field message box frame (border + interior fill)
+ * from prebattle-room-msgbox.json, replicating WindowFunc_DrawDialogueFrame's
+ * tile placement (reference/pokeemerald/src/menu.c:319-402) for the
+ * width=27/height=4 field window: one top border row, BOX_HEIGHT_TILES
+ * interior rows (flat fill + left/right edge art), one bottom border row
+ * (same border tiles, v-flipped) - byte-exact verified against the
+ * predecessor baked-pixel asset before its deletion (ISSUES #15 fix; see
+ * module doc).
+ */
+function drawMessageBoxFrame(fb: Uint8Array): void {
+  for (let bx = 0; bx < BOX_COLS; bx += 1) {
+    drawMsgboxTile(fb, borderTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y, false);
+  }
+  for (let by = 1; by <= BOX_HEIGHT_TILES; by += 1) {
+    for (let bx = 0; bx < BOX_COLS; bx += 1) {
+      drawMsgboxTile(fb, interiorTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y + by * 8, false);
+    }
+  }
+  const bottomRow = BOX_ROWS - 1;
+  for (let bx = 0; bx < BOX_COLS; bx += 1) {
+    drawMsgboxTile(fb, borderTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y + bottomRow * 8, true);
+  }
+}
+
 const MESSAGE_TEXT_ORIGIN = { x: 16, y: 121 };
 
-/** {fg:1,bg:0,shadow:2} into a 3-entry palette matching font.ts's role convention (raw 0/3->colors.bg, 1->fg, 2->shadow); bg=0 is always skipped (transparent). */
-const MESSAGE_PALETTE: RgbColor[] = [{ r: 0, g: 0, b: 0 }, MESSAGE_FG_COLOR, MESSAGE_SHADOW_COLOR];
+/** {fg:1,bg:0,shadow:2} into a 3-entry palette matching font.ts's role convention (raw 0/3->colors.bg, 1->fg, 2->shadow); bg=0 is always skipped (transparent). Indexed straight from message_box.json's own palette - see module doc. */
+const MESSAGE_PALETTE: RgbColor[] = [{ r: 0, g: 0, b: 0 }, msgboxPalette[2]!, msgboxPalette[3]!];
 const MESSAGE_TEXT_COLORS = { fg: 1, bg: 0, shadow: 2 };
 
 /** Draws the message box (frame + interior) and the first `visibleChars` characters of MESSAGE_TEXT. */

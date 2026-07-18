@@ -19,6 +19,17 @@ describe("gbaColor", () => {
     expect(gbaRoundTrip(255)).toBe(255);
     expect(gbaRoundTrip(0)).toBe(0);
   });
+
+  it("recovers the true 5-bit value from a raw-multiple-of-8 PNG palette entry (ISSUES #15 regression)", () => {
+    // graphics/text_window/message_box.png's embedded PLTE stores colors as
+    // a plain c5*8 left-shift (e.g. 248 for c5=31), not the floor(c5*255/31)
+    // convention interface.pal-style JASC-PAL files use. The old
+    // round((v8*31)/255) formula rounded 248 down to 30 (-> 247, one GBA
+    // step off the oracle's actual 255); v8>>3 recovers 31 exactly regardless
+    // of which convention produced the reference 8-bit value.
+    expect(to5Bit(248)).toBe(31);
+    expect(gbaRoundTrip(248)).toBe(255);
+  });
 });
 
 describe("parseJascPal", () => {

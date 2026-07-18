@@ -5,6 +5,49 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 45 — Supervisor wind-down: session end 2026-07-18 ~01:20; S5 COMPLETE [x], S6 slice 0 banked
+
+- **State (verified this minute):** `npm test` **341/341**, `npm run build`
+  green, working tree clean. All 12 parity traces verified this session at
+  final counts: anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
+  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+  summary-info-magby 132/132, **confirm-decline 67/67** (new),
+  **accept-prebattle 137/137** (new) — plus rent-slot1 125/139, rent-3picks
+  157/190, confirm-flow 79/95 (all three ISSUES #5 settled policy).
+  Ground-truth trace `traces-groundtruth/battle1-intro.json` committed.
+  ISSUES backlog: only **#15** (baked msgbox frame asset, non-blocking
+  debt). ROADMAP: **S5 marked [x]**; S4 remainder deferral extended behind
+  the S5→S8 critical path (recorded decision); S6 slice 0 done.
+- **Session summary (supervised, ~21:20-01:20):** 7 worker steps, all
+  supervisor-verified green, zero trace regressions at every step:
+  (1) S5 decline path landed (confirm-decline.json first cut 13/67;
+  ISSUES #11/#12/#13 filed from its attributions); (2) ISSUES #11
+  species-name breathe modeled exactly, 53/67 (`tools/probe/ram-probe.py`
+  banked, papercut retired); (3) ISSUES #12 partial — prior hypothesis
+  RAM-disproven, ball-grid snapshot fix, 54/67; (4) ISSUES #12 rc2 +
+  #13 fixed → **67/67**; (5) S5 accept path (exit fade → pre-battle room →
+  message print), 123/137, ISSUES #14 filed + #15 debt filed;
+  (6) ISSUES #14 fixed → **137/137** → S5 [x]; (7) S6 slice 0
+  ground-truth pinning (battle1-intro.json + dossier corrections).
+  Suite 297→341 Tier-1 tests; traces 10→12 parity + 1 ground truth.
+- **Next:** S6 slice 1 — engine implementation against
+  battle1-intro.json's pinned targets, suggested order: message A-press +
+  closemessage + warp fade (extends S5 scene machinery), then the
+  heal-icon window (nature-reroll/transition-select ticks 842-869), then
+  the transition itself. Early in slice 1 resolve the dossier §4 loose
+  ends: transition-end bound (1200-1290), transition-variant pixel
+  confirmation (2 of 12 candidates), the 2 unexplained post-freeze
+  `Random()` draws (ticks 1741/1745). ISSUES #15 whenever convenient.
+- **Notes:** every worker ended at a green commit; no usage-limit events;
+  no parallel-lane use this session (all 7 steps serial in the main tree).
+  One supervisor error: the ISSUES #15 filing clobbered #14's heading
+  line (worker caught + restored it, `ba6ff0d`). PAPERCUTS: battle1-intro
+  ground-truth entry retired this commit (trace now committed).
+
+
+---
+
+
 ## 44 — S6 slice 0: ground-truth bring-up pinning complete — battle1-intro.json (1886f/254 captures) committed, RNG/transition/personality checkpoints RAM-verified, dossier extended; NO ENGINE CODE
 
 - **State:** `npm test` **341/341** (unchanged, no engine touched), `npm run
