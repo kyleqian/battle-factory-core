@@ -5,29 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #11 — species-name breathe (`Select_Task_FadeSpeciesName`) must now be
-  modeled — the decline path re-activates it immediately
-
-**Symptom:** `confirm-decline.json` frames 256-306 carry a constant 129px
-color-only diff confined to the WIN_SPECIES text box (x196-236, y20-28):
-same glyphs, app renders the static red (255,0,0), oracle ~(173,0,0) —
-RGB-sampled by the decline worker (2026-07-17, commit `9a8e96b`).
-
-**Confirmed:** the decline handler sets `fadeSpeciesNameActive = TRUE` on
-re-entry to cursor mode (`battle_factory_screen.c` :1551-1570,
-`docs/confirm-flow-notes.md` §3), so the breathe starts within a few ticks
-of the decline press — the old "keep cumulative cursor-mode ticks < 105"
-budget rule (slice 2) cannot dodge it. This blocks `confirm-decline.json`
-(and any future decline/post-decline trace) from the trace bar.
-
-**Leads:** `Select_Task_FadeSpeciesName` (`battle_factory_screen.c`) is the
-waveform source; pin period + per-tick palette values via dense RGB
-sampling over ≥2 full periods; onset rules to pin: (a) post-decline onset
-tick (empirically first diff at trace frame 256; decline press ~250), (b)
-normal cursor-mode onset at cumulative ~104-105 ticks (budget known, exact
-onset tick + phase never pinned). Constraint: all 10 pre-existing traces
-stay under the budget and must remain byte-identical.
-
 ## #12 — un-reveal first-ticks residual: `confirm-decline.json` frames
   253-255 (156/251/1129px) not root-caused
 
@@ -42,18 +19,53 @@ jitter attribution: ISSUES #8/#9/#10 all looked like this and were all
 real, fixable modeling bugs. Needs a RAM/pixel chase (the #9/#10 recipe:
 dense captures + direct RGB row-scans + `gSprites`/task-state probes).
 
-## #13 — periodic ball-area bumps during the post-decline window (10
-  frames: 259/263/267/270/271/275/278/286/294/302, +173-176px, y54-73)
+**New evidence (2026-07-17, ISSUES #11 worker, `tools/probe/ram-probe.py`):**
+RAM-probing `confirm-decline.json`'s actual decline tick-by-tick
+(`fadeSpeciesNameActive` at `sFactorySelectScreen+0x2A2`) shows the real
+flag flips TRUE exactly **one tick after** this engine's own decline branch
+(`core.ts`, `newKeys.has("B") || (A && yesNoCursorPos===1)`) fires its other
+same-tick effects (`selectedIds`/`message`/`confirmReveal`→"closing") — even
+though in the source, `Select_DeclineChosenMons()` and
+`fadeSpeciesNameActive = TRUE` are the same synchronous call
+(`battle_factory_screen.c:1556`/`1567`), so they can't really be 1 tick
+apart in the real game. The likely explanation: this engine's decline
+branch itself fires 1 tick early relative to the oracle for *all* its
+effects, not just this one — a plausible root cause for this entry's
+253-255 residual (frames right at that same boundary). Not chased further
+(out of scope for that step); the speciesNameFade wiring compensates with
+an explicit +1 tick delay on its own activation only (`core.ts`, see the
+comment at the `wasClosingAtZero` check) rather than touching the existing
+(possibly off-by-one) decline branch itself.
 
-**Symptom:** on top of #11's constant baseline, the ball-rendering area
-diffs on a rough ball-anim cadence while the un-reveal plays out and after.
+## #13 — periodic ball-area bumps during the post-decline window (11
+  frames: 259/263/267/270/271/273/275/278/286/294/302, mostly +173-176px
+  (273 is +3px), y54-73)
+
+**Symptom:** on top of #11's now-fixed constant baseline, the ball-rendering
+area diffs on a rough ball-anim cadence while the un-reveal plays out and
+after.
+
+**New evidence (2026-07-17, ISSUES #11 worker):** with #11 fixed
+(`confirm-decline.json` now 53/67, `npm run compare`), an 11th frame in this
+family surfaced: **273** (3px, `x=44/120/196,y=64` — the ball row), much
+smaller than the other 10's ~173-176px but the same y54-73 ball-area
+region and clearly independent of species-text rendering (verified: the
+species-name-fade commit touches only `drawText`'s palette argument for the
+WIN_SPECIES window, nothing ball-related — `git diff` of that commit has no
+`ballAnims`/`drawSprite`/`drawConfirmReveal` changes). Was invisible before
+#11's fix because every frame 256-306 was already diffing on the ~129px
+species-color baseline, so a lone independent 3px bump never stood out in
+the prior (un-decomposed) per-frame counts. Confirms this entry isn't
+specific to the ~173-176px magnitude — the underlying stall/lag predicate
+fires on some 11th tick too, just with a smaller footprint there.
 
 **Lead:** a display-lag/stall analogue of `isRevealStallActive` on the
 un-reveal side (decline's own print call is already modeled as a 1-tick
 `ballAnimStall`; something near `Select_Task_CloseChosenMonPics` — or the
 `Select_CreateChosenMonsSprites` teardown mirror — may add more).
 RAM-probe balls' `animCmdIndex`/`displayTile` across the decline window
-with ISSUES #9's method. Fix likely lands in `ballAnim.ts`/`core.ts` as
+with ISSUES #9's method (or the newly-committed `tools/probe/ram-probe.py`,
+see its own usage note). Fix likely lands in `ballAnim.ts`/`core.ts` as
 one more stall predicate.
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V

@@ -5,6 +5,80 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 39 — ISSUES #11 fixed: species-name breathe (`Select_Task_FadeSpeciesName`) modeled exactly, RAM-pinned; `confirm-decline.json` 13/67 → 53/67
+
+- **State:** `npm test` **323/323** (310→323, +13
+  `tests/speciesNameFade.test.ts`), `npm run build` green. All 10
+  pre-existing traces re-verified at their exact prior counts (anchor 1/1,
+  draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
+  rent-slot1 125/139, rent-3picks 157/190, summary-info-magby 132/132,
+  summary-info-onix 122/122, confirm-flow 79/95) — zero regressions, the
+  breathe never fires within any of their action budgets.
+  `confirm-decline.json`: **13/67 → 53/67** (one short of the step brief's
+  "exactly 54/67" target - see Notes for why, and why that's the right stop
+  point rather than a sign the model is wrong).
+- **Did:** Built `tools/probe/ram-probe.py` (generic, reusable per-tick
+  RAM-probe over a button-segment script; committed per `PAPERCUTS.md`) and
+  used it to pin `fadeSpeciesNameActive`/`fadeOut`/`coeffDelay`/`coeff`/
+  `faceSpeciesNameDelay` tick-by-tick (`sFactorySelectScreen+0x2A2..0x2A9`,
+  cross-verified against the already-RAM-confirmed `monPicAnimating` at
+  `+0x2A0`) from both the anchor (idle) and `confirm-decline.json`'s actual
+  decline. Confirmed the state machine matches `Select_Task_FadeSpeciesName`
+  exactly, including a subtle quirk: `FADESTATE_RUN`'s `coeff === 0` check is
+  unconditional, so the pre-onset ramp bounces through six 16-tick
+  `FADESTATE_DELAY` pauses (1 RUN tick each) before `coeff` ever leaves 0 -
+  103 ticks of active time, matching ROADMAP.md's empirically-observed
+  "~104 cumulative cursor-mode ticks" idle-stable budget exactly (was never
+  explained before). Cross-checked `BlendPalette` (reusing
+  `paletteFade.ts`'s already-verified `blendComponentToBlack`) against a
+  direct pixel probe: reproduces ISSUES #11's oracle sample (coeff 5 → RGB
+  173,0,0) exactly, plus the full table (0..6 → 255,239,222,206,189,173,156).
+  Found a genuine GBA render lag (RAM `coeff` steps at tick T, the rendered
+  pixel only changes at T+1) - modeled via a `renderCoeff` field, same shape
+  as this codebase's other queued-write lags (ISSUES #5, `paletteFade.ts`).
+  New `src/engine/speciesNameFade.ts` (state + advance + activate/
+  deactivate + `speciesNameColor`), wired into `core.ts`: deactivates on
+  cursor-mode A (popup open), reactivates on B-close/OTHERS/non-confirming
+  RENT-DESELECT directly, and on decline with an extra RAM-required 1-tick
+  delay (see Notes and ISSUES #12's update). `factoryDraftScreen.ts` now
+  renders WIN_SPECIES through a per-tick-blended palette instead of the
+  fixed one. 13 new Tier-1 tests (`tests/speciesNameFade.test.ts`): waveform
+  boundaries (7-tick cadence, peak-6 flip, 16-tick pause), the blend table,
+  the anchor-onset tick, pause/resume (not reset) semantics, and the
+  core.ts wiring. Full mechanics + evidence trail in commit `2013459`.
+- **Next (supervisor-set, per the original brief):** ISSUES #12/#13 chases
+  (both got new evidence this session, see below - still open, out of
+  scope for this step), then S5's last piece: the YES-press accept path
+  (exit fade → pre-battle room, `docs/prebattle-room-notes.md`). Then S6.
+- **Notes:** **why 53/67, not the brief's "exactly 54/67":** with #11's
+  constant baseline gone, an **11th** ball-area frame surfaced - **273**
+  (3px, `x=44/120/196,y=64`), the same y54-73 ball-region family as ISSUES
+  #13's already-documented 10 frames but much smaller and previously
+  invisible under the uniform ~129px species-color diff that used to cover
+  256-306. Verified this can't be caused by this session's change (`git
+  diff` of the speciesNameFade commit touches only `drawText`'s palette
+  argument for the WIN_SPECIES window - zero lines touching `ballAnims`,
+  `drawSprite`, or `drawConfirmReveal`), so it's a pre-existing #13-pattern
+  gap the original characterization simply didn't enumerate, not a
+  regression. Documented as new evidence in ISSUES #13 (not fixed - out of
+  scope for this step) rather than chased further. Also appended new
+  evidence to ISSUES #12: RAM shows `fadeSpeciesNameActive` truly flips one
+  tick after this engine's OTHER decline effects, even though they're the
+  same synchronous C statement in the source - likely evidence the existing
+  decline branch itself fires 1 tick early (a candidate root cause for #12's
+  253-255 residual), compensated here only for this module's own activation
+  timing, not fixed at the source. All RAM/pixel probing beyond the
+  committed `tools/probe/ram-probe.py` script itself (its one-off spec
+  JSONs, a scratch pixel-cross-check script) was scratch, deleted before
+  finishing. PAPERCUT: building the per-tick RAM-probe harness from scratch
+  (symbol/pointer-deref plumbing, mGBA's exit-139/stdout-spew quirks) ate
+  a large fraction of this session before any engine code was written -
+  now moot for future sessions since `tools/probe/ram-probe.py` is
+  committed and reusable (usage note in its own docstring), but worth
+  flagging: ~25-30 min lost this session to (re)deriving it.
+
+---
+
 ## 38 — S5 decline path landed: YES/NO cursor UP/DOWN + B/A-on-NO decline + 20-tick un-reveal, oracle-pinned; `confirm-decline.json` committed at 13/67 (54 frames individually attributed, none new/unexplained)
 
 - **State:** `npm test` **310/310** (297→310, +13), `npm run build` green. All
@@ -94,65 +168,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   request (`c52d42a`).
 
 ---
-
-## 36 — ISSUES #10 root-caused and fixed (RAM/oracle-pixel-verified); `confirm-flow.json` COMMITTED — S5's confirm-reveal render surface is now trace-pinned; ISSUES #9 and #10 both deleted
-
-- **State:** `npm test` **297/297** (296→297, +1 net in
-  `tests/confirmReveal.test.ts`), `npm run build` green. All 9 pre-existing
-  traces re-verified at their exact prior counts (anchor 1/1, draft-cursor
-  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, rent-slot1
-  125/139, rent-3picks 157/190, summary-info-magby 132/132, summary-info-onix
-  122/122) — zero regressions. **`confirm-flow.json` committed** at 79/95
-  frames matched, the 16 non-matching frames individually attributed below.
-- **Did:** Built a scratch oracle trace (`rent-3picks.json`'s 19 segments +
-  90-tick idle, dense `captureFrames` 195-230) and sampled RGB directly at
-  the 2 flash-bar centers unshared with any other on-screen element (x=44,
-  x=196 - x=120 was ruled out, it sits under an unrelated always-present
-  element that coincidentally shares `FLASH_BLENDED_COLOR`) plus a clean
-  edge probe at x=8-20 (bar1's own left edge vs the wide window's fixed
-  `WIDE_WINDOW_LEFT=16` - a value no flash-bar width can ever produce, the
-  one unambiguous discriminator between "bar still on screen" and "window
-  opened"). Found: the true flash-width sequence
-  (`1,1,4,4,8,8,16,16,32,32,64,64` - unchanged, every value and the doubling
-  cadence pixel-confirmed exact) starts exactly 1 tick later than modeled -
-  the engine's `elapsed=-1` (existing 1-tick OAM-creation lag) needed a
-  *second* hidden tick before `FLASH_WIDTHS[0]` applies, matching the shape
-  `monPic.ts`'s own `OPEN_TABLE_*` already models (multiple hidden ticks
-  before its first `flash(1)`). Cross-verified against the window-growth
-  boundary too: with the extra hidden tick, `WINDOW_STEPS`' previously-added
-  2nd `{64,65}` degenerate hold (PROGRESS #33) becomes redundant - dropping
-  it (12→11 entries) is the exact 1-tick compensation needed to keep the
-  total confirm-to-"shown" duration unchanged, so every already-RAM-verified
-  downstream absolute tick (ISSUES #9's ball-anim/stall timing) stays where
-  it was; row-scanned BG3 wash content at x=120 for frames 222-226 confirmed
-  the growth step (60,69) lands exactly 1 tick after the single degenerate
-  hold, not 2. Fixed in `confirmReveal.ts` (`FLASH_WIDTHS` now indexed
-  `elapsed-1`, hidden below `elapsed<1`; `WINDOW_STEPS` lost its duplicate
-  hold; `advanceConfirmReveal`'s flash→window transition threshold bumped by
-  1 to match) and re-pinned in `tests/confirmReveal.test.ts` (boundary
-  ticks shifted, 1 test added for the new 2nd hidden tick). Rebuilt
-  `confirm-flow.json` (same recipe, `captureFrames` 185-279) and ran
-  `npm run compare`: frames 210-279 (the entire flash + window + shown/
-  YES-NO-dwell portion, where every ISSUES #9/#10 diff lived) are now
-  **byte-exact**. The only remaining diffs, frames 189/190/191/192/193/194/
-  195/196/197/198/199/201/203/205/207/209 (107/949/2892/512/512/512/512/512/
-  448/64/32/16/8/4/3/1px), exactly reproduce ISSUES #5's own pre-documented
-  pattern (tapering 189→199 then the halving tail 199/201/203/205/207/209 -
-  32/16/8/4/3/1px, verbatim-matching PROGRESS #35's own prior characterization
-  of this same window) - the 3rd pick's own popup-close catch-up, unrelated
-  to this session's fix (untouched code path). Committed the trace with each
-  attributed frame listed in the commit message. Full 9-trace suite +
-  `confirm-flow.json` + `npm test` + `npm run build` all green (counts
-  above); ISSUES #9 and #10 both deleted (git keeps history).
-- **Next:** S5's confirm-reveal render surface is now fully trace-pinned
-  modulo ISSUES #5 (policy-settled, no further fix attempts). S5's remainder:
-  the decline path (stretch goal, still open), the YES-press exit fade +
-  pre-battle room (`docs/prebattle-room-notes.md`), then S6.
-- **Notes:** all RAM/pixel probing (`bin/oracle run` + direct RGB sampling
-  via a scratch Node script, `/tmp/issue10/`) was scratch, deleted before
-  finishing - nothing uncommitted left beyond the intended
-  `src/engine/confirmReveal.ts` + `tests/confirmReveal.test.ts` +
-  `tools/compare/traces/confirm-flow.json` + docs changes. PAPERCUT: none
-  this session.
 
 ---

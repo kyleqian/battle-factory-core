@@ -5,6 +5,68 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 36 — ISSUES #10 root-caused and fixed (RAM/oracle-pixel-verified); `confirm-flow.json` COMMITTED — S5's confirm-reveal render surface is now trace-pinned; ISSUES #9 and #10 both deleted
+
+- **State:** `npm test` **297/297** (296→297, +1 net in
+  `tests/confirmReveal.test.ts`), `npm run build` green. All 9 pre-existing
+  traces re-verified at their exact prior counts (anchor 1/1, draft-cursor
+  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, rent-slot1
+  125/139, rent-3picks 157/190, summary-info-magby 132/132, summary-info-onix
+  122/122) — zero regressions. **`confirm-flow.json` committed** at 79/95
+  frames matched, the 16 non-matching frames individually attributed below.
+- **Did:** Built a scratch oracle trace (`rent-3picks.json`'s 19 segments +
+  90-tick idle, dense `captureFrames` 195-230) and sampled RGB directly at
+  the 2 flash-bar centers unshared with any other on-screen element (x=44,
+  x=196 - x=120 was ruled out, it sits under an unrelated always-present
+  element that coincidentally shares `FLASH_BLENDED_COLOR`) plus a clean
+  edge probe at x=8-20 (bar1's own left edge vs the wide window's fixed
+  `WIDE_WINDOW_LEFT=16` - a value no flash-bar width can ever produce, the
+  one unambiguous discriminator between "bar still on screen" and "window
+  opened"). Found: the true flash-width sequence
+  (`1,1,4,4,8,8,16,16,32,32,64,64` - unchanged, every value and the doubling
+  cadence pixel-confirmed exact) starts exactly 1 tick later than modeled -
+  the engine's `elapsed=-1` (existing 1-tick OAM-creation lag) needed a
+  *second* hidden tick before `FLASH_WIDTHS[0]` applies, matching the shape
+  `monPic.ts`'s own `OPEN_TABLE_*` already models (multiple hidden ticks
+  before its first `flash(1)`). Cross-verified against the window-growth
+  boundary too: with the extra hidden tick, `WINDOW_STEPS`' previously-added
+  2nd `{64,65}` degenerate hold (PROGRESS #33) becomes redundant - dropping
+  it (12→11 entries) is the exact 1-tick compensation needed to keep the
+  total confirm-to-"shown" duration unchanged, so every already-RAM-verified
+  downstream absolute tick (ISSUES #9's ball-anim/stall timing) stays where
+  it was; row-scanned BG3 wash content at x=120 for frames 222-226 confirmed
+  the growth step (60,69) lands exactly 1 tick after the single degenerate
+  hold, not 2. Fixed in `confirmReveal.ts` (`FLASH_WIDTHS` now indexed
+  `elapsed-1`, hidden below `elapsed<1`; `WINDOW_STEPS` lost its duplicate
+  hold; `advanceConfirmReveal`'s flash→window transition threshold bumped by
+  1 to match) and re-pinned in `tests/confirmReveal.test.ts` (boundary
+  ticks shifted, 1 test added for the new 2nd hidden tick). Rebuilt
+  `confirm-flow.json` (same recipe, `captureFrames` 185-279) and ran
+  `npm run compare`: frames 210-279 (the entire flash + window + shown/
+  YES-NO-dwell portion, where every ISSUES #9/#10 diff lived) are now
+  **byte-exact**. The only remaining diffs, frames 189/190/191/192/193/194/
+  195/196/197/198/199/201/203/205/207/209 (107/949/2892/512/512/512/512/512/
+  448/64/32/16/8/4/3/1px), exactly reproduce ISSUES #5's own pre-documented
+  pattern (tapering 189→199 then the halving tail 199/201/203/205/207/209 -
+  32/16/8/4/3/1px, verbatim-matching PROGRESS #35's own prior characterization
+  of this same window) - the 3rd pick's own popup-close catch-up, unrelated
+  to this session's fix (untouched code path). Committed the trace with each
+  attributed frame listed in the commit message. Full 9-trace suite +
+  `confirm-flow.json` + `npm test` + `npm run build` all green (counts
+  above); ISSUES #9 and #10 both deleted (git keeps history).
+- **Next:** S5's confirm-reveal render surface is now fully trace-pinned
+  modulo ISSUES #5 (policy-settled, no further fix attempts). S5's remainder:
+  the decline path (stretch goal, still open), the YES-press exit fade +
+  pre-battle room (`docs/prebattle-room-notes.md`), then S6.
+- **Notes:** all RAM/pixel probing (`bin/oracle run` + direct RGB sampling
+  via a scratch Node script, `/tmp/issue10/`) was scratch, deleted before
+  finishing - nothing uncommitted left beyond the intended
+  `src/engine/confirmReveal.ts` + `tests/confirmReveal.test.ts` +
+  `tools/compare/traces/confirm-flow.json` + docs changes. PAPERCUT: none
+  this session.
+
+---
+
 ## 35 — ISSUES #9's ball-anim drift root-caused and fixed (2 independent display-lag bugs, both RAM-verified); `confirm-flow.json` STILL not committed — the fix cleared every ball-OBJ diff but exposed a 5th, unrelated gap in confirmReveal's own flash-bar timing, filed as new ISSUES #10
 
 - **State:** `npm test` **296/296** (292→296, +4), `npm run build` green.
