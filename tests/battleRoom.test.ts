@@ -8,8 +8,13 @@ import {
   ENTRY_SETTLE_ELAPSED,
   FADE_IN,
   INITIAL_BATTLE_ROOM_STATE,
+  OPPONENT_ADD_ELAPSED,
+  OPPONENT_SETTLED_SCREEN_Y,
+  OPPONENT_WALK_END_ELAPSED,
   WARP_FADE_TO_ROOM_ELAPSED,
   entryStep,
+  opponentStep,
+  scientistTurnFrame,
 } from "../src/engine/battleRoom.ts";
 import { EXIT_TO_ROOM_BLACK_HOLD_TICKS, MESSAGE_CLOSING_TICKS, MESSAGE_PRINT_TICKS, ROOM_HOLD_TICKS, WALK_TICKS } from "../src/engine/prebattleRoom.ts";
 import { EXIT_FADE_OUT_TICKS, FADE_IN_TICKS, bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
@@ -118,6 +123,65 @@ describe("core.ts wiring: prebattleRoom's warpFade hands off to battleRoom", () 
     // Holds indefinitely past settle, reading no input (even A held).
     for (let i = 0; i < 200; i += 1) state = tick(state, new Set(["A"]));
     expect(state.battleRoom).toEqual({ phase: "entering", elapsed: 200 });
+  });
+});
+
+describe("battleRoom.ts: scientistTurnFrame (S6 slice 2b, RAM-probed)", () => {
+  it("holds the pre-turn face-south pose (picture frame 0) through elapsed 105", () => {
+    expect(scientistTurnFrame(0)).toEqual({ frame: 0, turned: false });
+    expect(scientistTurnFrame(104)).toEqual({ frame: 0, turned: false });
+    expect(scientistTurnFrame(105)).toEqual({ frame: 0, turned: false });
+  });
+
+  it("shows the 2-tick transient picture frame 8 at elapsed 106-107", () => {
+    expect(scientistTurnFrame(106)).toEqual({ frame: 8, turned: true });
+    expect(scientistTurnFrame(107)).toEqual({ frame: 8, turned: true });
+  });
+
+  it("settles turned (picture frame 2) from elapsed 108 on, indefinitely", () => {
+    expect(scientistTurnFrame(108)).toEqual({ frame: 2, turned: true });
+    expect(scientistTurnFrame(109)).toEqual({ frame: 2, turned: true });
+    expect(scientistTurnFrame(197)).toEqual({ frame: 2, turned: true });
+    expect(scientistTurnFrame(10000)).toEqual({ frame: 2, turned: true });
+  });
+});
+
+describe("battleRoom.ts: opponentStep (S6 slice 2b, RAM-probed)", () => {
+  it("is hidden through elapsed 111 (OPPONENT_ADD_ELAPSED - 1)", () => {
+    expect(OPPONENT_ADD_ELAPSED).toBe(112);
+    expect(opponentStep(0)).toEqual({ visible: false, frame: 0, screenY: 0 });
+    expect(opponentStep(111)).toEqual({ visible: false, frame: 0, screenY: 0 });
+  });
+
+  it("becomes visible at elapsed 112, one sub-pixel step already into its walk_down (screenY -23, not the formula spawn of -24)", () => {
+    expect(opponentStep(112)).toEqual({ visible: true, frame: 3, screenY: -23 });
+  });
+
+  it("ramps screenY a clean 1px/tick with no sub-tile easing, through the settle at elapsed 191", () => {
+    expect(OPPONENT_WALK_END_ELAPSED).toBe(191);
+    expect(OPPONENT_SETTLED_SCREEN_Y).toBe(56);
+    for (let e = 112; e <= 191; e += 1) {
+      expect(opponentStep(e).screenY).toBe(e - 135);
+    }
+    expect(opponentStep(191).screenY).toBe(56);
+  });
+
+  it("cycles the walk picture frames 3/0/4/0 (sAnim_GoSouth) in 8-tick blocks", () => {
+    expect(opponentStep(112).frame).toBe(3);
+    expect(opponentStep(119).frame).toBe(3);
+    expect(opponentStep(120).frame).toBe(0);
+    expect(opponentStep(127).frame).toBe(0);
+    expect(opponentStep(128).frame).toBe(4);
+    expect(opponentStep(135).frame).toBe(4);
+    expect(opponentStep(136).frame).toBe(0);
+    expect(opponentStep(184).frame).toBe(0);
+    expect(opponentStep(191).frame).toBe(0);
+  });
+
+  it("settles facing west (picture frame 2) from elapsed 192 on, screenY held at 56 indefinitely", () => {
+    expect(opponentStep(192)).toEqual({ visible: true, frame: 2, screenY: 56 });
+    expect(opponentStep(197)).toEqual({ visible: true, frame: 2, screenY: 56 });
+    expect(opponentStep(10000)).toEqual({ visible: true, frame: 2, screenY: 56 });
   });
 });
 

@@ -223,6 +223,18 @@ decoy is screen-fixed the whole window (walks in exact lockstep with the
 camera pan) - only its walk-cycle frame changes. Scientists turn + opponent
 walk-in (624-739) and the opponent-speech msgbox (739-843) are still open
 for slices 2b/2c.
+**Slice 2b complete (2026-07-18):** the SCIENTISTS-TURN + OPPONENT WALK-IN
+window (ticks 624-717) is engine-implemented and RAM/pixel-pinned (same
+`battleRoom.ts`/`battleRoomRender.ts`, no new assets needed - #49's
+`battle-room-layout.json` already carried the object inventory);
+`tools/compare/traces/room-npcs.json` (98/98, 0 diff). Ended the trace at
+717 (before the msgbox appears at 718, per #51's groundwork) rather than
+739 - the print window is slice 2c's. Resolved: the scientists' turn is
+only 2 visually-distinct ticks (not the RAM `duration=4`, which counts
+movement-step calls, not frames); the opponent is added and takes its
+first walk step within the same engine tick; its walk screenY is a clean
+1px/tick ramp (no sub-tile easing), same convention as the entry camera
+pan. The opponent-speech msgbox (718-843) is still open for slice 2c.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain

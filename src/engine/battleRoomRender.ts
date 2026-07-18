@@ -29,7 +29,7 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { type EntryStep } from "./battleRoom.ts";
+import { type EntryStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
 
 import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
 import tileset from "../assets/gen/battle-room-tileset.json" with { type: "json" };
@@ -63,6 +63,7 @@ interface RoomLayout {
   initialCameraOriginPx: { x: number; y: number };
   settledCameraOriginPx: { x: number; y: number };
   objects: {
+    opponent: { spawnTile: { x: number; y: number }; settleTile: { x: number; y: number }; settleFacing: string };
     scientists: { localId: number; tile: { x: number; y: number }; turn: string }[];
   };
 }
@@ -79,9 +80,6 @@ interface NpcSprite {
 const roomLayout = layout as RoomLayout;
 const roomTileset = tileset as RoomTileset;
 const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; opponent: NpcSprite };
-
-/** Scientists never move or animate this window (battleRoom.ts doc point 4). */
-const SCIENTIST_SETTLED_FRAME = 0;
 
 function drawBlockLayer(fb: Uint8Array, entries: TileEntry[], screenX: number, screenY: number, fadeY: number): void {
   for (let i = 0; i < 4; i += 1) {
@@ -189,18 +187,31 @@ const INITIAL_ORIGIN = roomLayout.initialCameraOriginPx;
 const DECOY_POS = { x: 5, y: 11 } satisfies { x: number; y: number };
 const decoyScreenPos = tileScreenPos(DECOY_POS, INITIAL_ORIGIN);
 
+/** Fixed screen X of the opponent's walk-in column (tile x=7, never changes - `walk_down` is vertical-only, battleRoom.ts finding 2). */
+const opponentScreenX = tileScreenPos(roomLayout.objects.opponent.settleTile, INITIAL_ORIGIN).x;
+
 /**
  * Renders the battle-room ENTRY window's scene at a given camera pan amount
  * (0 = initial/warp-landing origin, 80 = settled), decoy frame/facing, and
  * optional BG/OBJ fade coefficients (paletteFade.ts convention - 0 = no
  * fade, matching every other faded-render function in this codebase).
+ * `elapsed` (S6 slice 2b) additionally drives the scientists' turn-in-place
+ * and the opponent's walk-in, both settled/no-op for elapsed <=103 (the
+ * slice 2a ENTRY window) - see battleRoom.ts's scientistTurnFrame/
+ * opponentStep for the oracle-pinned per-tick schedule.
  */
-export function renderBattleRoomEntryScene(fb: Uint8Array, step: EntryStep, bgFadeY = 0, objFadeY = 0): void {
+export function renderBattleRoomEntryScene(fb: Uint8Array, step: EntryStep, elapsed: number, bgFadeY = 0, objFadeY = 0): void {
   const origin = { x: roomLayout.initialCameraOriginPx.x, y: roomLayout.initialCameraOriginPx.y - step.camPanY };
   drawRoomTiles(fb, origin, bgFadeY);
+  const turn = scientistTurnFrame(elapsed);
   for (const scientist of roomLayout.objects.scientists) {
     const pos = tileScreenPos(scientist.tile, origin);
-    drawNpcFrame(fb, roomNpcs.scientist, SCIENTIST_SETTLED_FRAME, pos, false, objFadeY);
+    const hFlip = turn.turned && scientist.turn === "east";
+    drawNpcFrame(fb, roomNpcs.scientist, turn.frame, pos, hFlip, objFadeY);
   }
   drawNpcFrame(fb, roomNpcs.player, step.decoyFrame, decoyScreenPos, step.decoyHFlip, objFadeY);
+  const opponent = opponentStep(elapsed);
+  if (opponent.visible) {
+    drawNpcFrame(fb, roomNpcs.opponent, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
+  }
 }

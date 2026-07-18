@@ -452,7 +452,7 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
   const bgY = bgFadeY(b.elapsed, FADE_IN);
   const objY = objFadeY(b.elapsed, FADE_IN);
   const fb = createFramebuffer();
-  renderBattleRoomEntryScene(fb, step, bgY, objY);
+  renderBattleRoomEntryScene(fb, step, b.elapsed, bgY, objY);
   return fb;
 }
 

@@ -5,6 +5,40 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 49 — S6 groundwork (parallel worktree lane, merged): Battle Factory BATTLE ROOM scene extracted, composite-verified 0/38400 at tick 624; NO ENGINE CODE
+
+- **State:** merge of `worker/wt-20260718-094141` (single commit `f943df7`,
+  new files only) on top of #48; `npm test` **349/349** + `npm run build`
+  green on the merged result. New: `tools/extract/extract-battle-room.ts`
+  (deterministic, byte-identical across two runs),
+  `src/assets/gen/battle-room-tileset.json` (88 tiles/5 palettes/153
+  metatiles), `src/assets/gen/battle-room-npcs.json` (3 nine-frame sheets:
+  fake-player decoy, scientist, opponent `OBJ_EVENT_GFX_BUG_CATCHER`),
+  `src/data/gen/battle-room-layout.json`, `docs/battle-room-notes.md`.
+- **Did (worker, supervisor-verified):** extracted the warp-destination
+  room (`BattleFrontier_BattleFactoryBattleRoom`) covering ground-truth
+  ticks 520-838. Composite checks: tick 624 **0/38400 full-frame**
+  (supervisor independently re-diffed the committed composite vs the
+  oracle capture: 0 px), ticks 740-838 **0/21600 on y<90** (region
+  excludes the not-yet-extracted opponent-speech msgbox; the full-frame
+  residual at tick 800 is confined exactly to the msgbox rows). Findings:
+  the camera **pans** (tracks the invisible real player, warp (6,11) →
+  settle (6,6)) despite the source's "camera is supposed to remain still"
+  comment; opponent gfx resolved via `gTowerMaleFacilityClasses[28]`; no
+  attendant object exists in this map.
+- **Next:** S6 slice 2a — engine implementation of room entry (fade-in +
+  camera pan + decoy walk, ticks 520-624, ending at the verified tick-624
+  composite), then 2b (scientists turn + opponent walk-in 624-739), then
+  2c (opponent speech msgbox 739-843). Open items from
+  `docs/battle-room-notes.md` §6 for those slices: camera pan sub-tile
+  timing not derived; tick 520-535 brightness fade-in observed
+  (~10→~97 mean) but not modeled; walk-cycle/turn transient frames
+  extracted but pixel-unverified; opponent-speech msgbox variant art not
+  yet extracted (deliberately deferred behind #48's derivation fix).
+- **Notes:** worktree removed + branch deleted post-merge.
+
+---
+
 ## 48 — ISSUES #15 root-caused and fixed: pre-battle msgbox frame now derived from `prebattle-room-msgbox.json`, baked asset deleted
 
 - **State:** `npm test` **349/349** (+2 regression tests), `npm run build`

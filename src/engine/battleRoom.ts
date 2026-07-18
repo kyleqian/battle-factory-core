@@ -221,4 +221,122 @@ export function entryStep(elapsed: number): EntryStep {
 /** Elapsed tick the scene is fully settled (camera + decoy stopped) - RAM tick 622. */
 export const ENTRY_SETTLE_ELAPSED = ENTRY_STEPS.length - 1;
 
+// S6 slice 2b: SCIENTISTS-TURN + OPPONENT WALK-IN window (trace ticks
+// 624-717 - elapsed 104-197, this module's `elapsed` = trace tick - 520).
+//
+// Ground truth: a custom RAM probe (same conventions as slice 2a's module
+// doc above - struct Sprite/ObjectEvent offsets, gObjectEvents=0x2037350/
+// gSprites=0x2020630/sizeof 0x24/0x44), every tick 600-745, watching all 16
+// gObjectEvents slots' active/spriteId/graphicsId/localId/currentCoords/
+// movementActionId and the corresponding gSprites' x/y/animNum/
+// animCmdIndex/hFlip/invisible bits. Cross-checked against source
+// (data/maps/BattleFrontier_BattleFactoryBattleRoom/scripts.inc's
+// EventScript_ScientistsFaceBattle + EventScript_EnterRoom's
+// removeobject/setobjectxyperm/addobject/applymovement sequence,
+// src/event_object_movement.c's MovementAction_WalkInPlaceFasterRight/
+// Left_Step0 + InitMoveInPlace/MovementAction_WalkInPlace_Step1, and
+// src/data/object_events/object_event_anims.h's sAnimTable_Standard).
+//
+// **One-tick render lag applies here too** (this module's own doc for
+// slice 2a: "frame N = RAM of tick N-1"), cross-confirmed against the
+// already-pinned ENTRY_SETTLE_ELAPSED boundary (RAM tick 622 -> frame/
+// elapsed 103, i.e. frameTick = RAMtick + 1, so elapsed = RAMtick - 519).
+// All tick numbers below are already given in `elapsed` terms (post-shift).
+//
+// Findings:
+// 1. **Scientists' turn is exactly 2 ticks of a transient frame, not 4** -
+//    the RAM `duration=4` passed to InitMoveInPlace (event_object_movement.c
+//    :5822-5828, `MovementAction_WalkInPlaceFasterRight/Left_Step0`) counts
+//    *movement-step calls*, not visually-distinct frames: the anim's own
+//    ANIMCMD_FRAME duration is 2 ticks/entry (`sAnim_GoFasterEast/West`,
+//    object_event_anims.h:292-308, frames `[7,2,8,2]` each hFlip per
+//    direction), and `SetStepAnimHandleAlternation`'s alternation logic
+//    starts the anim already at cmdIndex 2 (not 0) - matching this file's
+//    own precedent for the decoy's walk (doc point 3 above: "first observed
+//    at cmdIdx 1, not 0"). Net effect, RAM-confirmed tick-by-tick: elapsed
+//    <=105 holds the pre-turn face-south pose (picture frame 0); elapsed
+//    106-107 shows the transient picture frame 8 (`ANIMCMD_FRAME(8,2,...)`,
+//    cmdIndex 2); elapsed >=108 holds picture frame 2 (`ANIMCMD_FRAME(2,2,
+//    ...)`, cmdIndex 3) - the SAME frame the movement settles on
+//    (`animPaused=TRUE` freezes at whatever cmdIndex was live when the
+//    4-tick action counter hits 0), so there is no distinct third phase.
+//    hFlip is TRUE (face east) for scientists 1-3 (`turn: "east"` in
+//    battle-room-layout.json, `Common_Movement_WalkInPlaceFasterRight` ->
+//    `sAnim_GoFasterEast`, all frames hFlip) and FALSE (face west) for
+//    scientists 4-6 (`...FasterLeft` -> `sAnim_GoFasterWest`, no hFlip) -
+//    matching the doc's documented turn directions. All 6 scientists turn
+//    in exact lockstep (single shared `waitmovement 0` after all 6
+//    `applymovement`s, scripts.inc:235-241) - one shared phase table
+//    suffices, no per-scientist timing needed.
+// 2. **The opponent is added and starts its first walk_down step within the
+//    same elapsed tick** - RAM shows the object still at its old (7,4)
+//    template position/gfx through elapsed 111, then fully active at the
+//    new (7,1) spawn tile *already one sub-pixel step into its walk*
+//    (`sy` raw already offset by 1 from the extrapolated spawn value) at
+//    elapsed 112 - i.e. `factory_setopponentgfx`/`removeobject`/
+//    `setobjectxyperm`/`addobject`/`applymovement`'s Step0 (which
+//    immediately calls Step1, `event_object_movement.c`'s general
+//    `InitMovementNormal`+`Step1` pattern) all resolve inside one engine
+//    tick, same as scientists' turn starting pre-advanced (finding 1).
+//    Screen Y is **not** derived from the tile-camera formula during the
+//    walk (unlike the settled/static case) - it free-runs a clean 1px/tick
+//    ramp (no sub-tile easing, same convention as the entry camera pan),
+//    RAM-confirmed via the sprite's raw `y` + the settled camera origin's Y
+//    (24) matching the tile-formula screen position at both ends: spawn
+//    tile (7,1) -> -23 at elapsed 112 (one tick past the formula spawn of
+//    -24) and settle tile (7,6) -> 56 at elapsed 191 (`tileScreenPos`'s own
+//    formula, independently confirmed since the opponent is static there,
+//    same as the scientists' proven convention) - a clean affine map,
+//    `screenY(elapsed) = elapsed - 135`, clamped at the settle value past
+//    191. Screen X never changes (`walk_down` is vertical-only) - drawn via
+//    the ordinary `tileScreenPos` tile-formula on the fixed tile x=7, same
+//    as every other camera-tracked element (no raw-sprite-x dependency,
+//    sidestepping this sprite's own raw-x/y encoding quirks).
+// 3. **The walk's picture-frame cycle is `sAnim_GoSouth`** (animNum 4 =
+//    `ANIM_STD_GO_SOUTH`, `object_event_anims.h:202-209`: frames
+//    `[3,0,4,0]`, 8 ticks each, no hFlip) - RAM-confirmed for the full
+//    80-tick walk (elapsed 112-191, 5 tiles x 16 ticks/tile, `walk_down x5`
+//    at this game's established 1px/tick object-movement speed - see doc
+//    point 3 above for the pan's own confirmation of this per-tick rate).
+//    At settle (elapsed >=192) the RAM shows `animNum` switch to 6
+//    (`ANIM_STD_GO_WEST`) cmdIndex 1 = picture frame 2, no hFlip - "face
+//    west", matching `Movement_OpponentEnter`'s trailing `face_left`
+//    (scripts.inc:206-213) and the documented settle facing.
+
+/** Scientists' turn phase, keyed by `elapsed` (see finding 1 above). Picture frame 0 = pre-turn (face south); 8 = transient; 2 = settled turned (east/west per each scientist's own `turn` field). */
+export function scientistTurnFrame(elapsed: number): { frame: number; turned: boolean } {
+  if (elapsed < 106) return { frame: 0, turned: false };
+  if (elapsed < 108) return { frame: 8, turned: true };
+  return { frame: 2, turned: true };
+}
+
+/** First elapsed tick the opponent is active/visible (see finding 2). */
+export const OPPONENT_ADD_ELAPSED = 112;
+/** Last elapsed tick of the opponent's walk_down ramp - screenY reaches its settled value here and holds. */
+export const OPPONENT_WALK_END_ELAPSED = 191;
+/** Opponent's settled screen Y (tile (7,6) via the standard tileScreenPos formula - see finding 2). */
+export const OPPONENT_SETTLED_SCREEN_Y = 56;
+
+export interface OpponentStep {
+  visible: boolean;
+  /** Picture frame index into the opponent's 9-frame sheet. */
+  frame: number;
+  screenY: number;
+}
+
+/** The invisible/pre-add placeholder - never drawn (battleRoomRender.ts checks `visible`). */
+const OPPONENT_HIDDEN: OpponentStep = { visible: false, frame: 0, screenY: 0 };
+
+/** Opponent's per-tick walk-in state, keyed by `elapsed` (see findings 2/3). */
+export function opponentStep(elapsed: number): OpponentStep {
+  if (elapsed < OPPONENT_ADD_ELAPSED) return OPPONENT_HIDDEN;
+  const screenY = Math.min(elapsed - 135, OPPONENT_SETTLED_SCREEN_Y);
+  if (elapsed > OPPONENT_WALK_END_ELAPSED) {
+    return { visible: true, frame: 2, screenY };
+  }
+  const cyclePos = Math.floor((elapsed - OPPONENT_ADD_ELAPSED) / 8) % 4;
+  const frame = [3, 0, 4, 0][cyclePos]!;
+  return { visible: true, frame, screenY };
+}
+
 export { FADE_IN };
