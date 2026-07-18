@@ -97,12 +97,30 @@ for (const p of usedPalNibbles) {
 // gBattleEnvironmentAnimTiles_Building (anim_tiles.png) + AnimTilemap_Building
 // (anim_map.bin, a plain 32x32 tilemap = 2048 bytes = 1 screen block, no
 // width/height ambiguity - only one block, so no recomposition question).
-// Not yet oracle-cross-checked (only the *static* background's geometry was
-// pinned this session - the entry-slide variant is a short-lived transitional
-// frame, harder to isolate in a trace; flagged for a future session).
+// DrawBattleEntryBackground's BATTLE_TYPE_FRONTIER branch (battle_bg.c:1143-
+// 1149) never loads a palette for this BG1 layer - a prior session read that
+// as "palette bank 4 is missing" (every tilemap entry's raw palette nibble is
+// 4, and this table only has 3 local subpalettes 0-2) and left it untestable.
+// That was a misdiagnosis, not a real gap: the anim_map.bin entries use the
+// same hardware-absolute encoding as the static tilemap above (raw nibble -
+// hardware base 2 = local index), because DrawMainBattleBackground already
+// loaded gBattleEnvironmentPalette_Frontier at BG_PLTT_ID(2) for 3 subpalettes
+// (hardware slots 2/3/4) before the intro slide runs, and nothing reloads
+// palette RAM in between - so raw nibble 4 IS local subpalette index 2,
+// already captured. Confirmed directly against RAM this session
+// (tools/probe/ram-probe.py on gPlttBufferFaded + BG_PLTT_ID(4)'s byte
+// offset, ticks 1073-1886 of the scene-dense script): the 16 live colors at
+// hardware bank 4 are bit-exact equal to this table's local subpalette 2
+// (framePalette.slice(32,48)) at every sampled tick - it's the SAME bank,
+// never anything else. Normalized the same way as the static tilemap so
+// downstream code doesn't need to special-case the +2 offset per table.
 const animTileset = loadTileset(join(BUILDING, "anim_tiles.png"));
 const animMapBuf = readFileSync(join(BUILDING, "anim_map.bin"));
-const animTilemap = parseTilemap(animMapBuf, 32, 32);
+const animTilemap = normalizePaletteOffset(parseTilemap(animMapBuf, 32, 32), 2);
+const usedAnimPalNibbles = new Set(animTilemap.entries.map((e) => e.palette));
+for (const p of usedAnimPalNibbles) {
+  if (p > 2) throw new Error(`entrySlide tilemap uses normalized palette index ${p}, expected only 0-2 (3 loaded subpalettes)`);
+}
 
 writeJson(join(ASSETS_GEN, "battle-bg.json"), {
   // 3 subpalettes of 16 colors each, indexed by each tilemap entry's `palette`

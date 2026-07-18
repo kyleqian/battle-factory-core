@@ -40,4 +40,21 @@ describe("battle-bg.json", () => {
     expect(bg.entrySlide.tilemap.width).toBe(32);
     expect(bg.entrySlide.tilemap.height).toBe(32);
   });
+
+  // RAM-confirmed (tools/probe/ram-probe.py, gPlttBufferFaded @ BG_PLTT_ID(4)'s
+  // byte offset, ticks 1073-1886 of battle1-scene-dense.json): entrySlide's raw
+  // palette nibble 4 is hardware-absolute like the static tilemap's (same +2
+  // base - DrawMainBattleBackground loads the Frontier palette at BG_PLTT_ID(2)
+  // for 3 subpalettes covering hardware slots 2-4, and DrawBattleEntryBackground
+  // never reloads palette RAM before the intro slide runs) - NOT a missing 4th
+  // subpalette as a prior session concluded. See extract-battle-bg.ts's header.
+  it("normalizes entrySlide's tilemap palette nibbles into the same 3 loaded subpalettes (0-2)", () => {
+    const used = new Set(bg.entrySlide.tilemap.entries.map((e) => e.palette));
+    for (const p of used) expect(p).toBeLessThanOrEqual(2);
+    expect(used.has(2)).toBe(true); // the streak content's own subpalette (raw nibble 4)
+  });
+
+  it("pins the entry-slide tileset's tile 0 as fully blank (used as the map's transparent filler)", () => {
+    expect(bg.entrySlide.tileset.tiles[0]).toEqual(new Array(64).fill(0));
+  });
 });
