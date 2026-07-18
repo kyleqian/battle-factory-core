@@ -5,6 +5,54 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 26 — Supervisor wind-down: session end 2026-07-17 ~15:20
+
+- **State (verified this minute):** `npm test` **264/264**, `npm run build`
+  green, working tree clean. Traces: `anchor` 1/1, `draft-cursor` 13/13,
+  `draft-menu` 38/38, `draft-menu-slot6` 66/66, `summary-info-onix`
+  122/122, `summary-info-magby` 132/132 — all 0 diff — and `rent-slot1`
+  125/139 (gap 100% attributed to ISSUES #5). ROADMAP: S1-S3 [x], S4 [~]
+  (slice 1 closed, remainder deferred behind S5 by supervisor re-scope),
+  S5 [~], S6-S9 [ ] with heavy groundwork banked.
+- **Session summary (supervised, ~10:54-15:20):** 9 main-lane worker steps
+  + 7 worktree-lane steps, all verified. Landed: MAGBY summary trace (S4
+  "≥2 slots" met); RENT/DESELECT + single-ball rock/idle RNG-exact
+  (`rent-slot1.json`); ISSUES #5 root-caused (WIN0V cycle jitter,
+  unmodelable at tick level — POLICY QUESTION TO USER, still open);
+  multi-ball stall model (ISSUES #6 fixed: text-print stall) + two latent
+  ballAnim timing bugs; post-confirm cursor-input gate fixed
+  (`isCursorInputReady`); species-name-breathe rule pinned (no model
+  needed under 105 cursor-mode ticks). Groundwork merged: moves/exp/items
+  data, pre-battle-room scene (composite-verified 0/38400px), S6
+  battle-bringup dossier + battle-1 assets + all 12 transition variants,
+  S5 confirm-flow dossier, S7 turn-1 ground truth (RAM-truthed damage/
+  order/HP-drain). Two PAPERCUTS entries added.
+- **DECISIONS (user delegated to supervisor, 2026-07-17 ~15:10):**
+  (1) ISSUES #5 policy: 0-diff stays the bar; re-time committed traces
+  into jitter-clean windows where feasible; otherwise ship with every
+  non-matching frame individually attributed to #5's documented pattern.
+  #5 is now a settled policy note, not an open bug. (2) ISSUES #7:
+  continue as DATA-DRIVEN empirical modeling (per-species stall table,
+  context-validated via RAM probes) — the "no per-species lookup" guard
+  is overruled because this race perturbs the RNG stream (unlike #5's
+  pixel-only jitter) and must be exact for the S5-exit→transition path;
+  an oracle-derived table has the same epistemic status as the engine's
+  other pinned empirical constants. Supervisor's own width check
+  sharpened this: ALL uppercase glyphs are 6px in font-normal, so
+  name/category pixel-width and char-count theories are ALL dead
+  (BAYLEEF total 11 chars sits between stalling HAUNTER 10 and MAGBY
+  14); and every "count-dependent" data point is species-confounded
+  (each non-stalling move entered BAYLEEF) — species alone may be the
+  entire cursor-move rule.
+- **Next:** worker in flight implementing the per-species stall table +
+  rent-3picks.json; then confirm-flow implementation
+  (docs/confirm-flow-notes.md), exit sequence
+  (docs/prebattle-room-notes.md), S6 off its dossier + assets.
+- **Notes:** every worker ended at a green commit; no usage-limit events;
+  parallel worktree lane ran 6 extraction/scout steps concurrently with
+  zero merge conflicts.
+
+---
 ## 25 — S5 slice 2 (worker, capped, LAST of this supervised session): STOPPED before implementing a fix — ISSUES #7's "count-dependent" AND "first-event-only" stall hypotheses BOTH RAM-DISPROVEN this session with clean counterexamples; best remaining evidence points to a species-render-cost-dependent race (same class as ISSUES #5), not a clean state rule
 
 - **State:** unchanged from entry 24 — `npm test` **264/264**, `npm run

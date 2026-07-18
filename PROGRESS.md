@@ -5,6 +5,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 29 — ISSUES #7 Part 1 landed (species-keyed LEFT/RIGHT stall, sanctioned per entries 26-28): fixed, tested, committed; Part 2 (`rent-3picks.json`) STOPPED per the brief's own explicit stop condition — a SECOND, narrower ball-render bug (unrelated to the stall rule) surfaced once the trace was actually built
+
+- **State:** `npm test` **270/270** (264→270, +6 in
+  `tests/ballAnimSpeciesStall.test.ts`), `npm run build` green, working tree
+  clean. `rent-slot1.json` re-verified still **125/139** (no regression).
+  `rent-3picks.json` **still not built** (blocked by a newly-found, different
+  bug - see below and ISSUES #7).
+- **Did:** **Part 1 (committed, `e3f712e`):** implemented the corrected
+  2-species safe-list in `ballAnimStall`'s LEFT/RIGHT branch
+  (`cursorMoveStallsBalls`, `factoryDraftScreen.ts`) - stalls every active
+  ball only when the entering slot's species is outside `{BAYLEEF,
+  HAUNTER}`, keyed by the engine's existing draft-pool species string (not
+  slot index). Pinned with 6 new Tier-1 tests against ISSUES #7's
+  RAM-derived checkpoints (Probe A: action ticks 79/121/163/205 reproduced,
+  decisive HAUNTER-no-stall window 203→207 not 208; Probe C: count=2
+  HAUNTER-no-stall windows 276→284/275→307 not 285/308) - every expected
+  value hand-derived from documented RAM facts via `MOVING_CMDS`' fixed
+  durations, then cross-checked against the implementation before
+  committing to the numbers (not the other way around). No existing test
+  had pinned the old always-stall behavior, so nothing needed updating.
+  **Part 2 (not committed):** rebuilt PROGRESS-archive #21's exact 3-pick
+  trace (confirms at press-ticks 37/113/189) and ran `npm run compare`
+  (scratch, captures 0-245). First checked the brief's required amendment
+  (probe for the first YES/NO-hand-off pixel after tick 189): frame 189
+  itself is still clean/#5-attributable, but frames ≥190 diverge
+  immediately and explode fast (949px→13271px by 234+, spreading to
+  x239/y32-156) - confirms the trace must end at/before 189. Then found
+  frames 180 and 188 show a 176px diff at **x56-76/y54-73, outside the
+  x88-151 mon-pic window, at ball-index-1's (MAGBY) own OBJ position** -
+  the brief's explicit stop condition. Root-caused enough to rule out the
+  stall rule as the cause (byte-identical diff before/after Part 1's fix,
+  confirmed via `git worktree` against the pre-fix commit; ball 1's
+  internal `cmdIndex` timing independently matches pure zero-stall
+  arithmetic exactly) and pinned it precisely: the engine's `displayTile`
+  lags the oracle by 1 tick at this transition, not the documented-as-2-tick
+  constant. Per the brief, stopped without guessing a fix - did not commit
+  `rent-3picks.json`, wrote the full finding into ISSUES #7 (trimmed to this
+  remainder, historical species-stall investigation trail removed - git
+  history has it if ever needed) instead of re-litigating the now-fixed
+  stall rule.
+- **Next:** a future session should RAM-probe the display-lag mechanism for
+  a second active ball directly - the bug reproduces with just 2 plain
+  rents and a long-enough dwell, no cursor moves needed (ball 1's own
+  cmdIndex8→9→10 transition around tick 179-188). Once that's fixed,
+  `rent-3picks.json` should build cleanly against the same trace shape
+  already validated here. Confirm-flow implementation
+  (`docs/confirm-flow-notes.md`), exit sequence
+  (`docs/prebattle-room-notes.md`), and S6 remain queued behind this per
+  entry 26.
+- **Notes:** all oracle probing this session was scratch (trace JSON files
+  under `/tmp`, a throwaway `git worktree` for the before/after comparison,
+  a throwaway TS script overlaying candidate ball tiles onto the oracle's
+  own PNG per this issue's established zero-residual-diff method) - nothing
+  uncommitted left in the tree, worktree removed. PAPERCUT: none beyond the
+  usual oracle round-trip overhead; the `git worktree add HEAD~1` +
+  symlink-node_modules/reference trick to run `npm run compare` against a
+  prior commit without disturbing the working tree is worth remembering for
+  future before/after regression checks.
+
+---
+
 ## 28 — ISSUES #7 minimal-pair probes (worker, capped, probe-only): the fifth update's "contradiction" was ITSELF a measurement artifact — P_STALL (HAUNTER, count3/RIGHT/origin3) is RAM-DISPROVEN as a valid data point (count=3 is structurally unreachable via LEFT/RIGHT — completing the 3rd rent exits cursor mode on the same tick); species-only table RESURRECTED with a corrected 2-species safe-list {BAYLEEF, HAUNTER}
 
 - **State:** unchanged from entry 27 — `npm test` **264/264**, `npm run
@@ -148,53 +209,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 26 — Supervisor wind-down: session end 2026-07-17 ~15:20
-
-- **State (verified this minute):** `npm test` **264/264**, `npm run build`
-  green, working tree clean. Traces: `anchor` 1/1, `draft-cursor` 13/13,
-  `draft-menu` 38/38, `draft-menu-slot6` 66/66, `summary-info-onix`
-  122/122, `summary-info-magby` 132/132 — all 0 diff — and `rent-slot1`
-  125/139 (gap 100% attributed to ISSUES #5). ROADMAP: S1-S3 [x], S4 [~]
-  (slice 1 closed, remainder deferred behind S5 by supervisor re-scope),
-  S5 [~], S6-S9 [ ] with heavy groundwork banked.
-- **Session summary (supervised, ~10:54-15:20):** 9 main-lane worker steps
-  + 7 worktree-lane steps, all verified. Landed: MAGBY summary trace (S4
-  "≥2 slots" met); RENT/DESELECT + single-ball rock/idle RNG-exact
-  (`rent-slot1.json`); ISSUES #5 root-caused (WIN0V cycle jitter,
-  unmodelable at tick level — POLICY QUESTION TO USER, still open);
-  multi-ball stall model (ISSUES #6 fixed: text-print stall) + two latent
-  ballAnim timing bugs; post-confirm cursor-input gate fixed
-  (`isCursorInputReady`); species-name-breathe rule pinned (no model
-  needed under 105 cursor-mode ticks). Groundwork merged: moves/exp/items
-  data, pre-battle-room scene (composite-verified 0/38400px), S6
-  battle-bringup dossier + battle-1 assets + all 12 transition variants,
-  S5 confirm-flow dossier, S7 turn-1 ground truth (RAM-truthed damage/
-  order/HP-drain). Two PAPERCUTS entries added.
-- **DECISIONS (user delegated to supervisor, 2026-07-17 ~15:10):**
-  (1) ISSUES #5 policy: 0-diff stays the bar; re-time committed traces
-  into jitter-clean windows where feasible; otherwise ship with every
-  non-matching frame individually attributed to #5's documented pattern.
-  #5 is now a settled policy note, not an open bug. (2) ISSUES #7:
-  continue as DATA-DRIVEN empirical modeling (per-species stall table,
-  context-validated via RAM probes) — the "no per-species lookup" guard
-  is overruled because this race perturbs the RNG stream (unlike #5's
-  pixel-only jitter) and must be exact for the S5-exit→transition path;
-  an oracle-derived table has the same epistemic status as the engine's
-  other pinned empirical constants. Supervisor's own width check
-  sharpened this: ALL uppercase glyphs are 6px in font-normal, so
-  name/category pixel-width and char-count theories are ALL dead
-  (BAYLEEF total 11 chars sits between stalling HAUNTER 10 and MAGBY
-  14); and every "count-dependent" data point is species-confounded
-  (each non-stalling move entered BAYLEEF) — species alone may be the
-  entire cursor-move rule.
-- **Next:** worker in flight implementing the per-species stall table +
-  rent-3picks.json; then confirm-flow implementation
-  (docs/confirm-flow-notes.md), exit sequence
-  (docs/prebattle-room-notes.md), S6 off its dossier + assets.
-- **Notes:** every worker ended at a green commit; no usage-limit events;
-  parallel worktree lane ran 6 extraction/scout steps concurrently with
-  zero merge conflicts.
-
----
 
 

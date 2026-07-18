@@ -5,613 +5,81 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #7 — `ballAnimStall`'s LEFT/RIGHT branch is wrong once 2+ balls are
-  simultaneously active (**sixth worker update: the "contradiction" that
-  drove the fifth update's stop was ITSELF a measurement artifact - the
-  fourth update's own P_STALL data point (HAUNTER, count3/RIGHT/origin3,
-  "stalls") is RAM-DISPROVEN AS A VALID READ: completing a 3rd rent
-  irreversibly exits cursor mode into the YES/NO confirm screen on the SAME
-  tick, so a count=3 LEFT/RIGHT move is impossible in the real game - R5's
-  cursor never actually reached slot4. With that point discarded, the
-  species-only table is RESURRECTED with a corrected 2-species safe-list**
-  {BAYLEEF, HAUNTER} never stall; {MAGBY, BUTTERFREE, ONIX, QUILAVA} always
-  stall - fits every remaining valid data point (counts 1-2, both
-  directions, multiple origins). Fix not yet implemented (this was a
-  probe-only step); no per-species table was coded. Blocks
-  `rent-3picks.json`. The separate post-confirm cursor-input-drop bug this
-  entry previously flagged is FIXED (`isCursorInputReady`, see PROGRESS); a
-  fresh repro just needs any dwell `>= 20 ticks` after a confirm's
-  press-tick before the next cursor move (`isCursorInputReady`'s own
-  RAM-verified minimum) to avoid it entirely.
+## #7 — `rent-3picks.json` still blocked: a SECOND, narrower ball-render bug
+  (a second active ball's own display-tile lags real hardware by 1 tick
+  around its cmdIndex8→9→10 moving-cadence transition), unrelated to the
+  LEFT/RIGHT stall rule this entry used to be about.
 
-**Symptom:** building the 3-pick dense trace (rent slot1 → RIGHT → rent
-slot2 → RIGHT → rent slot3, each rent = `A`(2f) idle28f `DOWN`(2f) idle4f
-`A`(2f), same shape as the committed `rent-slot1.json`, confirms landing at
-press-ticks 37/113/189) surfaces `npm run compare` diffs at **ball OBJ
-positions** (bbox e.g. x57-77/y54-73 = slot index 1's ball, x22-42/y54-73 =
-slot index 0's ball) during plain idle dwell with no button held - i.e. well
-outside any `CloseMonPic` popup-close window (which is confined to the
-`x88-151` mon-pic-bg blend region per ISSUES #5's own scope). This is
-exactly the "diffs at ball positions outside close windows" case the S5
-worker brief calls out as "a model bug, investigate, don't attribute."
+**The LEFT/RIGHT stall rule itself is FIXED** (worker, this session):
+`ballAnimStall`'s cursor-move branch now stalls every active ball only when
+the entering slot's species is outside `{BAYLEEF, HAUNTER}`
+(`cursorMoveStallsBalls`, `factoryDraftScreen.ts`) - the corrected 2-species
+safe-list from the prior "sixth worker update" (12/12 RAM data points, zero
+exceptions; full evidence table was in this entry's history, now pruned -
+see git log for `factoryDraftScreen.ts`/this file around 2026-07-17 if
+needed). Pinned with `tests/ballAnimSpeciesStall.test.ts` (6 tests) against
+the RAM-derived checkpoints (Probe A: action ticks 79/121/163/205, decisive
+HAUNTER-no-stall window 203→207; Probe C: count=2 HAUNTER-no-stall windows
+276→284 and 275→307). RENT/DESELECT confirms are unchanged (always stall
+every other active ball, species-independent). `npm test` 270/270, build
+green, `rent-slot1.json` re-verified still 125/139 (no regression).
 
-**Root-cause method (evidence, reproducible):** rather than trusting
-`ballAnimTile()`'s own internal state, cloned the *oracle's own PNG* for a
-mismatched frame and overlaid each of the ball's 3 candidate anim tiles
-(0/16/32, `pokeball.selectedPalette`) directly onto it via `drawSprite`
-(same call the renderer uses) - the **correct** tile is the one whose
-overlay produces **zero residual diff** against the untouched oracle frame
-(a same-bitmap-on-itself no-op; any other tile leaves nonzero diff both from
-its own different pixels AND stale edge pixels from the ball graphic
-underneath). This cleanly separates "which tile is objectively correct" from
-this engine's (possibly wrong) internal state, with no RAM access needed.
-Results for the specific trace above:
-- **frame 124, ball index 1** (rented at confirm-2, press-tick 113 - only 11
-  ticks earlier): true tile = **32**; engine's `ballAnimTile` = **0**.
-- **frame 155, ball index 0** (rented at confirm-1, press-tick 37, 118 ticks
-  earlier - well past `ballAnimMultiBall.test.ts`'s scenarios, which only
-  probe to frame ~260 total but only under a SINGLE cross-ball stall event
-  at a time): true tile = **32**; engine = **0**.
-- **frame 163, same ball 0**: true tile = **0**; engine = **32** (i.e. the
-  engine is sometimes *behind* and sometimes *ahead* of the correct phase by
-  this point - not a constant offset).
+**But `rent-3picks.json` still can't ship clean** - building the exact
+PROGRESS-archive #21 trace (rent slot0 → dwell36 → RIGHT into MAGBY (stalls,
+action tick 75) → rent slot1 → dwell36 → RIGHT into BAYLEEF (no stall, action
+tick 151, now correctly modeled) → rent slot2, confirm press-tick 189) and
+running `npm run compare` (scratch trace, captures 0-245, not committed)
+surfaces:
 
-**Why this looks like a genuinely untested scenario, not a regression of the
-ISSUES #6 fix:** by frame ~145 this trace has moved the cursor with `RIGHT`
-a *second* time (slot 1 → slot 2) while **two** balls (index 0 and 1) are
-simultaneously rented - i.e. one trigger's `ballAnimStall` must stall *two*
-already-active balls at once. `tests/ballAnimMultiBall.test.ts`'s own
-"two-ball scenario" (the only multi-ball RAM-pinned case) never reaches this
-shape: it only ever has a trigger stall exactly **one** already-active ball
-(ball 0, from either the slot-2 `RIGHT` move or the slot-2 `RENT`-confirm,
-never both at once). Ball 0 in the new repro above has accumulated **three**
-stall-worthy trigger events by frame 163 (the `RIGHT` to slot 2, the slot-2
-`RENT`-confirm, and the `RIGHT` to slot 3 - the last one shared
-simultaneously with ball 1) - the two-simultaneous-stall case is completely
-unverified. Separately, ball 1's own frame-124 mismatch (only 11 ticks after
-its *own* confirm, before any second `RIGHT` exists yet) hints there may be
-a second, independent gap in how a freshly-rented ball's settle/roll timeline
-interacts with a same-tick stall applied to some *other* ball - these two
-sub-symptoms were not disentangled this session.
+- **Frames 168-170, 189: DIFF confined to x88-151** (the mon-pic-bg blend
+  window) - matches ISSUES #5's already-accepted WIN0V-jitter pattern
+  exactly (same bbox, same class), fine per #5's settled policy.
+- **Frames 180 and 188: DIFF at x56-76/y54-73 (176px each) - OUTSIDE
+  x88-151, at ball-index-1's (MAGBY) own OBJ position.** This is the
+  brief's explicit stop condition ("diff at ball OBJ positions or otherwise
+  outside a close window means the stall model is still wrong").
+- **Frames ≥190: diff explodes immediately** (949px at 190, growing to
+  13271px by 234+, bbox spreading up to x239/y32-156) - the "Are these three
+  POKéMON OK?" YES/NO reveal chain (unimplemented screen, out of scope per
+  entry 26) starts diverging essentially the very next tick after the 3rd
+  confirm, not gradually - confirms the trace's own captures must end
+  strictly at or before tick 189 (189 itself is clean/#5-attributable; 190+
+  is not).
 
-**Not attributable to ISSUES #5:** confirmed by bbox location alone (ball
-OBJ tiles, not the `x88-151` mon-pic window) - independently cross-checked by
-the overlay method above, which needs no popup/window state at all.
+**Root-caused the 180/188 diff, confirmed NOT a stall-model bug:**
+cross-checked via `git worktree` against the pre-this-session commit (before
+the species-key fix landed) - the 176px diff at 180/188 is **byte-identical
+before and after the fix**, so it isn't caused by (or fixable via) the
+LEFT/RIGHT stall rule at all. Ball 1 (MAGBY, rented at confirm press-tick
+113) experiences zero stall triggers between its own selection and tick 188
+(RIGHT into BAYLEEF at tick 151 is correctly a no-stall event for it too,
+confirmed identical before/after the fix) - pure zero-stall arithmetic from
+`MOVING_CMDS`' fixed durations independently predicts its internal `cmdIndex`
+reaches 9 at tick 179 exactly, which **matches the engine's actual internal
+state** (verified via a scratch replay). The bug is specifically in the
+**display tile**, not the internal/RNG-critical cmdIndex: overlaying each
+candidate ball tile (0/16/32) onto the oracle's own frame-180 PNG (same
+zero-residual-diff method as this entry's original "second worker update")
+shows the oracle displays tile **16** at frame 180 and tile **0** at frame
+188, while the engine (per `ballAnimTile`'s documented 2-tick display lag)
+still shows the *previous* tile at each of those frames, catching up exactly
+1 tick late (engine shows tile 16 starting frame 181, not 180; tile 0
+starting frame 189, not 188). So `ballAnimState.displayTile`'s "always
+exactly 2 ticks behind" constant (`ballAnim.ts` header doc) isn't exactly 2
+for this transition on a second simultaneously-active ball - it's 1. Not
+root-caused further this session (why the lag varies is unknown - possibly
+the same class of composition gap this entry originally suspected before
+being redirected to the LEFT/RIGHT stall question).
 
-**Status (superseded by the "second worker update" below - kept for the
-original evidence trail):** the two/three-simultaneous-stall question this
-section raises is now answered (see below): real hardware stalls *every*
-simultaneously-active ball per trigger, exactly matching `ballAnimStall`'s
-existing `activeSlotsBeforeAction` formula - no fix needed there. The
-frame 124/155/163 pixel mismatches are real but traced to something more
-specific (a ball's own reroll-timer desync after 4+ accumulated stalls, RAM
-evidence starts at tick 204) - see "Status" at the end of this entry for the
-current next-step.
-
-**Blocks:** `rent-3picks.json` (needs a 2-ball-then-3-ball dwell window to
-assert ball-rock churn per the S5 brief) and the accompanying 3-ball
-`gRngValue` Tier-1 RAM-pin (would either pin a known-wrong stream or require
-fixing this first) - neither was committed this session; see `PROGRESS.md`.
-
-**First worker update (superseded - the cursor-input-drop bug it found is
-now fixed):** a prior session's 10-tick-dwell probe hit a *separate* bug -
-real hardware drops a post-RENT-confirm cursor move sent too soon - and
-never reached this issue's own question. That bug is now root-caused, fixed,
-and Tier-1-pinned: `isCursorInputReady` (`src/engine/monPic.ts`), gating
-`core.ts`'s cursor-mode branch on `monPic.phase === "closed"` (mirrors
-`isMonPicInputReady`'s open-side gate). RAM-verified exact boundary
-(`sFactorySelectScreen->monPicAnimating`, empirically-found struct offset
-672 - NOT the naive `12 + 108*6 + 3*2 = 666` computed from the struct's
-declared field sizes, so something in that layout has an unaccounted 6
-bytes; re-derive by byte-scanning if this offset is ever needed again):
-replaying `RENT_SLOT1` (confirm A press-tick 37), a `RIGHT` sent tick 56 is
-dropped (`cursorPos` stays 0); tick 57 (the tick `monPicAnimating` first
-reads FALSE) is accepted. See `tests/cursorInputGate.test.ts`.
-
-**Second worker update (same session, after the fix above): the
-two/three-simultaneous-stall rule itself is CONFIRMED CORRECT as already
-implemented - `ballAnimStall`'s existing `activeSlotsBeforeAction` formula
-(stall *every* currently-active ball, not just one) generalizes exactly
-right up to a `cursorPos`-desync boundary that turned out to be OUT OF
-SCOPE. The real, still-open bug is narrower and different: a ball that has
-accumulated several stall events develops a 1-tick internal desync in its
-own resting→moving reroll schedule, first observed at tick 204 of the repro
-below. Do not guess a fix for this narrower bug without further RAM data -
-see "Status" below.**
-
-Built a fresh 3-ball repro (RAM probe, `tools/extract/inspect-anchor.py`
-pattern, dumping `gSprites[ballSpriteId].data[0]`/`animNum`/`animCmdIndex`/
-`animEnded` (empirically-verified struct-Sprite offsets `0x2A`/`0x2B`/`0x2E`/
-`0x3F` bit `0x10`, `sizeof(struct Sprite)` = `0x44`) + `gRngValue`
-tick-by-tick, cross-checked against a matching engine replay of the
-identical button script) using a **≥40-tick dwell before every cursor
-move** (well past the 20-tick gate above): rent slot0 → dwell40 → `RIGHT` →
-rent slot1 (now 2 balls simultaneously active) → dwell40 → `RIGHT` (the
-critical trigger: 2 already-active balls) → rent slot2 (3 balls active).
-**Result: `gRngValue` matches bit-exact between RAM and engine on every one
-of 37 sampled ticks spanning both the pre-trigger and post-trigger window
-around the 2-active-ball `RIGHT`** - i.e. `ballAnimStall`'s current
-"stall everyone active" formula already handles 2 (and, per the 3-ball
-window sampled after slot2's rent, 3) simultaneously-active balls exactly
-right. (A further probe tick pressing `RIGHT` a 3rd time, past the 3rd/final
-rent, showed a real `cursorPos` divergence at that point - but this is
-`Select_OptionRentDeselect` returning `SELECT_CONFIRM_MONS` and handing off
-to `Select_Task_HandleYesNo` once all `FRONTIER_PARTY_SIZE` picks are made
-(:1949-1970, :1615-1619) - the reveal/YES-NO screen this run's brief
-explicitly keeps out of scope, not a `ballAnimStall` bug. No further cursor
-input is legal after the 3rd confirm in the real game either.)
-
-**Then reproduced ISSUES #7's original pixel symptom directly**, using a
-script shaped like entry 21's own repro (36-tick dwells, confirms landing at
-press-ticks 37/113/189 - `npm run compare` on a scratch trace, deleted after,
-not committed): frame 124 (173px DIFF), frame 155 (173px), and frame 163
-(173px) all still mismatch - so this issue is NOT resolved by the
-cursor-input-gate fix alone; the pixel symptom is real. Cross-referencing
-against the RAM/engine `gRngValue` dump of the *same* button script (a
-different script than the clean-generalization repro above - this one keeps
-the original 36-tick dwells rather than 40): **the two streams match
-bit-exact for all 204 ticks from frame 1 through 203** (spanning both
-cursor-move triggers and the 3rd rent, i.e. everywhere the pixel-mismatch
-frames 124/155/163 themselves land - so those specific pixel diffs are
-NOT yet explained by any `gRngValue`-visible state divergence at that point;
-they may be a rendering-only lag/offset rather than a stall-count error, or
-the divergence found below may propagate backward into earlier frames'
-*rendering* without yet showing in gRngValue - not disentangled this
-session). The streams then diverge for the first time at **tick 204**:
-RAM shows ball 0 completing a resting→moving reroll this tick
-(`animCmdIndex` 16→0, `animEnded` 1→0) and ball 1 advancing its moving cycle
-normally (`animCmdIndex` 11→12); the engine has **neither** transition fire
-- both stay parked one tick behind where RAM already is, only catching up
-the following tick. By tick 204, ball 0 has accumulated **4** cumulative
-stall events (the first `RIGHT`, confirm2, the second `RIGHT` shared with
-ball 1, and confirm3 shared with ball 1 again) - more than
-`ballAnimMultiBall.test.ts`'s own pinned cases ever reach (max 2). This
-looks like the `REST_INTERNAL_OFFSET`/`FAILURE_REROLL_DELAY` internal-timing
-machinery (`ballAnim.ts`) not composing correctly once a ball's rest-timer
-countdown has itself been stalled multiple times by other balls' triggers
-along the way, but this was not root-caused this session - RAM data stops
-at tick 204's discovery, not yet enough to derive the correct formula.
-
-**Status (superseded again - see "third worker update" below):** the
-tick-204 mystery is now fully explained and the actual wrong rule is
-identified precisely - it is NOT a "4th accumulated stall composes wrong"
-internal-counter bug, it's that `ballAnimStall`'s LEFT/RIGHT branch
-over-applies once 2+ balls are simultaneously active. No fix has been
-implemented yet (ran out of session time deriving *why*, see below) -
-next session can likely go straight to a fix with the evidence already in
-hand.
-
-**Third worker update: found and fixed a bystander bug in every prior
-session's own RAM-probe methodology (wrong `struct Sprite` offsets), then
-used the corrected probe to fully resolve the tick-204 mystery - the ball
-DOES desync, but not from an internal-counter composition error: `ballAnimStall`'s
-"stall everyone active" rule is RAM-DISPROVEN for LEFT/RIGHT triggers once
-2+ balls are simultaneously active (RENT/DESELECT-confirm triggers are
-unaffected and still correct). This directly contradicts the "second worker
-update"'s own "RAM-CONFIRMED CORRECT" verdict above - that verdict was
-built on a probe using the same wrong offsets fixed here, and/or a sample
-window too narrow (37 ticks right around the trigger) to reach the ~30-tick-
-later transition where the missing stall would first become visible.**
-
-**The offset bug:** every prior session's RAM probe (this entry's own text
-above, `PROGRESS.md`/`PROGRESS-archive.md`) cited `struct Sprite` offsets
-`animNum`=0x2B, `animCmdIndex`=0x2E (as a `u8`), `data[0]`=0x2A. Direct
-read of `reference/pokeemerald/include/sprite.h:194-242` (ground truth,
-should have been consulted from the start instead of re-deriving offsets by
-feel) shows the real layout is `animNum` **u8 @0x2A**, `animCmdIndex`
-**u8 @0x2B**, `data[8]` **s16 array @0x2E** (so `data[0]` is a **2-byte
-signed** read at 0x2E, not a `u8`), `animEnded` bit `0x10` of the u16 at
-0x3E (that part was already right). All three non-`animEnded` fields were
-mislabeled/mistyped relative to each other. This doesn't invalidate the
-`gRngValue`-only findings (a separate, unambiguous global address, untouched
-by this bug) but does invalidate any claim in this entry's history that
-reasoned about which *sprite field* moved when.
-
-**Corrected repro + method:** rebuilt entry 21/23's exact original script
-(confirms landing at press-ticks 37/113/189, 36-tick dwells before each
-RIGHT - `A`×2/idle×28/`DOWN`×2/idle×4/`A`×2 per rent, `RIGHT`×2/idle×36
-between rents) against a fresh dev-time RAM probe (`EmeraldOracle`,
-corrected offsets above, dumping `animNum`/`animCmdIndex`/`data[0]` for
-`gSprites[0..2]` + `gRngValue` + `sFactorySelectScreen->cursorPos` every
-tick from an early anchor point through tick ~230; scratch script, not
-committed). Cross-referenced every `MOVING_CMDS`-cadence transition
-(4-or-8-or-32-tick steps, exact durations from `ballAnim.ts`'s own table)
-against its *naive* (zero-stall) expected tick to read off, per ball, per
-trigger, whether that specific trigger's stall-consumption tick (one tick
-after the trigger's own action tick) actually shifted the following
-transition by +1:
-
-| trigger (action tick) | balls active-before-action | ball0 shifted? | ball1 shifted? |
-|---|---|---|---|
-| RIGHT #1 (tick 75) | {0} | **yes** (+1) | n/a (not rented yet) |
-| RENT-confirm #2 (tick 113) | {0} (excl. acted slot 1) | **yes** (+1) | n/a (is the acted slot) |
-| RIGHT #2 (tick 151) | {0, 1} | **no** (+0) | **no** (+0) |
-| RENT-confirm #3 (tick 189) | {0, 1} (excl. acted slot 2) | **yes** (+1) | **yes** (+1) |
-
-`cursorPos` was independently confirmed to move 0→1 and 1→2 on both RIGHT
-presses (not gate-dropped), so RIGHT #2 is a genuine, accepted cursor move
-that simply doesn't cost anyone a tick - unlike RIGHT #1. Ball 0's total by
-tick 204: RIGHT#1 + confirm#2 + confirm#3 = **3** real stalls (not the
-previously-assumed 4, since RIGHT#2 contributes zero) - which lands its
-2nd roll (a FAILURE, same as the single-ball baseline's own frame-201
-FAILURE roll, RAM-pinned in `tests/ballAnim.test.ts`) at exactly
-201 + 3 = **tick 204**, bit-exact with RAM. The current `ballAnimStall`
-code computes a **4th** spurious stall (it still stalls both balls on
-RIGHT #2), predicting the roll one tick later than RAM - exactly matching
-entry 23's own observation ("the engine has neither transition fire - both
-stay parked one tick behind"). Mystery fully closed: this was never an
-internal-counter composition bug, it's this one over-stall.
-
-**Not yet root-caused:** *why* LEFT/RIGHT stops costing anyone a tick once
-2+ balls are active, while RENT/DESELECT-confirm keeps costing every
-non-acted-on active ball a tick regardless of count. Both call the same
-shaped `AddTextPrinterParameterized`+`CopyWindowToVram` pair
-(`Select_PrintMonCategory`+`Select_PrintMonSpecies` vs
-`Select_PrintSelectMonString`), so the mechanism entry 20 proposed (a
-same-tick text-print call stealing the *next* tick's `AnimateSprites()` for
-every other sprite) can't be the whole story as stated - something about
-LEFT/RIGHT specifically must stop applying past 1 active ball.
-
-**Fourth worker update: both the "count-dependent" and "first-event-only"
-hypotheses above are now RAM-DISPROVEN with clean counterexamples (fresh
-probes, same corrected offsets as the third update). Neither active-ball
-count, cursor direction, nor "is this the first-ever cursor move" predicts
-the data; the actual determinant looks like the ENTERING slot's species
-name (a render-cost-dependent race, same *class* of bug as ISSUES #5's
-WIN0V jitter) - not proven down to the exact mechanism, and not fixed. Do
-not hardcode a guess; see "Status" below for what's needed next.**
-
-Built two RAM probes (same `EmeraldOracle` recipe + corrected `struct
-Sprite` offsets as the third update, scratch scripts under `/tmp`, not
-committed): (1) a fresh 4-rent/6-cursor-move trace (slots 0→1→2→3→4,
-40-tick dwells throughout, plus a deliberate **consecutive** RIGHT at
-1-active - two cursor moves in a row with no rent between them, both at the
-same active count - to directly test "count==1 always stalls" against
-"only the very first-ever cursor move stalls"); (2) an exact independent
-re-derivation of entry 21/23/24's own original repro shape (36-tick dwells,
-confirms landing at press-ticks 37/113/189) to cross-check RIGHT#2 rather
-than trust the prior write-up at face value. Both used the cadence-
-transition method (MOVING_CMDS' fixed 4/8/32-tick durations are
-RNG-independent, so any *observed* gap of `duration+1` unambiguously means
-exactly one stall landed in that window - no RNG replay needed).
-
-Results (`t=action tick`, cursor move is `cursorPosBefore → cursorPosAfter`,
-species per the anchor's pinned pool ONIX/MAGBY/BAYLEEF/BUTTERFREE/
-HAUNTER/QUILAVA at slots 0-5):
-
-| trigger | move | active-before | entering species | stalled? |
-|---|---|---|---|---|
-| RIGHT#1 (entry24 repro, t=75) | 0→1 | {0} | MAGBY | **yes** |
-| RIGHT#2 (entry24 repro, t=151) | 1→2 | {0,1} | BAYLEEF | **no** |
-| R1 (fresh probe, t=79) | 0→1 | {0} | MAGBY | **yes** |
-| R2 (fresh probe, t=121, consecutive w/ R1, still 1 active) | 1→2 | {0} | BAYLEEF | **no** |
-| R3 (fresh probe, t=241) | 2→3 | {0,2} | BUTTERFREE | **yes** |
-| L1 (fresh probe, t=283) | 3→2 | {0,2} | BAYLEEF | **no** |
-| R4 (fresh probe, t=325) | 2→3 | {0,2} | BUTTERFREE | **yes** |
-| R5 (fresh probe, t=445) | 3→4 | {0,2,3} | HAUNTER | **yes** |
-
-This kills both remaining hypotheses cleanly:
-- **"count==1 stalls, count>1 doesn't" (H1) is disproven by R2**: exactly 1
-  ball active (only ball 0, same as R1), immediately consecutive with no
-  rent in between, yet **no** stall - count alone doesn't determine it.
-- **"only the first-ever cursor move stalls" (H2) is disproven by R3/R4/R5**:
-  each is the 3rd/5th/6th cursor move of the session (never the first), yet
-  **all** stall.
-- **Directional asymmetry is ruled out**: L1 (a LEFT) and R2/RIGHT#2 (RIGHTs)
-  all enter BAYLEEF and all show *no* stall regardless of direction or which
-  slot was left (R2/RIGHT#2 leave slot 1, L1 leaves slot 3 - different
-  origins, same destination, same (null) result).
-- **"leaving an occupied slot" was a promising 6/6 fit against the fresh
-  probe alone but is directly falsified by RIGHT#2**: it leaves slot 1,
-  freshly rented one confirm earlier (structurally identical timing to R3's
-  own setup, which *does* stall) - same shape, opposite outcome.
-
-What DOES fit all 8 points with zero exceptions: **the ENTERING slot's
-species**. Every move landing on BAYLEEF (3 independent occurrences: R2,
-RIGHT#2, L1 - two different origins, both directions) shows no stall; every
-move landing on MAGBY/BUTTERFREE/HAUNTER (5 occurrences) stalls. Plain
-string length doesn't explain it either (BAYLEEF and HAUNTER are both 7
-characters but land on opposite sides) - `Select_PrintMonSpecies`
-(`battle_factory_screen.c:1879-1891`) computes `x =
-GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 86)`, a **variable-
-width font** pixel-width calculation, so the render/CPU cost genuinely
-depends on which glyphs are in the name, not just its length - a plausible
-mechanism for a cycle-timing race landing on one side of some boundary
-depending on that cost, structurally the same *kind* of bug as ISSUES #5
-(WIN0V register race depending on unrelated per-frame CPU cost), just in a
-different subsystem. `Select_PrintSelectMonString` (the RENT/DESELECT-
-confirm path) prints one of 4 *fixed* strings unrelated to species, which
-would explain why that trigger's stall is count-independent and always
-fires - consistent with every RENT/DESELECT data point gathered so far
-(third update's table + this session's R3/R4 confirms, all still stall
-every non-acted active ball at every count tried).
-
-**Status:** root cause narrowed to "likely a species-name-render-width-
-dependent race on the ENTERING slot," analogous in kind to ISSUES #5 - but
-not proven down to the exact GBA font-metric mechanism, and NOT fixed.
-Implementing it exactly would mean porting `FONT_NORMAL`'s per-glyph pixel
-widths and replicating `GetStringRightAlignXOffset`'s cost model well
-enough to predict which side of the race a given species name lands on -
-a materially bigger lift than the state-machine-level fixes this issue
-has taken so far, and per ISSUES #5's own precedent this class of bug may
-not be modelable at this engine's tick/state granularity at all (as opposed
-to a clean formula that was simply hard to spot). **Do not hardcode a
-per-slot lookup keyed to this one anchor's fixed rental pool as a
-substitute for a real rule** - it would silently break for any other
-species/anchor and isn't asked for. Per this run's own brief: the rule
-still resists a clean derivation, so no `ballAnimStall` code change was
-made this session; `rent-3picks.json` remains blocked.
-
-**Next session, in order:** (1) determine whether the species-render-width
-theory is even testable further without a font-metric port - e.g. RAM-read
-`GetStringRightAlignXOffset`'s actual computed `x` value or the raw
-`REG_VCOUNT` at the `SetGpuReg`-equivalent moment (if any single register
-write is the actual race point here, analogous to ISSUES #5's investigation
-method) directly, rather than inferring it from stall/no-stall outcomes;
-(2) if that confirms a genuine sub-tick hardware race with no tick-level
-proxy (as ISSUES #5 concluded for its own case), close this out the same
-way ISSUES #5 was closed - root-caused, not fixable at this granularity,
-document and move on; (3) if it turns out to reduce to something simpler
-after all (e.g. a specific glyph or byte value, not full font-metric
-simulation), that's the fix. Either way, get sign-off before spending
-further session budget here given two consecutive sessions have now each
-found the prior session's "confirmed" rule wrong on closer data - this
-issue has proven expensive to chase further without new investigative
-tooling (RAM access to the actual race-determining register/variable, not
-just its downstream effect on sprite state).
-
-**Fifth worker update: the supervisor-sanctioned "species-only" table (PROGRESS
-entry 26's DECISIONS block, user-delegated) is RAM-DISPROVEN by a clean
-counterexample this session, per the SANCTIONED APPROACH's own explicit stop
-condition ("if ANY probe contradicts the species-only rule, STOP... do not
-implement"). No `ballAnimStall` code change was made; `rent-3picks.json`
-remains blocked.**
-
-**Method:** same corrected `struct Sprite` offsets as the third/fourth
-updates (`animNum` u8@0x2A, `animCmdIndex` u8@0x2B, `data[0]` s16@0x2E,
-`animEnded` bit 0x10 of u16@0x3E), `ballSpriteId` read directly from
-`sFactorySelectScreen->mons[i].ballSpriteId` (not assumed `== i`) rather than
-inferred from stall outcomes. Two fresh scripts (scratch Python under `/tmp`,
-`EmeraldOracle`, not committed), each with **exactly one active ball**
-throughout (so `activeSlotsBeforeAction` is trivially `[observer]` for every
-LEFT/RIGHT - no multi-ball composition to disentangle) and 40-tick dwells
-between moves:
-- **Script A** (observer = ball0, ONIX, rented via the exact `RENT_SLOT1`
-  shape - confirm action-tick 37, cross-verified bit-exact against
-  `ballAnim.test.ts`'s own frame-39 SUCCESS-roll checkpoint, `data[0]`
-  0→32 at tick 39 in this probe too): four consecutive LEFT moves,
-  slot0→5 (QUILAVA)→4 (HAUNTER)→3 (BUTTERFREE)→2 (BAYLEEF).
-- **Script B** (observer = ball1, MAGBY, rented at slot1): one LEFT move,
-  slot1→0 (ONIX).
-
-Per-move attribution used the same cadence-transition method as the third/
-fourth updates (`MOVING_CMDS`' 4-or-8-or-32-tick durations are RNG-
-independent when no rest/reroll boundary is crossed, so an observed
-transition gap of `duration+1` unambiguously means one stall landed in that
-window), cross-checked at every step against 6-8 *clean, unaffected*
-neighboring gaps in the same run (all matching their table duration exactly,
-confirming the method's calibration before trusting any single reading):
-
-| move | count/dir/origin | prior data for this species | this probe |
-|---|---|---|---|
-| ONIX (script B, slot1→0) | count1/LEFT/origin1 | none (first data point) | **stalls** (gap 73→106 = 33 = 32+1, window contains the only move) |
-| QUILAVA (script A, slot0→5) | count1/LEFT/origin0(wrap) | none (first data point) | **stalls** (gap 72→105 = 33 = 32+1) |
-| HAUNTER (script A, slot5→4) | count1/LEFT/origin5 | count3/RIGHT/origin3 (fourth update, R5): **stalls** | **no stall** (gap 121→129 = 8, exactly matching the unstalled `MOVING_CMDS[11].duration`, flanked by six other clean duration-8/duration-4 gaps in the same run with zero drift) |
-| BUTTERFREE (script A, slot4→3) | count1/LEFT/origin4 | count2/RIGHT/origin2 ×2 (third/fourth updates): **stalls** | inconclusive - lands on the cmdIndex16-exhaustion→resting boundary, whose true unstalled RAM gap isn't independently calibrated in this session's data (observed 171 vs a naive 169; a generic "+1 visible-lag" pattern seen elsewhere in this same probe, e.g. the settling→moving `animNum` flip landing 1 tick after the roll itself, would predict 170 clean or 171 stalled - most consistent with **stalls**, matching prior data, but not as clean a read as the HAUNTER point) |
-| BAYLEEF (script A, slot3→2) | count1/LEFT/origin3 | count1/RIGHT/origin1, count2/RIGHT/origin1, count2/LEFT/origin3 (all): **no stall** | **no stall** (gap 203→207 = 4, clean) - consistent, 4/4 |
-
-`cursorPos` was independently read at every sampled tick (both scripts) and
-confirms every move landed on the intended slot - not a script/gate bug.
-
-**The contradiction:** HAUNTER stalls at (count3, RIGHT, origin=slot3) but
-does *not* stall at (count1, LEFT, origin=slot5) - the entering species
-(HAUNTER, identical both times) is the same, yet the outcome differs. This
-directly falsifies "the entering slot's species alone determines the stall"
-- the SANCTIONED APPROACH this session was asked to complete and implement.
-Combined with ONIX/QUILAVA both cleanly joining the "stalls" set as
-first-time data points (no contradiction there) and BAYLEEF's clean 4/4
-no-stall record, the shape of the data now looks like: BAYLEEF is genuinely
-special (never stalls regardless of anything tried - 4/4 across both
-directions, three different origins, two counts), but the *other* species
-aren't a clean fixed set - something about HAUNTER's specific move context
-(direction, origin/leaving-species, or count) flips its outcome. This
-resurrects the pre-simplification "fourth worker update" theory (a genuine
-render-cost/cycle-timing race, not a clean per-species lookup) rather than
-supporting the simpler table the supervisor's width-check reasoning
-(PROGRESS entry 26) proposed - that reasoning correctly killed the
-character-count/pixel-width theories, but "BAYLEEF is uniquely cheap to
-render" doesn't imply "every other species is uniformly expensive
-regardless of context."
-
-**Not attempted this session:** re-testing HAUNTER a third time (e.g. at
-count1/RIGHT/origin3, isolating direction from the count/origin change
-already made) to see whether direction, origin, or count is the actual
-missing variable - ran out of session budget after finding the
-contradiction, per the brief's explicit stop condition.
-
-**Next session:** do not resume "species-only table" implementation as
-scoped. Options, in rough order of promise: (1) get renewed sign-off on
-whether to chase the finer variable (direction/origin/count in combination
-with species) with a few more targeted single-ball isolated probes (this
-session's method - one active ball, cadence-transition gaps - is cheap and
-reliable, ~15-20 min per targeted re-test); (2) revisit the "fourth worker
-update"'s harder-to-implement render-cost-race theory (`GetStringRightAlignXOffset`
-pixel-width-dependent timing) now that it's no longer superseded by a working
-simpler alternative; (3) if neither converges, treat like ISSUES #5 - root-
-caused as a race, not modelable at this tick granularity, document and ship
-`rent-3picks.json` un-built (or move it out of scope) rather than keep
-re-deriving "confirmed" rules that keep breaking on the next data point (this
-is now the *second* consecutive sanctioned/confirmed rule RAM-disproven by
-the following session - worth flagging to whoever owns the user-delegated
-policy decision for #7, per entry 26's DECISIONS block, that empirical-table
-modeling has not yet produced a rule that survives a fresh probe).
-
-**Sixth worker update (supervisor-mandated minimal-pair probes, per PROGRESS
-entry 27's "Supervisor ruling for the next session"): PROBE A (mandated,
-count differs from P_STALL only) reads clean and decisive as
-NO STALL; PROBE B (mandated, count=3/LEFT/origin5) turned out to be
-IMPOSSIBLE TO CONSTRUCT - and re-deriving *why* directly invalidates
-P_STALL itself as a data point. Full writeup below.**
-
-**Method:** same corrected `struct Sprite` offsets as the third/fourth/fifth
-updates (`animNum` u8@0x2A, `animCmdIndex` u8@0x2B, `data[0]` s16@0x2E,
-`animEnded` bit 0x10 of u16@0x3E), `ballSpriteId` read from
-`sFactorySelectScreen->mons[i].ballSpriteId`, `cursorPos` read from
-`sFactorySelectScreen->cursorPos` (struct field order confirmed against
-`reference/pokeemerald/src/battle_factory_screen.c:102-123`: offset 3).
-Cadence-transition method as before (`MOVING_CMDS`' 4/8/32-tick durations are
-RNG-independent so an observed `duration+1` gap unambiguously means one
-stall), refined this session with a second signal: `data[0]` itself is the
-real hardware's REST COUNTDOWN (set to 32 the instant a SUCCESS roll fires at
-a cycle's start, held constant through the entire 128-tick moving cycle,
-then counted down 32→0 tick-by-tick once the cycle's own cadence exhausts +
-a fixed `REST_INTERNAL_OFFSET`(2) delay - matches `ballAnim.ts`'s existing
-model exactly); a stall shows up directly as a *repeated* `data[0]` value
-across two consecutive ticks during that countdown - a cleaner, more direct
-signal than inferring it from `animCmdIndex` transition gaps alone, and used
-below to cross-calibrate an otherwise-ambiguous read (see BUTTERFREE, PROBE
-A). Scratch scripts under `/tmp/issues7probe/` (not committed): `common.py`
-(shared oracle setup + tick recorder), `probe_a.py`, `probe_b.py`, `probe_c.py`
-(bonus), plus two diagnostic replications.
-
-**PROBE A** (HAUNTER entered at slot4 via count=1/RIGHT/origin=slot3 -
-differs from P_STALL in count ONLY): rent slot0 (ONIX, `RENT_SLOT1` shape,
-confirm press-tick 37 - cross-checked bit-exact against `ballAnim.test.ts`'s
-own frame-39 SUCCESS-roll checkpoint, `data0` 0→32 at tick 39 in this probe
-too), then 40-tick dwells + RIGHT×4 (slots 0→1→2→3→4). Action ticks (RAM,
-`cursorPos` changes): R1=79, R2=121, R3=163, **R4(decisive)=205**.
-
-| move | count/dir/origin | prior data | this probe |
-|---|---|---|---|
-| R1: 0→1 MAGBY | count1/RIGHT/origin0 | known **stall** (calibration) | **stall** (gap 72→105 = 33 = 32+1) |
-| R2: 1→2 BAYLEEF | count1/RIGHT/origin1 | known **no-stall** (calibration) | **no-stall** (gap 113→121 = 8, clean) |
-| R3: 2→3 BUTTERFREE | count1/RIGHT/origin2 | count2/RIGHT/origin2 (3rd/4th updates): **stall** | **stall** - see cross-calibration note below (this read alone lands on the cmdIndex16-exhaustion→rest-wrap boundary, ambiguous on its own; resolved via Probe B's independent RENT-confirm calibration of the same wrap shape, see Probe B section) |
-| **R4 (DECISIVE): 3→4 HAUNTER** | **count1/RIGHT/origin3** | P_STALL: count3/RIGHT/origin3 **stalls** | **NO STALL** (clean, unambiguous: window 203→207, gap 4, exactly matching `MOVING_CMDS[0]`'s duration, landing entirely *after* the wrap has already resolved - cross-checked against 6+ other clean duration-4/8/32 gaps in the same run) |
-
-**PROBE B** (mandated shape: rent slots 0,2,3, navigate to slot5, dwell,
-LEFT 5→4 - HAUNTER count3/LEFT/origin5, differing from P_NOSTALL in count
-ONLY and from P_STALL in {direction+origin} ONLY): **could not be completed
-as specified.** After the 3rd rent (slot3, confirm press-tick 319 in this
-script), `cursorPos` froze at 3 for the remaining 300+ ticks of the run
-despite three further RIGHT/RIGHT/LEFT presses - none registered. RAM read
-of `sFactorySelectScreen->selectingMonsState` after the 3rd rent: **4**
-(not 3). Screenshot at that point shows the "Are these three POKéMON OK?"
-YES/NO confirmation screen, not the draft cursor screen.
-
-**Root cause (reference-confirmed):** `selectingMonsState` initializes to
-**1**, not 0 (so a mon's `selectedId` - set to the *pre-increment* value of
-`selectingMonsState` - is never confused with 0/unselected;
-`Select_HandleMonSelectionChange`, `battle_factory_screen.c:1432-1436`). It
-increments by 1 on every successful rent. `Select_OptionRentDeselect`
-(`battle_factory_screen.c:1949-1968`) checks
-`if (sFactorySelectScreen->selectingMonsState > FRONTIER_PARTY_SIZE) return
-SELECT_CONFIRM_MONS;` **on the very same tick the rent's own confirm
-completes** (`FRONTIER_PARTY_SIZE` = 3, `include/constants/global.h:35`) -
-after exactly 3 successful rents, `selectingMonsState` is 1+3 = 4, `4 > 3` is
-true, and the screen hands off to `Select_Task_HandleYesNo` immediately,
-with **no intervening tick** where "3 balls active AND cursor mode still
-responds to LEFT/RIGHT" exists. This is a hard, structural impossibility,
-not a probe-script bug - confirmed independently via a fresh probe (this
-session's Probe B) AND via an **exact tick-for-tick re-replication of the
-fourth worker update's own original R5 script** (rent0 → R1(0→1) →
-R2(1→2) → rent2 → R3(2→3) → L1(3→2) → R4(2→3) → rent3 → **R5(3→4)**):
-`cursorPos` after the R5 RIGHT press is still **3**, never reaches 4;
-`selectingMonsState` reads 4; the screenshot again shows the YES/NO prompt.
-
-**This directly invalidates P_STALL.** The fourth worker update's R5
-("HAUNTER, count3/RIGHT/origin3, active-before {0,2,3}, stalls") was not a
-genuine `ballAnimStall` LEFT/RIGHT-branch observation - the cursor never
-moved from slot3 to slot4 in the real game at that point in that script; the
-screen had already handed off to the YES/NO confirm. Whatever cadence
-anomaly the fourth update attributed to "entering HAUNTER" was measured
-against an already-exited screen state and is not evidence of anything
-`ballAnimStall`-related. **Every historical count=3 LEFT/RIGHT data point in
-this issue's history is void** (R5 is the only one that was ever claimed;
-no other entry reports a count=3 LEFT/RIGHT read) - count=3 is simply
-unreachable via a legal LEFT/RIGHT cursor move in the real game, full stop.
-
-Bonus data captured by Probe B before hitting the wall (same calibration +
-one new confirmation, all cross-checked against 6+ clean neighboring gaps):
-
-| move | count/dir/origin | prior data | this probe |
-|---|---|---|---|
-| 0→1 MAGBY | count1/RIGHT/origin0 | known stall | **stall** (calibration, matches) |
-| 1→2 BAYLEEF | count1/RIGHT/origin1 | known no-stall | **no-stall** (calibration, matches) |
-| 2→3 BUTTERFREE | count2/RIGHT/origin2, active{0,2} | 3rd/4th updates: stall | **stall** (ball0 gap 33=32+1 AND ball2 gap 33=32+1, both independently confirm) |
-| slot2 RENT-confirm (press-tick 199) | RENT/DESELECT, active{0} | known: always stalls other active balls | **stall** (directly visible: ball0's `data0` frozen at value 2 across BOTH ticks 199 and 200 - the cleanest possible stall signature, used to calibrate the wrap-window baseline and resolve Probe A's ambiguous BUTTERFREE (R3) read above as **stall**, consistent with prior BUTTERFREE data) |
-
-**PROBE C (bonus, added given Probe B's finding):** since count=3 is
-unreachable, re-tested HAUNTER at **count=2** (a legitimately reachable
-state) to check it isn't a fluke of count=1: rent slot0 → R1(0→1 MAGBY,
-stall) → R2(1→2 BAYLEEF, no-stall) → R3(2→3 BUTTERFREE, stall) → rent slot3
-→ **RIGHT (3→4 HAUNTER, count2/RIGHT/origin3, active-before {0,3}, action
-tick 283)**. Result: **NO STALL**, doubly confirmed - ball0's window
-(276→284, gap 8, clean) AND ball3's window (275→307, gap 32, clean) both
-show zero extra ticks.
-
-**Decision-matrix verdict:** this doesn't map cleanly onto the four rows
-sketched going in (all of which assumed Probe B would return a stall/no-stall
-verdict), but it resolves to the closest one: **"P_STALL is the only odd
-point; re-replicate the fourth update's R5 script exactly to check whether
-P_STALL itself was a misread"** - done, and it WAS a misread, for a more
-fundamental reason than a mistimed cadence read (the cursor move behind it
-never happened at all). With P_STALL discarded, HAUNTER now shows **NO
-STALL at every legitimately-tested condition**: count1/RIGHT/origin3 (Probe
-A, this session), count1/LEFT/origin5 (fifth update's P_NOSTALL),
-count2/RIGHT/origin3 (Probe C, this session) - fully consistent with being a
-second "safe" species alongside BAYLEEF, not a contradiction of anything.
-
-**Full keyed data table (every valid LEFT/RIGHT data point across all
-sessions, count=3 entries excluded as unreachable):**
-
-| species | count | dir | origin | stalled? | source |
-|---|---|---|---|---|---|
-| BAYLEEF | 1 | RIGHT | 1 | no | 5th update, this session's R2/Probe A & B |
-| BAYLEEF | 1 | LEFT | 3 | no | 5th update |
-| BAYLEEF | 2 | RIGHT | 1 | no | 3rd/4th update |
-| BAYLEEF | 2 | LEFT | 3 | no | 4th update |
-| HAUNTER | 1 | RIGHT | 3 | **no** | **this session, Probe A (decisive)** |
-| HAUNTER | 1 | LEFT | 5 | no | 5th update (P_NOSTALL) |
-| HAUNTER | 2 | RIGHT | 3 | **no** | **this session, Probe C** |
-| MAGBY | 1 | RIGHT | 0 | yes | 4th update, this session's R1 ×3 |
-| BUTTERFREE | 1 | RIGHT | 2 | yes | this session, Probe A/C (calibrated via Probe B) |
-| BUTTERFREE | 2 | RIGHT | 2 | yes | 3rd/4th update, this session's Probe B |
-| ONIX | 1 | LEFT | 1 | yes | 5th update |
-| QUILAVA | 1 | LEFT | 0(wrap) | yes | 5th update |
-
-**Every row is explained by one variable: the entering slot's species.**
-{BAYLEEF, HAUNTER} never stall (6 occurrences, both directions, 3 origins,
-counts 1-2); {MAGBY, BUTTERFREE, ONIX, QUILAVA} always stall (6
-occurrences). No count, direction, or origin dependence survives once the
-sole count=3 data point (P_STALL/R5) is recognized as void. **The
-species-only table (PROGRESS entry 26's original sanctioned approach) is
-resurrected, with a corrected safe-list of 2 species instead of 1** -
-BAYLEEF's specialness wasn't unique; HAUNTER shares it. RENT/DESELECT
-confirms remain confirmed count/species-independent (always stall every
-other active ball - third update, re-confirmed again this session).
-
-**Not attempted this session (per the ~5-6 probe budget and the brief's
-"report major news and stop" clause):** re-testing ONIX/MAGBY/QUILAVA at a
-second count, or testing a 7th/8th species outside this anchor's fixed pool
-(none exists - only 6 rental slots). Given the clean 12/12 fit above, further
-probing would be confirmatory rather than discriminating.
-
-**Next session:** (1) get sign-off on implementing the corrected 2-species
-safe-list table (`ballAnimStall`'s LEFT/RIGHT branch: skip the stall for
-every active ball when the entering species is BAYLEEF or HAUNTER, keep the
-existing "stall everyone active" formula otherwise), pinned with a Tier-1
-test asserting both safe species' cadence stays clean against this session's
-own RAM-dumped checkpoints; (2) `rent-3picks.json` can then be
-attempted, BUT note Probe B's finding means the exact trace this issue was
-originally chasing (3 simultaneous active balls, a further LEFT/RIGHT move)
-is **impossible in the real game** - `rent-3picks.json`'s own design (per
-PROGRESS-archive #21's spec) should be re-checked against this constraint
-before building it, since any dense capture window assuming a post-3rd-rent
-cursor move would itself be testing an unreachable game state; (3) if a
-per-species table feels uncomfortably ad hoc even with 12/12 fit, the
-render-cost-race theory (`GetStringRightAlignXOffset`) remains a live
-fallback per PROGRESS entry 27's ruling, but is no longer obviously needed
-given the clean fit above.
+**Do not guess a fix.** This is a different, narrower bug than the one this
+entry spent its history on - the LEFT/RIGHT species-stall rule is correct
+and shipped. `rent-3picks.json` remains blocked until a future session
+RAM-probes the display-lag mechanism for a second active ball directly (same
+recipe as this entry's prior sessions: `EmeraldOracle` + corrected `struct
+Sprite` offsets, dump `animCmdIndex`/`data[0]` tick-by-tick for
+`gSprites[1]` across a 2-ball dwell with no cursor moves at all - the bug
+reproduces with just 2 plain rents, no RIGHT/LEFT needed, since it's tied to
+ball 1's *own* cmdIndex8→9→10 transition timing, not to any stall trigger).
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
