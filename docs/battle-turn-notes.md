@@ -256,7 +256,82 @@ battle-frontier-mons.json` (pre-existing, opponent movesets/items/natures).
    LAX_INCENSE/WHITE_HERB on the opponent side — none of these are damage
    modifiers per a quick source skim of `sHoldEffectToType`/the named
    hold-effect checks above, but this was not exhaustively confirmed this
-   session).
+   session). **CONFIRMED exhaustively (S7 worktree lane, follow-up
+   session)**: battle 1's three opponent-side held items, per
+   `battle-bringup-notes.md` §5's already-established assignment table
+   (`FRONTIER_MON_GROVYLE_1`=188→BRIGHT_POWDER, `FRONTIER_MON_MURKROW_1`=184
+   →LAX_INCENSE, `FRONTIER_MON_PIDGEOTTO`=135→WHITE_HERB — moveset
+   cross-check against `battle-frontier-mons.json` confirms these are the
+   *battle-1* table rows, not one of the pool's other same-species rows,
+   e.g. `FRONTIER_MON_GROVYLE_1`'s FURY_CUTTER/ENDEAVOR/BRICK_BREAK/
+   DOUBLE_TEAM moveset matches this dossier's own §8 point 2 rather than
+   index 293's GIGA_DRAIN/CRUSH_CLAW/SCREECH/ROCK_TOMB LUM_BERRY row),
+   resolve via `src/data/items.h` (`gItems[]`) to:
+   - `ITEM_BRIGHT_POWDER`: `.holdEffect = HOLD_EFFECT_EVASION_UP,
+     .holdEffectParam = 10` (`items.h:2191-2192`)
+   - `ITEM_LAX_INCENSE`: `.holdEffect = HOLD_EFFECT_EVASION_UP,
+     .holdEffectParam = 5` (`items.h:2721-2722`)
+   - `ITEM_WHITE_HERB`: `.holdEffect = HOLD_EFFECT_RESTORE_STATS` (no
+     explicit param, defaults to 0) (`items.h:2202`)
+
+   Grepped every occurrence of `HOLD_EFFECT_EVASION_UP` and
+   `HOLD_EFFECT_RESTORE_STATS` across `reference/pokeemerald/src/*.c`
+   (excluding the `items.h` data-table assignments above) — each has
+   **exactly one** engine call site, neither inside `CalculateBaseDamage`:
+   - `HOLD_EFFECT_EVASION_UP` — `battle_script_commands.c:1172`, inside
+     `Cmd_accuracycheck` (:1097-1183, `Cmd_accuracycheck` backs the
+     `accuracycheck` battle-script command every damaging/status move with
+     an accuracy check dispatches through): after the normal
+     stat-stage/ability/weather accuracy calc, `if (holdEffect ==
+     HOLD_EFFECT_EVASION_UP) calc = (calc * (100 - param)) / 100;` where
+     `holdEffect`/`param` are read from **`gBattleMons[gBattlerTarget]
+     .item`** (:1163-1170) — i.e. this is the *target's* held item cutting
+     the *attacker's* hit chance by `param`%. **Confirmed accuracy-relevant
+     as the brief anticipated**: any move directed at Grovyle is rolled at
+     90% of its normal hit chance (10% cut), at Murkrow 95% (5% cut).
+     ROCK_SLIDE's accuracy roll this turn (§3, tick 2182, RNG step 1)
+     targeted Grovyle, so this mechanism was live for that exact roll —
+     the move visibly hit (no `MOVE_RESULT_MISSED`, §2/§5), consistent
+     with either a modified or unmodified 90%-accuracy pass, but the
+     specific `calc` value (pre- vs post-10%-cut) was not RAM-extracted
+     this session to confirm the cut's *magnitude* landed correctly, only
+     that the code path is live for this matchup — a cheap follow-up in
+     the same shape as item 2's, not done this session (time budget).
+   - `HOLD_EFFECT_RESTORE_STATS` — `battle_util.c:3312` (`ITEMEFFECT_ON_
+     SWITCH_IN`), `:3383` (`ITEMEFFECT_NORMAL`), `:3739` (`ITEMEFFECT_
+     MOVE_END`) — all three identical: `for (i = 0; i < NUM_BATTLE_STATS;
+     i++) if (statStages[i] < DEFAULT_STAT_STAGE) statStages[i] =
+     DEFAULT_STAT_STAGE`, i.e. WHITE_HERB (Pidgeotto) resets any *lowered*
+     stat stage back to neutral (6) the first time one of these three
+     check-points runs after the drop, then is consumed (routes to
+     `BattleScript_WhiteHerbEnd2`/`WhiteHerbRet`, which remove the item —
+     not traced further this session, out of scope). **Stat-stage-
+     relevant, not a damage modifier directly** — but since stat stages
+     feed `CalculateBaseDamage`'s `APPLY_STAT_MOD` (:3238-3257), a future
+     S7 slice modeling a turn where Pidgeotto gets its Attack/Defense/etc.
+     lowered (not this turn — Pidgeotto never battles in this dossier's
+     traced turn) needs this rule to get subsequent damage right.
+   - `sHoldEffectToType[]` (`pokemon.c:1919-1938`, the type-boost lookup
+     `CalculateBaseDamage` uses at :3171-3182) — 18 entries, all
+     `HOLD_EFFECT_*_POWER` constants (bug/steel/ground/rock/grass/dark/
+     fighting/electric/water/flying/poison/ice/ghost/psychic/fire/dragon/
+     normal power) — **`HOLD_EFFECT_EVASION_UP` and `HOLD_EFFECT_
+     RESTORE_STATS` are absent**, confirming by exhaustive table
+     inspection (not just "not found by name-grep in the function body")
+     that neither item can hit this path.
+   - **Net: none of BRIGHT_POWDER/LAX_INCENSE/WHITE_HERB touch
+     `CalculateBaseDamage` anywhere — confirmed, not assumed.** BRIGHT_
+     POWDER/LAX_INCENSE are exclusively accuracy-relevant (one call site);
+     WHITE_HERB is exclusively stat-stage-relevant (three call sites, same
+     rule). Extracted as data since the accuracy path is real:
+     `tools/extract/extract-item-hold-effects.ts` →
+     `src/data/gen/item-hold-effects.json` (70 items with an explicit
+     `.holdEffect`, `{item, holdEffect, holdEffectParam}`; items with only
+     a stray `.holdEffectParam` and no `.holdEffect` — e.g. `ITEM_POTION`
+     — correctly excluded, since an unset `.holdEffect` designated-
+     initializer defaults to `HOLD_EFFECT_NONE` and no switch/case ever
+     reads that param), pinned by `tests/itemHoldEffects.test.ts`,
+     re-run-verified byte-identical.
 2. **Status-move effect tables** (stat-stage deltas, evasion/accuracy
    stage math) — DOUBLE_TEAM this turn only *changed* battler 1's evasion
    stage; this dossier did not RAM-read `gBattleMons[1].statStages[]`
