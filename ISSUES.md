@@ -5,114 +5,75 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #8 — confirm-flow reveal render: real diffs remain past the wide-window's opening, root cause not yet identified (BG3 content + tick boundaries now RAM-verified; a 3rd, different-shaped gap remains)
+## #9 — confirm-flow YES/NO dwell: multi-ball `SpriteCB_Pokeball` timing drift over a long undisturbed 3-ball idle, never exercised by any committed trace
 
-**Symptom (narrowed this session):** the two leads this issue originally
-opened with are now **closed** (see Confirmed below) — `bg3ColorTiled`'s
-tiled approximation is replaced with real VRAM-extracted content, and
-`confirmReveal.ts`'s window-hold boundary got a RAM-verified fix. Rebuilding
-`confirm-flow.json` (rent-3picks.json's exact button prefix + idle to frame
-279) and running `npm run compare` shows the diff magnitude drop sharply
-(was 1000-5000px/2-14% starting ~confirm+34; now mostly 30-950px/0.1-2.5%,
-with two outlier frames still in the old range) — real, substantial
-progress, but **not yet 0-diff-modulo-ISSUES-#5**, so the trace was again
-**not committed** per the brief's stop condition. Frames 185-188 (dense
-continuity with rent-3picks.json's own 0-189 coverage) match exactly; every
-frame from 189 (the confirm tick itself) onward through 279 (last capture)
-has a nonzero diff. Bboxes/samples (`tools/compare/out/latest`, this
-session, not committed):
-- frame 189: 107px, small — plausibly a 1-tick boundary nuance right at the
-  confirm tick itself, not investigated further.
-- frame 190: 949px, bbox x88-223/y32-156 — app renders bright yellow
-  `(255,222,0)` at e.g. (89,32) where oracle shows `(210,230,164)`; this is
-  **during the flash phase** (confirm+1), and y=32 is nowhere near the flash
-  bar's own y=64 row, so this looks like a *different*, likely pre-existing
-  code path (the 3rd pick's own `monPic` close-window rendering, which
-  `rent-3picks.json` never exercised past its own frame 189) — not
-  diagnosed further this session.
-- frame 191: 2922px, bbox x88-239/y36-143 — same yellow-vs-oracle mismatch,
-  larger.
-- frame 233 (the "shown" transition tick under the corrected model): 4058px,
-  bbox x21-218/y34-140 — app shows grayscale-ish tones (e.g. `(132,123,123)`
-  at (51,34)) where oracle shows `(210,230,164)`; likely related to the
-  1-2 tick stagger this session's RAM probe found between real hardware's 3
-  chosen-mon sprites (slot0 appears 2 ticks before, slots1-2 one tick
-  before, this engine's single `monsAndYesNoVisible` flag flips) - not yet
-  modeled, see Confirmed.
-- frame 249 (steady YES/NO dwell): 81px, bbox x158-199/y116-139 — app shows
-  red `(255,0,0)` where oracle shows white `(255,255,255)`, near the YES/NO
-  box's own text/cursor area — unrelated in location/color to either of the
-  above, a 3rd distinct gap.
-- **Ruled out:** none of these match ISSUES #5's own signature (x88-151
-  confinement, 512px/frame-scale window-growth jitter) — different bboxes,
-  different magnitudes, different (non-jitter-like: solid wrong colors, not
-  partial-window blends) failure shape. Not attributable to that policy.
+**Symptom:** rebuilding `confirm-flow.json` (rent-3picks.json's exact button
+prefix + idle to frame 279, dense captures 185-279) after fixing ISSUES #8's
+3 gaps (see PROGRESS #34) still leaves periodic diffs scattered through
+BOTH the reveal window (confirm+16 to confirm+40ish) and the settled YES/NO
+dwell (confirm+48 onward through the last capture, frame 279) — every one
+confined to a single rented ball's own 32x32 OBJ region (never the window,
+text, or flash-bar pixels, which are all now clean), and every one small
+(36-180px). This is a **4th, distinct** gap from #8's 3 (which were about
+the reveal's own window/sprite/text rendering, all now fixed) — it's the
+pre-existing `ballAnim.ts` model (already RAM-verified for shorter,
+input-interrupted multi-ball windows by the now-closed ISSUES #6/#7) being
+exercised, for the first time in any committed trace, by ~90 continuous
+ticks of 3-balls-simultaneously-idle with **no cursor/menu input at all**
+to periodically resync it. Not attributable to ISSUES #5 (wrong region:
+ball OBJ pixels, not the WIN0 window; wrong shape: small steady blips, not
+a shrinking/growing transient).
 
-**Confirmed this session (leads 1-2 from the prior write-up, both closed):**
-1. **BG3 wide-window content, RAM/VRAM-verified and fixed.**
-   `Select_InitBgs` (`battle_factory_screen.c:1202-1206`) calls
-   `CopyToBgTilemapBufferRect(3, sMonPicBg_Tilemap, X, 4, 8, 8)` for
-   `X ∈ {11, 2, 20}` — i.e. it copies the *same* already-extracted 8x8
-   tile block to 3 disjoint tile-column anchors (x=16/88/160) **once at
-   screen init**, unconditionally; two 8px gaps (x80-88, x152-160) are never
-   written and stay transparent (`AllocZeroed`). Direct VRAM dump (scratch
-   probe, mapBaseIndex 27 → VRAM 0x0600D800, rows 4-11) confirmed this
-   tile-for-tile, byte-for-byte. Fixed: `extract-factory-screen.ts` now
-   emits a `wideTilemap` field (26x8) in `mon-pic-bg.json` with the real
-   3-block+2-gap geometry; `monPicRender.ts`'s `bg3ColorTiled` (continuous
-   64px-period tiling, anchored wrong) is replaced with `bg3ColorWide`
-   (reads the real wideTilemap).
-2. **`confirmReveal.ts`'s window-hold boundary, RAM-verified and fixed.**
-   Direct `REG_DISPCNT`/`REG_WIN0V` + `gSprites[]` reads (scratch probe,
-   sprites located by known screen position, not struct-offset guessing)
-   across the whole reveal found `Select_Task_OpenChosenMonPics`' case0
-   (WIN0 on, degenerate 64,65 window) and case1 (`ShowBg(3)`/`BLDCNT` setup,
-   no window change) are **2 separate ticks**, not 1 as originally modeled
-   — real hardware holds the degenerate window for 2 ticks before the
-   8-tick growth starts, one tick later than previously implemented.
-   `WINDOW_STEPS` gained an extra `{64,65}` entry (old→new: `[64/65,
-   60/69, 56/73, 52/77, 48/81, 44/85, 40/89, 36/93, 32/96, 32/96, 32/96]`
-   → `[64/65, 64/65, 60/69, 56/73, 52/77, 48/81, 44/85, 40/89, 36/93,
-   32/96, 32/96]`, same 11-entry length so the flash→window→shown overall
-   tick budget is unchanged, only the content of indices 1/8/9/10 shifted).
-   The flash-phase boundary (13 ticks incl. 1-tick creation lag) was
-   independently re-confirmed exact (sprite creation at confirm+19, all 3
-   border sprites' `affineAnimEnded` simultaneously true at confirm+31,
-   matching the existing 12-entry `FLASH_WIDTHS` table with no change
-   needed).
-3. **New, not-yet-modeled real behavior found along the way:** the 3 chosen
-   mon sprites do **not** all appear on the same tick real hardware-side —
-   `Select_CreateChosenMonsSprites()`'s sprite-creation loop shows slot0 (x16)
-   one tick *before* slots1-2 (x88/x160) in the RAM probe (confirm+41 vs
-   confirm+42) — `confirmReveal.ts`'s single `monsAndYesNoVisible` boolean
-   collapses this to one tick (matching slots1-2, not slot0). Mechanism not
-   diagnosed (plausibly a `RunTasks`/sprite-creation-loop ordering artifact,
-   same family as other 1-tick OAM-vs-window lags already documented
-   elsewhere in this codebase) — likely contributor to frame 233's diff.
-4. The BG3 wash was confirmed (pixel-sampled, several frames through
-   confirm+69) to stay visible **permanently** through the settled YES/NO
-   idle, not just during the window's growth — `confirmReveal.ts`'s
-   existing "shown"-phase `window` field (already non-null) already models
-   this correctly; no change needed there.
+**Confirmed (this session, via `tools/compare` + oracle diffing, scratch
+`confirm-flow.json` not committed):**
+- All 3 rented balls are implicated at different times, not just one:
+  frames 205/209/213/217/221/225/229 (bbox x21-42/y54-73, ~170-180px each,
+  every 4 ticks) match ball **slot0**'s own 32x32 region (`ox=35*0+32-16=16`
+  per `factoryDraftScreen.ts`'s ball layout); frames 237/254/258/270/274
+  (bbox x69-77/y60-73, 45px) and 246/250/262/266 (x69-76/y61-73, 36px)
+  match **slot1**'s region (`ox=51`); frames 256/264/272 (x91-110/y54-73,
+  143-151px) match **slot2**'s region (`ox=86`).
+- Not a regression from this session's ISSUES #8 fixes: the same pattern
+  (with the same bboxes) is already present, byte-for-byte, in the
+  *pre-fix* `npm run compare` run from earlier this session — the old
+  font.ts bg-overrun bug (ISSUES #8 gap 3, since fixed) added a constant
+  +30px to every dwell frame's count on top of it (e.g. old frame 256's
+  181px = new 151px + the old bug's 30px), confirming the two are
+  independent and this one predates every change committed this session.
+- `core.ts`'s per-tick ball-anim loop is unconditional and un-gated by
+  `confirmed`/`confirmReveal` state (by design, RNG-critical per
+  `docs/confirm-flow-notes.md` §4) — `ballAnimStall` is freshly computed
+  `[]` every tick with no cursor/menu input to ever populate it during this
+  window, so the existing per-ball `advanceBallAnim` state machine
+  (`ballAnim.ts`) runs fully undisturbed for the whole ~90-tick stretch -
+  the first time any committed trace has exercised that for this long with
+  all 3 slots simultaneously active.
 
-**Leads (renumbered):**
-1. Diagnose frame 190/191's yellow-pixel mismatch — likely in the 3rd
-   pick's own `monPic` close-window rendering during ticks confirm+1/+2,
-   territory `rent-3picks.json` never reached (it stops at frame 189).
-   Cross-check against `monPic.ts`'s `CLOSE_TABLE_B` + `monPicRender.ts`'s
-   narrow-window `drawMonPic` path with a dense oracle capture of exactly
-   these ticks.
-2. Model the slot0-vs-slots1/2 1-tick creation stagger found in Confirmed
-   item 3 (RAM-verify the exact mechanism first, not just the offset) and
-   re-check frame 233.
-3. Diagnose frame 249's red-vs-white mismatch near the YES/NO box — likely
-   an unrelated, 3rd bug (different bbox, different failure shape from
-   1/2 above).
-4. Once 1-3 land, rebuild `confirm-flow.json` and re-run `npm run compare`;
-   commit if clean modulo ISSUES #5's own already-accepted pattern.
-5. The decline path (B/NO back to cursor mode, `docs/confirm-flow-notes.md`
-   §3) is still unimplemented — explicitly a stretch goal, not attempted
-   this slice.
+**Leads:**
+1. RAM-probe `gSprites[ballSpriteId].data[]`/`animCmdIndex` for all 3 ball
+   slots across a dense confirm-flow-shaped idle window (same recipe as
+   ISSUES #6/#7: `EmeraldOracle`, sprites located by known screen position)
+   and cross-correlate tick-by-tick against `ballAnim.ts`'s internal
+   `phase`/`cmdIndex`/`timer` state for the same replay, the way ISSUES #7's
+   own fix was found — the periodicity (slot0's every-4-ticks cadence is
+   notably regular) suggests a clean, state-derivable rule rather than
+   another #5-style hardware race, but this needs RAM ground truth to
+   confirm either way.
+2. `ballAnim.ts`'s own `REST_INTERNAL_OFFSET`/`FAILURE_REROLL_DELAY` fudges
+   are explicitly documented as tuned against 1-2-ball scenarios
+   ("single-ball behavior is unaffected either way... a second ball's own
+   interleaved draws made during that gap desync without this") - a 3-ball
+   simultaneous scenario, run for many consecutive cycles with no
+   interrupting stall, is untested territory for those constants; check
+   whether a 3-ball-specific adjustment (same family as #7's slot-count-
+   dependent fixes elsewhere in this screen) is needed.
+3. Once modeled, rebuild `confirm-flow.json` (recipe: `rent-3picks.json`'s
+   exact 19 segments + one 90-tick idle segment appended, `captureFrames`
+   185-279) and re-run `npm run compare`; commit once clean modulo ISSUES
+   #5's own already-accepted window-jitter pattern (frames 189-197ish, the
+   3rd pick's own popup-close catch-up, byte-for-byte matching this same
+   trace's own ball1/ball2 closes at frames 38/39 and 114/115 - see
+   PROGRESS #34 for the cross-check that closed ISSUES #8's own gap 1).
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean

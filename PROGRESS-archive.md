@@ -5,6 +5,86 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 31 — ISSUES #7 remainder CLOSED: frames 152/153 root-caused and fixed (cursor-redraw catch-up accelerates with 2+ rented balls), plus a second bug found+fixed along the way (frame 92/168: `OPEN_TABLE_B`'s "extra hold" tick was a wrong flash frame, should be a degenerate 1px window); `rent-3picks.json` committed at 157/190, every remaining diff frame individually attributed to ISSUES #5
+
+- **State:** `npm test` **276/276** (273→276, +3), `npm run build` green.
+  All 8 previously-committed traces re-verified UNCHANGED at their exact
+  prior counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
+  draft-menu-slot6 66/66, example 4/4, rent-slot1 **125/139**,
+  summary-info-magby 132/132, summary-info-onix 122/122).
+  `tools/compare/traces/rent-3picks.json` **committed** at **157/190**.
+- **Did:** Rebuilt the exact 3-pick shape from ISSUES #7 (confirms@37/113/
+  189, 36-idle+2RIGHT between rents, dense captures 0-189) and reproduced
+  the prior session's diff set exactly, confirming it was stable. Tested
+  the assigned hypotheses in order: (1) "perpetual species-name breathe" for
+  frame 152 - FALSE, ruled out immediately (frames 154-189 are clean, a
+  perpetual breathe would keep diffing them). (2) Cross-checked the FIRST
+  RIGHT (1 ball rented): its own +1/+2 frames (76/77) are clean, confirming
+  the single/zero-ball 3-tick-staggered redraw timing
+  (`CursorRedrawState`'s existing doc) is untouched. (3) Overlaid
+  oracle-vs-app crops at frames 152/153: **frame 152** - oracle already
+  shows "BAYLEEF" (species text) where the app still shows "MAGBY"; **frame
+  153** - oracle's cursor arrow is already under slot 2 where the app's is
+  still under slot 1. Both are the SAME mechanism: with 2+ balls already
+  rented at the move tick, the whole redraw pipeline lands 1 tick sooner -
+  species text catches up alongside category (`elapsed>=1`, not staggered
+  to `elapsed>=2`) and the arrow settles at `elapsed>=2` instead of
+  `elapsed>=3`. **Root-caused as a clean, state-derivable rule** (not a
+  chaotic race): confirmed absent with exactly 1 rented ball (frames 76/77
+  clean), present with exactly 2 (frames 152/153, both fixed). Fixed by
+  adding a `fast: boolean` field to `CursorRedrawState`, set from
+  `activeSlotsBeforeAction.length >= 2` at move time (`core.ts`), consulted
+  by `advanceCursorRedraw`'s settle threshold and the species-catch-up
+  condition (`factoryDraftScreen.ts`). Pinned with 4 new Tier-1 tests
+  (`tests/draftScreen.test.ts`) against both the isolated `advanceCursorRedraw`
+  transition and a full `tick()` integration (rent slot0, RIGHT with 1
+  ball -> `fast:false`; rent slot0+slot1, RIGHT with 2 balls -> `fast:true`).
+  **Along the way, found frame 92 was a diff too** (not mentioned in the
+  brief's "already decomposed" list - a gap in the prior sessions' own
+  accounting, not a new regression) - **byte-identical bbox/pixel-values to
+  frame 168** (both `x92-146/y64`, oracle showing ball-art gradient colors,
+  app showing a flat `FLASH_BLENDED_COLOR` (194,233,226) fill). RAM-probed
+  (`REG_DISPCNT`/`WIN0V` direct reads) around ticks 88-96: real hardware's
+  `DISPCNT` WIN0 bit sets at tick 91, its BG3 bit at tick 92 - i.e.
+  `Task_OpenMonPic`'s case0/case1 have already fired by frame 92, but the
+  window hasn't started growing yet (still the initial `top=64,bottom=65`
+  degenerate 1px window from case0). `monPic.ts`'s `OPEN_TABLE_B` modeled
+  this "extra hold" tick (idx15, oracle-measured but never explained) as a
+  3rd flat `flash(64,true)` frame; it's actually `win(64,65)` - a real,
+  blended 1px window, not the flash sprite. Fixed by replacing that table
+  entry; pinned by updating `tests/monPic.test.ts`'s variant-B open test to
+  assert the window shape at idx15 instead of a 3rd flash tick. This fix
+  incidentally cleared frame 168 too (the exact same table index, hit again
+  by the 3rd ball's own open) - **frames 37-57/113-133 (rent-close jitter,
+  unaffected, byte-identical to before), 92/152/153/168 (all now CLEAN)**.
+  Only **169/170/189** remain, matching the brief's own pre-classification
+  ("#5-attributable") exactly: `169` (x88-151/y56-72, 512px) and `170`
+  (x88-151/y52-76, 512px) are the same magnitude/location as every other
+  accepted ISSUES #5 window-growth frame (e.g. rent1's own 117/118/119/120,
+  each 512px in the same x88-151 window); `189` (x93-110/y55-68, 107px)
+  matches the brief's own predicted bbox verbatim. Committed
+  `rent-3picks.json` (0-189 dense) with all 33 remaining diff frames
+  individually attributed in the commit message.
+- **Next:** confirm-flow implementation (`docs/confirm-flow-notes.md`),
+  exit sequence (`docs/prebattle-room-notes.md`), and S6 remain queued
+  behind S5's completion per entry 26 - S5's own acceptance criterion (a
+  committed 3-pick trace) is now met modulo the ISSUES #5 window-jitter gap
+  (root-caused as an unfixable-at-this-engine's-level hardware cycle race,
+  policy settled).
+- **Notes:** all RAM probing was scratch (`/tmp/probe_regs.py`,
+  `/tmp/probe_ballstate.ts`, `/tmp/probe_monpic.ts`, deleted before
+  finishing; trace JSON under `/tmp`) - nothing uncommitted left in the
+  tree beyond the final `tools/compare/traces/rent-3picks.json`. Also
+  deduplicated an accidental exact-duplicate "## 28" entry in this file
+  during the archive rotation (both copies were byte-identical; kept one).
+  PAPERCUT: manually decoding PNG filters in pure Python to bbox a diff
+  cost ~10 min before switching to PIL (already a dev dependency via the
+  system Python, not this project's own toolchain) - worth reaching for
+  PIL/Pillow first next time instead of hand-rolling a PNG decoder for
+  quick bbox/pixel-dump scripts.
+
+---
+
 ## 30 — ISSUES #7 remainder: RAM-pinned + fixed the second-ball display-tile lag (Parts 1-2 landed, committed); Part 3 (`rent-3picks.json`) built a clean candidate but STOPPED short of committing per the brief's own stop condition — more diff frames than expected, though all classify as pre-existing/benign on inspection
 
 - **State:** `npm test` **273/273** (270→273, +3 in
