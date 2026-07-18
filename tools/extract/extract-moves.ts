@@ -1,11 +1,16 @@
 // Dev-time extractor: all gen-3 move data the Summary screen's Battle-Moves
 // and Contest-Moves pages show - name, type, PP, power, accuracy, battle
-// description text, and the contest-move data (category, appeal, jam). See
-// docs/summary-screen-notes.md section 3 (MOVE_NAMES/MOVE_PP/MOVE_DESCRIPTION
-// windows, PrintMoveDetails/PrintContestMoveDescription) and section 2's
-// window table. Sources:
+// description text, and the contest-move data (category, appeal, jam) -
+// plus (S7 groundwork) the battle-engine fields turn resolution needs:
+// effect, secondaryEffectChance, target, priority, flags (see
+// docs/battle-turn-notes.md). See docs/summary-screen-notes.md section 3
+// (MOVE_NAMES/MOVE_PP/MOVE_DESCRIPTION windows, PrintMoveDetails/
+// PrintContestMoveDescription) and section 2's window table. Sources:
 //   include/constants/moves.h      - MOVE_x ids, MOVES_COUNT
-//   src/data/battle_moves.h        - gBattleMoves (type/power/accuracy/pp)
+//   include/constants/battle_move_effects.h - EFFECT_x ids
+//   include/battle.h               - MOVE_TARGET_x bit flags
+//   include/constants/pokemon.h    - FLAG_x move-flag bits
+//   src/data/battle_moves.h        - gBattleMoves (full struct BattleMove)
 //   src/data/text/move_names.h     - gMoveNames
 //   src/data/text/move_descriptions.h - gMoveDescriptionPointers text
 //   src/data/contest_moves.h       - gContestMoves + gContestEffects
@@ -57,23 +62,53 @@ function parseMoveIds(): Map<string, number> {
 }
 const moveIds = parseMoveIds();
 
+type BattleMoveData = {
+  type: string;
+  power: number;
+  accuracy: number;
+  pp: number;
+  effect: string;
+  secondaryEffectChance: number;
+  target: string[];
+  priority: number;
+  flags: string[];
+};
+
 // gBattleMoves[MOVE_x] = { .effect = ..., .power = ..., .type = ...,
-// .accuracy = ..., .pp = ..., ... }, - MOVE_NONE is written in the same
+// .accuracy = ..., .pp = ..., .secondaryEffectChance = ..., .target = ...,
+// .priority = ..., .flags = ... }, - MOVE_NONE is written in the same
 // multi-line brace form as every other entry (no single-line special case).
-function parseBattleMoves(): Map<string, { type: string; power: number; accuracy: number; pp: number }> {
-  const out = new Map<string, { type: string; power: number; accuracy: number; pp: number }>();
+// .target and .flags are bitwise-OR'd C constant names (or literal 0 for
+// "none") - kept as the named-constant list rather than resolved to a
+// numeric bitmask, so this stays pure source-shape data with no engine-side
+// bit-layout assumption baked in.
+function parseBattleMoves(): Map<string, BattleMoveData> {
+  const out = new Map<string, BattleMoveData>();
   for (const m of battleMovesC.matchAll(/\[MOVE_(\w+)\]\s*=\s*\{\n([\s\S]*?)\n {4}\},?/g)) {
     const [, name, body] = m as unknown as [string, string, string];
     const type = /\.type\s*=\s*(TYPE_\w+)/.exec(body);
     const power = /\.power\s*=\s*(\d+)/.exec(body);
     const accuracy = /\.accuracy\s*=\s*(\d+)/.exec(body);
     const pp = /\.pp\s*=\s*(\d+)/.exec(body);
-    if (!type || !power || !accuracy || !pp) throw new Error(`incomplete gBattleMoves entry for MOVE_${name}`);
+    const effect = /\.effect\s*=\s*EFFECT_(\w+)/.exec(body);
+    const secondaryEffectChance = /\.secondaryEffectChance\s*=\s*(\d+)/.exec(body);
+    const target = /\.target\s*=\s*([\w\s|]+?),?\n/.exec(body);
+    const priority = /\.priority\s*=\s*(-?\d+)/.exec(body);
+    const flags = /\.flags\s*=\s*([\w\s|]+?),?\n?$/.exec(body);
+    if (!type || !power || !accuracy || !pp || !effect || !secondaryEffectChance || !target || !priority || !flags)
+      throw new Error(`incomplete gBattleMoves entry for MOVE_${name}`);
+    const targetNames = target[1]!.trim() === "0" ? [] : target[1]!.split("|").map((x) => x.trim());
+    const flagNames = flags[1]!.trim() === "0" ? [] : flags[1]!.trim().split("|").map((x) => x.trim());
     out.set(name, {
       type: type[1]!,
       power: Number.parseInt(power[1]!, 10),
       accuracy: Number.parseInt(accuracy[1]!, 10),
       pp: Number.parseInt(pp[1]!, 10),
+      effect: `EFFECT_${effect[1]!}`,
+      secondaryEffectChance: Number.parseInt(secondaryEffectChance[1]!, 10),
+      target: targetNames,
+      priority: Number.parseInt(priority[1]!, 10),
+      flags: flagNames,
     });
   }
   return out;
@@ -166,6 +201,11 @@ const moves = orderedMoveNames.map((name) => {
     power: battle.power,
     accuracy: battle.accuracy,
     pp: battle.pp,
+    effect: battle.effect,
+    secondaryEffectChance: battle.secondaryEffectChance,
+    target: battle.target,
+    priority: battle.priority,
+    flags: battle.flags,
     description: isNone ? "" : (moveDescriptions.get(name) ?? ""),
     contest: isNone ? null : (contestMoves.get(name) ?? null),
   };
