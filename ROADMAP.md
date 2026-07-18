@@ -254,25 +254,22 @@ open window: scene assembly (1031-1300+), off `docs/battle-scene-notes.md`
 tick 1030, exactly where that slice takes over. Out of scope for both:
 RNG-modeling which of the 12 transition variants plays (a separate step
 owns RNG-exactness) and the other 11 variants' own pixel behavior.
-**Scene-assembly slice in progress (2026-07-18, PROGRESS #58→#64, four
+**Scene-assembly slice COMPLETE (2026-07-18, PROGRESS #58→#70, seven
 iterations):** `src/engine/battleScene.ts` implements the 1040-1295
-window; `tools/compare/traces/scene-assembly.json` is at **104/256**
-(42→40→41→104 across iterations — each converged the problem to a
-strictly smaller named gap). Byte-exact so far: black hold, the settled
-composite from 1227 (bg + both trainer pics + window frame), text print,
-wait-cursor bob, and (as of #64) the full ball-widget entrance 1230-1291
-minus one 22px single-tick residual. Load-bearing discoveries along the
-way: a **systemic one-tick render lag** on every intro-task-driven
-register (#63, also resolved #62's widget-invisibility mystery in #64);
-BG3 (not BG1) carries the per-scanline shift; neither trainer sprite is
-visible during the reveal; the "missing palette bank 4" was a tilemap
-normalization bug (#62, extractor fixed). **Sole remaining gap (GAP A
-residual):** the streak window 1075-1226's blend arithmetic — one
-specific pixel class is numerically unreachable under the modeled
-BLDALPHA ramp; exact next RAM probe recorded in PROGRESS #63 and
-`battleScene.ts`'s module doc. **User decision (2026-07-18, interactive):
-keep iterating with fresh targeted briefs until 256/256 — no re-scope,
-no skip-ahead; each iteration must keep naming a strictly smaller gap.**
+window; `tools/compare/traces/scene-assembly.json` is **256/256** —
+byte-exact end to end (42→40→41→104→151→255→256; each iteration
+converged to a strictly smaller named gap, per the user's recorded
+keep-iterating decision, honored to completion). Load-bearing
+discoveries: a **systemic one-tick render lag** on every intro-task-
+driven register (#63/#64/#68, incl. evaEvb's ramp anchor); the trainer
+OBJs DO slide in during the reveal (#66, correcting #63's settled-corner-
+only sampling); BG3 is 512px wide (`screenSize=1`, #66); mGBA blends in
+its native 8-bit domain, not 5-bit hardware space (#68, mathematically
+proven — `blendChannel` is battleScene-local, `paletteFade.ts`'s 5-bit
+blend stays oracle-validated elsewhere); the player status bar has a
+RAM-confirmed asymmetric one-tick `x2` stall at creation the opponent
+bar lacks (#70); the "missing palette bank 4" was a tilemap
+normalization bug (#62, extractor fixed).
 **RNG-exactness criterion satisfied (2026-07-18, PROGRESS #61):**
 `src/engine/opponentGen.ts` + `tests/opponentGen.test.ts` pin battle 1's
 personality rejection loops, `Random32()` word order, and the 12-way
