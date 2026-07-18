@@ -5,6 +5,67 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 44 — S6 slice 0: ground-truth bring-up pinning complete — battle1-intro.json (1886f/254 captures) committed, RNG/transition/personality checkpoints RAM-verified, dossier extended; NO ENGINE CODE
+
+- **State:** `npm test` **341/341** (unchanged, no engine touched), `npm run
+  build` green. `tools/compare/traces-groundtruth/battle1-intro.json`
+  (new dir, +README) committed: 1886 frames (`accept-prebattle.json`'s
+  verified 392-frame prefix + A-press@400 + 2 more player-paced A-presses
+  + idle through transition/intro/both send-outs), 254 dense captures.
+  `bin/oracle run` on it verified green; spot-checked anchor (1/1) and
+  confirm-decline (67/67) still exact — zero regressions.
+- **Did:** Two chained oracle probe passes (sparse locator, then a dense
+  final pass around each located boundary) pinned every frame boundary
+  the step asked for (message-close, warp-fade black window, transition
+  start/first-visual, both send-out text settles, first-action-menu
+  settle at tick 1750 with its 36-frame idle cycle) — see
+  `docs/battle-bringup-notes.md`'s new "Slice-0 ground truth, 2026-07-18"
+  section for the full sha256-cited list. `tools/probe/ram-probe.py`
+  (gRngValue + gBattleTypeFlags + gEnemyParty[0..2].personality, every
+  tick from 395) then pinned: the 1/VBlank cadence and its exact freeze
+  tick (1044→1045, then one explicit draw at 1066, then a 675-tick true
+  battle freeze 1066-1740); all 3 opponent personality rolls (28/16/95
+  rejection iterations for Grovyle/Murkrow/Pidgeotto respectively,
+  cross-validated 3-for-3 against this file's own expected-nature table
+  via `personality % 25`); and the transition-select roll (tick 868→869,
+  narrowed to 2 of 12 candidates — see below). **Two corrections to the
+  existing dossier filed with full RAM evidence** (not re-probing what
+  was already trusted — these surfaced from this session's own new data):
+  (1) the 3 nature-rerolls + transition-select happen during the
+  **heal-icon animation** (ticks 842-869), roughly 160-200 ticks *before*
+  the transition's black screen (1031) — not "the same frame" as the
+  transition start, as previously assumed; (2) **4** explicit `Random()`
+  draws survive the per-frame freeze, not the previously-documented 2 —
+  two of them (ticks 1741, 1745) are unexplained, flagged for a future
+  source re-read.
+- **Next:** S6 slice 1+ (actual engine implementation: battle transition
+  effect, scene init, intro text, first action menu) can now build against
+  this committed ground truth instead of re-scouting it. Two loose ends
+  flagged in the dossier's §4: (a) the transition-visual identification
+  is narrowed to `CIRCLES_MEET` or `CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ` (2
+  of 12) via RNG math but not pixel-confirmed — a future session should
+  either find the right RAM field for the resolved transition id or do a
+  frame-by-frame source cross-check; (b) transition-end (trainer/bg fully
+  assembled) is bounded to ticks 1200-1290, not resolved tighter.
+  Suggested `ROADMAP.md` S6 wording (not edited here, worker convention):
+  append under S6 "**Groundwork banked (2026-07-18):**
+  `tools/compare/traces-groundtruth/battle1-intro.json` (1886f, 254
+  captures) pins the full A-press-through-first-action-menu window with
+  sha256-cited frame boundaries and RAM-verified RNG/personality/
+  transition-candidate checkpoints (`docs/battle-bringup-notes.md`
+  'Slice-0 ground truth'); engine slices can now implement against fixed
+  targets instead of re-scouting timings."
+- **Notes:** PAPERCUT retired (not fixed by me, supervisor's file):
+  `PAPERCUTS.md`'s "No committed oracle trace for the battle-1 bring-up
+  path" entry is superseded by this commit. No new papercuts this
+  session. All scratch work (`/tmp/s6-worker/`: probe scripts, sparse/
+  dense locator trace JSONs, ram-probe spec/output) is scratch per
+  convention, not committed. `src/engine/`, `src/assets/`, `src/data/`,
+  and `tools/extract/` were **not touched** — confirmed via `git status`
+  before both commits.
+
+---
+
 ## 43 — ISSUES #14 root-caused and fixed (two distinct bugs, both the same "accept's own extra-work-free path renders early" mechanism family); `accept-prebattle.json` 123/137 → **137/137**, entry DELETED
 
 - **State:** `npm test` **341/341** (337→341, +4 `tests/prebattleRoomFlow.test.ts`),

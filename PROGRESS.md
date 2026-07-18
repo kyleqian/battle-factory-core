@@ -5,6 +5,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 47 — S6 slice 1b (parallel worktree lane, merged): slice-0 §4 loose ends resolved — transition = CIRCLES_MEET (RAM-confirmed), transition-end = tick 1227, post-freeze draws re-attributed; docs-only
+
+- **State:** merge `a004db2` (branch `worker/wt-20260718-091648`, single
+  docs commit `c005d87`) on top of #46; `npm test` **348/348** + `npm run
+  build` green on the merged result. Docs-only — `docs/battle-bringup-notes.md`
+  +227/−47, no engine/asset/fixture changes.
+- **Did (worker, supervisor-verified):** (1) transition variant **RESOLVED**:
+  `gTasks[6].data[1]` (`tTransitionId`) reads **34 =
+  `B_TRANSITION_FRONTIER_CIRCLES_MEET`** from tick 869 — enum ordinal
+  independently re-counted by the supervisor against
+  `include/battle_transition.h`; corroborated by `gTasks[7].func` becoming
+  `Task_FrontierCirclesMeet` (its state machine matching source math
+  tick-for-tick) and screenshots (3 circles converging, ticks 960-990).
+  The 1077-1197 "streak" frames are **not** the transition — all
+  transition tasks are destroyed by `CB2_InitBattleInternal`'s
+  `ResetTasks()` at tick 1044 (same tick as the independently-pinned RNG
+  freeze); they're `BeginBattleIntro`'s scene assembly. (2)
+  transition-end **pinned**: scene settled (modulo text) tick **1227**
+  (plateau through 1229); text milestones "would like to battle!"
+  no-heart 1272-1273, ♥ at 1274, true steady state from 1292 = the same
+  4-phase/36-tick idle cycle as the action menu (the old "1290 stable"
+  claim was a 6-frame transient — corrected in place). (3) post-freeze
+  RNG draws re-attributed: **1741 is `TryDoEventsBeforeFirstTurn`'s draw**
+  (RAM-confirmed via the `gBattleMainFunc` handoff; the old attribution
+  to 1747 was a proximity guess); 1745 (2-step) plausibly opponent-AI
+  switch heuristics (`AI_TrySwitchOrUseItem`, bracketed by controller
+  busy-bits, not single-stepped); 1747 (5-step) genuinely unpinned
+  (AI chain, player controller, TryDoEvents all source-ruled-out) — an
+  S7 concern, flagged in the dossier, not an S6 blocker.
+- **Next:** S6 slice 2 — battle-room entry scene (frames 520-838). A
+  parallel extraction worker (battle-room map/NPCs/opponent overworld
+  sprite, new files only) is in flight on the worktree lane as of this
+  entry.
+- **Notes:** worktree removed + branch deleted post-merge. Worker A's
+  ROADMAP slice-1a note was worker-written (convention is propose-only) —
+  ratified as accurate; the slice-1b roadmap note is the supervisor's own,
+  this commit.
+
+---
+
 ## 46 — S6 slice 1a: A-press → closemessage → guided walk → warp fade (ticks 400-519) implemented, oracle-pinned; `walk-warpout.json` committed 125/125
 
 - **State:** `npm test` **348/348** (341→348, +7 in `tests/prebattleRoomFlow.test.ts`),
@@ -106,68 +146,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   line (worker caught + restored it, `ba6ff0d`). PAPERCUTS: battle1-intro
   ground-truth entry retired this commit (trace now committed).
 
----
-
-
-
-## 44 — S6 slice 0: ground-truth bring-up pinning complete — battle1-intro.json (1886f/254 captures) committed, RNG/transition/personality checkpoints RAM-verified, dossier extended; NO ENGINE CODE
-
-- **State:** `npm test` **341/341** (unchanged, no engine touched), `npm run
-  build` green. `tools/compare/traces-groundtruth/battle1-intro.json`
-  (new dir, +README) committed: 1886 frames (`accept-prebattle.json`'s
-  verified 392-frame prefix + A-press@400 + 2 more player-paced A-presses
-  + idle through transition/intro/both send-outs), 254 dense captures.
-  `bin/oracle run` on it verified green; spot-checked anchor (1/1) and
-  confirm-decline (67/67) still exact — zero regressions.
-- **Did:** Two chained oracle probe passes (sparse locator, then a dense
-  final pass around each located boundary) pinned every frame boundary
-  the step asked for (message-close, warp-fade black window, transition
-  start/first-visual, both send-out text settles, first-action-menu
-  settle at tick 1750 with its 36-frame idle cycle) — see
-  `docs/battle-bringup-notes.md`'s new "Slice-0 ground truth, 2026-07-18"
-  section for the full sha256-cited list. `tools/probe/ram-probe.py`
-  (gRngValue + gBattleTypeFlags + gEnemyParty[0..2].personality, every
-  tick from 395) then pinned: the 1/VBlank cadence and its exact freeze
-  tick (1044→1045, then one explicit draw at 1066, then a 675-tick true
-  battle freeze 1066-1740); all 3 opponent personality rolls (28/16/95
-  rejection iterations for Grovyle/Murkrow/Pidgeotto respectively,
-  cross-validated 3-for-3 against this file's own expected-nature table
-  via `personality % 25`); and the transition-select roll (tick 868→869,
-  narrowed to 2 of 12 candidates — see below). **Two corrections to the
-  existing dossier filed with full RAM evidence** (not re-probing what
-  was already trusted — these surfaced from this session's own new data):
-  (1) the 3 nature-rerolls + transition-select happen during the
-  **heal-icon animation** (ticks 842-869), roughly 160-200 ticks *before*
-  the transition's black screen (1031) — not "the same frame" as the
-  transition start, as previously assumed; (2) **4** explicit `Random()`
-  draws survive the per-frame freeze, not the previously-documented 2 —
-  two of them (ticks 1741, 1745) are unexplained, flagged for a future
-  source re-read.
-- **Next:** S6 slice 1+ (actual engine implementation: battle transition
-  effect, scene init, intro text, first action menu) can now build against
-  this committed ground truth instead of re-scouting it. Two loose ends
-  flagged in the dossier's §4: (a) the transition-visual identification
-  is narrowed to `CIRCLES_MEET` or `CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ` (2
-  of 12) via RNG math but not pixel-confirmed — a future session should
-  either find the right RAM field for the resolved transition id or do a
-  frame-by-frame source cross-check; (b) transition-end (trainer/bg fully
-  assembled) is bounded to ticks 1200-1290, not resolved tighter.
-  Suggested `ROADMAP.md` S6 wording (not edited here, worker convention):
-  append under S6 "**Groundwork banked (2026-07-18):**
-  `tools/compare/traces-groundtruth/battle1-intro.json` (1886f, 254
-  captures) pins the full A-press-through-first-action-menu window with
-  sha256-cited frame boundaries and RAM-verified RNG/personality/
-  transition-candidate checkpoints (`docs/battle-bringup-notes.md`
-  'Slice-0 ground truth'); engine slices can now implement against fixed
-  targets instead of re-scouting timings."
-- **Notes:** PAPERCUT retired (not fixed by me, supervisor's file):
-  `PAPERCUTS.md`'s "No committed oracle trace for the battle-1 bring-up
-  path" entry is superseded by this commit. No new papercuts this
-  session. All scratch work (`/tmp/s6-worker/`: probe scripts, sparse/
-  dense locator trace JSONs, ram-probe spec/output) is scratch per
-  convention, not committed. `src/engine/`, `src/assets/`, `src/data/`,
-  and `tools/extract/` were **not touched** — confirmed via `git status`
-  before both commits.
-
 
 ---
+

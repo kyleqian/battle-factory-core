@@ -189,10 +189,17 @@ captures) pins the full A-press-through-first-action-menu window with
 sha256-cited frame boundaries and RAM-verified RNG/personality/
 transition checkpoints (`docs/battle-bringup-notes.md` "Slice-0 ground
 truth" — incl. two evidence-filed corrections to the earlier dossier);
-engine slices now implement against fixed targets. Open from that
-section's §4: transition-end bound (ticks 1200-1290) needs tightening;
-transition variant narrowed to 2 of 12 candidates, pixel-confirmation
-pending; 2 of the 4 post-freeze explicit `Random()` draws unexplained.
+engine slices now implement against fixed targets.
+**Slice 1b complete (2026-07-18, supervisor-verified):** the slice-0 §4
+loose ends are resolved in the dossier — transition RAM-confirmed as
+`B_TRANSITION_FRONTIER_CIRCLES_MEET` (id 34, `gTasks[].data[1]` +
+function-pointer + screenshot corroboration; the 1077-1197 "streaks" are
+`BeginBattleIntro` scene assembly, transition tasks destroyed at 1044);
+transition-end pinned to tick 1227 (text milestones through the ♥ glyph
++ 4-phase/36-tick idle from 1292); post-freeze draws re-attributed
+(1741 = `TryDoEventsBeforeFirstTurn`, RAM-confirmed; 1745 plausibly
+opponent-AI switch heuristics; the 5-step 1747 draw remains unpinned —
+S7 concern, not S6).
 **Slice 1a complete (2026-07-18):** the A-press → closemessage → guided
 walk (attendant + player, camera scroll, attendant set_invisible) → warp
 fade-to-black window (ticks 400-519) is engine-implemented and RAM/pixel-
