@@ -5,75 +5,127 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #9 — confirm-flow YES/NO dwell: multi-ball `SpriteCB_Pokeball` timing drift over a long undisturbed 3-ball idle, never exercised by any committed trace
+## #9 — [ball-anim part FIXED] confirm-flow.json still blocked - by a NEW, unrelated gap (#10), not by this issue's own ball-anim drift
 
-**Symptom:** rebuilding `confirm-flow.json` (rent-3picks.json's exact button
-prefix + idle to frame 279, dense captures 185-279) after fixing ISSUES #8's
-3 gaps (see PROGRESS #34) still leaves periodic diffs scattered through
-BOTH the reveal window (confirm+16 to confirm+40ish) and the settled YES/NO
-dwell (confirm+48 onward through the last capture, frame 279) — every one
-confined to a single rented ball's own 32x32 OBJ region (never the window,
-text, or flash-bar pixels, which are all now clean), and every one small
-(36-180px). This is a **4th, distinct** gap from #8's 3 (which were about
-the reveal's own window/sprite/text rendering, all now fixed) — it's the
-pre-existing `ballAnim.ts` model (already RAM-verified for shorter,
-input-interrupted multi-ball windows by the now-closed ISSUES #6/#7) being
-exercised, for the first time in any committed trace, by ~90 continuous
-ticks of 3-balls-simultaneously-idle with **no cursor/menu input at all**
-to periodically resync it. Not attributable to ISSUES #5 (wrong region:
-ball OBJ pixels, not the WIN0 window; wrong shape: small steady blips, not
-a shrinking/growing transient).
+**Original symptom (FIXED this session, RAM-probed + committed):** the
+`ballAnim.ts` display-lag model was wrong in two ways, both only visible
+over a long undisturbed 3-ball idle (never exercised by any committed trace
+before this session's `confirm-flow.json` rebuild attempt): (1) slot 0's
+2-tick display lag (ISSUES #7) was hardcoded permanently, but RAM-proved to
+apply only during slot 0's *first* moving cycle - `REST_INTERNAL_OFFSET`'s
+own extra tick already resyncs slot 0's internal `cmdIndex` with RAM the
+moment it first passes through "resting", so every cycle after that only
+needs the same 1-tick lag every other slot always has; (2) a previously
+unmodeled 4th stall source - `Select_CreateChosenMonsSprites()`'s own
+per-frame cost, same shape as the already-modeled LEFT/RIGHT/RENT-confirm
+text-print stalls (`ballAnimMultiBall.test.ts`) - adds 1 more display-lag
+tick to every currently-active ball, landing near the reveal's
+window-fully-grown hold (RAM-confirmed via all 3 slots' own next
+`cmdIndex`-transition boundary after that point, all consistent with one
+shared, screen-level event). Both are display-only fixes (`ballAnim.ts`'s
+new `hasRested` field + `confirmReveal.ts`'s new `isRevealStallActive`) -
+the RNG-critical internal `phase`/`cmdIndex`/`timer`/`pendingRest` state
+machine was not touched, so every existing RNG pin still passes unmodified.
+RAM-probed (all 3 ball slots simultaneously, `gSprites[]` located by known
+screen position, cross-correlated tick-by-tick against `ballAnim.ts`'s
+internal `cmdIndex` for confirm-flow.json's exact button script - scratch
+probe script, not committed) and cross-verified exhaustively against the
+fixed engine: **0 displayTile mismatches across all 3 slots for the full
+280-tick window** (down from 15 before the fix). Fixed in `ballAnim.ts`/
+`confirmReveal.ts`/`core.ts`, pinned by 4 new Tier-1 tests in
+`ballAnimDisplayLag.test.ts` (`npm test` 292→296). See that commit for the
+full evidence/derivation.
 
-**Confirmed (this session, via `tools/compare` + oracle diffing, scratch
-`confirm-flow.json` not committed):**
-- All 3 rented balls are implicated at different times, not just one:
-  frames 205/209/213/217/221/225/229 (bbox x21-42/y54-73, ~170-180px each,
-  every 4 ticks) match ball **slot0**'s own 32x32 region (`ox=35*0+32-16=16`
-  per `factoryDraftScreen.ts`'s ball layout); frames 237/254/258/270/274
-  (bbox x69-77/y60-73, 45px) and 246/250/262/266 (x69-76/y61-73, 36px)
-  match **slot1**'s region (`ox=51`); frames 256/264/272 (x91-110/y54-73,
-  143-151px) match **slot2**'s region (`ox=86`).
-- Not a regression from this session's ISSUES #8 fixes: the same pattern
-  (with the same bboxes) is already present, byte-for-byte, in the
-  *pre-fix* `npm run compare` run from earlier this session — the old
-  font.ts bg-overrun bug (ISSUES #8 gap 3, since fixed) added a constant
-  +30px to every dwell frame's count on top of it (e.g. old frame 256's
-  181px = new 151px + the old bug's 30px), confirming the two are
-  independent and this one predates every change committed this session.
-- `core.ts`'s per-tick ball-anim loop is unconditional and un-gated by
-  `confirmed`/`confirmReveal` state (by design, RNG-critical per
-  `docs/confirm-flow-notes.md` §4) — `ballAnimStall` is freshly computed
-  `[]` every tick with no cursor/menu input to ever populate it during this
-  window, so the existing per-ball `advanceBallAnim` state machine
-  (`ballAnim.ts`) runs fully undisturbed for the whole ~90-tick stretch -
-  the first time any committed trace has exercised that for this long with
-  all 3 slots simultaneously active.
+**Why #9 stays open instead of being deleted:** rebuilding
+`confirm-flow.json` with the fix above eliminated *every* ball-OBJ diff
+(frames 223-279 - the entire window-hold + shown/YES-NO-dwell portion - are
+now byte-exact) but exposed a **5th, different, unrelated** gap in the
+reveal's own flash-bar rendering (frames 210-222, confirmReveal's `flash`
+phase itself) that has nothing to do with ball anims - filed as ISSUES #10.
+`confirm-flow.json` cannot be committed until #10 is also resolved (or
+explicitly deferred with sign-off), so this entry stays open as a pointer:
+**the remaining blocker for `confirm-flow.json` is #10, not this issue's
+original ball-anim scope, which is done.** One unrelated, pre-existing,
+out-of-window gap also remains at absolute tick 114 (a `ballAnimStall`/
+display-lag-chain interaction during slot 0's first cycle, unaffected by
+this session's fix, outside `confirm-flow.json`'s captured range 185-279,
+already present in `rent-3picks.json`'s own long-standing 157/190 count) -
+not chased this session, no evidence yet of a clean rule for it.
+
+**Confirm-flow.json rebuild recipe (unchanged, still correct):**
+`rent-3picks.json`'s exact 19 segments + one 90-tick idle segment appended,
+`captureFrames` 185-279. Frames 189-209 are ISSUES #5's own already-accepted
+window-jitter pattern (the 3rd pick's own popup-close catch-up, tapering
+189→199 then a shrinking halving tail 199/201/203/205/207/209 - 32/16/8/4/
+3/1px, matching the mechanism record's own "halving... flash-bar width
+table" description); frames 210-222 are ISSUES #10 (below); frames 223-279
+are clean.
+
+## #10 — confirmReveal.ts's own flash-bar width table is 1 tick early on every doubling step (not ISSUES #5 - deterministic, not a hardware race)
+
+**Symptom:** during `confirm-flow.json`'s reveal-flash phase (engine ticks
+210-221, `confirmReveal.ts`'s `flash` phase, `FLASH_WIDTHS =
+[1,1,4,4,8,8,16,16,32,32,64,64]`), the 3 border-deco flash bars
+(`REVEAL_FLASH_CENTERS = [44,120,196]`) render 1 tick too wide, every single
+time the table doubles - not a chaotic ISSUES #5-style hardware race
+(that varies with absolute session tick / unrelated CPU cost and would not
+reproduce identically frame-for-frame): this is a clean, deterministic,
+always-in-the-same-direction 1-tick shift, present on **every** doubling
+boundary in this specific window (frames 210/212/214/216/218/220/222 all
+diff by a growing amount - 3/9/12/24/48/96/133px - alternating with clean
+matches at 211/213/215/217/219/221), not just one transition.
+
+**Confirmed (this session, via `tools/compare` + direct pixel sampling,
+scratch `confirm-flow.json` not committed - see ISSUES #9):** at engine
+tick 220 (`confirmReveal.elapsed` 10, `FLASH_WIDTHS[10] = 64`), this
+engine's bar 1 (center 44) already spans its full 64px width (x12-75) -
+but the oracle's own frame 220 still shows the *previous* pair's 32px width
+(x28-59 flash-colored, x12-27 still background/cursor/arrow colors
+underneath) - the oracle doesn't reach width 64 until frame 221. Sampled
+pixel-by-pixel (`app`/`oracle` RGB at y=64, x=0-39) to confirm this is a
+genuine 1-tick-early *width* mismatch, not an unrelated color/blend bug -
+every differing pixel is exactly this engine's *next* pair's width already
+painted where the oracle's *current* pair's un-painted background/cursor
+colors still show. All 3 bars show the identical shift (confirmed via the
+full-frame bbox: 6 flanking clusters at frame 220, 2 per bar, exactly the
+gap between this engine's width and the oracle's narrower one).
+
+**Not #5:** #5's mechanism is a `SetGpuReg`/`REG_VCOUNT` vblank-boundary
+race whose outcome depends on total CPU cycles burned earlier in the same
+frame by unrelated subsystems - it produces different jitter patterns for
+the same relative offsets shifted to different absolute ticks (the
+shift-test in #5's own mechanism record). This gap reproduces identically
+on every doubling boundary in a single trace with no such absolute-tick
+dependence tested yet, and it's a clean single-tick, single-direction
+shift (this engine always *ahead*, never behind) rather than a
+catch-up-then-resync pattern - consistent with an ordinary off-by-one in
+this engine's `flash` phase tick bookkeeping (same family as this file's
+own already-fixed `WINDOW_STEPS` extra-hold-tick bugs), not a hardware race.
+Not yet RAM-verified against `Task_...`'s own tick count though - the lead
+below is the next step, not a re-litigation of #5.
 
 **Leads:**
-1. RAM-probe `gSprites[ballSpriteId].data[]`/`animCmdIndex` for all 3 ball
-   slots across a dense confirm-flow-shaped idle window (same recipe as
-   ISSUES #6/#7: `EmeraldOracle`, sprites located by known screen position)
-   and cross-correlate tick-by-tick against `ballAnim.ts`'s internal
-   `phase`/`cmdIndex`/`timer` state for the same replay, the way ISSUES #7's
-   own fix was found — the periodicity (slot0's every-4-ticks cadence is
-   notably regular) suggests a clean, state-derivable rule rather than
-   another #5-style hardware race, but this needs RAM ground truth to
-   confirm either way.
-2. `ballAnim.ts`'s own `REST_INTERNAL_OFFSET`/`FAILURE_REROLL_DELAY` fudges
-   are explicitly documented as tuned against 1-2-ball scenarios
-   ("single-ball behavior is unaffected either way... a second ball's own
-   interleaved draws made during that gap desync without this") - a 3-ball
-   simultaneous scenario, run for many consecutive cycles with no
-   interrupting stall, is untested territory for those constants; check
-   whether a 3-ball-specific adjustment (same family as #7's slot-count-
-   dependent fixes elsewhere in this screen) is needed.
-3. Once modeled, rebuild `confirm-flow.json` (recipe: `rent-3picks.json`'s
-   exact 19 segments + one 90-tick idle segment appended, `captureFrames`
-   185-279) and re-run `npm run compare`; commit once clean modulo ISSUES
-   #5's own already-accepted window-jitter pattern (frames 189-197ish, the
-   3rd pick's own popup-close catch-up, byte-for-byte matching this same
-   trace's own ball1/ball2 closes at frames 38/39 and 114/115 - see
-   PROGRESS #34 for the cross-check that closed ISSUES #8's own gap 1).
+1. RAM/register-probe (same recipe as `confirmReveal.ts`'s own module-doc
+   citations, ISSUES #8) the flash-bar affine-anim's actual per-tick zoom
+   step during `confirm-flow.json`'s specific button script, to find
+   whether the *true* oracle-visible bar width sequence needs one more
+   hold tick somewhere in `FLASH_WIDTHS` (same shape as the already-fixed
+   `WINDOW_STEPS` hold-tick gap, PROGRESS #33) - or whether the discrepancy
+   is instead in `getConfirmRevealVisual`'s `elapsed` bookkeeping (an
+   off-by-one in when `flash:0` should first apply after the 1-tick
+   creation lag) rather than the table's values themselves.
+2. Check whether this same off-by-one is *also* present (and simply never
+   caught) in `monPic.ts`'s own single-ball flash, which reuses the
+   identical `FLASH_WIDTHS`-shaped table/lookup pattern - if committed
+   traces with single-ball flashes (e.g. `rent-slot1.json`) are clean
+   through their own flash phase, the bug is specific to
+   `confirmReveal.ts`'s *own* `elapsed` timing (its 1-tick creation-lag
+   convention, or the extra ticks `WINDOW_STEPS`/flash-phase-transition
+   bookkeeping already juggles elsewhere in this file), not the shared
+   table.
+3. Once modeled and RAM-verified, re-rebuild `confirm-flow.json` (same
+   recipe as ISSUES #9's own note above) and re-run `npm run compare`;
+   commit once clean modulo ISSUES #5's frames 189-209.
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean

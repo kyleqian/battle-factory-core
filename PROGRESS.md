@@ -5,6 +5,80 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 35 — ISSUES #9's ball-anim drift root-caused and fixed (2 independent display-lag bugs, both RAM-verified); `confirm-flow.json` STILL not committed — the fix cleared every ball-OBJ diff but exposed a 5th, unrelated gap in confirmReveal's own flash-bar timing, filed as new ISSUES #10
+
+- **State:** `npm test` **296/296** (292→296, +4), `npm run build` green.
+  All 9 committed traces re-verified at their exact prior counts (anchor
+  1/1, draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6 66/66, example
+  4/4, rent-slot1 125/139, rent-3picks 157/190, summary-info-magby 132/132,
+  summary-info-onix 122/122) — zero regressions. `confirm-flow.json` **not
+  committed** (see below).
+- **Did:** RAM-probed all 3 ball slots simultaneously (`gSprites[]` located
+  by known screen position, `animCmdIndex`/`animNum`/`data[0]` every tick)
+  across confirm-flow.json's exact button script (rent-3picks.json's 19
+  segments + 90-tick idle, 280 ticks) and cross-correlated tick-by-tick
+  against `ballAnim.ts`'s internal state for the same replay (scratch Python/
+  TS dump scripts, not committed). Found two independent, clean,
+  state-derivable causes, both display-only (RNG-critical internal state
+  untouched): (1) slot 0's `displayLagTicks=2` (ISSUES #7) was permanent,
+  but RAM-proved to apply only during its *first* moving cycle -
+  `REST_INTERNAL_OFFSET`'s own extra tick already resyncs slot 0's internal
+  `cmdIndex` with RAM the moment it first enters "resting" (RAM-confirmed:
+  slot 0's *second* moving cycle matches RAM's own `animCmdIndex` exactly,
+  transition for transition, zero drift) - added `BallAnimState.hasRested`,
+  slot 0 now uses lag 2 only while `!hasRested`, lag 1 after (matching every
+  other slot always). (2) A previously-unmodeled 4th stall source -
+  `Select_CreateChosenMonsSprites()`'s own per-frame cost, same shape as the
+  already-modeled LEFT/RIGHT/RENT-confirm text-print stalls
+  (`ballAnimMultiBall.test.ts`'s root cause) - adds 1 more display-lag tick
+  to every currently-active ball, landing near the reveal's
+  window-fully-grown hold (RAM-confirmed via all 3 slots' own next
+  `cmdIndex`-transition boundary after that point, all consistent with one
+  shared, screen-level event, empirically bounded to a 4-tick window given
+  this trace's own granularity) - added `confirmReveal.ts`'s
+  `isRevealStallActive` predicate, read by `core.ts`'s ball-anim loop.
+  Exhaustive cross-check: **0 `displayTile` mismatches across all 3 slots
+  for the full 280-tick window** (down from 15 pre-fix). Pinned with 4 new
+  Tier-1 tests (`ballAnimDisplayLag.test.ts`). Committed
+  (`src/engine/ballAnim.ts`/`confirmReveal.ts`/`core.ts` +
+  `tests/ballAnimDisplayLag.test.ts`).
+  **Trace rebuild (not committed):** rebuilt `confirm-flow.json` (same
+  recipe as before) and ran `npm run compare`: frames 223-279 (the entire
+  window-hold + shown/YES-NO-dwell portion, where every prior ball-OBJ diff
+  lived) are now **byte-exact**. Frames 189-209 remain diffing but match
+  ISSUES #5's own already-accepted pattern exactly (tapering 189→199 then a
+  halving tail 199/201/.../209 - 32/16/8/4/3/1px - the 3rd pick's own
+  popup-close catch-up). Frames 210-222 (confirmReveal's own `flash` phase)
+  still diff, but pixel-sampled and confirmed **not** ISSUES #5 (a clean,
+  deterministic, always-same-direction 1-tick-early shift on *every*
+  `FLASH_WIDTHS` doubling step, not a chaotic absolute-tick-dependent
+  hardware race) - a genuinely new, unrelated gap in the reveal's own
+  flash-bar tick bookkeeping, filed as **ISSUES #10** with the full
+  pixel-level evidence. Per the brief's stop condition (residual diff not
+  attributable to #5), did not commit the trace.
+- **Next:** ISSUES #10 (RAM/register-probe `confirmReveal.ts`'s flash-phase
+  tick bookkeeping - likely one more hold tick, same family as this file's
+  already-fixed `WINDOW_STEPS` gap, or an `elapsed`-offset bug rather than
+  the shared table's values), then rebuild and commit `confirm-flow.json`
+  clean modulo ISSUES #5's frames 189-209. One unrelated, pre-existing,
+  out-of-window gap also surfaced at absolute tick 114 (a `ballAnimStall`/
+  display-lag-chain interaction during slot 0's first cycle, outside
+  confirm-flow.json's captured range, already baked into rent-3picks.json's
+  long-standing 157/190 count) - not chased, no evidence yet of a clean
+  rule. After #10: the decline path (stretch goal, still open), then the
+  YES-press exit fade + pre-battle room (`docs/prebattle-room-notes.md`),
+  S6.
+- **Notes:** all RAM probing (position-scanned `gSprites[]`, same recipe as
+  ISSUES #6/#7's own) and the trial `confirm-flow.json` were scratch -
+  deleted before finishing, nothing uncommitted left in the tree beyond the
+  intended `src/engine/ballAnim.ts`/`confirmReveal.ts`/`core.ts` +
+  `tests/ballAnimDisplayLag.test.ts` changes and the `ISSUES.md`/
+  `PROGRESS.md` docs. PAPERCUT: none beyond the usual RAM-probe setup cost
+  (mgba-venv interpreter segfaults at teardown, exit 139, benign, already
+  documented).
+
+---
+
 ## 34 — ISSUES #8 CLOSED: all 3 remaining render gaps root-caused and fixed (gap 1 reattributed to #5, gap 2 was a 1-tick-early phase transition not a per-slot stagger, gap 3 was a highlight/text draw-order bug plus a real font.ts glyph-overrun bug); `confirm-flow.json` still NOT committed — rebuilding it surfaced a 4th, distinct gap, filed as new ISSUES #9
 
 - **State:** `npm test` **292/292** (291→292, +1), `npm run build` green.
@@ -158,83 +232,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   for sprites at known screen positions instead) — worth reaching for the
   position-scan method first next time a sprite/task needs locating, rather
   than hand-deriving struct byte offsets from source.
-
----
-
-## 32 — S5 slice 3 (confirm flow): state machine + RNG landed and Tier-1-pinned; render/trace STOPPED short of commit per the brief's own stop condition (wide-window pixel content not verified) — new ISSUES #8
-
-- **State:** `npm test` **290/290** (276→290, +14 in new
-  `tests/confirmReveal.test.ts`), `npm run build` green. All 9 committed
-  traces re-verified at their exact prior counts (anchor 1/1, draft-cursor
-  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, rent-slot1
-  125/139, rent-3picks **157/190**, summary-info-magby 132/132,
-  summary-info-onix 122/122) — zero regressions. `confirm-flow.json` **not
-  committed** (see below).
-- **Did:** Implemented the 3rd-RENT-confirm → reveal → settled YES/NO idle
-  state machine (`src/engine/confirmReveal.ts`, wired into `core.ts`/
-  `factoryDraftScreen.ts`): cursor/menu input permanently locks out once
-  `isMonsConfirmed` (`selectingMonsState > FRONTIER_PARTY_SIZE`, same tick as
-  every other confirm — no new logic needed there); the 3rd pick's own
-  popup close reuses `monPic.ts`'s existing `CLOSE_TABLE_B` unchanged; once
-  `monPic.phase === "closed"`, a new `ConfirmRevealState` machine runs the
-  border-sprite flash-zoom at 3 positions (x=44/120/196, reusing the exact
-  same 1/1/4/4/8/8/16/16/32/32/64/64 affine-anim widths `monPic.ts`'s own
-  flash already pins — verified via source read,
-  `sSpriteTemplate_Select_MonPicBgAnim` is literally the same sprite
-  template/anim table used by both), then a full-width WIN0 window
-  (x16-224, vs the single popup's x88-152) growing (64,65)→(32,96), then
-  the 3 chosen-mon front sprites (ordered by `selectedId`, not slot) +
-  YES/NO box appear together, cursor highlight 1 tick later (same
-  window-copy-vs-OAM lag pattern as everywhere else in this screen).
-  Exact tick counts (13 flash incl. 1-tick creation lag, 8 window-growth +
-  3 hold, cursor +1) were oracle-probed this slice (dense capture diffing,
-  scratch, not committed) against `rent-3picks.json`'s own button prefix
-  extended with idle — close settles at confirm+~20 (unchanged), reveal
-  settles around confirm+45, matching `docs/confirm-flow-notes.md`'s
-  tick+43/44/45 pinning closely. **RNG (mission-critical per the brief):
-  zero new logic** — the ball-anim loop in `core.ts` was already
-  unconditional (runs regardless of cursor/menu/confirmed state) and this
-  slice's confirmed-gate deliberately wraps only the cursor/menu *input*
-  branch, not the ball-roll loop, so the existing RAM-verified RNG stream
-  (`ballAnim.ts`, untouched) continues exactly through the whole window by
-  construction — pinned with a Tier-1 regression test asserting the stream
-  never merely advances 1/tick (proving ball-roll draws keep firing) and
-  stays fully deterministic. 14 new Tier-1 tests in
-  `tests/confirmReveal.test.ts` pin: `isMonsConfirmed`'s threshold, input
-  lockout, the `confirmReveal` trigger tick, the full phase-boundary
-  sequence (flash widths, window steps, shown/cursor timing), pick-order
-  species, and the two RNG properties above.
-  **Render/trace (not committed):** built a candidate `confirm-flow.json`
-  (rent-3picks.json's exact button prefix + idle to ~280) and ran `npm run
-  compare` — diverges hard (1000-5000px, 2-14%) starting at the wide
-  window's opening (~frame 223) through the settled YES/NO idle, **well
-  outside ISSUES #5's x88-151-confinement pattern** — not attributable to
-  that policy. Root cause: `mon-pic-bg.json`'s extracted tilemap is only
-  8x8 tiles (scoped for the single-popup window before this slice); the
-  reveal's 208px window is approximated by tiling that same pattern every
-  64px (`monPicRender.ts`'s new `bg3ColorTiled`), which doesn't match the
-  real wide-window BG3 content. Per the brief's stop condition, did not
-  commit the trace; filed **ISSUES #8** with the specifics. Decline path
-  (B/NO) is unimplemented — explicitly a stretch goal per the brief, and
-  time ran out before reaching it.
-- **Next:** ISSUES #8: RAM/VRAM-dump the wide-window BG3 content directly
-  (not tiled-approximated) and independently RAM-verify `confirmReveal.ts`'s
-  tick boundaries (byte-level, like `monPic.ts`'s tables), then rebuild
-  `confirm-flow.json` and commit once clean. After that: the decline path
-  (stretch goal, still open), then the YES-press exit fade + pre-battle room
-  (`docs/prebattle-room-notes.md`, explicitly next slice per the brief), S6.
-- **Notes:** all oracle probing this session was scratch (`/tmp/confirm_probe*`,
-  deleted before finishing) — nothing uncommitted left in the tree beyond
-  the intended `src/engine/confirmReveal.ts` + `tests/confirmReveal.test.ts`
-  + small exports added to `monPicRender.ts`/`factoryDraftScreen.ts`.
-  PAPERCUT: spent a long time re-deriving the reveal's exact source
-  mechanics (two chained tasks, shared `MonPicBgAnim` sprite template
-  between the single-popup and 3-mon-reveal paths) from
-  `battle_factory_screen.c` directly before writing any code — worth doing
-  again for future slices (the dossier's own prose was occasionally
-  ambiguous about which task owns which window/sprite), but it ate most of
-  the session's budget and left too little time to also nail the wide
-  window's exact pixel content; a future session should budget oracle
-  RAM-probing time for the render layer *before* implementation, not after.
 
 ---
