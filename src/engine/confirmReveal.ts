@@ -20,49 +20,77 @@
 // gSprites[] located by known screen position, not struct-offset guessing):
 // close settles into the plain grid at confirm-tick+20 (matching monPic.ts's
 // existing 20-tick CLOSE_TABLE_B exactly, no new close timing needed), the
-// flash phase's first visible pixel lands 1 tick later (OAM-creation lag,
-// same pattern as every other sprite-visibility split in this screen), the
-// wide window holds its degenerate (64,65) state for 2 ticks (WIN0-on and
-// BG3-ShowBg are separate task states/ticks, not simultaneous) before
-// growing over 8 more ticks to (32,96), holds 1 more tick, then the 3 mon
-// pics + YES/NO box appear together.
+// flash phase's first visible pixel lands 2 ticks later (OAM-creation lag,
+// same pattern as every other sprite-visibility split in this screen -
+// ISSUES #10, this session: oracle-pixel-verified as 2 ticks, not 1), the
+// wide window holds its degenerate (64,65) state for 1 tick (ISSUES #10
+// dropped the previously-modeled 2nd hold once the flash table's own missing
+// hidden tick is accounted for - net duration unchanged) before growing over
+// 8 more ticks to (32,96), holds 2 more ticks, then the 3 mon pics + YES/NO
+// box appear together.
 
 export type ConfirmRevealPhase = "flash" | "window" | "shown";
 
 export interface ConfirmRevealState {
   phase: ConfirmRevealPhase;
-  /** Ticks since this phase started; -1 during the 1-tick OAM-creation lag before the flash's first pixel is visible. */
+  /** Ticks since this phase started; -1 and 0 during the 2-tick OAM-creation lag before the flash's first pixel is visible (ISSUES #10 - see FLASH_WIDTHS' own doc). */
   elapsed: number;
 }
 
-/** sAffineAnim_Select_MonPicBg_Opening, same table monPic.ts's flash entries already pin (1/1/4/4/8/8/16/16/32/32/64/64). */
+/**
+ * sAffineAnim_Select_MonPicBg_Opening, same table monPic.ts's flash entries
+ * already pin (1/1/4/4/8/8/16/16/32/32/64/64) - indexed by `elapsed - 1`, not
+ * `elapsed` (ISSUES #10, RAM/oracle-verified this session via direct pixel
+ * sampling of `confirm-flow`'s bar1/bar3 flash centers - x44/x196, both
+ * uncontaminated by any other on-screen element unlike the shared x120
+ * position bar2 sits at): the OAM-creation lag documented on
+ * `ConfirmRevealState.elapsed` is 2 ticks, not 1 - `elapsed 0` is ALSO
+ * hidden, matching `monPic.ts`'s own OPEN_TABLE_* shape (3 HIDDEN entries
+ * before its first `flash(1)`, idx0-2, vs this table's previously-assumed 1).
+ * Confirmed via `bin/oracle run` + direct RGB sampling at (x, y=64) for
+ * x=44/196 across confirm-flow's exact button script: width stays 0 through
+ * the tick this engine previously rendered as `FLASH_WIDTHS[0]` (width 1),
+ * and the true 1/1/4/4/8/8/16/16/32/32/64/64 sequence lands one tick later,
+ * unchanged in every other respect (values, doubling cadence, final-64 hold
+ * length all pixel-confirmed exact). See WINDOW_STEPS' own doc for how the
+ * matching 1-tick compensation (removing its now-redundant 2nd degenerate
+ * hold) keeps the total confirm-to-"shown" duration unchanged, so
+ * ISSUES #9's already-RAM-verified ball-anim/stall timing is undisturbed.
+ */
 const FLASH_WIDTHS = [1, 1, 4, 4, 8, 8, 16, 16, 32, 32, 64, 64];
 
 /**
  * Select_Task_OpenChosenMonPics: case0 sets the degenerate (64,65) window +
- * DISPCNT_WIN0_ON (1 tick), case1 does ShowBg(3)/BLDCNT setup with NO window
- * change (1 tick - RAM/register-verified this slice via direct DISPCNT/WIN0V
- * reads, ISSUES #8: BG3's DISPCNT bit lands one tick after WIN0's own, a
- * separate case/tick from case0, not simultaneous as originally modeled),
- * THEN case2's -4/+4-per-tick growth (8 ticks) to (32,96), holding there 2
- * more ticks (idx9/idx10/idx11 below) while Select_CreateChosenMonsSprites's
- * own sprite-creation lag catches up. The hold length (2, not 1) is
- * oracle-pixel-verified (ISSUES #8 gap 2): dense captures of
- * confirm-flow.json show the fully-grown (32,96) window rendered unchanged
- * for 3 consecutive frames (idx9-11) before the 3 mon pics + YES/NO box
- * appear on the 4th - a plain RAM read of gSprites[] (the probe this
- * boundary's fix originally shipped with) had suggested the 3 chosen-mon
- * sprites are created 1-2 ticks apart (slot0 before slots1/2), but the
- * ACTUAL RENDERED PIXELS (re-verified directly against the oracle's own
- * PNGs, not just RAM) show all 3 appearing together on one frame, one tick
- * later than this table previously modeled - the RAM-level creation-order
- * stagger exists but is fully absorbed by the BuildOamBuffer-before-RunTasks
- * lag (same family as OPEN_TABLE_B's own creation lag, monPic.ts) and never
- * reaches the screen as a visible per-slot stagger, so `monsAndYesNoVisible`
- * staying a single flag (not 3 per-slot flags) is correct as modeled.
+ * DISPCNT_WIN0_ON (1 tick), THEN case2's -4/+4-per-tick growth (8 ticks) to
+ * (32,96), holding there 2 more ticks (idx8/idx9/idx10 below) while
+ * Select_CreateChosenMonsSprites's own sprite-creation lag catches up.
+ *
+ * ISSUES #10 (this session, RAM/oracle-verified via `bin/oracle run` + direct
+ * RGB sampling of confirm-flow's exact button script): case1's own
+ * ShowBg(3)/BLDCNT-setup tick - previously modeled as a SECOND (64,65)
+ * degenerate hold, idx1 below - does not produce a second visually-distinct
+ * held frame once FLASH_WIDTHS' own missing hidden tick (see that table's
+ * doc) is accounted for: sampling BG3's wash color at (x=120, y=56..75)
+ * frame-by-frame shows the window growing to (60,69) exactly 1 tick after
+ * its first degenerate frame, not 2 - so this table drops the old idx1
+ * duplicate (11 entries now, down from 12). This is the exact 1-tick
+ * compensation FLASH_WIDTHS' own new hidden tick needs: net zero change to
+ * the total confirm-to-"shown" duration, so every already-RAM-verified
+ * absolute tick downstream (ISSUES #9's ball-anim/stall timing, the
+ * mons+YES/NO appearance tick) stays exactly where it was. The hold-before-
+ * mons-appear length (2, not 1 - now idx8/idx9/idx10) is unchanged,
+ * independently oracle-pixel-verified (ISSUES #8 gap 2): dense captures show
+ * the fully-grown (32,96) window rendered unchanged for 3 consecutive frames
+ * before the 3 mon pics + YES/NO box appear on the 4th - a plain RAM read of
+ * gSprites[] had suggested the 3 chosen-mon sprites are created 1-2 ticks
+ * apart (slot0 before slots1/2), but the ACTUAL RENDERED PIXELS show all 3
+ * appearing together on one frame - the RAM-level creation-order stagger is
+ * fully absorbed by the BuildOamBuffer-before-RunTasks lag (same family as
+ * OPEN_TABLE_B's own creation lag, monPic.ts) and never reaches the screen as
+ * a visible per-slot stagger, so `monsAndYesNoVisible` staying a single flag
+ * (not 3 per-slot flags) is correct as modeled.
  */
 const WINDOW_STEPS: { top: number; bottom: number }[] = [
-  { top: 64, bottom: 65 },
   { top: 64, bottom: 65 },
   { top: 60, bottom: 69 },
   { top: 56, bottom: 73 },
@@ -83,7 +111,7 @@ export const REVEAL_FLASH_CENTERS = [44, 120, 196] as const;
 export const REVEAL_MON_CENTERS_X = [48, 120, 192] as const;
 export const REVEAL_MON_CENTER_Y = 64;
 
-/** Select_ShowChosenMons: the reveal starts the instant monPic.ts's close phase reaches "closed" (see core.ts) - 1 tick of nothing-new-yet (OAM creation lag) before the flash's first pixel. */
+/** Select_ShowChosenMons: the reveal starts the instant monPic.ts's close phase reaches "closed" (see core.ts) - 2 ticks of nothing-new-yet (OAM creation lag, ISSUES #10) before the flash's first pixel. */
 export const INITIAL_CONFIRM_REVEAL_STATE: ConfirmRevealState = { phase: "flash", elapsed: -1 };
 
 export function advanceConfirmReveal(state: ConfirmRevealState | null): ConfirmRevealState | null {
@@ -94,7 +122,9 @@ export function advanceConfirmReveal(state: ConfirmRevealState | null): ConfirmR
   }
   const elapsed = state.elapsed + 1;
   if (state.phase === "flash") {
-    if (elapsed >= FLASH_WIDTHS.length) return { phase: "window", elapsed: 0 };
+    // +1 vs FLASH_WIDTHS.length: elapsed 0 is a 2nd hidden tick (ISSUES #10), so the
+    // table (indexed elapsed-1, see getConfirmRevealVisual) needs elapsed up to its length.
+    if (elapsed >= FLASH_WIDTHS.length + 1) return { phase: "window", elapsed: 0 };
     return { phase: "flash", elapsed };
   }
   if (elapsed >= WINDOW_STEPS.length) return { phase: "shown", elapsed: 0 };
@@ -117,8 +147,9 @@ const HIDDEN_REVEAL: ConfirmRevealVisual = { flashWidths: null, window: null, mo
 export function getConfirmRevealVisual(state: ConfirmRevealState | null): ConfirmRevealVisual {
   if (!state) return HIDDEN_REVEAL;
   if (state.phase === "flash") {
-    if (state.elapsed < 0) return HIDDEN_REVEAL;
-    const w = FLASH_WIDTHS[state.elapsed] ?? FLASH_WIDTHS[FLASH_WIDTHS.length - 1]!;
+    // elapsed -1 (OAM creation) and 0 (ISSUES #10's 2nd hidden tick) are both hidden.
+    if (state.elapsed < 1) return HIDDEN_REVEAL;
+    const w = FLASH_WIDTHS[state.elapsed - 1] ?? FLASH_WIDTHS[FLASH_WIDTHS.length - 1]!;
     return { flashWidths: [w, w, w], window: null, monsAndYesNoVisible: false, cursorVisible: false };
   }
   if (state.phase === "window") {

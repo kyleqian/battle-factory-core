@@ -91,56 +91,65 @@ describe("confirmReveal state machine (hermetic, no core.ts)", () => {
     return state;
   }
 
-  it("starts in 'flash' with nothing visible yet (1-tick OAM-creation lag)", () => {
+  it("starts in 'flash' with nothing visible yet (2-tick OAM-creation lag, ISSUES #10)", () => {
     expect(INITIAL_CONFIRM_REVEAL_STATE.phase).toBe("flash");
     const visual = getConfirmRevealVisual(INITIAL_CONFIRM_REVEAL_STATE);
     expect(visual.flashWidths).toBeNull();
     expect(visual.window).toBeNull();
   });
 
-  it("flash widths grow 1/1/4/4/8/8/16/16/32/32/64/64 across ticks 1-12", () => {
+  it("stays hidden 1 more tick (ISSUES #10: oracle-pixel-verified 2nd hidden tick, not just the initial OAM-creation one)", () => {
+    const visual = getConfirmRevealVisual(run(1));
+    expect(visual.flashWidths).toBeNull();
+    expect(visual.window).toBeNull();
+  });
+
+  it("flash widths grow 1/1/4/4/8/8/16/16/32/32/64/64 across ticks 2-13 (after the 2-tick hidden lag)", () => {
     const widths = [1, 1, 4, 4, 8, 8, 16, 16, 32, 32, 64, 64];
     widths.forEach((expected, i) => {
-      const visual = getConfirmRevealVisual(run(i + 1));
+      const visual = getConfirmRevealVisual(run(i + 2));
       expect(visual.flashWidths).toEqual([expected, expected, expected]);
     });
   });
 
-  it("transitions from 'flash' to 'window' after 13 ticks (12 flash frames, 1-tick creation lag), starting at the degenerate (64,65) window", () => {
-    const atFlashEnd = run(13);
+  it("transitions from 'flash' to 'window' after 14 ticks (12 flash frames, 2-tick creation lag, ISSUES #10), starting at the degenerate (64,65) window", () => {
+    const atFlashEnd = run(14);
     expect(atFlashEnd!.phase).toBe("window");
     expect(getConfirmRevealVisual(atFlashEnd).window).toEqual({ top: 64, bottom: 65 });
   });
 
-  it("holds the degenerate (64,65) window 1 extra tick (BG3 ShowBg's own tick) before growth starts", () => {
-    const held = run(13 + 1);
-    expect(getConfirmRevealVisual(held).window).toEqual({ top: 64, bottom: 65 });
+  it("grows to (60,69) the very next tick (ISSUES #10: the previously-modeled 2nd degenerate hold was this table's own half of the same off-by-one - oracle-pixel-verified only 1 hold tick now that the flash table's hidden tick is accounted for)", () => {
+    const grownOneStep = run(14 + 1);
+    expect(getConfirmRevealVisual(grownOneStep).window).toEqual({ top: 60, bottom: 69 });
   });
 
-  it("window grows to (32,96) over 8 more ticks (starting after the extra hold), then holds before mons/YES-NO appear", () => {
-    const grown = run(13 + 9);
+  it("window grows to (32,96) over 8 ticks total (from the degenerate start), then holds before mons/YES-NO appear", () => {
+    const grown = run(14 + 8);
     expect(getConfirmRevealVisual(grown).window).toEqual({ top: 32, bottom: 96 });
     expect(getConfirmRevealVisual(grown).monsAndYesNoVisible).toBe(false);
   });
 
-  it("holds the fully-grown (32,96) window 1 more tick than the growth alone needs (oracle-pixel-verified, ISSUES #8 gap 2: 3 consecutive identical-window frames before mons/YES-NO appear, not 2)", () => {
-    const stillHeld = run(13 + 10);
-    expect(getConfirmRevealVisual(stillHeld).window).toEqual({ top: 32, bottom: 96 });
-    expect(getConfirmRevealVisual(stillHeld).monsAndYesNoVisible).toBe(false);
+  it("holds the fully-grown (32,96) window 2 more ticks than the growth alone needs (oracle-pixel-verified, ISSUES #8 gap 2: 3 consecutive identical-window frames before mons/YES-NO appear, not 1)", () => {
+    const stillHeld1 = run(14 + 9);
+    expect(getConfirmRevealVisual(stillHeld1).window).toEqual({ top: 32, bottom: 96 });
+    expect(getConfirmRevealVisual(stillHeld1).monsAndYesNoVisible).toBe(false);
+    const stillHeld2 = run(14 + 10);
+    expect(getConfirmRevealVisual(stillHeld2).window).toEqual({ top: 32, bottom: 96 });
+    expect(getConfirmRevealVisual(stillHeld2).monsAndYesNoVisible).toBe(false);
   });
 
   it("reaches 'shown' (mons + YES/NO visible) after the window's hold ticks, cursor highlight lagging 1 more tick", () => {
-    const shownState = run(13 + 12);
+    const shownState = run(14 + 11);
     expect(shownState!.phase).toBe("shown");
     const justShown = getConfirmRevealVisual(shownState);
     expect(justShown.monsAndYesNoVisible).toBe(true);
     expect(justShown.cursorVisible).toBe(false);
-    const oneMore = getConfirmRevealVisual(run(13 + 12 + 1));
+    const oneMore = getConfirmRevealVisual(run(14 + 11 + 1));
     expect(oneMore.cursorVisible).toBe(true);
   });
 
   it("'shown' is a steady state - further ticks are a no-op once the cursor has caught up", () => {
-    const shownState = run(13 + 12 + 5);
+    const shownState = run(14 + 11 + 5);
     expect(advanceConfirmReveal(shownState)).toEqual(shownState);
   });
 });
