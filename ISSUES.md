@@ -5,7 +5,28 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #14 — accept-path closing/un-reveal: 4-row window-edge color band wrong,
+## #15 — pre-battle message-box frame art is baked from oracle pixels, not
+  derived from the extracted asset (debt, works but unexplained)
+
+**Symptom:** `src/assets/gen/prebattle-msgbox-frame.json` (S5 accept slice,
+commit `c4880d4`) holds the box's pre-text frame as literal oracle-capture
+pixels because rendering `prebattle-room-msgbox.json`'s extracted
+tile/palette data through the standard `DrawDialogueFrame` tile algorithm
+produced a consistent one-GBA-step color offset vs the oracle (~20 min
+attempt, not root-caused — accept worker's PAPERCUT, 2026-07-18).
+
+**Why it matters:** the committed trace is pixel-exact so nothing is
+functionally wrong today, but the baked asset can't generalize (other
+rooms/messages reuse `message_box.png`), and "one GBA step" smells like a
+small, findable pipeline bug — likely the 15→24-bit expansion applied
+once too many/few times, or an off-by-one palette slot, in either
+`extract-prebattle-room.ts`'s msgbox path or the render step. Compare
+against `docs/prebattle-room-notes.md` §3's two-asset rule (frame art vs
+`text-palette.json` interior fill) before suspecting the algorithm itself.
+
+**Fix bar:** derive the frame from `prebattle-room-msgbox.json` (or a
+corrected re-extraction), delete the baked asset, and re-verify
+`accept-prebattle.json` at its exact then-current count.
   8 frames, tapering (`accept-prebattle.json`)
 
 **Symptom:** during the A-on-YES closing/un-reveal (`confirmReveal.ts`'s
