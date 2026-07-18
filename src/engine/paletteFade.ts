@@ -56,6 +56,24 @@ export const EXIT_FADE_OUT_TICKS = 18;
 /** Ticks a fade-in phase spans before both layers settle on the destination screen's true colors (shared by entry and exit - see FADE_IN). */
 export const FADE_IN_TICKS = 15;
 
+/**
+ * src/engine/prebattleRoom.ts's "warpFade" phase (S6 slice 1a,
+ * data/maps/.../scripts.inc:50 `warp MAP_..._BATTLE_ROOM, 6, 11` right
+ * after the guided walk's shared `waitmovement 0`): the same
+ * BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK) mechanism as
+ * every other transition in this file, timed against
+ * `tools/compare/traces-groundtruth/battle1-intro.json`'s own frames (dense
+ * pixel sampling of a static room pixel unaffected by any sprite): the walk
+ * animation itself freezes 80 ticks after the walk starts (prebattleRoom.ts
+ * WALK_STEPS' last entry); 3 ticks later the BG layer's first blend step
+ * lands (startDelay 4, matching this fade's own phase-start tick, one past
+ * the freeze), then the familiar step-2-every-2-ticks cadence to fully
+ * black at +18 (BG) / +19 (OBJ, one-tick lag per this file's own point 2) -
+ * both frames sha256-cross-checked against the ground-truth trace's solid
+ * black window (frames 501-519, `d8b44303...`).
+ */
+export const WARP_FADE_OUT: FadeTiming = { startDelay: 4, startY: 0, targetY: 16 };
+
 /** BlendPalette in 5-bit space, target color black, applied to an already-8-bit-expanded component (see module doc point 1). y=0 -> unfaded (c8 back out), y=16 -> 0 (black). */
 export function blendComponentToBlack(component8: number, y: number): number {
   const c5 = component8 >> 3;

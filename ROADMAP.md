@@ -193,6 +193,11 @@ engine slices now implement against fixed targets. Open from that
 section's §4: transition-end bound (ticks 1200-1290) needs tightening;
 transition variant narrowed to 2 of 12 candidates, pixel-confirmation
 pending; 2 of the 4 post-freeze explicit `Random()` draws unexplained.
+**Slice 1a complete (2026-07-18):** the A-press → closemessage → guided
+walk (attendant + player, camera scroll, attendant set_invisible) → warp
+fade-to-black window (ticks 400-519) is engine-implemented and RAM/pixel-
+pinned; `tools/compare/traces/walk-warpout.json` (125/125, 0 diff). Battle-
+room entry (frame 520+) and everything after is still open.
 
 ### [ ] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain

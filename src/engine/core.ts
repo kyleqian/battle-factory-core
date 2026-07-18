@@ -61,9 +61,12 @@ import {
   messageBoxVisible,
   visiblePrintedChars,
   EXIT_TO_ROOM_BLACK_HOLD_TICKS,
+  WARP_FADE_FROZEN_VISUAL,
+  WARP_FADE_OUT,
+  walkVisual,
   type PrebattleRoomState,
 } from "./prebattleRoom.ts";
-import { drawMessageBox, renderPrebattleRoomScene } from "./prebattleRoomRender.ts";
+import { drawMessageBox, renderPrebattleRoomScene, renderPrebattleRoomWalkScene } from "./prebattleRoomRender.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -129,7 +132,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       }
       draftScreen = { ...draftScreen, ballAnims };
     }
-    prebattleRoom = advancePrebattleRoom(prebattleRoom);
+    // S6 slice 1a: MSGBOX_DEFAULT's own A-press gate (prebattleRoom.ts's
+    // "messageClosing" doc) - the only input this screen ever reads. Created
+    // directly (not via advancePrebattleRoom) so this same tick already
+    // reflects it, matching every other same-tick-state-creation site in
+    // this file (e.g. the "wasAccepting" branch below).
+    if (prebattleRoom.phase === "idle" && newKeys.has("A")) {
+      prebattleRoom = { phase: "messageClosing", elapsed: 0 };
+    } else {
+      prebattleRoom = advancePrebattleRoom(prebattleRoom);
+    }
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, rngValue };
   }
 
@@ -431,6 +443,35 @@ function renderPrebattleRoomState(state: EngineState): Uint8Array {
     const ticks = p.elapsed + 1;
     const fb = createFramebuffer();
     renderPrebattleRoomScene(fb, bgFadeY(ticks, FADE_IN), objFadeY(ticks, FADE_IN));
+    return fb;
+  }
+  if (p.phase === "walking") {
+    const v = walkVisual(p.elapsed);
+    const fb = createFramebuffer();
+    renderPrebattleRoomWalkScene(
+      fb,
+      { x: v.originX, y: v.originY },
+      v.playerFrame,
+      { x: v.attendantX, y: v.attendantY, frameIndex: v.attendantFrame, visible: v.attendantVisible },
+    );
+    return fb;
+  }
+  if (p.phase === "warpFade") {
+    // WARP_FADE_FROZEN_VISUAL: the walk's own final position, held fixed
+    // while BeginNormalPaletteFade darkens the screen (prebattleRoom.ts doc).
+    const v = WARP_FADE_FROZEN_VISUAL;
+    const ticks = p.elapsed + 1;
+    const bgY = bgFadeY(ticks, WARP_FADE_OUT);
+    const objY = objFadeY(ticks, WARP_FADE_OUT);
+    const fb = createFramebuffer();
+    renderPrebattleRoomWalkScene(
+      fb,
+      { x: v.originX, y: v.originY },
+      v.playerFrame,
+      { x: v.attendantX, y: v.attendantY, frameIndex: v.attendantFrame, visible: v.attendantVisible },
+      bgY,
+      objY,
+    );
     return fb;
   }
   const fb = createFramebuffer();

@@ -8,13 +8,17 @@ import {
   advancePrebattleRoom,
   EXIT_TO_ROOM_BLACK_HOLD_TICKS,
   INITIAL_PREBATTLE_ROOM_STATE,
+  MESSAGE_CLOSING_TICKS,
   MESSAGE_PRINT_TICKS,
   MESSAGE_TEXT,
   ROOM_HOLD_TICKS,
+  WALK_TICKS,
+  WARP_FADE_FROZEN_VISUAL,
   messageBoxVisible,
   visiblePrintedChars,
+  walkVisual,
 } from "../src/engine/prebattleRoom.ts";
-import { EXIT_FADE_OUT_TICKS, FADE_IN_TICKS } from "../src/engine/paletteFade.ts";
+import { EXIT_FADE_OUT_TICKS, FADE_IN_TICKS, WARP_FADE_OUT, bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 import { getConfirmRevealVisual } from "../src/engine/confirmReveal.ts";
 import type { GbaButton } from "../src/input.ts";
 
@@ -139,16 +143,128 @@ describe("core.ts wiring: A-on-YES accept path", () => {
     expect(at19.draftScreen.confirmReveal).toBeNull();
   });
 
-  it("reaches the settled, fully-printed idle message and holds there (no player input processed)", () => {
+  it("reaches the settled, fully-printed idle message and holds there until A is pressed", () => {
     // THROUGH_YES already includes 1 tick of "closing" (see the describe
     // block above) - 19 more finishes it, then the fade/hold/print phases.
     const ticksToIdle = 19 + EXIT_FADE_OUT_TICKS + EXIT_TO_ROOM_BLACK_HOLD_TICKS + FADE_IN_TICKS + ROOM_HOLD_TICKS + MESSAGE_PRINT_TICKS;
     const settled = replay([...THROUGH_YES, [ticksToIdle, null]]);
     expect(settled.prebattleRoom?.phase).toBe("idle");
 
-    // A held afterward changes nothing this slice (closemessage/warp are S6).
-    const stillIdle = tick(settled, new Set(["A"]));
+    // No-input ticks hold idle indefinitely (MSGBOX_DEFAULT blocks on A).
+    const stillIdle = tick(settled, new Set());
     expect(stillIdle.prebattleRoom?.phase).toBe("idle");
+
+    // S6 slice 1a: A starts the closemessage/walk/warp-fade sequence.
+    const pressed = tick(settled, new Set(["A"]));
+    expect(pressed.prebattleRoom).toEqual({ phase: "messageClosing", elapsed: 0 });
+  });
+
+  it("walks the A-press through messageClosing -> walking -> warpFade at the pinned tick counts (tools/compare/traces/walk-warpout.json)", () => {
+    const ticksToIdle = 19 + EXIT_FADE_OUT_TICKS + EXIT_TO_ROOM_BLACK_HOLD_TICKS + FADE_IN_TICKS + ROOM_HOLD_TICKS + MESSAGE_PRINT_TICKS;
+    const settled = replay([...THROUGH_YES, [ticksToIdle, null]]);
+    let state = tick(settled, new Set(["A"]));
+    expect(state.prebattleRoom).toEqual({ phase: "messageClosing", elapsed: 0 });
+
+    // A held through the pulse changes nothing further (newKeys only fires once).
+    state = tick(state, new Set(["A"]));
+    expect(state.prebattleRoom).toEqual({ phase: "messageClosing", elapsed: 1 });
+
+    // MESSAGE_CLOSING_TICKS (2) registration-lag ticks, then "walking" begins
+    // at elapsed 0 - matches the ground truth's frame 403 (first visibly-
+    // changed frame, 3 ticks after the press's own first tick at frame 400).
+    expect(MESSAGE_CLOSING_TICKS).toBe(2);
+    state = tick(state, new Set());
+    expect(state.prebattleRoom).toEqual({ phase: "walking", elapsed: 0 });
+
+    for (let i = 0; i < WALK_TICKS - 1; i += 1) state = tick(state, new Set());
+    expect(state.prebattleRoom).toEqual({ phase: "walking", elapsed: WALK_TICKS - 1 });
+
+    // WALK_TICKS (80) ticks after walking starts, warpFade begins - matches
+    // the ground truth's frame 483 (walk motion frozen 80 ticks after frame
+    // 403 = tick 403+80 = 483).
+    state = tick(state, new Set());
+    expect(state.prebattleRoom).toEqual({ phase: "warpFade", elapsed: 0 });
+
+    // warpFade holds forever (out of this slice's scope past the solid-
+    // black window), never transitioning further.
+    for (let i = 0; i < 40; i += 1) state = tick(state, new Set());
+    expect(state.prebattleRoom).toEqual({ phase: "warpFade", elapsed: 40 });
+  });
+});
+
+describe("prebattleRoom.ts: WALK_STEPS table (RAM-probed - gObjectEvents/gSprites/gSpriteCoordOffsetX/Y, see module doc)", () => {
+  it("has exactly WALK_TICKS (80) entries, matching the ground truth's frozen-at-tick-483 boundary (403 + 80 = 483)", () => {
+    expect(WALK_TICKS).toBe(80);
+  });
+
+  it("pins the first walking tick (elapsed 0 = ground-truth frame 403, first visibly-changed frame)", () => {
+    expect(walkVisual(0)).toEqual({
+      originX: 16,
+      originY: 55,
+      attendantX: 111,
+      attendantY: 41,
+      attendantVisible: true,
+      playerFrame: 5, // ANIM_STD_GO_NORTH, first frame of its 4-step cycle
+      attendantFrame: 7, // ANIM_STD_GO_WEST
+    });
+  });
+
+  it("vanishes the attendant (set_invisible) exactly at elapsed 64 (ground-truth frame 467), matching the script's 5th movement command", () => {
+    expect(walkVisual(63).attendantVisible).toBe(true);
+    expect(walkVisual(64).attendantVisible).toBe(false);
+    // Screen position keeps updating even once invisible (camera still
+    // scrolling, the object just stops being drawn) - see module doc.
+    expect(walkVisual(64)).toEqual({
+      originX: -16,
+      originY: 23,
+      attendantX: 112,
+      attendantY: 41,
+      attendantVisible: false,
+      playerFrame: 5,
+      attendantFrame: 1,
+    });
+  });
+
+  it("the player's own screen position is never part of this table - the field camera exactly cancels the player's movement (module doc)", () => {
+    // prebattleRoomRender.ts's PLAYER_POS is reused unchanged for the whole
+    // walk; only WALK_STEPS' player *frame* index varies, never a position.
+    const frames = Array.from({ length: WALK_TICKS }, (_, i) => walkVisual(i).playerFrame);
+    expect(new Set(frames)).toEqual(new Set([1, 2, 5, 6, 7, 8]));
+  });
+
+  it("reaches the net 2-tiles-left + 3-tiles-up displacement and freezes there (last row), matching the script's own choreography", () => {
+    const last = walkVisual(WALK_TICKS - 1);
+    expect(last).toEqual({ originX: -16, originY: 8, attendantX: 112, attendantY: 56, attendantVisible: false, playerFrame: 1, attendantFrame: 1 });
+    expect(WARP_FADE_FROZEN_VISUAL).toEqual(last);
+    // Clamps beyond the table's end (warpFade keeps reading this same row).
+    expect(walkVisual(WALK_TICKS)).toEqual(last);
+    expect(walkVisual(WALK_TICKS + 1000)).toEqual(last);
+  });
+});
+
+describe("paletteFade.ts: WARP_FADE_OUT (S6 slice 1a warp fade, tools/compare/traces/walk-warpout.json frames 483-519)", () => {
+  it("holds unfaded for 3 ticks, then blends to fully black - BG settles one tick before OBJ (module doc)", () => {
+    // elapsed 0-2 (warpFade's own first 3 ticks, ground-truth frames 483-485,
+    // all still 255,255,255 on a static room pixel) - startDelay 4 means
+    // ticks (=elapsed+1) 1-3 are all still below the delay.
+    for (let elapsed = 0; elapsed <= 2; elapsed += 1) {
+      expect(bgFadeY(elapsed + 1, WARP_FADE_OUT)).toBe(0);
+      expect(objFadeY(elapsed + 1, WARP_FADE_OUT)).toBe(0);
+    }
+    // elapsed 3 (frame 486): BG's first step (y=2); OBJ still lags a tick.
+    expect(bgFadeY(4, WARP_FADE_OUT)).toBe(2);
+    expect(objFadeY(4, WARP_FADE_OUT)).toBe(0);
+    // elapsed 17 (frame 500): BG fully black, OBJ not yet (matches the
+    // ground truth: frame 500 is NOT part of the solid-black run).
+    expect(bgFadeY(18, WARP_FADE_OUT)).toBe(16);
+    expect(objFadeY(18, WARP_FADE_OUT)).toBe(14);
+    // elapsed 18 (frame 501): both layers fully black - first frame of the
+    // ground truth's solid-black window (frames 501-519, sha d8b44303...).
+    expect(bgFadeY(19, WARP_FADE_OUT)).toBe(16);
+    expect(objFadeY(19, WARP_FADE_OUT)).toBe(16);
+    // Stays fully black indefinitely past that (module doc: "holds forever").
+    expect(bgFadeY(100, WARP_FADE_OUT)).toBe(16);
+    expect(objFadeY(100, WARP_FADE_OUT)).toBe(16);
   });
 });
 

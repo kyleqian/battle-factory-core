@@ -5,6 +5,68 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 46 — S6 slice 1a: A-press → closemessage → guided walk → warp fade (ticks 400-519) implemented, oracle-pinned; `walk-warpout.json` committed 125/125
+
+- **State:** `npm test` **348/348** (341→348, +7 in `tests/prebattleRoomFlow.test.ts`),
+  `npm run build` green. New trace `tools/compare/traces/walk-warpout.json`
+  (520 frames, captures 395-519) passes `npm run compare` **125/125, 0
+  diff**. All 12 pre-existing traces re-verified at their exact prior
+  counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6
+  66/66, example 4/4, summary-info-onix 122/122, summary-info-magby
+  132/132, confirm-decline 67/67, accept-prebattle 137/137, rent-slot1
+  125/139, rent-3picks 157/190, confirm-flow 79/95) — zero regressions.
+- **Did:** RAM-probed the whole window directly (`tools/probe/ram-probe.py`,
+  scratch spec/output under `/tmp/s6-worker/`, not committed) rather than
+  fitting pixel diffs blind: watched `gObjectEvents[0/1]` (player/attendant
+  - localId/currentCoords/movementActionId/facing), `gSprites[0/1]`
+  (x/y/animNum/animCmdIdx/invisible flag), and `gSpriteCoordOffsetX/Y`
+  every tick 395-520. Cross-referencing against `sAnim_Go*`'s ANIMCMD
+  tables (`object_event_anims.h`) decoded exact per-tick walk-animation
+  frames; cross-referencing screen positions (`sprite.xy + coordOffsetXY -
+  {8,16}`) against the room's already-known camera-origin formula proved
+  **the player sprite stays screen-fixed at (112,56) the entire walk** (the
+  field camera exactly cancels the player's own movement) - only the room
+  tiles + the independently-moving attendant actually scroll on screen, a
+  finding that collapsed the whole camera-scroll gotcha the brief flagged
+  into "no per-tick player-position bookkeeping needed." Also discovered a
+  real one-tick **render-lag**: RAM state at tick N only becomes visible in
+  the rendered frame N+1 (verified against the ground truth's own frame-403
+  boundary). Baked the resulting 80-tick walk (frame 403 → 482, when motion
+  freezes) as an oracle-pinned lookup table (`prebattleRoom.ts` `WALK_STEPS`,
+  same style as this file's existing `WINDOW_STEPS`/`UNREVEAL_WINDOW_STEPS`
+  tables) rather than a general movement formula - safest match for exact
+  byte-parity given per-tile timing already deviates from the naive 16-
+  frames/tile assumption in places. Pixel-sampled the warp fade separately
+  (a static room pixel across frames 478-505) and fit it to the *existing*
+  `BlendPalette` shape already modeled in `paletteFade.ts` - new
+  `WARP_FADE_OUT` timing constant (startDelay 4), reusing `bgFadeY`/
+  `objFadeY` unchanged. New phases `messageClosing` (2-tick input-
+  registration lag, matching this file's existing `confirmReveal`
+  precedent) → `walking` (80 ticks, `WALK_STEPS`-driven) → `warpFade` (fades
+  to black and then holds solid black forever, matching the step's explicit
+  "may simply hold black from 501 onward" scope cut). Extended
+  `extract-prebattle-room.ts` to pull all 9 standard picture-table poses per
+  NPC (was 1 each) - `prebattle-room-npcs.json`'s shape changed from a
+  single `tileset` to a `frames[9]` array; updated `prebattleRoomRender.ts`
+  (`drawRoomTiles`/`drawNpcFrame` now take an explicit origin/frame index)
+  and `tests/prebattleRoom.test.ts` to match. Core.ts wires the A-press
+  (`newKeys.has("A")` while `phase==="idle"`) directly into `messageClosing`
+  - the only input this screen ever reads in this slice.
+- **Next:** S6 slice 1b+: battle-room entry (frame 520+, scientists facing,
+  opponent walk-in, opponent overworld speech "IT'S WAY TOO HOT HERE"),
+  then the heal-icon/nature-reroll/transition-select window (ticks 842-869)
+  and the transition itself - all pinned in `docs/battle-bringup-notes.md`'s
+  "Slice-0 ground truth" section (not touched this step, per the step
+  brief - a parallel worker owns that file). ISSUES.md still just #15.
+- **Notes:** no papercuts this session. All RAM-probe scratch (specs,
+  dense-capture trace JSONs used only to derive the table, PNG output under
+  `/tmp/s6-worker/`) is scratch per convention, not committed - only
+  `tools/compare/traces/walk-warpout.json` (the final byte-exact parity
+  trace) and the engine/asset/test diffs are. `docs/battle-bringup-notes.md`
+  was read but **not edited**, per the step brief.
+
+---
+
 ## 45 — Supervisor wind-down: session end 2026-07-18 ~01:20; S5 COMPLETE [x], S6 slice 0 banked
 
 - **State (verified this minute):** `npm test` **341/341**, `npm run build`
@@ -107,62 +169,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and `tools/extract/` were **not touched** — confirmed via `git status`
   before both commits.
 
-
-## 43 — ISSUES #14 root-caused and fixed (two distinct bugs, both the same "accept's own extra-work-free path renders early" mechanism family); `accept-prebattle.json` 123/137 → **137/137**, entry DELETED
-
-- **State:** `npm test` **341/341** (337→341, +4 `tests/prebattleRoomFlow.test.ts`),
-  `npm run build` green. `accept-prebattle.json`: **123/137 → 137/137, byte-
-  exact on every frame.** All 12 other traces re-verified at their exact
-  prior counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38, draft-
-  menu-slot6 66/66, example 4/4, rent-slot1 125/139, rent-3picks 157/190,
-  summary-info-magby 132/132, summary-info-onix 122/122, confirm-flow 79/95,
-  confirm-decline 67/67) — zero regressions. ISSUES #14 DELETED.
-- **Did:** Also fixed a doc bug inherited from the prior session: the
-  supervisor's ISSUES #15 insertion had clobbered #14's own heading line,
-  leaving its body under an orphaned continuation fragment (separate commit,
-  restored before starting). Root-caused #14 in two layers, both found by
-  replaying `accept-prebattle.json`'s exact button script through a scratch
-  engine harness and cross-referencing `confirmReveal` state per tick against
-  `npm run compare`'s per-frame diff-pixel counts (RAM/IO-register probing,
-  the step brief's suggested first approach, was superseded once this
-  cross-reference made the mechanism obvious without it). **Root cause #1**
-  (the 4-row window-edge band, frames 262-269/270-279, ~11 of the 14 listed
-  frames): the accept path's `UNREVEAL_WINDOW_STEPS`/`UNREVEAL_FLASH_WIDTHS`
-  table read lands exactly **one tick early** vs decline - confirmed
-  air-tight by reproducing every one of the residual's diff-pixel counts
-  exactly (96/48/24/12/9px = the precise pixel deltas between adjacent table
-  entries × 3 flash centers). Same "decline's extra same-tick work delays
-  the render by a tick" mechanism already fixed for `monsVisible` (ISSUES
-  #9/#13 family) — just not previously applied to this table. Fixed by
-  factoring the table lookup into a pure `closingWindowStep(tick)` and
-  reading it at `elapsed+1` (clamped to the last tick, matching decline's
-  own tail-hold behavior via the pre-existing `closingFlashResidual`) for
-  `accepting`, unchanged for decline. **Root cause #2** (a 36px residual on
-  frame 262 surfaced only after fixing #1): the same early-render mechanism
-  also hits the window's live ball-grid layer on accept's very first closing
-  tick (elapsed 1) - a naive display-only lag (the usual fix for this
-  family, tried first and reverted when it broke frame 263) doesn't work
-  here because the immediately-following tick permanently freezes via the
-  pre-existing `ballAnimStall` mechanism (ISSUES #13), so lagging the stored
-  value leaves the wrong tile frozen for the whole stall instead of
-  self-correcting. Fixed via a new `ConfirmRevealState.preCloseBallAnims`
-  snapshot (every active ball's state as of the tick closing started,
-  mirroring the existing `decliningBallAnim` pattern but for all slots)
-  consumed by `factoryDraftScreen.ts`'s window-ball rendering only at
-  `accepting && elapsed === 1`. Both fixes pinned in
-  `tests/prebattleRoomFlow.test.ts` (window/flash table-shift equivalence
-  vs. a live decline replay across every tick + the tail clamp, and the
-  ball-snapshot's exact one-tick lifecycle).
-- **Next:** ISSUES.md backlog is back to just #15 (message-box asset debt,
-  out of scope for this step). S6 (battle bring-up) is the next roadmap
-  stage, off its already-banked groundwork (`docs/battle-bringup-notes.md`).
-- **Notes:** no papercuts this session beyond the doc-heading fix above
-  (itself filed/fixed, not left standing). All scratch probing (a Node
-  replay harness importing `core.ts` directly, plus Python/PIL pixel
-  sampling of `tools/compare/out/latest`) was scratch, deleted before
-  finishing - nothing uncommitted beyond the intended
-  `src/engine/{confirmReveal,core,factoryDraftScreen}.ts` +
-  `tests/prebattleRoomFlow.test.ts` + `ISSUES.md`/`PROGRESS.md`/
-  `PROGRESS-archive.md`.
 
 ---

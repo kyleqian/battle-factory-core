@@ -5,6 +5,65 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 43 — ISSUES #14 root-caused and fixed (two distinct bugs, both the same "accept's own extra-work-free path renders early" mechanism family); `accept-prebattle.json` 123/137 → **137/137**, entry DELETED
+
+- **State:** `npm test` **341/341** (337→341, +4 `tests/prebattleRoomFlow.test.ts`),
+  `npm run build` green. `accept-prebattle.json`: **123/137 → 137/137, byte-
+  exact on every frame.** All 12 other traces re-verified at their exact
+  prior counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38, draft-
+  menu-slot6 66/66, example 4/4, rent-slot1 125/139, rent-3picks 157/190,
+  summary-info-magby 132/132, summary-info-onix 122/122, confirm-flow 79/95,
+  confirm-decline 67/67) — zero regressions. ISSUES #14 DELETED.
+- **Did:** Also fixed a doc bug inherited from the prior session: the
+  supervisor's ISSUES #15 insertion had clobbered #14's own heading line,
+  leaving its body under an orphaned continuation fragment (separate commit,
+  restored before starting). Root-caused #14 in two layers, both found by
+  replaying `accept-prebattle.json`'s exact button script through a scratch
+  engine harness and cross-referencing `confirmReveal` state per tick against
+  `npm run compare`'s per-frame diff-pixel counts (RAM/IO-register probing,
+  the step brief's suggested first approach, was superseded once this
+  cross-reference made the mechanism obvious without it). **Root cause #1**
+  (the 4-row window-edge band, frames 262-269/270-279, ~11 of the 14 listed
+  frames): the accept path's `UNREVEAL_WINDOW_STEPS`/`UNREVEAL_FLASH_WIDTHS`
+  table read lands exactly **one tick early** vs decline - confirmed
+  air-tight by reproducing every one of the residual's diff-pixel counts
+  exactly (96/48/24/12/9px = the precise pixel deltas between adjacent table
+  entries × 3 flash centers). Same "decline's extra same-tick work delays
+  the render by a tick" mechanism already fixed for `monsVisible` (ISSUES
+  #9/#13 family) — just not previously applied to this table. Fixed by
+  factoring the table lookup into a pure `closingWindowStep(tick)` and
+  reading it at `elapsed+1` (clamped to the last tick, matching decline's
+  own tail-hold behavior via the pre-existing `closingFlashResidual`) for
+  `accepting`, unchanged for decline. **Root cause #2** (a 36px residual on
+  frame 262 surfaced only after fixing #1): the same early-render mechanism
+  also hits the window's live ball-grid layer on accept's very first closing
+  tick (elapsed 1) - a naive display-only lag (the usual fix for this
+  family, tried first and reverted when it broke frame 263) doesn't work
+  here because the immediately-following tick permanently freezes via the
+  pre-existing `ballAnimStall` mechanism (ISSUES #13), so lagging the stored
+  value leaves the wrong tile frozen for the whole stall instead of
+  self-correcting. Fixed via a new `ConfirmRevealState.preCloseBallAnims`
+  snapshot (every active ball's state as of the tick closing started,
+  mirroring the existing `decliningBallAnim` pattern but for all slots)
+  consumed by `factoryDraftScreen.ts`'s window-ball rendering only at
+  `accepting && elapsed === 1`. Both fixes pinned in
+  `tests/prebattleRoomFlow.test.ts` (window/flash table-shift equivalence
+  vs. a live decline replay across every tick + the tail clamp, and the
+  ball-snapshot's exact one-tick lifecycle).
+- **Next:** ISSUES.md backlog is back to just #15 (message-box asset debt,
+  out of scope for this step). S6 (battle bring-up) is the next roadmap
+  stage, off its already-banked groundwork (`docs/battle-bringup-notes.md`).
+- **Notes:** no papercuts this session beyond the doc-heading fix above
+  (itself filed/fixed, not left standing). All scratch probing (a Node
+  replay harness importing `core.ts` directly, plus Python/PIL pixel
+  sampling of `tools/compare/out/latest`) was scratch, deleted before
+  finishing - nothing uncommitted beyond the intended
+  `src/engine/{confirmReveal,core,factoryDraftScreen}.ts` +
+  `tests/prebattleRoomFlow.test.ts` + `ISSUES.md`/`PROGRESS.md`/
+  `PROGRESS-archive.md`.
+
+---
+
 ## 42 — S5 COMPLETE: YES-press accept path (exit fade → pre-battle room → fully-printed "Right this way, please!") implemented, oracle-pinned; `accept-prebattle.json` committed at 123/137, ISSUES #14 filed for the residual
 
 - **State:** `npm test` **337/337** (329→337, +8 `tests/prebattleRoomFlow.test.ts`,

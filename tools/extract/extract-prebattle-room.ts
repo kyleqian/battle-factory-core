@@ -152,10 +152,18 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
-// --- NPC overworld sprite frames (settled pose only) ------------------------
-// Both frames come from a 144x32 (9-frame, 16x32 each) sheet; sliceTiles
-// gives 18 cols x 4 rows of 8x8 tiles, frame N = tile columns [2N, 2N+1] x
-// all 4 rows (object_event_pic_tables.h: overworld_frame(*, 2, 4, N)).
+// --- NPC overworld sprite frames (all 9 standard poses) ----------------------
+// Both sheets are 144x32 (9-frame, 16x32 each); sliceTiles gives 18 cols x 4
+// rows of 8x8 tiles, frame N = tile columns [2N, 2N+1] x all 4 rows
+// (object_event_pic_tables.h: overworld_frame(*, 2, 4, N)). The 9 standard
+// poses (object_event_anims.h sAnimTable_Standard/sAnim_Face*/sAnim_Go*,
+// picture-table indices): 0 face-south, 1 face-north, 2 face-west (east
+// reuses 2 hFlip'd, not extracted), 3/4 south-walk cycle, 5/6 north-walk
+// cycle, 7/8 west-walk cycle (east reuses 7/8 hFlip'd). S6 slice 1a's walk-
+// to-battle-room window (docs/battle-bringup-notes.md) uses frames
+// {1,2,5,6,7,8} for both NPCs (RAM-probed via gSprites[].animNum/
+// animCmdIdx cross-referenced against these tables) - all 9 are extracted
+// for simplicity/future slices rather than hand-picking the subset.
 {
   function extractFrame(sheetPath: string, frameIndex: number) {
     const img = decodeIndexedPng(sheetPath);
@@ -171,25 +179,25 @@ function writeJson(path: string, data: unknown): void {
     return { columns: 2, rows: 4, tiles };
   }
 
-  // Attendant: OBJ_EVENT_GFX_SCIENTIST_1 (map.json), sPicTable_Scientist1
-  // frame 0 = ANIM_STD_FACE_SOUTH (object_event_anims.h sAnim_FaceSouth
-  // uses picture-table frame 0) - matches the settled scene (attendant
-  // faces down, scripts.inc:418 `face_down`).
-  const attendantFrame = extractFrame(join(REF, "graphics", "object_events", "pics", "people", "scientist_1.png"), 0);
+  function extractAllFrames(sheetPath: string) {
+    const frames = [];
+    for (let i = 0; i < 9; i += 1) frames.push(extractFrame(sheetPath, i));
+    return frames;
+  }
+
+  // Attendant: OBJ_EVENT_GFX_SCIENTIST_1 (map.json), sPicTable_Scientist1.
+  const attendantFrames = extractAllFrames(join(REF, "graphics", "object_events", "pics", "people", "scientist_1.png"));
   const attendantPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_3.pal"));
 
   // Player (Brendan, male protagonist - confirmed against the oracle PNG's
   // green-shirt sprite, docs/prebattle-room-notes.md): gObjectEventPic_
-  // BrendanNormal, sPicTable_BrendanNormal frame 1 = ANIM_STD_FACE_NORTH
-  // (sAnim_FaceNorth uses picture-table frame 1) - player faces up after
-  // walking up into the room (scripts.inc Movement_PlayerEnterRoom, all
-  // walk_up, no trailing face_* so it holds the walk direction).
-  const playerFrame = extractFrame(join(REF, "graphics", "object_events", "pics", "people", "brendan", "walking.png"), 1);
+  // BrendanNormal, sPicTable_BrendanNormal.
+  const playerFrames = extractAllFrames(join(REF, "graphics", "object_events", "pics", "people", "brendan", "walking.png"));
   const playerPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "brendan.pal"));
 
   writeJson(join(ASSETS_GEN, "prebattle-room-npcs.json"), {
-    attendant: { tileset: attendantFrame, palette: attendantPalette, facing: "south" },
-    player: { tileset: playerFrame, palette: playerPalette, facing: "north" },
+    attendant: { frames: attendantFrames, palette: attendantPalette, facing: "south" },
+    player: { frames: playerFrames, palette: playerPalette, facing: "north" },
   });
 }
 

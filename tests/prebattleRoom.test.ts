@@ -68,11 +68,14 @@ describe("prebattle-room-tileset.json", () => {
 });
 
 describe("prebattle-room-npcs.json", () => {
-  it("extracted one 16x32 (2x4 8x8-tile) frame per NPC with its own 16-color palette", () => {
+  it("extracted all 9 standard 16x32 (2x4 8x8-tile) poses per NPC with its own 16-color palette", () => {
     for (const npc of [npcs.attendant, npcs.player]) {
-      expect(npc.tileset.columns).toBe(2);
-      expect(npc.tileset.rows).toBe(4);
-      expect(npc.tileset.tiles).toHaveLength(8);
+      expect(npc.frames).toHaveLength(9);
+      for (const frame of npc.frames) {
+        expect(frame.columns).toBe(2);
+        expect(frame.rows).toBe(4);
+        expect(frame.tiles).toHaveLength(8);
+      }
       expect(npc.palette).toHaveLength(16);
     }
   });

@@ -75,8 +75,14 @@ interface RoomLayout {
   attendantTile: { x: number; y: number };
   cameraOriginPx: { x: number; y: number };
 }
+interface NpcFrame {
+  columns: number;
+  rows: number;
+  tiles: number[][];
+}
 interface NpcSprite {
-  tileset: { columns: number; rows: number; tiles: number[][] };
+  /** All 9 standard poses (extract-prebattle-room.ts), indexed by picture-table frame number (object_event_anims.h sAnimTable_Standard). */
+  frames: NpcFrame[];
   palette: RgbColor[];
   facing: string;
 }
@@ -84,6 +90,10 @@ interface NpcSprite {
 const roomLayout = layout as RoomLayout;
 const roomTileset = tileset as RoomTileset;
 const roomNpcs = npcs as { attendant: NpcSprite; player: NpcSprite };
+
+/** Settled-scene picture-table frame indices (docs/prebattle-room-notes.md §2). */
+const ATTENDANT_SETTLED_FRAME = 0;
+const PLAYER_SETTLED_FRAME = 1;
 
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
@@ -124,13 +134,13 @@ function drawBlockLayer(fb: Uint8Array, entries: TileEntry[], screenX: number, s
   }
 }
 
-function drawRoomTiles(fb: Uint8Array, fadeY: number): void {
-  const { width, height, blocks, cameraOriginPx } = roomLayout;
+function drawRoomTiles(fb: Uint8Array, origin: { x: number; y: number }, fadeY: number): void {
+  const { width, height, blocks } = roomLayout;
   for (let by = 0; by < height; by += 1) {
     for (let bx = 0; bx < width; bx += 1) {
       const block = blocks[by * width + bx]!;
-      const screenX = bx * 16 - cameraOriginPx.x;
-      const screenY = by * 16 - cameraOriginPx.y;
+      const screenX = bx * 16 - origin.x;
+      const screenY = by * 16 - origin.y;
       if (screenX + 16 <= 0 || screenX >= 240 || screenY + 16 <= 0 || screenY >= 160) continue;
       const meta = roomTileset.metatiles[String(block.metatileId)];
       if (!meta) continue;
@@ -140,10 +150,11 @@ function drawRoomTiles(fb: Uint8Array, fadeY: number): void {
   }
 }
 
-function drawNpc(fb: Uint8Array, npc: NpcSprite, pos: { x: number; y: number }, fadeY: number): void {
-  for (let ty = 0; ty < npc.tileset.rows; ty += 1) {
-    for (let tx = 0; tx < npc.tileset.columns; tx += 1) {
-      const tile = npc.tileset.tiles[ty * npc.tileset.columns + tx];
+function drawNpcFrame(fb: Uint8Array, npc: NpcSprite, frameIndex: number, pos: { x: number; y: number }, fadeY: number): void {
+  const frame = npc.frames[frameIndex]!;
+  for (let ty = 0; ty < frame.rows; ty += 1) {
+    for (let tx = 0; tx < frame.columns; tx += 1) {
+      const tile = frame.tiles[ty * frame.columns + tx];
       if (!tile) continue;
       for (let py = 0; py < 8; py += 1) {
         for (let px = 0; px < 8; px += 1) {
@@ -161,9 +172,31 @@ function drawNpc(fb: Uint8Array, npc: NpcSprite, pos: { x: number; y: number }, 
 
 /** The settled scene: room tiles (BG) + both NPC sprites (OBJ) on top - docs/prebattle-room-notes.md §1/§2, oracle-verified 0/38400px. bgFadeY/objFadeY both 0 for the unfaded (settled) render. */
 export function renderPrebattleRoomScene(fb: Uint8Array, bgFadeY = 0, objFadeY = 0): void {
-  drawRoomTiles(fb, bgFadeY);
-  drawNpc(fb, roomNpcs.attendant, ATTENDANT_POS, objFadeY);
-  drawNpc(fb, roomNpcs.player, PLAYER_POS, objFadeY);
+  drawRoomTiles(fb, roomLayout.cameraOriginPx, bgFadeY);
+  drawNpcFrame(fb, roomNpcs.attendant, ATTENDANT_SETTLED_FRAME, ATTENDANT_POS, objFadeY);
+  drawNpcFrame(fb, roomNpcs.player, PLAYER_SETTLED_FRAME, PLAYER_POS, objFadeY);
+}
+
+/**
+ * S6 slice 1a - the A-press-to-warp-fade walk window
+ * (docs/battle-bringup-notes.md "Slice-0 ground truth" §2/§3,
+ * src/engine/prebattleRoom.ts's WALK_STEPS table): the room tiles scroll
+ * under a moving camera origin (the player itself stays screen-fixed at
+ * PLAYER_POS, oracle-verified via gSpriteCoordOffsetX/Y RAM probing - see
+ * that module's doc), the attendant walks independently and vanishes
+ * (set_invisible) partway through.
+ */
+export function renderPrebattleRoomWalkScene(
+  fb: Uint8Array,
+  origin: { x: number; y: number },
+  playerFrameIndex: number,
+  attendant: { x: number; y: number; frameIndex: number; visible: boolean },
+  bgFadeY = 0,
+  objFadeY = 0,
+): void {
+  drawRoomTiles(fb, origin, bgFadeY);
+  if (attendant.visible) drawNpcFrame(fb, roomNpcs.attendant, attendant.frameIndex, { x: attendant.x, y: attendant.y }, objFadeY);
+  drawNpcFrame(fb, roomNpcs.player, playerFrameIndex, PLAYER_POS, objFadeY);
 }
 
 interface MsgboxFrameAsset {
