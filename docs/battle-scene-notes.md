@@ -172,6 +172,44 @@ above, both RAM-confirmed against `gScanlineEffectRegBuffers` directly
    Treating BG1 as contributing black (this session's fallback in
    `battleScene.ts`) is a placeholder, not a confirmed mechanism.
 
+**CORRECTION (PROGRESS.md #62)**: point 2 above was a misdiagnosis, and the
+"blend everything by evb/16" fallback it left in place is independently
+wrong too:
+- **Palette bank 4 was never missing.** `DrawMainBattleBackground` loads
+  `gBattleEnvironmentPalette_Frontier` at `BG_PLTT_ID(2)` for 3 subpalettes
+  (hardware slots 2/3/4) before the intro slide runs, and
+  `DrawBattleEntryBackground`'s `BATTLE_TYPE_FRONTIER` branch never reloads
+  palette RAM — so `entrySlide`'s raw nibble 4 is hardware-absolute, same
+  `+2` base as the static tilemap. Normalizing it the same way lands on
+  local subpalette 2, which was already captured. RAM-confirmed bit-exact
+  against `gPlttBufferFaded` @ hardware bank 4 across the whole window
+  (ticks 1073-1886). `extract-battle-bg.ts` now normalizes both tilemaps
+  consistently; see its header comment and `battleBg.test.ts`.
+- **The "blend by evb/16 everywhere" fallback is categorically wrong, not
+  just missing BG1's content.** GBA alpha blend only engages where the
+  actual topmost non-transparent layer at a pixel is TGT1-flagged (here,
+  BG1 only). `entrySlide`'s tilemap is a sparse diagonal-streak pattern
+  over a mostly-transparent 32x32 grid, so most of the window's pixels have
+  BG1 transparent there — meaning BG3/OBJ must draw at their RAW color,
+  unscaled, not blended at all. Confirmed by direct oracle pixel
+  inspection (tick 1090, x=230/220/235 outside both trainer sprites):
+  observed colors are exact UNSCALED matches to `battle-bg.json` local
+  subpalette 0/1 (e.g. `rgb(247,247,255)` = index 15), not anything close
+  to that color scaled by 8/16.
+- **Still open**: the exact sign/magnitude convention linking `gTasks[0]
+  .data[2]`/`gBattle_BG1_X` to actual sampled map coordinates. A single
+  isolated point matched `shift=-240` (opposite sign from the existing
+  `shiftTop`/`shiftBottom` implementation) exactly, but a whole-scanline
+  brute-force pixel search was inconclusive: the static bg tileset reuses
+  the same ~5-6 sky colors across many tiles, so many candidate shifts
+  alias to similar match counts and a plain per-pixel-count fit can't be
+  trusted. Needs a direct RAM read of the actual DMA'd
+  `gScanlineEffectRegBuffers` content (not just `data[2]`'s value) plus
+  attention to the `dmaSrcBuffers[i] = ...+1` indexing trick in
+  `scanline_effect.c` (the buffer-index-to-scanline mapping may be off by
+  one from a naive reading) - see `battleScene.ts`'s module doc point 2 for
+  the full account.
+
 Net: an engine slice can bake this **exactly** as a lookup table
 (tick-offset-from-task-start → `{bg1X, scanlineShift, blendEVA, blendEVB}`),
 no RNG, no oracle-fitting — every number above is either a literal source

@@ -36,26 +36,51 @@
 //    STILL OPEN: the streak's *color*. RAM confirms `BLDCNT =
 //    TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ` (0x1842) literally - OBJ (both
 //    trainer pics) genuinely are blend targets alongside BG3, resolving
-//    #58's question there - but TGT1 (BG1)'s actual content this session
-//    could NOT pin down: `battle-bg.json`'s `entrySlide` tileset (scrolled
-//    by the RAM-confirmed `gBattle_BG1_X`, `+=8`/tick unconditionally from
-//    task start) was the leading hypothesis, but every one of its tilemap
-//    entries in the sampled window reference **palette bank 4, which
-//    `extract-battle-bg.ts` never captured** (`battle-bg.json`'s top-level
-//    `palette` array only has banks 0/1/2) - so every sampled pixel came
-//    back transparent and the hypothesis was numerically untestable this
-//    session (falls back identically to the "BG1 is black" approximation
-//    below). `drawSlideScene` therefore still renders the streak as pure
-//    brightness scaling (`evb/16`) of the per-scanline-shifted BG3 content
-//    plus the (unshifted) trainer OBJs, with no TGT1 contribution - closer
-//    to the real mechanism than #58's fixed/shifted cross-fade (which
-//    never fit either target), but still not byte-exact (`npm run compare
-//    -- tools/compare/traces/scene-assembly.json` diffs every frame
-//    1075-1226, growing from ~700px to tens of thousands as the window
-//    opens - see PROGRESS.md for exact counts). Next step: re-extract
-//    `battle-bg.json` with palette bank 4 included, then re-test the
-//    entrySlide-as-TGT1 hypothesis (the extraction, not the geometry, is
-//    the blocker).
+//    #58's question there.
+//    This session (#62) resolved the "palette bank 4 missing" blocker: it
+//    was a misdiagnosis, not a real gap - `entrySlide`'s raw palette nibble
+//    4 is hardware-absolute (same +2 base as the static tilemap), and
+//    normalizing it the same way lands on local subpalette 2, which was
+//    already extracted (RAM-confirmed bit-exact against `gPlttBufferFaded`
+//    @ hardware bank 4 - see extract-battle-bg.ts's header and
+//    battleBg.test.ts). `battle-bg.json`'s `entrySlide` now has usable
+//    content + palette.
+//    But wiring it up surfaced that the OLD fallback model (uniform
+//    `evb/16` brightness scaling of BG3+OBJ across the whole window) is
+//    ALSO categorically wrong, independent of BG1's missing content: GBA
+//    alpha blend only engages where the actual topmost non-transparent
+//    layer at a pixel is flagged TGT1 (here, only BG1) - wherever BG1's
+//    tile is transparent (index 0, the common case; the entrySlide tilemap
+//    is a sparse ~12-tile diagonal streak pattern over a mostly-blank 32x32
+//    grid), BG3/OBJ must draw at their RAW unscaled color, not blended at
+//    all. Direct pixel reverse-engineering against the oracle (tick 1090,
+//    columns clear of both trainer sprites) confirms this exactly: e.g.
+//    (x=230,y=70) is oracle-exact `rgb(247,247,255)` - `battle-bg.json`'s
+//    own local subpalette 0/1 index 15, an UNSCALED color, not `198,198,181`
+//    (bank 2, the static tile my shift formula predicted) scaled by 8/16.
+//    What remains unresolved: the exact BG3-per-scanline-shift sign/
+//    magnitude convention (`shiftTop`/`shiftBottom` below) and BG1's own
+//    `gBattle_BG1_X` scroll-direction convention, needed to know exactly
+//    WHICH pixels are BG1-transparent vs streak-covered before applying the
+//    rule above. A single sample point matched `shift=-240` (not the
+//    existing model's `+240`) exactly, but a wider brute-force pixel search
+//    across a whole scanline was inconclusive - the static bg's tileset is
+//    periodic/repetitive enough (many tiles share the same 5-6 sky colors)
+//    that many candidate shifts alias to similar match counts, so a plain
+//    per-pixel-count fit can't be trusted here. Next step: RAM-probe the
+//    actual DMA'd `gScanlineEffectRegBuffers` content directly (not just
+//    `gTasks[0].data[2]`'s value, which is confirmed, but its literal
+//    sign as written into the buffer + which buffer half the HBlank DMA
+//    reads for which scanline - the `dmaSrcBuffers[i] = ...+1` indexing
+//    trick in `scanline_effect.c` means the buffer-index-to-scanline
+//    mapping may be off by one from a naive reading) - that removes the
+//    sign-guessing this session couldn't fully resolve by pixel fitting
+//    alone. `drawSlideScene` is UNCHANGED this session (still the old,
+//    now-confirmed-wrong, uniform-brightness-scaling fallback) - the
+//    extraction fix above is real and committed, but wiring the corrected
+//    compositing rule needs the RAM trace above first, not more pixel
+//    guessing (`npm run compare -- tools/compare/traces/scene-assembly.json`
+//    is still NOT byte-exact for 1075-1226; unchanged at 40/256 overall).
 // 3. The party-status-summary ball-icon + diagonal-bar widgets' entrance
 //    slide (ticks ~1228-1291): RAM-probed directly per-tick (`sprite.x2`
 //    for the bar + all 12 ball-icon sprites, identified by matching their
@@ -70,6 +95,31 @@
 //    shape but land 1-2 ticks off the RAM truth on a few icons (likely a
 //    controller-command-handshake frame this module doesn't model) - the
 //    table is the ground truth, the source is corroborating shape only.
+//    STILL NOT byte-exact (16-300px/frame per `npm run compare`, unchanged
+//    this session - #62 confirmed the brief's "tile-index swap" theory is
+//    the wrong shape for at least PART of this gap, see below; a blanket
+//    1-tick index shift on `tableX2` was tried and rejected - it fixed some
+//    frames (e.g. 1230, 1232-1235) but broke others (1228/1229/1231),
+//    proving the x2 *tables themselves* aren't uniformly off-by-one, so it
+//    was reverted rather than committed as an unverified guess). Direct
+//    pixel diffing (frame 1285, opponent ball-icon slot 0, corner (26,32))
+//    shows our model already drawing that icon's SETTLED tile (the "Empty"
+//    hollow-ring shape, since `x2` has reached 0 in our table by then) at
+//    exactly the right position, while the oracle shows those same 16 ring-
+//    outline pixels as pure background (fully invisible) - i.e. the icon is
+//    positionally settled early but the real game keeps it invisible (or on
+//    a different, blank tile) until some LATER trigger swaps it to its
+//    state tile, separate from the `x2` slide entirely. `oam.tileNum` is
+//    NOT touched anywhere in `SpriteCB_StatusSummaryBalls_Enter` (checked
+//    directly - only `x2` and `data[]` counters change), so the swap this
+//    module still needs to model is either a `sprite.invisible` toggle or a
+//    tileNum write happening in a DIFFERENT function (a settle/finalize
+//    callback, or the switch to `SpriteCallbackDummy` itself gating
+//    visibility elsewhere) - not chased down this session for lack of time.
+//    Next step: RAM-probe `gSprites[id].{invisible, oam.tileNum}` per tick
+//    for the 14 widget sprites across 1228-1292 directly (the x/x2 probe
+//    already has the sprite-identification method banked from #60) rather
+//    than reasoning from the entrance-callback source alone.
 
 import type { RgbColor } from "./bg.ts";
 import { drawText, type FontData } from "./font.ts";
@@ -500,17 +550,22 @@ function drawSettledScene(fb: Uint8Array): void {
  * Render of the BattleIntroSlide3 reveal, ticks
  * FIRST_VISIBLE_TICK..SLIDE_END_TICK-1 (NOT byte-exact - see module doc
  * point 2's "still open" note). RAM confirms `BLDCNT =
- * TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ`: TGT1 is BG1. This module approximates
- * BG1 as contributing black (attempted using `battle-bg.json`'s
- * `entrySlide` tileset - scrolled via the RAM-confirmed `gBattle_BG1_X` -
- * as BG1's real content, but `entrySlide` references palette bank 4, which
- * was never extracted, so every sampled pixel came back empty and the
- * result was numerically identical to the black approximation; a future
- * session needs to re-extract `battle-bg.json` with that bank before this
- * is worth revisiting). TGT2 is the per-scanline-shifted BG3 (`static`)
- * with both trainer OBJs (RAM-confirmed real blend targets, scaled the
- * same as BG3) drawn on top of it, unshifted. The window frame (BG0) is
- * neither blend target, so it draws at full brightness, unshifted, on top.
+ * TGT1_BG1|BLEND|TGT2_BG3|TGT2_OBJ`: TGT1 is BG1. `battle-bg.json`'s
+ * `entrySlide` now has real content + a correctly-normalized palette (#62 -
+ * the earlier "palette bank 4 missing" diagnosis was wrong, see module doc
+ * point 2), but this function does NOT yet consume it: #62 also found the
+ * uniform-`evb/16`-brightness-scaling approach below is itself the wrong
+ * compositing rule (confirmed against real oracle pixels - GBA alpha blend
+ * only engages where the topmost non-transparent layer is TGT1-flagged;
+ * wherever BG1 is transparent, BG3/OBJ must draw at raw unscaled color, not
+ * scaled), and the BG3/BG1 shift-sign convention needed to know which
+ * pixels those are wasn't nailed down by pixel brute force alone (see
+ * module doc point 2's "next step"). Left as the prior (now confirmed
+ * inexact) approximation rather than wire in a half-verified compositing
+ * rule. TGT2 is the per-scanline-shifted BG3 (`static`) with both trainer
+ * OBJs (RAM-confirmed real blend targets, scaled the same as BG3) drawn on
+ * top of it, unshifted. The window frame (BG0) is neither blend target, so
+ * it draws at full brightness, unshifted, on top.
  */
 function drawSlideScene(fb: Uint8Array, t: number, win: { top: number; bottom: number }): void {
   const { evb } = evaEvb(t);
