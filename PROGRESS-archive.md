@@ -5,6 +5,41 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 67 — S7 groundwork banked (parallel worktree lane, merged): committed dense turn-1 trace + RAM dump + damage/type data extraction + `docs/battle-turn-notes.md` dossier — S7 engine slices now have fixed targets
+
+- **State:** merge of `worker/wt-20260718-143156` (base `3ac0303`, merged
+  onto #66's `19f12bb`): `npm test` **428/428**, `npm run build` green,
+  post-merge spot-checks anchor 1/1 + summary-info-onix 122/122 (the
+  regenerated `moves.json` with its new fields disturbs nothing).
+- **Did (worktree lane, supervisor-verified in the worktree pre-merge):**
+  (1) `tools/compare/traces-groundtruth/battle1-turn1.json` — 2620 frames,
+  223 dense captures, extends `battle1-intro.json`'s exact button script
+  with FIGHT→ROCK_SLIDE; twice-run 0 sha mismatches, and the supervisor's
+  own independent replay reconfirmed the dossier's cited shas
+  (`d223d98a2da9`@1884, `64857bf16c67`@2323, `70f4821905ff`@2345).
+  (2) `src/data/gen/battle1-turn1-ram-dump.json` — 741 per-tick rows
+  (gRngValue/HP/bar internals/turn order/damage) + two committed probe
+  scripts, re-run and byte-diffed 0 vs the committed dump. (3) Data:
+  `extract-moves.ts` now pulls effect/secondaryChance/target/priority/
+  flags; new `extract-battle-formula-data.ts` → `type-effectiveness.json`
+  (111 matchups) + `damage-formula-constants.json`. (4) `docs/
+  battle-turn-notes.md` — frame boundaries with shas, 12-step RNG ledger
+  (turn total: 0 for the AI's DOUBLE_TEAM + 4 for ROCK_SLIDE + 8-step
+  unattributed turn-end cluster), damage math hand-verified to the dumped
+  42 (supervisor re-derived it independently: base 30 → STAB 45 → spread
+  [38,45]), HP-drain rule reconfirmed (1 HP/tick; hp updates 1 tick after
+  the bar's done sentinel).
+- **Next:** S7 remains behind S6 — this is groundwork only, no engine
+  code. Open items carried in the dossier §7: the 8-9-step turn-end RNG
+  cluster is still unmapped to a call site (AI-scoring hypothesis
+  reinforced by a second independent stream, not proven);
+  `gBattleControllerExecFlags` bit semantics undecoded; move-animation
+  assets deliberately NOT extracted (listed as needs).
+- **Notes:** worktree removed, branch `worker/wt-20260718-143156` deleted
+  after merge. No PAPERCUT flagged.
+
+---
+
 ## 66 — S6 scene-assembly GAP A (streak blend arithmetic) root-caused and substantially fixed: two real bugs the RAM/brief hadn't suspected (trainer OBJ layer omitted; BG3's real hardware width is 512px not 256), plus a genuine blend-precision fix — `scene-assembly.json` 151/256 (was 104/256), 0 regressions. One narrower residual named, next probe on record.
 
 - **State:** `npm test` **428/428** (425→428, +3 pins), `npm run build`

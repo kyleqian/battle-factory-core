@@ -5,6 +5,72 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 70 — S6 scene-assembly slice FULLY CLOSED: last residual (trace tick 1229, player status bar) resolved with a RAM+pixel-confirmed asymmetric fix — `scene-assembly.json` **256/256** (was 255/256), 0 regressions
+
+- **State:** `npm test` **438/438** (437→438, +1 pin replacing 1 corrected),
+  `npm run build` green. `npm run compare -- tools/compare/traces/
+  scene-assembly.json` → **256/256** (was 255/256) — the whole
+  scene-assembly slice is now byte-exact end to end. Full 18-trace sweep
+  re-run, all others at their exact prior counts (anchor 1/1, draft-cursor
+  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
+  summary-info-onix 122/122, summary-info-magby 132/132, confirm-decline
+  67/67, accept-prebattle 137/137, walk-warpout 125/125, room-entry
+  110/110, room-npcs 98/98, room-msgbox 142/142, transition 206/206,
+  rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) — zero
+  regressions.
+- **Did — the brief's mandated RAM probe, then the fix:** RAM-probed
+  `gSprites[5]` (player bar) and `gSprites[6]` (opponent bar — identified
+  by matching each side's known settled corner against
+  `docs/battle-interface-assets.md`, same method #64 banked) tick-by-tick
+  across 1226-1239 (`tools/probe/ram-probe.py`, full `Sprite` struct:
+  callback, `data[]`, oam fields, subpriority, flags). Found the real
+  structural asymmetry the brief asked for: the player bar's `x2` STALLS
+  for one extra tick right after creation — `x2=95` at BOTH RAM tick 1228
+  (its own creation tick) and 1229, only resuming
+  `SpriteCB_StatusSummaryBar_Enter`'s ordinary per-tick `x2 += data[0]`
+  decrement at RAM tick 1230 — while the opponent bar's `x2` decrements
+  every single tick starting immediately at its own creation (`-95` at
+  1231, `-90` at 1232, no stall). Every other RAM field checked (callback
+  pointer, `subspriteTables` pointer, subpriority, `inUse`/`invisible`
+  flags, `data[1..7]`) was byte-identical in kind between the two sides —
+  the stall is specifically in `x2`'s per-tick progression, not a
+  visibility-flag or ordering difference. Independently pixel-ground-
+  truthed the oracle's own captures (re-ran `bin/oracle run` on
+  `battle1-scene-dense.json`, diffed consecutive frames in each side's
+  screen region) to re-verify both first-visible ticks from scratch rather
+  than trust the brief's numbers: player region is byte-identical
+  background through trace tick 1229 and first changes at 1230 (22px,
+  matching — hand-computed from the actual tileset asset — the bar's
+  leading-tile opaque wedge at exactly `x2=95`); opponent region is
+  unchanged through 1231 and first changes at 1232 (22px, same shape).
+  Both match the brief's cited ticks exactly. Fix: added
+  `PLAYER_BAR_VISIBLE_TICK = PLAYER_CREATE_TICK + 1`, gating ONLY the
+  player bar's `visible` field in `ballStatusBarPositions` — the table
+  lookup itself (and the opponent bar, and both sides' ball icons) is
+  untouched, since the RAM-baked `PLAYER_BAR_X2` table already encodes the
+  same stall verbatim as a literal repeated value (`[95, 95, 90, ...]`)
+  and the icons' own per-icon flat-delay prefix already keeps them fully
+  off-screen through this exact tick regardless (so any analogous stall
+  there, if present, produces no visible pixel and needs no correction).
+  This is the per-side structural fix the brief required, not a blanket
+  offset — confirmed it doesn't disturb the opponent's own first-visible
+  tick (1232, re-verified above) or any of the other 255 already-matching
+  frames (full sweep, 0 regressions). Updated the one existing Tier-1 test
+  that pinned the old (buggy) tick-1229-visible behavior, plus added a new
+  pin for the corrected asymmetric gate; `battleScene.ts` module doc point
+  3 and its top-of-file STATUS note rewritten with the full derivation.
+- **Next:** the scene-assembly slice (S6) is fully closed — no further
+  action needed there. Remaining S6/roadmap work: the send-out engine
+  slice (ticks 1300-1560, `battle-scene-notes.md` §7) and player send-out
+  + menu (1560-1810, `battle-menu-notes.md`) — groundwork complete, assets
+  ready, per #65's plan. S7 (battle-turn engine) stays behind S6, dossier
+  ready per #67/#69.
+- **Notes:** PAPERCUT: none new. RAM-probe scratch output went to
+  `/tmp/probe-identify*`, `/tmp/probe-deep*`, `/tmp/gt-recap/` (not
+  committed, no stale-cache risk).
+
+---
+
 ## 69 — S7 data needs closed (parallel worktree lane, merged): battle-message TEMPLATE system extracted + pixel-cross-checked, DOUBLE_TEAM evasion stage RAM-pinned, held-item damage-path inventory exhaustive
 
 - **State:** merge of `worker/wt-20260718-151756` (base `d1072d3`, merged
@@ -103,40 +169,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   output went to `/tmp/probe-gapA-*` (not committed, no stale-cache
   risk). Both `docs/battle-scene-notes.md` and `battleScene.ts`'s module
   doc point 2 updated with the full derivation.
-
----
-
-## 67 — S7 groundwork banked (parallel worktree lane, merged): committed dense turn-1 trace + RAM dump + damage/type data extraction + `docs/battle-turn-notes.md` dossier — S7 engine slices now have fixed targets
-
-- **State:** merge of `worker/wt-20260718-143156` (base `3ac0303`, merged
-  onto #66's `19f12bb`): `npm test` **428/428**, `npm run build` green,
-  post-merge spot-checks anchor 1/1 + summary-info-onix 122/122 (the
-  regenerated `moves.json` with its new fields disturbs nothing).
-- **Did (worktree lane, supervisor-verified in the worktree pre-merge):**
-  (1) `tools/compare/traces-groundtruth/battle1-turn1.json` — 2620 frames,
-  223 dense captures, extends `battle1-intro.json`'s exact button script
-  with FIGHT→ROCK_SLIDE; twice-run 0 sha mismatches, and the supervisor's
-  own independent replay reconfirmed the dossier's cited shas
-  (`d223d98a2da9`@1884, `64857bf16c67`@2323, `70f4821905ff`@2345).
-  (2) `src/data/gen/battle1-turn1-ram-dump.json` — 741 per-tick rows
-  (gRngValue/HP/bar internals/turn order/damage) + two committed probe
-  scripts, re-run and byte-diffed 0 vs the committed dump. (3) Data:
-  `extract-moves.ts` now pulls effect/secondaryChance/target/priority/
-  flags; new `extract-battle-formula-data.ts` → `type-effectiveness.json`
-  (111 matchups) + `damage-formula-constants.json`. (4) `docs/
-  battle-turn-notes.md` — frame boundaries with shas, 12-step RNG ledger
-  (turn total: 0 for the AI's DOUBLE_TEAM + 4 for ROCK_SLIDE + 8-step
-  unattributed turn-end cluster), damage math hand-verified to the dumped
-  42 (supervisor re-derived it independently: base 30 → STAB 45 → spread
-  [38,45]), HP-drain rule reconfirmed (1 HP/tick; hp updates 1 tick after
-  the bar's done sentinel).
-- **Next:** S7 remains behind S6 — this is groundwork only, no engine
-  code. Open items carried in the dossier §7: the 8-9-step turn-end RNG
-  cluster is still unmapped to a call site (AI-scoring hypothesis
-  reinforced by a second independent stream, not proven);
-  `gBattleControllerExecFlags` bit semantics undecoded; move-animation
-  assets deliberately NOT extracted (listed as needs).
-- **Notes:** worktree removed, branch `worker/wt-20260718-143156` deleted
-  after merge. No PAPERCUT flagged.
 
 ---

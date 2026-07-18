@@ -13,13 +13,18 @@
 // player input is read anywhere in this window - the next A-press is the
 // following slice's concern, trace tick 1420).
 //
-// STATUS (updated this session - see PROGRESS.md #68): GAP A is now FULLY
-// RESOLVED - the whole BattleIntroSlide3 streak window (ticks 1075-1226) is
-// byte-exact. Building on #66's three fixes (trainer OBJ layer, BG3's real
-// 512px width, floor-not-round blending), this session closed the last
-// named residual (point 2's "STILL OPEN" pixel, tick 1150 x=120/y=84) with
-// two more fixes: (a) the GBA alpha-blend formula matches the oracle when
-// run in **8-bit-expanded color space with floor division** directly on the
+// STATUS (updated this session - see PROGRESS.md #70): the whole
+// scene-assembly slice is now FULLY RESOLVED - tools/compare/traces/
+// scene-assembly.json is **256/256** (was 255/256). This session closed the
+// last residual (point 3's tick-1229 gap, GAP B) with an asymmetric,
+// RAM+pixel-confirmed fix to the player bar's own visibility gate - see
+// point 3 below for the full derivation. GAP A (the prior session, #68) was
+// already fully resolved: the whole BattleIntroSlide3 streak window (ticks
+// 1075-1226) is byte-exact. Building on #66's three fixes (trainer OBJ
+// layer, BG3's real 512px width, floor-not-round blending), that session
+// closed point 2's "STILL OPEN" pixel (tick 1150 x=120/y=84) with two more
+// fixes: (a) the GBA alpha-blend formula matches the oracle when run in
+// **8-bit-expanded color space with floor division** directly on the
 // source colors, NOT #66's 5-bit-quantize-then-reexpand convention -
 // proven both negatively (the oracle's exact pixel value is mathematically
 // UNREACHABLE by any 5-bit blend of any two palette colors under any
@@ -29,21 +34,18 @@
 // validated); (b) `evaEvb` needed the identical one-tick render lag every
 // other register in this task already has - found via 8 leftover
 // boundary-tick mismatches (one per 6-tick BLDALPHA step) after fix (a).
-// scene-assembly.json 151/256 -> **255/256** (0 regressions, full 18-trace
-// sweep + groundtruth traces re-verified; battle1-intro.json even improved
-// 141->167/254 as a side effect, same fix, different trace). The mandated
-// VRAM probe (`ram-probe.py` on BG1CNT, BLDCNT/BLDALPHA, the literal tile
-// entry at `BG_SCREEN_ADDR(28)` for this pixel, its palette-RAM and
-// char-VRAM bytes) came back clean on every axis this doc had flagged
-// unverified - BG1's `screenSize=2` reads 256px-wide exactly as assumed (no
-// bug), the tile/palette/char bytes match the extracted JSON exactly (the
-// JSON's palette-bank numbers are a local remap of VRAM's raw bank
-// indices, a labeling difference, not a data bug) - so the fix was purely
-// the blend-precision domain, not a geometry/extraction problem. Full
-// derivation in point 2 below. The ONLY remaining gap in this whole module
-// is GAP B's own pre-existing, narrower, out-of-scope residual (point 3,
-// trace tick 1229 specifically, untouched this session). tools/compare/
-// traces/scene-assembly.json is 255/256 (was 151/256).
+// That session took scene-assembly.json 151/256 -> 255/256 (0 regressions,
+// full 18-trace sweep + groundtruth traces re-verified; battle1-intro.json
+// even improved 141->167/254 as a side effect, same fix, different trace).
+// The mandated VRAM probe (`ram-probe.py` on BG1CNT, BLDCNT/BLDALPHA, the
+// literal tile entry at `BG_SCREEN_ADDR(28)` for this pixel, its
+// palette-RAM and char-VRAM bytes) came back clean on every axis this doc
+// had flagged unverified - BG1's `screenSize=2` reads 256px-wide exactly as
+// assumed (no bug), the tile/palette/char bytes match the extracted JSON
+// exactly (the JSON's palette-bank numbers are a local remap of VRAM's raw
+// bank indices, a labeling difference, not a data bug) - so that fix was
+// purely the blend-precision domain, not a geometry/extraction problem.
+// Full derivation in point 2 below.
 // 1. The settled composite (trace tick 1227 onward, before any widget
 //    slide) is byte-exact (unchanged from #58: battle-bg.json's `static`
 //    bg + both trainer pics at their source-derived corners + battle-
@@ -197,16 +199,43 @@
 //    included) rather than reconstructing from the source formula (same
 //    "RAM table is ground truth, source is shape-only corroboration"
 //    convention #60 established). Net: scene-assembly.json 41/256 -> 104/256.
-//    One narrow residual remains, NOT resolved: trace tick 1229 (player bar)
-//    is 22px off - the oracle is still background there a tick after our
-//    model shows the bar's first frame. A further one-tick-later `visible`
-//    gate fixes 1229 but then breaks the opponent side's own first-visible
-//    tick (1232) the same way (pixel-confirmed), so the two sides do not
-//    share one extra-tick correction and this wasn't chased further within
-//    this session's cap - next step is RAM-probing exactly what's
-//    structurally different between the player and opponent widgets' first
-//    visible tick (both created via the same `CreatePartyStatusSummarySprites`,
-//    3 ticks apart) rather than guessing another blanket offset.
+//
+//    GAP B FULLY RESOLVED this session (PROGRESS.md #70): the one narrow
+//    residual left above (trace tick 1229, player bar 22px off - the oracle
+//    was still background there a tick after the model showed the bar's
+//    first frame) was chased with the mandated RAM probe rather than another
+//    blanket offset. #64 had already shown a blanket one-tick-later `visible`
+//    gate fixes 1229 but breaks the opponent's own first-visible tick (1232)
+//    the same way - proof the two sides needed a genuinely asymmetric fix,
+//    not a shared constant. RAM-probing `gSprites[5]` (player bar) and
+//    `gSprites[6]` (opponent bar, both identified by matching their settled
+//    corners, same method as above) tick-by-tick found the actual structural
+//    difference: the player bar's `x2` STALLS for one extra tick right after
+//    creation - `x2=95` at BOTH RAM tick 1228 (its creation tick) and 1229,
+//    only resuming `SpriteCB_StatusSummaryBar_Enter`'s ordinary per-tick
+//    decrement (`x2 += data[0]`) at RAM tick 1230 - whereas the opponent
+//    bar's `x2` decrements every single tick starting immediately at its own
+//    creation (`-95` at 1231, `-90` at 1232, no stall). Pixel-ground-truthing
+//    the oracle's own captures independently confirms this is exactly what
+//    gates the display (not a coincidence): the player-side region is
+//    byte-identical background through trace tick 1229 and first changes
+//    (22px, matching the bar's leading-tile opaque wedge at `x2=95`
+//    precisely) at 1230; the opponent-side region is unchanged through 1231
+//    and first changes (22px, same shape) at 1232 - i.e. the player bar
+//    genuinely needs createTick+2 ticks to reach the display, the opponent
+//    bar only createTick+1 (the module's ordinary one-tick lag, untouched).
+//    Fix: `PLAYER_BAR_VISIBLE_TICK = PLAYER_CREATE_TICK + 1` gates ONLY the
+//    player bar's `visible` field (table lookup itself is untouched, since
+//    it was already RAM-exact and already encodes the same stall as a
+//    literal repeated value, `PLAYER_BAR_X2 = [95, 95, 90, ...]`) - the
+//    opponent bar and both sides' ball icons are untouched: icons have their
+//    own per-icon flat-delay prefix already baked into their tables (the
+//    `data[1]` countdown above), which keeps every icon fully off-screen
+//    through this exact tick regardless of any such stall, so nothing there
+//    needed correction. scene-assembly.json 255/256 -> **256/256**, 0
+//    regressions (full 18-trace sweep re-verified at each trace's exact
+//    prior count). This closes the whole scene-assembly slice - see the
+//    module-level STATUS note above.
 
 import type { RgbColor } from "./bg.ts";
 import { drawText, type FontData } from "./font.ts";
@@ -510,6 +539,32 @@ export function cursorState(t: number): { visible: boolean; yOffset: number } {
 const PLAYER_CREATE_TICK = 1228;
 /** Trace tick the opponent-side bar + all 6 opponent ball icons are first created/visible (RAM-confirmed - 3 ticks after the player side, not simultaneous). */
 const OPP_CREATE_TICK = 1231;
+/**
+ * The player bar's own display gate needs one extra tick beyond the module's
+ * usual `t-1` render lag (module doc point 3, resolved this session):
+ * RAM-probing `gSprites[5].x2` (the player bar, identified by matching its
+ * settled corner) tick-by-tick shows it STALLS for one extra tick right
+ * after creation - `x2=95` at BOTH RAM tick 1228 (creation) and 1229, only
+ * resuming its normal per-tick `SpriteCB_StatusSummaryBar_Enter` decrement
+ * (`x2 += data[0]`) at 1230 - whereas `gSprites[6]` (the opponent bar,
+ * created 3 ticks later at 1231) decrements every single tick starting
+ * immediately (`-95` at 1231, `-90` at 1231+1=1232, no stall). Pixel-diffing
+ * the oracle's own captures independently confirms this is exactly what
+ * gates the display: the player-side region is byte-identical background
+ * through trace tick 1229 and first changes (22px, matching the bar's tile0
+ * opaque wedge at `x2=95`) at 1230; the opponent-side region is unchanged
+ * through 1231 and first changes (22px, same shape) at 1232 - i.e. the
+ * player bar needs createTick+2 to reach the display, the opponent bar only
+ * createTick+1 (the module's ordinary one-tick lag, unmodified). This is a
+ * genuinely asymmetric, RAM-verified structural fact (not a guessed
+ * blanket offset) - only the PLAYER bar's gate gets the extra tick; the
+ * opponent bar and both sides' ball icons are untouched (icons have their
+ * own per-icon flat-delay prefix baked into their tables already - see §4 -
+ * which keeps them fully off-screen through this exact tick regardless, so
+ * the same underlying stall, if present, produces no visible pixel and
+ * needs no correction there).
+ */
+const PLAYER_BAR_VISIBLE_TICK = PLAYER_CREATE_TICK + 1;
 /** Trace tick every widget's entrance slide has settled (docs/battle-interface-assets.md). */
 export const BALL_WIDGETS_SETTLED_TICK = 1292;
 
@@ -575,12 +630,10 @@ export interface BallIcon {
  * comparison unshifted (PROGRESS.md #62) - that desyncs the two and produces
  * exactly the "fixes some frames, breaks others" result it saw. Shifting the
  * whole render tick uniformly (both the table lookup and the visibility
- * gate) is what the lag actually requires. One narrow residual remains at
- * trace tick 1229 specifically (player bar shows one tick early, 22px) -
- * a `visible` gate delayed one tick further fixes 1229 but then breaks the
- * opponent side's own first-visible tick (1232) the same way, so the two
- * sides don't share a single extra-tick correction; left as-is rather than
- * chase an unverified per-side special case (PROGRESS.md #64).
+ * gate) is what the lag actually requires. The player BAR specifically
+ * (not these icons - see `PLAYER_BAR_VISIBLE_TICK`'s own doc comment)
+ * needed one further asymmetric tick of gating, RAM+pixel-confirmed rather
+ * than guessed (PROGRESS.md #70) - closing the module's last residual.
  */
 export function ballIcons(t: number): BallIcon[] {
   const rt = t - 1;
@@ -606,12 +659,12 @@ export function ballIcons(t: number): BallIcon[] {
   return icons;
 }
 
-/** Diagonal-bar background corners at trace tick `t` - `ballStatusBar`'s own settled corners (docs module doc point 1: opponent `(-24,40)` h-flipped, player `(136,96)`) offset by the bar sprite's own `x2` entrance slide (RAM-confirmed tables above - the bar is itself `gSprites[summaryBarSpriteId]`, same mechanism as the ball icons). Renders at `t - 1`, same render-lag rationale as `ballIcons` above. */
+/** Diagonal-bar background corners at trace tick `t` - `ballStatusBar`'s own settled corners (docs module doc point 1: opponent `(-24,40)` h-flipped, player `(136,96)`) offset by the bar sprite's own `x2` entrance slide (RAM-confirmed tables above - the bar is itself `gSprites[summaryBarSpriteId]`, same mechanism as the ball icons). Renders at `t - 1`, same render-lag rationale as `ballIcons` above - except the player bar's gate, which needs one further tick (`PLAYER_BAR_VISIBLE_TICK` - see its doc comment, RAM+pixel confirmed asymmetric vs the opponent bar). */
 export function ballStatusBarPositions(t: number): { opponent: { x: number; visible: boolean }; player: { x: number; visible: boolean } } {
   const rt = t - 1;
   return {
     opponent: { x: -24 + tableX2(OPP_BAR_X2, OPP_CREATE_TICK, rt), visible: rt >= OPP_CREATE_TICK },
-    player: { x: 136 + tableX2(PLAYER_BAR_X2, PLAYER_CREATE_TICK, rt), visible: rt >= PLAYER_CREATE_TICK },
+    player: { x: 136 + tableX2(PLAYER_BAR_X2, PLAYER_CREATE_TICK, rt), visible: rt >= PLAYER_BAR_VISIBLE_TICK },
   };
 }
 

@@ -178,12 +178,16 @@ describe("battleScene: party-status-summary ball-icon + bar widget entrance slid
     expect(icons.every((icon) => !icon.visible)).toBe(true);
   });
 
-  it("player-side icons/bar become visible at tick 1229, opponent-side at tick 1232 (not simultaneous - one tick later than their own RAM creation tick, the same render lag GAP A found)", () => {
+  it("player-side icons become visible at tick 1229, opponent-side at tick 1232 (not simultaneous - one tick later than their own RAM creation tick, the same render lag GAP A found)", () => {
     expect(ballIcons(1228).every((icon) => !icon.visible)).toBe(true);
     expect(ballIcons(1229).slice(6).every((icon) => icon.visible)).toBe(true);
     expect(ballIcons(1229).slice(0, 6).every((icon) => !icon.visible)).toBe(true);
     expect(ballIcons(1232).every((icon) => icon.visible)).toBe(true);
-    expect(ballStatusBarPositions(1229).player.visible).toBe(true);
+  });
+
+  it("the bars' own first-visible ticks are asymmetric (module doc point 3, RAM+pixel-confirmed): player bar needs one further tick than the ordinary render lag (createTick+2 = 1230, not 1229), opponent bar matches the ordinary lag (createTick+1 = 1232) - RAM-probing gSprites[].x2 shows the player bar's SpriteCB_StatusSummaryBar_Enter callback stalls one extra tick right after creation (x2=95 at both RAM tick 1228 and 1229) while the opponent bar's decrements every tick with no stall", () => {
+    expect(ballStatusBarPositions(1229).player.visible).toBe(false);
+    expect(ballStatusBarPositions(1230).player.visible).toBe(true);
     expect(ballStatusBarPositions(1229).opponent.visible).toBe(false);
     expect(ballStatusBarPositions(1232).opponent.visible).toBe(true);
   });
