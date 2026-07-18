@@ -27,6 +27,8 @@ against `docs/prebattle-room-notes.md` §3's two-asset rule (frame art vs
 **Fix bar:** derive the frame from `prebattle-room-msgbox.json` (or a
 corrected re-extraction), delete the baked asset, and re-verify
 `accept-prebattle.json` at its exact then-current count.
+
+## #14 — accept-path closing/un-reveal: 4-row window-edge color band wrong,
   8 frames, tapering (`accept-prebattle.json`)
 
 **Symptom:** during the A-on-YES closing/un-reveal (`confirmReveal.ts`'s
