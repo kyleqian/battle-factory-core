@@ -186,6 +186,26 @@ transition in this run: black screen first seen ~1890, background/trainer
 fully assembled by ~2044-2100 (~150-210 frames) — coarse, not
 dense-verified (§7 risk 4).
 
+**Partially superseded (S6 slice 1b, see "Slice-0 ground truth" §3.1
+below)**: this section's own scratch trace was never re-probed this
+slice (different script/RNG stream, §0 — its transition draw is not
+necessarily the same variant), but the *method* here is now known to be
+the wrong one to reach for first. The transition id doesn't need pixel
+guessing at all — it's a plain field, `gTasks[taskId].data[1]`
+(`tTransitionId`, set once in `LaunchBattleTransitionTask`,
+`battle_transition.c:1059`) on whichever task slot runs
+`Task_BattleTransition`, directly RAM-readable and stable for the whole
+transition. Likewise, the "horizontal-banded wipe" this session attributed
+to *the transition itself* deserves a second look: the slice-0 session
+found that for its own trace, the transition subsystem (`Task_BattleTransition`
++ its dispatched main-effect task) is fully destroyed via `CB2_InitBattleInternal`'s
+`ResetTasks()` well before any extended streak/band pattern appears on
+screen — what looked like a transition visual may instead have been
+`BeginBattleIntro`'s post-transition background/trainer-slide assembly, a
+different code path entirely. Re-probing this section's own trace with
+the `gTasks[].data[1]` technique (rather than re-deriving the guess from
+scratch) is the recommended follow-up if this scratch trace still exists.
+
 ## 3. Battle init through the first action menu
 
 **CB2 chain** (all `src/battle_main.c` unless noted):
@@ -671,15 +691,36 @@ sha256 = first 8 hex chars unless spot-cited in full.
   horizontal streak/line-wipe pattern (screenshot-confirmed), continuous
   per-frame change through at least tick 1197 (stride-4 dense sample, no
   two consecutive samples equal).
-- **Transition end / trainer assembly**: **not resolved to single-frame
-  precision this session** (time-budget tradeoff, flagged as a risk
-  below) — tick 1200 (`a0933fc2`) still shows the trainer mid-slide over
-  transition-remnant background with an empty message box; by tick 1290
-  (`17e1960c500fe5bea9491ad5b8cf81899190c66029f66b03ec648b17433aae11`)
-  "BUG CATCHER DESTIN would like to battle!♥" is fully printed with the
-  heart glyph, party-ball icons visible both sides, screenshot-confirmed.
-  A future dense pass over 1197-1290 (currently sampled at stride 3-15)
-  would tighten this.
+- **Transition end / trainer assembly (RESOLVED, S6 slice 1b — dense
+  every-frame pass, ticks 1190-1300)**: the background + trainer sprite
+  slide-in settles at tick **1227** (`b2bcc9d0d32ed36944313c7c0605292e7cebc98b8048571072188e7618e856b5`),
+  held through **1229** (2-tick plateau, same sha) before the message
+  window's text starts printing at ~1231 — this is the "battle scene
+  settled, modulo text" boundary the previous loose 1200-1290 bound was
+  meant to capture. Text milestones from there (all screenshot-confirmed):
+  "BUG CATCHER DESTI" mid-print at 1250; **"...would like to battle!" (no
+  heart yet) fully printed, held ticks 1272-1273**
+  (`fb70157c18d155dae81005925f81ba3ef5ac2afb6f949e08d1283663068d795a`);
+  the **heart glyph "♥" appears at tick 1274**
+  (`81f5fbbcfa5ff51c99be24a21fa35ef07fee2b8c9609ec91b29443573ace7e39`).
+  **Correction**: the previously-cited "tick 1290, fully printed with
+  heart, `17e1960c...`" was a **transient**, not the settled state — it
+  only holds ticks 1285-1290 (6 frames) before changing again. The text
+  box's true steady state is reached at tick **1292**
+  (`19ccf0c6e493a42b4788f9e912d49d2ce4b288b2baae0d08468e2adaf824a262`),
+  and even that isn't a single fixed sha: it's the *first* phase of a
+  repeating **4-phase, ~36-tick-period idle cycle**
+  (`19ccf0c6`→`446ea38f`→`cb0e9fd4`→`446ea38f`→repeat, confirmed by
+  direct sha comparison at 2-tick stride through tick 1420, i.e. through
+  the entire remainder of this trace's "would like to battle!" hold) —
+  the **same 4-phase/36-tick signature** later documented for the
+  settled action-menu idle animation below, strongly suggesting a single
+  shared engine-wide UI blink/pulse timer (candidate: the small
+  waiting-for-input prompt indicator or the party-ball-count icons; not
+  pinned to a specific sprite/OAM entry this slice). Net effect: "fully
+  printed with heart" is correctly described as **input-gated and
+  pixel-stable only modulo this idle cycle**, not byte-identical — the
+  old single-sha claim undercounted its own steady state.
 - **Intro text milestone — opponent send-out**: "BUG CATCHER DESTIN sent
   out" mid-print at tick 1450 (screenshot); "...GROVYLE!" fully printed +
   opponent healthbox (Lv50, green HP bar) settled by tick **1522**
@@ -750,13 +791,73 @@ verifying RAM layout independently).
   (`BattleStartClearSetData` + `TryDoEventsBeforeFirstTurn`). RAM shows
   **four** distinct draw events after the main freeze: tick 1065→1066 (1
   step), tick 1740→1741 (1 step), tick 1744→1745 (2 steps), and tick
-  1746→1747 (5 steps) — 9 total `Random()` calls, not 2. The last (5
-  steps, ending 3 ticks before the menu settles at 1750) positionally
-  matches `TryDoEventsBeforeFirstTurn`'s draw "immediately before the
-  action menu is emitted." The two *middle* draws (1741, 1745, both
-  inside the message-box-clearing window §2) are **unaccounted for** by
-  this file's source read — worth a source re-check before any Tier-1
-  test hard-codes "exactly 2 post-freeze draws."
+  1746→1747 (5 steps) — 9 total `Random()` calls, not 2.
+
+  **RESOLVED (S6 slice 1b) — the 1740→1741 draw, not the 1747 one, is
+  `TryDoEventsBeforeFirstTurn`'s**: watching `gBattleMainFunc`
+  (`0x03005d04`) and `gBattleControllerExecFlags` (`0x02024068`)
+  alongside `gRngValue` shows `gBattleMainFunc = TryDoEventsBeforeFirstTurn`
+  (`nm`: `0803b628 t TryDoEventsBeforeFirstTurn`) continuously from at
+  least tick 1690 through **1740**, with `gBattleControllerExecFlags == 1`
+  the whole time (busy — this is the player-send-out ball-throw
+  controller command from `BattleIntroPlayer1SendsOutMonAnimation`,
+  `battle_main.c:3776-3813`, still finishing; matches this file's §2
+  observation that "Go! ONIX!" holds byte-identical 1696 through at least
+  1741). `gBattleControllerExecFlags` clears to `0` at tick 1740; on the
+  very next sampled tick, **1741**, `gRngValue` has advanced 1 step *and*
+  `gBattleMainFunc` already reads `HandleTurnActionSelectionState` — i.e.
+  `TryDoEventsBeforeFirstTurn` ran its entire body (the `GetWhoStrikesFirst`
+  turn-order sort at `battle_main.c:3858`, the no-op weather/switch-in-
+  ability/item checks §4 point 6 already ruled out, and the final
+  `gRandomTurnNumber = Random()` at `battle_main.c:3923`) to completion in
+  the single tick it first became unblocked, and reassigned
+  `gBattleMainFunc` as its last act — so **the 1740→1741 draw *is* the
+  previously-cited `TryDoEventsBeforeFirstTurn` draw**, not the 1747 one
+  as this file previously guessed by proximity to the menu.
+
+  **NARROWED, not fully pinned — the 1745 and 1747 draws are inside
+  `HandleTurnActionSelectionState`, not before it**: both occur while
+  `gBattleMainFunc == HandleTurnActionSelectionState`
+  (`nm`: `0803be74 t HandleTurnActionSelectionState`).
+  `gBattleControllerExecFlags` goes to `3` (both battler-0/player and
+  battler-1/opponent bits set, `MARK_BATTLE_CONTROLLER_ACTIVE_ON_LOCAL`
+  via `MarkBattlerForControllerExec`, `battle_util.c:856-862`) at tick
+  1743 — matching `STATE_BEFORE_ACTION_CHOSEN`'s `BtlController_EmitChooseAction`
+  call for both battlers (`battle_main.c:4168`, dispatching the player's
+  menu draw *and* the opponent AI's move/switch decision in the same
+  pass). The **2-step draw at 1745** happens while both bits are still
+  set; the opponent's bit (battler 1) clears between 1745 and 1746,
+  bracketing it tightly around when `OpponentHandleChooseAction` →
+  `AI_TrySwitchOrUseItem` → `ShouldSwitch()`
+  (`src/battle_ai_switch_items.c:429-527`) would run and finish — that
+  chain is genuinely dense with `Random()`-gated pre-battle switch
+  heuristics (10 call sites across the file, e.g.
+  `ShouldSwitchIfWonderGuard`'s `Random() % 3 < 2` at :106,
+  `FindMonThatAbsorbsOpponentsMove`'s `Random() % 3 != 0` at :128, more at
+  :206,229,236,248,282,305,416,660) gated behind type/status
+  preconditions not hand-verified this slice (e.g. Grovyle's BRICK_BREAK
+  is nominally super-effective on Onix's Rock/Ground typing, which could
+  route into `HasSuperEffectiveMoveAgainstOpponents`-gated checks) — so
+  "2 of these gates fired their `Random()` call, the rest short-circuited
+  before reaching theirs" is a **plausible, source-grounded fit**, not a
+  confirmed one (no single-step trace was taken to confirm which
+  specific gate(s) actually ran). `PlayerHandleChooseAction`/
+  `HandleChooseActionAfterDma3`/`HandleInputChooseAction`
+  (`src/battle_controller_player.c`) contain **zero** `Random()` calls
+  (full-file grep), ruling out the player-side controller as a source for
+  either draw. The **5-step draw at 1747** is the more genuinely open
+  question: it fires strictly *after* the opponent's controller-busy bit
+  has already cleared (i.e. after `AI_TrySwitchOrUseItem` has already
+  returned and called `OpponentBufferExecCompleted`), with only the
+  player's bit (`exec == 1`) still set — so it cannot be the AI chain
+  above (already finished), cannot be the player controller (no `Random()`
+  calls anywhere in that file), and cannot be `TryDoEventsBeforeFirstTurn`
+  re-entering (already reassigned `gBattleMainFunc` 6 ticks earlier, confirmed
+  above). Not pinned to a call site this slice — would need a PC-level
+  single-step trace across ticks 1746-1747, out of this slice's time
+  budget. Any Tier-1 test pinning "exact post-freeze RNG draw count" should
+  treat the 1741 draw as fully explained and the 1745/1747 pair as an
+  open item, not guess a mechanism for either.
 
 **3.1. Opponent personality rolls + transition pick** (all embedded in
 the **heal-icon animation window**, ticks 840-1030 — NOT at the
@@ -789,26 +890,92 @@ total LCG steps that tick = 1 baseline + 1 select), immediately after the
 3rd mon's rejection loop finishes (tick 862) — confirms this file's §4
 point 3's *ordering* claim (transition-select immediately follows the 3
 nature loops) even though the *timing* (relative to the black screen) was
-wrong. **Unresolved**: because RAM sampling is once-per-emulated-frame,
-the tick's 2 LCG applications can't be individually attributed to
-"baseline VBlank draw" vs. "transition-select draw" by order — both
-candidates were computed:
-- if the select call is the tick's **2nd** (final) LCG application:
-  `Random() % 12` = 22624 % 12 = **4 = `B_TRANSITION_FRONTIER_CIRCLES_MEET`**
-- if it's the **1st**: 9646 % 12 = **10 =
-  `B_TRANSITION_FRONTIER_CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ`**
+wrong.
 
-Neither candidate was visually confirmed against the captured transition
-frames (1077-1197 show a horizontal streak/line-wipe pattern, screenshot-
-confirmed — not obviously the "3 sprites converge on fixed points"
-mechanism `battle_transition_frontier.c`'s circles family describes, per
-this file's §2). **Flagged exactly as this file's own §7 risk 3 already
-predicted**: this session confirms only that *a* transition plays and
-narrows it to 2 of 12 candidates via RNG math cross-checked three-for-
-three against the personality natures (high confidence in the *math*),
-but does not close the loop against the pixels (unresolved, needs a
-frame-by-frame read of `Task_FrontierCirclesMeet`/`SpriteCB_LogoCircleSlide`
-vs. these exact captures — out of scope for this slice's time budget).
+**RESOLVED (S6 slice 1b), by direct RAM read instead of LCG-order
+inference**: `GetSpecialBattleTransition`'s return value is passed
+straight into `BattleTransition_StartOnField(transitionId)`
+(`battle_setup.c:864-909` → `battle_tower.c:2099`), which stores it in
+`LaunchBattleTransitionTask` as `gTasks[taskId].data[1]`
+(`#define tTransitionId data[1]`, `battle_transition.c:1038,1059`) on the
+task running `Task_BattleTransition` — no intermediate global, so this
+field is the ground truth, not an inference. `struct Task`
+(`include/task.h:13-21`: `func`(4)+`isActive`/`prev`/`next`/`priority`(4)+
+`data[16]`(32) = 40 bytes/`0x28`) lives at `gTasks` (`0x03005e00`,
+`nm`'d — no linker-map entry for a plain array symbol, cross-checked
+against `include/task.h`'s `NUM_TASKS=16`/`NUM_TASK_DATA=16`). Scanning
+all 16 slots' `func`+`data[1]` fields (`tools/probe/ram-probe.py`, watch
+list of raw `0x03005e00+i*0x28` addresses — the tool's existing
+label-or-hex-address resolver needed no changes) from tick 1010 onward
+found slot 6 holding `func = 0x08145fa9` (thumb-bit-set
+`Task_BattleTransition`, `nm`: `08145fa8 t Task_BattleTransition`) with
+`data[1] = 34` continuously from the first sampled tick — a second pass
+starting at tick 850 traced the value back further: slot 6 already shows
+`func=Task_BattleTransition, data[1]=34` at tick **869** itself (the same
+tick as the RNG draw above), stable through the transition's entire
+lifetime. `34` decodes via `include/battle_transition.h`'s enum (`B_TRANSITION_BLUR=0`
+… counting to `B_TRANSITION_FRONTIER_CIRCLES_MEET=34`) as
+**`B_TRANSITION_FRONTIER_CIRCLES_MEET`** — i.e. the *first* candidate
+computed previously (`Random() % 12` = 22624 % 12 = 4 →
+`sBattleTransitionTable_BattleFrontier[4]`), confirming the tick's 2nd
+LCG application (not the 1st) was the actual select call — but this is
+now known from the game's own stored value, not inferred from call order.
+
+**Independent confirmation via the dispatched function pointer** (stronger
+than the numeric id alone, since it's the literal effect that ran, not a
+table lookup that could itself be mis-transcribed): tracing all 16 task
+slots' `func` fields from tick 850 shows the exact intended dispatch
+chain from `battle_transition.c`'s `sTasks_Intro`/`sTasks_Main` tables
+playing out load-bearing-for-load-bearing — slot 5 = `Task_StartBattleAfterTransition`
+(created tick 869, matching `battle_tower.c:2097`'s sibling `CreateTask`
+call the same frame as `BattleTransition_StartOnField`); slot 8 =
+`Task_BattleTransition_Intro` (the shared gray-flicker intro every
+transition runs, `CreateIntroTask(0,0,3,2,2)`, `battle_transition.c:1121`)
+toggling `tState` 0↔1 every 8 ticks from 869 through 917 (3 fade-to-gray/
+fade-from-gray cycles × 16 ticks = 48, matching `TransitionIntro_FadeToGray`/
+`_FadeFromGray`'s math exactly); slot 7 becomes **`func =
+0x081dabdd` = thumb-bit-set `Task_FrontierCirclesMeet`** (`nm`:
+`081dabdc T Task_FrontierCirclesMeet`) at tick 918 (the tick after the
+intro flicker's `IsIntroTaskDone()` finally returns true), its own
+`tState` (`data[0]`) progressing exactly per `sFrontierCirclesMeet_Funcs[]`
+(`battle_transition_frontier.c:122-129`): `Circles_Init` (918-919) →
+`CirclesMeet_CreateSprites` (920, `tCircle1/2/3SpriteId` = sprites 10/11/12)
+→ `WaitForLogoCirclesAnim` (920-970, the 3 sprites sliding to their fixed
+targets) → `FadeInCenterLogoCircle` (970-1017, 16-tick blend ramp + 31-tick
+hold) → `CirclesMeet_End` (1018 onward, triggers the final
+`BeginNormalPaletteFade` to black).
+
+**Pixel confirmation, screenshot-verified** (a dense oracle pass, ticks
+869-1090, `captureFrames` at the state-machine milestones above): tick
+**960** shows 3 large blue circle sprites converging from the top edge and
+both bottom corners toward the screen center — an unambiguous match for
+`CirclesMeet_CreateSprites`' 3 sliding sprites (`sTargetX/Y` = `(120,45)`,
+`(89,97)`, `(151,97)`, `SpriteCB_LogoCircleSlide`, §2 above); tick **990**
+shows them fully overlapped into the assembled center-logo blob shape
+(matches `FadeInCenterLogoCircle` blending BG0's assembled-logo tilemap
+in over the sprites); by tick **1025** the shape is fading toward black
+(the final `BeginNormalPaletteFade`); tick **1031** is solid black
+(`d8b44303`, already documented in §2 below) — this **is** the transition's
+own black outro, not yet the trainer-slide.
+
+**Corrects the earlier framing of the "doesn't match circles" concern**:
+the captured frames 1077-1197 (horizontal streak/line-wipe, flagged as
+inconsistent with the circles mechanism) are **not part of the transition
+effect at all**. RAM shows `Task_FrontierCirclesMeet` (slot 7) and the
+outer `Task_BattleTransition` (slot 6) both already gone by tick 1044 —
+confirmed by a mass reset of task slots 0-8 to `TaskDummy`
+(`0x080a9179`, `nm`: `080a9178 T TaskDummy`) at that exact tick, which is
+`CB2_InitBattleInternal`'s `ResetTasks()` call (`battle_main.c:619-710`)
+firing the **same tick** this file's own RNG-freeze tick (`gMain.inBattle`
+becoming `TRUE`, `battle_main.c:703`) was already independently pinned at
+(1044→1045, see below) — two unrelated RAM signals landing on the same
+tick is strong cross-validation, not coincidence. So by the time the
+1077+ streak frames are captured, the whole transition subsystem has
+already been destroyed for over 30 ticks; those frames are
+`BeginBattleIntro`'s own background/trainer-slide-in assembly (§2 below),
+an entirely different code path with its own not-yet-identified visual
+mechanism — **not** a mismatch in the transition identification, which is
+now fully resolved.
 
 `gBattleTypeFlags`: `0x80008` (`BATTLE_TYPE_TRAINER | BATTLE_TYPE_FACTORY`)
 already set by tick 1015 (confirms §0's "set before the transition even
@@ -819,17 +986,30 @@ corroborating timestamp, not claimed as the freeze's direct cause (that's
 
 ### 4. Risk / follow-up notes for this slice
 
-1. Transition-visual identification is narrowed to 2 of 12 candidates via
-   RNG math (both nature-cross-validated indirectly, not directly) but
-   not pixel-confirmed — see §3.1. A future session should either probe
-   `gBattleTransitionType`/the equivalent RAM state a source read
-   identifies, or capture a frame-by-frame window of frames 1077-1200
-   against the two candidate source functions.
-2. Transition-end (trainer/background fully assembled) is bounded to
-   ticks 1200-1290, not resolved tighter — §2.
-3. The 2 unexplained extra post-freeze RNG draws (ticks 1741, 1745, §3)
-   need a source re-read of what runs between the message-box clearing
-   and `TryDoEventsBeforeFirstTurn`.
+1. **RESOLVED (S6 slice 1b)**: transition-visual identification is no
+   longer a 2-of-12 RNG-math guess — a direct RAM read of
+   `gTasks[6].data[1]` (`tTransitionId`) pins it to `34 =
+   B_TRANSITION_FRONTIER_CIRCLES_MEET`, independently corroborated by the
+   dispatched function pointer (`gTasks[7].func` becomes
+   `Task_FrontierCirclesMeet`) and by screenshot confirmation (3 blue
+   circle sprites converging at ticks 960-990). See §3.1.
+2. **RESOLVED (S6 slice 1b)**: transition-end (trainer/background fully
+   assembled, modulo text) is pinned to tick **1227** (2-tick plateau
+   through 1229) via a dense every-frame pass, replacing the old
+   1200-1290 bound; the full text-print-through-heart-through-idle-cycle
+   milestone chain is also pinned. See §2.
+3. **NARROWED, not fully resolved (S6 slice 1b)**: of the 2 previously
+   "unexplained" post-freeze draws, the 1740→1741 one is now fully
+   explained (it's `TryDoEventsBeforeFirstTurn`'s own draw, RAM-confirmed
+   via `gBattleMainFunc` — the dossier's earlier attribution of that role
+   to the 1747 draw was wrong). The 1744→1745 (2-step) draw has a
+   plausible, source-grounded but unconfirmed fit
+   (`AI_TrySwitchOrUseItem`'s dense `Random()`-gated switch heuristics,
+   bracketed by the opponent controller's busy-bit clearing). The
+   1746→1747 (5-step) draw remains genuinely unpinned — the AI chain,
+   the player controller, and `TryDoEventsBeforeFirstTurn` are all
+   source-ruled-out as its origin; would need a PC-level single-step
+   trace. See §3.
 4. The ~509-511 and any other small pre-battle RNG bursts outside the
    documented heal-icon window were not individually chased (out of
    scope for this slice — flagged, not silently dropped).
