@@ -352,8 +352,9 @@ battle-frontier-mons.json` (pre-existing, opponent movesets/items/natures).
    `6→7` at tick 1959 and holds at 7 through tick 2620** (the trace's
    end) — i.e. exactly one `EFFECT_EVASION_UP` stage step, matching
    DOUBLE_TEAM's move data (`moves.json`'s `EFFECT_EVASION_UP`, no
-   `stat`/`stages` multiplier beyond +1) and the "GROVYLE's evasiveness
-   rose!" text this turn actually prints. No other stat/stage on either
+   `stat`/`stages` multiplier beyond +1) and the "Foe GROVYLE's
+   evasiveness\nrose!" text this turn actually prints (pixel-confirmed,
+   frame 2182 — see item 4 below). No other stat/stage on either
    battler moves this turn. Tick 1959 lands inside §2's own
    1928-2173 "move choice / Grovyle's animation" window (well before
    `gLastMoves[1]` itself is written to 104, which per the committed RAM
@@ -368,16 +369,73 @@ battle-frontier-mons.json` (pre-existing, opponent movesets/items/natures).
    `turn-resolution-notes.md` §6 risk 3 already flagged; not narrowed this
    session, since this session's own scripted move was ROCK_SLIDE not one
    of these).
-4. **Battle text strings for turn 1's messages** ("ONIX used ROCK SLIDE!",
-   "It's super effective!"/"Critical hit!" variants, "GROVYLE used DOUBLE
-   TEAM!", "GROVYLE's evasiveness rose!", flinch/faint text) — **not**
-   extracted this session (ran out of time budget after the trace+RAM+data
-   work above); needed before an engine slice can render turn-1 text
-   byte-exactly. Location for a future extractor:
-   `src/data/battle_message.c`'s string tables (`gStatUpText`,
-   `gMoveUsedText`-equivalent battle-string templates addressed by
-   `B_TXT_*` placeholders, per `battle-bringup-notes.md` §3's own note on
-   this template system).
+4. ~~**Battle text strings for turn 1's messages**~~ **EXTRACTED (S7
+   worktree lane, follow-up session)**:
+   `tools/extract/extract-battle-messages.ts` →
+   `src/data/gen/battle-message-templates.json` (365 of
+   `gBattleStringsTable`'s 369 entries — 4 skipped, see below — plus the
+   below-`BATTLESTRINGS_TABLE_START` `STRINGID_USEDMOVE`, 52 `B_TXT_*`
+   placeholder tokens, `gStatNamesTable`'s 8 stat names, and the
+   `gStatUpStringIds`/`gStatDownStringIds`/`gMissStringIds`
+   `MULTISTRING_CHOOSER` sub-tables), source-verified against
+   `src/battle_message.c` (`gBattleStringsTable`, every `sText_*`/`gText_*`
+   definition, `gStatNamesTable`, the three `B_MSG_*` sub-tables),
+   `include/constants/battle_string_ids.h` (`STRINGID_*`/`B_MSG_*` numeric
+   ids), and `charmap.txt`'s "battle string placeholders" section (the
+   `{TOKEN}` → `FD <id>` encoding). Templates are kept **machine-usable,
+   not flattened**: each entry carries both its raw source text and a
+   `segments` array splitting it into `{type:"placeholder", token}` /
+   `{type:"control", name, args}` (non-`B_TXT_*` curly-brace macros like
+   `{WAIT_SE}`/`{PAUSE 32}`) / `{type:"linebreak", code}` (`\n`/`\p`/`\l`)
+   / `{type:"text", value}` runs, so a future renderer never re-parses
+   curly braces itself. 4 `gBattleStringsTable` entries (PC-transfer/
+   box-full messages, `STRINGID_PKMNTRANSFERRED{SOMEONES,LANETTES}PC` +
+   their `BOX...FULL` variants) point at `gText_*` symbols defined outside
+   `battle_message.c` in a `.inc` assembly-text file
+   (`data/text/pc_transfer.inc`'s `.string` directives — a different text-
+   compilation pathway entirely) — correctly skipped as out of scope (not
+   combat/turn text, `extract-battle-messages.ts`'s own doc comment names
+   them). Also new: `tools/extract/extract-species-names.ts` →
+   `src/data/gen/species-names.json` (412 species, `gSpeciesNames`) —
+   `B_ATK_NAME_WITH_PREFIX`/`B_DEF_NAME_WITH_PREFIX` resolve to a
+   battler's nickname, and Battle Factory rentals/opponent trainer mons
+   are never custom-nicknamed, so the in-battle name is always the plain
+   species name; move names were already covered by the existing
+   `moves.json`. Pinned by `tests/battleMessageTemplates.test.ts`
+   (5 tests) — includes a resolves-every-referenced-placeholder-token
+   check across all 366 extracted templates. Both new extractors re-run
+   twice, byte-identical output both times.
+
+   **Pixel cross-check (the brief's required minimum, both "used move"
+   strings)**: ran `bin/oracle run` on the committed
+   `tools/compare/traces-groundtruth/battle1-turn1.json` and inspected two
+   of its own committed `captureFrames` ticks directly:
+   - **tick 1960**: "Foe GROVYLE used\nDOUBLE TEAM!" — matches
+     `STRINGID_USEDMOVE`'s template (`{B_ATK_NAME_WITH_PREFIX} used\n
+     {B_BUFF2}`) with `B_ATK_NAME_WITH_PREFIX` → "Foe GROVYLE" (the
+     opponent-trainer-battle name-prefix convention; species name "GROVYLE"
+     from the new `species-names.json` matches exactly) and `B_BUFF2` →
+     "DOUBLE TEAM!" (move name from the pre-existing `moves.json` + the
+     appended "!" `Cmd_attackstring`/`ChooseTypeOfMoveUsedString` always
+     adds in this English build, `battle_message.c:2907-2921`).
+   - **tick 2270**: "ONIX used\nROCK SLIDE!" — same template,
+     `B_ATK_NAME_WITH_PREFIX` → "ONIX" (no prefix — player side), `B_BUFF2`
+     → "ROCK SLIDE!".
+   - Both strings' full character sets (`G,R,O,V,Y,L,E, ,U,S,D,O,B,L,E,
+     T,A,M,!` / `O,N,I,X, ,R,C,K,S,L,I,D,E,!`) are present in the run's
+     existing `src/data/gen/charmap.json` (the font glyph-encoding table
+     an engine renderer would use), confirmed programmatically — i.e. the
+     extracted move/species names are renderable through the already-
+     extracted font pipeline, not just visually similar.
+   - **One correction this cross-check surfaced**: this dossier's own §7
+     item 2 addition (and the original brief's own phrasing) wrote
+     "GROVYLE's evasiveness rose!" and "GROVYLE used DOUBLE TEAM!" without
+     the "Foe " prefix that tick 1960/2182's actual pixels show — corrected
+     in place above (§7 item 2) now that pixel ground truth is in hand;
+     the prefix itself is resolved inside `B_ATK_NAME_WITH_PREFIX`'s
+     runtime construction (engine-side, not template-side), so this
+     extraction's template (`{B_ATK_NAME_WITH_PREFIX} used\n{B_BUFF2}`,
+     no literal "Foe " text) is still correct as extracted.
 5. **Move-animation art assets** — explicitly out of scope per this
    session's brief (not listed as a need to extract, only to flag): ROCK_SLIDE's
    falling-rocks animation, DOUBLE_TEAM's afterimage-clone animation, and
