@@ -1553,3 +1553,237 @@ under `tools/compare/traces-groundtruth/` and the RAM dump under
 byte-identical; the assembled dump file independently regenerated and
 diffed byte-for-byte against the committed file — identical both times.
 
+## 14. Battle 1 continuation, turns 6-14 (S8 worker session, oracle scout — no engine code): PP exhaustion forces a move switch, Onix faints, the WIN is not reached this session
+
+**Scope change from the assigned brief, stated plainly up front**: the brief
+asked for the rest of battle 1 through the WIN (KO Pidgeotto and Murkrow).
+That did not happen this session. Playing the fixed "always ROCK_SLIDE"
+plan through Pidgeotto's fight hits a real, previously-undiscovered wall —
+**ROCK_SLIDE runs out of PP** (see headline below) — forcing an adapted
+move choice, and the adapted line results in **Onix fainting to Pidgeotto
+at turn 14**, not a Pidgeotto/Murkrow KO. Murkrow was never reached.
+Committed: `tools/compare/traces-groundtruth/battle1-victory.json` (misnamed
+in hindsight — it does not reach a victory; kept as the deliverable's
+specified filename since this session did not have time left to rename +
+re-verify — flagged here so a future session isn't misled by the filename),
+19634 frames, extends `battle1-grovyle-faint.json`'s own 7312-frame prefix
+verbatim, 256 `captureFrames` dense on the PP-exhaustion/move-switch turn,
+the faint turn, and the post-faint switch-menu tail. `src/data/gen/
+battle1-victory-ram-dump.json` (12323 rows, every tick 7312-19634, plus
+`battlerSnapshots` at every turn boundary + the faint tick + the two
+post-faint menu settles, and an `rngLedger`). **Both twice-run
+byte-identical** (trace: `bin/oracle run`, manifests diffed identical
+across two independent runs; RAM dump: `tools/probe/ram-probe.py` +
+`tools/probe/dump-battler-snapshot.py` each independently re-run and
+diffed byte-for-byte, and the assembled dump file independently
+regenerated from the second run's raw output and diffed byte-for-byte
+against the committed file — identical both times).
+
+### HEADLINE: ROCK_SLIDE runs out of PP mid-battle — a previously unmodeled mechanic
+
+Onix's ROCK_SLIDE has 10 max PP. The "always ROCK_SLIDE" plan has now used
+it in every turn where Onix wasn't testing something else: turns 1, 3, 4, 5
+(the Grovyle dossier — turn 2 used DRAGON_BREATH instead, per §13's own
+cursor-persistence note) + turns 6-11 this session = **10 total uses**.
+Turn 12's menu reopen shows ROCK_SLIDE at **0/10 PP** (pixel-confirmed,
+`tools/probe` screenshot), and confirming it does *nothing*: no menu
+transition, no text, no `Random()` calls at all — the game silently
+refuses the selection and sits frozen on the FIGHT submenu indefinitely
+(verified with a 3000+-frame idle control run, `gRngValue` bit-for-bit
+static the entire time, same diagnostic method §13 used for the KO-text
+gate). This is a **new class of finding**: no prior section of this
+dossier tracked PP at all. **Pinned rule for any future engine slice: PP
+must be tracked per move per battler and decremented on every use
+(hit or miss) — a naive "replay the fixed script forever" harness will
+silently deadlock the instant a scripted move's PP hits 0, exactly as this
+session's raw exploration did before the cause was diagnosed.**
+
+**Adaptation made this session** (per the brief's own contingency
+instruction): switched Onix's selection from ROCK_SLIDE (slot 0) to
+**DRAGON_BREATH** (slot 2, Onix's other already-partially-used damaging
+move, 20 max PP, 19/20 remaining going into turn 12 thanks to turn 2's own
+prior use) via one `DOWN` press. This is a *judgment call*, not the only
+option (BIND and SANDSTORM were also legal and were spot-tested — BIND
+missed the one time it was tried at 0-PP-recovery turn 12 in a throwaway
+side-branch, dealing 0 progress vs. DRAGON_BREATH's near-OHKO in the
+committed line; not exhaustively compared). Documented explicitly per the
+brief's request: **DRAGON_BREATH was chosen because it is Onix's own
+highest-power remaining move with no PP problem**, not because it carries
+a type advantage (Dragon vs. Flying is neutral — ROCK_SLIDE's 2× Rock-vs-
+Flying edge is lost the moment PP forces this switch, which matters for
+why the fight got dangerously close afterward, see below).
+
+### Per-turn ledger, turns 6-14 (RAM-truthed; move IDs decoded against `reference/pokeemerald/include/constants/moves.h`)
+
+Pidgeotto's own moveset, newly discovered this session (previously
+completely unprobed, §13 open item 7): **FEATHER_DANCE (297, lowers
+Onix's Attack, no damage), AERIAL_ACE (332, damaging, always-hit),
+SAND_ATTACK (28, lowers Onix's accuracy, no damage), QUICK_ATTACK (98,
+damaging, +1 priority)**. All ticks below are this trace's own absolute
+indices (shared numbering with `battle1-grovyle-faint.json` through tick
+7312).
+
+| turn | tick range | Pidgeotto's move | Onix's move | hp0 (Onix) | hp1 (Pidgeotto) |
+|---|---|---|---|---|---|
+| 6 | 7312-8346 | FEATHER_DANCE (no dmg) | ROCK_SLIDE (hit) | 31→31 | 156→113 (−43) |
+| 7 | 8346-9380 | FEATHER_DANCE (no dmg) | ROCK_SLIDE (hit) | 31→31 | 113→82 (−31) |
+| 8 | 9380-10414 | FEATHER_DANCE (no dmg) | ROCK_SLIDE (**miss**) | 31→31 | 82→82 (0) |
+| 9 | 10414-11448 | QUICK_ATTACK (hit) | ROCK_SLIDE (hit) | 31→24 (−7) | 82→61 (−21) |
+| 10 | 11448-12482 | AERIAL_ACE (hit) | ROCK_SLIDE (hit) | 24→14 (−10) | 61→38 (−23) |
+| 11 | 12482-13516 | FEATHER_DANCE (no dmg) | ROCK_SLIDE (hit, **PP 10→0**) | 14→14 | 38→16 (−22) |
+| 12 | 13516-14962 | AERIAL_ACE (hit) | **DRAGON_BREATH** (hit, PP switch) | 14→4 (−10) | 16→1 (−15, near-OHKO) |
+| 13 | 14962-16396 | SAND_ATTACK (no dmg, −1 accuracy stage) | DRAGON_BREATH (**miss**) | 4→4 | 1→1 (0) |
+| 14 | 16396-17830 | QUICK_ATTACK (hit, priority — **Onix faints before acting**) | (never resolves) | 4→**0** | 1 (unchanged) |
+
+`gBattleOutcome` stays **0** through the entire trace (through tick 19634)
+— Onix's own faint does **not** end the battle, see next section.
+`rngLedgerTotalSteps` for the whole 7312-19634 window is **93** across 61
+`Random()`-consuming events (same per-turn shape as §12/§13: 1-step rolls
+for accuracy/crit/spread/secondary/turn-pass, a 2-step `ShouldSwitch()`
+pair, and periodic 5-step AI-tie-break clusters at turn boundaries —
+turns 6,7,10,11,12 each match this exact shape; turns 8,9,13 have fewer
+steps consistent with a miss or a status move skipping the spread-roll
+and/or secondary-effect steps).
+
+### Turn 13's miss is genuinely unlucky, not move-dependent — a small methodology note
+
+A side-branch this session tested substituting **BIND** for DRAGON_BREATH
+at turn 13 (same RNG-consumption point, different move). Both produced
+the **identical resulting `gRngValue`** (415355474) and the identical
+"nothing lands" outcome. Since DRAGON_BREATH's accuracy (100, ×2/3 after
+Sand Attack's −1 stage ≈ 67%) is strictly better than BIND's (85, ×2/3 ≈
+57%), and both missed against the same underlying random draw, **the draw
+itself must have exceeded even the higher threshold** — i.e., this was a
+real, unavoidable-by-move-choice bad roll, not a fixable move-selection
+mistake. Recorded so a future session doesn't waste time re-deriving this.
+
+### The faint sequence: Onix faints, but the battle does NOT end — a major, previously-unknown finding
+
+Turn 14: Pidgeotto's QUICK_ATTACK carries +1 priority, so it resolves
+**before** Onix's own DRAGON_BREATH regardless of speed — `gBattleMons[0]
+.hp` drops 4→0 at tick 16556 (matching the established "hp==0 lags the
+final visible hit by ~1 tick" convention from §13), and **Onix's own
+queued move never executes at all this turn** (`gCurrentMove` never
+updates past QUICK_ATTACK's own value for the rest of the turn). The
+screen freezes on "Foe PIDGEOTTO used QUICK ATTACK!" — pixel-confirmed
+— exactly like every other move-use message in this dossier, **not** like
+a KO-message freeze (§13's headline finding: KO text is button-gated).
+Recorded to sharpen §13's own rule: **the button-gate applies to the
+*victim's own* faint acknowledgment ("X fainted!"), not to the attacker's
+ordinary move-announcement text that merely precedes a faint.** One `A`
+press (matching every other message-advance in this dossier) reaches
+"ONIX fainted!" and, critically:
+
+**the battle does not end.** `gBattleOutcome` stays 0. Instead, one more
+`A` press (dismissing "ONIX has no energy left to battle!", pixel-
+confirmed) opens a **"Choose a POKéMON."** party-select screen — pixel-
+confirmed, tick 18732 — listing **MAGBY (Lv50, 138/138 HP)** and
+**BAYLEEF (Lv50, 153/153 HP)** as available replacements. This is the
+first direct, in-battle confirmation of **the player's actual 3-mon
+draft roster for this challenge: ONIX + MAGBY + BAYLEEF**, drawn from the
+6-mon rental pool the v3/v5 bootstrap already pins (`ONIX, MAGBY, BAYLEEF,
+BUTTERFREE, HAUNTER, QUILAVA`) — confirming the first 3 pool slots were
+the ones drafted, not previously verified anywhere in this dossier.
+Selecting a mon (one more `A` press, tick 19634) opens a **"Do what with
+this Pokémon?" → SEND OUT / SUMMARY / CANCEL** submenu — pixel-confirmed —
+which is where this session's committed trace ends (frame-exact, see the
+final `captureFrames` entry).
+
+**Open, not resolved this session**: the exact button/timing needed to
+actually confirm SEND OUT and complete the switch. Several attempts this
+session (pressing `A` again on the submenu's presumed default, pressing
+`UP` then `A` in case the default is CANCEL, waiting 2500+ idle frames
+with no further input) all left the game parked on the identical
+"ONIX has no energy left to battle!" message / party-select / submenu
+loop without the switch ever committing (`gBattlerPartyIndexes[0]`
+observed flat at 0 the entire time — never advances to Magby's or
+Bayleef's party slot). This was **not chased to ground** — time-boxed.
+The most likely next step for a future session: find the submenu's own
+cursor RAM address (not yet located) and directly confirm which entry the
+default cursor sits on and what its exact confirm gesture is, rather than
+guessing blind from screenshots (this session's own approach, which
+repeatedly mis-diagnosed a legitimate no-damage turn as a freeze before
+finally isolating the real PP-exhaustion bug — see the false-start note
+below for why that cost significant session time).
+
+### False-start note: not every "nothing changed" state is a freeze
+
+This session repeatedly mistook a **legitimate mutual-miss turn** (both
+combatants' moves miss or deal no damage, so no RAM field the probe
+watches changes) for a genuine input-gated freeze, because early diagnostic
+scripts didn't log `gRngValue` alongside HP/species. The fix: **always
+include `gRngValue` in any "is this turn actually resolving" check** — a
+real freeze shows `gRngValue` *and* every other watched field bit-for-bit
+static across the entire idle window (as the PP-exhaustion case genuinely
+does); a legitimate no-progress turn still advances `gRngValue` by at
+least one `Random()` call (the failed accuracy roll itself). Worth pinning
+here since it is exactly the kind of tooling-conflation error a future
+session (or an engine slice's own test harness) could repeat.
+
+### What S8's first engine slice needs — pinned vs. open
+
+**Pinned this session:**
+- **PP must be modeled and decremented per use (hit or miss)** — the
+  single biggest new finding. A fixed-script harness (or a naive AI) that
+  doesn't track PP will deadlock exactly as this session's own raw
+  oracle exploration did.
+- Priority moves (QUICK_ATTACK, +1) resolve before slower/non-priority
+  moves regardless of Speed, and can prevent the slower battler's own
+  queued move from executing at all that turn if it faints first — the
+  turn-order model needs a priority tier, not just a Speed sort (this
+  generalizes §4's turn-order finding, which only ever tested same-
+  priority moves).
+- **A battler's own faint does not end the battle** if that side has
+  healthy party members remaining — it triggers a **mandatory
+  party-select UI flow** (`gBattleOutcome` stays 0 throughout), distinct
+  from both the ordinary action-select menu and the opponent-switch
+  sequence §13 documented. The player's actual draft roster this
+  challenge is **ONIX + MAGBY + BAYLEEF** (RAM- and pixel-confirmed here
+  for the first time).
+- The KO-message button-gate (§13) applies specifically to the fainted
+  mon's own "X fainted!" text, not to the attacker's preceding ordinary
+  move-announcement text — sharpens §13's rule with a concrete
+  counter-example (turn 14's "Foe PIDGEOTTO used QUICK ATTACK!" auto-
+  advances normally; only the following "ONIX fainted!" gates on `A`).
+- Pidgeotto's moveset (FEATHER_DANCE, AERIAL_ACE, SAND_ATTACK,
+  QUICK_ATTACK) and its stat-lowering/AI pattern (chip with FEATHER_DANCE/
+  SAND_ATTACK while healthy-ish, switch to the damaging AERIAL_ACE/
+  QUICK_ATTACK as the exchange tightens) — a real, traced AI behavior
+  sample, not yet generalized into a rule.
+- damageCalc-relevant: DRAGON_BREATH and AERIAL_ACE hits in this session
+  were not hand-verified against `damageCalc.ts`'s formula the way §13
+  did for ROCK_SLIDE/ENDEAVOR — flagged as unverified, not as a mismatch
+  (no contradicting evidence found, just not checked this session; time-
+  boxed).
+
+**Still open (in priority order for a resuming session):**
+1. **The exact SEND OUT confirmation sequence** — the single blocker to
+   completing this trace's own next step (getting Magby or Bayleef onto
+   the field). See the dedicated open paragraph above for what was tried.
+2. **The WIN itself, and everything the original brief asked for**
+   (Pidgeotto's actual KO, Murkrow's forced send-out, the victory
+   fanfare/text, and the post-battle transition into the swap-offer
+   screen) — none of this was reached. Pidgeotto is at 1/143 HP in the
+   committed trace's final state, i.e. very close to fainting once a
+   healthy replacement mon gets even one hit in.
+3. Whether BAYLEEF or MAGBY is the "right" choice to send out — this
+   session only confirmed both are available at full HP; neither's
+   moveset was probed.
+4. Murkrow remains **entirely unbattled** — same open item §12 and §13
+   both already flagged, now a third session running into the same gap.
+5. The submenu's own cursor RAM address is unlocated — needed both to
+   resolve open item 1 and as reusable probe-kit knowledge for any future
+   forced-switch scripting (fainted mon on either side).
+
+**Verification**: `npm test` and `npm run build` green (checked and
+passing after these additions; no `src/engine/` changes this session —
+the only `src/` additions are the committed trace under
+`tools/compare/traces-groundtruth/` and the RAM dump under
+`src/data/gen/`, per the worktree brief's constraint). Trace twice-run via
+`bin/oracle run`, manifests (frame count + every capture's sha256)
+byte-identical across two independent runs. RAM dump's constituent probe
+runs (`ram-probe.py`, `dump-battler-snapshot.py`) each independently
+re-run and diffed byte-for-byte; the assembled dump file independently
+regenerated from the second run's raw output and diffed byte-for-byte
+against the committed file — identical both times.
+
