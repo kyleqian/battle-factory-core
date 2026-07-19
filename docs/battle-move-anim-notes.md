@@ -558,3 +558,276 @@ Tier-1 pins this session (pure re-probing); the register/RNG claims above
 are backed by this session's own fresh probe runs, re-run where noted for
 determinism.
 
+## 9. Ground-truth scout (S7 worktree lane, parallel session): 2094-2600 pinned tick-for-tick — the §8 gap closed
+
+Follow-up to §8's last paragraph ("this session did not additionally
+re-derive the falling-rocks sprite-callback timing or the generic
+hit-flash's exact sub-window boundaries... flagged as the natural
+follow-up"). **No engine code touched** — pure oracle/RAM scouting. Two new
+dense ground-truth traces
+(`tools/compare/traces-groundtruth/battle1-rockslide-dense-{a,b}.json`,
+reusing `battle1-turn1.json`'s own first 43 segments — cumulative 1920
+frames, every button press already made — then idle-padded) together give
+**every tick 2094-2600 at stride 1** (`-a`: 2094-2349, 256 captures; `-b`:
+2350-2600, 251 captures; both twice-run, 0 sha mismatches). Cross-checked
+against three new committed RAM probes (§9.5) run directly against
+`battle1-turn1.json`'s own segments (no need for the dense traces — RAM
+probes replay buttons, not captures).
+
+### 9.1. 2094-2127 (post-clone, pre-banner): what's on screen
+
+Nothing new draws. Pixel-diff-sum between consecutive captured frames is
+**exact 0 for the entire 2094-2131 span** (38 ticks) — the screen is just
+the still-held **"Foe GROVYLE used\nDOUBLE TEAM!"** message box (opened
+long before this window, back near the clone-animation's own start) plus
+the static Onix/Grovyle sprites and both healthboxes, unchanged. The
+register trace (`dump-registers.py`, stride 1) shows why tick-for-tick:
+- **2094**: `BLDCNT=0x3F40`, `BLDALPHA=0x080C` (eva=12/evb=8) — the exact
+  flat value §8 already pinned for the DOUBLE_TEAM clone window's last tick
+  (1964-2094, 130 ticks).
+- **2095**: both registers drop to **exactly 0** — `Move_DOUBLE_TEAM`'s own
+  script tail (`clearmonbg -> blendoff -> delay 1 -> end`, §2) firing right
+  on schedule.
+- **2095-2126** (32 ticks): `BLDCNT`/`BLDALPHA` flat 0 — a genuine blend-off
+  gap between the clone script ending and the stat-change banner script
+  starting. `DISPCNT` holds `0xBF40` (bit 15/`OBJWIN` set) unchanged
+  throughout — that bit was set at clone start (§8) and isn't touched again
+  until the banner's own cleanup (§4's `StatsChangeAnimation_Step3`
+  citation) at 2193.
+- **2127**: `BLDCNT` jumps to `0x3F42`, `BLDALPHA` to `0x1000` (eva=0/evb=16)
+  — `General_StatsChange`'s own init (§4/§8), i.e. the banner's registers
+  start ramping exactly on the tick `battle-turn-notes.md` §9's table
+  already named, confirmed here at stride 1 for the first time.
+- Pixels don't visibly react until **2132** (first nonzero diff, 29034) —
+  5 ticks of lag between the register ramp starting and it becoming
+  pixel-visible, because `eva=0` at the ramp's start blends the banner
+  layer at 0% opacity (target1=BG1 contributes nothing until `eva` climbs
+  off zero, `battle-turn-notes.md`'s own reasoning for the old v3 dossier's
+  "35-tick fade-in" applies identically here). Visual confirmation
+  (`frame-02100.png` vs `frame-02150.png`): at 2150 the whole screen
+  (background dot-pattern, Grovyle's platform oval) reads a visibly
+  cooler/blended tint versus 2100's plain colors — **the banner is a
+  screen-wide `BLDCNT_TGT2_ALL` blend pulse, not a distinct arrow-icon
+  sprite** drawn at a fixed screen position; the message box text is
+  untouched by it.
+
+### 9.2. 2193-2348: text timing and when the screen first changes for the attack
+
+The banner's own registers zero out at 2193 (`battle-turn-notes.md` §9),
+but the **message box does not change yet** — pixel diff stays exact 0
+through 2202. Milestones (pixel-diff-sum boundaries, cross-checked against
+frame contents):
+
+| tick | event |
+|---|---|
+| 2193-2202 | held, exact 0 diff (10 ticks) — banner-cleanup/task-teardown overhead, nothing visible |
+| **2203** | "Foe GROVYLE's evasiveness\nrose!" textbox opens — diff spike **199885** (frame-02210.png shows "Foe GROV" mid-print) |
+| 2204-2232 | message prints character-by-character — small oscillating diffs (0-10216/tick) |
+| 2233-2311 | held, **exact 0 diff for 79 ticks** — the message box stays open with this text the whole time (no close/reopen transition) while three purely-internal events fire with zero visual effect: `gLastMoves[1]` write (2301), Onix's accuracy roll (2310), and (from §9.5's own probe) `gBattlerSprites[Grovyle].invisible` is still 0 throughout |
+| **2312** | "ONIX used\nROCK SLIDE!" textbox opens (same box, text replaced in place, no separate close animation) — diff spike **193857** (numerically the same magnitude as `battle-move-anim-notes.md`'s own v3-era "2183-2184... spike 193857" row, confirming it's the identical textbox graphic) |
+| 2313-2331 | message prints (small oscillating diffs) |
+| 2332-2348 | held, **exact 0 diff** — Onix's crit roll (2334) and damage-spread lock to 42 (2337, `battle-turn-notes.md` §9) both fire here with zero pixel effect; **tick 2344** is the first RAM-only change (§9.3) — nothing visible yet |
+| **2349** | first pixel change for the attack itself (diff 539667) — the BG3_Y shake + first rocks are now visibly rendering |
+
+So "when the screen first changes for the attack" = **tick 2349**, a full
+12 ticks after the damage roll locks (2337) and 5 ticks after the
+RAM-only `monbg` hide fires (2344, §9.3) — the shake/rock script steps
+themselves don't produce a visible frame delta until the second rock's
+already spawned (§9.3's spawn schedule: first spawn 2347, second 2351 —
+2349 lands mid-arc on the first rock, past its 0-diff spawn-instant tick).
+
+### 9.3. ROCK_SLIDE animation, per-tick (the §8 gap, now closed)
+
+**New finding not in §1-§8: Grovyle's own OBJ sprite goes invisible for the
+entire attack, well beyond the shake or the hit-flash.**
+`dump-rockslide-sprites.py` reads `gBattlerSpriteIds[1]` (Grovyle's own
+sprite slot) `.invisible` bit directly, every tick:
+
+| tick | `targetInvisible` |
+|---|---|
+| ≤2343 | 0 |
+| **2344** | **-> 1** |
+| 2344-2472 (129 ticks) | 1 (flat) |
+| **2473** | **-> 0** |
+
+This window (2344-2472) exactly brackets `monbg ANIM_DEF_PARTNER`'s own
+scope in the decoded script (§2: `monbg` is the *second* opcode, right
+after `loadspritegfx`, and `clearmonbg` is the *second-to-last*, right
+before `waitforvisualfinish`/`end`) — i.e. **`Cmd_monbg` hides the target's
+real OBJ sprite for the whole attack-animation, not just a no-op**, the
+same BG-layer-compositing mechanism `battle-move-anim-notes.md` §4 already
+identified for DOUBLE_TEAM's `ANIM_ATK_PARTNER` case (there, moving the
+*attacker* onto BG1 for the blend), generalized here: `ANIM_DEF_PARTNER`
+resolves to the defender itself in a single battle (§2's own note) and the
+same hide-the-OBJ/render-a-BG-copy-instead swap applies to the *target*.
+The pixels still show Grovyle normally throughout this window (confirmed
+in the montage frames, e.g. `frame-02400.png` — rocks visibly land on a
+fully-rendered Grovyle) because the BG-layer copy renders in the OBJ
+sprite's place; this closes part of §5 item 5's "not traced end-to-end"
+flag (still open: the exact BG-vs-OBJ compositing pipeline mechanics, just
+now empirically bounded in time).
+
+**BG3_Y shake — exact stride-1 register sequence (fully resolves §8's
+"sampled at stride 2" caveat):**
+
+| tick | 2347 | 2348 | 2349 | 2350 | 2351 | 2352 | 2353 | 2354 | 2355 | 2356 | 2357 | 2358+ |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `gBattle_BG3_Y` | 0 | -7 | -7 | 0 | 0 | -7 | -7 | 0 | 0 | -7 | -7 | 0 (flat) |
+
+Exact match to §3's hand-derived `0,-7,-7,0,0,-7,-7,0,0,-7,-7` sequence,
+now RAM-confirmed tick-for-tick rather than simulated. `BLDCNT`/`BLDALPHA`
+stay **exactly 0x0000 for the entire 2337-2600 window** (checked stride 1)
+— confirmed empirically, not just inferred from the absent `setalpha`
+opcode: ROCK_SLIDE genuinely uses no alpha blend. `DISPCNT` bit 15 is also
+flat (clear) the whole span — the banner's `OBJWIN` bit from §9.1 is long
+since restored and ROCK_SLIDE never sets it again.
+
+**Rock spawn schedule — all 20 rocks, RAM-confirmed spawn tick + argv
+match:** `dump-rockslide-sprites.py` identifies rock sprites by their
+`template` field (`struct Sprite+0x14`) equal to `gFallingRockSpriteTemplate`
+(`0x08596B04`, a non-static global — no `nm` needed), sidestepping the fact
+that both `AnimFallingRock` and `AnimFallingRock_Step` immediately hand off
+to the shared `TranslateSpriteInEllipse` callback (so scanning by callback
+name, as the v3-era `dump-task-and-sprite-callbacks.py` did, can't tell a
+rock from anything else using that same generic helper). Spawn cadence is
+**exactly every 4 ticks**, 20 spawns, tick = `2347 + 4*i` for i=0..19 (last
+spawn 2423) — a script `delay 2` opcode plus the `createsprite`+
+`playsewithpan` opcodes' own 1-tick-each execution cost, not the "delay 2"
+by itself. Each rock's velocity (RAM `data[5]`) matches
+`src/data/gen/battle-move-anim-scripts.json`'s decoded argv **in exact
+call order**, confirming both banks agree independently:
+
+| spawn # | tick | source (main 4 or `RockSlideRocks` call 1/2) | argv `[xOffset,animNum,velocity,useAvgPos]` | RAM `velocity` |
+|---|---|---|---|---|
+| 1 | 2347 | main | `[-5,1,-5,1]` | -5 |
+| 2 | 2351 | main | `[5,0,6,1]` | 6 |
+| 3 | 2355 | main | `[19,1,10,1]` | 10 |
+| 4 | 2359 | main | `[-23,2,-10,1]` | -10 |
+| 5-12 | 2363-2395 | `RockSlideRocks` call 1 | `[-20,0,-10,1] [28,1,10,1] [-10,1,-5,1] [10,0,6,1] [24,1,10,1] [-32,2,-10,1] [-20,0,-10,1] [30,2,10,1]` | -10,10,-5,6,10,-10,-10,10 |
+| 13-20 | 2399-2423 | `RockSlideRocks` call 2 | **identical 8-argv set as call 1**, RAM-confirmed reproduced verbatim in the same order | -10,10,-5,6,10,-10,-10,10 |
+
+Each rock lives **exactly 48 ticks** (§3's 16-tick arc-down + 32-tick
+settle-wobble, RAM-confirmed: e.g. the rock spawned at 2423 is last seen at
+2471 = 2423+48) — slots get reused (only 13 distinct `gSprites[]` slots
+host all 20 rocks; several slots host two sequential rocks). Per-rock
+`data[]` fields RAM-match `AnimFallingRock`/`_Step`'s own field assignments
+exactly (`data[2]`=circlePos step 4, `data[3]`=countdown timer 16 then 32,
+`data[4]`=amplitude -70 then -24, `data[6]`/`data[7]`=the
+`StoreSpriteCallbackInData6`-stashed next-callback pointer, constant within
+a phase and changing exactly once per rock at the phase1->phase2
+boundary). **All rocks gone by tick 2471** (last active tick across all 20,
+confirmed by scanning every `gSprites[]` slot for the rock template every
+tick 2337-2520).
+
+**Generic hit-flash — exact sub-window boundaries (the other half of the
+§8 gap):** starts **10 ticks after the last rock disappears** (2471 -> 2481
+gap, `waitforvisualfinish`/`clearmonbg`/battle-script `attackanimation-then-
+hitanimation` overhead, zero pixel diff in between). Both halves start
+within 1 tick of each other, confirmed by two independent RAM signals per
+tick:
+
+- **Healthbox wobble** (`gSprites[gHealthboxSpriteIds[1]].y2`, written by
+  `SpriteCB_HitAnimHealthoxEffect` via `gHealthboxSpriteIds[battler]` —
+  *not* the scratch invisible-sprite's own y2, which is always 0/irrelevant,
+  a dead end this session ruled out first): **+1/-1 alternating every tick,
+  ticks 2481-2500 (20 ticks)**, back to 0 and the effect sprite destroyed at
+  2501 — matches §3's "21 ticks" formula (`data[2]` counts 0..20, 21
+  increments; the window as observed from the outside is 20 full toggles).
+- **Mon blink** (`gBattlerSpriteIds[1]`'s own `.invisible` bit — distinct
+  from §9.3's earlier `monbg`-driven invisibility, which had already ended
+  at 2473): invisible **2482-2485, 2490-2493, 2498-2501, 2506-2509** (4
+  ticks each), visible **2481 (setup), 2486-2489, 2494-2497, 2502-2505,
+  2510-2513** (4 ticks each) — **exactly** 4 on/4 off, 4 full cycles, 32
+  ticks total (2482-2513), matching §3's `DoHitAnimBlinkSpriteEffect`
+  formula exactly. `gBattlerControllerFuncs[1]` (the opponent controller's
+  active function) confirms the effect's own active window independently:
+  **true 2481-2513**, flat false outside it.
+
+### 9.4. 2358-2516 pre-drain span: full account, nothing left silent
+
+Stitching §9.2's tail and §9.3 together, every tick from the damage-roll
+lock to the HP-bar drain start now has an attributed cause:
+
+| ticks | span | what's happening |
+|---|---|---|
+| 2337-2343 | 7 ticks, silent | crit roll (2334) already resolved; damage lock (2337) fires; zero pixel/RAM-visible effect yet |
+| 2344 | 1 tick, RAM-only | Grovyle's OBJ sprite goes invisible (`monbg` swap, §9.3) — no pixel diff this exact tick |
+| 2345-2348 | 4 ticks, silent | shake sprite + first rock about to spawn, not yet visible |
+| 2349-2357 | 9 ticks | BG3_Y shake active (§9.3's exact sequence), first 3 rocks in flight |
+| 2358-2471 | 114 ticks | shake done (BG3_Y flat 0 from 2358), rocks continue spawning/falling/settling (last spawn 2423, last rock gone 2471) — the visually busiest span, confirmed by the dense trace's large repeating pixel diffs |
+| 2472-2480 | 9 ticks, mostly silent | last rock gone (2471->2472), Grovyle's OBJ sprite restored visible at 2473, `waitforvisualfinish`/`clearmonbg`/script-transition overhead |
+| 2481-2513 | 33 ticks | generic hit-flash (healthbox wobble 2481-2500, mon blink 2482-2513, §9.3) |
+| 2514-2515 | 2 ticks, silent | hit-flash done, `healthbarupdate` battle-script opcode about to fire |
+| 2516 | — | HP-bar drain start (sentinel -32768, `battle-turn-notes.md` §9 — unchanged, cited here only as the span's own end boundary) |
+
+No tick in 2337-2516 is left unattributed.
+
+### 9.5. RAM probes run this session (committed, reusable)
+
+- **`tools/probe/dump-registers.py`** `<trace> <output> <startTick>
+  [endTick]` — per-tick `DISPCNT`/`BLDCNT`/`BLDALPHA`/`gBattle_BG3_X`/
+  `gBattle_BG3_Y` (raw hardware register addresses `0x04000000`/
+  `0x04000050`/`0x04000052`, plus `bin/oracle symbols gBattle_BG3_X
+  gBattle_BG3_Y`). Run against `battle1-turn1.json`'s own segments,
+  startTick 2094, endTick 2600 (507 rows) — every number in §9.1-§9.3's
+  register tables is cited to this run.
+- **`tools/probe/dump-rockslide-sprites.py`** `<trace> <output> <startTick>
+  <endTick> [targetBattler]` — scans all 64 `gSprites[]` slots every tick
+  for the rock (`gFallingRockSpriteTemplate`) and shake
+  (`gShakeMonOrPlatformSpriteTemplate`) templates (full position/anim/data
+  dump per match), plus the target battler's own sprite `.invisible` bit
+  (`gBattlerSpriteIds`), the real healthbox sprite's `y2`
+  (`gHealthboxSpriteIds`), the healthbox-wobble scratch sprite's active
+  state (`SpriteCB_HitAnimHealthoxEffect`, one single non-ambiguous
+  instance per `arm-none-eabi-nm -n --defined-only
+  reference/pokeemerald/pokeemerald.elf`), and the opponent controller's
+  active function pointer (`gBattlerControllerFuncs[1]`, matched against
+  all 8 `DoHitAnimBlinkSpriteEffect` instances — one per battle-controller
+  file, all behaviorally identical, `nm` can't disambiguate which file's
+  copy runs so this session matches the whole set rather than guessing).
+  Run against `battle1-turn1.json`'s own segments, startTick 2337, endTick
+  2520 — twice, byte-identical (`diff` clean). Every number in §9.3/§9.4 is
+  cited to this run.
+- **Two new committed dense ground-truth traces**
+  (`tools/compare/traces-groundtruth/battle1-rockslide-dense-{a,b}.json`,
+  256+251 captures) — every tick 2094-2600 at stride 1, twice-run each, 0
+  sha mismatches both. §9.1/§9.2's pixel-diff-sum tables and the montage
+  screenshots cited above are derived from these.
+
+### 9.6. What engine slices B/C/D need — pinned vs still open
+
+**Slice B (clone + banner, ticks ~1928-2193):** fully pinned by
+`battle-turn-notes.md` §9 (tick anchors) + this doc's §4/§8 (register
+envelopes) + this session's §9.1 (the post-clone 2095-2126 blend-off gap,
+and the banner's screen-wide-blend-not-icon visual character). **Open:**
+none identified this session — §5 item 5 (BG-vs-OBJ compositing pipeline
+mechanics) remains a documented-but-unimplemented-detail gap, not blocking
+for a pixel-matching engine (time the blend off the register envelope, per
+§4's existing recommendation).
+
+**Slice C (ROCK_SLIDE, ticks ~2312-2513):** now fully pinned —
+text-open tick (2312), rock spawn schedule (20 rocks, exact ticks + argv,
+§9.3's table), per-rock motion formula (§3, cross-checked against RAM this
+session), BG3_Y shake exact sequence (§9.3), the **new** `monbg`
+target-hide window (2344-2472, not previously documented at all — an
+engine implementing ROCK_SLIDE needs to hide/replace the target sprite for
+this whole span, not just during the 11-tick shake), and both hit-flash
+sub-windows (healthbox wobble 2481-2500, mon blink 2482-2513). **Open:**
+the exact BG-layer-copy rendering mechanics behind the `monbg` hide (what
+actually draws in the OBJ sprite's place — visually identical to the
+original per the montage frames, so a pixel-matching engine can likely get
+away with simply *not* hiding the sprite at all and matching pixels anyway,
+but this is unverified — flagged for whichever slice implements this).
+
+**Slice D (drain + turn-end, ticks ~2514-2586):** unaffected by this
+session — `battle-turn-notes.md` §9's existing table (drain 2516-2559, hp
+update 2560, flinch roll 2565, turn-pass roll 2575, AI rolls 2580/2582,
+menu settle ~2586) already fully covers this span; this session's §9.4
+table confirms the span immediately before it (2514-2516) is silent
+hit-flash-teardown with no new mechanism.
+
+**Verification:** `npm test` and `npm run build` re-run green this
+session (no `src/` changes — see the top-level commit log). Both new
+dense traces twice-run, 0 sha mismatches. Both new probe scripts re-run
+twice against their respective windows, byte-identical output.
+
