@@ -1787,3 +1787,201 @@ re-run and diffed byte-for-byte; the assembled dump file independently
 regenerated from the second run's raw output and diffed byte-for-byte
 against the committed file — identical both times.
 
+## 14 addendum. The SEND OUT confirm sequence, cracked — and battle 1's WIN does not fit the oracle's 20000-frame cap from anchor (S8 worktree lane wt-20260719-150558, oracle scout — no engine code)
+
+§14 left one blocker open: the exact button sequence to commit the forced
+switch from `battle1-victory.json`'s end state (the SEND OUT/SUMMARY/CANCEL
+submenu, tick 18732-19634), plus a frame-budget accounting of whether battle
+1's actual WIN can fit in one 20000-frame oracle trace at all. Both are
+resolved this session. Committed: `tools/compare/traces-groundtruth/
+battle1-switch.json` (19158 frames total, **byte-identical anchor-relative
+prefix to `battle1-victory.json`'s own first 106 segments through tick
+18732**, then a corrected 6-segment tail; 246 `captureFrames`, dense
+(stride 1) across the nav/select/confirm/animation core, stride 5 through
+the trailing settle) and `src/data/gen/battle1-switch-ram-dump.json` (427
+rows, ticks 18732-19158, `ram-probe.py` against this trace's own segments —
+`battle1-victory.json`'s own RAM dump is left untouched per the brief, and
+this new file does not re-dump the shared prefix). **Both twice-run
+byte-identical**: the trace via two independent `bin/oracle run` calls
+(manifests, frame count + every capture's sha256, diffed identical), the RAM
+dump via two independent `ram-probe.py` runs against the *committed* trace
+file (diffed identical, and separately diffed identical against the
+committed dump file itself).
+
+### HEADLINE 1: the "loop" was never an input-readiness gating problem — it was the cursor defaulting to the fainted mon itself
+
+§14 suspected a `gPaletteFade`-style input gate (the summary-screen
+precedent cited in the brief). That theory is **falsified this session**:
+every A press this session's probing sent registered *immediately* (visible
+on the very next few rendered frames each time) — there was no dead window
+to wait out. Screenshot-driven probing (`oracle.screen_png()` at a live,
+continuing `EmeraldOracle` session — no restart needed between experiments,
+since the emulator has no snapshot/restore API but does allow indefinite
+forward `advance()` calls within one process, avoiding an O(N) full-prefix
+replay per experiment) showed the real mechanism directly:
+
+1. `battle1-victory.json`'s own final committed A press (tick 18732-18734)
+   lands on the **"Choose a POKéMON." list**, cursor defaulted to **slot 0
+   — ONIX itself** (the just-fainted mon, still listed at the top of the
+   screen with its FNT status). Pressing A there does not fail silently or
+   get dropped; it correctly opens **"Do what with this Pokémon?" SEND
+   OUT/SUMMARY/CANCEL for ONIX** (source-confirmed:
+   `HandleChooseMonSelection`'s switch statement has no case for
+   `PARTY_ACTION_SEND_OUT`, so it falls to the `default:` arm —
+   `party_menu.c:1379-1383` — which unconditionally calls
+   `Task_TryCreateSelectionWindow` with **no HP/faint check**, unlike the
+   softboiled/use-item/mail/tutor arms which all guard with
+   `IsSelectedMonNotEgg` first).
+2. Confirming **SEND OUT** on that submenu calls `TrySwitchInPokemon()`
+   (`party_menu.c:5800`), which reads `GetCursorSelectionMonId()` — **slot
+   0, ONIX** — sees `GetMonData(&gPlayerParty[0], MON_DATA_HP) == 0`, and
+   fails with `gText_PkmnHasNoEnergy`, i.e. it reprints **"ONIX has no
+   energy left to battle!"** (RAM- and pixel-confirmed: `species0` stays
+   95/ONIX, `partyIdx0` stays 0, `mainFunc` never leaves the party-menu
+   dispatcher) and returns to the "Choose a POKéMON." list. This is
+   *exactly* the loop §14 observed — not a freeze, not a dropped input, but
+   a real, silent, always-fails action being genuinely re-executed every
+   time, because the previous session's naive A presses never moved the
+   cursor off slot 0 first.
+
+### HEADLINE 2: the working sequence
+
+From `battle1-victory.json`'s own tick 18732 (the settled "Choose a
+POKéMON." list, cursor on ONIX by default — i.e. `battle1-victory.json`'s
+**last 2 segments, the final `A` press and its trailing 900-frame idle, are
+both dropped** and replaced):
+
+| press | effect |
+|---|---|
+| `DOWN` (2f) + ~10f settle | cursor moves ONIX (slot 0) → **MAGBY (slot 1)** — pixel-confirmed via a small cursor-position marker next to the mon's icon, and via a second `DOWN` in a side-probe moving it on to BAYLEEF (slot 2), so `DOWN` walks the list top-to-bottom in party order |
+| `A` (2f) + ~30f settle | selects MAGBY → opens "Do what with this Pokémon?" SEND OUT/SUMMARY/CANCEL, cursor defaulted on **SEND OUT** |
+| `A` (2f) + ~380f idle | confirms SEND OUT → battle-scene fade, ball-throw/materialize (screen goes to black for several frames, then the battle scene with Pidgeotto reappears), "Your foe's weak! Get 'em, MAGBY!" (not button-gated — auto-advances), settles to **"What will MAGBY do?" FIGHT/BAG/POKéMON/RUN** |
+
+RAM ground truth at the two ends of this window (`battle1-switch-ram-dump.json`):
+`species0` 95→**240 (SPECIES_MAGBY, confirmed against `constants/species.h`)**,
+`hp0` 0→**138 (138/138, full HP, matches the on-screen bar)**,
+`partyIdx0` 0→**1**, `mainFunc` 134471705 (party-menu dispatcher) →
+**134463093 (the same settled-action-menu dispatcher constant used by every
+other settled menu in this dossier)**. Only **2 `Random()` steps** are
+consumed in the whole 426-tick window, both at tick 19102/19109, right at
+the transition into the new menu — the same small AI-pre-scoring cluster
+§13/§14 already documented at other turn boundaries; the switch-in
+animation itself is RNG-free. The settle transition (message → new menu)
+was bisected to between **+324 and +344 ticks** after the confirming A
+press ends (tick 19102 = not yet settled, tick 19112 = settled, against a
+press ending at 18778); the committed script uses **+380** for a ~40-tick
+margin, consistent with this dossier's usual settle-margin sizing elsewhere.
+
+### Frame-budget analysis (goal 2)
+
+**(a) How much idle slack does the current script carry?** Less than it
+looks. The one large, unambiguous waste was `battle1-victory.json`'s own
+trailing **900-frame dead wait after an action that could never succeed**
+(pressing A on ONIX's own doomed SEND OUT, repeatedly, per §14's own
+account) — that's not really "generous timing," it's a dead end, and this
+session's fix eliminates it entirely: the corrected tail needs only **426
+more ticks** (18732→19158) to reach a *healthy, settled, actionable* next
+menu, **less total than `battle1-victory.json`'s own 19634-frame dead-end**
+despite doing strictly more. Within that corrected tail, the measured real
+minimum (334-344 ticks post-confirm) vs. the committed 380 is **~90%+
+efficient** — not much left to reclaim. The same holds for the *ordinary*
+per-turn windows earlier in the script: turns 6-11 each cost a fixed 1034
+ticks (`A`+28f settle+`A`+~1000f idle covering both battlers' full move
+text/animation/HP-drain/menu-reopen), matching §12's independently-measured
+"946 frames, 1 confirm press" for a comparable full turn elsewhere in this
+dossier — i.e. these per-turn windows are close to real content-driven
+minimums (two move resolutions' worth of text+animation), **not** padded
+slop. **Conclusion: there is very little reclaimable idle slack in this
+dossier's scripts once the one genuine dead-end (the mis-targeted SEND OUT)
+is fixed** — the per-turn costs are close to the real minimum, not an
+artifact of over-cautious waiting.
+
+**(b) Can any line win battle 1 from the anchor within 20000 frames?**
+Using this dossier's own measured per-turn costs:
+
+- Draft + intro + turns 1-5 (fixed, already committed/verified): **7312
+  ticks**.
+- The *actual, RNG-determined* line played this dossier (turns 6-14,
+  including the PP-forced move switch and 2 genuine misses — turn 8
+  ROCK_SLIDE, turn 13 DRAGON_BREATH, both independently confirmed
+  unavoidable-by-move-choice bad rolls, §14): **10518 ticks** to Onix's
+  faint (tick 17830) + **902 ticks** to the settled party list (18732) +
+  this session's **426-tick** fix to a healthy settled menu = **19158
+  ticks total**. Remaining budget: **20000 − 19158 = 842 ticks** — under
+  one ordinary turn's minimum cost (~1000-1034 ticks, per (a) above), let
+  alone enough to finish off Pidgeotto (currently 1/143 HP, so probably
+  only 1 more turn) **and** fight Murkrow's entire, completely unscouted
+  second Pokémon (open item since §12, still true after 3 sessions — moves,
+  level, and bulk all unknown) **and** play the victory fanfare/dialogue
+  and post-battle transition. **From the one line this dossier has actually
+  ground-truthed, the answer is unambiguously NO — not close.**
+- A best-case, hypothetical (not verified this session) zero-miss line:
+  Pidgeotto has 156 max HP; the real trace's non-miss ROCK_SLIDE hits
+  averaged ~28 damage (43/31/21/23/22 across turns 6,7,9,10,11). Replaying
+  turn 8's miss as an average hit would drop Pidgeotto low enough that
+  turn 11's hit finishes it, saving 3 turns (~3000-3400 ticks) and never
+  triggering the PP exhaustion or the Onix-faint/switch detour at all —
+  reaching a Pidgeotto KO in roughly **7312 + 6×1034 ≈ 13516 ticks**,
+  leaving **~6484 ticks (≈6 ordinary turns' worth)** for Murkrow's fight
+  plus the victory sequence. This is *plausible but genuinely unverified*:
+  misses are an emergent property of the deterministic RNG stream tied to
+  the exact input timing, not a free script edit — no alternate button
+  sequence was found or tested this session that actually avoids those 2
+  rolls, and Onix would still enter that fight measurably chipped from
+  Pidgeotto's own un-missed hits, quite possibly forcing a switch anyway
+  against a totally unscouted Murkrow. **This session cannot respond to
+  "does a winning line exist" with a proven yes; only "the one verified
+  line misses the cap by a wide margin, and even an optimistic
+  best-case estimate leaves uncomfortably little room against an unknown
+  final opponent."**
+
+**Escalation-worthy harness finding**: a single continuous oracle trace
+spanning all of battle 1 (draft → WIN) very likely does not fit the
+20000-frame cap even under favorable assumptions, and definitely does not
+fit under the one line this dossier has actually played move-by-move. This
+session's own methodology also surfaces a secondary, process-level point
+worth the supervisor's attention: every RAM probe this session ran had to
+**replay the entire 18732-tick prefix from the anchor** before it could
+test anything new (no snapshot/restore API exists in `EmeraldOracle`) —
+harmless at ~6-8s/run here, but it is the same structural reason a single
+20000-frame trace budget is so easy to exhaust: there is no way to
+"resume" a long trace, only to replay it whole. A snapshot/restore
+capability (or a raised cap) would both make future long-horizon scouting
+cheaper *and* directly address whether a battle-1 WIN can ever be captured
+in one committed trace.
+
+### Updated pinned vs. open list
+
+**Newly pinned this session:**
+- The SEND OUT confirm sequence (table above) — not gated on any timing
+  window; the previous "loop" was a wrong-cursor-target bug
+  (`HandleChooseMonSelection`'s `default:` arm skips the HP/faint check
+  that every other action type gets), not an input-readiness race.
+- `DOWN` walks the "Choose a POKéMON." list in party order (slot 0 → 1 →
+  2, i.e. ONIX → MAGBY → BAYLEEF); no auto-skip past the fainted slot.
+- The switch-in animation (fade → ball-throw/materialize → flavor text →
+  settled menu) is RNG-free (0 `Random()` calls) except a 2-step AI
+  pre-scoring cluster right at the final settle, matching the shape already
+  documented at other turn boundaries.
+- Per-turn script cost is close to its real minimum in this dossier's
+  existing traces (§14 addendum (a)) — future scripting shouldn't expect
+  much frame budget to be reclaimable from "shortening waits."
+- A single oracle trace almost certainly cannot span battle 1 draft-to-WIN
+  under the current 20000-frame cap (§14 addendum (b)) — flagged for the
+  supervisor to make a harness-level call (raise the cap, add
+  snapshot/restore, or accept multi-trace assembly as the permanent model).
+
+**Still open:**
+1. Whether MAGBY or BAYLEEF is the better choice — this session sent out
+   MAGBY (arbitrary, matching the brief's "pick the first workable") but
+   never probed either one's moveset, same as §14 left it.
+2. Murkrow remains entirely unbattled — now a fourth session flagging this
+   same gap (§12, §13, §14, this addendum).
+3. The full WIN sequence (Pidgeotto's actual KO, Murkrow's forced send-out,
+   victory fanfare/text, post-battle transition into the swap-offer screen)
+   — still not reached, and per (b) above, may not be reachable in one
+   trace at all.
+4. The best-case "zero-miss" line sketched in (b) is arithmetic, not a
+   verified trace — nobody has actually found or tested an input sequence
+   that avoids the 2 real misses.
+
