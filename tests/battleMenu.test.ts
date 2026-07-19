@@ -44,6 +44,12 @@ import {
   rockSlideMonShakeY2,
   rockSlideDrawOrder,
   ROCK_SLIDE_RAM_ANCHOR_DELAY,
+  rockSlideOpponentHp,
+  ROCK_SLIDE_HP_DRAIN_START_DELAY,
+  ROCK_SLIDE_TEXT_CLEAR_DELAY,
+  ROCK_SLIDE_MENU_REDRAW_DELAY,
+  rockSlideResettledBounceTick,
+  MENU_IDLE_BLANK_END_TICK,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -518,5 +524,44 @@ describe("battleMenu: ROCK_SLIDE window (docs/battle-menu-notes.md §11, slice C
   it("rockSlideDrawOrder: empty before the window opens and after every rock has despawned", () => {
     expect(rockSlideDrawOrder(pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY, pressTick)).toEqual([]);
     expect(rockSlideDrawOrder(2473, pressTick)).toEqual([]); // one past rock 19's own despawn (2472)
+  });
+});
+
+describe("battleMenu: S7 slice D - HP drain + turn-end (docs/battle-menu-notes.md §12, docs/battle-turn-notes.md §9) - grid-searched against this session's own 161-frame dense oracle capture (ticks 2500-2660), 0 residual across all 15 fill-count transitions", () => {
+  const pressTick = 1919; // matches this window's other tests + turn1-drain.json's own anchor
+  const startHp = 143; // Grovyle before ROCK_SLIDE (battle1-turn1-ram-dump.json's before_turn.battler1.hp)
+  const endHp = 101; // Grovyle after ROCK_SLIDE (after_turn.battler1.hp)
+
+  it("ROCK_SLIDE_HP_DRAIN_START_DELAY anchors the sentinel to RAM/render tick 2516 (no extra render lag, unlike every other mechanism in this window)", () => {
+    expect(pressTick + ROCK_SLIDE_HP_DRAIN_START_DELAY).toBe(2516);
+  });
+
+  it("rockSlideOpponentHp: full HP before the sentinel tick, then exactly 1 HP/tick down to endHp, settled forever after", () => {
+    expect(rockSlideOpponentHp(2515, pressTick, startHp, endHp)).toBe(143);
+    expect(rockSlideOpponentHp(2516, pressTick, startHp, endHp)).toBe(143); // sentinel tick itself, no visible drop yet
+    expect(rockSlideOpponentHp(2517, pressTick, startHp, endHp)).toBe(142); // first drained tick (48px -> 47px)
+    expect(rockSlideOpponentHp(2518, pressTick, startHp, endHp)).toBe(141);
+    expect(rockSlideOpponentHp(2558, pressTick, startHp, endHp)).toBe(101); // d=42, last decrement, already at endHp
+    expect(rockSlideOpponentHp(2559, pressTick, startHp, endHp)).toBe(101); // done sentinel tick, settled
+    expect(rockSlideOpponentHp(2650, pressTick, startHp, endHp)).toBe(101); // stays settled indefinitely
+  });
+
+  it("rockSlideOpponentHp is value-agnostic (works for any startHp/endHp pair, not just this trace's 143/101)", () => {
+    expect(rockSlideOpponentHp(2516, pressTick, 200, 180)).toBe(200);
+    expect(rockSlideOpponentHp(2517, pressTick, 200, 180)).toBe(199);
+    expect(rockSlideOpponentHp(2536, pressTick, 200, 180)).toBe(180); // d=20, exactly startHp-endHp
+    expect(rockSlideOpponentHp(2600, pressTick, 200, 180)).toBe(180);
+  });
+
+  it("text-clear (pressTick+657=2576) then hard-cut menu-redraw (pressTick+664=2583), pixel-confirmed this session", () => {
+    expect(pressTick + ROCK_SLIDE_TEXT_CLEAR_DELAY).toBe(2576);
+    expect(pressTick + ROCK_SLIDE_MENU_REDRAW_DELAY).toBe(2583);
+  });
+
+  it("rockSlideResettledBounceTick: anchors the redraw tick to the same local t=MENU_IDLE_BLANK_END_TICK+1 the very first menu itself starts from", () => {
+    const redrawTick = pressTick + ROCK_SLIDE_MENU_REDRAW_DELAY;
+    expect(rockSlideResettledBounceTick(redrawTick, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 1);
+    expect(rockSlideResettledBounceTick(redrawTick + 1, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 2);
+    expect(rockSlideResettledBounceTick(redrawTick + 9, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 10);
   });
 });

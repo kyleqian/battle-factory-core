@@ -4,6 +4,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 132 — Bounded worker: S7 slice D — HP drain + turn-end CLOSED, `turn1-drain.json` **102/102, 0 diff** on first attempt; closes ISSUES #16's deferred partial-HP oracle validation — suite **648/648**
+
+- **State:** `npm test` **648/648** (+5 Tier-1 pins), `npm run build`
+  green, tree clean. New committed trace
+  `tools/compare/traces/turn1-drain.json` (canonical 44-segment prefix,
+  102 captures: dense every tick 2510-2600 + strided to 2655) **102/102,
+  0 diff**. Zero regressions: turn1-rockslide 250/256, turn1-cloneanim
+  230/230, turn1-kickoff 81/81, fight-submenu 234/235, sendout 255/256,
+  s6-acceptance 224/228 — all re-verified unchanged.
+- **Did:** implemented the whole window (`battleMenu.ts` pure fns +
+  `battleScene.ts` render, docs/battle-menu-notes.md §12 has the full
+  derivation) from a fresh 161-frame scratch dense capture (ticks
+  2500-2660, grid-search only, not committed). Three findings: (1) the
+  HP-bar drain renders with **no extra frame of render lag** (every other
+  ROCK_SLIDE mechanism in this window uses a `-1` lag; this one doesn't —
+  fit exact against all 15 fill-pixel-count transitions after that
+  hypothesis was tried and rejected first); (2) the resettled action
+  menu's idle-bounce cycle re-anchors to a **fresh** local tick
+  (`MENU_IDLE_BLANK_END_TICK+1`), matched by the very first menu's own
+  distinctive "1-tick blip then 9-tick dwell" opening shape recurring
+  identically at the redraw tick — not a continuation of the frozen
+  pre-turn absolute-tick counter; (3) the reused flat `menuIdleBase`
+  harvest's two bounce regions are both on the PLAYER's (Onix, undamaged)
+  side, so it stays valid for the resettled menu EXCEPT the opponent's own
+  healthbox, which now needs a live per-tick overdraw
+  (`opponentHealthboxContentForHp`, a small memoized cache — only 43
+  distinct integer HPs ever needed) instead of the old static
+  full-HP-only constant.
+- **ISSUES #16 outcome:** the partial-HP half is RESOLVED, not a headline
+  fix — `calcBarFilledPixels`'s existing `floor(hpFraction*48)` formula
+  already agreed with real oracle pixels for all 43 HPs this trace
+  exercises (0 residual, no model change). Trimmed the entry to what's
+  still unvalidated: yellow/red band thresholds and every status icon
+  (this seed's battle never leaves the green band or inflicts status).
+- **Next:** the §11.1-named 1px `drawStaticBgShiftedY` residual (single
+  stray pixel at (173,92) on `rockSlideBg3Y=-7` ticks, turn1-rockslide
+  250/256→256/256) is the next small pickup; otherwise turn 2+ ground
+  truth / the victory-scout lane's own next steps per #130.
+- **Notes:** the grid-search-against-a-scratch-capture technique (build a
+  throwaway dense trace via `bin/oracle run`, crop specific pixel regions
+  with PIL to isolate one mechanism's own sha/pixel transitions from
+  everything else moving on screen at the same time, rather than reading
+  full-frame shas alone) resolved all three findings above in well under
+  an hour combined — no papercuts.
+
+---
 ## 131 — Bounded worker: S7 slice C — rock-vs-rock OAM stacking order CLOSED via real slot-allocation + `SortSprites` simulation — `turn1-rockslide.json` **181/256 → 250/256**; suite **643/643**
 
 - **State:** `npm test` **643/643** (+5 Tier-1 pins), `npm run build`
@@ -80,36 +126,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (drain/turn-end + ISSUES #16 validation) next session.
 
 ---
-## 129 — Bounded worker: **S7 slice C — ROCK_SLIDE window engine, LARGE MAJORITY LANDED, not yet 0-diff** — `turn1-rockslide.json` **0/256 → 181/256** (2963px total residual, avg ~40px/frame, max 172px, all in the 2362-2453 rock-overlap sub-range); suite **638/638**
-
-- **State:** `npm test` **638/638**, `npm run build` green, tree clean.
-  New committed trace `tools/compare/traces/turn1-rockslide.json` (256
-  captures, 2193-2515) **181/256** — acceptance (0 diff) **not met**, but
-  every mechanism except rock-vs-rock stacking order is independently
-  pixel-exact (see below). Zero regressions: turn1-cloneanim 230/230,
-  turn1-kickoff 81/81, fight-submenu 234/235, menu-idle 69/69, sendout
-  255/256, s6-acceptance 224/228 — all re-verified unchanged.
-- **Did:** implemented the whole window (`battleMenu.ts` pure fns +
-  `battleScene.ts` render, docs/battle-menu-notes.md §11 has the full
-  derivation) — the two text boxes (stat-rose + used-move), the
-  `gBattle_BG3_Y` shake (a new background-only resampler,
-  `drawStaticBgShiftedY`, since OBJs stay fixed on real hardware but this
-  engine's usual `menuIdleBase` harvest bakes bg+OBJs into one flat image),
-  all 20 falling rocks' spawn schedule + per-rock ellipse motion
-  (call-timing model reverse-engineered tick-by-tick against fresh RAM
-  probes — the naive "1 call/tick from spawn" reading was off by one call
-  on the spawn tick specifically), the generic hit-flash, and — a genuine
-  new finding, not predicted by the existing docs — Grovyle's own
-  `AnimTask_ShakeMon` bounce, which §9.6 had predicted an engine could skip
-  during the `monbg`-hidden window; a per-tick pixel brute-force proved
-  otherwise (period-4 `[5,5,0,0]` render pattern, ticks 2362-2455). Also
-  fixed a silent text bug (the stat-rose apostrophe needs the game's own
-  U+2019 glyph, not ASCII `'` — the font has no glyph for the latter) and a
-  background-wrap bug (BG3's real vertical period, 256px, wasn't being
-  applied to the shake's negative `mapY`, blanking the top 7 screen rows).
-- **Notes:** docs/battle-menu-notes.md §11 has the full per-mechanism
-  accounting + RAM-probe citations. PAPERCUT: none new — the RAM-probe
-  scripts committed by the earlier ground-truth scout session
-  (§9.5/`dump-registers.py`/`dump-rockslide-sprites.py`) were directly
-  reusable against the already-committed dense traces, saved a lot of time
-  versus re-deriving from source alone.

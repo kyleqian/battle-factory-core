@@ -1,3 +1,39 @@
+## 129 — Bounded worker: **S7 slice C — ROCK_SLIDE window engine, LARGE MAJORITY LANDED, not yet 0-diff** — `turn1-rockslide.json` **0/256 → 181/256** (2963px total residual, avg ~40px/frame, max 172px, all in the 2362-2453 rock-overlap sub-range); suite **638/638**
+
+- **State:** `npm test` **638/638**, `npm run build` green, tree clean.
+  New committed trace `tools/compare/traces/turn1-rockslide.json` (256
+  captures, 2193-2515) **181/256** — acceptance (0 diff) **not met**, but
+  every mechanism except rock-vs-rock stacking order is independently
+  pixel-exact (see below). Zero regressions: turn1-cloneanim 230/230,
+  turn1-kickoff 81/81, fight-submenu 234/235, menu-idle 69/69, sendout
+  255/256, s6-acceptance 224/228 — all re-verified unchanged.
+- **Did:** implemented the whole window (`battleMenu.ts` pure fns +
+  `battleScene.ts` render, docs/battle-menu-notes.md §11 has the full
+  derivation) — the two text boxes (stat-rose + used-move), the
+  `gBattle_BG3_Y` shake (a new background-only resampler,
+  `drawStaticBgShiftedY`, since OBJs stay fixed on real hardware but this
+  engine's usual `menuIdleBase` harvest bakes bg+OBJs into one flat image),
+  all 20 falling rocks' spawn schedule + per-rock ellipse motion
+  (call-timing model reverse-engineered tick-by-tick against fresh RAM
+  probes — the naive "1 call/tick from spawn" reading was off by one call
+  on the spawn tick specifically), the generic hit-flash, and — a genuine
+  new finding, not predicted by the existing docs — Grovyle's own
+  `AnimTask_ShakeMon` bounce, which §9.6 had predicted an engine could skip
+  during the `monbg`-hidden window; a per-tick pixel brute-force proved
+  otherwise (period-4 `[5,5,0,0]` render pattern, ticks 2362-2455). Also
+  fixed a silent text bug (the stat-rose apostrophe needs the game's own
+  U+2019 glyph, not ASCII `'` — the font has no glyph for the latter) and a
+  background-wrap bug (BG3's real vertical period, 256px, wasn't being
+  applied to the shake's negative `mapY`, blanking the top 7 screen rows).
+- **Notes:** docs/battle-menu-notes.md §11 has the full per-mechanism
+  accounting + RAM-probe citations. PAPERCUT: none new — the RAM-probe
+  scripts committed by the earlier ground-truth scout session
+  (§9.5/`dump-registers.py`/`dump-rockslide-sprites.py`) were directly
+  reusable against the already-committed dense traces, saved a lot of time
+  versus re-deriving from source alone.
+
+---
+
 ## 128 — Supervisor: Grovyle-faint ground truth merged (turns 3-5, KO + Pidgeotto switch-in) — suite **638/638**; round 8 = slice C (ROCK_SLIDE engine) + victory scout
 
 - **State (verified post-merge):** `npm test` **638/638**, `npm run build`

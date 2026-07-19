@@ -1688,3 +1688,76 @@ export function rockSlideMonBlinkInvisible(t: number, pressTick: number): boolea
   if (d < 1 || d > 32) return false;
   return Math.floor((d - 1) / 4) % 2 === 0;
 }
+
+// --- S7 slice D: HP drain + turn-end (docs/battle-turn-notes.md §9,
+// docs/battle-menu-notes.md §12) - the opponent's HP-bar drain
+// (`pressTick`+597 = RAM tick 2516 on) through the resettled next-action
+// idle cycle. Grid-searched against this session's own dense oracle capture
+// (a 161-frame scratch trace, ticks 2500-2660) rather than the RAM-only
+// `bar1Curr` schedule alone, since what matters here is the RENDERED pixel
+// bar, not the raw counter.
+
+/**
+ * `bar1Curr`'s own drain schedule (`battle-turn-notes.md` §9: sentinel
+ * -32768 at RAM 2516, then 1-HP-unit/tick 142->101 over 2517-2558, done
+ * sentinel 0 at 2559) - but this window's render/RAM relationship is a
+ * genuine EXCEPTION to the one-tick render lag every other ROCK_SLIDE
+ * mechanism in this file uses (`rockSlideBg3Y`/`rockSlideHealthboxWobbleY2`
+ * etc. all subtract 1 from `t`): the drained bar's pixel-fill count matches
+ * `floor(hp/maxHp*48)` for `hp = startHp - clamp(t - drainStartTick, 0,
+ * startHp-endHp)` with **`t` itself**, no `-1` - fit exact (0 residual)
+ * against all 15 fill-count transitions in the dense capture (tick
+ * 2517->47px through 2558->33px settled). Plausible mechanism: unlike a
+ * hardware-register write that only becomes visible next vblank, the bar's
+ * sprite tiles are CPU-copied into VRAM synchronously within
+ * `MoveBattleBarGraphically`'s own call this same frame, so no extra frame
+ * of lag accrues. `startHp`/`endHp` are the caller's own battler HP values
+ * (this trace's own 143/101, not hardcoded here) - the formula is
+ * value-agnostic. Valid for every `t`, not just mid-drain: before the
+ * drain starts it clamps to `startHp` (full), after it's done it clamps to
+ * `endHp` (settled) - safe to call unconditionally for the healthbox render
+ * path.
+ */
+export const ROCK_SLIDE_HP_DRAIN_START_DELAY = 597;
+
+export function rockSlideOpponentHp(t: number, pressTick: number, startHp: number, endHp: number): number {
+  const d = t - (pressTick + ROCK_SLIDE_HP_DRAIN_START_DELAY);
+  return Math.max(endHp, startHp - Math.max(d, 0));
+}
+
+/**
+ * Turn-end: the held "ONIX used\nROCK SLIDE!" text (already drawn by
+ * `drawRockSlideWindow`) goes blank (box stays, no text - same "teal blank
+ * box" shape as `MENU_IDLE_BLANK_END_TICK`'s own pre-battle precedent) at
+ * `pressTick`+657 (RAM/render tick 2576, pixel-confirmed: the 60x26 text
+ * crop is byte-identical background-only from here, `battle-turn-notes.md`
+ * §9's own silent-rolls span - flinch/turn-pass/ShouldSwitch/AI-setup all
+ * land inside this blank hold with zero visible effect), then hard-cuts to
+ * the resettled action menu at `pressTick`+664 (RAM/render tick 2583,
+ * pixel-confirmed: a single-tick ~6000px swap of the whole bottom half of
+ * the screen, the same atomic BG0-scroll-reveal mechanism as the original
+ * menu's own tick-1748 draw, `battle-menu-notes.md` §5).
+ */
+export const ROCK_SLIDE_TEXT_CLEAR_DELAY = 657;
+export const ROCK_SLIDE_MENU_REDRAW_DELAY = 664;
+
+/**
+ * The resettled action menu's own idle-bounce phase, mapped onto the
+ * SAME closed-form `menuIdleBounce` this file already uses for the very
+ * first (pre-turn) menu - not a new formula. Grid-search evidence (this
+ * session): the resettled window's own observed sha sequence from
+ * `pressTick`+664 on (`c2a09dbe1350`x1, `a4bffb32ef6b`x1, `c2a09dbe1350`x9,
+ * `229869e8d282`x9, `0269314e68ff`x9, `a4bffb32ef6b`x9, repeat - the same
+ * short 1-tick "blip" before the first full 9-tick dwell that the very
+ * first menu ALSO shows at ticks 1748/1749, `battle-menu-notes.md` §4)
+ * matches `menuIdleBounce(localT)` tick-for-tick when `localT` is anchored
+ * so `pressTick`+664 (the redraw tick) lines up with `MENU_IDLE_BLANK_END_
+ * TICK+1` (1748, the very first menu's own first content tick) - i.e. the
+ * resettled menu's bounce task re-initializes fresh at redraw, not a
+ * continuation of the pre-turn absolute-`t` counter (that hypothesis was
+ * tried first and rejected: plain `menuIdleBounce(t)` does not reproduce
+ * the observed blip/dwell boundaries at this `t` range at all).
+ */
+export function rockSlideResettledBounceTick(t: number, pressTick: number): number {
+  return t - (pressTick + ROCK_SLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}

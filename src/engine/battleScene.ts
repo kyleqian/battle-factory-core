@@ -460,6 +460,10 @@ import {
   rockSlideMonBlinkInvisible,
   rockSlideMonShakeY2,
   STATS_BANNER_END_DELAY,
+  rockSlideOpponentHp,
+  ROCK_SLIDE_TEXT_CLEAR_DELAY,
+  ROCK_SLIDE_MENU_REDRAW_DELAY,
+  rockSlideResettledBounceTick,
 } from "./battleMenu.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
@@ -647,6 +651,10 @@ const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
 const anchorOpponentBattler = (
   battle1TurnRamDumpAsset as { battlerSnapshots: { before_turn: { battler1: { species: number; level: number; hp: number; maxHP: number } } } }
 ).battlerSnapshots.before_turn.battler1;
+/** S7 slice D: Grovyle's own post-ROCK_SLIDE HP (`battle1-turn1-ram-dump.json`'s `after_turn.battler1.hp`, 101) - the HP-bar drain's own settled endpoint (`rockSlideOpponentHp`, `battleMenu.ts`). */
+const anchorOpponentAfterTurnHp = (
+  battle1TurnRamDumpAsset as { battlerSnapshots: { after_turn: { battler1: { hp: number } } } }
+).battlerSnapshots.after_turn.battler1.hp;
 const anchorOpponentName = (speciesNamesAsset as { species: { name: string }[] }).species[anchorOpponentBattler.species]!.name;
 const ANCHOR_OPPONENT_GENDER = "male";
 
@@ -678,6 +686,36 @@ const opponentHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAsset
   hpFraction: anchorOpponentBattler.hp / anchorOpponentBattler.maxHP,
   status: "none",
 });
+
+/**
+ * S7 slice D (ISSUES #16's own deferred-validation window): the opponent
+ * healthbox composited at an arbitrary integer HP, memoized by HP value -
+ * the ROCK_SLIDE drain only ever needs the 43 distinct integer HPs from
+ * `anchorOpponentBattler.hp` (143) down to `anchorOpponentAfterTurnHp`
+ * (101), `rockSlideOpponentHp`'s own domain (`battleMenu.ts`), so a flat
+ * `Map` cache avoids re-running the compositor per rendered frame.
+ * `opponentHealthboxContent` above (full HP) is this map's own hp=143
+ * entry in disguise - kept as a separate constant since every OTHER call
+ * site (send-out, the pre-drain rockslide window, etc.) never sees a
+ * different HP and has no reason to route through the cache.
+ */
+const opponentHealthboxContentByHp = new Map<number, ReturnType<typeof composeOpponentHealthbox>>();
+function opponentHealthboxContentForHp(hp: number): ReturnType<typeof composeOpponentHealthbox> {
+  let cached = opponentHealthboxContentByHp.get(hp);
+  if (!cached) {
+    cached = hp === anchorOpponentBattler.hp
+      ? opponentHealthboxContent
+      : composeOpponentHealthbox(healthboxAssemblyAssets, {
+          name: anchorOpponentName,
+          level: anchorOpponentBattler.level,
+          gender: ANCHOR_OPPONENT_GENDER,
+          hpFraction: hp / anchorOpponentBattler.maxHP,
+          status: "none",
+        });
+    opponentHealthboxContentByHp.set(hp, cached);
+  }
+  return cached;
+}
 const summaryBall = summaryBallAsset as SummaryBallAsset;
 const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
@@ -3036,10 +3074,13 @@ function healthboxBackgroundColorAt(x: number, y: number): RgbColor | undefined 
  * background color exactly, so painting them changes nothing visually), and
  * cross-checked pixel-for-pixel against every oracle-pinned coordinate in
  * `tests/battleScene.test.ts`'s existing fade-window test. Clipped to screen
- * by `setPixel`, same as every other sprite draw here.
+ * by `setPixel`, same as every other sprite draw here. `content` defaults to
+ * the full-HP compositor result - S7 slice D's drain window is the only
+ * caller that ever passes a different (drained) one, via
+ * `opponentHealthboxContentForHp`.
  */
-function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
-  const { width, height, pixels } = opponentHealthboxContent;
+function drawSendOutHealthbox(fb: Uint8Array, dx: number, content: ReturnType<typeof composeOpponentHealthbox> = opponentHealthboxContent): void {
+  const { width, height, pixels } = content;
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
       const color = pixels[py * width + px];
@@ -3234,30 +3275,43 @@ function drawTurnKickoffText(fb: Uint8Array, t: number, pressTick: number): void
  * shake + falling rocks + generic hit-flash on top - the message box (BG0,
  * a separate layer on real hardware) stays fixed throughout, redrawn
  * unshifted after the shaken battlefield base per `drawRockSlideAttack`'s
- * own doc comment.
+ * own doc comment. **S7 slice D extends this dispatcher two phases
+ * further** (`battleMenu.ts`'s own module doc): the held "ONIX used\nROCK
+ * SLIDE!" text (with the HP bar now draining underneath it, per
+ * `drawRockSlideAttack`'s own `rockSlideOpponentHp` wiring) goes blank at
+ * `+657` (box stays, no text), then hard-cuts to the resettled action menu
+ * at `+664` (`drawTurnEndSettledMenu`).
  */
 function drawRockSlideWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  const redrawTick = pressTick + ROCK_SLIDE_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurnEndSettledMenu(fb, t, pressTick);
+    return;
+  }
   const statRoseStart = statRoseTextStartTick(pressTick);
   const rockSlideStart = rockSlideTextStartTick(pressTick);
-  let line1: string;
-  let line2: string;
-  let chars: number;
-  if (t < statRoseStart) {
-    line1 = TURN_KICKOFF_LINE1;
-    line2 = TURN_KICKOFF_LINE2;
-    chars = turnKickoffTextVisibleChars(t, pressTick);
-  } else if (t < rockSlideStart) {
-    line1 = STAT_ROSE_LINE1;
-    line2 = STAT_ROSE_LINE2;
-    chars = statRoseTextVisibleChars(t, pressTick);
-  } else {
-    line1 = ROCK_SLIDE_LINE1;
-    line2 = ROCK_SLIDE_LINE2;
-    chars = rockSlideTextVisibleChars(t, pressTick);
-  }
+  const textClearTick = pressTick + ROCK_SLIDE_TEXT_CLEAR_DELAY;
   drawRockSlideAttack(fb, t, pressTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, line1, line2, chars);
+  if (t < textClearTick) {
+    let line1: string;
+    let line2: string;
+    let chars: number;
+    if (t < statRoseStart) {
+      line1 = TURN_KICKOFF_LINE1;
+      line2 = TURN_KICKOFF_LINE2;
+      chars = turnKickoffTextVisibleChars(t, pressTick);
+    } else if (t < rockSlideStart) {
+      line1 = STAT_ROSE_LINE1;
+      line2 = STAT_ROSE_LINE2;
+      chars = statRoseTextVisibleChars(t, pressTick);
+    } else {
+      line1 = ROCK_SLIDE_LINE1;
+      line2 = ROCK_SLIDE_LINE2;
+      chars = rockSlideTextVisibleChars(t, pressTick);
+    }
+    drawMessageTextLines(fb, line1, line2, chars);
+  }
 }
 
 /**
@@ -3283,7 +3337,8 @@ function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  drawSendOutHealthbox(fb, 0);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentBattler.hp, anchorOpponentAfterTurnHp);
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2);
   drawMenuHealthboxPlayer(fb, 0);
   drawMenuIdleBounceOverlay(fb, turnKickoffBounceTick(t, pressTick));
@@ -3292,6 +3347,25 @@ function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void
     if (!rock) continue;
     drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
   }
+}
+
+/**
+ * S7 slice D: the turn-end resettled action menu, `pressTick`+664 on
+ * (`ROCK_SLIDE_MENU_REDRAW_DELAY`, `battleMenu.ts`). Reuses
+ * `drawActionMenuIdleContent`'s own flat `menuIdleBase` harvest for
+ * everything EXCEPT the opponent healthbox: that harvest was taken from the
+ * original pre-turn-1 screen (Grovyle still full HP), and the player's own
+ * ONIX side of the settled idle cycle (bbox-confirmed this session -
+ * `menuHealthboxPlayer`'s own origin (127,74) exactly matches
+ * `battle-menu-notes.md` §4's "Region B") never changes since Onix takes no
+ * damage this turn - so the harvest stays valid for everything but Grovyle's
+ * own bar, which is overdrawn on top at its real (possibly still-draining,
+ * though by this tick always settled) HP.
+ */
+function drawTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
+  drawActionMenuIdleContent(fb, rockSlideResettledBounceTick(t, pressTick));
+  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentBattler.hp, anchorOpponentAfterTurnHp);
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
 }
 
 /** BG3's own real hardware vertical period - `BGCNT_TXT512x256`'s screen-block height (32 tile rows = 256px, `staticBgPixel`'s own doc comment on the 512-wide double-block layout), needed here because `gBattle_BG3_Y` going negative (the shake's `-7`) pushes `mapY` below the JSON's own row-0 origin - unlike every other `staticBgPixel` caller in this file, which only ever samples `mapY` in `[0,160)` and never needed to wrap. */

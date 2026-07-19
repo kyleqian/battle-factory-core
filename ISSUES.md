@@ -90,19 +90,23 @@ stall). What remains is exactly one tick:
 Affects: `sendout.json` 255/256, `s6-acceptance.json` 224/228 (3 frames are
 ISSUES #5's settled pattern, x88-151-confirmed; 1 frame is #18's own 1496).
 
-## #16 — Opponent-healthbox compositor: partial-HP/status variants are
-  hermetically tested but have NO oracle-pixel validation yet
+## #16 — Opponent-healthbox compositor: status-icon variant has NO
+  oracle-pixel validation yet (partial-HP is now validated)
 
-Trimmed 2026-07-19 (supervisor): the compositor pipeline is complete and,
-as of this date, wired live into `battleScene.ts`'s send-out render path
-(zero pixel movement across the full sweep — see `docs/
-healthbox-assembly-notes.md` "Wired live"). What remains is exactly the
-long-stated caveat: `hpFraction != 1` and `status != "none"` rendering
-(`CalcBarFilledPixels`, yellow/red bands, status icons) is pinned only by
-hermetic Tier-1 tests — no oracle pixels exist for those states before the
-first action menu. **Validate against real oracle captures in S7's first
-HP-drain trace**; until then treat the partial-HP/status paths as
-provisional. Battles 2-7's other opponents (S8) consume the same pipeline.
+Trimmed 2026-07-19 (bounded worker, S7 slice D): the `hpFraction != 1`
+half of this entry is now RESOLVED — `turn1-drain.json`'s ROCK_SLIDE
+drain (Grovyle 143→101 HP, 43 distinct integer HPs, 15 distinct
+fill-pixel-count transitions) hits real oracle pixels for the first time
+and matches the hermetic `calcBarFilledPixels`/`floor(hpFraction*48)`
+formula exactly — 0 residual, no model fix needed (see
+`docs/battle-menu-notes.md` §12). The bar stays in the green band this
+whole window (33/48 px > the 24px green threshold), so the yellow/red
+band thresholds and the `filledPixels==0` sliver rule are still only
+hermetically pinned, not oracle-confirmed — same for every status icon
+(`UpdateStatusIconInHealthbox`'s placement/color-substitution math): this
+trace's own seed battle never inflicts a status condition, so `status !=
+"none"` remains untested against real pixels. Battles 2-7's other
+opponents (S8) consume the same pipeline and may exercise these paths.
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean

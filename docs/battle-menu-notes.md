@@ -1706,3 +1706,117 @@ the deferred pins named at the end of §11 above
 (`rockSlideRockState`/`rockSlideBg3Y`/`rockSlideMonShakeY2`, all still
 pixel-fit/RAM-exact as originally landed, now regression-guarded).
 `npm test` **643/643**, `npm run build` green.
+
+## 12. S7 slice D: HP drain + turn-end (bounded worker, this session) - `turn1-drain.json` **102/102, 0 diff**; closes ISSUES #16's deferred oracle validation
+
+Ticks `pressTick`+597 (RAM 2516, the HP-bar drain sentinel) through the
+resettled next-action idle cycle (`pressTick`+664 on, RAM 2583+, swept to
+2655/pressTick+736). No RAM probe run this session — every anchor tick was
+already pinned by `battle-turn-notes.md` §9's table (drain start/done, hp
+update, flinch/turn-pass/`ShouldSwitch`/AI rolls, all silent) or
+`battle-move-anim-notes.md` §9.4 (nothing left unattributed through 2516).
+What this session added: a fresh 161-frame dense oracle capture (scratch,
+ticks 2500-2660, not committed - superseded by the canonical
+`turn1-drain.json`) to grid-search the two things §9's RAM-only table
+can't answer by itself - the RENDERED pixel bar's exact lag convention, and
+the resettled menu's exact bounce-phase alignment.
+
+**HP-bar drain: renders with NO extra frame of lag, unlike every other
+ROCK_SLIDE mechanism in this file.** `rockSlideOpponentHp(t, pressTick,
+startHp, endHp)` (`battleMenu.ts`) computes `startHp - clamp(t -
+(pressTick+597), 0, startHp-endHp)`, clamped to `[endHp, startHp]` - valid
+for every `t`, not just mid-drain. Fit **exact (0 residual) against all 15
+distinct fill-pixel-count transitions** in the dense capture (cropped to
+the bar's own 48px-wide fill strip, sampled independent of the SHA-level
+diff): render tick 2517 shows 47/48 px filled, 2519->46, 2522->45, ...,
+2558->33/48 (settled, `floor(101/143*48)=33`, still green - `pickHpBarBand`
+was already correct, no model change needed). A `-1`-lag hypothesis (the
+convention `rockSlideBg3Y`/`rockSlideHealthboxWobbleY2`/etc. all use) was
+tried first and rejected: it mispredicts every one of the 15 transitions by
+one pixel-column. Plausible mechanism: unlike a hardware register that only
+takes visible effect next vblank, `MoveBattleBarGraphically` CPU-copies the
+bar's tiles into VRAM synchronously within its own call this same frame, so
+no extra render-lag tick accrues here.
+
+**ISSUES #16 resolved for the partial-HP path**: `composeOpponentHealthbox`
+/`calcBarFilledPixels`'s floating-point `hpFraction` formula
+(`floor(hpFraction*48)`) was never patched - it already agreed with the
+exact-integer source formula for every one of the 43 HP values 101-143
+this trace exercises (spot-checked: no truncation-boundary 1px divergence
+in this range). The compositor's hermetic model was **oracle-confirmed
+correct on first contact**, not a headline finding requiring a fix.
+
+**Turn-end (text-clear -> blank hold -> menu redraw), pixel-timed, not
+RAM-timed** (the RAM events themselves - flinch/turn-pass/`ShouldSwitch`/AI
+setup, 2565-2582 - are already documented as visually silent, so their
+exact ticks don't gate any pixel change): the held "ONIX used\nROCK SLIDE!"
+text goes blank (box stays, no text - a 60x26px crop diffed byte-identical
+background-only) at `pressTick`+657 (render 2576); a single-tick ~6000px
+swap of the whole bottom half of the screen (the same atomic
+BG0-scroll-reveal shape as the original menu's own tick-1748 draw, §5)
+lands at `pressTick`+664 (render 2583) - `ROCK_SLIDE_TEXT_CLEAR_DELAY`/
+`ROCK_SLIDE_MENU_REDRAW_DELAY`.
+
+**The resettled menu's own idle-bounce phase reuses `menuIdleBounce`
+verbatim, re-anchored to a fresh local `t`, not a continuation of the
+pre-turn absolute-`t` counter.** `rockSlideResettledBounceTick(t,
+pressTick) = t - (pressTick+664) + (MENU_IDLE_BLANK_END_TICK+1)`. Found by
+matching the STRUCTURE of the observed sha sequence, not by guessing a
+single shift constant: the very first menu's own opening (`MENU_IDLE_
+BLANK_END_TICK+1`=1748 on) shows a distinctive 1-tick "blip" (a transient
+sha visible for exactly 1 tick) immediately followed by a full 9-tick
+steady dwell, before settling into the regular 9-tick/phase, 36-tick/cycle
+pattern (§4). The resettled window's own capture shows the **identical
+blip-then-9-tick-dwell shape** at `pressTick`+664/+665, and the SHA
+sequence from there on (`c2a09dbe1350`x9 -> `229869e8d282`x9 ->
+`0269314e68ff`x9 -> `a4bffb32ef6b`x9, repeating) matches
+`menuIdleBounce(localT)` tick-for-tick under this shift, across the whole
+155-tick swept range - i.e. the underlying `DoBounceEffect`-class task
+(§4's own attribution) genuinely re-initializes when a fresh action menu
+opens, it doesn't keep running (frozen, per slice A/C's own finding) and
+then resume from where the absolute tick count "would have" put it. A
+plain-`t` hypothesis was tried first and rejected (doesn't reproduce the
+blip position at all).
+
+**The opponent healthbox is NOT part of the reused flat `menuIdleBase`
+harvest's valid content.** That harvest was taken from the original
+pre-turn-1 screen (Grovyle still full HP) - reusing it verbatim for the
+resettled menu would incorrectly show Grovyle back at 143/143. Bbox-
+confirmed this session that the harvest's own two BOUNCE regions (§4's
+"Region A"/"Region B") are both on the PLAYER's (ONIX) side -
+`menuHealthboxPlayer`'s own origin `(127,74)` is an exact match for
+Region B's bbox - and Onix takes zero damage this turn, so the harvest's
+*base* content stays valid for everything except Grovyle's own bar, which
+`drawTurnEndSettledMenu` (`battleScene.ts`) overdraws on top at its real
+(by then always-settled) HP via `opponentHealthboxContentForHp`, a small
+memoized cache over `composeOpponentHealthbox` (only 43 distinct integer
+HPs ever needed, 143 down to 101). The same per-tick HP now also feeds the
+drain-phase `drawSendOutHealthbox` call inside `drawRockSlideAttack`
+(previously always full-HP, static) - the only other opponent-healthbox
+draw call in the whole ROCK_SLIDE/turn-end window.
+
+**Engine implementation** (`battleMenu.ts` pure functions + `battleScene.ts`
+render): `rockSlideOpponentHp`, `ROCK_SLIDE_TEXT_CLEAR_DELAY`/
+`ROCK_SLIDE_MENU_REDRAW_DELAY`, `rockSlideResettledBounceTick` (new);
+`drawRockSlideWindow` gains a `t >= redrawTick` early-return to
+`drawTurnEndSettledMenu` (new) and a `t < textClearTick` guard around its
+existing text-draw call; `drawRockSlideAttack` and `drawTurnEndSettledMenu`
+both route the opponent healthbox through `opponentHealthboxContentForHp`
+instead of the old static `opponentHealthboxContent` constant (kept, now
+just that cache's own hp=143 entry).
+
+**Acceptance**: new committed trace `tools/compare/traces/turn1-drain.json`
+(canonical 44-segment prefix, dense captures every tick 2510-2600 + strided
+samples to 2655, 102 frames total) **102/102, 0 diff** - no residual, no
+attribution needed. Zero regressions: `turn1-rockslide` 250/256,
+`turn1-cloneanim` 230/230, `turn1-kickoff` 81/81, `fight-submenu` 234/235,
+`sendout` 255/256, `s6-acceptance` 224/228. **New Tier-1 pins**
+(`tests/battleMenu.test.ts`, 5 new tests): `rockSlideOpponentHp` (drain
+schedule + settle, value-agnostic), the text-clear/menu-redraw anchor
+ticks, `rockSlideResettledBounceTick`'s own re-anchoring. `npm test`
+**648/648**, `npm run build` green.
+
+**Out of scope, per the brief**: turn 2+ (scout lane's), the victory/switch
+windows, FONT_NARROW rewire, ISSUES #5/#18/#19/#20, the §11.1-named 1px
+`drawStaticBgShiftedY` residual (not attempted this session - ran out of
+budget after slice D landed at 0 diff).
