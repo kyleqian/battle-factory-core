@@ -1228,3 +1228,249 @@ export function statsBannerBg1Y(t: number, pressTick: number): number {
   const d = t - (pressTick + STATS_BANNER_BG1_Y_ANCHOR_DELAY);
   return Math.max(0, Math.min(180, 3 * d));
 }
+
+// --- S7 slice C: the ROCK_SLIDE window (docs/battle-move-anim-notes.md §9,
+// docs/battle-turn-notes.md §9) - picks up exactly where slice B's stat-
+// change banner leaves off (its own last active-but-zero-effect tick,
+// pressTick+274 = 2193) through the tick before the HP-bar drain sentinel
+// (pressTick+596 = 2515; slice D owns 2516+). All delays/tables below are
+// cited to this session's own re-run of the two committed probe scripts
+// (`dump-registers.py`/`dump-rockslide-sprites.py`) against the already-
+// committed dense ground-truth traces (`battle1-rockslide-dense-{a,b}.json`)
+// - RAM-tick-indexed, twice-run byte-identical - not re-derived from source
+// alone. Three text boxes share the same box/font/cadence mechanism as
+// `TURN_KICKOFF_LINE1/2` above: the held DOUBLE_TEAM text (unchanged,
+// through pressTick+283/2202), then "Foe GROVYLE's evasiveness\nrose!"
+// (opens pressTick+284/2203), then "ONIX used\nROCK SLIDE!" (opens
+// pressTick+393/2312) - `battle-message-templates.json`'s own
+// `STRINGID_ATTACKERSSTATROSE`/`STRINGID_USEDMOVE` templates, resolved for
+// this turn's actual attacker/stat/move.
+
+/** `STRINGID_ATTACKERSSTATROSE` (`"{B_ATK_NAME_WITH_PREFIX}'s {B_BUFF1}\n{B_BUFF2}"`) resolved for DOUBLE_TEAM's own evasion-up stat change: attacker "Foe GROVYLE", stat "evasiveness", buff2 "rose!" - line 1 wraps after "evasiveness" (pixel-confirmed, docs/battle-move-anim-notes.md §9.2). */
+/** Uses U+2019 (the game's own charmap right-single-quote glyph, `src/data/gen/charmap.json` code 180) not the ASCII apostrophe U+0027 - the font has no glyph for the latter. */
+export const STAT_ROSE_LINE1 = "Foe GROVYLE’s evasiveness";
+export const STAT_ROSE_LINE2 = "rose!";
+export const STAT_ROSE_TEXT_TOTAL = STAT_ROSE_LINE1.length + STAT_ROSE_LINE2.length;
+
+/** Ticks from the A-confirm press to this textbox's own clear+first-glyph tick (RAM/pixel-confirmed 2203, same "clear and draw in the same tick" convention as `TURN_KICKOFF_LINE1`). */
+export const STAT_ROSE_TEXT_DELAY = 284;
+
+export function statRoseTextStartTick(pressTick: number): number {
+  return pressTick + STAT_ROSE_TEXT_DELAY;
+}
+
+/** Visible character count (0..STAT_ROSE_TEXT_TOTAL) at absolute trace tick `t` - same 1-tick/char-including-spaces mechanism as `turnKickoffTextVisibleChars`. */
+export function statRoseTextVisibleChars(t: number, pressTick: number): number {
+  const start = statRoseTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(STAT_ROSE_TEXT_TOTAL, t - start + 1);
+}
+
+/** `STRINGID_USEDMOVE` resolved for Onix's own turn: "ONIX used\nROCK SLIDE!" (attacker is the PLAYER's own Onix, no "Foe " prefix - `HANDLE_NICKNAME_STRING_CASE`'s side check, `battle-message-templates.json`'s `usedMove` entry). */
+export const ROCK_SLIDE_LINE1 = "ONIX used";
+export const ROCK_SLIDE_LINE2 = "ROCK SLIDE!";
+export const ROCK_SLIDE_TEXT_TOTAL = ROCK_SLIDE_LINE1.length + ROCK_SLIDE_LINE2.length;
+
+/** Ticks from the A-confirm press to this textbox's own clear+first-glyph tick (RAM/pixel-confirmed 2312). */
+export const ROCK_SLIDE_TEXT_DELAY = 393;
+
+export function rockSlideTextStartTick(pressTick: number): number {
+  return pressTick + ROCK_SLIDE_TEXT_DELAY;
+}
+
+/** Visible character count (0..ROCK_SLIDE_TEXT_TOTAL) at absolute trace tick `t`. */
+export function rockSlideTextVisibleChars(t: number, pressTick: number): number {
+  const start = rockSlideTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(ROCK_SLIDE_TEXT_TOTAL, t - start + 1);
+}
+
+/**
+ * `gBattle_BG3_Y` (`shake_mon_or_platform velocity=7,shakeTimer=1,
+ * shakeDuration=11`, docs/battle-move-anim-notes.md §9.3) - the RAM sequence
+ * itself, indexed from RAM tick `pressTick+ROCK_SLIDE_RAM_ANCHOR_DELAY`
+ * (2347): `0,-7,-7,0,0,-7,-7,0,0,-7,-7`, then flat 0. RAM-reconfirmed this
+ * session (`dump-registers.py`, stride 1, ticks 2337-2365) bit-exact against
+ * §9.3's own table.
+ */
+const ROCK_SLIDE_SHAKE_SEQUENCE: readonly number[] = [0, -7, -7, 0, 0, -7, -7, 0, 0, -7, -7];
+
+/** Ticks from the A-confirm press to RAM tick 2347 (the shake's own first write, and rock #1's own `createsprite` tick - both anchored to the same RAM tick, §9.3). */
+export const ROCK_SLIDE_RAM_ANCHOR_DELAY = 428;
+
+/**
+ * `gBattle_BG3_Y` as it actually affects the RENDERED frame at trace tick
+ * `t` - needs the same one-tick render lag `bg1X`/`statsBannerBg1Y`
+ * (`battleScene.ts`) already established for BG scroll registers (module
+ * doc above): the value the oracle displays for tick `t` is the register as
+ * of RAM tick `t-1`. Confirmed empirically, not assumed: docs/battle-move-
+ * anim-notes.md §9.2's own dense pixel-diff pass shows the first VISIBLE
+ * screen change for the whole attack is tick 2349 (diff 539667), with 2348
+ * still exact-0-diff - only explained if render tick 2348 shows RAM tick
+ * 2347's PRE-write value (0, the flat baseline) and render tick 2349 is the
+ * first to show RAM tick 2348's already-written `-7`, i.e. the no-lag
+ * mapping (which would make 2348 the first visible tick) is wrong.
+ */
+export function rockSlideBg3Y(t: number, pressTick: number): number {
+  const ramTick = t - 1;
+  const d = ramTick - (pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY);
+  if (d < 0 || d >= ROCK_SLIDE_SHAKE_SEQUENCE.length) return 0;
+  return ROCK_SLIDE_SHAKE_SEQUENCE[d]!;
+}
+
+/**
+ * All 20 `createsprite gFallingRockSpriteTemplate` argv triples (docs/
+ * battle-move-anim-notes.md §9.3's own table, cross-verified this session
+ * against `dump-rockslide-sprites.py`'s per-tick `data[5]`/`x`/`animNum`
+ * reads for every one of the 20 spawns - bit-exact, not just source-
+ * transcribed): `[xOffset, animNum, velocity]` in script call order (the
+ * main script's 4 + 2×`RockSlideRocks` calls of 8 each, the second call
+ * reproducing the first's argv set verbatim).
+ */
+const ROCK_SLIDE_ROCK_TABLE: readonly { xOffset: number; animNum: 0 | 1 | 2; velocity: number }[] = [
+  { xOffset: -5, animNum: 1, velocity: -5 },
+  { xOffset: 5, animNum: 0, velocity: 6 },
+  { xOffset: 19, animNum: 1, velocity: 10 },
+  { xOffset: -23, animNum: 2, velocity: -10 },
+  { xOffset: -20, animNum: 0, velocity: -10 },
+  { xOffset: 28, animNum: 1, velocity: 10 },
+  { xOffset: -10, animNum: 1, velocity: -5 },
+  { xOffset: 10, animNum: 0, velocity: 6 },
+  { xOffset: 24, animNum: 1, velocity: 10 },
+  { xOffset: -32, animNum: 2, velocity: -10 },
+  { xOffset: -20, animNum: 0, velocity: -10 },
+  { xOffset: 30, animNum: 2, velocity: 10 },
+  { xOffset: -20, animNum: 0, velocity: -10 },
+  { xOffset: 28, animNum: 1, velocity: 10 },
+  { xOffset: -10, animNum: 1, velocity: -5 },
+  { xOffset: 10, animNum: 0, velocity: 6 },
+  { xOffset: 24, animNum: 1, velocity: 10 },
+  { xOffset: -32, animNum: 2, velocity: -10 },
+  { xOffset: -20, animNum: 0, velocity: -10 },
+  { xOffset: 30, animNum: 2, velocity: 10 },
+];
+
+export const ROCK_SLIDE_ROCK_COUNT = ROCK_SLIDE_ROCK_TABLE.length;
+
+/** Ticks between consecutive rock spawns (RAM-confirmed exact, §9.3). */
+export const ROCK_SLIDE_SPAWN_STRIDE = 4;
+
+/** `SetAverageBattlerPositions(gBattleAnimTarget, FALSE, ...)`'s own result for this single (non-double) battle - collapses to Grovyle's own `BATTLER_COORD_X/Y` (`battle_anim_mons.c:2289-2318`, `partnerX/Y = battlerX/Y` when `!IsDoubleBattle()`), plus `AnimFallingRock`'s own one-time `sprite->y += 14`. Empirically anchored this session (not source-derived - `GetBattlerSpriteCoord`'s coordinate tables aren't ported here): every one of the 20 rocks' own RAM `x` at its spawn tick equals `176 + xOffset` exactly and `y` equals `54` exactly (`dump-rockslide-sprites.py`, all 20 spawns cross-checked), so this pair is taken as the fixed anchor rather than re-derived. Sprite `x`/`y` are CENTER coordinates (GBA OAM convention) - the draw call subtracts half the 32x32 frame size to get the top-left corner. */
+const ROCK_SLIDE_ROCK_BASE = { x: 176, y: 54 };
+
+/** `gSineTable[i]` (`reference/pokeemerald/src/trig.c`), same literal Q8.8 table as `GBA_SINE_TABLE_256` above but exposed as a general `Sin(index, amplitude)`/`Cos(index, amplitude)` pair (not the amplitude-1-only `bounceSin`) - needed for the falling-rock ellipse motion's much larger amplitudes (up to 70). `Math.floor` on the already-signed product matches C's arithmetic-shift-by-8 (round toward -infinity) bit-for-bit for two's-complement values in this range - RAM-cross-verified this session against all 20 rocks' own per-tick `x2`/`y2` reads, 0 mismatches. */
+function gbaSinTable(index: number, amplitude: number): number {
+  const v = GBA_SINE_TABLE_256[((index % 256) + 256) % 256]!;
+  return Math.floor((amplitude * v) / 256);
+}
+function gbaCosTable(index: number, amplitude: number): number {
+  return gbaSinTable(index + 64, amplitude);
+}
+
+/**
+ * A single falling rock's render state at absolute trace tick `t`, or
+ * `null` outside its RAM-confirmed active window. `index` is 0-based
+ * (`ROCK_SLIDE_ROCK_TABLE[index]`).
+ *
+ * **Call-timing model** (docs/battle-move-anim-notes.md §3's source formula,
+ * corrected this session against `dump-rockslide-sprites.py`'s own per-tick
+ * `data[]` reads - the naive "one `TranslateSpriteInEllipse` call per RAM
+ * tick from the spawn tick" reading is off by one call on the spawn tick
+ * itself): the spawn tick gets TWO motion calls (both `CreateSprite`'s own
+ * init-invocation of the initial callback AND that same frame's regular
+ * per-frame sprite dispatch, since the callback pointer has already been
+ * reassigned to `TranslateSpriteInEllipse` inside the first call - RAM-
+ * confirmed via the stored `circlePos`/`duration` jumping by 2 steps, not 1,
+ * on the spawn tick alone), every tick after gets exactly ONE call while
+ * `duration` is nonzero, then exactly one HELD tick (duration hits 0, the
+ * callback pointer switches but no motion write happens) before phase 2's
+ * own single setup-call tick (`AnimFallingRock_Step`, itself making exactly
+ * one `TranslateSpriteInEllipse` call - unlike the spawn tick, this
+ * transition does NOT double-call). This gives, in local ticks `n` since
+ * spawn (`n=0` at the spawn tick itself):
+ * - `n=0..14`: phase 1 (arc down), circlePos input `4+4n`, `y2=Cos(4+4n,-70)`, `x2=0`.
+ * - `n=15`: held (repeats `n=14`'s value - the duration-hits-0 tick).
+ * - `n=16..47`: phase 2 (settle wobble), circlePos input `128+4n`,
+ *   `x2=Sin(128+4n,velocity)`, `y2=Cos(128+4n,-24)`, plus the one-time
+ *   `sprite->x += velocity` baked into the base X from `n=16` on.
+ * - `n=48`: held (repeats `n=47`'s value).
+ * - `n<0` or `n>48`: not rendered (not yet spawned / already destroyed -
+ *   RAM-confirmed gone from `gSprites[]` at `n=49`).
+ *
+ * Render tick `t` maps to RAM tick `t-1` (the same one-tick lag as
+ * `rockSlideBg3Y` above and this codebase's other sprite-state mechanisms,
+ * e.g. `doubleTeamCloneOffsets`) before computing `n`.
+ */
+export function rockSlideRockState(index: number, t: number, pressTick: number): { centerX: number; centerY: number; animNum: 0 | 1 | 2 } | null {
+  const args = ROCK_SLIDE_ROCK_TABLE[index];
+  if (!args) return null;
+  const spawnRamTick = pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + ROCK_SLIDE_SPAWN_STRIDE * index;
+  const ramTick = t - 1;
+  const n = ramTick - spawnRamTick;
+  if (n < 0 || n > 48) return null;
+  let x2: number;
+  let y2: number;
+  let xShift = 0;
+  if (n <= 15) {
+    const nClamped = Math.min(n, 14);
+    const circlePosIn = 4 + 4 * nClamped;
+    x2 = 0;
+    y2 = gbaCosTable(circlePosIn, -70);
+  } else {
+    const nClamped = Math.min(n, 47);
+    const circlePosIn = 128 + 4 * nClamped;
+    x2 = gbaSinTable(circlePosIn, args.velocity);
+    y2 = gbaCosTable(circlePosIn, -24);
+    xShift = args.velocity;
+  }
+  return {
+    centerX: ROCK_SLIDE_ROCK_BASE.x + args.xOffset + xShift + x2,
+    centerY: ROCK_SLIDE_ROCK_BASE.y + y2,
+    animNum: args.animNum,
+  };
+}
+
+/**
+ * `AnimTask_ShakeMon`'s own `y2` bounce on Grovyle (`(ANIM_TARGET, 0, 5, 50,
+ * 1)`, docs/battle-move-anim-notes.md §3) - toggles the target's sprite `y2`
+ * between 0 and the given offset. **Pixel-fit, not source-derived**: this
+ * session found (via a per-tick brute-force roll search against the dense
+ * ground-truth PNGs, cropped to a rock-free strip of Grovyle's own lower
+ * body, `y=64..76`) that Grovyle is genuinely NOT static during this window
+ * despite going `.invisible`-flagged (§9.3's `targetInvisible` RAM signal) -
+ * contrary to §9.6's own "a pixel-matching engine can likely get away with
+ * simply not hiding the sprite" prediction, the visible stand-in DOES track
+ * the shake task's `y2`. The render-tick pattern is a period-4 repeat of
+ * `[5,5,0,0]` (NOT a flat 1-tick toggle - the doubled hold is presumably an
+ * interaction between the task's own per-tick write and this window's
+ * one-tick render lag, not independently re-derived from source), active
+ * render ticks 2362-2455 (94 ticks) then flat 0 - both boundaries pixel-
+ * swept exact (0 diff in the crop at every tested tick from 2349-2459).
+ */
+const ROCK_SLIDE_MON_SHAKE_START_DELAY = 443;
+const ROCK_SLIDE_MON_SHAKE_END_DELAY = 536;
+
+export function rockSlideMonShakeY2(t: number, pressTick: number): number {
+  const start = pressTick + ROCK_SLIDE_MON_SHAKE_START_DELAY;
+  const end = pressTick + ROCK_SLIDE_MON_SHAKE_END_DELAY;
+  if (t < start || t > end) return 0;
+  const d = (t - start) % 4;
+  return d < 2 ? 5 : 0;
+}
+
+/** Ticks from the A-confirm press to RAM tick 2481 (both hit-flash sub-effects' own shared start tick, §9.3/§9.4 - `waitforvisualfinish`/`clearmonbg`/`hitanimation` overhead after the last rock disappears). */
+export const HIT_FLASH_RAM_ANCHOR_DELAY = 562;
+
+/** The real opponent healthbox sprite's own `y2` wobble (`SpriteCB_HitAnimHealthoxEffect`, `+1/-1` alternating every RAM tick for 20 ticks then 0, §9.3) at trace tick `t` - same one-tick render lag as `rockSlideBg3Y`. RAM-confirmed this session (`dump-rockslide-sprites.py`'s own `healthboxY2` field, ticks 2481-2501): `+1,-1,+1,-1,...` starting at RAM tick 2481, 20 values, 0 outside. */
+export function rockSlideHealthboxWobbleY2(t: number, pressTick: number): number {
+  const d = t - 1 - (pressTick + HIT_FLASH_RAM_ANCHOR_DELAY);
+  if (d < 0 || d > 19) return 0;
+  return d % 2 === 0 ? 1 : -1;
+}
+
+/** Grovyle's own `.invisible` blink bit (`DoHitAnimBlinkSpriteEffect`, 4-tick on/off cycles for 32 ticks, §9.3) at trace tick `t` - same one-tick render lag. RAM-confirmed this session (`dump-rockslide-sprites.py`'s own `targetInvisible` field, ticks 2481-2513): visible at `d=0` (setup), then 4-tick invisible/visible cycles from `d=1` through `d=32`. */
+export function rockSlideMonBlinkInvisible(t: number, pressTick: number): boolean {
+  const d = t - 1 - (pressTick + HIT_FLASH_RAM_ANCHOR_DELAY);
+  if (d < 1 || d > 32) return false;
+  return Math.floor((d - 1) / 4) % 2 === 0;
+}

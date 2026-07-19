@@ -445,8 +445,24 @@ import {
   doubleTeamCloneOffsets,
   statsBannerEva,
   statsBannerBg1Y,
+  STAT_ROSE_LINE1,
+  STAT_ROSE_LINE2,
+  statRoseTextStartTick,
+  statRoseTextVisibleChars,
+  ROCK_SLIDE_LINE1,
+  ROCK_SLIDE_LINE2,
+  rockSlideTextStartTick,
+  rockSlideTextVisibleChars,
+  rockSlideBg3Y,
+  rockSlideRockState,
+  ROCK_SLIDE_ROCK_COUNT,
+  rockSlideHealthboxWobbleY2,
+  rockSlideMonBlinkInvisible,
+  rockSlideMonShakeY2,
+  STATS_BANNER_END_DELAY,
 } from "./battleMenu.ts";
 
+import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
 import statAnimBannerAsset from "../assets/gen/stat-anim-banner.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
@@ -596,6 +612,12 @@ interface StatAnimBannerAsset {
   palettes: Record<"attack" | "defense" | "accuracy" | "speed" | "evasion" | "spAttack" | "spDefense" | "multiple", RgbColor[]>;
 }
 
+/** `rocks.png` (`gFallingRockSpriteTemplate`, `ANIM_TAG_ROCKS`) - a 4-column x 24-row tileset, 6 stacked 32x32 (4x4-tile) frames; only frames 2/3/4 (`animNum` 0/1/2, docs/battle-move-anim-notes.md §1) are ROCK_SLIDE's own. */
+interface BattleAnimRocksAsset {
+  tileset: Tileset;
+  palette: RgbColor[];
+}
+
 const battleBg = battleBgAsset as BattleBgAsset;
 const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -606,6 +628,7 @@ const downArrow = downArrowAsset as DownArrowAsset;
 const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAsset }).ballStatusBar;
 const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
+const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
 
 /**
  * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
@@ -3139,6 +3162,10 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     const pressTick = TICK0 + sm.confirmElapsed;
     const textStart = turnKickoffTextStartTick(pressTick);
     if (t >= textStart) {
+      if (t - pressTick > STATS_BANNER_END_DELAY) {
+        drawRockSlideWindow(fb, t, pressTick);
+        return;
+      }
       drawTurnKickoffText(fb, t, pressTick);
       if (!drawDoubleTeamClones(fb, t, pressTick)) drawStatsBanner(fb, t, pressTick);
       return;
@@ -3191,6 +3218,137 @@ function drawTurnKickoffText(fb: Uint8Array, t: number, pressTick: number): void
   drawActionMenuIdleContent(fb, turnKickoffBounceTick(t, pressTick));
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
+}
+
+/**
+ * S7 slice C (docs/battle-menu-notes.md §11, docs/battle-move-anim-notes.md
+ * §9): the ROCK_SLIDE window, ticks `pressTick`+275 (right after slice B's
+ * stat-change banner's own last active-but-zero-effect tick) through
+ * `pressTick`+596 (right before the HP-bar drain sentinel, slice D's own
+ * scope). Three phases share the same battlefield base (`drawActionMenuIdleContent`,
+ * frozen bounce tick - unchanged since slice A) + message-box mechanism as
+ * `drawTurnKickoffText`: (1) the held DOUBLE_TEAM text through `+283`, (2)
+ * "Foe GROVYLE's evasiveness\nrose!" from `+284`, (3) "ONIX used\nROCK
+ * SLIDE!" from `+393` on. Once the attack itself starts (rock spawns begin
+ * at RAM tick 2347 = `+429` render), `drawRockSlideAttack` layers the BG3_Y
+ * shake + falling rocks + generic hit-flash on top - the message box (BG0,
+ * a separate layer on real hardware) stays fixed throughout, redrawn
+ * unshifted after the shaken battlefield base per `drawRockSlideAttack`'s
+ * own doc comment.
+ */
+function drawRockSlideWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  const statRoseStart = statRoseTextStartTick(pressTick);
+  const rockSlideStart = rockSlideTextStartTick(pressTick);
+  let line1: string;
+  let line2: string;
+  let chars: number;
+  if (t < statRoseStart) {
+    line1 = TURN_KICKOFF_LINE1;
+    line2 = TURN_KICKOFF_LINE2;
+    chars = turnKickoffTextVisibleChars(t, pressTick);
+  } else if (t < rockSlideStart) {
+    line1 = STAT_ROSE_LINE1;
+    line2 = STAT_ROSE_LINE2;
+    chars = statRoseTextVisibleChars(t, pressTick);
+  } else {
+    line1 = ROCK_SLIDE_LINE1;
+    line2 = ROCK_SLIDE_LINE2;
+    chars = rockSlideTextVisibleChars(t, pressTick);
+  }
+  drawRockSlideAttack(fb, t, pressTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, line1, line2, chars);
+}
+
+/**
+ * The battlefield base, reconstructed from PRIMITIVES rather than
+ * `menuIdleBase`'s flat harvest during this window alone: real hardware's
+ * ROCK_SLIDE shake (`shake_mon_or_platform type=SHAKE_BG_Y`) scrolls only
+ * `gBattle_BG3_Y` - `staticBgPixel`'s own BG3 tilemap sampler (this file's
+ * `drawSettledScene`/scanline-shift precedent) - leaving every OBJ (Onix,
+ * Grovyle, both healthboxes) at its FIXED screen position; `menuIdleBase`'s
+ * own harvest bakes bg+OBJs into one flat image with no way to shift only
+ * the background portion, so this window draws the background via
+ * `staticBgPixel(x, y+shiftY)` and every OBJ unshifted on top instead.
+ * Falling rocks (`rockSlideRockState`) and the generic hit-flash (healthbox
+ * `y2` wobble + Grovyle's own blink, both `battleMenu.ts`) layer on top,
+ * also unshifted (real OBJs, matching their own RAM-probed positions
+ * directly).
+ */
+function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void {
+  const shiftY = rockSlideBg3Y(t, pressTick);
+  drawStaticBgShiftedY(fb, shiftY);
+  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
+    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  }
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
+  drawSendOutHealthbox(fb, 0);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2);
+  drawMenuHealthboxPlayer(fb, 0);
+  drawMenuIdleBounceOverlay(fb, turnKickoffBounceTick(t, pressTick));
+  for (let i = 0; i < ROCK_SLIDE_ROCK_COUNT; i += 1) {
+    const rock = rockSlideRockState(i, t, pressTick);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+}
+
+/** `staticBgPixel` (BG3, `battleBg.static`) sampled with a vertical scroll offset - `gBattle_BG3_Y`'s own real hardware semantics (`BG3VOFS`, a VERTICAL OFFSET added to the sampled map row for a given screen row). */
+function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number): void {
+  for (let screenY = 0; screenY < 160; screenY += 1) {
+    for (let screenX = 0; screenX < 240; screenX += 1) {
+      const c = staticBgPixel(screenX, screenY + shiftY);
+      if (!c) continue;
+      setPixel(fb, screenX, screenY, c);
+    }
+  }
+}
+
+/** The real opponent healthbox sprite's own `y2` wobble (`rockSlideHealthboxWobbleY2`) - same erase-then-redraw-translated shape as `drawDoubleTeamClones`' Grovyle erase, reusing `opponentHealthboxContent`/`HEALTHBOX_FRAME_ORIGIN` (`drawSendOutHealthbox`'s own asset, translated vertically here instead of horizontally). */
+function drawOpponentHealthboxWobble(fb: Uint8Array, dy: number): void {
+  const { width, height, pixels } = opponentHealthboxContent;
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const color = pixels[py * width + px];
+      if (!color) continue;
+      const bg = healthboxBackgroundColorAt(HEALTHBOX_FRAME_ORIGIN.x + px, HEALTHBOX_FRAME_ORIGIN.y + py);
+      if (bg) setPixel(fb, HEALTHBOX_FRAME_ORIGIN.x + px, HEALTHBOX_FRAME_ORIGIN.y + py, bg);
+    }
+  }
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const color = pixels[py * width + px];
+      if (!color) continue;
+      setPixel(fb, HEALTHBOX_FRAME_ORIGIN.x + px, HEALTHBOX_FRAME_ORIGIN.y + dy + py, color);
+    }
+  }
+}
+
+/** `rocks.png`'s frame `animNum` (0/1/2 -> tileset frame 2/3/4, `src/battle_anim_rock.c`'s `sAnims_FlyingRock`, docs/battle-move-anim-notes.md §1) at CENTER coordinates `(centerX, centerY)` (GBA OAM convention, `gOamData_AffineOff_ObjNormal_32x32` - top-left is `center - 16` each axis). Clipped to the opponent healthbox's own higher-priority OAM the same way `drawDoubleTeamClones` clips its clones (`isOpponentHealthboxOpaqueAt` - #127's z-order lesson, defensive here since the rocks' own X range rarely reaches that far left). */
+function drawRockSprite(fb: Uint8Array, animNum: 0 | 1 | 2, centerX: number, centerY: number): void {
+  const ox = centerX - 16;
+  const oy = centerY - 16;
+  const rowOffset = (animNum + 2) * 4;
+  const { tileset, palette } = battleAnimRocks;
+  for (let ty = 0; ty < 4; ty += 1) {
+    for (let tx = 0; tx < 4; tx += 1) {
+      const tile = tileset.tiles[(rowOffset + ty) * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          const idx = tile[py * 8 + px]!;
+          if (idx === 0) continue;
+          const c = palette[idx];
+          if (!c) continue;
+          const x = ox + tx * 8 + px;
+          const y = oy + ty * 8 + py;
+          if (isOpponentHealthboxOpaqueAt(x, y)) continue;
+          setPixel(fb, x, y, c);
+        }
+      }
+    }
+  }
 }
 
 /** The settled (post-tick-1227) composite: static bg + both trainer pics + the window frame - byte-exact against the oracle (see module doc point 1). */
