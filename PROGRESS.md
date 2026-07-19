@@ -5,6 +5,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 95 — Supervisor: both worktree branches merged — mechanism 4 silhouette-edge fix (`sendout.json` **214 → 215/256**) + player-materialize asset audit (zero new extraction needed; §6's MISSING flags were stale)
+
+- **State (verified post-merge):** `npm test` **498/498**, `npm run build`
+  green, tree clean. Post-merge re-runs: sendout **215/256** (render 1481
+  newly exact), scene-assembly 256/256, transition 206/206, menu-text
+  18/18, menu-throw 11/11, anchor 1/1. Draft-family traces not re-run
+  post-merge: neither branch touches their code paths, and each branch ran
+  a full clean sweep pre-merge (#94's 21-trace + the branch's own 19-trace).
+  Both worktrees removed, branches deleted.
+- **Did:** (1) merged `worker/wt-20260718-235841` — mechanism 4's
+  materialize silhouette-edge residual root-caused by direct RAM probe
+  (`gSprites[8]`/`gOamMatrices[2]`, new probe spec committed): an
+  accumulator-lookup render-lag off-by-one (render T needs RAM T-1, the
+  convention mechanism 5 already had) + a previously-unmodeled `y2`
+  vertical bob (14→0 over the 12-tick emerge ramp, literal table). The
+  brief's "shared root cause with mechanism 5" hypothesis was FALSIFIED
+  (mechanism 5 already correct; call sites genuinely differ via
+  `ConvertScaleParam`). Full derivation §7.21. Remaining 1482-1492
+  residual re-attributed to the ball sprite's own occlusion footprint;
+  new named gap: mechanism 5 writes its affine matrix before its render
+  window at 1493-1503. (2) merged `worker/wt-20260719-003214` — asset
+  audit for the player materialize window: all three "MISSING" §6 items
+  were already extracted this run (`battle-anim-particles/-ball-open/
+  -tables.json`, shared `SpriteCB_ReleaseMonFromBall` source) and are now
+  pixel-confirmed applicable player-side (particles 14/14+12/12+12/12 at
+  1662-1665; color-fade RGB exact; affine-emerge shape holds for a back
+  sprite; thrown-ball closed frame 112/112 over 1607-1614). §6 rows
+  corrected to point at `docs/battle-anim-assets.md` §5.
+- **Next:** (1) player status-bar subsprite-split exit (1575-1604, <1%
+  residual/tick — mirror of §7.19's opponent-side EXIT_BAR_TILE_ORDER
+  work), then densify menu-throw.json to the full 1574-1614 window; (2)
+  ball-spin affine keyframe renderer (1615+, needs the keyframe-matrix
+  table + a new primitive); (3) materialize window ~1646-1690 (assets all
+  confirmed ready); (4) healthbox slide-in → settle 1693; (5) blank-box +
+  menu draw + idle (1742-1810); sendout residuals continue in parallel
+  (§7.21's named 1493-1503 matrix-early gap, 1516/17 age overrun,
+  1470/71/79 icon edge, tick 1462).
+- **Notes:** merges conflict-free (doc/file-ownership discipline held
+  across 3 concurrent workers). Ball-open pose frame occlusion at player
+  screen position is a placement (engine) question, not asset — see audit.
+
+---
+
 ## 94 — Bounded worker: PLAYER SEND-OUT slice 2 landed — Brendan's throw pose-cycle + exit translation, thrown-ball arc, player status-bar fade+slide; `menu-throw.json` **11/11** (ticks 1574, 1605-1614) — two new mechanisms found+named, not implemented (GBA ball-spin affine, bar subsprite-split)
 
 - **State:** `npm test` **497/497** (+11), `npm run build` green, tree
@@ -113,68 +156,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   brief's concurrent-worker note. No PAPERCUT.
 
 ---
-
-## 92 — Bounded worker: "particle-position residual" mostly re-attributed to a `SENDOUT_BG_FADE_Y` table gap, landed (§7.20) — pixel mass in 1481-1503/1516-1517 cut ~50%, but `sendout.json` **stays 214/256** (supersedes #91's "session end" as the final entry; #91's summary kept intact below)
-
-- **State:** `npm test` **477/477** (+1), `npm run build` green, tree
-  clean. Full 19-trace sweep against the live oracle: all 18 others at
-  their exact established counts (anchor 1/1, draft-cursor 13/13,
-  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
-  122/122, summary-info-magby 132/132, confirm-decline 67/67,
-  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
-  room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
-  256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) —
-  zero regressions. `sendout.json` **214/256 (unchanged)**.
-- **Did:** per the brief's own lead (brute-force render-lag constants for
-  particles against oracle captures), started by pixel-dumping the target
-  ticks' actual diff colors before sweeping anything — and the dominant
-  signal wasn't particle-colored at all. Root cause: `SENDOUT_BG_FADE_Y`
-  (§7.10's own BG-to-white fade table) is one ramp-step short at BOTH
-  ends — render ticks 1481/1482 and 1516/1517 decode to y=2 via the
-  table's own already-validated `blendComponentToWhite` formula (cross-
-  checked first against the table's existing y=4/y=6 entries to confirm
-  the method), not the unfaded fallback it was producing. Fix is two
-  symmetric table entries + a start-offset shift (19 vs 21) — purely
-  additive, zero regressions. Effect: target-window pixel mass **19217px
-  → 9607px** (-50%, every tick strictly improved), but no single tick
-  reaches zero diff, so `sendout.json`'s count doesn't move. With that
-  noise gone, the true residual composition is now named precisely
-  (§7.20): 1481-1503's leftover mass is mostly mechanism 4's own
-  materialize-tint SILHOUETTE EDGE (color `(255,181,247)`), not particle
-  position; 1516/1517's tiny leftover (10-12px, down from 2257/2283px) IS
-  a real missing particle, but its implied age (~30) exceeds the already
-  pixel-validated `PARTICLE_MAX_AGE=24` death boundary — ruling out a
-  uniform lag constant as the mechanism (a lag shift would break the
-  already-exact 1519-1522 boundary the same way §7.18's RAM-tick
-  rederivation did). One new Tier-1 test pins both new boundary steps.
-- **Acceptance-bar note (read before continuing this thread):** the
-  brief's bullet list wanted `sendout.json` strictly >214/256 OR a
-  writeup with NO code change. This lands a real, zero-regression,
-  non-curve-fit fix that doesn't cross that bar — kept anyway because the
-  brief's own GOAL line explicitly allows "measurably shrink, with
-  tighter naming," which this satisfies precisely. Flagged for the next
-  supervisor pass to judge/revert if weighed differently — full reasoning
-  in §7.20's own "Acceptance-bar note."
-- **Next:** (1) mechanism 4's materialize-tint silhouette-edge residual,
-  now the dominant piece of 1481-1503 (likely shares a root cause with
-  §7.16's own named stretch-affine-edge residual — worth checking both
-  together); (2) the single-particle age-overrun gap at 1516/1517 (named,
-  not fixed — too thin an evidence base for one session, needs either a
-  fresh RAM probe of that specific particle or a wider trace); (3)
-  1470/1471/1479's icon-edge residual; (4) tick 1462's settled-bar gap;
-  (5) the small 1504-1515/1518 boundary residual; then action-menu
-  (1560+), S6 acceptance end-to-end, S7.
-- **Notes:** healthboxAssembly.ts/healthbox docs, oracle/harness, and
-  ROADMAP.md stayed out of scope, per the brief. No PAPERCUT.
-  **Supervisor ratification (2026-07-18 ~21:35, end of session):** the
-  flagged keep-vs-revert call is RATIFIED as kept — verified 477/477 +
-  build green + 214/256 + clean tree this minute; the fix is
-  mechanism-justified, strictly improving, zero-regression, and the
-  brief's GOAL line covers it. Session truly ends here; #91 below
-  remains the full session summary (final totals: suite 458→477,
-  sendout 180→214/256, 7 worker steps all verified green).
-
----
-
----
-

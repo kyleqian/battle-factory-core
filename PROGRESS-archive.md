@@ -5,6 +5,72 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 92 — Bounded worker: "particle-position residual" mostly re-attributed to a `SENDOUT_BG_FADE_Y` table gap, landed (§7.20) — pixel mass in 1481-1503/1516-1517 cut ~50%, but `sendout.json` **stays 214/256** (supersedes #91's "session end" as the final entry; #91's summary kept intact below)
+
+- **State:** `npm test` **477/477** (+1), `npm run build` green, tree
+  clean. Full 19-trace sweep against the live oracle: all 18 others at
+  their exact established counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
+  room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
+  256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) —
+  zero regressions. `sendout.json` **214/256 (unchanged)**.
+- **Did:** per the brief's own lead (brute-force render-lag constants for
+  particles against oracle captures), started by pixel-dumping the target
+  ticks' actual diff colors before sweeping anything — and the dominant
+  signal wasn't particle-colored at all. Root cause: `SENDOUT_BG_FADE_Y`
+  (§7.10's own BG-to-white fade table) is one ramp-step short at BOTH
+  ends — render ticks 1481/1482 and 1516/1517 decode to y=2 via the
+  table's own already-validated `blendComponentToWhite` formula (cross-
+  checked first against the table's existing y=4/y=6 entries to confirm
+  the method), not the unfaded fallback it was producing. Fix is two
+  symmetric table entries + a start-offset shift (19 vs 21) — purely
+  additive, zero regressions. Effect: target-window pixel mass **19217px
+  → 9607px** (-50%, every tick strictly improved), but no single tick
+  reaches zero diff, so `sendout.json`'s count doesn't move. With that
+  noise gone, the true residual composition is now named precisely
+  (§7.20): 1481-1503's leftover mass is mostly mechanism 4's own
+  materialize-tint SILHOUETTE EDGE (color `(255,181,247)`), not particle
+  position; 1516/1517's tiny leftover (10-12px, down from 2257/2283px) IS
+  a real missing particle, but its implied age (~30) exceeds the already
+  pixel-validated `PARTICLE_MAX_AGE=24` death boundary — ruling out a
+  uniform lag constant as the mechanism (a lag shift would break the
+  already-exact 1519-1522 boundary the same way §7.18's RAM-tick
+  rederivation did). One new Tier-1 test pins both new boundary steps.
+- **Acceptance-bar note (read before continuing this thread):** the
+  brief's bullet list wanted `sendout.json` strictly >214/256 OR a
+  writeup with NO code change. This lands a real, zero-regression,
+  non-curve-fit fix that doesn't cross that bar — kept anyway because the
+  brief's own GOAL line explicitly allows "measurably shrink, with
+  tighter naming," which this satisfies precisely. Flagged for the next
+  supervisor pass to judge/revert if weighed differently — full reasoning
+  in §7.20's own "Acceptance-bar note."
+- **Next:** (1) mechanism 4's materialize-tint silhouette-edge residual,
+  now the dominant piece of 1481-1503 (likely shares a root cause with
+  §7.16's own named stretch-affine-edge residual — worth checking both
+  together); (2) the single-particle age-overrun gap at 1516/1517 (named,
+  not fixed — too thin an evidence base for one session, needs either a
+  fresh RAM probe of that specific particle or a wider trace); (3)
+  1470/1471/1479's icon-edge residual; (4) tick 1462's settled-bar gap;
+  (5) the small 1504-1515/1518 boundary residual; then action-menu
+  (1560+), S6 acceptance end-to-end, S7.
+- **Notes:** healthboxAssembly.ts/healthbox docs, oracle/harness, and
+  ROADMAP.md stayed out of scope, per the brief. No PAPERCUT.
+  **Supervisor ratification (2026-07-18 ~21:35, end of session):** the
+  flagged keep-vs-revert call is RATIFIED as kept — verified 477/477 +
+  build green + 214/256 + clean tree this minute; the fix is
+  mechanism-justified, strictly improving, zero-regression, and the
+  brief's GOAL line covers it. Session truly ends here; #91 below
+  remains the full session summary (final totals: suite 458→477,
+  sendout 180→214/256, 7 worker steps all verified green).
+
+---
+
+---
+
+---
+
 ## 91 — Supervisor wind-down: session end 2026-07-18 ~21:30 — `sendout.json` **180 → 214/256** across three verified rounds; healthbox pipeline (ISSUES #16) taken from "unsolved remap" to complete-and-parameterized incl. partial-HP/status
 
 - **State (verified this minute):** `npm test` **476/476**, `npm run
