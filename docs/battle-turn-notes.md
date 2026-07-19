@@ -567,3 +567,122 @@ battle-frontier-mons.json` (pre-existing, opponent movesets/items/natures).
    exercises the alternate `maxHP < 48` Q24.8 branch (all are level 50);
    unchanged from `turn-resolution-notes.md` §6 risk 8, still low-risk for
    S7 specifically.
+
+## 9. CORRECTION BLOCK (S7 worktree lane, oracle v5 regen — Battle Scene ON): §1-§7 above describe the v3/v4-stale trace; this section is the re-verified v5 truth
+
+Per PROGRESS #76/#77, the oracle's canonical bootstrap moved from Battle
+Scene OFF (v3) to Battle Scene ON (v4, then v5 which bakes the same pixels
+into the save file itself). `tools/compare/traces-groundtruth/
+battle1-turn1.json` has been **replaced in place** (same filename, v3 truth
+gone) with a new 2900-frame trace (was 2620), 242 dense captureFrames
+(was 223), twice-run **0 sha mismatches**. `src/data/gen/
+battle1-turn1-ram-dump.json` has been replaced likewise (1021 per-tick rows,
+ticks 1880-2900; all four probe scripts re-run twice, byte-identical).
+§1-§8 above remain historically accurate **descriptions of the v3
+Battle-Scene-OFF trace** and are left unmodified as that record; treat every
+tick number in §2/§3 as v3-only from here on. The old committed trace file
+this dossier was built from is gone (replaced), but its own historical
+numbers are preserved verbatim in the prose above.
+
+**1. First-action-menu timing is UNCHANGED.** Directly re-verified (not
+assumed) by replaying `battle1-intro.json`'s own 1886-frame button script
+against the v5 oracle with extended idle padding: the settled first-menu
+sha (`d223d98a2da9...`, full hash matches §2's table exactly) still lands at
+tick **1884-1886**, the FIGHT-submenu-open sha (`b145eaeff966...`) still at
+**1887-1888**, and the idle-cycling through the 2nd `A` press still matches
+§2's table tick-for-tick through **tick 1924** (confirmed both by this
+session's own oracle probe and by the already-recorded PROGRESS #76 finding
+that replaying the *old* trace verbatim under v4/v5 shows "first divergence
+tick 1968" — i.e. everything up to and including the two scripted `A`
+presses at 1886/1888 and 1918/1920 registers identically). **Old→new tick
+mapping for this phase: identity (no shift).** The brief's concern that
+these presses "may no longer land on the settled menu" is **falsified for
+this specific trace** — the front-sprite-entrance-animation timing change
+that affects `sendout.json` (PROGRESS #76) does not measurably delay
+`battle1-intro.json`'s own settle point.
+
+**2. Everything from tick ~1928 onward now takes substantially longer**
+(real move/effect animations play instead of the OFF-state's short generic
+pause), so the new trace's absolute tick numbers diverge increasingly from
+§2's table the further into the turn you go. New key ticks (all RAM- and/or
+pixel-confirmed this session, `startTick`-anchored per-tick probes,
+twice-run byte-identical):
+
+| event | v3 tick (§2/§3, historical) | v5 tick (this session) | shift |
+|---|---|---|---|
+| evasion stage flips 6→7 (DOUBLE_TEAM's stat-stage effect fires) | 1959 | **1959** | +0 |
+| DOUBLE_TEAM's own clone blend window (`AnimTask_DoubleTeam`, flat `BLDALPHA` eva=12/evb=8, script's literal `setalpha 12,8`) | never ran (§4/§6 of the anim-notes doc) | **1964-2094** (130 ticks) | n/a — new |
+| `General_StatsChange` banner ramp (eva 0→10→0/evb 16→6→16) | 1999-2064 | **2127-2193** (66 ticks) | +128 |
+| `gLastMoves[1]` write (=104, DOUBLE_TEAM) | ~2173 | **2301** | +128 |
+| Onix's accuracy roll | 2182 | **2310** | +128 |
+| Onix's crit roll | 2206 | **2334** | +128 |
+| Onix's damage-spread roll (locks to 42) | 2209 | **2337** | +128 |
+| ROCK_SLIDE's BG3_Y shake (`gBattle_BG3_Y` alternating 0/-7) | never ran (never observed under v3) | **~2348-2358** (~10 ticks) | n/a — new |
+| HP-bar drain start (sentinel -32768) | 2281 | **2516** | +235 |
+| HP-bar drain done (sentinel 0) | 2324 | **2559** | +235 |
+| `gBattleMons[1].hp` updates to 101 | 2325 | **2560** | +235 |
+| Onix's secondary-effect (flinch) roll | 2330 | **2565** | +235 |
+| `BattleTurnPassed`'s `gRandomTurnNumber` roll | 2340 | **2575** | +235 |
+| `ShouldSwitch()` 2-step roll resolves | 2345 | **2580** | +235 |
+| `BattleAI_SetupAIData` 5-step roll resolves | 2347 | **2582** | +235 |
+| next action menu settles into its 4-phase idle cycle | 2348 | **~2586** | +238 |
+
+The shift is **not uniform**: +128 ticks accumulate entirely from
+DOUBLE_TEAM's own clone animation + the stat-change banner (both now really
+playing, back-to-back, before Onix's own turn even begins); a further +107
+ticks (to +235) accumulate from ROCK_SLIDE's own attack animation (shake +
+rocks + the generic hit-flash, which per `battle-move-anim-notes.md`'s v5
+section now genuinely plays rather than being skipped) between the
+damage-spread roll and the HP-bar drain start. The settled-menu 4-phase idle
+cycle itself is confirmed identical in *content* (same four shas
+`c2a09dbe1350`/`229869e8d282`/`0269314e68ff`/`a4bffb32ef6b`, same ~36-tick
+period, re-confirmed stable for 20+ repeats out to tick 3318 in a scratch
+probe) — only its start tick moved.
+
+**3. RNG ledger: still exactly 12 `Random()` calls, and every value is
+IDENTICAL to §3's table** — only the ticks moved (per the table above).
+Verified programmatically (LCG-distance replay from each observed value to
+the next, not just call-counted): accuracy/crit/damage-spread/secondary-
+effect/turn-pass are each still exactly 1 step, `ShouldSwitch()` still
+exactly 2, `BattleAI_SetupAIData`+tie-break still exactly 5. **Animation
+tasks consume zero `Random()` calls** — confirmed, not assumed: `gRngValue`
+is flat at `3485459011` for the *entire* 1880-2309 window (covering all of
+DOUBLE_TEAM's clone animation and the stat banner), exactly mirroring §3's
+own "DOUBLE_TEAM consumes zero Random() calls" finding, now additionally
+proven true even with the real clone/banner animation code paths executing.
+Total ledger: same 1+1+1+1+1+2+5=12 as v3, same values, just later.
+
+**4. Damage, HP, turn order, stat stages all re-verified unchanged.**
+`gBattleMoveDamage` locks to **42** at the new tick 2337 (same value, §5's
+hand-worked damage formula therefore still applies verbatim — the roll
+landing in the same `m∈{94,95}` sub-range is, as §5 already noted for the
+v3↔`turn-resolution-notes.md` comparison, expected coincidence-range
+behavior, not a re-derivation). `gCritMultiplier`=1 (no crit) unchanged.
+Battler snapshots at ticks 1880/2900 are byte-identical to §5's own table
+(ONIX 117/117 unchanged, GROVYLE 143→101). HP-bar drain is still exactly
+**1 unit/tick over 42 ticks** (RAM-read `bar1Curr`: sentinel -32768 at 2516,
+142→101 across 2517-2558, done-sentinel 0 at 2559, `gBattleMons[1].hp`
+itself updates one tick later at 2560 — same lag rule as §5).
+`gBattlerByTurnOrder`=[1,0] unchanged (Grovyle before Onix). Evasion stage
+6→7 unchanged (§7 item 2's finding holds, just re-confirmed with a
+re-baked `tools/probe/specs/battle1-turn1-statstages-watch.json` — segments
+updated to the new 2900-frame trace, re-run twice, byte-identical).
+
+**5. `gHitMarker`'s `HITMARKER_NO_ANIMATIONS` bit (byte 0 of
+`0x2024280`) and `gSaveBlock2Ptr->optionsBattleSceneOff` are both
+CLEAR (0) for the entire trace** (`tools/probe/dump-ai-and-hitmarker.py`
+re-run against the new trace, ticks 1880-2900, twice, byte-identical) —
+the exact inverse of §6's v3 finding in `battle-move-anim-notes.md`, as
+expected: this is the mechanism directly responsible for every timing shift
+in this section.
+
+**Verification**: `npm test` 454/454, `npm run build` green. New trace +
+new RAM dump both twice-run byte-identical. New probe outputs (RNG/hp/
+moves/attacker/target/crit/damage/turnOrder/evasion/mainFunc/execFlags via
+`ram-probe.py`; healthbar via `dump-battle-bars.py`; full battler stat
+blocks via `dump-battler-snapshot.py`; hitMarker/AI/battleSceneOffBit via
+`dump-ai-and-hitmarker.py`; a scratch register probe for `BLDCNT`/
+`BLDALPHA`/`DISPCNT`/`gBattle_BG3_Y`/`gBattle_BG3_X`, not committed,
+re-derivable from the committed trace's own segments) all re-run twice this
+session, 0 mismatches.
+

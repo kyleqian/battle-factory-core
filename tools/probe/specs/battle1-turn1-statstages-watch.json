@@ -1,5 +1,5 @@
 {
-  "_comment": "S7 groundwork follow-up (item 2): watch gBattleMons[1].statStages[] (all 8 stages, offset 0x18 within the 0x58-byte struct BattlePokemon, so battler1 base = gBattleMons+0x58) across Grovyle DOUBLE_TEAM to RAM-confirm the evasion stage change dossier item 2 flagged as unconfirmed; also battler0 acc/eva as a control (should stay at DEFAULT_STAT_STAGE=6 the whole trace). segments copied verbatim from tools/compare/traces-groundtruth/battle1-turn1.json.",
+  "_comment": "S7 groundwork follow-up (item 2): watch gBattleMons[1].statStages[] (all 8 stages, offset 0x18 within the 0x58-byte struct BattlePokemon, so battler1 base = gBattleMons+0x58) across Grovyle DOUBLE_TEAM to RAM-confirm the evasion stage change dossier item 2 flagged as unconfirmed; also battler0 acc/eva as a control (should stay at DEFAULT_STAT_STAGE=6 the whole trace). segments copied verbatim from tools/compare/traces-groundtruth/battle1-turn1.json (S7 v5 regen, 2900 frames - updated from the v3/v4-stale 2620-frame baking).",
   "watch": [
     {
       "name": "statStage1_hp",
@@ -260,7 +260,7 @@
       ]
     },
     {
-      "frames": 700,
+      "frames": 980,
       "buttons": []
     }
   ],
