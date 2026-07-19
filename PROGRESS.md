@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 129 — Bounded worker: **S7 slice C — ROCK_SLIDE window engine, LARGE MAJORITY LANDED, not yet 0-diff** — `turn1-rockslide.json` **0/256 → 181/256** (2963px total residual, avg ~40px/frame, max 172px, all in the 2362-2453 rock-overlap sub-range); suite **638/638**
+
+- **State:** `npm test` **638/638**, `npm run build` green, tree clean.
+  New committed trace `tools/compare/traces/turn1-rockslide.json` (256
+  captures, 2193-2515) **181/256** — acceptance (0 diff) **not met**, but
+  every mechanism except rock-vs-rock stacking order is independently
+  pixel-exact (see below). Zero regressions: turn1-cloneanim 230/230,
+  turn1-kickoff 81/81, fight-submenu 234/235, menu-idle 69/69, sendout
+  255/256, s6-acceptance 224/228 — all re-verified unchanged.
+- **Did:** implemented the whole window (`battleMenu.ts` pure fns +
+  `battleScene.ts` render, docs/battle-menu-notes.md §11 has the full
+  derivation) — the two text boxes (stat-rose + used-move), the
+  `gBattle_BG3_Y` shake (a new background-only resampler,
+  `drawStaticBgShiftedY`, since OBJs stay fixed on real hardware but this
+  engine's usual `menuIdleBase` harvest bakes bg+OBJs into one flat image),
+  all 20 falling rocks' spawn schedule + per-rock ellipse motion
+  (call-timing model reverse-engineered tick-by-tick against fresh RAM
+  probes — the naive "1 call/tick from spawn" reading was off by one call
+  on the spawn tick specifically), the generic hit-flash, and — a genuine
+  new finding, not predicted by the existing docs — Grovyle's own
+  `AnimTask_ShakeMon` bounce, which §9.6 had predicted an engine could skip
+  during the `monbg`-hidden window; a per-tick pixel brute-force proved
+  otherwise (period-4 `[5,5,0,0]` render pattern, ticks 2362-2455). Also
+  fixed a silent text bug (the stat-rose apostrophe needs the game's own
+  U+2019 glyph, not ASCII `'` — the font has no glyph for the latter) and a
+  background-wrap bug (BG3's real vertical period, 256px, wasn't being
+  applied to the shake's negative `mapY`, blanking the top 7 screen rows).
+- **Next:** round 9 — close the 75-frame gap: simulate the real `gSprites[]`
+  slot allocation/reuse sequence for rock-vs-rock OAM stacking order (only
+  13 distinct slots host all 20 rocks per the RAM dump; this session's
+  fixed table-index draw order is a heuristic that gets ~71% of frames
+  right, and the reverse order was tried and is worse, not better — the
+  true rule needs actual slot simulation). Then add Tier-1 pins for the new
+  pure functions (`rockSlideRockState`/`rockSlideBg3Y`/`rockSlideMonShakeY2`,
+  time-boxed out this session). Then slice D (drain/turn-end) and the
+  parallel victory-scout lane (#128's own next-action, unaffected by this
+  session).
+- **Notes:** docs/battle-menu-notes.md §11 has the full per-mechanism
+  accounting + RAM-probe citations. PAPERCUT: none new — the RAM-probe
+  scripts committed by the earlier ground-truth scout session
+  (§9.5/`dump-registers.py`/`dump-rockslide-sprites.py`) were directly
+  reusable against the already-committed dense traces, saved a lot of time
+  versus re-deriving from source alone.
+
+---
 ## 128 — Supervisor: Grovyle-faint ground truth merged (turns 3-5, KO + Pidgeotto switch-in) — suite **638/638**; round 8 = slice C (ROCK_SLIDE engine) + victory scout
 
 - **State (verified post-merge):** `npm test` **638/638**, `npm run build`
@@ -65,26 +110,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   a real, small, root-causeable bug (not a fit), gap 2 was genuinely new
   extraction+compositing work, no rework of the already-CLOSED clone-motion
   formula needed.
-
----
-## 126 — Supervisor: turn-2 scout merged — DRAGON_BREATH validates damageCalc's special branch **bit-exact**; ENDEAVOR discovered as Grovyle's AI move (HP-diff mechanic documented) — battle-1 move coverage 3→5 of 8; suite **634/634**
-
-- **State (verified post-merge):** `npm test` **634/634**, `npm run build`
-  green, tree clean, no worktrees/branches. turn1-cloneanim re-verified
-  168/230 (slice-B target, #125).
-- **Did (worktree scout, verified then merged, conflict-free):**
-  `battle1-turn2.json` (3846 frames, 221 captures, twice-run 0 mismatch) +
-  `battle1-turn2-ram-dump.json` (953 rows, 4 probes re-run byte-identical)
-  + `battle-turn-notes.md` §12: all 14 turn-2 Random() steps LCG-attributed
-  (1 single-step at tick 3121 honestly open); DRAGON_BREATH (first special-
-  split move probed) reproduced bit-exact by the +2-corrected formula
-  (15 pre-spread → 13 final); ENDEAVOR's `setdamagetohealthdifference`
-  path documented (typecalc scales then copyword restores — type only
-  gates immunity); paralysis didn't proc this seed; falsifiable turn-3
-  prediction recorded.
-- **Next:** round 7 — main lane: slice-B completion (extract
-  `gStatAnim_*` via a new LZ77-BG extractor, OBJ-window-clipped BG1-scroll
-  compositor, + the 4 near-1px clone ticks → 230/230); worktree:
-  faint-to-victory ground-truth scout (extend the script through
-  Grovyle's KO + Murkrow send-out — S7 tail + S8 prep). Then slice C/D.
-

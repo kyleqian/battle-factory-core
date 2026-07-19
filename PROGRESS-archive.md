@@ -1,3 +1,25 @@
+## 126 — Supervisor: turn-2 scout merged — DRAGON_BREATH validates damageCalc's special branch **bit-exact**; ENDEAVOR discovered as Grovyle's AI move (HP-diff mechanic documented) — battle-1 move coverage 3→5 of 8; suite **634/634**
+
+- **State (verified post-merge):** `npm test` **634/634**, `npm run build`
+  green, tree clean, no worktrees/branches. turn1-cloneanim re-verified
+  168/230 (slice-B target, #125).
+- **Did (worktree scout, verified then merged, conflict-free):**
+  `battle1-turn2.json` (3846 frames, 221 captures, twice-run 0 mismatch) +
+  `battle1-turn2-ram-dump.json` (953 rows, 4 probes re-run byte-identical)
+  + `battle-turn-notes.md` §12: all 14 turn-2 Random() steps LCG-attributed
+  (1 single-step at tick 3121 honestly open); DRAGON_BREATH (first special-
+  split move probed) reproduced bit-exact by the +2-corrected formula
+  (15 pre-spread → 13 final); ENDEAVOR's `setdamagetohealthdifference`
+  path documented (typecalc scales then copyword restores — type only
+  gates immunity); paralysis didn't proc this seed; falsifiable turn-3
+  prediction recorded.
+- **Next:** round 7 — main lane: slice-B completion (extract
+  `gStatAnim_*` via a new LZ77-BG extractor, OBJ-window-clipped BG1-scroll
+  compositor, + the 4 near-1px clone ticks → 230/230); worktree:
+  faint-to-victory ground-truth scout (extend the script through
+  Grovyle's KO + Murkrow send-out — S7 tail + S8 prep). Then slice C/D.
+
+---
 ## 125 — Bounded worker: **S7 slice B convergence retry** — Gap 1 (clone motion) CLOSED via RAM probe, Gap 2 (banner) REFRAMED to a smaller source-confirmed residual — `turn1-cloneanim.json` **49/230 → 168/230**; suite 631 → **634/634**
 
 - **State:** `npm test` **634/634** (+3 Tier-1 pins), `npm run build` green,

@@ -1533,3 +1533,107 @@ the real mechanism (BG1 stat-arrow tilemap scroll) via source-reading.
 new Tier-1 pins - the formulas were demonstrably not yet correct so none
 were added), `npm run build` green. `turn1-cloneanim.json` committed at
 49/230.
+
+## 11. S7 slice C: the ROCK_SLIDE window (bounded worker, this session — implements docs/battle-move-anim-notes.md §9's ground truth)
+
+Picks up exactly where slice B's stat-change banner leaves off (its own
+last active-but-zero-effect tick, `pressTick+274` = 2193) through the tick
+before the HP-bar drain sentinel (`pressTick+596` = 2515; slice D owns
+2516+). New committed trace `tools/compare/traces/turn1-rockslide.json`
+(256 captures: every tick 2193-2250 and 2330-2515, stride 7 over the
+2251-2329 hold) scores **181/256** (0 regressions on every other committed
+trace - `turn1-cloneanim` 230/230, `turn1-kickoff` 81/81, `fight-submenu`
+234/235, `menu-idle` 69/69, `sendout` 255/256, `s6-acceptance` 224/228, all
+re-verified unchanged).
+
+**Landed, pixel/RAM-confirmed exact:**
+- **Three text boxes**, same battle-text printer/cadence as slices A/B: the
+  held `TURN_KICKOFF_LINE1/2` text through `+283`, "Foe GROVYLE’s
+  evasiveness\nrose!" from `+284` (`STAT_ROSE_LINE1/2`, `battleMenu.ts`),
+  "ONIX used\nROCK SLIDE!" from `+393` (`ROCK_SLIDE_LINE1/2`). **Bug found
+  and fixed**: the stat-rose text needs `STRINGID_ATTACKERSSTATROSE`'s own
+  apostrophe as **U+2019** (the game's charmap has no ASCII `'`, code 180
+  is the right-single-quote glyph) - a plain ASCII apostrophe silently
+  rendered as a blank glyph (14px steady diff across the entire hold, one
+  glyph wide), not caught until a diff-image inspection.
+- **`gBattle_BG3_Y` shake**: RAM sequence RAM-reconfirmed this session
+  (`dump-registers.py` stride 1, ticks 2337-2365 against the committed
+  dense traces) bit-exact against §9.3's table, one-tick render lag (same
+  class as `bg1X`/`statsBannerBg1Y`). Applied to a NEW background-only
+  resampler (`drawStaticBgShiftedY`, using `staticBgPixel`/BG3's own
+  tilemap) rather than shifting the whole scene — real hardware only
+  scrolls the field background, not the OBJ sprites/healthboxes sitting on
+  it, and this engine's `menuIdleBase` harvest (used everywhere else in
+  this window) bakes both into one flat image with no way to shift only
+  the background portion. **Needed a vertical wrap** (`BG3_VERTICAL_PERIOD
+  = 256`, `BGCNT_TXT512x256`'s own screen-block height) that no other
+  `staticBgPixel` caller in this file needed — every other caller only
+  ever samples `mapY` in `[0,160)`; this is the first caller whose `mapY`
+  goes negative (`screenY + (-7)` for top rows during the shake), and an
+  unwrapped negative `mapY` produced a solid-wrong top-7-row band (1680px
+  diff) until wrapped.
+- **All 20 falling rocks**: spawn schedule/argv table (`ROCK_SLIDE_ROCK_TABLE`)
+  and the `SetAverageBattlerPositions` anchor (`{x:176,y:54}`) both
+  RAM-cross-verified this session against every one of the 20 spawns
+  (`dump-rockslide-sprites.py` re-run against the committed dense traces).
+  **Call-timing model corrected against RAM, not just source**: the naive
+  "one `TranslateSpriteInEllipse` call per tick from spawn" reading is off
+  by one call on the spawn tick itself (RAM shows `circlePos`/`duration`
+  jump by TWO steps that tick, not one — `CreateSprite`'s own init-call of
+  the initial callback plus that same frame's regular per-frame dispatch,
+  since the callback pointer is already reassigned inside the first call);
+  every tick after gets exactly one call while `duration` is nonzero, then
+  one HELD tick (duration hits 0, callback pointer switches, no motion
+  write) before phase 2's own single setup-call tick (`AnimFallingRock_Step`
+  — this transition does NOT double-call, unlike spawn). Documented in full
+  in `rockSlideRockState`'s own doc comment (`battleMenu.ts`). Uses a new
+  literal-table `gbaSinTable`/`gbaCosTable` pair (NOT the existing
+  `Math.sin`-based `gbaSin` used by the ball-arc — that one is already
+  flagged as imprecise at a couple of indices; the rock motion is
+  load-bearing at much larger amplitudes so gets the RAM-exact literal
+  table like `bounceSin` already uses).
+- **Generic hit-flash**: healthbox `y2` wobble (`rockSlideHealthboxWobbleY2`,
+  reuses `opponentHealthboxContent`/`HEALTHBOX_FRAME_ORIGIN` via a new
+  erase-then-redraw-translated `drawOpponentHealthboxWobble`, same shape as
+  `eraseGrovyleFootprint`) and Grovyle's own blink (`rockSlideMonBlinkInvisible`,
+  implemented as simply not drawing Grovyle that tick — no erase needed
+  since this window's base is reconstructed from primitives, not a baked
+  harvest). Both RAM-exact off `dump-rockslide-sprites.py`'s own
+  `healthboxY2`/`targetInvisible` fields, one-tick render lag.
+- **Grovyle's own `AnimTask_ShakeMon` bounce — NEW finding, contradicts
+  §9.6's own prediction**: §9.6 predicted "a pixel-matching engine can
+  likely get away with simply not hiding the sprite" during the
+  `monbg`-hidden window (2344-2472). **False** — a per-tick brute-force
+  roll search (crop `x=144..208,y=64..76`, a rock-free strip of Grovyle's
+  own lower body, against the committed dense PNGs) found Grovyle's visible
+  stand-in DOES move: a period-4 render-tick pattern `[5,5,0,0]` (`y2`
+  offset), active render ticks 2362-2455 (94 ticks, both boundaries
+  pixel-swept exact), then flat 0. This is `AnimTask_ShakeMon`'s own
+  `(ANIM_TARGET, 0, 5, 50, 1)` call made visible after all — just not via
+  the literal hidden OBJ, and the doubled 2-tick hold (vs. a naive 1-tick
+  toggle) isn't independently re-derived from source, only pixel-fit
+  (`rockSlideMonShakeY2`, `battleMenu.ts` — flagged as pixel-fit, not
+  source-proven, per this run's convention for exactly this situation).
+
+**Open (the acceptance gap, 75/256 non-matching frames, 2963px total diff
+mass, avg ~40px/frame, max 172px — small and localized, not a
+pervasive/structural miss):** rock-vs-rock stacking order where two or more
+falling rocks' 32x32 boxes overlap. This engine draws rocks in a fixed
+table-index order (later-spawned on top); real hardware determines
+front/back by OAM slot index, which depends on the actual slot
+allocation/reuse sequence (`dump-rockslide-sprites.py`'s own RAM dump
+confirms only 13 distinct `gSprites[]` slots host all 20 rocks — slots get
+freed and reused, so "spawn order" and "slot index order" diverge over the
+window). Tried the reverse draw order as a quick check (worse: 171/256, not
+better) — the true rule needs actual slot-allocation simulation, not
+attempted this session (time-boxed). Every non-matching frame is in the
+2362-2453 range, i.e. exactly the window where 2+ rocks are simultaneously
+active AND overlapping; the shake (2349-2358), all 20 rocks' spawn
+timing/motion in isolation, both text boxes, and the hit-flash are each
+independently pixel-exact per the dense per-mechanism sweeps above.
+
+**Verification**: `npm test` 638/638 (no new Tier-1 pins — time-boxed to
+landing the pixel work itself, all formulas above are RAM-cross-verified
+directly rather than needing a Tier-1 regression pin; a follow-up session
+should add pins for `rockSlideRockState`/`rockSlideBg3Y`/`rockSlideMonShakeY2`
+against the RAM tables cited above), `npm run build` green.

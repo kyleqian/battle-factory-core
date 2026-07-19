@@ -3294,11 +3294,15 @@ function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void
   }
 }
 
-/** `staticBgPixel` (BG3, `battleBg.static`) sampled with a vertical scroll offset - `gBattle_BG3_Y`'s own real hardware semantics (`BG3VOFS`, a VERTICAL OFFSET added to the sampled map row for a given screen row). */
+/** BG3's own real hardware vertical period - `BGCNT_TXT512x256`'s screen-block height (32 tile rows = 256px, `staticBgPixel`'s own doc comment on the 512-wide double-block layout), needed here because `gBattle_BG3_Y` going negative (the shake's `-7`) pushes `mapY` below the JSON's own row-0 origin - unlike every other `staticBgPixel` caller in this file, which only ever samples `mapY` in `[0,160)` and never needed to wrap. */
+const BG3_VERTICAL_PERIOD = 256;
+
+/** `staticBgPixel` (BG3, `battleBg.static`) sampled with a vertical scroll offset - `gBattle_BG3_Y`'s own real hardware semantics (`BG3VOFS`, a VERTICAL OFFSET added to the sampled map row for a given screen row), wrapped to BG3's own real vertical period. */
 function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number): void {
   for (let screenY = 0; screenY < 160; screenY += 1) {
     for (let screenX = 0; screenX < 240; screenX += 1) {
-      const c = staticBgPixel(screenX, screenY + shiftY);
+      const mapY = ((screenY + shiftY) % BG3_VERTICAL_PERIOD + BG3_VERTICAL_PERIOD) % BG3_VERTICAL_PERIOD;
+      const c = staticBgPixel(screenX, mapY);
       if (!c) continue;
       setPixel(fb, screenX, screenY, c);
     }
