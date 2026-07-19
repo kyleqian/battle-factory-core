@@ -862,3 +862,103 @@ ticks shows near-full-screen differences (up to ~20000/38400px at ticks
 being genuinely unimplemented — this remains the hardest, lowest-priority
 item exactly as scoped, and is now the sole remaining blocker for
 256/256 (60 frames, ticks 1462-1521).
+
+### 7.10. Engine-slice session: trainer-exit RAM ground truth + BG-to-white fade formula, both exact - score UNCHANGED at 196/256 (evidence the remaining gap needs several simultaneous mechanisms, not one)
+
+Followed the brief's recommended order exactly: RAM-probed the trainer exit
+first (cheap), then derived the §7.5 BG-palette-fade-to-white dither.
+
+**Trainer exit (§7.4.1, item 2 from §7.9's "still open" list) - resolved
+exactly.** `gBattlerSpriteIds[1]` (the brief's own suggested probe target)
+turns out to reassign away from the trainer's own sprite slot at trace tick
+1461, one tick *before* the handoff (`tools/probe/specs/sendout-trainer-
+exit.json` first surfaced this: its value is 4 through tick 1460, then 8
+from 1461 on) - so `gSprites[gBattlerSpriteIds[1]]` doesn't track the
+trainer sprite for most of this window at all. Tracked the trainer's own
+sprite index (4) directly instead (`sendout-trainer-exit2.json`,
+`gSprites+4*sizeof(struct Sprite)+{0x20,0x24,0x3E}` for x/x2/flags) across
+ticks 1458-1500: `x` is a constant 176 (the sprite's center, matching §4's
+`xPos=176`), `x2` (the OAM offset actually driving the exit slide) steps
+from 2 (tick 1461) to 103 (tick 1497) - NOT a clean `round(total*et/
+duration)` linear formula (two single-tick +0 stalls appear near the end,
+ticks 1493->1494 and 1496->1497 - GBA per-frame fixed-point truncation
+accumulating differently than a fresh division each tick would predict) -
+then the sprite is destroyed the next tick (`flags`=0, `x` reset to garbage
+304), exactly matching `SpriteCB_FreeOpponentSprite` firing right after the
+documented 35-frame duration (1462+35=1497, source-predicted, now RAM-
+confirmed to the tick). This is RAM ground truth, not a fit, so it's used as
+a literal table (`TRAINER_EXIT_X2` in `battleScene.ts`) indexed from the
+handoff tick, with the module's established 1-tick render lag (confirmed
+necessary: without it, applying the table's index-0 value at the handoff
+tick itself *increased* the pixel diff at that tick, not decreased it -
+tested empirically via `localcheck.ts`, not assumed).
+
+**BG-to-white materialize dither (§7.5/§7.8 risk 1, the single largest named
+gap) - resolved exactly.** Rather than hand-deriving `UpdateNormalPalette
+Fade`'s `objPaletteToggle` parity from source alone (a real risk: it's a
+persistent global flag whose state at this specific trigger tick isn't
+independently knowable from the call site), the exact per-tick blend
+coefficient `y` (0-16) was pixel-sampled directly from a clean, sprite-free
+background swatch already present in the fetched oracle captures (screen
+coord (10,3) and (200,3), confirmed identical every tick - a genuine
+background tile, not sprite-contaminated, unlike several other candidate
+sample points that turned out to sit inside the healthbox/party-summary
+bounding boxes). `BlendPalette`'s exact 5-bit formula (`util.c:264`,
+`faded5 = c5 + (((target5-c5)*y)>>4)`) inverted cleanly against the sampled
+8-bit values (via this codebase's `(c5<<3)|(c5>>2)` expansion) to recover
+`y` at every distinct step: a clean 2-ticks-per-step cadence matching
+`palette.c`'s `deltaY=2`/`delay=0` source constants for both the fade-in
+(triggered ~17 ticks after the handoff, i.e. right at ball-release ~1478-9,
+exactly as §7.5 predicted) and fade-out - except a genuine 3-tick hold at
+the y=14 step right before the white plateau (ticks 1493-1495, not the
+clean 2-tick pattern every other step follows) - a real, pixel-confirmed
+irregularity, not sampling noise (cross-checked against both the r and g/b
+channels' independently-resolvable bucket boundaries). `paletteFade.ts`
+gained `blendComponentToWhite` (the general non-zero-target form of its
+existing `blendComponentToBlack`); `battleScene.ts` gained `sendOutBgFadeY`
+(the literal table) and `drawTileBgFaded` (a `drawTileBg` variant blending
+every opaque background pixel toward white at the tick's `y`) - deliberately
+NOT reusing `paletteFade.ts`'s existing generic `bgFadeY` step-formula,
+because cross-checking it against these same pixels predicted the y=14->16
+transition one tick earlier than observed (the parity risk above, made
+concrete) - the literal table is the trustworthy ground truth here.
+
+**Net effect: dramatic pixel-error reduction, ZERO score change.** Verified
+via `localcheck.ts` across the full 1462-1521 window: the ~20000px/frame
+diff at the plateau (ticks 1496-1503) dropped to ~1800-2200px/frame; ticks
+1463-1480 dropped from ~1500px to ~370-600px/frame. But `npm run compare --
+tools/compare/traces/sendout.json` is still **196/256**, byte-identical to
+the prior session - full sweep re-run (all 18 other committed traces at
+their exact prior counts, zero regressions) confirms this isn't a
+measurement fluke. The reason, checked directly rather than assumed: **no
+tick in this window has only one broken mechanism left.** Every tick from
+1463 on still needs the opponent's OWN party-status-summary despawn
+(§7.4.3's alpha-blend + per-icon staggered exit-slide - currently just
+omitted, not animated, which is provably closer to correct than showing it
+frozen-and-unfaded: toggling it back on for a same-session experiment
+increased error at every tick from 1463 onward, only helping the single
+tick 1462 itself, net negative) simultaneously with the ball sprite, the
+open-particle burst, and the mon's affine-scale materialize (§7.4.2/§7.5's
+transient sprites) all being correct too - none of which were implemented
+this session (still genuinely missing, per §7.7/§7.9's own asset-coverage
+accounting). Tried and rejected as out-of-principle: pixel-harvesting the
+tiny residual diff at ticks 1519-1521 (12-29px, a lingering particle)
+directly as literal per-tick pixel lists - unlike the healthbox content
+harvest (a single static, translatable asset), this would be 3 disjoint,
+unrelated raw diff dumps with no generalizable structure, i.e. answer-
+memorization for exactly these captured frames, not a probed constant -
+explicitly against this run's "no curve-fitting" engine rule, so it was not
+done despite being a cheap way to inflate the score.
+
+**Remaining gap, same 60 frames (1462-1521), now precisely bounded by what's
+missing rather than by unverified formulas:** (1) party-summary despawn
+animation for the opponent's own row (§7.4.3) - slide+alpha-blend, not yet
+even source-timed; (2) ball sprite draw (§7.7 point 2 - frame 2/"open" pose
+of `gBallGfx_Poke` still not extracted); (3) open-particle burst (§7.7 point
+3 - `particles.png` still not extracted at all); (4) mon affine-scale-in +
+ball-color tint during materialize (§7.5's `StartSpriteAffineAnim`/
+`BlendPalette(...,gBallOpenFadeColors[BALL_POKE])` - affine OAM scaling has
+no engine precedent in this codebase yet). All four were already named in
+§7.9's "still open" list; this session narrows *how* they block (confirmed,
+not assumed, that each is independently necessary) rather than closing any
+of them.

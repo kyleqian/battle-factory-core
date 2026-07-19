@@ -15,8 +15,31 @@
 // A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
 // state rather than a phase enum (see the field's own doc comment).
 //
-// STATUS (this session - the send-out slice, PROGRESS.md - see current top
-// entry): `tools/compare/traces/sendout.json` is **196/256** (was 162/256).
+// STATUS (this session - trainer-exit RAM ground truth + BG palette-fade
+// formula, PROGRESS.md #74): `tools/compare/traces/sendout.json` is still
+// **196/256** (score UNCHANGED from the prior session) despite two real,
+// independently-verified fixes landing: (1) `trainerExitX`'s `TRAINER_EXIT_X2`
+// is now a literal RAM-probed table (`gSprites[4].x2`, the trainer's own
+// sprite index - `gBattlerSpriteIds[1]` itself reassigns away from the
+// trainer one tick before the handoff, so it was tracked directly instead;
+// `tools/probe/specs/sendout-trainer-exit2.json`), replacing the old
+// unverified linear-rounding formula; (2) `sendOutBgFadeY`/`drawTileBgFaded`
+// implement §7.5's `BeginNormalPaletteFade(...,RGB_WHITE)` BG-to-white
+// dither, a per-tick table pixel-sampled from a clean background swatch in
+// the oracle's own captures (paletteFade.ts gained `blendComponentToWhite`
+// for the 5-bit blend math). Both are exact, oracle-verified, and cut the
+// per-frame pixel-diff dramatically across the whole 1462-1521 window (the
+// ~20000px/frame plateau at ticks 1496-1503 is now ~1800-2200px; ticks
+// 1463-1480 dropped from ~1500px to ~370-600px) - but the scoring metric is
+// full-frame exact match, and NO tick in this window has only ONE mechanism
+// left broken: every tick still needs the party-summary despawn fade
+// (§7.4.3, alpha-blend + per-icon staggered exit-slide, unimplemented), the
+// ball sprite, the open-particle burst, and the mon's affine-scale
+// materialize (§7.4.2/§7.5's own transient sprites) all simultaneously
+// correct too. See PROGRESS.md #74 and docs/battle-scene-notes.md §7.10 for
+// the full accounting - this is genuine, verified progress on the
+// mechanism, but it does NOT cross the trace's own full-frame-match bar
+// this session.
 // §7.1-7.3 (idle-hold, A-press-#3 registration, text cadence) were already
 // byte-exact (prior session). This session closed the post-text visual
 // handoff's highest-value items: (1) the opponent healthbox slide-in +
@@ -279,6 +302,7 @@
 
 import type { RgbColor } from "./bg.ts";
 import { drawText, type FontData } from "./font.ts";
+import { blendComponentToWhite } from "./paletteFade.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
@@ -776,17 +800,41 @@ export function sendOutTextVisibleChars(t: number, pressTick: number): number {
   return Math.min(SENDOUT_TEXT_TOTAL, t - start + 1);
 }
 
-/** §7.4.1: trainer-pic exit slide duration (`AnimTranslateLinear_WithFollowup`, 35 frames), destroyed (`SpriteCB_FreeOpponentSprite`) once complete. */
-const TRAINER_EXIT_DURATION = 35;
-/** §7.4.1: total px translation (target x=280, off the 240px screen, minus the settled center x=176) - applied identically to the top-left corner used for compositing (`OPPONENT_CORNER.x`), since it's a pure translation delta. NOT yet pixel-verified tick-by-tick (module doc STATUS note) - linear over the duration, one-tick render lag matching this module's established convention (`evaEvb`/`bg1X` etc). */
-const TRAINER_EXIT_DELTA = 280 - 176;
+/**
+ * §7.4.1: trainer-pic exit slide - `gSprites[gBattlerSpriteIds[1]].x2` (the
+ * OAM offset added to the sprite's fixed center x=176), RAM-probed directly
+ * (`tools/probe/specs/sendout-trainer-exit2.json`, addresses `gSprites +
+ * spriteIndex*sizeof(struct Sprite) + 0x24`, sprite index confirmed via
+ * `gBattlerSpriteIds[1]` at each tick - it reassigns away from the trainer's
+ * own sprite slot at trace tick 1461, one tick before the handoff, so the
+ * trainer's OWN index (4 in this trace) was tracked directly instead) across
+ * trace ticks 1461-1500. `x2` starts at 2 the tick BEFORE the handoff tick
+ * (1461, invisible at the pixel level - see `PALETTE_FADE_Y` module doc for
+ * the same "sub-pixel invisible" pattern) and increments to 103 by tick 1497
+ * (`flags` bit0/`inUse` still set), then the sprite is destroyed the next
+ * tick (`flags`=0, `x` reset to garbage 304) - matching
+ * `SpriteCB_FreeOpponentSprite` firing right after the documented 35-frame
+ * `AnimTranslateLinear_WithFollowup` duration. NOT a clean linear formula
+ * (confirmed: the probed steps are mostly +3/tick but with two single-tick
+ * +0 stalls near the end, ticks 1493->1494 and 1496->1497 - GBA fixed-point
+ * per-frame truncation accumulating differently than a fresh
+ * `round(total*et/duration)` computed each tick would predict) - this is
+ * the RAM ground truth itself, not a fit, so it's used as a literal table
+ * indexed from the handoff tick (`et = t - handoffTick`), which the probed
+ * trace confirms is exactly where index 0 (x2=5) lands.
+ */
+const TRAINER_EXIT_X2: readonly number[] = [
+  5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89, 92,
+  95, 97, 97, 100, 103, 103,
+];
 
-/** Opponent trainer-pic's top-left x at trace tick `t` during the exit slide, or `null` once destroyed (handoff+1+35 and beyond). */
+/** Opponent trainer-pic's top-left x at trace tick `t` during the exit slide, or `null` once destroyed (handoff+36 and beyond - see `TRAINER_EXIT_X2`). */
 function trainerExitX(t: number, handoffTick: number): number | null {
   const et = t - 1 - handoffTick;
   if (et < 0) return OPPONENT_CORNER.x;
-  if (et >= TRAINER_EXIT_DURATION) return null;
-  return OPPONENT_CORNER.x + Math.round((TRAINER_EXIT_DELTA * et) / TRAINER_EXIT_DURATION);
+  const x2 = TRAINER_EXIT_X2[et];
+  if (x2 === undefined) return null;
+  return OPPONENT_CORNER.x + x2;
 }
 
 /**
@@ -913,6 +961,66 @@ function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalet
   }
 }
 
+/**
+ * §7.5/§7.9: the send-out window's materialize BG-to-white dither
+ * (`BeginNormalPaletteFade(selectedPalettes=14, 0, 0, 16, RGB_WHITE)`,
+ * `battle_anim_throw.c:2056`, PALETTES_BG banks 1-3 only - never applied to
+ * OBJ sprites, which is why this is a `drawTileBg` variant, not a global
+ * post-process). `SENDOUT_BG_FADE_Y` is a literal per-tick table (not
+ * `paletteFade.ts`'s generic `bgFadeY` step formula), pixel-sampled
+ * directly from a clean sprite-free background swatch in the already-
+ * fetched oracle captures (tick 10,3 - `RGB(222,231,231)` unfaded,
+ * confirmed static every other tick in this trace) because the generic
+ * formula's implicit `objPaletteToggle` parity (a global flag whose state
+ * at this specific trigger tick isn't independently known) produced a
+ * 1-tick mismatch right at the y=14->16 boundary when cross-checked against
+ * these same pixels - the observed y=14 plateau is 3 ticks wide (1493-1495)
+ * here, not the formula's predicted 2. Every other step, forward and
+ * reverse, matches a clean 2-ticks-per-step cadence. Indexed by `t -
+ * handoffTick`; 0 (fully unfaded) outside the covered range.
+ */
+const SENDOUT_BG_FADE_Y: readonly number[] = [
+  4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 14, // r=21..33 (ramp up to white, incl. the observed 3-tick y=14 hold)
+  16, 16, 16, 16, 16, 16, 16, 16, // r=34..41 (white plateau)
+  14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, // r=42..53 (ramp back down)
+];
+const SENDOUT_BG_FADE_START = 21;
+
+function sendOutBgFadeY(t: number, handoffTick: number): number {
+  return SENDOUT_BG_FADE_Y[t - handoffTick - SENDOUT_BG_FADE_START] ?? 0;
+}
+
+/** Same as `drawTileBg`, but blending every opaque pixel toward white at coefficient `y` (0..16, see `SENDOUT_BG_FADE_Y`) first - `y=0` is a no-op equivalent to plain `drawTileBg`. */
+function drawTileBgFaded(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][], y: number): void {
+  if (y <= 0) {
+    drawTileBg(fb, tileset, tilemap, subpalettes);
+    return;
+  }
+  for (let screenY = 0; screenY < 160; screenY += 1) {
+    const tileRow = Math.floor(screenY / 8);
+    const inTileY = screenY % 8;
+    for (let screenX = 0; screenX < 240; screenX += 1) {
+      const tileCol = Math.floor(screenX / 8);
+      const inTileX = screenX % 8;
+      const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+      if (!entry) continue;
+      const tile = tileset.tiles[entry.tile];
+      if (!tile) continue;
+      const sx = entry.hFlip ? 7 - inTileX : inTileX;
+      const sy = entry.vFlip ? 7 - inTileY : inTileY;
+      const idx = tile[sy * 8 + sx]!;
+      if (idx === 0) continue;
+      const c = subpalettes[entry.palette]?.[idx];
+      if (!c) continue;
+      setPixel(fb, screenX, screenY, {
+        r: blendComponentToWhite(c.r, y),
+        g: blendComponentToWhite(c.g, y),
+        b: blendComponentToWhite(c.b, y),
+      });
+    }
+  }
+}
+
 const BRENDAN_FRAME_ROWS = brendan.tileset.rows / brendan.frameCount;
 /** Frame index 3 (of 4) is the settled slide-in pose (docs trainer-pic extractor comment) - the other 3 are the send-out throw animation, out of scope for this window. */
 const BRENDAN_SETTLED_FRAME = 3;
@@ -1026,23 +1134,24 @@ function drawSettledScene(fb: Uint8Array): void {
  * materialize, party-summary despawn, opponent healthbox slide-in.
  * `handoffTick` = `sendOutHandoffTick(pressTick)`.
  *
- * STATUS (this session): the message text (unchanged, full 35 chars - it
- * stays on screen throughout this whole window, a prior-session gap), the
- * player's OWN party-status-summary bar+icons (only the SENDING battler's
- * side despawns per §7.4.3's own source citation - the player hasn't sent
- * out yet, so their row never hides here; pixel-confirmed this session),
- * the trainer-pic exit slide (§7.4.1, structural - still not RAM/pixel-
- * verified tick-by-tick, see PROGRESS.md), Grovyle's settled materialize
- * pose (§7.5, static-step only - see `GROVYLE_MATERIALIZE_TICK`), and the
- * opponent healthbox slide-in + content (§7.6, byte-exact - see
- * `healthboxSlideDx`) are all rendered. NOT yet rendered: the ball sprite
- * itself, the open-particle burst, and the materialize tint/white-flash
- * transient frames (§7.4.2/§7.5's own transient window, ticks ~1462-1518) -
- * lowest priority per PROGRESS.md, deliberately deferred (every frame in
- * that sub-window needs all of the above simultaneously correct anyway).
+ * STATUS: the message text (unchanged, full 35 chars - stays on screen the
+ * whole window), the player's OWN party-status-summary bar+icons (only the
+ * SENDING battler's side despawns per §7.4.3's own source citation), the
+ * trainer-pic exit slide (§7.4.1, now a RAM-probed exact table - see
+ * `TRAINER_EXIT_X2`), Grovyle's settled materialize pose (§7.5, static-step
+ * only - see `GROVYLE_MATERIALIZE_TICK`), the opponent healthbox slide-in +
+ * content (§7.6, byte-exact - see `healthboxSlideDx`), and the BG-to-white
+ * materialize dither (§7.5, now an oracle-pixel-sampled exact table - see
+ * `sendOutBgFadeY`) are all rendered. NOT yet rendered: the opponent's OWN
+ * party-status-summary despawn (§7.4.3's alpha-blend + per-icon staggered
+ * exit-slide - its side is simply omitted rather than animated), the ball
+ * sprite itself, the open-particle burst, and the mon's affine-scale-in
+ * (§7.4.2/§7.5's own transient sprites, ticks ~1462-1518) - PROGRESS.md #74:
+ * every remaining tick in this window needs ALL of these simultaneously
+ * correct, so none of the fixes above alone flips a full-frame match yet.
  */
 function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): void {
-  drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+  drawTileBgFaded(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette, sendOutBgFadeY(t, handoffTick));
   drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
   const trainerX = trainerExitX(t, handoffTick);
   if (trainerX !== null) {

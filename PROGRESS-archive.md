@@ -5,6 +5,111 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 71 — S6 send-out slice STARTED: idle-hold + A-press #3 + "sent out GROVYLE!" text cadence byte-exact — NEW `sendout.json` **162/256**; visual handoff (trainer exit/ball/particles/materialize/healthbox) not yet implemented, precisely scoped for the next session
+
+- **State:** `npm test` **442/442** (438→442, +4 pins), `npm run build`
+  green. NEW committed trace `tools/compare/traces/sendout.json` (dense,
+  every tick 1300-1555, 256 captures, mirrors
+  `traces-groundtruth/battle1-sendout-dense.json`'s own segments/captures
+  exactly) → **162/256** via `npm run compare -- tools/compare/traces/
+  sendout.json`. Full 19-trace sweep re-run (all 18 prior + this new one),
+  every prior trace at its exact prior count (anchor 1/1, draft-cursor
+  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
+  summary-info-onix 122/122, summary-info-magby 132/132, confirm-decline
+  67/67, accept-prebattle 137/137, walk-warpout 125/125, room-entry
+  110/110, room-npcs 98/98, room-msgbox 142/142, transition 206/206,
+  scene-assembly 256/256, rent-slot1 125/139, rent-3picks 157/190,
+  confirm-flow 79/95) — zero regressions, confirmed not just argued (the
+  change surface is one new field on `BattleSceneState` and one new branch
+  in `core.ts`'s existing `if (battleScene)` block, inert for every trace
+  that never presses A after entering this phase - but re-run rather than
+  trusted).
+- **Did:** Implemented `docs/battle-scene-notes.md` §7.1-7.3 exactly
+  against the dossier's own cited evidence, independently re-verified this
+  session (not just trusted) by re-extracting sha256 transitions directly
+  from the committed groundtruth trace's own oracle captures
+  (`tools/compare/out/sendout-baseline/oracle-*.png`, fetched once via a
+  baseline `npm run compare` run, then diffed locally/offline with a
+  scratch python script - no repeat network calls needed): idle 9-tick
+  cursor-bob cadence continues unbroken through tick 1418 exactly as the
+  dossier states; screen frozen through tick 1424 (5-tick registration lag
+  off the A-press at 1420, matching press #2's own lag); message-box clear
+  + char-0 of "BUG CATCHER DESTIN sent" at 1425; the 4 predicted space-hold
+  ticks (1428/1436/1443/1451) all land exactly; last text change at 1459;
+  static through 1461; first post-text-handoff pixel change at 1462 - every
+  cited tick matched with no adjustment needed. Engine changes: extended
+  `BattleSceneState` with `sendOutPressElapsed: number | null` (the elapsed
+  value of A-press #3 once registered, folded into the existing flat
+  `elapsed`-only state per this module's "no phase enum" convention rather
+  than adding one just for this - see the field's own doc comment for why);
+  `core.ts` captures it directly (same "created directly, same tick already
+  reflects it" idiom every other press-gated window in this codebase uses)
+  gated on `sendOutPressEligible` (the idle wait-cursor must actually be
+  showing); `renderBattleScene` now branches on press-tick-derived
+  `sendOutTextStartTick`/`sendOutHandoffTick` to render the idle hold, then
+  the new "sent out GROVYLE!" text (`sendOutTextVisibleChars`,
+  `drawMessageTextLines` - generalized the existing single-string
+  `drawMessageText` to take arbitrary line pairs), then hands off to
+  `drawSendOutHandoff` for the visual window. Added a scratch (but
+  committed, reusable) dev aid `tools/compare/localcheck.ts` - diffs the
+  app engine locally against already-fetched oracle PNGs with no network
+  round-trip, the same role as `ram-probe.py` but for pixel-level oracle
+  ground truth instead of RAM.
+- **Also started (not yet pixel-exact):** `drawSendOutHandoff` renders the
+  §7.4.1 trainer-pic exit slide structurally (linear translation over the
+  source-exact 35-tick duration, `TRAINER_EXIT_DELTA`/`TRAINER_EXIT_DURATION`,
+  this module's established one-tick render lag) - a quick bg-diff pixel
+  probe of the trainer's own right edge in the cached oracle frames showed
+  roughly the expected ~3px/tick growth from tick 1463 on (matching the
+  dossier's own cited lag), but with enough noise from the ball/particle
+  pixels already appearing in the same crop region that the exact per-tick
+  fixed-point rounding was NOT confirmed to pixel-exactness - flagged
+  honestly rather than guessed-and-shipped. The ball spawn/open-frame anim
+  (§7.4.2), particle burst (§7.5), materialize palette-fade/affine-scale-in
+  (§7.5), party-status-summary despawn fade (§7.4.3), and opponent
+  healthbox slide-in + content assembly (§7.6) are NOT rendered at all yet -
+  all fully documented in the dossier and their assets already extracted
+  (`battle-anim-ball-open.json`, `battle-anim-particles.json`,
+  `battle-anim-tables.json`, `battle-healthbox.json`,
+  `battle-opponent-front-sprites.json`), just not yet composed into this
+  module. One concrete open question surfaced this session for whoever
+  picks this up: the healthbox's *internal* content (name/level/HP-bar
+  tile arrangement) was flagged by its own extractor
+  (`extract-battle-healthbox.ts`'s header comment) as not fully solved even
+  for a single static frame ("the real sprite is assembled from a HP/EXP-
+  fill-level-dependent subset of each sheet's tiles in a different
+  on-screen arrangement than the sheet's own raster order... a rendering-
+  code concern for a later engine slice") - that later slice is this one,
+  and it's real, non-trivial remaining work, not just wiring.
+- **Next:** close the visual handoff (§7.4-7.6) to reach 256/256 - in
+  priority order: (1) opponent healthbox internal tile-assembly + slide-in
+  (§7.6, source-exact linear 23-tick slide once the content-assembly
+  question above is resolved) - this is the highest-value target since the
+  window settles to a STATIC composite from ~tick 1522 through the trace's
+  end (1555, 34 frames) once every animation finishes, so solving healthbox
+  content + Grovyle's final materialized position alone (without needing
+  the transient particle/fade animations pixel-exact) would recover those
+  34 frames outright; (2) trainer-pic exit slide's exact rounding (RAM-probe
+  `gSprites[gBattlerSpriteIds[1]].x/x2` directly across ticks 1461-1497
+  rather than the noisy bg-diff this session used); (3) party-summary
+  despawn fade (§7.4.3, alpha blend + per-icon staggered exit); (4) ball
+  spawn/open/particle-burst/materialize (§7.4.2/§7.5) - the hardest piece
+  (radial trig motion + BlendPalette ramp), lowest priority since it's
+  transient (never produces a standalone matching frame on its own - every
+  frame in that sub-window also needs the trainer slide + party-summary
+  fade + healthbox slide all correct simultaneously to score as a match).
+- **Notes:** PAPERCUT: none new - `tools/compare/localcheck.ts` (committed)
+  turned what would have been a slow per-iteration network round-trip into
+  an instant local diff against one cached oracle fetch, worth keeping for
+  whoever continues this slice. Scratch python analysis (sha-transition
+  extraction, bg-diff edge probes) was ad hoc and not committed (same
+  convention as prior sessions' `ram-probe.py` scratch use) - re-derivable
+  from `tools/compare/out/sendout-baseline` if regenerated via `npm run
+  compare -- tools/compare/traces/sendout.json tools/compare/out/
+  sendout-baseline` (gitignored, not itself committed).
+
+---
+
 ## 70 — S6 scene-assembly slice FULLY CLOSED: last residual (trace tick 1229, player status bar) resolved with a RAM+pixel-confirmed asymmetric fix — `scene-assembly.json` **256/256** (was 255/256), 0 regressions
 
 - **State:** `npm test` **438/438** (437→438, +1 pin replacing 1 corrected),

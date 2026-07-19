@@ -81,6 +81,25 @@ export function blendComponentToBlack(component8: number, y: number): number {
   return (faded5 << 3) | (faded5 >> 2);
 }
 
+/**
+ * `BlendPalette` in 5-bit space, target color WHITE (`RGB_WHITE`,
+ * target5=31 per channel) - the send-out window's `BeginNormalPaletteFade
+ * (selectedPalettes, 0, 0, 16, RGB_WHITE)` (docs/battle-scene-notes.md
+ * §7.5/§7.9, `battle_anim_throw.c:2056`), same mechanism as
+ * `blendComponentToBlack` but blendColor isn't 0 so the `(16-y)` shortcut
+ * doesn't apply - uses the general `c5 + (((target5-c5)*y)>>4)` form
+ * instead (`util.c:264`'s literal formula, `>>4` truncation not `/16`
+ * rounding). Oracle pixel-cross-validated against
+ * `tools/compare/traces/sendout.json` (a clean background sample,
+ * `battleScene.ts`'s own send-out module doc) at every distinct `y` value
+ * 0/2/4/.../16 the trace's fade actually passes through.
+ */
+export function blendComponentToWhite(component8: number, y: number): number {
+  const c5 = component8 >> 3;
+  const faded5 = c5 + (((31 - c5) * y) >> 4);
+  return (faded5 << 3) | (faded5 >> 2);
+}
+
 /** The BG layer's fade coefficient `ticks` after the tick that triggered the transition (see FadeTiming.startDelay). Holds `startY` through the dead frames, then steps by 2 every 2 ticks toward `targetY`. */
 export function bgFadeY(ticks: number, timing: FadeTiming): number {
   const delta = ticks - timing.startDelay;
