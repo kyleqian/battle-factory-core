@@ -1534,7 +1534,7 @@ new Tier-1 pins - the formulas were demonstrably not yet correct so none
 were added), `npm run build` green. `turn1-cloneanim.json` committed at
 49/230.
 
-## 11. S7 slice C: the ROCK_SLIDE window (bounded worker, this session — implements docs/battle-move-anim-notes.md §9's ground truth)
+## 11. S7 slice C: the ROCK_SLIDE window (bounded worker session 1, implements docs/battle-move-anim-notes.md §9's ground truth; CLOSED to 250/256 by session 2, see the follow-up subsection below)
 
 Picks up exactly where slice B's stat-change banner leaves off (its own
 last active-but-zero-effect tick, `pressTick+274` = 2193) through the tick
@@ -1637,3 +1637,72 @@ landing the pixel work itself, all formulas above are RAM-cross-verified
 directly rather than needing a Tier-1 regression pin; a follow-up session
 should add pins for `rockSlideRockState`/`rockSlideBg3Y`/`rockSlideMonShakeY2`
 against the RAM tables cited above), `npm run build` green.
+
+### 11.1. Follow-up session: rock-vs-rock stacking order CLOSED via a real slot-allocation + `SortSprites` simulation, `turn1-rockslide.json` **181/256 → 250/256** — a separate, pre-existing 6-frame residual found and precisely attributed (NOT fixed, per this step's own "do not rework the shake" scope)
+
+**The named residual (75/256, all in 2362-2453) is fully closed.** Per the
+brief: simulated the real `gSprites[]` slot lifecycle (`CreateSprite`'s
+"lowest free slot" allocator, `reference/pokeemerald/src/sprite.c:502-510`)
+and the real `SortSprites` insertion-sort comparator (`:372-467`) in pure
+TS (`rockSlideDrawOrder`, `battleMenu.ts`), seeded from a live RAM read of
+`sSpriteOrder` (`EWRAM_DATA static`, no exported symbol — address
+`0x020217F4` resolved once via `arm-none-eabi-nm`, same technique this
+run already uses for other static callbacks). New probe
+`tools/probe/dump-rockslide-slot-order.py` validated the simulation
+**0 mismatches** against `battle1-rockslide-dense-b.json`: slot
+assignment for all 20 rocks + the shake sprite across 143 sampled RAM
+ticks, AND the resulting relative draw order across all 117 multi-rock
+ticks (56 of which have an exact on-screen-Y tie among simultaneously
+alive rocks).
+
+**Why the simulation only needs to track the 20 rocks, not the ~50 other
+`gSprites[]` slots the real hardware also sorts every frame**: RAM-
+confirmed the 20 rocks are the only sprites in this whole scene that ever
+share an exact `oam.priority`/`subpriority` key (`2`/`38` for every one,
+`Cmd_createsprite`'s subpriority formula never varies since the target
+battler is fixed all window) — the shake sprite is `oam.priority=3`, every
+persistent scene sprite (healthboxes, mons) is `oam.priority` 0 or 1.
+Since `SortSprites` is a stable sort, two elements that never tie with a
+third party can only have their relative order changed by a direct
+comparison against each other — confirmed empirically too (not just
+argued): collapsing every non-rock slot to one shared filler key changed
+0 of the 117 validated ticks. This is also why the fixed-index heuristic
+this session's predecessor tried (~71% of frames) couldn't be patched
+into something exact: it had no way to represent "two rocks currently tied
+on Y, resolved by which one has been continuously alive in a lower slot
+since they last differed."
+
+**A separate, PRE-EXISTING residual was found while sweeping the full
+256 frames, not introduced by this fix**: 6 frames (2349, 2350, 2353,
+2354, 2357, 2358), 1px each, ssimMin≈0.9999. Confirmed pre-existing by
+reverting this session's changes (`git stash`) and re-running compare —
+identical 6 mismatches present on the prior commit too. **The prior
+session's own claim that "the shake... [is] independently pixel-exact"
+(§11 above) was inaccurate** — it was never swept against the full
+256-frame set with this precision, only checked mechanism-by-mechanism.
+All 6 fall exactly on the render ticks where `rockSlideBg3Y` is `-7`
+(never on a `0` tick) — every one is a single stray pixel at screen
+position (173, 92), oracle `(255,255,255)` vs this engine's
+`(247,247,255)` (both real colors already present elsewhere in this
+window's own static-BG asset, `src/assets/gen/`, so not a made-up color —
+this engine is sampling a real but wrong tile pixel at that one screen
+position when the shake offset is non-zero). RAM-checked that the
+naive wrap culprit (§11's own `BG3_VERTICAL_PERIOD` fix) doesn't apply
+here — `mapY = 92 + (-7) = 85` never goes negative, so this is a
+different, narrower bug in `drawStaticBgShiftedY`'s per-scanline sampling
+that only this one pixel's tile boundary hits. **Not fixed this
+session**, per this step's own explicit scope ("do NOT rework
+text/shake/rocks-motion/hit-flash/ShakeMon") — named precisely instead of
+worked around, left for a future session that owns the shake mechanism.
+
+**Full regression sweep, zero regressions**: `turn1-cloneanim` 230/230,
+`turn1-kickoff` 81/81, `fight-submenu` 234/235, `sendout` 255/256,
+`s6-acceptance` 224/228, `menu-idle` 69/69 — all re-verified at their
+established counts.
+
+**New Tier-1 pins** (`tests/battleMenu.test.ts`): `rockSlideDrawOrder`
+(a spot sample across the window, background-to-foreground order) plus
+the deferred pins named at the end of §11 above
+(`rockSlideRockState`/`rockSlideBg3Y`/`rockSlideMonShakeY2`, all still
+pixel-fit/RAM-exact as originally landed, now regression-guarded).
+`npm test` **643/643**, `npm run build` green.

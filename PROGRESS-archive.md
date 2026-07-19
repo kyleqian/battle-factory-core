@@ -1,3 +1,28 @@
+## 128 — Supervisor: Grovyle-faint ground truth merged (turns 3-5, KO + Pidgeotto switch-in) — suite **638/638**; round 8 = slice C (ROCK_SLIDE engine) + victory scout
+
+- **State (verified post-merge):** `npm test` **638/638**, `npm run build`
+  green, tree clean, no worktrees/branches. turn1-cloneanim re-verified
+  **230/230** on the merged tree (slice B complete).
+- **Did (worktree scout, verified then merged, conflict-free):**
+  `battle1-grovyle-faint.json` (7312 frames, 256 captures, twice-run 0
+  mismatch) + full RAM dump + `battle-turn-notes.md` §13 (turns 3-5
+  ledgers, faint timeline, 7-item open list). Headlines: DESTIN switches
+  in **PIDGEOTTO, not Murkrow** (party index 0→2 — a real AI decision,
+  rule unresolved); **a KO's message is button-gated** (control run froze
+  ~2996 ticks without an A press — every future script must press A at
+  KOs); turn-4 falsified §12's AI-repeat prediction (DOUBLE_TEAM, not
+  ENDEAVOR); Onix's Sitrus Berry auto-proc'd (player-side items
+  previously unmodeled); +2 formula re-confirmed on RAM intermediates.
+- **Next:** round 8 — main lane: slice C (ROCK_SLIDE window engine,
+  2193→~2515: move text, monbg Grovyle-hide, BG3 shake, 20 rocks,
+  hit-flash — all §9-pinned); worktree: victory scout (extend through
+  Murkrow+Pidgeotto KOs to the battle-1 WIN and whatever follows — S8's
+  swap-screen prep). Then slice D (drain/turn-end, closes #16's deferred
+  validation) next session if time runs out.
+
+
+---
+
 ## 127 — Bounded worker: **S7 slice B COMPLETE** — banner's real BG1 scroll extracted+composited, clone-edge residual root-caused to opponent-healthbox z-order — `turn1-cloneanim.json` **168/230 → 230/230**; suite 634 → **638/638**
 
 - **State:** `npm test` **638/638** (+4 Tier-1 pins), `npm run build` green,

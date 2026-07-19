@@ -4,6 +4,57 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 131 — Bounded worker: S7 slice C — rock-vs-rock OAM stacking order CLOSED via real slot-allocation + `SortSprites` simulation — `turn1-rockslide.json` **181/256 → 250/256**; suite **643/643**
+
+- **State:** `npm test` **643/643** (+5 Tier-1 pins), `npm run build`
+  green, tree clean. `tools/compare/traces/turn1-rockslide.json`
+  **250/256** — the brief's own named residual (75 frames, all in
+  2362-2453, rock-vs-rock stacking) is **fully closed (0 remaining)**.
+  Zero regressions: turn1-cloneanim 230/230, turn1-kickoff 81/81,
+  fight-submenu 234/235, sendout 255/256, s6-acceptance 224/228, menu-idle
+  69/69 — all re-verified unchanged.
+- **Did:** ported the real `CreateSprite` "lowest free slot" allocator +
+  `SortSprites` insertion-sort comparator (`reference/pokeemerald/
+  src/sprite.c`) into a pure TS simulation (`rockSlideDrawOrder`,
+  `battleMenu.ts`), seeded from a live RAM read of `sSpriteOrder` (no
+  exported symbol — address resolved via `nm`, new probe
+  `tools/probe/dump-rockslide-slot-order.py`). RAM-validated **0
+  mismatches**: slot assignment for all 20 rocks + the shake sprite
+  across 143 sampled RAM ticks, AND the resulting draw order across all
+  117 multi-rock ticks (56 with an exact on-screen-Y tie). Key
+  simplification (also empirically confirmed, not just argued): the
+  20 rocks are RAM-confirmed the *only* sprites in the scene that ever
+  share an exact `oam.priority`/`subpriority` key, so — by a stable
+  sort's own defining property — the simulation only needs to track the
+  20 rocks, not the other ~50 `gSprites[]` slots. Full derivation in
+  docs/battle-menu-notes.md §11.1.
+- **Also found (not fixed, out of scope per this step's brief) — a
+  separate, PRE-EXISTING 6-frame residual**: sweeping the full 256
+  frames (not done with this precision before) surfaced 1px mismatches
+  at ticks 2349/2350/2353/2354/2357/2358, confirmed present before this
+  session's changes too (`git stash` + re-run). All 6 land exactly on
+  `rockSlideBg3Y=-7` ticks, a single stray pixel at (173,92) — a narrow
+  `drawStaticBgShiftedY` sampling bug, unrelated to rock ordering. The
+  prior session's §11 claim that the shake was "independently
+  pixel-exact" was inaccurate (never swept at full precision). Named
+  precisely in docs/battle-menu-notes.md §11.1 rather than worked around,
+  since this step's brief explicitly said not to rework the shake.
+- **Next:** a future session should own `drawStaticBgShiftedY`'s 1px
+  residual (§11.1's own attribution) to close `turn1-rockslide.json` to
+  256/256. Then slice D (drain/turn-end, `pressTick+596`=2516 on —
+  closes ISSUES #16's deferred validation) is next up on the main lane;
+  the victory-scout worktree (SEND OUT confirm + frame-budget analysis,
+  #130's own next-action) is unaffected by this session.
+- **Notes:** the RAM-probe environment
+  (`vendor/mgba-venv/bin/python tools/probe/*.py`) plus
+  `arm-none-eabi-nm -n --defined-only reference/pokeemerald/
+  pokeemerald.elf` for resolving `static` EWRAM symbols with no exported
+  name (this run already used this technique for callback addresses;
+  this session extended it to `sSpriteOrder`/`sSpritePriorities`) made
+  the whole derivation tractable inside one bounded session — no
+  papercuts.
+
+---
 ## 130 — Supervisor: victory scout merged — battle 1's win line is LONGER than one oracle trace: ROCK_SLIDE PP exhausts (silent no-op at 0 PP), Onix faints turn 14 → forced player switch (party ONIX/MAGBY/BAYLEEF revealed); trace ends at 19634 frames vs the 20000 oracle cap — suite **638/638**
 
 - **State (verified post-merge):** `npm test` **638/638**, `npm run build`
@@ -56,43 +107,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   U+2019 glyph, not ASCII `'` — the font has no glyph for the latter) and a
   background-wrap bug (BG3's real vertical period, 256px, wasn't being
   applied to the shake's negative `mapY`, blanking the top 7 screen rows).
-- **Next:** round 9 — close the 75-frame gap: simulate the real `gSprites[]`
-  slot allocation/reuse sequence for rock-vs-rock OAM stacking order (only
-  13 distinct slots host all 20 rocks per the RAM dump; this session's
-  fixed table-index draw order is a heuristic that gets ~71% of frames
-  right, and the reverse order was tried and is worse, not better — the
-  true rule needs actual slot simulation). Then add Tier-1 pins for the new
-  pure functions (`rockSlideRockState`/`rockSlideBg3Y`/`rockSlideMonShakeY2`,
-  time-boxed out this session). Then slice D (drain/turn-end) and the
-  parallel victory-scout lane (#128's own next-action, unaffected by this
-  session).
 - **Notes:** docs/battle-menu-notes.md §11 has the full per-mechanism
   accounting + RAM-probe citations. PAPERCUT: none new — the RAM-probe
   scripts committed by the earlier ground-truth scout session
   (§9.5/`dump-registers.py`/`dump-rockslide-sprites.py`) were directly
   reusable against the already-committed dense traces, saved a lot of time
   versus re-deriving from source alone.
-
----
-## 128 — Supervisor: Grovyle-faint ground truth merged (turns 3-5, KO + Pidgeotto switch-in) — suite **638/638**; round 8 = slice C (ROCK_SLIDE engine) + victory scout
-
-- **State (verified post-merge):** `npm test` **638/638**, `npm run build`
-  green, tree clean, no worktrees/branches. turn1-cloneanim re-verified
-  **230/230** on the merged tree (slice B complete).
-- **Did (worktree scout, verified then merged, conflict-free):**
-  `battle1-grovyle-faint.json` (7312 frames, 256 captures, twice-run 0
-  mismatch) + full RAM dump + `battle-turn-notes.md` §13 (turns 3-5
-  ledgers, faint timeline, 7-item open list). Headlines: DESTIN switches
-  in **PIDGEOTTO, not Murkrow** (party index 0→2 — a real AI decision,
-  rule unresolved); **a KO's message is button-gated** (control run froze
-  ~2996 ticks without an A press — every future script must press A at
-  KOs); turn-4 falsified §12's AI-repeat prediction (DOUBLE_TEAM, not
-  ENDEAVOR); Onix's Sitrus Berry auto-proc'd (player-side items
-  previously unmodeled); +2 formula re-confirmed on RAM intermediates.
-- **Next:** round 8 — main lane: slice C (ROCK_SLIDE window engine,
-  2193→~2515: move text, monbg Grovyle-hide, BG3 shake, 20 rocks,
-  hit-flash — all §9-pinned); worktree: victory scout (extend through
-  Murkrow+Pidgeotto KOs to the battle-1 WIN and whatever follows — S8's
-  swap-screen prep). Then slice D (drain/turn-end, closes #16's deferred
-  validation) next session if time runs out.
-
