@@ -55,6 +55,28 @@ function loadPic(speciesDir: string, picFile: "front.png" | "back.png"): Sprite 
   return { tileset: { columns, rows, tiles: tiles.map((t) => [...t.pixels]) }, palette };
 }
 
+// Mechanism 5 (docs/battle-scene-notes.md §7.11/§7.16): species with
+// `HasTwoFramesAnimation` (all but CASTFORM/DEOXYS/SPINDA/UNOWN) store their
+// front-sprite entrance-animation 2nd frame as the BOTTOM half of a stacked
+// 64x128 `anim_front.png` (top half is frame 0, pixel-identical to
+// front.png - verified below, not assumed). Only GROVYLE's frame 2 is
+// consumed by this run's engine so far (`SPRITE_ANIM_TAG`-less battle front
+// sprites swap to it via `StartSpriteAnim(sprite, 1)`), but all three
+// FRONT_SPECIES have the file, so all three are extracted while here.
+function loadAnimFrame2(speciesDir: string, frame0: Sprite): { columns: number; rows: number; tiles: number[][] } {
+  const image = decodeIndexedPng(join(speciesDir, "anim_front.png"));
+  if (image.width !== 64 || image.height !== 128) {
+    throw new Error(`${speciesDir}/anim_front.png: expected a 64x128 stacked 2-frame pic, got ${image.width}x${image.height}`);
+  }
+  const { columns, rows, tiles } = sliceTiles(image);
+  const frameRows = rows / 2;
+  const frame0Tiles = tiles.slice(0, frameRows * columns);
+  const frame0Match = frame0Tiles.every((t, i) => t.pixels.every((p, j) => p === frame0.tileset.tiles[i]![j]));
+  if (!frame0Match) throw new Error(`${speciesDir}/anim_front.png: top half doesn't match front.png - frame ordering assumption is wrong`);
+  const frame1Tiles = tiles.slice(frameRows * columns);
+  return { columns, rows: frameRows, tiles: frame1Tiles.map((t) => [...t.pixels]) };
+}
+
 // species display name -> reference/pokeemerald's graphics/pokemon/<dir>/ name.
 const BACK_SPECIES: Record<string, string> = {
   ONIX: "onix",
@@ -73,9 +95,12 @@ for (const [species, dir] of Object.entries(BACK_SPECIES)) {
 }
 writeJson(join(ASSETS_GEN, "battle-back-sprites.json"), backSprites);
 
-const opponentFrontSprites: Record<string, Sprite> = {};
+const opponentFrontSprites: Record<string, Sprite & { frame2: { columns: number; rows: number; tiles: number[][] } }> = {};
 for (const [species, dir] of Object.entries(FRONT_SPECIES)) {
-  opponentFrontSprites[species] = loadPic(join(REF, "graphics", "pokemon", dir), "front.png");
+  const speciesDir = join(REF, "graphics", "pokemon", dir);
+  const frame0 = loadPic(speciesDir, "front.png");
+  const frame2 = loadAnimFrame2(speciesDir, frame0);
+  opponentFrontSprites[species] = { ...frame0, frame2 };
 }
 writeJson(join(ASSETS_GEN, "battle-opponent-front-sprites.json"), opponentFrontSprites);
 
