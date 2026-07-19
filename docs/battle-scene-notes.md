@@ -1747,3 +1747,102 @@ commands are recorded above for reproduction.
    attempted this session; likely (not confirmed) owner of some/all of
    1463-1480's growing residual.
 3. The small 1504-1521 boundary residual - unchanged, still last priority.
+
+### 7.19. Engine-slice session: opponent party-summary bar's own exit slide landed (§7.15's flagged sub-gap) - `sendout.json` **199/256 -> 214/256**
+
+Per this step's brief (priority 2 of §7.18's own list): implemented the
+bar's own slide in `drawOpponentSummaryExit` (`battleScene.ts`), source-
+decoded from `SpriteCB_StatusSummaryBar_Exit`
+(`battle_interface.c:1823-1831`), then validated per-tick against the
+oracle across the whole 1462-1521 window.
+
+- **Slide is linear, not accelerating** (unlike the icons):
+  `data[1] += 32` then `&= 0xF` every active tick with no delay gate.
+  32's low 4 bits are always 0, so the mask resets `data[1]` to 0 every
+  tick - `x2 += data[1] >> 4` (reading the pre-mask value the same tick
+  it's added) is therefore a constant `+2px` per active tick, closed form
+  `x2(elapsed) = 2*(elapsed+1)` for the same `elapsed` zero-point the
+  icons/blend already use (direct simulation of the source's own integer
+  arithmetic, not fitted). Direction: `data[0]` is halved from its
+  entrance value (`5/2=2`, C truncating division) right before the exit
+  callback takes over, staying positive - same rightward sign as the
+  icons and the bar's own entrance slide.
+- **The subsprite table ALSO switches the same tick**
+  (`sStatusSummaryBar_Subsprites_Exit`, `battle_interface.c:575-625`): it
+  keeps the entrance layout's first 3 blocks (tileOffsets 0,4,8) and the
+  "tip" block (tileOffset 12), but inserts TWO extra copies of the
+  tileOffset-8 block before the tip - 6 subsprites x 4 tiles = 24 tiles
+  (192px) vs. the entrance layout's 16 tiles (128px). This is not just a
+  slide - the drawn shape itself widens the instant the exit begins
+  (`EXIT_BAR_TILE_ORDER`, built from the existing 16-tile harvested asset,
+  no new extraction needed).
+- **A source-derived (not fitted) render-anchor correction was required
+  once the subsprite table widens**: the Exit table's "tip" subsprite sits
+  64px further right in sprite-local space than the Enter table's tip
+  (`32*2=64` vs `32*0=0`, both tables' own last array entry). Since
+  `OPP_SUMMARY_BAR.x` was originally anchored (by the settled-bar render,
+  `drawBallStatusBar`) to the Enter tip's own mirrored screen position, and
+  h-flip mirroring turns a local-x increase into an equal-magnitude
+  screen-x *decrease*, switching subsprite tables shifts the render anchor
+  by that same 64px constant: `barX = OPP_SUMMARY_BAR.x + x2(elapsed) -
+  64`. This was *derived* from the two Subsprite tables' own literal `x`
+  fields (not curve-fit) but *validated* by an exhaustive oracle-pixel x2
+  sweep per tick (-150..150) that landed on exactly this constant
+  independently, tick after tick - source-cited and pixel-confirmed
+  both ways, per this run's own no-curve-fitting discipline.
+
+**Score effect:** `sendout.json` **199/256 -> 214/256** (+15). Full
+19-trace sweep re-run against the live oracle: all 18 others at their
+exact established counts (anchor 1/1, draft-cursor 13/13, draft-menu
+38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+room-msgbox 142/142, transition 206/206, scene-assembly 256/256,
+rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) - zero
+regressions. One new Tier-1 test (`tests/battleScene.test.ts`) pins the
+bar's tip moving from screen (96,40) at rest to (98,40) at handoff+1,
+oracle-confirmed exact colors both sides.
+
+**Per-tick attribution, 1463-1480 (every tick individually accounted, per
+the brief's acceptance bar):**
+- **1463-1469, 1472-1478, 1480** (15 of 18): bit-exact. NEW this session.
+- **1470** (14px), **1471** (11px), **1479** (34px): NOT the bar - direct
+  pixel dump shows the residual sits in the ICON row (y=32-38, x=185-237,
+  past the trailing icon's own position) with skin/orange tones consistent
+  with Grovyle's own materialize sprite or the icon's vanishing-edge
+  antialiasing, not the bar's green palette. Same character as the
+  already-named icon-boundary/materialize-overlap residuals elsewhere in
+  this window (§7.14/§7.17/§7.18) - not chased further this session, out
+  of this step's scope (the bar itself is closed at these ticks).
+
+**A genuine, out-of-scope finding, named per the brief's own fallback
+rather than fixed:** tick 1462 (handoff+0, still flagged "trainer-exit
+tail" and dominated by ~1161px of trainer-sprite-related diff, unchanged)
+also contains a SEPARATE small gap from the exact same mechanism this
+session touched: `drawSendOutHandoff` never renders the opponent's
+settled (un-faded, un-slid) bar+icons for the single tick between
+"still at rest" (t<handoffTick, rendered by the earlier branch) and
+"first exit-faded frame" (t=handoffTick+1, `drawOpponentSummaryExit`'s
+own `elapsed>=0` gate) - at t=handoffTick itself (`elapsed=-1`) nothing
+draws the opponent side at all. Oracle-confirmed: at t=1462 the real game
+still shows the bar's settled color `(33,57,0)` at screen (96,40); our
+app shows bare background. This is real and mechanism-clear (a one-line
+fix - call the settled render for the opponent side at that one tick) but
+was left untouched per the brief's explicit scope boundary: the bar slide
+is landed for 15/18 target ticks but not "fully landed" (1470/1471/1479
+remain open, owned elsewhere), and tick 1462's own diff is dominated by
+the unrelated trainer-exit-tail piece regardless, so fixing this gap
+would not by itself flip 1462 to a match. Left for a future step to pick
+up explicitly if it chases tick 1462.
+
+**Still open, per this step's own priority order (§7.18's list, updated):**
+1. Particle model: still not full-frame-exact in 1481-1503/1516-1519 (the
+   bar fix incidentally shrank some of this window's pixel mass via
+   reduced icon/bar overlap, but did not close any of these ticks) - the
+   RAM-register-vs-on-screen-timing snag from §7.18 is still the most
+   concrete lead.
+2. 1470/1471/1479's icon-edge/materialize-overlap residual (14/11/34px) -
+   not chased this session, likely the same family as 1481-1492's larger
+   spikes.
+3. Tick 1462's own settled-bar one-tick gap (above) - named, not fixed.
+4. The small 1504-1521 boundary residual - unchanged, still last priority.

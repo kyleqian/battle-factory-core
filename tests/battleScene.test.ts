@@ -415,6 +415,28 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(after).toEqual(before);
   });
 
+  // §7.19: pins the bar's OWN exit slide (`SpriteCB_StatusSummaryBar_Exit`,
+  // `barExitX2` in battleScene.ts) - a constant +2px/tick, distinct from the
+  // icons' accelerating slide, plus the subsprite-table width swap
+  // (`EXIT_BAR_TILE_ORDER`). At rest (1461, still in the pre-handoff settled
+  // branch) the bar's opaque tip pixel sits at screen (96,40) (oracle-
+  // confirmed exact color, direct pixel probe against
+  // tools/compare/out/sendout-baseline). At handoff+1 (1463, the first
+  // active exit tick) that same screen position is bare background - the
+  // tip has slid +2px right to (98,40)/(99,40) (also oracle-confirmed),
+  // proving the slide actually moves the bar rather than just fading it in
+  // place or just widening it. (handoff+0/1462 itself is a separate,
+  // out-of-scope one-tick gap - see docs/battle-scene-notes.md §7.19 - not
+  // used here.)
+  it("opponent party-summary bar: the bar's own tip slides +2px/tick, landing at screen (98-99,40) at handoff+1 (1463) (§7.19 mechanism 1)", () => {
+    const stillSettled = pixelAtSentOut(1461, 96, 40);
+    const slid = pixelAtSentOut(1463, 98, 40);
+    const oldPositionAfterSlide = pixelAtSentOut(1463, 96, 40);
+    expect(stillSettled).toEqual([33, 57, 0]);
+    expect(slid).toEqual([46, 69, 15]);
+    expect(oldPositionAfterSlide).toEqual([255, 255, 255]);
+  });
+
   // §7.17: pins the corrected `drawSpriteSheetAffineStretch` sampling math
   // (the OAM matrix element is `xScale`/`yScale` DIRECTLY, not
   // `0x10000/xScale`) for render tick 1525 (handoff+63, table index 21:

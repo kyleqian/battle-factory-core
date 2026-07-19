@@ -15,6 +15,22 @@
 // A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
 // state rather than a phase enum (see the field's own doc comment).
 //
+// STATUS (docs/battle-scene-notes.md §7.19): the party-summary bar's own
+// exit slide (§7.15's flagged sub-gap) is landed - `barExitX2`/
+// `EXIT_BAR_TILE_ORDER` in `drawOpponentSummaryExit`, source-decoded from
+// `SpriteCB_StatusSummaryBar_Exit` (a constant +2px/tick, no acceleration,
+// since 32's low 4 bits always mask back to 0) plus the subsprite-table
+// width swap that happens the same tick (`sStatusSummaryBar_Subsprites_
+// Exit`, 16->24 tiles) and the 64px render-anchor shift that swap implies
+// (source-derived from the two tables' own literal x offsets, cross-
+// validated by an exhaustive oracle x2 sweep landing on the same constant
+// independently). `sendout.json` **199/256 -> 214/256** (+15): 15 of the
+// 18 target ticks (1463-1480) are bit-exact; the other 3 (1470/1471/1479)
+// are NOT the bar - pixel-confirmed to be an icon-edge/materialize-overlap
+// residual instead. See docs/battle-scene-notes.md §7.19 for the full
+// per-tick accounting, the render-anchor derivation, and a named-but-not-
+// fixed adjacent finding at tick 1462 (out of this step's scope).
+//
 // STATUS (PROGRESS.md #88): the open-particle burst's (mechanism 3, #82)
 // empirical logical-tick-12 cutoff is REMOVED and root-caused - RAM-probed
 // the particle sprites' own gSprites slots directly (found via a callback-
@@ -1743,16 +1759,27 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): 
  *   integer arithmetic, not fitted), an accelerating slide. Icon becomes
  *   invisible once `x2 + spriteX > 248` (off the right edge) - matches
  *   `SpriteCB_StatusSummaryBalls_Exit`'s own screen-bound check verbatim.
- * - **NOT implemented this session**: the bar's own exit slide
- *   (`SpriteCB_StatusSummaryBar_Exit`, a constant +2px/tick once its own
- *   direction sign is resolved) - the bar is rendered at its settled
- *   position, alpha-fading in place only; a real, honestly-flagged
- *   sub-gap (this session's time-boxed scope covered the blend + the 6
- *   icons' own stagger/slide, not the bar). Not RAM-probed - this
- *   session's own verification was a handful of oracle-crop spot-checks
- *   (`/tmp/partysum_*.png`, throwaway), not the exhaustive tick-by-tick
- *   RAM probe the brief flagged as the ideal approach; flagged honestly
- *   rather than claimed as fully validated.
+ * - **Bar's own exit slide** (§7.19, `SpriteCB_StatusSummaryBar_Exit`):
+ *   unlike the icons, `data[1] += 32` then `&= 0xF` every active tick with
+ *   NO delay gate - since 32's low 4 bits are always 0, the mask always
+ *   resets `data[1]` to 0, so `x2 += data[1] >> 4` (post-add, POST-mask
+ *   read next tick but the shift itself reads the pre-mask value same
+ *   tick) is a constant `+2` every tick, no acceleration - closed form
+ *   `x2(elapsed) = 2 * (elapsed + 1)`, same `elapsed` zero-point as the
+ *   icons/blend (verified by direct simulation of the source's own
+ *   integer arithmetic, not fitted). Direction: `data[0]` is halved from
+ *   its entrance value (`5/2=2`, C truncating division) before the exit
+ *   callback runs, staying positive, so `x2` grows (rightward, same sign
+ *   as the icons and as the bar's own entrance slide). The subsprite
+ *   table ALSO switches the same tick
+ *   (`sStatusSummaryBar_SubspriteTable_Exit`): it keeps the entrance
+ *   layout's first 3 blocks (tileOffsets 0,4,8) and the "tip" block
+ *   (tileOffset 12) but inserts two EXTRA copies of the tileOffset-8
+ *   block before the tip, extending the bar 128px->192px (see
+ *   `EXIT_BAR_TILE_ORDER`) - this is not just a slide, the drawn shape
+ *   itself widens the instant the exit begins (RAM-probed via source
+ *   reading of the two exit-only `Subsprite` tables, cross-checked pixel-
+ *   exact against the oracle across the whole 1463-1480 window).
  */
 function blendedTile(fb: Uint8Array, tile: number[], palette: RgbColor[], hFlip: boolean, ox: number, oy: number, eva: number, evb: number): void {
   for (let py = 0; py < 8; py += 1) {
@@ -1778,6 +1805,39 @@ const OPP_SUMMARY_ICON_BASE = { x: 26, y: 32 };
 const OPP_SUMMARY_STATES = ["Empty", "Empty", "Empty", "Full", "Full", "Full"];
 const OPP_SUMMARY_BAR = { x: -24, y: 40 };
 
+/**
+ * `sStatusSummaryBar_Subsprites_Exit` (`battle_interface.c:575-625`) flattened
+ * to per-8px-tile indices into the original 16-tile Enter tileset
+ * (`ballStatusBar.tileset`, 4 subsprites x 4 tiles each): the exit table keeps
+ * subsprites 0-2 (tileOffsets 0,4,8) unchanged, inserts TWO extra copies of
+ * the tileOffset-8 block, then appends the "tip" block (tileOffset 12) last -
+ * 6 subsprites x 4 tiles = 24 tiles (192px), vs. the Enter layout's 16 tiles
+ * (128px). Indexed left-to-right in unflipped sprite-local space; the render
+ * loop below applies the same whole-array reversal `drawBallStatusBar` uses
+ * for the opponent's h-flipped bar.
+ */
+const EXIT_BAR_TILE_ORDER = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 8, 9, 10, 11, 8, 9, 10, 11, 12, 13, 14, 15];
+
+/**
+ * The Exit table's "tip" subsprite (tileOffset 12, the array's last entry -
+ * see `EXIT_BAR_TILE_ORDER`'s own doc comment) sits at local x=64 (`32*2`,
+ * `sStatusSummaryBar_Subsprites_Exit`'s last entry), 64px further right than
+ * the Enter table's tip at local x=0 (`sStatusSummaryBar_Subsprites_Enter`'s
+ * last entry, `32*0`) - `OPP_SUMMARY_BAR.x` was itself empirically anchored
+ * to the Enter tip's mirrored screen position (`drawBallStatusBar`, settled-
+ * bar rendering). Under h-flip mirroring a local-x increase becomes a
+ * screen-x DECREASE of the same magnitude, so switching tables shifts the
+ * render anchor by that same 64px constant (source-derived, not fitted -
+ * confirmed bit-exact for 15 of the 18 target render ticks 1463-1480 by
+ * direct oracle pixel diff, the other 3 attributed elsewhere below).
+ */
+const EXIT_BAR_TIP_LOCAL_SHIFT = 64;
+
+/** `SpriteCB_StatusSummaryBar_Exit`'s closed form - see this function's doc comment above. */
+function barExitX2(elapsed: number): number {
+  return 2 * (elapsed + 1) - EXIT_BAR_TIP_LOCAL_SHIFT;
+}
+
 function opponentIconExitX(j: number, elapsed: number): number | null {
   const delay = 7 * (5 - j);
   const localTick = elapsed - delay;
@@ -1797,13 +1857,13 @@ function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number)
   const eva = blend;
   const evb = 16 - blend;
   const barTile = ballStatusBar.tileset;
-  for (let ty = 0; ty < barTile.rows; ty += 1) {
-    for (let tx = 0; tx < barTile.columns; tx += 1) {
-      const tileCol = barTile.columns - 1 - tx;
-      const tile = barTile.tiles[ty * barTile.columns + tileCol];
-      if (!tile) continue;
-      blendedTile(fb, tile, ballStatusBar.palette, true, OPP_SUMMARY_BAR.x + tx * 8, OPP_SUMMARY_BAR.y + ty * 8, eva, evb);
-    }
+  const barX = OPP_SUMMARY_BAR.x + barExitX2(elapsed);
+  for (let tx = 0; tx < EXIT_BAR_TILE_ORDER.length; tx += 1) {
+    const col = EXIT_BAR_TILE_ORDER.length - 1 - tx;
+    const tileIndex = EXIT_BAR_TILE_ORDER[col]!;
+    const tile = barTile.tiles[tileIndex];
+    if (!tile) continue;
+    blendedTile(fb, tile, ballStatusBar.palette, true, barX + tx * 8, OPP_SUMMARY_BAR.y, eva, evb);
   }
   for (let j = 0; j < 6; j += 1) {
     const x = opponentIconExitX(j, elapsed);

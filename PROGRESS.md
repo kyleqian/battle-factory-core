@@ -5,6 +5,45 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 90 — Bounded worker: opponent party-summary bar's own exit slide landed (§7.15's flagged sub-gap) — `sendout.json` **199/256 → 214/256**
+
+- **State:** `npm test` **468/468** (+1), `npm run build` green, tree
+  clean. Full 19-trace sweep against the live oracle: all 18 others at
+  their exact established counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
+  room-npcs 98/98, room-msgbox 142/142, transition 206/206,
+  scene-assembly 256/256, rent-slot1 125/139, rent-3picks 157/190,
+  confirm-flow 79/95) — zero regressions. `sendout.json`: **199/256 →
+  214/256** (+15).
+- **Did:** priority 2 of §7.18's list. Source-decoded
+  `SpriteCB_StatusSummaryBar_Exit` (`battle_interface.c:1823-1831`): a
+  constant +2px/tick slide (no acceleration — 32's low 4 bits always mask
+  back to 0, unlike the icons' `+=56` accumulator), plus a subsprite-table
+  width swap the same tick (16→24 tiles, `EXIT_BAR_TILE_ORDER`) and the
+  64px render-anchor shift that swap implies (source-derived from both
+  tables' literal x offsets, independently cross-validated by an
+  exhaustive oracle x2 sweep landing on the same constant). 15 of the 18
+  target render ticks (1463-1480) are now bit-exact; the other 3
+  (1470/1471/1479) are pixel-confirmed NOT the bar (icon-edge/materialize-
+  overlap residual instead — skin-tone colors, not the bar's palette). One
+  new Tier-1 test pins the slide. Full per-tick accounting, the anchor
+  derivation, and a named-but-out-of-scope adjacent one-tick gap at tick
+  1462 (real, mechanism-clear, doesn't by itself flip 1462 since that
+  tick's diff is dominated by the unrelated trainer-exit-tail) are all in
+  `docs/battle-scene-notes.md` §7.19.
+- **Next:** per §7.19's updated priority order — (1) particle model still
+  not full-frame-exact in 1481-1503/1516-1519 (§7.18's RAM-vs-render-lag
+  lead); (2) the 1470/1471/1479 icon-edge residual, likely same family as
+  1481-1492's larger spikes; (3) tick 1462's settled-bar gap (named, not
+  fixed); (4) the small 1504-1521 boundary residual, still last priority.
+- **Notes:** particle code, action-menu, healthboxAssembly.ts/healthbox
+  docs, oracle/harness, and ROADMAP.md stayed out of scope, per the
+  brief. No PAPERCUT.
+
+---
+
 ## 89 — Supervisor: healthbox content pipeline COMPLETE (worktree round 2 merged) — 2574/2574 opaque px byte-exact, fully parameterized; ISSUES #16 trimmed to HP-variation/status/wiring
 
 - **State:** `npm test` **467/467**, `npm run build` green, tree clean at
@@ -79,37 +118,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** action-menu window, `healthboxAssembly.ts`/healthbox-
   assembly-notes.md (parallel worktree lane), oracle/harness, and
   ROADMAP.md stayed out of scope, per the brief. No PAPERCUT.
-
----
-
-## 87 — Supervisor: worktree lane merged — ISSUES #16's healthbox "tile remap" DISSOLVED (no remap exists; the old mismatch was un-composited content), real frame compositor + reusable VRAM probe landed alongside the shipping harvest
-
-- **State:** `npm test` **464/464** (+4), `npm run build` green, tree
-  clean at `30b2c26` (merge of `worker/wt-20260718-193456`, run in
-  parallel with #86's main-lane step). `sendout.json` 196/256 and the
-  full-suite counts re-verified by the supervisor post-merge — this merge
-  touches no render path (`battleScene.ts` untouched, 4 new files only).
-- **Did:** RAM/VRAM/OAM ground truth at trace tick 1555
-  (`tools/probe/dump-healthbox-vram.py`, new reusable probe) proved the
-  extracted frame sheet's raster tile order IS the on-screen order:
-  healthboxLeft/Right are two adjoining 64×32 OAM blocks (zero gap), no
-  tile shuffle anywhere — the old 728/2574-opaque-px brute-force mismatch
-  was 100% the three un-composited dynamic content pieces (name/gender
-  text, level text, HP-bar fill). Landed `src/engine/healthboxAssembly.ts`
-  (`composeOpponentHealthbox`), frame byte-exact vs the committed harvest
-  (859/2574 opaque px asserted, rest excluded-not-mismatched), pinned by
-  `tests/healthboxAssembly.test.ts`. NOT wired into `battleScene.ts` —
-  the harvest stays the shipping path this round. Dossier:
-  `docs/healthbox-assembly-notes.md`. ISSUES #16 rewritten to its open
-  remainder: 2 text pieces (FONT_SMALL render drew nothing at the derived
-  footprint — unresolved), HP-bar 3-entry `SubspriteTable` placement,
-  and the final battleScene wiring.
-- **Next:** unchanged from #86 — §7.14 particle divergence (confirmed
-  owner of 1481-1503 + 1516-1519) and §7.15 bar exit slide, toward
-  `sendout.json` 256/256; then action-menu (1560+); #16's remainder is
-  the standing worktree-lane candidate (S7 prep).
-- **Notes:** worktree verified in-lane pre-merge (462/462 there); branch
-  deleted post-merge. Both lanes' round-1 steps green, zero regressions.
 
 ---
 

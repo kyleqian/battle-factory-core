@@ -5,6 +5,37 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 87 — Supervisor: worktree lane merged — ISSUES #16's healthbox "tile remap" DISSOLVED (no remap exists; the old mismatch was un-composited content), real frame compositor + reusable VRAM probe landed alongside the shipping harvest
+
+- **State:** `npm test` **464/464** (+4), `npm run build` green, tree
+  clean at `30b2c26` (merge of `worker/wt-20260718-193456`, run in
+  parallel with #86's main-lane step). `sendout.json` 196/256 and the
+  full-suite counts re-verified by the supervisor post-merge — this merge
+  touches no render path (`battleScene.ts` untouched, 4 new files only).
+- **Did:** RAM/VRAM/OAM ground truth at trace tick 1555
+  (`tools/probe/dump-healthbox-vram.py`, new reusable probe) proved the
+  extracted frame sheet's raster tile order IS the on-screen order:
+  healthboxLeft/Right are two adjoining 64×32 OAM blocks (zero gap), no
+  tile shuffle anywhere — the old 728/2574-opaque-px brute-force mismatch
+  was 100% the three un-composited dynamic content pieces (name/gender
+  text, level text, HP-bar fill). Landed `src/engine/healthboxAssembly.ts`
+  (`composeOpponentHealthbox`), frame byte-exact vs the committed harvest
+  (859/2574 opaque px asserted, rest excluded-not-mismatched), pinned by
+  `tests/healthboxAssembly.test.ts`. NOT wired into `battleScene.ts` —
+  the harvest stays the shipping path this round. Dossier:
+  `docs/healthbox-assembly-notes.md`. ISSUES #16 rewritten to its open
+  remainder: 2 text pieces (FONT_SMALL render drew nothing at the derived
+  footprint — unresolved), HP-bar 3-entry `SubspriteTable` placement,
+  and the final battleScene wiring.
+- **Next:** unchanged from #86 — §7.14 particle divergence (confirmed
+  owner of 1481-1503 + 1516-1519) and §7.15 bar exit slide, toward
+  `sendout.json` 256/256; then action-menu (1560+); #16's remainder is
+  the standing worktree-lane candidate (S7 prep).
+- **Notes:** worktree verified in-lane pre-merge (462/462 there); branch
+  deleted post-merge. Both lanes' round-1 steps green, zero regressions.
+
+---
+
 ## 86 — Bounded worker: send-out mechanism 5's affine-sampling residual fixed - `sendout.json` **180/256 → 196/256** (+16), render ticks 1522-1559 now bit-exact
 
 - **State:** `npm test` **460/460** (+2), `npm run build` green. Full
