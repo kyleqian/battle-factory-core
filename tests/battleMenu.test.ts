@@ -177,3 +177,19 @@ describe("battleMenu: rendered pixels for slice 2 (oracle-pinned, tools/compare/
     expect(pixelAtSentOut(1610, 25, 58)).toEqual([173, 0, 0]);
   });
 });
+
+describe("battleMenu: player status-bar subsprite-split exit (docs/battle-menu-notes.md §3 item 4b, this session), oracle-pinned via tools/compare/traces/menu-throw.json (33/33 0-diff, 41-tick window minus 8 ticks named-blocked by a separate mechanism)", () => {
+  it("tick 1574 itself still renders the flat (pre-switch) Enter-shaped bar - the table switch has the same 1-tick render lag every other register in this window has, so it isn't visible until the next tick", () => {
+    // (232,98) sits at tx=12 of the flat 16-tile draw (barX=136, exit dx=0) -
+    // the "tip" subsprite's own first tile, unaffected by the split either way.
+    expect(pixelAtSentOut(1574, 232, 98)).toEqual([123, 148, 132]);
+  });
+
+  it("tick 1580 renders the widened (24-tile) Exit layout - (220,98) is inside one of the two EXTRA tileOffset-8 duplicate blocks EXIT_BAR_TILE_ORDER inserts before the tip, which the old flat 16-tile draw never had content for at this screen position", () => {
+    expect(pixelAtSentOut(1580, 220, 98)).toEqual([92, 112, 101]);
+  });
+
+  it("tick 1584 (later in the same exit, bar further slid + more faded) still matches the widened layout at a different duplicate-block offset", () => {
+    expect(pixelAtSentOut(1584, 212, 98)).toEqual([116, 133, 125]);
+  });
+});

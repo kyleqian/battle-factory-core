@@ -5,6 +5,56 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 93 — Bounded worker: PLAYER SEND-OUT slice 1 landed — message-box clear + "Go! ONIX!" print + static hold, new `battleMenu.ts`; `menu-text.json` ratified at **18/18** (supervisor-trimmed to the slice's true 1556-1573 window)
+
+- **State:** `npm test` **486/486** (+9), `npm run build` green, tree
+  clean at `84f2d08`. Full 19-trace sweep against the live oracle: all 19
+  at their exact established counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
+  room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
+  256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95,
+  **sendout 214/256 unchanged**) — zero regressions. New
+  `tools/compare/traces/menu-text.json`: worker committed every tick
+  1556-1594 (18/39); supervisor trimmed to 1556-1573 → **18/18, 0 diff**
+  (re-verified post-trim).
+- **Did:** per the brief, new `src/engine/battleMenu.ts` (pure cadence
+  logic) + a 2-line-conditional hook into `battleScene.ts`'s
+  `drawSendOutHandoff` (reuses the existing `drawMessageTextLines`
+  draw path, same B_WIN_MSG/FONT_NORMAL mechanism as battle-scene-notes.md
+  §3.1-3.2 — no new drawing code). Implements docs/battle-menu-notes.md
+  §1/§2 exactly: tick 1563 clears the box and draws "G" the same tick
+  (no blank-box frame), 1564-1571 print the remaining 8 chars 1/tick
+  (silent-but-charged space at 1566, byte-identical frame confirmed), 1572+
+  static (byte-identical confirmed). 9 new Tier-1 tests
+  (`tests/battleMenu.test.ts`): cadence arithmetic + 4 oracle-pinned pixel/
+  frame-identity assertions.
+- **Scope finding (worker) + ratification (supervisor):** ticks 1574-1594
+  of the briefed window diverge because Brendan's throw-pose swap + a
+  ball-icon change genuinely begin at trace tick **1574** — not "~1595" as
+  docs/battle-menu-notes.md §1's coarse pass estimated (worker pinned this
+  by diffing the oracle's own consecutive frames + a visual crop). That is
+  exactly the mechanism the brief ruled out of scope, so the worker landed
+  the verified text/box-clear feature and flagged rather than forcing a
+  fix — correct call, ratified. Supervisor trimmed the trace to the
+  slice's true window (18/18) and corrected §1's table row in
+  docs/battle-menu-notes.md; the next slice owns 1574+ with its own dense
+  trace.
+- **Next:** (1) Brendan's throw pose/exit translation + ball-icon change,
+  starting tick 1574 (needs pixel-tick-exact re-derivation per docs §3's
+  own "Not tick-exact this session" flag, plus the two MISSING asset
+  tables in §6: ball-open particles, affine emerge + color-fade); (2) then
+  ball arc / ONIX materialize / player healthbox (through settle 1693);
+  (3) blank-box + menu draw + idle cycle (1742-1810), per
+  docs/battle-menu-notes.md §3-§5.
+- **Notes:** healthboxAssembly.ts/healthbox docs, oracle/harness, and
+  ROADMAP.md stayed out of scope, per the brief. `battleScene.ts` touchpoint
+  kept minimal/additive (one import, one 8-line conditional) per the
+  brief's concurrent-worker note. No PAPERCUT.
+
+---
+
 ## 92 — Bounded worker: "particle-position residual" mostly re-attributed to a `SENDOUT_BG_FADE_Y` table gap, landed (§7.20) — pixel mass in 1481-1503/1516-1517 cut ~50%, but `sendout.json` **stays 214/256** (supersedes #91's "session end" as the final entry; #91's summary kept intact below)
 
 - **State:** `npm test` **477/477** (+1), `npm run build` green, tree

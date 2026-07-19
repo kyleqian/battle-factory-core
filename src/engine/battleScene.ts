@@ -415,6 +415,7 @@ import {
   playerSummaryFadeEva,
   playerSummaryIconExitDx,
   playerSummaryBarExitDx,
+  PLAYER_SUMMARY_FADE_START_TICK,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -1396,7 +1397,11 @@ function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; pl
   const playerEva = playerSummaryFadeEva(t);
   const barExitDx = playerSummaryBarExitDx(t);
   if (sides.opponent && bars.opponent.visible) drawBallStatusBar(fb, bars.opponent.x, 40, true);
-  if (sides.player && bars.player.visible) drawBallStatusBar(fb, bars.player.x + barExitDx, 96, false, playerEva);
+  if (sides.player && bars.player.visible) {
+    const barX = bars.player.x + barExitDx;
+    if (playerEva !== null && playerBarExitTableActive(t)) drawPlayerSummaryBarExit(fb, barX, playerEva);
+    else drawBallStatusBar(fb, barX, 96, false, playerEva);
+  }
   let playerIconIndex = 0;
   for (const icon of ballIcons(t)) {
     if (!icon.visible) continue;
@@ -1987,6 +1992,45 @@ function opponentIconExitX(j: number, elapsed: number): number | null {
   const offset = (3 * n * (n + 1)) / 2;
   const x = baseX + offset;
   return x > 248 ? null : x;
+}
+
+/**
+ * docs/battle-menu-notes.md §3 (`Task_HidePartyStatusSummary`'s subsprite
+ * split), the PLAYER-side twin of `drawOpponentSummaryExit` above -
+ * `SetSubspriteTables(..., sStatusSummaryBar_SubspriteTable_Exit)`
+ * (`battle_interface.c:1718`) is the exact same call and the exact same
+ * shared table for both sides, so `EXIT_BAR_TILE_ORDER` is reused verbatim.
+ * The only per-side difference is h-flip: `CreatePartyStatusSummarySprites`
+ * only sets `oam.matrixNum = ST_OAM_HFLIP` in the `isOpponent` branch
+ * (`:1499-1507`) - the player's bar sprite is drawn unflipped.
+ *
+ * That changes the render-anchor math entirely: `drawBallStatusBar`'s
+ * unflipped loop maps tile index 0 (subsprite 0, tileOffset 0, local x=-96 -
+ * the array's FIRST entry, not the tip) directly onto the render anchor
+ * `ox` (`ox + tx*8`, no reversal). Subsprite 0 is IDENTICAL between the
+ * Enter and Exit tables (both start `{x: 32*-3, tileOffset: 0}`) - the Exit
+ * table only inserts two extra copies of the tileOffset-8 block *before*
+ * the tip (see `EXIT_BAR_TILE_ORDER`'s own doc comment), so the anchor point
+ * this function uses never moves when the table switches. This is why the
+ * player side needs NO analogue of `EXIT_BAR_TIP_LOCAL_SHIFT` - that 64px
+ * correction is purely a consequence of the opponent's h-flip mirroring
+ * pegging its anchor to the TIP (the array's LAST entry) instead of the
+ * first. Confirmed by exhausting the alternative (a shift constant) against
+ * the oracle: any nonzero shift breaks every tick this renders exact.
+ */
+function playerBarExitTableActive(t: number): boolean {
+  return t - 1 >= PLAYER_SUMMARY_FADE_START_TICK;
+}
+
+/** Draws the widened (24-tile) Exit subsprite layout unflipped at `barX` - see the doc comment above for why no anchor shift is needed. */
+function drawPlayerSummaryBarExit(fb: Uint8Array, barX: number, eva: number): void {
+  const evb = 16 - eva;
+  const tiles = ballStatusBar.tileset.tiles;
+  for (let tx = 0; tx < EXIT_BAR_TILE_ORDER.length; tx += 1) {
+    const tile = tiles[EXIT_BAR_TILE_ORDER[tx]!];
+    if (!tile) continue;
+    blendedTile(fb, tile, ballStatusBar.palette, false, barX + tx * 8, 96, eva, evb);
+  }
 }
 
 function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number): void {

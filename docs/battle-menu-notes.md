@@ -181,12 +181,60 @@ already right, only specific numeric claims needed fixing.
     (`SpriteCB_StatusSummaryBar_Exit`) slides a flat `-2px`/tick (its own
     "acceleration" term never actually grows — `data[1]`'s low nibble is
     unchanged by `+=32` every tick, collapsing the ramp to a constant).
-    All pixel-fit exact at ticks 1574 and 1605-1614; ticks 1575-1604 have
+    All pixel-fit exact at ticks 1574 and 1605-1614; ticks 1575-1604 had
     a small (<1%, 20-136px) residual — `SetSubspriteTables(...,
     sStatusSummaryBar_SubspriteTable_Exit)` (`:1717`) splits the bar into
     independently-animated subsprites during this exact exit, which the
-    engine's monolithic `drawBallStatusBar` doesn't model — **named
-    blocker**, not attempted this session.
+    engine's monolithic `drawBallStatusBar` doesn't model.
+
+    **Landed this session** (`drawPlayerSummaryBarExit`, `battleScene.ts`):
+    this is the *exact same* `SetSubspriteTables` call and the *exact same*
+    shared `sStatusSummaryBar_Subsprites_Exit` table §7.19
+    (`battle-scene-notes.md`) already decoded for the opponent side — only
+    `CreatePartyStatusSummarySprites`'s h-flip differs (`oam.matrixNum =
+    ST_OAM_HFLIP` is set only in the `isOpponent` branch, `:1499-1507`; the
+    player bar is drawn unflipped), so `EXIT_BAR_TILE_ORDER` is reused
+    verbatim, just drawn without whole-array reversal or per-tile hFlip.
+    **Correction to the anchor math**: unlike the opponent (whose h-flipped
+    render anchors to the table's *last* entry, the "tip" — hence
+    `EXIT_BAR_TIP_LOCAL_SHIFT=64`), the player's unflipped
+    `drawBallStatusBar` loop maps tile index 0 (the array's *first* entry,
+    subsprite 0, tileOffset 0, local x=-96) directly onto the render anchor.
+    Subsprite 0 is byte-identical between the Enter and Exit tables (both
+    start `{x:32*-3, tileOffset:0}` — the Exit table only inserts two extra
+    copies of the tileOffset-8 block *before* the tip), so the player's
+    anchor needs **no shift at all** when the table switches — confirmed by
+    testing a nonzero shift against the oracle, which breaks every tick.
+    The switch itself has the same 1-tick render lag as every other
+    register in this window (`ballIcons`/`ballStatusBarPositions`'s own
+    `rt=t-1` convention): the flat/Enter-shaped draw is still exactly right
+    at tick `PLAYER_SUMMARY_FADE_START_TICK` (1574) itself, and the split
+    first becomes visible the next tick (1575) — matching exactly why the
+    residual window was 1575-1604, not 1574-1604. `tools/compare/traces/
+    menu-throw.json` densified to every tick 1574-1614 (41 total):
+    **33/41** at 0 diff (was 11/41 pre-fix; the bar-split residual itself
+    is fully gone — see below for the 8 ticks still excluded and why).
+
+    **A separate, previously-hidden mechanism surfaced once the bar was
+    fixed**: 8 of the 41 ticks (1581-1583, 1589-1591, 1597-1598) still
+    diff, but the mismatch is NOT in the bar — pixel dumps show it's a
+    small (4-26px) blob at y=88-94 (the player ICON row), landing exactly
+    on the icon whose exit-slide position currently overlaps Brendan's own
+    exiting back sprite on screen. Oracle shows Brendan's raw (unblended)
+    skin-tone pixel there; this engine shows the alpha-blended icon color
+    painted over him. Root cause: this software renderer composites purely
+    in draw-call order (icons drawn after Brendan, so they paint over him
+    wherever opaque), but real GBA OAM resolves equal-priority overlaps by
+    sprite/OAM-slot creation order — Brendan's back sprite (`.priority`,
+    created at the intro, long before the status-summary icons) wins the
+    tie and renders in front whenever they overlap. This is a genuinely
+    different mechanism (sprite-priority/creation-order compositing, not
+    the subsprite-split bar this step targeted) and touching the shared
+    `drawSendOutHandoff` draw order would risk regressing `sendout.json`'s
+    own established 215/256 (that function is shared with the whole
+    1462+ send-out window) — **named blocker, not attempted this
+    session**, left for a future step that wants to tackle sprite-priority
+    compositing generally.
 5. `SpriteCB_ReleaseMonFromBall` (`pokeball.c:750`) on arrival:
    `AnimateBallOpenParticles` (sparkle burst), `LaunchBallFadeMonTask(TRUE,
    battler, 14, ballId)` (flat-color silhouette → true color over ~14
@@ -315,19 +363,25 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
 
 ## 7. Risks / follow-ups for the engine slice
 
-1. **Slice 2 landed** (this session): Brendan's throw pose-cycle + exit
-   translation and the thrown ball's arc are engine-modeled exact for
-   ticks 1574 and 1605-1614 (`tools/compare/traces/menu-throw.json`, 0
-   diff). Two concrete, precisely-named follow-ups remain, both real GBA
-   mechanisms this session identified but didn't implement (not
-   estimation gaps — see §3 for the full derivation of each):
+1. **Slice 2 landed**: Brendan's throw pose-cycle + exit translation and
+   the thrown ball's arc are engine-modeled exact for ticks 1574 and
+   1605-1614. **Slice 2b landed this session**: the status-bar's
+   subsprite-split exit (`sStatusSummaryBar_SubspriteTable_Exit`,
+   `drawPlayerSummaryBarExit` in `battleScene.ts`) — `tools/compare/
+   traces/menu-throw.json` densified to every tick 1574-1614 (41 total),
+   **33/41** at 0 diff (up from 11/41; full derivation §3 point 4b). Two
+   concrete, precisely-named follow-ups remain, both real mechanisms this
+   session identified but didn't implement (not estimation gaps):
    - **The ball's GBA affine "spin"** (`StartSpriteAffineAnim(sprite,4)`),
      which takes over at tick 1615 — blocks extending
      `playerThrowBallTopLeft` past 1614 without an affine-matrix keyframe
      renderer (§3 point 4).
-   - **The status-bar's subsprite split** during its exit slide
-     (`sStatusSummaryBar_SubspriteTable_Exit`) — blocks ticks 1575-1604
-     reaching 0 diff (currently <1%/20-136px residual, §3 point 4b).
+   - **Brendan-vs-player-icon sprite-priority compositing** (8 ticks,
+     1581-1583/1589-1591/1597-1598) — this engine draws strictly in
+     draw-call order, but real GBA OAM breaks equal-priority overlap ties
+     by sprite-creation order, so Brendan's back sprite (created at the
+     intro) wins over the later-created status icons whenever their
+     screen footprints briefly cross during his exit slide (§3 point 4b).
    Materialization (~1646+) is still unattempted — §6's two MISSING items
    (ball-open particles, affine emerge + color-fade tables) block it, same
    as before this session.
