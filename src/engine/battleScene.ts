@@ -2078,8 +2078,9 @@ function drawGrovyleStretchEarly(fb: Uint8Array, t: number, handoffTick: number)
  * cross-trace match above is the verification this session actually has.
  * **Not implemented**: WIN0 clipping (unlike `drawSpriteSheetWindowed`,
  * mirroring `drawSendOutBall`'s own same simplification - out of scope for
- * this pass), and z-order between particles (drawn spawn-index order,
- * unverified against real OAM priority).
+ * this pass). Z-order between particles is now a real per-tick
+ * `SortSprites`-derived Y-sort (§7.26/§7.27, `sortAliveParticlesByScreenY`),
+ * not spawn-index order - see that function's own doc comment.
  */
 const PARTICLE_ORIGIN = { x: 172, y: 55 };
 const PARTICLE_SPAWN_COUNT = 16;
@@ -2146,6 +2147,53 @@ function gbaCos(index: number, amplitude: number): number {
   return gbaSin(index + 64, amplitude);
 }
 
+export type AliveParticle = { i: number; age: number; dx: number; dy: number };
+
+/**
+ * §7.26 OAM-priority-compositor model, `struct OamData.priority`/
+ * `struct Sprite.subpriority` literals, source-verified against
+ * `reference/pokeemerald`: `sBallOamData.priority` (`pokeball.c` ~line 104,
+ * shared by every send-out/materialize ball sprite) vs. the literal
+ * `1, 28` `AnimateBallOpenParticles` passes for the whole particle burst
+ * (`pokeball.c:441` opponent, `:757` player). Lower `oam.priority` wins
+ * (renders on top) unconditionally in `SortSprites` (`sprite.c:372-467`)
+ * regardless of screen position or subpriority - since
+ * `PARTICLE_OAM_PRIORITY < BALL_OAM_PRIORITY`, the particle burst always
+ * renders on top of the ball sprite it shares screen space with, which is
+ * why `drawSendOutBall`/`drawPlayerBallOpen` are called before
+ * `drawBallOpenParticles`/`drawPlayerBallOpenParticles` in
+ * `drawSendOutHandoff` below (painter's-algorithm draw order = later-drawn
+ * wins, matching the lower-OAM-priority-wins rule).
+ */
+export const BALL_OAM_PRIORITY = 2;
+export const PARTICLE_OAM_PRIORITY = 1;
+export const PARTICLE_OAM_SUBPRIORITY = 28;
+
+/**
+ * §7.26's real `SortSprites()` model, applied: every particle in one burst
+ * shares the exact same literal `oam.priority`/`subpriority`
+ * (`AnimateBallOpenParticles`, `pokeball.c:441,757` - both call sites pass
+ * literal `1, 28`), so two same-burst particles NEVER resolve their relative
+ * order via priority/subpriority - the entire rule is `SortSprites`'s Y
+ * tie-break (`sprite.c:372-467`): ascending by `oam.y` (`origin.y + dy` here,
+ * the constant origin/centerToCornerVec offset cancels out of the
+ * comparison), and on an EXACT Y tie, the insertion sort's strict `<`
+ * swap condition never fires, so original `sSpriteOrder` order (ascending
+ * sprite-slot/creation-order, i.e. ascending spawn index `i`) survives -
+ * meaning the OLDER (lower-index) particle keeps the lower final OAM index,
+ * i.e. renders ON TOP. Draw order is a painter's algorithm (later draws
+ * overwrite), so: sort ascending by `dy` (lowest Y drawn first/most
+ * background, highest Y drawn last/on top), tie-broken by DESCENDING index
+ * (so within a tie the newest is drawn first and the oldest is drawn last,
+ * landing on top) - this is the exact rule the player-side function's own
+ * prior static "descending spawn index" fit (§7.20-era, superseded below)
+ * was curve-fitting for its own narrow radius~0 window; this generalizes it
+ * to every tick instead of just that one.
+ */
+export function sortAliveParticlesByScreenY(alive: readonly AliveParticle[]): AliveParticle[] {
+  return alive.slice().sort((a, b) => a.dy - b.dy || b.i - a.i);
+}
+
 /** `clipBottom` (screen y at/below which pixels are skipped) is only used by the player-side call site - the opponent's own particle field is never occluded at its screen position, so its call omits it. */
 function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox: number, oy: number, clipBottom?: number): void {
   const tile = battleAnimParticles.tileset.tiles[tileIndex];
@@ -2168,6 +2216,7 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): 
   const logicalT = t - handoffTick - BALL_OPEN_START_OFFSET - 1;
   if (logicalT < 0) return;
   const anim = battleAnimParticles.regularBallAnim;
+  const alive: AliveParticle[] = [];
   for (let i = 0; i < PARTICLE_SPAWN_COUNT; i += 1) {
     let age = logicalT - i;
     if (i >= PARTICLE_LATE_SPAWN_START_INDEX) {
@@ -2178,10 +2227,11 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): 
     if (age < 0 || age > PARTICLE_MAX_AGE) continue;
     const angle = (i % 8) * 32;
     const radius = age === 0 ? 0 : 2 * (age - 1);
-    const dx = gbaSin(angle, radius);
-    const dy = gbaCos(angle, radius);
-    const frame = anim[age % anim.length]!;
-    drawParticleTile(fb, frame.tile, frame.hFlip, PARTICLE_ORIGIN.x + dx, PARTICLE_ORIGIN.y + dy);
+    alive.push({ i, age, dx: gbaSin(angle, radius), dy: gbaCos(angle, radius) });
+  }
+  for (const p of sortAliveParticlesByScreenY(alive)) {
+    const frame = anim[p.age % anim.length]!;
+    drawParticleTile(fb, frame.tile, frame.hFlip, PARTICLE_ORIGIN.x + p.dx, PARTICLE_ORIGIN.y + p.dy);
   }
 }
 
@@ -2233,32 +2283,25 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): 
  * useful range well short of 13, so porting either correction is
  * unverifiable and unnecessary here.
  *
- * **Spawn-index draw order reversed, pixel-confirmed**: unlike the
- * opponent's own `drawBallOpenParticles` (drawn ascending spawn index, i.e.
- * newest-on-top), this function draws index `PARTICLE_SPAWN_COUNT-1` down to
- * `0` (oldest-on-top). The two newly-spawned particles that briefly coexist
- * at radius 0 (a particle's own age-0 tick and the NEXT particle's age-0
- * tick one game-tick later both render at the shared origin, same as the
- * opponent's own age0/age1 no-op overlap) need the OLDER one drawn on top to
- * match the oracle - confirmed by direct A/B against the oracle (ascending
- * order left small 3-24px residuals at ticks 1654-1656, all in the
- * ball-frame's own overlap region; reversing made all three exact). Not
- * ported back to the opponent's own function - out of scope for this
- * session, and its own established committed window doesn't currently
- * exercise this overlap.
+ * **Draw order, §7.27 update**: previously a static reversed spawn-index
+ * loop (oldest-on-top), curve-fit to this window's own radius~0 overlap
+ * ticks; now `sortAliveParticlesByScreenY` (§7.26's real per-tick
+ * `SortSprites` Y-sort, shared with the opponent's own
+ * `drawBallOpenParticles`) - the static reversed order was itself just this
+ * sort's own exact-Y-tie case (see that function's doc comment), which this
+ * generalizes to every tick instead of only the radius~0 ticks it was
+ * fit against.
  *
  * **Verified against the oracle** (`npm run compare` against
  * `tools/compare/traces/menu-materialize.json`): with this origin, the
- * terrain clip, and the reversed draw order, ticks 1653-1656 reach 0 diff.
- * **1657+ still has a small (19-30px), separately-named residual** - not
- * particle-colored (every mismatched pixel is one of the ball-open frame's
- * own colors, `66,66,66`/`214,41,41`/`132,0,0`/`255,156,123`, appearing where
- * this module's own `drawPlayerMaterialize` tint is currently drawn instead)
- * - i.e. a materialize-silhouette-edge issue, the same CLASS of bug
- * `battle-scene-notes.md` §7.21 root-caused for the opponent's own
- * materialize, not this function's own particle mechanism. Not root-caused
- * this session (out of scope for the particle-burst brief; `#98`/`#99` own
- * `drawPlayerMaterialize`) - see `docs/battle-menu-notes.md` §3 item 5.
+ * terrain clip, and the per-tick Y-sort, ticks 1652-1663 (all 12 captured
+ * frames) reach 0 diff - §7.27 closed the previously-named 1657-1662
+ * residual (it was this same particle-vs-particle Y z-order family, not
+ * particle-vs-ball as originally guessed; the ball sprite's own higher
+ * `oam.priority` (2 vs. the particles' 1) already made it lose to the
+ * particle burst unconditionally, so no ball-side change was needed - see
+ * `BALL_OAM_PRIORITY`/`PARTICLE_OAM_PRIORITY` above `sortAliveParticlesByScreenY`).
+ * See `docs/battle-menu-notes.md` §3 item 5.
  */
 const PLAYER_PARTICLE_ORIGIN = { x: 68, y: 106 };
 
@@ -2266,20 +2309,22 @@ function drawPlayerBallOpenParticles(fb: Uint8Array, t: number): void {
   const logicalT = t - PLAYER_BG_FADE_START_TICK;
   if (logicalT < 0) return;
   const anim = battleAnimParticles.regularBallAnim;
-  for (let i = PARTICLE_SPAWN_COUNT - 1; i >= 0; i -= 1) {
+  const alive: AliveParticle[] = [];
+  for (let i = 0; i < PARTICLE_SPAWN_COUNT; i += 1) {
     const age = logicalT - i;
     if (age < 0 || age > PARTICLE_MAX_AGE) continue;
     const angle = (i % 8) * 32;
     const radius = age === 0 ? 0 : 2 * (age - 1);
-    const dx = gbaSin(angle, radius);
-    const dy = gbaCos(angle, radius);
-    const frame = anim[age % anim.length]!;
+    alive.push({ i, age, dx: gbaSin(angle, radius), dy: gbaCos(angle, radius) });
+  }
+  for (const p of sortAliveParticlesByScreenY(alive)) {
+    const frame = anim[p.age % anim.length]!;
     drawParticleTile(
       fb,
       frame.tile,
       frame.hFlip,
-      PLAYER_PARTICLE_ORIGIN.x + dx,
-      PLAYER_PARTICLE_ORIGIN.y + dy,
+      PLAYER_PARTICLE_ORIGIN.x + p.dx,
+      PLAYER_PARTICLE_ORIGIN.y + p.dy,
       PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
     );
   }

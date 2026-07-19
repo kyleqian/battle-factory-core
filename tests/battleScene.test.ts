@@ -1,17 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
   advanceBattleScene,
+  BALL_OAM_PRIORITY,
   ballIcons,
   ballStatusBarPositions,
   cursorState,
   CURSOR_START_TICK,
   evaEvb,
   INITIAL_BATTLE_SCENE_STATE,
+  PARTICLE_OAM_PRIORITY,
+  PARTICLE_OAM_SUBPRIORITY,
   renderBattleScene,
   sendOutPressEligible,
   sendOutTextVisibleChars,
   shiftBottom,
   shiftTop,
+  sortAliveParticlesByScreenY,
   TEXT_START_TICK,
   TEXT_TOTAL_CHARS,
   textVisibleChars,
@@ -543,6 +547,38 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     const PARTICLE_COLOR: [number, number, number] = [255, 173, 0];
     const pixel = pixelAtSentOut(1522, 141, 88);
     expect(pixel).not.toEqual(PARTICLE_COLOR);
+  });
+
+  // §7.26: the real SortSprites() compositor model, source-verified against
+  // reference/pokeemerald (pokeball.c's sBallOamData vs. its
+  // AnimateBallOpenParticles(..., 1, 28, ...) call sites). Lower oam.priority
+  // wins unconditionally, regardless of screen position - the particle burst
+  // (priority 1) always renders on top of the ball sprite (priority 2) it
+  // shares screen space with.
+  it("particle-vs-ball OAM priority: the particle burst's oam.priority (1) beats the ball sprite's (2), source-verified literals from pokeball.c", () => {
+    expect(PARTICLE_OAM_PRIORITY).toBeLessThan(BALL_OAM_PRIORITY);
+    expect(PARTICLE_OAM_SUBPRIORITY).toBe(28);
+  });
+
+  // §7.26 Finding 2: same-burst particles share identical oam.priority/
+  // subpriority, so their relative order is decided ENTIRELY by SortSprites'
+  // Y tie-break - ascending screen Y (higher Y renders on top, i.e. drawn
+  // last), and on an EXACT Y tie the insertion sort's strict `<` never
+  // fires, so original (ascending spawn-index) order survives, meaning the
+  // OLDER (lower-index) particle keeps the lower final OAM index and renders
+  // on top - it must be drawn LAST.
+  it("particle-vs-particle Y tie-break (§7.26): distinct screen Y sorts ascending (higher Y drawn last/on top); an exact Y tie draws the older (lower-index) particle last/on top", () => {
+    const distinctY = sortAliveParticlesByScreenY([
+      { i: 0, age: 5, dx: 0, dy: 10 },
+      { i: 1, age: 3, dx: 0, dy: -4 },
+    ]);
+    expect(distinctY.map((p) => p.i)).toEqual([1, 0]);
+
+    const tiedY = sortAliveParticlesByScreenY([
+      { i: 3, age: 0, dx: 0, dy: 0 },
+      { i: 4, age: 0, dx: 0, dy: 0 },
+    ]);
+    expect(tiedY.map((p) => p.i)).toEqual([4, 3]);
   });
 
   // Mechanism 1 (PROGRESS.md, §7.4.3): the opponent party-status-summary
