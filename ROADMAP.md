@@ -309,9 +309,21 @@ speed → `Random()&1` tie-break, tie branch synthetic-unit-tested),
 `turnRng.ts` (turn-1's 12-step ledger) — hermetically pinned against
 `battle1-turn1-ram-dump.json`'s LCG transitions (19 Tier-1 tests,
 `docs/battle-turn-notes.md` §10, incl. two evidence-cited corrections to
-the earlier groundwork's worked examples). Not yet wired into
-`core.ts`/UI; move-select UI, battle-script sequencing, HP-drain timing,
-text printing are the remaining slices.
+the earlier groundwork's worked examples). Later cross-validated bit-exact
+by turn 2's DRAGON_BREATH (first special-branch exercise, §12).
+**Turn-1 UI/animation chain (2026-07-19 session, supervisor-verified):**
+FIGHT submenu open/nav/close (`fight-submenu.json` 234/235, ISSUES #19's
+1 frame) → move confirm + kickoff text (`turn1-kickoff.json` 81/81) →
+DOUBLE_TEAM clone anim + real-BG1 stat banner (`turn1-cloneanim.json`
+230/230) → full ROCK_SLIDE window incl. 20-rock OAM slot-allocation
+simulation (`turn1-rockslide.json` 250/256 — 6 frames are §11.1's
+pre-existing 1px shake-sampling bug) → HP drain + turn end
+(`turn1-drain.json` 102/102; ISSUES #16 partial-HP path oracle-validated
+exactly). Ground truth banked through turn 14's forced switch
+(§12-§14: turns 2-5 ledgers, faint + Pidgeotto switch-in, PP exhaustion,
+SEND OUT sequence). Remaining for S7: the 1px shake residual, turn-2+
+engine slices (ENDEAVOR/DRAGON_BREATH windows), faint/forced-switch
+engine slice, ISSUES #19.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

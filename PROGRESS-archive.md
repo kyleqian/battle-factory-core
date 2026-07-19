@@ -1,3 +1,28 @@
+## 130 — Supervisor: victory scout merged — battle 1's win line is LONGER than one oracle trace: ROCK_SLIDE PP exhausts (silent no-op at 0 PP), Onix faints turn 14 → forced player switch (party ONIX/MAGBY/BAYLEEF revealed); trace ends at 19634 frames vs the 20000 oracle cap — suite **638/638**
+
+- **State (verified post-merge):** `npm test` **638/638**, `npm run build`
+  green, tree clean, no worktrees/branches. turn1-rockslide re-verified
+  181/256 (slice-C target, #129); turn1-cloneanim 230/230.
+- **Did (worktree scout, verified then merged, conflict-free):**
+  `battle1-victory.json` (19634 frames, twice-run 0/256 mismatch) +
+  3.7MB RAM dump + `battle-turn-notes.md` §14. Headlines: **PP exhaustion
+  is real and silent** (0-PP selection does nothing — no RNG, no text; a
+  fixed-script harness deadlocks); DRAGON_BREATH fallback adapted; turn-13
+  genuine miss; **Onix faints turn 14** (priority QUICK_ATTACK) and the
+  battle does NOT end — forced party-select (SEND OUT/SUMMARY/CANCEL)
+  with reserves MAGBY/BAYLEEF at full HP; trace ends there, one confirm
+  press from continuing vs Pidgeotto at 1/143 HP. Open: the SEND OUT
+  confirm button sequence (several attempts didn't commit the switch);
+  **the full win may not fit the oracle's 20000-frame cap** from anchor —
+  needs either a tighter script or a harness-level cap decision.
+- **Next:** round 9 (final this session) — main lane: slice-C completion
+  (rock slot-allocation simulation → 256/256 + the deferred Tier-1 pins);
+  worktree: crack the SEND OUT confirm + frame-budget analysis (can an
+  efficient line win under 20000 frames? — if provably not, that is an
+  escalation-worthy harness finding for next session). Then slice D
+  (drain/turn-end + ISSUES #16 validation) next session.
+
+---
 ## 129 — Bounded worker: **S7 slice C — ROCK_SLIDE window engine, LARGE MAJORITY LANDED, not yet 0-diff** — `turn1-rockslide.json` **0/256 → 181/256** (2963px total residual, avg ~40px/frame, max 172px, all in the 2362-2453 rock-overlap sub-range); suite **638/638**
 
 - **State:** `npm test` **638/638**, `npm run build` green, tree clean.
