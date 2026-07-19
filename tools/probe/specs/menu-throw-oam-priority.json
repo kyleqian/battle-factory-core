@@ -1,0 +1,298 @@
+{
+ "_comment": "docs/battle-scene-notes.md \u00a77.26 - watches gSprites slot 3 (Brendan's trainer back-pic, PlayerHandleIntroTrainerBallThrow, battle_controller_player.c:2381) and slots 54-59 (the 6 player party-status-summary ball icons, CreatePartyStatusSummarySprites, battle_interface.c:1511) over PROGRESS #96's own named 8-tick Brendan-vs-icon overlap window. oam2 is the 3rd u16 of struct OamData (offset 0x04 within struct Sprite) - priority = (oam2>>10)&3. sub is struct Sprite.subpriority (offset 0x43). y is struct Sprite.y (offset 0x22), included for the SortSprites() Y-tiebreak (only relevant when oam2's priority+subpriority both tie, which they don't for this pair - see finding).",
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 70,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 130,
+   "buttons": []
+  },
+  {
+   "frames": 8,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 96,
+   "buttons": []
+  },
+  {
+   "frames": 24,
+   "buttons": []
+  },
+  {
+   "frames": 162,
+   "buttons": []
+  },
+  {
+   "frames": 54,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 196,
+   "buttons": []
+  },
+  {
+   "frames": 14,
+   "buttons": []
+  },
+  {
+   "frames": 210,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 144,
+   "buttons": []
+  },
+  {
+   "frames": 180,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 80,
+   "buttons": []
+  }
+ ],
+ "watch": [
+  {
+   "name": "brendan_oam2",
+   "addr": "gSprites+0xd0",
+   "size": 2
+  },
+  {
+   "name": "brendan_sub",
+   "addr": "gSprites+0x10f",
+   "size": 1
+  },
+  {
+   "name": "icon0_oam2",
+   "addr": "gSprites+0xe5c",
+   "size": 2
+  },
+  {
+   "name": "icon0_sub",
+   "addr": "gSprites+0xe9b",
+   "size": 1
+  },
+  {
+   "name": "icon0_y",
+   "addr": "gSprites+0xe7a",
+   "size": 2
+  },
+  {
+   "name": "icon1_oam2",
+   "addr": "gSprites+0xea0",
+   "size": 2
+  },
+  {
+   "name": "icon1_sub",
+   "addr": "gSprites+0xedf",
+   "size": 1
+  },
+  {
+   "name": "icon1_y",
+   "addr": "gSprites+0xebe",
+   "size": 2
+  },
+  {
+   "name": "icon2_oam2",
+   "addr": "gSprites+0xee4",
+   "size": 2
+  },
+  {
+   "name": "icon2_sub",
+   "addr": "gSprites+0xf23",
+   "size": 1
+  },
+  {
+   "name": "icon2_y",
+   "addr": "gSprites+0xf02",
+   "size": 2
+  },
+  {
+   "name": "icon3_oam2",
+   "addr": "gSprites+0xf28",
+   "size": 2
+  },
+  {
+   "name": "icon3_sub",
+   "addr": "gSprites+0xf67",
+   "size": 1
+  },
+  {
+   "name": "icon3_y",
+   "addr": "gSprites+0xf46",
+   "size": 2
+  },
+  {
+   "name": "icon4_oam2",
+   "addr": "gSprites+0xf6c",
+   "size": 2
+  },
+  {
+   "name": "icon4_sub",
+   "addr": "gSprites+0xfab",
+   "size": 1
+  },
+  {
+   "name": "icon4_y",
+   "addr": "gSprites+0xf8a",
+   "size": 2
+  },
+  {
+   "name": "icon5_oam2",
+   "addr": "gSprites+0xfb0",
+   "size": 2
+  },
+  {
+   "name": "icon5_sub",
+   "addr": "gSprites+0xfef",
+   "size": 1
+  },
+  {
+   "name": "icon5_y",
+   "addr": "gSprites+0xfce",
+   "size": 2
+  }
+ ],
+ "startTick": 1570
+}

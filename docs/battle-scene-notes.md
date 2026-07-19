@@ -2609,3 +2609,152 @@ scope).
   file. A future session touching this extractor should either restore the
   missing generation code or split the single script's output files so a
   partial re-run can't clobber data it doesn't produce.
+
+### 7.26. OAM-priority compositor (#96): the real `SortSprites()` model derived and RAM/source-verified - one prior hypothesis (Brendan-vs-icon, PROGRESS #96) DISPROVEN, the particle z-order family (§7.25) given a concrete non-guessed mechanism - no code landed, both findings blocked on more RAM work than this session's cap allowed
+
+Per the brief: derive the model, don't guess. Read the real GBA compositor
+source (`reference/pokeemerald/src/sprite.c`) before touching any draw
+order, since the brief's own premise ("every sprite has a knowable OAM
+slot... enumerate slots, draw in decreasing OAM-index order") undersells a
+detail that turns out to matter a lot: pokeemerald does NOT put sprites into
+the hardware OAM buffer in creation-order/array-index order. `BuildOamBuffer`
+(`sprite.c:325-337`) calls `BuildSpritePriorities` (packs a per-sprite sort
+key `subpriority | (oam.priority << 8)`, `:361-370`), then `SortSprites`
+(`:372-467`, a real insertion sort over `sSpriteOrder[]`, keyed primarily on
+that packed value and secondarily, only on an exact tie, on the sprite's
+current unwrapped screen Y), then `AddSpritesToOamBuffer` (`:482-500`) walks
+`sSpriteOrder` in order and assigns REAL hardware OAM index 0, 1, 2... to
+each visible sprite in that sorted sequence. Working through the insertion
+sort's swap condition (`:413-415`,
+`sprite1Priority > sprite2Priority || (equal && sprite1Y < sprite2Y)`) to its
+fixed-point invariant: the final `sSpriteOrder` (and therefore final OAM
+index) is sorted ASCENDING by the packed priority key, with ties broken by
+Y DESCENDING (the sprite lower on screen, i.e. larger `y`, sorts to the
+lower/topmost final index among ties). Combined with the hardware rule the
+brief already states (lower OAM index renders on top): **lower `oam.priority`
+number always wins regardless of OAM slot/creation order or subpriority (it's
+the dominant byte of the packed key); only sprites with the SAME
+`oam.priority` fall through to `subpriority`, and only sprites tied on BOTH
+fall through to "larger current Y wins."** This is a materially different
+(and stricter) model than "enumerate creation-order OAM slots" - two sprites
+with different `oam.priority` never need slot/creation-order data at all, and
+sprites that tie on both `oam.priority` and `subpriority` need PER-TICK
+current `y`, not a static table.
+
+**Finding 1 (menu-throw's 8 Brendan-vs-icon ticks, PROGRESS #96): the named
+hypothesis is DISPROVEN, RAM+source-confirmed - this is NOT a compositing-
+order bug, and the current engine's draw order (icon after Brendan) is
+already the GBA-correct one.** RAM-probed both sprites directly across the
+full named window, ticks 1570-1600 (`tools/probe/specs/menu-throw-oam-
+priority.json`, new this session, watches `gSprites[3]` - identified as
+Brendan's trainer back-pic sprite by callback,
+`AnimTranslateLinear_WithFollowup` at tick 1573 matching the throw-exit
+translation §3 item 2 already established - and `gSprites[54..59]`, the 6
+player status-icon sprites, identified the same way via
+`SpriteCB_StatusSummaryBalls_Exit` starting the same tick, cross-referenced
+against `tools/probe/dump-task-and-sprite-callbacks.py`'s per-tick callback
+dump): Brendan is `oam.priority=2, subpriority=30` at every tick checked,
+never changes; all 6 icons are `oam.priority=1, subpriority=9`, also never
+changes. Source-confirmed independently (not just RAM-read): Brendan's
+sprite is created at `battle_controller_player.c:2381`,
+`CreateSprite(&gMultiuseSpriteTemplate, ..., 30)` (the literal `30`
+matches the RAM-read subpriority exactly), using
+`gOamData_BattleSpritePlayerSide` (`battle_main.c:289-302`, `.priority = 2`);
+the icons are created at `battle_interface.c:1511`,
+`CreateSpriteAtEnd(&sStatusSummaryBallsSpriteTemplates[isOpponent], ..., 9)`,
+using `sOamData_StatusSummaryBalls` (`:678-693`, `.priority = 1`) - both
+literal source constants match the RAM reads exactly. Per the model above:
+`oam.priority` differs (1 vs 2), so this pair NEVER reaches the subpriority
+or Y tie-break - **the icon (priority 1) always renders on top of Brendan
+(priority 2), unconditionally, every tick, regardless of creation order** -
+the exact opposite of PROGRESS #96's "Brendan wins by sprite-creation order"
+guess (which was never RAM-verified, only inferred from the pixel symptom).
+This also matches what the CURRENT engine already does structurally
+(`drawBallIcons` for the player side is called well after Brendan's own draw
+call in `drawSendOutHandoff`, so the icon already paints over Brendan
+wherever both are opaque) - meaning **no reorder is called for here at all**,
+and attempting one (per #96's own guess) would have been actively wrong,
+regressing every one of this window's other 33 already-exact ticks wherever
+Brendan and an icon's footprints happen to overlap correctly today. Direct
+pixel dump of the 8 named ticks (`tools/compare` against a scratch
+`captureFrames: 1578-1600` copy of `menu-throw.json`'s own segments,
+un-committed scratch) confirms the residual doesn't even look like a
+Brendan-vs-icon swap: the oracle's mismatched pixels are light, near-white/
+gray tones (`(255,255,255)`, `(203,201,213)`, `(160,160,168)` - consistent
+with an ALREADY-faded icon or the message-box background), while the app's
+current pixels are darker and more saturated - not a clean "one sprite's
+raw color instead of another's" swap at all. **Corrected**:
+`docs/battle-menu-notes.md` §3 item 4b's "real GBA OAM resolves the tie by
+sprite-creation order (Brendan... wins)" sentence is wrong per the above;
+left in place with a forward-reference to this section rather than rewritten
+outright (the surrounding paragraph's other claims - the pixel symptom
+itself, the exclusion of the 8 ticks - are still accurate) so as not to
+silently erase a supersedable prior claim. **The 8 ticks' real root cause is
+still unknown** - ruled out (order), not found; a future session should
+compare `playerSummaryIconExitDx`/`playerSummaryFadeEva`'s own per-tick
+values against fresh RAM reads for whichever icon is closest to Brendan at
+each of the 8 ticks, since the near-white oracle color is consistent with an
+icon that should already be more-faded (`eva` closer to 16) or already
+farther-exited (`iconExitDx` larger in magnitude) than this engine currently
+computes there - a timing/position bug in the icon's OWN state, not a
+between-sprite ordering bug.
+
+**Finding 2 (§7.25's sendout 1482-84/1497-98, the "particle z-order" family
+- and by the same mechanism, likely #105's menu-materialize 1658-1662): a
+concrete, source-verified rule, not yet implemented.** `AnimateBallOpenParticles`
+(`battle_anim_throw.c:1577`) is called exactly ONCE per send-out to spawn an
+entire particle burst, from a single task (`PokeBallOpenParticleAnimation`)
+that creates all ~16 particles one-or-two per tick; both send-out call sites
+(`pokeball.c:441` opponent, `:757` player) pass **literal, identical**
+`priority=1, subpriority=28` for the WHOLE burst - every particle sprite in
+a burst has the exact SAME `oam.priority` and `subpriority`
+(`PokeBallOpenParticleAnimation`, `pokeball.c:1615-1621`, sets
+`gSprites[spriteId].oam.priority = priority` from that one shared task
+field for every particle it spawns). Per the model above, this means
+particles from the same burst NEVER resolve their relative order via
+priority/subpriority at all - **the entire ordering rule between two
+same-burst particles is `SortSprites`'s Y tie-break: the particle with the
+larger current (unwrapped) on-screen `y` wins (renders on top)**, recomputed
+fresh every tick as each particle's radial position changes
+(`radius = 2*(age-1)`, `dx/dy = gbaSin/gbaCos(angle, radius)` in this
+engine's own `drawBallOpenParticles`/`drawPlayerBallOpenParticles` - `y`
+is NOT monotonic in age or spawn index, since `angle = (i%8)*32` cycles).
+This is exactly why §7.25's own "tried and reverted" static descending-
+spawn-index reorder regressed ticks 1496/1499 while fixing 1482-1485 (spawn
+index is only a coincidental proxy for Y at the specific ticks it was fit
+against, not the real key), and why this codebase's two particle-burst
+functions already needed to hardcode OPPOSITE static draw directions to
+pixel-fit their own narrow windows (`drawBallOpenParticles`: ascending index;
+`drawPlayerBallOpenParticles`: descending index, its own doc comment at
+`battleScene.ts` around line 2236) - both are curve-fits of a Y-sort in
+disguise, each only valid over the narrow span it was fit against. **The
+correct general fix**: replace both functions' static index-direction loop
+with a real per-tick sort of the currently-alive particle indices by their
+computed `PARTICLE_ORIGIN.y + dy` (or the player equivalent), descending,
+immediately before the draw loop - lower computed Y drawn first (more
+background), higher Y drawn last (on top). **Not implemented this session**
+- this section is a derivation, not a landed fix; the RAM-probe budget for
+Finding 1 (above) consumed the remaining time in this session's cap. A
+future session should: (1) implement the per-tick Y-sort for both particle
+functions, verify against `sendout.json` (target: >236/256, watching
+specifically 1482-84/1497-98) and `menu-materialize.json` (target 12/12
+through 1662) with zero regressions elsewhere in the 22-trace sweep, since a
+dynamic sort is a strictly more faithful (not just differently-fit) model
+than either static direction and should subsume both without a per-side
+branch; (2) if #105's own 1658-1662 (particle-vs-BALL, not particle-vs-
+particle) doesn't close from this alone, the ball sprite's own
+`oam.priority`/`subpriority` (not yet RAM-probed - a different sprite from
+either particle burst) is the next thing to pull, using the same
+`tools/probe/specs/menu-throw-oam-priority.json` pattern (RAM-probe first,
+implement second, per this session's own working method).
+
+**Not chased further this round:** the general "enumerate every live
+sprite's slot" compositor the brief's own model paragraph describes -
+Findings 1-2 above show the real rule only needs PAIRWISE `oam.priority`/
+`subpriority`/Y comparisons where two draw calls can actually overlap on
+screen, not a full per-frame OAM table sort; the remaining converging family
+(#105's 1658-1662, particle-vs-ball) and any Brendan-vs-particle or ball-vs-
+icon overlaps this window might also have are unmeasured, not assumed
+absent. `npm test`/`npm run build` unaffected (no code changed this
+session - findings only); full 22-trace sweep unchanged from #105's own
+counts, nothing to regress.

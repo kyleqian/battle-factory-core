@@ -222,19 +222,28 @@ already right, only specific numeric claims needed fixing.
     on the icon whose exit-slide position currently overlaps Brendan's own
     exiting back sprite on screen. Oracle shows Brendan's raw (unblended)
     skin-tone pixel there; this engine shows the alpha-blended icon color
-    painted over him. Root cause: this software renderer composites purely
-    in draw-call order (icons drawn after Brendan, so they paint over him
-    wherever opaque), but real GBA OAM resolves equal-priority overlaps by
-    sprite/OAM-slot creation order — Brendan's back sprite (`.priority`,
-    created at the intro, long before the status-summary icons) wins the
-    tie and renders in front whenever they overlap. This is a genuinely
-    different mechanism (sprite-priority/creation-order compositing, not
-    the subsprite-split bar this step targeted) and touching the shared
-    `drawSendOutHandoff` draw order would risk regressing `sendout.json`'s
-    own established 215/256 (that function is shared with the whole
-    1462+ send-out window) — **named blocker, not attempted this
-    session**, left for a future step that wants to tackle sprite-priority
-    compositing generally.
+    painted over him. Root cause (as originally guessed here, **now
+    DISPROVEN — see `battle-scene-notes.md` §7.26**): this software
+    renderer composites purely in draw-call order (icons drawn after
+    Brendan, so they paint over him wherever opaque), but real GBA OAM
+    resolves equal-priority overlaps by sprite/OAM-slot creation order —
+    Brendan's back sprite (`.priority`, created at the intro, long before
+    the status-summary icons) wins the tie and renders in front whenever
+    they overlap. ~~This is a genuinely different mechanism (sprite-
+    priority/creation-order compositing, not the subsprite-split bar this
+    step targeted) and touching the shared `drawSendOutHandoff` draw order
+    would risk regressing `sendout.json`'s own established 215/256 (that
+    function is shared with the whole 1462+ send-out window)~~ —
+    **correction (§7.26, RAM+source-verified)**: Brendan is
+    `oam.priority=2`; every icon is `oam.priority=1` — real GBA priority
+    comparison is decided by `oam.priority` FIRST (creation order/OAM slot
+    only breaks ties within equal `oam.priority`, which this pair never
+    has), so the icon (lower number) always wins, unconditionally — the
+    engine's current draw order (icon after Brendan) is already correct,
+    and this was never a compositing-order bug. The 8 ticks' real cause is
+    still open (§7.26 has a concrete next hypothesis: the icon's own
+    `eva`/`iconExitDx` state, not sprite ordering) — **do not attempt an
+    order-based fix here**.
 4c. **Landed this session (the ball-spin blocker named above)**: the GBA
     affine "spin" is modeled tick 1615 through arrival, `playerThrowBallSpin`
     (`battleMenu.ts`) + `drawSpriteSheetAffineRotate` (`battleScene.ts`, this

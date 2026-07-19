@@ -1,3 +1,68 @@
+## 103 — Bounded worker: re-derived drawPlayerMaterialize's accumulator/`y2` with the full stack in place (still correct, no change) — the real bug was `PLAYER_BALL_OPEN_END_TICK` over-widened to 1663; RAM-confirmed the true window is 5 ticks (1652-1656) — `menu-materialize.json` **5/5 → 6/6** (+1663); 1657-1662 residual re-scoped, still open
+
+- **State:** `npm test` **520/520**, `npm run build` green, tree clean. Full
+  22-trace sweep against the live oracle: all at their exact established
+  counts (accept-prebattle 137/137, anchor 1/1, confirm-decline 67/67,
+  confirm-flow 79/95, draft-cursor 13/13, draft-menu-slot6 66/66, draft-menu
+  38/38, example 4/4, menu-materialize **6/6**, menu-text 18/18, menu-throw
+  70/70, rent-3picks 157/190, rent-slot1 125/139, room-entry 110/110,
+  room-msgbox 142/142, room-npcs 98/98, scene-assembly 256/256, sendout
+  236/256, summary-info-magby 132/132, summary-info-onix 122/122, transition
+  206/206, walk-warpout 125/125) — zero regressions.
+- **Did:** per the brief's own instruction, re-derived `drawPlayerMaterialize`'s
+  `local+2` accumulator lead + `MATERIALIZE_Y2_TABLE` reuse now that the BG
+  fade (#99) and particle burst (#101) both sit underneath it — re-ran the
+  same exact-tint-pixel-SET brute force §7.21 used (`tools/compare/scratch/
+  menu-audit/reprobe_player_materialize.mjs`) against fresh oracle captures:
+  **the current values are still the best match at every tick** (the
+  residual grows smoothly the same "known-occluder-holes" shape §7.21 itself
+  already documented as benign) — no change needed there. Then RAM-probed
+  the ball sprite directly (`tools/probe/specs/menu-player-materialize.json`,
+  `gSprites[5]`, `animCmdIndex`/`animDelayCounter`): `sBallAnimSeq1`'s "open"
+  frame (`ANIMCMD_FRAME(4,5)`) is only active for 5 RAM ticks (1651-1655),
+  then a genuinely-blank frame takes over — with this window's established
+  +1 render lag, that's renders 1652-1656 only, matching the OPPONENT's own
+  already-correct `drawSendOutBall` window exactly (also 5 ticks). #101's
+  widening of `PLAYER_BALL_OPEN_END_TICK` to 1663 was an unverified guess;
+  shrunk back to 1656. Verified empirically: this leaves ticks 1657-1662
+  completely unchanged (proving the wider window was never load-bearing
+  there) and newly fixes tick 1663 to exact 0 diff (was 1px).
+  `menu-materialize.json`: **5/5 → 6/6** (1652-1656 + 1663, non-contiguous,
+  same precedent as `menu-throw.json`'s own excluded-ticks pattern).
+- **What's still open (1657-1662, small residual, re-scoped not solved)**:
+  every mismatched pixel's color is uniquely in the ball's own palette
+  (`battle-anim-ball-open.json`/`summary-ball.json`) — confirmed by direct
+  palette scan to have zero overlap with the particle palette or ONIX's own
+  back-sprite palette (and mathematically incompatible with any single-
+  coefficient blend of ONIX's grayscale-ish true colors toward the tint).
+  Both of this session's own candidate mechanisms (materialize
+  accumulator/`y2`, ball-open's window) are now proven NOT responsible — a
+  future session should look for a still-unidentified third mechanism,
+  **not** re-try either of these two. Full accounting:
+  `docs/battle-menu-notes.md` §3 item 5.
+- **Next:** root-cause the 1657-1662 residual (now precisely bounded — see
+  above) to close `menu-materialize.json` the rest of the way to the
+  healthbox-slide-in boundary (~1693, still untouched, separately blocked by
+  the already-named coefficient-fade-to-true-color + idle-bob entanglement).
+  Sendout's own 1485-1495 span remains the concurrent worktree lane's
+  territory (unaffected by this session).
+- **Notes:** stayed in `battleMenu.ts`/`battleScene.ts` player-side functions
+  + `tests/battleMenu.test.ts` + `docs/battle-menu-notes.md`, per the brief.
+  Did not touch `battleScene.ts`'s opponent-side internals,
+  `tests/battleScene.test.ts`, or `docs/battle-scene-notes.md`. New
+  committed artifacts: `tools/probe/specs/menu-player-materialize.json`,
+  `tools/compare/scratch/menu-audit/reprobe_player_materialize.mjs`.
+  PAPERCUT: the "materialize-silhouette-edge" naming from #101 turned out to
+  describe a symptom (ball-palette colors near the tint boundary), not the
+  actual mechanism (which was a ball-open window timing bug one call-site
+  over) — cost most of this session's time chasing the accumulator/`y2`
+  angle before the RAM probe redirected to the real cause; a future brief
+  for a residual like this might explicitly ask "is the named function even
+  the one drawing the mismatched pixels" as a first triage step, mirroring
+  this session's own eventual A/B-shrink-the-window test.
+
+---
+
 ## 102 — Supervisor: round-7 worktree branch merged (one battleScene.ts draw-order conflict, hand-resolved + re-verified) — `sendout.json` **221 → 236/256**; 1504-1518 span closed by a one-line compositing fix
 
 - **State (verified post-merge):** `npm test` **520/520**, `npm run build`

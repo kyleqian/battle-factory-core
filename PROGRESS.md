@@ -4,6 +4,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 106 — Bounded worker: derived the REAL `SortSprites()` OAM-priority model (source+RAM verified) for #96's compositor — disproved PROGRESS #96's Brendan-vs-icon hypothesis, gave the particle z-order family (§7.25) a concrete non-guessed mechanism; no code landed (documentation-only session, ran out of RAM-probe budget before implementing)
+
+- **State:** `npm test` **523/523**, `npm run build` green, tree clean —
+  unchanged from #105 (no engine code touched this session). Full sweep not
+  re-run (nothing could have regressed; docs/probe-spec only diff).
+- **Did:** read `reference/pokeemerald/src/sprite.c`'s actual
+  `BuildOamBuffer`/`BuildSpritePriorities`/`SortSprites`/
+  `AddSpritesToOamBuffer` chain to derive the REAL compositor rule the
+  brief's own model paragraph undersold: pokeemerald sorts sprites into the
+  hardware OAM buffer by an insertion sort keyed on `subpriority |
+  (oam.priority<<8)` ascending, tie-broken by current unwrapped screen `y`
+  descending — NOT by creation order/array index. RAM-probed
+  (`tools/probe/specs/menu-throw-oam-priority.json`, new, committed) +
+  source-cross-checked (`battle_controller_player.c:2381`,
+  `battle_interface.c:678-693/1511`) the two sprites behind PROGRESS #96's
+  named 8-tick Brendan-vs-icon blocker: Brendan is `oam.priority=2`, every
+  player status icon is `oam.priority=1` — different `oam.priority` means
+  the pair never reaches subpriority/OAM-slot/creation-order at all; the
+  icon ALWAYS wins, unconditionally, exactly matching what the engine's
+  current draw order already does. **#96's "Brendan wins by creation
+  order" hypothesis is disproved** — the 8-tick residual is real but is NOT
+  a compositing-order bug (root cause still open, new hypothesis: icon's
+  own `eva`/`iconExitDx` state, not sprite ordering). Separately,
+  source-traced `AnimateBallOpenParticles` (`battle_anim_throw.c:1577`,
+  called from `pokeball.c:441`/`757`): every particle in one send-out burst
+  shares the exact SAME literal `priority=1, subpriority=28` — so
+  same-burst particle overlaps (§7.25's sendout 1482-84/1497-98, likely
+  #105's menu-materialize 1658-1662) are resolved ENTIRELY by the Y
+  tie-break, recomputed per-tick as each particle's radial position moves —
+  not by spawn index (explains why §7.25's static descending-spawn-index
+  reorder regressed elsewhere: spawn index is only a coincidental Y proxy,
+  since `angle=(i%8)*32` isn't monotonic in age). Full derivation + source
+  citations: `docs/battle-scene-notes.md` §7.26. Corrected (not rewrote)
+  `docs/battle-menu-notes.md` §3 item 4b's disproved claim with a
+  forward-reference.
+- **Next:** implement the per-tick Y-sort in `drawBallOpenParticles`/
+  `drawPlayerBallOpenParticles` (replace the static ascending/descending
+  index loops), verify against `sendout.json` (>236/256) and
+  `menu-materialize.json` (12/12 through 1662) with a full 22-trace
+  zero-regression sweep; if #105's own 1658-1662 doesn't close from that
+  alone (it's particle-vs-BALL, not particle-vs-particle), RAM-probe the
+  ball sprite's own `oam.priority`/`subpriority` next (same probe pattern).
+  Menu-throw's 8 ticks need fresh investigation along the new eva/
+  iconExitDx hypothesis, not a reorder. Then healthbox slide-in, menu draw
+  + idle, S6 acceptance.
+- **Notes:** this step's brief asked for a full OAM-priority compositor
+  rewrite of `drawSendOutHandoff`; the real `SortSprites` model (above)
+  turned out to require RAM-probing each relevant sprite PAIR individually
+  (not a one-shot "enumerate all slots" table) — only got through one pair
+  (Brendan/icon) plus one source-only derivation (particles) before the
+  cap. Per the brief's own explicit fallback ("if the full model can't land
+  green in-cap... document the rest"), landed research only — a code
+  change here without time to verify the 22-trace sweep would have violated
+  the brief's own "any regression = stop and bisect" discipline. New
+  committed artifact: `tools/probe/specs/menu-throw-oam-priority.json`. No
+  PAPERCUT beyond what's already named (dump-task-and-sprite-callbacks.py's
+  symbol resolution still requires a separate offline `nm` step, as its own
+  docstring already says).
+
+---
 
 ## 105 — Bounded worker: applied #104's opponent-side `open.png`/openFinal discovery to the PLAYER ball window — `menu-materialize.json` **6/6 → 7/7** (+1657, contiguous 1652-1657); 1658-1662 residual re-scoped to the already-named particle z-order family
 
@@ -87,70 +147,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** sendout remaining named: 1462, 1470/71/79, 1482-84/1491-98
   region (z-order + small sub-residual). Two lanes independently converged
   on the same missing ball frame from opposite sides this round.
-
----
-
-## 103 — Bounded worker: re-derived drawPlayerMaterialize's accumulator/`y2` with the full stack in place (still correct, no change) — the real bug was `PLAYER_BALL_OPEN_END_TICK` over-widened to 1663; RAM-confirmed the true window is 5 ticks (1652-1656) — `menu-materialize.json` **5/5 → 6/6** (+1663); 1657-1662 residual re-scoped, still open
-
-- **State:** `npm test` **520/520**, `npm run build` green, tree clean. Full
-  22-trace sweep against the live oracle: all at their exact established
-  counts (accept-prebattle 137/137, anchor 1/1, confirm-decline 67/67,
-  confirm-flow 79/95, draft-cursor 13/13, draft-menu-slot6 66/66, draft-menu
-  38/38, example 4/4, menu-materialize **6/6**, menu-text 18/18, menu-throw
-  70/70, rent-3picks 157/190, rent-slot1 125/139, room-entry 110/110,
-  room-msgbox 142/142, room-npcs 98/98, scene-assembly 256/256, sendout
-  236/256, summary-info-magby 132/132, summary-info-onix 122/122, transition
-  206/206, walk-warpout 125/125) — zero regressions.
-- **Did:** per the brief's own instruction, re-derived `drawPlayerMaterialize`'s
-  `local+2` accumulator lead + `MATERIALIZE_Y2_TABLE` reuse now that the BG
-  fade (#99) and particle burst (#101) both sit underneath it — re-ran the
-  same exact-tint-pixel-SET brute force §7.21 used (`tools/compare/scratch/
-  menu-audit/reprobe_player_materialize.mjs`) against fresh oracle captures:
-  **the current values are still the best match at every tick** (the
-  residual grows smoothly the same "known-occluder-holes" shape §7.21 itself
-  already documented as benign) — no change needed there. Then RAM-probed
-  the ball sprite directly (`tools/probe/specs/menu-player-materialize.json`,
-  `gSprites[5]`, `animCmdIndex`/`animDelayCounter`): `sBallAnimSeq1`'s "open"
-  frame (`ANIMCMD_FRAME(4,5)`) is only active for 5 RAM ticks (1651-1655),
-  then a genuinely-blank frame takes over — with this window's established
-  +1 render lag, that's renders 1652-1656 only, matching the OPPONENT's own
-  already-correct `drawSendOutBall` window exactly (also 5 ticks). #101's
-  widening of `PLAYER_BALL_OPEN_END_TICK` to 1663 was an unverified guess;
-  shrunk back to 1656. Verified empirically: this leaves ticks 1657-1662
-  completely unchanged (proving the wider window was never load-bearing
-  there) and newly fixes tick 1663 to exact 0 diff (was 1px).
-  `menu-materialize.json`: **5/5 → 6/6** (1652-1656 + 1663, non-contiguous,
-  same precedent as `menu-throw.json`'s own excluded-ticks pattern).
-- **What's still open (1657-1662, small residual, re-scoped not solved)**:
-  every mismatched pixel's color is uniquely in the ball's own palette
-  (`battle-anim-ball-open.json`/`summary-ball.json`) — confirmed by direct
-  palette scan to have zero overlap with the particle palette or ONIX's own
-  back-sprite palette (and mathematically incompatible with any single-
-  coefficient blend of ONIX's grayscale-ish true colors toward the tint).
-  Both of this session's own candidate mechanisms (materialize
-  accumulator/`y2`, ball-open's window) are now proven NOT responsible — a
-  future session should look for a still-unidentified third mechanism,
-  **not** re-try either of these two. Full accounting:
-  `docs/battle-menu-notes.md` §3 item 5.
-- **Next:** root-cause the 1657-1662 residual (now precisely bounded — see
-  above) to close `menu-materialize.json` the rest of the way to the
-  healthbox-slide-in boundary (~1693, still untouched, separately blocked by
-  the already-named coefficient-fade-to-true-color + idle-bob entanglement).
-  Sendout's own 1485-1495 span remains the concurrent worktree lane's
-  territory (unaffected by this session).
-- **Notes:** stayed in `battleMenu.ts`/`battleScene.ts` player-side functions
-  + `tests/battleMenu.test.ts` + `docs/battle-menu-notes.md`, per the brief.
-  Did not touch `battleScene.ts`'s opponent-side internals,
-  `tests/battleScene.test.ts`, or `docs/battle-scene-notes.md`. New
-  committed artifacts: `tools/probe/specs/menu-player-materialize.json`,
-  `tools/compare/scratch/menu-audit/reprobe_player_materialize.mjs`.
-  PAPERCUT: the "materialize-silhouette-edge" naming from #101 turned out to
-  describe a symptom (ball-palette colors near the tint boundary), not the
-  actual mechanism (which was a ball-open window timing bug one call-site
-  over) — cost most of this session's time chasing the accumulator/`y2`
-  angle before the RAM probe redirected to the real cause; a future brief
-  for a residual like this might explicitly ask "is the named function even
-  the one drawing the mismatched pixels" as a first triage step, mirroring
-  this session's own eventual A/B-shrink-the-window test.
 
 ---
