@@ -360,22 +360,43 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
   });
 
   // §7.5/§7.11 mechanism 4 (PROGRESS.md): the materialize affine-scale-in +
-  // ball-color tint. GROVYLE_CORNER+(32,32) is the sprite's exact center
-  // (tile 36, pixel (0,0), palette index 3, opaque) - a destination pixel
-  // that stays opaque across every accumulator in `affineEmerge`'s table
+  // ball-color tint. GROVYLE_CORNER+(33,32) (one px right of dead-center) is
+  // opaque in the source across every accumulator in `affineEmerge`'s table
   // (near-zero relative offset maps close to source-center regardless of
   // scale), so it's a clean signal for the tint window's own boundaries
-  // without depending on the scale-in's exact per-tick bounding box.
+  // without depending on the scale-in's exact per-tick bounding box. §7.21:
+  // the exact dead-center pixel is no longer usable for render 1481 once
+  // `MATERIALIZE_Y2_TABLE[0]=14` shifts it into `PARTICLE_ORIGIN`'s own
+  // territory (mechanism 3 draws on top there, out of this fix's scope) -
+  // `+(1,0)` was checked directly against the full composited render (not
+  // just the isolated sprite) across every covered tick 1481-1492 and
+  // avoids every occluder.
   it("Grovyle's materialize tint (flat RGB(255,181,247)) is absent before handoff+19 (1481), present through handoff+41 (1503), then a hard cutoff at handoff+42 (1504) (§7.5/§7.11 mechanism 4)", () => {
     const TINT: [number, number, number] = [255, 181, 247];
-    const before = pixelAtSentOut(1480, GROVYLE_CORNER.x + 32, GROVYLE_CORNER.y + 32);
-    const first = pixelAtSentOut(1481, GROVYLE_CORNER.x + 32, GROVYLE_CORNER.y + 32);
+    const before = pixelAtSentOut(1480, GROVYLE_CORNER.x + 33, GROVYLE_CORNER.y + 32);
+    const first = pixelAtSentOut(1481, GROVYLE_CORNER.x + 33, GROVYLE_CORNER.y + 32 + 14);
     const last = pixelAtSentOut(1503, GROVYLE_CORNER.x + 32, GROVYLE_CORNER.y + 32);
     const after = pixelAtSentOut(1504, GROVYLE_CORNER.x + 32, GROVYLE_CORNER.y + 32);
     expect(before).not.toEqual(TINT);
     expect(first).toEqual(TINT);
     expect(last).toEqual(TINT);
     expect(after).not.toEqual(TINT);
+  });
+
+  // §7.21: the materialize renderer's own vertical `y2` offset (RAM-probed,
+  // `MATERIALIZE_Y2_TABLE`) - pins its exact per-tick decay via the same
+  // occluder-free `+(1,0)` pixel from the test above (the negative case,
+  // "not tinted without the offset," is already covered by that test's
+  // `first` check at tick 1481 alone - later ticks' `y2` is too small to
+  // guarantee the un-offset pixel misses the silhouette too).
+  it("Grovyle's materialize silhouette carries a decaying y2 offset (RAM-probed, §7.21) through renders 1481-1492", () => {
+    const TINT: [number, number, number] = [255, 181, 247];
+    const table = [14, 13, 12, 11, 10, 9, 8, 7, 5, 4, 3, 2];
+    for (let i = 0; i < table.length; i += 1) {
+      const tick = 1481 + i;
+      const shifted = pixelAtSentOut(tick, GROVYLE_CORNER.x + 33, GROVYLE_CORNER.y + 32 + table[i]!);
+      expect(shifted).toEqual(TINT);
+    }
   });
 
   // Mechanism 3 (PROGRESS.md, docs/battle-anim-assets.md §1): the ball-open

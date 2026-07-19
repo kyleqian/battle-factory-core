@@ -1970,3 +1970,182 @@ different, already-partially-understood mechanisms. Landed rather than
 reverted-and-only-documented on that basis - flagged explicitly here so a
 supervisor reviewing against the stricter bullet can judge/revert if they
 weigh it differently.
+
+### 7.21. Engine-slice session: mechanism 4's materialize silhouette-edge residual root-caused via direct RAM probe (a render-lag off-by-one + a missing `y2` bob, not a shared bug with mechanism 5) - `sendout.json` **214/256 -> 215/256**
+
+Per this step's brief: root-cause the affine-EDGE residual family named in
+§7.20 (mechanism 4's materialize-tint SILHOUETTE EDGE, dominant in render
+ticks 1481-1503) and cross-check it against §7.16's own named stretch-affine-
+edge residual (mechanism 5), on the hypothesis that one sampling-convention
+fix might cover both.
+
+**That hypothesis does NOT hold, checked from source first, per this run's
+own rule.** `sAffineAnim_Battler_Emerge` (mechanism 4, `src/data.c:144-149`)
+is a generic `AFFINEANIMCMD_FRAME` sprite-affine-animation, processed by
+`ApplyAffineAnimFrameRelativeAndUpdateMatrix`
+(`reference/pokeemerald/src/sprite.c:1302-1314`), which explicitly calls
+`ConvertScaleParam` (`0x10000/scale`, `sprite.c:1316-1319`) before handing
+the result to `ObjAffineSet` - i.e. mechanism 4's own inverted matrix
+convention (`matrixParam = Math.trunc(0x10000/accumulator)`,
+`drawSpriteSheetAffineTinted`) is source-correct, not a bug. Mechanism 5's
+`Anim_VerticalStretch` instead calls `SetAffineData`
+(`pokemon_animation.c:984-999`), which feeds `xScale`/`yScale` **directly**
+into `ObjAffineSet` with no `ConvertScaleParam` step - a genuinely different
+source function, already correctly un-inverted per §7.17's own fix. These
+are two distinct, individually-correct conventions, not the same bug wearing
+two faces - the brief's "shared root cause" lead is falsified by source
+inspection, not by guessing.
+
+**Pixel evidence first, before touching any formula, per this session's own
+practice:** a per-pixel color dump of the 1481-1503 diff region
+(`tools/compare/scratch/materialize_edge_diag.mjs`, run but not committed -
+superseded by the RAM-verified scripts below) showed every mismatched pixel
+in this window is a tint-vs-background boundary pixel (at tick 1481: 100
+total diff = 41 "we render tint, oracle doesn't" + 59 "oracle renders tint,
+we don't", zero of any other category) - confirming the residual really is
+a pure SILHOUETTE SHAPE mismatch, not a color/blend bug, exactly as §7.20
+named it.
+
+**Brute force (accumulator alone, then accumulator + a Y-destination-offset)
+against the oracle's own exact-tint pixel SET** (not just aggregate diff
+count - `tools/compare/scratch/materialize_accum_bruteforce.mjs`,
+`materialize_2d_bruteforce.mjs`), independent of any RAM data: no single
+`accumulator` value reproduces the oracle's silhouette at any tick (best
+case still hundreds of px off), but jointly searching `accumulator` AND a
+per-tick Y offset converges tightly, and the winning `(accumulator, yOffset)`
+pairs at render ticks 1481/83/85/87/89/91/92 are
+`(58,14) (94,12) (129,10) (166,8) (202,5) (238,3) (256,2)` - `accumulator`
+matches `affineEmergeAccumulator` at exactly ONE LOGICAL TICK LATER than
+what was coded, uniformly, no per-tick exceptions.
+
+**RAM-probed to confirm, not left as a coincidental curve-fit**
+(`tools/probe/specs/sendout-grovyle-materialize.json`, `gSprites[8]` -
+watching `oam.x`/`y2`/`gOamMatrices[2].a` across RAM ticks 1476-1493, the
+same battler-sprite slot and matrix-register technique §7.16 used for
+mechanism 5): both brute-forced numbers are exactly real register values,
+not artifacts of the search.
+- **The accumulator lookup was one logical tick behind.** RAM tick 1479 (the
+  tick `StartSpriteAffineAnim(..., BATTLER_AFFINE_EMERGE)` runs) already
+  writes the anim's first absolute frame - `gOamMatrices[2].a` reads back
+  `1638 = round(0x10000/40)`, i.e. `accumulator=40` -
+  `affineEmergeAccumulator(0)` - but `oam.x` is still 0 (not yet positioned
+  on screen) that same tick, so nothing visible renders. `oam.x` becomes 144
+  (`GROVYLE_CORNER.x`) starting RAM tick 1480, the SAME tick the matrix
+  advances to `accumulator=58` (`gOamMatrices[2].a=1129`,
+  `affineEmergeAccumulator(1)`). With this window's already-established +1
+  render lag (RAM tick N visible at render N+1, re-confirmed yet again
+  here), render 1481 (the first visible tint tick, §7.13's own
+  pixel-brute-force boundary) shows `accumulator=58`, not the previously
+  coded `accumulator=40` - a plain off-by-one in which logical tick the
+  visible position/matrix pairing lands on, not a new mechanism. The RAM
+  values for every one of RAM ticks 1480-1491
+  (58,76,94,112,130,148,166,184,202,220,238,256) are bit-exact matches to
+  `affineEmergeAccumulator(1)` through `affineEmergeAccumulator(12)` - the
+  already-extracted table itself needed no changes, only its lookup offset.
+- **A real, previously-unmodeled vertical bob.** `sprite->y2` is nonzero
+  throughout the same 12-tick ramp - RAM tick 1480 (render 1481) reads
+  `y2=14`, decaying to `y2=0` by RAM tick 1492 (render 1493), then holding
+  zero. `sAffineAnim_Battler_Emerge` itself has no translation field, so
+  this comes from a separate concurrent write - not reverse-engineered to
+  its source this session (flagged as an open follow-up below); the RAM
+  values are trusted directly as ground truth, same precedent as
+  `GROVYLE_STRETCH_TABLE` (§7.16). This is what was producing the
+  "silhouette anchored low, converging toward center" shape §7.20's own
+  pixel evidence hinted at (oracle's exact-tint bounding box at render 1481
+  was y-range [40,50] vs this engine's then-symmetric [28,36] - a ~13px
+  gap, matching `y2=14` almost exactly) - not a coincidence, the brute-force
+  numbers above found the SAME 12 values independently, with zero RAM
+  knowledge, purely from oracle pixels.
+
+**Fix**: `drawSpriteSheetAffineTinted` gained an optional `y2` parameter
+(added to the destination row, mirroring mechanism 5's own already-existing
+`y2` handling in `drawSpriteSheetAffineStretch`); `drawGrovyleMaterialize`
+now looks up `affineEmergeAccumulator(local + 1)` (the off-by-one fix) and a
+new literal `MATERIALIZE_Y2_TABLE` (12 RAM-probed entries, `?? 0` past the
+end - the same "literal RAM table, not a guessed formula" shape as
+`GROVYLE_STRETCH_TABLE`). Purely additive to mechanism 4's own code path;
+mechanism 5 untouched.
+
+**Verified against the oracle's own exact-tint pixel SET before touching the
+full engine** (`tools/compare/scratch/materialize_ram_verify.mjs`): applying
+both RAM-derived corrections together reproduces the oracle's silhouette as
+an exact SUBSET-with-known-holes at every one of render 1481-1493 - every
+remaining mismatched pixel (a `diagCount` of 32-102px, was hundreds before)
+sits inside `BALL_CORNER`'s own footprint (144+26..144+38, 12+40..12+51,
+i.e. squarely inside the ball sprite's own screen box) - i.e. the ball
+sprite (mechanism 2, already implemented and separately validated, §7.12)
+correctly occludes the mon in the real game but our standalone probe script
+doesn't simulate compositing, so those pixels showed as "extra" tint in
+isolation. This is not a new mechanism-4 bug; it's evidence the fix is
+otherwise pixel-exact.
+
+**Score effect, verified against the full composited engine (not just the
+isolated probe)**: `sendout.json` **214/256 -> 215/256** (render **1481**
+newly bit-exact). Full 19-trace sweep re-run against the live oracle: all 18
+others at their exact established counts (anchor 1/1, draft-cursor 13/13,
+draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+122/122, summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+room-msgbox 142/142, transition 206/206, scene-assembly 256/256, rent-slot1
+125/139, rent-3picks 157/190, confirm-flow 79/95) - zero regressions.
+Per-tick pixel mass in 1481-1492 (`localcheck.ts`) dropped sharply and
+monotonically at every tick (examples: 1481 100px->0px, 1485 570px->114px,
+1490 923px->121px, 1492 552px->18px) - only render 1481 crossed the
+strict-zero bar because it's the only tick in this sub-window with no
+ball-occlusion pixels inside the crop (the ball's own open frame is only
+onscreen-and-exact at tick 1480, per §7.12; from 1481 on its footprint
+increasingly overlaps this exact region, which is why 1482-1492 still carry
+a small residual). Two Tier-1 tests updated/added in `tests/battleScene.test.ts`
+pin the corrected lag+`y2` pairing (one pre-existing test's fixed sample
+point had to move off dead-center, since at render 1481 dead-center now
+lands a few px from `PARTICLE_ORIGIN` and gets occluded by mechanism 3 -
+picked a nearby point verified occluder-free against the full composited
+render at every covered tick, not just checked in isolation).
+
+**Mechanism 5 cross-check, concluded (not just asserted): already correct,
+nothing to change.** `drawGrovyleStretch`'s own `GROVYLE_STRETCH_TABLE`
+lookup (`local = t - handoffTick - MATERIALIZE_END_OFFSET`, i.e. render
+1504 reads `table[0]`, documented as "RAM tick 1503's post-tick data") ALREADY
+implements the identical RAM-N-visible-at-render-N+1 convention that
+mechanism 4 was missing - confirmed by re-reading its own doc comment and
+RAM probe spec (`sendout-grovyle-stretch.json`) rather than assumed. This is
+why mechanism 5's own §7.16-named "affine-sampling-edge residual" was
+resolvable by §7.17's two DIFFERENT fixes (matrix inversion + frame
+cadence) without ever needing a lag correction - mechanism 5 never had this
+specific bug. The two mechanisms' residuals shared a family resemblance
+("silhouette edge, resolved by RAM-ground-truth over source formula") but
+not a root cause; §7.16/§7.20's "plausible shared root cause" language is
+retired by this finding, not confirmed.
+
+**Not chased further this session (named, not guessed at):**
+- `y2`'s own source/formula (12 RAM values used as a literal table, same as
+  `GROVYLE_STRETCH_TABLE`'s precedent - a future session could RAM-probe
+  which task/callback writes it, but the literal table is already
+  pixel-exact and sufficient).
+- The small residual still present at renders 1482-1492 (3-126px, down from
+  hundreds) - pixel-confirmed above to be the ball sprite's own occlusion
+  footprint (mechanism 2, already-implemented and separately validated,
+  §7.12) rather than anything wrong with mechanism 4's own corrected shape;
+  closing it would mean revisiting the ball's own visible-frame timing
+  (`BALL_OPEN_START_OFFSET`/blank-frame boundary), which is out of this
+  step's named scope (materialize + stretch) and risks the ball's own
+  already-exact 1464-1480 boundary.
+- Renders 1493-1503: RAM data collected this session (same probe, extended
+  through RAM tick 1502) shows `gOamMatrices[2].a` climbing past neutral
+  (256) again starting RAM tick 1498 (257,258,259,260,262,263 through RAM
+  1503, which is exactly `GROVYLE_STRETCH_TABLE[0].xScale=263` -
+  cross-confirms the two RAM probes agree) and `y2` going slightly negative
+  (`-1`) from RAM tick 1500 - i.e. mechanism 5's own affine write starts
+  bleeding into the matrix register several ticks before its currently-coded
+  render window (1504+) while mechanism 4 is still the one drawing (flat
+  tint, coefficient 16 unchanged per §7.13). This is a genuine, newly-named,
+  NOT-yet-fixed boundary-overlap gap - the current code still freezes
+  mechanism 4's shape at neutral/`y2=0` for renders 1493-1503, which is
+  provably slightly wrong for the tail of that range (RAM tick
+  1498+/render 1499+), but extending either table into this transition
+  risks the already-exact 1522-1559 tail (§7.17) without a lot more RAM
+  cross-checking than this step's remaining time allowed - left precisely
+  named for the next session rather than patched under time pressure.
+- 1470/1471/1479's icon-edge residual, 1462's settled-bar gap, and 1516/1517's
+  single-particle age overrun: unchanged, out of this step's scope per the
+  brief, not investigated.
