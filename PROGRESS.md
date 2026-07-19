@@ -5,6 +5,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 87 — Supervisor: worktree lane merged — ISSUES #16's healthbox "tile remap" DISSOLVED (no remap exists; the old mismatch was un-composited content), real frame compositor + reusable VRAM probe landed alongside the shipping harvest
+
+- **State:** `npm test` **464/464** (+4), `npm run build` green, tree
+  clean at `30b2c26` (merge of `worker/wt-20260718-193456`, run in
+  parallel with #86's main-lane step). `sendout.json` 196/256 and the
+  full-suite counts re-verified by the supervisor post-merge — this merge
+  touches no render path (`battleScene.ts` untouched, 4 new files only).
+- **Did:** RAM/VRAM/OAM ground truth at trace tick 1555
+  (`tools/probe/dump-healthbox-vram.py`, new reusable probe) proved the
+  extracted frame sheet's raster tile order IS the on-screen order:
+  healthboxLeft/Right are two adjoining 64×32 OAM blocks (zero gap), no
+  tile shuffle anywhere — the old 728/2574-opaque-px brute-force mismatch
+  was 100% the three un-composited dynamic content pieces (name/gender
+  text, level text, HP-bar fill). Landed `src/engine/healthboxAssembly.ts`
+  (`composeOpponentHealthbox`), frame byte-exact vs the committed harvest
+  (859/2574 opaque px asserted, rest excluded-not-mismatched), pinned by
+  `tests/healthboxAssembly.test.ts`. NOT wired into `battleScene.ts` —
+  the harvest stays the shipping path this round. Dossier:
+  `docs/healthbox-assembly-notes.md`. ISSUES #16 rewritten to its open
+  remainder: 2 text pieces (FONT_SMALL render drew nothing at the derived
+  footprint — unresolved), HP-bar 3-entry `SubspriteTable` placement,
+  and the final battleScene wiring.
+- **Next:** unchanged from #86 — §7.14 particle divergence (confirmed
+  owner of 1481-1503 + 1516-1519) and §7.15 bar exit slide, toward
+  `sendout.json` 256/256; then action-menu (1560+); #16's remainder is
+  the standing worktree-lane candidate (S7 prep).
+- **Notes:** worktree verified in-lane pre-merge (462/462 there); branch
+  deleted post-merge. Both lanes' round-1 steps green, zero regressions.
+
+---
+
 ## 86 — Bounded worker: send-out mechanism 5's affine-sampling residual fixed - `sendout.json` **180/256 → 196/256** (+16), render ticks 1522-1559 now bit-exact
 
 - **State:** `npm test` **460/460** (+2), `npm run build` green. Full
@@ -131,59 +162,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 84 — Bounded worker: send-out mechanism 5/5 (front-sprite entrance stretch) landed — ALL FIVE mechanisms in — `sendout.json` moves for the first time ever: **174/256 → 180/256**
-
-- **State:** `npm test` **458/458**, `npm run build` green. Full 19-trace
-  sweep against the live oracle: all 18 others at their exact established
-  counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
-  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
-  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
-  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
-  room-msgbox 142/142, transition 206/206, scene-assembly 256/256,
-  rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) — zero
-  regressions. `sendout.json`: **174/256 → 180/256**, the first score
-  movement in this window's whole multi-session history.
-- **Did:** extracted GROVYLE's missing 2nd front-sprite frame
-  (`anim_front.png`'s bottom half, `extract-battle-mon-pics.ts` — top half
-  self-verified pixel-identical to `front.png` first). Implemented
-  `drawGrovyleStretch`/`drawSpriteSheetAffineStretch` (`ANIM_V_STRETCH`,
-  `pokemon_animation.c:1597-1635`) — RAM-probed `gSprites[8]`'s
-  `data[4]`/`data[5]`/`y2` directly (`tools/probe/specs/sendout-grovyle-
-  stretch.json`, committed) rather than reimplementing `Sin()` math, per
-  this run's "RAM/groundtruth over source formulas" rule.
-  `GROVYLE_STRETCH_TABLE` is a literal 36-entry RAM-probed table (RAM ticks
-  1503-1538); the render lag (+1, this window's established family) was
-  independently re-confirmed for this mechanism by brute-forcing lag
-  candidates 0-7 against the oracle's own captures. Also RAM-probed the
-  concurrent ball-tint fade-to-normal (`Task_FadeMon_ToNormal_Step`,
-  `gTasks[3]`'s `tCoeff`, `tools/probe/specs/sendout-grovyle-taskfade.json`,
-  committed): a 15-tick linear ramp 16→1, residual coeff=1 rounds away to
-  nothing for GROVYLE's palette (confirmed directly). Found via direct
-  pixel evidence (not source-assumed) that the front sprite uses frame 2
-  throughout the whole entrance anim, reverting to frame 1 exactly at the
-  already-landed `GROVYLE_MATERIALIZE_TICK` (1544). `localcheck.ts`
-  pixel-diff mass across 1462-1543: **100498→89444px** (−11054px). The 6
-  newly-matching frames are render ticks 1538-1543 (the tail, near-neutral
-  `y2`, sidestepping the residual bug below).
-- **Known residuals, precisely bounded (not curve-fit away):** (1) 2 of the
-  40 covered render ticks (1536/1537) mismatch even with RAM-exact
-  affine params — neighbors on both sides match exactly, so not a lag/table
-  error, unexplained. (2) A larger, more consequential residual across most
-  of the active wobble window (render ~1504-1531): the affine-sampling
-  formula produces out-of-bounds source rows (`sy<0`) for edge pixels once
-  `y2` shifts the visible window, but the oracle shows real opaque content
-  there (`tools/compare/scratch/debug_integration2.mjs`) — suspected but
-  NOT confirmed cause: an off-by-one in the `half`/center convention when
-  combined with nonzero `y2`, or `ObjAffineSet`'s real BIOS-division
-  rounding differing from `Math.trunc(0x10000/scale)` at these magnitudes.
-  This is why most of 1462-1537 still mismatches despite the aggregate
-  pixel-mass improvement — full detail in docs/battle-scene-notes.md §7.16.
-- **Next:** fix the affine-sampling edge-of-bounds bug above (the committed
-  RAM probe data is sufficient to keep iterating on the renderer alone, no
-  new probing needed) — likely worth several more matching ticks once
-  resolved. Independently, two other flagged-but-unrelated gaps remain
-  open: the party-summary bar's own exit slide (§7.15) and the particle
-  model's logical-tick-13+ divergence (§7.14) — neither investigated this
-  session (mechanism 5 was the full scope).
-- **Notes:** action-menu window (1560+), ROADMAP, and the oracle/harness
-  stayed out of scope, per the brief. No PAPERCUT.

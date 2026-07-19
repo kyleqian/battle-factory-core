@@ -5,26 +5,32 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #16 — Opponent healthbox INTERNAL tile-assembly still unimplemented — the
-  S6 send-out slice ships a pixel-harvested static content block instead
+## #16 — Opponent healthbox real assembly: frame SOLVED, three content
+  pieces still open (text ×2, HP-bar subsprite placement) — send-out still
+  ships the pixel-harvested block
 
-**Symptom/debt (recorded by the supervisor at #73, 2026-07-18):** the
-send-out slice renders the opponent healthbox from
-`src/assets/gen/sendout-healthbox-opponent.json` — a flat 100×28 RGB
-rectangle pixel-harvested from the oracle's own settled tick-1555 capture
-(GROVYLE/male/Lv50/full-HP/no-status only). The REAL content-assembly
-pipeline (subsprite tables, per-column HP-bar-fill VRAM copies,
-FONT_SMALL/FONT_BOLD text into the healthbox tiles) is unimplemented;
-`extract-battle-healthbox.ts`'s own extractor comment flags the tile
-remap as unsolved, and #73 re-confirmed the blocker is real (best
-brute-force raster placement still mismatches 728/2574 opaque px).
-**Why it matters later, not now:** fine for S6 (HP never changes before
-the first action menu; this trace's one content is byte-exact incl. the
-23-step slide). S7's HP-bar drain, status icons, and battles 2-7's other
-opponents all need the real assembly. **Leads:** `battle_interface.c`
-(`UpdateHpTextInHealthbox`, `MoveBattleBarGraphically`), the healthbox
-subsprite tables in `data/battle_interface.c`-adjacent sources, and the
-existing extracted healthbox family assets (docs/battle-interface-assets.md).
+**Updated by the supervisor at PROGRESS #87 (2026-07-18):** the long-standing
+"tile remap" blocker was root-caused and DISSOLVED — there is no remap
+(RAM/VRAM/OAM proof: `docs/healthbox-assembly-notes.md`,
+`tools/probe/dump-healthbox-vram.py`). The frame is a flat blit of the
+extracted sheet at (12,14); the old 728/2574-px brute-force mismatch was
+entirely the un-composited dynamic CONTENT. `src/engine/
+healthboxAssembly.ts` (`composeOpponentHealthbox`) now reproduces the frame
+byte-exact vs the harvested block (`tests/healthboxAssembly.test.ts`), but
+is NOT yet the shipping path — `battleScene.ts` still renders
+`src/assets/gen/sendout-healthbox-opponent.json` (harvest, GROVYLE/male/
+Lv50/full-HP only). **Open remainder:** (1) nickname+gender text
+("GROVYLE♂", FONT_SMALL) — footprint pixel-derived, but a first
+`drawText`-infra render attempt drew nothing at the expected position
+(placement/decode mismatch unresolved); (2) level text, same situation;
+(3) HP-bar fill — tile *selection* VRAM-confirmed (`HP_BAR_FULL_TILES`),
+but the healthbar sprite has its own 3-entry `SubspriteTable` and the
+naive single-rectangle placement mismatches; (4) wiring the completed
+compositor into `battleScene.ts` to replace the harvest. Z-order fact for
+(3): healthboxLeft (OAM 1) wins over healthbar (OAM 60) wherever opaque.
+**Why it matters later, not now:** S6's one settled content is byte-exact
+via the harvest; S7's HP drain, status icons, and battles 2-7's other
+opponents need the full pipeline.
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
