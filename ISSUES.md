@@ -5,6 +5,23 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #20 — FONT_NARROW never extracted: FIGHT-submenu move-name/PP/type text
+  is a battle-1-only static harvest, blocks arbitrary movesets (S8/S9)
+
+Opened 2026-07-19 (supervisor, from the FIGHT-submenu worker's flag). The
+move-select submenu's text windows (`B_WIN_MOVE_NAME_*`/`B_WIN_PP`/
+`B_WIN_MOVE_TYPE`) use `FONT_NARROW` — source-confirmed a genuinely
+separate glyph tileset from `FONT_NORMAL` (not just narrower widths), and
+this run has never extracted it (`src/data/gen/` has font-normal/
+font-small only). The shipped slice renders battle 1's fixed Onix moveset
+via per-slot static pixel harvests (`fight-submenu-window.json`,
+pixel-confirmed byte-identical across each slot's dwell — fine for every
+battle-1 trace). Any OTHER moveset (post-swap battles 2-7 in S8, breadth
+in S9) cannot render until `FONT_NARROW` glyphs+widths are extracted and
+the submenu text goes through the real text pipeline like the action menu
+does. Lead: extractor conventions in `tools/extract/extract-battle-*.ts`;
+glyph source `graphics/fonts/`; widths table per font id in `text.c`.
+
 ## #19 — fight-submenu.json residual: tick 2073 (99px, healthbox-adjacent row)
 
 Opened 2026-07-19 (bounded worker, FIGHT-submenu engine slice). `tools/
@@ -23,7 +40,12 @@ optimal at 1/66 mismatches, strictly better than every neighbor). Full
 derivation: `docs/battle-menu-notes.md` §8.
 Affects: `tools/compare/traces/fight-submenu.json` 234/235 (only frame).
 
-## #18 — sendout/S6-acceptance final residual: 1496 (particle z-order, 3px)
+## #18 — [POLICY SETTLED 2026-07-19, user decision] sendout tick 1496
+  (particle z-order, 3px): accepted/parked permanently; S6 ticked [x] with
+  every diff frame individually attributed (3× #5, 1× this entry). The
+  persistent-`sSpriteOrder` architecture build was declined as out of
+  proportion. No further fix attempts unless the user re-opens it.
+  Mechanism record below is kept for attribution evidence.
 
 Parked 2026-07-19 (supervisor); trimmed 2026-07-19 (§7.31, closed tick
 1493); trimmed again 2026-07-19 (§7.32, closed 1494/1495 - a one-tick
@@ -56,42 +78,20 @@ stall). What remains is exactly one tick:
   derivation: `docs/battle-scene-notes.md` §7.32.
 Affects: `sendout.json` 255/256, `s6-acceptance.json` 224/228 (3 frames are
 ISSUES #5's settled pattern, x88-151-confirmed; 1 frame is #18's own 1496).
-S6 stays [~] until this closes or the user re-scopes.
 
-## #16 — Opponent healthbox real assembly: frame SOLVED, three content
-  pieces still open (text ×2, HP-bar subsprite placement) — send-out still
-  ships the pixel-harvested block
+## #16 — Opponent-healthbox compositor: partial-HP/status variants are
+  hermetically tested but have NO oracle-pixel validation yet
 
-**Updated by the supervisor at PROGRESS #89 (2026-07-18):** the assembly
-pipeline is now COMPLETE for the settled full-HP/no-status case:
-`composeOpponentHealthbox` (`src/engine/healthboxAssembly.ts`) reproduces
-the committed harvest byte-exact — **2574/2574 opaque px, zero exclusion
-rects** (`tests/healthboxAssembly.test.ts`), fully parameterized
-(name/gender/level proven generic via MISDREAVUS/female/Lv100 and
-MAGIKARP/none/Lv5 cases). Round-1's "tile remap" was dissolved (no remap
-exists); round 2 solved all three content pieces — HP-bar subsprite
-placement (offsets are CENTER-based, `AddSubspritesToOamBuffer`), nickname+
-gender text (window rows 5-15 rectangular blit; gender symbol uses a
-`{COLOR DYNAMIC_COLOR}` palette override 11/10), level text (healthboxRight
-tile0, right-aligned `xPos=5*(3-digitCount)`, "Lv" = glyph 261). NOTE:
-round-1's z-order claim was corrected — the BAR wins over the frame
-wherever both are opaque. Full evidence: `docs/healthbox-assembly-notes.md`.
-**Round 3 (supervisor, PROGRESS #91):** `hpFraction != 1` and
-`status != "none"` now land too — `CalcBarFilledPixels` arithmetic
-(floor(hpFraction*48), 1px non-faint sliver, strict-`>` band thresholds:
-exactly 50% is yellow, exactly 20% is red), yellow/red tiles from the
-newly-extracted `hpbar_anim.png` (`hpbarAnim` key), opponent status icons
-from the newly-extracted `status2.png` (battler-1 sheet; `status.png` is
-the player's), dynamic per-status palette slot battler+12. All hermetic-
-Tier-1-pinned. **CAVEAT: no oracle pixels exist yet for partial HP or
-status pre-action-menu — oracle validation is deferred to S7's first
-HP-drain trace** (stated in the dossier too). **Open remainder:** wiring
-the compositor into `battleScene.ts` to replace the shipping harvest
-(`src/assets/gen/sendout-healthbox-opponent.json`) — a supervised step,
-deliberately not done while the send-out window is under active pixel
-work — plus that deferred S7 validation. **Why it matters later, not
-now:** S6's settled content is byte-exact via the harvest; S7's HP drain
-and battles 2-7's other opponents consume this pipeline.
+Trimmed 2026-07-19 (supervisor): the compositor pipeline is complete and,
+as of this date, wired live into `battleScene.ts`'s send-out render path
+(zero pixel movement across the full sweep — see `docs/
+healthbox-assembly-notes.md` "Wired live"). What remains is exactly the
+long-stated caveat: `hpFraction != 1` and `status != "none"` rendering
+(`CalcBarFilledPixels`, yellow/red bands, status icons) is pinned only by
+hermetic Tier-1 tests — no oracle pixels exist for those states before the
+first action menu. **Validate against real oracle captures in S7's first
+HP-drain trace**; until then treat the partial-HP/status paths as
+provisional. Battles 2-7's other opponents (S8) consume the same pipeline.
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean

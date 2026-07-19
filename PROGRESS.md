@@ -4,6 +4,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 120 — Supervisor: **S6 → [x] (user decision — 1496 accepted/parked, ISSUES #18 policy-settled)**; healthbox-compositor branch merged (ISSUES #16 trimmed to its deferred-S7-validation stub) — **suite 593/593**; ISSUES #20 filed (FONT_NARROW gap)
+
+- **State (verified post-merge):** `npm test` **593/593**, `npm run build`
+  green, tree clean, no worktrees/branches. Sweeps re-run on the merged
+  tree: fight-submenu 234/235, sendout 255/256, s6-acceptance 224/228,
+  menu-idle 69/69 — unchanged, the compositor swap is pixel-neutral as
+  required.
+- **Did:** (1) user decided option 1 on the escalated S6 question: tick
+  1496 accepted/parked permanently, ROADMAP S6 → **[x]** (commit
+  17794e3), ISSUES #18 rewritten as a policy-settled attribution record
+  (mirrors #5's format). (2) merged the worktree healthbox lane:
+  `composeOpponentHealthbox` now drives the live send-out render (harvest
+  file kept as test fixture only); two both-sides-additive
+  `battleScene.ts`/test import conflicts hand-resolved, full suite run
+  BEFORE the merge commit per the truncated-merge-output lesson.
+  (3) ISSUES #16 trimmed to its one open debt (partial-HP/status oracle
+  validation, due in S7's first HP-drain trace). (4) ISSUES #20 filed:
+  FONT_NARROW was never extracted — submenu text is a battle-1-only
+  harvest, blocks S8/S9 movesets (from #119's flag).
+- **Next:** S7 turn execution — move confirmation (A on ROCK_SLIDE) →
+  battle-script sequencing → HP-drain trace (which also validates #16's
+  partial-HP path against real oracle pixels). Ground truth already
+  banked: battle1-turn1.json v5 + RAM dump + §9 tick tables +
+  battle-move-anim-notes. The S7 core modules (damageCalc/turnOrder/
+  turnRng) are wired-ready but not yet consumed by core.ts.
+- **Notes:** round 3 = 2 workers, both green first try ($4.60/11.6min +
+  ~$15/47min), zero regressions. This makes 6 verified worker steps + 3
+  merges today, suite 555 → 593.
+
+---
 ## 119 — Bounded worker: FIGHT (move-select) submenu engine slice landed — open/nav (all 4 positions)/B-close wired into core.ts, `fight-submenu.json` **234/235** (1 attributed anomaly); suite 579 → **592/592**
 
 - **State:** `npm test` **592/592** (+13 Tier-1), `npm run build` green,
@@ -74,58 +104,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   healthbox-assembly wiring per ISSUES #16), then S7 turn-execution
   slices (battle-script sequencing, HP-drain, text) per battle-turn-notes.
 
----
-## 117 — Bounded worker: closed ISSUES #18's 1494/1495 (a one-tick `drawOpponentSummaryExit` clock stall, found empirically) — `sendout.json` **253/256 → 255/256**; 1496 read source-first per the brief (`CreateSprite`/`CreateSpriteAtEnd`/`SortSprites`), root mechanism identified and documented, no fix shipped — it needs whole-scene persistent state this engine doesn't model, not a tweak
-
-- **State:** `npm test` **576/576** (+1 Tier-1), `npm run build` green, tree
-  clean. Full sweep vs. live oracle: sendout **255/256** (was 253/256,
-  only 1496 open), s6-acceptance 224/228 (unchanged — 1494/95 aren't its
-  sampled frames, only 1496 is, and 1496 didn't move), menu-throw 78/78,
-  menu-materialize 62/62, menu-idle 69/69, menu-text 18/18, scene-assembly
-  256/256, transition 206/206 — zero regressions.
-- **Did (1496 first, source-first per the brief):** read `sprite.c`'s
-  `CreateSprite`/`CreateSpriteAtEnd`/`SortSprites`/`ResetAllSprites` in full.
-  Falsified the standing assumption (ISSUES #18/§7.31): send-out particles
-  use plain `CreateSprite` (`battle_anim_throw.c:1615`, via
-  `PokeBallOpenParticleAnimation`), NOT `CreateSpriteAtEnd` (that allocator
-  is real in this scene, but only for the summary bar's icons/healthbox).
-  Real finding: `sSpriteOrder` is a PERSISTENT 64-slot permutation reset to
-  identity only once (`ResetAllSprites`, battle start) and insertion-sorted
-  in place every frame thereafter; on an exact tie (this residual's exact
-  case) no swap fires, so two tied slots keep whatever relative order they
-  inherited from the ENTIRE prior history of every sprite (any kind) that
-  ever occupied those two slot numbers — not their spawn index or raw slot
-  number. Resolving slots 6-vs-23's real order at tick 1496 would require
-  simulating that whole-scene history as persistent state, a materially
-  bigger architecture change than this engine's current stateless per-burst
-  Y-sort — out of proportion to a 3px fix and exactly the regression risk
-  the brief's sweep-mandate warns about. No fix shipped (a special-cased
-  swap would be undocumented curve-fitting, §7.25's own already-reverted
-  mistake). Full derivation with source line cites: `docs/battle-scene-
-  notes.md` §7.32.
-- **Did (1494/1495, with the time this freed up):** extended
-  `tools/compare/scratch/diag_1493.mjs` (not rewritten) to bisect the exact
-  boundary empirically. Naively extending the draw window while letting
-  `elapsed` keep incrementing over-corrects exactly as §7.31 found
-  (position slides 2px/tick past where the real sprite stopped). Freezing
-  at `elapsed=30` closes 1494 but not 1495; resuming at `elapsed=31` closes
-  1495 but not 1494 — both close together once modeled as a one-tick STALL:
-  `elapsed = rawElapsed<=30 ? rawElapsed : rawElapsed-1` (render 1494 repeats
-  1493's own `elapsed=30`, render 1495 resumes normal counting from there).
-  Same stall family as §7.18's already-documented particle stall; plausible
-  (not independently RAM-confirmed this session) shared cause is the
-  RAM-confirmed slot destroy/reuse event §7.31 already found. New Tier-1
-  test pins both the frozen 1494 edge and the resumed, wider 1495 edge.
-- **Next:** ISSUES #18 now names only 1496, with a documented architectural
-  reason a general fix doesn't fit this engine's current sprite-sort model
-  — a future session should decide whether whole-scene persistent
-  `sSpriteOrder` state is worth building (S6 → [x] blocker otherwise stays
-  parked) or accept it per the run's no-blind-fit policy. S7 (turn
-  resolution) otherwise unblocked and is probably the better next lane.
-- **Notes:** stayed within scope (`battleScene.ts`, `tests/
-  battleScene.test.ts`, `docs/battle-scene-notes.md`, `ISSUES.md`,
-  `PROGRESS.md`, `tools/compare/scratch/diag_1493.mjs` extended). No new
-  probe scripts needed — the existing five from #115/§7.31 plus source
-  reading sufficed. No PAPERCUT this session.
-
----
