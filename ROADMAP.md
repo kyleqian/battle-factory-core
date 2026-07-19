@@ -294,10 +294,20 @@ send-out window 1300-1560 (`docs/battle-scene-notes.md` §7) and player
 send-out + action menu 1560-1810 (`docs/battle-menu-notes.md`), then the
 S6 acceptance trace end-to-end.
 
-### [ ] S7 — Turn resolution: the anchor round's first battle exact
+### [~] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain
 timing, battle text, faint/switch/win — with move animations for the
 movesets actually in play, added until full capture windows pass.
+**Slice 1 complete (2026-07-19, supervisor-verified):** the pure-logic core
+— `damageCalc.ts` (CalculateBaseDamage bit-exact incl. its unconditional
+final `+2`, crit/STAB/type/spread/accuracy), `turnOrder.ts` (priority →
+speed → `Random()&1` tie-break, tie branch synthetic-unit-tested),
+`turnRng.ts` (turn-1's 12-step ledger) — hermetically pinned against
+`battle1-turn1-ram-dump.json`'s LCG transitions (19 Tier-1 tests,
+`docs/battle-turn-notes.md` §10, incl. two evidence-cited corrections to
+the earlier groundwork's worked examples). Not yet wired into
+`core.ts`/UI; move-select UI, battle-script sequencing, HP-drain timing,
+text printing are the remaining slices.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin
