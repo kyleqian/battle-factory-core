@@ -5,6 +5,15 @@ import {
   GO_TEXT_STATIC_FROM_TICK,
   GO_TEXT_TOTAL_CHARS,
   goTextVisibleChars,
+  BRENDAN_THROW_START_TICK,
+  brendanThrowFrame,
+  brendanThrowDx,
+  PLAYER_THROW_BALL_START_TICK,
+  PLAYER_THROW_BALL_EXACT_END_TICK,
+  playerThrowBallTopLeft,
+  playerSummaryFadeEva,
+  playerSummaryIconExitDx,
+  playerSummaryBarExitDx,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -74,5 +83,97 @@ describe("battleMenu: rendered pixels (oracle-pinned, tools/compare/traces/menu-
     renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380 });
     renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380 });
     expect(fb2).toEqual(fb1);
+  });
+});
+
+describe("battleMenu: Brendan's throw pose-swap + exit translation (docs/battle-menu-notes.md §3, slice 2)", () => {
+  it("throw pose starts at tick 1574, not the ~1595 coarse estimate", () => {
+    expect(BRENDAN_THROW_START_TICK).toBe(1574);
+    expect(brendanThrowFrame(BRENDAN_THROW_START_TICK - 1)).toBeNull();
+    expect(brendanThrowDx(BRENDAN_THROW_START_TICK - 1)).toBeNull();
+  });
+
+  it("cycles raw frames 0,1,2,0,3 per sAnimCmd_Brendan_1's own FRAME durations (24,9,24,9,50)", () => {
+    expect(brendanThrowFrame(1574)).toBe(0);
+    expect(brendanThrowFrame(1597)).toBe(0); // et=23, last frame-0 tick
+    expect(brendanThrowFrame(1598)).toBe(1); // et=24
+    expect(brendanThrowFrame(1606)).toBe(1); // et=32, last frame-1 tick
+    expect(brendanThrowFrame(1607)).toBe(2); // et=33
+    expect(brendanThrowFrame(1630)).toBe(2); // et=56, last frame-2 tick
+    expect(brendanThrowFrame(1631)).toBe(0); // et=57
+    expect(brendanThrowFrame(1639)).toBe(0); // et=65, last frame-0-reprise tick
+    expect(brendanThrowFrame(1640)).toBe(3); // et=66
+  });
+
+  it("x2 offset matches the pixel-fit Q8.8 accumulator exactly at every dense-trace tick sampled this session", () => {
+    // tools/compare/traces-groundtruth/battle1-menu-dense.json, 0/1665px
+    // mismatch at every one of these ticks against trainer-pic-brendan-back.json's frame 0/1/2.
+    expect(brendanThrowDx(1574)).toBe(-2);
+    expect(brendanThrowDx(1580)).toBe(-16);
+    expect(brendanThrowDx(1588)).toBe(-36);
+    expect(brendanThrowDx(1596)).toBe(-55);
+    expect(brendanThrowDx(1606)).toBe(-79);
+    expect(brendanThrowDx(1614)).toBe(-98);
+  });
+
+  it("freezes at n=50 (translation duration) instead of continuing to slide forever", () => {
+    const atDurationEnd = brendanThrowDx(BRENDAN_THROW_START_TICK + 49);
+    expect(brendanThrowDx(BRENDAN_THROW_START_TICK + 200)).toBe(atDurationEnd);
+  });
+});
+
+describe("battleMenu: the thrown Poke Ball's arc (docs/battle-menu-notes.md §3, slice 2)", () => {
+  it("becomes visible at tick 1607 (spawn, no motion yet) and stops being modeled after 1614 (GBA affine-spin branch kicks in)", () => {
+    expect(PLAYER_THROW_BALL_START_TICK).toBe(1607);
+    expect(PLAYER_THROW_BALL_EXACT_END_TICK).toBe(1614);
+    expect(playerThrowBallTopLeft(PLAYER_THROW_BALL_START_TICK - 1)).toBeNull();
+    expect(playerThrowBallTopLeft(PLAYER_THROW_BALL_EXACT_END_TICK + 1)).toBeNull();
+    expect(playerThrowBallTopLeft(1607)).toEqual({ x: 16, y: 60 });
+  });
+
+  it("traces the Q8.8 linear-x + sine-arc-y curve exactly at every tick this session pixel-fit (0/112px mismatch each)", () => {
+    expect(playerThrowBallTopLeft(1608)).toEqual({ x: 17, y: 57 });
+    expect(playerThrowBallTopLeft(1609)).toEqual({ x: 19, y: 55 });
+    expect(playerThrowBallTopLeft(1610)).toEqual({ x: 21, y: 54 });
+    expect(playerThrowBallTopLeft(1611)).toEqual({ x: 23, y: 52 });
+    expect(playerThrowBallTopLeft(1612)).toEqual({ x: 25, y: 50 });
+    expect(playerThrowBallTopLeft(1613)).toEqual({ x: 27, y: 49 });
+    expect(playerThrowBallTopLeft(1614)).toEqual({ x: 29, y: 49 });
+  });
+});
+
+describe("battleMenu: player party-status-summary fade-out (the tick-1574 'ball icon change', PROGRESS #93)", () => {
+  it("eva holds at 16 (opaque, no visible blend) the tick the hide task is assigned, then steps down every other tick to 0", () => {
+    expect(playerSummaryFadeEva(BRENDAN_THROW_START_TICK - 1)).toBeNull();
+    expect(playerSummaryFadeEva(1574)).toBe(16);
+    expect(playerSummaryFadeEva(1575)).toBe(15);
+    expect(playerSummaryFadeEva(1576)).toBe(15); // held - data[11] alternates
+    expect(playerSummaryFadeEva(1577)).toBe(14);
+    expect(playerSummaryFadeEva(1605)).toBe(0);
+    expect(playerSummaryFadeEva(1614)).toBe(0); // holds at 0, doesn't go negative
+  });
+
+  it("icon exit-slide is a per-icon-staggered (7 ticks/icon) triangular ramp, pixel-fit exact (icon 0 at tick 1580: -63px)", () => {
+    expect(playerSummaryIconExitDx(1573, 0)).toBe(0);
+    expect(playerSummaryIconExitDx(1580, 0)).toBe(-63); // K=6: -3*6*7/2
+    expect(playerSummaryIconExitDx(1580, 1)).toBe(0); // icon 1's 7-tick predelay hasn't elapsed yet (K=6-7<=0)
+    expect(playerSummaryIconExitDx(1587, 1)).toBe(-63); // icon 1, 7 ticks later, same K=6 shape
+  });
+
+  it("bar exit-slide is a flat -2px/tick (no predelay, no acceleration - data[1]'s low nibble never changes)", () => {
+    expect(playerSummaryBarExitDx(1573)).toBe(0);
+    expect(playerSummaryBarExitDx(1575)).toBe(-2);
+    expect(playerSummaryBarExitDx(1584)).toBe(-20);
+  });
+});
+
+describe("battleMenu: rendered pixels for slice 2 (oracle-pinned, tools/compare/traces/menu-throw.json, 11/11 0-diff)", () => {
+  it("Brendan's throw-pose ink color is present at the translated position on the pose-swap tick (1574)", () => {
+    expect(pixelAtSentOut(1574, 50, 70)).toEqual([247, 247, 255]);
+  });
+
+  it("the thrown ball's ink color is present at its arc position (tick 1607 spawn, tick 1610 mid-arc)", () => {
+    expect(pixelAtSentOut(1607, 20, 64)).toEqual([173, 0, 0]);
+    expect(pixelAtSentOut(1610, 25, 58)).toEqual([173, 0, 0]);
   });
 });

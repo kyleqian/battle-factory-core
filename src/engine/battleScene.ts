@@ -405,7 +405,17 @@
 import type { RgbColor } from "./bg.ts";
 import { drawText, type FontData } from "./font.ts";
 import { blendComponentToWhite } from "./paletteFade.ts";
-import { GO_TEXT, GO_TEXT_START_TICK, goTextVisibleChars } from "./battleMenu.ts";
+import {
+  GO_TEXT,
+  GO_TEXT_START_TICK,
+  goTextVisibleChars,
+  brendanThrowFrame,
+  brendanThrowDx,
+  playerThrowBallTopLeft,
+  playerSummaryFadeEva,
+  playerSummaryIconExitDx,
+  playerSummaryBarExitDx,
+} from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
@@ -1289,16 +1299,21 @@ function drawTileBgFaded(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, sub
 }
 
 const BRENDAN_FRAME_ROWS = brendan.tileset.rows / brendan.frameCount;
-/** Frame index 3 (of 4) is the settled slide-in pose (docs trainer-pic extractor comment) - the other 3 are the send-out throw animation, out of scope for this window. */
+/** One of Brendan's 4 stacked raw back-sprite frames (`trainer-pic-brendan-back.json`), sliced by index - frame 3 is the settled slide-in pose, frames 0-2 are the send-out throw animation (`battleMenu.ts`'s `brendanThrowFrame`). */
+function brendanFrameTileset(frameIndex: number): Tileset {
+  return {
+    columns: brendan.tileset.columns,
+    rows: BRENDAN_FRAME_ROWS,
+    tiles: brendan.tileset.tiles.slice(
+      frameIndex * BRENDAN_FRAME_ROWS * brendan.tileset.columns,
+      (frameIndex + 1) * BRENDAN_FRAME_ROWS * brendan.tileset.columns,
+    ),
+  };
+}
+/** Frame index 3 (of 4) is the settled slide-in pose (docs trainer-pic extractor comment). */
 const BRENDAN_SETTLED_FRAME = 3;
-const brendanSettledTileset: Tileset = {
-  columns: brendan.tileset.columns,
-  rows: BRENDAN_FRAME_ROWS,
-  tiles: brendan.tileset.tiles.slice(
-    BRENDAN_SETTLED_FRAME * BRENDAN_FRAME_ROWS * brendan.tileset.columns,
-    (BRENDAN_SETTLED_FRAME + 1) * BRENDAN_FRAME_ROWS * brendan.tileset.columns,
-  ),
-};
+const brendanSettledTileset: Tileset = brendanFrameTileset(BRENDAN_SETTLED_FRAME);
+const brendanThrowTilesets: readonly Tileset[] = [0, 1, 2, 3].map(brendanFrameTileset);
 
 const OPPONENT_CORNER = { x: 144, y: 8 };
 const PLAYER_CORNER = { x: 48, y: 48 };
@@ -1338,8 +1353,23 @@ function ballStateTileIndex(state: string): number {
   return Math.max(0, ballDisplay.states.indexOf(state));
 }
 
-/** gBattleInterface_BallStatusBarGfx (`ball_status_bar.png`), the diagonal bar the ball icons sit on - corners brute-force-matched against the oracle this session: opponent (-24,40) h-flipped, player (136,96) unflipped, both 212/212 exact. */
-function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolean): void {
+/** Same as `setPixel`, but alpha-blended against whatever's already in `fb` at `(x,y)` (`BLDALPHA_BLEND(eva, 16-eva)`) when `eva` isn't `null` - see `battleMenu.ts`'s `playerSummaryFadeEva`. `eva=16` is mathematically a no-op (`blendChannel` reduces to the flat color), so callers can pass it unconditionally once fading starts. */
+function blendedSetPixel(fb: Uint8Array, x: number, y: number, c: RgbColor, eva: number | null): void {
+  if (eva === null) {
+    setPixel(fb, x, y, c);
+    return;
+  }
+  if (x < 0 || x >= 240 || y < 0 || y >= 160) return;
+  const o = (y * 240 + x) * 4;
+  const evb = 16 - eva;
+  fb[o] = blendChannel(c.r, fb[o]!, eva, evb);
+  fb[o + 1] = blendChannel(c.g, fb[o + 1]!, eva, evb);
+  fb[o + 2] = blendChannel(c.b, fb[o + 2]!, eva, evb);
+  fb[o + 3] = 255;
+}
+
+/** gBattleInterface_BallStatusBarGfx (`ball_status_bar.png`), the diagonal bar the ball icons sit on - corners brute-force-matched against the oracle this session: opponent (-24,40) h-flipped, player (136,96) unflipped, both 212/212 exact. `eva` (non-null only for the player side, post-`PLAYER_SUMMARY_FADE_START_TICK`) alpha-blends against the framebuffer instead of drawing flat - see `blendedSetPixel`. */
+function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolean, eva: number | null = null): void {
   const { tileset, palette } = ballStatusBar;
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
@@ -1353,7 +1383,7 @@ function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolea
           if (idx === 0) continue;
           const c = palette[idx];
           if (!c) continue;
-          setPixel(fb, ox + tx * 8 + px, oy + ty * 8 + py, c);
+          blendedSetPixel(fb, ox + tx * 8 + px, oy + ty * 8 + py, c, eva);
         }
       }
     }
@@ -1362,13 +1392,32 @@ function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolea
 
 function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; player: boolean } = { opponent: true, player: true }): void {
   const bars = ballStatusBarPositions(t);
+  const playerEva = playerSummaryFadeEva(t);
+  const barExitDx = playerSummaryBarExitDx(t);
   if (sides.opponent && bars.opponent.visible) drawBallStatusBar(fb, bars.opponent.x, 40, true);
-  if (sides.player && bars.player.visible) drawBallStatusBar(fb, bars.player.x, 96, false);
+  if (sides.player && bars.player.visible) drawBallStatusBar(fb, bars.player.x + barExitDx, 96, false, playerEva);
+  let playerIconIndex = 0;
   for (const icon of ballIcons(t)) {
     if (!icon.visible) continue;
     if (icon.y === 32 && !sides.opponent) continue;
-    if (icon.y === 88 && !sides.player) continue;
-    drawSpriteSheetTile(fb, ballDisplay.tileset, ballDisplay.palette, ballStateTileIndex(icon.state), icon.x, icon.y);
+    if (icon.y === 88 && !sides.player) {
+      playerIconIndex += 1;
+      continue;
+    }
+    const tile = ballDisplay.tileset.tiles[ballStateTileIndex(icon.state)];
+    if (!tile) continue;
+    const eva = icon.y === 88 ? playerEva : null;
+    const iconExitDx = icon.y === 88 ? playerSummaryIconExitDx(t, playerIconIndex) : 0;
+    if (icon.y === 88) playerIconIndex += 1;
+    for (let py = 0; py < 8; py += 1) {
+      for (let px = 0; px < 8; px += 1) {
+        const idx = tile[py * 8 + px]!;
+        if (idx === 0) continue;
+        const c = ballDisplay.palette[idx];
+        if (!c) continue;
+        blendedSetPixel(fb, icon.x + iconExitDx + px, icon.y + py, c, eva);
+      }
+    }
   }
 }
 
@@ -1949,13 +1998,26 @@ function drawSettledScene(fb: Uint8Array): void {
  */
 function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): void {
   drawTileBgFaded(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette, sendOutBgFadeY(t, handoffTick));
-  drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
+  // battleMenu.ts: Brendan's throw pose-swap + exit translation start at
+  // BRENDAN_THROW_START_TICK - before that he's still the settled slide-in
+  // pose (frame 3, unshifted).
+  const throwFrame = brendanThrowFrame(t);
+  if (throwFrame === null) {
+    drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
+  } else {
+    const dx = brendanThrowDx(t) ?? 0;
+    drawSpriteSheet(fb, brendanThrowTilesets[throwFrame]!, brendan.palette, PLAYER_CORNER.x + dx, PLAYER_CORNER.y);
+  }
   const trainerX = trainerExitX(t, handoffTick);
   if (trainerX !== null) {
     drawSpriteSheet(fb, bugCatcher.tileset, bugCatcher.palette, trainerX, OPPONENT_CORNER.y);
   }
   drawGrovyleMaterialize(fb, t, handoffTick);
   drawSendOutBall(fb, t, handoffTick);
+  const playerBallTopLeft = playerThrowBallTopLeft(t);
+  if (playerBallTopLeft !== null) {
+    drawSpriteSheet(fb, BALL_CLOSED_TILESET, summaryBall.palette, playerBallTopLeft.x, playerBallTopLeft.y);
+  }
   drawBallOpenParticles(fb, t, handoffTick);
   if (t >= GROVYLE_MATERIALIZE_TICK) {
     drawGrovyleSettled(fb);
