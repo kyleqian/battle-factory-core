@@ -5,6 +5,76 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 99 — Bounded worker: root-caused + fixed #98's pre-existing ~1653+ full-frame residual — it's the player-side twin of `SENDOUT_BG_FADE_Y` (battle-scene-notes.md §7.10/§7.20); ~99% pixel reduction, but the remaining residual is 100% the (unimplemented) ball-open particle burst, so `menu-materialize.json` still can't extend past its existing 1/1
+
+- **State:** `npm test` **514/514** (+6 Tier-1), `npm run build` green, tree
+  clean. Full 21-trace sweep (mandatory this time, not spot-checked): all
+  21 at their exact established counts (accept-prebattle 137/137, anchor
+  1/1, confirm-decline 67/67, confirm-flow 79/95, draft-cursor 13/13,
+  draft-menu-slot6 66/66, draft-menu 38/38, example 4/4, menu-materialize
+  1/1, menu-text 18/18, menu-throw 70/70, rent-3picks 157/190, rent-slot1
+  125/139, room-entry 110/110, room-msgbox 142/142, room-npcs 98/98,
+  scene-assembly 256/256, sendout 215/256, summary-info-magby 132/132,
+  summary-info-onix 122/122, transition 206/206, walk-warpout 125/125) —
+  zero regressions.
+- **Did:** per the brief's FIRST STEP, A/B'd the unmodified baseline over
+  1653-1690 first (`npm run compare` against a scratch trace built from
+  `battle1-menu-dense.json`'s segments) and reproduced #98's exact
+  characterization (2461px at 1653 growing to 18374px by 1675). Root-cause,
+  decoded not fitted (`tools/compare/scratch/menu-audit/
+  decode_player_bgfade.mjs`): `SpriteCB_ReleaseMonFromBall`
+  (`pokeball.c:758`) calls `LaunchBallFadeMonTask(TRUE, sprite->sBattler,
+  14, ballId)` for BOTH battlers — the player's own ONIX release
+  re-triggers the identical `BeginNormalPaletteFade(14,0,0,16,RGB_WHITE)`
+  BG-to-white dither `SENDOUT_BG_FADE_Y` already models for the opponent,
+  which the engine only ever applied once. Reversed the already-validated
+  `blendComponentToWhite` formula against two clean background swatches,
+  cross-checked every tick 1653-1689: the decoded 37-entry y-ramp is
+  byte-identical to `SENDOUT_BG_FADE_Y` (same 3-tick y=14 hold included),
+  re-anchored at `PLAYER_BALL_OPEN_START_TICK+1` (1653) — the same
+  "one tick after ball-open" convention the opponent's own table uses.
+  `battleMenu.ts` gained `playerMaterializeBgFadeY`; `battleScene.ts`
+  additively ORs it into the existing `drawTileBgFaded` call (the two
+  windows never overlap). Verified: 1653-1663 full-frame diff drops ~99%
+  (2461px→19px at 1653, 7846px→92px at 1662). 6 new Tier-1 tests pin both
+  ramp boundaries (§7.20's lesson: ramps get truncated at both ends).
+- **Why `menu-materialize.json` still can't extend**: classified every
+  remaining diff pixel at ticks 1653-1663 pixel-for-pixel
+  (`tools/compare/scratch/menu-audit/classify_residual.mjs`) — **100%** is
+  the ball-open particle burst (mechanism 3's player-side analogue,
+  colors `(255,173,0)`/`(255,255,255)`/`(66,66,66)`/`(214,41,41)`/
+  `(255,156,123)`/`(132,0,0)` clustered at the ball's own position), not
+  yet implemented. Pixel evidence refines the brief's own "expected around
+  1662-1665" guess: the burst is present at **every** tick from 1653
+  itself (same tick `AnimateBallOpenParticles` fires alongside
+  `LaunchBallFadeMonTask`), so no tick in 1653-1663 reaches 0 diff and
+  none can be added to the committed trace this session. Ticks 1664+
+  remain separately blocked by the already-named coefficient-fade +
+  idle-bob entanglement. Per the brief, the particle burst itself was
+  **not attempted** (explicitly gated on "everything else done + 15 min
+  left," not the case after the root-cause work). Full derivation:
+  `docs/battle-menu-notes.md` §3 item 5 (updated this session).
+- **Next:** implement the player-side particle burst (origin + render-lag
+  offset — likely reusable machinery from the opponent's own
+  `drawBallOpenParticles`/`PARTICLE_ORIGIN`/age table, same derivation
+  pattern §7.14/§7.18/§7.20 used for the opponent side) — once landed,
+  ticks 1653-1663 should flip to full-frame-exact with no further changes
+  to the BG fade or materialize accumulator. Then: healthbox slide-in →
+  settle 1693 (entangled with materialize's own tail per §3 item 5); blank
+  box + menu draw + idle (1742-1810). Brendan-vs-icon sprite-priority
+  compositing (#96) and the #96 OAM-order general fix remain
+  supervisor-scheduled, untouched.
+- **Notes:** stayed in `battleMenu.ts` (pure timing) + additive
+  `battleScene.ts` hooks (one new call inside the existing
+  `drawSendOutHandoff`, no reordering) + `tests/battleMenu.test.ts` +
+  `docs/battle-menu-notes.md`, per the brief. Did not touch
+  `battleScene.ts`'s opponent-side internals, `tests/battleScene.test.ts`,
+  or `docs/battle-scene-notes.md`. No PAPERCUT — the newest PAPERCUTS.md
+  entry's "A/B the baseline first" advice is exactly what let this session
+  separate the real root cause from the ONIX-shaped noise immediately.
+
+---
+
 ## 98 — Bounded worker: ONIX MATERIALIZE window started — ball open-pose swap landed exact (tick 1652), materialize accumulator/`y2` derived + pixel-verified correct in isolation but NOT shippable yet — blocked by a pre-existing, un-root-caused full-frame residual from tick 1653 on (not this session's bug)
 
 - **State:** `npm test` **510/510** (+3 Tier-1), `npm run build` green, tree
@@ -147,63 +217,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 96 — Bounded worker: PLAYER status-bar subsprite-split exit landed (§7.19's opponent-side twin) — `menu-throw.json` densified to every tick 1574-1614, **33/41** 0-diff (was 11/11 on the old sparse trace); one new named blocker found (Brendan-vs-icon sprite-priority compositing, 8 ticks)
-
-- **State:** `npm test` **501/501** (+3 Tier-1), `npm run build` green,
-  tree clean. Full 21-trace sweep against the live oracle: all 20 others
-  at their exact established counts (anchor 1/1, draft-cursor 13/13,
-  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
-  122/122, summary-info-magby 132/132, confirm-decline 67/67,
-  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
-  room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
-  256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95,
-  sendout 215/256, menu-text 18/18) — zero regressions.
-  `tools/compare/traces/menu-throw.json` densified from 11 sparse
-  captures to every tick 1574-1614 (41 total, minus 8 named-excluded —
-  see below): **33/33** of the committed captures at 0 diff.
-- **Did:** implemented `drawPlayerSummaryBarExit`/`playerBarExitTableActive`
-  in `battleScene.ts` (additive, next to the existing `drawOpponentSummaryExit`
-  it mirrors) — the player-side twin of §7.19's opponent bar-exit
-  subsprite split. Same shared `SetSubspriteTables(...,
-  sStatusSummaryBar_SubspriteTable_Exit)` call and table as the opponent
-  (source-confirmed: only h-flip differs between sides), but the
-  unflipped player anchor needs **no** analogue of the opponent's
-  `EXIT_BAR_TIP_LOCAL_SHIFT` — derived (not fitted) from the fact that the
-  player's unflipped render anchors to the table's *first* entry
-  (unchanged between Enter/Exit), not the *last* (which is what moves
-  under h-flip). This alone took the densified trace from 11/41 to 33/41
-  (the 20-136px bar-split residual fully gone). 3 new Tier-1 tests
-  (`tests/battleMenu.test.ts`) pin the widened-layout pixels + the
-  pre-switch flat frame, oracle-cross-checked. Corrected
-  docs/battle-menu-notes.md §3 item 4b + §7 with the full derivation.
-- **New named blocker found (not attempted, out of this step's scope):**
-  8 of the 41 ticks (1581-1583, 1589-1591, 1597-1598) still diff by a
-  small 4-26px margin, but pixel dumps prove it's NOT the bar — it's a
-  sprite-priority compositing gap between Brendan's exiting back sprite
-  and the player status icon's exit-slide, whenever their screen
-  footprints briefly overlap: real GBA OAM resolves the tie by sprite-
-  creation order (Brendan, created at the intro, wins), but this engine
-  composites strictly in draw-call order (the icon, drawn after Brendan,
-  paints over him). Fixing this generally means touching
-  `drawSendOutHandoff`'s shared draw order, which also backs
-  `sendout.json`'s established 215/256 — too risky to improvise inside
-  this step's narrow brief, so the 8 ticks are excluded from the
-  committed trace with this exact explanation rather than forced/faked.
-- **Next:** (1) the ball's GBA affine "spin" (tick 1615+, needs an
-  affine-matrix keyframe renderer); (2) Brendan-vs-icon sprite-priority
-  compositing (above) — a real, scoped fix for a future step, likely
-  wants a proper OAM-priority-aware compositor rather than another
-  one-off reorder; (3) materialize (~1646-1690, assets confirmed ready);
-  (4) healthbox slide-in -> settle 1693; (5) blank-box + menu draw + idle
-  (1742-1810). Sendout residuals continue separately (§7.21's named
-  1493-1503 matrix-early gap, 1516/17 age overrun, 1470/71/79 icon edge,
-  tick 1462).
-- **Notes:** stayed out of battleScene.ts's mechanism-5 affine-matrix
-  region and battleScene.test.ts (the concurrent worker's territory) —
-  only additive functions next to the existing opponent-exit code, plus
-  the `drawBallIcons` call-site edit. docs/battle-scene-notes.md, oracle/
-  harness, ROADMAP.md, sendout.json untouched, per the brief. No
-  PAPERCUT.
-
----
 

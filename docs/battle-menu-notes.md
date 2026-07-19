@@ -325,28 +325,86 @@ already right, only specific numeric claims needed fixing.
      1653-1663 by exactly the tint silhouette's own pixel count each tick
      (150px at 1653 up to 1551px at 1663, matching this doc's own
      independently-harvested exact-tint-pixel-count table pixel-for-pixel) -
-     strong evidence the derivation itself is correct. **It is left OUT of
-     the committed trace/window boundary anyway**: a large (~2400-7700px),
-     genuinely PRE-EXISTING full-frame residual (confirmed present with
-     `git stash` on the unmodified engine, i.e. NOT caused by this
-     session's own code) already occupies ticks 1653+ before any of this
-     session's changes - a scattered, small-per-channel-delta pattern
-     across most of the frame width at y~51-52 that doesn't look like the
-     ONIX/ball/particle mechanisms this item is about, not yet root-caused
-     (candidate: some other in-flight table/mechanism this window's own
-     shared `drawSendOutHandoff` doesn't fully cover this far into the
-     trace - not investigated this session, genuinely out of this step's
-     time budget). Since this residual alone already exceeds a 0-diff bar
-     for every tick past 1652, extending the committed window past it would
-     mean either shipping a nonzero-diff trace (against this run's own
-     rules) or masking the gap - neither done. **Named blocker for the next
-     session**: root-cause the pre-existing ~1653+ full-frame residual
-     (not ONIX-shaped, not caused by this session), then the already-derived
-     `drawPlayerMaterialize` should just start landing full-frame-exact
-     ticks with no further changes needed to it. The open-particle burst
-     (mechanism 3's own player-side analogue) was not attempted this session
-     either - same time-budget reason, flagged as still-open alongside the
-     above.
+     strong evidence the derivation itself is correct. At the time this was
+     landed it was left OUT of the committed trace/window boundary because a
+     large (~2400-7700px) pre-existing full-frame residual already occupied
+     every tick past 1652 - **root-caused and fixed this session**, see
+     below.
+
+     **Root-caused this session (bounded worker, following this item's own
+     named blocker + the newest PAPERCUTS.md entry's "A/B the baseline
+     first" rule): the pre-existing ~1653+ residual is the player-side twin
+     of `battle-scene-notes.md` §7.10/§7.20's own `SENDOUT_BG_FADE_Y`.**
+     `SpriteCB_ReleaseMonFromBall` (`reference/pokeemerald/src/
+     pokeball.c:758`) calls `sprite->data[0] = LaunchBallFadeMonTask(TRUE,
+     sprite->sBattler, 14, ballId)` - the exact same call site (same
+     `selectedPalettes=14`, battler-generic signature) that already fires
+     for the OPPONENT's own release, so `BeginNormalPaletteFade(
+     selectedPalettes, 0, 0, 16, RGB_WHITE)` (`battle_anim_throw.c:2056`)
+     fires a SECOND time, independently, for the player's own ONIX release -
+     the engine only ever modeled it once. Decoded, not fitted
+     (`tools/compare/scratch/menu-audit/decode_player_bgfade.mjs`):
+     reversing the already-validated `blendComponentToWhite` formula
+     (`c5 + (((31-c5)*y)>>4)` per 5-bit channel, then re-expand) against two
+     independent clean background swatches - (165,52), which decodes to a
+     **perfectly clean** exact y sequence at all 3 channels for every one of
+     the 37 affected ticks (1653-1689), and (194,51), whose blue channel
+     cross-validates the exact same sequence (r/g channels alias at a few
+     ticks from that swatch's own different c5 rounding - expected, not
+     contradicting evidence) - both confirmed clean by sampling every tick
+     1600-1652 first (flat, unfaded, matching this doc's own swatch-picking
+     discipline). The decoded 37-entry ramp (`2,2,4,4,6,6,8,8,10,10,12,12,
+     14,14,14,16×8,14,14,12,12,10,10,8,8,6,6,4,4,2,2`) is **byte-identical to
+     `SENDOUT_BG_FADE_Y`** - including its same 3-tick y=14 hold
+     irregularity - confirming this is the SAME table/mechanism
+     re-triggered, not a coincidentally similar one. Start tick 1653 =
+     `PLAYER_BALL_OPEN_START_TICK`+1 - the identical "one tick after the
+     ball's own open-pose swap" offset `SENDOUT_BG_FADE_START`'s own
+     derivation used for the opponent, independently confirming the shared
+     convention rather than a tick chosen to fit.
+
+     **Fix landed**: `battleMenu.ts` gained `playerMaterializeBgFadeY(t)`
+     (the literal table, reused verbatim, at the new anchor) and
+     `PLAYER_BG_FADE_START_TICK`; `battleScene.ts`'s `drawSendOutHandoff`
+     additively ORs it into the existing `drawTileBgFaded` call alongside
+     `sendOutBgFadeY` (the two windows never overlap, so exactly one is ever
+     nonzero at a given tick). **Verified via oracle compare**: the
+     1653-1663 full-frame diff drops **~99%** (2461px→19px at 1653, up to
+     7846px→92px at 1662). 6 new Tier-1 tests (`tests/battleMenu.test.ts`)
+     pin both ramp boundaries.
+
+     **What's left, classified pixel-for-pixel, not assumed**
+     (`tools/compare/scratch/menu-audit/classify_residual.mjs`): **100% of
+     the remaining diff at every tick 1653-1663 is the ball-open particle
+     burst** (mechanism 3's player-side analogue) - every single mismatched
+     pixel's oracle-or-app color is one of the known particle-frame colors
+     (`(255,173,0)`, `(255,255,255)`, `(66,66,66)`, `(214,41,41)`,
+     `(255,156,123)`, `(132,0,0)`), landing in a small cluster around the
+     ball's own settled position (x≈67-80, y≈103-111) that grows tick-over-
+     tick as more particles spawn - exactly the shape a radial burst
+     originating at ball-open would produce. This refines (doesn't match
+     verbatim) this doc's own prior "expected around 1662-1665" guess: pixel
+     evidence shows the burst is already present at **every** tick from
+     1653 itself (the same tick `AnimateBallOpenParticles` and
+     `LaunchBallFadeMonTask` both fire together in
+     `SpriteCB_ReleaseMonFromBall`, source-consistent with a single-tick
+     trigger for both), not starting a few ticks later. **Named blocker for
+     the next session, precisely bounded this time**: implement the
+     player-side particle burst (origin position + render-lag offset,
+     likely reusable machinery from the opponent's own already-implemented
+     `drawBallOpenParticles`/`PARTICLE_ORIGIN`/age-table, same derivation
+     pattern §7.14/§7.18/§7.20 used) - once that lands, ticks 1653-1663
+     should flip to full-frame-exact with no further changes needed to
+     either the BG fade or the materialize accumulator. Ticks 1664+ remain
+     separately blocked by the already-named coefficient-fade-to-true-color
+     + idle-bob entanglement (unchanged by this session). **Not attempted
+     this session**: out of scope per this step's own brief (particle burst
+     explicitly deferred unless everything else lands with 15+ min of the
+     45-min cap left, which wasn't the case after the root-cause work
+     above). `tools/compare/traces/menu-materialize.json` stays at its
+     existing 1/1 (tick 1652 only) - no tick in 1653-1663 reaches 0 diff
+     without the particle burst, so nothing currently qualifies for the
+     extended window.
 6. `HandleBallAnimEnd` waits for both the ball sprite's anim **and** the mon
    sprite's affine anim to finish, then `Intro_TryShinyAnimShowHealthbox`
    (`battle_controller_player.c:979`) calls `UpdateHealthboxAttribute(...,
@@ -485,15 +543,16 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
      by sprite-creation order, so Brendan's back sprite (created at the
      intro) wins over the later-created status icons whenever their
      screen footprints briefly cross during his exit slide (§3 point 4b).
-   **Materialization landed partially this session (PROGRESS #98)**: the
-   ball's open-pose swap is engine-modeled exact at tick 1652
-   (`tools/compare/traces/menu-materialize.json`, 1/1 0-diff), and ONIX's
-   own color-fade/affine-emerge accumulator is derived and pixel-verified
-   correct in isolation (§3 item 5) but not yet included in a committed
-   trace — blocked by a pre-existing, un-root-caused full-frame residual
-   starting tick 1653 that has nothing to do with ONIX/the ball/particles
-   (named in §3 item 5, not this session's own bug). The open-particle
-   burst (mechanism 3's player-side analogue) is still fully unattempted.
+   **Materialization landed partially across two sessions (PROGRESS #98,
+   #99)**: the ball's open-pose swap is engine-modeled exact at tick 1652
+   (`tools/compare/traces/menu-materialize.json`, 1/1 0-diff); ONIX's own
+   color-fade/affine-emerge accumulator (derived #98) and the player-side
+   materialize BG-to-white fade (root-caused + fixed #99 - the pre-existing
+   ~1653+ full-frame residual #98 named was this) are both landed and
+   pixel-verified, cutting the 1653-1663 full-frame diff ~99%. Still not in
+   a committed trace: the remaining residual on those ticks is now 100%
+   attributable to the ball-open particle burst (mechanism 3's player-side
+   analogue), pixel-classified but not yet implemented (§3 item 5).
 2. §4's idle-cycle mechanism (which specific sprite/timer drives regions A
    and B) is pixel-pinned but not source-attributed — needed before an
    engine slice can *generate* the cycle rather than just replay captured

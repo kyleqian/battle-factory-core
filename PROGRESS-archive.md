@@ -1,3 +1,63 @@
+## 96 — Bounded worker: PLAYER status-bar subsprite-split exit landed (§7.19's opponent-side twin) — `menu-throw.json` densified to every tick 1574-1614, **33/41** 0-diff (was 11/11 on the old sparse trace); one new named blocker found (Brendan-vs-icon sprite-priority compositing, 8 ticks)
+
+- **State:** `npm test` **501/501** (+3 Tier-1), `npm run build` green,
+  tree clean. Full 21-trace sweep against the live oracle: all 20 others
+  at their exact established counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
+  room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
+  256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95,
+  sendout 215/256, menu-text 18/18) — zero regressions.
+  `tools/compare/traces/menu-throw.json` densified from 11 sparse
+  captures to every tick 1574-1614 (41 total, minus 8 named-excluded —
+  see below): **33/33** of the committed captures at 0 diff.
+- **Did:** implemented `drawPlayerSummaryBarExit`/`playerBarExitTableActive`
+  in `battleScene.ts` (additive, next to the existing `drawOpponentSummaryExit`
+  it mirrors) — the player-side twin of §7.19's opponent bar-exit
+  subsprite split. Same shared `SetSubspriteTables(...,
+  sStatusSummaryBar_SubspriteTable_Exit)` call and table as the opponent
+  (source-confirmed: only h-flip differs between sides), but the
+  unflipped player anchor needs **no** analogue of the opponent's
+  `EXIT_BAR_TIP_LOCAL_SHIFT` — derived (not fitted) from the fact that the
+  player's unflipped render anchors to the table's *first* entry
+  (unchanged between Enter/Exit), not the *last* (which is what moves
+  under h-flip). This alone took the densified trace from 11/41 to 33/41
+  (the 20-136px bar-split residual fully gone). 3 new Tier-1 tests
+  (`tests/battleMenu.test.ts`) pin the widened-layout pixels + the
+  pre-switch flat frame, oracle-cross-checked. Corrected
+  docs/battle-menu-notes.md §3 item 4b + §7 with the full derivation.
+- **New named blocker found (not attempted, out of this step's scope):**
+  8 of the 41 ticks (1581-1583, 1589-1591, 1597-1598) still diff by a
+  small 4-26px margin, but pixel dumps prove it's NOT the bar — it's a
+  sprite-priority compositing gap between Brendan's exiting back sprite
+  and the player status icon's exit-slide, whenever their screen
+  footprints briefly overlap: real GBA OAM resolves the tie by sprite-
+  creation order (Brendan, created at the intro, wins), but this engine
+  composites strictly in draw-call order (the icon, drawn after Brendan,
+  paints over him). Fixing this generally means touching
+  `drawSendOutHandoff`'s shared draw order, which also backs
+  `sendout.json`'s established 215/256 — too risky to improvise inside
+  this step's narrow brief, so the 8 ticks are excluded from the
+  committed trace with this exact explanation rather than forced/faked.
+- **Next:** (1) the ball's GBA affine "spin" (tick 1615+, needs an
+  affine-matrix keyframe renderer); (2) Brendan-vs-icon sprite-priority
+  compositing (above) — a real, scoped fix for a future step, likely
+  wants a proper OAM-priority-aware compositor rather than another
+  one-off reorder; (3) materialize (~1646-1690, assets confirmed ready);
+  (4) healthbox slide-in -> settle 1693; (5) blank-box + menu draw + idle
+  (1742-1810). Sendout residuals continue separately (§7.21's named
+  1493-1503 matrix-early gap, 1516/17 age overrun, 1470/71/79 icon edge,
+  tick 1462).
+- **Notes:** stayed out of battleScene.ts's mechanism-5 affine-matrix
+  region and battleScene.test.ts (the concurrent worker's territory) —
+  only additive functions next to the existing opponent-exit code, plus
+  the `drawBallIcons` call-site edit. docs/battle-scene-notes.md, oracle/
+  harness, ROADMAP.md, sendout.json untouched, per the brief. No
+  PAPERCUT.
+
+---
+
 ## 95 — Supervisor: both worktree branches merged — mechanism 4 silhouette-edge fix (`sendout.json` **214 → 215/256**) + player-materialize asset audit (zero new extraction needed; §6's MISSING flags were stale)
 
 - **State (verified post-merge):** `npm test` **498/498**, `npm run build`
