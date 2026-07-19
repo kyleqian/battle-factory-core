@@ -5,6 +5,53 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 81 — Bounded worker: send-out mechanism 4/5 (materialize affine-scale-in + ball-color tint) landed, pixel-validated; `sendout.json` stays **174/256** as expected, 3 mechanisms remain
+
+- **State:** `npm test` **456/456** (+1), `npm run build` green. Full
+  19-trace sweep against the live oracle: 18 others at exact prior counts,
+  `sendout.json` unchanged **174/256** — expected (§7.10/§7.12's
+  re-confirmed "no tick has only one mechanism left broken" finding). Zero
+  regressions.
+- **Did:** implemented this engine's **first affine-OAM scale renderer**
+  (`drawSpriteSheetAffineTinted`/`drawGrovyleMaterialize`,
+  `battleScene.ts`) — nearest-neighbor, GBA-hardware-accurate
+  (`texCoord = ((rel*matrixParam)>>8)+half`, `matrixParam = 0x10000 /
+  accumulator`), driven directly by the already-extracted
+  `battle-anim-tables.json` (`affineEmerge` accumulator table via a generic
+  step reducer, not hardcoded constants) plus the flat
+  `ballOpenFadeColor.rgb8` tint. Window boundaries pixel-brute-force-
+  confirmed against this trace's own ground truth: tint first visible at
+  handoffTick+19 (1481, 1-tick render lag off the ball-open tick, same lag
+  family as everything else in this window), scale-in growth exactly 12
+  ticks (1481-1492, bbox widths 15/23/31/41/49/57/62px — an EXACT
+  cross-trace match to `docs/battle-anim-assets.md` §4's independently-
+  harvested table), then a **hard cutoff at handoffTick+42 (1504)** where
+  the tint vanishes outright rather than fading gradually — source-read
+  (`battle_anim_throw.c:2037-2102`) but not fully reverse-engineered why
+  it's a hard step (flagged as an open follow-up, not guessed at — see
+  docs §7.13). `localcheck.ts` pixel-diff mass across 1462-1543:
+  **124762→106893px** (−17869px); not every tick strictly improved (ticks
+  1481-1487 show a small, real increase, +41 to +101px each — nearest-
+  neighbor quantization noise at extreme downscale, honestly flagged in
+  §7.13 rather than hidden) but zero full-frame matches regressed. New
+  Tier-1 test (`tests/battleScene.test.ts`) pins the tint's absent→present
+  and present→absent hard boundaries via the sprite's own always-opaque
+  center pixel. `docs/battle-scene-notes.md` gained §7.13.
+- **Next (per #79's ordering, now 2 of 5 done):** mechanism 3 (open-particle
+  burst) next — assets/frame-table already extracted
+  (`battle-anim-particles.json`), needs a radial spawn +
+  `Sin`/`Cos`-motion renderer (source formula cited, not RAM-probed yet).
+  Then mechanism 1 (opponent party-summary despawn fade, §7.4.3 — needs
+  fresh RAM/pixel timing first, not just a renderer) and mechanism 5
+  (front-sprite entrance anim — needs GROVYLE's missing 2nd front-sprite
+  frame extracted, a `Sin`-table wobble renderer that can reuse this
+  session's affine-matrix math, and the still-open start-tick arithmetic;
+  most expensive, left last on purpose).
+- **Notes:** action-menu window (1560+) and the oracle/harness stayed out
+  of scope, per the brief. No PAPERCUT.
+
+---
+
 ## 80 — S7 v5 ground truth regenerated (parallel worktree lane, merged): turn-1 trace/dump rebuilt under animations-on — menu timing UNCHANGED, RNG ledger IDENTICAL (12 calls, same LCG values), both old register mysteries answered
 
 - **State:** merge of `worker/wt-20260718-174536` (base `1050ba1`):

@@ -15,6 +15,19 @@
 // A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
 // state rather than a phase enum (see the field's own doc comment).
 //
+// STATUS (PROGRESS.md #84): mechanism 5 of the 5 named in #78/docs §7.11
+// landed - GROVYLE's FRONT-SPRITE ENTRANCE STRETCH (`drawGrovyleStretch`,
+// `ANIM_V_STRETCH`/`Anim_VerticalStretch`, RAM-probed data[4]/data[5]/y2
+// per tick rather than reimplemented from `Sin()` source math - see
+// `GROVYLE_STRETCH_TABLE`'s doc comment). ALL FIVE mechanisms are now
+// landed. `sendout.json` moved for the first time in this window's whole
+// history: **174/256 -> 180/256**; `localcheck.ts` pixel-diff mass across
+// 1462-1543 dropped 100498->89444px. Known residual: 2 of 40 covered
+// render ticks (1536/1537) have a small unexplained mismatch even with
+// RAM-exact affine parameters - flagged, not curve-fit away. See
+// PROGRESS.md #84 and docs/battle-scene-notes.md §7.16 for the full
+// accounting and remaining per-tick residual attribution.
+//
 // STATUS (PROGRESS.md #83): mechanism 1 of the 5 named in #78/docs §7.11
 // landed - the OPPONENT PARTY-STATUS-SUMMARY DESPAWN
 // (`drawOpponentSummaryExit`: source-exact `BLDALPHA` fade + per-icon

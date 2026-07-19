@@ -1372,3 +1372,104 @@ through - only one left:**
    the first time in this window's whole history - or, if it doesn't, that
    itself is a real finding worth naming precisely (per the brief's own
    "name what else differs" fallback), not forced.
+
+### 7.16. Engine-slice session (PROGRESS.md #84): mechanism 5 (front-sprite entrance stretch) landed, ALL FIVE mechanisms now in - score moves for the first time ever, 174/256 -> **180/256**
+
+Extracted GROVYLE's missing 2nd front-sprite frame (`anim_front.png`'s
+bottom half, `tools/extract/extract-battle-mon-pics.ts` - top half
+self-verified pixel-identical to `front.png` before accepting the bottom
+half as frame 2, for all three `FRONT_SPECIES` while touching this
+extractor) - the one remaining genuine ROM-extraction gap named since
+§7.11.
+
+**Start-tick arithmetic resolved via direct RAM probe**, per the brief's own
+explicit ask, rather than summing source constants (which §7.11-§7.15 all
+found didn't land cleanly): `tools/probe/specs/sendout-grovyle-stretch.json`
+watches `gSprites[8]` (`gBattlerSpriteIds[1]` confirmed 8 from tick 1461 on,
+§7.10) `data[4]`/`data[5]`/`y2` - the exact `xScale`/`yScale`/vertical-offset
+values `Anim_VerticalStretch` feeds `SetAffineData`/`ObjAffineSet`
+(`pokemon_animation.c:1597-1635`) - across trace ticks 1478-1556. Confirms
+the animation's own 41 active ticks (RAM `data[2]` 0->40) plus one reset
+tick, and separately RAM-probed the concurrent ball-color-tint fade
+(`Task_FadeMon_ToNormal_Step`, `battle_anim_throw.c:2088-2102`) via
+`gTasks[3]`'s own `tCoeff` (`tools/probe/specs/sendout-grovyle-taskfade.json`):
+a 15-tick linear ramp 16->1 (never a literal 0 - the task's last real call
+uses coeff=1, and that residual 1/16 blend rounds away to zero visible
+change for every one of GROVYLE's own palette colors, confirmed directly by
+testing plain/unblended rendering against the oracle).
+
+**RAM/groundtruth over source formula, applied literally**: rather than
+reimplementing `Sin()`/`gSineTable` (a real rounding risk for a mechanism
+needing pixel-exactness across dozens of ticks), `GROVYLE_STRETCH_TABLE` is
+a literal 36-entry table of the RAM-probed `(xScale, yScale, y2)` triples
+themselves (RAM ticks 1503-1538 - beyond that the probe shows the sprite
+already flat/neutral through at least 1549). The render-tick lag (this
+window's established "RAM tick N's write is visible at render tick N+1"
+family) was independently re-confirmed for this specific mechanism, not
+assumed: brute-forced lag candidates 0 through 7 directly against the
+oracle's own cached captures (`tools/compare/scratch/grovyle_full_check.mjs`,
+throwaway) - lag 1 gives an exact match on 38 of 40 covered render ticks,
+every other candidate strictly worse.
+
+**Frame-swap boundary, found via direct pixel evidence, not assumed from
+source**: `SpriteCB_OpponentMonFromBall`'s `StartSpriteAnim(sprite, 1)`
+(`battle_main.c:2837-2848`) reads as a single, permanent frame-2 swap in
+source, but direct pixel comparison (`tools/compare/scratch/
+grovyle_plateau_frame_check.mjs`) shows the front sprite actually reverts
+to frame 1 exactly at `GROVYLE_MATERIALIZE_TICK` (1544, the already-landed,
+already-validated settled-pose tick) - frame 2 renders exactly (0px diff)
+for every render tick 1538-1543, frame 1 renders exactly for every tick
+>=1544 (both cross-checked directly, not inferred). This module doesn't
+reverse-engineer *why* the frame reverts (not RAM-probed this session,
+flagged as an open follow-up) - the pixel evidence is trusted as ground
+truth over the source-reading assumption, per this run's own rule.
+
+**Score effect: real, and for the first time, non-zero.** `sendout.json`
+**174/256 -> 180/256** (full 19-trace sweep re-run against the live oracle:
+all 18 others at their exact established counts - anchor 1/1, draft-cursor
+13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
+summary-info-onix 122/122, summary-info-magby 132/132, confirm-decline
+67/67, accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
+room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
+256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95 - zero
+regressions anywhere). `localcheck.ts` pixel-diff mass across 1462-1543:
+**100498->89444px** (-11054px). The 6 newly-matching frames are exactly
+render ticks **1538-1543** - the tail of mechanism 5's own window where the
+stretch has already settled to (near-)neutral and `y2` is 0 or tiny,
+sidestepping the residual bug below.
+
+**Known residual, precisely bounded (not curve-fit away):** 2 of the 40
+render ticks mechanism 5 covers - **1536 and 1537** - have a real,
+unexplained pixel mismatch (1000/1688px in the Grovyle 64x64 crop alone)
+*even when using the RAM-exact `xScale`/`yScale`/`y2` for those exact two
+ticks* - their immediate neighbors on both sides (1535 and 1538) match
+exactly, ruling out a lag or table-transcription error. Not reverse-
+engineered further this session given the time budget.
+
+**Second, larger residual found this session, also not yet resolved:**
+across most of mechanism 5's own ACTIVE window (render ticks roughly
+1504-1531, the heavy-wobble portion where `y2` is most negative, -3 to
+-5px), the affine-sampling formula (`drawSpriteSheetAffineStretch`,
+nearest-neighbor, same `texCoord = ((rel*matrixParam)>>8)+half` shape as
+mechanism 4's already-validated renderer) produces sampled-source rows
+that go out of the source tile's own bounds (`sy<0`) for destination rows
+right at the sprite's edge once `y2` shifts the visible window - and the
+real oracle shows OPAQUE content at exactly those excluded pixels
+(pixel-confirmed directly, `tools/compare/scratch/debug_integration2.mjs`).
+This means the renderer's per-tick shape is measurably close (it drives
+the aggregate pixel-mass improvement and the exact tail match) but not yet
+fully exact through the wobble's heaviest ticks - full-frame matches in
+that sub-range are not yet reached. Suspected but **not confirmed** cause:
+either an off-by-one in the `half`/center convention specifically when
+combined with a nonzero `y2`, or `ObjAffineSet`'s real BIOS division
+rounding differing slightly from `Math.trunc(0x10000/scale)` at these
+specific magnitudes. Flagged precisely for the next session rather than
+guessed at further - `tools/probe/specs/sendout-grovyle-stretch.json`'s own
+RAM data (already committed) is sufficient to keep iterating on the
+renderer alone, no new probing needed.
+
+**Not implemented, unchanged from prior sessions (both still open,
+independent of mechanism 5):** the party-summary bar's own exit slide
+(§7.15's flagged sub-gap) and the particle model's logical-tick-13+
+divergence (§7.14's empirical hard cutoff). Neither was investigated this
+session - time was spent entirely on mechanism 5 per the brief's own scope.
