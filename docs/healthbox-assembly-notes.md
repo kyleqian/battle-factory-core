@@ -90,67 +90,129 @@ frame. This reframes the remaining work from "reverse-engineer an unknown
 tile shuffle" (open-ended) to "implement three well-scoped, precisely
 located overlays" (bounded).
 
-## What this session lands vs. what's still open
+## Round 2 (this session): the three open pieces landed, byte-exact
 
-**Landed, byte-exact, RAM/VRAM-verified** (`src/engine/healthboxAssembly.ts`,
-pinned by `tests/healthboxAssembly.test.ts`):
-- The base frame: a flat blit of `battle-healthbox.json`'s `singlesOpponent`
-  tileset+palette at the healthbox's own corner. Exact for every pixel
-  outside the content footprints below (verified against 859/2574 opaque
-  px of the committed harvested block - the rest is excluded from the
-  assertion, not mismatched, per the still-open items below).
+All three round-1 "still open" items are now landed in
+`src/engine/healthboxAssembly.ts`, pinned by
+`tests/healthboxAssembly.test.ts`'s full-byte-exactness assertion: **every
+opaque pixel of the harvested 100x28 block (2574/2574) is now asserted and
+matches, with zero exclusion rects.** `composeOpponentHealthbox`'s signature
+changed to take an `assets: { frame, hpbar }` bag (was just `frame`) since
+the HP bar now needs its own sheet too - the only caller is the test, so
+this was a safe change (not wired into `battleScene.ts` this round either).
 
-**Still open (named precisely, not curve-fit):**
-- **HP-bar placement.** Tile *selection* for the full-HP case is
-  RAM/VRAM-confirmed exact (`HP_BAR_FULL_TILES = [1, 2, 11, 11, 11, 11, 11,
-  11]` from the `hpbar` tileset - `MoveBattleBarGraphically`'s full-HP case,
-  `battle_interface.c:2275-2306`). Its on-screen *placement* is not:
-  unlike `healthboxLeft`/`Right`, the healthbar sprite has its own
-  `SubspriteTable` (`sHealthBar_Subsprites_Opponent`,
-  `battle_interface.c:491-518`) — **3** subsprites, not 1: two `32x8`
-  halves (`tileOffset 0` and `4`) plus a lone extra `8x8` subsprite
-  (`tileOffset 8`, offset `x=-32` from the bar's own center) that this
-  session only discovered by reading the source *after* a naive
-  single-rectangle placement (bar's own OAM corner, `(36,26)`, 32×8) had
-  already mismatched the harvested block at that exact footprint (tried
-  once, empirically wrong — see the git history of this file's own
-  compositor for the discarded attempt). Also confirmed empirically along
-  the way: sprite z-order matters here — `healthboxLeft` (OAM index 1) is
-  a lower index than the healthbar sprite (OAM index 60), and GBA hardware
-  renders the lower OAM index on top for equal-priority sprites, so
-  wherever the frame itself is opaque it wins over the bar beneath it (not
-  asserted by a test since the bar isn't composited at all this round, but
-  worth keeping for whoever implements the subsprite placement). Not
-  reattempted this session (time-boxed) — the tile selection is solid
-  groundwork; the 3-subsprite geometry (likely: two adjoining 32-wide
-  halves plus a separate cap piece 8px further left) is the next step.
-- **Name/gender text rendering.** A first attempt reusing the existing
-  `drawText`/`FONT_SMALL` glyph data (`src/data/gen/font-small.json`) at
-  the derived footprint (`x=20..75,y=19..29` screen / `x=8..63,y=5..15`
-  local-to-frame-canvas) with a first-guess `TextColors` (`fg` = palette
-  index 1 `(66,66,66)`, `shadow` = index 3 `(222,214,181)`, both colors
-  *are* present in the harvested crop's own pixels at that location, so the
-  palette guess is likely right) drew **nothing** at that position — the
-  glyph bitmap's role values were 0 (transparent) everywhere sampled,
-  meaning either the x/y anchor is off, `UpdateNickInHealthbox`'s actual
-  string has a leading control/prefix character (`gText_HealthboxNickname`
-  is not necessarily an empty string — not inspected this session) that
-  shifts the cursor, or `FONT_SMALL`'s glyph bitmap layout doesn't decode
-  with the same `sFontHalfRowOffsets` 4-role convention `font.ts` already
-  uses for `FONT_NORMAL` (not verified either way this session).
-- **Level text rendering** ("Lv50", `FONT_BOLD`): footprint derived
-  (`x=76..99,y=19..29` screen), not attempted — blocked behind the same
-  glyph-decode question as the name text, plus the bolding technique itself
-  (`RenderTextHandleBold`, not read this session).
-- **HP-bar partial-fill tile selection** (`CalcBarFilledPixels`'s per-column
-  fill-level table, `battle_interface.c` — not read this session): the
-  function signature accepts `hpFraction` for S7's benefit but only `1.0`
-  is implemented; anything else throws rather than silently producing wrong
-  pixels.
+### 1. HP-bar placement (was open)
+
+Round 1's read of `sHealthBar_Subsprites_Opponent` (3 subsprites: two `32x8`
+halves + a lone `8x8`) was correct groundwork; what was missing was the
+actual coordinate transform. `AddSubspritesToOamBuffer`
+(`reference/pokeemerald/src/sprite.c:1679-1755`) computes each subsprite's
+screen corner as `base{X,Y} + subsprite.{x,y}`, where `base{X,Y} =
+oam.{x,y} - sprite.centerToCornerVec{X,Y}` — **this is the sprite's own
+*center*, not its corner** (round 1's naive placement used the bar's OAM
+corner `(36,26)` directly, which is why it mismatched). Re-probed via
+`dump-healthbox-vram.py` at the same trace/tick: bar `oam.{x,y}=(36,26)`,
+`centerToCornerVec=(-16,-4)` → `base=(52,30)` → canvas-local center
+`(40,16)` (frame origin `(12,14)`). Applying the two visible subsprites'
+offsets:
+- `{x:-16,y:0,tileOffset:0}` (32×8, bar's own local tiles 0-3) → canvas-local
+  corner `(24,16)`.
+- `{x:16,y:0,tileOffset:4}` (32×8, local tiles 4-7) → canvas-local corner
+  `(56,16)`.
+- `{x:-32,y:0,tileOffset:8}` (8×8) → canvas-local corner `(8,16)`, but its
+  backing VRAM (bar's own local tile 8) is confirmed **all-zero nibbles** in
+  a fresh probe dump — fully transparent, so it contributes no pixels and
+  is omitted from the compositor entirely (see `HP_BAR_SUBSPRITES`, only 2
+  entries).
+
+Bar's own local tiles 0-7 (i.e. `HP_BAR_FULL_TILES`) are exactly what round
+1 already nailed: `[1,2,11,11,11,11,11,11]` from the `hpbar` tileset (tiles
+0-1 = the static "HP" caption letters, `HEALTHBOX_GFX_1`/`_2`, copied once
+at sprite creation, `battle_interface.c:938`; tiles 2-7 = the full-HP green
+fill segment, `HEALTHBOX_GFX_HP_BAR_GREEN`+8 = `HEALTHBOX_GFX_11`).
+
+**Correction to round 1's z-order claim:** round 1 guessed (unverified)
+that `healthboxLeft` (OAM index 1) wins over the healthbar (OAM index 60)
+wherever the frame is opaque, since GBA ties resolve to the lower OAM
+index. Direct pixel diffing this round shows the **opposite**: at
+canvas-local `(37,17)` (well inside the bar's footprint) the frame's own
+tile is fully opaque (`singlesOpponent` tile #36, entirely palette index 2)
+but the harvested pixel is the bar's teal fill color — the bar wins.
+Whatever the actual OAM-buffer insertion order/tie-break is here (not
+re-derived; the subsprite expansion makes naive spriteId-ordering
+reasoning unreliable), the compositor now just draws the frame first and
+the bar on top, which reproduces all 2574 pixels exactly.
+
+### 2. Nickname+gender text (was open)
+
+Root cause of round 1's "drew nothing": nothing wrong with the font decode
+or charmap - the bug was rendering directly into a screen-bound
+framebuffer/window abstraction that didn't match the real compositing
+model. Read `UpdateNickInHealthbox` (`battle_interface.c:1912-1965`) and
+`TextIntoHealthboxObject` (`battle_interface.c:2585-2598`) in full this
+round: the real game renders into an 8×2-tile (64×16px) window at print
+position `(x=0,y=3)` with `FONT_SMALL` and `TextColors{bg:2,fg:1,shadow:3}`
+(literal palette indices — `AddTextPrinterAndCreateWindowOnHealthbox`'s
+`color[]={bgColor,1,3}`, confirmed exactly against the harvested pixels:
+frame palette index 1 ≈ `(66,66,66)`, 2 ≈ `(255,255,222)`, 3 ≈
+`(222,214,181)`), then `TextIntoHealthboxObject` CPU-copies it into
+`healthboxLeft`'s own VRAM via a two-part tile-aligned copy. Traced the
+copy's net pixel effect by hand: it's equivalent to a **plain rectangular
+blit** of window-local `(x:0..55, y:5..15)` to the destination sprite's
+own canvas-local `(x:8..63, y:5..15)` — window rows 0-4 (the glyphs' own
+top 2px, since text starts at print-y 3) are simply never copied to the
+sprite at all. Verified this transform pixel-for-pixel against the
+harvested block (0 mismatches over 616 cells before adding it to the real
+compositor).
+
+One real wrinkle found along the way: **gender symbols are colored
+differently than the nickname text.** `gText_HealthboxGender_Male`/
+`_Female` (`strings.c:1247-1248`) embed a `{COLOR DYNAMIC_COLOR2}`/`{COLOR
+DYNAMIC_COLOR1}` control code right before the `♂`/`♀` glyph
+(`TEXT_DYNAMIC_COLOR_2=0xB=11`, `_1=0xA=10` -
+`include/constants/characters.h:244-245`), which overrides just the
+printer's `fgColor` for the rest of the string (`text.c:980-984`,
+`EXT_CTRL_CODE_COLOR`). Palette indices 11/10 in this sprite's own bank are
+a saturated sky-blue/salmon-pink (`(66,206,255)`/`(255,156,148)`) —
+matches the harvested `♂` pixels exactly once applied (`GENDER_SYMBOL_FG`).
+The glyph bitmaps themselves (`font-small.json` codes 181/182) are plain
+3-role glyphs like any other letter; the color comes entirely from the
+string's own embedded control code, not the glyph data.
+
+The "Lv" prefix glyph likewise resolved cleanly: `UpdateLvlInHealthbox`
+writes `CHAR_EXTRA_SYMBOL` (0xF9) + `CHAR_LV_2` (0x05) -
+`text.c:1454-1456`'s `CHAR_EXTRA_SYMBOL` escape resolves the next byte to
+glyph code `byte | 0x100` = `0x105` = 261, which `font-small.json` does
+carry (a combined "Lv" icon bitmap, width 8) even though it's not a normal
+printable charmap entry.
+
+### 3. Level text (was open)
+
+Same window/copy model as nickname text, just a different destination
+(`healthboxRight`'s own tile 0 → canvas-local `x=64`, since Right's corner
+is Left's + `(64,0)`) and copy width (3 tiles / 24px, vs. 7 for the
+nickname). `UpdateLvlInHealthbox` (`battle_interface.c:1105-1137`) builds
+`"Lv" + ConvertIntToDecimalStringN(level, LEFT_ALIGN, 3)`, then
+right-aligns the *whole* "Lv"+digits string within a reserved 3-digit field
+via `xPos = 5 * (3 - digitCount)` (so `"Lv50"`, 2 digits, prints at window
+x=5 - not x=0). No `FONT_BOLD`/bolding technique involved despite the
+comment in `UpdateLvlInHealthbox`'s neighboring code (`RenderTextHandleBold`
+is called elsewhere in this file for other bars, not this path) - level
+text uses plain `FONT_SMALL` like the nickname, same `TextColors`. Verified
+0 mismatches over 264 cells before wiring into the compositor.
+
+### Still open / out of scope (unchanged from round 1, not this round's brief)
+
+- **HP-bar partial-fill tile selection** (`CalcBarFilledPixels`'s
+  per-column fill-level table) — `hpFraction` still only accepts `1.0`;
+  other values throw rather than guess. The subsprite *placement* work
+  above is what unblocks this for whoever tackles it next (geometry is now
+  solid; only the tile-selection-per-fraction math is unread).
 - **Status icon / caught-ball overlay**: out of scope for this trace (no
-  status, non-Safari trainer battle → `TryAddPokeballIconToHealthbox`
-  returns early, `UpdateStatusIconInHealthbox`'s "no status" case appears to
-  draw a blank/transparent tile — not independently verified).
+  status, non-Safari trainer battle) — not attempted, still throws for any
+  `status != "none"`.
+- Not wired into `battleScene.ts` (explicitly out of scope for this
+  worktree lane) — that's the next, supervised step once this is reviewed.
 
 ## Reproduce the RAM/VRAM ground truth
 
