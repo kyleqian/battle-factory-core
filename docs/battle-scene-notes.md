@@ -1094,3 +1094,67 @@ reaching 256/256 in one step). Attempting any proper subset would repeat
 pixel-diff magnitude dramatically but zero full-frame matches) - so per this
 run's "no fix that trades ticks" / "no curve-fitting" engine rules, no
 partial-mechanism implementation was attempted this session either.
+
+### 7.12. Engine-slice session (PROGRESS.md #79): mechanism 2 (ball sprite) landed, pixel-validated - score unchanged at 174/256 as predicted
+
+Checked `src/assets/gen/` first, per this step's own brief: mechanisms 2, 3,
+and part of 4's assets/tables were **already extracted** in commit
+`c4a7a85` (a parallel worktree lane, "feat(extract): send-out particle
+burst + ball-open frame + materialize tables") - `battle-anim-ball-open.json`
+(ball open/blank frames), `battle-anim-particles.json` (particle tiles +
+`regularBallAnim` frame table), `src/data/gen/battle-anim-tables.json`
+(`ballOpenFadeColor`, `affineEmerge` scale-step table) - none of #78's "not
+extracted" language about the ball/particles was still true; only the
+front-sprite's 2nd frame (mechanism 5) remains genuinely unextracted. See
+`docs/battle-anim-assets.md` for that commit's own full derivation.
+
+**Mechanism 2 (ball sprite) implemented and pixel-validated exactly**, using
+`summary-ball.json`'s incidentally-full `poke.png` sheet (closed frame,
+slot 0 - the extractor pulls the whole 2x6-tile sheet even though only
+slot 0 is ever *used* for the summary screen) and `battle-anim-ball-open.json`
+(open frame, slot 1). Position and every tick boundary were pixel-brute-
+force-confirmed directly against this trace's own regenerated v5 ground
+truth (`tools/compare/scratch/find_ball.mjs`/`ball_ticks.mjs`, throwaway,
+not committed) rather than reused from `battle-anim-assets.md`'s own
+(different-trace) numbers or summed from source constants: the closed
+frame at corner (168,56) is a **ZERO-diff exact match at every tick
+1464-1479** (16 ticks, matching `SpriteCB_OpponentMonSendOut`'s 16-tick
+wait verbatim) and a full mismatch at every tick 1460-1463 before it
+(confirming 1464, not 1462, as the true first-visible tick - a 2-tick
+render lag off the ball-spawn tick, consistent with this module's
+established lag family). The open frame is a **ZERO-diff exact match at
+1480 only**, degrading tick-by-tick after as the (still-unrendered)
+particle burst and emerging mon increasingly occlude that screen region -
+matching `sBallAnimSeq1`'s 5-tick-open+5-tick-blank (blank = zero opaque
+pixels) followed by `HandleBallAnimEnd` destroying the sprite once both
+its own anim and the mon's affine-emerge finish. `battleScene.ts` gained
+`drawSendOutBall` + `BALL_CORNER`/`BALL_CLOSED_START_OFFSET`/
+`BALL_OPEN_START_OFFSET`/`BALL_INVISIBLE_START_OFFSET`.
+
+**Score effect, exactly as #74/#78 predicted: none.** `sendout.json` stays
+**174/256** (full 19-trace sweep re-run, other 18 at exact prior counts,
+zero regressions) - `localcheck.ts`'s pixel-diff mass across 1462-1543
+dropped **127107→124762px** (real, measured, every affected tick strictly
+non-increasing), but per #74/#78's own re-confirmed structural finding, no
+tick in this window has only one mechanism left broken, so a single
+mechanism landing cannot flip a full-frame match on its own.
+
+**Remaining for `sendout.json` toward 256/256, unchanged in kind from
+§7.11's list, mechanism 2 now struck through:**
+1. Opponent party-status-summary despawn fade (§7.4.3) - still not even
+   source-timed precisely; needs fresh RAM/pixel work, not just a renderer.
+2. ~~Ball sprite draw~~ - **done this session** (above).
+3. Open-particle burst (§7.7 point 3 / `docs/battle-anim-assets.md` §1) -
+   tiles/palette/anim-frame-table already extracted; needs a new radial
+   spawn+`Sin`/`Cos`-motion renderer (source-cited formula, not RAM-probed
+   this session - flagged as a follow-up risk for whoever implements it).
+4. Mon affine-scale-in + ball-color tint (§7.5 / `battle-anim-tables.json`)
+   - table already extracted; needs this engine's first affine-OAM-scaling
+   sprite renderer (nearest-neighbor scale from the accumulator table),
+   which mechanism 5 will also need for its own stretch - worth
+   implementing once, shared.
+5. Front-sprite entrance anim (`ANIM_V_STRETCH`) - the only mechanism still
+   needing a genuine new ROM extraction (GROVYLE's 2nd front-sprite frame),
+   plus the `Sin`-table wobble renderer and the still-open exact
+   start-tick arithmetic (§7.11's own flagged follow-up) - the most
+   expensive of the five, left last on purpose.

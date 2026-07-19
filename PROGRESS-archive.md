@@ -5,6 +5,45 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 76 — ORACLE BOOTSTRAP v4 SHIPPED (supervisor, harness-level, user-directed): Battle Scene forced ON via zero-frame poke — anchor byte-identical, 18/19 traces hold exactly, only the send-out window's truth moved (174/256, window 1462-1543)
+
+- **State:** harness commit `aae8b98` (+ template-revert follow-up, per
+  user preference the ROADMAPs stay untouched — the oracle speaks for
+  itself). Oracle service restarted on v4 (`bin/oracle info` → version 4,
+  canonical sha unchanged `9c89c741…`). Smoke test green (version pin
+  bumped in lockstep). This run: `npm test` 454/454, build green.
+- **Did:** single poke in the bootstrap's previously-unused `pokes` field
+  (applied after all 6910 scripted frames, before settle — ZERO frames
+  added, RNG stream untouched): `gSaveBlock2Ptr`(deref)+0x15: `0x07→0x03`,
+  clearing only `optionsBattleSceneOff` (u16 bit 10). Fixed a latent
+  harness bug blocking all pokes (`emerald_core.write_u8` used libmgba-py's
+  broken `__setitem__` sugar → now `raw_write`). Full verification chain:
+  probe shows bit=0 + anchor sha byte-identical; smoke-test golden hashes
+  pass; battle1-turn1 replay vs v3 truth: all pre-battle captures
+  identical, first divergence tick 1968, 172/223 differ — animations
+  visually confirmed (DOUBLE_TEAM afterimage on screen). Full 19-trace
+  sweep: 18 at exact prior counts; `sendout.json` 196→**174/256** with ONE
+  contiguous mismatch window **1462-1543** (was 1462-1521) — mechanism
+  source-identified: `SpriteCB_OpponentMonFromBall`→`BattleAnimateFrontSprite`
+  no longer passes `SKIP_FRONT_ANIM` (`battle_main.c:2837`,
+  `pokemon.c:6888`), so the mon front-sprite entrance animation now plays
+  post-materialize; settled tail 1544-1555 unchanged.
+- **Stale-by-design inventory (v3-truth artifacts to regenerate):**
+  `battle1-sendout-dense.json` (1462+), `battle1-turn1.json` + its RAM
+  dump + battle-turn-notes.md battle-window tables (first action menu
+  itself lands later — player send-out front anim), battle-move-anim-notes
+  §4-6 timelines (its Battle-Scene-OFF root-cause finding is historical
+  truth of v3; its asset/decode work is now exercised). Two lane briefs
+  for exactly this split are DRAFTED but NOT LAUNCHED — the user asked to
+  hold new workers (2026-07-18 ~17:45); briefs live in the supervisor
+  scratchpad (brief-sendout-v4.txt, brief-s7-v4-regen.txt) and their
+  content is re-derivable from this entry alone.
+- **Notes:** sibling run `swift-koala` shares this oracle and inherits v4
+  (user-directed harness change). `docs/battle-turn-notes.md`/`battle-
+  move-anim-notes.md` §-references above are the regen worker's map.
+
+---
+
 ## 75 — S7 research questions ALL RESOLVED (parallel worktree lane, merged): one RAM-confirmed root cause — the canonical save has Battle Scene OFF; turn-end RNG cluster fully line-cited + LCG-verified. **USER SCOPE DECISION (2026-07-18, interactive): turn animations ON at the oracle level, incl. the harness template — supervisor implementing next.**
 
 - **State:** merge of `worker/wt-20260718-162513` (base `2ad8b52`):

@@ -5,6 +5,64 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 79 — Bounded worker: send-out mechanism 2/5 (ball sprite) landed, pixel-validated; `sendout.json` stays **174/256** as expected (per #74/#78's "no subset moves the count" finding), 4 mechanisms remain
+
+- **State:** `npm test` **455/455** (+1), `npm run build` green. Full
+  19-trace sweep: 18 others at exact prior counts, `sendout.json`
+  unchanged **174/256** — expected, not a miss (see below). Zero
+  regressions.
+- **Did:** implemented and pixel-validated the **ball sprite** (mechanism 2
+  of the 5 named in #78/§7.11) — `StartSendOutAnim`/
+  `SpriteCB_ReleaseMonFromBall` (`pokeball.c:389-395,750-824`), using the
+  already-extracted `summary-ball.json` (closed frame) and
+  `battle-anim-ball-open.json` (open frame) — both landed in an earlier
+  commit (`c4a7a85`, a parallel worktree lane) but were unused by any
+  engine code until now; checking `src/assets/gen/` first (per the brief)
+  found both assets already done, so no new extraction was needed for
+  this mechanism. Position/timing pixel-brute-force-confirmed against this
+  run's own regenerated ground truth (not assumed from the different trace
+  `docs/battle-anim-assets.md` used): corner (168,56), closed frame
+  ZERO-diff exact every tick 1464-1479 (16 ticks), open frame ZERO-diff
+  exact at 1480 only (degrading after as still-unrendered particles/mon
+  occlude it) — confirms `sBallAnimSeq1`'s 5-tick-open+5-tick-blank
+  exactly. `localcheck.ts` pixel-diff mass across 1462-1543:
+  **127107→124762px** (−2345px, zero tick regressed). New Tier-1 test
+  (`tests/battleScene.test.ts`) pins both boundary ticks via a pixel
+  opaque in the closed frame's tile but transparent at the same offset in
+  the open frame's tile. `docs/battle-scene-notes.md` §7.11 gained the
+  ball's own sub-section (mechanism-2 status); `battleScene.ts` gained a
+  doc'd `drawSendOutBall` + supporting constants.
+- **Why the count didn't move (expected, re-confirmed not re-tested):**
+  #74 and #78 both already established structurally that no tick in this
+  window has only one mechanism left broken — every tick 1462-1543 needs
+  **all five** of: (1) opponent party-summary despawn fade, (2) ball
+  sprite [DONE this session], (3) open-particle burst, (4) mon
+  affine-scale-in + ball-color tint, (5) front-sprite entrance anim
+  (`ANIM_V_STRETCH`) + its missing 2nd frame. This session's own
+  before/after sweep (above) reconfirms it: real, measured pixel-mass
+  reduction, zero full-frame flips — same pattern as #74's two mechanisms.
+- **Next (in decreasing tractability, given time remaining in a session):**
+  mechanisms 3 and 4 have their assets/tables **already extracted**
+  (`battle-anim-particles.json` incl. `regularBallAnim`'s frame table and
+  the spawn/motion formulas cited in `docs/battle-anim-assets.md` §1;
+  `battle-anim-tables.json`'s `ballOpenFadeColor`/`affineEmerge` step
+  table) — no extraction blocks them, only new renderer code (a radial
+  particle spawner for 3; nearest-neighbor affine-scale sprite blending
+  for 4, which is this engine's first affine-OAM precedent and will also
+  serve mechanism 5's stretch). Mechanism 1 (party-summary despawn) needs
+  fresh RAM/pixel timing work first (not even source-timed precisely yet,
+  per §7.4.3). Mechanism 5 needs a genuine ROM extraction (GROVYLE's 2nd
+  front-sprite frame, `HasTwoFramesAnimation`) plus the `Anim_
+  VerticalStretch` Sin-table renderer and its still-open start-tick
+  arithmetic — the most expensive of the five. A future step should
+  probably tackle 4 next (unlocks 4 and de-risks 5's renderer together),
+  then 3, then 1, then 5.
+- **Notes:** action-menu window (1560+) and the turn-notes/move-anim docs
+  stayed untouched (this step's explicit out-of-scope, per the brief's
+  hands-off note for the parallel worktree worker on that lane).
+
+---
+
 ## 78 — Send-out window re-grounded under v5 truth: ground truth regenerated + twice-run deterministic, new front-sprite-entrance mechanism decoded, one stale Tier-1 pin corrected (1519→1544). `sendout.json` still **174/256** — score target NOT met, gap precisely re-bounded
 
 - **State:** `npm test` **454/454**, `npm run build` green. Full 19-trace
@@ -89,44 +147,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   on user go-ahead.
 - **Notes:** pristine factory.sav recoverable via pokebench git history;
   v4 section kept in BOOTSTRAP.md as superseded history.
-
----
-
-## 76 — ORACLE BOOTSTRAP v4 SHIPPED (supervisor, harness-level, user-directed): Battle Scene forced ON via zero-frame poke — anchor byte-identical, 18/19 traces hold exactly, only the send-out window's truth moved (174/256, window 1462-1543)
-
-- **State:** harness commit `aae8b98` (+ template-revert follow-up, per
-  user preference the ROADMAPs stay untouched — the oracle speaks for
-  itself). Oracle service restarted on v4 (`bin/oracle info` → version 4,
-  canonical sha unchanged `9c89c741…`). Smoke test green (version pin
-  bumped in lockstep). This run: `npm test` 454/454, build green.
-- **Did:** single poke in the bootstrap's previously-unused `pokes` field
-  (applied after all 6910 scripted frames, before settle — ZERO frames
-  added, RNG stream untouched): `gSaveBlock2Ptr`(deref)+0x15: `0x07→0x03`,
-  clearing only `optionsBattleSceneOff` (u16 bit 10). Fixed a latent
-  harness bug blocking all pokes (`emerald_core.write_u8` used libmgba-py's
-  broken `__setitem__` sugar → now `raw_write`). Full verification chain:
-  probe shows bit=0 + anchor sha byte-identical; smoke-test golden hashes
-  pass; battle1-turn1 replay vs v3 truth: all pre-battle captures
-  identical, first divergence tick 1968, 172/223 differ — animations
-  visually confirmed (DOUBLE_TEAM afterimage on screen). Full 19-trace
-  sweep: 18 at exact prior counts; `sendout.json` 196→**174/256** with ONE
-  contiguous mismatch window **1462-1543** (was 1462-1521) — mechanism
-  source-identified: `SpriteCB_OpponentMonFromBall`→`BattleAnimateFrontSprite`
-  no longer passes `SKIP_FRONT_ANIM` (`battle_main.c:2837`,
-  `pokemon.c:6888`), so the mon front-sprite entrance animation now plays
-  post-materialize; settled tail 1544-1555 unchanged.
-- **Stale-by-design inventory (v3-truth artifacts to regenerate):**
-  `battle1-sendout-dense.json` (1462+), `battle1-turn1.json` + its RAM
-  dump + battle-turn-notes.md battle-window tables (first action menu
-  itself lands later — player send-out front anim), battle-move-anim-notes
-  §4-6 timelines (its Battle-Scene-OFF root-cause finding is historical
-  truth of v3; its asset/decode work is now exercised). Two lane briefs
-  for exactly this split are DRAFTED but NOT LAUNCHED — the user asked to
-  hold new workers (2026-07-18 ~17:45); briefs live in the supervisor
-  scratchpad (brief-sendout-v4.txt, brief-s7-v4-regen.txt) and their
-  content is re-derivable from this entry alone.
-- **Notes:** sibling run `swift-koala` shares this oracle and inherits v4
-  (user-directed harness change). `docs/battle-turn-notes.md`/`battle-
-  move-anim-notes.md` §-references above are the regen worker's map.
-
 ---

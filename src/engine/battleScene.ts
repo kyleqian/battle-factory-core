@@ -15,7 +15,18 @@
 // A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
 // state rather than a phase enum (see the field's own doc comment).
 //
-// STATUS (this session - trainer-exit RAM ground truth + BG palette-fade
+// STATUS (PROGRESS.md #79): mechanism 2 of the 5 named in #78/docs §7.11
+// landed - the send-out BALL SPRITE (`drawSendOutBall`, closed+open frames,
+// pixel-brute-force-confirmed corner+timing). `sendout.json` stays
+// **174/256** (expected, not a miss - #74/#78 already proved no tick in this
+// window has only one mechanism left broken); `localcheck.ts` pixel-diff
+// mass across 1462-1543 dropped 127107->124762px, zero regressions. Still
+// missing: (1) opponent party-summary despawn fade, (3) open-particle
+// burst, (4) mon affine-scale-in + ball-color tint, (5) front-sprite
+// entrance anim - see PROGRESS.md #79 and docs/battle-scene-notes.md §7.11
+// for the full per-mechanism accounting.
+//
+// STATUS (prior session - trainer-exit RAM ground truth + BG palette-fade
 // formula, PROGRESS.md #74): `tools/compare/traces/sendout.json` is still
 // **196/256** (score UNCHANGED from the prior session) despite two real,
 // independently-verified fixes landing: (1) `trainerExitX`'s `TRAINER_EXIT_X2`
