@@ -3050,3 +3050,135 @@ they read exactly as expected (as every other field checked this session
 did), the GBA hardware alpha-blend target-selection hypothesis above
 becomes the more likely remaining lead and would need a from-scratch
 compositor rethink (out of a single bounded session's scope).
+
+### 7.29. Round-10 worktree: executed §7.28's own named next step (per-instance OAM `priority`/`objMode`/`subpriority` + real `BLDCNT`/`BLDALPHA`) - FOURTH independent RAM confirmation, everything checks out correct again, `sendout.json` stays **246/256** (no regressions), one new untested lead named
+
+Per this round's brief: run exactly §7.28's "recommended next step" (RAM-probe
+the icon/bar subsprites' own `oam.priority`/`objMode` bytes per-instance
+during the Exit phase, plus `BLDCNT`/`BLDALPHA`), and close the 8 remaining
+ticks of the family (1470/1471/1479/1491-1495) if it turns up a real
+mechanism, else document a clean negative - explicitly told not to guess
+past that fork.
+
+**Identified the exact `gSprites[]` indices first** (`tools/probe/dump-
+task-and-sprite-callbacks.py` against `tools/compare/traces/sendout.json`
+from RAM tick 1455, throwaway run, cross-resolved against `arm-none-eabi-nm
+-n --defined-only pokeemerald.elf`): `SpriteCB_StatusSummaryBar_Exit`
+(`0x08074090`) occupies `gSprites[6]` for RAM ticks 1461-1493 (a second,
+later occupancy at `gSprites[5]` from RAM 1573+ is the PLAYER-side bar,
+different window - ignored). `SpriteCB_StatusSummaryBalls_Exit`
+(`0x08074158`) confirms §7.28's already-cited `gSprites[48..53]`, and
+independently reconfirms its per-icon cull ticks (48/49/50 drop out of the
+list at RAM 1472/1479/1486 - the same three ticks §7.28 already derived from
+this same tool).
+
+**Extended `tools/probe/specs/sendout-summary-exit-blend.json` (committed)**
+with 34 new watches: `oam` attr1 (byte @ `+0x01`, decodes `affineMode`/
+`objMode`) and attr2 (u16 @ `+0x04`, decodes `priority`) for `gSprites[6]`
+(bar), `gSprites[8]` (Grovyle, already known from `sendout-grovyle-
+materialize.json`), and `gSprites[48..53]` (icons j=5..0), plus each one's
+software `subpriority` byte (`+0x43`) and `invisible`-flag byte (`+0x3e`),
+plus the raw hardware registers `BLDCNT` (`0x04000050`) and `BLDALPHA`
+(`0x04000052`) directly (not the software `tBlend` proxy - the actual
+memory-mapped I/O bytes). Ran across RAM ticks 1460-1496 (`sizeof(struct
+Sprite)=0x44`, confirmed against the already-committed `dump-task-and-
+sprite-callbacks.py`'s own header comment).
+
+**Every value read exactly as the engine's model already assumes - no
+discrepancy found anywhere:**
+- **`objMode`**: bar and all 6 icons read `1` (`ST_OAM_OBJ_BLEND`, semi-
+  transparent) throughout 1461-1493. Grovyle reads `0` (`ST_OAM_OBJ_NORMAL`)
+  the whole time - confirming Grovyle's own materialize tint is NOT a
+  hardware alpha-blend target on its own account (consistent with it being a
+  software/CPU-side palette fade, matching §7.28's already-RAM-confirmed
+  constant `matA=256` finding) - it's purely the *passive* layer the icon's
+  forced-1st-target blend reads.
+- **`priority`**: bar and all 6 icons read `1`; Grovyle reads `2` - exactly
+  the ordering `drawGrovyleMaterialize` (drawn first, "back") then
+  `drawOpponentSummaryExit` (drawn second, "front", blending against
+  whatever's already painted) already assumes.
+- **`subpriority`**: bar reads `10`, icons all read `9` - exact match to
+  `CreatePartyStatusSummarySprites`'s own source call sites
+  (`CreateSprite(&sStatusSummaryBarSpriteTemplates[...], bar_X, bar_Y, 10)`
+  and `CreateSpriteAtEnd(&sStatusSummaryBallsSpriteTemplates[...], ...,  9)`,
+  `battle_interface.c:1489,1503`). Irrelevant to this residual anyway (bar
+  and icons never occupy the same screen column at the same tick), but
+  confirms the probe's own addressing is correct.
+- **`BLDCNT` reads a constant `0x3f40`** across the whole 1462-1493 window:
+  decoded, bits 6-7 = `01` (alpha-blend effect mode), bits 0-5 (1st-target
+  selection) are **all zero** (no BG/OBJ layer nominally flagged as 1st
+  target through `BLDCNT` itself), bits 8-13 (2nd-target selection) are
+  **all set** (every BG, OBJ, and the backdrop are valid 2nd targets). This
+  is precisely the documented GBA hardware quirk the engine's
+  `blendedTile`/`blendedSetPixel` approximation depends on: a semi-
+  transparent OBJ (`objMode=1`) is *forced* to act as the 1st target
+  regardless of `BLDCNT`'s own 1st-target bit, provided blending is enabled
+  and a valid 2nd target exists behind it at that pixel - both conditions
+  are true here (icon/bar `objMode=1`, `BLDCNT` OBJ-2nd-target bit set). No
+  target-selection anomaly exists; the register setup fully supports exactly
+  the OBJ-blends-against-OBJ-behind-it model this engine already uses.
+- **`BLDALPHA`** decodes (`eva = bits0-4`, `evb = bits8-12`) to the exact
+  same schedule as §7.28's already-RAM-confirmed `tBlend` sequence, one tick
+  delayed (a register-write-then-read lag, not a new lag - consistent with
+  this window's already-established +1 render lag): RAM 1491/1492 read
+  `eva=1,evb=15`; RAM 1493 reads `eva=0,evb=16` (the "blend turned off"
+  register value, one tick after the task's own `tBlend` field hit `0` at
+  RAM 1492). Confirms `blend = max(0,15-floor(elapsed/2))` isn't just
+  matching the task's *internal counter* (already known) but the *actual
+  hardware register it drives* too.
+- **The bar's own subsprite-table priority** (the one per-instance field
+  `AddSubspritesToOamBuffer` (`sprite.c:1747-1748`) can override per-tile,
+  independent of the base `oam.priority` just confirmed): read
+  `sStatusSummaryBar_Subsprites_Exit` directly from source
+  (`battle_interface.c:575-625`, all 6 entries, including the two EXTRA
+  tileOffset-8 blocks this table inserts) - every single entry hardcodes
+  `.priority = 1`, identical to the base value already RAM-confirmed above.
+  No override exists, so there's no per-subsprite divergence to find. The
+  ball icons don't use subsprite tables at all
+  (`CreatePartyStatusSummarySprites`, source-confirmed - only
+  `SetSubspriteTables` is called for the bar sprite id, never for the ball
+  icon ids), so their base `oam.priority` unconditionally IS the real
+  hardware value - no override path exists for them either.
+
+**Net result: this is the FOURTH independent thing this family has RAM/
+source-confirmed correct** (after §7.28's blend schedule, per-icon sprite
+lifetime/position, and Grovyle's materialize params) **with zero
+discrepancy found.** Every field this session's own named next step called
+out - the exact ask - came back exactly as the engine's compositor already
+assumes. Per the brief's explicit instruction for this outcome: no fix
+attempted, no guessing past this fork. None of the 8 target ticks
+(1470/1471/1479/1491-1495) close this round.
+
+**Score effect: none.** Zero code changed (`git diff` against `battleScene.
+ts` and every other `src/` file is empty - only `tools/probe/specs/sendout-
+summary-exit-blend.json` gained watches, plus this doc). Live compare rerun
+confirms `sendout.json` unchanged at **246/256**. `npm test` 545/545, `npm
+run build` green.
+
+**Committed this session**: `tools/probe/specs/sendout-summary-exit-blend.
+json`'s extension (bar/Grovyle/6-icon `oam` attr1+attr2+subpriority+
+invisible-flag watches, plus raw `BLDCNT`/`BLDALPHA` register watches - 66
+total fields now, reusable ground truth for whoever picks this back up).
+
+**One new lead surfaced this session, NOT tested (named per this file's own
+precedent rather than guessed at)**: while reading `AddSubspritesToOamBuffer`
+for the subsprite-priority check above, this session noted that every field
+now checked, across §7.28 and this round, is *metadata* (position, blend
+coefficient, priority, objMode, subpriority) - none of it is the actual
+*tile graphics bytes* the icon/bar sprites point into VRAM. This codebase
+has ALREADY found one case in this exact send-out window where a static-
+extracted asset's assumed pixel content silently went stale against a
+*runtime* VRAM tile overwrite while every other field (sprite alive,
+correctly positioned) stayed nominally correct (`e00f8f3`, "sendout ball's
+missing 3rd frame", `open.png` runtime VRAM overwrite). Untested this
+session: whether the "Empty" ball-icon tile's or the bar's own tile-graphics
+bytes in VRAM still match the statically-extracted `battle-interface-ball-
+display.json`/`ballStatusBar` tileset specifically during RAM ticks
+1489-1496 - that family of bug wouldn't show up in any OAM/register field
+either this round or §7.28 probed, since the sprite/OAM metadata would stay
+correct even if the tile data underneath it had changed. Would need a direct
+VRAM tile-data RAM read (tile base address = `oam.tileNum` resolved against
+the relevant OBJ VRAM charblock) compared byte-for-byte against the engine's
+own extracted tileset arrays - out of this session's remaining budget, named
+concretely so the next session doesn't have to rediscover the "checked
+everything but the graphics data itself" gap.
