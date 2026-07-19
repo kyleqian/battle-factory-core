@@ -369,6 +369,39 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(first).toEqual(PARTICLE_COLOR);
   });
 
+  // §7.18: pins the RAM-confirmed one-tick global engine stall correction
+  // (`PARTICLE_STALL_LOGICAL_TICK`). Particle 0 (angle 0, straight down) is
+  // at real age 12 (radius 22) by render tick 1494 (logicalT 13), one tick
+  // BEHIND the naive age-13/radius-24 the un-corrected formula would use -
+  // RAM-probed directly (`gSprites`' own `x2`/`y2` duplicate across RAM
+  // ticks 1493/1494, `tools/probe/ram-probe.py` against this trace's own
+  // segments). Local (2,1) is tile0's own first opaque pixel (age%6===0 at
+  // both age 12 and 13, so the tile itself doesn't disambiguate - only the
+  // vertical position does).
+  it("ball-open particle burst: the global one-tick engine stall shifts particle 0 to radius 22 (not the naive 24) by handoff+32 (1494) (§7.14/§7.18 mechanism 3)", () => {
+    const ORIGIN = { x: 172, y: 55 };
+    const PARTICLE_COLOR: [number, number, number] = [255, 173, 0];
+    const correctedRadius = pixelAtSentOut(1494, ORIGIN.x + 2, ORIGIN.y + 22 + 1);
+    const naiveRadius = pixelAtSentOut(1494, ORIGIN.x + 2, ORIGIN.y + 24 + 1);
+    expect(correctedRadius).toEqual(PARTICLE_COLOR);
+    expect(naiveRadius).not.toEqual(PARTICLE_COLOR);
+  });
+
+  // §7.18: pins the death-boundary fix (`PARTICLE_MAX_AGE` 25 -> 24) for the
+  // last-spawned particle (index 15, itself also delayed one tick by the
+  // same stall - `PARTICLE_LATE_SPAWN_START_INDEX`). RAM shows the register
+  // write for a particle's final age (25, radius 48) happens the same tick
+  // `DestroyBallOpenAnimationParticle` runs, so it's never actually
+  // composited to screen - rendering it anyway (the pre-fix behavior)
+  // regressed render tick 1522 from bit-exact to an 12px mismatch at screen
+  // (141,88), oracle-cross-checked (`tools/compare/out/latest` at the time
+  // of the regression).
+  it("ball-open particle burst: particle 15 does not render past its RAM-confirmed death tick, handoff+60 (1522) (§7.18 mechanism 3)", () => {
+    const PARTICLE_COLOR: [number, number, number] = [255, 173, 0];
+    const pixel = pixelAtSentOut(1522, 141, 88);
+    expect(pixel).not.toEqual(PARTICLE_COLOR);
+  });
+
   // Mechanism 1 (PROGRESS.md, §7.4.3): the opponent party-status-summary
   // despawn (alpha blend + per-icon staggered exit slide). Icon j=5 (the
   // rightmost, delay 0) starts sliding+fading the very first active tick;

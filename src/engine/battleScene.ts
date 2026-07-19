@@ -15,6 +15,33 @@
 // A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
 // state rather than a phase enum (see the field's own doc comment).
 //
+// STATUS (PROGRESS.md #88): the open-particle burst's (mechanism 3, #82)
+// empirical logical-tick-12 cutoff is REMOVED and root-caused - RAM-probed
+// the particle sprites' own gSprites slots directly (found via a callback-
+// pointer cross-reference against the ELF, not guessed): the whole
+// particle subsystem (spawner task + all live particles) freezes for
+// exactly one real game tick (RAM tick 1494 duplicates 1493 verbatim),
+// which is exactly the boundary the prior session's empirical cutoff had
+// already (unknowingly) found the edge of, and the spawner's own `data[0]`
+// increment freezes the same tick, delaying the last 2 of 16 particles'
+// own spawns by one tick too. Both are RAM-confirmed, not curve-fit - see
+// `PARTICLE_STALL_LOGICAL_TICK`'s doc comment on `drawBallOpenParticles`
+// for the full derivation. The already pixel-validated age<->radius/frame
+// formulas (ages 0-12) are UNCHANGED; only two `logicalT`-relative age
+// offsets were added on top, plus a one-tick tighter `PARTICLE_MAX_AGE`
+// (25->24: a particle's final RAM write happens the same tick it self-
+// destructs, so it's never actually composited - rendering it anyway
+// regressed an already-bit-exact tail frame, caught by the compare sweep
+// and fixed before landing). `sendout.json` **196/256 -> 199/256** (+3);
+// most of the previously-craterous 1481-1503/1516-1519 window's PER-TICK
+// pixel mass dropped sharply (several thousand px/tick down to double or
+// triple digits) without yet reaching a full-frame match there - see
+// PROGRESS.md #88 and docs/battle-scene-notes.md §7.18 for the complete
+// per-tick accounting. The party-summary bar's own exit slide (§7.15's
+// flagged sub-gap, priority 2) and the small 1504-1521 boundary residual
+// (priority 3) are still open, unattempted this session (time-boxed to
+// priority 1 alone, per the brief's own precedence rule).
+//
 // STATUS (PROGRESS.md #84): mechanism 5 of the 5 named in #78/docs §7.11
 // landed - GROVYLE's FRONT-SPRITE ENTRANCE STRETCH (`drawGrovyleStretch`,
 // `ANIM_V_STRETCH`/`Anim_VerticalStretch`, RAM-probed data[4]/data[5]/y2
@@ -1590,25 +1617,57 @@ function drawGrovyleStretch(fb: Uint8Array, t: number, handoffTick: number): voi
  */
 const PARTICLE_ORIGIN = { x: 172, y: 55 };
 const PARTICLE_SPAWN_COUNT = 16;
-const PARTICLE_MAX_AGE = 25;
+const PARTICLE_MAX_AGE = 24;
 /**
- * Empirical hard render cutoff (pixel-brute-force-confirmed against this
- * trace's own ground truth, `localcheck.ts`): the per-particle radial model
- * above tracks the oracle almost exactly through logical tick 12 (rendered
- * tick 1493, pixel-diff mass in this window's own isolated tick drops from
- * 147px to 9px with particles on) but the match craters immediately after
- * (1494 on, every tick strictly worse with particles than without) - this
- * logical tick is exactly `affineEmergeAccumulator`'s own growth-complete
- * point (`MATERIALIZE_START_OFFSET` + 12, i.e. mechanism 4's own scale-in
- * finishing at the same instant), suggesting something in the real game
- * (plausibly `HandleBallAnimEnd`, gated on the mon's `affineAnimEnded`)
- * changes the particle population's behavior at that same tick in a way
- * this session did not reverse-engineer (not RAM-probed) - flagged as an
- * open follow-up rather than guessed at. Per this run's "no curve-fitting"
- * rule, rendering simply stops at the boundary where it's still measurably
- * correct instead of extrapolating the model further.
+ * §7.18: the prior session's empirical hard cutoff (render tick 1493, i.e.
+ * logical tick 12) is now root-caused and REMOVED - RAM-probed directly
+ * (`tools/probe/ram-probe.py` against `tools/compare/traces/sendout.json`'s
+ * own segments so tick numbers line up 1:1 with this window's established
+ * numbering; watches `gSprites[6/9-23]` - the particles' own slots, found by
+ * cross-referencing `dump-task-and-sprite-callbacks.py`'s callback dump
+ * against `PokeBallOpenParticleAnimation_Step1`/`_Step2`'s ELF addresses -
+ * and `gTasks[2]` - the spawner task itself). Ground truth: **the whole
+ * particle subsystem (spawner task AND all already-alive particles'
+ * `x2`/`y2`/`animCmdIndex`) freezes for exactly ONE real game tick**, RAM
+ * tick 1494 duplicating RAM tick 1493 verbatim (`gTasks[2].data[0]` stays 14
+ * across both ticks; every already-spawned particle's `x2`/`y2` is
+ * bit-identical across both ticks) - not a particle-specific bug, a
+ * whole-frame engine stall (cause not reverse-engineered - a task/sprite
+ * list-relinking hiccup is one plausible source, not confirmed; the ONE
+ * observed occurrence is treated as ground truth here regardless of cause).
+ * This single stall is the root cause the prior session's cutoff had
+ * (unknowingly) found the edge of: the naive age model assumed monotonic
+ * ticks, so every already-spawned particle silently ran one tick "ahead" of
+ * real RAM once the stall passed, and the two not-yet-spawned particles
+ * (spawn indices 14/15) were themselves delayed a tick too (the spawner's
+ * own `data[0]` increment froze the same tick). Both are corrected below via
+ * `logicalT`-relative offsets, not hardcoded absolute ticks.
+ *
+ * `PARTICLE_STALL_LOGICAL_TICK = 13` is the prior session's OWN
+ * pixel-brute-forced boundary ("every tick from logical 13 on is strictly
+ * worse"), reused directly rather than re-derived from the RAM ticks above -
+ * the two don't translate 1:1 by simple arithmetic (this session tried;
+ * RAM-tick math implies logical 15, but that value regressed the
+ * already-exact render tick 1522 when tested against the live oracle, while
+ * the prior session's own pixel-derived 13 - paired with `PARTICLE_MAX_AGE`
+ * tightened 25->24 below - reproduces the correct boundary). The mismatch is
+ * a real, open finding: RAM register state and what's actually composited to
+ * screen that same tick are NOT the same clock for this mechanism (a raw
+ * register read is not proof of on-screen timing) - flagged rather than
+ * papered over. The age<->radius/frame formulas themselves (`age<=1 ? 0 :
+ * 2*(age-1)` / `anim[age % anim.length]`) are UNCHANGED from the prior
+ * session, since they were already pixel-validated for ages 0-12 and a
+ * from-RAM-registers rederivation of them (tried this session) measurably
+ * hurt that already-good region when checked against the live oracle.
+ *
+ * `PARTICLE_MAX_AGE` tightened 25->24: a particle's final RAM write (age 25,
+ * radius 48) happens the SAME tick `DestroyBallOpenAnimationParticle` runs,
+ * so it is never actually composited on screen - rendering it anyway
+ * regressed the already-bit-exact render tick 1522 (caught by the full
+ * 19-trace sweep before landing, not shipped broken).
  */
-const PARTICLE_RENDER_LAST_LOGICAL_TICK = 12;
+const PARTICLE_STALL_LOGICAL_TICK = 13;
+const PARTICLE_LATE_SPAWN_START_INDEX = 14;
 
 /** `Sin(index, amplitude)` (`trig.c:515-517`): `gSineTable` is a 256-entry (period) Q8.8 sine table, `(amplitude * gSineTable[index]) >> 8` - reproduced via `Math.sin` at the same Q8.8 rounding rather than a literal 256-entry copy (this mechanism doesn't gate any full-frame match, see the module doc above). */
 function gbaSin(index: number, amplitude: number): number {
@@ -1638,10 +1697,15 @@ function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox:
 
 function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): void {
   const logicalT = t - handoffTick - BALL_OPEN_START_OFFSET - 1;
-  if (logicalT < 0 || logicalT > PARTICLE_RENDER_LAST_LOGICAL_TICK) return;
+  if (logicalT < 0) return;
   const anim = battleAnimParticles.regularBallAnim;
   for (let i = 0; i < PARTICLE_SPAWN_COUNT; i += 1) {
-    const age = logicalT - i;
+    let age = logicalT - i;
+    if (i >= PARTICLE_LATE_SPAWN_START_INDEX) {
+      age -= 1;
+    } else if (logicalT >= PARTICLE_STALL_LOGICAL_TICK) {
+      age -= 1;
+    }
     if (age < 0 || age > PARTICLE_MAX_AGE) continue;
     const angle = (i % 8) * 32;
     const radius = age === 0 ? 0 : 2 * (age - 1);
