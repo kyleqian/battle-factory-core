@@ -1,3 +1,48 @@
+## 119 — Bounded worker: FIGHT (move-select) submenu engine slice landed — open/nav (all 4 positions)/B-close wired into core.ts, `fight-submenu.json` **234/235** (1 attributed anomaly); suite 579 → **592/592**
+
+- **State:** `npm test` **592/592** (+13 Tier-1), `npm run build` green,
+  tree clean. New trace `tools/compare/traces/fight-submenu.json`
+  **234/235** (only tick 2073, a 99px row-shaped anomaly, individually
+  attributed — see below). Zero regressions: menu-idle 69/69, menu-throw
+  78/78, menu-text 18/18, sendout 255/256 (1496 still the only open item),
+  s6-acceptance 224/228 — all unchanged.
+- **Did:** `src/engine/battleMenu.ts`'s new `FightSubmenuState`
+  (open/nav/close, JOY_NEW-only cursor nav with a real 1-tick display lag,
+  matching §11 finding 2's empirically-confirmed no-auto-repeat) +
+  `battleScene.ts`'s `drawFightSubmenuWindow` dispatcher + `core.ts` wiring
+  (A opens on the settled action menu, RIGHT/LEFT/UP/DOWN nav, B closes).
+  **Rendering deviates from the brief's suggestion** (glyph-rendering via
+  `font-normal.json`): `B_WIN_MOVE_NAME_*`/`B_WIN_PP`/`B_WIN_MOVE_TYPE` all
+  use `FONT_NARROW`, a font this codebase has never extracted (source-
+  confirmed genuinely separate glyph tileset from `FONT_NORMAL`, not just
+  narrower widths) — flagged as a real asset gap, sidestepped by extending
+  this window's own established per-region-harvest convention (§5/§6) one
+  level deeper: a static per-slot harvest (4 patches, pixel-confirmed
+  byte-identical across each slot's ENTIRE dwell) composited with the
+  existing, unmodified onix/healthbox bounce patches. Found and fixed a
+  real 2-extra-tick-per-DMA-event drift in the bounce overlay (empirically
+  pixel-fit, mechanism plausible but not RAM-confirmed — see docs/
+  battle-menu-notes.md §8 for the full derivation and the grid-search that
+  ruled out alternatives) and a 1-tick off-by-one in how `core.ts` stamps
+  its own press-tick into new state (found via this session's own dense
+  compare, unrelated to the pre-existing `sendOutPressElapsed` convention
+  which stores the same value one tick earlier by an established, unfixed
+  convention this session didn't touch).
+- **Open item (individually attributed, not curve-fit):** tick 2073's 99px
+  residual — a single row (y=111, x127-225) just below the healthbox
+  bounce region's own bbox, same still-unidentified family as §11 finding
+  4's own two idle-only-trace anomalies (2071/2135). Grid-searched every
+  integer bounce-shift from -9 to 0; -4 is uniquely optimal at 1/66
+  mismatches post-close, no better value exists. Not root-caused further
+  within this session's cap.
+- **Next:** move confirmation (A on a move → turn execution) is next in
+  this lane, or S7 turn-execution proper (battle-script sequencing,
+  HP-drain, text) per battle-turn-notes — either unblocks real turn play.
+- **Notes:** stayed in scope (battleMenu.ts/battleScene.ts/core.ts +
+  their tests, new extractor/asset/trace, this doc's §8, PROGRESS.md) -
+  did not touch healthboxAssembly.ts/battle-turn-notes.md/ISSUES #5/#16/#18
+  per the brief. No PAPERCUT this session.
+
 ## 118 — Supervisor: scout lane merged — species-types data gap closed (all 411 species) + FIGHT-submenu ground truth banked (§11) — **suite 579/579**; round 3 launched (FIGHT-submenu engine slice + ISSUES #16 healthbox wiring); S6-vs-1496 decision escalated to the user
 
 - **State (verified post-merge):** `npm test` **579/579**, `npm run build`
