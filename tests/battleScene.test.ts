@@ -423,6 +423,31 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     }
   });
 
+  // §7.22/§7.23: mechanism 5 (GROVYLE_STRETCH_EARLY_TABLE) starts writing its
+  // affine matrix at handoff+35 (1497), not handoff+42 (1504) - closing
+  // §7.21's own named "matrix-early" gap. Mechanism 4's window is shortened
+  // to match (et<35, was et<42) and mechanism 5's early portion is drawn in
+  // mechanism 4's OLD (pre-ball/particle) call slot so the particle burst
+  // still correctly occludes Grovyle through et 35-41 (the compositing-order
+  // correction named in §7.22). Pins the table's own asymmetric xScale/
+  // yScale silhouette-edge boundary (not just tint presence, which mechanism
+  // 4's own flat cutoff would also show) at two covered ticks - a boundary
+  // pixel pair straddling the exact silhouette edge the RAM-derived scale
+  // produces, confirming the table's specific values (not a neutral
+  // fallback) are what's actually rendered.
+  it("mechanism 5's affine matrix write starts 7 ticks early (handoff+35, GROVYLE_STRETCH_EARLY_TABLE) - the corrected silhouette edge at renders 1499 and 1503 (§7.22/§7.23)", () => {
+    const TINT: [number, number, number] = [255, 181, 247];
+    const before1499 = pixelAtSentOut(1499, GROVYLE_CORNER.x + 48, GROVYLE_CORNER.y + 4);
+    const after1499 = pixelAtSentOut(1499, GROVYLE_CORNER.x + 49, GROVYLE_CORNER.y + 4);
+    expect(before1499).not.toEqual(TINT);
+    expect(after1499).toEqual(TINT);
+
+    const before1503 = pixelAtSentOut(1503, GROVYLE_CORNER.x + 48, GROVYLE_CORNER.y + 2);
+    const after1503 = pixelAtSentOut(1503, GROVYLE_CORNER.x + 49, GROVYLE_CORNER.y + 2);
+    expect(before1503).not.toEqual(TINT);
+    expect(after1503).toEqual(TINT);
+  });
+
   // Mechanism 3 (PROGRESS.md, docs/battle-anim-assets.md §1): the ball-open
   // particle burst. PARTICLE_ORIGIN (172,55) + local (2,1) is tile0's own
   // first opaque pixel (palette index 2, orange) - particle 0 (angle 0,

@@ -1550,9 +1550,23 @@ function affineEmergeAccumulator(logicalOffset: number): number {
  */
 const MATERIALIZE_Y2_TABLE: readonly number[] = [14, 13, 12, 11, 10, 9, 8, 7, 5, 4, 3, 2];
 
+/**
+ * §7.23 (re-applying §7.22's verified fix): mechanism 5's own affine matrix
+ * write starts 7 ticks before its original coded window (et 35, not et 42 -
+ * `GROVYLE_FRONT_ANIM_START_OFFSET`, the SAME tick its front-sprite frame
+ * cadence already switches, §7.17) - RAM-probed directly
+ * (`tools/probe/specs/sendout-grovyle-stretch.json`, already-committed spec,
+ * read further into its existing run): mechanism 4's own window is
+ * shortened to match (`et < GROVYLE_FRONT_ANIM_START_OFFSET`, was `et <
+ * MATERIALIZE_END_OFFSET`) - mechanism 4 never drew non-neutral pixels in
+ * the newly-excluded et 35-41 gap anyway (its own tables are already dry by
+ * et 30), so this only changes WHICH function renders that tail, not its
+ * pixels. See `GROVYLE_STRETCH_EARLY_TABLE`'s doc comment for the other half
+ * of this fix.
+ */
 function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number): void {
   const et = t - handoffTick;
-  if (et < MATERIALIZE_START_OFFSET || et >= MATERIALIZE_END_OFFSET) return;
+  if (et < MATERIALIZE_START_OFFSET || et >= GROVYLE_FRONT_ANIM_START_OFFSET) return;
   const local = et - MATERIALIZE_START_OFFSET;
   const accumulator = affineEmergeAccumulator(local + 1);
   const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
@@ -1646,6 +1660,43 @@ const GROVYLE_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: numb
   { xScale: 264, yScale: 235, y2: -2 }, { xScale: 263, yScale: 238, y2: -2 }, { xScale: 262, yScale: 241, y2: -1 },
   { xScale: 261, yScale: 244, y2: -1 }, { xScale: 259, yScale: 247, y2: -1 }, { xScale: 258, yScale: 250, y2: 0 },
   { xScale: 257, yScale: 253, y2: 0 }, { xScale: 256, yScale: 256, y2: 0 }, { xScale: 256, yScale: 256, y2: 0 },
+];
+/**
+ * §7.22/§7.23: mechanism 5's matrix write starts 7 RAM ticks before render
+ * 1504 (`GROVYLE_STRETCH_TABLE[0]`'s own tick) - RAM ticks 1496-1502 (et
+ * 35-41 via the established +1 render lag), read from the same already-
+ * committed `sendout-grovyle-stretch.json` probe run (just further into its
+ * existing output, no new spec needed). `GROVYLE_STRETCH_EARLY_TABLE[i]` is
+ * RAM tick `1496+i`'s post-tick `(d4, d5, y2)`, literal, same "RAM ground
+ * truth over curve-fit" precedent as `GROVYLE_STRETCH_TABLE`, EXCEPT entry 0
+ * (RAM 1496, the exact tick the sprite callback switches, §7.17): the raw
+ * field read is `(0,0,0)`, but feeding that literally into
+ * `drawSpriteSheetAffineStretch` (`mx=my=0`) degenerates to sampling a
+ * single source texel for the ENTIRE destination box - a real-hardware
+ * affine-matrix artifact, but one that's provably not what's actually
+ * latched for this render: render 1497's own oracle pixels (checked
+ * directly, `tools/compare/scratch/band_diag.mjs`) are a near-exact match
+ * (3px, the already-known ball-occlusion residual, §7.21) to mechanism 4's
+ * OWN saturated-neutral tail silhouette, not a solid tint block - i.e. the
+ * `data[4]/data[5]` C-level fields have been reset for the callback switch
+ * this tick, but the OAM matrix register itself (`gOamMatrices[2]`) hasn't
+ * been recomputed from them YET (an extra one-tick lag on top of the
+ * already-established RAM-to-render lag, specific to a callback's first
+ * tick) - so render 1497 still shows whatever was latched last: the neutral
+ * matrix. Substituting neutral (256,256,0) for this one entry (rather than
+ * the literal (0,0,0) capture) reproduces that exactly, verified pixel-exact
+ * against the oracle below. RAM 1503's value `(263,239,-2)` is bit-exact
+ * `GROVYLE_STRETCH_TABLE[0]`, confirming the two probe reads agree at the
+ * seam and this table needs no 8th entry.
+ */
+const GROVYLE_STRETCH_EARLY_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
+  { xScale: 256, yScale: 256, y2: 0 }, // RAM 1496 raw (0,0,0) not yet latched - see doc comment above
+  { xScale: 256, yScale: 256, y2: 0 },
+  { xScale: 257, yScale: 254, y2: 0 },
+  { xScale: 258, yScale: 251, y2: 0 },
+  { xScale: 259, yScale: 248, y2: -1 },
+  { xScale: 260, yScale: 245, y2: -1 },
+  { xScale: 262, yScale: 241, y2: -1 },
 ];
 /** handoffTick+42 through +56 (15 ticks): tCoeff 15 down to 1 (RAM-probed, see the module doc above); et>56 is the true normal palette. */
 function grovyleStretchTintCoeff(localOffset: number): number {
@@ -1774,6 +1825,42 @@ function drawGrovyleStretch(fb: Uint8Array, t: number, handoffTick: number): voi
   );
 }
 
+/**
+ * §7.22/§7.23: the et 35-41 portion of mechanism 5 (`GROVYLE_STRETCH_EARLY_TABLE`) -
+ * a separate call site, not a widened `drawGrovyleStretch` window, because it
+ * must be drawn in mechanism 4's OLD slot (before `drawSendOutBall`/
+ * `drawBallOpenParticles`), not mechanism 5's own later slot. §7.22 found
+ * this the hard way: naively widening `drawGrovyleStretch` in its EXISTING
+ * (late) call site made render 1497 WORSE (Grovyle-region diff 3px -> 114px)
+ * because the ball-open particle burst (mechanism 3) is still active for et
+ * 35-41 and must occlude Grovyle, same as it already correctly does through
+ * mechanism 4's call site. Mechanism 5's own original window (et>=42) never
+ * needed this ordering because by then the particles have mostly cleared
+ * this screen region. Tint coefficient is pinned at 16 (fully tinted, same
+ * as mechanism 4's own flat cutoff value) rather than `grovyleStretchTintCoeff`
+ * (which assumes `local>=0`, i.e. et>=42) - RAM-confirmed separately
+ * (§7.16/§7.21) that `Task_FadeMon_ToNormal`'s poll-gate doesn't start
+ * decaying it until et 42 either way.
+ */
+function drawGrovyleStretchEarly(fb: Uint8Array, t: number, handoffTick: number): void {
+  const et = t - handoffTick;
+  if (et < GROVYLE_FRONT_ANIM_START_OFFSET || et >= MATERIALIZE_END_OFFSET) return;
+  const entry = GROVYLE_STRETCH_EARLY_TABLE[et - GROVYLE_FRONT_ANIM_START_OFFSET]!;
+  const frameOffset = et - GROVYLE_FRONT_ANIM_START_OFFSET;
+  const frame = frontSpriteAnimFrame(battleAnimTables.grovyleFrontAnim.steps, frameOffset);
+  drawSpriteSheetAffineStretch(
+    fb,
+    frame === 0 ? grovyleFrontSprite.tileset : grovyleFrontSprite.frame2,
+    grovyleFrontSprite.palette,
+    GROVYLE_CORNER.x,
+    GROVYLE_CORNER.y,
+    entry.xScale,
+    entry.yScale,
+    entry.y2,
+    MATERIALIZE_TINT_COLOR,
+    16,
+  );
+}
 
 /**
  * §7.4.2/mechanism 3 (`docs/battle-anim-assets.md` §1): the ball-open
@@ -2229,6 +2316,7 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
     drawSpriteSheet(fb, bugCatcher.tileset, bugCatcher.palette, trainerX, OPPONENT_CORNER.y);
   }
   drawGrovyleMaterialize(fb, t, handoffTick);
+  drawGrovyleStretchEarly(fb, t, handoffTick);
   drawSendOutBall(fb, t, handoffTick);
   const playerBallTopLeft = playerThrowBallTopLeft(t);
   if (playerBallTopLeft !== null) {
