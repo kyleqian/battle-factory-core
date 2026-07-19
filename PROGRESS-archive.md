@@ -5,6 +5,33 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 77 — ORACLE BOOTSTRAP v5 (supervisor, harness-level, user preference): Battle Scene ON moved INTO factory.sav itself; v4's runtime poke retired — ground truth proven identical (223/223), all counts unchanged
+
+- **State:** harness commit on the pokebench repo ("bootstrap v5");
+  oracle service restarted on v5, smoke test green, this run 454/454 +
+  build green. Sweep identical to #76's v4 sweep (18 exact + sendout
+  174/256).
+- **Did:** per the user's preference for a self-consistent save over
+  runtime manipulation: new `oracle/bootstrap/set-battle-scene-on.py`
+  (idempotent, layout + checksum from `save.c`, used-size re-derived
+  from the file's own verifying checksum rather than hard-coded) edits
+  both save slots' SaveBlock2 sectors `0x07→0x03` + recomputed
+  checksums; `factory.json` v5 with `pokes: []` again. **Equivalence
+  proven, not assumed:** fresh-bootstrap probe bit=0 + anchor sha
+  byte-identical; turn-1 groundtruth replay byte-identical to v4's
+  manifest (223/223 capture shas) — v5 ≡ v4 ground truth exactly, so
+  everything #76 verified carries over unchanged, incl. the
+  stale-artifact inventory and the sendout 1462-1543 window.
+- **Next:** unchanged from #76 — the two drafted lane briefs (sendout
+  re-ground-truth + engine; S7 v4/v5 regeneration) remain HELD per the
+  user's standing "don't launch new workers yet" (~17:45). Launch only
+  on user go-ahead.
+- **Notes:** pristine factory.sav recoverable via pokebench git history;
+  v4 section kept in BOOTSTRAP.md as superseded history.
+---
+
+---
+
 ## 76 — ORACLE BOOTSTRAP v4 SHIPPED (supervisor, harness-level, user-directed): Battle Scene forced ON via zero-frame poke — anchor byte-identical, 18/19 traces hold exactly, only the send-out window's truth moved (174/256, window 1462-1543)
 
 - **State:** harness commit `aae8b98` (+ template-revert follow-up, per
