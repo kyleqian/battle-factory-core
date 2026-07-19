@@ -440,7 +440,6 @@ import ballDisplayAsset from "../assets/gen/battle-interface-ball-display.json" 
 import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { type: "json" };
 import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
 import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
-import sendOutHealthboxOpponentAsset from "../assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -453,6 +452,9 @@ import menuIdleBlankAsset from "../assets/gen/menu-idle-blank.json" with { type:
 import menuIdleBaseAsset from "../assets/gen/menu-idle-base.json" with { type: "json" };
 import menuIdleOnixBounceAsset from "../assets/gen/menu-idle-onix-bounce.json" with { type: "json" };
 import menuIdleHealthboxBounceAsset from "../assets/gen/menu-idle-healthbox-bounce.json" with { type: "json" };
+import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, type HealthboxAssets } from "./healthboxAssembly.ts";
+import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
+import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
 
 interface Tileset {
   columns: number;
@@ -571,8 +573,56 @@ const ballDisplay = ballDisplayAsset as BallDisplayAsset;
 const downArrow = downArrowAsset as DownArrowAsset;
 const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAsset }).ballStatusBar;
 const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
-const sendOutHealthboxOpponent = sendOutHealthboxOpponentAsset as SendOutHealthboxContentAsset;
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
+
+/**
+ * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
+ * from committed battle data rather than hardcoded - `battle1-turn1-ram-dump
+ * .json`'s `before_turn.battler1` (species/level/hp/maxHP, RAM-probed) and
+ * `species-names.json` (species id -> display name), both already-committed
+ * data files (also used by `tests/turnRng.test.ts`/`tests/
+ * battleMessageTemplates.test.ts`). `hp === maxHP` here (143/143) confirms
+ * the full-HP case this window actually renders. Gender has no committed
+ * data file yet (frontier-trainer opponents' `personality` isn't extracted
+ * anywhere - only the player's own rentals carry it, `anchor-state.json`) -
+ * "male" is the oracle-pixel-confirmed value for GROVYLE's harvested gender
+ * glyph (docs/healthbox-assembly-notes.md), kept as a literal for that
+ * reason alone.
+ */
+const anchorOpponentBattler = (
+  battle1TurnRamDumpAsset as { battlerSnapshots: { before_turn: { battler1: { species: number; level: number; hp: number; maxHP: number } } } }
+).battlerSnapshots.before_turn.battler1;
+const anchorOpponentName = (speciesNamesAsset as { species: { name: string }[] }).species[anchorOpponentBattler.species]!.name;
+const ANCHOR_OPPONENT_GENDER = "male";
+
+const healthboxAssemblyAssets: HealthboxAssets = {
+  frame: (battleHealthboxAsset as { singlesOpponent: HealthboxAssets["frame"] }).singlesOpponent,
+  hpbar: (battleHealthboxAsset as { hpbar: HealthboxAssets["hpbar"] }).hpbar,
+  hpbarAnim: (battleHealthboxAsset as { hpbarAnim: HealthboxAssets["hpbarAnim"] }).hpbarAnim,
+  statusIcons: (battleHealthboxAsset as { status2: HealthboxAssets["statusIcons"] }).status2,
+};
+
+/**
+ * ISSUES #16: the composited opponent healthbox for the send-out window's
+ * settled full-HP/no-status case - replaces the pixel-harvested
+ * `sendout-healthbox-opponent.json` as the actual render source (see
+ * `drawSendOutHealthbox` below). Byte-exact against that same harvest
+ * (`tests/healthboxAssembly.test.ts`), and its own transparency (null cells)
+ * is REAL per-pixel OAM transparency (derived from the frame tileset's own
+ * index-0 convention), not the old harvest's value-equality bleed heuristic
+ * (formerly `getHealthboxContentMask`, removed here; the player-side
+ * healthbox keeps its own analogous `getMenuHealthboxPlayerContentMask` -
+ * out of scope this round) - a strict superset was confirmed empirically
+ * before wiring this in: every cell the old heuristic called "real content"
+ * the compositor also paints, with the identical RGB.
+ */
+const opponentHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
+  name: anchorOpponentName,
+  level: anchorOpponentBattler.level,
+  gender: ANCHOR_OPPONENT_GENDER,
+  hpFraction: anchorOpponentBattler.hp / anchorOpponentBattler.maxHP,
+  status: "none",
+});
 const summaryBall = summaryBallAsset as SummaryBallAsset;
 const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
@@ -2676,33 +2726,6 @@ function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number)
   }
 }
 
-/**
- * §7.22/§7.23: `sendOutHealthboxOpponent`'s rectangular harvest bounding box
- * (§7.9) is not the healthbox sprite's own true (non-rectangular) shape - its
- * corners/right edge include real background pixels that were only included
- * because the bounding box has to be a rectangle. At the settled tick
- * (post-materialize-fade) that's harmless, since the harvested bleed pixels
- * equal whatever the plain background already renders there anyway - but
- * during the slide-in (renders 1496-1503), that same screen region is under
- * the BG-to-white materialize fade (`sendOutBgFadeY`, plateau y=16), so the
- * true background at that moment is pure white, NOT the frozen post-fade
- * texture the harvest captured. `drawSendOutHealthbox` was painting that
- * stale texture over the already-correctly-faded background every tick,
- * producing a fixed ~138px band sliding with the box's own leading edge -
- * root-caused (not curve-fit) by directly diffing the asset's own pixels
- * against a plain unfaded render of `battleBg.static` at the healthbox's
- * settled screen position (`tools/compare/scratch/band_diag.mjs`): exactly
- * the pixels that equal the plain background are the bleed (257 of the
- * asset's 2800 pixels, concentrated at the corners/right edge in a shape
- * matching the box's real scalloped/diagonal border - the other 2543 differ
- * and are genuine healthbox art). `HEALTHBOX_CONTENT_MASK` (computed once,
- * lazily, from that same comparison) marks bleed pixels transparent so the
- * per-tick correctly-faded background shows through instead - a no-op once
- * settled (bleed pixels already equal the plain background then), so this
- * only changes the faded-window ticks.
- */
-let healthboxContentMask: Uint8Array | null = null;
-
 function healthboxBackgroundColorAt(x: number, y: number): RgbColor | undefined {
   const tilemap = battleBg.static.tilemap;
   const tileset = battleBg.static.tileset;
@@ -2721,31 +2744,29 @@ function healthboxBackgroundColorAt(x: number, y: number): RgbColor | undefined 
   return battleBg.palette[entry.palette]?.[idx];
 }
 
-function getHealthboxContentMask(): Uint8Array {
-  if (healthboxContentMask) return healthboxContentMask;
-  const { x, y, width, height, pixels } = sendOutHealthboxOpponent;
-  const mask = new Uint8Array(width * height);
-  for (let py = 0; py < height; py += 1) {
-    for (let px = 0; px < width; px += 1) {
-      const i = (py * width + px) * 3;
-      const bg = healthboxBackgroundColorAt(x + px, y + py);
-      const isBleed = bg !== undefined && bg.r === pixels[i] && bg.g === pixels[i + 1] && bg.b === pixels[i + 2];
-      mask[py * width + px] = isBleed ? 0 : 1;
-    }
-  }
-  healthboxContentMask = mask;
-  return mask;
-}
-
-/** §7.6: opponent healthbox content, translated by its slide-in `dx` - see `healthboxSlideDx`'s doc comment. Pixel-harvested asset, background-bleed pixels skipped (see `getHealthboxContentMask`'s doc comment), clipped to screen by `setPixel` same as every other sprite draw here. */
+/**
+ * §7.6, wired to `composeOpponentHealthbox` (ISSUES #16): opponent healthbox
+ * content, translated by its slide-in `dx` - see `healthboxSlideDx`'s doc
+ * comment. Was a pixel-harvested rectangular asset masked by a value-equality
+ * background-bleed heuristic (§7.22/§7.23's `getHealthboxContentMask`,
+ * removed) to approximate the healthbox sprite's true non-rectangular shape;
+ * now draws the compositor's own canvas directly, whose null cells ARE that
+ * true shape (real per-pixel OAM transparency from the frame tileset's own
+ * index-0 convention, not a heuristic) - confirmed a strict superset of the
+ * old heuristic's "real content" classification before wiring this in (every
+ * old-heuristic content cell, plus 48 more that happen to equal the settled
+ * background color exactly, so painting them changes nothing visually), and
+ * cross-checked pixel-for-pixel against every oracle-pinned coordinate in
+ * `tests/battleScene.test.ts`'s existing fade-window test. Clipped to screen
+ * by `setPixel`, same as every other sprite draw here.
+ */
 function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
-  const { x, y, width, height, pixels } = sendOutHealthboxOpponent;
-  const mask = getHealthboxContentMask();
+  const { width, height, pixels } = opponentHealthboxContent;
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
-      if (!mask[py * width + px]) continue;
-      const i = (py * width + px) * 3;
-      setPixel(fb, x + dx + px, y + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
+      const color = pixels[py * width + px];
+      if (!color) continue;
+      setPixel(fb, HEALTHBOX_FRAME_ORIGIN.x + dx + px, HEALTHBOX_FRAME_ORIGIN.y + py, color);
     }
   }
 }
