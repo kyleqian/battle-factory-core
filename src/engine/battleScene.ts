@@ -1063,31 +1063,53 @@ function healthboxSlideDx(t: number): number | null {
  * closed, then `SpriteCB_OpponentMonSendOut` idles 16 ticks
  * (`pokeball.c:991-1003`) before `SpriteCB_ReleaseMonFromBall` fires
  * `StartSpriteAnim(sprite, 1)` -> `sBallAnimSeq1`
- * (`ANIMCMD_FRAME(4,5)` open, `ANIMCMD_FRAME(8,5)` blank,
- * `docs/battle-anim-assets.md` §2). Position and every tick boundary here are
- * pixel-brute-force-confirmed against this trace's own regenerated ground
- * truth (not assumed from the other trace `battle-anim-assets.md` used, nor
- * from summing the source constants) - `tools/compare/scratch/find_ball.mjs`/
- * `ball_ticks.mjs` (throwaway, not committed): the closed frame at corner
- * (168,56) is a ZERO-diff pixel match at every tick 1464-1479 (16 ticks,
- * matching the source-cited wait exactly) and a full mismatch at every tick
- * 1460-1463 before it (confirming 1464 = handoffTick+2 as the true first-
- * visible tick, not handoffTick+0). The "open" frame is a ZERO-diff exact
- * match at 1480 (handoffTick+18), degrading tick-by-tick from 1481 on as the
- * particle burst and the emerging mon (both still unrendered) increasingly
- * occlude that screen region - not evidence the frame itself is wrong, since
- * the underlying content that WOULD be occluding it isn't drawn yet either.
- * By 1491 the region no longer resembles either frame at all (mon fully
- * emerged over it) - matching `sBallAnimSeq1`'s 5-tick open + 5-tick blank
- * (blank = zero opaque pixels, i.e. nothing left to draw) followed by
- * `HandleBallAnimEnd` destroying the sprite once both anims finish. Net:
- * only "closed" (1464-1479) and "open" (1480-1484) ever need a draw call;
- * blank/destroyed (1485+) is a no-op.
+ * (`ANIMCMD_FRAME(4,5)` "open", `ANIMCMD_FRAME(8,5)` "openFinal",
+ * `docs/battle-anim-assets.md` §2). Position and the closed/open tick
+ * boundaries are pixel-brute-force-confirmed against this trace's own
+ * regenerated ground truth (not assumed from the other trace
+ * `battle-anim-assets.md` used, nor from summing the source constants) -
+ * `tools/compare/scratch/find_ball.mjs`/`ball_ticks.mjs` (throwaway, not
+ * committed): the closed frame at corner (168,56) is a ZERO-diff pixel match
+ * at every tick 1464-1479 (16 ticks, matching the source-cited wait exactly)
+ * and a full mismatch at every tick 1460-1463 before it (confirming 1464 =
+ * handoffTick+2 as the true first-visible tick, not handoffTick+0). The
+ * "open" frame is a ZERO-diff exact match at 1480 (handoffTick+18).
+ *
+ * **§7.25 correction**: `ANIMCMD_FRAME(8,5)`'s own tile data in `poke.png`
+ * (frame slot 2) genuinely IS blank (every pixel palette index 0) - but that
+ * data is never what's on screen, because `LoadBallGfx` (`pokeball.c:1308-
+ * 1332`), called once when the ball sprite is created, unconditionally DMAs
+ * a SEPARATE graphic (`gOpenPokeballGfx` = `graphics/balls/open.png`, its
+ * own 16x16 file, never previously extracted) over that exact VRAM tile
+ * range for BALL_POKE (and every ball except Dive/Timer/Luxury/Premier). So
+ * the ball's real 3rd/4th/5th visible frame is NOT blank: a full round ball
+ * (red top/black band/white-gray bottom), distinct from "open"'s
+ * halves-separated look. RAM-probed (`gSprites[9]`, confirmed via `x=176,
+ * y=64` = `BALL_CORNER`+8,+8 - the ball's own slot, distinct from the
+ * particle sprites spawned at `y=59`) across RAM ticks 1462-1495:
+ * `animNum` flips 0->1 at RAM 1479 (open anim starts), `animCmdIndex` flips
+ * 0->1 at RAM 1484 (6th tick of the open anim - the `openFinal` tile,
+ * 43553, appears here, exactly `poke.png`'s tile-offset-8 slot, matching
+ * `ANIMCMD_FRAME(8,...)`), `animEnded` sets at RAM 1489 (5 ticks of
+ * `openFinal`, matching `ANIMCMD_FRAME(8,5)`'s own duration), and
+ * `invisible` sets at RAM 1490 (the tick after `HandleBallAnimEnd` observes
+ * `animEnded`). With this window's established +1 render lag (RAM N visible
+ * at render N+1, re-confirmed yet again here): open 1480-1484 (unchanged),
+ * openFinal 1485-1490 (6 ticks, was wrongly treated as invisible), truly
+ * invisible/destroyed from 1491 on. Verified against the oracle's own exact
+ * pixels (`tools/compare/scratch/openpng_verify.mjs`, isolated - not yet
+ * composited): `open.png`'s own palette indices, drawn at `BALL_CORNER`
+ * against renders 1485-1490, match the oracle's opaque pixels 70-82% before
+ * even accounting for mechanism 4's tint compositing on top (the ball is
+ * drawn AFTER the tint in `drawSendOutHandoff`, so partial occlusion here is
+ * expected, same shape as §7.21's already-accepted ball-corner residual) -
+ * far above chance and confirmed by the full composited re-render below.
  */
 const BALL_CORNER = { x: 168, y: 56 };
 const BALL_CLOSED_START_OFFSET = 2;
 const BALL_OPEN_START_OFFSET = 18;
-const BALL_INVISIBLE_START_OFFSET = 23;
+const BALL_OPEN_FINAL_START_OFFSET = 23;
+const BALL_INVISIBLE_START_OFFSET = 29;
 
 function subTileset(tileset: Tileset, tileRowOffset: number, rows: number): Tileset {
   return {
@@ -1099,14 +1121,17 @@ function subTileset(tileset: Tileset, tileRowOffset: number, rows: number): Tile
 
 const BALL_CLOSED_TILESET = subTileset(summaryBall.tileset, 0, 2);
 const BALL_OPEN_TILESET = subTileset(battleAnimBallOpen.tileset, 0, 2);
+const BALL_OPEN_FINAL_TILESET = subTileset(battleAnimBallOpen.tileset, 2, 2);
 
 function drawSendOutBall(fb: Uint8Array, t: number, handoffTick: number): void {
   const et = t - handoffTick;
   if (et < BALL_CLOSED_START_OFFSET || et >= BALL_INVISIBLE_START_OFFSET) return;
   if (et < BALL_OPEN_START_OFFSET) {
     drawSpriteSheet(fb, BALL_CLOSED_TILESET, summaryBall.palette, BALL_CORNER.x, BALL_CORNER.y);
-  } else {
+  } else if (et < BALL_OPEN_FINAL_START_OFFSET) {
     drawSpriteSheet(fb, BALL_OPEN_TILESET, battleAnimBallOpen.palette, BALL_CORNER.x, BALL_CORNER.y);
+  } else {
+    drawSpriteSheet(fb, BALL_OPEN_FINAL_TILESET, battleAnimBallOpen.palette, BALL_CORNER.x, BALL_CORNER.y);
   }
 }
 

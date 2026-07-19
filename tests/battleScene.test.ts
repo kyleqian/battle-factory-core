@@ -448,6 +448,34 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(after1503).toEqual(TINT);
   });
 
+  // §7.25: mechanism 2's ball sprite has a 3rd visible frame the prior
+  // sessions missed. `ANIMCMD_FRAME(8,5)`'s own tile data (`poke.png`'s
+  // frame slot 2) genuinely is blank, but `LoadBallGfx` (pokeball.c:1308-
+  // 1332) unconditionally DMAs a SEPARATE graphic (`gOpenPokeballGfx` =
+  // `graphics/balls/open.png`, a full round ball, not the "halves
+  // separated" look of the "open" frame) over that exact VRAM tile range
+  // when the ball sprite is created - so the ball is genuinely visible for
+  // 6 more render ticks (1485-1490) than previously modeled, and only truly
+  // goes invisible at handoff+29 (1491), not handoff+23 (RAM-probed:
+  // `gSprites[9]`'s `invisible` flag flips at RAM tick 1490, `animEnded` at
+  // RAM 1489, `animCmdIndex` 0->1 at RAM 1484 - all with this window's
+  // established +1 render lag). (172,65) is `BALL_CORNER`-relative (4,9) -
+  // `openFinal`'s own gray button pixel (palette index 6, `(148,148,148)`),
+  // checked against the full composited render (not just the isolated
+  // sprite) for occluder-free stability across every covered tick and both
+  // its neighbors (handoff+22/1484 shows the ball's own "open" frame there
+  // instead; handoff+29/1491 shows the mon's materialize tint once the ball
+  // is truly gone).
+  it("the ball's 3rd frame (openFinal, open.png) is visible handoff+23..28 (1485-1490), not blank - genuinely invisible only from handoff+29 (1491) (§7.25)", () => {
+    const OPEN_FINAL_GRAY: [number, number, number] = [148, 148, 148];
+    const beforeOpenFinal = pixelAtSentOut(1484, 172, 65);
+    expect(beforeOpenFinal).not.toEqual(OPEN_FINAL_GRAY);
+    for (let tick = 1485; tick <= 1490; tick += 1) {
+      expect(pixelAtSentOut(tick, 172, 65)).toEqual(OPEN_FINAL_GRAY);
+    }
+    expect(pixelAtSentOut(1491, 172, 65)).not.toEqual(OPEN_FINAL_GRAY);
+  });
+
   // §7.24: mechanism 5's LATE window (`GROVYLE_STRETCH_TABLE`, handoff+42/
   // render 1504 on) was drawn AFTER `drawBallOpenParticles` in its original
   // call site - the same compositing-order bug §7.22/§7.23 already fixed for

@@ -2486,3 +2486,126 @@ summary-info-onix 122/122, walk-warpout 125/125 - zero regressions.
   callback-first-tick matrix latch delay's ultimate C-source cause) -
   unrelated to this round's finding, still just RAM-ground-truth tables,
   unchanged.
+
+### 7.25. Round-8 worktree: 1485-1495's dominant residual was mechanism 2's own missing 3rd ball frame (`open.png`, DMA'd over the "blank" slot at runtime) - landed (massive pixel-mass cut), but `sendout.json` stays **236/256** because a separate, narrower, pre-existing particle-edge residual sits underneath at the exact same pixels
+
+Per this round's brief: pixel-classify every diff in the named 1485-1495 span
+BEFORE forming a fix hypothesis, per §7.24's own method, and take 1470/71/79
+or 1462 too only if the same root cause provably covers them.
+
+**Pixel-classified first** (`tools/compare/scratch/span_1485_diag.mjs`):
+renders 1485-1490 (114-128px each, the dominant mass) are NOT particle
+color, NOT materialize tint, NOT background fade - every mismatched pixel is
+a distinct 6-color set (`(132,0,0)/(173,0,0)/(214,41,41)/(148,148,148)/
+(66,66,66)/(255,255,255)`) forming a recognizable Poké Ball shape (red top,
+black band, white/gray bottom) at exactly `BALL_CORNER` (168,56), which this
+engine renders as nothing there. Renders 1491-1495 are a DIFFERENT, smaller
+residual (materialize tint `(255,181,247)` + a `(247,247,255)` shade +
+a few particle-pair pixels) - a separate family, confirmed not covered by
+this session's fix (see below).
+
+**Root cause, RAM-verified before touching any code** (`tools/probe/
+ram-probe.py` against a new scan spec, throwaway, not committed; sprite
+slot 9 identified by cross-referencing `x=176,y=64` = `BALL_CORNER`+8,+8
+against the already-established center-coordinate convention `battler
+sprite center = corner + halfSize`, §7.21's own precedent): `gSprites[9]`'s
+`animCmdIndex` flips 0->1 at RAM tick 1484 (the tile switches from
+`43549` to `43553`, i.e. exactly `poke.png`'s tile-offset-8 "blank" slot
+`ANIMCMD_FRAME(8,...)` indexes), `animEnded` sets at RAM 1489 (5 ticks
+later, matching `ANIMCMD_FRAME(8,5)`'s own duration), and `invisible` sets
+at RAM 1490 - all with this window's established +1 render lag (open
+1480-1484 unchanged, this 3rd frame 1485-1490, truly invisible from 1491).
+Tracing tile 43553 back to source: `poke.png`'s own frame slot 2 (tile
+offset 8) genuinely IS blank (every pixel palette index 0, confirmed by
+direct read of the source PNG) - but `LoadBallGfx` (`pokeball.c:1308-1332`),
+called once when the ball sprite is created, unconditionally DMAs a
+SEPARATE graphic over that exact VRAM tile range for BALL_POKE (and every
+ball except Dive/Timer/Luxury/Premier):
+`LZDecompressVram(gOpenPokeballGfx, OBJ_VRAM0 + 0x100 + var*32)`.
+`gOpenPokeballGfx` is `graphics/balls/open.png` (16x16, its own file, never
+previously extracted by this run) - a full round ball, not the "halves
+separated" look of the "open" frame. This is why the prior sessions'
+"verified blank via pixel scan" claim (§7.5/§7.11's original doc comment)
+was true of the ROM data and false of what's actually on screen: nobody had
+traced `ANIMCMD_FRAME(8,...)`'s tile index through the runtime VRAM
+overwrite before. Cross-checked against the oracle's own exact pixels
+BEFORE wiring into the engine (`tools/compare/scratch/openpng_verify.mjs`):
+`open.png`'s own indices (against `poke.png`'s already-extracted palette -
+the two files share one palette bank) match the oracle's opaque pixels at
+renders 1485-1490 70-82% in isolation, the remaining gap fully explained by
+mechanism 4's tint compositing on top once checked against the full
+composited render (below) - not a coincidence.
+
+**Fix**: extractor (`tools/extract/extract-battle-anim-assets.ts`) now
+decodes `open.png` alongside `poke.png` and uses it (renamed `"openFinal"`,
+was `"blank"`) as `battle-anim-ball-open.json`'s 2nd tileset frame.
+`drawSendOutBall` (`battleScene.ts`) gained a 3rd branch:
+`BALL_OPEN_FINAL_START_OFFSET = 23` (was where `BALL_INVISIBLE_START_OFFSET`
+used to cut off) now switches to the new `BALL_OPEN_FINAL_TILESET`, and
+`BALL_INVISIBLE_START_OFFSET` moved `23 -> 29` (RAM-derived, above). No
+change to `BALL_CLOSED_START_OFFSET`/`BALL_OPEN_START_OFFSET` or any other
+mechanism's window.
+
+**Score effect, verified against the full composited engine (not the
+isolated probe)**: per-tick pixel mass in 1485-1490 (`tools/compare -- 
+sendout.json`) dropped ~95-97%: **114->7, 105->5, 106->3, 126->3, 128->4,
+121->3px**. Every one of those 6 ticks strictly improved, zero regressions
+across a 9-trace sweep (sendout, scene-assembly, transition, menu-text,
+menu-throw, menu-materialize, draft-cursor, draft-menu, draft-menu-slot6 -
+all at their exact established counts). **`sendout.json` stays 236/256** -
+no tick in the span crosses to a full match, because a SEPARATE, narrower,
+PRE-EXISTING residual (2-7px, present identically at ticks 1482-1484 and
+1497-1498 even before this session's fix - i.e. provably not caused by it)
+sits at the same screen region (~x174-181,y55-64): two adjacent particles'
+8x8 tiles overlap there (e.g. at render 1485, particle index1's age-3
+`tile0,hFlip` and index2's age-2 `tile2` both cover part of `(175-178,
+57-60)`), and the currently-coded ascending-spawn-index draw order picks
+the wrong one as "on top" for a handful of edge pixels where their opaque
+regions intersect - exactly the "z-order between particles... unverified
+against real OAM priority" gap `drawBallOpenParticles`'s own doc comment
+already named as open.
+
+**Tried and reverted, not shipped**: flipping the particle draw loop to
+descending spawn-index order (testing "lower OAM slot = lower spawn index =
+drawn on top," the standard GBA priority convention) DOES close 1482-1485
+(net `sendout.json` 236->238) but regresses two previously-exact ticks
+(1496, 1499) elsewhere in the same particle field - proof the real ordering
+rule isn't a simple global reversal (plausibly interacts with the RAM-
+observed sprite-slot recycling once early particles die and new ones reuse
+their slots, §7.25's own RAM scan saw this directly: slot 9 itself gets
+reused for a new particle once the ball sprite is destroyed at RAM 1492).
+Shipping a net-positive-but-unverified reordering would violate this run's
+own no-curve-fitting discipline and the brief's "zero regressions" bar
+(regressing 1496/1499 to fix 1482-1485 is not zero-regression even though
+the aggregate count improves) - reverted, left named here instead so a
+future session can RAM-probe the particles' actual OAM index assignment
+(not just spawn index) before touching this again.
+
+**1470/1471/1479 and 1462: NOT covered, confirmed rather than assumed.**
+This session's root cause is entirely about mechanism 2 (the ball sprite)
+at `BALL_CORNER`; 1470/1471/1479's own residual sits in the icon row
+(y=32-38, per §7.19) and 1462's is the trainer-exit-tail/settled-bar gap
+(§7.19) - neither screen region nor mechanism overlaps this fix, so neither
+is touched (verified unchanged in the sweep above, not just assumed out of
+scope).
+
+**Not chased further this round (named, not guessed at):**
+- The particle z-order/overlap bug named above (1482-1490+1497-1498's own
+  2-7px residual) - real, narrow, and now the dominant remaining mass in
+  the ball-corner region, but the one reordering hypothesis tried regresses
+  elsewhere; needs actual OAM-slot RAM evidence, not spawn-index guessing.
+- 1491-1495's own residual (materialize tint `(255,181,247)` + a
+  `(247,247,255)` shade neither ball- nor already-named-particle-colored) -
+  pixel-classified (above) but not root-caused; a different family from
+  both this session's fix and the particle z-order bug.
+- Renders 1462, 1470/1471/1479 (confirmed not covered, above), the menu
+  window (1560+), #96's OAM-order fix, oracle/harness internals - untouched.
+- **Papercut**: `tools/extract/extract-battle-anim-assets.ts` re-run
+  regenerates `src/data/gen/battle-anim-tables.json` WITHOUT its committed
+  `grovyleFrontAnim` field (that field isn't produced by any code currently
+  in the script - added by some earlier, no-longer-present process/session).
+  Re-running the whole extractor blindly silently drops it; this session
+  caught it via `git diff` before committing and reverted just that one
+  file. A future session touching this extractor should either restore the
+  missing generation code or split the single script's output files so a
+  partial re-run can't clobber data it doesn't produce.

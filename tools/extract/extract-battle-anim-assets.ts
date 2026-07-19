@@ -86,7 +86,7 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
-// --- (2) poke.png: remaining ball-open frame(s) -----------------------------
+// --- (2) poke.png + open.png: the ball-open frames --------------------------
 //
 // poke.png (graphics/balls/poke.png, 16x48 = 2x6 tiles) is gBallGfx_Poke's
 // source (src/data/graphics/pokeballs.h:1-2), a 3-frame-slot sheet where
@@ -98,13 +98,30 @@ function writeJson(path: string, data: unknown): void {
 //   ANIMCMD_FRAME(4, 5)  - tile offset 4 = rows 2-3 = frame slot 1 ("open")
 //   ANIMCMD_FRAME(8, 5)  - tile offset 8 = rows 4-5 = frame slot 2
 //   ANIMCMD_END
-// Frame slot 2 (rows 4-5) is BLANK in the source PNG - every pixel is
-// palette index 0 (verified: 0 non-zero indices across all 128px) - so the
-// ball sprite renders nothing for its last 5 animation ticks before
-// HandleBallAnimEnd (pokeball.c:842-869) destroys it once both it and the
-// mon's affine-emerge anim have ended. Both frame slots extracted below for
-// completeness (the blank one documents its own absence rather than being
-// silently omitted).
+// Frame slot 2 (rows 4-5) IS all palette-index-0 in poke.png's own raw data -
+// but that data is NEVER what's on screen there. `LoadBallGfx`
+// (pokeball.c:1308-1332), called once when the ball sprite is created,
+// unconditionally DMAs a SEPARATE graphic over that exact VRAM tile range for
+// every non-Dive/Timer/Luxury/Premier ball (BALL_POKE included):
+// `LZDecompressVram(gOpenPokeballGfx, OBJ_VRAM0 + 0x100 + var*32)` where `var`
+// is the ball sprite's own tile-sheet start and `0x100` bytes = 8 tiles = the
+// same offset `ANIMCMD_FRAME(8,...)` indexes into. `gOpenPokeballGfx` (pokeballs.h:37)
+// is `graphics/balls/open.png` (16x16 = 2x2 tiles, its own file, never
+// touched by earlier extraction) - a full round ball (red top / black band /
+// white-gray bottom), NOT the "halves separated" look of frame slot 1. This
+// was found by direct pixel-classifying the oracle's own diff at renders
+// 1485-1490 (docs/battle-scene-notes.md §7.25): every mismatched pixel there
+// is exactly `open.png`'s own palette (132,0,0 / 173,0,0 / 214,41,41 /
+// 148,148,148 / 66,66,66), which poke.png's genuinely-blank slot 2 cannot
+// produce - tracing `ANIMCMD_FRAME(8,...)`'s tile index back through
+// `LoadBallGfx` found the runtime overwrite. So the ball sprite's 3 visible
+// animation frames are: closed (summary-ball.json, unrelated extractor) ->
+// "open" (poke.png rows 2-3, frame slot 1) -> "openFinal" (open.png,
+// overwriting poke.png's own slot 2) -> destroyed. The two ball-open PNGs
+// share one palette (poke.png's - confirmed by cross-checking open.png's
+// indices against it: high opaque-pixel match against the oracle, the
+// remaining diff fully explained by mechanism 4's tint compositing on top,
+// same "occlusion, not a color bug" shape as §7.21's ball-corner residual).
 // Verified byte-exact against oracle pixels: see docs/battle-anim-assets.md
 // (frame slot 1, 122/122 non-transparent px exact @ tick 1480, screen
 // (168,56) - the single clean tick before particles/the emerging mon start
@@ -112,15 +129,16 @@ function writeJson(path: string, data: unknown): void {
 {
   const image = decodeIndexedPng(join(REF, "graphics", "balls", "poke.png"));
   const { columns, rows, tiles } = sliceTiles(image);
-  // rows 2-3 = frame slot 1 (tiles index 4-7), rows 4-5 = frame slot 2 (8-11).
+  // rows 2-3 = frame slot 1 (tiles index 4-7, "open").
   const openTiles = tiles.slice(4, 8);
-  const blankTiles = tiles.slice(8, 12);
+  const finalImage = decodeIndexedPng(join(REF, "graphics", "balls", "open.png"));
+  const finalTiles = sliceTiles(finalImage).tiles;
   writeJson(join(ASSETS_GEN, "battle-anim-ball-open.json"), {
-    frames: ["open", "blank"],
+    frames: ["open", "openFinal"],
     tileset: {
       columns,
       rows: 4,
-      tiles: [...openTiles, ...blankTiles].map((t) => [...t.pixels]),
+      tiles: [...openTiles, ...finalTiles].map((t) => [...t.pixels]),
     },
     palette: image.palette,
   });
