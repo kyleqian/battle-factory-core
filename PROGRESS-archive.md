@@ -1,3 +1,62 @@
+## 115 — Bounded worker: closed ISSUES #18's tick 1493 (bar composites at `eva=0`, not "skip drawing") — `sendout.json` **252/256 → 253/256**; 1494/95 (bar) + 1496 (particle tie-break) investigated with 6 fresh RAM probes, left open with concrete negative findings (no curve-fit)
+
+- **State:** `npm test` **556/556** (+1 Tier-1), `npm run build` green, tree
+  clean. Full sweep: sendout **253/256** (was 252/256), s6-acceptance
+  224/228 (unchanged — its own sampled frames are 40/120/192, ISSUES #5's
+  pattern, re-confirmed still exactly x88-151, + 1496, this session's own
+  remaining residual; 1493 isn't one of its sampled frames), menu-throw
+  78/78, menu-materialize 62/62, menu-idle 69/69, menu-text 18/18,
+  scene-assembly 256/256, transition 206/206 — zero regressions.
+- **Did:** pixel-classified 1493-96 first (`tools/compare/scratch/
+  diag_1493.mjs`/`crop_1493.mjs`, committed): 1491/1492 already 0px (closed
+  incidentally by #112/§7.30's earlier fixes, not realized until now);
+  1493-95 is a clean diagonal edge, app=Grovyle's flat tint, oracle=the
+  window's own faded background; 1496 is a literal 2-color swap between two
+  particles. Executed §7.29's named VRAM-tile-bytes lead for 1493-95
+  (`probe_grovyle_vram.py`/`probe_grovyle_palette.py`/`probe_bar_vram.py`,
+  all committed): Grovyle's own tile/accumulator/y2/rotation/palette are
+  ALL byte-exact vs. the static extraction across the whole window (a clean
+  negative — not the bug); the bar's own tile IS byte-exact too, through
+  RAM tick 1493, THEN jumps to a totally different graphic at RAM 1494
+  (destroyed+reused, the exact `open.png` pattern recurring). The REAL bug
+  was a compositing-model gap the VRAM read incidentally surfaced:
+  `drawOpponentSummaryExit` returned early once `blend` hit 0, treating
+  "no blend" as "sprite absent" — but real hardware still composites a
+  `blend=0` sprite as 100% target-2 (the plain, correctly-faded background,
+  hand-verified bit-exact against `SENDOUT_BG_FADE_Y`). Fixed by replacing
+  the early return with `SUMMARY_EXIT_LAST_ALIVE_ELAPSED=30` (draw through
+  blend=0, stop only once the RAM-confirmed sprite-reuse actually happens).
+  Tried extending to render 1494 (bar's tile is STILL genuine there per the
+  same VRAM probe) — empirically over-corrects (3 new wrong pixels), so
+  left at exactly render 1493, not shipped wider than verified.
+- **1496 (particle z-order, §7.25/7.28's long-standing gap)**: RAM-derived
+  the pixel-exact tie-break winner from oracle colors (spawn index 14 must
+  beat 13, opposite of this engine's current rule) and RAM-probed both
+  particles' real `gSprites[]` array positions (`probe_particle_slots.py`,
+  committed) to test the one cheap hypothesis (slot-reuse scrambling
+  creation order) — ruled OUT (array order matches spawn-index order
+  exactly, no scrambling found). Real mechanism likely lives in
+  `CreateSpriteAtEnd`'s actual `sSpriteOrder` semantics, not read this
+  session (out of RAM-probe budget) — named, not guessed at, in ISSUES #18
+  and `docs/battle-scene-notes.md` §7.31.
+- **New Tier-1 test** (`tests/battleScene.test.ts`) pins the render-1493
+  fix: both newly-fixed pixels equal the faded background, plus a same-tick
+  control pixel a few columns over that must STILL show Grovyle's tint.
+- **Next:** ISSUES #18's remainder — 1494/95 (bar, narrower-than-modeled
+  real boundary) + 1496 (particle tie-break, `sSpriteOrder`/
+  `CreateSpriteAtEnd` source read needed) — both have concrete RAM findings
+  recorded (§7.31), don't re-run the five clean RAM probes already done.
+  S7 (turn resolution) otherwise unblocked whenever picked up.
+- **Notes:** stayed within scope (`battleScene.ts`, `tests/
+  battleScene.test.ts`, `docs/battle-scene-notes.md`, `ISSUES.md`,
+  `PROGRESS.md`, `tools/compare/scratch/*`) per the brief. Seven new
+  scratch scripts committed (3 JS pixel diagnostics + 4 Python RAM/VRAM
+  probes, cited directly by §7.31's findings) since a future session
+  picking up 1494/95/1496 should be able to re-run them without rebuilding
+  from scratch. No PAPERCUT this session.
+
+---
+
 ## 114 — Supervisor wind-down: session end 2026-07-19 ~06:00 — S6 chain COMPLETE and acceptance-trace-committed (`s6-acceptance.json` **224/228**, every diff attributed); `sendout.json` **214 → 252/256**; suite **477 → 555**; 15 verified worker steps across two lanes
 
 - **State (verified this minute):** `npm test` **555/555**, `npm run

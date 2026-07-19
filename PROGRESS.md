@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 118 — Supervisor: scout lane merged — species-types data gap closed (all 411 species) + FIGHT-submenu ground truth banked (§11) — **suite 579/579**; round 3 launched (FIGHT-submenu engine slice + ISSUES #16 healthbox wiring); S6-vs-1496 decision escalated to the user
+
+- **State (verified post-merge):** `npm test` **579/579**, `npm run build`
+  green, tree clean, worktrees/branches cleaned up. Traces: sendout
+  255/256 (only 1496 open), s6-acceptance 224/228 (3 = ISSUES #5 pattern,
+  1 = 1496), rest unchanged.
+- **Did (worktree scout, verified then merged):**
+  `tools/extract/extract-species-types.ts` → `src/data/gen/
+  species-types.json` (all 411 species, spot-checked ONIX/GROVYLE/MURKROW/
+  PIDGEOTTO/MAGBY/BAYLEEF correct; `damageCalc.test.ts` fixtures now
+  consume it, pinned values unchanged). FIGHT-submenu ground truth:
+  2 twice-run 0-mismatch groundtruth traces + `battle-turn-notes.md` §11
+  (atomic submenu draw at tick 1892, JOY_NEW-only nav w/ 1-tick render
+  lag, B-close RESUMES the 4-phase cycle in place, gRngValue flat, two
+  single-tick anomalous idle frames flagged open).
+- **Open question (escalated, non-blocking):** accept/park 1496 and tick
+  S6 [x] (s6-acceptance 224/228 all-attributed), vs build persistent
+  whole-scene `sSpriteOrder` state (§7.32 documents why a general fix
+  needs it), vs leave S6 [~]. Default if unanswered: leave [~], continue
+  S7.
+- **Next:** verify round 3 (FIGHT-submenu engine slice vs §11;
+  healthbox-assembly wiring per ISSUES #16), then S7 turn-execution
+  slices (battle-script sequencing, HP-drain, text) per battle-turn-notes.
+
+---
 ## 117 — Bounded worker: closed ISSUES #18's 1494/1495 (a one-tick `drawOpponentSummaryExit` clock stall, found empirically) — `sendout.json` **253/256 → 255/256**; 1496 read source-first per the brief (`CreateSprite`/`CreateSpriteAtEnd`/`SortSprites`), root mechanism identified and documented, no fix shipped — it needs whole-scene persistent state this engine doesn't model, not a tweak
 
 - **State:** `npm test` **576/576** (+1 Tier-1), `npm run build` green, tree
@@ -92,62 +117,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   conflict-free (disjoint files by design).
 
 ---
-## 115 — Bounded worker: closed ISSUES #18's tick 1493 (bar composites at `eva=0`, not "skip drawing") — `sendout.json` **252/256 → 253/256**; 1494/95 (bar) + 1496 (particle tie-break) investigated with 6 fresh RAM probes, left open with concrete negative findings (no curve-fit)
-
-- **State:** `npm test` **556/556** (+1 Tier-1), `npm run build` green, tree
-  clean. Full sweep: sendout **253/256** (was 252/256), s6-acceptance
-  224/228 (unchanged — its own sampled frames are 40/120/192, ISSUES #5's
-  pattern, re-confirmed still exactly x88-151, + 1496, this session's own
-  remaining residual; 1493 isn't one of its sampled frames), menu-throw
-  78/78, menu-materialize 62/62, menu-idle 69/69, menu-text 18/18,
-  scene-assembly 256/256, transition 206/206 — zero regressions.
-- **Did:** pixel-classified 1493-96 first (`tools/compare/scratch/
-  diag_1493.mjs`/`crop_1493.mjs`, committed): 1491/1492 already 0px (closed
-  incidentally by #112/§7.30's earlier fixes, not realized until now);
-  1493-95 is a clean diagonal edge, app=Grovyle's flat tint, oracle=the
-  window's own faded background; 1496 is a literal 2-color swap between two
-  particles. Executed §7.29's named VRAM-tile-bytes lead for 1493-95
-  (`probe_grovyle_vram.py`/`probe_grovyle_palette.py`/`probe_bar_vram.py`,
-  all committed): Grovyle's own tile/accumulator/y2/rotation/palette are
-  ALL byte-exact vs. the static extraction across the whole window (a clean
-  negative — not the bug); the bar's own tile IS byte-exact too, through
-  RAM tick 1493, THEN jumps to a totally different graphic at RAM 1494
-  (destroyed+reused, the exact `open.png` pattern recurring). The REAL bug
-  was a compositing-model gap the VRAM read incidentally surfaced:
-  `drawOpponentSummaryExit` returned early once `blend` hit 0, treating
-  "no blend" as "sprite absent" — but real hardware still composites a
-  `blend=0` sprite as 100% target-2 (the plain, correctly-faded background,
-  hand-verified bit-exact against `SENDOUT_BG_FADE_Y`). Fixed by replacing
-  the early return with `SUMMARY_EXIT_LAST_ALIVE_ELAPSED=30` (draw through
-  blend=0, stop only once the RAM-confirmed sprite-reuse actually happens).
-  Tried extending to render 1494 (bar's tile is STILL genuine there per the
-  same VRAM probe) — empirically over-corrects (3 new wrong pixels), so
-  left at exactly render 1493, not shipped wider than verified.
-- **1496 (particle z-order, §7.25/7.28's long-standing gap)**: RAM-derived
-  the pixel-exact tie-break winner from oracle colors (spawn index 14 must
-  beat 13, opposite of this engine's current rule) and RAM-probed both
-  particles' real `gSprites[]` array positions (`probe_particle_slots.py`,
-  committed) to test the one cheap hypothesis (slot-reuse scrambling
-  creation order) — ruled OUT (array order matches spawn-index order
-  exactly, no scrambling found). Real mechanism likely lives in
-  `CreateSpriteAtEnd`'s actual `sSpriteOrder` semantics, not read this
-  session (out of RAM-probe budget) — named, not guessed at, in ISSUES #18
-  and `docs/battle-scene-notes.md` §7.31.
-- **New Tier-1 test** (`tests/battleScene.test.ts`) pins the render-1493
-  fix: both newly-fixed pixels equal the faded background, plus a same-tick
-  control pixel a few columns over that must STILL show Grovyle's tint.
-- **Next:** ISSUES #18's remainder — 1494/95 (bar, narrower-than-modeled
-  real boundary) + 1496 (particle tie-break, `sSpriteOrder`/
-  `CreateSpriteAtEnd` source read needed) — both have concrete RAM findings
-  recorded (§7.31), don't re-run the five clean RAM probes already done.
-  S7 (turn resolution) otherwise unblocked whenever picked up.
-- **Notes:** stayed within scope (`battleScene.ts`, `tests/
-  battleScene.test.ts`, `docs/battle-scene-notes.md`, `ISSUES.md`,
-  `PROGRESS.md`, `tools/compare/scratch/*`) per the brief. Seven new
-  scratch scripts committed (3 JS pixel diagnostics + 4 Python RAM/VRAM
-  probes, cited directly by §7.31's findings) since a future session
-  picking up 1494/95/1496 should be able to re-run them without rebuilding
-  from scratch. No PAPERCUT this session.
-
----
-
