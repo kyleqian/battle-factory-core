@@ -422,6 +422,7 @@ import {
   PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
   playerMaterializeBgFadeY,
   PLAYER_BG_FADE_START_TICK,
+  playerHealthboxSlideDx,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -433,6 +434,7 @@ import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { ty
 import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
 import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import sendOutHealthboxOpponentAsset from "../assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
+import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
 import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { type: "json" };
@@ -548,6 +550,7 @@ const downArrow = downArrowAsset as DownArrowAsset;
 const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAsset }).ballStatusBar;
 const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
 const sendOutHealthboxOpponent = sendOutHealthboxOpponentAsset as SendOutHealthboxContentAsset;
+const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const summaryBall = summaryBallAsset as SummaryBallAsset;
 const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
@@ -2586,6 +2589,38 @@ function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
   }
 }
 
+/** PLAYER-side twin of `getHealthboxContentMask` (§7.22/§7.23's own bleed-masking precedent) - same rectangular-harvest-vs-true-shape gap, same fix: mark pixels that already equal the plain background as transparent bleed. Lazily computed once. */
+let menuHealthboxPlayerContentMask: Uint8Array | null = null;
+
+function getMenuHealthboxPlayerContentMask(): Uint8Array {
+  if (menuHealthboxPlayerContentMask) return menuHealthboxPlayerContentMask;
+  const { x, y, width, height, pixels } = menuHealthboxPlayer;
+  const mask = new Uint8Array(width * height);
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const i = (py * width + px) * 3;
+      const bg = healthboxBackgroundColorAt(x + px, y + py);
+      const isBleed = bg !== undefined && bg.r === pixels[i] && bg.g === pixels[i + 1] && bg.b === pixels[i + 2];
+      mask[py * width + px] = isBleed ? 0 : 1;
+    }
+  }
+  menuHealthboxPlayerContentMask = mask;
+  return mask;
+}
+
+/** docs/battle-menu-notes.md §3 item 6: player healthbox content, translated by its slide-in `dx` (`playerHealthboxSlideDx`, `battleMenu.ts`) - same pixel-harvest-plus-content-mask shape as `drawSendOutHealthbox`, mirrored for the player side's own asset/mask/geometry. Unlike the opponent (`x2` starts negative and counts up toward 0), the player's own `x2` starts positive (110, off the right edge) and counts down toward 0 - `dx` is still added to the settled `x`, same as the opponent's own draw. */
+function drawMenuHealthboxPlayer(fb: Uint8Array, dx: number): void {
+  const { x, y, width, height, pixels } = menuHealthboxPlayer;
+  const mask = getMenuHealthboxPlayerContentMask();
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      if (!mask[py * width + px]) continue;
+      const i = (py * width + px) * 3;
+      setPixel(fb, x + dx + px, y + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
+    }
+  }
+}
+
 /** The settled (post-tick-1227) composite: static bg + both trainer pics + the window frame - byte-exact against the oracle (see module doc point 1). */
 function drawSettledScene(fb: Uint8Array): void {
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
@@ -2668,6 +2703,8 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   drawOpponentSummaryExit(fb, t, handoffTick);
   const healthboxDx = healthboxSlideDx(t);
   if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx);
+  const playerHealthboxDx = playerHealthboxSlideDx(t);
+  if (playerHealthboxDx !== null) drawMenuHealthboxPlayer(fb, playerHealthboxDx);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   // battleMenu.ts §1/§2: the box clears (no blank-box frame - a bare
   // `drawTileBg` above already redraws it empty) and "Go! ONIX!" starts

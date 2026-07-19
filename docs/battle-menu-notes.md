@@ -20,10 +20,22 @@ hex chars unless spot-cited in full.
 Committed: `tools/compare/traces-groundtruth/battle1-menu-dense.json` —
 **identical 40-segment button script** to `battle1-intro.json`, with
 `captureFrames` = every tick **1560-1810 inclusive** (251 captures, under the
-oracle's 256-capture limit). Verified green via `bin/oracle run`. All three
-of the brief's coarse SS2 pins reproduced exactly: tick 1696 and tick 1741
-both sha `6d2e0945...` (byte-identical, confirmed not assumed), tick 1750 sha
-`fd778a4bb67c314116e902d9d30abff50cc4526f0ba5776f20acf1b4312b960c`.
+oracle's 256-capture limit). Verified green via `bin/oracle run`. Tick 1750
+sha `fd778a4bb67c314116e902d9d30abff50cc4526f0ba5776f20acf1b4312b960c`
+reproduced exactly.
+
+**Correction (bounded worker, healthbox slide-in step, following up on the
+1693/1696 settle pin below)**: the "tick 1696 and tick 1741 both sha
+`6d2e0945...`" claim above was **wrong** — re-verified via two independent
+fresh `bin/oracle run` replays of this exact trace (byte-identical to each
+other, ruling out nondeterminism) **and** cross-checked against
+`battle1-intro.json` (same 40-segment script, confirmed byte-identical
+`segments`) at the same ticks, which reproduces the identical wrong-vs-right
+shas — not a trace-file drift, a genuine derivation error in the original
+pass. Tick 1696's real sha is `4b66ecf2...`; `6d2e0945...` doesn't appear
+until tick **1702** (see §1's own correction below for the full tick-by-tick
+evidence). Flagging prominently since a later brief (this session's own)
+inherited the wrong pin as "scene settles at pinned tick 1693."
 
 ## 1. Frame-boundary milestones (every-single-frame, not sampled)
 
@@ -36,9 +48,11 @@ both sha `6d2e0945...` (byte-identical, confirmed not assumed), tick 1750 sha
 | **1574** | — | Brendan (player back-sprite) throw-pose swap, exit translation, AND the player party-status-summary bar/icons' fade+slide all begin the same tick **1574** (pixel-pinned every tick this session, engine-modeled exact in `battleMenu.ts` — corrects this row's original "~1595" coarse estimate by 21 ticks); Brendan's frame-cycle + translation continues exact through at least 1614 (§3) |
 | **1607**-**1614** | — | thrown Poké Ball sprite visible, arcing toward ONIX's spawn point — engine-modeled exact this session (§3); **1615** is the pinned boundary where an unmodeled GBA affine "ball spin" animation takes over (§3's own named blocker), not ~1638 as the original coarse pass guessed |
 | ~1646-1662 | — | ONIX materializes as a flat-color silhouette (ball-open + color-fade, §3) |
-| ~1662-1690 | — | ONIX gains full color (affine emerge anim) + healthbox slides in (§3) |
-| **1693** | `6d2e0945...` | **scene settles** — corrects the brief's coarse "1696" pin by 3 ticks (same off-by-a-few-ticks correction pattern as `battle-scene-notes.md`'s 1075-not-1077 and this session's own findings below) |
-| 1693-1741 | `6d2e0945` | static hold, 49 ticks — matches `battle-bringup-notes.md` §3's RAM finding that `gBattleControllerExecFlags` stays busy (=1) through tick 1740 (cry SFX + `Intro_DelayAndEnd`'s 3-tick delay still running, invisible on-screen, §3) |
+| **1667-1689** | — | player healthbox slides in, RAM-exact (§3 item 6, this session): `dx=110` at first visible tick 1667, steps -5/tick, settles (`dx=0`) at tick 1689 |
+| ~1662-1701 | — | ONIX's own color-fade-to-true-color + a settle-in wobble/overshoot continue past the healthbox's own settle (§3 item 5's still-open blocker) — **not** fully settled by 1693, see the correction below |
+| ~~**1693** `6d2e0945...` **scene settles**~~ | | **CORRECTED, WRONG (this session)** — re-verified via fresh `bin/oracle run` (twice, byte-identical) plus an independent cross-check against `battle1-intro.json`'s identical script: tick 1693's real sha is `8ead1641...`, not `6d2e0945...`. The screen keeps changing past 1693 in a way that isn't a clean monotonic settle — it's an **oscillating pattern** (tick 1693 and tick 1700 share the identical sha `8ead1641...`, a 7-tick round-trip) consistent with ONIX's own materialize-tail overshooting and settling, not a hard cut. A transient pass through the eventual hold-sha (`6d2e0945...`) even appears briefly at tick 1698 before diverging again. |
+| **1702** | `6d2e0945` | **real scene settle** (corrected pin) — first tick of the true, permanent static hold; verified unchanged through 1741 (40 ticks) |
+| 1702-1741 | `6d2e0945` | static hold, 40 ticks — still consistent with `battle-bringup-notes.md` §3's RAM finding that `gBattleControllerExecFlags` stays busy (=1) through tick 1740 (cry SFX + `Intro_DelayAndEnd`'s 3-tick delay still running, invisible on-screen, §3); the delay window is a few ticks longer than this correction's own 1702 start, consistent (the RAM-busy window covers, but isn't identical to, the pixel-static window) |
 | 1742-1747 | `4db851c4` | message box **blank** (teal box, no text) — 6 ticks flat, not "several distinct transitional frames" as the coarse pass guessed; it's one steady blank state |
 | **1748** | `fd778a4b...` | **first action menu fully drawn — atomically** ("What will ONIX do?" + full FIGHT/BAG/POKéMON/RUN grid + cursor on FIGHT, all in one tick) — corrects the brief's coarse "tick 1750" pin by 2 ticks; same sha as the idle cycle's phase-0 state (§4) |
 | 1749 | `b145eaef` | single-tick idle-cycle phase-3 blip (§4) — **not** part of the menu draw itself, a pre-existing global bob timer already mid-cycle |
@@ -49,11 +63,18 @@ both sha `6d2e0945...` (byte-identical, confirmed not assumed), tick 1750 sha
 | 1786-1810 | (repeats) | phase 0/1/2 (trace ends mid-phase-2 at 1810) |
 
 Coarse-pin corrections this session made (all pixel-verified, not guessed):
-**settle 1693** (not 1696), **menu fully drawn 1748** (not 1750). Both are
-2-3-tick corrections of the same kind `battle-scene-notes.md` made for its
-own window (1075 not 1077) — a recurring lesson that this codebase's coarse
-6-14-frame sampling passes systematically land a few ticks late on settle
-events.
+**menu fully drawn 1748** (not 1750), a 2-tick correction of the same kind
+`battle-scene-notes.md` made for its own window (1075 not 1077). **A second,
+larger correction (bounded worker, healthbox slide-in step)**: the prior
+"settle 1693 (not 1696)" pin was itself wrong in a different way — not just
+off by a few ticks, but describing the wrong kind of event (the screen does
+NOT reach a clean static hold at 1693; it oscillates through 1701 before
+settling for real at **1702**, see §1's correction). A recurring lesson: this
+codebase's coarse sampling passes have twice now systematically landed a
+few-to-several ticks early on settle events for this specific window,
+not late — the opposite direction from `battle-scene-notes.md`'s own
+precedent, so "trust the pixel re-derivation over the coarse pass" holds,
+but "always land late" is not itself a safe assumption.
 
 ## 2. "Go! ONIX!" print cadence (source + pixel, exact)
 
@@ -592,13 +613,93 @@ already right, only specific numeric claims needed fixing.
    `introEndDelay` and hands off to `Intro_DelayAndEnd` (`:931`), which
    decrements it to `PlayerBufferExecCompleted()`.
 
-**The 1693-1741 static hold, explained**: pixels settle at 1693, but
+**The 1702-1741 static hold, explained**: pixels settle at **1702**
+(corrected from the previously-claimed 1693, §1) but
 `battle-bringup-notes.md` §3's RAM trace shows `gBattleControllerExecFlags`
-staying busy through tick 1740 — this is the **cry SFX still playing**
-(audio-gated, `waitForCry`, no pixel effect) plus the 3-tick
-`introEndDelay`, not a mechanism gap. No RNG anywhere in this chain (the
-9-total-draws RNG-checkpoint table in `battle-bringup-notes.md` §3 is
-unaffected; this slice found no additional draws).
+staying busy through tick 1740 — this is consistent with the **cry SFX
+still playing** (audio-gated, `waitForCry`, no pixel effect) plus the 3-tick
+`introEndDelay`, not a mechanism gap; the busy window simply extends a few
+ticks earlier than the pixel-static one (nothing requires the two to share
+an exact start tick). No RNG anywhere in this chain (the 9-total-draws
+RNG-checkpoint table in `battle-bringup-notes.md` §3 is unaffected; this
+slice found no additional draws).
+
+## 3a. Item 6: player healthbox slide-in (this session, bounded worker)
+
+**RAM-probed exact** (`tools/probe/specs/menu-player-healthbox.json`,
+`gSprites[0]` — per `docs/battle-menu-idle-notes.md`'s own pin, the same
+slot that sprite's later idle-bob analysis (§4) already names as the
+healthbox's main sprite): `callback` flips from `SpriteCallbackDummy`
+(`0x8010ce9`, decimal `134247465`) to `SpriteCB_HealthboxSlideIn`
+(`134703565`) at **RAM tick 1666**, where `x2` is first written **110** and
+steps **-5/RAM-tick** every tick after (110, 105, 100, ..., 5), landing on
+**0** at RAM tick 1688 and holding — callback reverts to the dummy value
+there too, confirming settle. `y2` stays 0 throughout (horizontal-only, like
+the opponent's own mechanism). `oam.priority` (`gSprites+0x04`, bits 10-11)
+reads **1** — same layer as the opponent's own healthbox and the
+ball-open-particle family (`battle-scene-notes.md` §7.26).
+
+With this window's established **+1 render lag** (screen tick = RAM tick+1,
+independently re-confirmed here: RAM 1666 → render 1667 matches the
+pixel-derived first-visible tick and its `dx=110` exactly, brute-force
+found in isolation before this was RAM-probed at all), the box is first
+visible at trace tick **1667** (`dx=110`, almost entirely off the right
+edge of the 240px screen — only its own leftmost sliver is on-screen),
+steps -5px/tick, and settles (`dx=0`) at trace tick **1689**, holding
+indefinitely from there (through at least 1741, the confirmed static-hold
+tail).
+
+**Content**: pixel-harvested (same "oracle is ground truth" methodology as
+`extract-sendout-healthbox-content.ts`'s own opponent-side precedent, §7.6/
+§7.9 of `battle-scene-notes.md`) — `extract-menu-healthbox-player.ts` →
+`src/assets/gen/menu-healthbox-player.json`, bbox `(127,74)-(229,109)`
+(103×36), harvested from `battle1-menu-dense.json`'s own tick 1730 (deep in
+the confirmed static hold). Non-rectangular-content bleed masked out at
+draw time (`getMenuHealthboxPlayerContentMask`, `battleScene.ts` — the same
+`§7.23` lesson the opponent's own harvest already needed, applied up
+front this time rather than discovered after the fact).
+
+**No spatial overlap with ONIX, despite the brief's working assumption**:
+the settled bbox (x0=127) never comes within reach of ONIX's own
+materialize bbox (x≤104, `ONIX_MATERIALIZE_CORNER`+64px sprite width) even
+at the slide's maximum offset (dx=110 → left edge x=237) — pixel-confirmed,
+no oracle capture shows the two regions' bounding boxes intersecting at any
+modeled tick. No `SortSprites`-family z-order/priority-tiebreak code was
+needed for this mechanism.
+
+**Region-isolated verification (not full-frame — see the blocker below)**:
+comparing the app's own rendered healthbox bbox region (`x≥127, y∈[74,109]`)
+against the oracle at every tick 1653-1711 gives **zero pixel diff at every
+tick**, including through the confirmed 1702-1741 static hold — the slide
+mechanism itself is exact, both during the slide and settled.
+
+**Blocked from closing a full-frame trace (pre-existing, not introduced
+this session, and out of this task's own assigned mechanism)**: every trace
+tick from ~1664 onward already has a full-frame mismatch regardless of the
+healthbox, because (1) `drawPlayerMaterialize`'s own materialize-tint
+window ends at `PLAYER_MATERIALIZE_END_TICK` (1663) and **nothing draws
+ONIX at all after that** — the "coefficient-fade-to-true-color ramp...
+entangled with the still-unresolved idle-bob mechanism" §3 item 5 already
+named and deliberately left unimplemented is a real, unsolved gap, not a
+formality (empirically checked this session: even the single best candidate
+tick for "ONIX has reached its plain, untinted, unscaled settled sprite"
+still mismatches by 632px in isolation — no clean single tick exists where
+a plain draw closes it); and (2) a small triangular residual (x∈[100,109],
+y∈[96,111], ONIX's own ground-shadow, immediately adjacent to but distinct
+from the healthbox's own bbox — see `extract-menu-healthbox-player.ts`'s own
+header comment) is tied to the same unresolved ONIX-tail mechanism, not the
+healthbox. **Neither gap is this task's assigned mechanism** (the brief was
+"the PLAYER healthbox slide-in") and neither was introduced this session —
+both pre-date it and are already named in §3 item 5's own "not continued
+into the coefficient-fade..." disclaimer. Filed as ISSUES #17 for a future
+session. Per this run's own harvest-first precedent (`sendout.json` stayed
+at a fixed score across several sessions while its own transient window was
+solved piece by piece, `battle-scene-notes.md` §7.9-§7.27), `tools/compare/
+traces/menu-materialize.json` is intentionally left unwidened past 1663 (no
+regression: still 12/12) rather than widened with captures that would fail
+on a mechanism this step doesn't own — a sibling `menu-healthbox.json`
+trace was considered and rejected for the same reason (every candidate
+capture tick already fails full-frame on the ONIX gap alone).
 
 **Not tick-exact this session** (time-budget cut, pixel-sampled at ~8-tick
 granularity rather than every-tick sub-region diffing): the precise
@@ -692,7 +793,7 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
 | ONIX back sprite | **extracted** | `src/assets/gen/battle-back-sprites.json["ONIX"]` |
 | Brendan back sprite, all 4 throw-anim frames | **extracted, byte-exact** | `src/assets/gen/trainer-pic-brendan-back.json` (`frameCount:4`) — already covers the throw pose (anim frame 1) used by `PlayerHandleIntroTrainerBallThrow`, per that extractor's own oracle cross-check |
 | Thrown Poké Ball sprite (`graphics/balls/poke.png`, 3-frame 16×48 send-out sheet) | frame 0 **wired + pixel-exact this session** (`playerThrowBallTopLeft`, `battleMenu.ts`) | `src/assets/gen/summary-ball.json` — frame 0 (closed) is what's visible the whole 1607-1614 modeled arc window; frames 1-2 (needed for `SpriteCB_ReleaseMonFromBall`'s `StartSpriteAnim(ball,1)` "open" pose, and possibly for the affine-spin phase past 1614) still unverified pixel-exact against this window |
-| Player healthbox (name/level/HP-bar/digits, left+right halves) | **extracted** | `src/assets/gen/battle-healthbox.json` (`singlesPlayer`, `hpbar`, etc. — same file the opponent healthbox already uses per `battle-bringup-notes.md` §3) |
+| Player healthbox (name/level/HP-bar/digits, left+right halves) | **extracted (raw tileset)**; **rendered content pixel-harvested** (§3a, this session) | `src/assets/gen/battle-healthbox.json` (raw tileset, unused for rendering per ISSUES #16's deliberate harvest-first deferral) / `src/assets/gen/menu-healthbox-player.json` (the actual settled-content asset `drawMenuHealthboxPlayer` reads, `battleScene.ts`) |
 | Action-menu window frame + font | **extracted** (shared with the message box) | `src/assets/gen/battle-window.json` — same asset `battle-scene-notes.md` §3.1 already confirmed covers `B_WIN_MSG`; `B_WIN_ACTION_PROMPT`/`B_WIN_ACTION_MENU` use the same `sStandardBattleWindowTemplates` family, not independently re-verified pixel-exact this session |
 | Action-menu cursor ("▶") | **likely already covered, unverified** | direct tilemap tiles `{1,2}` from the same sheet as the window itself (§5) — no separate sprite/asset file exists to extract; a future slice should byte-check tiles 1-2 of `battle-window.json`'s tileset against the on-screen cursor rather than treat this as a gap |
 | Ball-open particle burst (`AnimateBallOpenParticles`) | **extracted** (this row's original MISSING flag was stale) | `src/assets/gen/battle-anim-particles.json` — extracted for the opponent window; pixel-confirmed applicable unchanged to the player window (14/14, 12/12, 12/12 at ticks 1662-1665) by the PROGRESS #95 audit, `docs/battle-anim-assets.md` §5 |

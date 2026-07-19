@@ -562,3 +562,54 @@ export const PLAYER_BG_FADE_START_TICK = PLAYER_BALL_OPEN_START_TICK + 1; // 165
 export function playerMaterializeBgFadeY(t: number): number {
   return PLAYER_BG_FADE_Y[t - PLAYER_BG_FADE_START_TICK] ?? 0;
 }
+
+/**
+ * Player healthbox slide-in (docs/battle-menu-notes.md S3 item 6 / S7 new
+ * item). RAM-probed directly (`tools/probe/specs/menu-player-healthbox.json`,
+ * `gSprites[0]` - `StartHealthboxSlideIn`'s target sprite per
+ * `docs/battle-menu-idle-notes.md`'s own gSprites[0] pin), not pixel-fitted:
+ * `callback` flips from `SpriteCallbackDummy` to `SpriteCB_HealthboxSlideIn`
+ * (dummy's own literal value, `0x8010CE9`-family address) at RAM tick 1666,
+ * where `x2` is first written **110** and steps **-5/RAM-tick** every tick
+ * after (110, 105, 100, ..., 5), landing on **0** at RAM tick 1688 and
+ * holding (callback reverts to the dummy value there too - matches
+ * `docs/battle-menu-notes.md` S4's own "template callback is
+ * SpriteCallbackDummy" finding for the settled sprite). `y2` stays 0
+ * throughout - horizontal-only, unlike the opponent's own mechanism (which
+ * is also x2-only, so this is the same convention, not a coincidence).
+ * `oam.priority` RAM-read as **1** (`gSprites+0x04`, bits 10-11) - same
+ * layer as the opponent's own healthbox and the ball-open particle family
+ * (docs/battle-scene-notes.md S7.26).
+ *
+ * With this window's established +1 render lag (screen tick = RAM tick+1,
+ * cross-checked the same way S3 item 4's own ball-arrival pin was: RAM 1666
+ * -> render 1667, matching the pixel-derived first-visible tick and its
+ * `dx=110` exactly, brute-force confirmed in isolation against the oracle's
+ * own bounding-box growth before this was RAM-probed at all) - the box is
+ * first visible at trace tick 1667 (`dx=110`, mostly off the right edge of
+ * the 240px screen - only its own leftmost sliver is on-screen), steps -5
+ * px/tick, and settles (`dx=0`) at trace tick 1689, holding from there.
+ *
+ * **No spatial overlap with ONIX**: unlike the brief's own working
+ * assumption (a SortSprites-family z-order conflict during the slide,
+ * mirroring the ball-open-particle family), the settled content's own
+ * bbox (`src/assets/gen/menu-healthbox-player.json`, x0=127) never comes
+ * within reach of ONIX's own materialize bbox (x<=104, `ONIX_MATERIALIZE_
+ * CORNER`+64px sprite width) even at the slide's own maximum offset
+ * (dx=110 -> left edge x=237) - pixel-confirmed (no oracle capture shows
+ * the two regions' bounding boxes intersecting at any modeled tick). No
+ * z-order/priority-tiebreak code is needed for this mechanism; the RAM
+ * read above is recorded for completeness/future reuse, not because a
+ * conflict was found.
+ */
+export const PLAYER_HEALTHBOX_SLIDE_START_TICK = 1667;
+export const PLAYER_HEALTHBOX_SLIDE_START_DX = 110;
+export const PLAYER_HEALTHBOX_SLIDE_STEP = 5;
+export const PLAYER_HEALTHBOX_SLIDE_SETTLE_TICK = 1689;
+
+/** Player healthbox content-image x offset (added to its extracted `x`) at trace tick `t`, or `null` before it's created (fully off-screen - `drawSendOutHealthboxPlayer`'s caller need not special-case this, `setPixel` already clips). */
+export function playerHealthboxSlideDx(t: number): number | null {
+  if (t < PLAYER_HEALTHBOX_SLIDE_START_TICK) return null;
+  if (t >= PLAYER_HEALTHBOX_SLIDE_SETTLE_TICK) return 0;
+  return PLAYER_HEALTHBOX_SLIDE_START_DX - PLAYER_HEALTHBOX_SLIDE_STEP * (t - PLAYER_HEALTHBOX_SLIDE_START_TICK);
+}

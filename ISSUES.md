@@ -5,6 +5,54 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #17 — PLAYER-side ONIX materialize tail (color-fade-to-true-color +
+  settle-in wobble/overshoot) unmodeled — blocks any post-1663 full-frame
+  trace closure in the menu-materialize window, independent of the
+  (separately solved) healthbox slide-in
+
+**Confirmed (bounded worker, PROGRESS healthbox-slide-in step, 2026-07-19):**
+`drawPlayerMaterialize` (`battleScene.ts`) draws ONIX's tint/scale-in
+silhouette only through `PLAYER_MATERIALIZE_END_TICK` (1663); nothing draws
+ONIX at all after that tick. `docs/battle-menu-notes.md` §3 item 5 already
+named this as a deliberately-deferred gap ("entangles with the still-
+unresolved idle-bob mechanism... non-monotonic residual"), not solved this
+session either — empirically re-confirmed: even the single best candidate
+tick for "ONIX has reached its plain untinted/unscaled settled sprite"
+still mismatches the oracle by 632px in isolation (region `x∈[40,104],
+y∈[48,111]`), and every other candidate tick in 1664-1695 mismatches by
+1300-2100px — no clean single-mechanism fit, consistent with a genuine
+palette-fade (`gPaletteFade`) plus a real settle-in wobble, not a missing
+constant. **New this session**: the trace's own settle tick was
+independently found to be **wrong in the ground-truth docs** — the true,
+permanent static hold starts at trace tick **1702** (RAM/pixel-verified
+via two independent fresh `bin/oracle run` replays, byte-identical, plus a
+cross-check against `battle1-intro.json`'s identical script), not 1693/1696
+as previously documented; ticks 1693-1701 show a genuine **oscillating**
+pattern (tick 1693 and tick 1700 share an identical sha, a 7-tick
+round-trip), likely the ONIX-tail mechanism's own overshoot settling, not a
+simple ramp. A small ONIX-owned ground-shadow triangle (screen region
+`x∈[100,109], y∈[96,111]`) is part of the same unmodeled tail. **Not the
+player healthbox's own mechanism** — the healthbox slide-in (§3a of
+`docs/battle-menu-notes.md`) is fully implemented and RAM/pixel-exact in
+isolation (zero diff at every tick 1653-1711 within its own bbox,
+`x≥127, y∈[74,109]`), but sits underneath this same still-open blocker for
+any FULL-FRAME trace comparison past tick 1663 — `tools/compare/traces/
+menu-materialize.json` intentionally stays at 12/12 (1652-1663) rather
+than being widened with captures that would fail here.
+
+**Leads for a future session**: RAM-probe `gPaletteFade`
+(`include/palette.h:35-51`, `0x2037fd4`) across ticks 1653-1710, the same
+"re-derive the standard normal-palette-fade constant from `palette.c`
+directly" approach `battle-scene-notes.md` §7.8 risk 1 already recommended
+for the OPPONENT's own analogous fade and never circled back to; separately
+RAM-probe ONIX's own sprite (`gSprites[6]` per `docs/battle-menu-idle-
+notes.md`'s naming) `y2`/`data[]` fields across the same range to check for
+a real squash-and-stretch overshoot distinct from the idle-bob mechanism
+§4 already isolated (region A, ONIX itself, 18-tick period) - the 1693-1701
+wobble's own ~7-tick period doesn't obviously match either known cycle, so
+treat it as a third, not-yet-attributed animation rather than assuming it's
+one of the other two.
+
 ## #16 — Opponent healthbox real assembly: frame SOLVED, three content
   pieces still open (text ×2, HP-bar subsprite placement) — send-out still
   ships the pixel-harvested block

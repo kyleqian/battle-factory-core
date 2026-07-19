@@ -24,6 +24,9 @@ import {
   playerBallOpenTopLeft,
   PLAYER_BG_FADE_START_TICK,
   playerMaterializeBgFadeY,
+  PLAYER_HEALTHBOX_SLIDE_START_TICK,
+  PLAYER_HEALTHBOX_SLIDE_SETTLE_TICK,
+  playerHealthboxSlideDx,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -314,5 +317,36 @@ describe("battleMenu: player-side materialize BG-to-white fade (docs/battle-menu
     expect(pixelAtSentOut(1653, 165, 52)).toEqual([198, 198, 165]);
     expect(pixelAtSentOut(1668, 165, 52)).toEqual([255, 255, 255]);
     expect(pixelAtSentOut(1689, 165, 52)).toEqual([198, 198, 165]);
+  });
+});
+
+describe("battleMenu: player healthbox slide-in (docs/battle-menu-notes.md §3 item 6/§7 new item, this session) - RAM-probed exact (tools/probe/specs/menu-player-healthbox.json, gSprites[0]: x2 starts 110, steps -5/RAM-tick, settles 0; +1 render lag matches every other mechanism in this window)", () => {
+  it("is null (not created / fully off-screen) before the first visible tick", () => {
+    expect(playerHealthboxSlideDx(PLAYER_HEALTHBOX_SLIDE_START_TICK - 1)).toBeNull();
+    expect(PLAYER_HEALTHBOX_SLIDE_START_TICK).toBe(1667);
+  });
+
+  it("starts at dx=110 (mostly off the right edge of the 240px screen) and steps -5/tick", () => {
+    expect(playerHealthboxSlideDx(1667)).toBe(110);
+    expect(playerHealthboxSlideDx(1668)).toBe(105);
+    expect(playerHealthboxSlideDx(1672)).toBe(85);
+    expect(playerHealthboxSlideDx(1688)).toBe(5);
+  });
+
+  it("settles (dx=0) at PLAYER_HEALTHBOX_SLIDE_SETTLE_TICK (1689) and holds indefinitely after", () => {
+    expect(PLAYER_HEALTHBOX_SLIDE_SETTLE_TICK).toBe(1689);
+    expect(playerHealthboxSlideDx(1689)).toBe(0);
+    expect(playerHealthboxSlideDx(1700)).toBe(0);
+    expect(playerHealthboxSlideDx(1741)).toBe(0);
+  });
+
+  it("renders nothing at the settled healthbox's own screen position before the box is created (bare background - still under the tail of the materialize BG-white fade at this tick, §3 item 5)", () => {
+    expect(pixelAtSentOut(1666, 180, 92)).toEqual([255, 255, 255]);
+  });
+
+  it("renders the settled green HP-bar content exact once slid into place, held through the static hold (oracle-pinned, battle1-menu-dense.json)", () => {
+    expect(pixelAtSentOut(1689, 180, 92)).toEqual([115, 255, 173]);
+    expect(pixelAtSentOut(1710, 180, 92)).toEqual([115, 255, 173]);
+    expect(pixelAtSentOut(1741, 180, 92)).toEqual([115, 255, 173]);
   });
 });
