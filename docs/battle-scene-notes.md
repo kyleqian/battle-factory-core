@@ -1611,3 +1611,139 @@ own exit slide (§7.15) and the particle model's logical-tick-13+ divergence
 (§7.14, now confirmed to be the exact owner of the 1481-1503 and 1516-1519
 residuals above) - neither investigated further this session, per the
 brief's own scope (attribution only).
+
+### 7.18. Engine-slice session: particle model's logical-tick-13+ divergence root-caused via direct RAM probe (a real one-tick engine stall, not curve-fit) - `sendout.json` **196/256 -> 199/256**
+
+Per this step's brief (priority 1): RAM-probed the ball-open particle
+sprites' own `gSprites` slots directly, rather than continuing to guess at
+the cause from source reading alone. Method: `dump-task-and-sprite-
+callbacks.py` against `tools/compare/traces/sendout.json` (same tick
+numbering as scoring) dumped every `gSprites[]`/`gTasks[]` callback
+pointer per tick; cross-referencing those against
+`PokeBallOpenParticleAnimation_Step1`/`_Step2`'s own ELF addresses
+(`arm-none-eabi-nm`) identified the particles' 16 slots (6, 9-23) and the
+spawner task's own slot (`gTasks[2]`) without guessing. A follow-up
+`ram-probe.py` spec then watched `x2`/`y2`/`animCmdIndex` for all 16 slots
+across the whole spawn/lifetime window.
+
+**Ground truth: the whole particle subsystem freezes for exactly one real
+game tick.** RAM tick 1494 duplicates RAM tick 1493 verbatim - not just for
+one particle, but for `gTasks[2].data[0]` (the spawner's own progress
+counter) AND every already-alive particle's `x2`/`y2`/`animCmdIndex`
+simultaneously. This is a whole-frame engine stall, not a particle-specific
+bug (cause not reverse-engineered - a task/sprite list-relinking hiccup
+mid-iteration is one plausible source, not confirmed; the one observed
+occurrence is treated as ground truth regardless of cause). Confirmed
+against RAM registers exhaustively for all 16 particles' full lifespans
+(510 of 512 checked RAM-tick/particle pairs exact against a closed-form
+radius/angle model; the other 2 are reads of slot 6 before that slot's
+particle existed - stale prior-occupant memory the renderer never queries).
+Two consequences fall out of the single stall: (1) any particle already
+alive when it hits silently loses one tick of "real" age relative to the
+naive monotonic-tick model from that point on; (2) the 2 of 16 particles
+whose spawn attempt would have landed on/after the stalled tick are
+themselves created one real tick later than the clean one-per-tick
+schedule, since the spawner's own increment froze too.
+
+**A genuine, open snag: RAM register state is not proof of on-screen
+timing.** The obvious next step - re-deriving the age-to-radius mapping
+directly from the RAM ticks above (this session tried it: RAM evidence
+suggested particles spend 3 ticks at radius 0 before growth starts, not the
+prior session's source-hand-derived 2) - measurably REGRESSED the
+already-good ages-0-12 region when checked against the live oracle
+(render 1493 went from the prior session's 9px to 173px). The RAM-tick
+arithmetic also implied the stall's visible effect starts at logical tick
+15, which reproduced the crater everywhere BUT additionally caused a live
+regression at the previously-bit-exact render tick 1522 (an already-dead
+particle rendered one tick too long). Both symptoms trace to the same
+cause: a register write and what the PPU actually composites that same
+tick are not the same clock - GBA sprite pipelines commonly report
+"next state" a tick before it's visible, and this dossier has already
+found different per-mechanism lag constants for other sprites (§7.16: lag
+1 for the front-sprite stretch). Rather than chase a THIRD lag constant
+under time pressure, this session kept the prior session's own
+PIXEL-brute-forced boundary (`PARTICLE_STALL_LOGICAL_TICK = 13`, "every
+tick from logical 13 on is strictly worse") and the ORIGINAL, already
+pixel-validated age<->radius/frame formulas (`age<=1 ? 0 : 2*(age-1)`,
+`anim[age % anim.length]`) completely unchanged, layering ONLY the two
+`logicalT`-relative corrections (stall + late-spawn) on top of `age`
+before it feeds those formulas. `PARTICLE_MAX_AGE` was additionally
+tightened 25->24: RAM shows a particle's final register write (age 25,
+radius 48) lands the SAME tick `DestroyBallOpenAnimationParticle` runs, so
+it's never actually composited - rendering it anyway is exactly what broke
+render tick 1522.
+
+**Score effect:** `sendout.json` **196/256 -> 199/256** (+3: render ticks
+1519, 1520, 1521 now bit-exact, up from 1522-1559 only). Full 19-trace
+sweep re-run against the live oracle: all 18 others at their exact
+established counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
+draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+room-msgbox 142/142, transition 206/206, scene-assembly 256/256, rent-slot1
+125/139, rent-3picks 157/190, confirm-flow 79/95) - zero regressions. Two
+new Tier-1 tests pin the stall correction (particle 0's radius at render
+1494) and the death-boundary fix (particle 15 excluded at render 1522).
+
+**Per-tick attribution for every remaining diff in 1462-1521** (1522-1559
+stays bit-exact; full log: `npm run compare -- tools/compare/traces/
+sendout.json`):
+- **1462** (1161px): pre-mechanism-5 window (trainer-exit tail), unrelated,
+  unchanged.
+- **1463-1480** (45-216px, roughly monotonically increasing): unrelated to
+  this session's fix (values identical to before) - this is the window
+  §7.15 flagged the party-summary bar's own exit slide as a known,
+  unimplemented sub-gap (priority 2 of this step's brief, not attempted
+  this session) - the steadily-growing pixel count across exactly this
+  span (the bar's own alpha-fade window) is consistent with that being the
+  owner, though not re-confirmed by direct RAM probe this session.
+- **1481-1492** (525-2963px, the single largest spikes in the whole
+  window): still owned by the particle/materialize overlap named in
+  §7.14/§7.17, and still NOT closed by this session's fix - the pixel MASS
+  dropped substantially in this range (spot-checked, not every tick logged)
+  but no tick here crossed into a full-frame match. Given the "RAM register
+  vs on-screen timing" snag above, this is most likely the SAME lag
+  ambiguity biting the largest-radius, most spatially-spread particles
+  hardest (small per-particle position errors compound with 8+ particles
+  overlapping Grovyle's own materialize tint at once) - not confirmed
+  further this session.
+- **1493-1495** (9px, 9px, 10px): tiny, likely sub-pixel/antialiasing-shaped
+  residual at the particle/Grovyle-crop boundary, not chased (matches the
+  prior session's own 9px finding at 1493 almost exactly, confirming the
+  age<=12 formula itself is undisturbed by this session's changes).
+- **1496-1503** (138-545px): moderate, same general owner as 1481-1492
+  (particle-model residual past the stall boundary), not closed.
+- **1504-1515** (8-62px, shrinking): small, boundary/antialiasing-shaped,
+  same character as §7.17's already-flagged small residual - not chased
+  further (this is priority 3 of this step's brief, correctly left for
+  last since priorities 1/2 aren't both closed yet).
+- **1516-1517** (2257px/2283px, still the largest remaining spikes): still
+  owned by the particle/opponent-healthbox color collision named in §7.17
+  (`PARTICLE_ORIGIN`'s own pinned color overlapping Grovyle's crop box) -
+  the underlying particle-position imprecision in this sub-window (same
+  root cause as 1481-1492) means the collision isn't cleanly resolved by
+  this session's timing fix alone.
+- **1518** (11px): small, same character as 1504-1515.
+- **1519-1521**: bit-exact (NEW this session).
+- **1522-1559**: bit-exact, unchanged.
+
+**Committed this session:** the two `logicalT`-relative age corrections and
+`PARTICLE_MAX_AGE` tightening in `drawBallOpenParticles`/`battleScene.ts`;
+two new Tier-1 tests in `tests/battleScene.test.ts`. RAM probe specs and
+scratch scripts used to derive the above were throwaway (run directly via
+`ram-probe.py`/`dump-task-and-sprite-callbacks.py` against the committed
+trace, not saved as new spec files, since the callback-cross-reference
+step is a one-off lookup rather than a reusable watch list) - the exact
+commands are recorded above for reproduction.
+
+**Still open, per this step's own priority order:**
+1. Particle model: still not full-frame-exact in 1481-1503/1516-1519
+   despite the root-cause fix - the RAM-register-vs-on-screen-timing snag
+   above is the most concrete lead (try lag constants other than the
+   "immediate" one this session assumed, brute-forced directly against the
+   oracle the way §7.16 did for the front-sprite stretch, rather than
+   RAM-tick arithmetic).
+2. §7.15's bar exit slide (`SpriteCB_StatusSummaryBar_Exit`) - not
+   attempted this session; likely (not confirmed) owner of some/all of
+   1463-1480's growing residual.
+3. The small 1504-1521 boundary residual - unchanged, still last priority.
