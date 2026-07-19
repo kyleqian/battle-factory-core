@@ -24,8 +24,12 @@ import {
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
+import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
 import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import sendOutHealthboxOpponentAsset from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
+import battleHealthboxAsset from "../src/assets/gen/battle-healthbox.json" with { type: "json" };
+import ramDump from "../src/data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
+import speciesNames from "../src/data/gen/species-names.json" with { type: "json" };
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -329,6 +333,44 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     // true background-bleed pixels, not real healthbox art.
     const content = pixelAtSentOut(1500, 3, 16);
     expect(content).toEqual([82, 107, 99]);
+  });
+
+  // ISSUES #16 (worktree lane, this session): the harvest-blit call site was
+  // replaced by `composeOpponentHealthbox` - this test proves the LIVE
+  // render path actually goes through the compositor now, independent of
+  // battleScene.ts's own internals: it recomposes the same anchor-battle
+  // params (GROVYLE/male/Lv50/full-HP/no-status, sourced the same way
+  // battleScene.ts does - battle1-turn1-ram-dump.json + species-names.json,
+  // not hardcoded) and asserts every opaque compositor cell equals the
+  // settled (dx=0) on-screen pixel at the corresponding screen position.
+  it("settled opponent healthbox render equals composeOpponentHealthbox's own output buffer for the real anchor params (ISSUES #16, wired live)", () => {
+    const battler1 = ramDump.battlerSnapshots.before_turn.battler1;
+    const name = speciesNames.species[battler1.species]!.name;
+    expect(name).toBe("GROVYLE");
+    expect(battler1.level).toBe(50);
+    expect(battler1.hp).toBe(battler1.maxHP); // full HP - this window's actual case
+
+    const composed = composeOpponentHealthbox(
+      {
+        frame: battleHealthboxAsset.singlesOpponent,
+        hpbar: battleHealthboxAsset.hpbar,
+        hpbarAnim: battleHealthboxAsset.hpbarAnim,
+        statusIcons: battleHealthboxAsset.status2,
+      },
+      { name, level: battler1.level, gender: "male", hpFraction: battler1.hp / battler1.maxHP, status: "none" },
+    );
+
+    let checked = 0;
+    for (let cy = 0; cy < composed.height; cy += 1) {
+      for (let cx = 0; cx < composed.width; cx += 1) {
+        const cell = composed.pixels[cy * composed.width + cx];
+        if (!cell) continue;
+        checked += 1;
+        const onScreen = pixelAtSentOut(1555, HEALTHBOX_FRAME_ORIGIN.x + cx, HEALTHBOX_FRAME_ORIGIN.y + cy);
+        expect(onScreen, `mismatch at compositor-local (${cx},${cy})`).toEqual([cell.r, cell.g, cell.b]);
+      }
+    }
+    expect(checked).toBeGreaterThan(2500); // not a hardcoded magic number - just a floor so this can't silently degrade to checking nothing
   });
 
   // §7.20: `SENDOUT_BG_FADE_Y`'s own ramp was one step short at both ends -
