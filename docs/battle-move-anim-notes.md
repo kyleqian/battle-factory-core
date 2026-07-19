@@ -487,3 +487,74 @@ byte-identical output. All numeric claims in §4/§6's correction blocks
 above are backed by a fresh, independent re-probe this session (not a
 re-read of the prior session's own numbers) - see each correction block's
 own "confirmed via" sentence for which probe.
+
+## 8. CORRECTION BLOCK (S7 worktree lane, oracle v5 regen — Battle Scene ON): the animations actually run now
+
+Per PROGRESS #76/#77 the oracle's canonical bootstrap moved to Battle Scene
+ON (v5). §4/§6 above document that under v3 (Battle Scene OFF) neither
+`Move_DOUBLE_TEAM` nor `Move_ROCK_SLIDE` ever actually ran — this section is
+the re-verified **real** timeline now that `HITMARKER_NO_ANIMATIONS` and
+`gSaveBlock2Ptr->optionsBattleSceneOff` are both confirmed **clear** for the
+entire trace (re-probed via `dump-ai-and-hitmarker.py` against the new
+`battle1-turn1.json`, twice, byte-identical — see `battle-turn-notes.md` §9
+point 5). §1-§3's asset/decode work (script step lists, motion formulas) is
+now genuinely exercised; §4/§6's account of what v3 showed is left
+unmodified as the historical OFF-state record. All tick numbers below are
+this session's new trace numbering (`battle-turn-notes.md` §9's tick-mapping
+table); a scratch per-tick register probe (`BLDCNT`/`BLDALPHA`/`DISPCNT`/
+`gBattle_BG3_Y`/`gBattle_BG3_X`, 0x04000050/0x04000052/0x04000000 +
+`bin/oracle symbols gBattle_BG3_Y gBattle_BG3_X`) was run once against the
+committed trace's own segments (deterministic replay, re-derivable, not
+committed as a separate trace file).
+
+**DOUBLE_TEAM's clone animation now genuinely plays, and resolves §4's old
+open finding outright**: `BLDCNT=0x3F40`/`BLDALPHA` **flat** at `eva=12,
+evb=8` for ticks **1964-2094 (130 ticks)** — this is exactly the script's
+own literal `setalpha 12,8` opcode (§2), a fixed value with no ramp, and its
+**130-tick duration matches §3's clone-motion-formula-derived prediction
+almost exactly** (the old ~130-tick vs ~66-tick mismatch §4 flagged is fully
+resolved: the 66-tick window it measured under v3 was never the clone at
+all, it was only the always-on stat banner running alone). Immediately
+after, the **stat-change banner runs separately**, ticks **2127-2193** (66
+ticks): `BLDCNT=0x3F42`, `BLDALPHA` ramps `eva=0/evb=16` → `eva=10/evb=6`
+(reached ~2150, held) → back to `eva=0/evb=16` at 2190, zero at 2193 — same
+envelope shape and same exact register values `battle-turn-notes.md`'s old
+§4 (this doc's) table already decoded from the v3 trace's exempt-from-the-
+gate banner, just now running *after* a real clone animation instead of
+being the only thing that ran. `DISPCNT` bit 15 (`DISPCNT_OBJWIN_ON`) sets
+at clone start and clears at 2193 exactly as §4's `StatsChangeAnimation_
+Step3` source citation predicts.
+
+**ROCK_SLIDE's BG shake now genuinely fires** — resolves §4's other old
+open finding (option (a) vs (b); this reconfirms (b) was right about the
+*mechanism*, but the effect itself was never actually absent, only gated):
+`gBattle_BG3_Y` alternates **0 / 0xFFF9 (-7 as s16)** across ticks
+**~2348-2358** (~10 ticks, sampled at stride 2 — matches §3's hand-derived
+`0,-7,-7,0,0,-7,-7,0,0,-7,-7` write schedule within this probe's sampling
+granularity), landing exactly in the "silent" window between the damage
+roll locking (tick 2337, `battle-turn-notes.md` §9) and the HP-bar drain
+start (tick 2516) — i.e. inside `Move_ROCK_SLIDE`'s own `attackanimation`
+window, as §2's decoded script predicted. This session did not additionally
+re-derive the falling-rocks sprite-callback timing or the generic
+hit-flash's exact sub-window boundaries within this now-much-longer
+silent-to-bar-drain span (2337-2516, 179 ticks) — flagged as the natural
+follow-up for whichever session next needs ROCK_SLIDE's precise rock-spawn
+cadence under v5 (the §2/§3 script/formula groundwork is unchanged and
+still the right starting point; only the *root cause that suppressed it*
+has flipped).
+
+**Implication for a future engine slice — reversed from §6's old
+conclusion**: this run's canonical anchor now plays with move animations
+**on**, so an engine slice faithfully matching *this* trace's pixels needs
+the real custom move-animation art (rocks/clones/shake) this doc's §1-§3
+banked, not just the generic always-on effects §6 previously said were
+sufficient. §1's asset inventory (rocks.png, the decoded script step lists,
+the per-tick motion/blend formulas) is load-bearing groundwork now, not just
+banked-for-later.
+
+**Verification**: `npm test` 454/454, `npm run build` green (see `battle-
+turn-notes.md` §9's verification note — same commit). No new extractors or
+Tier-1 pins this session (pure re-probing); the register/RNG claims above
+are backed by this session's own fresh probe runs, re-run where noted for
+determinism.
+
