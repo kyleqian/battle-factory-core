@@ -2868,3 +2868,185 @@ unrelated to this fix's own mechanism, not just left alone:
 
 No new residual families were introduced or exposed by this fix in either
 trace - the 22-trace sweep's zero-regression result covers this directly.
+
+### 7.28. Round-9 worktree: 1491-96 root-caused down to `drawOpponentSummaryExit`'s blended edge (icon AND bar), position/blend-timing/materialize-params all RAM-CONFIRMED correct, but the real screen still shows zero contribution there - no fix found, `sendout.json` stays **246/256** (no regressions)
+
+Per this round's brief: root-cause and close the named 1491-96 span,
+pixel-classifying every diff first, and take 1470/1471/1479/1462 too only if
+provably covered. **Reconciled against a fresh live-oracle compare run
+first, per the brief's own instruction**: the exact failing ticks are
+`1462, 1470, 1471, 1479, 1491, 1492, 1493, 1494, 1495, 1496` (unchanged from
+§7.27's own post-landing dump) - 246/256, confirming #110's "1491-96"
+framing is the right target and nothing drifted since §7.27.
+
+**Pixel-classified every tick in the span first** (`tools/compare/scratch/
+span_1491_diag.mjs`, `grid_dump.mjs`, throwaway, not committed - full RGB
+grids not just diff pixels, since the earlier `span_1485_diag.mjs`-style
+"list mismatched pixel colors" view alone wasn't enough to see the *shape*
+of what's missing):
+- **1491 (10px), 1492 (13px)**: every mismatched pixel has app showing a
+  color `(243,173,237)` the oracle never shows anywhere in this window, at
+  screen positions that trace out a small hollow-ring shape sitting inside
+  Grovyle's own materialize-tint silhouette (ears region, `y=32-38`).
+  `(243,173,237)` is not a literal palette color anywhere in this engine's
+  assets (checked `grovyleFrontSprite`/`ballDisplay`/`battleAnimBallOpen`/
+  `battleAnimParticles` palettes directly, and every `blendComponentToward`
+  combination of them - no match) - it's a **computed alpha blend**,
+  confirmed by instrumenting `setPixel`/`blendedSetPixel`/`blendedTile`
+  directly (temporary `console.log` + stack trace on a specific `(x,y)`,
+  reverted before committing - not shipped): the actual call chain is
+  `drawTileBgFaded`(white) → `drawGrovyleMaterialize`(tint, via
+  `drawSpriteSheetAffineTinted`) → **`drawOpponentSummaryExit`**'s
+  `blendedTile`, blending source color `(74,66,90)` (the "Empty" ball-icon
+  ring's own outline color) onto the tint at `eva=1,evb=15` -
+  `blendChannel` reproduces `(243,173,237)` exactly by hand. Cross-checked
+  the position: `opponentIconExitX(2, elapsed)` (this engine's own,
+  already-landed §7.19 formula) lands **exactly** on `154` (render 1491)
+  and `181` (render 1492) - the SAME x this diff's bbox sits at, to the
+  pixel. The "Empty" ball-icon tile itself (`battle-interface-ball-display.
+  json`, state index 1) is a **thin hollow-ring sprite** (every opaque texel
+  is palette index 5, forming an 8x8 ring outline, not a filled disc) -
+  its opaque-texel positions match this diff's pixel set almost exactly
+  (checked cell-by-cell), confirming the WHOLE visible icon is the
+  residual, not just its edge.
+- **1493 (2px), 1494 (2px), 1495 (5px)**: app shows flat materialize tint
+  `(255,181,247)`, oracle shows near-white `(247,247,255)`, at
+  `x=164-167,y=42-43` - inside Grovyle's silhouette box but nowhere near the
+  ball's own occlusion footprint (§7.21's already-named residual sits at
+  `x~170-182,y~52-63`). Checked against `drawOpponentSummaryExit`'s **bar**
+  (not icon) footprint this time: `barX + 192` (the widened Exit bar's own
+  right edge, `EXIT_BAR_TILE_ORDER`) lands at **166 / 168 / 170** for
+  elapsed 30/31/32 (renders 1493/1494/1495) - squarely straddling this
+  diff's `x=164-167` range. Same family as 1491/1492 (an edge of
+  `drawOpponentSummaryExit`'s blended content bleeding onto Grovyle's tint
+  where the real game shows nothing), just the bar's trailing tip instead
+  of an icon.
+- **1496 (3px)**: `(255,173,0)`/`(255,255,255)` particle-pair colors at
+  `x=175-176,y=57-60` - inside `PARTICLE_ORIGIN`'s field, the SAME
+  "z-order between two same-burst particles, unverified against real OAM
+  subpriority" gap §7.25 already named and left open (its own "tried
+  descending order, reverted - regressed 1496/1499" note this session
+  independently re-confirmed still applies: this tick's 3px sit exactly
+  where two particles' 8x8 footprints overlap). Not the same family as
+  1491-1495; not chased further this session (§7.25's own fallback - needs
+  real OAM-slot RAM evidence, not spawn-index guessing - still the blocker).
+
+**RAM-verified three independent things before attempting any fix, all
+CAME BACK CORRECT (confirming the existing model, not finding a new bug in
+it)** - this is the round's main negative result:
+1. **The blend (`tBlend`) schedule.** New probe
+   (`tools/probe/specs/sendout-summary-exit-blend.json`, committed - watches
+   every `gTasks[]` slot's `func` pointer + `data[15]` across the whole
+   send-out window): task slot 1 is `Task_HidePartyStatusSummary`
+   (`func` changes at RAM tick 1461, matching handoff+0). Its `data[15]`
+   (`tBlend`) reads **16 (RAM1461) → 15 (1462) → ... → 1 (1490) → 1 (1491) →
+   0 + func switches to `_BattleStart_2` (1492) → 0 (1493) → -1/0xFFFF,
+   sprites destroyed per source (1494) → -2 (1495) → -3, task destroyed,
+   `BLDCNT=BLDALPHA=0` (1496)**. With this window's established +1 render
+   lag, render 1491/1492 see `tBlend=1` - **exactly what this engine's own
+   `blend = max(0,15-floor(elapsed/2))` closed form already predicts** (RAM
+   source-derivation, `Task_HidePartyStatusSummary_BattleStart_1`:
+   `data[11]++ % 2==0` gates a once-per-2-ticks decrement starting the
+   task's first tick - the closed form matches this exactly, source-checked
+   line by line). **The blend value is not the bug.**
+2. **Per-icon sprite lifetime/position.** `tools/probe/dump-task-and-
+   sprite-callbacks.py` against `sendout.json`'s own segments (throwaway
+   run, spec not committed - the tool itself already is) identifies the 6
+   opponent ball-icon sprites as `gSprites[48..53]` (callback flips to
+   `SpriteCB_StatusSummaryBalls_Exit`'s address at RAM 1461, matching
+   handoff+0) and shows `s48`/`s49`/`s50` individually revert to
+   `SpriteCallbackDummy` (i.e. self-cull via their own `x2+x>248` check) at
+   RAM ticks **1472/1479/1486** - render 1473/1480/1487. This engine's own
+   `opponentIconExitX(j, elapsed)` predicts those SAME three icons (j=5,4,3)
+   first return `null` (culled) at renders **1473/1480/1487** - a 3-for-3
+   exact match, independently confirming both the acceleration formula AND
+   its off-screen cutoff are correct, not just for the icons already known
+   to match but for the exact ticks they stop rendering. `s51/s52/s53`
+   (icons j=2/1/0, the ones still alive at 1491/1492) share callback
+   `SpriteCB_StatusSummaryBalls_Exit` unbroken through RAM 1493, then ALL
+   THREE flip to dummy at RAM 1494 together - matching the task-level
+   `tBlend==-1` mass-destroy branch above, not an individual position cull
+   (none of their `x` values exceed 248 yet at that tick per the formula).
+   **The icon is genuinely alive, correctly positioned, per RAM - not a
+   phantom this engine is inventing.**
+3. **Grovyle's own materialize parameters underneath.** Extended
+   `sendout-grovyle-materialize.json`'s existing RAM probe through RAM tick
+   1496 (previously stopped at 1493): `matA` (the OAM matrix register,
+   i.e. `matrixParam`) reads a constant **256** (exact neutral/identity,
+   zero rounding error) from RAM 1491 through 1496 inclusive, and
+   `spriteY2` reads **0** from RAM 1492 onward - both exactly matching this
+   engine's own `affineEmergeAccumulator`/`MATERIALIZE_Y2_TABLE` fallback
+   behavior for `local>=12` (renders 1493+). §7.21's own flagged "matrix
+   climbs early, RAM tick 1498+" boundary is real but doesn't start until
+   AFTER this span. **Mechanism 4's own parameters are not the bug either.**
+
+**Net result: every input this engine's `drawOpponentSummaryExit` and
+`drawGrovyleMaterialize` use to decide "draw this pixel" is RAM-confirmed
+correct, yet the composited output still doesn't match** - the icon/bar
+edge visibly blends in this engine and visibly doesn't in the real game,
+with no wrong number found anywhere in the chain of position, blend
+coefficient, or underlying tint shape. Plausible remaining leads, none
+tested this session (out of RAM-probe budget, named rather than guessed
+at):
+- **GBA hardware alpha-blend target selection** may not reduce to "blend
+  against whatever this engine's own painter's-algorithm framebuffer
+  currently holds" the way `blendedTile`/`blendedSetPixel` assume - real
+  `BLDALPHA` blends the two TOP-BY-PRIORITY layers at a pixel, which this
+  engine approximates by drawing priority-2 (Grovyle) before priority-1
+  (icon/bar) and letting the icon's blend read back whatever's already
+  there. That approximation has been correct everywhere else this window
+  uses it (§7.26/§7.27's whole OAM-priority derivation) - untested
+  specifically for a THREE-way stack (icon over Grovyle's silhouette EDGE,
+  where the "layer beneath" might itself be ambiguous per-subpixel in a way
+  a flat painter's algorithm can't see) - the shared trait of every
+  residual this session found (1470/71/79 too, see below) is that it's
+  always at a silhouette/tile EDGE, never the interior.
+- Some **per-subsprite OAM field this session didn't probe** (each
+  icon/bar-tile subsprite is its own real OAM entry per GBA hardware, not
+  just a logical group) - `oam.priority`/`subpriority` were assumed shared
+  with the base template (source-cited, §7.19/present session) but never
+  RAM-read per subsprite instance during the Exit phase specifically.
+- A **window (WIN0) interaction** specific to this screen region - flagged
+  as a possibility, not investigated (no RAM evidence either way).
+
+**1470/1471/1479 (already named "icon-edge/materialize-overlap residual"
+in §7.19, never root-caused): CONFIRMED same family as 1491/1492, still not
+fixed.** `opponentIconExitX(5, elapsed)` lands exactly on **184** (render
+1470) and **211** (render 1471); `opponentIconExitX(4, elapsed)` lands
+exactly on **231** (render 1479) - all three match those ticks' own diff
+bboxes to the pixel, the same "icon renders where oracle shows nothing"
+shape as 1491/1492. Per the brief's own "take them only if provably
+covered" condition: the ROOT CAUSE is shared (confirmed, not guessed), but
+since no FIX was found for the root cause itself, none of these ticks
+actually close either - naming the connection is as far as this session
+could take it.
+
+**Score effect: none.** No code was changed (a temporary debug
+instrumentation of `setPixel`/`blendedSetPixel`/`blendedTile` was added,
+used to trace the exact call chain behind pixel `(157,32)`, then fully
+reverted - `git diff` confirms zero net change to `battleScene.ts`).
+`sendout.json` stays **246/256**. Full battle-family sweep (scene-assembly
+256/256, transition 206/206, menu-text 18/18, menu-throw 70/70,
+menu-materialize 12/12, menu-idle 69/69) plus spot checks unaffected since
+nothing was touched - zero regressions, trivially. `npm test` 545/545,
+`npm run build` green, both unchanged from the branch point.
+
+**Committed this session**: `tools/probe/specs/sendout-summary-exit-blend.
+json` (the `tBlend`-across-all-tasks probe, reusable ground truth for
+whoever picks this back up - watch `t1blend` past RAM 1496 too if the next
+session wants to confirm the task slot fully frees up / gets reused, not
+checked here). Scratch diagnostic scripts (`span_1491_diag.mjs`,
+`span_1470_diag.mjs`, `grid_dump.mjs`, `debug_pixel_1491.mjs`) intentionally
+NOT committed, per this file's own established "throwaway" precedent
+(§7.24/§7.25) - reproducible from this section's own description if needed.
+
+**Recommended next step, concretely**: RAM-probe the icon/bar subsprites'
+OWN `oam.priority`/`subpriority`/`objMode` bytes directly during the Exit
+phase (not just trust the shared template/source-cited values) at RAM
+ticks 1489-1496 specifically, cross-referencing against Grovyle's own
+`gSprites[8]` OAM bytes at the same ticks - if they somehow read something
+other than the expected `priority=1/objMode=BLEND`, that's the answer; if
+they read exactly as expected (as every other field checked this session
+did), the GBA hardware alpha-blend target-selection hypothesis above
+becomes the more likely remaining lead and would need a from-scratch
+compositor rethink (out of a single bounded session's scope).
