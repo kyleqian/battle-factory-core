@@ -68,6 +68,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   territory) — only additive `drawSpriteSheetAffineRotate` + a call-site
   hook in `drawSendOutHandoff`. docs/battle-scene-notes.md, oracle/harness,
   ROADMAP.md untouched, per the brief. No PAPERCUT.
+  **Supervisor merge addendum (post-#97):** worktree branch
+  `wt-20260719-004700` merged (docs-only, §7.22): §7.21's 1493-1503
+  matrix-early gap was root-caused and its fix VERIFIED (5 ticks'
+  Grovyle region → 0px) but reverted per the step's strict >215 bar — an
+  unrelated ~138px band sliding ~5px/tick across x∈[0,42], y∈[17,42]
+  (opponent-healthbox slide-in region) masks those ticks from full-frame
+  exactness. §7.22 records the 7 RAM table entries + compositing-order
+  correction for exact re-application once the band is fixed — that
+  combined step is round 5's worktree brief.
 
 ---
 
