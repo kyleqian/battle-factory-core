@@ -213,6 +213,72 @@ timing the visual off the **register envelope** (66 ticks, oracle-
 confirmed) rather than the naively-computed 130-tick source formula is the
 safer bet until this gap is resolved.
 
+**RESOLVED (S7 worktree lane, RNG/BG3_Y follow-up session)**: the BLDALPHA
+ramp is **not** driven by `Move_DOUBLE_TEAM`/`AnimTask_DoubleTeam` at all -
+it's `General_StatsChange`'s `InitStatsChangeAnimation`/
+`StatsChangeAnimation_Step1-3` (`src/battle_anim_utility_funcs.c:415-628`),
+the **generic** stat-stage-change arrow/banner effect that fires for *any*
+stat boost, dispatched by a completely different battle-script command
+(`playanimation BS_EFFECT_BATTLER, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1`,
+`data/battle_scripts_1.s:511`, reached via `BattleScript_EffectEvasionUp ->
+BattleScript_EffectStatUp -> ... -> BattleScript_StatUpAttackAnim
+(attackanimation, waitanimation) -> BattleScript_StatUpDoAnim ->
+BattleScript_StatUp`) that happens to run in the same script slot right
+after DOUBLE_TEAM's own `attackanimation` step. Exact match, both source-
+and RAM-derived:
+- `StatsChangeAnimation_Step1` (`:442-443`) writes `BLDCNT =
+  BLDCNT_TGT1_BG1 | BLDCNT_TGT2_ALL | BLDCNT_EFFECT_BLEND` = **`0x3F42`**,
+  byte-for-byte the value this dossier's own §4 table reports; and
+  `BLDALPHA = BLDALPHA_BLEND(0, 16)` (eva=0/evb=16), matching the RAM-
+  observed value at tick 1999 exactly.
+- `StatsChangeAnimation_Step3`'s case 0 (`:571-583`) increments `tBlend`
+  by 1 every 2 ticks (`tFadeTimer++ > 0` gate) until it hits `tTargetBlend`
+  (10 for a non-"sharply" +1 stage change - DOUBLE_TEAM's own
+  `EFFECT_EVASION_UP`, not `_2`), writing `BLDALPHA_BLEND(tBlend, 16-
+  tBlend)` each step - reproduces the observed 10-step/20-tick ramp to
+  eva=10/evb=6 exactly. Case 1 holds for `tWaitTime=20` ticks. Case 2
+  mirrors the ramp back down. Case 3 (`:603-627`) resets `BLDCNT`/
+  `BLDALPHA` to 0 and **toggles `DISPCNT_OBJWIN_ON`** (`^=`, i.e. clears
+  the bit `StatsChangeAnimation_Step1` set) - this is what this dossier's
+  §5 item 4 (DISPCNT bit 15) actually is; not DOUBLE_TEAM-related at all.
+- RAM-verified two ways: (1) a fresh, densified per-tick `BLDALPHA`
+  re-probe reproduces the dossier's own table exactly (`eva/evb` = `0/16`
+  @1999, ramping to `10/6` held 2022-2043, back to `0/16` @2063-2064, `0`
+  @2065); (2) `tools/probe/dump-task-and-sprite-callbacks.py` (new,
+  committed) dumped every `gTasks[]` slot's function pointer every tick
+  1900-2070 and, bisected against `arm-none-eabi-nm`'s full (static-
+  symbol-inclusive) table, shows task slot 1 running
+  `StatsChangeAnimation_Step2` then `_Step3` for exactly the observed
+  ramp window, and task slot 0 running `Task_ClearBitWhenBattleTableAnimDone`
+  (`src/battle_gfx_sfx_util.c:493` - the generic "wait for a
+  `TryHandleLaunchBattleTableAnimation`-launched anim to finish" tracker,
+  confirming `General_StatsChange` was launched through that path, not
+  through `Cmd_createvisualtask`).
+
+**A deeper finding this same probe surfaced**: `AnimTask_DoubleTeam`'s own
+task (and its `AnimDoubleTeam`-callback clone sprites) **never appear at
+all** - `tools/probe/dump-task-and-sprite-callbacks.py` scanned all 16
+`gTasks[]` slots every tick 1900-2070 and all 64 `gSprites[].callback`
+slots every tick 1920-2070 and found zero matches for
+`AnimTask_DoubleTeam`/`AnimTask_DoubleTeam_Step`/`AnimDoubleTeam` anywhere.
+Root cause (RAM-confirmed, §6 below): this canonical save has **Battle
+Scene: OFF** (`gSaveBlock2Ptr->optionsBattleSceneOff == TRUE`), which sets
+`gHitMarker`'s `HITMARKER_NO_ANIMATIONS` bit at battle init
+(`battle_main.c:3085`) and makes `Cmd_attackanimation`
+(`battle_script_commands.c:1742-1747`) skip **every** move's own custom
+attack-animation script (substituting a short generic pause,
+`BattleScript_Pausex20`) - so `Move_DOUBLE_TEAM` (clones, `setalpha 12,8`,
+the whole script) never runs in this trace. `Cmd_playanimation`
+(`:4009-4018`) special-cases `B_ANIM_STATS_CHANGE` (and
+`B_ANIM_SNATCH_MOVE`/`B_ANIM_SUBSTITUTE_FADE`) as **exempt** from that
+gate, which is exactly why the stats-change banner still played while the
+clones didn't. This also fully explains why the clone-motion formula's
+~130-tick prediction never matched the observed ~66-tick window (§3/this
+section's old open finding) - there was no clone motion to match against;
+the 66 ticks are 100% the (unrelated) stats-change banner's own envelope.
+See §6 for the full root-cause writeup (shared with the ROCK_SLIDE findings
+below) and the exact RAM evidence.
+
 ### ROCK_SLIDE window (2182-2281)
 
 | ticks | phase | evidence |
@@ -222,6 +288,29 @@ safer bet until this gap is resolved.
 | 2204-2246 | **silent** - crit roll (2206), damage-spread roll (2209, `gBattleMoveDamage` locks to 42), `typecalc`/`adjustnormaldamage`, and (per script order) the very start of `attackanimation` (`loadspritegfx`/`monbg`/`shake_mon_or_platform`/the first few rock spawns) | **exact 0 diff every tick**, 43 ticks - see the open finding below, this is longer than expected if rocks were visible from the first `createsprite` |
 | 2247-2267 | **falling rocks visible** - repeating ~4-tick pattern (1.29M, 631k, 631k, 631k) matching the script's 2-tick rock-spawn cadence | large repeating diffs |
 | 2268-2281 | **hit-flash blink tail** - diffs recur every 4 ticks (2268, 2272, 2276 - window ends at 2281 before a 4th toggle) | matches `hitFlash.spriteBlink`'s exact 4-tick toggle cadence (§3) - truncated by this window's own end (2281 = the dossier's own "HP-bar drain start" boundary, `battle-turn-notes.md` §2) |
+
+**RESOLVED/REFRAMED (S7 worktree lane, RNG/BG3_Y follow-up session) - the
+"2247-2267 falling rocks visible" row above is not rocks**: per this same
+session's root-cause finding (this section, above, and §6), ROCK_SLIDE's
+`attackanimation` (rocks included) never runs in this trace at all - so
+there is nothing rock-related to see in this window's pixels. A fresh
+`tools/probe/dump-task-and-sprite-callbacks.py` run confirms directly:
+zero `gSprites[]` slots ever carry `AnimFallingRock`/`AnimFallingRock_Step`
+(`src/battle_anim_rock.c:55-63`, the rock sprite's own callback) at any
+tick 2180-2320, while `SpriteCB_HitAnimHealthoxEffect`
+(`src/pokeball.c` - the healthbox-wobble half of the generic hit-flash,
+§3) is confirmed **active in a sprite slot from tick 2246 through 2265**
+- i.e. one continuous tick earlier than this dossier's own "2247" boundary,
+within normal one-tick alignment slop. The generic hit-flash (healthbox
+wobble, 21 ticks, `DoHitAnimHealthboxEffect`) and mon-sprite blink (32
+ticks, `DoHitAnimBlinkSpriteEffect`) **both start together around tick
+2246** and simply overlap - this dossier's own separately-drawn
+"2247-2267" and "2268-2281" rows are two halves of that **one** effect,
+not two different phenomena, and the "20-spawn cadence vs ~20-tick visible
+window" discrepancy this dossier's §5 item 3 asked to reconcile does not
+exist because there was never a rocks-visible window to reconcile against.
+This also closes §5 item 3 outright rather than needing the extended-
+capture follow-up it proposed.
 
 **Register findings**: `BLDCNT`/`BLDALPHA`/`MOSAIC` are **`0x0000` for the
 entire window** (and the entire 1920-2620 trace outside the DOUBLE_TEAM
@@ -250,35 +339,64 @@ flagged as the clearest concrete follow-up if an engine slice needs the
 exact shake timing (a source-level breakpoint trace, not just RAM
 sampling, would settle it).
 
+**RESOLVED (S7 worktree lane, RNG/BG3_Y follow-up session) - option (b), not
+(a)**: confirmed via a fresh, independent `gBattle_BG3_Y`/`gBattle_BG3_X`
+re-probe (both hardware-mirror-equivalent EWRAM vars,
+`bin/oracle symbols gBattle_BG3_Y gBattle_BG3_X` = `0x2022e22`/`0x2022e20`,
+correct addresses double-checked, ruling out possibility (a)'s "wrong
+symbol" guess) across ticks 2180-2580: **both stay exactly 0 the entire
+window, no exceptions**. `tools/probe/dump-task-and-sprite-callbacks.py`'s
+same run scanned all 64 `gSprites[].callback` slots every tick and found
+**zero** matches for `AnimShakeMonOrBattlePlatforms`/`_Step`
+(`src/battle_anim_normal.c:853-916`, the shake's own sprite callback) -
+the shake sprite (`gShakeMonOrPlatformSpriteTemplate`) never gets created
+at all. This is the exact same root cause as DOUBLE_TEAM's missing clones
+above: `Cmd_attackanimation` skips ROCK_SLIDE's entire `attackanimation`
+step (rocks, `AnimTask_ShakeMon`'s mon-bounce, and this BG shake all
+together) because `HITMARKER_NO_ANIMATIONS` is set for this save. Hand-
+verified the shake's own write schedule would otherwise be trivially
+RAM-visible if it ran (not a granularity problem, closing option (a) on
+its own terms too): simulating `AnimShakeMonOrBattlePlatforms_Step`
+(`velocity=7, shake_timer=1, shake_duration=11` -> internally
+`sShakeDuration` is set from the `shake_timer` **arg**, a pret naming
+quirk, not a bug) call-by-call gives the register value sequence `0, -7,
+-7, 0, 0, -7, -7, 0, 0, -7, -7` across the sprite's 11 active calls (a
+write lands every other call, alternating sign, each value held for 2
+calls before the next write flips it), then a final 12th call restores it
+to `0` and destroys the sprite - i.e. `gBattle_BG3_Y` would sit at `-7`
+for 6 of those 11 calls, easily caught by 1-tick-granularity sampling, not
+a single-tick blip. See §6 for the shared root-cause writeup.
+
 ## 5. Open questions for the S7 engine slice
 
-1. **DOUBLE_TEAM's BLDALPHA ramp mechanism is unidentified** (§4) - the
-   script's own `setalpha` is a single fixed value, but the oracle shows a
-   smooth fade-in/hold/fade-out envelope. Whatever drives that (not
-   `AnimTask_DoubleTeam` itself, per this session's read of its source) is
-   needed before an engine slice can reproduce the visual timing exactly;
-   the 66-tick oracle-observed envelope is the trustworthy number in the
-   meantime, not the ~130-tick clone-motion formula.
-2. **ROCK_SLIDE's `shake_mon_or_platform`/`gBattle_BG3_Y` shake was never
-   observed in RAM** (§4) despite being a real, unconditional script step -
-   needs a source-level trace (not RAM sampling) to confirm whether/how it
-   actually manifests.
-3. **The falling-rocks visible window (2247-2267, ~20 ticks) is shorter
-   than a naive spawn-cadence estimate** (20 rocks x 2-tick spacing = 40+
-   ticks just to spawn them all, before each rock's own 48-tick flight) -
-   not reconciled this session; possibly later rocks' per-tick pixel
-   contribution shrinks once the screen is already saturated with
-   overlapping sprites (diminishing marginal diff), or the visible window
-   genuinely continues a little past this session's own 2182-2281 probe
-   boundary (which was set by the brief, tied to the dossier's existing
-   accuracy-roll/bar-drain-start ticks, not to this animation's own actual
-   end).
+1. ~~**DOUBLE_TEAM's BLDALPHA ramp mechanism is unidentified**~~ **RESOLVED
+   (S7 worktree lane follow-up)** - it's the generic `General_StatsChange`/
+   `InitStatsChangeAnimation` stat-arrow-banner effect
+   (`src/battle_anim_utility_funcs.c:415-628`), not `Move_DOUBLE_TEAM`
+   itself; see §4's correction block and §6 for the full root cause
+   (`Move_DOUBLE_TEAM`'s own `attackanimation` never runs at all in this
+   trace - Battle Scene is OFF for this save).
+2. ~~**ROCK_SLIDE's `shake_mon_or_platform`/`gBattle_BG3_Y` shake was never
+   observed in RAM**~~ **RESOLVED (S7 worktree lane follow-up)** - same
+   root cause as item 1: `attackanimation` never runs for this save, so the
+   shake sprite is never created. See §4's correction block and §6.
+3. ~~**The falling-rocks visible window (2247-2267, ~20 ticks) is shorter
+   than a naive spawn-cadence estimate**~~ **RESOLVED/REFRAMED (S7
+   worktree lane follow-up)** - there is no falling-rocks window; the rocks
+   never spawn (same root cause). The pixels this dossier attributed to
+   rocks are the generic hit-flash (healthbox wobble + mon blink), which
+   starts around tick 2246 regardless. See §4's correction block and §6.
 4. **`DISPCNT` bit 15 clearing at tick 2065** (§4) wasn't tied to a source
    line - `AnimTask_DoubleTeam_Step`'s own cleanup only names
    `DISPCNT_BG1_ON`/`BG2_ON` (bits 9/10), which this session's probe never
-   saw move at all. Possibly an unrelated, coincidentally-timed change (a
-   window/HUD element toggling as the message system resumes) rather than
-   part of this move's own effect - not chased further.
+   saw move at all. **RESOLVED (S7 worktree lane follow-up)**: this is
+   `StatsChangeAnimation_Step3`'s own cleanup (case 3,
+   `src/battle_anim_utility_funcs.c:613`:
+   `SetGpuReg(REG_OFFSET_DISPCNT, GetGpuReg(REG_OFFSET_DISPCNT) ^
+   DISPCNT_OBJWIN_ON)`), toggling off the `DISPCNT_OBJWIN_ON` bit
+   `StatsChangeAnimation_Step1` set at the start of the same effect (§4) -
+   unrelated to `AnimTask_DoubleTeam` as suspected, and now fully
+   explained by item 1's resolution.
 5. **DOUBLE_TEAM's `monbg`-vs-`CloneBattlerSpriteWithBlend` interaction**
    is documented at the level both mechanisms' own source shows (§3) but
    the exact BG-vs-OBJ compositing pipeline (how the attacker's real OBJ
@@ -293,7 +411,62 @@ sampling, would settle it).
    just noting the animation-asset angle specifically now exists as a
    template (this doc + its extractor) for whichever session picks one up.
 
-## 6. Verification
+## 6. Root cause (S7 worktree lane follow-up): this save has Battle Scene OFF
+
+Questions 1-4 above all trace back to a single mechanism, RAM-confirmed
+directly rather than inferred:
+
+- `gHitMarker` (`0x2024280`) has bit 7 (`HITMARKER_NO_ANIMATIONS`,
+  `include/constants/battle.h:184`) **set for the entire trace** (checked
+  ticks 1900/2000/2200/2250, all read `1`).
+- `gSaveBlock2Ptr->optionsBattleSceneOff` (a 1-bit field, bit 10 of the
+  packed `u16` at offset `0x14` of `struct SaveBlock2`,
+  `include/global.h:520-523`; `gSaveBlock2Ptr` itself a pointer,
+  `0x3005d90`, one deref) is **`1` (TRUE)** at every sampled tick - i.e.
+  this canonical anchor's underlying save (the GameFAQs SharkPortSave
+  import, `battle-turn-notes.md` §1's own provenance note) has the in-game
+  **Options -> Battle Scene** setting turned **OFF**.
+- `battle_main.c:3084-3086` sets `HITMARKER_NO_ANIMATIONS` in `gHitMarker`
+  at battle init whenever `optionsBattleSceneOff == TRUE` (and it isn't a
+  link battle). `Cmd_attackanimation` (`battle_script_commands.c:1742-
+  1747`) checks that bit and, if set, **substitutes a short generic pause
+  (`BattleScript_Pausex20`) for the move's own custom attack-animation
+  script** - for every move except `TRANSFORM`/`SUBSTITUTE`. This is why
+  neither `Move_DOUBLE_TEAM` (clones) nor `Move_ROCK_SLIDE` (rocks + BG
+  shake) ever actually run in this trace, despite both being read
+  correctly from the script tables (§2) and both having genuine,
+  unconditional script steps that *would* produce the RAM effects this
+  dossier originally went looking for.
+- Two effects still show up because they're **exempt** from this gate by
+  design, not because the flag doesn't apply to them: `Cmd_playanimation`
+  (`battle_script_commands.c:4009-4018`) special-cases
+  `B_ANIM_STATS_CHANGE`/`B_ANIM_SNATCH_MOVE`/`B_ANIM_SUBSTITUTE_FADE` as
+  always-play regardless of `HITMARKER_NO_ANIMATIONS` (the DOUBLE_TEAM
+  BLDALPHA ramp, §4), and the generic hit-flash
+  (`DoHitAnimHealthboxEffect`/`DoHitAnimBlinkSpriteEffect`) is dispatched
+  by the battle script's own separate `hitanimation` command, which isn't
+  gated by this flag at all (the ROCK_SLIDE "falling rocks" pixels, §4).
+- Evidence tooling: `tools/probe/dump-ai-and-hitmarker.py` (new,
+  committed) reads `gHitMarker`'s bit and `gSaveBlock2Ptr`'s option bit
+  every tick (plus the AI-struct fields used in
+  `battle-turn-notes.md`'s RNG-cluster resolution, same script); re-run
+  twice, byte-identical output both times, confirmed against a fresh
+  from-scratch scratch probe of the same two addresses before the script
+  was written.
+
+**Implication for a future engine slice**: this run's canonical anchor
+save plays with move animations off, so any engine slice that faithfully
+matches *this* trace's pixels should likewise skip custom move-animation
+art (rocks/clones/shake) and only implement the generic, always-on effects
+(hit-flash, HP bar, stat-change banner, the short `BattleScript_Pausex20`-
+equivalent pause) - the custom move-animation asset extraction this doc's
+§1-§3 banked is still correct and reusable groundwork (e.g. for a mode
+that honors `optionsBattleSceneOff == FALSE`, or a future trace against a
+save with Battle Scene ON), just not exercised by the specific committed
+`battle1-turn1.json` trace this dossier's own ground-truth table is built
+from.
+
+## 7. Verification
 
 `npm test` **444/444** (437 prior + 7 new pins, `tests/
 moveAnimAssets.test.ts`), `npm run build` green. Both new extractor outputs
@@ -303,3 +476,14 @@ anim-tables.json`) re-run twice, byte-identical both times. Oracle traces
 committed - re-derivable from `tools/compare/traces-groundtruth/
 battle1-turn1.json`'s own committed `segments` plus this doc's own cited
 tick ranges.
+
+**S7 worktree lane follow-up session (RNG cluster / BG3_Y / BLDALPHA
+resolution)**: `npm test` still green (see the top-level run log below);
+no engine code touched, no new extractors, no new Tier-1 pins needed (pure
+research). New committed probes:
+`tools/probe/dump-task-and-sprite-callbacks.py` and
+`tools/probe/dump-ai-and-hitmarker.py`, both re-run twice with
+byte-identical output. All numeric claims in §4/§6's correction blocks
+above are backed by a fresh, independent re-probe this session (not a
+re-read of the prior session's own numbers) - see each correction block's
+own "confirmed via" sentence for which probe.
