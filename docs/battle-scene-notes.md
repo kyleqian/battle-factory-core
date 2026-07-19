@@ -962,3 +962,135 @@ no engine precedent in this codebase yet). All four were already named in
 §7.9's "still open" list; this session narrows *how* they block (confirmed,
 not assumed, that each is independently necessary) rather than closing any
 of them.
+
+### 7.11. v4/v5 truth (Battle Scene ON, PROGRESS.md #78): ground truth regenerated, window widens to 1462-1543, new front-sprite-entrance mechanism decoded, ONE stale Tier-1 pin corrected; score unchanged at 174/256 (was 196/256 under v3-truth scoring, same engine code)
+
+**§§7.0-7.8 above are v3 truth** (Battle Scene OFF, `HITMARKER_NO_ANIMATIONS`
+set) - kept verbatim, not deleted, per this session's brief. **§7.9-7.10 are
+v3-stale**: both sessions' `sendout.json` counts (162→196, then 196
+unchanged) were scored against v3 ground truth; the pixel accountings and
+"still open" gap lists in both are v3-truth-only and must be re-read through
+this section's corrections, not trusted standalone, for anything downstream
+of tick ~1519.
+
+**Ground truth regenerated and re-verified deterministic.** Per this step's
+brief: `battle1-sendout-dense.json`'s button script is unchanged (its one
+press, tick 1420, predates the divergence, confirmed already true in §7.0),
+so no new trace fixture was needed - re-ran it twice via `bin/oracle run`
+against the current (v5) oracle into separate output dirs: **all 256
+captures byte-identical between the two runs** (zero sha mismatches),
+confirming the v5 bootstrap's send-out window is as deterministic as v3's
+was. `tools/compare/traces/sendout.json` (the parity fixture, same button
+script) scores **174/256** against this engine, unchanged from the
+supervisor's own pre-session measurement (PROGRESS.md #76/#77) - confirms
+the regenerated ground truth matches what the supervisor already
+characterized, not a new/different mismatch shape.
+
+**Root cause, source-cited exactly as the brief's seed described, now with
+the two extra mechanism details it flagged:** `SpriteCB_OpponentMonFromBall`
+(`battle_main.c:2837-2848`) calls `BattleAnimateFrontSprite(sprite,
+sprite->sSpeciesId, TRUE, 1)` once `sprite->affineAnimEnded` (i.e. once the
+§7.5 affine-emerge sequence itself finishes - unconditional, identical in
+v3/v4/v5) - **without** `SKIP_FRONT_ANIM` under v4/v5 (`gHitMarker &
+HITMARKER_NO_ANIMATIONS` is clear), so `DoMonFrontSpriteAnimation`
+(`pokemon.c:6811-6856`) now actually launches the species front-sprite
+entrance animation instead of going static immediately:
+- `sMonFrontAnimIdsTable[SPECIES_GROVYLE - 1] = ANIM_V_STRETCH`
+  (`pokemon.c:1659`, `SPECIES_GROVYLE = 278`,
+  `include/constants/species.h:284`); `sMonAnimationDelayTable[SPECIES_GROVYLE
+  - 1]` has no explicit entry (sparse designated-initializer array, GROVYLE
+  defaults to `0`) - so no delay task, `LaunchAnimationTaskForFrontSprite`
+  fires immediately (`pokemon.c:6852`).
+- `ANIM_V_STRETCH` → `Anim_VerticalStretch` (`pokemon_animation.c:655`,
+  body `:1597-1635`): an affine OAM vertical squish/stretch driven by
+  `data[2]` counting 0→40 (41 ticks), reading `Sin()` twice per tick for the
+  stretch factor plus, on ticks `data[2]` 10-29 only, a second `Sin()`-driven
+  "wobble" term (`data[7] += 51` each such tick, `index1 = data[7] & 0xFF`) -
+  genuinely not a linear scale, a real sinusoidal animation.
+- `HasTwoFramesAnimation(SPECIES_GROVYLE)` is `TRUE` (`pokemon.c:6988-6994`
+  excludes only CASTFORM/DEOXYS/SPINDA/UNOWN), and
+  `SpriteCB_OpponentMonFromBall` itself (not
+  `DoMonFrontSpriteAnimation`, since it's called with `noCry=TRUE`) does
+  `StartSpriteAnim(sprite, 1)` the same tick - i.e. the front sprite ALSO
+  swaps to its 2nd frame concurrently with the affine stretch starting.
+  **Asset gap, per the brief's "decode + extract if needed" ask:**
+  `battle-opponent-front-sprites.json`'s `GROVYLE` entry is a single
+  `{tileset, palette}` (confirmed by direct inspection this session) - only
+  frame 1. Frame 2 is not extracted anywhere; needed before an engine slice
+  can render this animation at all. (Not extracted this session - the
+  animation itself, not just the missing frame, is the harder blocker; see
+  below.)
+
+**Boundary re-derivation (empirical, not formula-derived - "RAM/groundtruth
+over source formulas" per this run's engine rules):** rather than summing
+the source constants above (affine-emerge-complete tick + animation-task
+scheduling lag + the 41-tick duration), the new hard-step tick was found the
+same way §7.9 found the v3 one - isolating the Grovyle sprite's own 64x64
+crop (`GROVYLE_CORNER` (144,12) to (208,76)) across every regenerated-ground-
+truth tick 1510-1555 and hashing each crop: **continuous per-tick change
+through tick 1543, byte-static from tick 1544 on** - and 1544 is also
+exactly where the full-frame oracle-vs-engine match boundary already sits
+(`sendout.json` frame 1543 mismatches, 1544 matches), corroborating that
+1544 is when the *entire* scene (not just Grovyle) finishes settling, not a
+coincidence specific to this one crop. **This widens the transient window
+from v3's 1462-1521 (60 frames, §7.9/§7.10) to v4/v5's 1462-1543 (82
+frames)** - a **25-tick extension** (1544-1519), a bit more than the brief's
+own rough "~22 ticks" estimate but the same mechanism it named. The intra-
+window arithmetic (exactly which tick the entrance animation *starts*
+relative to the 1519 affine-complete tick, and why the sum doesn't land
+cleanly on 1519+41=1560) was **not** reverse-engineered tick-by-tick this
+session - flagged as a follow-up below, same as §7.8's existing risk-1
+precedent for the palette-fade step rate.
+
+**Engine correction (Tier-1 pin fixed, not just documented):**
+`battleScene.ts`'s `GROVYLE_MATERIALIZE_TICK` constant - the hard-step tick
+gating when the engine switches from "not yet rendered" to "draw the
+settled sprite" - was `1519` (the v3-truth value); corrected to `1544`
+(v4/v5 truth), with the module comment rewritten to carry both values
+forward (v3 fact kept, not deleted, per this session's own brief). The one
+Tier-1 test that pinned the v3-only value
+(`tests/battleScene.test.ts`, "Grovyle's settled materialize pose appears as
+a hard step at tick 1519") was corrected to assert tick 1544 instead - this
+*is* the "if an existing Tier-1 pin encodes v3-only send-out truth, correct
+it" case the brief anticipated. **Net score effect: none** - `sendout.json`
+stays at 174/256, full 19-trace sweep re-run with zero regressions among the
+other 18's exact counts. This is expected, not a bug: ticks 1519-1543 were
+already mismatching before this fix (the engine was drawing the *wrong*
+static settled sprite there, since neither engine state was correct for
+those ticks either way), so moving the gate later doesn't create or destroy
+any full-frame match - it just stops asserting a materially false "settled"
+pixel for ticks 1519-1543, and keeps the Tier-1 suite honest about what tick
+range is and isn't implemented.
+
+**Remaining gap for `sendout.json` toward 256/256, precisely bounded:** all
+82 frames from **1462 through 1543** (the settled tail 1544-1555, 12 frames,
+stays byte-exact, confirmed this session too). Per §7.10's own
+still-entangled finding (re-confirmed, not re-tested this session - no
+reason to expect it changed): every tick in this range needs **five**
+simultaneous mechanisms correct, not any one alone:
+1. Opponent party-status-summary despawn fade (§7.4.3) - alpha-blend +
+   per-icon staggered exit-slide, unimplemented, not yet even source-timed
+   precisely.
+2. Ball sprite draw (§7.7 point 2) - `gBallGfx_Poke` frame 2 ("open" pose)
+   still not extracted.
+3. Open-particle burst (§7.7 point 3) - `particles.png`
+   (`gBattleAnimSpriteGfx_Particles`) still not extracted at all.
+4. Mon affine-scale-in + ball-color tint during materialize (§7.5) - no
+   affine-OAM-scaling precedent in this engine yet.
+5. **NEW this session**: GROVYLE's front-sprite entrance animation
+   (`ANIM_V_STRETCH`/`Anim_VerticalStretch`, ticks ~1519-1543) - needs (a)
+   the missing 2nd front-sprite frame extracted, (b) an engine-side
+   `Sin()`-table-driven affine vertical-stretch renderer (shares the "no
+   affine-OAM precedent yet" blocker with item 4, but is a distinct
+   animation, not reusable as-is), (c) the still-open exact start-tick/
+   scheduling-lag arithmetic flagged above.
+
+None of these five were implemented this session (out of a bounded worker's
+single-step time budget - decoding and precisely re-bounding the window,
+fixing the one incorrect Tier-1 pin, and regenerating+verifying ground truth
+was this step's own scope; the brief's own fallback clause anticipated not
+reaching 256/256 in one step). Attempting any proper subset would repeat
+§7.10's own demonstrated result (implementing 2 of 4 blockers moved the
+pixel-diff magnitude dramatically but zero full-frame matches) - so per this
+run's "no fix that trades ticks" / "no curve-fitting" engine rules, no
+partial-mechanism implementation was attempted this session either.

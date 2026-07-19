@@ -257,17 +257,23 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
   const GROVYLE_CORNER = { x: 144, y: 12 };
   const HEALTHBOX = { x: healthboxContent.x, y: healthboxContent.y, w: healthboxContent.width, h: healthboxContent.height };
 
-  it("Grovyle's settled materialize pose appears as a hard step at tick 1519, not before (§7.5)", () => {
-    const before = pixelAtSentOut(1518, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
-    const after = pixelAtSentOut(1519, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+  // v4/v5 truth (PROGRESS.md #78, docs/battle-scene-notes.md §7.11): with Battle
+  // Scene ON, the affine-emerge sequence itself still completes at tick 1519
+  // (same as v3), but GROVYLE's species front-sprite entrance animation
+  // (ANIM_V_STRETCH) now plays afterward, unmatched-and-unrendered by this
+  // engine, so the settled pose's hard step moves to tick 1544 - the v3-only
+  // "hard step at 1519" pin this replaces is now stale (Battle Scene OFF only).
+  it("Grovyle's settled materialize pose appears as a hard step at tick 1544, not before (§7.5/§7.11)", () => {
+    const before = pixelAtSentOut(1543, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    const after = pixelAtSentOut(1544, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
     expect(after).toEqual([grovyleFirstOpaquePixel.r, grovyleFirstOpaquePixel.g, grovyleFirstOpaquePixel.b]);
     expect(before).not.toEqual(after);
   });
 
   it("Grovyle's settled pose is static (no further change) through the end of the trace", () => {
-    const at1519 = pixelAtSentOut(1519, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    const at1544 = pixelAtSentOut(1544, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
     const at1555 = pixelAtSentOut(1555, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
-    expect(at1555).toEqual(at1519);
+    expect(at1555).toEqual(at1544);
   });
 
   it("opponent healthbox is entirely absent before tick 1495, then slides in at +5px/tick, settling (dx=0) from tick 1517 (§7.6)", () => {

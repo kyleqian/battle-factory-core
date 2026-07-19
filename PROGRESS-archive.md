@@ -5,6 +5,44 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 75 — S7 research questions ALL RESOLVED (parallel worktree lane, merged): one RAM-confirmed root cause — the canonical save has Battle Scene OFF; turn-end RNG cluster fully line-cited + LCG-verified. **USER SCOPE DECISION (2026-07-18, interactive): turn animations ON at the oracle level, incl. the harness template — supervisor implementing next.**
+
+- **State:** merge of `worker/wt-20260718-162513` (base `2ad8b52`):
+  `npm test` **454/454**, `npm run build` green. Pure research — no
+  engine code.
+- **Did (worktree lane, supervisor-verified incl. re-checking all three
+  load-bearing source citations verbatim in the decomp):**
+  (1) ROOT CAUSE: `gSaveBlock2Ptr->optionsBattleSceneOff == TRUE` +
+  `gHitMarker` bit 7 (`HITMARKER_NO_ANIMATIONS`) set all trace —
+  `battle_main.c:3084` wires the option to the marker;
+  `Cmd_attackanimation` (`battle_script_commands.c:1745`) substitutes a
+  generic pause for EVERY move's custom animation (except TRANSFORM/
+  SUBSTITUTE). Resolves 3 of the 4 questions: DOUBLE_TEAM's 66-tick
+  BLDALPHA ramp is `General_StatsChange` (explicitly exempt in
+  `Cmd_playanimation:4009-4018`), ROCK_SLIDE's shake sprite never
+  spawns, the "falling rocks" pixels are the ungated generic hit-flash.
+  (2) Turn-end RNG cluster (1+2+5): `BattleTurnPassed`'s
+  `gRandomTurnNumber` (1), `ShouldSwitch` traced call-by-call (2),
+  `BattleAI_SetupAIData` 4×`simulatedRNG` + move tie-break (5) — all
+  LCG-value-verified; factory challenge has 0 AI-script flags here.
+  Falsifiable bonus prediction: Grovyle's turn-2 move = ENDEAVOR.
+  Dossiers updated correction-block style; 2 new probe scripts committed,
+  each twice-run byte-identical.
+- **Next (user directive, supersedes the OFF status quo):** flip Battle
+  Scene ON in the ORACLE's canonical bootstrap via a ZERO-FRAME poke
+  (any added input frame would reshuffle the pinned rental pool /
+  anchor seed per oracle/BOOTSTRAP.md) + template/doc updates, then
+  re-verify: anchor sha unchanged, smoke-test golden hashes, full
+  19-trace sweep at exact counts, in-battle `gHitMarker` bit 7 clear.
+  S7's turn-1 ground truth (#67 trace/dump/ledger) becomes stale by
+  design and must be regenerated under animations-on; #72's move-anim
+  assets become exercised, load-bearing groundwork.
+- **Notes:** worktree removed, branch deleted after merge. Sibling run
+  `swift-koala` shares this oracle — the canonical-state change affects
+  it too (user-directed, harness-level).
+
+---
+
 ## 74 — S6 send-out: trainer-exit RAM ground truth + BG-to-white materialize-fade formula, both exact and verified — `sendout.json` STILL **196/256** (score unchanged), gap now bounded to 4 named simultaneous-mechanism blockers
 
 - **State:** `npm test` **454/454** (unchanged, no new pins - both fixes are

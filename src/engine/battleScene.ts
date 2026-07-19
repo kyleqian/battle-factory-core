@@ -838,19 +838,40 @@ function trainerExitX(t: number, handoffTick: number): number | null {
 }
 
 /**
- * §7.5: Grovyle's materialize (ball-color tint -> BG white flash -> affine
- * emerge -> fade to normal colors) resolves to a fixed static pose at a
- * fixed position - pixel-brute-force-confirmed this session (every 8x8
- * opaque pixel of the extracted `GROVYLE` front sprite tileset, at this
- * exact corner, against every single one of the trace's captured oracle
- * frames 1478-1555): ZERO mismatch for ticks 1519-1555 (and every prior
- * tick 1478-1518 is a full unconditional mismatch, i.e. the sprite is not
- * yet in this settled form at all - the transient tint/flash/affine-scale
- * frames are a hard, clean step, not a gradual pixel-level convergence).
- * Only the settled step is rendered (§7.5's own transient frames stay
- * unmatched - out of this session's priority order, see PROGRESS.md).
+ * §7.5/§7.11: Grovyle's materialize (ball-color tint -> BG white flash ->
+ * affine emerge -> fade to normal colors) resolves to a fixed static pose at
+ * a fixed position. **v3 truth (Battle Scene OFF, `SKIP_FRONT_ANIM`):**
+ * pixel-brute-force-confirmed as tick 1519 (every 8x8 opaque pixel of the
+ * extracted `GROVYLE` front sprite tileset, at this exact corner, against
+ * every captured oracle frame 1478-1555 - ZERO mismatch from 1519, full
+ * mismatch every tick 1478-1518 before it - a hard step, not a gradual
+ * convergence). **v4/v5 truth (Battle Scene ON, current oracle bootstrap,
+ * PROGRESS.md #78):** tick 1519 is still exactly when the affine
+ * emerge/tint/BG-flash sequence itself completes (same unconditional
+ * `StartSpriteAffineAnim(BATTLER_AFFINE_EMERGE)` in both cases - v3's
+ * SKIP_FRONT_ANIM path going static there is what pixel-pinned 1519 as that
+ * completion tick in the first place), but `SpriteCB_OpponentMonFromBall`
+ * (`battle_main.c:2837-2848`) no longer passes `SKIP_FRONT_ANIM` to
+ * `BattleAnimateFrontSprite` (`pokemon.c:6803-6809`), so once
+ * `affineAnimEnded` fires it now ALSO plays GROVYLE's species front-sprite
+ * entrance animation - `sMonFrontAnimIdsTable[SPECIES_GROVYLE-1] =
+ * ANIM_V_STRETCH` (`pokemon.c:1659`) -> `Anim_VerticalStretch`
+ * (`pokemon_animation.c:1597-1635`, a ~41-tick affine vertical
+ * squish/stretch with a Sin-table wobble on frames 10-29), plus a swap to
+ * the front sprite's 2nd frame (`HasTwoFramesAnimation(GROVYLE)` is TRUE -
+ * `pokemon.c:6988-6994` excludes only CASTFORM/DEOXYS/SPINDA/UNOWN - 2nd
+ * frame not yet extracted, see docs/battle-scene-notes.md §7.11 gap list).
+ * Re-timed empirically against the regenerated v5 ground truth
+ * (`battle1-sendout-dense.json`, twice-run byte-identical): isolating the
+ * Grovyle sprite's own 64x64 crop across every tick 1510-1555 shows
+ * continuous per-tick change through **1543**, static from **1544** on -
+ * exactly the oracle-vs-engine full-frame match boundary too (`sendout.json`
+ * frame 1543 mismatches, 1544 matches). The transient entrance-anim frames
+ * themselves (1519-1543) are NOT rendered this session (same "hard step,
+ * not curve-fitted" principle as the v3 pin) - see docs/battle-scene-notes.md
+ * §7.11 for the full derivation and the still-open gap list.
  */
-const GROVYLE_MATERIALIZE_TICK = 1519;
+const GROVYLE_MATERIALIZE_TICK = 1544;
 const GROVYLE_CORNER = { x: 144, y: 12 };
 
 /**
