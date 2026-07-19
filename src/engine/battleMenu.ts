@@ -441,7 +441,51 @@ export const PLAYER_BALL_OPEN_START_TICK = PLAYER_THROW_BALL_ARRIVE_TICK + 1; //
  */
 export const PLAYER_BALL_OPEN_END_TICK = 1656;
 
-/** The ball's settled center once arrived (`playerThrowBallSpin`'s own `BALL_ARRIVE_CENTER_X/Y`) - top-left of its 16x16 open-pose sprite. */
+/**
+ * Last tick the ball's OWN openFinal pose (`sBallAnimSeq1`'s
+ * `ANIMCMD_FRAME(8,5)`) is visible - the SAME missing-3rd-frame mechanism
+ * PROGRESS #104 (`battle-scene-notes.md` §7.25) found for the opponent's own
+ * ball (`LoadBallGfx`, `pokeball.c:1308-1332`, unconditionally DMAs
+ * `graphics/balls/open.png` over that anim slot's nominally-blank tile data
+ * at sprite creation - a shared, battler-generic code path, not an
+ * opponent-only quirk), applied here to close this doc's own long-named
+ * 1657-1662 residual (`docs/battle-menu-notes.md` §3 item 5's "still
+ * unidentified" tail).
+ *
+ * RAM-probed directly (`tools/probe/specs/menu-player-materialize.json`,
+ * `gSprites[5]` - the same ball slot `PLAYER_BALL_OPEN_END_TICK` already
+ * pins): `ballAnimCmdIndex` flips 0->1 at RAM tick 1656 (the openFinal tile
+ * takes over, immediately after the open pose's own 5-tick
+ * `ANIMCMD_FRAME(4,5)` hold ends), `ballAnimDelay` counts 4,3,2,1,0 (5 more
+ * ticks, matching `ANIMCMD_FRAME(8,5)`'s own duration exactly, RAM
+ * 1656-1660), then holds at cmd-index 1 with `animEnded` newly set at RAM
+ * 1661 (still visible - `HandleBallAnimEnd`, `pokeball.c:845`, only sets
+ * `invisible` the FOLLOWING tick once its own callback next observes
+ * `animEnded` true, the same 1-tick internal lag already established for
+ * the opponent's analogous `animEnded`->`invisible` gap in §7.25). With this
+ * window's established +1 render lag, the openFinal pose is visible at
+ * renders 1657-1662 (6 ticks) - **pixel-confirmed, not just RAM-inferred**
+ * (`tools/compare/scratch/menu-audit/classify_1657_1663.mjs` against fresh
+ * oracle captures): every one of tick 1657's 19 residual pixels is an exact
+ * match to `battle-anim-ball-open.json`'s openFinal tile content at this
+ * window's own `BALL_OPEN_TOP_LEFT`/`PLAYER_BALL_OPEN_VISIBLE_BOTTOM`
+ * position (19/19), and the large majority of ticks 1658-1662's own
+ * residual too (17/19, 20/26, 26/30, 19/21, 14/16) - the remainder at those
+ * ticks is a DIFFERENT, already-named class of bug (particle-position
+ * pixels, oracle color `255,173,0`, not in this frame's own palette at
+ * all - the same particle-vs-ball z-order family §7.25 named and left open
+ * for the opponent's own send-out, not re-attempted here). Tick 1663 was
+ * checked and confirmed NOT part of this window (`classify_1657_1663.mjs`
+ * finds 0 residual pixels there already, and direct oracle sampling at
+ * (67-72,107-111) shows the materialize tint color already fully replacing
+ * the ball's own colors by then - the ball is already invisible, matching
+ * the RAM trace's own destroy-adjacent timing) - widening one tick further
+ * would have been the same over-widening mistake `PLAYER_BALL_OPEN_END_TICK`
+ * itself was corrected away from.
+ */
+export const PLAYER_BALL_OPEN_FINAL_END_TICK = 1662;
+
+/** The ball's settled center once arrived (`playerThrowBallSpin`'s own `BALL_ARRIVE_CENTER_X/Y`) - top-left of its 16x16 open-pose sprite. Also the openFinal pose's own top-left (same settled position, `PLAYER_BALL_OPEN_FINAL_END_TICK`'s own doc comment). */
 const BALL_OPEN_TOP_LEFT = { x: BALL_ARRIVE_CENTER_X - 8, y: BALL_ARRIVE_CENTER_Y - 8 }; // (64,107)
 
 /**
@@ -458,9 +502,9 @@ const BALL_OPEN_TOP_LEFT = { x: BALL_ARRIVE_CENTER_X - 8, y: BALL_ARRIVE_CENTER_
  */
 export const PLAYER_BALL_OPEN_VISIBLE_BOTTOM = 112;
 
-/** The ball's open-pose top-left corner at tick `t`, or `null` outside `[PLAYER_BALL_OPEN_START_TICK, PLAYER_BALL_OPEN_END_TICK]`. Callers must clip the draw to `y < PLAYER_BALL_OPEN_VISIBLE_BOTTOM` (see its own doc comment). */
+/** The ball's open/openFinal-pose top-left corner at tick `t` (both poses share the same settled-position corner), or `null` outside `[PLAYER_BALL_OPEN_START_TICK, PLAYER_BALL_OPEN_FINAL_END_TICK]`. Callers must clip the draw to `y < PLAYER_BALL_OPEN_VISIBLE_BOTTOM` (see its own doc comment) and pick the pose (open vs openFinal) by comparing `t` against `PLAYER_BALL_OPEN_END_TICK` (see that constant's own doc comment). */
 export function playerBallOpenTopLeft(t: number): { x: number; y: number } | null {
-  if (t < PLAYER_BALL_OPEN_START_TICK || t > PLAYER_BALL_OPEN_END_TICK) return null;
+  if (t < PLAYER_BALL_OPEN_START_TICK || t > PLAYER_BALL_OPEN_FINAL_END_TICK) return null;
   return BALL_OPEN_TOP_LEFT;
 }
 

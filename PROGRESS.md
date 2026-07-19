@@ -5,6 +5,60 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 105 — Bounded worker: applied #104's opponent-side `open.png`/openFinal discovery to the PLAYER ball window — `menu-materialize.json` **6/6 → 7/7** (+1657, contiguous 1652-1657); 1658-1662 residual re-scoped to the already-named particle z-order family
+
+- **State:** `npm test` **523/523** (+2 Tier-1), `npm run build` green, tree
+  clean. Full 22-trace sweep against the live oracle: all others at their
+  exact #104 counts (accept-prebattle 137/137, anchor 1/1, confirm-decline
+  67/67, confirm-flow 79/95, draft-cursor 13/13, draft-menu-slot6 66/66,
+  draft-menu 38/38, example 4/4, menu-materialize **7/7**, menu-text 18/18,
+  menu-throw 70/70, rent-3picks 157/190, rent-slot1 125/139, room-entry
+  110/110, room-msgbox 142/142, room-npcs 98/98, scene-assembly 256/256,
+  sendout 236/256, summary-info-magby 132/132, summary-info-onix 122/122,
+  transition 206/206, walk-warpout 125/125) — zero regressions.
+- **Did:** per #104's own "Next" hypothesis, confirmed §7.25's opponent-side
+  `LoadBallGfx` discovery (`pokeball.c:1308-1332` unconditionally DMAs
+  `graphics/balls/open.png` over `sBallAnimSeq1`'s nominally-blank
+  `ANIMCMD_FRAME(8,5)` slot) is battler-generic, not opponent-only. RAM-probed
+  the player ball sprite directly (`tools/probe/specs/menu-player-
+  materialize.json`, `gSprites[5]`): `animCmdIndex` flips 0→1 at RAM 1656
+  (right after the open pose's own 5-tick hold), holds 5 more ticks
+  (`ANIMCMD_FRAME(8,5)`'s own duration), `animEnded` sets at RAM 1661 - with
+  the established +1 render lag, openFinal is visible at renders 1657-1662.
+  A/B'd against fresh oracle captures BEFORE touching code
+  (`tools/compare/scratch/menu-audit/classify_1657_1663.mjs`): tick 1657's
+  entire 19px residual is an exact match to openFinal's own tile content
+  (19/19), and most of 1658-1662's own residual too (17/19, 20/26, 26/30,
+  19/21, 14/16); tick 1663 confirmed NOT part of the window (ball already
+  invisible there, oracle-checked directly). Landed: `PLAYER_BALL_OPEN_
+  FINAL_END_TICK` (1662, `battleMenu.ts`), widened `playerBallOpenTopLeft`'s
+  range to it, `drawPlayerBallOpen` (`battleScene.ts`) now switches tile-row
+  offset (0↔2) at `PLAYER_BALL_OPEN_END_TICK`, reusing the SAME extracted
+  `battleAnimBallOpen` tileset the opponent's own `BALL_OPEN_FINAL_TILESET`
+  already selects. `menu-materialize.json`: **6/6 → 7/7** (tick 1657 exact;
+  1652-1657 now contiguous, +1663 non-contiguous past it).
+- **What's left (1658-1662, small residual, re-scoped not solved)**: 2-6px
+  per tick, pixel-classified as particle-position pixels (oracle color
+  `255,173,0`, the known particle-burst color, not in the ball-open palette)
+  — the same particle-vs-ball z-order family §7.25 already named and left
+  open for the OPPONENT's own send-out (1482-1490/1497-1498), now confirmed
+  to have a player-side twin. Not chased this session (§7.25's own "tried
+  and reverted" note already warns a naive spawn-index reorder regresses
+  elsewhere without real OAM-slot RAM evidence) — belongs with the OAM-
+  priority compositor (#96), not a curve-fit on either side alone.
+- **Next:** the OAM-priority compositor (#96, solo) — three residual
+  families now converge on it: this session's 1658-1662, §7.25's
+  1482-84/1491-98, and menu-throw's own 8 Brendan-vs-icon ticks; then
+  healthbox slide-in, menu draw + idle (§4/§5, concurrent worktree lane),
+  S6 acceptance end-to-end.
+- **Notes:** stayed in `battleMenu.ts`/`battleScene.ts` player-side
+  functions + `tests/battleMenu.test.ts` + `docs/battle-menu-notes.md` §3,
+  per the brief. Did not touch §4/§5, `battleScene.ts` opponent-side
+  internals, `tests/battleScene.test.ts`, or `sendout.json`. New committed
+  artifact: `tools/compare/scratch/menu-audit/classify_1657_1663.mjs`.
+
+---
+
 ## 104 — Supervisor: round-8 worktree branch merged — sendout ball's REAL 3rd frame found (`open.png`, runtime VRAM overwrite; never previously extracted) — 1485-1490 pixel mass -95-97%, `sendout.json` holds 236/256 behind a narrow z-order residual
 
 - **State (verified post-merge):** `npm test` **521/521**, `npm run build`
@@ -98,93 +152,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   for a residual like this might explicitly ask "is the named function even
   the one drawing the mismatched pixels" as a first triage step, mirroring
   this session's own eventual A/B-shrink-the-window test.
-
----
-
-## 102 — Supervisor: round-7 worktree branch merged (one battleScene.ts draw-order conflict, hand-resolved + re-verified) — `sendout.json` **221 → 236/256**; 1504-1518 span closed by a one-line compositing fix
-
-- **State (verified post-merge):** `npm test` **520/520**, `npm run build`
-  green, tree clean. Post-merge re-runs: sendout **236/256**,
-  scene-assembly 256/256, menu-materialize 5/5, menu-throw 70/70,
-  menu-text 18/18, transition 206/206. Worktree removed, branch deleted.
-- **Did:** merged `worker/wt-20260719-021108`: the whole 1504-1518
-  residual was mechanism 5's LATE window still drawing AFTER the particle
-  burst (the early window was already moved pre-particles by §7.22/§7.23);
-  every diff pixel in the span was particle-colored inside an alive
-  particle's predicted footprint — no formula/task move (§7.24). BONUS:
-  falsifies §7.20's 1516/17 "particle survives past age 24" theory — that
-  pixel is index 12 at age 22, was just masked by the same ordering bug. The
-  merge conflicted with #101's player-particle additions in the same
-  drawSendOutHandoff region; resolution keeps #101's player draw calls + the
-  branch's Grovyle ordering (stretch pre-particles, settled-only post) —
-  re-verified above.
-- **Next:** main lane → drawPlayerMaterialize's silhouette-edge residual
-  at 1657+ (§7.21-class, named in #101; the opponent-side fix is the
-  template) then extend menu-materialize toward the healthbox-slide
-  boundary; worktree lane → sendout 1485-1495 (11 ticks, last big span);
-  then the #96 OAM-order fix solo, menu draw + idle, S6 acceptance.
-- **Notes:** sendout remaining: 1462, 1470/71/79, 1485-1495 (15 ticks
-  total). First merge conflict of the session — the two lanes finally
-  met in drawSendOutHandoff's z-order; resolution was mechanical.
-
----
-
-## 101 — Bounded worker: PLAYER-side ball-open particle burst landed (mechanism 3's player-side analogue, docs/battle-menu-notes.md §3 item 5) — `menu-materialize.json` **1/1 → 5/5** (ticks 1652-1656); a distinct materialize-silhouette-edge residual found starting 1657, not root-caused
-
-- **State:** `npm test` **519/519** (+3 Tier-1), `npm run build` green,
-  tree clean. Full 22-trace sweep against the live oracle: all 21 others at
-  their exact established counts (accept-prebattle 137/137, anchor 1/1,
-  confirm-decline 67/67, confirm-flow 79/95, draft-cursor 13/13,
-  draft-menu-slot6 66/66, draft-menu 38/38, example 4/4, menu-text 18/18,
-  menu-throw 70/70, rent-3picks 157/190, rent-slot1 125/139, room-entry
-  110/110, room-msgbox 142/142, room-npcs 98/98, scene-assembly 256/256,
-  sendout 221/256, summary-info-magby 132/132, summary-info-onix 122/122,
-  transition 206/206, walk-warpout 125/125) — zero regressions.
-  `tools/compare/traces/menu-materialize.json`: **1/1 → 5/5** (tick 1652 was
-  already committed; added 1653-1656).
-- **Did:** per the brief's FIRST STEP, confirmed #99's own residual
-  classification still held on this session's starting code (100%
-  particle-colored, 1653-1663) before writing anything. Implemented
-  `drawPlayerBallOpenParticles` (`battleScene.ts`) — same age/radius/frame
-  math as the opponent's own `drawBallOpenParticles`, battler-specific only
-  in origin/anchor: **origin `(68,106)`**, brute-force pixel-fit against the
-  single isolated particle visible at logical tick 0
-  (`tools/compare/scratch/menu-audit/fit_player_particle_origin.mjs`, 13/14
-  exact — the 14th is the already-established terrain occlusion), **not**
-  the naive `sprite->x,y-5` center value directly (that value needs the
-  tile's own `-4,-4` half-size folded in first, since `drawParticleTile`'s
-  args are a top-left corner); **anchor** `PLAYER_BG_FADE_START_TICK` (1653,
-  same "both fire the same RAM tick" reasoning #99 established for the BG
-  fade). **Draw order reversed from the opponent's own function** (oldest
-  spawn on top) — pixel-confirmed necessary via direct A/B (ascending order
-  left 3-24px residuals at 1654-1656, all explained by the two-particles-
-  briefly-coexisting-at-radius-0 overlap; reversing fixed all three exact).
-  **A second, distinct gap found while wiring this in**: the ball's own
-  "open" pose sprite (#98's `drawPlayerBallOpen`) was only modeled for its
-  single tick 1652 — real particles exposed that the ball's static art is
-  still genuinely on screen (through the same terrain clip) for several more
-  ticks; widened `PLAYER_BALL_OPEN_END_TICK` to 1663 (`battleMenu.ts`) —
-  alone fixed tick 1653.
-  3 new Tier-1 tests (`tests/battleMenu.test.ts`) pin the origin tile,
-  a later-tick particle position, and the pre-burst boundary; 2 existing
-  tests updated for the widened ball-open window.
-- **Why the window stops at 1656, not 1663 (the materialize window's own
-  end)**: ticks 1657+ have a small (19-30px), separately-named residual that
-  is **NOT** particle-colored — every mismatched pixel is one of the
-  ball-open frame's own colors (`66,66,66`/`214,41,41`/`132,0,0`/
-  `255,156,123`), appearing where `drawPlayerMaterialize`'s tint is drawn
-  instead of the real ball/mon color underneath. **Superseded by #103**:
-  this was a materialize-silhouette-EDGE misattribution — #103 proved both
-  the materialize accumulator/`y2` AND the ball-open window (widened to 1663
-  right here) were not responsible; the 1663 widening itself has since been
-  reverted back to the RAM-confirmed 5-tick truth (1656).
-- **Notes:** stayed in `battleMenu.ts` (pure timing) + additive
-  `battleScene.ts` hooks (new function + one call-site line in the existing
-  `drawSendOutHandoff`, plus reordering the three already-existing
-  player-materialize-window calls to fix compositing order) +
-  `tests/battleMenu.test.ts` + `docs/battle-menu-notes.md`, per the brief.
-  Did not touch `battleScene.ts`'s opponent-side internals,
-  `tests/battleScene.test.ts`, or `docs/battle-scene-notes.md`. Archived
-  PROGRESS #97 to `PROGRESS-archive.md` per the brief. No PAPERCUT.
 
 ---

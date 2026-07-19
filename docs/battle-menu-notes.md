@@ -508,6 +508,64 @@ already right, only specific numeric claims needed fixing.
      `drawPlayerMaterialize` silhouette-edge bug, despite the surface
      resemblance to §7.21's own naming) rather than re-trying either of this
      session's two ruled-out candidates.
+
+     **Root-caused and mostly landed (bounded worker, PROGRESS #105, following
+     up on PROGRESS #104's own "Next" hypothesis)**: the mismatched colors
+     above (`66,66,66`/`214,41,41`/`132,0,0`/`255,156,123`) are exclusively
+     the ball's own palette because they ARE the ball, still on screen -
+     `battle-scene-notes.md` §7.25's discovery for the OPPONENT's own ball
+     (`LoadBallGfx`, `pokeball.c:1308-1332`, unconditionally DMAs
+     `graphics/balls/open.png` over `sBallAnimSeq1`'s nominally-blank
+     `ANIMCMD_FRAME(8,5)` tile slot at sprite creation) is a battler-generic
+     call site, not opponent-only, so the exact same "openFinal" 3rd frame
+     plays for the PLAYER's own ball too. RAM-probed directly
+     (`tools/probe/specs/menu-player-materialize.json`, `gSprites[5]` - the
+     same ball slot `PLAYER_BALL_OPEN_END_TICK` already pins): `animCmdIndex`
+     flips 0->1 at RAM 1656 (immediately after the open pose's own 5-tick
+     hold ends), `animDelayCounter` counts down 5 more ticks (RAM 1656-1660,
+     matching `ANIMCMD_FRAME(8,5)`'s own duration exactly), `animEnded` sets
+     at RAM 1661 - with the window's established +1 render lag, the openFinal
+     pose is visible at renders 1657-1662 (6 ticks). **Pixel-confirmed before
+     touching code, per this session's own A/B-the-baseline-first brief**
+     (`tools/compare/scratch/menu-audit/classify_1657_1663.mjs`, fresh oracle
+     captures): tick 1657's entire 19px residual is an EXACT match to
+     `battle-anim-ball-open.json`'s openFinal tile content at
+     `BALL_OPEN_TOP_LEFT`/`PLAYER_BALL_OPEN_VISIBLE_BOTTOM` (19/19), and the
+     large majority of 1658-1662's own residual too (17/19, 20/26, 26/30,
+     19/21, 14/16). Tick 1663 was checked and confirmed the ball is already
+     invisible by then (oracle's own pixels there show the materialize tint
+     fully replacing the ball's colors) - extending one tick further would
+     repeat the exact over-widening mistake `PLAYER_BALL_OPEN_END_TICK` was
+     itself corrected away from in this same item, so the window stops at
+     1662, not 1663.
+
+     **Fix landed**: `battleMenu.ts` gained `PLAYER_BALL_OPEN_FINAL_END_TICK`
+     (1662) and widened `playerBallOpenTopLeft`'s own range to it (both poses
+     share the same settled-position corner); `drawPlayerBallOpen`
+     (`battleScene.ts`) now picks the tile-row offset (0 for open, 2 for
+     openFinal) by comparing `t` against `PLAYER_BALL_OPEN_END_TICK`, reusing
+     the SAME extracted `battleAnimBallOpen` tileset the opponent's own
+     `BALL_OPEN_FINAL_TILESET` already selects (one shared asset, two
+     battler-specific draw sites - `drawSendOutBall`'s own unclipped corner
+     vs. this function's clipped one). `tools/compare/traces/
+     menu-materialize.json`: **6/6 -> 7/7** (tick 1657 newly exact; verified
+     via `npm run compare` against the full composited engine, not the
+     isolated probe above).
+
+     **What's left at 1658-1662, re-scoped again (still open)**: a SMALL
+     (2-6px) residual remains at every one of these 5 ticks -
+     pixel-classified (same script) as particle-position pixels (oracle
+     color `255,173,0`, `battle-anim-particles.json`'s own known burst
+     color, not in the ball-open palette at all) sitting adjacent to the ball
+     corner - the same particle-vs-ball z-order/overlap family
+     `battle-scene-notes.md` §7.25 already named and left open for the
+     OPPONENT's own send-out (1482-1490/1497-1498), now confirmed to have a
+     player-side twin too. Not chased this session (out of scope for this
+     brief, and §7.25's own "tried and reverted" note already warns a naive
+     spawn-index reorder regresses elsewhere without real OAM-slot RAM
+     evidence) - a future session should treat both sides' particle z-order
+     residuals as one shared root cause once the OAM-priority compositor
+     (#96) is built, rather than curve-fitting either side in isolation.
 6. `HandleBallAnimEnd` waits for both the ball sprite's anim **and** the mon
    sprite's affine anim to finish, then `Intro_TryShinyAnimShowHealthbox`
    (`battle_controller_player.c:979`) calls `UpdateHealthboxAttribute(...,
@@ -646,21 +704,24 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
      by sprite-creation order, so Brendan's back sprite (created at the
      intro) wins over the later-created status icons whenever their
      screen footprints briefly cross during his exit slide (§3 point 4b).
-   **Materialization landed across four sessions (PROGRESS #98, #99, #101,
-   this session)**: the ball's open-pose swap is engine-modeled through
-   `PLAYER_BALL_OPEN_END_TICK`, RAM-confirmed this session to be exactly 5
-   ticks (1652-1656, corrected down from #101's over-widened 1663 guess);
+   **Materialization landed across five sessions (PROGRESS #98, #99, #101,
+   #103, #105)**: the ball's open-pose swap is engine-modeled through
+   `PLAYER_BALL_OPEN_END_TICK` (5 ticks, 1652-1656, #103) then its own
+   openFinal 3rd frame through `PLAYER_BALL_OPEN_FINAL_END_TICK` (6 more
+   ticks, 1657-1662, #105 - the same missing-frame mechanism
+   `battle-scene-notes.md` §7.25 found for the opponent's own ball);
    ONIX's own color-fade/affine-emerge accumulator (derived #98,
-   re-brute-forced correct this session with the full stack in place, no
-   change needed), the player-side materialize BG-to-white fade (root-caused
-   + fixed #99), and the ball-open particle burst (mechanism 3's player-side
-   analogue, landed #101) are all landed and pixel-verified.
-   `tools/compare/traces/menu-materialize.json`: **1/1 → 6/6** (ticks
-   1652-1656 + 1663, non-contiguous). Ticks 1657-1662 still have a small,
-   re-scoped residual - this session ruled out BOTH the materialize
-   accumulator/`y2` pair AND the ball-open window as causes (see §3 item 5's
-   own detailed accounting); every mismatched pixel's color is uniquely in
-   the ball's own palette, not yet attributed to a specific mechanism.
+   re-brute-forced correct #103, no change needed), the player-side
+   materialize BG-to-white fade (root-caused + fixed #99), and the ball-open
+   particle burst (mechanism 3's player-side analogue, landed #101) are all
+   landed and pixel-verified.
+   `tools/compare/traces/menu-materialize.json`: **1/1 → 7/7** (contiguous
+   1652-1657 + 1663, non-contiguous past 1657). Ticks 1658-1662 still have a
+   small (2-6px) residual - #105 pixel-classified it as the particle-vs-ball
+   z-order family `battle-scene-notes.md` §7.25 already named for the
+   opponent's own send-out (not the ball-open window or the materialize
+   accumulator, both ruled out by #103/#105), left open pending the
+   OAM-priority compositor (#96).
 2. §4's idle-cycle mechanism (which specific sprite/timer drives regions A
    and B) is pixel-pinned but not source-attributed — needed before an
    engine slice can *generate* the cycle rather than just replay captured

@@ -418,6 +418,7 @@ import {
   playerSummaryBarExitDx,
   PLAYER_SUMMARY_FADE_START_TICK,
   playerBallOpenTopLeft,
+  PLAYER_BALL_OPEN_END_TICK,
   PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
   playerMaterializeBgFadeY,
   PLAYER_BG_FADE_START_TICK,
@@ -1701,15 +1702,29 @@ function drawPlayerMaterialize(fb: Uint8Array, t: number): void {
  * also exactly 5 ticks) - a prior session's wider guess (1663) was corrected
  * back down this session once RAM probing (not pixel guessing) pinned the
  * true duration.
+ *
+ * **openFinal pose (PROGRESS #104/this session)**: `sBallAnimSeq1` doesn't
+ * end at the open pose - the SAME `ANIMCMD_FRAME(8,5)` "openFinal" frame
+ * §7.25 found DMA'd over a nominally-blank tile slot for the opponent's own
+ * ball (`LoadBallGfx`, `pokeball.c:1308-1332`, a battler-generic call site)
+ * plays next here too, RAM-confirmed visible at renders 1657-1662 (6 ticks -
+ * `PLAYER_BALL_OPEN_FINAL_END_TICK`'s own doc comment, `battleMenu.ts`, has
+ * the full RAM + pixel derivation). Reuses the SAME extracted tileset
+ * (`battleAnimBallOpen`, tile rows 2-3) the opponent's own
+ * `BALL_OPEN_FINAL_TILESET` already selects - one shared asset, two
+ * battler-specific draw sites (this function owns position/occlusion
+ * clipping here; `drawSendOutBall` owns the opponent's own unclipped
+ * corner).
  */
 function drawPlayerBallOpen(fb: Uint8Array, t: number): void {
   const topLeft = playerBallOpenTopLeft(t);
   if (!topLeft) return;
+  const tileRowOffset = t <= PLAYER_BALL_OPEN_END_TICK ? 0 : 2;
   for (let ty = 0; ty < 2; ty += 1) {
     const rowY = topLeft.y + ty * 8;
     if (rowY >= PLAYER_BALL_OPEN_VISIBLE_BOTTOM) continue;
     for (let tx = 0; tx < 2; tx += 1) {
-      const tile = battleAnimBallOpen.tileset.tiles[ty * battleAnimBallOpen.tileset.columns + tx];
+      const tile = battleAnimBallOpen.tileset.tiles[(ty + tileRowOffset) * battleAnimBallOpen.tileset.columns + tx];
       if (!tile) continue;
       for (let py = 0; py < 8; py += 1) {
         const y = rowY + py;

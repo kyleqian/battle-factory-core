@@ -19,6 +19,7 @@ import {
   playerSummaryBarExitDx,
   PLAYER_BALL_OPEN_START_TICK,
   PLAYER_BALL_OPEN_END_TICK,
+  PLAYER_BALL_OPEN_FINAL_END_TICK,
   PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
   playerBallOpenTopLeft,
   PLAYER_BG_FADE_START_TICK,
@@ -234,14 +235,13 @@ describe("battleMenu: player status-bar subsprite-split exit (docs/battle-menu-n
   });
 });
 
-describe("battleMenu: ONIX materialize window start - ball 'open' pose swap (docs/battle-menu-notes.md §3 item 5, tools/compare/traces/menu-materialize.json 5/5 0-diff)", () => {
+describe("battleMenu: ONIX materialize window start - ball 'open' pose swap (docs/battle-menu-notes.md §3 item 5, tools/compare/traces/menu-materialize.json 7/7 0-diff)", () => {
   it("the ball's open pose swaps in exactly one tick after arrival (1651), and stays visible through PLAYER_BALL_OPEN_END_TICK - RAM-confirmed exactly 5 ticks (1652-1656), matching sBallAnimSeq1's own ANIMCMD_FRAME(4,5) duration (see the constant's own doc comment; corrects a prior session's over-widened 1663 guess)", () => {
     expect(PLAYER_BALL_OPEN_START_TICK).toBe(1652);
     expect(PLAYER_BALL_OPEN_END_TICK).toBe(1656);
     expect(playerBallOpenTopLeft(1651)).toBeNull();
     expect(playerBallOpenTopLeft(1652)).toEqual({ x: 64, y: 107 });
     expect(playerBallOpenTopLeft(1656)).toEqual({ x: 64, y: 107 });
-    expect(playerBallOpenTopLeft(1657)).toBeNull();
   });
 
   it("terrain occludes the open pose below screen y=112 - only the sprite's own top 2 rows are ever visible at this screen position", () => {
@@ -250,6 +250,21 @@ describe("battleMenu: ONIX materialize window start - ball 'open' pose swap (doc
 
   it("the visible sliver of the ball's open-pose art renders its own ink color at tick 1652 (oracle-pinned, battle1-menu-dense.json)", () => {
     expect(pixelAtSentOut(1652, 70, 111)).toEqual([255, 156, 123]);
+  });
+});
+
+describe("battleMenu: ball openFinal pose (PROGRESS #104/this session - the same missing-3rd-frame mechanism §7.25 found for the opponent's own ball, LoadBallGfx DMA'ing graphics/balls/open.png over a nominally-blank anim slot at sprite creation, a battler-generic code path)", () => {
+  it("stays visible 6 more ticks past PLAYER_BALL_OPEN_END_TICK, through PLAYER_BALL_OPEN_FINAL_END_TICK (1657-1662) - RAM-confirmed via gSprites[5]'s animCmdIndex/animDelayCounter (see the constant's own doc comment), then gone by 1663 (the ball is already invisible by then, oracle-confirmed)", () => {
+    expect(PLAYER_BALL_OPEN_FINAL_END_TICK).toBe(1662);
+    expect(playerBallOpenTopLeft(1656)).toEqual({ x: 64, y: 107 });
+    expect(playerBallOpenTopLeft(1657)).toEqual({ x: 64, y: 107 });
+    expect(playerBallOpenTopLeft(1662)).toEqual({ x: 64, y: 107 });
+    expect(playerBallOpenTopLeft(1663)).toBeNull();
+  });
+
+  it("renders the openFinal tile's own ink colors (distinct from the open pose's own colors at the same coords), oracle-pinned (battle1-menu-dense.json)", () => {
+    expect(pixelAtSentOut(1657, 70, 111)).toEqual([132, 0, 0]);
+    expect(pixelAtSentOut(1657, 67, 110)).toEqual([66, 66, 66]);
   });
 });
 
