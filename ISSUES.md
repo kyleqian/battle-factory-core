@@ -21,6 +21,17 @@ in S9) cannot render until `FONT_NARROW` glyphs+widths are extracted and
 the submenu text goes through the real text pipeline like the action menu
 does. Lead: extractor conventions in `tools/extract/extract-battle-*.ts`;
 glyph source `graphics/fonts/`; widths table per font id in `text.c`.
+**Extraction half CLOSED 2026-07-19** (bounded worker, supervisor-merged):
+`src/data/gen/font-narrow.json` landed, proven byte-exact by rendering all
+four battle-1 move names through the engine's own `drawText` against the
+oracle-harvested patches (`tests/fontNarrow.test.ts`, 24 checks, 0
+mismatches). **Remaining: the rewire itself** — `drawFightSubmenuWindow` →
+real glyph rendering instead of the static harvest, which needs (a) the
+PP dynamic-color state machine (`SetPPNumbersPaletteInMoveSelection`,
+bank-5 idx 11/12 by `GetCurrentPPToMaxPPState`) and (b) the mixed-font
+runs ("TYPE/" in NARROW then FONT_NORMAL type name; PP numbers on the
+separate FONT_NORMAL `B_WIN_PP_REMAINING` window) — both source-traced in
+the test header.
 
 ## #19 — fight-submenu.json residual: tick 2073 (99px, healthbox-adjacent row)
 
