@@ -394,8 +394,22 @@ export function playerThrowBallSpin(t: number): { centerX: number; centerY: numb
 /** `StartSpriteAnim(sprite, 1)` (`sBallAnimSeq1`'s "open" frame) fires one tick after arrival - same 1-tick render-lag family as every other register in this window (RAM-confirmed pattern re-applied, not re-verified independently this session). */
 export const PLAYER_BALL_OPEN_START_TICK = PLAYER_THROW_BALL_ARRIVE_TICK + 1; // 1652
 
-/** Last tick this session models the ball's open pose (docs/battle-menu-notes.md §3 item 5's own pinned window boundary - see `drawPlayerBallOpen`'s doc comment in `battleScene.ts` for why just the one tick suffices). */
-export const PLAYER_BALL_OPEN_END_TICK = PLAYER_BALL_OPEN_START_TICK;
+/**
+ * Last tick this session models the ball's open pose - widened this session
+ * from the prior single-tick window (1652 only) once oracle pixels showed
+ * the ball's own "open" art stays on screen (partially - see the
+ * `PLAYER_BALL_OPEN_VISIBLE_BOTTOM` terrain clip) well past arrival, still
+ * needed to explain the oracle's own pixels once the particle burst and
+ * materialize silhouette are both drawn too (`docs/battle-menu-notes.md` §3
+ * item 5). Set to `PLAYER_MATERIALIZE_END_TICK` (1663, `battleScene.ts`) as
+ * the same outline boundary that mechanism uses - **pixel-confirmed exact
+ * only through 1656** (`tools/compare/traces/menu-materialize.json`); 1657+
+ * has a small, separately-named residual (ball-open-frame colors bleeding
+ * through where this session's own `drawPlayerMaterialize` tint is drawn -
+ * NOT particle-colored, so not this session's own mechanism) not root-caused
+ * this session - see `docs/battle-menu-notes.md` §3 item 5 for the accounting.
+ */
+export const PLAYER_BALL_OPEN_END_TICK = 1663;
 
 /** The ball's settled center once arrived (`playerThrowBallSpin`'s own `BALL_ARRIVE_CENTER_X/Y`) - top-left of its 16x16 open-pose sprite. */
 const BALL_OPEN_TOP_LEFT = { x: BALL_ARRIVE_CENTER_X - 8, y: BALL_ARRIVE_CENTER_Y - 8 }; // (64,107)

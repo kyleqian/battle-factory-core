@@ -388,23 +388,65 @@ already right, only specific numeric claims needed fixing.
      1653 itself (the same tick `AnimateBallOpenParticles` and
      `LaunchBallFadeMonTask` both fire together in
      `SpriteCB_ReleaseMonFromBall`, source-consistent with a single-tick
-     trigger for both), not starting a few ticks later. **Named blocker for
-     the next session, precisely bounded this time**: implement the
-     player-side particle burst (origin position + render-lag offset,
-     likely reusable machinery from the opponent's own already-implemented
-     `drawBallOpenParticles`/`PARTICLE_ORIGIN`/age-table, same derivation
-     pattern §7.14/§7.18/§7.20 used) - once that lands, ticks 1653-1663
-     should flip to full-frame-exact with no further changes needed to
-     either the BG fade or the materialize accumulator. Ticks 1664+ remain
-     separately blocked by the already-named coefficient-fade-to-true-color
-     + idle-bob entanglement (unchanged by this session). **Not attempted
-     this session**: out of scope per this step's own brief (particle burst
-     explicitly deferred unless everything else lands with 15+ min of the
-     45-min cap left, which wasn't the case after the root-cause work
-     above). `tools/compare/traces/menu-materialize.json` stays at its
-     existing 1/1 (tick 1652 only) - no tick in 1653-1663 reaches 0 diff
-     without the particle burst, so nothing currently qualifies for the
-     extended window.
+     trigger for both), not starting a few ticks later.
+
+     **Landed this session (bounded worker, PROGRESS #101)**:
+     `drawPlayerBallOpenParticles` (`battleScene.ts`) - the same
+     age/radius/frame math as the opponent's own `drawBallOpenParticles`,
+     battler-specific only in origin and anchor tick:
+     - **Origin `(68,106)`** (top-left, `PLAYER_PARTICLE_ORIGIN`):
+       brute-force pixel-fit against the isolated single particle visible at
+       logical tick 0 (`tools/compare/scratch/menu-audit/
+       fit_player_particle_origin.mjs`, 13/14 opaque pixels exact, next-best
+       candidate 3/14 - the 14th pixel is the same terrain occlusion
+       (`PLAYER_BALL_OPEN_VISIBLE_BOTTOM`) already established for the
+       ball's own open pose). Not the naive `sprite->x, sprite->y-5` center
+       value used directly - `drawParticleTile`'s args are a top-left
+       corner, so the center `(72,110)` needed the tile's own `-4,-4`
+       half-width/height folded in, unlike the opponent's own already-topleft
+       `PARTICLE_ORIGIN`.
+     - **Anchor**: logical tick 0 renders at `PLAYER_BG_FADE_START_TICK`
+       (1653) - same "both `AnimateBallOpenParticles` and
+       `LaunchBallFadeMonTask` fire the same RAM tick" reasoning above.
+     - **Draw order reversed from the opponent's own function** (oldest
+       spawn drawn on top, not newest): pixel-confirmed necessary - the two
+       particles that briefly coexist at radius 0 (a particle's own age-0
+       tick and the next particle's age-0 tick one game-tick later, same
+       origin) need the older on top to match the oracle. Found by direct
+       A/B (ascending order left 3-24px residuals at ticks 1654-1656, all
+       explained by this exact overlap; reversing made them exact).
+     - **A second, distinct problem found while wiring this in**: the ball's
+       own "open" pose sprite (item 4c/this item, `drawPlayerBallOpen`) was
+       only modeled for its own single tick 1652 - once particles were drawn
+       for real, oracle pixels proved the ball's static "open" art is still
+       genuinely on screen (through the same terrain clip) for several more
+       ticks, needed to explain pixels the particle burst alone doesn't
+       cover. Widened `PLAYER_BALL_OPEN_END_TICK` to 1663 (`battleMenu.ts`) -
+       fixed tick 1653 outright.
+     - **Result, pixel-confirmed exact through tick 1656** (4 new ticks past
+       the pre-existing 1652): `tools/compare/traces/menu-materialize.json`
+       **1/1 → 5/5** (ticks 1652-1656).
+     - **1657+ still has a small (19-30px), separately-named residual - NOT
+       this mechanism**: every mismatched pixel is one of the ball-open
+       frame's own colors (`66,66,66`/`214,41,41`/`132,0,0`/`255,156,123`),
+       appearing where `drawPlayerMaterialize`'s own tint is currently drawn
+       instead of the ball/mon's real color - i.e. a materialize-silhouette
+       edge issue, the same CLASS of bug `battle-scene-notes.md` §7.21
+       root-caused for the opponent's own materialize (a render-lag
+       off-by-one and/or a missing accumulator/`y2` correction), not a
+       particle problem. **Not root-caused this session** - out of scope for
+       the particle-burst brief, and `drawPlayerMaterialize` is `#98`/`#99`'s
+       own code; a future session should treat this the same way §7.21
+       treated the opponent's analogous edge residual. Named blocker,
+       precisely bounded: root-cause the `drawPlayerMaterialize`
+       accumulator/`y2`/render-lag combination starting at trace tick 1657
+       (`local`=4 in `PLAYER_MATERIALIZE_START_TICK`-relative terms) - once
+       fixed, `menu-materialize.json` should extend past 1663 with no
+       further particle-burst changes needed. Ticks past the materialize
+       window's own end are still separately blocked by the already-named
+       coefficient-fade-to-true-color + idle-bob entanglement, and the
+       healthbox slide-in boundary (~1693) past that, neither touched this
+       session.
 6. `HandleBallAnimEnd` waits for both the ball sprite's anim **and** the mon
    sprite's affine anim to finish, then `Intro_TryShinyAnimShowHealthbox`
    (`battle_controller_player.c:979`) calls `UpdateHealthboxAttribute(...,
@@ -543,16 +585,18 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
      by sprite-creation order, so Brendan's back sprite (created at the
      intro) wins over the later-created status icons whenever their
      screen footprints briefly cross during his exit slide (§3 point 4b).
-   **Materialization landed partially across two sessions (PROGRESS #98,
-   #99)**: the ball's open-pose swap is engine-modeled exact at tick 1652
-   (`tools/compare/traces/menu-materialize.json`, 1/1 0-diff); ONIX's own
-   color-fade/affine-emerge accumulator (derived #98) and the player-side
-   materialize BG-to-white fade (root-caused + fixed #99 - the pre-existing
-   ~1653+ full-frame residual #98 named was this) are both landed and
-   pixel-verified, cutting the 1653-1663 full-frame diff ~99%. Still not in
-   a committed trace: the remaining residual on those ticks is now 100%
-   attributable to the ball-open particle burst (mechanism 3's player-side
-   analogue), pixel-classified but not yet implemented (§3 item 5).
+   **Materialization landed across three sessions (PROGRESS #98, #99,
+   #101)**: the ball's open-pose swap is engine-modeled through tick 1663
+   (widened from a single tick #101, pixel-exact through 1656); ONIX's own
+   color-fade/affine-emerge accumulator (derived #98), the player-side
+   materialize BG-to-white fade (root-caused + fixed #99), and the ball-open
+   particle burst (mechanism 3's player-side analogue, landed #101) are all
+   landed and pixel-verified. `tools/compare/traces/menu-materialize.json`:
+   **1/1 → 5/5** (ticks 1652-1656). Tick 1657+ has a small, separately-named
+   residual in `drawPlayerMaterialize`'s own silhouette edge (same CLASS of
+   bug §7.21 in `battle-scene-notes.md` root-caused for the opponent's own
+   materialize) - not the particle burst, not root-caused this session
+   (§3 item 5 has the full accounting).
 2. §4's idle-cycle mechanism (which specific sprite/timer drives regions A
    and B) is pixel-pinned but not source-attributed — needed before an
    engine slice can *generate* the cycle rather than just replay captured

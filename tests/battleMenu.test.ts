@@ -234,13 +234,14 @@ describe("battleMenu: player status-bar subsprite-split exit (docs/battle-menu-n
   });
 });
 
-describe("battleMenu: ONIX materialize window start - ball 'open' pose swap (docs/battle-menu-notes.md §3 item 5, tools/compare/traces/menu-materialize.json 1/1 0-diff)", () => {
-  it("the ball's open pose swaps in exactly one tick after arrival (1651), and is only modeled the one tick this session pinned", () => {
+describe("battleMenu: ONIX materialize window start - ball 'open' pose swap (docs/battle-menu-notes.md §3 item 5, tools/compare/traces/menu-materialize.json 5/5 0-diff)", () => {
+  it("the ball's open pose swaps in exactly one tick after arrival (1651), and stays visible through PLAYER_BALL_OPEN_END_TICK (widened this session - see its own doc comment for the pixel-confirmed vs. still-open sub-range)", () => {
     expect(PLAYER_BALL_OPEN_START_TICK).toBe(1652);
-    expect(PLAYER_BALL_OPEN_END_TICK).toBe(1652);
+    expect(PLAYER_BALL_OPEN_END_TICK).toBe(1663);
     expect(playerBallOpenTopLeft(1651)).toBeNull();
     expect(playerBallOpenTopLeft(1652)).toEqual({ x: 64, y: 107 });
-    expect(playerBallOpenTopLeft(1653)).toBeNull();
+    expect(playerBallOpenTopLeft(1656)).toEqual({ x: 64, y: 107 });
+    expect(playerBallOpenTopLeft(1664)).toBeNull();
   });
 
   it("terrain occludes the open pose below screen y=112 - only the sprite's own top 2 rows are ever visible at this screen position", () => {
@@ -249,6 +250,22 @@ describe("battleMenu: ONIX materialize window start - ball 'open' pose swap (doc
 
   it("the visible sliver of the ball's open-pose art renders its own ink color at tick 1652 (oracle-pinned, battle1-menu-dense.json)", () => {
     expect(pixelAtSentOut(1652, 70, 111)).toEqual([255, 156, 123]);
+  });
+});
+
+describe("battleMenu: PLAYER-side ball-open particle burst (docs/battle-menu-notes.md §3 item 5, mechanism 3's player-side analogue, battleScene.ts's drawPlayerBallOpenParticles - tools/compare/traces/menu-materialize.json 5/5 0-diff)", () => {
+  it("nothing particle-colored renders before the burst starts (PLAYER_BG_FADE_START_TICK, 1653) - the origin tile's own pixel is still the ball-open sprite's ink at 1652", () => {
+    expect(pixelAtSentOut(1652, 72, 110)).toEqual([66, 66, 66]);
+  });
+
+  it("logical tick 0 (trace tick 1653): the single spawned particle's own tile renders exactly, oracle-pinned (battle1-menu-dense.json)", () => {
+    expect(pixelAtSentOut(1653, 70, 108)).toEqual([255, 255, 255]);
+    expect(pixelAtSentOut(1653, 70, 107)).toEqual([255, 173, 0]);
+  });
+
+  it("by logical tick 3 (trace tick 1656) later-spawned particles have grown outward, changing pixels the single-particle tick 1653 frame left as background - oracle-pinned", () => {
+    expect(pixelAtSentOut(1656, 75, 111)).toEqual([255, 255, 255]);
+    expect(pixelAtSentOut(1653, 75, 111)).toEqual([66, 66, 66]);
   });
 });
 

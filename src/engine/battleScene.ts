@@ -420,6 +420,7 @@ import {
   playerBallOpenTopLeft,
   PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
   playerMaterializeBgFadeY,
+  PLAYER_BG_FADE_START_TICK,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -1667,12 +1668,17 @@ function drawPlayerMaterialize(fb: Uint8Array, t: number): void {
  * (`battleMenu.ts`) encode the position/clip; this function does the actual
  * clipped draw.
  *
- * **Window boundary**: only trace tick 1652 itself is modeled - by 1653 the
+ * **Window boundary, widened this session**: the prior session assumed the
  * ONIX materialize/particle burst (drawn after this in `drawSendOutHandoff`)
- * already occupies the same screen rows, and `sBallAnimSeq1`'s own 5-tick
- * open span means the ball's underlying pose doesn't change again until it
- * goes blank regardless - the single visible tick is sufficient for this
- * step's pinned window (`docs/battle-menu-notes.md` §3 item 5).
+ * would fully occupy the ball's own screen rows from 1653 on, so only trace
+ * tick 1652 was modeled. Oracle pixels prove otherwise once the particle
+ * burst is actually drawn: the ball's own static "open" art is still
+ * genuinely visible (through the same terrain clip) for several ticks past
+ * arrival, needed to explain oracle pixels the particle burst alone doesn't
+ * cover. Extended through `PLAYER_BALL_OPEN_END_TICK` (1663,
+ * `battleMenu.ts`) - see that constant's own doc comment for exactly how far
+ * this is pixel-confirmed (1656) vs. still-open (1657+, a separately-named
+ * residual).
  */
 function drawPlayerBallOpen(fb: Uint8Array, t: number): void {
   const topLeft = playerBallOpenTopLeft(t);
@@ -2103,17 +2109,20 @@ function gbaCos(index: number, amplitude: number): number {
   return gbaSin(index + 64, amplitude);
 }
 
-function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox: number, oy: number): void {
+/** `clipBottom` (screen y at/below which pixels are skipped) is only used by the player-side call site - the opponent's own particle field is never occluded at its screen position, so its call omits it. */
+function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox: number, oy: number, clipBottom?: number): void {
   const tile = battleAnimParticles.tileset.tiles[tileIndex];
   if (!tile) return;
   for (let py = 0; py < 8; py += 1) {
+    const y = oy + py;
+    if (clipBottom !== undefined && y >= clipBottom) continue;
     for (let px = 0; px < 8; px += 1) {
       const sx = hFlip ? 7 - px : px;
       const idx = tile[py * 8 + sx]!;
       if (idx === 0) continue;
       const c = battleAnimParticles.palette[idx];
       if (!c) continue;
-      setPixel(fb, ox + px, oy + py, c);
+      setPixel(fb, ox + px, y, c);
     }
   }
 }
@@ -2136,6 +2145,106 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): 
     const dy = gbaCos(angle, radius);
     const frame = anim[age % anim.length]!;
     drawParticleTile(fb, frame.tile, frame.hFlip, PARTICLE_ORIGIN.x + dx, PARTICLE_ORIGIN.y + dy);
+  }
+}
+
+/**
+ * PLAYER-side analogue of `drawBallOpenParticles` (docs/battle-menu-notes.md
+ * §3 item 5, docs/battle-anim-assets.md §5's own player-window particle-tile
+ * cross-check). Same `AnimateBallOpenParticles`/`PokeBallOpenParticleAnimation`
+ * source mechanism (`pokeball.c:757`, called from the same battler-generic
+ * `SpriteCB_ReleaseMonFromBall` this module's own `drawPlayerMaterialize`/
+ * `drawPlayerBallOpen` already model for the player's ONIX release) - only the
+ * origin and the anchor tick differ per side, not the age/radius/frame math.
+ *
+ * **Origin, brute-force pixel-fit (not geometry-assumed)**: at
+ * `PLAYER_BG_FADE_START_TICK` (1653, logical tick 0) only ONE particle is
+ * ever visible (spawn index 0, age 0, radius 0 - no `dx`/`dy` offset), so its
+ * tile is isolated with nothing else overlapping - searched every top-left
+ * offset in a generous window against the oracle's tile-0 pixels
+ * (`tools/compare/scratch/menu-audit/fit_player_particle_origin.mjs`):
+ * `(68,106)` scores 13/14 opaque pixels exact, the best fit by a wide margin
+ * (next-best candidate scores 3/14). This is NOT `sprite->y-5`'s center value
+ * used directly as a top-left the way the opponent's own `PARTICLE_ORIGIN`
+ * is - it's that center `(72,110)` (ball settled center `(72,115)`, `y-5`)
+ * shifted by the tile's own half-width/height `(-4,-4)`, since
+ * `drawParticleTile`'s `ox,oy` args are a top-left corner while this engine's
+ * sprite x/y convention (ball, mon, particle alike) is center-based - the
+ * opponent's own `(172,55)` apparently already had this folded in from ITS
+ * OWN brute-force fit, not a coincidence this session re-derives differently.
+ * The one non-matching pixel of the 14 (tile row 6, col 5 -> screen `(73,112)`)
+ * is explained, not a residual: oracle shows a flat, uniform terrain-graphic
+ * color there spanning the ENTIRE row 112 (`74,66,82`) - the exact same
+ * `y>=PLAYER_BALL_OPEN_VISIBLE_BOTTOM` terrain occlusion already established
+ * for the ball's own open pose (`battleMenu.ts`'s
+ * `PLAYER_BALL_OPEN_VISIBLE_BOTTOM`/`playerBallOpenTopLeft`'s doc comment) -
+ * particles are occluded by the same foreground terrain tile, clipped below.
+ *
+ * **Anchor**: logical tick 0 renders at `PLAYER_BG_FADE_START_TICK` (1653) -
+ * the same tick `battleMenu.ts`'s module doc establishes as "one tick after
+ * the ball's own open-pose swap", the identical render-lag convention
+ * `BALL_OPEN_START_OFFSET`+1 anchors the opponent's own particle logical tick
+ * 0 to (`SENDOUT_BG_FADE_START`, see that function's own doc above) - both
+ * `AnimateBallOpenParticles` and `LaunchBallFadeMonTask` fire the same RAM
+ * tick, so their first-visible render tick is the same tick for both
+ * mechanisms, on both sides.
+ *
+ * **Stall/late-spawn corrections NOT ported**: `PARTICLE_STALL_LOGICAL_TICK`/
+ * `PARTICLE_LATE_SPAWN_START_INDEX` only affect ages at logical tick 13+ (the
+ * opponent's own empirically-found one-tick RAM stall past that point) - this
+ * window's own separately-named boundary (see below) stops this function's
+ * useful range well short of 13, so porting either correction is
+ * unverifiable and unnecessary here.
+ *
+ * **Spawn-index draw order reversed, pixel-confirmed**: unlike the
+ * opponent's own `drawBallOpenParticles` (drawn ascending spawn index, i.e.
+ * newest-on-top), this function draws index `PARTICLE_SPAWN_COUNT-1` down to
+ * `0` (oldest-on-top). The two newly-spawned particles that briefly coexist
+ * at radius 0 (a particle's own age-0 tick and the NEXT particle's age-0
+ * tick one game-tick later both render at the shared origin, same as the
+ * opponent's own age0/age1 no-op overlap) need the OLDER one drawn on top to
+ * match the oracle - confirmed by direct A/B against the oracle (ascending
+ * order left small 3-24px residuals at ticks 1654-1656, all in the
+ * ball-frame's own overlap region; reversing made all three exact). Not
+ * ported back to the opponent's own function - out of scope for this
+ * session, and its own established committed window doesn't currently
+ * exercise this overlap.
+ *
+ * **Verified against the oracle** (`npm run compare` against
+ * `tools/compare/traces/menu-materialize.json`): with this origin, the
+ * terrain clip, and the reversed draw order, ticks 1653-1656 reach 0 diff.
+ * **1657+ still has a small (19-30px), separately-named residual** - not
+ * particle-colored (every mismatched pixel is one of the ball-open frame's
+ * own colors, `66,66,66`/`214,41,41`/`132,0,0`/`255,156,123`, appearing where
+ * this module's own `drawPlayerMaterialize` tint is currently drawn instead)
+ * - i.e. a materialize-silhouette-edge issue, the same CLASS of bug
+ * `battle-scene-notes.md` §7.21 root-caused for the opponent's own
+ * materialize, not this function's own particle mechanism. Not root-caused
+ * this session (out of scope for the particle-burst brief; `#98`/`#99` own
+ * `drawPlayerMaterialize`) - see `docs/battle-menu-notes.md` §3 item 5.
+ */
+const PLAYER_PARTICLE_ORIGIN = { x: 68, y: 106 };
+
+function drawPlayerBallOpenParticles(fb: Uint8Array, t: number): void {
+  const logicalT = t - PLAYER_BG_FADE_START_TICK;
+  if (logicalT < 0) return;
+  const anim = battleAnimParticles.regularBallAnim;
+  for (let i = PARTICLE_SPAWN_COUNT - 1; i >= 0; i -= 1) {
+    const age = logicalT - i;
+    if (age < 0 || age > PARTICLE_MAX_AGE) continue;
+    const angle = (i % 8) * 32;
+    const radius = age === 0 ? 0 : 2 * (age - 1);
+    const dx = gbaSin(angle, radius);
+    const dy = gbaCos(angle, radius);
+    const frame = anim[age % anim.length]!;
+    drawParticleTile(
+      fb,
+      frame.tile,
+      frame.hFlip,
+      PLAYER_PARTICLE_ORIGIN.x + dx,
+      PLAYER_PARTICLE_ORIGIN.y + dy,
+      PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+    );
   }
 }
 
@@ -2468,8 +2577,9 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
     );
   }
   drawBallOpenParticles(fb, t, handoffTick);
-  drawPlayerBallOpen(fb, t);
   drawPlayerMaterialize(fb, t);
+  drawPlayerBallOpen(fb, t);
+  drawPlayerBallOpenParticles(fb, t);
   if (t >= GROVYLE_MATERIALIZE_TICK) {
     drawGrovyleSettled(fb);
   } else {

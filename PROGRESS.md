@@ -5,6 +5,78 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 101 — Bounded worker: PLAYER-side ball-open particle burst landed (mechanism 3's player-side analogue, docs/battle-menu-notes.md §3 item 5) — `menu-materialize.json` **1/1 → 5/5** (ticks 1652-1656); a distinct materialize-silhouette-edge residual found starting 1657, not root-caused
+
+- **State:** `npm test` **519/519** (+3 Tier-1), `npm run build` green,
+  tree clean. Full 22-trace sweep against the live oracle: all 21 others at
+  their exact established counts (accept-prebattle 137/137, anchor 1/1,
+  confirm-decline 67/67, confirm-flow 79/95, draft-cursor 13/13,
+  draft-menu-slot6 66/66, draft-menu 38/38, example 4/4, menu-text 18/18,
+  menu-throw 70/70, rent-3picks 157/190, rent-slot1 125/139, room-entry
+  110/110, room-msgbox 142/142, room-npcs 98/98, scene-assembly 256/256,
+  sendout 221/256, summary-info-magby 132/132, summary-info-onix 122/122,
+  transition 206/206, walk-warpout 125/125) — zero regressions.
+  `tools/compare/traces/menu-materialize.json`: **1/1 → 5/5** (tick 1652 was
+  already committed; added 1653-1656).
+- **Did:** per the brief's FIRST STEP, confirmed #99's own residual
+  classification still held on this session's starting code (100%
+  particle-colored, 1653-1663) before writing anything. Implemented
+  `drawPlayerBallOpenParticles` (`battleScene.ts`) — same age/radius/frame
+  math as the opponent's own `drawBallOpenParticles`, battler-specific only
+  in origin/anchor: **origin `(68,106)`**, brute-force pixel-fit against the
+  single isolated particle visible at logical tick 0
+  (`tools/compare/scratch/menu-audit/fit_player_particle_origin.mjs`, 13/14
+  exact — the 14th is the already-established terrain occlusion), **not**
+  the naive `sprite->x,y-5` center value directly (that value needs the
+  tile's own `-4,-4` half-size folded in first, since `drawParticleTile`'s
+  args are a top-left corner); **anchor** `PLAYER_BG_FADE_START_TICK` (1653,
+  same "both fire the same RAM tick" reasoning #99 established for the BG
+  fade). **Draw order reversed from the opponent's own function** (oldest
+  spawn on top) — pixel-confirmed necessary via direct A/B (ascending order
+  left 3-24px residuals at 1654-1656, all explained by the two-particles-
+  briefly-coexisting-at-radius-0 overlap; reversing fixed all three exact).
+  **A second, distinct gap found while wiring this in**: the ball's own
+  "open" pose sprite (#98's `drawPlayerBallOpen`) was only modeled for its
+  single tick 1652 — real particles exposed that the ball's static art is
+  still genuinely on screen (through the same terrain clip) for several more
+  ticks; widened `PLAYER_BALL_OPEN_END_TICK` to 1663, which alone fixed tick
+  1653. 3 new Tier-1 tests (`tests/battleMenu.test.ts`) pin the origin tile,
+  a later-tick particle position, and the pre-burst boundary; 2 existing
+  tests updated for the widened ball-open window.
+- **Why the window stops at 1656, not 1663 (the materialize window's own
+  end)**: ticks 1657+ have a small (19-30px), separately-named residual that
+  is **NOT** particle-colored — every mismatched pixel is one of the
+  ball-open frame's own colors (`66,66,66`/`214,41,41`/`132,0,0`/
+  `255,156,123`), appearing where `drawPlayerMaterialize`'s tint is drawn
+  instead of the real ball/mon color underneath. This is a materialize-
+  silhouette-EDGE issue — the same *class* of bug `battle-scene-notes.md`
+  §7.21 root-caused for the opponent's own materialize (a render-lag
+  off-by-one and/or missing accumulator/`y2` correction) — not a particle
+  problem, and `drawPlayerMaterialize` is `#98`/`#99`'s own code, out of
+  this step's particle-burst scope. Not root-caused this session (would
+  need the same kind of RAM-probe/brute-force work §7.21 did, and time ran
+  out after landing + verifying the particle burst itself). Full accounting:
+  `docs/battle-menu-notes.md` §3 item 5.
+- **Next:** root-cause the `drawPlayerMaterialize` accumulator/`y2`/
+  render-lag combination starting at trace tick 1657 (mirror §7.21's method)
+  — should extend `menu-materialize.json` past 1663 with no further
+  particle-burst changes. Then: the coefficient-fade-to-true-color + idle-bob
+  entanglement past the materialize window's own end, healthbox slide-in →
+  settle (~1693, still untouched), blank-box + menu draw + idle
+  (1742-1810). Sendout's own 1504-1518 boundary residual remains the
+  concurrent worktree lane's territory (unaffected by this session — no
+  overlap, verified by the trace's own max-tick bounds).
+- **Notes:** stayed in `battleMenu.ts` (pure timing) + additive
+  `battleScene.ts` hooks (new function + one call-site line in the existing
+  `drawSendOutHandoff`, plus reordering the three already-existing
+  player-materialize-window calls to fix compositing order) +
+  `tests/battleMenu.test.ts` + `docs/battle-menu-notes.md`, per the brief.
+  Did not touch `battleScene.ts`'s opponent-side internals,
+  `tests/battleScene.test.ts`, or `docs/battle-scene-notes.md`. Archived
+  PROGRESS #97 to `PROGRESS-archive.md` per the brief. No PAPERCUT.
+
+---
+
 ## 100 — Supervisor: round-5 worktree branch merged — masking band root-caused (harvest-asset background bleed, not the slide model) + §7.22's mechanism-5 fix re-applied; `sendout.json` **215 → 221/256**
 
 - **State (verified post-merge):** `npm test` **516/516**, `npm run build`
@@ -175,80 +247,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   A/B-testing against unmodified code sooner.
 
 ---
-
-## 97 — Bounded worker: ball-spin GBA affine keyframe animation landed (§3 item 4's named blocker) — `menu-throw.json` densified to every tick 1574-1651, **70/70** 0-diff (was 33/33); ball arrival pinned exact at trace tick 1651
-
-- **State:** `npm test` **507/507** (+6 Tier-1), `npm run build` green,
-  tree clean. Full 21-trace sweep against the live oracle: all 20 others at
-  their exact established counts (anchor 1/1, draft-cursor 13/13,
-  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
-  122/122, summary-info-magby 132/132, confirm-decline 67/67,
-  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
-  room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
-  256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95,
-  sendout 215/256, menu-text 18/18) — zero regressions.
-  `tools/compare/traces/menu-throw.json` extended from 33 committed
-  captures (1574-1614) to 70 (1574-1651, still minus #96's 8 named-excluded
-  Brendan-vs-icon ticks): **70/70** at 0 diff.
-- **Did:** implemented `playerThrowBallSpin` (`battleMenu.ts`) +
-  `drawSpriteSheetAffineRotate` (`battleScene.ts` - this codebase's first
-  TRUE-rotation affine OAM sampler; mechanism 4/5 both special-case
-  `rotation=0`), covering trace tick 1615 (where the GBA affine "ball spin"
-  starts, `StartSpriteAffineAnim(sprite, 4)`) through arrival. Root-caused
-  via source (`SpriteCB_PlayerMonSendOut_2`, `pokeball.c:915-953`) +
-  RAM ground-truth (new probe `tools/probe/specs/sendout-ball-spin.json`;
-  ball sprite = `gSprites[5]`, ID'd by matching its callback pointer to
-  `SpriteCB_PlayerMonSendOut_2`'s address via
-  `tools/probe/dump-task-and-sprite-callbacks.py`) rather than hand-sim
-  alone — the control flow was subtler than #94's blocker note implied
-  (`sprite->sBattler`/`data[6]` inside the branch is the arc's own angular
-  step by this point, not the original battler index, since
-  `InitAnimArcTranslation` already overwrote it — full derivation in
-  docs/battle-menu-notes.md §3 item 4c). The rotation itself is a clean
-  closed form (`+=25` GBA angle units/tick, confirmed by hand against RAM),
-  but kept as a literal per-tick matrix table (`BALL_SPIN_TABLE`) because
-  this codebase's `gbaSin` (`Math.sin`-derived, not a literal
-  `gSineTable` copy) is off by up to 1 Q8.8 unit at some indices — invisible
-  to the existing sine-ARC mechanisms but not to a rotate SAMPLE kernel
-  (confirmed by brute-force oracle diffing: sparse 1-11px edge diffs at
-  exactly the affected ticks, gone once swapped to RAM-exact values). Same
-  render-lag convention as mechanism 4/5 (§7.21), RAM-confirmed here rather
-  than assumed. **Arrival pinned exact: trace tick 1651** (was "~1646"
-  coarse) — resolves that "not tick-exact" item in docs §3. 6 new Tier-1
-  tests (`tests/battleMenu.test.ts`): keyframe/matrix pinning at the first
-  spin tick, the last spin tick, and arrival, plus 3 oracle-cross-checked
-  rendered-pixel tests.
-- **Window boundary (why 1651, not further):** tick 1652 is where
-  `SpriteCB_ReleaseMonFromBall` (which takes over the RAM tick after
-  arrival) starts the ball's own "open" pose swap
-  (`StartSpriteAnim(sprite,1)`), and tick 1653 is where the magenta
-  materialize silhouette color first appears anywhere in the frame
-  (oracle-confirmed by direct pixel search) — both the already-named,
-  out-of-scope materialize/ball-open mechanism (docs §3 item 5), not a new
-  gap. Stopped there per the brief rather than reaching into that mechanism.
-- **Next:** (1) materialize (~1653+, ball-open particles + affine-emerge +
-  color-fade — assets already confirmed ready per `battle-anim-assets.md`
-  §5, "just" placement/timing); (2) Brendan-vs-icon sprite-priority
-  compositing (#96's named blocker, 8 ticks, wants a proper
-  OAM-priority-aware compositor); (3) healthbox slide-in → settle 1693; (4)
-  blank-box + menu draw + idle (1742-1810). Sendout residuals continue
-  separately (§7.21's named 1493-1503 matrix-early gap, 1516/17 age
-  overrun, 1470/71/79 icon edge, tick 1462).
-- **Notes:** stayed out of battleScene.ts's mechanism-5 (GROVYLE stretch)
-  internals and tests/battleScene.test.ts (the concurrent worker's
-  territory) — only additive `drawSpriteSheetAffineRotate` + a call-site
-  hook in `drawSendOutHandoff`. docs/battle-scene-notes.md, oracle/harness,
-  ROADMAP.md untouched, per the brief. No PAPERCUT.
-  **Supervisor merge addendum (post-#97):** worktree branch
-  `wt-20260719-004700` merged (docs-only, §7.22): §7.21's 1493-1503
-  matrix-early gap was root-caused and its fix VERIFIED (5 ticks'
-  Grovyle region → 0px) but reverted per the step's strict >215 bar — an
-  unrelated ~138px band sliding ~5px/tick across x∈[0,42], y∈[17,42]
-  (opponent-healthbox slide-in region) masks those ticks from full-frame
-  exactness. §7.22 records the 7 RAM table entries + compositing-order
-  correction for exact re-application once the band is fixed — that
-  combined step is round 5's worktree brief.
-
----
-
-
