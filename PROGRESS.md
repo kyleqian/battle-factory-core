@@ -5,6 +5,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 83 — Bounded worker: send-out mechanism 1/5 (party-summary despawn) landed; `sendout.json` stays **174/256** as expected — only mechanism 5 remains
+
+- **State:** `npm test` **458/458** (+1), `npm run build` green. Full
+  19-trace sweep against the live oracle: 18 others at exact prior counts,
+  `sendout.json` unchanged **174/256** — expected. Zero regressions
+  (checked per-tick, not just aggregate).
+- **Did:** implemented `drawOpponentSummaryExit` — source-exact `BLDALPHA`
+  alpha-blend fade + per-icon staggered exit slide, decoded from
+  `Task_HidePartyStatusSummary`/`_BattleStart_1`/`SpriteCB_
+  StatusSummaryBalls_Exit` (`battle_interface.c:1671-1738,1878-1902`).
+  Blend: `tBlend` 16→0, decrementing every OTHER tick, closed form
+  `blend(elapsed)=max(0,15-floor(elapsed/2))`. Per-icon slide: `7*(5-j)`-tick
+  stagger (reverse index order, opponent side), then an accelerating slide
+  hand-derived from the source's own integer accumulator to closed form
+  `x2(n)=3*n*(n+1)/2` — direction (rightward) pixel-confirmed via direct
+  oracle-crop screenshots at ticks 1462/1480/1490. **Deliberately NOT
+  implemented**: the bar's own exit slide (`SpriteCB_StatusSummaryBar_Exit`)
+  — bar alpha-fades in place at its settled position only, a flagged
+  sub-gap (time-boxed scope: the 6 icons were the visually larger piece).
+  `localcheck.ts` pixel-diff mass across 1462-1543: **105984→100498px**
+  (−5486px, the largest single-mechanism drop of the four landed this
+  session-family), every affected tick strictly improved or held. New
+  Tier-1 test (`tests/battleScene.test.ts`) pins the blend/absent boundary
+  via the first-active icon's own opaque pixel. `docs/battle-scene-notes.md`
+  gained §7.15.
+- **Session total (3 mechanisms landed, one bounded worker step):**
+  mechanism 4 (materialize affine-scale-in+tint, #81), mechanism 3
+  (particle burst, #82), mechanism 1 (party-summary despawn, this entry) —
+  `localcheck.ts` pixel-diff mass across 1462-1543: **124762→100498px**
+  (−24264px, −19.4%), `sendout.json` count unchanged at 174/256 throughout
+  (expected per §7.10's structural finding, re-confirmed three more times).
+- **Next: only mechanism 5 remains** (front-sprite entrance anim,
+  `ANIM_V_STRETCH`) — needs GROVYLE's 2nd front-sprite frame extracted (a
+  genuine ROM extraction, not yet done), a `Sin`-table wobble renderer
+  (can reuse the affine-matrix/`Sin`/`Cos` math already landed this
+  session-family), and the still-open exact start-tick arithmetic
+  (§7.11's flagged follow-up — the affine-emerge-complete tick + scheduling
+  lag + 41-tick duration doesn't sum cleanly to the empirical settle tick
+  1544). Once this lands, `sendout.json`'s count should finally move for
+  the first time in this window's whole history — or, if it doesn't, that
+  itself is a real finding worth naming precisely rather than forcing.
+  Also worth a future pass: mechanism 3's own logical-tick-13+ divergence
+  and mechanism 1's bar-slide gap, both flagged above, could each recover
+  a bit more coverage independently of mechanism 5.
+- **Notes:** action-menu window (1560+) and the oracle/harness stayed out
+  of scope, per the brief. No PAPERCUT.
+
+---
+
 ## 82 — Bounded worker: send-out mechanism 3/5 (open-particle burst) landed with an empirical hard cutoff; `sendout.json` stays **174/256** as expected, 2 mechanisms remain
 
 - **State:** `npm test` **457/457** (+1), `npm run build` green. Full
@@ -97,33 +146,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   most expensive, left last on purpose).
 - **Notes:** action-menu window (1560+) and the oracle/harness stayed out
   of scope, per the brief. No PAPERCUT.
-
----
-
-## 80 — S7 v5 ground truth regenerated (parallel worktree lane, merged): turn-1 trace/dump rebuilt under animations-on — menu timing UNCHANGED, RNG ledger IDENTICAL (12 calls, same LCG values), both old register mysteries answered
-
-- **State:** merge of `worker/wt-20260718-174536` (base `1050ba1`):
-  `npm test` **455/455**, `npm run build` green.
-- **Did (worktree lane, supervisor-verified incl. an independent replay
-  of the new trace — 242 captures, menu sha `d223d98a2da9`@1884 exactly
-  as claimed):** (1) first-action-menu timing byte-identical to v3
-  (drift concern falsified — the intro's fixed waits absorb the entrance
-  anims), so battle-menu groundwork is NOT stale. (2) battle1-turn1.json
-  rebuilt: same buttons, 2620→2900 frames, 242 dense captures over both
-  anim windows, twice-run deterministic. (3) RAM dump rebuilt (1021
-  rows, 4 probe scripts re-run twice byte-identical): RNG ledger still
-  EXACTLY 12 calls with identical LCG values at later ticks —
-  **animations consume zero RNG**; damage 42, 1HP/tick drain, stat
-  stages, turn order all reproduce. (4) Dossier corrections:
-  battle-turn-notes §9 old→new tick map (+128 through DOUBLE_TEAM, +235
-  by turn-end); battle-move-anim-notes §8 real timelines — DOUBLE_TEAM
-  clone blend is flat eva=12/evb=8 for 130 ticks (resolves the old
-  130-vs-66 mismatch), ROCK_SLIDE's BG3_Y shake fires (0/-7, ~10
-  ticks). (5) HITMARKER_NO_ANIMATIONS + optionsBattleSceneOff both 0
-  all trace. Flagged open: rock-spawn cadence within 2337-2516.
-- **Next:** send-out mechanisms 1/3/4/5 (main lane, #79's list), then
-  the action-menu slice — its groundwork is confirmed still valid.
-- **Notes:** worktree removed, branch deleted. No PAPERCUT.
 
 ---
 

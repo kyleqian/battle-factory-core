@@ -15,15 +15,23 @@
 // A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
 // state rather than a phase enum (see the field's own doc comment).
 //
+// STATUS (PROGRESS.md #83): mechanism 1 of the 5 named in #78/docs §7.11
+// landed - the OPPONENT PARTY-STATUS-SUMMARY DESPAWN
+// (`drawOpponentSummaryExit`: source-exact `BLDALPHA` fade + per-icon
+// staggered exit slide, `battle_interface.c:1671-1738,1878-1902`; the bar's
+// OWN exit slide is NOT implemented, alpha-fades in place only - a known,
+// flagged sub-gap). `sendout.json` stays **174/256** (expected);
+// `localcheck.ts` pixel-diff mass across 1462-1543 dropped
+// 105984->100498px, zero per-tick regressions. Only mechanism 5
+// (front-sprite entrance anim) remains - see PROGRESS.md #83 and
+// docs/battle-scene-notes.md §7.15 for the full per-mechanism accounting.
+//
 // STATUS (PROGRESS.md #82): mechanism 3 of the 5 named in #78/docs §7.11
 // landed - the OPEN-PARTICLE BURST (`drawBallOpenParticles`, a
 // `gSineTable`-driven radial spawner, source-exact through logical tick 12
 // then an empirical hard cutoff - see `PARTICLE_RENDER_LAST_LOGICAL_TICK`'s
-// doc comment). `sendout.json` stays **174/256** (expected); `localcheck.ts`
-// pixel-diff mass across 1462-1543 dropped 106893->105984px, zero per-tick
-// regressions. Still missing: (1) opponent party-summary despawn fade, (5)
-// front-sprite entrance anim - see PROGRESS.md #82 and docs/battle-scene-
-// notes.md §7.14 for the full per-mechanism accounting.
+// doc comment). `localcheck.ts` pixel-diff mass across 1462-1543 dropped
+// 106893->105984px.
 //
 // STATUS (PROGRESS.md #81): mechanism 4 of the 5 named in #78/docs §7.11
 // landed - Grovyle's materialize AFFINE-SCALE-IN + BALL-COLOR TINT
@@ -1461,6 +1469,105 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): 
   }
 }
 
+/**
+ * §7.4.3/mechanism 1: the opponent party-status-summary widget's despawn -
+ * `Task_HidePartyStatusSummary`/`_BattleStart_1`/`SpriteCB_
+ * StatusSummaryBalls_Exit` (`battle_interface.c:1671-1738,1878-1902`),
+ * source-exact:
+ * - **Alpha blend**: `BLDALPHA_BLEND(tBlend, 16-tBlend)`, `tBlend` starts
+ *   16, decrements once every OTHER tick (`data[11]++ % 2 == 0` gate) -
+ *   pixel-confirmed start tick 1463 (§7.4.3), so `blend(elapsed) =
+ *   15 - floor(elapsed/2)` for `elapsed = t - handoffTick - 1`, floored at
+ *   0. Applied here as a per-pixel blend toward whatever this frame has
+ *   already drawn behind the icon (the same TGT1/TGT2 semantics as
+ *   `blendChannel` elsewhere in this module) - correct since nothing else
+ *   occupies this screen region during the handoff.
+ * - **Per-icon exit slide** (`SpriteCB_StatusSummaryBalls_Exit`): each
+ *   icon has a `7*(5-j)`-tick delay (reverse index order on the opponent
+ *   side - source assigns `data[1]=7*i` to array slot `PARTY_SIZE-1-i`,
+ *   so screen-order slot `j` gets `i=5-j`), pixel-confirmed rightward
+ *   (positive x2) via direct oracle-crop inspection (icons visibly shift
+ *   right and disappear off the right edge between ticks 1462-1494, not
+ *   left). Once a delayed icon's own wait elapses, `x2` grows via a
+ *   closed-form accumulator (`data[3] += 56` every active tick, `x2 +=
+ *   data[3]>>4` using the PRE-mask value, `data[3] &= 0xFFF0` for next
+ *   tick) - hand-derived to the closed form `x2(n) = 3*n*(n+1)/2` for `n`
+ *   active ticks (verified by direct simulation of the source's own
+ *   integer arithmetic, not fitted), an accelerating slide. Icon becomes
+ *   invisible once `x2 + spriteX > 248` (off the right edge) - matches
+ *   `SpriteCB_StatusSummaryBalls_Exit`'s own screen-bound check verbatim.
+ * - **NOT implemented this session**: the bar's own exit slide
+ *   (`SpriteCB_StatusSummaryBar_Exit`, a constant +2px/tick once its own
+ *   direction sign is resolved) - the bar is rendered at its settled
+ *   position, alpha-fading in place only; a real, honestly-flagged
+ *   sub-gap (this session's time-boxed scope covered the blend + the 6
+ *   icons' own stagger/slide, not the bar). Not RAM-probed - this
+ *   session's own verification was a handful of oracle-crop spot-checks
+ *   (`/tmp/partysum_*.png`, throwaway), not the exhaustive tick-by-tick
+ *   RAM probe the brief flagged as the ideal approach; flagged honestly
+ *   rather than claimed as fully validated.
+ */
+function blendedTile(fb: Uint8Array, tile: number[], palette: RgbColor[], hFlip: boolean, ox: number, oy: number, eva: number, evb: number): void {
+  for (let py = 0; py < 8; py += 1) {
+    for (let px = 0; px < 8; px += 1) {
+      const sx = hFlip ? 7 - px : px;
+      const idx = tile[py * 8 + sx]!;
+      if (idx === 0) continue;
+      const c = palette[idx];
+      if (!c) continue;
+      const x = ox + px;
+      const y = oy + py;
+      if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      const o = (y * 240 + x) * 4;
+      fb[o] = blendChannel(c.r, fb[o]!, eva, evb);
+      fb[o + 1] = blendChannel(c.g, fb[o + 1]!, eva, evb);
+      fb[o + 2] = blendChannel(c.b, fb[o + 2]!, eva, evb);
+      fb[o + 3] = 255;
+    }
+  }
+}
+
+const OPP_SUMMARY_ICON_BASE = { x: 26, y: 32 };
+const OPP_SUMMARY_STATES = ["Empty", "Empty", "Empty", "Full", "Full", "Full"];
+const OPP_SUMMARY_BAR = { x: -24, y: 40 };
+
+function opponentIconExitX(j: number, elapsed: number): number | null {
+  const delay = 7 * (5 - j);
+  const localTick = elapsed - delay;
+  const baseX = OPP_SUMMARY_ICON_BASE.x + 10 * j;
+  if (localTick < 0) return baseX;
+  const n = localTick + 1;
+  const offset = (3 * n * (n + 1)) / 2;
+  const x = baseX + offset;
+  return x > 248 ? null : x;
+}
+
+function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number): void {
+  const elapsed = t - handoffTick - 1;
+  if (elapsed < 0) return;
+  const blend = Math.max(0, 15 - Math.floor(elapsed / 2));
+  if (blend <= 0) return;
+  const eva = blend;
+  const evb = 16 - blend;
+  const barTile = ballStatusBar.tileset;
+  for (let ty = 0; ty < barTile.rows; ty += 1) {
+    for (let tx = 0; tx < barTile.columns; tx += 1) {
+      const tileCol = barTile.columns - 1 - tx;
+      const tile = barTile.tiles[ty * barTile.columns + tileCol];
+      if (!tile) continue;
+      blendedTile(fb, tile, ballStatusBar.palette, true, OPP_SUMMARY_BAR.x + tx * 8, OPP_SUMMARY_BAR.y + ty * 8, eva, evb);
+    }
+  }
+  for (let j = 0; j < 6; j += 1) {
+    const x = opponentIconExitX(j, elapsed);
+    if (x === null) continue;
+    const tileIndex = ballStateTileIndex(OPP_SUMMARY_STATES[j]!);
+    const tile = ballDisplay.tileset.tiles[tileIndex];
+    if (!tile) continue;
+    blendedTile(fb, tile, ballDisplay.palette, false, x, OPP_SUMMARY_ICON_BASE.y, eva, evb);
+  }
+}
+
 /** §7.6: opponent healthbox content, translated by its slide-in `dx` - see `healthboxSlideDx`'s doc comment. Flat opaque rectangle (pixel-harvested asset), clipped to screen by `setPixel` same as every other sprite draw here. */
 function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
   const { x, y, width, height, pixels } = sendOutHealthboxOpponent;
@@ -1513,6 +1620,7 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   drawBallOpenParticles(fb, t, handoffTick);
   if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
   drawBallIcons(fb, t, { opponent: false, player: true });
+  drawOpponentSummaryExit(fb, t, handoffTick);
   const healthboxDx = healthboxSlideDx(t);
   if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);

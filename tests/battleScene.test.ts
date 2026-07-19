@@ -368,4 +368,17 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(before).not.toEqual(PARTICLE_COLOR);
     expect(first).toEqual(PARTICLE_COLOR);
   });
+
+  // Mechanism 1 (PROGRESS.md, §7.4.3): the opponent party-status-summary
+  // despawn (alpha blend + per-icon staggered exit slide). Icon j=5 (the
+  // rightmost, delay 0) starts sliding+fading the very first active tick;
+  // its own tile's opaque pixel at local (3,2) sits at screen (82,34) at
+  // that tick (base x=76 + exit offset 3 for n=1 active tick).
+  it("opponent party-summary despawn: icon j=5 is blended (neither pure background nor the icon's own true color) at handoff+1 (1463), and gone again once the blend reaches 0 at handoff+31 (1493) (mechanism 1)", () => {
+    const before = pixelAtSentOut(1462, 82, 34);
+    const during = pixelAtSentOut(1463, 82, 34);
+    const after = pixelAtSentOut(1493, 82, 34);
+    expect(during).not.toEqual(before);
+    expect(after).toEqual(before);
+  });
 });

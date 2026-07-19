@@ -1310,3 +1310,65 @@ through:**
    extracted, the `Sin`-table wobble renderer (can reuse this session's/
    §7.13's affine-matrix and `Sin`/`Cos` math), and the still-open exact
    start-tick arithmetic.
+
+### 7.15. Engine-slice session (PROGRESS.md #83): mechanism 1 (party-summary despawn) landed, bar's own slide flagged as a known sub-gap - score unchanged at 174/256 as predicted
+
+Implemented `drawOpponentSummaryExit` (`battleScene.ts`) - source-exact
+`BLDALPHA` alpha-blend fade + per-icon staggered exit slide, decoded from
+`Task_HidePartyStatusSummary`/`_BattleStart_1`/`SpriteCB_
+StatusSummaryBalls_Exit` (`battle_interface.c:1671-1738,1878-1902`):
+
+- **Blend**: `tBlend` starts 16, decrements once every OTHER tick - closed
+  form `blend(elapsed) = max(0, 15 - floor(elapsed/2))`,
+  `elapsed = t - handoffTick - 1` (matching §7.4.3's own pixel-confirmed
+  1463 start tick), applied as a per-pixel blend toward whatever this
+  frame already drew behind the icon (same TGT1/TGT2 semantics as this
+  module's other `blendChannel` use, §2).
+- **Per-icon slide**: each icon has a `7*(5-j)`-tick delay (reverse index
+  order on the opponent side, source-cited), then an accelerating slide -
+  hand-derived from the source's own integer accumulator
+  (`data[3]+=56` every active tick, `x2 += data[3]>>4` using the
+  PRE-mask value) to the closed form `x2(n) = 3*n*(n+1)/2` for `n` active
+  ticks (verified by direct simulation of the source arithmetic by hand,
+  not fitted). Direction (rightward/positive) pixel-confirmed via direct
+  oracle-crop inspection at ticks 1462/1480/1490 (`/tmp/partysum_*.png`,
+  throwaway) - icons visibly shift right and vanish off the right edge,
+  not left.
+- **NOT implemented**: the bar's own exit slide
+  (`SpriteCB_StatusSummaryBar_Exit`, source-cited as a constant +2px/tick
+  once its direction sign is resolved) - the bar renders at its settled
+  position, alpha-fading in place only. A real, deliberately time-boxed
+  sub-gap, not an oversight - this session's own verification budget
+  covered the blend + the 6 icons' stagger/slide (the visually larger
+  piece) via spot-check pixel probes rather than the exhaustive RAM probe
+  the brief's own seed suggested; flagged honestly rather than claimed
+  fully validated.
+
+**Score effect, as predicted**: `sendout.json` stays **174/256**, full
+19-trace sweep re-run against the live oracle, other 18 at exact prior
+counts, zero regressions (checked per-tick, not just aggregate).
+`localcheck.ts` pixel-diff mass across 1462-1543: **105984->100498px**
+(-5486px, the largest single-mechanism drop of the four landed this
+session-family) - every affected tick strictly improved or held.
+
+**Remaining for `sendout.json` toward 256/256, mechanism 1 now struck
+through - only one left:**
+1. ~~Opponent party-status-summary despawn fade~~ - done this session
+   (above), except the bar's own slide (flagged sub-gap).
+2. ~~Ball sprite draw~~ - done (§7.12).
+3. ~~Open-particle burst~~ - done (§7.14), through logical tick 12 only.
+4. ~~Mon affine-scale-in + ball-color tint~~ - done (§7.13).
+5. Front-sprite entrance anim (`ANIM_V_STRETCH`) - the only mechanism
+   remaining. Needs GROVYLE's 2nd front-sprite frame extracted (a genuine
+   ROM extraction, not yet done), the `Sin`-table wobble renderer (can
+   reuse the affine-matrix and `Sin`/`Cos` math already landed this
+   session-family, §7.13/§7.14), and the still-open exact start-tick
+   arithmetic (§7.11's own flagged follow-up - the sum of the affine-emerge
+   completion tick + animation-task scheduling lag + the 41-tick duration
+   does not land cleanly on the empirically-found settle tick 1544,
+   per §7.11). Even once this lands, per this dossier's own structural
+   finding (every tick needs ALL currently-missing mechanisms
+   simultaneously), `sendout.json`'s score should be expected to move for
+   the first time in this window's whole history - or, if it doesn't, that
+   itself is a real finding worth naming precisely (per the brief's own
+   "name what else differs" fallback), not forced.

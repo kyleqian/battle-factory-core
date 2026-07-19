@@ -5,6 +5,33 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 80 — S7 v5 ground truth regenerated (parallel worktree lane, merged): turn-1 trace/dump rebuilt under animations-on — menu timing UNCHANGED, RNG ledger IDENTICAL (12 calls, same LCG values), both old register mysteries answered
+
+- **State:** merge of `worker/wt-20260718-174536` (base `1050ba1`):
+  `npm test` **455/455**, `npm run build` green.
+- **Did (worktree lane, supervisor-verified incl. an independent replay
+  of the new trace — 242 captures, menu sha `d223d98a2da9`@1884 exactly
+  as claimed):** (1) first-action-menu timing byte-identical to v3
+  (drift concern falsified — the intro's fixed waits absorb the entrance
+  anims), so battle-menu groundwork is NOT stale. (2) battle1-turn1.json
+  rebuilt: same buttons, 2620→2900 frames, 242 dense captures over both
+  anim windows, twice-run deterministic. (3) RAM dump rebuilt (1021
+  rows, 4 probe scripts re-run twice byte-identical): RNG ledger still
+  EXACTLY 12 calls with identical LCG values at later ticks —
+  **animations consume zero RNG**; damage 42, 1HP/tick drain, stat
+  stages, turn order all reproduce. (4) Dossier corrections:
+  battle-turn-notes §9 old→new tick map (+128 through DOUBLE_TEAM, +235
+  by turn-end); battle-move-anim-notes §8 real timelines — DOUBLE_TEAM
+  clone blend is flat eva=12/evb=8 for 130 ticks (resolves the old
+  130-vs-66 mismatch), ROCK_SLIDE's BG3_Y shake fires (0/-7, ~10
+  ticks). (5) HITMARKER_NO_ANIMATIONS + optionsBattleSceneOff both 0
+  all trace. Flagged open: rock-spawn cadence within 2337-2516.
+- **Next:** send-out mechanisms 1/3/4/5 (main lane, #79's list), then
+  the action-menu slice — its groundwork is confirmed still valid.
+- **Notes:** worktree removed, branch deleted. No PAPERCUT.
+
+---
+
 ## 79 — Bounded worker: send-out mechanism 2/5 (ball sprite) landed, pixel-validated; `sendout.json` stays **174/256** as expected (per #74/#78's "no subset moves the count" finding), 4 mechanisms remain
 
 - **State:** `npm test` **455/455** (+1), `npm run build` green. Full
