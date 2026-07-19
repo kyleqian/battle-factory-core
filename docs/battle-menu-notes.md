@@ -1374,6 +1374,68 @@ s6-acceptance 224/228. `turn1-cloneanim.json` (unchanged, per the brief) now
 failing ticks are ALL inside the banner window (2132-2189, gap 2's own newly
 -bounded residual) plus the 4 sub-pixel clone-edge ticks named above.
 
+### 10c. Gap 1's own 4 sub-pixel clone-edge ticks CLOSED (bounded worker, this session) - opponent healthbox z-order, not an offset-table bug
+
+Per the brief's own instruction: fix from the already-committed probe data,
+not by fitting. Re-ran `dump-doubleteam-sprites.py` fresh over ticks
+2070-2093 of `turn1-cloneanim.json` and cross-checked every one of the 4
+failing ticks' own `x2` values (both clone slots) against
+`doubleTeamCloneOffsets`' computed table, respecting the one-tick render lag
+(render tick `T` reads RAM tick `T-1`): **all 4 match bit-exact**
+(e.g. render 2075 reads RAM 2074's `x2=-41/40`; render 2088 reads RAM
+2087's `x2=-41/40`; render 2082/2089 read RAM 2081/2088's `x2=41/-42` and
+`-42/41`) - confirming §10a's own offset-table fix needed no further
+correction. The residual was NOT a formula bug.
+
+Diffed the actual failing pixels directly (`tools/compare/out/latest`,
+oracle vs. app PNGs): at tick 2075, both diff pixels (104,25)/(104,26) show
+oracle=`(82,107,99)` (a real, STATIC pixel - confirmed unchanged across
+ticks 20-30 in the same column, i.e. not clone-related at all) vs.
+app=`(123,123,127)` (this run's generic erased-background fill). Cross-
+checked against a plain (non-clone) tick 2100: the exact same screen
+position (104,25) - and the whole 8x8 tile block it belongs to
+(GROVYLE_CORNER+(1,13), tile row 1 col 0) - already matches the oracle
+byte-exact at Grovyle's OWN rest position (145-152, 20-27), proving the
+tileset's own pixel data (index 14, a genuine chin/jaw shadow tile) is
+correct, not corrupted.
+
+**Root cause**: `(104,25)` is the OPPONENT HEALTHBOX's own right border
+(`HEALTHBOX_FRAME_ORIGIN = (12,14)`, `FRAME_SIZE = 128x32` - `104,25` is
+comfortably inside that rect, local `(92,11)`). On real hardware the
+healthbox is a separate, higher-OAM-priority element than the battler mon
+sprite (`battle_interface.c`) - normally irrelevant since Grovyle's own
+silhouette (corner x=144) never reaches anywhere near the healthbox's right
+edge (x<=140), but DOUBLE_TEAM's clones can: `DOUBLE_TEAM_CLONE_OFFSETS_A/B`
+peak at amplitude 41-42px (the sine table's own near-90&deg; entries, `data0`
+approaching its max 64), putting the clone's leftmost content tile (the same
+chin/jaw detail) within 1-2px of the healthbox border at exactly 4 ticks
+(2075/2082/2088/2089 - the only render ticks where `n`'s excursion reaches
+that peak). This run's clone compositor (`drawDoubleTeamClones`) drew the
+shifted tile unconditionally, painting over the healthbox border that
+`menuIdleBase`'s own static full-frame harvest had already drawn correctly
+underneath.
+
+**Fix**: `isOpponentHealthboxOpaqueAt(x,y)` (`battleScene.ts`) - a per-pixel
+lookup against `opponentHealthboxContent`'s own composited canvas at its
+settled origin (no slide `dx` - this window is deep past send-out, always
+settled) - threaded through `blendedTile`/`drawSpriteSheetBlended` as an
+optional `skip` predicate (scoped ONLY to the clone draw call sites, not the
+other `blendedTile` callers - ball-status-bar compositing elsewhere in this
+file never overlaps the healthbox region so needed no change). Verified
+against the compare tool directly: `turn1-cloneanim.json`'s clone window
+(1964-2093) is now 0 diff on EVERY tick (was 4/129 failing). New Tier-1 pin
+(`tests/battleScene.test.ts`): renders tick 2075 with a real
+`FightSubmenuState` and asserts `(104,25)` equals `composeOpponentHealthbox`'s
+own output pixel, not a hardcoded literal - ties the regression directly to
+the compositor rather than an oracle-sampled magic number.
+
+**Verification**: `npm test` 635/635 (+1 pin), `npm run build` green.
+Regression sweep unchanged: turn1-kickoff 81/81, fight-submenu 234/235,
+menu-idle 69/69, sendout 255/256, s6-acceptance 224/228, scene-assembly
+256/256. `turn1-cloneanim.json` **168/230 -> 172/230** (the clone window
+itself now fully 0 diff; all remaining 58 failures are gap 2's own banner
+window, 2132-2189).
+
 ### 10b. First attempt (bounded worker, prior session) - superseded by §10a above
 
 Picks up exactly where §9 left off (tick 1964 = pressTick+45). Engine code

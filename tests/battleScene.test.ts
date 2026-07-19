@@ -24,7 +24,7 @@ import {
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
-import { CLOSED_FIGHT_SUBMENU_STATE } from "../src/engine/battleMenu.ts";
+import { CLOSED_FIGHT_SUBMENU_STATE, confirmFightMove, openFightSubmenu } from "../src/engine/battleMenu.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
 import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import sendOutHealthboxOpponentAsset from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
@@ -760,5 +760,42 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     const atFrame0Tick = pixelAtSentOut(1525, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
     expect(atFrame1Tick).toEqual([198, 239, 189]);
     expect(atFrame0Tick).toEqual([189, 255, 181]);
+  });
+});
+
+describe("battleScene: S7 slice B - DOUBLE_TEAM clone vs. opponent healthbox z-order (docs/battle-menu-notes.md §10c)", () => {
+  // At the clone's most extreme excursion (amplitude 41-42px, `DOUBLE_TEAM_
+  // CLONE_OFFSETS_A/B`'s own peak), its leftmost content tile (a chin/jaw
+  // detail, genuinely opaque in Grovyle's own tileset - confirmed correct at
+  // rest, tick 2100, GROVYLE_CORNER+(1,13)) reaches within 1-2px of the
+  // opponent healthbox's own right border. The healthbox is a separate,
+  // higher-priority OBJ on real hardware (`battle_interface.c`), so its
+  // border must stay drawn on top wherever the clone's silhouette would
+  // otherwise overpaint it - previously it didn't (`isOpponentHealthboxOpaqueAt`,
+  // `battleScene.ts`), producing 4 near-1px oracle mismatches (ticks
+  // 2075/2082/2088/2089, PROGRESS.md #125's own named residual). Render tick
+  // 2075 = pressTick(1919)+156, offset -41 - oracle-confirmed at (104,25).
+  it("clips the clone's own leftmost content tile so the opponent healthbox's real border stays on top at render tick 2075, x=104/y=25", () => {
+    const battler1 = ramDump.battlerSnapshots.before_turn.battler1;
+    const name = speciesNames.species[battler1.species]!.name;
+    const composed = composeOpponentHealthbox(
+      {
+        frame: battleHealthboxAsset.singlesOpponent,
+        hpbar: battleHealthboxAsset.hpbar,
+        hpbarAnim: battleHealthboxAsset.hpbarAnim,
+        statusIcons: battleHealthboxAsset.status2,
+      },
+      { name, level: battler1.level, gender: "male", hpFraction: battler1.hp / battler1.maxHP, status: "none" },
+    );
+    const lx = 104 - HEALTHBOX_FRAME_ORIGIN.x;
+    const ly = 25 - HEALTHBOX_FRAME_ORIGIN.y;
+    const expected = composed.pixels[ly * composed.width + lx]!;
+    expect(expected).not.toBeNull();
+
+    const submenu = confirmFightMove(openFightSubmenu(0), 879); // pressTick = TICK0+879 = 1919
+    const fb = new Uint8Array(240 * 160 * 4);
+    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu });
+    const o = (25 * 240 + 104) * 4;
+    expect([fb[o]!, fb[o + 1]!, fb[o + 2]!]).toEqual([expected.r, expected.g, expected.b]);
   });
 });

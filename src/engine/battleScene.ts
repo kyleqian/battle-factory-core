@@ -2571,7 +2571,17 @@ function drawPlayerBallOpenParticles(fb: Uint8Array, t: number): void {
  *   exact against the oracle across the whole 1463-1480 window).
  */
 /** Same real-hardware target-2 rule as `blendedSetPixel` above (backdrop/BG, never another sprite already in `fb`) - see that function's doc comment. */
-function blendedTile(fb: Uint8Array, tile: number[], palette: RgbColor[], hFlip: boolean, ox: number, oy: number, eva: number, evb: number): void {
+function blendedTile(
+  fb: Uint8Array,
+  tile: number[],
+  palette: RgbColor[],
+  hFlip: boolean,
+  ox: number,
+  oy: number,
+  eva: number,
+  evb: number,
+  skip?: (x: number, y: number) => boolean,
+): void {
   for (let py = 0; py < 8; py += 1) {
     for (let px = 0; px < 8; px += 1) {
       const sx = hFlip ? 7 - px : px;
@@ -2582,6 +2592,7 @@ function blendedTile(fb: Uint8Array, tile: number[], palette: RgbColor[], hFlip:
       const x = ox + px;
       const y = oy + py;
       if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      if (skip?.(x, y)) continue;
       const o = (y * 240 + x) * 4;
       const bg = healthboxBackgroundColorAt(x, y);
       const tgt2 = bg ?? { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! };
@@ -2644,14 +2655,51 @@ function eraseGrovyleFootprint(fb: Uint8Array): void {
 }
 
 /** Same tile-grid iteration as `drawSpriteSheet`, but through `blendedTile` (explicit `eva`/`evb`, not necessarily summing to 16 - the clone window's own flat 12/8 doesn't). */
-function drawSpriteSheetBlended(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, eva: number, evb: number): void {
+function drawSpriteSheetBlended(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  eva: number,
+  evb: number,
+  skip?: (x: number, y: number) => boolean,
+): void {
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
       const tile = tileset.tiles[ty * tileset.columns + tx];
       if (!tile) continue;
-      blendedTile(fb, tile, palette, false, ox + tx * 8, oy + ty * 8, eva, evb);
+      blendedTile(fb, tile, palette, false, ox + tx * 8, oy + ty * 8, eva, evb, skip);
     }
   }
+}
+
+/**
+ * Whether the OPPONENT healthbox's own real (non-transparent) art occupies
+ * screen pixel `(x, y)`, at its settled post-slide-in position
+ * (`HEALTHBOX_FRAME_ORIGIN`, no `dx` - by the DOUBLE_TEAM window (tick
+ * `pressTick`+47 on, deep into turn 1) the send-out slide is long settled,
+ * baked statically into `menuIdleBase`'s own full-frame harvest). The
+ * healthbox is a separate, higher-priority OBJ than the battler mon sprite
+ * on real hardware (`battle_interface.c`'s own healthbox OAM priority sits
+ * in front of the mon OBJ) - normally invisible since Grovyle's own
+ * silhouette never reaches this far left, but DOUBLE_TEAM's clones can
+ * (`DOUBLE_TEAM_CLONE_OFFSETS_A/B`'s largest excursions, amplitude up to
+ * 42px, put the clone's own leftmost content tile within a couple columns of
+ * the healthbox's right edge). Used to clip the clone draw so it doesn't
+ * paint over the healthbox border - pixel-confirmed against the oracle
+ * (docs/battle-menu-notes.md §10c): the previously-unexplained 4-tick, 2-7px
+ * residual at ticks 2075/2082/2088/2089 was exactly this border being
+ * overpainted by the clone's own chin/jaw tile detail at its most extreme
+ * offsets (-41/-42), never a bug in the offset table itself (RAM-reverified
+ * bit-exact at every one of those ticks first).
+ */
+function isOpponentHealthboxOpaqueAt(x: number, y: number): boolean {
+  const { width, height, pixels } = opponentHealthboxContent;
+  const lx = x - HEALTHBOX_FRAME_ORIGIN.x;
+  const ly = y - HEALTHBOX_FRAME_ORIGIN.y;
+  if (lx < 0 || lx >= width || ly < 0 || ly >= height) return false;
+  return pixels[ly * width + lx] != null;
 }
 
 /**
@@ -2671,8 +2719,8 @@ function drawDoubleTeamClones(fb: Uint8Array, t: number, pressTick: number): boo
   eraseGrovyleFootprint(fb);
   const palette = getDoubleTeamClonePalette();
   const { tileset } = grovyleFrontSprite;
-  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.a, GROVYLE_CORNER.y, 12, 8);
-  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.b, GROVYLE_CORNER.y, 12, 8);
+  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.a, GROVYLE_CORNER.y, 12, 8, isOpponentHealthboxOpaqueAt);
+  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.b, GROVYLE_CORNER.y, 12, 8, isOpponentHealthboxOpaqueAt);
   return true;
 }
 
