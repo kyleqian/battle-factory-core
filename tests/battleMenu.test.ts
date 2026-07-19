@@ -27,6 +27,10 @@ import {
   PLAYER_HEALTHBOX_SLIDE_START_TICK,
   PLAYER_HEALTHBOX_SLIDE_SETTLE_TICK,
   playerHealthboxSlideDx,
+  PLAYER_MATERIALIZE_SETTLE_START_TICK,
+  PLAYER_MATERIALIZE_SETTLE_TICK,
+  playerMaterializeSettleTintCoeff,
+  playerMaterializeSettleY2,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -348,5 +352,46 @@ describe("battleMenu: player healthbox slide-in (docs/battle-menu-notes.md §3 i
     expect(pixelAtSentOut(1689, 180, 92)).toEqual([115, 255, 173]);
     expect(pixelAtSentOut(1710, 180, 92)).toEqual([115, 255, 173]);
     expect(pixelAtSentOut(1741, 180, 92)).toEqual([115, 255, 173]);
+  });
+});
+
+describe("battleMenu: ONIX color-fade-to-true-color + settle wobble (ISSUES #17, docs/battle-menu-notes.md §3 item 5's own named blocker - RAM-probed via tools/probe/specs/menu-player-materialize-taskfade.json, cross-validated by brute-force pixel decode against battle1-menu-dense.json)", () => {
+  it("hands off from drawPlayerMaterialize's own fixed-tint window (ends 1663) with no gap or overlap", () => {
+    expect(PLAYER_MATERIALIZE_SETTLE_START_TICK).toBe(1664);
+  });
+
+  it("tCoeff (Task_FadeMon_ToNormal_Step) stays fully tinted (16) while frozen polling the concurrent BG-white fade, then ramps down exactly 1/tick, reaching true color (0) at render 1691", () => {
+    expect(playerMaterializeSettleTintCoeff(1664)).toBe(16);
+    expect(playerMaterializeSettleTintCoeff(1675)).toBe(16);
+    expect(playerMaterializeSettleTintCoeff(1676)).toBe(15);
+    expect(playerMaterializeSettleTintCoeff(1683)).toBe(8);
+    expect(playerMaterializeSettleTintCoeff(1690)).toBe(1);
+    expect(playerMaterializeSettleTintCoeff(1691)).toBe(0);
+    expect(playerMaterializeSettleTintCoeff(1702)).toBe(0);
+    expect(playerMaterializeSettleTintCoeff(1741)).toBe(0);
+  });
+
+  it("y2 settle wobble (gSprites[6].y2, RAM-derived table) is irregular/non-monotonic - not DoBounceEffect (too small an amplitude) and not a curve, a genuine third animation (BACK_ANIM_V_SHAKE) - then permanently 0 from PLAYER_MATERIALIZE_SETTLE_TICK (1702) on, matching PROGRESS #109's independently-corrected settle pin", () => {
+    expect(playerMaterializeSettleY2(1664)).toBe(2);
+    expect(playerMaterializeSettleY2(1669)).toBe(0);
+    expect(playerMaterializeSettleY2(1670)).toBe(6);
+    expect(playerMaterializeSettleY2(1671)).toBe(11);
+    expect(PLAYER_MATERIALIZE_SETTLE_TICK).toBe(1702);
+    expect(playerMaterializeSettleY2(1702)).toBe(0);
+    expect(playerMaterializeSettleY2(1710)).toBe(0);
+    expect(playerMaterializeSettleY2(1741)).toBe(0);
+  });
+
+  it("tick 1693 and tick 1700 land on the identical wobble phase (y2=11, both fully true-color) - the same 'oscillating, 7-tick round trip' the docs' own sha comparison independently found", () => {
+    expect(playerMaterializeSettleY2(1693)).toBe(playerMaterializeSettleY2(1700));
+    expect(playerMaterializeSettleY2(1693)).toBe(11);
+  });
+
+  it("rendered pixels: fully tinted through 1666-1675, mid-fade at 1676, settled true gray from 1691 on, oracle-pinned (battle1-menu-dense.json)", () => {
+    expect(pixelAtSentOut(1666, 60, 70)).toEqual([255, 181, 247]);
+    expect(pixelAtSentOut(1676, 60, 70)).toEqual([247, 173, 239]);
+    expect(pixelAtSentOut(1691, 60, 70)).toEqual([132, 123, 123]);
+    expect(pixelAtSentOut(1702, 60, 70)).toEqual([132, 123, 123]);
+    expect(pixelAtSentOut(1730, 60, 70)).toEqual([132, 123, 123]);
   });
 });

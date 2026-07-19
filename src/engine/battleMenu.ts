@@ -614,6 +614,89 @@ export function playerHealthboxSlideDx(t: number): number | null {
   return PLAYER_HEALTHBOX_SLIDE_START_DX - PLAYER_HEALTHBOX_SLIDE_STEP * (t - PLAYER_HEALTHBOX_SLIDE_START_TICK);
 }
 
+// --- Slice 4c (ISSUES #17): ONIX's own color-fade-to-true-color + settle
+// wobble - the LAST unimplemented S6 window (docs/battle-menu-notes.md §3
+// item 5's own named blocker: "the player window's LaunchBallFadeMonTask
+// coefficient ramp entangles with the still-unresolved idle-bob mechanism
+// starting ~1670... a non-monotonic residual, not a clean single-mechanism
+// fit"). RAM-probed directly this session (`tools/probe/specs/menu-player-
+// materialize-taskfade.json` - a full `gTasks[0..15]` scan reusing
+// `sendout-grovyle-taskfade.json`'s own watch shape, PLUS `gSprites[6]`'s
+// own `y2` field `menu-player-materialize.json` already watched), and
+// cross-validated a SECOND, independent way (brute-force pixel decode
+// against `battle1-menu-dense.json`'s own oracle captures, reversing
+// `blendComponentToward` per-channel over every opaque ONIX texel -
+// `tools/compare/scratch/menu-audit/decode_player_tint_scratch3.mjs`): both
+// methods agree at every one of the 39 checked ticks (1664-1702), so this
+// is ground truth, not a fit.
+//
+// **The color fade** (`Task_FadeMon_ToNormal`/`_Step`,
+// `battle_anim_throw.c:2078-2102` - the OTHER effect of the SAME
+// `LaunchBallFadeMonTask(TRUE, battler, 14, ballId)` call site §3 item 5
+// already cites for the BG-white dither): the task is created at ball
+// release with `tCoeff=16` (fully tinted, matching the existing
+// `drawPlayerMaterialize` window's own constant tint) and sits frozen
+// there polling `!gPaletteFade.active` (the concurrent BG-white flash,
+// `PLAYER_BG_FADE_Y` above) until it clears - RAM-confirmed the poll
+// resolves at RAM tick 1673 - then `Task_FadeMon_ToNormal_Step` decrements
+// `tCoeff` by 1 every tick for 17 calls (RAM ticks 1674-1690: stored values
+// 16,15,...,0 then task self-destroys) before true colors show. Folding in
+// this window's own established render lag (a blend applied during RAM
+// tick T is visible at render T+1, and a Step call's own stored result is
+// the NEXT call's pre-decrement input - i.e. render R shows the
+// coefficient that was live during RAM tick R-2) collapses to a clean
+// closed form with no fitting needed: coefficient 16 constant through
+// render 1675, then exactly one integer step down per tick.
+//
+// **The settle wobble** (§3 item 5's own "may be the DoBounceEffect
+// pre-menu state or an affine tail" lead): confirmed NOT `DoBounceEffect`
+// (`battle_controller_player.c:237-238`, `HandleInputChooseAction` - too
+// small a range (amplitude 1) and that call site only runs once the action
+// menu is polling for input, i.e. `MENU_DRAW_TICK`+ - a different,
+// already-implemented mechanism, `menuIdleBounce`). RAM-probed instead
+// (`gSprites[6].y2`): once ONIX's own affine scale-in finishes
+// (`affineAnimEnded`, RAM tick 1666 - confirmed by the sprite callback
+// switching that same tick), `BattleAnimateBackSprite` (`pokemon.c:6886`)
+// launches ONIX's own species back-sprite entrance animation
+// (`LaunchAnimationTaskForBackSprite`, source-confirmed
+// `GetSpeciesBackAnimSet(SPECIES_ONIX) = BACK_ANIM_V_SHAKE` - a real
+// vertical-shake entrance, one of 3 nature-dependent variants selected by
+// `sBackAnimNatureModTable`) - a genuine THIRD animation, exactly as this
+// doc's own lead warned ("treat it as a third, not-yet-attributed
+// animation" - its ~11-tick apparent period doesn't match either the
+// affine-emerge tail or the later idle-bounce cycle because it isn't
+// either of them). Kept as a literal RAM-derived table per this run's
+// established convention for exactly this situation
+// (`MATERIALIZE_Y2_TABLE`/`GROVYLE_STRETCH_TABLE` precedent) rather than
+// reverse-engineering which of the 3 nature-dependent `VerticalShake*`
+// variants this particular save's ONIX resolves to: holds 0 through render
+// 1669, then an irregular (non-monotonic, `Sin`-table-driven) bounce
+// through render 1701, settling permanently at 0 from render **1702** on -
+// the exact tick PROGRESS #109 independently corrected the scene's own
+// full-frame settle pin to (cross-validating both derivations again: the
+// wobble table and the pixel-sha settle pin agree on the same tick from
+// two unrelated methods).
+
+/** First render tick `drawPlayerMaterialize`'s own fixed-tint window (`PLAYER_MATERIALIZE_END_TICK`, `battleScene.ts`) hands off to the real per-tick fade+wobble below - one past its last-modeled tick, no gap or overlap. */
+export const PLAYER_MATERIALIZE_SETTLE_START_TICK = 1664;
+/** The real, permanent scene settle tick (PROGRESS #109's own corrected pin, replacing the wrong inherited 1693/1696) - `playerMaterializeSettleTintCoeff`/`playerMaterializeSettleY2` both independently reach their resting value (0) here. */
+export const PLAYER_MATERIALIZE_SETTLE_TICK = 1702;
+
+/** `Task_FadeMon_ToNormal_Step`'s `tCoeff` (0-16, `battleScene.ts`'s `blendComponentToward` blend target) at render tick `t` - RAM-derived per the module doc above, a plain closed form (constant, then a 1-unit-per-tick ramp), not a table. Only meaningful for `t >= PLAYER_MATERIALIZE_SETTLE_START_TICK`. */
+export function playerMaterializeSettleTintCoeff(t: number): number {
+  if (t <= 1675) return 16;
+  return Math.max(0, 16 - (t - 1675));
+}
+
+/** `gSprites[6].y2` (RAM-read, 39 ticks 1664-1702 inclusive) - see the module doc above for why this is a literal table, not a formula. Indexed from `PLAYER_MATERIALIZE_SETTLE_START_TICK`; holds its last entry (0) forever past 1702 via the `?? 0` fallback below. */
+const PLAYER_SETTLE_WOBBLE_Y2_TABLE: readonly number[] = [
+  2, 0, 0, 0, 0, 0, 6, 11, 3, 1, 10, 9, 0, 3, 11, 6, 0, 7, 11, 3, 1, 10, 9, 0, 3, 11, 6, 0, 7, 11, 2, 1, 10, 9, 0, 4, 11, 6, 0,
+];
+/** ONIX's own settle-wobble `y2` (pixel offset) at render tick `t` - see `PLAYER_SETTLE_WOBBLE_Y2_TABLE`'s own doc comment. Only meaningful for `t >= PLAYER_MATERIALIZE_SETTLE_START_TICK`. */
+export function playerMaterializeSettleY2(t: number): number {
+  return PLAYER_SETTLE_WOBBLE_Y2_TABLE[t - PLAYER_MATERIALIZE_SETTLE_START_TICK] ?? 0;
+}
+
 // --- Slice 5: the settled first-action-menu window (docs/battle-menu-idle-
 // notes.md, trace ticks 1742-1810) - the 6-tick teal blank box, the atomic
 // menu draw, and the settled idle-bounce cycle. `battleScene.ts` composes

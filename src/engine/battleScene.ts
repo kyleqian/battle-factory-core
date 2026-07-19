@@ -409,6 +409,7 @@ import {
   GO_TEXT,
   GO_TEXT_START_TICK,
   goTextVisibleChars,
+  BRENDAN_THROW_START_TICK,
   brendanThrowFrame,
   brendanThrowDx,
   playerThrowBallTopLeft,
@@ -423,6 +424,9 @@ import {
   playerMaterializeBgFadeY,
   PLAYER_BG_FADE_START_TICK,
   playerHealthboxSlideDx,
+  PLAYER_MATERIALIZE_SETTLE_START_TICK,
+  playerMaterializeSettleTintCoeff,
+  playerMaterializeSettleY2,
   MENU_IDLE_BLANK_START_TICK,
   MENU_IDLE_BLANK_END_TICK,
   menuIdleBounce,
@@ -1703,6 +1707,35 @@ function drawPlayerMaterialize(fb: Uint8Array, t: number): void {
 }
 
 /**
+ * ISSUES #17: ONIX's own color-fade-to-true-color + settle wobble, picking
+ * up exactly where `drawPlayerMaterialize`'s fixed-tint window
+ * (`PLAYER_MATERIALIZE_END_TICK`, 1663) leaves off - see
+ * `playerMaterializeSettleTintCoeff`/`playerMaterializeSettleY2`
+ * (`battleMenu.ts`) for the full RAM+pixel derivation. The affine scale-in
+ * itself is already complete by this point (`affineEmergeAccumulator`
+ * reaches its own neutral clamp, 256, before this window starts), so unlike
+ * `drawGrovyleStretch`'s own independent x/y stretch this is a plain 1:1
+ * blit - reuses `drawSpriteSheetAffineStretch` at `xScale=yScale=256`
+ * (the identity matrix) purely for its existing palette+`tintCoeff`-blend
+ * support, not for any actual stretch.
+ */
+function drawPlayerMaterializeSettle(fb: Uint8Array, t: number): void {
+  if (t < PLAYER_MATERIALIZE_SETTLE_START_TICK) return;
+  drawSpriteSheetAffineStretch(
+    fb,
+    onixBackSprite.tileset,
+    onixBackSprite.palette,
+    ONIX_MATERIALIZE_CORNER.x,
+    ONIX_MATERIALIZE_CORNER.y,
+    256,
+    256,
+    playerMaterializeSettleY2(t),
+    MATERIALIZE_TINT_COLOR,
+    playerMaterializeSettleTintCoeff(t),
+  );
+}
+
+/**
  * PLAYER-side ball "open" pose swap (docs/battle-menu-notes.md §3 item 5) -
  * `StartSpriteAnim(sprite, 1)` one tick after arrival (§3 item 4c's
  * `PLAYER_THROW_BALL_ARRIVE_TICK`), same shared `sBallAnimSeq1` mechanism 2
@@ -2301,12 +2334,22 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): 
  * tick, so their first-visible render tick is the same tick for both
  * mechanisms, on both sides.
  *
- * **Stall/late-spawn corrections NOT ported**: `PARTICLE_STALL_LOGICAL_TICK`/
+ * **Stall/late-spawn correction, ISSUES #17**: `PARTICLE_STALL_LOGICAL_TICK`/
  * `PARTICLE_LATE_SPAWN_START_INDEX` only affect ages at logical tick 13+ (the
- * opponent's own empirically-found one-tick RAM stall past that point) - this
- * window's own separately-named boundary (see below) stops this function's
- * useful range well short of 13, so porting either correction is
- * unverifiable and unnecessary here.
+ * opponent's own empirically-found one-tick RAM stall past that point) - a
+ * prior session left this un-ported since this window's own then-relevant
+ * range stopped well short of 13. Once ISSUES #17's settle-window work
+ * extended this function's own relevant range out to logical tick 39
+ * (`PARTICLE_MAX_AGE`+`PARTICLE_SPAWN_COUNT`-1, i.e. render tick 1692 -
+ * the particle math was already unconditionally live that far, just
+ * unverified past 1663), the SAME correction the opponent's own
+ * `drawBallOpenParticles` already applies turned out to be needed here too
+ * - porting it verbatim (same call site, same `AnimateBallOpenParticles`
+ * source function, battler-generic) closed the full residual: `tools/
+ * compare/traces/menu-materialize.json` widened to 1652-1741 (+samples)
+ * went from a 104px-down-to-13px tail at 1666-1692 to 0 diff everywhere,
+ * confirming this is the same one-tick RAM stall on both sides, not a
+ * coincidence.
  *
  * **Draw order, §7.27 update**: previously a static reversed spawn-index
  * loop (oldest-on-top), curve-fit to this window's own radius~0 overlap
@@ -2336,7 +2379,12 @@ function drawPlayerBallOpenParticles(fb: Uint8Array, t: number): void {
   const anim = battleAnimParticles.regularBallAnim;
   const alive: AliveParticle[] = [];
   for (let i = 0; i < PARTICLE_SPAWN_COUNT; i += 1) {
-    const age = logicalT - i;
+    let age = logicalT - i;
+    if (i >= PARTICLE_LATE_SPAWN_START_INDEX) {
+      age -= 1;
+    } else if (logicalT >= PARTICLE_STALL_LOGICAL_TICK) {
+      age -= 1;
+    }
     if (age < 0 || age > PARTICLE_MAX_AGE) continue;
     const angle = (i % 8) * 32;
     const radius = age === 0 ? 0 : 2 * (age - 1);
@@ -2722,11 +2770,21 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   drawTileBgFaded(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette, bgFadeY);
   // battleMenu.ts: Brendan's throw pose-swap + exit translation start at
   // BRENDAN_THROW_START_TICK - before that he's still the settled slide-in
-  // pose (frame 3, unshifted).
+  // pose (frame 3, unshifted). `brendanThrowFrame` uses `null` for BOTH ends
+  // of its own table (before the throw starts, AND once its `FRAME(3,50)`
+  // tail is exhausted, et>=116 - a "table truncated both ends" case, per
+  // this run's own named convention) - the two must NOT be conflated here:
+  // once the throw has started, `null` means "long done and off-screen"
+  // (`brendanThrowDx` itself freezes fully off-screen at n=50), not "back to
+  // the settled on-screen pose". Found via ISSUES #17's own settle-window
+  // work: this bug was invisible before (masked by the much larger
+  // ONIX-missing gap it happened to overlap) and surfaced only once ONIX's
+  // own real transparency let Brendan's incorrectly-redrawn settled sprite
+  // show through at render tick 1690+ (`BRENDAN_THROW_START_TICK`+116).
   const throwFrame = brendanThrowFrame(t);
-  if (throwFrame === null) {
+  if (t < BRENDAN_THROW_START_TICK) {
     drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
-  } else {
+  } else if (throwFrame !== null) {
     const dx = brendanThrowDx(t) ?? 0;
     drawSpriteSheet(fb, brendanThrowTilesets[throwFrame]!, brendan.palette, PLAYER_CORNER.x + dx, PLAYER_CORNER.y);
   }
@@ -2758,6 +2816,7 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   }
   drawBallOpenParticles(fb, t, handoffTick);
   drawPlayerMaterialize(fb, t);
+  drawPlayerMaterializeSettle(fb, t);
   drawPlayerBallOpen(fb, t);
   drawPlayerBallOpenParticles(fb, t);
   if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
