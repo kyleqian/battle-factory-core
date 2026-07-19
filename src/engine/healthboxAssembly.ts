@@ -1,9 +1,10 @@
 // Real content-assembly path for the opponent healthbox (ISSUES #16) - see
 // docs/healthbox-assembly-notes.md for the full root-cause dossier and
-// RAM/VRAM evidence. This is NOT wired into battleScene.ts this round (the
-// brief keeps the pixel-harvested `sendout-healthbox-opponent.json` as the
-// shipping render path) - it's the proven-so-far replacement candidate,
-// exercised only by tests/healthboxAssembly.test.ts.
+// RAM/VRAM evidence. Wired live into battleScene.ts's `drawSendOutHealthbox`
+// (see the doc's "Wired live" section) - the pixel-harvested
+// `sendout-healthbox-opponent.json` is no longer the shipping render source
+// for the opponent healthbox (it stays committed as a ground-truth fixture
+// for tests/healthboxAssembly.test.ts and tests/battleScene.test.ts).
 //
 // Landed, byte-exact (RAM/VRAM-confirmed, see the doc) for the full-HP/
 // no-status case: the base frame (a flat blit of the existing
