@@ -442,6 +442,8 @@ import {
   turnKickoffBounceTick,
   TURN_KICKOFF_LINE1,
   TURN_KICKOFF_LINE2,
+  doubleTeamCloneOffset,
+  statsBannerEva,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -2591,6 +2593,138 @@ function blendedTile(fb: Uint8Array, tile: number[], palette: RgbColor[], hFlip:
   }
 }
 
+/**
+ * S7 slice B (docs/battle-menu-notes.md §10): DOUBLE_TEAM's clone animation
+ * (ticks `pressTick`+47..+174) + the post-clone gap (+175..+207, no code
+ * needed - the plain `drawTurnKickoffText` base already shows Grovyle
+ * normally, matching the oracle's own frozen-baseline pixels there exactly)
+ * + the generic stat-change banner (+208..+274). Both mechanisms erase
+ * Grovyle's real-sprite footprint and redraw a blended copy in its place;
+ * neither window overlaps the other or the gap, so the caller just tries
+ * clones first, then the banner, then falls back to whatever the base scene
+ * already drew (plain Grovyle).
+ */
+
+/** DOUBLE_TEAM's clone palette - Grovyle's own front-sprite palette blended 11/16 toward RGB_BLACK (`BlendPalette(r3, 16, 11, RGB_BLACK)`, `AnimTask_DoubleTeam`, docs/battle-move-anim-notes.md §3) - the darkened "afterimage" tint. Lazily computed once. */
+let doubleTeamClonePaletteCache: RgbColor[] | null = null;
+function getDoubleTeamClonePalette(): RgbColor[] {
+  if (doubleTeamClonePaletteCache) return doubleTeamClonePaletteCache;
+  doubleTeamClonePaletteCache = grovyleFrontSprite.palette.map((c) =>
+    c ? { r: blendComponentToward(c.r, 0, 11), g: blendComponentToward(c.g, 0, 11), b: blendComponentToward(c.b, 0, 11) } : c,
+  );
+  return doubleTeamClonePaletteCache;
+}
+
+/**
+ * Erases Grovyle's own real-sprite footprint (only the settled tileset's
+ * opaque pixels, not the whole bounding box) back to the true field
+ * background (`healthboxBackgroundColorAt`) - the target-hide half of
+ * `monbg ANIM_ATK_PARTNER` (docs/battle-move-anim-notes.md §2, the
+ * `ANIM_DEF_PARTNER` analogue §9.3 already documented for ROCK_SLIDE's own
+ * target-hide), needed before drawing either the clone pair or the
+ * stat-banner's own blended copy in its place.
+ */
+function eraseGrovyleFootprint(fb: Uint8Array): void {
+  const { tileset } = grovyleFrontSprite;
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          if (tile[py * 8 + px] === 0) continue;
+          const x = GROVYLE_CORNER.x + tx * 8 + px;
+          const y = GROVYLE_CORNER.y + ty * 8 + py;
+          const bg = healthboxBackgroundColorAt(x, y);
+          if (bg) setPixel(fb, x, y, bg);
+        }
+      }
+    }
+  }
+}
+
+/** Same tile-grid iteration as `drawSpriteSheet`, but through `blendedTile` (explicit `eva`/`evb`, not necessarily summing to 16 - the clone window's own flat 12/8 doesn't). */
+function drawSpriteSheetBlended(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, eva: number, evb: number): void {
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      blendedTile(fb, tile, palette, false, ox + tx * 8, oy + ty * 8, eva, evb);
+    }
+  }
+}
+
+/**
+ * DOUBLE_TEAM's two afterimage clones - struct-copies of Grovyle's own
+ * rendered sprite (`CloneBattlerSpriteWithBlend`), symmetric `±offset`
+ * horizontal motion (`doubleTeamCloneOffset`, `battleMenu.ts`), the darkened
+ * palette, flat `eva=12/evb=8` blend (mind #112's OBJ-vs-OBJ target-2
+ * lesson - `blendedTile` already resolves target-2 from the plain
+ * background, not whatever's already in `fb`). Real sprite hidden for the
+ * whole visible window. Returns whether the window is active (so the caller
+ * can fall through to the stat banner otherwise).
+ */
+function drawDoubleTeamClones(fb: Uint8Array, t: number, pressTick: number): boolean {
+  const offset = doubleTeamCloneOffset(t, pressTick);
+  if (offset === null) return false;
+  eraseGrovyleFootprint(fb);
+  const palette = getDoubleTeamClonePalette();
+  const { tileset } = grovyleFrontSprite;
+  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x - offset, GROVYLE_CORNER.y, 12, 8);
+  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offset, GROVYLE_CORNER.y, 12, 8);
+  return true;
+}
+
+/**
+ * The generic stat-change banner (`General_StatsChange`, docs/battle-move-
+ * anim-notes.md §4/§8/§9 correction blocks). **Not a BG-vs-background
+ * blend** - reverse-engineered directly against oracle pixels this session
+ * (two independent sample points, both solved exactly at ticks 2140/2150):
+ * target-1 is FLAT WHITE (255,255,255), target-2 is whatever's ALREADY
+ * drawn at that pixel (Grovyle's own real, un-hidden sprite - the base
+ * `drawTurnKickoffText` call already drew it before this function runs), a
+ * white flash blended IN OVER the real sprite, not a BG1-composited copy
+ * replacing it. This also explains `eva=0`'s own boundary ticks (2127-2131,
+ * 2193) needing no special case: `blendChannel(255, real, 0, 16) === real`
+ * exactly, matching the oracle showing plain, un-tinted Grovyle there.
+ *
+ * **Known gap** (docs/battle-menu-notes.md §10): oracle pixels show a
+ * second, still-unidentified per-tick motion under this blend (sampled
+ * directly against two different pixels mid-hold, ticks 2150-2160 - `eva`/
+ * `evb` flat the whole time yet the raw color cycles through several
+ * distinct values) that this function does not reproduce - not
+ * root-caused in the time available this session. Kept as the
+ * best-understood partial model (exact for the ramp boundary/edge ticks
+ * before the extra motion's effect dominates) rather than withheld, per
+ * this run's no-silent-omission convention; the resulting trace residual is
+ * individually attributed, not curve-fit away.
+ */
+function drawStatsBanner(fb: Uint8Array, t: number, pressTick: number): boolean {
+  const eva = statsBannerEva(t, pressTick);
+  if (eva === null) return false;
+  const evb = 16 - eva;
+  const { tileset } = grovyleFrontSprite;
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          if (tile[py * 8 + px] === 0) continue;
+          const x = GROVYLE_CORNER.x + tx * 8 + px;
+          const y = GROVYLE_CORNER.y + ty * 8 + py;
+          if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+          const o = (y * 240 + x) * 4;
+          fb[o] = blendChannel(255, fb[o]!, eva, evb);
+          fb[o + 1] = blendChannel(255, fb[o + 1]!, eva, evb);
+          fb[o + 2] = blendChannel(255, fb[o + 2]!, eva, evb);
+        }
+      }
+    }
+  }
+  return true;
+}
+
 const OPP_SUMMARY_ICON_BASE = { x: 26, y: 32 };
 const OPP_SUMMARY_STATES = ["Empty", "Empty", "Empty", "Full", "Full", "Full"];
 const OPP_SUMMARY_BAR = { x: -24, y: 40 };
@@ -2909,6 +3043,7 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     const textStart = turnKickoffTextStartTick(pressTick);
     if (t >= textStart) {
       drawTurnKickoffText(fb, t, pressTick);
+      if (!drawDoubleTeamClones(fb, t, pressTick)) drawStatsBanner(fb, t, pressTick);
       return;
     }
     // Engine-side turn-order/attacker resolution is in flight but not yet

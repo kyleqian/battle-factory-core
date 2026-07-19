@@ -1232,3 +1232,124 @@ field), `npm run build` green.
 1964+, `battle-move-anim-notes.md` §8), the stat-change banner, ROCK_SLIDE's
 own resolution (accuracy/crit/damage/HP-drain, all much later per
 battle-turn-notes.md §9's table), ISSUES #5/#16/#18/#19/#20.
+
+## 10. S7 slice B: DOUBLE_TEAM clone animation + banner - PARTIAL, NOT
+0-diff (bounded worker, this session) - two genuine unresolved mechanisms,
+individually attributed, not curve-fit
+
+Picks up exactly where §9 left off (tick 1964 = pressTick+45). Engine code
+landed and wired (`battleMenu.ts`'s `doubleTeamCloneOffset`/`statsBannerEva`
++ `battleScene.ts`'s `drawDoubleTeamClones`/`drawStatsBanner`/
+`eraseGrovyleFootprint`), `npm test` 602/602 and `npm run build` stay green,
+and the regression sweep is clean (turn1-kickoff 81/81, fight-submenu
+234/235, menu-idle 69/69, sendout 255/256, s6-acceptance 224/228 - all
+unchanged). **But the acceptance bar (0 diff on the new committed trace)
+is NOT met**: `tools/compare/traces/turn1-cloneanim.json` (canonical prefix,
+1964-2193, 230 captures) scores **49/230**. Committing anyway per this run's
+"attribute, don't withhold" convention - the two gaps below are real,
+bounded findings for the next session, not a guess.
+
+**What's confirmed solid (RAM/register findings, all re-verified this
+session via a fresh `dump-registers.py` stride-1 re-probe, twice
+internally-consistent):**
+- Clone window register envelope: `BLDCNT=0x3F40`/`BLDALPHA` flat
+  `eva=12,evb=8` for pixel-visible ticks 1966-2093 (ticks 1964-1965 are an
+  exact full-frame pixel match to the pre-window baseline - no visible
+  clone yet); reverts fully by 2094.
+- Gap (2094-2131): exact full-frame pixel match to baseline throughout - no
+  code needed, confirmed by this session's own dense diff (not assumed).
+- Banner register envelope: `BLDCNT=0x3F42`/`BLDALPHA` ramps `eva` 0→10
+  (steps of 1/2 ticks, 2127-2150) → holds 10 (2150-2171) → ramps back to 0
+  (2172-2193), `evb=16-eva` throughout (unlike the clone window's own
+  non-16-summing 12/8) - RAM-exact, stride-1 confirmed.
+- Banner mechanism identity (NOT a BG1-composited copy replacing the real
+  sprite, contrary to this dossier's own first-pass assumption): reverse-
+  engineered from oracle pixels directly (two independent sample points,
+  both solved exactly, ticks 2140/2150) - target-1 is flat WHITE
+  `(255,255,255)`, target-2 is Grovyle's own REAL, un-hidden sprite (already
+  drawn by the base scene) - a white flash blended IN OVER the real sprite.
+  This is why `eva=0`'s own boundary ticks (2127-2131, 2193) show plain
+  Grovyle with no special-casing needed (`blendChannel(255,real,0,16)===
+  real` exactly).
+
+**Gap 1 (clone motion): the per-tick advance rate doesn't fit any simple
+(anchor, rate) pair against `AnimDoubleTeam`'s own decoded C formula.**
+`DOUBLE_TEAM_CLONE_OFFSETS` (`battleMenu.ts`) is a faithful simulation of
+the source (`src/battle_anim_effects_1.c:5222-5243` - data0/phase/amplitude
+progression, cross-checked against `battle-move-anim-tables.json`'s own
+`doubleTeam.motion` fields). Anchoring it at `n = t - 1964` reproduces THREE
+independent long-range zero-crossings exactly (bbox collapses back to
+baseline width at ticks 1999/2024/2092, matching the simulated sequence's
+own `n=35/60/128` zero-crossings bit-for-bit) - strong evidence the
+AMPLITUDE ENVELOPE's overall shape/period is right. But the SAME anchor
+fails badly at short range: ticks 1966-1969 exactly match the oracle at
+offset=0 (as expected, `n=2..5` all give `x2=0` in the simulated sequence),
+yet the oracle's own pixels are ALREADY visibly different from its own
+1966-1969 baseline by tick 1970 (`oracle-01966.png != oracle-01970.png`,
+confirmed by direct pixel diff) while the `n=2..11` window of the simulated
+sequence stays at `x2=0` through tick 1975 - i.e. the REAL clone starts
+moving several ticks sooner than the naive "1 call per RAM tick" model
+predicts. A grid search over `(anchor, rate)` pairs (rate = calls per render
+tick, 1/2/3 tried) against every tick's oracle bbox width, using this
+session's own dense pixel-diff table, found NO combination that fits both
+the short-range onset AND the long-range crossings simultaneously (best
+error still ~68k-95k px² across the window - not close to a real fit). This
+means either (a) the true call cadence isn't uniform (matches `AnimDoubleTeam`'s
+own `data[3]` sub-counter more subtly than modeled - e.g. the task's own
+per-tick scheduling isn't 1:1 with render ticks the way this run's other
+mechanisms have been), or (b) there's a per-tick RENDER LAG specific to this
+window (this run's usual "RAM tick T shows at render T+1" convention) that
+compounds with the amplitude ramp in a way a flat single-tick shift can't
+capture. **Not resolved this session** - flagged as the concrete next step:
+a dedicated dense RAM probe of `gSprites[].data[0..5]` for the actual clone
+sprite slots (the same technique `dump-rockslide-sprites.py` used for
+ROCK_SLIDE's own rocks) would settle this directly instead of inferring from
+pixel bbox widths.
+
+**Gap 2 (banner): a second, unidentified motion sits underneath the
+white-flash blend during the hold.** Two independent pixel samples (one
+edge-adjacent, one sprite-center) both show the raw color cycling through
+3-4 distinct values tick-to-tick during ticks 2150-2171, where `eva`/`evb`
+are RAM-confirmed perfectly flat (`10,6`) the whole time - meaning
+Grovyle's own REAL sprite (this mechanism's target-2) must itself be
+moving/changing during the hold, not the blend math. Not `menuIdleBounce`
+(period/shape don't match - the observed cycle is much faster, and
+`menuIdleBounce` is already frozen for Onix/healthbox at this point in the
+turn-kickoff branch, per `turnKickoffFrozenBounceTick`). Candidate not
+tested this session: Grovyle's own SPECIES-specific front-sprite idle
+animation (a "breathing" 2-frame loop, common in Emerald's mon sprites -
+`grovyleFrontSprite`'s asset already has an unused `frame2` key from a prior
+extraction session, never wired into any renderer yet) - worth checking
+first, since it would also explain why the GAP window (2094-2131, plain
+un-blended Grovyle) stays perfectly frozen while the BANNER window doesn't
+(if the idle-animation task itself is gated by `HandleInputChooseMove` no
+longer polling, but the banner's own generic task launch re-triggers a
+per-mon idle-anim tick some other way).
+
+**Implementation as committed** (kept, not reverted, despite the residual -
+this run's "attribute, don't withhold" convention): `battleMenu.ts`'s
+`doubleTeamAnchorTick`/`doubleTeamCloneOffset`/`statsBannerEva` (pure tick
+formulas) + `battleScene.ts`'s `eraseGrovyleFootprint`/
+`drawSpriteSheetBlended`/`drawDoubleTeamClones`/`drawStatsBanner`, wired into
+`drawFightSubmenuWindow`'s `confirmElapsed` branch right after
+`drawTurnKickoffText`. Zero regressions confirmed (see above) since the new
+code only activates for `t >= pressTick+47`, well past every other committed
+trace's own captured range.
+
+**Next steps for whoever picks this up**: (1) a dense
+`gSprites[].data[]`-watching RAM probe (not just pixel bboxes) for the two
+clone sprite slots, across ticks 1964-2094, to nail the true call cadence
+outright rather than inferring it; (2) check whether wiring
+`grovyleFrontSprite.frame2` as a periodic idle-animation swap (independent
+of the banner's own blend) closes Gap 2; (3) once both are pinned, widen
+`tools/compare/traces/turn1-cloneanim.json`'s own captures incrementally
+(the trace itself is already correct/committed, only the rendering needs to
+change) and re-run `npm run compare` until 230/230.
+
+**Verification**: `npm test` 602/602 (no new Tier-1 pins this session - the
+formulas are demonstrably not yet correct, so no pin was added rather than
+pinning a known-wrong value; per this run's own "don't pin what you don't
+trust" precedent), `npm run build` green. Regression sweep (5 traces) all
+unchanged from their pre-session scores. `turn1-cloneanim.json` committed at
+49/230 - the acceptance criterion is NOT met; flagging explicitly for the
+supervisor rather than reporting a false pass.

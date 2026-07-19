@@ -1023,3 +1023,129 @@ export function turnKickoffBounceTick(t: number, pressTick: number): number {
   if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   return turnKickoffFrozenBounceTick(pressTick);
 }
+
+// --- S7 slice B: DOUBLE_TEAM clone animation + post-clone gap + stat-change
+// banner (docs/battle-menu-notes.md §10, docs/battle-move-anim-notes.md
+// §3/§8/§9, docs/battle-turn-notes.md §9) - picks up exactly where slice A's
+// turn-kickoff text left off (tick 1964 = pressTick+45, the "Foe GROVYLE
+// used\nDOUBLE TEAM!" text already fully printed and held) and runs through
+// the stat-change banner's own zero tick (2193 = pressTick+274). All ticks
+// below this session's own dense re-probe of `battle1-turn1.json`'s
+// segments (`tools/probe/dump-registers.py`, stride 1, 1955-2264) plus a
+// fresh full-frame pixel diff pass every tick 1963-2263 against the
+// pre-window baseline (scratch, not committed - re-derivable from the
+// committed trace's own segments the same way every prior session's scratch
+// probes are).
+
+/** Ticks from the A-confirm press to the clone motion's own `n=1` anchor
+ * (`AnimDoubleTeam`'s first per-tick step call - RAM/register tick 1964,
+ * `BLDCNT`/`BLDALPHA` jump to `0x3F40`/`eva=12,evb=8` here and hold flat).
+ * The first two calls (`n=1,2`) land on `data[0]=0`, i.e. zero motion -
+ * pixel-CONFIRMED indistinguishable from the un-cloned baseline (this
+ * session's own dense diff: ticks 1964-1965 are an EXACT full-frame match to
+ * the pre-window baseline) - visible motion genuinely starts 2 ticks later,
+ * see `DOUBLE_TEAM_VISIBLE_START_DELAY`. */
+export const DOUBLE_TEAM_ANCHOR_DELAY = 45;
+/** First trace tick the clone motion is pixel-visible (this session's dense
+ * diff: 1966 is the first tick differing from baseline; 1964-1965 match
+ * exactly - see `DOUBLE_TEAM_ANCHOR_DELAY`). */
+export const DOUBLE_TEAM_VISIBLE_START_DELAY = 47;
+/** Last trace tick the clone motion is pixel-visible - `n=129`, the sequence's
+ * final entry (`data[0]` exceeds 64 on the very next call and both clones are
+ * destroyed); tick 2094 (`+175`) is an EXACT full-frame match to the
+ * pre-window baseline again (real sprite restored, no lag). */
+export const DOUBLE_TEAM_VISIBLE_END_DELAY = 174;
+
+export function doubleTeamAnchorTick(pressTick: number): number {
+  return pressTick + DOUBLE_TEAM_ANCHOR_DELAY;
+}
+
+/**
+ * `AnimDoubleTeam`'s per-call `x2` sequence (`src/battle_anim_effects_1.c:
+ * 5222-5243`, `battle-move-anim-tables.json`'s own `doubleTeam.motion`),
+ * simulated exactly from the decoded source, index `n` (1-based, matching
+ * the sprite's own call count since creation) - table[1] is call 1's `x2`
+ * (always 0), table[129] is the last call before both clones self-destroy.
+ * Both clones share the SAME `data[0]`/amplitude/phaseSpeed progression
+ * (only their seed phase differs, 0 vs 128 - an exact half-cycle stagger),
+ * and `Sin(phase+128, amp) === -Sin(phase, amp)` on the GBA's 256-unit
+ * circle, so clone B's offset is ALWAYS exactly the negative of clone A's -
+ * this table drives both (`+offset` / `-offset`), pixel-confirmed via this
+ * session's own dense trace (three independent zero-crossings - n=35/60/128
+ * - land exactly on trace ticks 1999/2024/2092, i.e. `DOUBLE_TEAM_ANCHOR_
+ * DELAY`+{35,60,128}, all three EXACT bbox-symmetric matches).
+ */
+const DOUBLE_TEAM_CLONE_OFFSETS: readonly number[] = (() => {
+  const offsets: number[] = [0]; // index 0 unused, n starts at 1
+  let data0 = 0;
+  let sub = 0;
+  let phase = 0;
+  for (let n = 1; ; n += 1) {
+    sub += 1;
+    if (sub > 1) {
+      sub = 0;
+      data0 += 1;
+    }
+    if (data0 > 64) break;
+    const table0 = GBA_SINE_TABLE_256[data0]!;
+    const amplitude = Math.floor(table0 / 6);
+    const phaseSpeed = Math.floor(table0 / 13);
+    phase = (phase + phaseSpeed) & 0xff;
+    const tableValue = GBA_SINE_TABLE_256[phase]!;
+    offsets.push(Math.floor((amplitude * tableValue) / 256));
+  }
+  return offsets;
+})();
+
+/** Clone A's horizontal `x2` offset at trace tick `t` (clone B mirrors it,
+ * `-doubleTeamCloneOffset(...)`), or `null` outside the pixel-visible window
+ * (`DOUBLE_TEAM_VISIBLE_START_DELAY`..`DOUBLE_TEAM_VISIBLE_END_DELAY`). */
+export function doubleTeamCloneOffset(t: number, pressTick: number): number | null {
+  const start = pressTick + DOUBLE_TEAM_VISIBLE_START_DELAY;
+  const end = pressTick + DOUBLE_TEAM_VISIBLE_END_DELAY;
+  if (t < start || t > end) return null;
+  const n = t - doubleTeamAnchorTick(pressTick);
+  return DOUBLE_TEAM_CLONE_OFFSETS[n] ?? 0;
+}
+
+/** First/last trace tick of the stat-change banner's own register-active
+ * window (`General_StatsChange`/`StatsChangeAnimation_Step1-3`,
+ * `src/battle_anim_utility_funcs.c:415-628`) - `BLDCNT`/`BLDALPHA` first
+ * write at `+208` (2127, `eva=0/evb=16`) and both zero out at `+274` (2193,
+ * this slice's own committed-trace end tick). RAM/register-exact, no render
+ * lag (unlike the clone window above): this session's dense diff shows the
+ * first PIXEL-visible tick is `+213` (2132, `eva=1`) purely because `eva=0`
+ * is a mathematical no-op, not a lag - `statsBannerEva` naturally reproduces
+ * that by construction. */
+export const STATS_BANNER_START_DELAY = 208;
+export const STATS_BANNER_END_DELAY = 274;
+
+/**
+ * `BLDALPHA`'s `eva` at trace tick `t` (`evb = 16 - eva` throughout - unlike
+ * the clone window's flat 12/8, this session's stride-1 register re-probe
+ * confirms every sampled tick sums to exactly 16), or `null` outside the
+ * banner's register-active window. RAM-exact schedule (`dump-registers.py`,
+ * stride 1, 2127-2193): flat 0 for 5 ticks, then +1 every 2 ticks up to 10
+ * (reached tick+23/2150), held 22 ticks, then the same ramp back down to 0.
+ *
+ * **Known gap, not resolved this session**: this formula alone does NOT
+ * reproduce the banner's pixels 0-diff - a SEPARATE, still-unidentified
+ * per-tick motion (Grovyle's own sprite visibly shifts a few px, sampled
+ * directly against the oracle at two different pixels mid-hold, tick
+ * 2150-2160, eva/evb flat the whole time yet the raw pixel color cycles
+ * through multiple distinct values) sits underneath this blend and was not
+ * reverse-engineered in the time available - see docs/battle-menu-notes.md
+ * §10's own writeup. Kept as the best-understood partial model (matches the
+ * ramp-up ticks 2132-2150 exactls where the extra motion hasn't kicked in
+ * yet) rather than withheld, per this run's no-silent-omission convention.
+ */
+export function statsBannerEva(t: number, pressTick: number): number | null {
+  const start = pressTick + STATS_BANNER_START_DELAY;
+  const end = pressTick + STATS_BANNER_END_DELAY;
+  if (t < start || t > end) return null;
+  const d = t - start;
+  if (d <= 4) return 0;
+  if (d <= 22) return Math.min(10, Math.floor((d - 5) / 2) + 1);
+  if (d <= 44) return 10;
+  return Math.max(0, 10 - (Math.floor((d - 45) / 2) + 1));
+}
