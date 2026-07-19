@@ -5,6 +5,55 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 83 — Bounded worker: send-out mechanism 1/5 (party-summary despawn) landed; `sendout.json` stays **174/256** as expected — only mechanism 5 remains
+
+- **State:** `npm test` **458/458** (+1), `npm run build` green. Full
+  19-trace sweep against the live oracle: 18 others at exact prior counts,
+  `sendout.json` unchanged **174/256** — expected. Zero regressions
+  (checked per-tick, not just aggregate).
+- **Did:** implemented `drawOpponentSummaryExit` — source-exact `BLDALPHA`
+  alpha-blend fade + per-icon staggered exit slide, decoded from
+  `Task_HidePartyStatusSummary`/`_BattleStart_1`/`SpriteCB_
+  StatusSummaryBalls_Exit` (`battle_interface.c:1671-1738,1878-1902`).
+  Blend: `tBlend` 16→0, decrementing every OTHER tick, closed form
+  `blend(elapsed)=max(0,15-floor(elapsed/2))`. Per-icon slide: `7*(5-j)`-tick
+  stagger (reverse index order, opponent side), then an accelerating slide
+  hand-derived from the source's own integer accumulator to closed form
+  `x2(n)=3*n*(n+1)/2` — direction (rightward) pixel-confirmed via direct
+  oracle-crop screenshots at ticks 1462/1480/1490. **Deliberately NOT
+  implemented**: the bar's own exit slide (`SpriteCB_StatusSummaryBar_Exit`)
+  — bar alpha-fades in place at its settled position only, a flagged
+  sub-gap (time-boxed scope: the 6 icons were the visually larger piece).
+  `localcheck.ts` pixel-diff mass across 1462-1543: **105984→100498px**
+  (−5486px, the largest single-mechanism drop of the four landed this
+  session-family), every affected tick strictly improved or held. New
+  Tier-1 test (`tests/battleScene.test.ts`) pins the blend/absent boundary
+  via the first-active icon's own opaque pixel. `docs/battle-scene-notes.md`
+  gained §7.15.
+- **Session total (3 mechanisms landed, one bounded worker step):**
+  mechanism 4 (materialize affine-scale-in+tint, #81), mechanism 3
+  (particle burst, #82), mechanism 1 (party-summary despawn, this entry) —
+  `localcheck.ts` pixel-diff mass across 1462-1543: **124762→100498px**
+  (−24264px, −19.4%), `sendout.json` count unchanged at 174/256 throughout
+  (expected per §7.10's structural finding, re-confirmed three more times).
+- **Next: only mechanism 5 remains** (front-sprite entrance anim,
+  `ANIM_V_STRETCH`) — needs GROVYLE's 2nd front-sprite frame extracted (a
+  genuine ROM extraction, not yet done), a `Sin`-table wobble renderer
+  (can reuse the affine-matrix/`Sin`/`Cos` math already landed this
+  session-family), and the still-open exact start-tick arithmetic
+  (§7.11's flagged follow-up — the affine-emerge-complete tick + scheduling
+  lag + 41-tick duration doesn't sum cleanly to the empirical settle tick
+  1544). Once this lands, `sendout.json`'s count should finally move for
+  the first time in this window's whole history — or, if it doesn't, that
+  itself is a real finding worth naming precisely rather than forcing.
+  Also worth a future pass: mechanism 3's own logical-tick-13+ divergence
+  and mechanism 1's bar-slide gap, both flagged above, could each recover
+  a bit more coverage independently of mechanism 5.
+- **Notes:** action-menu window (1560+) and the oracle/harness stayed out
+  of scope, per the brief. No PAPERCUT.
+
+---
+
 ## 82 — Bounded worker: send-out mechanism 3/5 (open-particle burst) landed with an empirical hard cutoff; `sendout.json` stays **174/256** as expected, 2 mechanisms remain
 
 - **State:** `npm test` **457/457** (+1), `npm run build` green. Full

@@ -381,4 +381,34 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(during).not.toEqual(before);
     expect(after).toEqual(before);
   });
+
+  // §7.17: pins the corrected `drawSpriteSheetAffineStretch` sampling math
+  // (the OAM matrix element is `xScale`/`yScale` DIRECTLY, not
+  // `0x10000/xScale`) for render tick 1525 (handoff+63, table index 21:
+  // xScale=269, yScale=232, y2=-3, frame 0/tileset per the breathing
+  // cadence). Screen (193,12) = GROVYLE_CORNER+(49,0) is a destination
+  // pixel that the OLD (inverted) formula sampled out of the source tile's
+  // own bounds (blank) - the real oracle (and the fixed formula) puts
+  // opaque body color RGB(82,165,189) there; oracle-cross-checked directly
+  // (tools/compare/out/sendout-baseline/oracle-01525.png).
+  it("Grovyle's front-sprite stretch (mechanism 5) samples in-bounds body color at a destination pixel the old inverted-matrix formula wrongly left blank, render tick 1525 (§7.17)", () => {
+    const pixel = pixelAtSentOut(1525, GROVYLE_CORNER.x + 49, GROVYLE_CORNER.y + 0);
+    expect(pixel).toEqual([82, 165, 189]);
+  });
+
+  // §7.17: pins the corrected front-sprite breathing-frame cadence
+  // (`sAnim_Grovyle_1`: frame 0 for 10 RAM ticks, frame 1 for 18, frame 0
+  // for 7, ..., `GROVYLE_FRONT_ANIM_START_OFFSET`-anchored). GROVYLE_CORNER+
+  // (31,7) samples a different source position under each tick's own
+  // affine stretch, but the two render ticks land in different
+  // `animCmdIndex` spans (1517 in the frame-1/frame2 span, 1525 in the
+  // following frame-0/tileset span) and so read different source frames -
+  // both expected colors oracle-cross-checked directly
+  // (tools/compare/out/sendout-baseline/oracle-0151{7,25}.png @ (175,19)).
+  it("Grovyle's front-sprite breathing cadence: frame 1 active at render 1517, frame 0 active at render 1525 (§7.17, RAM-probed gSprites[8].animCmdIndex boundaries)", () => {
+    const atFrame1Tick = pixelAtSentOut(1517, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    const atFrame0Tick = pixelAtSentOut(1525, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    expect(atFrame1Tick).toEqual([198, 239, 189]);
+    expect(atFrame0Tick).toEqual([189, 255, 181]);
+  });
 });

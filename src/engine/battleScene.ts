@@ -446,6 +446,7 @@ interface BattleAnimBallOpenAsset {
 interface BattleAnimTablesAsset {
   ballOpenFadeColor: { rgb8: RgbColor };
   affineEmerge: { neutralScale: number; steps: { xScale: number; yScale: number; rotation: number; duration: number }[] };
+  grovyleFrontAnim: { steps: { frame: 0 | 1; duration: number }[] };
 }
 /** `docs/battle-anim-assets.md` §1: `gBattleAnimSpriteGfx_Particles` (8 separate 8x8 tiles) + `sAnim_RegularBall`'s own 6-frame tile sequence (`regularBallAnim`, verbatim from source - `duration` ticks per frame, `hFlip` per entry). */
 interface BattleAnimParticlesAsset {
@@ -1370,16 +1371,33 @@ function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number):
 }
 
 /**
- * §7.11/§7.16 mechanism 5: GROVYLE's species front-sprite entrance animation
- * - `sMonFrontAnimIdsTable[SPECIES_GROVYLE-1] = ANIM_V_STRETCH` ->
+ * §7.11/§7.16/§7.17 mechanism 5: GROVYLE's species front-sprite entrance
+ * animation - `sMonFrontAnimIdsTable[SPECIES_GROVYLE-1] = ANIM_V_STRETCH` ->
  * `Anim_VerticalStretch` (`pokemon_animation.c:1597-1635`), launched by
  * `SpriteCB_OpponentMonFromBall` (`battle_main.c:2837-2848`) once
  * `sprite->affineAnimEnded` (mechanism 4's own emerge finishing) - the SAME
  * tick it also does `StartSpriteAnim(sprite, 1)` (`HasTwoFramesAnimation`),
- * swapping the front sprite to its 2nd frame (`grovyleFrontSprite.frame2`,
- * extracted this session from `anim_front.png`'s bottom half - top half
- * self-verified pixel-identical to `front.png` before accepting the bottom
- * half, `tools/extract/extract-battle-mon-pics.ts`).
+ * selecting `sprite->anims[1]` (`grovyleFrontSprite.frame2` is that anim's
+ * `ANIMCMD_FRAME(1,...)` image, extracted this session from `anim_front.png`'s
+ * bottom half - top half self-verified pixel-identical to `front.png` before
+ * accepting the bottom half, `tools/extract/extract-battle-mon-pics.ts`).
+ *
+ * **§7.17 correction**: `anims[1]` is NOT a static single-frame swap - it's
+ * `sAnim_Grovyle_1` (`data/pokemon_graphics/front_pic_anims.h:2930-2938`), a
+ * real 5-command "breathing" `ANIMCMD_FRAME` sequence alternating frame 0
+ * (`grovyleFrontSprite.tileset`) and frame 1 (`.frame2`) with its own
+ * per-command tick durations (`battleAnimTables.grovyleFrontAnim`, extracted
+ * verbatim from that source table). A prior
+ * session's claim ("frame 2 throughout, reverts to frame 1 at
+ * `GROVYLE_MATERIALIZE_TICK`") was pixel-evidence gathered through the
+ * broken affine formula below (§7.16's own unconfirmed residual) and didn't
+ * hold up: RAM-probed directly this session (`gSprites[8].animCmdIndex`,
+ * `tools/probe/specs/sendout-grovyle-frame.json`) - the command sequence
+ * starts at RAM tick 1496 (render 1497, this window's established +1 lag),
+ * confirmed by its own per-command durations (10,18,7,12,6 RAM ticks) landing
+ * exactly on every `animCmdIndex` transition. `frontSpriteAnimFrame` is a
+ * generic reducer over the extracted steps (same shape as
+ * `affineEmergeAccumulator`), anchored at `GROVYLE_FRONT_ANIM_START_OFFSET`.
  *
  * RAM-probed directly (`tools/probe/specs/sendout-grovyle-stretch.json`,
  * `gSprites[8]` - `gBattlerSpriteIds[1]` confirmed 8 from tick 1461 on,
@@ -1410,13 +1428,22 @@ function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number):
  * palette colors (confirmed directly: plain/unblended rendering from render
  * tick 1519 on is an exact pixel match against the oracle).
  *
- * **Known residual** (2 of 40 covered ticks, handoffTick+74/75 - render
- * 1536/1537): a real, small, unexplained mismatch (1000/1688px, isolated to
- * a small region near the sprite's head) even using the RAM-exact
- * xScale/yScale/y2 for those two specific ticks - their immediate neighbors
- * on both sides match exactly, so it isn't a lag or table error; not
- * reverse-engineered further this session (flagged, not curve-fit away).
+ * **§7.16's "known residual" (render 1536/1537) is RESOLVED** by §7.17's two
+ * fixes below (the direct, unInverted `xScale`/`yScale` matrix convention in
+ * `drawSpriteSheetAffineStretch`, and this frame-cadence correction) - it
+ * was never an isolated 2-tick anomaly, just two of the many ticks broken by
+ * the same two root causes across the whole window (full account in
+ * `docs/battle-scene-notes.md` §7.17).
  */
+const GROVYLE_FRONT_ANIM_START_OFFSET = 35; // et (t-handoffTick) of RAM tick 1496's render (1497) - see the module doc above
+function frontSpriteAnimFrame(steps: readonly { frame: 0 | 1; duration: number }[], localOffset: number): 0 | 1 {
+  let consumed = 0;
+  for (const step of steps) {
+    if (localOffset < consumed + step.duration) return step.frame;
+    consumed += step.duration;
+  }
+  return steps[steps.length - 1]!.frame;
+}
 const GROVYLE_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
   { xScale: 263, yScale: 239, y2: -2 }, { xScale: 264, yScale: 236, y2: -2 }, { xScale: 265, yScale: 234, y2: -2 },
   { xScale: 266, yScale: 231, y2: -3 }, { xScale: 267, yScale: 221, y2: -4 }, { xScale: 268, yScale: 222, y2: -4 },
@@ -1442,7 +1469,11 @@ function blendComponentToward(component8: number, target8: number, coeff: number
   const b5 = c5 + (((t5 - c5) * coeff) >> 4);
   return (b5 << 3) | (b5 >> 2);
 }
-/** Same nearest-neighbor affine sampling as `drawSpriteSheetAffineTinted`, but with INDEPENDENT x/y scale (a true stretch, not uniform), a vertical pixel offset, and the sprite's OWN palette (optionally blended toward `tintColor` at `tintCoeff`) instead of a flat tint. */
+/**
+ * Same nearest-neighbor affine sampling as `drawSpriteSheetAffineTinted`, but with INDEPENDENT x/y scale (a true stretch, not uniform), a vertical pixel offset, and the sprite's OWN palette (optionally blended toward `tintColor` at `tintCoeff`) instead of a flat tint.
+ *
+ * §7.17: `xScale`/`yScale` here are used AS THE MATRIX VALUE DIRECTLY (`mx=xScale`), NOT inverted (`0x10000/xScale`, mechanism 4's own convention). Root cause: real `ObjAffineSet` (BIOS SWI 0x0E) computes `pa=xScale*cos(theta)`/`pd=yScale*cos(theta)` - with `Anim_VerticalStretch`'s `rotation` always literally 0 (`cos(0)=1.0` exactly, no lookup-table rounding since it's not table-driven here), the OAM matrix element IS `xScale`/`yScale` verbatim, not their reciprocal. `SetAffineData`/`ObjAffineSet` never divides for this mechanism. Validated by brute-forcing both conventions against the RAM-exact `GROVYLE_STRETCH_TABLE` params across all 40 covered oracle-captured render ticks (`tools/compare/scratch/grovyle_formula_sweep.mjs`): the inverted convention only ever matched the near-neutral tail (a coincidence - `0x10000/256===256`, the two conventions agree exactly at the identity point and diverge everywhere else); the direct convention matches far more ticks and is the one kept here. (Mechanism 4's own `drawSpriteSheetAffineTinted` is left as-is, out of this fix's scope - untouched code, no regression risk - though the same BIOS mechanism suggests it may have a latching analogous residual, unconfirmed.)
+ */
 function drawSpriteSheetAffineStretch(
   fb: Uint8Array,
   tileset: Tileset,
@@ -1459,8 +1490,8 @@ function drawSpriteSheetAffineStretch(
   const h = tileset.rows * 8;
   const halfW = w / 2;
   const halfH = h / 2;
-  const mx = Math.trunc(0x10000 / xScale);
-  const my = Math.trunc(0x10000 / yScale);
+  const mx = xScale;
+  const my = yScale;
   for (let dy = 0; dy < h; dy += 1) {
     const ry = dy - halfH;
     const sy = ((ry * my) >> 8) + halfH;
@@ -1490,9 +1521,11 @@ function drawGrovyleStretch(fb: Uint8Array, t: number, handoffTick: number): voi
   if (local < 0) return;
   const entry = GROVYLE_STRETCH_TABLE[Math.min(local, GROVYLE_STRETCH_TABLE.length - 1)]!;
   const coeff = grovyleStretchTintCoeff(local);
+  const frameOffset = t - handoffTick - GROVYLE_FRONT_ANIM_START_OFFSET;
+  const frame = frontSpriteAnimFrame(battleAnimTables.grovyleFrontAnim.steps, frameOffset);
   drawSpriteSheetAffineStretch(
     fb,
-    grovyleFrontSprite.frame2,
+    frame === 0 ? grovyleFrontSprite.tileset : grovyleFrontSprite.frame2,
     grovyleFrontSprite.palette,
     GROVYLE_CORNER.x,
     GROVYLE_CORNER.y,

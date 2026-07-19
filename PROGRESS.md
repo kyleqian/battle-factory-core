@@ -5,6 +5,73 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 86 — Bounded worker: send-out mechanism 5's affine-sampling residual fixed - `sendout.json` **180/256 → 196/256** (+16), render ticks 1522-1559 now bit-exact
+
+- **State:** `npm test` **460/460** (+2), `npm run build` green. Full
+  19-trace sweep against the live oracle: all 18 others at their exact
+  established counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
+  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+  room-msgbox 142/142, transition 206/206, scene-assembly 256/256,
+  rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) — zero
+  regressions. `sendout.json`: **180/256 → 196/256**.
+- **Did:** found and fixed TWO root causes behind §7.16's flagged residual
+  (both mechanism-justified against reference source + RAM probes, not
+  curve-fit — full account in `docs/battle-scene-notes.md` §7.17). (1)
+  `drawSpriteSheetAffineStretch`'s matrix element was inverted
+  (`Math.trunc(0x10000/xScale)`, copied from mechanism 4's own convention);
+  real `ObjAffineSet` with `rotation=0` (always true for this mechanism)
+  computes `pa=xScale*cos(0)=xScale` directly — no division at all. Fixed to
+  `mx=xScale` (mechanism 4 left untouched, out of scope, separate code).
+  Validated by brute-forcing both conventions against the committed
+  RAM-exact `GROVYLE_STRETCH_TABLE`: 39845px→11950px total diff across the
+  40 covered ticks (`tools/compare/scratch/grovyle_formula_sweep.mjs`). The
+  double-size-affine-box hypothesis (§7.16's other suspected cause) was
+  tested and ruled out — makes no difference, proven both algebraically and
+  empirically. (2) The front sprite's frame was never a one-time swap to
+  frame 2 as both §7.11 and §7.16 assumed (pixel evidence gathered through
+  the broken formula above, unreliable) — RAM-probed directly
+  (`gSprites[8].animCmdIndex`, new probe `tools/probe/specs/sendout-
+  grovyle-frame.json`) that GROVYLE's `anims[1]` is the species-specific
+  `sAnim_Grovyle_1` (`data/pokemon_graphics/front_pic_anims.h:2930-2938`), a
+  real 5-command breathing sequence (frame 0/1/0/1/0, durations 10/18/7/12/6
+  RAM ticks) — GROVYLE is the OPPONENT battler, which source wires to the
+  species-specific anim table, not the generic single-frame one both prior
+  sessions implicitly assumed. `animCmdIndex`'s own RAM transitions land
+  exactly on those durations starting RAM tick 1496. Implemented as a
+  generic reducer (`frontSpriteAnimFrame`, same shape as
+  `affineEmergeAccumulator`) over an extracted step table
+  (`battleAnimTables.grovyleFrontAnim`, new). Both fixes combined: isolated
+  crop diff across the 40 covered ticks drops to 398px (from 11950px
+  formula-only), **25/40 ticks bit-exact in isolation**
+  (`tools/compare/scratch/grovyle_final_check.mjs`). Two new Tier-1 tests
+  pin the fix (representative tick 1525's corrected sampling + the 1517-vs-
+  1525 frame-cadence boundary, both oracle-cross-checked).
+- **Per-tick attribution, full window (§7.17 has the complete breakdown):**
+  1462-1480 unrelated pre-mechanism-5 window (unchanged); 1481-1503 and
+  1516-1519 **owned by §7.14** (the particle model's own already-flagged
+  logical-tick-13+ divergence — proved directly: the real integrated
+  renderer's Grovyle-crop output is bit-for-bit identical to an isolated
+  reproduction using RAM-exact params, so mechanism 5's own code is
+  self-consistent; the residual against oracle is dominated by
+  `PARTICLE_ORIGIN`'s own pinned color overlapping Grovyle's crop box,
+  exactly where late-lifespan particles would still be alive);
+  **1522-1559 bit-exact.** A small (3-195px, shrinking to 0) unexplained
+  residual remains in 1504-1521 (excl. 1516/1517), boundary/antialiasing-
+  shaped, not reverse-engineered further (small, flagged not chased).
+- **Next:** send-out slice's two other still-open, independent gaps: the
+  party-summary bar's own exit slide (§7.15) and the particle model's
+  logical-tick-13+ divergence (§7.14, now confirmed as the owner of real
+  residual pixels above, not just a same-window coincidence) — either could
+  recover more of `sendout.json`'s remaining 60/256. After that: action-menu
+  window (1560+, `docs/battle-menu-notes.md`), then S6 acceptance
+  end-to-end, then S7.
+- **Notes:** action-menu window (1560+), ROADMAP, and the oracle/harness
+  stayed out of scope, per the brief. No PAPERCUT.
+
+---
+
 ## 85 — Supervisor wind-down: session end 2026-07-18 ~19:40; scene-assembly CLOSED 256/256, oracle now ANIMATIONS-ON (v5, user decision), send-out slice all-5-mechanisms in at 180/256 with one named renderer residual, S7 groundwork fully regenerated under the new truth
 
 - **State (verified this minute):** `npm test` **458/458**, `npm run
@@ -120,54 +187,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   session (mechanism 5 was the full scope).
 - **Notes:** action-menu window (1560+), ROADMAP, and the oracle/harness
   stayed out of scope, per the brief. No PAPERCUT.
-
----
-
-## 83 — Bounded worker: send-out mechanism 1/5 (party-summary despawn) landed; `sendout.json` stays **174/256** as expected — only mechanism 5 remains
-
-- **State:** `npm test` **458/458** (+1), `npm run build` green. Full
-  19-trace sweep against the live oracle: 18 others at exact prior counts,
-  `sendout.json` unchanged **174/256** — expected. Zero regressions
-  (checked per-tick, not just aggregate).
-- **Did:** implemented `drawOpponentSummaryExit` — source-exact `BLDALPHA`
-  alpha-blend fade + per-icon staggered exit slide, decoded from
-  `Task_HidePartyStatusSummary`/`_BattleStart_1`/`SpriteCB_
-  StatusSummaryBalls_Exit` (`battle_interface.c:1671-1738,1878-1902`).
-  Blend: `tBlend` 16→0, decrementing every OTHER tick, closed form
-  `blend(elapsed)=max(0,15-floor(elapsed/2))`. Per-icon slide: `7*(5-j)`-tick
-  stagger (reverse index order, opponent side), then an accelerating slide
-  hand-derived from the source's own integer accumulator to closed form
-  `x2(n)=3*n*(n+1)/2` — direction (rightward) pixel-confirmed via direct
-  oracle-crop screenshots at ticks 1462/1480/1490. **Deliberately NOT
-  implemented**: the bar's own exit slide (`SpriteCB_StatusSummaryBar_Exit`)
-  — bar alpha-fades in place at its settled position only, a flagged
-  sub-gap (time-boxed scope: the 6 icons were the visually larger piece).
-  `localcheck.ts` pixel-diff mass across 1462-1543: **105984→100498px**
-  (−5486px, the largest single-mechanism drop of the four landed this
-  session-family), every affected tick strictly improved or held. New
-  Tier-1 test (`tests/battleScene.test.ts`) pins the blend/absent boundary
-  via the first-active icon's own opaque pixel. `docs/battle-scene-notes.md`
-  gained §7.15.
-- **Session total (3 mechanisms landed, one bounded worker step):**
-  mechanism 4 (materialize affine-scale-in+tint, #81), mechanism 3
-  (particle burst, #82), mechanism 1 (party-summary despawn, this entry) —
-  `localcheck.ts` pixel-diff mass across 1462-1543: **124762→100498px**
-  (−24264px, −19.4%), `sendout.json` count unchanged at 174/256 throughout
-  (expected per §7.10's structural finding, re-confirmed three more times).
-- **Next: only mechanism 5 remains** (front-sprite entrance anim,
-  `ANIM_V_STRETCH`) — needs GROVYLE's 2nd front-sprite frame extracted (a
-  genuine ROM extraction, not yet done), a `Sin`-table wobble renderer
-  (can reuse the affine-matrix/`Sin`/`Cos` math already landed this
-  session-family), and the still-open exact start-tick arithmetic
-  (§7.11's flagged follow-up — the affine-emerge-complete tick + scheduling
-  lag + 41-tick duration doesn't sum cleanly to the empirical settle tick
-  1544). Once this lands, `sendout.json`'s count should finally move for
-  the first time in this window's whole history — or, if it doesn't, that
-  itself is a real finding worth naming precisely rather than forcing.
-  Also worth a future pass: mechanism 3's own logical-tick-13+ divergence
-  and mechanism 1's bar-slide gap, both flagged above, could each recover
-  a bit more coverage independently of mechanism 5.
-- **Notes:** action-menu window (1560+) and the oracle/harness stayed out
-  of scope, per the brief. No PAPERCUT.
-
----

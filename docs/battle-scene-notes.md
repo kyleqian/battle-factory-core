@@ -1473,3 +1473,141 @@ independent of mechanism 5):** the party-summary bar's own exit slide
 (§7.15's flagged sub-gap) and the particle model's logical-tick-13+
 divergence (§7.14's empirical hard cutoff). Neither was investigated this
 session - time was spent entirely on mechanism 5 per the brief's own scope.
+
+### 7.17. Engine-slice session: mechanism 5's affine-sampling residual fixed (two root causes, both mechanism-justified, not curve-fit) - `sendout.json` **180/256 -> 196/256**
+
+Both of §7.16's flagged residuals (the large 1504-1531 sampling gap and the
+"isolated" 1536/1537 mismatch) turned out to share the SAME two root causes,
+neither of which was the suspected "BIOS division rounding" - the BIOS
+never divides at all for this mechanism.
+
+**Root cause 1 - the matrix element was inverted when it shouldn't be.**
+`drawSpriteSheetAffineStretch` computed `mx = Math.trunc(0x10000 / xScale)`
+(and same for `my`/`yScale`), copying mechanism 4's own convention. But
+`Anim_VerticalStretch` always calls `SetAffineData(sprite, data4, data5, 0)`
+- **rotation literally 0** - and real `ObjAffineSet` (BIOS SWI 0x0E) computes
+`pa = xScale*cos(theta)`, `pd = yScale*cos(theta)` (`pb`/`pc` involve `sin`,
+zero here). With `cos(0)` exactly 1.0 (no lookup-table rounding since
+rotation isn't table-driven for this call), the OAM matrix element **is**
+`xScale`/`yScale` verbatim - `SetAffineData` never divides. Mechanism 4's own
+inverted convention isn't necessarily wrong for *it* (its `accumulator` never
+exceeds `neutralScale=256`, i.e. only ever shrinks, and mechanism 4's own
+bounding-box-width pixel validation happened to hold either way near that
+range - not re-examined this session, left as-is, flagged as an unconfirmed
+open question) - but mechanism 5's `xScale`/`yScale` range (209-272,
+straddling 256 on both sides) makes the two conventions diverge sharply away
+from the identity point, which is exactly why only the near-neutral tail
+(§7.16's 1538-1543) ever matched: `0x10000/256 === 256`, so the two
+conventions coincide exactly at identity and diverge everywhere else.
+Confirmed by brute-forcing both conventions against the committed RAM-exact
+`GROVYLE_STRETCH_TABLE` params, per-tick, against the oracle's own cached
+captures (`tools/compare/scratch/grovyle_formula_sweep.mjs`): total diff
+across the 40 covered ticks dropped from 39845px (inverted) to 11950px
+(direct) - `mx = xScale` directly is the fix, applied in
+`drawSpriteSheetAffineStretch` only (mechanism 4 untouched, out of this
+session's scope, no regression risk since it's separate code).
+Double-size-affine-box hypothesis (a second suspected cause named in
+§7.16) was tested and **ruled out** empirically in the same sweep - doubling
+the destination box makes no difference (`Math.min` was already checking
+this: undoubled and doubled totals were identical to the pixel), because
+`y2`+corner-vector placement is a pure translation independent of box size
+(proved algebraically, then confirmed empirically).
+
+**Root cause 2 - the front sprite's own frame was never oscillating.**
+§7.16 (and §7.11 before it) assumed `StartSpriteAnim(sprite, 1)` is a
+one-time, permanent swap to frame 2, based on pixel evidence gathered
+through the (broken) inverted formula above - unreliable ground since a
+badly-shaped render can't cleanly distinguish which frame is active. RAM-
+probed directly this session (`gSprites[8].animNum`/`.animCmdIndex`,
+`tools/probe/specs/sendout-grovyle-frame.json`, extending the committed
+stretch-probe's watch list): `animNum` does stay 1 throughout (confirming
+`anims[1]` is selected once, as source reads), but `anims[1]` is
+`sAnim_Grovyle_1` (`data/pokemon_graphics/front_pic_anims.h:2930-2938`) - a
+real 5-command breathing sequence, NOT the generic single-frame
+`gAnims_MonPic` table both prior sessions implicitly assumed (GROVYLE is the
+OPPONENT battler, so `SetMultiuseSpriteTemplateToPokemon` wires up the
+species-specific `gMonFrontAnimsPtrTable[SPECIES_GROVYLE]`, not the generic
+table - `pokemon.c:3499-3505`):
+```
+ANIMCMD_FRAME(0, 10), ANIMCMD_FRAME(1, 18), ANIMCMD_FRAME(0, 7),
+ANIMCMD_FRAME(1, 12), ANIMCMD_FRAME(0, 6), ANIMCMD_END
+```
+`animCmdIndex`'s own RAM transitions (0->1->2->3->4) landed exactly on
+those cumulative durations starting at RAM tick 1496 (render 1497, this
+window's established +1 lag) - a clean, exact confirmation, not a
+coincidence. `GROVYLE_FRONT_ANIM_START_OFFSET` anchors a generic reducer
+(`frontSpriteAnimFrame`, same shape as `affineEmergeAccumulator`) over the
+extracted `battleAnimTables.grovyleFrontAnim.steps` table. Within the
+40-tick covered window this alternates F0(tileset)/F1(frame2)/F0/F1 at
+render boundaries 1497,1507,1525,1532 - meaning roughly HALF of the covered
+ticks were being rendered with the wrong pose entirely, compounding root
+cause 1's own sampling error.
+
+**Both fixes combined, validated tick-by-tick against oracle-exact RAM
+params** (`tools/compare/scratch/grovyle_final_check.mjs`): total diff
+across the 40 covered ticks (formula alone: 11950px) drops to **398px**,
+with **25/40 ticks now bit-exact in isolation** (up from the tail-only
+6/40 baseline) - and every one of the remaining 15 isolated-diff ticks is
+in the *coeff>0* (tint-blend) sub-window, all under 62px.
+
+**Score effect: `sendout.json` 180/256 -> 196/256** (+16, strictly above the
+180 floor). Full 19-trace sweep re-run against the live oracle: all 18
+others at their exact established counts (anchor 1/1, draft-cursor 13/13,
+draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+122/122, summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+room-msgbox 142/142, transition 206/206, scene-assembly 256/256, rent-slot1
+125/139, rent-3picks 157/190, confirm-flow 79/95) - zero regressions. Within
+1462-1559, **render ticks 1522-1559 (38 consecutive ticks) are now
+full-frame bit-exact**, where before this session only 1538-1543 were.
+
+**Per-tick attribution for every remaining diff in 1462-1559** (full log:
+`npm run compare -- tools/compare/traces/sendout.json`):
+- **1462-1480** (45-1161px): pre-mechanism-5 window (trainer-exit tail,
+  ball-idle) - unrelated to this fix, unchanged from before, not
+  investigated this session.
+- **1481-1503** (500-2963px): mechanism 4 (materialize, untouched this
+  session) overlapping mechanism 3's own known gap - **owned by §7.14**
+  (particle model past logical tick 12: "every tick from logical 13 on is
+  strictly WORSE" was already the finding; this session didn't touch it).
+- **1504-1521 except 1516/1517** (3-195px, shrinking steadily toward 0 as
+  the tint coefficient fades out): a small residual, isolated to Grovyle's
+  own 64x64 crop (confirmed via `tools/compare/scratch/grovyle_crop_sweep.mjs`
+  restricted to just that box) - mostly boundary/antialiasing-shaped
+  (`weOpaqueTheyBlankish`-dominant per `grovyle_tick_categorize.mjs`), not
+  reverse-engineered further this session (small, not curve-fit away).
+- **1516/1517** (2317/2332px, the single largest remaining spike): **NOT**
+  a Grovyle/mechanism-5 bug - `tools/compare/scratch/grovyle_real_vs_isolated.mjs`
+  proves the real integrated renderer's own Grovyle-crop output is
+  bit-for-bit IDENTICAL (0px diff) to an isolated reproduction using the
+  exact RAM-probed table/coeff/frame for that tick, so mechanism 5's own
+  code is self-consistently correct there. The diff against the oracle is
+  dominated by `bothOpaqueDiffColor` (both sides opaque, wrong color, not a
+  coverage gap) exactly where `PARTICLE_ORIGIN` (172,55, mechanism 3) sits
+  within Grovyle's crop box, and the mismatch color (255,173,0) is
+  literally the particle's own pinned RGB (`tests/battleScene.test.ts`'s
+  own particle test uses the same constant) - **owned by §7.14**: this
+  window (render ~1516-1519) is exactly where the last-spawned particles'
+  26-age lifespan would still be alive at large radius in the real game
+  (spawn ~1478-1493 + up to 26 ticks = alive through ~1519), consistent with
+  the residual vanishing by 1520-1521 and gone entirely by 1522.
+- **1522-1559**: bit-exact, zero diff.
+
+**Committed this session:** `tools/probe/specs/sendout-grovyle-frame.json`
+(new RAM probe, `animNum`/`animCmdIndex`); `src/data/gen/battle-anim-
+tables.json` gained `grovyleFrontAnim` (the extracted `sAnim_Grovyle_1`
+step table); two new Tier-1 tests in `tests/battleScene.test.ts` pin the
+corrected sampling formula (render 1525, a destination pixel the old
+inverted formula left wrongly blank) and the frame cadence (render 1517 vs
+1525, different `animCmdIndex` spans read different source frames).
+`tools/compare/scratch/grovyle_formula_sweep.mjs`,
+`grovyle_coeff_bruteforce.mjs`, `grovyle_real_vs_isolated.mjs`,
+`grovyle_tick_categorize.mjs`, `grovyle_crop_sweep.mjs`, and
+`grovyle_final_check.mjs` are kept as resumable diagnostics for the next
+session.
+
+**Still open, unchanged, independent of this fix:** the party-summary bar's
+own exit slide (§7.15) and the particle model's logical-tick-13+ divergence
+(§7.14, now confirmed to be the exact owner of the 1481-1503 and 1516-1519
+residuals above) - neither investigated further this session, per the
+brief's own scope (attribution only).
