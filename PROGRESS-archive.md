@@ -5,6 +5,56 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 82 — Bounded worker: send-out mechanism 3/5 (open-particle burst) landed with an empirical hard cutoff; `sendout.json` stays **174/256** as expected, 2 mechanisms remain
+
+- **State:** `npm test` **457/457** (+1), `npm run build` green. Full
+  19-trace sweep against the live oracle: 18 others at exact prior counts,
+  `sendout.json` unchanged **174/256** — expected. Zero regressions
+  (verified per-tick, not just in aggregate).
+- **Did:** implemented `drawBallOpenParticles` — a source-exact
+  reimplementation of `PokeBallOpenParticleAnimation`/`Sin`/`Cos`
+  (`battle_anim_throw.c:1599-1657`, `trig.c:515-523`): 16 particles spawn
+  one per tick (8 radial directions), each with its own 26-age lifespan
+  growing from radius 0 to 48. Hand-derived the spawn/Step1/Step2 timeline
+  from source and cross-validated it **analytically** against
+  `docs/battle-anim-assets.md` §4's independently-harvested (different-
+  trace) pixel evidence - bit-for-bit match on the first 3 ticks' offsets.
+  A same-trace direct pixel re-verification was tried but proved
+  inconclusive (particle and ball-open-frame palettes coincidentally share
+  exact RGB values, `tools/compare/scratch/probe_particle.mjs`, throwaway).
+  **Found (pixel-brute-force against `localcheck.ts`) that the naive
+  full-lifespan model is only correct through logical tick 12** - that
+  single tick's own isolated diff drops from 147px to 9px with particles
+  on, but every tick from logical 13 on is strictly WORSE with particles
+  than without (confirmed via a direct oracle-crop screenshot at tick
+  1508: real particle radii are much narrower than the model predicts by
+  then). Not reverse-engineered why (not RAM-probed) - logical tick 12
+  happens to be exactly mechanism 4's own scale-in completion point, a
+  plausible but unconfirmed `HandleBallAnimEnd` interaction - flagged as
+  an open follow-up. Per this run's "no curve-fitting" rule, added
+  `PARTICLE_RENDER_LAST_LOGICAL_TICK = 12` as an explicit, documented hard
+  cutoff rather than extrapolating past where the model is verified.
+  `localcheck.ts` pixel-diff mass across 1462-1543: **106893→105984px**
+  (−909px), and with the cutoff every affected tick strictly improved or
+  held (checked individually, not just summed). New Tier-1 test
+  (`tests/battleScene.test.ts`) pins the first particle's appearance tick.
+  `docs/battle-scene-notes.md` gained §7.14.
+- **Next:** 2 mechanisms remain, per #79/#81's ordering: (1) opponent
+  party-summary despawn fade (§7.4.3, needs fresh RAM/pixel timing first,
+  not just a renderer) and (5) front-sprite entrance anim (needs GROVYLE's
+  missing 2nd front-sprite frame extracted, a `Sin`-table wobble renderer
+  reusing this session's/#81's affine-matrix and `Sin`/`Cos` math, and the
+  still-open start-tick arithmetic) - most expensive, left last on
+  purpose. Also worth a future RAM-probe pass: mechanism 3's own logical-
+  tick-13+ divergence, flagged above, could plausibly widen 3's own
+  coverage without waiting on mechanism 5.
+- **Notes:** action-menu window (1560+) and the oracle/harness stayed out
+  of scope, per the brief. No PAPERCUT.
+
+---
+
+---
+
 ## 81 — Bounded worker: send-out mechanism 4/5 (materialize affine-scale-in + ball-color tint) landed, pixel-validated; `sendout.json` stays **174/256** as expected, 3 mechanisms remain
 
 - **State:** `npm test` **456/456** (+1), `npm run build` green. Full

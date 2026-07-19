@@ -5,6 +5,65 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 85 — Supervisor wind-down: session end 2026-07-18 ~19:40; scene-assembly CLOSED 256/256, oracle now ANIMATIONS-ON (v5, user decision), send-out slice all-5-mechanisms in at 180/256 with one named renderer residual, S7 groundwork fully regenerated under the new truth
+
+- **State (verified this minute):** `npm test` **458/458**, `npm run
+  build` green, tree clean at `5cb8259`. Full 19-trace sweep re-run by
+  the supervisor: anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
+  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+  room-msgbox 142/142, transition 206/206, **scene-assembly 256/256**,
+  **sendout 180/256** (sole in-progress slice), rent-slot1 125/139,
+  rent-3picks 157/190, confirm-flow 79/95 (last three: ISSUES #5
+  settled policy). Oracle: harness bootstrap **v5 — Battle Scene ON in
+  factory.sav itself** (`../../oracle/BOOTSTRAP.md`), smoke test green.
+- **Session summary (supervised, ~14:29-19:40, 15 worker steps across 2
+  lanes + supervisor harness work, zero regressions at every verified
+  step):** (1) **Scene-assembly slice CLOSED** per the user's standing
+  keep-iterating mandate: 104→151 (trainer OBJ layer + BG3 512px width,
+  #66) →255 (mGBA blends in 8-bit space, proven; evaEvb render lag,
+  #68) →**256/256** (player bar's asymmetric one-tick x2 stall, #70).
+  (2) **USER SCOPE DECISION: battle animations ON** — discovered the
+  canonical save had Battle Scene OFF (#75, one root cause resolving 4
+  standing research questions); user directed animations into scope;
+  shipped as harness bootstrap v4 (zero-frame poke) then v5 (bit set in
+  factory.sav itself + per-sector checksums, poke retired; ground truth
+  proven byte-identical 223/223, #76/#77). Anchor + all pre-battle
+  truth byte-identical; only the send-out window's truth moved
+  (1462-1543). (3) **Send-out slice** (S6): text/press/idle byte-exact
+  (#71), healthbox content + Grovyle settle (#73, pixel-harvest —
+  ISSUES #16 records the real-assembly debt), trainer-exit RAM table +
+  BG-white dither (#74), re-grounded under v5 (#78), then ALL FIVE
+  transient mechanisms landed one-by-one (#79 ball, #81 affine
+  materialize+tint, #82 particles, #83 party-summary despawn, #84
+  front-sprite entrance stretch) — count moved 174→**180/256** once the
+  set completed, exactly as the "no subset moves the count" analysis
+  predicted. (4) **S7 groundwork complete AND current**: turn-1 dense
+  trace + 1021-row RAM dump regenerated under animations-on (#80 —
+  menu timing unchanged, RNG ledger identical: animations consume ZERO
+  RNG); battle-message templates (#69), hold effects (#69), move-anim
+  assets/decodes (#72), all four research questions closed (#75).
+  Suite 425→458 Tier-1 tests; traces 18→19 (+regenerated groundtruth).
+- **Next (in order):** (1) sendout residual → 256/256: the affine
+  wobble renderer samples out-of-source-bounds at sprite edges across
+  ~1504-1531 while the oracle shows real content — full account + the
+  committed RAM probe tables in PROGRESS #84 and
+  `docs/battle-scene-notes.md` §7.16; plus the small 1536/1537
+  mismatch. No new ground-truth work needed. (2) Action-menu slice
+  1560-1810 (`docs/battle-menu-notes.md` — #80 confirmed its
+  groundwork is still valid under v5). (3) S6 acceptance trace
+  end-to-end, then S7 (dossiers current, all data breadth-ready).
+- **Notes:** no usage-limit events; both lanes idle at close; no
+  unmerged branches. Two mid-session worker under-cap stalls on the
+  send-out window were corrected by brief design (pixel-mass interim
+  metric + explicit clock checks, #79 onward). Supervisor-authored
+  harness commits: bootstrap v4, v5, template-ROADMAP revert (user
+  preference: the oracle speaks for itself). Sibling run swift-koala
+  inherits the v5 oracle. PAPERCUTS: none new.
+
+---
+
 ## 84 — Bounded worker: send-out mechanism 5/5 (front-sprite entrance stretch) landed — ALL FIVE mechanisms in — `sendout.json` moves for the first time ever: **174/256 → 180/256**
 
 - **State:** `npm test` **458/458**, `npm run build` green. Full 19-trace
@@ -108,54 +167,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Also worth a future pass: mechanism 3's own logical-tick-13+ divergence
   and mechanism 1's bar-slide gap, both flagged above, could each recover
   a bit more coverage independently of mechanism 5.
-- **Notes:** action-menu window (1560+) and the oracle/harness stayed out
-  of scope, per the brief. No PAPERCUT.
-
----
-
-## 82 — Bounded worker: send-out mechanism 3/5 (open-particle burst) landed with an empirical hard cutoff; `sendout.json` stays **174/256** as expected, 2 mechanisms remain
-
-- **State:** `npm test` **457/457** (+1), `npm run build` green. Full
-  19-trace sweep against the live oracle: 18 others at exact prior counts,
-  `sendout.json` unchanged **174/256** — expected. Zero regressions
-  (verified per-tick, not just in aggregate).
-- **Did:** implemented `drawBallOpenParticles` — a source-exact
-  reimplementation of `PokeBallOpenParticleAnimation`/`Sin`/`Cos`
-  (`battle_anim_throw.c:1599-1657`, `trig.c:515-523`): 16 particles spawn
-  one per tick (8 radial directions), each with its own 26-age lifespan
-  growing from radius 0 to 48. Hand-derived the spawn/Step1/Step2 timeline
-  from source and cross-validated it **analytically** against
-  `docs/battle-anim-assets.md` §4's independently-harvested (different-
-  trace) pixel evidence - bit-for-bit match on the first 3 ticks' offsets.
-  A same-trace direct pixel re-verification was tried but proved
-  inconclusive (particle and ball-open-frame palettes coincidentally share
-  exact RGB values, `tools/compare/scratch/probe_particle.mjs`, throwaway).
-  **Found (pixel-brute-force against `localcheck.ts`) that the naive
-  full-lifespan model is only correct through logical tick 12** - that
-  single tick's own isolated diff drops from 147px to 9px with particles
-  on, but every tick from logical 13 on is strictly WORSE with particles
-  than without (confirmed via a direct oracle-crop screenshot at tick
-  1508: real particle radii are much narrower than the model predicts by
-  then). Not reverse-engineered why (not RAM-probed) - logical tick 12
-  happens to be exactly mechanism 4's own scale-in completion point, a
-  plausible but unconfirmed `HandleBallAnimEnd` interaction - flagged as
-  an open follow-up. Per this run's "no curve-fitting" rule, added
-  `PARTICLE_RENDER_LAST_LOGICAL_TICK = 12` as an explicit, documented hard
-  cutoff rather than extrapolating past where the model is verified.
-  `localcheck.ts` pixel-diff mass across 1462-1543: **106893→105984px**
-  (−909px), and with the cutoff every affected tick strictly improved or
-  held (checked individually, not just summed). New Tier-1 test
-  (`tests/battleScene.test.ts`) pins the first particle's appearance tick.
-  `docs/battle-scene-notes.md` gained §7.14.
-- **Next:** 2 mechanisms remain, per #79/#81's ordering: (1) opponent
-  party-summary despawn fade (§7.4.3, needs fresh RAM/pixel timing first,
-  not just a renderer) and (5) front-sprite entrance anim (needs GROVYLE's
-  missing 2nd front-sprite frame extracted, a `Sin`-table wobble renderer
-  reusing this session's/#81's affine-matrix and `Sin`/`Cos` math, and the
-  still-open start-tick arithmetic) - most expensive, left last on
-  purpose. Also worth a future RAM-probe pass: mechanism 3's own logical-
-  tick-13+ divergence, flagged above, could plausibly widen 3's own
-  coverage without waiting on mechanism 5.
 - **Notes:** action-menu window (1560+) and the oracle/harness stayed out
   of scope, per the brief. No PAPERCUT.
 
