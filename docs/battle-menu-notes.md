@@ -33,7 +33,7 @@ both sha `6d2e0945...` (byte-identical, confirmed not assumed), tick 1750 sha
 | **1563** | `4af1dc66` | message box clears **and** first glyph "G" draws **in the same tick** (1133px sub-region delta) — the box-clear-to-first-char transition is a single-tick jump, no visible blank-box frame, unlike the later 1742-1747 clear (§3) |
 | 1564-1571 | (unique per tick) | "Go! ONIX!" prints, 1 tick/char (§2) |
 | **1572** | (static begins) | "Go! ONIX!" fully printed; message box text region stops changing (residual per-tick sha changes past this point are Brendan's throw animation elsewhere in frame, not text — confirmed via a sub-region-only diff, §2) |
-| ~1595-1608 | — | Brendan (player back-sprite) visible in throw pose, exiting frame (§3) |
+| **1574**-~1608 | — | Brendan (player back-sprite) throw-pose swap + ball-icon change begin at tick **1574** (pixel-pinned, PROGRESS #93 — corrects this row's original "~1595" coarse estimate by 21 ticks); throw pose/exit continues through ~1608 (§3, still coarse) |
 | ~1606-1638 | — | thrown Poké Ball sprite visible, arcing toward ONIX's spawn point (§3) |
 | ~1646-1662 | — | ONIX materializes as a flat-color silhouette (ball-open + color-fade, §3) |
 | ~1662-1690 | — | ONIX gains full color (affine emerge anim) + healthbox slides in (§3) |

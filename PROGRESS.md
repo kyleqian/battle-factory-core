@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 93 — Bounded worker: PLAYER SEND-OUT slice 1 landed — message-box clear + "Go! ONIX!" print + static hold, new `battleMenu.ts`; `menu-text.json` **18/39** (full scope), not 39/39 (acceptance-bar mismatch, flagged not forced)
+## 93 — Bounded worker: PLAYER SEND-OUT slice 1 landed — message-box clear + "Go! ONIX!" print + static hold, new `battleMenu.ts`; `menu-text.json` ratified at **18/18** (supervisor-trimmed to the slice's true 1556-1573 window)
 
 - **State:** `npm test` **486/486** (+9), `npm run build` green, tree
   clean at `84f2d08`. Full 19-trace sweep against the live oracle: all 19
@@ -16,8 +16,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
   256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95,
   **sendout 214/256 unchanged**) — zero regressions. New
-  `tools/compare/traces/menu-text.json` (every tick 1556-1594, 39
-  captures): **18/39**.
+  `tools/compare/traces/menu-text.json`: worker committed every tick
+  1556-1594 (18/39); supervisor trimmed to 1556-1573 → **18/18, 0 diff**
+  (re-verified post-trim).
 - **Did:** per the brief, new `src/engine/battleMenu.ts` (pure cadence
   logic) + a 2-line-conditional hook into `battleScene.ts`'s
   `drawSendOutHandoff` (reuses the existing `drawMessageTextLines`
@@ -29,39 +30,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   static (byte-identical confirmed). 9 new Tier-1 tests
   (`tests/battleMenu.test.ts`): cadence arithmetic + 4 oracle-pinned pixel/
   frame-identity assertions.
-- **Acceptance-bar mismatch (read before continuing this thread):** the
-  brief wanted `menu-text.json` at 0 diff (39/39). It's **18/39** —
-  ticks 1556-1573 (this slice's entire true scope: the inherited settled
-  hold through this slice's own print+static-hold) are bit-exact, ALL
-  confirmed via direct sub-region and full-frame oracle diffing, not
-  assumed. Ticks 1574-1594 diverge for a reason genuinely **outside** this
-  slice: pixel-diffing the oracle's own consecutive frames (not app-vs-
-  oracle) shows Brendan's throw-pose swap + a ball-icon-count change begin
-  at trace tick **1574** (re-derived this session, oracle-confirmed both by
-  bounding-box and by a visual crop showing his arm pose + a spawned ball
-  icon) — **not "~1595"** as docs/battle-menu-notes.md §1's own coarse pass
-  estimated, a 21-tick underestimate (larger than that doc's other
-  few-tick corrections, but the same species of error). The brief's own
-  OUT-OF-SCOPE list names exactly this mechanism ("Brendan throw animation,
-  ball arc... ticks 1595+") — its start tick was just wrong, so ticks
-  1574-1594 of the assigned 1556-1594 window fall inside a mechanism this
-  step was told not to build (unextracted assets per docs §6: ball-open
-  particles, affine emerge + color-fade tables; "Not tick-exact this
-  session" per docs §3). Did NOT force a fix here — landed the correctly-
-  scoped, fully-verified text/box-clear feature instead and documented the
-  finding in both `battleScene.ts`'s module doc and here, mirroring #92's
-  own "flag for supervisor judgment" precedent. The trace is committed
-  at the brief's exact specified capture range (1556-1594) rather than
-  narrowed to the achievable sub-range, so the gap is visible and
-  re-checkable, not hidden.
-- **Next:** (1) supervisor call on the acceptance-bar mismatch above —
-  either re-scope the next slice's window to end at 1573 (this slice's
-  true boundary) or explicitly fold "Brendan throw-pose swap + ball spawn"
-  into the next slice's brief now that its real start tick (1574) is
-  pinned; (2) Brendan's throw pose/exit translation + ball-icon decrement
-  (needs pixel-tick-exact re-derivation per docs §3's own "Not tick-exact
-  this session" flag, plus the two MISSING asset tables in §6); (3) then
-  ball arc / ONIX materialize / first action menu (1595-1810), per
+- **Scope finding (worker) + ratification (supervisor):** ticks 1574-1594
+  of the briefed window diverge because Brendan's throw-pose swap + a
+  ball-icon change genuinely begin at trace tick **1574** — not "~1595" as
+  docs/battle-menu-notes.md §1's coarse pass estimated (worker pinned this
+  by diffing the oracle's own consecutive frames + a visual crop). That is
+  exactly the mechanism the brief ruled out of scope, so the worker landed
+  the verified text/box-clear feature and flagged rather than forcing a
+  fix — correct call, ratified. Supervisor trimmed the trace to the
+  slice's true window (18/18) and corrected §1's table row in
+  docs/battle-menu-notes.md; the next slice owns 1574+ with its own dense
+  trace.
+- **Next:** (1) Brendan's throw pose/exit translation + ball-icon change,
+  starting tick 1574 (needs pixel-tick-exact re-derivation per docs §3's
+  own "Not tick-exact this session" flag, plus the two MISSING asset
+  tables in §6: ball-open particles, affine emerge + color-fade); (2) then
+  ball arc / ONIX materialize / player healthbox (through settle 1693);
+  (3) blank-box + menu draw + idle cycle (1742-1810), per
   docs/battle-menu-notes.md §3-§5.
 - **Notes:** healthboxAssembly.ts/healthbox docs, oracle/harness, and
   ROADMAP.md stayed out of scope, per the brief. `battleScene.ts` touchpoint
