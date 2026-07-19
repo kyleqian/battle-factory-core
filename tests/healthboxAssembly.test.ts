@@ -4,33 +4,20 @@ import battleHealthbox from "../src/assets/gen/battle-healthbox.json" with { typ
 import harvested from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
 
 // ISSUES #16 - see docs/healthbox-assembly-notes.md for the full root-cause
-// dossier (RAM/VRAM-confirmed) and what's landed vs. still open here.
-// Pins the one piece this session proved byte-exact against the
+// dossier (RAM/VRAM-confirmed) and what landed.
+// Pins the full content-assembly pipeline byte-exact against the
 // pixel-harvested GROVYLE/male/Lv50/full-HP/no-status block
-// (sendout-healthbox-opponent.json): the base frame is a flat blit of the
-// existing singlesOpponent sheet - no tile remap exists (the previously
-// "unsolved" mismatch was 100% attributable to un-composited content, not
-// a frame-placement bug). Deliberately does NOT assert equality over the
-// name/level text footprint or the HP-bar footprint - neither is rendered
-// yet (see the doc: text placement wasn't nailed down, and the healthbar
-// sprite's own SubspriteTable placement wasn't verified in time) - this
-// test must fail loudly (not silently pass) if that ever regresses to
-// drawing wrong pixels there instead of leaving them transparent.
+// (sendout-healthbox-opponent.json): the base frame (a flat blit - no tile
+// remap), the HP bar (full-HP tile selection + its own SubspriteTable
+// placement), and the nickname/gender + level text (the real FONT_SMALL
+// window-printer path, including the dynamic-color gender-symbol
+// override). Every opaque pixel of the harvested 100x28 block is asserted -
+// no exclusion rects.
 
-// Canvas-local (origin = HEALTHBOX_FRAME_ORIGIN) rects excluded from the
-// exactness assertion below - generously sized to cover the un-composited
-// content regions documented in docs/healthbox-assembly-notes.md.
-const NAME_TEXT_RECT = { x0: 8, y0: 5, x1: 64, y1: 16 };
-const LEVEL_TEXT_RECT = { x0: 64, y0: 5, x1: 88, y1: 16 };
-const HP_BAR_RECT = { x0: 0, y0: 8, x1: 100, y1: 24 }; // sHealthBar_Subsprites_Opponent's placement is unverified this session (see docs/healthbox-assembly-notes.md) - generously wide margin rather than a precise (and possibly wrong) box
-
-function inRect(x: number, y: number, r: { x0: number; y0: number; x1: number; y1: number }): boolean {
-  return x >= r.x0 && x < r.x1 && y >= r.y0 && y < r.y1;
-}
+const assets = { frame: battleHealthbox.singlesOpponent, hpbar: battleHealthbox.hpbar };
 
 describe("composeOpponentHealthbox (ISSUES #16)", () => {
-  const frame = { tileset: battleHealthbox.singlesOpponent.tileset, palette: battleHealthbox.singlesOpponent.palette };
-  const result = composeOpponentHealthbox(frame, { name: "GROVYLE", level: 50, gender: "male", hpFraction: 1, status: "none" });
+  const result = composeOpponentHealthbox(assets, { name: "GROVYLE", level: 50, gender: "male", hpFraction: 1, status: "none" });
 
   it("produces a 128x32 canvas anchored at the healthbox's own screen corner", () => {
     expect(result.width).toBe(128);
@@ -38,27 +25,24 @@ describe("composeOpponentHealthbox (ISSUES #16)", () => {
     expect(HEALTHBOX_FRAME_ORIGIN).toEqual({ x: 12, y: 14 });
   });
 
-  it("matches the pixel-harvested block byte-exact everywhere outside the (still-unimplemented) text/HP-bar footprints", () => {
+  it("matches the entire pixel-harvested block byte-exact", () => {
     // harvested crop is (x:13,y:16)-(113,44) screen = canvas-local (1,2)-(101,30).
     let checked = 0;
     for (let ly = 0; ly < harvested.height; ly += 1) {
       for (let lx = 0; lx < harvested.width; lx += 1) {
         const cx = lx + (harvested.x - HEALTHBOX_FRAME_ORIGIN.x);
         const cy = ly + (harvested.y - HEALTHBOX_FRAME_ORIGIN.y);
-        if (inRect(cx, cy, NAME_TEXT_RECT) || inRect(cx, cy, LEVEL_TEXT_RECT) || inRect(cx, cy, HP_BAR_RECT)) continue;
         const cell = result.pixels[cy * result.width + cx];
-        if (!cell) continue; // still-transparent frame pixel (e.g. outside the opaque bbox) - nothing to assert
+        if (!cell) continue; // still-transparent frame pixel (outside the healthbox's own opaque shape) - nothing to assert
         const hi = (ly * harvested.width + lx) * 3;
         checked += 1;
         expect([cell.r, cell.g, cell.b], `mismatch at local (${cx},${cy})`).toEqual([harvested.pixels[hi], harvested.pixels[hi + 1], harvested.pixels[hi + 2]]);
       }
     }
-    // Sanity: a substantial chunk of the 100x28 bbox is asserted even after
-    // excluding the generous text/bar rects and background-transparent px
-    // (859/2574 opaque px, oracle-confirmed this run - not a hardcoded
-    // magic number, just a floor so this test can't silently degrade to
-    // checking nothing).
-    expect(checked).toBeGreaterThan(800);
+    // Every opaque pixel of the harvested 100x28 bbox is asserted (2574/2574,
+    // oracle-confirmed this run) - not a hardcoded magic number to hit, just
+    // a floor so this test can't silently degrade to checking nothing.
+    expect(checked).toBe(2574);
   });
 
   it("HP_BAR_FULL_TILES is the RAM/VRAM-confirmed full-HP tile selection (cap + 6x fully-filled green segment)", () => {
@@ -68,7 +52,15 @@ describe("composeOpponentHealthbox (ISSUES #16)", () => {
   });
 
   it("rejects unimplemented HP fractions and statuses instead of guessing", () => {
-    expect(() => composeOpponentHealthbox(frame, { name: "GROVYLE", level: 50, gender: "male", hpFraction: 0.5, status: "none" })).toThrow();
-    expect(() => composeOpponentHealthbox(frame, { name: "GROVYLE", level: 50, gender: "male", hpFraction: 1, status: "poison" })).toThrow();
+    expect(() => composeOpponentHealthbox(assets, { name: "GROVYLE", level: 50, gender: "male", hpFraction: 0.5, status: "none" })).toThrow();
+    expect(() => composeOpponentHealthbox(assets, { name: "GROVYLE", level: 50, gender: "male", hpFraction: 1, status: "poison" })).toThrow();
+  });
+
+  it("stays parameterized: a different name/gender/level renders without GROVYLE-specific constants", () => {
+    const female = composeOpponentHealthbox(assets, { name: "MISDREAVUS", level: 100, gender: "female", hpFraction: 1, status: "none" });
+    const none = composeOpponentHealthbox(assets, { name: "MAGIKARP", level: 5, gender: "none", hpFraction: 1, status: "none" });
+    expect(female.width).toBe(128);
+    expect(female.pixels.some((p) => p !== null)).toBe(true);
+    expect(none.pixels.some((p) => p !== null)).toBe(true);
   });
 });
