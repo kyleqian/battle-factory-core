@@ -856,6 +856,8 @@ export interface FightSubmenuState {
   displayCursor: FightSubmenuSlot;
   /** `elapsed` of the B-press that started closing; `null` until B is pressed. */
   closeElapsed: number | null;
+  /** `elapsed` of the A-press that confirmed the highlighted move (turn kickoff); `null` until confirmed. Mutually exclusive with `closeElapsed` (B and A both hand off to `HandleInputChooseMove`'s caller, but only one branch fires per press - see `confirmFightMove`). */
+  confirmElapsed: number | null;
 }
 
 export const CLOSED_FIGHT_SUBMENU_STATE: FightSubmenuState = {
@@ -863,17 +865,32 @@ export const CLOSED_FIGHT_SUBMENU_STATE: FightSubmenuState = {
   cursor: 0,
   displayCursor: 0,
   closeElapsed: null,
+  confirmElapsed: null,
 };
 
 /** A-press on the settled action menu (FIGHT already highlighted - the only case this slice models, §11's own scope) opens the submenu fresh at ROCK_SLIDE (slot 0, `gMoveSelectionCursor`'s own zero-init; this slice never re-opens after a close, so a persisted nonzero cursor from a prior open is out of scope). */
 export function openFightSubmenu(elapsed: number): FightSubmenuState {
-  return { openElapsed: elapsed, cursor: 0, displayCursor: 0, closeElapsed: null };
+  return { openElapsed: elapsed, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null };
 }
 
 /** B-press while the submenu is open and not already closing - starts the close DMA-wait. No-op (returns `state` unchanged) if not open or already closing, so callers can call this unconditionally on a B-press. */
 export function closeFightSubmenu(state: FightSubmenuState, elapsed: number): FightSubmenuState {
-  if (state.openElapsed === null || state.closeElapsed !== null) return state;
+  if (state.openElapsed === null || state.closeElapsed !== null || state.confirmElapsed !== null) return state;
   return { ...state, closeElapsed: elapsed };
+}
+
+/**
+ * A-press on the highlighted move (this slice only models Onix's slot 0,
+ * ROCK_SLIDE - the brief's own scope) - hands off to `HandleInputChooseMove`'s
+ * `!canSelectTarget` branch (`battle_controller_player.c:524-528`:
+ * `BtlController_EmitTwoReturnValues` + `PlayerBufferExecCompleted`, no
+ * visible per-frame submenu-close redraw at all, unlike B's own round-trip
+ * through a fresh `PlayerHandleChooseAction`). No-op if not open, already
+ * closing, or already confirmed, so callers can call this unconditionally on
+ * an A-press. */
+export function confirmFightMove(state: FightSubmenuState, elapsed: number): FightSubmenuState {
+  if (state.openElapsed === null || state.closeElapsed !== null || state.confirmElapsed !== null) return state;
+  return { ...state, confirmElapsed: elapsed };
 }
 
 /** Advance the 1-tick display lag - call once per tick BEFORE applying that tick's own nav input (so a same-tick cursor move is correctly held back one more tick, §11 finding 2). No-op while closed. */
@@ -901,4 +918,108 @@ export function moveFightCursor(cursor: FightSubmenuSlot, direction: "LEFT" | "R
     return (cursor ^ 2) as FightSubmenuSlot;
   }
   return cursor;
+}
+
+// --- Slice 7 (S7 slice A): turn kickoff - A-confirm on ROCK_SLIDE (docs/
+// battle-turn-notes.md §9's 2nd A press, tick 1918/1920) through the first
+// tick of DOUBLE_TEAM's clone animation (1964, out of this slice's scope
+// per docs/battle-move-anim-notes.md §8). Densely re-probed this session
+// (own oracle trace, 121 captures ticks 1900-2020, twice-run 0 sha
+// mismatches) since §11 only ever exercised B-close, never A-confirm.
+//
+// **No visible submenu-close redraw at all** (contrast B-close's own
+// `FIGHT_SUBMENU_CLOSE_DELAY` round-trip): `HandleInputChooseMove`'s A
+// branch hands off directly to the engine (`confirmFightMove`'s own doc
+// comment) - the submenu keeps showing its ordinary idle-cycle content,
+// frozen mid-phase, for 9 more ticks while the battle engine resolves turn
+// order/attacker (RAM-probed `gBattleMainFunc` steps through 3 distinct
+// values at ticks 1922/1923/1924, `gBattlerAttacker` becomes 1 (GROVYLE) at
+// 1924, `gCurrentMove` becomes 104 (DOUBLE_TEAM) at 1925 - Grovyle outspeeds
+// Onix, `gBattlerByTurnOrder`=[1,0], battle-turn-notes.md §9 point 4), THEN
+// hard-cuts atomically to the "used move" message at tick 1929 (`gBattle_BG0_Y`
+// flips 320->0 at RAM tick 1928, visible at render 1929 - this window's
+// established +1 render lag). No intermediate blank-box frame, same "off-
+// screen draw then one-step reveal" mechanism as the submenu's own open
+// transition (§11 finding 1) and `battleMenu.ts`'s "Go! ONIX!" transition
+// (module doc above) - just a different, longer, ENGINE-gated delay instead
+// of a fixed DMA-wait.
+//
+// **String, pixel/arithmetic-confirmed exact** (not assumed): `StringId
+// STRINGID_USEDMOVE` = "{B_ATK_NAME_WITH_PREFIX} used\n{B_BUFF2}"
+// (`src/data/gen/battle-message-templates.json`'s own `usedMove` entry) -
+// attacker is Grovyle, the OPPONENT (`HANDLE_NICKNAME_STRING_CASE`,
+// `battle_message.c:2286-2306`: `GetBattlerSide(gBattlerAttacker) !=
+// B_SIDE_PLAYER` + `BATTLE_TYPE_TRAINER` set for this Factory battle ->
+// `sText_FoePkmnPrefix = "Foe "`, NOT `sText_WildPkmnPrefix`), giving "Foe
+// GROVYLE used\nDOUBLE TEAM!" (29 chars incl. the free `\n`, 28 printable).
+// Direct oracle-pixel confirmation, not just source-reasoning: densely
+// capturing every tick 1929-1956 shows a new glyph every tick EXCEPT ticks
+// 1932/1940/1951 (pixel-silent holds) - these land EXACTLY on the string's 3
+// space characters (indices 3/11/22 from tick 1929 = 'F'), the same
+// "1-tick/char including silently-charged spaces" rule already established
+// for the intro text (`battleScene.ts` §3.2) and "Go! ONIX!" (this module's
+// own §1) - confirmed here for a THIRD independent string, and confirmed to
+// be 1 tick/char (this save's FAST speed), NOT the 2-ticks/char a stale
+// scratch doc (`turn-resolution-notes.md` §6 item 5) had claimed - that
+// doc's own reading of `sTextSpeedFrameDelays[FAST]=1` was a misinterpretation
+// of the delay-counter semantics, superseded by this run's own two prior
+// direct pixel/arithmetic derivations (battle-scene-notes.md §3.2,
+// battle-menu-notes.md §1/§2) which this session's own fresh probe now
+// makes three-for-three.
+//
+// **The onix/healthbox bounce overlay freezes 3 ticks after the press, not
+// at the press itself, and NOT at the phase the live formula would predict**:
+// pixel hashing the bounce region (x0-120,y60-112) across ticks 1922-1964
+// shows a single constant value the entire span, but it is NOT
+// `menuIdleBounce(t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT)`'s own live value at
+// the freeze moment (grid-searched directly against this session's own dense
+// oracle probe/`tools/compare/traces/turn1-kickoff.json`: the live formula
+// stays exact through ticks 1919-1921, a DIFFERENT plateau of frozen-tick
+// candidates 1896-1904 is exact for every tick 1922+, and every other
+// candidate tried - including the live formula's own value at 1921/1922 -
+// is not). Plausible mechanism (not RAM-confirmed): `HandleInputChooseMove`
+// keeps running for a couple more ticks after `JOY_NEW(A_BUTTON)` registers
+// (the source's own `PlaySE`/target-resolution work before
+// `PlayerBufferExecCompleted` hands off - `battle_controller_player.c:481-528`),
+// so the bounce sprite's own per-tick update (driven by that controller
+// function's polling loop, not a free-running task) keeps advancing briefly
+// past the press before truly stopping; kept as literal pixel-fit constants
+// per this run's established convention for exactly this situation
+// (`BALL_SPIN_TABLE`/`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT` precedent) rather
+// than asserted as proven source behavior.
+
+/** Ticks from the A-confirm registration tick (`FightSubmenuState.confirmElapsed`'s own convention, matching `openFightSubmenu`'s - the true absolute press tick, not `sendOutPressElapsed`'s pre-increment one) to the first glyph - pixel-fit exact against this session's own dense probe (press-registers 1919 -> first glyph 1929). */
+export const FIGHT_CONFIRM_TEXT_DELAY = 10;
+
+/** `sText_FoePkmnPrefix` (`"Foe "`) + GROVYLE + STRINGID_USEDMOVE's own literal " used" (module doc above) - line 1 of the turn-kickoff message, never wraps. */
+export const TURN_KICKOFF_LINE1 = "Foe GROVYLE used";
+/** `gBattleTextBuff2` resolved to DOUBLE_TEAM's display name + "!" (module doc above) - line 2. */
+export const TURN_KICKOFF_LINE2 = "DOUBLE TEAM!";
+/** Total printable characters across both lines (`\n` free, same rule as every other message window in this codebase). */
+export const TURN_KICKOFF_TEXT_TOTAL = TURN_KICKOFF_LINE1.length + TURN_KICKOFF_LINE2.length;
+
+/** First trace tick the turn-kickoff message box clears and the first glyph ("F") draws, in the same tick (module doc above - no separate blank-box frame). */
+export function turnKickoffTextStartTick(pressTick: number): number {
+  return pressTick + FIGHT_CONFIRM_TEXT_DELAY;
+}
+
+/** Visible character count (0..TURN_KICKOFF_TEXT_TOTAL) of "Foe GROVYLE used\nDOUBLE TEAM!" at absolute trace tick `t`, given the A-confirm press tick. Same 1-tick/char-including-spaces mechanism as `textVisibleChars`/`goTextVisibleChars`/`sendOutTextVisibleChars`. */
+export function turnKickoffTextVisibleChars(t: number, pressTick: number): number {
+  const start = turnKickoffTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN_KICKOFF_TEXT_TOTAL, t - start + 1);
+}
+
+/** Ticks after the A-confirm press the onix/healthbox bounce overlay keeps advancing live before it freezes (module doc above) - pixel-fit exact. */
+export const FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY = 3;
+
+/** The onix/healthbox bounce tick to freeze at once `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks have elapsed (module doc above) - a literal pixel-fit value, NOT `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`'s own live value at the freeze moment (grid-searched exact against a 9-tick-wide plateau of candidates, `pressTick - 19` picked as the plateau's center). */
+export function turnKickoffFrozenBounceTick(pressTick: number): number {
+  return pressTick - 19;
+}
+
+/** The onix/healthbox bounce tick to use for `menuIdleBounce` at trace tick `t` once the move is confirmed (module doc above): live for the first `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks after the press, then frozen. */
+export function turnKickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  return turnKickoffFrozenBounceTick(pressTick);
 }

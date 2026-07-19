@@ -1,3 +1,28 @@
+## 118 — Supervisor: scout lane merged — species-types data gap closed (all 411 species) + FIGHT-submenu ground truth banked (§11) — **suite 579/579**; round 3 launched (FIGHT-submenu engine slice + ISSUES #16 healthbox wiring); S6-vs-1496 decision escalated to the user
+
+- **State (verified post-merge):** `npm test` **579/579**, `npm run build`
+  green, tree clean, worktrees/branches cleaned up. Traces: sendout
+  255/256 (only 1496 open), s6-acceptance 224/228 (3 = ISSUES #5 pattern,
+  1 = 1496), rest unchanged.
+- **Did (worktree scout, verified then merged):**
+  `tools/extract/extract-species-types.ts` → `src/data/gen/
+  species-types.json` (all 411 species, spot-checked ONIX/GROVYLE/MURKROW/
+  PIDGEOTTO/MAGBY/BAYLEEF correct; `damageCalc.test.ts` fixtures now
+  consume it, pinned values unchanged). FIGHT-submenu ground truth:
+  2 twice-run 0-mismatch groundtruth traces + `battle-turn-notes.md` §11
+  (atomic submenu draw at tick 1892, JOY_NEW-only nav w/ 1-tick render
+  lag, B-close RESUMES the 4-phase cycle in place, gRngValue flat, two
+  single-tick anomalous idle frames flagged open).
+- **Open question (escalated, non-blocking):** accept/park 1496 and tick
+  S6 [x] (s6-acceptance 224/228 all-attributed), vs build persistent
+  whole-scene `sSpriteOrder` state (§7.32 documents why a general fix
+  needs it), vs leave S6 [~]. Default if unanswered: leave [~], continue
+  S7.
+- **Next:** verify round 3 (FIGHT-submenu engine slice vs §11;
+  healthbox-assembly wiring per ISSUES #16), then S7 turn-execution
+  slices (battle-script sequencing, HP-drain, text) per battle-turn-notes.
+
+---
 ## 117 — Bounded worker: closed ISSUES #18's 1494/1495 (a one-tick `drawOpponentSummaryExit` clock stall, found empirically) — `sendout.json` **253/256 → 255/256**; 1496 read source-first per the brief (`CreateSprite`/`CreateSpriteAtEnd`/`SortSprites`), root mechanism identified and documented, no fix shipped — it needs whole-scene persistent state this engine doesn't model, not a tweak
 
 - **State:** `npm test` **576/576** (+1 Tier-1), `npm run build` green, tree

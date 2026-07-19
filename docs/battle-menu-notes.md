@@ -1120,3 +1120,115 @@ per this run's no-silent-exclusion policy.
 sendout 255/256 (unchanged, only 1496 open), s6-acceptance 224/228
 (unchanged). `npm test` 592/592 (+13 Tier-1 this session), `npm run build`
 green.
+
+## 9. S7 slice A: move CONFIRMATION and turn kickoff (bounded worker, this
+session - A on ROCK_SLIDE -> submenu closes -> "Foe GROVYLE used\nDOUBLE
+TEAM!" prints, ending exactly at tick 1964 where DOUBLE_TEAM's clone
+animation starts, out of scope per docs/battle-move-anim-notes.md §8)
+
+§11 (docs/battle-turn-notes.md) only ever exercised nav + B-close; nobody had
+pressed A on a highlighted move before. This session densely re-probed the
+window (own oracle trace, 121 dense captures ticks 1900-2020, twice-run 0
+sha mismatches - `bin/oracle run` against a trace that reuses
+`battle1-turn1.json`'s own first 43 segments verbatim through the 2nd A
+press) and RAM-probed alongside it (`tools/probe/ram-probe.py`, `mainFunc`/
+`execFlags`/`ctrlFunc0`/`ctrlFunc1`/`moveCursor`/`attacker`/`curMove`/
+`bg0y`, ticks 1900-2020).
+
+**Milestone table** (all ticks this session's v5 numbering, identity-mapped
+from §9's own table through the 2nd A press per §11's own method note):
+
+| tick | event |
+|---|---|
+| 1918-1920 | 2nd A press (held 2 frames) |
+| **1919** | `JOY_NEW(A_BUTTON)` registers: `gBattleControllerExecFlags` bit0 clears, player `gBattlerControllerFuncs[0]` changes away from `HandleInputChooseMove` - RAM-confirmed, matches `HandleInputChooseMove`'s `!canSelectTarget` branch (`battle_controller_player.c:524-528`: `BtlController_EmitTwoReturnValues`+`PlayerBufferExecCompleted`, no visible per-frame close redraw at all, unlike B's own DMA round-trip) |
+| 1919-1921 | submenu keeps showing its ordinary idle-cycle content (mid-phase, frozen visually only because the phase's own sine value happens to plateau there - NOT yet a mechanism freeze) |
+| 1922-1924 | `gBattleMainFunc` steps through 3 distinct values (engine-side turn-order/attacker resolution) - RAM-confirmed, no pixel change yet |
+| 1924 | `gBattlerAttacker` becomes 1 (GROVYLE) - Grovyle outspeeds Onix, `gBattlerByTurnOrder`=[1,0] (battle-turn-notes.md §9 point 4) |
+| 1925 | `gCurrentMove` becomes 104 (MOVE_DOUBLE_TEAM) |
+| RAM 1928 (render **1929**) | `gBattle_BG0_Y` flips 320->0 - the message-box hard cut: submenu vanishes AND the first glyph ("F") draws, same tick, no intermediate blank frame (same "off-screen draw then one-step reveal" mechanism as the submenu's own open transition, §11 finding 1) |
+| 1929-1956 | "Foe GROVYLE used\nDOUBLE TEAM!" prints 1 char/tick (28 printable, `\n` free), 3 pixel-silent-but-charged space ticks at 1932/1940/1951 - direct oracle-pixel/arithmetic confirmation (not source-reasoning alone), same rule as §1/§2's "Go! ONIX!" and battle-scene-notes.md §3.2's intro text |
+| 1957-1963 | static hold, fully printed, no down-arrow prompt cursor (battle text auto-advances, doesn't wait for input) |
+| **1964** | scope boundary - pixel-identical to 1957 (DOUBLE_TEAM's clone animation is RAM-confirmed to start here per battle-move-anim-notes.md §8, but produces no visible pixel change until tick 1966 - this slice's own committed trace correctly stops one tick before anything the clone-animation slice would need to model) |
+
+**String, pixel/arithmetic-confirmed, not assumed.** `STRINGID_USEDMOVE` =
+`"{B_ATK_NAME_WITH_PREFIX} used\n{B_BUFF2}"` (`src/data/gen/
+battle-message-templates.json`'s own `usedMove` entry). Attacker is
+GROVYLE, the OPPONENT: `HANDLE_NICKNAME_STRING_CASE`
+(`battle_message.c:2286-2306`) prefixes `sText_FoePkmnPrefix = "Foe "` (not
+`sText_WildPkmnPrefix`) whenever `GetBattlerSide(gBattlerAttacker) !=
+B_SIDE_PLAYER` and `BATTLE_TYPE_TRAINER` is set (true for this Factory
+battle) - giving **"Foe GROVYLE used\nDOUBLE TEAM!"**, confirmed by direct
+visual inspection of the oracle's own PNG captures at ticks 1929-1964 (not
+inferred from source alone).
+
+**Text cadence: 1 tick/char, NOT 2 ticks/char.** `turn-resolution-notes.md`
+§6 item 5 (a prior session's own uncommitted scratch doc) claimed FAST speed
+means "1 char printed per 2 frames" - **wrong**, a misreading of
+`sTextSpeedFrameDelays[FAST]=1`'s delay-counter semantics. This session's
+own fresh oracle probe (the 3 silent-tick positions landing exactly on the
+string's 3 space characters, ticks 1929+3/+11/+22) independently confirms 1
+tick/char, the SAME rule already established twice over in this run
+(battle-scene-notes.md §3.2's intro text, this doc's own §1/§2's "Go!
+ONIX!") - now three-for-three. `battleScene.ts`'s existing battle-text
+printer (`drawMessageTextLines`/`battleWindow`, the `B_WIN_MSG`-family
+window+FONT_NORMAL+cadence already pinned for the intro/"Go!"/send-out text)
+was reused verbatim for the new string/timing - no new asset or rendering
+mechanism needed, since this message (unlike the FIGHT submenu's own move
+list) uses FONT_NORMAL, not the unextracted FONT_NARROW.
+
+**The onix/healthbox bounce overlay: live for 3 ticks past the press, then
+freezes at a literal pixel-fit tick, not the live formula's own value at the
+freeze moment.** Grid-searched directly against this session's own dense
+oracle probe (`tools/compare/traces/turn1-kickoff.json`): `menuIdleBounce(t
+- FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT)` (the still-open submenu's own live
+formula) stays exact through ticks 1919-1921, then a DIFFERENT 9-tick-wide
+plateau of frozen-tick candidates (`pressTick-19` through `pressTick-11`,
+all equally exact) becomes exact for every tick 1922 onward including the
+whole text-print window through 1964 - every other candidate tried
+(including the live formula's own tick-1922 value) is not. Plausible
+mechanism (not RAM-confirmed): `HandleInputChooseMove` keeps running a
+couple more ticks after `JOY_NEW(A_BUTTON)` registers (the source's own
+`PlaySE`/target-resolution work before `PlayerBufferExecCompleted` hands
+off) before the controller function that drives `DoBounceEffect`'s per-tick
+update truly stops being polled. Kept as literal pixel-fit constants per
+this run's established convention for exactly this situation
+(`BALL_SPIN_TABLE`/`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT` precedent).
+
+**RNG stays flat.** No `src/engine/` code this slice added calls any RNG
+function - matches battle-turn-notes.md §9 point 3's "gRngValue flat
+3485459011 through 1880-2309" finding (this window is entirely inside that
+flat span). Pinned by a determinism Tier-1 test (identical button script
+replayed twice yields identical state) rather than a `turnRng` integration,
+since `turnRng` isn't wired into `core.ts` yet (PROGRESS #120) and this
+window consumes zero `Random()` calls to begin with - nothing for it to
+assert against.
+
+**Engine implementation**: `battleMenu.ts`'s `FightSubmenuState` gains
+`confirmElapsed` (mirrors `closeElapsed`'s own convention) + `confirmFightMove`
+(A on cursor 0 only - the only move this trace's ground truth covers) +
+`turnKickoffTextStartTick`/`turnKickoffTextVisibleChars`/`turnKickoffBounceTick`.
+`battleScene.ts`'s `drawFightSubmenuWindow` gains a `sm.confirmElapsed !==
+null` branch (before text: submenu content unchanged, bounce per
+`turnKickoffBounceTick`; from `textStart` on: `drawTurnKickoffText`, which
+redraws `battleWindow` as a blank box then layers `drawMessageTextLines` on
+top - the same "redraw, don't diff" approach `drawSendOutHandoff` already
+uses for "Go! ONIX!"). `core.ts` wires the A-press (cursor 0 only) into the
+existing FIGHT-submenu input branch, and now also guards that whole branch
+on `confirmElapsed === null` so no further input (nav, B) mutates the
+submenu once confirmed - matching the source's own "controller no longer
+polling" behavior, not just this trace's own idle button script.
+
+**Acceptance**: `tools/compare/traces/turn1-kickoff.json` (canonical
+`battle1-turn1.json` prefix through the 2nd A press, then idle to tick 1964,
+81 dense captures from the settled submenu) **81/81, 0 diff** - no residual,
+no attribution needed. Zero regressions: fight-submenu 234/235 (unchanged,
+the one pre-existing tick-2073 anomaly), menu-idle 69/69, sendout 255/256,
+s6-acceptance 224/228, menu-throw 78/78. `npm test` 602/602 (+9 net Tier-1
+this session, 2 pre-existing tests updated for the new `confirmElapsed`
+field), `npm run build` green.
+
+**Out of scope, per the brief**: DOUBLE_TEAM's own clone animation (tick
+1964+, `battle-move-anim-notes.md` §8), the stat-change banner, ROCK_SLIDE's
+own resolution (accuracy/crit/damage/HP-drain, all much later per
+battle-turn-notes.md §9's table), ISSUES #5/#16/#18/#19/#20.

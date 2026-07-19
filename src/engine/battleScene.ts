@@ -437,6 +437,11 @@ import {
   FIGHT_SUBMENU_SLOT_NAMES,
   CLOSED_FIGHT_SUBMENU_STATE,
   type FightSubmenuState,
+  turnKickoffTextStartTick,
+  turnKickoffTextVisibleChars,
+  turnKickoffBounceTick,
+  TURN_KICKOFF_LINE1,
+  TURN_KICKOFF_LINE2,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -2899,17 +2904,61 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
       return;
     }
   }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turnKickoffTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurnKickoffText(fb, t, pressTick);
+      return;
+    }
+    // Engine-side turn-order/attacker resolution is in flight but not yet
+    // visible - the submenu keeps showing its ordinary slot content, but the
+    // onix/healthbox bounce overlay is already frozen (battleMenu.ts's new
+    // Slice 7 doc comment: `DoBounceEffect` stops being polled the instant
+    // the A-press hands off, not merely once the text becomes visible).
+    drawRect(fb, menuIdleBase);
+    const slotName = FIGHT_SUBMENU_SLOT_NAMES[sm.displayCursor];
+    const patch = fightSubmenuWindow.slots[slotName]!;
+    drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
+    drawMenuIdleBounceOverlay(fb, turnKickoffBounceTick(t, pressTick));
+    return;
+  }
   drawRect(fb, menuIdleBase);
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[sm.displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const { onixY2, healthboxY2 } = menuIdleBounce(t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+  drawMenuIdleBounceOverlay(fb, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+}
+
+/** The onix/healthbox bounce overlay alone (`drawActionMenuIdleContent`'s own second half, factored out so `drawFightSubmenuWindow`'s frozen-bounce branch can reuse it without redrawing `menuIdleBase`). */
+function drawMenuIdleBounceOverlay(fb: Uint8Array, bounceTick: number): void {
+  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
   if (onixY2 >= 1) drawRect(fb, menuIdleOnixBounce);
   if (healthboxY2 === 1) {
     drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y1 });
   } else if (healthboxY2 >= 2) {
     drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y2 });
   }
+}
+
+/**
+ * S7 slice A: the turn-kickoff "Foe GROVYLE used\nDOUBLE TEAM!" message
+ * (`battleMenu.ts`'s new Slice 7 - see its own module doc for the full
+ * derivation). Reuses this file's existing battle-text printer
+ * (`drawMessageTextLines`/`battleWindow`, the same `B_WIN_MSG`-family
+ * window+font+cadence already pinned for the intro text/"Go! ONIX!"/
+ * send-out text) rather than a new harvest - this message is FONT_NORMAL,
+ * unlike the FIGHT submenu's own FONT_NARROW move list. The battlefield
+ * base (onix + healthbox, bounce tick per `turnKickoffBounceTick`) is
+ * unaffected by the window swap - `drawTileBg` below fully overwrites the
+ * settled action-menu's own window content with a blank box before the text
+ * draws on top, the same "redraw the window, don't try to diff it" approach
+ * `drawSendOutHandoff` already uses for "Go! ONIX!".
+ */
+function drawTurnKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
+  drawActionMenuIdleContent(fb, turnKickoffBounceTick(t, pressTick));
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
 }
 
 /** The settled (post-tick-1227) composite: static bg + both trainer pics + the window frame - byte-exact against the oracle (see module doc point 1). */

@@ -4,6 +4,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 121 — Bounded worker: **S7 slice A landed** — move CONFIRMATION (A on ROCK_SLIDE) + turn kickoff through "Foe GROVYLE used\nDOUBLE TEAM!" — `turn1-kickoff.json` **81/81, 0 diff**; suite 593 → **602/602**
+
+- **State:** `npm test` **602/602** (+9 net Tier-1), `npm run build` green,
+  tree clean. New trace `tools/compare/traces/turn1-kickoff.json` (canonical
+  `battle1-turn1.json` prefix through the 2nd A press, idle to tick 1964, 81
+  dense captures) **81/81, 0 diff** - no residual, no attribution needed.
+  Zero regressions: fight-submenu 234/235 (unchanged), menu-idle 69/69,
+  sendout 255/256, s6-acceptance 224/228, menu-throw 78/78.
+- **Did:** densely re-probed ticks 1900-2020 (own oracle trace + RAM probe,
+  twice-run 0 mismatches - §11 never exercised A-confirm, only nav/B-close)
+  and found: A-confirm hands off to the engine with **no visible submenu-
+  close redraw at all** (unlike B's own DMA round-trip) - the submenu keeps
+  showing its idle content for 9 more ticks while `gBattleMainFunc`/
+  `gBattlerAttacker`/`gCurrentMove` resolve turn order (Grovyle outspeeds
+  Onix), then hard-cuts atomically to the message at tick 1929
+  (`gBattle_BG0_Y` 320->0). String pixel-confirmed exact: "Foe GROVYLE
+  used\nDOUBLE TEAM!" (`STRINGID_USEDMOVE` + `sText_FoePkmnPrefix`), 1
+  tick/char (this save's FAST speed - corrects a stale scratch-doc claim of
+  2 ticks/char, now three-for-three confirmed against this cadence rule).
+  Reused the existing battle-text printer (`drawMessageTextLines`/
+  `battleWindow`, FONT_NORMAL) verbatim - no new asset needed, unlike the
+  FIGHT submenu's own FONT_NARROW move list. The onix/healthbox bounce
+  overlay stays live for 3 ticks past the press then freezes at a
+  grid-searched literal tick (not the live formula's own value at that
+  moment) through tick 1964. `battleMenu.ts`'s `FightSubmenuState` gains
+  `confirmElapsed`; `core.ts`'s FIGHT-submenu input branch now also guards
+  on `confirmElapsed === null` so no further input mutates the submenu once
+  confirmed (matches the source's "controller stops polling" behavior, not
+  just this trace's own idle script - a real hardening, not just a feature
+  add). RNG ledger pinned via a determinism test (identical script replayed
+  twice -> identical state), not a `turnRng` integration - this window
+  consumes zero `Random()` calls, `turnRng` isn't wired into `core.ts` yet.
+- **Next:** the clone animation (tick 1964+, DOUBLE_TEAM's own blend/motion,
+  `battle-move-anim-notes.md` §8) is the immediate next window; the stat-
+  change banner and ROCK_SLIDE's own resolution (accuracy/crit/damage/
+  HP-drain) follow per battle-turn-notes.md §9's tick table.
+- **Notes:** docs in `docs/battle-menu-notes.md` §9 (this session's own
+  section, per the brief's choice). Stayed in scope (battleMenu.ts/
+  battleScene.ts/core.ts + their tests, new trace, this doc's §9,
+  PROGRESS.md) - did not touch battle-turn-notes.md/battle-move-anim-notes.md
+  or ISSUES #5/#16/#18/#19/#20 per the brief. No PAPERCUT this session.
+
+---
 ## 120 — Supervisor: **S6 → [x] (user decision — 1496 accepted/parked, ISSUES #18 policy-settled)**; healthbox-compositor branch merged (ISSUES #16 trimmed to its deferred-S7-validation stub) — **suite 593/593**; ISSUES #20 filed (FONT_NARROW gap)
 
 - **State (verified post-merge):** `npm test` **593/593**, `npm run build`
@@ -78,29 +121,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   their tests, new extractor/asset/trace, this doc's §8, PROGRESS.md) -
   did not touch healthboxAssembly.ts/battle-turn-notes.md/ISSUES #5/#16/#18
   per the brief. No PAPERCUT this session.
-
----
-## 118 — Supervisor: scout lane merged — species-types data gap closed (all 411 species) + FIGHT-submenu ground truth banked (§11) — **suite 579/579**; round 3 launched (FIGHT-submenu engine slice + ISSUES #16 healthbox wiring); S6-vs-1496 decision escalated to the user
-
-- **State (verified post-merge):** `npm test` **579/579**, `npm run build`
-  green, tree clean, worktrees/branches cleaned up. Traces: sendout
-  255/256 (only 1496 open), s6-acceptance 224/228 (3 = ISSUES #5 pattern,
-  1 = 1496), rest unchanged.
-- **Did (worktree scout, verified then merged):**
-  `tools/extract/extract-species-types.ts` → `src/data/gen/
-  species-types.json` (all 411 species, spot-checked ONIX/GROVYLE/MURKROW/
-  PIDGEOTTO/MAGBY/BAYLEEF correct; `damageCalc.test.ts` fixtures now
-  consume it, pinned values unchanged). FIGHT-submenu ground truth:
-  2 twice-run 0-mismatch groundtruth traces + `battle-turn-notes.md` §11
-  (atomic submenu draw at tick 1892, JOY_NEW-only nav w/ 1-tick render
-  lag, B-close RESUMES the 4-phase cycle in place, gRngValue flat, two
-  single-tick anomalous idle frames flagged open).
-- **Open question (escalated, non-blocking):** accept/park 1496 and tick
-  S6 [x] (s6-acceptance 224/228 all-attributed), vs build persistent
-  whole-scene `sSpriteOrder` state (§7.32 documents why a general fix
-  needs it), vs leave S6 [~]. Default if unanswered: leave [~], continue
-  S7.
-- **Next:** verify round 3 (FIGHT-submenu engine slice vs §11;
-  healthbox-assembly wiring per ISSUES #16), then S7 turn-execution
-  slices (battle-script sequencing, HP-drain, text) per battle-turn-notes.
 

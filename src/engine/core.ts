@@ -89,6 +89,7 @@ import {
 import {
   advanceFightSubmenuDisplay,
   closeFightSubmenu,
+  confirmFightMove,
   FIGHT_SUBMENU_OPEN_DELAY,
   MENU_DRAW_TICK,
   moveFightCursor,
@@ -181,8 +182,24 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
         fightSubmenu = openFightSubmenu(battleScene.elapsed + 1);
       }
-    } else if (fightSubmenu.closeElapsed === null && sceneT >= SCENE_TICK0 + fightSubmenu.openElapsed + FIGHT_SUBMENU_OPEN_DELAY) {
-      if (newKeys.has("B")) {
+    } else if (
+      fightSubmenu.closeElapsed === null &&
+      fightSubmenu.confirmElapsed === null &&
+      sceneT >= SCENE_TICK0 + fightSubmenu.openElapsed + FIGHT_SUBMENU_OPEN_DELAY
+    ) {
+      // S7 slice A (docs/battle-turn-notes.md §9's 2nd A press, battleMenu.ts's
+      // new Slice 7): A on the highlighted move hands off to turn kickoff -
+      // once confirmed, `HandleInputChooseMove` is no longer the active
+      // controller function (source-confirmed, battleMenu.ts's own Slice 7
+      // doc), so no further input (nav, B) is read at all - matching that,
+      // this whole branch's own guard excludes `confirmElapsed !== null`
+      // above rather than re-checking it per input case. Gated to cursor 0
+      // (ROCK_SLIDE) - the only move this trace's own oracle ground truth
+      // covers; the other 3 slots' confirm timing/text is unverified and out
+      // of this slice's scope.
+      if (newKeys.has("A") && fightSubmenu.cursor === 0) {
+        fightSubmenu = confirmFightMove(fightSubmenu, battleScene.elapsed + 1);
+      } else if (newKeys.has("B")) {
         fightSubmenu = closeFightSubmenu(fightSubmenu, battleScene.elapsed + 1);
       } else if (newKeys.has("LEFT")) {
         fightSubmenu = { ...fightSubmenu, cursor: moveFightCursor(fightSubmenu.cursor, "LEFT") };

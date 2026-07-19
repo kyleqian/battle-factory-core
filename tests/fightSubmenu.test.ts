@@ -9,10 +9,18 @@ import {
   CLOSED_FIGHT_SUBMENU_STATE,
   FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_DELAY,
+  FIGHT_CONFIRM_TEXT_DELAY,
+  TURN_KICKOFF_LINE1,
+  TURN_KICKOFF_LINE2,
+  TURN_KICKOFF_TEXT_TOTAL,
   advanceFightSubmenuDisplay,
   closeFightSubmenu,
+  confirmFightMove,
   moveFightCursor,
   openFightSubmenu,
+  turnKickoffTextStartTick,
+  turnKickoffTextVisibleChars,
+  turnKickoffBounceTick,
   type FightSubmenuState,
 } from "../src/engine/battleMenu.ts";
 import { TICK0 as SCENE_TICK0 } from "../src/engine/battleScene.ts";
@@ -56,12 +64,12 @@ describe("battleMenu: moveFightCursor (HandleInputChooseMove's DPAD guards, §11
 
 describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
   it("CLOSED_FIGHT_SUBMENU_STATE starts unopened at ROCK_SLIDE", () => {
-    expect(CLOSED_FIGHT_SUBMENU_STATE).toEqual({ openElapsed: null, cursor: 0, displayCursor: 0, closeElapsed: null });
+    expect(CLOSED_FIGHT_SUBMENU_STATE).toEqual({ openElapsed: null, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null });
   });
 
   it("openFightSubmenu sets openElapsed and resets cursor/displayCursor to ROCK_SLIDE", () => {
     const state = openFightSubmenu(847);
-    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null });
+    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null });
   });
 
   it("closeFightSubmenu is a no-op if not open, or already closing", () => {
@@ -87,16 +95,16 @@ describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
   });
 });
 
+/** A synthetic EngineState with `battleScene` already in the settled action-menu idle window, `elapsed` chosen so the FIRST tick() call below lands on trace tick `firstTickAbsolute` (see the `+1` convention noted in core.ts's own fightSubmenu block). Other fields are inert pass-throughs for this branch of tick() (verified by reading core.ts: the battleScene branch returns early using only battleScene/keyRepeat). */
+function stateAtTick(firstTickAbsolute: number): EngineState {
+  return { ...createInitialState(), battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE } };
+}
+
+function press(state: EngineState, buttons: GbaButton[]): EngineState {
+  return tick(state, new Set(buttons));
+}
+
 describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gating, 1-tick lag, B-close resume)", () => {
-  /** A synthetic EngineState with `battleScene` already in the settled action-menu idle window, `elapsed` chosen so the FIRST tick() call below lands on trace tick `firstTickAbsolute` (see the `+1` convention noted in core.ts's own fightSubmenu block). Other fields are inert pass-throughs for this branch of tick() (verified by reading core.ts: the battleScene branch returns early using only battleScene/keyRepeat). */
-  function stateAtTick(firstTickAbsolute: number): EngineState {
-    return { ...createInitialState(), battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE } };
-  }
-
-  function press(state: EngineState, buttons: GbaButton[]): EngineState {
-    return tick(state, new Set(buttons));
-  }
-
   it("A on the settled action menu opens the submenu at the exact next tick, JOY_NEW only (a held A the following tick doesn't re-open/no-op differently)", () => {
     let state = stateAtTick(1887);
     state = press(state, ["A"]);
@@ -142,5 +150,101 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     state = press(state, ["A"]); // reveal not until 1892
     state = press(state, ["B"]); // 1888 - too early
     expect(state.battleScene!.fightSubmenu.closeElapsed).toBeNull();
+  });
+
+  it("A on ROCK_SLIDE (cursor 0) confirms the move (records confirmElapsed) instead of closing", () => {
+    let state = stateAtTick(1887);
+    state = press(state, ["A"]); // opens at 1887
+    for (let i = 0; i < 5; i += 1) state = press(state, []); // reveal at 1892
+    state = press(state, ["A"]); // 1893: confirm on ROCK_SLIDE (cursor still 0)
+    const sm = state.battleScene!.fightSubmenu;
+    expect(sm.confirmElapsed).not.toBeNull();
+    expect(sm.closeElapsed).toBeNull();
+    expect(sm.cursor).toBe(0);
+  });
+
+  it("A on a different slot does NOT confirm (this slice only models ROCK_SLIDE) - it's simply ignored, the submenu stays open and interactive", () => {
+    let state = stateAtTick(1887);
+    state = press(state, ["A"]);
+    for (let i = 0; i < 5; i += 1) state = press(state, []);
+    state = press(state, ["RIGHT"]); // -> BIND (cursor 1)
+    state = press(state, []);
+    state = press(state, ["A"]); // confirm attempt on a non-ROCK_SLIDE slot
+    const sm = state.battleScene!.fightSubmenu;
+    expect(sm.confirmElapsed).toBeNull();
+    expect(sm.cursor).toBe(1);
+  });
+
+  it("once confirmed, no further input (nav, B) mutates the submenu - HandleInputChooseMove is no longer polling (source-confirmed, battleMenu.ts's Slice 7 doc)", () => {
+    let state = stateAtTick(1887);
+    state = press(state, ["A"]);
+    for (let i = 0; i < 5; i += 1) state = press(state, []);
+    state = press(state, ["A"]); // confirm
+    const confirmedSm = state.battleScene!.fightSubmenu;
+    state = press(state, ["B"]);
+    state = press(state, ["LEFT"]);
+    state = press(state, ["RIGHT"]);
+    expect(state.battleScene!.fightSubmenu).toEqual(confirmedSm);
+  });
+});
+
+describe("battleMenu: turn kickoff text (S7 slice A, docs/battle-turn-notes.md §9's 2nd A press through tick 1964)", () => {
+  it("FIGHT_CONFIRM_TEXT_DELAY matches the pixel-fit groundtruth (press 1919 -> first glyph 1929)", () => {
+    expect(FIGHT_CONFIRM_TEXT_DELAY).toBe(10);
+    expect(turnKickoffTextStartTick(1919)).toBe(1929);
+  });
+
+  it("the message is \"Foe GROVYLE used\\nDOUBLE TEAM!\" - Grovyle (the opponent) outspeeds Onix and moves first, regardless of which move Onix selected", () => {
+    expect(TURN_KICKOFF_LINE1).toBe("Foe GROVYLE used");
+    expect(TURN_KICKOFF_LINE2).toBe("DOUBLE TEAM!");
+    expect(TURN_KICKOFF_TEXT_TOTAL).toBe(28); // 17 + 12 - \n is free, not counted
+  });
+
+  it("turnKickoffTextVisibleChars prints 1 char/tick including 3 pixel-silent-but-charged spaces (indices 3/11/22), completing at tick 1956", () => {
+    const pressTick = 1919;
+    const start = turnKickoffTextStartTick(pressTick); // 1929
+    expect(turnKickoffTextVisibleChars(start - 1, pressTick)).toBe(0);
+    for (let i = 0; i < TURN_KICKOFF_TEXT_TOTAL; i += 1) {
+      expect(turnKickoffTextVisibleChars(start + i, pressTick)).toBe(i + 1);
+    }
+    expect(turnKickoffTextVisibleChars(start + TURN_KICKOFF_TEXT_TOTAL - 1, pressTick)).toBe(28); // tick 1956, fully printed
+    expect(turnKickoffTextVisibleChars(start + TURN_KICKOFF_TEXT_TOTAL + 50, pressTick)).toBe(28); // static hold well past tick 1964
+  });
+
+  it("turnKickoffBounceTick stays live for 3 ticks after the press, then freezes (pixel-fit grid-searched against this session's own dense oracle probe - see battleMenu.ts's Slice 7 doc)", () => {
+    const pressTick = 1919;
+    expect(turnKickoffBounceTick(1919, pressTick)).toBe(1919 - 2); // still live (FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT=2)
+    expect(turnKickoffBounceTick(1921, pressTick)).toBe(1921 - 2); // still live
+    const frozen = turnKickoffBounceTick(1922, pressTick);
+    expect(turnKickoffBounceTick(1930, pressTick)).toBe(frozen); // frozen - same value regardless of t
+    expect(turnKickoffBounceTick(1964, pressTick)).toBe(frozen);
+  });
+
+  it("confirmFightMove is idempotent and a no-op unless the submenu is open, not closing, and not already confirmed", () => {
+    expect(confirmFightMove(CLOSED_FIGHT_SUBMENU_STATE, 100)).toBe(CLOSED_FIGHT_SUBMENU_STATE); // not open
+    const opened = openFightSubmenu(847);
+    const confirmed = confirmFightMove(opened, 879);
+    expect(confirmed.confirmElapsed).toBe(879);
+    expect(confirmFightMove(confirmed, 2000)).toBe(confirmed); // already confirmed - unchanged
+    const closing = closeFightSubmenu(opened, 1007);
+    expect(confirmFightMove(closing, 1100)).toBe(closing); // already closing - unchanged
+  });
+
+  it("RNG ledger stays flat across the whole confirm-through-1964 window (docs/battle-turn-notes.md §9 point 3: gRngValue is flat 1880-2309, DOUBLE_TEAM's clone animation consumes zero Random() calls) - this slice's own state machine never calls any RNG function, pure/deterministic given only ticks and button input", () => {
+    let state = stateAtTick(1887);
+    state = press(state, ["A"]);
+    for (let i = 0; i < 5; i += 1) state = press(state, []);
+    state = press(state, ["A"]); // confirm at 1893
+    for (let i = 0; i < 80; i += 1) state = press(state, []); // idle through tick 1964+
+    // Replaying the identical button script twice from the identical start
+    // state must produce identical fightSubmenu/battleScene state - i.e. no
+    // hidden nondeterminism (RNG or otherwise) snuck into this slice's own
+    // code, matching the ground truth's own "zero Random() calls" finding.
+    let replay = stateAtTick(1887);
+    replay = press(replay, ["A"]);
+    for (let i = 0; i < 5; i += 1) replay = press(replay, []);
+    replay = press(replay, ["A"]);
+    for (let i = 0; i < 80; i += 1) replay = press(replay, []);
+    expect(replay.battleScene!.fightSubmenu).toEqual(state.battleScene!.fightSubmenu);
   });
 });
