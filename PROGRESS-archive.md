@@ -5,6 +5,45 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 90 — Bounded worker: opponent party-summary bar's own exit slide landed (§7.15's flagged sub-gap) — `sendout.json` **199/256 → 214/256**
+
+- **State:** `npm test` **468/468** (+1), `npm run build` green, tree
+  clean. Full 19-trace sweep against the live oracle: all 18 others at
+  their exact established counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
+  room-npcs 98/98, room-msgbox 142/142, transition 206/206,
+  scene-assembly 256/256, rent-slot1 125/139, rent-3picks 157/190,
+  confirm-flow 79/95) — zero regressions. `sendout.json`: **199/256 →
+  214/256** (+15).
+- **Did:** priority 2 of §7.18's list. Source-decoded
+  `SpriteCB_StatusSummaryBar_Exit` (`battle_interface.c:1823-1831`): a
+  constant +2px/tick slide (no acceleration — 32's low 4 bits always mask
+  back to 0, unlike the icons' `+=56` accumulator), plus a subsprite-table
+  width swap the same tick (16→24 tiles, `EXIT_BAR_TILE_ORDER`) and the
+  64px render-anchor shift that swap implies (source-derived from both
+  tables' literal x offsets, independently cross-validated by an
+  exhaustive oracle x2 sweep landing on the same constant). 15 of the 18
+  target render ticks (1463-1480) are now bit-exact; the other 3
+  (1470/1471/1479) are pixel-confirmed NOT the bar (icon-edge/materialize-
+  overlap residual instead — skin-tone colors, not the bar's palette). One
+  new Tier-1 test pins the slide. Full per-tick accounting, the anchor
+  derivation, and a named-but-out-of-scope adjacent one-tick gap at tick
+  1462 (real, mechanism-clear, doesn't by itself flip 1462 since that
+  tick's diff is dominated by the unrelated trainer-exit-tail) are all in
+  `docs/battle-scene-notes.md` §7.19.
+- **Next:** per §7.19's updated priority order — (1) particle model still
+  not full-frame-exact in 1481-1503/1516-1519 (§7.18's RAM-vs-render-lag
+  lead); (2) the 1470/1471/1479 icon-edge residual, likely same family as
+  1481-1492's larger spikes; (3) tick 1462's settled-bar gap (named, not
+  fixed); (4) the small 1504-1521 boundary residual, still last priority.
+- **Notes:** particle code, action-menu, healthboxAssembly.ts/healthbox
+  docs, oracle/harness, and ROADMAP.md stayed out of scope, per the
+  brief. No PAPERCUT.
+
+---
+
 ## 89 — Supervisor: healthbox content pipeline COMPLETE (worktree round 2 merged) — 2574/2574 opaque px byte-exact, fully parameterized; ISSUES #16 trimmed to HP-variation/status/wiring
 
 - **State:** `npm test` **467/467**, `npm run build` green, tree clean at

@@ -5,6 +5,71 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 93 — Bounded worker: PLAYER SEND-OUT slice 1 landed — message-box clear + "Go! ONIX!" print + static hold, new `battleMenu.ts`; `menu-text.json` **18/39** (full scope), not 39/39 (acceptance-bar mismatch, flagged not forced)
+
+- **State:** `npm test` **486/486** (+9), `npm run build` green, tree
+  clean at `84f2d08`. Full 19-trace sweep against the live oracle: all 19
+  at their exact established counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
+  room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
+  256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95,
+  **sendout 214/256 unchanged**) — zero regressions. New
+  `tools/compare/traces/menu-text.json` (every tick 1556-1594, 39
+  captures): **18/39**.
+- **Did:** per the brief, new `src/engine/battleMenu.ts` (pure cadence
+  logic) + a 2-line-conditional hook into `battleScene.ts`'s
+  `drawSendOutHandoff` (reuses the existing `drawMessageTextLines`
+  draw path, same B_WIN_MSG/FONT_NORMAL mechanism as battle-scene-notes.md
+  §3.1-3.2 — no new drawing code). Implements docs/battle-menu-notes.md
+  §1/§2 exactly: tick 1563 clears the box and draws "G" the same tick
+  (no blank-box frame), 1564-1571 print the remaining 8 chars 1/tick
+  (silent-but-charged space at 1566, byte-identical frame confirmed), 1572+
+  static (byte-identical confirmed). 9 new Tier-1 tests
+  (`tests/battleMenu.test.ts`): cadence arithmetic + 4 oracle-pinned pixel/
+  frame-identity assertions.
+- **Acceptance-bar mismatch (read before continuing this thread):** the
+  brief wanted `menu-text.json` at 0 diff (39/39). It's **18/39** —
+  ticks 1556-1573 (this slice's entire true scope: the inherited settled
+  hold through this slice's own print+static-hold) are bit-exact, ALL
+  confirmed via direct sub-region and full-frame oracle diffing, not
+  assumed. Ticks 1574-1594 diverge for a reason genuinely **outside** this
+  slice: pixel-diffing the oracle's own consecutive frames (not app-vs-
+  oracle) shows Brendan's throw-pose swap + a ball-icon-count change begin
+  at trace tick **1574** (re-derived this session, oracle-confirmed both by
+  bounding-box and by a visual crop showing his arm pose + a spawned ball
+  icon) — **not "~1595"** as docs/battle-menu-notes.md §1's own coarse pass
+  estimated, a 21-tick underestimate (larger than that doc's other
+  few-tick corrections, but the same species of error). The brief's own
+  OUT-OF-SCOPE list names exactly this mechanism ("Brendan throw animation,
+  ball arc... ticks 1595+") — its start tick was just wrong, so ticks
+  1574-1594 of the assigned 1556-1594 window fall inside a mechanism this
+  step was told not to build (unextracted assets per docs §6: ball-open
+  particles, affine emerge + color-fade tables; "Not tick-exact this
+  session" per docs §3). Did NOT force a fix here — landed the correctly-
+  scoped, fully-verified text/box-clear feature instead and documented the
+  finding in both `battleScene.ts`'s module doc and here, mirroring #92's
+  own "flag for supervisor judgment" precedent. The trace is committed
+  at the brief's exact specified capture range (1556-1594) rather than
+  narrowed to the achievable sub-range, so the gap is visible and
+  re-checkable, not hidden.
+- **Next:** (1) supervisor call on the acceptance-bar mismatch above —
+  either re-scope the next slice's window to end at 1573 (this slice's
+  true boundary) or explicitly fold "Brendan throw-pose swap + ball spawn"
+  into the next slice's brief now that its real start tick (1574) is
+  pinned; (2) Brendan's throw pose/exit translation + ball-icon decrement
+  (needs pixel-tick-exact re-derivation per docs §3's own "Not tick-exact
+  this session" flag, plus the two MISSING asset tables in §6); (3) then
+  ball arc / ONIX materialize / first action menu (1595-1810), per
+  docs/battle-menu-notes.md §3-§5.
+- **Notes:** healthboxAssembly.ts/healthbox docs, oracle/harness, and
+  ROADMAP.md stayed out of scope, per the brief. `battleScene.ts` touchpoint
+  kept minimal/additive (one import, one 8-line conditional) per the
+  brief's concurrent-worker note. No PAPERCUT.
+
+---
+
 ## 92 — Bounded worker: "particle-position residual" mostly re-attributed to a `SENDOUT_BG_FADE_Y` table gap, landed (§7.20) — pixel mass in 1481-1503/1516-1517 cut ~50%, but `sendout.json` **stays 214/256** (supersedes #91's "session end" as the final entry; #91's summary kept intact below)
 
 - **State:** `npm test` **477/477** (+1), `npm run build` green, tree
@@ -104,45 +169,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   worktree merges conflict-free (doc-ownership discipline held). 30-min
   single-mechanism caps landed reliably (#90 in 21 min, worktree round 3
   in 14 min). PAPERCUTS: none new reported across all six workers.
-
----
-
-## 90 — Bounded worker: opponent party-summary bar's own exit slide landed (§7.15's flagged sub-gap) — `sendout.json` **199/256 → 214/256**
-
-- **State:** `npm test` **468/468** (+1), `npm run build` green, tree
-  clean. Full 19-trace sweep against the live oracle: all 18 others at
-  their exact established counts (anchor 1/1, draft-cursor 13/13,
-  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
-  122/122, summary-info-magby 132/132, confirm-decline 67/67,
-  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
-  room-npcs 98/98, room-msgbox 142/142, transition 206/206,
-  scene-assembly 256/256, rent-slot1 125/139, rent-3picks 157/190,
-  confirm-flow 79/95) — zero regressions. `sendout.json`: **199/256 →
-  214/256** (+15).
-- **Did:** priority 2 of §7.18's list. Source-decoded
-  `SpriteCB_StatusSummaryBar_Exit` (`battle_interface.c:1823-1831`): a
-  constant +2px/tick slide (no acceleration — 32's low 4 bits always mask
-  back to 0, unlike the icons' `+=56` accumulator), plus a subsprite-table
-  width swap the same tick (16→24 tiles, `EXIT_BAR_TILE_ORDER`) and the
-  64px render-anchor shift that swap implies (source-derived from both
-  tables' literal x offsets, independently cross-validated by an
-  exhaustive oracle x2 sweep landing on the same constant). 15 of the 18
-  target render ticks (1463-1480) are now bit-exact; the other 3
-  (1470/1471/1479) are pixel-confirmed NOT the bar (icon-edge/materialize-
-  overlap residual instead — skin-tone colors, not the bar's palette). One
-  new Tier-1 test pins the slide. Full per-tick accounting, the anchor
-  derivation, and a named-but-out-of-scope adjacent one-tick gap at tick
-  1462 (real, mechanism-clear, doesn't by itself flip 1462 since that
-  tick's diff is dominated by the unrelated trainer-exit-tail) are all in
-  `docs/battle-scene-notes.md` §7.19.
-- **Next:** per §7.19's updated priority order — (1) particle model still
-  not full-frame-exact in 1481-1503/1516-1519 (§7.18's RAM-vs-render-lag
-  lead); (2) the 1470/1471/1479 icon-edge residual, likely same family as
-  1481-1492's larger spikes; (3) tick 1462's settled-bar gap (named, not
-  fixed); (4) the small 1504-1521 boundary residual, still last priority.
-- **Notes:** particle code, action-menu, healthboxAssembly.ts/healthbox
-  docs, oracle/harness, and ROADMAP.md stayed out of scope, per the
-  brief. No PAPERCUT.
 
 ---
 
