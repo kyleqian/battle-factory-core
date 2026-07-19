@@ -5,6 +5,24 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #19 — fight-submenu.json residual: tick 2073 (99px, healthbox-adjacent row)
+
+Opened 2026-07-19 (bounded worker, FIGHT-submenu engine slice). `tools/
+compare/traces/fight-submenu.json` is 234/235; the one residual tick, 2073,
+is a 99px diff confined to exactly screen row y=111 (x 127-225) — one row
+below the healthbox bounce region's own bbox (y74-110). Same
+still-unidentified family as `docs/battle-turn-notes.md` §11 finding 4's
+own two idle-only-trace anomalies (ticks 2071/2135 there — different
+absolute tick since that trace's button script differs, same "single-tick,
+boundary-row, healthbox-adjacent" shape). Ruled out this session: a third
+discrete healthbox-bounce state (the existing 0/1/2 model gets every OTHER
+tick in the 235-tick window to 0 diff); every integer
+`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT` value from -9 to 0 (grid-searched
+against the full post-close range — -4, the shipped value, is uniquely
+optimal at 1/66 mismatches, strictly better than every neighbor). Full
+derivation: `docs/battle-menu-notes.md` §8.
+Affects: `tools/compare/traces/fight-submenu.json` 234/235 (only frame).
+
 ## #18 — sendout/S6-acceptance final residual: 1496 (particle z-order, 3px)
 
 Parked 2026-07-19 (supervisor); trimmed 2026-07-19 (§7.31, closed tick

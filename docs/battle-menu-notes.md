@@ -1021,3 +1021,102 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
 4. The cursor-tile byte-check (§5/§6) is a 10-minute follow-up, not a real
    gap — flagged so a future session doesn't waste time re-extracting
    `battle-window.json` from scratch.
+
+## 8. The FIGHT (move-select) submenu engine slice (bounded worker, this session — implements docs/battle-turn-notes.md §11's ground truth)
+
+Extends the S6 chain (§4/§5 above) past the settled action menu's first
+A-press: `src/engine/battleMenu.ts`'s new `FightSubmenuState` (open/nav/
+close, `openFightSubmenu`/`moveFightCursor`/`closeFightSubmenu`/
+`advanceFightSubmenuDisplay`) plus `battleScene.ts`'s `drawFightSubmenuWindow`
+dispatcher, wired into `core.ts`'s `tick()`. Scope: A-press → submenu opens
+→ cursor nav (all 4 positions) → B-close → resumed action-menu idle cycle.
+Move confirmation (A on a move) is out of scope, per the brief.
+
+**Rendering approach — per-slot static harvest, not glyph rendering.**
+The brief suggested reusing the text/glyph infrastructure
+(`font-normal.json` etc.), but `B_WIN_MOVE_NAME_*`/`B_WIN_PP`/
+`B_WIN_MOVE_TYPE` all use `FONT_NARROW` (`battle_message.c`), a font this
+codebase has never extracted — only `FONT_NORMAL`/`FONT_SMALL` exist, and
+`FontFunc_Narrow` reads `gFontNarrowLatinGlyphs`, a genuinely separate glyph
+tileset from `gFontNormalLatinGlyphs` (source-confirmed, not just a
+narrower-width table over the same glyphs). Extracting a whole new font
+was out of proportion to this slice's time budget. Instead: §11 finding 2
+already established the window content is "a pure function of (selected
+slot, global phase clock)" — this session pixel-confirmed the STRONGER
+claim that the window-region bbox `(1,113)-(231,158)` (231×46, isolated by
+diffing tick 1887 vs 1892, both sharing the same onix/healthbox bounce
+state) is **byte-identical across an entire slot's whole dwell**, both of
+DRAGON_BREATH's two separate visits included. So each of the 4 slots needs
+exactly ONE static harvested patch (`tools/extract/
+extract-fight-submenu-window.ts` → `src/assets/gen/fight-submenu-window.json`),
+reusing the exact same harvest-per-region convention §5/§6 already
+established for the settled action menu itself — not a new mechanism, the
+same one applied one level deeper. The bounce regions above/beside this
+window (ONIX battler + healthbox, `menuIdleBounce`) are reused verbatim;
+this bbox sits entirely below both (max bounce y=110 vs. this window's
+y≥113), pixel-confirmed no overlap.
+
+**Timing constants, pixel-fit exact against the groundtruth trace**
+(`tools/compare/traces-groundtruth/battle1-fight-submenu-nav.json`):
+`FIGHT_SUBMENU_OPEN_DELAY = 5` (press 1887 → reveal 1892, matching §11
+finding 1 exactly) and `FIGHT_SUBMENU_CLOSE_DELAY = 6` (press 2047 → reveal
+2053 — wider than §11's own "2-tick hold" description, which characterizes
+the RAM-side redraw calls, not this window's full pixel-visible round-trip
+back through a fresh `PlayerHandleChooseAction`, source-confirmed to redraw
+the whole action-menu window from scratch via its own `HandleChooseActionAfterDma3`
+DMA-wait — not merely un-hide the old one). The open DMA-wait's "5-tick
+hold" (§11 finding 1) needed **no special-casing at all**: it's just this
+same bounce cycle naturally dwelling on one phase for that exact span
+(pixel-confirmed with a plain, unshifted `t` against `drawActionMenuIdleWindow`) —
+the settled action-menu window content genuinely doesn't change until the
+hard cut, so nothing new was needed for that span beyond calling the
+existing function.
+
+**The bounce-overlay tick shift — a real, pixel-fit-necessary correction,
+mechanism not fully source-confirmed.** `menuIdleBounce`'s existing sprite
+(never reset while FIGHT is open — `HandleInputChooseMove` doesn't call
+`DoBounceEffect`/`EndBounceEffect` at all, source-confirmed) should in
+principle apply completely unmodified to the submenu window too. Dense
+pixel comparison against the oracle found otherwise: the submenu's own
+bounce overlay needs `menuIdleBounce(t - 2)` (`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`,
+0/160 mismatches across the ENTIRE nav groundtruth window, every slot
+checked — a clean, total match), and the RESUMED action menu (post
+B-close) needs a FURTHER `t - 4` (`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`,
+only 1/66 residual — see below). I.e. each of the two atomic hard-cut
+DMA-wait events (open, then the close-and-redraw round-trip) costs the
+bounce sprite's own per-frame update exactly 2 more ticks of drift than
+this window's established render-lag convention alone predicts. Plausible
+mechanism (not RAM-confirmed this session): the DMA copy is a genuine
+CPU-blocking transfer — while it runs, no game logic (incl. the bounce
+sprite's own per-frame `+=7`) executes for a couple of frames, even though
+the trace's own frame/VBlank count keeps advancing regardless (frames are
+counted by hardware VBlank, not by whether game logic ran that frame).
+Kept as literal pixel-fit constants per this run's own established
+convention for exactly this situation (`BALL_SPIN_TABLE`/
+`MATERIALIZE_Y2_TABLE` precedent), not asserted as proven source behavior.
+
+**One open anomaly, individually attributed (not curve-fit or silently
+excluded).** `tools/compare/traces/fight-submenu.json` (a direct copy of
+the nav groundtruth trace's button script, 235 dense captures spanning
+open → all 4 nav positions → held-repeat check → B-close → 65+ ticks of
+resumed idle, more than one full 36-tick cycle) passes **234/235**. The one
+residual, tick **2073**, is a 99px row-shaped diff confined to exactly
+screen row y=111 (x 127-225) — one pixel row BELOW the healthbox bounce
+region's own bbox (y74-110) — pixel-confirmed via direct diff, not
+inferred. This is the same still-unidentified family §11 finding 4 already
+flagged for the idle-only trace's own two anomalies (ticks 2071/2135 there,
+a different button script so not the same absolute tick, but the same
+"single-tick, boundary-row, healthbox-adjacent" shape). Tried and ruled
+out: a third discrete healthbox-bounce state (the existing 0/1/2 model
+already covers every OTHER tick in this 235-tick window with 0 residual);
+a different `FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT` value (every integer
+shift from -9 to 0 was grid-searched against the full post-close range —
+`-4` is uniquely optimal at 1/66, every other value is strictly worse, see
+the git history of this session's scratch work). Not root-caused further
+within this session's cap — flagged for whoever next touches this window,
+per this run's no-silent-exclusion policy.
+
+**Zero regressions**: menu-idle 69/69, menu-throw 78/78, menu-text 18/18,
+sendout 255/256 (unchanged, only 1496 open), s6-acceptance 224/228
+(unchanged). `npm test` 592/592 (+13 Tier-1 this session), `npm run build`
+green.

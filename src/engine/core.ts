@@ -86,6 +86,14 @@ import {
   TICK0 as SCENE_TICK0,
   type BattleSceneState,
 } from "./battleScene.ts";
+import {
+  advanceFightSubmenuDisplay,
+  closeFightSubmenu,
+  FIGHT_SUBMENU_OPEN_DELAY,
+  MENU_DRAW_TICK,
+  moveFightCursor,
+  openFightSubmenu,
+} from "./battleMenu.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -148,6 +156,45 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     if (battleScene.sendOutPressElapsed === null && newKeys.has("A") && sendOutPressEligible(SCENE_TICK0 + battleScene.elapsed)) {
       battleScene = { ...battleScene, sendOutPressElapsed: battleScene.elapsed };
     }
+    // S7 FIGHT-submenu slice (docs/battle-turn-notes.md §11): the settled
+    // action menu's own A-press opens it (FIGHT presumed already
+    // highlighted - this engine doesn't model the action menu's own BAG/
+    // POKéMON/RUN cursor, out of §11's own scope); nav is JOY_NEW-gated
+    // only, no auto-repeat (finding 2, empirically confirmed via the
+    // held-DOWN check); B starts the close. The 1-tick display lag must
+    // catch up BEFORE this tick's own input is applied (see
+    // `advanceFightSubmenuDisplay`'s own doc) - hence this runs before the
+    // input checks below, not after.
+    let fightSubmenu = advanceFightSubmenuDisplay(battleScene.fightSubmenu);
+    // `battleScene.elapsed` here is still this tick's PRE-increment value
+    // (advanceBattleScene hasn't run yet) - the trace tick this tick's own
+    // input is read on is one past that (`+1`), same convention `render`'s
+    // own `t = TICK0 + elapsed` uses post-increment. `sendOutPressElapsed`
+    // above stores the pre-increment value instead (an established, if
+    // inconsistent, convention this slice doesn't touch) - kept independent
+    // here since `FIGHT_SUBMENU_OPEN_DELAY`/`FIGHT_SUBMENU_CLOSE_DELAY` are
+    // pixel-fit directly against the true press tick and would otherwise be
+    // off by one (found empirically this session: the app opened/closed
+    // exactly 1 tick early against the oracle until this was corrected).
+    const sceneT = SCENE_TICK0 + battleScene.elapsed + 1;
+    if (fightSubmenu.openElapsed === null) {
+      if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
+        fightSubmenu = openFightSubmenu(battleScene.elapsed + 1);
+      }
+    } else if (fightSubmenu.closeElapsed === null && sceneT >= SCENE_TICK0 + fightSubmenu.openElapsed + FIGHT_SUBMENU_OPEN_DELAY) {
+      if (newKeys.has("B")) {
+        fightSubmenu = closeFightSubmenu(fightSubmenu, battleScene.elapsed + 1);
+      } else if (newKeys.has("LEFT")) {
+        fightSubmenu = { ...fightSubmenu, cursor: moveFightCursor(fightSubmenu.cursor, "LEFT") };
+      } else if (newKeys.has("RIGHT")) {
+        fightSubmenu = { ...fightSubmenu, cursor: moveFightCursor(fightSubmenu.cursor, "RIGHT") };
+      } else if (newKeys.has("UP")) {
+        fightSubmenu = { ...fightSubmenu, cursor: moveFightCursor(fightSubmenu.cursor, "UP") };
+      } else if (newKeys.has("DOWN")) {
+        fightSubmenu = { ...fightSubmenu, cursor: moveFightCursor(fightSubmenu.cursor, "DOWN") };
+      }
+    }
+    battleScene = { ...battleScene, fightSubmenu };
     battleScene = advanceBattleScene(battleScene);
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
   }

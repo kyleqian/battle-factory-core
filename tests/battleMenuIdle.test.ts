@@ -5,7 +5,7 @@
 // worktree-contract split from tests/battleMenu.test.ts - no oracle/pixels
 // here (see tools/compare/traces/menu-idle.json for the pixel-parity side).
 import { describe, expect, it } from "vitest";
-import { MENU_IDLE_BLANK_START_TICK, MENU_IDLE_BLANK_END_TICK, MENU_DRAW_TICK, menuIdleBounce } from "../src/engine/battleMenu.ts";
+import { MENU_IDLE_BLANK_START_TICK, MENU_IDLE_BLANK_END_TICK, MENU_DRAW_TICK, menuIdleBounce, CLOSED_FIGHT_SUBMENU_STATE } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 import menuIdleBlankAsset from "../src/assets/gen/menu-idle-blank.json" with { type: "json" };
 import menuIdleBaseAsset from "../src/assets/gen/menu-idle-base.json" with { type: "json" };
@@ -82,7 +82,7 @@ describe("battleMenu: idle window render matches its own committed pixel-harvest
   /** Renders `t` exactly ONCE (unlike `pixelAtSentOut`, which re-renders per call - too slow for a full-rect scan) and checks every pixel of `asset`'s rect against it. */
   function assertRectMatches(t: number, asset: { x: number; y: number; width: number; height: number; pixels: number[] }) {
     const fb = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380 });
+    renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE });
     const { x, y, width, height, pixels } = asset;
     for (let py = 0; py < height; py += 1) {
       for (let px = 0; px < width; px += 1) {

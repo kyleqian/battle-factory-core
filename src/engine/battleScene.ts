@@ -430,6 +430,13 @@ import {
   MENU_IDLE_BLANK_START_TICK,
   MENU_IDLE_BLANK_END_TICK,
   menuIdleBounce,
+  FIGHT_SUBMENU_OPEN_DELAY,
+  FIGHT_SUBMENU_CLOSE_DELAY,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT,
+  FIGHT_SUBMENU_SLOT_NAMES,
+  CLOSED_FIGHT_SUBMENU_STATE,
+  type FightSubmenuState,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -453,6 +460,7 @@ import menuIdleBlankAsset from "../assets/gen/menu-idle-blank.json" with { type:
 import menuIdleBaseAsset from "../assets/gen/menu-idle-base.json" with { type: "json" };
 import menuIdleOnixBounceAsset from "../assets/gen/menu-idle-onix-bounce.json" with { type: "json" };
 import menuIdleHealthboxBounceAsset from "../assets/gen/menu-idle-healthbox-bounce.json" with { type: "json" };
+import fightSubmenuWindowAsset from "../assets/gen/fight-submenu-window.json" with { type: "json" };
 
 interface Tileset {
   columns: number;
@@ -562,6 +570,14 @@ interface MenuIdleHealthboxBounceAsset {
   y1: number[];
   y2: number[];
 }
+/** The FIGHT submenu's own window content (move names/PP/type/cursor), one static per-slot patch (docs/battle-menu-notes.md's new section / `extract-fight-submenu-window.ts`'s own doc for why a per-slot static harvest suffices here). */
+interface FightSubmenuWindowAsset {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  slots: Record<string, number[]>;
+}
 
 const battleBg = battleBgAsset as BattleBgAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -584,6 +600,7 @@ const menuIdleBlank = menuIdleBlankAsset as MenuIdleFrameAsset;
 const menuIdleBase = menuIdleBaseAsset as MenuIdleFrameAsset;
 const menuIdleOnixBounce = menuIdleOnixBounceAsset as MenuIdleFrameAsset;
 const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleHealthboxBounceAsset;
+const fightSubmenuWindow = fightSubmenuWindowAsset as FightSubmenuWindowAsset;
 
 /** This window's own trace-tick origin - `elapsed` 0 == trace tick 1040 (tools/compare/traces-groundtruth/battle1-scene-dense.json's own first captured frame). */
 export const TICK0 = 1040;
@@ -605,12 +622,14 @@ export interface BattleSceneState {
    * tick regardless (it's a pure `t - TICK0` counter, not phase-relative).
    */
   sendOutPressElapsed: number | null;
+  /** The FIGHT (move-select) submenu (docs/battle-turn-notes.md §11) - `CLOSED_FIGHT_SUBMENU_STATE` until the settled action menu's own A-press opens it. core.ts owns applying input (open/nav/close) directly, mirroring `sendOutPressElapsed`'s own "created directly, same tick already reflects it" idiom; core.ts must call `advanceFightSubmenuDisplay` on this BEFORE applying each tick's own input (not after - the 1-tick display lag depends on that ordering, see that function's own doc). */
+  fightSubmenu: FightSubmenuState;
 }
 
-export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = { elapsed: 0, sendOutPressElapsed: null };
+export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = { elapsed: 0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
-  return { elapsed: state.elapsed + 1, sendOutPressElapsed: state.sendOutPressElapsed };
+  return { elapsed: state.elapsed + 1, sendOutPressElapsed: state.sendOutPressElapsed, fightSubmenu: state.fightSubmenu };
 }
 
 /** Trace tick `t` is eligible to register the send-out A-press (docs/battle-scene-notes.md §7.2) - the idle wait-cursor must actually be showing, same "message settled" gate every other press-gated window in this codebase uses. */
@@ -2807,13 +2826,63 @@ function drawRect(fb: Uint8Array, asset: MenuIdleFrameAsset): void {
  * `onixY2 >= 1` degrades to the same `y2=1` patch rather than crashing, a
  * named (not silent) approximation for that unmodeled state.
  */
+/** The settled base (window/text content) plus the onix/healthbox idle bounce, using `bounceTick` (not necessarily `t` itself - see `drawFightSubmenuWindow`'s own callers, which pass a shifted tick for the FIGHT-submenu window's own two extra DMA-wait ticks of drift) to select the bounce phase. Factored out of `drawActionMenuIdleWindow` so the FIGHT-submenu slice can reuse the identical base+bounce compositing with a different tick input for the bounce alone. */
+function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number): void {
+  drawRect(fb, menuIdleBase);
+  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
+  if (onixY2 >= 1) drawRect(fb, menuIdleOnixBounce);
+  if (healthboxY2 === 1) {
+    drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y1 });
+  } else if (healthboxY2 >= 2) {
+    drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y2 });
+  }
+}
+
 function drawActionMenuIdleWindow(fb: Uint8Array, t: number): void {
   if (t <= MENU_IDLE_BLANK_END_TICK) {
     drawRect(fb, menuIdleBlank);
     return;
   }
+  drawActionMenuIdleContent(fb, t);
+}
+
+/**
+ * The FIGHT submenu window (docs/battle-turn-notes.md §11 / docs/battle-
+ * menu-notes.md's new section) - dispatches between the settled action menu
+ * (before open / during either DMA-wait), the submenu's own static per-slot
+ * content (open, using `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`'s empirically-fit
+ * bounce-tick offset), and the resumed action menu (after close, using
+ * `FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`'s own further offset) - see
+ * `battleMenu.ts`'s own doc comment on those two constants for why they
+ * differ from a plain, unshifted `t`.
+ */
+function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+  if (sm.openElapsed === null) {
+    drawActionMenuIdleWindow(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    // Open DMA-wait: the submenu's content is drawn off-screen, not yet
+    // revealed - the screen still shows the action menu, unmodified (§11
+    // finding 1's "5-tick hold" turns out to need no special-casing at all:
+    // it's just this same bounce cycle naturally dwelling on one phase for
+    // that span, pixel-confirmed exact with a plain, unshifted `t`).
+    drawActionMenuIdleWindow(fb, t);
+    return;
+  }
+  if (sm.closeElapsed !== null) {
+    const closeRevealTick = TICK0 + sm.closeElapsed + FIGHT_SUBMENU_CLOSE_DELAY;
+    if (t >= closeRevealTick) {
+      drawActionMenuIdleContent(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT);
+      return;
+    }
+  }
   drawRect(fb, menuIdleBase);
-  const { onixY2, healthboxY2 } = menuIdleBounce(t);
+  const slotName = FIGHT_SUBMENU_SLOT_NAMES[sm.displayCursor];
+  const patch = fightSubmenuWindow.slots[slotName]!;
+  drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
+  const { onixY2, healthboxY2 } = menuIdleBounce(t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
   if (onixY2 >= 1) drawRect(fb, menuIdleOnixBounce);
   if (healthboxY2 === 1) {
     drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y1 });
@@ -3061,8 +3130,15 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     // the atomic menu draw, and the settled idle-bounce cycle - an
     // oracle-harvested composition, not layered onto `drawSendOutHandoff`'s
     // own (here, superseded) draw stack. See `drawActionMenuIdleWindow`'s
-    // own doc comment.
-    drawActionMenuIdleWindow(fb, t);
+    // own doc comment. Past the blank box, `drawFightSubmenuWindow` extends
+    // this chain with the FIGHT submenu (docs/battle-turn-notes.md §11) -
+    // it falls back to `drawActionMenuIdleWindow` itself whenever the
+    // submenu isn't open, so this is a strict superset, not a branch.
+    if (t <= MENU_IDLE_BLANK_END_TICK) {
+      drawRect(fb, menuIdleBlank);
+      return;
+    }
+    drawFightSubmenuWindow(fb, t, state.fightSubmenu);
     return;
   }
   drawSendOutHandoff(fb, t, handoffTick);

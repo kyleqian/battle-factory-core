@@ -780,3 +780,125 @@ export function menuIdleBounce(t: number): { onixY2: number; healthboxY2: number
     healthboxY2: bounceSin(healthboxSinIndex(n)) + 1,
   };
 }
+
+// --- Slice 6: the FIGHT (move-select) submenu window (docs/battle-turn-
+// notes.md §11, the twice-run 0-mismatch groundtruth traces
+// battle1-fight-submenu-nav.json/-idle.json). Extends the settled
+// action-menu chain (Slice 5 above) past its first A-press: FIGHT opens a
+// 4-move grid (Onix's fixed moveset ROCK_SLIDE/BIND/DRAGON_BREATH/
+// SANDSTORM), JOY_NEW-gated (no auto-repeat, empirically confirmed - §11
+// finding 2's held-DOWN check) cursor nav with a 1-tick render lag, B
+// closes back to the action menu's own idle cycle RESUMED IN PLACE (not
+// reset - §11 finding 3).
+//
+// State machine only - the window's own TEXT/cursor content
+// (`fight-submenu-window.json`, `extract-fight-submenu-window.ts`) is a
+// per-slot STATIC oracle harvest (pixel-confirmed byte-identical across an
+// entire slot's whole dwell, both of DRAGON_BREATH's two separate visits
+// included - see that extractor's own doc), not a glyph-rendered redraw:
+// FONT_NARROW (the real font backing the move-name/PP/type window family,
+// `battle_message.c`'s B_WIN_MOVE_NAME_*/B_WIN_PP/B_WIN_MOVE_TYPE templates)
+// isn't extracted anywhere in this codebase (only FONT_NORMAL/FONT_SMALL
+// are - a real, source-confirmed gap: `FontFunc_Narrow` reads
+// `gFontNarrowLatinGlyphs`, a wholly separate glyph tileset from
+// `gFontNormalLatinGlyphs`, not just a narrower-width table over the same
+// glyphs). Flagged for whoever needs FONT_NARROW next; sidestepped here
+// since the per-slot harvest approach the settled action menu itself
+// already established (Slice 5) covers this atomic, non-progressive window
+// exactly as well without it.
+
+/** Ticks after the A-press before the submenu's off-screen-drawn content hard-cuts into view (§11 finding 1: DMA-wait, pixel-fit exact against the groundtruth trace - press tick 1887 -> reveal tick 1892). */
+export const FIGHT_SUBMENU_OPEN_DELAY = 5;
+/** Ticks after the B-press before the resumed action menu's content hard-cuts back into view (pixel-fit exact against the groundtruth trace this session - press tick 2047 -> reveal tick 2053; §11 finding 3's own "2-tick hold" describes the RAM-side redraw calls, not this full pixel-visible round-trip through `PlayerHandleChooseAction`'s own fresh DMA-wait - see docs/battle-menu-notes.md's new section for the derivation). */
+export const FIGHT_SUBMENU_CLOSE_DELAY = 6;
+
+/**
+ * The settled action-menu idle cycle's own bounce (`menuIdleBounce`) is
+ * driven by an invisible sprite created ONCE by `HandleInputChooseAction`
+ * and never reset while FIGHT is open (`HandleInputChooseMove` doesn't call
+ * `DoBounceEffect`/`EndBounceEffect` at all - source-confirmed, not
+ * assumed) - so in principle the exact same closed form should apply
+ * unmodified for the submenu's own idle-cycle overlay too. Empirically it
+ * does NOT: dense pixel comparison against the oracle (this session)
+ * found the submenu's own bounce overlay needs `menuIdleBounce(t - 2)`
+ * (0/160 mismatches across the full nav groundtruth window, every slot
+ * checked), and the RESUMED action menu (post B-close) needs a FURTHER
+ * `t - 4` (`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT` - only 1/66 residual).
+ * I.e. each of the two atomic hard-cut DMA-wait events (open, then the
+ * close-and-redraw round-trip back through a fresh
+ * `PlayerHandleChooseAction`) costs the bounce sprite's own per-frame
+ * update exactly 2 more ticks of drift than this window's established
+ * render-lag convention alone predicts. Plausible (not RAM-confirmed this
+ * session) mechanism: the DMA copy is a genuine CPU-blocking transfer -
+ * while it runs, no game logic (incl. the bounce sprite's own per-frame
+ * `+=7`) executes for a couple of frames, even though the trace's own
+ * frame/VBlank count keeps advancing regardless (frames are counted by
+ * hardware VBlank, not by whether game logic ran that frame). Kept as a
+ * literal pixel-fit constant per this run's own established convention for
+ * exactly this situation (`BALL_SPIN_TABLE`/`MATERIALIZE_Y2_TABLE`
+ * precedent) rather than asserted as proven source behavior.
+ */
+export const FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT = 2;
+/** See `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`'s own doc - the second DMA-wait event (B-close's round-trip) costs 2 MORE ticks on top, for a cumulative 4. One single-tick residual remains even with this correction (tick 2073 of the nav groundtruth trace, unusual multi-region diff shape) - not root-caused this session; individually attributed alongside §11 finding 4's own two named idle-only-trace anomalies (2071/2135) as the same still-unidentified family, per this run's no-silent-exclusion policy. See `tools/compare/traces/fight-submenu.json` / docs/battle-menu-notes.md's new section. */
+export const FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT = 4;
+
+export type FightSubmenuSlot = 0 | 1 | 2 | 3;
+
+/** Onix's fixed 4-move battle-1 moveset, in `gMoveSelectionCursor` slot order (§11 finding 2, RAM-confirmed via `gBattleMons`) - the asset-key order `fight-submenu-window.json`'s `slots` map uses. PP/type values themselves aren't consumed by this module; the harvested window asset already bakes them in. */
+export const FIGHT_SUBMENU_SLOT_NAMES = ["ROCK_SLIDE", "BIND", "DRAGON_BREATH", "SANDSTORM"] as const;
+
+export interface FightSubmenuState {
+  /** `elapsed` (battleScene state) of the A-press that opened this submenu; `null` if never opened (still just the action menu). */
+  openElapsed: number | null;
+  /** `gMoveSelectionCursor[gActiveBattler]` - RAM-committed slot (0-3), updates the same tick a nav press registers. */
+  cursor: FightSubmenuSlot;
+  /** Slot to actually draw this tick - lags `cursor` by exactly one tick (§11 finding 2's 1-tick render lag). Callers must advance this (`advanceFightSubmenuDisplay`) before applying a new tick's own nav input. */
+  displayCursor: FightSubmenuSlot;
+  /** `elapsed` of the B-press that started closing; `null` until B is pressed. */
+  closeElapsed: number | null;
+}
+
+export const CLOSED_FIGHT_SUBMENU_STATE: FightSubmenuState = {
+  openElapsed: null,
+  cursor: 0,
+  displayCursor: 0,
+  closeElapsed: null,
+};
+
+/** A-press on the settled action menu (FIGHT already highlighted - the only case this slice models, §11's own scope) opens the submenu fresh at ROCK_SLIDE (slot 0, `gMoveSelectionCursor`'s own zero-init; this slice never re-opens after a close, so a persisted nonzero cursor from a prior open is out of scope). */
+export function openFightSubmenu(elapsed: number): FightSubmenuState {
+  return { openElapsed: elapsed, cursor: 0, displayCursor: 0, closeElapsed: null };
+}
+
+/** B-press while the submenu is open and not already closing - starts the close DMA-wait. No-op (returns `state` unchanged) if not open or already closing, so callers can call this unconditionally on a B-press. */
+export function closeFightSubmenu(state: FightSubmenuState, elapsed: number): FightSubmenuState {
+  if (state.openElapsed === null || state.closeElapsed !== null) return state;
+  return { ...state, closeElapsed: elapsed };
+}
+
+/** Advance the 1-tick display lag - call once per tick BEFORE applying that tick's own nav input (so a same-tick cursor move is correctly held back one more tick, §11 finding 2). No-op while closed. */
+export function advanceFightSubmenuDisplay(state: FightSubmenuState): FightSubmenuState {
+  if (state.openElapsed === null || state.displayCursor === state.cursor) return state;
+  return { ...state, displayCursor: state.cursor };
+}
+
+/**
+ * `HandleInputChooseMove`'s DPAD branches (`battle_controller_player.c`,
+ * exact guards reproduced): LEFT only escapes bit0 if it's set, RIGHT only
+ * if it's clear (both toggle bit0); UP only escapes bit1 if it's set, DOWN
+ * only if it's clear (both toggle bit1) - a 2x2 grid, no wraparound. Onix's
+ * fixed 4-move set means the source's own `(cursor^bit) <
+ * gNumberOfMovesToChoose` guard (RIGHT/DOWN) is always satisfied here, so
+ * it's omitted. JOY_NEW-gated only by the caller (no auto-repeat - §11
+ * finding 2's held-DOWN check, empirically confirmed, not just assumed from
+ * the source read).
+ */
+export function moveFightCursor(cursor: FightSubmenuSlot, direction: "LEFT" | "RIGHT" | "UP" | "DOWN"): FightSubmenuSlot {
+  if ((direction === "LEFT" && (cursor & 1) !== 0) || (direction === "RIGHT" && (cursor & 1) === 0)) {
+    return (cursor ^ 1) as FightSubmenuSlot;
+  }
+  if ((direction === "UP" && (cursor & 2) !== 0) || (direction === "DOWN" && (cursor & 2) === 0)) {
+    return (cursor ^ 2) as FightSubmenuSlot;
+  }
+  return cursor;
+}

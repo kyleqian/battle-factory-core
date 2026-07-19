@@ -1,3 +1,40 @@
+## 116 — Supervisor: S7 BEGUN — turn-resolution pure-logic core merged (worktree lane) — damage calc / turn order / RNG ledger hermetically pinned vs the committed RAM dump; **suite 556 → 575/575**; found+fixed a real `+2` bug in the groundwork's damage formula
+
+- **State (verified post-merge):** `npm test` **575/575** (+19 Tier-1),
+  `npm run build` green, tree clean at the merge commit, worktree/branch
+  cleaned up. Trace counts unchanged from #115 (sendout 253/256,
+  s6-acceptance 224/228, rest at their established counts).
+- **Did (worktree lane, run parallel to #115, verified then merged):** new
+  `src/engine/damageCalc.ts` (`CalculateBaseDamage` bit-exact for battle
+  1's physical branches + crit/STAB/type/spread/accuracy),
+  `src/engine/turnOrder.ts` (`GetWhoStrikesFirst` incl. the synthetic-only
+  `Random()&1` speed-tie test), `src/engine/turnRng.ts` (the 12-step
+  turn-1 ledger, reusing S3's LCG). All pinned vs
+  `battle1-turn1-ram-dump.json` LCG transitions (accuracy 2310 / crit 2334
+  / spread 2337, v5 ticks), `docs/battle-turn-notes.md` §10.
+  **Two groundwork corrections, both supervisor-verified in source:**
+  (1) `CalculateBaseDamage` ends with an unconditional `return damage+2`
+  (`pokemon.c:3371`) — both prior dossier sessions missed it; the
+  LCG-decoded real spread roll proves Rock Slide's pre-STAB damage is 32
+  (not 30), progression 32→48→42 now exact. (2) `turn-resolution-notes.md`
+  §6's Fury Cutter case had a stat typo (def56 = Grovyle's own defense;
+  real defender Onix def=187) and its "crit×2" conclusion was an artifact
+  of the missing +2 — corrected case pinned instead.
+- **Next:** (1) main lane: ISSUES #18 remainder (1494-95 bar boundary,
+  1496 particle tie-break via the named `CreateSpriteAtEnd`/`sSpriteOrder`
+  source read); (2) worktree lane: scout-ahead — FIGHT-submenu/move-select
+  ground truth + the flagged species-types data gap (no committed JSON has
+  opponent-side species types; worker used a source-cited fixture);
+  (3) then wire the S7 core into turn execution (battle-script
+  sequencing, HP-drain timing, text) per battle-turn-notes.
+- **Notes:** worker was hermetic as briefed (no oracle/probes); flagged
+  the species-types gap instead of probing — correct call. Merge was
+  conflict-free (disjoint files by design).
+
+---
+
+---
+
 ## 115 — Bounded worker: closed ISSUES #18's tick 1493 (bar composites at `eva=0`, not "skip drawing") — `sendout.json` **252/256 → 253/256**; 1494/95 (bar) + 1496 (particle tie-break) investigated with 6 fresh RAM probes, left open with concrete negative findings (no curve-fit)
 
 - **State:** `npm test` **556/556** (+1 Tier-1), `npm run build` green, tree
