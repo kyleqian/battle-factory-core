@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 130 — Supervisor: victory scout merged — battle 1's win line is LONGER than one oracle trace: ROCK_SLIDE PP exhausts (silent no-op at 0 PP), Onix faints turn 14 → forced player switch (party ONIX/MAGBY/BAYLEEF revealed); trace ends at 19634 frames vs the 20000 oracle cap — suite **638/638**
+
+- **State (verified post-merge):** `npm test` **638/638**, `npm run build`
+  green, tree clean, no worktrees/branches. turn1-rockslide re-verified
+  181/256 (slice-C target, #129); turn1-cloneanim 230/230.
+- **Did (worktree scout, verified then merged, conflict-free):**
+  `battle1-victory.json` (19634 frames, twice-run 0/256 mismatch) +
+  3.7MB RAM dump + `battle-turn-notes.md` §14. Headlines: **PP exhaustion
+  is real and silent** (0-PP selection does nothing — no RNG, no text; a
+  fixed-script harness deadlocks); DRAGON_BREATH fallback adapted; turn-13
+  genuine miss; **Onix faints turn 14** (priority QUICK_ATTACK) and the
+  battle does NOT end — forced party-select (SEND OUT/SUMMARY/CANCEL)
+  with reserves MAGBY/BAYLEEF at full HP; trace ends there, one confirm
+  press from continuing vs Pidgeotto at 1/143 HP. Open: the SEND OUT
+  confirm button sequence (several attempts didn't commit the switch);
+  **the full win may not fit the oracle's 20000-frame cap** from anchor —
+  needs either a tighter script or a harness-level cap decision.
+- **Next:** round 9 (final this session) — main lane: slice-C completion
+  (rock slot-allocation simulation → 256/256 + the deferred Tier-1 pins);
+  worktree: crack the SEND OUT confirm + frame-budget analysis (can an
+  efficient line win under 20000 frames? — if provably not, that is an
+  escalation-worthy harness finding for next session). Then slice D
+  (drain/turn-end + ISSUES #16 validation) next session.
+
+---
 ## 129 — Bounded worker: **S7 slice C — ROCK_SLIDE window engine, LARGE MAJORITY LANDED, not yet 0-diff** — `turn1-rockslide.json` **0/256 → 181/256** (2963px total residual, avg ~40px/frame, max 172px, all in the 2362-2453 rock-overlap sub-range); suite **638/638**
 
 - **State:** `npm test` **638/638**, `npm run build` green, tree clean.
@@ -71,42 +96,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   swap-screen prep). Then slice D (drain/turn-end, closes #16's deferred
   validation) next session if time runs out.
 
----
-## 127 — Bounded worker: **S7 slice B COMPLETE** — banner's real BG1 scroll extracted+composited, clone-edge residual root-caused to opponent-healthbox z-order — `turn1-cloneanim.json` **168/230 → 230/230**; suite 634 → **638/638**
-
-- **State:** `npm test` **638/638** (+4 Tier-1 pins), `npm run build` green,
-  tree clean. `tools/compare/traces/turn1-cloneanim.json` **230/230 - S7
-  slice B ACCEPTANCE MET.** Zero regressions: turn1-kickoff 81/81,
-  fight-submenu 234/235, menu-idle 69/69, sendout 255/256, s6-acceptance
-  224/228, scene-assembly 256/256 - all re-verified unchanged.
-- **Did (two separate green commits, per the brief):** (1) **Gap 1's 4
-  sub-pixel clone-edge ticks (2075/2082/2088/2089) CLOSED** - re-verified
-  the offset table bit-exact against a fresh RAM probe first (not a fit);
-  root cause was DOUBLE_TEAM's clones reaching peak excursion (41-42px)
-  right where their own chin/jaw tile overlaps the OPPONENT HEALTHBOX's
-  right border, and this run's clone compositor painting over that
-  higher-priority UI element instead of respecting its z-order.
-  `isOpponentHealthboxOpaqueAt` (`battleScene.ts`) clips the clone draw.
-  (2) **Gap 2 (banner) CLOSED** - new extractor `tools/extract/
-  extract-stat-anim.ts` -> `stat-anim-banner.json` (reference/pokeemerald's
-  `graphics/battle_anims/stat_change/` is all plain/uncompressed dev-time
-  source, no LZ77 decoder needed - same situation `extract-battle-bg.ts`'s
-  header already flagged; extracted the full 8-palette/2-tilemap family,
-  wired only the evasion/increase pair DOUBLE_TEAM needs); rewrote
-  `drawStatsBanner` to sample the real scrolling BG1 tilemap (same alpha-
-  blend shape as the intro-slide's own `drawSlideScene`) instead of a flat
-  white flash. The scroll anchor needed the SAME one-tick render lag `bg1X`
-  already established for BG scroll registers (NOT `statsBannerEva`'s own
-  no-lag convention - a different register class) - root-caused via a
-  per-tick brute-force pixel sweep (`tools/compare/scratch/
-  diagnose_banner.mjs`) after a naive same-tick mapping got the mechanism
-  right but not bit-exact (halved the diff, didn't zero it).
-- **Next:** round 8 — slice C (ROCK_SLIDE) or slice D (drain/turn-end,
-  closes #16's deferred validation) — supervisor's call. The parallel
-  ground-truth scout lane (turn-2, then faint-to-victory) continues
-  independently.
-- **Notes:** docs/battle-menu-notes.md §10 marked COMPLETE (§10c/§10d added).
-  PAPERCUT: none - both residuals were exactly as scoped by #125: gap 1 was
-  a real, small, root-causeable bug (not a fit), gap 2 was genuinely new
-  extraction+compositing work, no rework of the already-CLOSED clone-motion
-  formula needed.
