@@ -11,6 +11,9 @@ import {
   PLAYER_THROW_BALL_START_TICK,
   PLAYER_THROW_BALL_EXACT_END_TICK,
   playerThrowBallTopLeft,
+  PLAYER_THROW_BALL_SPIN_START_TICK,
+  PLAYER_THROW_BALL_ARRIVE_TICK,
+  playerThrowBallSpin,
   playerSummaryFadeEva,
   playerSummaryIconExitDx,
   playerSummaryBarExitDx,
@@ -139,6 +142,37 @@ describe("battleMenu: the thrown Poke Ball's arc (docs/battle-menu-notes.md §3,
     expect(playerThrowBallTopLeft(1612)).toEqual({ x: 25, y: 50 });
     expect(playerThrowBallTopLeft(1613)).toEqual({ x: 27, y: 49 });
     expect(playerThrowBallTopLeft(1614)).toEqual({ x: 29, y: 49 });
+  });
+});
+
+describe("battleMenu: the thrown Poke Ball's GBA affine 'spin' (docs/battle-menu-notes.md §3 item 4, PROGRESS #94/#96's named blocker)", () => {
+  it("is null outside [1615, 1651] - picks up exactly where the plain-arc model (PLAYER_THROW_BALL_EXACT_END_TICK=1614) leaves off", () => {
+    expect(PLAYER_THROW_BALL_SPIN_START_TICK).toBe(PLAYER_THROW_BALL_EXACT_END_TICK + 1);
+    expect(playerThrowBallSpin(PLAYER_THROW_BALL_SPIN_START_TICK - 1)).toBeNull();
+    expect(playerThrowBallSpin(PLAYER_THROW_BALL_ARRIVE_TICK + 1)).toBeNull();
+  });
+
+  it("first spin tick (1615) renders RAM tick 1614's matrix (Cos(25,256)=209, -Sin(25,256)=-147) - the same render-lag convention (screen T shows RAM T-1) already established for mechanism 4/5 and RAM-confirmed here via gSprites[5]'s callback pointer", () => {
+    expect(playerThrowBallSpin(1615)).toEqual({ centerX: 38, centerY: 56, pa: 209, pb: -147, pc: 147, pd: 209 });
+  });
+
+  it("rotation keeps accumulating (25 GBA angle units/tick) all the way to the last spin tick (1650), even though the arc's own duration countdown has already fallen back to the plain (non-spin) branch by then - the affine anim is driven independently by AnimateSprite, not by SpriteCB_PlayerMonSendOut_2's own branch", () => {
+    expect(playerThrowBallSpin(1650)).toEqual({ centerX: 72, centerY: 115, pa: -254, pb: 25, pc: -25, pd: -254 });
+  });
+
+  it("arrival (1651): the ball snaps to its final center (72,115) and the affine matrix resets to identity (StartSpriteAffineAnim(sprite, 0), the neutral anim) - RAM-confirmed via gSprites[5]'s matrix (gOamMatrices[3]) going back to (256,0,0,256) the same tick its callback switches to SpriteCB_ReleaseMonFromBall", () => {
+    expect(playerThrowBallSpin(PLAYER_THROW_BALL_ARRIVE_TICK)).toEqual({ centerX: 72, centerY: 115, pa: 256, pb: 0, pc: 0, pd: 256 });
+  });
+});
+
+describe("battleMenu: rendered pixels for the ball spin (oracle-pinned, tools/compare/traces/menu-throw.json, 70/70 0-diff)", () => {
+  it("the ball's ink color is present at its rotated position early in the spin (tick 1615) and mid-spin (tick 1630)", () => {
+    expect(pixelAtSentOut(1615, 35, 52)).toEqual([173, 0, 0]);
+    expect(pixelAtSentOut(1630, 52, 59)).toEqual([173, 0, 0]);
+  });
+
+  it("arrival (tick 1651): the ball's ink color is present at its final, unrotated resting position", () => {
+    expect(pixelAtSentOut(1651, 70, 110)).toEqual([173, 0, 0]);
   });
 });
 

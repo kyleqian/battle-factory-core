@@ -229,3 +229,154 @@ export function playerThrowBallTopLeft(t: number): { x: number; y: number } | nu
   const dy = linearDy + gbaSin(arcIdx, BALL_ARC_HEIGHT);
   return { x: 16 + dx, y: 60 + dy };
 }
+
+// --- Slice 3: the ball-spin GBA affine keyframe animation (docs/
+// battle-menu-notes.md §3 item 4, PROGRESS #94/#96's named blocker) - trace
+// tick PLAYER_THROW_BALL_SPIN_START_TICK (1615) through PLAYER_THROW_BALL_ARRIVE_TICK
+// (1651), re-derived source-exact from `SpriteCB_PlayerMonSendOut_2`
+// (`reference/pokeemerald/src/pokeball.c:915-953`) and RAM-ground-truthed
+// against `battle1-menu-dense.json` (`tools/probe/specs/menu-ballspin-scan.json`,
+// gSprites[5] confirmed the ball's slot via its callback pointer,
+// `tools/probe/dump-task-and-sprite-callbacks.py`).
+//
+// Source chain: once `HIBYTE(data[7])` (the arc's own sine-index accumulator,
+// see `playerThrowBallTopLeft`'s doc comment) first reaches 35 - RAM tick
+// 1614 - the `HIBYTE(data[7]) in [35,80)` branch activates for the first
+// time (`oam.affineParam & 0xFF00 == 0` guard) and:
+//   1. halves^H^Hthirds the translation speed: `data[1]`/`data[2]` (the
+//      Q8.8 x/y step `AnimTranslateLinear` uses) are each replaced by
+//      `((data[N]/3) & ~1) | (data[N]&1)` (parity-preserving truncated
+//      division - the low bit encodes the sign-negate flag `AnimTranslateLinear`
+//      itself reads, so it must survive the divide unchanged).
+//   2. `StartSpriteAffineAnim(sprite, 4)` starts `sAffineAnim_BallRotate_4`
+//      (`pokeball.c:190-194`): `AFFINEANIMCMD_FRAME(0, 0, 25, 1)` then
+//      `AFFINEANIMCMD_JUMP(0)` - an infinite loop that adds rotation 25 (u8
+//      units, 256=360deg) once per tick forever, xScale/yScale delta 0 (stays
+//      at the neutral 256 the anim system resets to on `StartSpriteAffineAnim`,
+//      `sprite.c:1277-1279`). This is genuinely the FIRST true (nonzero
+//      rotation) affine matrix this codebase models - mechanism 4/5's own
+//      `rotation` is always literally 0 (`docs/battle-scene-notes.md` §7.17).
+//   3. every tick thereafter, `data[7]` still advances (by
+//      `sprite->sBattler/3` - NOT the original battler index; `sBattler` is
+//      `#define`d `data[6]`, which `InitAnimArcTranslation` had already
+//      overwritten with the arc's own angular step 1310 (`pokeball.c:790`),
+//      so this reads 1310/3=436/tick, not 0 - RAM-confirmed exact) until
+//      `HIBYTE(data[7])>=80` (~26 ticks later), at which point the branch's
+//      condition itself goes false and `SpriteCB_PlayerMonSendOut_2` falls
+//      back to the plain `TranslateAnimHorizontalArc` else-branch (restoring
+//      the x3 speed) to coast the last few ticks to the arc's actual target -
+//      but the affine anim keeps looping regardless (it's driven by
+//      `AnimateSprite`'s own per-tick affine-anim processing, independent of
+//      which branch the sprite's OWN callback takes), so the ball keeps
+//      visibly spinning all the way through arrival. Arrival itself (RAM
+//      tick 1650, RAM-confirmed via the ball's callback switching from
+//      `SpriteCB_PlayerMonSendOut_2` to `SpriteCB_ReleaseMonFromBall`) resets
+//      the affine anim to index 0 (`sAffineAnim_BallRotate_0`, an identity
+//      no-op) and snaps the sprite's real x/y to its final center (72,115).
+//
+// **Render lag** (§7.21's convention, RAM-confirmed here too - the brief's
+// "check this first" flag was worth heeding): trace/screen tick T shows RAM
+// tick T-1's sprite state, cross-validated against the ALREADY-exact
+// `playerThrowBallTopLeft` window itself (e.g. screen tick 1614's dx=13
+// matches RAM tick 1613's `x2`, not RAM tick 1614's) before trusting it for
+// the new ticks.
+//
+// `BALL_SPIN_TABLE` is RAM tick (1614+k)'s full state, rendered at screen
+// tick 1615+k (k=0..35, RAM 1614-1649): `x2`/`y2` (already includes both
+// `AnimTranslateLinear`'s linear term and the `Sin(...)` arc-bump term added
+// on top, same as `playerThrowBallTopLeft`'s combined `dy` - not decomposed
+// since the combined pair is what RAM actually shows) plus `pa`/`pb`/`pc`/`pd`
+// (`gOamMatrices[3]`, the ball's assigned matrix slot - identified via
+// `tools/probe/dump-task-and-sprite-callbacks.py` matching `gSprites[5]`'s
+// callback pointer to `SpriteCB_PlayerMonSendOut_2`). The matrix is a clean
+// closed form in principle (`pa=Cos(25*(k+1) mod 256, 256)`, etc. - see
+// `sAffineAnim_BallRotate_4`'s derivation above), and a first pass computed
+// it that way; kept as a literal table instead because this codebase's
+// `gbaSin` (a `Math.sin`-based re-derivation of `gSineTable`, not a literal
+// copy - see its own doc comment) is off by up to 1 Q8.8 unit from the real
+// table at a handful of the 256 indices, which the sine-ARC mechanisms never
+// noticed (a +-1px `y2` bump rarely flips a rendered pixel) but a rotate
+// SAMPLE kernel does (a +-1 matrix unit can flip which source texel an edge
+// pixel reads) - confirmed by brute-force comparison against the oracle
+// (sparse 1-11px edge diffs at exactly the ticks whose derived angle hit one
+// of `gbaSin`'s imprecise indices; 0 diff once swapped for the RAM-exact
+// values below).
+const BALL_SPIN_TABLE: readonly { x2: number; y2: number; pa: number; pb: number; pc: number; pd: number }[] = [
+  { x2: 14, y2: -12, pa: 209, pb: -147, pc: 147, pd: 209 },
+  { x2: 14, y2: -12, pa: 86, pb: -241, pc: 241, pd: 86 },
+  { x2: 15, y2: -11, pa: -68, pb: -246, pc: 246, pd: -68 },
+  { x2: 15, y2: -12, pa: -197, pb: -162, pc: 162, pd: -197 },
+  { x2: 16, y2: -12, pa: -255, pb: -18, pc: 18, pd: -255 },
+  { x2: 17, y2: -13, pa: -219, pb: 131, pc: -131, pd: -219 },
+  { x2: 17, y2: -12, pa: -103, pb: 234, pc: -234, pd: -103 },
+  { x2: 18, y2: -12, pa: 49, pb: 251, pc: -251, pd: 49 },
+  { x2: 19, y2: -12, pa: 185, pb: 176, pc: -176, pd: 185 },
+  { x2: 19, y2: -11, pa: 253, pb: 37, pc: -37, pd: 253 },
+  { x2: 20, y2: -12, pa: 228, pb: -115, pc: 115, pd: 228 },
+  { x2: 20, y2: -11, pa: 120, pb: -225, pc: 225, pd: 120 },
+  { x2: 21, y2: -11, pa: -31, pb: -254, pc: 254, pd: -31 },
+  { x2: 22, y2: -10, pa: -171, pb: -189, pc: 189, pd: -171 },
+  { x2: 22, y2: -9, pa: -249, pb: -56, pc: 56, pd: -249 },
+  { x2: 23, y2: -9, pa: -236, pb: 97, pc: -97, pd: -236 },
+  { x2: 24, y2: -8, pa: -136, pb: 216, pc: -216, pd: -136 },
+  { x2: 24, y2: -8, pa: 12, pb: 255, pc: -255, pd: 12 },
+  { x2: 25, y2: -7, pa: 157, pb: 201, pc: -201, pd: 157 },
+  { x2: 26, y2: -6, pa: 244, pb: 74, pc: -74, pd: 244 },
+  { x2: 26, y2: -6, pa: 243, pb: -80, pc: 80, pd: 243 },
+  { x2: 27, y2: -5, pa: 152, pb: -205, pc: 205, pd: 152 },
+  { x2: 27, y2: -5, pa: 6, pb: -255, pc: 255, pd: 6 },
+  { x2: 28, y2: -3, pa: -142, pb: -212, pc: 212, pd: -142 },
+  { x2: 29, y2: -3, pa: -238, pb: -92, pc: 92, pd: -238 },
+  { x2: 29, y2: -1, pa: -248, pb: 62, pc: -62, pd: -248 },
+  { x2: 31, y2: 2, pa: -167, pb: 193, pc: -193, pd: -167 },
+  { x2: 33, y2: 6, pa: -25, pb: 254, pc: -254, pd: -25 },
+  { x2: 35, y2: 10, pa: 126, pb: 222, pc: -222, pd: 126 },
+  { x2: 37, y2: 15, pa: 231, pb: 109, pc: -109, pd: 231 },
+  { x2: 39, y2: 20, pa: 252, pb: -43, pc: 43, pd: 252 },
+  { x2: 41, y2: 25, pa: 181, pb: -181, pc: 181, pd: 181 },
+  { x2: 43, y2: 29, pa: 43, pb: -252, pc: 252, pd: 43 },
+  { x2: 45, y2: 35, pa: -109, pb: -231, pc: 231, pd: -109 },
+  { x2: 46, y2: 41, pa: -222, pb: -126, pc: 126, pd: -222 },
+  { x2: 48, y2: 47, pa: -254, pb: 25, pc: -25, pd: -254 },
+];
+
+/** First trace tick the ball's affine "spin" is visible (RAM tick 1614's matrix, one tick lagged - see the module doc above). */
+export const PLAYER_THROW_BALL_SPIN_START_TICK = 1615;
+
+/** The tick the ball sprite settles at its final center (72,115) with the affine matrix reset to identity (RAM tick 1650's state, one tick lagged) - `SpriteCB_ReleaseMonFromBall` takes over the NEXT RAM tick and starts the (out-of-scope, separately-named) ball-open/materialize sequence, first visible the tick after this one. Last tick this module models. */
+export const PLAYER_THROW_BALL_ARRIVE_TICK = 1651;
+
+const BALL_SPIN_CENTER_X = 24;
+const BALL_SPIN_CENTER_Y = 68;
+const BALL_ARRIVE_CENTER_X = 72;
+const BALL_ARRIVE_CENTER_Y = 115;
+const BALL_SPIN_NEUTRAL_SCALE = 256; // xScale/yScale delta 0 - stays at StartSpriteAffineAnim's reset neutral (sprite.c:1277-1279)
+
+/**
+ * The thrown ball's OAM-space center + affine matrix (`{pa,pb,pc,pd}`, the
+ * literal GBA OAM matrix registers - `ObjAffineSet`'s output, `sprite.c:
+ * 1302-1313`: `pa=Cos(angle,xScale)`, `pb=-Sin(angle,xScale)`,
+ * `pc=Sin(angle,yScale)`, `pd=Cos(angle,yScale)`, `angle = 25*(k+1) mod 256`
+ * for `sAffineAnim_BallRotate_4`) at tick `t`, or `null` outside
+ * `[PLAYER_THROW_BALL_SPIN_START_TICK, PLAYER_THROW_BALL_ARRIVE_TICK]`.
+ * RAM-ground-truthed exact (`gOamMatrices[3]`, RAM ticks 1614-1650) - see the
+ * module doc above (`BALL_SPIN_TABLE`) for the full derivation, why the
+ * matrix is a literal table rather than computed from `angle` directly, and
+ * the render-lag convention.
+ */
+export function playerThrowBallSpin(t: number): { centerX: number; centerY: number; pa: number; pb: number; pc: number; pd: number } | null {
+  if (t < PLAYER_THROW_BALL_SPIN_START_TICK || t > PLAYER_THROW_BALL_ARRIVE_TICK) return null;
+  if (t === PLAYER_THROW_BALL_ARRIVE_TICK) {
+    return { centerX: BALL_ARRIVE_CENTER_X, centerY: BALL_ARRIVE_CENTER_Y, pa: BALL_SPIN_NEUTRAL_SCALE, pb: 0, pc: 0, pd: BALL_SPIN_NEUTRAL_SCALE };
+  }
+  const k = t - PLAYER_THROW_BALL_SPIN_START_TICK;
+  const entry = BALL_SPIN_TABLE[k]!;
+  return {
+    centerX: BALL_SPIN_CENTER_X + entry.x2,
+    centerY: BALL_SPIN_CENTER_Y + entry.y2,
+    pa: entry.pa,
+    pb: entry.pb,
+    pc: entry.pc,
+    pd: entry.pd,
+  };
+}

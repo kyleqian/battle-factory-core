@@ -412,6 +412,7 @@ import {
   brendanThrowFrame,
   brendanThrowDx,
   playerThrowBallTopLeft,
+  playerThrowBallSpin,
   playerSummaryFadeEva,
   playerSummaryIconExitDx,
   playerSummaryBarExitDx,
@@ -1704,6 +1705,54 @@ function drawSpriteSheetAffineStretch(
   }
 }
 
+/**
+ * `docs/battle-menu-notes.md` §3 item 4 / `battleMenu.ts`'s `playerThrowBallSpin`:
+ * this engine's first TRUE-rotation affine OAM sampler - mechanism 4/5 above
+ * both special-case `rotation=0` (`pb=pc=0`, a pure diagonal scale matrix), so
+ * neither generalizes to the thrown ball's actual GBA "spin" affine anim.
+ * Real GBA affine OBJ sampling (`sprite.c:1302-1313`'s `ObjAffineSet`, the
+ * same BIOS SWI 0x0E mechanism `docs/battle-scene-notes.md` §7.17 already
+ * named): for a destination pixel offset `(rx,ry)` from the sprite's OWN
+ * center, the sampled source texel is `((rx*pa+ry*pb)>>8+halfW,
+ * (rx*pc+ry*pd)>>8+halfH)` - the direct 2x2-matrix generalization of
+ * mechanism 4/5's own `(rx*matrixParam)>>8` (which is this formula
+ * specialized to `pb=pc=0`, `pa=pd=matrixParam`). `ST_OAM_AFFINE_DOUBLE`
+ * (`sBallOamData.affineMode`, `pokeball.c:95`) doubles the destination scan
+ * window to 32x32 (still centered on the sprite's real x/y) so a rotated
+ * 16x16 source isn't corner-clipped - mechanism 4/5 never needed this since
+ * neither ever rotates away from its axis-aligned bounding box.
+ */
+function drawSpriteSheetAffineRotate(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  centerX: number,
+  centerY: number,
+  pa: number,
+  pb: number,
+  pc: number,
+  pd: number,
+): void {
+  const w = tileset.columns * 8;
+  const h = tileset.rows * 8;
+  const halfW = w / 2;
+  const halfH = h / 2;
+  for (let dy = -h; dy < h; dy += 1) {
+    for (let dx = -w; dx < w; dx += 1) {
+      const sx = ((dx * pa + dy * pb) >> 8) + halfW;
+      const sy = ((dx * pc + dy * pd) >> 8) + halfH;
+      if (sx < 0 || sx >= w || sy < 0 || sy >= h) continue;
+      const tile = tileset.tiles[Math.floor(sy / 8) * tileset.columns + Math.floor(sx / 8)];
+      if (!tile) continue;
+      const idx = tile[(sy % 8) * 8 + (sx % 8)]!;
+      if (idx === 0) continue;
+      const c = palette[idx];
+      if (!c) continue;
+      setPixel(fb, centerX + dx, centerY + dy, c);
+    }
+  }
+}
+
 function drawGrovyleStretch(fb: Uint8Array, t: number, handoffTick: number): void {
   const local = t - handoffTick - MATERIALIZE_END_OFFSET;
   if (local < 0) return;
@@ -2120,6 +2169,20 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   const playerBallTopLeft = playerThrowBallTopLeft(t);
   if (playerBallTopLeft !== null) {
     drawSpriteSheet(fb, BALL_CLOSED_TILESET, summaryBall.palette, playerBallTopLeft.x, playerBallTopLeft.y);
+  }
+  const playerBallSpin = playerThrowBallSpin(t);
+  if (playerBallSpin !== null) {
+    drawSpriteSheetAffineRotate(
+      fb,
+      BALL_CLOSED_TILESET,
+      summaryBall.palette,
+      playerBallSpin.centerX,
+      playerBallSpin.centerY,
+      playerBallSpin.pa,
+      playerBallSpin.pb,
+      playerBallSpin.pc,
+      playerBallSpin.pd,
+    );
   }
   drawBallOpenParticles(fb, t, handoffTick);
   if (t >= GROVYLE_MATERIALIZE_TICK) {

@@ -235,6 +235,56 @@ already right, only specific numeric claims needed fixing.
     1462+ send-out window) — **named blocker, not attempted this
     session**, left for a future step that wants to tackle sprite-priority
     compositing generally.
+4c. **Landed this session (the ball-spin blocker named above)**: the GBA
+    affine "spin" is modeled tick 1615 through arrival, `playerThrowBallSpin`
+    (`battleMenu.ts`) + `drawSpriteSheetAffineRotate` (`battleScene.ts`, this
+    codebase's first TRUE-rotation affine OAM sampler - mechanism 4/5 both
+    special-case `rotation=0`). RAM ground-truthed exact via a new probe
+    (`tools/probe/specs/sendout-ball-spin.json`; the ball sprite is
+    `gSprites[5]`, identified by matching its callback pointer to
+    `SpriteCB_PlayerMonSendOut_2`'s address, `tools/probe/
+    dump-task-and-sprite-callbacks.py`) rather than hand-simulated from
+    source alone, because the control flow turned out subtler than the
+    original blocker note implied: `sprite->sBattler` (`data[6]`) inside the
+    branch is NOT the original battler index by this point -
+    `InitAnimArcTranslation` already overwrote `data[6]` with the arc's own
+    angular step (1310) before the branch ever runs, so `data[7] +=
+    sBattler/3` actually advances by 436/tick (not 0), which is what lets the
+    branch's own exit condition (`HIBYTE(data[7])>=80`) ever fire at all for
+    a singles player battler. `StartSpriteAffineAnim(sprite, 4)`
+    (`sAffineAnim_BallRotate_4`, `pokeball.c:190-194`:
+    `AFFINEANIMCMD_FRAME(0,0,25,1)` + `AFFINEANIMCMD_JUMP(0)`) is a clean
+    closed form (rotation += 25 GBA angle units/tick, forever, scale pinned
+    at neutral) — confirmed by hand against RAM, and **kept as a literal
+    per-tick matrix table anyway** (`BALL_SPIN_TABLE`) because this
+    codebase's `gbaSin` (a `Math.sin`-based re-derivation of `gSineTable`,
+    not a literal copy) is off by up to 1 Q8.8 unit at a handful of the 256
+    indices — invisible to the sine-ARC mechanisms (a ±1px `y2` bump rarely
+    flips a rendered pixel) but not to a rotate SAMPLE kernel (a ±1 matrix
+    unit can flip which source texel an edge pixel reads); brute-force
+    diffing against the oracle confirmed exactly this (sparse 1-11px edge
+    diffs at the affected ticks, 0 diff once swapped for the RAM-exact
+    values). The **render lag** (§7.21's convention) applies here too,
+    RAM-confirmed rather than assumed: screen tick T shows RAM tick T-1's
+    sprite state (cross-checked against the already-exact
+    `playerThrowBallTopLeft` window itself first, e.g. screen tick 1614's
+    `dx=13` matches RAM tick 1613's `x2`, not RAM tick 1614's, before
+    trusting the same offset for the new ticks). **Arrival is exactly trace
+    tick 1651** (RAM tick 1650, where the ball's real `x`/`y` snap to their
+    final center (72,115) and the affine matrix resets to identity,
+    RAM-confirmed the same tick `gSprites[5]`'s callback switches from
+    `SpriteCB_PlayerMonSendOut_2` to `SpriteCB_ReleaseMonFromBall`) — this
+    resolves the "ball arrives" entry in this doc's own §3 "not tick-exact"
+    list below, correcting the ~1646 coarse estimate. **Window boundary**:
+    this session's committed trace (`menu-throw.json`, now 70/70 at 0 diff,
+    every tick 1574-1651 minus the 8 already-named Brendan-vs-icon ticks)
+    stops at 1651 itself — tick 1652 is where `SpriteCB_ReleaseMonFromBall`
+    (which starts the NEXT RAM tick after arrival) begins the ball's own
+    "open" pose swap (`StartSpriteAnim(sprite, 1)`), and tick 1653 is where
+    the magenta materialize silhouette color first appears anywhere in the
+    frame (oracle-confirmed by direct pixel search) — both squarely the
+    already-named, out-of-scope materialize/ball-open mechanism (item 5
+    below), not a new gap.
 5. `SpriteCB_ReleaseMonFromBall` (`pokeball.c:750`) on arrival:
    `AnimateBallOpenParticles` (sparkle burst), `LaunchBallFadeMonTask(TRUE,
    battler, 14, ballId)` (flat-color silhouette → true color over ~14
@@ -265,9 +315,10 @@ unaffected; this slice found no additional draws).
 
 **Not tick-exact this session** (time-budget cut, pixel-sampled at ~8-tick
 granularity rather than every-tick sub-region diffing): the precise
-tick boundaries for "Brendan fully exits" / "ball spawns" / "ball arrives" /
+tick boundaries for "Brendan fully exits" / "ball spawns" /
 "silhouette flat-color starts" / "true-color complete" / "healthbox
-slide starts". The dense trace (`battle1-menu-dense.json`) has every
+slide starts". ("Ball arrives" is now resolved exactly - trace tick 1651,
+item 4c above.) The dense trace (`battle1-menu-dense.json`) has every
 frame needed for a future session to nail these exactly via the same
 sub-region-diff technique used for the text cadence (§2) — flagging as
 open rather than asserting unverified tick numbers.

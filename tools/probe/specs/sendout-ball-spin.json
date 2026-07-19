@@ -1,0 +1,272 @@
+{
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 70,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 130,
+   "buttons": []
+  },
+  {
+   "frames": 8,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 96,
+   "buttons": []
+  },
+  {
+   "frames": 24,
+   "buttons": []
+  },
+  {
+   "frames": 162,
+   "buttons": []
+  },
+  {
+   "frames": 54,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 196,
+   "buttons": []
+  },
+  {
+   "frames": 14,
+   "buttons": []
+  },
+  {
+   "frames": 210,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 144,
+   "buttons": []
+  },
+  {
+   "frames": 180,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 80,
+   "buttons": []
+  }
+ ],
+ "watch": [
+  {
+   "name": "oamXM",
+   "addr": "gSprites+0x156",
+   "size": 2
+  },
+  {
+   "name": "affineParam",
+   "addr": "gSprites+0x15A",
+   "size": 2
+  },
+  {
+   "name": "x",
+   "addr": "gSprites+0x174",
+   "size": 2
+  },
+  {
+   "name": "y",
+   "addr": "gSprites+0x176",
+   "size": 2
+  },
+  {
+   "name": "x2",
+   "addr": "gSprites+0x178",
+   "size": 2
+  },
+  {
+   "name": "y2",
+   "addr": "gSprites+0x17A",
+   "size": 2
+  },
+  {
+   "name": "data0",
+   "addr": "gSprites+0x182",
+   "size": 2
+  },
+  {
+   "name": "data1",
+   "addr": "gSprites+0x184",
+   "size": 2
+  },
+  {
+   "name": "data2",
+   "addr": "gSprites+0x186",
+   "size": 2
+  },
+  {
+   "name": "data7",
+   "addr": "gSprites+0x190",
+   "size": 2
+  },
+  {
+   "name": "flags",
+   "addr": "gSprites+0x193",
+   "size": 1
+  },
+  {
+   "name": "matA",
+   "addr": "gOamMatrices+0x18",
+   "size": 2
+  },
+  {
+   "name": "matB",
+   "addr": "gOamMatrices+0x1A",
+   "size": 2
+  },
+  {
+   "name": "matC",
+   "addr": "gOamMatrices+0x1C",
+   "size": 2
+  },
+  {
+   "name": "matD",
+   "addr": "gOamMatrices+0x1E",
+   "size": 2
+  }
+ ],
+ "startTick": 1605
+}
