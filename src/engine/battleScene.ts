@@ -2604,11 +2604,45 @@ function drawPlayerSummaryBarExit(fb: Uint8Array, barX: number, eva: number): vo
   }
 }
 
+/**
+ * §7.31 (ISSUES #18, closes render 1493 only - see the doc comment above
+ * `blendedTile` for what this reuses, and the module notes for 1494/95's
+ * still-open remainder). Once `blend` bottoms out at 0 (`elapsed>=30`), the
+ * old `if (blend <= 0) return` treated that as "nothing to draw, let
+ * whatever's already painted underneath (Grovyle's opaque materialize tint)
+ * show through" - but real GBA OBJ-blend hardware still composites a
+ * `blend=0` sprite: at `eva=0,evb=16` the blend output is 100% target-2
+ * (`blendedTile`'s own `healthboxBackgroundColorAt` fallback, the plain BG
+ * layer, per the "target-2 is never another already-drawn sprite" rule
+ * `blendedSetPixel`'s own doc comment already established), not a skip.
+ * RAM/VRAM-probed before landing this (`tools/compare/scratch/
+ * probe_bar_vram.py`, throwaway, ISSUES #18's own §7.29-named "check the
+ * tile-graphics bytes" lead): `gSprites[6]`'s OAM `tileNum` (433) and its
+ * full 16-tile OBJ VRAM range are byte-IDENTICAL to the static
+ * `ballStatusBar` extraction through RAM tick 1493 (render 1494) - the bar
+ * is still genuinely itself, not yet reused - then at RAM tick 1494
+ * (render 1495) `tileNum` jumps to 549 and the VRAM content there is a
+ * completely unrelated graphic: the sprite slot has been destroyed and
+ * reused, exactly the `open.png` runtime-VRAM-overwrite pattern (§7.25).
+ * `SUMMARY_EXIT_LAST_ALIVE_ELAPSED=30` draws exactly render 1493
+ * (`elapsed=30`, the one render both still-genuinely-the-bar AND at
+ * `blend=0`) with this eva=0-still-composites model - oracle-pixel-exact,
+ * 0 diff. Render 1494 (`elapsed=31`) is ALSO still-genuinely-the-bar per
+ * this same VRAM read (RAM 1493, tileNum still 433) but drawing its full
+ * tile there over-corrects (empirically: introduces 3 new wrong pixels
+ * where none existed, `tools/compare/scratch/diag_1493.mjs` re-run at
+ * `elapsed<=31`) - the real per-pixel boundary at that render is narrower
+ * than this tile's own diagonal shape predicts, root cause NOT found this
+ * session (see the module notes below for what's ruled out). Left at 30,
+ * not extended, per this run's no-curve-fitting rule - a smaller, oracle-
+ * verified win over a wider unverified one.
+ */
+const SUMMARY_EXIT_LAST_ALIVE_ELAPSED = 30;
+
 function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number): void {
   const elapsed = t - handoffTick - 1;
-  if (elapsed < 0) return;
+  if (elapsed < 0 || elapsed > SUMMARY_EXIT_LAST_ALIVE_ELAPSED) return;
   const blend = Math.max(0, 15 - Math.floor(elapsed / 2));
-  if (blend <= 0) return;
   const eva = blend;
   const evb = 16 - blend;
   const barTile = ballStatusBar.tileset;

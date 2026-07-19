@@ -3282,3 +3282,173 @@ call + `TRAINER_EXIT_X2`/`trainerExitX`), `tests/battleScene.test.ts` (1
 corrected + 1 new test). Scratch diagnostic scripts (`diag_1462.mjs`,
 `diag_1462b.mjs`, `crop_1462.mjs`, `shift_1462.mjs`) intentionally NOT
 committed, per this file's own established throwaway precedent.
+
+### 7.31. Bounded worker: closed ISSUES #18's tick 1493 (§7.29's VRAM lead, executed) - the bar composites at `eva=0`, not "skip drawing" - `sendout.json` **252/256 -> 253/256**; 1494/1495 (bar) and 1496 (particle z-order) investigated with fresh RAM evidence, left open with concrete negative findings, not curve-fit
+
+Per this step's brief (ISSUES #18's full remainder): pixel-classify 1493-96
+first, execute §7.29's named-but-untested VRAM-tile-bytes lead for 1493-95,
+and get RAM/OAM evidence for 1496's particle z-order before touching code.
+
+**Pixel-classified first** (`tools/compare/scratch/diag_1493.mjs`,
+committed): confirmed the exact current-baseline residual is `sendout.json`
+1493 (2px), 1494 (2px), 1495 (5px), 1496 (3px) - unchanged from ISSUES #18's
+own inventory. 1491/1492 (§7.28's own named ticks) are ALREADY 0px this
+session, closed by an earlier session's OBJ-vs-OBJ blend-target-2 fix
+(#112/§7.30) without that session realizing it also subsumed this family's
+two easiest ticks. 1493-95's app-side color is uniformly the flat Grovyle
+materialize tint `(255,181,247)`; oracle is uniformly the send-out window's
+own faded-background white `(247,247,255)`, at `x164-169,y41-43` -
+`tools/compare/scratch/crop_1493.mjs` (committed) dumped the full local grid
+(not just diff pixels) and showed this is a clean, single diagonal edge, not
+scattered noise. 1496's residual is a literal 2-color SWAP (`(255,173,0)`
+orange and `(255,255,255)` white trade places at 3 adjacent pixels) -
+confirming §7.25/§7.28's "z-order between two same-burst particles" framing
+directly at the pixel level, not just by position.
+
+**1493-95, §7.29's lead executed**: RAM-probed the actual OBJ VRAM tile
+bytes behind BOTH candidate sprites before touching any code
+(`tools/compare/scratch/probe_grovyle_vram.py` +
+`probe_grovyle_palette.py` + `probe_bar_vram.py`, all committed,
+per-tile/per-tick, `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/
+python`):
+- **Grovyle's own materialize tile (VRAM tile 26, the one under the
+  residual) is BYTE-IDENTICAL to the static `battle-opponent-front-sprites.
+  json["GROVYLE"]` extraction across the ENTIRE RAM 1486-1497 window** - no
+  runtime overwrite, unlike the `open.png` precedent this lead was modeled
+  on. Its accumulator (`gOamMatrices[2].a=256`), `y2=0`, and rotation
+  (`b=c=0`) are ALSO RAM-confirmed exactly matching this engine's own
+  formula at every relevant tick (re-running/extending the already-committed
+  `sendout-grovyle-materialize.json` probe). **Its own OBJ palette bank is a
+  genuinely FLAT single color `(255,181,247)` across all 16 indices**, RAM
+  tick 1486-1497 (not a still-converging per-index fade) - ruling out a
+  "palette hasn't finished fading" theory too. Grovyle's own contribution at
+  this pixel is thus proven correct on every axis this session could probe;
+  it is NOT the bug.
+- **The opponent bar's own VRAM tile 0 (the diagonal-edge tile at the exact
+  screen column this residual sits under) IS byte-identical to the static
+  `ballStatusBar` extraction through RAM tick 1493 (`gSprites[6].oam.
+  tileNum=433`, unchanged) - then at RAM tick 1494 `tileNum` jumps to 549
+  and the VRAM content there is a totally unrelated graphic**: the sprite
+  slot has been destroyed and reused, the exact `open.png` runtime-VRAM-
+  overwrite pattern (§7.25) recurring at a new location. This is real,
+  useful ground truth (the bar's own identity ends at RAM 1494, i.e. is
+  visible through render 1494 and gone by render 1495) but is NOT itself
+  the pixel bug at 1493 - see below.
+
+**Root cause actually found (not the VRAM-bytes lead - a compositing-model
+gap the VRAM read incidentally ruled out first)**: `drawOpponentSummaryExit`
+had `if (blend <= 0) return` - once the bar's blend closed-form hits 0
+(`elapsed=30`, render 1493), the function stopped drawing ENTIRELY,
+letting whatever was already painted underneath (Grovyle's opaque tint)
+show through. But real GBA OBJ-blend hardware still composites a `blend=0`
+sprite: at `eva=0,evb=16` the blend output is 100% target-2 (`blendedTile`'s
+own `healthboxBackgroundColorAt`), not "sprite absent". Since the bar's own
+tile is confirmed genuinely opaque (VRAM-matching) directly over Grovyle's
+opaque silhouette at this screen position, skipping the draw was wrong -
+real hardware forces target-2 there (the correctly-already-faded background,
+independently confirmed exact by hand: `blendComponentToWhite` applied to
+the static tile's own raw color at `SENDOUT_BG_FADE_Y`'s `y=14` reproduces
+`(247,247,255)` bit-for-bit). **Fix**: replaced the early return with
+`SUMMARY_EXIT_LAST_ALIVE_ELAPSED=30` (draw through blend=0, stop only once
+the sprite is gone) - see the doc comment on that constant in
+`battleScene.ts` for the full derivation. Closes render 1493 to 0 diff
+(oracle-verified, not assumed).
+
+**1494/1495 tried and NOT shipped, per this run's no-curve-fitting rule**:
+extending the same fix to `elapsed<=31` (render 1494, where the bar's VRAM
+identity is ALSO still confirmed genuine per the probe above) does NOT
+reproduce the oracle - it introduces 3 NEW wrong pixels (a different part of
+the same tile's diagonal edge) while only fixing the original 2. `elapsed<=
+32` (render 1495, past the RAM-confirmed destroy/reuse point) is worse
+still. The real per-pixel boundary at render 1494 is narrower than tile 0's
+own diagonal shape predicts under the "always 100% target-2 once opaque"
+model - since the tile bytes are independently confirmed correct, the gap
+must be in exactly WHEN a partially-transparent/differently-scaled bar
+column stops contributing full opacity between render 1493 and 1494, which
+this session did not resolve. Left at `elapsed<=30` only - a smaller,
+oracle-verified win over a wider, unverified one. `sendout.json` **252/256
+-> 253/256** (only 1493 closes; 1494/1495/1496 remain, matching ISSUES #18's
+already-known inventory minus one tick).
+
+**1496, particle z-order: RAM evidence gathered, root cause NOT resolved,
+no fix attempted** (per this step's own explicit instruction not to guess
+past a negative-finding fork). Hand-derived which two particles' tiles cover
+the 3 residual pixels (replicating `drawBallOpenParticles`'s own
+age/angle/radius formula at `t=1496`, `logicalT=15`): spawn indices 13
+(age 1) and 14 (age 0) are BOTH exactly at the animation origin (`dx=dy=0`,
+radius 0 for both ages) - an EXACT Y tie, landing this squarely in
+`sortAliveParticlesByScreenY`'s own tie-break branch. The three residual
+pixels' exact colors (white index 1 vs. orange index 2 of the particle
+tileset, confirmed against `battle-anim-particles.json`) prove, with no
+ambiguity, that the oracle wants spawn index **14 drawn last (on top)**,
+not 13 - the OPPOSITE of this engine's current tie-break winner (§7.26/27's
+rule: lower spawn index wins ties, i.e. 13 over 14). RAM-probed the two
+particles' REAL `gSprites[]` array positions before considering any fix
+(`tools/compare/scratch/probe_particle_slots.py`, committed, scans all 64
+slots by `subpriority=28` each RAM tick 1492-1496): particle 13's real
+sprite (first appears RAM 1494, `x2=y2=0`, callback transitions
+"just-spawned" -> "moving" one tick later exactly as index 9's already-
+tracked lifecycle shows) occupies **array index 6**; particle 14's real
+sprite (first appears RAM 1495, still on its "just-spawned" callback,
+`x2=y2=0`) occupies **array index 23**. `idx6 < idx23` - i.e. the REAL
+sprite array order is NOT scrambled relative to spawn-index order (13's
+sprite genuinely has the lower array position, exactly as this engine's
+"ascending spawn index" assumption already predicts) - so the already-RAM-
+confirmed §7.26/27 rule ("lower array/creation position renders on top")
+would still pick 13, matching this engine's current (wrong, per the oracle)
+output. **This means the bug is not "the creation-order assumption is
+scrambled by slot reuse"** (the one concrete mechanism this session could
+test cheaply) - the discrepancy must be in a detail of how
+`CreateSpriteAtEnd` (the real allocator `AnimateBallOpenParticles` uses,
+`pokeball.c:441`) builds `sSpriteOrder` that doesn't reduce to raw
+ascending `gSprites[]` array index the way §7.26's own derivation assumed,
+or a subpriority/OAM-matrix detail specific to a sprite's first tick alive
+(idx23 is still on its very first live RAM tick, `Step1` callback, when
+this residual renders) - neither confirmed nor ruled out this session, and
+genuinely out of the RAM-probe budget remaining. Not fixed - a one-tick
+special-cased index swap would be exactly the curve-fitting this run's own
+`§7.25` "tried and reverted" precedent already warns against (that session's
+blind descending-order flip regressed OTHER ticks in this same particle
+field). Left named, with concrete evidence, for whoever picks this back up.
+
+**Full battle-family sweep, live oracle, zero regressions**: sendout
+253/256 (was 252/256), s6-acceptance 224/228 (unchanged - its own sampled
+frames are 40/120/192 (ISSUES #5's pattern, RE-confirmed still exactly
+`x88-151,y40-87`, `tools/compare/scratch/check_s6_bbox.mjs`, committed) and
+1496 (this session's own remaining particle residual, unchanged) - tick
+1493 isn't one of its sampled frames, so no visible movement there despite
+the underlying fix), menu-throw 78/78, menu-materialize 62/62, menu-idle
+69/69, menu-text 18/18, scene-assembly 256/256, transition 206/206 - every
+trace at its prior count or better, nothing regressed.
+
+**One new Tier-1 test** pinning the render-1493 fix directly (`tests/
+battleScene.test.ts`, "opponent summary bar: still composites at eva=0 on
+handoff+31 (1493)..."): asserts both now-fixed pixels equal the faded-
+background color, plus a same-tick control pixel a few columns over that
+must STILL show Grovyle's tint (proving this isn't a blanket "always draw
+background" regression). `npm test` **556/556** (+1), `npm run build`
+green.
+
+**ISSUES #18 update**: trimmed to exactly what remains - 1494/1495 (bar,
+narrower-than-modeled real boundary, root cause not found) and 1496
+(particle tie-break, RAM-confirmed NOT a slot-reuse/creation-order issue,
+real mechanism not found). Both leads now have concrete negative findings
+recorded above rather than being untested placeholders - a future session
+should NOT re-run the VRAM/palette/accumulator/array-position confirmations
+already done here (five independent RAM probes, all clean), and should
+start instead from: (a) 1494's bar - what narrows tile 0's real opaque
+footprint between render 1493 and 1494 specifically; (b) 1496's particle -
+`CreateSpriteAtEnd`'s actual `sSpriteOrder` insertion semantics, read
+directly from `reference/pokeemerald/src/sprite.c`, not assumed from raw
+array index.
+
+**Committed this session**: `src/engine/battleScene.ts`
+(`SUMMARY_EXIT_LAST_ALIVE_ELAPSED` + `drawOpponentSummaryExit`'s early-
+return fix), `tests/battleScene.test.ts` (1 new test), `docs/battle-scene-
+notes.md` (this section), `ISSUES.md` (trimmed #18), `tools/compare/scratch/
+diag_1493.mjs`/`crop_1493.mjs`/`check_s6_bbox.mjs`/`probe_grovyle_vram.py`/
+`probe_grovyle_palette.py`/`probe_bar_vram.py`/`probe_particle_slots.py`
+(all five RAM probes + two pixel diagnostics, committed since this
+section's own findings cite them directly and a future session picking up
+1494/1495/1496 should be able to re-run them without rebuilding from
+scratch).

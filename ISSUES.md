@@ -5,24 +5,37 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #18 — sendout/S6-acceptance final residuals: 1493-96 (2-5px tail)
+## #18 — sendout/S6-acceptance final residuals: 1494-96 (2-5px tail)
 
-Parked 2026-07-19 (supervisor). After the OBJ-vs-OBJ blend-target-2 fix
-(#113 / battle-menu-notes §3c) closed most of the blended-edge family
-(sendout 246→251/256, menu-throw 78/78), and §7.30 (bounded worker,
-2026-07-19) closed tick 1462 (the §7.19-named "settled-bar one-tick gap +
-trainer-exit tail", sendout 251→252/256), what remains:
-- **1493-95** (2-5px): last tail of the §7.28 blended-edge family — four
-  independent RAM confirmations say every OAM/blend/position input is
-  correct (§7.28/§7.29); the blend-target-2 fix closed 1470/71/79+1491/92
-  but not these; §7.29's untested lead stands: probe the actual VRAM
-  tile-graphics bytes (precedent: the `open.png` runtime overwrite,
-  §7.25/e00f8f3).
+Parked 2026-07-19 (supervisor); trimmed 2026-07-19 (§7.31, bounded worker —
+closed tick 1493). After the OBJ-vs-OBJ blend-target-2 fix (#113 /
+battle-menu-notes §3c) closed most of the blended-edge family (sendout
+246→251/256, menu-throw 78/78), §7.30 closed tick 1462 (sendout
+251→252/256), and §7.31 closed tick 1493 (the bar-still-composites-at-eva=0
+gap — sendout 252→253/256; also incidentally revealed 1491/1492 were
+already closed by #112's blend-target-2 fix), what remains:
+- **1494-95** (2-5px): same `drawOpponentSummaryExit` family as 1493, but
+  NOT the same fix — §7.31's RAM/VRAM probe confirms the bar sprite's own
+  identity/tile bytes are STILL genuine (unreused) through render 1494, yet
+  extending the eva=0-composites fix to `elapsed<=31` empirically
+  over-corrects (introduces 3 new wrong pixels while only fixing the
+  original 2) — the real per-pixel boundary at render 1494 is narrower than
+  the bar's own tile shape predicts; root cause not found. Five independent
+  RAM/VRAM/palette probes this session (§7.31) all came back clean on
+  Grovyle's own contribution — the gap is specifically in the bar's
+  eva=0 compositing width at this one tick.
 - **1496** (3px): particle z-order gap named in §7.25 — the ONE
-  non-ISSUES-#5 frame keeping `s6-acceptance.json` at 224/228.
-Affects: `sendout.json` 252/256, `s6-acceptance.json` 224/228 (other 3
-frames are ISSUES #5's settled pattern, x88-151-confirmed). S6 stays [~]
-until these close or the user re-scopes.
+  non-ISSUES-#5 frame keeping `s6-acceptance.json` at 224/228. §7.31
+  RAM-confirmed the pixel-exact winner (spawn index 14, not 13) and
+  RAM-checked the one cheap hypothesis (sprite-slot reuse scrambling
+  creation order) — ruled OUT (real array positions: idx6 for particle 13,
+  idx23 for particle 14, i.e. NOT scrambled, matching this engine's current
+  — wrong, per the oracle — tie-break output). Real mechanism is somewhere
+  in `CreateSpriteAtEnd`'s actual `sSpriteOrder` semantics (`reference/
+  pokeemerald/src/sprite.c`), not yet read this session.
+Affects: `sendout.json` 253/256, `s6-acceptance.json` 224/228 (3 frames are
+ISSUES #5's settled pattern, x88-151-confirmed; 1 frame is #18's own 1496).
+S6 stays [~] until these close or the user re-scopes.
 
 ## #16 — Opponent healthbox real assembly: frame SOLVED, three content
   pieces still open (text ×2, HP-bar subsprite placement) — send-out still

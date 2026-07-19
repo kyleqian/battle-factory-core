@@ -603,6 +603,25 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(after).toEqual([247, 247, 255]);
   });
 
+  // §7.31 (ISSUES #18, closes render 1493 - `SUMMARY_EXIT_LAST_ALIVE_ELAPSED`):
+  // at handoff+31 (1493) the bar's own blend has bottomed out at eva=0, but
+  // the bar sprite itself isn't destroyed until RAM tick 1494 (render 1495)
+  // - RAM/VRAM-confirmed (`tools/compare/scratch/probe_bar_vram.py`,
+  // throwaway). Screen (164,43)/(165,43) sit under the bar's own opaque
+  // tile-0 diagonal edge, directly over Grovyle's opaque materialize
+  // silhouette there - real hardware still composites the bar at eva=0
+  // (100% target-2, the plain background), so these pixels must show the
+  // background's own faded color, not Grovyle's flat tint.
+  it("opponent summary bar: still composites at eva=0 on handoff+31 (1493), showing background (not Grovyle's tint) under the bar's own opaque edge (§7.31)", () => {
+    const GROVYLE_TINT: [number, number, number] = [255, 181, 247];
+    const BG_FADED: [number, number, number] = [247, 247, 255];
+    expect(pixelAtSentOut(1493, 164, 43)).toEqual(BG_FADED);
+    expect(pixelAtSentOut(1493, 165, 43)).toEqual(BG_FADED);
+    // sanity: Grovyle's own tint is genuinely reachable nearby, so this
+    // isn't just "the whole region is background regardless".
+    expect(pixelAtSentOut(1493, 168, 43)).toEqual(GROVYLE_TINT);
+  });
+
   // §7.30: the opponent trainer-pic's exit slide (`trainerExitX`/
   // `TRAINER_EXIT_X2`) starts at x2=2 at handoff+0 (1462, RAM tick 1461's
   // value, +1 render lag) - RAM-probed (`sendout-trainer-exit2.json`,
