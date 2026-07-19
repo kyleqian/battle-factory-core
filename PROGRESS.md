@@ -5,6 +5,40 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 100 — Supervisor: round-5 worktree branch merged — masking band root-caused (harvest-asset background bleed, not the slide model) + §7.22's mechanism-5 fix re-applied; `sendout.json` **215 → 221/256**
+
+- **State (verified post-merge):** `npm test` **516/516**, `npm run build`
+  green, tree clean. Post-merge re-runs: sendout **221/256**,
+  scene-assembly 256/256, menu-throw 70/70, menu-materialize 1/1,
+  menu-text 18/18. Worktree removed, branch deleted.
+- **Did:** merged `worker/wt-20260719-013134` (base 2e42eb5, conflict-free
+  with #98/#99's parallel main-lane work). PART 1: §7.22's ~138px sliding
+  band was NOT a healthbox-slide-model bug — the §7.9 pixel-harvest asset's
+  rectangular bounding box contains real background pixels frozen at their
+  post-fade color in the sprite's scalloped-corner margin, and
+  `drawSendOutHealthbox` painted the whole rectangle every tick, clobbering
+  the correctly-faded background during the materialize plateau
+  (renders 1496-1503). Fix: `getHealthboxContentMask()` classifies bleed
+  vs content; bleed pixels skipped. +1 (render 1496). PART 2: §7.22's
+  7-entry `GROVYLE_STRETCH_EARLY_TABLE` + shortened mechanism-4 window +
+  compositing-order split re-applied; RAM tick 1496's raw `(0,0,0)` matrix
+  entry replaced by neutral `(256,256,0)` — mechanism-justified (OAM
+  matrix not yet re-latched; a literal zero matrix provably blows render
+  1497 up to 2362px, which the oracle contradicts). +5 (renders
+  1499-1503). Dossier: §7.23.
+- **Next:** main lane is on the player-side ball-open particle burst
+  (mechanism 3 analogue, present from tick 1653 per #99); worktree lane
+  takes sendout's 1504-1518 boundary residual (15 ticks, biggest remaining
+  named span; 1485-1495 if same family). Then: healthbox slide-in →
+  settle, blank-box + menu draw + idle, the #96 OAM-order fix (solo,
+  supervisor-scheduled), S6 acceptance end-to-end.
+- **Notes:** sendout remaining gaps now: 1462, 1470/71/79, 1485-1495,
+  1504-1518 (35 ticks). ISSUES #16 note: the new content mask composites
+  ON TOP of the shipping harvest — #16's eventual assembly wiring should
+  subsume both.
+
+---
+
 ## 99 — Bounded worker: root-caused + fixed #98's pre-existing ~1653+ full-frame residual — it's the player-side twin of `SENDOUT_BG_FADE_Y` (battle-scene-notes.md §7.10/§7.20); ~99% pixel reduction, but the remaining residual is 100% the (unimplemented) ball-open particle burst, so `menu-materialize.json` still can't extend past its existing 1/1
 
 - **State:** `npm test` **514/514** (+6 Tier-1), `npm run build` green, tree
