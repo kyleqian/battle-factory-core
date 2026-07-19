@@ -304,11 +304,81 @@ corroborating the palette-index identification.
 
 ### Out of scope (unchanged)
 
-- Not wired into `battleScene.ts` (explicitly out of scope for this
-  worktree lane) — that's the next, supervised step once this is reviewed.
 - Doubles-battle battler positions (2/3), the Safari-ball / caught-ball
   overlay, and the player-side healthbox are still untouched — this module
   is opponent-singles-only, as it always has been.
+- Partial-HP/status oracle pixel validation is still deferred to S7's first
+  HP-drain trace (unchanged by the wiring below — the live call site only
+  ever requests `hpFraction: 1, status: "none"` this round).
+
+## Wired live (worktree lane, 2026-07-19): the send-out render path now goes through the compositor
+
+`src/engine/battleScene.ts`'s `drawSendOutHealthbox` (called from
+`renderBattleScene` for the send-out/settled windows) no longer blits the
+pixel-harvested `sendout-healthbox-opponent.json` rectangle. It now draws
+`composeOpponentHealthbox`'s own 128×32 canvas directly, translated by the
+same slide-in `dx` as before, skipping `null` (transparent) cells so the
+scene's background shows through exactly where the real OAM sprite would be
+transparent.
+
+**Call-site params**, sourced from committed battle data rather than
+hardcoded (module-level consts right after the existing asset consts in
+`battleScene.ts`):
+- `name`/`level`/`hpFraction`: `src/data/gen/battle1-turn1-ram-dump.json`'s
+  `battlerSnapshots.before_turn.battler1` (species 278/level 50/hp
+  143/maxHP 143 — RAM-probed, already a committed data file used by
+  `tests/turnRng.test.ts`) crossed with `src/data/gen/species-names.json`
+  (species id → display name, likewise already used by
+  `tests/battleMessageTemplates.test.ts`) for `"GROVYLE"`. `hp === maxHP`
+  confirms this window's actual case is full HP, so `hpFraction: 1`.
+- `gender: "male"` stays a literal — no committed data file carries
+  frontier-trainer opponents' `personality` (only the player's own rentals
+  do, `anchor-state.json`), so there's nothing to derive it from yet; it's
+  the oracle-pixel-confirmed value for GROVYLE's harvested gender glyph
+  (see above).
+- `status: "none"` — the settled send-out window never shows a status
+  condition.
+
+**Old bleed-masking machinery removed.** `getHealthboxContentMask` and its
+backing `healthboxContentMask` cache existed only to approximate the
+healthbox sprite's true non-rectangular shape from the rectangular harvest,
+via a value-equality heuristic against the plain background (§7.22/§7.23).
+The compositor's own transparency is the REAL per-pixel shape (the frame
+tileset's own index-0 convention), so that heuristic is now unnecessary for
+the opponent side. Before wiring this in, confirmed empirically (scratch
+comparison script, not committed) that the compositor's non-null cells are
+a **strict superset** of the old heuristic's "real content" cells within the
+harvest's own 100×28 crop (2574 vs. 2526 of 2800 total cells; 0 cells where
+the old heuristic said "paint" and the compositor disagreed) and that the
+48 extra cells all carry the exact same RGB as the settled background
+(so painting them changes nothing visually) — including the three specific
+coordinates `tests/battleScene.test.ts`'s own pre-existing fade-window test
+pins (a bleed-margin pixel, a genuine-content pixel, and the nameplate
+border pixel), all of which agree exactly between the two approaches. The
+player-side healthbox keeps its own separate, untouched
+`getMenuHealthboxPlayerContentMask` (out of scope this round).
+
+**Sweep evidence** (all in this worktree, before vs. after the swap — every
+count identical, zero pixel movement): sendout 255/256, s6-acceptance
+224/228, menu-throw 78/78, menu-materialize 62/62, menu-idle 69/69,
+menu-text 18/18, scene-assembly 256/256, transition 206/206. `npm test`
+580/580 (579 base + 1 new), `npm run build` green.
+
+**`sendout-healthbox-opponent.json` was NOT deleted** — grepped first:
+`tests/healthboxAssembly.test.ts` still uses it as the byte-exact
+ground-truth fixture for the compositor itself, and
+`tests/battleScene.test.ts` still uses it directly (independent of
+`battleScene.ts`'s own render internals) to pin the slide-in/bleed-window
+behavior. Both are legitimate ground-truth uses, not leftover call-site
+wiring, so the harvest stays.
+
+**New Tier-1 test**: `tests/battleScene.test.ts` — "settled opponent
+healthbox render equals composeOpponentHealthbox's own output buffer for
+the real anchor params" — independently recomputes the same anchor params
+the live call site uses and asserts every opaque compositor cell equals
+the rendered on-screen pixel at trace tick 1555, proving the render path
+actually goes through the compositor rather than merely agreeing with it
+in isolation.
 
 ## Reproduce the RAM/VRAM ground truth
 
