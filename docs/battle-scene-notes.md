@@ -2270,3 +2270,107 @@ why it wasn't committed speculatively.
 - Everything already out of scope per the brief: 1516/1517 particle age
   overrun, 1470/1471/1479 icon edge, tick 1462, menu window (1560+),
   healthbox wiring.
+
+### 7.23. Round-5 worktree: §7.22's masking band root-caused and fixed, then §7.22's own mechanism-5 fix re-applied - `sendout.json` **215/256 -> 221/256** (both parts landed, committed separately)
+
+Per this round's brief: close §7.22's own named masking band (mechanism-
+derived, no curve-fit) as PART 1, then re-apply §7.22's already-verified
+mechanism-5 early-window fix as PART 2 - the two are coupled since PART 2's
+score effect was masked by PART 1's bug until PART 1 landed.
+
+**PART 1 - the masking band, root-caused (not the healthbox slide itself,
+but the harvest asset's own margin).** §7.22 named the band's position/
+timing as "suspicious coincidences worth checking" against the healthbox
+region but did not RAM-probe it. This session found the actual mechanism by
+direct pixel diffing instead of RAM probing (no register write was needed -
+the bug is purely a rendering-side compositing order issue, not a missing
+game-state model): `sendOutHealthboxOpponent` (§7.9's pixel-harvest asset)
+has a RECTANGULAR bounding box, but the healthbox sprite's own real shape is
+NOT rectangular (diagonal/scalloped corners, confirmed visually in the
+asset's own pixel data). The harvest necessarily included real BACKGROUND
+pixels in the box's corners/right edge, frozen at their POST-materialize-
+fade settled color. `drawSendOutHealthbox` painted the ENTIRE bounding
+rectangle unconditionally every tick, including those bleed pixels - during
+renders 1496-1503 (the BG-to-white fade's y=16 plateau, `SENDOUT_BG_FADE_Y`
+r=34-41), this clobbered the ALREADY-correctly-faded-white background
+underneath with the stale non-white texture, producing exactly the ~138px
+band §7.22 measured (verified directly: `git stash` + a plain unfaded
+render of `battleBg.static` at the healthbox's own settled screen position,
+`tools/compare/scratch/band_diag.mjs` - every mismatched pixel in the band
+is EXACTLY a pixel where the asset's stored color equals the plain
+background at that position, i.e. bleed, not content; content pixels
+diverge from that comparison and were left untouched).
+
+**Fix**: `getHealthboxContentMask()` (lazily computed once, from the same
+comparison) marks bleed pixels transparent; `drawSendOutHealthbox` skips
+them, letting the per-tick correctly-faded background (already drawn
+earlier in the same frame by `drawTileBgFaded`) show through instead. A
+no-op once settled (fade=0), since bleed pixels equal the plain background
+then too - confirmed zero regression on every other tick/trace.
+
+**Score effect, verified in isolation before PART 2**: band fully gone (0px
+diff) at every one of renders 1496-1503; render **1496** flips to exact.
+`sendout.json` **215/256 -> 216/256**. Full 21-trace sweep: all 20 others
+unchanged at their established counts (scene-assembly, which also renders
+inside this window, re-verified still 256/256). Committed separately
+(`c411390`) with its own Tier-1 pin (a bleed pixel and a content pixel at
+the same tick, confirming the mask only skips true bleed).
+
+**PART 2 - §7.22's fix, re-applied almost verbatim, with one correction
+found by re-verifying rather than trusting the prior transcription.**
+`GROVYLE_STRETCH_EARLY_TABLE` (7 entries, et 35-41), mechanism 4's window
+shortened to `et < GROVYLE_FRONT_ANIM_START_OFFSET` (was `et <
+MATERIALIZE_END_OFFSET`), and mechanism 5's early portion drawn via a
+separate call site (`drawGrovyleStretchEarly`) in mechanism 4's OLD slot
+(before `drawSendOutBall`/`drawBallOpenParticles`) - all exactly as §7.22
+recorded, including the compositing-order rationale (the ball-open particle
+burst is still active for et 35-41 and must occlude Grovyle).
+
+One entry needed a real fix, not just a transcription: §7.22's table lists
+RAM 1496 (et 35, the exact tick the sprite callback switches) as raw
+`(0,0,0)`. Applying that literally to `drawSpriteSheetAffineStretch`
+degenerates the affine sampler to a single repeated source texel across the
+WHOLE destination box (`mx=my=0` makes every `(rx*mx)>>8` collapse to 0) -
+verified by trying it: render 1497 regressed from 3px to **2362px**, a
+solid tint-colored block exactly matching Grovyle's full 64x64 bounding box
+(`app@mid == oracle@mid` check showed the oracle does NOT show this block -
+the real render still shows the ordinary saturated-neutral tail silhouette
+there, matching mechanism 4's own already-good rendering one tick earlier).
+Interpretation: the C-level `data[4]/data[5]` fields have been reset for
+the callback switch this tick, but the actual OAM matrix register
+(`gOamMatrices[2]`) hasn't been recomputed from them yet - an extra one-tick
+latch delay specific to a callback's first tick, on top of the
+already-established RAM-to-render lag. Substituting neutral `(256,256,0)`
+for that one entry reproduces the oracle exactly (verified: render 1497
+back to its pre-existing 3px ball-occlusion residual, matching §7.22's own
+"pixel-identical before and after" claim for this tick once translated into
+this round's band-free baseline).
+
+**Score effect**: renders 1499-1503 (previously 244/234/295/357/407px, per
+§7.22's own measurement) all flip to exact; 1497/1498 unchanged at 3px/2px.
+`sendout.json` **216/256 -> 221/256**. Full 21-trace sweep re-run: all 20
+others still at their established counts, zero regressions. Committed
+separately (`23430c4`) with its own Tier-1 pin (a silhouette-edge boundary
+pixel pair at renders 1499 and 1503, chosen so it depends on the table's
+actual asymmetric xScale/yScale values, not just tint presence which
+mechanism 4's own flat cutoff would also satisfy).
+
+**Combined**: `sendout.json` **215/256 -> 221/256** (+6, both parts landed
+and committed). `npm test` 509/509 (+2 Tier-1 tests over this round's
+starting 507), `npm run build` green. Full 21-trace sweep after both parts:
+every other trace at its established count from PROGRESS.md #97's State
+line, zero regressions - scene-assembly (which the brief flagged for extra
+scrutiny since the healthbox slide renders in its window) re-verified
+256/256 after each part.
+
+**Not chased further this round (named, not guessed at):**
+- Renders 1462, 1470/1471/1479, 1485-1495 (the affine-emerge/ball-occlusion
+  residuals, §7.20/§7.21's own territory), 1504-1518 (mechanism 5's
+  established late-window residual, §7.16/§7.17) - all named out-of-scope
+  in the brief, unchanged by either part, not investigated.
+- `y2`'s and the et=35 neutral-substitution's own ultimate C-source cause
+  (which task/callback writes `data[4]/data[5]`, and why the OAM matrix
+  register latches one tick behind the C-level fields specifically on a
+  callback's first tick) - RAM ground truth trusted directly per this
+  file's established precedent, same as `GROVYLE_STRETCH_TABLE`/
+  `MATERIALIZE_Y2_TABLE`.
