@@ -1,3 +1,24 @@
+## 124 — Supervisor: FONT_NARROW branch merged (ISSUES #20 → extraction half closed, rewire half open) — **suite 631/631**; round 6 = slice-B convergence retry (two named leads) + turn-2 ground-truth scout
+
+- **State (verified post-merge):** `npm test` **631/631** (+29), `npm run
+  build` green, tree clean, no worktrees/branches. turn1-kickoff 81/81
+  re-verified post-slice-B-attempt; turn1-cloneanim committed at 49/230
+  (in-progress target, #123).
+- **Did:** merged the FONT_NARROW lane (extractor + font-narrow.json +
+  byte-exact proof vs the submenu harvest, 24 render checks 0 mismatch,
+  via the engine's own drawText); trimmed ISSUES #20 to its rewire half
+  (PP dynamic-color state machine + mixed-font runs, both source-traced
+  in tests/fontNarrow.test.ts's header).
+- **Next:** round 6 — main lane: slice-B convergence retry per #123's own
+  two named probes (dense gSprites[].data[] over the clone slots;
+  frame2 idle-breathing hypothesis under the banner hold) with the
+  strictly-smaller-gap discipline; worktree: turn-2 ground-truth scout
+  (extend the canonical script into turn 2, pin fresh RNG/damage/text —
+  also cross-validates damageCalc's +2-corrected formula on new rolls).
+  Then slice C (ROCK_SLIDE) + D (drain/turn-end, closes #16's deferred
+  validation).
+
+---
 ## 123 — Bounded worker: **S7 slice B attempted, NOT accepted** — DOUBLE_TEAM clone anim + stat banner engine code landed and wired, but `turn1-cloneanim.json` scores **49/230** (acceptance was 0 diff); two genuine unresolved mechanisms individually attributed; suite stays **602/602**, zero regressions
 
 - **State:** `npm test` **602/602** (unchanged - no new Tier-1 pins added,

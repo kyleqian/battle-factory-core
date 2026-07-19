@@ -37,6 +37,8 @@ import {
   DOUBLE_TEAM_ANCHOR_DELAY,
   DOUBLE_TEAM_VISIBLE_START_DELAY,
   DOUBLE_TEAM_VISIBLE_END_DELAY,
+  statsBannerBg1Y,
+  STATS_BANNER_BG1_Y_ANCHOR_DELAY,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -446,5 +448,23 @@ describe("battleMenu: DOUBLE_TEAM clone motion (docs/battle-menu-notes.md §10 g
     expect(doubleTeamCloneOffsets(2025, pressTick)).toEqual({ a: -9, b: 8 });
     expect(doubleTeamCloneOffsets(2046, pressTick)).toEqual({ a: -36, b: 35 });
     expect(doubleTeamCloneOffsets(2093, pressTick)).toEqual({ a: 19, b: -20 }); // last active render tick, right before both clones self-destroy
+  });
+});
+
+describe("battleMenu: stat-change banner BG1 scroll (docs/battle-menu-notes.md §10d, RESOLVED this session) - gBattle_BG1_Y's +3/tick ramp, one-tick render lag (same convention as battleScene.ts's bg1X, NOT statsBannerEva's own no-lag convention)", () => {
+  const pressTick = 1919;
+
+  it("anchor constant places the ramp's zero point one tick past the RAM-confirmed ramp start (RAM tick 2129 -> pressTick+211=2130)", () => {
+    expect(STATS_BANNER_BG1_Y_ANCHOR_DELAY).toBe(211);
+  });
+
+  it("flat 0 before the ramp, then +3/tick, matching RAM tick t-1's own gBattle_BG1_Y value exactly (dump-registers.py-class register probe, ticks 2120-2193)", () => {
+    expect(statsBannerBg1Y(2130, pressTick)).toBe(0); // RAM tick 2129 (still 0)
+    expect(statsBannerBg1Y(2131, pressTick)).toBe(3); // RAM tick 2130 (first +3)
+    expect(statsBannerBg1Y(2132, pressTick)).toBe(6); // RAM tick 2131
+    expect(statsBannerBg1Y(2140, pressTick)).toBe(30); // RAM tick 2139
+    expect(statsBannerBg1Y(2150, pressTick)).toBe(60); // RAM tick 2149
+    expect(statsBannerBg1Y(2160, pressTick)).toBe(90); // RAM tick 2159
+    expect(statsBannerBg1Y(2190, pressTick)).toBe(180); // holds at the ramp's own max past teardown
   });
 });

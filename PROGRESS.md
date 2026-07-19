@@ -4,6 +4,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 127 — Bounded worker: **S7 slice B COMPLETE** — banner's real BG1 scroll extracted+composited, clone-edge residual root-caused to opponent-healthbox z-order — `turn1-cloneanim.json` **168/230 → 230/230**; suite 634 → **638/638**
+
+- **State:** `npm test` **638/638** (+4 Tier-1 pins), `npm run build` green,
+  tree clean. `tools/compare/traces/turn1-cloneanim.json` **230/230 - S7
+  slice B ACCEPTANCE MET.** Zero regressions: turn1-kickoff 81/81,
+  fight-submenu 234/235, menu-idle 69/69, sendout 255/256, s6-acceptance
+  224/228, scene-assembly 256/256 - all re-verified unchanged.
+- **Did (two separate green commits, per the brief):** (1) **Gap 1's 4
+  sub-pixel clone-edge ticks (2075/2082/2088/2089) CLOSED** - re-verified
+  the offset table bit-exact against a fresh RAM probe first (not a fit);
+  root cause was DOUBLE_TEAM's clones reaching peak excursion (41-42px)
+  right where their own chin/jaw tile overlaps the OPPONENT HEALTHBOX's
+  right border, and this run's clone compositor painting over that
+  higher-priority UI element instead of respecting its z-order.
+  `isOpponentHealthboxOpaqueAt` (`battleScene.ts`) clips the clone draw.
+  (2) **Gap 2 (banner) CLOSED** - new extractor `tools/extract/
+  extract-stat-anim.ts` -> `stat-anim-banner.json` (reference/pokeemerald's
+  `graphics/battle_anims/stat_change/` is all plain/uncompressed dev-time
+  source, no LZ77 decoder needed - same situation `extract-battle-bg.ts`'s
+  header already flagged; extracted the full 8-palette/2-tilemap family,
+  wired only the evasion/increase pair DOUBLE_TEAM needs); rewrote
+  `drawStatsBanner` to sample the real scrolling BG1 tilemap (same alpha-
+  blend shape as the intro-slide's own `drawSlideScene`) instead of a flat
+  white flash. The scroll anchor needed the SAME one-tick render lag `bg1X`
+  already established for BG scroll registers (NOT `statsBannerEva`'s own
+  no-lag convention - a different register class) - root-caused via a
+  per-tick brute-force pixel sweep (`tools/compare/scratch/
+  diagnose_banner.mjs`) after a naive same-tick mapping got the mechanism
+  right but not bit-exact (halved the diff, didn't zero it).
+- **Next:** round 8 — slice C (ROCK_SLIDE) or slice D (drain/turn-end,
+  closes #16's deferred validation) — supervisor's call. The parallel
+  ground-truth scout lane (turn-2, then faint-to-victory) continues
+  independently.
+- **Notes:** docs/battle-menu-notes.md §10 marked COMPLETE (§10c/§10d added).
+  PAPERCUT: none - both residuals were exactly as scoped by #125: gap 1 was
+  a real, small, root-causeable bug (not a fit), gap 2 was genuinely new
+  extraction+compositing work, no rework of the already-CLOSED clone-motion
+  formula needed.
+
+---
 ## 126 — Supervisor: turn-2 scout merged — DRAGON_BREATH validates damageCalc's special branch **bit-exact**; ENDEAVOR discovered as Grovyle's AI move (HP-diff mechanic documented) — battle-1 move coverage 3→5 of 8; suite **634/634**
 
 - **State (verified post-merge):** `npm test` **634/634**, `npm run build`
@@ -74,25 +114,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   PAPERCUT: none - the RAM-probe-first discipline the brief mandated worked
   exactly as intended, turning two prior "grid search found no fit" dead
   ends into one closed formula bug + one correctly-scoped extraction task.
-
----
-## 124 — Supervisor: FONT_NARROW branch merged (ISSUES #20 → extraction half closed, rewire half open) — **suite 631/631**; round 6 = slice-B convergence retry (two named leads) + turn-2 ground-truth scout
-
-- **State (verified post-merge):** `npm test` **631/631** (+29), `npm run
-  build` green, tree clean, no worktrees/branches. turn1-kickoff 81/81
-  re-verified post-slice-B-attempt; turn1-cloneanim committed at 49/230
-  (in-progress target, #123).
-- **Did:** merged the FONT_NARROW lane (extractor + font-narrow.json +
-  byte-exact proof vs the submenu harvest, 24 render checks 0 mismatch,
-  via the engine's own drawText); trimmed ISSUES #20 to its rewire half
-  (PP dynamic-color state machine + mixed-font runs, both source-traced
-  in tests/fontNarrow.test.ts's header).
-- **Next:** round 6 — main lane: slice-B convergence retry per #123's own
-  two named probes (dense gSprites[].data[] over the clone slots;
-  frame2 idle-breathing hypothesis under the banner hold) with the
-  strictly-smaller-gap discipline; worktree: turn-2 ground-truth scout
-  (extend the canonical script into turn 2, pin fresh RNG/damage/text —
-  also cross-validates damageCalc's +2-corrected formula on new rolls).
-  Then slice C (ROCK_SLIDE) + D (drain/turn-end, closes #16's deferred
-  validation).
-

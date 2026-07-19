@@ -444,9 +444,11 @@ import {
   TURN_KICKOFF_LINE2,
   doubleTeamCloneOffsets,
   statsBannerEva,
+  statsBannerBg1Y,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
+import statAnimBannerAsset from "../assets/gen/stat-anim-banner.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
 import bugCatcherAsset from "../assets/gen/trainer-pic-bug-catcher.json" with { type: "json" };
 import brendanAsset from "../assets/gen/trainer-pic-brendan-back.json" with { type: "json" };
@@ -588,7 +590,14 @@ interface FightSubmenuWindowAsset {
   slots: Record<string, number[]>;
 }
 
+interface StatAnimBannerAsset {
+  tileset: Tileset;
+  tilemaps: { increase: Tilemap; decrease: Tilemap };
+  palettes: Record<"attack" | "defense" | "accuracy" | "speed" | "evasion" | "spAttack" | "spDefense" | "multiple", RgbColor[]>;
+}
+
 const battleBg = battleBgAsset as BattleBgAsset;
+const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
 const bugCatcher = bugCatcherAsset as TrainerPicAsset;
 const brendan = brendanAsset as BrendanAsset;
@@ -2724,35 +2733,72 @@ function drawDoubleTeamClones(fb: Uint8Array, t: number, pressTick: number): boo
   return true;
 }
 
+/** BG1's own period for the stat-anim banner: a single 32x32 screen block (`extract-stat-anim.ts`'s own header note - `increase.bin`/`decrease.bin` are each exactly one block, no second-block row offset needed, same situation as `entrySlidePixel`'s BG1 above). */
+const STAT_ANIM_BG_PERIOD = statAnimBanner.tilemaps.increase.height * 8;
+
 /**
- * The generic stat-change banner (`General_StatsChange`, docs/battle-move-
- * anim-notes.md §4/§8/§9 correction blocks). **Not a BG-vs-background
- * blend** - reverse-engineered directly against oracle pixels this session
- * (two independent sample points, both solved exactly at ticks 2140/2150):
- * target-1 is FLAT WHITE (255,255,255), target-2 is whatever's ALREADY
- * drawn at that pixel (Grovyle's own real, un-hidden sprite - the base
- * `drawTurnKickoffText` call already drew it before this function runs), a
- * white flash blended IN OVER the real sprite, not a BG1-composited copy
- * replacing it. This also explains `eva=0`'s own boundary ticks (2127-2131,
- * 2193) needing no special case: `blendChannel(255, real, 0, 16) === real`
- * exactly, matching the oracle showing plain, un-tinted Grovyle there.
- *
- * **Known gap** (docs/battle-menu-notes.md §10): oracle pixels show a
- * second, still-unidentified per-tick motion under this blend (sampled
- * directly against two different pixels mid-hold, ticks 2150-2160 - `eva`/
- * `evb` flat the whole time yet the raw color cycles through several
- * distinct values) that this function does not reproduce - not
- * root-caused in the time available this session. Kept as the
- * best-understood partial model (exact for the ramp boundary/edge ticks
- * before the extra motion's effect dominates) rather than withheld, per
- * this run's no-silent-omission convention; the resulting trace residual is
- * individually attributed, not curve-fit away.
+ * Stat-anim BG1 pixel at map coords, wrapped both axes (unlike
+ * `entrySlidePixel`, which never needs a vertical wrap since THAT window's
+ * own `gBattle_BG1_Y` never moves - this banner's does, `statsBannerBg1Y`).
+ * `null` wherever the sampled tile pixel is transparent (index 0) - per real
+ * GBA alpha-blend semantics, BG1 (TGT1) not opaque there means the
+ * next-topmost layer (whatever's already in `fb`) shows raw, unblended -
+ * `drawStatsBanner` below only touches `fb` when this returns non-null.
+ */
+function statAnimBg1PixelAt(tilemap: Tilemap, tileset: Tileset, palette: RgbColor[], mapX: number, mapY: number): RgbColor | null {
+  const wrappedX = ((mapX % STAT_ANIM_BG_PERIOD) + STAT_ANIM_BG_PERIOD) % STAT_ANIM_BG_PERIOD;
+  const wrappedY = ((mapY % STAT_ANIM_BG_PERIOD) + STAT_ANIM_BG_PERIOD) % STAT_ANIM_BG_PERIOD;
+  const tileCol = Math.floor(wrappedX / 8);
+  const tileRow = Math.floor(wrappedY / 8);
+  const inTileX = wrappedX % 8;
+  const inTileY = wrappedY % 8;
+  const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+  if (!entry) return null;
+  const tile = tileset.tiles[entry.tile];
+  if (!tile) return null;
+  const sx = entry.hFlip ? 7 - inTileX : inTileX;
+  const sy = entry.vFlip ? 7 - inTileY : inTileY;
+  const idx = tile[sy * 8 + sx]!;
+  if (idx === 0) return null;
+  return palette[idx] ?? null;
+}
+
+/**
+ * The generic stat-change banner (`General_StatsChange`,
+ * `StatsChangeAnimation_Step1-3`, `src/battle_anim_utility_funcs.c:415-628` -
+ * docs/battle-menu-notes.md §10a/§10c/§10d). A real BG1 layer, NOT a flat-
+ * white flash (a prior session's 2-sample algebraic solve coincidentally
+ * landed on white at both points it checked): `StatsChangeAnimation_Step2`
+ * loads `gStatAnim_Increase_Tilemap`/`_Gfx`/`gStatAnim_Evasion_Pal` onto BG1
+ * (DOUBLE_TEAM's own `EFFECT_EVASION_UP` - the only stat/direction this
+ * slice wires up, per the brief's own scope; `extract-stat-anim.ts` pulls
+ * the full 8-palette/2-tilemap family for future battles), and
+ * `StatsChangeAnimation_Step1` sets an OBJ-WINDOW mask via a FROZEN copy of
+ * Grovyle's own OAM sprite (`CreateInvisibleSpriteCopy`, `battle_anim_mons.
+ * c:2323` - `objMode = ST_OAM_OBJ_WINDOW`, taken once at banner start and
+ * never moved again) - exactly Grovyle's own silhouette at his current
+ * (static, RAM-confirmed unmoving throughout this window) position, which is
+ * why this function iterates the same `GROVYLE_CORNER`-anchored tile mask
+ * `drawDoubleTeamClones` above uses, not the whole screen. Bit-exact
+ * compositing per real GBA alpha-blend semantics: BG1 is TGT1 (priority 0,
+ * frontmost within the window), TGT2 is ALL (whatever's already drawn -
+ * Grovyle's own real, un-hidden sprite, since `drawTurnKickoffText` already
+ * drew it before this runs) - blend where BG1 is opaque, else leave the
+ * existing pixel raw (`statAnimBg1PixelAt`'s own `null` case).
+ * `statsBannerBg1Y` (`battleMenu.ts`) reproduces `gBattle_BG1_Y`'s own
+ * continuous `+3`/tick scroll bit-exact, RAM-confirmed - `gBattle_BG1_X`
+ * stays 0 for a stat INCREASE (only a stat DECREASE sets it to 64, out of
+ * scope this slice), so only the vertical map coordinate shifts.
  */
 function drawStatsBanner(fb: Uint8Array, t: number, pressTick: number): boolean {
   const eva = statsBannerEva(t, pressTick);
   if (eva === null) return false;
   const evb = 16 - eva;
+  const bg1Y = statsBannerBg1Y(t, pressTick);
   const { tileset } = grovyleFrontSprite;
+  const bgTileset = statAnimBanner.tileset;
+  const bgTilemap = statAnimBanner.tilemaps.increase;
+  const bgPalette = statAnimBanner.palettes.evasion;
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
       const tile = tileset.tiles[ty * tileset.columns + tx];
@@ -2763,10 +2809,12 @@ function drawStatsBanner(fb: Uint8Array, t: number, pressTick: number): boolean 
           const x = GROVYLE_CORNER.x + tx * 8 + px;
           const y = GROVYLE_CORNER.y + ty * 8 + py;
           if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+          const bg1c = statAnimBg1PixelAt(bgTilemap, bgTileset, bgPalette, x, y + bg1Y);
+          if (!bg1c) continue;
           const o = (y * 240 + x) * 4;
-          fb[o] = blendChannel(255, fb[o]!, eva, evb);
-          fb[o + 1] = blendChannel(255, fb[o + 1]!, eva, evb);
-          fb[o + 2] = blendChannel(255, fb[o + 2]!, eva, evb);
+          fb[o] = blendChannel(bg1c.r, fb[o]!, eva, evb);
+          fb[o + 1] = blendChannel(bg1c.g, fb[o + 1]!, eva, evb);
+          fb[o + 2] = blendChannel(bg1c.b, fb[o + 2]!, eva, evb);
         }
       }
     }

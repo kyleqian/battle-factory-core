@@ -1233,7 +1233,7 @@ field), `npm run build` green.
 own resolution (accuracy/crit/damage/HP-drain, all much later per
 battle-turn-notes.md §9's table), ISSUES #5/#16/#18/#19/#20.
 
-## 10. S7 slice B: DOUBLE_TEAM clone animation + banner
+## 10. S7 slice B: DOUBLE_TEAM clone animation + banner - **COMPLETE** (§10d, `turn1-cloneanim.json` 230/230)
 
 ### 10a. Convergence retry (bounded worker, this session): Gap 1 CLOSED (RAM-probed, 0 diff except 4 sub-pixel edge ticks), Gap 2 REFRAMED to a smaller, source-confirmed residual
 
@@ -1435,6 +1435,74 @@ menu-idle 69/69, sendout 255/256, s6-acceptance 224/228, scene-assembly
 256/256. `turn1-cloneanim.json` **168/230 -> 172/230** (the clone window
 itself now fully 0 diff; all remaining 58 failures are gap 2's own banner
 window, 2132-2189).
+
+### 10d. Gap 2 (banner) CLOSED - real BG1 scroll extracted + composited - **S7 slice B COMPLETE, `turn1-cloneanim.json` 230/230** (bounded worker, this session)
+
+Per the brief: extracted the stat-anim family and wired the real, scrolling
+BG1 compositor (not the prior flat-white approximation).
+
+**Extractor** (`tools/extract/extract-stat-anim.ts` -> `src/assets/gen/
+stat-anim-banner.json`): reference/pokeemerald's `graphics/battle_anims/
+stat_change/` directory keeps every one of these assets as a plain,
+uncompressed dev-time source (`tiles.png`, 128x32 4-bit-indexed = 64 tiles;
+`increase.bin`/`decrease.bin`, a plain 2048-byte/32x32 tilemap - same format
+as `extract-battle-bg.ts`'s own `anim_map.bin`; 8 `*.pal` JASC-PAL files) -
+no LZ77 decompression needed, same situation that extractor's own header
+note already flagged. Extracted the full family (all 8 stat palettes + both
+tilemaps) since it's cheap and battles 2-7 will exercise other stats; this
+slice only wires up the `evasion`/`increase` pair DOUBLE_TEAM needs.
+Verified against oracle pixels before wiring the compositor (brief's own
+instruction): the evasion palette's green ramp (`(0,148,99)`, `(33,214,148)`,
+`(107,247,198)`, etc.) visibly matches the oracle banner region's own
+dominant colors at tick 2150 (histogram-sampled, `(21,142,117)`,
+`(72,185,151)`, `(33,160,102)` etc. - clearly the same green family blended
+darker with Grovyle's own body colors underneath).
+
+**Compositor** (`drawStatsBanner`, `battleScene.ts`): real GBA alpha-blend
+semantics, same shape as the intro-slide's own `drawSlideScene` (BG1=TGT1,
+blend where opaque else raw TGT2) - not a special case. The OBJ-window mask
+(`StatsChangeAnimation_Step1`'s `CreateInvisibleSpriteCopy`, a FROZEN copy of
+Grovyle's own OAM taken once at banner start) is exactly Grovyle's own
+silhouette at his current, RAM-confirmed-unmoving position - so the
+compositor reuses the SAME `GROVYLE_CORNER`-anchored tile-opacity mask the
+prior flat-white version already iterated; only the blended COLOR and the
+"transparent BG1 pixel -> leave raw" case are new. `statAnimBg1PixelAt`
+samples the tilemap/tileset/palette at `(x, y + statsBannerBg1Y(t))`
+(`gBattle_BG1_X` stays 0 for a stat INCREASE, only a DECREASE sets it to 64 -
+out of scope this slice), wrapped both axes over the tilemap's own 256px
+period.
+
+**The scroll anchor needed the SAME one-tick render lag `bg1X` already uses**
+(`battleScene.ts`'s own doc comment: "the value the oracle displays for tick
+`t` is the register as of tick `t-1`") - NOT `statsBannerEva`'s own
+register-exact, no-lag convention (a different register class, `BLDALPHA`,
+apparently on a different display-copy cadence than `BG1VOFS`). This wasn't
+assumed - a naive same-tick mapping (`gBattle_BG1_Y(t)` directly) got the
+general mechanism right (diff pixel counts roughly halved, ~650-960px vs.
+~1500px) but never reached 0. Root-caused via a per-tick brute-force sweep
+(`tools/compare/scratch/diagnose_banner.mjs`, not committed as a tool since
+it's a one-off diagnostic, kept as scratch per this run's convention): at
+ticks 2132/2140/2150/2160, swept every integer Y-shift and found the exact
+set that reproduces the oracle bit-exact - periodic mod 32 (the tilemap's
+own vertical repeat), and the residue at every tick matches `3*clamp((t-1)-
+2129, 0, 60)` (RAM tick `t-1`'s value) exactly, never the same-tick value.
+`STATS_BANNER_BG1_Y_ANCHOR_DELAY=211` (`battleMenu.ts`) folds that single
+extra tick into the anchor.
+
+**Verification**: `npm test` **638/638** (+3 pins: `STATS_BANNER_BG1_Y_
+ANCHOR_DELAY`/`statsBannerBg1Y` schedule in `tests/battleMenu.test.ts`
+against the same register probe; a render-level pin in `tests/battleScene.
+test.ts` at two banner ticks - 2140 ramp-up, 2160 hold - confirming the
+rendered pixel actually differs between them, i.e. content genuinely
+scrolls, not just a static blend), `npm run build` green. Regression sweep
+unchanged: turn1-kickoff 81/81, fight-submenu 234/235, menu-idle 69/69,
+sendout 255/256, s6-acceptance 224/228, scene-assembly 256/256.
+
+**`tools/compare/traces/turn1-cloneanim.json`: 172/230 -> 230/230 - S7 slice
+B ACCEPTANCE MET, slice COMPLETE.** Both named residuals from #125 (the
+banner's real mechanism, and gap 1's own 4 sub-pixel clone-edge ticks -
+§10c above) are closed; zero known gaps remain in this trace's own window
+(1964-2193).
 
 ### 10b. First attempt (bounded worker, prior session) - superseded by §10a above
 

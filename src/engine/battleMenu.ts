@@ -1170,16 +1170,14 @@ export const STATS_BANNER_END_DELAY = 274;
  * stride 1, 2127-2193): flat 0 for 5 ticks, then +1 every 2 ticks up to 10
  * (reached tick+23/2150), held 22 ticks, then the same ramp back down to 0.
  *
- * **Known gap, not resolved this session**: this formula alone does NOT
- * reproduce the banner's pixels 0-diff - a SEPARATE, still-unidentified
- * per-tick motion (Grovyle's own sprite visibly shifts a few px, sampled
- * directly against the oracle at two different pixels mid-hold, tick
- * 2150-2160, eva/evb flat the whole time yet the raw pixel color cycles
- * through multiple distinct values) sits underneath this blend and was not
- * reverse-engineered in the time available - see docs/battle-menu-notes.md
- * §10's own writeup. Kept as the best-understood partial model (matches the
- * ramp-up ticks 2132-2150 exactls where the extra motion hasn't kicked in
- * yet) rather than withheld, per this run's no-silent-omission convention.
+ * **Formerly a known gap, RESOLVED (docs/battle-menu-notes.md §10d)**: this
+ * `eva`/`evb` schedule alone never reproduced the banner's pixels 0-diff -
+ * the apparent "per-tick motion under a flat blend" a prior session sampled
+ * (raw pixel color cycling tick-to-tick at 2150-2160 despite flat `eva`) was
+ * never a second, separate mechanism: it's `gBattle_BG1_Y`'s own real,
+ * continuous scroll (`statsBannerBg1Y` below) - target-1 is a genuinely
+ * scrolling tilemap, not a flat white flash. This function's own schedule
+ * needed no change once that was found.
  */
 export function statsBannerEva(t: number, pressTick: number): number | null {
   const start = pressTick + STATS_BANNER_START_DELAY;
@@ -1190,4 +1188,43 @@ export function statsBannerEva(t: number, pressTick: number): number | null {
   if (d <= 22) return Math.min(10, Math.floor((d - 5) / 2) + 1);
   if (d <= 44) return 10;
   return Math.max(0, 10 - (Math.floor((d - 45) / 2) + 1));
+}
+
+/**
+ * `gBattle_BG1_Y` as it actually affects the RENDERED frame at trace tick
+ * `t` (docs/battle-menu-notes.md §10d): `StatsChangeAnimation_Step3` runs
+ * `gBattle_BG1_Y += tVelocity` (`tVelocity = 3` for a stat INCREASE, e.g.
+ * DOUBLE_TEAM's `EFFECT_EVASION_UP`) unconditionally at the top of every
+ * call, all three fade-in/wait/fade-out states alike - so BG1 keeps
+ * scrolling continuously through the whole banner, including the "flat
+ * eva/evb" hold. RAM-exact schedule (fresh register probe, stride 1, ticks
+ * 2120-2193): flat 0 through RAM tick 2129, then a clean `+3`/tick ramp
+ * (`3,6,...,180`) from RAM tick 2130 through 2189, holding at 180 after.
+ *
+ * **Needs the same one-tick render lag `bg1X` above already established for
+ * BG scroll registers** (`battleScene.ts`'s own `gBattle_BG1_X` doc
+ * comment: "the value the oracle displays for tick `t` is the register as
+ * of tick `t-1`") - NOT `statsBannerEva`'s own no-lag convention (a
+ * different register class, `BLDALPHA`, apparently copied to the display
+ * pipeline on a different cadence than `BG1VOFS`). Confirmed empirically,
+ * not assumed: a per-tick brute-force sweep against the oracle
+ * (`tools/compare/scratch/diagnose_banner.mjs`) found the exact map-space Y
+ * shift needed at several ticks (2132/2140/2150/2160) is periodic mod 32
+ * (this tilemap's own vertical repeat - see `extract-stat-anim.ts`'s
+ * `increase.bin`), and the residue at every one of those ticks matches
+ * `3*clamp((t-1)-2129, 0, 60)` exactly, i.e. RAM tick `t-1`'s own value -
+ * never matches the naive same-tick `3*clamp(t-2129,0,60)`.
+ * `STATS_BANNER_BG1_Y_ANCHOR_DELAY=211` folds that single extra tick into
+ * the anchor (`pressTick+211` = RAM tick 2130, one past the ramp's own
+ * RAM-tick-2129 zero point) rather than threading a separate `-1` through
+ * the call site. Clamped to [0,180] outside the ramp's own active span
+ * rather than continuing to apply `tVelocity` past task teardown - never
+ * observed to matter since `statsBannerEva` gates every caller to the
+ * banner's own active window anyway.
+ */
+export const STATS_BANNER_BG1_Y_ANCHOR_DELAY = 211;
+
+export function statsBannerBg1Y(t: number, pressTick: number): number {
+  const d = t - (pressTick + STATS_BANNER_BG1_Y_ANCHOR_DELAY);
+  return Math.max(0, Math.min(180, 3 * d));
 }
