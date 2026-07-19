@@ -1,3 +1,83 @@
+---
+## 107 — Supervisor: idle/menu-draw dossier branch merged (docs/spec only) — final menu slice (1742-1810) fully unblocked; round-11 = SortSprites implementation SOLO
+
+- **State (verified post-merge):** `npm test` **523/523**, `npm run build`
+  green, tree clean. New `docs/battle-menu-idle-notes.md` (+ probe spec
+  `menu-idle-bounce.json`): idle cycle SOLVED closed-form
+  (`DoBounceEffect` drivers on gSprites[6]/gSprites[0], sine step +=7 mod
+  256, +1 render lag — even explains the prior dossier's unattributed
+  tick-1813 transient); menu idle is INDEPENDENT of the scene-assembly
+  idle (re-derive, don't reuse); atomic menu draw = off-screen draw +
+  BG0-scroll reveal after DMA3. Still open there: cursor-tile byte-check,
+  the 1742-47 teal-blank's specific source call (pointers named).
+- **Next (in order):** (1) SOLO main-lane step NOW: implement §7.26's
+  derived SortSprites model (priority → subpriority → per-tick screen-Y
+  tiebreak) in drawSendOutHandoff — targets sendout 1482-84/1497-98 and
+  menu-materialize 1658-62; menu-throw's 8 ticks are NOT this mechanism
+  (§7.26 disproved #96's hypothesis — icon fade/exit timing is the new
+  lead, separate step); (2) then parallel: healthbox slide-in 1663-1693
+  (harvest-based like §7.9's precedent, assembly stays with ISSUES #16)
+  + menu draw/idle slice off the new dossier; (3) S6 acceptance
+  end-to-end attempt; wind-down with margin before 07:55.
+- **Notes:** two model-falsifications this session (§7.21's shared-root,
+  §7.26's creation-order) — both caught by RAM before shipping wrong code.
+
+## 108 — Bounded worker: implemented §7.26's real `SortSprites()` Y-tiebreak for both ball-open particle bursts — `sendout.json` **236/256 → 246/256** (+10, closes 1482-84/1497-98), `menu-materialize.json` widened + **12/12** (closes #105's 1658-1662 too — same family, not the particle-vs-ball fallback)
+
+- **State:** `npm test` **525/525** (+2 Tier-1), `npm run build` green, tree
+  clean. Full 22-trace sweep against the live oracle: all others at #107's
+  exact counts (accept-prebattle 137/137, anchor 1/1, confirm-decline 67/67,
+  confirm-flow 79/95, draft-cursor 13/13, draft-menu-slot6 66/66, draft-menu
+  38/38, example 4/4, menu-materialize **12/12**, menu-text 18/18,
+  menu-throw 70/70, rent-3picks 157/190, rent-slot1 125/139, room-entry
+  110/110, room-msgbox 142/142, room-npcs 98/98, scene-assembly 256/256,
+  sendout **246/256**, summary-info-magby 132/132, summary-info-onix
+  122/122, transition 206/206, walk-warpout 125/125) — zero regressions.
+- **Did:** implemented (not re-derived) §7.26 Finding 2: both
+  `drawBallOpenParticles`/`drawPlayerBallOpenParticles` (`battleScene.ts`)
+  now build the currently-alive particle list per tick and draw it in
+  `sortAliveParticlesByScreenY`'s order — ascending computed screen Y (lowest
+  drawn first/background, highest drawn last/on top, matching
+  `SortSprites`'s "larger Y wins" rule under a painter's-algorithm draw
+  order), tie-broken by descending spawn index (an exact Y tie never
+  triggers `SortSprites`'s insertion-sort swap, so original ascending
+  creation order survives — the older/lower-index particle keeps the lower
+  final OAM index, i.e. must be drawn LAST to render on top) — replacing the
+  two previously-separate, opposite-direction static index loops §7.26
+  identified as narrow curve-fits of this one real rule. Also source-checked
+  (no live probe needed — literal already in `reference/pokeemerald`) the
+  ball sprite's own `oam.priority` (`sBallOamData.priority=2`,
+  `pokeball.c`) against the particles' (`1`, already RAM-verified in #106):
+  since particle priority is strictly lower, particles always beat the ball
+  unconditionally — the engine's existing ball-before-particles draw order
+  was already GBA-correct, so the "if Finding 2 alone doesn't close #105,
+  probe the ball" fallback §7.26 flagged needed zero code change, just the
+  two constants pinned as documentation/tests
+  (`BALL_OAM_PRIORITY`/`PARTICLE_OAM_PRIORITY`/`PARTICLE_OAM_SUBPRIORITY`).
+  Widened `tools/compare/traces/menu-materialize.json`'s `captureFrames` to
+  the full contiguous 1652-1663 span (was 7 frames skipping 1658-1662) —
+  verified 12/12 on a scratch copy before committing the change to the real
+  trace file. `docs/battle-scene-notes.md` §7.27 (full derivation + score
+  effect); `docs/battle-menu-notes.md` §3/§7 updated in place (not rewritten)
+  with forward-references, matching this run's existing correction style.
+- **What's still open in `sendout.json` (10 ticks, confirmed unrelated, not
+  assumed out of scope)**: `1462` (trainer-exit-tail/settled-bar gap,
+  §7.25), `1470/1471/1479` (icon-row residual, different screen region —
+  mismatch pixel sets bit-identical before/after this session's change),
+  `1491-1496` (§7.25's own separately-named "materialize tint" family, not
+  particle-colored). None are the OAM-priority compositor's territory.
+- **Next:** healthbox slide-in (1663-1693, harvest-based per §7.9's
+  precedent); menu draw/idle slice (source/RAM dossier already landed, #107);
+  menu-throw's own 8 Brendan-vs-icon ticks (§7.26 Finding 1's new lead: the
+  icon's own `eva`/`iconExitDx` state, NOT a compositing-order bug — do not
+  re-attempt a reorder there); then S6 acceptance end-to-end.
+- **Notes:** stayed entirely within `battleScene.ts` particle functions +
+  `tests/battleScene.test.ts` + the two named docs files, per the brief.
+  Did not touch menu-throw's 8 ticks, healthbox, idle, tick 1462, or
+  1470/71/79 (checked unaffected, not skipped blindly). No PAPERCUT this
+  session.
+
+---
 ## 106 — Bounded worker: derived the REAL `SortSprites()` OAM-priority model (source+RAM verified) for #96's compositor — disproved PROGRESS #96's Brendan-vs-icon hypothesis, gave the particle z-order family (§7.25) a concrete non-guessed mechanism; no code landed (documentation-only session, ran out of RAM-probe budget before implementing)
 
 - **State:** `npm test` **523/523**, `npm run build` green, tree clean —

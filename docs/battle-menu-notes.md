@@ -711,6 +711,93 @@ frame needed for a future session to nail these exactly via the same
 sub-region-diff technique used for the text cadence (§2) — flagging as
 open rather than asserting unverified tick numbers.
 
+## 3b. Item 5's own blocker RESOLVED (ISSUES #17, bounded worker, this
+   session): color-fade-to-true-color + settle wobble - the LAST
+   unimplemented S6 window closes, `menu-materialize.json` **12/12 → 62/62**
+   (widened 1652-1663 to 1652-1741 with samples)
+
+RAM-probed directly (`tools/probe/specs/menu-player-materialize-taskfade.json`
+— a full `gTasks[0..15]` scan reusing `sendout-grovyle-taskfade.json`'s own
+watch shape, PLUS `gSprites[6]`'s own `y2` field `menu-player-
+materialize.json` already watched), and independently cross-validated a
+SECOND way (brute-force pixel decode against `battle1-menu-dense.json`'s own
+oracle captures, reversing `blendComponentToward` per-channel over every
+opaque ONIX texel, `tools/compare/scratch/menu-audit/
+decode_player_tint_scratch3.mjs`) — both methods agree at every one of the 39
+checked ticks (1664-1702), so this is ground truth, not a fit.
+
+**The color fade** (`Task_FadeMon_ToNormal`/`_Step`, `battle_anim_throw.c:
+2078-2102` — the OTHER effect of the SAME `LaunchBallFadeMonTask(TRUE,
+battler, 14, ballId)` call site item 5 already cites for the BG-white
+dither): the task is created at ball release with `tCoeff=16` (fully
+tinted) and sits frozen there polling `!gPaletteFade.active` (the concurrent
+BG-white flash, `PLAYER_BG_FADE_Y`) until it clears — RAM-confirmed the
+poll resolves at RAM tick 1673 — then `Task_FadeMon_ToNormal_Step`
+decrements `tCoeff` by 1 every tick for 17 calls before true colors show.
+Folding in this window's own established render lag collapses to a clean
+closed form: coefficient 16 constant through render 1675, then exactly one
+integer step down per tick, reaching 0 (true color) at render **1691** and
+staying there (`playerMaterializeSettleTintCoeff`, `battleMenu.ts`).
+
+**The settle wobble** (item 5's own "may be the DoBounceEffect pre-menu
+state or an affine tail" lead): confirmed NOT `DoBounceEffect`
+(`battle_controller_player.c:237-238`, `HandleInputChooseAction` — too small
+an amplitude (1), and that call site only runs once the action menu is
+polling for input, i.e. `MENU_DRAW_TICK`+ — a different, already-implemented
+mechanism, `menuIdleBounce`). RAM-probed instead (`gSprites[6].y2`): once
+ONIX's own affine scale-in finishes (`affineAnimEnded`, RAM tick 1666),
+`BattleAnimateBackSprite` (`pokemon.c:6886`) launches ONIX's own species
+back-sprite entrance animation (`LaunchAnimationTaskForBackSprite`,
+source-confirmed `GetSpeciesBackAnimSet(SPECIES_ONIX) = BACK_ANIM_V_SHAKE` —
+a real vertical-shake entrance, one of 3 nature-dependent variants selected
+by `sBackAnimNatureModTable`) — a genuine THIRD animation, exactly as item
+5's own lead warned. Kept as a literal RAM-derived table
+(`PLAYER_SETTLE_WOBBLE_Y2_TABLE`, `battleMenu.ts`) rather than
+reverse-engineering which of the 3 nature-dependent `VerticalShake*`
+variants this save's ONIX resolves to: holds 0 through render 1669, then an
+irregular (non-monotonic, `Sin`-table-driven) bounce through render 1701,
+settling permanently at 0 from render **1702** on — the exact tick PROGRESS
+#109 independently corrected the scene's own full-frame settle pin to (two
+unrelated derivations landing on the same tick, not a coincidence).
+
+**A second, pre-existing bug found and fixed along the way** (not part of
+ISSUES #17's own named mechanism, but blocking this window's 0-diff
+closure): `brendanThrowFrame` (`battleMenu.ts`) uses `null` for BOTH ends of
+its own frame table — before the throw starts, AND once its `FRAME(3,50)`
+tail is exhausted (et≥116, render tick 1690+) — a "table truncated both
+ends" case, this run's own named convention. `drawSendOutHandoff`
+(`battleScene.ts`) conflated the two, redrawing Brendan's **settled
+on-screen pose** at `PLAYER_CORNER` once the table ran out, when the real
+game has him long gone (permanently off-screen, `brendanThrowDx` itself
+freezes there). Invisible before this session (masked by the much larger
+ONIX-missing gap it happened to spatially overlap — `PLAYER_CORNER` (48,48)
+vs. `ONIX_MATERIALIZE_CORNER` (40,48)); surfaced the moment ONIX's own real
+transparency let Brendan's incorrect redraw show through underneath at
+render 1690+. Fixed by gating the settled-pose draw on `t <
+BRENDAN_THROW_START_TICK` directly instead of `throwFrame === null`.
+
+**A third, pre-existing gap found and closed**: `drawPlayerBallOpenParticles`
+(`battleScene.ts`) never had an upper tick cutoff (particle age alone gates
+it, live through logical tick 39 / render 1692), but a prior session had
+explicitly NOT ported the opponent's own `drawBallOpenParticles` one-tick
+RAM-stall correction (`PARTICLE_STALL_LOGICAL_TICK`/
+`PARTICLE_LATE_SPAWN_START_INDEX`) since "this window's own then-relevant
+range stopped well short of" where it matters. This session's own widened
+window (out to render 1692) made that omission visible for the first time
+(a small, shrinking 104px→13px residual, exclusively particle-burst colors)
+— porting the identical correction verbatim closed it to 0 diff, confirming
+it's the same one-tick stall on both sides, not a coincidence.
+
+**Result**: `tools/compare/traces/menu-materialize.json` widened from
+`captureFrames` 1652-1663 (12) to 1652-1710 contiguous + 1720/1730/1741
+samples (62 total; the 1702-1741 static hold is one sha, per PROGRESS #109
+— a few samples suffice, `menu-idle.json` owns 1742+) — **62/62 at 0 diff**.
+Full 23-trace sweep re-verified at every other trace's exact prior count,
+zero regressions. **With this landed, the S6 chain (send-out through the
+settled first-action-menu idle) has NO unimplemented window left**:
+`menu-throw.json` (1574-1651, 70/70) → `menu-materialize.json` (1652-1741+,
+62/62) → `menu-idle.json` (1742-1810, 69/69) are contiguous and all 0-diff.
+
 ## 4. The settled action-menu idle cycle: two independent regions, not one
 
 `battle-scene-notes.md` §3.3 and `battle-bringup-notes.md` §6/§2 both
