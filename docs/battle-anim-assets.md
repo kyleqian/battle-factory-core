@@ -19,6 +19,13 @@ Extractor: `tools/extract/extract-battle-anim-assets.ts`. Outputs:
 
 All source cites are `reference/pokeemerald/<path>`.
 
+**§5 update (S6 PLAYER SEND-OUT worktree lane):** every asset below was
+extracted from the shared `SpriteCB_ReleaseMonFromBall` path and originally
+pixel-verified only against the OPPONENT send-out window. §5 cross-checks
+the same assets against the PLAYER send-out window
+(`docs/battle-menu-notes.md`, ticks ~1646-1690) and confirms they apply
+unchanged - no new extractor was needed.
+
 ## 0. The real call chain
 
 Every mechanism below fires from the same function,
@@ -259,6 +266,51 @@ magnitudes beyond "starts small, ends at exactly neutral 12 ticks later,"
 since recovering the true OAM matrix scale from a rasterized, palette-blended
 silhouette's pixel width is not itself byte-exact - flagged honestly as the
 one number in this doc verified by *timing* rather than *pixel* exactness.
+
+## 5. PLAYER-side audit (S6 PLAYER SEND-OUT window, ticks ~1646-1690)
+
+`docs/battle-menu-notes.md` §6 flagged the ball-open particle burst and the
+materialize affine/color-fade tables as **MISSING** for the player's own
+send-out (Brendan throws ONIX's ball, ~ticks 1646-1690 of
+`battle1-menu-dense.json`). That flag was **stale**: this doc's own §0 call
+chain already names `SpriteCB_ReleaseMonFromBall` as "the real send-out path
+for both `SpriteCB_OpponentMonSendOut` and `SpriteCB_PlayerMonSendOut_2`"
+(`extract-battle-anim-assets.ts`'s own header comment, written the same
+session as this doc, before `battle-menu-notes.md` existed) - every asset in
+§1-§3 was already extracted from that one shared function, generically, not
+from an opponent-only code path. This section cross-checks that claim
+against actual player-window oracle pixels rather than taking it on source
+faith alone, and confirms it. **No new extractor, no new gen file** - every
+element the brief asked about is either already covered or is a placement
+question explicitly out of scope for an extraction step.
+
+**Method**: `tools/compare/traces-groundtruth/battle1-menu-dense.json`
+(already committed, §0 of `battle-menu-notes.md`) captures every tick
+1560-1810, so the player materialize window needed no new oracle trace -
+`bin/oracle run` against the existing file to a scratch PNG directory was
+enough. Verification script (not committed as a fixture, reproducible):
+`tools/compare/scratch/menu-audit/verify-player-sendout-assets.mjs`.
+
+| element | verdict | evidence |
+|---|---|---|
+| Ball-open particle burst tiles (`battle-anim-particles.json`) | **already extracted, confirmed applicable to player side** | tiles 0/1/2 of `sAnim_RegularBall` found **pixel-exact** (14/14, 12/12, 12/12) in the player window at ticks 1662-1665, region-searched around the ONIX battler bbox - same tile+palette data as the opponent-window verification in §4, now cross-checked against a second, independent instance |
+| Materialize color-fade (`battle-anim-tables.json` `ballOpenFadeColor`) | **already extracted, confirmed applicable to player side** | exact RGB (255,181,247) pixels found growing from 150px (width 17) at tick 1653 to a ~1600-1630px plateau (width 56) by tick 1663-1669, then the same kind of renderer-residual jitter (1670-1675, width dipping to 53-55) already named and root-caused for the opponent window in `battle-scene-notes.md` §7.20/PROGRESS #92 - same mechanism, same known residual, recurring on the player side as expected rather than a new bug |
+| Materialize affine-emerge table (`battle-anim-tables.json` `affineEmerge`) | **already extracted, confirmed applicable to player side** | the fade-color silhouette's width grows monotonically for ticks 1653-1663 (10-12 samples depending on where "start" is drawn from, given the same rasterized-width imprecision §3b already flagged) before plateauing - same growth-then-plateau shape as `sAffineAnim_Battler_Emerge`'s `duration=12` step, matching §3b's opponent-window finding structurally, not just by table lookup |
+| Ball open-pose frame (`battle-anim-ball-open.json`, `frames[0]` = "open") | **already extracted (same source `poke.png`, side-agnostic - no ball art differs by side); placement-only gap, not a content gap** | best brute-force match in the player window peaked at 9-13/122 non-transparent px (ticks 1649-1652), never the opponent window's clean 122/122 tick. Manual pixel dump at tick 1652 (screen region x[63,79) y[104,120)) shows only the sprite's **top 2 rows** matching exactly (the `424242`/`ff9c7b`/`d62929` band) - the rows below are flat solid-color bands unrelated to the ball (battle-terrain/ground graphic occupying that part of the screen), i.e. the ball is drawn **behind/under** foreground terrain at its player-side screen position. This is exactly the kind of "screen placement formula" gap this doc's own "What remains unverified" section already calls out of scope for an extraction step - the tile/palette bytes themselves are unchanged and don't need re-extraction, only a future engine slice's OAM/priority placement math needs to reproduce the occlusion |
+| Ball open-pose frame, thrown-ball **closed** frame (`summary-ball.json` frame 0, per `battle-menu-notes.md` §6's "extracted as a byproduct... unverified... a cheap follow-up") | **cross-check done - pixel-exact, no gap** | tracked **112/112 exact** across 8 consecutive ticks (1607-1614) along the throw arc's early path (16,60)→(29,49) in the player window - the flagged follow-up is resolved, no re-extraction needed |
+| ONIX back-pic + `gMonBackPicCoords` | **already extracted, no gap** | `src/assets/gen/battle-back-sprites.json["ONIX"]` (back sprite pixels) + `src/data/gen/mon-pic-coords.json.back.ONIX` (`tools/extract/extract-battle-mon-pics.ts`, full `gMonBackPicCoords` table, all 400+ species incl. ONIX) - both already exist and are player-side-only by construction (back pics are never used by the opponent), nothing to newly extract |
+| Player ballId / palette (`GetBattlerPokeballItemId`) | **confirmed BALL_POKE, same as opponent - no per-side variant needed** | `reference/pokeemerald/src/pokeball.c:1342-1348` (`GetBattlerPokeballItemId`) reads `MON_DATA_POKEBALL` off whichever party slot the battler maps to (player or enemy) - it is **not** hardcoded per side. But `extract-summary-screen.ts`'s own already-established reasoning (`MON_DATA_POKEBALL` left at `CreateBoxMon`'s hardcoded default, `ITEM_POKE_BALL`, `pokemon.c:2261`) applies to **every** Battle Factory rental mon regardless of which side rents it, since both sides' rentals come from the same rental-generation path (`battle_factory.c`) - so BALL_POKE covers ONIX's send-out too, confirmed structurally, not just by assumption |
+| Back-sprite emerge curve differences (front vs. back sprite) | **none - same table, confirmed by this session's own width-growth check above** | `StartSpriteAffineAnim(&gSprites[gBattlerSpriteIds[sprite->sBattler]], BATTLER_AFFINE_EMERGE)` is called once per `SpriteCB_ReleaseMonFromBall` invocation with no front/back branch in the source (`pokeball.c:815`) - the affine-emerge row above is the direct pixel confirmation this generic table produces the same monotonic-then-plateau shape for a back sprite (ONIX) as it already did for a front sprite (§3b/§4's opponent-window GROVYLE-family check) |
+| Cry timing | **N/A - no pixel effect, nothing to extract** | already established in `battle-menu-notes.md` §3 ("cry SFX still playing (audio-gated, `waitForCry`, no pixel effect)") - reconfirmed here rather than re-derived: no oracle pixel signature was expected or looked for |
+
+**Net result: zero new extractors, zero new gen files.** Every element the
+brief listed either already has a byte-exact, source-cited extraction
+(reused unchanged) or resolves to a placement/timing question this doc's own
+"what remains unverified" section already scopes out of an extraction step.
+The two `docs/battle-menu-notes.md` §6 "MISSING" flags should be read as
+**stale** (written without cross-referencing this doc, which predates them);
+a supervisor pass over that file can retire those two rows the same way
+PROGRESS #93 retired its own stale coarse-timing estimate.
 
 ## What remains unverified / explicitly out of scope
 
