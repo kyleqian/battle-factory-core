@@ -1213,13 +1213,27 @@ function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalet
  * here, not the formula's predicted 2. Every other step, forward and
  * reverse, matches a clean 2-ticks-per-step cadence. Indexed by `t -
  * handoffTick`; 0 (fully unfaded) outside the covered range.
+ *
+ * §7.20: the table's own head/tail were one step short of the ramp it
+ * otherwise follows exactly - r=19/20 and r=54/55 (render ticks 1481/1482
+ * and 1516/1517) render as y=2 in the oracle (direct pixel decode via
+ * `blendComponentToWhite`'s own closed form against a clean background
+ * swatch at (150,60): e.g. r=19's oracle RGB (198,198,165) solves exactly
+ * to y=2 for unfaded (189,189,156), same formula, same swatch, cross-checked
+ * at r=21/22/50/51 against the table's own EXISTING values first to confirm
+ * the method - not a new mechanism, the same validated 2-ticks-per-step
+ * cadence simply continues one more step at both ends before the table's
+ * prior boundaries fell back to the `?? 0` default. `SENDOUT_BG_FADE_START`
+ * moves 21->19 to match.
  */
 const SENDOUT_BG_FADE_Y: readonly number[] = [
+  2, 2, // r=19..20 (§7.20: ramp's own missing head step)
   4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 14, // r=21..33 (ramp up to white, incl. the observed 3-tick y=14 hold)
   16, 16, 16, 16, 16, 16, 16, 16, // r=34..41 (white plateau)
   14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, // r=42..53 (ramp back down)
+  2, 2, // r=54..55 (§7.20: ramp's own missing tail step)
 ];
-const SENDOUT_BG_FADE_START = 21;
+const SENDOUT_BG_FADE_START = 19;
 
 function sendOutBgFadeY(t: number, handoffTick: number): number {
   return SENDOUT_BG_FADE_Y[t - handoffTick - SENDOUT_BG_FADE_START] ?? 0;

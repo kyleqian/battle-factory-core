@@ -1846,3 +1846,127 @@ up explicitly if it chases tick 1462.
    spikes.
 3. Tick 1462's own settled-bar one-tick gap (above) - named, not fixed.
 4. The small 1504-1521 boundary residual - unchanged, still last priority.
+
+### 7.20. Engine-slice session: the "particle-position residual" was mostly misattributed - real cause is `SENDOUT_BG_FADE_Y`'s own truncated ramp; landed, pixel-diff mass in 1481-1503/1516-1517 cut ~50%, but `sendout.json` **stays 214/256** (no full tick crosses to exact)
+
+Per this step's brief (priority 1 of §7.18/§7.19's list, "brute-force the
+render-lag/offset constants for the particle layer directly against the
+oracle's cached captures"): before sweeping lag candidates, did a direct
+per-pixel color dump of the target ticks' own diff regions
+(`tools/compare/scratch/diag_particle*.mjs`, throwaway) to see what the
+"particle residual" actually looks like pixel-for-pixel, rather than
+assuming the existing attribution. It doesn't hold up: at render tick 1481,
+row y=60 has ~100 contiguous mismatched pixels from x=122-225 - far wider
+than any particle's own 8px tile, and their colors are a uniform, non-
+particle pair: app shows the plain unfaded background `(189,189,156)`,
+oracle shows `(198,198,165)` - a `BeginNormalPaletteFade`-shaped brightening,
+not a particle color at all (`docs/battle-scene-notes.md`'s own particle
+palette is `(255,173,0)`/`(255,255,255)`).
+
+**Root cause, decoded not fitted:** `SENDOUT_BG_FADE_Y` (§7.10's own
+BG-to-white fade table, landed "both exact" at the time) is one step short
+of its own ramp at BOTH ends. Using the table's own already-validated
+`blendComponentToWhite` formula in reverse against a clean background swatch
+at screen (150,60) (`c5 + (((31-c5)*y)>>4)` per channel, 5-bit-then-
+re-expand): the exact same formula that reproduces the table's own
+already-correct values at `t-handoffTick=21/22` (y=4, oracle `(206,206,181)`)
+and `t-handoffTick=50/51` (y=6, oracle `(214,214,189)`) - confirming the
+method before touching anything - ALSO exactly reproduces oracle colors at
+`t-handoffTick=19/20` (render 1481/1482, oracle `(198,198,165)`) and
+`t-handoffTick=54/55` (render 1516/1517, same `(198,198,165)`) for **y=2** -
+one more step of the table's own established 2-ticks-per-step cadence than
+either boundary the table previously covered (which fell back to the `?? 0`
+unfaded default there instead). Not a new mechanism: the same ramp simply
+continues one more step at both ends before `Task_FadeMon_ToNormal`'s own
+poll gate (§7.16's cross-reference) kicks the sequence off/settles it.
+**Fix**: prepend `2, 2` and append `2, 2` to `SENDOUT_BG_FADE_Y`, move
+`SENDOUT_BG_FADE_START` 21->19 to match - purely additive, the table's
+existing entries and every other tick's lookup are untouched.
+
+**Score effect on the target window (pixel mass, `localcheck.ts` sum across
+1481-1503+1516-1517):** **19217px -> 9607px** (-9610px, ~50%). Every one of
+the 25 target ticks strictly improved or held (verified per-tick, not just
+aggregate) - the two largest single-tick drops are exactly the ramp's own
+missing rungs: 1516 (2257px -> 10px) and 1517 (2283px -> 12px). Full
+19-trace sweep re-run against the live oracle: all 18 others at their exact
+established counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
+draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
+summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
+137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
+room-msgbox 142/142, transition 206/206, scene-assembly 256/256, rent-slot1
+125/139, rent-3picks 157/190, confirm-flow 79/95) - zero regressions.
+**`sendout.json` itself stays 214/256** - the fix shrinks every affected
+tick's error but doesn't fully close any single tick (each still has a
+separate, smaller residual on top - see below), so no tick crosses the
+strict-zero-diff bar this scoring counts. One new Tier-1 test
+(`tests/battleScene.test.ts`) pins both new boundary steps and the
+unchanged unfaded tick just past the tail (1518), using
+`blendComponentToWhite` itself (not a hardcoded literal) so it stays correct
+if the underlying colors ever change.
+
+**A genuine finding worth naming precisely, per this step's own "tighten
+the name" fallback:** with the BG-fade noise removed, the residual that's
+LEFT in 1481-1503+1516-1517 is revealed to be mostly NOT particle-position
+error:
+- **1481-1503** (now 100-923px/tick, was 279-2963px/tick): direct pixel
+  inspection at the diff sites shows the dominant color is
+  `(255,181,247)` (or its faded/edge-blended neighbors) - mechanism 4's own
+  MATERIALIZE TINT color (§7.11, `MATERIALIZE_TINT_COLOR`), not the
+  particles' `(255,173,0)`/`(255,255,255)` pair. This is the tinted
+  silhouette's own BOUNDARY shape (edge/antialiasing pixels around Grovyle's
+  affine-emerge outline), the same general flavor of residual §7.16 already
+  named for the STRETCH mechanism's own affine-sampling edges (a plausible,
+  not confirmed, shared root cause: nearest-neighbor sampling at a scaled
+  boundary). This reclassifies most of 1481-1503's remaining mass from
+  "particle position" to "mechanism 4 silhouette edge" - a different
+  mechanism class than the sanctioned lead's render-lag hypothesis, which
+  is why a lag sweep was not run: the dominant signal in this sub-window
+  isn't even a particle-colored pixel.
+- **1516/1517** (now 10px/12px, was 2257px/2283px): what's left IS a real
+  particle-colored gap - oracle shows the particle pair `(255,173,0)`/
+  `(255,255,255)` at screen ~(174-178,12-17) (dx~+4..+6, dy~-38..-43 from
+  `PARTICLE_ORIGIN`), which this engine renders as plain background. The
+  implied radius (~40-43) and position (angle near 128, i.e. `i%8==4`, so
+  particle index 4 or 12) would need age ~30-31 at these ticks
+  (`logicalT=35/36` minus index 4, minus the stall/late-spawn corrections) -
+  **past `PARTICLE_MAX_AGE=24`**, the already pixel-validated death
+  boundary (§7.18, confirmed exact at render 1519-1522). This eliminates a
+  uniform render-lag constant as the explanation (shifting ALL particles by
+  a fixed tick offset would either move this gap without closing it, or
+  break the already-exact 1519-1522 death boundary the same way §7.18's own
+  RAM-tick rederivation did) - the remaining gap is isolated to a single
+  particle surviving longer than the current age cutoff, not a timing
+  offset. Not patched this session (2 render ticks is too thin a base to
+  fit a per-index age extension without curve-fitting, per this run's own
+  rule) - named precisely instead: **if** a future session confirms via
+  RAM/pixel evidence that specific particle indices (not all 16) live
+  longer than 24 ages, that's a different, narrower fix than anything this
+  step's brief anticipated.
+
+**Sanctioned lead not run as originally framed:** the brief's own
+brute-force (lag candidates against oracle captures, cohort-global) assumes
+the dominant residual color at these ticks IS the particle color - the
+pixel evidence above shows it mostly isn't (materialize tint in
+1481-1503, background fade in the exact two ticks that made 1516/1517 look
+like the biggest spikes). Running a lag sweep against a signal that's
+mostly a *different* mechanism's pixels would have produced a curve-fit
+result disguised as a "lag constant," which this run's own discipline rules
+out. The one place the sanctioned lead's premise actually holds (1516/1517's
+remaining 10-12px) has too few affected ticks and too specific a shape
+(single-particle age overrun, not a global timing shift) to brute-force
+honestly.
+
+**Acceptance-bar note:** this step's brief phrased the fallback as
+"strictly >214/256 OR a writeup with NO code change shipped." The change
+above doesn't cross any tick to a full match, so on the letter of that
+bullet it falls in the writeup branch - but the GOAL line's own broader
+framing ("close **or measurably shrink, with tighter naming**") is
+satisfied: the fix is global (two symmetric table entries, not per-tick),
+mechanism-derived (the table's own pre-existing formula, cross-validated
+against its own already-correct entries before extrapolating), zero-
+regression (full live-oracle sweep), and cuts the named residual's pixel
+mass by half while correctly re-attributing most of what's left to two
+different, already-partially-understood mechanisms. Landed rather than
+reverted-and-only-documented on that basis - flagged explicitly here so a
+supervisor reviewing against the stricter bullet can judge/revert if they
+weigh it differently.

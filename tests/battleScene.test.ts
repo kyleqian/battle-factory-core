@@ -19,6 +19,7 @@ import {
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
+import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
 import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import sendOutHealthboxOpponentAsset from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
 
@@ -300,6 +301,28 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     // re-assembly / redraw of different content per tick).
     const at1516 = pixelAtSentOut(1516, HEALTHBOX.x + cx - 5, HEALTHBOX.y + cy);
     expect(at1516).toEqual(contentColor);
+  });
+
+  // §7.20: `SENDOUT_BG_FADE_Y`'s own ramp was one step short at both ends -
+  // handoff+19/20 (1481/1482) and handoff+54/55 (1516/1517) render as y=2 in
+  // the oracle (direct pixel decode via `blendComponentToWhite` against a
+  // clean background swatch, cross-checked first at the table's own
+  // already-established r=21/22 and r=50/51 entries to confirm the method),
+  // not the unfaded fallback the table previously produced there. A clean
+  // background tile at (150,60) makes the fade's own on/off boundary
+  // directly visible without any sprite/particle overlap.
+  it("send-out BG-to-white fade ramps one more step at both ends than the table's old boundaries (handoff+19/20 and +54/55 render y=2, not unfaded) (§7.20)", () => {
+    const unfaded = pixelAtSentOut(1480, 150, 60);
+    const expectedY2: [number, number, number] = [
+      blendComponentToWhite(unfaded[0], 2),
+      blendComponentToWhite(unfaded[1], 2),
+      blendComponentToWhite(unfaded[2], 2),
+    ];
+    expect(pixelAtSentOut(1481, 150, 60)).toEqual(expectedY2);
+    expect(pixelAtSentOut(1482, 150, 60)).toEqual(expectedY2);
+    expect(pixelAtSentOut(1516, 150, 60)).toEqual(expectedY2);
+    expect(pixelAtSentOut(1517, 150, 60)).toEqual(expectedY2);
+    expect(pixelAtSentOut(1518, 150, 60)).toEqual(unfaded);
   });
 
   it("message text stays fully printed (all 35 chars) throughout the visual handoff, past its own completion tick", () => {

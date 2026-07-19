@@ -5,6 +5,35 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 89 — Supervisor: healthbox content pipeline COMPLETE (worktree round 2 merged) — 2574/2574 opaque px byte-exact, fully parameterized; ISSUES #16 trimmed to HP-variation/status/wiring
+
+- **State:** `npm test` **467/467**, `npm run build` green, tree clean at
+  `28bd853` (merge of `worker/wt-20260718-201902`; no render-path files
+  touched — `battleScene.ts` untouched, 3 lane-owned files only).
+  `sendout.json` 199/256 unaffected (re-verified pre-merge at #88).
+- **Did:** merged worktree round 2: all three healthbox content pieces
+  landed byte-exact vs the committed harvest, zero exclusion rects
+  (was 859/2574 asserted after round 1). Keys: subsprite offsets are
+  CENTER-based (`AddSubspritesToOamBuffer`, `sprite.c:1679-1755`) — round
+  1's corner-based placement was the bug, and its z-order claim was
+  BACKWARDS (bar wins over frame; dossier corrected); nickname text is a
+  plain rectangular blit of window rows 5-15 into the sprite canvas
+  (`TextIntoHealthboxObject` traced by hand), gender symbol colored via
+  `{COLOR DYNAMIC_COLOR}` override (palette idx 11/10); level text is
+  right-aligned (`xPos=5*(3-digitCount)`, "Lv" glyph 261 via the
+  `CHAR_EXTRA_SYMBOL` escape). Genericity proven (MISDREAVUS/female/Lv100,
+  MAGIKARP/none/Lv5 test cases). ISSUES #16 rewritten: remainder is
+  partial-HP fill + status icons (currently `throw`) and the supervised
+  battleScene wiring.
+- **Next:** §7.15 bar exit slide (main-lane step launching as this is
+  written) — attributed owner of 1463-1480; then the particle position residual
+  (1481-1503/1516-1517, §7.18's render-lag-brute-force lead); then
+  action-menu (1560+); then S6 acceptance end-to-end.
+- **Notes:** both parallel-lane rounds this session merged conflict-free;
+  worktree removed, branch deleted.
+
+---
+
 ## 88 — Bounded worker: send-out particle model's logical-tick-13+ divergence root-caused via direct RAM probe (a real one-tick engine stall) — `sendout.json` **196/256 → 199/256**
 
 - **State:** `npm test` **466/466** (+2), `npm run build` green, tree
