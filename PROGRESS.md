@@ -5,6 +5,53 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 81 — Bounded worker: send-out mechanism 4/5 (materialize affine-scale-in + ball-color tint) landed, pixel-validated; `sendout.json` stays **174/256** as expected, 3 mechanisms remain
+
+- **State:** `npm test` **456/456** (+1), `npm run build` green. Full
+  19-trace sweep against the live oracle: 18 others at exact prior counts,
+  `sendout.json` unchanged **174/256** — expected (§7.10/§7.12's
+  re-confirmed "no tick has only one mechanism left broken" finding). Zero
+  regressions.
+- **Did:** implemented this engine's **first affine-OAM scale renderer**
+  (`drawSpriteSheetAffineTinted`/`drawGrovyleMaterialize`,
+  `battleScene.ts`) — nearest-neighbor, GBA-hardware-accurate
+  (`texCoord = ((rel*matrixParam)>>8)+half`, `matrixParam = 0x10000 /
+  accumulator`), driven directly by the already-extracted
+  `battle-anim-tables.json` (`affineEmerge` accumulator table via a generic
+  step reducer, not hardcoded constants) plus the flat
+  `ballOpenFadeColor.rgb8` tint. Window boundaries pixel-brute-force-
+  confirmed against this trace's own ground truth: tint first visible at
+  handoffTick+19 (1481, 1-tick render lag off the ball-open tick, same lag
+  family as everything else in this window), scale-in growth exactly 12
+  ticks (1481-1492, bbox widths 15/23/31/41/49/57/62px — an EXACT
+  cross-trace match to `docs/battle-anim-assets.md` §4's independently-
+  harvested table), then a **hard cutoff at handoffTick+42 (1504)** where
+  the tint vanishes outright rather than fading gradually — source-read
+  (`battle_anim_throw.c:2037-2102`) but not fully reverse-engineered why
+  it's a hard step (flagged as an open follow-up, not guessed at — see
+  docs §7.13). `localcheck.ts` pixel-diff mass across 1462-1543:
+  **124762→106893px** (−17869px); not every tick strictly improved (ticks
+  1481-1487 show a small, real increase, +41 to +101px each — nearest-
+  neighbor quantization noise at extreme downscale, honestly flagged in
+  §7.13 rather than hidden) but zero full-frame matches regressed. New
+  Tier-1 test (`tests/battleScene.test.ts`) pins the tint's absent→present
+  and present→absent hard boundaries via the sprite's own always-opaque
+  center pixel. `docs/battle-scene-notes.md` gained §7.13.
+- **Next (per #79's ordering, now 2 of 5 done):** mechanism 3 (open-particle
+  burst) next — assets/frame-table already extracted
+  (`battle-anim-particles.json`), needs a radial spawn +
+  `Sin`/`Cos`-motion renderer (source formula cited, not RAM-probed yet).
+  Then mechanism 1 (opponent party-summary despawn fade, §7.4.3 — needs
+  fresh RAM/pixel timing first, not just a renderer) and mechanism 5
+  (front-sprite entrance anim — needs GROVYLE's missing 2nd front-sprite
+  frame extracted, a `Sin`-table wobble renderer that can reuse this
+  session's affine-matrix math, and the still-open start-tick arithmetic;
+  most expensive, left last on purpose).
+- **Notes:** action-menu window (1560+) and the oracle/harness stayed out
+  of scope, per the brief. No PAPERCUT.
+
+---
+
 ## 80 — S7 v5 ground truth regenerated (parallel worktree lane, merged): turn-1 trace/dump rebuilt under animations-on — menu timing UNCHANGED, RNG ledger IDENTICAL (12 calls, same LCG values), both old register mysteries answered
 
 - **State:** merge of `worker/wt-20260718-174536` (base `1050ba1`):
@@ -90,63 +137,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 78 — Send-out window re-grounded under v5 truth: ground truth regenerated + twice-run deterministic, new front-sprite-entrance mechanism decoded, one stale Tier-1 pin corrected (1519→1544). `sendout.json` still **174/256** — score target NOT met, gap precisely re-bounded
-
-- **State:** `npm test` **454/454**, `npm run build` green. Full 19-trace
-  sweep: 18 others at exact prior counts (anchor 1/1, draft-cursor 13/13,
-  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
-  122/122, summary-info-magby 132/132, confirm-decline 67/67,
-  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
-  room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
-  256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95),
-  zero regressions. `sendout.json` **174/256**, unchanged from the
-  supervisor's pre-session measurement (#76/#77) — **acceptance bar
-  "strictly > 174/256" NOT reached this step.**
-- **Did:** (1) Regenerated `battle1-sendout-dense.json` ground truth against
-  the current v5 oracle via `bin/oracle run`, twice, into separate dirs: all
-  256 captures byte-identical between runs (determinism confirmed, no new
-  fixture needed — button script unchanged, its one press predates the
-  divergence). (2) Re-derived the window boundary empirically (not from
-  source-constant arithmetic): isolating Grovyle's own 64×64 sprite crop
-  across ticks 1510-1555 shows continuous per-tick change through 1543,
-  static from **1544** — corroborated by the full-frame oracle-vs-engine
-  match boundary sitting at the same tick. Widens the transient window from
-  v3's 1462-1521 (60 frames) to v4/v5's **1462-1543 (82 frames)**, tail
-  1544-1555 still byte-exact. (3) Decoded the newly-unmasked mechanism
-  source-exactly: `SpriteCB_OpponentMonFromBall` (`battle_main.c:2837-2848`)
-  now runs GROVYLE's species front-sprite entrance anim once
-  `affineAnimEnded` — `sMonFrontAnimIdsTable[SPECIES_GROVYLE-1] =
-  ANIM_V_STRETCH` (`pokemon.c:1659`) → `Anim_VerticalStretch`
-  (`pokemon_animation.c:1597-1635`, a 41-tick Sin-table-driven affine
-  vertical stretch with a wobble sub-term on ticks 10-29), plus a concurrent
-  swap to the front sprite's un-extracted 2nd frame
-  (`HasTwoFramesAnimation(GROVYLE)` = TRUE). (4) Corrected the one Tier-1
-  pin that encoded v3-only truth: `GROVYLE_MATERIALIZE_TICK` in
-  `battleScene.ts` (1519→1544) + its test in `tests/battleScene.test.ts` —
-  net score effect is exactly zero (ticks 1519-1543 were already mismatches
-  either way; the fix stops asserting a materially false "settled" pixel
-  there, doesn't create or destroy a match) but is real correctness, not a
-  no-op. Full correction-block written to `docs/battle-scene-notes.md` §7.11
-  (§§7.0-7.8 kept verbatim as v3 truth; §7.9/§7.10 marked v3-stale in
-  place, not deleted).
-- **Next:** per §7.11's own gap list, `sendout.json`'s remaining 82 frames
-  (1462-1543) need **five** simultaneous mechanisms, none alone sufficient
-  (re-confirmed pattern from #74's two-of-four-implemented/zero-score-change
-  result): (1) opponent party-summary despawn fade — still not source-timed
-  precisely; (2) ball sprite frame 2 ("open" pose) — not extracted; (3)
-  particle-burst sheet (`particles.png`) — not extracted at all; (4) mon
-  affine-scale-in + ball-color tint — no affine-OAM precedent in this
-  engine; (5) **new**, GROVYLE's front-sprite entrance anim itself — needs
-  the missing 2nd front frame extracted AND a `Sin()`-table affine-stretch
-  renderer (shares the affine-OAM gap with item 4, not reusable as one
-  fix) AND the still-open exact start-tick/scheduling-lag arithmetic. None
-  implemented this session — correctly out of one bounded worker step's
-  budget per this run's own "no fix that trades ticks"/"no curve-fitting"
-  rules (a partial subset was already shown, twice, to move pixel-diff
-  magnitude without moving the frame-match count).
-- **Notes:** the action-menu window (1560+, first-action-menu timing,
-  `battle-turn-notes.md`/`battle-move-anim-notes.md`/
-  `battle1-turn1.json`/`battle1-intro.json`/`battle1-menu*.json`) was left
-  untouched, per this step's explicit out-of-scope — a parallel worktree
-  worker (`.worktrees/wt-20260718-174536`, branch
-  `worker/wt-20260718-174536`, unstarted as of this commit) owns that lane.

@@ -15,16 +15,22 @@
 // A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
 // state rather than a phase enum (see the field's own doc comment).
 //
+// STATUS (PROGRESS.md #81): mechanism 4 of the 5 named in #78/docs §7.11
+// landed - Grovyle's materialize AFFINE-SCALE-IN + BALL-COLOR TINT
+// (`drawGrovyleMaterialize`/`drawSpriteSheetAffineTinted`, this engine's
+// first affine-OAM scale renderer, nearest-neighbor). `sendout.json` stays
+// **174/256** (expected - #74/#78/#79 already proved no tick in this window
+// has only one mechanism left broken); `localcheck.ts` pixel-diff mass
+// across 1462-1543 dropped 124762->106893px, zero full-frame regressions
+// (full 19-trace sweep re-run against the live oracle). Still missing: (1)
+// opponent party-summary despawn fade, (3) open-particle burst, (5)
+// front-sprite entrance anim - see PROGRESS.md #81 and docs/battle-scene-
+// notes.md §7.13 for the full per-mechanism accounting.
+//
 // STATUS (PROGRESS.md #79): mechanism 2 of the 5 named in #78/docs §7.11
 // landed - the send-out BALL SPRITE (`drawSendOutBall`, closed+open frames,
-// pixel-brute-force-confirmed corner+timing). `sendout.json` stays
-// **174/256** (expected, not a miss - #74/#78 already proved no tick in this
-// window has only one mechanism left broken); `localcheck.ts` pixel-diff
-// mass across 1462-1543 dropped 127107->124762px, zero regressions. Still
-// missing: (1) opponent party-summary despawn fade, (3) open-particle
-// burst, (4) mon affine-scale-in + ball-color tint, (5) front-sprite
-// entrance anim - see PROGRESS.md #79 and docs/battle-scene-notes.md §7.11
-// for the full per-mechanism accounting.
+// pixel-brute-force-confirmed corner+timing). `localcheck.ts` pixel-diff
+// mass across 1462-1543 dropped 127107->124762px, zero regressions.
 //
 // STATUS (prior session - trainer-exit RAM ground truth + BG palette-fade
 // formula, PROGRESS.md #74): `tools/compare/traces/sendout.json` is still
@@ -326,6 +332,7 @@ import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprit
 import sendOutHealthboxOpponentAsset from "../assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
+import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 
@@ -407,6 +414,11 @@ interface BattleAnimBallOpenAsset {
   tileset: Tileset;
   palette: RgbColor[];
 }
+/** `docs/battle-anim-assets.md` §3: the materialize numeric tables - `sAffineAnim_Battler_Emerge` (`src/data.c:144-149`) and `gBallOpenFadeColors[BALL_POKE]` (`src/battle_anim_throw.c:371-374`). `affineEmerge.steps` mirror `AFFINEANIMCMD_FRAME` verbatim: `duration=0` is an absolute accumulator overwrite, `duration=N>0` adds `xScale` once per tick for N ticks (§3b's own derivation - `x`/`yScale` are always equal here, no rotation, so only `xScale` is used by the renderer). */
+interface BattleAnimTablesAsset {
+  ballOpenFadeColor: { rgb8: RgbColor };
+  affineEmerge: { neutralScale: number; steps: { xScale: number; yScale: number; rotation: number; duration: number }[] };
+}
 
 const battleBg = battleBgAsset as BattleBgAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -419,6 +431,7 @@ const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponent
 const sendOutHealthboxOpponent = sendOutHealthboxOpponentAsset as SendOutHealthboxContentAsset;
 const summaryBall = summaryBallAsset as SummaryBallAsset;
 const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
+const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 
@@ -1010,6 +1023,48 @@ function drawSpriteSheet(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], 
   }
 }
 
+/**
+ * Mechanism 4 (§7.5/§7.11, `docs/battle-anim-assets.md` §3): this engine's
+ * first affine-OAM scale renderer - nearest-neighbor, the same shape
+ * `ConvertScaleParam`/the GBA's own affine sprite hardware uses (`src/
+ * sprite.c:1316-1319`): for a source-centered destination pixel offset
+ * `(rx,ry)`, the sampled source texel is `((rx*matrixParam) >> 8 +
+ * halfWidth, (ry*matrixParam) >> 8 + halfHeight)`, `matrixParam = 0x10000 /
+ * accumulator` (truncating integer division, same as the GBA's own u16
+ * matrix register). Every opaque source texel draws as a flat `tintColor`
+ * (not the sprite's own palette) - correct only for `BlendPalette`
+ * coefficient 16 (fully blended, see `MATERIALIZE_TINT_*` below); this
+ * primitive does not itself model a partial blend. `accumulator` must be
+ * <=`neutralScale` (this mechanism only ever shrinks the sprite, never
+ * magnifies it - see `affineEmergeAccumulator`), so scanning the sprite's
+ * own unscaled bounding box (no `ST_OAM_AFFINE_DOUBLE` doubling) is always
+ * sufficient.
+ */
+function drawSpriteSheetAffineTinted(fb: Uint8Array, tileset: Tileset, ox: number, oy: number, accumulator: number, tintColor: RgbColor): void {
+  const w = tileset.columns * 8;
+  const h = tileset.rows * 8;
+  const halfW = w / 2;
+  const halfH = h / 2;
+  const matrixParam = Math.trunc(0x10000 / accumulator);
+  for (let dy = 0; dy < h; dy += 1) {
+    const ry = dy - halfH;
+    const sy = ((ry * matrixParam) >> 8) + halfH;
+    if (sy < 0 || sy >= h) continue;
+    const tileRow = Math.floor(sy / 8);
+    const inTileY = sy % 8;
+    for (let dx = 0; dx < w; dx += 1) {
+      const rx = dx - halfW;
+      const sx = ((rx * matrixParam) >> 8) + halfW;
+      if (sx < 0 || sx >= w) continue;
+      const tile = tileset.tiles[tileRow * tileset.columns + Math.floor(sx / 8)];
+      if (!tile) continue;
+      const idx = tile[inTileY * 8 + (sx % 8)]!;
+      if (idx === 0) continue;
+      setPixel(fb, ox + dx, oy + dy, tintColor);
+    }
+  }
+}
+
 /** Same as `drawSpriteSheet`, but clipped to the WIN0 vertical range (`WININ` includes `WIN0_OBJ` - OBJs are windowed too, module doc point 2). */
 function drawSpriteSheetWindowed(
   fb: Uint8Array,
@@ -1211,6 +1266,74 @@ function drawGrovyleSettled(fb: Uint8Array): void {
   drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
 }
 
+/**
+ * §7.5/§7.11 mechanism 4: Grovyle's materialize - `BATTLER_AFFINE_EMERGE`'s
+ * scale-in (`sAffineAnim_Battler_Emerge`, `docs/battle-anim-assets.md` §3b)
+ * plus `LaunchBallFadeMonTask(TRUE, ...)`'s flat ball-color tint
+ * (`gBallOpenFadeColors[BALL_POKE]`, §3a) - both start the same tick as the
+ * ball's own "open" frame (`BALL_OPEN_START_OFFSET`, mechanism 2). Window
+ * boundaries here are pixel-brute-force-confirmed against this trace's own
+ * regenerated ground truth (`tools/compare/scratch/probe_tint.mjs`,
+ * throwaway, not committed) by scanning for the exact-tint RGB
+ * (255,181,247) - not assumed from `battle-anim-assets.md`'s own
+ * (different-trace) ticks, though they land on the identical relative
+ * offsets, cross-trace-confirming the same mechanism: first visible tint
+ * pixel at **handoffTick+19 (1481)** - one tick after the ball's own open
+ * frame (handoffTick+18), the same 1-tick render-lag family as every other
+ * sprite/register in this window (checked first, per this run's own rule) -
+ * full mismatch/zero tint pixels at handoffTick+18 (1480) confirms it's not
+ * 1480. The tinted silhouette's bounding-box width grows monotonically for
+ * exactly 12 ticks (1481-1492: 15,23,31,41,49,57,62px at every other tick,
+ * an EXACT match to `battle-anim-assets.md` §4's own table from a different
+ * trace), matching `affineEmerge`'s `duration=12` step verbatim, then holds
+ * - so `affineEmergeAccumulator` is driven directly by the extracted table,
+ * not a fitted curve. **Hard cutoff at handoffTick+42 (1504)**: the
+ * exact-tint pixel count is non-zero and stable at every tick 1492-1503 (the
+ * mon is still a flat, fully-blended silhouette - `BlendPalette` coefficient
+ * 16 unchanged, matching `LaunchBallFadeMonTask`'s own `tCoeff=16` initial
+ * value and `Task_FadeMon_ToNormal`'s poll-and-wait gate before the 17-tick
+ * fade-to-normal even begins, `battle_anim_throw.c:2043-2054,2078-2102`),
+ * then hits exactly ZERO at 1504, not a gradual decline - this session did
+ * NOT reverse-engineer why the transition is a hard step rather than
+ * `Task_FadeMon_ToNormal_Step`'s own gradual 17-tick ramp (flagged as an
+ * open follow-up below; plausible causes include the front-sprite entrance
+ * animation, mechanism 5, replacing the sprite's own affine matrix/palette
+ * state at that exact tick - notably `SENDOUT_BG_FADE_Y`'s ramp-down also
+ * starts at this identical offset, `t-handoffTick=42`, which is NOT a
+ * coincidence: both are gated by the same `Task_FadeMon_ToNormal`
+ * `!gPaletteFade.active` poll per source, `:2078-2086`). Per this run's "no
+ * curve-fitting" rule, mechanism 4 simply stops rendering at the hard
+ * cutoff rather than guessing the fade-out curve - ticks 1504-1543 stay a
+ * known gap (mechanism 5's own window, unimplemented).
+ */
+const MATERIALIZE_START_OFFSET = 19;
+const MATERIALIZE_END_OFFSET = 42;
+const MATERIALIZE_TINT_COLOR = battleAnimTables.ballOpenFadeColor.rgb8;
+
+/** `sAffineAnim_Battler_Emerge`'s accumulator at `logicalOffset` ticks after the anim starts (0 = the tick it starts) - a generic reducer over `affineEmerge.steps` (`AFFINEANIMCMD_FRAME` semantics, `docs/battle-anim-assets.md` §3b), not hardcoded constants, so it stays correct if the extracted table ever changes. */
+function affineEmergeAccumulator(logicalOffset: number): number {
+  let acc = battleAnimTables.affineEmerge.neutralScale;
+  let consumed = 0;
+  for (const step of battleAnimTables.affineEmerge.steps) {
+    if (step.duration === 0) {
+      acc = step.xScale;
+      continue;
+    }
+    const stepsApplied = Math.min(step.duration, Math.max(0, logicalOffset - consumed));
+    acc += step.xScale * stepsApplied;
+    consumed += step.duration;
+    if (logicalOffset < consumed) break;
+  }
+  return Math.min(battleAnimTables.affineEmerge.neutralScale, acc);
+}
+
+function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number): void {
+  const et = t - handoffTick;
+  if (et < MATERIALIZE_START_OFFSET || et >= MATERIALIZE_END_OFFSET) return;
+  const accumulator = affineEmergeAccumulator(et - MATERIALIZE_START_OFFSET);
+  drawSpriteSheetAffineTinted(fb, grovyleFrontSprite.tileset, GROVYLE_CORNER.x, GROVYLE_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR);
+}
+
 /** §7.6: opponent healthbox content, translated by its slide-in `dx` - see `healthboxSlideDx`'s doc comment. Flat opaque rectangle (pixel-harvested asset), clipped to screen by `setPixel` same as every other sprite draw here. */
 function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
   const { x, y, width, height, pixels } = sendOutHealthboxOpponent;
@@ -1258,6 +1381,7 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   if (trainerX !== null) {
     drawSpriteSheet(fb, bugCatcher.tileset, bugCatcher.palette, trainerX, OPPONENT_CORNER.y);
   }
+  drawGrovyleMaterialize(fb, t, handoffTick);
   drawSendOutBall(fb, t, handoffTick);
   if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
   drawBallIcons(fb, t, { opponent: false, player: true });

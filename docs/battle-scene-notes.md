@@ -1158,3 +1158,85 @@ mechanism landing cannot flip a full-frame match on its own.
    plus the `Sin`-table wobble renderer and the still-open exact
    start-tick arithmetic (§7.11's own flagged follow-up) - the most
    expensive of the five, left last on purpose.
+
+### 7.13. Engine-slice session (PROGRESS.md #81): mechanism 4 (affine-scale-in + ball-color tint) landed, this engine's first affine-OAM scale renderer - score unchanged at 174/256 as predicted
+
+Implemented `drawGrovyleMaterialize`/`drawSpriteSheetAffineTinted`
+(`battleScene.ts`) - a nearest-neighbor GBA-affine-OAM-accurate renderer
+(`texCoord = ((rel*matrixParam) >> 8) + half`, `matrixParam = 0x10000 /
+accumulator`, the same `ConvertScaleParam` shape the hardware itself uses)
+driven directly by the already-extracted `battle-anim-tables.json` -
+`affineEmergeAccumulator` is a generic reducer over `affineEmerge.steps`
+(not hardcoded 40/18/12), and every opaque sampled texel draws as the flat
+`ballOpenFadeColor.rgb8` tint (a full `BlendPalette` coefficient-16
+silhouette, not a partial blend - correct for this mechanism's whole
+window, see below).
+
+**Window boundaries pixel-brute-force-confirmed against this trace's own
+regenerated ground truth** (scanning for exact-RGB tint pixels,
+`tools/compare/scratch/probe_tint.mjs`, throwaway): first visible tint
+pixel at **handoffTick+19 (1481)** - one tick after the ball's own open
+frame (handoffTick+18), the same 1-tick render-lag family already
+established for every other sprite/register in this window (checked first,
+per this run's own rule); zero tint pixels at handoffTick+18 (1480)
+confirms it's not that tick. The tinted silhouette's bounding-box width
+grows monotonically for exactly 12 ticks (1481-1492: **15,23,31,41,49,57,62px
+at ticks 1481/83/85/87/89/91/92** - an EXACT match to
+`docs/battle-anim-assets.md` §4's own table, harvested from a *different*
+trace, cross-confirming the same mechanism/timing), matching
+`affineEmerge`'s `duration=12` step verbatim - so the accumulator table is
+used as-is, not fitted. **Hard cutoff at handoffTick+42 (1504)**: exact-tint
+pixel count is non-zero and stable (coefficient 16 unchanged) at every tick
+1492-1503, then hits exactly zero at 1504 - not a gradual decline. Source
+read (`battle_anim_throw.c:2037-2102`): `LaunchBallFadeMonTask(TRUE,...)`
+sets `tCoeff=16` immediately and defers to `Task_FadeMon_ToNormal`, which
+just polls `!gPaletteFade.active` every tick and does nothing else until
+that clears - only then does it kick a *second* `BeginNormalPaletteFade`
+(BG, white->normal) and hand off to `Task_FadeMon_ToNormal_Step`'s own
+17-tick `tCoeff` ramp. `SENDOUT_BG_FADE_Y`'s own ramp-down (module doc,
+`battleScene.ts`) independently starts at this **identical** offset
+(`t-handoffTick=42`) - not a coincidence, since both are gated by the same
+`!gPaletteFade.active` poll per source. **Not reverse-engineered this
+session**: why the transition is a hard step at 1504 rather than
+`Task_FadeMon_ToNormal_Step`'s own gradual per-tick ramp starting there -
+plausible causes include the front-sprite entrance animation (mechanism 5)
+replacing the sprite's affine/palette state at that same tick. Flagged as
+an open follow-up, not guessed at - per this run's "no curve-fitting" rule,
+mechanism 4 simply stops rendering at the hard cutoff; ticks 1504-1543
+remain a known gap (mechanism 5's own window).
+
+**Compositing**: pixel-checked directly (tick 1481, corner-overlap region
+x168-184/y56-62) that the ball's own open-frame art draws **on top of** the
+tinted mon wherever both are opaked - `drawSendOutHandoff` now calls
+`drawGrovyleMaterialize` before `drawSendOutBall` to match.
+
+**Score effect, as predicted (§7.10/§7.12's structural finding, re-confirmed
+again)**: `sendout.json` stays **174/256**, full 19-trace sweep re-run
+against the live oracle, other 18 at exact prior counts, zero full-frame
+regressions. `localcheck.ts` pixel-diff mass across 1462-1543:
+**124762->106893px** (-17869px). Not every affected tick strictly
+improved: ticks 1481-1487 (the earliest, smallest-scale ticks, accumulator
+40-118 of 256) show a small increase (+41 to +101px each, mon-region-
+isolated diff confirms it's real, not measurement noise) - nearest-neighbor
+sampling quantization at extreme downscale of a non-rectangular silhouette,
+not a placement/table bug (the bounding-box width numbers above are exact);
+ticks 1488-1503 improve substantially (up to -1071px at 1492). None of the
+regressed ticks were full-frame matches before or after, so the "zero
+currently-matching frames regressing" acceptance bar holds; flagged
+honestly here as a known, minor, unresolved imperfection rather than
+silently claimed as strictly-monotonic.
+
+**Remaining for `sendout.json` toward 256/256, mechanism 4 now struck
+through:**
+1. Opponent party-status-summary despawn fade (§7.4.3) - still not even
+   source-timed precisely; needs fresh RAM/pixel work.
+2. ~~Ball sprite draw~~ - done (§7.12).
+3. Open-particle burst (§7.7 point 3 / `docs/battle-anim-assets.md` §1) -
+   tiles/palette/anim-frame-table already extracted; needs a new radial
+   spawn+`Sin`/`Cos`-motion renderer.
+4. ~~Mon affine-scale-in + ball-color tint~~ - done this session (above).
+5. Front-sprite entrance anim (`ANIM_V_STRETCH`) - needs GROVYLE's 2nd
+   front-sprite frame extracted, the `Sin`-table wobble renderer (can reuse
+   this session's affine-scale primitive, `drawSpriteSheetAffineTinted`'s
+   matrix math, for its own affine transform), and the still-open exact
+   start-tick arithmetic - the most expensive of the five, left last.

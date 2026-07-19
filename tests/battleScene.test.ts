@@ -335,4 +335,23 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(before).not.toEqual([66, 66, 66]);
     expect(afterOpen).not.toEqual([66, 66, 66]);
   });
+
+  // §7.5/§7.11 mechanism 4 (PROGRESS.md): the materialize affine-scale-in +
+  // ball-color tint. GROVYLE_CORNER+(32,32) is the sprite's exact center
+  // (tile 36, pixel (0,0), palette index 3, opaque) - a destination pixel
+  // that stays opaque across every accumulator in `affineEmerge`'s table
+  // (near-zero relative offset maps close to source-center regardless of
+  // scale), so it's a clean signal for the tint window's own boundaries
+  // without depending on the scale-in's exact per-tick bounding box.
+  it("Grovyle's materialize tint (flat RGB(255,181,247)) is absent before handoff+19 (1481), present through handoff+41 (1503), then a hard cutoff at handoff+42 (1504) (§7.5/§7.11 mechanism 4)", () => {
+    const TINT: [number, number, number] = [255, 181, 247];
+    const before = pixelAtSentOut(1480, GROVYLE_CORNER.x + 32, GROVYLE_CORNER.y + 32);
+    const first = pixelAtSentOut(1481, GROVYLE_CORNER.x + 32, GROVYLE_CORNER.y + 32);
+    const last = pixelAtSentOut(1503, GROVYLE_CORNER.x + 32, GROVYLE_CORNER.y + 32);
+    const after = pixelAtSentOut(1504, GROVYLE_CORNER.x + 32, GROVYLE_CORNER.y + 32);
+    expect(before).not.toEqual(TINT);
+    expect(first).toEqual(TINT);
+    expect(last).toEqual(TINT);
+    expect(after).not.toEqual(TINT);
+  });
 });
