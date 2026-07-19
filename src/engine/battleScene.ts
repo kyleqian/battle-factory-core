@@ -313,6 +313,8 @@ import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { ty
 import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
 import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import sendOutHealthboxOpponentAsset from "../assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
+import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
+import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 
@@ -383,6 +385,17 @@ interface SendOutHealthboxContentAsset {
   height: number;
   pixels: number[];
 }
+/** Full `poke.png` sheet (2 cols x 6 rows = all 3 16x16 frame slots) - `extract-summary-screen.ts` only ever *uses* rows 0-1 (the closed-ball icon), but extracts the whole sheet incidentally. */
+interface SummaryBallAsset {
+  tileset: Tileset;
+  palette: RgbColor[];
+}
+/** `extract-battle-anim-assets.ts` §2: `poke.png` frame slots 1 ("open") and 2 (blank) - rows 0-1 of `tileset` are slot 1, rows 2-3 are slot 2. */
+interface BattleAnimBallOpenAsset {
+  frames: string[];
+  tileset: Tileset;
+  palette: RgbColor[];
+}
 
 const battleBg = battleBgAsset as BattleBgAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -393,6 +406,8 @@ const downArrow = downArrowAsset as DownArrowAsset;
 const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAsset }).ballStatusBar;
 const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
 const sendOutHealthboxOpponent = sendOutHealthboxOpponentAsset as SendOutHealthboxContentAsset;
+const summaryBall = summaryBallAsset as SummaryBallAsset;
+const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 
@@ -897,6 +912,60 @@ function healthboxSlideDx(t: number): number | null {
   return HEALTHBOX_SLIDE_START_DX + HEALTHBOX_SLIDE_STEP * (t - HEALTHBOX_SLIDE_START_TICK);
 }
 
+/**
+ * §7.4.2/§7.11 mechanism 2: the send-out ball sprite - `StartSendOutAnim`
+ * creates it at `GetBattlerSpriteCoord(battler, BATTLER_COORD_X)`,
+ * `GetBattlerSpriteCoord(battler, BATTLER_COORD_Y)+24` (`pokeball.c:389-395`),
+ * closed, then `SpriteCB_OpponentMonSendOut` idles 16 ticks
+ * (`pokeball.c:991-1003`) before `SpriteCB_ReleaseMonFromBall` fires
+ * `StartSpriteAnim(sprite, 1)` -> `sBallAnimSeq1`
+ * (`ANIMCMD_FRAME(4,5)` open, `ANIMCMD_FRAME(8,5)` blank,
+ * `docs/battle-anim-assets.md` §2). Position and every tick boundary here are
+ * pixel-brute-force-confirmed against this trace's own regenerated ground
+ * truth (not assumed from the other trace `battle-anim-assets.md` used, nor
+ * from summing the source constants) - `tools/compare/scratch/find_ball.mjs`/
+ * `ball_ticks.mjs` (throwaway, not committed): the closed frame at corner
+ * (168,56) is a ZERO-diff pixel match at every tick 1464-1479 (16 ticks,
+ * matching the source-cited wait exactly) and a full mismatch at every tick
+ * 1460-1463 before it (confirming 1464 = handoffTick+2 as the true first-
+ * visible tick, not handoffTick+0). The "open" frame is a ZERO-diff exact
+ * match at 1480 (handoffTick+18), degrading tick-by-tick from 1481 on as the
+ * particle burst and the emerging mon (both still unrendered) increasingly
+ * occlude that screen region - not evidence the frame itself is wrong, since
+ * the underlying content that WOULD be occluding it isn't drawn yet either.
+ * By 1491 the region no longer resembles either frame at all (mon fully
+ * emerged over it) - matching `sBallAnimSeq1`'s 5-tick open + 5-tick blank
+ * (blank = zero opaque pixels, i.e. nothing left to draw) followed by
+ * `HandleBallAnimEnd` destroying the sprite once both anims finish. Net:
+ * only "closed" (1464-1479) and "open" (1480-1484) ever need a draw call;
+ * blank/destroyed (1485+) is a no-op.
+ */
+const BALL_CORNER = { x: 168, y: 56 };
+const BALL_CLOSED_START_OFFSET = 2;
+const BALL_OPEN_START_OFFSET = 18;
+const BALL_INVISIBLE_START_OFFSET = 23;
+
+function subTileset(tileset: Tileset, tileRowOffset: number, rows: number): Tileset {
+  return {
+    columns: tileset.columns,
+    rows,
+    tiles: tileset.tiles.slice(tileRowOffset * tileset.columns, (tileRowOffset + rows) * tileset.columns),
+  };
+}
+
+const BALL_CLOSED_TILESET = subTileset(summaryBall.tileset, 0, 2);
+const BALL_OPEN_TILESET = subTileset(battleAnimBallOpen.tileset, 0, 2);
+
+function drawSendOutBall(fb: Uint8Array, t: number, handoffTick: number): void {
+  const et = t - handoffTick;
+  if (et < BALL_CLOSED_START_OFFSET || et >= BALL_INVISIBLE_START_OFFSET) return;
+  if (et < BALL_OPEN_START_OFFSET) {
+    drawSpriteSheet(fb, BALL_CLOSED_TILESET, summaryBall.palette, BALL_CORNER.x, BALL_CORNER.y);
+  } else {
+    drawSpriteSheet(fb, BALL_OPEN_TILESET, battleAnimBallOpen.palette, BALL_CORNER.x, BALL_CORNER.y);
+  }
+}
+
 // --- rendering ----------------------------------------------------------
 
 function setPixel(fb: Uint8Array, x: number, y: number, c: RgbColor): void {
@@ -1178,6 +1247,7 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   if (trainerX !== null) {
     drawSpriteSheet(fb, bugCatcher.tileset, bugCatcher.palette, trainerX, OPPONENT_CORNER.y);
   }
+  drawSendOutBall(fb, t, handoffTick);
   if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
   drawBallIcons(fb, t, { opponent: false, player: true });
   const healthboxDx = healthboxSlideDx(t);

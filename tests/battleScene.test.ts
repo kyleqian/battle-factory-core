@@ -314,4 +314,25 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     const stillIdle = pixelAt(1300, playerBar.player.x + 4, 96 + 4);
     expect(atBar).toEqual(stillIdle);
   });
+
+  // §7.4.2/§7.11 mechanism 2 (PROGRESS.md): the send-out ball sprite, pixel-
+  // brute-force-confirmed against this trace's own regenerated ground truth
+  // (tools/compare/scratch/{find_ball,ball_ticks}.mjs, throwaway, not
+  // committed) - corner (168,56), closed frame ZERO-diff exact 1464-1479,
+  // open frame ZERO-diff exact at 1480. Screen (174,58) = corner+(6,2) is
+  // opaque gray (idx7, both palettes coincidentally (66,66,66)) in the
+  // CLOSED frame's tile but transparent (idx0) in the OPEN frame's tile at
+  // the same offset - a clean three-state signal (background -> gray ->
+  // background-again) pinning both boundary ticks without hand-picking a
+  // background color.
+  it("send-out ball: closed frame appears at handoff+2 (tick 1464, not the handoff tick itself) and is replaced by the (locally transparent) open frame at handoff+18 (tick 1480) (§7.4.2/§7.11)", () => {
+    const before = pixelAtSentOut(1463, 174, 58);
+    const closed = pixelAtSentOut(1464, 174, 58);
+    const stillClosed = pixelAtSentOut(1479, 174, 58);
+    const afterOpen = pixelAtSentOut(1480, 174, 58);
+    expect(closed).toEqual([66, 66, 66]);
+    expect(stillClosed).toEqual([66, 66, 66]);
+    expect(before).not.toEqual([66, 66, 66]);
+    expect(afterOpen).not.toEqual([66, 66, 66]);
+  });
 });
