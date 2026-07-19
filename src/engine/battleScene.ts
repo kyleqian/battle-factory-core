@@ -15,6 +15,23 @@
 // A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
 // state rather than a phase enum (see the field's own doc comment).
 //
+// STATUS (docs/battle-menu-notes.md §1/§2, S6 PLAYER SEND-OUT slice 1): the
+// message-box clear + "Go! ONIX!" print + settled static hold (trace ticks
+// 1563-1594) is landed - see `battleMenu.ts` for the cadence logic, hooked
+// in at the bottom of `drawSendOutHandoff` below. `tools/compare/traces/
+// menu-text.json` (every tick 1556-1594) is **18/39** - ticks 1556-1573
+// (the settled "sent\nout GROVYLE!" hold through this slice's own static
+// hold) are bit-exact, but 1574-1594 diverge for a reason OUTSIDE this
+// slice's scope: pixel-diffing the oracle's own consecutive frames shows
+// Brendan's throw-pose swap + a ball-icon-count change genuinely begin at
+// trace tick **1574** (re-derived this session, oracle-confirmed), not
+// "~1595" as docs/battle-menu-notes.md §1's own coarse pass estimated - the
+// same kind of few-to-20-tick coarse-pass underestimate flagged elsewhere in
+// that doc, just larger here. Modeling that (Brendan's throw animation/ball
+// arc) is explicitly out of scope for this slice (unextracted assets per
+// docs/battle-menu-notes.md §6: ball-open particles, affine emerge + color-
+// fade tables) - flagged for the next slice/supervisor rather than forced.
+//
 // STATUS (docs/battle-scene-notes.md §7.19): the party-summary bar's own
 // exit slide (§7.15's flagged sub-gap) is landed - `barExitX2`/
 // `EXIT_BAR_TILE_ORDER` in `drawOpponentSummaryExit`, source-decoded from
@@ -388,6 +405,7 @@
 import type { RgbColor } from "./bg.ts";
 import { drawText, type FontData } from "./font.ts";
 import { blendComponentToWhite } from "./paletteFade.ts";
+import { GO_TEXT, GO_TEXT_START_TICK, goTextVisibleChars } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
@@ -1949,7 +1967,15 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   const healthboxDx = healthboxSlideDx(t);
   if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, SENDOUT_LINE1, SENDOUT_LINE2, SENDOUT_TEXT_TOTAL);
+  // battleMenu.ts §1/§2: the box clears (no blank-box frame - a bare
+  // `drawTileBg` above already redraws it empty) and "Go! ONIX!" starts
+  // printing the same tick the opponent's held "sent\nout GROVYLE!" text
+  // would otherwise still be drawn.
+  if (t >= GO_TEXT_START_TICK) {
+    drawMessageTextLines(fb, GO_TEXT, "", goTextVisibleChars(t));
+  } else {
+    drawMessageTextLines(fb, SENDOUT_LINE1, SENDOUT_LINE2, SENDOUT_TEXT_TOTAL);
+  }
 }
 
 /**
