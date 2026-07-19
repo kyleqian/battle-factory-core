@@ -966,3 +966,284 @@ idle cycle).
 value each run. `npm test` and `npm run build` green (no `src/` changes
 this section — oracle/probe/docs only, per the worktree brief's scope).
 
+## 12. Turn 2 ground truth (S7 worktree lane, oracle scout — no engine code)
+
+Extends the canonical `battle1-turn1.json` prefix (v5, 2900 frames, §9) past
+turn 1's resettled action menu into a full second turn: player picks
+**Onix's DRAGON_BREATH** (move slot 2, §11's cursor-grid mapping
+`0=ROCK_SLIDE,1=BIND,2=DRAGON_BREATH,3=SANDSTORM`, one `DOWN` press from the
+cursor's slot-0 resting position toggles bit1 directly to slot 2 — no
+diagonal nav needed). The opponent's move is AI-picked, not scripted;
+discovered from RAM (not assumed) to be **ENDEAVOR** (`gLastMoves[1]`=283),
+exactly matching §8 point 1's own falsifiable prediction from the prior
+session's turn-end tie-break decode.
+
+**Committed artifacts**: `tools/compare/traces-groundtruth/battle1-turn2.json`
+(prefix's 44 segments, 2900 frames, byte-for-byte identical — its own tick
+2900 capture sha `0269314e68ff...` matches `battle1-turn1.json`'s own final
+capture exactly, directly re-verified this session — **plus 6 new
+segments**: `A`(2f, open FIGHT), idle(30f), `DOWN`(2f, cursor 0→2), idle(10f),
+`A`(2f, confirm DRAGON_BREATH), idle(900f, full turn resolution + settle
+margin) — total **3846 frames**, 221 dense/strided `captureFrames` (under
+the 256 cap, one file). `src/data/gen/battle1-turn2-ram-dump.json` (953
+per-tick rows, ticks 2894-3846, same column convention as
+`battle1-turn1-ram-dump.json` plus `status1_0`/`status1_1` columns for the
+paralysis check). **Both twice-run byte-identical**: the trace via
+`bin/oracle run` (0 sha mismatches across all 221 captures, both runs); the
+RAM dump via `tools/probe/ram-probe.py` + `tools/probe/dump-battle-bars.py`
++ `tools/probe/dump-battler-snapshot.py` + `tools/probe/dump-ai-and-hitmarker.py`
+(all four re-run independently, diffed byte-for-byte against the committed
+dump — 0 mismatches). No new probe tooling needed — all four scripts are
+the same ones §6/§9 already committed. No `src/engine/` changes.
+
+### Frame boundaries and RNG ledger
+
+All ticks below are this trace's own absolute indices (shared numbering
+with `battle1-turn1.json` through tick 2900, since the prefix is identical).
+
+| tick | event |
+|---|---|
+| 2894-2900 | settled post-turn-1 action menu (identical to §9's own tail) |
+| 2901-2907 | `A` opens the FIGHT submenu (DMA-wait hold, same shape as §11 finding 1) |
+| 2908-2932 | submenu settled, idle-cycling on ROCK_SLIDE (cursor's resting slot from turn 1's own choice) — PP now **9/10** (one use), pixel-confirmed at tick 2911 |
+| 2933-2934 | `DOWN` pressed — `gMoveSelectionCursor` 0→2 same-tick (§11's cursor-write convention); pixel content (DRAGONBREATH highlighted, PP 20/20, TYPE/DRAGON) confirmed at tick 2940 |
+| 2945-2946 | `A` confirms DRAGON_BREATH |
+| 2948-2950 | `mainFunc` transitions (3 ticks, same shape as turn 1's own menu-dismiss); `attacker`→1 (Grovyle acts first — turn order unchanged, see below) |
+| 2951 | `gCurrentMove`→283 (**MOVE_ENDEAVOR**, Grovyle's moveset slot 1: FURY_CUTTER/**ENDEAVOR**/BRICK_BREAK/DOUBLE_TEAM) |
+| 2955-2960ish | "Foe GROVYLE used\nENDEAVOR!" text prints (partial text pixel-confirmed at tick 2955, full text at tick 3135 alongside Onix's already-updated 101/117 HP) |
+| 2981 | `gBattleMoveDamage`→16 (`setdamagetohealthdifference`: Onix.hp(117) − Grovyle.hp(101), **not** the normal damage calc — see below) |
+| 2983 | **ENDEAVOR's accuracy-check roll** (1 step) — always passes (`calc=100`, no roll can exceed it) |
+| 2984 | `gBattleMoveDamage` 16→**8** (`typecalc`'s type-effectiveness step: ENDEAVOR is NORMAL, Onix is ROCK/GROUND — ROCK gives 0.5×, GROUND is neutral, combined 0.5×; no RNG cost) |
+| 2987 | `gBattleMoveDamage` 8→**16** (`copyword gBattleMoveDamage, gHpDealt` restores the real HP-diff — type effectiveness only gates the `jumpifmovehadnoeffect` immunity check for this effect, never scales the actual damage dealt) |
+| 3098 | Onix's HP-bar sentinel (`-32768`) |
+| 3099-3114 | HP-bar drains 116→101 (16 ticks, 16 damage — same 1-unit/tick rule as §5/§9) |
+| 3115 | bar "done" sentinel (0) |
+| 3116 | `gBattleMons[0].hp` itself updates to **101** (1-tick lag, same rule) |
+| 3121 | **unattributed 1-step RNG event** — occurs after Onix's hp updates, before Grovyle's `gLastMoves[]` bookkeeping write; call site not identified this session (flagged below, §12 needs list) |
+| 3126 | `gLastMoves[1]`→283 (ENDEAVOR bookkeeping write) |
+| 3128 | `gBattlerTarget` 0→1 |
+| 3129-3130 | `gCurrentMove`→225 (**MOVE_DRAGON_BREATH**), `gBattlerAttacker`→0 (Onix acts) |
+| 3135 | **DRAGON_BREATH's accuracy roll** (1 step) |
+| ~3140-3170 | "ONIX used\nDRAGONBREATH!" text + attack animation window (pixel-confirmed at ticks 3170/3306) |
+| 3161 | **crit roll** (1 step) |
+| 3162 | `gBattleMoveDamage` locks to **15** (post-damagecalc, pre-STAB/type) |
+| 3163 | STAB/type step — no change (no STAB, DRAGON-vs-GRASS neutral, no table entry) |
+| 3164 | **damage-spread roll** (1 step); `gBattleMoveDamage` locks to **13** |
+| 3298 | Grovyle's HP-bar sentinel (`-32768`) |
+| 3299-3311 | HP-bar drains 100→88 (13 ticks, 13 damage) |
+| 3312 | bar "done" sentinel (0) |
+| 3313 | `gBattleMons[1].hp` itself updates to **88** (1-tick lag, same rule) |
+| 3318 | **secondary-effect (30% paralysis) roll** (1 step) — does **not** proc (see below) |
+| 3323 | `gLastMoves[0]`→225 (DRAGON_BREATH bookkeeping write) |
+| 3326-3328 | turn-end bookkeeping begins; `BattleTurnPassed`'s `gRandomTurnNumber` roll (1 step) |
+| 3333 | `ShouldSwitch()` group resolves (2 steps — same step count as §8 point 1's turn-1 finding) |
+| 3335 | `BattleAI_SetupAIData`+tie-break group resolves (5 steps — same structure as §8 point 1) |
+| ~3340-3846 | next (turn 3) action menu settles and idles stably through the trace's end (pixel-confirmed at tick 3846: "What will ONIX do?", Onix 101/117) |
+
+**RNG ledger total: 14 `Random()` calls this turn** (1 ENDEAVOR-accuracy + 1
+unattributed + 1 DRAGON_BREATH-accuracy + 1 crit + 1 spread + 1 secondary +
+1 turn-pass + 2 ShouldSwitch + 5 AI-setup/tie-break). Every step count is an
+LCG-distance replay (not just call-counted), programmatically verified
+against the committed dump's own `gRngValue` column — see the dump's own
+`rngLedger` field. This is 2 more than turn 1's 12: ENDEAVOR's own
+always-passing accuracy check (turn 1's DOUBLE_TEAM, being self-targeted,
+skipped `accuracycheck` entirely and cost 0 — §3) plus the one unattributed
+step at tick 3121.
+
+**Turn order unchanged**: `gBattlerByTurnOrder`=`[1,0]` (Grovyle before
+Onix) — same plain speed comparison as turn 1 (§4), no stat/status change
+affects either battler's speed this turn.
+
+### Damage math, hand-worked against `damageCalc.ts`
+
+**Grovyle's move (ENDEAVOR, `EFFECT_ENDEAVOR`)** does **not** exercise
+`calculateBaseDamage` at all — confirmed by source
+(`data/battle_scripts_1.s:2479-2491`, `BattleScript_EffectEndeavor`) and by
+the RAM trace: `setdamagetohealthdifference` sets `gBattleMoveDamage` (via
+`gHpDealt`) directly to `attacker_target.hp − user.hp` = 117−101 = **16**,
+with no `Cmd_damagecalc`/STAB/spread roll in its path. `typecalc` still
+runs afterward (for its `jumpifmovehadnoeffect` immunity gate) and visibly
+scales `gBattleMoveDamage` by the type multiplier (16→8, confirmed
+NORMAL-vs-ROCK/GROUND = 0.5×: `src/data/gen/type-effectiveness.json` has a
+`TYPE_NORMAL`/`TYPE_ROCK` entry at `multiplierTenths:5` and no
+`TYPE_NORMAL`/`TYPE_GROUND` entry (neutral 1×), combining to 0.5× overall),
+but the script's
+very next command (`copyword gBattleMoveDamage, gHpDealt`) **overwrites
+that scaled value with the original HP-diff (16)** before it's ever
+applied — i.e. type effectiveness gates whether ENDEAVOR *works* at all,
+never how much damage it deals. `gBattleMons[0].hp` (Onix) does drop by
+exactly 16 (117→101), matching `gHpDealt`, not the type-scaled 8. **This is
+a genuinely different code path from `damageCalc.ts`'s ported formula** — a
+future engine slice implementing `EFFECT_ENDEAVOR` needs its own
+HP-difference function, not a `calculateBaseDamage` call with a fake power
+value.
+
+**Onix's move (DRAGON_BREATH, slot 2)**: `power: 60`, `type: TYPE_DRAGON`,
+`accuracy: 100`, `effect: EFFECT_PARALYZE_HIT`, `secondaryEffectChance: 30`
+(`src/data/gen/moves.json`). **TYPE_DRAGON is a *special*-split type**
+under gen 3's type-based (not move-based) physical/special split
+(`isTypeSpecial`, `damageCalc.ts` — `TYPE_DRAGON=16 > TYPE_MYSTERY=9`), so
+this exercises the **special branch** of `calculateBaseDamage`, not yet
+RAM-verified by any prior battle-1 fixture (§8 point 2 flagged this as a
+gap — closed by this session for the special branch specifically, still
+open for the rest of the item/weather modifier chain per §7's original
+inventory).
+
+```
+base   = floor(floor(spAttack * power * (2*level/5 + 2)) / spDefense) / 50 + 2
+       = floor(floor(36 * 60 * 22) / 71) / 50 + 2      (Onix spA=36, Grovyle spD=71, both RAM-confirmed unchanged since turn 1)
+       = floor(floor(47520) / 71) / 50 + 2
+       = floor(669.29..) / 50 + 2
+       = floor(13.38) + 2 = 13 + 2 = 15
+```
+
+Matches the RAM-read pre-STAB `gBattleMoveDamage=15` (tick 3162) **bit-exactly**,
+confirming the `+2`-corrected formula (§10) reproduces this fresh roll too,
+not just Rock Slide's. No STAB (Onix is ROCK/GROUND, move is DRAGON). Type
+effectiveness: DRAGON vs GRASS (Grovyle) has no `type-effectiveness.json`
+entry — neutral, matching the observed flat tick 3163 (no change between
+the pre-STAB value and the spread roll).
+
+**Every RNG roll this turn independently LCG-decoded and hand-verified
+against `damageCalc.ts`'s exported functions** (raw `Random()` u16 outputs
+decoded via the exact same `GbaRng`-equivalent LCG the committed dump's
+`gRngValue` column uses, replayed by hand for this dossier — not asserted,
+computed):
+
+| roll | `gRngValue` transition | raw `Random()` u16 | `damageCalc.ts` call | result |
+|---|---|---|---|---|
+| DRAGON_BREATH accuracy | `1916845633`→`114241568` | 1743 | `calculateAccuracy({moveAccuracy:100, attackerAccuracyStage:6, targetEvasionStage:7, targetHoldEffect:"HOLD_EFFECT_EVASION_UP", targetHoldEffectParam:10})`→`calc=67`; `rollAccuracyHits(67, 1743)` | **true** (hits) — matches (no miss observed) |
+| crit | `114241568`→`1604427283` | 24481 | `rollIsCriticalHit(0, 24481)` (24481%16=1≠0) | **false** — matches `gCritMultiplier=1` |
+| damage spread | `1604427283`→`195852426` | 2988 | `applyRandomDamageMultiplier(15, 2988)` (pct=100−(2988%16)=88, floor(15×88/100)) | **13** — matches `gBattleMoveDamage` locking to 13 bit-exactly |
+| secondary (paralysis, 30%) | `195852426`→`3387277109` | 51685 | `51685 % 100 = 85`, `85 < 30` → | **false** (no proc) — matches `status1` staying 0 on both battlers the entire trace |
+| ENDEAVOR accuracy | `4098214719`→`2002721862` | 30559 | `calculateAccuracy` for acc=100/neutral stages → `calc=100`; any roll passes | **true** (always) |
+
+**Paralysis does not proc on this seed** — `gBattleMons[1].status1` (Grovyle,
+the target) and `gBattleMons[0].status1` (Onix) both read `0` at every
+single sampled tick 2894-3846 (confirmed via the committed dump's
+`status1_0`/`status1_1` columns). This is a fair, representative outcome
+for a 30%-chance roll landing 85/100 — not a cherry-picked seed; recorded as
+what actually happened, per the brief ("either way is fine, record what
+IS").
+
+**Battler stat blocks unchanged from turn 1** (`tools/probe/dump-battler-snapshot.py`,
+ticks 2894/3846 — species/stats identical to §5's table, only HP moves):
+Onix 117→101 (ENDEAVOR's 16), Grovyle 101→88 (DRAGON_BREATH's 13). Grovyle's
+evasion stage stays at **7** (DOUBLE_TEAM's turn-1 stage boost persists
+across turns, RAM-confirmed flat the entire trace — stat stages don't reset
+turn-to-turn absent a switch or a stage-resetting effect) — directly
+relevant since it's still cutting Onix's accuracy roll this turn exactly as
+it did in turn 1.
+
+### Text and timing
+
+"Foe GROVYLE used\nENDEAVOR!" and "ONIX used\nDRAGONBREATH!" both print
+using the same `STRINGID_USEDMOVE` template §7 item 4 already extracted and
+pixel-cross-checked (`{B_ATK_NAME_WITH_PREFIX} used\n{B_BUFF2}`) — visually
+confirmed at ticks 3135 and 3170/3306 respectively (both full-text, mid-hold
+frames), move/species names resolving through the same already-extracted
+`moves.json`/`species-names.json` pipeline, no new template needed. FIGHT
+submenu pixel content re-confirmed consistent with §11: ROCK_SLIDE's PP
+reads **9/10** at the reopen (one PP consumed by turn 1's use), DRAGON_BREATH
+shows PP **20/20** (unused before this turn) with `TYPE/DRAGON` in the
+corner.
+
+**Phase timeline**: menu→submenu open (2894-2908, 14 ticks) → cursor nav +
+confirm (2908-2950, 42 ticks) → Grovyle's ENDEAVOR resolves including its
+own HP-bar drain (2950-3116, 166 ticks, dominated by the anim + 16-tick
+drain) → inter-move bookkeeping (3116-3130, 14 ticks) → Onix's DRAGON_BREATH
+resolves including its own HP-bar drain (3130-3313, 183 ticks, dominated by
+anim + 13-tick drain) → turn-end RNG cluster (3313-3340, 27 ticks) → next
+menu settle-and-hold (3340-3846, 506 ticks, pixel-stable). Total turn-2
+wall-clock (menu-open to next-menu-settle): **~446 ticks** of actual
+resolution (2900→3340ish) versus turn 1's own **~686 ticks** (1886→2586,
+handshake §9) — turn 2 is faster mainly because ENDEAVOR's own attack
+animation is a plain generic hit (no move-specific animation asset the way
+ROCK_SLIDE's falling-rocks or DOUBLE_TEAM's clone-blend were), and neither
+move this turn triggers a stat-stage banner (§9's own DOUBLE_TEAM banner
+added +66 ticks turn 1 had that turn 2 doesn't).
+
+**Bonus falsifiable prediction (mirrors §8 point 1's own convention)**: the
+tick-3335 tie-break group's 5 individual raw rolls were also hand-decoded
+(same LCG, not committed as a new probe): `100−(Random()%16)` four times
+(11,12,10,9 → simulated scores, unused since `aiFlags=0` still holds this
+challenge — reconfirmed via `dump-ai-and-hitmarker.py`, all 4 moves tied at
+the default 100) then `Random()%4=1` for the final tie-break. If this
+dossier's own moveset-order assumption holds (same as §8 point 1's), this
+predicts Grovyle uses **ENDEAVOR again** on turn 3 (slot 1) — checkable by
+a future session extending this trace further. Not independently re-derived
+from `ShouldSwitch()`'s branch-by-branch source trace the way §8 point 1
+did for turn 1 (time-boxed this session) — the 2-step/5-step *counts*
+matching turn 1's structure exactly is taken as strong (not proven)
+evidence the same code paths fired, not re-verified branch-by-branch for
+this turn's specific state (Grovyle 88/143, evasion+1, vs. Onix 101/117).
+
+### What slice E (turn-2 engine) needs — pinned vs. open
+
+**Pinned this session:**
+- Full second-turn button sequence (FIGHT submenu reopen when the cursor
+  isn't at its default slot-0 rest position — confirmed the cursor stays
+  wherever the *previous* turn left it, not a scripted reset, since turn 1's
+  own choice was also slot 0 and this session never observed a reset event).
+- `EFFECT_ENDEAVOR`'s complete mechanic: HP-difference formula, its
+  interaction with `typecalc` (type effectiveness gates immunity only, then
+  gets overwritten), and its own 1-step always-passing accuracy roll —
+  ready to port as a distinct function from `calculateBaseDamage`.
+- `calculateBaseDamage`'s **special branch**, bit-exact against a real
+  RAM-observed roll for the first time (turn 1 only exercised the physical
+  branch) — no changes needed to `damageCalc.ts`, it already ports both
+  branches structurally (§10), this just adds the special-branch fixture.
+- `EFFECT_PARALYZE_HIT`'s secondary-effect shape, confirmed identical to
+  `EFFECT_FLINCH_HIT`'s (`Cmd_seteffectwithchance`, `Random()%100 < chance`,
+  1 RNG step) — the two effects differ only in which status/volatile flag
+  `SetMoveEffect` applies, not in the roll mechanics.
+- Cross-turn stat-stage persistence (evasion stage 7 carries from turn 1
+  into turn 2 without any reset event) — relevant for any slice modeling
+  more than one turn.
+- A second independent RAM-confirmed sample of every "shape" §5/§9 already
+  established (HP-bar 1-unit/tick drain + 1-tick stat-update lag, cursor
+  same-tick-write/one-tick-later-redraw, turn-end 1+2+5 RNG cluster
+  structure) — reinforces these as general engine rules, not turn-1-only
+  coincidences.
+
+**Still open:**
+1. **Tick-3121's 1-step RNG event is unattributed** — same category as
+   §8 point 1 was before its own follow-up session resolved it; a future
+   session should source-trace `BattleScript_EffectEndeavor`'s continuation
+   past `adjustsetdamage` (`BattleScript_HitFromAtkAnimation` onward) and
+   Grovyle's specific `MOVE_END` item/status checks for this exact state to
+   find the call site.
+2. **The turn-3 tie-break prediction (ENDEAVOR again, slot 1) is
+   unverified** — this session's trace ends at the turn-3 menu settling,
+   before any turn-3 button is scripted. A future session extending this
+   trace (or a fresh one) can confirm or falsify it directly, the same way
+   this session confirmed §8 point 1's own turn-2 prediction.
+3. **`ShouldSwitch()`'s specific branch outcomes for turn 2's state**
+   (Grovyle 88/143, evasion+1, BRIGHT_POWDER, vs. Onix 101/117) were not
+   individually re-traced against source the way §8 point 1 did for turn
+   1's state — only the step *count* (2) was confirmed, by analogy. Low
+   risk (the count matches and DESTIN plainly doesn't switch, consistent
+   with either outcome), but not source-verified this session.
+4. **BIND, SANDSTORM (Onix) and BRICK_BREAK, FURY_CUTTER (Grovyle,
+   post-first-use) remain unprobed** — this session's scripted second turn
+   covers 1 more of Onix's 4 moves (DRAGON_BREATH) and Grovyle's AI picked
+   1 more of its own 4 (ENDEAVOR), leaving the same two Onix moves (BIND,
+   SANDSTORM) and now-2 Grovyle moves (FURY_CUTTER, BRICK_BREAK) still
+   without any RAM ground truth, per §8 point 2's original inventory
+   (updated: 5 of 8 distinct battle-1 moves now have ground truth across
+   both dossiers — ROCK_SLIDE, FURY_CUTTER, DOUBLE_TEAM, ENDEAVOR,
+   DRAGON_BREATH — versus the prior count of 3).
+5. **Murkrow and Pidgeotto still never battled** (§8 point 3, unchanged) —
+   this session's turn 2 stayed within the same Onix-vs-Grovyle pairing.
+6. **Special-branch coverage is now 1 fixture (DRAGON_BREATH) — still no
+   Reflect/Light Screen/burn/double-battle-split special-branch case**, all
+   of which remain structurally-ported-but-untested per §10's own inventory.
+
+**Verification**: `npm test` 631/631, `npm run build` green (no `src/engine/`
+changes this session — the only `src/` addition is the committed RAM dump
+under `src/data/gen/`, per the worktree brief's constraint). New trace
+twice-run, 0/221 sha mismatches. New RAM dump's 4 constituent probe runs
+each twice-run, byte-identical; the assembled dump file itself independently
+regenerated from each run's raw probe output and diffed byte-for-byte
+against the committed file — identical both times.
+
