@@ -4,6 +4,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 128 — Supervisor: Grovyle-faint ground truth merged (turns 3-5, KO + Pidgeotto switch-in) — suite **638/638**; round 8 = slice C (ROCK_SLIDE engine) + victory scout
+
+- **State (verified post-merge):** `npm test` **638/638**, `npm run build`
+  green, tree clean, no worktrees/branches. turn1-cloneanim re-verified
+  **230/230** on the merged tree (slice B complete).
+- **Did (worktree scout, verified then merged, conflict-free):**
+  `battle1-grovyle-faint.json` (7312 frames, 256 captures, twice-run 0
+  mismatch) + full RAM dump + `battle-turn-notes.md` §13 (turns 3-5
+  ledgers, faint timeline, 7-item open list). Headlines: DESTIN switches
+  in **PIDGEOTTO, not Murkrow** (party index 0→2 — a real AI decision,
+  rule unresolved); **a KO's message is button-gated** (control run froze
+  ~2996 ticks without an A press — every future script must press A at
+  KOs); turn-4 falsified §12's AI-repeat prediction (DOUBLE_TEAM, not
+  ENDEAVOR); Onix's Sitrus Berry auto-proc'd (player-side items
+  previously unmodeled); +2 formula re-confirmed on RAM intermediates.
+- **Next:** round 8 — main lane: slice C (ROCK_SLIDE window engine,
+  2193→~2515: move text, monbg Grovyle-hide, BG3 shake, 20 rocks,
+  hit-flash — all §9-pinned); worktree: victory scout (extend through
+  Murkrow+Pidgeotto KOs to the battle-1 WIN and whatever follows — S8's
+  swap-screen prep). Then slice D (drain/turn-end, closes #16's deferred
+  validation) next session if time runs out.
+
+---
 ## 127 — Bounded worker: **S7 slice B COMPLETE** — banner's real BG1 scroll extracted+composited, clone-edge residual root-caused to opponent-healthbox z-order — `turn1-cloneanim.json` **168/230 → 230/230**; suite 634 → **638/638**
 
 - **State:** `npm test` **638/638** (+4 Tier-1 pins), `npm run build` green,
@@ -65,52 +88,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   faint-to-victory ground-truth scout (extend the script through
   Grovyle's KO + Murkrow send-out — S7 tail + S8 prep). Then slice C/D.
 
----
-## 125 — Bounded worker: **S7 slice B convergence retry** — Gap 1 (clone motion) CLOSED via RAM probe, Gap 2 (banner) REFRAMED to a smaller source-confirmed residual — `turn1-cloneanim.json` **49/230 → 168/230**; suite 631 → **634/634**
-
-- **State:** `npm test` **634/634** (+3 Tier-1 pins), `npm run build` green,
-  tree clean. `tools/compare/traces/turn1-cloneanim.json` (unchanged, per
-  the brief) now **168/230** (was 49/230) - acceptance (230/230) not yet
-  met but both named gaps individually advanced per the brief's discipline.
-  Zero regressions: turn1-kickoff 81/81, fight-submenu 234/235, menu-idle
-  69/69, sendout 255/256, s6-acceptance 224/228 - all re-verified unchanged.
-- **Did:** new probe `tools/probe/dump-doubleteam-sprites.py` (identifies
-  the two clone sprites by `callback === AnimDoubleTeam`, `nm`-resolved
-  since it's `static`) dumped their `data[]`/`x2` every tick 1955-2200
-  directly off RAM. **Gap 1 CLOSED**: found the prior session's formula had
-  two bugs, not the "non-uniform call cadence" it suspected - (a) the two
-  clones are NOT a shared `+offset`/`-offset` table (C's arithmetic-shift
-  truncation isn't symmetric around zero at small amplitude, RAM-proved:
-  clone A `x2=0` but clone B `x2=-1` at the same tick, not `-0`) - fixed by
-  simulating both clones independently (`DOUBLE_TEAM_CLONE_OFFSETS_A`/`_B`,
-  `battleMenu.ts`); (b) the anchor tick was actually already correct once
-  combined with fix (a) and this run's established one-tick render-lag
-  convention - re-verified against the compare tool directly (clone window
-  1964-2093: pervasive multi-KB diffs → 0 diff except 4 near-1px edge
-  ticks). **Gap 2 REFRAMED**: tested `frame2` first as instructed - RAM
-  disproves it outright (Grovyle's own sprite fields are perfectly flat the
-  whole banner window). Re-read `StatsChangeAnimation_Step1-3` source
-  directly and found the real mechanism: target-1 is **BG1** (not flat
-  white, the prior session's 2-sample algebraic solve was a coincidence),
-  loaded with a real scrolling stat-arrow tilemap/palette
-  (`gStatAnim_Increase_Tilemap`/`gStatAnim_Evasion_Pal`) that
-  `StatsChangeAnimation_Step3` scrolls via `gBattle_BG1_Y += tVelocity`
-  (`tVelocity=3`) UNCONDITIONALLY every tick including the "flat eva/evb"
-  hold - RAM-confirmed exact (`gBattle_BG1_Y`: flat 0 through 2129, then a
-  clean `0,3,6,...,180` ramp 2130-2189, matching `tVelocity=3` exactly).
-- **Next:** slice B is NOT done - gap 2's residual is now well-bounded but
-  requires real new work (extract `gStatAnim_Evasion_Pal`/`_Tilemap`/`_Gfx`,
-  new LZ77-BG extractor, wire an OBJ-window-clipped BG1-scroll compositor -
-  the OBJ-window registers `StatsChangeAnimation_Step1` sets are almost
-  certainly why the banner tracks Grovyle's silhouette instead of covering
-  the whole screen) - materially larger than a formula fix, flagged for the
-  next slice-B session rather than rushed. Gap 1's own 4-tick sub-pixel
-  residual (2075/2082/2088/2089, 2-7px each) also left named, not chased
-  further this session. Once gap 2 lands, re-run `npm run compare` for
-  230/230. ROCK_SLIDE (slice C) and drain/turn-end (slice D) still queued
-  behind this.
-- **Notes:** docs/battle-menu-notes.md §10 restructured (§10a this
-  session's findings, §10b prior attempt preserved for history, superseded).
-  PAPERCUT: none - the RAM-probe-first discipline the brief mandated worked
-  exactly as intended, turning two prior "grid search found no fit" dead
-  ends into one closed formula bug + one correctly-scoped extraction task.
