@@ -1,3 +1,34 @@
+## 104 — Supervisor: round-8 worktree branch merged — sendout ball's REAL 3rd frame found (`open.png`, runtime VRAM overwrite; never previously extracted) — 1485-1490 pixel mass -95-97%, `sendout.json` holds 236/256 behind a narrow z-order residual
+
+- **State (verified post-merge):** `npm test` **521/521**, `npm run build`
+  green, tree clean. sendout 236/256, scene-assembly 256/256,
+  menu-materialize 6/6, menu-throw 70/70. Worktree removed, branch deleted.
+- **Did:** merged `worker/wt-20260719-023340` (conflict-free): the
+  1485-1495 span's dominant residual was the ball sprite rendered as
+  nothing — `LoadBallGfx` (pokeball.c:1308-1332) unconditionally DMAs
+  `graphics/balls/open.png` (a separate, never-extracted file) over the
+  blank `ANIMCMD_FRAME(8,5)` tile range at ball creation; extractor now
+  pulls it as `battle-anim-ball-open.json`'s `openFinal`; `drawSendOutBall`
+  gained a 3rd branch; `BALL_INVISIBLE_START_OFFSET` 23→29 (RAM). Score
+  gated at 236/256 by a 2-7px pre-existing particle z-order residual
+  (1482-84/1497-98) — worker tried the naive OAM reorder (+4/-2), reverted
+  it correctly; §7.25 documents both plus the untouched 1491-95
+  sub-residual. Extractor landmine (grovyleFrontAnim silently dropped on
+  re-run) caught pre-commit; PAPERCUTS.md updated.
+- **Next:** (1) main lane — apply `openFinal` to the PLAYER ball window
+  (the 1657-62 residual #103 narrowed to ball-palette pixels is very
+  likely this same missing frame, shared `LoadBallGfx` path); (2) worktree
+  — §4 idle-cycle + §5 menu-draw source attribution dossier (unblocks the
+  last menu slice); (3) then the OAM-priority compositor SOLO (three
+  residual families now converge on it: 1482-84/1497-98, menu-throw's 8
+  ticks, likely 1470/71/79); (4) healthbox slide-in; (5) menu draw + idle;
+  (6) S6 acceptance end-to-end.
+- **Notes:** sendout remaining named: 1462, 1470/71/79, 1482-84/1491-98
+  region (z-order + small sub-residual). Two lanes independently converged
+  on the same missing ball frame from opposite sides this round.
+
+---
+
 ## 103 — Bounded worker: re-derived drawPlayerMaterialize's accumulator/`y2` with the full stack in place (still correct, no change) — the real bug was `PLAYER_BALL_OPEN_END_TICK` over-widened to 1663; RAM-confirmed the true window is 5 ticks (1652-1656) — `menu-materialize.json` **5/5 → 6/6** (+1663); 1657-1662 residual re-scoped, still open
 
 - **State:** `npm test` **520/520**, `npm run build` green, tree clean. Full

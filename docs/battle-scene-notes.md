@@ -2758,3 +2758,113 @@ icon overlaps this window might also have are unmeasured, not assumed
 absent. `npm test`/`npm run build` unaffected (no code changed this
 session - findings only); full 22-trace sweep unchanged from #105's own
 counts, nothing to regress.
+
+### 7.27. §7.26 Finding 2 IMPLEMENTED: real per-tick `SortSprites` Y-sort for both ball-open particle bursts - `sendout.json` 236/256 → **246/256** (+10, closes 1482-84/1497-98), `menu-materialize.json` widened + **12/12** (closes #105's 1658-1662 too - same family, not the "particle-vs-ball" fallback §7.26 flagged)
+
+Per the brief: implement §7.26's derived model, don't re-derive it. Also
+RAM-probed (source-only, no new probe spec needed - the two literals below
+were already in `reference/pokeemerald`, not requiring a live probe) the one
+open fallback §7.26 Finding 2 left conditional on Finding 2 alone not
+closing #105's residual.
+
+**Ball's own `oam.priority`, source-checked before writing any code**
+(`reference/pokeemerald/src/pokeball.c` ~line 104, `sBallOamData`):
+`.priority = 2`, shared by every ball sprite (send-out AND materialize
+release, both use `gBallSpriteTemplates[BALL_POKE]` → `sBallOamData`) on
+both battler sides. Combined with §7.26's own already-source-verified
+particle literal (`AnimateBallOpenParticles(..., 1, 28, ...)`,
+`pokeball.c:441,757`, `oam.priority=1`): the particle burst's priority (1) is
+strictly LOWER than the ball's (2), so per the model, **particles always
+render on top of the ball wherever they overlap, unconditionally, regardless
+of screen position** - no per-tick comparison needed for that pair at all.
+Checked against the existing engine's own draw order in `drawSendOutHandoff`
+before touching anything: `drawSendOutBall`/`drawPlayerBallOpen` are both
+already called BEFORE `drawBallOpenParticles`/`drawPlayerBallOpenParticles`
+(painter's algorithm - later draw wins) - **the ball-vs-particle order was
+already GBA-correct**, so this fallback needed zero code change, only the
+two RAM-verified constants pinned as documentation
+(`BALL_OAM_PRIORITY`/`PARTICLE_OAM_PRIORITY`/`PARTICLE_OAM_SUBPRIORITY`,
+`battleScene.ts`, tested in `tests/battleScene.test.ts`).
+
+**Fix (the actual mechanism, §7.26 Finding 2)**: both `drawBallOpenParticles`
+and `drawPlayerBallOpenParticles` (`battleScene.ts`) now build a list of
+currently-alive particles (`{i, age, dx, dy}`) and draw them in
+`sortAliveParticlesByScreenY`'s order instead of a hardcoded index
+direction: sort ascending by `dy` (lower computed Y drawn first/more
+background, higher Y drawn last/on top - matches `SortSprites`'s "larger Y
+wins" rule since draw order here is a painter's algorithm), tie-broken by
+DESCENDING spawn index (worked out from `SortSprites`'s own insertion-sort
+mechanics: an EXACT Y tie never triggers the strict `<` swap condition, so
+original `sSpriteOrder` order - ascending sprite-slot/spawn order - survives,
+meaning the OLDER/lower-index particle keeps the lower final OAM index, i.e.
+renders on top; to reproduce that with a painter's algorithm, the older
+particle must be drawn LAST). This replaces two previously-separate,
+opposite-direction static loops (`drawBallOpenParticles`: ascending index;
+`drawPlayerBallOpenParticles`: descending index) that §7.26 already
+identified as two narrow curve-fits of this exact rule in disguise, each
+only valid over the ticks it was fit against - confirmed directly this
+session: the player-side function's old static "descending index" loop
+IS this sort's own exact-Y-tie case (radius~0 ticks, where dx=dy=0 for every
+live particle), which is why it worked there and nowhere else.
+
+**Score effect, verified against the live oracle**:
+- `sendout.json`: **236/256 → 246/256** (+10). Every previously-named tick in
+  the 1482-84/1497-98 family is now bit-exact (confirmed both by per-tick
+  diff and by the fact those ticks no longer appear in a fresh full-trace
+  diff dump at all). Target was "strictly >236/256" - exceeded by 10, not 1.
+- `menu-materialize.json`: `captureFrames` widened from 7 frames (1652-1657 +
+  1663, skipping 1658-1662) to the full contiguous 1652-1663 span (12
+  frames) - per-tick isolated check against a scratch copy of the wider
+  frame list showed all 12 exact BEFORE committing the change to the real
+  trace file (so the widening itself never risked landing a false "12/12" by
+  accident). Result: **12/12**, all bit-exact - closes the residual #105
+  pixel-classified as "particle-vs-ball" and §7.26 Finding 2 flagged as a
+  possible exception to Finding 1's mechanism. **It was not an exception**:
+  the fallback check above (ball's own `oam.priority=2` vs. particles' `1`)
+  confirms particle-vs-ball was already correctly ordered by the *existing*
+  draw-call order; #105's own pixel classification ("particle-position
+  pixels, oracle color `255,173,0`... not in the ball-open palette") was
+  read as "vs. ball" only because the ball sprite was the nearest other
+  moving thing on screen at that tick, not because the ball was the actual
+  other party in the ordering conflict - the real conflict was two
+  same-burst PARTICLES (the player-side window's own smaller particle
+  field made this harder to see by eye than the opponent-side window's
+  §7.25 finding, where the two-particle overlap was pixel-classified
+  directly). One general fix therefore closed both #105's and §7.25's
+  residuals, exactly as §7.26 Finding 2 predicted it should ("should subsume
+  both without a per-side branch").
+
+**Full 22-trace sweep, live oracle, before AND after the `menu-materialize.json`
+widening**: all 22 traces at #107's exact established counts except the two
+above - accept-prebattle 137/137, anchor 1/1, confirm-decline 67/67,
+confirm-flow 79/95, draft-cursor 13/13, draft-menu-slot6 66/66, draft-menu
+38/38, example 4/4, menu-text 18/18, menu-throw 70/70, rent-3picks 157/190,
+rent-slot1 125/139, room-entry 110/110, room-msgbox 142/142, room-npcs
+98/98, scene-assembly 256/256, summary-info-magby 132/132, summary-info-onix
+122/122, transition 206/206, walk-warpout 125/125 - **zero regressions**.
+`npm test` **525/525** (+2 Tier-1: the priority-literal pin and the
+Y-sort's own distinct-Y/exact-tie cases, `tests/battleScene.test.ts`),
+`npm run build` green.
+
+**What's still open in `sendout.json` (10 residual ticks, confirmed NOT
+covered by this fix, not assumed)**: a fresh full-trace diff after landing
+shows exactly `1462, 1470, 1471, 1479, 1491, 1492, 1493, 1494, 1495, 1496`
+still mismatched - all OUT OF SCOPE per this step's brief, and confirmed
+unrelated to this fix's own mechanism, not just left alone:
+- **1462** (1161px, by far the largest): the trainer-exit-tail/settled-bar
+  gap already named in §7.25, nothing to do with ball-open particles at all
+  (this window predates the particle burst's own first-visible tick, 1481).
+- **1470/1471/1479** (11-34px): the icon-row residual (y=32-38) §7.25 already
+  confirmed sits in a different screen region/mechanism from this fix - the
+  brief's own "unless the sort provably covers them" condition does not
+  hold (checked directly: these three ticks' own mismatch pixel sets are
+  bit-identical before and after this session's change).
+- **1491-1496** (2-13px): §7.25's own separately-named "materialize tint"
+  residual (`(255,181,247)`/`(247,247,255)`-family colors, not particle
+  color) - a different family from the particle-vs-particle one this session
+  closed, still unsolved; out of scope for this step (belongs with
+  `drawGrovyleMaterialize`/the affine-emerge accumulator, §7.20/§7.21's
+  territory, not the OAM-priority compositor).
+
+No new residual families were introduced or exposed by this fix in either
+trace - the 22-trace sweep's zero-regression result covers this directly.

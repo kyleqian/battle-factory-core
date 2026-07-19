@@ -561,20 +561,27 @@ already right, only specific numeric claims needed fixing.
      via `npm run compare` against the full composited engine, not the
      isolated probe above).
 
-     **What's left at 1658-1662, re-scoped again (still open)**: a SMALL
-     (2-6px) residual remains at every one of these 5 ticks -
+     **What's left at 1658-1662, re-scoped again (CLOSED, §7.27)**: a SMALL
+     (2-6px) residual remained at every one of these 5 ticks -
      pixel-classified (same script) as particle-position pixels (oracle
      color `255,173,0`, `battle-anim-particles.json`'s own known burst
      color, not in the ball-open palette at all) sitting adjacent to the ball
-     corner - the same particle-vs-ball z-order/overlap family
-     `battle-scene-notes.md` §7.25 already named and left open for the
-     OPPONENT's own send-out (1482-1490/1497-1498), now confirmed to have a
-     player-side twin too. Not chased this session (out of scope for this
-     brief, and §7.25's own "tried and reverted" note already warns a naive
-     spawn-index reorder regresses elsewhere without real OAM-slot RAM
-     evidence) - a future session should treat both sides' particle z-order
-     residuals as one shared root cause once the OAM-priority compositor
-     (#96) is built, rather than curve-fitting either side in isolation.
+     corner. Named here as "the same particle-vs-ball z-order/overlap family"
+     `battle-scene-notes.md` §7.25 left open for the OPPONENT's own send-out
+     (1482-1490/1497-1498) - **that framing turned out to be imprecise, not
+     wrong**: `battle-scene-notes.md` §7.26/§7.27 root-caused it as
+     particle-vs-PARTICLE (same-burst particles resolving their own Y
+     tie-break, `SortSprites`), not particle-vs-ball - the ball sprite's own
+     `oam.priority` (2, `sBallOamData`, `pokeball.c`) is strictly higher than
+     the particle burst's (1, `AnimateBallOpenParticles`'s literal `1, 28`
+     argument, `pokeball.c:757`), so the particle-vs-ball order was already
+     GBA-correct unconditionally (particles always win) with no code change
+     needed there. Implementing `drawPlayerBallOpenParticles`'s real per-tick
+     Y-sort (`sortAliveParticlesByScreenY`, replacing the static reversed
+     spawn-index loop) closed all 5 ticks to 0 diff -
+     `tools/compare/traces/menu-materialize.json`'s own `captureFrames` was
+     widened to include 1658-1662 (was 7 frames skipping them, now 12
+     contiguous 1652-1663) and reads **12/12**.
 6. `HandleBallAnimEnd` waits for both the ball sprite's anim **and** the mon
    sprite's affine anim to finish, then `Intro_TryShinyAnimShowHealthbox`
    (`battle_controller_player.c:979`) calls `UpdateHealthboxAttribute(...,
@@ -707,12 +714,14 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
      which takes over at tick 1615 — blocks extending
      `playerThrowBallTopLeft` past 1614 without an affine-matrix keyframe
      renderer (§3 point 4).
-   - **Brendan-vs-player-icon sprite-priority compositing** (8 ticks,
-     1581-1583/1589-1591/1597-1598) — this engine draws strictly in
-     draw-call order, but real GBA OAM breaks equal-priority overlap ties
-     by sprite-creation order, so Brendan's back sprite (created at the
-     intro) wins over the later-created status icons whenever their
-     screen footprints briefly cross during his exit slide (§3 point 4b).
+   - **Brendan-vs-player-icon compositing** (8 ticks,
+     1581-1583/1589-1591/1597-1598) — **the "equal-priority, sprite-creation-
+     order tie-break" framing here is DISPROVEN, see `battle-scene-notes.md`
+     §7.26/§3 point 4b below**: Brendan and the icons have DIFFERENT
+     `oam.priority` (2 vs. 1), so the icon wins unconditionally regardless of
+     creation order - this engine's current draw order (icon after Brendan)
+     is already GBA-correct. The 8 ticks' real root cause is still open (icon
+     eva/exit-timing lead, not a compositing-order bug).
    **Materialization landed across five sessions (PROGRESS #98, #99, #101,
    #103, #105)**: the ball's open-pose swap is engine-modeled through
    `PLAYER_BALL_OPEN_END_TICK` (5 ticks, 1652-1656, #103) then its own
@@ -724,13 +733,16 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
    materialize BG-to-white fade (root-caused + fixed #99), and the ball-open
    particle burst (mechanism 3's player-side analogue, landed #101) are all
    landed and pixel-verified.
-   `tools/compare/traces/menu-materialize.json`: **1/1 → 7/7** (contiguous
-   1652-1657 + 1663, non-contiguous past 1657). Ticks 1658-1662 still have a
-   small (2-6px) residual - #105 pixel-classified it as the particle-vs-ball
-   z-order family `battle-scene-notes.md` §7.25 already named for the
-   opponent's own send-out (not the ball-open window or the materialize
-   accumulator, both ruled out by #103/#105), left open pending the
-   OAM-priority compositor (#96).
+   `tools/compare/traces/menu-materialize.json`: **1/1 → 7/7 → 12/12
+   (§7.27)** - `captureFrames` widened to the contiguous 1652-1663 span (was
+   7 frames skipping 1658-1662); those 5 ticks' small (2-6px) residual
+   (pixel-classified by #105 as "the particle-vs-ball z-order family"
+   `battle-scene-notes.md` §7.25 already named for the opponent's own
+   send-out) is root-caused and closed by §7.26/§7.27's real per-tick
+   `SortSprites` Y-sort (`sortAliveParticlesByScreenY`) - it turned out to be
+   particle-vs-PARTICLE, not particle-vs-ball (the ball's own higher
+   `oam.priority` already made it lose to the particle burst
+   unconditionally, no ball-side change needed).
 2. §4's idle-cycle mechanism (which specific sprite/timer drives regions A
    and B) is pixel-pinned but not source-attributed — needed before an
    engine slice can *generate* the cycle rather than just replay captured

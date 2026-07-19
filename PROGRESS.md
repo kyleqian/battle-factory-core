@@ -4,6 +4,62 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 108 — Bounded worker: implemented §7.26's real `SortSprites()` Y-tiebreak for both ball-open particle bursts — `sendout.json` **236/256 → 246/256** (+10, closes 1482-84/1497-98), `menu-materialize.json` widened + **12/12** (closes #105's 1658-1662 too — same family, not the particle-vs-ball fallback)
+
+- **State:** `npm test` **525/525** (+2 Tier-1), `npm run build` green, tree
+  clean. Full 22-trace sweep against the live oracle: all others at #107's
+  exact counts (accept-prebattle 137/137, anchor 1/1, confirm-decline 67/67,
+  confirm-flow 79/95, draft-cursor 13/13, draft-menu-slot6 66/66, draft-menu
+  38/38, example 4/4, menu-materialize **12/12**, menu-text 18/18,
+  menu-throw 70/70, rent-3picks 157/190, rent-slot1 125/139, room-entry
+  110/110, room-msgbox 142/142, room-npcs 98/98, scene-assembly 256/256,
+  sendout **246/256**, summary-info-magby 132/132, summary-info-onix
+  122/122, transition 206/206, walk-warpout 125/125) — zero regressions.
+- **Did:** implemented (not re-derived) §7.26 Finding 2: both
+  `drawBallOpenParticles`/`drawPlayerBallOpenParticles` (`battleScene.ts`)
+  now build the currently-alive particle list per tick and draw it in
+  `sortAliveParticlesByScreenY`'s order — ascending computed screen Y (lowest
+  drawn first/background, highest drawn last/on top, matching
+  `SortSprites`'s "larger Y wins" rule under a painter's-algorithm draw
+  order), tie-broken by descending spawn index (an exact Y tie never
+  triggers `SortSprites`'s insertion-sort swap, so original ascending
+  creation order survives — the older/lower-index particle keeps the lower
+  final OAM index, i.e. must be drawn LAST to render on top) — replacing the
+  two previously-separate, opposite-direction static index loops §7.26
+  identified as narrow curve-fits of this one real rule. Also source-checked
+  (no live probe needed — literal already in `reference/pokeemerald`) the
+  ball sprite's own `oam.priority` (`sBallOamData.priority=2`,
+  `pokeball.c`) against the particles' (`1`, already RAM-verified in #106):
+  since particle priority is strictly lower, particles always beat the ball
+  unconditionally — the engine's existing ball-before-particles draw order
+  was already GBA-correct, so the "if Finding 2 alone doesn't close #105,
+  probe the ball" fallback §7.26 flagged needed zero code change, just the
+  two constants pinned as documentation/tests
+  (`BALL_OAM_PRIORITY`/`PARTICLE_OAM_PRIORITY`/`PARTICLE_OAM_SUBPRIORITY`).
+  Widened `tools/compare/traces/menu-materialize.json`'s `captureFrames` to
+  the full contiguous 1652-1663 span (was 7 frames skipping 1658-1662) —
+  verified 12/12 on a scratch copy before committing the change to the real
+  trace file. `docs/battle-scene-notes.md` §7.27 (full derivation + score
+  effect); `docs/battle-menu-notes.md` §3/§7 updated in place (not rewritten)
+  with forward-references, matching this run's existing correction style.
+- **What's still open in `sendout.json` (10 ticks, confirmed unrelated, not
+  assumed out of scope)**: `1462` (trainer-exit-tail/settled-bar gap,
+  §7.25), `1470/1471/1479` (icon-row residual, different screen region —
+  mismatch pixel sets bit-identical before/after this session's change),
+  `1491-1496` (§7.25's own separately-named "materialize tint" family, not
+  particle-colored). None are the OAM-priority compositor's territory.
+- **Next:** healthbox slide-in (1663-1693, harvest-based per §7.9's
+  precedent); menu draw/idle slice (source/RAM dossier already landed, #107);
+  menu-throw's own 8 Brendan-vs-icon ticks (§7.26 Finding 1's new lead: the
+  icon's own `eva`/`iconExitDx` state, NOT a compositing-order bug — do not
+  re-attempt a reorder there); then S6 acceptance end-to-end.
+- **Notes:** stayed entirely within `battleScene.ts` particle functions +
+  `tests/battleScene.test.ts` + the two named docs files, per the brief.
+  Did not touch menu-throw's 8 ticks, healthbox, idle, tick 1462, or
+  1470/71/79 (checked unaffected, not skipped blindly). No PAPERCUT this
+  session.
+
+---
 ## 107 — Supervisor: idle/menu-draw dossier branch merged (docs/spec only) — final menu slice (1742-1810) fully unblocked; round-11 = SortSprites implementation SOLO
 
 - **State (verified post-merge):** `npm test` **523/523**, `npm run build`
@@ -141,36 +197,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   per the brief. Did not touch §4/§5, `battleScene.ts` opponent-side
   internals, `tests/battleScene.test.ts`, or `sendout.json`. New committed
   artifact: `tools/compare/scratch/menu-audit/classify_1657_1663.mjs`.
-
----
-
-## 104 — Supervisor: round-8 worktree branch merged — sendout ball's REAL 3rd frame found (`open.png`, runtime VRAM overwrite; never previously extracted) — 1485-1490 pixel mass -95-97%, `sendout.json` holds 236/256 behind a narrow z-order residual
-
-- **State (verified post-merge):** `npm test` **521/521**, `npm run build`
-  green, tree clean. sendout 236/256, scene-assembly 256/256,
-  menu-materialize 6/6, menu-throw 70/70. Worktree removed, branch deleted.
-- **Did:** merged `worker/wt-20260719-023340` (conflict-free): the
-  1485-1495 span's dominant residual was the ball sprite rendered as
-  nothing — `LoadBallGfx` (pokeball.c:1308-1332) unconditionally DMAs
-  `graphics/balls/open.png` (a separate, never-extracted file) over the
-  blank `ANIMCMD_FRAME(8,5)` tile range at ball creation; extractor now
-  pulls it as `battle-anim-ball-open.json`'s `openFinal`; `drawSendOutBall`
-  gained a 3rd branch; `BALL_INVISIBLE_START_OFFSET` 23→29 (RAM). Score
-  gated at 236/256 by a 2-7px pre-existing particle z-order residual
-  (1482-84/1497-98) — worker tried the naive OAM reorder (+4/-2), reverted
-  it correctly; §7.25 documents both plus the untouched 1491-95
-  sub-residual. Extractor landmine (grovyleFrontAnim silently dropped on
-  re-run) caught pre-commit; PAPERCUTS.md updated.
-- **Next:** (1) main lane — apply `openFinal` to the PLAYER ball window
-  (the 1657-62 residual #103 narrowed to ball-palette pixels is very
-  likely this same missing frame, shared `LoadBallGfx` path); (2) worktree
-  — §4 idle-cycle + §5 menu-draw source attribution dossier (unblocks the
-  last menu slice); (3) then the OAM-priority compositor SOLO (three
-  residual families now converge on it: 1482-84/1497-98, menu-throw's 8
-  ticks, likely 1470/71/79); (4) healthbox slide-in; (5) menu draw + idle;
-  (6) S6 acceptance end-to-end.
-- **Notes:** sendout remaining named: 1462, 1470/71/79, 1482-84/1491-98
-  region (z-order + small sub-residual). Two lanes independently converged
-  on the same missing ball frame from opposite sides this round.
 
 ---
