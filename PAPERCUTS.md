@@ -71,3 +71,19 @@ compare run exposed the staleness.
   `manifest.json` (trace name, git SHA, timestamp) next to the PNGs
   and/or clear `out/latest` at the start of each run, so stale
   artifacts are self-identifying.
+
+## New-window engine slices: baseline A/B check not done first (2026-07-19)
+
+- **What:** when a slice's target window shows diffs, workers debug their
+  OWN new code first — but twice now the true blocker was a PRE-EXISTING
+  residual on the unmodified baseline (menu slice 2's bar-split span;
+  materialize slice's 1653+ full-frame residual, #98). A `git stash` A/B
+  compare of the untouched code over the target ticks costs ~2 min and
+  immediately separates "my bug" from "inherited gap".
+- **Hits:** 2 (menu slice 2 implicitly, materialize slice #98 explicitly:
+  ~10-15 min lost).
+- **Cost each:** ~10-15 min of misdirected pixel forensics.
+- **Workaround:** supervisor briefs for window-extension slices now
+  include "A/B the unmodified baseline over the target ticks FIRST";
+  workers should treat any diff shared by the baseline as out-of-scope
+  evidence, not a debugging target.
