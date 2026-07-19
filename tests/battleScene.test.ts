@@ -303,6 +303,30 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(at1516).toEqual(contentColor);
   });
 
+  // §7.22/§7.23: the healthbox's rectangular pixel-harvest bounding box
+  // includes real background pixels around its own non-rectangular shape
+  // (the box's own corners/right edge are diagonal, not square) - during the
+  // slide-in these bleed pixels were painted verbatim (frozen at their
+  // POST-materialize-fade settled color), clobbering the correctly-faded
+  // (fully white at this tick) background underneath with stale texture. A
+  // fixed ~138px band, root-caused by direct pixel comparison against a
+  // plain unfaded render of the background at the healthbox's own settled
+  // position (`tools/compare/scratch/band_diag.mjs`, not curve-fit).
+  it("opponent healthbox background-bleed margin pixels let the correctly-faded background show through during the slide-in fade window, instead of painting stale post-fade texture over it (§7.22/§7.23)", () => {
+    // Local (97,10) - background-bleed (matches the plain unfaded bg at its
+    // settled screen position, oracle-cross-checked) - at tick 1500 (dx=-85)
+    // lands on-screen at (25,26), inside the fade's y=16 (fully-white)
+    // plateau (`SENDOUT_BG_FADE_Y`, r=34-41).
+    const bleed = pixelAtSentOut(1500, 25, 26);
+    expect(bleed).toEqual([255, 255, 255]);
+
+    // Local (75,0) - genuine healthbox border content (not bleed) - at the
+    // same tick lands on-screen at (3,16); confirms the mask only skips
+    // true background-bleed pixels, not real healthbox art.
+    const content = pixelAtSentOut(1500, 3, 16);
+    expect(content).toEqual([82, 107, 99]);
+  });
+
   // §7.20: `SENDOUT_BG_FADE_Y`'s own ramp was one step short at both ends -
   // handoff+19/20 (1481/1482) and handoff+54/55 (1516/1517) render as y=2 in
   // the oracle (direct pixel decode via `blendComponentToWhite` against a

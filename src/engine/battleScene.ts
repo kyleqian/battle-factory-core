@@ -1774,6 +1774,7 @@ function drawGrovyleStretch(fb: Uint8Array, t: number, handoffTick: number): voi
   );
 }
 
+
 /**
  * §7.4.2/mechanism 3 (`docs/battle-anim-assets.md` §1): the ball-open
  * particle burst - `AnimateBallOpenParticles(sprite->x, sprite->y - 5, 1,
@@ -2108,11 +2109,74 @@ function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number)
   }
 }
 
-/** §7.6: opponent healthbox content, translated by its slide-in `dx` - see `healthboxSlideDx`'s doc comment. Flat opaque rectangle (pixel-harvested asset), clipped to screen by `setPixel` same as every other sprite draw here. */
-function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
+/**
+ * §7.22/§7.23: `sendOutHealthboxOpponent`'s rectangular harvest bounding box
+ * (§7.9) is not the healthbox sprite's own true (non-rectangular) shape - its
+ * corners/right edge include real background pixels that were only included
+ * because the bounding box has to be a rectangle. At the settled tick
+ * (post-materialize-fade) that's harmless, since the harvested bleed pixels
+ * equal whatever the plain background already renders there anyway - but
+ * during the slide-in (renders 1496-1503), that same screen region is under
+ * the BG-to-white materialize fade (`sendOutBgFadeY`, plateau y=16), so the
+ * true background at that moment is pure white, NOT the frozen post-fade
+ * texture the harvest captured. `drawSendOutHealthbox` was painting that
+ * stale texture over the already-correctly-faded background every tick,
+ * producing a fixed ~138px band sliding with the box's own leading edge -
+ * root-caused (not curve-fit) by directly diffing the asset's own pixels
+ * against a plain unfaded render of `battleBg.static` at the healthbox's
+ * settled screen position (`tools/compare/scratch/band_diag.mjs`): exactly
+ * the pixels that equal the plain background are the bleed (257 of the
+ * asset's 2800 pixels, concentrated at the corners/right edge in a shape
+ * matching the box's real scalloped/diagonal border - the other 2543 differ
+ * and are genuine healthbox art). `HEALTHBOX_CONTENT_MASK` (computed once,
+ * lazily, from that same comparison) marks bleed pixels transparent so the
+ * per-tick correctly-faded background shows through instead - a no-op once
+ * settled (bleed pixels already equal the plain background then), so this
+ * only changes the faded-window ticks.
+ */
+let healthboxContentMask: Uint8Array | null = null;
+
+function healthboxBackgroundColorAt(x: number, y: number): RgbColor | undefined {
+  const tilemap = battleBg.static.tilemap;
+  const tileset = battleBg.static.tileset;
+  const tileRow = Math.floor(y / 8);
+  const tileCol = Math.floor(x / 8);
+  const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+  if (!entry) return undefined;
+  const tile = tileset.tiles[entry.tile];
+  if (!tile) return undefined;
+  const inTileX = x % 8;
+  const inTileY = y % 8;
+  const sx = entry.hFlip ? 7 - inTileX : inTileX;
+  const sy = entry.vFlip ? 7 - inTileY : inTileY;
+  const idx = tile[sy * 8 + sx]!;
+  if (idx === 0) return undefined;
+  return battleBg.palette[entry.palette]?.[idx];
+}
+
+function getHealthboxContentMask(): Uint8Array {
+  if (healthboxContentMask) return healthboxContentMask;
   const { x, y, width, height, pixels } = sendOutHealthboxOpponent;
+  const mask = new Uint8Array(width * height);
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
+      const i = (py * width + px) * 3;
+      const bg = healthboxBackgroundColorAt(x + px, y + py);
+      const isBleed = bg !== undefined && bg.r === pixels[i] && bg.g === pixels[i + 1] && bg.b === pixels[i + 2];
+      mask[py * width + px] = isBleed ? 0 : 1;
+    }
+  }
+  healthboxContentMask = mask;
+  return mask;
+}
+
+/** §7.6: opponent healthbox content, translated by its slide-in `dx` - see `healthboxSlideDx`'s doc comment. Pixel-harvested asset, background-bleed pixels skipped (see `getHealthboxContentMask`'s doc comment), clipped to screen by `setPixel` same as every other sprite draw here. */
+function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
+  const { x, y, width, height, pixels } = sendOutHealthboxOpponent;
+  const mask = getHealthboxContentMask();
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      if (!mask[py * width + px]) continue;
       const i = (py * width + px) * 3;
       setPixel(fb, x + dx + px, y + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
     }
