@@ -87,3 +87,17 @@ compare run exposed the staleness.
   include "A/B the unmodified baseline over the target ticks FIRST";
   workers should treat any diff shared by the baseline as out-of-scope
   evidence, not a debugging target.
+
+## `extract-battle-anim-assets.ts` re-run silently drops `grovyleFrontAnim` (2026-07-19)
+
+- **What:** `battle-anim-tables.json`'s committed `grovyleFrontAnim` field
+  is not produced by any code currently in the extractor — re-running the
+  script regenerates the file WITHOUT it, silently breaking the front-anim
+  cadence until the diff is noticed. A worktree worker caught it in
+  `git diff` before committing (§7.25).
+- **Hits:** 1.
+- **Cost each:** ~5 min (would be far more if committed unnoticed —
+  Tier-1 tests would catch the missing field, but attribution would cost).
+- **Workaround:** never re-run that extractor without diffing its output;
+  proper fix is folding the `grovyleFrontAnim` derivation into the script
+  (small, unclaimed follow-up).
