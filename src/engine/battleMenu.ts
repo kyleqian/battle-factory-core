@@ -1037,24 +1037,33 @@ export function turnKickoffBounceTick(t: number, pressTick: number): number {
 // committed trace's own segments the same way every prior session's scratch
 // probes are).
 
-/** Ticks from the A-confirm press to the clone motion's own `n=1` anchor
- * (`AnimDoubleTeam`'s first per-tick step call - RAM/register tick 1964,
- * `BLDCNT`/`BLDALPHA` jump to `0x3F40`/`eva=12,evb=8` here and hold flat).
- * The first two calls (`n=1,2`) land on `data[0]=0`, i.e. zero motion -
- * pixel-CONFIRMED indistinguishable from the un-cloned baseline (this
- * session's own dense diff: ticks 1964-1965 are an EXACT full-frame match to
- * the pre-window baseline) - visible motion genuinely starts 2 ticks later,
- * see `DOUBLE_TEAM_VISIBLE_START_DELAY`. */
+/** Ticks from the A-confirm press to the RAM-tick whose `AnimDoubleTeam`
+ * state a render at trace tick `t` reflects, i.e. `n = t -
+ * doubleTeamAnchorTick(pressTick)` is call `n`'s state as read off RAM tick
+ * `t-1` (see `doubleTeamCloneOffsets` below). **Corrected this session**
+ * (docs/battle-menu-notes.md §10 gap 1) via a dense per-tick `gSprites[].
+ * data[]` RAM probe of the two actual clone sprite slots
+ * (`tools/probe/dump-doubleteam-sprites.py`, identified by `callback ===
+ * AnimDoubleTeam`, not by slot-number guess): the sprite's own `data[3]`
+ * sub-counter shows call 1 has ALREADY happened by the time RAM tick 1964 is
+ * readable (`data[3]=1`, i.e. `++data[3]` already fired once inside that same
+ * `oracle.advance()`), and each subsequent RAM tick advances the call count
+ * by exactly 1 - so RAM tick `T`'s own state is call `n=T-1963`. Pixel
+ * comparison against the oracle then pinned the RENDER-side mapping: this
+ * window follows this run's established one-tick display latency (GBA's OAM
+ * shadow-buffer-to-hardware DMA lag, the same motif named "RAM tick T shows
+ * at render T+1" elsewhere in this codebase, e.g. `battleScene.ts`'s
+ * `GROVYLE_STRETCH_TABLE`) - render tick `T` shows RAM tick `T-1`'s state,
+ * i.e. call `n = (T-1) - 1963 = T - 1964`. That collapses to the SAME anchor
+ * tick (1964) the register envelope's own `BLDCNT`/`BLDALPHA` jump uses, so
+ * `DOUBLE_TEAM_ANCHOR_DELAY` is unchanged from the previous session's value -
+ * what was actually wrong was the OFFSET TABLE itself (see
+ * `DOUBLE_TEAM_CLONE_OFFSETS_A/B` below), not this anchor. Verified against
+ * the compare tool directly: with the corrected per-clone tables, this
+ * anchor takes `turn1-cloneanim.json`'s clone window (1964-2093) from
+ * pervasive multi-thousand-pixel diffs to 0 diff on all but 4 near-1px edge
+ * ticks (2075/2082/2088/2089, see docs/battle-menu-notes.md §10). */
 export const DOUBLE_TEAM_ANCHOR_DELAY = 45;
-/** First trace tick the clone motion is pixel-visible (this session's dense
- * diff: 1966 is the first tick differing from baseline; 1964-1965 match
- * exactly - see `DOUBLE_TEAM_ANCHOR_DELAY`). */
-export const DOUBLE_TEAM_VISIBLE_START_DELAY = 47;
-/** Last trace tick the clone motion is pixel-visible - `n=129`, the sequence's
- * final entry (`data[0]` exceeds 64 on the very next call and both clones are
- * destroyed); tick 2094 (`+175`) is an EXACT full-frame match to the
- * pre-window baseline again (real sprite restored, no lag). */
-export const DOUBLE_TEAM_VISIBLE_END_DELAY = 174;
 
 export function doubleTeamAnchorTick(pressTick: number): number {
   return pressTick + DOUBLE_TEAM_ANCHOR_DELAY;
@@ -1062,24 +1071,39 @@ export function doubleTeamAnchorTick(pressTick: number): number {
 
 /**
  * `AnimDoubleTeam`'s per-call `x2` sequence (`src/battle_anim_effects_1.c:
- * 5222-5243`, `battle-move-anim-tables.json`'s own `doubleTeam.motion`),
- * simulated exactly from the decoded source, index `n` (1-based, matching
- * the sprite's own call count since creation) - table[1] is call 1's `x2`
- * (always 0), table[129] is the last call before both clones self-destroy.
- * Both clones share the SAME `data[0]`/amplitude/phaseSpeed progression
- * (only their seed phase differs, 0 vs 128 - an exact half-cycle stagger),
- * and `Sin(phase+128, amp) === -Sin(phase, amp)` on the GBA's 256-unit
- * circle, so clone B's offset is ALWAYS exactly the negative of clone A's -
- * this table drives both (`+offset` / `-offset`), pixel-confirmed via this
- * session's own dense trace (three independent zero-crossings - n=35/60/128
- * - land exactly on trace ticks 1999/2024/2092, i.e. `DOUBLE_TEAM_ANCHOR_
- * DELAY`+{35,60,128}, all three EXACT bbox-symmetric matches).
+ * 5222-5243`), simulated exactly from the decoded source for BOTH clones
+ * independently, index `n` (1-based, matching the sprite's own call count
+ * since creation) - table[1] is call 1's `x2`, table[129] is the last call
+ * before both clones self-destroy (`data[0]` exceeds 64 on the next call).
+ *
+ * **Corrected this session** (docs/battle-menu-notes.md §10 gap 1): the
+ * previous session's single shared table (`+offset`/`-offset`) assumed
+ * `Sin(phase+128, amp) === -Sin(phase, amp)` exactly - true as REAL-VALUED
+ * math (`gSineTable[x+128] === -gSineTable[x]` holds bit-for-bit, confirmed
+ * directly off the table above), but FALSE once the `>> 8`-equivalent
+ * `Math.floor(amplitude * tableValue / 256)` truncation is applied: C's
+ * arithmetic right-shift (and this codebase's matching `Math.floor` div)
+ * rounds toward -infinity, not toward zero, so `floor(-y/256) !==
+ * -floor(y/256)` whenever `y` isn't an exact multiple of 256 - i.e. almost
+ * always at these small amplitudes. RAM-confirmed directly (same probe as
+ * above): e.g. at `n=6` clone A's `x2=0` but clone B's `x2=-1`, NOT `-0` -
+ * the two sequences only coincide "in the limit", never exactly at small
+ * amplitude. Both tables built in one pass (they share the same `data0`/
+ * `sub`/amplitude/phaseSpeed progression - RAM-confirmed identical between
+ * the two clone sprites at every tick - only the seed phase differs, 0 vs
+ * 128) rather than two independent loops, to keep that shared-progression
+ * invariant structurally obvious. Verified 0 mismatches against the RAM
+ * probe's own per-tick `x2` reads across the full 129-tick lifetime for
+ * BOTH clones independently (258 datapoints, not just the shared-table's
+ * old 129).
  */
-const DOUBLE_TEAM_CLONE_OFFSETS: readonly number[] = (() => {
-  const offsets: number[] = [0]; // index 0 unused, n starts at 1
+const { a: DOUBLE_TEAM_CLONE_OFFSETS_A, b: DOUBLE_TEAM_CLONE_OFFSETS_B }: { a: readonly number[]; b: readonly number[] } = (() => {
+  const a: number[] = [0]; // index 0 unused, n starts at 1
+  const b: number[] = [0];
   let data0 = 0;
   let sub = 0;
-  let phase = 0;
+  let phaseA = 0;
+  let phaseB = 128;
   for (let n = 1; ; n += 1) {
     sub += 1;
     if (sub > 1) {
@@ -1090,23 +1114,41 @@ const DOUBLE_TEAM_CLONE_OFFSETS: readonly number[] = (() => {
     const table0 = GBA_SINE_TABLE_256[data0]!;
     const amplitude = Math.floor(table0 / 6);
     const phaseSpeed = Math.floor(table0 / 13);
-    phase = (phase + phaseSpeed) & 0xff;
-    const tableValue = GBA_SINE_TABLE_256[phase]!;
-    offsets.push(Math.floor((amplitude * tableValue) / 256));
+    phaseA = (phaseA + phaseSpeed) & 0xff;
+    phaseB = (phaseB + phaseSpeed) & 0xff;
+    a.push(Math.floor((amplitude * GBA_SINE_TABLE_256[phaseA]!) / 256));
+    b.push(Math.floor((amplitude * GBA_SINE_TABLE_256[phaseB]!) / 256));
   }
-  return offsets;
+  return { a, b };
 })();
 
-/** Clone A's horizontal `x2` offset at trace tick `t` (clone B mirrors it,
- * `-doubleTeamCloneOffset(...)`), or `null` outside the pixel-visible window
+/** Clone A/B's horizontal `x2` offsets at trace tick `t` (independent, NOT
+ * mirror images of each other - see `DOUBLE_TEAM_CLONE_OFFSETS_A/B`'s own
+ * doc comment), or `null` outside the RAM-confirmed sprite-active window
  * (`DOUBLE_TEAM_VISIBLE_START_DELAY`..`DOUBLE_TEAM_VISIBLE_END_DELAY`). */
-export function doubleTeamCloneOffset(t: number, pressTick: number): number | null {
+export function doubleTeamCloneOffsets(t: number, pressTick: number): { a: number; b: number } | null {
   const start = pressTick + DOUBLE_TEAM_VISIBLE_START_DELAY;
   const end = pressTick + DOUBLE_TEAM_VISIBLE_END_DELAY;
   if (t < start || t > end) return null;
   const n = t - doubleTeamAnchorTick(pressTick);
-  return DOUBLE_TEAM_CLONE_OFFSETS[n] ?? 0;
+  return { a: DOUBLE_TEAM_CLONE_OFFSETS_A[n] ?? 0, b: DOUBLE_TEAM_CLONE_OFFSETS_B[n] ?? 0 };
 }
+
+/** First/last trace tick the clone motion is pixel-active on screen. The
+ * clone sprites are RAM-confirmed active for RAM ticks 1964-2092
+ * (`tools/probe/dump-doubleteam-sprites.py`: `data[0]` exceeds 64 and
+ * triggers `DestroySpriteWithActiveSheet` right after 2092); folding in the
+ * one-tick render lag (`DOUBLE_TEAM_ANCHOR_DELAY`'s own doc comment) shifts
+ * that to render ticks 1965-2093. Pixel-compare-verified two ticks EARLIER
+ * than that (1964 itself is register-envelope-active per the RAM probe but
+ * still oracle-baseline-exact - `n=0`'s placeholder zero offset draws two
+ * fully-overlapping zero-motion clones whose blended result happens to sit
+ * one tick before the oracle's own real transition), and both edges were
+ * swept directly against the compare tool rather than assumed: `+47`/`+174`
+ * (ticks 1966/2093) is the pair that zeroes out ticks 1964-1965 and 2094+
+ * while keeping the whole interior clean. */
+export const DOUBLE_TEAM_VISIBLE_START_DELAY = 47;
+export const DOUBLE_TEAM_VISIBLE_END_DELAY = 174;
 
 /** First/last trace tick of the stat-change banner's own register-active
  * window (`General_StatsChange`/`StatsChangeAnimation_Step1-3`,

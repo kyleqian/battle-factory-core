@@ -1,3 +1,26 @@
+## 122 — Supervisor: ROCK_SLIDE ground-truth scout merged — ticks 2094-2600 pinned stride-1 (`battle-move-anim-notes.md` §9); round-4 fold complete, suite **602/602**
+
+- **State (verified post-merge):** `npm test` **602/602**, `npm run build`
+  green, tree clean, no worktrees/branches. turn1-kickoff 81/81 and
+  fight-submenu 234/235 re-verified on the merged tree.
+- **Did (worktree scout, verified then merged, conflict-free):** two dense
+  stride-1 groundtruth traces (`battle1-rockslide-dense-a/b.json`,
+  2094-2600 complete, twice-run 0 mismatch), two reusable probes
+  (`dump-registers.py`, `dump-rockslide-sprites.py`), and §9 tick tables:
+  all 20 rock spawns (4-tick cadence 2347-2423, argv-cross-verified),
+  exact BG3_Y shake sequence (0,-7,-7,0,0,-7,-7,0,0,-7,-7), hit-flash
+  sub-windows (healthbox wobble 2481-2500, mon blink 2482-2513, 4-tick
+  cycles), text-timing tables, and a NEW finding: Grovyle's OBJ goes
+  BG-composited (invisible as sprite) for 2344-2472 — the `monbg`
+  mechanism, target-side. §9 ends with a pinned-vs-open list per engine
+  slice B/C/D.
+- **Next:** round 5 — main lane: slice B (clone anim 1964-2094 + post-
+  clone gap + stat banner + evasiveness text, through 2193); worktree:
+  ISSUES #20 (FONT_NARROW extraction + byte-exact validation against the
+  committed submenu harvest). Then slice C (ROCK_SLIDE) and D (drain +
+  turn end, which also closes ISSUES #16's deferred validation).
+
+---
 ## 121 — Bounded worker: **S7 slice A landed** — move CONFIRMATION (A on ROCK_SLIDE) + turn kickoff through "Foe GROVYLE used\nDOUBLE TEAM!" — `turn1-kickoff.json` **81/81, 0 diff**; suite 593 → **602/602**
 
 - **State:** `npm test` **602/602** (+9 net Tier-1), `npm run build` green,

@@ -1233,9 +1233,148 @@ field), `npm run build` green.
 own resolution (accuracy/crit/damage/HP-drain, all much later per
 battle-turn-notes.md §9's table), ISSUES #5/#16/#18/#19/#20.
 
-## 10. S7 slice B: DOUBLE_TEAM clone animation + banner - PARTIAL, NOT
-0-diff (bounded worker, this session) - two genuine unresolved mechanisms,
-individually attributed, not curve-fit
+## 10. S7 slice B: DOUBLE_TEAM clone animation + banner
+
+### 10a. Convergence retry (bounded worker, this session): Gap 1 CLOSED (RAM-probed, 0 diff except 4 sub-pixel edge ticks), Gap 2 REFRAMED to a smaller, source-confirmed residual
+
+Per the supervisor's brief: RAM/probe evidence first, no more grid searches
+over formula space. `tools/compare/traces/turn1-cloneanim.json` went from
+**49/230 to 168/230** (was 49/230 after §10b's initial attempt).
+
+**New probe, committed**: `tools/probe/dump-doubleteam-sprites.py` (same
+family as `dump-rockslide-sprites.py`) - identifies the two clone sprites by
+`callback === AnimDoubleTeam` (`arm-none-eabi-nm`-resolved, `0x08102b3c`,
+`static` so absent from `bin/oracle symbols`) via a full 64-slot scan every
+tick, dumps their `data[0..7]`/`x2` directly, plus Grovyle's own front
+sprite (`gBattlerSpriteIds[1]`) anim/x2/y2 fields in the same pass. Run
+against `battle1-turn1.json`'s own segments, ticks 1955-2200, twice
+internally cross-checked (a fresh `dump-registers.py` re-probe of the same
+window agrees on every `BLDCNT`/`BLDALPHA` transition tick).
+
+**Gap 1 (clone motion) - CLOSED.** The dense `data[]` dump gave the sprite's
+OWN internal call-count/phase counters directly, ground truth instead of a
+fit, and found TWO separate bugs in the prior session's formula (not one):
+
+1. **The two clones are NOT a shared `+offset`/`-offset` table.** The prior
+   session's `Sin(phase+128, amp) === -Sin(phase, amp)` assumption is true
+   as real-valued math (`gSineTable[x+128] === -gSineTable[x]` holds
+   bit-for-bit) but FALSE once the C-level `>> 8` truncation applies:
+   arithmetic right-shift rounds toward -infinity, so
+   `floor(-y/256) !== -floor(y/256)` whenever `y` isn't an exact multiple of
+   256 - i.e. almost always at these small amplitudes. RAM-confirmed
+   directly: at RAM tick 1969 (`n=6`) clone A's `x2=0` but clone B's
+   `x2=-1`, NOT `-0`. Fixed by simulating both clones' `data0`/phase/
+   amplitude progressions independently in one pass
+   (`DOUBLE_TEAM_CLONE_OFFSETS_A`/`_B`, `battleMenu.ts`) instead of negating
+   a single table. Verified 0 mismatches against the probe's own per-tick
+   `x2` reads for BOTH clones across the full 129-tick lifetime (258
+   datapoints).
+2. **The anchor tick was right, but for the wrong reason, and the previous
+   session's own short-range-vs-long-range conflict was real** - it just
+   wasn't caused by a non-uniform call cadence. The clone sprite's own
+   `data[3]` sub-counter shows call 1 has ALREADY happened by the time RAM
+   tick 1964 is readable, so RAM tick `T`'s own state is call
+   `n = T - 1963`. Folding in this run's established one-tick display
+   latency (GBA's OAM shadow-buffer-to-hardware-DMA lag - the same "RAM tick
+   T shows at render T+1" motif used elsewhere, e.g. `battleScene.ts`'s
+   `GROVYLE_STRETCH_TABLE`) means render tick `T` shows RAM tick `T-1`'s
+   state, i.e. call `n = T - 1964` - which collapses back to the SAME
+   anchor (1964) the register envelope's own `BLDCNT`/`BLDALPHA` jump uses,
+   `DOUBLE_TEAM_ANCHOR_DELAY` unchanged at 45. The previous session's grid
+   search never found a fit because it was searching the WRONG axis (call
+   cadence) for a bug that was actually in the offset TABLE (point 1 above)
+   - the anchor itself needed no correction, only empirical confirmation.
+
+   Both fixes verified together against the compare tool (not just RAM):
+   the clone window (render ticks 1964-2093) goes from pervasive
+   multi-thousand-pixel diffs to exact 0 diff on every tick except four
+   (2075/2082/2088/2089), each a 2-7px residual confined to a single edge
+   column at the extreme end of the clone's travel (e.g. tick 2075: exactly
+   2 adjacent pixels at `x=104,y=25-26`, the clone's leftmost fringe at
+   `n`'s largest excursions) - consistent with a sub-pixel rounding
+   difference in `eraseGrovyleFootprint`'s fixed-position erase vs. the
+   redrawn clone's shifted position, not re-derived further this session
+   (bounded, tiny, four ticks out of 230).
+
+   Window bounds also corrected: sprite-active RAM ticks are 1964-2092
+   (`data[0]` exceeds 64 and self-destroys right after), but the pixel-
+   visible RENDER window is 1966-2093 (`DOUBLE_TEAM_VISIBLE_START_DELAY`=47,
+   `_END_DELAY`=174) - both edges swept directly against the compare tool:
+   ticks 1964-1965 are oracle-baseline-exact (the register envelope is
+   RAM-active there, but `n=0`'s placeholder zero-offset render doesn't
+   match yet), and tick 2093 still needs the clone drawn (last render
+   showing RAM tick 2092's data under the lag) while 2094+ is baseline
+   again.
+
+**Gap 2 (banner-hold color cycling) - REFRAMED, smaller, source-confirmed,
+NOT closed.** Followed the brief's own instruction: tested `frame2` FIRST
+via the same probe's Grovyle fields. Result: **disproven directly** -
+`gSprites[gBattlerSpriteIds[1]]`'s `animNum`/`animCmdIndex`/
+`animDelayCounter`/`x2`/`y2`/`callback` are ALL perfectly flat across the
+entire banner window (2125-2200 sampled, every single tick identical) -
+Grovyle's own sprite fields never move, so no per-mon idle-breathing task is
+running here at all (unlike the sendout window's own `frame2` breathing
+loop, which genuinely does run there - this just isn't the same situation).
+
+Re-read `StatsChangeAnimation_Step1-3` source directly
+(`src/battle_anim_utility_funcs.c:415-628`) since the sprite-side dead end
+meant the cycling has to come from somewhere the RAM probe wasn't yet
+watching, and found the actual mechanism: `StatsChangeAnimation_Step1` sets
+`BLDCNT = BLDCNT_TGT1_BG1 | BLDCNT_TGT2_ALL | ...` - target-1 is **BG1**,
+not the flat white color the prior session's two-sample algebraic solve
+concluded (that solve was only checked at 2 ticks and happened to land on a
+white BG1 tile by coincidence, not a general fit). `StatsChangeAnimation_
+Step2` loads a REAL tilemap+graphic+palette onto BG1 for this specific stat
+(`gStatAnim_Increase_Tilemap`/`gStatAnim_Gfx`/`gStatAnim_Evasion_Pal` for
+DOUBLE_TEAM's `EFFECT_EVASION_UP`), and `StatsChangeAnimation_Step3` runs
+`gBattle_BG1_Y += tVelocity` (`tVelocity=3` for a stat increase)
+**unconditionally at the top of every call, in ALL THREE states** (fade-in,
+wait/hold, fade-out) - i.e. BG1 keeps scrolling continuously through the
+whole banner including the "flat eva/evb" hold, which is exactly why the
+hold's own pixels still change tick-to-tick despite the blend registers
+being frozen: the scrolling tilemap CONTENT is what's moving, not the blend
+math or the mon sprite. RAM-confirmed directly (scratch probe of
+`gBattle_BG1_Y`, `bin/oracle symbols gBattle_BG1_Y` = `0x2022e1a`): flat 0
+through tick 2129, then `0,3,6,9,...,180` in a clean +3/tick ramp from 2130
+through 2189 - exact match to `tVelocity=3`, no gaps, confirming the
+mechanism outright rather than inferring it. (The hardware `BG1VOFS` mirror
+itself reads 0 throughout in this same probe - same "read the EWRAM mirror,
+not the raw MMIO register" precedent `gBattle_BG3_Y` needed for ROCK_SLIDE's
+shake, `battle-move-anim-notes.md` §8.)
+
+This also explains the window setup this session's probe re-confirmed but
+hadn't yet connected: `StatsChangeAnimation_Step1` sets `gBattle_WIN0H`/
+`WIN0V`/`WININ`/`WINOUT` and `DISPCNT_OBJWIN_ON` - an OBJ-WINDOW mask, which
+is almost certainly why the banner's own visible extent tracks Grovyle's
+silhouette (the mechanism this dossier's §9 first assumed was a direct
+sprite blend): the window is shaped by Grovyle's own OBJ, and BG1's
+scrolling tilemap only shows through the pixels inside that window, not the
+whole screen.
+
+**Not implemented this session** - this is genuinely new work, not a
+formula tweak: extracting `gStatAnim_Evasion_Pal`/`gStatAnim_Increase_
+Tilemap`/`gStatAnim_Gfx` (LZ77-compressed BG assets, need a new extractor,
+this run's existing extraction tooling is the right starting point) and
+wiring an OBJ-window-clipped, `gBattle_BG1_Y`-scrolled BG1 compositor is a
+materially larger task than either gap 1 fix, out of this session's
+remaining budget. **Residual is strictly smaller and differently attributed
+than before**: previously "a second, unidentified motion, candidate
+untested"; now "BG1 stat-arrow tilemap scroll, mechanism identified and
+RAM-confirmed byte-exact (`tVelocity=3`, `gBattle_BG1_Y` table above),
+blocked only on asset extraction + OBJ-window compositing, not on any
+further reverse-engineering."
+
+**Verification**: `npm test` 634/634 (631 + 3 new pins in
+`tests/battleMenu.test.ts`, pinning the corrected `doubleTeamAnchorTick`/
+`doubleTeamCloneOffsets` against the RAM probe's own literal per-tick
+values), `npm run build` green. Regression sweep unchanged: turn1-kickoff
+81/81, fight-submenu 234/235, menu-idle 69/69, sendout 255/256,
+s6-acceptance 224/228. `turn1-cloneanim.json` (unchanged, per the brief) now
+**168/230** (was 49/230) - acceptance (230/230) not met; the remaining 62
+failing ticks are ALL inside the banner window (2132-2189, gap 2's own newly
+-bounded residual) plus the 4 sub-pixel clone-edge ticks named above.
+
+### 10b. First attempt (bounded worker, prior session) - superseded by §10a above
 
 Picks up exactly where §9 left off (tick 1964 = pressTick+45). Engine code
 landed and wired (`battleMenu.ts`'s `doubleTeamCloneOffset`/`statsBannerEva`
@@ -1245,111 +1384,22 @@ and the regression sweep is clean (turn1-kickoff 81/81, fight-submenu
 234/235, menu-idle 69/69, sendout 255/256, s6-acceptance 224/228 - all
 unchanged). **But the acceptance bar (0 diff on the new committed trace)
 is NOT met**: `tools/compare/traces/turn1-cloneanim.json` (canonical prefix,
-1964-2193, 230 captures) scores **49/230**. Committing anyway per this run's
-"attribute, don't withhold" convention - the two gaps below are real,
-bounded findings for the next session, not a guess.
+1964-2193, 230 captures) scores **49/230**.
 
-**What's confirmed solid (RAM/register findings, all re-verified this
-session via a fresh `dump-registers.py` stride-1 re-probe, twice
-internally-consistent):**
-- Clone window register envelope: `BLDCNT=0x3F40`/`BLDALPHA` flat
-  `eva=12,evb=8` for pixel-visible ticks 1966-2093 (ticks 1964-1965 are an
-  exact full-frame pixel match to the pre-window baseline - no visible
-  clone yet); reverts fully by 2094.
-- Gap (2094-2131): exact full-frame pixel match to baseline throughout - no
-  code needed, confirmed by this session's own dense diff (not assumed).
-- Banner register envelope: `BLDCNT=0x3F42`/`BLDALPHA` ramps `eva` 0→10
-  (steps of 1/2 ticks, 2127-2150) → holds 10 (2150-2171) → ramps back to 0
-  (2172-2193), `evb=16-eva` throughout (unlike the clone window's own
-  non-16-summing 12/8) - RAM-exact, stride-1 confirmed.
-- Banner mechanism identity (NOT a BG1-composited copy replacing the real
-  sprite, contrary to this dossier's own first-pass assumption): reverse-
-  engineered from oracle pixels directly (two independent sample points,
-  both solved exactly, ticks 2140/2150) - target-1 is flat WHITE
-  `(255,255,255)`, target-2 is Grovyle's own REAL, un-hidden sprite (already
-  drawn by the base scene) - a white flash blended IN OVER the real sprite.
-  This is why `eva=0`'s own boundary ticks (2127-2131, 2193) show plain
-  Grovyle with no special-casing needed (`blendChannel(255,real,0,16)===
-  real` exactly).
+**Gap 1 (clone motion) as originally (mis-)diagnosed**: the per-tick
+advance rate doesn't fit any simple `(anchor, rate)` pair against
+`AnimDoubleTeam`'s own decoded C formula - a grid search over `(anchor,
+rate)` pairs found no fit reconciling the long-range zero-crossings with the
+short-range onset. **§10a above found the real cause**: not a non-uniform
+call cadence, but a shared-table sign-negation bug in the offset formula
+itself (the anchor was actually already correct).
 
-**Gap 1 (clone motion): the per-tick advance rate doesn't fit any simple
-(anchor, rate) pair against `AnimDoubleTeam`'s own decoded C formula.**
-`DOUBLE_TEAM_CLONE_OFFSETS` (`battleMenu.ts`) is a faithful simulation of
-the source (`src/battle_anim_effects_1.c:5222-5243` - data0/phase/amplitude
-progression, cross-checked against `battle-move-anim-tables.json`'s own
-`doubleTeam.motion` fields). Anchoring it at `n = t - 1964` reproduces THREE
-independent long-range zero-crossings exactly (bbox collapses back to
-baseline width at ticks 1999/2024/2092, matching the simulated sequence's
-own `n=35/60/128` zero-crossings bit-for-bit) - strong evidence the
-AMPLITUDE ENVELOPE's overall shape/period is right. But the SAME anchor
-fails badly at short range: ticks 1966-1969 exactly match the oracle at
-offset=0 (as expected, `n=2..5` all give `x2=0` in the simulated sequence),
-yet the oracle's own pixels are ALREADY visibly different from its own
-1966-1969 baseline by tick 1970 (`oracle-01966.png != oracle-01970.png`,
-confirmed by direct pixel diff) while the `n=2..11` window of the simulated
-sequence stays at `x2=0` through tick 1975 - i.e. the REAL clone starts
-moving several ticks sooner than the naive "1 call per RAM tick" model
-predicts. A grid search over `(anchor, rate)` pairs (rate = calls per render
-tick, 1/2/3 tried) against every tick's oracle bbox width, using this
-session's own dense pixel-diff table, found NO combination that fits both
-the short-range onset AND the long-range crossings simultaneously (best
-error still ~68k-95k px² across the window - not close to a real fit). This
-means either (a) the true call cadence isn't uniform (matches `AnimDoubleTeam`'s
-own `data[3]` sub-counter more subtly than modeled - e.g. the task's own
-per-tick scheduling isn't 1:1 with render ticks the way this run's other
-mechanisms have been), or (b) there's a per-tick RENDER LAG specific to this
-window (this run's usual "RAM tick T shows at render T+1" convention) that
-compounds with the amplitude ramp in a way a flat single-tick shift can't
-capture. **Not resolved this session** - flagged as the concrete next step:
-a dedicated dense RAM probe of `gSprites[].data[0..5]` for the actual clone
-sprite slots (the same technique `dump-rockslide-sprites.py` used for
-ROCK_SLIDE's own rocks) would settle this directly instead of inferring from
-pixel bbox widths.
+**Gap 2 (banner) as originally flagged**: a second, unidentified motion
+under the white-flash blend during the hold, candidate `grovyleFrontSprite.
+frame2` untested. **§10a above tested and disproved it**, then identified
+the real mechanism (BG1 stat-arrow tilemap scroll) via source-reading.
 
-**Gap 2 (banner): a second, unidentified motion sits underneath the
-white-flash blend during the hold.** Two independent pixel samples (one
-edge-adjacent, one sprite-center) both show the raw color cycling through
-3-4 distinct values tick-to-tick during ticks 2150-2171, where `eva`/`evb`
-are RAM-confirmed perfectly flat (`10,6`) the whole time - meaning
-Grovyle's own REAL sprite (this mechanism's target-2) must itself be
-moving/changing during the hold, not the blend math. Not `menuIdleBounce`
-(period/shape don't match - the observed cycle is much faster, and
-`menuIdleBounce` is already frozen for Onix/healthbox at this point in the
-turn-kickoff branch, per `turnKickoffFrozenBounceTick`). Candidate not
-tested this session: Grovyle's own SPECIES-specific front-sprite idle
-animation (a "breathing" 2-frame loop, common in Emerald's mon sprites -
-`grovyleFrontSprite`'s asset already has an unused `frame2` key from a prior
-extraction session, never wired into any renderer yet) - worth checking
-first, since it would also explain why the GAP window (2094-2131, plain
-un-blended Grovyle) stays perfectly frozen while the BANNER window doesn't
-(if the idle-animation task itself is gated by `HandleInputChooseMove` no
-longer polling, but the banner's own generic task launch re-triggers a
-per-mon idle-anim tick some other way).
-
-**Implementation as committed** (kept, not reverted, despite the residual -
-this run's "attribute, don't withhold" convention): `battleMenu.ts`'s
-`doubleTeamAnchorTick`/`doubleTeamCloneOffset`/`statsBannerEva` (pure tick
-formulas) + `battleScene.ts`'s `eraseGrovyleFootprint`/
-`drawSpriteSheetBlended`/`drawDoubleTeamClones`/`drawStatsBanner`, wired into
-`drawFightSubmenuWindow`'s `confirmElapsed` branch right after
-`drawTurnKickoffText`. Zero regressions confirmed (see above) since the new
-code only activates for `t >= pressTick+47`, well past every other committed
-trace's own captured range.
-
-**Next steps for whoever picks this up**: (1) a dense
-`gSprites[].data[]`-watching RAM probe (not just pixel bboxes) for the two
-clone sprite slots, across ticks 1964-2094, to nail the true call cadence
-outright rather than inferring it; (2) check whether wiring
-`grovyleFrontSprite.frame2` as a periodic idle-animation swap (independent
-of the banner's own blend) closes Gap 2; (3) once both are pinned, widen
-`tools/compare/traces/turn1-cloneanim.json`'s own captures incrementally
-(the trace itself is already correct/committed, only the rendering needs to
-change) and re-run `npm run compare` until 230/230.
-
-**Verification**: `npm test` 602/602 (no new Tier-1 pins this session - the
-formulas are demonstrably not yet correct, so no pin was added rather than
-pinning a known-wrong value; per this run's own "don't pin what you don't
-trust" precedent), `npm run build` green. Regression sweep (5 traces) all
-unchanged from their pre-session scores. `turn1-cloneanim.json` committed at
-49/230 - the acceptance criterion is NOT met; flagging explicitly for the
-supervisor rather than reporting a false pass.
+**Verification (this session, superseded numbers)**: `npm test` 602/602 (no
+new Tier-1 pins - the formulas were demonstrably not yet correct so none
+were added), `npm run build` green. `turn1-cloneanim.json` committed at
+49/230.

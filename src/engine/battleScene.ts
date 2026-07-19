@@ -442,7 +442,7 @@ import {
   turnKickoffBounceTick,
   TURN_KICKOFF_LINE1,
   TURN_KICKOFF_LINE2,
-  doubleTeamCloneOffset,
+  doubleTeamCloneOffsets,
   statsBannerEva,
 } from "./battleMenu.ts";
 
@@ -2656,22 +2656,23 @@ function drawSpriteSheetBlended(fb: Uint8Array, tileset: Tileset, palette: RgbCo
 
 /**
  * DOUBLE_TEAM's two afterimage clones - struct-copies of Grovyle's own
- * rendered sprite (`CloneBattlerSpriteWithBlend`), symmetric `±offset`
- * horizontal motion (`doubleTeamCloneOffset`, `battleMenu.ts`), the darkened
- * palette, flat `eva=12/evb=8` blend (mind #112's OBJ-vs-OBJ target-2
- * lesson - `blendedTile` already resolves target-2 from the plain
- * background, not whatever's already in `fb`). Real sprite hidden for the
- * whole visible window. Returns whether the window is active (so the caller
- * can fall through to the stat banner otherwise).
+ * rendered sprite (`CloneBattlerSpriteWithBlend`), each with its OWN
+ * independent `x2` horizontal motion (`doubleTeamCloneOffsets`,
+ * `battleMenu.ts` - NOT a mirrored `±offset` pair, see that function's own
+ * doc comment for why), the darkened palette, flat `eva=12/evb=8` blend
+ * (mind #112's OBJ-vs-OBJ target-2 lesson - `blendedTile` already resolves
+ * target-2 from the plain background, not whatever's already in `fb`). Real
+ * sprite hidden for the whole visible window. Returns whether the window is
+ * active (so the caller can fall through to the stat banner otherwise).
  */
 function drawDoubleTeamClones(fb: Uint8Array, t: number, pressTick: number): boolean {
-  const offset = doubleTeamCloneOffset(t, pressTick);
-  if (offset === null) return false;
+  const offsets = doubleTeamCloneOffsets(t, pressTick);
+  if (offsets === null) return false;
   eraseGrovyleFootprint(fb);
   const palette = getDoubleTeamClonePalette();
   const { tileset } = grovyleFrontSprite;
-  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x - offset, GROVYLE_CORNER.y, 12, 8);
-  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offset, GROVYLE_CORNER.y, 12, 8);
+  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.a, GROVYLE_CORNER.y, 12, 8);
+  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.b, GROVYLE_CORNER.y, 12, 8);
   return true;
 }
 

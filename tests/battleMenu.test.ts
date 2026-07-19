@@ -32,6 +32,11 @@ import {
   playerMaterializeSettleTintCoeff,
   playerMaterializeSettleY2,
   CLOSED_FIGHT_SUBMENU_STATE,
+  doubleTeamAnchorTick,
+  doubleTeamCloneOffsets,
+  DOUBLE_TEAM_ANCHOR_DELAY,
+  DOUBLE_TEAM_VISIBLE_START_DELAY,
+  DOUBLE_TEAM_VISIBLE_END_DELAY,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -413,5 +418,33 @@ describe("battleMenu: ONIX color-fade-to-true-color + settle wobble (ISSUES #17,
     expect(pixelAtSentOut(1691, 60, 70)).toEqual([132, 123, 123]);
     expect(pixelAtSentOut(1702, 60, 70)).toEqual([132, 123, 123]);
     expect(pixelAtSentOut(1730, 60, 70)).toEqual([132, 123, 123]);
+  });
+});
+
+describe("battleMenu: DOUBLE_TEAM clone motion (docs/battle-menu-notes.md §10 gap 1, RESOLVED this session) - two independent per-clone x2 sequences, RAM-confirmed via tools/probe/dump-doubleteam-sprites.py's dense gSprites[].data[] dump against battle1-turn1.json, cross-checked against the compare tool (turn1-cloneanim.json's clone window 1964-2093: 0 diff except 4 near-1px edge ticks)", () => {
+  const pressTick = 1919;
+
+  it("anchor/window constants match the RAM-confirmed register envelope (BLDCNT/BLDALPHA jump at pressTick+45=1964, pixel-visible pressTick+47=1966 through pressTick+174=2093 with the established one-tick render lag)", () => {
+    expect(DOUBLE_TEAM_ANCHOR_DELAY).toBe(45);
+    expect(doubleTeamAnchorTick(pressTick)).toBe(1964);
+    expect(DOUBLE_TEAM_VISIBLE_START_DELAY).toBe(47);
+    expect(DOUBLE_TEAM_VISIBLE_END_DELAY).toBe(174);
+  });
+
+  it("null outside the visible window (before 1966, after 2093)", () => {
+    expect(doubleTeamCloneOffsets(1964, pressTick)).toBeNull();
+    expect(doubleTeamCloneOffsets(1965, pressTick)).toBeNull();
+    expect(doubleTeamCloneOffsets(2094, pressTick)).toBeNull();
+  });
+
+  it("per-clone x2 sequence is RAM-exact (tools/probe/dump-doubleteam-sprites.py, RAM ticks 1964/1969/1975/1980/1999/2024/2045/2092 read at slots 3/4, shifted +1 tick for render lag) - NOT a shared +/-offset table: clone A and B diverge from an exact mirror at small amplitude (e.g. render 1970: a=0 but b=-1, not -0) because C's arithmetic-right-shift truncation isn't symmetric around zero", () => {
+    expect(doubleTeamCloneOffsets(1966, pressTick)).toEqual({ a: 0, b: 0 });
+    expect(doubleTeamCloneOffsets(1970, pressTick)).toEqual({ a: 0, b: -1 });
+    expect(doubleTeamCloneOffsets(1976, pressTick)).toEqual({ a: 1, b: -2 });
+    expect(doubleTeamCloneOffsets(1981, pressTick)).toEqual({ a: 4, b: -5 });
+    expect(doubleTeamCloneOffsets(2000, pressTick)).toEqual({ a: -3, b: 2 });
+    expect(doubleTeamCloneOffsets(2025, pressTick)).toEqual({ a: -9, b: 8 });
+    expect(doubleTeamCloneOffsets(2046, pressTick)).toEqual({ a: -36, b: 35 });
+    expect(doubleTeamCloneOffsets(2093, pressTick)).toEqual({ a: 19, b: -20 }); // last active render tick, right before both clones self-destroy
   });
 });
