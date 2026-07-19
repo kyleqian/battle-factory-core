@@ -5,6 +5,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 89 — Supervisor: healthbox content pipeline COMPLETE (worktree round 2 merged) — 2574/2574 opaque px byte-exact, fully parameterized; ISSUES #16 trimmed to HP-variation/status/wiring
+
+- **State:** `npm test` **467/467**, `npm run build` green, tree clean at
+  `28bd853` (merge of `worker/wt-20260718-201902`; no render-path files
+  touched — `battleScene.ts` untouched, 3 lane-owned files only).
+  `sendout.json` 199/256 unaffected (re-verified pre-merge at #88).
+- **Did:** merged worktree round 2: all three healthbox content pieces
+  landed byte-exact vs the committed harvest, zero exclusion rects
+  (was 859/2574 asserted after round 1). Keys: subsprite offsets are
+  CENTER-based (`AddSubspritesToOamBuffer`, `sprite.c:1679-1755`) — round
+  1's corner-based placement was the bug, and its z-order claim was
+  BACKWARDS (bar wins over frame; dossier corrected); nickname text is a
+  plain rectangular blit of window rows 5-15 into the sprite canvas
+  (`TextIntoHealthboxObject` traced by hand), gender symbol colored via
+  `{COLOR DYNAMIC_COLOR}` override (palette idx 11/10); level text is
+  right-aligned (`xPos=5*(3-digitCount)`, "Lv" glyph 261 via the
+  `CHAR_EXTRA_SYMBOL` escape). Genericity proven (MISDREAVUS/female/Lv100,
+  MAGIKARP/none/Lv5 test cases). ISSUES #16 rewritten: remainder is
+  partial-HP fill + status icons (currently `throw`) and the supervised
+  battleScene wiring.
+- **Next:** §7.15 bar exit slide (main-lane step launching as this is
+  written) — attributed owner of 1463-1480; then the particle position residual
+  (1481-1503/1516-1517, §7.18's render-lag-brute-force lead); then
+  action-menu (1560+); then S6 acceptance end-to-end.
+- **Notes:** both parallel-lane rounds this session merged conflict-free;
+  worktree removed, branch deleted.
+
+---
+
 ## 88 — Bounded worker: send-out particle model's logical-tick-13+ divergence root-caused via direct RAM probe (a real one-tick engine stall) — `sendout.json` **196/256 → 199/256**
 
 - **State:** `npm test` **466/466** (+2), `npm run build` green, tree
@@ -81,73 +110,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the standing worktree-lane candidate (S7 prep).
 - **Notes:** worktree verified in-lane pre-merge (462/462 there); branch
   deleted post-merge. Both lanes' round-1 steps green, zero regressions.
-
----
-
-## 86 — Bounded worker: send-out mechanism 5's affine-sampling residual fixed - `sendout.json` **180/256 → 196/256** (+16), render ticks 1522-1559 now bit-exact
-
-- **State:** `npm test` **460/460** (+2), `npm run build` green. Full
-  19-trace sweep against the live oracle: all 18 others at their exact
-  established counts (anchor 1/1, draft-cursor 13/13, draft-menu 38/38,
-  draft-menu-slot6 66/66, example 4/4, summary-info-onix 122/122,
-  summary-info-magby 132/132, confirm-decline 67/67, accept-prebattle
-  137/137, walk-warpout 125/125, room-entry 110/110, room-npcs 98/98,
-  room-msgbox 142/142, transition 206/206, scene-assembly 256/256,
-  rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95) — zero
-  regressions. `sendout.json`: **180/256 → 196/256**.
-- **Did:** found and fixed TWO root causes behind §7.16's flagged residual
-  (both mechanism-justified against reference source + RAM probes, not
-  curve-fit — full account in `docs/battle-scene-notes.md` §7.17). (1)
-  `drawSpriteSheetAffineStretch`'s matrix element was inverted
-  (`Math.trunc(0x10000/xScale)`, copied from mechanism 4's own convention);
-  real `ObjAffineSet` with `rotation=0` (always true for this mechanism)
-  computes `pa=xScale*cos(0)=xScale` directly — no division at all. Fixed to
-  `mx=xScale` (mechanism 4 left untouched, out of scope, separate code).
-  Validated by brute-forcing both conventions against the committed
-  RAM-exact `GROVYLE_STRETCH_TABLE`: 39845px→11950px total diff across the
-  40 covered ticks (`tools/compare/scratch/grovyle_formula_sweep.mjs`). The
-  double-size-affine-box hypothesis (§7.16's other suspected cause) was
-  tested and ruled out — makes no difference, proven both algebraically and
-  empirically. (2) The front sprite's frame was never a one-time swap to
-  frame 2 as both §7.11 and §7.16 assumed (pixel evidence gathered through
-  the broken formula above, unreliable) — RAM-probed directly
-  (`gSprites[8].animCmdIndex`, new probe `tools/probe/specs/sendout-
-  grovyle-frame.json`) that GROVYLE's `anims[1]` is the species-specific
-  `sAnim_Grovyle_1` (`data/pokemon_graphics/front_pic_anims.h:2930-2938`), a
-  real 5-command breathing sequence (frame 0/1/0/1/0, durations 10/18/7/12/6
-  RAM ticks) — GROVYLE is the OPPONENT battler, which source wires to the
-  species-specific anim table, not the generic single-frame one both prior
-  sessions implicitly assumed. `animCmdIndex`'s own RAM transitions land
-  exactly on those durations starting RAM tick 1496. Implemented as a
-  generic reducer (`frontSpriteAnimFrame`, same shape as
-  `affineEmergeAccumulator`) over an extracted step table
-  (`battleAnimTables.grovyleFrontAnim`, new). Both fixes combined: isolated
-  crop diff across the 40 covered ticks drops to 398px (from 11950px
-  formula-only), **25/40 ticks bit-exact in isolation**
-  (`tools/compare/scratch/grovyle_final_check.mjs`). Two new Tier-1 tests
-  pin the fix (representative tick 1525's corrected sampling + the 1517-vs-
-  1525 frame-cadence boundary, both oracle-cross-checked).
-- **Per-tick attribution, full window (§7.17 has the complete breakdown):**
-  1462-1480 unrelated pre-mechanism-5 window (unchanged); 1481-1503 and
-  1516-1519 **owned by §7.14** (the particle model's own already-flagged
-  logical-tick-13+ divergence — proved directly: the real integrated
-  renderer's Grovyle-crop output is bit-for-bit identical to an isolated
-  reproduction using RAM-exact params, so mechanism 5's own code is
-  self-consistent; the residual against oracle is dominated by
-  `PARTICLE_ORIGIN`'s own pinned color overlapping Grovyle's crop box,
-  exactly where late-lifespan particles would still be alive);
-  **1522-1559 bit-exact.** A small (3-195px, shrinking to 0) unexplained
-  residual remains in 1504-1521 (excl. 1516/1517), boundary/antialiasing-
-  shaped, not reverse-engineered further (small, flagged not chased).
-- **Next:** send-out slice's two other still-open, independent gaps: the
-  party-summary bar's own exit slide (§7.15) and the particle model's
-  logical-tick-13+ divergence (§7.14, now confirmed as the owner of real
-  residual pixels above, not just a same-window coincidence) — either could
-  recover more of `sendout.json`'s remaining 60/256. After that: action-menu
-  window (1560+, `docs/battle-menu-notes.md`), then S6 acceptance
-  end-to-end, then S7.
-- **Notes:** action-menu window (1560+), ROADMAP, and the oracle/harness
-  stayed out of scope, per the brief. No PAPERCUT.
 
 ---
 

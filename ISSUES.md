@@ -9,28 +9,29 @@ symptom, what's confirmed from the reference/oracle, and any leads.
   pieces still open (text ×2, HP-bar subsprite placement) — send-out still
   ships the pixel-harvested block
 
-**Updated by the supervisor at PROGRESS #87 (2026-07-18):** the long-standing
-"tile remap" blocker was root-caused and DISSOLVED — there is no remap
-(RAM/VRAM/OAM proof: `docs/healthbox-assembly-notes.md`,
-`tools/probe/dump-healthbox-vram.py`). The frame is a flat blit of the
-extracted sheet at (12,14); the old 728/2574-px brute-force mismatch was
-entirely the un-composited dynamic CONTENT. `src/engine/
-healthboxAssembly.ts` (`composeOpponentHealthbox`) now reproduces the frame
-byte-exact vs the harvested block (`tests/healthboxAssembly.test.ts`), but
-is NOT yet the shipping path — `battleScene.ts` still renders
-`src/assets/gen/sendout-healthbox-opponent.json` (harvest, GROVYLE/male/
-Lv50/full-HP only). **Open remainder:** (1) nickname+gender text
-("GROVYLE♂", FONT_SMALL) — footprint pixel-derived, but a first
-`drawText`-infra render attempt drew nothing at the expected position
-(placement/decode mismatch unresolved); (2) level text, same situation;
-(3) HP-bar fill — tile *selection* VRAM-confirmed (`HP_BAR_FULL_TILES`),
-but the healthbar sprite has its own 3-entry `SubspriteTable` and the
-naive single-rectangle placement mismatches; (4) wiring the completed
-compositor into `battleScene.ts` to replace the harvest. Z-order fact for
-(3): healthboxLeft (OAM 1) wins over healthbar (OAM 60) wherever opaque.
-**Why it matters later, not now:** S6's one settled content is byte-exact
-via the harvest; S7's HP drain, status icons, and battles 2-7's other
-opponents need the full pipeline.
+**Updated by the supervisor at PROGRESS #89 (2026-07-18):** the assembly
+pipeline is now COMPLETE for the settled full-HP/no-status case:
+`composeOpponentHealthbox` (`src/engine/healthboxAssembly.ts`) reproduces
+the committed harvest byte-exact — **2574/2574 opaque px, zero exclusion
+rects** (`tests/healthboxAssembly.test.ts`), fully parameterized
+(name/gender/level proven generic via MISDREAVUS/female/Lv100 and
+MAGIKARP/none/Lv5 cases). Round-1's "tile remap" was dissolved (no remap
+exists); round 2 solved all three content pieces — HP-bar subsprite
+placement (offsets are CENTER-based, `AddSubspritesToOamBuffer`), nickname+
+gender text (window rows 5-15 rectangular blit; gender symbol uses a
+`{COLOR DYNAMIC_COLOR}` palette override 11/10), level text (healthboxRight
+tile0, right-aligned `xPos=5*(3-digitCount)`, "Lv" = glyph 261). NOTE:
+round-1's z-order claim was corrected — the BAR wins over the frame
+wherever both are opaque. Full evidence: `docs/healthbox-assembly-notes.md`.
+**Open remainder:** (1) `hpFraction != 1` and `status != "none"` still
+throw — the partial-fill HP-bar tiles + status icons are unimplemented
+(the clean next step, unblocked by the solved subsprite geometry);
+(2) wiring the compositor into `battleScene.ts` to replace the shipping
+harvest (`src/assets/gen/sendout-healthbox-opponent.json`) — a supervised
+step, deliberately not done while the send-out window is under active
+pixel work. **Why it matters later, not now:** S6's settled content is
+byte-exact via the harvest; S7's HP drain and battles 2-7's other
+opponents need (1)+(2).
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
