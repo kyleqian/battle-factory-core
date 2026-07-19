@@ -3090,7 +3090,30 @@ function drawSendOutHealthbox(fb: Uint8Array, dx: number, content: ReturnType<ty
   }
 }
 
-/** PLAYER-side twin of `getHealthboxContentMask` (§7.22/§7.23's own bleed-masking precedent) - same rectangular-harvest-vs-true-shape gap, same fix: mark pixels that already equal the plain background as transparent bleed. Lazily computed once. */
+/**
+ * PLAYER-side twin of `getHealthboxContentMask` (§7.22/§7.23's own
+ * bleed-masking precedent) - same rectangular-harvest-vs-true-shape gap,
+ * same base fix: mark pixels that already equal the plain (unshifted)
+ * background as transparent bleed. Lazily computed once.
+ *
+ * §11.1 fix - despeckle pass: value-equality alone is a coincidence-prone
+ * proxy for real transparency (no per-pixel alpha survives a flat RGB
+ * harvest), and genuine bleed is a byproduct of the healthbox's real
+ * non-rectangular SHAPE - it comes in the contiguous patches that shape
+ * implies (this harvest's own bleed set forms exactly 4 connected regions,
+ * sizes 8/55/260/**1**), never a lone pixel stranded inside solid content.
+ * A single stray "bleed" cell with every 4-neighbor classified as content
+ * is therefore not a real gap in the sprite, just a harvested content pixel
+ * (a white frame highlight, turn1-rockslide.json's own root cause - see
+ * `drawRockSlideAttack`) that happens to equal the flat background's color
+ * at that one spot; only visible once this same draw call got reused under
+ * a scrolled BG3 (`rockSlideBg3Y`), where the flat-background reference
+ * this mask is built from no longer matches what's actually behind it.
+ * Reclassifying singleton islands as content is a general fix for that
+ * whole *class* of coincidence, not a fix for one coordinate: it holds
+ * regardless of which pixel the coincidence lands on, and leaves every
+ * multi-pixel (real) bleed region untouched.
+ */
 let menuHealthboxPlayerContentMask: Uint8Array | null = null;
 
 function getMenuHealthboxPlayerContentMask(): Uint8Array {
@@ -3103,6 +3126,17 @@ function getMenuHealthboxPlayerContentMask(): Uint8Array {
       const bg = healthboxBackgroundColorAt(x + px, y + py);
       const isBleed = bg !== undefined && bg.r === pixels[i] && bg.g === pixels[i + 1] && bg.b === pixels[i + 2];
       mask[py * width + px] = isBleed ? 0 : 1;
+    }
+  }
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      if (mask[py * width + px]) continue;
+      const hasBleedNeighbor =
+        (px > 0 && !mask[py * width + px - 1]) ||
+        (px < width - 1 && !mask[py * width + px + 1]) ||
+        (py > 0 && !mask[(py - 1) * width + px]) ||
+        (py < height - 1 && !mask[(py + 1) * width + px]);
+      if (!hasBleedNeighbor) mask[py * width + px] = 1;
     }
   }
   menuHealthboxPlayerContentMask = mask;

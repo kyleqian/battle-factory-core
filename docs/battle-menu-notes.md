@@ -1700,6 +1700,45 @@ worked around, left for a future session that owns the shake mechanism.
 `s6-acceptance` 224/228, `menu-idle` 69/69 — all re-verified at their
 established counts.
 
+**FIXED (later session)**: the suspected culprit above (`drawStaticBgShiftedY`
+per-scanline tile-boundary sampling) was a misdiagnosis — that function's
+`mapY` math is correct; `staticBgPixel(173, 85)` genuinely does return
+`(247,247,255)`, and that's the right raw BG3 sample. The real bug is one
+layer up, in the PLAYER healthbox overlay drawn on top of it every one of
+these ticks: `drawMenuHealthboxPlayer`'s `getMenuHealthboxPlayerContentMask`
+(a pixel-harvested rectangular asset, no real per-pixel alpha) infers
+"background bleed" (transparent, let BG3 show through) by comparing each
+harvested pixel against the plain, always-**unshifted** static background
+(`healthboxBackgroundColorAt`) — correct for the settled action-menu window
+this asset was harvested from (background never shifts there), but this
+exact draw call is reused inside the Rock Slide window too
+(`drawRockSlideAttack`), where BG3 genuinely scrolls. One harvested pixel —
+a white healthbox-frame highlight at screen (173,92) — coincidentally
+equals the *unshifted* background's own color at that spot, so the
+heuristic misclassified it as a hole: invisible on `0`-shift ticks (the
+live background there is white too, by the same coincidence), wrong on
+`-7`-shift ticks (the live background samples a different, non-white tile
+row, `staticBgPixel(173,85)` → index 15 → `(247,247,255)`, leaking through
+the wrongly-punched hole).
+
+Root-cause fix, not a special case: the harvest's own bleed set forms
+exactly 4 connected regions (sizes 8/55/260/**1**) — real bleed is a
+byproduct of the healthbox's true non-rectangular shape, so it comes in the
+contiguous patches that shape implies, never a lone pixel stranded inside
+solid content. `getMenuHealthboxPlayerContentMask` now despeckles:
+any bleed-classified pixel whose 4-neighbors are *all* content gets
+reclassified as content too. This generalizes to the whole class of
+"harvested content pixel coincidentally equals the flat background"
+coincidences, not just this one coordinate — and leaves all 3 genuine
+multi-pixel bleed regions (and every other trace that exercises this same
+draw call) untouched. `turn1-rockslide.json`: 250/256 → **256/256**, 0
+diff. New Tier-1 pin: `tests/battleScene.test.ts` (S7 slice C describe
+block) renders ticks 2348 (unshifted) and 2349 (shaken) and asserts
+`(173,92)` is `(255,255,255)` on both. Full regression sweep re-verified
+zero change at established counts: `turn1-drain` 102/102, `turn1-cloneanim`
+230/230, `turn1-kickoff` 81/81, `fight-submenu` 234/235, `sendout` 255/256,
+`s6-acceptance` 224/228, `menu-idle` 69/69, `scene-assembly` 256/256.
+
 **New Tier-1 pins** (`tests/battleMenu.test.ts`): `rockSlideDrawOrder`
 (a spot sample across the window, background-to-foreground order) plus
 the deferred pins named at the end of §11 above

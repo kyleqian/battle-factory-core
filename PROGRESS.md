@@ -4,6 +4,56 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 134 — Bounded worker: §11.1's 1px shake residual CLOSED — misdiagnosed as `drawStaticBgShiftedY`; real cause was the player healthbox's bleed-mask heuristic coincidentally matching the unshifted background — `turn1-rockslide.json` **250/256 → 256/256**; suite **649/649**
+
+- **State:** `npm test` **649/649** (+1 Tier-1 pin), `npm run build`
+  green, tree clean. `tools/compare/traces/turn1-rockslide.json`
+  **256/256, 0 diff**. Full regression sweep, zero change at established
+  counts: `turn1-drain` 102/102, `turn1-cloneanim` 230/230,
+  `turn1-kickoff` 81/81, `fight-submenu` 234/235, `sendout` 255/256,
+  `s6-acceptance` 224/228, `menu-idle` 69/69, `scene-assembly` 256/256.
+- **Did:** the brief's own hypothesis (`drawStaticBgShiftedY` sampling a
+  wrong tile pixel at a boundary) turned out to be a misdiagnosis —
+  `staticBgPixel(173, 85)` genuinely returns `(247,247,255)`, the
+  correct raw BG3 sample for that shifted map row. The real bug is one
+  layer up: `drawMenuHealthboxPlayer`'s bleed mask
+  (`getMenuHealthboxPlayerContentMask`) infers "background bleed" for a
+  harvested rectangular pixel by comparing it against the plain,
+  always-unshifted background — correct for the settled action-menu
+  window it was harvested from, but this same draw call is reused inside
+  the Rock Slide shake window, where BG3 genuinely scrolls. One harvested
+  pixel (a white frame highlight at screen (173,92)) coincidentally
+  equals the *unshifted* background's color there, so the heuristic
+  always called it a hole — invisible on `0`-shift ticks (live bg is
+  white there too, same coincidence), wrong on `-7`-shift ticks (live bg
+  samples a different, non-white tile row). Root-cause fix, not a
+  special case: the harvest's bleed set forms exactly 4 connected regions
+  (sizes 8/55/260/**1**) — real bleed is a byproduct of the healthbox's
+  true non-rectangular shape, so it comes in contiguous patches, never a
+  lone pixel stranded inside solid content. The mask now despeckles:
+  any bleed-classified pixel whose 4-neighbors are all content gets
+  reclassified as content too — generalizes to the whole class of
+  coincidence, leaves all genuine bleed regions and every other trace
+  untouched. Full derivation + fix in docs/battle-menu-notes.md §11.1
+  ("FIXED" note appended, not rewritten — the original attribution stays
+  visible as the record of what was tried first and why it was wrong).
+- **Next:** ISSUES #19's 99px single-row anomaly family; S7 continues
+  (turn-2+ engine slices against §12-§14 ground truth); ISSUES #20
+  rewire when S8 nears.
+- **Notes:** the misdiagnosis cost real time — confirming
+  `drawStaticBgShiftedY`'s math was innocent (dumping the tilemap/tileset
+  JSON directly, cross-checking against the oracle's own PNGs pixel-by-
+  pixel across the whole 8x8 tile and neighboring ticks) before finding
+  the actual layer. A naive first fix attempt (compare the healthbox
+  harvest against the *live* framebuffer instead of the flat background)
+  made things worse, not better: same 6 failing frames but 1px→211px
+  diff each, by reclassifying ~210 genuine bleed pixels as content;
+  reverted in favor of the despeckle approach once connected-component
+  analysis on the bleed mask made the real distinguishing signal
+  (isolated vs. contiguous) obvious. No papercuts otherwise.
+
+---
+
 ## 133 — Supervisor wind-down: session end 2026-07-19 ~16:05 — **S6 ticked [x] (user), S7 turn 1 nearly complete** (kickoff 81/81 + clone 230/230 + rockslide 250/256 + drain 102/102), FIGHT submenu playable, S7 core (damage/order/RNG) landed + twice cross-validated, ground truth through turn 14's forced switch — suite **555 → 648/648**, 18 verified worker steps
 
 - **State (verified this minute):** `npm test` **648/648**, `npm run build`
@@ -86,55 +136,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   everything else moving on screen at the same time, rather than reading
   full-frame shas alone) resolved all three findings above in well under
   an hour combined — no papercuts.
-
----
-## 131 — Bounded worker: S7 slice C — rock-vs-rock OAM stacking order CLOSED via real slot-allocation + `SortSprites` simulation — `turn1-rockslide.json` **181/256 → 250/256**; suite **643/643**
-
-- **State:** `npm test` **643/643** (+5 Tier-1 pins), `npm run build`
-  green, tree clean. `tools/compare/traces/turn1-rockslide.json`
-  **250/256** — the brief's own named residual (75 frames, all in
-  2362-2453, rock-vs-rock stacking) is **fully closed (0 remaining)**.
-  Zero regressions: turn1-cloneanim 230/230, turn1-kickoff 81/81,
-  fight-submenu 234/235, sendout 255/256, s6-acceptance 224/228, menu-idle
-  69/69 — all re-verified unchanged.
-- **Did:** ported the real `CreateSprite` "lowest free slot" allocator +
-  `SortSprites` insertion-sort comparator (`reference/pokeemerald/
-  src/sprite.c`) into a pure TS simulation (`rockSlideDrawOrder`,
-  `battleMenu.ts`), seeded from a live RAM read of `sSpriteOrder` (no
-  exported symbol — address resolved via `nm`, new probe
-  `tools/probe/dump-rockslide-slot-order.py`). RAM-validated **0
-  mismatches**: slot assignment for all 20 rocks + the shake sprite
-  across 143 sampled RAM ticks, AND the resulting draw order across all
-  117 multi-rock ticks (56 with an exact on-screen-Y tie). Key
-  simplification (also empirically confirmed, not just argued): the
-  20 rocks are RAM-confirmed the *only* sprites in the scene that ever
-  share an exact `oam.priority`/`subpriority` key, so — by a stable
-  sort's own defining property — the simulation only needs to track the
-  20 rocks, not the other ~50 `gSprites[]` slots. Full derivation in
-  docs/battle-menu-notes.md §11.1.
-- **Also found (not fixed, out of scope per this step's brief) — a
-  separate, PRE-EXISTING 6-frame residual**: sweeping the full 256
-  frames (not done with this precision before) surfaced 1px mismatches
-  at ticks 2349/2350/2353/2354/2357/2358, confirmed present before this
-  session's changes too (`git stash` + re-run). All 6 land exactly on
-  `rockSlideBg3Y=-7` ticks, a single stray pixel at (173,92) — a narrow
-  `drawStaticBgShiftedY` sampling bug, unrelated to rock ordering. The
-  prior session's §11 claim that the shake was "independently
-  pixel-exact" was inaccurate (never swept at full precision). Named
-  precisely in docs/battle-menu-notes.md §11.1 rather than worked around,
-  since this step's brief explicitly said not to rework the shake.
-- **Next:** a future session should own `drawStaticBgShiftedY`'s 1px
-  residual (§11.1's own attribution) to close `turn1-rockslide.json` to
-  256/256. Then slice D (drain/turn-end, `pressTick+596`=2516 on —
-  closes ISSUES #16's deferred validation) is next up on the main lane;
-  the victory-scout worktree (SEND OUT confirm + frame-budget analysis,
-  #130's own next-action) is unaffected by this session.
-- **Notes:** the RAM-probe environment
-  (`vendor/mgba-venv/bin/python tools/probe/*.py`) plus
-  `arm-none-eabi-nm -n --defined-only reference/pokeemerald/
-  pokeemerald.elf` for resolving `static` EWRAM symbols with no exported
-  name (this run already used this technique for callback addresses;
-  this session extended it to `sSpriteOrder`/`sSpritePriorities`) made
-  the whole derivation tractable inside one bounded session — no
-  papercuts.
 

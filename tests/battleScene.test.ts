@@ -829,3 +829,38 @@ describe("battleScene: S7 slice B - stat-change banner as a real scrolling BG1 (
     expect(at2140).not.toEqual(at2160); // the scroll genuinely moves content, not just a static blend
   });
 });
+
+describe("battleScene: S7 slice C - Rock Slide's shaken BG3 vs. the player healthbox's own bleed-mask despeckle (docs/battle-menu-notes.md §11.1 fix)", () => {
+  // §11.1: `getMenuHealthboxPlayerContentMask`'s value-equality bleed
+  // heuristic classifies a harvested pixel as "background bleed" whenever it
+  // equals the FLAT (unshifted) static background at that spot - correct
+  // for the settled action-menu window this asset was harvested from, but
+  // this exact draw call is reused inside the Rock Slide shake window too
+  // (`drawRockSlideAttack`), where BG3 actually scrolls (`rockSlideBg3Y`).
+  // One harvested content pixel (a white healthbox-frame highlight, screen
+  // (173,92)) coincidentally equals the flat background's own color there,
+  // so the heuristic misclassified it as a hole - invisible on unshifted
+  // ticks (live background there is ALSO white by the same coincidence),
+  // wrong on shifted ticks (live background samples a different, non-white
+  // tile row instead). The fix despeckles single-pixel-island "bleed"
+  // classifications (real bleed is a byproduct of the sprite's true shape,
+  // so it comes in contiguous patches, never a lone cell surrounded by
+  // content) - was 250/256 on turn1-rockslide.json, now 256/256.
+  it("draws the always-opaque healthbox highlight at (173,92) on both an unshifted and a BG3_Y=-7 shaken tick", () => {
+    const submenu = confirmFightMove(openFightSubmenu(0), 879); // pressTick = TICK0+879 = 1919
+    const x = 173;
+    const y = 92;
+    const o = (y * 240 + x) * 4;
+
+    const fbUnshifted = new Uint8Array(240 * 160 * 4);
+    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu }); // rockSlideBg3Y === 0 here
+    const atUnshifted: [number, number, number] = [fbUnshifted[o]!, fbUnshifted[o + 1]!, fbUnshifted[o + 2]!];
+
+    const fbShaken = new Uint8Array(240 * 160 * 4);
+    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu }); // rockSlideBg3Y === -7 here
+    const atShaken: [number, number, number] = [fbShaken[o]!, fbShaken[o + 1]!, fbShaken[o + 2]!];
+
+    expect(atUnshifted).toEqual([255, 255, 255]);
+    expect(atShaken).toEqual([255, 255, 255]); // was [247, 247, 255] pre-fix: the flat background's tile row leaking through
+  });
+});
