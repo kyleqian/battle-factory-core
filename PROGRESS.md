@@ -4,6 +4,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 113 — Bounded worker: closed ISSUES #18's first bullet — sendout tick 1462 (1161px, §7.19's named "settled-bar gap + trainer-exit tail") — both co-located mechanisms fixed — **sendout.json 251/256 → 252/256**
+
+- **State:** `npm test` **555/555** (+1 net: 1 corrected + 1 new Tier-1),
+  `npm run build` green, tree clean. Full battle-family sweep against the
+  live oracle: sendout **252/256** (was 251/256), scene-assembly 256/256,
+  transition 206/206, menu-text 18/18, menu-throw 78/78, menu-materialize
+  62/62, menu-idle 69/69, s6-acceptance 224/228 (unchanged — 1462 isn't one
+  of its sampled ticks), draft-cursor 13/13, draft-menu 38/38,
+  draft-menu-slot6 66/66 — zero regressions.
+- **Did:** pixel-classified 1462's 1161px diff by bounding box first
+  (`tools/compare/scratch/diag_1462*.mjs`, throwaway): 365px sat outside
+  the trainer's 64x64 bbox (icon/bar row), 796px inside it — confirming
+  §7.19's two co-located, non-overlapping mechanisms. **(a) Settled-bar
+  gap**: `drawSendOutHandoff` skipped the opponent bar+icons entirely at
+  `t===handoffTick` (`drawBallIcons` always passed `opponent:false`;
+  `drawOpponentSummaryExit` gates on `elapsed>=0`, i.e. handoff+1) — fixed
+  with the exact one-line call §7.19 already named:
+  `drawBallIcons(fb, t, {opponent: t === handoffTick, ...})`, reusing the
+  existing settled-render path. Closed 365px→0. **(b) Trainer-exit tail**:
+  NOT a new mechanism — `trainerExitX`'s own already-RAM-probed table
+  (`TRAINER_EXIT_X2`) skipped its own index 0 (`et<0` fallback to unshifted
+  `OPPONENT_CORNER.x`), so render 1462 showed x2=0 instead of the RAM-true
+  x2=2 (`sendout-trainer-exit2.json`'s `sprite4x2`, re-probed live: reads 2
+  at RAM 1461, +1 render lag lands at render 1462). §7.19's own "invisible
+  at the pixel level" call on this value was wrong — a real 2px OAM shift,
+  confirmed independently by an exhaustive oracle-pixel dx/dy sweep
+  (`shift_1462.mjs`) landing on the identical +2 before the RAM probe was
+  even re-run. Fixed by prepending `2` to `TRAINER_EXIT_X2` and dropping
+  the `-1` from the index (`et = t - handoffTick`) — pure index-shift, the
+  destroy-cutoff tick (1499) unchanged (verified by hand). Closed 796px→0.
+  Tick 1462 is now bit-exact.
+- **One pre-existing Tier-1 test corrected**: `tests/battleScene.test.ts`'s
+  "opponent party-summary despawn" test asserted
+  `pixelAtSentOut(1493,...) === pixelAtSentOut(1462,...)`, which passed
+  before only because BOTH ticks accidentally showed background under bug
+  (a). With 1462 now correctly showing the icon's own settled color
+  `(74,66,90)`, rewrote the test to pin the three ticks' literal
+  oracle-confirmed colors instead of the since-invalidated relationship.
+- **Next:** ISSUES #18's remaining bullets (1493-95 blended-edge tail,
+  1496 particle z-order — both explicitly out of scope for this step,
+  untouched); S6 acceptance stays [~] until those close.
+- **Notes:** stayed within `src/engine/battleScene.ts` +
+  `tests/battleScene.test.ts` + `docs/battle-scene-notes.md` (new §7.30) +
+  `ISSUES.md` (trimmed #18's first bullet), per the brief. No new
+  committed artifacts (reused `sendout-trainer-exit2.json`, already
+  committed); scratch diagnostic scripts intentionally not committed, per
+  this file's own throwaway precedent. No PAPERCUT this session.
+
+---
 ## 112 — Bounded worker: closed `menu-throw.json`'s last 8 excluded ticks (1581-83/1589-91/1597-98) — root cause was NOT icon timing (both RAM-exact) but `blendedSetPixel`/`blendedTile`'s blend target-2, a real GBA OBJ-vs-OBJ hardware quirk — **70/78 → 78/78**, `sendout.json` incidentally 246/256 → 251/256 — **S6 chain (send-out → materialize → idle) fully 0-diff, contiguous, no known gap left**
 
 - **State:** `npm test` **554/554** (+4 Tier-1), `npm run build` green, tree
@@ -143,35 +192,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   decode_player_tint_scratch3.mjs`. Did not touch the opponent-side sendout
   internals (1491-96, concurrent worktree's) or `docs/battle-scene-notes.md`/
   `tests/battleScene.test.ts`. No PAPERCUT this session.
-
----
-## 110 — Supervisor: menu-idle branch merged (two-file conflict, hand-resolved incl. a marker that briefly slipped into the merge commit — caught by the post-commit test run, amended before push) — `menu-idle.json` **69/69**; S6 chain has ONE unimplemented window left (1664-1741, ISSUES #17)
-
-- **State (verified post-merge, amended commit):** `npm test` **545/545**,
-  `npm run build` green, tree clean. menu-idle 69/69, menu-materialize
-  12/12, sendout 246/256, scene-assembly 256/256, menu-throw 70/70,
-  menu-text 18/18, transition 206/206, anchor 1/1.
-- **Did:** merged `worker/wt-20260719-034821` (action-menu window
-  1742-1810): closed-form idle generator (`menuIdleBounce` + literal
-  `gSineTable` copy — the `Math.sin`-derived `gbaSin` is off by 1 at
-  indices 62/63, which would have produced phantom y2=2 frames at ticks
-  1767/1804 inside this very window), atomic menu draw, teal blank pinned
-  to `TryDoEventsBeforeFirstTurn`'s `BattlePutTextOnWindow(gText_
-  EmptyString3)`, cursor tiles byte-verified. Window base is
-  oracle-harvested composition (sibling healthbox work was in flight) —
-  honest, documented; regenerating it from the engine's own render once
-  #17 closes is a cheap future cleanup. Conflicts: battleScene.ts (2
-  regions) + battleMenu.ts (1 region), all both-sides-added — resolved
-  keeping both; the battleMenu.ts markers initially slipped into the
-  merge commit (compound-command tail truncated the conflict list),
-  caught immediately by the test run, amended.
-- **Next:** (1) main lane — ISSUES #17 (ONIX color-fade to true color +
-  settle wobble, 1664-1701, the LAST unimplemented S6 window; RAM leads
-  filed in the issue); (2) worktree — sendout 1491-96 (biggest remaining
-  span, opponent-side internals); (3) then S6 acceptance trace (uniform
-  ~250-capture grid anchor→1810), remaining polish (menu-throw's 8
-  icon-exit ticks, 1470/71/79, 1462), wind-down before 07:55.
-- **Notes:** sendout remaining: 1462, 1470/71/79, 1491-96 (10 ticks).
-  menu-throw's 8 ticks: §7.26 disproved the order hypothesis; icon
-  fade/exit timing is the standing lead.
 

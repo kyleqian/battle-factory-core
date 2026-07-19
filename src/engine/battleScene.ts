@@ -997,11 +997,10 @@ export function sendOutTextVisibleChars(t: number, pressTick: number): number {
  * `gBattlerSpriteIds[1]` at each tick - it reassigns away from the trainer's
  * own sprite slot at trace tick 1461, one tick before the handoff, so the
  * trainer's OWN index (4 in this trace) was tracked directly instead) across
- * trace ticks 1461-1500. `x2` starts at 2 the tick BEFORE the handoff tick
- * (1461, invisible at the pixel level - see `PALETTE_FADE_Y` module doc for
- * the same "sub-pixel invisible" pattern) and increments to 103 by tick 1497
- * (`flags` bit0/`inUse` still set), then the sprite is destroyed the next
- * tick (`flags`=0, `x` reset to garbage 304) - matching
+ * trace ticks 1461-1500. `x2` reads 2 at RAM tick 1461 (visible at render
+ * tick 1462 = handoffTick+0, the established +1 render lag) and increments
+ * to 103 by tick 1497 (`flags` bit0/`inUse` still set), then the sprite is
+ * destroyed the next tick (`flags`=0, `x` reset to garbage 304) - matching
  * `SpriteCB_FreeOpponentSprite` firing right after the documented 35-frame
  * `AnimTranslateLinear_WithFollowup` duration. NOT a clean linear formula
  * (confirmed: the probed steps are mostly +3/tick but with two single-tick
@@ -1009,17 +1008,25 @@ export function sendOutTextVisibleChars(t: number, pressTick: number): number {
  * per-frame truncation accumulating differently than a fresh
  * `round(total*et/duration)` computed each tick would predict) - this is
  * the RAM ground truth itself, not a fit, so it's used as a literal table
- * indexed from the handoff tick (`et = t - handoffTick`), which the probed
- * trace confirms is exactly where index 0 (x2=5) lands.
+ * indexed from the handoff tick (`et = t - handoffTick`), index 0 = x2=2
+ * (render 1462) confirmed both by the RAM probe (`sendout-trainer-exit2.json`,
+ * `sprite4x2` field) AND independently by an exhaustive oracle-pixel dx sweep
+ * at tick 1462 (`tools/compare/scratch/shift_1462.mjs`, throwaway - dx=+2
+ * cuts that tick's trainer-bbox mismatch from 796px to 151px, the clear
+ * minimum over dx,dy in [-6,6]) - **§7.19's own "invisible at the pixel
+ * level" call on this same value was wrong**: a 2px OAM offset is a real,
+ * visible shift, not sub-pixel like `PALETTE_FADE_Y`'s case - previously
+ * unmodeled because `trainerExitX` skipped index 0 entirely (`et<0` fell
+ * back to the unshifted settled corner at render 1462, prepend fixes it).
  */
 const TRAINER_EXIT_X2: readonly number[] = [
-  5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89, 92,
-  95, 97, 97, 100, 103, 103,
+  2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89,
+  92, 95, 97, 97, 100, 103, 103,
 ];
 
-/** Opponent trainer-pic's top-left x at trace tick `t` during the exit slide, or `null` once destroyed (handoff+36 and beyond - see `TRAINER_EXIT_X2`). */
+/** Opponent trainer-pic's top-left x at trace tick `t` during the exit slide, or `null` once destroyed (handoff+37 and beyond - see `TRAINER_EXIT_X2`). */
 function trainerExitX(t: number, handoffTick: number): number | null {
-  const et = t - 1 - handoffTick;
+  const et = t - handoffTick;
   if (et < 0) return OPPONENT_CORNER.x;
   const x2 = TRAINER_EXIT_X2[et];
   if (x2 === undefined) return null;
@@ -2858,7 +2865,12 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   drawPlayerBallOpen(fb, t);
   drawPlayerBallOpenParticles(fb, t);
   if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
-  drawBallIcons(fb, t, { opponent: false, player: true });
+  // §7.19: `drawOpponentSummaryExit` only draws from elapsed=t-handoffTick-1
+  // >= 0 (render handoffTick+1 on) - at handoffTick itself (elapsed=-1) the
+  // real game still shows the opponent's settled (un-faded, un-slid) bar+
+  // icons for exactly one tick before the exit fade/slide takes over, so
+  // fall back to the same settled render the pre-handoff branch uses.
+  drawBallIcons(fb, t, { opponent: t === handoffTick, player: true });
   drawOpponentSummaryExit(fb, t, handoffTick);
   const healthboxDx = healthboxSlideDx(t);
   if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx);

@@ -586,12 +586,33 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
   // rightmost, delay 0) starts sliding+fading the very first active tick;
   // its own tile's opaque pixel at local (3,2) sits at screen (82,34) at
   // that tick (base x=76 + exit offset 3 for n=1 active tick).
-  it("opponent party-summary despawn: icon j=5 is blended (neither pure background nor the icon's own true color) at handoff+1 (1463), and gone again once the blend reaches 0 at handoff+31 (1493) (mechanism 1)", () => {
-    const before = pixelAtSentOut(1462, 82, 34);
+  // §7.30 correction: handoff+0 (1462) is the icon's own SETTLED color, not
+  // background - `drawOpponentSummaryExit` only starts at handoff+1, so
+  // handoff+0 needs the settled render (see `drawSendOutHandoff`'s own
+  // `t === handoffTick` branch). The old pin asserted `after (1493) ==
+  // before (1462)`, which only passed because both were background under
+  // the pre-fix bug (the settled opponent icon wasn't drawn at 1462 at all)
+  // - not a real equality. All three ticks are oracle-pixel-exact now.
+  it("opponent party-summary despawn: icon j=5 is its own settled color at handoff+0 (1462), blended at handoff+1 (1463), and gone (background) once the blend reaches 0 at handoff+31 (1493) (mechanism 1)", () => {
+    const settled = pixelAtSentOut(1462, 82, 34);
     const during = pixelAtSentOut(1463, 82, 34);
     const after = pixelAtSentOut(1493, 82, 34);
-    expect(during).not.toEqual(before);
-    expect(after).toEqual(before);
+    expect(settled).toEqual([74, 66, 90]);
+    expect(during).not.toEqual(settled);
+    expect(after).not.toEqual(settled);
+    expect(after).toEqual([247, 247, 255]);
+  });
+
+  // §7.30: the opponent trainer-pic's exit slide (`trainerExitX`/
+  // `TRAINER_EXIT_X2`) starts at x2=2 at handoff+0 (1462, RAM tick 1461's
+  // value, +1 render lag) - RAM-probed (`sendout-trainer-exit2.json`,
+  // `sprite4x2`) AND independently confirmed by an exhaustive oracle-pixel
+  // dx sweep (best match at dx=+2, cutting this tick's trainer-bbox
+  // mismatch 796px->151px). Screen (197,20), inside the trainer's hat brim,
+  // is background if x2 is wrongly treated as 0 (the pre-fix behavior) but
+  // the hat's own color once the +2 offset lands, matching the oracle.
+  it("opponent trainer-pic exit slide starts at x2=2, not 0, on handoff+0 (1462)", () => {
+    expect(pixelAtSentOut(1462, 197, 20)).toEqual([156, 140, 74]);
   });
 
   // §7.19: pins the bar's OWN exit slide (`SpriteCB_StatusSummaryBar_Exit`,

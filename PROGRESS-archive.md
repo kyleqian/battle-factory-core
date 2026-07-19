@@ -1,3 +1,34 @@
+## 110 — Supervisor: menu-idle branch merged (two-file conflict, hand-resolved incl. a marker that briefly slipped into the merge commit — caught by the post-commit test run, amended before push) — `menu-idle.json` **69/69**; S6 chain has ONE unimplemented window left (1664-1741, ISSUES #17)
+
+- **State (verified post-merge, amended commit):** `npm test` **545/545**,
+  `npm run build` green, tree clean. menu-idle 69/69, menu-materialize
+  12/12, sendout 246/256, scene-assembly 256/256, menu-throw 70/70,
+  menu-text 18/18, transition 206/206, anchor 1/1.
+- **Did:** merged `worker/wt-20260719-034821` (action-menu window
+  1742-1810): closed-form idle generator (`menuIdleBounce` + literal
+  `gSineTable` copy — the `Math.sin`-derived `gbaSin` is off by 1 at
+  indices 62/63, which would have produced phantom y2=2 frames at ticks
+  1767/1804 inside this very window), atomic menu draw, teal blank pinned
+  to `TryDoEventsBeforeFirstTurn`'s `BattlePutTextOnWindow(gText_
+  EmptyString3)`, cursor tiles byte-verified. Window base is
+  oracle-harvested composition (sibling healthbox work was in flight) —
+  honest, documented; regenerating it from the engine's own render once
+  #17 closes is a cheap future cleanup. Conflicts: battleScene.ts (2
+  regions) + battleMenu.ts (1 region), all both-sides-added — resolved
+  keeping both; the battleMenu.ts markers initially slipped into the
+  merge commit (compound-command tail truncated the conflict list),
+  caught immediately by the test run, amended.
+- **Next:** (1) main lane — ISSUES #17 (ONIX color-fade to true color +
+  settle wobble, 1664-1701, the LAST unimplemented S6 window; RAM leads
+  filed in the issue); (2) worktree — sendout 1491-96 (biggest remaining
+  span, opponent-side internals); (3) then S6 acceptance trace (uniform
+  ~250-capture grid anchor→1810), remaining polish (menu-throw's 8
+  icon-exit ticks, 1470/71/79, 1462), wind-down before 07:55.
+- **Notes:** sendout remaining: 1462, 1470/71/79, 1491-96 (10 ticks).
+  menu-throw's 8 ticks: §7.26 disproved the order hypothesis; icon
+  fade/exit timing is the standing lead.
+
+---
 ## 109 — Bounded worker: player healthbox slide-in implemented, RAM-exact and region-isolated 0-diff — but found + corrected a wrong settle-tick pin (real settle 1702, not 1693/1696) and the assigned full-frame trace-closure acceptance criterion is BLOCKED by a separate, pre-existing, already-named ONIX materialize-tail gap (new ISSUES #17)
 
 - **State:** `npm test` **530/530** (+8 Tier-1), `npm run build` green, tree

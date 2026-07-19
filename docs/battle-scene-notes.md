@@ -3182,3 +3182,103 @@ the relevant OBJ VRAM charblock) compared byte-for-byte against the engine's
 own extracted tileset arrays - out of this session's remaining budget, named
 concretely so the next session doesn't have to rediscover the "checked
 everything but the graphics data itself" gap.
+
+### 7.30. Bounded worker: closed tick 1462 (1161px, §7.19's named "settled-bar gap + trainer-exit tail") - both co-located mechanisms fixed, `sendout.json` **251/256 -> 252/256**
+
+Per this step's brief (ISSUES #18's first bullet): pixel-classify 1462's
+1161px diff first, split by mechanism, derive each fix from RAM/source
+ground truth (no curve-fitting). Split the diff by bounding box before
+touching any code (`tools/compare/scratch/diag_1462.mjs`/`diag_1462b.mjs`,
+throwaway): **365px sat outside the trainer's 64x64 bbox** (x<144, y=32-43 -
+the icon/bar row), **796px sat inside it** (x=144-207, y=8-71) - confirming
+§7.19's two-mechanism sketch was right, and that they don't overlap a
+single pixel.
+
+**Mechanism (a): the settled-bar one-tick gap, exactly as §7.19 named it.**
+The 365px outside-trainer region was 100% `app(247,247,255 or 255,255,255)
+oracle(<bar/icon palette color>)` pairs - the app showing bare (BG-fade)
+background where the oracle shows the opponent bar/icon's own settled
+color (`(33,57,0)` bar green, `(74,66,90)` icon ring, etc.). Root cause
+confirmed exactly as §7.19 already diagnosed: `drawSendOutHandoff` only
+calls `drawBallIcons(fb, t, {opponent: false, ...})` (opponent side always
+skipped) and defers the opponent bar/icons entirely to
+`drawOpponentSummaryExit`, which gates on `elapsed = t - handoffTick - 1 >=
+0` - at `t === handoffTick` (elapsed=-1) NEITHER function draws the
+opponent side at all. **Fix**: `drawBallIcons(fb, t, {opponent: t ===
+handoffTick, ...})` - the exact one-line call §7.19 already named, reusing
+the existing settled-render path (`ballIcons`/`ballStatusBarPositions`
+already compute the correct settled position/state for `t=handoffTick`,
+since their own `rt = t-1` render-lag convention lands well past
+`OPP_CREATE_TICK` by then - no new position math needed). Closed this
+region to 0 diff.
+
+**Mechanism (b): the trainer-exit tail - a real, previously-unmodeled 1-tick
+lead on the exit slide's OWN x2, not a new mechanism.** The 796px inside
+the trainer bbox was NOT one clean color-pair family (168 distinct pairs,
+mixed skin/clothing/outline tones) - a shape mismatch, not a
+missing-content one. An oracle-pixel dx/dy sweep (`shift_1462.mjs`,
+throwaway, exhaustive over [-6,6]x[-6,6]) found a clean minimum at
+**dx=+2, dy=0** (796px -> 151px, a shifted-sprite signature, not a new-
+mechanism signature) - i.e. the oracle's trainer sprite sits exactly 2px
+right of where this engine drew it. RAM-probed directly to confirm before
+touching code (`sendout-trainer-exit2.json`'s already-committed watch,
+re-run against the live oracle): `sprite4x2` (the trainer's own OAM `x2`)
+reads **2 at RAM tick 1461**, one tick before RAM tick 1462's already-
+tabulated `TRAINER_EXIT_X2[0]=5`. With this window's already-established
++1 render lag (RAM N visible at render N+1, the same convention every
+other table in this window uses), RAM 1461's x2=2 is what render tick 1462
+(`handoffTick+0`) should show - but `trainerExitX`'s `et = t - 1 -
+handoffTick` check (`et<0` -> unshifted `OPPONENT_CORNER.x`) skipped index
+0 entirely, treating render 1462 as if x2=0. **§7.19's own "invisible at
+the pixel level" characterization of this same RAM value was wrong** - a
+real 2px OAM offset is a visible shift (confirmed by the exhaustive pixel
+sweep independently landing on the same +2, before the RAM probe was even
+re-run), not sub-pixel like `PALETTE_FADE_Y`'s genuinely-invisible case.
+**Fix**: prepended `2` to `TRAINER_EXIT_X2` and dropped the `-1` from
+`trainerExitX`'s index (`et = t - handoffTick`) - purely an index-shift, the
+table's existing 36 entries (RAM 1462-1497) and the destroy cutoff
+(render 1499, unchanged - verified by hand: `et_new(1498)=36 ->
+new[36]=old[35]=103`, `et_new(1499)=37 -> undefined -> null`, identical to
+the old mapping) are otherwise untouched. Closed the trainer-bbox region
+796px -> 0px (the sweep's own 151px residual dropped to exactly 0 once the
+correct RAM-derived value replaced the sweep's empirically-found dx, not
+just the closest nearby integer - confirming it's the exact mechanism, not
+a partial fit).
+
+**Result: tick 1462 is now a bit-exact 0-diff match** (`tools/compare/
+scratch/diag_1462.mjs` re-run post-fix: `0px diff`). `sendout.json`
+**251/256 -> 252/256**.
+
+**Full battle-family sweep, live oracle, zero regressions**: scene-assembly
+256/256, transition 206/206, menu-text 18/18, menu-throw 78/78,
+menu-materialize 62/62, menu-idle 69/69, s6-acceptance 224/228 (unchanged -
+1462 isn't one of its sampled ticks, so no improvement there, but no
+regression either), draft-cursor 13/13, draft-menu 38/38, draft-menu-slot6
+66/66 - every trace at its exact prior count except `sendout.json` itself.
+
+**One pre-existing Tier-1 test corrected, not just a new one added**:
+`tests/battleScene.test.ts`'s "opponent party-summary despawn... mechanism
+1" test asserted `pixelAtSentOut(1493,...) === pixelAtSentOut(1462,...)` -
+this passed before only because BOTH ticks accidentally rendered background
+under mechanism (a)'s bug (1462 never drew the icon at all). With 1462 now
+correctly showing the icon's own settled color `(74,66,90)`, that equality
+is genuinely false (oracle-confirmed at both ticks) - rewrote the test to
+pin the three ticks' literal oracle colors instead of a since-invalidated
+relationship. Two new tests added: the trainer x2=2 pin (screen (197,20),
+inside the hat brim - background under the old bug, the hat's own color
+`(156,140,74)` once fixed) and the corrected settled-icon pin above.
+`npm test` **555/555** (+1 net, one corrected + one added), `npm run build`
+green.
+
+**ISSUES #18 update**: this closes the entry's first bullet (1462) in full -
+both named mechanisms fixed, oracle-pixel-exact, no curve-fitting (both
+fixes are RAM/source-derived, cross-validated by an independent exhaustive
+pixel sweep landing on the identical value). The entry's remaining bullets
+(1493-95, 1496) are unrelated families (§7.28/7.29's blended-edge residual,
+§7.25's particle z-order) - explicitly out of scope for this step, untouched.
+
+**Committed this session**: `src/engine/battleScene.ts` (`drawBallIcons`
+call + `TRAINER_EXIT_X2`/`trainerExitX`), `tests/battleScene.test.ts` (1
+corrected + 1 new test). Scratch diagnostic scripts (`diag_1462.mjs`,
+`diag_1462b.mjs`, `crop_1462.mjs`, `shift_1462.mjs`) intentionally NOT
+committed, per this file's own established throwaway precedent.
