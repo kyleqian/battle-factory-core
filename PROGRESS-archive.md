@@ -5,6 +5,38 @@ archived entry on top. Git history has the full detail regardless.
 
 ---
 
+## 72 — S7 move-anim groundwork banked (parallel worktree lane, merged): ROCK_SLIDE assets + both turn-1 moves' script decode + oracle phase timelines — `docs/battle-move-anim-notes.md`
+
+- **State:** merge of `worker/wt-20260718-154328` (base `1f63f82`, merged
+  onto #71's `42d2258`): `npm test` **449/449** (442+7), `npm run build`
+  green.
+- **Did (worktree lane, supervisor-verified in the worktree pre-merge):**
+  (1) `extract-battle-move-anim-assets.ts` (twice-run byte-identical) →
+  `battle-anim-rocks.json` (rocks.png tiles/palette, the 3 frames
+  `gFallingRockSpriteTemplate` uses labeled); DOUBLE_TEAM needs ZERO new
+  art (clones are struct-copies of Grovyle's extracted front sprite via
+  `CloneBattlerSpriteWithBlend` — changes that move's "asset" shape
+  entirely). (2) `battle-move-anim-scripts.json` — decoded step lists
+  for both moves (20 rock spawns; DOUBLE_TEAM's 9-cue sound schedule);
+  `battle-move-anim-tables.json` — per-tick formulas (rock ellipse arc,
+  shake tasks, generic hit-flash shared by every damaging move). +7 pins.
+  (3) Oracle register watch + phase boundaries for both windows in new
+  `docs/battle-move-anim-notes.md` (did not touch battle-anim-assets.md).
+- **Open (dossier §5, honestly flagged not chased):** DOUBLE_TEAM's
+  66-tick BLDALPHA envelope isn't produced by the script's own single
+  `setalpha` (mechanism unidentified — the oracle envelope is the
+  trustworthy number); ROCK_SLIDE's unconditional `gBattle_BG3_Y` shake
+  never showed in RAM; falling-rocks visible window shorter than naive
+  spawn cadence predicts.
+- **Notes:** worktree removed, branch deleted after merge. No PAPERCUT.
+
+---
+
+---
+
+
+---
+
 ## 71 — S6 send-out slice STARTED: idle-hold + A-press #3 + "sent out GROVYLE!" text cadence byte-exact — NEW `sendout.json` **162/256**; visual handoff (trainer exit/ball/particles/materialize/healthbox) not yet implemented, precisely scoped for the next session
 
 - **State:** `npm test` **442/442** (438→442, +4 pins), `npm run build`
