@@ -795,3 +795,174 @@ frontier-pool species) will need an actual extractor (e.g. widening
 keyed off `battle-frontier-mons.json`'s species list) rather than
 hand-citing source per-species.
 
+**Follow-up (separate worker lane, same day):** the data gap above is
+closed — `tools/extract/extract-species-types.ts` now emits a full
+species->types table (`src/data/gen/species-types.json`, all 411 real
+species) and `tests/damageCalc.test.ts`'s ONIX/GROVYLE fixtures read from
+it instead of the hand-cited literal, pinned by `tests/speciesTypes.test.ts`.
+
+## 11. FIGHT submenu ground truth (S7 worktree lane, oracle-only scout — no engine code)
+
+Pins the window from the settled first action menu through the FIGHT
+(move-select) submenu: open transition, DOWN/UP/RIGHT/LEFT cursor nav
+(+ a held-repeat check), B-close, and the settled submenu's own idle
+behavior over 200+ ticks. **Oracle/probe work + docs only** — no
+`src/engine/` changes this session, per the worktree brief's scope.
+
+**Method.** Both new traces reuse `battle1-turn1.json`'s own first 41
+segments **verbatim** (cumulative 1888 frames, ending in the first `A`
+press that dismisses the settled action menu) so every tick number below
+stays directly comparable to §2/§9's tables — `identity` mapping, no
+shift, per §9 finding 1 (re-verified this session by replaying that exact
+prefix again: settled-menu sha and its tick range matched byte-for-byte).
+From tick 1888 the two traces diverge:
+
+- `tools/compare/traces-groundtruth/battle1-fight-submenu-nav.json` — open,
+  then a full RIGHT->DOWN->LEFT->UP loop through Onix's 4 moves (returns to
+  the start), a 40-frame held-DOWN repeat check, B-close, then idle to watch
+  the resumed action menu. Dense capture, every tick 1884-2118 (235 of the
+  256-capture cap).
+- `tools/compare/traces-groundtruth/battle1-fight-submenu-idle.json` — open
+  only, then idle-pads to tick 2139 with every tick captured (256 captures,
+  the oracle's hard per-trace cap) to watch the settled submenu for drift
+  over 200+ idle ticks undisturbed by any further input.
+
+Both run twice, **0 sha mismatches** (235/235 and 256/256 identical across
+runs) — every finding below, including the two odd single-tick anomalies in
+finding 4, reproduced byte-for-byte on the second run, so they're real
+deterministic emulator behavior, not capture flakiness.
+
+**1. The submenu OPEN — a hard cut, not a progressive draw-in.**
+
+| tick | sha256 (12 hex) | what |
+|---|---|---|
+| 1884-1886 | `d223d98a2da9` | settled action menu (identical to §2's own citation) |
+| 1887-1891 (5t) | `b145eaeff966` | **held/frozen** — see below, not a new draw |
+| **1892** | `9965bf5b2de9` | **submenu fully drawn** — window frame, all 4 move names, PP counter, type line, and cursor all present simultaneously |
+| 1892-1924 | 4-phase cycle (`9965bf5b2de9`/`1e6f506c5b5e`/`1be59a4ef8d4`/`d6f83c6fa9c3`, 9 ticks each) | idle-cycling on ROCK_SLIDE (slot 0) — same 4 shas §2's table already cited for this range, now confirmed as the actual repeating cycle, not just a sample |
+
+Densely capturing every tick 1887-1892 (not just the historically-sampled
+ticks) shows **no intermediate/partially-drawn frame** — the screen sits
+completely unchanged for 5 ticks (1887-1891), then the entire submenu
+(all 5 element categories at once) appears in a single frame at 1892.
+Source-confirmed why: `PlayerHandleChooseMove` (`battle_controller_player.c`)
+calls `InitMoveSelectionsVarsAndStrings()` synchronously the instant FIGHT
+is chosen — this draws the move names/PP string/PP number/type/cursor all
+in one call, into an **off-screen** BG0 tilemap region — then hands off to
+`HandleChooseMoveAfterDma3`, which just polls `IsDma3ManagerBusyWithBgCopy()`
+every tick and does nothing else (no `DoBounceEffect` call, unlike
+`HandleInputChooseAction`) until the copy finishes, at which point it flips
+`gBattle_BG0_Y` to scroll the pre-drawn region into view in one step. The
+5-tick hold is that DMA-wait window (variable-length, gated on `IsDma3Manager
+BusyWithBgCopy()`, not a fixed animation): the screen is static because the
+action menu's own bounce animation has *stopped being called*, not because
+anything is still drawing. **Settle tick: 1892** (6 ticks after the last
+settled-menu frame, 5 ticks after the `A` registers).
+
+**2. Cursor navigation.** `gMoveSelectionCursor` (`0x20244b0`, per-battler
+array, battler 0 = Onix/player) toggles bit0 on LEFT/RIGHT and bit1 on
+UP/DOWN (`battle_controller_player.c`'s `HandleInputChooseMove`, e.g.
+`gMoveSelectionCursor[gActiveBattler] ^= 1` for the RIGHT/LEFT branches),
+giving a 2x2 grid: `0`=ROCK_SLIDE, `1`=BIND, `2`=DRAGON_BREATH,
+`3`=SANDSTORM — confirmed both via this RAM read and via a direct RAM read
+of Onix's own move/pp slots at the settle tick (`gBattleMons+0x0C`/`+0x24`,
+species 95 = Onix): `move0`=MOVE_ROCK_SLIDE (pp 10/10, TYPE_ROCK),
+`move1`=MOVE_BIND (pp 20/20, TYPE_NORMAL), `move2`=MOVE_DRAGON_BREATH
+(pp 20/20, TYPE_DRAGON), `move3`=MOVE_SANDSTORM (pp 10/10, TYPE_ROCK) —
+`ppBonuses`=0 so max==base PP for all four, matching `src/data/gen/
+moves.json`. The nav script's RIGHT->DOWN->LEFT->UP loop (0->1->3->2->0)
+exercises every direction exactly once and returns to the start:
+
+| press | tick pressed | cursor RAM updates | pixel content changes |
+|---|---|---|---|
+| RIGHT (0->1, BIND) | 1909-1910 | same tick as press (1909) | 1 tick later (1910) |
+| DOWN (1->3, SANDSTORM) | 1931-1932 | 1931 | 1932 |
+| LEFT (3->2, DRAGON_BREATH) | 1953-1954 | 1953 | 1954 |
+| UP (2->0, ROCK_SLIDE) | 1975-1976 | 1975 | 1976 |
+
+Consistent 1-tick render lag every time: the RAM cursor write always lands
+on the button's first held frame, the visible redraw always lands one tick
+later (poll-then-commit-next-frame, the same pattern seen elsewhere in this
+dossier). Each of the 4 slots has its **own distinct set of idle-cycling
+shas** (zero overlap with any other slot's set) — direct pixel evidence,
+independent of the RAM read above, that the PP counter/type line/move name
+genuinely redraw per slot, not just the cursor sprite. Returning to
+ROCK_SLIDE (the UP press) reuses the exact same 4 shas seen at the original
+open (`1e6f506c5b5e`, `1be59a4ef8d4`, `d6f83c6fa9c3`, `9965bf5b2de9`) —
+content is a pure function of (selected slot, global phase clock), not of
+navigation history. DRAGON_BREATH (slot 2) got the longest dwell time in
+this script (via the held-repeat window below) and its full 4-phase set is
+directly confirmed twice over: `5dfb782aa6f7` -> `bb2275aaf67c` ->
+`691bd17740d3` -> `7f26033168ed` -> repeat, 9 ticks each. BIND/SANDSTORM
+were only visited for ~20-tick windows (less than one full 36-tick period),
+so only 2-3 of their 4 phases were directly observed this session — the
+same 9-tick/4-phase structure held everywhere it was checked, so the
+remaining phases are inferred, not independently confirmed.
+
+**Held-repeat check:** holding DOWN for 40 consecutive frames from
+ROCK_SLIDE moves the cursor exactly **once** (0->2, on the hold's first
+frame) and then holds there for the remaining 39 frames — RAM-confirmed,
+`gMoveSelectionCursor` reads `2` for the entire hold plus the following
+idle padding, through the B-close and beyond. **No auto-repeat.**
+Source-confirmed why: `HandleInputChooseMove`'s DPAD branches all gate on
+`JOY_NEW(...)`, never `JOY_REPEAT(...)` — unlike `HandleInputChooseAction`
+(the action menu one level up), which tracks `gPlayerDpadHoldFrames` for
+its L=A button-mode feature. This submenu's cursor nav has no repeat by
+design, verified empirically, not assumed from the source read alone.
+
+**3. B-close.** B registers, the screen holds static for 2 ticks (shorter
+than the 5-tick open-side DMA-wait, but the same kind of window — B's
+handler in `HandleInputChooseMove` also calls `MoveSelectionDisplayPPString/
+PPNumber/MoveSelectionDisplayMoveType` before handing back to
+`HandleInputChooseAction`), then cuts directly to the action menu's own
+4-phase/36-tick idle cycle: `dfc21fafddb9` -> `d223d98a2da9` ->
+`b145eaeff966` -> `fd778a4bb67c` -> repeat. **This set includes the exact
+tick-1884-1886 sha (`d223d98a2da9`) and the "open" transition's frozen sha
+(`b145eaeff966`) as ordinary 9-tick phases of the same cycle** — direct
+confirmation that those weren't special one-off graphics, just the action
+menu's regular animation caught mid-phase and frozen while its `DoBounceEffect`
+call was suspended during the submenu's DMA-wait windows. **The action menu
+resumes the same 4-phase idle cycle it was already running before FIGHT was
+opened — it does not reset to a fresh phase.** Evidence beyond the shas
+matching: the very first observed submenu-open phase was truncated to 6
+ticks instead of a full 9 (`9965bf5b2de9` at 1892-1897, immediately
+followed by a full 9-tick `1e6f506c5b5e` phase) — meaning that phase had
+already been running for 3 ticks *before* the reveal at 1892, i.e. the
+phase clock is a persistent/global counter that keeps advancing whether or
+not the submenu (or even the action menu) is currently being redrawn;
+opening/closing the submenu only pauses the *visible* redraw during its
+DMA-wait windows, never the underlying clock.
+
+**4. Settled-submenu idle behavior: cyclic, same 36-tick period as the
+action menu — but not perfectly pixel-stable.** The dedicated 256-capture
+idle-only trace (tick 1892-2139, ~6.9 full periods, no input after the
+initial open) confirms the exact same 4-phase/9-tick-each/36-tick-total
+cycle on ROCK_SLIDE as above, holding cleanly for the entire window with
+one exception: **two single-tick anomalous frames**, each a distinct sha
+not belonging to the 4-phase rotation, at tick **2071** and tick **2135**
+(64 ticks apart; both reproduced identically on the second independent
+run, so this is real deterministic behavior, not noise). Cause not
+identified this session — a plausible candidate is a slower, independent
+per-tick animation (e.g. the mon/healthbox bounce or a blend counter) that
+occasionally intersects the submenu's own redraw; flagged as an **open
+item** for whoever implements pixel-parity here, in case long-run cycle
+fidelity (beyond ~4 periods) matters for that slice's acceptance criteria.
+
+**5. RNG stays flat throughout.** `gRngValue` reads a single constant value
+(`3485459011`) across the *entire* window of both traces (ticks 1880-2118
+and 1880-2139 respectively) — open, all 4 nav presses, the held-repeat
+check, B-close, and both idle-padding windows. Zero `Random()` calls,
+confirmed via `tools/probe/ram-probe.py` +
+`tools/probe/specs/battle1-fight-submenu-rng-watch.json` (segments spliced
+in from the committed trace per that spec's own comment, matching this
+project's established convention for specs that mirror a committed trace's
+segments) — matches the dossier's established rule that menu navigation
+never consumes RNG (§9 finding 3's "animation tasks consume zero `Random()`
+calls", now confirmed for submenu nav/close too, not just the open-menu
+idle cycle).
+
+**Verification:** both traces run twice, 0 sha mismatches (235/235,
+256/256). RNG probe run against both traces' segments, single distinct
+value each run. `npm test` and `npm run build` green (no `src/` changes
+this section — oracle/probe/docs only, per the worktree brief's scope).
+
