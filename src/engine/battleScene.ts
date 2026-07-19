@@ -407,6 +407,8 @@ interface BallStatusBarAsset {
 interface OpponentFrontSpriteAsset {
   tileset: Tileset;
   palette: RgbColor[];
+  /** §7.16 mechanism 5: `HasTwoFramesAnimation`'s 2nd frame (`anim_front.png`'s bottom half) - shares `palette` above. */
+  frame2: Tileset;
 }
 /** Flat opaque RGB rectangle (row-major), pixel-harvested from the oracle's own settled capture - see `extract-sendout-healthbox-content.ts`'s header for why (the general tile-assembly mechanism is unsolved; this trace only ever needs one fixed content). */
 interface SendOutHealthboxContentAsset {
@@ -1355,6 +1357,141 @@ function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number):
 }
 
 /**
+ * §7.11/§7.16 mechanism 5: GROVYLE's species front-sprite entrance animation
+ * - `sMonFrontAnimIdsTable[SPECIES_GROVYLE-1] = ANIM_V_STRETCH` ->
+ * `Anim_VerticalStretch` (`pokemon_animation.c:1597-1635`), launched by
+ * `SpriteCB_OpponentMonFromBall` (`battle_main.c:2837-2848`) once
+ * `sprite->affineAnimEnded` (mechanism 4's own emerge finishing) - the SAME
+ * tick it also does `StartSpriteAnim(sprite, 1)` (`HasTwoFramesAnimation`),
+ * swapping the front sprite to its 2nd frame (`grovyleFrontSprite.frame2`,
+ * extracted this session from `anim_front.png`'s bottom half - top half
+ * self-verified pixel-identical to `front.png` before accepting the bottom
+ * half, `tools/extract/extract-battle-mon-pics.ts`).
+ *
+ * RAM-probed directly (`tools/probe/specs/sendout-grovyle-stretch.json`,
+ * `gSprites[8]` - `gBattlerSpriteIds[1]` confirmed 8 from tick 1461 on,
+ * §7.10 - `data[4]`/`data[5]`/`y2`, the exact `xScale`/`yScale`/vertical-
+ * offset args `Anim_VerticalStretch` feeds `SetAffineData`/`ObjAffineSet`)
+ * rather than reimplemented from `Sin()` source math, per this run's "RAM/
+ * groundtruth over source formulas" rule - avoids any `gSineTable` rounding
+ * risk for a mechanism that must be pixel-exact for dozens of ticks.
+ * `GROVYLE_STRETCH_TABLE[i]` is RAM tick `1503+i`'s post-tick data (36
+ * entries, RAM 1503-1538 - beyond that the sprite is already settled at
+ * neutral (256,256,0), confirmed by the same probe holding flat through
+ * 1549). Applied with this window's established 1-tick render lag
+ * (`renderTick = ramTick + 1`, the same family as every other sprite/
+ * register here) - re-confirmed for THIS mechanism specifically by brute-
+ * force testing lag candidates 0-7 directly against the oracle's own
+ * captures rather than assumed: lag 1 gives an exact pixel match on 38 of
+ * the 40 covered render ticks (`tools/compare/scratch/grovyle_full_check.mjs`,
+ * throwaway).
+ *
+ * The concurrent ball-color-tint fade-to-normal (`Task_FadeMon_ToNormal_Step`,
+ * `battle_anim_throw.c:2088-2102`) was ALSO RAM-probed directly (`gTasks[3]`,
+ * `tools/probe/specs/sendout-grovyle-taskfade.json`): `tCoeff` blends from 16
+ * (fully tinted, matching mechanism 4's own flat-cutoff value) down by 1
+ * every tick for 15 ticks (handoffTick+42 through +56, i.e. render
+ * 1504-1518), then the true normal palette (`coeff=0`) - the task's own
+ * last real call uses `coeff=1`, never a literal 0, but that residual 1/16
+ * blend rounds away to zero visible change for every one of GROVYLE's own
+ * palette colors (confirmed directly: plain/unblended rendering from render
+ * tick 1519 on is an exact pixel match against the oracle).
+ *
+ * **Known residual** (2 of 40 covered ticks, handoffTick+74/75 - render
+ * 1536/1537): a real, small, unexplained mismatch (1000/1688px, isolated to
+ * a small region near the sprite's head) even using the RAM-exact
+ * xScale/yScale/y2 for those two specific ticks - their immediate neighbors
+ * on both sides match exactly, so it isn't a lag or table error; not
+ * reverse-engineered further this session (flagged, not curve-fit away).
+ */
+const GROVYLE_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
+  { xScale: 263, yScale: 239, y2: -2 }, { xScale: 264, yScale: 236, y2: -2 }, { xScale: 265, yScale: 234, y2: -2 },
+  { xScale: 266, yScale: 231, y2: -3 }, { xScale: 267, yScale: 221, y2: -4 }, { xScale: 268, yScale: 222, y2: -4 },
+  { xScale: 268, yScale: 229, y2: -3 }, { xScale: 269, yScale: 231, y2: -3 }, { xScale: 270, yScale: 222, y2: -4 },
+  { xScale: 270, yScale: 213, y2: -5 }, { xScale: 271, yScale: 215, y2: -5 }, { xScale: 271, yScale: 223, y2: -4 },
+  { xScale: 271, yScale: 225, y2: -3 }, { xScale: 271, yScale: 218, y2: -4 }, { xScale: 272, yScale: 209, y2: -5 },
+  { xScale: 271, yScale: 212, y2: -5 }, { xScale: 271, yScale: 222, y2: -4 }, { xScale: 271, yScale: 226, y2: -3 },
+  { xScale: 271, yScale: 219, y2: -4 }, { xScale: 270, yScale: 213, y2: -5 }, { xScale: 270, yScale: 216, y2: -5 },
+  { xScale: 269, yScale: 227, y2: -3 }, { xScale: 269, yScale: 232, y2: -3 }, { xScale: 268, yScale: 227, y2: -3 },
+  { xScale: 267, yScale: 228, y2: -3 }, { xScale: 266, yScale: 230, y2: -3 }, { xScale: 265, yScale: 233, y2: -2 },
+  { xScale: 264, yScale: 235, y2: -2 }, { xScale: 263, yScale: 238, y2: -2 }, { xScale: 262, yScale: 241, y2: -1 },
+  { xScale: 261, yScale: 244, y2: -1 }, { xScale: 259, yScale: 247, y2: -1 }, { xScale: 258, yScale: 250, y2: 0 },
+  { xScale: 257, yScale: 253, y2: 0 }, { xScale: 256, yScale: 256, y2: 0 }, { xScale: 256, yScale: 256, y2: 0 },
+];
+/** handoffTick+42 through +56 (15 ticks): tCoeff 15 down to 1 (RAM-probed, see the module doc above); et>56 is the true normal palette. */
+function grovyleStretchTintCoeff(localOffset: number): number {
+  return Math.max(0, 15 - localOffset);
+}
+/** `BlendPalette`'s own 5-bit-channel blend (`palette.c`), same shape as `blendComponentToWhite` but toward an arbitrary target color, not just white. */
+function blendComponentToward(component8: number, target8: number, coeff: number): number {
+  const c5 = component8 >> 3;
+  const t5 = target8 >> 3;
+  const b5 = c5 + (((t5 - c5) * coeff) >> 4);
+  return (b5 << 3) | (b5 >> 2);
+}
+/** Same nearest-neighbor affine sampling as `drawSpriteSheetAffineTinted`, but with INDEPENDENT x/y scale (a true stretch, not uniform), a vertical pixel offset, and the sprite's OWN palette (optionally blended toward `tintColor` at `tintCoeff`) instead of a flat tint. */
+function drawSpriteSheetAffineStretch(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  xScale: number,
+  yScale: number,
+  y2: number,
+  tintColor: RgbColor,
+  tintCoeff: number,
+): void {
+  const w = tileset.columns * 8;
+  const h = tileset.rows * 8;
+  const halfW = w / 2;
+  const halfH = h / 2;
+  const mx = Math.trunc(0x10000 / xScale);
+  const my = Math.trunc(0x10000 / yScale);
+  for (let dy = 0; dy < h; dy += 1) {
+    const ry = dy - halfH;
+    const sy = ((ry * my) >> 8) + halfH;
+    if (sy < 0 || sy >= h) continue;
+    const tileRow = Math.floor(sy / 8);
+    const inTileY = sy % 8;
+    for (let dx = 0; dx < w; dx += 1) {
+      const rx = dx - halfW;
+      const sx = ((rx * mx) >> 8) + halfW;
+      if (sx < 0 || sx >= w) continue;
+      const tile = tileset.tiles[tileRow * tileset.columns + Math.floor(sx / 8)];
+      if (!tile) continue;
+      const idx = tile[inTileY * 8 + (sx % 8)]!;
+      if (idx === 0) continue;
+      const c = palette[idx];
+      if (!c) continue;
+      const color = tintCoeff > 0
+        ? { r: blendComponentToward(c.r, tintColor.r, tintCoeff), g: blendComponentToward(c.g, tintColor.g, tintCoeff), b: blendComponentToward(c.b, tintColor.b, tintCoeff) }
+        : c;
+      setPixel(fb, ox + dx, oy + dy + y2, color);
+    }
+  }
+}
+
+function drawGrovyleStretch(fb: Uint8Array, t: number, handoffTick: number): void {
+  const local = t - handoffTick - MATERIALIZE_END_OFFSET;
+  if (local < 0) return;
+  const entry = GROVYLE_STRETCH_TABLE[Math.min(local, GROVYLE_STRETCH_TABLE.length - 1)]!;
+  const coeff = grovyleStretchTintCoeff(local);
+  drawSpriteSheetAffineStretch(
+    fb,
+    grovyleFrontSprite.frame2,
+    grovyleFrontSprite.palette,
+    GROVYLE_CORNER.x,
+    GROVYLE_CORNER.y,
+    entry.xScale,
+    entry.yScale,
+    entry.y2,
+    MATERIALIZE_TINT_COLOR,
+    coeff,
+  );
+}
+
+/**
  * §7.4.2/mechanism 3 (`docs/battle-anim-assets.md` §1): the ball-open
  * particle burst - `AnimateBallOpenParticles(sprite->x, sprite->y - 5, 1,
  * 28, ballId)` (`pokeball.c:757`), same release tick as mechanism 4.
@@ -1618,7 +1755,11 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   drawGrovyleMaterialize(fb, t, handoffTick);
   drawSendOutBall(fb, t, handoffTick);
   drawBallOpenParticles(fb, t, handoffTick);
-  if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
+  if (t >= GROVYLE_MATERIALIZE_TICK) {
+    drawGrovyleSettled(fb);
+  } else {
+    drawGrovyleStretch(fb, t, handoffTick);
+  }
   drawBallIcons(fb, t, { opponent: false, player: true });
   drawOpponentSummaryExit(fb, t, handoffTick);
   const healthboxDx = healthboxSlideDx(t);
