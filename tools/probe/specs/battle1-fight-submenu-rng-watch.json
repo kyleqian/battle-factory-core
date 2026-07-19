@@ -1,0 +1,8 @@
+{
+  "_comment": "S7 groundwork (docs/battle-turn-notes.md §11): confirm gRngValue stays flat (no Random() calls) across the FIGHT-submenu open/nav/held-repeat/close window, plus gMoveSelectionCursor[0] as a cross-check that the nav script's RIGHT/DOWN/LEFT/UP presses land where expected (0=ROCK_SLIDE,1=BIND,2=DRAGON_BREATH,3=SANDSTORM per src/battle_controller_player.c's bit0=column/bit1=row toggle). segments = tools/compare/traces-groundtruth/battle1-fight-submenu-nav.json's own segments array (copy it in verbatim before running - kept out of this file to avoid duplicating 2118 committed segments). Re-run against battle1-fight-submenu-idle.json's segments too (idle-only window) for the same rng flatness check - both give a single distinct rng value across the whole run.",
+  "watch": [
+    { "name": "rng", "addr": "gRngValue", "size": 4 },
+    { "name": "cursor0", "addr": "gMoveSelectionCursor+0", "size": 1 }
+  ],
+  "startTick": 1880
+}

@@ -14,8 +14,19 @@ import {
 } from "../src/engine/damageCalc.ts";
 import { GbaRng } from "../src/engine/rng.ts";
 import typeEffectivenessData from "../src/data/gen/type-effectiveness.json" with { type: "json" };
+import speciesTypesData from "../src/data/gen/species-types.json" with { type: "json" };
 
 const TYPE_TABLE = typeEffectivenessData.typeEffectiveness as TypeEffectivenessEntry[];
+
+type SpeciesTypes = { name: string; types: [string, string] };
+const speciesTypes = new Map<string, [string, string]>(
+  (speciesTypesData.species as SpeciesTypes[]).map((s) => [s.name, s.types]),
+);
+function typesOf(species: string): [string, string] {
+  const types = speciesTypes.get(species);
+  if (!types) throw new Error(`no species-types.json entry for ${species}`);
+  return types;
+}
 
 // Battle 1's real, RAM-confirmed level-50 stat blocks (src/data/gen/
 // battle1-turn1-ram-dump.json's battlerSnapshots.before_turn, also matching
@@ -26,7 +37,7 @@ const ONIX = {
   spAttack: 36,
   spDefense: 72,
   level: 50,
-  types: ["TYPE_ROCK", "TYPE_GROUND"] as [string, string],
+  types: typesOf("SPECIES_ONIX"),
   statStages: { ...NEUTRAL_STAT_STAGES },
 };
 const GROVYLE = {
@@ -35,12 +46,7 @@ const GROVYLE = {
   spAttack: 91,
   spDefense: 71,
   level: 50,
-  // SPECIES_GROVYLE .types = { TYPE_GRASS, TYPE_GRASS } (reference/pokeemerald/
-  // src/data/pokemon/species_info.h:7657) - not in a committed extracted JSON
-  // for the frontier-opponent mon pool (species-stats.json/summary-info.json
-  // only cover the 6-species draft pool), so cited directly from reference
-  // source per docs/battle-turn-notes.md §10's data-gap note.
-  types: ["TYPE_GRASS", "TYPE_GRASS"] as [string, string],
+  types: typesOf("SPECIES_GROVYLE"),
   statStages: { ...NEUTRAL_STAT_STAGES },
 };
 
