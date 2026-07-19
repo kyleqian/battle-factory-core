@@ -5,6 +5,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 102 — Supervisor: round-7 worktree branch merged (one battleScene.ts draw-order conflict, hand-resolved + re-verified) — `sendout.json` **221 → 236/256**; 1504-1518 span closed by a one-line compositing fix
+
+- **State (verified post-merge):** `npm test` **520/520**, `npm run build`
+  green, tree clean. Post-merge re-runs: sendout **236/256**,
+  scene-assembly 256/256, menu-materialize 5/5, menu-throw 70/70,
+  menu-text 18/18, transition 206/206. Worktree removed, branch deleted.
+- **Did:** merged `worker/wt-20260719-021108`: the whole 1504-1518
+  residual was mechanism 5's LATE window still drawing AFTER the particle
+  burst (the early window was already moved pre-particles by §7.22/§7.23);
+  every diff pixel in the span was particle-colored inside an alive
+  particle's predicted footprint — no formula/table change, one call-site
+  move (§7.24). BONUS: falsifies §7.20's 1516/17 "particle survives past
+  age 24" theory — that pixel is index 12 at age 22, was just masked by
+  the same ordering bug. The merge conflicted with #101's player-particle
+  additions in the same drawSendOutHandoff region; resolution keeps
+  #101's player draw calls + the branch's Grovyle ordering (stretch
+  pre-particles, settled-only post) — re-verified above.
+- **Next:** main lane → drawPlayerMaterialize's silhouette-edge residual
+  at 1657+ (§7.21-class, named in #101; the opponent-side fix is the
+  template) then extend menu-materialize toward the healthbox-slide
+  boundary; worktree lane → sendout 1485-1495 (11 ticks, last big span);
+  then the #96 OAM-order fix solo, menu draw + idle, S6 acceptance.
+- **Notes:** sendout remaining: 1462, 1470/71/79, 1485-1495 (15 ticks
+  total). First merge conflict of the session — the two lanes finally
+  met in drawSendOutHandoff's z-order; resolution was mechanical.
+
+---
+
 ## 101 — Bounded worker: PLAYER-side ball-open particle burst landed (mechanism 3's player-side analogue, docs/battle-menu-notes.md §3 item 5) — `menu-materialize.json` **1/1 → 5/5** (ticks 1652-1656); a distinct materialize-silhouette-edge residual found starting 1657, not root-caused
 
 - **State:** `npm test` **519/519** (+3 Tier-1), `npm run build` green,
@@ -178,72 +206,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   or `docs/battle-scene-notes.md`. No PAPERCUT — the newest PAPERCUTS.md
   entry's "A/B the baseline first" advice is exactly what let this session
   separate the real root cause from the ONIX-shaped noise immediately.
-
----
-
-## 98 — Bounded worker: ONIX MATERIALIZE window started — ball open-pose swap landed exact (tick 1652), materialize accumulator/`y2` derived + pixel-verified correct in isolation but NOT shippable yet — blocked by a pre-existing, un-root-caused full-frame residual from tick 1653 on (not this session's bug)
-
-- **State:** `npm test` **510/510** (+3 Tier-1), `npm run build` green, tree
-  clean. New `tools/compare/traces/menu-materialize.json` (tick 1652 only):
-  **1/1** at 0 diff. Spot-check regression sweep (not the full 21 — time-
-  capped): `sendout.json` **215/256**, `menu-throw.json` **70/70**,
-  `menu-text.json` **18/18**, `scene-assembly.json` **256/256**, `anchor.json`
-  **1/1** — all at their exact established counts, zero regressions.
-- **Did:** implemented `drawPlayerBallOpen`/`playerBallOpenTopLeft`
-  (`battleMenu.ts`+`battleScene.ts`) — the ball's `StartSpriteAnim(sprite,1)`
-  "open" pose swap one tick after arrival (1652), clipped to screen y<112
-  (pixel-confirmed terrain occlusion — only the sprite's own top 2 rows are
-  ever visible at this screen position, resolving `battle-anim-assets.md`
-  §5's named placement gap). Also implemented `drawPlayerMaterialize`
-  (ONIX's own `BATTLER_AFFINE_EMERGE` scale-in silhouette, same shared
-  `SpriteCB_ReleaseMonFromBall`/accumulator table mechanism 4 already uses):
-  corner `(40,48)` (brute-force-confirmed via the settled back sprite's own
-  zero-diff exact match), accumulator lookup `local+2` (one step later than
-  mechanism 4's own `local+1` — a real, distinct offset for this call site,
-  not copied), reusing mechanism 4's exact 12-entry `y2` table verbatim —
-  all derived via oracle-pixel brute force
-  (`tools/compare/scratch/menu-audit/onix_materialize_bruteforce.mjs`,
-  committed) against `battle1-menu-dense.json`, cross-checked by confirming
-  it reduces the full-frame diff at every tick 1653-1663 by EXACTLY the
-  tint silhouette's own pixel count each tick (150px→1551px, matching
-  `docs/battle-menu-notes.md`'s own independently-harvested exact-tint-pixel
-  table 1:1) — strong evidence the derivation is correct even though it
-  isn't in the committed trace (see below).
-- **Why the window stops at 1652, not ~1690 as the brief hoped:** a
-  `git stash` A/B check proved a large (~2400px at 1653, growing to
-  ~7700px by 1663) full-frame pixel residual already exists on this
-  session's UNMODIFIED starting code for every tick from 1653 on — i.e. it
-  predates this session and isn't caused by anything landed here. Its shape
-  (small, ~8-9-per-channel deltas scattered across most of the frame width
-  at y≈51-52, not confined to ONIX's own `(40,48)`-`(104,112)` box) doesn't
-  match the ONIX/ball/particle mechanisms this step targets, and wasn't
-  root-caused this session (time-boxed). Since it alone exceeds a 0-diff
-  bar for every tick past 1652, extending the committed trace past it would
-  mean shipping a nonzero-diff trace — not done, per this run's own rules.
-  Full derivation + exact evidence: `docs/battle-menu-notes.md` §3 item 5
-  (updated this session).
-- **Next:** (1) root-cause the pre-existing ~1653+ full-frame residual (NOT
-  ONIX-shaped — start by bisecting which existing mechanism/table stops
-  covering this far into the trace); once fixed, `drawPlayerMaterialize`
-  (already landed, already verified correct in isolation) should start
-  flipping full-frame-exact ticks with no further changes; (2) the
-  open-particle burst (mechanism 3's player-side analogue) — fully
-  unattempted this session; (3) healthbox slide-in → settle (the idle-bob
-  interaction flagged in §3 item 5 makes this entangled with materialize's
-  own tail, don't attempt independently); (4) full 21-trace sweep before
-  the next window extension (this session only spot-checked 5). Brendan-
-  vs-icon sprite-priority compositing (#96) and the #96 OAM-order general
-  fix remain supervisor-scheduled, untouched.
-- **Notes:** stayed out of battleScene.ts's opponent-side internals/
-  battleScene.test.ts (the concurrent worktree worker's territory) — only
-  additive `drawPlayerBallOpen`/`drawPlayerMaterialize` + call-site hooks in
-  `drawSendOutHandoff`, plus `battleMenu.ts` pure functions and
-  `docs/battle-menu-notes.md` (mine to edit). docs/battle-scene-notes.md,
-  ROADMAP.md, oracle/harness untouched. PAPERCUT: this step's brief assumed
-  the window would cleanly reach ~1690 given "assets ready"; a full 45-min
-  session went mostly to pixel-forensics (corner/accumulator/occlusion
-  brute-forcing) before finding the REAL blocker was a pre-existing,
-  unrelated residual outside this step's own code — ~10-15 min lost to not
-  A/B-testing against unmodified code sooner.
 
 ---
