@@ -686,3 +686,112 @@ blocks via `dump-battler-snapshot.py`; hitMarker/AI/battleSceneOffBit via
 re-derivable from the committed trace's own segments) all re-run twice this
 session, 0 mismatches.
 
+## 10. Engine port (S7 worktree lane, turn-resolution core) — hermetic, no oracle this session
+
+Ported the pure-logic core this dossier's groundwork enables:
+`src/engine/damageCalc.ts` (`CalculateBaseDamage`, `Cmd_critcalc`,
+`Cmd_typecalc`'s STAB/type-effectiveness steps, `ApplyRandomDmgMultiplier`,
+`Cmd_accuracycheck`), `src/engine/turnOrder.ts` (`GetWhoStrikesFirst` +
+a generalized N-battler turn-order sort), `src/engine/turnRng.ts` (the
+12-step turn-1 RNG ledger, replaying on top of S3's existing `GbaRng`
+rather than duplicating the LCG). Tests: `tests/damageCalc.test.ts`,
+`tests/turnOrder.test.ts`, `tests/turnRng.test.ts` (19 new, `npm test`
+574/574, `npm run build` green). Entirely hermetic — no oracle calls, no
+new traces, no RAM probes; every pinned number comes from the already-
+committed `src/data/gen/battle1-turn1-ram-dump.json` and reference source.
+
+**Major discrepancy found and fixed: `CalculateBaseDamage` has an
+unconditional `+2` at its very end (`pokemon.c:3371`, `return damage + 2;`)
+that both this dossier's own §5 hand-verification AND `turn-resolution-
+notes.md`'s §3 hand-verification missed.** It's easy to miss reading the
+function top-down — it lives after the entire weather/Flash-Fire block, far
+past where the physical/special branches' arithmetic ends. Discovered by
+decoding the *exact* raw `Random()` u16 output for Rock Slide's
+damage-spread roll from the committed dump's LCG transition
+(`gRngValue`: `2176095973` → `435971572`, tick 2337) and finding that only
+`base=32` (not §5's hand-derived `base=30`) reproduces the dump's own
+`gBattleMoveDamage=42` bit-exactly against that real roll — `30→STAB 45→
+spread with the real roll = 39 ≠ 42`; `32→STAB 48→spread with the real
+roll = 42` exactly. Cross-checked against the dump's own raw per-tick
+`moveDamage` column, which independently confirms the intermediate values:
+tick 2335 (post-`Cmd_damagecalc`, pre-STAB) = **32**; tick 2336
+(post-`Cmd_typecalc` STAB) = **48**; tick 2337 (post-spread) = **42**. This
+is now `calculateBaseDamage`'s pinned Tier-1 regression case (`tests/
+damageCalc.test.ts`), LCG-step-verified end to end: accuracy roll (hit,
+`calc=60` after Grovyle's evasion stage 7 + BRIGHT_POWDER's 10% cut) → crit
+roll (not a crit) → damage-spread roll (42) all independently reproduce the
+dump's real per-step RNG transitions and outputs, not just the final
+number.
+
+**Second-order consequence: `turn-resolution-notes.md` §3's Fury Cutter
+"this was a critical hit" conclusion is very likely itself an artifact of
+the same missing-`+2` bug**, and the brief's own stated regression case
+(`atk103/def56/pow10/lvl50/crit×2/no-STAB/neutral → 3`, inherited from
+`turn-resolution-notes.md` §6 item 1's condensed one-liner) is internally
+inconsistent with the corrected formula — `def56` is Grovyle's *own*
+defense (irrelevant; Grovyle is Fury Cutter's attacker, not its defender)
+and, worked through `calculateBaseDamage` with the `+2` fix, produces a
+spread range of `[17,20]` (crit×2) or `[8,10]` (no crit) — **3 is
+unreachable either way**. The defender is actually **Onix** (`def=187`,
+matching `turn-resolution-notes.md` §3's own worked prose, not that same
+document's §6 summary line), which with the `+2` fix gives `base=4` — and
+**3 turns out to be reachable via the ordinary 85–100% spread with NO
+crit at all** (15 of 16 equally-likely `Random()%16` outcomes floor to 3;
+only the 100% outcome gives 4). Pinned as a corrected regression case in
+`tests/damageCalc.test.ts` with the discrepancy documented inline. This
+case is *not* independently RAM-verified this session (its source trace was
+an uncommitted scratch session, per that document's own header) — the
+correction is a formula-consistency argument, not a fresh oracle probe
+(this session stayed hermetic per its brief), so it's reported as a
+correction with reasoning shown, not asserted as re-verified ground truth.
+
+**Branches exercised (Tier-1-tested) vs. structurally-present-but-untested
+this step:**
+
+- **Exercised**: physical-move damage (attack/level/power/defense chain,
+  the `+2`, STAB, neutral type-effectiveness lookup), crit determination at
+  `critChance` stage 0, the 85–100% random spread, accuracy calc including
+  a target's `HOLD_EFFECT_EVASION_UP` item, `GetWhoStrikesFirst`'s plain
+  speed comparison (real battle-1 stats, no tie), the full 12-step turn-1
+  RNG ledger replayed bit-exactly against the committed dump.
+- **Structurally present, NOT exercised by any battle-1 turn-1 fixture**:
+  the special-move damage branch (mirrors the physical branch; no special
+  move was traced this dossier), crit-chance boosters (Focus Energy,
+  Scope Lens, Lucky Punch/Chansey, Stick/Farfetch'd, high-crit move
+  effects), Reflect/Light Screen halving, double-battle target-split
+  halving, burn-halves-attack (unless Guts), type-effectiveness
+  multipliers other than 1x (no super/not-very-effective matchup occurs in
+  battle 1 turn 1), `GetWhoStrikesFirst`'s weather-speed-double
+  (Swift Swim/Chlorophyll), Macho Brace, paralysis speed-quarter, and Quick
+  Claw. The `Random()&1` speed-tie branch is unit-tested **directly** with
+  synthetic speeds (`tests/turnOrder.test.ts`), both bit values, since no
+  battle-1 pairing ever ties (`turn-resolution-notes.md` §6 risk 4) and no
+  oracle trace will ever exercise it.
+- **NOT ported at all** (out of scope, no battle-1 turn needs them):
+  weather-based damage modifiers (rain/sun/sandstorm/hail, Flash Fire),
+  the 6 species-locked hold items (Soul Dew, Deep Sea Tooth/Scale, Light
+  Ball, Metal Powder, Thick Club — none of battle 1's 6 mons are eligible
+  species), badge boosts (hardcoded off — `ShouldGetStatBadgeBoost` is
+  unconditionally `FALSE` for `BATTLE_TYPE_FRONTIER`, which every battle
+  this engine models is), Wonder Guard's move-failure side effect (only its
+  raw type multiplier is applied via the normal table lookup),
+  `sHoldEffectToType`'s type-boosting hold items (battle 1 confirmed
+  item-free of these, `docs/battle-turn-notes.md` §7 item 1).
+
+**Data gap found (not fixed this step, noted per the brief's hermetic
+constraint):** `src/data/gen/species-stats.json` and `summary-info.json`
+(the only committed species-type data) are scoped to the 6-species player
+draft pool (ONIX/MAGBY/BAYLEEF/BUTTERFREE/HAUNTER/QUILAVA per
+`tools/extract/extract-species-header.ts`'s own `POOL_SPECIES` list) — the
+opponent battle-1 mons (GROVYLE/MURKROW/PIDGEOTTO) have **no committed
+type-data JSON at all**. This dossier's own §5 asserts "Grovyle is GRASS"
+as prose, sourced from reading `reference/pokeemerald/src/data/pokemon/
+species_info.h` directly rather than from extracted data — confirmed
+again this session (`SPECIES_GROVYLE.types = { TYPE_GRASS, TYPE_GRASS }`,
+`species_info.h:7657`) and used as a test fixture constant with that
+citation, but a future S7 slice touching Murkrow/Pidgeotto (or any other
+frontier-pool species) will need an actual extractor (e.g. widening
+`extract-species-header.ts`'s pattern, or a new `extract-species-types.ts`
+keyed off `battle-frontier-mons.json`'s species list) rather than
+hand-citing source per-species.
+
