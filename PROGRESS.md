@@ -57,6 +57,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (1560+), S6 acceptance end-to-end, S7.
 - **Notes:** healthboxAssembly.ts/healthbox docs, oracle/harness, and
   ROADMAP.md stayed out of scope, per the brief. No PAPERCUT.
+  **Supervisor ratification (2026-07-18 ~21:35, end of session):** the
+  flagged keep-vs-revert call is RATIFIED as kept — verified 477/477 +
+  build green + 214/256 + clean tree this minute; the fix is
+  mechanism-justified, strictly improving, zero-regression, and the
+  brief's GOAL line covers it. Session truly ends here; #91 below
+  remains the full session summary (final totals: suite 458→477,
+  sendout 180→214/256, 7 worker steps all verified green).
 
 ---
 
