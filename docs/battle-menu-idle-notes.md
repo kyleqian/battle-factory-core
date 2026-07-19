@@ -333,3 +333,132 @@ clear call itself (§4) is still open.
 New committed artifact: `tools/probe/specs/menu-idle-bounce.json` (RAM
 probe spec backing §1's table; reruns clean against the live oracle,
 `gSprites[6]`/`gSprites[0]` `y2` fields).
+
+## 7. Engine-slice session (worker lane): the window implemented, both remaining open items closed, `menu-idle.json` **69/69** at 0 diff
+
+**Both of §6's still-open items are now closed:**
+
+**Cursor-tile byte-check (§3/§6, was "still open")**: byte-compared
+`src/assets/gen/battle-window.json`'s tiles `{1,2}` (rendered with that
+asset's own `palette[0]` — the same palette `MESSAGE_PALETTE`
+already uses for the message text) against every position in the
+oracle-harvested tick-1748 frame — **exactly one** 8x16 position matches
+every opaque pixel byte-for-byte: `(128,120)`, i.e. immediately left of
+"FIGHT". Confirms `battle-menu-notes.md` §5's own "likely already covered,
+unverified" note: the cursor genuinely is tiles 1/2 of the same window
+tileset, no separate asset needed. (Script: ad hoc, not committed — a
+direct brute-force position scan, not needing to persist since the
+harvested frame itself is the committed artifact this check reads.)
+
+**Blank-box 1742-1747 source call (§4, was "not found this session")**:
+found. `TryDoEventsBeforeFirstTurn` (`battle_main.c:3841-3910`) — the
+function `gBattleMainFunc` is still set to at trace tick 1741 (per §5's own
+already-established `gBattleControllerExecFlags`-gated chain: this function
+itself early-returns at its very first line while the flag is still set,
+`:3847-3848`) — on the tick everything finally clears through with no
+switch-in ability/item/weather effect firing, ends with:
+```c
+BattlePutTextOnWindow(gText_EmptyString3, B_WIN_MSG);   // battle_main.c:3904
+gBattleMainFunc = HandleTurnActionSelectionState;        // :3905
+```
+`gText_EmptyString3` (`battle_message.c:498`) is a literal `""` — zero
+characters — so this is the SAME `BattlePutTextOnWindow` mechanism §2's
+"Go! ONIX!" print already uses, just with an empty string: it redraws
+`B_WIN_MSG`'s frame with no text, producing exactly the pixel-observed
+teal blank (this is also why the blank reuses the *same* window art as
+every other message box in this trace — it's the identical window, just
+emptied, not a distinct asset). This resolves the dossier's own named
+distinction from tick 1563's clear (`battle-menu-notes.md` §1/§2): both
+are the *same* `BattlePutTextOnWindow`-clears-then-optionally-fills
+mechanism; 1563 fills the very next tick (one call, `PrintTextOnWindow`
+starts immediately after), while this window's clear (from
+`TryDoEventsBeforeFirstTurn`, a completely different call site than
+`BattleIntroPrintPlayerSendsOut`) is followed by several ticks of unrelated
+state-machine plumbing (`HandleTurnActionSelectionState`'s
+`STATE_BEFORE_ACTION_CHOSEN` emitting `BtlController_EmitChooseAction`,
+the controller-exec round trip, `PlayerHandleChooseAction`'s *off-screen*
+draw per §3, then `HandleChooseActionAfterDma3` polling
+`IsDma3ManagerBusyWithBgCopy()`) before anything fills the box again — that
+gap is what stretches one clear call into 6 visible-blank ticks. The exact
+per-tick breakdown of those 6 ticks across that chain was not individually
+RAM-probed this session (not needed: the window is modeled as a single flat
+harvested frame end-to-end, §7.1 below) — flagging as a finer-grained
+open item for a session that wants the sub-tick mechanism rather than the
+pixel result.
+
+**Implementation (`battleMenu.ts` + additive `battleScene.ts` hooks,
+`tests/battleMenuIdle.test.ts`)**:
+
+1. **Composition strategy — oracle pixel-harvest, not layered redraw.**
+   This window's settled composition (ONIX materialized, its healthbox slid
+   in, ball icons, window frame) depends on a concurrent sibling lane's
+   in-flight healthbox-slide work, and the engine's own pre-existing
+   `drawSendOutHandoff` has a latent bug in this exact tick range (Brendan's
+   throw-pose→settled-pose fallback re-draws him at his original corner
+   once his own frame table runs out at `t>=1690`, since `brendanThrowFrame`
+   returns `null` there and the caller's `null` branch means "hasn't
+   started" as well as "long since finished" — out of scope to fix, not
+   this lane's file). Per the supervisor's brief, this window instead
+   pixel-harvests full-frame/region content directly from the oracle
+   (`tools/extract/extract-menu-idle-window.ts`, same §7.9 methodology as
+   `sendout-healthbox-opponent.json`) and **entirely bypasses**
+   `drawSendOutHandoff` for `t >= MENU_IDLE_BLANK_START_TICK` (1742) —
+   `renderBattleScene` dispatches straight to the new
+   `drawActionMenuIdleWindow`. **Composed vs. inherited, explicitly**: the
+   *pixels* for every layer in this window (background, ONIX, healthbox,
+   ball icons, window frame, menu text/cursor) are 100% oracle-harvested
+   (inherited verbatim, not independently redrawn/decomposed); the
+   *generator logic* selecting which harvested layer to show at a given
+   tick (blank vs. drawn; which of the bounce's states) is newly composed,
+   real code — a closed-form function of `t`, not a per-tick replay table.
+2. **Assets** (`src/assets/gen/`): `menu-idle-blank.json` (full 240x160,
+   tick 1742 — used verbatim for all of 1742-1747, byte-identical per §4's
+   own pixel confirmation); `menu-idle-base.json` (full 240x160, tick 1748
+   — both bounce regions at rest); `menu-idle-onix-bounce.json` (region A's
+   bbox, `(44,49)-(99,110)`, tick 1759's content — composited on top of the
+   base when `onixY2>=1`); `menu-idle-healthbox-bounce.json` (region B's
+   bbox, `(127,74)-(229,110)`, two states: tick 1749's content for
+   `healthboxY2=1`, tick 1813's for the rare `healthboxY2=2`). Full frames
+   for the blank/base states (the entire underlying composition genuinely
+   differs, or is out-of-lane-scope to independently derive); small bbox
+   patches for the two bounce regions (same rectangle-blit methodology as
+   `sendout-healthbox-opponent.json`, since only those regions ever change
+   once the menu is drawn).
+3. **Generator** (`battleMenu.ts`'s `menuIdleBounce(t)`): implements §1's
+   closed-form exactly — `sinIndex(t) = seed + 7*(ramTick-1748)`,
+   `y2 = Sin(sinIndex,1)+1`, `screenTick T` reads `ramTick=T-1` — **using a
+   literal copy of `gSineTable[0..255]`** (`reference/pokeemerald/src/
+   trig.c`), not the existing `gbaSin` `Math.sin`-based approximation §1
+   explicitly flagged as untested/risky for this exact use: this session
+   found `gbaSin` disagrees with the real table by 1 Q8.8 unit at indices
+   62/63 (`Math.round` rounds `0.99609375*256` up to `256`; the real table
+   is `255`), which flips `y2` from `1` to a phantom `2` at screen ticks
+   1767/1804 — **ticks this window's own trace covers**, where the oracle
+   never actually shows that state (confirmed: the literal-table version
+   matches the oracle's own sha at all 69 captured ticks with zero
+   mismatches; the `gbaSin` version would have produced 2 wrong frames).
+   The risk §1 flagged as "smaller for amplitude-1 uses, but untested" was
+   real, not hypothetical, for this specific mechanism.
+4. **Verified**: `tools/compare/traces/menu-idle.json` (NEW, captures every
+   tick 1742-1810, the brief's own 69-frame span) — **69/69 at 0 diff**.
+   Full battle-family sweep (23 traces incl. this new one) — every other
+   trace's count exactly matches PROGRESS #108's own baseline, zero
+   regressions (the 3 draft traces — `draft-cursor` 13/13, `draft-menu`
+   38/38, `draft-menu-slot6` 66/66 — are part of that same sweep, all still
+   exact). `tests/battleMenuIdle.test.ts` (NEW file, 15 tests): pins the
+   blank/draw boundary ticks, the closed-form generator against the
+   dossier's own RAM-probed phase table (§1) including the tick-1749 blip
+   and the tick-1813 rare transient, and a belt-and-suspenders check that
+   `renderBattleScene`'s output matches each committed harvest asset
+   exactly. `npm test` 540/540 (was 525), `npm run build` green.
+5. **Not attempted / explicitly out of scope this session** (per the
+   worktree brief): fixing `drawSendOutHandoff`'s Brendan-reappears bug in
+   `t>=1690` (irrelevant now that this window bypasses that function
+   entirely, but the bug itself is still latent in that function's own
+   code, for whichever lane owns 1663-1741); the finer-grained per-tick
+   breakdown of the 6-tick blank's own state-machine walk (item 2 above);
+   generalizing the generator/harvest beyond this window's own tested range
+   (e.g. region A's own rare `y2=2` tick, which the closed-form predicts
+   correctly but has no harvested pixel patch, since it doesn't occur
+   within 1742-1810 — `drawActionMenuIdleWindow` degrades that state to the
+   `y2=1` patch rather than crashing, a named approximation, not silent).
