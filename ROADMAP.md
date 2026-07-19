@@ -321,9 +321,17 @@ damage/order/RNG-consumption values against a RAM dump of the same turns.
 Victory flow, the swap offer + factory swap screen, chaining into battles
 2–7, round completion and loss endings (BP beyond the single round stays out
 of scope).
-**Acceptance:** committed trace winning battle 1 and traversing the swap
-screen into battle 2's first action menu passes compare with 0 diff on
-dense captures; Tier-1 tests pin swap logic and round-loop state.
+**Acceptance (re-scoped by user decision, 2026-07-19):** battle 1's win and
+the swap traversal into battle 2's first action menu are pinned by a
+**chain of overlapping committed traces** (each ≤ the oracle's 20000-frame
+cap, each passing compare with 0 diff on dense captures, adjacent traces
+sharing verbatim button-script prefixes so coverage is gapless) — a single
+end-to-end trace is NOT required. Rationale: `battle-turn-notes.md` §14's
+frame-budget analysis (supervisor-verified) shows no proven winning line
+fits one trace from the anchor; the user chose multi-trace assembly over
+raising the oracle cap or adding snapshot/restore (those remain available
+as future harness options). Tier-1 tests pin swap logic and round-loop
+state as before.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
