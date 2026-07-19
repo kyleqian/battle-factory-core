@@ -39,6 +39,11 @@ import {
   DOUBLE_TEAM_VISIBLE_END_DELAY,
   statsBannerBg1Y,
   STATS_BANNER_BG1_Y_ANCHOR_DELAY,
+  rockSlideRockState,
+  rockSlideBg3Y,
+  rockSlideMonShakeY2,
+  rockSlideDrawOrder,
+  ROCK_SLIDE_RAM_ANCHOR_DELAY,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -466,5 +471,52 @@ describe("battleMenu: stat-change banner BG1 scroll (docs/battle-menu-notes.md �
     expect(statsBannerBg1Y(2150, pressTick)).toBe(60); // RAM tick 2149
     expect(statsBannerBg1Y(2160, pressTick)).toBe(90); // RAM tick 2159
     expect(statsBannerBg1Y(2190, pressTick)).toBe(180); // holds at the ramp's own max past teardown
+  });
+});
+
+describe("battleMenu: ROCK_SLIDE window (docs/battle-menu-notes.md §11, slice C - #129's deferred pins plus this session's rock-vs-rock draw-order simulation)", () => {
+  const pressTick = 1919; // matches this window's other tests + turn1-rockslide.json's own anchor
+
+  it("rockSlideBg3Y: the 11-tick shake sequence (0,-7,-7,0,0,-7,-7,0,0,-7,-7), RAM-reconfirmed §11, one-tick render lag", () => {
+    expect(rockSlideBg3Y(pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + 1, pressTick)).toBe(0); // RAM tick anchor (d=0)
+    expect(rockSlideBg3Y(pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + 2, pressTick)).toBe(-7); // d=1
+    expect(rockSlideBg3Y(pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + 3, pressTick)).toBe(-7); // d=2
+    expect(rockSlideBg3Y(pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + 4, pressTick)).toBe(0); // d=3
+    expect(rockSlideBg3Y(pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + 11, pressTick)).toBe(-7); // d=10, last active
+    expect(rockSlideBg3Y(pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + 12, pressTick)).toBe(0); // d=11, past the sequence
+  });
+
+  it("rockSlideMonShakeY2: period-4 [5,5,0,0] render pattern, active 2362-2455 only (pixel-fit per §11, pinned here as a regression guard)", () => {
+    expect(rockSlideMonShakeY2(2361, pressTick)).toBe(0); // one tick before the window opens
+    expect(rockSlideMonShakeY2(2362, pressTick)).toBe(5);
+    expect(rockSlideMonShakeY2(2363, pressTick)).toBe(5);
+    expect(rockSlideMonShakeY2(2364, pressTick)).toBe(0);
+    expect(rockSlideMonShakeY2(2365, pressTick)).toBe(0);
+    expect(rockSlideMonShakeY2(2455, pressTick)).toBe(5); // last active render tick
+    expect(rockSlideMonShakeY2(2456, pressTick)).toBe(0); // one tick after the window closes
+  });
+
+  it("rockSlideRockState: position/animNum RAM-cross-verified this session (dump-rockslide-slot-order.py) for rocks at both window edges and mid-window", () => {
+    expect(rockSlideRockState(0, 2348, pressTick)).toEqual({ centerX: 171, centerY: -16, animNum: 1 }); // rock 0's own spawn tick
+    expect(rockSlideRockState(4, 2400, pressTick)).toEqual({ centerX: 142, centerY: 31, animNum: 0 });
+    expect(rockSlideRockState(12, 2440, pressTick)).toEqual({ centerX: 136, centerY: 44, animNum: 0 });
+    expect(rockSlideRockState(19, 2470, pressTick)).toEqual({ centerX: 225, centerY: 49, animNum: 2 }); // rock 19 (last), near its own despawn
+    expect(rockSlideRockState(19, 2472, pressTick)).toEqual({ centerX: 225, centerY: 51, animNum: 2 }); // n=48, last active render tick (held)
+    expect(rockSlideRockState(19, 2473, pressTick)).toBeNull(); // n=49, gone
+  });
+
+  it("rockSlideDrawOrder: the real gSprites[] slot-allocation + SortSprites simulation (this session, docs/battle-menu-notes.md §11) - RAM-validated 0 mismatches (tools/probe/dump-rockslide-slot-order.py vs battle1-rockslide-dense-b.json, 143 slot-assignment ticks + 117 multi-rock order ticks) - a spot sample across the window, background-to-foreground order", () => {
+    expect(rockSlideDrawOrder(2352, pressTick)).toEqual([1, 0]); // first overlap (2 rocks), no Y-tie
+    expect(rockSlideDrawOrder(2367, pressTick)).toEqual([4, 3, 2, 1, 0]); // 5 rocks, still no Y-tie
+    expect(rockSlideDrawOrder(2379, pressTick)).toEqual([7, 6, 5, 0, 1, 2, 4, 3]); // 8 rocks, first Y-ties resolved via sSpriteOrder history
+    expect(rockSlideDrawOrder(2396, pressTick)).toEqual([12, 11, 10, 4, 3, 5, 9, 2, 6, 1, 7, 0, 8]); // 13 rocks, peak overlap
+    expect(rockSlideDrawOrder(2418, pressTick)).toEqual([17, 16, 15, 9, 10, 8, 11, 7, 12, 14, 6, 13]); // slot reuse well underway
+    expect(rockSlideDrawOrder(2434, pressTick)).toEqual([19, 13, 14, 12, 15, 11, 16, 18, 10, 17]);
+    expect(rockSlideDrawOrder(2454, pressTick)).toEqual([18, 19, 17, 16, 15]); // winding down to the last 5
+  });
+
+  it("rockSlideDrawOrder: empty before the window opens and after every rock has despawned", () => {
+    expect(rockSlideDrawOrder(pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY, pressTick)).toEqual([]);
+    expect(rockSlideDrawOrder(2473, pressTick)).toEqual([]); // one past rock 19's own despawn (2472)
   });
 });

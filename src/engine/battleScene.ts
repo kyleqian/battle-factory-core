@@ -455,7 +455,7 @@ import {
   rockSlideTextVisibleChars,
   rockSlideBg3Y,
   rockSlideRockState,
-  ROCK_SLIDE_ROCK_COUNT,
+  rockSlideDrawOrder,
   rockSlideHealthboxWobbleY2,
   rockSlideMonBlinkInvisible,
   rockSlideMonShakeY2,
@@ -3287,7 +3287,7 @@ function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2);
   drawMenuHealthboxPlayer(fb, 0);
   drawMenuIdleBounceOverlay(fb, turnKickoffBounceTick(t, pressTick));
-  for (let i = 0; i < ROCK_SLIDE_ROCK_COUNT; i += 1) {
+  for (const i of rockSlideDrawOrder(t, pressTick)) {
     const rock = rockSlideRockState(i, t, pressTick);
     if (!rock) continue;
     drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);

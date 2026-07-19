@@ -1431,6 +1431,220 @@ export function rockSlideRockState(index: number, t: number, pressTick: number):
 }
 
 /**
+ * Rock-vs-rock OAM stacking order (docs/battle-menu-notes.md §11's own
+ * named residual) - a faithful port of the real `SortSprites`
+ * insertion-sort comparator (`reference/pokeemerald/src/sprite.c:372-467`)
+ * plus `CreateSprite`'s "lowest free slot" allocator (`:502-510`), run
+ * forward tick-by-tick from a RAM-read seed. RAM-validated (new probe
+ * `tools/probe/dump-rockslide-slot-order.py`, run against the committed
+ * `battle1-rockslide-dense-b.json`, twice for determinism): **0
+ * mismatches** on slot assignment (all 20 rocks + the shake sprite,
+ * every one of 143 sampled RAM ticks 2338-2480) AND **0 mismatches** on
+ * the resulting relative rock draw order (all 117 multi-rock ticks in
+ * that window, including the 56 that have at least one exact on-screen-Y
+ * tie among simultaneously alive rocks).
+ *
+ * **Why simulate at all, not a static table**: only 13 distinct
+ * `gSprites[]` slots host all 20 rocks (slots free up and get reused as
+ * earlier rocks despawn, RAM-confirmed - `rockSlideRockState`'s own doc
+ * comment on the `n=49` destroy), so "spawn order" and "final OAM order"
+ * diverge over the window - the prior session's fixed table-index draw
+ * order only got ~71% of frames right.
+ *
+ * **Why the simulation only needs to track the 20 rocks (not the other
+ * ~50 `gSprites[]` slots the real hardware also sorts every frame)**:
+ * `SortSprites`'s own tie-break only fires between two slots with an
+ * EXACT packed-key tie (`subpriority | oam.priority<<8`). RAM-confirmed
+ * the 20 rocks are the ONLY sprites in this whole scene that ever share
+ * their exact key - `oam.priority=2` for every one
+ * (`gOamData_AffineOff_ObjNormal_32x32`, `battle_anim_rock.c:59`) and
+ * `subpriority=38` for every one (`Cmd_createsprite`'s own
+ * `GetBattlerSpriteSubpriority(target)-2` formula, constant since the
+ * target battler never changes mid-window). The shake sprite itself is
+ * RAM-confirmed `oam.priority=3` (never 2); every battle-scene-persistent
+ * sprite (healthboxes, mons, etc.) is RAM-confirmed `oam.priority` 0 or 1.
+ * Since `SortSprites` is a STABLE sort (ties never swap), two elements
+ * that never tie with any third element can only have their relative
+ * order changed by a DIRECT comparison against each other - confirmed
+ * empirically too, not just argued: collapsing every non-rock slot to
+ * one shared filler key (`sDummySprite`'s own packed key,
+ * `sprite.c:159-169`) changed 0 of the 117 validated ticks.
+ */
+const ROCK_SLIDE_BASELINE_SLOTS: readonly number[] = [0, 1, 2, 6, 8, 60, 61, 62, 63];
+
+/** `shake_mon_or_platform`'s own `shake_duration=11` (`Move_ROCK_SLIDE`, `data/battle_anim_scripts.s`) - the shake sprite's own lifetime in RAM ticks, RAM-confirmed (`gSprites[3]` inUse 2347..2357, freed by 2358). */
+const ROCK_SLIDE_SHAKE_LIFETIME = 11;
+
+/** `Cmd_createsprite`'s own `GetBattlerSpriteSubpriority(gBattleAnimTarget) - 2` result for every one of the 20 rocks (`subpriority_offset=2` is the same literal in every ROCK_SLIDE `createsprite` call, `data/battle_anim_scripts.s`) - RAM-confirmed a single constant across all 20 spawns, not re-derived from `GetBattlerSpriteSubpriority`'s own coordinate tables (not ported to this engine). */
+const ROCK_SLIDE_SUBPRIORITY = 38;
+
+/** RAM ticks before the shake/rock-0 creation event (`ROCK_SLIDE_RAM_ANCHOR_DELAY`) used as the simulation's seed point - `sSpriteOrder` (below) is RAM-confirmed unchanged for at least this many ticks beforehand, so it's a stable, non-mid-transition seed. */
+const ROCK_SLIDE_ORDER_SEED_OFFSET = 9;
+
+/**
+ * `sSpriteOrder` (`EWRAM_DATA static u8 sSpriteOrder[MAX_SPRITES]`,
+ * `reference/pokeemerald/src/sprite.c:282`) read directly via a live RAM
+ * probe at RAM tick `pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY -
+ * ROCK_SLIDE_ORDER_SEED_OFFSET` (2338 in the probed trace) - the array
+ * has no exported symbol (`bin/oracle symbols` can't resolve it, it's
+ * `static`); its address (`0x020217F4`) was resolved once via
+ * `arm-none-eabi-nm -n --defined-only reference/pokeemerald/
+ * pokeemerald.elf` (same technique this run already uses for other
+ * static callbacks, e.g. `dump-rockslide-sprites.py`'s
+ * `HEALTHBOX_WOBBLE_CB`). Values are real `gSprites[]` slot indices;
+ * `AddSpritesToOamBuffer` (`sprite.c:482-500`) walks this array ASCENDING
+ * assigning ASCENDING real OAM index, and lower OAM index renders on top
+ * - so within this array, background-to-foreground draw order is
+ * DESCENDING array position.
+ */
+const ROCK_SLIDE_ORDER_SEED: readonly number[] = [
+  62, 60, 0, 63, 1, 61, 6, 8, 2, 3, 4, 21, 20, 5, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58,
+  59, 23, 22, 48, 49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
+  44, 45, 46, 47,
+];
+
+/** `sDummySprite`'s own packed sort key (`sprite.c:159-169`: `DUMMY_OAM_DATA`'s `.priority=3` ["lowest priority", the macro's own comment], `.subpriority=0xFF`) - the shared filler every non-rock slot collapses to (see the derivation above). */
+const ROCK_SLIDE_FILLER_PACKED_KEY = (3 << 8) | 255;
+/** `sDummySprite.y = DISPLAY_HEIGHT` (160), wrapped the same way `SortSprites` wraps every `oam.y` (`>= 160` subtracts 256). */
+const ROCK_SLIDE_FILLER_Y = -96;
+
+function rockSlideSpawnRamTick(index: number, pressTick: number): number {
+  return pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY + ROCK_SLIDE_SPAWN_STRIDE * index;
+}
+
+/** RAM-confirmed: a rock's host slot is freed the tick after its last rendered tick (`rockSlideRockState`'s own `n=49` destroy). */
+function rockSlideDespawnRamTick(index: number, pressTick: number): number {
+  return rockSlideSpawnRamTick(index, pressTick) + 49;
+}
+
+/** `sprite->y + sprite->y2 + centerToCornerVecY` (`UpdateOamCoords`, `sprite.c`) wrapped to the real 8-bit OAM `y` field's signed-screen-position semantics (`SortSprites`'s own `>= DISPLAY_HEIGHT` check) - numerically cross-checked this session against 980 RAM-read `oam.y` samples (all 20 rocks, full window), 0 mismatches. */
+function wrapOamY(cornerY: number): number {
+  const u8 = ((cornerY % 256) + 256) % 256;
+  return u8 >= 160 ? u8 - 256 : u8;
+}
+
+type RockSlideOrderEvent = { ramTick: number; isDestroy: boolean; rank: number; rockIndex: number | null };
+
+/** Per-`pressTick` memo of `computeRockSlideOrders`'s result - a single compare/render run only ever needs one `pressTick`, and recomputing the ~200-tick simulation from scratch on every rendered frame would be wasteful (though not incorrect - the function is pure). */
+const rockSlideOrderCache = new Map<number, Map<number, readonly number[]>>();
+
+/**
+ * Simulates the whole ROCK_SLIDE window's slot lifecycle + `SortSprites`
+ * passes, RAM tick by RAM tick, from the seed above through the last
+ * rock's own despawn. Returns a map from RAM tick to the alive rocks (by
+ * `ROCK_SLIDE_ROCK_TABLE` index), background-to-foreground.
+ */
+function computeRockSlideOrders(pressTick: number): Map<number, readonly number[]> {
+  const anchor = pressTick + ROCK_SLIDE_RAM_ANCHOR_DELAY;
+  const seedRamTick = anchor - ROCK_SLIDE_ORDER_SEED_OFFSET;
+  const lastRamTick = rockSlideDespawnRamTick(ROCK_SLIDE_ROCK_COUNT - 1, pressTick);
+
+  // Event order matches real RAM behavior, confirmed by the 0-mismatch
+  // slot-assignment validation above: destroys process before creates on
+  // a shared tick (never actually co-occurs in this schedule, but kept
+  // for robustness), and the shake sprite's own creation - earlier in
+  // Move_ROCK_SLIDE's script than rock 0's - claims the lower slot when
+  // both are created on the anchor tick.
+  const events: RockSlideOrderEvent[] = [
+    { ramTick: anchor, isDestroy: false, rank: -1, rockIndex: null },
+    { ramTick: anchor + ROCK_SLIDE_SHAKE_LIFETIME, isDestroy: true, rank: -1, rockIndex: null },
+  ];
+  for (let i = 0; i < ROCK_SLIDE_ROCK_COUNT; i += 1) {
+    events.push({ ramTick: rockSlideSpawnRamTick(i, pressTick), isDestroy: false, rank: i, rockIndex: i });
+    events.push({ ramTick: rockSlideDespawnRamTick(i, pressTick), isDestroy: true, rank: i, rockIndex: i });
+  }
+  events.sort((a, b) => a.ramTick - b.ramTick || Number(a.isDestroy) - Number(b.isDestroy) || a.rank - b.rank);
+
+  const inUse = new Array<boolean>(64).fill(false);
+  for (const slot of ROCK_SLIDE_BASELINE_SLOTS) inUse[slot] = true;
+  let shakeSlot = -1;
+  const rockSlot = new Array<number>(ROCK_SLIDE_ROCK_COUNT).fill(-1);
+
+  const order = ROCK_SLIDE_ORDER_SEED.slice();
+  const result = new Map<number, readonly number[]>();
+
+  let eventIdx = 0;
+  for (let ramTick = seedRamTick + 1; ramTick <= lastRamTick; ramTick += 1) {
+    while (eventIdx < events.length && events[eventIdx]!.ramTick === ramTick) {
+      const ev = events[eventIdx]!;
+      if (ev.isDestroy) {
+        const slot = ev.rockIndex === null ? shakeSlot : rockSlot[ev.rockIndex]!;
+        inUse[slot] = false;
+        if (ev.rockIndex === null) shakeSlot = -1;
+        else rockSlot[ev.rockIndex] = -1;
+      } else {
+        let slot = 0;
+        while (inUse[slot]) slot += 1;
+        inUse[slot] = true;
+        if (ev.rockIndex === null) shakeSlot = slot;
+        else rockSlot[ev.rockIndex] = slot;
+      }
+      eventIdx += 1;
+    }
+
+    const packedKey = new Array<number>(64).fill(ROCK_SLIDE_FILLER_PACKED_KEY);
+    const yKey = new Array<number>(64).fill(ROCK_SLIDE_FILLER_Y);
+    for (let i = 0; i < ROCK_SLIDE_ROCK_COUNT; i += 1) {
+      const slot = rockSlot[i]!;
+      if (slot < 0) continue;
+      const state = rockSlideRockState(i, ramTick + 1, pressTick);
+      if (!state) continue;
+      packedKey[slot] = (2 << 8) | ROCK_SLIDE_SUBPRIORITY;
+      yKey[slot] = wrapOamY(state.centerY - 16);
+    }
+
+    // One `SortSprites` pass - the exact insertion-sort comparator
+    // (`sprite.c:372-467`, minus the double-affine-size-3 special case,
+    // irrelevant to every sprite in this window).
+    for (let i = 1; i < 64; i += 1) {
+      let j = i;
+      while (j > 0) {
+        const s1 = order[j - 1]!;
+        const s2 = order[j]!;
+        const p1 = packedKey[s1]!;
+        const p2 = packedKey[s2]!;
+        if (p1 > p2 || (p1 === p2 && yKey[s1]! < yKey[s2]!)) {
+          order[j - 1] = s2;
+          order[j] = s1;
+          j -= 1;
+        } else {
+          break;
+        }
+      }
+    }
+
+    const alive: { index: number; pos: number }[] = [];
+    for (let i = 0; i < ROCK_SLIDE_ROCK_COUNT; i += 1) {
+      const slot = rockSlot[i]!;
+      if (slot >= 0) alive.push({ index: i, pos: order.indexOf(slot) });
+    }
+    alive.sort((a, b) => b.pos - a.pos);
+    result.set(
+      ramTick,
+      alive.map((r) => r.index),
+    );
+  }
+
+  return result;
+}
+
+/**
+ * The alive falling rocks (by `ROCK_SLIDE_ROCK_TABLE` index) at trace tick
+ * `t`, in real-hardware draw order (background-first, on-top last) - see
+ * `computeRockSlideOrders`'s own derivation above. Same one-tick render
+ * lag as `rockSlideRockState`/`rockSlideBg3Y`.
+ */
+export function rockSlideDrawOrder(t: number, pressTick: number): readonly number[] {
+  const ramTick = t - 1;
+  let cached = rockSlideOrderCache.get(pressTick);
+  if (!cached) {
+    cached = computeRockSlideOrders(pressTick);
+    rockSlideOrderCache.set(pressTick, cached);
+  }
+  return cached.get(ramTick) ?? [];
+}
+
+/**
  * `AnimTask_ShakeMon`'s own `y2` bounce on Grovyle (`(ANIM_TARGET, 0, 5, 50,
  * 1)`, docs/battle-move-anim-notes.md §3) - toggles the target's sprite `y2`
  * between 0 and the given offset. **Pixel-fit, not source-derived**: this
