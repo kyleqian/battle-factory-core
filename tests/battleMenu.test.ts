@@ -226,7 +226,7 @@ describe("battleMenu: rendered pixels for slice 2 (oracle-pinned, tools/compare/
   });
 });
 
-describe("battleMenu: player status-bar subsprite-split exit (docs/battle-menu-notes.md §3 item 4b, this session), oracle-pinned via tools/compare/traces/menu-throw.json (33/33 0-diff, 41-tick window minus 8 ticks named-blocked by a separate mechanism)", () => {
+describe("battleMenu: player status-bar subsprite-split exit (docs/battle-menu-notes.md §3 item 4b, this session), oracle-pinned via tools/compare/traces/menu-throw.json (41/41 0-diff, was 33/41 until §3c's OBJ-vs-OBJ blend fix closed the other 8)", () => {
   it("tick 1574 itself still renders the flat (pre-switch) Enter-shaped bar - the table switch has the same 1-tick render lag every other register in this window has, so it isn't visible until the next tick", () => {
     // (232,98) sits at tx=12 of the flat 16-tile draw (barX=136, exit dx=0) -
     // the "tip" subsprite's own first tile, unaffected by the split either way.
@@ -239,6 +239,25 @@ describe("battleMenu: player status-bar subsprite-split exit (docs/battle-menu-n
 
   it("tick 1584 (later in the same exit, bar further slid + more faded) still matches the widened layout at a different duplicate-block offset", () => {
     expect(pixelAtSentOut(1584, 212, 98)).toEqual([116, 133, 125]);
+  });
+});
+
+describe("battleMenu: player status-icon vs. Brendan OBJ-vs-OBJ blend (docs/battle-menu-notes.md §3c, this session), oracle-pinned via tools/compare/traces/menu-throw.json - closes the 8 ticks §7.26 disproved the ordering hypothesis for (78/78 0-diff, up from 70/78)", () => {
+  it("tick 1581: icon 0 (already past Brendan's own leading edge) blends against the plain background, not Brendan's raw sprite color underneath - real GBA OBJ-OBJ blending has no 'second sprite' to fall back on", () => {
+    expect(pixelAtSentOut(1581, 73, 89)).toEqual([117, 111, 131]);
+  });
+
+  it("tick 1589: icon 1 (its own 7-tick predelay elapsed) overlapping Brendan, same mechanism", () => {
+    expect(pixelAtSentOut(1589, 50, 90)).toEqual([140, 222, 115]);
+  });
+
+  it("tick 1597: icon 2 (14-tick predelay elapsed) overlapping Brendan, same mechanism", () => {
+    expect(pixelAtSentOut(1597, 44, 90)).toEqual([247, 222, 220]);
+  });
+
+  it("tick 1646: once playerSummaryFadeEva bottoms out at 0 the bar/icons must stop drawing entirely (real hardware destroys them, RAM tick 1605) - regression guard for the fix above, which would otherwise repaint this spot (behind the settled ball) with plain background every tick", () => {
+    expect(playerSummaryFadeEva(1646)).toBe(0);
+    expect(pixelAtSentOut(1646, 63, 98)).toEqual([66, 66, 66]);
   });
 });
 

@@ -1422,7 +1422,27 @@ function ballStateTileIndex(state: string): number {
   return Math.max(0, ballDisplay.states.indexOf(state));
 }
 
-/** Same as `setPixel`, but alpha-blended against whatever's already in `fb` at `(x,y)` (`BLDALPHA_BLEND(eva, 16-eva)`) when `eva` isn't `null` - see `battleMenu.ts`'s `playerSummaryFadeEva`. `eva=16` is mathematically a no-op (`blendChannel` reduces to the flat color), so callers can pass it unconditionally once fading starts. */
+/**
+ * Same as `setPixel`, but alpha-blended (`BLDALPHA_BLEND(eva, 16-eva)`) when
+ * `eva` isn't `null` - see `battleMenu.ts`'s `playerSummaryFadeEva`. `eva=16`
+ * is mathematically a no-op (`blendChannel` reduces to the flat color), so
+ * callers can pass it unconditionally once fading starts.
+ *
+ * **Target 2 is the plain background tile, never whatever another sprite
+ * already painted into `fb`** (menu-throw.json's 1581-83/1589-91/1597-98
+ * root cause, docs/battle-menu-notes.md §3 item 4b's follow-up): real GBA
+ * OBJ hardware tracks only ONE sprite pixel per dot in its compositing
+ * buffer (the topmost by priority) - when that top OBJ pixel is itself the
+ * blend's target-1 (the icon/bar, `oam.priority=1`), there is no "other OBJ
+ * pixel" left for target-2 to resolve to even though `BLDCNT_TGT2_OBJ` is
+ * set and a lower-priority sprite (Brendan, `priority=2`) is genuinely
+ * beneath it on screen - the blend falls through to the backdrop/BG layers'
+ * pixel instead. Oracle-verified exact at the mismatch's own pixel
+ * (73,89)/tick 1581: `blend(iconColor, backgroundColor)` reproduces the
+ * oracle's `(117,111,131)` bit-for-bit, where `blend(iconColor,
+ * brendanColor)` (this function's old behavior) gave the wrong `(61,59,88)`
+ * this codebase was actually drawing.
+ */
 function blendedSetPixel(fb: Uint8Array, x: number, y: number, c: RgbColor, eva: number | null): void {
   if (eva === null) {
     setPixel(fb, x, y, c);
@@ -1431,9 +1451,11 @@ function blendedSetPixel(fb: Uint8Array, x: number, y: number, c: RgbColor, eva:
   if (x < 0 || x >= 240 || y < 0 || y >= 160) return;
   const o = (y * 240 + x) * 4;
   const evb = 16 - eva;
-  fb[o] = blendChannel(c.r, fb[o]!, eva, evb);
-  fb[o + 1] = blendChannel(c.g, fb[o + 1]!, eva, evb);
-  fb[o + 2] = blendChannel(c.b, fb[o + 2]!, eva, evb);
+  const bg = healthboxBackgroundColorAt(x, y);
+  const tgt2 = bg ?? { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! };
+  fb[o] = blendChannel(c.r, tgt2.r, eva, evb);
+  fb[o + 1] = blendChannel(c.g, tgt2.g, eva, evb);
+  fb[o + 2] = blendChannel(c.b, tgt2.b, eva, evb);
   fb[o + 3] = 255;
 }
 
@@ -1463,8 +1485,21 @@ function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; pl
   const bars = ballStatusBarPositions(t);
   const playerEva = playerSummaryFadeEva(t);
   const barExitDx = playerSummaryBarExitDx(t);
+  // `Task_HidePartyStatusSummary_BattleStart_2`'s own `tBlend==-1` case
+  // (battle_interface.c:1746) destroys the player bar+icon sprites outright
+  // the instant the fade bottoms out (RAM-confirmed: RAM tick 1605, first
+  // visible screen tick 1606, the same tick `playerSummaryFadeEva` itself
+  // first clamps to 0) - so once `playerEva` reaches 0 this must stop
+  // drawing them altogether, not keep drawing them blended at 0% opacity:
+  // with the real sprites gone, whatever's actually behind them (the thrown
+  // ball, its open/spin animation, etc.) is fully visible on real hardware,
+  // and continuing to draw at eva=0 would instead re-paint that spot with
+  // `blendedSetPixel`'s target-2 (see its own doc comment) every tick,
+  // silently overwriting whatever draws there later (menu-throw.json
+  // 1646-1648, found immediately after fixing the OBJ-vs-OBJ target-2 bug).
+  const playerSummaryAlive = playerEva === null || playerEva > 0;
   if (sides.opponent && bars.opponent.visible) drawBallStatusBar(fb, bars.opponent.x, 40, true);
-  if (sides.player && bars.player.visible) {
+  if (sides.player && bars.player.visible && playerSummaryAlive) {
     const barX = bars.player.x + barExitDx;
     if (playerEva !== null && playerBarExitTableActive(t)) drawPlayerSummaryBarExit(fb, barX, playerEva);
     else drawBallStatusBar(fb, barX, 96, false, playerEva);
@@ -1473,7 +1508,7 @@ function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; pl
   for (const icon of ballIcons(t)) {
     if (!icon.visible) continue;
     if (icon.y === 32 && !sides.opponent) continue;
-    if (icon.y === 88 && !sides.player) {
+    if (icon.y === 88 && (!sides.player || !playerSummaryAlive)) {
       playerIconIndex += 1;
       continue;
     }
@@ -2452,6 +2487,7 @@ function drawPlayerBallOpenParticles(fb: Uint8Array, t: number): void {
  *   reading of the two exit-only `Subsprite` tables, cross-checked pixel-
  *   exact against the oracle across the whole 1463-1480 window).
  */
+/** Same real-hardware target-2 rule as `blendedSetPixel` above (backdrop/BG, never another sprite already in `fb`) - see that function's doc comment. */
 function blendedTile(fb: Uint8Array, tile: number[], palette: RgbColor[], hFlip: boolean, ox: number, oy: number, eva: number, evb: number): void {
   for (let py = 0; py < 8; py += 1) {
     for (let px = 0; px < 8; px += 1) {
@@ -2464,9 +2500,11 @@ function blendedTile(fb: Uint8Array, tile: number[], palette: RgbColor[], hFlip:
       const y = oy + py;
       if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
       const o = (y * 240 + x) * 4;
-      fb[o] = blendChannel(c.r, fb[o]!, eva, evb);
-      fb[o + 1] = blendChannel(c.g, fb[o + 1]!, eva, evb);
-      fb[o + 2] = blendChannel(c.b, fb[o + 2]!, eva, evb);
+      const bg = healthboxBackgroundColorAt(x, y);
+      const tgt2 = bg ?? { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! };
+      fb[o] = blendChannel(c.r, tgt2.r, eva, evb);
+      fb[o + 1] = blendChannel(c.g, tgt2.g, eva, evb);
+      fb[o + 2] = blendChannel(c.b, tgt2.b, eva, evb);
       fb[o + 3] = 255;
     }
   }

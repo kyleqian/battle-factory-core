@@ -798,6 +798,85 @@ settled first-action-menu idle) has NO unimplemented window left**:
 `menu-throw.json` (1574-1651, 70/70) → `menu-materialize.json` (1652-1741+,
 62/62) → `menu-idle.json` (1742-1810, 69/69) are contiguous and all 0-diff.
 
+## 3c. `menu-throw.json`'s last 8 ticks (1581-83/1589-91/1597-98) CLOSED - not a compositing-order bug (`battle-scene-notes.md` §7.26 was right to rule that out), not an icon timing bug either (both `playerSummaryIconExitDx`/`playerSummaryFadeEva` are RAM-exact at every one of these ticks) - the real bug was `blendedSetPixel`/`blendedTile`'s own target-2 choice, plus a missing "sprite destroyed" cutoff (bounded worker, this session)
+
+Per the brief: pixel-classify first. Direct oracle diff on a scratch
+`captureFrames` copy of the 8 ticks (`tools/compare` against a widened
+`menu-throw.json`) shows the mismatch pixels sit squarely inside **Brendan's
+own sprite footprint** (e.g. tick 1581, x72-78/y89-94 - `PLAYER_CORNER`
+(48,48) + `brendanThrowDx(1581)=-19` puts his 64x64 frame at x29-92), not
+anywhere near where the docs' own "player icons live at x150-239" note would
+suggest - so the icon really does travel all the way there: `playerSummaryIconExitDx`'s
+triangular accelerating slide (§3 above) is far larger than it looks over a
+handful of ticks (icon 0 alone covers -84px by tick 1581, -198px by 1585).
+
+**RAM-probed both mechanisms directly** (new
+`tools/probe/specs/menu-throw-icon-exit-timing.json`, `gSprites[3].x2`
+(Brendan), `gSprites[54..59].x2` (the 6 player icons), and a `gTasks[0..15]`
+func+`tBlend` scan to find `Task_HidePartyStatusSummary`'s own live task)
+across trace ticks 1560-1611. Both `brendanThrowDx` and
+`playerSummaryIconExitDx`/`playerSummaryFadeEva` reproduce the RAM values
+**bit-exact at every single tick in the named window** (verified
+programmatically, not sampled) - so the 8-tick residual is not a timing bug
+in either sprite's own position/alpha at all. It's the two sprites'
+**overlap itself**, i.e. how this codebase composites one blended sprite on
+top of an already-opaque one.
+
+**The real mechanism**: real GBA OBJ hardware tracks only the **single
+topmost** sprite pixel per screen dot in its compositing buffer - there is no
+"second OBJ pixel" available for the blend hardware to fall back on. When
+the icon (`oam.priority=1`, blend target-1, `BLDCNT_TGT2_ALL` includes OBJ)
+is the topmost opaque pixel at a dot, and Brendan (`oam.priority=2`) is
+genuinely underneath it on screen, the hardware's "target 2" is **not**
+Brendan's sprite color - it falls through to whatever the BG layers show at
+that dot (the plain background here, since nothing else occupies it).
+`blendedSetPixel`/`blendedTile` (`battleScene.ts`) instead blended against
+whatever this codebase's own painter's-algorithm framebuffer already held at
+that pixel - Brendan's raw, unblended, opaque color, since he's drawn first.
+Confirmed arithmetically before writing any code: at tick 1581/(73,89),
+`blend(iconColor, backgroundColor=(247,247,255))` reproduces the oracle's
+`(117,111,131)` exactly; `blend(iconColor, brendanColor=(24,41,82))` (the
+prior behavior) gives `(61,59,88)` - exactly what this codebase was actually
+drawing.
+
+**Fix**: both blend helpers now resolve target-2 from the plain background
+tile (`healthboxBackgroundColorAt`, already used elsewhere in this file for
+an analogous "what's really behind this" lookup) instead of `fb`'s
+accumulated content, falling back to `fb` only if no background tile is
+found (should never happen in practice - belt-and-suspenders).
+
+**A second bug this immediately exposed** (regression caught by the full
+sweep before landing, not shipped blind): once `playerSummaryFadeEva` bottoms
+out at 0 (tick 1605+ - the real hardware's `Task_HidePartyStatusSummary_
+BattleStart_2` destroys the bar+icon sprites outright the same tick,
+RAM-confirmed), this codebase kept calling the blend helpers anyway with
+`eva=0`. Blending at 0% is mathematically a no-op **only if target-2 is
+whatever's already drawn there** - which is exactly the behavior the fix
+above just removed. With target-2 now resolved to the plain background,
+`eva=0` stopped being a no-op and instead re-painted background over
+whatever draws later at that spot every tick (the thrown ball's own
+open/spin animation, `menu-throw.json` 1646-1648 - previously-passing ticks
+that regressed the moment the OBJ-vs-OBJ fix landed). Fixed the same way the
+already-correct `drawOpponentSummaryExit` handles its own analogous case
+(`if (blend <= 0) return`): `drawBallIcons` now skips drawing the player
+bar/icons entirely once `playerEva` reaches 0, matching the real sprites'
+destruction instead of blending them at zero visible effect against the
+wrong target.
+
+**Result**: `tools/compare/traces/menu-throw.json` widened `captureFrames`
+from 70 (1574-1651 minus the 8 excluded ticks) to the full contiguous
+1574-1651 (78 ticks) - **78/78 at 0 diff**. Full 23-trace sweep re-verified:
+every other trace at #111's exact prior count, zero regressions -
+**`sendout.json` incidentally improved 246/256 → 251/256** for free (the
+same OBJ-vs-OBJ target-2 fix applies to `drawOpponentSummaryExit`'s own
+blended tiles, shared code, no separate diagnosis needed). **With this
+landed, `menu-throw.json` (1574-1651) → `menu-materialize.json`
+(1652-1741+) → `menu-idle.json` (1742-1810) are ALL 0-diff and contiguous -
+the whole S6 chain (send-out through the settled action menu) has no known
+pixel gap left.** New Tier-1 tests (`tests/battleMenu.test.ts`) pin 3
+oracle-verified pixels inside the fixed overlap (one per excluded tick
+group) plus the destroy-cutoff regression guard.
+
 ## 4. The settled action-menu idle cycle: two independent regions, not one
 
 `battle-scene-notes.md` §3.3 and `battle-bringup-notes.md` §6/§2 both

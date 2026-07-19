@@ -1,0 +1,390 @@
+{
+ "_comment": "Follow-up to menu-throw-oam-priority.json (docs/battle-scene-notes.md \u00a77.26 Finding 1): that spec disproved the Brendan-vs-icon ordering hypothesis for menu-throw.json 8 excluded ticks (1581-83,1589-91,1597-98) and left the icon's OWN per-tick x2/blend timing as the standing lead (playerSummaryIconExitDx/playerSummaryFadeEva, battleMenu.ts). This spec RAM-probes gSprites[3].x2 (Brendan), gSprites[54..59].x2 (the 6 player status icons, offsets base+0x24 per struct Sprite, sprite.h) directly, plus a gTasks[0..15] func+tBlend(data[15]) scan to identify and read Task_HidePartyStatusSummary's own blend coefficient live, across ticks 1560-1611 (the named window plus margin).",
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 70,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 130,
+   "buttons": []
+  },
+  {
+   "frames": 8,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 96,
+   "buttons": []
+  },
+  {
+   "frames": 24,
+   "buttons": []
+  },
+  {
+   "frames": 162,
+   "buttons": []
+  },
+  {
+   "frames": 54,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 196,
+   "buttons": []
+  },
+  {
+   "frames": 14,
+   "buttons": []
+  },
+  {
+   "frames": 210,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 144,
+   "buttons": []
+  },
+  {
+   "frames": 45,
+   "buttons": []
+  }
+ ],
+ "watch": [
+  {
+   "name": "brendan_x2",
+   "addr": "gSprites+0xF0",
+   "size": 2
+  },
+  {
+   "name": "brendan_oam2",
+   "addr": "gSprites+0xD0",
+   "size": 2
+  },
+  {
+   "name": "icon0_x2",
+   "addr": "gSprites+0xE7C",
+   "size": 2
+  },
+  {
+   "name": "icon1_x2",
+   "addr": "gSprites+0xEC0",
+   "size": 2
+  },
+  {
+   "name": "icon2_x2",
+   "addr": "gSprites+0xF04",
+   "size": 2
+  },
+  {
+   "name": "icon3_x2",
+   "addr": "gSprites+0xF48",
+   "size": 2
+  },
+  {
+   "name": "icon4_x2",
+   "addr": "gSprites+0xF8C",
+   "size": 2
+  },
+  {
+   "name": "icon5_x2",
+   "addr": "gSprites+0xFD0",
+   "size": 2
+  },
+  {
+   "name": "t0_func",
+   "addr": "gTasks+0x0",
+   "size": 4
+  },
+  {
+   "name": "t0_blend",
+   "addr": "gTasks+0x26",
+   "size": 2
+  },
+  {
+   "name": "t1_func",
+   "addr": "gTasks+0x28",
+   "size": 4
+  },
+  {
+   "name": "t1_blend",
+   "addr": "gTasks+0x4e",
+   "size": 2
+  },
+  {
+   "name": "t2_func",
+   "addr": "gTasks+0x50",
+   "size": 4
+  },
+  {
+   "name": "t2_blend",
+   "addr": "gTasks+0x76",
+   "size": 2
+  },
+  {
+   "name": "t3_func",
+   "addr": "gTasks+0x78",
+   "size": 4
+  },
+  {
+   "name": "t3_blend",
+   "addr": "gTasks+0x9e",
+   "size": 2
+  },
+  {
+   "name": "t4_func",
+   "addr": "gTasks+0xa0",
+   "size": 4
+  },
+  {
+   "name": "t4_blend",
+   "addr": "gTasks+0xc6",
+   "size": 2
+  },
+  {
+   "name": "t5_func",
+   "addr": "gTasks+0xc8",
+   "size": 4
+  },
+  {
+   "name": "t5_blend",
+   "addr": "gTasks+0xee",
+   "size": 2
+  },
+  {
+   "name": "t6_func",
+   "addr": "gTasks+0xf0",
+   "size": 4
+  },
+  {
+   "name": "t6_blend",
+   "addr": "gTasks+0x116",
+   "size": 2
+  },
+  {
+   "name": "t7_func",
+   "addr": "gTasks+0x118",
+   "size": 4
+  },
+  {
+   "name": "t7_blend",
+   "addr": "gTasks+0x13e",
+   "size": 2
+  },
+  {
+   "name": "t8_func",
+   "addr": "gTasks+0x140",
+   "size": 4
+  },
+  {
+   "name": "t8_blend",
+   "addr": "gTasks+0x166",
+   "size": 2
+  },
+  {
+   "name": "t9_func",
+   "addr": "gTasks+0x168",
+   "size": 4
+  },
+  {
+   "name": "t9_blend",
+   "addr": "gTasks+0x18e",
+   "size": 2
+  },
+  {
+   "name": "t10_func",
+   "addr": "gTasks+0x190",
+   "size": 4
+  },
+  {
+   "name": "t10_blend",
+   "addr": "gTasks+0x1b6",
+   "size": 2
+  },
+  {
+   "name": "t11_func",
+   "addr": "gTasks+0x1b8",
+   "size": 4
+  },
+  {
+   "name": "t11_blend",
+   "addr": "gTasks+0x1de",
+   "size": 2
+  },
+  {
+   "name": "t12_func",
+   "addr": "gTasks+0x1e0",
+   "size": 4
+  },
+  {
+   "name": "t12_blend",
+   "addr": "gTasks+0x206",
+   "size": 2
+  },
+  {
+   "name": "t13_func",
+   "addr": "gTasks+0x208",
+   "size": 4
+  },
+  {
+   "name": "t13_blend",
+   "addr": "gTasks+0x22e",
+   "size": 2
+  },
+  {
+   "name": "t14_func",
+   "addr": "gTasks+0x230",
+   "size": 4
+  },
+  {
+   "name": "t14_blend",
+   "addr": "gTasks+0x256",
+   "size": 2
+  },
+  {
+   "name": "t15_func",
+   "addr": "gTasks+0x258",
+   "size": 4
+  },
+  {
+   "name": "t15_blend",
+   "addr": "gTasks+0x27e",
+   "size": 2
+  }
+ ],
+ "startTick": 1560
+}

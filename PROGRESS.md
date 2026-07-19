@@ -4,6 +4,73 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 112 — Bounded worker: closed `menu-throw.json`'s last 8 excluded ticks (1581-83/1589-91/1597-98) — root cause was NOT icon timing (both RAM-exact) but `blendedSetPixel`/`blendedTile`'s blend target-2, a real GBA OBJ-vs-OBJ hardware quirk — **70/78 → 78/78**, `sendout.json` incidentally 246/256 → 251/256 — **S6 chain (send-out → materialize → idle) fully 0-diff, contiguous, no known gap left**
+
+- **State:** `npm test` **554/554** (+4 Tier-1), `npm run build` green, tree
+  clean. Full 23-trace sweep against the live oracle at #111's exact counts
+  except two: menu-throw **78/78** (was 70/70+8 excluded) and sendout
+  **251/256** (was 246/256, free improvement, same fix) — every other trace
+  unchanged (accept-prebattle 137/137, anchor 1/1, confirm-decline 67/67,
+  confirm-flow 79/95, draft-cursor 13/13, draft-menu-slot6 66/66, draft-menu
+  38/38, example 4/4, menu-idle 69/69, menu-materialize 62/62, menu-text
+  18/18, rent-3picks 157/190, rent-slot1 125/139, room-entry 110/110,
+  room-msgbox 142/142, room-npcs 98/98, scene-assembly 256/256,
+  summary-info-magby 132/132, summary-info-onix 122/122, transition
+  206/206, walk-warpout 125/125) — zero regressions.
+- **Did:** per the brief, pixel-classified first: the 8 ticks' mismatch
+  pixels sit inside **Brendan's own sprite footprint**, not near the
+  player-icon region docs assumed — the icon's accelerating exit slide
+  travels there fast (icon 0 alone: -84px by tick 1581, -198px by 1585).
+  RAM-probed both sprites directly (new `tools/probe/specs/menu-throw-icon-
+  exit-timing.json`: `gSprites[3]`/`gSprites[54..59]` `.x2`,
+  `gTasks[0..15]` func+`tBlend` scan) across ticks 1560-1611 — both
+  `brendanThrowDx` and `playerSummaryIconExitDx`/`playerSummaryFadeEva`
+  reproduce RAM **bit-exact at every tick, programmatically verified** —
+  ruling out timing/position on either side, exactly as `battle-scene-
+  notes.md` §7.26 already ruled out draw order. **Real root cause**: real
+  GBA OBJ hardware tracks only the single TOPMOST sprite pixel per dot —
+  when the icon (blend target-1) is topmost and Brendan is genuinely
+  beneath it, hardware target-2 falls through to the BG layer, never to
+  Brendan's own color, since there's no "2nd OBJ pixel" for the blend
+  circuit to see. This codebase's `blendedSetPixel`/`blendedTile`
+  (`battleScene.ts`) instead blended against whatever the painter's-
+  algorithm framebuffer already held (Brendan's raw color) — confirmed
+  arithmetically before touching code: `blend(iconColor, backgroundColor)`
+  reproduces the oracle's tick-1581/(73,89) `(117,111,131)` exactly;
+  `blend(iconColor, brendanColor)` gives the wrong `(61,59,88)` this
+  codebase was actually drawing. Fixed by resolving target-2 from
+  `healthboxBackgroundColorAt` (an existing helper, reused not duplicated)
+  instead of `fb`'s accumulated content.
+- **Regression caught by the full sweep before landing** (not shipped
+  blind): the fix immediately broke 3 previously-passing ticks (1646-1648,
+  `sendout.json` unaffected) — once `playerSummaryFadeEva` bottoms out at 0
+  (tick 1605+, real hardware destroys the sprites there,
+  `Task_HidePartyStatusSummary_BattleStart_2`), blending at eva=0 was only
+  a no-op against the OLD (wrong) target-2; against the new correct
+  background target-2 it instead re-painted background over the thrown
+  ball's own later animation every tick. Fixed the same way
+  `drawOpponentSummaryExit` already handles its own analogous case
+  (`if (blend <= 0) return`) — `drawBallIcons` now stops drawing the player
+  bar/icons entirely once `playerEva` reaches 0, matching real destruction.
+- **Widened `tools/compare/traces/menu-throw.json`**: `captureFrames` from
+  70 (1574-1651 minus the 8 excluded) to the full contiguous 1574-1651 (78)
+  — **78/78 at 0 diff**. 4 new Tier-1 tests (`tests/battleMenu.test.ts`)
+  pin one oracle-verified pixel per excluded tick group plus the
+  destroy-cutoff regression guard.
+- **Next:** S6 acceptance trace (uniform grid, anchor→1810, supervisor's
+  per the brief); `sendout.json`'s remaining 5 ticks (1462, 1470/71/79,
+  1491-96 minus whatever this fix already closed — opponent-side,
+  concurrent worktree's lane); no other known gap in the S6 chain.
+- **Notes:** stayed within `battleMenu.ts`/`battleScene.ts` (a shared
+  render-utility fix, `blendedSetPixel`/`blendedTile`/`drawBallIcons` —
+  used by both player and opponent code, hence `sendout.json`'s free
+  improvement) + `tests/battleMenu.test.ts` + `docs/battle-menu-notes.md`
+  (new §3c), per the brief. New committed artifact: `tools/probe/specs/
+  menu-throw-icon-exit-timing.json`. Did not touch `docs/battle-scene-
+  notes.md`/`tests/battleScene.test.ts` or `s6-acceptance.json` (left
+  untouched, uncommitted, supervisor's). No PAPERCUT this session.
+
+---
 ## 111 — Bounded worker: closed ISSUES #17 (ONIX color-fade-to-true-color + settle wobble) — `menu-materialize.json` **12/12 → 62/62** (widened 1652-1663 to 1652-1741+samples), also found+fixed two pre-existing bugs it was masking — **the S6 chain (send-out → settled action menu) now has NO unimplemented window**
 
 - **State:** `npm test` **550/550** (+5 Tier-1), `npm run build` green, tree
@@ -108,82 +175,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   menu-throw's 8 ticks: §7.26 disproved the order hypothesis; icon
   fade/exit timing is the standing lead.
 
----
-
-## 109 — Bounded worker: player healthbox slide-in implemented, RAM-exact and region-isolated 0-diff — but found + corrected a wrong settle-tick pin (real settle 1702, not 1693/1696) and the assigned full-frame trace-closure acceptance criterion is BLOCKED by a separate, pre-existing, already-named ONIX materialize-tail gap (new ISSUES #17)
-
-- **State:** `npm test` **530/530** (+8 Tier-1), `npm run build` green, tree
-  clean. Full 22-trace sweep against the live oracle: every trace at #108's
-  exact counts (accept-prebattle 137/137, anchor 1/1, confirm-decline
-  67/67, confirm-flow 79/95, draft-cursor 13/13, draft-menu-slot6 66/66,
-  draft-menu 38/38, example 4/4, menu-materialize **12/12** (unchanged,
-  deliberately not widened - see below), menu-text 18/18, menu-throw 70/70,
-  rent-3picks 157/190, rent-slot1 125/139, room-entry 110/110, room-msgbox
-  142/142, room-npcs 98/98, scene-assembly 256/256, sendout 246/256,
-  summary-info-magby 132/132, summary-info-onix 122/122, transition
-  206/206, walk-warpout 125/125) — zero regressions.
-- **Did:** implemented the PLAYER healthbox slide-in end-to-end:
-  RAM-probed `gSprites[0]` directly (`tools/probe/specs/menu-player-
-  healthbox.json`, new) rather than pixel-fitting — `x2` starts **110** at
-  RAM tick 1666, steps **-5/RAM-tick**, settles **0** at RAM tick 1688;
-  `oam.priority` reads **1**. With this window's established +1 render lag,
-  the box is first visible at trace tick **1667** (`dx=110`), settles
-  (`dx=0`) at **1689**, holds through at least 1741. Pixel-harvested the
-  settled content (`extract-menu-healthbox-player.ts` → new
-  `src/assets/gen/menu-healthbox-player.json`, bbox `(127,74)-(229,109)`,
-  103×36) from `battle1-menu-dense.json`'s own tick 1730, built the
-  content mask up front (§7.23's lesson, not discovered after the fact) —
-  `getMenuHealthboxPlayerContentMask`/`drawMenuHealthboxPlayer`,
-  `battleScene.ts`, wired into `drawSendOutHandoff`. **No spatial overlap
-  with ONIX found** (pixel-checked directly) — the brief's own working
-  assumption that this window needs #108's SortSprites z-order model was
-  disproved for this specific mechanism; no such code was added. Verified
-  the mechanism in total isolation: comparing just the healthbox's own bbox
-  region against the oracle across ticks 1653-1711 gives **0px diff at
-  every tick**, slide and settled alike. 8 new Tier-1 tests
-  (`tests/battleMenu.test.ts`) pin the RAM-derived table, geometry, and two
-  oracle-pinned pixel samples.
-- **Found and corrected a pre-existing wrong pin**: the brief's own
-  "scene settles at pinned tick 1693" (inherited from
-  `docs/battle-menu-notes.md` §1) is **wrong** — re-verified via two fresh
-  `bin/oracle run` replays (byte-identical) plus an independent cross-check
-  against `battle1-intro.json`'s identical script: the real, permanent
-  static hold starts at trace tick **1702**; ticks 1693-1701 oscillate
-  (tick 1693 and 1700 share an identical sha, a 7-tick round-trip) rather
-  than settling cleanly. Corrected in `docs/battle-menu-notes.md` §1/§3a.
-- **Why the trace can't close (not this session's mechanism, not
-  introduced this session)**: every tick from ~1664 onward already has a
-  full-frame mismatch regardless of the healthbox, because nothing draws
-  ONIX at all past `PLAYER_MATERIALIZE_END_TICK` (1663) — the
-  "coefficient-fade-to-true-color... entangled with idle-bob" gap §3 item 5
-  already named and deliberately deferred is real, not a formality
-  (empirically re-checked: best-candidate plain-sprite tick still
-  mismatches by 632px in isolation, no clean single tick closes it) — plus
-  a small ONIX-owned ground-shadow triangle tied to the same tail. Filed as
-  **ISSUES #17** with RAM-probe leads (`gPaletteFade`, ONIX's own
-  `gSprites[6]`) for a future session. Per this run's own harvest-first
-  precedent (`sendout.json` held a fixed score across several sessions
-  while solved piece by piece), `menu-materialize.json` stays unwidened
-  past 1663 (still 12/12, zero regression) rather than widened with
-  captures that would fail on a mechanism this step doesn't own; a sibling
-  `menu-healthbox.json` trace was considered and rejected for the same
-  reason (every candidate tick already fails full-frame on the ONIX gap
-  alone, independent of the healthbox).
-- **Next:** ISSUES #17 (ONIX materialize-tail: palette-fade + settle
-  wobble) is now the hard blocker for closing any menu-window trace past
-  1663 — RAM-probe `gPaletteFade`/ONIX's own sprite fields per #17's own
-  leads before attempting a pixel-fit. Once closed, revisit whether
-  `menu-materialize.json` should widen all the way to 1702+ or a new
-  trace should own the healthbox+ONIX-settled window. Menu draw/idle slice
-  is the concurrent worktree lane's (separate docs file, not touched here).
-- **Notes:** stayed within `battleMenu.ts`/`battleScene.ts` additive hooks
-  + `tests/battleMenu.test.ts` + `docs/battle-menu-notes.md`/`ISSUES.md`,
-  per the brief. New committed artifacts: `tools/extract/extract-menu-
-  healthbox-player.ts`, `src/assets/gen/menu-healthbox-player.json`,
-  `tools/probe/specs/menu-player-healthbox.json`. Did not touch
-  `battleScene.ts` opponent-side internals, `sendout.json`, or the
-  1694-1741 static hold/1742+ menu draw (out of scope, worktree lane's).
-  No PAPERCUT beyond time spent re-verifying a wrong inherited pin (~15min)
-  — flagging as a process note, not a tooling papercut: coarse-derived
-  tick pins in this codebase's docs should get an independent re-check
-  before a brief cites them as a hard acceptance boundary.
