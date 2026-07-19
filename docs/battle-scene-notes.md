@@ -1240,3 +1240,73 @@ through:**
    this session's affine-scale primitive, `drawSpriteSheetAffineTinted`'s
    matrix math, for its own affine transform), and the still-open exact
    start-tick arithmetic - the most expensive of the five, left last.
+
+### 7.14. Engine-slice session (PROGRESS.md #82): mechanism 3 (open-particle burst) landed with an empirical hard cutoff - score unchanged at 174/256 as predicted
+
+Implemented `drawBallOpenParticles` (`battleScene.ts`) - a source-exact
+reimplementation of `PokeBallOpenParticleAnimation`/`_Step1`/`_Step2`
+(`battle_anim_throw.c:1599-1657`) and `Sin`/`Cos` (`trig.c:515-523`, a
+256-entry Q8.8 sine table, `Sin(i,r)=(r*gSineTable[i])>>8`,
+`Cos(i,r)=Sin(i+64,r)` - reproduced via `Math.sin` at the same Q8.8
+rounding rather than a literal table copy, since this mechanism doesn't
+gate a full-frame match). 16 particles spawn one per tick (angle
+`(spawnIndex%8)*32`, 8 directions), each with its OWN 26-age lifespan
+(age 0-1 at radius 0 - `Step1`'s own "wait" is a no-op since its gate
+variable starts at exactly 0 - then age *k* at radius `2*(k-1)` through
+age 25 at radius 48, destroyed after). Origin **(172,55)** + the same
+1-tick render lag as every other sprite/register in this window - not
+independently re-derivable against THIS trace's own captures (the
+particle and ball-open-frame palettes coincidentally share exact RGB
+values, and the two sprites heavily overlap during the particles'
+earliest ticks, so a same-trace color-scan couldn't disambiguate them,
+`tools/compare/scratch/probe_particle.mjs`, throwaway) - instead
+cross-validated **analytically**: this session hand-derived the
+spawn/Step1/Step2 timeline from source line-by-line and it predicts the
+exact tick-by-tick offsets `docs/battle-anim-assets.md` §4 independently
+pixel-harvested from a *different* trace (age0/1 at origin, age2 at
+`Cos(0,2)=+2` i.e. (172,57) - bit-for-bit match), on a trace that already
+shares this one's exact ball corner (168,56, mechanism 2) - strong
+indirect evidence, not a direct same-trace pixel proof.
+
+**Empirical hard cutoff, found the same way as every other boundary in
+this dossier (pixel-brute-force against `localcheck.ts`, not assumed):**
+turning particles on strictly IMPROVES `localcheck.ts`'s per-tick pixel
+mass through **logical tick 12** (rendered tick 1493: that single tick's
+own isolated diff drops from 147px to **9px**) but every tick from
+**logical 13 (rendered 1494) on is strictly WORSE** with particles than
+without - confirmed by direct pixel inspection (`/tmp/oracle_1508.png`
+crop, throwaway): the real oracle's particle field at tick 1508 has a
+much narrower radius spread than this session's spawn/lifespan model
+predicts for that same tick, meaning something about the particle
+population's real behavior diverges from the naive per-particle
+26-age-lifespan model starting there. **Not reverse-engineered this
+session** (not RAM-probed) - logical tick 12 is exactly
+`affineEmergeAccumulator`'s own growth-complete point (mechanism 4's
+scale-in finishing the same instant), suggesting `HandleBallAnimEnd`
+(gated on the mon's `affineAnimEnded`, `pokeball.c:845-884`) plausibly
+interacts with the particle population at that same tick - flagged as an
+open follow-up rather than guessed at. Per this run's "no curve-fitting"
+rule, `PARTICLE_RENDER_LAST_LOGICAL_TICK = 12` simply stops rendering at
+the boundary where the model is still measurably correct.
+
+**Score effect, as predicted**: `sendout.json` stays **174/256**, full
+19-trace sweep re-run against the live oracle, other 18 at exact prior
+counts, zero regressions. `localcheck.ts` pixel-diff mass across
+1462-1543: **106893->105984px** (-909px), and with the cutoff in place
+**every** affected tick strictly improved or held (verified directly,
+not just in aggregate - unlike mechanism 4's own honestly-flagged small
+per-tick regressions, §7.13).
+
+**Remaining for `sendout.json` toward 256/256, mechanism 3 now struck
+through:**
+1. Opponent party-status-summary despawn fade (§7.4.3) - still not even
+   source-timed precisely; needs fresh RAM/pixel work.
+2. ~~Ball sprite draw~~ - done (§7.12).
+3. ~~Open-particle burst~~ - done this session (above), through logical
+   tick 12 only; the tail (logical 13+) is a known, flagged gap.
+4. ~~Mon affine-scale-in + ball-color tint~~ - done (§7.13).
+5. Front-sprite entrance anim (`ANIM_V_STRETCH`) - the only mechanism
+   remaining besides mechanism 1 - needs GROVYLE's 2nd front-sprite frame
+   extracted, the `Sin`-table wobble renderer (can reuse this session's/
+   §7.13's affine-matrix and `Sin`/`Cos` math), and the still-open exact
+   start-tick arithmetic.

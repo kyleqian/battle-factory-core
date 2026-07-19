@@ -15,17 +15,21 @@
 // A-PRESS-#3 (trace tick 1420) once registered, folded into this same flat
 // state rather than a phase enum (see the field's own doc comment).
 //
+// STATUS (PROGRESS.md #82): mechanism 3 of the 5 named in #78/docs §7.11
+// landed - the OPEN-PARTICLE BURST (`drawBallOpenParticles`, a
+// `gSineTable`-driven radial spawner, source-exact through logical tick 12
+// then an empirical hard cutoff - see `PARTICLE_RENDER_LAST_LOGICAL_TICK`'s
+// doc comment). `sendout.json` stays **174/256** (expected); `localcheck.ts`
+// pixel-diff mass across 1462-1543 dropped 106893->105984px, zero per-tick
+// regressions. Still missing: (1) opponent party-summary despawn fade, (5)
+// front-sprite entrance anim - see PROGRESS.md #82 and docs/battle-scene-
+// notes.md §7.14 for the full per-mechanism accounting.
+//
 // STATUS (PROGRESS.md #81): mechanism 4 of the 5 named in #78/docs §7.11
 // landed - Grovyle's materialize AFFINE-SCALE-IN + BALL-COLOR TINT
 // (`drawGrovyleMaterialize`/`drawSpriteSheetAffineTinted`, this engine's
-// first affine-OAM scale renderer, nearest-neighbor). `sendout.json` stays
-// **174/256** (expected - #74/#78/#79 already proved no tick in this window
-// has only one mechanism left broken); `localcheck.ts` pixel-diff mass
-// across 1462-1543 dropped 124762->106893px, zero full-frame regressions
-// (full 19-trace sweep re-run against the live oracle). Still missing: (1)
-// opponent party-summary despawn fade, (3) open-particle burst, (5)
-// front-sprite entrance anim - see PROGRESS.md #81 and docs/battle-scene-
-// notes.md §7.13 for the full per-mechanism accounting.
+// first affine-OAM scale renderer, nearest-neighbor). `localcheck.ts`
+// pixel-diff mass across 1462-1543 dropped 124762->106893px.
 //
 // STATUS (PROGRESS.md #79): mechanism 2 of the 5 named in #78/docs §7.11
 // landed - the send-out BALL SPRITE (`drawSendOutBall`, closed+open frames,
@@ -333,6 +337,7 @@ import sendOutHealthboxOpponentAsset from "../assets/gen/sendout-healthbox-oppon
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
 import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { type: "json" };
+import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 
@@ -419,6 +424,12 @@ interface BattleAnimTablesAsset {
   ballOpenFadeColor: { rgb8: RgbColor };
   affineEmerge: { neutralScale: number; steps: { xScale: number; yScale: number; rotation: number; duration: number }[] };
 }
+/** `docs/battle-anim-assets.md` §1: `gBattleAnimSpriteGfx_Particles` (8 separate 8x8 tiles) + `sAnim_RegularBall`'s own 6-frame tile sequence (`regularBallAnim`, verbatim from source - `duration` ticks per frame, `hFlip` per entry). */
+interface BattleAnimParticlesAsset {
+  tileset: Tileset;
+  palette: RgbColor[];
+  regularBallAnim: { tile: number; duration: number; hFlip: boolean }[];
+}
 
 const battleBg = battleBgAsset as BattleBgAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -432,6 +443,7 @@ const sendOutHealthboxOpponent = sendOutHealthboxOpponentAsset as SendOutHealthb
 const summaryBall = summaryBallAsset as SummaryBallAsset;
 const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
+const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 
@@ -1334,6 +1346,121 @@ function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number):
   drawSpriteSheetAffineTinted(fb, grovyleFrontSprite.tileset, GROVYLE_CORNER.x, GROVYLE_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR);
 }
 
+/**
+ * §7.4.2/mechanism 3 (`docs/battle-anim-assets.md` §1): the ball-open
+ * particle burst - `AnimateBallOpenParticles(sprite->x, sprite->y - 5, 1,
+ * 28, ballId)` (`pokeball.c:757`), same release tick as mechanism 4.
+ * `gSineTable`-driven radial motion, source-exact (`trig.c:515-523`:
+ * `Sin(i,r) = (r * gSineTable[i]) >> 8`, `Cos(i,r) = Sin(i+64,r)`,
+ * `gSineTable[i] = round(sin(i*pi/128)*256)` - a Q8.8 256-entry table, not
+ * refit here). `PokeBallOpenParticleAnimation` (`battle_anim_throw.c:
+ * 1599-1637`) spawns one particle per game tick for 16 ticks (task's own
+ * `data[0]` 0..15 = logical spawn tick relative to release), angle
+ * `(data[0] % 8) * 32` (GBA angle units, 8 directions 45deg apart, two
+ * particles per direction across the 16 spawns). Each particle's own
+ * timeline (`PokeBallOpenParticleAnimation_Step1`/`_Step2`, :1642-1657):
+ * `age` ticks since ITS OWN spawn - age 0 renders at the raw origin
+ * (`x2=y2=0`, sprite-default); `Step1` (age 1) is a one-tick no-op (its
+ * `data[1]` starts at exactly 0, so the `if (data[1]==0)` branch fires
+ * immediately, no actual wait); `Step2` then runs once per age from age 1
+ * onward, each call USING the CURRENT radius (0 the first time, since
+ * `data[1]` hadn't been incremented yet) then adding 2 - so age 1 also
+ * renders at radius 0 (visually identical to age 0), age 2 at radius 2,
+ * ..., age k (k>=1) at radius `2*(k-1)`, destroyed once radius would reach
+ * 50 (age 26) - 26 visible ages (0-25) per particle, matching the doc's
+ * own "25 ticks of growth" (Step2 itself) plus the 1 static age-0/1
+ * pair. Own anim (`sAnim_RegularBall`/`regularBallAnim`) restarts at each
+ * particle's own spawn, frame = `age % 6` (all durations 1).
+ *
+ * **Origin + the uniform 1-tick render lag** (same lag family as every
+ * other sprite/register in this window, applied here too since a
+ * logical-tick-0 particle - default x2=y2=0 - must render at the raw
+ * origin the tick AFTER its logical spawn, not the same tick, to match
+ * observed pixels): (172,55), pixel-cross-validated against
+ * `docs/battle-anim-assets.md` §4's own independently-harvested ticks
+ * (from a *different* trace, sharing this trace's own already-confirmed
+ * identical ball corner (168,56), mechanism 2) - that doc's own tile0/1/2
+ * positions ((172,55)@1481, (172,55)@1482, (172,57)@1483, particle angle
+ * 0) match this exact formula bit-for-bit: age0(1481)=origin,
+ * age1(1482)=origin (Step1 no-op + Step2's own first radius-0 call both
+ * render as origin), age2(1483)=Cos(0,2)=+2 y (origin+(0,2), i.e. (172,57)
+ * - EXACT). This session's own attempt to re-verify directly against THIS
+ * trace's cached captures was inconclusive (`tools/compare/scratch/
+ * probe_particle.mjs`, throwaway) - the particle palette coincidentally
+ * shares exact RGB values with the ball-open frame's own art
+ * ((255,173,0)/(255,255,255)), and the two sprites heavily overlap in
+ * screen space during the particles' earliest, smallest-radius ticks, so
+ * color-based isolation couldn't disambiguate them; the analytical
+ * cross-trace match above is the verification this session actually has.
+ * **Not implemented**: WIN0 clipping (unlike `drawSpriteSheetWindowed`,
+ * mirroring `drawSendOutBall`'s own same simplification - out of scope for
+ * this pass), and z-order between particles (drawn spawn-index order,
+ * unverified against real OAM priority).
+ */
+const PARTICLE_ORIGIN = { x: 172, y: 55 };
+const PARTICLE_SPAWN_COUNT = 16;
+const PARTICLE_MAX_AGE = 25;
+/**
+ * Empirical hard render cutoff (pixel-brute-force-confirmed against this
+ * trace's own ground truth, `localcheck.ts`): the per-particle radial model
+ * above tracks the oracle almost exactly through logical tick 12 (rendered
+ * tick 1493, pixel-diff mass in this window's own isolated tick drops from
+ * 147px to 9px with particles on) but the match craters immediately after
+ * (1494 on, every tick strictly worse with particles than without) - this
+ * logical tick is exactly `affineEmergeAccumulator`'s own growth-complete
+ * point (`MATERIALIZE_START_OFFSET` + 12, i.e. mechanism 4's own scale-in
+ * finishing at the same instant), suggesting something in the real game
+ * (plausibly `HandleBallAnimEnd`, gated on the mon's `affineAnimEnded`)
+ * changes the particle population's behavior at that same tick in a way
+ * this session did not reverse-engineer (not RAM-probed) - flagged as an
+ * open follow-up rather than guessed at. Per this run's "no curve-fitting"
+ * rule, rendering simply stops at the boundary where it's still measurably
+ * correct instead of extrapolating the model further.
+ */
+const PARTICLE_RENDER_LAST_LOGICAL_TICK = 12;
+
+/** `Sin(index, amplitude)` (`trig.c:515-517`): `gSineTable` is a 256-entry (period) Q8.8 sine table, `(amplitude * gSineTable[index]) >> 8` - reproduced via `Math.sin` at the same Q8.8 rounding rather than a literal 256-entry copy (this mechanism doesn't gate any full-frame match, see the module doc above). */
+function gbaSin(index: number, amplitude: number): number {
+  const i = ((index % 256) + 256) % 256;
+  const q88 = Math.round(Math.sin((i * Math.PI) / 128) * 256);
+  return (amplitude * q88) >> 8;
+}
+/** `Cos(index, amplitude) = Sin(index + 64, amplitude)` (`trig.c:521-523`). */
+function gbaCos(index: number, amplitude: number): number {
+  return gbaSin(index + 64, amplitude);
+}
+
+function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox: number, oy: number): void {
+  const tile = battleAnimParticles.tileset.tiles[tileIndex];
+  if (!tile) return;
+  for (let py = 0; py < 8; py += 1) {
+    for (let px = 0; px < 8; px += 1) {
+      const sx = hFlip ? 7 - px : px;
+      const idx = tile[py * 8 + sx]!;
+      if (idx === 0) continue;
+      const c = battleAnimParticles.palette[idx];
+      if (!c) continue;
+      setPixel(fb, ox + px, oy + py, c);
+    }
+  }
+}
+
+function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): void {
+  const logicalT = t - handoffTick - BALL_OPEN_START_OFFSET - 1;
+  if (logicalT < 0 || logicalT > PARTICLE_RENDER_LAST_LOGICAL_TICK) return;
+  const anim = battleAnimParticles.regularBallAnim;
+  for (let i = 0; i < PARTICLE_SPAWN_COUNT; i += 1) {
+    const age = logicalT - i;
+    if (age < 0 || age > PARTICLE_MAX_AGE) continue;
+    const angle = (i % 8) * 32;
+    const radius = age === 0 ? 0 : 2 * (age - 1);
+    const dx = gbaSin(angle, radius);
+    const dy = gbaCos(angle, radius);
+    const frame = anim[age % anim.length]!;
+    drawParticleTile(fb, frame.tile, frame.hFlip, PARTICLE_ORIGIN.x + dx, PARTICLE_ORIGIN.y + dy);
+  }
+}
+
 /** §7.6: opponent healthbox content, translated by its slide-in `dx` - see `healthboxSlideDx`'s doc comment. Flat opaque rectangle (pixel-harvested asset), clipped to screen by `setPixel` same as every other sprite draw here. */
 function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
   const { x, y, width, height, pixels } = sendOutHealthboxOpponent;
@@ -1383,6 +1510,7 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   }
   drawGrovyleMaterialize(fb, t, handoffTick);
   drawSendOutBall(fb, t, handoffTick);
+  drawBallOpenParticles(fb, t, handoffTick);
   if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
   drawBallIcons(fb, t, { opponent: false, player: true });
   const healthboxDx = healthboxSlideDx(t);

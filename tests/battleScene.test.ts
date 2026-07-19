@@ -354,4 +354,18 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(last).toEqual(TINT);
     expect(after).not.toEqual(TINT);
   });
+
+  // Mechanism 3 (PROGRESS.md, docs/battle-anim-assets.md §1): the ball-open
+  // particle burst. PARTICLE_ORIGIN (172,55) + local (2,1) is tile0's own
+  // first opaque pixel (palette index 2, orange) - particle 0 (angle 0,
+  // radius 0 at age 0) renders exactly there, undisplaced, the tick it
+  // first appears.
+  it("ball-open particle burst: the first particle (angle 0) appears at PARTICLE_ORIGIN+(2,1) at handoff+19 (1481), not before (mechanism 3)", () => {
+    const ORIGIN = { x: 172, y: 55 };
+    const PARTICLE_COLOR: [number, number, number] = [255, 173, 0];
+    const before = pixelAtSentOut(1480, ORIGIN.x + 2, ORIGIN.y + 1);
+    const first = pixelAtSentOut(1481, ORIGIN.x + 2, ORIGIN.y + 1);
+    expect(before).not.toEqual(PARTICLE_COLOR);
+    expect(first).toEqual(PARTICLE_COLOR);
+  });
 });
