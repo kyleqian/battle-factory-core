@@ -33,8 +33,8 @@ both sha `6d2e0945...` (byte-identical, confirmed not assumed), tick 1750 sha
 | **1563** | `4af1dc66` | message box clears **and** first glyph "G" draws **in the same tick** (1133px sub-region delta) — the box-clear-to-first-char transition is a single-tick jump, no visible blank-box frame, unlike the later 1742-1747 clear (§3) |
 | 1564-1571 | (unique per tick) | "Go! ONIX!" prints, 1 tick/char (§2) |
 | **1572** | (static begins) | "Go! ONIX!" fully printed; message box text region stops changing (residual per-tick sha changes past this point are Brendan's throw animation elsewhere in frame, not text — confirmed via a sub-region-only diff, §2) |
-| **1574**-~1608 | — | Brendan (player back-sprite) throw-pose swap + ball-icon change begin at tick **1574** (pixel-pinned, PROGRESS #93 — corrects this row's original "~1595" coarse estimate by 21 ticks); throw pose/exit continues through ~1608 (§3, still coarse) |
-| ~1606-1638 | — | thrown Poké Ball sprite visible, arcing toward ONIX's spawn point (§3) |
+| **1574** | — | Brendan (player back-sprite) throw-pose swap, exit translation, AND the player party-status-summary bar/icons' fade+slide all begin the same tick **1574** (pixel-pinned every tick this session, engine-modeled exact in `battleMenu.ts` — corrects this row's original "~1595" coarse estimate by 21 ticks); Brendan's frame-cycle + translation continues exact through at least 1614 (§3) |
+| **1607**-**1614** | — | thrown Poké Ball sprite visible, arcing toward ONIX's spawn point — engine-modeled exact this session (§3); **1615** is the pinned boundary where an unmodeled GBA affine "ball spin" animation takes over (§3's own named blocker), not ~1638 as the original coarse pass guessed |
 | ~1646-1662 | — | ONIX materializes as a flat-color silhouette (ball-open + color-fade, §3) |
 | ~1662-1690 | — | ONIX gains full color (affine emerge anim) + healthbox slides in (§3) |
 | **1693** | `6d2e0945...` | **scene settles** — corrects the brief's coarse "1696" pin by 3 ticks (same off-by-a-few-ticks correction pattern as `battle-scene-notes.md`'s 1075-not-1077 and this session's own findings below) |
@@ -92,50 +92,101 @@ assumed identical.
 
 ## 3. Mechanism decode: Brendan's throw → ball arc → ONIX materializes → healthbox slides in
 
+**Slice 2 (this session) re-derived everything below pixel-exact, every
+tick, from `battle1-menu-dense.json` via the same sub-region-diff +
+brute-force asset-position-fit technique §2 used for text** (not the
+coarse ~8-tick pass this section originally used) — engine code lives in
+`src/engine/battleMenu.ts` (`brendanThrowFrame`/`brendanThrowDx`,
+`playerThrowBallTopLeft`, `playerSummaryFadeEva`/
+`playerSummaryIconExitDx`/`playerSummaryBarExitDx`), pinned by
+`tools/compare/traces/menu-throw.json` (0 diff at ticks 1574 and
+1605-1614). Corrections to the original coarse-pass text are called out
+inline below; the source chain itself (which functions call what) was
+already right, only specific numeric claims needed fixing.
+
 **Source chain** (`src/battle_main.c` → `src/battle_controller_player.c` →
 `src/pokeball.c`, cross-checked against the dense trace's pixels):
 
 1. `BattleIntroPlayer1SendsOutMonAnimation` (`battle_main.c:3776`) emits
    `BtlController_EmitIntroTrainerBallThrow` to the player controller.
 2. `PlayerHandleIntroTrainerBallThrow` (`battle_controller_player.c:2931`):
-   plays Brendan's back-sprite **anim frame 1** (throw pose — one of the 4
-   stacked frames in `trainer-pic-brendan-back.json`, already extracted
-   byte-exact per that file's own oracle cross-check), starts a **linear**
-   translation (`StartAnimLinearTranslation`, delta x=-40, duration=50) that
-   exits the trainer sprite off-frame, and creates `Task_StartSendOutAnim`
-   with a **31-tick pre-delay** (`tStartTimer < 31`) before the actual
-   send-out fires. Pixel-confirmed: Brendan visible in throw pose through
-   ~tick 1608 (last frame with any Brendan pixels in the crop
-   `x∈[0,120],y∈[95,160]`), consistent with a translate-then-free sequence
-   inherited already-in-progress from before tick 1560 (this window's start
-   is mid-throw, not the throw's origin — the throw itself began in the
-   sibling worktree's 1300-1560 window per PROGRESS #57's "Next").
+   plays Brendan's back-sprite anim **index 1** (`sAnimCmd_Brendan_1`,
+   `back_pic_anims.h` — **correction**: this is an *anim command sequence*,
+   not raw frame 1 directly; it cycles raw frames **0 (24 ticks), 1 (9
+   ticks), 2 (24 ticks), 0 (9 ticks), 3 (50 ticks)** — pixel-fit exact
+   against every one of these spans in the dense trace), starts a
+   **linear** translation (`StartAnimLinearTranslation`) that exits the
+   trainer sprite off-frame, and creates `Task_StartSendOutAnim` with a
+   **31-tick pre-delay** (`tStartTimer < 31`) before the actual send-out
+   fires. **Correction**: the throw-pose swap and the first translation
+   step both begin at trace tick **1574** exactly (pixel-pinned every
+   tick, not "~1595"/"inherited already-in-progress from before 1560" as
+   originally guessed) — the source sets `data[2]=-40` as an *absolute
+   OAM-space x target* (`StartAnimLinearTranslation` overwrites `data[1]`
+   with the sprite's own *current* x right before computing `target -
+   current`), not a `-40px` delta, so the true total displacement isn't
+   40px; this codebase doesn't have Brendan's starting OAM x extracted to
+   recover the exact delta algebraically, so the engine pixel-fits the
+   Q8.8 step register directly (615, duration 50) — exact (0/1665px
+   mismatch) at every dense-trace tick checked, 1574-1614.
 3. `StartSendOutAnim` (`:2196`) creates the (invisible) ONIX battler sprite,
    then `DoPokeballSendOutAnimation(0, POKEBALL_PLAYER_SENDOUT)`
    (`pokeball.c:335`).
 4. `Task_DoPokeballSendOutAnim` (`pokeball.c:352`): spawns the thrown-ball
-   sprite at **(24, 68)**, callback `SpriteCB_PlayerMonSendOut_1`.
-   **Correction to the brief's framing**: the player-side throw is **not**
-   the same code path as the generic "unused ball throw animation" branch
-   (`InitAnimArcTranslation` toward `gBattlerTarget` with `data[5]=-40`) —
-   that branch is dead for both `POKEBALL_PLAYER_SENDOUT` and
-   `POKEBALL_OPPONENT_SENDOUT` (both `return` before reaching it, `:399-404`).
-   The player's *own* arc lives in `SpriteCB_PlayerMonSendOut_1/_2`
-   (`pokeball.c:911-968`): `InitAnimArcTranslation` toward
-   `(GetBattlerSpriteCoord(battler, BATTLER_COORD_X_2),
-   GetBattlerSpriteCoord(battler, BATTLER_COORD_Y_PIC_OFFSET) + 24)`, arc
+   sprite at OAM-space **center (24, 68)** (**correction**: this engine's
+   sprite `x`/`y` are center coordinates, not top-left — confirmed by the
+   offset landing exactly 8px, half the 16x16 ball sprite's width/height,
+   inside the pixel-fit top-left corner (16,60) at tick 1607, not
+   assumed), callback `SpriteCB_PlayerMonSendOut_1`. The player's arc lives
+   in `SpriteCB_PlayerMonSendOut_1/_2` (`pokeball.c:911-968`):
+   `InitAnimArcTranslation` toward `(GetBattlerSpriteCoord(battler,
+   BATTLER_COORD_X_2), GetBattlerSpriteCoord(battler,
+   BATTLER_COORD_Y_PIC_OFFSET) + 24)` — pixel-fit to center (72,112), arc
    height `-30`, nominal duration `data[0]=25`, driven by
-   `TranslateAnimHorizontalArc` every tick until arrival. (The
-   `HIBYTE(data[7]) ∈ [35,80)` branch inside `_2` is dead code for a singles
-   player battler — `data[7] += sBattler/3` never increments when
-   `sBattler=0`.) This **confirms the brief's suspicion**: the player send-out
-   genuinely has a throw arc; **the opponent's does not** —
-   `SpriteCB_OpponentMonSendOut` (`pokeball.c:986-996`) is a flat 16-tick
-   delay with no `InitAnimArcTranslation` call at all, ball just appears at
-   the target and pauses. Pixel-confirmed: the thrown ball is visible mid-air
-   (small red/white sprite) from ~tick 1606 through ~1638, tracing an
-   arc-shaped path across the lower-middle of the screen toward ONIX's
-   spawn point — matches an arc, not a flat teleport.
+   `TranslateAnimHorizontalArc` every tick until arrival — exact (0/112px
+   mismatch) at every tick 1607-1614. **Correction, this session's most
+   important finding**: the `HIBYTE(data[7]) ∈ [35,80)` branch inside `_2`
+   is **not** dead code for a singles player battler. The original claim
+   ("`data[7] += sBattler/3` never increments when `sBattler=0`") is true
+   but incomplete — it missed that `data[7]` is the *same field*
+   `TranslateAnimHorizontalArc` (called from the `else` branch, i.e. every
+   tick this branch *isn't* active) increments by `data[6]=1310`
+   regardless of `sBattler`. Solving `floor(n*1310/256) ∈ [35,80)` gives
+   `n≥7`, which lands exactly on the tick this session's pixel search
+   stops finding an exact match against the plain sine-arc model (n=8,
+   trace tick 1615). That branch starts a real GBA affine sprite animation
+   (`StartSpriteAffineAnim(sprite, 4)` — a rotate/scale "ball spin" over an
+   affine-matrix keyframe table this codebase hasn't extracted or built a
+   renderer for) and simultaneously cuts the horizontal step to 1/3 and
+   slows the duration countdown to roughly 1-in-3 ticks. This is the
+   **named blocker** for extending `playerThrowBallTopLeft` past tick
+   1614 — a distinct, non-trivial mechanism from the plain Q8.8 sine-arc
+   arithmetic, not attempted this session. This still **confirms the
+   original brief's suspicion**: the player send-out genuinely has a
+   throw arc; **the opponent's does not** — `SpriteCB_OpponentMonSendOut`
+   (`pokeball.c:986-996`) is a flat 16-tick delay with no
+   `InitAnimArcTranslation` call at all.
+4b. **New this session, not in the original pass**: the same tick
+    Brendan's throw starts, `PlayerHandleIntroTrainerBallThrow` also
+    reassigns `gTasks[gBattlerStatusSummaryTaskId[...]].func =
+    Task_HidePartyStatusSummary` (`:2954-2955`) — the player's own
+    party-status-summary bar+icons (the "ball-icon change" PROGRESS #93
+    flagged, pixel-confirmed at x150-239/y88-99) start hiding via an
+    alpha-blend fade (`Task_HidePartyStatusSummary_BattleStart_1`,
+    `battle_interface.c:1727`: `BLDALPHA` `eva` steps 16→0, 1 step every
+    *other* tick) **plus** a position slide: each of the 6 icons gets a
+    `7*i`-tick predelay then an accelerating leftward
+    `SpriteCB_StatusSummaryBalls_Exit` ramp that closes to the triangular
+    form `-3*K*(K+1)/2` (`K` = active ticks so far), and the bar itself
+    (`SpriteCB_StatusSummaryBar_Exit`) slides a flat `-2px`/tick (its own
+    "acceleration" term never actually grows — `data[1]`'s low nibble is
+    unchanged by `+=32` every tick, collapsing the ramp to a constant).
+    All pixel-fit exact at ticks 1574 and 1605-1614; ticks 1575-1604 have
+    a small (<1%, 20-136px) residual — `SetSubspriteTables(...,
+    sStatusSummaryBar_SubspriteTable_Exit)` (`:1717`) splits the bar into
+    independently-animated subsprites during this exact exit, which the
+    engine's monolithic `drawBallStatusBar` doesn't model — **named
+    blocker**, not attempted this session.
 5. `SpriteCB_ReleaseMonFromBall` (`pokeball.c:750`) on arrival:
    `AnimateBallOpenParticles` (sparkle burst), `LaunchBallFadeMonTask(TRUE,
    battler, 14, ballId)` (flat-color silhouette → true color over ~14
@@ -254,7 +305,7 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
 |---|---|---|
 | ONIX back sprite | **extracted** | `src/assets/gen/battle-back-sprites.json["ONIX"]` |
 | Brendan back sprite, all 4 throw-anim frames | **extracted, byte-exact** | `src/assets/gen/trainer-pic-brendan-back.json` (`frameCount:4`) — already covers the throw pose (anim frame 1) used by `PlayerHandleIntroTrainerBallThrow`, per that extractor's own oracle cross-check |
-| Thrown Poké Ball sprite (`graphics/balls/poke.png`, 3-frame 16×48 send-out sheet) | **extracted (as a byproduct)**, not yet wired for this context | `src/assets/gen/summary-ball.json` — extracted whole (all 3 frames) for the summary-screen caught-ball icon, which only renders frame 0; frames 1-2 (needed for `SpriteCB_ReleaseMonFromBall`'s `StartSpriteAnim(ball,1)` "open" pose) are present in the JSON but unverified pixel-exact against *this* window — a cheap follow-up, not a re-extraction |
+| Thrown Poké Ball sprite (`graphics/balls/poke.png`, 3-frame 16×48 send-out sheet) | frame 0 **wired + pixel-exact this session** (`playerThrowBallTopLeft`, `battleMenu.ts`) | `src/assets/gen/summary-ball.json` — frame 0 (closed) is what's visible the whole 1607-1614 modeled arc window; frames 1-2 (needed for `SpriteCB_ReleaseMonFromBall`'s `StartSpriteAnim(ball,1)` "open" pose, and possibly for the affine-spin phase past 1614) still unverified pixel-exact against this window |
 | Player healthbox (name/level/HP-bar/digits, left+right halves) | **extracted** | `src/assets/gen/battle-healthbox.json` (`singlesPlayer`, `hpbar`, etc. — same file the opponent healthbox already uses per `battle-bringup-notes.md` §3) |
 | Action-menu window frame + font | **extracted** (shared with the message box) | `src/assets/gen/battle-window.json` — same asset `battle-scene-notes.md` §3.1 already confirmed covers `B_WIN_MSG`; `B_WIN_ACTION_PROMPT`/`B_WIN_ACTION_MENU` use the same `sStandardBattleWindowTemplates` family, not independently re-verified pixel-exact this session |
 | Action-menu cursor ("▶") | **likely already covered, unverified** | direct tilemap tiles `{1,2}` from the same sheet as the window itself (§5) — no separate sprite/asset file exists to extract; a future slice should byte-check tiles 1-2 of `battle-window.json`'s tileset against the on-screen cursor rather than treat this as a gap |
@@ -264,11 +315,22 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
 
 ## 7. Risks / follow-ups for the engine slice
 
-1. §3's ball-throw/materialization phase boundaries are pixel-sampled at
-   ~8-tick granularity, not every-tick — an engine slice should re-derive
-   exact tick boundaries from `battle1-menu-dense.json`'s 251 captures via
-   the same sub-region-diff technique §2 used for text (cheap, no new
-   oracle calls needed).
+1. **Slice 2 landed** (this session): Brendan's throw pose-cycle + exit
+   translation and the thrown ball's arc are engine-modeled exact for
+   ticks 1574 and 1605-1614 (`tools/compare/traces/menu-throw.json`, 0
+   diff). Two concrete, precisely-named follow-ups remain, both real GBA
+   mechanisms this session identified but didn't implement (not
+   estimation gaps — see §3 for the full derivation of each):
+   - **The ball's GBA affine "spin"** (`StartSpriteAffineAnim(sprite,4)`),
+     which takes over at tick 1615 — blocks extending
+     `playerThrowBallTopLeft` past 1614 without an affine-matrix keyframe
+     renderer (§3 point 4).
+   - **The status-bar's subsprite split** during its exit slide
+     (`sStatusSummaryBar_SubspriteTable_Exit`) — blocks ticks 1575-1604
+     reaching 0 diff (currently <1%/20-136px residual, §3 point 4b).
+   Materialization (~1646+) is still unattempted — §6's two MISSING items
+   (ball-open particles, affine emerge + color-fade tables) block it, same
+   as before this session.
 2. §4's idle-cycle mechanism (which specific sprite/timer drives regions A
    and B) is pixel-pinned but not source-attributed — needed before an
    engine slice can *generate* the cycle rather than just replay captured

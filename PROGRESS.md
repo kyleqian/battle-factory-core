@@ -5,6 +5,65 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 94 — Bounded worker: PLAYER SEND-OUT slice 2 landed — Brendan's throw pose-cycle + exit translation, thrown-ball arc, player status-bar fade+slide; `menu-throw.json` **11/11** (ticks 1574, 1605-1614) — two new mechanisms found+named, not implemented (GBA ball-spin affine, bar subsprite-split)
+
+- **State:** `npm test` **497/497** (+11), `npm run build` green, tree
+  clean. Full 21-trace sweep against the live oracle: all 20 others at
+  their exact established counts (anchor 1/1, draft-cursor 13/13,
+  draft-menu 38/38, draft-menu-slot6 66/66, example 4/4, summary-info-onix
+  122/122, summary-info-magby 132/132, confirm-decline 67/67,
+  accept-prebattle 137/137, walk-warpout 125/125, room-entry 110/110,
+  room-npcs 98/98, room-msgbox 142/142, transition 206/206, scene-assembly
+  256/256, rent-slot1 125/139, rent-3picks 157/190, confirm-flow 79/95,
+  sendout 214/256, menu-text 18/18) — zero regressions. New
+  `tools/compare/traces/menu-throw.json`: **11/11, 0 diff** at
+  `captureFrames=[1574, 1605..1614]`.
+- **Did:** re-derived docs/battle-menu-notes.md §3's throw/arc mechanism
+  every-tick (not the coarse ~8-tick pass) via sub-region diffing +
+  brute-force asset-position-fit against `battle1-menu-dense.json`, per
+  the brief. New `battleMenu.ts` exports (+ additive `battleScene.ts`
+  hooks, same pattern as slice 1): `brendanThrowFrame`/`brendanThrowDx`
+  (Brendan's `sAnimCmd_Brendan_1` frame cycle + Q8.8 exit-translation
+  accumulator, step=615/duration=50, exact every tick 1574-1614),
+  `playerThrowBallTopLeft` (the thrown ball's linear+sine-arc position,
+  exact ticks 1607-1614), and `playerSummaryFadeEva`/
+  `playerSummaryIconExitDx`/`playerSummaryBarExitDx` (the tick-1574
+  "ball-icon change" flagged in #93: the player's OWN party-status-summary
+  bar+icons alpha-fade + slide out, `Task_HidePartyStatusSummary` -
+  triggered by the *same* controller call as Brendan's throw, not a
+  separate mechanism). 11 new Tier-1 tests (`tests/battleMenu.test.ts`).
+- **Two real mechanisms found and precisely named, not implemented
+  (time-boxed, not estimation gaps):** (1) at trace tick 1615 (arc tick
+  n=8), `SpriteCB_PlayerMonSendOut_2`'s `HIBYTE(data[7])∈[35,80)` branch
+  activates — **docs' original "dead code for singles" claim was wrong**:
+  `data[7]` is the same field the arc's own accumulator drives regardless
+  of battler, so it crosses into that range on a fixed schedule. The
+  branch starts a real GBA affine "ball spin" (`StartSpriteAffineAnim`)
+  this codebase has no keyframe-matrix renderer for - blocks
+  `playerThrowBallTopLeft` past 1614. (2) the player status-bar's exit
+  uses `SetSubspriteTables(..., sStatusSummaryBar_SubspriteTable_Exit)` -
+  the bar splits into independently-animated subsprites during the exit,
+  which the engine's monolithic bar draw doesn't model - leaves a small
+  (<1%, 20-136px) residual at ticks 1575-1604, why the committed trace
+  skips that span rather than claiming a false 0-diff. Both corrected in
+  docs/battle-menu-notes.md §3 (this session's own file to own, per the
+  brief) with full derivations.
+- **Next:** (1) the ball-spin affine animation (tick 1615+) - needs the
+  affine-matrix keyframe table's source location and a keyframe-matrix
+  sprite renderer (a bigger primitive than this codebase has built so
+  far); (2) the status-bar subsprite split (1575-1604) - smaller, a
+  focused follow-up; (3) then materialize (~1646+, ball-open particles +
+  affine-emerge + color-fade, §6's two still-MISSING asset tables); (4)
+  healthbox slide-in, action menu, idle cycle (1693-1810), per
+  docs/battle-menu-notes.md §3-§5.
+- **Notes:** healthboxAssembly.ts/healthbox docs, oracle/harness, and
+  ROADMAP.md stayed out of scope, per the brief. Stayed out of
+  battleScene.ts's affine-sampling internals / battleScene.test.ts (the
+  concurrent worker's region) - only additive hooks in `drawSendOutHandoff`/
+  `drawBallIcons`. No PAPERCUT.
+
+---
+
 ## 93 — Bounded worker: PLAYER SEND-OUT slice 1 landed — message-box clear + "Go! ONIX!" print + static hold, new `battleMenu.ts`; `menu-text.json` ratified at **18/18** (supervisor-trimmed to the slice's true 1556-1573 window)
 
 - **State:** `npm test` **486/486** (+9), `npm run build` green, tree
@@ -116,44 +175,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   sendout 180→214/256, 7 worker steps all verified green).
 
 ---
-
-## 91 — Supervisor wind-down: session end 2026-07-18 ~21:30 — `sendout.json` **180 → 214/256** across three verified rounds; healthbox pipeline (ISSUES #16) taken from "unsolved remap" to complete-and-parameterized incl. partial-HP/status
-
-- **State (verified this minute):** `npm test` **476/476**, `npm run
-  build` green, tree clean at `c78bbcf` (merge of
-  `worker/wt-20260718-205048`, the last of 3 conflict-free worktree
-  merges). Post-merge re-runs by the supervisor: sendout **214/256**,
-  scene-assembly 256/256, transition 206/206, anchor 1/1 (the merge's
-  `battle-healthbox.json` change is additive; no other trace's inputs
-  touched — workers ran full 19-trace sweeps at #86/#88/#90, zero
-  regressions every time). No unmerged branches, no live worktrees.
-- **Session summary (supervised, ~19:31-21:30, 6 worker steps = 3 rounds
-  × 2 lanes, every step verified green, zero regressions):** Main lane —
-  send-out window 180→196 (#86: affine formula was inverted, `pa=xScale`
-  directly; GROVYLE front sprite runs `sAnim_Grovyle_1` breathing, not a
-  frame swap) →199 (#88: whole particle subsystem freezes one real tick,
-  RAM 1494≡1493) →**214/256** (#90: bar exit slide +2px/tick + 16→24-tile
-  subsprite swap; 15/18 target ticks bit-exact). Worktree lane — ISSUES
-  #16 healthbox: "tile remap" DISSOLVED (#87: no remap; mismatch was
-  un-composited content), full content pipeline byte-exact 2574/2574 and
-  parameterized (#89: center-based subsprites, text-blit model, bar-wins
-  z-order), partial-HP + status icons landed hermetically (#91: strict-`>`
-  band thresholds, new `hpbar_anim.png`/`status2.png` extractions; oracle
-  validation deferred to S7's first drain trace). Suite 458→476 Tier-1
-  tests.
-- **Next (in order, per `docs/battle-scene-notes.md` §7.19):** (1)
-  particle position residual, 1481-1503/1516-1519 — §7.18's lead:
-  brute-force render-lag constants directly against oracle captures
-  rather than RAM-tick arithmetic; (2) icon-edge/materialize residual
-  1470/1471/1479 (likely same family); (3) tick 1462's named settled-bar
-  one-tick gap + trainer-exit tail; (4) small 1504-1521 boundary
-  residual; then action-menu window 1560-1810 (`docs/battle-menu-notes.md`,
-  groundwork complete), S6 acceptance end-to-end, then S7 (healthbox
-  wiring + drain-trace validation fold in there).
-- **Notes:** no usage-limit events; both lanes idle at close; all three
-  worktree merges conflict-free (doc-ownership discipline held). 30-min
-  single-mechanism caps landed reliably (#90 in 21 min, worktree round 3
-  in 14 min). PAPERCUTS: none new reported across all six workers.
 
 ---
 
