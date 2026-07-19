@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 107 — Supervisor: idle/menu-draw dossier branch merged (docs/spec only) — final menu slice (1742-1810) fully unblocked; round-11 = SortSprites implementation SOLO
+
+- **State (verified post-merge):** `npm test` **523/523**, `npm run build`
+  green, tree clean. New `docs/battle-menu-idle-notes.md` (+ probe spec
+  `menu-idle-bounce.json`): idle cycle SOLVED closed-form
+  (`DoBounceEffect` drivers on gSprites[6]/gSprites[0], sine step +=7 mod
+  256, +1 render lag — even explains the prior dossier's unattributed
+  tick-1813 transient); menu idle is INDEPENDENT of the scene-assembly
+  idle (re-derive, don't reuse); atomic menu draw = off-screen draw +
+  BG0-scroll reveal after DMA3. Still open there: cursor-tile byte-check,
+  the 1742-47 teal-blank's specific source call (pointers named).
+- **Next (in order):** (1) SOLO main-lane step NOW: implement §7.26's
+  derived SortSprites model (priority → subpriority → per-tick screen-Y
+  tiebreak) in drawSendOutHandoff — targets sendout 1482-84/1497-98 and
+  menu-materialize 1658-62; menu-throw's 8 ticks are NOT this mechanism
+  (§7.26 disproved #96's hypothesis — icon fade/exit timing is the new
+  lead, separate step); (2) then parallel: healthbox slide-in 1663-1693
+  (harvest-based like §7.9's precedent, assembly stays with ISSUES #16)
+  + menu draw/idle slice off the new dossier; (3) S6 acceptance
+  end-to-end attempt; wind-down with margin before 07:55.
+- **Notes:** two model-falsifications this session (§7.21's shared-root,
+  §7.26's creation-order) — both caught by RAM before shipping wrong code.
+
+---
+
 ## 106 — Bounded worker: derived the REAL `SortSprites()` OAM-priority model (source+RAM verified) for #96's compositor — disproved PROGRESS #96's Brendan-vs-icon hypothesis, gave the particle z-order family (§7.25) a concrete non-guessed mechanism; no code landed (documentation-only session, ran out of RAM-probe budget before implementing)
 
 - **State:** `npm test` **523/523**, `npm run build` green, tree clean —
