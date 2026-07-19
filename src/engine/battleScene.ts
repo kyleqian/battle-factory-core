@@ -2448,6 +2448,7 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   }
   drawGrovyleMaterialize(fb, t, handoffTick);
   drawGrovyleStretchEarly(fb, t, handoffTick);
+  if (t < GROVYLE_MATERIALIZE_TICK) drawGrovyleStretch(fb, t, handoffTick);
   drawSendOutBall(fb, t, handoffTick);
   const playerBallTopLeft = playerThrowBallTopLeft(t);
   if (playerBallTopLeft !== null) {
@@ -2470,11 +2471,7 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   drawBallOpenParticles(fb, t, handoffTick);
   drawPlayerBallOpen(fb, t);
   drawPlayerMaterialize(fb, t);
-  if (t >= GROVYLE_MATERIALIZE_TICK) {
-    drawGrovyleSettled(fb);
-  } else {
-    drawGrovyleStretch(fb, t, handoffTick);
-  }
+  if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
   drawBallIcons(fb, t, { opponent: false, player: true });
   drawOpponentSummaryExit(fb, t, handoffTick);
   const healthboxDx = healthboxSlideDx(t);

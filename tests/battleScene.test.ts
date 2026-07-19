@@ -448,6 +448,28 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(after1503).toEqual(TINT);
   });
 
+  // §7.24: mechanism 5's LATE window (`GROVYLE_STRETCH_TABLE`, handoff+42/
+  // render 1504 on) was drawn AFTER `drawBallOpenParticles` in its original
+  // call site - the same compositing-order bug §7.22/§7.23 already fixed for
+  // the EARLY window (handoff 35-41), just not yet applied here because a
+  // prior session's own comment asserted "by then the particles have mostly
+  // cleared this screen region." That assertion doesn't hold: the existing
+  // (unmodified) particle age formula puts several particles still alive
+  // with ages well under `PARTICLE_MAX_AGE` throughout 1504-1518 (e.g. index
+  // 12 at age 10, render 1504; index 12 at age 22, render 1516) - the same
+  // particle-position formula already pixel-validated elsewhere in this
+  // file. Moving mechanism 5's late call site to before
+  // `drawSendOutBall`/`drawBallOpenParticles` (matching the early window's
+  // already-established slot; `drawSendOutBall` is itself a confirmed no-op
+  // past handoff+23, so this doesn't disturb ball occlusion) lets particles
+  // occlude Grovyle's stretched silhouette again, closing `sendout.json`'s
+  // 1504-1518 span (221/256 -> 236/256) without touching any table/formula.
+  it("mechanism 5's late window (handoff+42 on) no longer paints over the still-alive particle burst - renders 1504 and 1516 show particle color, not Grovyle's tint, at a particle's own predicted footprint (§7.24)", () => {
+    const PARTICLE_COLOR: [number, number, number] = [255, 173, 0];
+    expect(pixelAtSentOut(1504, 173, 40)).toEqual(PARTICLE_COLOR);
+    expect(pixelAtSentOut(1516, 174, 16)).toEqual(PARTICLE_COLOR);
+  });
+
   // Mechanism 3 (PROGRESS.md, docs/battle-anim-assets.md §1): the ball-open
   // particle burst. PARTICLE_ORIGIN (172,55) + local (2,1) is tile0's own
   // first opaque pixel (palette index 2, orange) - particle 0 (angle 0,
