@@ -2374,3 +2374,115 @@ scrutiny since the healthbox slide renders in its window) re-verified
   callback's first tick) - RAM ground truth trusted directly per this
   file's established precedent, same as `GROVYLE_STRETCH_TABLE`/
   `MATERIALIZE_Y2_TABLE`.
+
+### 7.24. Round-6 worktree: 1504-1518's "boundary residual" was mechanism 5's LATE window drawn on the wrong side of the particle burst - a pure compositing-order fix (no table/formula change) - `sendout.json` **221/256 -> 236/256** (full 15-tick span closed)
+
+Per this round's brief: root-cause and close `sendout.json`'s named 1504-1518
+boundary residual (the biggest remaining named span), pixel-classifying
+before fixing, and take 1485-1495 too only if the same root cause provably
+covers it.
+
+**Pixel-classified first, per this file's own established practice**
+(`tools/compare/scratch/span_pixels.mjs`, throwaway - per-pixel color dump
+of every mismatched pixel at renders 1504/1507/1510 against the live
+oracle). Every single mismatched pixel in the span has the SAME shape: the
+oracle shows the ball-open particle burst's own established colors
+(`(255,173,0)` orange / `(255,255,255)` white), while this engine shows
+Grovyle's own tinted-stretch silhouette color instead - never the reverse,
+never a third color. This is not a new color/blend bug and not a
+particle-formula bug (the app isn't drawing the WRONG particle - it isn't
+drawing a particle there at all, because something else is painted on top
+of where one should be).
+
+**Cross-checked against the ALREADY-implemented, already pixel-validated
+particle formula** (`drawBallOpenParticles`, unmodified) rather than
+guessing a new one: reproducing its exact math in a throwaway script
+(`tools/compare/scratch/particle_predict.mjs`) and predicting every
+particle's screen footprint at renders 1504-1518 confirms every mismatched
+pixel this session found sits exactly inside a currently-alive particle's
+own 8x8 tile footprint - e.g. render 1504's mismatches at (173,40)/
+(174,40)/.../(178,40) are exactly particle index 12's age-10 footprint
+`[172,179]x[37,44]`; render 1516's mismatch band is exactly particle index
+12's age-22 footprint `[172,179]x[13,20]`. Ages involved (7-24 across the
+span) are all comfortably within the already-established `PARTICLE_MAX_AGE
+= 24` cutoff - **no particle in this span is an age overrun**. This directly
+falsifies §7.20's own "single particle surviving past `PARTICLE_MAX_AGE`"
+hypothesis for renders 1516/1517: recomputing that specific residual with
+the unmodified formula shows it's particle index 12 at age 22 (not a
+survivor past 24), previously invisible only because something drew over it
+- the same bug as the rest of the span, not a distinct one. No RAM probing
+was needed to reach this: the formula and its RAM grounding were already
+established and pixel-exact elsewhere in this trace (§7.14/§7.17/§7.18);
+only where it composites was ever wrong here.
+
+**Root cause: a compositing-order bug, structurally identical to
+§7.22/§7.23's already-fixed one, just in the other half of the same
+mechanism.** `drawSendOutHandoff`'s call order draws mechanism 5's LATE
+window (`drawGrovyleStretch`, `GROVYLE_STRETCH_TABLE`, handoff+42/render
+1504 on) AFTER `drawBallOpenParticles` - unlike mechanism 5's EARLY window
+(`drawGrovyleStretchEarly`, handoff 35-41), which §7.22/§7.23 already moved
+to BEFORE the ball/particles specifically so the particle burst keeps
+occluding Grovyle. §7.22's own doc comment asserted the late window "never
+needed this ordering because by then the particles have mostly cleared this
+screen region" - checked, not assumed, this session, and it doesn't hold:
+`drawBallOpenParticles`'s own unmodified age formula (`logicalT - i [-1]`,
+`age <= PARTICLE_MAX_AGE`) keeps several particle indices alive with ages
+well under 24 throughout render 1504-1518 (worked out by hand against the
+formula, then confirmed against the oracle's own pixels above) - the
+assumption in that prior comment was never verified against the formula
+it's describing.
+
+**Fix**: one line moved. `drawGrovyleStretch(fb, t, handoffTick)` (guarded
+by `t < GROVYLE_MATERIALIZE_TICK`, same condition as before, just no longer
+paired with the settled-sprite branch via if/else) now runs immediately
+after `drawGrovyleStretchEarly`, in the SAME pre-ball/pre-particle slot -
+i.e. mechanism 5's early and late windows now share one consistent
+compositing position, matching mechanism 4's. Verified safe against the
+ball sprite specifically before landing: `drawSendOutBall` is a confirmed
+no-op for `et >= BALL_INVISIBLE_START_OFFSET` (23, i.e. render >= 1485),
+so by render 1504 it never draws anything regardless of ordering - moving
+Grovyle's draw earlier relative to it changes nothing. No table, formula,
+or constant was touched - not `GROVYLE_STRETCH_TABLE`, not
+`PARTICLE_MAX_AGE`, not any offset - purely a draw-order correction,
+mirroring §7.22/§7.23's own already-accepted fix for the adjacent window.
+
+**Score effect, verified against the live oracle**: `sendout.json`
+**221/256 -> 236/256** (+15) - every one of the 15 named ticks (1504-1518)
+now bit-exact (confirmed individually via `localcheck`-style per-tick diff
+count, all zero, before re-running the full trace). Renders 1497/1498 (the
+early window's own small residual, §7.22/§7.23) are pixel-identical
+before/after (3px/2px, unchanged) - this fix only touches the late window's
+own call site. Renders 1485-1495 are pixel-identical before/after too
+(114-128px, unchanged) - **not covered by this root cause**, confirming the
+brief's own fallback applies: that span sits entirely within mechanism 4's
+window (`drawGrovyleMaterialize`, et<35) and `drawGrovyleStretchEarly`'s
+window (et 35-41), both of which were ALREADY drawn before ball/particles
+(§7.11, §7.22/§7.23) - there is no compositing-order bug left to fix there,
+so it's left exactly as already named (the ball-occlusion-footprint/
+affine-emerge residual territory, §7.20/§7.21). One Tier-1 test added
+(`tests/battleScene.test.ts`, "mechanism 5's late window... no longer
+paints over the still-alive particle burst") pinning particle color (not
+Grovyle's tint) at renders 1504 and 1516, chosen so it fails against the
+pre-fix call order and passes only with the reorder.
+
+**Full sweep, live oracle**: all 22 traces at their established counts -
+sendout 236/256 (this session's own gain), scene-assembly 256/256,
+transition 206/206, menu-text 18/18, menu-throw 70/70, menu-materialize
+1/1, draft-cursor 13/13, draft-menu-slot6 66/66, draft-menu 38/38,
+accept-prebattle 137/137, anchor 1/1, confirm-decline 67/67, confirm-flow
+79/95, example 4/4, rent-3picks 157/190, rent-slot1 125/139, room-entry
+110/110, room-msgbox 142/142, room-npcs 98/98, summary-info-magby 132/132,
+summary-info-onix 122/122, walk-warpout 125/125 - zero regressions.
+`npm test` 517/517 (+1 Tier-1 test), `npm run build` green.
+
+**Not chased further this round (named, not guessed at):**
+- 1485-1495 (mechanism 4/early-mechanism-5's own ball-occlusion/affine-emerge
+  residual territory, §7.20/§7.21) - confirmed above NOT covered by this
+  root cause, unchanged, out of scope per the brief's own fallback.
+- Renders 1462, 1470/1471/1479 (separate named gaps, out of scope per the
+  brief), the menu window (1560+), #96's OAM-order fix, oracle/harness
+  internals - all untouched, not investigated this round.
+- §7.21's own still-open follow-up (`y2`'s ultimate C-source cause, the
+  callback-first-tick matrix latch delay's ultimate C-source cause) -
+  unrelated to this round's finding, still just RAM-ground-truth tables,
+  unchanged.
