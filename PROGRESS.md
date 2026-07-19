@@ -4,6 +4,60 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 117 — Bounded worker: closed ISSUES #18's 1494/1495 (a one-tick `drawOpponentSummaryExit` clock stall, found empirically) — `sendout.json` **253/256 → 255/256**; 1496 read source-first per the brief (`CreateSprite`/`CreateSpriteAtEnd`/`SortSprites`), root mechanism identified and documented, no fix shipped — it needs whole-scene persistent state this engine doesn't model, not a tweak
+
+- **State:** `npm test` **576/576** (+1 Tier-1), `npm run build` green, tree
+  clean. Full sweep vs. live oracle: sendout **255/256** (was 253/256,
+  only 1496 open), s6-acceptance 224/228 (unchanged — 1494/95 aren't its
+  sampled frames, only 1496 is, and 1496 didn't move), menu-throw 78/78,
+  menu-materialize 62/62, menu-idle 69/69, menu-text 18/18, scene-assembly
+  256/256, transition 206/206 — zero regressions.
+- **Did (1496 first, source-first per the brief):** read `sprite.c`'s
+  `CreateSprite`/`CreateSpriteAtEnd`/`SortSprites`/`ResetAllSprites` in full.
+  Falsified the standing assumption (ISSUES #18/§7.31): send-out particles
+  use plain `CreateSprite` (`battle_anim_throw.c:1615`, via
+  `PokeBallOpenParticleAnimation`), NOT `CreateSpriteAtEnd` (that allocator
+  is real in this scene, but only for the summary bar's icons/healthbox).
+  Real finding: `sSpriteOrder` is a PERSISTENT 64-slot permutation reset to
+  identity only once (`ResetAllSprites`, battle start) and insertion-sorted
+  in place every frame thereafter; on an exact tie (this residual's exact
+  case) no swap fires, so two tied slots keep whatever relative order they
+  inherited from the ENTIRE prior history of every sprite (any kind) that
+  ever occupied those two slot numbers — not their spawn index or raw slot
+  number. Resolving slots 6-vs-23's real order at tick 1496 would require
+  simulating that whole-scene history as persistent state, a materially
+  bigger architecture change than this engine's current stateless per-burst
+  Y-sort — out of proportion to a 3px fix and exactly the regression risk
+  the brief's sweep-mandate warns about. No fix shipped (a special-cased
+  swap would be undocumented curve-fitting, §7.25's own already-reverted
+  mistake). Full derivation with source line cites: `docs/battle-scene-
+  notes.md` §7.32.
+- **Did (1494/1495, with the time this freed up):** extended
+  `tools/compare/scratch/diag_1493.mjs` (not rewritten) to bisect the exact
+  boundary empirically. Naively extending the draw window while letting
+  `elapsed` keep incrementing over-corrects exactly as §7.31 found
+  (position slides 2px/tick past where the real sprite stopped). Freezing
+  at `elapsed=30` closes 1494 but not 1495; resuming at `elapsed=31` closes
+  1495 but not 1494 — both close together once modeled as a one-tick STALL:
+  `elapsed = rawElapsed<=30 ? rawElapsed : rawElapsed-1` (render 1494 repeats
+  1493's own `elapsed=30`, render 1495 resumes normal counting from there).
+  Same stall family as §7.18's already-documented particle stall; plausible
+  (not independently RAM-confirmed this session) shared cause is the
+  RAM-confirmed slot destroy/reuse event §7.31 already found. New Tier-1
+  test pins both the frozen 1494 edge and the resumed, wider 1495 edge.
+- **Next:** ISSUES #18 now names only 1496, with a documented architectural
+  reason a general fix doesn't fit this engine's current sprite-sort model
+  — a future session should decide whether whole-scene persistent
+  `sSpriteOrder` state is worth building (S6 → [x] blocker otherwise stays
+  parked) or accept it per the run's no-blind-fit policy. S7 (turn
+  resolution) otherwise unblocked and is probably the better next lane.
+- **Notes:** stayed within scope (`battleScene.ts`, `tests/
+  battleScene.test.ts`, `docs/battle-scene-notes.md`, `ISSUES.md`,
+  `PROGRESS.md`, `tools/compare/scratch/diag_1493.mjs` extended). No new
+  probe scripts needed — the existing five from #115/§7.31 plus source
+  reading sufficed. No PAPERCUT this session.
+
+---
 ## 116 — Supervisor: S7 BEGUN — turn-resolution pure-logic core merged (worktree lane) — damage calc / turn order / RNG ledger hermetically pinned vs the committed RAM dump; **suite 556 → 575/575**; found+fixed a real `+2` bug in the groundwork's damage formula
 
 - **State (verified post-merge):** `npm test` **575/575** (+19 Tier-1),
@@ -94,50 +148,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   probes, cited directly by §7.31's findings) since a future session
   picking up 1494/95/1496 should be able to re-run them without rebuilding
   from scratch. No PAPERCUT this session.
-
----
-## 114 — Supervisor wind-down: session end 2026-07-19 ~06:00 — S6 chain COMPLETE and acceptance-trace-committed (`s6-acceptance.json` **224/228**, every diff attributed); `sendout.json` **214 → 252/256**; suite **477 → 555**; 15 verified worker steps across two lanes
-
-- **State (verified this minute):** `npm test` **555/555**, `npm run
-  build` green, tree clean at `b5a499e`, no worktrees, no unmerged
-  branches. Trace suite (23 committed): s6-acceptance 224/228 (3 frames =
-  ISSUES #5's user-settled WIN0V pattern, x88-151-verified; 1 frame =
-  ISSUES #18's 3px particle z-order tick 1496), sendout 252/256 (open:
-  1493-96 only, ISSUES #18), menu-text 18/18, menu-throw 78/78,
-  menu-materialize 62/62, menu-idle 69/69, scene-assembly 256/256,
-  transition 206/206, all draft/room/summary traces at their long-
-  established counts. ROADMAP: S6 → **[~]** with recorded status (not [x]
-  while #18's 4 ticks stand; RNG-exactness + opponent-pin criteria met).
-- **Session summary (supervised, ~23:50-06:00, 15 worker steps + 7
-  supervisor merges, every step verified green before folding):** built
-  the ENTIRE player-send-out→action-menu window from zero — text print,
-  Brendan throw + ball arc + first true-rotation affine sampler (ball
-  spin), materialize (BG fade twin, particles, color-fade + settle
-  wobble), healthbox slide-in (RAM-exact), atomic menu draw + closed-form
-  idle (literal gSineTable — gbaSin is ±1 off at indices 62/63).
-  Sendout climbed 214→252 via: silhouette-edge render-lag+y2 (§7.21),
-  harvest-bleed mask + §7.22 re-apply (§7.23), late-window compositing
-  move (§7.24), the ball's REAL 3rd frame (open.png runtime VRAM
-  overwrite, §7.25), SortSprites Y-tiebreak (§7.27), OBJ-vs-OBJ blend
-  target-2 hardware quirk (#112 — also closed menu-throw's 8 ticks), and
-  tick 1462's twin mechanisms (§7.30). Two wrong models were falsified by
-  RAM before shipping (§7.21 shared-root, §7.26 creation-order). ISSUES
-  #17 opened+closed same session; #18 filed+trimmed to 1493-96.
-- **Next:** (1) ISSUES #18's remainder — 1493-95 (§7.29's untested VRAM
-  tile-byte lead) + 1496 (particle z-order) → then S6 → [x] (or user
-  re-scope); (2) S7 begins: turn resolution (docs/battle-turn-notes.md /
-  turn-resolution-notes.md groundwork exists), fold ISSUES #16's
-  healthbox-assembly wiring + deferred partial-HP/status oracle
-  validation into its first drain trace; menu-idle window's harvested
-  base can be regenerated from the engine's own render now that the
-  chain is complete (cheap cleanup, noted #110); (3) S4 remainder stays
-  deferred behind S5-S8 per the recorded re-scope.
-- **Notes:** no usage-limit events all session. Two battleScene.ts merge
-  conflicts (both both-sides-additive, hand-resolved; one briefly
-  committed with markers — caught by the immediate post-merge test run,
-  amended, and PAPERCUTS-noted via the truncated-merge-output lesson).
-  PAPERCUTS gained 2 entries (baseline-A/B-first; extractor drops
-  grovyleFrontAnim). Worker cost ~\$7/step avg, 9-39 min/step.
 
 ---
 

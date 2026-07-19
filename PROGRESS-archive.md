@@ -1,3 +1,47 @@
+## 114 — Supervisor wind-down: session end 2026-07-19 ~06:00 — S6 chain COMPLETE and acceptance-trace-committed (`s6-acceptance.json` **224/228**, every diff attributed); `sendout.json` **214 → 252/256**; suite **477 → 555**; 15 verified worker steps across two lanes
+
+- **State (verified this minute):** `npm test` **555/555**, `npm run
+  build` green, tree clean at `b5a499e`, no worktrees, no unmerged
+  branches. Trace suite (23 committed): s6-acceptance 224/228 (3 frames =
+  ISSUES #5's user-settled WIN0V pattern, x88-151-verified; 1 frame =
+  ISSUES #18's 3px particle z-order tick 1496), sendout 252/256 (open:
+  1493-96 only, ISSUES #18), menu-text 18/18, menu-throw 78/78,
+  menu-materialize 62/62, menu-idle 69/69, scene-assembly 256/256,
+  transition 206/206, all draft/room/summary traces at their long-
+  established counts. ROADMAP: S6 → **[~]** with recorded status (not [x]
+  while #18's 4 ticks stand; RNG-exactness + opponent-pin criteria met).
+- **Session summary (supervised, ~23:50-06:00, 15 worker steps + 7
+  supervisor merges, every step verified green before folding):** built
+  the ENTIRE player-send-out→action-menu window from zero — text print,
+  Brendan throw + ball arc + first true-rotation affine sampler (ball
+  spin), materialize (BG fade twin, particles, color-fade + settle
+  wobble), healthbox slide-in (RAM-exact), atomic menu draw + closed-form
+  idle (literal gSineTable — gbaSin is ±1 off at indices 62/63).
+  Sendout climbed 214→252 via: silhouette-edge render-lag+y2 (§7.21),
+  harvest-bleed mask + §7.22 re-apply (§7.23), late-window compositing
+  move (§7.24), the ball's REAL 3rd frame (open.png runtime VRAM
+  overwrite, §7.25), SortSprites Y-tiebreak (§7.27), OBJ-vs-OBJ blend
+  target-2 hardware quirk (#112 — also closed menu-throw's 8 ticks), and
+  tick 1462's twin mechanisms (§7.30). Two wrong models were falsified by
+  RAM before shipping (§7.21 shared-root, §7.26 creation-order). ISSUES
+  #17 opened+closed same session; #18 filed+trimmed to 1493-96.
+- **Next:** (1) ISSUES #18's remainder — 1493-95 (§7.29's untested VRAM
+  tile-byte lead) + 1496 (particle z-order) → then S6 → [x] (or user
+  re-scope); (2) S7 begins: turn resolution (docs/battle-turn-notes.md /
+  turn-resolution-notes.md groundwork exists), fold ISSUES #16's
+  healthbox-assembly wiring + deferred partial-HP/status oracle
+  validation into its first drain trace; menu-idle window's harvested
+  base can be regenerated from the engine's own render now that the
+  chain is complete (cheap cleanup, noted #110); (3) S4 remainder stays
+  deferred behind S5-S8 per the recorded re-scope.
+- **Notes:** no usage-limit events all session. Two battleScene.ts merge
+  conflicts (both both-sides-additive, hand-resolved; one briefly
+  committed with markers — caught by the immediate post-merge test run,
+  amended, and PAPERCUTS-noted via the truncated-merge-output lesson).
+  PAPERCUTS gained 2 entries (baseline-A/B-first; extractor drops
+  grovyleFrontAnim). Worker cost ~\$7/step avg, 9-39 min/step.
+
+---
 ## 113 — Bounded worker: closed ISSUES #18's first bullet — sendout tick 1462 (1161px, §7.19's named "settled-bar gap + trainer-exit tail") — both co-located mechanisms fixed — **sendout.json 251/256 → 252/256**
 
 - **State:** `npm test` **555/555** (+1 net: 1 corrected + 1 new Tier-1),

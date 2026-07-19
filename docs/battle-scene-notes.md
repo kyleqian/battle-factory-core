@@ -3452,3 +3452,159 @@ diag_1493.mjs`/`crop_1493.mjs`/`check_s6_bbox.mjs`/`probe_grovyle_vram.py`/
 section's own findings cite them directly and a future session picking up
 1494/1495/1496 should be able to re-run them without rebuilding from
 scratch).
+
+### 7.32. Bounded worker: closed ISSUES #18's 1494/1495 (a one-tick engine stall, found empirically after the source-derived rule for 1496 turned out to require whole-scene state this engine doesn't model) - `sendout.json` **253/256 -> 255/256**; 1496 investigated source-first per the brief, root mechanism identified and documented, no fix shipped (would need a different architecture, not a tweak)
+
+Per this step's brief: 1496 first (source-first - read `CreateSpriteAtEnd`,
+`SortSprites`, and the real `sSpriteOrder` comparator before touching code),
+then 1494/95 with any remaining time.
+
+**1496, source read completed (`reference/pokeemerald/src/sprite.c`,
+`battle_anim_throw.c`, `pokeball.c`, `battle_interface.c`) - the brief's
+first candidate falsified directly, not assumed**: ISSUES #18/§7.31 both
+assumed the send-out particles are created via `CreateSpriteAtEnd`. They are
+not. `AnimateBallOpenParticles` (`battle_anim_throw.c:1577-1591`) creates a
+task running `sBallParticleAnimationFuncs[ballId]` (`:243-247`); for
+`BALL_POKE` that's `PokeBallOpenParticleAnimation` (`:1599-1641`), which
+calls plain **`CreateSprite`** (`:1615`, `sprite.c:502-510` - scans slot 0
+upward for the first free slot) once per tick, 16 times, one particle per
+spawn index. `CreateSpriteAtEnd` (`sprite.c:513-521`, scans slot 63
+downward) is real and used in this exact scene, but only for the party-
+summary bar's own ball icons (`battle_interface.c:1511`) and the healthbox
+sprites (`:881-958`) - never for particles. This rules out "CreateSpriteAtEnd
+place­ment" as a factor for 1496 specifically, by source, not by guessing.
+
+**The real mechanism (candidate 2 from the brief, "the sort's stability/
+direction over equal keys") - confirmed by source, but proven not locally
+resolvable**: `sSpriteOrder` (`sprite.c:282`,
+`EWRAM_DATA static u8 sSpriteOrder[MAX_SPRITES]`) is initialized to identity
+**exactly once**, in `ResetAllSprites` (`sprite.c:848-859`, called at
+battle-scene setup - not every frame). Every subsequent frame,
+`BuildOamBuffer` -> `SortSprites` (`sprite.c:325-337`, `:372-467`) runs a
+full insertion sort of this SAME array **in place**, continuing from
+wherever the *previous* frame's sort left it - never rebuilt from a fresh
+identity or creation-order array. The swap condition
+(`sprite1Priority > sprite2Priority || (equal && sprite1Y < sprite2Y)`,
+`:413-415`) is a strict `>`/`<`; on an EXACT tie (both the combined
+`priority`/`subpriority` key AND `oam.y`, this residual's exact situation,
+hand-derived in §7.31: spawn 13 age 1 and spawn 14 age 0 both have radius 0)
+**no swap fires**, so the relative order of two tied slots is whatever the
+array already held at the end of the previous frame's pass - which itself
+came from the frame before that, recursively, back to the last
+`ResetAllSprites`. `BuildSpritePriorities` (`sprite.c:361-370`) recomputes
+every slot's key fresh each frame with **no `inUse` check** - an idle/freed
+slot's leftover key (0, from `ResetSprite`) still participates and gets
+sorted near the front of the array among other idle slots; when that slot
+is later reused (as slot 23 is here, becoming particle 14's sprite, per
+§7.31's own RAM probe), the single insertion-sort pass only pulls it as far
+left as its *current* neighbors force it - it does not jump to reflect
+"creation order" or its raw slot number at all.
+
+**Practical consequence, stated plainly**: a slot's position in
+`sSpriteOrder` is a function of the FULL history of every sprite of any
+kind - Brendan, the trainer, the healthbox, the ball, every earlier particle
+burst, menu icons, all of it - that has ever occupied that slot number and
+every strict (non-tied) comparison it won or lost since this battle's last
+`ResetAllSprites`, not a function of the current occupant's spawn index or
+even its raw `gSprites[]` slot number. Confirming which of slot 6 (particle
+13) or slot 23 (particle 14) actually sits earlier in `sSpriteOrder` at tick
+1496 would require simulating that entire history - every sprite this scene
+has ever created, destroyed, and repositioned - as a single persistent
+64-slot state machine. That is not "the minimal engine change" this step
+calls for; it is a materially different architecture (a real whole-scene
+OAM-order simulator with cross-window persistent state) than this engine's
+current per-burst, stateless `sortAliveParticlesByScreenY` (§7.26/27), which
+has no memory between windows at all. Building it would be exactly the kind
+of change this step's own sweep-mandate warns about ("the sort is shared - a
+wrong general rule will regress other windows") - except here the risk runs
+the other way: a *correct* general model would require rewriting this
+engine's whole sprite-priority story as stateful, far outside a 3px fix's
+proportion, not a tweak to an existing tie-break.
+
+**No fix shipped for 1496**, per this run's own standing policy (§7.25's own
+reverted blind index-flip, and this step's brief: "documented no-fix...
+beats any blind fit"): a special-cased index swap for exactly
+(spawn 13, spawn 14, tick 1496) would carry no derived general rule behind
+it - indistinguishable from curve-fitting, and the §7.25 precedent already
+shows that kind of narrow fix regresses other ticks in this same particle
+field. Left open, named precisely: `sortAliveParticlesByScreenY`'s
+"ascending array/creation-index survives ties" model (§7.26/27) is *correct
+for every other tie in this run's traces* (confirmed by the zero-regression
+sweep below) and is a reasonable stand-in for `sSpriteOrder`'s real
+persistent-history behavior in the common case (freshly-created slots whose
+history has never diverged from identity) - it is simply not equivalent to
+it in general, and 1496 is the one place in this trace suite where the two
+diverge. `sendout.json`'s 1496 residual stays open; `s6-acceptance.json`
+stays **224/228** (1496 is its own sole non-ISSUES-#5 residual, unchanged).
+
+**1494/1495 - closed empirically, mechanism derived and oracle-verified
+(not curve-fit)**: with the RAM/VRAM ground truth §7.31 already
+established (the bar sprite's own tile identity is byte-genuine through
+render 1494, then destroyed/reused starting render 1495), the naive next
+step - extend `SUMMARY_EXIT_LAST_ALIVE_ELAPSED` past 30 and let `elapsed`
+keep incrementing normally - was tested directly against the oracle
+(`tools/compare/scratch/diag_1493.mjs`, extended, not rewritten) and
+confirmed to over-correct exactly as §7.31 found: `barExitX2`'s exit-slide
+position keeps advancing 2px/tick past the point the real sprite stopped
+moving, flipping the sign of the error at render 1494 (background painted
+where the oracle still wants Grovyle's tint). Freezing the position/blend
+inputs at their render-1493 values (`elapsed=30`) for every later render
+closes 1494 exactly (0 diff, oracle-verified) but leaves 3 of render 1495's
+own pixels open (still Grovyle's tint where the oracle wants background - a
+narrower version of the same under-drawing gap, one tick later). Testing
+the next value up (`elapsed=31`, one step of *resumed* counting from the
+frozen point) closes 1495 exactly instead, but reopens 1494. Both closed
+**simultaneously** once the clock's own behavior is modeled directly: render
+1494 (`rawElapsed=31`) reads `elapsed=30` (repeats 1493's own value - a
+one-tick stall), and render 1495 (`rawElapsed=32`) reads `elapsed=31`
+(resumes normal 1:1 counting from the stalled value, not from a continuous
+2-tick-later projection). Implemented as
+`elapsed = rawElapsed <= 30 ? rawElapsed : rawElapsed - 1` (`battleScene.ts`,
+`drawOpponentSummaryExit`) with `SUMMARY_EXIT_LAST_ALIVE_ELAPSED` raised to
+32 (draws through render 1495; render 1496 is untouched, a separate
+residual). This is a genuine one-tick engine stall of the same family as
+§7.18's already-documented particle stall - plausible cause is the very
+same RAM-confirmed slot destroy/reuse event (§7.31) pausing whatever
+internal counter drives this exit animation for exactly one tick while the
+slot transitions, though that specific causal chain (as opposed to the
+stall's existence, which is oracle-proven) was not independently RAM-probed
+this session - flagged as the one open "why", not a blind fit, since the
+*existence and exact magnitude* of the stall is derived from direct,
+oracle-verified per-tick pixel search across both candidate values, not
+assumed.
+
+**Score effect, verified against the live oracle**: `sendout.json`
+**253/256 -> 255/256** (+2, closes 1494 AND 1495; 1496 remains, the sole
+residual). Full battle-family sweep, zero regressions: s6-acceptance
+224/228 (unchanged - 1494/95 are not among its sampled frames, only 1496
+is, and 1496 didn't move), menu-throw 78/78, menu-materialize 62/62,
+menu-idle 69/69, menu-text 18/18, scene-assembly 256/256, transition
+206/206 - every trace at its prior count, nothing regressed. Low regression
+risk by construction: `SUMMARY_EXIT_LAST_ALIVE_ELAPSED` was 30 before this
+session, so `elapsed>30` was previously unreachable code - this change only
+adds behavior for two renders that never executed before, it does not alter
+any previously-verified tick.
+
+**One new Tier-1 test** (`tests/battleScene.test.ts`) pins both the frozen
+render-1494 edge (identical to 1493's) and the resumed, wider render-1495
+edge, plus per-tick sanity controls proving Grovyle's tint is still
+reachable at both ticks (not a blanket "always background" regression).
+`npm test` **576/576** (+1), `npm run build` green.
+
+**ISSUES #18 updated**: trimmed to exactly 1496 (the particle tie-break) -
+1494/1495 deleted, closed. 1496's entry corrected to remove the
+`CreateSpriteAtEnd` red herring and replaced with the `sSpriteOrder`-
+persistence finding above, framed as a probable engine-architecture limit
+(whole-scene persistent OAM-order state this engine doesn't track) rather
+than an unsolved probing gap - a future session should not re-derive the
+mechanism above from scratch, only decide whether building real persistent
+`sSpriteOrder` state (a scene-wide architecture change) is worth it for one
+3px residual, or RAM-read `sSpriteOrder` itself directly (untried this
+session, would give a definitive per-tick answer but still could not
+justify a *general* code rule without that larger architecture change).
+
+**Committed this session**: `src/engine/battleScene.ts`
+(`SUMMARY_EXIT_LAST_ALIVE_ELAPSED=32` + the stalled-`elapsed` fix + updated
+doc comments), `tests/battleScene.test.ts` (1 new test), `docs/battle-scene-
+notes.md` (this section), `ISSUES.md` (trimmed #18 to 1496 only),
+`PROGRESS.md`.

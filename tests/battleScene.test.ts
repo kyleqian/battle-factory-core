@@ -622,6 +622,39 @@ describe("battleScene: post-text visual handoff (docs/battle-scene-notes.md §7.
     expect(pixelAtSentOut(1493, 168, 43)).toEqual(GROVYLE_TINT);
   });
 
+  // §7.32 (ISSUES #18, closes renders 1494/1495): RAM/VRAM-confirmed
+  // (§7.31's `probe_bar_vram.py`) the bar's own sprite slot is destroyed and
+  // reused starting RAM tick 1494 (render 1495) - but empirically extending
+  // `SUMMARY_EXIT_LAST_ALIVE_ELAPSED`'s closed-form `elapsed` uniformly
+  // overshoots (the bar's exit-slide position, `barExitX2`, keeps advancing
+  // 2px/tick past the point the real sprite stopped moving). The oracle's
+  // own pixels prove the position/blend clock STALLS for exactly one extra
+  // tick at handoff+31 (1493's own `elapsed=30` value repeats at 1494) then
+  // resumes normal 1:1 counting from there (1495 uses `elapsed=31`, not 32) -
+  // a one-tick engine stall of the same family as §7.18's particle stall,
+  // plausibly the same RAM-confirmed destroy/reuse event pausing whatever
+  // internal counter drives this exit animation for one tick while the slot
+  // transitions. Verified against the oracle by direct pixel search (not
+  // assumed): freezing at 30 alone closes 1494 but leaves 1495's own wider
+  // edge open (3px); resuming at 31 (not 32) for 1495 closes it exactly.
+  it("opponent summary bar: elapsed clock stalls one tick at the RAM-confirmed destroy/reuse (handoff+31/+32, renders 1494/1495) - render 1494 stays frozen at 1493's own edge, render 1495 widens by one more step (§7.32)", () => {
+    const GROVYLE_TINT: [number, number, number] = [255, 181, 247];
+    const BG_FADED: [number, number, number] = [247, 247, 255];
+    // 1494 is pixel-identical to 1493's own frozen edge (elapsed=30 reused).
+    expect(pixelAtSentOut(1494, 164, 43)).toEqual(BG_FADED);
+    expect(pixelAtSentOut(1494, 165, 43)).toEqual(BG_FADED);
+    expect(pixelAtSentOut(1494, 166, 43)).toEqual(GROVYLE_TINT);
+    // 1495 resumes counting (elapsed=31) and widens the background edge by
+    // one more step - these three pixels are still Grovyle's tint at 1494
+    // (and would stay tint forever under a naive elapsed=30 freeze).
+    expect(pixelAtSentOut(1495, 165, 42)).toEqual(BG_FADED);
+    expect(pixelAtSentOut(1495, 166, 43)).toEqual(BG_FADED);
+    expect(pixelAtSentOut(1495, 167, 43)).toEqual(BG_FADED);
+    // sanity: Grovyle's own tint is still reachable nearby at both ticks.
+    expect(pixelAtSentOut(1494, 168, 43)).toEqual(GROVYLE_TINT);
+    expect(pixelAtSentOut(1495, 168, 43)).toEqual(GROVYLE_TINT);
+  });
+
   // §7.30: the opponent trainer-pic's exit slide (`trainerExitX`/
   // `TRAINER_EXIT_X2`) starts at x2=2 at handoff+0 (1462, RAM tick 1461's
   // value, +1 render lag) - RAM-probed (`sendout-trainer-exit2.json`,
