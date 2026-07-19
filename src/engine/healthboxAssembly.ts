@@ -13,9 +13,15 @@
 // pixel-evidence contradicts round 1's OAM-index z-order guess, see the
 // doc), and the nickname/gender + level text (the game's own small-font
 // window-printer path, replicated pixel-for-pixel including the
-// dynamic-color gender-symbol override). `composeOpponentHealthbox` still
-// throws on any parameter combination this pipeline can't yet render
-// (hpFraction != 1, any status) rather than silently producing wrong pixels.
+// dynamic-color gender-symbol override).
+//
+// Round 3 (ISSUES #16): hpFraction != 1 and status != "none" are now
+// implemented too - source-decoded (CalcBarFilledPixels' fill-pixel/color-
+// band math, UpdateStatusIconInHealthbox's status-icon placement), pinned
+// by hermetic Tier-1 tests only. No oracle pixels exist yet for partial HP
+// or status (the canonical trace never reaches that state before the first
+// action menu) - that validation is deferred to S7's first HP-drain trace,
+// see docs/healthbox-assembly-notes.md.
 
 import type { RgbColor } from "./bg.ts";
 import fontSmallData from "../data/gen/font-small.json" with { type: "json" };
@@ -35,8 +41,12 @@ interface SheetAsset {
 export interface HealthboxAssets {
   /** `battle-healthbox.json`'s `singlesOpponent` - the static frame sheet. */
   frame: SheetAsset;
-  /** `battle-healthbox.json`'s `hpbar` - the HP-bar fill tileset+palette. */
+  /** `battle-healthbox.json`'s `hpbar` - the HP-bar caption + green-band fill tileset+palette. */
   hpbar: SheetAsset;
+  /** `battle-healthbox.json`'s `hpbarAnim` - the HP-bar yellow/red-band fill tileset (green lives in `hpbar`, see `HP_BAR_GREEN_BASE`). */
+  hpbarAnim: SheetAsset;
+  /** `battle-healthbox.json`'s `status2` - GetStatusIconForBattlerId's BATTLER1 sheet, the one the opponent (battler 1 in singles) actually uses. */
+  statusIcons: SheetAsset;
 }
 
 export interface HealthboxContentParams {
@@ -44,9 +54,8 @@ export interface HealthboxContentParams {
   name: string;
   level: number;
   gender: "male" | "female" | "none";
-  /** 0-1. Only 1 (full HP) is implemented. */
+  /** currentHP/maxHP, 0-1. */
   hpFraction: number;
-  /** Only "none" is implemented (no status icon drawn). */
   status: "none" | "sleep" | "poison" | "burn" | "freeze" | "paralysis";
 }
 
@@ -83,12 +92,15 @@ const LV_GLYPH_CODE = 261;
 /**
  * hpbar.png tile indices for a fully-filled green bar: cap (1,2) + 6x
  * fully-filled segment (11) - VRAM-confirmed, MoveBattleBarGraphically's
- * full-HP case (battle_interface.c:2275-2306).
+ * full-HP case (battle_interface.c:2275-2306). Kept as a standalone pinned
+ * constant (round 2); `hpBarLocalTiles(assets, 1)` below reproduces the same
+ * 8 values through the general per-fraction path, and a test asserts they
+ * agree.
  */
 export const HP_BAR_FULL_TILES = [1, 2, 11, 11, 11, 11, 11, 11];
 
 /**
- * The healthbar sprite's own SubspriteTable for the opponent side
+ * The healthbar sprite's own SubspriteTable geometry for the opponent side
  * (`sHealthBar_Subsprites_Opponent`, battle_interface.c:491-517), resolved
  * to canvas-local corners via the same transform `AddSubspritesToOamBuffer`
  * uses (sprite.c:1679-1755): `base{X,Y} = oam.{x,y} - centerToCornerVec{X,Y}`
@@ -98,12 +110,156 @@ export const HP_BAR_FULL_TILES = [1, 2, 11, 11, 11, 11, 11, 11];
  * canvas-local center (40,16)), then `corner = base + subsprite.{x,y}`.
  * The third subsprite (8x8, tileOffset 8, x=-32) is VRAM-confirmed fully
  * transparent (bar's own local tile 8 is all-zero nibbles) - omitted here
- * since it never contributes a visible pixel.
+ * since it never contributes a visible pixel. Geometry is fill-level
+ * independent - only which tiles land here (see `hpBarLocalTiles`) varies.
  */
-const HP_BAR_SUBSPRITES = [
-  { localTiles: HP_BAR_FULL_TILES.slice(0, 4), cornerX: 24, cornerY: 16 },
-  { localTiles: HP_BAR_FULL_TILES.slice(4, 8), cornerX: 56, cornerY: 16 },
+const HP_BAR_SUBSPRITE_CORNERS = [
+  { cornerX: 24, cornerY: 16 },
+  { cornerX: 56, cornerY: 16 },
 ];
+
+/**
+ * `B_HEALTHBAR_PIXELS` (battle_interface.c:2233) - the health bar's total
+ * fill width in pixels, 6 tiles x 8px.
+ */
+const HP_BAR_TOTAL_PIXELS = 48;
+
+/**
+ * `MoveBattleBarGraphically`'s color-band thresholds (battle_interface.c:
+ * 2279-2283): `filledPixelsCount > 50% -> green`, `> 20% -> yellow`, else
+ * red. Integer division, same as the source (`48*50/100=24` exactly;
+ * `48*20/100=9.6` truncates to 9) - so exactly-50% HP (24 px) is YELLOW, not
+ * green, and exactly-20% HP (9 px) is RED, not yellow. Pinned by a test.
+ */
+const HP_BAR_GREEN_THRESHOLD = Math.floor((HP_BAR_TOTAL_PIXELS * 50) / 100);
+const HP_BAR_YELLOW_THRESHOLD = Math.floor((HP_BAR_TOTAL_PIXELS * 20) / 100);
+
+/** `HEALTHBOX_GFX_HP_BAR_GREEN`'s enum offset within `hpbar`'s own 12-tile sheet (0px..8px = local tiles 3..11). */
+const HP_BAR_GREEN_BASE = 3;
+/** `HEALTHBOX_GFX_HP_BAR_YELLOW`'s enum offset within `hpbarAnim`'s own 18-tile sheet (0px..8px = local tiles 0..8). */
+const HP_BAR_YELLOW_BASE = 0;
+/** `HEALTHBOX_GFX_HP_BAR_RED`'s enum offset within `hpbarAnim`'s own 18-tile sheet (0px..8px = local tiles 9..17). */
+const HP_BAR_RED_BASE = 9;
+
+export type HpBarBand = "green" | "yellow" | "red";
+
+/** `CalcBarFilledPixels` (battle_interface.c:2413-2456), specialized to the settled (non-mid-animation) case where `currValue` has already converged to `newValue` and `maxValue >= totalPixels` (true for every real Pokemon's max HP vs. this bar's 48px) - so `pixels = floor(hpFraction * totalPixels)` stands in for the source's `currValue * totalPixels / maxValue` integer division. Floating-point `hpFraction` (vs. the source's exact integer ratio) can differ by 1px right at a truncation boundary for some HP pairs - accepted per the ISSUES #16 ground-truth caveat (no oracle pixels to pin this against yet). The `filledPixels==0 && hp>0 -> force 1px` rule (source lines 2436-2440) is the "never show a fully-empty bar for a Pokemon that isn't fainted" sliver case. */
+export function calcBarFilledPixels(hpFraction: number): { filledPixels: number; columns: number[] } {
+  const rawPixels = Math.floor(hpFraction * HP_BAR_TOTAL_PIXELS);
+  const columns = [0, 0, 0, 0, 0, 0];
+  if (rawPixels === 0 && hpFraction > 0) {
+    columns[0] = 1;
+    return { filledPixels: 1, columns };
+  }
+  let remaining = rawPixels;
+  for (let i = 0; i < 6; i += 1) {
+    if (remaining >= 8) {
+      columns[i] = 8;
+    } else {
+      columns[i] = remaining;
+      break;
+    }
+    remaining -= 8;
+  }
+  return { filledPixels: rawPixels, columns };
+}
+
+/** Color-band selection from `filledPixelsCount` (battle_interface.c:2279-2284) - see `HP_BAR_GREEN_THRESHOLD`/`HP_BAR_YELLOW_THRESHOLD`. */
+export function pickHpBarBand(filledPixels: number): HpBarBand {
+  if (filledPixels > HP_BAR_GREEN_THRESHOLD) return "green";
+  if (filledPixels > HP_BAR_YELLOW_THRESHOLD) return "yellow";
+  return "red";
+}
+
+/**
+ * Resolves the healthbar sprite's own local tiles 0-7 for a given HP
+ * fraction: tiles 0-1 are the static "H"/"P" caption (always `hpbar` sheet,
+ * band-independent - loaded once at sprite creation, `battle_interface.c:
+ * 938`, never touched by `MoveBattleBarGraphically`); tiles 2-7 are the 6
+ * fill columns, sourced from `hpbar` (green) or `hpbarAnim` (yellow/red) per
+ * the selected band.
+ */
+function hpBarLocalTiles(assets: HealthboxAssets, hpFraction: number): { sheet: SheetAsset; tileIndex: number }[] {
+  const { filledPixels, columns } = calcBarFilledPixels(hpFraction);
+  const band = pickHpBarBand(filledPixels);
+  const fillSheet = band === "green" ? assets.hpbar : assets.hpbarAnim;
+  const fillBase = band === "green" ? HP_BAR_GREEN_BASE : band === "yellow" ? HP_BAR_YELLOW_BASE : HP_BAR_RED_BASE;
+  return [
+    { sheet: assets.hpbar, tileIndex: 1 },
+    { sheet: assets.hpbar, tileIndex: 2 },
+    ...columns.map((px) => ({ sheet: fillSheet, tileIndex: fillBase + px })),
+  ];
+}
+
+/**
+ * `UpdateStatusIconInHealthbox`'s opponent path (battle_interface.c:2000-
+ * 2003, 2059): `tileNumAdder = 0x11 = 17` regardless of singles/doubles for
+ * any opponent battler, CPU-copied 3 tiles (96 bytes) into the healthboxLeft
+ * sprite's own local tile array at that offset. Left's own tile grid is
+ * 8 cols x 4 rows (64x32px / 8), so local tile 17 = row 2 (17>>3), col 1
+ * (17&7) => canvas-local corner (8,16), 24px wide, 8px tall. This overlaps
+ * the HP bar's leftmost ("H" caption) tile at canvas (24,16) by one column -
+ * the compositor draws the status icon into the frame layer *before* the HP
+ * bar (see `composeOpponentHealthbox`), so the already-established z-order
+ * rule (round 2: the bar sprite wins over the frame wherever both are
+ * opaque) naturally clips that shared column in the bar's favor, with no new
+ * z-order assumption needed.
+ */
+const STATUS_ICON_DEST = { x: 8, y: 16 };
+
+/** Row order within `status2` (3 cols x 5 rows) - matches the enum order PSN,PRZ,SLP,FRZ,BRN (battle_interface.c:112-126). */
+const STATUS_ICON_ROWS: Record<Exclude<HealthboxContentParams["status"], "none">, number> = {
+  poison: 0,
+  paralysis: 1,
+  sleep: 2,
+  freeze: 3,
+  burn: 4,
+};
+
+/** mGBA's 5-bit -> 8-bit channel expansion (`tools/extract/gbaColor.ts`'s `expand5to8`, reproduced locally - engine code doesn't import dev-time extractor tools). */
+function expandGbaChannel(c5: number): number {
+  return (c5 << 3) | (c5 >> 2);
+}
+
+/**
+ * `sStatusIconColors` (battle_interface.c:751-757), 5-bit-per-channel GBA
+ * `RGB(r,g,b)` literals expanded the same way mGBA's framebuffer does. Each
+ * status icon's tile pixel data indexes this sprite's own palette slot
+ * `battler + 12` (`pltAdder`, battle_interface.c:2057-2058) for its one
+ * "dynamic" color (VRAM/PNG-confirmed placeholder `(197,98,197)` at that
+ * slot in `ball_status_bar.png`'s embedded palette, close to
+ * `expandGbaChannel(24)`'s 198 - the placeholder art already approximates
+ * the runtime-substituted color). For the opponent healthbox, `battler` is
+ * always 1 in a singles battle, so the dynamic slot is fixed at index 13.
+ */
+const STATUS_ICON_DYNAMIC_PALETTE_INDEX = 13;
+const STATUS_ICON_COLORS: Record<Exclude<HealthboxContentParams["status"], "none">, RgbColor> = {
+  poison: { r: expandGbaChannel(24), g: expandGbaChannel(12), b: expandGbaChannel(24) },
+  paralysis: { r: expandGbaChannel(23), g: expandGbaChannel(23), b: expandGbaChannel(3) },
+  sleep: { r: expandGbaChannel(20), g: expandGbaChannel(20), b: expandGbaChannel(17) },
+  freeze: { r: expandGbaChannel(17), g: expandGbaChannel(22), b: expandGbaChannel(28) },
+  burn: { r: expandGbaChannel(28), g: expandGbaChannel(14), b: expandGbaChannel(10) },
+};
+
+/** Draws the opponent's 3-tile status icon (see `STATUS_ICON_DEST`), substituting the status-specific color into the sheet's dynamic palette slot. */
+function drawStatusIcon(canvas: (RgbColor | null)[], canvasWidth: number, canvasHeight: number, sheet: SheetAsset, status: Exclude<HealthboxContentParams["status"], "none">): void {
+  const row = STATUS_ICON_ROWS[status];
+  const palette = sheet.palette.slice();
+  palette[STATUS_ICON_DYNAMIC_PALETTE_INDEX] = STATUS_ICON_COLORS[status];
+  for (let i = 0; i < 3; i += 1) {
+    const tile = sheet.tileset.tiles[row * 3 + i]!;
+    for (let y = 0; y < 8; y += 1) {
+      for (let x = 0; x < 8; x += 1) {
+        const idx = tile[y * 8 + x]!;
+        if (idx === 0) continue;
+        const px = STATUS_ICON_DEST.x + i * 8 + x;
+        const py = STATUS_ICON_DEST.y + y;
+        if (px < 0 || px >= canvasWidth || py < 0 || py >= canvasHeight) continue;
+        canvas[py * canvasWidth + px] = palette[idx] ?? null;
+      }
+    }
+  }
+}
 
 /**
  * The healthbox window-printer's fixed layout (`sHealthboxWindowTemplate`,
@@ -161,10 +317,11 @@ function drawTileset(canvas: (RgbColor | null)[], canvasWidth: number, canvasHei
   }
 }
 
-/** Draws a single horizontal row of (already-selected) hpbar tiles - the healthbar subsprite's own local tile layout. */
-function drawHpBarSubsprite(canvas: (RgbColor | null)[], canvasWidth: number, canvasHeight: number, hpbar: SheetAsset, localTiles: number[], ox: number, oy: number): void {
-  for (let i = 0; i < localTiles.length; i += 1) {
-    const tile = hpbar.tileset.tiles[localTiles[i]!]!;
+/** Draws a single horizontal row of (already-selected, per-tile-sheet-resolved) hpbar tiles - the healthbar subsprite's own local tile layout. */
+function drawHpBarSubsprite(canvas: (RgbColor | null)[], canvasWidth: number, canvasHeight: number, tiles: { sheet: SheetAsset; tileIndex: number }[], ox: number, oy: number): void {
+  for (let i = 0; i < tiles.length; i += 1) {
+    const { sheet, tileIndex } = tiles[i]!;
+    const tile = sheet.tileset.tiles[tileIndex]!;
     for (let y = 0; y < 8; y += 1) {
       for (let x = 0; x < 8; x += 1) {
         const idx = tile[y * 8 + x]!;
@@ -172,7 +329,7 @@ function drawHpBarSubsprite(canvas: (RgbColor | null)[], canvasWidth: number, ca
         const px = ox + i * 8 + x;
         const py = oy + y;
         if (px < 0 || px >= canvasWidth || py < 0 || py >= canvasHeight) continue;
-        canvas[py * canvasWidth + px] = hpbar.palette[idx] ?? null;
+        canvas[py * canvasWidth + px] = sheet.palette[idx] ?? null;
       }
     }
   }
@@ -265,23 +422,34 @@ function drawHealthboxText(canvas: (RgbColor | null)[], canvasWidth: number, can
  * regions) rather than guessing - callers must not blit those cells.
  */
 export function composeOpponentHealthbox(assets: HealthboxAssets, params: HealthboxContentParams): { width: number; height: number; pixels: (RgbColor | null)[] } {
-  if (params.hpFraction !== 1) {
-    throw new Error(`composeOpponentHealthbox: only hpFraction=1 (full HP) is implemented, got ${params.hpFraction}`);
+  if (!(params.hpFraction >= 0 && params.hpFraction <= 1)) {
+    throw new Error(`composeOpponentHealthbox: hpFraction must be in [0,1], got ${params.hpFraction}`);
   }
-  if (params.status !== "none") {
-    throw new Error(`composeOpponentHealthbox: only status="none" is implemented, got ${params.status}`);
+  if (params.status !== "none" && !(params.status in STATUS_ICON_ROWS)) {
+    throw new Error(`composeOpponentHealthbox: unknown status ${params.status}`);
   }
 
   const { width, height } = FRAME_SIZE;
   const canvas: (RgbColor | null)[] = new Array(width * height).fill(null);
 
-  // Frame first, then the HP bar drawn on top (wherever the bar's own tiles
+  // Frame first. Status icon (if any) is also frame-layer content (real
+  // game CPU-copies it into the same sprite's VRAM as the frame art), so it
+  // must land before the HP bar too - see STATUS_ICON_DEST's doc for why
+  // that ordering, not a fresh z-order guess, is what resolves its overlap
+  // with the bar's leftmost tile.
+  drawTileset(canvas, width, height, assets.frame, 0, 0);
+  if (params.status !== "none") {
+    drawStatusIcon(canvas, width, height, assets.statusIcons, params.status);
+  }
+
+  // HP bar drawn on top of the frame layer (wherever the bar's own tiles
   // are opaque it wins over the frame beneath - confirmed by direct pixel
   // diff against the harvested block; this corrects round 1's speculative
   // OAM-index z-order guess, which had it backwards for this pair).
-  drawTileset(canvas, width, height, assets.frame, 0, 0);
-  for (const sub of HP_BAR_SUBSPRITES) {
-    drawHpBarSubsprite(canvas, width, height, assets.hpbar, sub.localTiles, sub.cornerX, sub.cornerY);
+  const hpBarTiles = hpBarLocalTiles(assets, params.hpFraction);
+  for (let i = 0; i < HP_BAR_SUBSPRITE_CORNERS.length; i += 1) {
+    const { cornerX, cornerY } = HP_BAR_SUBSPRITE_CORNERS[i]!;
+    drawHpBarSubsprite(canvas, width, height, hpBarTiles.slice(i * 4, i * 4 + 4), cornerX, cornerY);
   }
 
   // Nickname+gender and level text are CPU-copied directly into the frame

@@ -201,18 +201,114 @@ is called elsewhere in this file for other bars, not this path) - level
 text uses plain `FONT_SMALL` like the nickname, same `TextColors`. Verified
 0 mismatches over 264 cells before wiring into the compositor.
 
-### Still open / out of scope (unchanged from round 1, not this round's brief)
+### Round 3 (this session): hpFraction != 1 and status != "none" landed
 
-- **HP-bar partial-fill tile selection** (`CalcBarFilledPixels`'s
-  per-column fill-level table) — `hpFraction` still only accepts `1.0`;
-  other values throw rather than guess. The subsprite *placement* work
-  above is what unblocks this for whoever tackles it next (geometry is now
-  solid; only the tile-selection-per-fraction math is unread).
-- **Status icon / caught-ball overlay**: out of scope for this trace (no
-  status, non-Safari trainer battle) — not attempted, still throws for any
-  `status != "none"`.
+Both remaining throws are gone. **No oracle ground truth exists for either
+of these** — the canonical trace (`sendout.json`) never reaches a frame
+with partial HP or a status condition before the first action menu, so
+there is nothing to harvest pixels from. This round's validation is
+source-decoded logic pinned by hermetic Tier-1 tests only (exact
+`filledPixels` arithmetic for the boundary cases, tile bytes taken from
+newly-extracted real sheets, never hand-drawn) — **oracle pixel validation
+against real hardware is explicitly deferred to S7's first HP-drain
+trace.**
+
+#### HP-bar partial fill
+
+`CalcBarFilledPixels` (`battle_interface.c:2413-2456`), specialized to the
+settled (non-mid-animation) case: `pixels = floor(hpFraction * 48)`
+(`B_HEALTHBAR_PIXELS=48`, `battle_interface.c:2233`) stands in for the
+source's `currValue * totalPixels / maxValue` integer division, valid
+whenever `maxValue >= totalPixels` (true for essentially every real
+Pokémon's max HP against a 48px bar — the Q24.8 fixed-point branch for
+`maxValue < totalPixels` is not implemented). One accepted imprecision:
+floating-point `hpFraction` can differ from the source's exact integer
+ratio by 1px right at a truncation boundary for some HP pairs — acceptable
+per the no-oracle-yet caveat above.
+
+The 6-column fill array (`pixelsArray`, one 0-8 value per healthbar-local
+tile) is filled greedily (8,8,8,... then the remainder, then zeros) exactly
+as the source loop does. The **"never show a fully-empty bar for a
+Pokémon that isn't fainted" sliver rule** (source lines 2436-2440:
+`filledPixels==0 && newValue>0` → force `pixelsArray[0]=1`) is reproduced
+as `rawPixels===0 && hpFraction>0` → force column 0 to 1px, `filledPixels=1`.
+
+Color-band selection (`MoveBattleBarGraphically`, `battle_interface.c:
+2279-2284`) is `filledPixelsCount > 24` (50% of 48, exact) → green,
+`> 9` (`floor(48*20/100)=9`, **not** 9.6) → yellow, else red — pinned by a
+test at both boundaries: **exactly 50% HP (24px) is yellow, not green**;
+**exactly 20% HP (9px) is red, not yellow** (both `>`, not `>=`). This is
+a real, easy-to-get-wrong detail, not a hypothetical.
+
+Tile selection: the healthbar sprite's own local tiles 0-1 ("H"/"P"
+caption) are always `hpbar` sheet tiles 1-2, band-independent (loaded once
+at sprite creation, `battle_interface.c:938`, never touched by
+`MoveBattleBarGraphically`). Local tiles 2-7 (the 6 fill columns) select
+per-column-pixel-count tiles from whichever band's sheet:
+`HEALTHBOX_GFX_HP_BAR_GREEN`/`_YELLOW`/`_RED`'s enum offsets into
+`gHealthboxElementsGfxTable` are 3, 47, 56 respectively (counted by hand
+through the full enum, `battle_interface.c:39-115`); `hpbar.png` only
+covers the green band (enum 0-11, confirmed: it's exactly 12 tiles) — the
+yellow/red bands live in a **separate PNG, `hpbar_anim.png`** (enum 47-64,
+18 tiles = 9 yellow + 9 red), which was not extracted before this round.
+Extended `tools/extract/extract-battle-healthbox.ts` to pull it in
+(`battle-healthbox.json`'s new `hpbarAnim` key) — real decoded PNG bytes,
+same pipeline as every other sheet here, not hand-drawn. Verified
+`hpbarAnim` tile 8 (yellow, "8px filled") has the exact same opaque/
+transparent mask as the already-proven `hpbar` tile 11 (green "8px
+filled") before trusting the enum-offset arithmetic.
+
+#### Status icon
+
+`UpdateStatusIconInHealthbox`'s opponent path (`battle_interface.c:2000-
+2003`, `2059`): `tileNumAdder=0x11=17` for any opponent battler (singles or
+doubles), 3 tiles (96 bytes) CPU-copied into the healthboxLeft sprite's own
+local tile array at that offset. Left's own tile grid is 8 cols × 4 rows
+(64×32px frame half ÷ 8px tiles), so local tile 17 = row 2, col 1 → canvas-
+local corner `(8,16)`, 24×8px.
+
+**This footprint overlaps the HP bar's leftmost ("H" caption) tile at
+canvas `(24,16)` by one 8px column** — the status icon's 3rd tile and the
+bar's "H" tile both claim canvas `x=24..31,y=16..23`. Rather than invent a
+new z-order rule for this collision, the compositor draws the status icon
+as part of the **frame layer** (since the real game CPU-copies it into the
+same sprite's VRAM as the static frame art) *before* drawing the HP bar on
+top — reusing round 2's already-pixel-confirmed rule that the bar wins
+wherever both are opaque. Pinned by a test that computes the expected
+pixel as "the bar's H-tile color if opaque there, else the status icon's
+own color."
+
+Row selection within `status2.png` (3 cols × 5 rows = 15 tiles): enum order
+PSN, PRZ, SLP, FRZ, BRN (`battle_interface.c:112-126`) maps directly to
+sheet rows 0-4. **`status2.png`, not `status.png`, is the correct sheet for
+this module** — `GetStatusIconForBattlerId` (`battle_interface.c:2074-
+2129`) selects a battler-specific variant (`status.png`=BATTLER0/player,
+`status2.png`=BATTLER1), and the opponent is always battler 1 in a singles
+battle. The pre-existing `status` key in `battle-healthbox.json` is the
+*wrong* sheet for this module; extended the extractor to also pull
+`status2.png` (new `status2` key) rather than reuse the wrong one.
+
+Each status icon's tile pixel data indexes one shared "dynamic color" slot
+— this sprite's own palette index `battler+12` (`pltAdder`,
+`battle_interface.c:2057-2058`), fixed at index 13 for the opponent in
+singles — which `sStatusIconColors` (`battle_interface.c:751-757`)
+overwrites at runtime with a status-specific 5-bit GBA color
+(`RGB(24,12,24)` for poison, etc.), expanded to 8-bit the same way mGBA's
+framebuffer does (`(c5<<3)|(c5>>2)`, reproduced locally in
+`healthboxAssembly.ts` rather than importing the dev-time-only
+`tools/extract/gbaColor.ts` into engine code). Confirmed the placeholder
+color baked into `ball_status_bar.png`'s own palette at that slot,
+`(197,98,197)`, is close to `expand5to8(24,12,24)`'s `(198,99,198)` —
+the art's own placeholder already approximates the runtime substitution,
+corroborating the palette-index identification.
+
+### Out of scope (unchanged)
+
 - Not wired into `battleScene.ts` (explicitly out of scope for this
   worktree lane) — that's the next, supervised step once this is reviewed.
+- Doubles-battle battler positions (2/3), the Safari-ball / caught-ball
+  overlay, and the player-side healthbox are still untouched — this module
+  is opponent-singles-only, as it always has been.
 
 ## Reproduce the RAM/VRAM ground truth
 

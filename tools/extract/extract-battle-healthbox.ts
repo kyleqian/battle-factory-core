@@ -99,8 +99,16 @@ writeJson(join(ASSETS_GEN, "battle-healthbox.json"), {
   singlesOpponent: { tileset: loadTileset(join(BATTLE_INTERFACE, "healthbox_singles_opponent.png")), palette: ballStatusBar.palette },
   // gHealthboxElementsGfxTable[HEALTHBOX_GFX_*] singles-relevant sheets.
   hpbar: { tileset: loadTileset(join(BATTLE_INTERFACE, "hpbar.png")), palette: ballDisplayPalette },
+  // HP bar yellow/red fill bands (HEALTHBOX_GFX_HP_BAR_YELLOW/_RED, enum
+  // offsets 47/56 - hpbar.png only covers the green band, enum 0-11; ISSUES
+  // #16 round 3, docs/healthbox-assembly-notes.md).
+  hpbarAnim: { tileset: loadTileset(join(BATTLE_INTERFACE, "hpbar_anim.png")), palette: ballDisplayPalette },
   expbar: { tileset: loadTileset(join(BATTLE_INTERFACE, "expbar.png")), palette: ballDisplayPalette },
   status: { tileset: loadTileset(join(BATTLE_INTERFACE, "status.png")), palette: ballStatusBar.palette },
+  // status2.png = GetStatusIconForBattlerId's BATTLER1 variant - the sheet
+  // actually used by the *opponent* healthbox in a singles battle (battler
+  // index 1), distinct from `status` (BATTLER0/player). ISSUES #16 round 3.
+  status2: { tileset: loadTileset(join(BATTLE_INTERFACE, "status2.png")), palette: ballStatusBar.palette },
   misc: { tileset: loadTileset(join(BATTLE_INTERFACE, "misc.png")), palette: ballStatusBar.palette },
   // The party status summary ball strip itself (CreatePartyStatusSummarySprites),
   // uses its own embedded palette directly (its own sprite's paletteTag).
