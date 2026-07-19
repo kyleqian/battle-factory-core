@@ -5,6 +5,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 91 — Supervisor wind-down: session end 2026-07-18 ~21:30 — `sendout.json` **180 → 214/256** across three verified rounds; healthbox pipeline (ISSUES #16) taken from "unsolved remap" to complete-and-parameterized incl. partial-HP/status
+
+- **State (verified this minute):** `npm test` **476/476**, `npm run
+  build` green, tree clean at `c78bbcf` (merge of
+  `worker/wt-20260718-205048`, the last of 3 conflict-free worktree
+  merges). Post-merge re-runs by the supervisor: sendout **214/256**,
+  scene-assembly 256/256, transition 206/206, anchor 1/1 (the merge's
+  `battle-healthbox.json` change is additive; no other trace's inputs
+  touched — workers ran full 19-trace sweeps at #86/#88/#90, zero
+  regressions every time). No unmerged branches, no live worktrees.
+- **Session summary (supervised, ~19:31-21:30, 6 worker steps = 3 rounds
+  × 2 lanes, every step verified green, zero regressions):** Main lane —
+  send-out window 180→196 (#86: affine formula was inverted, `pa=xScale`
+  directly; GROVYLE front sprite runs `sAnim_Grovyle_1` breathing, not a
+  frame swap) →199 (#88: whole particle subsystem freezes one real tick,
+  RAM 1494≡1493) →**214/256** (#90: bar exit slide +2px/tick + 16→24-tile
+  subsprite swap; 15/18 target ticks bit-exact). Worktree lane — ISSUES
+  #16 healthbox: "tile remap" DISSOLVED (#87: no remap; mismatch was
+  un-composited content), full content pipeline byte-exact 2574/2574 and
+  parameterized (#89: center-based subsprites, text-blit model, bar-wins
+  z-order), partial-HP + status icons landed hermetically (#91: strict-`>`
+  band thresholds, new `hpbar_anim.png`/`status2.png` extractions; oracle
+  validation deferred to S7's first drain trace). Suite 458→476 Tier-1
+  tests.
+- **Next (in order, per `docs/battle-scene-notes.md` §7.19):** (1)
+  particle position residual, 1481-1503/1516-1519 — §7.18's lead:
+  brute-force render-lag constants directly against oracle captures
+  rather than RAM-tick arithmetic; (2) icon-edge/materialize residual
+  1470/1471/1479 (likely same family); (3) tick 1462's named settled-bar
+  one-tick gap + trainer-exit tail; (4) small 1504-1521 boundary
+  residual; then action-menu window 1560-1810 (`docs/battle-menu-notes.md`,
+  groundwork complete), S6 acceptance end-to-end, then S7 (healthbox
+  wiring + drain-trace validation fold in there).
+- **Notes:** no usage-limit events; both lanes idle at close; all three
+  worktree merges conflict-free (doc-ownership discipline held). 30-min
+  single-mechanism caps landed reliably (#90 in 21 min, worktree round 3
+  in 14 min). PAPERCUTS: none new reported across all six workers.
+
+---
+
 ## 90 — Bounded worker: opponent party-summary bar's own exit slide landed (§7.15's flagged sub-gap) — `sendout.json` **199/256 → 214/256**
 
 - **State:** `npm test` **468/468** (+1), `npm run build` green, tree
@@ -70,54 +110,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   action-menu (1560+); then S6 acceptance end-to-end.
 - **Notes:** both parallel-lane rounds this session merged conflict-free;
   worktree removed, branch deleted.
-
----
-
-## 88 — Bounded worker: send-out particle model's logical-tick-13+ divergence root-caused via direct RAM probe (a real one-tick engine stall) — `sendout.json` **196/256 → 199/256**
-
-- **State:** `npm test` **466/466** (+2), `npm run build` green, tree
-  clean at `74f16a8`. Full 19-trace sweep against the live oracle: all
-  18 others at their exact established counts (anchor 1/1, draft-cursor
-  13/13, draft-menu 38/38, draft-menu-slot6 66/66, example 4/4,
-  summary-info-onix 122/122, summary-info-magby 132/132, confirm-decline
-  67/67, accept-prebattle 137/137, walk-warpout 125/125, room-entry
-  110/110, room-npcs 98/98, room-msgbox 142/142, transition 206/206,
-  scene-assembly 256/256, rent-slot1 125/139, rent-3picks 157/190,
-  confirm-flow 79/95) — zero regressions. `sendout.json`: **196/256 →
-  199/256**.
-- **Did:** priority 1 of the step brief (§7.14 particle-model
-  divergence). RAM-probed the particle sprites' own `gSprites` slots
-  directly (`dump-task-and-sprite-callbacks.py` cross-referenced against
-  `PokeBallOpenParticleAnimation_Step1`/`_Step2`'s ELF addresses to find
-  the slots without guessing, then `ram-probe.py` watched `x2`/`y2`/
-  `animCmdIndex` across the whole window). Found the real mechanism: the
-  WHOLE particle subsystem (spawner task + all live particles) freezes
-  for exactly one real game tick (RAM tick 1494 duplicates 1493
-  verbatim) — this single stall is the root cause of the prior session's
-  empirical "logical tick 13+ is strictly worse" cutoff. Layered two
-  `logicalT`-relative age corrections onto the EXISTING, already
-  pixel-validated age formulas (kept unchanged after a from-RAM
-  rederivation measurably regressed the already-good ages-0-12 region
-  when checked live — a genuine open finding: RAM register state isn't
-  proof of on-screen compositing timing for this mechanism, see
-  `PARTICLE_STALL_LOGICAL_TICK`'s doc comment). Also tightened
-  `PARTICLE_MAX_AGE` 25→24 after the fix initially regressed the
-  previously-bit-exact render tick 1522 (a particle's final RAM write
-  lands the same tick it self-destructs, never actually composited) —
-  caught by the full sweep before landing, not shipped broken. Full
-  per-tick attribution for every remaining diff frame in
-  `docs/battle-scene-notes.md` §7.18. Two new Tier-1 tests pin the
-  stall correction and the death-boundary fix.
-- **Next:** per §7.18's own updated priority order — (1) particle model
-  still not full-frame-exact in 1481-1503/1516-1519 despite the
-  root-cause fix (try brute-forcing lag constants directly against the
-  oracle the way §7.16 did, rather than RAM-tick arithmetic); (2) §7.15's
-  bar exit slide (`SpriteCB_StatusSummaryBar_Exit`), not attempted this
-  session, likely owner of some/all of 1463-1480's residual; (3) the
-  small 1504-1521 boundary residual, unchanged, still last priority.
-- **Notes:** action-menu window, `healthboxAssembly.ts`/healthbox-
-  assembly-notes.md (parallel worktree lane), oracle/harness, and
-  ROADMAP.md stayed out of scope, per the brief. No PAPERCUT.
 
 ---
 

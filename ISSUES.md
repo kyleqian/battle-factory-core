@@ -23,15 +23,22 @@ gender text (window rows 5-15 rectangular blit; gender symbol uses a
 tile0, right-aligned `xPos=5*(3-digitCount)`, "Lv" = glyph 261). NOTE:
 round-1's z-order claim was corrected — the BAR wins over the frame
 wherever both are opaque. Full evidence: `docs/healthbox-assembly-notes.md`.
-**Open remainder:** (1) `hpFraction != 1` and `status != "none"` still
-throw — the partial-fill HP-bar tiles + status icons are unimplemented
-(the clean next step, unblocked by the solved subsprite geometry);
-(2) wiring the compositor into `battleScene.ts` to replace the shipping
-harvest (`src/assets/gen/sendout-healthbox-opponent.json`) — a supervised
-step, deliberately not done while the send-out window is under active
-pixel work. **Why it matters later, not now:** S6's settled content is
-byte-exact via the harvest; S7's HP drain and battles 2-7's other
-opponents need (1)+(2).
+**Round 3 (supervisor, PROGRESS #91):** `hpFraction != 1` and
+`status != "none"` now land too — `CalcBarFilledPixels` arithmetic
+(floor(hpFraction*48), 1px non-faint sliver, strict-`>` band thresholds:
+exactly 50% is yellow, exactly 20% is red), yellow/red tiles from the
+newly-extracted `hpbar_anim.png` (`hpbarAnim` key), opponent status icons
+from the newly-extracted `status2.png` (battler-1 sheet; `status.png` is
+the player's), dynamic per-status palette slot battler+12. All hermetic-
+Tier-1-pinned. **CAVEAT: no oracle pixels exist yet for partial HP or
+status pre-action-menu — oracle validation is deferred to S7's first
+HP-drain trace** (stated in the dossier too). **Open remainder:** wiring
+the compositor into `battleScene.ts` to replace the shipping harvest
+(`src/assets/gen/sendout-healthbox-opponent.json`) — a supervised step,
+deliberately not done while the send-out window is under active pixel
+work — plus that deferred S7 validation. **Why it matters later, not
+now:** S6's settled content is byte-exact via the harvest; S7's HP drain
+and battles 2-7's other opponents consume this pipeline.
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
