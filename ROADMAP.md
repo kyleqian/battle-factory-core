@@ -150,7 +150,15 @@ policy; sole open debt is ISSUES #15 (baked msgbox frame asset,
 non-blocking). Suite at stage close: 341 Tier-1 tests, 12 committed
 traces.
 
-### [ ] S6 — Battle bring-up: transition → first action menu, opponent exact
+### [~] S6 — Battle bring-up: transition → first action menu, opponent exact
+**Status (supervisor, 2026-07-19):** every window of the chain is
+implemented and trace-pinned every-tick (12 committed per-window traces,
+walk-warpout through menu-idle, all 0-diff except sendout 251/256);
+`s6-acceptance.json` (anchor→settled action menu, uniform 8-tick grid,
+228 captures) is committed at **224/228** — 3 frames are ISSUES #5's
+user-settled WIN0V pattern (x88-151-verified), 1 frame (1496, 3px) is
+ISSUES #18's open particle z-order gap. Not ticked [x] until #18 closes
+or the user re-scopes; RNG-exactness + opponent-pin criteria are met.
 Battle transition effect, battle scene init (backgrounds, healthboxes,
 sprites, send-out), intro text, through the first action menu. Opponent
 selection + team generation reproduced RNG-exactly (frontier battles do NOT

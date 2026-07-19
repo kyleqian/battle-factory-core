@@ -5,6 +5,25 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #18 — sendout/S6-acceptance final residuals: tick 1462 (1161px, named §7.19) + 1493-96 (2-5px tail)
+
+Parked 2026-07-19 (supervisor). After the OBJ-vs-OBJ blend-target-2 fix
+(#113 / battle-menu-notes §3c) closed most of the blended-edge family
+(sendout 246→251/256, menu-throw 78/78), what remains:
+- **1462** (1161px): the §7.19-named "settled-bar one-tick gap + trainer-
+  exit tail" — mechanism-sketched there, never attempted.
+- **1493-95** (2-5px): last tail of the §7.28 blended-edge family — four
+  independent RAM confirmations say every OAM/blend/position input is
+  correct (§7.28/§7.29); the blend-target-2 fix closed 1470/71/79+1491/92
+  but not these; §7.29's untested lead stands: probe the actual VRAM
+  tile-graphics bytes (precedent: the `open.png` runtime overwrite,
+  §7.25/e00f8f3).
+- **1496** (3px): particle z-order gap named in §7.25 — the ONE
+  non-ISSUES-#5 frame keeping `s6-acceptance.json` at 224/228.
+Affects: `sendout.json` 251/256, `s6-acceptance.json` 224/228 (other 3
+frames are ISSUES #5's settled pattern, x88-151-confirmed). S6 stays [~]
+until these close or the user re-scopes.
+
 ## #16 — Opponent healthbox real assembly: frame SOLVED, three content
   pieces still open (text ×2, HP-bar subsprite placement) — send-out still
   ships the pixel-harvested block
