@@ -235,13 +235,13 @@ describe("battleMenu: player status-bar subsprite-split exit (docs/battle-menu-n
 });
 
 describe("battleMenu: ONIX materialize window start - ball 'open' pose swap (docs/battle-menu-notes.md §3 item 5, tools/compare/traces/menu-materialize.json 5/5 0-diff)", () => {
-  it("the ball's open pose swaps in exactly one tick after arrival (1651), and stays visible through PLAYER_BALL_OPEN_END_TICK (widened this session - see its own doc comment for the pixel-confirmed vs. still-open sub-range)", () => {
+  it("the ball's open pose swaps in exactly one tick after arrival (1651), and stays visible through PLAYER_BALL_OPEN_END_TICK - RAM-confirmed exactly 5 ticks (1652-1656), matching sBallAnimSeq1's own ANIMCMD_FRAME(4,5) duration (see the constant's own doc comment; corrects a prior session's over-widened 1663 guess)", () => {
     expect(PLAYER_BALL_OPEN_START_TICK).toBe(1652);
-    expect(PLAYER_BALL_OPEN_END_TICK).toBe(1663);
+    expect(PLAYER_BALL_OPEN_END_TICK).toBe(1656);
     expect(playerBallOpenTopLeft(1651)).toBeNull();
     expect(playerBallOpenTopLeft(1652)).toEqual({ x: 64, y: 107 });
     expect(playerBallOpenTopLeft(1656)).toEqual({ x: 64, y: 107 });
-    expect(playerBallOpenTopLeft(1664)).toBeNull();
+    expect(playerBallOpenTopLeft(1657)).toBeNull();
   });
 
   it("terrain occludes the open pose below screen y=112 - only the sprite's own top 2 rows are ever visible at this screen position", () => {

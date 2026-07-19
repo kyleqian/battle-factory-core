@@ -1668,17 +1668,14 @@ function drawPlayerMaterialize(fb: Uint8Array, t: number): void {
  * (`battleMenu.ts`) encode the position/clip; this function does the actual
  * clipped draw.
  *
- * **Window boundary, widened this session**: the prior session assumed the
- * ONIX materialize/particle burst (drawn after this in `drawSendOutHandoff`)
- * would fully occupy the ball's own screen rows from 1653 on, so only trace
- * tick 1652 was modeled. Oracle pixels prove otherwise once the particle
- * burst is actually drawn: the ball's own static "open" art is still
- * genuinely visible (through the same terrain clip) for several ticks past
- * arrival, needed to explain oracle pixels the particle burst alone doesn't
- * cover. Extended through `PLAYER_BALL_OPEN_END_TICK` (1663,
- * `battleMenu.ts`) - see that constant's own doc comment for exactly how far
- * this is pixel-confirmed (1656) vs. still-open (1657+, a separately-named
- * residual).
+ * **Window boundary**: RAM-confirmed at `PLAYER_BALL_OPEN_END_TICK`
+ * (`battleMenu.ts` - see that constant's own doc comment) to be exactly 5
+ * ticks (renders 1652-1656), matching `sBallAnimSeq1`'s own
+ * `ANIMCMD_FRAME(4,5)` duration and the OPPONENT's own already-correct
+ * `drawSendOutBall` window (`BALL_OPEN_START_OFFSET`..`BALL_INVISIBLE_START_OFFSET`,
+ * also exactly 5 ticks) - a prior session's wider guess (1663) was corrected
+ * back down this session once RAM probing (not pixel guessing) pinned the
+ * true duration.
  */
 function drawPlayerBallOpen(fb: Uint8Array, t: number): void {
   const topLeft = playerBallOpenTopLeft(t);

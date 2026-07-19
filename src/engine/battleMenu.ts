@@ -395,21 +395,51 @@ export function playerThrowBallSpin(t: number): { centerX: number; centerY: numb
 export const PLAYER_BALL_OPEN_START_TICK = PLAYER_THROW_BALL_ARRIVE_TICK + 1; // 1652
 
 /**
- * Last tick this session models the ball's open pose - widened this session
- * from the prior single-tick window (1652 only) once oracle pixels showed
- * the ball's own "open" art stays on screen (partially - see the
- * `PLAYER_BALL_OPEN_VISIBLE_BOTTOM` terrain clip) well past arrival, still
- * needed to explain the oracle's own pixels once the particle burst and
- * materialize silhouette are both drawn too (`docs/battle-menu-notes.md` §3
- * item 5). Set to `PLAYER_MATERIALIZE_END_TICK` (1663, `battleScene.ts`) as
- * the same outline boundary that mechanism uses - **pixel-confirmed exact
- * only through 1656** (`tools/compare/traces/menu-materialize.json`); 1657+
- * has a small, separately-named residual (ball-open-frame colors bleeding
- * through where this session's own `drawPlayerMaterialize` tint is drawn -
- * NOT particle-colored, so not this session's own mechanism) not root-caused
- * this session - see `docs/battle-menu-notes.md` §3 item 5 for the accounting.
+ * Last tick the ball's "open" pose is actually visible - RAM-probed directly
+ * this session (`tools/probe/specs/menu-player-materialize.json`, `gSprites[5]`
+ * - the same ball-sprite slot §3 item 4c already pinned - watching
+ * `animCmdIndex`/`animDelayCounter`), correcting a prior session's
+ * over-widened guess (was 1663). Source: `SpriteCB_ReleaseMonFromBall`'s
+ * `StartSpriteAnim(sprite, 1)` selects `sBallAnimSeq1`
+ * (`docs/battle-anim-assets.md` §2): `ANIMCMD_FRAME(4,5)` (the "open" pose,
+ * held 5 ticks) THEN `ANIMCMD_FRAME(8,5)` (a genuinely blank, 0-opaque-pixel
+ * frame - confirmed by direct scan of the committed
+ * `battle-anim-ball-open.json` tileset, tiles 4-7 all-zero). RAM-confirmed:
+ * `animCmdIndex` is 0 (open) for exactly RAM ticks 1651-1655 (`animDelayCounter`
+ * 4,3,2,1,0 - 5 ticks, matching the source duration exactly), THEN flips to 1
+ * (blank) at RAM tick 1656. With this window's established +1 render lag
+ * (RAM tick N visible at render N+1 - re-confirmed here via the arrival
+ * position itself: RAM tick 1650's `(x,y)` snapping to the settled center
+ * matches the independently-established "arrival is exactly trace tick
+ * 1651"), the open pose is visible at renders 1652-1656 only - **exactly**
+ * the already-committed 0-diff span (`tools/compare/traces/
+ * menu-materialize.json`, 5/5). This is also the SAME 5-tick window the
+ * OPPONENT's own `drawSendOutBall` already implements
+ * (`BALL_OPEN_START_OFFSET=18` to `BALL_INVISIBLE_START_OFFSET=23`, exactly
+ * 5 ticks) - the opponent's own code was already right; the player's own
+ * window had drifted wider than the shared mechanism actually is.
+ * **Verified empirically** (`npm run compare` against `battle1-menu-dense.json`):
+ * shrinking this window from 1663 back to 1656 leaves ticks 1657-1662
+ * UNCHANGED (19/19/26/30/21/16px - this function's own drawn pixels never
+ * overlapped that residual's specific positions even while the window was
+ * wider, confirming the widening was never actually load-bearing for those
+ * ticks) and newly fixes tick 1663 to exact 0 diff (was 1px) - a real, if
+ * small, net improvement with no regressions. The residual at 1657-1662
+ * remains open, re-scoped by this same session's re-derivation: it is NOT
+ * this function's ball-open window (proven by the above A/B) and NOT
+ * `drawPlayerMaterialize`'s accumulator/`y2` (re-brute-forced this session
+ * with the full stack - BG fade + particles - in place; the current
+ * `local+2`/`MATERIALIZE_Y2_TABLE` values are still the closest match to the
+ * oracle's own exact-tint-pixel set at every tick, `tools/compare/scratch/
+ * menu-audit/reprobe_player_materialize.mjs`). Every mismatched pixel's
+ * color is exclusively in the ball's own (`battle-anim-ball-open.json`/
+ * `summary-ball.json`) palette - not the particle palette
+ * (`battle-anim-particles.json`, checked directly, no overlap) nor ONIX's own
+ * back-sprite palette (checked directly, no overlap, and mathematically
+ * incompatible with any single-coefficient blend toward the tint color) -
+ * still unidentified this session; see `docs/battle-menu-notes.md` §3 item 5.
  */
-export const PLAYER_BALL_OPEN_END_TICK = 1663;
+export const PLAYER_BALL_OPEN_END_TICK = 1656;
 
 /** The ball's settled center once arrived (`playerThrowBallSpin`'s own `BALL_ARRIVE_CENTER_X/Y`) - top-left of its 16x16 open-pose sprite. */
 const BALL_OPEN_TOP_LEFT = { x: BALL_ARRIVE_CENTER_X - 8, y: BALL_ARRIVE_CENTER_Y - 8 }; // (64,107)
