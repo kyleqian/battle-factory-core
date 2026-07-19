@@ -380,3 +380,42 @@ export function playerThrowBallSpin(t: number): { centerX: number; centerY: numb
     pd: entry.pd,
   };
 }
+
+// --- Slice 4: ONIX materializes (docs/battle-menu-notes.md §3 item 5) - the
+// ball's own "open" pose swap. Same shared SpriteCB_ReleaseMonFromBall chain
+// as the opponent's own materialize window (battleScene.ts's
+// drawGrovyleMaterialize/drawPlayerMaterialize, which owns the actual
+// silhouette/color-fade derivation) - this module owns only the ball's own
+// timing/position, re-derived fresh against battle1-menu-dense.json since
+// screen position/timing genuinely differ per side (docs/battle-anim-
+// assets.md §5's own audit only confirmed the underlying assets, not tick
+// alignment).
+
+/** `StartSpriteAnim(sprite, 1)` (`sBallAnimSeq1`'s "open" frame) fires one tick after arrival - same 1-tick render-lag family as every other register in this window (RAM-confirmed pattern re-applied, not re-verified independently this session). */
+export const PLAYER_BALL_OPEN_START_TICK = PLAYER_THROW_BALL_ARRIVE_TICK + 1; // 1652
+
+/** Last tick this session models the ball's open pose (docs/battle-menu-notes.md §3 item 5's own pinned window boundary - see `drawPlayerBallOpen`'s doc comment in `battleScene.ts` for why just the one tick suffices). */
+export const PLAYER_BALL_OPEN_END_TICK = PLAYER_BALL_OPEN_START_TICK;
+
+/** The ball's settled center once arrived (`playerThrowBallSpin`'s own `BALL_ARRIVE_CENTER_X/Y`) - top-left of its 16x16 open-pose sprite. */
+const BALL_OPEN_TOP_LEFT = { x: BALL_ARRIVE_CENTER_X - 8, y: BALL_ARRIVE_CENTER_Y - 8 }; // (64,107)
+
+/**
+ * Screen y at/below which the ball's "open" pose is occluded by the
+ * battlefield terrain graphic at the player's send-out screen position
+ * (`docs/battle-anim-assets.md` §5's own named placement gap, resolved here
+ * with direct pixel evidence rather than guessed): row-by-row pixel diff at
+ * trace tick 1652 (`tools/compare/scratch/menu-audit/onix_ball_open_clip.mjs`)
+ * shows only screen rows y=110-111 (the sprite's own top 2 opaque rows)
+ * match the open-pose art exactly - every row y>=112 mismatches (real
+ * terrain art there instead). Unlike the opponent's own ball sprite (fully
+ * unoccluded at its screen position), the player's send-out lands the ball
+ * mostly BEHIND the battlefield's foreground terrain tile.
+ */
+export const PLAYER_BALL_OPEN_VISIBLE_BOTTOM = 112;
+
+/** The ball's open-pose top-left corner at tick `t`, or `null` outside `[PLAYER_BALL_OPEN_START_TICK, PLAYER_BALL_OPEN_END_TICK]`. Callers must clip the draw to `y < PLAYER_BALL_OPEN_VISIBLE_BOTTOM` (see its own doc comment). */
+export function playerBallOpenTopLeft(t: number): { x: number; y: number } | null {
+  if (t < PLAYER_BALL_OPEN_START_TICK || t > PLAYER_BALL_OPEN_END_TICK) return null;
+  return BALL_OPEN_TOP_LEFT;
+}

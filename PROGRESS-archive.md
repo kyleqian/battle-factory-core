@@ -1,3 +1,44 @@
+## 95 — Supervisor: both worktree branches merged — mechanism 4 silhouette-edge fix (`sendout.json` **214 → 215/256**) + player-materialize asset audit (zero new extraction needed; §6's MISSING flags were stale)
+
+- **State (verified post-merge):** `npm test` **498/498**, `npm run build`
+  green, tree clean. Post-merge re-runs: sendout **215/256** (render 1481
+  newly exact), scene-assembly 256/256, transition 206/206, menu-text
+  18/18, menu-throw 11/11, anchor 1/1. Draft-family traces not re-run
+  post-merge: neither branch touches their code paths, and each branch ran
+  a full clean sweep pre-merge (#94's 21-trace + the branch's own 19-trace).
+  Both worktrees removed, branches deleted.
+- **Did:** (1) merged `worker/wt-20260718-235841` — mechanism 4's
+  materialize silhouette-edge residual root-caused by direct RAM probe
+  (`gSprites[8]`/`gOamMatrices[2]`, new probe spec committed): an
+  accumulator-lookup render-lag off-by-one (render T needs RAM T-1, the
+  convention mechanism 5 already had) + a previously-unmodeled `y2`
+  vertical bob (14→0 over the 12-tick emerge ramp, literal table). The
+  brief's "shared root cause with mechanism 5" hypothesis was FALSIFIED
+  (mechanism 5 already correct; call sites genuinely differ via
+  `ConvertScaleParam`). Full derivation §7.21. Remaining 1482-1492
+  residual re-attributed to the ball sprite's own occlusion footprint;
+  new named gap: mechanism 5 writes its affine matrix before its render
+  window at 1493-1503. (2) merged `worker/wt-20260719-003214` — asset
+  audit for the player materialize window: all three "MISSING" §6 items
+  were already extracted this run (`battle-anim-particles/-ball-open/
+  -tables.json`, shared `SpriteCB_ReleaseMonFromBall` source) and are now
+  pixel-confirmed applicable player-side (particles 14/14+12/12+12/12 at
+  1662-1665; color-fade RGB exact; affine-emerge shape holds for a back
+  sprite; thrown-ball closed frame 112/112 over 1607-1614). §6 rows
+  corrected to point at `docs/battle-anim-assets.md` §5.
+- **Next:** (1) player status-bar subsprite-split exit (1575-1604, <1%
+  residual/tick — mirror of §7.19's opponent-side EXIT_BAR_TILE_ORDER
+  work), then densify menu-throw.json to the full 1574-1614 window; (2)
+  ball-spin affine keyframe renderer (1615+, needs the keyframe-matrix
+  table + a new primitive); (3) materialize window ~1646-1690 (assets all
+  confirmed ready); (4) healthbox slide-in → settle 1693; (5) blank-box +
+  menu draw + idle (1742-1810); sendout residuals continue in parallel
+  (§7.21's named 1493-1503 matrix-early gap, 1516/17 age overrun,
+  1470/71/79 icon edge, tick 1462).
+- **Notes:** merges conflict-free (doc/file-ownership discipline held
+  across 3 concurrent workers). Ball-open pose frame occlusion at player
+  screen position is a placement (engine) question, not asset — see audit.
+
 ## 94 — Bounded worker: PLAYER SEND-OUT slice 2 landed — Brendan's throw pose-cycle + exit translation, thrown-ball arc, player status-bar fade+slide; `menu-throw.json` **11/11** (ticks 1574, 1605-1614) — two new mechanisms found+named, not implemented (GBA ball-spin affine, bar subsprite-split)
 
 - **State:** `npm test` **497/497** (+11), `npm run build` green, tree

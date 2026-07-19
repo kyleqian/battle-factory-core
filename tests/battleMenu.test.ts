@@ -17,6 +17,10 @@ import {
   playerSummaryFadeEva,
   playerSummaryIconExitDx,
   playerSummaryBarExitDx,
+  PLAYER_BALL_OPEN_START_TICK,
+  PLAYER_BALL_OPEN_END_TICK,
+  PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+  playerBallOpenTopLeft,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -225,5 +229,23 @@ describe("battleMenu: player status-bar subsprite-split exit (docs/battle-menu-n
 
   it("tick 1584 (later in the same exit, bar further slid + more faded) still matches the widened layout at a different duplicate-block offset", () => {
     expect(pixelAtSentOut(1584, 212, 98)).toEqual([116, 133, 125]);
+  });
+});
+
+describe("battleMenu: ONIX materialize window start - ball 'open' pose swap (docs/battle-menu-notes.md §3 item 5, tools/compare/traces/menu-materialize.json 1/1 0-diff)", () => {
+  it("the ball's open pose swaps in exactly one tick after arrival (1651), and is only modeled the one tick this session pinned", () => {
+    expect(PLAYER_BALL_OPEN_START_TICK).toBe(1652);
+    expect(PLAYER_BALL_OPEN_END_TICK).toBe(1652);
+    expect(playerBallOpenTopLeft(1651)).toBeNull();
+    expect(playerBallOpenTopLeft(1652)).toEqual({ x: 64, y: 107 });
+    expect(playerBallOpenTopLeft(1653)).toBeNull();
+  });
+
+  it("terrain occludes the open pose below screen y=112 - only the sprite's own top 2 rows are ever visible at this screen position", () => {
+    expect(PLAYER_BALL_OPEN_VISIBLE_BOTTOM).toBe(112);
+  });
+
+  it("the visible sliver of the ball's open-pose art renders its own ink color at tick 1652 (oracle-pinned, battle1-menu-dense.json)", () => {
+    expect(pixelAtSentOut(1652, 70, 111)).toEqual([255, 156, 123]);
   });
 });

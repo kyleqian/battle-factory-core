@@ -417,6 +417,8 @@ import {
   playerSummaryIconExitDx,
   playerSummaryBarExitDx,
   PLAYER_SUMMARY_FADE_START_TICK,
+  playerBallOpenTopLeft,
+  PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -432,6 +434,7 @@ import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "jso
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
 import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { type: "json" };
 import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" with { type: "json" };
+import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 
@@ -527,6 +530,11 @@ interface BattleAnimParticlesAsset {
   palette: RgbColor[];
   regularBallAnim: { tile: number; duration: number; hFlip: boolean }[];
 }
+/** `src/assets/gen/battle-back-sprites.json`'s per-species shape (`extract-battle-mon-pics.ts`) - a plain 64x64 back-pic tileset+palette, no per-frame/anim data (back sprites are static art, unlike front sprites' 2-frame entrance anim). */
+interface BattleBackSpriteAsset {
+  tileset: Tileset;
+  palette: RgbColor[];
+}
 
 const battleBg = battleBgAsset as BattleBgAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -541,6 +549,7 @@ const summaryBall = summaryBallAsset as SummaryBallAsset;
 const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
+const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 
@@ -1560,6 +1569,121 @@ function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number):
 }
 
 /**
+ * PLAYER-side materialize (docs/battle-menu-notes.md §3 item 5 /
+ * docs/battle-anim-assets.md §5) - ONIX's own `SpriteCB_ReleaseMonFromBall`
+ * scale-in, the SAME shared source function/table as mechanism 4 above
+ * (`BATTLER_AFFINE_EMERGE`/`sAffineAnim_Battler_Emerge`), re-derived fresh
+ * against `battle1-menu-dense.json` since screen position/timing genuinely
+ * differ per side (only the underlying assets were confirmed to transfer,
+ * not tick alignment - `docs/battle-anim-assets.md` §5's own caveat).
+ *
+ * **Corner**: `(40,48)` - pixel-brute-force-confirmed (`tools/compare/
+ * scratch/menu-audit/find_onix_corner2.mjs`, throwaway): the settled ONIX
+ * back sprite is a ZERO-diff EXACT match (1664/1664 opaque px) against
+ * `src/assets/gen/battle-back-sprites.json["ONIX"]` at this corner, first at
+ * trace tick 1691 and repeatedly thereafter (1710-1740, sampled) whenever
+ * the not-yet-source-attributed idle-bob (`docs/battle-menu-notes.md` §4,
+ * still open) isn't mid-swing.
+ *
+ * **Accumulator lookup offset**: unlike mechanism 4's `local+1`, the
+ * PLAYER-side accumulator is `affineEmergeAccumulator(local+2)` - one
+ * logical tick further ahead. Brute-force-confirmed (`tools/compare/
+ * scratch/menu-audit/onix_materialize_bruteforce.mjs`, jointly searching
+ * `accumulator`+`yOff` against the oracle's own exact-tint-color pixel SET
+ * within the `ONIX_CORNER` crop, same method as §7.21's own opponent-side
+ * derivation): renders 1653-1659 land on `affineEmergeAccumulator(2..8)`
+ * (76,94,112,129~130,148,166,184) at diff 0-13px (near-exact - the codebase's
+ * own established "brute-force cross-check over source formula" standard),
+ * confirming a uniform +2 (not +1) lag for this call site - a real, distinct
+ * offset, not copied from the opponent's own number. Not RAM-probed this
+ * session (time-boxed): flagged as a follow-up for full RAM confirmation,
+ * same as §7.21's own `y2` precedent of trusting a pixel-brute-forced table
+ * directly.
+ *
+ * **`y2` table**: the SAME 12 values as `MATERIALIZE_Y2_TABLE` (§7.21),
+ * reused verbatim at the SAME local index (not offset) - the brute-force
+ * search above independently landed on `y2` values 14,13,12,11,10,9,8,7 at
+ * local 0-7 (renders 1653-1660), an exact match to `MATERIALIZE_Y2_TABLE`'s
+ * own first 8 entries. Plausible since `y2` is a generic per-sprite write
+ * (§7.21 didn't source-attribute it either), unlike the accumulator's own
+ * anim-index lookup which this call site schedules one tick later.
+ *
+ * **Window boundary, pinned this session**: `PLAYER_MATERIALIZE_START_TICK`
+ * (1653, one tick after the ball's own "open" pose swap, §3 item 4c's
+ * already-pinned pattern) through `PLAYER_MATERIALIZE_END_TICK` (1663
+ * exclusive of growth, i.e. last modeled tick 1663 - the accumulator/y2
+ * pair reaches the table's own tail, `affineEmergeAccumulator(12)=256`
+ * neutral) - NOT continued into the coefficient-fade-to-true-color ramp or
+ * past it (unlike mechanism 4's own clean hard cutoff, the player window's
+ * `LaunchBallFadeMonTask` coefficient ramp entangles with the
+ * still-unresolved idle-bob mechanism starting ~1670 - pixel-brute-force
+ * showed a non-monotonic residual there rather than a clean single-mechanism
+ * fit, so per this run's "no curve-fitting" rule this session stops at the
+ * clean boundary rather than forcing it). Named, not guessed at - see
+ * `docs/battle-menu-notes.md` §3 item 5 for the full accounting.
+ */
+const ONIX_MATERIALIZE_CORNER = { x: 40, y: 48 };
+const PLAYER_MATERIALIZE_START_TICK = 1653;
+const PLAYER_MATERIALIZE_END_TICK = 1663;
+const PLAYER_MATERIALIZE_ACCUMULATOR_LEAD = 2;
+
+function drawPlayerMaterialize(fb: Uint8Array, t: number): void {
+  if (t < PLAYER_MATERIALIZE_START_TICK || t > PLAYER_MATERIALIZE_END_TICK) return;
+  const local = t - PLAYER_MATERIALIZE_START_TICK;
+  const accumulator = affineEmergeAccumulator(local + PLAYER_MATERIALIZE_ACCUMULATOR_LEAD);
+  const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
+  drawSpriteSheetAffineTinted(fb, onixBackSprite.tileset, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, y2);
+}
+
+/**
+ * PLAYER-side ball "open" pose swap (docs/battle-menu-notes.md §3 item 5) -
+ * `StartSpriteAnim(sprite, 1)` one tick after arrival (§3 item 4c's
+ * `PLAYER_THROW_BALL_ARRIVE_TICK`), same shared `sBallAnimSeq1` mechanism 2
+ * (`drawSendOutBall`) already models for the opponent, but at the player's
+ * OWN settled center `(72,115)` - top-left `(64,107)`.
+ *
+ * **Terrain occlusion, resolved with pixel evidence** (`docs/battle-anim-
+ * assets.md` §5's own named placement gap): row-by-row pixel diff at trace
+ * tick 1652 (`tools/compare/scratch/menu-audit/onix_ball_open_clip.mjs`)
+ * shows only screen rows y=110-111 (the open-pose sprite's own top 2 opaque
+ * rows) match exactly - every row y>=112 mismatches (the battlefield terrain
+ * graphic there instead, confirmed a background-priority occlusion, not a
+ * missing/wrong asset). `playerBallOpenTopLeft`/`PLAYER_BALL_OPEN_VISIBLE_BOTTOM`
+ * (`battleMenu.ts`) encode the position/clip; this function does the actual
+ * clipped draw.
+ *
+ * **Window boundary**: only trace tick 1652 itself is modeled - by 1653 the
+ * ONIX materialize/particle burst (drawn after this in `drawSendOutHandoff`)
+ * already occupies the same screen rows, and `sBallAnimSeq1`'s own 5-tick
+ * open span means the ball's underlying pose doesn't change again until it
+ * goes blank regardless - the single visible tick is sufficient for this
+ * step's pinned window (`docs/battle-menu-notes.md` §3 item 5).
+ */
+function drawPlayerBallOpen(fb: Uint8Array, t: number): void {
+  const topLeft = playerBallOpenTopLeft(t);
+  if (!topLeft) return;
+  for (let ty = 0; ty < 2; ty += 1) {
+    const rowY = topLeft.y + ty * 8;
+    if (rowY >= PLAYER_BALL_OPEN_VISIBLE_BOTTOM) continue;
+    for (let tx = 0; tx < 2; tx += 1) {
+      const tile = battleAnimBallOpen.tileset.tiles[ty * battleAnimBallOpen.tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        const y = rowY + py;
+        if (y >= PLAYER_BALL_OPEN_VISIBLE_BOTTOM) continue;
+        for (let px = 0; px < 8; px += 1) {
+          const idx = tile[py * 8 + px]!;
+          if (idx === 0) continue;
+          const c = battleAnimBallOpen.palette[idx];
+          if (!c) continue;
+          setPixel(fb, topLeft.x + tx * 8 + px, y, c);
+        }
+      }
+    }
+  }
+}
+
+/**
  * §7.11/§7.16/§7.17 mechanism 5: GROVYLE's species front-sprite entrance
  * animation - `sMonFrontAnimIdsTable[SPECIES_GROVYLE-1] = ANIM_V_STRETCH` ->
  * `Anim_VerticalStretch` (`pokemon_animation.c:1597-1635`), launched by
@@ -2185,6 +2309,8 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
     );
   }
   drawBallOpenParticles(fb, t, handoffTick);
+  drawPlayerBallOpen(fb, t);
+  drawPlayerMaterialize(fb, t);
   if (t >= GROVYLE_MATERIALIZE_TICK) {
     drawGrovyleSettled(fb);
   } else {

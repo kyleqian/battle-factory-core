@@ -295,6 +295,58 @@ already right, only specific numeric claims needed fixing.
    (the two largest per-tick pixel deltas in the whole window, 16-17k px,
    land at 1668/1676 — consistent with the affine emerge + healthbox
    slide-in being the single biggest visual events here).
+
+   **Landed this session (bounded worker, PROGRESS #98), engine-modeled
+   through trace tick 1652 only** - narrower than this item's own coarse
+   "~1653-1690" framing, for a specific, verified reason (below), not a
+   time-budget shortcut:
+   - **Ball open-pose swap, tick 1652 exact** (`playerBallOpenTopLeft`,
+     `battleMenu.ts` + `drawPlayerBallOpen`, `battleScene.ts`):
+     `StartSpriteAnim(sprite, 1)` one tick after arrival (`PLAYER_THROW_BALL_ARRIVE_TICK`+1),
+     drawn at the ball's settled center `(72,115)`. **Terrain occlusion**
+     (this item's own named placement gap, `docs/battle-anim-assets.md` §5)
+     resolved with direct pixel evidence, not guessed: row-by-row diff at
+     tick 1652 shows only screen rows y=110-111 (the sprite's own top 2
+     opaque rows) match: everything y>=112 is the battlefield terrain
+     graphic instead. `tools/compare/traces/menu-materialize.json` (new,
+     captures tick 1652 only): **1/1 at 0 diff**.
+   - **ONIX's own materialize accumulator/`y2` derived and pixel-verified
+     correct in isolation, but NOT included in the committed trace**: the
+     same shared `BATTLER_AFFINE_EMERGE` table mechanism 4
+     (`battle-scene-notes.md` §7.21) already decoded applies to ONIX's back
+     sprite at corner `(40,48)` (brute-force-confirmed - the settled back
+     sprite is a zero-diff 1664/1664 exact match there, first at trace tick
+     1691), with a `+2` (not `+1`) accumulator-lookup lead and the SAME
+     12-entry `y2` table §7.21 already extracted, reused verbatim
+     (`drawPlayerMaterialize`, `battleScene.ts` - see its own doc comment for
+     the full brute-force derivation, `tools/compare/scratch/menu-audit/
+     onix_materialize_bruteforce.mjs`). Enabling it measurably and
+     monotonically REDUCES the full-frame pixel diff at every tick
+     1653-1663 by exactly the tint silhouette's own pixel count each tick
+     (150px at 1653 up to 1551px at 1663, matching this doc's own
+     independently-harvested exact-tint-pixel-count table pixel-for-pixel) -
+     strong evidence the derivation itself is correct. **It is left OUT of
+     the committed trace/window boundary anyway**: a large (~2400-7700px),
+     genuinely PRE-EXISTING full-frame residual (confirmed present with
+     `git stash` on the unmodified engine, i.e. NOT caused by this
+     session's own code) already occupies ticks 1653+ before any of this
+     session's changes - a scattered, small-per-channel-delta pattern
+     across most of the frame width at y~51-52 that doesn't look like the
+     ONIX/ball/particle mechanisms this item is about, not yet root-caused
+     (candidate: some other in-flight table/mechanism this window's own
+     shared `drawSendOutHandoff` doesn't fully cover this far into the
+     trace - not investigated this session, genuinely out of this step's
+     time budget). Since this residual alone already exceeds a 0-diff bar
+     for every tick past 1652, extending the committed window past it would
+     mean either shipping a nonzero-diff trace (against this run's own
+     rules) or masking the gap - neither done. **Named blocker for the next
+     session**: root-cause the pre-existing ~1653+ full-frame residual
+     (not ONIX-shaped, not caused by this session), then the already-derived
+     `drawPlayerMaterialize` should just start landing full-frame-exact
+     ticks with no further changes needed to it. The open-particle burst
+     (mechanism 3's own player-side analogue) was not attempted this session
+     either - same time-budget reason, flagged as still-open alongside the
+     above.
 6. `HandleBallAnimEnd` waits for both the ball sprite's anim **and** the mon
    sprite's affine anim to finish, then `Intro_TryShinyAnimShowHealthbox`
    (`battle_controller_player.c:979`) calls `UpdateHealthboxAttribute(...,
@@ -433,9 +485,15 @@ now.", already documented in `battle-bringup-notes.md` §3), 2=POKéMON,
      by sprite-creation order, so Brendan's back sprite (created at the
      intro) wins over the later-created status icons whenever their
      screen footprints briefly cross during his exit slide (§3 point 4b).
-   Materialization (~1646+) is still unattempted — §6's two MISSING items
-   (ball-open particles, affine emerge + color-fade tables) block it, same
-   as before this session.
+   **Materialization landed partially this session (PROGRESS #98)**: the
+   ball's open-pose swap is engine-modeled exact at tick 1652
+   (`tools/compare/traces/menu-materialize.json`, 1/1 0-diff), and ONIX's
+   own color-fade/affine-emerge accumulator is derived and pixel-verified
+   correct in isolation (§3 item 5) but not yet included in a committed
+   trace — blocked by a pre-existing, un-root-caused full-frame residual
+   starting tick 1653 that has nothing to do with ONIX/the ball/particles
+   (named in §3 item 5, not this session's own bug). The open-particle
+   burst (mechanism 3's player-side analogue) is still fully unattempted.
 2. §4's idle-cycle mechanism (which specific sprite/timer drives regions A
    and B) is pixel-pinned but not source-attributed — needed before an
    engine slice can *generate* the cycle rather than just replay captured
