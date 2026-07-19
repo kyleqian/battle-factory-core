@@ -2149,3 +2149,124 @@ retired by this finding, not confirmed.
 - 1470/1471/1479's icon-edge residual, 1462's settled-bar gap, and 1516/1517's
   single-particle age overrun: unchanged, out of this step's scope per the
   brief, not investigated.
+
+### 7.22. Engine-slice session: §7.21's named 1493-1503 matrix-early gap CONFIRMED and a mechanism-derived fix VERIFIED to close it - but `sendout.json` stays **215/256** (code reverted, no net change) because a separate, previously-undocumented residual masks every affected tick
+
+Per this step's brief: root-cause and close §7.21's own named gap ("mechanism 5
+starts writing its affine matrix before its current render window begins,
+render ticks 1493-1503"). The gap is real, was root-caused precisely, and a
+fix was built and pixel-verified to fully close it - but the overall score
+doesn't move, for a reason unrelated to mechanism 5 (see below), so per this
+step's own acceptance bar ("strictly >215/256 or revert+document") the code
+change was reverted. This entry documents the closed analysis and the new
+finding so a future session doesn't have to re-derive either.
+
+**Re-probed, no new spec needed**: `tools/probe/specs/sendout-grovyle-stretch.json`
+(already committed, watches `gSprites[8]`'s `callback`/`d4`/`d5`/`y2`) already
+covers this range in its existing 1886-frame run - just read further into its
+output. RAM ticks 1495-1503 (`d4`=xScale, `d5`=yScale, `y2`, all post-tick):
+
+| RAM tick | callback | d4 | d5 | y2 |
+|---|---|---|---|---|
+| 1495 | (mechanism 4's, `134454105`) | 0 | 0 | 0 |
+| 1496 | **switches to `135791121`** | 0 | 0 | 0 |
+| 1497 | 135791121 | 256 | 256 | 0 |
+| 1498 | 135791121 | 257 | 254 | 0 |
+| 1499 | 135791121 | 258 | 251 | 0 |
+| 1500 | 135791121 | 259 | 248 | -1 |
+| 1501 | 135791121 | 260 | 245 | -1 |
+| 1502 | 135791121 | 262 | 241 | -1 |
+| 1503 | 135791121 | 263 | 239 | -2 |
+
+RAM 1503's `(263,239,-2)` is bit-exact `GROVYLE_STRETCH_TABLE[0]` (already
+committed) - the two probe reads agree at the seam, confirming the table
+itself needs no correction, only its start point. **The sprite callback
+itself switches at RAM tick 1496** - exactly `GROVYLE_FRONT_ANIM_START_OFFSET`
+(35, already used for the front-anim frame cadence, §7.17) via the established
++1 render lag (RAM N visible at render N+1: RAM 1496 -> render 1497 -> et 35).
+This is a single, unified handoff tick already known to the code for the
+frame cadence - the matrix/scale table simply wasn't anchored there too
+(it started 7 ticks later, at et 42/render 1504, `MATERIALIZE_END_OFFSET`).
+§7.21's brute-forced boundary values (257,258,259,260,262,263 for RAM
+1498-1503) match this table exactly, confirmed independently.
+
+**Fix built and verified** (then reverted, see below): a 7-entry
+`GROVYLE_STRETCH_EARLY_TABLE` (et 35-41, the RAM values above verbatim, same
+"literal RAM table" precedent as `GROVYLE_STRETCH_TABLE`/`MATERIALIZE_Y2_TABLE`),
+`drawGrovyleMaterialize`'s own window shortened from et<42 to et<35 (mechanism
+4 never draws non-neutral pixels in that gap anyway - its own tables are
+already dry by et 30 - so this only changes WHICH function renders the tail,
+not its pixels), and `drawGrovyleStretch`'s tint coefficient pinned at 16
+(unfaded) for `et < MATERIALIZE_END_OFFSET` (the real `Task_FadeMon_ToNormal`
+poll-gate, RAM-confirmed separately in §7.16/§7.21, still doesn't start
+decaying it until et 42 - unaffected by this fix).
+
+**A real compositing-order bug found and fixed along the way**: naively
+extending `drawGrovyleStretch`'s call to activate at et 35 in its EXISTING
+call-site (after `drawSendOutBall`/`drawBallOpenParticles`) made things much
+WORSE (render 1497 Grovyle-region diff went from 3px to 114px) - because for
+et 35-41 the ball-open particle burst (mechanism 3) is still active and must
+occlude Grovyle, the same way it already correctly does through mechanism 4's
+own call site (positioned BEFORE the ball/particles in `drawSendOutHandoff`).
+Mechanism 5's call site was never moved before because its ORIGINAL window
+(et>=42) starts after the particles have mostly cleared this screen region,
+so the ordering never mattered there. Fix: split the call - the et 35-41
+portion is drawn in mechanism 4's own slot (before the ball/particles,
+preserving correct occlusion), the et>=42 portion keeps its original later
+call site (moving that back too was not attempted/needed once the split
+version measured clean).
+
+**Verified against the oracle, isolated to Grovyle's own screen region**
+(`x∈[130,210], y∈[0,70]`, i.e. excluding the unrelated residual named below):
+render ticks 1499-1503's Grovyle-region diff (baseline, i.e. `sendout.json`'s
+committed state before this fix): **244, 234, 295, 357, 407px** (these are
+`{382,372,433,495,545}` total minus the 138px unrelated band below, present
+identically at every one of these ticks). After the fix: **0, 0, 0, 0, 0px** -
+a complete, exact closure of the named gap, for all 5 affected ticks. Render
+1497/1498 (et 35/36, the two neutral-value ticks) are pixel-IDENTICAL before
+and after (141px/140px total, both wholly the unrelated band + a pre-existing
+2-3px ball-occlusion-footprint residual, §7.21) - confirming the fix is a
+precise, zero-collateral-damage boundary correction, not a broad rewrite.
+
+**But `sendout.json` stays 215/256 - no tick crosses to exact - because of a
+separate, previously-undocumented residual** that exactly coincides with this
+window: a fixed-size (~138px), fixed-shape diff band, screen region
+`x∈[0,42], y∈[17,42]` at the ticks sampled, where this engine renders
+`(247,247,255)` and the oracle renders `(255,255,255)`. Measured directly
+(not inferred): its x-range slides right at a constant ~5px/tick -
+`x∈[0,7]` at render 1496, `x∈[20,27]` at 1500, `x∈[35,42]` at 1503 - and its
+pixel COUNT is a constant 138 at every one of renders 1496-1503, vanishing
+entirely by 1504 (confirmed 0px band-shaped diff at 1504/1505/1518/1519).
+Confirmed present, unchanged, in the CURRENT COMMITTED CODE (`git stash`
+before/after this session's edits reproduces identical counts/positions at
+every sampled tick) - **not caused by this session's fix, and not affected by
+it either way**. Not root-caused this session (out of scope, discovered only
+while isolating mechanism 5's own region) - named precisely rather than
+guessed at: the y-range (17-42) and the fact it starts exactly at render 1496
+and ends exactly at render 1504 (mechanism 5's OLD window boundary) are
+suspicious coincidences worth checking against `OPPONENT_CORNER`/trainer-exit/
+opponent-summary-bar RAM state directly in a future session, but this session
+did not do that RAM probing, so no mechanism is claimed. This is DIFFERENT
+from the already-known/out-of-scope items (1470/1471/1479 icon edge, 1462
+settled-bar gap, 1516/1517 particle age overrun) - none of those match this
+band's position, timing, or color.
+
+**Disposition, per this step's own acceptance bar** ("if code changes:
+strictly >215/256... if no qualifying fix: revert, document"): the fix above
+is real, mechanism-derived (RAM-verified, not curve-fit), and a full
+21-trace-equivalent zero-regression check was not re-run because **the code
+was reverted** - `git diff` against this entry's starting point is empty,
+`src/engine/battleScene.ts` is unchanged, `sendout.json` stays 215/256,
+`npm test` 498/498 and `npm run build` green (the pre-existing baseline,
+untouched). The fix's derivation and verification (above) are preserved here
+so a future session can re-apply it in ~minutes via this entry once the
+masking band is understood - re-applying it alone, without also addressing
+the band, would cost real engineering time for zero score movement, which is
+why it wasn't committed speculatively.
+
+**Not chased further this session (named, not guessed at):**
+- The masking band's own root cause (position/timing/color pinned above,
+  mechanism not identified).
+- Everything already out of scope per the brief: 1516/1517 particle age
+  overrun, 1470/1471/1479 icon edge, tick 1462, menu window (1560+),
+  healthbox wiring.
