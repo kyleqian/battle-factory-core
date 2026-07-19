@@ -419,6 +419,7 @@ import {
   PLAYER_SUMMARY_FADE_START_TICK,
   playerBallOpenTopLeft,
   PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+  playerMaterializeBgFadeY,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -2273,7 +2274,13 @@ function drawSettledScene(fb: Uint8Array): void {
  * correct, so none of the fixes above alone flips a full-frame match yet.
  */
 function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): void {
-  drawTileBgFaded(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette, sendOutBgFadeY(t, handoffTick));
+  // battleMenu.ts's own module doc (§3 item 5 root-cause, PROGRESS.md #98's
+  // named blocker): the player's own ONIX release re-triggers the identical
+  // BG-to-white materialize dither `sendOutBgFadeY` models for the
+  // opponent's own send-out - the two windows never overlap, so only one of
+  // the two is ever nonzero at a given tick.
+  const bgFadeY = sendOutBgFadeY(t, handoffTick) || playerMaterializeBgFadeY(t);
+  drawTileBgFaded(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette, bgFadeY);
   // battleMenu.ts: Brendan's throw pose-swap + exit translation start at
   // BRENDAN_THROW_START_TICK - before that he's still the settled slide-in
   // pose (frame 3, unshifted).

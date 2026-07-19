@@ -21,6 +21,8 @@ import {
   PLAYER_BALL_OPEN_END_TICK,
   PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
   playerBallOpenTopLeft,
+  PLAYER_BG_FADE_START_TICK,
+  playerMaterializeBgFadeY,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -247,5 +249,38 @@ describe("battleMenu: ONIX materialize window start - ball 'open' pose swap (doc
 
   it("the visible sliver of the ball's open-pose art renders its own ink color at tick 1652 (oracle-pinned, battle1-menu-dense.json)", () => {
     expect(pixelAtSentOut(1652, 70, 111)).toEqual([255, 156, 123]);
+  });
+});
+
+describe("battleMenu: player-side materialize BG-to-white fade (docs/battle-menu-notes.md §3 item 5, PROGRESS #98's pre-existing ~1653+ residual root-caused this session - the SAME BeginNormalPaletteFade mechanism battleScene.ts's SENDOUT_BG_FADE_Y models for the opponent, re-triggered by the player's own ONIX release)", () => {
+  it("starts exactly one tick after the ball's own open-pose swap (1653 = PLAYER_BALL_OPEN_START_TICK+1), 0 (unfaded) the tick before", () => {
+    expect(PLAYER_BG_FADE_START_TICK).toBe(1653);
+    expect(playerMaterializeBgFadeY(1652)).toBe(0);
+    expect(playerMaterializeBgFadeY(1653)).toBe(2);
+  });
+
+  it("ramps up 2-per-2-ticks with the same 3-tick y=14 hold as SENDOUT_BG_FADE_Y, to a 16 (white) plateau (oracle-decoded, tools/compare/scratch/menu-audit/decode_player_bgfade.mjs)", () => {
+    expect(playerMaterializeBgFadeY(1654)).toBe(2);
+    expect(playerMaterializeBgFadeY(1655)).toBe(4);
+    expect(playerMaterializeBgFadeY(1663)).toBe(12);
+    expect(playerMaterializeBgFadeY(1665)).toBe(14);
+    expect(playerMaterializeBgFadeY(1666)).toBe(14);
+    expect(playerMaterializeBgFadeY(1667)).toBe(14);
+    expect(playerMaterializeBgFadeY(1668)).toBe(16);
+    expect(playerMaterializeBgFadeY(1675)).toBe(16);
+  });
+
+  it("ramps back down symmetrically and returns to unfaded (0) past the table's own tail - the exact boundary-truncation lesson §7.20 named for the opponent's own table, re-verified here rather than assumed", () => {
+    expect(playerMaterializeBgFadeY(1676)).toBe(14);
+    expect(playerMaterializeBgFadeY(1688)).toBe(2);
+    expect(playerMaterializeBgFadeY(1689)).toBe(2);
+    expect(playerMaterializeBgFadeY(1690)).toBe(0);
+    expect(playerMaterializeBgFadeY(1700)).toBe(0);
+  });
+
+  it("rendered pixels match the oracle's faded background at a clean swatch, tick 1653 and tick 1668's white plateau (oracle-pinned, battle1-menu-dense.json)", () => {
+    expect(pixelAtSentOut(1653, 165, 52)).toEqual([198, 198, 165]);
+    expect(pixelAtSentOut(1668, 165, 52)).toEqual([255, 255, 255]);
+    expect(pixelAtSentOut(1689, 165, 52)).toEqual([198, 198, 165]);
   });
 });

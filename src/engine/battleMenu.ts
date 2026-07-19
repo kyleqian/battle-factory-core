@@ -419,3 +419,58 @@ export function playerBallOpenTopLeft(t: number): { x: number; y: number } | nul
   if (t < PLAYER_BALL_OPEN_START_TICK || t > PLAYER_BALL_OPEN_END_TICK) return null;
   return BALL_OPEN_TOP_LEFT;
 }
+
+// --- The pre-existing ~1653+ full-frame residual named in PROGRESS.md #98 /
+// docs/battle-menu-notes.md §3 item 5's "Next" list, root-caused this
+// session: `SpriteCB_ReleaseMonFromBall` (`pokeball.c:758`) calls
+// `LaunchBallFadeMonTask(TRUE, sprite->sBattler, 14, ballId)` for BOTH
+// battlers (the call site is battler-generic, `reference/pokeemerald/
+// src/pokeball.c:758`) - i.e. the SAME `BeginNormalPaletteFade(selectedPalettes
+// =14, 0, 0, 16, RGB_WHITE)` BG-to-white materialize dither
+// `battleScene.ts`'s `SENDOUT_BG_FADE_Y` already models for the opponent's
+// own send-out fires AGAIN, independently, for the player's own ONIX
+// release - a second cycle of the identical mechanism, not a new one.
+//
+// Verified by direct pixel decode against `battle1-menu-dense.json`
+// (`tools/compare/scratch/menu-audit/decode_player_bgfade.mjs`), NOT
+// curve-fit: reversing the already-validated `blendComponentToWhite`
+// formula (`c5 + (((31-c5)*y)>>4)` per 5-bit channel, then re-expand) against
+// two independent clean background swatches, (165,52) and (194,51) -
+// confirmed clean (a genuine static bg tile, constant through tick 1652) by
+// sampling every tick 1600-1652 first, matching this doc's own established
+// swatch-picking discipline (§7.10). The (165,52) swatch decodes to a
+// PERFECTLY clean, exact y sequence at every one of the 37 affected ticks
+// (1653-1689) with all 3 channels agreeing every tick: 2,2,4,4,6,6,8,8,10,
+// 10,12,12,14,14,14,16x8,14,14,12,12,10,10,8,8,6,6,4,4,2,2 - byte-IDENTICAL
+// to `SENDOUT_BG_FADE_Y`'s own 37-entry table, including its same 3-tick
+// y=14 hold irregularity at both the up-ramp and (symmetrically) nothing
+// extra on the down-ramp (matches the up-ramp's own hold, not a new one).
+// The second swatch (194,51) cross-validates the same y sequence on its
+// blue channel exactly (its r/g channels show harmless quantization
+// aliasing at a few ticks - expected, since that swatch's own unfaded c5
+// values are different and floor-round differently at intermediate y, not
+// evidence against the shared table). This is the SAME table reused
+// verbatim, not re-derived by coincidence.
+//
+// Start tick, decoded not guessed: 1653 = `PLAYER_BALL_OPEN_START_TICK`+1 -
+// the exact same "one tick after the ball's own open-pose swap" offset
+// `SENDOUT_BG_FADE_START`'s own derivation used for the opponent
+// (handoffTick+18 ball-open -> handoffTick+19 fade start, §7.10/§7.20) -
+// strong independent confirmation this is the ball-release chain's own
+// fixed timing convention, not tick 1653 chosen to fit.
+
+/** Literal per-tick blend coefficient `y` (0-16), indexed from `PLAYER_BG_FADE_START_TICK` - byte-identical to `battleScene.ts`'s own `SENDOUT_BG_FADE_Y` (see the module doc above for the decode). */
+const PLAYER_BG_FADE_Y: readonly number[] = [
+  2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 14, // ramp up (1653-1667), incl. the 3-tick y=14 hold
+  16, 16, 16, 16, 16, 16, 16, 16, // white plateau (1668-1675)
+  14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, // ramp down (1676-1687)
+  2, 2, // 1688-1689
+];
+
+/** First trace tick the player-side materialize BG-to-white fade takes a step (one tick after `PLAYER_BALL_OPEN_START_TICK`, see the module doc above). */
+export const PLAYER_BG_FADE_START_TICK = PLAYER_BALL_OPEN_START_TICK + 1; // 1653
+
+/** The player-side materialize BG-to-white blend coefficient (0-16, see `battleScene.ts`'s `drawTileBgFaded`) at absolute trace tick `t` - 0 (unfaded) outside `PLAYER_BG_FADE_Y`'s own covered range. */
+export function playerMaterializeBgFadeY(t: number): number {
+  return PLAYER_BG_FADE_Y[t - PLAYER_BG_FADE_START_TICK] ?? 0;
+}
