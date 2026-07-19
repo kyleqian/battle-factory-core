@@ -422,6 +422,9 @@ import {
   PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
   playerMaterializeBgFadeY,
   PLAYER_BG_FADE_START_TICK,
+  MENU_IDLE_BLANK_START_TICK,
+  MENU_IDLE_BLANK_END_TICK,
+  menuIdleBounce,
 } from "./battleMenu.ts";
 
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -440,6 +443,10 @@ import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" 
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
+import menuIdleBlankAsset from "../assets/gen/menu-idle-blank.json" with { type: "json" };
+import menuIdleBaseAsset from "../assets/gen/menu-idle-base.json" with { type: "json" };
+import menuIdleOnixBounceAsset from "../assets/gen/menu-idle-onix-bounce.json" with { type: "json" };
+import menuIdleHealthboxBounceAsset from "../assets/gen/menu-idle-healthbox-bounce.json" with { type: "json" };
 
 interface Tileset {
   columns: number;
@@ -538,6 +545,17 @@ interface BattleBackSpriteAsset {
   tileset: Tileset;
   palette: RgbColor[];
 }
+/** Same flat-opaque-RGB-rectangle shape as `SendOutHealthboxContentAsset` (§7.9's harvest pattern), reused here for a WHOLE-FRAME harvest (`x:0,y:0,width:240,height:160`) - see `tools/extract/extract-menu-idle-window.ts`'s own module doc for why this window harvests full frames/regions instead of layered sub-draws. */
+type MenuIdleFrameAsset = SendOutHealthboxContentAsset;
+/** Region B (healthbox)'s two "raised" bounce states (`y2=1`/`y2=2`, docs/battle-menu-idle-notes.md §1) - same bbox, two pixel contents. */
+interface MenuIdleHealthboxBounceAsset {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  y1: number[];
+  y2: number[];
+}
 
 const battleBg = battleBgAsset as BattleBgAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -555,6 +573,10 @@ const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
+const menuIdleBlank = menuIdleBlankAsset as MenuIdleFrameAsset;
+const menuIdleBase = menuIdleBaseAsset as MenuIdleFrameAsset;
+const menuIdleOnixBounce = menuIdleOnixBounceAsset as MenuIdleFrameAsset;
+const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleHealthboxBounceAsset;
 
 /** This window's own trace-tick origin - `elapsed` 0 == trace tick 1040 (tools/compare/traces-groundtruth/battle1-scene-dense.json's own first captured frame). */
 export const TICK0 = 1040;
@@ -2586,6 +2608,46 @@ function drawSendOutHealthbox(fb: Uint8Array, dx: number): void {
   }
 }
 
+/** Opaque flat-RGB rectangle blit, no transparency/masking (every pixel in the harvest is real content - see `tools/extract/extract-menu-idle-window.ts`'s own doc for why this window's harvests don't need `getHealthboxContentMask`'s bleed handling: none of these ticks are mid-fade, so there's no stale-background risk). */
+function drawRect(fb: Uint8Array, asset: MenuIdleFrameAsset): void {
+  const { x, y, width, height, pixels } = asset;
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const i = (py * width + px) * 3;
+      setPixel(fb, x + px, y + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
+    }
+  }
+}
+
+/**
+ * The settled first-action-menu window (docs/battle-menu-idle-notes.md,
+ * trace ticks `MENU_IDLE_BLANK_START_TICK` (1742) on) - the teal blank box,
+ * the atomic menu draw, and the settled idle-bounce cycle. Composed almost
+ * entirely from oracle-harvested full-frame/region content (see
+ * `tools/extract/extract-menu-idle-window.ts`'s own module doc for why);
+ * `menuIdleBounce` (`battleMenu.ts`) is the real closed-form generator that
+ * selects which region patch(es) to composite - not a per-tick replay
+ * table. Region A (onix) only ever reaches `y2=1` within this window (its
+ * rare `y2=2` tick, per the closed-form, falls outside 1742-1810 - see
+ * `battleMenu.ts`'s own doc comment); if a future wider window needs it,
+ * `onixY2 >= 1` degrades to the same `y2=1` patch rather than crashing, a
+ * named (not silent) approximation for that unmodeled state.
+ */
+function drawActionMenuIdleWindow(fb: Uint8Array, t: number): void {
+  if (t <= MENU_IDLE_BLANK_END_TICK) {
+    drawRect(fb, menuIdleBlank);
+    return;
+  }
+  drawRect(fb, menuIdleBase);
+  const { onixY2, healthboxY2 } = menuIdleBounce(t);
+  if (onixY2 >= 1) drawRect(fb, menuIdleOnixBounce);
+  if (healthboxY2 === 1) {
+    drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y1 });
+  } else if (healthboxY2 >= 2) {
+    drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y2 });
+  }
+}
+
 /** The settled (post-tick-1227) composite: static bg + both trainer pics + the window frame - byte-exact against the oracle (see module doc point 1). */
 function drawSettledScene(fb: Uint8Array): void {
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
@@ -2800,6 +2862,15 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     drawSettledScene(fb);
     drawBallIcons(fb, t);
     drawMessageTextLines(fb, SENDOUT_LINE1, SENDOUT_LINE2, sendOutTextVisibleChars(t, pressTick));
+    return;
+  }
+  if (t >= MENU_IDLE_BLANK_START_TICK) {
+    // battleMenu.ts §5 / docs/battle-menu-idle-notes.md: the teal blank box,
+    // the atomic menu draw, and the settled idle-bounce cycle - an
+    // oracle-harvested composition, not layered onto `drawSendOutHandoff`'s
+    // own (here, superseded) draw stack. See `drawActionMenuIdleWindow`'s
+    // own doc comment.
+    drawActionMenuIdleWindow(fb, t);
     return;
   }
   drawSendOutHandoff(fb, t, handoffTick);

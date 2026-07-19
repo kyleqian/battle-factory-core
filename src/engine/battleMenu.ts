@@ -562,3 +562,87 @@ export const PLAYER_BG_FADE_START_TICK = PLAYER_BALL_OPEN_START_TICK + 1; // 165
 export function playerMaterializeBgFadeY(t: number): number {
   return PLAYER_BG_FADE_Y[t - PLAYER_BG_FADE_START_TICK] ?? 0;
 }
+
+// --- Slice 5: the settled first-action-menu window (docs/battle-menu-idle-
+// notes.md, trace ticks 1742-1810) - the 6-tick teal blank box, the atomic
+// menu draw, and the settled idle-bounce cycle. `battleScene.ts` composes
+// this window almost entirely from oracle-harvested full-frame/region
+// pixel content (docs/battle-menu-idle-notes.md's own §1 open item: "the
+// engine slice must re-derive/model the menu idle independently" - the
+// harvest supplies the PIXELS, this module supplies the real GENERATOR that
+// selects among them) - see `tools/extract/extract-menu-idle-window.ts`'s
+// own module doc for why full-frame/region harvests were chosen over a
+// layered redraw for this window specifically (the settled composition
+// underneath is a sibling lane's in-flight work, not yet available here).
+
+/** First trace tick of the 6-tick teal blank box (message box cleared, no text) - byte-identical every tick through `MENU_IDLE_BLANK_END_TICK` (docs/battle-menu-idle-notes.md §4/battle-menu-notes.md §1, tick 1742). Source call not pinned (dossier §4, still open) - modeled from pixels, a flat harvested frame. */
+export const MENU_IDLE_BLANK_START_TICK = 1742;
+/** Last tick of the teal blank box, inclusive (battle-menu-notes.md §1, tick 1747) - `MENU_DRAW_TICK` (1748) is the very next tick. */
+export const MENU_IDLE_BLANK_END_TICK = 1747;
+/** The first-action-menu draw tick - atomic (off-screen draw + BG0-scroll reveal, docs/battle-menu-idle-notes.md §3's source-confirmed `PlayerHandleChooseAction`/`HandleChooseActionAfterDma3`): "What will ONIX do?" + FIGHT/BAG/POKéMON/RUN + cursor on FIGHT all appear in one tick, no partial draws. Also the first tick both idle-bounce driver sprites exist (still at their rest position this tick - `DoBounceEffect` itself doesn't fire until the NEXT screen tick, see `menuIdleBounce`'s own doc). */
+export const MENU_DRAW_TICK = 1748;
+
+/**
+ * `gSineTable[0..255]` (`reference/pokeemerald/src/trig.c`), Q8.8 fixed
+ * point, literal - NOT re-derived via `Math.sin` (unlike `gbaSin` above).
+ * This session found `gbaSin` disagrees with the real table by exactly 1
+ * unit at indices 62/63 (255 vs `Math.round`'s 256) - harmless for the
+ * ball-arc's `y2` (a few points among a much larger accumulated position),
+ * but load-bearing here: this window's bounce is driven by `Sin(index,1)`
+ * alone, so a spurious `table[62]=256` flips `y2` from 1 to a phantom `2`
+ * at a real, reachable tick (screen tick 1767 in this very window) that the
+ * oracle never actually shows (RAM/pixel-confirmed against
+ * `battle1-menu-dense.json` - `menuIdleBounce`'s own state, cross-checked
+ * against every one of this window's 69 captured ticks with this literal
+ * table, zero mismatches; the `Math.sin`-derived version mismatches at
+ * ticks 1767/1804). Source values are already exact multiples of 1/256 in
+ * `trig.c`'s own comments (e.g. `0.99609375 = 255/256`), so this table is
+ * copied, not approximated.
+ */
+const GBA_SINE_TABLE_256: readonly number[] = [
+  0, 6, 12, 18, 25, 31, 37, 43, 49, 56, 62, 68, 74, 80, 86, 92,
+  97, 103, 109, 115, 120, 126, 131, 136, 142, 147, 152, 157, 162, 167, 171, 176,
+  181, 185, 189, 193, 197, 201, 205, 209, 212, 216, 219, 222, 225, 228, 231, 234,
+  236, 238, 241, 243, 244, 246, 248, 249, 251, 252, 253, 254, 254, 255, 255, 255,
+  256, 255, 255, 255, 254, 254, 253, 252, 251, 249, 248, 246, 244, 243, 241, 238,
+  236, 234, 231, 228, 225, 222, 219, 216, 212, 209, 205, 201, 197, 193, 189, 185,
+  181, 176, 171, 167, 162, 157, 152, 147, 142, 136, 131, 126, 120, 115, 109, 103,
+  97, 92, 86, 80, 74, 68, 62, 56, 49, 43, 37, 31, 25, 18, 12, 6,
+  0, -6, -12, -18, -25, -31, -37, -43, -49, -56, -62, -68, -74, -80, -86, -92,
+  -97, -103, -109, -115, -120, -126, -131, -136, -142, -147, -152, -157, -162, -167, -171, -176,
+  -181, -185, -189, -193, -197, -201, -205, -209, -212, -216, -219, -222, -225, -228, -231, -234,
+  -236, -238, -241, -243, -244, -246, -248, -249, -251, -252, -253, -254, -254, -255, -255, -255,
+  -256, -255, -255, -255, -254, -254, -253, -252, -251, -249, -248, -246, -244, -243, -241, -238,
+  -236, -234, -231, -228, -225, -222, -219, -216, -212, -209, -205, -201, -197, -193, -189, -185,
+  -181, -176, -171, -167, -162, -157, -152, -147, -142, -136, -131, -126, -120, -115, -109, -103,
+  -97, -92, -86, -80, -74, -68, -62, -56, -49, -43, -37, -31, -25, -18, -12, -6,
+];
+
+/** `Sin(index, 1)` (`trig.c:515`) via the literal table: `table[index & 0xFF] >> 8`, a true arithmetic (floor) shift. */
+function bounceSin(index: number): number {
+  const v = GBA_SINE_TABLE_256[((index % 256) + 256) % 256]!;
+  return Math.floor(v / 256);
+}
+
+/** `sprite->sSinIndex` (region A, ONIX battler sprite / `BOUNCE_MON`) at RAM ticks since `DoBounceEffect`'s setup call - seeded 192, `+=7` every tick (docs/battle-menu-idle-notes.md §1). */
+function onixSinIndex(ramTicksSinceSetup: number): number {
+  return 192 + 7 * ramTicksSinceSetup;
+}
+/** Same as `onixSinIndex`, region B (healthbox main sprite / `BOUNCE_HEALTHBOX`) - seeded 128. */
+function healthboxSinIndex(ramTicksSinceSetup: number): number {
+  return 128 + 7 * ramTicksSinceSetup;
+}
+
+/** RAM tick `DoBounceEffect`'s one-time setup runs (`HandleInputChooseAction`'s first tick) - one tick *after* `MENU_DRAW_TICK`'s screen-visible reveal, since the bounce is a later controller-func state (docs/battle-menu-idle-notes.md §1's "phase origin" derivation). Screen tick `MENU_DRAW_TICK + 1` (1749) is the first screen tick that can show a nonzero bounce (the window's established +1 render lag - see `menuIdleBounce`). */
+const MENU_BOUNCE_RAM_SETUP_TICK = MENU_DRAW_TICK;
+
+/** Region A (`gSprites[gBattlerSpriteIds[player]]`, the ONIX battler sprite itself) / region B (`gSprites[gHealthboxSpriteIds[player]]`, the healthbox main sprite) `y2` bounce offsets (0-2px, vertical only) at absolute trace/screen tick `t`. Pure closed-form generator (docs/battle-menu-idle-notes.md §1) - `screenTick T` shows RAM tick `T-1`'s sprite state (this window's own established render-lag convention, re-derived and RAM-confirmed independently of `battle-menu-notes.md`'s ball-arc convention). Both are 0 before the bounce starts (RAM tick < `MENU_BOUNCE_RAM_SETUP_TICK`, i.e. screen tick <= `MENU_DRAW_TICK`). */
+export function menuIdleBounce(t: number): { onixY2: number; healthboxY2: number } {
+  const ramTick = t - 1;
+  if (ramTick < MENU_BOUNCE_RAM_SETUP_TICK) return { onixY2: 0, healthboxY2: 0 };
+  const n = ramTick - MENU_BOUNCE_RAM_SETUP_TICK;
+  return {
+    onixY2: bounceSin(onixSinIndex(n)) + 1,
+    healthboxY2: bounceSin(healthboxSinIndex(n)) + 1,
+  };
+}

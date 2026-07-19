@@ -1,0 +1,265 @@
+{
+  "segments": [
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 28,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 4,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 36,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "RIGHT"
+      ]
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 28,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 4,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 36,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "RIGHT"
+      ]
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 28,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 4,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 70,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 130,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 96,
+      "buttons": []
+    },
+    {
+      "frames": 24,
+      "buttons": []
+    },
+    {
+      "frames": 162,
+      "buttons": []
+    },
+    {
+      "frames": 54,
+      "buttons": []
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 196,
+      "buttons": []
+    },
+    {
+      "frames": 14,
+      "buttons": []
+    },
+    {
+      "frames": 210,
+      "buttons": []
+    },
+    {
+      "frames": 60,
+      "buttons": []
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 144,
+      "buttons": []
+    },
+    {
+      "frames": 180,
+      "buttons": []
+    },
+    {
+      "frames": 60,
+      "buttons": []
+    },
+    {
+      "frames": 80,
+      "buttons": []
+    }
+  ],
+  "captureFrames": [
+    1742,
+    1743,
+    1744,
+    1745,
+    1746,
+    1747,
+    1748,
+    1749,
+    1750,
+    1751,
+    1752,
+    1753,
+    1754,
+    1755,
+    1756,
+    1757,
+    1758,
+    1759,
+    1760,
+    1761,
+    1762,
+    1763,
+    1764,
+    1765,
+    1766,
+    1767,
+    1768,
+    1769,
+    1770,
+    1771,
+    1772,
+    1773,
+    1774,
+    1775,
+    1776,
+    1777,
+    1778,
+    1779,
+    1780,
+    1781,
+    1782,
+    1783,
+    1784,
+    1785,
+    1786,
+    1787,
+    1788,
+    1789,
+    1790,
+    1791,
+    1792,
+    1793,
+    1794,
+    1795,
+    1796,
+    1797,
+    1798,
+    1799,
+    1800,
+    1801,
+    1802,
+    1803,
+    1804,
+    1805,
+    1806,
+    1807,
+    1808,
+    1809,
+    1810
+  ]
+}
