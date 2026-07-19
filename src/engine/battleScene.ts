@@ -1117,9 +1117,10 @@ function drawSpriteSheet(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], 
  * <=`neutralScale` (this mechanism only ever shrinks the sprite, never
  * magnifies it - see `affineEmergeAccumulator`), so scanning the sprite's
  * own unscaled bounding box (no `ST_OAM_AFFINE_DOUBLE` doubling) is always
- * sufficient.
+ * sufficient. `y2` (§7.21) is `sprite->y2` added to the destination row -
+ * see `MATERIALIZE_Y2_TABLE` below for why this exists.
  */
-function drawSpriteSheetAffineTinted(fb: Uint8Array, tileset: Tileset, ox: number, oy: number, accumulator: number, tintColor: RgbColor): void {
+function drawSpriteSheetAffineTinted(fb: Uint8Array, tileset: Tileset, ox: number, oy: number, accumulator: number, tintColor: RgbColor, y2 = 0): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
   const halfW = w / 2;
@@ -1139,7 +1140,7 @@ function drawSpriteSheetAffineTinted(fb: Uint8Array, tileset: Tileset, ox: numbe
       if (!tile) continue;
       const idx = tile[inTileY * 8 + (sx % 8)]!;
       if (idx === 0) continue;
-      setPixel(fb, ox + dx, oy + dy, tintColor);
+      setPixel(fb, ox + dx, oy + dy + y2, tintColor);
     }
   }
 }
@@ -1420,11 +1421,69 @@ function affineEmergeAccumulator(logicalOffset: number): number {
   return Math.min(battleAnimTables.affineEmerge.neutralScale, acc);
 }
 
+/**
+ * §7.21: RAM-probed (`tools/probe/specs/sendout-grovyle-materialize.json`,
+ * `gSprites[8]` - the same battler-sprite slot §7.10/§7.16 already pinned -
+ * watching `oam.x`/`y2`/`gOamMatrices[2].a` across RAM ticks 1476-1493) two
+ * corrections to the materialize renderer, both needed to close the
+ * "silhouette edge" residual (§7.20's naming) in render ticks 1481-1492:
+ *
+ * 1. **The accumulator lookup was one logical tick behind.** RAM tick 1479
+ *    (the tick `StartSpriteAffineAnim(..., BATTLER_AFFINE_EMERGE)` runs)
+ *    already writes the anim's absolute first frame (`gOamMatrices[2].a`
+ *    reads back exactly `0x10000/40=1638`, i.e. `accumulator=40`,
+ *    `affineEmergeAccumulator(0)`) - but `oam.x` is still 0 (the sprite not
+ *    yet positioned on screen) that same tick, so nothing visible renders.
+ *    `oam.x` becomes 144 (matching `GROVYLE_CORNER.x`) starting RAM tick
+ *    1480, the SAME tick the matrix advances to `accumulator=58`
+ *    (`affineEmergeAccumulator(1)`) - confirmed by reading back
+ *    `gOamMatrices[2].a=1129=round(0x10000/58)` directly, not inferred. With
+ *    this window's already-established +1 render lag (RAM tick N visible at
+ *    render N+1), render 1481 (the first visible tint tick, per §7.13's own
+ *    pixel-brute-force) therefore shows `accumulator=58`
+ *    (`affineEmergeAccumulator(1)`), not `accumulator=40`
+ *    (`affineEmergeAccumulator(0)`) as previously coded - a plain off-by-one
+ *    in which logical tick the visible position/matrix pairing lands on,
+ *    not a new mechanism. Brute-force-confirmed independently first
+ *    (`tools/compare/scratch/materialize_accum_bruteforce.mjs`, `..
+ *    _2d_bruteforce.mjs`): searching every `accumulator` 1-256 (then jointly
+ *    with a Y-offset) against the oracle's own exact-tint pixel set at each
+ *    of render 1481/83/85/87/89/91/92 landed on exactly this
+ *    logicalOffset+1 sequence (58,94,166,202,238,256,256) with NO per-tick
+ *    exceptions - a single, uniform +1 shift, not curve-fitting.
+ * 2. **A real, previously-unmodeled vertical offset**: `sprite->y2` is
+ *    nonzero throughout the same 12-tick ramp - RAM tick 1480 (render 1481)
+ *    reads `y2=14`, decaying roughly linearly to `y2=0` by RAM tick 1492
+ *    (render 1493), then holding zero (source cause not reverse-engineered
+ *    this session - `sAffineAnim_Battler_Emerge` itself has no translation
+ *    field, so this must come from a separate concurrent write; RAM
+ *    ground truth is trusted over a guessed formula, same precedent as
+ *    `GROVYLE_STRETCH_TABLE`, §7.16). This is NOT a curve-fit: the same
+ *    brute-force script above, searching accumulator AND a Y-destination-
+ *    offset jointly per tick with no RAM knowledge at all, independently
+ *    landed on offsets (14,12,10,8,5,3,2) at renders (1481,83,85,87,89,91,92)
+ *    - an EXACT match to the RAM-read `y2` values at the corresponding RAM
+ *    ticks, found two independent ways.
+ * `MATERIALIZE_Y2_TABLE[i]` is RAM tick `1480+i`'s post-tick `y2` (12
+ * entries, RAM 1480-1491 inclusive - beyond that `y2` is 0, the `?? 0`
+ * fallback). Applying both corrections together (verified against the
+ * oracle's own exact-tint-color pixel SET, not just aggregate diff count,
+ * `tools/compare/scratch/materialize_ram_verify.mjs`) reproduces the
+ * oracle's silhouette as an exact SUBSET-with-known-occluder-holes: every
+ * remaining mismatched pixel sits inside the ball sprite's own screen
+ * footprint (`BALL_CORNER`, drawn on top per §7.13's compositing order) -
+ * i.e. the residual pixels are mechanism 2 (already-implemented, already
+ * validated) occluding mechanism 4, not a mechanism-4 sampling error.
+ */
+const MATERIALIZE_Y2_TABLE: readonly number[] = [14, 13, 12, 11, 10, 9, 8, 7, 5, 4, 3, 2];
+
 function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number): void {
   const et = t - handoffTick;
   if (et < MATERIALIZE_START_OFFSET || et >= MATERIALIZE_END_OFFSET) return;
-  const accumulator = affineEmergeAccumulator(et - MATERIALIZE_START_OFFSET);
-  drawSpriteSheetAffineTinted(fb, grovyleFrontSprite.tileset, GROVYLE_CORNER.x, GROVYLE_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR);
+  const local = et - MATERIALIZE_START_OFFSET;
+  const accumulator = affineEmergeAccumulator(local + 1);
+  const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
+  drawSpriteSheetAffineTinted(fb, grovyleFrontSprite.tileset, GROVYLE_CORNER.x, GROVYLE_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, y2);
 }
 
 /**
