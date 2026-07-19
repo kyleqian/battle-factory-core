@@ -1247,3 +1247,309 @@ each twice-run, byte-identical; the assembled dump file itself independently
 regenerated from each run's raw probe output and diffed byte-for-byte
 against the committed file — identical both times.
 
+## 13. Grovyle's faint + switch-in ground truth (S7 worktree lane, oracle scout — no engine code)
+
+Extends `battle1-turn2.json`'s own 3846-frame prefix (turns 1-2, verbatim)
+through three more player turns (3, 4, 5) of the fixed "always ROCK_SLIDE"
+battle plan, into **Foe GROVYLE's faint** (turn 5) and DESTIN's forced
+switch-in, ending at the next settled action menu. Committed:
+`tools/compare/traces-groundtruth/battle1-grovyle-faint.json` (7312 frames,
+256 `captureFrames` — dense on the faint/text/switch-in tail, strided
+elsewhere, the 256-capture cap), `src/data/gen/
+battle1-grovyle-faint-ram-dump.json` (3467 rows, every tick 3846-7312, plus
+`battlerSnapshots` at the 6 turn/event boundaries and an `rngLedger`).
+**Both twice-run byte-identical** (trace: `bin/oracle run`, 0/256 sha
+mismatches across two independent runs; RAM dump: `tools/probe/ram-probe.py`
++ `tools/probe/dump-battler-snapshot.py`, both re-run independently and
+diffed byte-for-byte — identical). No `src/engine/` changes; no new probe
+tooling needed (reused §6/§12's committed scripts, `dump-ai-and-hitmarker.py`
+was available but not needed this session — see open item 5 below).
+
+### HEADLINE: DESTIN sends out PIDGEOTTO, not Murkrow
+
+This session's own brief predicted "DESTIN's next-mon send-out (Murkrow)"
+by analogy with the previously-established opponent roster. **That
+prediction is wrong** — directly RAM- and pixel-confirmed: `gBattleMons[1]
+.species` flips from 278 (GROVYLE) to **17 (SPECIES_PIDGEOTTO)** at tick
+6684, and the settled next-menu screen (tick 7215+) visibly reads
+"PIDGEOTTO Lv50" (pixel-confirmed, see below). `gBattlerPartyIndexes[1]`
+(opponent's party-slot pointer) goes 0→**2** at tick 6682, not 0→1 — i.e.
+DESTIN's party is ordered `[GROVYLE(0), MURKROW(1), PIDGEOTTO(2)]` and the
+switch-in **skips index 1 (Murkrow) to send index 2 (Pidgeotto) instead**.
+This is a real AI decision, not a fixed "next in list" rule — worth
+flagging loudly for whichever engine slice models forced switch-ins, since
+"send the next living party member in order" is the wrong rule. **Not
+resolved this session**: *why* the AI prefers Pidgeotto over Murkrow here
+(both are Flying-type and both take the same 2× Rock-Slide weakness, so
+it isn't an obvious type-matchup read) — a fresh open item, §13 open list
+below. Murkrow itself remains completely unbattled (same gap §12's own
+open item 5 already flagged, now narrowed: still true even after this
+session's faint).
+
+### Per-turn RNG ledger (RAM-truthed, LCG-step-counted, same method as §3/§12)
+
+All ticks are this trace's own absolute indices (shared numbering with
+`battle1-turn2.json` through tick 3846). Every step count below is an
+LCG-distance replay against the committed dump's own `rngLedger` field
+(`next = 1103515245*v + 24691 mod 2^32`), not just a call count.
+
+**Turn 3** (menu reopen 3846 → next-menu settle ~4892): cursor nav needed —
+`gMoveSelectionCursor[0]` reads **2** (DRAGON_BREATH, turn 2's own pick) at
+reopen, confirming the pinned "cursor persists across turns" rule (§12); one
+`UP` press at tick 3878-3879 flips it back to **0** (ROCK_SLIDE) same-tick,
+pixel-redraw one tick later (3880) — same convention as §11/§12. Grovyle
+(attacker, speed 90 first as always) uses **ENDEAVOR again** (`gCurrentMove`
+283 at tick 3897) — **confirms §12's own falsifiable turn-3 prediction**,
+the tie-break roll landed on slot 1 again. Onix uses ROCK_SLIDE (157).
+14 `Random()` calls total — bit-for-bit the same total §12 found for turn 2
+(1 ENDEAVOR-accuracy + 1 unattributed + 1 ROCK_SLIDE-accuracy + 1 crit + 1
+spread + 1 secondary/flinch + 1 turn-pass + 2 ShouldSwitch + 5 AI-tie-break):
+
+| tick | event |
+|---|---|
+| 3846-3896 | FIGHT submenu reopen (cursor at 2) + `UP` nav (2→0) + confirm |
+| 3897 | `gCurrentMove`→283 (ENDEAVOR), attacker=1 |
+| 3927-3933 | `gBattleMoveDamage` 13 (base HP-diff, Onix 101−Grovyle 88) → 6 (typecalc 0.5×) → 13 (copyword restore) — same shape as §12 |
+| 3929 | ENDEAVOR's own always-passing accuracy roll (1 step) |
+| 4059 | Onix hp updates 101→88 (ENDEAVOR's HP-bar drain done, 1-tick lag rule) |
+| 4064 | unattributed 1-step RNG event — same category as §12's tick-3121 finding, still not call-site-attributed |
+| 4073 | attacker=0, `gCurrentMove`→157 (ROCK_SLIDE) |
+| 4078 | ROCK_SLIDE accuracy roll (1 step) |
+| 4102 | crit roll (1 step, no crit) |
+| 4103-4105 | `gBattleMoveDamage` 32 (base, **includes the unconditional +2** — see damage-math section below) → 48 (STAB) → **47** (spread roll, 1 step) |
+| 4333 | Grovyle hp updates 88→41 (HP-bar drain done) |
+| 4338 | secondary/flinch roll (1 step, ROCK_SLIDE's 30% chance — no proc) |
+| 4348 | turn-pass roll (1 step) |
+| 4353 | `ShouldSwitch()` group (2 steps) |
+| 4355 | AI-setup/tie-break group (5 steps) — decodes to ENDEAVOR again for turn 4 by the same convention §12 used, **falsified next turn (see turn 4)** |
+| ~4360-4892 | next-menu settle-and-hold |
+
+**Turn 4** (4892 → ~5926): cursor already at 0 (no nav needed — confirms
+the "cursor persists, ROCK_SLIDE stays selected" rule generalizes past one
+carry-over). Grovyle **does not repeat ENDEAVOR this time** — it uses
+**DOUBLE_TEAM** (`gCurrentMove` 104, self-targeted, matching §9's turn-1
+DOUBLE_TEAM shape) instead, **falsifying turn 3's own tie-break-decoded
+prediction from the previous paragraph**. A plausible read (not source-
+verified this session, time-boxed): at 41/143 HP, DESTIN's AI switches
+strategy from ENDEAVOR (which becomes weaker as Grovyle's own HP drops,
+since it equalizes to Grovyle's HP) toward evasion-stacking, but this is
+inference from the outcome, not a traced AI-scoring branch. Onix's
+ROCK_SLIDE brings Grovyle to 41→1 (not fainted — a 1-HP survival, entirely
+a matter of which spread-roll value landed, not scripted). 12 `Random()`
+calls total (2 fewer than turn 3 — DOUBLE_TEAM, like turn 1's own use,
+costs 0 RNG, §3/§9):
+
+| tick | event |
+|---|---|
+| 4892-4930 | FIGHT submenu reopen (cursor at 0) + confirm (no nav) |
+| 4931 | `gCurrentMove`→104 (DOUBLE_TEAM), attacker=1, 0 RNG cost |
+| 5311 | attacker=0, `gCurrentMove`→157 (ROCK_SLIDE) |
+| 5316 | accuracy roll (1 step) |
+| 5340 | crit roll (1 step, no crit) |
+| 5341-5343 | `gBattleMoveDamage` 32→48→**40** (spread roll, 1 step) |
+| ~5560 | Grovyle hp updates 41→1 (HP-bar drain done) |
+| 5569 | secondary/flinch roll (1 step, no proc) |
+| 5579 | turn-pass roll (1 step) |
+| 5583 | `ShouldSwitch()` group (2 steps) |
+| 5585 | AI-setup/tie-break group (5 steps) |
+| ~5590-5926 | next-menu settle-and-hold |
+
+**Turn 5 — the faint turn** (5926 → 7312, see full timeline below).
+Grovyle uses ENDEAVOR again (`gCurrentMove` 283 at tick 5965): Onix
+88→1 (HP-diff 87, matching 88−1). Onix's ROCK_SLIDE (base 32→STAB
+48→spread **41**) brings Grovyle from 1 to **0 — faints**. 12 `Random()`
+calls in the turn's own move-resolution phase, same shape as turn 3's
+ENDEAVOR turn minus the always-passing-accuracy roll's usual place (see
+open item 2 below for the one ambiguous step) plus the faint/switch-in
+tail's own extra 6-step cluster at the very end (tick 7215/7221, see
+below) — **rngLedgerTotalSteps in the committed dump is 38** for the whole
+3846-7312 window (14+12+12).
+
+### Damage math, checked against `damageCalc.ts`
+
+**Both of turn 3's and turn 4's ROCK_SLIDE hits, and turn 5's fatal one, are
+bit-exact against `damageCalc.ts`'s physical-branch formula including the
+unconditional `+2` the module's own doc comment already documents** (line
+192-199 of `src/engine/damageCalc.ts`, self-citing this very dossier's §10):
+
+```
+base(+2) = floor(floor(atk * power * (2*level/5+2)) / def) / 50 + 2
+         = floor(floor(51 * 75 * 22) / 56) / 50 + 2 = 30 + 2 = 32   (atk/def unchanged all 5 turns, RAM-confirmed each snapshot)
+STAB     = floor(32 * 15/10) = 48
+spread   = floor(48 * m/100), m in [85,100] -> range [40,48]
+turn 3: RAM gBattleMoveDamage locks to 32->48->47 (m=98)   — 47 in [40,48], matches
+turn 4: RAM gBattleMoveDamage locks to 32->48->40 (m=85, the range floor) — 40 in [40,48], matches
+turn 5: RAM gBattleMoveDamage locks to 32->48->41 (m=87)   — 41 in [40,48], matches (Grovyle's 1 HP << 41, so the actual HP loss is capped at 1, not 41 — `gBattleMoveDamage` itself still reports the uncapped 41)
+```
+
+**No mismatch** — this is a *confirmation*, not a new finding: §5's original
+turn-1 hand-calc (`base = floor(...) = 30`, no +2) was actually
+under-verified — it never directly compared its hand-derived 30 against the
+RAM-read intermediate value, only against the *final* post-spread 42, which
+coincidentally falls inside both the correct (`base+2=32`) and the stale
+(`base=30`) hypothesized ranges (`[40,48]` and `[38,45]` overlap at 40-45).
+Re-checking `battle1-turn1-ram-dump.json`'s own `moveDamage` column this
+session confirms turn 1's ROCK_SLIDE **also** locked to 32 pre-STAB, not
+30 — i.e. `damageCalc.ts`'s `+2` was already correct (§10 already fixed and
+documented this), and every ROCK_SLIDE hit across all 5 turns of this
+dossier (turns 1, 3, 4, 5) is consistent with it. Recorded here so a future
+reader doesn't get confused re-deriving §5's stale 30-based range by hand.
+
+**ENDEAVOR** (turns 3 and 5) reconfirms §12's mechanic exactly both times:
+`gBattleMoveDamage` set to `target.hp − user.hp` (turn 3: 101−88=13, turn 5:
+88−1=87), `typecalc` scales it by the NORMAL-vs-ROCK/GROUND 0.5× (13→6,
+87→43) purely for the immunity gate, then `copyword` restores the real
+HP-diff (→13, →87) before it's applied. Both turns' own "always-passing"
+1-step accuracy roll observed (tick 3929, tick ~5997).
+
+**Onix's own Sitrus Berry** (new finding, not previously catalogued):
+after turn 5's ROCK_SLIDE, Onix sits at 1/117 (well under the classic
+"HP ≤ 1/4 max" berry-proc threshold, 117/4=29.25). Mid-way through the
+switch-in sequence, the settled-menu pixel capture (tick 7215+) shows
+"ONIX's SITRUS BERRY restored health!" and Onix's HP reads **31/117** —
+i.e. Onix silently held a Sitrus Berry this whole dossier and it procs the
+instant HP crosses the threshold, mid-sequence, well before the player
+regains control. `31−1=30` healed; a naive `floor(117/4)=29` under by 1 —
+**not reconciled against the exact berry-heal formula this session** (open
+item below; could be a rounding convention this dossier hasn't extracted,
+e.g. round-half-up vs round-down, or `ceil`). This item was entirely
+outside §7's original data-needs audit (which only inventoried the
+*opponent's* three held items) — the **player's own rental mon can also
+hold an item**, a previously-unexplored mechanic.
+
+### Faint + switch-in sequence timeline
+
+| tick | event |
+|---|---|
+| 6213-6247 | Onix's ROCK_SLIDE resolves (accuracy/crit/spread rolls, `gBattleMoveDamage` locks to 41) |
+| ~6290-6420 | HP-bar drains toward 0 (1-unit/tick rule, same as every prior hit) |
+| 6429 | `gBattleMons[1].hp` itself updates to **0** (1-tick lag rule, same as every prior hit) — Grovyle has fainted at the RAM level |
+| 6429-~6560 | **screen frozen** on "ONIX used ROCK SLIDE!" (pixel-confirmed, tick 6500) — `gBattleMainFunc` reads a single constant value for **2531+ ticks** with zero further state change in a dedicated no-extra-input control run (see finding below) |
+| **~6562** | an extra player **A press is required** to advance past this point (see headline finding below) |
+| ~6570-6600 | "Foe GROVYLE fainted!" prints (pixel-confirmed, tick 6600) |
+| ~6600-6680 | "[BUG CATCHER] DESTIN sent out\nPIDGEOTTO!"-shaped text scrolls in (partial text pixel-confirmed mid-scroll at tick 6700, reading "BUG CATCHER DE...") — **DESTIN's trainer class is BUG CATCHER**, a new fact, not previously recorded in this dossier |
+| 6682 | `gBattlerPartyIndexes[1]` 0→**2** (party-slot switch commits) |
+| 6684 | `gBattleMons[1].species` 278→**17** (PIDGEOTTO), `hp`→156/156 (full health, fresh switch-in) |
+| ~6684-7215 | ball-throw/materialize/healthbox-swap animation plays out (not individually pixel-itemized this session — time-boxed, see open item 4) |
+| ~7215 | mid-sequence, Onix's Sitrus Berry procs (1→31 HP) — see damage-math section |
+| 7215 | `gBattleMainFunc` settles to the same dispatcher value used by every prior turn's settled action menu (134463093) |
+| 7215-7221 | a final small RNG cluster (1 + 5 steps) — plausibly the AI pre-scoring Pidgeotto's own first move the same way §12's turn-end cluster pre-scored Grovyle's, but the step count (6, not the usual 2+5=7) doesn't cleanly match `ShouldSwitch`+tie-break's usual shape — **not resolved this session**, open item below |
+| 7215-7312 | settled "What will ONIX do?" menu vs. **PIDGEOTTO Lv50**, Onix 31/117 — pixel-confirmed (tick 7300, tick 8562 in the exploratory over-run both show the identical settled screen) |
+
+**Does the opponent get a free turn, or does the player choose immediately
+after the switch-in?** Directly answered: **no separate "opponent's free
+turn" prompt of any kind is shown to the player** — the switch-in itself
+*is* DESTIN's action for that exchange (there is no move used, no damage
+dealt by Pidgeotto), and the very next thing the player sees is a fresh,
+fully-interactive "What will ONIX do?" menu targeting the newly-arrived
+Pidgeotto. The player does not get to act *during* Grovyle's death or the
+switch-in animation (no input is read except the one dismiss-press below);
+the first opportunity to act is this next settled menu.
+
+### HEADLINE: text after a KO is button-gated, not auto-timed
+
+Every other text/animation window in this dossier (§9's move-use text, §12's
+ENDEAVOR/DRAGON_BREATH text, this session's own DOUBLE_TEAM/ENDEAVOR text
+on turns 3-4) resolved **fully automatically** inside a fixed idle-frame
+budget — no button press beyond the initial move-confirm was ever needed,
+confirmed as far back as §12's turn 2 (946 frames total, only 1 confirm
+press). This session directly falsifies that as a general rule: a **dedicated
+control run** extended turn 5 with **3000 pure-idle frames and no further
+input** after the ROCK_SLIDE confirm press — `gBattleMainFunc` and every
+other watched address (species, HP, absent-flags, exec-flags) sat **frozen
+bit-for-bit from tick 5964 through tick 8960** (2996 consecutive idle ticks,
+~50 seconds of real time), never reaching the "Foe GROVYLE fainted!" text
+at all. A second run, identical up to that point but with **one extra `A`
+press inserted** at tick 6562, reached the fainted text within 8 ticks and
+fully resolved through switch-in to a settled menu by tick 7215 — **562
+ticks after the press**, nowhere near the 2996-tick control window's
+length, so this isn't "it just needed more idle time," it is genuinely
+input-gated. **Pinned rule: a KO's own "used move" message holds
+indefinitely until the player presses A — ordinary (non-fainting) move-use
+text does not.** This is a real, previously-undocumented difference in this
+dossier's model of battle-message pacing, and it directly matters for any
+future engine slice's input-handling state machine (a naive "auto-advance
+every message on a timer" implementation would deadlock forever on a KO).
+
+### What the faint/switch-in engine slice needs — pinned vs. open
+
+**Pinned this session:**
+- The full turn-3/4/5 button sequence (cursor-persistence rule holds a
+  second and third time — no nav needed once ROCK_SLIDE is already
+  selected; one `UP` press suffices to leave DRAGON_BREATH's slot).
+- Grovyle's HP-driven AI switches its own move choice turn-to-turn
+  (ENDEAVOR on turns 2-3, DOUBLE_TEAM on turn 4, ENDEAVOR again on turn 5)
+  — **the tie-break/AI-setup RNG cluster's *decoded* prediction from one
+  turn does not reliably predict the next turn's actual move** (turn 3's
+  own decoded tie-break wrongly predicted turn 4's ENDEAVOR — see the
+  turn-4 ledger entry) — a caution against over-trusting the tie-break
+  decode as a forward predictor without also modeling whatever HP/state-
+  dependent branch flips DESTIN's AI strategy near-KO.
+- `damageCalc.ts`'s existing `+2` physical-branch constant is confirmed
+  correct against 3 more independent ROCK_SLIDE RAM samples (turns 3, 4,
+  5) — no engine change needed, this just adds fixtures and corrects
+  §5's own stale prose (which the engine code had already gotten right).
+- The complete faint sequence shape: HP-bar drain → 1-tick-lag hp==0 →
+  **button-gated pause** → fainted-text → switch-in text/animation →
+  party-index + species + full-HP battler-slot swap → settled menu — a
+  ready-to-implement state-machine outline, including the specific gate
+  (headline finding above) a naive auto-advance implementation would miss.
+- The switch-in is **not** "next party member in list order" — DESTIN
+  skipped index 1 (Murkrow) for index 2 (Pidgeotto); any switch-in AI
+  model needs an actual selection rule, not sequential fallback.
+- No separate "opponent's free turn" UI state exists — the switch-in IS
+  the opponent's action; the player's next menu is a normal, fully
+  interactive action-select against the new mon.
+- The player's own rental mon (Onix) can hold a berry-class item that
+  auto-procs on a HP threshold mid-sequence, independent of player input —
+  previously unmodeled (§7's data-needs audit only covered opponent items).
+
+**Still open:**
+1. **Why DESTIN picks Pidgeotto over Murkrow** — not source-traced this
+   session (time-boxed); both are Flying-type with the same Rock-Slide
+   weakness, so it isn't an obvious type read. `dump-ai-and-hitmarker.py`
+   (already committed, unused this session) is the natural next tool —
+   it reads the AI's own scratch struct (`aiState`/`score[4]`/`aiAction`)
+   and might resolve this directly against a switch-in-scoring trace.
+2. **Two RNG steps remain unattributed**: tick 4064 (turn 3) and tick 6206
+   (turn 5, occurring *before* `gCurrentMove` flips to ROCK_SLIDE, unlike
+   every other turn's analogous step) — same open category as §12's own
+   tick-3121 finding, now with a third data point that doesn't fit the
+   exact same relative position, suggesting the unattributed step's timing
+   is state-dependent, not fixed-offset from a turn boundary.
+3. **The tick-7215/7221 post-switch-in RNG cluster (1+5=6 steps) doesn't
+   cleanly match the established `ShouldSwitch`(2)+tie-break(5)=7 shape** —
+   either `ShouldSwitch` costs only 1 step right after an actual switch (a
+   plausible short-circuit — nothing left to decide, so less work), or one
+   of this session's other "1-step" entries is secretly part of this
+   group and got mis-bucketed by tick-proximity alone. Not source-traced.
+4. **The switch-in animation itself (ball throw / sprite materialize /
+   healthbox swap, roughly ticks 6684-7215) was not individually
+   pixel-itemized** the way §9 itemized DOUBLE_TEAM's clone animation or
+   §11 itemized the FIGHT submenu's open transition — the committed trace's
+   dense capture window covers it (so the pixels exist for a future
+   session to walk frame-by-frame) but this dossier doesn't narrate it.
+5. **Onix's Sitrus Berry heal (1→31, not the naive floor(117/4)=29→30)**
+   is unreconciled against an exact formula — a cheap follow-up (the berry
+   heal fraction/rounding is probably in the same item-hold-effects data
+   §7 already extracted, `HOLD_EFFECT_RESTORE_HP` or similar, not yet
+   cross-checked against this specific roll).
+6. **BIND, SANDSTORM (Onix) and BRICK_BREAK, FURY_CUTTER (Grovyle) remain
+   permanently unprobed** — Grovyle fainted this session without ever
+   using its other two moves, so this branch of §12 open item 4 is now
+   closed off entirely for this specific mon (unlike Onix's moves, which
+   remain reachable in a future battle/session).
+7. **Pidgeotto and Murkrow's own movesets/battle behavior are entirely
+   unexplored** — this session only confirms Pidgeotto's stat block
+   (atk 98, def 61, speed 77, spAtk 56, spDef 56, hp 156/156, level 50)
+   via `dump-battler-snapshot.py`, not any move it uses (the trace ends
+   at the menu settle, before the player picks turn 6's action).
+
+**Verification**: `npm test` and `npm run build` green (no `src/engine/`
+changes this session — the only `src/` additions are the committed trace
+under `tools/compare/traces-groundtruth/` and the RAM dump under
+`src/data/gen/`, per the worktree brief's constraint). Trace twice-run,
+0/256 sha mismatches. RAM dump's constituent probe runs twice-run,
+byte-identical; the assembled dump file independently regenerated and
+diffed byte-for-byte against the committed file — identical both times.
+
