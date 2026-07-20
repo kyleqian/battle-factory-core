@@ -174,3 +174,17 @@ compare run exposed the staleness.
 - **Workaround:** probe the containing u16 and decode in the analysis
   script; or a future session adds a `{"op":"mask","shift":N,"mask":M}`
   step to the path vocabulary (small, backward-compatible).
+
+## Pixel-sampling a palette-fade table from a screenshot under-resolves steps (2026-07-20)
+
+- **What:** deriving a fade/tint coefficient table by sampling rendered
+  pixels needs a swatch with enough per-channel dynamic range to resolve
+  every step — a low-range swatch collapses adjacent coefficients into
+  identical RGB values and the fitted table is silently wrong. Cost the
+  L-3 worker ~25-30 min before isolating it.
+- **Hits:** 1.
+- **Cost each:** ~25-30 min.
+- **Workaround:** solve fade/tint tables directly from RAM palette-buffer
+  data (`gPlttBufferFaded` probes — the switch-in tint precedent) instead
+  of screenshot sampling; if sampling anyway, pick swatch pixels with
+  near-255 channel values first.
