@@ -4,7 +4,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 146 — Bounded worker (session's LAST): S7 slice E1d batch-1 increment — **batch-1 droplets confirmed (zero code changes needed) + extended squish/blend table wired (both cycles) + two new "inter-round lull" islands landed green**; the true wall found and pinned exactly: render 3008, gated by an unmodeled hitsplat sprite, not a droplet/squish bug; `npm test` **678/678** (+4), `npm run build` green
+## 147 — Bounded worker (session's LAST): S7 slice E1 hitsplat/shake increment — **both remaining ENDEAVOR sub-mechanisms landed green; the 3008-3023/3034-3049 gaps are CLOSED, `turn2-endeavor-drain.json` runs contiguously 3000→3060**; `npm test` **685/685** (+7), `npm run build` green — closes the brief's own acceptance criteria exactly
+
+- **State:** `npm test` **685/685**, `npm run build` green, tree clean.
+  `turn2-endeavor-drain.json` `captureFrames` now covers every tick
+  2999-3060 contiguously (grown 135→167); `tools/probe/dump-endeavor-
+  hitsplat-shake.py` committed (new).
+- **Did:** RAM-probed `gAnimMovePower` (**75** for ENDEAVOR, never confirmed
+  before despite three prior sessions flagging it — the move's *listed*
+  power is 0 but `GetMovePower`'s real HP-diff placeholder is 75), the
+  target's own `sprite->x2` (shake), and both `AnimHitSplatBasic` sprites'
+  real position + OAM matrix. First hitsplat probe attempt found zero
+  sprites (filtering on `callback==AnimHitSplatBasic`'s address fails since
+  that function reassigns its own sprite's callback on its first
+  invocation) — fixed by filtering on the stable `affineAnims` field
+  instead. Wired `endeavorShakeX2`/`drawEndeavorHitsplats` into
+  `drawEndeavorSquish`. First wiring attempt (shake using the same
+  `RAM=render-1` lag as blend/droplets) landed round-0 hitsplat exactly but
+  half-missed shake on alternating render ticks — pixel-solved the real lag
+  as `RAM=render-2` (matching squish's matrix, a THIRD distinct lag
+  confirmed in this one window) via a neutral-baseline diff against fresh
+  oracle captures; fixed, then the whole 3000-3060 window landed first-try
+  with zero further mismatches. Also found the hitsplat's own OAM matrix is
+  a RAM-confirmed CONSTANT (372) for its whole visible life, not a ramp —
+  corrects this run's own earlier banked asset-doc summary (not edited in
+  place, corrected via engine-code doc comment per this run's convention). 7
+  new Tier-1 pins, oracle-cross-checked. Full writeup:
+  `docs/battle-menu-notes.md` §15e.
+- **Next:** OUT of this session's scope but flagged for whoever picks it up:
+  renders past 3060 (`3061-3094`) are still red/uncaptured — likely the same
+  mechanisms' own tail, never RAM-probed (§15's own original scan called it
+  "alternating two distinct shapes", unattributed). Otherwise S7 slice E1
+  (ENDEAVOR) is DONE per the brief's own acceptance criteria.
+- **Notes:** no papercuts. Session's last main-lane increment — tree is
+  resume-ready (clean, green, no worktrees).
+
+---
+## 146 — Bounded worker: S7 slice E1d batch-1 increment — **batch-1 droplets confirmed (zero code changes needed) + extended squish/blend table wired (both cycles) + two new "inter-round lull" islands landed green**; the true wall found and pinned exactly: render 3008, gated by an unmodeled hitsplat sprite, not a droplet/squish bug; `npm test` **678/678** (+4), `npm run build` green
 
 - **State:** `npm test` **678/678**, `npm run build` green, tree clean.
   `turn2-endeavor-drain.json` `captureFrames` grown 114→135 (dense
@@ -63,39 +99,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   banked extended squish table, §15c's named next step), then wind-down
   (~21:00-21:30).
 - **Notes:** none.
-
----
-## 144 — Bounded worker: S7 slice E1d droplets increment — **first ENDEAVOR sweat-droplet batch RAM-probed and landed green** (renders 3006-3007, real hardware sprite reads, not a pixel fit); `npm test` **674/674** (+2), `npm run build` green
-
-- **State:** `npm test` **674/674**, `npm run build` green, tree clean.
-  `turn2-endeavor-drain.json` dense window now 2999-3007 (was 2999-3005);
-  `tools/probe/dump-endeavor-droplets.py` and `dump-endeavor-squish-blend-
-  ext.py` committed.
-- **Did:** RAM-probed all 16 droplet sprites (`AnimFacadeSweatDrop`'s own
-  static callback address, thumb-bit-adjusted, since it's not exported)
-  across both squish cycles — found §15's own banked table had the two
-  `CreateSweatDroplets` offset variants (upper/-20 vs lower/+20) mislabeled
-  relative to which `tTimer` triggers which, corrected in `battleScene.ts`'s
-  own doc comment. Landing the FIRST batch found a second bug: droplets
-  aren't visible on their own `CreateSprite` tick — the naive "same render
-  lag as the squish matrix" guess put every droplet one physics step ahead
-  of the oracle; fixed via a fresher lag (`RAM=render-1`, matching blend's
-  own) plus requiring the sprite's `n>=1` (not `n>=0`), reproducing both the
-  previously-pinned clean tick (3005) and the newly-contaminated one (3006)
-  at once. Also RAM-probed (not pixel-solved) the ENTIRE squish+blend window
-  across both cycles (`gPlttBufferFaded` read directly, `coeff` solved via
-  `BlendPalette`'s own real formula) and found/fixed an off-by-one in §15b's
-  own prose (matrix lag is `render-2`, not `render-3` — the committed table
-  values were always right, only the restated formula was wrong). Tried
-  extending `ENDEAVOR_SQUISH_TABLE`/droplets through both full cycles but
-  `npm run compare` showed real residual diffs starting render 3008 (batch-1
-  droplet timing not yet re-verified past batch 0, and/or shake/hitsplat) —
-  trimmed to the last green tick (3007) rather than commit red, per this
-  run's own discipline. Full writeup: `docs/battle-menu-notes.md` §15c.
-- **Next:** batch-1 (upper) droplet timing — verify/correct the same
-  render-lag convention past render 3017 (the analogous first-visible tick);
-  once both batches/cycles close, the already-RAM-probed extended squish
-  table (banked, not wired) should drop in directly. After that: shake/
-  hitsplat (still fully unmodeled, `gAnimMovePower` for ENDEAVOR still not
-  RAM-confirmed).
-- **Notes:** no papercuts.

@@ -490,6 +490,7 @@ import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" w
 import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { type: "json" };
 import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" with { type: "json" };
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
+import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
@@ -638,6 +639,11 @@ interface BattleAnimSweatDropAsset {
   palette: RgbColor[];
 }
 
+interface BattleAnimHitsplatAsset {
+  tileset: Tileset;
+  palette: RgbColor[];
+}
+
 const battleBg = battleBgAsset as BattleBgAsset;
 const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -650,6 +656,7 @@ const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponent
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
+const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
 
 /**
  * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
@@ -3766,6 +3773,114 @@ function drawEndeavorDroplets(fb: Uint8Array, t: number, pressTick: number): voi
 }
 
 /**
+ * S7 slice E1 hitsplat/shake increment (`docs/battle-menu-notes.md` §15e):
+ * `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`'s own amplitude
+ * (`gAnimMovePower/12`, clamped `[1,16]`) - RAM-confirmed this session
+ * (`tools/probe/dump-endeavor-hitsplat-shake.py`): `gAnimMovePower` reads
+ * **75** for ENDEAVOR throughout the whole window, not the move's own
+ * listed base power of 0 (`GetMovePower`'s real placeholder for the HP-diff
+ * move, never RAM-confirmed before this session - §15's own flag). `75/12=6`
+ * (C integer division), `downStep=6/2=3`, `upStep=3+(6&1)=3` - both steps
+ * land on the same value (3px), matching the RAM-read `sprite->x2`
+ * alternation exactly (always `+-3`, nothing else observed).
+ */
+const ENDEAVOR_SHAKE_STEP = 3;
+/**
+ * Two independent `AnimTask_ShakeTargetBasedOnMovePowerOrDmg` instances (one
+ * per script round) - RAM tick each round's FIRST toggle lands on, as a
+ * `pressTick`-relative offset (`tools/probe/dump-endeavor-hitsplat-shake.py`,
+ * RAM ticks 2995-3050 for `turn2-endeavor-drain.json`'s own `pressTick=2945`:
+ * round 0 toggles first at RAM 3008 = `pressTick+63`, round 1 at RAM 3034 =
+ * `pressTick+89` - not hand-derived from the script's own `delay 24`, RAM-read
+ * directly per the brief). Each round alternates `+step`/`-step` every 2 RAM
+ * ticks for 7 full alternations (14 RAM ticks, `n=0..13`), then the task's
+ * own 8th alternation immediately overwrites itself with a reset-to-0 in the
+ * SAME tick before self-destroying (`battle_anim_mon_movement.c:1040-1046`)
+ * - never actually visible as a nonzero value, so this table only needs 7.
+ */
+const ENDEAVOR_SHAKE_ROUND_RAM_OFFSET = [63, 89] as const;
+const ENDEAVOR_SHAKE_ALTERNATIONS = 7;
+/**
+ * Render tick `t` shows RAM tick `t-2`'s value - NOT the one-tick blend/
+ * droplet lag (`ENDEAVOR_DROPLET_RENDER_LAG`) despite this also being a
+ * task-driven field write; pixel-solved directly against oracle captures
+ * this session (`oracle-03008..03023.png` vs a `t=3008` neutral baseline,
+ * restricted to the target's own `x=40-110,y=45-115` box to exclude the
+ * concurrent squish region): the FIRST shake-visible render tick is 3010,
+ * not 3009 - matching the SAME `RAM=render-2` lag `ENDEAVOR_SQUISH_TABLE`'s
+ * own matrix uses (both are direct per-tick sprite-field writes read once
+ * per frame during OAM buffer build, apparently one step further behind
+ * the render than a palette-buffer DMA write like blend's `coeff` or a
+ * fresh sprite creation like the droplets - three distinct lags in this one
+ * animation window, none assumed, all RAM/pixel-confirmed separately).
+ */
+const ENDEAVOR_SHAKE_RENDER_LAG = 2;
+
+/** The target's (Onix's) own x2 shake offset at trace tick `t`, or 0 outside both rounds' windows. */
+function endeavorShakeX2(t: number, pressTick: number): number {
+  const ramTick = t - ENDEAVOR_SHAKE_RENDER_LAG;
+  for (const roundOffset of ENDEAVOR_SHAKE_ROUND_RAM_OFFSET) {
+    const n = ramTick - pressTick - roundOffset;
+    if (n < 0 || n >= ENDEAVOR_SHAKE_ALTERNATIONS * 2) continue;
+    const half = Math.floor(n / 2);
+    return half % 2 === 0 ? ENDEAVOR_SHAKE_STEP : -ENDEAVOR_SHAKE_STEP;
+  }
+  return 0;
+}
+
+/**
+ * S7 slice E1 hitsplat/shake increment: the two `AnimHitSplatBasic` sprites
+ * (`ANIM_TAG_IMPACT`, `gBasicHitSplatSpriteTemplate`) - RAM-confirmed real
+ * CENTER position and real hardware affine matrix (`tools/probe/
+ * dump-endeavor-hitsplat-shake.py`), not hand-derived from the source's own
+ * `GetBattlerSpriteCoord2`+per-side-X-flip offset math (both absolute
+ * centers were RAM-read directly, cheaper and less error-prone than
+ * reverse-engineering the general formula for just two static positions).
+ * **Unlike the squish matrix (`ENDEAVOR_SQUISH_TABLE`), the hitsplat's own
+ * OAM matrix (`gOamMatrices.a`/`.d`) is CONSTANT (372, i.e. `0x10000/176`)
+ * for its entire visible lifetime, not a ramp** - the affine anim's own
+ * second frame is a literal zero-delta `AFFINEANIMCMD_FRAME(0,0,0,8)`
+ * (`battle_anim_normal.c:147-152`), so it pops once and HOLDS for 8 ticks
+ * before the sprite is destroyed outright (no fade-back), correcting this
+ * run's own earlier banked asset doc summary ("ramps back to neutral over 8
+ * ticks", `src/data/gen/battle-move-anim-tables.json`'s `endeavor.hitSplat`
+ * - not edited in place, same "doc comment here is the authoritative
+ * correction" convention `ENDEAVOR_DROPLET_BATCH_OFFSETS`'s own doc uses).
+ * Visible window RAM-confirmed at 10 ticks/round (creation tick's own
+ * "written but not yet composited" tick, matching every other freshly-
+ * created sprite in this window, PLUS the pop tick PLUS the 8-tick hold).
+ */
+const ENDEAVOR_HITSPLAT_MATRIX = 372;
+const ENDEAVOR_HITSPLAT_VISIBLE_TICKS = 10;
+const ENDEAVOR_HITSPLAT_RENDER_LAG = 1;
+const ENDEAVOR_HITSPLAT_ROUNDS: readonly { center: { x: number; y: number }; ramOffset: number }[] = [
+  { center: { x: 60, y: 76 }, ramOffset: 62 }, // round 0: RAM 3007-3016 visible (script offset (12,-12), X-flipped for the target side)
+  { center: { x: 84, y: 100 }, ramOffset: 88 }, // round 1: RAM 3033-3042 visible (script offset (-12,12), X-flipped for the target side)
+];
+
+/** Draws both `AnimHitSplatBasic` sprites active at trace tick `t` (0, 1, or - briefly at the very start of this window - neither), on top of the target. */
+function drawEndeavorHitsplats(fb: Uint8Array, t: number, pressTick: number): void {
+  const ramTick = t - ENDEAVOR_HITSPLAT_RENDER_LAG;
+  for (const round of ENDEAVOR_HITSPLAT_ROUNDS) {
+    const n = ramTick - pressTick - round.ramOffset;
+    if (n < 0 || n >= ENDEAVOR_HITSPLAT_VISIBLE_TICKS) continue;
+    drawSpriteSheetAffineStretch(
+      fb,
+      battleAnimHitsplat.tileset,
+      battleAnimHitsplat.palette,
+      round.center.x - 16,
+      round.center.y - 16,
+      ENDEAVOR_HITSPLAT_MATRIX,
+      ENDEAVOR_HITSPLAT_MATRIX,
+      0,
+      ENDEAVOR_BLEND_COLOR,
+      0,
+      true,
+    );
+  }
+}
+
+/**
  * Draws the squished attacker plus everything else the settled turn-2 idle
  * screen normally shows (background, Onix, both healthboxes, the idle
  * bounce overlay) reconstructed from PRIMITIVES, the same
@@ -3786,7 +3901,9 @@ function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boole
   if (local < 0 || local >= ENDEAVOR_SQUISH_TABLE.length) return false;
   const entry = ENDEAVOR_SQUISH_TABLE[local]!;
   drawStaticBgShiftedY(fb, 0);
-  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  const shakeX2 = endeavorShakeX2(t, pressTick);
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + shakeX2, ONIX_MATERIALIZE_CORNER.y);
+  drawEndeavorHitsplats(fb, t, pressTick);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurnHp));
   drawMenuHealthboxPlayer(fb, 0);
   drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick));

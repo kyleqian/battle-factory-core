@@ -2725,3 +2725,102 @@ ENDEAVOR RAM-confirmed, still open per §15's own flag) to close the
 disturbing the now-closed attacker-side squish/blend/droplet modeling. Once
 those land, the two islands this session found should merge with 3000-3007
 into one fully contiguous green block through at least 3060.
+
+### 15e. S7 slice E1 hitsplat/shake increment (bounded worker, fifth follow-up session, session's LAST): **both remaining sub-mechanisms landed green - the 3008-3023/3034-3049 gaps are CLOSED, `turn2-endeavor-drain.json`'s green window now runs contiguously 3000→3060** (the two "inter-round lull" islands §15d found merged with everything around them, exactly as predicted)
+
+**What landed:** `tools/probe/dump-endeavor-hitsplat-shake.py` (new probe) RAM-
+read both remaining mechanisms directly - `gAnimMovePower` (a per-tick scalar,
+confirmed **75** for ENDEAVOR throughout, never RAM-confirmed before this
+session per §15/§15c/§15d's own repeated flag - the move's *listed* base
+power is 0, but `GetMovePower`'s real placeholder for HP-diff moves is 75),
+the target's own `sprite->x2` (shake), and the two `AnimHitSplatBasic`
+sprites' real position + OAM matrix. Both wired into `drawEndeavorSquish`
+(`endeavorShakeX2` applied to Onix's own draw offset, `drawEndeavorHitsplats`
+layered on top) and `turn2-endeavor-drain.json`'s `captureFrames` extended to
+cover the two previously-red spans in full (3008-3023, 3034-3049) - the trace
+now captures EVERY tick 2999-3060 (the two islands §15d found, 3024-3033 and
+3050-3060, are no longer distinguishable from their neighbors - all green).
+7 new Tier-1 pins (`battleScene.test.ts`), all oracle-cross-checked against
+this session's own `bin/oracle run` captures (`tools/compare/out/latest`),
+not hand-picked.
+
+**First real probe attempt found a dead end, banked so it isn't re-hit:**
+filtering hitsplat sprites by `callback == AnimHitSplatBasic`'s own address
+(the same pattern `dump-endeavor-droplets.py` uses for `AnimFacadeSweatDrop`)
+finds ZERO sprites, ever - `AnimHitSplatBasic` reassigns
+`sprite->callback = RunStoredCallbackWhenAffineAnimEnds` on its own very
+first invocation (`battle_anim_normal.c:1006-1017`), so by the earliest tick
+any probe could observe the sprite, the callback has already moved on. Fixed
+by filtering on `sprite->affineAnims` (offset `0x10`, stable for the sprite's
+whole life) against `sAffineAnims_HitSplat`'s own real (rodata) address
+instead - a more robust identifying field than `callback` for any sprite
+whose callback reassigns itself post-creation.
+
+**Hitsplat: RAM-confirmed CONSTANT matrix, not a ramp - corrects this run's
+own earlier banked asset-doc summary.** `src/data/gen/battle-move-anim-
+tables.json`'s `endeavor.hitSplat.decoded` (§15, never edited in place) says
+the affine anim "ramps back to neutral 0x100 over 8 ticks" after the pop;
+reading the actual `sAffineAnim_HitSplat_2` cmd table
+(`battle_anim_normal.c:147-152`) shows the SECOND frame is a literal
+`AFFINEANIMCMD_FRAME(0x0, 0x0, 0, 8)` - a ZERO delta held for 8 ticks, not a
+ramp. RAM-confirmed directly: `gOamMatrices[matrixNum].a`/`.d` read exactly
+**372** (`0x10000/176`, the pop's own inverted accumulator) for the sprite's
+ENTIRE visible lifetime (10 RAM ticks/round), then the sprite is destroyed
+outright with no fade. So the engine only needed a static enlarged pop
+(`drawSpriteSheetAffineStretch` reused as-is, `doubled=true` for the same
+"enlarges past its native box" reason squish needed it, `tintCoeff=0` for its
+own palette), not an interpolated table like squish's.
+
+**Hitsplat position: RAM-read directly rather than hand-deriving the general
+target-relative-offset formula.** The script's own literal offsets
+(`(12,-12)` round 0, `(-12,12)` round 1, `relative_to=ANIM_TARGET`) don't
+apply directly - solving both rounds' RAM-read absolute centers (`(60,76)`,
+`(84,100)`) against a single consistent target anchor requires negating the
+X component only (`InitSpritePosToAnimTarget`'s own per-side mirroring,
+unconfirmed in detail - not worth deriving generally for two static
+positions when both are already RAM-ground-truth). Banked as two literal
+`{center, ramOffset}` entries (`ENDEAVOR_HITSPLAT_ROUNDS`), the same
+"hand-plugged RAM-confirmed literals over a live formula" convention
+`ENDEAVOR_DROPLET_BATCH_OFFSETS` already established.
+
+**Shake: THREE distinct render lags now confirmed across this one animation
+window, none assumed.** The naive guess (reuse blend/droplet's own
+`RAM=render-1`) pixel-solved WRONG - a first wiring attempt using that lag
+passed the round-0 hitsplat entirely (render 3008 matched) but round-0 shake
+diffed on alternating render ticks (3009/3011/3013/...) while matching on the
+others (3010/3012/3014/...), a signature of the render lag being off by
+exactly one tick from the RAM's own 2-tick-held pairs. RAM-vs-pixel cross-
+check (diffing `oracle-03008..03023.png` against a `t=3008` neutral baseline,
+cropped to the target's own `x=40-110,y=45-115` box to exclude the
+concurrent squish region) pinned the real first-shake-visible render tick at
+**3010**, not 3009 - i.e. `RAM=render-2`, the SAME lag `ENDEAVOR_SQUISH_TABLE`'s
+own matrix uses, not blend/droplet's fresher one. So this one window now has
+three confirmed lags for three different kinds of per-tick RAM writes: a
+direct sprite-field write read once per OAM-build pass (squish matrix, shake
+x2: `render-2`), a palette-buffer DMA write (blend coeff: `render-1`), and a
+freshly-created sprite's own "written but not yet composited" creation tick
+(droplets: `render-1` + `n>=1`). Once the lag was fixed, amplitude fell out
+directly from the RAM-confirmed `gAnimMovePower=75` (`75/12=6` integer
+division, `upStep=downStep=3`) and the whole window (3000-3060, both
+squish/blend cycles, both droplet batches, both shake/hitsplat rounds) landed
+first-try with zero further pixel mismatches.
+
+**Verification**: `npm test` **685/685** (+7 new pixel-pins, oracle-cross-
+checked per their own doc comments), `npm run build` green. `tools/compare`:
+`turn2-endeavor-drain.json` **166/167** (grown from 134/135 - `captureFrames`
+now covers every tick 2999-3060 contiguously; only the pre-existing #19 diff
+at frame 2906 remains), `turn2-endeavor.json` **76/77** (unchanged),
+`turn1-rockslide.json` **256/256** (unchanged), `turn1-cloneanim.json`
+**230/230** (unchanged), `turn1-drain.json` **102/102** (unchanged) - zero
+regressions. This closes the brief's own acceptance criteria exactly: the
+green window runs contiguously 3000→3060 with no new diffs beyond #19's own
+frame 2906.
+
+**What's left for whoever picks this up next**: renders past 3060 (the
+`3061-3094` span - §15's own original full-window scan found activity there
+too, unattributed) are still red/uncaptured - out of THIS session's own
+scope (the brief capped at "≥3060"), but likely the SAME hitsplat/shake
+mechanisms' own tail interacting with something not yet isolated (§15's own
+scan called it "alternating two distinct shapes tick-to-tick", never RAM-
+probed). A future session should RAM-probe that span the same way this one
+did before assuming it's new territory.

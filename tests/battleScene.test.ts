@@ -954,3 +954,39 @@ describe("S7 slice E1d batch-1 (docs/battle-menu-notes.md §15d): the extended s
     expect(pixelAtTurn2(3050, 175, 19)).toEqual([57, 132, 66]);
   });
 });
+
+// S7 slice E1 hitsplat/shake increment (docs/battle-menu-notes.md §15e):
+// AnimHitSplatBasic (RAM-confirmed real center + constant OAM matrix, not a
+// ramp) and AnimTask_ShakeTargetBasedOnMovePowerOrDmg (gAnimMovePower=75
+// RAM-confirmed for ENDEAVOR, amplitude 3px both directions). All four
+// pixels below are oracle-cross-checked (tools/probe/dump-endeavor-hitsplat-
+// shake.py's own RAM window, oracle-030XX.png captures), not hand-picked.
+describe("S7 slice E1 (docs/battle-menu-notes.md §15e): ENDEAVOR's hitsplat pop-in and target shake", () => {
+  it("render 3008 (round 0 hitsplat's own first visible tick, RAM 3007+1) shows the hitsplat's own bright color at its RAM-confirmed center (60,76)", () => {
+    expect(pixelAtTurn2(3008, 60, 76)).toEqual([255, 255, 173]);
+  });
+
+  it("render 3007 (one tick earlier) still shows plain background at that same pixel - the hitsplat hasn't popped in yet", () => {
+    expect(pixelAtTurn2(3007, 60, 76)).toEqual([82, 74, 74]);
+  });
+
+  it("render 3010 (round 0 shake's own first visible tick - RAM=render-2, one tick later than the blend/droplet RAM=render-1 convention) shows the target shifted +3px at (58,49)", () => {
+    expect(pixelAtTurn2(3010, 58, 49)).toEqual([247, 247, 255]);
+  });
+
+  it("render 3009 (one tick earlier) still shows the unshaken silhouette at that same pixel", () => {
+    expect(pixelAtTurn2(3009, 58, 49)).toEqual([189, 181, 181]);
+  });
+
+  it("render 3034 (round 1 hitsplat's own first visible tick, generalizing the same convention across the script's `delay 24` gap) shows the hitsplat color at its RAM-confirmed center (84,100)", () => {
+    expect(pixelAtTurn2(3034, 84, 100)).toEqual([255, 255, 173]);
+  });
+
+  it("render 3050 (past round 1 shake's own last alternation - the settle this session's own extended captureFrames now starts at) shows the target back at its unshaken position", () => {
+    expect(pixelAtTurn2(3050, 58, 49)).toEqual([189, 181, 181]);
+  });
+
+  it("render 3049 (one tick earlier - round 1 shake's own final +3 still held) still shows the shifted pixel", () => {
+    expect(pixelAtTurn2(3049, 58, 49)).toEqual([247, 247, 255]);
+  });
+});

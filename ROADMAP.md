@@ -334,8 +334,11 @@ HP-digit overlay (`composePlayerHealthboxHpOverlay`, FONT_SMALL) landed
 own attack animation (source-confirmed a genuinely custom asset —
 attacker squish/sweat-droplet/yellow-blend + target shake+hitsplat,
 `Move_ENDEAVOR` — NOT "plain generic hit" as earlier assumed, ticks
-3003-3094) is explicit remaining work, not folded into this slice.
-Remaining for S7: ENDEAVOR's own attack anim, DRAGON_BREATH's own window,
+3003-3094) **through render 3060 is now landed** (§15-§15e: squish/blend/
+droplets/shake/hitsplat all RAM-probed and wired, `turn2-endeavor-
+drain.json` 166/167, contiguous green 3000-3060). Renders 3061-3094 (past
+this slice's own scope) are still red/unattributed.
+Remaining for S7: ENDEAVOR's own 3061-3094 tail, DRAGON_BREATH's own window,
 faint/forced-switch engine slice, ISSUES #19.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
