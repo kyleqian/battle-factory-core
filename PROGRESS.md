@@ -4,6 +4,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 187 — Worktree scout (supervisor-folded): turn 6 ground truth BANKED — prefix consistency of the whole engine chain vs the WIN line CONFIRMED (one line, no divergence through turn 7); `battle1-turn6-dense.json` (8346 frames, 251 captures, twice-run identical) + `docs/turn6-notes.md`; merged `858f482`, suite 790/790 on the merged tree
+
+- **State:** merged into master, `npm test` 790/790 + build green
+  post-merge (docs+trace only, no src changes). Supervisor re-verified
+  independently: script-level prefix check (turn5-switchin ⊂ turn6-dense ⊂
+  winline-b-swap, exact) and 4/4 cited boundary shas reproduced on a fresh
+  oracle run.
+- **Did:** turn 6 = FEATHER_DANCE (Pidgeotto acts first, speed 77 vs 76 —
+  RAM-confirmed, previously unpublished) then Onix's ROCK_SLIDE (43 dmg,
+  Pidgeotto 156→113, drain window ~7970-8019 at ~3 ticks/pixel-column —
+  NOT the 1-unit-per-tick pattern of small bars). RNG ledger: 11
+  `Random()` calls, LCG-step-verified. Boundaries sha-cited: menu 7307,
+  submenu 7317, confirm 7344, FD kickoff ~7358, ATK-fall msg 7385-7558,
+  RS kickoff ~7770, impact 7935-7956, turn-7 menu settled 8122 (+222
+  ticks margin to the next winline press). New-to-turn-6 mechanism
+  inventoried: FEATHER_DANCE (EFFECT_ATTACK_DOWN_2, two chained message
+  phases, `statStages` write mid-message at 7391, no HP drain). One
+  characterized-not-attributed find: ticks 7659-7684 and 7765-7784 are a
+  byte-identical 26-frame msgbox open/close sequence (likely one generic
+  slide routine; lead: shared `gBattlerControllerFuncs[1]`=134609789).
+- **Next:** unchanged from #186 — healthbox slide-in/Sitrus/settled-menu
+  slice (§8e/§2/§3e), then a turn-6 engine slice against this dossier.
+- **Notes:** scout stayed in contract (no src/, no ledger edits); no
+  papercuts.
+
+---
 ## 186 — Bounded worker (S7 slice L-4): materialize ramp-down + wobble phase CLOSED, `turn5-switchin.json` extended **167→241** (6588-6828, full ball-to-settle window), **0 diff, ZERO exclusions** — two independent bugs root-caused (a corrupted coefficient table + a healthbox Z-order miss)
 
 - **State:** `npm test` **790/790** (+3), `npm run build` green, tree clean
@@ -104,41 +130,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   on the sharpened retry.
 
 ---
-## 184 — Bounded worker: PROGRESS #183's two extremum ticks CLOSED — both verified corrective rules applied, both restored 0-diff; `turn4-doubleteam.json` **250/250**, `turn5-menu.json` **42/42**, `npm test` **787/787** (+2), build green, zero regressions across turns 1-5
-
-- **State:** `npm test` 787/787, `npm run build` green, tree clean (2
-  commits, `73bce5b` fix 4934 + `a05e9d0` fix 5927). Turns 1-5 now carry
-  **zero excluded residual ticks**.
-- **Did:** applied both rules verbatim from `docs/turn3-residual-probe-
-  notes.md` "The extremum class, probed", each verified first via its own
-  `tools/probe/verify-turn{4,5}-*.py` (reran clean before touching code, per
-  the brief). (4934) `battleScene.ts`'s `drawFightSubmenuWindow` `textStart`
-  gate now additionally excludes `turn3Resolved && !turn4Resolved` from the
-  ENDEAVOR-family test, so turn 4's own DOUBLE_TEAM kickoff gets the right
-  delay family. (5927) `drawActionMenuIdleWindow` gained an optional
-  `turn5ReopenPressTick` param (threaded from `sm.openElapsed` at the one
-  DMA-wait call site) that holds the unshifted
-  `turn4RockSlideResettledBounceTick` formula for exactly `t === pressTick`,
-  switching to the shifted `turn5SubmenuBounceTick` from `pressTick+1` on -
-  single-tick-scoped, matches the doc's "delay the switch by one tick"
-  framing exactly. Both traces restored to their captureFrames (249→250,
-  41→42), both 0 diff. Regression sweep (turn4-rockslide 250/250, turn5-
-  endeavor 254/254, turn5-sentout 141/141, turn3-menu 254/254, turn2-
-  dragonbreath 237/237, fight-submenu-reopen 90/90, turn1-cloneanim
-  230/230) all unchanged, 0 diff. +2 Tier-1 pins (`tests/battleScene.test.ts`:
-  the kickoff-text gate at 4933/4934/4935, the Onix bounce phase at
-  5926/5927/5928). Docs: both ticks marked RESOLVED in `turn3-residual-
-  probe-notes.md`, one-line corrections at `battle-turn-notes.md` §22/§23's
-  old exclusion notes; archived #181 to `PROGRESS-archive.md` to keep the
-  ledger to 3 entries.
-- **Next:** resume the roadmap where #181/#182 left off - materialize's own
-  ramp-down/wobble phases (`docs/faint-switch-notes.md` §10) + everything
-  past them (healthbox slide-in, Sitrus, settled-menu). No other residuals
-  remain open in the turn 1-5 window.
-- **Notes:** caught one arithmetic slip mid-session: the reopen's own
-  `sm.openElapsed` encodes `pressTick - TICK0` (not `+1` as a first read of
-  `core.ts`'s call-site comment suggested) - verified against
-  `fightSubmenu.test.ts`'s own pinned `openElapsed` value before trusting
-  the offset, caught by the first compare run (41/42, not 42/42) rather than
-  shipped wrong.
-

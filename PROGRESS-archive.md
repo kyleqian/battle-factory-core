@@ -1,3 +1,42 @@
+## 184 — Bounded worker: PROGRESS #183's two extremum ticks CLOSED — both verified corrective rules applied, both restored 0-diff; `turn4-doubleteam.json` **250/250**, `turn5-menu.json` **42/42**, `npm test` **787/787** (+2), build green, zero regressions across turns 1-5
+
+- **State:** `npm test` 787/787, `npm run build` green, tree clean (2
+  commits, `73bce5b` fix 4934 + `a05e9d0` fix 5927). Turns 1-5 now carry
+  **zero excluded residual ticks**.
+- **Did:** applied both rules verbatim from `docs/turn3-residual-probe-
+  notes.md` "The extremum class, probed", each verified first via its own
+  `tools/probe/verify-turn{4,5}-*.py` (reran clean before touching code, per
+  the brief). (4934) `battleScene.ts`'s `drawFightSubmenuWindow` `textStart`
+  gate now additionally excludes `turn3Resolved && !turn4Resolved` from the
+  ENDEAVOR-family test, so turn 4's own DOUBLE_TEAM kickoff gets the right
+  delay family. (5927) `drawActionMenuIdleWindow` gained an optional
+  `turn5ReopenPressTick` param (threaded from `sm.openElapsed` at the one
+  DMA-wait call site) that holds the unshifted
+  `turn4RockSlideResettledBounceTick` formula for exactly `t === pressTick`,
+  switching to the shifted `turn5SubmenuBounceTick` from `pressTick+1` on -
+  single-tick-scoped, matches the doc's "delay the switch by one tick"
+  framing exactly. Both traces restored to their captureFrames (249→250,
+  41→42), both 0 diff. Regression sweep (turn4-rockslide 250/250, turn5-
+  endeavor 254/254, turn5-sentout 141/141, turn3-menu 254/254, turn2-
+  dragonbreath 237/237, fight-submenu-reopen 90/90, turn1-cloneanim
+  230/230) all unchanged, 0 diff. +2 Tier-1 pins (`tests/battleScene.test.ts`:
+  the kickoff-text gate at 4933/4934/4935, the Onix bounce phase at
+  5926/5927/5928). Docs: both ticks marked RESOLVED in `turn3-residual-
+  probe-notes.md`, one-line corrections at `battle-turn-notes.md` §22/§23's
+  old exclusion notes; archived #181 to `PROGRESS-archive.md` to keep the
+  ledger to 3 entries.
+- **Next:** resume the roadmap where #181/#182 left off - materialize's own
+  ramp-down/wobble phases (`docs/faint-switch-notes.md` §10) + everything
+  past them (healthbox slide-in, Sitrus, settled-menu). No other residuals
+  remain open in the turn 1-5 window.
+- **Notes:** caught one arithmetic slip mid-session: the reopen's own
+  `sm.openElapsed` encodes `pressTick - TICK0` (not `+1` as a first read of
+  `core.ts`'s call-site comment suggested) - verified against
+  `fightSubmenu.test.ts`'s own pinned `openElapsed` value before trusting
+  the offset, caught by the first compare run (41/42, not 42/42) rather than
+  shipped wrong.
+
+---
 ## 183 — Worktree probe (supervisor-folded): BOTH remaining "redraw extremum" ticks ROOT-CAUSED as real engine bugs (label retired) — 4934 = kickoff-text delay-family mis-selected by the monotonic `turn2Resolved` gate during turn 4's DOUBLE_TEAM window; 5927 = the -2 bounce phase shift applied in the SAME render tick the reopen press registers (hardware switches one tick later); merged `7d93103`, suite 785/785 on the merged tree
 
 - **State:** merged into master, `npm test` 785/785 + build green
