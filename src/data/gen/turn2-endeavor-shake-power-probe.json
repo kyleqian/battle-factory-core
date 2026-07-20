@@ -1,0 +1,1741 @@
+{
+"ticks": [
+{
+"tick": 2940,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2941,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2942,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2943,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2944,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2945,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2946,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2947,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2948,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2949,
+"gCurrentMove": 0,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2950,
+"gCurrentMove": 0,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2951,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2952,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2953,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2954,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2955,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2956,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2957,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2958,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2959,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2960,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2961,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2962,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2963,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2964,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2965,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2966,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2967,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2968,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2969,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2970,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2971,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2972,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2973,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2974,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2975,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2976,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2977,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2978,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2979,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2980,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 2
+},
+{
+"tick": 2981,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2982,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2983,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2984,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 8
+},
+{
+"tick": 2985,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 8
+},
+{
+"tick": 2986,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 8
+},
+{
+"tick": 2987,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2988,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2989,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 42,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2990,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2991,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2992,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2993,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2994,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2995,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2996,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2997,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2998,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 2999,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3000,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3001,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3002,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3003,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3004,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3005,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3006,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3007,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3008,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3009,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3010,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3011,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3012,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3013,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3014,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3015,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3016,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3017,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3018,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3019,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3020,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3021,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3022,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3023,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3024,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3025,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3026,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3027,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3028,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3029,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3030,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3031,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3032,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3033,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3034,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3035,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3036,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3037,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3038,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3039,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3040,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3041,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3042,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3043,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3044,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3045,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3046,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3047,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3048,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3049,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3050,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3051,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3052,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3053,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3054,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3055,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3056,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3057,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3058,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3059,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3060,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3061,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3062,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3063,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3064,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3065,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3066,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3067,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3068,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3069,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3070,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3071,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3072,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3073,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3074,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3075,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3076,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3077,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3078,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3079,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3080,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3081,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3082,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3083,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3084,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3085,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3086,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3087,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3088,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3089,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3090,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3091,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3092,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3093,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3094,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3095,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3096,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3097,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3098,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3099,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3100,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3101,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3102,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3103,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3104,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3105,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3106,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3107,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3108,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3109,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3110,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3111,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3112,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3113,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3114,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3115,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3116,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3117,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3118,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3119,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3120,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3121,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3122,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3123,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3124,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3125,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3126,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3127,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3128,
+"gCurrentMove": 283,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 16
+},
+{
+"tick": 3129,
+"gCurrentMove": 0,
+"gBattlerAttacker": 1,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 0
+},
+{
+"tick": 3130,
+"gCurrentMove": 225,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 0
+},
+{
+"tick": 3131,
+"gCurrentMove": 225,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 0
+},
+{
+"tick": 3132,
+"gCurrentMove": 225,
+"gBattlerAttacker": 0,
+"gBattleMovePower": 75,
+"gAnimMovePower": 75,
+"gAnimMoveDmg": 16,
+"gBattleMoveDamage": 0
+}
+]
+}
