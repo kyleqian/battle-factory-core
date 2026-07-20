@@ -4031,6 +4031,35 @@ function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boole
 }
 
 /**
+ * S7 slice E2a (docs/dragon-breath-notes.md): DRAGON_BREATH's own kickoff
+ * message, "ONIX used\nDRAGONBREATH!" - line 1 reuses `ROCK_SLIDE_LINE1`
+ * verbatim (same attacker, Onix, same `STRINGID_USEDMOVE` template turn 1's
+ * ROCK_SLIDE kickoff already established), line 2 is `moves.json`'s own
+ * `MOVE_DRAGON_BREATH` display name ("DRAGONBREATH", no space) + "!". Unlike
+ * `turnKickoffTextStartTick`/`turn2KickoffTextStartTick` (both a fixed delay
+ * off the A-confirm press), this kickoff has no press to anchor from - it's
+ * gated on Grovyle's ENDEAVOR fully resolving first (bookkeeping through
+ * render 3136, `gBattleControllerExecFlags` bit0), so the start tick is kept
+ * as a literal pixel-fit delay off the same `pressTick` turn 2's other
+ * timings use (`docs/dragon-breath-notes.md`'s phase table: RAM 3136 sets
+ * the busy flag, render = RAM+1 = 3137 = pressTick(2945)+192).
+ */
+const DRAGONBREATH_KICKOFF_LINE2 = "DRAGONBREATH!";
+const DRAGONBREATH_KICKOFF_TEXT_TOTAL = ROCK_SLIDE_LINE1.length + DRAGONBREATH_KICKOFF_LINE2.length;
+const DRAGONBREATH_TEXT_START_DELAY = 192;
+
+function dragonBreathTextStartTick(pressTick: number): number {
+  return pressTick + DRAGONBREATH_TEXT_START_DELAY;
+}
+
+/** Visible character count (0..DRAGONBREATH_KICKOFF_TEXT_TOTAL) of "ONIX used\nDRAGONBREATH!" at absolute trace tick `t` - same 1-tick/char mechanism as `turn2KickoffTextVisibleChars`. Oracle-confirmed exact (docs/dragon-breath-notes.md): tick 3157 (start+20) is the last still-increasing frame (21 chars), tick 3158 (start+21) shows all 22 and holds flat through 3176. */
+function dragonBreathTextVisibleChars(t: number, pressTick: number): number {
+  const start = dragonBreathTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(DRAGONBREATH_KICKOFF_TEXT_TOTAL, t - start + 1);
+}
+
+/**
  * S7 slice E1: turn 2's own kickoff message, "Foe GROVYLE used\nENDEAVOR!"
  * (docs/battle-turn-notes.md §12, docs/battle-menu-notes.md §13) - same
  * mechanism as `drawTurnKickoffText` (line 1 is textually identical, reused
@@ -4040,6 +4069,14 @@ function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boole
  * above - S7 slice E1d-retry, §15b; the rest of ENDEAVOR's own animation +
  * Onix's HP-bar drain + the player healthbox's own HP digits are still out
  * of scope - see docs/battle-menu-notes.md §13's "what's left" note).
+ * S7 slice E2a (docs/dragon-breath-notes.md): extended to also cover the
+ * handoff into DRAGON_BREATH's own kickoff text (`dragonBreathTextStartTick`
+ * on) - the ENDEAVOR text simply holds through the quiet 3121-3136 handoff
+ * (unchanged, no new code needed for that span) and then this function
+ * switches to the DRAGON_BREATH line pair once its own start tick arrives.
+ * DRAGON_BREATH's own attack animation (projectiles/blend/shake/hit-flash)
+ * is still out of scope here - see docs/dragon-breath-notes.md's "what's
+ * left" note.
  */
 function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): void {
   // Only ever reached via turn 2's own confirm (cursor 2), which by
@@ -4060,6 +4097,11 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
   const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerBattler.hp, anchorPlayerAfterTurnHp);
   drawPlayerHealthboxHpOverlay(fb, onixHp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const dragonBreathStart = dragonBreathTextStartTick(pressTick);
+  if (t >= dragonBreathStart) {
+    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, DRAGONBREATH_KICKOFF_LINE2, dragonBreathTextVisibleChars(t, pressTick));
+    return;
+  }
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
 }
 
