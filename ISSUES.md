@@ -5,6 +5,52 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
+  escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
+  turn2-dragonbreath.json remain uncaptured after 4 bounded attempts
+
+Opened 2026-07-20 (supervisor). The 8 fire-projectile sprites of
+`Move_DRAGON_BREATH` (small_ember gfx, spawn every 4 ticks, 20-tick life)
+are the sole un-landed mechanism of turn 2; `turn2-dragonbreath.json` ships
+**166/166** with 3177-3235 excluded from `captureFrames` (this run's
+standard treatment of un-green spans — never committed red). Everything
+around it is green: kickoff text 3121-3176, shake/blend 3236-3263,
+resolution half 3264-3346.
+
+**Settled by the four attempts (do NOT re-derive):**
+- Geometry: 21-entry `gOamMatrices` table (`a===d`, `b===-c`, identical
+  across all 8 spawns), base `(72,88)`, render lag 1, spawn cadence and
+  frame cycling — all RAM-verified.
+- The "concurrent `AnimTask_BlendBattleAnimPal` also blends the ember
+  palette" theory is CLOSED by source-level call-chain proof
+  (`F_PAL_TARGET` → `GetBattlePalettesMask` only ever selects a named
+  battler's own OBJ palette bank, never the ember's gfx-tag palette),
+  corroborated by pixel evidence (every mismatched pixel is a clean
+  small-ember ramp color — a shape defect, not a color one).
+- The shared sampler `drawSpriteSheetAffineRotate` is ELIMINATED: its
+  double-size iteration box is source-confirmed correct
+  (`gOamData_AffineDouble_ObjNormal_32x32`, same mode as the working ball
+  spin), and a 4-variant rounding/offset sweep found the current
+  convention strictly best (8181 diff-px vs 11410/21469/21933). This
+  matters beyond DRAGON_BREATH: a defect there would have affected every
+  other rotating sprite.
+- An extra-tick-of-life hypothesis was tested and made tick 3220 worse
+  (342→649px); reverted.
+
+**Residual, precisely characterized:** salt-and-pepper edge OVER-DRAW when
+the sprite is compressed (`|matrixA|>256`) versus an isolated MISSING blob
+when magnified (`|matrixA|<256`), with a correctly-matching core in both
+regimes — possibly TWO separate defects. Note the working ball-spin
+precedent never exceeds `|pa|=255` while DRAGON_BREATH starts at 703, so
+this scale regime is genuinely unexercised elsewhere in the engine.
+
+**Named next instrument (never attempted):** isolate a single spawn —
+render spawn 7 alone to a blank canvas and diff against an oracle capture
+with all other content subtracted — rather than fitting against
+whole-scene diffs, which is what defeated the "which n" arithmetic in
+attempt #3. Full derivations: `docs/dragon-breath-notes.md`, sections
+"Engine slice E2a-3", "E2a-4", "E2a-5".
+
 ## #22 — battle1-fight-submenu-idle.json (groundtruth fixture) tick 2135:
   769px single-tick residual, NOT closed by #19's harvest fix
 

@@ -346,8 +346,22 @@ pixel window is **3137→3846** (3095-3136 is ENDEAVOR's own HP-drain
 tail, already green); ground truth banked in `docs/dragon-breath-notes.md`
 (dense trace 3095-3346, task/sprite inventory, §12 ledger re-verified,
 sole missing asset `small_ember.png`).
-Remaining for S7: DRAGON_BREATH engine slices (E2a/E2b), faint/forced-switch
-engine slice, ISSUES #19.
+**Slices E2a/E2b landed (2026-07-20, supervisor-verified):** kickoff text,
+target shake (`AnimTask_ShakeMon2`), the two red-fade blends, Grovyle's HP
+drain 101→88, text-clear and the turn-3 menu reopen —
+`tools/compare/traces/turn2-dragonbreath.json` **166/166**.
+**Fire projectiles PARKED as a named remainder (supervisor decision
+2026-07-20 ~01:10, under the session's stated escalation default after the
+question went unanswered — see ISSUES #23; reversible, the user may
+re-open):** renders 3177-3235 are excluded from `captureFrames` rather
+than committed red, exactly as this run treats every un-green span. Four
+bounded attempts pinned the geometry (21-entry matrix table, base, lag,
+cadence, frame cycling), closed the palette-blend theory by source proof,
+and eliminated the shared affine sampler by a 4-variant sweep; no attempt
+shipped known-wrong pixels. S7's acceptance is unaffected — it asks for
+committed traces green on their captures, which this trace is.
+Remaining for S7: the parked projectile gap (ISSUES #23), the tick-3337
+flicker, faint/forced-switch engine slice.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin
