@@ -1,3 +1,30 @@
+## 173 — Worktree probe (supervisor-folded): Family B (menu-idle ticks 3879/3888) ROOT-CAUSED — no hardware quirk; the engine's turn-3 reopened-submenu bounce composition is uniformly ONE RAM tick ahead of the real invisible bouncer's `sSinIndex`, visible only at sine-plateau crossings; merged `42b26f9`, suite 756/756 on the merged tree
+
+- **State:** merged into master, `npm test` 756/756 + build green
+  post-merge (supervisor-verified; verification script re-run in the
+  worktree by supervisor — all 5 checks PASS). New: multi-hop `"path"`
+  support in `tools/probe/ram-probe.py` (backward-compat verified),
+  `tools/probe/verify-turn3-menu-bounce-rule.py`, probe spec + twice-run
+  dump, `docs/turn3-residual-probe-notes.md` "Family B, continued".
+- **Did:** pointer-chase (`gBattleSpritesDataPtr` → `healthBoxesData[0]`
+  → bouncer sprite ids → `gSprites[].data[]`) proves the bouncer's
+  `sSinIndex` ticks a perfectly uniform +7/tick (both regions, 41 ticks,
+  zero exceptions) with plain read-before-increment sampling
+  (`battle_main.c:2967-2979`). `model(t) == real_screen(t+1)` holds with
+  ZERO violations: a constant miscalibration, masked on shared plateaus,
+  visible exactly at crossings — 3861/3870/3879/3888 in this window.
+  OVERTURNS §19's "hardware quirk at a bounce extremum" reading. The
+  earlier "1-tick shift ruled out" test had shifted the WRONG WAY
+  (2→1 advances further); the corrective direction is 2→3 for this
+  composition. Caveat flagged: predicted mismatches at 3861 (onix) and
+  3870 (healthbox) are NOT in captureFrames — the fix slice must add
+  them alongside restoring 3879/3888.
+- **Next:** one small main-lane cleanup slice applies Family A's
+  stale-power shake rule + Family B's phase correction and restores all
+  16 excluded ticks (12 shake + 3879/3888 + 3861/3870); then turn 5.
+- **Notes:** no new papercuts.
+
+---
 ## 172 — Bounded worker retry: S7 slice I-2 — the turn-4 clone-window residual ROOT-CAUSED and FIXED (2 real bugs, not the bounce/HP candidates §22 suspected); `turn4-doubleteam.json` (new) **249/249**, `turn4-rockslide.json` (new) **250/250**, `npm test` **756/756** (+3), build green, zero regressions
 
 - **State:** `npm test` 756/756, `npm run build` green, tree clean. New

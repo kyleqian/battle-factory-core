@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 176 — Worktree scout (supervisor-folded): switch-in formula verification — faint sink PINNED as a closed form (source+RAM agree tick-for-tick), materialize stretch is a BYTE-EXACT re-anchored reuse of `GROVYLE_STRETCH_TABLE` (41/41), Sitrus = 2 sprites (`ANIM_TAG_THIN_RING`/`ANIM_TAG_SPARKLE_2`, gfx confirmed unextracted); merged `4fd6489`, suite 768/768 on the merged tree
+
+- **State:** merged into master, `npm test` 768/768 + build green
+  post-merge (supervisor-verified; sink formula re-checked vs
+  `battle_main.c:2783` by supervisor). New: `docs/faint-switch-notes.md`
+  §7 + 2 probe specs with twice-run outputs. No engine changes.
+- **Did:** (1) faint sink closed form: handoff at 6502, `n = 8 -
+  floor(yOffset/8)` erase steps at `S+1,S+3,…,S+2n-1` (`y2` 8→64),
+  destroy at `S+2n+1` = 6519 — matches §3a pixel evidence tick-for-tick.
+  (2) Pidgeotto's materialize stretch geometry = `GROVYLE_STRETCH_TABLE`/
+  `_EARLY_TABLE` verbatim, re-anchored 1503→6791 — no new table needed.
+  Open-particle burst shape confirmed (13 sprites, 1-tick stagger,
+  26-tick life) but its radial motion formula was not captured. (3)
+  Sitrus effect: exactly 2 sprites, cross-checked vs
+  `General_HeldItemEffect`'s two `loadspritegfx` calls; gfx genuinely
+  unextracted (checked, not assumed).
+- **Next (slice L's named gaps):** thrown-ball prop sprite identity/
+  table; materialize palette tint RAM confirmation; particle burst
+  motion formula; Sitrus ring+sparkle gfx extraction; healthbox
+  slide-in ramps (not reached). Slice K (ROCK_SLIDE→faint→gate→fainted
+  text) needs NONE of these.
+- **Notes:** worker PAPERCUT (ram-probe.py path vocab can't shift/mask
+  sub-byte bitfields — blocked the tint check) recorded in PAPERCUTS.md.
+
+---
 ## 175 — Bounded worker: S7 slice J — turn 5's FIGHT-submenu reopen + Grovyle's ENDEAVOR (Onix 88→1), landed green, ending BEFORE Onix's own ROCK_SLIDE kickoff; `turn5-menu.json` (new) **41/41**, `turn5-endeavor.json` (new) **254/254**, both 0 diff, `npm test` **768/768** (+7), build green, zero regressions
 
 - **State:** `npm test` 768/768, `npm run build` green, tree clean.
@@ -103,31 +128,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and the faint/switch-in ground truth §3-§6 already banked. Tick 4934's
   excluded redraw-extremum is a different, still-open residual class (out
   of this slice's scope).
-- **Notes:** no new papercuts.
-
----
-## 173 — Worktree probe (supervisor-folded): Family B (menu-idle ticks 3879/3888) ROOT-CAUSED — no hardware quirk; the engine's turn-3 reopened-submenu bounce composition is uniformly ONE RAM tick ahead of the real invisible bouncer's `sSinIndex`, visible only at sine-plateau crossings; merged `42b26f9`, suite 756/756 on the merged tree
-
-- **State:** merged into master, `npm test` 756/756 + build green
-  post-merge (supervisor-verified; verification script re-run in the
-  worktree by supervisor — all 5 checks PASS). New: multi-hop `"path"`
-  support in `tools/probe/ram-probe.py` (backward-compat verified),
-  `tools/probe/verify-turn3-menu-bounce-rule.py`, probe spec + twice-run
-  dump, `docs/turn3-residual-probe-notes.md` "Family B, continued".
-- **Did:** pointer-chase (`gBattleSpritesDataPtr` → `healthBoxesData[0]`
-  → bouncer sprite ids → `gSprites[].data[]`) proves the bouncer's
-  `sSinIndex` ticks a perfectly uniform +7/tick (both regions, 41 ticks,
-  zero exceptions) with plain read-before-increment sampling
-  (`battle_main.c:2967-2979`). `model(t) == real_screen(t+1)` holds with
-  ZERO violations: a constant miscalibration, masked on shared plateaus,
-  visible exactly at crossings — 3861/3870/3879/3888 in this window.
-  OVERTURNS §19's "hardware quirk at a bounce extremum" reading. The
-  earlier "1-tick shift ruled out" test had shifted the WRONG WAY
-  (2→1 advances further); the corrective direction is 2→3 for this
-  composition. Caveat flagged: predicted mismatches at 3861 (onix) and
-  3870 (healthbox) are NOT in captureFrames — the fix slice must add
-  them alongside restoring 3879/3888.
-- **Next:** one small main-lane cleanup slice applies Family A's
-  stale-power shake rule + Family B's phase correction and restores all
-  16 excluded ticks (12 shake + 3879/3888 + 3861/3870); then turn 5.
 - **Notes:** no new papercuts.
