@@ -4,6 +4,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 143 — Supervisor: battle-2 scout merged (§17 debts closed + §18 battle-2 turn-1 ground truth); **new ISSUES #21** — RAM-observed base damage 19 vs formula 17 on ROCK_SLIDE-vs-KABUTO, a damageCalc generality gap
+
+- **State:** `npm test` **672/672**, `npm run build` green, tree clean at
+  merge `031bfc5`; no worktrees, no unmerged branches.
+- **Did:** verified and merged worker/wt-20260719-184149 (3 commits):
+  rentalMons[] probe fixed (root cause: global.h's field comments are
+  SaveBlock2-absolute offsets, the old probe double-added frontier's
+  0x64C base) and validated two ways (pre-swap == anchor dump 3/3 slots;
+  post-swap slot0 == pre-swap slot3 per CopySwappedMonData); YES-branch
+  LCG ledger committed (bonus: frontier RNG freeze begins tick 33286);
+  battle2-turn1.json (33672f/168c, twice-run) + §18 ledger — new pinned
+  mechanic: KABUTO's BATTLE_ARMOR short-circuits the crit roll's
+  Random() call. Damage discrepancy honestly flagged → filed as ISSUES
+  #21 (leads: probe defense/statStages at calc tick). Also
+  verified+accepted #142 (squish+blend landed via RAM-probed matrices,
+  turn2-endeavor-drain 111/112).
+- **Next:** (1) main lane: ENDEAVOR droplets increment (spawn boundary
+  pixel-pinned at 3006, physics banked in §15); (2) worktree: root-cause
+  ISSUES #21; (3) wind down ~21:30-21:45 (deadline 22:16).
+- **Notes:** none.
+
+---
 ## 142 — Bounded worker: S7 slice E1d-retry — **ENDEAVOR squish RAM-probed and landed green** (renders 3000-3005, real hardware `gOamMatrices` values, not a pixel fit); `npm test` **672/672** (+3), `npm run build` green
 
 - **State:** `npm test` **672/672**, `npm run build` green, tree clean.
@@ -54,41 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (2) worktree: §17 debt (rentalMons offset fix + YES-branch ledger) +
   battle-2 opening-turns ground truth; (3) wind-down prep ~21:45.
 - **Notes:** none.
-
----
-## 140 — Bounded worker: S7 slice E1d — ENDEAVOR squish wired + oracle-fitted, X-axis MISFITS — reverted, nothing landed; suite unchanged **669/669** (`docs/battle-menu-notes.md` §15a FITTED addendum has the full empirical writeup)
-
-- **State:** `npm test` **669/669** (unchanged), `npm run build` green,
-  tree clean, no trace changes. Engine code was written and tested this
-  session but **reverted** (`git checkout`) once it was clear it only
-  half-fit — this run's own "never commit red" rule, not a scope call.
-- **Did:** confirmed `drawSpriteSheetAffineStretch` (already in
-  `battleScene.ts`, built for GROVYLE_STRETCH) is the renderer §15 asked
-  for — no new primitive needed, just pre-invert the accumulator
-  (`0x10000/acc`) before calling it, since squish is table-driven
-  (`AFFINEANIMCMD_FRAME`/real `ObjAffineSet`, same family as materialize)
-  unlike GROVYLE_STRETCH's own bespoke direct-write function. Ran a fresh
-  dense oracle probe (`turn2-endeavor-drain.json`'s own prefix, captures
-  2996-3012) that sharpened §15's bbox table to the exact tick: 2999
-  neutral, 3000 first visible, 3006 widest, 3008 target-side contamination
-  starts — pins `ENDEAVOR_SQUISH_START_DELAY=54`. Fitting against that
-  data found the **Y axis matches the oracle exactly** (`dxScale`'s own
-  accumulator maps to rendered Y, not X — a real axis-label correction)
-  but the **X axis doesn't**: oracle wants a 76px-wide silhouette (12px
-  past the 64px neutral canvas), the fitted renderer only reaches 63px —
-  a whole-silhouette misalignment, not an edge residual. Tried both
-  remaining axis-mapping directions and an `ST_OAM_AFFINE_DOUBLE`-style
-  doubled destination box (added as a backward-compatible opt-in param,
-  since reverted with everything else) — neither closed the gap.
-- **Next:** RAM-probe `gSprites[]`'s own affine data fields for X directly
-  (same `dump-rockslide-sprites.py`/`sendout-grovyle-stretch.json`
-  precedent this run already has) rather than continuing to pixel-fit
-  blind — recommended over more guessing, per §15a's own "open questions"
-  list (possible causes: a transcription error in the extracted step
-  table, or a concurrent mechanism, e.g. the blend task, already
-  contributing pixels earlier than assumed). Once X fits, land exactly
-  per the original brief's staged order (squish sub-window 3000-3007 →
-  droplets → blend → shake → hitsplat).
-- **Notes:** no papercuts. Time-boxed session spent its remaining room on
-  pixel-fit attempts rather than switching to a RAM probe soon enough —
-  flagged in §15a so the next session doesn't repeat the same dead ends.
