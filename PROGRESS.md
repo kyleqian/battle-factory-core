@@ -4,6 +4,62 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 161 — Bounded worker: S7 slice E2b-2 — the `3347-3846` tail closed, but NOT a "cheap confirm pass" as expected: found and fixed a real live-bounce/HP-digit-overlay bug, plus two new named single-tick residuals (same class as tick 3337); `turn2-dragonbreath.json` **235/235**, `npm test` **732/732** (+1), build green, zero regressions
+
+- **State:** `npm test` 732/732, `npm run build` green, tree clean.
+  `turn2-dragonbreath.json` **235/235** (`3121-3346` minus tick 3337, plus
+  the `3347-3846` tail at stride 10 + two dense 11-tick windows, minus
+  ticks 3465/3721). Regressions re-run and confirmed: `turn2-endeavor-
+  drain.json` **201/201**, `fight-submenu.json` **235/235**, `s6-
+  acceptance.json` **224/228** (this trace's own pre-existing gap,
+  unchanged). The `3177-3235` fire-projectile gap (ISSUES #23) untouched.
+- **Did:** Probed the `3347-3846` hold with scratch traces first (own
+  capture budget, not the committed trace's) rather than assuming E2b's
+  "already pixel-stable" handoff note meant nothing to find. A stride-5
+  sweep found a **401px mismatch on ~half the ticks**, in alternating
+  15-20-tick runs — not the single-tick blip expected. Root cause: the
+  resettled menu's healthbox bounce is LIVE here (unlike every earlier
+  resettled-menu path), and `drawPlayerHealthboxHpOverlay` (added in E2b)
+  blitted Onix's HP digits at a fixed `y`, unaware of the healthbox's own
+  1-2px bounce — so the digits floated free of the bar whenever the
+  bounce was non-zero. Fixed with an optional `yOffset` param (default 0,
+  every other call site unaffected) fed from `menuIdleBounce(bounceTick)
+  .healthboxY2`. Re-swept dense (2×250 stride-1 scratch captures) to
+  confirm: only two single-tick 769px residuals remained, at ticks 3465
+  and 3721 — traced analytically (not swept) to `onixSinIndex(n) mod 256
+  == 64`, the sine table's own peak entry, recurring exactly every 256
+  ticks (next occurrence 3977 is past this trace's end) — same
+  "hardware quirk at a bounce extremum" class as E2b's own tick-3337
+  residual, formula already textbook-exact there. Extended `turn2-
+  dragonbreath.json` to 235 captures: stride 10 across the tail (denser
+  than the groundtruth's own stride 20 — a stride-20 sample had a real
+  chance of missing the half-the-ticks-wrong bug entirely) plus two dense
+  windows pinning the new residuals as excluded, same-neighbor-density
+  convention as tick 3337. One new Tier-1 pixel pin (`tests/battleScene
+  .test.ts`, "S7 slice E2b-2") exercising the new `yOffset` plumbing
+  directly (same coordinate, offset 0 vs 1, digit present vs shifted
+  away). Full writeup in `docs/dragon-breath-notes.md`'s new "Engine
+  slice E2b-2" section.
+- **Next:** with this tail closed, `turn2-dragonbreath.json` has no more
+  un-investigated span between 3121 and 3846 — everything left is one of
+  three precisely named, deliberately-excluded single ticks (3337, 3465,
+  3721) plus the parked `3177-3235` fire-projectile gap (ISSUES #23).
+  Whoever wants to chase 3465/3721 further should RAM-probe the ONIX
+  battler sprite's own `sSinIndex` at ticks 3464-3466 directly, not sweep
+  the formula (already provably exact everywhere else). Otherwise:
+  faint/forced-switch is the next S7 engine slice (§13-§14 ground truth
+  already banked per #160); S8 engine work is unblocked separately.
+- **Notes:** no papercuts, though worth flagging: this run's git repo is
+  shared live with the concurrent supervisor process (direct commits
+  landing on `master` mid-session, observed via a `git status`/`git diff`
+  race on `ROADMAP.md` that resolved itself a few seconds later) — not a
+  problem this session, but worth the supervisor knowing if a future
+  worker's `git stash`/diff timing ever looks inconsistent. Scratch probe
+  traces (`tools/compare/scratch/probe-tail-*.json`) were deleted after
+  use, not committed, matching this run's own no-new-scratch-tooling
+  precedent.
+
+---
 ## 160 — Supervisor: round 5 folded — **turn 2's RESOLUTION half landed (`turn2-dragonbreath.json` 84→166/166)** + **S8's per-battle-moveset dependency CLOSED** (suite 731/731); projectile attempt #4 rejected the supervisor's own sampler hypothesis with clean evidence
 
 - **State (supervisor-verified this minute):** `npm test` **731/731**,
@@ -105,59 +161,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `rockSlideMonBlinkInvisible` were already imported).
 
 ---
-## 158 — Bounded worker: S7 slice E2a-5 attempt — fire-projectile attempt #4: SUPERVISOR'S SAMPLING-CONVENTION HYPOTHESIS TESTED AND REJECTED by direct 4-variant sweep (every alternative to the current convention scored 1.4x-2.7x WORSE); pulled a fourth time, no wrong pixels shipped, `npm test` **711/711** (unchanged), build green
-
-- **State:** `npm test` 711/711, `npm run build` green, tree clean.
-  `turn2-dragonbreath.json` **unchanged** (`3121-3176` + `3236-3263`,
-  84/84 green) — `3177-3235` still open. No engine code left changed
-  (shared `drawSpriteSheetAffineRotate` is byte-identical to E2a-4's own
-  baseline — nothing to regress-check against).
-- **Did:** Per the brief, tested the supervisor's specific hypothesis
-  FIRST (not a fresh RAM-probe cycle): re-wired E2a-3's exact settled
-  config verbatim, then swept `drawSpriteSheetAffineRotate`'s sampling
-  convention. (1) **Iteration-box question answered from source, not
-  swept**: `gDragonBreathFireSpriteTemplate.oam =
-  &gOamData_AffineDouble_ObjNormal_32x32` (`battle_anim_dragon.c:93`) —
-  same `ST_OAM_AFFINE_DOUBLE` mode the ball spin already uses; the
-  existing `-w..w`/`-h..h` loop already implements exactly this
-  doubled-window convention (source-confirmed correct, not an open
-  question). (2) **Rounding/offset convention swept, 4 variants**
-  (`"default"` = unchanged original body, `"halfPixel"` = sample at
-  `dx+0.5`, `"round"` = `+128`-before-`>>8` round-to-nearest,
-  `"halfPixelRound"` = both — all kept in fixed-point, no floats, to
-  avoid JS's truncate-toward-zero-before-shift trap) against the dense
-  3177-3235 scratch trace, summed `diffPixels` over 59 frames: default
-  **8181** (baseline) vs halfPixel 21469 (2.6x worse), round 21933 (2.7x
-  worse), halfPixelRound 11410 (1.4x worse) — **every alternative is
-  worse**, the opposite of the hypothesis's prediction. Cross-checked the
-  default run's own per-tick numbers against E2a-4's banked reads (23px@
-  3178, 2px@3208, 342px@3220 — all three exact matches) to confirm this
-  was an apples-to-apples reproduction before trusting the sweep.
-  GBATEK/Tonc's documented OBJ affine formula (plain integer
-  floor-via-arithmetic-shift, no half-pixel destination offset) is
-  already what `"default"` implements, consistent with the sweep result.
-  **Verdict: hypothesis REJECTED** — the residual's cause is something
-  else, not the sampler's rounding/offset convention. Full writeup
-  (formula citation, fixed-point sweep mechanics, the table, the
-  `halfPixelRound`-beats-neither-alone signal and what it implies) in
-  `docs/dragon-breath-notes.md`'s new "Engine slice E2a-5" section.
-  Pulled (`git checkout -- src/engine/battleScene.ts`) per the
-  no-wrong-pixels rule — `drawSpriteSheetAffineRotate` carries no
-  `variant` param in the committed tree.
-- **Next:** the brief's own step-4 fallback (isolate the magnified-half
-  missing blob: render spawn 7 alone against a blank canvas, diff against
-  an oracle capture with all other content subtracted) was NOT attempted
-  — the hypothesis test consumed the full time budget. That's the next
-  concrete lead, not a fresh sweep of position/scale/sign/lag/box (all
-  now closed questions across E2a-3/4/5). Per #157's own open
-  escalation: this is a 4th bounded attempt with a real, provable
-  negative result (one more hypothesis eliminated) but still no closure —
-  worth the supervisor/user weighing a dedicated non-bounded session
-  (isolated single-spawn pixel trace) against parking `3177-3235` as a
-  named remainder and moving to E2b (3347+)/faint-switch, none of which
-  depend on this gap.
-- **Notes:** no papercuts. Scratch sweep infra (`tools/compare/out/e2a5-*`,
-  gitignored, not committed) reproduced E2a-4's own numbers exactly — no
-  new committed scratch tooling this session (reused E2a-3/E2a-4's
-  `dragonbreath-projectile-window.json` and `dump-dragonbreath-anim.py`
-  unchanged).

@@ -799,16 +799,25 @@ function playerHealthboxHpOverlayForHp(hp: number): ReturnType<typeof composePla
  * the same pre-turn-1 screen) - same null-skip blit shape as
  * `drawSendOutHealthbox`. No-ops (skips the draw entirely) when `hp` is
  * still the anchor full-HP value, since the static base already shows that
- * exact content and the overlay would just repaint it unchanged.
+ * exact content and the overlay would just repaint it unchanged. S7 slice
+ * E2b-2: gained an optional `yOffset` (default 0, every pre-existing caller
+ * unaffected) - the resettled action menu's own healthbox BOUNCES
+ * (`menuIdleHealthboxBounce`'s `y1`/`y2` harvests, region B of
+ * `menuIdleBounce`) as a single unit including its HP digits, so a caller
+ * whose menu is live-bouncing (not frozen) must shift this overlay by the
+ * same `healthboxY2` or the digits float over the un-bounced base position
+ * whenever the bounce is non-zero - found via a dense tail probe of
+ * `turn2-dragonbreath.json`'s post-redraw hold (401px mismatch, ~50% of
+ * ticks, period matching the bounce's own `256/7`-tick sine cycle).
  */
-function drawPlayerHealthboxHpOverlay(fb: Uint8Array, hp: number): void {
+function drawPlayerHealthboxHpOverlay(fb: Uint8Array, hp: number, yOffset = 0): void {
   if (hp === anchorPlayerBattler.hp) return;
   const { width, height, pixels } = playerHealthboxHpOverlayForHp(hp);
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
       const color = pixels[py * width + px];
       if (!color) continue;
-      setPixel(fb, menuHealthboxPlayer.x + px, menuHealthboxPlayer.y + py, color);
+      setPixel(fb, menuHealthboxPlayer.x + px, menuHealthboxPlayer.y + py + yOffset, color);
     }
   }
 }
@@ -4244,14 +4253,18 @@ function dragonBreathResettledBounceTick(t: number, pressTick: number): number {
 }
 
 function drawDragonBreathTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
-  drawActionMenuIdleContent(fb, dragonBreathResettledBounceTick(t, pressTick), true);
+  const bounceTick = dragonBreathResettledBounceTick(t, pressTick);
+  drawActionMenuIdleContent(fb, bounceTick, true);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurn2Hp));
   // Unlike `drawTurnEndSettledMenu` (ROCK_SLIDE's own turn-1->turn-2
   // analogue, where Onix is still full HP at that transition), Onix
   // already carries ENDEAVOR's own damage (117->101) by this point in turn
   // 2 - `menuIdleBase`'s own flat harvest was taken pre-turn-1 (Onix full),
-  // so its digits are stale here too, not just Grovyle's bar.
-  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurnHp);
+  // so its digits are stale here too, not just Grovyle's bar. This bounce
+  // is LIVE (not frozen), so the overlay must track the healthbox's own
+  // bounce offset too, or the digits float free of the bar once it bounces
+  // (S7 slice E2b-2 - see `drawPlayerHealthboxHpOverlay`'s own doc).
+  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurnHp, menuIdleBounce(bounceTick).healthboxY2);
 }
 
 /**

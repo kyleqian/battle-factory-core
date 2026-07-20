@@ -980,3 +980,108 @@ follow-up dense-capture-and-confirm pass for a future worker, not expected
 to need new engine logic since the turn-3 action menu is already fully
 modeled here); faint/forced-switch (out of scope, ISSUES-adjacent); ISSUES
 #22 (idle fixture tick 2135, informational, untouched).
+
+## Engine slice E2b-2 (S7, bounded worker, follows E2b above): the `3347-3846` tail closed — a real live-bounce/HP-overlay bug caught (not the expected "cheap confirm pass"), plus two new same-class named single-tick residuals; `turn2-dragonbreath.json` now **235/235**, full trace (`3121-3846` minus 3 named ticks) green
+
+E2b's own handoff expected this tail to be "likely a cheap dense-capture-
+and-confirm pass" since the turn-3 menu was already fully modeled. That
+turned out to be half right: the region **is** pixel-stable, but a dense
+probe (not the sparser strided sampling E2b's own tests used) surfaced a
+real bug in that already-modeled menu that no earlier trace's capture
+density had ever exercised.
+
+**Method**: per the brief's capture-budget note, probed with scratch
+traces (own `maxCaptures`, not counted against the committed trace's
+budget) before touching `turn2-dragonbreath.json` itself. A stride-5 sweep
+of the whole `3347-3846` span (101 captures) found a **401px mismatch on
+about half the ticks**, in runs of ~15-20 ticks alternating with clean
+runs of similar length — not the single-tick blip E2b's own tick-3337
+residual was. A full stride-1 rescan of the entire span (2×250 captures)
+after the fix (below) confirmed the fix closes every one of those, leaving
+exactly two isolated single-tick 769px mismatches (a different bbox/cause,
+named separately below).
+
+**Bug found and fixed**: the mismatch bbox (x174-221, y89-104) sits inside
+the player healthbox region. `drawDragonBreathTurnEndSettledMenu` draws
+the resettled menu via `drawActionMenuIdleContent(fb, dragonBreathResettled
+BounceTick(t, pressTick), true)` — this bounce is **live** (increments
+every tick), unlike every earlier resettled-menu path this engine already
+modeled (ROCK_SLIDE's own turn-1→2 transition never needed an HP-overlay
+at all, since Onix was still full HP there — see E2b's own note). The
+healthbox's own bounce (`menuIdleBounce`'s region B, `menuIdleHealthboxBounce`'s
+harvested `y1`/`y2` rects) shifts the WHOLE healthbox — bar, border, and
+digits — up to 2px vertically as one unit. But `drawPlayerHealthboxHpOverlay`
+(added in E2b to overdraw Onix's real, non-anchor HP digits) blitted at a
+FIXED `y`, un-aware of the bounce — so whenever `healthboxY2` was non-zero,
+the digit overlay landed on the un-bounced base position, floating free of
+the bounced bar underneath. Every earlier caller of this function only
+ever ran it against a FROZEN bounce tick (`TURN2_KICKOFF_FROZEN_BOUNCE_TICK`,
+which happens to freeze at `healthboxY2=0`) or never needed a nonzero-HP
+overlay at all — so this is a genuine gap in the model, not a regression,
+one only a long LIVE-bounce hold could expose. Fix: `drawPlayerHealthboxHpOverlay`
+gained an optional `yOffset` parameter (default 0, every pre-existing call
+site unaffected); `drawDragonBreathTurnEndSettledMenu` now passes
+`menuIdleBounce(bounceTick).healthboxY2` through. Confirmed by rerunning
+the same stride-5/stride-1 scratch probes: 101/101 and 500/500 (minus the
+two ticks named below) all green after the fix.
+
+**Two new named single-tick residuals (same class as tick 3337, not
+chased further)**: after the fix, the only remaining mismatches in the
+full dense `3347-3846` rescan are single ticks **3465** and **3721** —
+769px each, same signature both times, in the ONIX-sprite bounce region
+(region A, bbox matches `menuIdleOnixBounce`'s own harvest rect almost
+exactly). Traced analytically (not swept): both land exactly where
+`onixSinIndex(n) mod 256 == 64` — the literal `GBA_SINE_TABLE_256`'s peak
+entry (`table[64] = 256`, the exact +1.0 amplitude in Q8.8), recurring
+every **256 ticks** (`3465`, `3465+256=3721`; the next occurrence,
+`3977`, is past this trace's own end at 3846). This is the same "one-off
+real-hardware quirk at a bounce extremum" class E2b's own tick-3337
+residual already named (that one was the bounce task's re-init moment,
+`n=0`; these are the amplitude peak, `n≡128 mod 256`) — the closed-form
+`bounceSin`/`onixSinIndex` formula is textbook-exact here (`(256*1)>>8=1`,
+matching Tonc/GBATEK's own documented `Sin(index,1)` arithmetic), so this
+reads as a genuine hardware/task-timing artifact at that one recurring
+tick rather than a formula bug — RAM-probing the ONIX battler sprite's
+own `sSinIndex` at ticks 3464-3466 would be the next concrete step for
+whoever wants to chase it further, not more formula sweeping (which is
+already provably exact everywhere else in this 500-tick span). Both ticks
+are excluded from `captureFrames` (named gaps, not silent ones) with their
+immediate neighbors (`3460-3470`, `3716-3726` minus the excluded tick
+itself) densely captured to pin the anomaly to exactly that one tick each.
+
+**Trace**: `turn2-dragonbreath.json`'s `captureFrames` extended from 166
+to **235** — every tick `3121-3346` (unchanged, minus 3337) plus the
+`3347-3846` tail sampled at stride 10 (51 ticks, `3347,3357,...,3837,3846`)
+plus two dense 11-tick windows (`3460-3470`, `3716-3726`) pinning the two
+new residuals, minus `3465`/`3721` themselves. Stride 10 was chosen over
+the groundtruth's own stride 20 (`battle1-turn2.json`) since the capture
+budget easily covered it (69 new captures against a ~90-slot budget) and
+the bounce's own ~36.6-tick cycle gets 3-4 samples per cycle at stride 10
+vs 1-2 at stride 20 — cheap insurance against exactly the kind of
+half-the-ticks-wrong bug this session found, which a stride-20 sample
+alone had a real chance of missing entirely (a coin-flip per sample
+whether it lands in a wrong run). **235/235 green.**
+
+**Tier-1**: one new pixel pin (`tests/battleScene.test.ts`, "S7 slice
+E2b-2") — ticks 3347 (`healthboxY2=0`) vs 3357 (`healthboxY2=1`) at the
+same digit-glyph coordinate (192,97), showing the digit is only present at
+rest and shifts away once the live bounce moves off zero, directly
+exercising the new `yOffset` plumbing rather than just re-confirming HP
+values already pinned in E2b.
+
+**Verification**: `npm test` **732/732** (1 new, all others unchanged),
+`npm run build` green. `turn2-dragonbreath.json` **235/235** green.
+Zero regressions: `turn2-endeavor-drain.json` **201/201**, `fight-submenu.json`
+**235/235**, `s6-acceptance.json` **224/228** (this trace's own
+pre-existing, unrelated gap — unchanged, not a regression; all three
+re-run this session, not assumed unchanged).
+
+**Not landed / next**: the `3177-3235` fire-projectile gap (ISSUES #23,
+unchanged, out of scope per the brief); the tick-3337 residual (E2b,
+unchanged); the two new tick-3465/3721 residuals (named above — a direct
+RAM probe of the ONIX sprite's `sSinIndex` at those ticks is the
+concrete next step, not more sweeping); faint/forced-switch (out of
+scope); ISSUES #22 (untouched). With this tail closed, `turn2-
+dragonbreath.json` has no more un-investigated span between `3121` and
+`3846` — everything left in that range is one of these three precisely
+named, deliberately-excluded single ticks.

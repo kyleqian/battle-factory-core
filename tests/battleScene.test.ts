@@ -1132,3 +1132,18 @@ describe("S7 slice E2b: Grovyle's HP-bar drain, hit-flash reuse, text-clear, and
     expect(pixelAtTurn2(3336, 192, 97)).toEqual([66, 66, 66]);
   });
 });
+
+// S7 slice E2b-2 (docs/dragon-breath-notes.md "Engine slice E2b-2"): the
+// `3347-3846` tail - the resettled menu's own idle bounce is LIVE (not
+// frozen, unlike every earlier resettled-menu path this engine already
+// modeled), so `drawPlayerHealthboxHpOverlay`'s HP-digit blit must track
+// the healthbox's own bounce offset (`menuIdleBounce(bounceTick).healthboxY2`)
+// or the digits float free of the bar whenever the bounce is non-zero - a
+// real bug a dense oracle probe of this tail caught (401px mismatch on
+// ~50% of ticks, none of it visible in any earlier/shorter-held trace).
+describe("S7 slice E2b-2: the resettled menu's live bounce carries its own HP-digit overlay (docs/dragon-breath-notes.md)", () => {
+  it("render 3347 (healthboxY2=0, bounce at rest) vs render 3357 (healthboxY2=1) at the same digit-glyph pixel (192,97) - the digit is only there at rest, since the bar (and its digits) shifted up 1px once the live bounce moves off zero", () => {
+    expect(pixelAtTurn2(3347, 192, 97)).toEqual([66, 66, 66]);
+    expect(pixelAtTurn2(3357, 192, 97)).toEqual([255, 255, 222]);
+  });
+});
