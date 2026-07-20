@@ -134,6 +134,46 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- DRAGON_BREATH's own new sprite gfx (S7 slice E2a, docs/dragon-breath-
+// notes.md's asset inventory) ------------------------------------------------
+//
+// gDragonBreathFireSpriteTemplate (src/battle_anim_dragon.c:89-98) loads
+// ANIM_TAG_SMALL_EMBER -> gBattleAnimSpriteGfx_SmallEmber (graphics/
+// battle_anims/sprites/small_ember.png, src/graphics.c:113-114) - 32x160px =
+// 4x20 tiles = 80 8x8 tiles, OAM shape 32x32 (4x4 tiles = 16 tiles/frame,
+// gOamData_AffineDouble_ObjNormal_32x32) -> 5 stacked frames (tile offsets
+// 0/16/32/48/64, sAnim_DragonBreathFire_0/_1 at battle_anim_dragon.c:47-59
+// both ANIMCMD_FRAME into this same sheet, only frames 1/2/3 (offsets
+// 16/32/48) are ever used - a yellow->red ramp, frame 0/4 belong to sibling
+// moves sharing this tag (OUTRAGE/DRAGON_RAGE's own fire templates further
+// up the same file). `_1` is the mirrored (vFlip+hFlip) variant, selected
+// when the attacker is player-side (StartDragonFireTranslation's own
+// GetBattlerSide check) - Onix here, so `_1` is this trace's own variant;
+// both share the same tile/palette source, only the OAM flip flags differ
+// (a renderer concern, not a gfx-extraction one).
+{
+  const smallEmber = decodeIndexedPng(join(REF, "graphics", "battle_anims", "sprites", "small_ember.png"));
+  const smallEmberTiles = sliceTiles(smallEmber);
+  writeJson(join(ASSETS_GEN, "battle-anim-small-ember.json"), {
+    source: "graphics/battle_anims/sprites/small_ember.png (src/graphics.c:113-114, ANIM_TAG_SMALL_EMBER)",
+    tileset: { columns: smallEmberTiles.columns, rows: smallEmberTiles.rows, tiles: smallEmberTiles.tiles.map((t) => [...t.pixels]) },
+    palette: smallEmber.palette,
+    oam: { shape: "32x32", size: "32x32", affine: true },
+    frameSizeTiles: 16,
+    // Frame index = tile offset / 16 (frame occupies tiles [16*i, 16*i+16)).
+    dragonBreathFireAnims: {
+      source: "src/battle_anim_dragon.c:47-98 (sAnim_DragonBreathFire_0/_1, gDragonBreathFireSpriteTemplate)",
+      frames: [1, 2, 3],
+      variant0: "attacker on the opponent side (unmirrored)",
+      variant1: "attacker on the player side (vFlip+hFlip) - Onix's own case this trace",
+    },
+    otherFramesNeedsOnly: {
+      note: "frames 0,4 belong to sibling moves sharing ANIM_TAG_SMALL_EMBER (OUTRAGE/DRAGON_RAGE fire templates, same file) - out of scope for DRAGON_BREATH, not decoded this session",
+      frames: [0, 4],
+    },
+  });
+}
+
 // --- decoded battle_anim_scripts.s step lists -------------------------------
 //
 // Hand-transcribed (not machine-parsed) from data/battle_anim_scripts.s -
