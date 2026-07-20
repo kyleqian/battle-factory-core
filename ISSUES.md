@@ -51,21 +51,6 @@ whole-scene diffs, which is what defeated the "which n" arithmetic in
 attempt #3. Full derivations: `docs/dragon-breath-notes.md`, sections
 "Engine slice E2a-3", "E2a-4", "E2a-5".
 
-## #22 — battle1-fight-submenu-idle.json (groundtruth fixture) tick 2135:
-  769px single-tick residual, NOT closed by #19's harvest fix
-
-Opened 2026-07-19 night (supervisor). After ISSUES #19's root-cause fix
-(healthbox-bounce y2 harvest was 1 row short; that closed fight-submenu
-235/235, turn2-endeavor 77/77, turn2-endeavor-drain 201/201, and this
-fixture's OTHER anomaly at tick 2071), the idle fixture still shows one
-diff: tick 2135, 769px (2.00%), ssimMin -0.16 — an order of magnitude
-larger than #19's 99px row-111 signature, so a different mechanism.
-`docs/battle-turn-notes.md` §11 finding 4 first logged 2071/2135 together
-as "same shape"; that grouping is now half-disproven (2071 was #19's
-family and is fixed; 2135 is not). Not in any committed acceptance trace
-— informational fixture only, low priority. Lead: diff the out/ PNGs at
-2135 (colors + bbox) before hypothesizing.
-
 ## #18 — [POLICY SETTLED 2026-07-19, user decision] sendout tick 1496
   (particle z-order, 3px): accepted/parked permanently; S6 ticked [x] with
   every diff frame individually attributed (3× #5, 1× this entry). The

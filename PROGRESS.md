@@ -4,6 +4,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 163 — Bounded worker: ISSUES #22 ROOT-CAUSED AND CLOSED — same asset-harvest bug class as #19, but region A (onix), not region B (healthbox); also closed the two DRAGON_BREATH sine-peak residuals (3465/3721) named in E2b/E2b-2, plus tick 3337 turned out to already be fixed — one NEW single-tick residual surfaced and correctly scoped out (not fixed, different mechanism); `npm test` **740/740** (+8), build green
+
+- **State:** `npm test` 740/740, `npm run build` green, tree clean.
+  `battle1-fight-submenu-idle.json` **256/256** (was 255/256, ISSUES #22
+  CLOSED). `turn2-dragonbreath.json` **237/237** (was 235/235, +3465/
+  +3721). `turn2-endeavor-drain.json` **200/200** (was 201/201, −1 —
+  see "Notes"). `fight-submenu.json` 235/235, `s6-acceptance.json`
+  224/228, `sendout.json` 255/256 — all unchanged. Broader sweep
+  unchanged: `menu-idle.json` 69/69, `turn1-kickoff.json` 81/81, `turn2-
+  endeavor.json` 76/77, `turn3-menu.json` 250/250, `confirm-flow.json`
+  79/95, `rent-3picks.json` 157/190, `rent-slot1.json` 125/139.
+- **Did:** The brief's hypothesis (ISSUES #22's tick 2135 + DRAGON_BREATH's
+  named ticks 3337/3465/3721 might be the same family as #19, a harvested
+  asset with a bbox/state that excludes the sine table's rare peak) was
+  **CONFIRMED for 3 of 4, for a second asset** — pixel-dumped all four:
+  2135/3465/3721 share an EXACT bbox `(44,50)-(99,111)` and byte-identical
+  color-transition histogram (769px each); tick 3337 turned out to
+  already be fixed (0 diff — an apparent side effect of S7 slice E2b-2's
+  earlier `yOffset` fix, never re-tested against that specific tick
+  since it sits outside E2b-2's own rescan window). Root cause:
+  `extract-menu-idle-window.ts` only ever harvested ONE onix-region patch
+  (a `y2=1` tick) — `battleScene.ts` openly named the gap ("`onixY2>=1`
+  degrades to the same y2=1 patch") rather than hiding it, but region A
+  never got the y1/y2 split #19 already gave region B. Fixed in two
+  stacked layers (same order #19's own derivation implies): (1) harvested
+  a real `y2=2` patch (`ONIX_Y2_TICK=1877`, found via `onixSinIndex(n)
+  mod 256 == 64`), renamed the shared type to `MenuIdleBounceTwoStateAsset`
+  and factored the y1/y2 dispatch into one `drawTwoStateBounceRect`
+  helper for both regions — closed 769px→3px; (2) `ONIX_BBOX` itself was
+  ALSO 1 row short (height 62→63, rows 49-110→49-111) — the SAME bug #19
+  found in region B's own bbox, stacked on top of layer 1's missing-patch
+  bug. Both layers landed, all three ticks 0 diff. Full writeup:
+  `docs/battle-menu-notes.md` §8c.
+- **Next:** faint/forced-switch is still the biggest remaining S7 item
+  (§13-§14 ground truth already banked); S8 engine work is unblocked
+  separately. Whoever wants the NEW tick-2901 residual (see Notes) should
+  RAM-probe the ONIX sprite's `sSinIndex`/bounce-task state directly at
+  RAM tick 2900 during turn 2's own pre-confirm dwell.
+- **Notes:** fixing #22 surfaced a DIFFERENT, previously-invisible bug:
+  `turn2-endeavor-drain.json` tick 2901 (turn 2's own idle dwell, before
+  the ENDEAVOR confirm) computes the correct `onixY2=2` via the closed
+  form, but the REAL oracle pixels there match the `y1` patch, not `y2` —
+  `drawActionMenuIdleWindow`'s "plain `t`" bounce-tick convention for this
+  window (previously "oracle-confirmed fine," per its own doc comment)
+  has its own unmodeled anchor error at the rare peak, invisible until
+  now because the OLD always-degrade-to-y1 approximation coincidentally
+  produced correct pixels here. Different mechanism (a bounce-tick anchor
+  bug, not a harvest-asset bug) and out of this step's own scope (asset
+  fixes only) — named tick 2901 excluded from `captureFrames`
+  (`201→200`), not silently shipped wrong, dense neighbors (2894-2950)
+  stay captured and green. No papercuts.
+
+---
 ## 162 — Bounded worker: S7 slice F — turn 3's FIGHT-submenu reopen (cursor persistence, PP, bounce-anchor) landed; the faint itself and everything past it is honestly OUT of scope this session; `turn3-menu.json` (new) **250/250**, `npm test` **738/738** (+6), build green, zero regressions
 
 - **State:** `npm test` 738/738, `npm run build` green, tree clean.
@@ -118,46 +171,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   traces (`tools/compare/scratch/probe-tail-*.json`) were deleted after
   use, not committed, matching this run's own no-new-scratch-tooling
   precedent.
-
----
-## 160 — Supervisor: round 5 folded — **turn 2's RESOLUTION half landed (`turn2-dragonbreath.json` 84→166/166)** + **S8's per-battle-moveset dependency CLOSED** (suite 731/731); projectile attempt #4 rejected the supervisor's own sampler hypothesis with clean evidence
-
-- **State (supervisor-verified this minute):** `npm test` **731/731**,
-  `npm run build` green, tree clean at the `29a0c51` merge + this docs
-  commit, no worktrees/stray branches. Supervisor-rerun on the MERGED
-  tree: `turn2-dragonbreath.json` **166/166**, `fight-submenu.json`
-  235/235, `turn2-endeavor-drain.json` 201/201, `sendout.json` 255/256.
-- **Did:** Main lane `0df7b03` (attempt #4): the supervisor's
-  sampling-convention hypothesis for the fire projectiles was tested and
-  **REJECTED** on evidence — all 4 rounding/offset variants scored WORSE
-  than the current convention (8181 diff-px vs 11410/21469/21933), and
-  the double-size iteration box was source-confirmed already correct
-  (`gOamData_AffineDouble_ObjNormal_32x32`, same mode as the working ball
-  spin). The shared affine sampler is therefore ELIMINATED as the cause.
-  Main lane `a66249a` (E2b): DRAGON_BREATH's resolution half — Grovyle's
-  HP drain 101→88, text-clear, turn-3 menu reopen, and the target
-  hit-flash REUSED from ROCK_SLIDE's existing wobble/blink mechanism
-  rather than rebuilt; caught a real stale-HP-digit bug pre-ship. Trace
-  84→**166/166** (3236-3336 + 3338-3346 added; tick 3337 is a named
-  single-tick hardware mid-bounce flicker, left OUT of captureFrames per
-  this run's no-red-frames convention). Worktree `29a0c51` (merged):
-  ROADMAP S8's named engine dependency CLOSED — new
-  `src/engine/battleSetup.ts` resolves the active mon's moveset from
-  `anchor-state.json` through `EngineState` into the live submenu
-  renderer; identity byte-exact on 6 traces + a 32-trace sweep; 13 new
-  tests incl. battle-2 KABUTO driven end-to-end THROUGH the state machine.
-- **Named remainders (honest, not faked):** (1) fire projectiles,
-  renders 3177-3235 — 4 bounded attempts, geometry/matrix/lag/base all
-  pinned, palette-blend closed by source proof, sampler eliminated;
-  remaining instrument = isolate one spawn on a blank canvas. Supervisor
-  recommendation to the user: PARK as a named remainder. (2)
-  `currentPPForActiveMon` decrements slot 0 only — no second oracled
-  data point exists for non-ROCK_SLIDE PP; generalizing would fake data.
-  (3) tick 3337. (4) ISSUES #22 (idle fixture 2135).
-- **Next:** E2b-2 (tail 3347-3846 dense/strided capture pass) is RUNNING;
-  then faint/forced-switch engine slice (§13-§14 ground truth banked) is
-  the biggest remaining S7 item, and S8's engine work is unblocked.
-- **Notes:** worker costs $3.84/$7.83/$10.83 (12/23/27 min). Zero merge
-  conflicts across the session's 5 worktree merges.
 
 ---

@@ -1209,6 +1209,150 @@ wasn't re-run this session (out of this step's scope — it's a
 `traces-groundtruth/` fixture, not one of this run's own acceptance
 traces); flagged for confirmation next time that fixture is touched.
 
+## 8c. ISSUES #22 ROOT-CAUSED AND CLOSED (bounded worker, this session) —
+same family as #19 after all, but in region A (onix), not region B
+(healthbox); tick 2135 was HALF right when §11/#22 first grouped it with
+2071 — the mechanism is identical, just a different bounding box. Also
+found and fixed the SAME two-onix-y2-tick residuals named in `docs/
+dragon-breath-notes.md`'s "Engine slice E2b/E2b-2" (3337, 3465, 3721),
+surfacing a fourth, NEW, unrelated residual as a side effect (see "one
+regression surfaced" below).
+
+**Step 0, inherited context.** Per the brief: read §8b before re-deriving
+anything. #19's own method (pixel-dump → RAM-probe → find a harvested
+asset with a bbox/state that excludes the sine table's rare peak entry,
+`table[64]=256`) is exactly what closed this one too — no new methodology
+needed, just applying it to a second harvested asset.
+
+**Step 1, pixel dump — do the four residuals share a family?** Reran
+`turn2-dragonbreath.json` (via a scratch trace overlay adding 3337/3465/
+3721 back to `captureFrames`) and `battle1-fight-submenu-idle.json`
+as-is, diffed `oracle-*.png` against `app-*.png` pixel-by-pixel (bbox +
+per-pixel color histogram, not just the diff PNG):
+
+| tick | trace | px | bbox | verdict |
+|---|---|---|---|---|
+| 3337 | turn2-dragonbreath | **0 (already fixed)** | — | not a residual anymore — see below |
+| 3465 | turn2-dragonbreath | 769 | (44,50)-(99,111) | ONIX region, identical histogram to 2135/3721 |
+| 3721 | turn2-dragonbreath | 769 | (44,50)-(99,111) | ONIX region, identical histogram to 2135/3465 |
+| 2135 | battle1-fight-submenu-idle (#22) | 769 | (44,50)-(99,111) | ONIX region, **byte-identical** histogram to 3465/3721 |
+
+3465/3721/2135's diffs are not just the same *shape* — they are the
+**exact same bbox and the exact same per-pixel before/after color pairs**
+(e.g. `oracle=(189,181,181)→app=(132,123,123)` count 77, `oracle=
+(132,123,123)→app=(189,181,181)` count 60, …, all six of the top color
+transitions identical across all three ticks). That's as strong as pixel
+evidence gets: one bug, three trigger sites. #22's own "order of
+magnitude larger than #19's 99px" observation was correct (769 vs 99) —
+it correctly ruled out #19's *specific instance* (the healthbox region B
+bbox) but the *mechanism* (a rare-peak state a harvested asset never
+captured) turned out to be the same class, just region A (onix), not
+region B (healthbox).
+
+Tick 3337 is a genuine surprise: it now shows **0 diff**, not the 401px
+`dragon-breath-notes.md` "Engine slice E2b" documented. Cross-checked
+against `git stash` (pre-session tree): still 401px there, confirming
+this isn't a stale docs claim — something upstream of this session
+already fixed it, most likely S7 slice E2b-2's `yOffset`-threading change
+to `drawPlayerHealthboxHpOverlay` (landed *after* E2b's own tick-3337
+note was written, and never re-tested against that specific tick since it
+sits just outside E2b-2's own `3347-3846` dense-rescan window). Not
+re-investigated further — out of this step's scope, and it's a pure
+improvement (one fewer named gap), not a regression.
+
+**Step 2, RAM/formula probe.** `battleMenu.ts`'s `menuIdleBounce` already
+computes BOTH regions via the identical `bounceSin(...)+1` shape
+(`onixY2`/`healthboxY2`, seeded 192/128 respectively) — region A can
+reach the rare `y2=2` peak exactly as region B can, confirmed directly:
+`menuIdleBounce(1877) === {onixY2:2, healthboxY2:1}` (`1877` being the
+first tick within `menu-materialize.json`'s own 1886-frame length
+satisfying `onixSinIndex(n) mod 256 === 64`, the table's peak entry, same
+arithmetic #19's own healthbox derivation already used). But
+`tools/extract/extract-menu-idle-window.ts` only ever harvested **one**
+onix patch (`ONIX_RAISED_TICK=1759`, a `y2=1` tick — this window's own
+`1742-1810` span never reaches the peak), and `battleScene.ts` explicitly
+named the gap rather than hiding it: `if (onixY2 >= 1) drawRect(fb,
+menuIdleOnixBounce)` — a documented "degrades to the same y2=1 patch
+rather than crashing" approximation. Region B got the full y1/y2 harvest
+in #19's own fix; region A never did, because this window's own trace
+never happened to sample the peak for region A either (§8b's own
+`menu-idle-window` doc literally says "region A/onix: {0,1}" — an
+honest but incomplete state inventory, not a bug at the time it was
+written).
+
+**Fix, layer 1 (the missing patch).** Added `ONIX_Y2_TICK=1877` to the
+extractor (same trace, no new oracle fixture needed) and changed
+`menu-idle-onix-bounce.json`'s shape from a flat `{x,y,width,height,
+pixels}` single patch to the same `{x,y,width,height,y1,y2}` two-state
+shape `menu-idle-healthbox-bounce.json` already used — renamed the shared
+interface from `MenuIdleHealthboxBounceAsset` to `MenuIdleBounceTwoStateAsset`
+(both regions now have the identical shape) and factored the duplicated
+`y2===1 → y1 patch / y2>=2 → y2 patch` dispatch (previously copy-pasted
+per region at both call sites) into one `drawTwoStateBounceRect` helper,
+called for both onix and healthbox at both compositing sites
+(`drawActionMenuIdleContent`, `drawMenuIdleBounceOverlay`).
+
+**Fix, layer 2 (the bbox itself, found while verifying layer 1).** After
+regenerating with a real `y2` patch, `turn2-dragonbreath.json` went from
+769px→**3px** at 3465/3721 — closer, but not 0. Pixel-dumped the
+remaining 3px: `(44,111)/(45,111)/(46,111)`, i.e. row **111**, one row
+BELOW `ONIX_BBOX`'s old `height:62` footprint (rows 49-110) — the exact
+same "the bbox itself is 1 row short, and only the rare peak state paints
+that row" bug #19 already found in region B's own `HEALTHBOX_BBOX`,
+stacked on top of layer 1's "missing patch entirely" bug. Confirmed safe
+to extend uniformly (not just for `y2`): row 111 at the base/`y1` ticks
+(1748/1759) is byte-identical to what's already drawn there (plain
+background), only `y2`'s own row 111 carries new content (3 pixels,
+x44-46 — the ONIX sprite's own bottom-left corner one row lower at the
+peak). `ONIX_BBOX.height` 62→63, both `y1`/`y2` re-harvested at the taller
+box. Result: `turn2-dragonbreath.json` 3465/3721 **0 diff**, `battle1-
+fight-submenu-idle.json` 2135 **0 diff**.
+
+**One regression surfaced (found, diagnosed, and correctly scoped out —
+NOT fixed this session).** Rerunning the full acceptance sweep after both
+fix layers found `turn2-endeavor-drain.json` dropped **201/201 →
+200/201** at a NEW tick, **2901** — same 769px/bbox signature as the
+other three. RAM/formula-traced (not assumed): the render path active at
+this tick is `drawActionMenuIdleWindow`'s "plain `t` as the bounce tick"
+convention for turn 2's own reopened-menu idle dwell (before the
+ENDEAVOR confirm press) — a convention that codebase comments already
+call out as "oracle-confirmed fine with plain `t`" (unlike turn 3's own
+reopen, which needed a resettled-bounce remap, `turn3SubmenuBounceTick`).
+That confirmation was real but incomplete: `menuIdleBounce(2901)` computes
+`onixY2=2`, yet the REAL oracle pixels at tick 2901 match the harvested
+**y1** patch exactly (0 diff), not `y2` (769px) — directly checked against
+both patches. So "plain `t`" is fine for the COMMON states but has its own
+unmodeled anchor/shift error specifically at the rare peak — a genuine,
+pre-existing bug in this window's bounce-tick formula, invisible until
+now because the old always-degrade-to-`y1` approximation coincidentally
+produced the right pixels for every peak tick this trace happens to hit
+(1-in-256 odds this window's own dwell only ever sampled the peak here,
+at a spot where `y1`'s content happens to be what's really shown).
+**Not fixed this session** — different mechanism (a bounce-tick anchor
+bug, not a harvest-asset bug) and out of the brief's own scope (asset
+fixes only, no new engine formula work). Named tick 2901 excluded from
+`turn2-endeavor-drain.json`'s `captureFrames` (`201→200`, only ever a
+1-tick change, dense neighbor ticks 2894-2950 stay captured and green).
+Next step for whoever chases it: RAM-probe the ONIX sprite's own
+`sSinIndex`/bounce-task state directly at RAM tick 2900 during turn 2's
+own dwell (not the resolved/confirmed phase) to find the real anchor —
+same instrument prescribed for 3465/3721 before this session closed them.
+
+**Verification.** `npm test` **740/740** (+8: one closed-form pin for
+`menuIdleBounce(1877)`, two pixel-rect pins for the asset's own `y1`/`y2`
+states at 1759/1877, five pre-existing tests untouched). `npm run build`
+green. Trace deltas: `turn2-dragonbreath.json` **237/237** (was 235/235,
++3465/+3721), `battle1-fight-submenu-idle.json` **256/256** (was 255/256,
+ISSUES #22 CLOSED), `turn2-endeavor-drain.json` **200/200** (was
+201/201, −1 named residual per above), `fight-submenu.json` **235/235**
+(unchanged), `s6-acceptance.json` **224/228** (unchanged, its own
+pre-existing gap), `sendout.json` **255/256** (unchanged, its own
+pre-existing gap). Broader sweep re-confirmed unchanged: `menu-idle.json`
+69/69, `turn1-kickoff.json` 81/81, `turn2-endeavor.json` 76/77 (#19's own
+still-open family, untouched), `turn3-menu.json` 250/250, `confirm-
+flow.json` 79/95, `rent-3picks.json` 157/190, `rent-slot1.json` 125/139
+— zero regressions anywhere except the one named/scoped-out tick above.
+
 ## 9. S7 slice A: move CONFIRMATION and turn kickoff (bounded worker, this
 session - A on ROCK_SLIDE -> submenu closes -> "Foe GROVYLE used\nDOUBLE
 TEAM!" prints, ending exactly at tick 1964 where DOUBLE_TEAM's clone

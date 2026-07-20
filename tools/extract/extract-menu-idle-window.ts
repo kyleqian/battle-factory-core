@@ -25,13 +25,14 @@
 // session against the literal `gSineTable` - see that module's own doc
 // comment) selects which patch(es) to composite at any tick; this
 // extractor only supplies the pixel content for each of that generator's
-// reachable states within the observed window (region A/onix: {0,1},
-// region B/healthbox: {0,1,2} - the y=2 states are the dossier's own named
-// "tick-1813-class transient", rare within a ~256-tick period but a real,
-// distinct state, not noise).
+// reachable states: region A/onix and region B/healthbox BOTH reach {0,1,2}
+// (ISSUES #22, docs/battle-menu-notes.md §8c - region A's own y=2 state was
+// missed for a full session+ before that, see ONIX_Y2_TICK's own comment
+// below) - the y=2 states are rare (once per ~256-tick sine lap) but real,
+// distinct states, not noise.
 //
 // Regenerate: requires the live oracle service (POKEBENCH_ORACLE_URL, see
-// AGENTS.md) - fetches ticks 1742/1748/1759/1749/1813 of the shared
+// AGENTS.md) - fetches ticks 1742/1748/1759/1877/1749/1813 of the shared
 // 40-segment button script directly (same script as every other trace in
 // this window's family; only captureFrames differ).
 //
@@ -53,8 +54,31 @@ const BASE_TICK = 1748; // atomic menu draw, both bounce regions at rest (onix=0
 // Region bbox harvest sources - a single representative tick per state,
 // pixel-derived this session (full-frame diff against BASE_TICK's own
 // capture; see tools/compare/scratch/menu-idle/fetch_and_diff.mjs).
-const ONIX_BBOX = { x: 44, y: 49, width: 56, height: 62 }; // region A: (44,49)-(99,110) inclusive
-const ONIX_RAISED_TICK = 1759; // onix=1, healthbox=0 - only the onix bbox differs from BASE_TICK here
+const ONIX_BBOX = { x: 44, y: 49, width: 56, height: 63 }; // region A: (44,49)-(99,111) inclusive
+const ONIX_Y1_TICK = 1759; // onix=1, healthbox=0 - only the onix bbox differs from BASE_TICK here
+// ISSUES #22 root cause (docs/battle-menu-notes.md §8c): region A (onix) can
+// reach the SAME rare y2=2 sine-peak state region B does (`menuIdleBounce`
+// computes both via the identical `bounceSin(...)+1` shape) - but this
+// extractor only ever harvested a single onix patch (this window's own
+// 1742-1810 span never reaches it - see the module doc above), and
+// `battleScene.ts` silently degraded any `onixY2 >= 1` to that one y2=1
+// patch. TWO stacked instances of #19's own bug class, found in sequence
+// this session: (1) the missing y2 patch itself (769px, bbox (44,50)-
+// (99,111)) - pixel-confirmed identical across THREE independent oracle
+// captures: tick 1877 of this very trace, tick 2135 of `traces-groundtruth/
+// battle1-fight-submenu-idle.json`, and ticks 3465/3721 of `turn2-
+// dragonbreath.json`; (2) even after harvesting a real y2 patch, `ONIX_BBOX`
+// itself was still 1 row short (height 62, rows 49-110) for the SAME reason
+// #19's `HEALTHBOX_BBOX` was: only the rare y2=2 state paints row 111 (3px,
+// x44-46 - RAM/pixel-confirmed base/y1 states' own row 111 is identical,
+// unpainted background at ticks 1748/1759), so height=63 (rows 49-111) is
+// safe for every state, not just y2. `n ≡ 128 mod 256` in `onixSinIndex`
+// (`192 + 7n ≡ 64 mod 256`, the table's peak entry) - the first tick within
+// THIS trace's own 1886-frame length satisfying that is 1877, confirmed
+// directly against `battleMenu.ts`'s own `menuIdleBounce(1877)` ===
+// `{onixY2:2, healthboxY2:1}` (healthbox's own state at this tick is
+// irrelevant - only the onix bbox is harvested here).
+const ONIX_Y2_TICK = 1877;
 // ISSUES #19 root cause (docs/battle-menu-notes.md §8b): the original
 // height=37 bbox (127,74)-(229,110) was cropped to match the y=0/y=1 states'
 // own footprint without independently verifying the rare y=2 state's true
@@ -70,7 +94,7 @@ const HEALTHBOX_BBOX = { x: 127, y: 74, width: 103, height: 38 }; // region B: (
 const HEALTHBOX_Y1_TICK = 1749; // onix=0, healthbox=1 (the dossier's own tick-1749 "blip")
 const HEALTHBOX_Y2_TICK = 1813; // onix=1, healthbox=2 (the dossier's own tick-1813 rare transient, ISSUES #19's root cause)
 
-trace.captureFrames = [BLANK_TICK, BASE_TICK, ONIX_RAISED_TICK, HEALTHBOX_Y1_TICK, HEALTHBOX_Y2_TICK];
+trace.captureFrames = [BLANK_TICK, BASE_TICK, ONIX_Y1_TICK, ONIX_Y2_TICK, HEALTHBOX_Y1_TICK, HEALTHBOX_Y2_TICK];
 const result = await runOracleTrace(trace);
 const byTick = new Map(result.captures.map((c) => [c.frame, c]));
 
@@ -101,14 +125,14 @@ function writeRect(outPath: string, x: number, y: number, width: number, height:
 
 writeRect("src/assets/gen/menu-idle-blank.json", 0, 0, 240, 160, need(BLANK_TICK).rgba);
 writeRect("src/assets/gen/menu-idle-base.json", 0, 0, 240, 160, need(BASE_TICK).rgba);
-writeRect(
+
+const onixY1 = cropRgb(need(ONIX_Y1_TICK).rgba, ONIX_BBOX.x, ONIX_BBOX.y, ONIX_BBOX.width, ONIX_BBOX.height);
+const onixY2 = cropRgb(need(ONIX_Y2_TICK).rgba, ONIX_BBOX.x, ONIX_BBOX.y, ONIX_BBOX.width, ONIX_BBOX.height);
+writeFileSync(
   "src/assets/gen/menu-idle-onix-bounce.json",
-  ONIX_BBOX.x,
-  ONIX_BBOX.y,
-  ONIX_BBOX.width,
-  ONIX_BBOX.height,
-  need(ONIX_RAISED_TICK).rgba,
+  `${JSON.stringify({ x: ONIX_BBOX.x, y: ONIX_BBOX.y, width: ONIX_BBOX.width, height: ONIX_BBOX.height, y1: onixY1, y2: onixY2 })}\n`,
 );
+console.log(`wrote src/assets/gen/menu-idle-onix-bounce.json (${ONIX_BBOX.width}x${ONIX_BBOX.height}, 2 states)`);
 
 const hbY1 = cropRgb(need(HEALTHBOX_Y1_TICK).rgba, HEALTHBOX_BBOX.x, HEALTHBOX_BBOX.y, HEALTHBOX_BBOX.width, HEALTHBOX_BBOX.height);
 const hbY2 = cropRgb(need(HEALTHBOX_Y2_TICK).rgba, HEALTHBOX_BBOX.x, HEALTHBOX_BBOX.y, HEALTHBOX_BBOX.width, HEALTHBOX_BBOX.height);

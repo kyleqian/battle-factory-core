@@ -606,8 +606,8 @@ interface BattleBackSpriteAsset {
 }
 /** Same flat-opaque-RGB-rectangle shape as `SendOutHealthboxContentAsset` (§7.9's harvest pattern), reused here for a WHOLE-FRAME harvest (`x:0,y:0,width:240,height:160`) - see `tools/extract/extract-menu-idle-window.ts`'s own module doc for why this window harvests full frames/regions instead of layered sub-draws. */
 type MenuIdleFrameAsset = SendOutHealthboxContentAsset;
-/** Region B (healthbox)'s two "raised" bounce states (`y2=1`/`y2=2`, docs/battle-menu-idle-notes.md §1) - same bbox, two pixel contents. */
-interface MenuIdleHealthboxBounceAsset {
+/** Region A (onix) / region B (healthbox)'s two "raised" bounce states (`y2=1`/`y2=2`, docs/battle-menu-idle-notes.md §1) - same bbox, two pixel contents each (ISSUES #22, docs/battle-menu-notes.md §8c: region A needs the same y1/y2 split region B already had - its own rare y2=2 sine-peak state paints different pixels than y2=1, not a safe degrade). */
+interface MenuIdleBounceTwoStateAsset {
   x: number;
   y: number;
   width: number;
@@ -830,8 +830,8 @@ const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 const menuIdleBlank = menuIdleBlankAsset as MenuIdleFrameAsset;
 const menuIdleBase = menuIdleBaseAsset as MenuIdleFrameAsset;
-const menuIdleOnixBounce = menuIdleOnixBounceAsset as MenuIdleFrameAsset;
-const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleHealthboxBounceAsset;
+const menuIdleOnixBounce = menuIdleOnixBounceAsset as MenuIdleBounceTwoStateAsset;
+const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleBounceTwoStateAsset;
 const fightSubmenuWindow = fightSubmenuWindowAsset as FightSubmenuWindowAsset;
 
 /** This window's own trace-tick origin - `elapsed` 0 == trace tick 1040 (tools/compare/traces-groundtruth/battle1-scene-dense.json's own first captured frame). */
@@ -3328,6 +3328,15 @@ function drawRect(fb: Uint8Array, asset: MenuIdleFrameAsset): void {
   }
 }
 
+/** Draws a `MenuIdleBounceTwoStateAsset` region's `y1` patch at `y2===1`, its `y2` patch at `y2>=2`, nothing at `y2===0` - shared by both onix and healthbox regions (ISSUES #22, docs/battle-menu-notes.md §8c: both regions reach the same rare `y2=2` sine-peak state and need the same two-patch treatment, not just healthbox). */
+function drawTwoStateBounceRect(fb: Uint8Array, asset: MenuIdleBounceTwoStateAsset, y2: number): void {
+  if (y2 === 1) {
+    drawRect(fb, { x: asset.x, y: asset.y, width: asset.width, height: asset.height, pixels: asset.y1 });
+  } else if (y2 >= 2) {
+    drawRect(fb, { x: asset.x, y: asset.y, width: asset.width, height: asset.height, pixels: asset.y2 });
+  }
+}
+
 /**
  * The settled first-action-menu window (docs/battle-menu-idle-notes.md,
  * trace ticks `MENU_IDLE_BLANK_START_TICK` (1742) on) - the teal blank box,
@@ -3336,11 +3345,12 @@ function drawRect(fb: Uint8Array, asset: MenuIdleFrameAsset): void {
  * `tools/extract/extract-menu-idle-window.ts`'s own module doc for why);
  * `menuIdleBounce` (`battleMenu.ts`) is the real closed-form generator that
  * selects which region patch(es) to composite - not a per-tick replay
- * table. Region A (onix) only ever reaches `y2=1` within this window (its
- * rare `y2=2` tick, per the closed-form, falls outside 1742-1810 - see
- * `battleMenu.ts`'s own doc comment); if a future wider window needs it,
- * `onixY2 >= 1` degrades to the same `y2=1` patch rather than crashing, a
- * named (not silent) approximation for that unmodeled state.
+ * table. Both regions (onix and healthbox) reach the rare `y2=2` sine-peak
+ * state on a ~256-tick period (ISSUES #22, docs/battle-menu-notes.md §8c) -
+ * region A's own `y2=2` tick falls outside this window's own 1742-1810 span,
+ * so its harvest is sourced from a later tick of the same underlying trace
+ * (`ONIX_Y2_TICK`, `extract-menu-idle-window.ts`), not from this window
+ * itself.
  */
 /** The settled base (window/text content) plus the onix/healthbox idle bounce, using `bounceTick` (not necessarily `t` itself - see `drawFightSubmenuWindow`'s own callers, which pass a shifted tick for the FIGHT-submenu window's own two extra DMA-wait ticks of drift) to select the bounce phase. Factored out of `drawActionMenuIdleWindow` so the FIGHT-submenu slice can reuse the identical base+bounce compositing with a different tick input for the bounce alone. */
 /**
@@ -3378,12 +3388,8 @@ function drawMenuIdleBaseWithOpponentHp(fb: Uint8Array, turn1Resolved: boolean, 
 function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number, turn1Resolved: boolean, turn2Resolved: boolean = false): void {
   drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved, turn2Resolved);
   const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
-  if (onixY2 >= 1) drawRect(fb, menuIdleOnixBounce);
-  if (healthboxY2 === 1) {
-    drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y1 });
-  } else if (healthboxY2 >= 2) {
-    drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y2 });
-  }
+  drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
+  drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
   // S7 slice F: Onix's own HP overlay (117->101, ENDEAVOR's own settle) is
   // stale in `menuIdleBase`'s flat harvest just like Grovyle's bar - applied
   // AFTER the bounce patches above so it isn't overdrawn by the healthbox's
@@ -3533,12 +3539,8 @@ function drawFightSubmenuChrome(fb: Uint8Array, displayCursor: FightSubmenuSlot,
 /** The onix/healthbox bounce overlay alone (`drawActionMenuIdleContent`'s own second half, factored out so `drawFightSubmenuWindow`'s frozen-bounce branch can reuse it without redrawing `menuIdleBase`). */
 function drawMenuIdleBounceOverlay(fb: Uint8Array, bounceTick: number): void {
   const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
-  if (onixY2 >= 1) drawRect(fb, menuIdleOnixBounce);
-  if (healthboxY2 === 1) {
-    drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y1 });
-  } else if (healthboxY2 >= 2) {
-    drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y2 });
-  }
+  drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
+  drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
 }
 
 /**

@@ -69,6 +69,10 @@ describe("battleMenu: menuIdleBounce closed-form generator vs the dossier's RAM-
     expect(menuIdleBounce(1813)).toEqual({ onixY2: 1, healthboxY2: 2 });
   });
 
+  it("region A has the SAME rare y2=2 sine-peak transient as region B (ISSUES #22, docs/battle-menu-notes.md §8c) - tick 1877, further past this window's own trace than region B's own 1813", () => {
+    expect(menuIdleBounce(1877)).toEqual({ onixY2: 2, healthboxY2: 1 });
+  });
+
   it("is a real closed-form generator, not a lookup table: distinct sinIndex sequences for regions A and B (seeded 192/128, +7/tick) never re-collide back to the same relative phase within this window (drift, per docs/battle-menu-idle-notes.md §2)", () => {
     // Sanity-check the +7 mod 256 step by re-deriving one point analytically:
     // region B's sinIndex at RAM tick 1748+18=1766 is (128+7*18)&0xFF = 254,
@@ -103,8 +107,14 @@ describe("battleMenu: idle window render matches its own committed pixel-harvest
     assertRectMatches(1748, menuIdleBaseAsset);
   });
 
-  it("region A raised (tick 1759) matches the harvested onix-bounce patch", () => {
-    assertRectMatches(1759, menuIdleOnixBounceAsset);
+  it("region A raised to y2=1 (tick 1759) matches the harvested onix-bounce patch's y1 state", () => {
+    const { x, y, width, height, y1 } = menuIdleOnixBounceAsset;
+    assertRectMatches(1759, { x, y, width, height, pixels: y1 });
+  });
+
+  it("region A raised to y2=2 (tick 1877, the rare sine-peak transient - ISSUES #22, docs/battle-menu-notes.md §8c) matches the harvested onix-bounce patch's y2 state, NOT its y1 state", () => {
+    const { x, y, width, height, y2 } = menuIdleOnixBounceAsset;
+    assertRectMatches(1877, { x, y, width, height, pixels: y2 });
   });
 
   it("region B raised to y2=1 (tick 1749, the blip) matches the harvested healthbox-bounce patch's y1 state", () => {

@@ -1,3 +1,45 @@
+## 160 — Supervisor: round 5 folded — **turn 2's RESOLUTION half landed (`turn2-dragonbreath.json` 84→166/166)** + **S8's per-battle-moveset dependency CLOSED** (suite 731/731); projectile attempt #4 rejected the supervisor's own sampler hypothesis with clean evidence
+
+- **State (supervisor-verified this minute):** `npm test` **731/731**,
+  `npm run build` green, tree clean at the `29a0c51` merge + this docs
+  commit, no worktrees/stray branches. Supervisor-rerun on the MERGED
+  tree: `turn2-dragonbreath.json` **166/166**, `fight-submenu.json`
+  235/235, `turn2-endeavor-drain.json` 201/201, `sendout.json` 255/256.
+- **Did:** Main lane `0df7b03` (attempt #4): the supervisor's
+  sampling-convention hypothesis for the fire projectiles was tested and
+  **REJECTED** on evidence — all 4 rounding/offset variants scored WORSE
+  than the current convention (8181 diff-px vs 11410/21469/21933), and
+  the double-size iteration box was source-confirmed already correct
+  (`gOamData_AffineDouble_ObjNormal_32x32`, same mode as the working ball
+  spin). The shared affine sampler is therefore ELIMINATED as the cause.
+  Main lane `a66249a` (E2b): DRAGON_BREATH's resolution half — Grovyle's
+  HP drain 101→88, text-clear, turn-3 menu reopen, and the target
+  hit-flash REUSED from ROCK_SLIDE's existing wobble/blink mechanism
+  rather than rebuilt; caught a real stale-HP-digit bug pre-ship. Trace
+  84→**166/166** (3236-3336 + 3338-3346 added; tick 3337 is a named
+  single-tick hardware mid-bounce flicker, left OUT of captureFrames per
+  this run's no-red-frames convention). Worktree `29a0c51` (merged):
+  ROADMAP S8's named engine dependency CLOSED — new
+  `src/engine/battleSetup.ts` resolves the active mon's moveset from
+  `anchor-state.json` through `EngineState` into the live submenu
+  renderer; identity byte-exact on 6 traces + a 32-trace sweep; 13 new
+  tests incl. battle-2 KABUTO driven end-to-end THROUGH the state machine.
+- **Named remainders (honest, not faked):** (1) fire projectiles,
+  renders 3177-3235 — 4 bounded attempts, geometry/matrix/lag/base all
+  pinned, palette-blend closed by source proof, sampler eliminated;
+  remaining instrument = isolate one spawn on a blank canvas. Supervisor
+  recommendation to the user: PARK as a named remainder. (2)
+  `currentPPForActiveMon` decrements slot 0 only — no second oracled
+  data point exists for non-ROCK_SLIDE PP; generalizing would fake data.
+  (3) tick 3337. (4) ISSUES #22 (idle fixture 2135).
+- **Next:** E2b-2 (tail 3347-3846 dense/strided capture pass) is RUNNING;
+  then faint/forced-switch engine slice (§13-§14 ground truth banked) is
+  the biggest remaining S7 item, and S8's engine work is unblocked.
+- **Notes:** worker costs $3.84/$7.83/$10.83 (12/23/27 min). Zero merge
+  conflicts across the session's 5 worktree merges.
+
+---
+
 ## 159 — Bounded worker: S7 slice E2b — DRAGON_BREATH's RESOLUTION half landed (HP-bar drain, hit-flash reuse, text-clear, turn-3 menu reopen): `turn2-dragonbreath.json` extended 3121-3176/3236-3263 (84/84) -> +3264-3346 minus one named tick, **166/166 green**; `npm test` **718/718** (+7 Tier-1), build green, zero regressions
 
 - **State:** `npm test` 718/718, `npm run build` green, tree clean.
