@@ -4,6 +4,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 141 — Supervisor: swap-YES scout merged — **the factory swap screen is fully ground-truthed** (entry fade → party picker → popup → opponent picker → accept → completed swap → battle 2's menu: swapped-in GROVYLE 143/143 vs KABUTO); S8 ground truth is now essentially complete on both swap branches
+
+- **State:** `npm test` **669/669**, `npm run build` green, tree clean at
+  this merge; no worktrees, no unmerged branches.
+- **Did:** verified (suite in worktree, 34081-frame trace re-run, final
+  frame visually confirmed) and merged worker/wt-20260719-181044:
+  `battle1-swapyes-{a,b}.json` (30001f/235c, 34081f/194c, verbatim
+  prefix off battle1-winline-b-swap.json's committed swap-offer prompt
+  at tick 29601, both twice-run byte-identical), §17 (swap-screen UI
+  sequence + asset inventory: nearly all draft-screen assets literally
+  shared; only action-button pills + swap text bank are new). Worker
+  honestly deleted a broken `rentalMons[]` probe (offset bug, §17 open
+  item) rather than commit implausible data; YES-branch LCG ledger also
+  still open.
+- **Next:** (1) main lane: ENDEAVOR squish X-axis via RAM-probing the
+  real affine matrices (§15a's own recommendation) — second landing
+  attempt; if it fails again, park the anim and move to E2/#19/#20;
+  (2) worktree: §17 debt (rentalMons offset fix + YES-branch ledger) +
+  battle-2 opening-turns ground truth; (3) wind-down prep ~21:45.
+- **Notes:** none.
+
+---
 ## 140 — Bounded worker: S7 slice E1d — ENDEAVOR squish wired + oracle-fitted, X-axis MISFITS — reverted, nothing landed; suite unchanged **669/669** (`docs/battle-menu-notes.md` §15a FITTED addendum has the full empirical writeup)
 
 - **State:** `npm test` **669/669** (unchanged), `npm run build` green,
@@ -81,31 +103,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   mechanisms here made a rushed pixel-fit likelier to land wrong or red
   than useful, so this session banked the (expensive, otherwise-repeated)
   research instead. No papercuts.
-
----
-## 138 — Supervisor: WIN-chain scout merged — **battle 1's WIN, swap decline, and battle 2's first action menu fully ground-truthed at tick 33031** (11969 under the new 45000 cap); S8's acceptance chain is now provably pinnable
-
-- **State:** `npm test` **669/669**, `npm run build` green, tree clean at
-  merge `2eed99a`; no worktrees, no unmerged branches.
-- **Did:** verified (suite in worktree, 33031-frame trace re-run on the
-  restarted service, final frame visually confirmed: KABUTO vs healed
-  ONIX 117/117 at a settled action menu) and merged the worktree scout:
-  Magby chosen over Bayleef on RAM-dumped evidence, Murkrow killed in 2
-  turns (Magby survives 27/138), burn residual pinned `floor(maxHP/8)`,
-  full victory text → free heal → GO ON → swap offer declined →
-  battle 2 = FISHERMAN JENSON / KABUTO. Traces
-  `battle1-winline-b{,-swap}.json` + 3 RAM dumps + §16 (ledger
-  discipline). Load-bearing methodology note (§16): OUTSIDE battle,
-  idle-timing DOES shift RNG (per-VBlank advance resumes) — battle 2's
-  opponent identity is timing-sensitive; scripts extending the chain
-  must reuse the committed segments verbatim. Also verified+accepted
-  #137 (slice E1b drain+digits, turn2-endeavor-drain 105/106; ENDEAVOR
-  anim descoped on source evidence — real custom assets).
-- **Next:** (1) main lane: ENDEAVOR attack-anim asset slice (ticks
-  3003-3094, `Move_ENDEAVOR` at battle_anim_scripts.s:3789) to complete
-  turn 2's first half; then E2 (DRAGON_BREATH window 3129-3846); (2)
-  worktree lane: swap-YES branch + factory swap screen ground truth +
-  asset inventory (S8's only un-scouted UI); (3) ISSUES #19 family
-  (3 traces now), #20 rewire remainder.
-- **Notes:** none.
-

@@ -1,3 +1,29 @@
+## 138 — Supervisor: WIN-chain scout merged — **battle 1's WIN, swap decline, and battle 2's first action menu fully ground-truthed at tick 33031** (11969 under the new 45000 cap); S8's acceptance chain is now provably pinnable
+
+- **State:** `npm test` **669/669**, `npm run build` green, tree clean at
+  merge `2eed99a`; no worktrees, no unmerged branches.
+- **Did:** verified (suite in worktree, 33031-frame trace re-run on the
+  restarted service, final frame visually confirmed: KABUTO vs healed
+  ONIX 117/117 at a settled action menu) and merged the worktree scout:
+  Magby chosen over Bayleef on RAM-dumped evidence, Murkrow killed in 2
+  turns (Magby survives 27/138), burn residual pinned `floor(maxHP/8)`,
+  full victory text → free heal → GO ON → swap offer declined →
+  battle 2 = FISHERMAN JENSON / KABUTO. Traces
+  `battle1-winline-b{,-swap}.json` + 3 RAM dumps + §16 (ledger
+  discipline). Load-bearing methodology note (§16): OUTSIDE battle,
+  idle-timing DOES shift RNG (per-VBlank advance resumes) — battle 2's
+  opponent identity is timing-sensitive; scripts extending the chain
+  must reuse the committed segments verbatim. Also verified+accepted
+  #137 (slice E1b drain+digits, turn2-endeavor-drain 105/106; ENDEAVOR
+  anim descoped on source evidence — real custom assets).
+- **Next:** (1) main lane: ENDEAVOR attack-anim asset slice (ticks
+  3003-3094, `Move_ENDEAVOR` at battle_anim_scripts.s:3789) to complete
+  turn 2's first half; then E2 (DRAGON_BREATH window 3129-3846); (2)
+  worktree lane: swap-YES branch + factory swap screen ground truth +
+  asset inventory (S8's only un-scouted UI); (3) ISSUES #19 family
+  (3 traces now), #20 rewire remainder.
+- **Notes:** none.
+
 ## 137 — Bounded worker: S7 slice E1b — Onix's own HP-bar drain (117→101) + player-healthbox HP digits, `turn2-endeavor-drain.json` **105/106** (the 1 residual is the same ISSUES #19 family already accepted in `turn2-endeavor.json`) — suite **669/669**; ENDEAVOR's own attack animation stays OUT OF SCOPE (real custom asset, not "plain generic" as briefed)
 
 - **State:** `npm test` **669/669** (+9 Tier-1 pins), `npm run build`
