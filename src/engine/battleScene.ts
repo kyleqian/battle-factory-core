@@ -403,7 +403,7 @@
 //    module-level STATUS note above.
 
 import type { RgbColor } from "./bg.ts";
-import { drawText, type FontData } from "./font.ts";
+import { drawText, measureText, type FontData } from "./font.ts";
 import { blendComponentToWhite } from "./paletteFade.ts";
 import {
   GO_TEXT,
@@ -917,6 +917,24 @@ export interface BattleSceneState {
   turn3Resolved: boolean;
   /** S7 slice J (docs/battle-turn-notes.md §13/§23): `true` once turn 4's whole ROCK_SLIDE resolution has redrawn the settled action menu (`TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 4's own real confirm) AND a fresh A-press has reopened FIGHT for turn 5 - same "created directly" idiom as `turn1Resolved`/`turn2Resolved`/`turn3Resolved`. Turn 5's reopen persists the cursor at slot 0 (ROCK_SLIDE, unchanged since turn 3) - no nav needed, §13's own ledger. Distinguishes turn 5's own ENDEAVOR resolution (Grovyle's fatal-to-1 hit on Onix) from turn 4's DOUBLE_TEAM+ROCK_SLIDE one (both confirm at cursor 0). */
   turn4Resolved: boolean;
+  /**
+   * S7 slice K (docs/battle-turn-notes.md §24, docs/faint-switch-notes.md
+   * §3b/§7a): `elapsed` value of the KO-text dismiss A-press once registered
+   * (`TICK0 + turn5KoDismissElapsed` is the actual trace tick), `null`
+   * before - same "created directly, same tick already reflects it" idiom as
+   * `sendOutPressElapsed`. This is this engine's FIRST input-gated BATTLE
+   * TEXT (as opposed to a menu re-open): once Onix's ROCK_SLIDE faints
+   * Grovyle, "Foe GROVYLE fainted!" prints automatically (no button needed -
+   * same auto-advance every other move-use text in this dossier already
+   * has), then HOLDS INDEFINITELY (idle-cursor bounce only, `cursorState`
+   * re-anchored - see `TURN5_FAINTED_CURSOR_START_DELAY`) until the player
+   * presses A - a real, oracle-proven difference from every other text
+   * window (`docs/battle-turn-notes.md` §13's own control-run finding: 2996
+   * idle ticks with zero further state change). `tick()` must never
+   * auto-advance past this point on its own; only the `A` edge (gated by
+   * `turn5RockSlideKoDismissEligible`) sets this field.
+   */
+  turn5KoDismissElapsed: number | null;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -927,6 +945,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn2Resolved: false,
   turn3Resolved: false,
   turn4Resolved: false,
+  turn5KoDismissElapsed: null,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -938,6 +957,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn2Resolved: state.turn2Resolved,
     turn3Resolved: state.turn3Resolved,
     turn4Resolved: state.turn4Resolved,
+    turn5KoDismissElapsed: state.turn5KoDismissElapsed,
   };
 }
 
@@ -1124,16 +1144,36 @@ export function textVisibleChars(t: number): number {
 
 /** First trace tick the down-arrow prompt cursor draws (docs/battle-scene-notes.md §3.3 - one tick after `\p` is consumed at text-complete). */
 export const CURSOR_START_TICK = 1274;
+/**
+ * S7 slice K correction (docs/battle-turn-notes.md §24): this is NOT a fixed
+ * screen position - it sits immediately after line 2's own last printed
+ * glyph (`LINE2_ORIGIN.x + measureText(...LINE2)`), which for the S6 intro's
+ * own "would like to battle!" (107px wide) happens to equal exactly 123
+ * (`16+107`). Turn 5's own much shorter "fainted!" (44px wide) cursor sits
+ * at `16+44=60` instead - pixel-confirmed this session (oracle diff isolated
+ * the cursor to x=61-67 for that window, not 123-130) - proof this is
+ * text-width-relative, not a hardcoded box position. Kept as the default
+ * for the intro's own unparameterized call site; `drawCursor`'s own `x`
+ * param overrides it.
+ */
 const CURSOR_DEST_X = 123;
 /** Empirically re-derived this session (direct oracle brute-force match, 37/37 exact at ticks 1274/1283/1292/1295): destY = BASE - sDownArrowYCoords[idx], NOT BASE + offset as docs/battle-interface-assets.md's own "destY = 135 + offset" phrasing states - that doc's formula and this one are numerically equivalent up to a base/sign convention, but 135+offset alone (offset from CURSOR_Y_OFFSETS below) does not match; 137-offset does. */
 const CURSOR_DEST_Y_BASE = 137;
 /** sDownArrowYCoords (src/text.c:75) - 4-phase, 9 ticks/phase, 36-tick period (docs/battle-interface-assets.md). */
 const CURSOR_Y_OFFSETS = [0, 1, 2, 1] as const;
 
-/** Whether the wait-cursor is drawn at trace tick `t`, and its dest-Y offset phase if so. */
-export function cursorState(t: number): { visible: boolean; yOffset: number } {
-  if (t < CURSOR_START_TICK) return { visible: false, yOffset: 0 };
-  const phase = Math.floor((t - CURSOR_START_TICK) / 9) % CURSOR_Y_OFFSETS.length;
+/**
+ * Whether the wait-cursor is drawn at trace tick `t`, and its dest-Y offset
+ * phase if so - `startTick` defaults to the S6 intro's own `CURSOR_START_
+ * TICK` but is a real parameter (S7 slice K, docs/battle-turn-notes.md §24):
+ * turn 5's own post-faint "Foe GROVYLE\nfainted!" hold re-triggers this same
+ * 4-phase/9-tick-per-phase cycle from its OWN local start tick (pixel-
+ * confirmed, not the global constant - see `TURN5_FAINTED_CURSOR_START_
+ * DELAY`), so the phase math is reused verbatim, just re-anchored.
+ */
+export function cursorState(t: number, startTick: number = CURSOR_START_TICK): { visible: boolean; yOffset: number } {
+  if (t < startTick) return { visible: false, yOffset: 0 };
+  const phase = Math.floor((t - startTick) / 9) % CURSOR_Y_OFFSETS.length;
   return { visible: true, yOffset: CURSOR_Y_OFFSETS[phase]! };
 }
 
@@ -1740,7 +1780,7 @@ function drawMessageText(fb: Uint8Array, chars: number): void {
   drawMessageTextLines(fb, LINE1, LINE2, chars);
 }
 
-function drawCursor(fb: Uint8Array, yOffset: number): void {
+function drawCursor(fb: Uint8Array, yOffset: number, x: number = CURSOR_DEST_X): void {
   const destY = CURSOR_DEST_Y_BASE - yOffset;
   for (let py = 0; py < downArrow.blitHeight; py += 1) {
     for (let px = 0; px < downArrow.blitWidth; px += 1) {
@@ -1748,7 +1788,7 @@ function drawCursor(fb: Uint8Array, yOffset: number): void {
       if (idx === 0) continue;
       const c = MESSAGE_PALETTE[idx];
       if (!c) continue;
-      setPixel(fb, CURSOR_DEST_X + px, destY + py, c);
+      setPixel(fb, x + px, destY + py, c);
     }
   }
 }
@@ -5178,8 +5218,19 @@ function turn5KickoffBounceTick(t: number, pressTick: number): number {
  * no-op here either) - this turn's drain is the longest yet (88->1, 87
  * units) and the FIRST to cross the player healthbox's own yellow/red HP
  * bands (docs/battle-turn-notes.md §23).
+ *
+ * S7 slice K (docs/battle-turn-notes.md §24): UNLIKE slice G's original
+ * `drawTurn3EndeavorText` (which never dispatches onward - turn 3's own
+ * ROCK_SLIDE is a separate, later slice's job), this one now hands off into
+ * `drawTurn5RockSlideWindow` once `t` reaches Onix's own ROCK_SLIDE kickoff
+ * (`rockSlideTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK)`) - the same shape
+ * slice H's own `drawTurn3EndeavorText` handoff established a turn earlier.
  */
 function drawTurn5EndeavorText(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= rockSlideTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn5RockSlideWindow(fb, t);
+    return;
+  }
   const bounceTick = turn5KickoffBounceTick(t, pressTick);
   const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerAfterTurn3Hp, anchorPlayerAfterTurn5Hp);
   if (drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurn4Hp, bounceTick, ROCK_SLIDE_MOVE_POWER)) {
@@ -5189,6 +5240,196 @@ function drawTurn5EndeavorText(fb: Uint8Array, t: number, pressTick: number): vo
   }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
+}
+
+/**
+ * S7 slice K (docs/battle-turn-notes.md §24): turn 5's own ROCK_SLIDE half -
+ * Onix's fatal hit on Grovyle (1->0, a faint, not a survival like turns 3/4).
+ * A SYNTHETIC press anchor, same reasoning as `TURN3_ROCKSLIDE_PRESS_TICK`:
+ * turn 5's own preceding move is ENDEAVOR (variable-length resolution), so
+ * the ROCK_SLIDE press can't be a fixed offset from `TURN5_CONFIRM_PRESS_
+ * TICK` the way turn 4's DOUBLE_TEAM-preceded case could - instead this is
+ * chosen so `rockSlideTextStartTick` lands exactly on the oracle-pixel-
+ * confirmed kickoff hard-cut (tick 6222, dense oracle sweep this session:
+ * the message box goes from Grovyle's held ENDEAVOR text to "ONIX used\nROCK
+ * SLIDE!" in one tick, 2175px). Cross-confirmed independently via the drain
+ * formula: `rockSlideOpponentHp` reused UNCHANGED predicts Grovyle's raw
+ * `hp` field write (the bar's own "+2" render/RAM-lag convention every prior
+ * turn shows) at `PRESS_TICK+597+1+2=6429` - bit-exact against §13's own
+ * RAM-confirmed tick 6429, independently validating this anchor two ways.
+ */
+const TURN5_ROCKSLIDE_PRESS_TICK = 5829; // rockSlideTextStartTick(5829) = 6222
+
+/** Grovyle faints this hit (1->0) - the opponent healthbox's own EMPTY bar (`filledPixels===0`, no forced sliver since `hpFraction` is exactly 0) is oracle-exercised for the first time in this dossier; `calcBarFilledPixels`'s existing general formula already produces this correctly with zero compositor changes (verified via `npm run compare`, not assumed). */
+const anchorOpponentAfterTurn5Hp = 0;
+
+/**
+ * The faint-sink animation (docs/faint-switch-notes.md §3a/§7a,
+ * `SpriteCB_FaintOpponentMon`/`SpriteCB_AnimFaintOpponent`,
+ * `reference/pokeemerald/src/battle_main.c:2744-2811`): erases the fainting
+ * sprite's own bottom 8px-tall tile-row on a 1-then-2-tick cadence while
+ * shifting the remainder down `y2 += 8` each step - NOT a fade/dissolve, a
+ * genuinely new mechanism (no S6 send-out analogue erases-and-shifts a
+ * sprite this way). RAM-pinned exact for Grovyle this trace (`gSprites[8]`,
+ * `gBattlerSpriteIds[1]`'s slot, `battle1-switchin-b1-sprite-probe.json`):
+ * handoff (`SpriteCB_FaintOpponentMon`'s own one-tick cameo, sets
+ * `data[3]=8-yOffset/8=8`, `data[4]=1`) at RAM tick **6502** (`S` below, a
+ * fixed real-data anchor - NOT `TURN5_ROCKSLIDE_PRESS_TICK`-relative, since
+ * this session didn't itemize the general rule for locating `S` in a fresh
+ * battle, only this one instance's RAM-confirmed value). 8 explicit erase
+ * steps follow at RAM ticks `S+1, S+3, ..., S+2n-1` (6503, 6505, ..., 6517;
+ * `n = 8 - floor(yOffset/8) = 8` for Grovyle's `yOffset=4`), `y2` climbing
+ * 8->64; destroyed at `S+2n+1` = 6519. Render lag is the SAME +1 every other
+ * ROCK_SLIDE mechanism in this file uses (`rockSlideBg3Y` etc: RAM value at
+ * tick R first shows in the render at tick R+1) - pixel-confirmed this
+ * session (frame-to-frame diffs isolated to Grovyle's own on-field crop):
+ * changes land at render ticks 6504, 6506, ..., 6518 (8 steps, matching `n`),
+ * zero further diff from 6519 on.
+ */
+export const GROVYLE_FAINT_SINK_START_TICK = 6502; // S
+export const GROVYLE_FAINT_SINK_STEPS = 8; // n = 8 - floor(yOffset/8), Grovyle yOffset=4 (mon-pic-coords.json)
+
+/** `{ keptRows, y2 }` for Grovyle's own faint sink at render tick `t` - `keptRows` of `grovyleFrontSprite.tileset`'s own 8 tile-rows (top-down, `0` meaning fully erased/gone) remain to draw, shifted down by `y2` px. Pure closed form, no table. */
+export function grovyleFaintSinkRowsAndY2(t: number): { keptRows: number; y2: number } {
+  const d = t - 1 - GROVYLE_FAINT_SINK_START_TICK;
+  if (d <= 0) return { keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 };
+  const k = Math.min(GROVYLE_FAINT_SINK_STEPS, Math.ceil(d / 2));
+  return { keptRows: GROVYLE_FAINT_SINK_STEPS - k, y2: k * 8 };
+}
+
+/** Grovyle's own opponent healthbox vanishes entirely 2 ticks after the sink's own last visible erase-step (`GROVYLE_FAINT_SINK_START_TICK + 2*GROVYLE_FAINT_SINK_STEPS + 3` = 6521) - pixel-confirmed this session (dense oracle sweep of the healthbox's own crop: byte-identical bare background from tick 6521 on, a 7064px whole-healthbox-region diff the tick before). A distinct UI element from the sprite sink above (different screen region), not itemized in docs/faint-switch-notes.md §3/§7 - this session's own re-probe answers the brief's own "what happens to Grovyle's healthbox" question directly. */
+const GROVYLE_HEALTHBOX_VANISH_TICK = GROVYLE_FAINT_SINK_START_TICK + 19; // 6521
+
+/** Same tile-grid walk as `drawSpriteSheet`, but only the top `keptRows` of `tileset.rows` (the faint sink's own progressive bottom-up erase, `grovyleFaintSinkRowsAndY2`) - `oy` already includes any `y2` shift, same convention every other sprite draw in this file uses. */
+function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, keptRows: number): void {
+  for (let ty = 0; ty < keptRows && ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      drawSpriteSheetTile(fb, tileset, palette, ty * tileset.columns + tx, ox + tx * 8, oy + ty * 8);
+    }
+  }
+}
+
+/**
+ * The battlefield base for turn 5's own ROCK_SLIDE window - same shape as
+ * `drawTurn3RockSlideAttack`/`drawTurn4RockSlideAttack` (shake/rocks/hit-
+ * flash mechanisms reused with ZERO code changes, only the new synthetic
+ * anchor), plus the two genuinely new pieces this turn needs since Grovyle
+ * actually FAINTS here: the sink (`grovyleFaintSinkRowsAndY2`) replaces the
+ * plain sprite draw once active, and the opponent healthbox stops drawing
+ * entirely past its own vanish tick.
+ */
+function drawTurn5RockSlideAttack(fb: Uint8Array, t: number): void {
+  const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
+  const shiftY = rockSlideBg3Y(t, pressTick);
+  drawStaticBgShiftedY(fb, shiftY);
+  const sink = grovyleFaintSinkRowsAndY2(t);
+  if (sink.keptRows >= GROVYLE_FAINT_SINK_STEPS) {
+    if (!rockSlideMonBlinkInvisible(t, pressTick)) {
+      drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+    }
+  } else if (sink.keptRows > 0) {
+    drawSpriteSheetTopRows(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + sink.y2, sink.keptRows);
+  }
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn4Hp, anchorOpponentAfterTurn5Hp);
+  if (t < GROVYLE_HEALTHBOX_VANISH_TICK) {
+    const opponentContent = opponentHealthboxContentForHp(opponentHp);
+    drawSendOutHealthbox(fb, 0, opponentContent);
+    if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
+  }
+  drawMenuHealthboxPlayer(fb, 0);
+  drawMenuIdleBounceOverlay(fb, turn5KickoffBounceTick(t, TURN5_CONFIRM_PRESS_TICK));
+  for (const i of rockSlideDrawOrder(t, pressTick)) {
+    const rock = rockSlideRockState(i, t, pressTick);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+}
+
+/** `STRINGID_FAINTED` resolved for Grovyle's own faint: "Foe GROVYLE\nfainted!" (pixel-confirmed exact line wrap, `tools/compare/scratch` dense sweep this session). */
+const TURN5_FAINTED_LINE1 = "Foe GROVYLE";
+const TURN5_FAINTED_LINE2 = "fainted!";
+const TURN5_FAINTED_TEXT_TOTAL = TURN5_FAINTED_LINE1.length + TURN5_FAINTED_LINE2.length;
+
+/** The wait-cursor's own X position for THIS text - `CURSOR_DEST_X`'s own doc explains why this isn't a fixed constant: it sits right after line 2's own last printed glyph, pixel-confirmed this session (oracle diff isolated to x=61-67, matching `LINE2_ORIGIN.x + measureText(...TURN5_FAINTED_LINE2)` = 60 exactly, not the intro's own 123). */
+const TURN5_FAINTED_CURSOR_X = LINE2_ORIGIN.x + measureText(font, charmap, TURN5_FAINTED_LINE2);
+
+/** Ticks from `TURN5_ROCKSLIDE_PRESS_TICK` to this text's own clear+first-glyph tick - pixel-confirmed this session (dense oracle sweep: the message box hard-cuts from the held "ONIX used\nROCK SLIDE!" text to this one in a single tick, 1660px, at trace tick 6523 = `PRESS_TICK`+694). Unlike turns 3/4's own ROCK_SLIDE text (which auto-clears to blank via `ROCK_SLIDE_TEXT_CLEAR_DELAY` then hard-cuts to the resettled menu), this turn's text never clears to blank at all - it holds through the ENTIRE hit-flash+drain+sink window, then transitions DIRECTLY into this fainted text (still automatic, no button yet - only the fainted text's own post-print hold is button-gated, see `turn5RockSlideKoDismissEligible`). */
+const TURN5_FAINTED_TEXT_DELAY = 694;
+
+function turn5FaintedTextStartTick(pressTick: number): number {
+  return pressTick + TURN5_FAINTED_TEXT_DELAY;
+}
+
+/** Visible character count (0..TURN5_FAINTED_TEXT_TOTAL) at absolute trace tick `t` - same 1-tick/char mechanism as every other message in this dossier. */
+function turn5FaintedTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn5FaintedTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN5_FAINTED_TEXT_TOTAL, t - start + 1);
+}
+
+/** Ticks from `TURN5_ROCKSLIDE_PRESS_TICK` to the fainted text's own wait-cursor first appearing - pixel-confirmed this session (dense oracle sweep: first cursor-shaped diff at trace tick 6543 = `PRESS_TICK`+714, matching `turn5FaintedTextStartTick`+`TURN5_FAINTED_TEXT_TOTAL`+1 exactly, the same "one tick after the last glyph's own text-complete tick" shape `CURSOR_START_TICK`'s own doc describes for the S6 intro). */
+const TURN5_FAINTED_CURSOR_START_DELAY = TURN5_FAINTED_TEXT_DELAY + TURN5_FAINTED_TEXT_TOTAL + 1; // 714 -> trace tick 6543
+
+/**
+ * NOT `cursorState`'s own perpetual 4-phase BOUNCE - dense oracle re-check
+ * this session (`turn5-faint.json`'s own compare run) shows this cursor
+ * instead CLIMBS once (offset 0->1->2 over two 9-tick steps: rows 143-147 at
+ * 6543-6551, 142-146 at 6552-6560, 141-145 from 6561 on) and then HOLDS at
+ * offset 2 for the rest of this trace's own window (through its own
+ * stopping tick 6587, 26 ticks past the KO-dismiss press with zero further
+ * change) - it never visibly bounces back down to 1 inside this slice's own
+ * scope. Whether it eventually resumes a bounce loop past 6587 (like the S6
+ * intro's own cursor, which persists through a much longer uninterrupted
+ * wait) is NOT known - this slice's own window doesn't run long enough past
+ * the press to observe it, so this is deliberately a plain climb-then-hold,
+ * not generalized into a perpetual cycle the pixels don't support yet.
+ */
+function turn5FaintedCursorYOffset(t: number, start: number): number {
+  return Math.min(2, Math.floor((t - start) / 9));
+}
+
+/**
+ * S7 slice K's headline mechanism (docs/battle-turn-notes.md §24): this
+ * engine's FIRST input-gated BATTLE TEXT. Eligible once the fainted text's
+ * own wait-cursor is showing (same "message settled" gate `sendOutPress
+ * Eligible` already established for the S6 intro's analogous press) - the
+ * player must press A to advance past this point; idle ticks alone never
+ * do (docs/battle-turn-notes.md §13's own control-run finding: 2996 idle
+ * ticks, zero further state change). `core.ts`'s `tick()` uses this to gate
+ * `turn5KoDismissElapsed` - see that field's own doc for why a naive
+ * fixed-delay auto-advance (every OTHER text window in this dossier's own
+ * shape) would be wrong here.
+ */
+export function turn5RockSlideKoDismissEligible(t: number): boolean {
+  return t >= TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
+}
+
+/**
+ * S7 slice K's own ROCK_SLIDE/faint window dispatcher - the held kickoff
+ * text (still Onix's "ONIX used\nROCK SLIDE!", drawn by `drawTurn5EndeavorText`'s
+ * own handoff caller, `rockSlideTextVisibleChars` unchanged) through the
+ * hit-flash/drain/sink transient, then the fainted text (auto-printed) and
+ * its own indefinite button-gated hold. Deliberately stops rendering any
+ * FURTHER phase (the party-icon-bar re-trigger, DESTIN's own switch-in
+ * text) - out of this slice's scope; the committed trace's own stopping
+ * boundary (tick 6587, pixel-confirmed 0 diff through here, first change at
+ * 6588) sits safely before any of that.
+ */
+function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
+  drawTurn5RockSlideAttack(fb, t);
+  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn5Hp);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const faintedStart = turn5FaintedTextStartTick(pressTick);
+  if (t < faintedStart) {
+    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    return;
+  }
+  drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t, pressTick));
+  const cursorStart = pressTick + TURN5_FAINTED_CURSOR_START_DELAY;
+  if (t >= cursorStart) drawCursor(fb, turn5FaintedCursorYOffset(t, cursorStart), TURN5_FAINTED_CURSOR_X);
 }
 
 /**

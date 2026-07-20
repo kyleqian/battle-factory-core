@@ -4242,3 +4242,224 @@ Sitrus Berry proc). Tick 4934's excluded redraw-extremum and this slice's
 own new tick-5927 residual remain a different, still-open residual class
 (out of scope for a resolution slice).
 
+
+## 24. Engine slice K: turn 5's ROCK_SLIDE (Grovyle 1->0, the faint), the faint sink, the button-gated KO hold, and "Foe GROVYLE fainted!" - `turn5-rockslide.json` **256/256**, `turn5-faint.json` **110/110**, both 0 diff, ending BEFORE "DESTIN sent out PIDGEOTTO!" (S7 bounded worker session)
+
+Implements §13's own ground truth for Onix's fatal ROCK_SLIDE (Grovyle
+1->0, a faint, not a survival like turns 3/4), CORRECTED AND SHARPENED by
+`docs/faint-switch-notes.md` §3/§7's own frame-accurate itemization: the
+faint sink closed form (§7a), the exact tick "Foe GROVYLE fainted!" prints
+(auto, no button - §3b), and the real button-gated hold that follows.
+Per this slice's own brief and every prior slice's precedent:
+**parameterize, don't rebuild** - the shake/rocks/hit-flash mechanism
+(`rockSlideBg3Y`/`rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/
+`rockSlideDrawOrder`/`rockSlideRockState`/`rockSlideOpponentHp`) is reused
+with ZERO code changes, same shape slice H's own turn-3 ROCK_SLIDE
+established; only a fresh synthetic press-tick anchor was needed. The faint
+sink and the KO-text gate ARE genuinely new mechanisms (no prior turn ever
+modeled a faint) and are implemented as a closed form + real state,
+per the brief's own explicit instruction.
+
+### Anchors (RAM- and pixel-probed this session, not assumed)
+
+- **`TURN5_ROCKSLIDE_PRESS_TICK = 5829`** - a SYNTHETIC anchor (same
+  reasoning as `TURN3_ROCKSLIDE_PRESS_TICK`): turn 5's own preceding move is
+  ENDEAVOR (variable-length resolution), so this can't be a fixed offset
+  from `TURN5_CONFIRM_PRESS_TICK` the way turn 4's DOUBLE_TEAM-preceded case
+  could. Chosen so `rockSlideTextStartTick(5829)` = 6222 lands exactly on
+  the oracle-pixel-confirmed kickoff hard-cut (dense sweep this session:
+  the message box swaps from Grovyle's held ENDEAVOR text to "ONIX used
+  \nROCK SLIDE!" in one tick, 2175px, at trace tick 6222 - matching slice
+  J's own boundary exactly). **Independently cross-confirmed** via the
+  drain formula: `rockSlideOpponentHp` reused UNCHANGED (`startHp=1,
+  endHp=0`) predicts Grovyle's raw `hp`-field write at
+  `5829+597(ROCK_SLIDE_HP_DRAIN_START_DELAY)+1+2=6429` - bit-exact against
+  §13's own RAM-confirmed tick 6429 (the same "+2" render/RAM lag every
+  prior drain's raw hp-field write already shows past its own bar-done
+  sentinel) - two independent derivations landing on the same anchor.
+- **The faint sink** (`docs/faint-switch-notes.md` §3a/§7a,
+  `SpriteCB_FaintOpponentMon`/`SpriteCB_AnimFaintOpponent`,
+  `battle_main.c:2744-2811`) - RAM-pinned exact for Grovyle (`yOffset=4`,
+  `n=8-floor(4/8)=8`) at handoff tick `S=6502`. Re-verified this session via
+  a fresh dense pixel diff of Grovyle's own on-field crop (not re-probed via
+  RAM - §7a's own RAM probe was already exact and committed): 8 visible
+  erase-steps land at render ticks 6504,6506,...,6518 (the SAME +1 render
+  lag every other ROCK_SLIDE mechanism in this file already uses - RAM step
+  at `S+2k-1` first shows at render tick `S+2k`), zero further diff from
+  6519 on. Implemented as the literal closed form (`grovyleFaintSinkRowsAndY2`),
+  not a table: `keptRows = n - min(n, ceil(max(t-1-S,0)/2))`,
+  `y2 = 8*min(n, ceil(max(t-1-S,0)/2))`.
+- **Grovyle's own opponent healthbox vanish tick** - NOT itemized in
+  `docs/faint-switch-notes.md` (the brief's own "what happens to Grovyle's
+  healthbox" question, re-probed this session as instructed): a dense pixel
+  sweep of the healthbox's own crop shows it disappears ENTIRELY (bare
+  background, byte-identical from here on) at trace tick **6521** - exactly
+  2 ticks after the sink's own last visible erase-step (6519), a fixed
+  offset (`GROVYLE_HEALTHBOX_VANISH_TICK = S+19`), not itemized anywhere
+  else in this dossier.
+- **The fainted text** - "Foe GROVYLE\nfainted!" (`STRINGID_FAINTED`),
+  pixel-confirmed exact line wrap. Hard-cuts in automatically (no button
+  needed - unlike every prior turn's ROCK_SLIDE text, THIS text never
+  clears to blank at all; it holds through the entire hit-flash/drain/sink
+  window, then transitions straight into the fainted text) at trace tick
+  **6523** = `PRESS_TICK+694` (`TURN5_FAINTED_TEXT_DELAY`), pixel-confirmed
+  via a dense message-box-crop diff (1660px hard cut). Prints 1 char/tick
+  (19 chars total), completing at 6541.
+- **The wait-cursor is NOT a fixed screen position** - a real correction to
+  this file's own prior assumption (`CURSOR_DEST_X`/`cursorState`'s own S6
+  intro precedent): the cursor sits immediately after line 2's own last
+  printed glyph (`LINE2_ORIGIN.x + measureText(...line2)`), which for the
+  intro's own "would like to battle!" (107px wide) happens to equal exactly
+  123 - the same constant this file already had, but coincidentally, not
+  fundamentally. Turn 5's own much shorter "fainted!" (44px wide) cursor
+  sits at `16+44=60` instead - pixel-confirmed (oracle diff isolated the
+  first mismatch to x=61-67, not 123-130, before this was corrected).
+  `drawCursor` now takes an `x` param; `CURSOR_DEST_X` remains the default
+  for the (unparameterized) intro call site.
+- **The wait-cursor's own bounce is NOT `cursorState`'s perpetual 4-phase
+  loop here** - a second correction, pixel-confirmed via the same dense
+  crop diff: it CLIMBS once (offset 0->1->2 over two 9-tick steps: cursor
+  rows 143-147 at ticks 6543-6551, 142-146 at 6552-6560, 141-145 from 6561
+  on) and then HOLDS at offset 2 through this trace's own stopping tick
+  (6587, 26 ticks past the KO-dismiss press with zero further change) - it
+  never visibly bounces back down inside this slice's own scope. Whether it
+  eventually resumes a perpetual bounce past 6587 (like the intro's own
+  cursor, which persists through a much longer uninterrupted wait) is
+  **not known** - this slice's own window doesn't run long enough past the
+  press to observe it, so `turn5FaintedCursorYOffset` is deliberately a
+  plain climb-then-hold, not generalized into a cycle the pixels don't
+  support yet.
+- **Cursor-visible tick 6543** = `PRESS_TICK+714` (`TURN5_FAINTED_CURSOR_
+  START_DELAY` = `TURN5_FAINTED_TEXT_DELAY+TEXT_TOTAL(19)+1`), matching the
+  same "one tick after the last glyph's own text-complete tick" shape
+  `CURSOR_START_TICK`'s own doc already describes for the S6 intro -
+  re-derived and pixel-confirmed independently for this window, not assumed
+  from the intro's formula.
+
+### The button-gated KO hold - this engine's first input-gated battle text
+
+Per §13's own headline finding (re-confirmed, not re-derived, this
+session): once "Foe GROVYLE fainted!" is fully printed and its own
+wait-cursor showing, the screen holds **indefinitely** - idle ticks alone
+never advance it - until the player presses A. Implemented as real state,
+the same "created directly, same tick already reflects it" idiom
+`sendOutPressElapsed` already established: `BattleSceneState.
+turn5KoDismissElapsed: number | null`, set by a new `core.ts` branch (gated
+on `turn4Resolved` and the new exported `turn5RockSlideKoDismissEligible`)
+the tick a fresh `A` press registers while the fainted text's own cursor is
+showing. `core.ts`'s `tick()` has NO other logic that could advance past
+this point on its own (every other window's formulas are all
+`pressTick`-relative with no auto-advance timer wired to fire after this
+gate) - so "hold indefinitely" falls out for free from the state machine's
+own shape, not a separate freeze check. Both branches Tier-1-pinned
+(`tests/battleScene.test.ts`): 700 idle ticks past the eligible tick never
+set the field; a fresh `A` press while eligible sets it on that same edge
+and it stays stable afterward; an early press (long before eligible) is
+simply dropped, the same "gate stays closed" precedent every other
+press-gated window in this dossier already established.
+
+**Rendering-wise this gate has no visible consequence within this slice's
+own scope** - pixel-confirmed via a dense sweep: the screen is
+byte-identical for the ENTIRE stretch from the fainted text's own full
+print (6541) through this trace's own stopping tick (6587), 26 ticks past
+the press, with or without the press having registered. The gate's real
+purpose (matching the committed groundtruth trace exactly) is to correctly
+withhold the NEXT phase (the party-icon-bar re-trigger ~6588, DESTIN's own
+"sent out PIDGEOTTO!" text ~6687) until the player actually presses A - out
+of this slice's own scope to render, but the state the next slice needs is
+now real and tested.
+
+### The opponent's own EMPTY healthbox bar - oracle-exercised for the first time
+
+Grovyle's HP hits 0 (not just low) for the first time in this dossier -
+`calcBarFilledPixels`'s own general formula (`hpFraction` exactly 0, not
+merely small) ALREADY produces the correct "genuinely empty, no forced
+sliver" result with **zero compositor changes needed** (the `rawPixels===0
+&& hpFraction>0` sliver-forcing condition is false when `hpFraction` is
+exactly 0, by construction) - verified via `npm run compare`
+(`turn5-faint.json`'s own dense sweep through the whole empty-bar window,
+0 diff), not merely assumed from reading the code. New Tier-1 pin
+(`tests/healthboxAssembly.test.ts`) ties this to Grovyle's own real anchor
+value (0/143) directly, mirroring the existing hp=1/117 pin's own shape.
+
+### What landed (`src/engine/battleScene.ts`/`core.ts`)
+
+- `TURN5_ROCKSLIDE_PRESS_TICK`, `anchorOpponentAfterTurn5Hp`(0).
+- `GROVYLE_FAINT_SINK_START_TICK`(6502)/`GROVYLE_FAINT_SINK_STEPS`(8) +
+  `grovyleFaintSinkRowsAndY2` (exported for the Tier-1 pin) - the closed
+  form itself.
+- `GROVYLE_HEALTHBOX_VANISH_TICK`(6521) + `drawSpriteSheetTopRows` (a
+  `drawSpriteSheet` variant limited to the sink's own `keptRows`).
+- `drawTurn5RockSlideAttack`/`drawTurn5RockSlideWindow` - same three-part
+  shape as turns 3/4's own ROCK_SLIDE windows, but the text NEVER
+  auto-clears (there's no resettled menu this turn - it's a faint) and the
+  attack draw dispatches into the sink once active.
+- `TURN5_FAINTED_LINE1/2`, `TURN5_FAINTED_TEXT_DELAY`(694),
+  `turn5FaintedTextStartTick`/`turn5FaintedTextVisibleChars`,
+  `TURN5_FAINTED_CURSOR_X` (text-width-derived, see anchors above),
+  `TURN5_FAINTED_CURSOR_START_DELAY`(714), `turn5FaintedCursorYOffset`
+  (climb-then-hold, see anchors above).
+- `turn5RockSlideKoDismissEligible` (exported) + `BattleSceneState.
+  turn5KoDismissElapsed` + `core.ts`'s new detection branch.
+- `drawTurn5EndeavorText` gained a handoff into `drawTurn5RockSlideWindow`
+  once `t >= rockSlideTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK)` - the same
+  shape slice H's own turn-3 handoff established a turn earlier. No other
+  `core.ts` render-dispatch changes needed - the existing `turn2Resolved`
+  branch already calls `drawTurn5EndeavorText` unconditionally for the rest
+  of the window.
+- **Generalized, not duplicated**: `cursorState(t, startTick =
+  CURSOR_START_TICK)` and `drawCursor(fb, yOffset, x = CURSOR_DEST_X)` both
+  gained real parameters (defaults preserve the S6 intro's own existing
+  behavior byte-exact, re-verified via `sendout.json`/`s6-acceptance.json`
+  regression - see below) instead of a second copy-pasted cursor mechanism.
+
+### Committed traces (both new, both 0 diff)
+
+- **`turn5-rockslide.json`**: extends the groundtruth's own button script
+  verbatim (idle only past turn 5's own confirm press) through tick 6477 -
+  256 dense `captureFrames` from tick 6222 (kickoff hard-cut) through 6477
+  (kickoff/shake/rocks/hit-flash/drain, ending mid-hold well before the
+  sink starts). **256/256, 0 diff.**
+- **`turn5-faint.json`**: extends the groundtruth's own button script
+  verbatim INCLUDING the real KO-dismiss `A` press (frames 6560-6561,
+  reused byte-for-byte from `tools/compare/traces-groundtruth/
+  battle1-grovyle-faint.json`) through tick 6587 - 110 dense `captureFrames`
+  from tick 6478 through 6587 (the pre-sink hold's own tail, the sink
+  itself, the healthbox vanish, the fainted text, the cursor, the press,
+  and 26 ticks of confirmed-static hold after it). **110/110, 0 diff.**
+  Stops here - tick 6588 is the first pixel change (the party-icon-bar
+  re-trigger), out of this slice's own scope, matching the brief's explicit
+  instruction to stop before "DESTIN sent out PIDGEOTTO!" (which doesn't
+  even start printing until 6687, later still).
+
+### Verification
+
+`npm test` **776/776** (+8: 3 sink-formula pins against every one of the 8
+RAM-confirmed step ticks plus the before/after-destroy boundaries, 1
+eligibility-boundary pin, 2 KO-gate state-machine pins - idle-forever and
+A-advances - 1 early-press-dropped pin, 1 empty-bar `composeOpponentHealthbox`
+pin). `npm run build` green. `turn5-rockslide.json` **256/256**,
+`turn5-faint.json` **110/110**, both 0 diff. Zero regressions, full sweep
+re-verified at exact prior counts: `turn5-endeavor.json` **254/254**,
+`turn5-menu.json` **41/41**, `turn4-rockslide.json` **250/250**, `turn4-
+doubleteam.json` **249/249**, `turn3-rockslide.json` **256/256**, `turn1-
+rockslide.json` **256/256**, plus `sendout.json` **255/256** (unchanged -
+the pre-existing named tick-1496 particle-color residual, ISSUES #18-era,
+untouched by this session's `cursorState`/`drawCursor` generalization),
+`fight-submenu.json` **235/235**, `turn3-endeavor.json` **192/192**,
+`turn3-menu.json` **254/254**, `turn2-endeavor-drain.json` **201/201**,
+`turn4-menu.json` **44/44**, `turn2-dragonbreath.json` **237/237**,
+`turn1-cloneanim.json` **230/230**, `menu-idle.json` **69/69**, `turn2-
+endeavor.json` **77/77**.
+
+### What's left
+
+Everything from tick 6588 on: the opponent's own 6-icon party-status bar
+re-trigger, "[BUG CATCHER] DESTIN sent out\nPIDGEOTTO!" text (starts
+printing 6687), the ball-throw/materialize sequence (mon-sprite geometry
+already formula-verified in `docs/faint-switch-notes.md` §7b - reuse
+`GROVYLE_STRETCH_TABLE`/`_EARLY_TABLE` verbatim, re-anchored), the
+healthbox slide-in, Onix's own Sitrus Berry proc (exact formula already
+pinned, §2 of that same file), and the next settled menu vs. Pidgeotto -
+ground truth already substantially banked, explicitly out of this slice's
+own scope per the brief.

@@ -121,7 +121,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null },
   };
 }
 
@@ -235,7 +235,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: false,
-      turn3Resolved: false, turn4Resolved: false,
+      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null
     },
   };
 }
@@ -352,7 +352,7 @@ function stateAtTurn3Confirm(): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: true,
-      turn3Resolved: false, turn4Resolved: false,
+      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null
     },
   };
 }
@@ -510,7 +510,7 @@ function stateAtTurn4Confirm(): EngineState {
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: false,
+      turn4Resolved: false, turn5KoDismissElapsed: null
     },
   };
 }
@@ -534,7 +534,7 @@ function stateAtTurn5Confirm(): EngineState {
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: true,
+      turn4Resolved: true, turn5KoDismissElapsed: null
     },
   };
 }

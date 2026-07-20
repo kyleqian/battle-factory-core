@@ -1,3 +1,48 @@
+## 174 — Bounded worker: S7 residual-cleanup slice — Family A (stale shake power) + Family B (turn-3 bounce phase) both APPLIED; `turn3-endeavor.json` **192/192**, `turn3-menu.json` **254/254**, both 0 diff, all 16 excluded ticks restored, `npm test` **761/761** (+5), build green, zero regressions
+
+- **State:** `npm test` 761/761, `npm run build` green, tree clean.
+  `turn3-endeavor.json` **192/192** (12 shake ticks restored: 3958/3959/
+  3962/3963/3966/3967/3984/3985/3988/3989/3992/3993). `turn3-menu.json`
+  **254/254** (3879/3888 restored, 3861/3870 added as the predicted-but-
+  never-captured crossings). Full regression sweep at exact prior counts,
+  all 0 diff: `turn4-menu` 44/44, `turn4-doubleteam` 249/249, `turn4-
+  rockslide` 250/250, `turn3-rockslide` 256/256, `turn2-dragonbreath`
+  237/237, `turn2-endeavor-drain` 201/201, `turn2-endeavor` 77/77, `fight-
+  submenu` 235/235, `battle1-fight-submenu-idle` (groundtruth) 256/256,
+  `turn1-rockslide` 256/256, `turn1-cloneanim` 230/230, `menu-idle` 69/69.
+- **Did:** implemented both already-root-caused (#171/#173) fixes as
+  faithful, general rules — no re-derivation, per the brief. **Family A**
+  (`src/engine/battleScene.ts`): replaced the literal `ENDEAVOR_SHAKE_STEP`
+  constant with `endeavorShakeSteps(stalePower)` (the source-derived
+  `downStep=amp/2`/`upStep=downStep+(amp&1)` formula), threaded a new
+  `stalePower` param through `endeavorShakeX2`/`drawEndeavorSquish` from
+  each ENDEAVOR call site — turn 2 passes `ROCK_SLIDE_MOVE_POWER=75`
+  (unchanged, still symmetric 3/3), turn 3 passes
+  `DRAGON_BREATH_MOVE_POWER=60` (now asymmetric 2/3, matching the RAM-
+  proven mechanism). **Family B**: `turn3SubmenuBounceTick` now subtracts
+  one additional tick (`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT - 1`), scoped to
+  this composition only — `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` itself is
+  untouched, so turn 2's own reopen windows (proven correctly calibrated)
+  are unaffected. Both fixes verified 0 diff via `npm run compare` before
+  and after restoring/adding the excluded ticks. Added 5 Tier-1 pins:
+  `endeavorShakeSteps` against all three RAM-confirmed data points
+  (75→3/3 ×2 including the turn-5 prediction, 60→2/3) plus clamp bounds;
+  `turn3SubmenuBounceTick`+`menuIdleBounce` against the committed RAM
+  pointer-chase dump (`src/data/gen/turn3-menu-bouncer-raw-probe.json`,
+  38+38 region-ticks, zero exceptions) plus the two named residuals
+  individually. Docs: both families marked RESOLVED in
+  `docs/turn3-residual-probe-notes.md` (short subsection each); one-line
+  correction notes added to `docs/battle-turn-notes.md` §19/§20 pointing
+  at the resolution, history left intact.
+- **Next:** turn 5's own reopen (input tick 5926) is the natural next
+  engine slice — it inherits both fixes for free (Family A predicts
+  symmetric 3/3 again, stale 75 from turn 4's own ROCK_SLIDE, now pinned)
+  and the faint/switch-in ground truth §3-§6 already banked. Tick 4934's
+  excluded redraw-extremum is a different, still-open residual class (out
+  of this slice's scope).
+- **Notes:** no new papercuts.
+
+---
 ## 173 — Worktree probe (supervisor-folded): Family B (menu-idle ticks 3879/3888) ROOT-CAUSED — no hardware quirk; the engine's turn-3 reopened-submenu bounce composition is uniformly ONE RAM tick ahead of the real invisible bouncer's `sSinIndex`, visible only at sine-plateau crossings; merged `42b26f9`, suite 756/756 on the merged tree
 
 - **State:** merged into master, `npm test` 756/756 + build green

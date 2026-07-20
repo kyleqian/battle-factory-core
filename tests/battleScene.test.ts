@@ -10,6 +10,9 @@ import {
   dragonBreathGrovyleHp,
   endeavorShakeSteps,
   evaEvb,
+  GROVYLE_FAINT_SINK_START_TICK,
+  GROVYLE_FAINT_SINK_STEPS,
+  grovyleFaintSinkRowsAndY2,
   INITIAL_BATTLE_SCENE_STATE,
   PARTICLE_OAM_PRIORITY,
   PARTICLE_OAM_SUBPRIORITY,
@@ -25,6 +28,7 @@ import {
   textVisibleChars,
   TICK0,
   turn3SubmenuBounceTick,
+  turn5RockSlideKoDismissEligible,
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
@@ -32,6 +36,7 @@ import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
 import { CLOSED_FIGHT_SUBMENU_STATE, confirmFightMove, menuIdleBounce, openFightSubmenu } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
+import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import sendOutHealthboxOpponentAsset from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
 import battleHealthboxAsset from "../src/assets/gen/battle-healthbox.json" with { type: "json" };
@@ -41,7 +46,7 @@ import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-pro
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -49,7 +54,7 @@ function pixelAt(t: number, x: number, y: number): [number, number, number] {
 /** Same as `pixelAt`, but with the send-out A-press already registered at trace tick 1420 (`sendOutPressElapsed = 380`, matching the §7.2/§7.3 tests above). */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -67,7 +72,7 @@ const TURN2_FIGHT_SUBMENU_STATE = {
 /** Same as `pixelAtSentOut`, but with turn 2's own FIGHT submenu already confirmed on ENDEAVOR (cursor slot 2) - the state `drawTurn2KickoffText`/`drawEndeavorSquish` render under (S7 slice E1d-retry, §15b). */
 function pixelAtTurn2(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -85,7 +90,7 @@ const TURN4_FIGHT_SUBMENU_STATE = {
 /** Same as `pixelAtTurn2`, but turns 1-3 all resolved and the FIGHT submenu confirmed on turn 4's own ROCK_SLIDE (slot 0) - the state `drawTurn4KickoffText`/`drawTurn4RockSlideWindow` render under (S7 slice I resolution, docs/battle-turn-notes.md §22). */
 function pixelAtTurn4(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false, turn5KoDismissElapsed: null });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -302,7 +307,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null });
   });
 });
 
@@ -837,7 +842,7 @@ describe("battleScene: S7 slice B - DOUBLE_TEAM clone vs. opponent healthbox z-o
 
     const submenu = confirmFightMove(openFightSubmenu(0, rentalMoveset("ONIX")), 879); // pressTick = TICK0+879 = 1919
     const fb = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
+    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null });
     const o = (25 * 240 + 104) * 4;
     expect([fb[o]!, fb[o + 1]!, fb[o + 2]!]).toEqual([expected.r, expected.g, expected.b]);
   });
@@ -860,11 +865,11 @@ describe("battleScene: S7 slice B - stat-change banner as a real scrolling BG1 (
     const o = (y * 240 + x) * 4;
 
     const fb2140 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2140, { elapsed: 2140 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
+    renderBattleScene(fb2140, { elapsed: 2140 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null });
     const at2140: [number, number, number] = [fb2140[o]!, fb2140[o + 1]!, fb2140[o + 2]!];
 
     const fb2160 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2160, { elapsed: 2160 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
+    renderBattleScene(fb2160, { elapsed: 2160 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null });
     const at2160: [number, number, number] = [fb2160[o]!, fb2160[o + 1]!, fb2160[o + 2]!];
 
     expect(at2140).toEqual([118, 170, 125]);
@@ -896,11 +901,11 @@ describe("battleScene: S7 slice C - Rock Slide's shaken BG3 vs. the player healt
     const o = (y * 240 + x) * 4;
 
     const fbUnshifted = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false }); // rockSlideBg3Y === 0 here
+    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null }); // rockSlideBg3Y === 0 here
     const atUnshifted: [number, number, number] = [fbUnshifted[o]!, fbUnshifted[o + 1]!, fbUnshifted[o + 2]!];
 
     const fbShaken = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false }); // rockSlideBg3Y === -7 here
+    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null }); // rockSlideBg3Y === -7 here
     const atShaken: [number, number, number] = [fbShaken[o]!, fbShaken[o + 1]!, fbShaken[o + 2]!];
 
     expect(atUnshifted).toEqual([255, 255, 255]);
@@ -1258,5 +1263,110 @@ describe("S7 slice I resolution: the two turn-4-only bugs found this session (do
   it("stat-rose text phase: render 5210 (pressTick+285, mid-`STAT_ROSE_LINE1` typing) at a message-glyph pixel (16,124)/(17,124) - `drawTurn4RockSlideWindow` was missing the `TURN_KICKOFF`->`STAT_ROSE`->`ROCK_SLIDE` three-phase text dispatch entirely (always drew `ROCK_SLIDE_LINE1/2` from hand-off at +275 on, 265 ticks too early) - now reuses the same phase gate `drawRockSlideWindow` (turn 1) already established", () => {
     expect(pixelAtTurn4(5210, 16, 124)).toEqual([255, 255, 255]);
     expect(pixelAtTurn4(5210, 17, 124)).toEqual([255, 255, 255]);
+  });
+});
+
+// S7 slice K (docs/battle-turn-notes.md §24): the faint-sink closed form
+// (docs/faint-switch-notes.md §7a, `SpriteCB_FaintOpponentMon`/
+// `SpriteCB_AnimFaintOpponent`, battle_main.c:2744-2811) - RAM-pinned exact
+// for Grovyle (yOffset=4, n=8) at handoff tick S=6502; this pins the CLOSED
+// FORM itself against every one of the 8 RAM-confirmed step ticks (not just
+// endpoints), independent of `tools/compare/traces/turn5-faint.json`'s own
+// pixel parity (110/110, 0 diff) which only proves the RENDER, not the
+// formula's own shape.
+describe("S7 slice K: grovyleFaintSinkRowsAndY2 (docs/faint-switch-notes.md §7a's closed form)", () => {
+  it("before the handoff tick S(6502), fully visible (keptRows=STEPS, y2=0)", () => {
+    expect(grovyleFaintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
+    expect(grovyleFaintSinkRowsAndY2(6000)).toEqual({ keptRows: 8, y2: 0 });
+  });
+
+  it("the 8 RAM-confirmed erase steps (S+1,S+3,...,S+15 = 6503,6505,...,6517) land at render ticks S+2,S+4,...,S+16 (the same +1 render lag every other ROCK_SLIDE mechanism in this file uses) - keptRows counts down 7->0, y2 climbs 8->64", () => {
+    const expected = [
+      [6504, 7, 8],
+      [6505, 7, 8], // RAM unchanged between odd ticks - same render as 6504
+      [6506, 6, 16],
+      [6508, 5, 24],
+      [6510, 4, 32],
+      [6512, 3, 40],
+      [6514, 2, 48],
+      [6516, 1, 56],
+      [6518, 0, 64],
+    ] as const;
+    for (const [t, keptRows, y2] of expected) {
+      expect(grovyleFaintSinkRowsAndY2(t), `tick ${t}`).toEqual({ keptRows, y2 });
+    }
+  });
+
+  it("destroyed at S+2n+1=6519 (RAM-confirmed) - stays fully erased (keptRows=0) forever after, y2 clamped at its final 64", () => {
+    expect(grovyleFaintSinkRowsAndY2(6519)).toEqual({ keptRows: 0, y2: 64 });
+    expect(grovyleFaintSinkRowsAndY2(6560)).toEqual({ keptRows: 0, y2: 64 });
+    expect(grovyleFaintSinkRowsAndY2(9999)).toEqual({ keptRows: 0, y2: 64 });
+  });
+});
+
+// S7 slice K's headline finding (docs/battle-turn-notes.md §24, docs/
+// battle-turn-notes.md §13's own control-run evidence): this engine's FIRST
+// input-gated battle text. Both branches pinned directly against core.ts's
+// tick() - idle input never advances it (arbitrarily long), only the A edge
+// while eligible does.
+describe("S7 slice K: the KO-text dismiss gate (turn5KoDismissElapsed) - both branches", () => {
+  function stateAtTurn5Confirm(): { battleScene: BattleSceneState } {
+    return {
+      battleScene: {
+        elapsed: 5959 - TICK0,
+        sendOutPressElapsed: 380,
+        fightSubmenu: {
+          openElapsed: 5927 - TICK0,
+          cursor: 0,
+          displayCursor: 0,
+          closeElapsed: null,
+          confirmElapsed: 5959 - TICK0,
+          activeMonMoveset: rentalMoveset("ONIX"),
+        },
+        turn1Resolved: true,
+        turn2Resolved: true,
+        turn3Resolved: true,
+        turn4Resolved: true,
+        turn5KoDismissElapsed: null,
+      },
+    };
+  }
+
+  it("turn5RockSlideKoDismissEligible: false before the fainted text's own cursor tick (6543), true from exactly that tick on", () => {
+    expect(turn5RockSlideKoDismissEligible(6542)).toBe(false);
+    expect(turn5RockSlideKoDismissEligible(6543)).toBe(true);
+    expect(turn5RockSlideKoDismissEligible(7000)).toBe(true);
+  });
+
+  it("idle branch: hundreds of idle ticks well past the eligible tick never set turn5KoDismissElapsed - a naive fixed-delay auto-advance would be wrong here, unlike every other move-text window in this dossier", () => {
+    const state = stateAtTurn5Confirm();
+    let scene = state.battleScene;
+    for (let i = 0; i < 700; i += 1) scene = advanceBattleScene(scene); // idle past tick 6659, well past 6543 AND this trace's own 6587 stopping boundary
+    expect(scene.turn5KoDismissElapsed).toBeNull();
+  });
+
+  it("A-press branch (core.ts's tick(), not just advanceBattleScene): idling up to the eligible tick then pressing A sets turn5KoDismissElapsed exactly once, on that same edge, and it's stable afterward - the real committed groundtruth trace's own equivalent press (turn5-faint.json's segment at frames 6560-6561, well past this eligible tick) is what tools/compare/traces/turn5-faint.json's own 110/110 pixel match verifies end to end; this test isolates the STATE MACHINE edge itself", () => {
+    let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn5Confirm().battleScene };
+    // Idle from trace tick 5960 through 6542 (one tick before eligible).
+    for (let i = 0; i < 6542 - 5959; i += 1) state = tick(state, new Set());
+    expect(state.battleScene!.elapsed).toBe(6542 - TICK0);
+    expect(state.battleScene!.turn5KoDismissElapsed).toBeNull();
+    // One more idle tick reaches the eligible tick itself - still no press yet.
+    state = tick(state, new Set());
+    expect(state.battleScene!.elapsed).toBe(6543 - TICK0);
+    expect(state.battleScene!.turn5KoDismissElapsed).toBeNull();
+    // Now press A - registers on this same edge (not deferred, not dropped).
+    state = tick(state, new Set(["A"]));
+    expect(state.battleScene!.turn5KoDismissElapsed).not.toBeNull();
+    const dismissedAt = state.battleScene!.turn5KoDismissElapsed;
+    // Further idle ticks don't change it once set.
+    for (let i = 0; i < 20; i += 1) state = tick(state, new Set());
+    expect(state.battleScene!.turn5KoDismissElapsed).toBe(dismissedAt);
+  });
+
+  it("an early A press (long before the fainted text's own cursor tick) is simply dropped, same 'gate stays closed' precedent every other press-gated window in this dossier already established", () => {
+    let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn5Confirm().battleScene };
+    state = tick(state, new Set(["A"])); // trace tick 5960 - nowhere near eligible (6543)
+    expect(state.battleScene!.turn5KoDismissElapsed).toBeNull();
   });
 });

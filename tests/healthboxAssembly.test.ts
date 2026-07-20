@@ -301,6 +301,35 @@ describe("composePlayerHealthboxHpOverlay (S7 slice E1b)", () => {
       }
     }
   });
+
+  // S7 slice K (docs/battle-turn-notes.md §24): turn 5's own ROCK_SLIDE
+  // faints Grovyle (1->0) - the FIRST time this dossier's own compositor
+  // renders a TRULY EMPTY opponent bar (filledPixels===0, no forced 1px
+  // sliver, unlike every prior drain which always stopped at hp>=1). The
+  // general `calcBarFilledPixels`/`pickHpBarBand` formulas already handle
+  // this correctly with zero changes (`hpFraction` is exactly 0, not merely
+  // small) - oracle-verified this session (tools/compare/traces/
+  // turn5-faint.json, 110/110, 0 diff, spanning the whole empty-bar window)
+  // - this pin ties that verified fact to Grovyle's own real anchor value.
+  it("hp=0/143 (turn 5's fatal ROCK_SLIDE endpoint, Grovyle faints): calcBarFilledPixels is genuinely empty (no sliver), band is red, and composeOpponentHealthbox draws every fill column as the red sheet's own empty tile", () => {
+    const { filledPixels, columns } = calcBarFilledPixels(0 / 143);
+    expect(filledPixels).toBe(0);
+    expect(columns).toEqual([0, 0, 0, 0, 0, 0]);
+    expect(pickHpBarBand(filledPixels)).toBe("red");
+    const result = composeOpponentHealthbox(assets, { name: "GROVYLE", level: 50, gender: "male", hpFraction: 0, status: "none" });
+    // Same 6 fill-column placement (canvas x=40+col*8, y=16) the half-HP test
+    // above already establishes - every column reads the red sheet's own
+    // empty tile (HP_BAR_RED_BASE(9) + 0px), not the yellow/green sheets.
+    for (let col = 0; col < 6; col += 1) {
+      const destX = 40 + col * 8;
+      for (let x = 0; x < 8; x += 1) {
+        for (let y = 0; y < 8; y += 1) {
+          const expected = tilePixel(battleHealthbox.hpbarAnim, battleHealthbox.hpbarAnim.palette, 9, x, y);
+          if (expected) expect(result.pixels[(16 + y) * result.width + (destX + x)], `column ${col} px (${x},${y})`).toEqual(expected);
+        }
+      }
+    }
+  });
 });
 
 describe("rightAlign3GlyphCodes (ConvertIntToDecimalStringN's own STR_CONV_MODE_RIGHT_ALIGN, string_util.c:163-217, as UpdateHpTextInHealthbox uses it)", () => {

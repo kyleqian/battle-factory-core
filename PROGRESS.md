@@ -4,6 +4,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 177 — Bounded worker: S7 slice K — turn 5's ROCK_SLIDE (Grovyle 1→0, the faint), the faint sink, the button-gated KO hold, and "Foe GROVYLE fainted!", landed green, ending BEFORE "DESTIN sent out PIDGEOTTO!"; `turn5-rockslide.json` (new) **256/256**, `turn5-faint.json` (new) **110/110**, both 0 diff, `npm test` **776/776** (+8), build green, zero regressions
+
+- **State:** `npm test` 776/776, `npm run build` green, tree clean.
+  `turn5-rockslide.json` (kickoff/shake/rocks/hit-flash/drain, tick
+  6222-6477) **256/256**, `turn5-faint.json` (pre-sink hold tail through
+  the sink, healthbox vanish, fainted text, cursor, the real KO-dismiss `A`
+  press, and 26 post-press static ticks, tick 6478-6587) **110/110**, both
+  0 diff. Full regression sweep at exact prior counts, all 0 diff:
+  `turn5-endeavor` 254/254, `turn5-menu` 41/41, `turn4-rockslide` 250/250,
+  `turn4-doubleteam` 249/249, `turn3-rockslide` 256/256, `turn1-rockslide`
+  256/256, `fight-submenu` 235/235, `turn3-endeavor` 192/192, `turn3-menu`
+  254/254, `turn2-endeavor-drain` 201/201, `turn4-menu` 44/44, `turn2-
+  dragonbreath` 237/237, `turn1-cloneanim` 230/230, `menu-idle` 69/69,
+  `turn2-endeavor` 77/77, plus `sendout.json` **255/256** (unchanged - the
+  pre-existing named tick-1496 particle-color residual, untouched).
+- **Did:** RAM/pixel-probed turn 5's own ROCK_SLIDE window first (dense
+  oracle sweeps, no new committed probe traces needed - reused the
+  already-committed groundtruth). Parameterized turn 3's own ROCK_SLIDE
+  mechanism unchanged (synthetic anchor `TURN5_ROCKSLIDE_PRESS_TICK=5829`,
+  cross-confirmed two independent ways: the kickoff-text hard-cut pixel
+  tick AND the drain formula's own raw-hp-field-write prediction both land
+  on 6429 exactly). Implemented the faint sink as THE FORMULA (§7a's closed
+  form: `grovyleFaintSinkRowsAndY2`, handoff S=6502, n=8, +1 render lag),
+  not a table - pinned against every one of the 8 RAM-confirmed step ticks.
+  Re-probed (not assumed) and answered the brief's own "what happens to
+  Grovyle's healthbox" question: it vanishes entirely at S+19=6521, a fact
+  not itemized anywhere in the prior dossier. Implemented the KO-text
+  button gate as real state (`BattleSceneState.turn5KoDismissElapsed`,
+  `sendOutPressElapsed`'s own "created directly" idiom) - `core.ts`'s
+  `tick()` has no auto-advance timer that could fire past this point, so
+  "hold indefinitely" falls out of the state machine's own shape rather
+  than a bolted-on freeze check; both branches (idle-forever, A-advances)
+  Tier-1-pinned. Found and fixed two real bugs the naive intro-cursor reuse
+  would have shipped wrong, both pixel-confirmed via `npm run compare`
+  before committing: the wait-cursor's X position is text-width-relative
+  (`LINE2_ORIGIN.x + measureText(...line2)`), not the fixed `CURSOR_DEST_X`
+  the S6 intro's own case coincidentally matches; and this cursor's own
+  bounce is a one-shot climb-then-hold (0→1→2 over 9-tick steps, then flat
+  through this trace's own stopping tick), not `cursorState`'s perpetual
+  4-phase loop - both generalized as real parameters on `cursorState`/
+  `drawCursor` rather than a second copy-pasted mechanism, S6 intro
+  behavior re-verified byte-exact (`sendout.json`, `s6-acceptance.json`
+  unaffected). The opponent's own EMPTY healthbox bar (Grovyle's hp=0) is
+  oracle-exercised for the first time - `calcBarFilledPixels`'s existing
+  general formula already renders it correctly, zero compositor changes,
+  confirmed via `npm run compare` not assumed. Added 8 Tier-1 pins: 3 sink-
+  formula (all 8 RAM steps + before/after-destroy boundaries), 1
+  eligibility-boundary, 2 KO-gate state-machine (both branches), 1 early-
+  press-dropped, 1 empty-bar `composeOpponentHealthbox` pin (mirrors the
+  existing hp=1/117 player-side pin). Docs: new §24 in
+  `docs/battle-turn-notes.md`.
+- **Next:** the switch-in tail (tick 6588 on - party-icon-bar re-trigger,
+  DESTIN's own "sent out PIDGEOTTO!" text at 6687, ball-throw/materialize
+  reusing `GROVYLE_STRETCH_TABLE` per §7b, healthbox slide-in, Onix's own
+  Sitrus proc per §2's exact formula, the next settled menu) is the
+  immediate next slice - ground truth already substantially banked in
+  `docs/faint-switch-notes.md` §3/§6/§7.
+- **Notes:** no new papercuts this session.
+
+---
 ## 176 — Worktree scout (supervisor-folded): switch-in formula verification — faint sink PINNED as a closed form (source+RAM agree tick-for-tick), materialize stretch is a BYTE-EXACT re-anchored reuse of `GROVYLE_STRETCH_TABLE` (41/41), Sitrus = 2 sprites (`ANIM_TAG_THIN_RING`/`ANIM_TAG_SPARKLE_2`, gfx confirmed unextracted); merged `4fd6489`, suite 768/768 on the merged tree
 
 - **State:** merged into master, `npm test` 768/768 + build green
@@ -85,47 +145,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   mid-experiment checkouts; scratch probe traces (uncommitted) deleted
   after use, only the named committed traces + RAM-probe spec/dump kept.
 
----
-## 174 — Bounded worker: S7 residual-cleanup slice — Family A (stale shake power) + Family B (turn-3 bounce phase) both APPLIED; `turn3-endeavor.json` **192/192**, `turn3-menu.json` **254/254**, both 0 diff, all 16 excluded ticks restored, `npm test` **761/761** (+5), build green, zero regressions
-
-- **State:** `npm test` 761/761, `npm run build` green, tree clean.
-  `turn3-endeavor.json` **192/192** (12 shake ticks restored: 3958/3959/
-  3962/3963/3966/3967/3984/3985/3988/3989/3992/3993). `turn3-menu.json`
-  **254/254** (3879/3888 restored, 3861/3870 added as the predicted-but-
-  never-captured crossings). Full regression sweep at exact prior counts,
-  all 0 diff: `turn4-menu` 44/44, `turn4-doubleteam` 249/249, `turn4-
-  rockslide` 250/250, `turn3-rockslide` 256/256, `turn2-dragonbreath`
-  237/237, `turn2-endeavor-drain` 201/201, `turn2-endeavor` 77/77, `fight-
-  submenu` 235/235, `battle1-fight-submenu-idle` (groundtruth) 256/256,
-  `turn1-rockslide` 256/256, `turn1-cloneanim` 230/230, `menu-idle` 69/69.
-- **Did:** implemented both already-root-caused (#171/#173) fixes as
-  faithful, general rules — no re-derivation, per the brief. **Family A**
-  (`src/engine/battleScene.ts`): replaced the literal `ENDEAVOR_SHAKE_STEP`
-  constant with `endeavorShakeSteps(stalePower)` (the source-derived
-  `downStep=amp/2`/`upStep=downStep+(amp&1)` formula), threaded a new
-  `stalePower` param through `endeavorShakeX2`/`drawEndeavorSquish` from
-  each ENDEAVOR call site — turn 2 passes `ROCK_SLIDE_MOVE_POWER=75`
-  (unchanged, still symmetric 3/3), turn 3 passes
-  `DRAGON_BREATH_MOVE_POWER=60` (now asymmetric 2/3, matching the RAM-
-  proven mechanism). **Family B**: `turn3SubmenuBounceTick` now subtracts
-  one additional tick (`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT - 1`), scoped to
-  this composition only — `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` itself is
-  untouched, so turn 2's own reopen windows (proven correctly calibrated)
-  are unaffected. Both fixes verified 0 diff via `npm run compare` before
-  and after restoring/adding the excluded ticks. Added 5 Tier-1 pins:
-  `endeavorShakeSteps` against all three RAM-confirmed data points
-  (75→3/3 ×2 including the turn-5 prediction, 60→2/3) plus clamp bounds;
-  `turn3SubmenuBounceTick`+`menuIdleBounce` against the committed RAM
-  pointer-chase dump (`src/data/gen/turn3-menu-bouncer-raw-probe.json`,
-  38+38 region-ticks, zero exceptions) plus the two named residuals
-  individually. Docs: both families marked RESOLVED in
-  `docs/turn3-residual-probe-notes.md` (short subsection each); one-line
-  correction notes added to `docs/battle-turn-notes.md` §19/§20 pointing
-  at the resolution, history left intact.
-- **Next:** turn 5's own reopen (input tick 5926) is the natural next
-  engine slice — it inherits both fixes for free (Family A predicts
-  symmetric 3/3 again, stale 75 from turn 4's own ROCK_SLIDE, now pinned)
-  and the faint/switch-in ground truth §3-§6 already banked. Tick 4934's
-  excluded redraw-extremum is a different, still-open residual class (out
-  of this slice's scope).
-- **Notes:** no new papercuts.
