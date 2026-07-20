@@ -580,6 +580,32 @@ describe("battleMenu: S7 slice D - HP drain + turn-end (docs/battle-menu-notes.m
   });
 });
 
+// S7 slice I resolution (docs/battle-turn-notes.md §22): turn 4's own
+// ROCK_SLIDE drain, Grovyle 41 -> 1 (a 1-HP survival, not a faint) - the
+// same `rockSlideOpponentHp` formula already proven value-agnostic above,
+// pinned here with turn 4's REAL numbers (`TURN4_CONFIRM_PRESS_TICK`=4925,
+// a real press - `battle-turn-notes.md` §22) since this is the first turn
+// whose drain crosses the healthbox's green->yellow->red HP-band
+// thresholds (ISSUES #16's own "never oracle-exercised" note) - oracle-
+// confirmed via `tools/compare/traces/turn4-rockslide.json` (250/250, 0
+// diff) that the drain itself needs no new band-color code: `composeOpp
+// onentHealthbox`'s existing band thresholds already render 41 and 1
+// correctly with zero changes this session.
+describe("S7 slice I resolution: rockSlideOpponentHp with turn 4's real numbers (41 -> 1)", () => {
+  const pressTick = 4925;
+  const startHp = 41;
+  const endHp = 1;
+
+  it("full HP before the sentinel tick, then exactly 1 HP/tick down to endHp, settled forever after", () => {
+    const sentinel = pressTick + ROCK_SLIDE_HP_DRAIN_START_DELAY;
+    expect(rockSlideOpponentHp(sentinel, pressTick, startHp, endHp)).toBe(41);
+    expect(rockSlideOpponentHp(sentinel + 1, pressTick, startHp, endHp)).toBe(40); // first drained tick
+    expect(rockSlideOpponentHp(sentinel + 40, pressTick, startHp, endHp)).toBe(1); // d=40, exactly startHp-endHp
+    expect(rockSlideOpponentHp(sentinel + 41, pressTick, startHp, endHp)).toBe(1); // settled
+    expect(rockSlideOpponentHp(sentinel + 200, pressTick, startHp, endHp)).toBe(1); // stays settled indefinitely
+  });
+});
+
 describe("S7 slice E1: turn 2's FIGHT-submenu reopen - dynamic PP + ENDEAVOR kickoff (docs/battle-menu-notes.md §13)", () => {
   it("getCurrentPPToMaxPPState(9, 10) is 3 (full band) - PP 9/10 does NOT change color, verified against GetCurrentPPToMaxPPState's own source branches, not assumed", () => {
     expect(getCurrentPPToMaxPPState(9, 10)).toBe(3);

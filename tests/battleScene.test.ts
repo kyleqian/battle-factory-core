@@ -67,6 +67,24 @@ function pixelAtTurn2(t: number, x: number, y: number): [number, number, number]
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
 
+/** turn 4's own real `pressTick` (`TURN4_CONFIRM_PRESS_TICK`, `battleScene.ts` - docs/battle-turn-notes.md §22). FIGHT submenu confirmed on cursor slot 0 (ROCK_SLIDE), same shape `TURN2_FIGHT_SUBMENU_STATE` above uses for cursor slot 2. */
+const TURN4_PRESS_TICK = 4925;
+const TURN4_FIGHT_SUBMENU_STATE = {
+  openElapsed: 0,
+  cursor: 0 as const,
+  displayCursor: 0 as const,
+  closeElapsed: null,
+  confirmElapsed: TURN4_PRESS_TICK - TICK0,
+  activeMonMoveset: rentalMoveset("ONIX"),
+};
+/** Same as `pixelAtTurn2`, but turns 1-3 all resolved and the FIGHT submenu confirmed on turn 4's own ROCK_SLIDE (slot 0) - the state `drawTurn4KickoffText`/`drawTurn4RockSlideWindow` render under (S7 slice I resolution, docs/battle-turn-notes.md §22). */
+function pixelAtTurn4(t: number, x: number, y: number): [number, number, number] {
+  const fb = new Uint8Array(240 * 160 * 4);
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true });
+  const o = (y * 240 + x) * 4;
+  return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+}
+
 const grovyleFront = (grovyleFrontSpritesAsset as Record<string, { tileset: { columns: number; tiles: number[][] }; palette: { r: number; g: number; b: number }[] }>).GROVYLE!;
 /** GROVYLE_CORNER-relative (31,7) - the sprite's own first opaque pixel in raster order (tile 3, pixel (7,7)), used to pin the materialize-gate tick without hardcoding a color by hand. */
 const GROVYLE_FIRST_OPAQUE_OFFSET = { x: 31, y: 7 };
@@ -1145,5 +1163,24 @@ describe("S7 slice E2b-2: the resettled menu's live bounce carries its own HP-di
   it("render 3347 (healthboxY2=0, bounce at rest) vs render 3357 (healthboxY2=1) at the same digit-glyph pixel (192,97) - the digit is only there at rest, since the bar (and its digits) shifted up 1px once the live bounce moves off zero", () => {
     expect(pixelAtTurn2(3347, 192, 97)).toEqual([66, 66, 66]);
     expect(pixelAtTurn2(3357, 192, 97)).toEqual([255, 255, 222]);
+  });
+});
+
+// S7 slice I resolution (docs/battle-turn-notes.md §22): turn 4's own
+// DOUBLE_TEAM/ROCK_SLIDE window - two real bugs found and fixed by
+// autopsying a genuine app-vs-oracle residual (NOT the bounce-tick/HP
+// state the brief's own candidates first suspected), both confirmed via
+// direct RAM probes (`tools/probe/ram-probe.py`), both oracle-verified via
+// `tools/compare/traces/turn4-doubleteam.json` (249/249) and `turn4-
+// rockslide.json` (250/250), zero regressions on every prior trace.
+describe("S7 slice I resolution: the two turn-4-only bugs found this session (docs/battle-turn-notes.md §22)", () => {
+  it("clone z-order: render 4978 (n=8 into DOUBLE_TEAM's clone motion) shows clone A on top at (191,17)/(192,17) - turn 4's own `sSpriteOrder` RAM read has slot 3 (A) before slot 4 (B), the OPPOSITE tie order from turn 1's own analogous n=8 (RAM-confirmed both ways this session) - `drawDoubleTeamClones`'s new `frontClone` param flips the draw order for turn 4 only", () => {
+    expect(pixelAtTurn4(4978, 191, 17)).toEqual([123, 141, 139]);
+    expect(pixelAtTurn4(4978, 192, 17)).toEqual([135, 154, 158]);
+  });
+
+  it("stat-rose text phase: render 5210 (pressTick+285, mid-`STAT_ROSE_LINE1` typing) at a message-glyph pixel (16,124)/(17,124) - `drawTurn4RockSlideWindow` was missing the `TURN_KICKOFF`->`STAT_ROSE`->`ROCK_SLIDE` three-phase text dispatch entirely (always drew `ROCK_SLIDE_LINE1/2` from hand-off at +275 on, 265 ticks too early) - now reuses the same phase gate `drawRockSlideWindow` (turn 1) already established", () => {
+    expect(pixelAtTurn4(5210, 16, 124)).toEqual([255, 255, 255]);
+    expect(pixelAtTurn4(5210, 17, 124)).toEqual([255, 255, 255]);
   });
 });

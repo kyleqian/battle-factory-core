@@ -1,0 +1,537 @@
+{
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 70,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 130,
+   "buttons": []
+  },
+  {
+   "frames": 8,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 96,
+   "buttons": []
+  },
+  {
+   "frames": 24,
+   "buttons": []
+  },
+  {
+   "frames": 162,
+   "buttons": []
+  },
+  {
+   "frames": 54,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 196,
+   "buttons": []
+  },
+  {
+   "frames": 14,
+   "buttons": []
+  },
+  {
+   "frames": 210,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 144,
+   "buttons": []
+  },
+  {
+   "frames": 180,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 80,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 273,
+   "buttons": []
+  }
+ ],
+ "watch": [
+  {
+   "name": "ord0",
+   "addr": "0x20217f4",
+   "size": 1
+  },
+  {
+   "name": "ord1",
+   "addr": "0x20217f5",
+   "size": 1
+  },
+  {
+   "name": "ord2",
+   "addr": "0x20217f6",
+   "size": 1
+  },
+  {
+   "name": "ord3",
+   "addr": "0x20217f7",
+   "size": 1
+  },
+  {
+   "name": "ord4",
+   "addr": "0x20217f8",
+   "size": 1
+  },
+  {
+   "name": "ord5",
+   "addr": "0x20217f9",
+   "size": 1
+  },
+  {
+   "name": "ord6",
+   "addr": "0x20217fa",
+   "size": 1
+  },
+  {
+   "name": "ord7",
+   "addr": "0x20217fb",
+   "size": 1
+  },
+  {
+   "name": "ord8",
+   "addr": "0x20217fc",
+   "size": 1
+  },
+  {
+   "name": "ord9",
+   "addr": "0x20217fd",
+   "size": 1
+  },
+  {
+   "name": "ord10",
+   "addr": "0x20217fe",
+   "size": 1
+  },
+  {
+   "name": "ord11",
+   "addr": "0x20217ff",
+   "size": 1
+  },
+  {
+   "name": "ord12",
+   "addr": "0x2021800",
+   "size": 1
+  },
+  {
+   "name": "ord13",
+   "addr": "0x2021801",
+   "size": 1
+  },
+  {
+   "name": "ord14",
+   "addr": "0x2021802",
+   "size": 1
+  },
+  {
+   "name": "ord15",
+   "addr": "0x2021803",
+   "size": 1
+  },
+  {
+   "name": "ord16",
+   "addr": "0x2021804",
+   "size": 1
+  },
+  {
+   "name": "ord17",
+   "addr": "0x2021805",
+   "size": 1
+  },
+  {
+   "name": "ord18",
+   "addr": "0x2021806",
+   "size": 1
+  },
+  {
+   "name": "ord19",
+   "addr": "0x2021807",
+   "size": 1
+  },
+  {
+   "name": "ord20",
+   "addr": "0x2021808",
+   "size": 1
+  },
+  {
+   "name": "ord21",
+   "addr": "0x2021809",
+   "size": 1
+  },
+  {
+   "name": "ord22",
+   "addr": "0x202180a",
+   "size": 1
+  },
+  {
+   "name": "ord23",
+   "addr": "0x202180b",
+   "size": 1
+  },
+  {
+   "name": "ord24",
+   "addr": "0x202180c",
+   "size": 1
+  },
+  {
+   "name": "ord25",
+   "addr": "0x202180d",
+   "size": 1
+  },
+  {
+   "name": "ord26",
+   "addr": "0x202180e",
+   "size": 1
+  },
+  {
+   "name": "ord27",
+   "addr": "0x202180f",
+   "size": 1
+  },
+  {
+   "name": "ord28",
+   "addr": "0x2021810",
+   "size": 1
+  },
+  {
+   "name": "ord29",
+   "addr": "0x2021811",
+   "size": 1
+  },
+  {
+   "name": "ord30",
+   "addr": "0x2021812",
+   "size": 1
+  },
+  {
+   "name": "ord31",
+   "addr": "0x2021813",
+   "size": 1
+  },
+  {
+   "name": "ord32",
+   "addr": "0x2021814",
+   "size": 1
+  },
+  {
+   "name": "ord33",
+   "addr": "0x2021815",
+   "size": 1
+  },
+  {
+   "name": "ord34",
+   "addr": "0x2021816",
+   "size": 1
+  },
+  {
+   "name": "ord35",
+   "addr": "0x2021817",
+   "size": 1
+  },
+  {
+   "name": "ord36",
+   "addr": "0x2021818",
+   "size": 1
+  },
+  {
+   "name": "ord37",
+   "addr": "0x2021819",
+   "size": 1
+  },
+  {
+   "name": "ord38",
+   "addr": "0x202181a",
+   "size": 1
+  },
+  {
+   "name": "ord39",
+   "addr": "0x202181b",
+   "size": 1
+  },
+  {
+   "name": "ord40",
+   "addr": "0x202181c",
+   "size": 1
+  },
+  {
+   "name": "ord41",
+   "addr": "0x202181d",
+   "size": 1
+  },
+  {
+   "name": "ord42",
+   "addr": "0x202181e",
+   "size": 1
+  },
+  {
+   "name": "ord43",
+   "addr": "0x202181f",
+   "size": 1
+  },
+  {
+   "name": "ord44",
+   "addr": "0x2021820",
+   "size": 1
+  },
+  {
+   "name": "ord45",
+   "addr": "0x2021821",
+   "size": 1
+  },
+  {
+   "name": "ord46",
+   "addr": "0x2021822",
+   "size": 1
+  },
+  {
+   "name": "ord47",
+   "addr": "0x2021823",
+   "size": 1
+  },
+  {
+   "name": "ord48",
+   "addr": "0x2021824",
+   "size": 1
+  },
+  {
+   "name": "ord49",
+   "addr": "0x2021825",
+   "size": 1
+  },
+  {
+   "name": "ord50",
+   "addr": "0x2021826",
+   "size": 1
+  },
+  {
+   "name": "ord51",
+   "addr": "0x2021827",
+   "size": 1
+  },
+  {
+   "name": "ord52",
+   "addr": "0x2021828",
+   "size": 1
+  },
+  {
+   "name": "ord53",
+   "addr": "0x2021829",
+   "size": 1
+  },
+  {
+   "name": "ord54",
+   "addr": "0x202182a",
+   "size": 1
+  },
+  {
+   "name": "ord55",
+   "addr": "0x202182b",
+   "size": 1
+  },
+  {
+   "name": "ord56",
+   "addr": "0x202182c",
+   "size": 1
+  },
+  {
+   "name": "ord57",
+   "addr": "0x202182d",
+   "size": 1
+  },
+  {
+   "name": "ord58",
+   "addr": "0x202182e",
+   "size": 1
+  },
+  {
+   "name": "ord59",
+   "addr": "0x202182f",
+   "size": 1
+  },
+  {
+   "name": "ord60",
+   "addr": "0x2021830",
+   "size": 1
+  },
+  {
+   "name": "ord61",
+   "addr": "0x2021831",
+   "size": 1
+  },
+  {
+   "name": "ord62",
+   "addr": "0x2021832",
+   "size": 1
+  },
+  {
+   "name": "ord63",
+   "addr": "0x2021833",
+   "size": 1
+  }
+ ],
+ "startTick": 1971
+}

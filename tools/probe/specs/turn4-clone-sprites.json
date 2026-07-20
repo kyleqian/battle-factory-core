@@ -1,0 +1,361 @@
+{
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 70,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 130,
+   "buttons": []
+  },
+  {
+   "frames": 8,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 96,
+   "buttons": []
+  },
+  {
+   "frames": 24,
+   "buttons": []
+  },
+  {
+   "frames": 162,
+   "buttons": []
+  },
+  {
+   "frames": 54,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 196,
+   "buttons": []
+  },
+  {
+   "frames": 14,
+   "buttons": []
+  },
+  {
+   "frames": 210,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 144,
+   "buttons": []
+  },
+  {
+   "frames": 180,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 80,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 980,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 10,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 900,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "UP"
+   ]
+  },
+  {
+   "frames": 10,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1000,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 8,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  }
+ ],
+ "watch": [
+  {
+   "name": "s3_x2",
+   "addr": "0x2020720",
+   "size": 2
+  },
+  {
+   "name": "s3_y2",
+   "addr": "0x2020722",
+   "size": 2
+  },
+  {
+   "name": "s3_d0",
+   "addr": "0x202072a",
+   "size": 2
+  },
+  {
+   "name": "s3_d1",
+   "addr": "0x202072c",
+   "size": 2
+  },
+  {
+   "name": "s3_d2",
+   "addr": "0x202072e",
+   "size": 2
+  },
+  {
+   "name": "s3_d3",
+   "addr": "0x2020730",
+   "size": 2
+  },
+  {
+   "name": "s4_x2",
+   "addr": "0x2020764",
+   "size": 2
+  },
+  {
+   "name": "s4_y2",
+   "addr": "0x2020766",
+   "size": 2
+  },
+  {
+   "name": "s4_d0",
+   "addr": "0x202076e",
+   "size": 2
+  },
+  {
+   "name": "s4_d1",
+   "addr": "0x2020770",
+   "size": 2
+  },
+  {
+   "name": "s4_d2",
+   "addr": "0x2020772",
+   "size": 2
+  },
+  {
+   "name": "s4_d3",
+   "addr": "0x2020774",
+   "size": 2
+  }
+ ],
+ "startTick": 4960
+}

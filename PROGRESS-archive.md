@@ -1,3 +1,30 @@
+## 169 — Worktree scout (supervisor-folded): switch-in window fully itemized + Pidgeotto front sprite verified byte-exact (0/1087) — the faint engine slice now has complete pinned ground truth; merged `18c7bbd`, suite 749/749 on the merged tree
+
+- **State:** merged into master, `npm test` 749/749 + build green
+  post-merge (supervisor-verified). New: 4 dense stride-1 groundtruth
+  traces (`battle1-switchin-dense-{a,b,c,d}.json`, ticks 6350-7312,
+  twice-run/0 sha mismatches), `docs/faint-switch-notes.md` §3-§6.
+- **Did:** (goal 1) Pidgeotto's front pic was ALREADY extracted (S6
+  groundwork `38f687c`; #167's "not extracted" claim was a stale false
+  negative) — verified byte-exact vs a fresh oracle capture, and the
+  corner formula generalizes: `(144, 8 + gMonFrontPicCoords[species]
+  .yOffset)`, 2 species cross-checked. (goal 2) Full frame-accurate
+  itemization: hit-flicker → erase-and-sink faint (source-cited
+  `SpriteCB_FaintOpponentMon`, NOT fade/dissolve) → text phases →
+  party-summary-bar re-trigger → ball throw/tinted materialize →
+  healthbox slide-in → Sitrus proc text+heal-bar. CORRECTS §13: real
+  animation plays inside the "frozen 6429-6560" window, and the menu
+  visually settles ~7250-7256, not 7215. (goal 3) §6 grades each element
+  reused-verbatim / similar-unverified / genuinely-new (faint-sink and
+  Sitrus sparkle are new; ball/materialize not formula-verified).
+- **Next:** turn 4 engine slice is in flight (main lane); after it, the
+  turn-5 + faint/switch-in engine slice implements directly against
+  §3-§6 + §13.
+- **Notes:** worker PAPERCUT (contact-sheet row-slicing desync) recorded
+  in PAPERCUTS.md by supervisor.
+
+---
+
 ## 168 — Bounded worker: S7 slice H — turn 3's ROCK_SLIDE resolution (the turn's second half) landed by PARAMETERIZING turn 1's own ROCK_SLIDE mechanism with ZERO code changes; `turn3-rockslide.json` (new) **256/256, 0 diff**, `npm test` **749/749** (+3), build green, zero regressions
 
 - **State:** `npm test` 749/749, `npm run build` green, tree clean.

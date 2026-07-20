@@ -4,6 +4,68 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 172 — Bounded worker retry: S7 slice I-2 — the turn-4 clone-window residual ROOT-CAUSED and FIXED (2 real bugs, not the bounce/HP candidates §22 suspected); `turn4-doubleteam.json` (new) **249/249**, `turn4-rockslide.json` (new) **250/250**, `npm test` **756/756** (+3), build green, zero regressions
+
+- **State:** `npm test` 756/756, `npm run build` green, tree clean. New
+  `tools/compare/traces/turn4-doubleteam.json` (kickoff text/clone/banner/
+  stat-rose-text, ticks 4934→5317, 249 captures, dense over every actively-
+  changing window + strided over the provably-static holds) and `turn4-
+  rockslide.json` (ticks 5318→5925, 250 captures, dense at every boundary +
+  stride-2 through the shake/rock-fall midsection — the 256-capture service
+  ceiling forced that one compromise, noted honestly rather than silently)
+  are both **0 diff**, one tick (4934) excluded with restated §22-style
+  evidence (13292px, both neighbors exact, same "redraw extremum" family as
+  3337/3465/3721/3879/3888). Zero regressions at exact prior counts:
+  `turn4-menu` 44/44, `turn3-rockslide` 256/256, `turn3-endeavor` 180/180,
+  `turn1-cloneanim` 230/230, `turn1-rockslide` 256/256, `turn2-dragonbreath`
+  237/237.
+- **Did:** followed the brief's mandated autopsy order instead of re-fitting
+  pixel formulas. (1) Diffed app-vs-oracle at tick 4978 directly: pixels
+  showed a clean "app(x) == oracle(x+1)" substitution, not noise. (2) Diffed
+  turn 1's oracle (tick 1972, the same `n=8` into DOUBLE_TEAM's clone motion)
+  against turn 4's oracle (tick 4978) directly — genuinely DIFFERENT
+  real-hardware pixels at the identical `n`, AND turn 4's *app* matched
+  turn 1's *oracle* exactly — proof the code was faithfully reproducing
+  turn 1's mechanism while turn 4's real hardware does something else. (3)
+  RAM-probed the actual clone sprites (`gSprites[3]`/`gSprites[4]`, found by
+  scanning all 64 slots' callback pointers): `x2`/`data[]` progressions are
+  BIT-IDENTICAL to the model at matching `n` — the offset formula was never
+  wrong. RAM-probed `BLDCNT`/`BLDALPHA`/BG scroll registers: also identical
+  both turns. RAM-probed Grovyle's own front-sprite palette (`gPlttBuffer
+  {Unfaded,Faded}`): also byte-identical both turns. Then RAM-probed
+  `sSpriteOrder` (`0x020217F4`, the same static array `rockSlideDrawOrder`
+  already uses) at both turns' analogous ticks — **found it**: the two
+  clones tie exactly on `SortSprites`' key (`oam.priority`/`subpriority`/
+  `oam.y` all raw-copied identical via `CloneBattlerSpriteWithBlend`), and
+  the tie-break (whichever's earlier in the persistent, history-dependent
+  `sSpriteOrder`) is B-before-A for turn 1 but A-before-B for turn 4 — same
+  two slots (3/4) both times, opposite order. Fixed via a new `frontClone`
+  param on `drawDoubleTeamClones` (RAM-verified per turn, NOT a general
+  `SortSprites` simulation — scoped honestly in the code comment, since
+  unlike the rock-stacking fix these two sprites only ever tie against each
+  other, once per turn). (4) Sweeping the full window past this fix (stride-
+  1, 4934-5925) surfaced a SECOND, unrelated bug: `drawTurn4RockSlideWindow`
+  never wired in the "Foe GROVYLE's evasiveness\nrose!" text phase turn 1's
+  own `drawRockSlideWindow` already has — it jumped straight to the
+  ROCK_SLIDE line 265 ticks early. Ported the same three-phase text gate
+  (`TURN_KICKOFF`→`STAT_ROSE`→`ROCK_SLIDE`, `statRoseTextStartTick`/
+  `rockSlideTextStartTick`, both already generic `pressTick`-parameterized
+  functions) — closed it outright, 250/250. Grovyle's 41→1 drain (the first
+  turn to cross the healthbox's yellow/red HP bands, ISSUES #16's own "never
+  oracle-exercised" note) needed ZERO new compositor code — bands render
+  correctly already. Added 3 Tier-1 pins: the two pixel fixes (clone
+  z-order at (191/192,17)/t4978, stat-rose text at (16/17,124)/t5210) plus
+  `rockSlideOpponentHp`'s real 41→1 numbers.
+- **Next:** the ENTIRE turn-4 window (4934-5925) is now committed and
+  verified — S7 slice I is fully closed. Turn 5's own reopen (input tick
+  5926) is the natural next engine slice; it inherits the Family A stale-
+  shake fix #171 already root-caused (predicts turn 5's ENDEAVOR shake is
+  symmetric, stale 75 from turn 4's ROCK_SLIDE) and the faint/switch-in
+  ground truth §3-§6 already banked.
+- **Notes:** none — no papercuts this session; `git status`/stash discipline
+  held throughout (no mid-experiment checkouts).
+
+---
 ## 171 — Worktree probe (supervisor-folded): slice G's 12-tick shake asymmetry ROOT-CAUSED (stale `gBattleMovePower` drives shake amplitude — 75→±3, 60→+3/-2, source formula reproduces BOTH turns); menu-idle ticks 3879/3888 localized but need a pointer-chase probe; merged `e8edc8d`, suite 753/753 on the merged tree
 
 - **State:** merged into master, `npm test` 753/753 + build green
@@ -73,29 +135,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   memory (verified via fresh `tsc`/`npm test`), but cost real time —
   PAPERCUT: never `git checkout` a file mid-experiment without committing
   or stashing real work first, ~15 min lost.
-
----
-## 169 — Worktree scout (supervisor-folded): switch-in window fully itemized + Pidgeotto front sprite verified byte-exact (0/1087) — the faint engine slice now has complete pinned ground truth; merged `18c7bbd`, suite 749/749 on the merged tree
-
-- **State:** merged into master, `npm test` 749/749 + build green
-  post-merge (supervisor-verified). New: 4 dense stride-1 groundtruth
-  traces (`battle1-switchin-dense-{a,b,c,d}.json`, ticks 6350-7312,
-  twice-run/0 sha mismatches), `docs/faint-switch-notes.md` §3-§6.
-- **Did:** (goal 1) Pidgeotto's front pic was ALREADY extracted (S6
-  groundwork `38f687c`; #167's "not extracted" claim was a stale false
-  negative) — verified byte-exact vs a fresh oracle capture, and the
-  corner formula generalizes: `(144, 8 + gMonFrontPicCoords[species]
-  .yOffset)`, 2 species cross-checked. (goal 2) Full frame-accurate
-  itemization: hit-flicker → erase-and-sink faint (source-cited
-  `SpriteCB_FaintOpponentMon`, NOT fade/dissolve) → text phases →
-  party-summary-bar re-trigger → ball throw/tinted materialize →
-  healthbox slide-in → Sitrus proc text+heal-bar. CORRECTS §13: real
-  animation plays inside the "frozen 6429-6560" window, and the menu
-  visually settles ~7250-7256, not 7215. (goal 3) §6 grades each element
-  reused-verbatim / similar-unverified / genuinely-new (faint-sink and
-  Sitrus sparkle are new; ball/materialize not formula-verified).
-- **Next:** turn 4 engine slice is in flight (main lane); after it, the
-  turn-5 + faint/switch-in engine slice implements directly against
-  §3-§6 + §13.
-- **Notes:** worker PAPERCUT (contact-sheet row-slicing desync) recorded
-  in PAPERCUTS.md by supervisor.

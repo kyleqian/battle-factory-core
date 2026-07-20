@@ -2991,15 +2991,59 @@ function isOpponentHealthboxOpaqueAt(x: number, y: number): boolean {
  * target-2 from the plain background, not whatever's already in `fb`). Real
  * sprite hidden for the whole visible window. Returns whether the window is
  * active (so the caller can fall through to the stat banner otherwise).
+ *
+ * **`frontClone` - S7 slice I follow-up (docs/battle-turn-notes.md §22
+ * resolution): the two clones tie EXACTLY on real hardware's sprite-sort key**
+ * (`SortSprites`, `reference/pokeemerald/src/sprite.c:371-467`: both clones are
+ * raw `gSprites[i] = gSprites[spriteId]` copies of Grovyle's own sprite via
+ * `CloneBattlerSpriteWithBlend`, so `oam.priority`, `subpriority`, AND `oam.y`
+ * are bit-identical between them) - the tie is broken by their relative
+ * position in the persistent, frame-to-frame-stable `sSpriteOrder` array
+ * (`EWRAM_DATA static`, address `0x020217F4`, same symbol this run's own
+ * `rockSlideDrawOrder` already uses for the analogous rock-vs-rock tie, S7
+ * slice C/11.1), which is NOT a pure function of slot number - it's whatever
+ * order history left the two slots in. RAM-probed directly both turns (this
+ * session): turn 1's clones land in slots 3 (phase-0, "A", allocated first)
+ * and 4 (phase-128, "B", allocated second) - `sSpriteOrder` at RAM tick 1971
+ * (turn 1's own n=8) has slot 4 BEFORE slot 3 (positions 8/9), i.e. B ends up
+ * with the lower final OAM index and renders in front. Turn 4's clones land
+ * in the SAME two slots (3/4 - the free-slot pool is otherwise identical by
+ * turn 4), but `sSpriteOrder` at RAM tick 4977 (turn 4's own n=8) has slot 3
+ * BEFORE slot 4 (positions 8/9) - the tie order has flipped, so A is now
+ * front. This engine draws in plain sequential order (no OAM/z-order
+ * simulation), so "front" = drawn LAST (`blendedTile`'s own target-2 always
+ * reads the static background, never the other clone's already-drawn pixel,
+ * so the second draw call cleanly overwrites the first in any overlap - real
+ * hardware's front-sprite-wins-the-overlap is reproduced exactly by
+ * last-write-wins here). Confirmed to close the tick-4978 residual (728px,
+ * `x=145-205,y=17-70`) that made turn 4's app render exactly reproduce turn
+ * 1's oracle (not turn 4's own) before this fix.
+ *
+ * **Honest scope**: this flips a hardcoded boolean per turn (`turn3Resolved`
+ * at the call site), RAM-verified for both turns actually shipped, NOT a
+ * general `sSpriteOrder`/`SortSprites` simulation (unlike the rock-stacking
+ * fix, which needed one because 20 rocks churn through slots continuously -
+ * these two clones tie only against EACH OTHER, once per turn, and stay tied
+ * for their whole lifetime, so a single RAM-confirmed fact per turn fully
+ * determines the whole window). A future turn whose clones land in different
+ * slots, or where the tie order changes mid-window, would need the real
+ * simulation - flagged here rather than assumed to generalize silently.
  */
-function drawDoubleTeamClones(fb: Uint8Array, t: number, pressTick: number): boolean {
+function drawDoubleTeamClones(fb: Uint8Array, t: number, pressTick: number, frontClone: "a" | "b" = "b"): boolean {
   const offsets = doubleTeamCloneOffsets(t, pressTick);
   if (offsets === null) return false;
   eraseGrovyleFootprint(fb);
   const palette = getDoubleTeamClonePalette();
   const { tileset } = grovyleFrontSprite;
-  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.a, GROVYLE_CORNER.y, 12, 8, isOpponentHealthboxOpaqueAt);
-  drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.b, GROVYLE_CORNER.y, 12, 8, isOpponentHealthboxOpaqueAt);
+  const drawA = () => drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.a, GROVYLE_CORNER.y, 12, 8, isOpponentHealthboxOpaqueAt);
+  const drawB = () => drawSpriteSheetBlended(fb, tileset, palette, GROVYLE_CORNER.x + offsets.b, GROVYLE_CORNER.y, 12, 8, isOpponentHealthboxOpaqueAt);
+  if (frontClone === "a") {
+    drawB();
+    drawA();
+  } else {
+    drawA();
+    drawB();
+  }
   return true;
 }
 
@@ -4848,7 +4892,7 @@ function drawTurn4KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
   drawActionMenuIdleContent(fb, bounceTick, true, true, anchorPlayerAfterTurn3Hp, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
-  if (!drawDoubleTeamClones(fb, t, pressTick)) drawStatsBanner(fb, t, pressTick);
+  if (!drawDoubleTeamClones(fb, t, pressTick, "a")) drawStatsBanner(fb, t, pressTick);
 }
 
 /**
@@ -4925,12 +4969,30 @@ function drawTurn4RockSlideWindow(fb: Uint8Array, t: number): void {
     drawTurn4RockSlideTurnEndSettledMenu(fb, t);
     return;
   }
+  const statRoseStart = statRoseTextStartTick(pressTick);
+  const rockSlideStart = rockSlideTextStartTick(pressTick);
   const textClearTick = pressTick + TURN4_ROCKSLIDE_TEXT_CLEAR_DELAY;
   drawTurn4RockSlideAttack(fb, t);
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
-    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    let line1: string;
+    let line2: string;
+    let chars: number;
+    if (t < statRoseStart) {
+      line1 = TURN_KICKOFF_LINE1;
+      line2 = TURN_KICKOFF_LINE2;
+      chars = turnKickoffTextVisibleChars(t, pressTick);
+    } else if (t < rockSlideStart) {
+      line1 = STAT_ROSE_LINE1;
+      line2 = STAT_ROSE_LINE2;
+      chars = statRoseTextVisibleChars(t, pressTick);
+    } else {
+      line1 = ROCK_SLIDE_LINE1;
+      line2 = ROCK_SLIDE_LINE2;
+      chars = rockSlideTextVisibleChars(t, pressTick);
+    }
+    drawMessageTextLines(fb, line1, line2, chars);
   }
 }
 

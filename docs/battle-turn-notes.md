@@ -3893,3 +3893,143 @@ RAM- and boundary-pixel-confirmed, only the mid-window sweep is missing.
 Turn 5 (input at 5926) and everything after (the faint, switch-in) remains
 entirely out of scope, ground truth already banked in §13.
 
+### §22 RESOLUTION (S7 bounded worker retry): the clone-window residual was TWO real bugs, neither on the candidate list - `turn4-doubleteam.json` **249/249**, `turn4-rockslide.json` **250/250**, both 0 diff, S7 slice I fully closed
+
+The brief's own candidates (background dither/tile-scroll offset, palette-
+index rounding in `drawSpriteSheetBlended`, `eraseGrovyleFootprint`'s region)
+were all ELIMINATED by direct RAM probing, not fitted around - the mandated
+autopsy-before-fitting order found something none of them named.
+
+**Autopsy, in the order the brief specified:**
+
+1. **Pixel-level autopsy of tick 4978** (`tools/compare/scratch/turn4-clone-
+   probe.json`, a dense stride-1 probe 4934-5033): the 728px residual is a
+   flat plateau across ticks 4976-4981 (matching the clone offsets' own
+   near-total-overlap window there), not noise. Per-pixel dump: `app(x,y) ==
+   oracle(x+1,y)` at every sampled mismatch (e.g. `(191,17)`: oracle
+   `[123,141,139]`, app `[135,154,158]` == oracle's own `(192,17)`) - a
+   clean one-column substitution, not a shift/rounding artifact.
+2. **Turn 1's analogous tick (1972, the same `n=8` into the clone motion)**:
+   diffing turn 1's OWN oracle capture against turn 4's OWN oracle capture,
+   restricted to the residual bbox, shows **728 real pixel differences** -
+   i.e. the two turns' real hardware renders this window DIFFERENTLY at the
+   identical relative tick, despite identical anchors/formulas. Diffing
+   turn 1's oracle against turn 4's APP shows **0 differences** - turn 4's
+   app was faithfully reproducing turn 1's mechanism while turn 4's real
+   hardware does something else. This is the finding that redirected the
+   whole investigation: not "the app is wrong", but "turn 4 needs a
+   turn-specific fact the formula doesn't carry."
+3. **RAM-probing the candidates, in order, all ELIMINATED:**
+   - **Clone `x2` motion** (`gSprites[3]`/`gSprites[4]`, found by scanning
+     all 64 slots' `callback` pointer for `AnimDoubleTeam`'s address
+     `0x08102b3d`, thumb-bit set): `data[]`/`x2` progressions bit-identical
+     to `doubleTeamCloneOffsets`'s own model at matching `n`, both clones,
+     dense across the whole window. The offset table was never wrong.
+   - **Blend/window registers** (`BLDCNT`/`BLDALPHA`/`DISPCNT`/BG0-3
+     scroll, `0x04000050`/`0x04000052`/`0x04000000`/`gBattle_BG{0..3}_{X,Y}`):
+     flat and IDENTICAL both turns (`BLDCNT=0x3f40`, `BLDALPHA=0x080c`,
+     eva=12/evb=8, matching §8's own turn-1 finding exactly). `DISPCNT`
+     differs by one bit (OBJWIN, bit 15 - on for turn 1, off for turn 4,
+     leftover from turn 1's own earlier send-out effects never having been
+     cleared) but this bit is behaviorally inert here: no OBJ with
+     `objMode=OBJ_WINDOW` exists yet during the clone phase (that copy is
+     only made later, at the stat-banner's own start), so neither window's
+     rectangle is populated and `WINOUT` governs identically either way.
+   - **Grovyle's own front-sprite palette** (`gPlttBufferUnfaded`/
+     `gPlttBufferFaded` at `OBJ_PLTT_ID(1)`, `paletteNum=1` confirmed via
+     `gSprites[8].oam` - `gBattlerSpriteIds[1]`=8 both turns): all 16 colors
+     byte-identical both turns, before AND unaffected by ROCK_SLIDE's/
+     ENDEAVOR's own earlier hit-flash - no persistent contamination.
+   - **`sSpriteOrder`** (`0x020217F4`, `EWRAM_DATA static`, the same address
+     `rockSlideDrawOrder` already resolved for the rock-stacking fix, §11.1)
+     - **this is where it was.** Both clones are raw `gSprites[i] =
+     gSprites[spriteId]` STRUCT COPIES of Grovyle's own sprite
+     (`CloneBattlerSpriteWithBlend`, `battle_anim_mons.c:1626-1641`), so
+     `oam.priority`, `subpriority`, AND `oam.y` are bit-identical between
+     them - a GUARANTEED tie on `SortSprites`' own sort key
+     (`sprite.c:371-467`). Ties are broken by relative position in the
+     persistent, frame-to-frame-STABLE `sSpriteOrder` array - not a pure
+     function of slot number, but whatever order HISTORY left the two slots
+     in. RAM-read directly at both turns' analogous `n=8` tick: both turns'
+     clones land in the SAME two slots (3 and 4 - the free-slot pool is
+     otherwise identical by turn 4), but turn 1's `sSpriteOrder` has slot 4
+     BEFORE slot 3 (positions 8/9) while turn 4's has slot 3 BEFORE slot 4
+     (same positions, flipped) - the tie order genuinely flipped somewhere
+     in the intervening turns' own sprite churn, and nothing in either
+     turn's DOUBLE_TEAM-specific state predicts which way without reading
+     it.
+4. **The fix**: `drawDoubleTeamClones` (`battleScene.ts`) gained a
+   `frontClone: "a" | "b"` param (default `"b"`, turn 1's own RAM-confirmed
+   order, unchanged) - the two draw calls are ordered so whichever clone is
+   named front-most is applied LAST (this renderer's own `blendedTile`
+   always reads target-2 from the static background per #112's own OBJ-
+   vs-OBJ lesson, never from the other clone's already-drawn pixel, so
+   last-write-wins reproduces real hardware's front-sprite-wins-the-overlap
+   exactly). Turn 4's own call site passes `"a"`. Closes the ENTIRE
+   728px/1.90% residual, all bounce-tick-invariant ticks, 4976-5033 and
+   beyond (the whole clone+banner window, verified stride-1).
+
+**A second, unrelated bug surfaced once the clone fix was verified and the
+sweep continued past the banner**: `drawTurn4RockSlideWindow` never wired in
+the three-phase message-text gate turn 1's own `drawRockSlideWindow` already
+has (held `TURN_KICKOFF_LINE1/2` -> `STAT_ROSE_LINE1/2` ("Foe GROVYLE's
+evasiveness\nrose!") -> `ROCK_SLIDE_LINE1/2`, gated by `statRoseTextStartTick`/
+`rockSlideTextStartTick` - both already generic, `pressTick`-parameterized
+functions, no new code needed, just wiring). The turn-4 dispatcher instead
+always drew `ROCK_SLIDE_LINE1/2` from the hand-off tick (`pressTick`+275) on
+- 265 ticks (`pressTick+275` through `+392`) of the wrong text, growing to a
+907px plateau once the stat-rose glyphs diverge enough from the rock-slide
+glyphs' own pixel footprint. Found by the brief's own mandated full-window
+stride-1 sweep AFTER the clone fix (not by further register probing - a
+plain oracle-vs-app pixel diff at the newly-passing region's neighbor ticks
+was enough once the clone residual stopped masking it). Ported the same
+three-branch dispatch turn 1's function already has; closed outright.
+
+**Grovyle's 41->1 drain** (the first turn whose drain crosses the
+healthbox's green/yellow/red HP-band thresholds, ISSUES #16's own "never
+oracle-exercised" note) needed **zero new compositor code** - the dense
+`turn4-rockslide.json` sweep (stride-1 through the whole drain, `pressTick`+
+393 to +661) is 0 diff throughout, confirming `composeOpponentHealthbox`'s
+existing band thresholds already render both the yellow and red bands
+correctly with no changes.
+
+**Committed traces** (both new, both 0 diff, `turn4-menu.json` unchanged):
+- `turn4-doubleteam.json`: `pressTick`+9 through +392 (ticks 4934-5317, one
+  tick before ROCK_SLIDE's own hard-cut) - dense stride-1 over every
+  actively-changing sub-window (clone motion 45-174, banner 213-274,
+  stat-rose text typing 284-315) and light stride over the provably-static
+  holds between them (pre-clone text-dwell, the register-active-but-pixel-
+  inert blend-off gap 175-212, the post-stat-rose dwell before the
+  ROCK_SLIDE hard-cut) - 249 captures, tick 4934 itself excluded (13292px,
+  both neighbors exact, the same "redraw extremum" single-tick class as
+  3337/3465/3721/3879/3888, restated per the brief's own instruction).
+- `turn4-rockslide.json`: `pressTick`+393 through +1000 (ticks 5318-5925,
+  ending one tick before turn 5's own input at 5926) - dense stride-1 at
+  every named boundary (text hard-cut/accuracy/crit/damage-lock, the
+  text-clear/menu-redraw pair) and stride-2 through the shake/rock-fall
+  midsection (the hard 256-capture-per-trace service ceiling, `bin/oracle
+  info`'s own `limits.maxCaptures`, made full stride-1 across the entire
+  607-tick window impossible in one file - noted honestly rather than
+  silently thinning without saying so), then stride-15 across the settled
+  dwell - 250 captures.
+
+**Honest scope note on the `frontClone` fix**: this is a RAM-verified fact
+per turn (`turn3Resolved` at the call site), not a general `SortSprites`/
+`sSpriteOrder` simulation like the rock-stacking fix needed (§11.1) - flagged
+explicitly in the code comment. It generalizes correctly BECAUSE these two
+sprites only ever tie against each other, once per turn, for their whole
+shared lifetime (unlike the 20 churning rocks) - a future turn whose clones
+land in different slots, or whose tie order changes mid-window, would need
+the real simulation, not another hardcoded branch.
+
+**Verification**: `npm test` **756/756** (+3: two pixel pins for the clone
+z-order and stat-rose-text fixes, one pin for `rockSlideOpponentHp` with
+turn 4's real 41->1 numbers). `npm run build` green. `turn4-doubleteam.json`
+**249/249**, `turn4-rockslide.json` **250/250**, both 0 diff. Zero
+regressions, exact prior counts: `turn4-menu.json` **44/44**, `turn3-
+rockslide.json` **256/256**, `turn3-endeavor.json` **180/180**, `turn1-
+cloneanim.json` **230/230**, `turn1-rockslide.json` **256/256**, `turn2-
+dragonbreath.json` **237/237**. S7 slice I is now fully closed end to end
+(reopen through the settled post-ROCK_SLIDE menu); turn 5's own reopen
+(input tick 5926) is the natural next engine slice.
+
