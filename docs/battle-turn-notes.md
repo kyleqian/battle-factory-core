@@ -3741,3 +3741,155 @@ turn-4 section) is the immediate next slice. Slice G's own 12-tick
 shake-asymmetry exclusions (turn 3's ENDEAVOR window) and `turn3-menu.json`'s
 own 3879/3888 residuals remain untouched, out of this slice's own scope.
 
+## 22. Engine slice I: turn 4's FIGHT-submenu reopen, landed green; the DOUBLE_TEAM/ROCK_SLIDE resolution itself does NOT land this session - a real, uncracked pixel residual, not a scope choice (S7 bounded worker session)
+
+The assigned brief was turn 4 end to end (menu reopen through DOUBLE_TEAM
+through ROCK_SLIDE to the settled next menu). **That did not fully land.**
+What's committed and green: `tools/compare/traces/turn4-menu.json` (new,
+extends `turn3-rockslide.json`'s own 4890-frame prefix **verbatim** with
+`battle1-grovyle-faint.json`'s own turn-4 reopen+confirm presses - A at
+4892-4893, A at 4924-4925, both reused byte-for-byte from the groundtruth
+trace, per the brief's own instruction - through tick 4933, 44 dense
+`captureFrames`) is **44/44, 0 diff**. This covers the reopen, the
+(unneeded, cursor already 0) non-nav dwell, and the confirm registering -
+i.e. exactly `turn3-menu.json`'s own scope one turn later, NOT the fuller
+"reopen+DOUBLE_TEAM" fallback the brief explicitly allowed as a landing
+point. The DOUBLE_TEAM-text-onward and ROCK_SLIDE code below is written and
+RAM-validated but **NOT pixel-verified** - see the honest accounting below
+before trusting it.
+
+### What landed and is verified
+
+- **`BattleSceneState.turn3Resolved`** (new field, same "created directly"
+  idiom as `turn1Resolved`/`turn2Resolved`) - `core.ts` gained a new
+  `turn2Resolved && !turn3Resolved && ...` reopen branch, gated on a new
+  exported `TURN3_ROCKSLIDE_REOPEN_GATE_DELAY` (465, `battleScene.ts`) past
+  turn 3's own REAL confirm tick (3891) - **not** `TURN3_ROCKSLIDE_MENU_
+  REDRAW_DELAY`(669) directly, since that constant is relative to a
+  SYNTHETIC anchor (`TURN3_ROCKSLIDE_PRESS_TICK`, slice H), not the real
+  press; this session derives the real-press-relative delay as the two
+  anchors' own arithmetic difference (`3687+669-3891=465`). Reopen calls
+  `openFightSubmenu` with the default cursor (0) - no persisted-cursor param
+  needed, since ROCK_SLIDE (slot 0) is already where turn 3 left it, matching
+  §13's own "no nav needed" finding. Pinned by a new Tier-1 test replaying
+  `turn4-menu.json`'s own button script through `core.ts`'s `tick()`: reopen
+  registers at 4893 (`openElapsed`), confirm at 4925, cursor 0,
+  `turn3Resolved` flips true - plus a gate-still-closed test (100 ticks past
+  turn 3's confirm, well short of 465, leaves `fightSubmenu` untouched) and a
+  determinism/replay check.
+- **PP arithmetic**: `currentPPForActiveMon` (`battleMenu.ts`) gained a
+  `turn3Resolved` param - ROCK_SLIDE (slot 0) now reads **8/10** once turn 3
+  has ALSO resolved (used turns 1 AND 3, two independent slot-0 decrements),
+  distinct from `turn2Resolved`'s own unrelated slot-2 (DRAGON_BREATH)
+  decrement. Directly pixel-confirmed correct (not just RAM-inferred) - the
+  8/10 digits are inside `turn4-menu.json`'s own 0-diff dense window.
+- **`drawMenuIdleBaseWithOpponentHp`/`drawActionMenuIdleContent`/
+  `drawActionMenuIdleWindow`/`drawFightSubmenuWindow`/`drawFightSubmenuChrome`**
+  all gained a `turn3Resolved` param, extending the existing 2-state
+  (turn1Resolved/turn2Resolved) opponent-HP/bounce-tick selector to a 3rd
+  state (`anchorOpponentAfterTurn3Hp`=41 for Grovyle, `anchorPlayerAfterTurn3Hp`
+  =88 for Onix) - same shape slice F/G's own additions already established,
+  verified correct for the reopen/dwell/confirm-wait window (`turn4-menu.json`'s
+  own 0-diff result covers all of it).
+- **`turn4SubmenuBounceTick`/`turn4KickoffBounceTick`/`TURN4_KICKOFF_FROZEN_
+  BOUNCE_TICK`**: the onix/healthbox idle-bounce chain one epoch further
+  (composing `turn3RockSlideResettledBounceTick`'s own reset point with
+  `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`, same shape `turn3SubmenuBounceTick`
+  established). **The frozen constant needed a real pixel-fit grid search**
+  (unlike turn 3's own case, which coincidentally needed none) - swept
+  `turn4SubmenuBounceTick(TURN4_CONFIRM_PRESS_TICK - d)` for `d` from 0 to 30
+  against a live single-tick `npm run compare` oracle diff at tick 4928 (the
+  freeze moment): `d` in `[9..15]` is an exact 7-tick-wide 0-diff plateau
+  (matching `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`'s own doc's "grid-searched
+  plateau" precedent), `d=12` picked as the center. Verified exact for
+  ticks 4928-4933 (the whole confirm-wait window this session's own committed
+  trace covers).
+
+### What's written but NOT pixel-verified - the honest remainder
+
+`drawTurn4KickoffText`/`drawDoubleTeamClones`/`drawStatsBanner` (DOUBLE_TEAM
++ evasion-banner) and `drawTurn4RockSlideAttack`/`drawTurn4RockSlideWindow`/
+`drawTurn4RockSlideTurnEndSettledMenu` (ROCK_SLIDE) are all implemented,
+following slice H's own "parameterize turn 1's mechanism with a real, not
+synthetic, press tick" approach (`TURN4_CONFIRM_PRESS_TICK`=4925 - a REAL
+press, unlike turn 3's synthetic `TURN3_ROCKSLIDE_PRESS_TICK`, since turn 4's
+own preceding move is DOUBLE_TEAM again, the SAME move turn 1 used, unlike
+turn 3's ENDEAVOR). This session's own fresh `tools/probe/ram-probe.py` run
+strongly supports zero-code-change reuse being the RIGHT shape: every one of
+turn 1's own `pressTick`-relative anchors reproduces EXACTLY at
+`TURN4_CONFIRM_PRESS_TICK` plus turn 1's own v5-table offset, bit-for-bit,
+no fitting needed - `gCurrentMove`->104 at 4931 (+6, matching turn 3's own
+ENDEAVOR-write offset too), evasion stage 7->8 at **4965** (+40, RAM-exact),
+ROCK_SLIDE's own accuracy roll at **5316** (+391), crit roll at **5340**
+(+415), damage-lock 32->48->**40** at **5343** (+418), Grovyle's raw
+`gBattleMons[1].hp` update 41->**1** at **5564** (matching `rockSlideOpponentHp`'s
+own unchanged formula, `pressTick+597+40+2`, exactly) - all six bit-exact.
+Pixel-confirmed (dense `bin/oracle run` + cropped-diff sweep, ticks
+5290-5330/5550-5610): ROCK_SLIDE's own kickoff text hard-cuts the message
+box at **5318** (`pressTick+393`, matching turn 1's own unchanged
+`ROCK_SLIDE_TEXT_DELAY` exactly - no synthetic-anchor correction needed,
+confirming the "same move, same timing" hypothesis), text-clears at **5580**
+(`TURN4_ROCKSLIDE_TEXT_CLEAR_DELAY=655`, 2 LESS than turn 1's naive 657 -
+turn 4's own drain diff, 40, is 2 less than turn 1's 42, consistent with
+slice H's own "drain-diff explains the delta" finding, sign and all), and
+hard-cuts to the resettled menu at **5586** (`TURN4_ROCKSLIDE_MENU_REDRAW_
+DELAY=661`).
+
+**Despite all of that matching exactly, `npm run compare` against a scratch
+(uncommitted) dense probe trace over this window still shows real, non-trivial
+diffs** that this session could not resolve in the time remaining:
+- A single isolated tick at **4934** (13292px/28.47% mismatch, the whole
+  message-box region) - both neighbors (4933, 4935) are EXACT matches, the
+  same "hardware quirk at a redraw extremum" shape this dossier has
+  repeatedly found (ticks 3337/3465/3721/3879/3888) and excluded rather than
+  chased. A same-class, plausible-but-unconfirmed exclusion, not chased
+  further this session.
+- **A genuine, NOT-bounce-related residual inside the clone/banner window**
+  (tick 4978 sampled: 728px/1.90%, bbox `x=145-205,y=17-70` - the Grovyle
+  sprite's own top-right region, NOT the onix/healthbox area the bounce grid
+  search above already nailed). Confirmed NOT a bounce-tick issue directly:
+  sweeping the SAME `d` range that produced an exact 7-wide plateau at tick
+  4928 produces a FLAT, unchanged 728px at every `d` in that same range at
+  tick 4978 - i.e. whatever's wrong here is invariant to the bounce tick
+  entirely, a different mechanism. The app and oracle PNGs are visually
+  indistinguishable at normal zoom (no visible clone duplicate, no obvious
+  color/shape difference) - the diff is real but subtle, not yet identified
+  (candidates not investigated, time-boxed: a background dither/tile-scroll
+  offset under the sprite, a palette-index rounding difference in
+  `drawSpriteSheetBlended`'s blend path, or `eraseGrovyleFootprint`'s own
+  region not matching turn 4's real content exactly). **This is a real open
+  bug, not a "not modeled yet" gap** - the code path exists and mostly
+  works, but isn't provably exact, so it is correctly excluded from any
+  committed trace per this run's own "never commit red" rule.
+- The ROCK_SLIDE window itself (attack/shake/rocks/drain/text-clear/redraw,
+  5318-5586) was NOT densely pixel-swept this session at all (time-boxed
+  after the above) - only the four RAM anchors and the two text-box boundary
+  ticks above were oracle-confirmed. Given the clone-window residual above
+  is real and unexplained, this window should be assumed **unverified**,
+  not assumed correct by the "same formula, real anchor" argument alone -
+  the very next thing this dossier's next session should do before trusting
+  any of it.
+
+### Verification
+
+`npm test` **753/753** (+4: the turn-4 reopen/confirm replay pin, the
+reopen-gate-still-closed pin, the PP-arithmetic pin, and a determinism
+replay check - all Tier-1, state-only). `npm run build` green. `turn4-
+menu.json` **44/44, 0 diff**. Zero regressions, full sweep re-verified at
+exact prior counts: `turn3-rockslide.json` **256/256**, `turn3-endeavor.json`
+**180/180**, `turn3-menu.json` **250/250**, `turn1-cloneanim.json`
+**230/230**, `turn1-rockslide.json` **256/256**, `turn2-dragonbreath.json`
+**237/237**.
+
+### What's left
+
+The clone-window residual (728px, `x=145-205,y=17-70`, bounce-invariant) is
+the immediate blocker - RAM-probe `BLDALPHA`/`BLDCNT`/the palette buffer
+directly at tick 4978 rather than re-sweeping pixel formulas blind. Once
+resolved, the dense capture sweep for both the DOUBLE_TEAM/banner window
+(4934-5317) and the full ROCK_SLIDE window (5318-5586) plus the settled
+plateau (5586-5926) is mechanical - the anchors/constants above are already
+RAM- and boundary-pixel-confirmed, only the mid-window sweep is missing.
+Turn 5 (input at 5926) and everything after (the faint, switch-in) remains
+entirely out of scope, ground truth already banked in §13.
+

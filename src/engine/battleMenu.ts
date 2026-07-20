@@ -1862,13 +1862,23 @@ export function turn2KickoffBounceTick(t: number, pressTick: number): number {
  * "whichever move was actually confirmed" in general; BIND/SANDSTORM's own
  * PP-after-use remains unoracled and would still be faking data to model.
  */
+/**
+ * S7 slice I: `turn3Resolved` (docs/battle-turn-notes.md §13/§22) adds a
+ * SECOND slot-0 decrement - turn 3 also used ROCK_SLIDE (this engine's own
+ * scripted turn-3 choice, cursor 0 again after the turn-2->3 UP-nav), so by
+ * turn 4's own reopen ROCK_SLIDE has been used twice (turns 1 and 3, PP
+ * 10->8), independent of `turn2Resolved`'s own slot-2 (DRAGON_BREATH)
+ * decrement.
+ */
 export function currentPPForActiveMon(
   moveset: ActiveMonMoveset,
   turn1Resolved: boolean,
   turn2Resolved: boolean = false,
+  turn3Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
-  return [turn1Resolved ? a - 1 : a, b, turn2Resolved ? c - 1 : c, d];
+  const slot0Uses = (turn1Resolved ? 1 : 0) + (turn3Resolved ? 1 : 0);
+  return [a - slot0Uses, b, turn2Resolved ? c - 1 : c, d];
 }
 
 export function getCurrentPPToMaxPPState(currentPP: number, maxPP: number): 0 | 1 | 2 | 3 {

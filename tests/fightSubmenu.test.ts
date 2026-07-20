@@ -26,7 +26,7 @@ import {
 } from "../src/engine/battleMenu.ts";
 import { TICK0 as SCENE_TICK0 } from "../src/engine/battleScene.ts";
 import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
-import { rockSlideOpponentHp } from "../src/engine/battleMenu.ts";
+import { rockSlideOpponentHp, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import type { GbaButton } from "../src/input.ts";
 
@@ -121,7 +121,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false },
   };
 }
 
@@ -235,6 +235,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: false,
+      turn3Resolved: false,
     },
   };
 }
@@ -351,6 +352,7 @@ function stateAtTurn3Confirm(): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: true,
+      turn3Resolved: false,
     },
   };
 }
@@ -426,5 +428,65 @@ describe("battleMenu/battleScene: turn 3's ROCK_SLIDE resolution (S7 slice H, do
     let replay = stateAtTurn3Confirm();
     for (let i = 0; i < 999; i += 1) replay = press(replay, []);
     expect(replay.battleScene).toEqual(state.battleScene);
+  });
+});
+
+describe("battleMenu/battleScene: turn 4's FIGHT-submenu reopen (S7 slice I, docs/battle-turn-notes.md §13/§22)", () => {
+  it("replaying turn4-menu.json's own committed button script (reopen, NO nav needed, confirm) lands turn 4's own confirm at tick 4925, cursor persisted at 0 (ROCK_SLIDE, unchanged since turn 3), turn3Resolved flips true", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn4-menu.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    let state = createInitialState();
+    for (const seg of trace.segments) {
+      for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
+    }
+    // 4893, not 4892: the "last frame of the 2-frame hold" convention every
+    // other CONFIRM/OPEN press tick in this dossier already uses (`newKeys`
+    // fires on the FIRST held frame, but `battleScene.elapsed+1` at THAT
+    // tick's own `tick()` call lands one tick later in trace-tick terms -
+    // same lag `TURN1/2/3_CONFIRM_PRESS_TICK`'s own docs describe).
+    expect(state.battleScene!.fightSubmenu.openElapsed).toBe(4893 - SCENE_TICK0);
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(4925 - SCENE_TICK0);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    expect(state.battleScene!.turn1Resolved).toBe(true);
+    expect(state.battleScene!.turn2Resolved).toBe(true);
+    expect(state.battleScene!.turn3Resolved).toBe(true);
+  });
+
+  it("the turn-3-resolved reopen gate stays closed before TURN3_ROCKSLIDE_REOPEN_GATE_DELAY(465) has elapsed past turn 3's own real confirm (3891) - an early A press is simply dropped (fightSubmenu keeps turn 3's own already-confirmed state, no fresh openFightSubmenu call), matching turns 1/2/3's own reopen-gate precedent", () => {
+    let state = stateAtTurn3Confirm();
+    const confirmElapsedBefore = state.battleScene!.fightSubmenu.confirmElapsed;
+    // Advance only 100 ticks (well short of the real gate delay, 465) then
+    // try to reopen - the gate must still be closed, so this A is a no-op.
+    for (let i = 0; i < 100; i += 1) state = press(state, []);
+    state = press(state, ["A"]);
+    expect(state.battleScene!.turn3Resolved).toBe(false);
+    // A no-op press leaves the PRIOR (turn 3's own already-confirmed)
+    // fightSubmenu state entirely untouched - confirmElapsed stays set
+    // (a fresh reopen would reset it to null via `openFightSubmenu`).
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(confirmElapsedBefore);
+  });
+
+  it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 8/10 once turn3Resolved (used turns 1 AND 3), independent of turn2Resolved's own slot-2 DRAGON_BREATH decrement", () => {
+    const moveset = rentalMoveset("ONIX");
+    expect(currentPPForActiveMon(moveset, true, true, true)[0]).toBe(moveset.maxPP[0] - 2);
+    expect(currentPPForActiveMon(moveset, true, true, true)[0]).toBe(8);
+    // Sanity: turn1Resolved alone (pre-turn-3) still reads 9/10, matching
+    // every earlier turn's own pinned behavior - this test doesn't regress it.
+    expect(currentPPForActiveMon(moveset, true, false, false)[0]).toBe(9);
+  });
+
+  it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn4-menu.json (44/44, 0 diff)", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn4-menu.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    function replay(): EngineState {
+      let state = createInitialState();
+      for (const seg of trace.segments) {
+        for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
+      }
+      return state;
+    }
+    expect(replay().battleScene).toEqual(replay().battleScene);
   });
 });

@@ -85,6 +85,7 @@ import {
   renderBattleScene,
   sendOutPressEligible,
   TICK0 as SCENE_TICK0,
+  TURN3_ROCKSLIDE_REOPEN_GATE_DELAY,
   type BattleSceneState,
 } from "./battleScene.ts";
 import {
@@ -183,6 +184,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     const sceneT = SCENE_TICK0 + battleScene.elapsed + 1;
     let turn1Resolved = battleScene.turn1Resolved;
     let turn2Resolved = battleScene.turn2Resolved;
+    let turn3Resolved = battleScene.turn3Resolved;
     if (fightSubmenu.openElapsed === null) {
       if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
         // S8 engine dependency (docs/battle-menu-notes.md §13c): the FIGHT
@@ -253,8 +255,23 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // from "persist" - see `openFightSubmenu`'s own doc).
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
       turn2Resolved = true;
+    } else if (
+      turn2Resolved &&
+      !turn3Resolved &&
+      fightSubmenu.confirmElapsed !== null &&
+      newKeys.has("A") &&
+      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN3_ROCKSLIDE_REOPEN_GATE_DELAY
+    ) {
+      // S7 slice I (docs/battle-turn-notes.md §13/§22): turn 3's whole
+      // ROCK_SLIDE resolution has redrawn the settled action menu by now
+      // (`TURN3_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 3's own real confirm)
+      // - a fresh A-press reopens FIGHT for turn 4, cursor persisted at slot
+      // 0 (ROCK_SLIDE, unchanged since turn 3 - no UP-nav needed this time,
+      // §13's own ledger).
+      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
+      turn3Resolved = true;
     }
-    battleScene = { ...battleScene, fightSubmenu, turn1Resolved, turn2Resolved };
+    battleScene = { ...battleScene, fightSubmenu, turn1Resolved, turn2Resolved, turn3Resolved };
     battleScene = advanceBattleScene(battleScene);
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
   }
