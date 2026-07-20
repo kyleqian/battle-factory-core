@@ -1,5 +1,11 @@
 # Turn 3 residual probe notes (S7 bounded worker session, RAM/oracle probing only — no engine changes)
 
+**Update (follow-up bounded worker session, same constraints — RAM/oracle
+probing only, no engine changes): Family B's own "next instrument" (the
+invisible bouncer sprites' raw state) was run — see "Family B, continued"
+below for the pointer-chase and the derived rule. Family B is now MECHANISM
+CLOSED, same as Family A.**
+
 Root-cause probe for the two excluded-tick residual families named in the
 brief: `docs/battle-turn-notes.md` §20's shake asymmetry (family A) and §19's
 two menu-idle ticks (family B). Both instruments named in the brief were run
@@ -211,6 +217,132 @@ differently), that would fully close this out as a corrective single-tick
 data table (the `BALL_SPIN_TABLE`/`MATERIALIZE_Y2_TABLE` precedent this run
 already uses for exactly this residual class), not a formula change.
 
+## Family B, continued: the pointer-chase run, and the rule found (S7 bounded worker session, RAM/oracle probing only — no engine changes)
+
+### The instrument
+
+Extended `tools/probe/ram-probe.py` (backward compatible — every existing
+spec still works unchanged) with a generic multi-hop `"path"` alternative to
+the single-hop `"addr"`/`"deref"` watch format, exactly the kind of chase its
+own module doc anticipated ("so the next chase... doesn't have to rebuild
+this from scratch"). A `path` is an ordered list of hops (`{"symbol": "x"}`,
+`{"add": N}`, `{"addSymbol": "x"}`, `{"derefU32": true}`,
+`{"derefU8Scaled": M}`) applied to a running cursor — enough to chase
+`gBattleSpritesDataPtr` (deref) → `+4` (the `healthBoxesData` field,
+`include/battle.h`'s `struct BattleSpriteData`) → (deref) → `+2`/`+3` (battler
+0's `healthboxBounceSpriteId`/`battlerBounceSpriteId` bytes, `struct
+BattleHealthboxInfo`) → read that byte, scale by `sizeof(struct Sprite)`
+(0x44) → add `gSprites`'s own address → add the wanted `data[]` field offset
+(`sSinIndex`=0x2E, `sDelta`=0x30, `sAmplitude`=0x32, `sBouncerSpriteId`=0x34,
+`sWhich`=0x36 — `battle_main.c:2893-2897`'s own `#define`s over `data[0..4]`,
+struct `Sprite.data` at 0x2E per `include/sprite.h`). No engine code touched;
+this is purely `tools/probe/`.
+
+New spec `tools/probe/specs/turn3-menu-bouncer-raw.json` (segments copied
+verbatim from `turn3-menu.json`'s own committed button script, `startTick`
+3855), watching, for BOTH bounce regions (battler 0's ONIX `BOUNCE_MON`
+driver and its healthbox-main `BOUNCE_HEALTHBOX` driver — confirmed distinct
+sprites via `sWhich`, per `battle_main.c:2899-2938`): the driver sprite's own
+`id`, raw `sSinIndex`, `sDelta`, `sAmplitude`, `sBouncerSpriteId` (the target
+it drives), `sWhich`, plus the target's own resultant `y2` (same
+`gSprites[6]`/`gSprites[0]` addressing the prior session already
+established). Run twice independently
+(`/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+tools/probe/ram-probe.py ...`), **byte-identical both times** (`diff`, 0
+bytes). Committed: `src/data/gen/turn3-menu-bouncer-raw-probe.json`.
+
+### Validated against the known-good window first
+
+Both driver sprite ids are **constant across the entire probed window**
+(3855-3892, spanning multiple button presses): onix driver = sprite slot 4,
+healthbox driver = sprite slot 3 — confirming (as the prior session inferred
+indirectly via `onixCallback`/`healthboxMainCallback` stability) these are
+the SAME two long-lived invisible sprites the whole time, never
+destroyed/recreated by any of turn 3's own submenu opens/closes. Both
+`sBouncerSpriteId`/`sWhich` match expectation (target=6/`BOUNCE_MON` for
+onix, target=0/`BOUNCE_HEALTHBOX` for healthbox) throughout. At tick ~3893
+(right after turn 3's own confirm) all four driver fields go to 0 in the same
+tick — `EndBounceEffect`'s `DestroySprite` call, not a new mechanism.
+
+### The rule, derived and verified (`tools/probe/verify-turn3-menu-bounce-rule.py`, committed)
+
+A pure-Python (no mGBA) analysis script over the committed probe JSON. Four
+checks, all against RAM ground truth only (no pixels, no model until check 4):
+
+1. **`sSinIndex` never stalls or skips**: every tick-to-tick step is exactly
+   `+7 (mod 256)`, both regions, for all 74 active steps in the window — **zero
+   exceptions, including right through ticks 3878→3879 and 3887→3888**. This
+   directly rules out the "invisible sprite ticks on a different cadence" /
+   accumulator-stall hypothesis the prior session flagged as the open
+   question: it does not happen. The driver sprite's own phase is a perfectly
+   uniform linear counter throughout.
+2. **The sampling convention is exact, zero exceptions**: `resultant y2(T) ==
+   bounceSin(sSinIndex(T-1)) + amplitude` for every active tick in the window,
+   both regions — i.e. `SpriteCB_BounceEffect`'s own source-coded
+   read-before-increment (`battle_main.c:2967-2979`: `index =
+   sprite->sSinIndex` happens BEFORE `sprite->sSinIndex = ... + sDelta`) holds
+   with no special-casing anywhere, including AT ticks 3879/3888 themselves.
+   Nothing hardware-quirky happens at these ticks at all.
+3. **The engine's `turn3SubmenuBounceTick`+`menuIdleBounce` formula, replicated
+   verbatim in Python from the committed TS constants/logic, compared against
+   real RAM at the correct screen-tick alignment** (`real_screen_y2(T) =
+   probed_y2(T-1)`, the already-established render lag): mismatches at
+   exactly 4 region-ticks in the whole probed range — onix@3861, onix@3879,
+   healthbox@3870, healthbox@3888. **3879 and 3888 are this dossier's own two
+   named residuals.**
+4. **The exact rule**: `model(t) == real_screen_y2(t+1)` holds with **zero
+   violations** across every probed region-tick (41 ticks × 2 regions). I.e.
+   the engine's composed bounce-tick argument for turn 3's reopened submenu is
+   **uniformly exactly one RAM tick more advanced** than the real,
+   continuously-running invisible sprite's own `sSinIndex`. This single,
+   constant, per-window offset is invisible at ~37 of the 41 probed ticks
+   (neighbors share the same quantized 0/1/2 `y2` plateau) and visible only
+   where the sine table's own step boundary is crossed — which happens to be
+   ticks 3861, 3870, 3879, 3888 in this specific window (4 boundary crossings;
+   only 2 are named/excluded in the committed trace, see caveat below).
+
+### Verdict: Family B CLOSED as a mechanism — a uniform 1-RAM-tick-advanced phase reference, NOT a hardware quirk
+
+This fully overturns the prior classification of 3879/3888 as a
+"hardware quirk at a bounce extremum" (the `docs/battle-turn-notes.md` §19
+analogy to ticks 3337/3465/3721): the raw driver sprite's own state shows
+**no quirk, no stall, no peak-hold exception** anywhere. The two ticks are
+ordinary sine-table plateau crossings; what's actually wrong is the TS
+engine's own `turn3SubmenuBounceTick` composition (`battleScene.ts:4448`,
+which reduces algebraically to a plain `t - 1590`), which is a constant one
+RAM tick too fast relative to the real invisible sprite. This also explains
+why the earlier "ruled out: systematic 1-tick offset" experiment (this
+session's own prior part, `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` 2→1) made things
+*worse*, not better: decreasing the shift subtracts less, advancing the
+model's phase even further ahead (compounding, not correcting, the
+one-tick-too-fast error) — the untried direction (increasing the shift, e.g.
+to 3) is what the algebra above implies would remove the offset. **Not
+applied — out of scope this session (no engine changes); this is the
+corrective direction for whoever picks up the fix.**
+
+### Honest caveat: two more predicted-but-unverified crossings (3861, 3870)
+
+The same rule predicts mismatches at onix@3861 and healthbox@3870 too — but
+neither tick is in `turn3-menu.json`'s own `captureFrames` list (checked
+directly: `3861 in captureFrames` → `False`, `3870 in captureFrames` →
+`False`, same as 3879/3888 which the trace already knows to exclude). So
+these two are **not independently pixel-verified** either way: they may be
+silently-uncaptured additional residuals of the exact same mechanism, or the
+"idle, cursor shown, live formula" branch may genuinely not be the operative
+draw path at those two specific ticks for an unrelated reason (e.g. still
+inside a DMA-wait redraw hold) that this session didn't chase further. Flagged
+per this dossier's own no-silent-exclusion policy, not fixed or hidden.
+
+### Verification (this addendum)
+
+`ram-probe.py`'s new `path` hop is additive — every pre-existing spec's
+`"addr"` form is untouched (verified: re-ran `turn3-menu-bounce-watch.json`,
+identical output to the prior session's own committed
+`turn3-menu-bounce-probe.json`). `npm test`/`npm run build` unaffected
+(`tools/probe/`, `src/data/gen/`, `docs/` only). New:
+`tools/probe/verify-turn3-menu-bounce-rule.py` (plain `python3`, no mGBA
+needed) — run it directly to reproduce every claim above.
+
 ## Summary for the supervisor
 
 - **Family A (shake asymmetry): SOLVED.** Root cause is a genuine stale-global
@@ -222,14 +354,28 @@ already uses for exactly this residual class), not a formula change.
   symmetric behavior from the same formula, verified computationally this
   session. Ready for a follow-up engine slice (add the `downStep`/`upStep`
   pair + the preceding-move-power anchor; no further probing needed).
-- **Family B (menu-idle ticks): partially pinned, needs different/deeper
-  tooling.** The divergence is real, isolated to exactly the 2 named ticks,
-  and conclusively NOT a constant-offset bug in the composed bounce-tick
-  formula (tested and ruled out this session) — but the full mechanism needs
-  the invisible bouncer sprite's own task-like state (a further pointer-chase
-  through `gBattleSpritesDataPtr`, not reached this session), not just its
-  target's resultant `y2` (which is all this session's probe reached). A
-  follow-up session should resolve that struct's offsets first.
+- **Family B (menu-idle ticks): MECHANISM CLOSED** (follow-up bounded worker
+  session, pointer-chase completed). The invisible bouncer sprites' own raw
+  `sSinIndex` (`gBattleSpritesDataPtr`→`healthBoxesData[0]`→
+  `{battlerBounceSpriteId,healthboxBounceSpriteId}`→`gSprites[id].data[]`, RAM-
+  confirmed via a new generic multi-hop `path` addition to `ram-probe.py`)
+  shows **zero stalls, zero skips, and zero sampling-convention exceptions**
+  anywhere in the window, including at the two named residuals — the
+  divergence is NOT a hardware quirk at a "bounce extremum" as previously
+  catalogued. Instead: the engine's own `turn3SubmenuBounceTick` composition
+  is a **uniform, constant one-RAM-tick-too-advanced** phase reference
+  relative to the real driver sprite (verified computationally, zero
+  exceptions, `tools/probe/verify-turn3-menu-bounce-rule.py`) — invisible
+  almost everywhere in this window because neighboring ticks share the same
+  quantized `y2` plateau, and visible only at the exact 2 (of 4 total in this
+  window) sine-table plateau-crossing ticks the trace already excludes.
+  Corrective direction identified but **not applied** (out of scope, no
+  engine changes this session): the untried direction on
+  `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (increase, not the already-ruled-out
+  decrease) is what the algebra implies removes the offset — a follow-up
+  engine slice should try that first. One honest open caveat: the same rule
+  also predicts mismatches at 2 further ticks (3861, 3870) neither pixel-
+  verified nor currently named/excluded — flagged, not chased further.
 
 ## Verification
 
