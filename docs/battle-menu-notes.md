@@ -2641,3 +2641,87 @@ extended `ENDEAVOR_SQUISH_TABLE` data (this session's own probe dump) can
 likely just be dropped in; (3) shake/hitsplat (`gAnimMovePower` for ENDEAVOR
 still not RAM-confirmed, §15's own flag) remain the last unmodeled
 sub-mechanisms blocking a full close of this window.
+
+### 15d. S7 slice E1d batch-1 increment (bounded worker, fourth follow-up session): batch-1 droplets + the extended squish/blend table landed green through render 3007 as before, PLUS two genuine "inter-round lull" islands past it (3024-3033, 3050-3060) - wall found and pinned exactly: render 3008, gated by an unmodeled hitsplat sprite, not a droplet/squish bug
+
+**What landed:** `ENDEAVOR_SQUISH_TABLE` extended from 8 rows (`t=3000..3007`)
+to 57 rows (`t=3000..3056`), covering both squish/blend cycles - same two
+lags (`matrix/y2: RAM=render-2`, `coeff: RAM=render-1`) that fit the
+original 8 rows, re-derived from a fresh `dump-endeavor-squish-blend-ext.py`
+run (RAM 2996-3055; the prior session's own dump was scratch/uncommitted, so
+this session re-ran it rather than trusting a stale transcription).
+`turn2-endeavor-drain.json`'s `captureFrames` grew from 114 to 135: the
+pre-existing dense 3000-3007 block, PLUS two newly-verified-green stretches,
+`3024-3033` and `3050-3060` (see "the wall" below for why the frames between
+them - 3008-3023 and 3034-3049 - stay uncaptured rather than committed red).
+4 new Tier-1 pins in `battleScene.test.ts`, all oracle-cross-checked (a
+scratch `bin/oracle run` capture, not this engine's own output).
+
+**Batch-1 (upper) droplets: convention generalizes, ZERO code changes
+needed - confirmed both by a targeted oracle pixel check and by full-frame
+diff evidence.** Batch 1/cycle 0 spawns at RAM `pressTick+59+12=3016`
+(`ENDEAVOR_DROPLET_BATCH_STRIDE=12`, already-committed formula); applying
+the SAME `RAM=render-1`/`n>=1` convention batch 0 established gives first
+visible render `3016+1(n)+1(lag)=3018` - one tick later than §15c's own
+rough "~3017" guess (that note was an estimate for where to start looking,
+not a computed prediction). A scratch oracle capture at (156,19) - batch 1
+droplet index 0's own predicted center - confirms it exactly: render 3017
+shows plain background `(247,247,255)`, render 3018 shows the droplet's own
+bright highlight `(206,255,255)`, the identical color batch 0's own pin
+uses. Independently corroborated by the full-window `npm run compare` diff
+bounding boxes (below): every diff tick's bbox stays confined to
+`x=41-102` (the target/Onix side) and NEVER shifts toward the
+`x=142-210` droplet/attacker region even at render 3018 when batch 1 first
+becomes visible - if the convention were wrong for batch 1, that region
+would show up as a diff exactly there and it never does, through the whole
+3008-3049 span.
+
+**The wall, found and pinned exactly: render 3008, gated by hitsplat (not
+shake, not a droplet/squish bug).** Extending dense captures tick-by-tick
+past 3007 (per the brief's own "extend then trim to last green" method)
+immediately hit a diff at 3008 (277px). Cropping the diff mask's own
+bounding box (`tools/compare/diff.ts`'s red-highlight convention) pinpoints
+it precisely: `x=49-71,y=65-87` at 3008-3009, growing to `x=44-102,y=49-111`
+by 3010 and staying in that same footprint (never touching the attacker
+side) through 3023. Visually (`diff-03008.png`) it's an unmistakable small
+red starburst sitting on Onix's own body - `AnimHitSplatBasic`'s own "pop"
+sprite (§15's own derivation: two static 32x32 sprites at target-relative
+`(12,-12)`/`(-12,12)`, instant pop to scale 176/256 then ramping back to
+256/256 over 8 ticks) appearing exactly where source says it should, just
+not yet modeled by this engine. This is a clean, unambiguous attribution -
+not a guess: the bbox never once overlaps the `x>127` attacker/squish/
+droplet region across the entire 3008-3049 span, which is exactly the
+independent evidence (above) that closes out batch-1's own convention too.
+
+**A genuine bonus finding: two "inter-round lull" islands exist inside what
+§15's own coarser bbox scan called one continuous 3008-3049 span.** Diffing
+every tick individually (not sampled) found the hitsplat/shake contamination
+actually has gaps: `3024-3033` (10 ticks) and `3050-3060` (11 ticks, past
+the previously-known settle) both diff EXACTLY ZERO pixels - real quiet
+windows between hitsplat round 1's own decay and round 2's own pop-in (and
+past round 2 entirely for the second island), not previously distinguished
+at §15's coarser 4-tick sampling resolution. Since these ticks are
+genuinely, individually oracle-verified green - not adjacent to the
+3000-3007 block, but real nonetheless - `captureFrames` includes them
+(matching this trace's own pre-existing sparse-then-dense convention, e.g.
+the `2963,2967,2971...` prefix already mixes densities); the red spans
+between islands (3008-3023, 3034-3049) are deliberately left OUT of
+`captureFrames` entirely rather than committed as known-red, per this run's
+"never commit red" rule.
+
+**Verification**: `npm test` **678/678** (+4 new pixel-pins, oracle-
+cross-checked per their own doc comments), `npm run build` green.
+`tools/compare`: `turn2-endeavor-drain.json` **134/135** (grown from
+113/114 - only the pre-existing #19 diff at frame 2906 remains),
+`turn2-endeavor.json` **76/77** (unchanged), `turn1-rockslide.json`
+**256/256** (unchanged), `turn1-cloneanim.json` **230/230** (unchanged),
+`turn1-drain.json` **102/102** (unchanged) - zero regressions.
+
+**What's left, precisely scoped for whoever picks this up next**: model
+`AnimHitSplatBasic` (gfx + affine pop table already extracted/derived, §15)
+and `AnimTask_ShakeTargetBasedOnMovePowerOrDmg` (needs `gAnimMovePower` for
+ENDEAVOR RAM-confirmed, still open per §15's own flag) to close the
+3008-3023 and 3034-3049 gaps - both squarely target-side, zero risk of
+disturbing the now-closed attacker-side squish/blend/droplet modeling. Once
+those land, the two islands this session found should merge with 3000-3007
+into one fully contiguous green block through at least 3060.

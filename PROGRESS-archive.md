@@ -1,3 +1,25 @@
+## 143 — Supervisor: battle-2 scout merged (§17 debts closed + §18 battle-2 turn-1 ground truth); **new ISSUES #21** — RAM-observed base damage 19 vs formula 17 on ROCK_SLIDE-vs-KABUTO, a damageCalc generality gap
+
+- **State:** `npm test` **672/672**, `npm run build` green, tree clean at
+  merge `031bfc5`; no worktrees, no unmerged branches.
+- **Did:** verified and merged worker/wt-20260719-184149 (3 commits):
+  rentalMons[] probe fixed (root cause: global.h's field comments are
+  SaveBlock2-absolute offsets, the old probe double-added frontier's
+  0x64C base) and validated two ways (pre-swap == anchor dump 3/3 slots;
+  post-swap slot0 == pre-swap slot3 per CopySwappedMonData); YES-branch
+  LCG ledger committed (bonus: frontier RNG freeze begins tick 33286);
+  battle2-turn1.json (33672f/168c, twice-run) + §18 ledger — new pinned
+  mechanic: KABUTO's BATTLE_ARMOR short-circuits the crit roll's
+  Random() call. Damage discrepancy honestly flagged → filed as ISSUES
+  #21 (leads: probe defense/statStages at calc tick). Also
+  verified+accepted #142 (squish+blend landed via RAM-probed matrices,
+  turn2-endeavor-drain 111/112).
+- **Next:** (1) main lane: ENDEAVOR droplets increment (spawn boundary
+  pixel-pinned at 3006, physics banked in §15); (2) worktree: root-cause
+  ISSUES #21; (3) wind down ~21:30-21:45 (deadline 22:16).
+- **Notes:** none.
+
+---
 ## 142 — Bounded worker: S7 slice E1d-retry — **ENDEAVOR squish RAM-probed and landed green** (renders 3000-3005, real hardware `gOamMatrices` values, not a pixel fit); `npm test` **672/672** (+3), `npm run build` green
 
 - **State:** `npm test` **672/672**, `npm run build` green, tree clean.

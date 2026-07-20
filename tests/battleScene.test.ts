@@ -923,3 +923,34 @@ describe("S7 slice E1d: ENDEAVOR's sweat droplets (docs/battle-menu-notes.md §1
     expect(pixelAtTurn2(3005, 144, 59)).toEqual([140, 165, 115]);
   });
 });
+
+// S7 slice E1d batch-1 increment (docs/battle-menu-notes.md §15d): the
+// SAME RAM=render-1/n>=1 convention above, verified to generalize to batch 1
+// ("upper", tTimer==18) without any code change - oracle-cross-checked
+// against a scratch bin/oracle run capture (frame-03017/03018.png), not
+// hand-picked. Batch 1 cycle 0 spawns at RAM 3016 (pressTick+59+12), so its
+// first visible render tick is 3016+1(n)+1(lag)=3018, one tick later than
+// the naive "~3017" estimate §15c's own next-steps note guessed.
+describe("S7 slice E1d batch-1 (docs/battle-menu-notes.md §15d): the upper droplet batch's own first-visible tick generalizes the same convention", () => {
+  it("render 3018 (batch 1/cycle 0's own first visible tick) shows the droplet's own bright highlight color at (156,19)", () => {
+    expect(pixelAtTurn2(3018, 156, 19)).toEqual([206, 255, 255]);
+  });
+
+  it("render 3017 (one tick earlier - composited but not yet visible, same as batch 0's own n=0 tick) still shows plain background at that same pixel", () => {
+    expect(pixelAtTurn2(3017, 156, 19)).toEqual([247, 247, 255]);
+  });
+});
+
+// S7 slice E1d batch-1 increment (§15d): the extended ENDEAVOR_SQUISH_TABLE
+// now covers cycle 2 - these two pins lock in the "one extra RAM tick per
+// cycle boundary" quirk (coeff restarts a tick before the matrix) and the
+// table's own neutral tail, both oracle-cross-checked the same way as above.
+describe("S7 slice E1d batch-1 (docs/battle-menu-notes.md §15d): the extended squish/blend table's cycle-2 restart and neutral tail", () => {
+  it("render 3024 (cycle 2's own blend restart, matrix still neutral - the inter-round lull between hitsplat rounds) reproduces the exact coeff=1 blended color render 3000 used", () => {
+    expect(pixelAtTurn2(3024, 175, 19)).toEqual([66, 132, 57]);
+  });
+
+  it("render 3050 (past both full squish/blend cycles - table's own neutral tail) shows the plain, unblended Grovyle color at the same pixel", () => {
+    expect(pixelAtTurn2(3050, 175, 19)).toEqual([57, 132, 66]);
+  });
+});

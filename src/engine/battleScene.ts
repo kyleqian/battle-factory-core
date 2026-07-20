@@ -3553,17 +3553,28 @@ const ENDEAVOR_SQUISH_START_DELAY = 55; // pressTick+55 = render tick 3000, the 
  * against oracle PNGs as §15b's own note flagged for whoever extended past
  * tick 3007).
  *
- * **Table stays `t=3000..3007`** (8 rows, unchanged from §15b) - a fresh
- * full-window RAM probe this session (`dump-endeavor-squish-blend-ext.py`,
- * RAM 2996-3055, both squish/blend cycles) confirmed these 8 rows exact
- * and extended the UNDERLYING RAM data through both full cycles, but the
- * pixel fit past row 7 is NOT yet confirmed (batch-1/cycle-2 droplet timing
- * needed its own render-lag correction this session - see
- * `ENDEAVOR_DROPLET_RENDER_LAG`'s own doc - and shake/hitsplat, unmodeled,
- * may already be contributing pixels by RAM~3010+ per §15's own bbox scan).
- * Extending this table to cover cycle 2 is real, banked, RAM-exact prep for
- * a future session (§15c's own probe dump has it), just not landed this
- * session per this run's "commit only what's pixel-verified" discipline.
+ * **Table extended `t=3000..3056`** (S7 slice E1d batch-1/§15d) - the first
+ * 8 rows (3000-3007) are unchanged from §15b/§15c; rows 3008-3056 are the
+ * SAME `dump-endeavor-squish-blend-ext.py` RAM probe (2996-3055, re-run this
+ * session since the prior dump was scratch/uncommitted) mapped through the
+ * SAME two lags (`matrix/y2: RAM=render-2`, `coeff: RAM=render-1`) that
+ * fit rows 0-7 exactly - both squish/blend cycles now covered (the second
+ * cycle's own "one extra RAM tick at the boundary" quirk shows up as
+ * `a=256/d=256` persisting across RAM 3022 AND 3023 before the second climb
+ * starts at RAM 3024, matching `ENDEAVOR_DROPLET_CYCLE_STRIDE=25`'s own
+ * quirk). `coeff` was solved directly from RAM (`gPlttBufferFaded` vs
+ * `gPlttBufferUnfaded`, `BlendPalette`'s exact per-5-bit-channel formula) -
+ * NOTE the blend only touches palette indices 1-15 (`numEntries=15`,
+ * `AnimTask_BlendMonInAndOut`'s own `OBJ_PLTT_ID(...)+1` offset skips index
+ * 0, the transparent/backdrop slot) - a fresh finding this session (the
+ * committed rows 0-7 above happened not to need index 0, so this didn't
+ * matter until solving the later rows independently surfaced an
+ * unsatisfiable-coeff conflict that traced back to including index 0).
+ * Table settles back to neutral (`256/256/0`, `coeff=0`) at `t=3049` and
+ * stays there through `t=3056` (extra trailing neutral rows are harmless -
+ * `drawEndeavorSquish` renders identically to the non-squish idle path at
+ * neutral scale/coeff - kept only so the table's own length doesn't
+ * artificially gate a longer capture window before shake/hitsplat do).
  */
 const ENDEAVOR_SQUISH_TABLE: readonly { xScale: number; yScale: number; y2: number; coeff: number }[] = [
   { xScale: 256, yScale: 256, y2: 0, coeff: 1 }, // t=3000 (RAM matrix=2998, coeff=2999)
@@ -3574,6 +3585,55 @@ const ENDEAVOR_SQUISH_TABLE: readonly { xScale: number; yScale: number; y2: numb
   { xScale: 176, yScale: 336, y2: 7, coeff: 6 }, // t=3005 (RAM matrix=3003, coeff=3004)
   { xScale: 160, yScale: 352, y2: 8, coeff: 7 }, // t=3006 (RAM matrix=3004, coeff=3005) - droplet batch 0 also becomes visible this render tick (`ENDEAVOR_DROPLET_*` below)
   { xScale: 176, yScale: 336, y2: 7, coeff: 8 }, // t=3007 (RAM matrix=3005, coeff=3006)
+  { xScale: 192, yScale: 320, y2: 6, coeff: 9 }, // t=3008 (RAM matrix=3006, coeff=3007)
+  { xScale: 208, yScale: 304, y2: 4, coeff: 10 }, // t=3009 (RAM matrix=3007, coeff=3008)
+  { xScale: 224, yScale: 288, y2: 3, coeff: 11 }, // t=3010 (RAM matrix=3008, coeff=3009)
+  { xScale: 240, yScale: 272, y2: 2, coeff: 12 }, // t=3011 (RAM matrix=3009, coeff=3010)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 11 }, // t=3012 (RAM matrix=3010, coeff=3011)
+  { xScale: 272, yScale: 240, y2: -1, coeff: 10 }, // t=3013 (RAM matrix=3011, coeff=3012)
+  { xScale: 288, yScale: 224, y2: -4, coeff: 9 }, // t=3014 (RAM matrix=3012, coeff=3013)
+  { xScale: 304, yScale: 208, y2: -6, coeff: 8 }, // t=3015 (RAM matrix=3013, coeff=3014)
+  { xScale: 320, yScale: 192, y2: -9, coeff: 7 }, // t=3016 (RAM matrix=3014, coeff=3015)
+  { xScale: 336, yScale: 176, y2: -12, coeff: 6 }, // t=3017 (RAM matrix=3015, coeff=3016)
+  { xScale: 352, yScale: 160, y2: -16, coeff: 5 }, // t=3018 (RAM matrix=3016, coeff=3017) - droplet batch 1 (upper, cycle 0) also becomes visible this render tick
+  { xScale: 336, yScale: 176, y2: -12, coeff: 4 }, // t=3019 (RAM matrix=3017, coeff=3018)
+  { xScale: 320, yScale: 192, y2: -9, coeff: 3 }, // t=3020 (RAM matrix=3018, coeff=3019)
+  { xScale: 304, yScale: 208, y2: -6, coeff: 2 }, // t=3021 (RAM matrix=3019, coeff=3020)
+  { xScale: 288, yScale: 224, y2: -4, coeff: 1 }, // t=3022 (RAM matrix=3020, coeff=3021)
+  { xScale: 272, yScale: 240, y2: -1, coeff: 0 }, // t=3023 (RAM matrix=3021, coeff=3022)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 1 }, // t=3024 (RAM matrix=3022, coeff=3023) - cycle 2's coeff restarts a tick before the matrix
+  { xScale: 256, yScale: 256, y2: 0, coeff: 2 }, // t=3025 (RAM matrix=3023, coeff=3024)
+  { xScale: 240, yScale: 272, y2: 2, coeff: 3 }, // t=3026 (RAM matrix=3024, coeff=3025) - cycle 2's matrix restarts here
+  { xScale: 224, yScale: 288, y2: 3, coeff: 4 }, // t=3027 (RAM matrix=3025, coeff=3026)
+  { xScale: 208, yScale: 304, y2: 4, coeff: 5 }, // t=3028 (RAM matrix=3026, coeff=3027)
+  { xScale: 192, yScale: 320, y2: 6, coeff: 6 }, // t=3029 (RAM matrix=3027, coeff=3028)
+  { xScale: 176, yScale: 336, y2: 7, coeff: 7 }, // t=3030 (RAM matrix=3028, coeff=3029)
+  { xScale: 160, yScale: 352, y2: 8, coeff: 8 }, // t=3031 (RAM matrix=3029, coeff=3030) - droplet batch 0 (lower, cycle 1) also becomes visible this render tick
+  { xScale: 176, yScale: 336, y2: 7, coeff: 9 }, // t=3032 (RAM matrix=3030, coeff=3031)
+  { xScale: 192, yScale: 320, y2: 6, coeff: 10 }, // t=3033 (RAM matrix=3031, coeff=3032)
+  { xScale: 208, yScale: 304, y2: 4, coeff: 11 }, // t=3034 (RAM matrix=3032, coeff=3033)
+  { xScale: 224, yScale: 288, y2: 3, coeff: 12 }, // t=3035 (RAM matrix=3033, coeff=3034)
+  { xScale: 240, yScale: 272, y2: 2, coeff: 11 }, // t=3036 (RAM matrix=3034, coeff=3035)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 10 }, // t=3037 (RAM matrix=3035, coeff=3036)
+  { xScale: 272, yScale: 240, y2: -1, coeff: 9 }, // t=3038 (RAM matrix=3036, coeff=3037)
+  { xScale: 288, yScale: 224, y2: -4, coeff: 8 }, // t=3039 (RAM matrix=3037, coeff=3038)
+  { xScale: 304, yScale: 208, y2: -6, coeff: 7 }, // t=3040 (RAM matrix=3038, coeff=3039)
+  { xScale: 320, yScale: 192, y2: -9, coeff: 6 }, // t=3041 (RAM matrix=3039, coeff=3040)
+  { xScale: 336, yScale: 176, y2: -12, coeff: 5 }, // t=3042 (RAM matrix=3040, coeff=3041)
+  { xScale: 352, yScale: 160, y2: -16, coeff: 4 }, // t=3043 (RAM matrix=3041, coeff=3042) - droplet batch 1 (upper, cycle 1) also becomes visible this render tick
+  { xScale: 336, yScale: 176, y2: -12, coeff: 3 }, // t=3044 (RAM matrix=3042, coeff=3043)
+  { xScale: 320, yScale: 192, y2: -9, coeff: 2 }, // t=3045 (RAM matrix=3043, coeff=3044)
+  { xScale: 304, yScale: 208, y2: -6, coeff: 1 }, // t=3046 (RAM matrix=3044, coeff=3045)
+  { xScale: 288, yScale: 224, y2: -4, coeff: 0 }, // t=3047 (RAM matrix=3045, coeff=3046)
+  { xScale: 272, yScale: 240, y2: -1, coeff: 0 }, // t=3048 (RAM matrix=3046, coeff=3047)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3049 (RAM matrix=3047, coeff=3048) - squish+blend fully neutral from here
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3050 (RAM matrix=3048, coeff=3049)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3051 (RAM matrix=3049, coeff=3050)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3052 (RAM matrix=3050, coeff=3051)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3053 (RAM matrix=3051, coeff=3052)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3054 (RAM matrix=3052, coeff=3053)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3055 (RAM matrix=3053, coeff=3054)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3056 (RAM matrix=3054, coeff=3055)
 ];
 
 /**
