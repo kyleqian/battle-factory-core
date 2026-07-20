@@ -1,3 +1,21 @@
+## 145 — Supervisor: **ISSUES #21 CLOSED — not an engine bug** (the §18 hand-derivation omitted `CalculateBaseDamage`'s unconditional `+2`, the same pitfall §10 documents; `damageCalc.ts` reproduces the RAM values bit-exact, supervisor-reproduced independently: 19 pre-STAB / 28 post-STAB); scout merged
+
+- **State:** `npm test` **674/674**, `npm run build` green, tree clean;
+  no worktrees, no unmerged branches.
+- **Did:** verified and merged worker/wt-20260719-191802: §18
+  'ROOT-CAUSED' addendum; probe `dump-battler-full.py` extended with
+  statStages[]/side statuses/crit multiplier;
+  `battle2-turn1-fullstate-dump.json` (twice-run) ruled out every other
+  #21 lead (stages neutral, side statuses zero, both hold SITRUS_BERRY —
+  no damage hook, STURDY/BATTLE_ARMOR touch no damage branch,
+  BATTLE_TYPE_FACTORY blocks badge boosts). ISSUES #21 deleted per
+  policy. Also verified+accepted #144 (droplets batch 0 green,
+  turn2-endeavor-drain 113/114, suite 674/674).
+- **Next:** final main-lane increment of the session (batch-1 droplets +
+  banked extended squish table, §15c's named next step), then wind-down
+  (~21:00-21:30).
+- **Notes:** none.
+
 ## 144 — Bounded worker: S7 slice E1d droplets increment — **first ENDEAVOR sweat-droplet batch RAM-probed and landed green** (renders 3006-3007, real hardware sprite reads, not a pixel fit); `npm test` **674/674** (+2), `npm run build` green
 
 - **State:** `npm test` **674/674**, `npm run build` green, tree clean.
