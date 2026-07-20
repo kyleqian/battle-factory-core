@@ -4,6 +4,13 @@ chosen battler slot at chosen ticks, including moves/PP/item/ability (not
 covered by dump-battler-snapshot.py's stat-only subset). Built for S8's
 Murkrow scout (docs/battle-turn-notes.md §15) but generic to any battler.
 
+Extended for ISSUES #21 (docs/battle-turn-notes.md §18 damage-math gap):
+also reads statStages[] (offset 0x18, pokemon.h:277, NUM_BATTLE_STATS=8:
+HP/ATK/DEF/SPEED/SPATK/SPDEF/ACC/EVASION) plus gSideStatuses/gSideTimers
+(both sides) and gCritMultiplier/gBattleMovePower, so a damage-calc
+reconstruction has every CalculateBaseDamage input available, not just the
+raw stats dump-battler-snapshot.py already covered.
+
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
     /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
         tools/probe/dump-battler-full.py <trace.json> <output.json> <tick1,tick2,...>
@@ -47,6 +54,10 @@ BOOTSTRAP_PATH = ORACLE_DIR / "bootstrap" / "factory.json"
 STRUCT_SIZE = 0x58
 MAX_BATTLERS = 4
 MAX_MON_MOVES = 4
+NUM_BATTLE_STATS = 8  # HP,ATK,DEF,SPEED,SPATK,SPDEF,ACC,EVASION (constants/pokemon.h)
+NUM_BATTLE_SIDES = 2
+# struct SideTimer (include/battle.h): sizeof == 11 bytes, no padding (all u8).
+SIDE_TIMER_SIZE = 11
 
 
 def main() -> None:
@@ -54,6 +65,10 @@ def main() -> None:
     oracle = EmeraldOracle(ROM_PATH, MAP_PATH, BOOTSTRAP_PATH)
     oracle.new_session()
     gbm = oracle.symbols["gBattleMons"]
+    g_side_statuses = oracle.symbols["gSideStatuses"]
+    g_side_timers = oracle.symbols["gSideTimers"]
+    g_crit_multiplier = oracle.symbols["gCritMultiplier"]
+    g_battle_move_power = oracle.symbols["gBattleMovePower"]
 
     def u16(addr: int) -> int:
         return oracle.read_u8(addr) | (oracle.read_u8(addr + 1) << 8)
@@ -66,6 +81,9 @@ def main() -> None:
             | (oracle.read_u8(addr + 3) << 24)
         )
 
+    def s8(val: int) -> int:
+        return val - 256 if val >= 128 else val
+
     def read_battler(idx: int) -> dict:
         base = gbm + idx * STRUCT_SIZE
         return {
@@ -76,6 +94,7 @@ def main() -> None:
             "spAttack": u16(base + 0x08),
             "spDefense": u16(base + 0x0A),
             "moves": [u16(base + 0x0C + 2 * i) for i in range(MAX_MON_MOVES)],
+            "statStages": [s8(oracle.read_u8(base + 0x18 + i)) for i in range(NUM_BATTLE_STATS)],
             "ability": oracle.read_u8(base + 0x20),
             "types": [oracle.read_u8(base + 0x21), oracle.read_u8(base + 0x22)],
             "pp": [oracle.read_u8(base + 0x24 + i) for i in range(MAX_MON_MOVES)],
@@ -87,8 +106,22 @@ def main() -> None:
             "status2": u32(base + 0x50),
         }
 
+    def read_side_timer(idx: int) -> dict:
+        base = g_side_timers + idx * SIDE_TIMER_SIZE
+        fields = [
+            "reflectTimer", "reflectBattlerId", "lightscreenTimer", "lightscreenBattlerId",
+            "mistTimer", "mistBattlerId", "safeguardTimer", "safeguardBattlerId",
+            "followmeTimer", "followmeTarget", "spikesAmount",
+        ]
+        return {name: oracle.read_u8(base + i) for i, name in enumerate(fields)}
+
     def snapshot() -> dict:
-        return {f"battler{i}": read_battler(i) for i in range(MAX_BATTLERS)}
+        out = {f"battler{i}": read_battler(i) for i in range(MAX_BATTLERS)}
+        out["sideStatuses"] = [u16(g_side_statuses + 2 * i) for i in range(NUM_BATTLE_SIDES)]
+        out["sideTimers"] = [read_side_timer(i) for i in range(NUM_BATTLE_SIDES)]
+        out["critMultiplier"] = oracle.read_u8(g_crit_multiplier)
+        out["battleMovePower"] = u16(g_battle_move_power)
+        return out
 
     out = {}
     tick = 0
