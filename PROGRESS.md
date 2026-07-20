@@ -4,6 +4,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 136 — Supervisor: S8's blocking question answered (WIN unreachable at 20000) → **user decision: oracle frame cap raised to 45000** (harness `ccd7554`, service restarted + verified); §15 winline scout merged — Pidgeotto-KO line verified (tick 15887), Murkrow's first RAM ground truth
+
+- **State:** `npm test` **659/659**, `npm run build` green, tree clean at
+  the merge commit `f8b0649`; no worktrees, no unmerged branches. Oracle
+  answers with `maxFrames: 45000` (smoke-tested on anchor.json).
+- **Did:** (1) Worktree scout (merged): confirmed idle-timing is NOT an
+  RNG lever (probe: +4-frame shift reproduces §12's ledger shifted +4) —
+  move-choice sequence is; found+verified a line KO'ing Pidgeotto at tick
+  15887 (BIND at turn 8), settled menu vs Murkrow at 17722; Murkrow RAM
+  ground truth (Lv50 142/142 DARK/FLYING, INSOMNIA, LAX INCENSE, Spd 97,
+  FAINT_ATTACK/FLY/TORMENT/TAUNT); Onix (4/117 after felling Pidgeotto)
+  faints at 19147 dealing 0 to Murkrow — WIN provably misses the 20000
+  cap for every plausible line (floor ≈22500 incl. swap + battle-2 menu).
+  Traces `battle1-winline-a{,-murkrow}.json` + 2 RAM dumps + new probe
+  `dump-battler-full.py` committed (§15). (2) Escalated; user chose
+  raising the cap over snapshot/restore or re-scope: harness commit
+  `ccd7554` (`MAX_FRAMES = 45_000`), service restarted, verified.
+  ROADMAP S8 + Domain notes updated. (3) Verified+accepted workers #134
+  (shake residual, turn1-rockslide 256/256) and #135 (slice E1,
+  turn2-endeavor 76/77) — see their entries.
+- **Next:** (1) scout lane: ground-truth the full WIN → swap → battle-2
+  first-menu line under the 45000 cap (extend §15's winline; keep Onix
+  healthier / voluntary switch options open); (2) main lane: slice E1b —
+  ENDEAVOR attack anim + Onix HP drain 116→101 + player-side HP-digit
+  compositor (ticks 2999-3128, §13 handoff: digits are FONT_SMALL,
+  already extracted); then E2 (DRAGON_BREATH window, 3129-3846); (3)
+  ISSUES #19 family (now 2 traces affected), #20 rewire remainder.
+- **Notes:** oracle restart was deferred until the main lane was idle (a
+  mid-flight restart would have broken E1's compares). Old cap's two
+  stale Thursday `server.py` processes (not on :8012) left untouched.
+
+---
 ## 135 — Bounded worker: S7 slice E1 — turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff text, `turn2-endeavor.json` **76/77** (the 1 residual is ISSUES #19's own pre-existing family, confirmed recurring, not new) — suite **659/659**
 
 - **State:** `npm test` **659/659** (+12 Tier-1 pins), `npm run build`
@@ -108,43 +140,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   reverted in favor of the despeckle approach once connected-component
   analysis on the bleed mask made the real distinguishing signal
   (isolated vs. contiguous) obvious. No papercuts otherwise.
-
----
-
-## 133 — Supervisor wind-down: session end 2026-07-19 ~16:05 — **S6 ticked [x] (user), S7 turn 1 nearly complete** (kickoff 81/81 + clone 230/230 + rockslide 250/256 + drain 102/102), FIGHT submenu playable, S7 core (damage/order/RNG) landed + twice cross-validated, ground truth through turn 14's forced switch — suite **555 → 648/648**, 18 verified worker steps
-
-- **State (verified this minute):** `npm test` **648/648**, `npm run build`
-  green, tree clean at `27473b1` + this docs commit, no worktrees, no
-  unmerged branches. Committed compare traces (28): turn1-drain 102/102,
-  turn1-cloneanim 230/230, turn1-kickoff 81/81, turn1-rockslide 250/256
-  (6 frames = §11.1's pre-existing 1px shake-sampling bug), fight-submenu
-  234/235 (ISSUES #19), sendout 255/256 + s6-acceptance 224/228 (settled
-  #5/#18 attributions), all earlier traces at their long-established
-  counts.
-- **Session summary (supervised, ~10:15-16:05, 18 worker steps: 9 main +
-  9 worktree, every one verified green before folding; 9 merges, 2
-  trivial conflicts hand-resolved):** S6 closed by user decision (1496
-  parked, ISSUES #18 policy-settled). S7 built from zero: hermetic core
-  (damageCalc with the newly-found unconditional `+2` at
-  `pokemon.c:3371`, turnOrder, turnRng) later cross-validated bit-exact
-  by DRAGON_BREATH (special branch) and RAM intermediates; FIGHT submenu
-  (open/nav/confirm) + turn-kickoff text + DOUBLE_TEAM clone anim + stat
-  banner (real BG1 scroll, extracted) + full ROCK_SLIDE window (20-rock
-  slot-allocation simulation) + HP drain/turn-end. Ground truth banked
-  through turn 14: turns 2-5 ledgers, faint + Pidgeotto switch-in,
-  PP-exhaustion mechanic, forced-switch SEND OUT sequence (wrong-cursor
-  root cause), frame-budget analysis → user re-scoped S8 acceptance to
-  multi-trace assembly (ROADMAP updated, commit 4b435d0). FONT_NARROW
-  extracted + proven (ISSUES #20 → rewire-only). ISSUES #16 partial-HP
-  path oracle-validated exactly (0 residual), trimmed to yellow/red
-  bands + status icons.
-- **Next:** (1) turn1-rockslide's §11.1 1px shake residual (250→256);
-  (2) ISSUES #19's 99px single-row anomaly family; (3) S7 continues:
-  turn-2+ engine slices against §12-§14 ground truth (ENDEAVOR's HP-diff
-  path, DRAGON_BREATH window), then the faint/forced-switch engine
-  slice; (4) ISSUES #20 rewire when S8 nears; (5) S4 remainder stays
-  deferred per the recorded re-scope.
-- **Notes:** no usage-limit events. Worker cost ~$6.6/step avg, 12-34
-  min/step. Two user decisions this session: S6 [x] (1496 parked) and
-  S8 multi-trace acceptance — both recorded in ROADMAP with rationale.
-

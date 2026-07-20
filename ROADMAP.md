@@ -342,15 +342,23 @@ Victory flow, the swap offer + factory swap screen, chaining into battles
 of scope).
 **Acceptance (re-scoped by user decision, 2026-07-19):** battle 1's win and
 the swap traversal into battle 2's first action menu are pinned by a
-**chain of overlapping committed traces** (each ≤ the oracle's 20000-frame
-cap, each passing compare with 0 diff on dense captures, adjacent traces
+**chain of overlapping committed traces** (each ≤ the oracle's frame cap,
+each passing compare with 0 diff on dense captures, adjacent traces
 sharing verbatim button-script prefixes so coverage is gapless) — a single
 end-to-end trace is NOT required. Rationale: `battle-turn-notes.md` §14's
 frame-budget analysis (supervisor-verified) shows no proven winning line
 fits one trace from the anchor; the user chose multi-trace assembly over
-raising the oracle cap or adding snapshot/restore (those remain available
-as future harness options). Tier-1 tests pin swap logic and round-loop
-state as before.
+raising the oracle cap or adding snapshot/restore. Tier-1 tests pin swap
+logic and round-loop state as before.
+**Frame cap raised (user decision #2, 2026-07-19 ~17:00):** §15's scout
+proved the WIN unreachable under the 20000-frame cap for ANY plausible
+line (best verified line: Onix faints at 19147 with Murkrow untouched at
+142/142; floor arithmetic for WIN + swap + battle-2 menu ≈ 22500+). The
+user chose raising the oracle cap (option 1) over snapshot/restore or
+another re-scope: harness commit `ccd7554` sets `MAX_FRAMES = 45_000`,
+service restarted and verified (`bin/oracle info` → 45000). The
+multi-trace chain acceptance above stands unchanged; maxCaptures stays
+256, so the chain model is still how capture density is achieved.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
@@ -428,8 +436,9 @@ is `[x]` or its remainder is explicitly re-scoped here by the supervisor.
   `tools/extract/inspect-anchor.py`). `gSaveBlock2Ptr->frontier.rentalMons[]`
   carries only `monId` pre-pick; its personality/IVs/ability fields are
   stale until a pick commits.
-- **Oracle limits:** maxFrames 20000, maxCaptures 256; long traces ~10-15s;
-  service serializes runs (parallel workers safe).
+- **Oracle limits:** maxFrames 45000 (raised from 20000 by user decision
+  2026-07-19, harness commit `ccd7554`), maxCaptures 256; long traces
+  ~10-30s; service serializes runs (parallel workers safe).
 - **Reference geography:** draft/swap UI `src/battle_factory_screen.c`
   (4314 lines); challenge logic `src/battle_factory.c` (919); rental mons +
   frontier trainers `src/data/battle_frontier/`; factory screen art

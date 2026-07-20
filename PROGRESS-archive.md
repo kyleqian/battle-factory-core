@@ -1,3 +1,40 @@
+## 133 — Supervisor wind-down: session end 2026-07-19 ~16:05 — **S6 ticked [x] (user), S7 turn 1 nearly complete** (kickoff 81/81 + clone 230/230 + rockslide 250/256 + drain 102/102), FIGHT submenu playable, S7 core (damage/order/RNG) landed + twice cross-validated, ground truth through turn 14's forced switch — suite **555 → 648/648**, 18 verified worker steps
+
+- **State (verified this minute):** `npm test` **648/648**, `npm run build`
+  green, tree clean at `27473b1` + this docs commit, no worktrees, no
+  unmerged branches. Committed compare traces (28): turn1-drain 102/102,
+  turn1-cloneanim 230/230, turn1-kickoff 81/81, turn1-rockslide 250/256
+  (6 frames = §11.1's pre-existing 1px shake-sampling bug), fight-submenu
+  234/235 (ISSUES #19), sendout 255/256 + s6-acceptance 224/228 (settled
+  #5/#18 attributions), all earlier traces at their long-established
+  counts.
+- **Session summary (supervised, ~10:15-16:05, 18 worker steps: 9 main +
+  9 worktree, every one verified green before folding; 9 merges, 2
+  trivial conflicts hand-resolved):** S6 closed by user decision (1496
+  parked, ISSUES #18 policy-settled). S7 built from zero: hermetic core
+  (damageCalc with the newly-found unconditional `+2` at
+  `pokemon.c:3371`, turnOrder, turnRng) later cross-validated bit-exact
+  by DRAGON_BREATH (special branch) and RAM intermediates; FIGHT submenu
+  (open/nav/confirm) + turn-kickoff text + DOUBLE_TEAM clone anim + stat
+  banner (real BG1 scroll, extracted) + full ROCK_SLIDE window (20-rock
+  slot-allocation simulation) + HP drain/turn-end. Ground truth banked
+  through turn 14: turns 2-5 ledgers, faint + Pidgeotto switch-in,
+  PP-exhaustion mechanic, forced-switch SEND OUT sequence (wrong-cursor
+  root cause), frame-budget analysis → user re-scoped S8 acceptance to
+  multi-trace assembly (ROADMAP updated, commit 4b435d0). FONT_NARROW
+  extracted + proven (ISSUES #20 → rewire-only). ISSUES #16 partial-HP
+  path oracle-validated exactly (0 residual), trimmed to yellow/red
+  bands + status icons.
+- **Next:** (1) turn1-rockslide's §11.1 1px shake residual (250→256);
+  (2) ISSUES #19's 99px single-row anomaly family; (3) S7 continues:
+  turn-2+ engine slices against §12-§14 ground truth (ENDEAVOR's HP-diff
+  path, DRAGON_BREATH window), then the faint/forced-switch engine
+  slice; (4) ISSUES #20 rewire when S8 nears; (5) S4 remainder stays
+  deferred per the recorded re-scope.
+- **Notes:** no usage-limit events. Worker cost ~$6.6/step avg, 12-34
+  min/step. Two user decisions this session: S6 [x] (1496 parked) and
+  S8 multi-trace acceptance — both recorded in ROADMAP with rationale.
+
 ## 132 — Bounded worker: S7 slice D — HP drain + turn-end CLOSED, `turn1-drain.json` **102/102, 0 diff** on first attempt; closes ISSUES #16's deferred partial-HP oracle validation — suite **648/648**
 
 - **State:** `npm test` **648/648** (+5 Tier-1 pins), `npm run build`
