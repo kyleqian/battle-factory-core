@@ -1,3 +1,38 @@
+## 155 — Supervisor: round 3 folded — **ISSUES #19 ROOT-CAUSED AND CLOSED (asset harvest 1 row short): fight-submenu 235/235, turn2-endeavor 77/77, turn2-endeavor-drain 201/201 — all three now PERFECT**; shake/blend Tier-1 debt backfilled (711/711); fire-projectile pulled a 2nd time (findings banked, 3rd attempt briefed with a new instrument)
+
+- **State (supervisor-verified this minute):** `npm test` **711/711**,
+  `npm run build` green, tree clean at the `779e484` merge + this docs
+  commit, no worktrees. Supervisor-rerun on the MERGED tree:
+  `fight-submenu.json` **235/235**, `turn2-endeavor.json` **77/77**,
+  `turn2-endeavor-drain.json` **201/201**, `s6-acceptance.json` 224/228
+  (unchanged, #5/#18 policy-settled), `turn2-dragonbreath.json` 84/84.
+- **Did:** Worktree lane (`779e484`, merged): #19 was never a timing
+  mechanism — `extract-menu-idle-window.ts` hardcoded the healthbox
+  bounce harvest at height:37, cropping row 111 of the rare y2=2 sine
+  peak (once per ~256-tick lap); bbox→38 + regenerated asset fixed all
+  three affected traces with zero code changes and a 30-trace sweep
+  clean. Its sibling anomaly tick 2135 in the idle groundtruth fixture
+  is NOT the same family (769px vs 99px) — filed as new ISSUES #22
+  (informational fixture, low priority); tick 2071 IS closed. Main lane
+  (`6a11221`): E2a-2's untested shake/blend formulas now pinned (4
+  tests, fresh-capture cross-checked; 707→711); fire-projectile retry
+  PULLED again per the no-wrong-pixels rule — but the matrix is now a
+  settled 21-entry table (a==d, b==-c, identical across all 8 spawns,
+  non-inverting family confirmed from source), base=(72,88), lag=1;
+  remaining residual is flat ~15-100px/tick, mechanism unnamed.
+- **Next:** Round 4: main = E2a-4 projectile attempt #3 with a NEW
+  instrument — diff-COLOR dump first (geometry vs palette
+  discrimination), prime suspect: a concurrent AnimTask_BlendBattleAnimPal
+  instance also blends the EMBER palette while the engine renders it
+  unblended. If #3 misses, ESCALATE to the user (options: park as named
+  remainder / dedicated deep session). Worktree = S8 swap-screen asset
+  extraction (from §17's inventory). Then E2b (3347-3846), faint/switch.
+- **Notes:** worker costs $3.66 + $8.60 (15/28 min). ISSUES #19 deleted,
+  #22 opened. Convergence per the strictly-smaller-named-gap rule is
+  real but slowing on the projectile — attempt #3 is the last before
+  escalation.
+
+---
 ## 154 — Bounded worker: S7 slice E2a-3 attempt — Tier-1 pins backfilled for E2a-2's shake/blend (debt closed); fire-projectile RE-PULLED after a much-closer-but-not-exact retry; `npm test` **711/711** (+4), build green, zero regressions, no trace change
 
 - **State:** `npm test` 711/711, `npm run build` green, tree clean.

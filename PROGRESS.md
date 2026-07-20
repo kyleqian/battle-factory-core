@@ -4,6 +4,64 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 158 — Bounded worker: S7 slice E2a-5 attempt — fire-projectile attempt #4: SUPERVISOR'S SAMPLING-CONVENTION HYPOTHESIS TESTED AND REJECTED by direct 4-variant sweep (every alternative to the current convention scored 1.4x-2.7x WORSE); pulled a fourth time, no wrong pixels shipped, `npm test` **711/711** (unchanged), build green
+
+- **State:** `npm test` 711/711, `npm run build` green, tree clean.
+  `turn2-dragonbreath.json` **unchanged** (`3121-3176` + `3236-3263`,
+  84/84 green) — `3177-3235` still open. No engine code left changed
+  (shared `drawSpriteSheetAffineRotate` is byte-identical to E2a-4's own
+  baseline — nothing to regress-check against).
+- **Did:** Per the brief, tested the supervisor's specific hypothesis
+  FIRST (not a fresh RAM-probe cycle): re-wired E2a-3's exact settled
+  config verbatim, then swept `drawSpriteSheetAffineRotate`'s sampling
+  convention. (1) **Iteration-box question answered from source, not
+  swept**: `gDragonBreathFireSpriteTemplate.oam =
+  &gOamData_AffineDouble_ObjNormal_32x32` (`battle_anim_dragon.c:93`) —
+  same `ST_OAM_AFFINE_DOUBLE` mode the ball spin already uses; the
+  existing `-w..w`/`-h..h` loop already implements exactly this
+  doubled-window convention (source-confirmed correct, not an open
+  question). (2) **Rounding/offset convention swept, 4 variants**
+  (`"default"` = unchanged original body, `"halfPixel"` = sample at
+  `dx+0.5`, `"round"` = `+128`-before-`>>8` round-to-nearest,
+  `"halfPixelRound"` = both — all kept in fixed-point, no floats, to
+  avoid JS's truncate-toward-zero-before-shift trap) against the dense
+  3177-3235 scratch trace, summed `diffPixels` over 59 frames: default
+  **8181** (baseline) vs halfPixel 21469 (2.6x worse), round 21933 (2.7x
+  worse), halfPixelRound 11410 (1.4x worse) — **every alternative is
+  worse**, the opposite of the hypothesis's prediction. Cross-checked the
+  default run's own per-tick numbers against E2a-4's banked reads (23px@
+  3178, 2px@3208, 342px@3220 — all three exact matches) to confirm this
+  was an apples-to-apples reproduction before trusting the sweep.
+  GBATEK/Tonc's documented OBJ affine formula (plain integer
+  floor-via-arithmetic-shift, no half-pixel destination offset) is
+  already what `"default"` implements, consistent with the sweep result.
+  **Verdict: hypothesis REJECTED** — the residual's cause is something
+  else, not the sampler's rounding/offset convention. Full writeup
+  (formula citation, fixed-point sweep mechanics, the table, the
+  `halfPixelRound`-beats-neither-alone signal and what it implies) in
+  `docs/dragon-breath-notes.md`'s new "Engine slice E2a-5" section.
+  Pulled (`git checkout -- src/engine/battleScene.ts`) per the
+  no-wrong-pixels rule — `drawSpriteSheetAffineRotate` carries no
+  `variant` param in the committed tree.
+- **Next:** the brief's own step-4 fallback (isolate the magnified-half
+  missing blob: render spawn 7 alone against a blank canvas, diff against
+  an oracle capture with all other content subtracted) was NOT attempted
+  — the hypothesis test consumed the full time budget. That's the next
+  concrete lead, not a fresh sweep of position/scale/sign/lag/box (all
+  now closed questions across E2a-3/4/5). Per #157's own open
+  escalation: this is a 4th bounded attempt with a real, provable
+  negative result (one more hypothesis eliminated) but still no closure —
+  worth the supervisor/user weighing a dedicated non-bounded session
+  (isolated single-spawn pixel trace) against parking `3177-3235` as a
+  named remainder and moving to E2b (3347+)/faint-switch, none of which
+  depend on this gap.
+- **Notes:** no papercuts. Scratch sweep infra (`tools/compare/out/e2a5-*`,
+  gitignored, not committed) reproduced E2a-4's own numbers exactly — no
+  new committed scratch tooling this session (reused E2a-3/E2a-4's
+  `dragonbreath-projectile-window.json` and `dump-dragonbreath-anim.py`
+  unchanged).
+
+---
 ## 157 — Supervisor: round 4 folded + **OPEN ESCALATION to the user (fire projectiles: 3 bounded attempts, each narrowing, none closing)** — swap-screen assets extracted & composite-verified; suite 711/711, build green, tree clean, no worktrees
 
 - **State (supervisor-verified this minute):** `npm test` **711/711**,
@@ -92,37 +150,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   window.json` (a ready `captureFrames` 3177-3235 scratch trace) also left
   committed for the next attempt to reuse without rebuilding the harness.
 
----
-## 155 — Supervisor: round 3 folded — **ISSUES #19 ROOT-CAUSED AND CLOSED (asset harvest 1 row short): fight-submenu 235/235, turn2-endeavor 77/77, turn2-endeavor-drain 201/201 — all three now PERFECT**; shake/blend Tier-1 debt backfilled (711/711); fire-projectile pulled a 2nd time (findings banked, 3rd attempt briefed with a new instrument)
-
-- **State (supervisor-verified this minute):** `npm test` **711/711**,
-  `npm run build` green, tree clean at the `779e484` merge + this docs
-  commit, no worktrees. Supervisor-rerun on the MERGED tree:
-  `fight-submenu.json` **235/235**, `turn2-endeavor.json` **77/77**,
-  `turn2-endeavor-drain.json` **201/201**, `s6-acceptance.json` 224/228
-  (unchanged, #5/#18 policy-settled), `turn2-dragonbreath.json` 84/84.
-- **Did:** Worktree lane (`779e484`, merged): #19 was never a timing
-  mechanism — `extract-menu-idle-window.ts` hardcoded the healthbox
-  bounce harvest at height:37, cropping row 111 of the rare y2=2 sine
-  peak (once per ~256-tick lap); bbox→38 + regenerated asset fixed all
-  three affected traces with zero code changes and a 30-trace sweep
-  clean. Its sibling anomaly tick 2135 in the idle groundtruth fixture
-  is NOT the same family (769px vs 99px) — filed as new ISSUES #22
-  (informational fixture, low priority); tick 2071 IS closed. Main lane
-  (`6a11221`): E2a-2's untested shake/blend formulas now pinned (4
-  tests, fresh-capture cross-checked; 707→711); fire-projectile retry
-  PULLED again per the no-wrong-pixels rule — but the matrix is now a
-  settled 21-entry table (a==d, b==-c, identical across all 8 spawns,
-  non-inverting family confirmed from source), base=(72,88), lag=1;
-  remaining residual is flat ~15-100px/tick, mechanism unnamed.
-- **Next:** Round 4: main = E2a-4 projectile attempt #3 with a NEW
-  instrument — diff-COLOR dump first (geometry vs palette
-  discrimination), prime suspect: a concurrent AnimTask_BlendBattleAnimPal
-  instance also blends the EMBER palette while the engine renders it
-  unblended. If #3 misses, ESCALATE to the user (options: park as named
-  remainder / dedicated deep session). Worktree = S8 swap-screen asset
-  extraction (from §17's inventory). Then E2b (3347-3846), faint/switch.
-- **Notes:** worker costs $3.66 + $8.60 (15/28 min). ISSUES #19 deleted,
-  #22 opened. Convergence per the strictly-smaller-named-gap rule is
-  real but slowing on the projectile — attempt #3 is the last before
-  escalation.

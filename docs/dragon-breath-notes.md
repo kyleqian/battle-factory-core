@@ -734,3 +734,127 @@ commit. `turn2-dragonbreath.json` **84/84** unchanged. Regression spot-check
 `turn2-endeavor-drain.json` **200/201** unchanged (same pre-existing
 ISSUES #19 residual tick, untouched this session — out of this session's
 file ownership per the brief).
+
+## Engine slice E2a-5 (S7, bounded worker, follows E2a-4 above): fire-projectile attempt #4 — supervisor's SAMPLING-CONVENTION hypothesis tested and REJECTED by direct sweep (every alternative convention scores worse than the current one); pulled a fourth time, no wrong pixels shipped
+
+This session's assigned method was narrower than E2a-2/3/4's own RAM-probe-
+then-sweep cycle: re-wire E2a-3's exact settled config verbatim (base=
+(72,88), lag=1, direct matrix `pa=a,pb=b,pc=-b,pd=a`, position/matrix/frame
+tables all taken byte-for-byte from E2a-3/E2a-2's own banked data, nothing
+re-derived) and test ONE specific hypothesis first: that
+`drawSpriteSheetAffineRotate`'s own sampling convention (half-pixel
+destination offset, `>>8` rounding, iteration-box size) — not any
+DRAGON_BREATH-specific value — is the defect, since this is this codebase's
+only other rotating-affine consumer besides the ball spin, and DRAGON_BREATH
+scales far more extreme (`|pa|` starts at 703 vs the ball's max 255) than
+the ball spin ever exercises.
+
+**Iteration-box convention — already correct, confirmed from source, not
+swept as a live variant.** `gDragonBreathFireSpriteTemplate.oam =
+&gOamData_AffineDouble_ObjNormal_32x32` (`battle_anim_dragon.c:93`) — the
+SAME `ST_OAM_AFFINE_DOUBLE` mode the ball spin's own sprite already uses
+(`docs/battle-scene-notes.md` §7.17's own citation), i.e. hardware doubles
+the destination scan window to 2×native-size, still centered on the
+sprite's real x/y. `drawSpriteSheetAffineRotate`'s existing `for (dy=-h;
+dy<h...) for (dx=-w; dx<w...)` loop (`w`/`h` = the NATIVE 32×32 frame size,
+not doubled) already iterates exactly this 64×64 doubled window with
+`halfW=w/2=16` as the native texture-space center — this is precisely the
+double-size convention GBATEK/hardware specifies for `AFFINE_DOUBLE` OBJs,
+already validated working for the ball spin. Re-testing a non-doubled
+variant would contradict a source-confirmed fact and was skipped to spend
+the session's time on the two conventions that were genuinely open
+questions.
+
+**Rounding/offset convention — SWEPT, hypothesis REJECTED.** Real GBA OBJ
+affine sampling (GBATEK "Rotation/Scaling for OBJs", same formula Tonc's
+`affine` chapter documents bit-for-bit and this codebase's own module doc
+above already cites for the ball spin): for a destination screen pixel at
+INTEGER offset `(dx,dy)` from the sprite's own center, `texX = ((dx*pa +
+dy*pb) >> 8) + halfW`, `texY = ((dx*pc + dy*pd) >> 8) + halfH` — plain
+integer pixel-corner sampling, no `+0.5` destination offset documented
+anywhere in the hardware spec, and the `>>8` is a genuine arithmetic shift
+(floor toward -infinity for negative operands, not truncate-toward-zero —
+matters for the negative `pa`/`pb` DRAGON_BREATH's near-180°-rotated matrix
+always has). This is EXACTLY what `drawSpriteSheetAffineRotate`'s existing
+body already does — so the "default" convention is already the
+hardware-documented one, not an unvalidated guess.
+
+Swept it against E2a-3's settled config anyway, per the brief's explicit
+instruction to test empirically rather than trust the reading alone.
+`drawSpriteSheetAffineRotate` gained an optional `variant` param (`"default"
+| "halfPixel" | "round" | "halfPixelRound"`) — **`"default"` is
+byte-identical to the function's original body**, so the ball spin's own
+call site (unchanged, still omits the param) carries zero regression risk
+regardless of what the sweep found; only the (temporary, since-reverted)
+projectile draw call passed a non-default variant. The two non-default
+axes, kept in fixed-point (no floats, since a fractional intermediate would
+make JS's `>>` truncate-toward-zero before shifting, which would NOT match
+what real fixed-point hardware does — scaling `dx`/`dy` by 2 and shifting by
+9 instead of 8 avoids that trap):
+- **`halfPixel`**: sample at `(dx+0.5, dy+0.5)` instead of `(dx,dy)`
+  (`dx2=2*dx+1`, shift 9).
+- **`round`**: round-to-nearest via `+256` before the (now 9-bit) shift,
+  instead of a bare floor.
+- **`halfPixelRound`**: both together.
+
+Ran all 4 through `npm run compare` against
+`tools/compare/scratch/dragonbreath-projectile-window.json` (dense
+3177-3235, 59 frames, unchanged from E2a-4), summing `diffPixels` across
+every captured frame:
+
+| variant | total diffPixels (59 frames) | vs default |
+|---|---|---|
+| **default** (current code, unchanged) | **8181** | baseline |
+| halfPixel | 21469 | **2.6x worse** |
+| round | 21933 | **2.7x worse** |
+| halfPixelRound | 11410 | **1.4x worse** |
+
+Every alternative convention is worse than the current one, most by a wide
+margin — the opposite of what the hypothesis predicted. Spot-checked the
+`default` run's own numbers against E2a-4's own banked per-tick reads to
+confirm this session's re-implementation is a faithful reproduction (not a
+different, accidentally-worse baseline): tick 3178 = 23px (E2a-4: "23px at
+tick 3178"), tick 3208 = 2px (E2a-4: "only 2px at tick 3208 — the closest
+this residual gets to exact anywhere in the window"), tick 3220 = 342px
+(E2a-4: "342 diff pixels" at spawn 7's `n=17`) — all three exact matches,
+confirming apples-to-apples before trusting the sweep's relative verdict.
+
+**Verdict: the supervisor's hypothesis is REJECTED.** The defect is NOT in
+`drawSpriteSheetAffineRotate`'s sampling convention — the function's
+existing floor-based, no-half-pixel-offset, doubled-box convention already
+matches the hardware-documented one, and empirically nothing beats it. The
+residual E2a-4 characterized (salt-and-pepper edge over-draw when
+compressed, one isolated missing blob when magnified) has some OTHER cause,
+not yet identified. Two structural notes for whoever picks this up next:
+- The `halfPixelRound` combination scoring meaningfully better than either
+  half-pixel or round alone (11410 vs ~21700) but still worse than plain
+  `default` is itself informative — it says the current convention isn't
+  merely "close to right with the wrong rounding," since any rounding
+  perturbation in either direction makes it worse, not better. That's the
+  signature of matching the true convention already, with the residual
+  coming from a different source entirely (a data value, not a formula).
+- Per the brief's step 4 fallback (isolate the magnified-half blob against a
+  blank canvas), that work was not attempted this session — the hypothesis
+  test above consumed the full time budget. It remains the next concrete
+  lead: render spawn 7 alone (the tick-3220 case already localized) against
+  a blank canvas and diff against an oracle capture with all other content
+  subtracted, since whole-scene diffing hasn't isolated it.
+
+**Pulled, not shipped**: same discipline as E2a-2/3/4 — the render code +
+`variant` sweep instrument were written, tested, found to confirm rather
+than close the gap, and reverted in full (`git checkout --
+src/engine/battleScene.ts`); `drawSpriteSheetAffineRotate` carries no
+`variant` param in the committed tree, byte-identical to before this
+session. `turn2-dragonbreath.json`'s `captureFrames` are UNCHANGED (still
+`3121-3176` + `3236-3263`, 84/84) — the `3177-3235` gap remains open, and
+(per E2a-4's own still-valid finding) an unconditional projectile draw call
+would also regress the already-green `3175-3176` pair, so this can't be
+landed as a partial/conditional fix either.
+
+**Verification**: `npm test` **711/711** unchanged (no engine/test code
+changed or left changed), `npm run build` green, tree clean at this docs
+commit. Regression suite not re-run this session since the shared function
+is byte-identical to its pre-session state (nothing to regress) — the
+`variant` param and the projectile draw call both lived and died together
+within this session, never landing in a state where `drawSpriteSheetAffineRotate`'s
+committed behavior differed from E2a-4's own baseline.
