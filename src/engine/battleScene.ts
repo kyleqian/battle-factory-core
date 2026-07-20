@@ -3309,15 +3309,15 @@ function getMenuHealthboxPlayerContentMask(): Uint8Array {
   return mask;
 }
 
-/** docs/battle-menu-notes.md §3 item 6: player healthbox content, translated by its slide-in `dx` (`playerHealthboxSlideDx`, `battleMenu.ts`) - same pixel-harvest-plus-content-mask shape as `drawSendOutHealthbox`, mirrored for the player side's own asset/mask/geometry. Unlike the opponent (`x2` starts negative and counts up toward 0), the player's own `x2` starts positive (110, off the right edge) and counts down toward 0 - `dx` is still added to the settled `x`, same as the opponent's own draw. */
-function drawMenuHealthboxPlayer(fb: Uint8Array, dx: number): void {
+/** docs/battle-menu-notes.md §3 item 6: player healthbox content, translated by its slide-in `dx` (`playerHealthboxSlideDx`, `battleMenu.ts`) - same pixel-harvest-plus-content-mask shape as `drawSendOutHealthbox`, mirrored for the player side's own asset/mask/geometry. Unlike the opponent (`x2` starts negative and counts up toward 0), the player's own `x2` starts positive (110, off the right edge) and counts down toward 0 - `dx` is still added to the settled `x`, same as the opponent's own draw. `dy` (default 0) is `endeavorHealthboxBounceY2`'s own real hardware `y2` value (S7 slice E1 tail, §15f) - every other caller leaves it at the default. */
+function drawMenuHealthboxPlayer(fb: Uint8Array, dx: number, dy: number = 0): void {
   const { x, y, width, height, pixels } = menuHealthboxPlayer;
   const mask = getMenuHealthboxPlayerContentMask();
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
       if (!mask[py * width + px]) continue;
       const i = (py * width + px) * 3;
-      setPixel(fb, x + dx + px, y + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
+      setPixel(fb, x + dx + px, y + dy + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
     }
   }
 }
@@ -3582,6 +3582,17 @@ const ENDEAVOR_SQUISH_START_DELAY = 55; // pressTick+55 = render tick 3000, the 
  * `drawEndeavorSquish` renders identically to the non-squish idle path at
  * neutral scale/coeff - kept only so the table's own length doesn't
  * artificially gate a longer capture window before shake/hitsplat do).
+ *
+ * **Table extended again `t=3057..3092`** (S7 slice E1 tail, §15f): all 36
+ * rows are the same trailing neutral entry - Grovyle itself has nothing left
+ * to animate past `t=3056` (RAM-confirmed: `dump-endeavor-squish-blend-ext.py`
+ * re-run over RAM 3045-3100 for this session found `matrixA`/`matrixD` pinned
+ * at `256/256` and the faded/unfaded OBJ palettes byte-identical throughout -
+ * see that probe's own re-run note). The table's own length now gates
+ * `drawEndeavorSquish`'s valid window all the way through the tail's real
+ * settle tick (`t=3092`, one before `ENDEAVOR_FLICKER`'s own last invisible
+ * render tick) - past that, the plain `drawActionMenuIdleContent` fallback
+ * already matches the oracle exactly (pixel-confirmed, no code needed).
  */
 const ENDEAVOR_SQUISH_TABLE: readonly { xScale: number; yScale: number; y2: number; coeff: number }[] = [
   { xScale: 256, yScale: 256, y2: 0, coeff: 1 }, // t=3000 (RAM matrix=2998, coeff=2999)
@@ -3641,6 +3652,42 @@ const ENDEAVOR_SQUISH_TABLE: readonly { xScale: number; yScale: number; y2: numb
   { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3054 (RAM matrix=3052, coeff=3053)
   { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3055 (RAM matrix=3053, coeff=3054)
   { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3056 (RAM matrix=3054, coeff=3055)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3057
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3058
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3059
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3060
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3061
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3062
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3063
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3064 - ENDEAVOR_HEALTHBOX_BOUNCE's own first visible tick
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3065 - ENDEAVOR_FLICKER's own first invisible tick
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3066
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3067
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3068
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3069
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3070
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3071
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3072
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3073
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3074
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3075
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3076
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3077
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3078
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3079
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3080
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3081
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3082
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3083 - ENDEAVOR_HEALTHBOX_BOUNCE's own last affected tick
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3084
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3085
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3086
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3087
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3088
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3089
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3090
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3091
+  { xScale: 256, yScale: 256, y2: 0, coeff: 0 }, // t=3092 - ENDEAVOR_FLICKER's own last invisible tick; t=3093 settles for good, plain fallback matches from there
 ];
 
 /**
@@ -3881,6 +3928,58 @@ function drawEndeavorHitsplats(fb: Uint8Array, t: number, pressTick: number): vo
 }
 
 /**
+ * S7 slice E1 tail increment (§15f): the player healthbox's own brief
+ * post-hit "wobble" - RAM-confirmed (`tools/probe/dump-endeavor-tail.py`)
+ * on THREE sprites at once (the healthbox's main sprite plus two sub-sprites
+ * that move in lockstep - `gHealthboxSpriteIds[0]` plus two undetermined
+ * neighbor slots, all sharing the identical `y2` value every tick), a
+ * DIFFERENT mechanism from `menuIdleBounce`'s own slow, continuous,
+ * never-negative sine bounce (that one never produces `-1`; this one is a
+ * sharp `+1`/`-1` alternation, one tick per half-step, for a fixed count then
+ * a hard stop - not a damping/decaying oscillation). RAM-active for
+ * `pressTick+118..pressTick+137` (20 ticks, alternating starting `+1`),
+ * render lag confirmed **directly against oracle pixels** (a healthbox
+ * border pixel sampled every tick 3060-3085, not just inferred from
+ * `npm run compare`'s own diff-percentage pattern): `render = RAM+1`, the
+ * same lag family as blend/droplet/flicker below (not squish/shake's own
+ * `render=RAM+2`).
+ */
+const ENDEAVOR_HEALTHBOX_BOUNCE_RENDER_LAG = 1;
+const ENDEAVOR_HEALTHBOX_BOUNCE_START = 118;
+const ENDEAVOR_HEALTHBOX_BOUNCE_TICKS = 20;
+function endeavorHealthboxBounceY2(t: number, pressTick: number): number {
+  const ramTick = t - ENDEAVOR_HEALTHBOX_BOUNCE_RENDER_LAG;
+  const n = ramTick - pressTick - ENDEAVOR_HEALTHBOX_BOUNCE_START;
+  if (n < 0 || n >= ENDEAVOR_HEALTHBOX_BOUNCE_TICKS) return 0;
+  return n % 2 === 0 ? 1 : -1;
+}
+
+/**
+ * S7 slice E1 tail increment (§15f): Onix's own brief post-hit "flicker" -
+ * the target sprite's `struct Sprite.invisible` bit (RAM-confirmed via
+ * `tools/probe/dump-endeavor-tail.py`'s own `flags` byte read, NOT a palette
+ * blend or position change - both were checked and ruled out first: the
+ * OBJ palette is byte-identical to the settled baseline throughout, and
+ * `x2`/`y2` both stay 0). Toggles invisible for 4 ticks then visible for 4
+ * ticks, four full cycles (`pressTick+119..+150`), then settles visible for
+ * good - RAM-confirmed no fifth cycle. Render lag independently pixel-
+ * confirmed (a single diagnostic pixel deep inside Onix's own silhouette,
+ * sampled every tick 3060-3095 against the oracle - not inferred): `render =
+ * RAM+1`, same family as the healthbox bounce above.
+ */
+const ENDEAVOR_FLICKER_RENDER_LAG = 1;
+const ENDEAVOR_FLICKER_START = 119;
+const ENDEAVOR_FLICKER_PERIOD = 8;
+const ENDEAVOR_FLICKER_ON_TICKS = 4;
+const ENDEAVOR_FLICKER_CYCLES = 4;
+function endeavorOnixInvisible(t: number, pressTick: number): boolean {
+  const ramTick = t - ENDEAVOR_FLICKER_RENDER_LAG;
+  const n = ramTick - pressTick - ENDEAVOR_FLICKER_START;
+  if (n < 0 || n >= ENDEAVOR_FLICKER_PERIOD * ENDEAVOR_FLICKER_CYCLES) return false;
+  return n % ENDEAVOR_FLICKER_PERIOD < ENDEAVOR_FLICKER_ON_TICKS;
+}
+
+/**
  * Draws the squished attacker plus everything else the settled turn-2 idle
  * screen normally shows (background, Onix, both healthboxes, the idle
  * bounce overlay) reconstructed from PRIMITIVES, the same
@@ -3894,7 +3993,12 @@ function drawEndeavorHitsplats(fb: Uint8Array, t: number, pressTick: number): vo
  * path unchanged. §15c: now also layers the 16 sweat-droplet sprites
  * (`drawEndeavorDroplets`) on top - unlike the squish/blend table, droplets
  * aren't windowed by `local`/table length, they self-gate via
- * `endeavorDropletCenter`'s own per-droplet spawn/lifetime check.
+ * `endeavorDropletCenter`'s own per-droplet spawn/lifetime check. §15f:
+ * `ENDEAVOR_SQUISH_TABLE`'s own extended tail (through `t=3092`) now also
+ * covers the healthbox-bounce/flicker window - both still need the same
+ * primitive reconstruction the squish/droplet mechanisms already required,
+ * since neither "erase Onix" nor "shift the healthbox by a non-baked amount"
+ * is expressible from the flat `menuIdleBase` harvest.
  */
 function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boolean {
   const local = t - pressTick - ENDEAVOR_SQUISH_START_DELAY;
@@ -3902,10 +4006,12 @@ function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boole
   const entry = ENDEAVOR_SQUISH_TABLE[local]!;
   drawStaticBgShiftedY(fb, 0);
   const shakeX2 = endeavorShakeX2(t, pressTick);
-  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + shakeX2, ONIX_MATERIALIZE_CORNER.y);
+  if (!endeavorOnixInvisible(t, pressTick)) {
+    drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + shakeX2, ONIX_MATERIALIZE_CORNER.y);
+  }
   drawEndeavorHitsplats(fb, t, pressTick);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurnHp));
-  drawMenuHealthboxPlayer(fb, 0);
+  drawMenuHealthboxPlayer(fb, 0, endeavorHealthboxBounceY2(t, pressTick));
   drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick));
   drawSpriteSheetAffineStretch(
     fb,

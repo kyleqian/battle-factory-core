@@ -990,3 +990,47 @@ describe("S7 slice E1 (docs/battle-menu-notes.md §15e): ENDEAVOR's hitsplat pop
     expect(pixelAtTurn2(3049, 58, 49)).toEqual([247, 247, 255]);
   });
 });
+
+// S7 slice E1 tail increment (docs/battle-menu-notes.md §15f): the two
+// mechanisms past the settled squish/blend/droplet/shake/hitsplat window
+// (§15e) - the player healthbox's own brief post-hit "wobble" (y2 bounce,
+// RAM-confirmed on gHealthboxSpriteIds[0]'s own sprite) and Onix's own
+// brief post-hit "flicker" (struct Sprite.invisible toggling, NOT a
+// palette blend - both ruled out first via tools/probe/dump-endeavor-
+// tail.py's own paletteDiffersFromBaseline/x2/y2 fields staying
+// False/0/0 throughout). All pixels below are oracle-cross-checked
+// (tools/compare/out/latest's own oracle-030XX.png captures for this
+// trace), not hand-picked.
+describe("S7 slice E1 tail (docs/battle-menu-notes.md §15f): the player healthbox's post-hit wobble and Onix's post-hit flicker", () => {
+  it("render 3064 (the healthbox wobble's own first visible tick, RAM 3063+1, y2=+1) shows a shifted color at the healthbox's own top-border pixel (150,74)", () => {
+    expect(pixelAtTurn2(3064, 150, 74)).toEqual([189, 189, 156]);
+  });
+
+  it("render 3060 (before the wobble starts) shows the plain, unshifted color at that same pixel", () => {
+    expect(pixelAtTurn2(3060, 150, 74)).toEqual([82, 107, 99]);
+  });
+
+  it("render 3083 (the wobble's own last affected tick, RAM 3082+1, y2=-1) shows the opposite-direction shifted color at the same pixel", () => {
+    expect(pixelAtTurn2(3083, 150, 74)).toEqual([33, 57, 0]);
+  });
+
+  it("render 3084 (one tick later - the wobble has hard-stopped, not damped) shows the plain color again", () => {
+    expect(pixelAtTurn2(3084, 150, 74)).toEqual([82, 107, 99]);
+  });
+
+  it("render 3065 (the flicker's own first invisible tick, RAM 3064+1) shows plain background at (60,90), deep inside Onix's own silhouette", () => {
+    expect(pixelAtTurn2(3065, 60, 90)).toEqual([247, 247, 255]);
+  });
+
+  it("render 3064 (one tick earlier - still visible) shows Onix's own body color at that same pixel", () => {
+    expect(pixelAtTurn2(3064, 60, 90)).toEqual([132, 123, 123]);
+  });
+
+  it("render 3092 (the flicker's own fourth and final invisible tick) still shows plain background at the same pixel", () => {
+    expect(pixelAtTurn2(3092, 60, 90)).toEqual([247, 247, 255]);
+  });
+
+  it("render 3093 (one tick later - settled visible for good, no fifth cycle) shows Onix's own body color again", () => {
+    expect(pixelAtTurn2(3093, 60, 90)).toEqual([132, 123, 123]);
+  });
+});

@@ -2824,3 +2824,119 @@ mechanisms' own tail interacting with something not yet isolated (§15's own
 scan called it "alternating two distinct shapes tick-to-tick", never RAM-
 probed). A future session should RAM-probe that span the same way this one
 did before assuming it's new territory.
+
+### 15f. S7 slice E1 tail increment (bounded worker, sixth follow-up session): the ENDEAVOR animation window CLOSES - `turn2-endeavor-drain.json`'s green span now runs contiguously **3000→3094+** (every tick through the pre-existing dense 3095-3120 block), TWO more sub-mechanisms found, neither the ones §15's own coarse scan guessed at
+
+**What landed:** `tools/probe/dump-endeavor-tail.py` (new probe) RAM-read the
+`3061-3094` gap directly rather than trusting §15's own "alternating two
+distinct shapes... likely the same hitsplat/shake mechanisms' own tail"
+guess - that guess was WRONG (both `dump-endeavor-hitsplat-shake.py`'s own
+fields and `dump-endeavor-squish-blend-ext.py`'s own matrix/blend fields
+read zero/neutral throughout this entire span, RAM-confirmed before writing
+a single line of new render code, per the brief's own mandatory method).
+Two genuinely NEW, previously-unmodeled mechanisms found instead: the player
+healthbox's own brief post-hit "wobble" (`endeavorHealthboxBounceY2`) and
+Onix's own brief post-hit "flicker" (`endeavorOnixInvisible`). Both wired
+into `drawEndeavorSquish` (`battleScene.ts`), which needed its own
+`ENDEAVOR_SQUISH_TABLE` extended with 36 more (all-neutral) rows through
+`t=3092` so its primitive-reconstruction path - already required for
+"erase/shift a live OBJ, which a flat harvest can't do" reasons since §15b -
+keeps covering the tail instead of falling back to the flat
+`drawActionMenuIdleContent` harvest a tick too early. `turn2-endeavor-
+drain.json`'s `captureFrames` extended from 167 to 201 (every tick 3061-3094
+added, closing the gap between the previously-committed 3000-3060 block and
+the pre-existing dense 3095-3120 block - the whole animation is now one
+contiguous captured span). 8 new Tier-1 pins (`battleScene.test.ts`), all
+oracle-cross-checked against this session's own `bin/oracle run` captures
+(`tools/compare/out/latest`), not hand-picked.
+
+**Method, per the brief: RAM-probe first, wide, before any pixel-diffing.**
+Extended both committed §15e-era probes (`dump-endeavor-hitsplat-shake.py`,
+`dump-endeavor-squish-blend-ext.py`) over RAM 3050-3100 first, exactly as
+the brief instructed - both came back flat: `gAnimMovePower`'s shake/hitsplat
+fields empty/zero, the squish matrix pinned at neutral `256/256`, the
+attacker's own OBJ palette faded==unfaded throughout. This ruled out "the
+same mechanisms' own tail" (§15's own guess) before any render code was
+touched. Extending `captureFrames` to the full `3061-3094` gap and running
+`npm run compare` against the STILL-unmodified engine (per this run's
+"extend then trim to last green" method) confirmed real, non-trivial diffs
+from render 3064 on (`3061-3063` matched with zero code changes - genuinely
+quiet ticks, not a probe gap) - so the gap was real, not an artifact of
+under-capturing.
+
+**Finding the healthbox wobble: a from-scratch full-sprite-table scan, not a
+guess.** With the known mechanisms ruled out, a scratch probe dumped EVERY
+in-use sprite's `x2`/`y2` over RAM 3058-3096 with zero filtering - three
+sprites (`gHealthboxSpriteIds[0]` plus two neighbor slots, almost certainly
+other pieces of the same compound healthbox assembly - real healthboxes in
+this engine are composited from a single flat harvest, but the real hardware
+evidently still uses several OBJ sprites underneath) moved in perfect
+lockstep, `y2` alternating `+1`/`-1` every RAM tick for exactly 20 ticks
+(`pressTick+118..+137`) then a hard stop - a structurally DIFFERENT
+mechanism from `menuIdleBounce`'s own slow, continuous, sine-driven bounce
+(`battleMenu.ts` - that one's range is `[0,2]`, never negative, and never
+stops). Render lag confirmed **directly against oracle pixels** (a
+healthbox border pixel sampled every tick 3060-3085, not just inferred from
+`npm run compare`'s own diff-percentage pattern): `render = RAM+1`, the
+same lag family blend/droplet already established (not squish/shake's own
+`render=RAM+2`). Modeled as a `dy` parameter threaded through
+`drawMenuHealthboxPlayer` (previously `dx`-only, default `dy=0` so its other
+two call sites are unaffected) rather than a new draw primitive - the
+healthbox is already a primitive composite, not a flat harvest, once inside
+`drawEndeavorSquish`'s reconstruction path.
+
+**Finding the flicker: two real hypotheses tried and ruled out with RAM
+evidence before landing on the right one.** The residual diff after the
+healthbox wobble was wired traced to Onix's own silhouette exactly (bbox
+`x=44-99,y=49-111`, oracle-confirmed via a direct crop showing Onix fully
+ABSENT from an otherwise-correct background at render 3089 - not a color or
+position difference, the sprite is simply gone). Two hypotheses were checked
+against RAM before guessing further: (1) a palette blend like the attacker's
+own `BlendPalette` yellow ramp - ruled out, Onix's own OBJ palette
+(`gPlttBufferFaded`, all 16 colors) is byte-identical to a pre-window
+baseline at every probed tick; (2) a hardware alpha blend
+(`BLDCNT`/`BLDALPHA`/`BLDY`, the same registers a "flash white" effect would
+use) - ruled out, all three read `0` throughout (confirming, as a bonus,
+that the ATTACKER's own earlier blend genuinely is a manual palette rewrite,
+not a hardware blend, cross-checking §15b's own claim). The real mechanism
+was found by widening the RAM read to the sprite's full `struct Sprite`
+`flags` byte (offset `0x3E`) rather than just position/palette fields:
+`gBattlerSpriteIds[0]`'s own sprite toggles its `invisible` bit (bit 2) on
+and off - 4 ticks invisible, 4 ticks visible, four full cycles
+(`pressTick+119..+150`), then settles visible for good with RAM-confirmed no
+fifth cycle. Render lag independently pixel-confirmed the same way as the
+wobble (a diagnostic pixel deep inside Onix's own silhouette, sampled every
+tick 3060-3095 against the oracle, not inferred): `render = RAM+1`, matching
+the wobble's own lag. Modeled as a boolean gate around the existing
+`drawSpriteSheet` call for Onix inside `drawEndeavorSquish` - no new
+primitive needed, since that path was already reconstructing Onix from a
+live sprite draw (not a flat harvest) since §15b.
+
+**The true settle tick, evidence-named per the brief:** render **3093** is
+the first tick where BOTH new mechanisms (and every earlier one) are
+simultaneously back to their neutral/absent state and stay there - RAM-
+confirmed (`dump-endeavor-tail.py`'s own scan through RAM 3096 shows no
+further activity on either mechanism) and pixel-confirmed (renders 3093-3094
+match the plain fallback with zero code changes, and the pre-existing dense
+3095-3120 block was already green). This is 1-2 ticks earlier than §15's own
+coarse "settles by 3095" estimate - consistent with that section's own
+caveat that it was a whole-frame diff against a neutral baseline, not a
+per-tick oracle-vs-engine comparison.
+
+**Verification**: `npm test` **693/693** (+8 new pixel-pins, oracle-cross-
+checked per their own doc comments), `npm run build` green. `tools/compare`:
+`turn2-endeavor-drain.json` **200/201** (grown from 166/167 -
+`captureFrames` now covers every tick 2999-3060 AND 3061-3094 AND the
+pre-existing 3095-3120/3125/3128/3130 block, i.e. the entire animation
+window through settle; only the pre-existing #19 diff at frame 2906
+remains), `turn2-endeavor.json` **76/77** (unchanged), `turn1-rockslide.json`
+**256/256** (unchanged), `turn1-cloneanim.json` **230/230** (unchanged),
+`turn1-drain.json` **102/102** (unchanged) - zero regressions. This closes
+the ENDEAVOR animation window entirely: S7 slice E1 (ENDEAVOR, `docs/
+battle-menu-notes.md` §15-§15f) is DONE, no more unattributed spans.
+
+**What's left for whoever picks this up next**: nothing further within
+ENDEAVOR's own window. The next S7 remainder is DRAGON_BREATH's own window
+(~3129+, out of this session's scope per the brief) and the standing
+ISSUES #19 family (the one residual every ENDEAVOR-window trace still
+carries, root-caused as pre-existing and out of scope for this slice).
