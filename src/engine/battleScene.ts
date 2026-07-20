@@ -4074,11 +4074,11 @@ function drawEndeavorDroplets(fb: Uint8Array, t: number, pressTick: number): voi
  * DRAGON_BREATH (`.power = 60`, `battle_moves.h:2931`) -> amplitude 5 ->
  * down=2/up=3 (asymmetric, matches the RAM-probed `+3,-2,+3,-2,...`).
  */
-const ROCK_SLIDE_MOVE_POWER = 75;
-const DRAGON_BREATH_MOVE_POWER = 60;
+export const ROCK_SLIDE_MOVE_POWER = 75;
+export const DRAGON_BREATH_MOVE_POWER = 60;
 
-/** `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`'s amplitude/downStep/upStep, derived from whatever `gBattleMovePower` was left holding by the last power-calculated move (see `ROCK_SLIDE_MOVE_POWER`'s own doc comment above) - a general rule, not a per-turn literal pair. */
-function endeavorShakeSteps(stalePower: number): { downStep: number; upStep: number } {
+/** `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`'s amplitude/downStep/upStep, derived from whatever `gBattleMovePower` was left holding by the last power-calculated move (see `ROCK_SLIDE_MOVE_POWER`'s own doc comment above) - a general rule, not a per-turn literal pair. Exported for a direct Tier-1 pin against all three RAM-confirmed data points (turn 2 and the turn-5 prediction both anchor on `ROCK_SLIDE_MOVE_POWER`, turn 3 on `DRAGON_BREATH_MOVE_POWER`). */
+export function endeavorShakeSteps(stalePower: number): { downStep: number; upStep: number } {
   const amplitude = Math.min(16, Math.max(1, Math.floor(stalePower / 12)));
   const downStep = Math.floor(amplitude / 2);
   const upStep = downStep + (amplitude & 1);
@@ -4529,8 +4529,12 @@ const TURN2_CONFIRM_PRESS_TICK = 2945;
  * (ticks 2135/3465/3721, all green) are proven correctly calibrated with
  * `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` unshifted, and a uniform shift there
  * would break them.
+ *
+ * Exported for a direct Tier-1 pin against the committed RAM pointer-chase
+ * dump (`src/data/gen/turn3-menu-bouncer-raw-probe.json`,
+ * `tools/probe/verify-turn3-menu-bounce-rule.py`'s own source).
  */
-function turn3SubmenuBounceTick(t: number): number {
+export function turn3SubmenuBounceTick(t: number): number {
   return dragonBreathResettledBounceTick(t, TURN2_CONFIRM_PRESS_TICK) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT - 1;
 }
 

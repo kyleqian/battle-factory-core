@@ -6,12 +6,15 @@ import {
   ballStatusBarPositions,
   cursorState,
   CURSOR_START_TICK,
+  DRAGON_BREATH_MOVE_POWER,
   dragonBreathGrovyleHp,
+  endeavorShakeSteps,
   evaEvb,
   INITIAL_BATTLE_SCENE_STATE,
   PARTICLE_OAM_PRIORITY,
   PARTICLE_OAM_SUBPRIORITY,
   renderBattleScene,
+  ROCK_SLIDE_MOVE_POWER,
   sendOutPressEligible,
   sendOutTextVisibleChars,
   shiftBottom,
@@ -21,11 +24,12 @@ import {
   TEXT_TOTAL_CHARS,
   textVisibleChars,
   TICK0,
+  turn3SubmenuBounceTick,
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
-import { CLOSED_FIGHT_SUBMENU_STATE, confirmFightMove, openFightSubmenu } from "../src/engine/battleMenu.ts";
+import { CLOSED_FIGHT_SUBMENU_STATE, confirmFightMove, menuIdleBounce, openFightSubmenu } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
 import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
@@ -33,6 +37,7 @@ import sendOutHealthboxOpponentAsset from "../src/assets/gen/sendout-healthbox-o
 import battleHealthboxAsset from "../src/assets/gen/battle-healthbox.json" with { type: "json" };
 import ramDump from "../src/data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import speciesNames from "../src/data/gen/species-names.json" with { type: "json" };
+import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-probe.json" with { type: "json" };
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -1015,6 +1020,73 @@ describe("S7 slice E1 (docs/battle-menu-notes.md §15e): ENDEAVOR's hitsplat pop
 
   it("render 3049 (one tick earlier - round 1 shake's own final +3 still held) still shows the shifted pixel", () => {
     expect(pixelAtTurn2(3049, 58, 49)).toEqual([247, 247, 255]);
+  });
+});
+
+// S7 residual cleanup (Family A, docs/turn3-residual-probe-notes.md):
+// endeavorShakeSteps generalizes the shake amplitude away from a hardcoded
+// symmetric constant - gAnimMovePower/gBattleMovePower is stale (ENDEAVOR
+// never writes it), so the amplitude always reflects whatever the LAST
+// power-calculated move left behind. Pinned against all three RAM-confirmed
+// data points: turn 2's ENDEAVOR (stale ROCK_SLIDE_MOVE_POWER=75, symmetric
+// 3/3), turn 3's ENDEAVOR (stale DRAGON_BREATH_MOVE_POWER=60, asymmetric
+// 2/3), and the turn-5 prediction (stale ROCK_SLIDE_MOVE_POWER=75 again,
+// from turn 4's own ROCK_SLIDE - symmetric 3/3, same anchor as turn 2's).
+describe("S7 residual cleanup (docs/turn3-residual-probe-notes.md, Family A): endeavorShakeSteps amplitude formula", () => {
+  it("stale power 75 (ROCK_SLIDE, turn 2's own anchor and the turn-5 prediction) gives a symmetric downStep=3/upStep=3", () => {
+    expect(endeavorShakeSteps(ROCK_SLIDE_MOVE_POWER)).toEqual({ downStep: 3, upStep: 3 });
+  });
+
+  it("stale power 60 (DRAGON_BREATH, turn 3's own anchor) gives an asymmetric downStep=2/upStep=3", () => {
+    expect(endeavorShakeSteps(DRAGON_BREATH_MOVE_POWER)).toEqual({ downStep: 2, upStep: 3 });
+  });
+
+  it("clamps amplitude to [1,16] at both ends (source formula's own clamp, never RAM-exercised by this dossier's own two anchors)", () => {
+    expect(endeavorShakeSteps(0)).toEqual({ downStep: 0, upStep: 1 }); // amplitude clamped up to 1
+    expect(endeavorShakeSteps(1000)).toEqual({ downStep: 8, upStep: 8 }); // amplitude clamped down to 16
+  });
+});
+
+// S7 residual cleanup (Family B, docs/turn3-residual-probe-notes.md "Family
+// B, continued"): turn3SubmenuBounceTick's own composition was uniformly one
+// RAM tick more advanced than the real invisible bouncer sprite's own
+// sSinIndex (proven by a pointer-chase RAM dump, zero exceptions over 41
+// probed ticks x 2 regions). The retarding `-1` fix should make
+// `menuIdleBounce(turn3SubmenuBounceTick(t))` (the exact composition the
+// renderer calls) match the real hardware's own screen-tick content
+// (`real_screen_y2(t) == probed_y2(t-1)`, the window's already-established
+// +1 render lag) directly, with no further shift - pinned against the
+// committed RAM dump itself, not re-derived by hand.
+describe("S7 residual cleanup (docs/turn3-residual-probe-notes.md, Family B): turn3SubmenuBounceTick vs the real bouncer's own RAM-probed sSinIndex", () => {
+  const rows = new Map(turn3MenuBouncerRawProbe.ticks.map((r) => [r.tick, r]));
+
+  it("menuIdleBounce(turn3SubmenuBounceTick(t)) equals real_screen_y2(t) (= probed y2 at RAM tick t-1) at every probed tick while the bounce is active, both regions - zero exceptions", () => {
+    let onixChecked = 0;
+    let healthboxChecked = 0;
+    for (const row of turn3MenuBouncerRawProbe.ticks) {
+      const t = row.tick;
+      const prev = rows.get(t - 1);
+      if (!prev) continue;
+      const model = menuIdleBounce(turn3SubmenuBounceTick(t));
+      if (prev.onixAmplitude !== 0) {
+        expect({ t, region: "onix", model: model.onixY2 }).toEqual({ t, region: "onix", model: prev.onixY2 });
+        onixChecked++;
+      }
+      if (prev.healthboxAmplitude !== 0) {
+        expect({ t, region: "healthbox", model: model.healthboxY2 }).toEqual({ t, region: "healthbox", model: prev.healthboxMainY2 });
+        healthboxChecked++;
+      }
+    }
+    // Sanity floor on the pin's own coverage, not a magic tolerance - both
+    // regions' probed-and-active tick counts, computed straight from the
+    // committed RAM dump.
+    expect(onixChecked).toBe(38);
+    expect(healthboxChecked).toBe(38);
+  });
+
+  it("the two named residuals (3879 onix, 3888 healthbox) individually match post-fix, not just in aggregate", () => {
+    expect(menuIdleBounce(turn3SubmenuBounceTick(3879)).onixY2).toBe(rows.get(3878)!.onixY2);
+    expect(menuIdleBounce(turn3SubmenuBounceTick(3888)).healthboxY2).toBe(rows.get(3887)!.healthboxMainY2);
   });
 });
 
