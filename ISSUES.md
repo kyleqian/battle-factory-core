@@ -90,23 +90,23 @@ stall). What remains is exactly one tick:
 Affects: `sendout.json` 255/256, `s6-acceptance.json` 224/228 (3 frames are
 ISSUES #5's settled pattern, x88-151-confirmed; 1 frame is #18's own 1496).
 
-## #16 — Opponent-healthbox compositor: status-icon variant has NO
-  oracle-pixel validation yet (partial-HP is now validated)
+## #16 — Healthbox compositor: status-icon variant has NO oracle-pixel
+  validation yet (HP bands, sliver, and empty bar are now ALL validated)
 
-Trimmed 2026-07-19 (bounded worker, S7 slice D): the `hpFraction != 1`
-half of this entry is now RESOLVED — `turn1-drain.json`'s ROCK_SLIDE
-drain (Grovyle 143→101 HP, 43 distinct integer HPs, 15 distinct
-fill-pixel-count transitions) hits real oracle pixels for the first time
-and matches the hermetic `calcBarFilledPixels`/`floor(hpFraction*48)`
-formula exactly — 0 residual, no model fix needed (see
-`docs/battle-menu-notes.md` §12). The bar stays in the green band this
-whole window (33/48 px > the 24px green threshold), so the yellow/red
-band thresholds and the `filledPixels==0` sliver rule are still only
-hermetically pinned, not oracle-confirmed — same for every status icon
-(`UpdateStatusIconInHealthbox`'s placement/color-substitution math): this
-trace's own seed battle never inflicts a status condition, so `status !=
-"none"` remains untested against real pixels. Battles 2-7's other
-opponents (S8) consume the same pipeline and may exercise these paths.
+Trimmed 2026-07-19 (S7 slice D): partial-HP green-band drain validated
+(`turn1-drain.json`, Grovyle 143→101, 0 residual). Trimmed again
+2026-07-20 (supervisor, after S7 slices I-2/J/K): the remaining band
+coverage is now oracle-confirmed on BOTH sides with zero compositor
+changes — opponent yellow/red bands (turn 4's 41→1 drain,
+`turn4-rockslide.json` 250/250), player green→yellow→red + the hp=1
+`filledPixels==0`-adjacent red sliver (turn 5's 88→1 drain,
+`turn5-endeavor.json` 254/254, Tier-1 sliver pin added), and the truly
+EMPTY opponent bar at hp=0 (turn 5's faint, `turn5-rockslide.json`
+256/256, Tier-1 empty-bar pin added). Sole remainder: every status icon
+(`UpdateStatusIconInHealthbox`'s placement/color-substitution math) —
+battle 1 never inflicts a status condition, so `status != "none"` is
+still untested against real pixels. Battles 2-7's other opponents (S8)
+consume the same pipeline and may exercise these paths.
 
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean

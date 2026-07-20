@@ -368,6 +368,23 @@ turn3-menu.json` **250/250**; turn 3's own actual move resolution (and
 everything past it — turn 4, the turn-5 faint, DESTIN's switch-in, Onix's
 own later faint, forced party-select/SEND OUT) remains unbuilt, see
 `docs/battle-turn-notes.md` §19.
+**Turns 3-5 + the faint COMPLETE (supervisor, 2026-07-20 afternoon
+session, slices G through K + residual cleanup, §20-§24):** turn 3
+(`turn3-endeavor` 192/192, `turn3-rockslide` 256/256), turn 4
+(`turn4-menu` 44/44, `turn4-doubleteam` 249/249, `turn4-rockslide`
+250/250), turn 5 through the KO (`turn5-menu` 41/41, `turn5-endeavor`
+254/254, `turn5-rockslide` 256/256, `turn5-faint` 110/110) — all 0 diff
+on their captures. Both long-standing excluded-residual families were
+root-caused and FIXED (stale-`gBattleMovePower` shake amplitude; turn-3
+bounce +1 phase), all 16 excluded ticks restored; the engine's first
+input-gated battle text (the KO hold) landed Tier-1-pinned both
+branches. Healthbox band/sliver/empty-bar coverage is now fully
+oracle-confirmed (ISSUES #16 trimmed to status-icons only). The
+switch-in tail (slice L: sent-out text → materialize → healthbox
+slide-in → Sitrus proc → settled menu vs PIDGEOTTO) is in flight with
+all formulas/assets banked (`docs/faint-switch-notes.md` §3-§8).
+Remaining known residual classes: the isolated redraw-extremum ticks
+(4934, 5927 — same documented class), ISSUES #23 (parked).
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin
