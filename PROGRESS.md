@@ -4,6 +4,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 167 — Worktree scout (supervisor-folded): faint/switch-in unknowns — the Pidgeotto-over-Murkrow AI rule SOURCE-TRACED + RAM-confirmed, the Sitrus heal formula PINNED exactly (flat +30, not a maxHP fraction); merged `7f4edcb`, suite 746/746 on the merged tree
+
+- **State:** merged into master (`3be0276`), `npm test` 746/746 + build
+  green post-merge (supervisor-verified). New: `docs/faint-switch-notes.md`,
+  `tools/probe/dump-switch-decision.py` (twice-run byte-identical),
+  `src/data/gen/battle1-grovyle-switch-decision.json`. No engine changes.
+- **Did:** (§13 open item 1) `GetMostSuitableMonToSwitchInto`
+  (`battle_ai_switch_items.c:629-790`) is a two-phase algorithm; phase 1's
+  source-commented bug (scores the candidate taking the MOST damage from
+  the opponent's own types) ties Murkrow/Pidgeotto 0-0 (both Flying,
+  zeroed by Ground immunity) → falls to phase 2's damage fallback.
+  Corrected a probe-docstring error: this opponent type's real party
+  lives in `gFrontierTempParty`, not `rentalMons[3..5]`; banked Murkrow's
+  first-ever RAM stat/moveset ground truth via a plaintext struct-offset
+  read. Honestly flagged unresolved: phase 2's `AI_CalcDmg` reads a stale
+  `gCurrentMove` (RAM-pinned to ROCK_SLIDE all decision window) and a
+  naive hand-trace of that predicts the WRONG winner — needs stack-local
+  tracing the oracle probes can't reach; do NOT model phase 2 from this
+  dossier alone. (Item 5) Sitrus = `HOLD_EFFECT_RESTORE_HP`, flat
+  `holdEffectParam=30`, gate `hp <= maxHP/2`, capped at maxHP
+  (supervisor re-verified vs `items.h:1753`/`battle_util.c:3336`); 1+30=31
+  exact, §13's floor(117/4) guess was the wrong generation's formula.
+- **Next:** scout goals 1/4 NOT reached (time-boxed): the 6684-7215
+  switch-in animation window is still un-itemized (dense pixels already
+  committed in `battle1-grovyle-faint.json` — narrate from those), and
+  **Pidgeotto's front sprite is NOT extracted** (`src/assets/gen/` has
+  nothing for it) — hard prerequisite for the faint engine slice.
+- **Notes:** supervisor also re-tested slice F's excluded ticks 3879/3888
+  against the #22/#24 fixes directly — still DIFF (769px/1573px), NOT
+  that family; §19's RAM-probe follow-up stands.
+
+---
 ## 166 — Bounded worker: S7 slice G — turn 3's ENDEAVOR resolution (the turn's first half) landed by PARAMETERIZING turn 2's own mechanisms, not rebuilding; `turn3-endeavor.json` (new) **180/180**, `npm test` **746/746** (+2), build green, zero regressions
 
 - **State:** `npm test` 746/746, `npm run build` green, tree clean.
@@ -86,56 +118,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   edited ROADMAP.md (supervisor-owned) — content was accurate status
   only, kept, boundary noted. One new PAPERCUTS entry (supervisor
   mid-worker commits on the shared tree).
-
----
-## 164 — Bounded worker: ISSUES #24 CLOSED — the §8c "tick 2901 regression" was a missing dispatch arm in `drawActionMenuIdleWindow`'s bounce-tick selection, not a second asset bug; all four RAM-verified ticks (2901/2135/3465/3721) now correct simultaneously; `npm test` **744/744** (+4), build green, zero regressions
-
-- **State:** `npm test` 744/744, `npm run build` green, tree clean.
-  `turn2-endeavor-drain.json` **201/201** (was 200/200, tick 2901
-  restored), `battle1-fight-submenu-idle.json` **256/256** (unchanged),
-  `turn2-dragonbreath.json` **237/237** (unchanged). `fight-submenu.json`
-  235/235, `turn3-menu.json` 250/250, `s6-acceptance.json` 224/228,
-  `sendout.json` 255/256, `menu-idle.json` 69/69, `turn1-kickoff.json`
-  81/81, `rent-3picks.json` 157/190, `rent-slot1.json` 125/139,
-  `confirm-flow.json` 79/95 — all unchanged. Bonus: `turn2-endeavor.json`
-  **77/77** (was 76/77, same one-line fix happens to cover it too).
-- **Did:** ISSUES #24 asked to find the anchor that gets all 4 named
-  ticks right simultaneously, RAM-grounded rather than grid-searched.
-  Read `reference/pokeemerald/src/battle_main.c`'s real `DoBounceEffect`/
-  `SpriteCB_BounceEffect`/`EndBounceEffect` mechanism first (confirms this
-  file's existing "resettled" anchors — `rockSlideResettledBounceTick`/
-  `turn2SubmenuBounceTick`/`turn3SubmenuBounceTick` — model a REAL
-  per-turn reset, not a curve-fit), then replayed each trace's real button
-  script through `core.ts`'s actual `tick()` (a scratch script, not hand
-  derivation) to find exactly which render branch owns each of the 4
-  ticks. Result: 2135/3465/3721 were ALREADY correct pre-session (their
-  own formulas, `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` and
-  `dragonBreathResettledBounceTick`, both unchanged by this fix — §8c's
-  asset fix really was sufficient for those three). Tick 2901 sits in a
-  DIFFERENT branch entirely: `drawActionMenuIdleWindow`'s open-DMA-wait
-  hold, whose bounce-tick dispatch was `turn2Resolved ?
-  turn3SubmenuBounceTick(t) : t` — missing the `turn1Resolved` arm
-  entirely, so turn 2's OWN reopen (which per the source read above DOES
-  inherit a reset bounce task) fell through to a plain, never-reset `t`.
-  That formula is only correct for the very first, truly-never-reset
-  epoch. One-line fix: add the missing arm, reusing
-  `turn2SubmenuBounceTick` (already established, already verified
-  elsewhere in this same window) — not a new anchor, not a magic offset.
-  The "two different anchors" the brief's strong lead predicted turned out
-  to be ONE anchor applied to a code path that had never been given the
-  case at all. RAM-verified all 4 ticks pass now, restored 2901 to
-  `turn2-endeavor-drain.json`'s `captureFrames`. New Tier-1 describe block
-  (`tests/battleMenu.test.ts`, "ISSUES #24") pins the reachable
-  `FightSubmenuState` + resulting `onixY2` at all 4 ticks against the
-  RAM-probed truth, plus a regression guard proving the fix is scoped to
-  tick 2901 alone (2902-2905 agree under both the old and new formula).
-  Full writeup: `docs/battle-menu-notes.md` §8d.
-- **Next:** faint/forced-switch is still the biggest remaining S7 item
-  (§13-§14 ground truth already banked); S8 engine work is unblocked
-  separately. ISSUES.md is now clean of the #22/#24 onix-bounce family.
-- **Notes:** no papercuts. The `battle1-fight-submenu-idle.json` groundtruth
-  trace (`tools/compare/traces-groundtruth/`) was re-run directly this
-  session (not just inferred from the acceptance sweep) to get its own
-  exact `FightSubmenuState` at tick 2135 — worth knowing this fixture is
-  runnable the same way as the committed `tools/compare/traces/` ones.
-

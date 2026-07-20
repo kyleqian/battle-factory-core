@@ -1,3 +1,55 @@
+## 164 — Bounded worker: ISSUES #24 CLOSED — the §8c "tick 2901 regression" was a missing dispatch arm in `drawActionMenuIdleWindow`'s bounce-tick selection, not a second asset bug; all four RAM-verified ticks (2901/2135/3465/3721) now correct simultaneously; `npm test` **744/744** (+4), build green, zero regressions
+
+- **State:** `npm test` 744/744, `npm run build` green, tree clean.
+  `turn2-endeavor-drain.json` **201/201** (was 200/200, tick 2901
+  restored), `battle1-fight-submenu-idle.json` **256/256** (unchanged),
+  `turn2-dragonbreath.json` **237/237** (unchanged). `fight-submenu.json`
+  235/235, `turn3-menu.json` 250/250, `s6-acceptance.json` 224/228,
+  `sendout.json` 255/256, `menu-idle.json` 69/69, `turn1-kickoff.json`
+  81/81, `rent-3picks.json` 157/190, `rent-slot1.json` 125/139,
+  `confirm-flow.json` 79/95 — all unchanged. Bonus: `turn2-endeavor.json`
+  **77/77** (was 76/77, same one-line fix happens to cover it too).
+- **Did:** ISSUES #24 asked to find the anchor that gets all 4 named
+  ticks right simultaneously, RAM-grounded rather than grid-searched.
+  Read `reference/pokeemerald/src/battle_main.c`'s real `DoBounceEffect`/
+  `SpriteCB_BounceEffect`/`EndBounceEffect` mechanism first (confirms this
+  file's existing "resettled" anchors — `rockSlideResettledBounceTick`/
+  `turn2SubmenuBounceTick`/`turn3SubmenuBounceTick` — model a REAL
+  per-turn reset, not a curve-fit), then replayed each trace's real button
+  script through `core.ts`'s actual `tick()` (a scratch script, not hand
+  derivation) to find exactly which render branch owns each of the 4
+  ticks. Result: 2135/3465/3721 were ALREADY correct pre-session (their
+  own formulas, `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` and
+  `dragonBreathResettledBounceTick`, both unchanged by this fix — §8c's
+  asset fix really was sufficient for those three). Tick 2901 sits in a
+  DIFFERENT branch entirely: `drawActionMenuIdleWindow`'s open-DMA-wait
+  hold, whose bounce-tick dispatch was `turn2Resolved ?
+  turn3SubmenuBounceTick(t) : t` — missing the `turn1Resolved` arm
+  entirely, so turn 2's OWN reopen (which per the source read above DOES
+  inherit a reset bounce task) fell through to a plain, never-reset `t`.
+  That formula is only correct for the very first, truly-never-reset
+  epoch. One-line fix: add the missing arm, reusing
+  `turn2SubmenuBounceTick` (already established, already verified
+  elsewhere in this same window) — not a new anchor, not a magic offset.
+  The "two different anchors" the brief's strong lead predicted turned out
+  to be ONE anchor applied to a code path that had never been given the
+  case at all. RAM-verified all 4 ticks pass now, restored 2901 to
+  `turn2-endeavor-drain.json`'s `captureFrames`. New Tier-1 describe block
+  (`tests/battleMenu.test.ts`, "ISSUES #24") pins the reachable
+  `FightSubmenuState` + resulting `onixY2` at all 4 ticks against the
+  RAM-probed truth, plus a regression guard proving the fix is scoped to
+  tick 2901 alone (2902-2905 agree under both the old and new formula).
+  Full writeup: `docs/battle-menu-notes.md` §8d.
+- **Next:** faint/forced-switch is still the biggest remaining S7 item
+  (§13-§14 ground truth already banked); S8 engine work is unblocked
+  separately. ISSUES.md is now clean of the #22/#24 onix-bounce family.
+- **Notes:** no papercuts. The `battle1-fight-submenu-idle.json` groundtruth
+  trace (`tools/compare/traces-groundtruth/`) was re-run directly this
+  session (not just inferred from the acceptance sweep) to get its own
+  exact `FightSubmenuState` at tick 2135 — worth knowing this fixture is
+  runnable the same way as the committed `tools/compare/traces/` ones.
+
+---
 ## 163 — Bounded worker: ISSUES #22 ROOT-CAUSED AND CLOSED — same asset-harvest bug class as #19, but region A (onix), not region B (healthbox); also closed the two DRAGON_BREATH sine-peak residuals (3465/3721) named in E2b/E2b-2, plus tick 3337 turned out to already be fixed — one NEW single-tick residual surfaced and correctly scoped out (not fixed, different mechanism); `npm test` **740/740** (+8), build green
 
 - **State:** `npm test` 740/740, `npm run build` green, tree clean.
