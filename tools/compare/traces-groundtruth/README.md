@@ -29,3 +29,15 @@ frames — every button press already made) then idle-pad: `-a` covers
 2094-2349 (256 captures), `-b` covers 2350-2600 (251 captures) — together
 every tick 2094-2600 at stride 1, no striding needed. Both twice-run, 0 sha
 mismatches.
+
+`battle1-switchin-dense-a.json` (ticks 6350-6560, 211 captures) / `-b.json`
+(6555-6810, 256) / `-c.json` (6811-7066, 256) / `-d.json` (7067-7312, 246):
+dense stride-1 pixel coverage of the whole Grovyle-faint -> Pidgeotto-
+switch-in window (docs/faint-switch-notes.md's own "switch-in animation
+window" section), superseding §13's coarser-strided captures
+(`battle1-grovyle-faint.json`) for this specific span. All four reuse that
+same trace's own 66 segments verbatim (identical button script, only
+`captureFrames` differs) so tick numbers stay directly comparable to every
+other section of the dossier. Together they cover every tick 6350-7312 at
+stride 1 (no gaps, no overlap beyond the shared boundary ticks 6560/6555
+and 6810/6811 and 7066/7067). All four twice-run, 0 sha mismatches.

@@ -256,43 +256,289 @@ dossier), so there's no existing pure-logic module to pin this fact
 against without first choosing where a future berry-effects module would
 live — left for whichever engine slice implements switch-in/item effects.
 
-## 3. Switch-in animation window (§13 open item 4) — NOT itemized this session
+## 3. Switch-in animation window (§13 open item 4) — ITEMIZED this session (worktree lane `wt-20260720-100854`, oracle scout — no engine code)
 
-**Time-boxed out, not attempted beyond one quick asset check.** Goals 2
-and 3 above took the entire session's budget (the "why Pidgeotto" question
-in particular required building a new probe technique — the plaintext
-`struct Pokemon` stat-field offsets — from scratch after the first two
-approaches, `dump-rentalmons.py`'s existing array and a hand-derived
-struct-offset guess, both turned out to point at the wrong data). One
-finding worth recording so the next session doesn't have to re-check it:
+**§3's own prior claim above ("Pidgeotto's front-facing sprite has not been
+extracted") was WRONG** — see §5 below: it was already extracted, byte-exact,
+since the very first S6-groundwork commit (`38f687c`). §13's own claim that
+"the committed trace's dense capture window covers [ticks 6684-7215] at
+full stride" was **also imprecise** — `battle1-grovyle-faint.json`'s own
+`captureFrames` stride through this window is 2-18 ticks, not 1, and (more
+importantly) the interesting animation starts well *before* 6684, not at
+it. This session generated four new dense stride-1 traces,
+`battle1-switchin-dense-{a,b,c,d}.json` (tools/compare/traces-groundtruth/,
+README updated), covering every tick 6350-7312 at stride 1 (all four reuse
+`battle1-grovyle-faint.json`'s own 66 segments verbatim — identical button
+script, only `captureFrames` differs — so tick numbers stay directly
+comparable to every other section of this dossier). All four twice-run
+oracle-side, 0/969 sha mismatches across the two runs.
 
-**Pidgeotto's front-facing sprite has not been extracted** — `ls
-src/assets/gen/` and a grep for `PIDGEOTTO`/`pidgeotto` across `src/`
-both come back empty. Whichever engine slice implements this switch-in
-will need to add that extraction (species 17, `SPECIES_PIDGEOTTO`) before
-it can render the send-out animation, on top of whatever S6 send-out
-machinery it reuses (`docs/battle-scene-notes.md` §7).
+Method: for each phase below, either (a) a per-tick numeric probe (opaque-
+pixel count in a fixed crop box, or full-frame byte diff count between
+consecutive ticks) computed over every tick in the dense traces to find
+exact transition ticks, or (b) direct visual inspection of the crop/frame
+at and around a transition, cross-checked against `reference/pokeemerald`
+source where a mechanism was identifiable. All tick numbers below are
+**exact** (stride-1, not interpolated) unless marked with `~`.
 
-The dense capture window in the already-committed
-`battle1-grovyle-faint.json` trace covers ticks ~6684-7215 at full stride
-(§13's own note: "the committed trace's dense capture window covers it")
-— so the pixels needed for a future session's frame-by-frame narration
-already exist; no new trace is needed, only the narration work itself.
+### 3a. The faint sequence corrects §13's own "screen frozen 6429-6560" claim — real animation happens in that window
+
+§13 (this file's own prior session) concluded from a RAM-only control run
+that `gBattleMainFunc` and every watched RAM address sit frozen from
+"tick 5964 through tick 8960" absent a player A-press, and concluded the
+whole 6429-6560 span is visually inert. **That RAM-only conclusion is right
+about `gBattleMainFunc` but wrong about the screen** — real, un-RAM-tracked
+sprite/window animation plays automatically inside that span, no A-press
+needed for it. Pixel ground truth (`battle1-switchin-dense-a.json`,
+opaque-pixel count in a `(135,5)-(215,75)` crop around Grovyle's own
+on-field position, one sample per tick):
+
+| ticks | opaque px in crop | what's on screen |
+|---|---|---|
+| 6350-6378 | 2570 -> 2008, monotonically falling | ROCK_SLIDE's own rock-debris impact animation finishing (the debris pixels themselves fall out of the crop's "non-background" count as each rock disappears) — Grovyle's own healthbar is still **full** here (`GROVYLE Lv50` box, undrained) |
+| 6379-6392 | steady 2008 | Grovyle fully visible, undamaged-looking, holding (this is *before* the HP-bar drain the general "1 HP-unit/tick" rule handles — that drain is not re-verified this session, already pinned generically by earlier turns' docs) |
+| 6393-6420 | alternates 2008 / 484 every ~4 ticks (4 on/off cycles) | a **hit-flash flicker** — Grovyle's sprite toggles fully invisible/visible several times, matching the general Gen 3 "flinch/faint flash" cue (`SpriteCB_Flicker`-family mechanism, `reference/pokeemerald/src/battle_main.c:2721-2736`, toggles `sprite->invisible` on a countdown) — not the final faint animation itself |
+| 6421-6503 | steady 2008 | held fully visible again, no RAM change either (this is the span §13's control run actually observed as "frozen") |
+| 6504-6518 | steps 2008 -> 1994 -> 1709 -> 1329 -> 1206 -> 1077 -> 750 -> 499 -> 484, ~2 ticks/step | **the real faint animation**: Grovyle visibly sinks into the ground shadow, erased from the bottom up (confirmed by direct crop inspection, `/tmp/sheet_sink_zoom.png`-equivalent — the visible remnant's top edge steps downward each pair of ticks until only a foot-tip remains at 6520-6521, gone by 6522) |
+| 6519-6560 | steady 484 (just the shadow oval + healthbar-box edges) | Grovyle's sprite fully gone |
+
+**Source-identified mechanism for the sink** (not curve-fit — this is the
+literal, only faint-sprite-animation function in `battle_main.c`):
+`SpriteCB_FaintOpponentMon` / `SpriteCB_AnimFaintOpponent`
+(`reference/pokeemerald/src/battle_main.c:2744-2811`). It does **not**
+fade or dissolve — it erases the sprite's bottom 8px-tall tile-row on a
+timer and shifts the remainder down (`sprite->y2 += 8`), creating the
+"sinking into the ground" illusion the pixels above show directly:
+
+```c
+sprite->data[3] = 8 - yOffset / 8;   // number of erase-steps left
+sprite->data[4] = 1;                  // 1-tick delay before the first step
+sprite->callback = SpriteCB_AnimFaintOpponent;
+// ...
+static void SpriteCB_AnimFaintOpponent(struct Sprite *sprite)
+{
+    if (--sprite->data[4] == 0) {
+        sprite->data[4] = 2;          // every step after the first is 2 ticks apart
+        sprite->y2 += 8;              // move the sprite down
+        if (--sprite->data[3] < 0) { FreeSpriteOamMatrix(sprite); DestroySprite(sprite); }
+        else { /* erase the sprite's own bottom 8px row, re-play its idle anim */ }
+    }
+}
+```
+
+For Grovyle (`yOffset=4`, from `gMonFrontPicCoords`, already extracted in
+`mon-pic-coords.json`): `data[3] = 8 - floor(4/8) = 8`, so **9** erase-steps
+at a 1-then-2-tick cadence — spanning ticks `S+1, S+3, S+5, ..., S+17` for
+some start tick `S`. The observed pixel data (6504-6521, ~8-9 distinct
+plateaus over ~17-18 ticks) matches this shape closely; the exact `S` and
+step count weren't independently RAM-confirmed this session (would need a
+`gSprites[].y2`/`.data[3]` probe, not attempted — time-boxed), but the
+*qualitative* mechanism (erase-and-sink, not fade/dissolve, not a uniform
+slide) is now source-cited and pixel-corroborated, answering §13's own
+open "slide-down? fade? dissolve?" question directly: **it's a stepped
+bottom-up erase with an 8px-per-step downward shift, on a 1-then-2-tick
+cadence** — a distinct mechanism from any of S6's own send-out mechanisms
+(none of which erase/shift a sprite this way).
+
+### 3b. Text phases, pinned to the tick
+
+Text-box content read directly off cropped frames (`(0,108)-(240,160)`),
+stride-1 through the transitions:
+
+| ticks | text box content |
+|---|---|
+| through 6503 | "ONIX used\nROCK SLIDE!" (unchanged, held) |
+| 6504-~6533 | still "ONIX used\nROCK SLIDE!" — **the sink animation (3a) plays while this text is still on screen**, not after it clears |
+| ~6534-6554 | box clears and "Foe GROVYLE\nfainted!" prints, 1 char/tick (same cadence as every other message in this dossier); the trailing "!" lands at 6552, the down-arrow/heart prompt cursor appears at 6554 (text fully printed, now idling) |
+| 6554-6561 | held, idle-cursor bounce only (tiny, ~24px diagonal-adjacent diff at 6561 — the cursor's own established 4-phase bounce, not a scene change) |
+| **6562** | the A-press §13 already identified registers here (this session doesn't re-derive that gate, only confirms the text sitting right at it) |
+| 6562-6586 | genuinely frozen (0 pixel change tick-to-tick) — the true gate wait |
+| ~6588-6607 (opponent-side, see 3c) / 6687-~6727 (the message itself) | see below — two *different* things happen in this stretch, not one |
+
+Between the A-press and the new message, the **opponent's own 6-icon party-
+status-summary bar** (§7's own `ballIcons`/`drawBallStatusBar` mechanism,
+`OPP_ICON_X2`/`OPP_BAR_X2` tables, `src/engine/battleScene.ts:1144-1242`)
+re-triggers and slides onto the top-left of the screen starting **~6588**
+(first bbox-diff evidence: `(0,40)-(8,43)` at 6588, growing rightward tick
+by tick through 6607 and beyond — the bar's own entrance-slide silhouette,
+same y=32/40 coordinates as the intro's own opponent bar). This is the
+same widget being reused a second time with updated per-slot states
+(Grovyle's own icon flips from "Full" to a fainted state) — see §6's
+mapping table.
+
+The **new message itself** ("BUG CATCHER DESTIN sent\nout PIDGEOTTO!",
+`sText_Trainer1SentOutPkmn`, same string family as §7.3's own send-out
+text) starts printing at **6687** (full-frame bbox diff jumps to 638px
+here — the message-window redraw, not a char print), 1 char/tick through
+completion at **~6727** ("BUG CATCHER DESTIN sent\nout PIDGEOTTO!" fully
+on screen, confirmed by direct crop read). This lines up tightly with the
+RAM-confirmed party-index/species-flip ticks §13 already pinned
+(`gBattlerPartyIndexes[1]` 0->2 at 6682, `gBattleMons[1].species` 278->17
+at 6684) — the switch commits in RAM 3-5 ticks *before* its own
+announcement text starts printing, not after.
+
+### 3c. Ball throw + materialize (~6746-6820)
+
+Pixel-confirmed sequence (full-frame contact sheet over `battle1-
+switchin-dense-{b,c}.json`):
+
+| tick | what's on screen |
+|---|---|
+| through 6745 | just the empty ground-shadow oval where Pidgeotto will appear; "sent\nout PIDGEOTTO!" text fully printed and held |
+| **~6746** | a small thrown-ball sprite appears in the oval (the ball-throw arc's landing frame — the throw's own earlier arc, if any, is off-screen or too brief to have caught a distinct capture tick in this window; not separately itemized) |
+| ~6748-6752 | the ball shows an "open" flash/sparkle frame |
+| ~6752-6810 | Pidgeotto's silhouette grows in, **tinted pink/magenta** throughout (the same flat ball-color tint mechanism as `MATERIALIZE_TINT_COLOR` in `battleScene.ts`, mechanism 4/5 of S6's own Grovyle materialize) fading back to normal color by ~6810 |
+| ~6810-6820 | Pidgeotto's sprite fully formed, normal colors, static — no healthbox yet |
+
+This is qualitatively the **same shape** as S6's own Grovyle send-out
+(ball -> open flash -> tinted materialize -> settle), just compressed
+(≈75 ticks here vs. the intro's own ≈80-ticks-wide 1462-1543 window) —
+consistent with reusing the same underlying animation task, not a new one.
+**Not verified to formula precision this session** (no per-tick affine-
+matrix/tint-coefficient RAM probe was run against Pidgeotto, unlike
+Grovyle's own exhaustively-probed `GROVYLE_STRETCH_TABLE`) — this is a
+visual-shape match, not a byte-exact mechanism confirmation. Flagged
+honestly rather than assumed identical.
+
+### 3d. Healthbox slide-in (~6830-6875)
+
+Pidgeotto's own `PIDGEOTTO Lv50` healthbox is **not** on screen when its
+sprite finishes materializing (~6820) — a ramping full-frame diff
+(6829:6px -> 6851:879px, monotonically increasing) starting at **~6830**
+shows it sliding into place, landing by **~6851-6875** (settled, static
+from 6875 through the next phase). This is the same "healthbox slides in
+after the sprite settles, with a lag" shape §7.6 already documented for
+Grovyle's own intro send-out (~1496-1522) — same relative ordering
+(sprite first, healthbox follows), different absolute ticks.
+
+### 3e. Onix's Sitrus Berry proc (~7040-7250)
+
+| ticks | what's on screen |
+|---|---|
+| 6875-~7040 | fully settled (Pidgeotto sprite+healthbox, Onix idle), no change |
+| ~7040-7048 | a small sparkle appears near Onix, Onix's own sprite briefly tints cyan/teal |
+| ~7056-7072 | an expanding translucent ring/burst effect radiates outward from Onix (grows over ~16 ticks, then fades) — this is the generic Gen 3 "restored HP" item-use visual (`HOLD_EFFECT_RESTORE_HP`'s own battle-script animation, `BattleScript_ItemHealHP_RemoveItem`), not itemized to its own source-level animation-task ID this session |
+| **~7078-7112** | "ONIX's SITRUS BERRY\nrestored health!" prints, 1 char/tick, completing at 7112 — Onix's HP number is still **1/117** throughout this entire print (the text completes well before the heal itself animates) |
+| 7112-~7216 | held (text fully printed, no further change) |
+| **~7216-7250** | the actual heal animates: HP bar + digits climb 1 -> 6 -> 14 -> 22 -> 30 -> 31 (samples 8 ticks apart, consistent with the dossier's established generic "1 HP-unit/tick" bar-fill rule) |
+| **~7250-7256** | settles fully at 31/117, message box switches directly to the interactive "What will ONIX do?" / FIGHT-BAG-POKéMON-RUN menu — no further input needed to reach it |
+
+**This corrects §13's own settle-tick claim.** §13 stated `gBattleMainFunc`
+settles to its post-turn dispatcher value "at 7215" and the menu is
+interactive "7215-7312". The RAM-level dispatcher value may well flip at
+7215 (not re-checked this session — that's a RAM fact, not a pixel one),
+but the **visible** screen is still mid-heal-animation at 7215 by this
+session's own pixel evidence (HP reads well under 31 at 7224) and doesn't
+finish settling until roughly **7250-7256**, not 7215. Framed the other
+way: whatever RAM value §13 sampled at 7215 evidently isn't tied to the
+on-screen heal-bar-fill animation, which keeps running for ~35-40 more
+ticks after that RAM state change. Both facts can be true simultaneously
+(a "logically settled, still animating" state) but the doc text describing
+7215 as when the player *sees* a settled menu was imprecise; this session's
+pixel data is the more precise source for "when can the player actually
+act," which is what an input-handling engine slice actually needs.
 
 ## 4. RNG cluster attribution (§13 open items 2-3) — NOT reached this session
 
-Not attempted — time-boxed out entirely (goals 2 and 3 were this session's
-full scope per priority order). Both remain exactly as §13 left them:
-the tick-4064/6206 unattributed 1-step events, and the tick-7215/7221
-6-step post-switch-in cluster's shape mismatch against the established
-`ShouldSwitch`(2)+tie-break(5)=7 pattern.
+Not attempted — out of this session's scope (extraction + animation
+itemization only, per the worktree brief). Both remain exactly as §13 left
+them: the tick-4064/6206 unattributed 1-step events, and the tick-
+7215/7221 6-step post-switch-in cluster's shape mismatch against the
+established `ShouldSwitch`(2)+tie-break(5)=7 pattern — though see §3e
+immediately above: this session's own pixel data puts the *visible* menu
+settle closer to 7250-7256 than 7215, which may be worth cross-checking
+against wherever that RNG cluster's own RAM ticks actually land before
+trusting the "6, not 7" shape mismatch §13 flagged (not re-checked this
+session — a plausible lead for whoever picks this open item up next).
+
+## 5. Pidgeotto's front sprite — already extracted, byte-exact verified (goal 1)
+
+**§3's own prior-session claim above ("Pidgeotto's front-facing sprite has
+not been extracted... `ls src/assets/gen/` and a grep... both come back
+empty") does not hold up** — re-checked directly this session:
+`src/assets/gen/battle-opponent-front-sprites.json` already contains a
+`PIDGEOTTO` entry (64 tiles, 8x8 columns/rows = 48x56px, 16-color palette,
+plus a `frame2` entrance-animation second frame), and `src/data/gen/
+mon-pic-coords.json`'s `front.PIDGEOTTO` entry (`{width:48, height:56,
+yOffset:11}`) is present too. Both come from `tools/extract/extract-
+battle-mon-pics.ts`'s existing `FRONT_SPECIES` map (`GROVYLE: "grovyle",
+MURKROW: "murkrow", PIDGEOTTO: "pidgeotto"`, line 86-90) — **all three of
+DESTIN's mons were extracted together in the very first S6-groundwork
+commit** (`38f687c`, "extract battle-1 bring-up static assets"), long
+before §13's own faint dossier existed. The prior session's grep evidently
+missed the `.json` asset files (plausibly scoped to source-code
+extensions only) and never re-ran the extractor to check — this session's
+finding is a correction of a stale negative, not new extraction work; no
+extractor or asset changes were needed or made.
+
+**Byte-exact verification against a fresh oracle capture** (goal 1's own
+ask): `tools/compare/scratch/pidgeotto_corner_verify.mjs` composites the
+extracted `PIDGEOTTO` tileset+palette (skipping index-0/transparent
+pixels) at every candidate top-left corner in a `(100-190, 0-40)` search
+box against the settled post-switch-in screen (tick 7310,
+`battle1-grovyle-faint.json`, oracle-regenerated fresh this session) and
+reports the best (lowest-diff) corner:
+
+```
+{ cx: 144, cy: 19, diff: 0, opaque: 1087 }
+```
+
+**0 residual mismatched pixels out of 1087 opaque** — a byte-exact match,
+at corner `(144, 19)`. This also resolves a real mechanism, not just a
+number: Grovyle's own known settled corner is `(144, 12)`
+(`GROVYLE_CORNER`, `battleScene.ts:1356`) — the **x** coordinate is
+identical (144, species-independent, the fixed opponent-slot screen
+position) but **y** differs by exactly 7px. Grovyle's `gMonFrontPicCoords`
+`yOffset` is 4; Pidgeotto's is 11 — a difference of exactly 7, matching the
+corner-y difference exactly. So the generalizing formula (2 independent
+data points, both exact, not curve-fit to one): **opponent front-sprite
+corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)`**, using the
+same `mon-pic-coords.json` table `extract-battle-mon-pics.ts` already
+extracts in full (all species, not just the 3 battle-1 mons) — a future
+engine slice generalizing S6's `GROVYLE_CORNER` constant into a per-
+species lookup can use this formula directly rather than re-deriving it.
+Source-consistent too: `reference/pokeemerald/src/battle_main.c:2783` uses
+the identical `8 - yOffset/8` relationship (in 8px sprite-row units, for
+the faint-sink step count, §3a above) — the same `yOffset` constant
+governing two independently-observed on-screen effects is corroborating,
+not coincidental.
+
+**Not verified this session**: Murkrow's own corner (never sent out in any
+committed trace, no oracle pixels exist to check against) and whether the
+formula holds for non-battle-1 species in general (only 2 data points,
+both from this one battle) — stated as a generalization with the evidence
+it deserves, not overclaimed.
+
+## 6. Mechanism mapping: switch-in vs. S6's own send-out (goal 3, partial)
+
+A direct answer to "does the opponent switch-in reuse the intro's Grovyle
+materialize timing verbatim, or is it new" — partial, evidence-graded:
+
+| switch-in element | maps to an existing S6 mechanism? | evidence |
+|---|---|---|
+| Opponent front-sprite corner (x, and now y via yOffset) | **Yes, generalizes** — same `(144, ...)` slot, y now formula-derived from the same coords table S6's own extractor already pulls | §5 above, byte-exact, 2 independent species |
+| Opponent 6-icon party-status-summary bar (ball icons, top-left) | **Yes, verbatim reuse, re-triggered** — same `ballIcons`/`drawBallStatusBar`/`OPP_ICON_X2`/`OPP_BAR_X2` mechanism, second invocation with updated per-slot state | §3b, bbox-diff evidence of the same entrance-slide shape at the same y=32/40 coordinates |
+| Ball throw -> open flash -> tinted materialize -> settle shape | **Visually yes, not formula-verified** — same phase order, similar (not identical) duration | §3c — a shape match from contact-sheet inspection only, no RAM/affine-table probe run against Pidgeotto |
+| Healthbox slide-in-after-sprite lag | **Yes, same shape** — sprite settles first, healthbox follows with a visible lag | §3d, same relative ordering as §7.6's own Grovyle finding |
+| The faint-sink animation (Grovyle's own exit) | **New — no S6 mechanism resembles it.** None of S6's own 5 send-out mechanisms erase-and-shift a sprite; this is a distinct source function (`SpriteCB_FaintOpponentMon`/`AnimFaintOpponent`) with no analogue anywhere else in this dossier | §3a, source-cited |
+| The pre-sink hit-flash flicker (6393-6420) | **Unclear — not cross-checked against S6.** Resembles a generic Gen 3 flinch/hit-flash toggle (`SpriteCB_Flicker`-family); whether S6's own hit-flash code (if any exists in `battleScene.ts`) already models this wasn't checked this session | §3a — flagged, not resolved |
+| Sitrus Berry's ring/sparkle heal effect | **New — no S6 analogue.** No item-effect animation exists anywhere else in this dossier (§13's own note: item effects are unmodeled entirely) | §3e |
+
+This table is a starting point for whoever implements the engine slice, not
+an implementation-ready spec — several rows are explicitly flagged
+"visually yes, not formula-verified" rather than claimed solved.
 
 ## Verification
 
-`npm test` and `npm run build` green (docs/data-only session, no
-`src/engine/` changes). New probe script (`tools/probe/
-dump-switch-decision.py`) run twice independently against the already-
-committed `battle1-grovyle-faint.json` trace, output diffed byte-for-byte
-— identical both times. No new oracle traces were generated (every fact
-above comes from RAM-probing the existing committed trace or reading
-`reference/pokeemerald` source directly).
+`npm test` and `npm run build` green (extraction-verification + docs-only
+session; no `src/engine/` changes). Four new dense stride-1 oracle traces
+(`battle1-switchin-dense-{a,b,c,d}.json`, `tools/compare/traces-
+groundtruth/`, README updated) each twice-run against the oracle, 0/969
+total sha mismatches across the two runs (211+256+256+246 captures each
+run). No extractor or `src/assets/gen/`/`src/data/gen/` changes — §5's own
+finding is that the Pidgeotto assets already existed and are already
+byte-exact; the only new committed artifact for goal 1 is the verification
+script (`tools/compare/scratch/pidgeotto_corner_verify.mjs`). Every pixel
+claim in §3 above traces to a specific tick in one of the four new dense
+traces, re-derivable via `bin/oracle run tools/compare/traces-groundtruth/
+battle1-switchin-dense-<a|b|c|d>.json -o <dir>/`.
