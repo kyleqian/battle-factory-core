@@ -1,0 +1,221 @@
+{
+"ticks": [
+{
+"tick": 2935,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2936,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2937,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2938,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2939,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2940,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2941,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2942,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2943,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2944,
+"battler1ControllerFunc": 134607233,
+"execFlags": 1,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2945,
+"battler1ControllerFunc": 134607233,
+"execFlags": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2946,
+"battler1ControllerFunc": 134607233,
+"execFlags": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2947,
+"battler1ControllerFunc": 134607233,
+"execFlags": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2948,
+"battler1ControllerFunc": 134607233,
+"execFlags": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2949,
+"battler1ControllerFunc": 134607233,
+"execFlags": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2950,
+"battler1ControllerFunc": 134607233,
+"execFlags": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 2951,
+"battler1ControllerFunc": 134607233,
+"execFlags": 0,
+"bg0y": 320,
+"currentMove": 283
+},
+{
+"tick": 2952,
+"battler1ControllerFunc": 134607233,
+"execFlags": 0,
+"bg0y": 320,
+"currentMove": 283
+},
+{
+"tick": 2953,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2954,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2955,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2956,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2957,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2958,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2959,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2960,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2961,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2962,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2963,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2964,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+},
+{
+"tick": 2965,
+"battler1ControllerFunc": 134609789,
+"execFlags": 2,
+"bg0y": 0,
+"currentMove": 283
+}
+]
+}

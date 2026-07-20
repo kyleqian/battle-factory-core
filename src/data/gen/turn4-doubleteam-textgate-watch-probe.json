@@ -1,0 +1,314 @@
+{
+"ticks": [
+{
+"tick": 4915,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4916,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4917,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4918,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4919,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4920,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4921,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4922,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4923,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4924,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134577149,
+"execFlags": 1,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4925,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134575365,
+"execFlags": 0,
+"commState0": 3,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4926,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134575365,
+"execFlags": 0,
+"commState0": 4,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4927,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134575365,
+"execFlags": 0,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4928,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134575365,
+"execFlags": 0,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4929,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134575365,
+"execFlags": 0,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4930,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134575365,
+"execFlags": 0,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 0
+},
+{
+"tick": 4931,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134575365,
+"execFlags": 0,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 104
+},
+{
+"tick": 4932,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134575365,
+"execFlags": 0,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 104
+},
+{
+"tick": 4933,
+"battler1ControllerFunc": 134607233,
+"battler0ControllerFunc": 134575365,
+"execFlags": 0,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 320,
+"currentMove": 104
+},
+{
+"tick": 4934,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4935,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4936,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4937,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4938,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4939,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4940,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4941,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4942,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4943,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4944,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+},
+{
+"tick": 4945,
+"battler1ControllerFunc": 134609789,
+"battler0ControllerFunc": 134575365,
+"execFlags": 2,
+"commState0": 5,
+"bg0x": 0,
+"bg0y": 0,
+"currentMove": 104
+}
+]
+}

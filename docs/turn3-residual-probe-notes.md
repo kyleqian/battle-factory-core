@@ -417,3 +417,255 @@ record.
 re-ran to confirm no regression. `npm run build` green. No `tools/compare/`
 trace changed; the two families' excluded-tick counts are unchanged from
 `docs/battle-turn-notes.md` §19/§20's own committed state.
+
+## The extremum class, probed (bounded worker session, RAM/oracle probing
+only — no engine changes): tick 4934 and tick 5927, both root-caused, both
+NOT hardware quirks
+
+Assigned brief: root-cause the last two ticks still carrying the "redraw
+extremum" label — `docs/battle-turn-notes.md` §22's tick **4934** (turn
+4's `turn4-doubleteam.json`, 13292px/28.47%, the whole message-box region)
+and §23's tick **5927** (turn 5's `turn5-menu.json` reopen, 769px, the Onix
+silhouette region). The label itself was always a hypothesis, never a
+finding — per this run's own track record (Family A/B above, plus the §22
+clone-z-order/stale-text bugs), every previously-"unexplained" single tick
+in this dossier has turned out to be a real, modelable mechanism. Both do
+again this session. **Neither is a hardware quirk; neither is the same
+mechanism as the other.**
+
+### Tick 4934: MECHANISM FOUND — the kickoff-text gate picks the wrong
+move-family's timing constant for exactly one tick
+
+**Pixel autopsy** (`tools/compare/scratch/redraw-extremum/autopsy_4934.mjs`,
+oracle-only, dense stride-1 4925-4943): real hardware is **byte-identical
+across ticks 4928-4934** (7 ticks, one static plateau — sha
+`9a6b4026b9f8` throughout), then changes at 4935 (new sha `41d7a0dc2606`).
+Cross-checked against the app (`tools/compare/run.ts` on a dense
+4925-4960 window): **35/36 frames match, only 4934 differs** (10932px/
+28.47%, matching the brief's own cited magnitude) — both neighbors
+(4933, 4935) match exactly, confirming the residual is real and precisely
+this one tick. The app's own internal transition
+(`tools/compare/scratch/redraw-extremum/app_dump_4934.ts`, rendering the
+app alone with no oracle) shows the app's message-box background flips
+from the settled-menu content to the cleared/blank message window **one
+tick early**, at 4934 instead of 4935 — sample pixel `(16,118)`:
+oracle stays `[255,255,255]` through 4934 then becomes teal
+`[107,165,165]` at 4935; the app is already teal at 4934.
+
+**RAM probe** (`tools/probe/specs/turn{1,2,3,4,5}-{kickoff,endeavor,
+doubleteam}-textgate-watch.json`, one per turn's own kickoff-text-gate
+window, watching `gBattlerControllerFuncs[1]`/`gBattleControllerExecFlags`/
+`gBattle_BG0_Y` — the RAM signature of `OpponentHandlePrintString` firing,
+`reference/pokeemerald/src/battle_controller_opponent.c:1520-1530`, which
+resets `gBattle_BG0_Y` to 0 and installs `CompleteOnInactiveTextPrinter`).
+Twice-run byte-identical for all five (`diff`, 0 bytes each). Outputs:
+`src/data/gen/turn{1,2,3,4,5}-{kickoff,endeavor,doubleteam}-textgate-
+watch-probe.json`. Finding, verified by
+`tools/probe/verify-turn4-kickoff-textgate-rule.py`:
+
+| turn | move (Grovyle's) | RAM printstring tick | pixel-visible tick (RAM+1) |
+|---|---|---|---|
+| 1 | DOUBLE_TEAM | pressTick+9 (1928) | pressTick+10 (1929) |
+| 2 | ENDEAVOR | pressTick+8 (2953) | pressTick+9 (2954) |
+| 3 | ENDEAVOR | pressTick+8 (3899) | pressTick+9 (3900) |
+| 4 | DOUBLE_TEAM | pressTick+9 (**4934**) | pressTick+10 (**4935**) |
+| 5 | ENDEAVOR | pressTick+8 (5967) | pressTick+9 (5968) |
+
+The RAM-to-pixel render lag is a **uniform +1 tick in all five cases** —
+the same "RAM flip, then a short bookkeeping delay before the visible
+hard-cut" pattern this dossier already documents everywhere else, not a
+new mechanism. What varies by turn is purely **which RAM tick
+`OpponentHandlePrintString` itself fires at**, and that tracks the MOVE
+(DOUBLE_TEAM's own battle-script preamble is one tick longer than
+ENDEAVOR's — not traced to the exact `.s` script command this session,
+but the RAM evidence is unambiguous and consistent across both of
+DOUBLE_TEAM's own two instances and all three of ENDEAVOR's own), **not
+the turn number and not the reopen count**. Turn 4 is a reopened window
+exactly like turns 2/3/5, yet it needs DOUBLE_TEAM's own (turn-1-style)
+delay, not ENDEAVOR's.
+
+Both pixel-visible constants already exist and are already individually
+correct: `turnKickoffTextStartTick` (delay 10, `src/engine/battleMenu.ts`)
+for DOUBLE_TEAM, `turn2KickoffTextStartTick` (delay 9, `= turnKickoffText
+StartTick(pressTick) - 1`) for ENDEAVOR. **The bug is which one
+`drawFightSubmenuWindow`'s own `textStart` gate
+(`src/engine/battleScene.ts` ~line 3647) selects**:
+
+```ts
+const textStart = sm.cursor === 2 || turn2Resolved
+  ? turn2KickoffTextStartTick(pressTick)
+  : turnKickoffTextStartTick(pressTick);
+```
+
+`turn2Resolved` is a **monotonic** "has turn 2 happened" flag — true for
+turns 3, 4, AND 5, not just turn 2/3's own ENDEAVOR windows. It was written
+correctly for turn 3 (ENDEAVOR, wants delay 9) but never revisited when
+slice I added turn 4 (DOUBLE_TEAM, wants delay 10) — turn 5 happens to
+still want delay 9 (ENDEAVOR again), so only turn 4's own window is wrong,
+for exactly the one tick where the two candidate delays disagree
+(`pressTick+9`, i.e. 4934 — for `t<4934` both formulas agree "not yet",
+for `t>=4935` both agree "yes", so a single tick is the ENTIRE blast
+radius by construction).
+
+**Corrective rule** (not applied — out of scope this session):
+
+```ts
+const inTurn4DoubleTeamWindow = turn3Resolved && !turn4Resolved;
+const textStart = (sm.cursor === 2 || turn2Resolved) && !inTurn4DoubleTeamWindow
+  ? turn2KickoffTextStartTick(pressTick)
+  : turnKickoffTextStartTick(pressTick);
+```
+
+**Verified computationally**, not just asserted
+(`tools/probe/verify-turn4-kickoff-textgate-rule.py`, reruns cleanly): the
+CURRENT gate is wrong for exactly turn 4's own window and correct for
+turns 1/2/3/5; the PROPOSED gate is correct for all five, and its own
+formula-selection output is **provably unchanged** for turns 1/2/3/5 (only
+turn 4's own case flips) — the fix's blast radius is exactly the single
+named tick, by the same "half-open interval, both ends already agree"
+argument above, not merely by testing.
+
+**Predicted blast radius of the fix**: `turn4-doubleteam.json` gains tick
+4934 back into `captureFrames` at 0 diff (249→250 captures); no other
+committed trace is touched (the condition change is inert everywhere else,
+confirmed above).
+
+### Tick 5927: MECHANISM FOUND — a one-tick-early phase-shift application at
+the reopen's own dispatch switch, not a hardware quirk and not a uniform
+composition offset
+
+**RAM probe** (`tools/probe/specs/turn5-menu-bouncer-raw.json`, the exact
+multi-hop `path` syntax `turn3-menu-bouncer-raw.json` established,
+re-anchored to turn 5's own reopen window via `turn5-menu.json`'s own
+committed button script verbatim, `startTick=5900`; addressed dynamically
+via `gBattlerSpriteIds[0]`/`gHealthboxSpriteIds[0]` rather than hardcoded
+sprite-slot numbers, since §22 already showed slot occupancy can churn
+turn to turn — confirmed unchanged from turn 3's own `{6}`/`{0}` this
+session, no churn here). Twice-run byte-identical (`diff`, 0 bytes).
+Output: `src/data/gen/turn5-menu-bouncer-raw-probe.json`.
+
+A genuine, novel RAM fact turned up first
+(`tools/probe/verify-turn5-menu-bounce-rule.py`, checks 0-2): the
+invisible bouncer sprite's own raw `sSinIndex` **stalls for two ticks**,
+5927→5928 and 5928→5929 (delta 0 instead of the usual `+7`), both regions
+(onix/`BOUNCE_MON` and healthbox/`BOUNCE_HEALTHBOX`) — the first non-`+7`
+step this dossier has ever found (Family B's own turn-3 probe found zero,
+anywhere). The read-before-increment sampling convention
+(`y2(T)==bounceSin(sinIndex(T-1))+amplitude`) holds exactly through the
+stall, zero exceptions — not a sampling artifact.
+
+**This stall turned out to be a real but NON-causal finding for this
+specific residual** — a trap this session fell into and backed out of
+honestly rather than silently discarding. Ground truth
+(`npm run compare` on a dense 5900-5967 window,
+`tools/compare/scratch/redraw-extremum/out-5927-appvsoracle/`): **only
+tick 5927 mismatches (769px/2.00%) in the entire window** — every other
+tick, including 5928 and 5929 (themselves inside the stall) is exact. A
+raw pixel autopsy of the same span
+(`tools/compare/scratch/redraw-extremum/autopsy_5927.mjs`, oracle-only)
+shows real hardware is **byte-identical across ALL of 5926-5931** (sha
+`24418c54aeb7` for all six ticks) — the stall is entirely invisible in the
+pixel domain here, because both the stalled and unstalled `sSinIndex`
+values land in the same sine-table plateau (amplitude 1, `y2` only ever
+0/±1 in this window). A naive "engine model vs real, search for a uniform
+tick-shift `k`" sweep (mixing `turn5SubmenuBounceTick` into ticks BEFORE
+the reopen, where it is not actually the operative formula) produced
+spurious extra "mismatches" at 5926 and 5964+ that ground truth disproves
+— flagged and removed from the committed script rather than left in as a
+false lead (see that script's own trimmed verdict).
+
+**The actual mechanism**, found by reading the dispatch itself
+(`src/engine/core.ts`, `src/engine/battleScene.ts`): `core.ts` sets
+`turn4Resolved = true` and calls `openFightSubmenu` in the **same tick**
+`newKeys.has("A")` registers the reopen press (5927) — and
+`drawActionMenuIdleWindow`'s own bounce-tick selection
+(`battleScene.ts:3596-3604`) is a plain `turn4Resolved ? turn5SubmenuBounceTick(t)
+: ...` ternary with no further gating, so the **same render call for tick
+5927** already applies `turn5SubmenuBounceTick`'s own
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`(2)-tick phase SUBTRACTION relative to the
+formula active one tick earlier
+(`turn4RockSlideResettledBounceTick`, unshifted). This is an
+**instantaneous 2-tick backward jump in the modeled sine phase**, evaluated
+for the first time at the press's own registering tick. Real hardware's own
+invisible bouncer makes no such jump — RAM-confirmed, its `sSinIndex`
+steps normally (`+7`) straight through the 5926→5927 transition (the stall
+above only starts one step later). Computed directly
+(`tools/probe/verify-turn5-reopen-switch-rule.py`, using the committed
+sine table + both candidate formulas against the real probed `onixY2`):
+
+| tick | real (probed `onixY2(t-1)`) | UNSHIFTED formula | SHIFTED formula (current code) |
+|---|---|---|---|
+| 5926 | 1 | 1 (match) | 0 (would mismatch — not reached, still pre-reopen) |
+| **5927** | **1** | **1 (MATCH)** | **0 (MISMATCH — the named residual)** |
+| 5928 | 1 | 1 | 1 (match) |
+| 5929-5959 | (varies) | — | matches at every probed tick (32/32) |
+
+The unshifted formula, evaluated one tick "too long," reproduces the exact
+real value at 5927; the shifted formula (what the current code actually
+uses starting that same tick) does not, and the shifted formula is already
+exactly right from 5928 onward with zero exceptions through the confirm
+press (5959) — **including the three ticks (5936, 5945, 5954) the brief's
+own already-tried "uniform -1 shift" experiment broke**. That prior
+experiment failed for exactly this reason: it perturbed the ALREADY-correct
+5928+ span to chase a defect that is local to the single switch-tick, not a
+property of the formula's steady-state slope.
+
+**Corrective rule** (not applied — out of scope this session): delay the
+dispatch's own switch from the unshifted to the `FIGHT_SUBMENU_OPEN_
+BOUNCE_SHIFT`-corrected formula by one render tick — i.e. keep using
+`turn4RockSlideResettledBounceTick(t)` through `t == pressTick` (5927)
+itself, switching to `turn5SubmenuBounceTick(t)` only from `t ==
+pressTick + 1` (5928) onward. Because this is a single-tick-scoped
+carve-out (it can only change what tick 5927 itself renders), it provably
+cannot disturb 5936/5945/5954 or any other currently-passing tick —
+confirmed above rather than merely asserted (the shifted formula already
+matches ground truth at every one of 5928-5959).
+
+**Predicted blast radius of the fix**: `turn5-menu.json` gains tick 5927
+back into `captureFrames` at 0 diff (41→42 captures); no other trace
+touched. **Open generalization question, flagged not chased** (this
+session's own budget): turns 2/3/4's own reopens set their own
+`turnNResolved` flag in the same same-tick-as-press pattern (`core.ts`'s
+`turn1Resolved`/`turn2Resolved`/`turn3Resolved` branches share this exact
+shape) — whether they carry the SAME latent one-tick vulnerability, merely
+invisible because their own specific press-tick numbers don't happen to
+land on a sine-table plateau boundary at the switch instant (the same
+"lucky vs unlucky" framing Family B already established for a different
+composition), was not tested this session. A future session could check by
+running the same dynamic multi-hop probe at turns 2/3/4's own reopen
+registering ticks.
+
+### Summary for the supervisor
+
+Both ticks are **real, distinct, non-hardware mechanisms**, joining Family
+A/B as further evidence against the "redraw extremum" label as a genuine
+class — it was always just "single ticks nobody had root-caused yet."
+
+- **Tick 4934: a move-family mis-selection in a shared gate**, one
+  half-open-interval tick wide by construction. Fix: two-line condition
+  change in `battleScene.ts`'s `textStart` gate.
+- **Tick 5927: a one-render-tick-early phase-shift application at a
+  same-tick dispatch switch.** Fix: delay `turn5SubmenuBounceTick`'s own
+  first use by one tick relative to `turn4Resolved` flipping true.
+
+Neither fix is applied (RAM/oracle probing only, no `src/engine/` changes
+per this session's own scope). Both are verified computationally against
+every other currently-green tick in their own windows, not just the named
+residual — `tools/probe/verify-turn4-kickoff-textgate-rule.py` and
+`tools/probe/verify-turn5-reopen-switch-rule.py`, both rerunnable with
+plain `python3`, no mGBA needed.
+
+### Verification
+
+`npm test`/`npm run build` unaffected (`docs/`, `tools/probe/`,
+`tools/compare/scratch/`, `src/data/gen/` only — no `src/engine/` file
+touched, confirmed by `git status` before commit). No `tools/compare/`
+trace file changed; `turn4-doubleteam.json` stays **249/249**,
+`turn5-menu.json` stays **41/41**, both with their named single-tick
+exclusion still in place (the fix is documented and verified here, not
+applied). New: `tools/probe/specs/turn{1,2,3,4,5}-{kickoff,endeavor,
+doubleteam}-textgate-watch.json`, `tools/probe/specs/turn5-menu-bouncer-
+raw.json`, all twice-run byte-identical; `tools/probe/verify-turn4-
+kickoff-textgate-rule.py`, `tools/probe/verify-turn5-menu-bounce-rule.py`,
+`tools/probe/verify-turn5-reopen-switch-rule.py`; `tools/compare/scratch/
+redraw-extremum/{autopsy_4934.mjs,app_dump_4934.ts,autopsy_5927.mjs}`.
