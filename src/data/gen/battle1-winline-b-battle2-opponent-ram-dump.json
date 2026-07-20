@@ -1,0 +1,133 @@
+{
+  "source": "tools/compare/traces-groundtruth/battle1-winline-b-swap.json (committed)",
+  "method": "tools/probe/dump-battler-full.py at tick 33030 (battle 2's first action menu, fully settled)",
+  "battlerSnapshot": {
+    "33030": {
+      "battler0": {
+        "species": 95,
+        "attack": 51,
+        "defense": 187,
+        "speed": 76,
+        "spAttack": 36,
+        "spDefense": 72,
+        "moves": [
+          157,
+          20,
+          225,
+          201
+        ],
+        "ability": 5,
+        "types": [
+          5,
+          4
+        ],
+        "pp": [
+          10,
+          20,
+          20,
+          10
+        ],
+        "hp": 117,
+        "level": 50,
+        "maxHP": 117,
+        "item": 142,
+        "status1": 0,
+        "status2": 0
+      },
+      "battler1": {
+        "species": 140,
+        "attack": 118,
+        "defense": 96,
+        "speed": 61,
+        "spAttack": 93,
+        "spDefense": 51,
+        "moves": [
+          72,
+          246,
+          28,
+          182
+        ],
+        "ability": 4,
+        "types": [
+          5,
+          11
+        ],
+        "pp": [
+          10,
+          5,
+          15,
+          10
+        ],
+        "hp": 91,
+        "level": 50,
+        "maxHP": 91,
+        "item": 142,
+        "status1": 0,
+        "status2": 0
+      },
+      "battler2": {
+        "species": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 0,
+        "spDefense": 0,
+        "moves": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "ability": 0,
+        "types": [
+          0,
+          0
+        ],
+        "pp": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "hp": 0,
+        "level": 0,
+        "maxHP": 0,
+        "item": 0,
+        "status1": 0,
+        "status2": 0
+      },
+      "battler3": {
+        "species": 0,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 0,
+        "spDefense": 0,
+        "moves": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "ability": 0,
+        "types": [
+          0,
+          0
+        ],
+        "pp": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "hp": 0,
+        "level": 0,
+        "maxHP": 0,
+        "item": 0,
+        "status1": 0,
+        "status2": 0
+      }
+    }
+  },
+  "noSwapEvidence": "battler0 at tick 33030 is species 95 (ONIX) at full HP 117/117 -- the same mon/party-slot-0 as pre-battle-1 (see docs/battle-turn-notes.md earlier sections), i.e. declining the swap offer left the player's rental lineup and ordering unchanged; the attendant's free between-round heal (\"Let us restore your POKeMON!\") restored ONIX/MAGBY/BAYLEEF to full HP ahead of this snapshot."
+}

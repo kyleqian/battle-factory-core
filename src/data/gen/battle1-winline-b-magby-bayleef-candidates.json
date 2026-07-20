@@ -1,0 +1,198 @@
+{
+  "source": "exploratory EmeraldOracle probes (not the committed trace) -- one branch sends out MAGBY, the other BAYLEEF, from the identical battle1-winline-a-murkrow.json prefix (tick 19990, ONIX just fainted to Murkrow). Used to compare both candidates' full battle data before committing to MAGBY in battle1-winline-b.json.",
+  "method": "tools/probe/dump-battler-full.py's own read_battler() logic, run inline against a live EmeraldOracle session (no snapshot/restore -- two independent full replays from the anchor, one per candidate)",
+  "magby": {
+    "tag": "magby",
+    "slot": 1,
+    "log": [
+      {
+        "label": "prefix_end",
+        "tick": 19990,
+        "mainFunc": 134469657,
+        "partyIdx0": 0
+      },
+      {
+        "label": "dismissed_settled",
+        "tick": 20192,
+        "mainFunc": 134471705,
+        "partyIdx0": 0
+      },
+      {
+        "label": "cursor_on_slot",
+        "tick": 20209,
+        "mainFunc": 134471705,
+        "partyIdx0": 0
+      },
+      {
+        "label": "mon_selected_submenu",
+        "tick": 20251,
+        "mainFunc": 134471705,
+        "partyIdx0": 0
+      },
+      {
+        "label": "sendout_settled",
+        "tick": 20753,
+        "mainFunc": 134463093,
+        "partyIdx0": 1
+      }
+    ],
+    "battlers": {
+      "battler0": {
+        "species": 240,
+        "attack": 81,
+        "defense": 43,
+        "speed": 89,
+        "spAttack": 108,
+        "spDefense": 61,
+        "moves": [
+          7,
+          108,
+          109,
+          123
+        ],
+        "ability": 49,
+        "types": [
+          10,
+          10
+        ],
+        "pp": [
+          15,
+          20,
+          10,
+          20
+        ],
+        "hp": 138,
+        "level": 50,
+        "maxHP": 138,
+        "item": 221
+      },
+      "battler1": {
+        "species": 198,
+        "attack": 91,
+        "defense": 69,
+        "speed": 97,
+        "spAttack": 91,
+        "spDefense": 69,
+        "moves": [
+          185,
+          19,
+          259,
+          269
+        ],
+        "ability": 15,
+        "types": [
+          17,
+          2
+        ],
+        "pp": [
+          20,
+          14,
+          15,
+          20
+        ],
+        "hp": 142,
+        "level": 50,
+        "maxHP": 142,
+        "item": 221
+      }
+    },
+    "finalTick": 20753
+  },
+  "bayleef": {
+    "tag": "bayleef",
+    "slot": 2,
+    "log": [
+      {
+        "label": "prefix_end",
+        "tick": 19990,
+        "mainFunc": 134469657,
+        "partyIdx0": 0
+      },
+      {
+        "label": "dismissed_settled",
+        "tick": 20192,
+        "mainFunc": 134471705,
+        "partyIdx0": 0
+      },
+      {
+        "label": "cursor_on_slot",
+        "tick": 20226,
+        "mainFunc": 134471705,
+        "partyIdx0": 0
+      },
+      {
+        "label": "mon_selected_submenu",
+        "tick": 20268,
+        "mainFunc": 134471705,
+        "partyIdx0": 0
+      },
+      {
+        "label": "sendout_settled",
+        "tick": 20770,
+        "mainFunc": 134463093,
+        "partyIdx0": 2
+      }
+    ],
+    "battlers": {
+      "battler0": {
+        "species": 153,
+        "attack": 68,
+        "defense": 86,
+        "speed": 66,
+        "spAttack": 101,
+        "spDefense": 86,
+        "moves": [
+          75,
+          92,
+          219,
+          113
+        ],
+        "ability": 65,
+        "types": [
+          12,
+          12
+        ],
+        "pp": [
+          25,
+          10,
+          25,
+          30
+        ],
+        "hp": 153,
+        "level": 50,
+        "maxHP": 153,
+        "item": 179
+      },
+      "battler1": {
+        "species": 198,
+        "attack": 91,
+        "defense": 69,
+        "speed": 97,
+        "spAttack": 91,
+        "spDefense": 69,
+        "moves": [
+          185,
+          19,
+          259,
+          269
+        ],
+        "ability": 15,
+        "types": [
+          17,
+          2
+        ],
+        "pp": [
+          20,
+          14,
+          15,
+          20
+        ],
+        "hp": 142,
+        "level": 50,
+        "maxHP": 142,
+        "item": 221
+      }
+    },
+    "finalTick": 20770
+  }
+}
