@@ -96,6 +96,7 @@ import {
   openFightSubmenu,
   ROCK_SLIDE_MENU_REDRAW_DELAY,
 } from "./battleMenu.ts";
+import { activeMonMoveset } from "./battleSetup.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -182,7 +183,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn1Resolved = battleScene.turn1Resolved;
     if (fightSubmenu.openElapsed === null) {
       if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
-        fightSubmenu = openFightSubmenu(battleScene.elapsed + 1);
+        // S8 engine dependency (docs/battle-menu-notes.md §13c): the FIGHT
+        // submenu's moveset is derived fresh from the draft screen's own
+        // confirmed rental picks (`draftScreen` is untouched by this branch,
+        // so this is stable/idempotent across the whole battle) instead of
+        // a battle-1-fixed literal.
+        fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
       }
     } else if (
       fightSubmenu.closeElapsed === null &&
@@ -226,7 +232,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // ground truth: turn 1's own rest was also slot 0 - see
       // `openFightSubmenu`'s own doc for the caveat this doesn't generalize
       // cursor persistence beyond that coincidence).
-      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1);
+      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
       turn1Resolved = true;
     }
     battleScene = { ...battleScene, fightSubmenu, turn1Resolved };

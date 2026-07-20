@@ -26,6 +26,7 @@ import {
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
 import { CLOSED_FIGHT_SUBMENU_STATE, confirmFightMove, openFightSubmenu } from "../src/engine/battleMenu.ts";
+import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
 import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import sendOutHealthboxOpponentAsset from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
@@ -50,7 +51,14 @@ function pixelAtSentOut(t: number, x: number, y: number): [number, number, numbe
 
 /** turn 2's own real `pressTick` (`battleMenu.test.ts`'s own `pressTick = 2945`, `TURN2_KICKOFF`/ENDEAVOR fixture) - the FIGHT submenu confirmed on cursor slot 2. */
 const TURN2_PRESS_TICK = 2945;
-const TURN2_FIGHT_SUBMENU_STATE = { openElapsed: 0, cursor: 2 as const, displayCursor: 2 as const, closeElapsed: null, confirmElapsed: TURN2_PRESS_TICK - TICK0 };
+const TURN2_FIGHT_SUBMENU_STATE = {
+  openElapsed: 0,
+  cursor: 2 as const,
+  displayCursor: 2 as const,
+  closeElapsed: null,
+  confirmElapsed: TURN2_PRESS_TICK - TICK0,
+  activeMonMoveset: rentalMoveset("ONIX"),
+};
 /** Same as `pixelAtSentOut`, but with turn 2's own FIGHT submenu already confirmed on ENDEAVOR (cursor slot 2) - the state `drawTurn2KickoffText`/`drawEndeavorSquish` render under (S7 slice E1d-retry, §15b). */
 function pixelAtTurn2(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -804,7 +812,7 @@ describe("battleScene: S7 slice B - DOUBLE_TEAM clone vs. opponent healthbox z-o
     const expected = composed.pixels[ly * composed.width + lx]!;
     expect(expected).not.toBeNull();
 
-    const submenu = confirmFightMove(openFightSubmenu(0), 879); // pressTick = TICK0+879 = 1919
+    const submenu = confirmFightMove(openFightSubmenu(0, rentalMoveset("ONIX")), 879); // pressTick = TICK0+879 = 1919
     const fb = new Uint8Array(240 * 160 * 4);
     renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false });
     const o = (25 * 240 + 104) * 4;
@@ -823,7 +831,7 @@ describe("battleScene: S7 slice B - stat-change banner as a real scrolling BG1 (
   // directly (`turn1-cloneanim.json`, now 230/230).
   it("renders the real scrolling arrow tilemap, not a flat color, at two different points in the banner (ramp-up tick 2140, hold tick 2160)", () => {
     const GROVYLE_CORNER = { x: 144, y: 12 };
-    const submenu = confirmFightMove(openFightSubmenu(0), 879); // pressTick = 1919
+    const submenu = confirmFightMove(openFightSubmenu(0, rentalMoveset("ONIX")), 879); // pressTick = 1919
     const x = GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x;
     const y = GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y;
     const o = (y * 240 + x) * 4;
@@ -859,7 +867,7 @@ describe("battleScene: S7 slice C - Rock Slide's shaken BG3 vs. the player healt
   // so it comes in contiguous patches, never a lone cell surrounded by
   // content) - was 250/256 on turn1-rockslide.json, now 256/256.
   it("draws the always-opaque healthbox highlight at (173,92) on both an unshifted and a BG3_Y=-7 shaken tick", () => {
-    const submenu = confirmFightMove(openFightSubmenu(0), 879); // pressTick = TICK0+879 = 1919
+    const submenu = confirmFightMove(openFightSubmenu(0, rentalMoveset("ONIX")), 879); // pressTick = TICK0+879 = 1919
     const x = 173;
     const y = 92;
     const o = (y * 240 + x) * 4;

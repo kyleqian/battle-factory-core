@@ -25,7 +25,11 @@ import {
 } from "../src/engine/battleMenu.ts";
 import { TICK0 as SCENE_TICK0 } from "../src/engine/battleScene.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
+import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import type { GbaButton } from "../src/input.ts";
+
+/** Onix's real moveset (`battleSetup.ts`'s own rental-pool lookup) - every `openFightSubmenu` call below needs this now that it threads the S8 `activeMonMoveset` plumbing (docs/battle-menu-notes.md §13c) through explicitly, rather than each test re-deriving it from a fully-played draft screen. */
+const ONIX_MOVESET = rentalMoveset("ONIX");
 
 describe("battleMenu: moveFightCursor (HandleInputChooseMove's DPAD guards, §11 finding 2)", () => {
   it("RIGHT/DOWN/LEFT/UP loop 0(ROCK_SLIDE)->1(BIND)->3(SANDSTORM)->2(DRAGON_BREATH)->0(ROCK_SLIDE), matching the nav groundtruth trace exactly", () => {
@@ -64,17 +68,24 @@ describe("battleMenu: moveFightCursor (HandleInputChooseMove's DPAD guards, §11
 
 describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
   it("CLOSED_FIGHT_SUBMENU_STATE starts unopened at ROCK_SLIDE", () => {
-    expect(CLOSED_FIGHT_SUBMENU_STATE).toEqual({ openElapsed: null, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null });
+    expect(CLOSED_FIGHT_SUBMENU_STATE).toEqual({
+      openElapsed: null,
+      cursor: 0,
+      displayCursor: 0,
+      closeElapsed: null,
+      confirmElapsed: null,
+      activeMonMoveset: ONIX_MOVESET,
+    });
   });
 
   it("openFightSubmenu sets openElapsed and resets cursor/displayCursor to ROCK_SLIDE", () => {
-    const state = openFightSubmenu(847);
-    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null });
+    const state = openFightSubmenu(847, ONIX_MOVESET);
+    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET });
   });
 
   it("closeFightSubmenu is a no-op if not open, or already closing", () => {
     expect(closeFightSubmenu(CLOSED_FIGHT_SUBMENU_STATE, 100)).toBe(CLOSED_FIGHT_SUBMENU_STATE);
-    const opened = openFightSubmenu(847);
+    const opened = openFightSubmenu(847, ONIX_MOVESET);
     const closing = closeFightSubmenu(opened, 1007);
     expect(closing.closeElapsed).toBe(1007);
     expect(closeFightSubmenu(closing, 2000)).toBe(closing); // already closing - unchanged
@@ -82,7 +93,7 @@ describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
 
   it("advanceFightSubmenuDisplay lags displayCursor by exactly one call behind cursor, and is a no-op while closed", () => {
     expect(advanceFightSubmenuDisplay(CLOSED_FIGHT_SUBMENU_STATE)).toBe(CLOSED_FIGHT_SUBMENU_STATE);
-    let state: FightSubmenuState = { ...openFightSubmenu(847), cursor: 1 }; // simulate a same-tick RIGHT press: cursor updated, displayCursor not yet
+    let state: FightSubmenuState = { ...openFightSubmenu(847, ONIX_MOVESET), cursor: 1 }; // simulate a same-tick RIGHT press: cursor updated, displayCursor not yet
     expect(state.displayCursor).toBe(0);
     state = advanceFightSubmenuDisplay(state); // next tick, no new input: catches up
     expect(state.displayCursor).toBe(1);
@@ -95,9 +106,16 @@ describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
   });
 });
 
-/** A synthetic EngineState with `battleScene` already in the settled action-menu idle window, `elapsed` chosen so the FIRST tick() call below lands on trace tick `firstTickAbsolute` (see the `+1` convention noted in core.ts's own fightSubmenu block). Other fields are inert pass-throughs for this branch of tick() (verified by reading core.ts: the battleScene branch returns early using only battleScene/keyRepeat). */
+/**
+ * A synthetic EngineState with `battleScene` already in the settled action-menu idle window, `elapsed` chosen so the FIRST tick() call below lands on trace tick `firstTickAbsolute` (see the `+1` convention noted in core.ts's own fightSubmenu block). Other fields are inert pass-throughs for this branch of tick() (verified by reading core.ts: the battleScene branch returns early using only battleScene/keyRepeat) - EXCEPT `draftScreen`, which core.ts's `openFightSubmenu` call sites now read (S8 engine dependency, docs/battle-menu-notes.md §13c): `selectedIds: [1, 2, 3, 0, 0, 0]` reproduces the real anchor trace's own fully-confirmed ONIX/MAGBY/BAYLEEF pick order (the same shape `tests/confirmDecline.test.ts` pins for a real played-through draft screen), so `chosenMonSpecies` resolves to Onix's lead exactly as every committed trace's own real button script does.
+ */
 function stateAtTick(firstTickAbsolute: number): EngineState {
-  return { ...createInitialState(), battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false } };
+  const initial = createInitialState();
+  return {
+    ...initial,
+    draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false },
+  };
 }
 
 function press(state: EngineState, buttons: GbaButton[]): EngineState {
@@ -222,7 +240,7 @@ describe("battleMenu: turn kickoff text (S7 slice A, docs/battle-turn-notes.md �
 
   it("confirmFightMove is idempotent and a no-op unless the submenu is open, not closing, and not already confirmed", () => {
     expect(confirmFightMove(CLOSED_FIGHT_SUBMENU_STATE, 100)).toBe(CLOSED_FIGHT_SUBMENU_STATE); // not open
-    const opened = openFightSubmenu(847);
+    const opened = openFightSubmenu(847, ONIX_MOVESET);
     const confirmed = confirmFightMove(opened, 879);
     expect(confirmed.confirmElapsed).toBe(879);
     expect(confirmFightMove(confirmed, 2000)).toBe(confirmed); // already confirmed - unchanged

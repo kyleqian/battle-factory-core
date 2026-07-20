@@ -21,6 +21,8 @@
 // blank-box frame), 1564-1571 print the remaining 8 characters 1/tick
 // including a pixel-silent-but-charged space at 1566, 1572+ holds static.
 
+import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
+
 /** `sText_GoPkmn` resolved for this save's rental pool (single line, fits `B_WIN_MSG`'s line 1 - never wraps to line 2). */
 export const GO_TEXT = "Go! ONIX!";
 
@@ -858,7 +860,20 @@ export interface FightSubmenuState {
   closeElapsed: number | null;
   /** `elapsed` of the A-press that confirmed the highlighted move (turn kickoff); `null` until confirmed. Mutually exclusive with `closeElapsed` (B and A both hand off to `HandleInputChooseMove`'s caller, but only one branch fires per press - see `confirmFightMove`). */
   confirmElapsed: number | null;
+  /**
+   * S8 engine dependency (docs/battle-menu-notes.md §13c): the PLAYER's
+   * active mon's real moveset (`battleSetup.ts`'s `activeMonMoveset`,
+   * sourced from the draft screen's own confirmed rental picks) - set once
+   * by `openFightSubmenu` and carried unchanged through every other
+   * transition below (`closeFightSubmenu`/`confirmFightMove`/
+   * `advanceFightSubmenuDisplay` all spread `...state`), the same "created
+   * directly, then passed through" idiom every other field here uses.
+   */
+  activeMonMoveset: ActiveMonMoveset;
 }
+
+/** Never actually rendered (the FIGHT submenu's own text only draws once `openElapsed` is set - see `drawFightSubmenuChrome`) - a placeholder so this state stays a plain, always-fully-populated object like every other field here. `openFightSubmenu` always sets the real value. */
+const PLACEHOLDER_MOVESET: ActiveMonMoveset = rentalMoveset("ONIX");
 
 export const CLOSED_FIGHT_SUBMENU_STATE: FightSubmenuState = {
   openElapsed: null,
@@ -866,11 +881,12 @@ export const CLOSED_FIGHT_SUBMENU_STATE: FightSubmenuState = {
   displayCursor: 0,
   closeElapsed: null,
   confirmElapsed: null,
+  activeMonMoveset: PLACEHOLDER_MOVESET,
 };
 
-/** A-press on the settled action menu (FIGHT already highlighted - the only case this slice models, §11's own scope) opens the submenu fresh at ROCK_SLIDE (slot 0, `gMoveSelectionCursor`'s own zero-init; this slice never re-opens after a close, so a persisted nonzero cursor from a prior open is out of scope). */
-export function openFightSubmenu(elapsed: number): FightSubmenuState {
-  return { openElapsed: elapsed, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null };
+/** A-press on the settled action menu (FIGHT already highlighted - the only case this slice models, §11's own scope) opens the submenu fresh at ROCK_SLIDE (slot 0, `gMoveSelectionCursor`'s own zero-init; this slice never re-opens after a close, so a persisted nonzero cursor from a prior open is out of scope). `activeMonMoveset` is threaded in by the caller (core.ts), derived fresh from the draft screen's own confirmed picks each time - S8 engine dependency, see `battleSetup.ts`. */
+export function openFightSubmenu(elapsed: number, activeMonMoveset: ActiveMonMoveset): FightSubmenuState {
+  return { openElapsed: elapsed, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset };
 }
 
 /** B-press while the submenu is open and not already closing - starts the close DMA-wait. No-op (returns `state` unchanged) if not open or already closing, so callers can call this unconditionally on a B-press. */
@@ -1832,6 +1848,24 @@ export function turn2KickoffBounceTick(t: number, pressTick: number): number {
  * redraw this turn (confirmed against a real oracle capture, not assumed -
  * see docs/battle-menu-notes.md §13).
  */
+/**
+ * ISSUES #20's ONLY previously-live PP change (ROCK_SLIDE spending 1 PP
+ * once turn 1 resolves, docs/battle-menu-notes.md §13/§13b), now generalized
+ * to whatever `activeMonMoveset` the caller supplies - `turn1Resolved` still
+ * only ever decrements SLOT 0 (this engine's own scripted turn-1 choice is
+ * always slot 0, `core.ts`'s own confirm gate), not "whichever move was
+ * actually confirmed" in general. No other move's PP-after-use has been
+ * oracled for this run, so generalizing further would fake data rather than
+ * model something verified - flagged here, not silently assumed, per this
+ * run's no-silent-exclusion policy. Every existing trace only ever exercises
+ * slot 0 as turn 1's real choice, so this reproduces every committed
+ * capture exactly.
+ */
+export function currentPPForActiveMon(moveset: ActiveMonMoveset, turn1Resolved: boolean): readonly [number, number, number, number] {
+  const [a, b, c, d] = moveset.maxPP;
+  return turn1Resolved ? [a - 1, b, c, d] : [a, b, c, d];
+}
+
 export function getCurrentPPToMaxPPState(currentPP: number, maxPP: number): 0 | 1 | 2 | 3 {
   if (maxPP === currentPP) return 3;
   if (maxPP <= 2) return currentPP > 1 ? 3 : ((2 - currentPP) as 0 | 1 | 2);
