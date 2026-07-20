@@ -1985,3 +1985,315 @@ in one committed trace.
    verified trace — nobody has actually found or tested an input sequence
    that avoids the 2 real misses.
 
+## 15. A faster, RNG-shifted winning line to Pidgeotto's KO, Murkrow's first RAM ground truth, and the WIN still doesn't fit the cap (S8 worktree lane, oracle scout — no engine code)
+
+**Correction to this session's own brief, stated up front**: the brief cited
+"Pidgeotto sits at 1/143 HP after turn 5." Both numbers are off — 143 is
+**Grovyle's** max HP (§12), not Pidgeotto's (**156**, RAM-confirmed below and
+in §14's own table), and the 1-HP state is reached after **turn 12**, not
+turn 5 (turn 5 is when *Grovyle* faints, per §13). Likely a telephone-game
+merge of two separate facts from §12-§14. Re-verified from the committed RAM
+dumps before doing anything else this session (`battle1-victory-ram-dump.json`'s
+own `battlerSnapshots`): Pidgeotto is 156/156 at tick 7312 and 1/156 at every
+sampled tick from 14962 through the §14-addendum trace's own end.
+
+**Scope**: this session had two deliverables — (1) test whether idle-timing
+is a lever on RNG outcomes (it is not, confirmed cheaply), and (2) use the
+real lever (move-choice sequence) to search for a faster verified line past
+Pidgeotto's fight, then scout Murkrow. Both done. **Headline result: found
+and verified a line that KOs Pidgeotto at tick 15887 — under the cap with
+2278 ticks to spare to a fully-settled menu against a freshly-identified
+Murkrow — a dramatic improvement over §14's verified line (which never KO'd
+Pidgeotto at all in 19634 ticks). But Onix enters that Murkrow fight at 4/117
+HP as an unavoidable cost of the moves it took to fell Pidgeotto, and
+Murkrow (Lv50, Spd 97 > Onix's 76, movepool includes an always-hits STAB
+move) faints it 2 turns later without taking a single point of damage back —
+verified through tick 19990, 10 ticks under the cap, frozen on Onix's own
+un-dismissed faint text. The answer to S8's blocking question is still NO
+for every line anyone has actually played move-by-move, but the bottleneck
+has moved: it is no longer "can't beat Pidgeotto in time," it is "Onix
+arrives at Murkrow too wounded to survive the exchange."**
+
+Committed: `tools/compare/traces-groundtruth/battle1-winline-a.json`
+(17722 frames, byte-identical anchor-relative prefix to
+`battle1-grovyle-faint.json`'s own 7312-frame prefix, then 8 new turns,
+256 `captureFrames` dense on the KO tick/switch-in/settle) and
+`battle1-winline-a-murkrow.json` (19990 frames, extends `battle1-winline-a.json`'s
+own script verbatim by 2 more turns, 238 `captureFrames` dense on Murkrow's
+FLY charge/strike). `src/data/gen/battle1-winline-a-ram-dump.json` (10411
+per-tick rows, ticks 7312-17722, plus turn-boundary `battlerSnapshots`,
+Murkrow's full struct via a new `battlerFull`, and an `rngLedger`) and
+`src/data/gen/battle1-winline-a-murkrow-ram-dump.json` (2269 rows, ticks
+17722-19990, same convention, does not re-dump the shared prefix). New probe
+tool: `tools/probe/dump-battler-full.py` (extends `dump-battler-snapshot.py`'s
+schema with `moves[4]`/`pp[4]`/`item`/`ability`/`types`, needed for Murkrow's
+full battle data — none of the existing probes read those fields). **Both
+new traces twice-run byte-identical** (`bin/oracle run`, manifests diffed
+identical); **both RAM dumps' constituent probe runs twice-run byte-identical**
+(`ram-probe.py`, `dump-battler-snapshot.py`, `dump-battler-full.py`, each
+independently re-run and diffed byte-for-byte against their own first run).
+
+### HEADLINE 1: the cheap lever check — idle-timing does not move RNG outcomes; move-choice sequence does
+
+Directly tested the brief's priority-1 hypothesis with one minimal probe:
+took `battle1-turn2.json`'s own script (DRAGON_BREATH's turn-2 confirm press,
+already fully RNG-decoded in §12) and widened the idle window immediately
+before that confirm press by **+4 frames** — no button changed, only its
+timing shifted. Replayed with a `gRngValue`-per-tick watch
+(`tools/probe/ram-probe.py`) and compared every subsequent transition against
+§12's own already-published values:
+
+| event | original tick | original transition | shifted tick | shifted transition |
+|---|---|---|---|---|
+| ENDEAVOR accuracy | 2983 | `4098214719→2002721862` | 2987 | `4098214719→2002721862` |
+| unattributed step | 3121 | `→1916845633` | 3125 | `→1916845633` |
+| DRAGON_BREATH accuracy | 3135 | `1916845633→114241568` | 3139 | `1916845633→114241568` |
+| crit | 3161 | `114241568→1604427283` | 3165 | `114241568→1604427283` |
+| spread | 3164 | `1604427283→195852426` | 3168 | `1604427283→195852426` |
+| secondary | 3318 | `195852426→3387277109` | 3322 | `195852426→3387277109` |
+
+Every transition value is bit-identical to §12's own published ledger,
+shifted by exactly **+4 ticks** and not one tick more — i.e. **zero extra
+`Random()` calls were introduced by delaying the press**. This directly
+confirms the ROADMAP domain note ("frontier battles consume RNG only on
+demand") at the exact mechanism the brief asked about, with a single ~3.4s
+probe (no full-prefix replay needed — this reused the already-short
+`battle1-turn2.json` prefix). **Conclusion, matching the brief's own
+hypothesis: idle-timing is not a lever on this dossier's misses. The only
+lever is the move-choice sequence, since different moves/outcomes consume
+different `Random()` counts and shift every downstream roll.**
+
+### HEADLINE 2: a different move at turn 8 reshuffles the whole downstream RNG stream — Pidgeotto's KO now verified at tick 15887
+
+Built and verified one concrete alternate line ("winline-a"): identical to
+§14's own turns 1-7 (`battle1-grovyle-faint.json`'s 7312-tick prefix, then
+ROCK_SLIDE at turns 6 and 7, unchanged), then substitutes **BIND** (move
+slot 1, one `RIGHT` press from ROCK_SLIDE's slot 0) for ROCK_SLIDE at
+**turn 8** — the exact turn that missed in §14's own committed line — then
+returns to ROCK_SLIDE (one `LEFT` press back) for turns 9-12, forced to
+DRAGON_BREATH at turn 13 once PP hits 0 (same PP-exhaustion mechanic §14
+found, just landing one turn later since BIND used its own PP instead of
+ROCK_SLIDE's for turn 8):
+
+| turn | ticks | Onix's move | hp0 (Onix) | hp1 (Pidgeotto) |
+|---|---|---|---|---|
+| 6 | 7312-8346 | ROCK_SLIDE (hit) | 31→31 | 156→113 (−43) |
+| 7 | 8346-9380 | ROCK_SLIDE (hit) | 31→31 | 113→82 (−31) |
+| 8 | 9380-10826 | **BIND (miss)** | 31→31 | 82→82 (0) |
+| 9 | 10826-12272 | ROCK_SLIDE (hit) | 31→24 (−7) | 82→61 (−21) |
+| 10 | 12272-13306 | ROCK_SLIDE (hit) | 24→14 (−10) | 61→38 (−23) |
+| 11 | 13306-14340 | ROCK_SLIDE (hit) | 14→14 (0) | 38→16 (−22) |
+| 12 | 14340-15374 | ROCK_SLIDE (**miss**, 10th/last PP) | 14→4 (−10) | 16→16 (0) |
+| 13 | 15374-16820ish | DRAGON_BREATH (hit, forced) | 4→4 | 16→**0** (tick **15887**) |
+
+Turn 8's BIND miss is **the same underlying bad draw** ROCK_SLIDE hit in
+§14's own committed line at that identical turn — proven the same way §14
+proved turn 13's miss was move-independent: turns 6-7 are byte-identical to
+the committed line, so the RNG state entering turn 8 is identical too, and
+BIND's own accuracy check is the *first* roll of the turn regardless of
+which move is chosen — whatever number lands there is shared across any
+move choice tested at that exact point. That single substitution (plus
+returning to ROCK_SLIDE afterward) desynchronizes every downstream roll from
+§14's own line, and this time turn 13's DRAGON_BREATH **hits** (vs. §14's
+committed line, where the RNG-equivalent late-battle roll missed twice
+running, BIND and DRAGON_BREATH alike) — landing the kill on a Pidgeotto
+already chipped to 16 HP by five ROCK_SLIDE hits. **This is exactly the
+brief's predicted lever, empirically confirmed**: no timing change, only a
+different move at one turn, and a battle that never KO'd Pidgeotto in §14's
+19634-tick trace now does it in 15887.
+
+Both misses in this line (turn 8 BIND, turn 12 ROCK_SLIDE) are recorded as
+observed, not hand-derived against `damageCalc.ts` — BIND's own
+accuracy/effect chain (`EFFECT_TRAP`, `data/gen/moves.json`: power 15,
+accuracy 75, secondaryEffectChance 100) was not individually decoded to a
+raw `Random()` value the way ROCK_SLIDE/DRAGON_BREATH were in §12/§14
+(time-boxed; flagged as unverified, not as a mismatch — no contradicting
+evidence found, matching this dossier's usual disclosure convention for
+un-decoded rolls).
+
+### HEADLINE 3: Murkrow's full battle data, RAM-truthed for the first time in this dossier
+
+At the switch-in tick (species/HP populate at **16944**, `battler1` struct
+read via the new `dump-battler-full.py`):
+
+- **Species 198 = MURKROW**, Lv50, **142/142 HP**, types **DARK/FLYING**
+  (`[17, 2]` against `constants/pokemon.h`'s `TYPE_DARK=17, TYPE_FLYING=2`),
+  ability **15 = INSOMNIA**, held item **221 = LAX INCENSE**.
+- Stats: atk 91, def 69, **spd 97** (faster than Onix's 76 — Murkrow acts
+  first every turn against Onix, RAM-confirmed by `gCurrentMove` order
+  below), spAtk 91, spDef 69.
+- **Moveset**: FAINT_ATTACK (185, PP 20/20, `TYPE_DARK`, power 60,
+  `EFFECT_ALWAYS_HIT` — cannot miss, no accuracy roll at all), FLY (19,
+  PP 15/15, `TYPE_FLYING`, power 70, accuracy 95, `EFFECT_SEMI_INVULNERABLE`
+  — 2-turn move, no damage on the charge turn), TORMENT (259, PP 15/15, no
+  damage), TAUNT (269, PP 20/20, no damage). Only **1 of Murkrow's 4 moves
+  deals damage on its own turn** (FAINT_ATTACK); FLY deals damage only on
+  its second (strike) turn.
+- Two independent reads (ticks 16944 and 17722) are byte-identical — the
+  struct is already fully populated the instant the switch commits, same
+  "populate-then-animate" shape §13 found for Pidgeotto's own switch-in
+  (species/HP update same-tick, materialize animation plays out afterward
+  with no further struct change).
+
+The switch-in sequence itself matches §13's established shape exactly, no
+new mechanic: Pidgeotto's own KO text is button-gated (idling the entire
+1400-tick post-confirm window with **zero** presses left the game frozen on
+"ONIX used DRAGONBREATH!" indefinitely — re-confirmed directly, not just by
+analogy); one dismiss `A` (this session: tick 16830, chosen generously ~940
+ticks after the confirm press, not bisected to a minimum — time-boxed, see
+open items) reaches "Foe PIDGEOTTO fainted!" then the switch animation,
+settling to a fully interactive "What will ONIX do?" vs. MURKROW menu (same
+settled-menu `gBattleMainFunc` constant, 134463093, used everywhere else in
+this dossier) by tick **17105**, stable through this trace's own final tick
+17722.
+
+### HEADLINE 4: Murkrow faints Onix 2 turns later without taking a hit — verified, not favorable
+
+Extended the verified line by 2 more turns (`battle1-winline-a-murkrow.json`,
+DRAGON_BREATH selected both turns — Onix's only PP-healthy damaging move
+left; ROCK_SLIDE is at 0/10, BIND at 14/15 but already shown unreliable
+above):
+
+| turn | ticks | Murkrow's move | Onix's move | hp0 (Onix) | hp1 (Murkrow) |
+|---|---|---|---|---|---|
+| 14 | 17722-18956 | FLY (charge — semi-invulnerable, no roll, no damage either direction; Onix's own DRAGON_BREATH has no target to hit) | DRAGON_BREATH (no-op vs. an airborne target) | 4→4 | 142→142 |
+| 15 | 18956-19990 | **FLY (strike, hits)** | never resolves — Murkrow's higher Speed (97>76) acts first and its hit is lethal | 4→**0** (tick **19147**) | 142→142 |
+
+Onix's own queued move never executes turn 15, same rule §14 pinned for
+Pidgeotto's priority QUICK_ATTACK against Onix — here it's plain Speed, no
+priority move needed, since 97>76 unconditionally. RNG cost for these 2
+turns: only **5 `Random()` steps total** (turn 14's charge is essentially
+free — 1 step, some turn-end bookkeeping; turn 15's strike costs the other
+4 — accuracy+ before the fatal hit). The trace's own final committed tick
+(19990, 10 under the cap) is pixel-confirmed frozen on "ONIX fainted!" —
+same button-gated KO-text rule as every other faint in this dossier — one
+more `A` press and a switch-in detour (which, per §14's own SEND OUT
+precedent, costs on the order of 400-1450 ticks depending on how many
+extra menu presses are needed) would be needed just to get a fresh Magby or
+Bayleef onto the field, **let alone then fight down a full-HP, faster
+Murkrow with a third Pokémon** — none of which fits in the 10 ticks
+remaining before the cap.
+
+**This specific line's answer: Onix contributes zero damage to Murkrow.**
+Getting *unlucky* here isn't really the right frame — Murkrow's own AI
+opened with a non-damaging option (FLY's charge turn) essentially by chance,
+buying Onix one extra free turn it didn't need to survive Onix's own attack;
+the very next turn's guaranteed-faster, ordinary-accuracy hit ended it. A
+4-HP Onix was never going to survive more than 1-2 real exchanges against
+anything in Murkrow's kit (FAINT_ATTACK never misses at all; FLY's own
+strike-turn accuracy is 95%), regardless of which turn it happened on.
+
+### Frame-budget arithmetic — does the answer change?
+
+- Prefix (turns 1-5, fixed/committed): **7312** ticks.
+- This session's verified line to Pidgeotto's KO + full settle vs. a fresh
+  Murkrow: **17722** ticks (KO itself at 15887, settle by 17105). Remaining
+  budget at that point: **20000 − 17722 = 2278** ticks — over 2 ordinary
+  turns' worth, a *dramatically* larger cushion than §14's own line's 842
+  remaining ticks (and unlike §14's line, this one hasn't even touched
+  Murkrow yet, whereas §14's remaining budget wasn't even enough to finish
+  Pidgeotto).
+- Verified continuation: Onix faints to Murkrow at tick **19147**, un-dismissed
+  KO text frozen at the trace's final committed tick **19990** — **10 ticks**
+  under the cap, and Murkrow is still at full HP (142/142). **No line tested
+  this session reaches the actual WIN.** The 2278-tick cushion earned by the
+  faster Pidgeotto KO was entirely consumed by 2 turns against Murkrow that
+  net zero progress on Murkrow's own HP.
+- **Updated answer to S8's headline question: still NO for every line anyone
+  has verified move-by-move, but the failure mode has changed.** §14's line
+  failed because it couldn't even finish Pidgeotto in time. This session's
+  line finishes Pidgeotto with room to spare, and then fails because Onix
+  (unavoidably worn down to single-digit HP by the fight it takes to fell
+  Pidgeotto with this dossier's available PP/movepool) cannot survive
+  Murkrow's Speed-97 always-eventually-lands offense long enough to do any
+  damage back, let alone finish a fresh 142-HP Pokémon. **Whether some other
+  line exists that (a) keeps Onix healthier into the Murkrow fight, (b)
+  voluntarily switches Onix out *before* it faints (the FIGHT/BAG/POKéMON/RUN
+  menu's own POKéMON option, never yet used in this dossier — only forced
+  post-faint switches have been explored), or (c) otherwise still reaches a
+  Murkrow KO within the remaining ~2278-tick cushion, is open — not searched
+  exhaustively this session (time-boxed; see open items).**
+
+### A harness-methodology finding worth flagging to the supervisor
+
+`tools/probe/ram-probe.py` and friends call `EmeraldOracle` **directly**,
+bypassing `oracle/server.py` entirely — and the 20000-frame/256-capture caps
+are enforced *only* in `server.py` (`MAX_FRAMES`/`MAX_CAPTURES`, guarding the
+`bin/oracle run` HTTP endpoint), not in the underlying emulator wrapper. This
+session's own exploratory probes ran scripts up to **21122 ticks** with no
+error, confirming the raw probe path has **no built-in reach limit** — only
+the *committed, replayable-via-`bin/oracle`* trace format is capped. This
+means future ground-truth scouting can explore arbitrarily far past 20000
+ticks *before* committing to what to script as an actual 20000-frame trace
+(exactly how this session found the Pidgeotto-KO-to-Murkrow-fight shape
+before building the two committed traces above) — worth calling out
+explicitly since it wasn't spelled out anywhere in ROADMAP's domain notes or
+prior dossier sections, and it materially changes how "the cap" should be
+thought about during exploration vs. commitment.
+
+### What a resuming session needs — pinned vs. open
+
+**Pinned this session:**
+- Idle-timing is not an RNG lever in frontier battles (HEADLINE 1) — settles
+  the brief's priority-1 question definitively, with a single cheap probe.
+- A different move at one turn reshuffles every downstream roll, confirmed
+  empirically (not just in principle) by actually landing a faster Pidgeotto
+  KO this way (HEADLINE 2) — the general technique (substitute at a known
+  bad turn, observe the new downstream shape) is reusable for any future
+  attempt to hunt a still-faster or Onix-healthier line.
+- Murkrow's full battle data (HEADLINE 3) — species/level/HP/stats/types/
+  ability/item/moveset/PP, RAM-truthed for the first time in 4 sessions that
+  each flagged it as open (§12, §13, §14, §14 addendum).
+- `tools/probe/dump-battler-full.py` — reusable probe for any future
+  battler's moves/PP/item/ability (the existing `dump-battler-snapshot.py`
+  only covers stats/HP/status).
+- Onix cannot survive long against Murkrow at the HP this dossier's
+  available lines leave it with (HEADLINE 4) — a real, RAM-verified
+  constraint any future engine slice's AI-difficulty modeling should account
+  for, not a one-off unlucky roll.
+- The raw-probe path (`EmeraldOracle` direct) has no frame-count ceiling;
+  only committed `bin/oracle`-run traces are capped at 20000 — a
+  methodology point worth folding into ROADMAP's domain notes.
+- Updated headline: reaching Pidgeotto's KO is no longer the bottleneck
+  (proven with room to spare); reaching Murkrow's KO from a survivable Onix
+  state is.
+
+**Still open (in priority order for a resuming session):**
+1. Whether a line exists that keeps Onix healthier entering the Murkrow
+   fight (e.g. a different turn 6-12 move sequence than this session's own
+   single tested substitution) — only one alternate branch was tried; this
+   was not an exhaustive or even a wide search.
+2. Voluntary in-battle switching (the action menu's own POKéMON option) has
+   never been used anywhere in this dossier — only forced post-faint
+   switches (§13, §14 addendum) are ground-truthed. If Onix could be swapped
+   out for a healthy Magby/Bayleef *before* fainting (rather than after),
+   that detour's own tick cost and whether it fits the remaining budget is
+   completely unknown.
+3. BIND's own accuracy/effect chain was not decoded to a raw `Random()`
+   value the way ROCK_SLIDE/DRAGON_BREATH were — flagged as unverified only,
+   not as a mismatch.
+4. The dismiss press for Pidgeotto's KO text (tick 16830, chosen with a
+   ~940-tick margin) was not bisected to a true minimum the way §14
+   addendum bisected the SEND OUT settle window — there is likely a few
+   hundred ticks of further reclaimable slack in this session's own script,
+   unexplored due to time-boxing.
+5. A minor cross-check surfaced but not chased: §14's own text states BIND's
+   accuracy as "85" when comparing it to DRAGON_BREATH for turn 13's miss,
+   but `data/gen/moves.json` (RAM-independent, extracted data) gives BIND
+   accuracy **75**. Not re-verified against RAM this session (BIND wasn't
+   used at that turn in either session) — flagged for a future session
+   rather than silently trusted either way.
+6. The full WIN (Murkrow's actual KO, victory fanfare/text, post-battle
+   transition) remains unreached by any verified line across 5 sessions
+   now (§12, §13, §14, §14 addendum, this session).
+
+**Verification**: `npm test` **648/648**, `npm run build` green (no
+`src/engine/` changes this session — only the two new committed traces under
+`tools/compare/traces-groundtruth/`, the two new RAM dumps under
+`src/data/gen/`, and the new probe tool under `tools/probe/`, per the
+worktree brief's constraint). Both new traces twice-run via `bin/oracle run`,
+manifests (frame count + every capture's sha256) byte-identical across two
+independent runs each. Both RAM dumps' constituent probe runs (`ram-probe.py`,
+`dump-battler-snapshot.py`, `dump-battler-full.py`) each independently
+re-run and diffed byte-for-byte against their own first run.
+
