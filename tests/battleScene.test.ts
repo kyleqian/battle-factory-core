@@ -1034,3 +1034,32 @@ describe("S7 slice E1 tail (docs/battle-menu-notes.md §15f): the player healthb
     expect(pixelAtTurn2(3093, 60, 90)).toEqual([132, 123, 123]);
   });
 });
+
+// S7 slice E2a-3 Tier-1 backfill (docs/dragon-breath-notes.md "Engine slice
+// E2a-2"): `dragonBreathShakeX2`/`dragonBreathBlendCoeff` shipped in E2a-2
+// with only Tier-2 (oracle compare) verification, against this run's own
+// "pin every pure-logic fix with a Tier-1 test" rule (AGENTS.md) - debt
+// flagged in PROGRESS #152/#153, closed here. Both pixels below are
+// re-derived from a FRESH scratch `bin/oracle run` capture this session
+// (ticks 3172-3225, `battle1-turn2-dragonbreath.json`'s own verbatim
+// segments), not reused from any committed trace/PNG - genuinely
+// oracle-cross-checked, not hand-picked. (193,16) is the same Grovyle-body
+// coordinate `DRAGONBREATH_BLEND_RENDER_LAG`'s own doc comment already
+// cites for its render-lag derivation.
+describe("S7 slice E2a-2 Tier-1 backfill (docs/dragon-breath-notes.md): DRAGON_BREATH's target shake and red-fade blend, pinned against a fresh oracle capture", () => {
+  it("render 3211 (a shake polarity flip, RAM 3210, blend coeff flat at 9 - isolates the shake alone) shows the shake's own shifted+blended color at (193,16)", () => {
+    expect(pixelAtTurn2(3211, 193, 16)).toEqual([148, 33, 24]);
+  });
+
+  it("render 3210 (one tick earlier - opposite shake polarity, same flat blend coeff) shows the other polarity's color at the same pixel", () => {
+    expect(pixelAtTurn2(3210, 193, 16)).toEqual([255, 255, 255]);
+  });
+
+  it("render 3186 (blend coeff steps 0->1, RAM 3184 - shake not yet started, isolates the blend alone) shows the first non-neutral blended color at (193,16)", () => {
+    expect(pixelAtTurn2(3186, 193, 16)).toEqual([24, 74, 66]);
+  });
+
+  it("render 3184 (two ticks earlier - blend coeff still 0, shake still 0) shows the plain unblended color at the same pixel", () => {
+    expect(pixelAtTurn2(3184, 193, 16)).toEqual([16, 82, 74]);
+  });
+});

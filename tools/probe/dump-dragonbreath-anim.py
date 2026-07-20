@@ -148,6 +148,8 @@ def main() -> None:
                 "animCmdIndex": oracle.read_u8(base + SPRITE_ANIM_CMD_INDEX_OFF),
                 "matrixNum": matrix_num,
                 "matrixA": read_s16(mbase + 0),
+                "matrixB": read_s16(mbase + 2),
+                "matrixC": read_s16(mbase + 4),
                 "matrixD": read_s16(mbase + 6),
                 "invisible": bool(flags & 4),
                 "subpriority": oracle.read_u8(base + SPRITE_SUBPRIORITY_OFF),

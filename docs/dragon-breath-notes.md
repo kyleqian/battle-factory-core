@@ -462,3 +462,120 @@ Tier-2 compare, not pure state logic), `npm run build` green.
 `turn2-dragonbreath.json` **84/84** green (`3121-3176` + `3236-3263`).
 Regression spot-check `turn2-endeavor-drain.json` **200/201** (unchanged,
 same pre-existing ISSUES #19 residual tick).
+
+## Engine slice E2a-3 (S7, bounded worker, follows E2a-2 above): Tier-1 pins backfilled; fire-projectile retry got MUCH closer (full RAM matrix, family confirmed) but still not pixel-exact — pulled again, richer data banked
+
+**Tier-1 debt closed**: `tests/battleScene.test.ts` gained a
+"S7 slice E2a-2 Tier-1 backfill" describe block (4 pins) for
+`dragonBreathShakeX2`/`dragonBreathBlendCoeff`, which E2a-2 shipped with only
+Tier-2 verification (against this run's own "pin every pure-logic fix with a
+Tier-1 test" rule). Values are re-derived from a **fresh** scratch
+`bin/oracle run` capture this session (ticks 3172-3225, not reused from any
+committed PNG/trace) at Grovyle-body coordinate (193,16) — the same spot
+`DRAGONBREATH_BLEND_RENDER_LAG`'s own doc comment already used for its own
+lag derivation. Two tick-pairs isolate each mechanism from the other (a
+shake-polarity flip while blend coeff is flat at 9; a blend-coeff step while
+shake hasn't started yet), so each pin genuinely exercises one function's
+formula rather than both entangled. `npm test` 707 (PROGRESS #153's own
+merged baseline) →**711** (+4 new pins, this session's only Tier-1 change).
+
+**Fire-projectile retry — real progress, still pulled.** Per the brief's
+mandatory method: extended `tools/probe/dump-dragonbreath-anim.py` to read
+`matrixB`/`matrixC` (previously only `matrixA`/`matrixD`) and re-ran over
+ticks 3170-3230. Three findings that close open questions from E2a-2:
+
+1. **The full matrix is clean, not just `a`/`d`.** Every one of the 8 spawns
+   (RAM-read directly, not derived) shows `a === d` and `b === -c` at every
+   relative age `n` (0..20), and — RAM-confirmed, not assumed — **identical**
+   across all 8 spawns (spawn 7 reuses spawn 1's own matrix slot after it
+   frees up, and reads back byte-identical). So the "genuinely rotated"
+   affine reduces to one 21-entry `(a, b)` table, no per-spawn variation:
+   ```
+   n:  0     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
+   a: -703  -617  -549  -495  -450  -413  -382  -355  -331  -311  -292  -276  -262  -249  -237  -226  -216  -207  -199  -191  -184
+   b:  -17   -15   -13   -12   -11   -10    -9    -8    -8    -7    -7    -6    -6    -6    -5    -5    -5    -5    -4    -4    -4
+   ```
+   (`d = a`, `c = -b` always.) The position table (`x2`/`y2`) and frame
+   formula E2a-2 already banked were re-verified byte-identical against this
+   extended probe's own `x`/`y`/`x2`/`y2`/`animCmdIndex` fields (not just
+   re-trusted) — both still exact.
+2. **Family confirmed from source, per the brief's explicit ask**:
+   `gDragonBreathFireSpriteTemplate` (`battle_anim_dragon.c:83-98`) has
+   `.affineAnims = sAffineAnims_DragonBreathFire` — the generic sprite.c
+   `RunAffineAnimFrame`/`ContinueAffineAnim`/`ObjAffineSet` system, the SAME
+   family the thrown ball's own spin uses (`battleMenu.ts`'s
+   `playerThrowBallSpin`/`BALL_SPIN_TABLE`, also RAM-probed-direct) — **not**
+   squish's separate `SetSpriteRotScale`/task-data-driven system
+   (`docs/battle-menu-notes.md` §15b), which is only reachable via a
+   different sprite-template shape (no `.affineAnims` field). Since the
+   matrix is RAM-read directly (the real, final hardware values), no
+   `ConvertScaleParam`/`0x10000/x` inversion is needed before feeding
+   `drawSpriteSheetAffineRotate` — confirmed both from source (only the
+   AFFINEANIMCMD-table system, which converts scale params BEFORE calling
+   `ObjAffineSet`, would need that inversion if computing the matrix from a
+   script value; RAM-reading the OUTPUT sidesteps it entirely, same as the
+   ball spin precedent) and empirically (every inversion/sign-swap variant
+   tried scored worse than the direct convention — see below).
+3. **Base position and render lag pinned empirically, much better than
+   E2a-2's scale-only attempt, but not exact.** Oracle-cross-checked against
+   a fresh scratch `bin/oracle run` (ticks 3172-3225) plus this session's
+   own `renderBattleScene`-based clean-background diffing (not a naive PNG
+   diff — the real engine's own idle-bounce/blend/shake render for
+   everything ELSE was included, so only the projectile geometry itself was
+   under test): the sprite's own RAM `x`/`y` (72,88, constant across all 8
+   spawns) is the CENTER directly (no `+halfW`/`+halfH` correction needed —
+   tried and scored worse), and render lag **1 tick** (the SAME family the
+   ball spin/shake/text mechanisms already use in this window) fits far
+   better than every other lag tried (0, 2, 3, 4, 5, 6 all scored
+   worse — lag 3 in particular looked promising from a naive "first visible
+   tick" read but a clean-background re-check showed that read was itself
+   real DRAGON_BREATH content, not a false positive, and lag 3's own fit
+   degrades badly past the first few ticks). Sign convention (`pb=b,
+   pc=-b` vs the swap, vs an h/v-flip on the SOURCE sample — `small_ember
+   .json`'s own `dragonBreathFireAnims.variant1` field literally says "vFlip
+   +hFlip" for Onix's player-side case) was tested every combination; the
+   plain direct convention (no source flip — the near-178.6° rotation
+   itself already achieves the mirrored appearance, the flip note describes
+   the VISUAL RESULT of the rotation, not an additional transform) won by a
+   wide margin every time.
+
+   **Still not pixel-exact**: with the best-fit config (base=(72,88) exact,
+   lag=1, direct matrix, no source flip), per-tick whole-frame diff against
+   fresh oracle PNGs stays small and roughly flat across the 8-spawn window
+   (~15-100px/tick over ticks 3177-3210, not the "smoothly growing to
+   ~1000px" pattern E2a-2's scale-only approximation showed) but never
+   reaches 0. Inspecting individual residual pixels (`t=3178`) shows our
+   render lighting a handful of real (non-zero-index) tile pixels that the
+   oracle shows as plain background at that exact tick — a small silhouette
+   over-draw at specific tile-boundary-adjacent source coordinates, not a
+   wholesale position/scale/sign error (all of which were ruled out by the
+   sweeps above). **What a resuming worker needs**: the residual is now
+   small enough that it's very likely a narrow, specific bug (an edge-pixel
+   truncation/rounding convention, or a tile-selection off-by-one at a
+   specific `sx`/`sy` boundary) rather than a wrong fundamental — worth
+   instrumenting `drawSpriteSheetAffineRotate`'s own sample loop against a
+   single isolated spawn (ticks 3177-3197, only spawn 1 alive) pixel-by-
+   pixel rather than whole-frame diffing, to localize exactly which `(dx,
+   dy)` values disagree and why. The matrix/position/frame tables above are
+   exact and don't need re-deriving; base=(72,88)/lag=1/direct-matrix are
+   the correct starting point, not open questions anymore.
+
+**Pulled, not shipped**: per this run's "keep every commit green, never ship
+known-wrong pixels" rule (same call E2a-2 made for the scale-only attempt) —
+the render code was written, oracle-tested, found short of pixel-exact, and
+reverted (`git checkout -- src/engine/battleScene.ts`) rather than committed
+red or gapped. `turn2-dragonbreath.json`'s `captureFrames` are UNCHANGED
+this session (still `3121-3176` + `3236-3263`, 84/84) — the `3177-3235` gap
+(fire projectiles) and the `3264+` remainder (hit-flash, HP drain, turn-end)
+are still open, exactly as E2a-2 left them. Hit-flash was not attempted this
+session (all remaining time went to the projectile retry + the Tier-1
+backfill).
+
+**Verification**: `npm test` **711/711** (+4, the Tier-1 backfill — no
+other engine code changed or reverted-then-changed), `npm run build` green.
+`turn2-dragonbreath.json` **84/84** unchanged. Regression spot-check
+`turn2-endeavor-drain.json` **200/201** unchanged (same pre-existing
+ISSUES #19 residual tick). `tools/probe/dump-dragonbreath-anim.py` gained
+`matrixB`/`matrixC` fields (additive, existing `matrixA`/`matrixD`/
+everything else unchanged) — committed, ready for the next worker to re-run
+without modification.

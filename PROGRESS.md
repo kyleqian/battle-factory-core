@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 154 — Bounded worker: S7 slice E2a-3 attempt — Tier-1 pins backfilled for E2a-2's shake/blend (debt closed); fire-projectile RE-PULLED after a much-closer-but-not-exact retry; `npm test` **711/711** (+4), build green, zero regressions, no trace change
+
+- **State:** `npm test` 711/711, `npm run build` green, tree clean.
+  `turn2-dragonbreath.json` **unchanged** (still `3121-3176` + `3236-3263`,
+  84/84 green) — the `3177-3235` gap is still open. Regression:
+  `turn2-endeavor-drain.json` 200/201 (unchanged, pre-existing ISSUES #19
+  residual).
+- **Did:** (1) **Tier-1 debt closed** (required per the brief): 4 new pins
+  in `tests/battleScene.test.ts` for `dragonBreathShakeX2`/
+  `dragonBreathBlendCoeff`, oracle-cross-checked against a FRESH scratch
+  `bin/oracle run` capture (not reused data). (2) **Fire-projectile retry**:
+  extended `tools/probe/dump-dragonbreath-anim.py` to read `matrixB`/
+  `matrixC` (previously only `a`/`d`) — found the full matrix is clean
+  (`a===d`, `b===-c` always, one 21-entry table, identical across all 8
+  spawns, banked in docs). Confirmed from source (per the brief's explicit
+  ask) that the sprite template uses the generic `RunAffineAnimFrame`/
+  `ObjAffineSet` system (same family as the ball spin, NOT squish's
+  `SetSpriteRotScale`) — no inversion needed feeding RAM-read values
+  straight into `drawSpriteSheetAffineRotate`. Empirically swept base
+  position + render lag + sign convention against fresh oracle PNGs: best
+  fit is base=(72,88) exact (no half-width correction), lag=1 tick, direct
+  matrix (no source flip) — MUCH closer than E2a-2's scale-only attempt
+  (~15-100px/tick flat, not a growing-to-1000px curve) but still not 0.
+  **Pulled again** (`git checkout -- src/engine/battleScene.ts`) rather
+  than ship non-exact pixels — full writeup + exact tables +
+  narrowed-down "what's likely still wrong" in
+  docs/dragon-breath-notes.md's new "Engine slice E2a-3" section.
+  Hit-flash not attempted (all time went to the above).
+- **Next:** the fire-projectile residual is now small enough (a per-tile
+  edge/rounding artifact, not a wrong position/scale/sign — all ruled out
+  this session) that a resuming worker should instrument
+  `drawSpriteSheetAffineRotate`'s own sample loop pixel-by-pixel against a
+  single isolated spawn (ticks 3177-3197) rather than re-sweep whole-frame
+  diffs — base=(72,88)/lag=1/direct-matrix and all three data tables
+  (matrix/position/frame) are settled, not open questions. Then hit-flash
+  (3263-3283), Grovyle's HP-bar drain (3298+) + turn-end (3329+) = E2b,
+  then faint/forced-switch, ISSUES #19 root cause.
+- **Notes:** no papercuts. This mechanism has now been attempted twice and
+  pulled twice for the same reason (close but not pixel-exact) — if a
+  third attempt also falls short, worth the supervisor considering whether
+  to timebox it differently (e.g. a dedicated non-bounded session, or
+  accepting the `3177-3235` gap as a named remainder past this slice) rather
+  than repeating the same RAM-probe-then-sweep pattern a fourth time.
+
+---
 ## 153 — Supervisor: round 2 folded — **ISSUES #20 CLOSED (FIGHT submenu on the live FONT_NARROW glyph pipeline, arbitrary movesets render)** + DRAGON_BREATH shake/blend/kickoff landed; suite **707/707**, build green, zero regressions, no worktrees
 
 - **State (supervisor-verified this minute):** `npm test` **707/707**,
@@ -78,34 +123,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no papercuts. Three distinct RAM/pixel render-lag values
   confirmed independently in one window (shake=1, blend=2, text-family=1
   elsewhere) — don't assume mechanisms in the same window share a lag.
-
----
-## 151 — Bounded worker: S7 slice E2a increment — DRAGON_BREATH kickoff text lands (**`turn2-dragonbreath.json` new, 56/56 green, renders 3121-3176**) + `small_ember.png` extracted; `npm test` **693/693** (unchanged), build green
-
-- **State:** `npm test` 693/693, `npm run build` green, tree clean, 3
-  commits this session. New trace `tools/compare/traces/turn2-dragonbreath.json`
-  (verbatim 50-segment script from the scout's groundtruth trace, dense
-  captureFrames 3121-3176) is 56/56. Regression: `turn2-endeavor-drain.json`
-  200/201 (unchanged, pre-existing ISSUES #19 residual).
-- **Did:** landed priorities 1-2 of 5 from the brief (docs/dragon-breath-notes.md's
-  new "Engine slice E2a" section has the full writeup). (1) `drawTurn2KickoffText`
-  (`battleScene.ts`) now switches from ENDEAVOR's held text to "ONIX
-  used\nDRAGONBREATH!" at render 3137 (pressTick+192), holds through 3176 -
-  all new code in `battleScene.ts` only (not `drawFightSubmenuWindow`, not
-  `battleMenu.ts` - both off-limits per this session's file-ownership split
-  with a sibling FIGHT-submenu-text worktree). (2) `small_ember.png`
-  extracted (`extract-battle-move-anim-assets.ts`, `battle-anim-small-ember.json`),
-  independently byte-verified against the raw PNG via PIL (0/5120 pixel
-  mismatches; palette matches after the expected GBA round-trip).
-- **Next:** priorities 3-5 (8-projectile mechanism, red-fade blend,
-  `AnimTask_ShakeMon2`, hit-flash) - explicitly NOT attempted this session;
-  the projectile mechanism needs a fresh RAM probe first (this codebase's
-  own `AnimTranslateLinear_WithFollowup` precedent, `TRAINER_EXIT_X2`, found
-  that primitive does NOT reduce to a clean formula - expect a literal
-  RAM-probed table, not a derived one). Full detail + what to probe in
-  docs/dragon-breath-notes.md's new section. Then: E2b (HP drain + turn
-  end), faint/forced-switch slice, ISSUES #19 root cause, #20 FONT_NARROW
-  rewire (sibling worktree, separate from this session).
-- **Notes:** no papercuts. Stayed on the assigned step; did not attempt
-  priority 3+ rather than risk landing it half-verified against the
-  45-minute cap.
