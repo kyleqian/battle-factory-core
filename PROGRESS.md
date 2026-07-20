@@ -4,6 +4,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 169 — Worktree scout (supervisor-folded): switch-in window fully itemized + Pidgeotto front sprite verified byte-exact (0/1087) — the faint engine slice now has complete pinned ground truth; merged `18c7bbd`, suite 749/749 on the merged tree
+
+- **State:** merged into master, `npm test` 749/749 + build green
+  post-merge (supervisor-verified). New: 4 dense stride-1 groundtruth
+  traces (`battle1-switchin-dense-{a,b,c,d}.json`, ticks 6350-7312,
+  twice-run/0 sha mismatches), `docs/faint-switch-notes.md` §3-§6.
+- **Did:** (goal 1) Pidgeotto's front pic was ALREADY extracted (S6
+  groundwork `38f687c`; #167's "not extracted" claim was a stale false
+  negative) — verified byte-exact vs a fresh oracle capture, and the
+  corner formula generalizes: `(144, 8 + gMonFrontPicCoords[species]
+  .yOffset)`, 2 species cross-checked. (goal 2) Full frame-accurate
+  itemization: hit-flicker → erase-and-sink faint (source-cited
+  `SpriteCB_FaintOpponentMon`, NOT fade/dissolve) → text phases →
+  party-summary-bar re-trigger → ball throw/tinted materialize →
+  healthbox slide-in → Sitrus proc text+heal-bar. CORRECTS §13: real
+  animation plays inside the "frozen 6429-6560" window, and the menu
+  visually settles ~7250-7256, not 7215. (goal 3) §6 grades each element
+  reused-verbatim / similar-unverified / genuinely-new (faint-sink and
+  Sitrus sparkle are new; ball/materialize not formula-verified).
+- **Next:** turn 4 engine slice is in flight (main lane); after it, the
+  turn-5 + faint/switch-in engine slice implements directly against
+  §3-§6 + §13.
+- **Notes:** worker PAPERCUT (contact-sheet row-slicing desync) recorded
+  in PAPERCUTS.md by supervisor.
+
+---
 ## 168 — Bounded worker: S7 slice H — turn 3's ROCK_SLIDE resolution (the turn's second half) landed by PARAMETERIZING turn 1's own ROCK_SLIDE mechanism with ZERO code changes; `turn3-rockslide.json` (new) **256/256, 0 diff**, `npm test` **749/749** (+3), build green, zero regressions
 
 - **State:** `npm test` 749/749, `npm run build` green, tree clean.
@@ -88,43 +114,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** supervisor also re-tested slice F's excluded ticks 3879/3888
   against the #22/#24 fixes directly — still DIFF (769px/1573px), NOT
   that family; §19's RAM-probe follow-up stands.
-
----
-## 166 — Bounded worker: S7 slice G — turn 3's ENDEAVOR resolution (the turn's first half) landed by PARAMETERIZING turn 2's own mechanisms, not rebuilding; `turn3-endeavor.json` (new) **180/180**, `npm test` **746/746** (+2), build green, zero regressions
-
-- **State:** `npm test` 746/746, `npm run build` green, tree clean.
-  New `tools/compare/traces/turn3-endeavor.json` (`turn3-menu.json`'s own
-  button script + 190 idle frames, through tick 4079) is **180/180**
-  (192 dense captures minus 12 characterized shake-residual exclusions,
-  see below). Full regression sweep re-verified at exact prior counts:
-  `turn3-menu.json` **250/250**, `turn2-dragonbreath.json` **237/237**,
-  `turn2-endeavor-drain.json` **201/201**, `turn2-endeavor.json` **77/77**,
-  `fight-submenu.json` **235/235**.
-- **Did:** Extended `core.ts`'s dispatch so turn 3's own confirm (cursor 0,
-  ROCK_SLIDE selected by the player) still resolves Grovyle's ENDEAVOR
-  first (speed order), reusing turn 2's own ENDEAVOR sub-mechanisms
-  (kickoff text, squish/blend/droplets/hitsplat/healthbox-wobble/flicker —
-  all already `pressTick`-relative, needed ZERO formula changes) —
-  parameterized the two turn-2-hardcoded anchors (`drawEndeavorSquish`
-  gained `opponentHp`/`kickoffBounceTick` params, `drawActionMenuIdleContent`
-  gained an optional `playerHp` param) and wired a new `drawTurn3EndeavorText`
-  + `turn3KickoffBounceTick`/`TURN3_KICKOFF_FROZEN_BOUNCE_TICK`. All anchors
-  RAM/pixel-probed fresh, not assumed: `TURN3_CONFIRM_PRESS_TICK=3891`,
-  kickoff text start 3900 (same `-1` reopened-submenu correction turn 2
-  needed), HP drain 101→88 completing at tick 4057 (`ENDEAVOR_HP_DRAIN_
-  START_DELAY=153` unchanged), window-safe boundary tick 4079 (ROCK_SLIDE's
-  own kickoff text hard-cuts the message box at 4080). One genuine
-  divergence found and NOT curve-fit: turn 3's own target-shake RAM reads
-  asymmetric `+3/-2` (not turn 2's symmetric `±3`) — 12 ticks excluded,
-  precisely characterized (px count, region, bbox) rather than chased.
-  Full writeup: `docs/battle-turn-notes.md` §20.
-- **Next:** the ROCK_SLIDE half of turn 3 (Onix's own move hitting Grovyle
-  again, kickoff text starting sometime after tick 4080, ground truth
-  banked §13) and the turn-4 menu reopen are the immediate next slice. The
-  shake-asymmetry residual (§20) is a clean, scoped follow-up needing one
-  RAM read (`gAnimMovePower` at ticks 3956-3966) before touching render
-  code. ISSUES #23 (fire projectiles) stays parked.
-- **Notes:** no papercuts. `tools/probe/ram-probe.py` (generic, already
-  committed) was the right tool for the RAM-side anchors this session —
-  no new probe script needed, unlike most prior ENDEAVOR-window sessions.
-

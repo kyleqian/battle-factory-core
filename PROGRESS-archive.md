@@ -1,3 +1,42 @@
+## 166 — Bounded worker: S7 slice G — turn 3's ENDEAVOR resolution (the turn's first half) landed by PARAMETERIZING turn 2's own mechanisms, not rebuilding; `turn3-endeavor.json` (new) **180/180**, `npm test` **746/746** (+2), build green, zero regressions
+
+- **State:** `npm test` 746/746, `npm run build` green, tree clean.
+  New `tools/compare/traces/turn3-endeavor.json` (`turn3-menu.json`'s own
+  button script + 190 idle frames, through tick 4079) is **180/180**
+  (192 dense captures minus 12 characterized shake-residual exclusions,
+  see below). Full regression sweep re-verified at exact prior counts:
+  `turn3-menu.json` **250/250**, `turn2-dragonbreath.json` **237/237**,
+  `turn2-endeavor-drain.json` **201/201**, `turn2-endeavor.json` **77/77**,
+  `fight-submenu.json` **235/235**.
+- **Did:** Extended `core.ts`'s dispatch so turn 3's own confirm (cursor 0,
+  ROCK_SLIDE selected by the player) still resolves Grovyle's ENDEAVOR
+  first (speed order), reusing turn 2's own ENDEAVOR sub-mechanisms
+  (kickoff text, squish/blend/droplets/hitsplat/healthbox-wobble/flicker —
+  all already `pressTick`-relative, needed ZERO formula changes) —
+  parameterized the two turn-2-hardcoded anchors (`drawEndeavorSquish`
+  gained `opponentHp`/`kickoffBounceTick` params, `drawActionMenuIdleContent`
+  gained an optional `playerHp` param) and wired a new `drawTurn3EndeavorText`
+  + `turn3KickoffBounceTick`/`TURN3_KICKOFF_FROZEN_BOUNCE_TICK`. All anchors
+  RAM/pixel-probed fresh, not assumed: `TURN3_CONFIRM_PRESS_TICK=3891`,
+  kickoff text start 3900 (same `-1` reopened-submenu correction turn 2
+  needed), HP drain 101→88 completing at tick 4057 (`ENDEAVOR_HP_DRAIN_
+  START_DELAY=153` unchanged), window-safe boundary tick 4079 (ROCK_SLIDE's
+  own kickoff text hard-cuts the message box at 4080). One genuine
+  divergence found and NOT curve-fit: turn 3's own target-shake RAM reads
+  asymmetric `+3/-2` (not turn 2's symmetric `±3`) — 12 ticks excluded,
+  precisely characterized (px count, region, bbox) rather than chased.
+  Full writeup: `docs/battle-turn-notes.md` §20.
+- **Next:** the ROCK_SLIDE half of turn 3 (Onix's own move hitting Grovyle
+  again, kickoff text starting sometime after tick 4080, ground truth
+  banked §13) and the turn-4 menu reopen are the immediate next slice. The
+  shake-asymmetry residual (§20) is a clean, scoped follow-up needing one
+  RAM read (`gAnimMovePower` at ticks 3956-3966) before touching render
+  code. ISSUES #23 (fire projectiles) stays parked.
+- **Notes:** no papercuts. `tools/probe/ram-probe.py` (generic, already
+  committed) was the right tool for the RAM-side anchors this session —
+  no new probe script needed, unlike most prior ENDEAVOR-window sessions.
+
+---
 ## 165 — Supervisor wind-down: session end 2026-07-20 ~02:45 — **12 verified worker steps** (9 main + 3 worktree, every one folded green); suite **685 → 744/744**; headline: **turn 2 is COMPLETE end to end** (`turn2-dragonbreath.json` 237/237) and **three long-standing residual families were root-caused and closed** (ISSUES #19, #22, #24 — all three were harvest/dispatch bugs, none was the timing mystery they looked like)
 
 - **State (verified this minute):** `npm test` **744/744**, `npm run

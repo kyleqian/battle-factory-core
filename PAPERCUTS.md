@@ -122,3 +122,18 @@ compare run exposed the staleness.
   explicitly (never `git add -A`), and commit immediately rather than
   leaving edits dirty in the shared tree. Better: batch supervisor docs
   edits into the gap between workers when the schedule allows.
+
+## Contact-sheet row-slicing desyncs labels from frames (2026-07-20)
+
+- **What:** building a PIL contact sheet by slicing one tall stitched
+  image into row chunks of a fixed raw pixel height (not an exact
+  multiple of the cell height) silently shifts every later label off its
+  frame — the switch-in itemization worker chased a phantom
+  contradiction for ~15 min before abandoning the sheet for per-tick
+  numeric pixel probes.
+- **Hits:** 1.
+- **Cost each:** ~15 min.
+- **Workaround:** view contact sheets whole, or slice strictly at
+  cell-height multiples; for boundary-pinning work prefer per-tick
+  numeric pixel probes (which is what actually worked) over visual
+  sheets entirely.
