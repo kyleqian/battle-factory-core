@@ -2316,3 +2316,95 @@ touched, this session added only extractor code + generated JSON + this
 doc), `npm run build` green. No trace committed or extended (deliberate,
 see "Scope call" above). Zero regressions, trivially: every existing traces'
 render code path is byte-for-byte untouched.
+
+### 15a. FITTED addendum (S7 slice E1d, bounded worker, follow-up session): squish wired + oracle-fitted for Y, X-axis still MISFITS - reverted, nothing landed, `npm test` 669/669 unchanged
+
+**What landed:** nothing committed - engine code was written, tested against
+the oracle, found to only half-fit, and reverted rather than committing a red
+trace (per this run's own "keep every commit green" rule). This addendum
+banks the empirical findings so the next session doesn't have to re-derive
+them.
+
+**Renderer reuse confirmed, no new primitive needed.** §15's own "what a
+follow-up session needs" item 1 (a 2-axis affine renderer) turns out to
+already exist: `drawSpriteSheetAffineStretch` (`battleScene.ts` §7.17,
+built for GROVYLE_STRETCH/mechanism 5) already takes independent x/y matrix
+params, a palette, and an optional tint/coeff - exactly what squish needs.
+**But its calling convention doesn't transfer directly**: mechanism 5
+(`Anim_VerticalStretch`) is a bespoke C function that writes the OAM matrix
+fields DIRECTLY (no inversion), which is why that renderer takes `xScale`/
+`yScale` as the matrix value verbatim. Squish (`AnimTask_SquishAndSweatDroplets`)
+is instead driven through the generic `AFFINEANIMCMD_FRAME`/`RunAffineAnimFrame`
+table system - the SAME system mechanism 4's materialize uses
+(`sAffineAnim_Battler_Emerge`) - which goes through real `ObjAffineSet` and
+needs the INVERTED convention `drawSpriteSheetAffineTinted` already uses
+(`matrixParam = 0x10000/accumulator`). Confirmed empirically this session,
+not just reasoned: only the inverted convention reproduces "squashes X /
+stretches Y" from the extracted step signs (direct convention renders it
+backwards - accX dipping below neutral would ENLARGE under direct
+convention, when the label says squash). So a squish caller just needs to
+pre-invert its own accumulator (`0x10000/acc`) before calling the existing
+`drawSpriteSheetAffineStretch` - no new render primitive required, contra
+this section's own original "what's needed" list.
+
+**Local-tick anchor and one axis confirmed exact, pixel-checked, not
+assumed.** A fresh dense oracle probe this session (`bin/oracle run` against
+`turn2-endeavor-drain.json`'s own prefix, captures 2996-3012, whole-frame
+diff vs. the tick-2999 baseline) reproduced §15's own bbox table exactly and
+sharpened it to the pixel: **tick 2999 is the last neutral tick (zero diff),
+tick 3000 is the first visible squish tick** (bbox x=145-206,y=16-71) growing
+symmetrically through **tick 3006** (x=127-225,y=16-72, the widest) then
+narrowing at **3007** (x=131-221) before **3008** jumps to include the
+target side (x=49..) - droplet/shake/hitsplat contamination starting
+exactly on schedule with §15's own estimate. This pins
+`ENDEAVOR_SQUISH_START_DELAY=54` (`pressTick`+54 = tick 2999 = neutral/
+logical-offset-0) as the accumulator's own anchor, same "+1 tick to first
+visible frame" family as every other affine mechanism in this file.
+**The step table's `dxScale` field maps to the RENDERED Y axis, not X**
+(`dyScale` maps to X) - fitting `drawEndeavorSquish` against the oracle's
+own diff bbox at tick 3003 found the Y-axis bbox (16-71) matches the oracle
+EXACTLY using `dxScale`'s accumulator inverted into `my`, at every one of
+the 8 ticks checked - a real, pixel-confirmed axis-label correction to bank
+(the extracted table's own field names describe the SOURCE struct's own
+field order, not necessarily screen-space X/Y - not the first time this run
+has found a source-order/screen-order mismatch).
+
+**X axis still doesn't fit - the open problem.** With the Y axis pinned
+exact, the X axis (`dyScale`'s own accumulator, inverted into `mx`) produces
+a bbox far too narrow: oracle's own tick-3003 diff bbox is x=138-214 (76px
+wide, 12px WIDER than Grovyle's neutral 64px-wide sprite canvas), while the
+fitted renderer only reaches x=144-207 (63px, essentially unchanged) - a
+whole-silhouette misalignment (`tools/compare/out/latest/diff-03003.png`
+this session, not committed: the diff mask is one large connected blob
+covering nearly the entire Grovyle silhouette, not a thin edge fringe) -
+ruling out a simple off-by-a-few-pixels tuning issue. Two hypotheses tried
+and BOTH failed to close the gap: (1) the sprite's destination box might be
+too small to show a widened result (real hardware's `ST_OAM_AFFINE_DOUBLE`
+doubles the OAM bounding box, the same mechanism `drawSpriteSheetAffineRotate`
+already models for the thrown ball) - added an optional `doubled` param to
+`drawSpriteSheetAffineStretch` (scans -halfW..w+halfW/-halfH..h+halfH
+instead of 0..w/0..h, backward-compatible default `false`) and reran: the
+diff barely moved (2199px -> unchanged), ruling out box-clipping as the
+binding constraint; (2) tried both axis-mapping directions for X
+(`dxScale`-inverted and `dyScale`-inverted) - neither reaches the oracle's
+76px width. **Open questions for whoever picks this up next**: is the
+oracle's own 76px width evidence of an X-axis magnitude that's genuinely
+larger than the extracted `±16`/`±16` step deltas (i.e. the extracted table
+itself has a transcription error, not just a mislabeled axis - worth
+re-reading `gFacadeSquishAffineAnimCmds` at `battle_anim_effects_3.c:883-889`
+directly rather than trusting last session's own transcription); or is there
+a concurrent mechanism (a slight x2/position shift, or the blend task
+already contributing by tick 3000 despite this section's own "independently
+driven" claim) shifting/widening the visible footprint beyond pure scale.
+RAM-probing `gSprites[]`'s own affine data fields directly (the
+`dump-rockslide-sprites.py`/`sendout-grovyle-stretch.json`-style probe this
+run already has precedent for) rather than continuing to pixel-fit blind is
+the recommended next step - this session spent its remaining time on
+pixel-fit attempts and ran out of room before reaching for a RAM probe.
+
+**Verification**: engine changes (the `doubled` param + `drawEndeavorSquish`/
+`endeavorSquishAccumulator` + the `turn2-endeavor-drain.json` captureFrames
+extension) were all reverted (`git checkout`) once the X-axis misfit was
+confirmed real rather than a tuning slip - `npm test` **669/669** (unchanged),
+`npm run build` green, tree clean, no trace changes. Zero regressions,
+trivially: nothing shipped.

@@ -4,6 +4,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 140 — Bounded worker: S7 slice E1d — ENDEAVOR squish wired + oracle-fitted, X-axis MISFITS — reverted, nothing landed; suite unchanged **669/669** (`docs/battle-menu-notes.md` §15a FITTED addendum has the full empirical writeup)
+
+- **State:** `npm test` **669/669** (unchanged), `npm run build` green,
+  tree clean, no trace changes. Engine code was written and tested this
+  session but **reverted** (`git checkout`) once it was clear it only
+  half-fit — this run's own "never commit red" rule, not a scope call.
+- **Did:** confirmed `drawSpriteSheetAffineStretch` (already in
+  `battleScene.ts`, built for GROVYLE_STRETCH) is the renderer §15 asked
+  for — no new primitive needed, just pre-invert the accumulator
+  (`0x10000/acc`) before calling it, since squish is table-driven
+  (`AFFINEANIMCMD_FRAME`/real `ObjAffineSet`, same family as materialize)
+  unlike GROVYLE_STRETCH's own bespoke direct-write function. Ran a fresh
+  dense oracle probe (`turn2-endeavor-drain.json`'s own prefix, captures
+  2996-3012) that sharpened §15's bbox table to the exact tick: 2999
+  neutral, 3000 first visible, 3006 widest, 3008 target-side contamination
+  starts — pins `ENDEAVOR_SQUISH_START_DELAY=54`. Fitting against that
+  data found the **Y axis matches the oracle exactly** (`dxScale`'s own
+  accumulator maps to rendered Y, not X — a real axis-label correction)
+  but the **X axis doesn't**: oracle wants a 76px-wide silhouette (12px
+  past the 64px neutral canvas), the fitted renderer only reaches 63px —
+  a whole-silhouette misalignment, not an edge residual. Tried both
+  remaining axis-mapping directions and an `ST_OAM_AFFINE_DOUBLE`-style
+  doubled destination box (added as a backward-compatible opt-in param,
+  since reverted with everything else) — neither closed the gap.
+- **Next:** RAM-probe `gSprites[]`'s own affine data fields for X directly
+  (same `dump-rockslide-sprites.py`/`sendout-grovyle-stretch.json`
+  precedent this run already has) rather than continuing to pixel-fit
+  blind — recommended over more guessing, per §15a's own "open questions"
+  list (possible causes: a transcription error in the extracted step
+  table, or a concurrent mechanism, e.g. the blend task, already
+  contributing pixels earlier than assumed). Once X fits, land exactly
+  per the original brief's staged order (squish sub-window 3000-3007 →
+  droplets → blend → shake → hitsplat).
+- **Notes:** no papercuts. Time-boxed session spent its remaining room on
+  pixel-fit attempts rather than switching to a RAM probe soon enough —
+  flagged in §15a so the next session doesn't repeat the same dead ends.
+
+---
 ## 139 — Bounded worker: S7 slice E1c — ENDEAVOR's own attack animation, GROUNDWORK ONLY (2 gfx assets extracted + full 5-mechanism source derivation + oracle-timed transition table, `docs/battle-menu-notes.md` §15); engine wiring NOT landed, this session's own explicit scope call — suite unchanged **669/669**
 
 - **State:** `npm test` **669/669** (unchanged, no engine code touched),
@@ -70,48 +108,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   asset inventory (S8's only un-scouted UI); (3) ISSUES #19 family
   (3 traces now), #20 rewire remainder.
 - **Notes:** none.
-
----
-## 137 — Bounded worker: S7 slice E1b — Onix's own HP-bar drain (117→101) + player-healthbox HP digits, `turn2-endeavor-drain.json` **105/106** (the 1 residual is the same ISSUES #19 family already accepted in `turn2-endeavor.json`) — suite **669/669**; ENDEAVOR's own attack animation stays OUT OF SCOPE (real custom asset, not "plain generic" as briefed)
-
-- **State:** `npm test` **669/669** (+9 Tier-1 pins), `npm run build`
-  green, tree clean. New committed trace
-  `tools/compare/traces/turn2-endeavor-drain.json` (same verbatim 44+6
-  prefix as `turn2-endeavor.json`, idle extended to tick 3132, +29
-  captures dense 3095-3120 + 3 settle samples) **105/106**. Zero
-  regressions at exact prior counts: `turn2-endeavor` 76/77 (untouched),
-  `turn1-rockslide` 256/256, `turn1-drain` 102/102, `fight-submenu`
-  234/235, `turn1-kickoff` 81/81, `turn1-cloneanim` 230/230.
-- **Did:** landed the drain+digits half of slice E1b, per the brief's own
-  fallback clause, after source-checking (not assuming) that ENDEAVOR's
-  own attack animation is genuinely custom asset work (`Move_ENDEAVOR`:
-  attacker squish/sweat-droplet/yellow-blend task + two rounds of
-  target shake+hitsplat, `data/battle_anim_scripts.s:3789`) — NOT the
-  "plain generic hit, no move-specific asset" the handoff assumed.
-  Oracle-confirmed the animation's own onscreen window is 3003-3091
-  (whole-frame diff against the tick-2999 baseline), settling back to
-  an exact match (aside from the healthbox itself) from 3095 on — so
-  this session's own trace captures densely from 3095 through the
-  settle, explicitly skipping 3003-3094. `endeavorOnixHp` (`battleMenu
-  .ts`) reproduces `rockSlideOpponentHp`'s exact shape with its own
-  anchor delay (153, not 597) — grid-search-confirmed the same "no
-  extra render lag" rule holds player-side too (verified independently,
-  not assumed, since the player/opponent controllers are different
-  source files). `composePlayerHealthboxHpOverlay`
-  (`healthboxAssembly.ts`) is a small sparse patch (bar fill + FONT_SMALL
-  digit text) layered on the existing flat player-healthbox harvest,
-  NOT a full frame compositor (that's its own future slice, a player-
-  side ISSUES #16 analogue) — caught a real bug mid-session where an
-  initial fit reused the opponent's own 11-row text-window constants
-  verbatim (ink-exact, but clobbering 2 rows of the frame's own static
-  divider line with the printer window's own bg-fill color); re-fit
-  against a wider pixel check (not just ink) found the real 9-row
-  footprint, now Tier-1-regression-guarded. Full derivation in
-  docs/battle-menu-notes.md §14.
-- **Next:** ENDEAVOR's own attack animation (new sweat-droplet/hitsplat/
-  squish-blend assets, ticks 3003-3094 — a real asset-extraction slice,
-  not a formula reuse) is the natural continuation of this exact window;
-  otherwise DRAGON_BREATH's own window (3129+, slice E2) or ISSUES #19's
-  anomaly family.
-- **Notes:** no papercuts.
 
