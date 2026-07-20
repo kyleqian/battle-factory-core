@@ -1133,3 +1133,45 @@ slide transient needs a RAM probe, not more guessing); the real new
 unknown is finding 2 (the tick-6727 icon-bar interaction) — solve that
 first, since it's small in scope (a single sprite-region RAM probe) but
 gates a clean read on everything from the ball prop onward.
+
+### Resolution (S7 slice L retry, bounded worker, next session) — all three open items closed, LANDED
+
+RAM-probed both remaining unknowns directly (`tools/probe/specs/switchin-
+iconbar-slidein.json`, RAM ticks 6580-6614; `switchin-iconbar-transient.json`,
+RAM ticks 6710-6754 — `gSprites[]` x/y/x2/y2/flags/animNum/animCmdIndex/
+callback/raw-OAM-word for the bar's own reused slot 3 and the 6 icons'
+fresh slots 54-59) BEFORE writing any render code, closing all three open
+items above:
+
+1. **The icon slide transient**: NOT a per-icon staggered tail after all —
+   all 7 sprites (bar + 6 icons) share the IDENTICAL `x2` sequence every
+   tick, bit-for-bit `OPP_BAR_X2` itself (`-95..0` over RAM ticks
+   6587-6606), zero stagger. The "9-value ease-out tail" hypothesis this
+   session's prior attempt tried was the wrong shape; the real mechanism is
+   simpler (uniform, full 20-step curve) than guessed.
+2. **The tick-6727 transient**: RESOLVED. At RAM tick 6725, all 7 sprites'
+   raw OAM first word jumps by `0x400` simultaneously — `OamData.objMode`
+   flipping `NORMAL`->`BLEND` for all 7 in one shared tick, `x`/`y`/`x2`/
+   `y2` otherwise unchanged. At RAM tick 6742, all 7 are destroyed
+   simultaneously. This is `Task_HidePartyStatusSummary`'s own alpha-blend-
+   then-destroy shape (already modeled here for the PLAYER bar's own S6-
+   intro exit, `playerSummaryFadeEva`) applied to the OPPONENT bar, with a
+   flat 1-unit/tick ramp (not the player exit's "every OTHER tick") over
+   the 16-render-tick window 6727-6742 — matching this section's own
+   "alternating 1091/1087px" pixel finding exactly (that's the alpha-blend
+   ramp's own per-tick rounding noise, not a new mechanism). The freed
+   slot 3 is reused by the open-particle burst's own first spawn at RAM
+   6744 (§8d, already known, unrelated).
+3. **The front-sprite materialize/stretch anchor**: still unattempted this
+   session (out of the landed scope — the ball prop itself wasn't
+   implemented) — §9's own two-anchor derivation stands, untested by this
+   session's own findings either way.
+
+Landed as `turn5-sentout.json` (extends `turn5-faint.json`'s own script
+verbatim, tick 6588-6728, dense stride-1) — **141/141, 0 diff**, covering
+the icon bar's entire lifecycle (create/slide/settle/text/fade/destroy) in
+one commit, plus 4 new Tier-1 pins. Full details: `docs/battle-turn-
+notes.md` §25. Stops at 6728 (one tick before the unimplemented ball
+prop's own first pixel, confirmed by isolating the mismatched region to
+the ball's own resting corner, not the icon bar's bbox) — the ball prop
+through Sitrus/settled-menu remains open for a future session.

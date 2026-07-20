@@ -4463,3 +4463,121 @@ healthbox slide-in, Onix's own Sitrus Berry proc (exact formula already
 pinned, §2 of that same file), and the next settled menu vs. Pidgeotto -
 ground truth already substantially banked, explicitly out of this slice's
 own scope per the brief.
+
+## 25. Engine slice L (retry, ground cleared): the icon-bar re-trigger, RAM-probed and landed - the tick-6727 transient RESOLVED - `turn5-sentout.json` **141/141, 0 diff**, ending BEFORE the ball prop (S7 bounded worker session)
+
+Picks up exactly where `docs/faint-switch-notes.md` §9 (this slice's own
+prior, non-landed attempt) left off: the sent-out text and the icon-bar's
+settled state were already byte-exact and safe to re-add; the real blocker
+was the "unexplained tick-6727 icon-bar-region change." Per this session's
+own brief, RAM-probed BOTH remaining unknowns (the icon slide-in's own
+per-icon-vs-uniform shape, and the tick-6727 transient) with two new
+committed `ram-probe.py` specs BEFORE writing any render code, avoiding
+the prior attempt's own wasted speculative-draft cost.
+
+### The icon slide-in - corrects §9's own open item 1
+
+`switchin-iconbar-slidein.json` (`gSprites[]` x/y/x2/y2/flags for the bar's
+own reused slot 3 and the 6 icons' fresh slots 54-59, RAM ticks 6580-6614)
+shows creation at RAM tick **6587**, then all SEVEN sprites (bar + all 6
+icons) sharing the IDENTICAL `x2` sequence every tick - `-95, -90, ...,
+-5, 0` over RAM ticks 6587-6606 - bit-for-bit `OPP_BAR_X2` itself, with
+**zero per-icon stagger**. This is genuinely simpler than the S6 intro's
+own per-icon-staggered `OPP_ICON_X2` tables (§9's own tried-and-residual
+hypothesis guessed a 9-value ease-out tail, the wrong shape) - the real
+mechanism just reuses the bar's own already-defined curve for all seven
+objects uniformly. No new table needed.
+
+### The tick-6727 transient - RESOLVED, corrects §9's own open item 2
+
+`switchin-iconbar-transient.json` (`gSprites[]` x2/y2/animNum/animCmdIndex/
+callback/oam-raw-word for the same 7 slots, RAM ticks 6710-6754) shows:
+
+- At RAM tick **6725**, all 7 sprites' raw OAM first word jumps by exactly
+  `0x400` simultaneously - decoded, that's `OamData.objMode`'s low bit
+  flipping `NORMAL(0)` -> `BLEND(1)`, i.e. all 7 sprites enter GBA hardware
+  alpha-blend mode together, in one shared tick, with `x`/`y`/`x2`/`y2`
+  otherwise UNCHANGED (ruling out a position/slide explanation for §9's own
+  observed pixel diffs).
+- At RAM tick **6742**, all 7 sprites are destroyed simultaneously
+  (`flags`/`x`/`y` reset to the dead-sprite default in the same tick).
+- This is `Task_HidePartyStatusSummary`'s own alpha-blend-then-destroy
+  shape - already modeled in this engine for the PLAYER bar's own S6-intro
+  exit (`playerSummaryFadeEva`) - applied here to the OPPONENT bar, with a
+  DIFFERENT cadence: a flat 1-unit/tick ramp (not the player exit's "every
+  OTHER tick"), fitting the shorter 16-render-tick window exactly. This
+  resolves §9's own "16-tick alternating 1091/1087px, render 6727-6742"
+  finding precisely: it's this alpha-blend ramp, not a new mechanism.
+- The freed slot 3 is reused by the open-particle burst's own first spawn
+  at RAM 6744 (`docs/faint-switch-notes.md` §8d, unrelated, already
+  formula-pinned) - confirms the destroy boundary lines up with everything
+  else already known about this window.
+
+Both specs run twice, byte-identical both times (deterministic). Outputs
+committed at `src/data/gen/battle1-switchin-iconbar-{slidein,transient}-
+probe.json`.
+
+### What landed (`src/engine/battleScene.ts`)
+
+- `TURN5_ICONBAR_CREATE_TICK`(6587)/`_FADE_START_TICK`(6725)/
+  `_DESTROY_TICK`(6742) (all exported, RAM-pinned per above).
+- `TURN5_OPPONENT_ICON_STATES` (exported) - GROVYLE's own former slot
+  (index 5) flips `"Full"` -> `"Statused"`, §9's own pixel correction,
+  unchanged this session.
+- `turn5IconBarEva` (exported) - `null` (flat, unblended) before the fade,
+  else `16 - (rt - FADE_START_TICK)` clamped at 0.
+- `drawTurn5IconBar` - the bar + 6 icons, sharing one uniform `x2` (reuses
+  `OPP_BAR_X2`/`tableX2`/`drawBallStatusBar`/`ballStateTileIndex`/
+  `blendedSetPixel` - all pre-existing, zero new low-level drawing code).
+- `SWITCHIN_SENTOUT_LINE1/2`, `SWITCHIN_SENTOUT_TEXT_START_TICK`(6687, an
+  ABSOLUTE anchor, not `pressTick`-relative - §9's own text mechanism was
+  already pinned to this fixed oracle tick directly), `switchinSentOutText
+  VisibleChars` (exported).
+- `drawTurn5RockSlideWindow` gained the icon-bar draw call (a no-op outside
+  its own window) plus a third text branch (`SWITCHIN_SENTOUT_TEXT_START_
+  TICK` hard-cuts over the still-held fainted text, same "no button needed"
+  shape every other auto-advancing transition in this dossier already
+  uses) - the fainted-text/cursor code itself is UNCHANGED.
+
+### Committed trace
+
+**`turn5-sentout.json`**: extends `turn5-faint.json`'s own script verbatim
+(idle only) through tick 6728 - 141 dense `captureFrames` from 6588
+through 6728, covering the icon-bar's ENTIRE lifecycle (create, uniform
+slide-in, settle, sent-out text 6687-6726, alpha-blend fade, destroy) in
+one shot - both the mandatory rung and the tick-6727 transient landed
+together, since both were RAM-resolved before any render code was
+written. **141/141, 0 diff.** Stops at 6728, the last tick before the
+(unimplemented, out-of-scope-this-session) ball prop's own first pixel -
+confirmed via a pixel-level diff of the actual mismatched region (x170-181/
+y58-69, the ball's own resting corner, ball-open-palette colors) that this
+is a ball-prop gap, NOT an icon-bar residual - the icon bar's own bbox
+carries zero diff anywhere in the tested range.
+
+### Verification
+
+`npm test` **780/780** (+4: icon-flip-state pin, 3 `turn5IconBarEva`/anchor
+pins for the tick-6727 mechanism, 1 sent-out-text-timing pin). `npm run
+build` green. `turn5-sentout.json` **141/141, 0 diff**. Zero regressions,
+full sweep re-verified at exact prior counts: `turn5-faint.json`
+**110/110**, `turn5-rockslide.json` **256/256**, `turn5-endeavor.json`
+**254/254**, `turn5-menu.json` **41/41**, `turn4-rockslide.json`
+**250/250**, `turn4-doubleteam.json` **249/249**, `turn3-rockslide.json`
+**256/256**, `turn1-rockslide.json` **256/256**, `fight-submenu.json`
+**235/235**, `turn3-endeavor.json` **192/192**, `turn3-menu.json`
+**254/254**, `turn2-endeavor-drain.json` **201/201**, `turn4-menu.json`
+**44/44**, `turn2-dragonbreath.json` **237/237**, `turn1-cloneanim.json`
+**230/230**, `menu-idle.json` **69/69**, `turn2-endeavor.json` **77/77**,
+`s6-acceptance.json` **224/228**, `scene-assembly.json` **256/256**, plus
+`sendout.json` **255/256** (unchanged, the pre-existing named residual).
+
+### What's left
+
+The ball prop (fully spec'd, `docs/faint-switch-notes.md` §8b: slot 7,
+static `(176,64)`, no arc, 6727-6756) through Sitrus/settled-menu - all
+still pinned in docs, none reached this session (ran out of cap after
+landing the icon-bar mechanism cleanly). The two-anchor design §9
+prescribed (ball/tint/particles off one handoff-shaped tick vs. the
+front-sprite stretch tables off a different one 24 ticks later) is
+unaffected by this session's own findings and remains the right shape for
+whoever implements the ball/materialize window next.

@@ -5407,24 +5407,114 @@ export function turn5RockSlideKoDismissEligible(t: number): boolean {
 }
 
 /**
+ * S7 slice L (docs/faint-switch-notes.md §9 RAM-probed this session, RAM-
+ * confirmed, NOT curve-fit): the opponent party-icon-bar's SWITCH-IN
+ * re-trigger. `switchin-iconbar-slidein.json`'s own probe (`gSprites[]`
+ * x2 for the bar's own reused slot 3 and the 6 icons' fresh slots 54-59,
+ * every tick 6580-6614) shows all SEVEN sprites share the IDENTICAL x2
+ * sequence every tick, zero stagger - bit-for-bit `OPP_BAR_X2` itself
+ * (creation at RAM tick 6587, `x2` walks its 20 entries -95..0 through RAM
+ * tick 6606) - unlike the S6 intro's own per-icon-staggered `OPP_ICON_X2`
+ * tables. This corrects docs §9's own open item 1 (which guessed a
+ * "9-value ease-out tail" and hit a real residual) - the true shape is the
+ * full 20-step bar curve, applied uniformly to bar AND icons alike, no new
+ * table needed.
+ */
+export const TURN5_ICONBAR_CREATE_TICK = 6587;
+
+/**
+ * `switchin-iconbar-transient.json`'s own probe (this session): at RAM
+ * tick 6725 - the SAME tick as docs §9's own flagged "unexplained tick-6727
+ * transient" (render lag `rt=t-1` puts render 6727 one tick after RAM
+ * 6725's own first-visible render 6726) - all 7 icon-bar sprites (bar +
+ * 6 icons) flip their OAM `objMode` from NORMAL to BLEND simultaneously
+ * (`oam0`'s raw u32 jumps by exactly `0x400` for all 7, one shared tick),
+ * then are ALL destroyed together at RAM tick 6742 (`flags`/`x`/`y`
+ * reset to the dead-sprite default `304,160,0` for all 7 in the same
+ * tick). This is `Task_HidePartyStatusSummary`'s own alpha-blend-then-
+ * destroy shape (already modeled for the PLAYER bar's own intro exit,
+ * `playerSummaryFadeEva`) applied to the OPPONENT bar here - a flat
+ * 1-unit-per-tick ramp (not the player exit's "every OTHER tick" cadence)
+ * fits the 16-render-tick window (6727-6742) `switchin-iconbar-transient.json`
+ * covers exactly: `eva` holds 16 (unblended) through render 6726, ramps
+ * 16->0 over renders 6727-6742, and the sprites vanish outright at 6743 -
+ * resolving docs §9's own "alternating 1091/1087px, render 6727-6742"
+ * finding as this exact hardware alpha-blend ramp, not a new position/
+ * palette mechanism. The freed slot 3 is reused by the open-particle
+ * burst's own first spawn at RAM 6744 (docs §8d, unrelated to this bar).
+ */
+export const TURN5_ICONBAR_FADE_START_TICK = 6725;
+export const TURN5_ICONBAR_DESTROY_TICK = 6742;
+
+/** GROVYLE's own former slot (index 5) flips `"Full"` -> `"Statused"` (docs §9's own pixel correction) - the other 5 slots are unchanged from `ballIcons`' own opponent-side array. */
+export const TURN5_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Full", "Full", "Statused"];
+
+export function turn5IconBarEva(t: number): number | null {
+  const rt = t - 1;
+  if (rt < TURN5_ICONBAR_FADE_START_TICK) return null;
+  return Math.max(0, 16 - (rt - TURN5_ICONBAR_FADE_START_TICK));
+}
+
+/** Draws the switch-in icon-bar re-trigger (bar + 6 icons, uniform `x2` slide-in, then the shared alpha-blend fade-out) - a no-op outside `[TURN5_ICONBAR_CREATE_TICK, TURN5_ICONBAR_DESTROY_TICK)` (RAM ticks, `rt = t - 1` convention per `ballIcons`' own doc). */
+function drawTurn5IconBar(fb: Uint8Array, t: number): void {
+  const rt = t - 1;
+  if (rt < TURN5_ICONBAR_CREATE_TICK || rt >= TURN5_ICONBAR_DESTROY_TICK) return;
+  const x2 = tableX2(OPP_BAR_X2, TURN5_ICONBAR_CREATE_TICK, rt);
+  const eva = turn5IconBarEva(t);
+  drawBallStatusBar(fb, -24 + x2, 40, true, eva);
+  for (let i = 0; i < 6; i += 1) {
+    const tile = ballDisplay.tileset.tiles[ballStateTileIndex(TURN5_OPPONENT_ICON_STATES[i]!)];
+    if (!tile) continue;
+    const x = 26 + 10 * i + x2;
+    for (let py = 0; py < 8; py += 1) {
+      for (let px = 0; px < 8; px += 1) {
+        const idx = tile[py * 8 + px]!;
+        if (idx === 0) continue;
+        const c = ballDisplay.palette[idx];
+        if (!c) continue;
+        blendedSetPixel(fb, x + px, 32 + py, c, eva);
+      }
+    }
+  }
+}
+
+/** "BUG CATCHER DESTIN sent\nout PIDGEOTTO!" (docs §9, `sText_Trainer1SentOutPkmn` family, same line 1 as `SENDOUT_LINE1`) - starts printing at the oracle-pixel-confirmed absolute tick 6687, 1 char/tick. */
+const SWITCHIN_SENTOUT_LINE1 = "BUG CATCHER DESTIN sent";
+const SWITCHIN_SENTOUT_LINE2 = "out PIDGEOTTO!";
+export const SWITCHIN_SENTOUT_TEXT_TOTAL = SWITCHIN_SENTOUT_LINE1.length + SWITCHIN_SENTOUT_LINE2.length;
+export const SWITCHIN_SENTOUT_TEXT_START_TICK = 6687;
+
+export function switchinSentOutTextVisibleChars(t: number): number {
+  if (t < SWITCHIN_SENTOUT_TEXT_START_TICK) return 0;
+  return Math.min(SWITCHIN_SENTOUT_TEXT_TOTAL, t - SWITCHIN_SENTOUT_TEXT_START_TICK + 1);
+}
+
+/**
  * S7 slice K's own ROCK_SLIDE/faint window dispatcher - the held kickoff
  * text (still Onix's "ONIX used\nROCK SLIDE!", drawn by `drawTurn5EndeavorText`'s
  * own handoff caller, `rockSlideTextVisibleChars` unchanged) through the
  * hit-flash/drain/sink transient, then the fainted text (auto-printed) and
- * its own indefinite button-gated hold. Deliberately stops rendering any
- * FURTHER phase (the party-icon-bar re-trigger, DESTIN's own switch-in
- * text) - out of this slice's scope; the committed trace's own stopping
- * boundary (tick 6587, pixel-confirmed 0 diff through here, first change at
- * 6588) sits safely before any of that.
+ * its own button-gated hold. S7 slice L extends this dispatcher two phases
+ * further (docs/faint-switch-notes.md §9): the opponent icon-bar re-trigger
+ * (`drawTurn5IconBar`, layered on top throughout - it's a no-op before/after
+ * its own window) and DESTIN's own "sent out PIDGEOTTO!" text, which hard-
+ * cuts over the still-held fainted text at `SWITCHIN_SENTOUT_TEXT_START_TICK`
+ * (6687) with no further button press needed (matching every other auto-
+ * advancing text transition in this dossier).
  */
 function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   drawTurn5RockSlideAttack(fb, t);
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn5Hp);
+  drawTurn5IconBar(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {
     drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    return;
+  }
+  if (t >= SWITCHIN_SENTOUT_TEXT_START_TICK) {
+    drawMessageTextLines(fb, SWITCHIN_SENTOUT_LINE1, SWITCHIN_SENTOUT_LINE2, switchinSentOutTextVisibleChars(t));
     return;
   }
   drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t, pressTick));

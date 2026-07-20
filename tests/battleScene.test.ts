@@ -23,11 +23,19 @@ import {
   shiftBottom,
   shiftTop,
   sortAliveParticlesByScreenY,
+  SWITCHIN_SENTOUT_TEXT_START_TICK,
+  SWITCHIN_SENTOUT_TEXT_TOTAL,
+  switchinSentOutTextVisibleChars,
   TEXT_START_TICK,
   TEXT_TOTAL_CHARS,
   textVisibleChars,
   TICK0,
+  TURN5_ICONBAR_CREATE_TICK,
+  TURN5_ICONBAR_DESTROY_TICK,
+  TURN5_ICONBAR_FADE_START_TICK,
+  TURN5_OPPONENT_ICON_STATES,
   turn3SubmenuBounceTick,
+  turn5IconBarEva,
   turn5RockSlideKoDismissEligible,
   windowRange,
   type BattleSceneState,
@@ -1368,5 +1376,39 @@ describe("S7 slice K: the KO-text dismiss gate (turn5KoDismissElapsed) - both br
     let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn5Confirm().battleScene };
     state = tick(state, new Set(["A"])); // trace tick 5960 - nowhere near eligible (6543)
     expect(state.battleScene!.turn5KoDismissElapsed).toBeNull();
+  });
+});
+
+describe("S7 slice L (docs/faint-switch-notes.md §9's own follow-up, RAM-probed this session): the switch-in icon-bar re-trigger", () => {
+  it("TURN5_OPPONENT_ICON_STATES: only GROVYLE's own former slot (index 5) flips Full -> Statused, oracle-pixel-confirmed (docs §9's own correction)", () => {
+    expect(TURN5_OPPONENT_ICON_STATES).toEqual(["Empty", "Empty", "Empty", "Full", "Full", "Statused"]);
+  });
+
+  it("turn5IconBarEva: the tick-6727 transient RAM-pinned this session (switchin-iconbar-transient.json) - flat (unblended) through the render tick right before the fade, then a 1-unit/tick ramp 16->0 over RAM ticks 6725-6741, clamped at 0 through the destroy tick", () => {
+    // rt = t - 1 (this module's own established render-lag convention) -
+    // render tick TURN5_ICONBAR_FADE_START_TICK + 1 is the first tick whose
+    // rt equals the RAM tick the OAM objMode flip actually lands on.
+    expect(turn5IconBarEva(TURN5_ICONBAR_FADE_START_TICK)).toBeNull(); // rt = FADE_START-1, still flat
+    expect(turn5IconBarEva(TURN5_ICONBAR_FADE_START_TICK + 1)).toBe(16); // rt = FADE_START, mode just flipped, still visually opaque
+    expect(turn5IconBarEva(TURN5_ICONBAR_FADE_START_TICK + 2)).toBe(15);
+    expect(turn5IconBarEva(TURN5_ICONBAR_FADE_START_TICK + 17)).toBe(0); // rt = FADE_START+16 = DESTROY_TICK-1, fully faded
+    expect(turn5IconBarEva(TURN5_ICONBAR_DESTROY_TICK + 5)).toBe(0); // clamped, not negative
+  });
+
+  it("TURN5_ICONBAR_CREATE_TICK/FADE_START_TICK/DESTROY_TICK: the three RAM-pinned anchors this session's probe found (bar + 6 icons move/fade/destroy in lockstep, no per-icon stagger)", () => {
+    expect(TURN5_ICONBAR_CREATE_TICK).toBe(6587);
+    expect(TURN5_ICONBAR_FADE_START_TICK).toBe(6725);
+    expect(TURN5_ICONBAR_DESTROY_TICK).toBe(6742);
+  });
+});
+
+describe("S7 slice L: switchinSentOutTextVisibleChars (docs/faint-switch-notes.md §9, byte-exact 6687-6726)", () => {
+  it("0 chars before the start tick, growing 1/tick from it, clamped at the full total", () => {
+    expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK - 1)).toBe(0);
+    expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK)).toBe(1);
+    expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK + 1)).toBe(2);
+    expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK + SWITCHIN_SENTOUT_TEXT_TOTAL + 50)).toBe(
+      SWITCHIN_SENTOUT_TEXT_TOTAL,
+    );
   });
 });

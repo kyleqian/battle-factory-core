@@ -4,6 +4,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 180 — Bounded worker: S7 slice L-2 (retry) — icon-bar re-trigger LANDED, tick-6727 transient RESOLVED (RAM-probed, not guessed); `turn5-sentout.json` (new) **141/141, 0 diff**, `npm test` **780/780** (+4), build green, zero regressions
+
+- **State:** `npm test` 780/780, `npm run build` green, tree clean.
+  `turn5-sentout.json` (icon-bar create/slide/settle/text/fade/destroy,
+  tick 6588-6728) **141/141, 0 diff** (new). Full regression sweep at exact
+  prior counts, all 0 diff: `turn5-faint` 110/110, `turn5-rockslide`
+  256/256, `turn5-endeavor` 254/254, `turn5-menu` 41/41, `turn4-rockslide`
+  250/250, `turn4-doubleteam` 249/249, `turn3-rockslide` 256/256, `turn1-
+  rockslide` 256/256, `fight-submenu` 235/235, `turn3-endeavor` 192/192,
+  `turn3-menu` 254/254, `turn2-endeavor-drain` 201/201, `turn4-menu`
+  44/44, `turn2-dragonbreath` 237/237, `turn1-cloneanim` 230/230,
+  `menu-idle` 69/69, `turn2-endeavor` 77/77, `s6-acceptance` 224/228,
+  `scene-assembly` 256/256, plus `sendout.json` **255/256** (unchanged,
+  pre-existing named residual).
+- **Did:** per the supervisor's own explicit instruction, RAM-probed BOTH
+  of #179's open unknowns BEFORE writing any render code (two new
+  `ram-probe.py` specs, `switchin-iconbar-{slidein,transient}.json`, each
+  run twice, byte-identical). Result: (1) the icon slide-in is NOT
+  per-icon-staggered as #179 guessed - all 7 sprites (bar + 6 icons) share
+  one IDENTICAL `x2` curve, bit-for-bit `OPP_BAR_X2` itself, zero stagger.
+  (2) the tick-6727 "mystery transient" RESOLVED: at RAM 6725 all 7
+  sprites' OAM `objMode` flips `NORMAL`->`BLEND` simultaneously (`x`/`y`/
+  `x2`/`y2` unchanged - ruling out a position explanation), then all 7 are
+  destroyed together at RAM 6742 - the same `Task_HidePartyStatusSummary`
+  alpha-blend-then-destroy shape already modeled for the PLAYER bar's own
+  S6-intro exit (`playerSummaryFadeEva`), just a flatter cadence here (1
+  unit/tick, not "every other"). Implemented `drawTurn5IconBar` (reuses
+  `OPP_BAR_X2`/`tableX2`/`drawBallStatusBar`/`blendedSetPixel` - zero new
+  low-level drawing code) + the sent-out text hard-cut at the oracle-pinned
+  absolute tick 6687. Landed BOTH the mandatory rung (a) and rung (b) in
+  one commit (`turn5-sentout.json`, 6588-6728) since both were RAM-resolved
+  before any code was written - stops one tick before the unimplemented
+  ball prop's own first pixel (confirmed via a pixel-level diff that the
+  gap is ball-shaped, not icon-bar-shaped: mismatched region isolated to
+  x170-181/y58-69, the ball's own resting corner, ball-open-palette
+  colors). Added 4 Tier-1 pins (icon-flip state, 3 for the tick-6727
+  eva-ramp mechanism, 1 for the sent-out text timing). Docs: `docs/faint-
+  switch-notes.md` §9 gained a "Resolution" subsection; new §25 in
+  `docs/battle-turn-notes.md`.
+- **Next:** the ball prop (fully spec'd, §8b: slot 7, static `(176,64)`,
+  6727-6756) through Sitrus/settled-menu - all still pinned in docs, none
+  reached this session (ran out of cap after landing the icon-bar
+  mechanism cleanly). The two-anchor design (ball/tint/particles vs. the
+  front-sprite stretch tables, 24 ticks apart) is unaffected by this
+  session's findings and remains the right shape for that work.
+- **Notes:** no new papercuts - the RAM-probe-first approach (both
+  unknowns resolved before writing render code) avoided #179's own
+  papercut (a large speculative draft reverted after burning most of the
+  cap) entirely; worth keeping as the default order for future sessions
+  chasing an undocumented pixel transient.
+
+---
 ## 179 — Bounded worker: S7 slice L attempt (switch-in tail) — NOT LANDED, ran out of the 60-min cap mid-verification; speculative engine draft reverted (uncommitted); one real new blocker pinned precisely, `npm test` 776/776 + build unchanged (docs-only commit)
 
 - **State:** tree unchanged from #178 except one docs-only addition
@@ -76,64 +128,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   choice is its only in-flight unknown.
 - **Notes:** no new papercuts (known ram-probe bitfield gap worked
   around as documented).
-
----
-## 177 — Bounded worker: S7 slice K — turn 5's ROCK_SLIDE (Grovyle 1→0, the faint), the faint sink, the button-gated KO hold, and "Foe GROVYLE fainted!", landed green, ending BEFORE "DESTIN sent out PIDGEOTTO!"; `turn5-rockslide.json` (new) **256/256**, `turn5-faint.json` (new) **110/110**, both 0 diff, `npm test` **776/776** (+8), build green, zero regressions
-
-- **State:** `npm test` 776/776, `npm run build` green, tree clean.
-  `turn5-rockslide.json` (kickoff/shake/rocks/hit-flash/drain, tick
-  6222-6477) **256/256**, `turn5-faint.json` (pre-sink hold tail through
-  the sink, healthbox vanish, fainted text, cursor, the real KO-dismiss `A`
-  press, and 26 post-press static ticks, tick 6478-6587) **110/110**, both
-  0 diff. Full regression sweep at exact prior counts, all 0 diff:
-  `turn5-endeavor` 254/254, `turn5-menu` 41/41, `turn4-rockslide` 250/250,
-  `turn4-doubleteam` 249/249, `turn3-rockslide` 256/256, `turn1-rockslide`
-  256/256, `fight-submenu` 235/235, `turn3-endeavor` 192/192, `turn3-menu`
-  254/254, `turn2-endeavor-drain` 201/201, `turn4-menu` 44/44, `turn2-
-  dragonbreath` 237/237, `turn1-cloneanim` 230/230, `menu-idle` 69/69,
-  `turn2-endeavor` 77/77, plus `sendout.json` **255/256** (unchanged - the
-  pre-existing named tick-1496 particle-color residual, untouched).
-- **Did:** RAM/pixel-probed turn 5's own ROCK_SLIDE window first (dense
-  oracle sweeps, no new committed probe traces needed - reused the
-  already-committed groundtruth). Parameterized turn 3's own ROCK_SLIDE
-  mechanism unchanged (synthetic anchor `TURN5_ROCKSLIDE_PRESS_TICK=5829`,
-  cross-confirmed two independent ways: the kickoff-text hard-cut pixel
-  tick AND the drain formula's own raw-hp-field-write prediction both land
-  on 6429 exactly). Implemented the faint sink as THE FORMULA (§7a's closed
-  form: `grovyleFaintSinkRowsAndY2`, handoff S=6502, n=8, +1 render lag),
-  not a table - pinned against every one of the 8 RAM-confirmed step ticks.
-  Re-probed (not assumed) and answered the brief's own "what happens to
-  Grovyle's healthbox" question: it vanishes entirely at S+19=6521, a fact
-  not itemized anywhere in the prior dossier. Implemented the KO-text
-  button gate as real state (`BattleSceneState.turn5KoDismissElapsed`,
-  `sendOutPressElapsed`'s own "created directly" idiom) - `core.ts`'s
-  `tick()` has no auto-advance timer that could fire past this point, so
-  "hold indefinitely" falls out of the state machine's own shape rather
-  than a bolted-on freeze check; both branches (idle-forever, A-advances)
-  Tier-1-pinned. Found and fixed two real bugs the naive intro-cursor reuse
-  would have shipped wrong, both pixel-confirmed via `npm run compare`
-  before committing: the wait-cursor's X position is text-width-relative
-  (`LINE2_ORIGIN.x + measureText(...line2)`), not the fixed `CURSOR_DEST_X`
-  the S6 intro's own case coincidentally matches; and this cursor's own
-  bounce is a one-shot climb-then-hold (0→1→2 over 9-tick steps, then flat
-  through this trace's own stopping tick), not `cursorState`'s perpetual
-  4-phase loop - both generalized as real parameters on `cursorState`/
-  `drawCursor` rather than a second copy-pasted mechanism, S6 intro
-  behavior re-verified byte-exact (`sendout.json`, `s6-acceptance.json`
-  unaffected). The opponent's own EMPTY healthbox bar (Grovyle's hp=0) is
-  oracle-exercised for the first time - `calcBarFilledPixels`'s existing
-  general formula already renders it correctly, zero compositor changes,
-  confirmed via `npm run compare` not assumed. Added 8 Tier-1 pins: 3 sink-
-  formula (all 8 RAM steps + before/after-destroy boundaries), 1
-  eligibility-boundary, 2 KO-gate state-machine (both branches), 1 early-
-  press-dropped, 1 empty-bar `composeOpponentHealthbox` pin (mirrors the
-  existing hp=1/117 player-side pin). Docs: new §24 in
-  `docs/battle-turn-notes.md`.
-- **Next:** the switch-in tail (tick 6588 on - party-icon-bar re-trigger,
-  DESTIN's own "sent out PIDGEOTTO!" text at 6687, ball-throw/materialize
-  reusing `GROVYLE_STRETCH_TABLE` per §7b, healthbox slide-in, Onix's own
-  Sitrus proc per §2's exact formula, the next settled menu) is the
-  immediate next slice - ground truth already substantially banked in
-  `docs/faint-switch-notes.md` §3/§6/§7.
-- **Notes:** no new papercuts this session.
 
