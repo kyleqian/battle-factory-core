@@ -77,6 +77,7 @@ const TURN2_FIGHT_SUBMENU_STATE = {
   closeElapsed: null,
   confirmElapsed: TURN2_PRESS_TICK - TICK0,
   activeMonMoveset: rentalMoveset("ONIX"),
+  reopenedFromClose: false,
 };
 /** Same as `pixelAtSentOut`, but with turn 2's own FIGHT submenu already confirmed on ENDEAVOR (cursor slot 2) - the state `drawTurn2KickoffText`/`drawEndeavorSquish` render under (S7 slice E1d-retry, §15b). */
 function pixelAtTurn2(t: number, x: number, y: number): [number, number, number] {
@@ -95,6 +96,7 @@ const TURN4_FIGHT_SUBMENU_STATE = {
   closeElapsed: null,
   confirmElapsed: TURN4_PRESS_TICK - TICK0,
   activeMonMoveset: rentalMoveset("ONIX"),
+  reopenedFromClose: false,
 };
 /** Same as `pixelAtTurn2`, but turns 1-3 all resolved and the FIGHT submenu confirmed on turn 4's own ROCK_SLIDE (slot 0) - the state `drawTurn4KickoffText`/`drawTurn4RockSlideWindow` render under (S7 slice I resolution, docs/battle-turn-notes.md §22). */
 function pixelAtTurn4(t: number, x: number, y: number): [number, number, number] {
@@ -1331,6 +1333,7 @@ describe("S7 slice K: the KO-text dismiss gate (turn5KoDismissElapsed) - both br
           closeElapsed: null,
           confirmElapsed: 5959 - TICK0,
           activeMonMoveset: rentalMoveset("ONIX"),
+          reopenedFromClose: false,
         },
         turn1Resolved: true,
         turn2Resolved: true,

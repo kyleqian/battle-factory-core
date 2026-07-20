@@ -77,17 +77,18 @@ describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
       closeElapsed: null,
       confirmElapsed: null,
       activeMonMoveset: ONIX_MOVESET,
+      reopenedFromClose: false,
     });
   });
 
   it("openFightSubmenu sets openElapsed and resets cursor/displayCursor to ROCK_SLIDE", () => {
     const state = openFightSubmenu(847, ONIX_MOVESET);
-    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET });
+    expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false });
   });
 
   it("openFightSubmenu's optional initialCursor persists the prior turn's own cursor position (S7 slice F, docs/battle-turn-notes.md §13: turn 3's reopen rests on slot 2, DRAGON_BREATH, where turn 2's own confirm left it)", () => {
     const state = openFightSubmenu(3846, ONIX_MOVESET, 2);
-    expect(state).toEqual({ openElapsed: 3846, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET });
+    expect(state).toEqual({ openElapsed: 3846, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET, reopenedFromClose: false });
   });
 
   it("closeFightSubmenu is a no-op if not open, or already closing", () => {
@@ -213,6 +214,86 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
   });
 });
 
+describe("battleMenu: ISSUES #25 - a B-close no longer strands the submenu forever; a fresh A-press reopens it, cursor persisted, at every turn epoch", () => {
+  it("turn 1 epoch (pre-confirm): B-close then A before the close redraw settles is still ignored (the gate itself, not just the reopen, is pixel-timed)", () => {
+    let state = stateAtTick(1887);
+    state = press(state, ["A"]); // opens at 1887
+    for (let i = 0; i < 5; i += 1) state = press(state, []); // reveal at 1892
+    state = press(state, ["RIGHT"]); // nav to BIND (cursor 1)
+    state = press(state, []); // displayCursor catches up
+    state = press(state, ["B"]); // close
+    expect(state.battleScene!.fightSubmenu.closeElapsed).not.toBeNull();
+    for (let i = 0; i < FIGHT_SUBMENU_CLOSE_DELAY - 2; i += 1) state = press(state, []); // one tick short of settled
+    state = press(state, ["A"]); // too early - still stranded pre-fix-style
+    expect(state.battleScene!.fightSubmenu.openElapsed).not.toBeNull(); // (never actually became null - `closeFightSubmenu` doesn't touch it)
+    expect(state.battleScene!.fightSubmenu.closeElapsed).not.toBeNull(); // still "closed, not yet reopenable"
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(1); // untouched by the rejected press
+  });
+
+  it("turn 1 epoch (pre-confirm): once the close redraw settles, a fresh A REOPENS the submenu with the cursor PERSISTED (not reset to ROCK_SLIDE) and reopenedFromClose=true, without advancing turn1Resolved/turn2Resolved (ISSUES #25's own exact reported scenario)", () => {
+    let state = stateAtTick(1887);
+    state = press(state, ["A"]); // opens at 1887
+    for (let i = 0; i < 5; i += 1) state = press(state, []); // reveal at 1892
+    state = press(state, ["RIGHT"]); // nav to BIND (cursor 1)
+    state = press(state, []);
+    state = press(state, ["B"]); // close
+    for (let i = 0; i < FIGHT_SUBMENU_CLOSE_DELAY - 1; i += 1) state = press(state, []); // settle
+    state = press(state, ["A"]); // reopen
+    const sm = state.battleScene!.fightSubmenu;
+    expect(sm.openElapsed).not.toBeNull();
+    expect(sm.closeElapsed).toBeNull();
+    expect(sm.confirmElapsed).toBeNull();
+    expect(sm.cursor).toBe(1); // persisted at BIND, exactly where the B-close left it
+    expect(sm.displayCursor).toBe(1);
+    expect(sm.reopenedFromClose).toBe(true);
+    expect(state.battleScene!.turn1Resolved).toBe(false); // no turn-epoch flag advanced by this reopen
+    expect(state.battleScene!.turn2Resolved).toBe(false);
+    expect(state.battleScene!.turn3Resolved).toBe(false);
+    expect(state.battleScene!.turn4Resolved).toBe(false);
+  });
+
+  it("the reopened submenu is fully interactive again: nav + a second close + a second reopen (close->reopen->nav->close->reopen cycling) keeps persisting the cursor each time", () => {
+    let state = stateAtTick(1887);
+    state = press(state, ["A"]);
+    for (let i = 0; i < 5; i += 1) state = press(state, []);
+    state = press(state, ["B"]); // close at ROCK_SLIDE (cursor 0, never navigated yet)
+    for (let i = 0; i < FIGHT_SUBMENU_CLOSE_DELAY - 1; i += 1) state = press(state, []);
+    state = press(state, ["A"]); // reopen #1
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    for (let i = 0; i < FIGHT_SUBMENU_OPEN_DELAY; i += 1) state = press(state, []); // this reopen's own settle
+    state = press(state, ["DOWN"]); // nav to DRAGON_BREATH (cursor 2)
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(2);
+    state = press(state, []);
+    state = press(state, ["B"]); // close #2, cursor still 2
+    for (let i = 0; i < FIGHT_SUBMENU_CLOSE_DELAY - 1; i += 1) state = press(state, []);
+    state = press(state, ["A"]); // reopen #2
+    const sm = state.battleScene!.fightSubmenu;
+    expect(sm.cursor).toBe(2); // persisted across BOTH close/reopen cycles
+    expect(sm.reopenedFromClose).toBe(true);
+    expect(state.battleScene!.turn1Resolved).toBe(false); // still no epoch flag advanced, after 2 full cycles
+  });
+
+  it("turn 3 epoch (post-confirm reopen): the SAME same-turn close/reopen mechanism also works once a turn-epoch reopen has already happened - cursor persists, and turn2Resolved (already true from the epoch reopen itself) is not advanced further by this same-turn cycle", () => {
+    let state = stateAtTurn3Reopen(3846);
+    state = press(state, ["A"]); // turn-epoch reopen for turn 3, cursor persisted at 2 (DRAGON_BREATH)
+    expect(state.battleScene!.turn2Resolved).toBe(true);
+    for (let i = 0; i < 5; i += 1) state = press(state, []); // FIGHT_SUBMENU_OPEN_DELAY settle
+    state = press(state, ["UP"]); // nav 2(DRAGON_BREATH) -> 0(ROCK_SLIDE)
+    state = press(state, []);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    state = press(state, ["B"]); // same-turn close
+    for (let i = 0; i < FIGHT_SUBMENU_CLOSE_DELAY - 1; i += 1) state = press(state, []); // settle
+    state = press(state, ["A"]); // ISSUES #25's own reopen branch, NOT a turn-epoch branch
+    const sm = state.battleScene!.fightSubmenu;
+    expect(sm.openElapsed).not.toBeNull();
+    expect(sm.closeElapsed).toBeNull();
+    expect(sm.cursor).toBe(0); // persisted at ROCK_SLIDE, where the nav+close left it
+    expect(sm.reopenedFromClose).toBe(true);
+    expect(state.battleScene!.turn2Resolved).toBe(true); // unchanged - already true from the epoch reopen, not re-advanced
+    expect(state.battleScene!.turn3Resolved).toBe(false); // NOT advanced by this same-turn cycle
+  });
+});
+
 /** Turn 2's own real confirm tick (`battleScene.test.ts`'s own `TURN2_PRESS_TICK`, same fixture) - DRAGON_BREATH confirmed on cursor slot 2, well past `DRAGONBREATH_MENU_REDRAW_DELAY`'s own 391-tick settle by the time these tests press a fresh A. */
 const TURN2_PRESS_TICK = 2945;
 
@@ -232,6 +313,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
         closeElapsed: null,
         confirmElapsed: TURN2_PRESS_TICK - SCENE_TICK0,
         activeMonMoveset: rentalMoveset("ONIX"),
+        reopenedFromClose: false,
       },
       turn1Resolved: true,
       turn2Resolved: false,
@@ -349,6 +431,7 @@ function stateAtTurn3Confirm(): EngineState {
         closeElapsed: null,
         confirmElapsed: 3891 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
+        reopenedFromClose: false,
       },
       turn1Resolved: true,
       turn2Resolved: true,
@@ -506,6 +589,7 @@ function stateAtTurn4Confirm(): EngineState {
         closeElapsed: null,
         confirmElapsed: 4925 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
+        reopenedFromClose: false,
       },
       turn1Resolved: true,
       turn2Resolved: true,
@@ -530,6 +614,7 @@ function stateAtTurn5Confirm(): EngineState {
         closeElapsed: null,
         confirmElapsed: 5959 - SCENE_TICK0,
         activeMonMoveset: ONIX_MOVESET,
+        reopenedFromClose: false,
       },
       turn1Resolved: true,
       turn2Resolved: true,

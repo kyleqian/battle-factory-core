@@ -94,6 +94,7 @@ import {
   advanceFightSubmenuDisplay,
   closeFightSubmenu,
   confirmFightMove,
+  FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_DELAY,
   MENU_DRAW_TICK,
   moveFightCursor,
@@ -243,6 +244,48 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       } else if (newKeys.has("DOWN")) {
         fightSubmenu = { ...fightSubmenu, cursor: moveFightCursor(fightSubmenu.cursor, "DOWN") };
       }
+    } else if (
+      fightSubmenu.closeElapsed !== null &&
+      newKeys.has("A") &&
+      sceneT >= SCENE_TICK0 + fightSubmenu.closeElapsed + FIGHT_SUBMENU_CLOSE_DELAY
+    ) {
+      // ISSUES #25 fix: a B-close (`closeElapsed !== null`) used to strand
+      // the submenu forever - no other branch's guard could ever fire again
+      // (branch 1 needs `openElapsed === null`; the nav branch above needs
+      // `closeElapsed === null`; every turn-epoch branch below needs
+      // `confirmElapsed !== null`, never set on a B-close). Oracle-proven
+      // (docs/battle-menu-notes.md §ISSUES-25): once the close redraw's own
+      // round-trip settles (same `FIGHT_SUBMENU_CLOSE_DELAY` gate the resumed
+      // action menu's own redraw uses), a fresh A-press reopens FIGHT again -
+      // at EVERY turn epoch, not just before the first confirm, and without
+      // advancing any `turnNResolved` flag (this is a same-epoch reopen, not
+      // a turn boundary). `gMoveSelectionCursor` is real per-battler RAM
+      // state that persists across close/reopen exactly as it already
+      // persists across turns (the turn-3 reopen below passes its own
+      // literal `initialCursor` for the same reason) - modeled generically
+      // here by threading the CURRENT (never-reset) `fightSubmenu.cursor`
+      // through instead of a literal, rather than special-casing "closed"
+      // cursor state separately.
+      //
+      // `+2` (not the usual `+1` press-tick convention every other
+      // `openFightSubmenu` call site here uses): oracle-probed dense against
+      // `tools/compare/traces/fight-submenu-reopen.json` (docs/battle-menu-
+      // notes.md §ISSUES-25) - this specific reopen's own DMA-wait redraw is
+      // pixel-confirmed to land exactly ONE TICK LATER than
+      // `FIGHT_SUBMENU_OPEN_DELAY` alone predicts from the true press tick
+      // (revealed at pressTick+6, not +5 - the plain `+1` encoding
+      // mismatched by a full-frame 7280px/19% diff at the wrong tick,
+      // 0 diff once corrected). Unlike the first open / turn-epoch reopens
+      // (which re-enter FIGHT from a genuinely fresh `PlayerHandleChooseAction`
+      // call after a whole turn's engine processing), this reopen fires while
+      // still mid-poll inside the settled action menu's own continuously-live
+      // `HandleInputChooseAction` - plausibly a real extra tick of input-
+      // buffering latency specific to that path, not proven from source.
+      // Encoding the extra tick into `openElapsed` itself (rather than a
+      // second reveal-delay constant) delays both consumers of `openElapsed`
+      // - the render's `revealTick` and the nav-input gate above - in
+      // lockstep, matching what the oracle actually shows for both.
+      fightSubmenu = openFightSubmenu(battleScene.elapsed + 2, activeMonMoveset(draftScreen), fightSubmenu.cursor, true);
     } else if (
       !turn1Resolved &&
       fightSubmenu.confirmElapsed !== null &&

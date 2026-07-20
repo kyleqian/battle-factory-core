@@ -433,6 +433,7 @@ import {
   FIGHT_SUBMENU_OPEN_DELAY,
   FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT,
   FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT,
   FIGHT_SUBMENU_SLOT_NAMES,
   CLOSED_FIGHT_SUBMENU_STATE,
@@ -3565,9 +3566,21 @@ function drawActionMenuIdleContent(
   if (turn2Resolved) drawPlayerHealthboxHpOverlay(fb, playerHp, healthboxY2);
 }
 
-function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: boolean, turn2Resolved: boolean = false, turn3Resolved: boolean = false, turn4Resolved: boolean = false): void {
+function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: boolean, turn2Resolved: boolean = false, turn3Resolved: boolean = false, turn4Resolved: boolean = false, reopenedFromClose: boolean = false): void {
   if (t <= MENU_IDLE_BLANK_END_TICK) {
     drawRect(fb, menuIdleBlank);
+    return;
+  }
+  if (reopenedFromClose) {
+    // ISSUES #25: this reopen's own DMA-wait hold is NOT a bounce-sprite
+    // reset (see `FightSubmenuState.reopenedFromClose`'s own doc) - it keeps
+    // showing whatever shift was already active right before this reopen's
+    // own press (`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`, the same one the
+    // resumed action menu was using), same "wait holds freeze the prior
+    // shift, only the reveal steps to the next one" pattern the original
+    // open/close events already established (see
+    // `FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT`'s own doc).
+    drawActionMenuIdleContent(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, turn1Resolved, turn2Resolved, turn3Resolved ? anchorPlayerAfterTurn3Hp : anchorPlayerAfterTurnHp, turn3Resolved, turn4Resolved);
     return;
   }
   // S7 slice F: turn 3's own reopen needs the same resettled-bounce remap
@@ -3630,7 +3643,7 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // finding 1's "5-tick hold" turns out to need no special-casing at all:
     // it's just this same bounce cycle naturally dwelling on one phase for
     // that span, pixel-confirmed exact with a plain, unshifted `t`).
-    drawActionMenuIdleWindow(fb, t, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved);
+    drawActionMenuIdleWindow(fb, t, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, sm.reopenedFromClose);
     return;
   }
   if (sm.closeElapsed !== null) {
@@ -3735,6 +3748,11 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
   // I: turn 4's own reopened submenu is the same shape one epoch further.
   // S7 slice J: turn 5's own reopened submenu is the same shape yet another
   // epoch further.
+  // ISSUES #25: a same-turn B-close/reopen (`sm.reopenedFromClose`) is
+  // neither the very first open nor a turn-boundary reset - it inherits the
+  // cumulative DMA-wait drift instead (`FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT`'s
+  // own doc), checked ahead of the plain-`t` fallback since it's otherwise
+  // indistinguishable from turn 1's first open (same `turn1Resolved=false`).
   const idleWaitBounceTick = turn4Resolved
     ? turn5SubmenuBounceTick(t)
     : turn3Resolved
@@ -3743,7 +3761,9 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
         ? turn3SubmenuBounceTick(t)
         : turn1Resolved
           ? turn2SubmenuBounceTick(t)
-          : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+          : sm.reopenedFromClose
+            ? t - FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT
+            : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   drawMenuIdleBounceOverlay(fb, idleWaitBounceTick);
   // S7 slice F (docs/battle-turn-notes.md §13): turn 3's own reopened submenu
   // (cursor persisted at 2, then UP-nav'd to 0) dwells here while waiting for

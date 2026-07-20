@@ -3504,3 +3504,97 @@ ENDEAVOR's own window. The next S7 remainder is DRAGON_BREATH's own window
 (~3129+, out of this session's scope per the brief) and the standing
 ISSUES #19 family (the one residual every ENDEAVOR-window trace still
 carries, root-caused as pre-existing and out of scope for this slice).
+
+## §ISSUES-25: the FIGHT submenu strand after a B-close - FIXED (bounded worker, this session)
+
+**Bug** (user-reported in the browser demo): open FIGHT, press B to exit,
+press A again - nothing happens, forever. **Mechanism**: after
+`closeFightSubmenu` sets `closeElapsed`, no `core.ts` dispatch branch could
+ever fire again for the submenu - branch 1 (first open) requires
+`openElapsed === null` (already false after any open); the nav/close/confirm
+branch requires `closeElapsed === null`; every turn-epoch reopen branch
+requires `confirmElapsed !== null` (never set on a B-close, mutually
+exclusive with it). A B-close permanently stranded the state - the committed
+`fight-submenu.json` trace ends right after its own close settles without
+re-pressing A, which is why 235/235 never caught this.
+
+**Fix**: a new `core.ts` dispatch branch (`fightSubmenu.closeElapsed !==
+null && newKeys.has("A") && sceneT >= closeElapsed + FIGHT_SUBMENU_CLOSE_DELAY`)
+transitions straight from "closed, waiting" to a fresh `openFightSubmenu`
+call - the same "old state -> fresh open in one step" shape the existing
+turn-epoch reopen branches (S7 slices E1/F/I/J) already use from
+`confirmElapsed !== null`, so no new intermediate "reset" state was needed
+(and none was added - `FightSubmenuState`'s own `openElapsed`/`closeElapsed`
+continue meaning exactly what they did before). The cursor is threaded
+through via `fightSubmenu.cursor` (never reset by a close) rather than a
+literal, matching `gMoveSelectionCursor`'s own real persistence (the same
+mechanism turn 3's reopen already relies on for its own `initialCursor`).
+This also means the fix generalizes for free: closing and reopening a
+SECOND time (or a third, ...) just re-enters the same branch, and it fires
+identically whether or not any turn has resolved yet - satisfying "works at
+every turn epoch, without advancing any `turnNResolved` flag" by construction
+rather than as a special case.
+
+**Oracle-probed timing** (`tools/compare/traces/fight-submenu-reopen.json` -
+`fight-submenu.json`'s script verbatim + `A`(2f) + 60 idle, dense stride-1
+captures 2040-2129, **90/90 0 diff**): two real findings, neither assumed:
+1. **The reopen's own redraw takes ONE TICK LONGER than a fresh/first open**:
+   pressTick+6, not pressTick+5 (`FIGHT_SUBMENU_OPEN_DELAY`'s own value,
+   otherwise unchanged and still correct for the very first open and every
+   turn-epoch reopen). A plain `elapsed+1` (the convention every other
+   `openFightSubmenu` call site uses) revealed the submenu one tick early -
+   a 7280px/19% full-frame diff at the wrong tick, 0 diff once corrected.
+   Modeled by passing `elapsed+2` instead of `+1` for this one call site
+   (`core.ts`), which delays both consumers of `openElapsed` (the render's
+   `revealTick` and the nav-input gate) in lockstep - not proven from
+   source, kept as an empirically pixel-fit correction per this run's own
+   convention for these DMA-wait-adjacent constants. Plausible mechanism
+   (unverified): this reopen re-enters `HandleInputChooseMove` while
+   `HandleInputChooseAction` is still mid-poll (bounce sprite continuously
+   live), unlike the turn-epoch reopens or the very first open, which all
+   re-enter from a genuinely fresh call.
+2. **The bounce-overlay sprite is NOT reset by this reopen** (same
+   established rule as the plain B-close: `HandleInputChooseMove` never
+   touches it) - it keeps accumulating the already-documented "+2 ticks of
+   drift per atomic DMA-wait hard-cut" pattern
+   (`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`/`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`'s
+   own docs): a new `FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT = 6` (4, the resumed-
+   menu's own shift, +2 more for this reopen's own hard-cut) is pixel-exact
+   for the reopened submenu's own revealed content. The wait hold BETWEEN
+   the reopen's own press and its reveal is NOT yet shifted by this new
+   amount - it freezes at shift 4 (whatever was already active immediately
+   before the press), the same "a wait hold shows the prior shift, only the
+   reveal steps to the next one" pattern the original open/close events
+   already established. Both are threaded through a new `FightSubmenuState.
+   reopenedFromClose: boolean` field (default `false`, set `true` only by
+   this one dispatch branch) since the render function otherwise has no way
+   to distinguish "same-turn reopen" from "turn 1's very first open" - both
+   present with `turn1Resolved=false` and no other epoch flag advanced.
+
+**Scope note**: the 90/90 clean window covers the B-close, its settle, the
+A-press, the reopen's own DMA-wait transient, and the reopened submenu's
+first several idle ticks. A recurring small residual (single/multi-tick,
+2-6% of the frame, isolated to the Onix/healthbox bounce sprite's own edge
+pixels) appears starting a few ticks further into the reopened submenu's
+own idle dwell (~every 9 ticks) - the same still-unattributed "sine-table
+quantization edge" family `FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`'s own doc
+already flags as an open, not-root-caused residual for the plain resumed-
+menu window (its own tick 2073). Not chased further this session (same
+family, same open status); the committed trace's own capture range was cut
+at the clean boundary rather than ship the residual, per this run's own
+convention.
+
+**Verification**: `npm test` **785/785** (+4: `openFightSubmenu`'s docs
+grew the constructor a 4th param but every prior test's own object literal
+just needed a matching one-line `reopenedFromClose: false` added, not a
+rewrite). New Tier-1 pins (`tests/fightSubmenu.test.ts`): the too-early gate
+itself, a full close->reopen with cursor persistence + `reopenedFromClose`
++ all 4 `turnNResolved` flags unchanged, a close->reopen->nav->close->reopen
+2-cycle with cursor persisted across both, and the SAME mechanism firing
+correctly at a SECOND turn epoch (turn 3's own reopened submenu, `turn2Resolved`
+already true from its own epoch reopen and NOT re-advanced by this same-turn
+cycle). Zero regressions, exact prior counts: `fight-submenu.json`
+**235/235**, `turn3-menu.json` **254/254**, `turn4-menu.json` **44/44**,
+`turn5-menu.json` **41/41**, `turn5-sentout.json` **141/141**, `turn5-
+switchin.json` **167/167**, `turn1-rockslide.json` **256/256**. `npm run
+build` green.

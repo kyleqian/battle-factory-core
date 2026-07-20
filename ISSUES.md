@@ -5,41 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #25 — [USER-REPORTED 2026-07-20, PRIORITIZED] FIGHT submenu can never
-  reopen after a B-close — the engine strands it; oracle proves reopen
-  (with cursor persistence) is the real behavior
-
-Symptom (user, in the browser demo): open FIGHT, press B to exit, press
-A again — nothing happens, forever.
-
-Mechanism (supervisor-confirmed in code, 2026-07-20 ~14:30): after
-`closeFightSubmenu` sets `closeElapsed`, NO `core.ts` dispatch branch can
-ever fire again for the submenu — branch 1 (first open) requires
-`openElapsed === null`, the input branch requires `closeElapsed === null`,
-and every turn-epoch reopen gate requires `confirmElapsed !== null`. A
-B-close therefore permanently strands the state. Nothing resets the
-submenu to a reopenable state after the close redraw completes. The
-committed `fight-submenu.json` trace ends right after its close settles
-without re-pressing A, which is why 235/235 never caught this.
-
-Oracle ground truth (supervisor probe, scratch trace =
-`fight-submenu.json`'s script + `A`(2f) + 60 idle, captures 2046-2179):
-the A press at tick 2118 reopens the FIGHT submenu on real hardware
-(new sha family from ~2125, submenu pixel-confirmed at 2145) and the
-cursor is STILL at slot 2 (DRAGONBREATH, where the trace's nav left it
-before the B-close) with PP 20/20 — cursor persists across close/reopen
-exactly as it persists across turns. Close-redraw side: B at 2046, the
-settled action-menu bounce cycle runs from ~2053.
-
-Fix shape (for the next main-lane worker): when the close redraw
-completes, reset `fightSubmenu` to a reopenable state PRESERVING the
-persistent cursor; the reopen must work at EVERY turn epoch without
-advancing any `turnNResolved` flag, and the reopen's own open-delay/
-redraw pipeline should match the first open's (verify against the probe
-recipe above, then pin with a committed `fight-submenu-reopen.json`
-extending `fight-submenu.json` verbatim + Tier-1 close→reopen→cycle
-pins at ≥2 epochs).
-
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
   turn2-dragonbreath.json remain uncaptured after 4 bounded attempts

@@ -4,6 +4,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 182 — Bounded worker: ISSUES #25 FIXED — FIGHT-submenu B-close/reopen strand (user-reported) — new dispatch branch reopens after a settled B-close with cursor persisted, at every turn epoch, no epoch flag advanced; `fight-submenu-reopen.json` (new) **90/90, 0 diff**, `npm test` **785/785** (+4), build green, zero regressions
+
+- **State:** `npm test` 785/785, `npm run build` green, tree clean.
+  `tools/compare/traces/fight-submenu-reopen.json` (`fight-submenu.json`'s
+  script verbatim + `A`(2f) + 60 idle, dense stride-1 captures 2040-2129 -
+  B-close, settle, A, reopen transient, reopened submenu's own idle start)
+  **90/90, 0 diff** (new). Regression sweep at exact prior counts, all
+  unchanged: `fight-submenu.json` 235/235, `turn3-menu.json` 254/254,
+  `turn4-menu.json` 44/44, `turn5-menu.json` 41/41, `turn5-sentout.json`
+  141/141, `turn5-switchin.json` 167/167, `turn1-rockslide.json` 256/256.
+- **Did:** ISSUES #25 (user-reported, supervisor already root-caused the
+  mechanism + banked oracle ground truth - implemented faithfully, no
+  re-derivation). `core.ts` gained one new dispatch branch: once the close
+  redraw settles (`closeElapsed !== null && sceneT >= closeElapsed +
+  FIGHT_SUBMENU_CLOSE_DELAY`), a fresh A calls `openFightSubmenu` directly
+  (same "old state -> fresh open in one step" shape the existing turn-epoch
+  reopen branches already use), threading `fightSubmenu.cursor` through
+  instead of a literal - no new "reset" state needed, generalizes to
+  unlimited close/reopen cycles at any epoch for free. Oracle-probed (not
+  assumed) two new timing facts: this reopen's own redraw is ONE TICK
+  LONGER than a fresh open (pressTick+6, not +5 - modeled via `elapsed+2`
+  at this one call site) and its bounce overlay is NOT reset, just keeps
+  accumulating the already-documented "+2 ticks of drift per DMA-wait
+  hard-cut" (new `FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT=6`, gated by a new
+  `FightSubmenuState.reopenedFromClose` flag so the render can tell this
+  apart from turn 1's own first open). 4 new Tier-1 pins: the too-early
+  gate, full reopen with cursor persistence + all 4 `turnNResolved` flags
+  unchanged, a 2-cycle close→reopen→nav→close→reopen, and the same
+  mechanism at a SECOND turn epoch (turn 3's own already-reopened submenu).
+  Docs: `docs/battle-menu-notes.md` new §ISSUES-25 (mechanism + full timing
+  evidence + the residual below); ISSUES #25 deleted.
+- **Next:** a recurring small residual (2-6% of frame, Onix/healthbox
+  bounce-sprite edge pixels only, ~every 9 ticks) starts a few ticks into
+  the reopened submenu's own idle dwell, past this session's committed
+  clean window - same still-unattributed "sine quantization edge" family
+  `FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`'s own doc already flags as open for
+  the plain resumed-menu window (its own tick 2073), not chased further
+  here (see §ISSUES-25's own "Scope note"). Otherwise resume the roadmap
+  where #181 left off (materialize ramp-down/wobble phases, §10 of
+  faint-switch-notes.md).
+- **Notes:** the render-path subtlety that made this non-trivial: naively
+  resetting `fightSubmenu` to a "never opened" shape on close-settle would
+  have swapped the resumed-menu's own proven-correct render formula for an
+  entirely different (epoch-remap) one and likely broken `fight-submenu
+  .json`'s own 235/235 - avoided by keeping `openElapsed`/`closeElapsed`
+  meaning exactly what they always did and only adding a NEW branch/flag,
+  never an intermediate reset state.
+
+---
 ## 181 — Bounded worker: S7 slice L-3 — ball prop + open-particle burst + materialize GROWING phase LANDED; `turn5-switchin.json` (new) **167/167, 0 diff**, `npm test` **781/781** (+1), build green, zero regressions; materialize's own ramp-down/wobble phases + everything past them (healthbox/Sitrus/settled-menu) NOT reached
 
 - **State:** `npm test` 781/781, `npm run build` green, tree clean.

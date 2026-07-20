@@ -843,6 +843,30 @@ export const FIGHT_SUBMENU_CLOSE_DELAY = 6;
 export const FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT = 2;
 /** See `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`'s own doc - the second DMA-wait event (B-close's round-trip) costs 2 MORE ticks on top, for a cumulative 4. One single-tick residual remains even with this correction (tick 2073 of the nav groundtruth trace, unusual multi-region diff shape) - not root-caused this session; individually attributed alongside §11 finding 4's own two named idle-only-trace anomalies (2071/2135) as the same still-unidentified family, per this run's no-silent-exclusion policy. See `tools/compare/traces/fight-submenu.json` / docs/battle-menu-notes.md's new section. */
 export const FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT = 4;
+/**
+ * ISSUES #25's own reopen (same-turn B-close then a fresh A-press, core.ts's
+ * dedicated reopen branch): the bounce sprite is still the SAME one from
+ * turn 1's original `DoBounceEffect` (never reset - see `FightSubmenuState.
+ * reopenedFromClose`'s own doc), so it keeps accumulating the established
+ * "+2 ticks of drift per atomic DMA-wait hard-cut" pattern
+ * (`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`'s own doc) - a THIRD hard-cut (this
+ * reopen's own redraw) on top of the open (`+2`) and close (`+2` more, `=4`)
+ * already accounted for, landing on `4+2=6` for the reopened submenu's own
+ * revealed content. Oracle-pixel-fit exact against
+ * `tools/compare/traces/fight-submenu-reopen.json` (0 diff once applied,
+ * vs. a full-frame-shaped Onix-silhouette residual with the plain `t-2`
+ * first-open formula) - per this run's own convention for these DMA-wait
+ * drift constants, kept as an empirically pixel-fit correction, not
+ * asserted as proven source behavior. The WAIT hold itself (between this
+ * reopen's own press and its reveal) is NOT yet shifted by this new amount -
+ * same pattern the original open/close events established (a wait hold
+ * shows whatever shift was already active before the transition started,
+ * only the REVEAL itself steps to the next cumulative shift) - so the wait
+ * hold reuses `FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT` (4, unchanged, the same
+ * shift the resumed action menu was already showing right before this
+ * reopen's own press).
+ */
+export const FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT = 6;
 
 export type FightSubmenuSlot = 0 | 1 | 2 | 3;
 
@@ -870,6 +894,23 @@ export interface FightSubmenuState {
    * directly, then passed through" idiom every other field here uses.
    */
   activeMonMoveset: ActiveMonMoveset;
+  /**
+   * ISSUES #25: `true` only when this open is a same-turn B-close/reopen
+   * (core.ts's own dedicated reopen branch) rather than the very first open
+   * or a turn-boundary reopen (branches 3-6, which re-enter FIGHT from a
+   * genuinely fresh `PlayerHandleChooseAction` after a whole turn's engine
+   * processing - a real bounce-sprite reset, RAM-confirmed by
+   * `rockSlideResettledBounceTick`'s own doc). This same-turn reopen's
+   * bounce sprite is NOT reset (re-entered while `HandleInputChooseAction`
+   * is still continuously polling) - selects the reopen's own cumulative
+   * DMA-wait-drift bounce family (`battleScene.ts`'s `drawFightSubmenuWindow`/
+   * `drawActionMenuIdleWindow`) instead of the plain-`t` (never-opened) or
+   * `turnNSubmenuBounceTick` (turn-boundary-reset) ones, which oracle-probing
+   * (`tools/compare/traces/fight-submenu-reopen.json`) showed do NOT apply
+   * here (fit a large, full-frame-shaped residual on the Onix sprite's own
+   * bounce edge). Only meaningful while `openElapsed !== null`.
+   */
+  reopenedFromClose: boolean;
 }
 
 /** Never actually rendered (the FIGHT submenu's own text only draws once `openElapsed` is set - see `drawFightSubmenuChrome`) - a placeholder so this state stays a plain, always-fully-populated object like every other field here. `openFightSubmenu` always sets the real value. */
@@ -882,11 +923,17 @@ export const CLOSED_FIGHT_SUBMENU_STATE: FightSubmenuState = {
   closeElapsed: null,
   confirmElapsed: null,
   activeMonMoveset: PLACEHOLDER_MOVESET,
+  reopenedFromClose: false,
 };
 
-/** A-press on the settled action menu (FIGHT already highlighted - the only case this slice models, §11's own scope) opens the submenu fresh, cursor at `initialCursor` (default 0, ROCK_SLIDE's `gMoveSelectionCursor` zero-init - turn 1's own first open, and turn 2's reopen, both coincidentally rest here). S7 slice F (docs/battle-turn-notes.md §13): turn 3's own reopen passes `initialCursor=2` instead - `gMoveSelectionCursor` genuinely PERSISTS across turns (RAM-confirmed: reads 2, DRAGON_BREATH, at turn 3's reopen, turn 2's own confirmed slot), it isn't always re-zeroed. `activeMonMoveset` is threaded in by the caller (core.ts), derived fresh from the draft screen's own confirmed picks each time - S8 engine dependency, see `battleSetup.ts`. */
-export function openFightSubmenu(elapsed: number, activeMonMoveset: ActiveMonMoveset, initialCursor: FightSubmenuSlot = 0): FightSubmenuState {
-  return { openElapsed: elapsed, cursor: initialCursor, displayCursor: initialCursor, closeElapsed: null, confirmElapsed: null, activeMonMoveset };
+/** A-press on the settled action menu (FIGHT already highlighted - the only case this slice models, §11's own scope) opens the submenu fresh, cursor at `initialCursor` (default 0, ROCK_SLIDE's `gMoveSelectionCursor` zero-init - turn 1's own first open, and turn 2's reopen, both coincidentally rest here). S7 slice F (docs/battle-turn-notes.md §13): turn 3's own reopen passes `initialCursor=2` instead - `gMoveSelectionCursor` genuinely PERSISTS across turns (RAM-confirmed: reads 2, DRAGON_BREATH, at turn 3's reopen, turn 2's own confirmed slot), it isn't always re-zeroed. `activeMonMoveset` is threaded in by the caller (core.ts), derived fresh from the draft screen's own confirmed picks each time - S8 engine dependency, see `battleSetup.ts`. `reopenedFromClose` (ISSUES #25, default false) - see `FightSubmenuState`'s own doc. */
+export function openFightSubmenu(
+  elapsed: number,
+  activeMonMoveset: ActiveMonMoveset,
+  initialCursor: FightSubmenuSlot = 0,
+  reopenedFromClose: boolean = false,
+): FightSubmenuState {
+  return { openElapsed: elapsed, cursor: initialCursor, displayCursor: initialCursor, closeElapsed: null, confirmElapsed: null, activeMonMoveset, reopenedFromClose };
 }
 
 /** B-press while the submenu is open and not already closing - starts the close DMA-wait. No-op (returns `state` unchanged) if not open or already closing, so callers can call this unconditionally on a B-press. */
