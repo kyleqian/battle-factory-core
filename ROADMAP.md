@@ -356,6 +356,16 @@ frame-budget analysis (supervisor-verified) shows no proven winning line
 fits one trace from the anchor; the user chose multi-trace assembly over
 raising the oracle cap or adding snapshot/restore. Tier-1 tests pin swap
 logic and round-loop state as before.
+**Groundwork banked (2026-07-19, supervisor-verified):** the full
+acceptance chain is ground-truthed end to end —
+`battle1-winline-b-swap.json` (33031 frames, 127 captures) reaches
+battle 2's settled first action menu (FISHERMAN JENSON / KABUTO) via
+battle 1's WIN and the declined swap offer, with §16's RAM-truthed
+ledgers (Murkrow fight, victory text, free heal, opponent-2 scouting
+text). Caveat pinned in §16: outside battle, per-VBlank RNG advance
+resumes, so battle 2's opponent identity is timing-sensitive — extend
+the chain only by reusing the committed segments verbatim. Open: the
+swap-YES branch (factory swap screen UI) and battle 2 itself.
 **Frame cap raised (user decision #2, 2026-07-19 ~17:00):** §15's scout
 proved the WIN unreachable under the 20000-frame cap for ANY plausible
 line (best verified line: Onix faints at 19147 with Murkrow untouched at

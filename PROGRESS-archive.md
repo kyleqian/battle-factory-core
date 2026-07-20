@@ -1,3 +1,61 @@
+## 135 — Bounded worker: S7 slice E1 — turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff text, `turn2-endeavor.json` **76/77** (the 1 residual is ISSUES #19's own pre-existing family, confirmed recurring, not new) — suite **659/659**
+
+- **State:** `npm test` **659/659** (+12 Tier-1 pins), `npm run build`
+  green, tree clean. New committed trace
+  `tools/compare/traces/turn2-endeavor.json` (exact 44-segment prefix +
+  `battle1-turn2.json`'s own next 6 segments verbatim, final idle trimmed
+  so the trace ends at tick 2999) **76/77**. Zero regressions at exact
+  prior counts: `turn1-rockslide` 256/256, `turn1-drain` 102/102,
+  `fight-submenu` 234/235, `turn1-kickoff` 81/81, `turn1-cloneanim`
+  230/230.
+- **Did:** FIGHT submenu reopens for turn 2 (cursor rests at slot 0,
+  matching — not yet generalizing — the ground truth) with PP now dynamic
+  (9/10, was static 10/10): rendered through the REAL FONT_NORMAL pipeline
+  per the brief's own ask (`ppRemainingGlyphCodes` + a new `font.ts` export,
+  `drawGlyphCodes`, needed for `CHAR_SPACER`'s own non-charmap glyph code),
+  not a second static harvest — oracle-pixel-confirmed 0/450 mismatches,
+  and `getCurrentPPToMaxPPState(9,10)` confirmed (not assumed) the color
+  band stays full, no palette change. `DOWN` to DRAGON_BREATH (slot 2, PP
+  20/20, its harvest already valid, 0 mismatches re-checked) → `A` confirms
+  → "Foe GROVYLE used\nENDEAVOR!" prints and holds. Three real bugs found
+  and fixed along the way (docs/battle-menu-notes.md §13 has the full
+  derivation for each): (1) Grovyle's HP was forgotten by every render path
+  except slice D's own `drawTurnEndSettledMenu` — fixed at the root via one
+  new `turn1Resolved`-gated helper (`drawMenuIdleBaseWithOpponentHp`)
+  threaded through every `menuIdleBase` draw site, not a per-site patch;
+  (2) the submenu's own bounce overlay must inherit the RESETTLED menu's
+  phase (`rockSlideResettledBounceTick`), not turn 1's own plain-`t`
+  formula, which only worked for turn 1 by coincidence (its open predates
+  any resettle event); (3) the post-confirm frozen bounce state and the
+  kickoff-text hard-cut tick both needed their own grid-search corrections
+  (mirroring `turnKickoffFrozenBounceTick`'s own established precedent),
+  landing at `TURN2_KICKOFF_FROZEN_BOUNCE_TICK=2119` and a 1-tick-earlier
+  `turn2KickoffTextStartTick`. ENDEAVOR's HP-diff math
+  (`calculateEndeavorDamage`/`resolveEndeavorDamage`, damageCalc.ts) is
+  pinned hermetically against the RAM dump (117,101→16, the 0.5x
+  intermediate scale to 8, the restore back to 16) per the brief's own ask,
+  independent of the (not-yet-wired) visual drain.
+- **Stopped exactly at:** the kickoff text fully printed and held (tick
+  2999) — the FIRST real pixel change past that point is oracle-confirmed
+  at tick 3003 (ENDEAVOR's own attack animation beginning), well before the
+  3128 cap. ENDEAVOR's animation, Onix's HP-bar drain (3098-3116), and the
+  player healthbox's own HP-digit compositor (117/117→101/117, needs a
+  player-side analogue of `composeOpponentHealthbox` — confirmed this
+  session to need nothing new font-wise, just FONT_SMALL again, source-
+  traced via `AddTextPrinterAndCreateWindowOnHealthbox`) are explicitly
+  NOT wired this session — left for a follow-up slice, per this step's own
+  fallback clause.
+- **Next:** the deferred visual half (ENDEAVOR anim → HP drain → player
+  healthbox digits → settled at tick ~3128) is the natural continuation;
+  otherwise ISSUES #19's own anomaly family (now confirmed general, not
+  turn-1-specific) or S8's faint/forced-switch slice per #133's own list.
+- **Notes:** the grid-search-against-cropped-oracle-regions technique (§8's
+  own convention) resolved all three bugs above without ever needing a
+  fresh scratch trace — the already-committed `battle1-turn2.json` ground
+  truth had every tick this session needed. No papercuts.
+
+---
+
 ## 134 — Bounded worker: §11.1's 1px shake residual CLOSED — misdiagnosed as `drawStaticBgShiftedY`; real cause was the player healthbox's bleed-mask heuristic coincidentally matching the unshifted background — `turn1-rockslide.json` **250/256 → 256/256**; suite **649/649**
 
 - **State:** `npm test` **649/649** (+1 Tier-1 pin), `npm run build`

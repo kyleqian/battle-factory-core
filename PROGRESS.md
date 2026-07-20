@@ -4,6 +4,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 138 — Supervisor: WIN-chain scout merged — **battle 1's WIN, swap decline, and battle 2's first action menu fully ground-truthed at tick 33031** (11969 under the new 45000 cap); S8's acceptance chain is now provably pinnable
+
+- **State:** `npm test` **669/669**, `npm run build` green, tree clean at
+  merge `2eed99a`; no worktrees, no unmerged branches.
+- **Did:** verified (suite in worktree, 33031-frame trace re-run on the
+  restarted service, final frame visually confirmed: KABUTO vs healed
+  ONIX 117/117 at a settled action menu) and merged the worktree scout:
+  Magby chosen over Bayleef on RAM-dumped evidence, Murkrow killed in 2
+  turns (Magby survives 27/138), burn residual pinned `floor(maxHP/8)`,
+  full victory text → free heal → GO ON → swap offer declined →
+  battle 2 = FISHERMAN JENSON / KABUTO. Traces
+  `battle1-winline-b{,-swap}.json` + 3 RAM dumps + §16 (ledger
+  discipline). Load-bearing methodology note (§16): OUTSIDE battle,
+  idle-timing DOES shift RNG (per-VBlank advance resumes) — battle 2's
+  opponent identity is timing-sensitive; scripts extending the chain
+  must reuse the committed segments verbatim. Also verified+accepted
+  #137 (slice E1b drain+digits, turn2-endeavor-drain 105/106; ENDEAVOR
+  anim descoped on source evidence — real custom assets).
+- **Next:** (1) main lane: ENDEAVOR attack-anim asset slice (ticks
+  3003-3094, `Move_ENDEAVOR` at battle_anim_scripts.s:3789) to complete
+  turn 2's first half; then E2 (DRAGON_BREATH window 3129-3846); (2)
+  worktree lane: swap-YES branch + factory swap screen ground truth +
+  asset inventory (S8's only un-scouted UI); (3) ISSUES #19 family
+  (3 traces now), #20 rewire remainder.
+- **Notes:** none.
+
+---
 ## 137 — Bounded worker: S7 slice E1b — Onix's own HP-bar drain (117→101) + player-healthbox HP digits, `turn2-endeavor-drain.json` **105/106** (the 1 residual is the same ISSUES #19 family already accepted in `turn2-endeavor.json`) — suite **669/669**; ENDEAVOR's own attack animation stays OUT OF SCOPE (real custom asset, not "plain generic" as briefed)
 
 - **State:** `npm test` **669/669** (+9 Tier-1 pins), `npm run build`
@@ -78,62 +105,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** oracle restart was deferred until the main lane was idle (a
   mid-flight restart would have broken E1's compares). Old cap's two
   stale Thursday `server.py` processes (not on :8012) left untouched.
-
----
-## 135 — Bounded worker: S7 slice E1 — turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff text, `turn2-endeavor.json` **76/77** (the 1 residual is ISSUES #19's own pre-existing family, confirmed recurring, not new) — suite **659/659**
-
-- **State:** `npm test` **659/659** (+12 Tier-1 pins), `npm run build`
-  green, tree clean. New committed trace
-  `tools/compare/traces/turn2-endeavor.json` (exact 44-segment prefix +
-  `battle1-turn2.json`'s own next 6 segments verbatim, final idle trimmed
-  so the trace ends at tick 2999) **76/77**. Zero regressions at exact
-  prior counts: `turn1-rockslide` 256/256, `turn1-drain` 102/102,
-  `fight-submenu` 234/235, `turn1-kickoff` 81/81, `turn1-cloneanim`
-  230/230.
-- **Did:** FIGHT submenu reopens for turn 2 (cursor rests at slot 0,
-  matching — not yet generalizing — the ground truth) with PP now dynamic
-  (9/10, was static 10/10): rendered through the REAL FONT_NORMAL pipeline
-  per the brief's own ask (`ppRemainingGlyphCodes` + a new `font.ts` export,
-  `drawGlyphCodes`, needed for `CHAR_SPACER`'s own non-charmap glyph code),
-  not a second static harvest — oracle-pixel-confirmed 0/450 mismatches,
-  and `getCurrentPPToMaxPPState(9,10)` confirmed (not assumed) the color
-  band stays full, no palette change. `DOWN` to DRAGON_BREATH (slot 2, PP
-  20/20, its harvest already valid, 0 mismatches re-checked) → `A` confirms
-  → "Foe GROVYLE used\nENDEAVOR!" prints and holds. Three real bugs found
-  and fixed along the way (docs/battle-menu-notes.md §13 has the full
-  derivation for each): (1) Grovyle's HP was forgotten by every render path
-  except slice D's own `drawTurnEndSettledMenu` — fixed at the root via one
-  new `turn1Resolved`-gated helper (`drawMenuIdleBaseWithOpponentHp`)
-  threaded through every `menuIdleBase` draw site, not a per-site patch;
-  (2) the submenu's own bounce overlay must inherit the RESETTLED menu's
-  phase (`rockSlideResettledBounceTick`), not turn 1's own plain-`t`
-  formula, which only worked for turn 1 by coincidence (its open predates
-  any resettle event); (3) the post-confirm frozen bounce state and the
-  kickoff-text hard-cut tick both needed their own grid-search corrections
-  (mirroring `turnKickoffFrozenBounceTick`'s own established precedent),
-  landing at `TURN2_KICKOFF_FROZEN_BOUNCE_TICK=2119` and a 1-tick-earlier
-  `turn2KickoffTextStartTick`. ENDEAVOR's HP-diff math
-  (`calculateEndeavorDamage`/`resolveEndeavorDamage`, damageCalc.ts) is
-  pinned hermetically against the RAM dump (117,101→16, the 0.5x
-  intermediate scale to 8, the restore back to 16) per the brief's own ask,
-  independent of the (not-yet-wired) visual drain.
-- **Stopped exactly at:** the kickoff text fully printed and held (tick
-  2999) — the FIRST real pixel change past that point is oracle-confirmed
-  at tick 3003 (ENDEAVOR's own attack animation beginning), well before the
-  3128 cap. ENDEAVOR's animation, Onix's HP-bar drain (3098-3116), and the
-  player healthbox's own HP-digit compositor (117/117→101/117, needs a
-  player-side analogue of `composeOpponentHealthbox` — confirmed this
-  session to need nothing new font-wise, just FONT_SMALL again, source-
-  traced via `AddTextPrinterAndCreateWindowOnHealthbox`) are explicitly
-  NOT wired this session — left for a follow-up slice, per this step's own
-  fallback clause.
-- **Next:** the deferred visual half (ENDEAVOR anim → HP drain → player
-  healthbox digits → settled at tick ~3128) is the natural continuation;
-  otherwise ISSUES #19's own anomaly family (now confirmed general, not
-  turn-1-specific) or S8's faint/forced-switch slice per #133's own list.
-- **Notes:** the grid-search-against-cropped-oracle-regions technique (§8's
-  own convention) resolved all three bugs above without ever needing a
-  fresh scratch trace — the already-committed `battle1-turn2.json` ground
-  truth had every tick this session needed. No papercuts.
-
----
