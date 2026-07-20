@@ -1,0 +1,272 @@
+{
+ "source": "S7 slice E2 scout, worktree wt-20260719-221202 (DRAGON_BREATH ground truth)",
+ "method": "tools/probe/dump-task-and-sprite-callbacks.py against tools/compare/traces-groundtruth/battle1-turn2.json startTick=3128, function pointers resolved (thumb-bit masked, nearest-symbol-at-or-below) against arm-none-eabi-nm -n --defined-only reference/pokeemerald/pokeemerald.elf",
+ "window": "ticks 3128-3346 (gTasks[0..15].func / gSprites[0..63].callback, printing only the slots whose resolved symbol changed each tick)",
+ "note": "gTasks/gSprites addresses per src/data/gen/battle1-turn2-ram-dump.json convention: gTasks=0x03005e00 (func at +0x0, sizeof 0x28), gSprites=0x02020630 (callback at +0x1C, sizeof 0x44)",
+ "events": [
+  {
+   "tick": 3171,
+   "kind": "task",
+   "slot": 0,
+   "func": "Task_InitUpdateMonBg"
+  },
+  {
+   "tick": 3171,
+   "kind": "task",
+   "slot": 1,
+   "func": "Task_UpdateMonBg"
+  },
+  {
+   "tick": 3174,
+   "kind": "task",
+   "slot": 0,
+   "func": "Task_LoopAndPlaySE"
+  },
+  {
+   "tick": 3174,
+   "kind": "sprite",
+   "slot": 3,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3178,
+   "kind": "sprite",
+   "slot": 4,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3182,
+   "kind": "task",
+   "slot": 2,
+   "func": "AnimTask_BlendSpriteColor_Step2"
+  },
+  {
+   "tick": 3182,
+   "kind": "sprite",
+   "slot": 5,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3186,
+   "kind": "task",
+   "slot": 3,
+   "func": "AnimTask_ShakeMon2_Step"
+  },
+  {
+   "tick": 3186,
+   "kind": "sprite",
+   "slot": 7,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3190,
+   "kind": "sprite",
+   "slot": 9,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3194,
+   "kind": "sprite",
+   "slot": 3,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3194,
+   "kind": "sprite",
+   "slot": 10,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3195,
+   "kind": "sprite",
+   "slot": 3,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3198,
+   "kind": "sprite",
+   "slot": 3,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3198,
+   "kind": "sprite",
+   "slot": 4,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3199,
+   "kind": "sprite",
+   "slot": 4,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3202,
+   "kind": "sprite",
+   "slot": 4,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3202,
+   "kind": "sprite",
+   "slot": 5,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3203,
+   "kind": "sprite",
+   "slot": 5,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3206,
+   "kind": "sprite",
+   "slot": 5,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3206,
+   "kind": "sprite",
+   "slot": 7,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3207,
+   "kind": "sprite",
+   "slot": 7,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3210,
+   "kind": "sprite",
+   "slot": 7,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3210,
+   "kind": "sprite",
+   "slot": 9,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3211,
+   "kind": "sprite",
+   "slot": 9,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3214,
+   "kind": "sprite",
+   "slot": 9,
+   "callback": "AnimTranslateLinear_WithFollowup"
+  },
+  {
+   "tick": 3214,
+   "kind": "sprite",
+   "slot": 10,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3215,
+   "kind": "sprite",
+   "slot": 10,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3218,
+   "kind": "sprite",
+   "slot": 3,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3219,
+   "kind": "sprite",
+   "slot": 3,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3222,
+   "kind": "sprite",
+   "slot": 4,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3223,
+   "kind": "sprite",
+   "slot": 4,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3226,
+   "kind": "sprite",
+   "slot": 5,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3227,
+   "kind": "sprite",
+   "slot": 5,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3230,
+   "kind": "sprite",
+   "slot": 7,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3231,
+   "kind": "sprite",
+   "slot": 7,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3234,
+   "kind": "sprite",
+   "slot": 9,
+   "callback": "DestroySpriteAndMatrix"
+  },
+  {
+   "tick": 3235,
+   "kind": "sprite",
+   "slot": 9,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3236,
+   "kind": "task",
+   "slot": 0,
+   "func": "AnimTask_BlendSpriteColor_Step2"
+  },
+  {
+   "tick": 3255,
+   "kind": "task",
+   "slot": 0,
+   "func": "Task_ClearMonBg"
+  },
+  {
+   "tick": 3263,
+   "kind": "sprite",
+   "slot": 3,
+   "callback": "SpriteCB_HitAnimHealthoxEffect"
+  },
+  {
+   "tick": 3283,
+   "kind": "sprite",
+   "slot": 3,
+   "callback": "SpriteCallbackDummy"
+  },
+  {
+   "tick": 3336,
+   "kind": "sprite",
+   "slot": 3,
+   "callback": "SpriteCB_BounceEffect"
+  },
+  {
+   "tick": 3336,
+   "kind": "sprite",
+   "slot": 4,
+   "callback": "SpriteCB_BounceEffect"
+  }
+ ]
+}
