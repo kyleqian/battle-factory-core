@@ -188,3 +188,16 @@ compare run exposed the staleness.
   data (`gPlttBufferFaded` probes — the switch-in tint precedent) instead
   of screenshot sampling; if sampling anyway, pick swatch pixels with
   near-255 channel values first.
+
+## run-subagent.sh briefs die on zsh parse when they contain `!(` (2026-07-20)
+
+- **What:** a brief passed inline containing `!(turn3Resolved && ...)`
+  killed the launch instantly ("parse error near `&&`") — the background
+  command produced only the parse error and no worker ever started. Easy
+  to misread as a worker failure.
+- **Hits:** 1.
+- **Cost each:** ~5 min + one relaunch.
+- **Workaround:** write the brief to a file and launch with
+  `run-subagent.sh -c N "$(cat brief.txt)"`, avoiding `!(`/history-
+  expansion-sensitive characters in inline briefs; a launcher flag that
+  reads the brief from a file (`--brief-file`) would remove the class.
