@@ -1,0 +1,82 @@
+{
+  "partyStatsTick": 6600,
+  "partyStats": {
+    "playerParty0": {
+      "level": 50,
+      "hp": 1,
+      "maxHP": 117,
+      "attack": 51,
+      "defense": 187,
+      "speed": 76,
+      "spAttack": 36,
+      "spDefense": 72
+    },
+    "enemyParty0": {
+      "level": 50,
+      "hp": 0,
+      "maxHP": 143,
+      "attack": 103,
+      "defense": 56,
+      "speed": 90,
+      "spAttack": 91,
+      "spDefense": 71
+    },
+    "enemyParty1": {
+      "level": 50,
+      "hp": 142,
+      "maxHP": 142,
+      "attack": 91,
+      "defense": 69,
+      "speed": 97,
+      "spAttack": 91,
+      "spDefense": 69
+    },
+    "enemyParty2": {
+      "level": 50,
+      "hp": 156,
+      "maxHP": 156,
+      "attack": 98,
+      "defense": 61,
+      "speed": 77,
+      "spAttack": 56,
+      "spDefense": 56
+    },
+    "frontierTempParty": [
+      188,
+      184,
+      135
+    ]
+  },
+  "gCurrentMoveLedger": [
+    {
+      "tick": 6400,
+      "gCurrentMove": 157,
+      "gActiveBattler": 2
+    },
+    {
+      "tick": 6580,
+      "gCurrentMove": 157,
+      "gActiveBattler": 1
+    },
+    {
+      "tick": 6581,
+      "gCurrentMove": 157,
+      "gActiveBattler": 2
+    },
+    {
+      "tick": 6682,
+      "gCurrentMove": 157,
+      "gActiveBattler": 1
+    },
+    {
+      "tick": 6683,
+      "gCurrentMove": 157,
+      "gActiveBattler": 2
+    },
+    {
+      "tick": 6684,
+      "gCurrentMove": 0,
+      "gActiveBattler": 2
+    }
+  ]
+}
