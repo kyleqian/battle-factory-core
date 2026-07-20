@@ -1,3 +1,28 @@
+## 183 — Worktree probe (supervisor-folded): BOTH remaining "redraw extremum" ticks ROOT-CAUSED as real engine bugs (label retired) — 4934 = kickoff-text delay-family mis-selected by the monotonic `turn2Resolved` gate during turn 4's DOUBLE_TEAM window; 5927 = the -2 bounce phase shift applied in the SAME render tick the reopen press registers (hardware switches one tick later); merged `7d93103`, suite 785/785 on the merged tree
+
+- **State:** merged into master, `npm test` 785/785 + build green
+  post-merge. New: 6 probe specs + twice-run outputs, 3 verification
+  scripts (supervisor re-ran `verify-turn4-kickoff-textgate-rule.py` and
+  `verify-turn5-reopen-switch-rule.py` in the worktree — both VERDICT
+  sections pass), `docs/turn3-residual-probe-notes.md` "The extremum
+  class, probed". No engine changes (by design).
+- **Did:** (4934) the RAM `OpponentHandlePrintString` tick is
+  move-family-specific (+9 DOUBLE_TEAM, +8 ENDEAVOR), render lag uniform
+  +1; the engine's `textStart` gate keys off monotonic `turn2Resolved`
+  so turn 4 wrongly gets ENDEAVOR-family delay. Corrective rule (add
+  `&& !(turn3Resolved && !turn4Resolved)`) verified across all 5 turns,
+  zero collateral. (5927) `core.ts` applies `turn5SubmenuBounceTick`'s
+  shift in the press-registering tick itself; the real bouncer is smooth
+  through it — the rule is a ONE-TICK-LATE formula switch, single-tick-
+  scoped, cannot touch 5928+ (all already exact). A non-causal 2-tick
+  sSinIndex stall one tick later was found and honestly ruled out.
+- **Next:** a small cleanup slice applies both rules + restores 4934/
+  5927 to their traces' captureFrames (turns 1-5 would then have ZERO
+  excluded residual ticks).
+- **Notes:** no new papercuts.
+
+---
+
 ## 182 — Bounded worker: ISSUES #25 FIXED — FIGHT-submenu B-close/reopen strand (user-reported) — new dispatch branch reopens after a settled B-close with cursor persisted, at every turn epoch, no epoch flag advanced; `fight-submenu-reopen.json` (new) **90/90, 0 diff**, `npm test` **785/785** (+4), build green, zero regressions
 
 - **State:** `npm test` 785/785, `npm run build` green, tree clean.

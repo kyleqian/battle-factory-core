@@ -1176,21 +1176,27 @@ prop's own first pixel, confirmed by isolating the mismatched region to
 the ball's own resting corner, not the icon bar's bbox) — the ball prop
 through Sitrus/settled-menu remains open for a future session.
 
-## 10. S7 slice L-3 (bounded worker): ball + particle burst + materialize growth LANDED, ball-to-settle window partially closed — `turn5-switchin.json` 167/167, 0 diff, stops at 6754 (mid-materialize, NOT the full ball-to-settle window)
+## 10. S7 slice L-3/L-4 (bounded workers): ball-to-settle window CLOSED — `turn5-switchin.json` 241/241, 0 diff, 6588-6828 (full ball-to-settle window, `TURN5_PIDGEOTTO_SETTLE_TICK`)
 
 Picked up exactly where §9's own Resolution left off (the ball prop
-through Sitrus/settled-menu). RAM-probed the remaining unknowns directly
-against the already-committed probes (`battle1-switchin-ball-particle-
-detail-probe.json`, `-materialize-tint-probe.json`, `-b1-sprite-probe.json`)
-plus fresh oracle pixel scans (`/tmp/oracle-switchin-{a,b}` regenerated from
-the committed `battle1-switchin-dense-{a,b}.json`), then iterated render
-code against the live oracle via `npm run compare`. Landed BALL (fully) and
-the front-sprite's own GROWING flat-tint silhouette phase (fully) — 26
-ticks (6729-6754) newly 0-diff. Did NOT land the remainder of the
-materialize window (coefficient ramp-down + wobble-table phases, roughly
-6755-6828) or anything past it (healthbox slide-in, Sitrus, settled menu) —
-real residuals remain there, itemized below so the next session doesn't
-re-spend the budget re-finding them.
+through Sitrus/settled-menu). Slice L-3 (first bounded worker) RAM-probed
+the remaining unknowns directly against the already-committed probes
+(`battle1-switchin-ball-particle-detail-probe.json`, `-materialize-tint-
+probe.json`, `-b1-sprite-probe.json`) plus fresh oracle pixel scans, then
+iterated render code against the live oracle via `npm run compare`. Landed
+BALL (fully) and the front-sprite's own GROWING flat-tint silhouette phase
+(fully) — 26 ticks (6729-6754) newly 0-diff, but left the coefficient
+ramp-down (~1100-1350px/frame residual) and wobble-table phases unresolved.
+
+Slice L-4 (second bounded worker, this session) closed both remaining
+items plus one NEWLY DISCOVERED bug the wider capture window exposed —
+see "What's landed" below. `turn5-switchin.json` now covers the FULL
+ball-to-settle window (6588-6828, 241/241 captures, 0 diff) with ZERO
+exclusions. Nothing remains open in this window; the only unexplored
+territory left in the whole faint/forced-switch sequence is past
+`TURN5_PIDGEOTTO_SETTLE_TICK` (healthbox slide-in, Sitrus proc, settled
+menu vs PIDGEOTTO — §8e/§2/§3e, deliberately untouched, out of this
+slice's scope).
 
 ### What's landed, byte-exact
 
@@ -1242,55 +1248,74 @@ re-spend the budget re-finding them.
   even-index-parity-to-frame0 mapping is INVERTED from the real one -
   pixel-verified (474px residual at render 6761 dropped to 26px once
   flipped). `turn5PidgeottoFrame` codes the corrected mapping.
-- **The materialize ramp phase's own render-lag is DIFFERENT from every
-  other RAM-tracked mechanism in this window**: the palette-coefficient
-  ramp (`TURN5_MATERIALIZE_RAMP_COEFF`, literal RAM-solved sequence,
-  `battle1-switchin-materialize-tint-probe.json`) becomes visible on-screen
-  at the SAME render tick as its own RAM tick (RAM 6768's coefficient=13 is
-  visible at render **6768**, not 6769) - NOT the "+1" lag this entire
-  dossier's every other mechanism (OAM x/y2, BG scroll, sprite callbacks)
-  carries. Using the expected "+1" first (ramp starting render 6769) put a
-  full extra flat-tint tick where the oracle already shows the first
-  partially-blended color, producing a solid-color full-silhouette mismatch
-  at exactly render 6768 (a >1300px residual) - flagged as a genuinely
-  different lag class for whoever next probes a palette-fade timing in this
-  file, not assumed to generalize back to `SENDOUT_BG_FADE_Y`'s own (already
-  pixel-verified, unrevisited) constants.
+- **The materialize ramp phase's own coefficient sequence and render-lag,
+  CORRECTED (S7 slice L-4, superseding the paragraph above from the
+  earlier session)**: the earlier session's `TURN5_MATERIALIZE_RAMP_COEFF
+  = [13,13,11,11,9,9,8,6,6,4,4,2,2,1,0]` and its "same render tick, no +1
+  lag" finding were BOTH corrupted by a degenerate palette-index choice.
+  That table was decoded from `gPlttBufferFaded+0x222..0x228` (OBJ-palette-
+  bank-1 color indices 1-4), whose specific true (unfaded) colors sit close
+  enough to `MATERIALIZE_TINT_COLOR` that `BlendPalette`'s own `(t5-c5)*
+  coeff>>4` integer truncation collapses several adjacent coefficients
+  (e.g. 15 and 16, or 13 and 14) onto the IDENTICAL faded output - the
+  decode silently picked one of several valid answers. Reprobing at
+  `+0x230` (color index 8 of the same bank - its true color `(214,49,24)`
+  sits far enough from the tint that every coefficient 0-16 produces a
+  distinct output) gives the real, perfectly LINEAR sequence: coefficient
+  **16 (flat) through RAM tick 6766, then exactly `6782 - ramTick` for RAM
+  6767-6782** (15,14,...,1,0, one integer step per tick, no doubling) - not
+  curve-fit, read directly and cross-validated against 3 independent oracle
+  pixels' own true palette colors. The render lag is the ORDINARY +1 tick
+  every other mechanism in this dossier carries (RAM tick T's value first
+  visible render T+1) - the earlier "same-tick" finding was a false
+  positive from testing the two co-occurring errors against a single tick
+  where they partially canceled. RAM-probing `oam.affineMode`/
+  `gOamMatrices` directly across RAM 6767-6783 (the named next instrument
+  from the prior write-up, `tools/probe/dump-switchin-materialize-affine.py`)
+  found the OAM matrix pinned at pure identity `(256,0,0,256)` and
+  `affineMode=ST_OAM_AFFINE_NORMAL` the entire span - geometry was never
+  the problem. `drawSpriteSheetAffineTintedBlend` (new: same accumulator-
+  sampling geometry as `drawSpriteSheetAffineTinted`, but per-pixel blend
+  toward the tint instead of a flat fill) replaces the old two-call split;
+  at `coeff=16` it's mathematically identical to the old flat-tint call, so
+  there's no seam between the flat and ramp portions.
+- **The wobble-table phase (render 6786-6826) needed `ST_OAM_AFFINE_DOUBLE`
+  scanning**: RAM-confirmed `affineMode=3` (`ST_OAM_AFFINE_DOUBLE`) starts
+  exactly at the wobble driver's own engage tick (RAM 6784, render 6785) -
+  `drawSpriteSheetAffineStretch`'s existing `doubled` param (already used
+  elsewhere for exactly this OAM mode) needed threading through for this
+  call site; it hadn't been before. Verified as its own isolated dense
+  0-diff span this session (not just observed as part of a fuller sweep).
+- **A second, independent bug the wider capture window exposed: the
+  opponent's own switch-in particle burst was painting over the PLAYER's
+  healthbox UI.** Both share OAM priority 1 (`PARTICLE_OAM_PRIORITY`,
+  `healthBarSpritePtr->oam.priority=1` in `battle_interface.c`), but real
+  hardware doesn't Y-sort them against each other during a battle
+  animation: `LaunchBattleAnimation` (`battle_anim.c:213-219`, called at
+  the start of every move/anim script incl. this switch-in's own particle
+  burst) calls `UpdateOamPriorityInAllHealthboxes(0)` - EVERY healthbox
+  piece (both left/right box art and the bar itself) gets OAM priority 0
+  for the duration of the animation, unconditionally on top of anything at
+  priority 1+, and is only restored to priority 1 once the animation script
+  ends. `drawTurn5RockSlideWindow` now draws `drawMenuHealthboxPlayer`/
+  `drawPlayerHealthboxHpOverlay` AFTER `drawTurn5SwitchinSprite` (moved out
+  of `drawTurn5RockSlideAttack`, which drew them first) to match. Confirmed
+  via oracle pixel crops: before the fix, small fragments of the switch-in
+  sparkle particles poked through the "Lv50"/"EXP" text areas at their own
+  large late-age radius (up to 46px from `PARTICLE_ORIGIN`) - real hardware
+  never shows this, healthbox always wins. This is a Z-order fix scoped
+  tightly to the switch-in window's own draw order, NOT the healthbox
+  slide-in mechanic itself (§8e, still untouched/out of scope).
+- **`TURN5_PIDGEOTTO_SETTLE_TICK = 6828`**: pixel-confirmed exact, safe
+  extension boundary (unchanged from the prior session's own finding).
 
-### What's NOT landed - the honest remainder
+### Status: CLOSED, zero exclusions
 
-1. **The coefficient ramp-down phase itself (render 6768-6782) still
-   carries a ~3% residual** (~1100-1350px/frame) even after the lag fix
-   above - the coefficient VALUES themselves are RAM-exact (solved directly
-   from `gPlttBufferFaded` vs `gPlttBufferUnfaded`, not guessed), and the
-   frame-parity fix and lag fix both measurably helped, but something more
-   is still off in this narrow window - not root-caused this session
-   (ran out of time mid-diagnosis). Candidate next step: RAM-probe
-   `oam.affineMode`/the matrix registers directly across this exact
-   sub-window (RAM 6767-6783) rather than continuing to infer geometry from
-   `affineEmergeAccumulator`'s own extrapolated saturation.
-2. **The wobble-table phase (render ~6786-6828, `TURN5_STRETCH_TABLE`) is
-   ALREADY near-clean** (residuals of 0-14px/frame, likely rounding/
-   anti-aliasing noise, not a real shape bug) but wasn't independently
-   pixel-verified as its own isolated 0-diff span this session (only
-   observed as part of the fuller ball-to-settle scratch sweep) - a fast
-   remaining task, not a research gap.
-3. **`TURN5_PIDGEOTTO_SETTLE_TICK = 6828` is pixel-confirmed** (exact 0-diff
-   match at render 6828 in every scratch sweep run this session) - safe to
-   reuse directly.
-4. Healthbox slide-in, Sitrus proc, and the settled menu vs. PIDGEOTTO are
-   UNTOUCHED this session (ran out of cap after the materialize-window
-   debugging above) - §8e/§2/§3e's own formulas/tables are still the
-   right starting point, unchanged by anything in this section.
-
-### Bottom line for whoever picks this up next
-
-Don't re-derive the ball/particle/growth-phase mechanisms above - they're
-byte-exact and committed (`turn5-switchin.json`, 6588-6754). The real next
-task is narrow: close the ~3% residual in the coefficient ramp-down
-sub-window (6768-6782, item 1 above), then verify the wobble-table phase
-its own dense 0-diff span (item 2), which should unlock `TURN5_PIDGEOTTO_
-SETTLE_TICK`(6828) as a clean extension boundary - at that point the
-healthbox slide-in through Sitrus/settled-menu (§8e/§2/§3e, all still
-fully spec'd, untouched by this session) is the only remaining unexplored
-territory in the whole faint/forced-switch sequence.
+Every tick 6588-6828 is 0-diff (`turn5-switchin.json`, 241/241). The
+ball/particle/growth-phase mechanisms from the prior session remain
+correct and byte-exact (untouched, only re-anchored where the coefficient/
+lag correction above required it). The only remaining unexplored
+territory in the whole faint/forced-switch sequence is past
+`TURN5_PIDGEOTTO_SETTLE_TICK`: healthbox slide-in, Sitrus proc, and the
+settled menu vs. PIDGEOTTO (§8e/§2/§3e, all still fully spec'd, untouched
+by this slice).

@@ -4,6 +4,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 186 — Bounded worker (S7 slice L-4): materialize ramp-down + wobble phase CLOSED, `turn5-switchin.json` extended **167→241** (6588-6828, full ball-to-settle window), **0 diff, ZERO exclusions** — two independent bugs root-caused (a corrupted coefficient table + a healthbox Z-order miss)
+
+- **State:** `npm test` **790/790** (+3), `npm run build` green, tree clean
+  at `9faddea`. No worktrees. `turn5-switchin.json` now covers the FULL
+  ball-to-settle window, 0 diff, no excluded ticks.
+- **Did:** assigned to close the ramp-down residual (~1100-1350px/frame,
+  render 6768-6782) and verify the wobble phase. RAM-probed `oam.affineMode`/
+  `gOamMatrices` directly (new `tools/probe/dump-switchin-materialize-
+  affine.py`) across the ramp window — matrix pinned at pure identity,
+  `affineMode=NORMAL` throughout, ruling out geometry entirely. Root cause
+  was the palette coefficient itself: the PRIOR session's own
+  `TURN5_MATERIALIZE_RAMP_COEFF` table and its "same render tick" lag
+  finding were BOTH corrupted — decoded from a degenerate `gPlttBufferFaded`
+  offset (`+0x222..0x228`) where `BlendPalette`'s integer truncation
+  collapses several coefficients onto identical output. Reprobed at
+  `+0x230` (a non-degenerate color, cross-checked against 3 independent
+  oracle pixels) and found the REAL sequence: flat coefficient 16 through
+  render 6767, then a perfectly linear 15->0 countdown from render 6768,
+  with the ORDINARY +1 RAM-to-render lag (not same-tick as previously
+  believed). Unified growing+ramp into one draw call via new
+  `drawSpriteSheetAffineTintedBlend` (identical to the old flat-tint call
+  at coeff=16, no seam). Wobble phase needed `doubled=true`
+  (`ST_OAM_AFFINE_DOUBLE`, RAM-confirmed) threaded into
+  `drawSpriteSheetAffineStretch` — verified as its own isolated 0-diff
+  span. A SEPARATE bug surfaced once the window widened past 6754: the
+  opponent's own particle burst painted over the player's healthbox UI —
+  real hardware sets ALL healthbox pieces to OAM priority 0 during battle
+  animations (`LaunchBattleAnimation`/`UpdateOamPriorityInAllHealthboxes(0)`,
+  `battle_anim.c`), unconditionally on top; moved `drawMenuHealthboxPlayer`/
+  `drawPlayerHealthboxHpOverlay` to draw after `drawTurn5SwitchinSprite` in
+  `drawTurn5RockSlideWindow`. +3 Tier-1 pins (`turn5MaterializeCoeff`).
+  Regression-swept clean at unchanged counts: `turn5-sentout` 141/141,
+  `turn5-rockslide` 256/256, `turn4-doubleteam` 250/250, `turn5-menu`
+  42/42, `fight-submenu-reopen` 90/90, `turn3-menu` 254/254,
+  `turn4-rockslide` 250/250, `turn5-endeavor` 254/254. Docs:
+  `faint-switch-notes.md` §10 rewritten (both prior "not landed" items
+  closed, the Z-order finding added, status CLOSED); archived #183 to
+  `PROGRESS-archive.md` to keep the ledger to 3 entries.
+- **Next:** the faint/forced-switch sequence's last unexplored territory
+  is past `TURN5_PIDGEOTTO_SETTLE_TICK`(6828) — healthbox slide-in, Sitrus
+  proc, settled menu vs PIDGEOTTO (§8e/§2/§3e, fully spec'd, untouched).
+  Then turn 6+ toward battle 1's WIN.
+- **Notes:** no new papercuts. One self-corrected false start: an
+  intermediate "constant coefficient 15" hypothesis for the flat span
+  looked plausible from a degenerate RAM decode but was caught by a direct
+  oracle pixel cross-check before it was ever committed.
+
+---
 ## 185 — Supervisor wind-down: session end 2026-07-20 ~16:00 — **15 worker steps verified and folded** (9 main-lane + 6 worktree, 41 commits); suite **744 → 787/787**; headlines: **turns 3, 4, and 5 of battle 1 are COMPLETE and pixel-exact through Grovyle's faint** (11 new committed traces), **every excluded residual tick in turns 1-5 is now RESTORED and GREEN** (four separate root-caused engine bugs, zero "hardware quirk" labels left standing), and the **user-reported FIGHT B-close/reopen strand (ISSUES #25) was root-caused, oracle-verified, and fixed same-day**
 
 - **State (verified this minute):** `npm test` **787/787**, `npm run
@@ -94,26 +142,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the offset, caught by the first compare run (41/42, not 42/42) rather than
   shipped wrong.
 
----
-## 183 — Worktree probe (supervisor-folded): BOTH remaining "redraw extremum" ticks ROOT-CAUSED as real engine bugs (label retired) — 4934 = kickoff-text delay-family mis-selected by the monotonic `turn2Resolved` gate during turn 4's DOUBLE_TEAM window; 5927 = the -2 bounce phase shift applied in the SAME render tick the reopen press registers (hardware switches one tick later); merged `7d93103`, suite 785/785 on the merged tree
-
-- **State:** merged into master, `npm test` 785/785 + build green
-  post-merge. New: 6 probe specs + twice-run outputs, 3 verification
-  scripts (supervisor re-ran `verify-turn4-kickoff-textgate-rule.py` and
-  `verify-turn5-reopen-switch-rule.py` in the worktree — both VERDICT
-  sections pass), `docs/turn3-residual-probe-notes.md` "The extremum
-  class, probed". No engine changes (by design).
-- **Did:** (4934) the RAM `OpponentHandlePrintString` tick is
-  move-family-specific (+9 DOUBLE_TEAM, +8 ENDEAVOR), render lag uniform
-  +1; the engine's `textStart` gate keys off monotonic `turn2Resolved`
-  so turn 4 wrongly gets ENDEAVOR-family delay. Corrective rule (add
-  `&& !(turn3Resolved && !turn4Resolved)`) verified across all 5 turns,
-  zero collateral. (5927) `core.ts` applies `turn5SubmenuBounceTick`'s
-  shift in the press-registering tick itself; the real bouncer is smooth
-  through it — the rule is a ONE-TICK-LATE formula switch, single-tick-
-  scoped, cannot touch 5928+ (all already exact). A non-causal 2-tick
-  sSinIndex stall one tick later was found and honestly ruled out.
-- **Next:** a small cleanup slice applies both rules + restores 4934/
-  5927 to their traces' captureFrames (turns 1-5 would then have ZERO
-  excluded residual ticks).
-- **Notes:** no new papercuts.
