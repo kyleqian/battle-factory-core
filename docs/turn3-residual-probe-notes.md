@@ -530,6 +530,15 @@ argument above, not merely by testing.
 committed trace is touched (the condition change is inert everywhere else,
 confirmed above).
 
+**RESOLVED** (PROGRESS #183/cleanup bounded worker session): the proposed
+rule was applied verbatim to `drawFightSubmenuWindow`'s `textStart` gate in
+`src/engine/battleScene.ts`. `turn4-doubleteam.json` restored to **250/250,
+0 diff**; the named regression sweep (`turn4-rockslide`, `turn5-endeavor`,
+`turn5-sentout`, `turn3-menu`, `turn2-dragonbreath`, `fight-submenu-reopen`,
+`turn1-cloneanim`) all unchanged at 0 diff. New Tier-1 pin in
+`tests/battleScene.test.ts` ("kickoff-text gate" case in the "S7 slice I
+resolution" describe block).
+
 ### Tick 5927: MECHANISM FOUND — a one-tick-early phase-shift application at
 the reopen's own dispatch switch, not a hardware quirk and not a uniform
 composition offset

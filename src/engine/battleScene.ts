@@ -3660,7 +3660,12 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // Onix's 76, same turn-order rule every prior turn established) -
     // distinguished from turn 1's OWN cursor-0 confirm by `turn2Resolved`
     // (true only once turn 3's reopen has fired, `core.ts`'s own gate).
-    const textStart = sm.cursor === 2 || turn2Resolved ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
+    // PROGRESS #183/cleanup: `turn2Resolved` is monotonic (true for turns
+    // 3/4/5), but turn 4's own window wants DOUBLE_TEAM-family timing, not
+    // ENDEAVOR-family - excluded here (docs/turn3-residual-probe-notes.md
+    // "The extremum class, probed", tick 4934).
+    const inTurn4DoubleTeamWindow = turn3Resolved && !turn4Resolved;
+    const textStart = (sm.cursor === 2 || turn2Resolved) && !inTurn4DoubleTeamWindow ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
     if (t >= textStart) {
       // S7 slice E1: turn 2's confirm (cursor 2, DRAGON_BREATH) kicks off
       // Grovyle's ENDEAVOR instead of turn 1's DOUBLE_TEAM - this slice only

@@ -1275,6 +1275,21 @@ describe("S7 slice I resolution: the two turn-4-only bugs found this session (do
     expect(pixelAtTurn4(5210, 16, 124)).toEqual([255, 255, 255]);
     expect(pixelAtTurn4(5210, 17, 124)).toEqual([255, 255, 255]);
   });
+
+  // PROGRESS #183/cleanup (docs/turn3-residual-probe-notes.md "The extremum
+  // class, probed", tick 4934): `drawFightSubmenuWindow`'s `textStart` gate
+  // keyed the ENDEAVOR-family kickoff delay off the monotonic `turn2Resolved`
+  // flag alone, so turn 4's own DOUBLE_TEAM window (which needs the one-
+  // tick-longer DOUBLE_TEAM-family delay, same as turn 1) wrongly got
+  // ENDEAVOR's delay for exactly one tick (pressTick+9=4934, where the two
+  // candidate delays disagree). Fixed by additionally excluding "turn3Resolved
+  // true and turn4Resolved false" (turn 4's own window) from the ENDEAVOR-
+  // family test.
+  it("kickoff-text gate: render 4934 (pressTick+9) still shows the settled menu's message box (DOUBLE_TEAM-family delay, pressTick+10=4935, not yet reached) vs render 4935 (message box hard-cuts to blank/teal) at the message-box background pixel (16,118)", () => {
+    expect(pixelAtTurn4(4933, 16, 118)).toEqual([255, 255, 255]);
+    expect(pixelAtTurn4(4934, 16, 118)).toEqual([255, 255, 255]);
+    expect(pixelAtTurn4(4935, 16, 118)).toEqual([107, 165, 165]);
+  });
 });
 
 // S7 slice K (docs/battle-turn-notes.md §24): the faint-sink closed form

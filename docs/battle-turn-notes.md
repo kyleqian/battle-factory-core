@@ -4018,6 +4018,10 @@ correctly with no changes.
   ROCK_SLIDE hard-cut) - 249 captures, tick 4934 itself excluded (13292px,
   both neighbors exact, the same "redraw extremum" single-tick class as
   3337/3465/3721/3879/3888, restated per the brief's own instruction).
+  **RESOLVED** (PROGRESS #183/cleanup): root-caused as the `textStart` gate
+  mis-selecting ENDEAVOR-family delay for turn 4's own DOUBLE_TEAM window;
+  fixed and restored, `turn4-doubleteam.json` now **250/250, 0 diff** - see
+  `docs/turn3-residual-probe-notes.md` "The extremum class, probed".
 - `turn4-rockslide.json`: `pressTick`+393 through +1000 (ticks 5318-5925,
   ending one tick before turn 5's own input at 5926) - dense stride-1 at
   every named boundary (text hard-cut/accuracy/crit/damage-lock, the
