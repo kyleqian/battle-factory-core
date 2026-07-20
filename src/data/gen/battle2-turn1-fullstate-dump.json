@@ -1,0 +1,1002 @@
+{
+"33031": {
+"battler0": {
+"species": 95,
+"attack": 51,
+"defense": 187,
+"speed": 76,
+"spAttack": 36,
+"spDefense": 72,
+"moves": [
+157,
+20,
+225,
+201
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 5,
+"types": [
+5,
+4
+],
+"pp": [
+10,
+20,
+20,
+10
+],
+"hp": 117,
+"level": 50,
+"maxHP": 117,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler1": {
+"species": 140,
+"attack": 118,
+"defense": 96,
+"speed": 61,
+"spAttack": 93,
+"spDefense": 51,
+"moves": [
+72,
+246,
+28,
+182
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 4,
+"types": [
+5,
+11
+],
+"pp": [
+10,
+5,
+15,
+10
+],
+"hp": 91,
+"level": 50,
+"maxHP": 91,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler2": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"battler3": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"sideStatuses": [
+0,
+0
+],
+"sideTimers": [
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+},
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+}
+],
+"critMultiplier": 1,
+"battleMovePower": 75
+},
+"33107": {
+"battler0": {
+"species": 95,
+"attack": 51,
+"defense": 187,
+"speed": 76,
+"spAttack": 36,
+"spDefense": 72,
+"moves": [
+157,
+20,
+225,
+201
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 5,
+"types": [
+5,
+4
+],
+"pp": [
+9,
+20,
+20,
+10
+],
+"hp": 117,
+"level": 50,
+"maxHP": 117,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler1": {
+"species": 140,
+"attack": 118,
+"defense": 96,
+"speed": 61,
+"spAttack": 93,
+"spDefense": 51,
+"moves": [
+72,
+246,
+28,
+182
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 4,
+"types": [
+5,
+11
+],
+"pp": [
+10,
+5,
+15,
+10
+],
+"hp": 91,
+"level": 50,
+"maxHP": 91,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler2": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"battler3": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"sideStatuses": [
+0,
+0
+],
+"sideTimers": [
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+},
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+}
+],
+"critMultiplier": 1,
+"battleMovePower": 75
+},
+"33108": {
+"battler0": {
+"species": 95,
+"attack": 51,
+"defense": 187,
+"speed": 76,
+"spAttack": 36,
+"spDefense": 72,
+"moves": [
+157,
+20,
+225,
+201
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 5,
+"types": [
+5,
+4
+],
+"pp": [
+9,
+20,
+20,
+10
+],
+"hp": 117,
+"level": 50,
+"maxHP": 117,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler1": {
+"species": 140,
+"attack": 118,
+"defense": 96,
+"speed": 61,
+"spAttack": 93,
+"spDefense": 51,
+"moves": [
+72,
+246,
+28,
+182
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 4,
+"types": [
+5,
+11
+],
+"pp": [
+10,
+5,
+15,
+10
+],
+"hp": 91,
+"level": 50,
+"maxHP": 91,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler2": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"battler3": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"sideStatuses": [
+0,
+0
+],
+"sideTimers": [
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+},
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+}
+],
+"critMultiplier": 1,
+"battleMovePower": 75
+},
+"33109": {
+"battler0": {
+"species": 95,
+"attack": 51,
+"defense": 187,
+"speed": 76,
+"spAttack": 36,
+"spDefense": 72,
+"moves": [
+157,
+20,
+225,
+201
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 5,
+"types": [
+5,
+4
+],
+"pp": [
+9,
+20,
+20,
+10
+],
+"hp": 117,
+"level": 50,
+"maxHP": 117,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler1": {
+"species": 140,
+"attack": 118,
+"defense": 96,
+"speed": 61,
+"spAttack": 93,
+"spDefense": 51,
+"moves": [
+72,
+246,
+28,
+182
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 4,
+"types": [
+5,
+11
+],
+"pp": [
+10,
+5,
+15,
+10
+],
+"hp": 91,
+"level": 50,
+"maxHP": 91,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler2": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"battler3": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"sideStatuses": [
+0,
+0
+],
+"sideTimers": [
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+},
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+}
+],
+"critMultiplier": 1,
+"battleMovePower": 75
+},
+"33110": {
+"battler0": {
+"species": 95,
+"attack": 51,
+"defense": 187,
+"speed": 76,
+"spAttack": 36,
+"spDefense": 72,
+"moves": [
+157,
+20,
+225,
+201
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 5,
+"types": [
+5,
+4
+],
+"pp": [
+9,
+20,
+20,
+10
+],
+"hp": 117,
+"level": 50,
+"maxHP": 117,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler1": {
+"species": 140,
+"attack": 118,
+"defense": 96,
+"speed": 61,
+"spAttack": 93,
+"spDefense": 51,
+"moves": [
+72,
+246,
+28,
+182
+],
+"statStages": [
+6,
+6,
+6,
+6,
+6,
+6,
+6,
+6
+],
+"ability": 4,
+"types": [
+5,
+11
+],
+"pp": [
+10,
+5,
+15,
+10
+],
+"hp": 91,
+"level": 50,
+"maxHP": 91,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler2": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"battler3": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"statStages": [
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"sideStatuses": [
+0,
+0
+],
+"sideTimers": [
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+},
+{
+"reflectTimer": 0,
+"reflectBattlerId": 0,
+"lightscreenTimer": 0,
+"lightscreenBattlerId": 0,
+"mistTimer": 0,
+"mistBattlerId": 0,
+"safeguardTimer": 0,
+"safeguardBattlerId": 0,
+"followmeTimer": 0,
+"followmeTarget": 0,
+"spikesAmount": 0
+}
+],
+"critMultiplier": 1,
+"battleMovePower": 75
+}
+}

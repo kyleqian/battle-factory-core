@@ -3014,6 +3014,100 @@ gating to rule those out, or re-derive `CalculateBaseDamage` with a wider
 net of possible modifiers than this session's manual reconstruction
 covered.
 
+### Damage math gap — ROOT-CAUSED, NOT an engine bug (worktree lane `wt-20260719-191802`, ISSUES #21 follow-up)
+
+**Root cause: the hand-reconstruction two paragraphs above dropped
+`CalculateBaseDamage`'s own unconditional `+2` (`pokemon.c:3371`,
+`return damage + 2;`), applied on *every* return path (physical/special/
+`TYPE_MYSTERY`) after all other modifiers — the same easy-to-miss-reading-
+top-down pitfall this exact dossier already named and fixed once before,
+in §10, for **battle 1's own ROCK_SLIDE sample** (tick 2335, base 32 not
+the naive 30). `src/engine/damageCalc.ts:199` already carries the `+2`
+(`return damage + 2;`, with an inline comment citing that precedent) —
+**`damageCalc.ts` needed zero changes.** §18's own from-scratch
+reconstruction simply re-derived the arithmetic straight from source
+without re-applying the already-established `+2` finding from earlier in
+this same file. `17 + 2 = 19` — the exact RAM-observed pre-STAB value —
+and `floor(19 × 15 / 10) = 28`, the exact RAM-observed final damage (and
+the exact `91 → 63` HP delta). No unmodeled branch, no matchup-specific
+gap: this session's own extended RAM probe (below) confirms every other
+input was already neutral, exactly as the original write-up assumed.
+
+**Directly verified by running the real engine function**, not just
+re-deriving by hand a second time — invoked `calculateBaseDamage`/
+`applyStab` from `src/engine/damageCalc.ts` (unmodified) with the exact
+RAM-confirmed inputs (attacker atk 51/lvl 50, defender def 96, movePower
+75, `TYPE_ROCK`, both battlers' `statStages` all `6`/neutral, no crit):
+
+```
+$ npx tsx <scratch script importing src/engine/damageCalc.ts>
+pre-STAB base: 19
+post-STAB:     28
+```
+
+Bit-exact against the dump, with the committed engine code exactly as it
+already sits in the tree.
+
+**Extended-probe inputs ruling out every other lead ISSUES #21 raised**
+(`tools/probe/dump-battler-full.py`, now extended this session with
+`statStages[]` at struct offset `0x18` (`pokemon.h:277`) plus
+`gSideStatuses`/`gSideTimers`/`gCritMultiplier`/`gBattleMovePower`;
+RAM-sampled at ticks 33031, 33107, 33108, 33109, 33110 — committed as
+`src/data/gen/battle2-turn1-fullstate-dump.json`, twice-run byte-identical):
+- **`statStages`**: both battlers, all 8 slots, **`6` (neutral) at every
+  sampled tick including 33108/33109** — no stage was hiding a modifier on
+  either side.
+- **`sideStatuses`/`sideTimers`**: both sides `0`/all-zero throughout — no
+  Reflect/Light Screen/Mist/Safeguard/Spikes in play.
+- **`critMultiplier`**: `1` throughout (confirms §18's own BATTLE_ARMOR
+  finding above). **`gBattleScripting.dmgMultiplier`** (separately
+  RAM-probed, `gBattleScripting+0xE`): `1` throughout — rules out the
+  `Cmd_damagecalc` post-multiply (`gBattleMoveDamage *= gCritMultiplier *
+  gBattleScripting.dmgMultiplier`) as a factor; with both factors `1`,
+  `gBattleMoveDamage` at tick 33108 (`19`) *is* `CalculateBaseDamage`'s raw
+  return, not a scaled derivative.
+- **Badge/frontier gating** (an explicit lead in ISSUES #21's own text):
+  RAM-confirmed `gBattleTypeFlags = 0x8000c` (bit 19, `BATTLE_TYPE_FACTORY`,
+  set) at the calc tick, so `gBattleTypeFlags & BATTLE_TYPE_FRONTIER` is
+  nonzero and `ShouldGetStatBadgeBoost` returns `FALSE` unconditionally —
+  **even though the save's own badge flags are separately confirmed all
+  set** (`FLAG_BADGE01_GET`/`05`/`07` all `TRUE`, RAM-read from
+  `gSaveBlock1Ptr->flags`). Badge boosts are structurally impossible in any
+  Factory battle, not just coincidentally absent this turn.
+- **Held items**: both battlers hold `ITEM_SITRUS_BERRY` (142, confirmed
+  via RAM, matching §18's own item-slot note above) — source-confirmed
+  (`reference/pokeemerald/src/data/items.h:1752`) `.holdEffect =
+  HOLD_EFFECT_RESTORE_HP`, which appears in none of `CalculateBaseDamage`'s
+  damage-modifying hold-effect branches (`sHoldEffectToType`'s type-power
+  items, `CHOICE_BAND`, `SOUL_DEW`, the four species-locked items). Not a
+  coincidental non-factor — verified by item ID, per the brief's explicit
+  instruction not to assume.
+- **Abilities**: ONIX is `ABILITY_STURDY` (5, RAM-confirmed), KABUTO is
+  `ABILITY_BATTLE_ARMOR` (4) — neither appears in any of
+  `CalculateBaseDamage`'s ability-gated branches (`HUGE_POWER`/
+  `PURE_POWER`, `THICK_FAT`, `HUSTLE`, `PLUS`/`MINUS`, `GUTS`,
+  `MARVEL_SCALE`, `OVERGROW`/`BLAZE`/`TORRENT`/`SWARM`).
+
+**Cross-check against battle 1 (why it "never diverged" there): it did —
+this is the exact same bug, caught the first time.** §10 already found and
+fixed this identical `+2` omission for battle 1's own ROCK_SLIDE sample
+before `damageCalc.ts` was ever written; that fix has been sitting in the
+engine (and cited in its own doc comment) the entire time. §18's "flagged
+gap" wasn't a second, distinct, matchup-specific bug — it was this
+dossier's *documentation* independently re-deriving the same formula by
+hand a second time, for a second matchup, and stepping on the same
+already-solved pitfall. Nothing in `src/engine/damageCalc.ts` changes as a
+result of this session.
+
+**Verification**: `npm test` (unchanged count, no engine files touched)
+and `npm run build` green. `tools/probe/dump-battler-full.py`'s extension
+(statStages + side statuses/timers + critMultiplier/battleMovePower) and
+the new `src/data/gen/battle2-turn1-fullstate-dump.json` are this session's
+only committed artifacts; the `dmgMultiplier`/badge-flag/`gBattleTypeFlags`
+reads above used scratch `ram-probe.py` specs (not committed — ad hoc,
+reproducible from the addresses cited inline) per this dossier's existing
+convention for one-off verification probes.
+
 ### Battler snapshots (`dump-battler-full.py`, ticks 33031 and 33672)
 
 | | species | atk | def | spd | hp before | hp after | move used | PP before→after |
@@ -3068,15 +3162,20 @@ move-selection policy.
   for future turns, independent of whether it was actually used this turn.
 
 **Still open (in priority order for a resuming session):**
-1. The damage-math gap above (RAM-confirmed 28 vs. hand-formula's [21,25])
-   — root cause not identified, explicitly flagged rather than guessed at.
+1. ~~The damage-math gap above (RAM-confirmed 28 vs. hand-formula's
+   [21,25])~~ — **ROOT-CAUSED, worktree lane `wt-20260719-191802`**: the
+   hand-reconstruction above omitted `CalculateBaseDamage`'s unconditional
+   `+2` (`pokemon.c:3371`); `src/engine/damageCalc.ts` already has it and
+   needed no change. See "Damage math gap — ROOT-CAUSED" below.
 2. Battle 2's own turn 2 onward — this session's own deliverable stops at
    the tick-33672 settled menu, per the brief's priority order (turn 2+ is
    explicitly "if time remains," not reached this session).
-3. `statStages[]` (struct offset `0x18`, `pokemon.h:277`) isn't read by
-   `dump-battler-full.py` — worth adding if a future session needs to
-   confirm stat-stage state directly (e.g. SAND_ATTACK's own accuracy-stage
-   write) rather than inferring it from PP/move-slot evidence alone.
+3. ~~`statStages[]` (struct offset `0x18`, `pokemon.h:277`) isn't read by
+   `dump-battler-full.py`~~ — **added, worktree lane `wt-20260719-191802`**
+   (see "Damage math gap — ROOT-CAUSED" below); confirms all 8 slots stayed
+   neutral (`6`) both battlers throughout the turn-1 window sampled,
+   including SAND_ATTACK's own accuracy-stage write not yet having landed
+   by tick 33110 (KABUTO's move executes later in the turn).
 
 **Verification**: `npm test` (669/669) and `npm run build` green — no
 `src/engine/` changes this session, only the new committed trace under
