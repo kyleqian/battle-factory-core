@@ -41,3 +41,15 @@ same trace's own 66 segments verbatim (identical button script, only
 other section of the dossier. Together they cover every tick 6350-7312 at
 stride 1 (no gaps, no overlap beyond the shared boundary ticks 6560/6555
 and 6810/6811 and 7066/7067). All four twice-run, 0 sha mismatches.
+
+`battle1-turn6-dense.json` (docs/turn6-notes.md): turn 6 of battle 1 (Onix
+vs. switched-in PIDGEOTTO) — reuses `tools/compare/traces/turn5-switchin.json`'s
+own 67-segment script verbatim, extended with one pure-idle filler segment
+to tick 7312 plus `battle1-winline-b-swap.json`'s own segments[66:70] (the
+turn-6 FIGHT-submenu-open, move-confirm, and resolution-idle — verbatim,
+cross-checked byte-identical against that committed trace). 8346 frames
+total, 251 `captureFrames` dense (stride-1) over nine windows bracketing
+every RAM-confirmed transition (submenu open, FEATHER_DANCE kickoff/stat-
+fall text, ROCK_SLIDE kickoff/impact/HP-drain, turn-7 menu reopen) — the
+6350-7312 settle window is intentionally not re-captured here, already
+covered by the `-switchin-dense-*` files above. Twice-run, 0 sha mismatches.
