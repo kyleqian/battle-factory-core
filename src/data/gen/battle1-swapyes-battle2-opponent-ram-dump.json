@@ -1,0 +1,128 @@
+{
+"34081": {
+"battler0": {
+"species": 278,
+"attack": 103,
+"defense": 56,
+"speed": 90,
+"spAttack": 91,
+"spDefense": 71,
+"moves": [
+210,
+283,
+280,
+104
+],
+"ability": 65,
+"types": [
+12,
+12
+],
+"pp": [
+20,
+5,
+15,
+15
+],
+"hp": 143,
+"level": 50,
+"maxHP": 143,
+"item": 179,
+"status1": 0,
+"status2": 0
+},
+"battler1": {
+"species": 140,
+"attack": 118,
+"defense": 96,
+"speed": 61,
+"spAttack": 93,
+"spDefense": 51,
+"moves": [
+72,
+246,
+28,
+182
+],
+"ability": 4,
+"types": [
+5,
+11
+],
+"pp": [
+10,
+5,
+15,
+10
+],
+"hp": 91,
+"level": 50,
+"maxHP": 91,
+"item": 142,
+"status1": 0,
+"status2": 0
+},
+"battler2": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+},
+"battler3": {
+"species": 0,
+"attack": 0,
+"defense": 0,
+"speed": 0,
+"spAttack": 0,
+"spDefense": 0,
+"moves": [
+0,
+0,
+0,
+0
+],
+"ability": 0,
+"types": [
+0,
+0
+],
+"pp": [
+0,
+0,
+0,
+0
+],
+"hp": 0,
+"level": 0,
+"maxHP": 0,
+"item": 0,
+"status1": 0,
+"status2": 0
+}
+}
+}

@@ -2552,3 +2552,237 @@ twice-run via `bin/oracle run`, 0 sha mismatches across both (118/118 and
 (`dump-battler-full.py` ×2, `ram-probe.py` ×1) independently re-run and
 diffed byte-for-byte against their own first run — identical every time.
 
+## 17. The swap offer's YES branch — the factory swap screen ground-truthed end to end (S8 worktree lane, oracle scout — no engine code)
+
+**Headline: §16's own open item #1 (the swap-picker UI, "completely unknown")
+is now closed.** Branching from `battle1-winline-b-swap.json`'s own committed
+prefix at the swap-offer's settled YES/NO prompt (tick 29601, cursor
+defaulting to **YES** per §16 HEADLINE 3), this session answered **YES**
+instead of declining, and ground-truthed the whole factory swap screen: its
+fade-in entry, the player's-own-party picker (ONIX/MAGBY/BAYLEEF), the
+SUMMARY/SWAP/RECHOOSE popup, the slide transition into the opponent's-party
+picker (DESTIN's Grovyle/Murkrow/Pidgeotto), cursor navigation across all 3
+opponent balls, the accept YES/NO popup, the completed swap, and the return
+through "Your POKéMON swap is complete." → "Right this way, please!" →
+battle 2's own intro, ending on battle 2's **settled first action menu**:
+**GROVYLE (143/143, swapped in for ONIX) vs KABUTO (91/91)** — the same
+opponent identity as the NO-branch (§16), because `factory_generateopponentmons`
+runs *before* the YES/NO branch point, in the shared prefix — expected per
+§16 HEADLINE 4's own timing-sensitivity finding (idle-timing before the
+branch is unaffected; nothing in this branch's own tail perturbs an
+already-generated opponent).
+
+**The mon picked to give up: ONIX (player slot 0), with zero extra
+navigation** — the cursor already sits on slot 0 when the picker screen
+opens, so no LEFT/RIGHT was needed; this is the "simplest unambiguous path"
+the brief asked for. **The mon picked to receive: GROVYLE (opponent slot
+0)** — reached only *after* navigating RIGHT/RIGHT/LEFT/LEFT across all 3 of
+DESTIN's balls (Murkrow, Pidgeotto, back through Murkrow to Grovyle) so the
+cursor-movement ground-truthing the brief asked for is on record, before
+landing back on slot 0 to confirm. (Trade-off flagged, not hidden: giving up
+ONIX means this branch's own party no longer matches the NO-branch's
+proven-effective ONIX/MAGBY roster — irrelevant to this session's own scope,
+which stops at battle 2's settled menu, but a future session actually
+*fighting* battle 2 on this branch inherits a different roster than §16's.)
+
+### Committed traces
+
+`tools/compare/traces-groundtruth/battle1-swapyes-a.json` (154 segments,
+30001 frames, 235 `captureFrames`) — `battle1-winline-b-swap.json`'s own
+segments 0-145 (**verbatim, byte-identical**, cum. 29601 ticks, ending on
+the settled swap-offer YES/NO prompt) plus 8 new segments: confirm YES,
+the fade-to-black/load/fade-in entry into the swap-player-screen (dense
+every-tick 29601-29670, the window sha-diffing showed real content still
+changing; sparse every-10th 29671-29701 for the settle tail), open the
+SUMMARY/SWAP/RECHOOSE popup (dense 29702-29765, sparse tail to 29781),
+move the popup cursor to SWAP and confirm it (dense 29782-29801), and the
+slide transition into the opponent's-party picker (dense-every-3rd
+29802-29978, sparse tail to 30001) — ends settled on the enemy screen,
+cursor on Grovyle (opponent slot 0). Plus 10 sparse anchors over the old
+prefix (ticks 0, 6970, 19990, 20192, 20745, 22418, 23601, 25802, 28002,
+29601), same convention as §16.
+
+`tools/compare/traces-groundtruth/battle1-swapyes-b.json` (174 segments,
+34081 frames, 194 `captureFrames`) — `battle1-swapyes-a.json`'s own segments,
+**verbatim**, plus 20 more: the RIGHT/RIGHT/LEFT/LEFT navigation across all
+3 opponent balls (dense every-2nd), open the accept popup on Grovyle (dense
+every-2nd 30082-30145), confirm YES (dense-then-sparse settle through the
+close-monpic/fade-out/return-to-field/"swap complete"-message window
+30182-30681), dismiss the swap-complete message, settle "Right this way,
+please!", dismiss, settle the battle-room opponent quote, dismiss, settle
+the trainer intro, dismiss, and the **settled battle 2 first action menu**
+at tick 34081 (11969 frames of headroom under wherever this trace's own
+frame budget matters least — 45000 cap, same as §16). **Both twice-run
+byte-identical via `bin/oracle run`** (0/235 and 0/194 sha mismatches
+respectively, across two independent runs each).
+
+Screen-shape findings, source-cited against `battle_factory_screen.c`'s
+`Swap_*` half (all confirmed against oracle PNGs, not assumed from source
+alone):
+
+- Entry is a hard cut to black (`Swap_Task_ScreenInfoTransitionOut`-style
+  fade is NOT used for the initial open — `CB2_InitSwapScreen`'s own
+  `gMain.state` load sequence runs fully behind a flat black screen, states
+  0-13, then `BeginNormalPaletteFade(..., 16, 0, RGB_BLACK)` at state 14
+  fades the fully-built screen in) — matches the oracle: solid black
+  29620-29646 (26 flat ticks), content fades in 29646-~29661.
+- The player's-own-party screen opens with **cursor defaulting to slot 0**
+  (`Swap_InitStruct`'s `AllocZeroed` + `Swap_InitActions(SWAP_PLAYER_SCREEN)`
+  explicitly zeroing `cursorPos`), title "POKéMON SWAP", top-right category/
+  species box showing the *selected ball's* mon (confirmed: "ROCK SNAKE
+  POKéMON" / "ONIX" at entry), bottom info line "Select POKéMON to swap."
+  (`gText_SelectPkmnToSwap`), CANCEL button bottom-right (no "PKMN FOR SWAP"
+  button on this screen — `Swap_Task_ScreenInfoTransitionIn`'s own
+  `inEnemyScreen` branch skips it).
+- `A` on a ball opens a SUMMARY/SWAP/RECHOOSE popup (`sSwap_MenuOptionFuncs`,
+  `battle_factory_screen.c:889`) with a large mon-pic sprite
+  (`OpenMonPic`/`sMonPicBg_*`) — **cursor defaults to SUMMARY (index 0)**,
+  not SWAP (`menuCursorPos` zeroed the same way); this session pressed
+  `DOWN` once to reach SWAP before confirming.
+- Confirming SWAP (`Swap_OptionSwap`, `:3989`) records `playerMonId` and
+  hands off to `Swap_Task_SwitchPartyScreen`, which slides the 3 pokéballs
+  off-right/on-left (`Swap_Task_SlideCycleBalls`) while cross-fading the
+  species-name text, landing on `Swap_InitActions(SWAP_ENEMY_SCREEN)` —
+  confirmed on-screen: same "POKéMON SWAP" chrome, category/species now
+  showing DESTIN's mons ("WOOD GECKO POKéMON" / "GROVYLE" at slot 0,
+  "DARKNESS POKéMON" / "MURKROW" at slot 1, "BIRD POKéMON" / "PIDGEOTTO" at
+  slot 2 — all three read directly off oracle PNGs, not inferred), info line
+  now "Select POKéMON to accept." (`gText_SelectPkmnToAccept`), and a new
+  "PKMN FOR SWAP" button appears next to CANCEL (`sSwap_EnemyScreenActions`
+  has a 4th action, `SWAPACTION_PKMN_FOR_SWAP` → `Swap_ActionPkmnForSwap`,
+  that goes back to the player screen — not exercised this session, the
+  brief's "simplest unambiguous path" didn't need it).
+- `A` on an enemy ball opens an accept popup, **"Accept this POKéMON?"
+  YES/NO, cursor defaulting to YES** (`Swap_AskAcceptMon`, `:2571`, same
+  zeroed-`yesNoCursorPos` pattern as every other YES/NO in this dossier) —
+  before that, `Swap_ActionMon` (`:4039`) checks
+  `Swap_AlreadyHasSameSpecies` and would show "This POKéMON is already in
+  your party!" (`gText_SamePkmnInPartyAlready`) instead if the target
+  species duplicates one of your *other* two party mons — not hit this
+  session (Grovyle isn't already in the ONIX/MAGBY/BAYLEEF roster), and thus
+  **not ground-truthed on-screen this session** (source-derived only,
+  flagged as an open item below).
+- Confirming YES on the accept popup (`Swap_HandleAcceptMonResponse` →
+  `Swap_Task_Exit`) closes the mon-pic sprite, writes `gPlayerParty[0] =
+  gEnemyParty[0]` plus a friendship reset (`CopySwappedMonData`, `:2350`),
+  fades to black, and returns to the overworld script via
+  `SetMainCallback2(CB2_ReturnToFieldContinueScript)` — the script then
+  shows `BattleFrontier_BattleFactoryPreBattleRoom_Text_YourSwapIsComplete`
+  ("Thank you!\nYour POKéMON swap is complete.") and rejoins the **shared**
+  `EventScript_EnterBattleRoom` label both branches use
+  (`data/maps/BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc:43-52`)
+  — meaning "Right this way, please!" is NOT NO-branch-specific text as
+  §16 read it in isolation; it's the shared post-branch continuation, just
+  with one extra msgbox page (the swap-complete confirmation) prepended on
+  the YES branch. Confirmed on-screen at tick 34081: "What will GROVYLE
+  do?" vs KABUTO, both mons at full/fresh HP — a clean battle-2 start.
+
+### RAM truth
+
+`src/data/gen/battle1-swapyes-battle2-opponent-ram-dump.json`
+(`dump-battler-full.py` against the committed `battle1-swapyes-b.json` at
+tick 34081, independently re-run and diffed byte-identical against its own
+first run): battler0 (player) = species 278 (**GROVYLE**), Lv50, 143/143,
+types `[12, 12]` = GRASS/GRASS (`include/constants/pokemon.h`:
+`TYPE_GRASS`=12), moves include 104 (DOUBLE_TEAM, matching the moveset this
+dossier already RAM-confirmed for DESTIN's Grovyle in §1); battler1
+(opponent) = species 140 (**KABUTO**), Lv50, 91/91, types `[5, 11]` =
+ROCK/WATER (`TYPE_ROCK`=5, `TYPE_WATER`=11), ability 4. Both fresh (no
+burn/status, full HP) — matches the free full-party heal + fresh-battle-
+start expected at this point.
+
+**Not delivered — the `gSaveBlock2Ptr->frontier.rentalMons[]` bookkeeping
+array (priority 2's other half) — flagged explicitly, not silently
+dropped:** a new probe (`tools/probe/dump-rentalmons.py`, written this
+session, **not committed** — deleted after failing its own sanity check)
+attempted to read `struct RentalMon rentalMons[6]`
+(`include/global.h:357-365`, offset `0x64C` (`frontier` field in
+`SaveBlock2`) + `0xE70` (`rentalMons` field in `struct BattleFrontier`) off
+`gSaveBlock2Ptr`'s own dereferenced value) before and after the swap. The
+read values were **byte-identical at ticks 29601, 30681, and 34081** —
+i.e., appeared not to change across the swap at all, which contradicts the
+visually- and `gBattleMons`-confirmed fact that the swap *did* happen
+(GROVYLE is on the field at 34081). A quick sanity cross-check of
+neighboring fields at the same computed base (`frontier.challengeStatus`,
+expected a small enum, read **38**; `frontier.curChallengeBattleNum`,
+expected roughly "1" for battle 2, read **0**; `frontier.selectedPartyMons`,
+expected 3 small pool-index values, read **[52573, 50658, 50623]** —
+obviously implausible) confirms the offset math itself is wrong somewhere
+upstream of `rentalMons`, not that the array is genuinely unwritten. Most
+likely culprit: one of the struct fields preceding `frontier` inside
+`SaveBlock2`, or preceding `rentalMons` inside `BattleFrontier`, has a
+different actual compiled size than this pinned pret checkout's own
+`/*0x64C*/`-style offset comments suggest (version/`#ifdef` skew is the
+dossier's own standing risk per ROADMAP's domain notes) — **unresolved,
+left as an explicit open item**, not worked around or guessed at further
+under this session's time cap.
+
+### Asset/UI inventory for a future engine slice (source-cited, not extracted)
+
+Confirmed via `battle_factory_screen.c`'s `Swap_*` half: **the swap screen
+is overwhelmingly asset-reuse from the draft (`Select_*`) screen, not new
+art** — same background tileset/tilemap/palette
+(`gFrontierFactoryMenu_Gfx`/`_Tilemap`/`_Pal`, loaded identically in both
+`CB2_InitSelectScreen:1153-1206` and `CB2_InitSwapScreen:3290-3337`), same
+mon-pic backdrop (`sMonPicBg_Gfx`/`_Tilemap`/`_Pal`, `graphics/
+battle_frontier/factory_screen/mon_pic_bg.{png,bin}`), same ball palettes
+(`sPokeballGray_Pal`/`sPokeballSelected_Pal`,
+`graphics/battle_frontier/factory_screen/pokeball_{gray,selected}.pal`),
+same cursor arrow (`sArrow_Gfx`, `.../arrow.png`) and interface highlight
+palette (`sInterface_Pal`, `.../interface.pal`), and **the same text
+palette literally reused by pointer comment** (`sSwapText_Pal` at `:1034`,
+"Identical to `sSelectText_Pal`"). The compressed ball sprite sheet
+(`sSwap_BallGfx` → `gPokeballSelection_Gfx`, referenced but not chased down
+to its own file this session) and `sMonPicBgAnim_Gfx`
+(`.../mon_pic_bg_anim.png`, the pulsing backdrop behind the big mon-pic
+sprite) are likewise shared with the draft screen's own sprite sheets.
+**Genuinely new-to-swap:** the action-button graphics (`sActionBoxLeft/
+Right_Gfx`, `sActionHighlightLeft/Middle/Right_Gfx`,
+`.../action_{box,highlight}_*.png` — the "CANCEL"/"PKMN FOR SWAP" pill
+buttons, used only by the swap screen's `Swap_Task_SlideButtonOnOffScreen`
+machinery, no `Select_*` equivalent found) and the swap-specific text bank
+(`gText_PkmnSwap`, `gText_Summary2`/`gText_Swap`/`gText_Rechoose`,
+`gText_PkmnForSwap`/`gText_Cancel3`, `gText_SelectPkmnToSwap`/
+`gText_SelectPkmnToAccept`, `gText_AcceptThisPkmn`, `gText_QuitSwapping`,
+`gText_SamePkmnInPartyAlready`, `gText_YourSwapIsComplete` — same
+`FONT_NORMAL` font as everywhere else in this dossier, no new glyph work
+expected). Window geometry (`sSwap_WindowTemplates`, `:948-1033`) and BG
+templates (`sSwap_BgTemplates`, `:896-947`) are declared separately from
+the draft screen's own but were not diffed field-by-field this session —
+flagged as a quick follow-up check, not assumed identical.
+
+### Not delivered this session (open, in priority order for a resuming session)
+
+1. **LCG-step ledger for the YES branch (brief's priority 4)** — not built.
+   This session's whole time budget went to reaching and ground-truthing the
+   swap screen itself (priority 1, the brief's own top item) plus the
+   partial RAM-truth and asset inventory above; a `gRngValue` per-tick watch
+   (`ram-probe.py`, same tool §15/§16 used) over `battle1-swapyes-b.json`'s
+   own segments is the natural next step and needs no new tooling.
+2. **The `rentalMons[]` bookkeeping array** — offset math wrong (see above),
+   genuinely unresolved, not just unattempted.
+3. **The "already in your party" duplicate-species block
+   (`gText_SamePkmnInPartyAlready`)** — never triggered on-screen; source-
+   read only.
+4. **The CANCEL path on either swap sub-screen, and the "quit swapping?"
+   confirmation it opens (`Swap_AskQuitSwapping`)** — not exercised; this
+   session only ever moved forward (mon-pick → mon-pick → accept), never
+   backed out.
+5. **The SUMMARY option from the popup** (`Swap_OptionSummary` →
+   `ShowPokemonSummaryScreen`) — not exercised; RECHOOSE likewise untested.
+6. **Window/BG-template diff against the draft screen** — flagged above,
+   not done.
+7. Everything §16 already left open (battle 2 itself unfought, burn-halving
+   not independently re-derived, BAYLEEF never battle-tested, exact
+   dismiss-timing minimums not bisected) still applies unchanged; this
+   session didn't touch battle 2's own fight.
+
+**Verification**: `npm test` (669/669) and `npm run build` green — no
+`src/engine/` changes this session, only the two new committed traces
+under `tools/compare/traces-groundtruth/` and one new RAM dump under
+`src/data/gen/`, per the worktree brief's constraint. Both new traces
+twice-run via `bin/oracle run`, 0 sha mismatches across both (235/235 and
+194/194 captures). The `battle2-opponent-ram-dump`'s `dump-battler-full.py`
+run independently re-run and diffed byte-for-byte against its own first
+run — identical.
+
