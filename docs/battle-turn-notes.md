@@ -4048,3 +4048,197 @@ dragonbreath.json` **237/237**. S7 slice I is now fully closed end to end
 (reopen through the settled post-ROCK_SLIDE menu); turn 5's own reopen
 (input tick 5926) is the natural next engine slice.
 
+## 23. Engine slice J: turn 5's FIGHT-submenu reopen + Grovyle's ENDEAVOR (Onix 88->1), landed green, ending BEFORE Onix's own ROCK_SLIDE kickoff - `turn5-menu.json` **41/41**, `turn5-endeavor.json` **254/254**, both 0 diff (S7 bounded worker session)
+
+Implements §13's own turn-5 ground truth up to (not including) Onix's own
+ROCK_SLIDE: the reopen (real press tick 5927) + confirm (5959, cursor
+already at 0 - ROCK_SLIDE, no nav needed, same as turn 4's own reopen) +
+Grovyle's third ENDEAVOR (`gCurrentMove`->283 at RAM tick 5965, target
+Onix, target.hp(88)-user.hp(1)=87 HP-diff) draining Onix 88->1 - the
+longest drain yet and the first to cross the PLAYER healthbox's own
+green->yellow->red bands. Per this slice's own brief and every prior
+slice's precedent: **parameterize, don't rebuild** - every mechanism
+function (`drawEndeavorSquish`, `endeavorOnixHp`, `endeavorShakeSteps`,
+`drawActionMenuIdleContent`, `currentPPForActiveMon`) was reused with a
+one-epoch-further `turn4Resolved` tier threaded through the same ternary
+chains slice I already established for `turn3Resolved` - no new render
+mechanism was needed anywhere in this window.
+
+### Anchors (RAM- and pixel-probed this session, not assumed)
+
+- **`TURN5_CONFIRM_PRESS_TICK = 5959`** - a REAL press (`battle1-grovyle-
+  faint.json`'s own committed button script: reopen A at 5926-5928, confirm
+  A at 5958-5960, both reused verbatim per this slice's own precedent, "last
+  frame of the hold" convention). Fresh `tools/probe/ram-probe.py` run
+  (`tools/probe/specs/turn5-endeavor-watch.json` ->
+  `src/data/gen/turn5-endeavor-watch-probe.json`, ticks 5900-6260) confirms
+  `gCurrentMove`->283 (ENDEAVOR) at RAM tick 5965 (`TURN5_CONFIRM_PRESS_
+  TICK`+6, the SAME +6 offset every prior turn's own ENDEAVOR/DOUBLE_TEAM
+  `gCurrentMove`-write already showed).
+- **The stale-power shake prediction, CONFIRMED for the first time on real
+  hardware**: `gBattleMovePower`/`gAnimMovePower` RAM-probed at **75** for
+  the ENTIRE window (turn 4's own ROCK_SLIDE was the last power-calculated
+  move before turn 5's ENDEAVOR - DOUBLE_TEAM doesn't touch it) - the
+  general `endeavorShakeSteps(75)` rule (S7 residual-cleanup slice) predicts
+  a SYMMETRIC `downStep=3/upStep=3`, matching turn 2's own case exactly.
+  **This was a falsifiable prediction landing for the first time this
+  session** (the residual-cleanup slice pinned it hermetically but this is
+  the first turn-5 pixels ever captured) - `turn5-endeavor.json`'s own
+  stride-1 sweep through both shake rounds is 0 diff throughout, so the
+  prediction holds: no asymmetry, no new formula needed.
+- **`gBattleMoveDamage` 87->43->87** (raw HP-diff -> typecalc 0.5x for the
+  NORMAL-vs-ROCK immunity gate -> copyword restore), RAM-confirmed at ticks
+  5995/5998/6001 - same three-step shape §13/§20 already document for every
+  prior ENDEAVOR use.
+- **HP drain: Onix 88->1, `ENDEAVOR_HP_DRAIN_START_DELAY=153` unchanged.**
+  `endeavorOnixHp(t, pressTick, anchorPlayerAfterTurn3Hp(88),
+  anchorPlayerAfterTurn5Hp(1))` - RAM-confirmed `gBattleMons[0].hp` updates
+  88->**1** at RAM tick 6201 (`pressTick+153+87+2`, the same "+2" render/RAM
+  lag every prior drain's raw hp-field write already shows past its own
+  bar-completion sentinel).
+- **PP: ROCK_SLIDE (slot 0) now 7/10** (three uses: turns 1, 3, 4) -
+  `currentPPForActiveMon` gained a `turn4Resolved` param (a third slot-0
+  decrement, independent of `turn2Resolved`'s own slot-2 DRAGON_BREATH
+  decrement) - pixel-confirmed exact, inside `turn5-menu.json`'s own 0-diff
+  dense window (not just RAM-inferred).
+- **Idle-bounce reopen/freeze**: `turn5SubmenuBounceTick` composes turn 4's
+  own `turn4RockSlideResettledBounceTick` with the unmodified
+  `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (the same, un-corrected shape
+  `turn4SubmenuBounceTick` already used - NOT Family B's own `-1`
+  correction, which was scoped to turn 3's own composition only, built on a
+  different resettled-bounce ancestor). `turn5KickoffBounceTick`'s own
+  frozen plateau needed a fresh grid search (`npm run compare` on a
+  single-tick scratch trace at `TURN5_CONFIRM_PRESS_TICK+FIGHT_CONFIRM_
+  BOUNCE_FREEZE_DELAY`=5962): `d` in `[-4..4]` (a 9-tick-wide plateau) are
+  ALL exact 0-diff, `d=0` picked as the center - i.e. the live formula
+  evaluated AT the freeze moment itself happens to already be correct here
+  (the same lucky coincidence turn 3's own case had).
+- **Safe stopping boundary: tick 6221**, oracle-confirmed via a dense
+  stride-1 sweep 6014-6249 (`tools/compare/scratch`, not committed): every
+  tick through 6221 is 0 diff, then tick 6222 hard-cuts to Onix's own
+  ROCK_SLIDE kickoff text (RAM: `gCurrentMove`->157, attacker->0, at RAM
+  tick 6215; the pixel hard-cut lands a few ticks later, same "RAM flip,
+  then a short bookkeeping delay before the visible hard-cut" pattern every
+  prior turn boundary shows) - **out of this slice's own scope**, matching
+  the brief's own instruction to stop before it. `drawTurn5EndeavorText`
+  deliberately does NOT dispatch onward (same shape slice G's own original
+  `drawTurn3EndeavorText` had, before slice H added the ROCK_SLIDE handoff)
+  - it only ever holds the ENDEAVOR text once fully printed.
+
+### One named single-tick residual, excluded from `captureFrames`
+
+**Tick 5927** (the reopen press's own registering tick): 769px/2.00%
+mismatch, isolated to the Onix silhouette region (`x=44-99,y=49-110`) - the
+SAME bbox shape this dossier's own "hardware quirk at a redraw/bounce
+extremum" class already catalogues repeatedly (ticks 3337/3465/3721/3879/
+3888/4934). Both neighbors (5926, 5928) are EXACT matches. **Tested and
+ruled out, not just assumed**: a uniform `-1` shift on `turn5SubmenuBounceTick`
+(mirroring Family B's own corrective direction) DOES fix tick 5927 in
+isolation, but breaks three OTHER previously-exact ticks in the same window
+(5936, 5945, 5954) when swept - i.e. a constant offset cannot fix this
+residual without breaking currently-passing ticks, the same "ruled out"
+finding Family B's own investigation already reached for a different
+composition. Excluded per this run's "characterize precisely, never commit
+red" rule rather than chased further this session - a future session should
+pointer-chase the real bouncer sprite's own raw `sSinIndex` at this specific
+tick (`turn3-menu-bouncer-raw.json`'s own precedent) before attempting
+another shift.
+
+### The player healthbox band/sliver crossing - verified, ZERO compositor changes needed
+
+Per this slice's own brief item (b): Onix's drain (88/117 green start ->
+1/117 red sliver) is the first PLAYER-side exercise of
+`composePlayerHealthboxHpOverlay`'s green->yellow->red band thresholds and
+the `filledPixels==0 && hp>0 -> force 1px` sliver rule (`calcBarFilledPixels`,
+`healthboxAssembly.ts`) - both were hermetically pinned but never oracle-
+exercised on the player side before this session. **Verified exact, no
+compositor changes needed**: `turn5-endeavor.json`'s own dense stride-1
+sweep through the WHOLE drain (152 ticks, HP values 88 down to 1) is 0 diff
+throughout, including the exact tick the bar visually enters yellow (HP<=58,
+i.e. `filledPixels<=24`) and red (HP<=23, i.e. `filledPixels<=9`), and the
+final 1-HP sliver tick itself. New Tier-1 pin
+(`tests/healthboxAssembly.test.ts`) asserts `calcBarFilledPixels(1/117)`
+forces the 1px sliver, band `"red"`, and the exact tile tilesheet/palette
+this compositor draws for it - matching the real pixels directly, not
+re-derived by hand. The HP-digit overlay's 2-digit->1-digit transition (88
+down through single digits to 1) is inside the same 0-diff sweep - no
+separate finding needed, the existing `rightAlign3GlyphCodes`-style digit
+layout already handles it.
+
+### What landed (`src/engine/battleScene.ts`/`battleMenu.ts`/`core.ts`)
+
+- **`BattleSceneState.turn4Resolved`** (new field, same "created directly"
+  idiom as `turn1Resolved`/`turn2Resolved`/`turn3Resolved`) - `core.ts`
+  gained a `turn3Resolved && !turn4Resolved && ...` reopen branch, gated on
+  the newly-exported `TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` (661) past turn 4's
+  own REAL confirm (4925) - directly usable with no synthetic-anchor
+  arithmetic, unlike `TURN3_ROCKSLIDE_REOPEN_GATE_DELAY`'s own correction,
+  since turn 4's own ROCK_SLIDE was already anchored to a real press. Reopen
+  calls `openFightSubmenu` with the default cursor (0) - no persisted-cursor
+  param needed, matching §13's own "no nav needed" finding.
+- **`turn4Resolved` threaded through every render dispatch tier one epoch
+  further**: `drawMenuIdleBaseWithOpponentHp`, `drawActionMenuIdleContent`,
+  `drawActionMenuIdleWindow`, `drawFightSubmenuWindow`, `drawFightSubmenuChrome`
+  all gained a `turn4Resolved` param extending their existing ternary chains
+  (opponent HP selects `anchorOpponentAfterTurn4Hp`=1; the reopened-submenu
+  and confirm-wait bounce ticks select `turn5SubmenuBounceTick`/
+  `turn5KickoffBounceTick`; PP selects the 7/10 reading).
+- **`drawTurn5EndeavorText`** - turn 5's own analogue of
+  `drawTurn3EndeavorText`, reusing `drawEndeavorSquish`'s entire animation
+  state machine and `endeavorOnixHp` unchanged, parameterized by
+  `anchorOpponentAfterTurn4Hp`(1, Grovyle's own hp - steady all through this
+  window, ENDEAVOR targets Onix not Grovyle), `anchorPlayerAfterTurn5Hp`(1,
+  new anchor), `ROCK_SLIDE_MOVE_POWER`(75, the stale-power anchor), and
+  `turn5KickoffBounceTick`. Deliberately does NOT dispatch onward into
+  ROCK_SLIDE (out of scope), same shape slice G's own original had.
+- New anchor constants: `anchorPlayerAfterTurn5Hp`(1), `TURN5_CONFIRM_PRESS_
+  TICK`(5959), `turn5SubmenuBounceTick`, `turn5KickoffBounceTick`/
+  `TURN5_KICKOFF_FROZEN_BOUNCE_TICK`. `TURN4_ROCKSLIDE_MENU_REDRAW_DELAY`
+  changed from a module-private `const` to `export const` (needed by
+  `core.ts`'s new reopen gate; value unchanged).
+- **`currentPPForActiveMon`** (`battleMenu.ts`) gained a `turn4Resolved`
+  param - a third independent slot-0 (ROCK_SLIDE) decrement, same shape
+  `turn3Resolved`'s own second decrement already established.
+
+### Committed traces (both new, both 0 diff)
+
+- **`turn5-menu.json`**: extends `turn4-rockslide.json`'s own 5926-frame
+  prefix verbatim with the groundtruth's own reopen (A, 5926-5928) + confirm
+  (A, 5958-5960) presses, through tick 5967 (`TURN5_CONFIRM_PRESS_TICK`+8,
+  the same "+8" boundary `turn4-menu.json` used, right before the kickoff
+  text starts at +9) - 41 dense `captureFrames` (tick 5927 excluded, see
+  above). **41/41, 0 diff.**
+- **`turn5-endeavor.json`**: extends `turn5-menu.json`'s own script with
+  idle frames through tick 6221 (the safe boundary above) - 254 dense
+  `captureFrames` from tick 5968 (kickoff text start) through 6221, stride-1
+  throughout (fits under the 256-per-trace service ceiling with no
+  compromise needed this time, unlike slice I's own `turn4-rockslide.json`).
+  **254/254, 0 diff.**
+
+### Verification
+
+`npm test` **768/768** (+7: the turn-5 reopen/confirm replay pin, the
+reopen-gate-still-closed pin, the PP-7/10 pin, two ENDEAVOR-window
+determinism/smoke pins, `endeavorOnixHp` with turn 5's real 88->1 numbers,
+and the player healthbox hp=1 red-sliver pin). `npm run build` green.
+`turn5-menu.json` **41/41**, `turn5-endeavor.json` **254/254**, both 0 diff.
+Zero regressions, full sweep re-verified at exact prior counts: `turn4-
+rockslide.json` **250/250**, `turn4-doubleteam.json` **249/249**, `turn3-
+endeavor.json` **192/192**, `turn3-menu.json` **254/254**, `turn2-endeavor-
+drain.json` **201/201**, `fight-submenu.json` **235/235**, plus `turn4-
+menu.json` **44/44**, `turn3-rockslide.json` **256/256**, `turn2-
+dragonbreath.json` **237/237**, `turn1-rockslide.json` **256/256**, `turn1-
+cloneanim.json` **230/230**, `menu-idle.json` **69/69**, `turn2-endeavor.json`
+**77/77**.
+
+### What's left
+
+Onix's own ROCK_SLIDE (tick 6222 onward, hitting Grovyle - already at 1 HP -
+for the fatal blow, 1->0, the faint itself) through DESTIN's forced
+Pidgeotto switch-in and the next settled menu is the immediate next slice -
+ground truth already fully banked in §13 (the whole
+faint/switch-in timeline, the button-gated KO-text finding, Onix's own
+Sitrus Berry proc). Tick 4934's excluded redraw-extremum and this slice's
+own new tick-5927 residual remain a different, still-open residual class
+(out of scope for a resolution slice).
+

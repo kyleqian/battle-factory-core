@@ -1869,15 +1869,21 @@ export function turn2KickoffBounceTick(t: number, pressTick: number): number {
  * turn 4's own reopen ROCK_SLIDE has been used twice (turns 1 and 3, PP
  * 10->8), independent of `turn2Resolved`'s own slot-2 (DRAGON_BREATH)
  * decrement.
+ *
+ * S7 slice J: `turn4Resolved` (docs/battle-turn-notes.md §13/§23) adds a
+ * THIRD slot-0 decrement - turn 4 also used ROCK_SLIDE (cursor stayed at 0,
+ * no nav needed), so by turn 5's own reopen ROCK_SLIDE has been used three
+ * times (turns 1, 3, 4 - PP 10->7), oracle-pixel-confirmed exact.
  */
 export function currentPPForActiveMon(
   moveset: ActiveMonMoveset,
   turn1Resolved: boolean,
   turn2Resolved: boolean = false,
   turn3Resolved: boolean = false,
+  turn4Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
-  const slot0Uses = (turn1Resolved ? 1 : 0) + (turn3Resolved ? 1 : 0);
+  const slot0Uses = (turn1Resolved ? 1 : 0) + (turn3Resolved ? 1 : 0) + (turn4Resolved ? 1 : 0);
   return [a - slot0Uses, b, turn2Resolved ? c - 1 : c, d];
 }
 

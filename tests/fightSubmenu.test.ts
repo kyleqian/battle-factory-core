@@ -121,7 +121,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false },
   };
 }
 
@@ -235,7 +235,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: false,
-      turn3Resolved: false,
+      turn3Resolved: false, turn4Resolved: false,
     },
   };
 }
@@ -352,7 +352,7 @@ function stateAtTurn3Confirm(): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: true,
-      turn3Resolved: false,
+      turn3Resolved: false, turn4Resolved: false,
     },
   };
 }
@@ -488,5 +488,114 @@ describe("battleMenu/battleScene: turn 4's FIGHT-submenu reopen (S7 slice I, doc
       return state;
     }
     expect(replay().battleScene).toEqual(replay().battleScene);
+  });
+});
+
+function stateAtTurn4Confirm(): EngineState {
+  const initial = createInitialState();
+  return {
+    ...initial,
+    draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
+    battleScene: {
+      elapsed: 4925 - SCENE_TICK0,
+      sendOutPressElapsed: 380,
+      fightSubmenu: {
+        openElapsed: 4893 - SCENE_TICK0,
+        cursor: 0,
+        displayCursor: 0,
+        closeElapsed: null,
+        confirmElapsed: 4925 - SCENE_TICK0,
+        activeMonMoveset: ONIX_MOVESET,
+      },
+      turn1Resolved: true,
+      turn2Resolved: true,
+      turn3Resolved: true,
+      turn4Resolved: false,
+    },
+  };
+}
+
+function stateAtTurn5Confirm(): EngineState {
+  const initial = createInitialState();
+  return {
+    ...initial,
+    draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
+    battleScene: {
+      elapsed: 5959 - SCENE_TICK0,
+      sendOutPressElapsed: 380,
+      fightSubmenu: {
+        openElapsed: 5927 - SCENE_TICK0,
+        cursor: 0,
+        displayCursor: 0,
+        closeElapsed: null,
+        confirmElapsed: 5959 - SCENE_TICK0,
+        activeMonMoveset: ONIX_MOVESET,
+      },
+      turn1Resolved: true,
+      turn2Resolved: true,
+      turn3Resolved: true,
+      turn4Resolved: true,
+    },
+  };
+}
+
+describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, docs/battle-turn-notes.md §13/§23)", () => {
+  it("replaying turn5-menu.json's own committed button script (reopen, NO nav needed, confirm) lands turn 5's own confirm at tick 5959, cursor persisted at 0 (ROCK_SLIDE, unchanged since turn 3), turn4Resolved flips true", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn5-menu.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    let state = createInitialState();
+    for (const seg of trace.segments) {
+      for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
+    }
+    expect(state.battleScene!.fightSubmenu.openElapsed).toBe(5927 - SCENE_TICK0);
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(5959 - SCENE_TICK0);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    expect(state.battleScene!.turn1Resolved).toBe(true);
+    expect(state.battleScene!.turn2Resolved).toBe(true);
+    expect(state.battleScene!.turn3Resolved).toBe(true);
+    expect(state.battleScene!.turn4Resolved).toBe(true);
+  });
+
+  it("the turn-4-resolved reopen gate stays closed before TURN4_ROCKSLIDE_MENU_REDRAW_DELAY(661) has elapsed past turn 4's own real confirm (4925) - an early A press is simply dropped, matching turns 1/2/3/4's own reopen-gate precedent", () => {
+    let state = stateAtTurn4Confirm();
+    const confirmElapsedBefore = state.battleScene!.fightSubmenu.confirmElapsed;
+    for (let i = 0; i < 100; i += 1) state = press(state, []);
+    state = press(state, ["A"]);
+    expect(state.battleScene!.turn4Resolved).toBe(false);
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(confirmElapsedBefore);
+  });
+
+  it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 7/10 once turn4Resolved (used turns 1, 3 AND 4), independent of turn2Resolved's own slot-2 DRAGON_BREATH decrement", () => {
+    const moveset = rentalMoveset("ONIX");
+    expect(currentPPForActiveMon(moveset, true, true, true, true)[0]).toBe(moveset.maxPP[0] - 3);
+    expect(currentPPForActiveMon(moveset, true, true, true, true)[0]).toBe(7);
+    // Sanity: turn3Resolved alone (pre-turn-5) still reads 8/10, matching
+    // slice I's own pinned behavior - this test doesn't regress it.
+    expect(currentPPForActiveMon(moveset, true, true, true, false)[0]).toBe(8);
+  });
+
+  it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn5-menu.json (41/41, 0 diff; tick 5927 is a single named residual, see docs/battle-turn-notes.md §23)", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn5-menu.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    function replay(): EngineState {
+      let state = createInitialState();
+      for (const seg of trace.segments) {
+        for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
+      }
+      return state;
+    }
+    expect(replay().battleScene).toEqual(replay().battleScene);
+  });
+
+  it("engine state stays well-formed (turn4Resolved, cursor 0) through the whole ENDEAVOR-again window - a pure smoke/determinism check, pixel parity lives in tools/compare/traces/turn5-endeavor.json (254/254, 0 diff)", () => {
+    let state = stateAtTurn5Confirm();
+    for (let i = 0; i < 254; i += 1) state = press(state, []);
+    expect(state.battleScene!.turn4Resolved).toBe(true);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    let replay = stateAtTurn5Confirm();
+    for (let i = 0; i < 254; i += 1) replay = press(replay, []);
+    expect(replay.battleScene).toEqual(state.battleScene);
   });
 });

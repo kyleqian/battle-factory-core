@@ -4,6 +4,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 175 — Bounded worker: S7 slice J — turn 5's FIGHT-submenu reopen + Grovyle's ENDEAVOR (Onix 88→1), landed green, ending BEFORE Onix's own ROCK_SLIDE kickoff; `turn5-menu.json` (new) **41/41**, `turn5-endeavor.json` (new) **254/254**, both 0 diff, `npm test` **768/768** (+7), build green, zero regressions
+
+- **State:** `npm test` 768/768, `npm run build` green, tree clean.
+  `turn5-menu.json` (reopen 5926→confirm-wait through tick 5967, 41 dense
+  captures, tick 5927 excluded) and `turn5-endeavor.json` (kickoff text 5968
+  through the safe boundary 6221, 254 dense captures) both **0 diff**. Full
+  regression sweep at exact prior counts, all 0 diff: `turn4-rockslide`
+  250/250, `turn4-doubleteam` 249/249, `turn3-endeavor` 192/192, `turn3-menu`
+  254/254, `turn2-endeavor-drain` 201/201, `fight-submenu` 235/235, plus
+  `turn4-menu` 44/44, `turn3-rockslide` 256/256, `turn2-dragonbreath`
+  237/237, `turn1-rockslide` 256/256, `turn1-cloneanim` 230/230, `menu-idle`
+  69/69, `turn2-endeavor` 77/77.
+- **Did:** RAM-probed turn 5's own window first (`tools/probe/ram-probe.py`,
+  `tools/probe/specs/turn5-endeavor-watch.json`) to nail real anchors before
+  touching render code: `TURN5_CONFIRM_PRESS_TICK=5959` (real press, +6 to
+  `gCurrentMove`->283 matching every prior turn), `gBattleMovePower`==75 for
+  the ENTIRE window (turn 4's own ROCK_SLIDE, stale) confirming the residual-
+  cleanup slice's own turn-5 shake prediction (symmetric 3/3) FOR REAL
+  against oracle pixels for the first time, `gBattleMons[0].hp` 88->1 at RAM
+  tick 6201. Added `BattleSceneState.turn4Resolved` + a `core.ts` reopen
+  branch gated on the newly-exported `TURN4_ROCKSLIDE_MENU_REDRAW_DELAY`
+  (directly usable — turn 4's own ROCK_SLIDE was already real-press-
+  anchored, no synthetic-anchor arithmetic needed unlike slice I's own
+  gate). Threaded `turn4Resolved` one epoch further through every render
+  dispatch tier (`drawMenuIdleBaseWithOpponentHp`/`drawActionMenuIdleContent`/
+  `drawActionMenuIdleWindow`/`drawFightSubmenuWindow`/`drawFightSubmenuChrome`/
+  `currentPPForActiveMon`) — zero new render mechanisms, pure parameterize-
+  don't-rebuild. New `drawTurn5EndeavorText` reuses `drawEndeavorSquish`/
+  `endeavorOnixHp` unchanged. Grid-searched `turn5KickoffBounceTick`'s frozen
+  plateau (`d` in `[-4..4]`, center 0) against a live oracle diff. One named
+  single-tick residual (5927, 769px, Onix silhouette) — tested and RULED OUT
+  a uniform `-1` shift (fixes 5927 but breaks 3 other ticks), so excluded per
+  this run's "characterize, don't force-fit" rule, same class as this
+  dossier's other redraw-extremum residuals. Dense-swept 6014-6249 to find
+  the safe stopping boundary: 0 diff through tick 6221, hard-cut to Onix's
+  own ROCK_SLIDE kickoff at 6222 (out of scope) — confirmed the exact
+  boundary rather than guessing. The player healthbox's green→yellow→red
+  bands + the hp=1 "never fully empty" sliver rule (ISSUES #16's own "never
+  oracle-exercised on the player side" gap) needed ZERO compositor changes —
+  verified exact across the whole 88→1 drain. Added 7 Tier-1 pins: reopen/
+  confirm replay, reopen-gate-still-closed, PP 7/10, two ENDEAVOR-window
+  determinism/smoke checks, `endeavorOnixHp` with the real 88→1 numbers, and
+  the player-healthbox hp=1 red-sliver pin (`calcBarFilledPixels`/
+  `pickHpBarBand`/tile content). Docs: new `docs/battle-turn-notes.md` §23
+  (anchors, the shake-prediction verdict, the residual-tick investigation,
+  the band/sliver findings).
+- **Next:** Onix's own ROCK_SLIDE (tick 6222 onward — hitting Grovyle, 1→0,
+  the faint itself) through DESTIN's forced Pidgeotto switch-in and the next
+  settled menu is the immediate next slice — ground truth already fully
+  banked in §13 (the button-gated KO-text finding, Onix's own Sitrus Berry
+  proc, DESTIN's non-sequential switch-in pick). Tick 4934's and this
+  slice's own tick-5927 residuals remain a different, still-open class.
+- **Notes:** no new papercuts. `git status`/stash discipline held; no
+  mid-experiment checkouts; scratch probe traces (uncommitted) deleted
+  after use, only the named committed traces + RAM-probe spec/dump kept.
+
+---
 ## 174 — Bounded worker: S7 residual-cleanup slice — Family A (stale shake power) + Family B (turn-3 bounce phase) both APPLIED; `turn3-endeavor.json` **192/192**, `turn3-menu.json` **254/254**, both 0 diff, all 16 excluded ticks restored, `npm test` **761/761** (+5), build green, zero regressions
 
 - **State:** `npm test` 761/761, `npm run build` green, tree clean.
@@ -74,65 +131,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   stale-power shake rule + Family B's phase correction and restores all
   16 excluded ticks (12 shake + 3879/3888 + 3861/3870); then turn 5.
 - **Notes:** no new papercuts.
-
----
-## 172 — Bounded worker retry: S7 slice I-2 — the turn-4 clone-window residual ROOT-CAUSED and FIXED (2 real bugs, not the bounce/HP candidates §22 suspected); `turn4-doubleteam.json` (new) **249/249**, `turn4-rockslide.json` (new) **250/250**, `npm test` **756/756** (+3), build green, zero regressions
-
-- **State:** `npm test` 756/756, `npm run build` green, tree clean. New
-  `tools/compare/traces/turn4-doubleteam.json` (kickoff text/clone/banner/
-  stat-rose-text, ticks 4934→5317, 249 captures, dense over every actively-
-  changing window + strided over the provably-static holds) and `turn4-
-  rockslide.json` (ticks 5318→5925, 250 captures, dense at every boundary +
-  stride-2 through the shake/rock-fall midsection — the 256-capture service
-  ceiling forced that one compromise, noted honestly rather than silently)
-  are both **0 diff**, one tick (4934) excluded with restated §22-style
-  evidence (13292px, both neighbors exact, same "redraw extremum" family as
-  3337/3465/3721/3879/3888). Zero regressions at exact prior counts:
-  `turn4-menu` 44/44, `turn3-rockslide` 256/256, `turn3-endeavor` 180/180,
-  `turn1-cloneanim` 230/230, `turn1-rockslide` 256/256, `turn2-dragonbreath`
-  237/237.
-- **Did:** followed the brief's mandated autopsy order instead of re-fitting
-  pixel formulas. (1) Diffed app-vs-oracle at tick 4978 directly: pixels
-  showed a clean "app(x) == oracle(x+1)" substitution, not noise. (2) Diffed
-  turn 1's oracle (tick 1972, the same `n=8` into DOUBLE_TEAM's clone motion)
-  against turn 4's oracle (tick 4978) directly — genuinely DIFFERENT
-  real-hardware pixels at the identical `n`, AND turn 4's *app* matched
-  turn 1's *oracle* exactly — proof the code was faithfully reproducing
-  turn 1's mechanism while turn 4's real hardware does something else. (3)
-  RAM-probed the actual clone sprites (`gSprites[3]`/`gSprites[4]`, found by
-  scanning all 64 slots' callback pointers): `x2`/`data[]` progressions are
-  BIT-IDENTICAL to the model at matching `n` — the offset formula was never
-  wrong. RAM-probed `BLDCNT`/`BLDALPHA`/BG scroll registers: also identical
-  both turns. RAM-probed Grovyle's own front-sprite palette (`gPlttBuffer
-  {Unfaded,Faded}`): also byte-identical both turns. Then RAM-probed
-  `sSpriteOrder` (`0x020217F4`, the same static array `rockSlideDrawOrder`
-  already uses) at both turns' analogous ticks — **found it**: the two
-  clones tie exactly on `SortSprites`' key (`oam.priority`/`subpriority`/
-  `oam.y` all raw-copied identical via `CloneBattlerSpriteWithBlend`), and
-  the tie-break (whichever's earlier in the persistent, history-dependent
-  `sSpriteOrder`) is B-before-A for turn 1 but A-before-B for turn 4 — same
-  two slots (3/4) both times, opposite order. Fixed via a new `frontClone`
-  param on `drawDoubleTeamClones` (RAM-verified per turn, NOT a general
-  `SortSprites` simulation — scoped honestly in the code comment, since
-  unlike the rock-stacking fix these two sprites only ever tie against each
-  other, once per turn). (4) Sweeping the full window past this fix (stride-
-  1, 4934-5925) surfaced a SECOND, unrelated bug: `drawTurn4RockSlideWindow`
-  never wired in the "Foe GROVYLE's evasiveness\nrose!" text phase turn 1's
-  own `drawRockSlideWindow` already has — it jumped straight to the
-  ROCK_SLIDE line 265 ticks early. Ported the same three-phase text gate
-  (`TURN_KICKOFF`→`STAT_ROSE`→`ROCK_SLIDE`, `statRoseTextStartTick`/
-  `rockSlideTextStartTick`, both already generic `pressTick`-parameterized
-  functions) — closed it outright, 250/250. Grovyle's 41→1 drain (the first
-  turn to cross the healthbox's yellow/red HP bands, ISSUES #16's own "never
-  oracle-exercised" note) needed ZERO new compositor code — bands render
-  correctly already. Added 3 Tier-1 pins: the two pixel fixes (clone
-  z-order at (191/192,17)/t4978, stat-rose text at (16/17,124)/t5210) plus
-  `rockSlideOpponentHp`'s real 41→1 numbers.
-- **Next:** the ENTIRE turn-4 window (4934-5925) is now committed and
-  verified — S7 slice I is fully closed. Turn 5's own reopen (input tick
-  5926) is the natural next engine slice; it inherits the Family A stale-
-  shake fix #171 already root-caused (predicts turn 5's ENDEAVOR shake is
-  symmetric, stale 75 from turn 4's ROCK_SLIDE) and the faint/switch-in
-  ground truth §3-§6 already banked.
-- **Notes:** none — no papercuts this session; `git status`/stash discipline
-  held throughout (no mid-experiment checkouts).

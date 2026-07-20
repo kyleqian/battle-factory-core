@@ -269,6 +269,38 @@ describe("composePlayerHealthboxHpOverlay (S7 slice E1b)", () => {
       }
     }
   });
+
+  // S7 slice J (docs/battle-turn-notes.md §13/§23): turn 5's ENDEAVOR drains
+  // Onix 88->1 - the FIRST time this engine's own player-side healthbox
+  // crosses green->yellow->red AND lands on the 1-HP "never fully empty"
+  // sliver, oracle-pixel-confirmed this session (tools/compare/traces/
+  // turn5-endeavor.json, 254/254, 0 diff, spanning the whole drain) - this
+  // compositor path was hermetically pinned but never oracle-exercised on
+  // the player side before now (ISSUES #16's own "never oracle-exercised"
+  // caveat, closed for hp=1 specifically).
+  it("hp=1/117 (turn 5's ENDEAVOR endpoint): calcBarFilledPixels forces the 1px sliver rule (floor(1/117*48)=0, but hp>0), band is red - matches real hardware, no compositor change needed", () => {
+    const { filledPixels, columns } = calcBarFilledPixels(1 / 117);
+    expect(filledPixels).toBe(1);
+    expect(columns).toEqual([1, 0, 0, 0, 0, 0]);
+    expect(pickHpBarBand(filledPixels)).toBe("red");
+    const result = composePlayerHealthboxHpOverlay(overlayAssets, 1, 117);
+    const tileIdx = 9 + columns[0]!; // HP_BAR_RED_BASE(9) + 1px column
+    for (let x = 0; x < 8; x += 1) {
+      for (let y = 0; y < 7; y += 1) {
+        const expected = tilePixel(battleHealthbox.hpbarAnim, battleHealthbox.hpbarAnim.palette, tileIdx, x, y);
+        expect(result.pixels[(14 + y) * result.width + (47 + x)], `sliver fill tile px (${x},${y})`).toEqual(expected);
+      }
+    }
+    // Every OTHER fill column reads the red sheet's own empty tile (base+0).
+    for (let i = 1; i < 6; i += 1) {
+      for (let x = 0; x < 8; x += 1) {
+        for (let y = 0; y < 7; y += 1) {
+          const expected = tilePixel(battleHealthbox.hpbarAnim, battleHealthbox.hpbarAnim.palette, 9, x, y);
+          expect(result.pixels[(14 + y) * result.width + (47 + i * 8 + x)], `empty tile ${i} px (${x},${y})`).toEqual(expected);
+        }
+      }
+    }
+  });
 });
 
 describe("rightAlign3GlyphCodes (ConvertIntToDecimalStringN's own STR_CONV_MODE_RIGHT_ALIGN, string_util.c:163-217, as UpdateHpTextInHealthbox uses it)", () => {

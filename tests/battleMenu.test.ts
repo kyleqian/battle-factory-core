@@ -70,7 +70,7 @@ import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 /** Same rig as tests/battleScene.test.ts's `pixelAtSentOut` - send-out A-press already registered at trace tick 1420 (sendOutPressElapsed=380), the fixed script every committed trace in this window shares. */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -122,16 +122,16 @@ describe("battleMenu: rendered pixels (oracle-pinned, tools/compare/traces/menu-
   it("renders byte-identical frames across the silent space tick (1565 -> 1566)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 
   it("renders byte-identical frames once static (1571 -> 1572)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 });
@@ -603,6 +603,32 @@ describe("S7 slice I resolution: rockSlideOpponentHp with turn 4's real numbers 
     expect(rockSlideOpponentHp(sentinel + 40, pressTick, startHp, endHp)).toBe(1); // d=40, exactly startHp-endHp
     expect(rockSlideOpponentHp(sentinel + 41, pressTick, startHp, endHp)).toBe(1); // settled
     expect(rockSlideOpponentHp(sentinel + 200, pressTick, startHp, endHp)).toBe(1); // stays settled indefinitely
+  });
+});
+
+// S7 slice J (docs/battle-turn-notes.md §13/§23): turn 5's own ENDEAVOR
+// drain, Onix 88 -> 1 (HP-diff 87, the longest drain yet - the same
+// `endeavorOnixHp` formula already proven value-agnostic above, pinned here
+// with turn 5's REAL numbers (`TURN5_CONFIRM_PRESS_TICK`=5959, a real press)
+// since this is the first turn whose drain crosses the PLAYER healthbox's
+// own green->yellow->red HP-band thresholds AND lands on the 1-HP "never
+// fully empty" sliver (ISSUES #16's own "never oracle-exercised on the
+// player side" note, healthboxAssembly.test.ts's own new sliver pin) -
+// oracle-confirmed via `tools/compare/traces/turn5-endeavor.json` (254/254,
+// 0 diff) that the drain needs zero new band-color code: the existing
+// compositor already renders every step of 88 -> 1 correctly.
+describe("S7 slice J: endeavorOnixHp with turn 5's real numbers (88 -> 1, the first player-side green->yellow->red crossing)", () => {
+  const pressTick = 5959;
+  const startHp = 88;
+  const endHp = 1;
+
+  it("full HP before the sentinel tick, then exactly 1 HP/tick down to endHp, settled forever after", () => {
+    const sentinel = pressTick + ENDEAVOR_HP_DRAIN_START_DELAY;
+    expect(endeavorOnixHp(sentinel, pressTick, startHp, endHp)).toBe(88);
+    expect(endeavorOnixHp(sentinel + 1, pressTick, startHp, endHp)).toBe(87); // first drained tick
+    expect(endeavorOnixHp(sentinel + 87, pressTick, startHp, endHp)).toBe(1); // d=87, exactly startHp-endHp
+    expect(endeavorOnixHp(sentinel + 88, pressTick, startHp, endHp)).toBe(1); // settled
+    expect(endeavorOnixHp(sentinel + 200, pressTick, startHp, endHp)).toBe(1); // stays settled indefinitely
   });
 });
 

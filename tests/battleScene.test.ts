@@ -41,7 +41,7 @@ import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-pro
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -49,7 +49,7 @@ function pixelAt(t: number, x: number, y: number): [number, number, number] {
 /** Same as `pixelAt`, but with the send-out A-press already registered at trace tick 1420 (`sendOutPressElapsed = 380`, matching the §7.2/§7.3 tests above). */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -67,7 +67,7 @@ const TURN2_FIGHT_SUBMENU_STATE = {
 /** Same as `pixelAtSentOut`, but with turn 2's own FIGHT submenu already confirmed on ENDEAVOR (cursor slot 2) - the state `drawTurn2KickoffText`/`drawEndeavorSquish` render under (S7 slice E1d-retry, §15b). */
 function pixelAtTurn2(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: false, turn3Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -85,7 +85,7 @@ const TURN4_FIGHT_SUBMENU_STATE = {
 /** Same as `pixelAtTurn2`, but turns 1-3 all resolved and the FIGHT submenu confirmed on turn 4's own ROCK_SLIDE (slot 0) - the state `drawTurn4KickoffText`/`drawTurn4RockSlideWindow` render under (S7 slice I resolution, docs/battle-turn-notes.md §22). */
 function pixelAtTurn4(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN4_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -302,7 +302,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
   });
 });
 
@@ -837,7 +837,7 @@ describe("battleScene: S7 slice B - DOUBLE_TEAM clone vs. opponent healthbox z-o
 
     const submenu = confirmFightMove(openFightSubmenu(0, rentalMoveset("ONIX")), 879); // pressTick = TICK0+879 = 1919
     const fb = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
+    renderBattleScene(fb, { elapsed: 2075 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
     const o = (25 * 240 + 104) * 4;
     expect([fb[o]!, fb[o + 1]!, fb[o + 2]!]).toEqual([expected.r, expected.g, expected.b]);
   });
@@ -860,11 +860,11 @@ describe("battleScene: S7 slice B - stat-change banner as a real scrolling BG1 (
     const o = (y * 240 + x) * 4;
 
     const fb2140 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2140, { elapsed: 2140 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
+    renderBattleScene(fb2140, { elapsed: 2140 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
     const at2140: [number, number, number] = [fb2140[o]!, fb2140[o + 1]!, fb2140[o + 2]!];
 
     const fb2160 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb2160, { elapsed: 2160 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false });
+    renderBattleScene(fb2160, { elapsed: 2160 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false });
     const at2160: [number, number, number] = [fb2160[o]!, fb2160[o + 1]!, fb2160[o + 2]!];
 
     expect(at2140).toEqual([118, 170, 125]);
@@ -896,11 +896,11 @@ describe("battleScene: S7 slice C - Rock Slide's shaken BG3 vs. the player healt
     const o = (y * 240 + x) * 4;
 
     const fbUnshifted = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false }); // rockSlideBg3Y === 0 here
+    renderBattleScene(fbUnshifted, { elapsed: 2348 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false }); // rockSlideBg3Y === 0 here
     const atUnshifted: [number, number, number] = [fbUnshifted[o]!, fbUnshifted[o + 1]!, fbUnshifted[o + 2]!];
 
     const fbShaken = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false }); // rockSlideBg3Y === -7 here
+    renderBattleScene(fbShaken, { elapsed: 2349 - TICK0, sendOutPressElapsed: 380, fightSubmenu: submenu, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false }); // rockSlideBg3Y === -7 here
     const atShaken: [number, number, number] = [fbShaken[o]!, fbShaken[o + 1]!, fbShaken[o + 2]!];
 
     expect(atUnshifted).toEqual([255, 255, 255]);
@@ -1030,10 +1030,14 @@ describe("S7 slice E1 (docs/battle-menu-notes.md §15e): ENDEAVOR's hitsplat pop
 // power-calculated move left behind. Pinned against all three RAM-confirmed
 // data points: turn 2's ENDEAVOR (stale ROCK_SLIDE_MOVE_POWER=75, symmetric
 // 3/3), turn 3's ENDEAVOR (stale DRAGON_BREATH_MOVE_POWER=60, asymmetric
-// 2/3), and the turn-5 prediction (stale ROCK_SLIDE_MOVE_POWER=75 again,
-// from turn 4's own ROCK_SLIDE - symmetric 3/3, same anchor as turn 2's).
+// 2/3), and turn 5's own ENDEAVOR (stale ROCK_SLIDE_MOVE_POWER=75 again,
+// from turn 4's own ROCK_SLIDE - symmetric 3/3, same anchor as turn 2's) -
+// this last one was a falsifiable PREDICTION when first pinned (S7 residual
+// cleanup slice); S7 slice J landed turn 5 for real and confirmed it against
+// real oracle pixels (tools/compare/traces/turn5-endeavor.json, 254/254, 0
+// diff spanning the whole shake window) - the prediction held.
 describe("S7 residual cleanup (docs/turn3-residual-probe-notes.md, Family A): endeavorShakeSteps amplitude formula", () => {
-  it("stale power 75 (ROCK_SLIDE, turn 2's own anchor and the turn-5 prediction) gives a symmetric downStep=3/upStep=3", () => {
+  it("stale power 75 (ROCK_SLIDE, turn 2's own anchor, confirmed again for turn 5's own ENDEAVOR - S7 slice J) gives a symmetric downStep=3/upStep=3", () => {
     expect(endeavorShakeSteps(ROCK_SLIDE_MOVE_POWER)).toEqual({ downStep: 3, upStep: 3 });
   });
 
