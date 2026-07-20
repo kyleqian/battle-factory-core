@@ -80,6 +80,7 @@ import { renderBattleRoomEntryScene } from "./battleRoomRender.ts";
 import { applyBattleTransitionOverlay, exitFadeY } from "./battleTransition.ts";
 import {
   advanceBattleScene,
+  DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
   sendOutPressEligible,
@@ -181,6 +182,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // exactly 1 tick early against the oracle until this was corrected).
     const sceneT = SCENE_TICK0 + battleScene.elapsed + 1;
     let turn1Resolved = battleScene.turn1Resolved;
+    let turn2Resolved = battleScene.turn2Resolved;
     if (fightSubmenu.openElapsed === null) {
       if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
         // S8 engine dependency (docs/battle-menu-notes.md §13c): the FIGHT
@@ -234,8 +236,25 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // cursor persistence beyond that coincidence).
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
       turn1Resolved = true;
+    } else if (
+      turn1Resolved &&
+      !turn2Resolved &&
+      fightSubmenu.confirmElapsed !== null &&
+      newKeys.has("A") &&
+      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + DRAGONBREATH_MENU_REDRAW_DELAY
+    ) {
+      // S7 slice F (docs/battle-turn-notes.md §13): turn 2's whole resolution
+      // has redrawn the settled action menu by now (`DRAGONBREATH_MENU_
+      // REDRAW_DELAY` past its own confirm) - a fresh A-press reopens FIGHT
+      // for turn 3, cursor persisted at slot 2 (DRAGON_BREATH, where turn 2's
+      // own confirm left it) rather than reset to slot 0 - unlike turn 1->2's
+      // own reopen, this is a REAL exercise of cursor persistence (turn 1->2
+      // rested at slot 0 both times, so it never distinguished "always reset"
+      // from "persist" - see `openFightSubmenu`'s own doc).
+      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 2);
+      turn2Resolved = true;
     }
-    battleScene = { ...battleScene, fightSubmenu, turn1Resolved };
+    battleScene = { ...battleScene, fightSubmenu, turn1Resolved, turn2Resolved };
     battleScene = advanceBattleScene(battleScene);
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
   }

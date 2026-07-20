@@ -361,7 +361,13 @@ and eliminated the shared affine sampler by a 4-variant sweep; no attempt
 shipped known-wrong pixels. S7's acceptance is unaffected — it asks for
 committed traces green on their captures, which this trace is.
 Remaining for S7: the parked projectile gap (ISSUES #23), the tick-3337
-flicker, faint/forced-switch engine slice.
+flicker, faint/forced-switch engine slice. **Slice F landed (2026-07-20
+bounded worker):** turn 3's FIGHT-submenu reopen (cursor persistence off
+turn 2's own confirmed slot, PP, bounce-anchor) — `tools/compare/traces/
+turn3-menu.json` **250/250**; turn 3's own actual move resolution (and
+everything past it — turn 4, the turn-5 faint, DESTIN's switch-in, Onix's
+own later faint, forced party-select/SEND OUT) remains unbuilt, see
+`docs/battle-turn-notes.md` §19.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

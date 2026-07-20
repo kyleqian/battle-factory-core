@@ -884,9 +884,9 @@ export const CLOSED_FIGHT_SUBMENU_STATE: FightSubmenuState = {
   activeMonMoveset: PLACEHOLDER_MOVESET,
 };
 
-/** A-press on the settled action menu (FIGHT already highlighted - the only case this slice models, §11's own scope) opens the submenu fresh at ROCK_SLIDE (slot 0, `gMoveSelectionCursor`'s own zero-init; this slice never re-opens after a close, so a persisted nonzero cursor from a prior open is out of scope). `activeMonMoveset` is threaded in by the caller (core.ts), derived fresh from the draft screen's own confirmed picks each time - S8 engine dependency, see `battleSetup.ts`. */
-export function openFightSubmenu(elapsed: number, activeMonMoveset: ActiveMonMoveset): FightSubmenuState {
-  return { openElapsed: elapsed, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset };
+/** A-press on the settled action menu (FIGHT already highlighted - the only case this slice models, §11's own scope) opens the submenu fresh, cursor at `initialCursor` (default 0, ROCK_SLIDE's `gMoveSelectionCursor` zero-init - turn 1's own first open, and turn 2's reopen, both coincidentally rest here). S7 slice F (docs/battle-turn-notes.md §13): turn 3's own reopen passes `initialCursor=2` instead - `gMoveSelectionCursor` genuinely PERSISTS across turns (RAM-confirmed: reads 2, DRAGON_BREATH, at turn 3's reopen, turn 2's own confirmed slot), it isn't always re-zeroed. `activeMonMoveset` is threaded in by the caller (core.ts), derived fresh from the draft screen's own confirmed picks each time - S8 engine dependency, see `battleSetup.ts`. */
+export function openFightSubmenu(elapsed: number, activeMonMoveset: ActiveMonMoveset, initialCursor: FightSubmenuSlot = 0): FightSubmenuState {
+  return { openElapsed: elapsed, cursor: initialCursor, displayCursor: initialCursor, closeElapsed: null, confirmElapsed: null, activeMonMoveset };
 }
 
 /** B-press while the submenu is open and not already closing - starts the close DMA-wait. No-op (returns `state` unchanged) if not open or already closing, so callers can call this unconditionally on a B-press. */
@@ -1854,16 +1854,21 @@ export function turn2KickoffBounceTick(t: number, pressTick: number): number {
  * to whatever `activeMonMoveset` the caller supplies - `turn1Resolved` still
  * only ever decrements SLOT 0 (this engine's own scripted turn-1 choice is
  * always slot 0, `core.ts`'s own confirm gate), not "whichever move was
- * actually confirmed" in general. No other move's PP-after-use has been
- * oracled for this run, so generalizing further would fake data rather than
- * model something verified - flagged here, not silently assumed, per this
- * run's no-silent-exclusion policy. Every existing trace only ever exercises
- * slot 0 as turn 1's real choice, so this reproduces every committed
- * capture exactly.
+ * actually confirmed" in general. `turn2Resolved` (S7 slice F, docs/
+ * battle-turn-notes.md §14: "DRAGON_BREATH... 19/20 remaining going into
+ * turn 12 thanks to turn 2's own prior use") adds the SAME one-shot
+ * decrement for SLOT 2 (DRAGON_BREATH, this engine's own scripted turn-2
+ * choice) once turn 2 resolves - still only ever these two fixed slots, not
+ * "whichever move was actually confirmed" in general; BIND/SANDSTORM's own
+ * PP-after-use remains unoracled and would still be faking data to model.
  */
-export function currentPPForActiveMon(moveset: ActiveMonMoveset, turn1Resolved: boolean): readonly [number, number, number, number] {
+export function currentPPForActiveMon(
+  moveset: ActiveMonMoveset,
+  turn1Resolved: boolean,
+  turn2Resolved: boolean = false,
+): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
-  return turn1Resolved ? [a - 1, b, c, d] : [a, b, c, d];
+  return [turn1Resolved ? a - 1 : a, b, turn2Resolved ? c - 1 : c, d];
 }
 
 export function getCurrentPPToMaxPPState(currentPP: number, maxPP: number): 0 | 1 | 2 | 3 {

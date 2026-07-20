@@ -83,6 +83,11 @@ describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
     expect(state).toEqual({ openElapsed: 847, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET });
   });
 
+  it("openFightSubmenu's optional initialCursor persists the prior turn's own cursor position (S7 slice F, docs/battle-turn-notes.md §13: turn 3's reopen rests on slot 2, DRAGON_BREATH, where turn 2's own confirm left it)", () => {
+    const state = openFightSubmenu(3846, ONIX_MOVESET, 2);
+    expect(state).toEqual({ openElapsed: 3846, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: null, activeMonMoveset: ONIX_MOVESET });
+  });
+
   it("closeFightSubmenu is a no-op if not open, or already closing", () => {
     expect(closeFightSubmenu(CLOSED_FIGHT_SUBMENU_STATE, 100)).toBe(CLOSED_FIGHT_SUBMENU_STATE);
     const opened = openFightSubmenu(847, ONIX_MOVESET);
@@ -114,7 +119,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false },
   };
 }
 
@@ -203,6 +208,64 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     state = press(state, ["LEFT"]);
     state = press(state, ["RIGHT"]);
     expect(state.battleScene!.fightSubmenu).toEqual(confirmedSm);
+  });
+});
+
+/** Turn 2's own real confirm tick (`battleScene.test.ts`'s own `TURN2_PRESS_TICK`, same fixture) - DRAGON_BREATH confirmed on cursor slot 2, well past `DRAGONBREATH_MENU_REDRAW_DELAY`'s own 391-tick settle by the time these tests press a fresh A. */
+const TURN2_PRESS_TICK = 2945;
+
+/** A synthetic EngineState already past turn 2's whole resolution (`turn1Resolved`+`turn2Resolved=false`, `fightSubmenu` confirmed on cursor 2 back at `TURN2_PRESS_TICK`) - the exact state `turn3-menu.json`'s own committed trace reaches at tick 3846, before its own fresh A-press reopens FIGHT for turn 3 (S7 slice F, docs/battle-turn-notes.md §13). */
+function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
+  const initial = createInitialState();
+  return {
+    ...initial,
+    draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
+    battleScene: {
+      elapsed: firstTickAbsolute - SCENE_TICK0 - 1,
+      sendOutPressElapsed: 380,
+      fightSubmenu: {
+        openElapsed: 0,
+        cursor: 2,
+        displayCursor: 2,
+        closeElapsed: null,
+        confirmElapsed: TURN2_PRESS_TICK - SCENE_TICK0,
+        activeMonMoveset: rentalMoveset("ONIX"),
+      },
+      turn1Resolved: true,
+      turn2Resolved: false,
+    },
+  };
+}
+
+describe("battleMenu: turn 3's FIGHT-submenu reopen wired through core.ts's tick() (S7 slice F, docs/battle-turn-notes.md §13)", () => {
+  it("A on the resettled action menu after turn 2 resolves reopens FIGHT for turn 3, cursor PERSISTED at slot 2 (DRAGON_BREATH, turn 2's own confirmed slot) - NOT reset to slot 0 the way turn 1->2's own reopen coincidentally was", () => {
+    let state = stateAtTurn3Reopen(3846);
+    state = press(state, ["A"]);
+    const sm = state.battleScene!.fightSubmenu;
+    expect(state.battleScene!.turn2Resolved).toBe(true);
+    expect(sm.openElapsed).toBe(3846 - SCENE_TICK0);
+    expect(sm.cursor).toBe(2);
+    expect(sm.displayCursor).toBe(2);
+    expect(sm.confirmElapsed).toBeNull(); // fresh submenu, not still turn 2's own confirmed one
+  });
+
+  it("UP nav flips the persisted cursor 2(DRAGON_BREATH)->0(ROCK_SLIDE) same-tick, matching §13's own ground truth, then A confirms ROCK_SLIDE again for turn 3", () => {
+    let state = stateAtTurn3Reopen(3846);
+    state = press(state, ["A"]); // reopen
+    for (let i = 0; i < 5; i += 1) state = press(state, []); // FIGHT_SUBMENU_OPEN_DELAY settle
+    state = press(state, ["UP"]);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    for (let i = 0; i < 5; i += 1) state = press(state, []);
+    state = press(state, ["A"]);
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).not.toBeNull();
+  });
+
+  it("a fresh A press does nothing until DRAGONBREATH_MENU_REDRAW_DELAY has elapsed since turn 2's own confirm - the resolution's own redraw still gates the next reopen, same rule as turn 1->2's own gate", () => {
+    // TURN2_PRESS_TICK + DRAGONBREATH_MENU_REDRAW_DELAY(391) = 3336 - well before that, a fresh A must be a no-op.
+    let state = stateAtTurn3Reopen(3200);
+    state = press(state, ["A"]);
+    expect(state.battleScene!.turn2Resolved).toBe(false);
+    expect(state.battleScene!.fightSubmenu.openElapsed).toBe(0); // unchanged - still turn 2's own long-settled submenu
   });
 });
 

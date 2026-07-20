@@ -3293,3 +3293,123 @@ the captures themselves live under the gitignored
 run` command in each script's own header comment) rather than being
 committed, matching this repo's existing scratch-script convention.
 
+## 19. Engine slice F: turn 3's FIGHT-submenu reopen — cursor persistence exercised for real, PROVEN not "always resets" (S7 bounded worker session)
+
+Assigned brief: land the faint/forced-switch engine slice starting from the
+earliest un-modeled window (§13/§14's own ground truth, banked by an earlier
+scout). This session's actual scope is much narrower than "faint/forced-
+switch" — see the honest accounting below. Committed: `tools/compare/
+traces/turn3-menu.json` (new app trace, extends `turn2-dragonbreath.json`'s
+own 3846-frame prefix **verbatim**, +50 frames covering turn 3's FIGHT-
+submenu reopen/nav/confirm through tick 3896, 250 `captureFrames`, dense
+stride 1 across the whole new window minus two named single-tick
+residuals — see below).
+
+### What landed
+
+The engine previously modeled turns 1 and 2 and stopped: `BattleSceneState.
+turn1Resolved` was a plain boolean (turn 1 done or not), and `core.ts`'s own
+reopen-FIGHT-submenu branch was gated `!turn1Resolved`, i.e. it could fire
+**exactly once** — there was no code path for a third FIGHT-submenu open at
+all. Pressing A on turn 2's own resettled menu did nothing.
+
+Added a second boolean, `turn2Resolved`, following the exact same pattern:
+`core.ts` gained a new `else if (turn1Resolved && !turn2Resolved && ...)`
+branch (gated on `DRAGONBREATH_MENU_REDRAW_DELAY`, now exported, having
+elapsed since turn 2's own confirm — the same "resolution's own redraw
+gates the next reopen" rule `ROCK_SLIDE_MENU_REDRAW_DELAY` already
+established for turn 1→2) that reopens FIGHT for turn 3.
+
+**The one genuinely new mechanic this exercises**: `openFightSubmenu`
+previously *always* reset the cursor to slot 0 on open — turn 1's own first
+open and turn 2's own reopen both coincidentally rested at slot 0, so
+nothing before this session had ever distinguished "always reset" from
+"persist the prior turn's own cursor." §13's ground truth is explicit that
+`gMoveSelectionCursor` reads **2** (DRAGON_BREATH, turn 2's own confirmed
+slot) at turn 3's reopen — a real, previously-unexercised persistence rule.
+`openFightSubmenu` gained an optional `initialCursor` param (default 0, every
+pre-existing call site unaffected); turn 3's own reopen call passes `2`.
+The existing generic `moveFightCursor("UP", ...)` bit-toggle already handles
+2→0 correctly with no changes (§13: one `UP` press flips DRAGON_BREATH back
+to ROCK_SLIDE, matching the turn-1/turn-2 nav mechanism exactly).
+
+**Three rendering gaps this surfaced, all fixed** (none was visible before
+because no prior render path needed a battler's *own* HP to differ from the
+static harvest while ALSO exercising the FIGHT-submenu's generic idle/DMA-
+wait draw functions):
+1. `drawMenuIdleBaseWithOpponentHp` only ever overlaid Grovyle's turn-1-end
+   HP (101) — by turn 3 Grovyle is really at 88 (post DRAGON_BREATH, §12).
+   Gained an optional `turn2Resolved` param selecting `anchorOpponentAfterTurn2Hp`.
+2. The SAME generic idle path never drew Onix's own HP overlay at all
+   (`menuIdleBase`'s static harvest bakes in Onix's pre-turn-1 117/117) —
+   fine through turn 2 (Onix's real HP only ever differed from 117 during
+   turn-2-specific bespoke draw functions that already had their own manual
+   overdraw, per S7 slice E2b-2's precedent), but turn 3's reopen dwells in
+   the *generic* path with Onix genuinely at 101. Fixed by threading the
+   overlay into `drawActionMenuIdleContent`/`drawFightSubmenuWindow`'s two
+   "idle, waiting" branches, applied **after** the live bounce patches draw
+   (same ordering constraint S7 slice E2b-2 already discovered for this
+   exact overlay — get it backwards and the bounce's own static asset
+   repaints the stale digits back over top).
+3. The idle-bounce phase itself: `turn2SubmenuBounceTick` (anchored to turn
+   1's own confirm + `ROCK_SLIDE_MENU_REDRAW_DELAY`) is turn-2-specific:
+   reusing it for turn 3 produced a **6.1%-of-frame, whole-battler-silhouette
+   mismatch** (dense oracle diff, not a subtle one) at every captured tick in
+   the new window. Added `turn3SubmenuBounceTick`/`TURN2_CONFIRM_PRESS_TICK`
+   (2945, cross-checked against `dragonBreathTextStartTick`'s own already-
+   committed doc comment: `2945+192=3137`), composing
+   `dragonBreathResettledBounceTick` (turn 2's own resettled-menu remap) with
+   the same DMA-wait correction `turn2SubmenuBounceTick` already applies —
+   used for BOTH the DMA-wait hold (plain `t` turned out to be wrong here too,
+   unlike turn 1/2's own DMA-wait, which are fine with plain `t` — pixel-
+   confirmed independently, not assumed) and the "idle, cursor shown" dwell.
+
+**Two named single-tick residuals, excluded from `captureFrames`** (same
+"hardware quirk at a bounce extremum" class already catalogued at ticks
+3337/3465/3721 elsewhere in this dossier, not chased further within this
+session's budget): tick **3879** (1 tick after the UP-nav's own 1-tick
+display-lag redraw, 769px/2.0% mismatch, isolated to the Onix sprite's own
+bounce region) and tick **3888** (the last idle tick before turn 3's own
+confirm, 1573px/4.1% mismatch, isolated to the Onix healthbox region). Both
+are single, isolated ticks surrounded on both sides by exact matches — a
+future session should RAM-probe `menuIdleBounce`'s own bounce-task state at
+exactly these two ticks rather than re-sweep the formula (already provably
+exact at every neighboring tick).
+
+### What did NOT land — honest scope accounting
+
+This is **far short of "faint/forced-switch."** The brief's own ground
+truth (§13/§14) covers turns 3-5, Grovyle's faint, the opponent's AI switch-
+in, Onix's own later faint, the forced party-select, and the SEND OUT
+sequence — thousands of ticks of largely unbuilt, bespoke-per-move engine
+work (each of turns 2's own sub-slices — E1, E1b, E2a×5, E2b, E2b-2 — took a
+full session; turn 3 alone needs its own ENDEAVOR-hits-Onix-again +
+ROCK_SLIDE-hits-Grovyle-again resolution, entirely unbuilt). This session
+landed only the **menu-reopen/cursor-nav/confirm-registration prefix** of
+turn 3 — the same class of "cheap, mostly-reuse" slice this dossier's own
+`turn1-kickoff`/`fight-submenu` slices established, not the resolution
+itself. Turn 3's actual move resolution (ENDEAVOR's kickoff text onward,
+`turnKickoffTextStartTick(pressTick)` = confirm+10) is deliberately
+**out of scope** — the trace stops 4 ticks after the confirm, safely before
+text would start, and does not attempt the HP-drain/animation/text work
+turns 1-2 each needed a dedicated session for. The faint itself (turn 5),
+DESTIN's Pidgeotto switch-in, Onix's own later faint, the forced
+party-select screen, and the SEND OUT confirm sequence remain **entirely
+unbuilt** — this is the correct next target, starting from turn 3's own
+resolution (§13's ledger has the exact HP/RNG values already banked).
+
+### Verification
+
+`npm test` **738/738** (+6: `openFightSubmenu`'s cursor-persistence param,
+`currentPPForActiveMon`'s `turn2Resolved` decrement, and a `core.ts`
+integration suite driving the new reopen gate through `tick()` directly —
+reopen fires with cursor persisted at 2, UP nav + re-confirm works, and the
+gate itself stays closed before `DRAGONBREATH_MENU_REDRAW_DELAY` has
+elapsed). `npm run build` green. `turn3-menu.json` **250/250** (two named
+single-tick exclusions above). Zero regressions: `turn2-dragonbreath.json`
+**235/235**, `turn2-endeavor-drain.json` **201/201**, `fight-submenu.json`
+**235/235**, plus a broader sweep of every other FIGHT-submenu/menu-idle-
+touching trace (`turn1-drain`, `turn1-rockslide`, `turn1-kickoff`,
+`menu-idle`, `turn2-endeavor`, `sendout` all still 100%; `s6-acceptance`
+224/228 and `sendout` 255/256 unchanged pre-existing gaps, not new).
+

@@ -90,6 +90,15 @@ describe("battleMenu: currentPPForActiveMon (S8 generalization of the old hardco
     expect(currentPPForActiveMon(kabuto, false)).toEqual(dump.battler1.pp);
     expect(currentPPForActiveMon(kabuto, true)).toEqual([dump.battler1.pp[0]! - 1, dump.battler1.pp[1], dump.battler1.pp[2], dump.battler1.pp[3]]);
   });
+
+  it("also decrements slot 2 by 1 once turn 2 resolves - S7 slice F, docs/battle-turn-notes.md §14's own DRAGON_BREATH 19/20 finding (turn 2's real choice, this engine's own scripted slot 2)", () => {
+    expect(currentPPForActiveMon(moveset, true, false)).toEqual([9, 20, 20, 10]);
+    expect(currentPPForActiveMon(moveset, true, true)).toEqual([9, 20, 19, 10]);
+  });
+
+  it("turn2Resolved defaults to false, leaving every pre-existing 2-arg call site unaffected", () => {
+    expect(currentPPForActiveMon(moveset, true)).toEqual([9, 20, 20, 10]);
+  });
 });
 
 function extractWindowRegion(fb: Uint8Array): number[] {
@@ -136,7 +145,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
     it(`cursor ${cursor} (${FIGHT_SUBMENU_SLOT_NAMES[cursor]} highlighted): renderBattleScene's FIGHT window matches an independently-assembled expected image byte-for-byte, at full PP`, () => {
       const sm = { ...opened, cursor: cursor as 0 | 1 | 2 | 3, displayCursor: cursor as 0 | 1 | 2 | 3 };
       const fb = createFramebuffer();
-      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1Resolved: false });
+      renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1Resolved: false, turn2Resolved: false });
 
       const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, false));
       expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, cursor as 0 | 1 | 2 | 3));
@@ -146,7 +155,7 @@ describe("battleScene: genericity end-to-end through the STATE plumbing (not jus
   it("turn1Resolved's PP-decrement rule also reaches the renderer for a non-Onix moveset (slot 0 only, currentPPForActiveMon's own documented scope)", () => {
     const sm = { ...opened, cursor: 0 as const, displayCursor: 0 as const };
     const fb = createFramebuffer();
-    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1Resolved: true });
+    renderBattleScene(fb, { elapsed: 900, sendOutPressElapsed: 380, fightSubmenu: sm, turn1Resolved: true, turn2Resolved: false });
 
     const expectedMoveset = buildFightMoveset(kabutoMoveset.moveIds, currentPPForActiveMon(kabutoMoveset, true));
     expect(extractWindowRegion(fb)).toEqual(expectedWindowRegion(expectedMoveset, 0));

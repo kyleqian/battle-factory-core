@@ -858,6 +858,8 @@ export interface BattleSceneState {
   fightSubmenu: FightSubmenuState;
   /** S7 slice E1: `true` once turn 1's whole resolution has redrawn the settled action menu (`ROCK_SLIDE_MENU_REDRAW_DELAY` past turn 1's own confirm) AND a fresh A-press has reopened FIGHT for turn 2 - core.ts sets this the same tick it calls `openFightSubmenu` again, mirroring `sendOutPressElapsed`'s "created directly" idiom. Distinguishes turn 2's ROCK_SLIDE dwell (PP 9/10, dynamic overlay) from turn 1's (PP 10/10, the static harvest alone) - both dwells are otherwise indistinguishable from `fightSubmenu` alone (cursor rests at slot 0 both times). */
   turn1Resolved: boolean;
+  /** S7 slice F (docs/battle-turn-notes.md §13): `true` once turn 2's whole resolution has redrawn the settled action menu (`DRAGONBREATH_MENU_REDRAW_DELAY` past turn 2's own confirm) AND a fresh A-press has reopened FIGHT for turn 3 - core.ts sets this the same tick it calls `openFightSubmenu` again, same "created directly" idiom as `turn1Resolved`. Turn 3's reopen persists the cursor at slot 2 (DRAGON_BREATH, where turn 2's own confirm left it) instead of resetting to slot 0 - §13's own "cursor persists across turns" finding, this run's first real test of it (turn 2's own reopen coincidentally rested at slot 0 both before and after, so it never exercised persistence). This slice only models the reopen/nav/confirm window itself (through the A-confirm registering ROCK_SLIDE again) - turn 3's actual resolution (ENDEAVOR/ROCK_SLIDE animations, HP drains, text) is out of scope, see `tools/compare/traces/turn3-menu.json`. */
+  turn2Resolved: boolean;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -865,6 +867,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   sendOutPressElapsed: null,
   fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE,
   turn1Resolved: false,
+  turn2Resolved: false,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -873,6 +876,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     sendOutPressElapsed: state.sendOutPressElapsed,
     fightSubmenu: state.fightSubmenu,
     turn1Resolved: state.turn1Resolved,
+    turn2Resolved: state.turn2Resolved,
   };
 }
 
@@ -3349,15 +3353,30 @@ function drawRect(fb: Uint8Array, asset: MenuIdleFrameAsset): void {
  * itself. A no-op (identical to the plain harvest) while `turn1Resolved` is
  * false, so every turn-1-only caller is unaffected.
  */
-function drawMenuIdleBaseWithOpponentHp(fb: Uint8Array, turn1Resolved: boolean): void {
+/**
+ * S7 slice F (docs/battle-turn-notes.md §13): `turn2Resolved` selects
+ * Grovyle's own POST-DRAGON_BREATH hp (`anchorOpponentAfterTurn2Hp`, 88)
+ * instead of turn 1's own settle (`anchorOpponentAfterTurnHp`, 101) once
+ * turn 2 has resolved too - every render path reachable once turn 3's own
+ * FIGHT submenu reopens needs this (the DMA-wait hold and the reopened
+ * submenu's own idle dwell both flow through here), not just
+ * `drawDragonBreathTurnEndSettledMenu`'s own already-fixed settled state.
+ * Does NOT draw Onix's own HP overlay (unlike `drawDragonBreathTurnEnd
+ * SettledMenu`'s manual overdraw) - that overlay must be applied AFTER the
+ * live bounce patches draw (see `drawActionMenuIdleContent`'s own call
+ * below, and `drawFightSubmenuWindow`'s two "idle, waiting" branches),
+ * exactly the ordering constraint S7 slice E2b-2 already found for this
+ * same overlay.
+ */
+function drawMenuIdleBaseWithOpponentHp(fb: Uint8Array, turn1Resolved: boolean, turn2Resolved: boolean = false): void {
   drawRect(fb, menuIdleBase);
   if (turn1Resolved) {
-    drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurnHp));
+    drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(turn2Resolved ? anchorOpponentAfterTurn2Hp : anchorOpponentAfterTurnHp));
   }
 }
 
-function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number, turn1Resolved: boolean): void {
-  drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
+function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number, turn1Resolved: boolean, turn2Resolved: boolean = false): void {
+  drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved, turn2Resolved);
   const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
   if (onixY2 >= 1) drawRect(fb, menuIdleOnixBounce);
   if (healthboxY2 === 1) {
@@ -3365,14 +3384,27 @@ function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number, turn1Reso
   } else if (healthboxY2 >= 2) {
     drawRect(fb, { x: menuIdleHealthboxBounce.x, y: menuIdleHealthboxBounce.y, width: menuIdleHealthboxBounce.width, height: menuIdleHealthboxBounce.height, pixels: menuIdleHealthboxBounce.y2 });
   }
+  // S7 slice F: Onix's own HP overlay (117->101, ENDEAVOR's own settle) is
+  // stale in `menuIdleBase`'s flat harvest just like Grovyle's bar - applied
+  // AFTER the bounce patches above so it isn't overdrawn by the healthbox's
+  // own static bounce asset (same ordering `drawDragonBreathTurnEndSettled
+  // Menu` already established for this exact overlay, S7 slice E2b-2).
+  if (turn2Resolved) drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurnHp, healthboxY2);
 }
 
-function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: boolean): void {
+function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: boolean, turn2Resolved: boolean = false): void {
   if (t <= MENU_IDLE_BLANK_END_TICK) {
     drawRect(fb, menuIdleBlank);
     return;
   }
-  drawActionMenuIdleContent(fb, t, turn1Resolved);
+  // S7 slice F: turn 3's own reopen (unlike turn 1's very first open, or
+  // turn 2's own reopen - both oracle-confirmed fine with plain `t` here)
+  // needs the same resettled-bounce remap its later "revealed, idle" phase
+  // uses (`turn3SubmenuBounceTick`) even during this brief DMA-wait hold -
+  // pixel-confirmed via `turn3-menu.json`'s own dense probe of ticks 3847/
+  // 3848 (plain `t` mismatched there, the remap doesn't).
+  const bounceTick = turn2Resolved ? turn3SubmenuBounceTick(t) : t;
+  drawActionMenuIdleContent(fb, bounceTick, turn1Resolved, turn2Resolved);
 }
 
 /**
@@ -3385,9 +3417,9 @@ function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: bool
  * `battleMenu.ts`'s own doc comment on those two constants for why they
  * differ from a plain, unshifted `t`.
  */
-function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState, turn1Resolved: boolean): void {
+function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState, turn1Resolved: boolean, turn2Resolved: boolean): void {
   if (sm.openElapsed === null) {
-    drawActionMenuIdleWindow(fb, t, turn1Resolved);
+    drawActionMenuIdleWindow(fb, t, turn1Resolved, turn2Resolved);
     return;
   }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -3397,13 +3429,13 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // finding 1's "5-tick hold" turns out to need no special-casing at all:
     // it's just this same bounce cycle naturally dwelling on one phase for
     // that span, pixel-confirmed exact with a plain, unshifted `t`).
-    drawActionMenuIdleWindow(fb, t, turn1Resolved);
+    drawActionMenuIdleWindow(fb, t, turn1Resolved, turn2Resolved);
     return;
   }
   if (sm.closeElapsed !== null) {
     const closeRevealTick = TICK0 + sm.closeElapsed + FIGHT_SUBMENU_CLOSE_DELAY;
     if (t >= closeRevealTick) {
-      drawActionMenuIdleContent(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, turn1Resolved);
+      drawActionMenuIdleContent(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, turn1Resolved, turn2Resolved);
       return;
     }
   }
@@ -3433,17 +3465,40 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // onix/healthbox bounce overlay is already frozen (battleMenu.ts's new
     // Slice 7 doc comment: `DoBounceEffect` stops being polled the instant
     // the A-press hands off, not merely once the text becomes visible).
-    drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
-    drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved, sm.activeMonMoveset);
-    drawMenuIdleBounceOverlay(fb, turn1Resolved ? turn2KickoffBounceTick(t, pressTick) : turnKickoffBounceTick(t, pressTick));
+    drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved, turn2Resolved);
+    drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved, turn2Resolved, sm.activeMonMoveset);
+    // S7 slice F: turn 3's own confirm-wait window (cursor 0, ROCK_SLIDE
+    // again) only ever needs the LIVE portion this session - the trace ends
+    // well before `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks past the press,
+    // so the frozen-plateau branch `turn2KickoffBounceTick`'s own analogue
+    // would need (a turn-3 frozen constant, unverified/unneeded here) is
+    // deliberately not modeled - out of scope, see docs/battle-turn-notes.md
+    // §13's own engine-slice writeup.
+    const confirmWaitBounceTick = turn2Resolved
+      ? turn3SubmenuBounceTick(t)
+      : turn1Resolved
+        ? turn2KickoffBounceTick(t, pressTick)
+        : turnKickoffBounceTick(t, pressTick);
+    drawMenuIdleBounceOverlay(fb, confirmWaitBounceTick);
+    // S7 slice F: same overlay-after-bounce ordering as `drawActionMenuIdleContent`'s
+    // own (turn 3's reopen isn't reachable through this specific branch yet -
+    // it needs a fresh confirm of its own first - but kept consistent so a
+    // future turn-3-confirm slice doesn't rediscover the ordering bug).
+    if (turn2Resolved) drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurnHp, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
     return;
   }
-  drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
-  drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved, sm.activeMonMoveset);
+  drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved, turn2Resolved);
+  drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved, turn2Resolved, sm.activeMonMoveset);
   // S7 slice E1: turn 2's own reopened submenu inherits the resettled menu's
   // bounce phase, not the plain absolute-`t` mapping turn 1's first open
   // happened to coincide with (`turn2SubmenuBounceTick`'s own doc).
-  drawMenuIdleBounceOverlay(fb, turn1Resolved ? turn2SubmenuBounceTick(t) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+  const idleWaitBounceTick = turn2Resolved ? turn3SubmenuBounceTick(t) : turn1Resolved ? turn2SubmenuBounceTick(t) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  drawMenuIdleBounceOverlay(fb, idleWaitBounceTick);
+  // S7 slice F (docs/battle-turn-notes.md §13): turn 3's own reopened submenu
+  // (cursor persisted at 2, then UP-nav'd to 0) dwells here while waiting for
+  // the confirm press - Onix's own HP overlay (101, stale in the flat
+  // harvest) needs the same after-bounce ordering as every other branch above.
+  if (turn2Resolved) drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurnHp, menuIdleBounce(idleWaitBounceTick).healthboxY2);
 }
 
 /**
@@ -3467,11 +3522,11 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
  * fightSubmenuText.test.ts`, and §13c for the state-plumbing tests proving
  * this same path end-to-end.
  */
-function drawFightSubmenuChrome(fb: Uint8Array, displayCursor: FightSubmenuSlot, turn1Resolved: boolean, moveset: ActiveMonMoveset): void {
+function drawFightSubmenuChrome(fb: Uint8Array, displayCursor: FightSubmenuSlot, turn1Resolved: boolean, turn2Resolved: boolean, moveset: ActiveMonMoveset): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -4246,10 +4301,19 @@ function drawDragonBreathScene(fb: Uint8Array, t: number, pressTick: number): vo
  * and Grovyle's post-DRAGON_BREATH HP (88, not ROCK_SLIDE's 101).
  */
 const DRAGONBREATH_TEXT_CLEAR_DELAY = 384; // pressTick+384 = RAM 3329 (message box goes blank, box stays)
-const DRAGONBREATH_MENU_REDRAW_DELAY = 391; // pressTick+391 = RAM 3336 (hard cut to the resettled action menu)
+/** Exported for core.ts's own turn-3 reopen gate (S7 slice F) - same "resolution's own redraw delay gates the next reopen" convention `ROCK_SLIDE_MENU_REDRAW_DELAY` already established for turn 1->2. */
+export const DRAGONBREATH_MENU_REDRAW_DELAY = 391; // pressTick+391 = RAM 3336 (hard cut to the resettled action menu)
 
 function dragonBreathResettledBounceTick(t: number, pressTick: number): number {
   return t - (pressTick + DRAGONBREATH_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
+/** S7 slice F (docs/battle-turn-notes.md §13): turn 2's own A-confirm press tick (RAM/render 2945 - matches `DRAGONBREATH_TEXT_START_DELAY`'s own doc: `2945+192=3137` is the busy-flag render tick already cited there). Needed for the same reason `TURN1_CONFIRM_PRESS_TICK` is (`battleMenu.ts`): turn 3's reopen inherits the turn-2-resettled-menu's own re-anchored bounce phase (`dragonBreathResettledBounceTick`), not a fresh mapping - reopening FIGHT doesn't reset the underlying bounce task any more than turn 2's own reopen did. */
+const TURN2_CONFIRM_PRESS_TICK = 2945;
+
+/** S7 slice F: turn 3's own reopened submenu's bounce overlay - composes `dragonBreathResettledBounceTick`'s own turn-2-resettled remap with the same `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` DMA-wait correction `turn2SubmenuBounceTick` (`battleMenu.ts`) already established for turn 2's own reopen, one level up the same chain. */
+function turn3SubmenuBounceTick(t: number): number {
+  return dragonBreathResettledBounceTick(t, TURN2_CONFIRM_PRESS_TICK) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
 }
 
 function drawDragonBreathTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
@@ -4745,7 +4809,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       drawRect(fb, menuIdleBlank);
       return;
     }
-    drawFightSubmenuWindow(fb, t, state.fightSubmenu, state.turn1Resolved);
+    drawFightSubmenuWindow(fb, t, state.fightSubmenu, state.turn1Resolved, state.turn2Resolved);
     return;
   }
   drawSendOutHandoff(fb, t, handoffTick);
