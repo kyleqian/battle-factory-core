@@ -101,3 +101,24 @@ compare run exposed the staleness.
 - **Workaround:** never re-run that extractor without diffing its output;
   proper fix is folding the `grovyleFrontAnim` derivation into the script
   (small, unclaimed follow-up).
+
+## Supervisor commits to `master` while a main-lane worker is mid-run look like git corruption (2026-07-20)
+
+- **What:** the supervisor and the main-lane worker share one working
+  tree and one `master`. When the supervisor commits its own docs
+  (ROADMAP/ISSUES/PROGRESS ledger) during a worker's run, the worker can
+  observe a transient `git status`/`git diff` inconsistency on a file it
+  never touched and reasonably suspect repo corruption. Reported by the
+  E2b-2 worker (~2 min lost) after this session's ISSUES #23 park commit.
+- **Hits:** 1 (first time observed; the supervisor has committed
+  mid-worker several times this session without a report, so the window
+  is narrow).
+- **Cost each:** ~2 min of investigation; the real risk is larger — a
+  worker running `git add -A` mid-supervisor-edit could sweep the
+  supervisor's uncommitted docs into its own commit.
+- **Workaround:** supervisor commits mid-worker should touch only files
+  no worker owns (ROADMAP.md / ISSUES.md / PAPERCUTS.md — never
+  PROGRESS.md, which main-lane workers own), stage those paths
+  explicitly (never `git add -A`), and commit immediately rather than
+  leaving edits dirty in the shared tree. Better: batch supervisor docs
+  edits into the gap between workers when the schedule allows.
