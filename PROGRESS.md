@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 165 — Supervisor wind-down: session end 2026-07-20 ~02:45 — **12 verified worker steps** (9 main + 3 worktree, every one folded green); suite **685 → 744/744**; headline: **turn 2 is COMPLETE end to end** (`turn2-dragonbreath.json` 237/237) and **three long-standing residual families were root-caused and closed** (ISSUES #19, #22, #24 — all three were harvest/dispatch bugs, none was the timing mystery they looked like)
+
+- **State (verified this minute):** `npm test` **744/744**, `npm run
+  build` green, tree clean at `fe8015b`, no worktrees, no unmerged
+  branches. Full acceptance sweep, supervisor-rerun:
+  `turn2-endeavor-drain` **201/201**, `turn2-endeavor` **77/77**,
+  `turn2-dragonbreath` **237/237**, `turn3-menu` **250/250**,
+  `fight-submenu` **235/235**, `turn1-rockslide` 256/256,
+  `battle1-fight-submenu-idle` **256/256**, `sendout` 255/256 (#18
+  policy-settled), `s6-acceptance` 224/228 (#5/#18 policy-settled).
+- **Session summary (supervised, ~22:10-02:45, 6 rounds):** S7's ENDEAVOR
+  window CLOSED (tail 3061-3094: healthbox wobble + Onix flicker); the
+  whole DRAGON_BREATH half built from scouted ground truth — kickoff
+  text, `AnimTask_ShakeMon2`, both red-fade blends, Grovyle's HP drain,
+  text-clear, turn-3 menu reopen, and the 3347-3846 tail (where a dense
+  probe caught a live-bounce/HP-digit bug the reference stride would have
+  missed); slice F opened turn 3 (the engine previously DEAD-ENDED after
+  turn 2) at 250/250. ISSUES #20 closed (FIGHT submenu on the live
+  FONT_NARROW pipeline) and S8's per-battle-moveset dependency closed
+  (`battleSetup.ts`, KABUTO proven through the state machine). S8
+  swap-screen assets extracted, 0 unexplained mismatches/1404 px.
+- **The residual-family thread (the session's best result):** #19's
+  root cause was an extractor bbox cropping a rare sine-peak state, NOT a
+  timing model — which generated the supervisor hypothesis that the other
+  named single-tick residuals shared that class. Confirmed: #22's 2135
+  plus 3465/3721 were the SAME class on a different asset (Onix's own
+  `y2=2` peak, never harvested); 3337 was already silently fixed. That
+  fix then TRADED tick 2901 (supervisor caught this: the landing report
+  called it an unrelated pre-existing bug, but re-adding 2901 reproduced
+  a byte-identical 769px signature) → filed #24 → closed by a ONE-LINE
+  missing dispatch arm (`turn1Resolved`), not the two-anchor model the
+  brief predicted. Net: four ticks green simultaneously, +4 Tier-1 pins.
+- **Next:** (1) S7's faint/forced-switch slice is the biggest open item —
+  turn 3's move resolution, turns 4-5, the faint, the AI switch-in, SEND
+  OUT (ground truth banked, §13/§14/§19; slice F is only its menu
+  prefix); (2) ISSUES #23 (fire projectiles, PARKED by supervisor default
+  after 4 attempts — reversible, findings fully banked); (3) S8 engine
+  work is unblocked end to end; (4) S4's remainder stays deferred.
+- **Notes:** no usage-limit events; worker cost ~$3.7-14/step, 10-40
+  min/step, 12/12 landed or returned a clean named negative. One worker
+  edited ROADMAP.md (supervisor-owned) — content was accurate status
+  only, kept, boundary noted. One new PAPERCUTS entry (supervisor
+  mid-worker commits on the shared tree).
+
+---
 ## 164 — Bounded worker: ISSUES #24 CLOSED — the §8c "tick 2901 regression" was a missing dispatch arm in `drawActionMenuIdleWindow`'s bounce-tick selection, not a second asset bug; all four RAM-verified ticks (2901/2135/3465/3721) now correct simultaneously; `npm test` **744/744** (+4), build green, zero regressions
 
 - **State:** `npm test` 744/744, `npm run build` green, tree clean.
@@ -107,64 +152,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fixes only) — named tick 2901 excluded from `captureFrames`
   (`201→200`), not silently shipped wrong, dense neighbors (2894-2950)
   stay captured and green. No papercuts.
-
----
-## 162 — Bounded worker: S7 slice F — turn 3's FIGHT-submenu reopen (cursor persistence, PP, bounce-anchor) landed; the faint itself and everything past it is honestly OUT of scope this session; `turn3-menu.json` (new) **250/250**, `npm test` **738/738** (+6), build green, zero regressions
-
-- **State:** `npm test` 738/738, `npm run build` green, tree clean.
-  New `tools/compare/traces/turn3-menu.json` (extends `turn2-dragonbreath
-  .json`'s 3846-frame prefix verbatim, +50 frames through tick 3896) is
-  **250/250** (two named single-tick residuals excluded, see below).
-  Regressions re-confirmed: `turn2-dragonbreath.json` **235/235**,
-  `turn2-endeavor-drain.json` **201/201**, `fight-submenu.json` **235/235**,
-  plus a broader sweep (`turn1-drain`, `turn1-rockslide`, `turn1-kickoff`,
-  `menu-idle`, `turn2-endeavor`, `sendout`, `s6-acceptance` all unchanged —
-  the latter two's own pre-existing gaps, 224/228 and 255/256, untouched).
-- **Did:** The engine only ever modeled turns 1-2 and then dead-ended: a
-  fresh A-press on turn 2's own resettled menu did nothing (`core.ts`'s
-  reopen-FIGHT branch was gated `!turn1Resolved`, one-shot by construction).
-  Added a second boolean (`BattleSceneState.turn2Resolved`) and a new
-  `core.ts` branch, same shape as turn 1→2's own gate, keyed off
-  `DRAGONBREATH_MENU_REDRAW_DELAY` (now exported) having elapsed since turn
-  2's own confirm. This is the FIRST reopen that genuinely exercises cursor
-  persistence (§13: `gMoveSelectionCursor` reads 2, DRAGON_BREATH, at turn
-  3's reopen — turn 1→2's own reopen coincidentally rested at slot 0 both
-  times, so it never distinguished "always reset" from "persist"):
-  `openFightSubmenu` gained an optional `initialCursor` param (default 0,
-  every existing call site unaffected). Fixing this surfaced 3 real
-  rendering gaps in shared, previously-turn-1/2-only code (never triggered
-  before because no earlier state needed a battler's own HP to differ from
-  the static harvest while ALSO dwelling in the FIGHT-submenu's *generic*
-  idle/DMA-wait draw path): Grovyle's opponent-HP overlay was frozen at
-  turn 1's end value (101, not turn 2's real 88); Onix's own HP overlay
-  wasn't drawn AT ALL in the generic path (only turn-2-specific bespoke
-  functions had it, each with their own manual overdraw); and the idle-
-  bounce phase (`turn2SubmenuBounceTick`, anchored to turn 1's own confirm)
-  is turn-2-specific — reusing it for turn 3 produced a 6.1%-of-frame
-  whole-silhouette mismatch on every captured tick, fixed with a new
-  `turn3SubmenuBounceTick`/`TURN2_CONFIRM_PRESS_TICK`(2945) composing
-  `dragonBreathResettledBounceTick`'s existing remap. `currentPPForActiveMon`
-  also gained a `turn2Resolved` param (DRAGON_BREATH 20→19 PP, §14's own
-  ground truth). Two named single-tick residuals (ticks **3879** and
-  **3888**, isolated Onix-sprite/healthbox bounce blips, same "hardware
-  quirk at a bounce extremum" class as this dossier's tick 3337/3465/3721)
-  excluded from `captureFrames`, not chased further. 6 new
-  Tier-1 tests (`openFightSubmenu` cursor persistence, `currentPPForActive
-  Mon`'s new decrement, and a 3-test `core.ts`-integration suite driving the
-  new reopen gate through `tick()` directly). Full writeup in
-  `docs/battle-turn-notes.md`'s new §19.
-- **Next:** turn 3's own actual RESOLUTION (ENDEAVOR hits Onix 101→88 again,
-  ROCK_SLIDE hits Grovyle 88→41) is next, starting from `turnKickoffTextStartTick`
-  on — §13's ledger already has every HP/RNG value banked, no new oracle
-  scouting needed, just engine work (expect it to cost about what turn 2's
-  own E1/E1b/E2a/E2b slices each did). After that: turn 4 (DOUBLE_TEAM),
-  turn 5 (the actual faint — Grovyle 1→0), the button-gated KO text, DESTIN's
-  Pidgeotto switch-in, then — much later — Onix's OWN faint (§14) and the
-  forced party-select/SEND OUT sequence. This session did NOT touch any of
-  that; "faint/forced-switch" as a whole is still almost entirely unbuilt.
-- **Notes:** no papercuts. The brief's own suggested trace name
-  (`turn3-faint.json`) was NOT used since this session's actual window
-  doesn't reach anywhere near the faint — named `turn3-menu.json` instead,
-  for what it actually covers, per this run's own "name it for what it
-  covers if your window differs" convention.
-

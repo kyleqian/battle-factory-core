@@ -1,3 +1,63 @@
+## 162 — Bounded worker: S7 slice F — turn 3's FIGHT-submenu reopen (cursor persistence, PP, bounce-anchor) landed; the faint itself and everything past it is honestly OUT of scope this session; `turn3-menu.json` (new) **250/250**, `npm test` **738/738** (+6), build green, zero regressions
+
+- **State:** `npm test` 738/738, `npm run build` green, tree clean.
+  New `tools/compare/traces/turn3-menu.json` (extends `turn2-dragonbreath
+  .json`'s 3846-frame prefix verbatim, +50 frames through tick 3896) is
+  **250/250** (two named single-tick residuals excluded, see below).
+  Regressions re-confirmed: `turn2-dragonbreath.json` **235/235**,
+  `turn2-endeavor-drain.json` **201/201**, `fight-submenu.json` **235/235**,
+  plus a broader sweep (`turn1-drain`, `turn1-rockslide`, `turn1-kickoff`,
+  `menu-idle`, `turn2-endeavor`, `sendout`, `s6-acceptance` all unchanged —
+  the latter two's own pre-existing gaps, 224/228 and 255/256, untouched).
+- **Did:** The engine only ever modeled turns 1-2 and then dead-ended: a
+  fresh A-press on turn 2's own resettled menu did nothing (`core.ts`'s
+  reopen-FIGHT branch was gated `!turn1Resolved`, one-shot by construction).
+  Added a second boolean (`BattleSceneState.turn2Resolved`) and a new
+  `core.ts` branch, same shape as turn 1→2's own gate, keyed off
+  `DRAGONBREATH_MENU_REDRAW_DELAY` (now exported) having elapsed since turn
+  2's own confirm. This is the FIRST reopen that genuinely exercises cursor
+  persistence (§13: `gMoveSelectionCursor` reads 2, DRAGON_BREATH, at turn
+  3's reopen — turn 1→2's own reopen coincidentally rested at slot 0 both
+  times, so it never distinguished "always reset" from "persist"):
+  `openFightSubmenu` gained an optional `initialCursor` param (default 0,
+  every existing call site unaffected). Fixing this surfaced 3 real
+  rendering gaps in shared, previously-turn-1/2-only code (never triggered
+  before because no earlier state needed a battler's own HP to differ from
+  the static harvest while ALSO dwelling in the FIGHT-submenu's *generic*
+  idle/DMA-wait draw path): Grovyle's opponent-HP overlay was frozen at
+  turn 1's end value (101, not turn 2's real 88); Onix's own HP overlay
+  wasn't drawn AT ALL in the generic path (only turn-2-specific bespoke
+  functions had it, each with their own manual overdraw); and the idle-
+  bounce phase (`turn2SubmenuBounceTick`, anchored to turn 1's own confirm)
+  is turn-2-specific — reusing it for turn 3 produced a 6.1%-of-frame
+  whole-silhouette mismatch on every captured tick, fixed with a new
+  `turn3SubmenuBounceTick`/`TURN2_CONFIRM_PRESS_TICK`(2945) composing
+  `dragonBreathResettledBounceTick`'s existing remap. `currentPPForActiveMon`
+  also gained a `turn2Resolved` param (DRAGON_BREATH 20→19 PP, §14's own
+  ground truth). Two named single-tick residuals (ticks **3879** and
+  **3888**, isolated Onix-sprite/healthbox bounce blips, same "hardware
+  quirk at a bounce extremum" class as this dossier's tick 3337/3465/3721)
+  excluded from `captureFrames`, not chased further. 6 new
+  Tier-1 tests (`openFightSubmenu` cursor persistence, `currentPPForActive
+  Mon`'s new decrement, and a 3-test `core.ts`-integration suite driving the
+  new reopen gate through `tick()` directly). Full writeup in
+  `docs/battle-turn-notes.md`'s new §19.
+- **Next:** turn 3's own actual RESOLUTION (ENDEAVOR hits Onix 101→88 again,
+  ROCK_SLIDE hits Grovyle 88→41) is next, starting from `turnKickoffTextStartTick`
+  on — §13's ledger already has every HP/RNG value banked, no new oracle
+  scouting needed, just engine work (expect it to cost about what turn 2's
+  own E1/E1b/E2a/E2b slices each did). After that: turn 4 (DOUBLE_TEAM),
+  turn 5 (the actual faint — Grovyle 1→0), the button-gated KO text, DESTIN's
+  Pidgeotto switch-in, then — much later — Onix's OWN faint (§14) and the
+  forced party-select/SEND OUT sequence. This session did NOT touch any of
+  that; "faint/forced-switch" as a whole is still almost entirely unbuilt.
+- **Notes:** no papercuts. The brief's own suggested trace name
+  (`turn3-faint.json`) was NOT used since this session's actual window
+  doesn't reach anywhere near the faint — named `turn3-menu.json` instead,
+  for what it actually covers, per this run's own "name it for what it
+  covers if your window differs" convention.
+
+---
 ## 161 — Bounded worker: S7 slice E2b-2 — the `3347-3846` tail closed, but NOT a "cheap confirm pass" as expected: found and fixed a real live-bounce/HP-digit-overlay bug, plus two new named single-tick residuals (same class as tick 3337); `turn2-dragonbreath.json` **235/235**, `npm test` **732/732** (+1), build green, zero regressions
 
 - **State:** `npm test` 732/732, `npm run build` green, tree clean.
