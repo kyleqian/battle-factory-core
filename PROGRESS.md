@@ -4,6 +4,45 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 184 — Bounded worker: PROGRESS #183's two extremum ticks CLOSED — both verified corrective rules applied, both restored 0-diff; `turn4-doubleteam.json` **250/250**, `turn5-menu.json` **42/42**, `npm test` **787/787** (+2), build green, zero regressions across turns 1-5
+
+- **State:** `npm test` 787/787, `npm run build` green, tree clean (2
+  commits, `73bce5b` fix 4934 + `a05e9d0` fix 5927). Turns 1-5 now carry
+  **zero excluded residual ticks**.
+- **Did:** applied both rules verbatim from `docs/turn3-residual-probe-
+  notes.md` "The extremum class, probed", each verified first via its own
+  `tools/probe/verify-turn{4,5}-*.py` (reran clean before touching code, per
+  the brief). (4934) `battleScene.ts`'s `drawFightSubmenuWindow` `textStart`
+  gate now additionally excludes `turn3Resolved && !turn4Resolved` from the
+  ENDEAVOR-family test, so turn 4's own DOUBLE_TEAM kickoff gets the right
+  delay family. (5927) `drawActionMenuIdleWindow` gained an optional
+  `turn5ReopenPressTick` param (threaded from `sm.openElapsed` at the one
+  DMA-wait call site) that holds the unshifted
+  `turn4RockSlideResettledBounceTick` formula for exactly `t === pressTick`,
+  switching to the shifted `turn5SubmenuBounceTick` from `pressTick+1` on -
+  single-tick-scoped, matches the doc's "delay the switch by one tick"
+  framing exactly. Both traces restored to their captureFrames (249→250,
+  41→42), both 0 diff. Regression sweep (turn4-rockslide 250/250, turn5-
+  endeavor 254/254, turn5-sentout 141/141, turn3-menu 254/254, turn2-
+  dragonbreath 237/237, fight-submenu-reopen 90/90, turn1-cloneanim
+  230/230) all unchanged, 0 diff. +2 Tier-1 pins (`tests/battleScene.test.ts`:
+  the kickoff-text gate at 4933/4934/4935, the Onix bounce phase at
+  5926/5927/5928). Docs: both ticks marked RESOLVED in `turn3-residual-
+  probe-notes.md`, one-line corrections at `battle-turn-notes.md` §22/§23's
+  old exclusion notes; archived #181 to `PROGRESS-archive.md` to keep the
+  ledger to 3 entries.
+- **Next:** resume the roadmap where #181/#182 left off - materialize's own
+  ramp-down/wobble phases (`docs/faint-switch-notes.md` §10) + everything
+  past them (healthbox slide-in, Sitrus, settled-menu). No other residuals
+  remain open in the turn 1-5 window.
+- **Notes:** caught one arithmetic slip mid-session: the reopen's own
+  `sm.openElapsed` encodes `pressTick - TICK0` (not `+1` as a first read of
+  `core.ts`'s call-site comment suggested) - verified against
+  `fightSubmenu.test.ts`'s own pinned `openElapsed` value before trusting
+  the offset, caught by the first compare run (41/42, not 42/42) rather than
+  shipped wrong.
+
+---
 ## 183 — Worktree probe (supervisor-folded): BOTH remaining "redraw extremum" ticks ROOT-CAUSED as real engine bugs (label retired) — 4934 = kickoff-text delay-family mis-selected by the monotonic `turn2Resolved` gate during turn 4's DOUBLE_TEAM window; 5927 = the -2 bounce phase shift applied in the SAME render tick the reopen press registers (hardware switches one tick later); merged `7d93103`, suite 785/785 on the merged tree
 
 - **State:** merged into master, `npm test` 785/785 + build green
@@ -75,57 +114,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   .json`'s own 235/235 - avoided by keeping `openElapsed`/`closeElapsed`
   meaning exactly what they always did and only adding a NEW branch/flag,
   never an intermediate reset state.
-
----
-## 181 — Bounded worker: S7 slice L-3 — ball prop + open-particle burst + materialize GROWING phase LANDED; `turn5-switchin.json` (new) **167/167, 0 diff**, `npm test` **781/781** (+1), build green, zero regressions; materialize's own ramp-down/wobble phases + everything past them (healthbox/Sitrus/settled-menu) NOT reached
-
-- **State:** `npm test` 781/781, `npm run build` green, tree clean.
-  `turn5-switchin.json` (ball prop create/open/openFinal, the open-particle
-  burst, Pidgeotto's materialize GROWING silhouette, tick 6588-6754)
-  **167/167, 0 diff** (new). Full regression sweep at exact prior counts,
-  all 0 diff: `turn5-sentout` 141/141, `turn5-faint` 110/110, `turn5-
-  rockslide` 256/256, `turn5-endeavor` 254/254, `turn5-menu` 41/41, `turn4-
-  rockslide` 250/250, `turn4-doubleteam` 249/249, `turn3-rockslide`
-  256/256, `turn1-rockslide` 256/256, `fight-submenu` 235/235, `turn3-
-  endeavor` 192/192, `turn3-menu` 254/254, `turn2-endeavor-drain` 201/201,
-  `turn4-menu` 44/44, `turn2-dragonbreath` 237/237, `turn1-cloneanim`
-  230/230, `menu-idle` 69/69, `turn2-endeavor` 77/77, `s6-acceptance`
-  224/228, `scene-assembly` 256/256, plus `sendout.json` **255/256**
-  (unchanged, pre-existing named residual).
-- **Did:** per the brief's own instruction, RAM-probed ambiguities against
-  the already-committed probes first, then iterated render code against the
-  live oracle. Landed the ball prop (`TURN5_BALL_HANDOFF_TICK=6727`,
-  reusing `drawSendOutBall` verbatim - zero new ball code), a NEW clean
-  open-particle-burst formula (`drawTurn5SwitchinParticles` - reusing
-  `drawBallOpenParticles` verbatim was WRONG, it bakes in an S6-specific
-  one-off RAM-stall correction that doesn't apply here), and Pidgeotto's
-  materialize GROWING phase (reuses `affineEmergeAccumulator`/
-  `MATERIALIZE_Y2_TABLE` verbatim, including the `+1` logical-offset
-  correction §7.21 already established for Grovyle). Found and fixed two
-  real bugs mid-session: (1) the switch-in window's own BG-to-white dither
-  table was under-resolved on a first pass (a low-dynamic-range sky swatch
-  hid two real steps) - re-derived from a ground swatch, exact; missing
-  this produced a >16000px/43% full-frame diff that read like a sprite bug
-  until isolated. (2) Pidgeotto's own front-sprite frame-parity mapping was
-  inverted from the naive even/odd guess - pixel-verified and flipped
-  (474px -> 26px residual). The coefficient ramp-down phase (render
-  6768-6782) still carries a real ~3% residual not root-caused this
-  session (RAM-exact coefficients, something else off - see docs); the
-  wobble-table phase (~6786-6828) looks clean in spot checks but wasn't
-  independently verified as its own 0-diff span. Per AGENTS.md, cut the
-  committed trace at the longest verified-clean boundary (6754, right
-  before the ramp phase) rather than ship the residual ticks.
-- **Next:** close the coefficient-ramp residual (render 6768-6782, exact
-  RAM values already known - `docs/faint-switch-notes.md` §10 item 1),
-  verify the wobble-table phase as its own dense span (item 2), which
-  unlocks `TURN5_PIDGEOTTO_SETTLE_TICK`(6828, already pixel-confirmed) as
-  a clean extension boundary. Healthbox slide-in through Sitrus/settled-menu
-  (§8e/§2/§3e, fully spec'd) remain completely untouched.
-- **Notes:** PAPERCUT: ~25-30 min lost to a background-fade-table
-  under-resolution that read as a sprite-geometry bug (huge 43% diff)
-  before isolating it to a palette-blend table built from too low a
-  dynamic-range swatch - worth flagging in any future "pixel-sample a
-  fade table" task: verify against a swatch whose unfaded value has enough
-  headroom in EVERY channel to resolve each step distinctly, or solve
-  directly from RAM palette-buffer data (as this session ultimately did for
-  the ramp-down coefficient) rather than a screenshot color read.
