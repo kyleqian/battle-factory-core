@@ -792,6 +792,19 @@ const anchorPlayerAfterTurn3Hp = (
   battle1GrovyleFaintRamDumpAsset as { battlerSnapshots: { "4892": { battler0: { hp: number } } } }
 ).battlerSnapshots["4892"].battler0.hp;
 
+/**
+ * S7 slice H (docs/battle-turn-notes.md §13/§21): Grovyle's own post-turn-3-
+ * ROCK_SLIDE hp (`battle1-grovyle-faint-ram-dump.json`'s `battlerSnapshots
+ * ["4892"].battler1.hp`, 41) - the same tick-4892 boundary snapshot
+ * `anchorPlayerAfterTurn3Hp` already sources, this time the OTHER battler
+ * (Grovyle is ROCK_SLIDE's own target, not Onix). Independently RAM-
+ * confirmed this session via a fresh `tools/probe/ram-probe.py` run:
+ * `gBattleMons[1].hp` updates 88->41 at tick 4333.
+ */
+const anchorOpponentAfterTurn3Hp = (
+  battle1GrovyleFaintRamDumpAsset as { battlerSnapshots: { "4892": { battler1: { hp: number } } } }
+).battlerSnapshots["4892"].battler1.hp;
+
 const playerHealthboxHpOverlayAssets = {
   hpbar: healthboxAssemblyAssets.hpbar,
   hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
@@ -4527,6 +4540,17 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
  * internally, so no second call is needed there.
  */
 function drawTurn3EndeavorText(fb: Uint8Array, t: number, pressTick: number): void {
+  // S7 slice H (docs/battle-turn-notes.md §21): once ROCK_SLIDE's own
+  // kickoff text hard-cuts the message box (oracle-pixel-confirmed at tick
+  // 4080 - `rockSlideTextStartTick(TURN3_ROCKSLIDE_PRESS_TICK)` below,
+  // matching slice G's own named boundary exactly), hand off to the turn's
+  // second half instead of holding the ENDEAVOR text forever - the same
+  // shape `drawTurn2KickoffText`'s own `dragonBreathStart` handoff already
+  // established for turn 2.
+  if (t >= rockSlideTextStartTick(TURN3_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn3RockSlideWindow(fb, t);
+    return;
+  }
   const bounceTick = turn3KickoffBounceTick(t, pressTick);
   const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp);
   if (drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurn2Hp, bounceTick)) {
@@ -4536,6 +4560,167 @@ function drawTurn3EndeavorText(fb: Uint8Array, t: number, pressTick: number): vo
   }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
+}
+
+/**
+ * S7 slice H (docs/battle-turn-notes.md §13/§21): turn 3's own ROCK_SLIDE
+ * half (Onix's own move, hitting Grovyle again - the SAME move/same target
+ * as turn 1's own `drawRockSlideWindow`/`drawRockSlideAttack`, just a
+ * different pair of HP endpoints and no preceding DOUBLE_TEAM/STAT_ROSE
+ * detour, since turn 3's own kickoff text is Grovyle's ENDEAVOR, not
+ * DOUBLE_TEAM). A synthetic "press tick" anchor lets this reuse EVERY one
+ * of turn 1's `battleMenu.ts` ROCK_SLIDE mechanism functions (`rockSlideBg3Y`/
+ * `rockSlideRockState`/`rockSlideDrawOrder`/`rockSlideMonShakeY2`/
+ * `rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
+ * `rockSlideOpponentHp`, all still `pressTick`-relative - PARAMETERIZATION,
+ * not a rebuild, exactly per this session's own brief) UNCHANGED: chosen so
+ * `rockSlideTextStartTick(TURN3_ROCKSLIDE_PRESS_TICK)` lands exactly on
+ * turn 3's own oracle-pixel-confirmed kickoff tick (4080 = `4080 -
+ * ROCK_SLIDE_TEXT_DELAY(393)`). RAM-probed this session (fresh
+ * `tools/probe/ram-probe.py` + `dump-rockslide-sprites.py`/
+ * `dump-rockslide-slot-order.py` runs against a turn-3-extended trace, NOT
+ * assumed from turn-1 symmetry - see slice G's own shake-asymmetry
+ * caution): with this ONE anchor, every downstream mechanism lands exactly
+ * where turn 1's own unchanged constants predict - `gBattle_BG3_Y`'s shake
+ * sequence starts at RAM tick 4115 (`TURN3_ROCKSLIDE_PRESS_TICK +
+ * ROCK_SLIDE_RAM_ANCHOR_DELAY(428)`, bit-exact against turn 1's own
+ * `[0,-7,-7,0,0,-7,-7,0,0,-7,-7]` table), and Grovyle's own raw
+ * `gBattleMons[1].hp` field updates 88->41 at RAM tick 4333 - EXACTLY
+ * `TURN3_ROCKSLIDE_PRESS_TICK + ROCK_SLIDE_HP_DRAIN_START_DELAY(597) +
+ * (88-41) + 2`, the identical "+2" render/RAM lag turn 1's own doc already
+ * establishes for `bar1Curr`'s done-sentinel-then-hp-field sequence.
+ * `gSprites[]` OAM slot occupancy at the rock-order simulation's own seed
+ * tick (4106) reads the SAME 9 baseline slots turn 1's own `ROCK_SLIDE_
+ * BASELINE_SLOTS` constant already lists (`[0,1,2,6,8,60,61,62,63]`, fresh
+ * `dump-rockslide-slot-order.py` `inUse` read, 9/9 exact match) - the
+ * caution in this session's own brief (three turns of other animations
+ * MIGHT have left different slots free) does NOT materialize here. The raw
+ * `sSpriteOrder` permutation itself DOES differ from turn 1's own committed
+ * `ROCK_SLIDE_ORDER_SEED` in 9 of 64 entries, but every one of those 9
+ * differing slots is a FREE (non-baseline) filler slot at the seed tick,
+ * and `computeRockSlideOrders`'s own per-tick `SortSprites` pass is a full
+ * single-pass insertion sort (not a partial one) - it fully re-sorts every
+ * slot's relative position from ITS packed key every RAM tick regardless of
+ * starting permutation, and every filler slot shares one identical packed
+ * key/`yKey` (so filler-vs-filler order is never observable in the output,
+ * confirmed by this session's own end-to-end result below, not just
+ * argued). Net: turn 1's own `rockSlideDrawOrder`/`computeRockSlideOrders`
+ * reused with ZERO code changes, verified by `npm run compare`'s own 0-diff
+ * result across the whole dense rock window (docs/battle-turn-notes.md §21).
+ */
+const TURN3_ROCKSLIDE_PRESS_TICK = 3687; // 4080 - ROCK_SLIDE_TEXT_DELAY(393)
+
+/**
+ * S7 slice H: text-clear/menu-redraw do NOT land at turn 1's own unchanged
+ * `ROCK_SLIDE_TEXT_CLEAR_DELAY`(657)/`ROCK_SLIDE_MENU_REDRAW_DELAY`(664) -
+ * pixel-confirmed this session (dense `bin/oracle run` sweep, ticks
+ * 4320-4370): the message box goes blank at tick 4349 (689px, the message-
+ * box's own bbox) and hard-cuts to the resettled menu at tick 4356 (5983px,
+ * the same whole-bottom-half swap turn 1's own boundary shows) - both
+ * exactly **+5** past the naive `TURN3_ROCKSLIDE_PRESS_TICK+657/+664`
+ * prediction. NOT a new/unexplained mechanism: turn 3's own HP-drain
+ * covers 47 HP (88->41) vs turn 1's 42 (143->101), and the whole post-drain
+ * RNG-cost tail (flinch/turn-pass/`ShouldSwitch`/AI-setup rolls) is anchored
+ * to the drain's own COMPLETION tick, not to `pressTick` directly - a
+ * bigger HP diff pushes the drain's completion (and everything chained
+ * after it) later by exactly the diff's own delta (47-42=5). Directly
+ * confirmed via §13's own turn-3 RNG ledger: every one of flinch(+5)/
+ * turn-pass(+15)/`ShouldSwitch`(+20)/AI-setup(+22) lands the SAME fixed
+ * number of ticks after the `gBattleMons[1].hp` field update (4333) as
+ * turn 1's v5 correction table (`battle-turn-notes.md` §9) shows relative
+ * to ITS OWN hp-field-update tick (2560) - the "+5" is fully explained by
+ * parameter drift through an unchanged formula, not a divergent mechanism.
+ */
+const TURN3_ROCKSLIDE_TEXT_CLEAR_DELAY = 662; // pressTick+662 = 4349 (message box blanks, box stays)
+const TURN3_ROCKSLIDE_MENU_REDRAW_DELAY = 669; // pressTick+669 = 4356 (hard cut to the resettled action menu)
+
+/**
+ * S7 slice H: the battlefield base + rocks + shake + Grovyle's own HP drain
+ * for turn 3's ROCK_SLIDE window - identical shape to turn 1's own
+ * `drawRockSlideAttack`, parameterized by `TURN3_ROCKSLIDE_PRESS_TICK` and
+ * turn 3's own HP endpoints (`anchorOpponentAfterTurn2Hp`(88) ->
+ * `anchorOpponentAfterTurn3Hp`(41)). Unlike turn 1 (where Onix stays at
+ * full HP(117) the whole window, so `drawMenuHealthboxPlayer`'s own stale
+ * full-HP harvest is already correct), Onix already carries ENDEAVOR's own
+ * damage (117->88) by this point - the caller (`drawTurn3RockSlideWindow`)
+ * applies the real HP overlay on top, same "overlay applied once at the
+ * dispatcher level" shape `drawTurn2KickoffText` already established for
+ * DRAGON_BREATH's own Onix-HP-overlay call.
+ */
+function drawTurn3RockSlideAttack(fb: Uint8Array, t: number): void {
+  const pressTick = TURN3_ROCKSLIDE_PRESS_TICK;
+  const shiftY = rockSlideBg3Y(t, pressTick);
+  drawStaticBgShiftedY(fb, shiftY);
+  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
+    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  }
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn2Hp, anchorOpponentAfterTurn3Hp);
+  const opponentContent = opponentHealthboxContentForHp(opponentHp);
+  drawSendOutHealthbox(fb, 0, opponentContent);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
+  drawMenuHealthboxPlayer(fb, 0);
+  drawMenuIdleBounceOverlay(fb, turn3KickoffBounceTick(t, TURN3_CONFIRM_PRESS_TICK));
+  for (const i of rockSlideDrawOrder(t, pressTick)) {
+    const rock = rockSlideRockState(i, t, pressTick);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+}
+
+/**
+ * S7 slice H: the same "resettled menu re-initializes its own bounce phase
+ * fresh at redraw" formula `rockSlideResettledBounceTick`/
+ * `dragonBreathResettledBounceTick` already establish, keyed off turn 3's
+ * own `TURN3_ROCKSLIDE_MENU_REDRAW_DELAY` rather than reusing either of
+ * those functions directly (both hardcode THEIR OWN turn-specific redraw
+ * delay internally, not parameterized).
+ */
+function turn3RockSlideResettledBounceTick(t: number): number {
+  return t - (TURN3_ROCKSLIDE_PRESS_TICK + TURN3_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
+/**
+ * S7 slice H: turn 3's own turn-end resettled action menu - same shape as
+ * `drawDragonBreathTurnEndSettledMenu` (turn 2's own analogue): reuse
+ * `drawActionMenuIdleContent`'s flat harvest for everything but the
+ * opponent healthbox (overdrawn at Grovyle's real settled HP, 41), and
+ * track the LIVE resettled bounce offset for Onix's own HP overlay (88 -
+ * `menuIdleBase`'s own harvest bakes Onix at full HP 117, stale here just
+ * like every earlier settled-menu variant in this turn sequence).
+ */
+function drawTurn3RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
+  const bounceTick = turn3RockSlideResettledBounceTick(t);
+  drawActionMenuIdleContent(fb, bounceTick, false);
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurn3Hp));
+  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp, menuIdleBounce(bounceTick).healthboxY2);
+}
+
+/**
+ * S7 slice H: turn 3's own ROCK_SLIDE window dispatcher - same three-phase
+ * shape as turn 1's own `drawRockSlideWindow` (attack animation + held
+ * "ONIX used\nROCK SLIDE!" text, text-clear, hard-cut to the resettled
+ * menu), minus the DOUBLE_TEAM/STAT_ROSE text phases turn 1's own window
+ * needed (this turn's kickoff text is Grovyle's ENDEAVOR, already drawn by
+ * `drawTurn3EndeavorText` before handing off here - see that function's own
+ * doc). Deliberately stops at the settled menu's own live idle hold -
+ * turn 4's own reopen input (tick 4892) is out of scope this session.
+ */
+function drawTurn3RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN3_ROCKSLIDE_PRESS_TICK;
+  const redrawTick = pressTick + TURN3_ROCKSLIDE_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurn3RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const textClearTick = pressTick + TURN3_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  drawTurn3RockSlideAttack(fb, t);
+  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t < textClearTick) {
+    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+  }
 }
 
 /**

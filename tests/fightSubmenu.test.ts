@@ -25,7 +25,8 @@ import {
   type FightSubmenuState,
 } from "../src/engine/battleMenu.ts";
 import { TICK0 as SCENE_TICK0 } from "../src/engine/battleScene.ts";
-import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
+import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
+import { rockSlideOpponentHp } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import type { GbaButton } from "../src/input.ts";
 
@@ -379,6 +380,51 @@ describe("battleMenu: turn 3's ENDEAVOR resolution (S7 slice G, docs/battle-turn
     // nondeterminism in the new turn-3 ENDEAVOR draw/dispatch path.
     let replay = stateAtTurn3Confirm();
     for (let i = 0; i < 190; i += 1) replay = press(replay, []);
+    expect(replay.battleScene).toEqual(state.battleScene);
+  });
+});
+
+describe("battleMenu/battleScene: turn 3's ROCK_SLIDE resolution (S7 slice H, docs/battle-turn-notes.md §21)", () => {
+  it("the synthetic TURN3_ROCKSLIDE_PRESS_TICK anchor (3687) reuses rockSlideOpponentHp unchanged for Grovyle's own 88->41 drain, matching the RAM-probed schedule exactly", () => {
+    const pressTick = 3687; // 4080 - ROCK_SLIDE_TEXT_DELAY(393), battleScene.ts's own TURN3_ROCKSLIDE_PRESS_TICK
+    expect(rockSlideOpponentHp(pressTick + 596, pressTick, 88, 41)).toBe(88); // still full, one tick before the drain-start sentinel
+    expect(rockSlideOpponentHp(pressTick + 597, pressTick, 88, 41)).toBe(88); // drain-start sentinel tick itself (ROCK_SLIDE_HP_DRAIN_START_DELAY)
+    expect(rockSlideOpponentHp(pressTick + 598, pressTick, 88, 41)).toBe(87); // first 1-HP-unit decrement
+    expect(rockSlideOpponentHp(pressTick + 644, pressTick, 88, 41)).toBe(41); // pressTick+597+(88-41): drain reaches its settled endpoint
+    expect(rockSlideOpponentHp(pressTick + 700, pressTick, 88, 41)).toBe(41); // clamped, well past settle
+  });
+
+  it("replaying turn3-rockslide.json's own idle window renders ROCK_SLIDE's kickoff text hard-cutting the message box at tick 4080 (not 4079), text-clearing at 4349, and hard-cutting to the resettled menu at 4356 - the three pixel-confirmed anchors this slice's own doc names", () => {
+    let state = stateAtTurn3Confirm();
+    // stateAtTurn3Confirm() starts at battleScene.elapsed = 3891 - SCENE_TICK0 (the confirm tick itself); advance to each
+    // boundary tick by pressing idle frames the same number of times as the elapsed-tick delta.
+    const frameAt = (targetTick: number): Uint8Array => {
+      let s = state;
+      const target = targetTick - SCENE_TICK0;
+      while (s.battleScene!.elapsed < target) s = press(s, []);
+      return render(s);
+    };
+    const before4080 = frameAt(4079);
+    const at4080 = frameAt(4080);
+    expect(before4080).not.toEqual(at4080); // ROCK_SLIDE's own kickoff text hard-cuts the message box here, not a tick earlier/later
+
+    const before4349 = frameAt(4348);
+    const at4349 = frameAt(4349);
+    expect(before4349).not.toEqual(at4349); // TURN3_ROCKSLIDE_TEXT_CLEAR_DELAY(662): the message box goes blank
+
+    const before4356 = frameAt(4355);
+    const at4356 = frameAt(4356);
+    expect(before4356).not.toEqual(at4356); // TURN3_ROCKSLIDE_MENU_REDRAW_DELAY(669): hard cut to the resettled action menu
+  });
+
+  it("engine state stays well-formed and deterministic through the whole ROCK_SLIDE window (turn1Resolved/turn2Resolved unchanged, cursor still 0) - pixel parity lives in tools/compare/traces/turn3-rockslide.json", () => {
+    let state = stateAtTurn3Confirm();
+    for (let i = 0; i < 999; i += 1) state = press(state, []); // 3891 -> 4890, this slice's own committed trace boundary (before tick 4892, turn 4's own input, out of scope)
+    expect(state.battleScene!.turn1Resolved).toBe(true);
+    expect(state.battleScene!.turn2Resolved).toBe(true);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    let replay = stateAtTurn3Confirm();
+    for (let i = 0; i < 999; i += 1) replay = press(replay, []);
     expect(replay.battleScene).toEqual(state.battleScene);
   });
 });

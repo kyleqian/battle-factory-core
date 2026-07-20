@@ -3580,3 +3580,164 @@ truth already banked (§13's own ledger: `gBattleMoveDamage` locks to
 excluded ticks) is a clean, precisely-scoped follow-up needing one RAM read
 (`gAnimMovePower` at ticks 3956-3966) before touching any render code.
 
+## 21. Engine slice H: turn 3's ROCK_SLIDE resolution (the turn's second half), by PARAMETERIZING turn 1's own ROCK_SLIDE mechanism unchanged - `turn3-rockslide.json` **256/256, 0 diff** (bounded worker session)
+
+Implements §13's own ground truth for turn 3's own ROCK_SLIDE half (Onix's
+move, hitting Grovyle again, 88->41) - slice G's own `drawTurn3EndeavorText`
+deliberately stopped holding the ENDEAVOR text at tick 4079 ("does NOT
+dispatch onward into ROCK_SLIDE"); this slice extends it past ROCK_SLIDE's
+own kickoff-text hard-cut (tick 4080, already pixel-confirmed by slice G)
+through the drain/text-clear/menu-redraw transient into the settled
+next-action menu, stopping at a stable green boundary (tick 4890) safely
+before turn 4's own reopen input (tick 4892, out of scope). Per the brief's
+own framing (and slice G's own precedent): **parameterization, not a
+rebuild** - ROCK_SLIDE is the SAME move against the SAME target (Grovyle)
+turn 1 already modeled end-to-end (`docs/battle-menu-notes.md` §11, `turn1-
+rockslide.json` 256/256), so every one of turn 1's own mechanism functions
+(`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
+`rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
+`rockSlideOpponentHp`, all still `pressTick`-relative) is reused **with ZERO
+code changes** - only a fresh synthetic press-tick anchor plus two new
+turn-3-specific delay constants for the RNG-cost tail were needed.
+
+### Anchors (RAM- and pixel-probed this session, not assumed)
+
+- **`TURN3_ROCKSLIDE_PRESS_TICK = 3687`** (`4080 - ROCK_SLIDE_TEXT_DELAY(393)`)
+  - a SYNTHETIC anchor, not a real button-press tick: chosen so
+  `rockSlideTextStartTick(TURN3_ROCKSLIDE_PRESS_TICK)` lands exactly on
+  turn 3's own oracle-pixel-confirmed kickoff tick (4080, slice G's own
+  named boundary). Distinct from `TURN3_KICKOFF_FROZEN_BOUNCE_TICK`'s own
+  real-press anchor (`TURN3_CONFIRM_PRESS_TICK`=3891, still used for the
+  onix/healthbox idle-bounce overlay in this window - the two anchors are
+  NOT the same thing and must not be conflated, since one is a real
+  hardware freeze point and the other is a convenience for reusing
+  `pressTick`-relative formulas).
+- **RAM ledger re-confirmed byte-for-byte against §13's own table** (fresh
+  `tools/probe/ram-probe.py` run this session): `gCurrentMove`->157
+  (ROCK_SLIDE) at RAM tick 4073; `gBattleMoveDamage` 32->48->47 at
+  4103-4105; `gBattleMons[1].hp` (Grovyle) updates 88->41 at RAM tick 4333 -
+  all match §13 exactly.
+- **`gBattle_BG3_Y` shake starts at RAM tick 4115** = `TURN3_ROCKSLIDE_
+  PRESS_TICK + ROCK_SLIDE_RAM_ANCHOR_DELAY(428)`, bit-exact against turn 1's
+  own unchanged `[0,-7,-7,0,0,-7,-7,0,0,-7,-7]` sequence (fresh `ram-probe.py`
+  dump of `gBattle_BG3_Y`, ticks 4108-4134, twice-run consistent pattern
+  matching the table exactly with no fitting needed).
+- **HP drain: `rockSlideOpponentHp` reused unchanged, `ROCK_SLIDE_HP_DRAIN_
+  START_DELAY=597` unchanged.** `rockSlideOpponentHp(t, TURN3_ROCKSLIDE_
+  PRESS_TICK, anchorOpponentAfterTurn2Hp(88), anchorOpponentAfterTurn3Hp(41))`
+  - the new `anchorOpponentAfterTurn3Hp` constant (41) sourced from
+  `battle1-grovyle-faint-ram-dump.json`'s own `battlerSnapshots["4892"]
+  .battler1.hp` (the same tick-4892 turn-3/turn-4 boundary snapshot
+  `anchorPlayerAfterTurn3Hp` already used, this time the OTHER battler),
+  independently cross-confirmed via this session's own fresh RAM probe
+  (`gBattleMons[1].hp` 88->41 at tick 4333). The raw hp-field-update tick
+  (4333) matches `TURN3_ROCKSLIDE_PRESS_TICK + 597 + (88-41) + 2` EXACTLY -
+  the identical "+2" render/RAM lag turn 1's own doc already establishes
+  between `bar1Curr`'s done-sentinel and the raw hp-field write.
+- **Text-clear/menu-redraw: two NEW turn-3-specific constants, NOT turn 1's
+  own unchanged 657/664.** Pixel-confirmed (dense `bin/oracle run` sweep,
+  ticks 4320-4370): the message box goes blank at tick 4349 (689px, the
+  message-box's own bbox) and hard-cuts to the resettled menu at tick 4356
+  (5983px, the same whole-bottom-half swap turn 1's own boundary shows) -
+  `TURN3_ROCKSLIDE_TEXT_CLEAR_DELAY=662`/`TURN3_ROCKSLIDE_MENU_REDRAW_
+  DELAY=669` (both `TURN3_ROCKSLIDE_PRESS_TICK`-relative). **Not a new
+  mechanism** - both are exactly **+5** past the naive turn-1-constant
+  prediction, and that +5 is fully explained by parameter drift through an
+  UNCHANGED formula, not a divergent one: turn 3's own HP-drain diff (88-41
+  =47) is 5 more than turn 1's (143-101=42), and the whole post-drain
+  RNG-cost tail (flinch/turn-pass/`ShouldSwitch`/AI-setup) is anchored to
+  the drain's own completion tick (the raw hp-field-update, 4333), not to
+  `pressTick` directly - confirmed directly via §13's own turn-3 ledger:
+  flinch(+5)/turn-pass(+15)/`ShouldSwitch`(+20)/AI-setup(+22) each land the
+  SAME fixed number of ticks after 4333 as turn 1's own v5 correction table
+  (`battle-turn-notes.md` §9) shows relative to ITS OWN hp-field-update tick
+  (2560) - bit-for-bit identical deltas both turns, not a coincidence.
+
+### The OAM-slot-state caution (from this session's own brief) - checked directly, not assumed
+
+Per the brief's own caution ("sprite slots may differ after 3 turns of
+animations; do not assume"), this session RAM-probed turn 3's own rock
+window directly (`dump-rockslide-sprites.py` + `dump-rockslide-slot-order.py`
+against a turn-3-extended trace) rather than assuming turn 1's own hardcoded
+`ROCK_SLIDE_BASELINE_SLOTS`/`ROCK_SLIDE_ORDER_SEED` constants still apply:
+- **`inUse` baseline at the rock-order simulation's own seed tick (4106,
+  matching turn 1's own `ROCK_SLIDE_ORDER_SEED_OFFSET` convention) reads the
+  SAME 9 slots** turn 1's own `ROCK_SLIDE_BASELINE_SLOTS` constant already
+  lists (`[0,1,2,6,8,60,61,62,63]`, 9/9 exact match) - three turns of other
+  animations left this specific set of persistent slots unchanged.
+- **The raw `sSpriteOrder` permutation itself DOES differ from turn 1's own
+  committed `ROCK_SLIDE_ORDER_SEED` in 9 of 64 entries** - but every one of
+  those 9 differing positions holds a FREE (non-baseline) filler slot at the
+  seed tick, and `computeRockSlideOrders`'s own per-tick `SortSprites` pass
+  is a full single-pass insertion sort (not partial) - it fully re-sorts
+  every slot's position from its own packed key every RAM tick regardless of
+  the starting permutation, and every filler slot shares one identical
+  packed key/`yKey` pair (so filler-vs-filler order is never externally
+  observable). **Net: turn 1's own `rockSlideDrawOrder`/
+  `computeRockSlideOrders` reused with ZERO code changes** - not just argued
+  from this reasoning, but directly confirmed by `npm run compare`'s own
+  0-diff result across the full dense rock/stacking window below (the
+  actual empirical test the brief asked for).
+
+### What landed (`src/engine/battleScene.ts`)
+
+- `anchorOpponentAfterTurn3Hp` (41) - new anchor constant, same sourcing
+  pattern as slice G's own `anchorPlayerAfterTurn3Hp`.
+- `TURN3_ROCKSLIDE_PRESS_TICK`/`TURN3_ROCKSLIDE_TEXT_CLEAR_DELAY`/
+  `TURN3_ROCKSLIDE_MENU_REDRAW_DELAY` - the three new anchors above.
+- `drawTurn3RockSlideAttack` - the battlefield+rocks+shake+drain scene,
+  identical shape to turn 1's own `drawRockSlideAttack`, reusing every
+  `battleMenu.ts` mechanism function unchanged; only new code is the Onix-
+  side HP overlay call (turn 1's Onix stays full HP through ITS OWN
+  ROCK_SLIDE window, so `drawRockSlideAttack` never needed one - turn 3's
+  Onix already carries ENDEAVOR's own damage, 117->88, by this point).
+- `turn3RockSlideResettledBounceTick`/`drawTurn3RockSlideTurnEndSettledMenu` -
+  same "resettled bounce re-initializes fresh at redraw" shape as
+  `rockSlideResettledBounceTick`/`dragonBreathResettledBounceTick`, keyed
+  off turn 3's own redraw delay (669) and Grovyle's own settled HP (41).
+- `drawTurn3RockSlideWindow` - the three-phase dispatcher (attack+text,
+  text-clear, settled menu), the same shape as turn 1's own
+  `drawRockSlideWindow` minus the DOUBLE_TEAM/STAT_ROSE text phases (not
+  needed - turn 3's kickoff text is Grovyle's ENDEAVOR, already drawn by
+  `drawTurn3EndeavorText` before handing off here).
+- `drawTurn3EndeavorText` gained a handoff: once `t >= rockSlideTextStartTick
+  (TURN3_ROCKSLIDE_PRESS_TICK)` (tick 4080), it now dispatches into
+  `drawTurn3RockSlideWindow` instead of holding the ENDEAVOR text forever -
+  the same shape `drawTurn2KickoffText`'s own `dragonBreathStart` handoff
+  already established for turn 2. No `core.ts` changes were needed - the
+  existing `turn2Resolved` branch already calls `drawTurn3EndeavorText`
+  unconditionally for the rest of the window (no upper bound), so the new
+  internal dispatch is picked up automatically.
+
+### Verification
+
+`npm test` **749/749** (+3: numeric anchor-arithmetic pins on
+`rockSlideOpponentHp` at turn 3's own synthetic press tick, a full-render
+pin on the three named boundary ticks - 4079/4080, 4348/4349, 4355/4356 -
+each showing a real frame change, and a determinism/smoke check over the
+whole 999-tick window). `npm run build` green. New `tools/compare/traces/
+turn3-rockslide.json` (`turn3-endeavor.json`'s own button script, idle
+frames extended to 4890 total, dense stride-1 over the kickoff/shake/rocks/
+hit-flash/drain/text-clear/redraw transient with a light stride over the
+rock settle-wobble tail and the settled plateau, 256 captures) is
+**256/256, 0 diff** - this session ALSO ran the full window at full stride-1
+density in four unbudgeted scratch `npm run compare` passes (4080-4335,
+4336-4591, 4592-4847, 4848-4891 - covering literally every tick from the
+kickoff text through the settled plateau, not just the committed trace's
+own 256-capture subset) to validate the OAM-slot-state caution above before
+committing to a capture selection: **0 diff on every single one of those
+812 additional probed ticks**, not just the 256 committed. Zero
+regressions, full sweep re-verified at exact prior counts: `turn3-endeavor.
+json` **180/180**, `turn3-menu.json` **250/250**, `turn1-rockslide.json`
+**256/256**, `turn1-drain.json` **102/102**, `turn2-dragonbreath.json`
+**237/237**, `turn2-endeavor-drain.json` **201/201**.
+
+### What's left
+
+Turn 4 entirely (its own menu-reopen input at tick 4892 and beyond, ground
+truth already banked in §13's own turn-4 ledger: DOUBLE_TEAM instead of a
+third ENDEAVOR, falsifying the tie-break-decode prediction - see §13's own
+turn-4 section) is the immediate next slice. Slice G's own 12-tick
+shake-asymmetry exclusions (turn 3's ENDEAVOR window) and `turn3-menu.json`'s
+own 3879/3888 residuals remain untouched, out of this slice's own scope.
+
