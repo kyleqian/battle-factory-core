@@ -1121,6 +1121,94 @@ sendout 255/256 (unchanged, only 1496 open), s6-acceptance 224/228
 (unchanged). `npm test` 592/592 (+13 Tier-1 this session), `npm run build`
 green.
 
+## 8b. ISSUES #19 ROOT-CAUSED AND CLOSED (bounded worker, worktree lane,
+following this run's mandatory pixel-dump-then-RAM-probe method) - a
+1-row-too-short asset-harvest bbox, not a timing/lag bug at all -
+`fight-submenu.json` **235/235**, `turn2-endeavor.json` **77/77**,
+`turn2-endeavor-drain.json` **201/201** (was 200/201), zero regressions
+
+**Step 1, pixel dump.** Re-ran `npm run compare` on `fight-submenu.json`
+and diffed `oracle-02073.png` against `app-02073.png` directly (not the
+diff-only PNG). The 99 wrong pixels are colors `(82,107,99)`/
+`(123,148,132)` at row y=111 x127-225 — a solid run with the same shape
+(medium-color edges, dark-color fill) as the healthbox bounce region's own
+diagonal-corner rows 108-110 directly above it, i.e. visually a continuation
+of the SAME box, not a different color family or an unrelated sprite/text
+glitch. A whole-frame bbox scan confirmed the diff is confined to exactly
+that one row (`minY=maxY=111`), matching ISSUES #19's own description
+exactly. Scanning **row 111 across all 235 dense-captured oracle frames**
+of this trace found the green content painted on **tick 2073 alone** — not
+a periodic phenomenon that "usually" gets modeled right, a genuine one-off
+in the ground truth itself.
+
+**Step 2, RAM probe.** New `tools/probe/dump-fight-submenu-row111.py`
+dumps the ONIX battler sprite + all 3 player-healthbox sprites' real
+`y`/`y2` fields (`struct Sprite`, not the closed-form model) plus
+`WIN0H/WIN0V/WIN1H/WIN1V/WININ/WINOUT/BLDCNT/BLDALPHA/BLDY/DISPCNT` for
+every tick 2060-2085. Every WIN/BLD/DISPCNT register is **byte-identical
+across the whole window** (`win0v=0x00a1`, `winin=winout=16191`, `bldcnt=0`
+throughout) — ruling out any windowing/blend-register mechanism outright.
+The healthbox sprites' real `y2` field, however, is genuinely dynamic:
+`...,1,1,1,1,1,1,1,1,1,`**`2`**`,1,1,1,1,1,1,1,1,1,0,0,...` — a single-tick
+spike to `y2=2` at real RAM tick **2072**, sandwiched in an otherwise-flat
+run of `y2=1`. This matches `menuIdleBounce`'s own math exactly:
+`bounceSin` (the literal `gSineTable`, amplitude ±1 via `Sin(index,1)`)
+returns its extreme value `+1` (giving `y2=2`) at exactly ONE index value
+out of 256 (`table[64]=256`, the sine's true peak) — so `y2=2` is a real
+but RARE state (once per ~256-tick lap of the `+=7`-per-tick driver, not
+once per the pixel-content's own apparent 36-tick phase cycle), previously
+sampled only once ever in this codebase (extraction tick 1813, `docs/
+battle-menu-idle-notes.md`'s own "tick-1813 rare transient").
+
+**The engine's STATE SELECTION was already exactly correct** — directly
+computed `menuIdleBounce(t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT)` for
+t=2065..2080 and it lands `healthboxY2=2` at screen tick **2073 alone**,
+matching the real RAM spike (real tick 2072, screen tick 2073 — the
+window's own established 1-tick render lag, holds exactly). So this was
+never a timing/lag/shift bug (the exhaustive `-9..0` shift grid search in
+§8 correctly found no better constant, because no constant shift was ever
+going to fix it). The bug is in the **asset itself**:
+`tools/extract/extract-menu-idle-window.ts`'s `HEALTHBOX_BBOX` used a
+single `height: 37` (y74-110) for BOTH the `y1` and `y2` harvested states,
+inherited from the region's rest/y1 geometry without independently
+re-checking the rare `y2` state's true footprint. Re-fetched the
+extractor's own source trace (`menu-materialize.json`) at ticks 1811-1814
+directly from the oracle: row 111 is plain, unpainted field background at
+1811/1812/1814, but shows the identical green healthbox content at
+**1813 — the extractor's own `HEALTHBOX_Y2_TICK`** — proving the y=2
+state's real visual footprint has always been 38 rows tall (y74-111), and
+the harvester silently cropped away its last row every time it ran. The
+`y1`/base states' own row 111 is confirmed plain background at 1748/1749/
+1750 (RAM/pixel read directly), so extending the shared bbox uniformly to
+`height: 38` is safe for every state, not just `y2`.
+
+**Fix**: `HEALTHBOX_BBOX` in `extract-menu-idle-window.ts` → `height: 38`;
+regenerated `src/assets/gen/menu-idle-healthbox-bounce.json` (103×38, was
+103×37) via the live oracle. No `src/engine/` or `battleScene.ts` code
+changes needed — `drawActionMenuIdleContent`/`drawMenuIdleBounceOverlay`
+already read `width`/`height` off the asset rather than a hardcoded
+constant. `tests/battleMenuIdle.test.ts`'s existing y1/y2 pixel-rect tests
+already scan the asset's own `height` field, so they now cover the extra
+row automatically — no new test needed, all still green.
+
+**Verification**: `fight-submenu.json` 235/235 (was 234/235),
+`turn2-endeavor.json` 77/77 (was 76/77 — its own tick-2906 residual is the
+same family, same fix), `turn2-endeavor-drain.json` **201/201** (was
+200/201 — same family too, confirming the brief's own prediction). Full
+trace sweep, all 30 committed traces: zero
+regressions — every pre-existing residual (`rent-slot1` 125/139,
+`rent-3picks` 157/190, `confirm-flow` 79/95, `s6-acceptance` 224/228,
+`sendout` 255/256) is unchanged, all previously-green traces stay green.
+`npm test` 707/707 (unchanged - no logic changed, only harvested asset
+data), `npm run build` green.
+
+**§11 finding 4's own two idle-only-trace anomalies (ticks 2071/2135,
+`battle1-fight-submenu-idle.json`) are the same family and should now also
+be closed** by this same asset fix, though that groundtruth trace itself
+wasn't re-run this session (out of this step's scope — it's a
+`traces-groundtruth/` fixture, not one of this run's own acceptance
+traces); flagged for confirmation next time that fixture is touched.
+
 ## 9. S7 slice A: move CONFIRMATION and turn kickoff (bounded worker, this
 session - A on ROCK_SLIDE -> submenu closes -> "Foe GROVYLE used\nDOUBLE
 TEAM!" prints, ending exactly at tick 1964 where DOUBLE_TEAM's clone
