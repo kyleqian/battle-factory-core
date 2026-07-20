@@ -4,6 +4,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 157 — Supervisor: round 4 folded + **OPEN ESCALATION to the user (fire projectiles: 3 bounded attempts, each narrowing, none closing)** — swap-screen assets extracted & composite-verified; suite 711/711, build green, tree clean, no worktrees
+
+- **State (supervisor-verified this minute):** `npm test` **711/711**,
+  `npm run build` green, tree clean at the `99ec13e` merge + this docs
+  commit, no worktrees/stray branches. Trace counts unchanged and
+  supervisor-spot-checked: `turn2-dragonbreath.json` 84/84,
+  `turn2-endeavor-drain.json` 201/201.
+- **Did:** Worktree lane (`99ec13e`, merged): swap-screen assets
+  extracted — `action-box`/`action-highlight` (slide buttons) +
+  `swap-screen-windows.json` (BG/window templates, mechanically parsed
+  from source), composite-verified vs FRESH oracle pixels at **0
+  unexplained mismatches / 1404 opaque px** (supervisor reran the
+  verification script itself); everything else the swap screen draws is
+  source-confirmed verbatim reuse of draft-screen gen assets. §17
+  ADDENDUM 3. Main lane (`f71448a`): projectile attempt #3 — the
+  ember-palette-blend suspect is now CLOSED by source-level call-chain
+  proof (not just empirics), and the residual is renamed precisely:
+  salt-and-pepper edge OVER-DRAW when compressed (|matrixA|>256) vs an
+  isolated MISSING blob when magnified, correct core both sides. Pulled
+  again (no wrong pixels shipped).
+- **ESCALATION (open, asked in-terminal 2026-07-20 ~00:35):** the fire
+  projectiles have now taken 3 bounded attempts with real narrowing each
+  time and no closure. Asked the user how to spend the remaining ~3.5h.
+  Supervisor recommendation: ONE more targeted attempt on a specific new
+  hypothesis (below), then park as a named remainder if it misses.
+  Attempt #4 launched concurrently with the question (cancelable).
+- **Supervisor hypothesis driving attempt #4** (`E2a-5`): the defect is
+  in `drawSpriteSheetAffineRotate`'s SAMPLING CONVENTION (battleScene.ts
+  ~2337), not in any DRAGON_BREATH value — correct core + wrong edges,
+  opposite artifacts either side of 1:1 scale, is the signature of a
+  half-texel/rounding mismatch in a backward-mapped affine sampler; and
+  this sampler's only other rotating consumer (ball spin) never exceeds
+  |pa|=255 while DRAGON_BREATH starts at 703, i.e. the bug's regime was
+  never exercised before. Brief mandates hardware-semantics derivation +
+  a 4-variant sweep + a hard regression gate on every shared consumer.
+- **Next:** fold attempt #4 and the concurrent core.ts per-battle-moveset
+  plumbing step (S8 prerequisite named in ROADMAP S8); then E2b (HP drain
+  + turn end, 3347-3846), faint/forced-switch slice. ISSUES #22 open
+  (idle fixture tick 2135, informational).
+- **Notes:** worker costs $5.26 + $5.10 (17/16 min). ISSUES #19's fix
+  left `battle1-fight-submenu-idle.json` at 255/256 (tick 2135 = #22).
+
+---
 ## 156 — Bounded worker: S7 slice E2a-4 attempt — fire-projectile attempt #3: PRIME SUSPECT (concurrent ember-palette blend) definitively RULED OUT by source+pixel evidence; residual precisely characterized (two scale-dependent artifact shapes, present from a spawn's very first tick) but NOT closed — pulled a third time; `npm test` **711/711** (unchanged), build green, zero regressions, no trace change
 
 - **State:** `npm test` 711/711, `npm run build` green, tree clean.
@@ -83,49 +126,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   #22 opened. Convergence per the strictly-smaller-named-gap rule is
   real but slowing on the projectile — attempt #3 is the last before
   escalation.
-
----
-## 154 — Bounded worker: S7 slice E2a-3 attempt — Tier-1 pins backfilled for E2a-2's shake/blend (debt closed); fire-projectile RE-PULLED after a much-closer-but-not-exact retry; `npm test` **711/711** (+4), build green, zero regressions, no trace change
-
-- **State:** `npm test` 711/711, `npm run build` green, tree clean.
-  `turn2-dragonbreath.json` **unchanged** (still `3121-3176` + `3236-3263`,
-  84/84 green) — the `3177-3235` gap is still open. Regression:
-  `turn2-endeavor-drain.json` 200/201 (unchanged, pre-existing ISSUES #19
-  residual).
-- **Did:** (1) **Tier-1 debt closed** (required per the brief): 4 new pins
-  in `tests/battleScene.test.ts` for `dragonBreathShakeX2`/
-  `dragonBreathBlendCoeff`, oracle-cross-checked against a FRESH scratch
-  `bin/oracle run` capture (not reused data). (2) **Fire-projectile retry**:
-  extended `tools/probe/dump-dragonbreath-anim.py` to read `matrixB`/
-  `matrixC` (previously only `a`/`d`) — found the full matrix is clean
-  (`a===d`, `b===-c` always, one 21-entry table, identical across all 8
-  spawns, banked in docs). Confirmed from source (per the brief's explicit
-  ask) that the sprite template uses the generic `RunAffineAnimFrame`/
-  `ObjAffineSet` system (same family as the ball spin, NOT squish's
-  `SetSpriteRotScale`) — no inversion needed feeding RAM-read values
-  straight into `drawSpriteSheetAffineRotate`. Empirically swept base
-  position + render lag + sign convention against fresh oracle PNGs: best
-  fit is base=(72,88) exact (no half-width correction), lag=1 tick, direct
-  matrix (no source flip) — MUCH closer than E2a-2's scale-only attempt
-  (~15-100px/tick flat, not a growing-to-1000px curve) but still not 0.
-  **Pulled again** (`git checkout -- src/engine/battleScene.ts`) rather
-  than ship non-exact pixels — full writeup + exact tables +
-  narrowed-down "what's likely still wrong" in
-  docs/dragon-breath-notes.md's new "Engine slice E2a-3" section.
-  Hit-flash not attempted (all time went to the above).
-- **Next:** the fire-projectile residual is now small enough (a per-tile
-  edge/rounding artifact, not a wrong position/scale/sign — all ruled out
-  this session) that a resuming worker should instrument
-  `drawSpriteSheetAffineRotate`'s own sample loop pixel-by-pixel against a
-  single isolated spawn (ticks 3177-3197) rather than re-sweep whole-frame
-  diffs — base=(72,88)/lag=1/direct-matrix and all three data tables
-  (matrix/position/frame) are settled, not open questions. Then hit-flash
-  (3263-3283), Grovyle's HP-bar drain (3298+) + turn-end (3329+) = E2b,
-  then faint/forced-switch, ISSUES #19 root cause.
-- **Notes:** no papercuts. This mechanism has now been attempted twice and
-  pulled twice for the same reason (close but not pixel-exact) — if a
-  third attempt also falls short, worth the supervisor considering whether
-  to timebox it differently (e.g. a dedicated non-bounded session, or
-  accepting the `3177-3235` gap as a named remainder past this slice) rather
-  than repeating the same RAM-probe-then-sweep pattern a fourth time.
-
