@@ -5,25 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #21 — Battle-2 turn-1 damage: RAM-observed pre-STAB base 19 vs
-  hand-formula 17 from the same RAM inputs — damageCalc generality gap
-
-Opened 2026-07-19 (supervisor, from the battle-2 scout's §18 finding).
-ONIX's ROCK_SLIDE vs KABUTO (decline branch, `battle2-turn1.json`):
-`gBattleMoveDamage` locks to 28, RAM-observed via an intermediate 19 one
-tick prior (33108→33109), and `19×15/10=28` (STAB) is exact — but the
-documented `CalculateBaseDamage` reconstruction with the same RAM-read
-inputs gives 17 (→ range [21,25] after spread). Structurally checked and
-not the cause: crit (BATTLE_ARMOR short-circuits the roll — itself a new
-pinned mechanic), weather, SITRUS_BERRY/BATTLE_ARMOR damage hooks. The
-2-point base gap is unexplained. `damageCalc.ts` was bit-exact for every
-battle-1 sample (§10/§12), so something about THIS matchup's inputs or a
-formula branch is unmodeled. Leads (§18): RAM-probe `gBattleMons[1].
-defense` and stat stages at the calc tick (scout's `dump-battler-full.py`
-lacks `statStages[]`, offset 0x18 `pokemon.h:277` — add it); re-check
-badge/frontier modifiers in `CalculateBaseDamage` source. Affects: S7/S8
-engine correctness for battles 2+ (battle-1 traces unaffected).
-
 ## #20 — FONT_NARROW never extracted: FIGHT-submenu move-name/PP/type text
   is a battle-1-only static harvest, blocks arbitrary movesets (S8/S9)
 

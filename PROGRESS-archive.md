@@ -1,3 +1,32 @@
+## 142 — Bounded worker: S7 slice E1d-retry — **ENDEAVOR squish RAM-probed and landed green** (renders 3000-3005, real hardware `gOamMatrices` values, not a pixel fit); `npm test` **672/672** (+3), `npm run build` green
+
+- **State:** `npm test` **672/672**, `npm run build` green, tree clean.
+  `turn2-endeavor-drain.json` dense window now 2999-3005 (was bare 2999);
+  `tools/probe/dump-endeavor-squish.py` committed.
+- **Did:** RAM-probed the attacker's real `gOamMatrices[matrixNum]`
+  per-tick (§15a's own recommendation) — found squish uses a DIFFERENT,
+  non-inverting battle-anim subsystem (`SetSpriteRotScale`/
+  `RunAffineAnimFromTaskData`) than mechanism 4's own inverting one, which
+  is what actually caused §15a's X-axis miss (wrong subsystem, not a wrong
+  axis — no swap needed, `xScale`→X/`yScale`→Y exactly as labeled).
+  `drawSpriteSheetAffineStretch` already had the right (direct, unswapped)
+  convention; added an opt-in `doubled` scan-window param (RAM-confirmed
+  `ST_OAM_AFFINE_DOUBLE`, re-derived from `CalcCenterToCornerVec`) to let
+  the silhouette grow past its native 64px box. Also found (pixel-solving
+  the oracle's own captures, not assumed) that §15's "independently driven"
+  palette blend is wrong — it's ALREADY ramping across this whole window,
+  not scheduled later — and that the matrix/blend don't share one render
+  lag (matrix: 2 ticks; blend: the usual 1). Landed squish+blend together
+  (blend reused `drawSpriteSheetAffineStretch`'s own existing tint params,
+  no new primitive). Droplets contaminate 1 tick earlier than §15 estimated
+  (3006, not 3008) — window trimmed 3000-3007→3000-3005 rather than commit
+  a knowingly-red pair; full analysis in `docs/battle-menu-notes.md` §15b.
+- **Next:** droplets are the clear next increment (asset extracted, physics
+  formula banked in §15, spawn boundary now pixel-pinned) — same
+  land-green-then-extend discipline. After that: blend/shake/hitsplat per
+  §15's leverage order, then DRAGON_BREATH (E2) or ISSUES #19/#20.
+- **Notes:** no papercuts.
+
 ---
 ## 141 — Supervisor: swap-YES scout merged — **the factory swap screen is fully ground-truthed** (entry fade → party picker → popup → opponent picker → accept → completed swap → battle 2's menu: swapped-in GROVYLE 143/143 vs KABUTO); S8 ground truth is now essentially complete on both swap branches
 
