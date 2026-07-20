@@ -4,6 +4,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 156 — Bounded worker: S7 slice E2a-4 attempt — fire-projectile attempt #3: PRIME SUSPECT (concurrent ember-palette blend) definitively RULED OUT by source+pixel evidence; residual precisely characterized (two scale-dependent artifact shapes, present from a spawn's very first tick) but NOT closed — pulled a third time; `npm test` **711/711** (unchanged), build green, zero regressions, no trace change
+
+- **State:** `npm test` 711/711, `npm run build` green, tree clean.
+  `turn2-dragonbreath.json` **unchanged** (`3121-3176` + `3236-3263`,
+  84/84 green) — `3177-3235` still open. Regression spot-checks:
+  `turn2-endeavor-drain.json` **201/201** (unchanged, ISSUES #19 already
+  closed by #155).
+- **Did:** Per the brief's mandatory method, re-wired E2a-3's exact
+  best-fit config (base=(72,88), lag=1, direct matrix, `drawSpriteSheet
+  AffineRotate`) and ran a diff-COLOR dump FIRST (`tools/compare/scratch/
+  diffdump.mjs`/`diffmap.mjs`, both new, committed, generic — reusable by
+  the next worker). Findings: (1) **prime suspect ruled out two ways** —
+  source trace shows `AnimTask_BlendBattleAnimPal`'s `F_PAL_TARGET`
+  structurally cannot reach the embers' own palette slot (unrelated gfx
+  tag), and every mismatched pixel this session sampled is a clean
+  small-ember yellow-red-ramp color, never a blended/wrong hue — this is a
+  shape defect, not a color one. (2) The residual splits into two distinct
+  scale-dependent shapes: salt-and-pepper edge over-draw when the sprite is
+  compressed (`|matrixA|>256`, small `n`) vs. one isolated ~15x15 missing
+  blob when magnified (`|matrixA|<256`, large `n`) that doesn't reduce to a
+  spawn-duration off-by-one (tested clamping `n` to 21 — made tick 3220
+  WORSE, 342px→649px, hypothesis killed and reverted within the session).
+  (3) **Caught a false claim before it shipped**: initially assumed the
+  reverted code was a no-op over the already-green `3121-3176`/`3236-3263`
+  captures; actually re-ran `npm run compare` with the code temporarily
+  back in and found it regresses `3175`/`3176` (12px/15px) — spawn 0's
+  first visible tick falls inside the currently-captured range. Docs
+  corrected to reflect the checked result, not the assumption. Pulled
+  (`git checkout -- src/engine/battleScene.ts`) per the no-wrong-pixels
+  rule — full writeup in `docs/dragon-breath-notes.md`'s new "Engine slice
+  E2a-4" section.
+- **Next:** per the brief, this was the last attempt before escalation —
+  **recommend the supervisor treat this as the escalation trigger**: three
+  bounded-worker attempts (E2a-2/E2a-3/E2a-4) have each made real, provable
+  progress (scale-only → full rotated matrix → palette ruled out + shape
+  characterized) without closing the gap, and the remaining work needs
+  either a dedicated non-bounded session (isolated single-spawn pixel
+  tracing, masking out every other draw call — sketched in the docs) or
+  accepting `3177-3235` as a permanently named remainder and moving on to
+  hit-flash (3263-3283)/E2b (HP drain 3298+, turn-end 3329+)/faint-switch,
+  none of which depend on this gap closing first.
+- **Notes:** no papercuts. `tools/compare/scratch/dragonbreath-projectile-
+  window.json` (a ready `captureFrames` 3177-3235 scratch trace) also left
+  committed for the next attempt to reuse without rebuilding the harness.
+
+---
 ## 155 — Supervisor: round 3 folded — **ISSUES #19 ROOT-CAUSED AND CLOSED (asset harvest 1 row short): fight-submenu 235/235, turn2-endeavor 77/77, turn2-endeavor-drain 201/201 — all three now PERFECT**; shake/blend Tier-1 debt backfilled (711/711); fire-projectile pulled a 2nd time (findings banked, 3rd attempt briefed with a new instrument)
 
 - **State (supervisor-verified this minute):** `npm test` **711/711**,
@@ -83,34 +129,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   accepting the `3177-3235` gap as a named remainder past this slice) rather
   than repeating the same RAM-probe-then-sweep pattern a fourth time.
 
----
-## 153 — Supervisor: round 2 folded — **ISSUES #20 CLOSED (FIGHT submenu on the live FONT_NARROW glyph pipeline, arbitrary movesets render)** + DRAGON_BREATH shake/blend/kickoff landed; suite **707/707**, build green, zero regressions, no worktrees
-
-- **State (supervisor-verified this minute):** `npm test` **707/707**,
-  `npm run build` green, tree clean at the `a7eb084` merge + this docs
-  commit, no worktrees/stray branches. Supervisor-rerun on the MERGED
-  tree: `fight-submenu.json` 234/235, `turn2-dragonbreath.json` 84/84,
-  `turn2-endeavor-drain.json` 200/201 — the two lanes' shared
-  `battleScene.ts` edits merged conflict-free and stayed exact.
-- **Did:** Round 2 = three workers. Main lane #151 (`f0324d6`+`906734e`):
-  DRAGON_BREATH kickoff text 3121-3176 green + `small_ember.png`
-  extracted. Main lane #152 (`6e6b334`): probe-first landed
-  `AnimTask_ShakeMon2` (±2px, lag=1) + both red-fade
-  `AnimTask_BlendBattleAnimPal` instances (exact formulas, lag=2);
-  fire-projectile attempt PULLED honestly — its affine pop is a genuine
-  ~178.6° rotation (first rotating affine in this codebase), exact
-  per-tick data banked in `docs/dragon-breath-notes.md`. Worktree lane
-  (`a7eb084`, merged): ISSUES #20 remainder closed — new
-  `src/engine/fightSubmenuText.ts` renders move names (FONT_NARROW),
-  TYPE/ mixed-font run, PP digits + full 4-band PP-color state machine;
-  identity preserved byte-exact on both submenu traces (same sole #19
-  frames); KABUTO's real battle-2 moveset renders (+14 tests).
-- **Next:** Round 3: main = E2a-3 fire-projectile retry (dump
-  `gOamMatrices` per tick for the projectile slots — use REAL matrix
-  values, not scale approximations; MUST also backfill #152's missing
-  Tier-1 pins for shake/blend); worktree = ISSUES #19 root-cause scout.
-  Then: E2b (HP drain + turn end 3347-3846), faint/forced-switch slice.
-- **Notes:** worker costs $4.23/$14.25/$7.26 (10-34 min). #152 landed
-  without Tier-1 pins (gap flagged, folded into E2a-3's brief).
-  ISSUES #20 deleted (remainder = per-battle moveset wiring through
-  `core.ts` is S8 engine scope, noted in ROADMAP S8).

@@ -579,3 +579,158 @@ ISSUES #19 residual tick). `tools/probe/dump-dragonbreath-anim.py` gained
 `matrixB`/`matrixC` fields (additive, existing `matrixA`/`matrixD`/
 everything else unchanged) — committed, ready for the next worker to re-run
 without modification.
+
+## Engine slice E2a-4 (S7, bounded worker, follows E2a-3 above): fire-projectile attempt #3 — PRIME SUSPECT (concurrent ember-palette blend) definitively RULED OUT; residual RENAMED from "unknown ~15-100px/tick" to "a per-pixel affine-sampling edge artifact, asymmetric between the compressed and magnified halves of the scale sweep" — pulled a third time, no wrong pixels shipped
+
+Per the brief's mandatory method: re-wired E2a-3's exact best-fit config
+(base=(72,88), lag=1, direct matrix `pa=a,pb=b,pc=-b,pd=a`, `drawSpriteSheet
+AffineRotate`, no source flip — all values taken verbatim from E2a-3's own
+banked tables, nothing re-derived) and ran the **diff-COLOR dump first**,
+before touching any other hypothesis, exactly as instructed.
+
+**Prime suspect (concurrent `AnimTask_BlendBattleAnimPal` also blending the
+embers) — RULED OUT, two independent ways:**
+
+1. **Source proof.** `Move_DRAGON_BREATH`'s own two `createvisualtask
+   AnimTask_BlendBattleAnimPal, 10, F_PAL_TARGET, ...` calls
+   (`battle_anim_scripts.s:4931-4963`, both instances confirmed re-read this
+   session) pass `F_PAL_TARGET` only. Traced the full call chain: `AnimTask_
+   BlendBattleAnimPal` → `UnpackSelectedBattlePalettes(gBattleAnimArgs[0])`
+   (`battle_anim_normal.c:317-327`) decodes bit 2 (`F_PAL_TARGET`) → `GetBattle
+   PalettesMask(..., target=TRUE, ...)` — this resolves to **the target
+   battler's own currently-assigned OBJ palette bank specifically** (the same
+   `gBattleAnimTarget`-indexed palette slot `dragonBreathBlendCoeff`'s own RAM
+   probe already reads via `gPlttBufferFaded`/`Unfaded`). The ember sprites
+   are loaded via `loadspritegfx ANIM_TAG_SMALL_EMBER` — an unrelated sprite
+   gfx tag with its own independently-assigned palette slot, never selected
+   by any bit of `UnpackSelectedBattlePalettes`'s selector (bits 0-6 only ever
+   name battler-role palettes or two fixed BG anim palettes — there is no
+   "all loaded anim sprites" bit). Structurally, this blend **cannot** reach
+   the embers' palette regardless of slot-allocation timing.
+2. **Pixel proof (the diff-color dump itself).** Extended `tools/compare/
+   scratch/diffdump.mjs` (new, committed — reads two already-rendered
+   `oracle-NNNNN.png`/`app-NNNNN.png` pairs and prints every differing
+   pixel's exact RGB on both sides) over a scratch trace (`tools/compare/
+   scratch/dragonbreath-projectile-window.json`, `captureFrames` 3177-3235,
+   same 50-segment script) run through `npm run compare`. If the blend were
+   incorrectly touching the app's own ember palette, the app's mismatched
+   pixels would show wrong/blended (red-shifted) hues. They don't: every
+   mismatched "app" pixel sampled (ticks 3178, 3181, 3208, 3220 — see below)
+   is a clean member of the small-ember yellow-red ramp itself (`(255,0,0)`,
+   `(255,99,16)`, `(255,148,24)`, `(255,198,33)`, `(255,255,123)` — the exact
+   5 non-transparent palette entries `battle-anim-small-ember.json` already
+   has). The defect is **which pixels** are lit, never **what color** they're
+   lit — conclusively a shape/geometry residual, not a palette one.
+
+**The residual itself, characterized precisely (new this session — E2a-3 had
+only a whole-frame diff-pixel-count, not a classified pixel-by-pixel read):**
+also added `tools/compare/scratch/diffmap.mjs` (new, committed — renders an
+ASCII occupancy map of a screen region: `#`=fire on both sides, `A`=app-only
+"extra" fire pixel, `O`=oracle-only "missing" fire pixel, using a simple
+`r>140 && r-b>40` yellow-red-ramp classifier). Two qualitatively different
+sub-patterns, split cleanly by which half of the scale sweep (§ E2a-3's own
+`matrixA` table, `|a|` crosses 256 at n≈10) the spawn is in:
+
+- **Compressed half (`n` small, `|a|>256`, the sprite is scaled DOWN from
+  native — RAM-verified starting at -703 for `n=0`, i.e. ~2.7x
+  shrunk):** the mismatch is **pure over-draw**, small in absolute pixel
+  count (23px at tick 3178 = spawn 0's `n=3`; only 2px at tick 3208 — the
+  closest this residual gets to exact anywhere in the window) and shaped as
+  scattered "salt-and-pepper" `A`s around the border of a correctly-matching
+  `#` core (`diffmap.mjs` dump, tick 3178, region (78,68) 28x28 — a compact
+  ~4x9 `#` blob with stray `A`s on 3 sides, zero `O`s). Consistent with a
+  coarse source-step-per-destination-pixel rounding artifact at high
+  compression (each dest pixel advances ~2 source texels at this `|a|`, so
+  which exact edge texel a boundary pixel samples is maximally rounding-
+  sensitive) — NOT a wrong position (the core silhouette IS in the right
+  place and shape) and NOT a wrong color (confirmed above).
+  Pixel-level evidence at tick 3178, e.g. `(91,76)`: oracle `(82,74,74)`
+  (Onix's own back-sprite gray — this region sits inside `ONIX_MATERIALIZE_
+  CORNER`'s (40,48) bounding box, confirmed by coordinate arithmetic, not a
+  flat backdrop color) vs app `(255,0,0)` — a real ember-ramp red painted
+  where the real hardware still shows Onix's own sprite untouched.
+- **Magnified half (`n` large, `|a|<256`, scaled UP from native):**
+  qualitatively different — tick 3220 (spawn 7's `n=17`, the sole spawn
+  alive at that tick per the position-table's own `n∈[0,20]` window,
+  double-checked against all 8 spawn ticks) shows 342 diff pixels, but
+  `diffmap.mjs`'s region dump (128,30)-(173,75) shows the diff is NOT
+  uniform edge noise here — there's a large, correctly-matching `#` core
+  (confirming position/scale/matrix are still right at this `n` too) plus
+  one **spatially separate, contiguous ~15x15 blob of pure `O`** (oracle has
+  real fire; app has nothing) below-left of the main silhouette. Tested and
+  ruled out the obvious explanation (a 9th/extra tick of life —
+  `DRAGONBREATH_PROJECTILE` duration read as 20 was too short by one and
+  spawn 6's own tail, `n=21`, should still render): patched the draw to
+  clamp `n` up to 21 (reusing `n=20`'s table row, mirroring the existing
+  "`n=20` repeats `n=19`" convention) and reran the same scratch compare —
+  tick 3220's diff got **worse** (342px → 649px), not better, so this is
+  **not** an off-by-one in the spawn's own duration; reverted immediately
+  (confirmed via `git diff --stat` showing only the intentional, still-
+  present base implementation afterward). The missing blob's rough center
+  (~137,57 from the map) doesn't correspond to any single table row's
+  `(x2,y2)` for any spawn either (its x2/y2 would need to come from two
+  different `n` values ~3 apart to fit both axes) — i.e. it is NOT simply
+  "one whole spawn rendered at the wrong `n`". Left **unresolved** — named
+  precisely rather than guessed at further, per this session's time budget.
+
+**What a resuming worker needs** (this session's incremental narrowing, on
+top of E2a-3's still-valid position/matrix/frame/lag/base tables, none of
+which needed re-deriving):
+- Don't re-open the palette/blend hypothesis — it's closed by source, not
+  just by empirics (see the call-chain trace above).
+- Don't re-open position/scale/sign/lag/base — E2a-3's sweep already covered
+  these exhaustively and this session's own diffmap confirms the bulk
+  silhouette matches at every `n` tested (2-3178px cores render correctly;
+  only edges/one localized blob don't).
+- The two sub-patterns (salt-and-pepper edge noise when `|a|>256`; one
+  isolated missing blob when `|a|<256`) may be TWO separate bugs, not one —
+  worth attacking them separately rather than one combined whole-frame fit.
+  The compressed-half noise smells like a rounding-convention mismatch in
+  `drawSpriteSheetAffineRotate`'s own `>>8` truncation at extreme scale
+  ratios (worth comparing against the ball-spin precedent's own scale range,
+  which never got this compressed — `BALL_SPIN_TABLE`'s largest `|pa|` is
+  255, `DRAGON_BREATH`'s starts at 703, ~2.75x further into the regime where
+  1-texel rounding differences flip more destination pixels). The magnified-
+  half missing blob needs its own isolated-spawn pixel trace (mask out every
+  OTHER draw call, render spawn 7 alone against a blank canvas, and diff
+  against an oracle capture with all other content subtracted) rather than
+  guessed at from whole-scene diffs, since the "which n" arithmetic above
+  didn't resolve to a clean single-spawn explanation.
+- `tools/compare/scratch/diffdump.mjs` and `diffmap.mjs` (both new, committed,
+  generic — not DRAGON_BREATH-specific) and `tools/compare/scratch/
+  dragonbreath-projectile-window.json` (a ready-made `captureFrames`
+  3177-3235 scratch trace, byte-identical script to the committed
+  ground-truth trace) are ready for the next worker to reuse without
+  rebuilding this session's own harness.
+
+**Pulled, not shipped**: same discipline as E2a-2/E2a-3 — the render code
+was written, re-verified against the diff-color dump, found still short of
+pixel-exact, and reverted (`git checkout -- src/engine/battleScene.ts`).
+`turn2-dragonbreath.json`'s `captureFrames` are UNCHANGED this session
+(still `3121-3176` + `3236-3263`, 84/84) — **checked, not assumed**: re-ran
+`npm run compare` against the actual committed trace with the (about-to-be-
+reverted) projectile code temporarily wired in, expecting a no-op since all
+8 spawns' `n` window closes by render tick 3223 (well before the 3236 half
+of the already-captured range). That expectation was **wrong on the OTHER
+edge** — spawn 0's own `n=0` becomes visible at render tick `pressTick+229+1
+= 3175`, which sits INSIDE the already-captured `3121-3176` range, and
+produced real regressions there (`3175`: 12px diff, `3176`: 15px diff,
+same salt-and-pepper compressed-half signature characterized above, not a
+new failure mode). Caught by actually running the check rather than trusting
+the arithmetic; reverted immediately after. This is exactly why the fix
+can't be landed partially (e.g. "only draw for `t>=3177`") without also
+special-casing the currently-green 3175-3176 pair — the residual reaches
+back to a spawn's very first visible tick, not just its later, larger
+frames. The `3177-3235` gap (and now also the fact that 3175-3176 would
+regress if this draw call were ever added unconditionally) remains open,
+with a precise negative result (palette ruled out by source+pixels) and a
+precise positive characterization (two distinct scale-dependent artifact
+shapes, present from a spawn's very first tick) rather than E2a-3's "narrow,
+specific bug" placeholder.
+
+**Verification**: `npm test` **711/711** unchanged (no engine/test code
+changed or left changed), `npm run build` green, tree clean at this docs
+commit. `turn2-dragonbreath.json` **84/84** unchanged. Regression spot-check
+`turn2-endeavor-drain.json` **200/201** unchanged (same pre-existing
+ISSUES #19 residual tick, untouched this session — out of this session's
+file ownership per the brief).
