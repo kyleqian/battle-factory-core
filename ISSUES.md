@@ -5,6 +5,43 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #24 — Onix-bounce two-state selection: the §8c fix TRADED tick 2901 for
+  ticks 2135/3465/3721 (same 769px signature) — the state-selection anchor,
+  not the asset, is still wrong somewhere
+
+Opened 2026-07-20 (supervisor, from direct verification — correcting the
+landing worker's own characterization). §8c harvested the missing Onix
+`y2=2` sine-peak patch and extended `ONIX_BBOX`, closing ISSUES #22's
+tick 2135 and `turn2-dragonbreath.json`'s 3465/3721. But
+`turn2-endeavor-drain.json` tick **2901**, which was CAPTURED AND GREEN
+before that commit (201/201, `ccd858e^`), is now **769px red** and was
+dropped from `captureFrames` (trace re-committed at 200/200).
+
+**Supervisor-verified, not inferred:** re-adding 2901 to `captureFrames`
+on the post-fix tree reproduces `DIFF 769px (2.00%) ssimMean=0.9594
+ssimMin=-0.1576` — byte-identical diff statistics to the three ticks the
+fix closed. The landing report called this "its own pre-existing
+bounce-tick-formula anchor error (different mechanism)"; the identical
+769px signature says otherwise. It is the SAME two-state mechanism
+selecting the wrong state at this tick.
+
+**What this means:** the asset half of §8c is right (three ticks went
+green and stayed green), but the *phase/anchor* that decides which of the
+two harvested states to composite is still incorrect for at least one
+code path — most likely the turn-2 submenu-reveal path, whose bounce
+anchor differs from the idle path's (`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`
+and the turn-2-specific anchor that slice F also had to special-case).
+Net position is +2 ticks, so the fix was worth landing, but it is
+INCOMPLETE, not clean.
+
+**Next instrument:** the discriminating data point is free — the old code
+got 2901 right and 2135/3465/3721 wrong, the new code the exact reverse.
+Diff the two state-selection paths over all four ticks and find the
+anchor that satisfies all four simultaneously (if none does, the two
+paths need genuinely different anchors, which is itself the answer).
+Full context: `docs/battle-menu-notes.md` §8b (ISSUES #19's harvest fix)
+and §8c (this fix).
+
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
   turn2-dragonbreath.json remain uncaptured after 4 bounded attempts
