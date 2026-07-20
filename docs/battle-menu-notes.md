@@ -2183,3 +2183,136 @@ and the 101/117 partial case), the digit-window's own 9-row footprint (a
 direct regression guard for the bug above), and `rightAlign3GlyphCodes`'s
 exact glyph-code output including the `CHAR_SPACER` padding cases. `npm
 test` **669/669**, `npm run build` green.
+
+## 15. S7 slice E1c: ENDEAVOR's own attack animation - groundwork ONLY this session (asset extraction + full source derivation + oracle timing table); ENGINE WIRING NOT LANDED, no trace/render changes - `npm test` 669/669 and `npm run build` green (unchanged, no engine code touched)
+
+**Scope call, made explicitly rather than improvised**: the brief asked for
+this exact window (ticks 3003-3094) as "a real asset slice," with an
+explicit fallback ("commit the green subset... report where you stopped").
+Source-reading `Move_ENDEAVOR` (`data/battle_anim_scripts.s:3789-3803`) this
+session found FIVE concurrent, independently-timed sub-mechanisms, not one:
+attacker squish (2-axis affine scale, a NEW capability - the engine's only
+existing affine renderer, `drawSpriteSheetAffineTinted`/`affineEmergeAccumulator`
+§7.22-7.23, is uniform-scale-only, built for the materialize sequence), 16
+sweat-droplet sprites with linear velocity+lifetime physics (new gfx,
+new particle-sprite bookkeeping), a 16-color palette blend ramp on the
+attacker (`BlendPalette`, no new gfx but a new blend primitive distinct from
+the existing `blendedTile`/`blendedSetPixel` alpha-compositing pair - this is
+a palette-table rewrite, not a framebuffer alpha blend), two independent
+target-shake task instances (x2-offset amplitude derived from
+`gAnimMovePower`, not yet RAM-confirmed for ENDEAVOR's own value), and two
+hitsplat sprites (new gfx, its own affine "pop" scale-down). Given this
+run's own precedent for comparable complexity - the ROCK_SLIDE falling-rock
+slice (§11) took a FULL session for ONE such mechanism and still left a
+6-frame residual - landing all five pixel-exact in the remaining time this
+session was not realistic without either rushing an unverified fit or
+risking a red trace, both against this run's explicit conventions. Chose to
+bank the (real, load-bearing, otherwise-expensive) research + extraction
+work instead: source formulas for all five mechanisms, the two new gfx
+assets, and an oracle-timed transition table, so a follow-up session can go
+straight to grid-search-fitting instead of re-deriving from source. **No
+trace was extended and no render code was touched** - extending
+`turn2-endeavor-drain.json`'s captures into this window without an engine
+change would just produce a red trace, which the brief explicitly forbids;
+zero risk of regression follows trivially (nothing existing was modified).
+
+**Assets extracted** (`tools/extract/extract-battle-move-anim-assets.ts`,
+new block before the "decoded battle_anim_scripts.s step lists" section):
+`src/assets/gen/battle-anim-sweat-drop.json` (`graphics/battle_anims/
+sprites/sweat_drop.png`, ANIM_TAG_SWEAT_DROP - a single un-animated 8x8
+tile) and `src/assets/gen/battle-anim-hitsplat.json` (`graphics/
+battle_anims/sprites/impact.png`, ANIM_TAG_IMPACT - 32x32px/16 tiles, one
+frame, affine-only "pop" via `sAffineAnims_HitSplat`, no ANIMCMD_FRAME
+table). Both wired through the same `decodeIndexedPng`/`sliceTiles` helpers
+every other sprite sheet in this file uses - deterministic, re-running the
+extractor reproduces byte-identical JSON.
+
+**Source-derived formulas** (`src/data/gen/battle-move-anim-tables.json`'s
+new `endeavor` key, same "decoded" convention as `fallingRock`/`shakeMon`/
+`doubleTeam` above - full field-level detail lives there, this is the
+summary):
+- **`squish`** (`AnimTask_SquishAndSweatDroplets`/`_Step`,
+  `battle_anim_effects_3.c:3742-3802`, table `:883-889`): attacker-only,
+  2-axis affine scale, steps `[(-16,+16,dur=6), (+16,-16,dur=12),
+  (-16,+16,dur=6)]` from neutral 256, run twice (2 full 24-tick cycles, 48
+  ticks total) - `arg1=2` (numSquishes).
+- **`sweatDroplets`** (`CreateSweatDroplets`/`AnimFacadeSweatDrop`,
+  `:3804-3849`): within EACH squish cycle, 2 batches of 4 droplets at local
+  tTimer 6 (upper, offset ±18/-20) and 18 (lower, offset ±30/+20) -
+  16 sprites total over the full window, each drifts (±2,-1) px/tick for 7
+  ticks then self-destroys.
+- **`blend`** (`AnimTask_BlendMonInAndOut`/`_Setup`/`_Step`,
+  `battle_anim_mons.c:1714-1769`): attacker-only palette ramp toward
+  RGB(31,21,0) via `BlendPalette`, coeff 0→12→0 at 1 tick/step, x2 cycles
+  (48 ticks total - same length as squish, independently driven).
+- **`targetShake`** (`AnimTask_ShakeTargetBasedOnMovePowerOrDmg`/`_Step`,
+  `battle_anim_mon_movement.c:971-1032`): TWO task instances (script args
+  `FALSE,1,8,1,0` both times - X-axis `x2` only, arg4=0 disables the Y
+  branch), amplitude `clamp(gAnimMovePower/12, 1, 16)` split into
+  up/down half-steps, alternating every 2 ticks for 8 alternations
+  (~16 ticks/instance) then resets to 0 and self-destroys. **ENDEAVOR's own
+  `gAnimMovePower` value is NOT RAM-confirmed this session** (the move's
+  listed base power is 0, HP-diff damage is computed separately via
+  `setdamagetohealthdifference` - whether the anim-power global still reads
+  0 or some placeholder needs a RAM dump, flagged for whoever wires this).
+- **`hitSplat`** (`gBasicHitSplatSpriteTemplate`/`sAffineAnims_HitSplat`/
+  `AnimHitSplatBasic`, `battle_anim_normal.c:134-178,1006-1017`): two static
+  32x32 sprites at target-relative offsets `(12,-12)` and `(-12,12)`, each
+  using affine-anim-index 2 (instant pop to scale 176/256, then ramps back
+  to neutral 256/256 over 8 ticks), self-destroying when its own affine anim
+  ends. Round 2 spawns after the script's own `delay 24` following round 1.
+
+**Oracle ground truth (scratch, not committed - `bin/oracle run` against a
+dense every-tick 2999-3095 capture, whole-frame diff vs. the tick-2999
+baseline, same crop/grid-search technique as PROGRESS-archive #132)**:
+confirms §14's own coarse finding (diff essentially the whole 3000-3092
+span, two brief 0-diff lulls) at FULL tick resolution:
+- **3000-3007**: bbox confined to `x=127-225,y=16-72` (opponent/attacker
+  side only, growing symmetrically) - this is the SQUISH alone, before any
+  droplet/shake/hitsplat contamination (droplets don't spawn until local
+  tTimer==6, i.e. ~3006 script-side). **This is an isolable sub-window** -
+  a future session could land squish-only here and capture a genuinely
+  green partial slice without needing droplets/blend/shake/hitsplat modeled
+  yet, matching the brief's own suggested fallback shape ("attacker-side
+  motion only").
+- **3008-3049**: bbox widens to include `x=41..` (target/Onix side) -
+  droplets + target shake/hitsplat round 1 (and round 2, by the tail)
+  overlapping the squish's own two cycles; continuous, no lull.
+  Exact per-mechanism boundaries within this span are NOT disentangled from
+  bbox alone (multiple concurrent sub-mechanisms touch overlapping regions)
+  - would need a RAM probe reading the relevant `gTasks[]`/sprite slots
+    (same technique as `dump-rockslide-sprites.py`), not attempted this
+    session.
+- **3050-3063**: bbox empty (exact match to the tick-2999 baseline) - the
+  first lull, corroborating §14's own coarser "3051-3063" finding.
+- **3064-3084**: active again (bbox `x=44..229,y=49..111`, alternating two
+  distinct shapes tick-to-tick) - unattributed at full resolution this
+  session (see above).
+- **3085-3088**: second lull (bbox empty).
+- **3089-3092**: brief final activity (bbox `x=44-99,y=49-111`, target side
+  only - consistent with hitsplat round 2's own tail).
+- **3093-3095**: bbox empty - matches §14's own "settles by 3095" finding
+  exactly (this session's own dense sweep confirms 3093/3094 are ALSO
+  already settled, a slightly earlier margin than §14 estimated).
+
+**What a follow-up session needs, concretely, to land this**: (1) a 2-axis
+affine sprite renderer (generalize `drawSpriteSheetAffineTinted` or add a
+sibling, no tint, independent x/y scale accumulators - the squish table
+above is ready to drive it); (2) a droplet-sprite render/composite path
+(the 8x8 tile is extracted, physics formula above is ready, needs a
+per-tick sprite-list render call site); (3) a palette-blend primitive
+distinct from `blendedTile` (a literal 16-color LUT rewrite toward a target
+color, not a framebuffer alpha blend); (4) the hitsplat sprite (gfx
+extracted, affine pop formula above is ready) plus RAM confirmation of
+`gAnimMovePower` for ENDEAVOR to pin the shake amplitude; (5) RAM-probing
+the 3008-3049 and 3064-3084 spans to attribute sub-mechanism boundaries
+precisely, the same way `dump-rockslide-sprites.py` did for ROCK_SLIDE's
+own concurrent mechanisms. The isolated 3000-3007 squish-only sub-window
+(above) is the cheapest possible starting point if a future session wants
+an incremental green landing rather than the whole thing at once.
+
+**Verification**: `npm test` **669/669** (unchanged - no engine code
+touched, this session added only extractor code + generated JSON + this
+doc), `npm run build` green. No trace committed or extended (deliberate,
+see "Scope call" above). Zero regressions, trivially: every existing traces'
+render code path is byte-for-byte untouched.

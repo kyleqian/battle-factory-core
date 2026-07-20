@@ -94,6 +94,46 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- ENDEAVOR's own new sprite gfx (S7 slice E1c groundwork) ---------------
+//
+// Move_ENDEAVOR (data/battle_anim_scripts.s:3789-3803, see docs/
+// battle-menu-notes.md §14/§15) is genuinely custom asset work, unlike
+// DOUBLE_TEAM above (no new gfx) - it `loadspritegfx`s TWO tags neither
+// ROCK_SLIDE nor DOUBLE_TEAM needed:
+//   ANIM_TAG_SWEAT_DROP -> gBattleAnimSpriteGfx_SweatDrop (graphics/
+//     battle_anims/sprites/sweat_drop.png, src/graphics.c:866-867) - a
+//     single 8x8 tile (0x0020 bytes / 32B-per-4bpp-tile = 1 tile), used
+//     un-animated (gDummySpriteAnimTable) by gFacadeSweatDropSpriteTemplate
+//     (src/battle_anim_effects_3.c:891-900, OAM gOamData_AffineOff_
+//     ObjNormal_8x8) - the small droplet dot CreateSweatDroplets spawns
+//     (see battle-move-anim-tables.json's own `endeavor.sweatDroplets`).
+//   ANIM_TAG_IMPACT -> gBattleAnimSpriteGfx_Impact (graphics/battle_anims/
+//     sprites/impact.png, src/graphics.c:464-465) - 32x32px = 4x4 tiles =
+//     16 tiles (0x0200 bytes / 32B = 16 tiles), ONE frame only (no
+//     ANIMCMD_FRAME table - gBasicHitSplatSpriteTemplate,
+//     src/battle_anim_normal.c:169-178, uses gDummySpriteAnimTable and
+//     instead pops/shrinks via its own AFFINE anim, sAffineAnims_HitSplat
+//     :134-166 - see `endeavor.hitSplat` below).
+{
+  const sweatDrop = decodeIndexedPng(join(REF, "graphics", "battle_anims", "sprites", "sweat_drop.png"));
+  const sweatDropTiles = sliceTiles(sweatDrop);
+  writeJson(join(ASSETS_GEN, "battle-anim-sweat-drop.json"), {
+    source: "graphics/battle_anims/sprites/sweat_drop.png (src/graphics.c:866-867, ANIM_TAG_SWEAT_DROP)",
+    tileset: { columns: sweatDropTiles.columns, rows: sweatDropTiles.rows, tiles: sweatDropTiles.tiles.map((t) => [...t.pixels]) },
+    palette: sweatDrop.palette,
+    oam: { shape: "8x8", size: "8x8", affine: false },
+  });
+
+  const impact = decodeIndexedPng(join(REF, "graphics", "battle_anims", "sprites", "impact.png"));
+  const impactTiles = sliceTiles(impact);
+  writeJson(join(ASSETS_GEN, "battle-anim-hitsplat.json"), {
+    source: "graphics/battle_anims/sprites/impact.png (src/graphics.c:464-465, ANIM_TAG_IMPACT)",
+    tileset: { columns: impactTiles.columns, rows: impactTiles.rows, tiles: impactTiles.tiles.map((t) => [...t.pixels]) },
+    palette: impact.palette,
+    oam: { shape: "32x32", size: "32x32", affine: true },
+  });
+}
+
 // --- decoded battle_anim_scripts.s step lists -------------------------------
 //
 // Hand-transcribed (not machine-parsed) from data/battle_anim_scripts.s -
@@ -287,6 +327,64 @@ function writeJson(path: string, data: unknown): void {
       paletteBlend: { towardColor: "RGB_BLACK", coefficient16ths: 11 },
       bldalpha: { eva: 12, evb: 8 },
       motion: { advanceEveryTicks: 2, counterMax: 64, phaseStagger: [0, 128], ampDivisor: 6, phaseSpeedDivisor: 13 },
+    },
+    endeavor: {
+      source: "data/battle_anim_scripts.s:3789-3803 (Move_ENDEAVOR) - see docs/battle-menu-notes.md §15 for the full oracle-timed derivation, NOT wired into the engine yet (groundwork only, S7 slice E1c)",
+      squish: {
+        source: "src/battle_anim_effects_3.c:3742-3802 (AnimTask_SquishAndSweatDroplets/_Step), gFacadeSquishAffineAnimCmds :883-889",
+        decoded:
+          "Attacker-only affine scale (2-axis, unlike the materialize sequence's uniform affineEmerge - x and y deltas are opposite sign here). Steps (AFFINEANIMCMD_FRAME(dx,dy,rotation,duration), same accumulator semantics as affineEmergeAccumulator): [(-16,+16,0,6), (+16,-16,0,12), (-16,+16,0,6)] starting from neutral (0x100,0x100) - squashes X / stretches Y for 6 ticks, reverses over 12, re-settles over 6 (24 ticks total per cycle). `createvisualtask ... 2` (arg1=numSquishes=2) repeats the WHOLE 24-tick cycle twice (48 ticks total), restarting the accumulator at neutral each cycle (AnimTask_SquishAndSweatDroplets_Step's case 0 re-calls PrepareAffineAnimInTaskData when tNumSquishes hasn't hit 0).",
+        steps: [
+          { dxScale: -16, dyScale: 16, rotation: 0, duration: 6 },
+          { dxScale: 16, dyScale: -16, rotation: 0, duration: 12 },
+          { dxScale: -16, dyScale: 16, rotation: 0, duration: 6 },
+        ],
+        neutralScale: 256,
+        cycles: 2,
+        cycleDurationTicks: 24,
+      },
+      sweatDroplets: {
+        source: "src/battle_anim_effects_3.c:3804-3849 (CreateSweatDroplets, AnimFacadeSweatDrop)",
+        decoded:
+          "Within EACH 24-tick squish cycle (so 2x total, 8 droplets/cycle = 16 sprites over the full window), CreateSweatDroplets fires twice off the squish task's own local tTimer: tTimer==6 with lowerDroplets=FALSE (xOffset=18,yOffset=-20, upper droplets) and tTimer==18 with lowerDroplets=TRUE (xOffset=30,yOffset=+20, lower droplets) - each call spawns 4 sprites at (baseX-xOffset[-4 for the 2nd]/+xOffset[+4 for the 4th], baseY+yOffset alternating +0/+6), 2 traveling velocX=-2 (leftward) and 2 at velocX=+2 (rightward), all velocY=-1 (drift up), 8x8 un-animated ANIM_TAG_SWEAT_DROP tile. AnimFacadeSweatDrop moves the sprite by (velocX,velocY) every tick and self-destroys once its own local timer exceeds 6 (7 ticks alive: spawn tick + 6 more).",
+        perBatch: { count: 4, velocYPerTick: -1, lifetimeTicks: 7 },
+        upper: { spawnLocalTick: 6, xOffset: 18, yOffset: -20, velocX: [-2, -2, 2, 2] },
+        lower: { spawnLocalTick: 18, xOffset: 30, yOffset: 20, velocX: [-2, -2, 2, 2] },
+      },
+      blend: {
+        source: "src/battle_anim_mons.c:1714-1769 (AnimTask_BlendMonInAndOut/_Setup/_Step), BlendPalette",
+        decoded:
+          "Attacker-only 16-color palette ramp toward RGB(31,21,0) (a warm yellow) via BlendPalette(paletteId,15,coeff,color) - coeff steps +1/tick (task data[5]=1-tick delay) up to targetCoeff=12 (arg2=12, i.e. 12/16 toward the color), then -1/tick back to 0, repeated numBlends=2 times (arg4=2) - 24 ticks/cycle (12 up + 12 down) x2 = 48 ticks total, same overall length as the squish above (independently driven, not synchronized by a shared clock - coincidence of both scripts using matching-length parameters).",
+        targetColor: { r: 31, g: 21, b: 0 },
+        coeffMax: 15,
+        targetCoeff: 12,
+        stepEveryTicks: 1,
+        cycles: 2,
+        cycleDurationTicks: 24,
+      },
+      targetShake: {
+        source: "src/battle_anim_mon_movement.c:971-1032 (AnimTask_ShakeTargetBasedOnMovePowerOrDmg/_Step)",
+        decoded:
+          "Two separate task instances (one per script `createvisualtask` call, NOT a single repeating task), each `(FALSE, 1, 8, 1, 0)`: arg0=FALSE -> amplitude source is gAnimMovePower (Endeavor's own listed power is 0, the move deals variable HP-diff damage instead - GetMovePower likely returns a nonzero placeholder or 0; NOT RAM-confirmed this session, flagged for the engine slice), clamped to [1,16], then halved into a +up/-down pair (data[14]=amp/2 down-step, data[13]=amp/2 rounded-up up-step). arg1=1 -> step every task-tick-counter > 1, i.e. every 2 ticks. arg2=8 -> 8 alternations before the task restores x2/y2=0 and self-destroys (~16 ticks/instance). arg3=1,arg4=0 -> X-axis (`x2`) shake only, Y branch (`y2`) is gated off (arg4=0) so never executes despite the code path existing. Target = Onix (ANIM_TARGET), the sprite's own x2 offset alternates between +upStep and -downStep every 2 ticks.",
+        amplitudeSource: "gAnimMovePower/12, clamped [1,16] (RAM-unconfirmed for ENDEAVOR specifically - base power likely 0, needs a dump)",
+        axis: "x2 only (arg4=0 disables y2)",
+        stepEveryTicks: 2,
+        alternations: 8,
+        instances: 2,
+        gapBetweenInstancesTicks: "script `delay 24` between the two create_basic_hitsplat_sprite/createvisualtask pairs",
+      },
+      hitSplat: {
+        source: "src/battle_anim_normal.c:169-178 (gBasicHitSplatSpriteTemplate), :134-166 (sAffineAnims_HitSplat), :1006-1017 (AnimHitSplatBasic)",
+        decoded:
+          "Two static-position 32x32 sprites (ANIM_TAG_IMPACT, one per script round) at target-relative offsets (12,-12) and (-12,12) (`relative_to=ANIM_TARGET`), each using affine anim index 2 (sAffineAnim_HitSplat_2: instant jump to scale 0xB0 i.e. a zoomed-in/large pop, then AFFINEANIMCMD_FRAME(0,0,0,8) ramps back to neutral 0x100 over 8 ticks) - self-destroys when the affine anim ends (RunStoredCallbackWhenAffineAnimEnds -> DestroyAnimSprite), so each hitsplat is visible ~8-9 ticks total. Round 1 spawns alongside the first targetShake instance; round 2 spawns after `delay 24` (script ticks) alongside the second targetShake instance.",
+        offsets: [
+          { x: 12, y: -12 },
+          { x: -12, y: 12 },
+        ],
+        popScale256: 176,
+        neutralScale256: 256,
+        settleDurationTicks: 8,
+      },
     },
   });
 }

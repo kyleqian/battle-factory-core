@@ -1,3 +1,35 @@
+## 136 — Supervisor: S8's blocking question answered (WIN unreachable at 20000) → **user decision: oracle frame cap raised to 45000** (harness `ccd7554`, service restarted + verified); §15 winline scout merged — Pidgeotto-KO line verified (tick 15887), Murkrow's first RAM ground truth
+
+- **State:** `npm test` **659/659**, `npm run build` green, tree clean at
+  the merge commit `f8b0649`; no worktrees, no unmerged branches. Oracle
+  answers with `maxFrames: 45000` (smoke-tested on anchor.json).
+- **Did:** (1) Worktree scout (merged): confirmed idle-timing is NOT an
+  RNG lever (probe: +4-frame shift reproduces §12's ledger shifted +4) —
+  move-choice sequence is; found+verified a line KO'ing Pidgeotto at tick
+  15887 (BIND at turn 8), settled menu vs Murkrow at 17722; Murkrow RAM
+  ground truth (Lv50 142/142 DARK/FLYING, INSOMNIA, LAX INCENSE, Spd 97,
+  FAINT_ATTACK/FLY/TORMENT/TAUNT); Onix (4/117 after felling Pidgeotto)
+  faints at 19147 dealing 0 to Murkrow — WIN provably misses the 20000
+  cap for every plausible line (floor ≈22500 incl. swap + battle-2 menu).
+  Traces `battle1-winline-a{,-murkrow}.json` + 2 RAM dumps + new probe
+  `dump-battler-full.py` committed (§15). (2) Escalated; user chose
+  raising the cap over snapshot/restore or re-scope: harness commit
+  `ccd7554` (`MAX_FRAMES = 45_000`), service restarted, verified.
+  ROADMAP S8 + Domain notes updated. (3) Verified+accepted workers #134
+  (shake residual, turn1-rockslide 256/256) and #135 (slice E1,
+  turn2-endeavor 76/77) — see their entries.
+- **Next:** (1) scout lane: ground-truth the full WIN → swap → battle-2
+  first-menu line under the 45000 cap (extend §15's winline; keep Onix
+  healthier / voluntary switch options open); (2) main lane: slice E1b —
+  ENDEAVOR attack anim + Onix HP drain 116→101 + player-side HP-digit
+  compositor (ticks 2999-3128, §13 handoff: digits are FONT_SMALL,
+  already extracted); then E2 (DRAGON_BREATH window, 3129-3846); (3)
+  ISSUES #19 family (now 2 traces affected), #20 rewire remainder.
+- **Notes:** oracle restart was deferred until the main lane was idle (a
+  mid-flight restart would have broken E1's compares). Old cap's two
+  stale Thursday `server.py` processes (not on :8012) left untouched.
+
+---
 ## 135 — Bounded worker: S7 slice E1 — turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff text, `turn2-endeavor.json` **76/77** (the 1 residual is ISSUES #19's own pre-existing family, confirmed recurring, not new) — suite **659/659**
 
 - **State:** `npm test` **659/659** (+12 Tier-1 pins), `npm run build`

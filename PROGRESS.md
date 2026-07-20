@@ -4,6 +4,47 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 139 — Bounded worker: S7 slice E1c — ENDEAVOR's own attack animation, GROUNDWORK ONLY (2 gfx assets extracted + full 5-mechanism source derivation + oracle-timed transition table, `docs/battle-menu-notes.md` §15); engine wiring NOT landed, this session's own explicit scope call — suite unchanged **669/669**
+
+- **State:** `npm test` **669/669** (unchanged, no engine code touched),
+  `npm run build` green, tree clean. New gen assets
+  `src/assets/gen/battle-anim-{sweat-drop,hitsplat}.json`; `endeavor` key
+  added to `src/data/gen/battle-move-anim-tables.json`. No trace
+  added/changed (deliberate — see below).
+- **Did:** source-read `Move_ENDEAVOR` (`battle_anim_scripts.s:3789-3803`)
+  and found FIVE concurrent sub-mechanisms, not the "generic hit" the
+  original handoff assumed and #137 already flagged: attacker 2-axis
+  squish (affine scale — the engine's only existing affine renderer is
+  uniform-scale-only, built for materialize), 16 sweat-droplet sprites
+  (new gfx + particle physics), a 16-color palette blend ramp (new
+  primitive, distinct from the existing `blendedTile` alpha-compositor),
+  two target-shake task instances, two hitsplat sprites (new gfx + its own
+  affine "pop"). Extracted both new gfx assets (`sweat_drop.png` 1 tile,
+  `impact.png` 16 tiles) via the established `extract-battle-move-anim-
+  assets.ts` convention; hand-derived exact formulas for all five
+  mechanisms from source (steps/offsets/timings, see §15); ran a scratch
+  dense every-tick oracle capture (2999-3095, not committed) and built a
+  full bbox-transition table — confirms §14's coarse "two 0-diff lulls"
+  finding at full resolution and isolates a clean squish-only sub-window
+  (3000-3007, attacker side only, before droplets/shake/hitsplat
+  contaminate it) as the cheapest possible incremental landing point.
+- **Next:** wire the engine per §15's "what a follow-up session needs"
+  list, in order of leverage: (1) a 2-axis affine sprite renderer
+  (generalizes the existing materialize one); (2) land the isolated
+  3000-3007 squish-only sub-window as its own green trace slice first,
+  proving the renderer before adding droplets/blend/shake/hitsplat; (3)
+  RAM-probe the 3008-3049/3064-3084 spans (dump-rockslide-sprites.py-style)
+  to attribute sub-mechanism boundaries precisely, and confirm
+  `gAnimMovePower` for ENDEAVOR (shake amplitude depends on it). Otherwise
+  DRAGON_BREATH's window (3129+, slice E2) or ISSUES #19/#20.
+- **Notes:** scope call made explicitly, not improvised — this run's own
+  precedent (ROCK_SLIDE, §11) shows comparable per-mechanism complexity
+  took a full session and still left a residual; five concurrent
+  mechanisms here made a rushed pixel-fit likelier to land wrong or red
+  than useful, so this session banked the (expensive, otherwise-repeated)
+  research instead. No papercuts.
+
+---
 ## 138 — Supervisor: WIN-chain scout merged — **battle 1's WIN, swap decline, and battle 2's first action menu fully ground-truthed at tick 33031** (11969 under the new 45000 cap); S8's acceptance chain is now provably pinnable
 
 - **State:** `npm test` **669/669**, `npm run build` green, tree clean at
@@ -74,34 +115,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   anomaly family.
 - **Notes:** no papercuts.
 
----
-## 136 — Supervisor: S8's blocking question answered (WIN unreachable at 20000) → **user decision: oracle frame cap raised to 45000** (harness `ccd7554`, service restarted + verified); §15 winline scout merged — Pidgeotto-KO line verified (tick 15887), Murkrow's first RAM ground truth
-
-- **State:** `npm test` **659/659**, `npm run build` green, tree clean at
-  the merge commit `f8b0649`; no worktrees, no unmerged branches. Oracle
-  answers with `maxFrames: 45000` (smoke-tested on anchor.json).
-- **Did:** (1) Worktree scout (merged): confirmed idle-timing is NOT an
-  RNG lever (probe: +4-frame shift reproduces §12's ledger shifted +4) —
-  move-choice sequence is; found+verified a line KO'ing Pidgeotto at tick
-  15887 (BIND at turn 8), settled menu vs Murkrow at 17722; Murkrow RAM
-  ground truth (Lv50 142/142 DARK/FLYING, INSOMNIA, LAX INCENSE, Spd 97,
-  FAINT_ATTACK/FLY/TORMENT/TAUNT); Onix (4/117 after felling Pidgeotto)
-  faints at 19147 dealing 0 to Murkrow — WIN provably misses the 20000
-  cap for every plausible line (floor ≈22500 incl. swap + battle-2 menu).
-  Traces `battle1-winline-a{,-murkrow}.json` + 2 RAM dumps + new probe
-  `dump-battler-full.py` committed (§15). (2) Escalated; user chose
-  raising the cap over snapshot/restore or re-scope: harness commit
-  `ccd7554` (`MAX_FRAMES = 45_000`), service restarted, verified.
-  ROADMAP S8 + Domain notes updated. (3) Verified+accepted workers #134
-  (shake residual, turn1-rockslide 256/256) and #135 (slice E1,
-  turn2-endeavor 76/77) — see their entries.
-- **Next:** (1) scout lane: ground-truth the full WIN → swap → battle-2
-  first-menu line under the 45000 cap (extend §15's winline; keep Onix
-  healthier / voluntary switch options open); (2) main lane: slice E1b —
-  ENDEAVOR attack anim + Onix HP drain 116→101 + player-side HP-digit
-  compositor (ticks 2999-3128, §13 handoff: digits are FONT_SMALL,
-  already extracted); then E2 (DRAGON_BREATH window, 3129-3846); (3)
-  ISSUES #19 family (now 2 traces affected), #20 rewire remainder.
-- **Notes:** oracle restart was deferred until the main lane was idle (a
-  mid-flight restart would have broken E1's compares). Old cap's two
-  stale Thursday `server.py` processes (not on :8012) left untouched.
