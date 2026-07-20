@@ -5,29 +5,20 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #19 — fight-submenu.json residual: tick 2073 (99px, healthbox-adjacent row)
+## #22 — battle1-fight-submenu-idle.json (groundtruth fixture) tick 2135:
+  769px single-tick residual, NOT closed by #19's harvest fix
 
-Opened 2026-07-19 (bounded worker, FIGHT-submenu engine slice). `tools/
-compare/traces/fight-submenu.json` is 234/235; the one residual tick, 2073,
-is a 99px diff confined to exactly screen row y=111 (x 127-225) — one row
-below the healthbox bounce region's own bbox (y74-110). Same
-still-unidentified family as `docs/battle-turn-notes.md` §11 finding 4's
-own two idle-only-trace anomalies (ticks 2071/2135 there — different
-absolute tick since that trace's button script differs, same "single-tick,
-boundary-row, healthbox-adjacent" shape). Ruled out this session: a third
-discrete healthbox-bounce state (the existing 0/1/2 model gets every OTHER
-tick in the 235-tick window to 0 diff); every integer
-`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT` value from -9 to 0 (grid-searched
-against the full post-close range — -4, the shipped value, is uniquely
-optimal at 1/66 mismatches, strictly better than every neighbor). Full
-derivation: `docs/battle-menu-notes.md` §8.
-**Recurs identically** (S7 slice E1, this session): `turn2-endeavor.json`
-tick 2906 - the FIGHT submenu's reveal tick for turn 2's own reopen - same
-exact bbox (x127-225, y=111), same 99px count, confirming this is a general
-property of the submenu-reveal/resume mechanism, not a turn-1-only or
-nav-only quirk. Still not root-caused.
-Affects: `tools/compare/traces/fight-submenu.json` 234/235 (only frame);
-`tools/compare/traces/turn2-endeavor.json` 76/77 (only frame, tick 2906).
+Opened 2026-07-19 night (supervisor). After ISSUES #19's root-cause fix
+(healthbox-bounce y2 harvest was 1 row short; that closed fight-submenu
+235/235, turn2-endeavor 77/77, turn2-endeavor-drain 201/201, and this
+fixture's OTHER anomaly at tick 2071), the idle fixture still shows one
+diff: tick 2135, 769px (2.00%), ssimMin -0.16 — an order of magnitude
+larger than #19's 99px row-111 signature, so a different mechanism.
+`docs/battle-turn-notes.md` §11 finding 4 first logged 2071/2135 together
+as "same shape"; that grouping is now half-disproven (2071 was #19's
+family and is fixed; 2135 is not). Not in any committed acceptance trace
+— informational fixture only, low priority. Lead: diff the out/ PNGs at
+2135 (colors + bbox) before hypothesizing.
 
 ## #18 — [POLICY SETTLED 2026-07-19, user decision] sendout tick 1496
   (particle z-order, 3px): accepted/parked permanently; S6 ticked [x] with
