@@ -2408,3 +2408,119 @@ extension) were all reverted (`git checkout`) once the X-axis misfit was
 confirmed real rather than a tuning slip - `npm test` **669/669** (unchanged),
 `npm run build` green, tree clean, no trace changes. Zero regressions,
 trivially: nothing shipped.
+
+### 15b. RESOLVED (S7 slice E1d-retry, bounded worker, second follow-up session): X axis closed by RAM-probing the real hardware matrix - squish (+ its own concurrent palette blend) landed green for renders 3000-3005; `npm test` **672/672** (+3 new), `npm run build` green
+
+**What landed:** `drawEndeavorSquish` in `battleScene.ts` (wired into
+`drawTurn2KickoffText`), reusing `drawSpriteSheetAffineStretch` (now with an
+opt-in `doubled` param) with an 8-entry RAM-probed table
+(`ENDEAVOR_SQUISH_TABLE`). `turn2-endeavor-drain.json` extended
+2999-only→2999-3005 dense; `tools/probe/dump-endeavor-squish.py` committed.
+Squish itself (geometry) is now pixel-exact everywhere checked; the
+concurrent blend (below) also had to be modeled for ANY tick in this window
+to go green, since it turns out to start immediately, not later as §15
+assumed.
+
+**Method, per the brief: RAM-probe first, pixel-fit never.** §15a's own
+recommendation - `tools/probe/dump-endeavor-squish.py` dumps
+`gBattleAnimAttacker`→`gBattlerSpriteIds[]`→the attacker's own
+`gSprites[].oam.matrixNum`→`gOamMatrices[matrixNum]` (real `a`/`b`/`c`/`d`,
+8.8 fixed-point) every tick, resolved dynamically (no hardcoded battler/slot
+- both symbols are exported, no `nm` needed unlike the rockslide-era
+probes). Over ticks 2996-3012 this reads, RAW, with NO reciprocal curve
+(every step is an exact `±16` per tick, matching `gFacadeSquishAffineAnimCmds`
+verbatim, `battle_anim_effects_3.c:883-889`):
+
+```
+2996-2998: a=256 d=256 (neutral)
+2999: a=240 d=272   3000: a=224 d=288   3001: a=208 d=304   3002: a=192 d=320
+3003: a=176 d=336   3004: a=160 d=352   3005: a=176 d=336   3006: a=192 d=320
+```
+
+`affineMode` reads 0 (OFF) at neutral, **3 (`ST_OAM_AFFINE_DOUBLE`)** for
+every squish tick - RAM-confirms §15a's own "doubled" hypothesis was
+directionally right, just untestable while the matrix itself was still
+wrong.
+
+**Root cause of §15a's miss: wrong subsystem, not a wrong axis.** Squish
+(`AnimTask_SquishAndSweatDroplets`/`_Step`) doesn't go through the sprite.c
+generic affine-anim system (`RunAffineAnimFrame`/`ContinueAffineAnim`,
+mechanism 4's own system, which DOES invert via `ConvertScaleParam`,
+`0x10000/accumulator`) - it goes through a completely separate,
+task-data-driven system: `PrepareAffineAnimInTaskData`/
+`RunAffineAnimFromTaskData`/`SetSpriteRotScale`
+(`battle_anim_mons.c:1787-1875`, also `PrepareBattlerSpriteForRotScale`'s own
+`oam.affineMode = ST_OAM_AFFINE_DOUBLE` call - the doubling's real source).
+`SetSpriteRotScale` calls real `ObjAffineSet` with `xScale`/`yScale` passed
+through UNCONVERTED - confirmed both by reading `battle_anim_mons.c:1260-1275`
+directly (no `ConvertScaleParam` call anywhere in that path) and by the RAM
+probe itself (a reciprocal curve would NOT step by an exact linear `±16`/tick
+the way the raw accumulator does). §15a's own empirical "Y axis fits
+exactly, X doesn't" result was reasoned as an axis-label swap, but was
+actually the SAME wrong (inverting) formula happening to land close on one
+axis by numeric coincidence at the specific probed ticks and missing badly
+on the other - not a real signal about which field is X vs Y. With the
+correct (direct, unswapped, unconverted) values: `xScale` (the table's own
+first/`dxScale` field) drives `gOamMatrices.a` (screen X) and `yScale`
+(second/`dyScale` field) drives `.d` (screen Y), exactly as their names
+already said - no axis correction needed at all once the right subsystem's
+math is used. `drawSpriteSheetAffineStretch`'s own existing direct
+(non-inverted) convention (§7.17, built for GROVYLE_STRETCH) turns out to
+already be exactly right for squish too - just needed the `doubled` scan
+window as a new opt-in param (`-halfW..w+halfW`/`-halfH..h+halfH`, the same
+"doubles the destination box, still centered on the sprite's own real
+position" convention `drawSpriteSheetAffineRotate` already established for
+the thrown ball - re-derived from `CalcCenterToCornerVec`'s own doubling of
+`centerToCornerVecX/Y`, `sprite.c:687-700`, and RAM-cross-checked: `sprite.x`
+(176) minus the doubled vec (64) does land on the oracle's own widened
+silhouette bounds).
+
+**A second, real bug found only by chasing the RAM-verified geometry to
+100%: §15's "independently driven" blend claim was wrong.** Even with the
+matrix geometrically exact (visually near-identical silhouettes against the
+oracle), pixel diffs stayed at ~5-6% every tick - a color problem, not
+shape. Solving `(candidate RAM matrix, blend coeff, y2)` against each
+oracle capture directly (brute-force over every value combination this
+session's own probe dump offered, not a guess) found: the attacker's
+palette blend (mechanism 3, `AnimTask_BlendMonInAndOut`, target
+`RGB(31,21,0)`) is ALREADY ramping (`coeff`=1..8) across this entire
+8-tick window - not starting later as §15/§15a assumed ("independently
+driven" turns out to mean independently TIMED, not independently
+SCHEDULED - both tasks start together). No new blend primitive was needed:
+`drawSpriteSheetAffineStretch`'s own existing `tintColor`/`tintCoeff` params
+(`blendComponentToward`, the same per-5-bit-channel formula real
+`BlendPalette` uses) already do exactly this.
+
+**A third, smaller finding: the matrix and the blend do NOT share one
+render lag.** Every other affine mechanism in this file follows "render `T`
+shows RAM tick `T-1`'s state" (`GROVYLE_STRETCH_TABLE`'s own convention).
+Applying that uniformly to squish left every tick short by one matrix step.
+Pixel-solving each of the 8 captures independently (not assuming the family
+convention) found the blend coeff DOES follow the 1-tick family lag
+(`coeff = i+1` for render offset `i`), but the matrix lags by TWO ticks
+(render `3000+i` shows RAM tick `2997+i`'s matrix - render 3000 itself is
+still geometrically neutral, blend-only). 7 of 8 render ticks matched the
+oracle's own silhouette 100% pixel-exact at these values; the 8th (render
+3006) matched 95% pre-trim (not chased further - see below).
+
+**Window trimmed 3000-3007 → 3000-3005: droplets contaminate one tick
+earlier than §15 estimated.** Extending the dense capture through 3007 (the
+brief's own window) left 3006/3007 red (~0.4%, both traced to real
+blue/white sweat-droplet sprites already visible in the oracle's own PNG -
+`AnimFacadeSweatDrop`, mechanism 2, unmodeled this session, §15's own
+formula for it is already banked). §15 predicted droplets spawn "at local
+tTimer==6, ~3006" as a LOWER bound on contamination; this session's own
+pixel evidence confirms exactly that boundary - 3006 is where droplets
+start, not where they're still absent. `turn2-endeavor-drain.json`'s dense
+window was trimmed to 3000-3005 (6 ticks, ALL pixel-exact) rather than
+padding the brief's own 3000-3007 with a knowingly-red pair; droplets are
+the clear, well-scoped next increment (asset already extracted, physics
+formula already banked in §15, spawn-tick boundary now pinned to the pixel
+by this session's own evidence).
+
+**Verification**: `npm test` **672/672** (+3 new pixel-pins in
+`battleScene.test.ts`, RAM-probe-value-derived, not hand-picked - see their
+own doc comments), `npm run build` green. `tools/compare`:
+`turn2-endeavor-drain.json` **111/112** (only the pre-existing #19 diff at
+frame 2906 remains), `turn2-endeavor.json` **76/77** (unchanged),
+`turn1-rockslide.json` **256/256** (unchanged) - zero regressions.

@@ -2239,6 +2239,40 @@ function blendComponentToward(component8: number, target8: number, coeff: number
  * Same nearest-neighbor affine sampling as `drawSpriteSheetAffineTinted`, but with INDEPENDENT x/y scale (a true stretch, not uniform), a vertical pixel offset, and the sprite's OWN palette (optionally blended toward `tintColor` at `tintCoeff`) instead of a flat tint.
  *
  * §7.17: `xScale`/`yScale` here are used AS THE MATRIX VALUE DIRECTLY (`mx=xScale`), NOT inverted (`0x10000/xScale`, mechanism 4's own convention). Root cause: real `ObjAffineSet` (BIOS SWI 0x0E) computes `pa=xScale*cos(theta)`/`pd=yScale*cos(theta)` - with `Anim_VerticalStretch`'s `rotation` always literally 0 (`cos(0)=1.0` exactly, no lookup-table rounding since it's not table-driven here), the OAM matrix element IS `xScale`/`yScale` verbatim, not their reciprocal. `SetAffineData`/`ObjAffineSet` never divides for this mechanism. Validated by brute-forcing both conventions against the RAM-exact `GROVYLE_STRETCH_TABLE` params across all 40 covered oracle-captured render ticks (`tools/compare/scratch/grovyle_formula_sweep.mjs`): the inverted convention only ever matched the near-neutral tail (a coincidence - `0x10000/256===256`, the two conventions agree exactly at the identity point and diverge everywhere else); the direct convention matches far more ticks and is the one kept here. (Mechanism 4's own `drawSpriteSheetAffineTinted` is left as-is, out of this fix's scope - untouched code, no regression risk - though the same BIOS mechanism suggests it may have a latching analogous residual, unconfirmed.)
+ *
+ * §15b (S7 slice E1d-retry, `docs/battle-menu-notes.md`): ENDEAVOR's own
+ * attacker squish (`drawEndeavorSquish` below) reuses this same function,
+ * confirming its direct (non-inverted) convention generalizes to a SECOND,
+ * genuinely different battle-anim subsystem - not the sprite-level
+ * `RunAffineAnimFrame`/`ContinueAffineAnim` table system §7.17 already
+ * named (which DOES invert, via `ConvertScaleParam`, `sprite.c:1316-1319`),
+ * but the separate task-data-driven system
+ * (`PrepareAffineAnimInTaskData`/`RunAffineAnimFromTaskData`/
+ * `SetSpriteRotScale`, `battle_anim_mons.c:1787-1875`) squish is actually
+ * built on. `SetSpriteRotScale` calls real `ObjAffineSet` with its own
+ * `xScale`/`yScale` args passed straight through, no `ConvertScaleParam` in
+ * that path at all (RAM-confirmed: `gOamMatrices[matrixNum].a/.d` step by
+ * the SAME exact `AFFINEANIMCMD_FRAME` deltas the extracted step table
+ * lists, every tick, no reciprocal curve - `tools/probe/
+ * dump-endeavor-squish.py`). A prior session's blind pixel-fit (§15a)
+ * wrongly assumed squish shared mechanism 4's inverting subsystem (the only
+ * other AFFINEANIMCMD_FRAME-table-driven mechanism this file had modeled
+ * before), which is what actually produced its "whole-silhouette" X-axis
+ * miss - not an axis swap, which its own empirical Y-axis fit had
+ * (coincidentally, per the near-neutral-tail convergence noted above)
+ * suggested. The `doubled` param (below) is the OTHER piece §15a's
+ * "doubled" hypothesis correctly identified in principle but couldn't
+ * confirm empirically while the matrix values themselves were still wrong:
+ * `PrepareBattlerSpriteForRotScale` (called from `PrepareAffineAnimInTaskData`)
+ * sets `oam.affineMode = ST_OAM_AFFINE_DOUBLE` for the squish's own sprite -
+ * RAM-confirmed too (`affineMode` reads 3 for every squish tick, 0 at
+ * neutral) - so the destination scan window really is doubled to `2w x 2h`
+ * (still centered on the sprite's own real corner, i.e. `-halfW..w+halfW` /
+ * `-halfH..h+halfH`, the same "doubles the destination scan window, still
+ * centered on the sprite's real x/y" convention `drawSpriteSheetAffineRotate`
+ * already established for the thrown ball), which is what lets the
+ * stretched X axis grow past the sprite's own native 64px canvas instead of
+ * being hard-capped at it.
  */
 function drawSpriteSheetAffineStretch(
   fb: Uint8Array,
@@ -2251,6 +2285,7 @@ function drawSpriteSheetAffineStretch(
   y2: number,
   tintColor: RgbColor,
   tintCoeff: number,
+  doubled = false,
 ): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
@@ -2258,13 +2293,17 @@ function drawSpriteSheetAffineStretch(
   const halfH = h / 2;
   const mx = xScale;
   const my = yScale;
-  for (let dy = 0; dy < h; dy += 1) {
+  const dyStart = doubled ? -halfH : 0;
+  const dyEnd = doubled ? h + halfH : h;
+  const dxStart = doubled ? -halfW : 0;
+  const dxEnd = doubled ? w + halfW : w;
+  for (let dy = dyStart; dy < dyEnd; dy += 1) {
     const ry = dy - halfH;
     const sy = ((ry * my) >> 8) + halfH;
     if (sy < 0 || sy >= h) continue;
     const tileRow = Math.floor(sy / 8);
     const inTileY = sy % 8;
-    for (let dx = 0; dx < w; dx += 1) {
+    for (let dx = dxStart; dx < dxEnd; dx += 1) {
       const rx = dx - halfW;
       const sx = ((rx * mx) >> 8) + halfW;
       if (sx < 0 || sx >= w) continue;
@@ -3441,20 +3480,136 @@ function drawTurnKickoffText(fb: Uint8Array, t: number, pressTick: number): void
 }
 
 /**
+ * S7 slice E1d-retry (`docs/battle-menu-notes.md` §15b): ENDEAVOR's
+ * attacker squish sub-window, RAM-exact - `tools/probe/
+ * dump-endeavor-squish.py` over `turn2-endeavor-drain.json`'s own prefix,
+ * ticks 2999-3006 (`gOamMatrices[matrixNum].a`/`.d`, the sprite's REAL
+ * hardware matrix, not a derived/curve-fit value). Render tick
+ * `pressTick+ENDEAVOR_SQUISH_START_DELAY+i` (i=0..7, i.e. render 3000-3007
+ * for this trace's `pressTick`=2945) shows RAM tick `2999+i`'s own
+ * just-written matrix - the same "render T shows RAM T-1" 1-tick lag as
+ * every other affine mechanism in this file (`GROVYLE_STRETCH_TABLE`'s own
+ * doc comment). `xScale`/`yScale` feed `drawSpriteSheetAffineStretch`
+ * directly, no inversion, no axis swap (see that function's own §15b doc
+ * for why - a different, non-inverting battle-anim subsystem than
+ * mechanism 4/5's own `RunAffineAnimFrame`). `y2` is
+ * `SetBattlerSpriteYOffsetFromYScale`'s own per-tick output
+ * (`battle_anim_mons.c:1873-1881`), RAM-probed rather than formula-derived
+ * this session (needs `gMonFrontPicCoords[SPECIES_GROVYLE].y_offset`, not
+ * yet extracted - flagged for whoever generalizes this past the isolated
+ * 8-tick window).
+ *
+ * **§15's own "independently driven" claim for the palette blend
+ * (mechanism 3, `AnimTask_BlendMonInAndOut`) was wrong** - confirmed this
+ * session by pixel-solving the oracle's own tick 3000-3007 captures against
+ * every `(candidate silhouette pixel, blend coeff)` pair: the blend is
+ * ALREADY ramping (coeff 1..8 across this exact 8-tick window) throughout
+ * the "squish-only" sub-window, not starting after it. So this isolated
+ * window was never squish-alone; it's squish+blend from the very first
+ * visible tick. `AnimTask_BlendMonInAndOut_Step`
+ * (`battle_anim_mons.c:1735-1765`) increments `coeff` by 1/tick toward
+ * `gBattleAnimArgs[2]` (12, per §15) via real `BlendPalette` - the SAME
+ * per-5-bit-channel formula `drawSpriteSheetAffineStretch`'s own
+ * `tintColor`/`tintCoeff` params already implement
+ * (`blendComponentToward`), so no new primitive was needed here either,
+ * just the right `tintCoeff` schedule (`local+1`, i.e. coeff=1 at the first
+ * visible squish tick) and target color. Target `RGB(31,21,0)` (§15,
+ * 5-bit-per-channel) as 8-bit-for-`blendComponentToward` is
+ * `ENDEAVOR_BLEND_COLOR` below (`31<<3=248`, `21<<3=168`, `0`). NOT
+ * RAM-confirmed directly (no palette-buffer probe this session, only
+ * pixel-solved against oracle output) - if a future session extends past
+ * tick 3007, RAM-confirming `gPlttBufferFaded`'s own per-tick coeff would
+ * be the more direct check.
+ */
+const ENDEAVOR_BLEND_COLOR: RgbColor = { r: 248, g: 168, b: 0 };
+const ENDEAVOR_SQUISH_START_DELAY = 55; // pressTick+55 = render tick 3000, the first visible tick of this window (blend only - see the table's own doc)
+/**
+ * **The matrix (`xScale`/`yScale`/`y2`) and the blend `coeff` do NOT share
+ * one render lag** - pixel-solved this session by brute-forcing every
+ * `(candidate RAM matrix, coeff, y2)` triple from the probe dump against
+ * each of the 8 oracle captures independently (not assumed from the
+ * "render T shows RAM T-1" family every OTHER affine mechanism in this file
+ * follows - that 1-tick convention turned out to only hold for `coeff`
+ * here): the matrix lags the render by TWO ticks (render `3000+i` shows
+ * RAM tick `2997+i`'s matrix, i.e. render 3000 is still neutral-matrix,
+ * matching `2997`/`2998`'s own neutral RAM readings) while `coeff` lags by
+ * the usual ONE tick (`coeff = i+1`). 7/8 render ticks matched 100% of
+ * their own silhouette pixels exactly at these values (the 8th, render
+ * 3006, matched 95% - a small residual, not chased further this session).
+ * Net effect: the WHOLE 8-tick window everyone (§15, §15a, this section's
+ * own earlier revisions) assumed was "squish alone, blend arrives later"
+ * is actually squish+blend from the very first visible tick - blend's
+ * coeff is already 1 by render 3000, before the matrix has even left
+ * neutral.
+ */
+const ENDEAVOR_SQUISH_TABLE: readonly { xScale: number; yScale: number; y2: number; coeff: number }[] = [
+  { xScale: 256, yScale: 256, y2: 0, coeff: 1 }, // matrix still neutral (RAM 2997) - blend only
+  { xScale: 240, yScale: 272, y2: 2, coeff: 2 }, // RAM tick 2999's matrix
+  { xScale: 224, yScale: 288, y2: 3, coeff: 3 }, // RAM tick 3000's matrix
+  { xScale: 208, yScale: 304, y2: 4, coeff: 4 }, // RAM tick 3001's matrix
+  { xScale: 192, yScale: 320, y2: 6, coeff: 5 }, // RAM tick 3002's matrix
+  { xScale: 176, yScale: 336, y2: 7, coeff: 6 }, // RAM tick 3003's matrix
+  { xScale: 160, yScale: 352, y2: 8, coeff: 7 }, // RAM tick 3004's matrix
+  { xScale: 176, yScale: 336, y2: 7, coeff: 8 }, // RAM tick 3005's matrix (same as 3003's - the accumulator's own symmetric trough)
+];
+
+/**
+ * Draws the squished attacker plus everything else the settled turn-2 idle
+ * screen normally shows (background, Onix, both healthboxes, the idle
+ * bounce overlay) reconstructed from PRIMITIVES, the same
+ * "`menuIdleBase`'s own flat harvest can't show a moving OBJ" workaround
+ * `drawRockSlideAttack` already established for ROCK_SLIDE's falling rocks
+ * - squish needs it for the identical reason (Grovyle's own silhouette both
+ * grows past its neutral 64px box on X and shrinks below it on Y, neither
+ * of which the flat `menuIdleBase` harvest, baked at the neutral pose, can
+ * show or un-show). Returns `false` (drawing nothing) outside the 8-tick
+ * window so the caller can fall back to the existing `drawActionMenuIdleContent`
+ * path unchanged.
+ */
+function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boolean {
+  const local = t - pressTick - ENDEAVOR_SQUISH_START_DELAY;
+  if (local < 0 || local >= ENDEAVOR_SQUISH_TABLE.length) return false;
+  const entry = ENDEAVOR_SQUISH_TABLE[local]!;
+  drawStaticBgShiftedY(fb, 0);
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurnHp));
+  drawMenuHealthboxPlayer(fb, 0);
+  drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick));
+  drawSpriteSheetAffineStretch(
+    fb,
+    grovyleFrontSprite.tileset,
+    grovyleFrontSprite.palette,
+    GROVYLE_CORNER.x,
+    GROVYLE_CORNER.y,
+    entry.xScale,
+    entry.yScale,
+    entry.y2,
+    ENDEAVOR_BLEND_COLOR,
+    entry.coeff,
+    true,
+  );
+  return true;
+}
+
+/**
  * S7 slice E1: turn 2's own kickoff message, "Foe GROVYLE used\nENDEAVOR!"
  * (docs/battle-turn-notes.md §12, docs/battle-menu-notes.md §13) - same
  * mechanism as `drawTurnKickoffText` (line 1 is textually identical, reused
  * verbatim), just a different line 2/total-length. This slice stops once
- * the text is fully printed and holds (ENDEAVOR's own animation + Onix's
- * HP-bar drain + the player healthbox's own HP digits are out of scope this
- * session - see docs/battle-menu-notes.md §13's "what's left" note).
+ * the text is fully printed and holds (ENDEAVOR's own attacker squish
+ * sub-window, ticks `pressTick`+55..+62, is modeled via `drawEndeavorSquish`
+ * above - S7 slice E1d-retry, §15b; the rest of ENDEAVOR's own animation +
+ * Onix's HP-bar drain + the player healthbox's own HP digits are still out
+ * of scope - see docs/battle-menu-notes.md §13's "what's left" note).
  */
 function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): void {
   // Only ever reached via turn 2's own confirm (cursor 2), which by
   // construction can't happen before the S7 slice E1 reopen sets
   // `turn1Resolved` - Grovyle's healthbox always needs its real (101) HP
   // here, never the stale full-HP harvest.
-  drawActionMenuIdleContent(fb, turn2KickoffBounceTick(t, pressTick), true);
+  if (!drawEndeavorSquish(fb, t, pressTick)) {
+    drawActionMenuIdleContent(fb, turn2KickoffBounceTick(t, pressTick), true);
+  }
   // S7 slice E1b: Onix's own HP-bar drain (117->101, `endeavorOnixHp`) is
   // valid for every `t` (clamped both sides) - safe to call unconditionally
   // here rather than gating on a separate "drain window" branch, same

@@ -47,6 +47,17 @@ function pixelAtSentOut(t: number, x: number, y: number): [number, number, numbe
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
 
+/** turn 2's own real `pressTick` (`battleMenu.test.ts`'s own `pressTick = 2945`, `TURN2_KICKOFF`/ENDEAVOR fixture) - the FIGHT submenu confirmed on cursor slot 2. */
+const TURN2_PRESS_TICK = 2945;
+const TURN2_FIGHT_SUBMENU_STATE = { openElapsed: 0, cursor: 2 as const, displayCursor: 2 as const, closeElapsed: null, confirmElapsed: TURN2_PRESS_TICK - TICK0 };
+/** Same as `pixelAtSentOut`, but with turn 2's own FIGHT submenu already confirmed on ENDEAVOR (cursor slot 2) - the state `drawTurn2KickoffText`/`drawEndeavorSquish` render under (S7 slice E1d-retry, §15b). */
+function pixelAtTurn2(t: number, x: number, y: number): [number, number, number] {
+  const fb = new Uint8Array(240 * 160 * 4);
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN2_FIGHT_SUBMENU_STATE, turn1Resolved: true });
+  const o = (y * 240 + x) * 4;
+  return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+}
+
 const grovyleFront = (grovyleFrontSpritesAsset as Record<string, { tileset: { columns: number; tiles: number[][] }; palette: { r: number; g: number; b: number }[] }>).GROVYLE!;
 /** GROVYLE_CORNER-relative (31,7) - the sprite's own first opaque pixel in raster order (tile 3, pixel (7,7)), used to pin the materialize-gate tick without hardcoding a color by hand. */
 const GROVYLE_FIRST_OPAQUE_OFFSET = { x: 31, y: 7 };
@@ -862,5 +873,39 @@ describe("battleScene: S7 slice C - Rock Slide's shaken BG3 vs. the player healt
 
     expect(atUnshifted).toEqual([255, 255, 255]);
     expect(atShaken).toEqual([255, 255, 255]); // was [247, 247, 255] pre-fix: the flat background's tile row leaking through
+  });
+});
+
+// S7 slice E1d-retry (docs/battle-menu-notes.md §15b): ENDEAVOR's attacker
+// squish sub-window, RAM-probed (tools/probe/dump-endeavor-squish.py)
+// against gOamMatrices directly rather than pixel-fit. Every value below is
+// Tier-1-pinned straight from that probe dump / the oracle cross-check that
+// found the matrix's own render lag (2 ticks) differs from the palette
+// blend's (1 tick) - see ENDEAVOR_SQUISH_TABLE's own doc comment.
+describe("S7 slice E1d-retry: ENDEAVOR's attacker squish sub-window (docs/battle-menu-notes.md §15b) - RAM-probed matrix, not a pixel fit", () => {
+  const GROVYLE_CORNER = { x: 144, y: 12 }; // battleScene.ts's own (unexported) constant - Grovyle's front-sprite corner, unchanged by this session
+
+  it("render 3000 (pressTick+55) is blend-only - matrix still neutral (GROVYLE_FIRST_OPAQUE_OFFSET unmoved) but the palette is already ramping toward the blend target (coeff=1, not the raw palette color)", () => {
+    const [r, g, b] = pixelAtTurn2(3000, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    expect([r, g, b]).not.toEqual([grovyleFirstOpaquePixel.r, grovyleFirstOpaquePixel.g, grovyleFirstOpaquePixel.b]);
+    expect([r, g, b]).toEqual([66, 132, 57]); // blendComponentToward(raw=(57,132,66), target=(248,168,0), coeff=1)
+
+    // Geometry is still neutral at 3000 - a doubled-box-only pixel (x=214, past
+    // the native 64px-wide canvas' own right edge at GROVYLE_CORNER.x+64=208)
+    // is still bare background, not yet-widened silhouette.
+    expect(pixelAtTurn2(3000, 214, 63)).toEqual([189, 189, 156]);
+  });
+
+  it("render 3003 (pressTick+58) silhouette extends past the native 64px canvas on X (the doubled-affine-box fix) with the correctly-blended color (coeff=4) at that same pixel - the exact §15a X-axis miss this session closed", () => {
+    // (214,63) is GROVYLE_CORNER-relative (70,51) - 6px past the sprite's own
+    // native right edge (GROVYLE_CORNER.x+64=208). Only reachable at all if
+    // drawSpriteSheetAffineStretch's `doubled` scan window is wired AND the
+    // matrix (not an inverted/axis-swapped guess) genuinely stretches X here.
+    expect(pixelAtTurn2(3003, 214, 63)).toEqual([57, 41, 0]);
+  });
+
+  it("the tick before the window (pressTick+54 = 2999, §15a's own neutral anchor) still falls back to the plain (unsquished, unblended) idle content", () => {
+    const before = pixelAtTurn2(TURN2_PRESS_TICK + 54, GROVYLE_CORNER.x + GROVYLE_FIRST_OPAQUE_OFFSET.x, GROVYLE_CORNER.y + GROVYLE_FIRST_OPAQUE_OFFSET.y);
+    expect(before).toEqual([grovyleFirstOpaquePixel.r, grovyleFirstOpaquePixel.g, grovyleFirstOpaquePixel.b]);
   });
 });

@@ -1,3 +1,44 @@
+## 139 — Bounded worker: S7 slice E1c — ENDEAVOR's own attack animation, GROUNDWORK ONLY (2 gfx assets extracted + full 5-mechanism source derivation + oracle-timed transition table, `docs/battle-menu-notes.md` §15); engine wiring NOT landed, this session's own explicit scope call — suite unchanged **669/669**
+
+- **State:** `npm test` **669/669** (unchanged, no engine code touched),
+  `npm run build` green, tree clean. New gen assets
+  `src/assets/gen/battle-anim-{sweat-drop,hitsplat}.json`; `endeavor` key
+  added to `src/data/gen/battle-move-anim-tables.json`. No trace
+  added/changed (deliberate — see below).
+- **Did:** source-read `Move_ENDEAVOR` (`battle_anim_scripts.s:3789-3803`)
+  and found FIVE concurrent sub-mechanisms, not the "generic hit" the
+  original handoff assumed and #137 already flagged: attacker 2-axis
+  squish (affine scale — the engine's only existing affine renderer is
+  uniform-scale-only, built for materialize), 16 sweat-droplet sprites
+  (new gfx + particle physics), a 16-color palette blend ramp (new
+  primitive, distinct from the existing `blendedTile` alpha-compositor),
+  two target-shake task instances, two hitsplat sprites (new gfx + its own
+  affine "pop"). Extracted both new gfx assets (`sweat_drop.png` 1 tile,
+  `impact.png` 16 tiles) via the established `extract-battle-move-anim-
+  assets.ts` convention; hand-derived exact formulas for all five
+  mechanisms from source (steps/offsets/timings, see §15); ran a scratch
+  dense every-tick oracle capture (2999-3095, not committed) and built a
+  full bbox-transition table — confirms §14's coarse "two 0-diff lulls"
+  finding at full resolution and isolates a clean squish-only sub-window
+  (3000-3007, attacker side only, before droplets/shake/hitsplat
+  contaminate it) as the cheapest possible incremental landing point.
+- **Next:** wire the engine per §15's "what a follow-up session needs"
+  list, in order of leverage: (1) a 2-axis affine sprite renderer
+  (generalizes the existing materialize one); (2) land the isolated
+  3000-3007 squish-only sub-window as its own green trace slice first,
+  proving the renderer before adding droplets/blend/shake/hitsplat; (3)
+  RAM-probe the 3008-3049/3064-3084 spans (dump-rockslide-sprites.py-style)
+  to attribute sub-mechanism boundaries precisely, and confirm
+  `gAnimMovePower` for ENDEAVOR (shake amplitude depends on it). Otherwise
+  DRAGON_BREATH's window (3129+, slice E2) or ISSUES #19/#20.
+- **Notes:** scope call made explicitly, not improvised — this run's own
+  precedent (ROCK_SLIDE, §11) shows comparable per-mechanism complexity
+  took a full session and still left a residual; five concurrent
+  mechanisms here made a rushed pixel-fit likelier to land wrong or red
+  than useful, so this session banked the (expensive, otherwise-repeated)
+  research instead. No papercuts.
+
+---
 ## 138 — Supervisor: WIN-chain scout merged — **battle 1's WIN, swap decline, and battle 2's first action menu fully ground-truthed at tick 33031** (11969 under the new 45000 cap); S8's acceptance chain is now provably pinnable
 
 - **State:** `npm test` **669/669**, `npm run build` green, tree clean at

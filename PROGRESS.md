@@ -4,6 +4,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 142 — Bounded worker: S7 slice E1d-retry — **ENDEAVOR squish RAM-probed and landed green** (renders 3000-3005, real hardware `gOamMatrices` values, not a pixel fit); `npm test` **672/672** (+3), `npm run build` green
+
+- **State:** `npm test` **672/672**, `npm run build` green, tree clean.
+  `turn2-endeavor-drain.json` dense window now 2999-3005 (was bare 2999);
+  `tools/probe/dump-endeavor-squish.py` committed.
+- **Did:** RAM-probed the attacker's real `gOamMatrices[matrixNum]`
+  per-tick (§15a's own recommendation) — found squish uses a DIFFERENT,
+  non-inverting battle-anim subsystem (`SetSpriteRotScale`/
+  `RunAffineAnimFromTaskData`) than mechanism 4's own inverting one, which
+  is what actually caused §15a's X-axis miss (wrong subsystem, not a wrong
+  axis — no swap needed, `xScale`→X/`yScale`→Y exactly as labeled).
+  `drawSpriteSheetAffineStretch` already had the right (direct, unswapped)
+  convention; added an opt-in `doubled` scan-window param (RAM-confirmed
+  `ST_OAM_AFFINE_DOUBLE`, re-derived from `CalcCenterToCornerVec`) to let
+  the silhouette grow past its native 64px box. Also found (pixel-solving
+  the oracle's own captures, not assumed) that §15's "independently driven"
+  palette blend is wrong — it's ALREADY ramping across this whole window,
+  not scheduled later — and that the matrix/blend don't share one render
+  lag (matrix: 2 ticks; blend: the usual 1). Landed squish+blend together
+  (blend reused `drawSpriteSheetAffineStretch`'s own existing tint params,
+  no new primitive). Droplets contaminate 1 tick earlier than §15 estimated
+  (3006, not 3008) — window trimmed 3000-3007→3000-3005 rather than commit
+  a knowingly-red pair; full analysis in `docs/battle-menu-notes.md` §15b.
+- **Next:** droplets are the clear next increment (asset extracted, physics
+  formula banked in §15, spawn boundary now pixel-pinned) — same
+  land-green-then-extend discipline. After that: blend/shake/hitsplat per
+  §15's leverage order, then DRAGON_BREATH (E2) or ISSUES #19/#20.
+- **Notes:** no papercuts.
+
+---
 ## 141 — Supervisor: swap-YES scout merged — **the factory swap screen is fully ground-truthed** (entry fade → party picker → popup → opponent picker → accept → completed swap → battle 2's menu: swapped-in GROVYLE 143/143 vs KABUTO); S8 ground truth is now essentially complete on both swap branches
 
 - **State:** `npm test` **669/669**, `npm run build` green, tree clean at
@@ -62,44 +92,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no papercuts. Time-boxed session spent its remaining room on
   pixel-fit attempts rather than switching to a RAM probe soon enough —
   flagged in §15a so the next session doesn't repeat the same dead ends.
-
----
-## 139 — Bounded worker: S7 slice E1c — ENDEAVOR's own attack animation, GROUNDWORK ONLY (2 gfx assets extracted + full 5-mechanism source derivation + oracle-timed transition table, `docs/battle-menu-notes.md` §15); engine wiring NOT landed, this session's own explicit scope call — suite unchanged **669/669**
-
-- **State:** `npm test` **669/669** (unchanged, no engine code touched),
-  `npm run build` green, tree clean. New gen assets
-  `src/assets/gen/battle-anim-{sweat-drop,hitsplat}.json`; `endeavor` key
-  added to `src/data/gen/battle-move-anim-tables.json`. No trace
-  added/changed (deliberate — see below).
-- **Did:** source-read `Move_ENDEAVOR` (`battle_anim_scripts.s:3789-3803`)
-  and found FIVE concurrent sub-mechanisms, not the "generic hit" the
-  original handoff assumed and #137 already flagged: attacker 2-axis
-  squish (affine scale — the engine's only existing affine renderer is
-  uniform-scale-only, built for materialize), 16 sweat-droplet sprites
-  (new gfx + particle physics), a 16-color palette blend ramp (new
-  primitive, distinct from the existing `blendedTile` alpha-compositor),
-  two target-shake task instances, two hitsplat sprites (new gfx + its own
-  affine "pop"). Extracted both new gfx assets (`sweat_drop.png` 1 tile,
-  `impact.png` 16 tiles) via the established `extract-battle-move-anim-
-  assets.ts` convention; hand-derived exact formulas for all five
-  mechanisms from source (steps/offsets/timings, see §15); ran a scratch
-  dense every-tick oracle capture (2999-3095, not committed) and built a
-  full bbox-transition table — confirms §14's coarse "two 0-diff lulls"
-  finding at full resolution and isolates a clean squish-only sub-window
-  (3000-3007, attacker side only, before droplets/shake/hitsplat
-  contaminate it) as the cheapest possible incremental landing point.
-- **Next:** wire the engine per §15's "what a follow-up session needs"
-  list, in order of leverage: (1) a 2-axis affine sprite renderer
-  (generalizes the existing materialize one); (2) land the isolated
-  3000-3007 squish-only sub-window as its own green trace slice first,
-  proving the renderer before adding droplets/blend/shake/hitsplat; (3)
-  RAM-probe the 3008-3049/3064-3084 spans (dump-rockslide-sprites.py-style)
-  to attribute sub-mechanism boundaries precisely, and confirm
-  `gAnimMovePower` for ENDEAVOR (shake amplitude depends on it). Otherwise
-  DRAGON_BREATH's window (3129+, slice E2) or ISSUES #19/#20.
-- **Notes:** scope call made explicitly, not improvised — this run's own
-  precedent (ROCK_SLIDE, §11) shows comparable per-mechanism complexity
-  took a full session and still left a residual; five concurrent
-  mechanisms here made a rushed pixel-fit likelier to land wrong or red
-  than useful, so this session banked the (expensive, otherwise-repeated)
-  research instead. No papercuts.
