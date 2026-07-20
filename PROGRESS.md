@@ -4,6 +4,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 173 — Worktree probe (supervisor-folded): Family B (menu-idle ticks 3879/3888) ROOT-CAUSED — no hardware quirk; the engine's turn-3 reopened-submenu bounce composition is uniformly ONE RAM tick ahead of the real invisible bouncer's `sSinIndex`, visible only at sine-plateau crossings; merged `42b26f9`, suite 756/756 on the merged tree
+
+- **State:** merged into master, `npm test` 756/756 + build green
+  post-merge (supervisor-verified; verification script re-run in the
+  worktree by supervisor — all 5 checks PASS). New: multi-hop `"path"`
+  support in `tools/probe/ram-probe.py` (backward-compat verified),
+  `tools/probe/verify-turn3-menu-bounce-rule.py`, probe spec + twice-run
+  dump, `docs/turn3-residual-probe-notes.md` "Family B, continued".
+- **Did:** pointer-chase (`gBattleSpritesDataPtr` → `healthBoxesData[0]`
+  → bouncer sprite ids → `gSprites[].data[]`) proves the bouncer's
+  `sSinIndex` ticks a perfectly uniform +7/tick (both regions, 41 ticks,
+  zero exceptions) with plain read-before-increment sampling
+  (`battle_main.c:2967-2979`). `model(t) == real_screen(t+1)` holds with
+  ZERO violations: a constant miscalibration, masked on shared plateaus,
+  visible exactly at crossings — 3861/3870/3879/3888 in this window.
+  OVERTURNS §19's "hardware quirk at a bounce extremum" reading. The
+  earlier "1-tick shift ruled out" test had shifted the WRONG WAY
+  (2→1 advances further); the corrective direction is 2→3 for this
+  composition. Caveat flagged: predicted mismatches at 3861 (onix) and
+  3870 (healthbox) are NOT in captureFrames — the fix slice must add
+  them alongside restoring 3879/3888.
+- **Next:** one small main-lane cleanup slice applies Family A's
+  stale-power shake rule + Family B's phase correction and restores all
+  16 excluded ticks (12 shake + 3879/3888 + 3861/3870); then turn 5.
+- **Notes:** no new papercuts.
+
+---
 ## 172 — Bounded worker retry: S7 slice I-2 — the turn-4 clone-window residual ROOT-CAUSED and FIXED (2 real bugs, not the bounce/HP candidates §22 suspected); `turn4-doubleteam.json` (new) **249/249**, `turn4-rockslide.json` (new) **250/250**, `npm test` **756/756** (+3), build green, zero regressions
 
 - **State:** `npm test` 756/756, `npm run build` green, tree clean. New
@@ -91,47 +118,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   a clean 30-45 min worktree step.
 - **Notes:** worker PAPERCUT (ram-probe.py spews mGBA logs to stdout,
   docstring implies stderr) recorded in PAPERCUTS.md by supervisor.
-
----
-## 170 — Bounded worker: S7 slice I — turn 4's FIGHT-submenu reopen landed green (44/44, 0 diff); the DOUBLE_TEAM/ROCK_SLIDE resolution itself does NOT land — a real uncracked pixel residual, not a scope choice
-
-- **State:** `npm test` **753/753** (+4), `npm run build` green, tree
-  clean. New `tools/compare/traces/turn4-menu.json` (extends `turn3-
-  rockslide.json`'s own 4890-frame prefix with the groundtruth trace's own
-  turn-4 reopen+confirm presses verbatim, through tick 4933, 44 dense
-  captures) is **44/44, 0 diff**. Zero regressions, exact prior counts:
-  `turn3-rockslide` 256/256, `turn3-endeavor` 180/180, `turn3-menu` 250/250,
-  `turn1-cloneanim` 230/230, `turn1-rockslide` 256/256, `turn2-dragonbreath`
-  237/237.
-- **Did:** New `BattleSceneState.turn3Resolved` + `core.ts` reopen gate
-  (`TURN3_ROCKSLIDE_REOPEN_GATE_DELAY=465`, derived from turn 3's own
-  synthetic-vs-real press-tick anchors' difference) — cursor stays at 0
-  (ROCK_SLIDE, no nav needed, §13's own finding), PP reads 8/10
-  (`currentPPForActiveMon` gained a `turn3Resolved` param, a second
-  independent slot-0 decrement). Wrote (but could NOT pixel-verify) the
-  DOUBLE_TEAM+banner+ROCK_SLIDE resolution itself, parameterizing turn 1's
-  own mechanism with a REAL press tick (`TURN4_CONFIRM_PRESS_TICK=4925` —
-  unlike turn 3, no synthetic anchor needed since turn 4's preceding move IS
-  DOUBLE_TEAM again, same as turn 1). Six independent RAM/pixel anchors
-  (`gCurrentMove` flip, evasion stage, accuracy/crit/damage rolls, ROCK_SLIDE
-  kickoff-text tick, HP field update) all landed EXACTLY where turn 1's own
-  unchanged formulas predict — strong evidence for zero-code-change reuse —
-  **but a live oracle diff still shows a real, unexplained ~2% residual
-  inside the clone-animation window** (728px, `x=145-205,y=17-70`, the
-  Grovyle sprite region — confirmed NOT bounce-related: invariant across the
-  entire bounce-tick grid-search plateau that fixed the confirm-wait
-  window's own separate bounce bug). Per this run's "never commit red" rule,
-  did not commit that window or the ROCK_SLIDE window (untested downstream
-  of the same unresolved issue) — only the reopen/confirm-registration
-  prefix, which IS fully verified.
-- **Next:** RAM-probe `BLDALPHA`/`BLDCNT`/the palette buffer directly at
-  the clone-window residual (tick 4978) before re-sweeping pixel formulas
-  blind — root-causing that is the hard blocker for the rest of turn 4.
-  Full writeup + every anchor/number: `docs/battle-turn-notes.md` §22.
-- **Notes:** mid-session accident — a scratch grid-search loop's own `git
-  checkout -- src/engine/battleScene.ts` (meant to revert a throwaway
-  experiment) wiped that file's real uncommitted edits too, since nothing
-  had been committed yet. Recovered by re-applying the same edits from
-  memory (verified via fresh `tsc`/`npm test`), but cost real time —
-  PAPERCUT: never `git checkout` a file mid-experiment without committing
-  or stashing real work first, ~15 min lost.

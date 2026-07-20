@@ -1,3 +1,47 @@
+## 170 — Bounded worker: S7 slice I — turn 4's FIGHT-submenu reopen landed green (44/44, 0 diff); the DOUBLE_TEAM/ROCK_SLIDE resolution itself does NOT land — a real uncracked pixel residual, not a scope choice
+
+- **State:** `npm test` **753/753** (+4), `npm run build` green, tree
+  clean. New `tools/compare/traces/turn4-menu.json` (extends `turn3-
+  rockslide.json`'s own 4890-frame prefix with the groundtruth trace's own
+  turn-4 reopen+confirm presses verbatim, through tick 4933, 44 dense
+  captures) is **44/44, 0 diff**. Zero regressions, exact prior counts:
+  `turn3-rockslide` 256/256, `turn3-endeavor` 180/180, `turn3-menu` 250/250,
+  `turn1-cloneanim` 230/230, `turn1-rockslide` 256/256, `turn2-dragonbreath`
+  237/237.
+- **Did:** New `BattleSceneState.turn3Resolved` + `core.ts` reopen gate
+  (`TURN3_ROCKSLIDE_REOPEN_GATE_DELAY=465`, derived from turn 3's own
+  synthetic-vs-real press-tick anchors' difference) — cursor stays at 0
+  (ROCK_SLIDE, no nav needed, §13's own finding), PP reads 8/10
+  (`currentPPForActiveMon` gained a `turn3Resolved` param, a second
+  independent slot-0 decrement). Wrote (but could NOT pixel-verify) the
+  DOUBLE_TEAM+banner+ROCK_SLIDE resolution itself, parameterizing turn 1's
+  own mechanism with a REAL press tick (`TURN4_CONFIRM_PRESS_TICK=4925` —
+  unlike turn 3, no synthetic anchor needed since turn 4's preceding move IS
+  DOUBLE_TEAM again, same as turn 1). Six independent RAM/pixel anchors
+  (`gCurrentMove` flip, evasion stage, accuracy/crit/damage rolls, ROCK_SLIDE
+  kickoff-text tick, HP field update) all landed EXACTLY where turn 1's own
+  unchanged formulas predict — strong evidence for zero-code-change reuse —
+  **but a live oracle diff still shows a real, unexplained ~2% residual
+  inside the clone-animation window** (728px, `x=145-205,y=17-70`, the
+  Grovyle sprite region — confirmed NOT bounce-related: invariant across the
+  entire bounce-tick grid-search plateau that fixed the confirm-wait
+  window's own separate bounce bug). Per this run's "never commit red" rule,
+  did not commit that window or the ROCK_SLIDE window (untested downstream
+  of the same unresolved issue) — only the reopen/confirm-registration
+  prefix, which IS fully verified.
+- **Next:** RAM-probe `BLDALPHA`/`BLDCNT`/the palette buffer directly at
+  the clone-window residual (tick 4978) before re-sweeping pixel formulas
+  blind — root-causing that is the hard blocker for the rest of turn 4.
+  Full writeup + every anchor/number: `docs/battle-turn-notes.md` §22.
+- **Notes:** mid-session accident — a scratch grid-search loop's own `git
+  checkout -- src/engine/battleScene.ts` (meant to revert a throwaway
+  experiment) wiped that file's real uncommitted edits too, since nothing
+  had been committed yet. Recovered by re-applying the same edits from
+  memory (verified via fresh `tsc`/`npm test`), but cost real time —
+  PAPERCUT: never `git checkout` a file mid-experiment without committing
+  or stashing real work first, ~15 min lost.
+
+---
 ## 169 — Worktree scout (supervisor-folded): switch-in window fully itemized + Pidgeotto front sprite verified byte-exact (0/1087) — the faint engine slice now has complete pinned ground truth; merged `18c7bbd`, suite 749/749 on the merged tree
 
 - **State:** merged into master, `npm test` 749/749 + build green
