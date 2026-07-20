@@ -55,9 +55,20 @@ const BASE_TICK = 1748; // atomic menu draw, both bounce regions at rest (onix=0
 // capture; see tools/compare/scratch/menu-idle/fetch_and_diff.mjs).
 const ONIX_BBOX = { x: 44, y: 49, width: 56, height: 62 }; // region A: (44,49)-(99,110) inclusive
 const ONIX_RAISED_TICK = 1759; // onix=1, healthbox=0 - only the onix bbox differs from BASE_TICK here
-const HEALTHBOX_BBOX = { x: 127, y: 74, width: 103, height: 37 }; // region B: (127,74)-(229,110) inclusive
+// ISSUES #19 root cause (docs/battle-menu-notes.md §8b): the original
+// height=37 bbox (127,74)-(229,110) was cropped to match the y=0/y=1 states'
+// own footprint without independently verifying the rare y=2 state's true
+// extent - pixel-confirmed this session (both against `fight-submenu.json`
+// tick 2073 AND this very extractor's own source tick 1813) that the y=2
+// state paints one row FURTHER than y=0/y=1 ever do (row 111, a 99px
+// near-solid green run, x127-225ish - the healthbox's own bottom edge one
+// pixel lower at its rare sine-peak position). Extending to height=38 for
+// ALL states is safe: y=0/y=1's own row 111 is plain, unpainted background
+// (RAM/pixel-confirmed at ticks 1748/1749/1750), identical to what's already
+// there - only the y=2 harvest's extra row carries real new content.
+const HEALTHBOX_BBOX = { x: 127, y: 74, width: 103, height: 38 }; // region B: (127,74)-(229,111) inclusive
 const HEALTHBOX_Y1_TICK = 1749; // onix=0, healthbox=1 (the dossier's own tick-1749 "blip")
-const HEALTHBOX_Y2_TICK = 1813; // onix=1, healthbox=2 (the dossier's own tick-1813 rare transient)
+const HEALTHBOX_Y2_TICK = 1813; // onix=1, healthbox=2 (the dossier's own tick-1813 rare transient, ISSUES #19's root cause)
 
 trace.captureFrames = [BLANK_TICK, BASE_TICK, ONIX_RAISED_TICK, HEALTHBOX_Y1_TICK, HEALTHBOX_Y2_TICK];
 const result = await runOracleTrace(trace);
