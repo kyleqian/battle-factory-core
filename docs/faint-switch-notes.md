@@ -528,6 +528,239 @@ This table is a starting point for whoever implements the engine slice, not
 an implementation-ready spec — several rows are explicitly flagged
 "visually yes, not formula-verified" rather than claimed solved.
 
+## 7. Formula verification (worktree lane `wt-20260720-115316`, oracle/RAM scouting only — no engine code)
+
+Direct follow-up to §6's mapping table, which graded three elements
+"visually yes, not formula-verified" or "new, no S6 analogue." This session
+RAM-pins all three to the precision an engine slice needs (exact ticks,
+literal per-tick tables, source citations), using two new committed
+`ram-probe.py` specs (`tools/probe/specs/switchin-b1-sprite.json`,
+path-based, tracks `gBattlerSpriteIds[1]`'s sprite dynamically through the
+sprite-destroy/recreate boundary; `tools/probe/specs/switchin-allslot-scan.json`,
+a brute-force `inUse`/`x`/`y` scan over all 65 `gSprites[]` slots, since the
+ball-prop and item-effect sprites aren't tracked by any battler-indexed
+global). Both run against the already-committed `battle1-grovyle-faint.json`
+button script (same 66 segments as the dense traces) via
+`/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+tools/probe/ram-probe.py <spec> <out.json>`, twice-run each, **byte-identical
+across both runs** (deterministic, no rerun diffs). Outputs committed at
+`src/data/gen/battle1-switchin-b1-sprite-probe.json` (853 ticks, 6460-7312)
+and `src/data/gen/battle1-switchin-allslot-probe.json` (all-slot scan
+6700-7312, trimmed to the 24 slots that ever toggle `inUse` — the other 41
+sit at the dead-sprite default `x=304,y=160,flags=0` the entire window).
+
+### 7a. Faint sink — PINNED, exact tick, exact closed form (goal 1)
+
+RAM-confirms §3a's source-cited mechanism to the tick. `gSprites[8]`
+(`gBattlerSpriteIds[1]`'s slot throughout the sink) per-tick, straight off
+`switchin-b1-sprite.json`'s probe:
+
+| tick | callback | y2 | data[3] | data[4] |
+|---|---|---|---|---|
+| 6501 | `0x08007429` (idle) | 0 | 0 | 256 |
+| **6502** | `0x08039a49` | 0 | 8 | 1 |
+| 6503 | `0x08039a49` | 8 | 7 | 2 |
+| 6505 | `0x08039a49` | 16 | 6 | 2 |
+| 6507 | `0x08039a49` | 24 | 5 | 2 |
+| 6509 | `0x08039a49` | 32 | 4 | 2 |
+| 6511 | `0x08039a49` | 40 | 3 | 2 |
+| 6513 | `0x08039a49` | 48 | 2 | 2 |
+| 6515 | `0x08039a49` | 56 | 1 | 2 |
+| 6517 | `0x08039a49` | 64 | 0 | 2 |
+| **6519** | `0x08007429` (idle again) | 0 | 0 | 0 |
+| 6520-6560 | `0x08007429` steady | 0 | 0 | 0 |
+
+`0x08039a49` is never independently symbol-resolvable (`SpriteCB_AnimFaintOpponent`
+is `static`, `bin/oracle symbols` returns `null` for it) but its identity
+isn't in doubt: `SpriteCB_FaintOpponentMon` itself (`0x08039934`, confirmed
+via `bin/oracle symbols`) sets `data[3]=8-yOffset/8`, `data[4]=1`, and
+`callback = SpriteCB_AnimFaintOpponent` as its last act (`battle_main.c:2783-2785`)
+— exactly the state this probe observes the FIRST tick the callback isn't
+the idle dummy, with `data[3]=8` matching Grovyle's `yOffset=4` from
+`mon-pic-coords.json` (`8 - 4/8 = 8`, integer division) bit-exact. So tick
+**6502** is `S`, the sink-start tick (`SpriteCB_FaintOpponentMon`'s own
+one-tick cameo — the tick before, still idle; is never separately
+observable as a *third* callback value because the handoff to
+`AnimFaintOpponent` happens inside the same C call before the next frame's
+sprite draw).
+
+The 8 explicit steps land at **6503, 6505, 6507, ..., 6517** — exactly the
+"first step 1 tick after `S`, every step after that 2 ticks apart" cadence
+`SpriteCB_AnimFaintOpponent`'s source states verbatim
+(`data[4]=1` then reset to `2`). `y2` climbs `8, 16, 24, ..., 64` (8×step).
+At tick **6519** (the 9th decrement, `data[3]: 0 -> -1`), `FreeSpriteOamMatrix`
++ `DestroySprite` fire in the same tick — the probe reads the slot's fields
+already cleared to their post-destroy defaults (idle callback, `y2=0`,
+`data[3]=data[4]=0`, `flags=0` i.e. `inUse` cleared too), steady through
+6560. This matches §3a's own pixel finding **exactly, tick for tick**: "484
+opaque px steady... 6519-6560" — RAM-destroy and pixel-invisible land on
+the identical tick, no residual lag for the *end* of the sink (the
+in-between steps still carry this dossier's usual ~1-tick render lag, per
+§3a's own pixel plateaus falling at 6504/6506/.../6518, one tick after each
+RAM step).
+
+**Closed form for the engine** (species-general, not curve-fit — every
+constant below is source-cited): let `Y` = the switching-out species'
+`gMonFrontPicCoords[species].yOffset` (already extracted,
+`mon-pic-coords.json`), and let `n = 8 - floor(Y/8)` (Grovyle: `n=8`). Let
+`S` = the tick `SpriteCB_FaintOpponentMon` assigns its callback (RAM-pinned
+at 6502 for this trace — the general rule for *finding* `S` in a fresh
+trace isn't itemized this session, just this one instance). Then:
+- Sprite invisible-and-y2=0 for `tick < S`.
+- For step `k = 1..n`: at tick `S + 2k - 1`, `y2 = 8k` and the sprite's
+  bottom `(n-k+1)`th 8px tile-row is erased (`StartSpriteAnim` restarts the
+  idle anim on the remaining rows each step — cosmetic, not needed for a
+  from-scratch renderer that just draws less of the sheet each step).
+- At tick `S + 2n + 1` (**6502 + 17 = 6519**, exact), the sprite is
+  destroyed — draw nothing from this tick on.
+
+This is a genuinely new mechanism (confirmed again this session — no S6
+send-out mechanism erases-and-shifts a sprite), fully pinned: **no
+remaining unknowns for whoever implements it**, modulo the general rule for
+locating `S` in a fresh (non-this-trace) battle, which is a "find where the
+opponent's HP hits 0 and add the usual post-KO text/menu latency," not a
+new research question.
+
+### 7b. Ball throw + materialize — mon-sprite geometry VERIFIED-SAME (shifted); ball prop + tint NOT located (goal 2, partial)
+
+**Mon-sprite side (Pidgeotto's own sprite, slot 5 this trace)**, full
+callback/field trace, `switchin-b1-sprite.json`:
+
+| tick | callback | notes |
+|---|---|---|
+| 6726 | `0x08007429` (idle) | sprite created, `flags=5` (inUse+**invisible**), `x=176,y=51`, still (176,51) throughout — this is the sprite's own logical center, not `GROVYLE_CORNER`-style blit corner |
+| 6744 | `0x08039b59` | = `SpriteCB_OpponentMonFromBall` (`0x08039b58`, confirmed via `bin/oracle symbols`) `+1` (thumb bit) — assigned per `pokeball.c:818` the instant the ball anim ends |
+| 6745 | (same) | `flags` drops to `1` (invisible cleared — sprite now **visible**); `y2` begins a short descent: `14,13,12,11,10,9,8,7,5,4,3,2,0` over ticks 6745-6757 (a landing "settle" bounce, literal table, not curve-fit — no S6 analogue documented this session, flagged as switch-in-specific or simply not previously checked for Grovyle's own intro) |
+| 6760 | `0x080398b9` | `animNum` flips 0->1 (`StartSpriteAnim(sprite,1)`, the two-frame front-anim family, §5's mechanism-5 precedent); `animCmdIndex` advances 0(6760)->1(6765)->2(6775) — **starts before the stretch matrix engages**, unlike Grovyle's own documented ordering (§7.17: front-anim starts only once affine-emerge finishes) — flagged as a possible sequencing difference, not cross-checked against Grovyle's own RAM this session |
+| 6784 | `0x08180211` | the stretch driver (functionally identified by its numeric output below, not independently symbol-resolved — it's `static`) |
+| 6785-6790 | (same) | `(data4,data5,y2)` = `(256,256,0),(257,254,0),(258,251,0),(259,248,-1),(260,245,-1),(262,241,-1)` — **byte-exact** to `GROVYLE_STRETCH_EARLY_TABLE[0..6]` (`battleScene.ts:2298-2306`); tick 6784 itself reads raw `(0,0,0)`, reproducing the same "matrix not yet latched this tick" artifact `GROVYLE_STRETCH_EARLY_TABLE[0]`'s own doc comment already names for Grovyle's tick 1496 |
+| 6791-6825 | (same) | `(data4,data5,y2)` **byte-exact** to `GROVYLE_STRETCH_TABLE[0..34]` (`battleScene.ts:2233-2247`) verbatim, tick `6791+i` = table index `i`, **all 35 entries checked, zero deviation** |
+| 6826 | `0x08184d89` | settle/handoff (unresolved symbol) |
+| 6827+ | `0x08007429` (idle) | fully settled — matches §3c's own "~6810-6820 static" pixel finding within this dossier's usual slop |
+
+**Verdict: verified-same, shifted.** The front-sprite stretch-in
+(mechanism 5) is **byte-identical** to `GROVYLE_STRETCH_TABLE` +
+`GROVYLE_STRETCH_EARLY_TABLE` — 41/41 checked tick-values exact, just
+re-anchored from RAM tick 1503 (Grovyle) to RAM tick 6791 (Pidgeotto, this
+trace). **No new table needed** — the engine slice can reuse the existing
+`GROVYLE_STRETCH_TABLE`/`GROVYLE_STRETCH_EARLY_TABLE` constants verbatim
+for any species' switch-in materialize, anchored at whatever tick its own
+ball-open event lands on (the species-agnostic mechanism this session's
+evidence implies: `Anim_VerticalStretch`'s math has no species-dependent
+term, so of course the numbers replay identically).
+
+**Open-particle burst** (`switchin-allslot-scan.json`, all-slot scan):
+13 distinct sprite slots (**9-21**) created in a staggered **1-per-tick**
+sequence at ticks **6746, 6747, ..., 6759**, all anchored at creation
+position `(176, 59)`. Each lives **exactly 26 ticks** then is destroyed
+(slot 9: 6746→6772; slot 10: 6747→6773; ...; slot 21: 6759→6785 — all
+26-tick lifetimes, **zero variance** across all 13). This matches the shape
+of S6's own already-implemented mechanism 3 ("open-particle burst",
+§7.14/§7.27) closely — same particle count family, same staggered-creation
+idea. **Not fully verified**: this scan only captured the struct's base
+`x`/`y` fields (frozen at spawn value in this sample), not `x2`/`y2` — the
+actual per-tick radial motion (which S6's own particle renderer drives via
+`x2`/`y2`, per `battleScene.ts`'s Y-sort/particle-position code) wasn't
+captured this session, so whether the radial *motion formula* is
+numerically identical (not just the creation cadence/lifetime) is unverified
+— concrete next step named, not glossed over.
+
+**The literal thrown-ball sprite: NOT conclusively located this session.**
+Slot 4 was investigated as the leading candidate (created at tick 6726 —
+the same tick as the mon sprite — at logical position `(248,168)`,
+off-screen since `y=168` exceeds the 160px screen height) but stays
+`invisible` (`flags=5`) for its **entire** 6726-6761 lifetime with `x`/`y`
+never changing once — inconsistent with a thrown ball that should become
+visible and arc onto the field. Most likely it's some other bookkeeping
+sprite, not the ball. Locating the real ball sprite would need the same
+brute-force pixel/RAM cross-reference §7.12 used for the intro
+(`find_ball.mjs`-style), re-run against this window — not attempted this
+session (time-boxed out).
+
+**Tint: NOT RAM-confirmed.** No palette-buffer probe was run — `paletteNum`
+lives in a 4-bit sub-byte field (`OamData.paletteNum`, sprite offset
+`0x04` bits 12-15) that `ram-probe.py`'s current path vocabulary (`add`,
+`addSymbol`, `derefU32`, `derefU8Scaled`) can't shift-and-mask directly;
+would need either a tool extension or a two-pass probe (read `paletteNum`
+once, assume static, then probe `gPlttBufferFaded`'s corresponding 32-byte
+bank by absolute address). Flagged as a precise, scoped gap, not glossed
+over. One data point worth a second look before assuming verbatim reuse:
+§3c's own pixel read puts the visible tint window at **~6752-6810** (~58
+ticks), notably longer than Grovyle's own RAM-pinned 15-tick
+`Task_FadeMon_ToNormal_Step` coefficient ramp (handoff+42 through +56,
+§7.17) — could be imprecise pixel-eyeballing (`~` marked) or a genuine
+difference; not resolved either way this session.
+
+### 7c. Sitrus sparkle/ring — sprite count + exact source citation PINNED, gfx confirmed unextracted (goal 3)
+
+Source first, then RAM cross-check. `HOLD_EFFECT_RESTORE_HP`'s battle
+script, `BattleScript_ItemHealHP_RemoveItem` (`battle_scripts_1.s:4356-4364`,
+already cited in §2 above for the heal-amount formula), opens with
+`playanimation BS_ATTACKER, B_ANIM_HELD_ITEM_EFFECT` (`B_ANIM_HELD_ITEM_EFFECT`
+= 7, `constants/battle_anim.h:364`), which dispatches
+(`battle_anim_scripts.s`'s `gBattleAnimTable`, line 397) to
+`General_HeldItemEffect` (`battle_anim_scripts.s:10440-10455`):
+
+```
+General_HeldItemEffect:
+	loadspritegfx ANIM_TAG_THIN_RING
+	loadspritegfx ANIM_TAG_SPARKLE_2
+	delay 0
+	...
+	createvisualtask AnimTask_RotateMonToSideAndRestore, 2, 16, 128, ANIM_ATTACKER, 2   (x3)
+	...
+	call GrantingStarsEffect
+```
+
+**Exactly two gfx tags load** (`ANIM_TAG_THIN_RING`, `ANIM_TAG_SPARKLE_2`) —
+and the all-slot RAM scan independently finds **exactly two** sprites
+active during the window, no more, no fewer: slot 3 (created tick 6968 at
+`(57,88)`, destroyed 7030; re-created tick 7040 at `(72,88)`, destroyed
+7067) and slot 4 (created tick 6978 at `(84,83)`, moves to `(72,88)` at
+tick **7040** — coincident with slot 3's second appearance, both now
+co-located — destroyed 7072). Two source-cited gfx loads, two RAM-observed
+sprites: independent cross-confirmation, not a guess. The positions
+(x in 57-84, y in 83-88) sit near Onix's own on-field sprite, consistent
+with §3e's "sparkle appears near Onix" / "ring radiates outward" pixel
+read; the tick-7040 co-location jump lines up with §3e's own "~7040-7048"
+window almost exactly. One correction to §3e's own pixel-only read: the
+"Onix's own sprite briefly tints cyan" observation is more likely the
+three `AnimTask_RotateMonToSideAndRestore` calls (Onix rocking side-to-side,
+a rotation, not a palette tint) — not independently confirmed via a
+rotation-specific RAM read this session, but the source only ever shows a
+rotate task here, no palette-blend task, for this animation.
+
+**Extraction status: genuinely unextracted, confirmed by direct check**
+(not assumed) — `grep -rli "sitrus|sparkle|itemheal|healring"
+src/assets/gen/ src/data/gen/` returns only unrelated hits (item-name/
+hold-effect data *tables*, not gfx). `ANIM_TAG_THIN_RING`/`ANIM_TAG_SPARKLE_2`
+tile+palette data would need a new extractor pass against the ROM's
+battle-anim graphics bank (same family as `tools/extract/`'s existing
+`battle-anim-particles.json`/`battle-anim-ball-open.json` pulls) — not
+attempted, per this session's explicit scope (extraction itself out of
+bounds at this cap).
+
+### 7d. Healthbox slide-in — NOT REACHED this session (goal 4, stretch)
+
+Out of time at this session's cap after 7a-7c. Completely unstarted — no
+probe run, no pixel ramp measured. §3d's own coarse pixel note (six-px to
+879-px growing diff, ~6829-6875) is the only evidence that exists; a future
+session doing this would want the same `extract-sendout-healthbox-content.ts`-
+style brute-force x-offset search §7.6 already used for Grovyle's own
+healthbox, pointed at this window instead.
+
+### Bottom line for the engine slice
+
+| element | verdict |
+|---|---|
+| Faint sink | **Fully pinned** — exact tick, exact closed form, no remaining unknowns for this species |
+| Materialize stretch geometry (mon sprite) | **Verified-same, shifted** — reuse `GROVYLE_STRETCH_TABLE`/`GROVYLE_STRETCH_EARLY_TABLE` verbatim, re-anchor to the new ball-open tick |
+| Open-particle burst | **Shape-verified** (count/cadence/lifetime), motion formula (`x2`/`y2`) unverified |
+| Thrown ball sprite | **Not located** — needs a `find_ball.mjs`-style pixel/RAM cross-reference pass |
+| Materialize tint | **Not RAM-verified** — needs a palette-buffer probe (tool extension or two-pass) |
+| Sitrus sparkle/ring | **Sprite count + exact source mechanism pinned**; gfx extraction still needed (confirmed absent, not assumed) |
+| Healthbox slide-in | **Not reached** |
+
 ## Verification
 
 `npm test` and `npm run build` green (extraction-verification + docs-only
@@ -542,3 +775,11 @@ script (`tools/compare/scratch/pidgeotto_corner_verify.mjs`). Every pixel
 claim in §3 above traces to a specific tick in one of the four new dense
 traces, re-derivable via `bin/oracle run tools/compare/traces-groundtruth/
 battle1-switchin-dense-<a|b|c|d>.json -o <dir>/`.
+
+§7's own two new `ram-probe.py` specs (`tools/probe/specs/switchin-b1-sprite.json`,
+`tools/probe/specs/switchin-allslot-scan.json`) were each run twice this
+session, byte-identical output both times (`diff` clean) — committed at
+`src/data/gen/battle1-switchin-b1-sprite-probe.json` and
+`src/data/gen/battle1-switchin-allslot-probe.json`. No `src/engine/`
+changes this section either; `npm test`/`npm run build` still green (see
+below — same run, not re-verified separately per section).
