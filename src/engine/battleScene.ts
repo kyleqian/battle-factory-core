@@ -3566,7 +3566,7 @@ function drawActionMenuIdleContent(
   if (turn2Resolved) drawPlayerHealthboxHpOverlay(fb, playerHp, healthboxY2);
 }
 
-function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: boolean, turn2Resolved: boolean = false, turn3Resolved: boolean = false, turn4Resolved: boolean = false, reopenedFromClose: boolean = false): void {
+function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: boolean, turn2Resolved: boolean = false, turn3Resolved: boolean = false, turn4Resolved: boolean = false, reopenedFromClose: boolean = false, turn5ReopenPressTick?: number): void {
   if (t <= MENU_IDLE_BLANK_END_TICK) {
     drawRect(fb, menuIdleBlank);
     return;
@@ -3609,8 +3609,15 @@ function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: bool
   // redraw) - same "reopening FIGHT doesn't reset the bounce task" rule.
   // S7 slice J: turn 5's own reopen is the same shape yet another epoch
   // further (`turn5SubmenuBounceTick`, reset at turn 4's own ROCK_SLIDE redraw).
+  // PROGRESS #183/cleanup (docs/turn3-residual-probe-notes.md "The extremum
+  // class, probed", tick 5927): hardware doesn't apply turn5SubmenuBounceTick's
+  // own -2-tick phase correction until the tick AFTER the reopen press
+  // registers - `t === turn5ReopenPressTick` is the press's own registering
+  // tick itself, so it alone still uses the unshifted formula.
   const bounceTick = turn4Resolved
-    ? turn5SubmenuBounceTick(t)
+    ? t === turn5ReopenPressTick
+      ? turn4RockSlideResettledBounceTick(t)
+      : turn5SubmenuBounceTick(t)
     : turn3Resolved
       ? turn4SubmenuBounceTick(t)
       : turn2Resolved
@@ -3643,7 +3650,7 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // finding 1's "5-tick hold" turns out to need no special-casing at all:
     // it's just this same bounce cycle naturally dwelling on one phase for
     // that span, pixel-confirmed exact with a plain, unshifted `t`).
-    drawActionMenuIdleWindow(fb, t, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, sm.reopenedFromClose);
+    drawActionMenuIdleWindow(fb, t, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, sm.reopenedFromClose, TICK0 + sm.openElapsed);
     return;
   }
   if (sm.closeElapsed !== null) {

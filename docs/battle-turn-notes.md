@@ -4148,6 +4148,12 @@ pointer-chase the real bouncer sprite's own raw `sSinIndex` at this specific
 tick (`turn3-menu-bouncer-raw.json`'s own precedent) before attempting
 another shift.
 
+**RESOLVED** (PROGRESS #183/cleanup): root-caused (not a uniform shift) as a
+one-render-tick-early application of `turn5SubmenuBounceTick`'s own phase
+correction at the reopen's same-tick dispatch switch; fixed by delaying that
+switch by one tick. `turn5-menu.json` now **42/42, 0 diff** - see
+`docs/turn3-residual-probe-notes.md` "The extremum class, probed".
+
 ### The player healthbox band/sliver crossing - verified, ZERO compositor changes needed
 
 Per this slice's own brief item (b): Onix's drain (88/117 green start ->

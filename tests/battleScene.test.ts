@@ -98,6 +98,25 @@ const TURN4_FIGHT_SUBMENU_STATE = {
   activeMonMoveset: rentalMoveset("ONIX"),
   reopenedFromClose: false,
 };
+/** turn 5's own real reopen press tick (`docs/turn3-residual-probe-notes.md` "The extremum class, probed", tick 5927) - the FIGHT submenu just reopened (cursor persisted at slot 0, ROCK_SLIDE), confirm not yet registered. */
+const TURN5_REOPEN_TICK = 5927;
+const TURN5_REOPEN_FIGHT_SUBMENU_STATE = {
+  openElapsed: TURN5_REOPEN_TICK - TICK0,
+  cursor: 0 as const,
+  displayCursor: 0 as const,
+  closeElapsed: null,
+  confirmElapsed: null,
+  activeMonMoveset: rentalMoveset("ONIX"),
+  reopenedFromClose: false,
+};
+/** Same shape as `pixelAtTurn4`, but for turn 5's own reopen DMA-wait window (`turn4Resolved: true`, no confirm yet) - the state `drawActionMenuIdleWindow`'s bounce-tick selection renders under (PROGRESS #183/cleanup, tick 5927). */
+function pixelAtTurn5Reopen(t: number, x: number, y: number): [number, number, number] {
+  const fb = new Uint8Array(240 * 160 * 4);
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN5_REOPEN_FIGHT_SUBMENU_STATE, turn1Resolved: true, turn2Resolved: true, turn3Resolved: true, turn4Resolved: true, turn5KoDismissElapsed: null });
+  const o = (y * 240 + x) * 4;
+  return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+}
+
 /** Same as `pixelAtTurn2`, but turns 1-3 all resolved and the FIGHT submenu confirmed on turn 4's own ROCK_SLIDE (slot 0) - the state `drawTurn4KickoffText`/`drawTurn4RockSlideWindow` render under (S7 slice I resolution, docs/battle-turn-notes.md §22). */
 function pixelAtTurn4(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -1289,6 +1308,22 @@ describe("S7 slice I resolution: the two turn-4-only bugs found this session (do
     expect(pixelAtTurn4(4933, 16, 118)).toEqual([255, 255, 255]);
     expect(pixelAtTurn4(4934, 16, 118)).toEqual([255, 255, 255]);
     expect(pixelAtTurn4(4935, 16, 118)).toEqual([107, 165, 165]);
+  });
+});
+
+// PROGRESS #183/cleanup (docs/turn3-residual-probe-notes.md "The extremum
+// class, probed", tick 5927): `core.ts` applies turn5SubmenuBounceTick's own
+// -2-tick phase correction in the SAME render tick the reopen press itself
+// registers (5927) - real hardware's own invisible bouncer switches ONE
+// TICK LATER (RAM-confirmed no jump at 5926->5927). Fixed by keeping the
+// unshifted `turn4RockSlideResettledBounceTick` through `t === pressTick`
+// itself, switching to the shifted formula only from `pressTick + 1` on -
+// a single-tick-scoped carve-out that cannot touch 5928+ (already exact).
+describe("PROGRESS #183/cleanup: turn 5's own reopen - the one-tick-late bounce-formula switch (docs/battle-turn-notes.md §23)", () => {
+  it("Onix bounce sprite: render 5926 (pre-reopen phase) vs render 5927 (the reopen press's own registering tick - now matches the SAME phase as 5928, not 5926's stale one) vs render 5928 (steady-state shifted formula) at (58,49)", () => {
+    expect(pixelAtTurn5Reopen(5926, 58, 49)).toEqual([189, 181, 181]);
+    expect(pixelAtTurn5Reopen(5927, 58, 49)).toEqual([247, 247, 255]);
+    expect(pixelAtTurn5Reopen(5928, 58, 49)).toEqual([247, 247, 255]);
   });
 });
 

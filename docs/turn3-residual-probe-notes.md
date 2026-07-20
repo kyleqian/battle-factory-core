@@ -632,7 +632,17 @@ matches ground truth at every one of 5928-5959).
 
 **Predicted blast radius of the fix**: `turn5-menu.json` gains tick 5927
 back into `captureFrames` at 0 diff (41→42 captures); no other trace
-touched. **Open generalization question, flagged not chased** (this
+touched.
+
+**RESOLVED** (PROGRESS #183/cleanup bounded worker session): the one-tick-
+late switch was applied verbatim (`drawActionMenuIdleWindow` gained an
+optional `turn5ReopenPressTick` param, threaded from `drawFightSubmenuWindow`'s
+own `sm.openElapsed`, used only to hold the unshifted formula for exactly
+`t === pressTick`). `turn5-menu.json` restored to **42/42, 0 diff**; the
+named regression sweep (same seven traces as the 4934 fix) all unchanged at
+0 diff. New Tier-1 pin in `tests/battleScene.test.ts` (the "one-tick-late
+bounce-formula switch" describe block). **Open generalization question,
+flagged not chased** (this
 session's own budget): turns 2/3/4's own reopens set their own
 `turnNResolved` flag in the same same-tick-as-press pattern (`core.ts`'s
 `turn1Resolved`/`turn2Resolved`/`turn3Resolved` branches share this exact
