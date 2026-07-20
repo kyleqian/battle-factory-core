@@ -1,3 +1,42 @@
+## 149 — Bounded worker: S7 slice E1 tail increment — **ENDEAVOR's animation window CLOSES**: `turn2-endeavor-drain.json` green span now runs contiguously **3000→3094+** (merges into the pre-existing 3095-3120 block); `npm test` **693/693** (+8), `npm run build` green
+
+- **State:** `npm test` **693/693**, `npm run build` green, tree clean.
+  `turn2-endeavor-drain.json` `captureFrames` grown 167→201 (every tick
+  3061-3094 added, closing the gap between the committed 3000-3060 block
+  and the pre-existing dense 3095-3120 block); `tools/probe/dump-endeavor-
+  tail.py` committed (new).
+- **Did:** RAM-probed the 3061-3094 tail FIRST (mandatory per the brief) by
+  extending both §15e-era probes over RAM 3050-3100 - both came back flat
+  (shake/hitsplat fields empty, squish matrix neutral, attacker palette
+  unchanged), ruling out §15's own "same mechanisms' own tail" guess before
+  touching render code. A from-scratch full-sprite-table scan then found
+  TWO new, previously-unmodeled mechanisms: (1) the player healthbox's own
+  brief post-hit "wobble" - 3 sprites (`gHealthboxSpriteIds[0]` + 2
+  lockstep neighbors) alternating `y2=+1/-1` every RAM tick for 20 ticks
+  then a hard stop, a different mechanism from `menuIdleBounce`'s own slow
+  never-negative sine; (2) Onix's own brief post-hit "flicker" -
+  `struct Sprite.invisible` toggling 4-on/4-off for 4 cycles then settling
+  visible for good (two other hypotheses - a palette blend, a hardware
+  BLDCNT/BLDALPHA flash - were RAM-checked and ruled out first). Both lags
+  independently pixel-confirmed at `render=RAM+1` (blend/droplet's family,
+  not squish/shake's `render=RAM+2`). Wired into `drawEndeavorSquish`
+  (`ENDEAVOR_SQUISH_TABLE` extended with 36 more neutral rows through
+  `t=3092` so its primitive-reconstruction path keeps covering the tail);
+  `drawMenuHealthboxPlayer` gained an optional `dy` param (default 0, other
+  2 call sites unaffected). Landed first-try, zero further mismatches once
+  wired. 8 new Tier-1 pins, oracle-cross-checked. True settle tick pinned
+  at render 3093 (1-2 ticks earlier than §15's own coarse estimate). Full
+  writeup: `docs/battle-menu-notes.md` §15f.
+- **Next:** S7's ENDEAVOR slice (§15-§15f) is fully DONE. Remaining S7 work:
+  DRAGON_BREATH's own window (~3129+), faint/forced-switch engine slice,
+  ISSUES #19 root cause, FONT_NARROW rewire (#20) - all out of this
+  session's own scope.
+- **Notes:** no papercuts. `tools/compare` full regression check across
+  `turn2-endeavor.json` (76/77), `turn1-rockslide.json` (256/256),
+  `turn1-cloneanim.json` (230/230), `turn1-drain.json` (102/102) - all
+  unchanged, zero regressions.
+
+---
 ## 148 — Supervisor wind-down: session end 2026-07-19 ~20:30 — **14 verified worker steps** (9 main + 5 worktree, every one folded green); suite **648 → 685/685**; headline: **oracle frame cap raised to 45000 (user decision, harness `ccd7554`)** after proving no battle-1 WIN fits 20000 → the full S8 acceptance chain is now ground-truthed (WIN + BOTH swap branches + battle-2 first menus + battle-2 turn 1); turn-2's ENDEAVOR half is engine-green 3000→3060
 
 - **State (verified this minute):** `npm test` **685/685**, `npm run

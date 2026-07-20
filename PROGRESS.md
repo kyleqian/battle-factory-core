@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 152 — Bounded worker: S7 slice E2a-2 increment — DRAGON_BREATH shake + red-fade blend land, oracle-verified (**`turn2-dragonbreath.json` 84/84 green, new contiguous block 3236-3263**); fire-projectile attempt pulled after failing pixel-exactness; `npm test` **693/693** (unchanged), build green
+
+- **State:** `npm test` 693/693, `npm run build` green, tree clean.
+  `turn2-dragonbreath.json` `captureFrames` now `3121-3176` (unchanged) +
+  `3236-3263` (new, 28 ticks) — **84/84 green**. Regression:
+  `turn2-endeavor-drain.json` 200/201 (unchanged, pre-existing ISSUES #19
+  residual).
+- **Did:** RAM-probed all 5 remaining priorities first (new
+  `tools/probe/dump-dragonbreath-anim.py`, ticks 3170-3350 — mandatory
+  per the brief). Landed 2: (1) target shake (`dragonBreathShakeX2`) —
+  `AnimTask_ShakeMon2`'s own fixed ±2px alternation, RAM-solved exactly,
+  render lag **1 tick**; (2) target red-fade blend
+  (`dragonBreathBlendCoeff`) — two `AnimTask_BlendBattleAnimPal` instances
+  (fade 0→9 then 9→0) via the same `BlendPalette` bit-math ENDEAVOR's own
+  blend uses, RAM-solved exactly, render lag **2 ticks** (a THIRD distinct
+  lag value in this window, oracle-confirmed independently, not assumed —
+  matches the brief's own warning that ENDEAVOR's window had three lag
+  conventions too). `drawSpriteSheetAffineStretch` gained an optional `x2`
+  param (default 0, other call sites unaffected); new `drawDragonBreathScene`
+  wired into `drawTurn2KickoffText`'s fallback branch. **Pulled** the
+  8-fire-projectile mechanism after a real attempt: position/spawn-cadence/
+  frame-cycle are all RAM-verified EXACT (banked in
+  docs/dragon-breath-notes.md's new "Engine slice E2a-2" section, ready to
+  wire), but the affine "pop" is a genuine ~178.6° ROTATION (not
+  `rotation=0` like every prior affine-scale mechanism in this codebase),
+  and a `Math.abs(matrixA)`-as-scale approximation (ignoring the rotation's
+  shear, never probed) was close but not pixel-exact (small, smoothly
+  growing diffs through the projectiles' own span) — pulled rather than
+  ship known-wrong pixels or regress the previously-green 3121-3176 block.
+  Hit-flash not attempted (time-boxed out).
+- **Next:** fire-projectile mechanism needs `gOamMatrices[].b/c` (this
+  session only read `a`/`d`) rendered via the general 2x2 sampler already
+  built for the ball-spin mechanism (`drawSpriteSheetAffineRotate`), not
+  the diagonal-only `drawSpriteSheetAffineStretch` — all other data
+  (position table, spawn ticks, frame formula) already banked. Then
+  hit-flash (`SpriteCB_HitAnimHealthoxEffect`, 3263-3283), then Grovyle's
+  own HP-bar drain (3298+) + turn-end (3329+) = slice E2b, then faint/
+  forced-switch, ISSUES #19 root cause, #20 FONT_NARROW rewire (sibling
+  worktree).
+- **Notes:** no papercuts. Three distinct RAM/pixel render-lag values
+  confirmed independently in one window (shake=1, blend=2, text-family=1
+  elsewhere) — don't assume mechanisms in the same window share a lag.
+
+---
 ## 151 — Bounded worker: S7 slice E2a increment — DRAGON_BREATH kickoff text lands (**`turn2-dragonbreath.json` new, 56/56 green, renders 3121-3176**) + `small_ember.png` extracted; `npm test` **693/693** (unchanged), build green
 
 - **State:** `npm test` 693/693, `npm run build` green, tree clean, 3
@@ -64,42 +108,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   flash + HP drain + turn end), faint/forced-switch slice, #19 root cause.
 - **Notes:** worker costs $8.75 + $4.73, 24.6 + 15.2 min. Zero merge
   conflicts, zero regressions.
-
----
-## 149 — Bounded worker: S7 slice E1 tail increment — **ENDEAVOR's animation window CLOSES**: `turn2-endeavor-drain.json` green span now runs contiguously **3000→3094+** (merges into the pre-existing 3095-3120 block); `npm test` **693/693** (+8), `npm run build` green
-
-- **State:** `npm test` **693/693**, `npm run build` green, tree clean.
-  `turn2-endeavor-drain.json` `captureFrames` grown 167→201 (every tick
-  3061-3094 added, closing the gap between the committed 3000-3060 block
-  and the pre-existing dense 3095-3120 block); `tools/probe/dump-endeavor-
-  tail.py` committed (new).
-- **Did:** RAM-probed the 3061-3094 tail FIRST (mandatory per the brief) by
-  extending both §15e-era probes over RAM 3050-3100 - both came back flat
-  (shake/hitsplat fields empty, squish matrix neutral, attacker palette
-  unchanged), ruling out §15's own "same mechanisms' own tail" guess before
-  touching render code. A from-scratch full-sprite-table scan then found
-  TWO new, previously-unmodeled mechanisms: (1) the player healthbox's own
-  brief post-hit "wobble" - 3 sprites (`gHealthboxSpriteIds[0]` + 2
-  lockstep neighbors) alternating `y2=+1/-1` every RAM tick for 20 ticks
-  then a hard stop, a different mechanism from `menuIdleBounce`'s own slow
-  never-negative sine; (2) Onix's own brief post-hit "flicker" -
-  `struct Sprite.invisible` toggling 4-on/4-off for 4 cycles then settling
-  visible for good (two other hypotheses - a palette blend, a hardware
-  BLDCNT/BLDALPHA flash - were RAM-checked and ruled out first). Both lags
-  independently pixel-confirmed at `render=RAM+1` (blend/droplet's family,
-  not squish/shake's `render=RAM+2`). Wired into `drawEndeavorSquish`
-  (`ENDEAVOR_SQUISH_TABLE` extended with 36 more neutral rows through
-  `t=3092` so its primitive-reconstruction path keeps covering the tail);
-  `drawMenuHealthboxPlayer` gained an optional `dy` param (default 0, other
-  2 call sites unaffected). Landed first-try, zero further mismatches once
-  wired. 8 new Tier-1 pins, oracle-cross-checked. True settle tick pinned
-  at render 3093 (1-2 ticks earlier than §15's own coarse estimate). Full
-  writeup: `docs/battle-menu-notes.md` §15f.
-- **Next:** S7's ENDEAVOR slice (§15-§15f) is fully DONE. Remaining S7 work:
-  DRAGON_BREATH's own window (~3129+), faint/forced-switch engine slice,
-  ISSUES #19 root cause, FONT_NARROW rewire (#20) - all out of this
-  session's own scope.
-- **Notes:** no papercuts. `tools/compare` full regression check across
-  `turn2-endeavor.json` (76/77), `turn1-rockslide.json` (256/256),
-  `turn1-cloneanim.json` (230/230), `turn1-drain.json` (102/102) - all
-  unchanged, zero regressions.

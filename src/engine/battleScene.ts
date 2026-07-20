@@ -2301,6 +2301,7 @@ function drawSpriteSheetAffineStretch(
   tintColor: RgbColor,
   tintCoeff: number,
   doubled = false,
+  x2 = 0,
 ): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
@@ -2331,7 +2332,7 @@ function drawSpriteSheetAffineStretch(
       const color = tintCoeff > 0
         ? { r: blendComponentToward(c.r, tintColor.r, tintCoeff), g: blendComponentToward(c.g, tintColor.g, tintCoeff), b: blendComponentToward(c.b, tintColor.b, tintCoeff) }
         : c;
-      setPixel(fb, ox + dx, oy + dy + y2, color);
+      setPixel(fb, ox + dx + x2, oy + dy + y2, color);
     }
   }
 }
@@ -4060,6 +4061,127 @@ function dragonBreathTextVisibleChars(t: number, pressTick: number): number {
 }
 
 /**
+ * S7 slice E2a-2 (docs/dragon-breath-notes.md "Engine slice E2a-2"):
+ * DRAGON_BREATH's target-side shake (`AnimTask_ShakeMon2`) and red-fade
+ * blend (`AnimTask_BlendBattleAnimPal`, two instances - fade in then out).
+ * Both RAM-probed directly (`tools/probe/dump-dragonbreath-anim.py`,
+ * ticks 3170-3350) - real per-tick `gSprites[targetSlot].x2` and
+ * `gPlttBufferFaded` reads, not pixel-fit. Both reduce to plain formulas
+ * (no lookup table needed - neither mechanism goes through the
+ * `AnimTranslateLinear_WithFollowup` primitive `TRAINER_EXIT_X2`'s own
+ * precedent needed a literal table for; see docs/dragon-breath-notes.md's
+ * "Engine slice E2a-2" section for the fire-projectile mechanism's own
+ * RAM-probed data, which DOES go through that primitive and IS banked as a
+ * table, just not wired into a renderer yet).
+ *
+ * Shake: `AnimTask_ShakeMon2`'s own setup writes `sprite->x2 =
+ * gBattleAnimArgs[1]` (=2) directly BEFORE the step function's own first
+ * call, and that first call's "else" branch (delay countdown) doesn't
+ * touch x2 - so by the first RAM tick this task's callback is observed
+ * (`gTasks[].func` diff dump, RAM 3186), x2 already reads the FIRST flip's
+ * result (-2), one flip ahead of what the step function's own bare logic
+ * would suggest starting from a neutral sprite. Verified RAM sequence
+ * (ticks 3186-3225, `pressTick`+241..+280): `-2,-2,+2,+2,-2,-2,+2,+2,...`
+ * (each polarity holds 2 real ticks, "1-tick cadence" in the script's own
+ * args - `2, ANIM_TARGET, 2, 0, 21, 1` - actually meaning 1 tick of delay
+ * between the paired hold+flip step, same 2-real-ticks-per-nominal-tick
+ * convention `ENDEAVOR_SHAKE_STEP`'s own doc flags), settling to 0 at
+ * `pressTick`+281 (RAM 3226, y offset arg is 0 so no y2 ever moves).
+ *
+ * Blend: two `AnimTask_BlendBattleAnimPal` instances (`battle_anim_scripts.s`
+ * DRAGON_BREATH script: `10, F_PAL_TARGET, 1, 0, 9, RGB_RED` then, after all
+ * projectiles+shake finish, `10, F_PAL_TARGET, 1, 9, 0, RGB_RED`) blend
+ * Grovyle's own palette toward `RGB_RED` (31,0,0 5-bit = 248,0,0 8-bit,
+ * `DRAGON_BREATH_BLEND_COLOR`) via the SAME `BlendPalette`/
+ * `blendComponentToward` bit-math ENDEAVOR's own blend already uses
+ * (`faded = unfaded + ((target-unfaded)*coeff)>>4`) - RAM-solved coeff
+ * directly from `gPlttBufferFaded` vs `gPlttBufferUnfaded`: creation tick
+ * holds coeff 0 for 2 ticks (same "one step already baked into the
+ * creation tick" pattern the shake and fire-projectile mechanisms both
+ * also show), then steps `+1` every 2 ticks up to 9 (`pressTick`+237
+ * creation -> 9 reached at `pressTick`+255, held there through
+ * `pressTick`+291 while the projectiles/shake finish under
+ * `waitforvisualfinish`), then the fade-out instance (`pressTick`+291
+ * creation) steps back down `-1` every 2 ticks to 0 by `pressTick`+309 -
+ * an exact mirror of the fade-in, both RAM-confirmed tick-for-tick across
+ * the full probed window (3170-3350).
+ */
+const DRAGONBREATH_SHAKE_START_OFFSET = 241; // pressTick+241 = RAM 3186 (AnimTask_ShakeMon2's own first observed flip)
+const DRAGONBREATH_SHAKE_END_OFFSET = 281; // pressTick+281 = RAM 3226 (settles to 0)
+const DRAGONBREATH_SHAKE_STEP = 2;
+const DRAGONBREATH_BLEND_FADE_IN_OFFSET = 237; // pressTick+237 = RAM 3182 (AnimTask_BlendBattleAnimPal creation, fade 0->9)
+const DRAGONBREATH_BLEND_FADE_OUT_OFFSET = 291; // pressTick+291 = RAM 3236 (2nd instance creation, fade 9->0)
+const DRAGONBREATH_BLEND_MAX_COEFF = 9;
+const DRAGON_BREATH_BLEND_COLOR: RgbColor = { r: 248, g: 0, b: 0 }; // RGB_RED (31,0,0 5-bit)
+/** Same `RAM=render-2` lag family `ENDEAVOR_SHAKE_RENDER_LAG`/`ENDEAVOR_SQUISH_TABLE` already use (§15's own doc: matrix/blend RAM state lags the rendered pixel by 2 ticks, NOT droplet/hitsplat/text's own separate 1-tick-lag family) - pixel-confirmed here independently, not assumed: oracle-cross-checked via `tools/compare` on this session's extended `turn2-dragonbreath.json` pixel-by-pixel at a fixed Grovyle-body coordinate (193,16) across ticks 3236-3245 - the observed 8-bit color sequence there (`(148,33,24)x4, (132,41,33)x2, (115,41,41)x2, (99,49,41)x2, ...`) only reduces cleanly to the RAM-probed coeff sequence (`9,9,8,8,7,7,6,6,5,5...` from `gPlttBufferFaded`) under a 2-tick lag - 1 tick (matching the kickoff-text family) leaves every odd-offset tick wrong, since the fade-out task's own creation-tick stall (same "one step already elapsed" pattern the shake setup call also shows) adds a 2nd stall tick on top of the 1-tick RAM/pixel gap. */
+const DRAGONBREATH_BLEND_RENDER_LAG = 2;
+/** Oracle-confirmed (pixel scan around ticks 3185-3188): the shake's own render lag is 1 tick, not the blend's 2 - a distinct lag value in this same window. Don't assume mechanisms in the same window share one lag - `docs/dragon-breath-notes.md`'s own brief flagged this exact risk (ENDEAVOR's own window had three distinct lag conventions too). */
+const DRAGONBREATH_SHAKE_RENDER_LAG = 1;
+
+/** Grovyle's own sprite `x2` during DRAGON_BREATH's target-shake window (`AnimTask_ShakeMon2`) - see the module doc above for the RAM-probed derivation. 0 outside the window. */
+function dragonBreathShakeX2(t: number, pressTick: number): number {
+  const ramTick = t - DRAGONBREATH_SHAKE_RENDER_LAG;
+  const start = pressTick + DRAGONBREATH_SHAKE_START_OFFSET;
+  const end = pressTick + DRAGONBREATH_SHAKE_END_OFFSET;
+  if (ramTick < start || ramTick >= end) return 0;
+  const half = Math.floor((ramTick - start) / 2);
+  return half % 2 === 0 ? -DRAGONBREATH_SHAKE_STEP : DRAGONBREATH_SHAKE_STEP;
+}
+
+/** Grovyle's own red-fade blend coefficient (0..9, `BlendPalette`/`blendComponentToward` units) at trace tick `t` - see the module doc above for the RAM-probed fade-in/fade-out derivation. 0 outside the window. */
+function dragonBreathBlendCoeff(t: number, pressTick: number): number {
+  const ramTick = t - DRAGONBREATH_BLEND_RENDER_LAG;
+  const fadeIn = pressTick + DRAGONBREATH_BLEND_FADE_IN_OFFSET;
+  const fadeOut = pressTick + DRAGONBREATH_BLEND_FADE_OUT_OFFSET;
+  if (ramTick < fadeIn) return 0;
+  if (ramTick < fadeOut) return Math.min(DRAGONBREATH_BLEND_MAX_COEFF, Math.floor((ramTick - fadeIn) / 2));
+  return Math.max(0, DRAGONBREATH_BLEND_MAX_COEFF - Math.floor((ramTick - fadeOut) / 2));
+}
+
+/**
+ * DRAGON_BREATH's own battlefield scene: same static-backdrop-plus-
+ * procedural-sprites shape `drawEndeavorSquish` already uses for its own
+ * window (`drawStaticBgShiftedY` for the backdrop since Grovyle needs a
+ * per-tick x2 shake/tint the flat `menuIdleBase` harvest can't express),
+ * with Onix static (no attacker-side mechanism touches Onix's own sprite
+ * this window - `Task_LoopAndPlaySE`'s `SE_M_FLAME_WHEEL` loop is audio
+ * only) and Grovyle drawn via `drawSpriteSheetAffineStretch` at neutral
+ * scale (256/256, no squish) with the shake's `x2` and the blend's tint
+ * coeff layered on. The 8 fire-projectile sprites and the target hit-flash
+ * (docs/dragon-breath-notes.md's remaining priorities) are NOT drawn here -
+ * a fire-projectile render attempt this session (position/cadence/frame-
+ * cycle all RAM-verified exact) got close but not pixel-exact using the
+ * direct-scale convention `Anim_VerticalStretch`/`ENDEAVOR_SQUISH_TABLE`
+ * established for ROTATION=0 affine anims - this one's `AFFINEANIMCMD`
+ * rotation is ~178.6 degrees, not 0, and a real shear term (pb/pc) was
+ * never probed, so it was pulled rather than ship close-but-wrong pixels;
+ * see that doc's "Engine slice E2a-2" section for the exact banked
+ * RAM data (position table, spawn cadence, frame formula) ready for a
+ * resuming worker to wire once the true rotated-affine sampling is solved.
+ */
+function drawDragonBreathScene(fb: Uint8Array, t: number, pressTick: number): void {
+  drawStaticBgShiftedY(fb, 0);
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurnHp));
+  drawMenuHealthboxPlayer(fb, 0, 0);
+  drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick));
+  drawSpriteSheetAffineStretch(
+    fb,
+    grovyleFrontSprite.tileset,
+    grovyleFrontSprite.palette,
+    GROVYLE_CORNER.x,
+    GROVYLE_CORNER.y,
+    256,
+    256,
+    0,
+    DRAGON_BREATH_BLEND_COLOR,
+    dragonBreathBlendCoeff(t, pressTick),
+    false,
+    dragonBreathShakeX2(t, pressTick),
+  );
+}
+
+/**
  * S7 slice E1: turn 2's own kickoff message, "Foe GROVYLE used\nENDEAVOR!"
  * (docs/battle-turn-notes.md §12, docs/battle-menu-notes.md §13) - same
  * mechanism as `drawTurnKickoffText` (line 1 is textually identical, reused
@@ -4084,7 +4206,11 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
   // `turn1Resolved` - Grovyle's healthbox always needs its real (101) HP
   // here, never the stale full-HP harvest.
   if (!drawEndeavorSquish(fb, t, pressTick)) {
-    drawActionMenuIdleContent(fb, turn2KickoffBounceTick(t, pressTick), true);
+    if (t >= dragonBreathTextStartTick(pressTick)) {
+      drawDragonBreathScene(fb, t, pressTick);
+    } else {
+      drawActionMenuIdleContent(fb, turn2KickoffBounceTick(t, pressTick), true);
+    }
   }
   // S7 slice E1b: Onix's own HP-bar drain (117->101, `endeavorOnixHp`) is
   // valid for every `t` (clamped both sides) - safe to call unconditionally

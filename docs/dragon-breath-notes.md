@@ -318,3 +318,147 @@ independent PIL byte-checks, not pure-logic functions needing a new unit
 test), `npm run build` green. `turn2-dragonbreath.json` 56/56 green.
 Regression spot-check `turn2-endeavor-drain.json` **200/201** (unchanged,
 same pre-existing ISSUES #19 residual tick).
+
+## Engine slice E2a-2 (S7, bounded worker, follows E2a above)
+
+RAM-probed all 5 remaining priorities first (mandatory per this run's
+method), landed 2 of them (shake, blend) fully oracle-verified, and pulled
+a 3rd (fire projectiles) after finding it wasn't pixel-exact rather than
+ship wrong pixels. Hit-flash not attempted this session.
+
+**New probe**: `tools/probe/dump-dragonbreath-anim.py` — per-tick RAM dump
+(ticks 3170-3350, `battle1-turn2-dragonbreath.json`) of: the target
+battler's own sprite `x/y/x2/y2` and OBJ palette (`gPlttBufferFaded`/
+`Unfaded`, for the shake and blend respectively), plus every sprite whose
+`affineAnims` pointer matches `sAffineAnims_DragonBreathFire` (the 8 fire
+projectiles — `x/y/x2/y2/animNum/animCmdIndex/matrixNum/matrixA/matrixD`)
+or whose `callback` matches `SpriteCB_HitAnimHealthoxEffect` (the hit-flash,
+never populated this session — see "Not landed" below). Same conventions
+prior probes in this file established (affine-anims-pointer id for a
+sprite whose `callback` reassigns mid-lifetime, thumb-bit-masked callback
+compare for one that doesn't).
+
+**1. Target shake (landed)** — `dragonBreathShakeX2` (`battleScene.ts`):
+`AnimTask_ShakeMon2`'s setup writes `sprite->x2 = gBattleAnimArgs[1]` (=2)
+directly at task-creation time, one step ahead of the step function's own
+bare logic (same "one step already elapsed by the first observable tick"
+pattern this run's prior probes keep finding at creation ticks generally).
+RAM-verified sequence `-2,-2,+2,+2,-2,-2,+2,+2,...` (each polarity holding 2
+real ticks) from `pressTick+241` (RAM 3186) through `pressTick+281` (RAM
+3226, settles to 0 — the 21st internal "alternation" is applied and
+immediately zeroed by `AnimTask_ShakeMon2_Step`'s own destroy branch in the
+same execution, per source: `battle_anim_mon_movement.c:214-241`). Render
+lag **1 tick** (oracle-confirmed via a pixel scan at ticks 3185-3188 — a
+distinct value from the blend's own 2-tick lag in the very same window,
+confirming the brief's own warning that a window can hold more than one lag
+family).
+
+**2. Target red-fade blend (landed)** — `dragonBreathBlendCoeff`
+(`battleScene.ts`): two `AnimTask_BlendBattleAnimPal` instances
+(`battle_anim_scripts.s`'s own `10, F_PAL_TARGET, 1, 0, 9, RGB_RED` then
+`10, F_PAL_TARGET, 1, 9, 0, RGB_RED`) blend Grovyle's own palette toward
+`RGB_RED` (248,0,0 8-bit) via the same `BlendPalette` bit-math
+(`faded = unfaded + ((target-unfaded)*coeff)>>4`) ENDEAVOR's own blend
+already uses (`blendComponentToward`, reused verbatim). RAM-solved coeff
+sequence directly from `gPlttBufferFaded` vs `Unfaded`: holds 0 for 2 ticks
+at creation (`pressTick+237`, RAM 3182), steps `+1` every 2 ticks to 9 by
+`pressTick+255`, holds at 9 through `pressTick+291` (RAM 3236, second
+instance's own creation) while the projectiles/shake finish under
+`waitforvisualfinish`, then steps `-1` every 2 ticks back to 0 by
+`pressTick+309` — an exact mirror. Render lag **2 ticks** (oracle-confirmed
+by pixel-scanning a fixed Grovyle-body coordinate, (193,16), across ticks
+3236-3245 — the observed 8-bit color sequence there only reduces cleanly to
+the RAM coeff sequence under a 2-tick lag, not the 1-tick "text family" lag
+this run's other mechanisms often use — this is the SAME `RAM=render-2`
+family `ENDEAVOR_SQUISH_TABLE`/`ENDEAVOR_SHAKE_RENDER_LAG` already use,
+just independently re-confirmed here rather than assumed).
+
+**`drawSpriteSheetAffineStretch`** gained an optional `x2` param (default 0,
+every other call site unaffected) so Grovyle's own draw could carry the
+shake offset alongside its existing `y2`/tint machinery.
+
+**`drawDragonBreathScene`** (new): the same static-backdrop-plus-procedural
+shape `drawEndeavorSquish` established for its own window — draws the
+`drawStaticBgShiftedY` backdrop, Onix (unaffected all window — the
+`Task_LoopAndPlaySE`/`SE_M_FLAME_WHEEL` loop is audio-only), the healthbox,
+and Grovyle via `drawSpriteSheetAffineStretch` at neutral scale (256/256)
+with the shake `x2` and blend `tintCoeff` layered on. Wired into
+`drawTurn2KickoffText` for `t >= dragonBreathTextStartTick(pressTick)`,
+replacing the flat `drawActionMenuIdleContent` fallback that window used to
+fall through to.
+
+**Not landed — 8-projectile mechanism (pulled after a real attempt)**: the
+position/cadence/frame-cycle ARE fully RAM-verified exact — banked here so
+the next worker doesn't have to re-derive them:
+
+- **Position** (`AnimTranslateLinear_WithFollowup`, `battle_anim_mons.c:
+  1065-1139`): brute-force-solved fixed-point params `dx=104, dy=-44,
+  duration=20` reproduce the RAM-probed `x2`/`y2` sequence EXACTLY at every
+  one of 20 steps across all 8 spawns (unlike `TRAINER_EXIT_X2`'s own
+  precedent for this same primitive, which needed a literal table because
+  of two single-tick +0 stalls this window's own dx/dy don't happen to
+  hit). Relative-age table (`n=0..20`, base = attacker's own `(72,88)`,
+  `n=20` repeats `n=19` — the internal duration counter's own last no-op
+  tick before `DestroySpriteAndMatrix`):
+  `x2: 5,10,15,20,25,31,36,41,46,51,57,62,67,72,77,83,88,93,98,103,103`
+  `y2: -2,-4,-6,-8,-10,-13,-15,-17,-19,-21,-24,-26,-28,-30,-32,-35,-37,-39,-41,-43,-43`
+  Spawn ticks (every exactly 4, `pressTick`-relative): `229, 233, 237, 241,
+  245, 249, 253, 257` (RAM 3174/3178/3182/3186/3190/3194/3198/3202,
+  `pressTick=2945`). The spawn tick itself already shows step 1 applied
+  (same "one step already elapsed" pattern as the shake/blend setups).
+- **Frame cycle** (`animCmdIndex`, RAM-confirmed): sheet-frame index at
+  relative age `n` is `((n+1)/3 | 0) % 3 + 1` (tile offsets 16/32/48 — the
+  anim's own first frame is already 2 ticks in, matching the position
+  table's own "one step already elapsed" quirk, then a plain 3-ticks/frame
+  cycle, matching the script's own `ANIMCMD_FRAME(_, 3)` triplet).
+- **What's NOT solved — the affine "pop"**: `sAffineAnims_DragonBreathFire_1`
+  (`AFFINEANIMCMD_FRAME(0x50,0x50,127,0)` then `(0xD,0xD,0,100)`) RAM-reads
+  as `matrixA`==`matrixD`, both NEGATIVE, shrinking in magnitude from -703
+  (`n=0`) to -184 (`n=20`) — a near-180-degree rotation (127/256 turns ≈
+  178.6°, `cos`≈-1, `sin`≈+0.02) applied once at spawn (that AFFINEANIMCMD
+  frame's own `duration` is 0), with only the scale portion actually
+  ramping over the second frame's 100-tick duration. This is a genuinely
+  ROTATED affine sample (unlike `Anim_VerticalStretch`/`ENDEAVOR_SQUISH_
+  TABLE`, both `rotation=0` always, which is why `drawSpriteSheetAffineStretch`'s
+  existing direct-`matrixParam`-as-scale convention was even a candidate
+  here) — a real attempt this session (`Math.abs(matrixA)` as a plain
+  diagonal scale, ignoring the rotation's shear) got CLOSE (ticks 3174-3175
+  matched exactly, since the sprite is still genuinely near-invisible at
+  that extreme a magnitude) but NOT pixel-exact from `n≈2` on (a small,
+  smoothly growing diff — dozens to ~1000px — through the projectiles'
+  whole 3176-3235 span), and was pulled rather than leave `captureFrames`
+  gapped by a known-wrong render. **What a resuming worker needs**: probe
+  `gOamMatrices[matrixNum]`'s full `a/b/c/d` (this session only read `a`/`d`
+  — assumed no shear from `AnimTask_ShakeMon2`-style symmetry, which turned
+  out wrong) and render via the general 2x2 sampler already built for the
+  ball-spin mechanism (`drawSpriteSheetAffineRotate`, `battleScene.ts`),
+  not the diagonal-only `drawSpriteSheetAffineStretch`. `small_ember.png`
+  (`battle-anim-small-ember.json`) is already extracted and ready; frame
+  slicing is `tiles.slice(16*frame, 16*frame+16)`, `columns:4, rows:4`.
+
+**Not landed — hit-flash sprite**: not attempted this session (time-boxed
+out after the shake/blend/projectile work) — `SpriteCB_HitAnimHealthoxEffect`
+RAM-confirmed active 3263-3283 (scout's own timeline above), but this
+session's probe never actually caught one in the `hitFlashSprites` field
+(the callback-match filter is wired and ready in
+`tools/probe/dump-dragonbreath-anim.py`, just never exercised against that
+exact sub-window — re-run the probe over 3260-3290 first).
+
+**Trace**: `turn2-dragonbreath.json`'s `captureFrames` extended from
+`3121-3176` (unchanged, 56 ticks) to ALSO include `3236-3263` (28 new
+ticks, contiguous) — **84/84 green**. The `3177-3235` span (fire
+projectiles active) is deliberately NOT captured yet — extending into it
+requires the rotated-affine fix above; `3264+` needs the hit-flash
+(3263-3283), Grovyle's own HP-bar drain (3298+, next slice's own scope per
+the original brief), and the turn-3 menu materialize (3329+), all still
+unmodeled. This is a **gap**, not a mistake — the brief's "dense... as far
+as you land" is satisfied for the two ranges actually landed; filling the
+gap is the very next worker's job, with all the position/cadence data
+above already banked.
+
+**Verification**: `npm test` 693/693 (unchanged, no new Tier-1 tests — same
+rationale as E2a: these are pixel-timing render functions verified via
+Tier-2 compare, not pure state logic), `npm run build` green.
+`turn2-dragonbreath.json` **84/84** green (`3121-3176` + `3236-3263`).
+Regression spot-check `turn2-endeavor-drain.json` **200/201** (unchanged,
+same pre-existing ISSUES #19 residual tick).
