@@ -783,3 +783,266 @@ session, byte-identical output both times (`diff` clean) — committed at
 `src/data/gen/battle1-switchin-allslot-probe.json`. No `src/engine/`
 changes this section either; `npm test`/`npm run build` still green (see
 below — same run, not re-verified separately per section).
+
+## 8. Closing the five §7 gaps (worktree lane `wt-20260720-123728`, extraction + RAM/oracle probing — no engine code)
+
+Direct follow-up to §7's own "Bottom line for the engine slice" table, in the
+priority order the brief specified. Three new committed `ram-probe.py` specs
+(`tools/probe/specs/switchin-ball-particle-detail.json`,
+`switchin-pidgeotto-tint.json`, `switchin-healthbox.json`, plus a small
+`switchin-pidgeotto-palettenum.json` lookup), each run twice, byte-identical
+both times — outputs at `src/data/gen/battle1-switchin-ball-particle-detail-probe.json`,
+`-materialize-tint-probe.json`, `-healthbox-probe.json`,
+`-pidgeotto-palettenum-probe.json`. One new extractor,
+`tools/extract/extract-battle-anim-item-heal.ts`, output
+`src/assets/gen/battle-anim-item-heal.json`.
+
+### 8a. Sitrus ring + sparkle gfx — sparkle CLOSED (byte-exact); ring extracted, NOT pixel-verified (goal 1)
+
+Source (`General_HeldItemEffect`, `reference/pokeemerald/data/battle_anim_scripts.s:10440-10460`,
+already cited in §7c) names two `loadspritegfx` tags plus one `createsprite`
+each for the star burst and the ring:
+
+- **`ANIM_TAG_SPARKLE_2`** ("granting stars"): tiles
+  `gBattleAnimSpriteGfx_Sparkle1` (`graphics/battle_anims/sprites/sparkle_1.png`,
+  32x256px = 4 cols x 32 rows of 8x8 tiles, `src/graphics.c:179`), palette
+  `gBattleAnimSpritePal_Sparkle2` (a standalone JASC-PAL file, `sparkle_2.pal`,
+  `src/graphics.c:182` — **not** PNG-embedded, unlike most other battle-anim
+  sprite gfx already extracted in this repo). Template
+  `gGrantingStarsSpriteTemplate` (`src/battle_anim_effects_2.c:1400-1410`):
+  OAM `&gOamData_AffineOff_ObjNormal_32x32`, anim `gGrantingStarsAnimCmds`
+  (`:733-741`, 8 frames at tile offsets `0,16,32,...,112`, 7 ticks each, then
+  loops). `GrantingStarsEffect` (`data/battle_anim_scripts.s:10040-10045`)
+  spawns two of these sprites 8 ticks apart, at attacker-relative offsets
+  `(-15,0)` and `(12,-5)`.
+- **`ANIM_TAG_THIN_RING`** (the expanding ring): a single source PNG
+  (`thin_ring.png`, 64x64px = 8x8 tiles) supplies **both** tiles and palette
+  (`src/graphics.c:691-692` — two separate `INCGFX_U32` calls targeting the
+  same file, one `.4bpp.lz` one `.gbapal.lz`). `General_HeldItemEffect`'s own
+  `createsprite` uses `gThinRingExpandingSpriteTemplate`
+  (`src/battle_anim_effects_2.c:742-751`: OAM
+  `&gOamData_AffineDouble_ObjNormal_64x64`, affine anims
+  `gThinRingExpandingAffineAnimTable` — **two** entries,
+  `gThinRingExpandingAffineAnimCmds1` (`0x10,0x10,dur=0` then `0x10,0x10,dur=30`,
+  i.e. a static, non-growing tiny render) and `...Cmds2` (`0x10,0x10,dur=0`
+  then `0x20,0x20,dur=15`, i.e. genuinely expanding over 15 ticks). Both
+  extracted; **which index the template's own createsprite call actually
+  selects was not traced to source this session** (`AnimSpriteOnMonPos`'s own
+  affine-anim-index selection wasn't followed that deep) — but §3e's own pixel
+  read ("expanding... over ~16 ticks") matches `cmds2`'s 15-tick growth
+  duration far better than `cmds1`'s no-op, so `cmds2` is the likely candidate,
+  flagged as evidence-based, not source-confirmed.
+
+Both extracted into `src/assets/gen/battle-anim-item-heal.json`
+(`{ sparkle: {...}, ring: {...} }`, extractor
+`tools/extract/extract-battle-anim-item-heal.ts`).
+
+**Verification — sparkle: byte-exact.** Brute-force corner+frame search
+(`tools/compare/scratch/sitrus_sparkle_verify.mjs`) over every tick
+6968-7072 of a fresh oracle regen of `battle1-switchin-dense-c.json` and
+every one of the 8 `grantingStarsAnim` frames, searching corners in a
+20-110 x 60-100 box: best match **`{tick: 6990, corner: (41,74), frame:
+tile 48 (the 4th of 8 anim frames), diff: 0, opaque: 115}`** — 0 residual
+mismatched pixels out of 115 opaque, a true byte-exact hit, at the position
+and timing §7c's own RAM scan already placed one of the two "sparkle" slots
+(slot 4, created tick 6978 near `(84,83)`, and slot 3's second life near
+`(57,88)` — `(41,74)` is in the same neighborhood, consistent with the two
+`GrantingStarsEffect` spawns' `(-15,0)`/`(12,-5)` attacker-relative offset
+pair landing near each other).
+
+**Verification — ring: NOT byte-exact-verified this session.** The ring's
+`ST_OAM_AFFINE_DOUBLE` scaling (accumulator 16-32 throughout either table,
+far from the neutral 256 the mon-materialize table reaches — meaning the
+64x64 source renders at roughly 1/16-1/8 scale, a genuinely tiny on-screen
+footprint) makes a placement+scale brute-force search meaningfully more
+expensive than the sparkle's fixed-size case; not attempted at this
+session's time budget. A coarse palette-presence scan (counting exact
+ring-palette RGB matches in the Onix-neighborhood crop across ticks
+7040-7066) found several hundred matching pixels throughout the window, but
+the ring's own palette shares common colors (white, black) with everything
+else on screen, so this is **not** a clean signal and is **not** reported as
+a verification — the honest state is "extracted, source-cited, gfx tag +
+sprite count already independently cross-confirmed by §7c's RAM scan, pixel
+byte-exactness not established." Concrete next step: a scaled-affine
+placement search (candidate corner x candidate accumulator value) analogous
+to `pidgeotto_corner_verify.mjs` but with a scale parameter, restricted to
+the tick range once `cmds1` vs `cmds2` is resolved (narrows the scale search
+space a lot).
+
+### 8b. Thrown-ball prop sprite — CLOSED, with a correction to the brief's own framing (goal 2)
+
+A new probe (`switchin-ball-particle-detail.json`, tracking
+`callback`/`x`/`y`/`x2`/`y2`/`animNum`/`animCmdIndex`/`data[0]`/`data[1]`/
+`flags` for slots 3, 7, 8, 9-21 across ticks 6700-7312 — the slots §7b's
+coarser x/y-only scan flagged as candidates or left unexplained) identifies
+**slot 7** as the ball prop, definitively:
+
+| tick | event |
+|---|---|
+| **6727** | sprite created, `flags=1` (inUse, **visible**), `x=176,y=64` (screen corner `(168,56)` under the already-established `corner=(x-8,y-8)` convention — **the identical resting screen slot** `battle-anim-assets.md §4` found for the intro send-out's own ball) |
+| 6727-6742 | callback `0x08076399` held, `data[0]` counts `0,1,2,...,15` (16 ticks) — the same generic "16-tick delay" shape already documented for `SpriteCB_OpponentMonSendOut` |
+| 6743 | callback `0x08075d15` (one-tick handoff state) |
+| **6744** | callback `0x08075fd5` (== `SpriteCB_ReleaseMonFromBall`'s real-battle switch-in equivalent), `animNum` flips 0->1 (`StartSpriteAnim(sprite,1)`, `sBallAnimSeq1`) — **the same tick** the particle burst's own first two spawns begin (§8d below) and the materialize tint engages (§8c below), confirming all three fire off one shared callback exactly as `pokeball.c:750-824`'s source states |
+| 6744-6748 | `animCmdIndex=0` (frame "open", tiles 4-7) held **5 ticks** — source-exact (`ANIMCMD_FRAME(4,5)`) |
+| 6749-6754 | `animCmdIndex=1` (frame "openFinal"/blank, tiles 8-11) held **~5-6 ticks** — source-exact (`ANIMCMD_FRAME(8,5)`), same one-tick render-lag slop this dossier's other timings already carry |
+| 6755-6756 | `flags` flips `1->5` (invisible) |
+| **6757** | slot reused for the burst's 14th particle spawn (§8d) — the ball's own sprite is gone by here |
+
+**Corrects the brief's own framing**: there is **no throw arc** anywhere in
+the observable RAM/pixel record — `x`/`y` are **constant** `(176,64)` for
+the entire 6727-6756 lifetime (zero motion), and the sprite doesn't exist at
+all before 6727, so the brief's "~6684-6720" throw-arc window is empty (the
+switch's own text is still printing through 6727, per §3b). §3c's own pixel
+read ("~6746 a small thrown-ball sprite appears in the oval") undercounted
+the sprite's actual lifetime by 19 ticks: a targeted pixel crop of the
+resting corner across ticks 6720-6750 (`/tmp` scratch, not committed — a
+one-off crop-color dump) shows the ball's own "open"-frame dark-gray tone
+(`(66,66,66)`, `battle-anim-ball-open.json`'s own palette) first appearing
+at **6745** (one tick after `animNum` flips, the usual render lag) — the
+*closed*-frame ball (6727-6743) apparently doesn't produce a big enough
+color delta against the pre-existing shadow-oval backdrop for a coarse
+"top colors in a 32x32 crop" scan to flag, not that it's actually invisible
+(RAM says `flags=1`, visible, the whole time). **No new gfx extraction
+needed** — this reuses `battle-anim-ball-open.json`/`summary-ball.json`
+verbatim, the third confirmed reuse of the shared
+`SpriteCB_ReleaseMonFromBall` ball-open asset family (opponent send-out,
+player send-out, now an AI mid-battle switch-in) with zero new tile/palette
+bytes.
+
+### 8c. Materialize palette tint — CLOSED, exact same mechanism as S6 (goal 3)
+
+Pidgeotto's mon sprite (slot 5) OAM's `paletteNum` (the sub-byte field the
+known ram-probe.py gap can't shift-and-mask directly — read the containing
+u16 at sprite-offset `0x04` and decoded bits 12-15 in the analysis script,
+per the papercut's own documented workaround): **paletteNum = 1** (RAM-read,
+ticks 6726-6735, steady). Two-pass probe:
+`gPlttBufferFaded`/`gPlttBufferUnfaded` at absolute bank `16+1=17`
+(`gPlttBufferFaded + 17*32 + colorIndex*2`, 32 bytes/bank = 16 colors x 2
+bytes, standard BG(0-15)/OBJ(16-31) split), colors 1-4, across ticks
+6740-6835.
+
+**Result: bit-for-bit the same tint as S6's own Grovyle materialize** —
+`gPlttBufferFaded`'s color 1 reads exactly `(31,22,30)` (5-bit channels) from
+tick 6744 (the ball-open tick, §8b) through 6767, **exactly**
+`MATERIALIZE_TINT_COLOR`'s own GBA5 source value (`RGB(31,22,30)`,
+`gBallOpenFadeColors[BALL_POKE]`, already extracted in
+`battle-anim-tables.json`/coded as `MATERIALIZE_TINT_COLOR` in
+`battleScene.ts:1914`) while `gPlttBufferUnfaded` holds the true color
+`(31,31,31)` unchanged throughout — direct RAM confirmation this is the
+identical `BlendPalette` target, not a new color. The coefficient (solved
+per-tick via `blendComponentToward`'s own formula,
+`b5 = c5 + ((t5-c5)*coeff)>>4`, same formula already reverse-engineered
+elsewhere in `battleScene.ts` for the dragon-breath/endeavor tints) holds at
+**16** (fully blended) for ticks 6744-6767 (24 ticks), then ramps linearly
+down to **0** (true color restored) over ticks 6768-6782 — **exactly 15
+ticks**, the identical duration already RAM-pinned for Grovyle's own
+`Task_FadeMon_ToNormal_Step` (§7.17, "handoff+42 through +56", also 15
+ticks) — settled flat at true color `(31,31,31)` from 6782 through 6835 (well
+past the pixel-estimated ~6810-6820 materialize-settle window).
+
+**No new tint transform needed for the engine** — reuse
+`MATERIALIZE_TINT_COLOR` and the existing coefficient-ramp code verbatim,
+anchored as: coefficient 16 held for `ballOpenTick` through `ballOpenTick+23`,
+then ramps 16->0 over the following 15 ticks (`ballOpenTick+24` through
+`+38`). This also resolves §7b's own flagged discrepancy ("~58-tick visible
+tint window, notably longer than Grovyle's 15-tick ramp") as **imprecise
+pixel-eyeballing, not a real difference** — the RAM-exact ramp is the same
+15 ticks; the small, fully-tinted, low-opacity silhouette during the early
+stretch-table ticks (§7b) visually reads as "still tinted" for longer than
+the ramp itself actually runs.
+
+### 8d. Open-particle burst motion formula — CLOSED, exact same formula as S6, corrects the burst's own count (goal 4)
+
+The detail probe's `x2`/`y2` fields (converted from raw `u16` to signed) were
+checked against the exact already-implemented closed form
+(`battleScene.ts`'s own `gbaSin`/`gbaCos`, `angle = (i%8)*32`,
+`radius = age===0 ? 0 : 2*(age-1)`, `dx=gbaSin(angle,radius)`,
+`dy=gbaCos(angle,radius)`) for all 16 particles (see below), across every
+tick each was alive: **400/400 checks match exactly**, once the same 1-tick
+RAM-vs-logical-tick lag this dossier's other mechanisms already carry is
+applied (`age = tick - spawnTick - 1`) — 0 mismatches. **The formula is
+bit-for-bit identical to the send-out burst already coded in
+`drawBallOpenParticles`/`sortAliveParticlesByScreenY`** — no new motion
+formula needed, only a new spawn anchor.
+
+**This also corrects §7b's own particle count.** §7b's coarser scan (x/y
+only, slots 9-21) found "13 distinct sprite slots," undercounting by 3: the
+full spawn sequence is **16 particles** (matching
+`PokeBallOpenParticleAnimation`'s own source-cited "one particle per tick
+for 16 ticks" exactly, and this repo's own already-defined
+`PARTICLE_SPAWN_COUNT`/`PARTICLE_LATE_SPAWN_START_INDEX=14` constants), spawn
+index `i=0..15` at tick `6744+i`, occupying slots in creation order `3, 8, 9,
+10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 7 (reused from the just-destroyed
+ball, §8b), 20, 21` — the two "missing" early spawns (`i=0` at tick 6744,
+`i=1` at tick 6745) landed in slots 3 and 8, which were free at that exact
+moment and so weren't part of §7b's `9-21`-only slot range, and the 14th
+spawn (`i=13`, tick 6757) reused the ball's own just-freed slot 7 rather than
+taking a fresh one — exactly the same "slot reuse" behavior `i=14`'s own
+already-coded `PARTICLE_LATE_SPAWN_START_INDEX=14` constant anticipates
+generically (this trace's reuse just happens one index earlier, at a
+freed ball slot instead of a freed particle slot). **Closed-form summary for
+the engine**: same formula, same 16-particle spawn count, anchored at
+`ballOpenTick` (6744) instead of the send-out's own anchor — no table dump
+needed, the formula generalizes cleanly and is now cross-verified on a
+second, independent instance.
+
+### 8e. Healthbox slide-in ramps — CLOSED, both directions (goal 5)
+
+Probed `gHealthboxSpriteIds[1]` (opponent battler)'s sprite dynamically
+(same multi-hop `path` pattern as `switchin-b1-sprite.json`) across ticks
+6480-6900. **The healthbox sprite slot itself never changes** (stays
+`gHealthboxSpriteIds[1]`'s slot 1 throughout — the same physical sprite
+object is reused for both Grovyle's and Pidgeotto's healthbox content, not
+destroyed and recreated) and its `(x,y)` base position never changes
+(`(44,30)`, matching the singles-opponent healthbox's fixed screen anchor)
+— **all** of the "old box out"/"new box in" motion happens on `x2` alone:
+
+- **Old (Grovyle) box out**: `flags` flips `1->5` (visible->invisible) at
+  **tick 6520** — exactly one tick after §7a's own RAM-pinned faint-sink
+  destroy tick (6519). **There is no slide-out** — the healthbox simply goes
+  invisible in lockstep with the fainted sprite's own destruction and stays
+  invisible (RAM-confirmed steady `flags=5`, `x2=0`) for the entire
+  6520-6827 switch-in window that follows.
+- **New (Pidgeotto) box in**: at **tick 6828**, `callback` flips to a slide
+  task (`0x080769cd`) and `flags` flips back to `1` (visible) with `x2`
+  jumping straight to **-110** (`u16` `65426` decoded as `s16`); `x2` then
+  climbs **+5/tick** for 22 explicit steps (`-110, -105, -100, ..., -5` at
+  ticks 6828-6849) before settling to `x2=0` with the callback reverting to
+  idle at **tick 6850** — a clean **23-step linear slide**, bit-for-bit the
+  same shape (step count, step size) `battleScene.ts`'s own `§7.6`
+  `StartHealthboxSlideIn` finding already documented for Grovyle's own
+  intro send-out (line ~1408, "23-step linear slide"). **No new ramp table
+  needed** — reuse the existing slide-in mechanism verbatim, anchored at
+  `pidgeottoSpriteSettleTick + N` (empirically 6828, i.e. roughly the tick
+  the mon's own materialize finishes per §3d/§7b) rather than re-deriving a
+  new step table.
+
+### Bottom line for the engine slice (supersedes §7's own table)
+
+| element | verdict |
+|---|---|
+| Faint sink | **Fully pinned** (§7a, unchanged) |
+| Materialize stretch geometry (mon sprite) | **Verified-same, shifted** (§7b, unchanged) |
+| Open-particle burst | **Fully pinned** — same formula as send-out, 16 particles (not 13), anchored at ball-open tick 6744 (§8d) |
+| Thrown ball sprite | **Fully pinned** — slot 7, static at `(176,64)`/corner `(168,56)`, no throw arc exists in this window, same gfx/timing family as the send-out ball (§8b) |
+| Materialize tint | **Fully pinned** — identical `MATERIALIZE_TINT_COLOR`/coefficient-ramp mechanism, coeff 16 held 24 ticks then ramps to 0 over 15 ticks from the ball-open tick (§8c) |
+| Sitrus sparkle/ring | **Sparkle: fully pinned, byte-exact** (0/115px). **Ring: extracted + source-cited, not pixel-verified** — affine-scale placement search not attempted this session (§8a) |
+| Healthbox slide-in | **Fully pinned, both directions** — old box goes invisible in lockstep with the faint-sink destroy tick (no slide-out exists), new box reuses the same 23-step slide-in already known from send-out (§8e) |
+
+Four of five gaps are now fully closed with exact ticks/formulas ready to
+implement against; the fifth (Sitrus ring) has its gfx extracted and
+source-cited but still needs a scaled-affine pixel placement pass before
+being called byte-exact.
+
+## Verification (§8)
+
+`npm test` and `npm run build` green (one new extractor + gen asset, four
+new probe specs + their twice-run, byte-identical outputs, docs only — no
+`src/engine/` changes). New committed artifacts: `tools/extract/
+extract-battle-anim-item-heal.ts`, `src/assets/gen/battle-anim-item-heal.json`,
+`tools/probe/specs/switchin-ball-particle-detail.json`,
+`switchin-pidgeotto-palettenum.json`, `switchin-pidgeotto-tint.json`,
+`switchin-healthbox.json`, their outputs at `src/data/gen/
+battle1-switchin-{ball-particle-detail,materialize-tint,healthbox,
+pidgeotto-palettenum}-probe.json`, and one verification script
+(`tools/compare/scratch/sitrus_sparkle_verify.mjs`).
