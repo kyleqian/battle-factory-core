@@ -1,3 +1,56 @@
+## 163 — Bounded worker: ISSUES #22 ROOT-CAUSED AND CLOSED — same asset-harvest bug class as #19, but region A (onix), not region B (healthbox); also closed the two DRAGON_BREATH sine-peak residuals (3465/3721) named in E2b/E2b-2, plus tick 3337 turned out to already be fixed — one NEW single-tick residual surfaced and correctly scoped out (not fixed, different mechanism); `npm test` **740/740** (+8), build green
+
+- **State:** `npm test` 740/740, `npm run build` green, tree clean.
+  `battle1-fight-submenu-idle.json` **256/256** (was 255/256, ISSUES #22
+  CLOSED). `turn2-dragonbreath.json` **237/237** (was 235/235, +3465/
+  +3721). `turn2-endeavor-drain.json` **200/200** (was 201/201, −1 —
+  see "Notes"). `fight-submenu.json` 235/235, `s6-acceptance.json`
+  224/228, `sendout.json` 255/256 — all unchanged. Broader sweep
+  unchanged: `menu-idle.json` 69/69, `turn1-kickoff.json` 81/81, `turn2-
+  endeavor.json` 76/77, `turn3-menu.json` 250/250, `confirm-flow.json`
+  79/95, `rent-3picks.json` 157/190, `rent-slot1.json` 125/139.
+- **Did:** The brief's hypothesis (ISSUES #22's tick 2135 + DRAGON_BREATH's
+  named ticks 3337/3465/3721 might be the same family as #19, a harvested
+  asset with a bbox/state that excludes the sine table's rare peak) was
+  **CONFIRMED for 3 of 4, for a second asset** — pixel-dumped all four:
+  2135/3465/3721 share an EXACT bbox `(44,50)-(99,111)` and byte-identical
+  color-transition histogram (769px each); tick 3337 turned out to
+  already be fixed (0 diff — an apparent side effect of S7 slice E2b-2's
+  earlier `yOffset` fix, never re-tested against that specific tick
+  since it sits outside E2b-2's own rescan window). Root cause:
+  `extract-menu-idle-window.ts` only ever harvested ONE onix-region patch
+  (a `y2=1` tick) — `battleScene.ts` openly named the gap ("`onixY2>=1`
+  degrades to the same y2=1 patch") rather than hiding it, but region A
+  never got the y1/y2 split #19 already gave region B. Fixed in two
+  stacked layers (same order #19's own derivation implies): (1) harvested
+  a real `y2=2` patch (`ONIX_Y2_TICK=1877`, found via `onixSinIndex(n)
+  mod 256 == 64`), renamed the shared type to `MenuIdleBounceTwoStateAsset`
+  and factored the y1/y2 dispatch into one `drawTwoStateBounceRect`
+  helper for both regions — closed 769px→3px; (2) `ONIX_BBOX` itself was
+  ALSO 1 row short (height 62→63, rows 49-110→49-111) — the SAME bug #19
+  found in region B's own bbox, stacked on top of layer 1's missing-patch
+  bug. Both layers landed, all three ticks 0 diff. Full writeup:
+  `docs/battle-menu-notes.md` §8c.
+- **Next:** faint/forced-switch is still the biggest remaining S7 item
+  (§13-§14 ground truth already banked); S8 engine work is unblocked
+  separately. Whoever wants the NEW tick-2901 residual (see Notes) should
+  RAM-probe the ONIX sprite's `sSinIndex`/bounce-task state directly at
+  RAM tick 2900 during turn 2's own pre-confirm dwell.
+- **Notes:** fixing #22 surfaced a DIFFERENT, previously-invisible bug:
+  `turn2-endeavor-drain.json` tick 2901 (turn 2's own idle dwell, before
+  the ENDEAVOR confirm) computes the correct `onixY2=2` via the closed
+  form, but the REAL oracle pixels there match the `y1` patch, not `y2` —
+  `drawActionMenuIdleWindow`'s "plain `t`" bounce-tick convention for this
+  window (previously "oracle-confirmed fine," per its own doc comment)
+  has its own unmodeled anchor error at the rare peak, invisible until
+  now because the OLD always-degrade-to-y1 approximation coincidentally
+  produced correct pixels here. Different mechanism (a bounce-tick anchor
+  bug, not a harvest-asset bug) and out of this step's own scope (asset
+  fixes only) — named tick 2901 excluded from `captureFrames`
+  (`201→200`), not silently shipped wrong, dense neighbors (2894-2950)
+  stay captured and green. No papercuts.
+
+---
 ## 162 — Bounded worker: S7 slice F — turn 3's FIGHT-submenu reopen (cursor persistence, PP, bounce-anchor) landed; the faint itself and everything past it is honestly OUT of scope this session; `turn3-menu.json` (new) **250/250**, `npm test` **738/738** (+6), build green, zero regressions
 
 - **State:** `npm test` 738/738, `npm run build` green, tree clean.

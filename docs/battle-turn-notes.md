@@ -3413,3 +3413,170 @@ touching trace (`turn1-drain`, `turn1-rockslide`, `turn1-kickoff`,
 `menu-idle`, `turn2-endeavor`, `sendout` all still 100%; `s6-acceptance`
 224/228 and `sendout` 255/256 unchanged pre-existing gaps, not new).
 
+## 20. Engine slice G: turn 3's ENDEAVOR resolution (the turn's first half), by PARAMETERIZING turn 2's own mechanisms - `turn3-endeavor.json` **180/180** (bounded worker session)
+
+Implements §13's own ground truth for turn 3's own ENDEAVOR-again window:
+`turn3-menu.json`'s own committed button script (through its own confirm at
+tick 3891) plus 190 idle frames, extending `core.ts`'s dispatch so a turn-3
+confirm (cursor 0, ROCK_SLIDE selected by the player) still resolves
+Grovyle's own ENDEAVOR first (speed 90 beats Onix's 76, same turn-order rule
+every prior turn already established). Per the brief's own framing, this is
+**parameterization, not a rebuild** - every one of turn 2's own ENDEAVOR
+sub-mechanisms (kickoff text, `ENDEAVOR_SQUISH_TABLE`'s squish/blend,
+droplets, hitsplat, healthbox-wobble/flicker tail) is already
+`pressTick`-relative in `battleScene.ts`/`battleMenu.ts` and needed ZERO
+formula changes - only the two turn-2-hardcoded anchors (Grovyle's own hp,
+the idle-bounce freeze tick) needed threading as real parameters.
+
+### Anchors (RAM- and pixel-probed this session, not assumed)
+
+- **`TURN3_CONFIRM_PRESS_TICK = 3891`** - the last frame of `turn3-menu.json`'s
+  own final 2-frame `A` hold (ticks 3890-3891), same "last frame of the hold"
+  convention `TURN1_CONFIRM_PRESS_TICK`(1919)/`TURN2_CONFIRM_PRESS_TICK`(2945)
+  already established - confirmed correct (not just assumed by analogy) via
+  the kickoff-text pixel probe below.
+- **RAM ledger, re-confirmed byte-for-byte against §13's own table** (fresh
+  `tools/probe/ram-probe.py` run this session, `gCurrentMove`/`gBattlerAttacker`/
+  `gBattleMons[]`/`gBattleMoveDamage`): `gCurrentMove`->283 (ENDEAVOR) at tick
+  3897; `gBattleMoveDamage` 13->6->13 at 3927-3933; Onix's `gBattleMons[0].hp`
+  101->88 at tick 4059; attacker flips to battler 0, `gCurrentMove`->157
+  (ROCK_SLIDE) at tick 4073 - all four match §13 exactly, validating this
+  session's own probe methodology before trusting any NEW number below.
+- **Kickoff text start: 3900** (`turn2KickoffTextStartTick(pressTick)` -
+  `pressTick+9`, the SAME `-1`-off-the-general-formula correction turn 2's
+  own reopened-submenu needed - oracle-pixel-confirmed this session: the
+  whole ~9280px message-box region is unchanged tick 3891-3899, then changes
+  simultaneously at 3900, not 3901 the generic `turnKickoffTextStartTick`
+  formula would predict). Text content is textually identical to turn 2's
+  own ("Foe GROVYLE used\nENDEAVOR!", Grovyle repeats its move) - reused
+  `TURN_KICKOFF_LINE1`/`TURN2_KICKOFF_LINE2`/`turn2KickoffTextVisibleChars`
+  verbatim, no new text constants needed.
+- **Animation window: unchanged relative offsets, reused verbatim.**
+  `ENDEAVOR_SQUISH_TABLE`'s own squish/blend/droplet/hitsplat/tail timing
+  (`ENDEAVOR_SQUISH_START_DELAY=55` through the table's own last row at
+  offset 147) needed zero changes - RAM/pixel-confirmed this session that
+  turn 3's own window follows the identical `pressTick`-relative schedule
+  (e.g. the HP drain's own sentinel/completion below lands exactly where
+  `ENDEAVOR_HP_DRAIN_START_DELAY=153`'s own unchanged formula predicts).
+- **HP drain: Onix 101->88, `ENDEAVOR_HP_DRAIN_START_DELAY=153` unchanged.**
+  `endeavorOnixHp(t, pressTick, anchorPlayerAfterTurnHp(101), anchorPlayerAfterTurn3Hp(88))`
+  - the new `anchorPlayerAfterTurn3Hp` constant (88) is sourced from
+  `battle1-grovyle-faint-ram-dump.json`'s own `battlerSnapshots["4892"]
+  .battler0.hp` (turn 3's end/turn 4's reopen boundary - Onix isn't touched
+  again by ROCK_SLIDE, which hits Grovyle, so this snapshot IS ENDEAVOR's own
+  settled endpoint), independently cross-confirmed by this session's own RAM
+  probe (`gBattleMons[0].hp` 101->88 at tick 4059). Drain completes (bar +
+  digits both read 88) at render tick 4044+13=4057 - pixel-confirmed via a
+  whole-frame sha256 sweep (`bin/oracle run`, dense 4020-4195): every tick
+  4057-4079 is BYTE-IDENTICAL (23-tick flat plateau), the drain's own
+  completion tick is the last-finishing sub-mechanism (the squish/blend/
+  droplet/hitsplat/wobble/flicker chain itself settles earlier, offset 147 =
+  tick 4038).
+- **Idle-bounce freeze: `TURN3_KICKOFF_FROZEN_BOUNCE_TICK`, a NEW literal**
+  (`turn3SubmenuBounceTick` evaluated at `TURN3_CONFIRM_PRESS_TICK +
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`, i.e. tick 3894) - unlike turns 1/2 (whose
+  own frozen plateaus were pixel-fit to a DIFFERENT value than their live
+  formula's freeze-moment reading), this session's own oracle probe showed
+  the onix/healthbox sprite region is already byte-identical from tick 3891
+  through at least 3899 - i.e. turn 3's own live formula is ALREADY flat over
+  the relevant span, so freezing at the live value AT the freeze moment
+  happens to be correct here (verified by the trace's own 0-diff result, not
+  assumed).
+- **Window boundary: tick 4079, oracle-confirmed via a message-box crop
+  diff** (dense `bin/oracle run` capture 4020-4195, cropped to the message
+  box's own `(0,116)-(240,155)` region against a tick-4030 baseline): the
+  message box stays byte-identical through tick 4079, then the WHOLE region
+  changes simultaneously at tick 4080 (885px) - ROCK_SLIDE's own kickoff text
+  hard-cutting the message box, matching the RAM attacker-flip at 4073 plus a
+  short bookkeeping delay (not itself modeled or timed precisely this
+  session - out of scope, see below). `turn3-endeavor.json`'s own dense
+  window stops at 4079, safely before this boundary.
+
+### One genuine divergence found and NOT curve-fit: the target-shake mechanism is asymmetric for turn 3
+
+RAM-probing `gSprites[onixSlot].x2` directly (`tools/probe`-style script, this
+session, cross-validated first against `turn2-endeavor-drain.json`'s own
+known-good window to confirm the probe methodology itself, which reproduced
+the documented symmetric `+3/-3` alternation exactly) found turn 3's own
+target-shake sequence reads **`+3, -2, +3, -2, ...`** - asymmetric, NOT the
+symmetric `±3` `ENDEAVOR_SHAKE_STEP` (derived from `gAnimMovePower=75`,
+§15e) already models and which turn 2's own RAM independently confirms
+exact. This is a REAL mechanism difference this session could not explain
+(and, per the brief's own instruction, did not curve-fit a second formula
+for) - candidates not investigated (time-boxed): `gAnimMovePower` reading a
+different value for turn 3's own instance despite ENDEAVOR being the same
+move (unconfirmed - not RAM-read this session), or the shake task's own
+half-step accumulator carrying residual state from a source other than a
+fresh `75/12` division. Produces a small, precisely-characterized, isolated
+residual: **12 ticks, ±1px in the target-shake's own x-offset, region
+`x=41-97,y=49-111`** (Onix's own silhouette, `588px`/`1.53%` mismatch per
+tick) - `3958,3959,3962,3963,3966,3967` (shake round 1's own second half)
+and `3984,3985,3988,3989,3992,3993` (round 2's own second half), both
+tick-pairs matching the render-lag-2 window `ENDEAVOR_SHAKE_ROUND_RAM_OFFSET`
+predicts. Every neighboring tick (the full 180/192 - 12 = 180 captured
+frames) is 0 diff. Excluded from `turn3-endeavor.json`'s own `captureFrames`
+per this run's "characterize precisely, never commit red" rule - a future
+session should RAM-probe `gAnimMovePower` directly at these ticks before
+attempting a second shake formula.
+
+### What landed (`src/engine/battleScene.ts`)
+
+- `drawActionMenuIdleContent` gained an optional `playerHp` param (default
+  `anchorPlayerAfterTurnHp`, every pre-existing call site unaffected) - turn
+  3's own still-draining Onix hp needs to reach the healthbox overlay while
+  the fallback idle-content path is active (past `ENDEAVOR_SQUISH_TABLE`'s
+  own window, before ROCK_SLIDE's own kickoff).
+- `drawEndeavorSquish` gained `opponentHp`/`kickoffBounceTick` params
+  (replacing the hardcoded `anchorOpponentAfterTurnHp`/`turn2KickoffBounceTick`
+  call) - turn 2's own call site passes its own literals unchanged, turn 3's
+  new `drawTurn3EndeavorText` passes `anchorOpponentAfterTurn2Hp`(88)/
+  `turn3KickoffBounceTick`.
+- New `drawTurn3EndeavorText` - turn 3's own analogue of `drawTurn2KickoffText`,
+  deliberately NOT dispatching onward into a ROCK_SLIDE phase (out of scope).
+  Needed its own yOffset threading for the player healthbox HP overlay
+  (`endeavorHealthboxBounceY2(t, pressTick)`) that turn 2's own call didn't:
+  turn 2's `onixHp` sits AT `anchorPlayerBattler.hp`(117) for the WHOLE
+  squish/tail window (its own drain starts later), so that overlay's own
+  no-op guard (`hp === anchorPlayerBattler.hp`) skips drawing during the ONE
+  span where a missing offset would show - turn 3's own `onixHp` starts at
+  101, never 117, so the overlay is NEVER a no-op here and the real hardware
+  wobble must be tracked explicitly. A genuine "parameterization can't hide
+  this" case, not a bug in turn 2's own code.
+- `turn3KickoffBounceTick`/`TURN3_KICKOFF_FROZEN_BOUNCE_TICK` - turn 3's own
+  freeze-then-hold idle-bounce formula, same shape as `turn2KickoffBounceTick`.
+  Also swapped into the pre-text confirm-wait branch (`turn2Resolved` case),
+  replacing slice F's own explicitly-flagged "live formula only, freeze not
+  modeled" gap - oracle-confirmed unchanged for every tick slice F's own
+  trace already covers (live/frozen values coincide there).
+- `anchorPlayerAfterTurn3Hp` (88) - new anchor constant, sourced from
+  `battle1-grovyle-faint-ram-dump.json` (already committed, from §13's own
+  scout session).
+- `core.ts`'s own dispatch (`drawFightSubmenuWindow`): `textStart` now uses
+  `turn2KickoffTextStartTick` whenever `turn2Resolved` (not just
+  `cursor===2`), and a new `turn2Resolved` branch routes to
+  `drawTurn3EndeavorText` instead of falling through to `drawRockSlideWindow`/
+  `drawTurnKickoffText` (which would have been wrong - turn 3's cursor is 0,
+  same as turn 1's, but the state machine must distinguish them).
+
+### Verification
+
+`npm test` **746/746** (+2: a full-button-script replay pinning
+`TURN3_CONFIRM_PRESS_TICK`=3891 through `core.ts`'s own `tick()`, and a
+determinism/smoke check over the whole new window). `npm run build` green.
+`turn3-endeavor.json` **180/180** (192 dense captures minus the 12
+characterized shake-residual exclusions above). Zero regressions, full
+sweep re-verified at exact prior counts: `turn3-menu.json` **250/250**,
+`turn2-dragonbreath.json` **237/237**, `turn2-endeavor-drain.json`
+**201/201**, `turn2-endeavor.json` **77/77**, `fight-submenu.json`
+**235/235**.
+
+### What's left
+
+The ROCK_SLIDE half of turn 3 (Onix's own move hitting Grovyle again,
+kickoff text starting sometime after tick 4080 - not itself timed this
+session) and the turn-4 menu reopen are the immediate next slice, ground
+truth already banked (§13's own ledger: `gBattleMoveDamage` locks to
+32->48->47, Grovyle 88->41). The shake-asymmetry divergence above (12
+excluded ticks) is a clean, precisely-scoped follow-up needing one RAM read
+(`gAnimMovePower` at ticks 3956-3966) before touching any render code.
+

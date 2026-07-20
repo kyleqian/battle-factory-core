@@ -473,6 +473,7 @@ import {
   turn2KickoffBounceTick,
   endeavorOnixHp,
   currentPPForActiveMon,
+  FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import type { ActiveMonMoveset } from "./battleSetup.ts";
@@ -505,6 +506,7 @@ import fightSubmenuWindowAsset from "../assets/gen/fight-submenu-window.json" wi
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
+import battle1GrovyleFaintRamDumpAsset from "../data/gen/battle1-grovyle-faint-ram-dump.json" with { type: "json" };
 import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
 
 interface Tileset {
@@ -773,6 +775,22 @@ const anchorPlayerAfterTurnHp = (
 const anchorOpponentAfterTurn2Hp = (
   battle1Turn2RamDumpAsset as { battlerSnapshots: { after_turn2: { battler1: { hp: number } } } }
 ).battlerSnapshots.after_turn2.battler1.hp;
+
+/**
+ * S7 slice G (docs/battle-turn-notes.md §13/§20): Onix's own post-turn-3-
+ * ENDEAVOR hp (`battle1-grovyle-faint-ram-dump.json`'s `battlerSnapshots["4892"]
+ * .battler0.hp`, 88 - the tick-4892 snapshot is turn 3's own end/turn 4's
+ * reopen boundary, taken AFTER both halves of turn 3 resolve, but Onix isn't
+ * touched again by ROCK_SLIDE - which hits Grovyle - so this is exactly
+ * ENDEAVOR's own settled endpoint, independently RAM-confirmed this session
+ * at tick 4059 too). `endeavorOnixHp`'s own `endHp` for turn 3's instance -
+ * turn 2's `anchorPlayerAfterTurnHp` (101) doubles as turn 3's own `startHp`
+ * (Onix carries no chip damage between turns 2 and 3, same reasoning
+ * `anchorOpponentAfterTurn2Hp`'s own doc already gives for Grovyle).
+ */
+const anchorPlayerAfterTurn3Hp = (
+  battle1GrovyleFaintRamDumpAsset as { battlerSnapshots: { "4892": { battler0: { hp: number } } } }
+).battlerSnapshots["4892"].battler0.hp;
 
 const playerHealthboxHpOverlayAssets = {
   hpbar: healthboxAssemblyAssets.hpbar,
@@ -3385,7 +3403,13 @@ function drawMenuIdleBaseWithOpponentHp(fb: Uint8Array, turn1Resolved: boolean, 
   }
 }
 
-function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number, turn1Resolved: boolean, turn2Resolved: boolean = false): void {
+function drawActionMenuIdleContent(
+  fb: Uint8Array,
+  bounceTick: number,
+  turn1Resolved: boolean,
+  turn2Resolved: boolean = false,
+  playerHp: number = anchorPlayerAfterTurnHp,
+): void {
   drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved, turn2Resolved);
   const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
   drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
@@ -3395,7 +3419,12 @@ function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number, turn1Reso
   // AFTER the bounce patches above so it isn't overdrawn by the healthbox's
   // own static bounce asset (same ordering `drawDragonBreathTurnEndSettled
   // Menu` already established for this exact overlay, S7 slice E2b-2).
-  if (turn2Resolved) drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurnHp, healthboxY2);
+  // S7 slice G: `playerHp` (default `anchorPlayerAfterTurnHp`, every
+  // pre-existing caller unaffected) lets turn 3's own still-draining Onix hp
+  // (101->88, `endeavorOnixHp`) reach this same overlay while its fallback
+  // idle-content path is active (past `ENDEAVOR_SQUISH_TABLE`'s own window
+  // but before the HP drain settles) - see `drawTurn3EndeavorText`.
+  if (turn2Resolved) drawPlayerHealthboxHpOverlay(fb, playerHp, healthboxY2);
 }
 
 function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: boolean, turn2Resolved: boolean = false): void {
@@ -3462,7 +3491,12 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
   }
   if (sm.confirmElapsed !== null) {
     const pressTick = TICK0 + sm.confirmElapsed;
-    const textStart = sm.cursor === 2 ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
+    // S7 slice G: turn 3's own confirm (cursor 0, ROCK_SLIDE selected by the
+    // player) still kicks off Grovyle's ENDEAVOR first (speed 90 beats
+    // Onix's 76, same turn-order rule every prior turn established) -
+    // distinguished from turn 1's OWN cursor-0 confirm by `turn2Resolved`
+    // (true only once turn 3's reopen has fired, `core.ts`'s own gate).
+    const textStart = sm.cursor === 2 || turn2Resolved ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
     if (t >= textStart) {
       // S7 slice E1: turn 2's confirm (cursor 2, DRAGON_BREATH) kicks off
       // Grovyle's ENDEAVOR instead of turn 1's DOUBLE_TEAM - this slice only
@@ -3471,6 +3505,15 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
       // turn-2 equivalent of `drawRockSlideWindow`'s later phases yet.
       if (sm.cursor === 2) {
         drawTurn2KickoffText(fb, t, pressTick);
+        return;
+      }
+      if (turn2Resolved) {
+        // S7 slice G (docs/battle-turn-notes.md §20): turn 3's own ENDEAVOR
+        // half - stops holding the kickoff text once printed, deliberately
+        // NOT dispatching onward into ROCK_SLIDE's own kickoff (out of
+        // scope; the caller/trace never captures past the oracle-confirmed
+        // safe boundary this function's own doc names).
+        drawTurn3EndeavorText(fb, t, pressTick);
         return;
       }
       if (t - pressTick > STATS_BANNER_END_DELAY) {
@@ -3488,15 +3531,16 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // the A-press hands off, not merely once the text becomes visible).
     drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved, turn2Resolved);
     drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved, turn2Resolved, sm.activeMonMoveset);
-    // S7 slice F: turn 3's own confirm-wait window (cursor 0, ROCK_SLIDE
-    // again) only ever needs the LIVE portion this session - the trace ends
-    // well before `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks past the press,
-    // so the frozen-plateau branch `turn2KickoffBounceTick`'s own analogue
-    // would need (a turn-3 frozen constant, unverified/unneeded here) is
-    // deliberately not modeled - out of scope, see docs/battle-turn-notes.md
-    // §13's own engine-slice writeup.
+    // S7 slice G: turn 3's own confirm-wait window now uses the same
+    // freeze-then-hold shape turns 1/2 already established
+    // (`turn3KickoffBounceTick`) instead of the plain live formula slice F's
+    // own trace got away with (its own window never reached past
+    // `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks past the press) - oracle-
+    // pixel-confirmed unchanged for every tick slice F already covers (the
+    // live/frozen values coincide there, see `TURN3_KICKOFF_FROZEN_BOUNCE_TICK`'s
+    // own doc).
     const confirmWaitBounceTick = turn2Resolved
-      ? turn3SubmenuBounceTick(t)
+      ? turn3KickoffBounceTick(t, pressTick)
       : turn1Resolved
         ? turn2KickoffBounceTick(t, pressTick)
         : turnKickoffBounceTick(t, pressTick);
@@ -4083,8 +4127,16 @@ function endeavorOnixInvisible(t: number, pressTick: number): boolean {
  * primitive reconstruction the squish/droplet mechanisms already required,
  * since neither "erase Onix" nor "shift the healthbox by a non-baked amount"
  * is expressible from the flat `menuIdleBase` harvest.
+ *
+ * S7 slice G: `opponentHp` (Grovyle's own steady hp during this window) and
+ * `kickoffBounceTick` (the idle-bounce overlay's own already-resolved tick)
+ * are threaded in rather than hardcoded, so turn 3's own instance (Grovyle
+ * at 88, `turn3KickoffBounceTick`) can reuse this same function verbatim -
+ * every other sub-mechanism here (squish/blend/droplets/shake/hitsplat/
+ * healthbox-wobble/flicker) is already `pressTick`-relative and needs no
+ * turn-specific change at all.
  */
-function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boolean {
+function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number, opponentHp: number, kickoffBounceTick: number): boolean {
   const local = t - pressTick - ENDEAVOR_SQUISH_START_DELAY;
   if (local < 0 || local >= ENDEAVOR_SQUISH_TABLE.length) return false;
   const entry = ENDEAVOR_SQUISH_TABLE[local]!;
@@ -4094,9 +4146,9 @@ function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boole
     drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + shakeX2, ONIX_MATERIALIZE_CORNER.y);
   }
   drawEndeavorHitsplats(fb, t, pressTick);
-  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurnHp));
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
   drawMenuHealthboxPlayer(fb, 0, endeavorHealthboxBounceY2(t, pressTick));
-  drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick));
+  drawMenuIdleBounceOverlay(fb, kickoffBounceTick);
   drawSpriteSheetAffineStretch(
     fb,
     grovyleFrontSprite.tileset,
@@ -4333,6 +4385,32 @@ function turn3SubmenuBounceTick(t: number): number {
   return dragonBreathResettledBounceTick(t, TURN2_CONFIRM_PRESS_TICK) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
 }
 
+/**
+ * S7 slice G (docs/battle-turn-notes.md §20): the onix/healthbox idle-bounce
+ * overlay's frozen state for turn 3's own confirm (cursor 0, ROCK_SLIDE
+ * selected, but Grovyle's ENDEAVOR resolves first) - same "`DoBounceEffect`
+ * stops being polled the instant the A-press hands off" rule
+ * `turnKickoffBounceTick`/`turn2KickoffBounceTick` already established for
+ * turns 1/2, live for `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks off
+ * `turn3SubmenuBounceTick`'s own resettled remap, then frozen. Oracle-pixel-
+ * confirmed (this session, `turn3-menu.json`'s own trace extended past its
+ * prior 3896 cutoff): the onix/healthbox sprite region is byte-identical to
+ * `pressTick`(3891) through at least `pressTick`+9 - i.e. this window's own
+ * plateau happens to already be flat under the LIVE formula too, so the
+ * frozen constant below is `turn3SubmenuBounceTick` evaluated at the freeze
+ * tick itself (unlike turns 1/2, whose own frozen plateaus were pixel-fit to
+ * a DIFFERENT value than their live formula's freeze-moment reading - not
+ * assumed here, directly oracle-confirmed for this specific window instead).
+ */
+/** Turn 3's own A-confirm press tick (RAM/render 3891 - `turn3-menu.json`'s own committed button script, last frame of its final 2-frame `A` hold, same "last frame of the hold" convention `TURN1_CONFIRM_PRESS_TICK`/`TURN2_CONFIRM_PRESS_TICK` already established). */
+const TURN3_CONFIRM_PRESS_TICK = 3891;
+const TURN3_KICKOFF_FROZEN_BOUNCE_TICK = turn3SubmenuBounceTick(TURN3_CONFIRM_PRESS_TICK + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY);
+
+function turn3KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return turn3SubmenuBounceTick(t);
+  return TURN3_KICKOFF_FROZEN_BOUNCE_TICK;
+}
+
 function drawDragonBreathTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
   const bounceTick = dragonBreathResettledBounceTick(t, pressTick);
   drawActionMenuIdleContent(fb, bounceTick, true);
@@ -4384,7 +4462,7 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
   // construction can't happen before the S7 slice E1 reopen sets
   // `turn1Resolved` - Grovyle's healthbox always needs its real (101) HP
   // here, never the stale full-HP harvest.
-  if (!drawEndeavorSquish(fb, t, pressTick)) {
+  if (!drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurnHp, turn2KickoffBounceTick(t, pressTick))) {
     if (t >= dragonBreathStart) {
       drawDragonBreathScene(fb, t, pressTick);
     } else {
@@ -4408,6 +4486,55 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
     }
     return;
   }
+  drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
+}
+
+/**
+ * S7 slice G (docs/battle-turn-notes.md §20): turn 3's own kickoff message,
+ * "Foe GROVYLE used\nENDEAVOR!" again (Grovyle repeats its turn-2 move,
+ * §13's own ledger) - reuses `drawTurn2KickoffText`'s exact text/timing
+ * formulas (`turn2KickoffTextStartTick`/`turn2KickoffTextVisibleChars`,
+ * oracle-pixel-confirmed this session to hard-cut at the SAME `pressTick`+9
+ * offset turn 2 used, tick 3900 for this trace's own `TURN3_CONFIRM_PRESS_
+ * TICK`=3891) and `drawEndeavorSquish`'s entire animation state machine
+ * (squish/blend/droplets/shake/hitsplat/healthbox-wobble/flicker - every
+ * one of those sub-mechanisms is `pressTick`-relative already, none needed
+ * a turn-3-specific correction), parameterized by turn 3's own Grovyle hp
+ * (`anchorOpponentAfterTurn2Hp`, 88, steady all through this window - turn
+ * 3's ENDEAVOR targets ONIX, not Grovyle) and turn 3's own idle-bounce
+ * freeze (`turn3KickoffBounceTick`). Unlike `drawTurn2KickoffText`, this
+ * function does NOT dispatch onward into the turn's second half (ROCK_SLIDE,
+ * Onix's own move, out of scope this session per the brief) - it only ever
+ * holds the ENDEAVOR text once fully printed, oracle-confirmed stable (byte-
+ * identical full-frame captures) through `pressTick`+188 (tick 4079), well
+ * past the HP drain's own completion (`pressTick`+166=4057) - safely before
+ * ROCK_SLIDE's own kickoff text hard-cuts the message box again at
+ * `pressTick`+189 (tick 4080, oracle-confirmed, NOT modeled here).
+ *
+ * The player healthbox's own HP-digit overlay needs its OWN yOffset
+ * threading here, unlike turn 2's analogous call (`drawTurn2KickoffText`'s
+ * own unconditional, offset-less `drawPlayerHealthboxHpOverlay(fb, onixHp)`
+ * call): turn 2's `onixHp` sits AT `anchorPlayerBattler.hp` (117) for this
+ * whole window (its own drain starts well after the tail's own healthbox-
+ * wobble sub-mechanism ends), so that overlay's own no-op guard (`hp ===
+ * anchorPlayerBattler.hp`) skips drawing entirely during the ONE span where
+ * a missing offset would show - turn 3's own `onixHp` starts at 101, never
+ * 117, so the overlay is NEVER a no-op here and must track
+ * `endeavorHealthboxBounceY2` (the real hardware wobble `drawEndeavorSquish`
+ * itself draws the healthbox base at) for as long as the squish/tail window
+ * is active; past that window, `drawActionMenuIdleContent`'s own `playerHp`
+ * param (S7 slice G) handles the (already-zero, oracle-confirmed) offset
+ * internally, so no second call is needed there.
+ */
+function drawTurn3EndeavorText(fb: Uint8Array, t: number, pressTick: number): void {
+  const bounceTick = turn3KickoffBounceTick(t, pressTick);
+  const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp);
+  if (drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurn2Hp, bounceTick)) {
+    drawPlayerHealthboxHpOverlay(fb, onixHp, endeavorHealthboxBounceY2(t, pressTick));
+  } else {
+    drawActionMenuIdleContent(fb, bounceTick, true, true, onixHp);
+  }
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
 }
 

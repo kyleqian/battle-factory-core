@@ -4,6 +4,45 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 166 — Bounded worker: S7 slice G — turn 3's ENDEAVOR resolution (the turn's first half) landed by PARAMETERIZING turn 2's own mechanisms, not rebuilding; `turn3-endeavor.json` (new) **180/180**, `npm test` **746/746** (+2), build green, zero regressions
+
+- **State:** `npm test` 746/746, `npm run build` green, tree clean.
+  New `tools/compare/traces/turn3-endeavor.json` (`turn3-menu.json`'s own
+  button script + 190 idle frames, through tick 4079) is **180/180**
+  (192 dense captures minus 12 characterized shake-residual exclusions,
+  see below). Full regression sweep re-verified at exact prior counts:
+  `turn3-menu.json` **250/250**, `turn2-dragonbreath.json` **237/237**,
+  `turn2-endeavor-drain.json` **201/201**, `turn2-endeavor.json` **77/77**,
+  `fight-submenu.json` **235/235**.
+- **Did:** Extended `core.ts`'s dispatch so turn 3's own confirm (cursor 0,
+  ROCK_SLIDE selected by the player) still resolves Grovyle's ENDEAVOR
+  first (speed order), reusing turn 2's own ENDEAVOR sub-mechanisms
+  (kickoff text, squish/blend/droplets/hitsplat/healthbox-wobble/flicker —
+  all already `pressTick`-relative, needed ZERO formula changes) —
+  parameterized the two turn-2-hardcoded anchors (`drawEndeavorSquish`
+  gained `opponentHp`/`kickoffBounceTick` params, `drawActionMenuIdleContent`
+  gained an optional `playerHp` param) and wired a new `drawTurn3EndeavorText`
+  + `turn3KickoffBounceTick`/`TURN3_KICKOFF_FROZEN_BOUNCE_TICK`. All anchors
+  RAM/pixel-probed fresh, not assumed: `TURN3_CONFIRM_PRESS_TICK=3891`,
+  kickoff text start 3900 (same `-1` reopened-submenu correction turn 2
+  needed), HP drain 101→88 completing at tick 4057 (`ENDEAVOR_HP_DRAIN_
+  START_DELAY=153` unchanged), window-safe boundary tick 4079 (ROCK_SLIDE's
+  own kickoff text hard-cuts the message box at 4080). One genuine
+  divergence found and NOT curve-fit: turn 3's own target-shake RAM reads
+  asymmetric `+3/-2` (not turn 2's symmetric `±3`) — 12 ticks excluded,
+  precisely characterized (px count, region, bbox) rather than chased.
+  Full writeup: `docs/battle-turn-notes.md` §20.
+- **Next:** the ROCK_SLIDE half of turn 3 (Onix's own move hitting Grovyle
+  again, kickoff text starting sometime after tick 4080, ground truth
+  banked §13) and the turn-4 menu reopen are the immediate next slice. The
+  shake-asymmetry residual (§20) is a clean, scoped follow-up needing one
+  RAM read (`gAnimMovePower` at ticks 3956-3966) before touching render
+  code. ISSUES #23 (fire projectiles) stays parked.
+- **Notes:** no papercuts. `tools/probe/ram-probe.py` (generic, already
+  committed) was the right tool for the RAM-side anchors this session —
+  no new probe script needed, unlike most prior ENDEAVOR-window sessions.
+
+---
 ## 165 — Supervisor wind-down: session end 2026-07-20 ~02:45 — **12 verified worker steps** (9 main + 3 worktree, every one folded green); suite **685 → 744/744**; headline: **turn 2 is COMPLETE end to end** (`turn2-dragonbreath.json` 237/237) and **three long-standing residual families were root-caused and closed** (ISSUES #19, #22, #24 — all three were harvest/dispatch bugs, none was the timing mystery they looked like)
 
 - **State (verified this minute):** `npm test` **744/744**, `npm run
@@ -100,55 +139,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   exact `FightSubmenuState` at tick 2135 — worth knowing this fixture is
   runnable the same way as the committed `tools/compare/traces/` ones.
 
----
-## 163 — Bounded worker: ISSUES #22 ROOT-CAUSED AND CLOSED — same asset-harvest bug class as #19, but region A (onix), not region B (healthbox); also closed the two DRAGON_BREATH sine-peak residuals (3465/3721) named in E2b/E2b-2, plus tick 3337 turned out to already be fixed — one NEW single-tick residual surfaced and correctly scoped out (not fixed, different mechanism); `npm test` **740/740** (+8), build green
-
-- **State:** `npm test` 740/740, `npm run build` green, tree clean.
-  `battle1-fight-submenu-idle.json` **256/256** (was 255/256, ISSUES #22
-  CLOSED). `turn2-dragonbreath.json` **237/237** (was 235/235, +3465/
-  +3721). `turn2-endeavor-drain.json` **200/200** (was 201/201, −1 —
-  see "Notes"). `fight-submenu.json` 235/235, `s6-acceptance.json`
-  224/228, `sendout.json` 255/256 — all unchanged. Broader sweep
-  unchanged: `menu-idle.json` 69/69, `turn1-kickoff.json` 81/81, `turn2-
-  endeavor.json` 76/77, `turn3-menu.json` 250/250, `confirm-flow.json`
-  79/95, `rent-3picks.json` 157/190, `rent-slot1.json` 125/139.
-- **Did:** The brief's hypothesis (ISSUES #22's tick 2135 + DRAGON_BREATH's
-  named ticks 3337/3465/3721 might be the same family as #19, a harvested
-  asset with a bbox/state that excludes the sine table's rare peak) was
-  **CONFIRMED for 3 of 4, for a second asset** — pixel-dumped all four:
-  2135/3465/3721 share an EXACT bbox `(44,50)-(99,111)` and byte-identical
-  color-transition histogram (769px each); tick 3337 turned out to
-  already be fixed (0 diff — an apparent side effect of S7 slice E2b-2's
-  earlier `yOffset` fix, never re-tested against that specific tick
-  since it sits outside E2b-2's own rescan window). Root cause:
-  `extract-menu-idle-window.ts` only ever harvested ONE onix-region patch
-  (a `y2=1` tick) — `battleScene.ts` openly named the gap ("`onixY2>=1`
-  degrades to the same y2=1 patch") rather than hiding it, but region A
-  never got the y1/y2 split #19 already gave region B. Fixed in two
-  stacked layers (same order #19's own derivation implies): (1) harvested
-  a real `y2=2` patch (`ONIX_Y2_TICK=1877`, found via `onixSinIndex(n)
-  mod 256 == 64`), renamed the shared type to `MenuIdleBounceTwoStateAsset`
-  and factored the y1/y2 dispatch into one `drawTwoStateBounceRect`
-  helper for both regions — closed 769px→3px; (2) `ONIX_BBOX` itself was
-  ALSO 1 row short (height 62→63, rows 49-110→49-111) — the SAME bug #19
-  found in region B's own bbox, stacked on top of layer 1's missing-patch
-  bug. Both layers landed, all three ticks 0 diff. Full writeup:
-  `docs/battle-menu-notes.md` §8c.
-- **Next:** faint/forced-switch is still the biggest remaining S7 item
-  (§13-§14 ground truth already banked); S8 engine work is unblocked
-  separately. Whoever wants the NEW tick-2901 residual (see Notes) should
-  RAM-probe the ONIX sprite's `sSinIndex`/bounce-task state directly at
-  RAM tick 2900 during turn 2's own pre-confirm dwell.
-- **Notes:** fixing #22 surfaced a DIFFERENT, previously-invisible bug:
-  `turn2-endeavor-drain.json` tick 2901 (turn 2's own idle dwell, before
-  the ENDEAVOR confirm) computes the correct `onixY2=2` via the closed
-  form, but the REAL oracle pixels there match the `y1` patch, not `y2` —
-  `drawActionMenuIdleWindow`'s "plain `t`" bounce-tick convention for this
-  window (previously "oracle-confirmed fine," per its own doc comment)
-  has its own unmodeled anchor error at the rare peak, invisible until
-  now because the OLD always-degrade-to-y1 approximation coincidentally
-  produced correct pixels here. Different mechanism (a bounce-tick anchor
-  bug, not a harvest-asset bug) and out of this step's own scope (asset
-  fixes only) — named tick 2901 excluded from `captureFrames`
-  (`201→200`), not silently shipped wrong, dense neighbors (2894-2950)
-  stay captured and green. No papercuts.

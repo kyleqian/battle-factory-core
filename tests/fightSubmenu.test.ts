@@ -5,6 +5,7 @@
 // in tools/compare/traces/fight-submenu.json (234/235, one attributed
 // anomaly - see docs/battle-menu-notes.md's new section).
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   CLOSED_FIGHT_SUBMENU_STATE,
   FIGHT_SUBMENU_CLOSE_DELAY,
@@ -327,5 +328,57 @@ describe("battleMenu: turn kickoff text (S7 slice A, docs/battle-turn-notes.md ย
     replay = press(replay, ["A"]);
     for (let i = 0; i < 80; i += 1) replay = press(replay, []);
     expect(replay.battleScene!.fightSubmenu).toEqual(state.battleScene!.fightSubmenu);
+  });
+});
+
+/** A synthetic EngineState at turn 3's own confirm (cursor 0, ROCK_SLIDE selected by the player, `turn2Resolved=true` - the state `turn3-menu.json`'s own committed trace reaches at tick 3891, right before its idle tail). */
+function stateAtTurn3Confirm(): EngineState {
+  const initial = createInitialState();
+  return {
+    ...initial,
+    draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
+    battleScene: {
+      elapsed: 3891 - SCENE_TICK0,
+      sendOutPressElapsed: 380,
+      fightSubmenu: {
+        openElapsed: 3846 - SCENE_TICK0,
+        cursor: 0,
+        displayCursor: 0,
+        closeElapsed: null,
+        confirmElapsed: 3891 - SCENE_TICK0,
+        activeMonMoveset: ONIX_MOVESET,
+      },
+      turn1Resolved: true,
+      turn2Resolved: true,
+    },
+  };
+}
+
+describe("battleMenu: turn 3's ENDEAVOR resolution (S7 slice G, docs/battle-turn-notes.md ยง20)", () => {
+  it("replaying turn3-menu.json's own committed button script (reopen/UP-nav/confirm) lands turn 3's own confirm at tick 3891, matching TURN3_CONFIRM_PRESS_TICK's own doc", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn3-menu.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    let state = createInitialState();
+    for (const seg of trace.segments) {
+      for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
+    }
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(3891 - SCENE_TICK0);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    expect(state.battleScene!.turn2Resolved).toBe(true);
+  });
+
+  it("engine state stays well-formed (turn2Resolved, cursor 0) through the whole ENDEAVOR-again window - a pure smoke/determinism check, pixel parity lives in tools/compare/traces/turn3-endeavor.json", () => {
+    let state = stateAtTurn3Confirm();
+    for (let i = 0; i < 190; i += 1) state = press(state, []);
+    expect(state.battleScene!.turn1Resolved).toBe(true);
+    expect(state.battleScene!.turn2Resolved).toBe(true);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    // Replaying the identical idle window twice from the identical start
+    // state must produce byte-identical battleScene state - no hidden
+    // nondeterminism in the new turn-3 ENDEAVOR draw/dispatch path.
+    let replay = stateAtTurn3Confirm();
+    for (let i = 0; i < 190; i += 1) replay = press(replay, []);
+    expect(replay.battleScene).toEqual(state.battleScene);
   });
 });
