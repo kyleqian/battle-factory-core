@@ -4,6 +4,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 185 — Supervisor wind-down: session end 2026-07-20 ~16:00 — **15 worker steps verified and folded** (9 main-lane + 6 worktree, 41 commits); suite **744 → 787/787**; headlines: **turns 3, 4, and 5 of battle 1 are COMPLETE and pixel-exact through Grovyle's faint** (11 new committed traces), **every excluded residual tick in turns 1-5 is now RESTORED and GREEN** (four separate root-caused engine bugs, zero "hardware quirk" labels left standing), and the **user-reported FIGHT B-close/reopen strand (ISSUES #25) was root-caused, oracle-verified, and fixed same-day**
+
+- **State (verified this minute):** `npm test` **787/787**, `npm run
+  build` green, tree clean at `a05e9d0`+docs, no worktrees, no unmerged
+  branches. Full sweep spot-rechecked by supervisor this hour:
+  `turn4-doubleteam` 250/250, `turn5-menu` 42/42, `fight-submenu-reopen`
+  90/90, `fight-submenu` 235/235, `turn3-menu` 254/254, `turn5-switchin`
+  167/167, `turn5-sentout` 141/141 — all 0 diff; `sendout` 255/256 and
+  `s6-acceptance` 224/228 unchanged (#5/#18 policy-settled).
+- **Session narrative (~09:30-16:00, 8 rounds, two lanes):** turn 3
+  (slices G/H), turn 4 (I, I-2 after a characterized-not-committed first
+  attempt), turn 5 through the KO (J, K) all landed by the
+  "parameterize, don't rebuild" pattern — every slice RAM-probed anchors
+  before render code. The switch-in tail landed in three rungs (L
+  no-land with findings banked → L-2 resolved the 6727 icon-bar
+  transient → L-3 landed ball/particles/materialize-growth); its
+  remainder (materialize ramp-down residual ~6768-6782, healthbox
+  slide-in, Sitrus, settled menu) is precisely bounded in
+  faint-switch-notes §10 / battle-turn-notes §26. Worktree lane ran 6
+  scouts/probes: faint/switch-in AI rule + Sitrus formula, switch-in
+  itemization + Pidgeotto verification, shake/bounce residual probes
+  (Families A/B), slice-L gap closure (4/5), and the extremum probe —
+  each folded with supervisor re-verification of a central claim.
+- **The residual-elimination thread (session's best result):** four
+  independent excluded-tick families were root-caused as REAL,
+  small engine bugs and fixed with all ticks restored: stale
+  `gBattleMovePower` shake amplitude (general rule + a turn-5
+  prediction pinned BEFORE its window rendered — confirmed live);
+  turn-3 bounce composition uniformly +1 tick (visible only at sine
+  plateau crossings); the turn-4 kickoff-text delay-family gate; the
+  turn-5 reopen's same-tick phase switch. Turns 1-5 traces now capture
+  every tick of their windows except ISSUES #23's parked projectile span.
+- **User interaction:** mid-session bug report (FIGHT → B → A dead) —
+  supervisor root-caused the state-machine strand + banked oracle ground
+  truth (reopen + cursor persistence) within the hour; fix landed as
+  ISSUES #25 (filed → fixed → deleted same day), `fight-submenu-reopen
+  .json` 90/90.
+- **Next:** (1) finish the switch-in tail from §10's bounded remainder
+  (ramp-down residual first — RAM palette-buffer approach per the
+  PAPERCUTS note); (2) then turn 6+ toward battle 1's WIN (§14-§16
+  ground truth banked); (3) ISSUES #23 stays parked; (4) the §ISSUES-25
+  "sine quantization edge" family in the reopened submenu's later dwell
+  is the one new named-open residual (same family as the pre-existing
+  resumed-menu tick 2073 note).
+- **Notes:** no usage-limit events; one launcher failure (inline brief
+  with `!(` — zsh parse, papercut recorded, relaunched via brief file);
+  4 new PAPERCUTS entries total this session. Worker discipline was
+  strong: two honest no-lands (slice L attempt 1, slice I attempt 1)
+  both banked findings instead of shipping red, and both windows landed
+  on the sharpened retry.
+
+---
 ## 184 — Bounded worker: PROGRESS #183's two extremum ticks CLOSED — both verified corrective rules applied, both restored 0-diff; `turn4-doubleteam.json` **250/250**, `turn5-menu.json` **42/42**, `npm test` **787/787** (+2), build green, zero regressions across turns 1-5
 
 - **State:** `npm test` 787/787, `npm run build` green, tree clean (2
@@ -65,52 +117,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   5927 to their traces' captureFrames (turns 1-5 would then have ZERO
   excluded residual ticks).
 - **Notes:** no new papercuts.
-
----
-## 182 — Bounded worker: ISSUES #25 FIXED — FIGHT-submenu B-close/reopen strand (user-reported) — new dispatch branch reopens after a settled B-close with cursor persisted, at every turn epoch, no epoch flag advanced; `fight-submenu-reopen.json` (new) **90/90, 0 diff**, `npm test` **785/785** (+4), build green, zero regressions
-
-- **State:** `npm test` 785/785, `npm run build` green, tree clean.
-  `tools/compare/traces/fight-submenu-reopen.json` (`fight-submenu.json`'s
-  script verbatim + `A`(2f) + 60 idle, dense stride-1 captures 2040-2129 -
-  B-close, settle, A, reopen transient, reopened submenu's own idle start)
-  **90/90, 0 diff** (new). Regression sweep at exact prior counts, all
-  unchanged: `fight-submenu.json` 235/235, `turn3-menu.json` 254/254,
-  `turn4-menu.json` 44/44, `turn5-menu.json` 41/41, `turn5-sentout.json`
-  141/141, `turn5-switchin.json` 167/167, `turn1-rockslide.json` 256/256.
-- **Did:** ISSUES #25 (user-reported, supervisor already root-caused the
-  mechanism + banked oracle ground truth - implemented faithfully, no
-  re-derivation). `core.ts` gained one new dispatch branch: once the close
-  redraw settles (`closeElapsed !== null && sceneT >= closeElapsed +
-  FIGHT_SUBMENU_CLOSE_DELAY`), a fresh A calls `openFightSubmenu` directly
-  (same "old state -> fresh open in one step" shape the existing turn-epoch
-  reopen branches already use), threading `fightSubmenu.cursor` through
-  instead of a literal - no new "reset" state needed, generalizes to
-  unlimited close/reopen cycles at any epoch for free. Oracle-probed (not
-  assumed) two new timing facts: this reopen's own redraw is ONE TICK
-  LONGER than a fresh open (pressTick+6, not +5 - modeled via `elapsed+2`
-  at this one call site) and its bounce overlay is NOT reset, just keeps
-  accumulating the already-documented "+2 ticks of drift per DMA-wait
-  hard-cut" (new `FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT=6`, gated by a new
-  `FightSubmenuState.reopenedFromClose` flag so the render can tell this
-  apart from turn 1's own first open). 4 new Tier-1 pins: the too-early
-  gate, full reopen with cursor persistence + all 4 `turnNResolved` flags
-  unchanged, a 2-cycle close→reopen→nav→close→reopen, and the same
-  mechanism at a SECOND turn epoch (turn 3's own already-reopened submenu).
-  Docs: `docs/battle-menu-notes.md` new §ISSUES-25 (mechanism + full timing
-  evidence + the residual below); ISSUES #25 deleted.
-- **Next:** a recurring small residual (2-6% of frame, Onix/healthbox
-  bounce-sprite edge pixels only, ~every 9 ticks) starts a few ticks into
-  the reopened submenu's own idle dwell, past this session's committed
-  clean window - same still-unattributed "sine quantization edge" family
-  `FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`'s own doc already flags as open for
-  the plain resumed-menu window (its own tick 2073), not chased further
-  here (see §ISSUES-25's own "Scope note"). Otherwise resume the roadmap
-  where #181 left off (materialize ramp-down/wobble phases, §10 of
-  faint-switch-notes.md).
-- **Notes:** the render-path subtlety that made this non-trivial: naively
-  resetting `fightSubmenu` to a "never opened" shape on close-settle would
-  have swapped the resumed-menu's own proven-correct render formula for an
-  entirely different (epoch-remap) one and likely broken `fight-submenu
-  .json`'s own 235/235 - avoided by keeping `openElapsed`/`closeElapsed`
-  meaning exactly what they always did and only adding a NEW branch/flag,
-  never an intermediate reset state.
