@@ -1,3 +1,34 @@
+## 150 — Supervisor: round 1 folded — **ENDEAVOR window fully CLOSED (S7 slice E1 done end to end)** + DRAGON_BREATH window scouted/ground-truthed (slice E2 unblocked); suite **693/693**, build green, scout branch merged clean, no worktrees
+
+- **State (supervisor-verified this minute):** `npm test` **693/693**,
+  `npm run build` green, tree clean at merge `6f8b005`, no worktrees or
+  stray branches. `turn2-endeavor-drain.json` **200/201** (supervisor-rerun;
+  sole residual = tick 2906, ISSUES #19 family, pre-attributed);
+  regression spot-checks `turn1-drain.json` 102/102,
+  `turn1-rockslide.json` 256/256.
+- **Did:** Round 1 = two 45-min workers in parallel. Main lane (#149,
+  `f6a53da`): ENDEAVOR tail 3061-3094 landed via RAM-probe-first — two NEW
+  mechanisms (player-healthbox post-hit wobble ±1px/20 ticks; Onix
+  post-hit invisible-flicker 4-on/4-off ×4), both `render=RAM+1`,
+  §15's "same mechanisms' tail" guess disproven by probe before any code.
+  Worktree lane (`5cdff4b`, merged): DRAGON_BREATH ground truth —
+  corrected window boundary (**3137→3846 pixel-visible**; 3095-3136 is
+  ENDEAVOR's own HP-drain tail through ~3116 + handoff), §12 RNG ledger
+  re-verified 0 corrections, per-tick task/sprite inventory committed
+  (8 fire projectiles @4-tick spawn/20-tick life, target red-fade
+  `AnimTask_BlendBattleAnimPal`, `AnimTask_ShakeMon2` ±2px, hit-flash
+  sprite), dense every-tick trace 3095-3346 (252 caps, verbatim 50-segment
+  prefix — supervisor-verified byte-equal), only `small_ember.png` needs
+  extraction. Docs: `docs/dragon-breath-notes.md` (new).
+- **Next:** Round 2: main = DRAGON_BREATH engine slice E2a (ember
+  extraction + kickoff text + projectile mechanism vs the banked ground
+  truth); worktree = ISSUES #20 FONT_NARROW rewire (real glyph pipeline for
+  the FIGHT submenu, unblocks S8 battle-2 menus). Then: E2b (blend/shake/
+  flash + HP drain + turn end), faint/forced-switch slice, #19 root cause.
+- **Notes:** worker costs $8.75 + $4.73, 24.6 + 15.2 min. Zero merge
+  conflicts, zero regressions.
+
+---
 ## 149 — Bounded worker: S7 slice E1 tail increment — **ENDEAVOR's animation window CLOSES**: `turn2-endeavor-drain.json` green span now runs contiguously **3000→3094+** (merges into the pre-existing 3095-3120 block); `npm test` **693/693** (+8), `npm run build` green
 
 - **State:** `npm test` **693/693**, `npm run build` green, tree clean.

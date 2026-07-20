@@ -386,6 +386,12 @@ another re-scope: harness commit `ccd7554` sets `MAX_FRAMES = 45_000`,
 service restarted and verified (`bin/oracle info` → 45000). The
 multi-trace chain acceptance above stands unchanged; maxCaptures stays
 256, so the chain model is still how capture density is achieved.
+**Engine dependency noted (2026-07-19 night):** the FIGHT submenu's text
+now renders through the live glyph pipeline (ISSUES #20 closed —
+`fightSubmenuText.ts`, KABUTO's moveset proven rendering in tests), but
+`core.ts` still feeds it battle-1's fixed moveset; wiring the per-battle
+moveset from battle-setup state through `EngineState` into that render
+call is an S8 engine slice prerequisite for battle-2 menu parity.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by

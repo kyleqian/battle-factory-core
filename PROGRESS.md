@@ -4,6 +4,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 153 — Supervisor: round 2 folded — **ISSUES #20 CLOSED (FIGHT submenu on the live FONT_NARROW glyph pipeline, arbitrary movesets render)** + DRAGON_BREATH shake/blend/kickoff landed; suite **707/707**, build green, zero regressions, no worktrees
+
+- **State (supervisor-verified this minute):** `npm test` **707/707**,
+  `npm run build` green, tree clean at the `a7eb084` merge + this docs
+  commit, no worktrees/stray branches. Supervisor-rerun on the MERGED
+  tree: `fight-submenu.json` 234/235, `turn2-dragonbreath.json` 84/84,
+  `turn2-endeavor-drain.json` 200/201 — the two lanes' shared
+  `battleScene.ts` edits merged conflict-free and stayed exact.
+- **Did:** Round 2 = three workers. Main lane #151 (`f0324d6`+`906734e`):
+  DRAGON_BREATH kickoff text 3121-3176 green + `small_ember.png`
+  extracted. Main lane #152 (`6e6b334`): probe-first landed
+  `AnimTask_ShakeMon2` (±2px, lag=1) + both red-fade
+  `AnimTask_BlendBattleAnimPal` instances (exact formulas, lag=2);
+  fire-projectile attempt PULLED honestly — its affine pop is a genuine
+  ~178.6° rotation (first rotating affine in this codebase), exact
+  per-tick data banked in `docs/dragon-breath-notes.md`. Worktree lane
+  (`a7eb084`, merged): ISSUES #20 remainder closed — new
+  `src/engine/fightSubmenuText.ts` renders move names (FONT_NARROW),
+  TYPE/ mixed-font run, PP digits + full 4-band PP-color state machine;
+  identity preserved byte-exact on both submenu traces (same sole #19
+  frames); KABUTO's real battle-2 moveset renders (+14 tests).
+- **Next:** Round 3: main = E2a-3 fire-projectile retry (dump
+  `gOamMatrices` per tick for the projectile slots — use REAL matrix
+  values, not scale approximations; MUST also backfill #152's missing
+  Tier-1 pins for shake/blend); worktree = ISSUES #19 root-cause scout.
+  Then: E2b (HP drain + turn end 3347-3846), faint/forced-switch slice.
+- **Notes:** worker costs $4.23/$14.25/$7.26 (10-34 min). #152 landed
+  without Tier-1 pins (gap flagged, folded into E2a-3's brief).
+  ISSUES #20 deleted (remainder = per-battle moveset wiring through
+  `core.ts` is S8 engine scope, noted in ROADMAP S8).
+
+---
 ## 152 — Bounded worker: S7 slice E2a-2 increment — DRAGON_BREATH shake + red-fade blend land, oracle-verified (**`turn2-dragonbreath.json` 84/84 green, new contiguous block 3236-3263**); fire-projectile attempt pulled after failing pixel-exactness; `npm test` **693/693** (unchanged), build green
 
 - **State:** `npm test` 693/693, `npm run build` green, tree clean.
@@ -77,34 +109,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no papercuts. Stayed on the assigned step; did not attempt
   priority 3+ rather than risk landing it half-verified against the
   45-minute cap.
-
----
-## 150 — Supervisor: round 1 folded — **ENDEAVOR window fully CLOSED (S7 slice E1 done end to end)** + DRAGON_BREATH window scouted/ground-truthed (slice E2 unblocked); suite **693/693**, build green, scout branch merged clean, no worktrees
-
-- **State (supervisor-verified this minute):** `npm test` **693/693**,
-  `npm run build` green, tree clean at merge `6f8b005`, no worktrees or
-  stray branches. `turn2-endeavor-drain.json` **200/201** (supervisor-rerun;
-  sole residual = tick 2906, ISSUES #19 family, pre-attributed);
-  regression spot-checks `turn1-drain.json` 102/102,
-  `turn1-rockslide.json` 256/256.
-- **Did:** Round 1 = two 45-min workers in parallel. Main lane (#149,
-  `f6a53da`): ENDEAVOR tail 3061-3094 landed via RAM-probe-first — two NEW
-  mechanisms (player-healthbox post-hit wobble ±1px/20 ticks; Onix
-  post-hit invisible-flicker 4-on/4-off ×4), both `render=RAM+1`,
-  §15's "same mechanisms' tail" guess disproven by probe before any code.
-  Worktree lane (`5cdff4b`, merged): DRAGON_BREATH ground truth —
-  corrected window boundary (**3137→3846 pixel-visible**; 3095-3136 is
-  ENDEAVOR's own HP-drain tail through ~3116 + handoff), §12 RNG ledger
-  re-verified 0 corrections, per-tick task/sprite inventory committed
-  (8 fire projectiles @4-tick spawn/20-tick life, target red-fade
-  `AnimTask_BlendBattleAnimPal`, `AnimTask_ShakeMon2` ±2px, hit-flash
-  sprite), dense every-tick trace 3095-3346 (252 caps, verbatim 50-segment
-  prefix — supervisor-verified byte-equal), only `small_ember.png` needs
-  extraction. Docs: `docs/dragon-breath-notes.md` (new).
-- **Next:** Round 2: main = DRAGON_BREATH engine slice E2a (ember
-  extraction + kickoff text + projectile mechanism vs the banked ground
-  truth); worktree = ISSUES #20 FONT_NARROW rewire (real glyph pipeline for
-  the FIGHT submenu, unblocks S8 battle-2 menus). Then: E2b (blend/shake/
-  flash + HP drain + turn end), faint/forced-switch slice, #19 root cause.
-- **Notes:** worker costs $8.75 + $4.73, 24.6 + 15.2 min. Zero merge
-  conflicts, zero regressions.

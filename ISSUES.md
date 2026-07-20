@@ -5,34 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #20 — FONT_NARROW never extracted: FIGHT-submenu move-name/PP/type text
-  is a battle-1-only static harvest, blocks arbitrary movesets (S8/S9)
-
-Opened 2026-07-19 (supervisor, from the FIGHT-submenu worker's flag). The
-move-select submenu's text windows (`B_WIN_MOVE_NAME_*`/`B_WIN_PP`/
-`B_WIN_MOVE_TYPE`) use `FONT_NARROW` — source-confirmed a genuinely
-separate glyph tileset from `FONT_NORMAL` (not just narrower widths), and
-this run has never extracted it (`src/data/gen/` has font-normal/
-font-small only). The shipped slice renders battle 1's fixed Onix moveset
-via per-slot static pixel harvests (`fight-submenu-window.json`,
-pixel-confirmed byte-identical across each slot's dwell — fine for every
-battle-1 trace). Any OTHER moveset (post-swap battles 2-7 in S8, breadth
-in S9) cannot render until `FONT_NARROW` glyphs+widths are extracted and
-the submenu text goes through the real text pipeline like the action menu
-does. Lead: extractor conventions in `tools/extract/extract-battle-*.ts`;
-glyph source `graphics/fonts/`; widths table per font id in `text.c`.
-**Extraction half CLOSED 2026-07-19** (bounded worker, supervisor-merged):
-`src/data/gen/font-narrow.json` landed, proven byte-exact by rendering all
-four battle-1 move names through the engine's own `drawText` against the
-oracle-harvested patches (`tests/fontNarrow.test.ts`, 24 checks, 0
-mismatches). **Remaining: the rewire itself** — `drawFightSubmenuWindow` →
-real glyph rendering instead of the static harvest, which needs (a) the
-PP dynamic-color state machine (`SetPPNumbersPaletteInMoveSelection`,
-bank-5 idx 11/12 by `GetCurrentPPToMaxPPState`) and (b) the mixed-font
-runs ("TYPE/" in NARROW then FONT_NORMAL type name; PP numbers on the
-separate FONT_NORMAL `B_WIN_PP_REMAINING` window) — both source-traced in
-the test header.
-
 ## #19 — fight-submenu.json residual: tick 2073 (99px, healthbox-adjacent row)
 
 Opened 2026-07-19 (bounded worker, FIGHT-submenu engine slice). `tools/
