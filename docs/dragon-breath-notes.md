@@ -235,3 +235,86 @@ sprites, the healthbox) or already-extracted menu assets.
 `npm test` and `npm run build` unchanged and green (no `src/engine/` touch,
 no changes to any existing trace — this session added two new files under
 `tools/compare/traces-groundtruth/` and `src/data/gen/`, plus this doc).
+
+## Engine slice E2a (S7, bounded worker, follows the scout above)
+
+Landed the first two of the brief's five priorities against the banked
+ground truth above; explicitly did NOT attempt priorities 3-5 this session
+(see "Not landed" below for why and what a resuming worker needs).
+
+**New committed trace**: `tools/compare/traces/turn2-dragonbreath.json` —
+verbatim 50-segment script copied from
+`tools/compare/traces-groundtruth/battle1-turn2-dragonbreath.json` (no
+input re-timed), `captureFrames` dense every tick **3121-3176** (the quiet
+ENDEAVOR-tail handoff through the kickoff text's full hold) — **56/56
+green**.
+
+**1. Kickoff text window (landed)**: `drawTurn2KickoffText`
+(`src/engine/battleScene.ts`) now switches from ENDEAVOR's held "Foe
+GROVYLE used\nENDEAVOR!" text to "ONIX used\nDRAGONBREATH!" once `t >=
+dragonBreathTextStartTick(pressTick)` (`pressTick+192` = render 3137, the
+scout's own RAM-confirmed first DRAGON_BREATH-attributable pixel — RAM 3136
+`gBattleControllerExecFlags` bit0 set, render=RAM+1). Line 1 reuses
+`ROCK_SLIDE_LINE1` ("ONIX used") verbatim — same attacker, same
+`STRINGID_USEDMOVE` template. Line 2 is `moves.json`'s own
+`MOVE_DRAGON_BREATH` display name ("DRAGONBREATH", no space) + "!", total
+22 printable chars. Visible-char count uses the same
+`Math.min(TOTAL, t-start+1)` mechanism every other kickoff message in this
+file uses; oracle-confirmed exact against the dense sweep (char-by-char
+3137-3157, full text holds flat 3158-3176, matching the scout's own phase
+table to the tick). All new code lives in `battleScene.ts` (both new
+consts/functions AND the edit to `drawTurn2KickoffText`'s own body) — none
+of it touches `drawFightSubmenuWindow` or `battleMenu.ts`, both off-limits
+this session per the sibling FIGHT-submenu-text worktree's file ownership.
+
+**2. `small_ember.png` extraction (landed)**: new block in
+`tools/extract/extract-battle-move-anim-assets.ts`, same tile-sheet
+convention ROCK_SLIDE's `rocks.png` block already established (32x32 OAM
+frames = 16 8x8 tiles each). Source is 32x160px (4x20 tiles = 80 total, 5
+stacked frames per `src/graphics.c:113-114`/`battle_anim_dragon.c:47-98`) —
+only frames 1/2/3 (tile offsets 16/32/48, `sAnim_DragonBreathFire_0/_1`)
+are DRAGON_BREATH's own; frames 0/4 belong to sibling moves sharing
+`ANIM_TAG_SMALL_EMBER` (OUTRAGE/DRAGON_RAGE), flagged needs-only, not
+decoded. Output: `src/assets/gen/battle-anim-small-ember.json`.
+Byte-verified independently (a fresh Python/PIL read of the raw PNG, not
+just re-trusting the engine's own decoder): pixel indices 0/5120
+mismatches; palette differs from the raw PNG bytes only by the expected
+GBA 15-bit round-trip (`gbaRoundTrip`, e.g. 205→206) — the same pipeline
+every other extracted asset in this codebase already goes through, not a
+bug. Re-running the whole extractor regenerates every other output file
+byte-identical — only the new small-ember JSON is new on disk. Not yet
+wired into any renderer (extraction only, per the brief's own priority-2
+scope: "extractor committed + gen asset byte-verified").
+
+**Not landed this session (3-5, in priority order for the next worker):**
+- **8-projectile mechanism**: the per-spawn/destroy tick cadence is already
+  pinned (`battle1-turn2-dragonbreath-tasks-sprites.json`, every-4-ticks
+  spawn, 20-tick life), but the exact per-tick x/y path within each 20-tick
+  life is NOT yet RAM-probed. This codebase already has a precedent for
+  this exact same primitive — `AnimTranslateLinear_WithFollowup` also
+  drives the sendout window's trainer-exit slide (`TRAINER_EXIT_X2`,
+  `battleScene.ts` ~line 1295) — and that precedent found the GBA
+  fixed-point per-frame truncation does NOT reduce to a clean formula (two
+  single-tick +0 stalls mid-slide); a resuming worker should expect to need
+  a literal RAM-probed table here too, not a derived formula, and must
+  RAM-probe BEFORE writing render code (mandatory per this run's method).
+  The affine "pop" matrix (`sAffineAnims_DragonBreathFire_1`,
+  `AFFINEANIMCMD_FRAME(0x50,0x50,127,0)` then `(0xD,0xD,0,100)`) and the
+  3-tick-per-color-frame yellow→red cycle also need their own RAM/pixel
+  confirmation, not assumed from the source constants alone (same
+  discipline `ENDEAVOR_SQUISH_TABLE`'s own doc comments already model).
+- **Target red-fade blend** (`AnimTask_BlendBattleAnimPal`) and
+  **`AnimTask_ShakeMon2`** (fixed ±2px): both structurally simple (a plain
+  `BlendPalette` ramp toward `RGB_RED`, a plain fixed-amplitude alternation)
+  but neither has an oracle-cross-checked coefficient/tick table yet — same
+  RAM-probe-first requirement.
+- **Hit-flash sprite** (`SpriteCB_HitAnimHealthoxEffect`): generic to any
+  normal hit, worth checking whether a later slice already needs/models it
+  under a different name before building a DRAGON_BREATH-specific path.
+
+**Verification**: `npm test` 693/693 (unchanged — no new Tier-1 tests this
+session; both landed pieces are pixel/asset-verified via Tier-2 compare and
+independent PIL byte-checks, not pure-logic functions needing a new unit
+test), `npm run build` green. `turn2-dragonbreath.json` 56/56 green.
+Regression spot-check `turn2-endeavor-drain.json` **200/201** (unchanged,
+same pre-existing ISSUES #19 residual tick).

@@ -1,3 +1,42 @@
+## 148 — Supervisor wind-down: session end 2026-07-19 ~20:30 — **14 verified worker steps** (9 main + 5 worktree, every one folded green); suite **648 → 685/685**; headline: **oracle frame cap raised to 45000 (user decision, harness `ccd7554`)** after proving no battle-1 WIN fits 20000 → the full S8 acceptance chain is now ground-truthed (WIN + BOTH swap branches + battle-2 first menus + battle-2 turn 1); turn-2's ENDEAVOR half is engine-green 3000→3060
+
+- **State (verified this minute):** `npm test` **685/685**, `npm run
+  build` green, tree clean at `32f1a9e` + this docs commit, no
+  worktrees, no unmerged branches, oracle serving `maxFrames: 45000`.
+  Committed-trace counts: turn1-rockslide **256/256** (shake residual
+  closed #134), turn2-endeavor 76/77, turn2-endeavor-drain **166/167**
+  (contiguous dense green 2999-3060; both residuals = ISSUES #19's
+  family), all earlier traces at their established counts.
+- **Session summary (supervised, ~16:15-20:30):** S7 turn-2 first half
+  built from zero across #135/#137/#142/#144/#146/#147 (dynamic
+  FONT_NORMAL PP digits, player HP-digit compositor, ENDEAVOR: HP-diff
+  core + squish/blend/droplets/hitsplat/shake — each mechanism
+  RAM-probed, three distinct render-lag conventions pinned). One failed
+  landing (#140, X-axis misfit) recovered by the RAM-probe-first retry
+  (#142: wrong-subsystem root cause). S8: §15 scout proved the WIN
+  unreachable at 20000 (idle-timing is NOT an in-battle RNG lever;
+  best line: Pidgeotto KO 15887, Onix faints 19147, Murkrow untouched)
+  → escalated → **user chose raising the cap** (harness `ccd7554`,
+  service restarted+verified) → §16 WIN chain (Magby beats Murkrow,
+  victory → decline → battle-2 menu at 33031), §17 swap-YES branch
+  (full swap screen, GROVYLE swapped in, asset inventory), §18
+  battle-2 turn 1 (BATTLE_ARMOR crit short-circuit; rentalMons probe
+  fixed+validated; frontier RNG freeze at 33286). ISSUES #21 opened
+  from §18's honest damage flag and CLOSED same session (derivation
+  omitted the `+2`; engine bit-exact, supervisor-reproduced). ISSUES
+  #19's family recurrence pinned at 2906 (now 3 affected frames across
+  3 traces, same 99px row-111 fingerprint).
+- **Next:** (1) ENDEAVOR tail 3061-3094 (second hitsplat/shake round +
+  settle) to close the whole anim window; (2) slice E2: DRAGON_BREATH
+  window 3129-3846 (turn-2 second half); (3) faint/forced-switch engine
+  slice (§13-§14 ground truth banked); (4) ISSUES #19 root cause, #20
+  FONT_NARROW rewire; (5) S8 engine work is fully unblocked
+  (ground truth complete end to end); S4 remainder stays deferred.
+- **Notes:** no usage-limit events; worker cost ~$5.5-23/step, 14-41
+  min/step. One harness change this session (`ccd7554`, cap 45000) —
+  recorded in ROADMAP S8 + Domain notes with rationale.
+
+---
 ## 147 — Bounded worker (session's LAST): S7 slice E1 hitsplat/shake increment — **both remaining ENDEAVOR sub-mechanisms landed green; the 3008-3023/3034-3049 gaps are CLOSED, `turn2-endeavor-drain.json` runs contiguously 3000→3060**; `npm test` **685/685** (+7), `npm run build` green — closes the brief's own acceptance criteria exactly
 
 - **State:** `npm test` **685/685**, `npm run build` green, tree clean.
