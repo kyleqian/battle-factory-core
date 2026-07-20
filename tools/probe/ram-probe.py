@@ -16,7 +16,17 @@ Run with the harness's mGBA-enabled interpreter (NOT system python3):
   "segments": [{"buttons": ["A"], "frames": 2}, {"buttons": [], "frames": 28}, ...],
   "watch": [
     {"name": "cursorPos", "addr": "sFactorySelectScreen+3", "size": 1},
-    {"name": "coeff", "addr": "sFactorySelectScreen+0x2A8", "size": 1, "deref": true}
+    {"name": "coeff", "addr": "sFactorySelectScreen+0x2A8", "size": 1, "deref": true},
+    {"name": "sSinIndex", "path": [
+        {"symbol": "gBattleSpritesDataPtr"},
+        {"derefU32": true},
+        {"add": 4},
+        {"derefU32": true},
+        {"add": 3},
+        {"derefU8Scaled": 68},
+        {"addSymbol": "gSprites"},
+        {"add": 46}
+    ], "size": 2}
   ],
   "startTick": 0   // optional, record only from this tick onward (default 0)
 }
@@ -26,6 +36,20 @@ oracle's symbol table) or one of the pinned raw pointer labels below.
 If "deref" is true, the base is read as a u32 pointer and dereferenced
 before adding the offset (use this for file-static struct pointers like
 sFactorySelectScreen, which point at a heap-allocated struct).
+
+"path" is a generic multi-hop alternative to "addr", for chasing more than
+one pointer deep (e.g. gBattleSpritesDataPtr -> healthBoxesData[battler] ->
+a dynamically-allocated sprite slot, an id read at runtime, not a fixed
+offset). A running cursor starts undefined and each hop transforms it:
+  {"symbol": "name"}        cursor = address of linker symbol `name`
+  {"add": N}                cursor += N
+  {"addSymbol": "name"}     cursor += address of linker symbol `name`
+  {"derefU32": true}        cursor = read_u32(cursor)  (follow a pointer)
+  {"derefU8Scaled": M}      cursor = read_u8(cursor) * M  (turn a byte read
+                             at `cursor` - e.g. a dynamic sprite/slot id -
+                             into a scaled array index for the next hop)
+The final cursor is the address `read_sized` reads from (per the watch's
+own "size", same as "addr").
 
 Output: {"ticks": [{"tick": 0, "cursorPos": 0, "coeff": 0, ...}, ...]}
 
@@ -88,7 +112,29 @@ def resolve_base(oracle: EmeraldOracle, label: str) -> int:
     return addr
 
 
+def resolve_path(oracle: EmeraldOracle, path: list) -> int:
+    cursor: int | None = None
+    for hop in path:
+        if "symbol" in hop:
+            cursor = resolve_base(oracle, hop["symbol"])
+        elif "add" in hop:
+            cursor = cursor + int(hop["add"])
+        elif "addSymbol" in hop:
+            cursor = cursor + resolve_base(oracle, hop["addSymbol"])
+        elif hop.get("derefU32"):
+            cursor = oracle.read_u32(cursor)
+        elif "derefU8Scaled" in hop:
+            cursor = oracle.read_u8(cursor) * int(hop["derefU8Scaled"])
+        else:
+            raise ValueError(f"unrecognized path hop {hop!r}")
+    if cursor is None:
+        raise ValueError("empty path")
+    return cursor
+
+
 def resolve_addr(oracle: EmeraldOracle, watch: dict) -> int:
+    if "path" in watch:
+        return resolve_path(oracle, watch["path"])
     spec = watch["addr"]
     if "+" in spec:
         label, offset_str = spec.split("+", 1)
