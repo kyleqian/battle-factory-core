@@ -2691,31 +2691,128 @@ ROCK/WATER (`TYPE_ROCK`=5, `TYPE_WATER`=11), ability 4. Both fresh (no
 burn/status, full HP) — matches the free full-party heal + fresh-battle-
 start expected at this point.
 
-**Not delivered — the `gSaveBlock2Ptr->frontier.rentalMons[]` bookkeeping
-array (priority 2's other half) — flagged explicitly, not silently
-dropped:** a new probe (`tools/probe/dump-rentalmons.py`, written this
-session, **not committed** — deleted after failing its own sanity check)
-attempted to read `struct RentalMon rentalMons[6]`
-(`include/global.h:357-365`, offset `0x64C` (`frontier` field in
-`SaveBlock2`) + `0xE70` (`rentalMons` field in `struct BattleFrontier`) off
-`gSaveBlock2Ptr`'s own dereferenced value) before and after the swap. The
-read values were **byte-identical at ticks 29601, 30681, and 34081** —
-i.e., appeared not to change across the swap at all, which contradicts the
-visually- and `gBattleMons`-confirmed fact that the swap *did* happen
-(GROVYLE is on the field at 34081). A quick sanity cross-check of
-neighboring fields at the same computed base (`frontier.challengeStatus`,
-expected a small enum, read **38**; `frontier.curChallengeBattleNum`,
-expected roughly "1" for battle 2, read **0**; `frontier.selectedPartyMons`,
-expected 3 small pool-index values, read **[52573, 50658, 50623]** —
-obviously implausible) confirms the offset math itself is wrong somewhere
-upstream of `rentalMons`, not that the array is genuinely unwritten. Most
-likely culprit: one of the struct fields preceding `frontier` inside
-`SaveBlock2`, or preceding `rentalMons` inside `BattleFrontier`, has a
-different actual compiled size than this pinned pret checkout's own
-`/*0x64C*/`-style offset comments suggest (version/`#ifdef` skew is the
-dossier's own standing risk per ROADMAP's domain notes) — **unresolved,
-left as an explicit open item**, not worked around or guessed at further
-under this session's time cap.
+### §17 ADDENDUM (S8 worktree lane, oracle scout — no engine code): the `rentalMons[]` offset bug, root-caused and fixed; readback validated on both branches
+
+**The `gSaveBlock2Ptr->frontier.rentalMons[]` bookkeeping array (this
+session's priority 1) is now closed.** Root cause of the original bug: the
+field-offset comments inside `struct BattleFrontier`
+(`include/global.h:378-461`) are pret's usual convention of annotating each
+field's offset **absolute within the top-level `SaveBlock2`**, not relative
+to `frontier` itself — proven by `BattleFrontier`'s own *first* field,
+`towerPlayer`, being commented `/*0x64C*/` (`global.h:380`), which is
+exactly `SaveBlock2.frontier`'s own offset (`global.h:541`); if the
+comments were `BattleFrontier`-relative, `towerPlayer` would read `/*0x0*/`.
+The deleted probe computed `rentalMons`' address as `gSaveBlock2Ptr + 0x64C
+(frontier's offset) + 0xE70 (rentalMons' own comment)` — **double-counting
+the 0x64C base**, landing ~5.6KB past the real struct (explaining both the
+implausible neighboring-field values it flagged and the apparent
+across-swap staleness — it was reading fixed garbage the whole time, not a
+genuinely-unwritten array).
+
+Fixed probe: `tools/probe/dump-rentalmons.py` (committed), reading
+`*gSaveBlock2Ptr + 0xE70` directly (`rentalMons`' own comment, un-added to
+anything), same absolute-offset fix applied to `challengeStatus` (+0xCA8),
+`selectedPartyMons` (+0xCAA), `curChallengeBattleNum` (+0xCB2) as a
+plausibility side-check. `struct RentalMon`'s own size confirmed as `0xC`
+(12 bytes: `u16 monId` + 2 pad, `u32 personality`, `u8 ivs`, `u8
+abilityNum` + 2 pad) two ways — natural C alignment, and the gap to the
+next field (`battlePoints` at `0xEB8` − `rentalMons` at `0xE70` = `0x48` =
+`6×0xC`).
+
+**Validated two independent ways**, both against `battle_factory.c`/
+`battle_factory_screen.c` source logic, not just "looks plausible":
+1. **Pre-swap, both branches' shared tick-29601 prefix**: `rentalMons[0..2]`
+   read `{monId 156, personality 1205102525, ivs 3, abilityNum 1}` / `{149,
+   1534575931, 3, 0}` / `{180, 1550278706, 3, 0}` — an **exact field-for-
+   field match** (monId/personality/ivs/abilityNum, all 3 slots) against
+   `src/data/gen/anchor-state.json`'s own independently-extracted
+   ONIX/MAGBY/BAYLEEF rental records.
+2. **Post-swap, YES branch (`battle1-swapyes-b.json`, ticks 30681/34081)**:
+   `rentalMons[0]` changes from ONIX's own record to `{monId 188,
+   personality 1094072807, ivs 3, abilityNum 0}` — which **exact-matches
+   pre-swap `rentalMons[3]`** (same trace, tick 29601), precisely what
+   `CopySwappedMonData` (`battle_factory_screen.c:2350-2361`) predicts:
+   `rentalMons[playerMonId].monId = rentalMons[enemyMonId +
+   FRONTIER_PARTY_SIZE].monId` (`playerMonId`=0 for ONIX, `enemyMonId`=0
+   for Grovyle, so `rentalMons[0] <- rentalMons[3]`). The decline branch's
+   own final tick (33031, `battle1-winline-b-swap.json`) shows **no
+   change** from the shared prefix, as expected (no swap occurred).
+
+One methodology note worth recording: `gSaveBlock2Ptr`'s own dereferenced
+value is **not** stable across ticks in this dump (33704624 at tick 29601
+vs. 33704540/33704616/33704532 at later ticks, depending on trace) — this
+is not a bug, it's `SetSaveBlocksPointers`' deliberate save-block-ASLR
+scheme (`load_save.c:70-82`, `offset = (offset + Random()) &
+(SAVEBLOCK_MOVE_RANGE - 4)`, re-rolled on `MoveSaveBlocks_ResetHeap`, which
+fires around scene/heap transitions such as the battle↔overworld switches
+this exact trace crosses). The fixed probe re-dereferences `gSaveBlock2Ptr`
+fresh at every snapshot rather than caching a base address once — any
+future probe over a similarly long, scene-crossing trace should do the
+same.
+
+Committed: `tools/probe/dump-rentalmons.py` (the fixed probe, full
+derivation in its own module docstring) and
+`src/data/gen/battle1-swap-rentalmons-dump.json` (both branches' full
+6-slot `rentalMons[]` state at the ticks above, plus the
+challengeStatus/selectedPartyMons/curChallengeBattleNum side-check fields).
+Both branches' probe runs independently re-run and diffed byte-identical
+against their own first run.
+
+### §17 ADDENDUM 2 (S8 worktree lane, oracle scout — no engine code): the YES-branch LCG-step ledger (brief's priority 4), closed
+
+**This session's priority 2** — the LCG-step ledger §17 flagged as
+"not built" — is now done. Method: `tools/probe/ram-probe.py` +
+`tools/probe/specs/battle1-swapyes-rng-watch.json` (`gRngValue` only, dense
+per-tick) over `battle1-swapyes-b.json`'s own new tail, ticks 29601-34081
+(4481 rows — every tick from the shared swap-offer prompt through battle
+2's settled first menu). LCG-step counts between window boundaries derived
+programmatically (same method as §3/§12/§16: replay the LCG forward from
+the earlier value until it matches the later one), not estimated from tick
+counts. Independently re-run and diffed byte-identical against its own
+first run.
+
+**Window ledger** (tick ranges taken from `battle1-swapyes-b.json`'s own
+committed segments, not eyeballed):
+
+| window | ticks | LCG steps | note |
+|---|---|---|---|
+| confirm YES (swap-offer) → entry fade-in settled | 29602-29701 (99) | 99 | baseline 1/tick |
+| A opens SUMMARY/SWAP/RECHOOSE popup → settled | 29702-29781 (79) | **82** | +3 extra `Random()` calls somewhere in the popup-open path |
+| DOWN (cursor→SWAP) → settled | 29782-29801 (19) | 19 | baseline |
+| A confirms SWAP → slide-transition settled (opponent picker) | 29802-30001 (199) | 199 | baseline |
+| RIGHT/RIGHT/LEFT/LEFT ball nav (4×) → each settled | 19 ticks each | 19 each | baseline, all 4 |
+| A opens accept popup on Grovyle → settled | 30082-30181 (99) | 99 | baseline |
+| A confirms YES (accept) → settled (monpic close/fade/return-to-field/swap-complete msg) | 30182-30681 (499) | **502** | +3 extra — plausibly `CopySwappedMonData`'s friendship reset or a cosmetic roll during the fade |
+| dismiss swap-complete msg → settled ("Right this way, please!") | 30682-31081 (399) | 399 | baseline |
+| dismiss "Right this way" → settled (warp + battle-room opponent quote) | 31082-33081 (1999) | **2004** | +5 extra — plausibly warp/transition-style selection, same family as the anchor's own scouting-text RNG |
+| dismiss battle-room quote → settled (trainer intro shown) | 33082-33581 (499) | **259** | **the frontier-battle RNG freeze begins inside this window** (see below) — the shortfall is not a miscount |
+| dismiss trainer intro → settled battle-2 first action menu | 33582-34081 (499) | **6** | deep in the frozen zone, matches §15 HEADLINE 1 ("`Random()` only advances on-demand inside frontier battles") |
+| **total, tick 29601→34081** | **4480** | **3757** | |
+
+**A new, precise finding**: the per-VBlank-unconditional RNG advance
+`main.c:366` grants outside battle (§16 HEADLINE 4) does not merely
+"eventually" stop once battle 2 starts — the dense per-tick data pins the
+**exact tick**: `gRngValue` is still advancing normally through tick 33285,
+takes one 5-step burst at tick 33286 (`135395612` → `3879112243`, plausibly
+`BattleSetup`'s own init calls — trainer-intro animation pick, AI seed,
+etc.), then goes **completely flat for the next 20 ticks** (33286-33306,
+frozen at `3879112243`) before a single isolated step
+(`3879112243`→`30250` at 33307) and another long flat run (33307-33934,
+627 ticks) — i.e. `gMain.inBattle && (gBattleTypeFlags &
+BATTLE_TYPE_FRONTIER)` flips true (disabling `main.c:366`'s automatic call)
+**at tick 33286**, comfortably inside the "dismiss battle-room quote →
+trainer-intro-shown" window, not at some later point like the menu
+settling. The handful of remaining non-zero steps after that (5 total
+across 33581-34081) are on-demand calls from specific battle-init logic,
+consistent with — not contradicting — the "on-demand only" rule.
+
+Committed: `tools/probe/specs/battle1-swapyes-rng-watch.json` (the watch
+spec, segments intentionally not baked in per the existing
+`battle1-turn1-watch.json` convention — copy `battle1-swapyes-b.json`'s own
+`segments` array in before running) and
+`src/data/gen/battle1-swapyes-rng-dump.json` (the full 4481-row per-tick
+`gRngValue` table plus the derived window ledger above, `totalStepsAcrossTail`,
+and the module's own step-derivation method in its `description` field).
 
 ### Asset/UI inventory for a future engine slice (source-cited, not extracted)
 
@@ -2753,14 +2850,15 @@ flagged as a quick follow-up check, not assumed identical.
 
 ### Not delivered this session (open, in priority order for a resuming session)
 
-1. **LCG-step ledger for the YES branch (brief's priority 4)** — not built.
-   This session's whole time budget went to reaching and ground-truthing the
-   swap screen itself (priority 1, the brief's own top item) plus the
-   partial RAM-truth and asset inventory above; a `gRngValue` per-tick watch
-   (`ram-probe.py`, same tool §15/§16 used) over `battle1-swapyes-b.json`'s
-   own segments is the natural next step and needs no new tooling.
-2. **The `rentalMons[]` bookkeeping array** — offset math wrong (see above),
-   genuinely unresolved, not just unattempted.
+1. ~~LCG-step ledger for the YES branch (brief's priority 4)~~ — **closed**,
+   see the §17 ADDENDUM 2 above (S8 worktree lane, `wt-20260719-184149`):
+   window-by-window `gRngValue` step ledger for the whole swap-screen
+   sequence, plus a precise tick pin (33286) for where the frontier-battle
+   RNG freeze begins.
+2. ~~The `rentalMons[]` bookkeeping array~~ — **closed**, see the §17
+   ADDENDUM above (S8 worktree lane, `wt-20260719-184149`): offset math was
+   the bug (double-counted `frontier`'s own base), not a genuinely-
+   unresolved read; fixed probe + validated dump committed.
 3. **The "already in your party" duplicate-species block
    (`gText_SamePkmnInPartyAlready`)** — never triggered on-screen; source-
    read only.
