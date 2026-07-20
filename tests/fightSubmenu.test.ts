@@ -97,7 +97,7 @@ describe("battleMenu: FightSubmenuState open/close/display-lag", () => {
 
 /** A synthetic EngineState with `battleScene` already in the settled action-menu idle window, `elapsed` chosen so the FIRST tick() call below lands on trace tick `firstTickAbsolute` (see the `+1` convention noted in core.ts's own fightSubmenu block). Other fields are inert pass-throughs for this branch of tick() (verified by reading core.ts: the battleScene branch returns early using only battleScene/keyRepeat). */
 function stateAtTick(firstTickAbsolute: number): EngineState {
-  return { ...createInitialState(), battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE } };
+  return { ...createInitialState(), battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false } };
 }
 
 function press(state: EngineState, buttons: GbaButton[]): EngineState {

@@ -319,10 +319,17 @@ DOUBLE_TEAM clone anim + real-BG1 stat banner (`turn1-cloneanim.json`
 simulation (`turn1-rockslide.json` 250/256 — 6 frames are §11.1's
 pre-existing 1px shake-sampling bug) → HP drain + turn end
 (`turn1-drain.json` 102/102; ISSUES #16 partial-HP path oracle-validated
-exactly). Ground truth banked through turn 14's forced switch
-(§12-§14: turns 2-5 ledgers, faint + Pidgeotto switch-in, PP exhaustion,
-SEND OUT sequence). Remaining for S7: the 1px shake residual, turn-2+
-engine slices (ENDEAVOR/DRAGON_BREATH windows), faint/forced-switch
+exactly). The 1px shake residual is CLOSED (§11.1, real cause was the
+player healthbox's bleed-mask heuristic, `turn1-rockslide.json` 256/256).
+Ground truth banked through turn 14's forced switch (§12-§14: turns 2-5
+ledgers, faint + Pidgeotto switch-in, PP exhaustion, SEND OUT sequence).
+**Turn-2 slice E1 (this session):** FIGHT submenu reopen (dynamic PP
+9/10, real FONT_NORMAL pipeline) → DRAGON_BREATH confirm → ENDEAVOR's
+kickoff text, fully printed and held (`turn2-endeavor.json` 76/77, the 1
+residual is ISSUES #19's own family, confirmed recurring); ENDEAVOR's HP-
+diff math pinned hermetically. Remaining for S7: ENDEAVOR's own attack
+anim + Onix's HP-bar drain + the player healthbox's own HP-digit
+compositor (slice E2), DRAGON_BREATH's own window, faint/forced-switch
 engine slice, ISSUES #19.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows

@@ -281,6 +281,37 @@ export function applyTypeEffectiveness(
 }
 
 /**
+ * `EFFECT_ENDEAVOR`'s `setdamagetohealthdifference` (`Cmd_setdamagetohealthdifference`,
+ * battle_script_commands.c; docs/battle-turn-notes.md §12): sets the raw
+ * damage to `targetHp - userHp`, clamped to 0 (never negative - if the user
+ * is already at or below the target's HP, the effect deals no damage; the
+ * move's own `jumpifmovehadnoeffect`/accuracy gating decides failure
+ * separately, not modeled here).
+ */
+export function calculateEndeavorDamage(targetHp: number, userHp: number): number {
+  return Math.max(0, targetHp - userHp);
+}
+
+/**
+ * `EFFECT_ENDEAVOR`'s full damage resolution end-to-end
+ * (`BattleScript_EffectEndeavor`, data/battle_scripts_1.s:2479-2491;
+ * docs/battle-turn-notes.md §12, RAM-verified 117/101 -> 16): `typecalc`
+ * still runs after `setdamagetohealthdifference` and visibly scales
+ * `gBattleMoveDamage` by the type multiplier (e.g. 16 -> 8 for a 0.5x
+ * matchup) - but that scaled value only gates whether the move has any
+ * effect at all (a 0x multiplier = immune, no damage); the script's very
+ * next command (`copyword gBattleMoveDamage, gHpDealt`) restores the
+ * original, UNSCALED HP-diff before it's ever applied. So type
+ * effectiveness never actually scales ENDEAVOR's dealt damage, only its
+ * immunity check - genuinely different from `calculateBaseDamage`'s own
+ * moves, where `applyTypeEffectiveness`'s result IS the final damage.
+ */
+export function resolveEndeavorDamage(targetHp: number, userHp: number, typeMultiplierTenths: number): number {
+  const hpDiff = calculateEndeavorDamage(targetHp, userHp);
+  return typeMultiplierTenths === 0 ? 0 : hpDiff;
+}
+
+/**
  * ApplyRandomDmgMultiplier (battle_script_commands.c:1639-1651): 85-100%
  * inclusive spread, `rngRoll` is the raw Random() u16 output (1 RNG step).
  */

@@ -92,3 +92,41 @@ export function drawText(
     cursorX += (font.widths[code] ?? font.cellSize) + font.letterSpacing;
   }
 }
+
+/**
+ * Same glyph-cell blit as `drawText`, but for a caller-supplied glyph-code
+ * array rather than a charmap-resolved string - needed for runs that mix in
+ * font-encoding-only codes with no charmap entry (e.g. `CHAR_SPACER`,
+ * ConvertIntToDecimalStringN's own right-align padding glyph, battleMenu.ts's
+ * `ppRemainingGlyphCodes`). No letter-spacing gap added (unused by any
+ * current caller; add if a future one needs it).
+ */
+export function drawGlyphCodes(
+  fb: Uint8Array,
+  font: FontData,
+  codes: readonly number[],
+  x: number,
+  y: number,
+  palette: RgbColor[],
+  colors: TextColors,
+): void {
+  let cursorX = x;
+  for (const code of codes) {
+    const bitmap = font.glyphs[code];
+    const glyphWidth = font.widths[code] ?? font.cellSize;
+    if (bitmap) {
+      for (let gy = 0; gy < font.glyphHeight; gy += 1) {
+        for (let gx = 0; gx < glyphWidth; gx += 1) {
+          const raw = bitmap[gy * font.cellSize + gx]!;
+          const role = raw === 3 ? 0 : raw;
+          const colorIndex = role === 0 ? colors.bg : role === 1 ? colors.fg : colors.shadow;
+          if (colorIndex === 0) continue;
+          const color = palette[colorIndex];
+          if (!color) continue;
+          setPixel(fb, cursorX + gx, y + gy, color.r, color.g, color.b);
+        }
+      }
+    }
+    cursorX += glyphWidth;
+  }
+}

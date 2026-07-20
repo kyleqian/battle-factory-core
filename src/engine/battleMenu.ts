@@ -1761,3 +1761,145 @@ export const ROCK_SLIDE_MENU_REDRAW_DELAY = 664;
 export function rockSlideResettledBounceTick(t: number, pressTick: number): number {
   return t - (pressTick + ROCK_SLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
+
+// --- S7 slice E1: turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff
+// text (docs/battle-turn-notes.md §12, docs/battle-menu-notes.md §13). The
+// resettled menu's own A-press (`rockSlideResettledBounceTick`'s domain)
+// reopens FIGHT fresh via the existing generic `openFightSubmenu` - cursor
+// rests at slot 0 (ROCK_SLIDE) same as turn 1's own rest, so no new "cursor
+// persistence" mechanism is needed this specific case (see the module's own
+// doc for the caveat: this only re-confirms turn 1's rest was ALSO slot 0,
+// not a general multi-slot persistence model). The one genuinely new thing
+// while dwelling on ROCK_SLIDE is its PP display: turn 1's own use dropped
+// it 10/10 -> 9/10, so the per-slot STATIC harvest (baked at 10/10) is now
+// stale for its own PP digits alone - `fight-submenu-window.json`'s
+// ROCK_SLIDE patch is still valid for every OTHER pixel (name/type/PP
+// label/cursor/border, byte-confirmed unchanged), it's just the "10/10"
+// glyph run within it that needs to become a fresh "9/10" render.
+
+/**
+ * Turn 1's own A-confirm press tick (RAM/render 1919 - matches
+ * `FIGHT_CONFIRM_TEXT_DELAY`'s own doc: press-registers 1919 -> first glyph
+ * 1929; `1919 + ROCK_SLIDE_MENU_REDRAW_DELAY(664) = 2583` matches the
+ * resettled-menu redraw tick exactly). Needed here because reopening FIGHT
+ * for turn 2 does NOT reset the underlying bounce task
+ * (`HandleInputChooseMove` doesn't call `DoBounceEffect`/`EndBounceEffect`,
+ * per this file's own turn-1 doc) - it inherits the RESETTLED action menu's
+ * own re-anchored phase (`rockSlideResettledBounceTick`), not a fresh
+ * absolute-`t` mapping the way turn 1's own very first open happened to
+ * (that one coincided with the very first menu's own natural anchor, a
+ * coincidence turn 2 doesn't share - oracle-pixel-confirmed this session:
+ * the plain `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` formula that works for
+ * turn 1 produces a wrong phase for turn 2's own dwelling ticks).
+ */
+const TURN1_CONFIRM_PRESS_TICK = 1919;
+
+/** S7 slice E1: turn 2's own reopened submenu's bounce overlay - composes the resettled remap (`TURN1_CONFIRM_PRESS_TICK`'s own doc) with the ordinary `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` DMA-wait correction every submenu open needs. */
+export function turn2SubmenuBounceTick(t: number): number {
+  return rockSlideResettledBounceTick(t, TURN1_CONFIRM_PRESS_TICK) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+}
+
+/**
+ * The onix/healthbox bounce overlay's frozen state once turn 2's confirm
+ * hands off (mirrors `turnKickoffFrozenBounceTick`'s own doc: the bounce
+ * task stops a few ticks into the resolution, at whatever phase it happens
+ * to be on then - not simply the live formula's own value at the freeze
+ * moment, tried first and rejected here too, same as turn 1's own case).
+ * Grid-searched directly against `battle1-turn2.json`'s own dwelling ticks
+ * 2948-2999 (docs/battle-menu-notes.md §13): the oracle shows NEITHER
+ * bounce region raised the entire span (`onixY2`=`healthboxY2`=0) - this is
+ * any tick in that plateau (`menuIdleBounce`'s own 9-tick "flat" stretch),
+ * kept as a literal pixel-fit constant per this run's established
+ * convention for exactly this situation (`turnKickoffFrozenBounceTick`'s
+ * own `pressTick - 19` precedent), not re-derived from `pressTick` this
+ * time since the plateau found isn't a small offset from it.
+ */
+const TURN2_KICKOFF_FROZEN_BOUNCE_TICK = 2119;
+
+/** S7 slice E1's own analogue of `turnKickoffBounceTick`, composed with `turn2SubmenuBounceTick`'s own resettled remap - live for the same `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks after the press, then frozen at `TURN2_KICKOFF_FROZEN_BOUNCE_TICK`. */
+export function turn2KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return turn2SubmenuBounceTick(t);
+  return TURN2_KICKOFF_FROZEN_BOUNCE_TICK;
+}
+
+/**
+ * `GetCurrentPPToMaxPPState` (battle_message.c:3047-3075) - the PP-color
+ * band `SetPPNumbersPaletteInMoveSelection` selects (0=empty..3=full).
+ * Needed to verify (not assume) whether ROCK_SLIDE's 9/10 needs a different
+ * color pair than the harvest's own baked-in full-PP band: for maxPP=10,
+ * currentPP=9 this returns 3 (currentPP(9) > floor(maxPP/2)=5) - the SAME
+ * band as 10/10, so no palette change accompanies the PP digit's own
+ * redraw this turn (confirmed against a real oracle capture, not assumed -
+ * see docs/battle-menu-notes.md §13).
+ */
+export function getCurrentPPToMaxPPState(currentPP: number, maxPP: number): 0 | 1 | 2 | 3 {
+  if (maxPP === currentPP) return 3;
+  if (maxPP <= 2) return currentPP > 1 ? 3 : ((2 - currentPP) as 0 | 1 | 2);
+  if (maxPP <= 7) return currentPP > 2 ? 3 : ((2 - currentPP) as 0 | 1 | 2);
+  if (currentPP === 0) return 2;
+  if (currentPP <= Math.floor(maxPP / 4)) return 1;
+  if (currentPP > Math.floor(maxPP / 2)) return 3;
+  return 0;
+}
+
+/** `CHAR_SPACER` (characters.h:74, "Empty space") - `ConvertIntToDecimalStringN`'s own right-align padding glyph, a genuinely distinct font-encoding code from the plain ASCII space (width 6, matching a digit's own width, vs. the plain space's width 3) - not in `charmap.json` (that only covers printable/typed characters). */
+export const CHAR_SPACER = 119;
+
+/** FONT_NORMAL glyph codes for each decimal digit + slash, `src/data/gen/charmap.json`'s own codes (kept local since `ppRemainingGlyphCodes` needs to interleave `CHAR_SPACER`, which has no charmap entry, so it can't just build a JS string and hand it to the charmap-based `drawText`). */
+const PP_DIGIT_CODES: readonly number[] = [161, 162, 163, 164, 165, 166, 167, 168, 169, 170];
+const PP_SLASH_CODE = 186;
+
+/**
+ * `MoveSelectionDisplayPPNumber` (battle_controller_player.c): prints
+ * `ConvertIntToDecimalStringN(currentPP, STR_CONV_MODE_RIGHT_ALIGN, 2)` +
+ * "/" + the same for `maxPP`, on `B_WIN_PP_REMAINING` (FONT_NORMAL, a
+ * separate window from the FONT_NARROW move-name/PP-label/type text - see
+ * ISSUES #20). Right-align width 2 means a single-digit value gets a
+ * leading `CHAR_SPACER` instead of a second digit (specialized to 0-99,
+ * this window's only real domain). Oracle-pixel-confirmed exact for 9/10
+ * against `battle1-turn2.json` tick 2911 (docs/battle-menu-notes.md §13) -
+ * not just source-reasoned.
+ */
+export function ppRemainingGlyphCodes(currentPP: number, maxPP: number): number[] {
+  const codes: number[] = [];
+  const pushRightAligned2 = (value: number): void => {
+    if (value > 9) codes.push(PP_DIGIT_CODES[Math.floor(value / 10)]!);
+    else codes.push(CHAR_SPACER);
+    codes.push(PP_DIGIT_CODES[value % 10]!);
+  };
+  pushRightAligned2(currentPP);
+  codes.push(PP_SLASH_CODE);
+  pushRightAligned2(maxPP);
+  return codes;
+}
+
+/** ROCK_SLIDE's own PP digit window origin, patch-local to `fight-submenu-window.json`'s ROCK_SLIDE slot (grid-searched byte-exact against oracle tick 2911, 0/450 mismatches - docs/battle-menu-notes.md §13). Cross-confirmed by tile-position arithmetic: `B_WIN_PP_REMAINING`'s own `sStandardBattleWindowTemplates` entry (battle_bg.c) is 4 tiles (+32px) right of `B_WIN_PP`'s own column with a further +2px from the window's own internal text.x, matching this exactly relative to `PP_LABEL_ORIGIN` (tests/fontNarrow.test.ts). */
+export const ROCK_SLIDE_PP_REMAINING_ORIGIN = { x: 201, y: 8 };
+
+/** Grovyle's turn-2 move, ENDEAVOR - the kickoff message's own line 2 (line 1, "Foe GROVYLE used", is identical text to turn 1's own `TURN_KICKOFF_LINE1` - same attacker, same STRINGID_USEDMOVE template, reused verbatim). */
+export const TURN2_KICKOFF_LINE2 = "ENDEAVOR!";
+/** Total printable characters across both lines for turn 2's kickoff message (`TURN_KICKOFF_LINE1.length` + this line's own length) - `\n` free, same rule as `TURN_KICKOFF_TEXT_TOTAL`. */
+export const TURN2_KICKOFF_TEXT_TOTAL = TURN_KICKOFF_LINE1.length + TURN2_KICKOFF_LINE2.length;
+
+/**
+ * Turn 2's own kickoff message hard-cuts in 1 tick EARLIER than
+ * `turnKickoffTextStartTick`'s general formula predicts - oracle-confirmed
+ * against `battle1-turn2.json` (the whole message window, all ~10900px of
+ * it, differs at tick 2954 but not 2953 or 2955): pressTick(2945) +
+ * `FIGHT_CONFIRM_TEXT_DELAY`(10) - 1 = 2954. A pixel-fit correction, not
+ * source-attributed this session (plausible unverified guess: the
+ * reopened-submenu's own extra DMA-wait state costs this transition 1 tick
+ * the same way `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` costs the bounce overlay 2
+ * - not confirmed further, flagged for a future session per this run's
+ * no-silent-exclusion policy).
+ */
+export function turn2KickoffTextStartTick(pressTick: number): number {
+  return turnKickoffTextStartTick(pressTick) - 1;
+}
+
+/** Visible character count (0..TURN2_KICKOFF_TEXT_TOTAL) of "Foe GROVYLE used\nENDEAVOR!" at absolute trace tick `t` - same 1-tick/char mechanism as turn 1's own `turnKickoffTextVisibleChars`, just a different total (26 vs turn 1's 29, only line 2 differs) and start tick (`turn2KickoffTextStartTick`). */
+export function turn2KickoffTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn2KickoffTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN2_KICKOFF_TEXT_TOTAL, t - start + 1);
+}

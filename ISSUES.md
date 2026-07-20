@@ -49,7 +49,13 @@ tick in the 235-tick window to 0 diff); every integer
 against the full post-close range — -4, the shipped value, is uniquely
 optimal at 1/66 mismatches, strictly better than every neighbor). Full
 derivation: `docs/battle-menu-notes.md` §8.
-Affects: `tools/compare/traces/fight-submenu.json` 234/235 (only frame).
+**Recurs identically** (S7 slice E1, this session): `turn2-endeavor.json`
+tick 2906 - the FIGHT submenu's reveal tick for turn 2's own reopen - same
+exact bbox (x127-225, y=111), same 99px count, confirming this is a general
+property of the submenu-reveal/resume mechanism, not a turn-1-only or
+nav-only quirk. Still not root-caused.
+Affects: `tools/compare/traces/fight-submenu.json` 234/235 (only frame);
+`tools/compare/traces/turn2-endeavor.json` 76/77 (only frame, tick 2906).
 
 ## #18 — [POLICY SETTLED 2026-07-19, user decision] sendout tick 1496
   (particle z-order, 3px): accepted/parked permanently; S6 ticked [x] with

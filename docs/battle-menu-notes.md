@@ -1859,3 +1859,145 @@ ticks, `rockSlideResettledBounceTick`'s own re-anchoring. `npm test`
 windows, FONT_NARROW rewire, ISSUES #5/#18/#19/#20, the §11.1-named 1px
 `drawStaticBgShiftedY` residual (not attempted this session - ran out of
 budget after slice D landed at 0 diff).
+
+## 13. S7 slice E1: turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff text (bounded worker, this session) - `turn2-endeavor.json` **76/77** (the one residual is ISSUES #19's own pre-existing family, recurring, not a new bug)
+
+Implements docs/battle-turn-notes.md §12's ground truth from the settled
+post-turn-1 action menu (tick 2894) through ENDEAVOR's kickoff message
+fully printed and held (tick 2999) - FIGHT submenu reopen (cursor rests at
+slot 0, PP now dynamic 9/10) -> `DOWN` to DRAGON_BREATH (slot 2, PP 20/20,
+unaffected) -> `A` confirms -> "Foe GROVYLE used\nENDEAVOR!" prints and
+holds. **Stops before ENDEAVOR's own attack animation** (first pixel change
+past the settled text is tick 3003, oracle-confirmed - see "What's left"
+below) - the animation, Onix's HP-bar drain, and the player healthbox's own
+HP digits are a follow-up slice's work, per this step's own explicit
+fallback ("land a green committed subset... say exactly where you
+stopped").
+
+**PP digits: real FONT_NORMAL pipeline, not a second static harvest.**
+ISSUES #20 flagged the FIGHT submenu's move-name/PP-label/type text as
+FONT_NARROW (never extracted, rewire deferred) - but the PP *number*
+("10/10") prints on a wholly separate window, `B_WIN_PP_REMAINING`
+(`battle_message.c:1560-1569`), which is FONT_NORMAL - already extracted,
+already proven (`font-normal.json`, used throughout this file for message
+text). `MoveSelectionDisplayPPNumber` (`battle_controller_player.c`) prints
+`ConvertIntToDecimalStringN(currentPP, RIGHT_ALIGN, 2)` + "/" + the same for
+maxPP - a single-digit value gets a leading `CHAR_SPACER` (`characters.h:74`,
+glyph code 119, width 6 - a genuinely distinct font-encoding code from the
+plain ASCII space, not in `charmap.json`), not a literal space. `battleMenu.ts`'s
+`ppRemainingGlyphCodes(currentPP, maxPP)` reproduces this exactly, rendered
+via a new `font.ts` export, `drawGlyphCodes` (a `drawText` sibling for
+raw glyph-code arrays, needed since `CHAR_SPACER` has no charmap entry to
+route through the string-based `drawText`).
+
+**Color: verified unchanged, not assumed.** `GetCurrentPPToMaxPPState`
+(`battle_message.c:3047-3075`, ported as `getCurrentPPToMaxPPState`) governs
+`SetPPNumbersPaletteInMoveSelection`'s color-band override - for
+currentPP=9/maxPP=10, `currentPP(9) > floor(maxPP/2)=5` is true, so this
+returns state 3, the SAME full-PP band 10/10 already uses. No new color
+pair is needed; oracle-pixel-confirmed at tick 2911 (0/450 mismatches
+against a direct `drawGlyphCodes` render, grid-searched to find the exact
+window origin - patch-local (201, 8), cross-confirmed by
+`sStandardBattleWindowTemplates`' own tile-position arithmetic relative to
+`tests/fontNarrow.test.ts`'s already-established `PP_LABEL_ORIGIN`).
+
+**Grovyle's HP, forgotten by every render path except `drawTurnEndSettledMenu`.**
+Slice D's own doc already named the flat `menuIdleBase` harvest as stale for
+Grovyle's healthbox (baked at the pre-turn-1 full HP) and patched exactly
+one call site (`drawTurnEndSettledMenu`) to overdraw it. Reopening FIGHT for
+turn 2 routes through a DIFFERENT set of call sites entirely
+(`drawActionMenuIdleWindow`/`drawActionMenuIdleContent`, plus two inline
+`drawRect(fb, menuIdleBase)` sites inside `drawFightSubmenuWindow`) - none of
+which knew about the overdraw, so turn 2's own submenu (and the brief
+pre-reveal action-menu hold) rendered Grovyle back at full HP until fixed.
+Root-cause fix, not a special case: a new `turn1Resolved: boolean` field on
+`BattleSceneState` (set the same tick core.ts's new reopen branch fires) is
+threaded through every one of these call sites via a single new helper,
+`drawMenuIdleBaseWithOpponentHp`, so the fix generalizes to every menu-base
+draw call rather than patching each site's symptom separately.
+
+**The submenu's own bounce overlay inherits the RESETTLED menu's phase, not
+turn 1's own "coincidentally-aligned" absolute-`t` formula.** Turn 1's first
+FIGHT-submenu open uses `menuIdleBounce(t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT)`
+directly against absolute `t` - this works because that open happens before
+ANY menu resettle event, so absolute-`t` and the bounce task's own local
+phase coincide by construction. Turn 2's reopen happens long after turn 1's
+OWN resettle (`rockSlideResettledBounceTick`'s own re-anchor event, pressTick
+1919 + 664), and `HandleInputChooseMove` never resets the bounce task - so
+it inherits whatever phase the RESETTLED menu already established, not a
+fresh mapping. Oracle-pixel-confirmed (dense diff across the whole 2906-2999
+window, 1579px wrong at every affected tick until corrected): the dwelling
+formula needs `turn2SubmenuBounceTick(t) = rockSlideResettledBounceTick(t,
+1919) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (composing BOTH known corrections),
+not plain `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`.
+
+**The post-confirm "frozen" bounce state needed its own grid search, same
+as turn 1's own precedent.** Mirroring `turnKickoffFrozenBounceTick`'s own
+finding (the live formula's value AT the freeze moment is NOT what's
+observed - a different plateau is), turn 2's own frozen state (ticks
+`pressTick`+3 on) is oracle-confirmed to be `onixY2=healthboxY2=0` (neither
+bounce region raised) the entire 2948-2999 span - direct pixel comparison
+against `menu-idle-healthbox-bounce.json`'s own `y1`/`y2`/base states,
+not a full-frame SSIM guess. `TURN2_KICKOFF_FROZEN_BOUNCE_TICK = 2119` is a
+literal pixel-fit constant landing in that exact 9-tick flat plateau,
+same convention as `turnKickoffFrozenBounceTick`'s own `pressTick - 19`.
+
+**Kickoff text hard-cuts 1 tick earlier than the general formula predicts.**
+`turnKickoffTextStartTick(pressTick)` (turn 1's own formula,
+`FIGHT_CONFIRM_TEXT_DELAY`=10) predicts 2955 for turn 2's own press (2945) -
+but the oracle's WHOLE message-box region (all ~10900px of it) differs at
+tick 2954, not 2953 or 2955, meaning the real hard-cut is at 2954. A new
+`turn2KickoffTextStartTick = turnKickoffTextStartTick(pressTick) - 1`
+pixel-fit correction, not source-attributed this session (a plausible,
+unverified guess: the reopened submenu's own extra DMA-wait state costs
+this transition 1 tick, the same way `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
+costs the bounce overlay 2 - flagged for whoever next touches this).
+
+**ENDEAVOR's damage, pinned hermetically per the brief's own ask** (no
+visual drain wired this session - see "what's left"): `damageCalc.ts` gains
+`calculateEndeavorDamage(targetHp, userHp)` (the raw
+`setdamagetohealthdifference` HP-diff, clamped to 0) and
+`resolveEndeavorDamage(targetHp, userHp, typeMultiplierTenths)` (the full
+`typecalc`-then-`copyword`-restore sequence: the type multiplier gates
+immunity only, a 0x multiplier zeroes the damage, anything else restores
+the full unscaled diff) - both pinned against the RAM dump's own values
+(117, 101 -> 16; the intermediate 0.5x scale to 8; the restore back to 16).
+
+**One known, pre-existing residual - not new, not fixed either.** Tick 2906
+(the submenu's own reveal tick for this reopen) shows the exact same 99px
+row-shaped diff (x127-225, y=111) ISSUES #19 already named for
+`fight-submenu.json`'s own tick 2073 - same bbox, same pixel count,
+confirming it's a property of the reveal/resume mechanism in general, not
+a turn-1-only or nav-only quirk. Left unfixed per this step's own explicit
+OUT OF SCOPE list (ISSUES #19); recorded there, not re-litigated here.
+
+**What's left (explicitly out of scope this session, for slice E2 or a
+follow-up)**: ENDEAVOR's own attack animation (first real pixel change past
+the settled kickoff text is oracle-confirmed at tick 3003 - a plain
+generic-hit-style animation per battle-turn-notes.md §12, no move-specific
+asset the way ROCK_SLIDE's rocks or DOUBLE_TEAM's clone-blend were); Onix's
+own HP-bar drain (3098-3116, 116->101); the player healthbox's own HP DIGITS
+changing for the first time (117/117 -> 101/117) - needs a player-side
+healthbox compositor analogous to `composeOpponentHealthbox`, using
+FONT_SMALL (source-confirmed: `AddTextPrinterAndCreateWindowOnHealthbox`
+uses `FONT_SMALL`, the SAME font/color convention `healthboxAssembly.ts`
+already uses for the opponent's own name/level text - "the tiny healthbox
+digit font" the brief flagged turns out to be nothing new, not yet wired
+for the player side); tick 3121's still-unattributed RNG step; the turn-3
+tie-break prediction.
+
+**Acceptance**: new committed trace `tools/compare/traces/turn2-endeavor.json`
+(the exact 44-segment prefix + `battle1-turn2.json`'s own next 6 segments,
+button-for-button identical - A/idle(30)/DOWN/idle(10)/A, with the final
+idle trimmed to 53 frames so the trace ends at tick 2999, well short of the
+3128 cap), 77 captures (dense every tick 2894-2960, strided every 4 to 2999)
+**76/77** - the one residual is ISSUES #19's own pre-existing family (see
+above), not a new defect. Zero regressions, full sweep re-verified at exact
+prior counts: `turn1-rockslide` 256/256, `turn1-drain` 102/102,
+`fight-submenu` 234/235, `turn1-kickoff` 81/81, `turn1-cloneanim` 230/230.
+**New Tier-1 pins** (`tests/battleMenu.test.ts`, 7 new tests):
+`getCurrentPPToMaxPPState`'s band boundaries, `ppRemainingGlyphCodes`'s
+exact glyph-code output (9/10 and 10/10), `turn2KickoffTextVisibleChars`'s
+timing; (`tests/damageCalc.test.ts`, 5 new tests): `calculateEndeavorDamage`/
+`resolveEndeavorDamage` against the RAM-confirmed 117/101/16/8 chain. `npm
+test` **659/659**, `npm run build` green.

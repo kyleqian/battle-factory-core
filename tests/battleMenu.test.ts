@@ -50,13 +50,20 @@ import {
   ROCK_SLIDE_MENU_REDRAW_DELAY,
   rockSlideResettledBounceTick,
   MENU_IDLE_BLANK_END_TICK,
+  getCurrentPPToMaxPPState,
+  ppRemainingGlyphCodes,
+  CHAR_SPACER,
+  turn2KickoffTextVisibleChars,
+  turn2KickoffTextStartTick,
+  turnKickoffTextStartTick,
+  TURN2_KICKOFF_TEXT_TOTAL,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
 /** Same rig as tests/battleScene.test.ts's `pixelAtSentOut` - send-out A-press already registered at trace tick 1420 (sendOutPressElapsed=380), the fixed script every committed trace in this window shares. */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -108,16 +115,16 @@ describe("battleMenu: rendered pixels (oracle-pinned, tools/compare/traces/menu-
   it("renders byte-identical frames across the silent space tick (1565 -> 1566)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE });
-    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE });
+    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 
   it("renders byte-identical frames once static (1571 -> 1572)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE });
-    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE });
+    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 });
@@ -563,5 +570,40 @@ describe("battleMenu: S7 slice D - HP drain + turn-end (docs/battle-menu-notes.m
     expect(rockSlideResettledBounceTick(redrawTick, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 1);
     expect(rockSlideResettledBounceTick(redrawTick + 1, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 2);
     expect(rockSlideResettledBounceTick(redrawTick + 9, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 10);
+  });
+});
+
+describe("S7 slice E1: turn 2's FIGHT-submenu reopen - dynamic PP + ENDEAVOR kickoff (docs/battle-menu-notes.md §13)", () => {
+  it("getCurrentPPToMaxPPState(9, 10) is 3 (full band) - PP 9/10 does NOT change color, verified against GetCurrentPPToMaxPPState's own source branches, not assumed", () => {
+    expect(getCurrentPPToMaxPPState(9, 10)).toBe(3);
+    expect(getCurrentPPToMaxPPState(10, 10)).toBe(3);
+    expect(getCurrentPPToMaxPPState(20, 20)).toBe(3);
+  });
+
+  it("getCurrentPPToMaxPPState covers the other bands too (maxPP=10: exactly-half is band 0, not 3; <=1/4 low; ==0 empty)", () => {
+    expect(getCurrentPPToMaxPPState(6, 10)).toBe(3); // > half
+    expect(getCurrentPPToMaxPPState(5, 10)).toBe(0); // exactly half - neither <=1/4 nor >half
+    expect(getCurrentPPToMaxPPState(3, 10)).toBe(0); // neither <=1/4 nor >half
+    expect(getCurrentPPToMaxPPState(2, 10)).toBe(1); // <= floor(10/4)=2
+    expect(getCurrentPPToMaxPPState(0, 10)).toBe(2);
+  });
+
+  it("ppRemainingGlyphCodes(9, 10) is CHAR_SPACER+'9'+'/'+'1'+'0' - oracle-pixel-confirmed byte-exact against battle1-turn2.json tick 2911 (docs/battle-menu-notes.md §13), not just source-reasoned", () => {
+    expect(ppRemainingGlyphCodes(9, 10)).toEqual([CHAR_SPACER, 170, 186, 162, 161]);
+  });
+
+  it("ppRemainingGlyphCodes(10, 10) is both digits, no CHAR_SPACER - matches the harvest's own baked-in '10/10'", () => {
+    expect(ppRemainingGlyphCodes(10, 10)).toEqual([162, 161, 186, 162, 161]);
+  });
+
+  it("turn2KickoffTextVisibleChars: starts 1 tick before turn 1's own formula would predict (oracle-confirmed, docs/battle-menu-notes.md §13), different total (26 vs turn 1's 29)", () => {
+    const pressTick = 2945;
+    expect(turnKickoffTextStartTick(pressTick)).toBe(2955); // the general (turn 1) formula's own prediction
+    const start = turn2KickoffTextStartTick(pressTick);
+    expect(start).toBe(2954); // oracle-confirmed: the whole message window differs at 2954, not 2953 or 2955
+    expect(turn2KickoffTextVisibleChars(start - 1, pressTick)).toBe(0);
+    expect(turn2KickoffTextVisibleChars(start, pressTick)).toBe(1);
+    expect(turn2KickoffTextVisibleChars(start + TURN2_KICKOFF_TEXT_TOTAL - 1, pressTick)).toBe(TURN2_KICKOFF_TEXT_TOTAL);
+    expect(turn2KickoffTextVisibleChars(start + TURN2_KICKOFF_TEXT_TOTAL + 50, pressTick)).toBe(TURN2_KICKOFF_TEXT_TOTAL);
   });
 });

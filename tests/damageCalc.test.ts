@@ -5,9 +5,11 @@ import {
   applyTypeEffectiveness,
   calculateAccuracy,
   calculateBaseDamage,
+  calculateEndeavorDamage,
   DEFAULT_STAT_STAGE,
   getCriticalHitChanceStage,
   NEUTRAL_STAT_STAGES,
+  resolveEndeavorDamage,
   rollAccuracyHits,
   rollIsCriticalHit,
   type TypeEffectivenessEntry,
@@ -163,5 +165,31 @@ describe("calculateAccuracy / rollAccuracyHits (turn 1's accuracy roll, incl. BR
     const roll = rng.next();
     expect(rng.rngValue).toBe(4000719098);
     expect(rollAccuracyHits(60, roll)).toBe(true);
+  });
+});
+
+describe("calculateEndeavorDamage / resolveEndeavorDamage (turn 2's ENDEAVOR, docs/battle-turn-notes.md §12)", () => {
+  it("Grovyle(101)'s ENDEAVOR vs Onix(117) hp-diff is 16, RAM-confirmed (gBattleMoveDamage tick 2981)", () => {
+    expect(calculateEndeavorDamage(117, 101)).toBe(16);
+  });
+
+  it("clamps to 0 when the user's own HP is already >= the target's (no effect, never negative)", () => {
+    expect(calculateEndeavorDamage(101, 117)).toBe(0);
+    expect(calculateEndeavorDamage(100, 100)).toBe(0);
+  });
+
+  it("typecalc's NORMAL-vs-ROCK/GROUND multiplier scales the diff to 8 (gBattleMoveDamage tick 2984) - the intermediate step ENDEAVOR's own resolution discards", () => {
+    const { damage, multiplierTenths } = applyTypeEffectiveness(16, "TYPE_NORMAL", ["TYPE_ROCK", "TYPE_GROUND"], TYPE_TABLE);
+    expect(multiplierTenths).toBe(5);
+    expect(damage).toBe(8);
+  });
+
+  it("resolveEndeavorDamage restores the full 16, not the type-scaled 8 (gBattleMoveDamage tick 2987's copyword restore)", () => {
+    const { multiplierTenths } = applyTypeEffectiveness(16, "TYPE_NORMAL", ["TYPE_ROCK", "TYPE_GROUND"], TYPE_TABLE);
+    expect(resolveEndeavorDamage(117, 101, multiplierTenths)).toBe(16);
+  });
+
+  it("a 0x (immune) type multiplier makes ENDEAVOR deal no damage at all, unlike every scaled-but-nonzero case", () => {
+    expect(resolveEndeavorDamage(117, 101, 0)).toBe(0);
   });
 });

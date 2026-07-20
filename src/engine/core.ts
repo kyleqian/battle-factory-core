@@ -94,6 +94,7 @@ import {
   MENU_DRAW_TICK,
   moveFightCursor,
   openFightSubmenu,
+  ROCK_SLIDE_MENU_REDRAW_DELAY,
 } from "./battleMenu.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
@@ -178,6 +179,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // off by one (found empirically this session: the app opened/closed
     // exactly 1 tick early against the oracle until this was corrected).
     const sceneT = SCENE_TICK0 + battleScene.elapsed + 1;
+    let turn1Resolved = battleScene.turn1Resolved;
     if (fightSubmenu.openElapsed === null) {
       if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
         fightSubmenu = openFightSubmenu(battleScene.elapsed + 1);
@@ -194,10 +196,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // doc), so no further input (nav, B) is read at all - matching that,
       // this whole branch's own guard excludes `confirmElapsed !== null`
       // above rather than re-checking it per input case. Gated to cursor 0
-      // (ROCK_SLIDE) - the only move this trace's own oracle ground truth
-      // covers; the other 3 slots' confirm timing/text is unverified and out
-      // of this slice's scope.
-      if (newKeys.has("A") && fightSubmenu.cursor === 0) {
+      // (ROCK_SLIDE, turn 1) or 2 (DRAGON_BREATH, turn 2, S7 slice E1) - the
+      // only two moves this trace's own oracle ground truth covers; the
+      // other 2 slots' confirm timing/text is unverified and out of scope.
+      if (newKeys.has("A") && (fightSubmenu.cursor === 0 || fightSubmenu.cursor === 2)) {
         fightSubmenu = confirmFightMove(fightSubmenu, battleScene.elapsed + 1);
       } else if (newKeys.has("B")) {
         fightSubmenu = closeFightSubmenu(fightSubmenu, battleScene.elapsed + 1);
@@ -210,8 +212,24 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       } else if (newKeys.has("DOWN")) {
         fightSubmenu = { ...fightSubmenu, cursor: moveFightCursor(fightSubmenu.cursor, "DOWN") };
       }
+    } else if (
+      !turn1Resolved &&
+      fightSubmenu.confirmElapsed !== null &&
+      newKeys.has("A") &&
+      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + ROCK_SLIDE_MENU_REDRAW_DELAY
+    ) {
+      // S7 slice E1 (docs/battle-turn-notes.md §12): turn 1's whole
+      // resolution has redrawn the settled action menu by now
+      // (`ROCK_SLIDE_MENU_REDRAW_DELAY` past its own confirm) - a fresh
+      // A-press reopens FIGHT for turn 2, same generic `openFightSubmenu`
+      // turn 1's own first open used (cursor rests at slot 0, matching the
+      // ground truth: turn 1's own rest was also slot 0 - see
+      // `openFightSubmenu`'s own doc for the caveat this doesn't generalize
+      // cursor persistence beyond that coincidence).
+      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1);
+      turn1Resolved = true;
     }
-    battleScene = { ...battleScene, fightSubmenu };
+    battleScene = { ...battleScene, fightSubmenu, turn1Resolved };
     battleScene = advanceBattleScene(battleScene);
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
   }

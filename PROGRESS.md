@@ -4,6 +4,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 135 — Bounded worker: S7 slice E1 — turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff text, `turn2-endeavor.json` **76/77** (the 1 residual is ISSUES #19's own pre-existing family, confirmed recurring, not new) — suite **659/659**
+
+- **State:** `npm test` **659/659** (+12 Tier-1 pins), `npm run build`
+  green, tree clean. New committed trace
+  `tools/compare/traces/turn2-endeavor.json` (exact 44-segment prefix +
+  `battle1-turn2.json`'s own next 6 segments verbatim, final idle trimmed
+  so the trace ends at tick 2999) **76/77**. Zero regressions at exact
+  prior counts: `turn1-rockslide` 256/256, `turn1-drain` 102/102,
+  `fight-submenu` 234/235, `turn1-kickoff` 81/81, `turn1-cloneanim`
+  230/230.
+- **Did:** FIGHT submenu reopens for turn 2 (cursor rests at slot 0,
+  matching — not yet generalizing — the ground truth) with PP now dynamic
+  (9/10, was static 10/10): rendered through the REAL FONT_NORMAL pipeline
+  per the brief's own ask (`ppRemainingGlyphCodes` + a new `font.ts` export,
+  `drawGlyphCodes`, needed for `CHAR_SPACER`'s own non-charmap glyph code),
+  not a second static harvest — oracle-pixel-confirmed 0/450 mismatches,
+  and `getCurrentPPToMaxPPState(9,10)` confirmed (not assumed) the color
+  band stays full, no palette change. `DOWN` to DRAGON_BREATH (slot 2, PP
+  20/20, its harvest already valid, 0 mismatches re-checked) → `A` confirms
+  → "Foe GROVYLE used\nENDEAVOR!" prints and holds. Three real bugs found
+  and fixed along the way (docs/battle-menu-notes.md §13 has the full
+  derivation for each): (1) Grovyle's HP was forgotten by every render path
+  except slice D's own `drawTurnEndSettledMenu` — fixed at the root via one
+  new `turn1Resolved`-gated helper (`drawMenuIdleBaseWithOpponentHp`)
+  threaded through every `menuIdleBase` draw site, not a per-site patch;
+  (2) the submenu's own bounce overlay must inherit the RESETTLED menu's
+  phase (`rockSlideResettledBounceTick`), not turn 1's own plain-`t`
+  formula, which only worked for turn 1 by coincidence (its open predates
+  any resettle event); (3) the post-confirm frozen bounce state and the
+  kickoff-text hard-cut tick both needed their own grid-search corrections
+  (mirroring `turnKickoffFrozenBounceTick`'s own established precedent),
+  landing at `TURN2_KICKOFF_FROZEN_BOUNCE_TICK=2119` and a 1-tick-earlier
+  `turn2KickoffTextStartTick`. ENDEAVOR's HP-diff math
+  (`calculateEndeavorDamage`/`resolveEndeavorDamage`, damageCalc.ts) is
+  pinned hermetically against the RAM dump (117,101→16, the 0.5x
+  intermediate scale to 8, the restore back to 16) per the brief's own ask,
+  independent of the (not-yet-wired) visual drain.
+- **Stopped exactly at:** the kickoff text fully printed and held (tick
+  2999) — the FIRST real pixel change past that point is oracle-confirmed
+  at tick 3003 (ENDEAVOR's own attack animation beginning), well before the
+  3128 cap. ENDEAVOR's animation, Onix's HP-bar drain (3098-3116), and the
+  player healthbox's own HP-digit compositor (117/117→101/117, needs a
+  player-side analogue of `composeOpponentHealthbox` — confirmed this
+  session to need nothing new font-wise, just FONT_SMALL again, source-
+  traced via `AddTextPrinterAndCreateWindowOnHealthbox`) are explicitly
+  NOT wired this session — left for a follow-up slice, per this step's own
+  fallback clause.
+- **Next:** the deferred visual half (ENDEAVOR anim → HP drain → player
+  healthbox digits → settled at tick ~3128) is the natural continuation;
+  otherwise ISSUES #19's own anomaly family (now confirmed general, not
+  turn-1-specific) or S8's faint/forced-switch slice per #133's own list.
+- **Notes:** the grid-search-against-cropped-oracle-regions technique (§8's
+  own convention) resolved all three bugs above without ever needing a
+  fresh scratch trace — the already-committed `battle1-turn2.json` ground
+  truth had every tick this session needed. No papercuts.
+
+---
 ## 134 — Bounded worker: §11.1's 1px shake residual CLOSED — misdiagnosed as `drawStaticBgShiftedY`; real cause was the player healthbox's bleed-mask heuristic coincidentally matching the unshifted background — `turn1-rockslide.json` **250/256 → 256/256**; suite **649/649**
 
 - **State:** `npm test` **649/649** (+1 Tier-1 pin), `npm run build`
@@ -90,50 +147,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no usage-limit events. Worker cost ~$6.6/step avg, 12-34
   min/step. Two user decisions this session: S6 [x] (1496 parked) and
   S8 multi-trace acceptance — both recorded in ROADMAP with rationale.
-
----
-## 132 — Bounded worker: S7 slice D — HP drain + turn-end CLOSED, `turn1-drain.json` **102/102, 0 diff** on first attempt; closes ISSUES #16's deferred partial-HP oracle validation — suite **648/648**
-
-- **State:** `npm test` **648/648** (+5 Tier-1 pins), `npm run build`
-  green, tree clean. New committed trace
-  `tools/compare/traces/turn1-drain.json` (canonical 44-segment prefix,
-  102 captures: dense every tick 2510-2600 + strided to 2655) **102/102,
-  0 diff**. Zero regressions: turn1-rockslide 250/256, turn1-cloneanim
-  230/230, turn1-kickoff 81/81, fight-submenu 234/235, sendout 255/256,
-  s6-acceptance 224/228 — all re-verified unchanged.
-- **Did:** implemented the whole window (`battleMenu.ts` pure fns +
-  `battleScene.ts` render, docs/battle-menu-notes.md §12 has the full
-  derivation) from a fresh 161-frame scratch dense capture (ticks
-  2500-2660, grid-search only, not committed). Three findings: (1) the
-  HP-bar drain renders with **no extra frame of render lag** (every other
-  ROCK_SLIDE mechanism in this window uses a `-1` lag; this one doesn't —
-  fit exact against all 15 fill-pixel-count transitions after that
-  hypothesis was tried and rejected first); (2) the resettled action
-  menu's idle-bounce cycle re-anchors to a **fresh** local tick
-  (`MENU_IDLE_BLANK_END_TICK+1`), matched by the very first menu's own
-  distinctive "1-tick blip then 9-tick dwell" opening shape recurring
-  identically at the redraw tick — not a continuation of the frozen
-  pre-turn absolute-tick counter; (3) the reused flat `menuIdleBase`
-  harvest's two bounce regions are both on the PLAYER's (Onix, undamaged)
-  side, so it stays valid for the resettled menu EXCEPT the opponent's own
-  healthbox, which now needs a live per-tick overdraw
-  (`opponentHealthboxContentForHp`, a small memoized cache — only 43
-  distinct integer HPs ever needed) instead of the old static
-  full-HP-only constant.
-- **ISSUES #16 outcome:** the partial-HP half is RESOLVED, not a headline
-  fix — `calcBarFilledPixels`'s existing `floor(hpFraction*48)` formula
-  already agreed with real oracle pixels for all 43 HPs this trace
-  exercises (0 residual, no model change). Trimmed the entry to what's
-  still unvalidated: yellow/red band thresholds and every status icon
-  (this seed's battle never leaves the green band or inflicts status).
-- **Next:** the §11.1-named 1px `drawStaticBgShiftedY` residual (single
-  stray pixel at (173,92) on `rockSlideBg3Y=-7` ticks, turn1-rockslide
-  250/256→256/256) is the next small pickup; otherwise turn 2+ ground
-  truth / the victory-scout lane's own next steps per #130.
-- **Notes:** the grid-search-against-a-scratch-capture technique (build a
-  throwaway dense trace via `bin/oracle run`, crop specific pixel regions
-  with PIL to isolate one mechanism's own sha/pixel transitions from
-  everything else moving on screen at the same time, rather than reading
-  full-frame shas alone) resolved all three findings above in well under
-  an hour combined — no papercuts.
 

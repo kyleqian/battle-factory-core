@@ -403,7 +403,7 @@
 //    module-level STATUS note above.
 
 import type { RgbColor } from "./bg.ts";
-import { drawText, type FontData } from "./font.ts";
+import { drawGlyphCodes, drawText, type FontData, type TextColors } from "./font.ts";
 import { blendComponentToWhite } from "./paletteFade.ts";
 import {
   GO_TEXT,
@@ -464,6 +464,13 @@ import {
   ROCK_SLIDE_TEXT_CLEAR_DELAY,
   ROCK_SLIDE_MENU_REDRAW_DELAY,
   rockSlideResettledBounceTick,
+  ppRemainingGlyphCodes,
+  ROCK_SLIDE_PP_REMAINING_ORIGIN,
+  TURN2_KICKOFF_LINE2,
+  turn2KickoffTextVisibleChars,
+  turn2KickoffTextStartTick,
+  turn2SubmenuBounceTick,
+  turn2KickoffBounceTick,
 } from "./battleMenu.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
@@ -729,6 +736,42 @@ const menuIdleOnixBounce = menuIdleOnixBounceAsset as MenuIdleFrameAsset;
 const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleHealthboxBounceAsset;
 const fightSubmenuWindow = fightSubmenuWindowAsset as FightSubmenuWindowAsset;
 
+/**
+ * `SetPPNumbersPaletteInMoveSelection`'s full-PP (state 3) color pair from
+ * `text_pp.pal` (`gPPTextPalette`), gbaRoundTrip-expanded - same source/
+ * values `tests/fontNarrow.test.ts` already pins for the harvest's own
+ * baked-in "10/10"/"20/20" digits. ROCK_SLIDE's 9/10 this turn resolves to
+ * this SAME state (`getCurrentPPToMaxPPState(9, 10) === 3`,
+ * `battleMenu.ts`), oracle-pixel-confirmed - no new color is needed.
+ */
+const PP_REMAINING_PALETTE: RgbColor[] = [];
+PP_REMAINING_PALETTE[12] = { r: 74, g: 74, b: 74 };
+PP_REMAINING_PALETTE[14] = { r: 255, g: 255, b: 255 };
+PP_REMAINING_PALETTE[11] = { r: 222, g: 222, b: 222 };
+const PP_REMAINING_COLORS: TextColors = { fg: 12, bg: 14, shadow: 11 };
+
+/**
+ * S7 slice E1: ROCK_SLIDE's PP digits redrawn dynamically over the static
+ * per-slot harvest (docs/battle-menu-notes.md §13) - the harvest's own
+ * "10/10" is stale once turn 1 spends a PP, so this overlays a fresh render
+ * at the real `B_WIN_PP_REMAINING` window position (`ROCK_SLIDE_PP_REMAINING_
+ * ORIGIN`, patch-local) via the real FONT_NORMAL glyph pipeline, matching
+ * ISSUES #20's own scope note (only the PP-digits question is in scope this
+ * slice, not the full FONT_NARROW rewire).
+ */
+function drawRockSlidePpOverlay(fb: Uint8Array, currentPP: number, maxPP: number): void {
+  const codes = ppRemainingGlyphCodes(currentPP, maxPP);
+  drawGlyphCodes(
+    fb,
+    font,
+    codes,
+    fightSubmenuWindow.x + ROCK_SLIDE_PP_REMAINING_ORIGIN.x,
+    fightSubmenuWindow.y + ROCK_SLIDE_PP_REMAINING_ORIGIN.y,
+    PP_REMAINING_PALETTE,
+    PP_REMAINING_COLORS,
+  );
+}
+
 /** This window's own trace-tick origin - `elapsed` 0 == trace tick 1040 (tools/compare/traces-groundtruth/battle1-scene-dense.json's own first captured frame). */
 export const TICK0 = 1040;
 
@@ -751,12 +794,24 @@ export interface BattleSceneState {
   sendOutPressElapsed: number | null;
   /** The FIGHT (move-select) submenu (docs/battle-turn-notes.md §11) - `CLOSED_FIGHT_SUBMENU_STATE` until the settled action menu's own A-press opens it. core.ts owns applying input (open/nav/close) directly, mirroring `sendOutPressElapsed`'s own "created directly, same tick already reflects it" idiom; core.ts must call `advanceFightSubmenuDisplay` on this BEFORE applying each tick's own input (not after - the 1-tick display lag depends on that ordering, see that function's own doc). */
   fightSubmenu: FightSubmenuState;
+  /** S7 slice E1: `true` once turn 1's whole resolution has redrawn the settled action menu (`ROCK_SLIDE_MENU_REDRAW_DELAY` past turn 1's own confirm) AND a fresh A-press has reopened FIGHT for turn 2 - core.ts sets this the same tick it calls `openFightSubmenu` again, mirroring `sendOutPressElapsed`'s "created directly" idiom. Distinguishes turn 2's ROCK_SLIDE dwell (PP 9/10, dynamic overlay) from turn 1's (PP 10/10, the static harvest alone) - both dwells are otherwise indistinguishable from `fightSubmenu` alone (cursor rests at slot 0 both times). */
+  turn1Resolved: boolean;
 }
 
-export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = { elapsed: 0, sendOutPressElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE };
+export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
+  elapsed: 0,
+  sendOutPressElapsed: null,
+  fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE,
+  turn1Resolved: false,
+};
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
-  return { elapsed: state.elapsed + 1, sendOutPressElapsed: state.sendOutPressElapsed, fightSubmenu: state.fightSubmenu };
+  return {
+    elapsed: state.elapsed + 1,
+    sendOutPressElapsed: state.sendOutPressElapsed,
+    fightSubmenu: state.fightSubmenu,
+    turn1Resolved: state.turn1Resolved,
+  };
 }
 
 /** Trace tick `t` is eligible to register the send-out A-press (docs/battle-scene-notes.md §7.2) - the idle wait-cursor must actually be showing, same "message settled" gate every other press-gated window in this codebase uses. */
@@ -3182,8 +3237,25 @@ function drawRect(fb: Uint8Array, asset: MenuIdleFrameAsset): void {
  * named (not silent) approximation for that unmodeled state.
  */
 /** The settled base (window/text content) plus the onix/healthbox idle bounce, using `bounceTick` (not necessarily `t` itself - see `drawFightSubmenuWindow`'s own callers, which pass a shifted tick for the FIGHT-submenu window's own two extra DMA-wait ticks of drift) to select the bounce phase. Factored out of `drawActionMenuIdleWindow` so the FIGHT-submenu slice can reuse the identical base+bounce compositing with a different tick input for the bounce alone. */
-function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number): void {
+/**
+ * `menuIdleBase`'s own flat harvest, overdrawn with Grovyle's real HP once
+ * turn 1 has resolved - the harvest itself was taken from the original
+ * pre-turn-1 screen (Grovyle still full HP, same caveat `drawTurnEndSettledMenu`'s
+ * own doc already names), so every render path reachable AFTER turn 1
+ * settles (S7 slice E1: turn 2's own reopened submenu, both dwelling and
+ * mid-resolution) needs this same overdraw, not just `drawTurnEndSettledMenu`
+ * itself. A no-op (identical to the plain harvest) while `turn1Resolved` is
+ * false, so every turn-1-only caller is unaffected.
+ */
+function drawMenuIdleBaseWithOpponentHp(fb: Uint8Array, turn1Resolved: boolean): void {
   drawRect(fb, menuIdleBase);
+  if (turn1Resolved) {
+    drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurnHp));
+  }
+}
+
+function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number, turn1Resolved: boolean): void {
+  drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
   const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
   if (onixY2 >= 1) drawRect(fb, menuIdleOnixBounce);
   if (healthboxY2 === 1) {
@@ -3193,12 +3265,12 @@ function drawActionMenuIdleContent(fb: Uint8Array, bounceTick: number): void {
   }
 }
 
-function drawActionMenuIdleWindow(fb: Uint8Array, t: number): void {
+function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: boolean): void {
   if (t <= MENU_IDLE_BLANK_END_TICK) {
     drawRect(fb, menuIdleBlank);
     return;
   }
-  drawActionMenuIdleContent(fb, t);
+  drawActionMenuIdleContent(fb, t, turn1Resolved);
 }
 
 /**
@@ -3211,9 +3283,9 @@ function drawActionMenuIdleWindow(fb: Uint8Array, t: number): void {
  * `battleMenu.ts`'s own doc comment on those two constants for why they
  * differ from a plain, unshifted `t`.
  */
-function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState, turn1Resolved: boolean): void {
   if (sm.openElapsed === null) {
-    drawActionMenuIdleWindow(fb, t);
+    drawActionMenuIdleWindow(fb, t, turn1Resolved);
     return;
   }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
@@ -3223,20 +3295,29 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // finding 1's "5-tick hold" turns out to need no special-casing at all:
     // it's just this same bounce cycle naturally dwelling on one phase for
     // that span, pixel-confirmed exact with a plain, unshifted `t`).
-    drawActionMenuIdleWindow(fb, t);
+    drawActionMenuIdleWindow(fb, t, turn1Resolved);
     return;
   }
   if (sm.closeElapsed !== null) {
     const closeRevealTick = TICK0 + sm.closeElapsed + FIGHT_SUBMENU_CLOSE_DELAY;
     if (t >= closeRevealTick) {
-      drawActionMenuIdleContent(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT);
+      drawActionMenuIdleContent(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, turn1Resolved);
       return;
     }
   }
   if (sm.confirmElapsed !== null) {
     const pressTick = TICK0 + sm.confirmElapsed;
-    const textStart = turnKickoffTextStartTick(pressTick);
+    const textStart = sm.cursor === 2 ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
     if (t >= textStart) {
+      // S7 slice E1: turn 2's confirm (cursor 2, DRAGON_BREATH) kicks off
+      // Grovyle's ENDEAVOR instead of turn 1's DOUBLE_TEAM - this slice only
+      // models the kickoff text itself (the animation/HP-drain window is out
+      // of scope this session, docs/battle-menu-notes.md §13), so there's no
+      // turn-2 equivalent of `drawRockSlideWindow`'s later phases yet.
+      if (sm.cursor === 2) {
+        drawTurn2KickoffText(fb, t, pressTick);
+        return;
+      }
       if (t - pressTick > STATS_BANNER_END_DELAY) {
         drawRockSlideWindow(fb, t, pressTick);
         return;
@@ -3250,18 +3331,25 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // onix/healthbox bounce overlay is already frozen (battleMenu.ts's new
     // Slice 7 doc comment: `DoBounceEffect` stops being polled the instant
     // the A-press hands off, not merely once the text becomes visible).
-    drawRect(fb, menuIdleBase);
+    drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
     const slotName = FIGHT_SUBMENU_SLOT_NAMES[sm.displayCursor];
     const patch = fightSubmenuWindow.slots[slotName]!;
     drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-    drawMenuIdleBounceOverlay(fb, turnKickoffBounceTick(t, pressTick));
+    drawMenuIdleBounceOverlay(fb, turn1Resolved ? turn2KickoffBounceTick(t, pressTick) : turnKickoffBounceTick(t, pressTick));
     return;
   }
-  drawRect(fb, menuIdleBase);
+  drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[sm.displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  drawMenuIdleBounceOverlay(fb, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+  // S7 slice E1: turn 2 dwelling back on ROCK_SLIDE (cursor rests at slot 0
+  // reopening) needs its PP redrawn 9/10 - the harvest's own baked "10/10"
+  // is turn-1-only (docs/battle-menu-notes.md §13).
+  if (turn1Resolved && slotName === "ROCK_SLIDE") drawRockSlidePpOverlay(fb, 9, 10);
+  // S7 slice E1: turn 2's own reopened submenu inherits the resettled menu's
+  // bounce phase, not the plain absolute-`t` mapping turn 1's first open
+  // happened to coincide with (`turn2SubmenuBounceTick`'s own doc).
+  drawMenuIdleBounceOverlay(fb, turn1Resolved ? turn2SubmenuBounceTick(t) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
 }
 
 /** The onix/healthbox bounce overlay alone (`drawActionMenuIdleContent`'s own second half, factored out so `drawFightSubmenuWindow`'s frozen-bounce branch can reuse it without redrawing `menuIdleBase`). */
@@ -3290,9 +3378,28 @@ function drawMenuIdleBounceOverlay(fb: Uint8Array, bounceTick: number): void {
  * `drawSendOutHandoff` already uses for "Go! ONIX!".
  */
 function drawTurnKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
-  drawActionMenuIdleContent(fb, turnKickoffBounceTick(t, pressTick));
+  drawActionMenuIdleContent(fb, turnKickoffBounceTick(t, pressTick), false);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
+}
+
+/**
+ * S7 slice E1: turn 2's own kickoff message, "Foe GROVYLE used\nENDEAVOR!"
+ * (docs/battle-turn-notes.md §12, docs/battle-menu-notes.md §13) - same
+ * mechanism as `drawTurnKickoffText` (line 1 is textually identical, reused
+ * verbatim), just a different line 2/total-length. This slice stops once
+ * the text is fully printed and holds (ENDEAVOR's own animation + Onix's
+ * HP-bar drain + the player healthbox's own HP digits are out of scope this
+ * session - see docs/battle-menu-notes.md §13's "what's left" note).
+ */
+function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): void {
+  // Only ever reached via turn 2's own confirm (cursor 2), which by
+  // construction can't happen before the S7 slice E1 reopen sets
+  // `turn1Resolved` - Grovyle's healthbox always needs its real (101) HP
+  // here, never the stale full-HP harvest.
+  drawActionMenuIdleContent(fb, turn2KickoffBounceTick(t, pressTick), true);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
 }
 
 /**
@@ -3397,7 +3504,7 @@ function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void
  * though by this tick always settled) HP.
  */
 function drawTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
-  drawActionMenuIdleContent(fb, rockSlideResettledBounceTick(t, pressTick));
+  drawActionMenuIdleContent(fb, rockSlideResettledBounceTick(t, pressTick), false);
   const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentBattler.hp, anchorOpponentAfterTurnHp);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
 }
@@ -3710,7 +3817,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       drawRect(fb, menuIdleBlank);
       return;
     }
-    drawFightSubmenuWindow(fb, t, state.fightSubmenu);
+    drawFightSubmenuWindow(fb, t, state.fightSubmenu, state.turn1Resolved);
     return;
   }
   drawSendOutHandoff(fb, t, handoffTick);
