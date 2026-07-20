@@ -1,0 +1,7 @@
+{
+  "_comment": "S8 worktree lane wt-20260719-184149: watch spec for tools/probe/ram-probe.py, reproduces src/data/gen/battle1-swapyes-rng-dump.json's gRngValue column over the swap-YES branch's own new tail (docs/battle-turn-notes.md sec17, closing its priority-4 LCG-ledger debt). segments = tools/compare/traces-groundtruth/battle1-swapyes-b.json's own segments array (copy it in verbatim before running - kept out of this file to avoid duplicating 174 committed segments).",
+  "watch": [
+    { "name": "gRngValue", "addr": "gRngValue", "size": 4 }
+  ],
+  "startTick": 29601
+}

@@ -1,0 +1,253 @@
+{
+  "description": "gSaveBlock2Ptr->frontier.rentalMons[6] readback (docs/battle-turn-notes.md sec17 fixed probe, tools/probe/dump-rentalmons.py), both post-battle-1-swap-offer branches. Validated against src/data/gen/anchor-state.json (rentalMons[0..2] exact-match ONIX/MAGBY/BAYLEEF monId+personality+ivs+abilityNum pre-swap) and against battle_factory_screen.c CopySwappedMonData source logic (post-swap rentalMons[0] on the YES branch exact-matches pre-swap rentalMons[3], the Grovyle slot DESTIN offered).",
+  "declineBranch": {
+    "trace": "tools/compare/traces-groundtruth/battle1-winline-b-swap.json",
+    "ticks": {
+      "29601": {
+        "saveBlock2Base": 33704624,
+        "rentalMons": [
+          {
+            "monId": 156,
+            "personality": 1205102525,
+            "ivs": 3,
+            "abilityNum": 1
+          },
+          {
+            "monId": 149,
+            "personality": 1534575931,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 180,
+            "personality": 1550278706,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 188,
+            "personality": 1094072807,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 184,
+            "personality": 3475344024,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 135,
+            "personality": 3971699699,
+            "ivs": 3,
+            "abilityNum": 0
+          }
+        ],
+        "challengeStatus": 1,
+        "selectedPartyMons": [
+          1,
+          2,
+          3
+        ],
+        "curChallengeBattleNum": 1
+      },
+      "33031": {
+        "saveBlock2Base": 33704540,
+        "rentalMons": [
+          {
+            "monId": 156,
+            "personality": 1205102525,
+            "ivs": 3,
+            "abilityNum": 1
+          },
+          {
+            "monId": 149,
+            "personality": 1534575931,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 180,
+            "personality": 1550278706,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 188,
+            "personality": 1094072807,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 184,
+            "personality": 3475344024,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 135,
+            "personality": 3971699699,
+            "ivs": 3,
+            "abilityNum": 0
+          }
+        ],
+        "challengeStatus": 1,
+        "selectedPartyMons": [
+          1,
+          2,
+          3
+        ],
+        "curChallengeBattleNum": 1
+      }
+    }
+  },
+  "yesBranch": {
+    "trace": "tools/compare/traces-groundtruth/battle1-swapyes-b.json",
+    "ticks": {
+      "29601": {
+        "saveBlock2Base": 33704624,
+        "rentalMons": [
+          {
+            "monId": 156,
+            "personality": 1205102525,
+            "ivs": 3,
+            "abilityNum": 1
+          },
+          {
+            "monId": 149,
+            "personality": 1534575931,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 180,
+            "personality": 1550278706,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 188,
+            "personality": 1094072807,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 184,
+            "personality": 3475344024,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 135,
+            "personality": 3971699699,
+            "ivs": 3,
+            "abilityNum": 0
+          }
+        ],
+        "challengeStatus": 1,
+        "selectedPartyMons": [
+          1,
+          2,
+          3
+        ],
+        "curChallengeBattleNum": 1
+      },
+      "30681": {
+        "saveBlock2Base": 33704616,
+        "rentalMons": [
+          {
+            "monId": 188,
+            "personality": 1094072807,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 149,
+            "personality": 1534575931,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 180,
+            "personality": 1550278706,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 188,
+            "personality": 1094072807,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 184,
+            "personality": 3475344024,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 135,
+            "personality": 3971699699,
+            "ivs": 3,
+            "abilityNum": 0
+          }
+        ],
+        "challengeStatus": 1,
+        "selectedPartyMons": [
+          1,
+          2,
+          3
+        ],
+        "curChallengeBattleNum": 1
+      },
+      "34081": {
+        "saveBlock2Base": 33704532,
+        "rentalMons": [
+          {
+            "monId": 188,
+            "personality": 1094072807,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 149,
+            "personality": 1534575931,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 180,
+            "personality": 1550278706,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 188,
+            "personality": 1094072807,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 184,
+            "personality": 3475344024,
+            "ivs": 3,
+            "abilityNum": 0
+          },
+          {
+            "monId": 135,
+            "personality": 3971699699,
+            "ivs": 3,
+            "abilityNum": 0
+          }
+        ],
+        "challengeStatus": 1,
+        "selectedPartyMons": [
+          1,
+          2,
+          3
+        ],
+        "curChallengeBattleNum": 1
+      }
+    }
+  }
+}

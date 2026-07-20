@@ -2691,31 +2691,128 @@ ROCK/WATER (`TYPE_ROCK`=5, `TYPE_WATER`=11), ability 4. Both fresh (no
 burn/status, full HP) — matches the free full-party heal + fresh-battle-
 start expected at this point.
 
-**Not delivered — the `gSaveBlock2Ptr->frontier.rentalMons[]` bookkeeping
-array (priority 2's other half) — flagged explicitly, not silently
-dropped:** a new probe (`tools/probe/dump-rentalmons.py`, written this
-session, **not committed** — deleted after failing its own sanity check)
-attempted to read `struct RentalMon rentalMons[6]`
-(`include/global.h:357-365`, offset `0x64C` (`frontier` field in
-`SaveBlock2`) + `0xE70` (`rentalMons` field in `struct BattleFrontier`) off
-`gSaveBlock2Ptr`'s own dereferenced value) before and after the swap. The
-read values were **byte-identical at ticks 29601, 30681, and 34081** —
-i.e., appeared not to change across the swap at all, which contradicts the
-visually- and `gBattleMons`-confirmed fact that the swap *did* happen
-(GROVYLE is on the field at 34081). A quick sanity cross-check of
-neighboring fields at the same computed base (`frontier.challengeStatus`,
-expected a small enum, read **38**; `frontier.curChallengeBattleNum`,
-expected roughly "1" for battle 2, read **0**; `frontier.selectedPartyMons`,
-expected 3 small pool-index values, read **[52573, 50658, 50623]** —
-obviously implausible) confirms the offset math itself is wrong somewhere
-upstream of `rentalMons`, not that the array is genuinely unwritten. Most
-likely culprit: one of the struct fields preceding `frontier` inside
-`SaveBlock2`, or preceding `rentalMons` inside `BattleFrontier`, has a
-different actual compiled size than this pinned pret checkout's own
-`/*0x64C*/`-style offset comments suggest (version/`#ifdef` skew is the
-dossier's own standing risk per ROADMAP's domain notes) — **unresolved,
-left as an explicit open item**, not worked around or guessed at further
-under this session's time cap.
+### §17 ADDENDUM (S8 worktree lane, oracle scout — no engine code): the `rentalMons[]` offset bug, root-caused and fixed; readback validated on both branches
+
+**The `gSaveBlock2Ptr->frontier.rentalMons[]` bookkeeping array (this
+session's priority 1) is now closed.** Root cause of the original bug: the
+field-offset comments inside `struct BattleFrontier`
+(`include/global.h:378-461`) are pret's usual convention of annotating each
+field's offset **absolute within the top-level `SaveBlock2`**, not relative
+to `frontier` itself — proven by `BattleFrontier`'s own *first* field,
+`towerPlayer`, being commented `/*0x64C*/` (`global.h:380`), which is
+exactly `SaveBlock2.frontier`'s own offset (`global.h:541`); if the
+comments were `BattleFrontier`-relative, `towerPlayer` would read `/*0x0*/`.
+The deleted probe computed `rentalMons`' address as `gSaveBlock2Ptr + 0x64C
+(frontier's offset) + 0xE70 (rentalMons' own comment)` — **double-counting
+the 0x64C base**, landing ~5.6KB past the real struct (explaining both the
+implausible neighboring-field values it flagged and the apparent
+across-swap staleness — it was reading fixed garbage the whole time, not a
+genuinely-unwritten array).
+
+Fixed probe: `tools/probe/dump-rentalmons.py` (committed), reading
+`*gSaveBlock2Ptr + 0xE70` directly (`rentalMons`' own comment, un-added to
+anything), same absolute-offset fix applied to `challengeStatus` (+0xCA8),
+`selectedPartyMons` (+0xCAA), `curChallengeBattleNum` (+0xCB2) as a
+plausibility side-check. `struct RentalMon`'s own size confirmed as `0xC`
+(12 bytes: `u16 monId` + 2 pad, `u32 personality`, `u8 ivs`, `u8
+abilityNum` + 2 pad) two ways — natural C alignment, and the gap to the
+next field (`battlePoints` at `0xEB8` − `rentalMons` at `0xE70` = `0x48` =
+`6×0xC`).
+
+**Validated two independent ways**, both against `battle_factory.c`/
+`battle_factory_screen.c` source logic, not just "looks plausible":
+1. **Pre-swap, both branches' shared tick-29601 prefix**: `rentalMons[0..2]`
+   read `{monId 156, personality 1205102525, ivs 3, abilityNum 1}` / `{149,
+   1534575931, 3, 0}` / `{180, 1550278706, 3, 0}` — an **exact field-for-
+   field match** (monId/personality/ivs/abilityNum, all 3 slots) against
+   `src/data/gen/anchor-state.json`'s own independently-extracted
+   ONIX/MAGBY/BAYLEEF rental records.
+2. **Post-swap, YES branch (`battle1-swapyes-b.json`, ticks 30681/34081)**:
+   `rentalMons[0]` changes from ONIX's own record to `{monId 188,
+   personality 1094072807, ivs 3, abilityNum 0}` — which **exact-matches
+   pre-swap `rentalMons[3]`** (same trace, tick 29601), precisely what
+   `CopySwappedMonData` (`battle_factory_screen.c:2350-2361`) predicts:
+   `rentalMons[playerMonId].monId = rentalMons[enemyMonId +
+   FRONTIER_PARTY_SIZE].monId` (`playerMonId`=0 for ONIX, `enemyMonId`=0
+   for Grovyle, so `rentalMons[0] <- rentalMons[3]`). The decline branch's
+   own final tick (33031, `battle1-winline-b-swap.json`) shows **no
+   change** from the shared prefix, as expected (no swap occurred).
+
+One methodology note worth recording: `gSaveBlock2Ptr`'s own dereferenced
+value is **not** stable across ticks in this dump (33704624 at tick 29601
+vs. 33704540/33704616/33704532 at later ticks, depending on trace) — this
+is not a bug, it's `SetSaveBlocksPointers`' deliberate save-block-ASLR
+scheme (`load_save.c:70-82`, `offset = (offset + Random()) &
+(SAVEBLOCK_MOVE_RANGE - 4)`, re-rolled on `MoveSaveBlocks_ResetHeap`, which
+fires around scene/heap transitions such as the battle↔overworld switches
+this exact trace crosses). The fixed probe re-dereferences `gSaveBlock2Ptr`
+fresh at every snapshot rather than caching a base address once — any
+future probe over a similarly long, scene-crossing trace should do the
+same.
+
+Committed: `tools/probe/dump-rentalmons.py` (the fixed probe, full
+derivation in its own module docstring) and
+`src/data/gen/battle1-swap-rentalmons-dump.json` (both branches' full
+6-slot `rentalMons[]` state at the ticks above, plus the
+challengeStatus/selectedPartyMons/curChallengeBattleNum side-check fields).
+Both branches' probe runs independently re-run and diffed byte-identical
+against their own first run.
+
+### §17 ADDENDUM 2 (S8 worktree lane, oracle scout — no engine code): the YES-branch LCG-step ledger (brief's priority 4), closed
+
+**This session's priority 2** — the LCG-step ledger §17 flagged as
+"not built" — is now done. Method: `tools/probe/ram-probe.py` +
+`tools/probe/specs/battle1-swapyes-rng-watch.json` (`gRngValue` only, dense
+per-tick) over `battle1-swapyes-b.json`'s own new tail, ticks 29601-34081
+(4481 rows — every tick from the shared swap-offer prompt through battle
+2's settled first menu). LCG-step counts between window boundaries derived
+programmatically (same method as §3/§12/§16: replay the LCG forward from
+the earlier value until it matches the later one), not estimated from tick
+counts. Independently re-run and diffed byte-identical against its own
+first run.
+
+**Window ledger** (tick ranges taken from `battle1-swapyes-b.json`'s own
+committed segments, not eyeballed):
+
+| window | ticks | LCG steps | note |
+|---|---|---|---|
+| confirm YES (swap-offer) → entry fade-in settled | 29602-29701 (99) | 99 | baseline 1/tick |
+| A opens SUMMARY/SWAP/RECHOOSE popup → settled | 29702-29781 (79) | **82** | +3 extra `Random()` calls somewhere in the popup-open path |
+| DOWN (cursor→SWAP) → settled | 29782-29801 (19) | 19 | baseline |
+| A confirms SWAP → slide-transition settled (opponent picker) | 29802-30001 (199) | 199 | baseline |
+| RIGHT/RIGHT/LEFT/LEFT ball nav (4×) → each settled | 19 ticks each | 19 each | baseline, all 4 |
+| A opens accept popup on Grovyle → settled | 30082-30181 (99) | 99 | baseline |
+| A confirms YES (accept) → settled (monpic close/fade/return-to-field/swap-complete msg) | 30182-30681 (499) | **502** | +3 extra — plausibly `CopySwappedMonData`'s friendship reset or a cosmetic roll during the fade |
+| dismiss swap-complete msg → settled ("Right this way, please!") | 30682-31081 (399) | 399 | baseline |
+| dismiss "Right this way" → settled (warp + battle-room opponent quote) | 31082-33081 (1999) | **2004** | +5 extra — plausibly warp/transition-style selection, same family as the anchor's own scouting-text RNG |
+| dismiss battle-room quote → settled (trainer intro shown) | 33082-33581 (499) | **259** | **the frontier-battle RNG freeze begins inside this window** (see below) — the shortfall is not a miscount |
+| dismiss trainer intro → settled battle-2 first action menu | 33582-34081 (499) | **6** | deep in the frozen zone, matches §15 HEADLINE 1 ("`Random()` only advances on-demand inside frontier battles") |
+| **total, tick 29601→34081** | **4480** | **3757** | |
+
+**A new, precise finding**: the per-VBlank-unconditional RNG advance
+`main.c:366` grants outside battle (§16 HEADLINE 4) does not merely
+"eventually" stop once battle 2 starts — the dense per-tick data pins the
+**exact tick**: `gRngValue` is still advancing normally through tick 33285,
+takes one 5-step burst at tick 33286 (`135395612` → `3879112243`, plausibly
+`BattleSetup`'s own init calls — trainer-intro animation pick, AI seed,
+etc.), then goes **completely flat for the next 20 ticks** (33286-33306,
+frozen at `3879112243`) before a single isolated step
+(`3879112243`→`30250` at 33307) and another long flat run (33307-33934,
+627 ticks) — i.e. `gMain.inBattle && (gBattleTypeFlags &
+BATTLE_TYPE_FRONTIER)` flips true (disabling `main.c:366`'s automatic call)
+**at tick 33286**, comfortably inside the "dismiss battle-room quote →
+trainer-intro-shown" window, not at some later point like the menu
+settling. The handful of remaining non-zero steps after that (5 total
+across 33581-34081) are on-demand calls from specific battle-init logic,
+consistent with — not contradicting — the "on-demand only" rule.
+
+Committed: `tools/probe/specs/battle1-swapyes-rng-watch.json` (the watch
+spec, segments intentionally not baked in per the existing
+`battle1-turn1-watch.json` convention — copy `battle1-swapyes-b.json`'s own
+`segments` array in before running) and
+`src/data/gen/battle1-swapyes-rng-dump.json` (the full 4481-row per-tick
+`gRngValue` table plus the derived window ledger above, `totalStepsAcrossTail`,
+and the module's own step-derivation method in its `description` field).
 
 ### Asset/UI inventory for a future engine slice (source-cited, not extracted)
 
@@ -2753,14 +2850,15 @@ flagged as a quick follow-up check, not assumed identical.
 
 ### Not delivered this session (open, in priority order for a resuming session)
 
-1. **LCG-step ledger for the YES branch (brief's priority 4)** — not built.
-   This session's whole time budget went to reaching and ground-truthing the
-   swap screen itself (priority 1, the brief's own top item) plus the
-   partial RAM-truth and asset inventory above; a `gRngValue` per-tick watch
-   (`ram-probe.py`, same tool §15/§16 used) over `battle1-swapyes-b.json`'s
-   own segments is the natural next step and needs no new tooling.
-2. **The `rentalMons[]` bookkeeping array** — offset math wrong (see above),
-   genuinely unresolved, not just unattempted.
+1. ~~LCG-step ledger for the YES branch (brief's priority 4)~~ — **closed**,
+   see the §17 ADDENDUM 2 above (S8 worktree lane, `wt-20260719-184149`):
+   window-by-window `gRngValue` step ledger for the whole swap-screen
+   sequence, plus a precise tick pin (33286) for where the frontier-battle
+   RNG freeze begins.
+2. ~~The `rentalMons[]` bookkeeping array~~ — **closed**, see the §17
+   ADDENDUM above (S8 worktree lane, `wt-20260719-184149`): offset math was
+   the bug (double-counted `frontier`'s own base), not a genuinely-
+   unresolved read; fixed probe + validated dump committed.
 3. **The "already in your party" duplicate-species block
    (`gText_SamePkmnInPartyAlready`)** — never triggered on-screen; source-
    read only.
@@ -2785,4 +2883,205 @@ twice-run via `bin/oracle run`, 0 sha mismatches across both (235/235 and
 194/194 captures). The `battle2-opponent-ram-dump`'s `dump-battler-full.py`
 run independently re-run and diffed byte-for-byte against its own first
 run — identical.
+
+## 18. Battle 2's opening ground truth — turn 1, decline branch (S8 worktree lane `wt-20260719-184149`, oracle scout — no engine code)
+
+**Headline: battle 2 (FISHERMAN JENSON's KABUTO, decline branch) now has
+its first turn ground-truthed end to end.** Branching from
+`battle1-winline-b-swap.json`'s own committed settled-menu tick (33031,
+"What will ONIX do?" vs KABUTO, ONIX 117/117), ONIX opened FIGHT and used
+**ROCK_SLIDE** (move slot 0, no cursor navigation needed — see the
+evidence-based rationale below); KABUTO's own AI-chosen response was
+**SAND_ATTACK** (not the far more threatening MEGA_DRAIN the matchup
+analysis below flags — see the "risk not realized" note). ROCK_SLIDE hits
+for **28 damage** (KABUTO 91→63), no flinch; SAND_ATTACK lowers ONIX's
+accuracy stage but deals no damage (ONIX stays 117/117). Settled next menu
+("What will ONIX do?" vs KABUTO, 63/91) reached at tick **33672**, well
+inside a single trace's frame budget (33672 ≪ 45000, 168/256 captures used).
+
+### Move choice: ROCK_SLIDE — an evidence-based call, not the first-slot default
+
+Same discipline as §16 HEADLINE 1 (MAGBY over BAYLEEF): decided from
+extracted data (`src/data/gen/moves.json`, `type-effectiveness.json`)
+*before* the turn was scripted, not picked arbitrarily because it happens
+to sit in slot 0:
+
+| ONIX move | type | power | acc | vs KABUTO (ROCK/WATER) effective power |
+|---|---|---|---|---|
+| **ROCK_SLIDE** | ROCK | 75 | 90% | `75 × STAB 1.5 × type 1.0` = **112.5** (ROCK→ROCK and ROCK→WATER are both neutral — no table entry in `gTypeEffectiveness`, source-confirmed, `battle_main.c:335-443`) |
+| BIND | NORMAL | 15 | 75% | `15 × 1.0 × 0.5` = 7.5 (NORMAL→ROCK is resisted) |
+| DRAGON_BREATH | DRAGON | 60 | 100% | `60 × 1.0 × 1.0` = 60 (neutral, no STAB) |
+| SANDSTORM | ROCK | 0 (status) | — | 0 — both mons are ROCK-type, immune to sandstorm's own chip damage; no other gen-3 effect |
+
+ROCK_SLIDE's effective output (112.5) dwarfs every alternative, and — a
+detail worth surfacing since Onix (speed 76) outspeeds Kabuto (speed 61,
+RAM-confirmed both directions) — its 30% `EFFECT_FLINCH_HIT` secondary can
+outright cancel Kabuto's turn (flinch only prevents a target's *own*,
+not-yet-taken move; since Onix always acts first here, it's live upside
+every turn, not just situational). **The far more important asymmetry this
+matchup analysis surfaced**: Kabuto's own MEGA_DRAIN (GRASS, `type
+1.0 vs neutral` — no: GRASS→ROCK **and** GRASS→GROUND are each `2.0×`,
+`src/data/gen/type-effectiveness.json`, so MEGA_DRAIN lands at a
+**4× effective multiplier** against Onix's ROCK/GROUND typing) is a
+genuine threat this dossier now has on record for whoever fights
+subsequent turns — it did **not** come up this turn (Kabuto's AI chose
+SAND_ATTACK instead, see below), but a future session should not assume
+that stays true.
+
+### Frame boundaries (RAM- and pixel-confirmed)
+
+| tick | what |
+|---|---|
+| 33031 | shared prefix ends — settled "What will ONIX do?" menu (`battle1-winline-b-swap.json`'s own final tick) |
+| 33032 | `A` opens FIGHT submenu |
+| 33071 | settled FIGHT submenu (cursor defaults to ROCK_SLIDE, slot 0 — same layout §11 pinned) |
+| 33072 | `A` confirms ROCK_SLIDE |
+| 33077-33078 | turn-order settles: `gBattlerAttacker`→0 (ONIX, faster), `gCurrentMove`→157 (ROCK_SLIDE) |
+| 33083 | ONIX's **accuracy** check (RNG step 1) |
+| 33108-33109 | `gBattleMoveDamage` locks: 19→**28** (see damage-math note below) |
+| 33110 | ONIX's **damage-spread/secondary** roll (RNG step 2) — `gBattleMoveDamage` unchanged after this (stays 28), consistent with this being the flinch-chance roll, not a further damage adjustment |
+| ~33115-33315 | ROCK_SLIDE's own hit animation plays (Battle Scene ON, per the v5 anchor) |
+| 33319 | `gBattleMons[1].hp` (KABUTO) updates 91→**63** |
+| 33324 | secondary-effect-adjacent roll (RNG step 3) — same **+5-tick-after-hp-update** offset §3 found for turn 1 of battle 1 (tick 2325→2330) |
+| 33332-33333 | ONIX's move cleanup; `gCurrentMove`→28 (SAND_ATTACK), `gBattlerAttacker`→1 (KABUTO acts) |
+| 33338 | KABUTO's **accuracy** check (RNG step 4, SAND_ATTACK is 100% acc but still rolls — same "always rolls" rule this dossier established elsewhere) |
+| 33605-33614 | turn-end RNG cluster (RNG steps 5-12, see ledger below) — structurally identical **1+2+5** shape to §3's own RESOLVED turn-end cluster |
+| ~33615 | next settled menu enters its own 4-phase/36-tick idle cycle (pixel-confirmed via dense sha sampling) |
+| 33672 | trace's own committed end (57 ticks of settle margin past 33615) |
+
+### RNG-consumption ledger (RAM-truthed, LCG-step-counted, same method as §3/§12/§16)
+
+`gRngValue` sampled every tick 33031-33672 (642 rows); step counts between
+each observed transition derived by replaying the LCG forward
+programmatically (not assumed) — same method as every prior ledger in this
+dossier.
+
+| tick | steps | value after | attribution |
+|---|---|---|---|
+| 33083 | 1 | `2956382169` | ONIX's accuracy check (ROCK_SLIDE, acc 90) |
+| 33110 | 1 | `2508258776` | ONIX's damage-spread roll (`ApplyRandomDmgMultiplier`) — **the crit roll (`Cmd_critcalc`) consumed *zero* calls this turn**, a new finding: KABUTO's ability is BATTLE_ARMOR (`ability` RAM field = 4), and the crit-chance check's own `&&`-chain short-circuits *before* its `Random()` call when the target has BATTLE_ARMOR/SHELL_ARMOR (`battle_script_commands.c:1279-1283`) — confirmed by RAM (`gCritMultiplier` stays **1** throughout, dense-watched) and by the step count (§3's own equivalent turn spent 2 steps here — accuracy *and* crit — this turn spends only 1, exactly the crit roll's absence) |
+| 33324 | 1 | `575948139` | secondary-effect-adjacent roll (ROCK_SLIDE's 30% flinch chance; didn't proc, KABUTO still acted) — same +5-tick-after-hp-update offset as §3's turn 1 |
+| 33338 | 1 | `650807554` | KABUTO's accuracy check (SAND_ATTACK, 100% acc, still rolls) |
+| 33607 | 1 | `3011990093` | turn-end cluster start — `BattleTurnPassed`'s `gRandomTurnNumber = Random()`, same call site §3 resolved |
+| 33612 | 2 | `1648070399` | `AI_TrySwitchOrUseItem`'s `ShouldSwitch()`, same resolved call site as §3 |
+| 33614 | 5 | `3121225034` | `OpponentHandleChooseMove`'s `BattleAI_SetupAIData` simulated-RNG loop (4) + `ChooseMoveOrAction_Singles` tie-break (1), same resolved call site as §3 |
+
+**Total: 12 `Random()` calls this turn** — an exact match to §3's own
+turn-1 total (also 12), with the same **1+2+5=8**-step turn-end-cluster
+signature, reconfirming §3's call-site attribution on a third, independent
+matchup rather than just re-deriving it from scratch. The only structural
+difference from §3's own count (also 4 for the active move) is the crit
+roll's absence here (BATTLE_ARMOR-driven), landing this turn's own
+move-phase total at 3 instead of 4 (accuracy + spread + secondary, no
+crit) — the *total* still lands on 12 only because KABUTO's own
+accuracy-check step (1, novel to this ledger — §3's opposing mon never got
+to act since Grovyle's DOUBLE_TEAM consumed no RNG at all) makes up the
+difference.
+
+### Damage math — mostly confirmed, one flagged gap
+
+RAM-confirmed inputs (`tools/probe/dump-battler-full.py`, tick 33031):
+ONIX attack **51**, KABUTO defense **96**, ROCK_SLIDE power **75**, ONIX
+level **50** — reproducing `CalculateBaseDamage` (`pokemon.c:3106-3282`) +
+`Cmd_typecalc`'s STAB step by hand:
+
+```
+base = floor(floor(floor(51*75*(2*50/5+2)) / 96) / 50)
+     = floor(floor(84150 / 96) / 50)
+     = floor(876 / 50) = 17
+STAB = floor(17 * 15 / 10) = 25      (ONIX is ROCK/GROUND, ROCK_SLIDE is ROCK - STAB applies;
+                                       ROCK vs ROCK/WATER has no gTypeEffectiveness entry - neutral 1x)
+spread = floor(25 * m / 100), m in [85,100] (ApplyRandomDmgMultiplier, battle_script_commands.c:1639-1651)
+       -> range [21, 25]
+```
+
+**The RAM-confirmed final damage is 28 — outside this [21,25] range.** The
+dense per-tick trace (frame-boundaries table above) shows `gBattleMoveDamage`
+passing through an intermediate value of **19** one tick before locking to
+28 (33108→33109), and `19 × 15 / 10 = 28` (integer-truncated) is an *exact*
+match — i.e. the engine's own pre-STAB base this turn was RAM-observed as
+**19, not the 17 this hand-reconstruction gives from the same documented
+formula and the same RAM-read inputs**. The gap is 2 points on the
+pre-STAB base, small enough that it isn't an obviously-wrong formula
+(type/STAB/spread mechanics all check out structurally — no crit per
+above, no weather, no held-item interaction found for SITRUS_BERRY or
+BATTLE_ARMOR that would touch damage) but hasn't been root-caused this
+session. **Left as an explicit open item, not swept under the rug or
+force-fit**: a future session should RAM-probe `gBattleMons[1].defense`'s
+raw stat-stage array (`statStages[]`, struct offset `0x18`, not read by
+`dump-battler-full.py` today) and `ShouldGetStatBadgeBoost`'s own frontier
+gating to rule those out, or re-derive `CalculateBaseDamage` with a wider
+net of possible modifiers than this session's manual reconstruction
+covered.
+
+### Battler snapshots (`dump-battler-full.py`, ticks 33031 and 33672)
+
+| | species | atk | def | spd | hp before | hp after | move used | PP before→after |
+|---|---|---|---|---|---|---|---|---|
+| battler0 (ONIX) | 95 | 51 | 187 | 76 | 117/117 | 117/117 (unchanged) | ROCK_SLIDE (157) | 10→9 |
+| battler1 (KABUTO) | 140 | 118 | 96 | 61 | 91/91 | 63/91 | SAND_ATTACK (28) | 15→14 |
+
+Matches the frame-boundary/RNG-ledger tables above exactly — PP decrements
+confirm each mon used exactly the move this session scripted/observed, no
+more.
+
+### Committed trace
+
+`tools/compare/traces-groundtruth/battle2-turn1.json` (160 segments, 33672
+frames, 168 `captureFrames`) — `battle1-winline-b-swap.json`'s own 156
+segments **verbatim** (byte-identical, cum. 33031 ticks) plus 4 new
+segments: open FIGHT (`A`, 1f) + settle (39f idle), confirm ROCK_SLIDE
+(`A`, 1f) + a 600f idle tail covering the whole turn's resolution through
+the next settled menu (with ~57 ticks of margin past the observed
+pixel-settle point, tick 33615). Captures: 11 sparse anchors over the old
+prefix (same tick set as §16/§17: 0, 6970, 19990, 20192, 20745, 22418,
+23601, 25802, 28002, 29601, 33031) plus dense coverage of every
+RNG/HP/text transition in the new tail (open, confirm, turn-order settle,
+accuracy roll, damage lock, animation start, sparse-every-20th through the
+long hit-animation span, HP update + secondary roll + Kabuto's move,
+turn-end cluster, and the settle-into-idle-cycle window) — well under the
+256-capture cap. **Twice-run byte-identical via `bin/oracle run`, 0/168
+sha mismatches.**
+
+### Kabuto's move choice: a risk flagged, not realized
+
+The move-choice analysis above flagged MEGA_DRAIN as a 4×-effective threat
+to ONIX; this turn's AI instead chose SAND_ATTACK (a 0-power accuracy-down
+status move). Not investigated further this session (AI move-scoring logic
+is out of this scout's scope), but worth flagging explicitly: **a future
+session should not assume Kabuto avoids MEGA_DRAIN on later turns** — this
+is one data point from one AI roll, not a characterization of Kabuto's own
+move-selection policy.
+
+### What a resuming session needs — pinned vs. open
+
+**Pinned this session:**
+- Battle 2's own turn 1 (decline branch), full RAM ground truth: move
+  choice rationale, frame boundaries, 12-step RNG ledger (structurally
+  matching §3's own resolved call sites almost exactly), battler snapshots.
+- BATTLE_ARMOR (Kabuto's ability) short-circuits the crit-chance roll's own
+  `Random()` call entirely (not just its effect) — a new, source-confirmed
+  mechanic this dossier hadn't exercised before (every prior RAM-truthed
+  hit was against a non-BATTLE_ARMOR target).
+- MEGA_DRAIN's 4× effective multiplier against Onix (GRASS is super
+  effective against both ROCK and GROUND) is now on record as a real risk
+  for future turns, independent of whether it was actually used this turn.
+
+**Still open (in priority order for a resuming session):**
+1. The damage-math gap above (RAM-confirmed 28 vs. hand-formula's [21,25])
+   — root cause not identified, explicitly flagged rather than guessed at.
+2. Battle 2's own turn 2 onward — this session's own deliverable stops at
+   the tick-33672 settled menu, per the brief's priority order (turn 2+ is
+   explicitly "if time remains," not reached this session).
+3. `statStages[]` (struct offset `0x18`, `pokemon.h:277`) isn't read by
+   `dump-battler-full.py` — worth adding if a future session needs to
+   confirm stat-stage state directly (e.g. SAND_ATTACK's own accuracy-stage
+   write) rather than inferring it from PP/move-slot evidence alone.
+
+**Verification**: `npm test` (669/669) and `npm run build` green — no
+`src/engine/` changes this session, only the new committed trace under
+`tools/compare/traces-groundtruth/` and two new RAM dumps under
+`src/data/gen/`. Trace twice-run via `bin/oracle run`, 0/168 sha
+mismatches. Both RAM-dump probe runs (`ram-probe.py`, `dump-battler-full.py`)
+independently re-run and diffed byte-identical against their own first run.
 

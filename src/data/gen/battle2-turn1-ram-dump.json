@@ -1,0 +1,6470 @@
+{
+  "description": "gRngValue/hp0/hp1/gBattleMainFunc/gCurrentMove/gBattlerAttacker/gBattleMoveDamage dense per-tick watch (tools/probe/ram-probe.py) over tools/compare/traces-groundtruth/battle2-turn1.json's own new tail, ticks 33031-33672 - battle 2's first turn (ONIX's ROCK_SLIDE vs KABUTO's SAND_ATTACK), decline-branch chain. docs/battle-turn-notes.md sec18.",
+  "ticks": [
+    {
+      "tick": 33031,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33032,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33033,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33034,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33035,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33036,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33037,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33038,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33039,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33040,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33041,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33042,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33043,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33044,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33045,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33046,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33047,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33048,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33049,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33050,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33051,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33052,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33053,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33054,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33055,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33056,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33057,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33058,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33059,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33060,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33061,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33062,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33063,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33064,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33065,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33066,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33067,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33068,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33069,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33070,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33071,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33072,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33073,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33074,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33075,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134468329,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33076,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469361,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33077,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33078,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33079,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33080,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33081,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33082,
+      "rng": 3530724670,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33083,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33084,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33085,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33086,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33087,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33088,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33089,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33090,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33091,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33092,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33093,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33094,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33095,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33096,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33097,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33098,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33099,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33100,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33101,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33102,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33103,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33104,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33105,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33106,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33107,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33108,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 19
+    },
+    {
+      "tick": 33109,
+      "rng": 2956382169,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33110,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33111,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33112,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33113,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33114,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33115,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33116,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33117,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33118,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33119,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33120,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33121,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33122,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33123,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33124,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33125,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33126,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33127,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33128,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33129,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33130,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33131,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33132,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33133,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33134,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33135,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33136,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33137,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33138,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33139,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33140,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33141,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33142,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33143,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33144,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33145,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33146,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33147,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33148,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33149,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33150,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33151,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33152,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33153,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33154,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33155,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33156,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33157,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33158,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33159,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33160,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33161,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33162,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33163,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33164,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33165,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33166,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33167,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33168,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33169,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33170,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33171,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33172,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33173,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33174,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33175,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33176,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33177,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33178,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33179,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33180,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33181,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33182,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33183,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33184,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33185,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33186,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33187,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33188,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33189,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33190,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33191,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33192,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33193,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33194,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33195,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33196,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33197,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33198,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33199,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33200,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33201,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33202,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33203,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33204,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33205,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33206,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33207,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33208,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33209,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33210,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33211,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33212,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33213,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33214,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33215,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33216,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33217,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33218,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33219,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33220,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33221,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33222,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33223,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33224,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33225,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33226,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33227,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33228,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33229,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33230,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33231,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33232,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33233,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33234,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33235,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33236,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33237,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33238,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33239,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33240,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33241,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33242,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33243,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33244,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33245,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33246,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33247,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33248,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33249,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33250,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33251,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33252,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33253,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33254,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33255,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33256,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33257,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33258,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33259,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33260,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33261,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33262,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33263,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33264,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33265,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33266,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33267,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33268,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33269,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33270,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33271,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33272,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33273,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33274,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33275,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33276,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33277,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33278,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33279,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33280,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33281,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33282,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33283,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33284,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33285,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33286,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33287,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33288,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33289,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33290,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33291,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33292,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33293,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33294,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33295,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33296,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33297,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33298,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33299,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33300,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33301,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33302,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33303,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33304,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33305,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33306,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33307,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33308,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33309,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33310,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33311,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33312,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33313,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33314,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33315,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33316,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33317,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33318,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 91,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33319,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33320,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33321,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33322,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33323,
+      "rng": 2508258776,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33324,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33325,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33326,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33327,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33328,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33329,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33330,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33331,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 157,
+      "attacker": 0,
+      "moveDmg": 28
+    },
+    {
+      "tick": 33332,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 0,
+      "attacker": 0,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33333,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33334,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33335,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33336,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33337,
+      "rng": 575948139,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33338,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33339,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33340,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33341,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33342,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33343,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33344,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33345,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33346,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33347,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33348,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33349,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33350,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33351,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33352,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33353,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33354,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33355,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33356,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33357,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33358,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33359,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33360,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33361,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33362,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33363,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33364,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33365,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33366,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33367,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33368,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33369,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33370,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33371,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33372,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33373,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33374,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33375,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33376,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33377,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33378,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33379,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33380,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33381,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33382,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33383,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33384,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33385,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33386,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33387,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33388,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33389,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33390,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33391,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33392,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33393,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33394,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33395,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33396,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33397,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33398,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33399,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33400,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33401,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33402,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33403,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33404,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33405,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33406,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33407,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33408,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33409,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33410,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33411,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33412,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33413,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33414,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33415,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33416,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33417,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33418,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33419,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33420,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33421,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33422,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33423,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33424,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33425,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33426,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33427,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33428,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33429,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33430,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33431,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33432,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33433,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33434,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33435,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33436,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33437,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33438,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33439,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33440,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33441,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33442,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33443,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33444,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33445,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33446,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33447,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33448,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33449,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33450,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33451,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33452,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33453,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33454,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33455,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33456,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33457,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33458,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33459,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33460,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33461,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33462,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33463,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33464,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33465,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33466,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33467,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33468,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33469,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33470,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33471,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33472,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33473,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33474,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33475,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33476,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33477,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33478,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33479,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33480,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33481,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33482,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33483,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33484,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33485,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33486,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33487,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33488,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33489,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33490,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33491,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33492,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33493,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33494,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33495,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33496,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33497,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33498,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33499,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33500,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33501,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33502,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33503,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33504,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33505,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33506,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33507,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33508,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33509,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33510,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33511,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33512,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33513,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33514,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33515,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33516,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33517,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33518,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33519,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33520,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33521,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33522,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33523,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33524,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33525,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33526,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33527,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33528,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33529,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33530,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33531,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33532,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33533,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33534,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33535,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33536,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33537,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33538,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33539,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33540,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33541,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33542,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33543,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33544,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33545,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33546,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33547,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33548,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33549,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33550,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33551,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33552,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33553,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33554,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33555,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33556,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33557,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33558,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33559,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33560,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33561,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33562,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33563,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33564,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33565,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33566,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33567,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33568,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33569,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33570,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33571,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33572,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33573,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33574,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33575,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33576,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33577,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33578,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33579,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33580,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33581,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33582,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33583,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33584,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33585,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33586,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33587,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33588,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33589,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33590,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33591,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33592,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33593,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33594,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33595,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33596,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33597,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33598,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33599,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33600,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33601,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33602,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33603,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33604,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134469657,
+      "curMove": 28,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33605,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134461701,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33606,
+      "rng": 650807554,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134461885,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33607,
+      "rng": 3011990093,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33608,
+      "rng": 3011990093,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33609,
+      "rng": 3011990093,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33610,
+      "rng": 3011990093,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33611,
+      "rng": 3011990093,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 0
+    },
+    {
+      "tick": 33612,
+      "rng": 1648070399,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33613,
+      "rng": 1648070399,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33614,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33615,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33616,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33617,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33618,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33619,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33620,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33621,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33622,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33623,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33624,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33625,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33626,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33627,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33628,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33629,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33630,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33631,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33632,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33633,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33634,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33635,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33636,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33637,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33638,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33639,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33640,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33641,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33642,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33643,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33644,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33645,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33646,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33647,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33648,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33649,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33650,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33651,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33652,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33653,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33654,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33655,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33656,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33657,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33658,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33659,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33660,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33661,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33662,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33663,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33664,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33665,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33666,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33667,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33668,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33669,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33670,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33671,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    },
+    {
+      "tick": 33672,
+      "rng": 3121225034,
+      "hp0": 117,
+      "hp1": 63,
+      "mainFunc": 134463093,
+      "curMove": 0,
+      "attacker": 1,
+      "moveDmg": 8
+    }
+  ],
+  "derivedRngStepLedger": [
+    {
+      "tick": 33083,
+      "steps": 1,
+      "rngBefore": 3530724670,
+      "rngAfter": 2956382169
+    },
+    {
+      "tick": 33110,
+      "steps": 1,
+      "rngBefore": 2956382169,
+      "rngAfter": 2508258776
+    },
+    {
+      "tick": 33324,
+      "steps": 1,
+      "rngBefore": 2508258776,
+      "rngAfter": 575948139
+    },
+    {
+      "tick": 33338,
+      "steps": 1,
+      "rngBefore": 575948139,
+      "rngAfter": 650807554
+    },
+    {
+      "tick": 33607,
+      "steps": 1,
+      "rngBefore": 650807554,
+      "rngAfter": 3011990093
+    },
+    {
+      "tick": 33612,
+      "steps": 2,
+      "rngBefore": 3011990093,
+      "rngAfter": 1648070399
+    },
+    {
+      "tick": 33614,
+      "steps": 5,
+      "rngBefore": 1648070399,
+      "rngAfter": 3121225034
+    }
+  ],
+  "totalRngSteps": 12
+}
