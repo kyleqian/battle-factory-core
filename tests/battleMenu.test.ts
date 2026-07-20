@@ -57,6 +57,8 @@ import {
   turn2KickoffTextStartTick,
   turnKickoffTextStartTick,
   TURN2_KICKOFF_TEXT_TOTAL,
+  endeavorOnixHp,
+  ENDEAVOR_HP_DRAIN_START_DELAY,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -605,5 +607,34 @@ describe("S7 slice E1: turn 2's FIGHT-submenu reopen - dynamic PP + ENDEAVOR kic
     expect(turn2KickoffTextVisibleChars(start, pressTick)).toBe(1);
     expect(turn2KickoffTextVisibleChars(start + TURN2_KICKOFF_TEXT_TOTAL - 1, pressTick)).toBe(TURN2_KICKOFF_TEXT_TOTAL);
     expect(turn2KickoffTextVisibleChars(start + TURN2_KICKOFF_TEXT_TOTAL + 50, pressTick)).toBe(TURN2_KICKOFF_TEXT_TOTAL);
+  });
+});
+
+describe("S7 slice E1b: ENDEAVOR's own HP-bar drain (docs/battle-menu-notes.md §14, docs/battle-turn-notes.md §12) - Onix's own 117->101 drain, grid-searched against battle1-turn2.json's own dense captures spanning the drain (2999/3099/3103/3107/3111/3128), 0 residual", () => {
+  const pressTick = 2945;
+  const startHp = 117;
+  const endHp = 101;
+
+  it("endeavorOnixHp: full HP through the sentinel tick, then exactly 1 HP/tick down to endHp, settled forever after", () => {
+    expect(pressTick + ENDEAVOR_HP_DRAIN_START_DELAY).toBe(3098); // the RAM sentinel tick itself
+    expect(endeavorOnixHp(3097, pressTick, startHp, endHp)).toBe(117);
+    expect(endeavorOnixHp(3098, pressTick, startHp, endHp)).toBe(117); // sentinel tick itself, no visible drop yet
+    expect(endeavorOnixHp(3099, pressTick, startHp, endHp)).toBe(116); // first drained tick
+    expect(endeavorOnixHp(3103, pressTick, startHp, endHp)).toBe(112);
+    expect(endeavorOnixHp(3111, pressTick, startHp, endHp)).toBe(104);
+    expect(endeavorOnixHp(3114, pressTick, startHp, endHp)).toBe(101); // d=16, last decrement, already at endHp
+    expect(endeavorOnixHp(3115, pressTick, startHp, endHp)).toBe(101); // done sentinel tick, settled
+    expect(endeavorOnixHp(3128, pressTick, startHp, endHp)).toBe(101); // stays settled indefinitely
+  });
+
+  it("endeavorOnixHp is value-agnostic (works for any startHp/endHp pair, not just this trace's 117/101)", () => {
+    expect(endeavorOnixHp(3098, pressTick, 200, 150)).toBe(200);
+    expect(endeavorOnixHp(3099, pressTick, 200, 150)).toBe(199);
+    expect(endeavorOnixHp(3148, pressTick, 200, 150)).toBe(150); // d=50, exactly startHp-endHp
+    expect(endeavorOnixHp(3200, pressTick, 200, 150)).toBe(150);
+  });
+
+  it("endeavorOnixHp's own anchor delay differs from ROCK_SLIDE's opponent-bar delay (a different move/animation window, not a shared constant)", () => {
+    expect(ENDEAVOR_HP_DRAIN_START_DELAY).not.toBe(ROCK_SLIDE_HP_DRAIN_START_DELAY);
   });
 });

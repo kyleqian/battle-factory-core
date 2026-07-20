@@ -323,14 +323,20 @@ exactly). The 1px shake residual is CLOSED (§11.1, real cause was the
 player healthbox's bleed-mask heuristic, `turn1-rockslide.json` 256/256).
 Ground truth banked through turn 14's forced switch (§12-§14: turns 2-5
 ledgers, faint + Pidgeotto switch-in, PP exhaustion, SEND OUT sequence).
-**Turn-2 slice E1 (this session):** FIGHT submenu reopen (dynamic PP
+**Turn-2 slice E1 (2026-07-19 session):** FIGHT submenu reopen (dynamic PP
 9/10, real FONT_NORMAL pipeline) → DRAGON_BREATH confirm → ENDEAVOR's
 kickoff text, fully printed and held (`turn2-endeavor.json` 76/77, the 1
 residual is ISSUES #19's own family, confirmed recurring); ENDEAVOR's HP-
-diff math pinned hermetically. Remaining for S7: ENDEAVOR's own attack
-anim + Onix's HP-bar drain + the player healthbox's own HP-digit
-compositor (slice E2), DRAGON_BREATH's own window, faint/forced-switch
-engine slice, ISSUES #19.
+diff math pinned hermetically. **Slice E1b (this session):** Onix's own
+HP-bar drain (117→101, `endeavorOnixHp`) + the player healthbox's own
+HP-digit overlay (`composePlayerHealthboxHpOverlay`, FONT_SMALL) landed
+(`turn2-endeavor-drain.json` 105/106, same ISSUES #19 residual). ENDEAVOR's
+own attack animation (source-confirmed a genuinely custom asset —
+attacker squish/sweat-droplet/yellow-blend + target shake+hitsplat,
+`Move_ENDEAVOR` — NOT "plain generic hit" as earlier assumed, ticks
+3003-3094) is explicit remaining work, not folded into this slice.
+Remaining for S7: ENDEAVOR's own attack anim, DRAGON_BREATH's own window,
+faint/forced-switch engine slice, ISSUES #19.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

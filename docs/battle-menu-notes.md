@@ -2001,3 +2001,185 @@ exact glyph-code output (9/10 and 10/10), `turn2KickoffTextVisibleChars`'s
 timing; (`tests/damageCalc.test.ts`, 5 new tests): `calculateEndeavorDamage`/
 `resolveEndeavorDamage` against the RAM-confirmed 117/101/16/8 chain. `npm
 test` **659/659**, `npm run build` green.
+
+## 14. S7 slice E1b: Onix's own HP-bar drain + player-healthbox HP digits (bounded worker, this session) - `turn2-endeavor-drain.json` **105/106** (the one residual is the SAME ISSUES #19 family already accepted in `turn2-endeavor.json`); ENDEAVOR's own attack animation stays OUT OF SCOPE, see below
+
+Extends slice E1's own handoff (§13's "what's left") from tick 2999 (the
+held "Foe GROVYLE used\nENDEAVOR!" text) toward the settled post-ENDEAVOR
+state (~3128): Onix's own HP-bar drain (117->101, `battle-turn-notes.md`
+§12's RAM table) and the player healthbox's own HP-digit text
+("117/117"->"101/117", FONT_SMALL) are landed; ENDEAVOR's own attack
+animation (Grovyle's squish/sweat-droplet/yellow-blend task + the target's
+generic hit-flash, `Move_ENDEAVOR`/`BattleScript_HitFromAtkAnimation`) is
+explicitly NOT modeled - see "What's out of scope" below for why and what's
+needed.
+
+**The brief's own premise ("a plain generic-hit-style animation, no
+move-specific asset") does not hold - source-checked, not assumed.**
+`data/battle_scripts_1.s:2479` (`BattleScript_EffectEndeavor`) confirms
+ENDEAVOR routes through the shared `BattleScript_HitFromAtkAnimation` label
+like most damaging moves - but that label's own `attackanimation` opcode
+plays ENDEAVOR's OWN animation script (`Move_ENDEAVOR`,
+`data/battle_anim_scripts.s:3789`), which is a genuinely custom asset: the
+attacker (Grovyle) gets `AnimTask_SquishAndSweatDroplets` (new sprites,
+sweat-droplet gfx) plus a yellow `AnimTask_BlendMonInAndOut` palette blend,
+THEN two rounds of `AnimTask_ShakeTargetBasedOnMovePowerOrDmg` + a
+"hitsplat" sprite (`create_basic_hitsplat_sprite`) on the target, each with
+its own sound. Only AFTER that does `hitanimation BS_TARGET` fire the
+generic hit-flash (healthbox wobble + mon blink) this file already has
+formulas for (`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`,
+§12's own derivation). Oracle-confirmed (this session, whole-frame diff
+against the tick-2999 baseline, `battle1-turn2.json`'s own dense captures
+2999-3095): the screen differs from the held-text baseline for essentially
+the WHOLE window 3003-3091 (with two brief 0-diff lulls around 3051-3063 and
+3087, matching the script's own two-hitsplat-round structure), settling back
+to an EXACT match with the pre-animation baseline (aside from the healthbox
+HP itself) from **3095 on**. This is real new-asset work (sweat-droplet
+sprites, a squish/stretch scale effect, a palette blend ramp, hitsplat
+sprites) - not a same-formula reuse the way ROCK_SLIDE's own hit-flash was
+for turn 2's target - so it's deferred, per this step's own explicit
+fallback clause ("land the drain+digits half green... report exactly where
+you stopped").
+
+**Onix's own hit-flash (healthbox wobble + back-sprite blink) is ALSO
+unmodeled, and turns out not to matter for this slice's own footprint.**
+RAM-probed this session (`tools/probe/dump-rockslide-sprites.py`, unchanged,
+just pointed at `targetBattler=0` for Onix instead of its default 1):
+Onix's own healthbox wobble is RAM-active ticks 3063-3082 (20 ticks, same
+shape as turn 1's own 20-tick wobble) and its own mon-sprite blink is
+RAM-active 3064-3095 (32 ticks, same 4-tick-cycle shape) - i.e. the SAME two
+formula shapes §12 already derived, just a new anchor delay (this move/
+animation takes a different number of ticks to reach the hit-flash than
+ROCK_SLIDE did) and the opposite battler. Not wired this session (still part
+of "the animation," out of scope) - but oracle-pixel-confirmed harmless to
+skip for THIS slice's own footprint specifically: the wobble only affects
+the HEALTHBOX UI element (not Onix's own big monster sprite, which sits
+elsewhere on screen), and a direct crop-diff against the tick-2999 baseline
+shows the healthbox region itself is byte-identical at every one of the
+sparse-sampled ticks 3091/3095/3098 (the wobble's own last RAM-active tick
+is 3082, safely settled by then) - so this slice's own trace can safely
+start dense captures at 3095 without needing either hit-flash formula.
+
+**Onix's own HP-bar drain: render tick used directly, no extra lag -
+verified, not assumed, exactly per this step's own brief.** Source-traced
+first (`CompleteOnHealthbarDone`, `battle_controller_player.c:1126-1141`):
+`MoveBattleBar` is called once per game frame while draining, and BOTH the
+bar's own pixel fill (`MoveBattleBarGraphically`) and the HP digit text
+(`UpdateHpTextInHealthbox(..., hpValue, HP_CURRENT)`) are driven off the
+SAME per-call return value in the SAME function call - i.e. source predicts
+no relative lag between the two, though it doesn't by itself say whether
+there's an ABSOLUTE lag relative to render tick (real hardware could still
+delay a CPU-copied sprite-tile write to the next vblank). Grid-search fit
+(this session) against 6 ticks spanning the drain (2999/3099/3103/3107/
+3111/3128, cropped to the bar's own fill-color rows and the digit glyph
+region) confirms `t` used directly - same "no extra render lag" rule §12
+found for the OPPONENT's own bar (`rockSlideOpponentHp`), now independently
+re-confirmed player-side (a real, not rubber-stamped, check: the two sides
+use entirely different battle-controller source files,
+`battle_controller_player.c` vs `_opponent.c`, so equal timing was a
+plausible-but-unverified guess going in). `endeavorOnixHp(t, pressTick,
+startHp, endHp)` (`battleMenu.ts`) reproduces `rockSlideOpponentHp`'s exact
+shape with its own anchor delay: `ENDEAVOR_HP_DRAIN_START_DELAY=153`
+(`pressTick`+153 = RAM/render tick 3098, the sentinel - cross-confirmed
+against `battle1-turn2-ram-dump.json`'s own `healthBar0Curr` column, which
+independently shows the identical sentinel/drain/done/hp-update tick
+sequence `battle-turn-notes.md` §12's table already names). A separate named
+function, not a shared generalization of `rockSlideOpponentHp` - the anchor
+delay is a different move/animation-window fact, not interchangeable, same
+reasoning §12 already gave for why ROCK_SLIDE's own delay is its own named
+constant.
+
+**The player healthbox's own HP-digit text needed its own fresh grid search
+- the "just FONT_SMALL, nothing new" prediction from §13 undersold how much
+of the LAYOUT still had to be found.** The font/charmap infra was indeed
+already sitting in `healthboxAssembly.ts` (unused for the player side until
+now), but the player healthbox's own screen geometry was never derived -
+`singlesPlayer`'s own frame sheet exists as an extracted asset but its
+layout/z-order/status-icon geometry has never been source- or pixel-derived
+(a full player-side analogue of ISSUES #16 - out of scope this session, see
+below). Rather than build that whole compositor, this session's own
+`composePlayerHealthboxHpOverlay` is a small sparse OVERLAY patch layered on
+top of the existing flat `menu-healthbox-player.json` harvest (which stays
+the render source for everything else) - just the two regions that actually
+change value: the bar's 6 fill tiles (reusing the SAME `hpbar`/`hpbarAnim`
+sheets + `calcBarFilledPixels`/`pickHpBarBand` the opponent's own bar
+already uses, just a different screen corner - grid-search-confirmed local
+origin `(47,14)`, NOT the opponent's own `(24,16)`) and the HP digit run
+(FONT_SMALL, `singlesPlayer`'s own palette bank - bg=idx2/fg=idx1/shadow=
+idx3, the SAME role convention `drawHealthboxText` established for the
+opponent's nickname/level text, just a different sprite's own palette;
+format = `rightAlign3(currentHp) + "/" + rightAlign3(maxHp)`, right-align
+padding via `CHAR_SPACER` not a literal space -
+`ConvertIntToDecimalStringN`'s own `STR_CONV_MODE_RIGHT_ALIGN` behavior,
+`string_util.c:163-217`, the SAME convention `ppRemainingGlyphCodes`
+already established for the PP number in slice E1).
+
+**A real bug caught mid-session by widening the pixel check past just the
+ink pixels**, worth naming since it's a general lesson for this kind of
+patch: an initial grid search fit the DIGIT INK exactly (0 mismatches)
+reusing the opponent's own `TEXT_VIS_Y0`/`TEXT_VIS_Y1`/`TEXT_PRINT_Y`
+window constants verbatim (an 11-row visible band) - looked done. Running it
+through the actual `npm run compare` tool on the extended trace immediately
+surfaced a 47px diff at every drained tick, all in the SAME 2-row strip
+right below the digits. Root cause: those two rows are the frame's own
+static divider line (byte-identical across every HP value this trace
+exercises, oracle-confirmed) sitting just past the REAL printer window's
+own bottom edge - the opponent's 11-row constants don't apply here (source
+confirms why: the HP-text printer calls pass `y=5` to
+`AddTextPrinterAndCreateWindowOnHealthbox`, `battle_interface.c:1152`/1163,
+vs. the nickname/level windows' own `y=3`, `:1119` - a different vertical
+placement this file's existing constants were never derived for). The
+INK-only check couldn't see this because the ink brute-force search is
+underdetermined (many (printY, destY) pairs place the ink identically) and
+never touched the BACKGROUND-clear rectangle's own extent, which is what
+was actually wrong. Re-fit against the wider check (every pixel in a
+superset region, ink AND non-ink) lands on a 9-row band (glyph rows
+`[2,11)` -> canvas rows `[21,30)`, `PLAYER_HP_TEXT_GLYPH_ROW0`/`_ROW1` in
+`healthboxAssembly.ts`) - 0 mismatches at all 6 tested ticks, confirmed via
+the actual `npm run compare` run afterward, not just the standalone script.
+A Tier-1 regression test now pins this specific failure mode (asserts the
+divider row stays untouched at every HP value).
+
+**What's out of scope, explicitly, per this step's own fallback clause**:
+ENDEAVOR's own attack animation (ticks ~3003-3094, both the attacker's
+squish/sweat/blend and the target's own hit-flash - see above for the full
+derivation of why this needs new asset work, not a formula reuse); a full
+player-side healthbox compositor (`singlesPlayer`'s own frame layout/z-order/
+status-icon geometry, the player-side analogue of ISSUES #16 - this
+session's own overlay patch sidesteps needing it, but a future status
+effect on Onix, or a player-side status icon, would); DRAGON_BREATH's own
+window (3129+, slice E2, per the brief's own OUT OF SCOPE list); ISSUES
+#19's root cause; #20's FONT_NARROW rewire.
+
+**Trace structure: a SEPARATE `turn2-endeavor-drain.json`, not an extension
+of `turn2-endeavor.json` itself - chosen so slice E1's own already-accepted
+76/77 fixture stays untouched** (lower blast radius than editing a
+passing, already-referenced file) and so this session's own reduced scope
+(drain+digits, explicitly NOT the animation) is legible as its own
+increment rather than silently folded into E1's own trace. Same verbatim
+44+6-segment prefix as `turn2-endeavor.json`, with the final idle segment
+extended from 53 to 186 frames (landing at tick 3132, past the 3128 target
+with a small settle margin) - all 77 of E1's own `captureFrames` kept
+verbatim (re-confirms E1's own result byte-for-byte on every run), plus 29
+new captures: dense every tick 3095-3120 (spans the drain sentinel through
+well past the settle - the earlier 3003-3094 span is intentionally NOT
+captured, since that's exactly the unmodeled animation window) and 3
+settle-tail samples (3125/3128/3130). 106 captures total, well under the
+256 cap.
+
+**Acceptance**: `tools/compare/traces/turn2-endeavor-drain.json` **105/106**
+- the one residual (tick 2906) is the exact same ISSUES #19 family already
+named and accepted in `turn2-endeavor.json`'s own 76/77 (same bbox, same
+pixel count - this trace shares that exact prefix, so it necessarily
+recurs), zero NEW diff frames anywhere in the drain/settle window. Zero
+regressions, full sweep re-verified at exact prior counts: `turn2-endeavor`
+76/77 (untouched), `turn1-rockslide` 256/256, `turn1-drain` 102/102,
+`fight-submenu` 234/235, `turn1-kickoff` 81/81, `turn1-cloneanim` 230/230.
+**New Tier-1 pins**: `tests/battleMenu.test.ts` (3 new tests) -
+`endeavorOnixHp`'s drain schedule + settle (value-agnostic) and its own
+distinct anchor delay from ROCK_SLIDE's; `tests/healthboxAssembly.test.ts`
+(6 new tests) - `composePlayerHealthboxHpOverlay`'s bar-tile wiring (full HP
+and the 101/117 partial case), the digit-window's own 9-row footprint (a
+direct regression guard for the bug above), and `rightAlign3GlyphCodes`'s
+exact glyph-code output including the `CHAR_SPACER` padding cases. `npm
+test` **669/669**, `npm run build` green.

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { calcBarFilledPixels, composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, HP_BAR_FULL_TILES, pickHpBarBand } from "../src/engine/healthboxAssembly.ts";
+import { calcBarFilledPixels, composeOpponentHealthbox, composePlayerHealthboxHpOverlay, HEALTHBOX_FRAME_ORIGIN, HP_BAR_FULL_TILES, pickHpBarBand, rightAlign3GlyphCodes } from "../src/engine/healthboxAssembly.ts";
+import { CHAR_SPACER } from "../src/engine/battleMenu.ts";
 import battleHealthbox from "../src/assets/gen/battle-healthbox.json" with { type: "json" };
 import harvested from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
 
@@ -192,5 +193,96 @@ describe("composeOpponentHealthbox partial HP + status (ISSUES #16 round 3, no o
       if (JSON.stringify(a) !== JSON.stringify(b)) differs = true;
     }
     expect(differs).toBe(true);
+  });
+});
+
+// S7 slice E1b (docs/battle-menu-notes.md §14, docs/battle-turn-notes.md
+// §12) - the player healthbox's own HP-bar drain + digit text overlay.
+// Oracle-pixel-confirmed this session (0 mismatches at 6 ticks spanning the
+// drain, and 105/106 via tools/compare/traces/turn2-endeavor-drain.json,
+// the 1 residual being ISSUES #19's own pre-existing family at tick 2906) -
+// these Tier-1 pins cover the hermetic layout/wiring, not a re-derivation of
+// that pixel evidence.
+describe("composePlayerHealthboxHpOverlay (S7 slice E1b)", () => {
+  const overlayAssets = {
+    hpbar: battleHealthbox.hpbar,
+    hpbarAnim: battleHealthbox.hpbarAnim,
+    textPalette: battleHealthbox.singlesPlayer.palette,
+  };
+
+  it("full HP (117/117): all 48 bar columns green-filled at local origin (47,14) - the SAME HP_BAR_FULL_TILES fill selection the opponent's bar uses, minus its 2 caption tiles (baked into the player's own static frame harvest here, never redrawn)", () => {
+    const result = composePlayerHealthboxHpOverlay(overlayAssets, 117, 117);
+    const fillTiles = HP_BAR_FULL_TILES.slice(2);
+    // Bar tile row 7 (local y=21) is the text patch's own top row too (`PLAYER_HP_TEXT_ORIGIN.y`=21) -
+    // legitimately overwritten by the text layer's bg-clear (drawn after the bar), so excluded here.
+    for (let i = 0; i < 6; i += 1) {
+      for (let x = 0; x < 8; x += 1) {
+        for (let y = 0; y < 7; y += 1) {
+          const expected = tilePixel(battleHealthbox.hpbar, battleHealthbox.hpbar.palette, fillTiles[i]!, x, y);
+          expect(result.pixels[(14 + y) * result.width + (47 + i * 8 + x)], `fill tile ${i} px (${x},${y})`).toEqual(expected);
+        }
+      }
+    }
+  });
+
+  it("partial HP (101/117, ENDEAVOR's own settled endpoint): bar fill matches calcBarFilledPixels(101/117)'s own column split (41px), band still green (86% > 50% threshold)", () => {
+    const result = composePlayerHealthboxHpOverlay(overlayAssets, 101, 117);
+    const { filledPixels, columns } = calcBarFilledPixels(101 / 117);
+    expect(filledPixels).toBe(41);
+    expect(pickHpBarBand(filledPixels)).toBe("green");
+    for (let i = 0; i < 6; i += 1) {
+      const tileIdx = 3 + columns[i]!; // HP_BAR_GREEN_BASE
+      for (let x = 0; x < 8; x += 1) {
+        for (let y = 0; y < 7; y += 1) {
+          const expected = tilePixel(battleHealthbox.hpbar, battleHealthbox.hpbar.palette, tileIdx, x, y);
+          expect(result.pixels[(14 + y) * result.width + (47 + i * 8 + x)], `fill tile ${i} px (${x},${y})`).toEqual(expected);
+        }
+      }
+    }
+  });
+
+  it("digit text lands in the frame's own 9-row band (local y=21..29), NOT the opponent's 11-row TEXT_VIS_Y0..Y1 band reused verbatim (an earlier iteration this session did exactly that - ink-exact but clobbered the frame's own static divider line at local y=30 with the printer window's bg-fill color, caught only once oracle pixels OUTSIDE the ink were checked too)", () => {
+    const full = composePlayerHealthboxHpOverlay(overlayAssets, 117, 117);
+    const drained = composePlayerHealthboxHpOverlay(overlayAssets, 101, 117);
+    const width = full.width;
+    for (let x = 59; x < 59 + 35; x += 1) {
+      expect(full.pixels[30 * width + x], `full HP row30 x=${x}`).toBeNull();
+      expect(drained.pixels[30 * width + x], `drained row30 x=${x}`).toBeNull();
+    }
+    let anyPaintedRow29 = false;
+    for (let x = 59; x < 59 + 35; x += 1) {
+      if (full.pixels[29 * width + x]) anyPaintedRow29 = true;
+    }
+    expect(anyPaintedRow29).toBe(true);
+  });
+
+  it("differs from the full-HP overlay only within the bar-fill/text footprint (no stray writes elsewhere on the 103x36 canvas)", () => {
+    const full = composePlayerHealthboxHpOverlay(overlayAssets, 117, 117);
+    const drained = composePlayerHealthboxHpOverlay(overlayAssets, 101, 117);
+    for (let y = 0; y < full.height; y += 1) {
+      for (let x = 0; x < full.width; x += 1) {
+        const inBar = x >= 47 && x < 95 && y >= 14 && y < 22;
+        const inText = x >= 59 && x < 94 && y >= 21 && y < 30;
+        if (inBar || inText) continue;
+        const i = y * full.width + x;
+        expect(drained.pixels[i], `stray write at (${x},${y})`).toEqual(full.pixels[i]);
+      }
+    }
+  });
+});
+
+describe("rightAlign3GlyphCodes (ConvertIntToDecimalStringN's own STR_CONV_MODE_RIGHT_ALIGN, string_util.c:163-217, as UpdateHpTextInHealthbox uses it)", () => {
+  it("3-digit values: 3 glyphs, no padding", () => {
+    expect(rightAlign3GlyphCodes(117)).toEqual([162, 162, 168]); // '1','1','7'
+    expect(rightAlign3GlyphCodes(101)).toEqual([162, 161, 162]); // '1','0','1'
+  });
+
+  it("fewer digits get leading CHAR_SPACER, NOT a literal space - matches ppRemainingGlyphCodes' own established convention for the exact same source function (battleMenu.ts)", () => {
+    expect(rightAlign3GlyphCodes(8)).toEqual([CHAR_SPACER, CHAR_SPACER, 169]); // '  8'
+    expect(rightAlign3GlyphCodes(42)).toEqual([CHAR_SPACER, 165, 163]); // ' 42'
+  });
+
+  it("0 still writes its trailing digit (never fully blank) - ConvertIntToDecimalStringN's own `powerOfTen == 1` escape", () => {
+    expect(rightAlign3GlyphCodes(0)).toEqual([CHAR_SPACER, CHAR_SPACER, 161]);
   });
 });

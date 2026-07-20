@@ -464,3 +464,177 @@ export function composeOpponentHealthbox(assets: HealthboxAssets, params: Health
 }
 
 export const HEALTHBOX_FRAME_ORIGIN = FRAME_ORIGIN;
+
+// --- S7 slice E1b: the player healthbox's own HP-bar drain + digit text
+// (docs/battle-turn-notes.md §12, docs/battle-menu-notes.md §13/§14) - the
+// player (ONIX) healthbox stays the flat pre-turn-1 `menu-healthbox-player
+// .json` harvest for everything else (unlike the opponent, which is a full
+// `composeOpponentHealthbox` re-composite every frame since ISSUES #16) -
+// ENDEAVOR's drain is the FIRST time it ever changes, so rather than build a
+// full player-side frame compositor (the `singlesPlayer` frame sheet exists
+// but its own layout/status-icon/z-order was never source-derived - out of
+// scope this session), this is a small sparse OVERLAY patch covering just
+// the two regions that actually change value: the bar's 6 fill tiles and the
+// HP digit run. Both patches share the exact same per-tick HP value
+// (`endeavorOnixHp`, `battleMenu.ts`) - grid-search-confirmed (this session,
+// against `battle1-turn2.json`'s own ENDEAVOR window) 0 mismatches at every
+// one of 6 independently-tested ticks (2999/3099/3103/3107/3111/3128) for
+// both the bar (288 checked px/tick) and the text (157-176 checked ink
+// px/tick, depending on which digits are non-blank that tick).
+
+/**
+ * `CHAR_SPACER` (characters.h:74, "Empty space") - `ConvertIntToDecimalStringN`'s
+ * own right-align padding glyph, a genuinely distinct font-encoding code
+ * from the plain ASCII space (kept as its own literal here, not imported
+ * from `battleMenu.ts`'s own copy, so this module keeps its existing
+ * zero-cross-engine-import shape - see that file's own doc comment on this
+ * same constant for the full derivation, a font-agnostic STRING byte code,
+ * not a font-specific glyph index).
+ */
+const CHAR_SPACER = 119;
+
+/**
+ * The HP bar's 6 fill tiles' own local origin within the player healthbox's
+ * canvas (`menu-healthbox-player.json`'s own coordinate system, origin =
+ * that harvest's screen corner) - oracle-pixel-confirmed (grid search this
+ * session): the full-HP (117/117) bar's fill strip spans local x=47..94
+ * (48px, `HP_BAR_TOTAL_PIXELS`) at y=14..21 (the fill tiles' own 8px-tall
+ * row - most of those 8 rows are index-0/transparent in `hpbar.png`'s own
+ * tile art, only 2 actually paint). Reuses the SAME `hpbar`/`hpbarAnim` tile
+ * sheets and `calcBarFilledPixels`/`pickHpBarBand` band selection as the
+ * opponent's own bar (`hpBarLocalTiles`) - unlike the opponent, the "HP"
+ * caption prefix is baked into the static frame harvest here (never
+ * redrawn), so only the 6 fill tiles (not `hpBarLocalTiles`'s 2 extra
+ * caption tiles) are drawn by this patch.
+ */
+const PLAYER_HP_BAR_FILL_ORIGIN = { x: 47, y: 14 };
+
+/**
+ * The HP digit-text glyph run's own local origin/width/visible-row-band -
+ * oracle-pixel-confirmed (grid search this session against 6 ticks spanning
+ * the drain, 0 mismatches): FONT_SMALL, `singlesPlayer`'s own palette bank
+ * (bg=idx2, fg=idx1, shadow=idx3 - the SAME `TEXT_COLORS` role convention
+ * `drawHealthboxText` already uses for the opponent's nickname/level, just
+ * sourced from a different sprite's own palette), run =
+ * rightAlign3(currentHp) + "/" + rightAlign3(maxHp), 7 glyphs x 5px each
+ * (FONT_SMALL digit/slash width, 0 letter-spacing) = 35px, with NO gap
+ * between the two logically-separate printer windows
+ * (`UpdateHpTextInHealthbox`'s two back-to-back
+ * `AddTextPrinterAndCreateWindowOnHealthbox` calls land contiguously on real
+ * hardware). **The visible glyph-row band is its own independent fit, NOT
+ * the opponent's `TEXT_VIS_Y0`/`TEXT_VIS_Y1`/`TEXT_PRINT_Y`** (this window
+ * uses a different `y` printer-parameter than the nickname/level windows,
+ * `battle_interface.c:1152`/1163 pass `y=5` vs `UpdateLvlInHealthbox`'s
+ * `y=3`) - an initial fit that reused the opponent's constants verbatim
+ * looked ink-exact but left the glyphs' own bottom row (local y=29, changes
+ * value with HP, oracle-confirmed) outside its 11-row window, silently
+ * clobbering 2 rows of the frame's own static border art with the text
+ * window's bg-fill color instead (caught by comparing against the FULL
+ * checked region, not just non-bg ink pixels). Re-fit against that wider
+ * check (frame border pixels included) lands on a 9-row band, glyph rows
+ * [2,11) mapping to local canvas rows [21,30) (`PLAYER_HP_TEXT_GLYPH_ROW0`/
+ * `PLAYER_HP_TEXT_GLYPH_ROW1`).
+ */
+const PLAYER_HP_TEXT_ORIGIN = { x: 59, y: 21 };
+const PLAYER_HP_TEXT_VIS_WIDTH = 35;
+const PLAYER_HP_TEXT_GLYPH_ROW0 = 2;
+const PLAYER_HP_TEXT_GLYPH_ROW1 = 11;
+
+/**
+ * `ConvertIntToDecimalStringN(value, STR_CONV_MODE_RIGHT_ALIGN, 3)`
+ * (string_util.c:163-217): right-pads missing leading digits with
+ * `CHAR_SPACER`, not a literal space (`battleMenu.ts`'s own
+ * `ppRemainingGlyphCodes` already established this same convention for the
+ * PP number's right-align - this is `UpdateHpTextInHealthbox`'s own use of
+ * the identical source function, `battle_interface.c:1151`/1160/1233).
+ */
+export function rightAlign3GlyphCodes(value: number): number[] {
+  const digits = String(Math.max(0, Math.min(999, Math.trunc(value))));
+  const codes: number[] = [];
+  for (let i = 0; i < 3 - digits.length; i += 1) codes.push(CHAR_SPACER);
+  for (const d of digits) {
+    const code = charmap.get(d);
+    if (code === undefined) throw new Error(`rightAlign3GlyphCodes: no glyph for digit ${d}`);
+    codes.push(code);
+  }
+  return codes;
+}
+
+export interface PlayerHealthboxHpOverlayAssets {
+  hpbar: SheetAsset;
+  hpbarAnim: SheetAsset;
+  /** `battle-healthbox.json`'s `singlesPlayer.palette` - see `PLAYER_HP_TEXT_ORIGIN`'s own doc on why the text uses this palette bank, not `hpbar`'s. */
+  textPalette: RgbColor[];
+}
+
+/**
+ * The player healthbox's own dynamic overlay (HP bar fill + HP digit text)
+ * at an arbitrary current/max HP, in the SAME local coordinate system as
+ * `menu-healthbox-player.json`'s own flat harvest (103x36, same screen
+ * corner) - callers blit this OVER that static harvest (or over
+ * `menuIdleBase`'s equivalent baked region, byte-identical there per
+ * `battle-menu-notes.md` §4), skipping `null` cells same as
+ * `composeOpponentHealthbox`'s own convention. Returns an all-`null`
+ * (no-op) canvas when `currentHp === maxHp` is NOT special-cased - callers
+ * that already know they're at the anchor full-HP value should just skip
+ * calling this entirely (a cheap `!==` check) rather than pay for a
+ * redundant draw, but calling it anyway is harmless (every fill/digit pixel
+ * it paints already matches the static harvest's own baked full-HP content,
+ * oracle-confirmed this session at trace tick 2999/3095/3098).
+ */
+export function composePlayerHealthboxHpOverlay(assets: PlayerHealthboxHpOverlayAssets, currentHp: number, maxHp: number): { width: number; height: number; pixels: (RgbColor | null)[] } {
+  const width = 103;
+  const height = 36;
+  const canvas: (RgbColor | null)[] = new Array(width * height).fill(null);
+
+  const { filledPixels, columns } = calcBarFilledPixels(currentHp / maxHp);
+  const band = pickHpBarBand(filledPixels);
+  const fillSheet = band === "green" ? assets.hpbar : assets.hpbarAnim;
+  const fillBase = band === "green" ? HP_BAR_GREEN_BASE : band === "yellow" ? HP_BAR_YELLOW_BASE : HP_BAR_RED_BASE;
+  for (let i = 0; i < 6; i += 1) {
+    const tile = fillSheet.tileset.tiles[fillBase + columns[i]!]!;
+    for (let y = 0; y < 8; y += 1) {
+      for (let x = 0; x < 8; x += 1) {
+        const idx = tile[y * 8 + x]!;
+        if (idx === 0) continue;
+        const px = PLAYER_HP_BAR_FILL_ORIGIN.x + i * 8 + x;
+        const py = PLAYER_HP_BAR_FILL_ORIGIN.y + y;
+        canvas[py * width + px] = fillSheet.palette[idx] ?? null;
+      }
+    }
+  }
+
+  const run: GlyphRun[] = [
+    ...rightAlign3GlyphCodes(currentHp).map((code) => ({ code })),
+    { code: charmap.get("/")! },
+    ...rightAlign3GlyphCodes(maxHp).map((code) => ({ code })),
+  ];
+  for (let gy = PLAYER_HP_TEXT_GLYPH_ROW0; gy < PLAYER_HP_TEXT_GLYPH_ROW1; gy += 1) {
+    const py = PLAYER_HP_TEXT_ORIGIN.y + (gy - PLAYER_HP_TEXT_GLYPH_ROW0);
+    for (let wx = 0; wx < PLAYER_HP_TEXT_VIS_WIDTH; wx += 1) {
+      canvas[py * width + PLAYER_HP_TEXT_ORIGIN.x + wx] = assets.textPalette[TEXT_COLORS.bg] ?? null;
+    }
+  }
+  let cursorX = 0;
+  for (const { code } of run) {
+    const bitmap = fontSmall.glyphs[code];
+    const glyphWidth = fontSmall.widths[code] ?? fontSmall.cellSize;
+    if (bitmap) {
+      for (let gy = PLAYER_HP_TEXT_GLYPH_ROW0; gy < PLAYER_HP_TEXT_GLYPH_ROW1; gy += 1) {
+        const py = PLAYER_HP_TEXT_ORIGIN.y + (gy - PLAYER_HP_TEXT_GLYPH_ROW0);
+        for (let gx = 0; gx < glyphWidth; gx += 1) {
+          const wx = cursorX + gx;
+          if (wx < 0 || wx >= PLAYER_HP_TEXT_VIS_WIDTH) continue;
+          const raw = bitmap[gy * fontSmall.cellSize + gx]!;
+          const role = raw === 3 ? 0 : raw;
+          if (role === 0) continue;
+          const colorIndex = role === 1 ? TEXT_COLORS.fg : TEXT_COLORS.shadow;
+          canvas[py * width + PLAYER_HP_TEXT_ORIGIN.x + wx] = assets.textPalette[colorIndex] ?? null;
+        }
+      }
+    }
+    cursorX += glyphWidth;
+  }
+
+  return { width, height, pixels: canvas };
+}

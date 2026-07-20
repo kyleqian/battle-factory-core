@@ -1,3 +1,52 @@
+## 134 — Bounded worker: §11.1's 1px shake residual CLOSED — misdiagnosed as `drawStaticBgShiftedY`; real cause was the player healthbox's bleed-mask heuristic coincidentally matching the unshifted background — `turn1-rockslide.json` **250/256 → 256/256**; suite **649/649**
+
+- **State:** `npm test` **649/649** (+1 Tier-1 pin), `npm run build`
+  green, tree clean. `tools/compare/traces/turn1-rockslide.json`
+  **256/256, 0 diff**. Full regression sweep, zero change at established
+  counts: `turn1-drain` 102/102, `turn1-cloneanim` 230/230,
+  `turn1-kickoff` 81/81, `fight-submenu` 234/235, `sendout` 255/256,
+  `s6-acceptance` 224/228, `menu-idle` 69/69, `scene-assembly` 256/256.
+- **Did:** the brief's own hypothesis (`drawStaticBgShiftedY` sampling a
+  wrong tile pixel at a boundary) turned out to be a misdiagnosis —
+  `staticBgPixel(173, 85)` genuinely returns `(247,247,255)`, the
+  correct raw BG3 sample for that shifted map row. The real bug is one
+  layer up: `drawMenuHealthboxPlayer`'s bleed mask
+  (`getMenuHealthboxPlayerContentMask`) infers "background bleed" for a
+  harvested rectangular pixel by comparing it against the plain,
+  always-unshifted background — correct for the settled action-menu
+  window it was harvested from, but this same draw call is reused inside
+  the Rock Slide shake window, where BG3 genuinely scrolls. One harvested
+  pixel (a white frame highlight at screen (173,92)) coincidentally
+  equals the *unshifted* background's color there, so the heuristic
+  always called it a hole — invisible on `0`-shift ticks (live bg is
+  white there too, same coincidence), wrong on `-7`-shift ticks (live bg
+  samples a different, non-white tile row). Root-cause fix, not a
+  special case: the harvest's bleed set forms exactly 4 connected regions
+  (sizes 8/55/260/**1**) — real bleed is a byproduct of the healthbox's
+  true non-rectangular shape, so it comes in contiguous patches, never a
+  lone pixel stranded inside solid content. The mask now despeckles:
+  any bleed-classified pixel whose 4-neighbors are all content gets
+  reclassified as content too — generalizes to the whole class of
+  coincidence, leaves all genuine bleed regions and every other trace
+  untouched. Full derivation + fix in docs/battle-menu-notes.md §11.1
+  ("FIXED" note appended, not rewritten — the original attribution stays
+  visible as the record of what was tried first and why it was wrong).
+- **Next:** ISSUES #19's 99px single-row anomaly family; S7 continues
+  (turn-2+ engine slices against §12-§14 ground truth); ISSUES #20
+  rewire when S8 nears.
+- **Notes:** the misdiagnosis cost real time — confirming
+  `drawStaticBgShiftedY`'s math was innocent (dumping the tilemap/tileset
+  JSON directly, cross-checking against the oracle's own PNGs pixel-by-
+  pixel across the whole 8x8 tile and neighboring ticks) before finding
+  the actual layer. A naive first fix attempt (compare the healthbox
+  harvest against the *live* framebuffer instead of the flat background)
+  made things worse, not better: same 6 failing frames but 1px→211px
+  diff each, by reclassifying ~210 genuine bleed pixels as content;
+  reverted in favor of the despeckle approach once connected-component
+  analysis on the bleed mask made the real distinguishing signal
+  (isolated vs. contiguous) obvious. No papercuts otherwise.
+
+---
 ## 133 — Supervisor wind-down: session end 2026-07-19 ~16:05 — **S6 ticked [x] (user), S7 turn 1 nearly complete** (kickoff 81/81 + clone 230/230 + rockslide 250/256 + drain 102/102), FIGHT submenu playable, S7 core (damage/order/RNG) landed + twice cross-validated, ground truth through turn 14's forced switch — suite **555 → 648/648**, 18 verified worker steps
 
 - **State (verified this minute):** `npm test` **648/648**, `npm run build`

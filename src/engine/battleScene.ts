@@ -471,6 +471,7 @@ import {
   turn2KickoffTextStartTick,
   turn2SubmenuBounceTick,
   turn2KickoffBounceTick,
+  endeavorOnixHp,
 } from "./battleMenu.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
@@ -496,8 +497,9 @@ import menuIdleBaseAsset from "../assets/gen/menu-idle-base.json" with { type: "
 import menuIdleOnixBounceAsset from "../assets/gen/menu-idle-onix-bounce.json" with { type: "json" };
 import menuIdleHealthboxBounceAsset from "../assets/gen/menu-idle-healthbox-bounce.json" with { type: "json" };
 import fightSubmenuWindowAsset from "../assets/gen/fight-submenu-window.json" with { type: "json" };
-import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, type HealthboxAssets } from "./healthboxAssembly.ts";
+import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
+import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
 import speciesNamesAsset from "../data/gen/species-names.json" with { type: "json" };
 
 interface Tileset {
@@ -722,6 +724,61 @@ function opponentHealthboxContentForHp(hp: number): ReturnType<typeof composeOpp
     opponentHealthboxContentByHp.set(hp, cached);
   }
   return cached;
+}
+
+/**
+ * S7 slice E1b: Onix's own before/after-turn-2 HP (`battle1-turn2-ram-dump
+ * .json`'s `before_turn2.battler0`/`after_turn2.battler0`, RAM-probed) -
+ * ENDEAVOR's drain start/settle endpoints (`endeavorOnixHp`, `battleMenu
+ * .ts`). Unlike `anchorOpponentBattler` (turn 1's own dump), this needs
+ * turn 2's dump specifically - Onix's HP is unchanged (117, full) the whole
+ * of turn 1, so no turn-1 fixture ever recorded a different value.
+ */
+const anchorPlayerBattler = (
+  battle1Turn2RamDumpAsset as { battlerSnapshots: { before_turn2: { battler0: { hp: number; maxHP: number } } } }
+).battlerSnapshots.before_turn2.battler0;
+/** Onix's own post-ENDEAVOR HP (`after_turn2.battler0.hp`, 101) - `endeavorOnixHp`'s own settled endpoint. */
+const anchorPlayerAfterTurnHp = (
+  battle1Turn2RamDumpAsset as { battlerSnapshots: { after_turn2: { battler0: { hp: number } } } }
+).battlerSnapshots.after_turn2.battler0.hp;
+
+const playerHealthboxHpOverlayAssets = {
+  hpbar: healthboxAssemblyAssets.hpbar,
+  hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
+  textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
+};
+
+/** Same memoization shape as `opponentHealthboxContentByHp` - only the 17 distinct integer HPs `endeavorOnixHp` ever produces (117 down to 101) are ever requested. */
+const playerHealthboxHpOverlayByHp = new Map<number, ReturnType<typeof composePlayerHealthboxHpOverlay>>();
+function playerHealthboxHpOverlayForHp(hp: number): ReturnType<typeof composePlayerHealthboxHpOverlay> {
+  let cached = playerHealthboxHpOverlayByHp.get(hp);
+  if (!cached) {
+    cached = composePlayerHealthboxHpOverlay(playerHealthboxHpOverlayAssets, hp, anchorPlayerBattler.maxHP);
+    playerHealthboxHpOverlayByHp.set(hp, cached);
+  }
+  return cached;
+}
+
+/**
+ * S7 slice E1b: blits the player healthbox's own HP-bar+digit overlay
+ * (`playerHealthboxHpOverlayForHp`) on top of whatever already drew the
+ * static base (the flat `menuHealthboxPlayer` harvest, or `menuIdleBase`'s
+ * own baked-in equivalent region - byte-identical there, both sourced from
+ * the same pre-turn-1 screen) - same null-skip blit shape as
+ * `drawSendOutHealthbox`. No-ops (skips the draw entirely) when `hp` is
+ * still the anchor full-HP value, since the static base already shows that
+ * exact content and the overlay would just repaint it unchanged.
+ */
+function drawPlayerHealthboxHpOverlay(fb: Uint8Array, hp: number): void {
+  if (hp === anchorPlayerBattler.hp) return;
+  const { width, height, pixels } = playerHealthboxHpOverlayForHp(hp);
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const color = pixels[py * width + px];
+      if (!color) continue;
+      setPixel(fb, menuHealthboxPlayer.x + px, menuHealthboxPlayer.y + py, color);
+    }
+  }
 }
 const summaryBall = summaryBallAsset as SummaryBallAsset;
 const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
@@ -3398,6 +3455,16 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
   // `turn1Resolved` - Grovyle's healthbox always needs its real (101) HP
   // here, never the stale full-HP harvest.
   drawActionMenuIdleContent(fb, turn2KickoffBounceTick(t, pressTick), true);
+  // S7 slice E1b: Onix's own HP-bar drain (117->101, `endeavorOnixHp`) is
+  // valid for every `t` (clamped both sides) - safe to call unconditionally
+  // here rather than gating on a separate "drain window" branch, same
+  // convention `drawRockSlideAttack`/`drawTurnEndSettledMenu` already use
+  // for the opponent's own bar. Before the drain starts (and through
+  // ENDEAVOR's own unmodeled attack-animation window, ticks ~3003-3097 -
+  // see battleMenu.ts's own slice E1b doc) this resolves to the anchor HP,
+  // a no-op.
+  const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerBattler.hp, anchorPlayerAfterTurnHp);
+  drawPlayerHealthboxHpOverlay(fb, onixHp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
 }

@@ -1903,3 +1903,47 @@ export function turn2KickoffTextVisibleChars(t: number, pressTick: number): numb
   if (t < start) return 0;
   return Math.min(TURN2_KICKOFF_TEXT_TOTAL, t - start + 1);
 }
+
+// --- S7 slice E1b: ENDEAVOR's own resolution window - Onix's HP-bar drain
+// (docs/battle-turn-notes.md §12: RAM sentinel at tick 3098, drains
+// 116->101 over 3099-3114, done sentinel 3115, `gBattleMons[0].hp` itself
+// updates 3116) + the player healthbox's own HP-digit text
+// (docs/battle-menu-notes.md §13/§14). ENDEAVOR's own attack animation
+// (the attacker's squish/sweat-droplet/yellow-blend task plus the target's
+// generic hit-flash, `Move_ENDEAVOR`/`BattleScript_HitFromAtkAnimation` -
+// genuinely NOT the "plain generic hit" the prior slice's handoff assumed,
+// see the doc) is explicitly NOT modeled this session - out of scope, see
+// the doc's "what's left" note. Only the drain itself (which starts after
+// the animation's own hit-flash has already finished, RAM tick 3096) is
+// wired here.
+
+/**
+ * Ticks from the A-confirm press to the HP-bar's own sentinel tick (RAM/
+ * render 3098 = pressTick(2945)+153, oracle/RAM-cross-confirmed against
+ * `battle1-turn2-ram-dump.json`'s `healthBar0Curr` column this session -
+ * NOT the same delay as `HIT_FLASH_RAM_ANCHOR_DELAY`/
+ * `ROCK_SLIDE_HP_DRAIN_START_DELAY` above, since ENDEAVOR's own attack
+ * animation (unmodeled, see this section's own doc) takes a different
+ * number of ticks than ROCK_SLIDE's before the target's hit-flash finishes
+ * and `healthbarupdate` fires).
+ */
+export const ENDEAVOR_HP_DRAIN_START_DELAY = 153;
+
+/**
+ * Onix's own HP-bar drain value at trace tick `t` (`startHp`=117, `endHp`=
+ * 101 for this trace) - same shape as `rockSlideOpponentHp` (1 HP unit per
+ * tick, clamped, valid for every `t`) but its own named function since the
+ * anchor delay differs (see `ENDEAVOR_HP_DRAIN_START_DELAY`'s doc) and this
+ * is the PLAYER side, not the opponent's. **Grid-search-confirmed (this
+ * session) the render tick uses `t` directly, no `-1` lag** - same
+ * same-frame-CPU-copy mechanism `rockSlideOpponentHp`'s own doc already
+ * reasoned about for the opponent bar, now independently re-confirmed
+ * player-side rather than assumed: fit exact (0/288 mismatches) against 6
+ * distinct fill-pixel-count/digit-text ticks spanning the drain (2999, 3099,
+ * 3103, 3107, 3111, 3128) via `battle-healthbox.json`'s `hpbar`/`hpbarAnim`
+ * tile sheets, cropped to the player healthbox's own fill strip.
+ */
+export function endeavorOnixHp(t: number, pressTick: number, startHp: number, endHp: number): number {
+  const d = t - (pressTick + ENDEAVOR_HP_DRAIN_START_DELAY);
+  return Math.max(endHp, startHp - Math.max(d, 0));
+}
