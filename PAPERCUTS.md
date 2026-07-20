@@ -137,3 +137,27 @@ compare run exposed the staleness.
   cell-height multiples; for boundary-pinning work prefer per-tick
   numeric pixel probes (which is what actually worked) over visual
   sheets entirely.
+
+## ram-probe.py's mGBA log spew goes to STDOUT, not stderr (2026-07-20)
+
+- **What:** the generic probe's docstring phrasing suggests redirecting
+  stderr silences the mGBA BIOS/DMA trace spew; it actually lands on
+  stdout, so `2>log` still buries results under megabytes of log lines.
+- **Hits:** 1 session (twice within it).
+- **Cost each:** ~5 min, twice.
+- **Workaround:** `>out 2>&1` and read the results FILE the probe
+  writes (never parse stdout) — consistent with the ROADMAP recipe's
+  existing "write JSON results to a file" rule; fixing the docstring
+  would be a one-line follow-up.
+
+## Uncommitted work wiped by a scratch-loop `git checkout` (2026-07-20)
+
+- **What:** a grid-search scratch loop that used `git checkout` to reset
+  experiment files wiped the session's real uncommitted `battleScene.ts`
+  edits (nothing had been committed yet); recovered from memory, ~15 min.
+- **Hits:** 1.
+- **Cost each:** ~15 min plus recovery risk.
+- **Workaround:** commit or stash BEFORE any throwaway-experiment loop
+  that touches tracked files — AGENTS.md's "commit after every green
+  step" already implies it; scratch loops that reset tracked files
+  should operate on copies under the scratch dir instead.
