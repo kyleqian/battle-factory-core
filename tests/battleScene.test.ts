@@ -38,7 +38,9 @@ import {
   turn3SubmenuBounceTick,
   turn5IconBarEva,
   turn5MaterializeCoeff,
+  turn5PidgeottoHealthboxSlideDx,
   turn5RockSlideKoDismissEligible,
+  TURN5_PIDGEOTTO_SETTLE_TICK,
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
@@ -1491,5 +1493,22 @@ describe("S7 slice L-4: turn5MaterializeCoeff (docs/faint-switch-notes.md §10 c
   it("stays 0 past the ramp (into the wobble-table phase)", () => {
     expect(turn5MaterializeCoeff(6784)).toBe(0);
     expect(turn5MaterializeCoeff(6800)).toBe(0);
+  });
+});
+
+describe("S7 slice M: turn5PidgeottoHealthboxSlideDx (docs/faint-switch-notes.md §8e/§11 - same 23-step linear slide as S6's own send-out healthbox, re-anchored TURN5_PIDGEOTTO_SETTLE_TICK+1 - the +1 is a pixel-verified correction this session, a naive TURN5_PIDGEOTTO_SETTLE_TICK anchor reproduced the oracle's own sequence exactly one tick early throughout)", () => {
+  it("is null (not yet created) before the mon's own materialize settles", () => {
+    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK - 1)).toBeNull();
+    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK)).toBeNull();
+  });
+  it("starts at -110 the tick it's created and climbs +5/tick", () => {
+    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK + 1)).toBe(-110);
+    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK + 2)).toBe(-105);
+    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK + 22)).toBe(-5);
+  });
+  it("settles to 0 at render 6851 (22 steps after the +1-lagged creation tick 6829) and stays settled indefinitely", () => {
+    expect(turn5PidgeottoHealthboxSlideDx(6851)).toBe(0);
+    expect(turn5PidgeottoHealthboxSlideDx(6852)).toBe(0);
+    expect(turn5PidgeottoHealthboxSlideDx(7000)).toBe(0);
   });
 });

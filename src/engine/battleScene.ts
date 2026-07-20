@@ -1457,12 +1457,14 @@ const HEALTHBOX_SLIDE_START_TICK = 1495;
 const HEALTHBOX_SLIDE_START_DX = -110;
 const HEALTHBOX_SLIDE_STEP = 5;
 const HEALTHBOX_SLIDE_SETTLE_TICK = 1517;
+/** 23-step linear slide span (settle - start), same shape at any anchor - docs/faint-switch-notes.md §8e re-confirmed this identical shape (same step count/size) for Pidgeotto's own switch-in slide-in, just anchored 6828 instead of 1495 (`TURN5_PIDGEOTTO_SETTLE_TICK`). */
+const HEALTHBOX_SLIDE_SPAN = HEALTHBOX_SLIDE_SETTLE_TICK - HEALTHBOX_SLIDE_START_TICK;
 
-/** Opponent healthbox's content-image x offset (added to its extracted `x`) at trace tick `t`, or `null` before it's created. */
-function healthboxSlideDx(t: number): number | null {
-  if (t < HEALTHBOX_SLIDE_START_TICK) return null;
-  if (t >= HEALTHBOX_SLIDE_SETTLE_TICK) return 0;
-  return HEALTHBOX_SLIDE_START_DX + HEALTHBOX_SLIDE_STEP * (t - HEALTHBOX_SLIDE_START_TICK);
+/** Opponent healthbox's content-image x offset (added to its extracted `x`) at trace tick `t`, or `null` before it's created (`startTick`, default `HEALTHBOX_SLIDE_START_TICK` for S6's own send-out). */
+function healthboxSlideDx(t: number, startTick: number = HEALTHBOX_SLIDE_START_TICK): number | null {
+  if (t < startTick) return null;
+  if (t >= startTick + HEALTHBOX_SLIDE_SPAN) return 0;
+  return HEALTHBOX_SLIDE_START_DX + HEALTHBOX_SLIDE_STEP * (t - startTick);
 }
 
 /**
@@ -5775,6 +5777,41 @@ const TURN5_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number
 ];
 export const TURN5_PIDGEOTTO_SETTLE_TICK = 6828;
 
+/**
+ * S7 slice M (docs/faint-switch-notes.md §8e/§3d): Pidgeotto's own opponent
+ * healthbox - composited the same way `opponentHealthboxContent` is for
+ * Grovyle, PIDGEOTTO's own name/level/gender pixel-confirmed this session
+ * (`PIDGEOTTO Lv50`, gender glyph sampled blue = male, oracle frame crop at
+ * tick 6900 of `battle1-switchin-dense-c.json`). HP stays full (156/156)
+ * for this entire slice's own window (turn 6's own ROCK_SLIDE hit, which
+ * drains it to 113, is out of scope - `docs/turn6-notes.md` §4).
+ */
+const PIDGEOTTO_LEVEL = 50;
+const pidgeottoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
+  name: "PIDGEOTTO",
+  level: PIDGEOTTO_LEVEL,
+  gender: "male",
+  hpFraction: 1,
+  status: "none",
+});
+
+/**
+ * S7 slice M (docs/faint-switch-notes.md §8e, re-timed this session): Pidgeotto's
+ * own healthbox slide-in - bit-for-bit the same 23-step `healthboxSlideDx`
+ * shape as S6's own send-out, re-anchored at `TURN5_PIDGEOTTO_SETTLE_TICK + 1`
+ * (6829). §8e's own RAM probe cites RAM tick 6828 for the slide task's own
+ * `callback` flip - this render anchor needs the ordinary +1 RAM-to-render
+ * lag every other mechanism in this dossier carries (first pixel-confirmed
+ * this session directly: a naive render anchor of 6828 reproduces the
+ * oracle's own slide sequence exactly one tick EARLY throughout, `tools/
+ * compare/out` diff isolated the whole mismatch to this single off-by-one -
+ * onset of visible content 6830 (app) vs 6831 (oracle), settle 6851 (app) vs
+ * 6852 (oracle), a constant 1-tick gap at every sample). Settles at 6851.
+ */
+export function turn5PidgeottoHealthboxSlideDx(t: number): number | null {
+  return healthboxSlideDx(t, TURN5_PIDGEOTTO_SETTLE_TICK + 1);
+}
+
 function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
   const materializeStart = TURN5_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET;
   if (t < materializeStart || t >= TURN5_PIDGEOTTO_SETTLE_TICK) return;
@@ -5858,6 +5895,11 @@ function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
   drawTurn5RockSlideAttack(fb, t);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
+  // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own
+  // healthbox slide-in, anchored at TURN5_PIDGEOTTO_SETTLE_TICK - a no-op
+  // (null) before the mon's own materialize settles.
+  const pidgeottoHealthboxDx = turn5PidgeottoHealthboxSlideDx(t);
+  if (pidgeottoHealthboxDx !== null) drawSendOutHealthbox(fb, pidgeottoHealthboxDx, pidgeottoHealthboxContent);
   drawMenuHealthboxPlayer(fb, 0);
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn5Hp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
