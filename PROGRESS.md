@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 183 — Worktree probe (supervisor-folded): BOTH remaining "redraw extremum" ticks ROOT-CAUSED as real engine bugs (label retired) — 4934 = kickoff-text delay-family mis-selected by the monotonic `turn2Resolved` gate during turn 4's DOUBLE_TEAM window; 5927 = the -2 bounce phase shift applied in the SAME render tick the reopen press registers (hardware switches one tick later); merged `7d93103`, suite 785/785 on the merged tree
+
+- **State:** merged into master, `npm test` 785/785 + build green
+  post-merge. New: 6 probe specs + twice-run outputs, 3 verification
+  scripts (supervisor re-ran `verify-turn4-kickoff-textgate-rule.py` and
+  `verify-turn5-reopen-switch-rule.py` in the worktree — both VERDICT
+  sections pass), `docs/turn3-residual-probe-notes.md` "The extremum
+  class, probed". No engine changes (by design).
+- **Did:** (4934) the RAM `OpponentHandlePrintString` tick is
+  move-family-specific (+9 DOUBLE_TEAM, +8 ENDEAVOR), render lag uniform
+  +1; the engine's `textStart` gate keys off monotonic `turn2Resolved`
+  so turn 4 wrongly gets ENDEAVOR-family delay. Corrective rule (add
+  `&& !(turn3Resolved && !turn4Resolved)`) verified across all 5 turns,
+  zero collateral. (5927) `core.ts` applies `turn5SubmenuBounceTick`'s
+  shift in the press-registering tick itself; the real bouncer is smooth
+  through it — the rule is a ONE-TICK-LATE formula switch, single-tick-
+  scoped, cannot touch 5928+ (all already exact). A non-causal 2-tick
+  sSinIndex stall one tick later was found and honestly ruled out.
+- **Next:** a small cleanup slice applies both rules + restores 4934/
+  5927 to their traces' captureFrames (turns 1-5 would then have ZERO
+  excluded residual ticks).
+- **Notes:** no new papercuts.
+
+---
 ## 182 — Bounded worker: ISSUES #25 FIXED — FIGHT-submenu B-close/reopen strand (user-reported) — new dispatch branch reopens after a settled B-close with cursor persisted, at every turn epoch, no epoch flag advanced; `fight-submenu-reopen.json` (new) **90/90, 0 diff**, `npm test` **785/785** (+4), build green, zero regressions
 
 - **State:** `npm test` 785/785, `npm run build` green, tree clean.
@@ -105,55 +129,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   headroom in EVERY channel to resolve each step distinctly, or solve
   directly from RAM palette-buffer data (as this session ultimately did for
   the ramp-down coefficient) rather than a screenshot color read.
-
----
-## 180 — Bounded worker: S7 slice L-2 (retry) — icon-bar re-trigger LANDED, tick-6727 transient RESOLVED (RAM-probed, not guessed); `turn5-sentout.json` (new) **141/141, 0 diff**, `npm test` **780/780** (+4), build green, zero regressions
-
-- **State:** `npm test` 780/780, `npm run build` green, tree clean.
-  `turn5-sentout.json` (icon-bar create/slide/settle/text/fade/destroy,
-  tick 6588-6728) **141/141, 0 diff** (new). Full regression sweep at exact
-  prior counts, all 0 diff: `turn5-faint` 110/110, `turn5-rockslide`
-  256/256, `turn5-endeavor` 254/254, `turn5-menu` 41/41, `turn4-rockslide`
-  250/250, `turn4-doubleteam` 249/249, `turn3-rockslide` 256/256, `turn1-
-  rockslide` 256/256, `fight-submenu` 235/235, `turn3-endeavor` 192/192,
-  `turn3-menu` 254/254, `turn2-endeavor-drain` 201/201, `turn4-menu`
-  44/44, `turn2-dragonbreath` 237/237, `turn1-cloneanim` 230/230,
-  `menu-idle` 69/69, `turn2-endeavor` 77/77, `s6-acceptance` 224/228,
-  `scene-assembly` 256/256, plus `sendout.json` **255/256** (unchanged,
-  pre-existing named residual).
-- **Did:** per the supervisor's own explicit instruction, RAM-probed BOTH
-  of #179's open unknowns BEFORE writing any render code (two new
-  `ram-probe.py` specs, `switchin-iconbar-{slidein,transient}.json`, each
-  run twice, byte-identical). Result: (1) the icon slide-in is NOT
-  per-icon-staggered as #179 guessed - all 7 sprites (bar + 6 icons) share
-  one IDENTICAL `x2` curve, bit-for-bit `OPP_BAR_X2` itself, zero stagger.
-  (2) the tick-6727 "mystery transient" RESOLVED: at RAM 6725 all 7
-  sprites' OAM `objMode` flips `NORMAL`->`BLEND` simultaneously (`x`/`y`/
-  `x2`/`y2` unchanged - ruling out a position explanation), then all 7 are
-  destroyed together at RAM 6742 - the same `Task_HidePartyStatusSummary`
-  alpha-blend-then-destroy shape already modeled for the PLAYER bar's own
-  S6-intro exit (`playerSummaryFadeEva`), just a flatter cadence here (1
-  unit/tick, not "every other"). Implemented `drawTurn5IconBar` (reuses
-  `OPP_BAR_X2`/`tableX2`/`drawBallStatusBar`/`blendedSetPixel` - zero new
-  low-level drawing code) + the sent-out text hard-cut at the oracle-pinned
-  absolute tick 6687. Landed BOTH the mandatory rung (a) and rung (b) in
-  one commit (`turn5-sentout.json`, 6588-6728) since both were RAM-resolved
-  before any code was written - stops one tick before the unimplemented
-  ball prop's own first pixel (confirmed via a pixel-level diff that the
-  gap is ball-shaped, not icon-bar-shaped: mismatched region isolated to
-  x170-181/y58-69, the ball's own resting corner, ball-open-palette
-  colors). Added 4 Tier-1 pins (icon-flip state, 3 for the tick-6727
-  eva-ramp mechanism, 1 for the sent-out text timing). Docs: `docs/faint-
-  switch-notes.md` §9 gained a "Resolution" subsection; new §25 in
-  `docs/battle-turn-notes.md`.
-- **Next:** the ball prop (fully spec'd, §8b: slot 7, static `(176,64)`,
-  6727-6756) through Sitrus/settled-menu - all still pinned in docs, none
-  reached this session (ran out of cap after landing the icon-bar
-  mechanism cleanly). The two-anchor design (ball/tint/particles vs. the
-  front-sprite stretch tables, 24 ticks apart) is unaffected by this
-  session's findings and remains the right shape for that work.
-- **Notes:** no new papercuts - the RAM-probe-first approach (both
-  unknowns resolved before writing render code) avoided #179's own
-  papercut (a large speculative draft reverted after burning most of the
-  cap) entirely; worth keeping as the default order for future sessions
-  chasing an undocumented pixel transient.
