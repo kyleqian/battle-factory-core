@@ -1,3 +1,46 @@
+## 157 — Supervisor: round 4 folded + **OPEN ESCALATION to the user (fire projectiles: 3 bounded attempts, each narrowing, none closing)** — swap-screen assets extracted & composite-verified; suite 711/711, build green, tree clean, no worktrees
+
+- **State (supervisor-verified this minute):** `npm test` **711/711**,
+  `npm run build` green, tree clean at the `99ec13e` merge + this docs
+  commit, no worktrees/stray branches. Trace counts unchanged and
+  supervisor-spot-checked: `turn2-dragonbreath.json` 84/84,
+  `turn2-endeavor-drain.json` 201/201.
+- **Did:** Worktree lane (`99ec13e`, merged): swap-screen assets
+  extracted — `action-box`/`action-highlight` (slide buttons) +
+  `swap-screen-windows.json` (BG/window templates, mechanically parsed
+  from source), composite-verified vs FRESH oracle pixels at **0
+  unexplained mismatches / 1404 opaque px** (supervisor reran the
+  verification script itself); everything else the swap screen draws is
+  source-confirmed verbatim reuse of draft-screen gen assets. §17
+  ADDENDUM 3. Main lane (`f71448a`): projectile attempt #3 — the
+  ember-palette-blend suspect is now CLOSED by source-level call-chain
+  proof (not just empirics), and the residual is renamed precisely:
+  salt-and-pepper edge OVER-DRAW when compressed (|matrixA|>256) vs an
+  isolated MISSING blob when magnified, correct core both sides. Pulled
+  again (no wrong pixels shipped).
+- **ESCALATION (open, asked in-terminal 2026-07-20 ~00:35):** the fire
+  projectiles have now taken 3 bounded attempts with real narrowing each
+  time and no closure. Asked the user how to spend the remaining ~3.5h.
+  Supervisor recommendation: ONE more targeted attempt on a specific new
+  hypothesis (below), then park as a named remainder if it misses.
+  Attempt #4 launched concurrently with the question (cancelable).
+- **Supervisor hypothesis driving attempt #4** (`E2a-5`): the defect is
+  in `drawSpriteSheetAffineRotate`'s SAMPLING CONVENTION (battleScene.ts
+  ~2337), not in any DRAGON_BREATH value — correct core + wrong edges,
+  opposite artifacts either side of 1:1 scale, is the signature of a
+  half-texel/rounding mismatch in a backward-mapped affine sampler; and
+  this sampler's only other rotating consumer (ball spin) never exceeds
+  |pa|=255 while DRAGON_BREATH starts at 703, i.e. the bug's regime was
+  never exercised before. Brief mandates hardware-semantics derivation +
+  a 4-variant sweep + a hard regression gate on every shared consumer.
+- **Next:** fold attempt #4 and the concurrent core.ts per-battle-moveset
+  plumbing step (S8 prerequisite named in ROADMAP S8); then E2b (HP drain
+  + turn end, 3347-3846), faint/forced-switch slice. ISSUES #22 open
+  (idle fixture tick 2135, informational).
+- **Notes:** worker costs $5.26 + $5.10 (17/16 min). ISSUES #19's fix
+  left `battle1-fight-submenu-idle.json` at 255/256 (tick 2135 = #22).
+
+---
 ## 156 — Bounded worker: S7 slice E2a-4 attempt — fire-projectile attempt #3: PRIME SUSPECT (concurrent ember-palette blend) definitively RULED OUT by source+pixel evidence; residual precisely characterized (two scale-dependent artifact shapes, present from a spawn's very first tick) but NOT closed — pulled a third time; `npm test` **711/711** (unchanged), build green, zero regressions, no trace change
 
 - **State:** `npm test` 711/711, `npm run build` green, tree clean.
