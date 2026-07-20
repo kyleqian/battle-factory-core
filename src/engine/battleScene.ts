@@ -403,7 +403,7 @@
 //    module-level STATUS note above.
 
 import type { RgbColor } from "./bg.ts";
-import { drawGlyphCodes, drawText, type FontData, type TextColors } from "./font.ts";
+import { drawText, type FontData } from "./font.ts";
 import { blendComponentToWhite } from "./paletteFade.ts";
 import {
   GO_TEXT,
@@ -437,6 +437,7 @@ import {
   FIGHT_SUBMENU_SLOT_NAMES,
   CLOSED_FIGHT_SUBMENU_STATE,
   type FightSubmenuState,
+  type FightSubmenuSlot,
   turnKickoffTextStartTick,
   turnKickoffTextVisibleChars,
   turnKickoffBounceTick,
@@ -464,8 +465,6 @@ import {
   ROCK_SLIDE_TEXT_CLEAR_DELAY,
   ROCK_SLIDE_MENU_REDRAW_DELAY,
   rockSlideResettledBounceTick,
-  ppRemainingGlyphCodes,
-  ROCK_SLIDE_PP_REMAINING_ORIGIN,
   TURN2_KICKOFF_LINE2,
   turn2KickoffTextVisibleChars,
   turn2KickoffTextStartTick,
@@ -473,6 +472,7 @@ import {
   turn2KickoffBounceTick,
   endeavorOnixHp,
 } from "./battleMenu.ts";
+import { buildFightMoveset, drawFightSubmenuText, type FightMoveset } from "./fightSubmenuText.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -809,39 +809,19 @@ const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleHealthbo
 const fightSubmenuWindow = fightSubmenuWindowAsset as FightSubmenuWindowAsset;
 
 /**
- * `SetPPNumbersPaletteInMoveSelection`'s full-PP (state 3) color pair from
- * `text_pp.pal` (`gPPTextPalette`), gbaRoundTrip-expanded - same source/
- * values `tests/fontNarrow.test.ts` already pins for the harvest's own
- * baked-in "10/10"/"20/20" digits. ROCK_SLIDE's 9/10 this turn resolves to
- * this SAME state (`getCurrentPPToMaxPPState(9, 10) === 3`,
- * `battleMenu.ts`), oracle-pixel-confirmed - no new color is needed.
+ * Onix's fixed battle-1 moveset (`FIGHT_SUBMENU_SLOT_NAMES`' own order),
+ * built from real `gBattleMons[0].moves`-style ids (157/20/225/201 =
+ * ROCK_SLIDE/BIND/DRAGON_BREATH/SANDSTORM, RAM-confirmed -
+ * `src/data/gen/battle1-turn1-ram-dump.json`) rather than hand-typed name
+ * strings - `fightSubmenuText.ts`'s `buildFightMoveset` looks up name/type/
+ * maxPP from `moves.json` per id. ISSUES #20's ONLY previously-live PP
+ * change (ROCK_SLIDE spending 1 PP once turn 1 resolves, docs/battle-menu-
+ * notes.md §13) is still the sole per-tick input needed here - nothing else
+ * in this run tracks PP spend for the other three moves, so they stay at
+ * max, matching every existing trace exactly.
  */
-const PP_REMAINING_PALETTE: RgbColor[] = [];
-PP_REMAINING_PALETTE[12] = { r: 74, g: 74, b: 74 };
-PP_REMAINING_PALETTE[14] = { r: 255, g: 255, b: 255 };
-PP_REMAINING_PALETTE[11] = { r: 222, g: 222, b: 222 };
-const PP_REMAINING_COLORS: TextColors = { fg: 12, bg: 14, shadow: 11 };
-
-/**
- * S7 slice E1: ROCK_SLIDE's PP digits redrawn dynamically over the static
- * per-slot harvest (docs/battle-menu-notes.md §13) - the harvest's own
- * "10/10" is stale once turn 1 spends a PP, so this overlays a fresh render
- * at the real `B_WIN_PP_REMAINING` window position (`ROCK_SLIDE_PP_REMAINING_
- * ORIGIN`, patch-local) via the real FONT_NORMAL glyph pipeline, matching
- * ISSUES #20's own scope note (only the PP-digits question is in scope this
- * slice, not the full FONT_NARROW rewire).
- */
-function drawRockSlidePpOverlay(fb: Uint8Array, currentPP: number, maxPP: number): void {
-  const codes = ppRemainingGlyphCodes(currentPP, maxPP);
-  drawGlyphCodes(
-    fb,
-    font,
-    codes,
-    fightSubmenuWindow.x + ROCK_SLIDE_PP_REMAINING_ORIGIN.x,
-    fightSubmenuWindow.y + ROCK_SLIDE_PP_REMAINING_ORIGIN.y,
-    PP_REMAINING_PALETTE,
-    PP_REMAINING_COLORS,
-  );
+function onixMoveset(turn1Resolved: boolean): FightMoveset {
+  return buildFightMoveset([157, 20, 225, 201], turn1Resolved ? [9, 20, 20, 10] : [10, 20, 20, 10]);
 }
 
 /** This window's own trace-tick origin - `elapsed` 0 == trace tick 1040 (tools/compare/traces-groundtruth/battle1-scene-dense.json's own first captured frame). */
@@ -3443,24 +3423,38 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // Slice 7 doc comment: `DoBounceEffect` stops being polled the instant
     // the A-press hands off, not merely once the text becomes visible).
     drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
-    const slotName = FIGHT_SUBMENU_SLOT_NAMES[sm.displayCursor];
-    const patch = fightSubmenuWindow.slots[slotName]!;
-    drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
+    drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved);
     drawMenuIdleBounceOverlay(fb, turn1Resolved ? turn2KickoffBounceTick(t, pressTick) : turnKickoffBounceTick(t, pressTick));
     return;
   }
   drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
-  const slotName = FIGHT_SUBMENU_SLOT_NAMES[sm.displayCursor];
-  const patch = fightSubmenuWindow.slots[slotName]!;
-  drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  // S7 slice E1: turn 2 dwelling back on ROCK_SLIDE (cursor rests at slot 0
-  // reopening) needs its PP redrawn 9/10 - the harvest's own baked "10/10"
-  // is turn-1-only (docs/battle-menu-notes.md §13).
-  if (turn1Resolved && slotName === "ROCK_SLIDE") drawRockSlidePpOverlay(fb, 9, 10);
+  drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved);
   // S7 slice E1: turn 2's own reopened submenu inherits the resettled menu's
   // bounce phase, not the plain absolute-`t` mapping turn 1's first open
   // happened to coincide with (`turn2SubmenuBounceTick`'s own doc).
   drawMenuIdleBounceOverlay(fb, turn1Resolved ? turn2SubmenuBounceTick(t) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+}
+
+/**
+ * ISSUES #20's rewire: the submenu's chrome (border + cursor arrow, still
+ * the oracle harvest - `MoveSelectionCreateCursorAt`/`DestroyCursorAt` poke
+ * the BG tilemap directly, a separate mechanism from the text-window/
+ * printer system, so there's nothing to rewire there) keyed by cursor
+ * position exactly as before, followed by the real live text layer
+ * (`fightSubmenuText.ts`'s `drawFightSubmenuText`) for the move names/PP/
+ * type - replaces the old per-slot static harvest's baked-in text, so this
+ * renders correctly for any moveset the caller supplies (only Onix's fixed
+ * battle-1 set is wired here still - `onixMoveset` - since nothing upstream
+ * of this render function threads a real per-battle moveset through yet;
+ * see docs/battle-menu-notes.md §13b for the scope boundary and the KABUTO
+ * moveset used to pin the live text path's generality in `tests/
+ * fightSubmenuText.test.ts`).
+ */
+function drawFightSubmenuChrome(fb: Uint8Array, displayCursor: FightSubmenuSlot, turn1Resolved: boolean): void {
+  const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
+  const patch = fightSubmenuWindow.slots[slotName]!;
+  drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
+  drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, onixMoveset(turn1Resolved), displayCursor);
 }
 
 /** The onix/healthbox bounce overlay alone (`drawActionMenuIdleContent`'s own second half, factored out so `drawFightSubmenuWindow`'s frozen-bounce branch can reuse it without redrawing `menuIdleBase`). */

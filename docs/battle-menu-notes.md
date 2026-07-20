@@ -2002,6 +2002,130 @@ timing; (`tests/damageCalc.test.ts`, 5 new tests): `calculateEndeavorDamage`/
 `resolveEndeavorDamage` against the RAM-confirmed 117/101/16/8 chain. `npm
 test` **659/659**, `npm run build` green.
 
+## 13b. ISSUES #20 remainder: the live-pipeline rewire (bounded worker, worktree lane) - `drawFightSubmenuWindow` now renders move names/PP/type through the real FONT_NARROW/FONT_NORMAL glyph pipeline for ANY moveset, not just battle 1's fixed Onix set; `fight-submenu.json` stays **234/235** and `turn2-endeavor.json` stays **76/77** (same sole ISSUES #19 residual, byte-identical everywhere else)
+
+Closes ISSUES #20's remainder (the extraction half - `src/data/gen/font-
+narrow.json`, `tests/fontNarrow.test.ts` - was already closed by a prior
+worker). `drawFightSubmenuWindow` (`battleScene.ts`) used to blit one of
+four PER-SLOT STATIC pixel harvests (`fight-submenu-window.json`, each
+patch a whole-window screen capture with Onix's fixed move names/PP/type
+baked in) - correct for battle 1's own fixed moveset, but incapable of
+rendering anything else, blocking S8 battles 2-7 (each has a different
+opponent moveset - e.g. battle 2's KABUTO: MEGA DRAIN/ANCIENTPOWER/
+SAND-ATTACK/PROTECT, not Onix's ROCK_SLIDE/BIND/DRAGONBREATH/SANDSTORM).
+
+**New file, `src/engine/fightSubmenuText.ts`** - owns exactly the six text
+windows `sStandardBattleWindowTemplates` defines for move selection
+(B_WIN_MOVE_NAME_1..4, B_WIN_PP, B_WIN_PP_REMAINING, B_WIN_MOVE_TYPE):
+
+- **Move names (FONT_NARROW).** All 4 names always drawn (`gMoveNames`
+  never depends on cursor position - only the highlighted slot's PP/type
+  does), each window's own rect first blanked to `PIXEL_FILL(0xE)`
+  (white, index 14) before redraw so a shorter/longer name than whatever
+  the chosen chrome patch baked in never leaves stale pixels - window
+  rects (64x16px name windows, 32x16 PP/PP_REMAINING, 64x16 TYPE) are
+  `sStandardBattleWindowTemplates`' own tile geometry (width/height tiles
+  * 8px) with `text.x`/`text.y` subtracted from the already-pinned text
+  origins (`tests/fontNarrow.test.ts`'s `MOVE_NAME_*_ORIGIN` etc) to
+  recover each window's own top-left - checked generous against every
+  move name/type-name width sampled (widest name DRAGONBREATH/
+  ANCIENTPOWER ~60px of 64; widest TYPE/+typename ~61px of 64).
+- **The mixed-font "TYPE/"+type-name run.** `MoveSelectionDisplayMoveType`
+  (battle_controller_player.c:1496-1508) prints "TYPE/" in the window's
+  own FONT_NARROW, splices an `EXT_CTRL_CODE_FONT` control code, then
+  prints the type name in FONT_NORMAL - SAME colors both halves
+  (fg=13/bg=14/shadow=15, the control code changes font id only). Ported
+  as two back-to-back `drawText` calls, the second starting at
+  `measureText(fontNarrow, "TYPE/")` past the first (both fonts'
+  `letterSpacing` extracted as 0, so the walking-cursor and measured-width
+  conventions coincide exactly - no drift). Type display names
+  (`TYPE_DISPLAY_NAMES`) are `gTypeNames` (battle_main.c:451-469)
+  transcribed verbatim, NOT a `TYPE_`-prefix strip - it diverges
+  (FIGHTING->"FIGHT", ELECTRIC->"ELECTR", PSYCHIC->"PSYCHC",
+  MYSTERY->"???") - source-re-parsed and pinned structurally in the new
+  test file, not just trusted.
+- **PP "x/y" digits (FONT_NORMAL, `B_WIN_PP_REMAINING`).** Reuses
+  `battleMenu.ts`'s existing `ppRemainingGlyphCodes`/
+  `ROCK_SLIDE_PP_REMAINING_ORIGIN` (already real/proven since §13 - the
+  name predates this general rewire, it's the window's own generic
+  origin, not ROCK_SLIDE-specific) - this session GENERALIZES its call
+  site from "only ROCK_SLIDE, only 9/10" to every slot/moveset.
+- **The PP dynamic-color state machine, fully wired (not just the one
+  full-PP state §13 needed).** `SetPPNumbersPaletteInMoveSelection`
+  (battle_message.c:3033-3045) overwrites BG palette bank 5 indices
+  12(fg)/11(shadow) from `gPPTextPalette` (`graphics/battle_interface/
+  text_pp.pal`) at `state*2 + {0,1}`, `state` = `GetCurrentPPToMaxPPState`
+  (0=empty..3=full, already ported/pinned in `battleMenu.ts` since §13).
+  Both B_WIN_PP (the "PP" label) and B_WIN_PP_REMAINING (the digits) read
+  these SAME two bank-5 indices, so both share one dynamic pair per state
+  - `PP_STATE_COLORS`, all 4 states' `gbaRoundTrip`-expanded values,
+  structurally pinned against a fresh `loadJascPal` re-parse of
+  `text_pp.pal` in the new test file (state 3 independently reproduces
+  `tests/fontNarrow.test.ts`'s own already-pinned (74,74,74)/(222,222,222)
+  pair, confirming the two extractions agree).
+- **`buildFightMoveset(moveIds, currentPPs)`.** Takes `gBattleMons[].
+  moves`-style numeric ids (the RAM-native representation - e.g.
+  `src/data/gen/battle2-turn1-battler-dump.json`'s own `moves`/`pp`
+  fields) plus live current-PP, looks up name/type/maxPP from
+  `moves.json` per id - `maxPP` is always the move's own base `pp` (no
+  PP-Up modeling anywhere in this run; every known RAM dump's `pp` field
+  already equals base PP exactly, Onix's and KABUTO's alike).
+
+**`battleScene.ts`'s own change is small.** `drawFightSubmenuWindow`'s two
+call sites that used to blit-then-stop (or blit-then-ROCK_SLIDE-PP-patch)
+now both call one new `drawFightSubmenuChrome(fb, displayCursor,
+turn1Resolved)`: blit the SAME oracle-harvested chrome patch as before
+(border + cursor arrow - `MoveSelectionCreateCursorAt`/`DestroyCursorAt`
+poke the BG tilemap directly, a wholly separate mechanism from the text-
+window/printer system this rewire targets, so there's genuinely nothing to
+replace there), then `drawFightSubmenuText` on top with `onixMoveset
+(turn1Resolved)` - battle 1's real moveset, built via `buildFightMoveset`
+from RAM-confirmed move ids (157/20/225/201) rather than hand-typed name
+strings, preserving the one real per-tick PP change (ROCK_SLIDE 10/10 ->
+9/10 once turn 1 resolves, §13's own finding) as the sole input. The old
+`drawRockSlidePpOverlay`/`PP_REMAINING_PALETTE` special-case is gone -
+subsumed by the general path.
+
+**Scope boundary, explicit.** This session rewires the RENDER layer only.
+Nothing upstream (`FightSubmenuState`, `core.ts`'s state machine) threads a
+real per-battle moveset through yet - `core.ts`'s own A-press confirm
+gating (`cursor === 0 || cursor === 2`) and turn-kickoff logic are still
+battle-1-specific and untouched (out of this worker's file ownership:
+`battleMenu.ts` + `drawFightSubmenuWindow`'s own region of `battleScene.ts`
++ new files only). Wiring S8 battles 2-7's real opponent movesets through
+the whole state machine (draft/rental -> battle setup -> this render call)
+is future work; this slice's job was only to prove the RENDER path itself
+is no longer battle-1-special-cased, which the KABUTO test below does.
+
+**Acceptance - identity first.** Both `npm run compare` traces re-run
+before AND after the rewire, diffed frame-list-for-frame-list:
+`fight-submenu.json` **234/235** before and after (residual frame 2073
+unchanged, ISSUES #19's own family); `turn2-endeavor.json` **76/77**
+before and after (residual frame 2906 unchanged, same family). Full
+regression sweep of every other trace this session could plausibly affect
+re-verified at prior exact counts: `turn1-rockslide` 256/256, `turn1-drain`
+102/102, `turn1-kickoff` 81/81, `turn1-cloneanim` 230/230, `turn2-endeavor-
+drain` 200/201 (same pre-existing residual), `menu-idle` 69/69. The other
+29 traces in `tools/compare/traces/` were also swept and match their own
+already-documented (pre-existing, unrelated) baselines - none regressed.
+
+**Acceptance - generality.** New `tests/fightSubmenuText.test.ts` (14
+tests): (1) the decisive identity test - composes chrome-blit +
+`drawFightSubmenuText` for battle 1's real moveset at all 4 cursor
+positions and compares the FULL `fight-submenu-window.json` patch
+byte-exact (not just each glyph's own crop the way `fontNarrow.test.ts`'s
+decisive test does - this also proves the new blank-rect geometry doesn't
+bleed into the surrounding chrome); (2) `PP_STATE_COLORS`/
+`TYPE_DISPLAY_NAMES` structural pins against fresh source re-parses; (3)
+KABUTO's real S8-battle-2 moveset (RAM-dumped move ids/PP from
+`battle2-turn1-battler-dump.json`) renders at all 4 cursor positions
+without throwing, its name/type strings verified against `moves.json`
+("SAND-ATTACK"'s hyphen, "ANCIENTPOWER"'s no-space), and all 4 PP-color
+states independently re-rendered (fresh `text_pp.pal` parse, not the
+module's own table) and compared byte-exact against `drawFightSubmenuText`'s
+own output on ANCIENTPOWER's real maxPP(5) at synthetic current-PP values
+spanning every band. `npm test` **707/707** (+14), `npm run build` green.
+
 ## 14. S7 slice E1b: Onix's own HP-bar drain + player-healthbox HP digits (bounded worker, this session) - `turn2-endeavor-drain.json` **105/106** (the one residual is the SAME ISSUES #19 family already accepted in `turn2-endeavor.json`); ENDEAVOR's own attack animation stays OUT OF SCOPE, see below
 
 Extends slice E1's own handoff (§13's "what's left") from tick 2999 (the
