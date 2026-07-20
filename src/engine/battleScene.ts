@@ -471,8 +471,10 @@ import {
   turn2SubmenuBounceTick,
   turn2KickoffBounceTick,
   endeavorOnixHp,
+  currentPPForActiveMon,
 } from "./battleMenu.ts";
-import { buildFightMoveset, drawFightSubmenuText, type FightMoveset } from "./fightSubmenuText.ts";
+import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
+import type { ActiveMonMoveset } from "./battleSetup.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -807,22 +809,6 @@ const menuIdleBase = menuIdleBaseAsset as MenuIdleFrameAsset;
 const menuIdleOnixBounce = menuIdleOnixBounceAsset as MenuIdleFrameAsset;
 const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleHealthboxBounceAsset;
 const fightSubmenuWindow = fightSubmenuWindowAsset as FightSubmenuWindowAsset;
-
-/**
- * Onix's fixed battle-1 moveset (`FIGHT_SUBMENU_SLOT_NAMES`' own order),
- * built from real `gBattleMons[0].moves`-style ids (157/20/225/201 =
- * ROCK_SLIDE/BIND/DRAGON_BREATH/SANDSTORM, RAM-confirmed -
- * `src/data/gen/battle1-turn1-ram-dump.json`) rather than hand-typed name
- * strings - `fightSubmenuText.ts`'s `buildFightMoveset` looks up name/type/
- * maxPP from `moves.json` per id. ISSUES #20's ONLY previously-live PP
- * change (ROCK_SLIDE spending 1 PP once turn 1 resolves, docs/battle-menu-
- * notes.md §13) is still the sole per-tick input needed here - nothing else
- * in this run tracks PP spend for the other three moves, so they stay at
- * max, matching every existing trace exactly.
- */
-function onixMoveset(turn1Resolved: boolean): FightMoveset {
-  return buildFightMoveset([157, 20, 225, 201], turn1Resolved ? [9, 20, 20, 10] : [10, 20, 20, 10]);
-}
 
 /** This window's own trace-tick origin - `elapsed` 0 == trace tick 1040 (tools/compare/traces-groundtruth/battle1-scene-dense.json's own first captured frame). */
 export const TICK0 = 1040;
@@ -3424,12 +3410,12 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
     // Slice 7 doc comment: `DoBounceEffect` stops being polled the instant
     // the A-press hands off, not merely once the text becomes visible).
     drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
-    drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved);
+    drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved, sm.activeMonMoveset);
     drawMenuIdleBounceOverlay(fb, turn1Resolved ? turn2KickoffBounceTick(t, pressTick) : turnKickoffBounceTick(t, pressTick));
     return;
   }
   drawMenuIdleBaseWithOpponentHp(fb, turn1Resolved);
-  drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved);
+  drawFightSubmenuChrome(fb, sm.displayCursor, turn1Resolved, sm.activeMonMoveset);
   // S7 slice E1: turn 2's own reopened submenu inherits the resettled menu's
   // bounce phase, not the plain absolute-`t` mapping turn 1's first open
   // happened to coincide with (`turn2SubmenuBounceTick`'s own doc).
@@ -3444,18 +3430,25 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
  * position exactly as before, followed by the real live text layer
  * (`fightSubmenuText.ts`'s `drawFightSubmenuText`) for the move names/PP/
  * type - replaces the old per-slot static harvest's baked-in text, so this
- * renders correctly for any moveset the caller supplies (only Onix's fixed
- * battle-1 set is wired here still - `onixMoveset` - since nothing upstream
- * of this render function threads a real per-battle moveset through yet;
- * see docs/battle-menu-notes.md §13b for the scope boundary and the KABUTO
- * moveset used to pin the live text path's generality in `tests/
- * fightSubmenuText.test.ts`).
+ * renders correctly for any moveset the caller supplies. S8 engine
+ * dependency (docs/battle-menu-notes.md §13c): `moveset` now reaches here
+ * from `FightSubmenuState.activeMonMoveset` (`battleSetup.ts`'s
+ * `activeMonMoveset`, sourced from the draft screen's own confirmed rental
+ * picks via core.ts) instead of a battle-1-fixed literal - `currentPP` is
+ * still `turn1Resolved`'s own PP-decrement rule (`battleMenu.ts`'s
+ * `currentPPForActiveMon`, generalized from the old hardcoded 9/10 but
+ * still only ever touching slot 0, see that function's own doc for the
+ * scope this doesn't extend). See docs/battle-menu-notes.md §13b for the
+ * KABUTO moveset used to pin the render layer's own generality in `tests/
+ * fightSubmenuText.test.ts`, and §13c for the state-plumbing tests proving
+ * this same path end-to-end.
  */
-function drawFightSubmenuChrome(fb: Uint8Array, displayCursor: FightSubmenuSlot, turn1Resolved: boolean): void {
+function drawFightSubmenuChrome(fb: Uint8Array, displayCursor: FightSubmenuSlot, turn1Resolved: boolean, moveset: ActiveMonMoveset): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, onixMoveset(turn1Resolved), displayCursor);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved);
+  drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
 /** The onix/healthbox bounce overlay alone (`drawActionMenuIdleContent`'s own second half, factored out so `drawFightSubmenuWindow`'s frozen-bounce branch can reuse it without redrawing `menuIdleBase`). */

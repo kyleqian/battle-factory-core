@@ -2214,6 +2214,119 @@ module's own table) and compared byte-exact against `drawFightSubmenuText`'s
 own output on ANCIENTPOWER's real maxPP(5) at synthetic current-PP values
 spanning every band. `npm test` **707/707** (+14), `npm run build` green.
 
+## 13c. S8 engine dependency closed: the PER-BATTLE MOVESET now reaches the FIGHT submenu through real state plumbing, not battle-1's hardcoded literal (bounded worker, worktree lane) - identity-first re-verified byte-for-byte (`fight-submenu.json` 235/235, `turn2-endeavor.json` 77/77, `turn2-endeavor-drain.json` 201/201, `turn2-dragonbreath.json` 84/84, `s6-acceptance.json` 224/228, `sendout.json` 255/256, all unchanged before/after), `npm test` **724/724** (+13)
+
+Closes the exact gap ROADMAP.md's S8 section flagged ("Engine dependency
+noted, 2026-07-19 night"): §13b's rewire proved `fightSubmenuText.ts`'s
+render primitives handle any moveset, but `core.ts` still fed
+`drawFightSubmenuChrome` battle-1's own `onixMoveset(turn1Resolved)`
+function - a literal `[157, 20, 225, 201]` (ROCK_SLIDE/BIND/DRAGON_BREATH/
+SANDSTORM) with a hand-typed PP ternary. This session wires the STATE half:
+the moveset the renderer receives is now sourced from the same battle-setup
+state the rest of the engine already derives (the draft screen's own
+confirmed rental picks), not a constant.
+
+**New file, `src/engine/battleSetup.ts`.** `activeMonMoveset(draftScreen)`
+resolves the party LEAD's moveset (`factoryDraftScreen.ts`'s own
+`chosenMonSpecies(draftScreen)[0]` - pick-rank order, the same mon every
+committed trace this engine's battle scene actually sends out) via
+`rentalMoveset(species)`, which looks the species up in
+`anchor-state.json`'s own `rentals[]` array - the SAME production data file
+`summaryInfoPage.ts` already reads for the Info page (indexed by pool slot
+there; matched by species name here, since `chosenMonSpecies` only returns
+species) - and converts each `MOVE_*` name to its numeric id via
+`moves.json`'s own `move` field, landing on exactly the
+`gBattleMons[].moves`-native shape `fightSubmenuText.ts`'s `buildFightMoveset`
+already expects (`{ moveIds, maxPP }`). Scope boundary stated in the
+module's own doc: this engine only ever models ONE battle in progress and
+never mid-battle switches, so "the active mon" always means the confirmed
+party's lead - generalizing to switches is future S8 work, not faked here.
+
+**The plumbing route, chosen to respect this step's file-ownership split**
+(worktree brief: `battleScene.ts` touchable only in the `drawFightSubmenu*`
+render region, ~lines 3350-3480; `core.ts`/`battleMenu.ts`/tests/new files
+otherwise). `BattleSceneState` (defined outside that region) is left
+**completely untouched** - instead, the new `activeMonMoveset` field lives
+on `FightSubmenuState` (`battleMenu.ts`, wholly owned this session), which
+`BattleSceneState` already carries as a plain field (`fightSubmenu`) that
+`advanceBattleScene`'s existing whole-object passthrough (`fightSubmenu:
+state.fightSubmenu`) already forwards unchanged tick-to-tick - so adding a
+field to `FightSubmenuState` requires zero edits to `BattleSceneState`,
+`INITIAL_BATTLE_SCENE_STATE`, or `advanceBattleScene`. `openFightSubmenu`
+(battleMenu.ts) now takes the moveset as a second argument and stamps it in
+directly (the same "created directly, then passed through" idiom
+`sendOutPressElapsed` already established); `core.ts`'s two call sites
+(turn 1's first open, turn 2's reopen) both pass
+`activeMonMoveset(draftScreen)` - `draftScreen` is already in scope there
+unchanged from `state.draftScreen` (the battle-scene branch of `tick()`
+never mutates it), so this is a stable, idempotent re-derivation each open,
+not a one-time snapshot that could drift. Inside the render region itself
+(`battleScene.ts`, in-bounds edits only), `drawFightSubmenuChrome` gained
+one parameter (`moveset: ActiveMonMoveset`, read from `sm.activeMonMoveset`
+at both its call sites in `drawFightSubmenuWindow`) and now builds
+`buildFightMoveset(moveset.moveIds, currentPPForActiveMon(moveset,
+turn1Resolved))` instead of calling the deleted `onixMoveset`.
+
+**PP state, generalized not regressed.** ISSUES #20's only previously-live
+PP change (ROCK_SLIDE spending 1 PP once turn 1 resolves) is now
+`battleMenu.ts`'s exported `currentPPForActiveMon(moveset, turn1Resolved)`:
+`turn1Resolved ? [maxPP[0]-1, ...maxPP.slice(1)] : maxPP`. Explicitly NOT
+generalized further - it still only ever decrements SLOT 0, because that's
+still the only PP-after-use this dossier has ever oracled (this engine's
+own turn-1 confirm gate only ever fires on cursor 0); a Tier-1 test proves
+the function itself is agnostic to whose moveset it's given (KABUTO's own
+maxPP decremented the same way), but the "which slot" rule stays the
+scripted battle-1 behavior on purpose, flagged in both the function's doc
+comment and here rather than silently assumed to generalize.
+
+**Tests (`tests/battleSetup.test.ts`, new, 13 tests).** (1) Battle-1
+identity: `activeMonMoveset` on a fully-confirmed ONIX/MAGBY/BAYLEEF draft
+screen equals `battle2-turn1-battler-dump.json`'s battler0 moveset (moves
++ pp) read straight from the committed dump, not a hand-copied literal -
+the exact "moveset the engine hands the renderer equals the RAM-dumped
+gBattleMons moveset" the brief asked for. (2) Battle-setup-layer
+genericity: `rentalMoveset("MAGBY")` resolves Magby's own real moveset
+(FIRE_PUNCH/SMOKESCREEN/CONFUSE_RAY/SMOG, ids cross-checked against
+`moves.json` independently of the module's own lookup) - and a draft screen
+that picks BAYLEEF *first* resolves to Bayleef, proving this reads pick-rank
+order, not pool slot 0. (3) State-plumbing genericity end-to-end - the
+brief's explicit ask, "not just at the render layer as today": KABUTO's
+real S8 battle-2 moveset (`battle2-turn1-battler-dump.json`'s battler1),
+placed on a `FightSubmenuState.activeMonMoveset` via the real
+`openFightSubmenu` constructor (not a hand-built state literal), drives
+`renderBattleScene` itself at all 4 cursor positions and matches an
+independently-assembled expected image (built from the same lower-level
+`buildFightMoveset`/`drawFightSubmenuText` primitives §13b's own tests
+already trust, but composed here without going through any state machine)
+byte-for-byte - plus one more case proving `turn1Resolved`'s PP-decrement
+also reaches the renderer for a non-Onix moveset. (4) Defensive pins:
+`activeMonMoveset` throws (not fakes data) on an unconfirmed draft screen;
+`rentalMoveset` throws on an unknown species.
+
+**Identity-first, verified before AND after, frame-list-diffed exact.**
+Ran all 6 named acceptance traces on the pre-rewire tree (`git stash`),
+saved each trace's full per-frame `DIFF`/`matched` output, restored the
+rewire, re-ran, and diffed the two frame-list files line-for-line:
+`fight-submenu.json` **235/235**, `turn2-endeavor.json` **77/77**,
+`turn2-endeavor-drain.json` **201/201**, `turn2-dragonbreath.json`
+**84/84**, `s6-acceptance.json` **224/228**, `sendout.json` **255/256** -
+every one **byte-identical**, not just count-identical (the diff files
+matched line-for-line, so even the residual frames' own diff-pixel-counts
+are unchanged). All 32 traces under `tools/compare/traces/` swept as a
+regression check too - every count matches its own pre-existing documented
+baseline, zero regressions. `npm test` **724/724** (+13), `npm run build`
+green.
+
+**What's left.** `activeMonMoveset` always resolves the confirmed party's
+LEAD - there is still no engine state machine for "which battle is this"
+or "which party mon is currently active" beyond that (battle 2 itself,
+mid-battle switches, and the swap-screen's own effect on the roster are
+all future S8 slices per ROADMAP.md). `currentPPForActiveMon`'s slot-0-only
+PP rule is scoped identically to before - generalizing "whichever move was
+actually confirmed loses 1 PP" needs a second real oracled data point this
+dossier doesn't have yet (every move-PP-after-use trace so far is
+ROCK_SLIDE's own). Neither gap blocks S8's stated acceptance for this step.
+
 ## 14. S7 slice E1b: Onix's own HP-bar drain + player-healthbox HP digits (bounded worker, this session) - `turn2-endeavor-drain.json` **105/106** (the one residual is the SAME ISSUES #19 family already accepted in `turn2-endeavor.json`); ENDEAVOR's own attack animation stays OUT OF SCOPE, see below
 
 Extends slice E1's own handoff (§13's "what's left") from tick 2999 (the
