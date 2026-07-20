@@ -30,6 +30,7 @@ import {
   TEXT_TOTAL_CHARS,
   textVisibleChars,
   TICK0,
+  TURN5_BALL_HANDOFF_TICK,
   TURN5_ICONBAR_CREATE_TICK,
   TURN5_ICONBAR_DESTROY_TICK,
   TURN5_ICONBAR_FADE_START_TICK,
@@ -1410,5 +1411,11 @@ describe("S7 slice L: switchinSentOutTextVisibleChars (docs/faint-switch-notes.m
     expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK + SWITCHIN_SENTOUT_TEXT_TOTAL + 50)).toBe(
       SWITCHIN_SENTOUT_TEXT_TOTAL,
     );
+  });
+});
+
+describe("S7 slice L-3: TURN5_BALL_HANDOFF_TICK (docs/faint-switch-notes.md §10 - RAM ball-creation tick, oracle-pixel-verified: reusing drawSendOutBall's own BALL_CLOSED_START_OFFSET(2) against this anchor lands the ball's first visible pixel exactly on render 6729, matched 0-diff against turn5-switchin.json)", () => {
+  it("is the RAM-probed ball-creation tick (battle1-switchin-ball-particle-detail-probe.json, slot 7)", () => {
+    expect(TURN5_BALL_HANDOFF_TICK).toBe(6727);
   });
 });

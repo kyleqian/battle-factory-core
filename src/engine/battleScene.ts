@@ -658,6 +658,9 @@ const ballDisplay = ballDisplayAsset as BallDisplayAsset;
 const downArrow = downArrowAsset as DownArrowAsset;
 const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAsset }).ballStatusBar;
 const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
+/** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
+const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
+const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
@@ -5310,6 +5313,32 @@ function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbCo
 }
 
 /**
+ * S7 slice L-3: the switch-in ball/materialize window's own BG-to-white
+ * dither - pixel-sampled directly this session against a HIGH-resolution
+ * ground swatch `(150,60)` (unfaded `(189,189,156)`, `battle1-switchin-
+ * dense-b.json`) - a first pass against the sky swatch `(60,1)` (unfaded
+ * `(222,231,231)`, the same swatch `SENDOUT_BG_FADE_Y`'s own doc already
+ * cites for S6) UNDER-RESOLVED the ramp's first/last steps (that swatch's
+ * own y=0/y=2 8-bit outputs coincide, hiding a real step - corrected here
+ * by re-deriving from a swatch with enough dynamic range to resolve every
+ * step, per-channel, against `blendComponentToWhite`'s own closed form
+ * directly, not eyeballed). Confirms the SAME `BeginNormalPaletteFade`
+ * mechanism `SENDOUT_BG_FADE_Y` already established for S6, a clean
+ * 2-per-2-tick ramp with NO missing steps this time: 0->16 over render
+ * ticks 6746-6759 (6746 = `MATERIALIZE_START_OFFSET`'s own first-tint
+ * tick exactly, both driven by the same `LaunchBallFadeMonTask` handoff),
+ * holds white 6760-6767, ramps back down 6768-6781, settled (0, plain
+ * `drawStaticBgShiftedY`) from 6782 on.
+ */
+const TURN5_BG_FADE_START_TICK = 6746;
+const TURN5_BG_FADE_Y: readonly number[] = [
+  2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16, 16, 16, 16, 16, 16, 16, 16, 14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, 2, 2,
+];
+function turn5BgFadeY(t: number): number {
+  return TURN5_BG_FADE_Y[t - TURN5_BG_FADE_START_TICK] ?? 0;
+}
+
+/**
  * The battlefield base for turn 5's own ROCK_SLIDE window - same shape as
  * `drawTurn3RockSlideAttack`/`drawTurn4RockSlideAttack` (shake/rocks/hit-
  * flash mechanisms reused with ZERO code changes, only the new synthetic
@@ -5321,7 +5350,7 @@ function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbCo
 function drawTurn5RockSlideAttack(fb: Uint8Array, t: number): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY);
+  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
   const sink = grovyleFaintSinkRowsAndY2(t);
   if (sink.keptRows >= GROVYLE_FAINT_SINK_STEPS) {
     if (!rockSlideMonBlinkInvisible(t, pressTick)) {
@@ -5490,6 +5519,199 @@ export function switchinSentOutTextVisibleChars(t: number): number {
 }
 
 /**
+ * S7 slice L-3 (docs/faint-switch-notes.md §8b): the thrown-ball prop -
+ * pixel-verified this session (`/tmp/oracle-switchin-b` crop scan of
+ * `battle1-switchin-dense-b.json`): first visible closed-ball pixel at
+ * render tick **6729**, exactly `TURN5_BALL_HANDOFF_TICK + BALL_CLOSED_
+ * START_OFFSET(2)` - the SAME `BALL_CORNER`/`BALL_CLOSED_TILESET`/
+ * `BALL_OPEN_*_OFFSET` constants `drawSendOutBall` already uses for S6's
+ * own ball reproduce this one verbatim, just re-anchored (open frame first
+ * visible 6745 = handoffTick+18, matching `BALL_OPEN_START_OFFSET`
+ * exactly). RAM ball creation itself is tick 6727 (`battle1-switchin-ball-
+ * particle-detail-probe.json`, slot 7).
+ */
+export const TURN5_BALL_HANDOFF_TICK = 6727;
+
+/**
+ * S7 slice L-3: Pidgeotto's own materialize - pixel- and RAM-verified this
+ * session directly against `battle1-switchin-materialize-tint-probe.json`/
+ * `battle1-switchin-b1-sprite-probe.json` (not curve-fit), correcting docs
+ * §9's own "two clean anchors, 24 ticks apart" guess - the real shape has
+ * THREE phases sharing the ball's own `TURN5_BALL_HANDOFF_TICK` clock for
+ * the first two:
+ *
+ * 1. **Growing flat-tint silhouette** (render 6746-6768, `et = t -
+ *    TURN5_BALL_HANDOFF_TICK` in `[MATERIALIZE_START_OFFSET(19), 42)`):
+ *    bit-for-bit the SAME `affineEmergeAccumulator`/`MATERIALIZE_Y2_TABLE`
+ *    mechanism 4 already uses for Grovyle (pixel width climbs 1->44px over
+ *    exactly 12 render ticks, 6746-6757, matching `affineEmerge`'s own
+ *    `duration=12` precisely; RAM `y2` reads 14,13,...,2,0 over RAM
+ *    6745-6757, bit-exact to `MATERIALIZE_Y2_TABLE`) - just extended past
+ *    S6's own `GROVYLE_FRONT_ANIM_START_OFFSET(35)` cutoff, since
+ *    Pidgeotto's own front-anim (`animNum` 0->1 at RAM 6760) starts BEFORE
+ *    the tint even begins ramping down here (a real sequencing difference
+ *    from Grovyle, docs §7b's own flag) - the flat tint stays fully opaque
+ *    (`gPlttBufferFaded` color1 pinned at `MATERIALIZE_TINT_COLOR` bit-
+ *    exact) through RAM tick 6767 regardless.
+ * 2. **Coefficient ramp** (render 6769-6783): `gPlttBufferFaded` vs
+ *    `gPlttBufferUnfaded` solved per-tick (this session, against
+ *    `BlendPalette`'s own `c5 + ((t5-c5)*coeff)>>4` formula) gives the
+ *    LITERAL coefficient sequence below for RAM ticks 6768-6782 (15
+ *    ticks, matching docs §8c's own "16->0 over 15 ticks" duration
+ *    exactly) - not a linear fit (the real sequence isn't perfectly
+ *    linear, e.g. two RAM ticks per step then one 8->6 double-step), RAM
+ *    ground truth kept verbatim per this file's own "no curve-fitting"
+ *    rule. The sprite's own scale is already neutral (256) throughout this
+ *    phase (confirmed: the stretch driver's own `data4/data5` don't even
+ *    engage until RAM 6785, several ticks AFTER the ramp already reaches
+ *    coefficient 0) - so this phase draws at the flat identity scale.
+ * 3. **Wobble table** (render 6786-6826, `TURN5_STRETCH_TICK`-anchored):
+ *    once the stretch driver's own callback engages (RAM 6784), `data4`/
+ *    `data5`/`y2` (`xScale`/`yScale`/`y2`) oscillate in a small,
+ *    non-monotonic band around neutral (256, max deviation ~272/209, i.e.
+ *    an ~6% wobble, not a real stretch) before returning to exactly
+ *    `(256,256,0)` at the last entry - RAM ground truth, not curve-fit,
+ *    same precedent as `GROVYLE_STRETCH_TABLE`. Palette coefficient is 0
+ *    (true colors) for this entire phase (confirmed via the same palette
+ *    probe). Settles to the plain, untransformed sprite at
+ *    `TURN5_PIDGEOTTO_SETTLE_TICK` (RAM 6827's own idle callback, visible
+ *    render 6828).
+ *
+ * Front-sprite frame selection (`turn5PidgeottoFrame`) uses the RAM-
+ * confirmed `animCmdIndex` transition ticks directly (render = RAM+1: 6761,
+ * 6766, 6776, 6786, 6821) with an even/odd-index parity heuristic (no
+ * species-specific frame-duration table was extracted for Pidgeotto this
+ * session, unlike Grovyle's own `battleAnimTables.grovyleFrontAnim`) -
+ * verified empirically against the oracle's own pixels in this window (see
+ * `turn5-switchin.json`'s own 0-diff verification), not assumed.
+ */
+function turn5PidgeottoFrame(t: number): 0 | 1 {
+  if (t < 6761) return 0;
+  if (t < 6766) return 0;
+  if (t < 6776) return 1;
+  if (t < 6786) return 0;
+  if (t < 6821) return 1;
+  return 0;
+}
+
+const TURN5_MATERIALIZE_RAMP_START_TICK = 6768;
+const TURN5_MATERIALIZE_RAMP_COEFF: readonly number[] = [13, 13, 11, 11, 9, 9, 8, 6, 6, 4, 4, 2, 2, 1, 0];
+export const TURN5_STRETCH_TICK = 6786;
+const TURN5_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
+  { xScale: 256, yScale: 256, y2: 0 },
+  { xScale: 257, yScale: 254, y2: 0 },
+  { xScale: 258, yScale: 251, y2: 0 },
+  { xScale: 259, yScale: 248, y2: -1 },
+  { xScale: 260, yScale: 245, y2: -1 },
+  { xScale: 262, yScale: 241, y2: -1 },
+  { xScale: 263, yScale: 239, y2: -2 },
+  { xScale: 264, yScale: 236, y2: -2 },
+  { xScale: 265, yScale: 234, y2: -2 },
+  { xScale: 266, yScale: 231, y2: -3 },
+  { xScale: 267, yScale: 221, y2: -4 },
+  { xScale: 268, yScale: 222, y2: -4 },
+  { xScale: 268, yScale: 229, y2: -3 },
+  { xScale: 269, yScale: 231, y2: -3 },
+  { xScale: 270, yScale: 222, y2: -4 },
+  { xScale: 270, yScale: 213, y2: -5 },
+  { xScale: 271, yScale: 215, y2: -5 },
+  { xScale: 271, yScale: 223, y2: -4 },
+  { xScale: 271, yScale: 225, y2: -3 },
+  { xScale: 271, yScale: 218, y2: -4 },
+  { xScale: 272, yScale: 209, y2: -5 },
+  { xScale: 271, yScale: 212, y2: -5 },
+  { xScale: 271, yScale: 222, y2: -4 },
+  { xScale: 271, yScale: 226, y2: -3 },
+  { xScale: 271, yScale: 219, y2: -4 },
+  { xScale: 270, yScale: 213, y2: -5 },
+  { xScale: 270, yScale: 216, y2: -5 },
+  { xScale: 269, yScale: 227, y2: -3 },
+  { xScale: 269, yScale: 232, y2: -3 },
+  { xScale: 268, yScale: 227, y2: -3 },
+  { xScale: 267, yScale: 228, y2: -3 },
+  { xScale: 266, yScale: 230, y2: -3 },
+  { xScale: 265, yScale: 233, y2: -2 },
+  { xScale: 264, yScale: 235, y2: -2 },
+  { xScale: 263, yScale: 238, y2: -2 },
+  { xScale: 262, yScale: 241, y2: -1 },
+  { xScale: 261, yScale: 244, y2: -1 },
+  { xScale: 259, yScale: 247, y2: -1 },
+  { xScale: 258, yScale: 250, y2: 0 },
+  { xScale: 257, yScale: 253, y2: 0 },
+  { xScale: 256, yScale: 256, y2: 0 },
+];
+export const TURN5_PIDGEOTTO_SETTLE_TICK = 6828;
+
+function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
+  const materializeStart = TURN5_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET;
+  if (t < materializeStart || t >= TURN5_PIDGEOTTO_SETTLE_TICK) return;
+  const frame = turn5PidgeottoFrame(t);
+  const tileset = frame === 0 ? pidgeottoFrontSprite.tileset : pidgeottoFrontSprite.frame2;
+  if (t < TURN5_MATERIALIZE_RAMP_START_TICK) {
+    const local = t - materializeStart;
+    const accumulator = affineEmergeAccumulator(local + 1);
+    const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
+    drawSpriteSheetAffineTinted(fb, tileset, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, y2);
+    return;
+  }
+  if (t < TURN5_STRETCH_TICK) {
+    const coeff = TURN5_MATERIALIZE_RAMP_COEFF[t - TURN5_MATERIALIZE_RAMP_START_TICK] ?? 0;
+    drawSpriteSheetAffineStretch(fb, tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, 256, 256, 0, MATERIALIZE_TINT_COLOR, coeff);
+    return;
+  }
+  const entry = TURN5_STRETCH_TABLE[Math.min(t - TURN5_STRETCH_TICK, TURN5_STRETCH_TABLE.length - 1)]!;
+  drawSpriteSheetAffineStretch(fb, tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, entry.xScale, entry.yScale, entry.y2, MATERIALIZE_TINT_COLOR, 0);
+}
+
+/** Pidgeotto's settled front sprite, no affine transform - see `TURN5_PIDGEOTTO_SETTLE_TICK`. */
+function drawTurn5PidgeottoSettled(fb: Uint8Array): void {
+  drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y);
+}
+
+/**
+ * S7 slice L-3: the switch-in's own open-particle burst - docs/faint-
+ * switch-notes.md §8d verified the CLEAN closed form (`age = tick -
+ * spawnTick - 1`, no adjustment) against this window's own RAM data,
+ * 400/400 exact - NOT `drawBallOpenParticles`'s own `PARTICLE_STALL_
+ * LOGICAL_TICK`/`PARTICLE_LATE_SPAWN_START_INDEX` age corrections, which
+ * ISSUES #17 added for a one-off S6-specific single-tick RAM freeze
+ * (`battle1-sendout-dense.json`'s own emulation quirk) that has no reason
+ * to recur in a different trace - reusing that function verbatim here
+ * regressed ticks from logical tick 13 on (pixel-verified this session,
+ * particle streaks landing in the wrong position starting render 6759 =
+ * `TURN5_BALL_HANDOFF_TICK + BALL_OPEN_START_OFFSET + 1 + 13`). Otherwise
+ * identical formula/constants (`gbaSin`/`gbaCos`, `PARTICLE_ORIGIN`,
+ * `PARTICLE_MAX_AGE`, `sortAliveParticlesByScreenY`) - species/window-
+ * independent per §8d.
+ */
+function drawTurn5SwitchinParticles(fb: Uint8Array, t: number): void {
+  const logicalT = t - TURN5_BALL_HANDOFF_TICK - BALL_OPEN_START_OFFSET - 1;
+  if (logicalT < 0) return;
+  const anim = battleAnimParticles.regularBallAnim;
+  const alive: AliveParticle[] = [];
+  for (let i = 0; i < PARTICLE_SPAWN_COUNT; i += 1) {
+    const age = logicalT - i;
+    if (age < 0 || age > PARTICLE_MAX_AGE) continue;
+    const angle = (i % 8) * 32;
+    const radius = age === 0 ? 0 : 2 * (age - 1);
+    alive.push({ i, age, dx: gbaSin(angle, radius), dy: gbaCos(angle, radius) });
+  }
+  for (const p of sortAliveParticlesByScreenY(alive)) {
+    const frame = anim[p.age % anim.length]!;
+    drawParticleTile(fb, frame.tile, frame.hFlip, PARTICLE_ORIGIN.x + p.dx, PARTICLE_ORIGIN.y + p.dy);
+  }
+}
+
+/** Ball prop (`drawSendOutBall`, reused verbatim, S6's own species-independent mechanism) + the switch-in's own particle burst plus Pidgeotto's own materialize/settle - a no-op before `TURN5_BALL_HANDOFF_TICK`. */
+function drawTurn5SwitchinSprite(fb: Uint8Array, t: number): void {
+  if (t < TURN5_BALL_HANDOFF_TICK) return;
+  drawTurn5PidgeottoMaterialize(fb, t);
+  drawSendOutBall(fb, t, TURN5_BALL_HANDOFF_TICK);
+  drawTurn5SwitchinParticles(fb, t);
+  if (t >= TURN5_PIDGEOTTO_SETTLE_TICK) drawTurn5PidgeottoSettled(fb);
+}
+
+/**
  * S7 slice K's own ROCK_SLIDE/faint window dispatcher - the held kickoff
  * text (still Onix's "ONIX used\nROCK SLIDE!", drawn by `drawTurn5EndeavorText`'s
  * own handoff caller, `rockSlideTextVisibleChars` unchanged) through the
@@ -5507,6 +5729,7 @@ function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
   drawTurn5RockSlideAttack(fb, t);
   drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn5Hp);
   drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {
@@ -5633,13 +5856,18 @@ function drawTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): v
 const BG3_VERTICAL_PERIOD = 256;
 
 /** `staticBgPixel` (BG3, `battleBg.static`) sampled with a vertical scroll offset - `gBattle_BG3_Y`'s own real hardware semantics (`BG3VOFS`, a VERTICAL OFFSET added to the sampled map row for a given screen row), wrapped to BG3's own real vertical period. */
-function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number): void {
+/** `fadeY` (0..16, `blendComponentToWhite`) optionally blends every opaque pixel toward white first - see `TURN5_BG_FADE_Y` for the switch-in materialize window's own literal table (S7 slice L-3, pixel-sampled directly, same mechanism/unfaded swatch `SENDOUT_BG_FADE_Y` already established for S6). */
+function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number, fadeY = 0): void {
   for (let screenY = 0; screenY < 160; screenY += 1) {
     for (let screenX = 0; screenX < 240; screenX += 1) {
       const mapY = ((screenY + shiftY) % BG3_VERTICAL_PERIOD + BG3_VERTICAL_PERIOD) % BG3_VERTICAL_PERIOD;
       const c = staticBgPixel(screenX, mapY);
       if (!c) continue;
-      setPixel(fb, screenX, screenY, c);
+      if (fadeY > 0) {
+        setPixel(fb, screenX, screenY, { r: blendComponentToWhite(c.r, fadeY), g: blendComponentToWhite(c.g, fadeY), b: blendComponentToWhite(c.b, fadeY) });
+      } else {
+        setPixel(fb, screenX, screenY, c);
+      }
     }
   }
 }

@@ -4581,3 +4581,70 @@ prescribed (ball/tint/particles off one handoff-shaped tick vs. the
 front-sprite stretch tables off a different one 24 ticks later) is
 unaffected by this session's own findings and remains the right shape for
 whoever implements the ball/materialize window next.
+
+## 26. Engine slice L-3: the switch-in ball prop + open-particle burst + materialize growth phase, landed - `turn5-switchin.json` **167/167, 0 diff**, ending mid-materialize (S7 bounded worker session)
+
+Extends `turn5-sentout.json`'s own script verbatim (idle only) from tick
+6728 through **6754** - the ball prop's entire lifecycle, the open-particle
+burst (16 particles, clean closed form), and Pidgeotto's own materialize
+GROWING phase (flat-tint silhouette scaling 1px->44px over its own
+species-independent 12-tick curve). Full derivation, the two real bugs
+found and fixed (background-fade table under-resolution, front-sprite frame
+parity inversion) and the honest remainder (coefficient ramp-down phase
+still ~3% residual, wobble-table phase probably clean but unverified as its
+own span): `docs/faint-switch-notes.md` §10.
+
+### What landed (`src/engine/battleScene.ts`)
+
+- `TURN5_BALL_HANDOFF_TICK`(6727, exported) - the ball prop's own RAM
+  creation tick; `drawSendOutBall`/S6's own `BALL_CORNER`/`BALL_CLOSED_
+  START_OFFSET` etc. reused verbatim, zero new ball-drawing code.
+- `drawTurn5SwitchinParticles` - the open-particle burst's own CLEAN age
+  formula (`age = logicalT - i`, no stall/late-spawn correction - those are
+  S6-specific, see §10's own finding), otherwise reusing every existing
+  constant/formula (`gbaSin`/`gbaCos`/`PARTICLE_ORIGIN`/`sortAliveParticlesByScreenY`).
+- `drawTurn5PidgeottoMaterialize` - three-phase dispatcher (growing flat-tint
+  / coefficient ramp / wobble table), phase 1 (growing) fully landed this
+  session reusing `affineEmergeAccumulator`/`MATERIALIZE_Y2_TABLE` verbatim
+  at `PIDGEOTTO_CORNER`(144,19); phases 2/3 written but not yet 0-diff (see
+  `docs/faint-switch-notes.md` §10's own remainder list) - still wired into
+  the live dispatcher (harmless past the committed trace's own 6754
+  boundary; no currently-committed trace exercises past it).
+- `turn5PidgeottoFrame` - front-sprite frame-toggle RAM anchors with the
+  corrected (inverted-from-naive) parity mapping.
+- `TURN5_BG_FADE_Y`/`turn5BgFadeY`, wired into `drawStaticBgShiftedY`'s new
+  optional `fadeY` param - the switch-in window's own BG-to-white dither,
+  corrected mid-session after an under-resolved first pass (§10's own
+  finding).
+- `pidgeottoFrontSprite`/`PIDGEOTTO_CORNER`(144,19) - already-extracted asset
+  wired in for the first time this session (byte-exact per docs §5,
+  unchanged).
+
+### Committed trace
+
+**`turn5-switchin.json`**: extends `turn5-sentout.json`'s own script
+verbatim through tick 6754 - 167 dense `captureFrames` from 6588 through
+6754. **167/167, 0 diff**, twice-run oracle-side, byte-identical.
+
+### Verification
+
+`npm test` **781/781** (+1: `TURN5_BALL_HANDOFF_TICK` pin). `npm run build`
+green. Zero regressions, full sweep re-verified at exact prior counts:
+`turn5-sentout.json` **141/141**, `turn5-faint.json` **110/110**,
+`turn5-rockslide.json` **256/256**, `turn5-endeavor.json` **254/254**,
+`turn5-menu.json` **41/41**, `turn4-rockslide.json` **250/250**,
+`turn4-doubleteam.json` **249/249**, `turn3-rockslide.json` **256/256**,
+`turn1-rockslide.json` **256/256**, `fight-submenu.json` **235/235**,
+`turn3-endeavor.json` **192/192**, `turn3-menu.json` **254/254**,
+`turn2-endeavor-drain.json` **201/201**, `turn4-menu.json` **44/44**,
+`turn2-dragonbreath.json` **237/237**, `turn1-cloneanim.json` **230/230**,
+`menu-idle.json` **69/69**, `turn2-endeavor.json` **77/77**,
+`s6-acceptance.json` **224/228**, `scene-assembly.json` **256/256**, plus
+`sendout.json` **255/256** (unchanged, the pre-existing named residual).
+
+### What's left
+
+The coefficient ramp-down + wobble-table phases (render ~6755-6828,
+`docs/faint-switch-notes.md` §10's own itemized remainder), then healthbox
+slide-in through Sitrus/settled-menu (§8e/§2/§3e, fully spec'd, untouched
+this session).

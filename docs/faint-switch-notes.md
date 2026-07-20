@@ -1175,3 +1175,122 @@ notes.md` §25. Stops at 6728 (one tick before the unimplemented ball
 prop's own first pixel, confirmed by isolating the mismatched region to
 the ball's own resting corner, not the icon bar's bbox) — the ball prop
 through Sitrus/settled-menu remains open for a future session.
+
+## 10. S7 slice L-3 (bounded worker): ball + particle burst + materialize growth LANDED, ball-to-settle window partially closed — `turn5-switchin.json` 167/167, 0 diff, stops at 6754 (mid-materialize, NOT the full ball-to-settle window)
+
+Picked up exactly where §9's own Resolution left off (the ball prop
+through Sitrus/settled-menu). RAM-probed the remaining unknowns directly
+against the already-committed probes (`battle1-switchin-ball-particle-
+detail-probe.json`, `-materialize-tint-probe.json`, `-b1-sprite-probe.json`)
+plus fresh oracle pixel scans (`/tmp/oracle-switchin-{a,b}` regenerated from
+the committed `battle1-switchin-dense-{a,b}.json`), then iterated render
+code against the live oracle via `npm run compare`. Landed BALL (fully) and
+the front-sprite's own GROWING flat-tint silhouette phase (fully) — 26
+ticks (6729-6754) newly 0-diff. Did NOT land the remainder of the
+materialize window (coefficient ramp-down + wobble-table phases, roughly
+6755-6828) or anything past it (healthbox slide-in, Sitrus, settled menu) —
+real residuals remain there, itemized below so the next session doesn't
+re-spend the budget re-finding them.
+
+### What's landed, byte-exact
+
+- **`TURN5_BALL_HANDOFF_TICK = 6727`** (RAM ball-creation tick, `battle1-
+  switchin-ball-particle-detail-probe.json` slot 7) - reusing `drawSendOutBall`
+  VERBATIM with this anchor reproduces the ball's entire closed/open/
+  openFinal lifecycle bit-exact (pixel-verified: first visible closed-ball
+  pixel at render **6729** = `handoffTick+BALL_CLOSED_START_OFFSET(2)` exactly,
+  open frame at **6745** = `handoffTick+18` exactly - the SAME S6 offset
+  constants generalize with zero changes, only a new anchor).
+- **The open-particle burst's CLEAN closed form** - reusing `drawBallOpenParticles`
+  VERBATIM was WRONG: that function bakes in `PARTICLE_STALL_LOGICAL_TICK`/
+  `PARTICLE_LATE_SPAWN_START_INDEX` age corrections ISSUES #17 added for a
+  one-off S6-specific single-RAM-tick emulation freeze that has no reason to
+  recur here - pixel-verified this session (regressed ticks from logical
+  tick 13 on). §8d's own CLEAN formula (`age = tick - spawnTick - 1`, no
+  adjustment) is what actually matches - implemented as a new
+  `drawTurn5SwitchinParticles`, otherwise identical constants/formula
+  (`gbaSin`/`gbaCos`, `PARTICLE_ORIGIN`, `PARTICLE_MAX_AGE`,
+  `sortAliveParticlesByScreenY`).
+- **The materialize GROWING phase** (render 6746-6767, `drawTurn5PidgeottoMaterialize`
+  phase 1): reuses `affineEmergeAccumulator`/`MATERIALIZE_Y2_TABLE`/
+  `MATERIALIZE_TINT_COLOR` verbatim (same universal `BATTLER_AFFINE_EMERGE`
+  curve, species-independent) at Pidgeotto's own corner `(144,19)` - INCLUDING
+  the accumulator's own `+1` logical-offset correction §7.21 already
+  established for Grovyle (`affineEmergeAccumulator(local + 1)`, NOT
+  `(local)` - missing this on the first attempt this session produced an
+  oversized/wrong-shaped silhouette for the first ~12 ticks, byte-exact once
+  added).
+- **The switch-in window's own BG-to-white dither** (`TURN5_BG_FADE_Y`,
+  `turn5BgFadeY`, wired into `drawStaticBgShiftedY`'s new optional `fadeY`
+  param): a clean 0->16->0 ramp over render ticks 6746-6781 (2-per-2-tick,
+  zero missing steps - see the correction note below), same
+  `BeginNormalPaletteFade`/`blendComponentToWhite` mechanism `SENDOUT_BG_
+  FADE_Y` already established for S6. **Real correction found and fixed
+  this session**: a first-pass decode against the SKY swatch `(60,1)`
+  (unfaded `(222,231,231)`, the same swatch S6's own table cites) produced
+  an under-resolved table with two steps silently missing (that swatch's
+  own y=0 and y=2 8-bit outputs happen to coincide) - re-derived from a
+  higher-dynamic-range GROUND swatch `(150,60)` (unfaded `(189,189,156)`)
+  instead, which resolves every step cleanly against `blendComponentToWhite`'s
+  own closed form, no missing values. This was the SINGLE largest
+  contributor to this session's own early false starts (a >16000px/43%
+  full-frame diff before the fix, since the missing background fade was
+  misread as a sprite-shape bug at first).
+- **Front-sprite frame parity, corrected**: Pidgeotto's own `animCmdIndex`
+  transition ticks (RAM 6760/6765/6775/6785/6820, render = RAM+1) are
+  RAM-exact (`battle1-switchin-b1-sprite-probe.json`), but the naive
+  even-index-parity-to-frame0 mapping is INVERTED from the real one -
+  pixel-verified (474px residual at render 6761 dropped to 26px once
+  flipped). `turn5PidgeottoFrame` codes the corrected mapping.
+- **The materialize ramp phase's own render-lag is DIFFERENT from every
+  other RAM-tracked mechanism in this window**: the palette-coefficient
+  ramp (`TURN5_MATERIALIZE_RAMP_COEFF`, literal RAM-solved sequence,
+  `battle1-switchin-materialize-tint-probe.json`) becomes visible on-screen
+  at the SAME render tick as its own RAM tick (RAM 6768's coefficient=13 is
+  visible at render **6768**, not 6769) - NOT the "+1" lag this entire
+  dossier's every other mechanism (OAM x/y2, BG scroll, sprite callbacks)
+  carries. Using the expected "+1" first (ramp starting render 6769) put a
+  full extra flat-tint tick where the oracle already shows the first
+  partially-blended color, producing a solid-color full-silhouette mismatch
+  at exactly render 6768 (a >1300px residual) - flagged as a genuinely
+  different lag class for whoever next probes a palette-fade timing in this
+  file, not assumed to generalize back to `SENDOUT_BG_FADE_Y`'s own (already
+  pixel-verified, unrevisited) constants.
+
+### What's NOT landed - the honest remainder
+
+1. **The coefficient ramp-down phase itself (render 6768-6782) still
+   carries a ~3% residual** (~1100-1350px/frame) even after the lag fix
+   above - the coefficient VALUES themselves are RAM-exact (solved directly
+   from `gPlttBufferFaded` vs `gPlttBufferUnfaded`, not guessed), and the
+   frame-parity fix and lag fix both measurably helped, but something more
+   is still off in this narrow window - not root-caused this session
+   (ran out of time mid-diagnosis). Candidate next step: RAM-probe
+   `oam.affineMode`/the matrix registers directly across this exact
+   sub-window (RAM 6767-6783) rather than continuing to infer geometry from
+   `affineEmergeAccumulator`'s own extrapolated saturation.
+2. **The wobble-table phase (render ~6786-6828, `TURN5_STRETCH_TABLE`) is
+   ALREADY near-clean** (residuals of 0-14px/frame, likely rounding/
+   anti-aliasing noise, not a real shape bug) but wasn't independently
+   pixel-verified as its own isolated 0-diff span this session (only
+   observed as part of the fuller ball-to-settle scratch sweep) - a fast
+   remaining task, not a research gap.
+3. **`TURN5_PIDGEOTTO_SETTLE_TICK = 6828` is pixel-confirmed** (exact 0-diff
+   match at render 6828 in every scratch sweep run this session) - safe to
+   reuse directly.
+4. Healthbox slide-in, Sitrus proc, and the settled menu vs. PIDGEOTTO are
+   UNTOUCHED this session (ran out of cap after the materialize-window
+   debugging above) - §8e/§2/§3e's own formulas/tables are still the
+   right starting point, unchanged by anything in this section.
+
+### Bottom line for whoever picks this up next
+
+Don't re-derive the ball/particle/growth-phase mechanisms above - they're
+byte-exact and committed (`turn5-switchin.json`, 6588-6754). The real next
+task is narrow: close the ~3% residual in the coefficient ramp-down
+sub-window (6768-6782, item 1 above), then verify the wobble-table phase
+its own dense 0-diff span (item 2), which should unlock `TURN5_PIDGEOTTO_
+SETTLE_TICK`(6828) as a clean extension boundary - at that point the
+healthbox slide-in through Sitrus/settled-menu (§8e/§2/§3e, all still
+fully spec'd, untouched by this session) is the only remaining unexplored
+territory in the whole faint/forced-switch sequence.
