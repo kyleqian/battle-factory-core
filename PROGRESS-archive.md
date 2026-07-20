@@ -1,3 +1,28 @@
+## 176 — Worktree scout (supervisor-folded): switch-in formula verification — faint sink PINNED as a closed form (source+RAM agree tick-for-tick), materialize stretch is a BYTE-EXACT re-anchored reuse of `GROVYLE_STRETCH_TABLE` (41/41), Sitrus = 2 sprites (`ANIM_TAG_THIN_RING`/`ANIM_TAG_SPARKLE_2`, gfx confirmed unextracted); merged `4fd6489`, suite 768/768 on the merged tree
+
+- **State:** merged into master, `npm test` 768/768 + build green
+  post-merge (supervisor-verified; sink formula re-checked vs
+  `battle_main.c:2783` by supervisor). New: `docs/faint-switch-notes.md`
+  §7 + 2 probe specs with twice-run outputs. No engine changes.
+- **Did:** (1) faint sink closed form: handoff at 6502, `n = 8 -
+  floor(yOffset/8)` erase steps at `S+1,S+3,…,S+2n-1` (`y2` 8→64),
+  destroy at `S+2n+1` = 6519 — matches §3a pixel evidence tick-for-tick.
+  (2) Pidgeotto's materialize stretch geometry = `GROVYLE_STRETCH_TABLE`/
+  `_EARLY_TABLE` verbatim, re-anchored 1503→6791 — no new table needed.
+  Open-particle burst shape confirmed (13 sprites, 1-tick stagger,
+  26-tick life) but its radial motion formula was not captured. (3)
+  Sitrus effect: exactly 2 sprites, cross-checked vs
+  `General_HeldItemEffect`'s two `loadspritegfx` calls; gfx genuinely
+  unextracted (checked, not assumed).
+- **Next (slice L's named gaps):** thrown-ball prop sprite identity/
+  table; materialize palette tint RAM confirmation; particle burst
+  motion formula; Sitrus ring+sparkle gfx extraction; healthbox
+  slide-in ramps (not reached). Slice K (ROCK_SLIDE→faint→gate→fainted
+  text) needs NONE of these.
+- **Notes:** worker PAPERCUT (ram-probe.py path vocab can't shift/mask
+  sub-byte bitfields — blocked the tint check) recorded in PAPERCUTS.md.
+
+---
 ## 175 — Bounded worker: S7 slice J — turn 5's FIGHT-submenu reopen + Grovyle's ENDEAVOR (Onix 88→1), landed green, ending BEFORE Onix's own ROCK_SLIDE kickoff; `turn5-menu.json` (new) **41/41**, `turn5-endeavor.json` (new) **254/254**, both 0 diff, `npm test` **768/768** (+7), build green, zero regressions
 
 - **State:** `npm test` 768/768, `npm run build` green, tree clean.

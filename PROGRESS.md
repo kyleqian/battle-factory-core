@@ -4,6 +4,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 179 — Bounded worker: S7 slice L attempt (switch-in tail) — NOT LANDED, ran out of the 60-min cap mid-verification; speculative engine draft reverted (uncommitted); one real new blocker pinned precisely, `npm test` 776/776 + build unchanged (docs-only commit)
+
+- **State:** tree unchanged from #178 except one docs-only addition
+  (`docs/faint-switch-notes.md` §9). `npm test` **776/776**, `npm run build`
+  green — identical to the pre-session baseline; no engine code shipped.
+- **Did:** implemented a full draft of the switch-in tail (party-icon-bar
+  re-trigger, "sent out PIDGEOTTO!" text, ball prop, materialize/stretch/
+  particle-burst reuse, healthbox slide-in) in `src/engine/battleScene.ts`
+  and iteratively verified it against the oracle via `npm run compare`
+  (dense scratch traces, ticks 6580-6815). Two pieces came back **byte-
+  exact**: the sent-out text (6687-6726, every tick 0 diff) and the icon-
+  bar retrigger's own SETTLED state (6608-6726, 0 diff) — both safe for the
+  next session to re-add verbatim. Found and pixel-verified a real
+  correction to §3b's own guess: the flipped icon (GROVYLE's own former
+  slot, index 5) renders as `"Statused"`, not `"Fainted"` (0/37 mismatched
+  px, byte-exact). Found a genuinely NEW, previously-undocumented blocker:
+  at render tick 6727 (exactly when the ball prop spawns), the icon-bar
+  region changes AGAIN (a 16-tick alternating-magnitude transient, then a
+  third distinct steady state) — not itemized anywhere in §3/§7/§8, and it
+  conflates with the ball/materialize window in any compare run spanning
+  both, so it blocks clean verification of everything from the ball prop
+  onward. Ran out of the session's 60-minute cap before RAM-probing this
+  directly (the fast path to resolve it) or reaching a clean 0-diff
+  boundary anywhere past tick 6726. Per AGENTS.md ("keep the tree green at
+  each commit," never ship a non-0-diff trace as done), reverted the
+  speculative `battleScene.ts` draft rather than commit broken/unverified
+  engine code — kept only the docs findings (real, oracle-verified,
+  independent of the reverted code).
+- **Next:** re-implement slice L starting from
+  `docs/faint-switch-notes.md` §9's own findings (saves re-deriving the
+  text/icon-settle mechanisms and the two-anchor materialize-timing
+  hypothesis). RAM-probe the tick-6727 icon-bar interaction FIRST
+  (`gSprites[]` for the 6 icon-bar sprites across render ticks 6720-6745,
+  same `path`-based technique as `switchin-b1-sprite.json`) — it's the one
+  new unknown gating everything downstream (ball/materialize/particles/
+  healthbox-slide/Sitrus/settled-menu, all still unattempted).
+- **Notes:** PAPERCUT: the switch-in window's timing turned out to need
+  TWO independent anchor points (ball/tint/particles off one RAM tick,
+  front-sprite materialize/stretch tables off a different one 24 ticks
+  later) rather than the S6 intro's own single shared `handoffTick` — cost
+  significant time to even suspect, since every existing precedent in this
+  file (`drawSendOutHandoff`) assumes one shared anchor; worth flagging in
+  the mapping table for whoever writes the eventual §9 follow-up. No other
+  new papercuts.
+
+---
 ## 178 — Worktree scout (supervisor-folded): slice L's five asset/formula gaps — 4/5 CLOSED with implementable numbers, 2 corrections to prior docs (the "thrown ball" is STATIC at (176,64), no arc exists; the particle burst is 16 sprites, not 13); merged `0f17f5c`, suite 776/776 on the merged tree
 
 - **State:** merged into master, `npm test` 776/776 + build green
@@ -91,27 +137,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `docs/faint-switch-notes.md` §3/§6/§7.
 - **Notes:** no new papercuts this session.
 
----
-## 176 — Worktree scout (supervisor-folded): switch-in formula verification — faint sink PINNED as a closed form (source+RAM agree tick-for-tick), materialize stretch is a BYTE-EXACT re-anchored reuse of `GROVYLE_STRETCH_TABLE` (41/41), Sitrus = 2 sprites (`ANIM_TAG_THIN_RING`/`ANIM_TAG_SPARKLE_2`, gfx confirmed unextracted); merged `4fd6489`, suite 768/768 on the merged tree
-
-- **State:** merged into master, `npm test` 768/768 + build green
-  post-merge (supervisor-verified; sink formula re-checked vs
-  `battle_main.c:2783` by supervisor). New: `docs/faint-switch-notes.md`
-  §7 + 2 probe specs with twice-run outputs. No engine changes.
-- **Did:** (1) faint sink closed form: handoff at 6502, `n = 8 -
-  floor(yOffset/8)` erase steps at `S+1,S+3,…,S+2n-1` (`y2` 8→64),
-  destroy at `S+2n+1` = 6519 — matches §3a pixel evidence tick-for-tick.
-  (2) Pidgeotto's materialize stretch geometry = `GROVYLE_STRETCH_TABLE`/
-  `_EARLY_TABLE` verbatim, re-anchored 1503→6791 — no new table needed.
-  Open-particle burst shape confirmed (13 sprites, 1-tick stagger,
-  26-tick life) but its radial motion formula was not captured. (3)
-  Sitrus effect: exactly 2 sprites, cross-checked vs
-  `General_HeldItemEffect`'s two `loadspritegfx` calls; gfx genuinely
-  unextracted (checked, not assumed).
-- **Next (slice L's named gaps):** thrown-ball prop sprite identity/
-  table; materialize palette tint RAM confirmation; particle burst
-  motion formula; Sitrus ring+sparkle gfx extraction; healthbox
-  slide-in ramps (not reached). Slice K (ROCK_SLIDE→faint→gate→fainted
-  text) needs NONE of these.
-- **Notes:** worker PAPERCUT (ram-probe.py path vocab can't shift/mask
-  sub-byte bitfields — blocked the tint check) recorded in PAPERCUTS.md.

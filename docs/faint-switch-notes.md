@@ -1046,3 +1046,90 @@ extract-battle-anim-item-heal.ts`, `src/assets/gen/battle-anim-item-heal.json`,
 battle1-switchin-{ball-particle-detail,materialize-tint,healthbox,
 pidgeotto-palettenum}-probe.json`, and one verification script
 (`tools/compare/scratch/sitrus_sparkle_verify.mjs`).
+
+## 9. S7 slice L attempt (bounded worker, this session) — NOT LANDED; a real, previously-unknown blocker found and precisely located, plus one small pixel correction
+
+This session attempted the engine slice §8's own "Bottom line" table was
+written for (tick 6588 → a settled menu vs. PIDGEOTTO). It did **not** land
+— ran out of the 60-minute cap mid-verification — and the speculative
+`src/engine/battleScene.ts` draft was **reverted** (uncommitted, never
+shipped) rather than landing a non-0-diff trace. What follows is real,
+oracle-verified information worth keeping so the next session doesn't
+re-spend the same budget re-deriving it.
+
+**Confirmed byte-exact, ready to implement directly:**
+- "BUG CATCHER DESTIN sent\nout PIDGEOTTO!" (`SWITCHIN_SENTOUT_LINE1/2`,
+  38 chars total) prints 1 char/tick starting render tick **6687** through
+  completion at **6724** — implemented directly against the oracle
+  (`npm run compare` against a scratch trace, ticks 6580-6815) and matched
+  **every single tick** 6687-6726 with zero pixel diff. This piece is safe
+  to re-add verbatim.
+- The party-icon-bar re-trigger (§3b) starts at render tick **6588** exactly
+  (`ballStatusBarPositions`' own `rt=t-1` convention: createTick=6587) and
+  its SETTLED state (bar + 6 icons, no further change) is byte-exact from
+  render tick **6608** through at least **6726** when reusing `OPP_BAR_X2`
+  re-anchored at createTick 6587 for the bar, and a plain per-icon x-offset
+  for the icons (no slide transient modeled at all, jumps straight to
+  settled) — 0 diff at every one of those settled ticks.
+- **Correction to §3b's own pixel-only read**: the icon that flips (GROVYLE's
+  own former slot) lands on index **5** (not verified positionally by §3b),
+  and its post-flip tile is **`"Statused"`**, not `"Fainted"` —
+  byte-exact pixel match (0/37 opaque px) against
+  `src/assets/gen/battle-interface-ball-display.json`'s own 4 states at the
+  settled render tick 6650 (script: ad hoc, not committed — a corner+state
+  brute-force identical in spirit to `pidgeotto_corner_verify.mjs`). Either
+  that asset's own `states` array is mislabeled relative to its real in-game
+  role, or "fainted" is genuinely rendered via the same tile the extractor
+  named "Statused" — not resolved which, out of this session's scope to fix
+  the extractor.
+
+**NOT byte-exact, real open problems:**
+1. **The icon SLIDE transient (render 6591-6606) has a small but real
+   residual** (~100-290 mismatched px/tick, every one of the 6 icon
+   columns) when modeled as "all 6 icons share the same 9-value ease-out
+   tail with zero lead-in, uniformly" (the hypothesis this session tried,
+   picked because the total 20-tick retrigger window length matches
+   `OPP_BAR_X2`'s own 20 entries exactly). The real per-icon behavior likely
+   still staggers somewhat (the S6 intro's own first entrance staggers each
+   icon by `i*7+10` ticks, per `battle_interface.c`'s own
+   `SpriteCB_StatusSummaryBalls_Enter` source, referenced in this file's own
+   §4 module doc) — a proportionally-compressed stagger was hypothesized but
+   never oracle-tested (ran out of time). **Next step**: RAM-probe
+   `gSprites[]`'s `x2` for the 6 icon sprites directly across render ticks
+   6587-6608 (same `path`-based technique as `switchin-b1-sprite.json`) —
+   much faster than another brute-force pixel search.
+2. **A second, unexplained icon-bar-region change at render tick 6727** —
+   exactly the tick the ball prop spawns (§8b). The SAME bbox
+   `(0,32)-(103,43)` that the retrigger itself uses changes AGAIN, in a
+   16-tick alternating-magnitude pattern (diff counts 1091/1087 alternating,
+   render ticks 6727-6742), then holds a NEW steady state from 6743 on that
+   is **different** from the tick-6608 settle (confirmed: a fresh oracle
+   diff of render tick 6726 vs 6587, the pre-retrigger background, is
+   ALSO nonzero — so it's not simply "the bar hides again" either). This is
+   a genuinely new, previously-undocumented sub-mechanism, not itemized
+   anywhere in §3/§7/§8 — flagged precisely rather than guessed at. It
+   directly blocks clean verification of the ball/materialize window (any
+   compare run spanning both regions conflates the two), so it should be
+   RAM-probed FIRST by whoever picks this back up (candidate:
+   `SpriteCB_StatusSummaryBalls_Enter`/`_Exit`, or `HandleBallAnimEnd`
+   itself touching the summary-bar sprites as a side effect of the new
+   battler's status becoming known — unconfirmed, a lead not a finding).
+3. **The front-sprite materialize/stretch table anchor is genuinely
+   different from the ball/tint/particle anchor** — re-derived this session
+   from the EXPLICIT RAM ticks §7b/§8b/§8c/§8d each independently pin (ball-
+   open/tint/particle share RAM tick 6744; `GROVYLE_STRETCH_TABLE`'s own
+   re-anchor is RAM tick 6791), giving two different `handoffTick`-shaped
+   constants (6726 for ball/particles, 6750 for materialize/stretch/early-
+   stretch, using the S6 intro's own internal offsets
+   `MATERIALIZE_START_OFFSET=19`/`GROVYLE_FRONT_ANIM_START_OFFSET=35`/
+   `MATERIALIZE_END_OFFSET=42` unchanged). This is *derived*, not
+   independently oracle-verified — blocked by finding 2 above before a clean
+   compare run could isolate it. Worth checking first before further hand-
+   derivation.
+
+**Bottom line for whoever picks this up next**: the text mechanism is done
+and safe to land as-is; the icon-bar retrigger is ~95% done (only the short
+slide transient needs a RAM probe, not more guessing); the real new
+unknown is finding 2 (the tick-6727 icon-bar interaction) — solve that
+first, since it's small in scope (a single sprite-region RAM probe) but
+gates a clean read on everything from the ball prop onward.
