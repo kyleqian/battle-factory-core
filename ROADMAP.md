@@ -336,10 +336,18 @@ attacker squish/sweat-droplet/yellow-blend + target shake+hitsplat,
 `Move_ENDEAVOR` — NOT "plain generic hit" as earlier assumed, ticks
 3003-3094) **through render 3060 is now landed** (§15-§15e: squish/blend/
 droplets/shake/hitsplat all RAM-probed and wired, `turn2-endeavor-
-drain.json` 166/167, contiguous green 3000-3060). Renders 3061-3094 (past
-this slice's own scope) are still red/unattributed.
-Remaining for S7: ENDEAVOR's own 3061-3094 tail, DRAGON_BREATH's own window,
-faint/forced-switch engine slice, ISSUES #19.
+drain.json` 166/167, contiguous green 3000-3060). **Slice E1 CLOSED
+(2026-07-19 night, supervisor-verified):** the 3061-3094 tail landed
+(two new mechanisms: player-healthbox post-hit wobble + Onix post-hit
+flicker, both `render=RAM+1`; §15f) — `turn2-endeavor-drain.json`
+**200/201**, green contiguously 3000→3120, sole residual = ISSUES #19's
+family frame. **Slice E2 scouted (same night):** DRAGON_BREATH's real
+pixel window is **3137→3846** (3095-3136 is ENDEAVOR's own HP-drain
+tail, already green); ground truth banked in `docs/dragon-breath-notes.md`
+(dense trace 3095-3346, task/sprite inventory, §12 ledger re-verified,
+sole missing asset `small_ember.png`).
+Remaining for S7: DRAGON_BREATH engine slices (E2a/E2b), faint/forced-switch
+engine slice, ISSUES #19.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

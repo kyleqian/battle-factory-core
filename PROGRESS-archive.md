@@ -1,3 +1,41 @@
+## 147 — Bounded worker (session's LAST): S7 slice E1 hitsplat/shake increment — **both remaining ENDEAVOR sub-mechanisms landed green; the 3008-3023/3034-3049 gaps are CLOSED, `turn2-endeavor-drain.json` runs contiguously 3000→3060**; `npm test` **685/685** (+7), `npm run build` green — closes the brief's own acceptance criteria exactly
+
+- **State:** `npm test` **685/685**, `npm run build` green, tree clean.
+  `turn2-endeavor-drain.json` `captureFrames` now covers every tick
+  2999-3060 contiguously (grown 135→167); `tools/probe/dump-endeavor-
+  hitsplat-shake.py` committed (new).
+- **Did:** RAM-probed `gAnimMovePower` (**75** for ENDEAVOR, never confirmed
+  before despite three prior sessions flagging it — the move's *listed*
+  power is 0 but `GetMovePower`'s real HP-diff placeholder is 75), the
+  target's own `sprite->x2` (shake), and both `AnimHitSplatBasic` sprites'
+  real position + OAM matrix. First hitsplat probe attempt found zero
+  sprites (filtering on `callback==AnimHitSplatBasic`'s address fails since
+  that function reassigns its own sprite's callback on its first
+  invocation) — fixed by filtering on the stable `affineAnims` field
+  instead. Wired `endeavorShakeX2`/`drawEndeavorHitsplats` into
+  `drawEndeavorSquish`. First wiring attempt (shake using the same
+  `RAM=render-1` lag as blend/droplets) landed round-0 hitsplat exactly but
+  half-missed shake on alternating render ticks — pixel-solved the real lag
+  as `RAM=render-2` (matching squish's matrix, a THIRD distinct lag
+  confirmed in this one window) via a neutral-baseline diff against fresh
+  oracle captures; fixed, then the whole 3000-3060 window landed first-try
+  with zero further mismatches. Also found the hitsplat's own OAM matrix is
+  a RAM-confirmed CONSTANT (372) for its whole visible life, not a ramp —
+  corrects this run's own earlier banked asset-doc summary (not edited in
+  place, corrected via engine-code doc comment per this run's convention). 7
+  new Tier-1 pins, oracle-cross-checked. Full writeup:
+  `docs/battle-menu-notes.md` §15e.
+- **Next:** OUT of this session's scope but flagged for whoever picks it up:
+  renders past 3060 (`3061-3094`) are still red/uncaptured — likely the same
+  mechanisms' own tail, never RAM-probed (§15's own original scan called it
+  "alternating two distinct shapes", unattributed). Otherwise S7 slice E1
+  (ENDEAVOR) is DONE per the brief's own acceptance criteria.
+- **Notes:** no papercuts. Session's last main-lane increment — tree is
+  resume-ready (clean, green, no worktrees).
+
+---
+
+---
 ## 146 — Bounded worker: S7 slice E1d batch-1 increment — **batch-1 droplets confirmed (zero code changes needed) + extended squish/blend table wired (both cycles) + two new "inter-round lull" islands landed green**; the true wall found and pinned exactly: render 3008, gated by an unmodeled hitsplat sprite, not a droplet/squish bug; `npm test` **678/678** (+4), `npm run build` green
 
 - **State:** `npm test` **678/678**, `npm run build` green, tree clean.

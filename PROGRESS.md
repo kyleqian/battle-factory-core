@@ -4,6 +4,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 150 — Supervisor: round 1 folded — **ENDEAVOR window fully CLOSED (S7 slice E1 done end to end)** + DRAGON_BREATH window scouted/ground-truthed (slice E2 unblocked); suite **693/693**, build green, scout branch merged clean, no worktrees
+
+- **State (supervisor-verified this minute):** `npm test` **693/693**,
+  `npm run build` green, tree clean at merge `6f8b005`, no worktrees or
+  stray branches. `turn2-endeavor-drain.json` **200/201** (supervisor-rerun;
+  sole residual = tick 2906, ISSUES #19 family, pre-attributed);
+  regression spot-checks `turn1-drain.json` 102/102,
+  `turn1-rockslide.json` 256/256.
+- **Did:** Round 1 = two 45-min workers in parallel. Main lane (#149,
+  `f6a53da`): ENDEAVOR tail 3061-3094 landed via RAM-probe-first — two NEW
+  mechanisms (player-healthbox post-hit wobble ±1px/20 ticks; Onix
+  post-hit invisible-flicker 4-on/4-off ×4), both `render=RAM+1`,
+  §15's "same mechanisms' tail" guess disproven by probe before any code.
+  Worktree lane (`5cdff4b`, merged): DRAGON_BREATH ground truth —
+  corrected window boundary (**3137→3846 pixel-visible**; 3095-3136 is
+  ENDEAVOR's own HP-drain tail through ~3116 + handoff), §12 RNG ledger
+  re-verified 0 corrections, per-tick task/sprite inventory committed
+  (8 fire projectiles @4-tick spawn/20-tick life, target red-fade
+  `AnimTask_BlendBattleAnimPal`, `AnimTask_ShakeMon2` ±2px, hit-flash
+  sprite), dense every-tick trace 3095-3346 (252 caps, verbatim 50-segment
+  prefix — supervisor-verified byte-equal), only `small_ember.png` needs
+  extraction. Docs: `docs/dragon-breath-notes.md` (new).
+- **Next:** Round 2: main = DRAGON_BREATH engine slice E2a (ember
+  extraction + kickoff text + projectile mechanism vs the banked ground
+  truth); worktree = ISSUES #20 FONT_NARROW rewire (real glyph pipeline for
+  the FIGHT submenu, unblocks S8 battle-2 menus). Then: E2b (blend/shake/
+  flash + HP drain + turn end), faint/forced-switch slice, #19 root cause.
+- **Notes:** worker costs $8.75 + $4.73, 24.6 + 15.2 min. Zero merge
+  conflicts, zero regressions.
+
+---
 ## 149 — Bounded worker: S7 slice E1 tail increment — **ENDEAVOR's animation window CLOSES**: `turn2-endeavor-drain.json` green span now runs contiguously **3000→3094+** (merges into the pre-existing 3095-3120 block); `npm test` **693/693** (+8), `npm run build` green
 
 - **State:** `npm test` **693/693**, `npm run build` green, tree clean.
@@ -80,41 +111,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no usage-limit events; worker cost ~$5.5-23/step, 14-41
   min/step. One harness change this session (`ccd7554`, cap 45000) —
   recorded in ROADMAP S8 + Domain notes with rationale.
-
----
-## 147 — Bounded worker (session's LAST): S7 slice E1 hitsplat/shake increment — **both remaining ENDEAVOR sub-mechanisms landed green; the 3008-3023/3034-3049 gaps are CLOSED, `turn2-endeavor-drain.json` runs contiguously 3000→3060**; `npm test` **685/685** (+7), `npm run build` green — closes the brief's own acceptance criteria exactly
-
-- **State:** `npm test` **685/685**, `npm run build` green, tree clean.
-  `turn2-endeavor-drain.json` `captureFrames` now covers every tick
-  2999-3060 contiguously (grown 135→167); `tools/probe/dump-endeavor-
-  hitsplat-shake.py` committed (new).
-- **Did:** RAM-probed `gAnimMovePower` (**75** for ENDEAVOR, never confirmed
-  before despite three prior sessions flagging it — the move's *listed*
-  power is 0 but `GetMovePower`'s real HP-diff placeholder is 75), the
-  target's own `sprite->x2` (shake), and both `AnimHitSplatBasic` sprites'
-  real position + OAM matrix. First hitsplat probe attempt found zero
-  sprites (filtering on `callback==AnimHitSplatBasic`'s address fails since
-  that function reassigns its own sprite's callback on its first
-  invocation) — fixed by filtering on the stable `affineAnims` field
-  instead. Wired `endeavorShakeX2`/`drawEndeavorHitsplats` into
-  `drawEndeavorSquish`. First wiring attempt (shake using the same
-  `RAM=render-1` lag as blend/droplets) landed round-0 hitsplat exactly but
-  half-missed shake on alternating render ticks — pixel-solved the real lag
-  as `RAM=render-2` (matching squish's matrix, a THIRD distinct lag
-  confirmed in this one window) via a neutral-baseline diff against fresh
-  oracle captures; fixed, then the whole 3000-3060 window landed first-try
-  with zero further mismatches. Also found the hitsplat's own OAM matrix is
-  a RAM-confirmed CONSTANT (372) for its whole visible life, not a ramp —
-  corrects this run's own earlier banked asset-doc summary (not edited in
-  place, corrected via engine-code doc comment per this run's convention). 7
-  new Tier-1 pins, oracle-cross-checked. Full writeup:
-  `docs/battle-menu-notes.md` §15e.
-- **Next:** OUT of this session's scope but flagged for whoever picks it up:
-  renders past 3060 (`3061-3094`) are still red/uncaptured — likely the same
-  mechanisms' own tail, never RAM-probed (§15's own original scan called it
-  "alternating two distinct shapes", unattributed). Otherwise S7 slice E1
-  (ENDEAVOR) is DONE per the brief's own acceptance criteria.
-- **Notes:** no papercuts. Session's last main-lane increment — tree is
-  resume-ready (clean, green, no worktrees).
-
----
