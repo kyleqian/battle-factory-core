@@ -37,6 +37,7 @@ import {
   TURN5_OPPONENT_ICON_STATES,
   turn3SubmenuBounceTick,
   turn5IconBarEva,
+  turn5MaterializeCoeff,
   turn5RockSlideKoDismissEligible,
   windowRange,
   type BattleSceneState,
@@ -1470,5 +1471,25 @@ describe("S7 slice L: switchinSentOutTextVisibleChars (docs/faint-switch-notes.m
 describe("S7 slice L-3: TURN5_BALL_HANDOFF_TICK (docs/faint-switch-notes.md §10 - RAM ball-creation tick, oracle-pixel-verified: reusing drawSendOutBall's own BALL_CLOSED_START_OFFSET(2) against this anchor lands the ball's first visible pixel exactly on render 6729, matched 0-diff against turn5-switchin.json)", () => {
   it("is the RAM-probed ball-creation tick (battle1-switchin-ball-particle-detail-probe.json, slot 7)", () => {
     expect(TURN5_BALL_HANDOFF_TICK).toBe(6727);
+  });
+});
+
+describe("S7 slice L-4: turn5MaterializeCoeff (docs/faint-switch-notes.md §10 correction - RAM-solved directly from gPlttBufferFaded+0x230/Unfaded+0x230, the OBJ-palette-bank-1 color-8 offset, cross-validated against 3 independent oracle pixels' own true palette colors; the prior session's [13,13,11,11,9,9,8,6,6,4,4,2,2,1,0] table and its 'same render tick' finding were both corrupted by a degenerate palette-index choice, root-caused and replaced this session)", () => {
+  it("is flat coefficient 16 (fully opaque) through render 6767", () => {
+    expect(turn5MaterializeCoeff(6588)).toBe(16);
+    expect(turn5MaterializeCoeff(6746)).toBe(16);
+    expect(turn5MaterializeCoeff(6767)).toBe(16);
+  });
+  it("ramps perfectly linearly 15->0, one integer step per tick, starting render 6768 (RAM tick T's value first visible render T+1, the ordinary lag)", () => {
+    expect(turn5MaterializeCoeff(6768)).toBe(15);
+    expect(turn5MaterializeCoeff(6769)).toBe(14);
+    expect(turn5MaterializeCoeff(6770)).toBe(13);
+    expect(turn5MaterializeCoeff(6775)).toBe(8);
+    expect(turn5MaterializeCoeff(6782)).toBe(1);
+    expect(turn5MaterializeCoeff(6783)).toBe(0);
+  });
+  it("stays 0 past the ramp (into the wobble-table phase)", () => {
+    expect(turn5MaterializeCoeff(6784)).toBe(0);
+    expect(turn5MaterializeCoeff(6800)).toBe(0);
   });
 });

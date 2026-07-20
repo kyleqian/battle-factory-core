@@ -2437,6 +2437,61 @@ function drawSpriteSheetAffineStretch(
 }
 
 /**
+ * S7 slice L-4: same accumulator-based shrink-sampling as `drawSpriteSheetAffineTinted`
+ * (`matrixParam = 0x10000 / accumulator`, the emerge/materialize sequence's own
+ * convention), but blends each sampled texel's OWN palette color toward
+ * `tintColor` at `tintCoeff` (the real `BlendPalette` per-pixel formula, same as
+ * `drawSpriteSheetAffineStretch`'s tint path) instead of `drawSpriteSheetAffineTinted`'s
+ * flat-tint shortcut - which its own doc comment already flags as "correct only for
+ * ... coefficient 16 (fully blended)". Needed because Pidgeotto's own switch-in
+ * materialize (docs/faint-switch-notes.md §10) RAM-solves to a real coefficient of
+ * **15, not 16** for its entire flat-silhouette span (`gPlttBufferFaded` vs
+ * `gPlttBufferUnfaded`, decoded directly - not curve-fit) - invisible in Grovyle's
+ * own turn-3 materialize (untouched, still uses the flat-tint primitive, out of
+ * this fix's scope) only because that trace's own dense captures never exposed a
+ * palette entry far enough from the tint color to reveal the 15-vs-16 gap.
+ */
+function drawSpriteSheetAffineTintedBlend(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  accumulator: number,
+  tintColor: RgbColor,
+  tintCoeff: number,
+  y2 = 0,
+): void {
+  const w = tileset.columns * 8;
+  const h = tileset.rows * 8;
+  const halfW = w / 2;
+  const halfH = h / 2;
+  const matrixParam = Math.trunc(0x10000 / accumulator);
+  for (let dy = 0; dy < h; dy += 1) {
+    const ry = dy - halfH;
+    const sy = ((ry * matrixParam) >> 8) + halfH;
+    if (sy < 0 || sy >= h) continue;
+    const tileRow = Math.floor(sy / 8);
+    const inTileY = sy % 8;
+    for (let dx = 0; dx < w; dx += 1) {
+      const rx = dx - halfW;
+      const sx = ((rx * matrixParam) >> 8) + halfW;
+      if (sx < 0 || sx >= w) continue;
+      const tile = tileset.tiles[tileRow * tileset.columns + Math.floor(sx / 8)];
+      if (!tile) continue;
+      const idx = tile[inTileY * 8 + (sx % 8)]!;
+      if (idx === 0) continue;
+      const c = palette[idx];
+      if (!c) continue;
+      const color = tintCoeff > 0
+        ? { r: blendComponentToward(c.r, tintColor.r, tintCoeff), g: blendComponentToward(c.g, tintColor.g, tintCoeff), b: blendComponentToward(c.b, tintColor.b, tintCoeff) }
+        : c;
+      setPixel(fb, ox + dx, oy + dy + y2, color);
+    }
+  }
+}
+
+/**
  * `docs/battle-menu-notes.md` §3 item 4 / `battleMenu.ts`'s `playerThrowBallSpin`:
  * this engine's first TRUE-rotation affine OAM sampler - mechanism 4/5 above
  * both special-case `rotation=0` (`pb=pc=0`, a pure diagonal scale matrix), so
@@ -5399,7 +5454,6 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number): void {
     drawSendOutHealthbox(fb, 0, opponentContent);
     if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
   }
-  drawMenuHealthboxPlayer(fb, 0);
   drawMenuIdleBounceOverlay(fb, turn5KickoffBounceTick(t, TURN5_CONFIRM_PRESS_TICK));
   for (const i of rockSlideDrawOrder(t, pressTick)) {
     const rock = rockSlideRockState(i, t, pressTick);
@@ -5572,32 +5626,66 @@ export const TURN5_BALL_HANDOFF_TICK = 6727;
  * THREE phases sharing the ball's own `TURN5_BALL_HANDOFF_TICK` clock for
  * the first two:
  *
- * 1. **Growing flat-tint silhouette** (render 6746-6768, `et = t -
- *    TURN5_BALL_HANDOFF_TICK` in `[MATERIALIZE_START_OFFSET(19), 42)`):
- *    bit-for-bit the SAME `affineEmergeAccumulator`/`MATERIALIZE_Y2_TABLE`
- *    mechanism 4 already uses for Grovyle (pixel width climbs 1->44px over
+ * 1. **Growing silhouette + coefficient ramp** (render 6746-6785, unified
+ *    into ONE per-pixel-blend draw call - see S7 slice L-4 correction
+ *    below): bit-for-bit the SAME `affineEmergeAccumulator`/
+ *    `MATERIALIZE_Y2_TABLE` mechanism 4 already uses for Grovyle drives the
+ *    shrink-sampling geometry throughout (pixel width climbs 1->44px over
  *    exactly 12 render ticks, 6746-6757, matching `affineEmerge`'s own
  *    `duration=12` precisely; RAM `y2` reads 14,13,...,2,0 over RAM
  *    6745-6757, bit-exact to `MATERIALIZE_Y2_TABLE`) - just extended past
  *    S6's own `GROVYLE_FRONT_ANIM_START_OFFSET(35)` cutoff, since
  *    Pidgeotto's own front-anim (`animNum` 0->1 at RAM 6760) starts BEFORE
- *    the tint even begins ramping down here (a real sequencing difference
- *    from Grovyle, docs §7b's own flag) - the flat tint stays fully opaque
- *    (`gPlttBufferFaded` color1 pinned at `MATERIALIZE_TINT_COLOR` bit-
- *    exact) through RAM tick 6767 regardless.
- * 2. **Coefficient ramp** (render 6769-6783): `gPlttBufferFaded` vs
- *    `gPlttBufferUnfaded` solved per-tick (this session, against
- *    `BlendPalette`'s own `c5 + ((t5-c5)*coeff)>>4` formula) gives the
- *    LITERAL coefficient sequence below for RAM ticks 6768-6782 (15
- *    ticks, matching docs §8c's own "16->0 over 15 ticks" duration
- *    exactly) - not a linear fit (the real sequence isn't perfectly
- *    linear, e.g. two RAM ticks per step then one 8->6 double-step), RAM
- *    ground truth kept verbatim per this file's own "no curve-fitting"
- *    rule. The sprite's own scale is already neutral (256) throughout this
- *    phase (confirmed: the stretch driver's own `data4/data5` don't even
- *    engage until RAM 6785, several ticks AFTER the ramp already reaches
- *    coefficient 0) - so this phase draws at the flat identity scale.
- * 3. **Wobble table** (render 6786-6826, `TURN5_STRETCH_TICK`-anchored):
+ *    the tint even begins ramping down (a real sequencing difference from
+ *    Grovyle, docs §7b's own flag). **S7 slice L-4 correction** (root-
+ *    caused via direct RAM probing, `tools/probe/dump-switchin-materialize-
+ *    affine.py` for the OAM side, a targeted `gPlttBufferFaded`/`Unfaded`
+ *    reprobe at the CORRECT palette offset for the color side): docs §10
+ *    flagged a ~3% residual in render 6768-6782 even after a same-tick lag
+ *    fix. Probing `oam.affineMode`/`gOamMatrices` directly across RAM
+ *    6767-6783 found the OAM matrix pinned at pure identity `(256,0,0,256)`
+ *    and `affineMode=ST_OAM_AFFINE_NORMAL` the ENTIRE growing+ramp span
+ *    (never `DOUBLE`) - ruling out geometry entirely, so the residual had
+ *    to be in the tint coefficient's own value or timing. The PRIOR
+ *    session's own `TURN5_MATERIALIZE_RAMP_COEFF` sequence (`[13,13,11,11,
+ *    9,9,8,6,6,4,4,2,2,1,0]`) and its "same render tick, no +1 lag" finding
+ *    turned out to be corrupted: it was decoded from OBJ-palette-bank-1
+ *    color indices 1-4 (`gPlttBufferFaded+0x222..0x228`), whose specific
+ *    true (unfaded) colors sit close enough to `MATERIALIZE_TINT_COLOR`
+ *    that MULTIPLE adjacent coefficients (e.g. 15 and 16, or 13 and 14)
+ *    resolve to the IDENTICAL faded output - `BlendPalette`'s `(t5-c5)*
+ *    coeff>>4` integer-truncates, so a small `t5-c5` delta collapses
+ *    several coefficients onto the same result. Reprobing the SAME buffers
+ *    at `+0x230` (color index 8 of the same bank - identified via
+ *    `battle1-switchin-pidgeotto-palettenum-probe.json`'s own `paletteNum
+ *    =1`, `struct OamData`'s `paletteNum:4` field at oam+3 bits 4-7 -
+ *    whose true color `(214,49,24)` sits far enough from the tint that
+ *    every coefficient 0-16 produces a DISTINCT faded output, confirmed by
+ *    cross-checking three separate channels) gives the real, perfectly
+ *    LINEAR sequence: coefficient 16 (flat, fully opaque) for RAM ticks
+ *    6744-6766, then exactly `6782 - ramTick` for RAM 6767-6782 (i.e.
+ *    15,14,13,...,1,0, one integer step per tick, no doubling), 0
+ *    thereafter - not curve-fit, read directly, cross-validated against
+ *    3 independent oracle pixels' own true palette colors (verified exact,
+ *    not approximate). The render lag is the ordinary **+1 tick** every
+ *    other mechanism in this dossier already carries (RAM tick T's value
+ *    first visible render T+1) - the earlier "same-tick" finding was a
+ *    false positive from testing against the ALSO-WRONG coefficient table
+ *    at a single tick where the two errors partially canceled.
+ *    `drawSpriteSheetAffineTinted`'s flat-tint shortcut (its own doc
+ *    comment: "correct only for ... coefficient 16") is mathematically
+ *    identical to a coefficient-16 call of the new per-pixel-blend sibling
+ *    `drawSpriteSheetAffineTintedBlend` (at `coeff=16`, `BlendPalette`'s
+ *    formula always reduces to the target color exactly, no truncation) -
+ *    so this whole phase now makes ONE draw call across the full span with
+ *    `turn5MaterializeCoeff(t)` supplying 16 during the flat portion and
+ *    the ramp value afterward, sharing the same accumulator-driven
+ *    geometry throughout (no phase seam). `affineEmergeAccumulator`
+ *    saturates to 256 (full size) well before the ramp starts, and the
+ *    sprite's own scale stays neutral throughout (the stretch driver's
+ *    `data4`/`data5` don't engage until RAM 6785, several ticks after the
+ *    ramp reaches coefficient 0).
+ * 2. **Wobble table** (render 6786-6826, `TURN5_STRETCH_TICK`-anchored):
  *    once the stretch driver's own callback engages (RAM 6784), `data4`/
  *    `data5`/`y2` (`xScale`/`yScale`/`y2`) oscillate in a small,
  *    non-monotonic band around neutral (256, max deviation ~272/209, i.e.
@@ -5626,8 +5714,21 @@ function turn5PidgeottoFrame(t: number): 0 | 1 {
   return 0;
 }
 
-const TURN5_MATERIALIZE_RAMP_START_TICK = 6768;
-const TURN5_MATERIALIZE_RAMP_COEFF: readonly number[] = [13, 13, 11, 11, 9, 9, 8, 6, 6, 4, 4, 2, 2, 1, 0];
+/**
+ * S7 slice L-4: the flat pre-ramp coefficient (RAM 6744-6766, RAM-solved
+ * from `gPlttBufferFaded+0x230` directly - see the correction note above)
+ * and the render-tick anchor for `TURN5_MATERIALIZE_RAMP_COEFF` below,
+ * shifted the ordinary +1 from RAM to render (RAM 6767's coeff=15 first
+ * visible render 6768).
+ */
+const TURN5_MATERIALIZE_FLAT_COEFF = 16;
+const TURN5_MATERIALIZE_RAMP_RENDER_START = 6768;
+/** RAM-exact per render tick (§10/S7 slice L-4 correction, see the doc comment above): a perfectly linear 15->0 countdown, one integer step per tick, no doubling - RAM ticks 6767-6782 read directly, not curve-fit. */
+const TURN5_MATERIALIZE_RAMP_COEFF: readonly number[] = [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
+export function turn5MaterializeCoeff(t: number): number {
+  if (t < TURN5_MATERIALIZE_RAMP_RENDER_START) return TURN5_MATERIALIZE_FLAT_COEFF;
+  return TURN5_MATERIALIZE_RAMP_COEFF[t - TURN5_MATERIALIZE_RAMP_RENDER_START] ?? 0;
+}
 export const TURN5_STRETCH_TICK = 6786;
 const TURN5_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
   { xScale: 256, yScale: 256, y2: 0 },
@@ -5679,20 +5780,16 @@ function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
   if (t < materializeStart || t >= TURN5_PIDGEOTTO_SETTLE_TICK) return;
   const frame = turn5PidgeottoFrame(t);
   const tileset = frame === 0 ? pidgeottoFrontSprite.tileset : pidgeottoFrontSprite.frame2;
-  if (t < TURN5_MATERIALIZE_RAMP_START_TICK) {
+  if (t < TURN5_STRETCH_TICK) {
     const local = t - materializeStart;
     const accumulator = affineEmergeAccumulator(local + 1);
     const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
-    drawSpriteSheetAffineTinted(fb, tileset, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, y2);
-    return;
-  }
-  if (t < TURN5_STRETCH_TICK) {
-    const coeff = TURN5_MATERIALIZE_RAMP_COEFF[t - TURN5_MATERIALIZE_RAMP_START_TICK] ?? 0;
-    drawSpriteSheetAffineStretch(fb, tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, 256, 256, 0, MATERIALIZE_TINT_COLOR, coeff);
+    const coeff = turn5MaterializeCoeff(t);
+    drawSpriteSheetAffineTintedBlend(fb, tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, coeff, y2);
     return;
   }
   const entry = TURN5_STRETCH_TABLE[Math.min(t - TURN5_STRETCH_TICK, TURN5_STRETCH_TABLE.length - 1)]!;
-  drawSpriteSheetAffineStretch(fb, tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, entry.xScale, entry.yScale, entry.y2, MATERIALIZE_TINT_COLOR, 0);
+  drawSpriteSheetAffineStretch(fb, tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, entry.xScale, entry.yScale, entry.y2, MATERIALIZE_TINT_COLOR, 0, true);
 }
 
 /** Pidgeotto's settled front sprite, no affine transform - see `TURN5_PIDGEOTTO_SETTLE_TICK`. */
@@ -5759,9 +5856,10 @@ function drawTurn5SwitchinSprite(fb: Uint8Array, t: number): void {
 function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   drawTurn5RockSlideAttack(fb, t);
-  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn5Hp);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
+  drawMenuHealthboxPlayer(fb, 0);
+  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn5Hp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {
