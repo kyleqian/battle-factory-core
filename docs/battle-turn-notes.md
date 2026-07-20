@@ -3184,3 +3184,112 @@ move-selection policy.
 mismatches. Both RAM-dump probe runs (`ram-probe.py`, `dump-battler-full.py`)
 independently re-run and diffed byte-identical against their own first run.
 
+### §17 ADDENDUM 3 (S8 worktree lane, extraction only — no engine code): swap-screen assets extracted, composite-verified byte-exact against fresh oracle pixels
+
+Closes S17's own "Asset/UI inventory" section — the genuinely-new-to-swap
+static assets are now extracted, and the "overwhelmingly reuse" claim for
+everything else is now backed by a pixel composite-check, not just a source
+read.
+
+**New extractor**: `tools/extract/extract-factory-swap-screen.ts`
+(run: `node --experimental-strip-types tools/extract/extract-factory-swap-screen.ts`).
+Writes:
+- `src/assets/gen/action-box.json` — `action_box_left.png`/`action_box_right.png`
+  (16×16 + 32×16 4bpp tilesets), the blank pill-button shape used for both
+  CANCEL (box_left + box_right) and PKMN FOR SWAP (box_left + box_right×2),
+  plus the shared `sInterface_Pal` subpalette (same 16 colors already
+  extracted as `arrow.json`/`menu-highlight.json`'s own `palette` — the
+  action-box/highlight sprite templates are `sSpriteTemplate_Swap_Arrow`/
+  `sSpriteTemplate_Swap_MenuHighlightLeft` with only `tileTag` swapped,
+  `battle_factory_screen.c:3469-3502`, so `paletteTag` stays
+  `PALTAG_INTERFACE` — confirmed from source, no new palette file needed).
+- `src/assets/gen/action-highlight.json` — `action_highlight_{left,middle,right}.png`,
+  the pressed/selected-cursor overlay for the same buttons, same palette.
+- `src/data/gen/swap-screen-windows.json` — `sSwap_BgTemplates`/
+  `sSwap_WindowTemplates`/`sSwapMenuOptionsTextColors`/
+  `sSwapSpeciesNameTextColors`, mechanically parsed from
+  `battle_factory_screen.c` (regex over the struct literals + `#define`
+  resolution for `PALNUM_FADE_TEXT`/`PALNUM_TEXT`, not hand-copied), the
+  same "parse don't transcribe" convention `extract-battle-window.ts` uses
+  for the battle action-menu geometry.
+
+**Everything else the swap screen draws is verbatim reuse** of the draft
+screen's own already-committed assets from `extract-factory-screen.ts`
+(`menu-bg.json` BG1 chrome, `mon-pic-bg.json`, `pokeball.json`, `arrow.json`,
+`menu-highlight.json`, `text-palette.json`, `font-normal.json`/
+`charmap.json`) — confirmed by source (`CB2_InitSwapScreen:3290-3337` loads
+the identical `gFrontierFactoryMenu_Gfx`/`_Tilemap`/`_Pal`,
+`sPokeballGray_Pal`/`sPokeballSelected_Pal`, `sArrow_Gfx`, `sInterface_Pal`,
+`sSwapText_Pal` — literally commented "Identical to `sSelectText_Pal`" at
+`:1034`) **and now by a fresh pixel check** (below) — no re-extraction of
+these files, per the worktree contract (existing extractors' output files
+are off-limits).
+
+**Window/BG-template diff against the draft screen** (S17's own open item
+6, closed): `sSwap_BgTemplates` adds a 4th background (`bg=2`,
+`mapBaseIndex=26`, priority 0) that `sSelect_BgTemplates` doesn't have —
+used to carry `SWAP_WIN_SPECIES` (moved from BG0 in the draft screen to
+this new BG2) plus 2 new fade-only windows (`SWAP_WIN_ACTION_FADE`,
+`SWAP_WIN_UNUSED`) — the extra layer exists specifically so the species
+name can cross-fade independently during the ball-slide transition (§17's
+own "cross-fading the species-name text" behavior finding), confirmed
+structurally, not just observed on-screen. `SWAP_WIN_SPECIES_AT_FADE` is
+new-to-swap on BG0. The windows shared with the draft screen
+(`TITLE`/`INFO`/`OPTIONS`/`YES_NO`/`MON_CATEGORY`) keep identical
+`tilemapLeft`/`tilemapTop`/`width`/`height` (only `baseBlock` addresses
+shift, from the extra windows ahead of them in the array) — i.e. **layout
+is unchanged, only the BG/window bookkeeping grew**. Text colors
+(`sSwapMenuOptionsTextColors`/`sSwapSpeciesNameTextColors`) are
+byte-identical to the draft screen's own (`{TRANSPARENT, DARK_GRAY,
+TRANSPARENT}` / `{TRANSPARENT, RED, TRANSPARENT}`).
+
+**Composite verification** (bar: 0 mismatches over the pixels this
+extraction owns; every excluded region documented), against a **fresh**
+`bin/oracle run` of the committed `battle1-swapyes-a.json`/`-b.json`
+traces (not stale PNGs):
+
+1. `tools/compare/scratch/swap_action_buttons_verify.mjs` — composites
+   `action-box.json`'s `left`/`right` tiles (OBJ-transparency-aware: index-0
+   pixels left as the oracle's own background, matching real GBA OBJ
+   semantics) at the exact `Swap_InitAllSprites` coordinates for the CANCEL
+   button (`x=192,y=144`) and the PKMN FOR SWAP button (`x=160,y=120`),
+   against frame 30001 of a fresh `battle1-swapyes-b.json` run (the settled
+   opponent-picker screen, both buttons visible unhighlighted). Result:
+   **0 unexplained mismatches** over 1404 opaque button-graphic pixels; 223
+   pixels differ but are *exactly* solid white (255,255,255,
+   independently confirmed as the only mismatching color) — the
+   "CANCEL"/"PKMN FOR SWAP" text printed by a separate BG window layer
+   (`SWAP_WIN_ACTION_FADE`/`OPTIONS`) on top of the plain button graphic,
+   not part of this asset and correctly excluded.
+2. `tools/compare/scratch/swap_chrome_reuse_verify.ts` — composites the
+   **existing, unmodified** `menu-bg.json` alone (no text/sprites/other
+   BGs) against frame 29670 of a fresh `battle1-swapyes-a.json` run (the
+   settled player-screen entry), to pixel-check the "same BG1 chrome"
+   reuse claim rather than trust the source comment alone. Result: 38400
+   opaque BG1 pixels checked, 2538 differ (everywhere a higher-priority
+   layer — title/species/info/mon-category text windows, the 3 ball
+   sprites, the cursor arrow, the CANCEL button — draws over BG1, which
+   this single-layer render doesn't composite), and **0 of those 2538 fall
+   outside the known overlay bounding boxes** — i.e. wherever BG1 chrome is
+   actually the topmost thing on screen, it is byte-exact.
+
+**Not verified against on-screen pixels (documented, not silently
+skipped)**: `action-highlight.json` — decoded via the identical pipeline as
+`action-box.json` (dimensions/bit-depth/palette-slot all cross-checked
+structurally against source), but the highlighted/pressed button state is
+never shown on screen in any committed ground-truth trace (S17's own "not
+delivered" item 4: the CANCEL path was never navigated to this dossier).
+`mon-pic-bg.json`'s reuse for the swap screen's SUMMARY popup is likewise
+unverified here for the same reason (item 5: SUMMARY never opened). Both
+are pre-existing S17 gaps, not new ones from this session — flagged for
+whichever session first exercises those paths.
+
+**Verification**: `npm test` (711/711, unchanged) and `npm run build`
+green — no `src/engine/` changes, only the new extractor + its 3 gen
+outputs + 2 new scratch verification scripts. Both scratch scripts are
+deterministic given their oracle captures (re-run twice, identical output);
+the captures themselves live under the gitignored
+`tools/compare/out/swap-verify-{a,b}/` (regenerate with the `bin/oracle
+run` command in each script's own header comment) rather than being
+committed, matching this repo's existing scratch-script convention.
+
