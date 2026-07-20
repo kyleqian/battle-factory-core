@@ -4056,18 +4056,34 @@ function drawEndeavorDroplets(fb: Uint8Array, t: number, pressTick: number): voi
 }
 
 /**
- * S7 slice E1 hitsplat/shake increment (`docs/battle-menu-notes.md` §15e):
- * `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`'s own amplitude
- * (`gAnimMovePower/12`, clamped `[1,16]`) - RAM-confirmed this session
- * (`tools/probe/dump-endeavor-hitsplat-shake.py`): `gAnimMovePower` reads
- * **75** for ENDEAVOR throughout the whole window, not the move's own
- * listed base power of 0 (`GetMovePower`'s real placeholder for the HP-diff
- * move, never RAM-confirmed before this session - §15's own flag). `75/12=6`
- * (C integer division), `downStep=6/2=3`, `upStep=3+(6&1)=3` - both steps
- * land on the same value (3px), matching the RAM-read `sprite->x2`
- * alternation exactly (always `+-3`, nothing else observed).
+ * S7 slice E1 hitsplat/shake increment (`docs/battle-menu-notes.md` §15e),
+ * generalized per the Family A root-cause (`docs/turn3-residual-probe-
+ * notes.md`): `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`'s amplitude input
+ * (`gAnimMovePower`, RAM-confirmed) is itself sourced from `gBattleMovePower`,
+ * a global written ONLY by `CalculateBaseDamage` - `EFFECT_ENDEAVOR` never
+ * calls it, so every ENDEAVOR shake reads whatever the LAST power-calculated
+ * move left behind, not ENDEAVOR's own listed power (0). Source formula
+ * (`reference/pokeemerald/src/battle_anim_mon_movement.c:975-998`):
+ * `amplitude = clamp(power/12, 1, 16)`, `downStep = amplitude/2`,
+ * `upStep = downStep + (amplitude & 1)` - the sequence is always
+ * `+upStep, -downStep, +upStep, -downStep, ...`, symmetric only when
+ * `amplitude` is even. RAM-verified at both known anchors: turn 2's ENDEAVOR
+ * inherits turn 1's ROCK_SLIDE (`.power = 75`, `reference/pokeemerald/src/
+ * data/battle_moves.h:2047`) -> amplitude 6 -> down=3/up=3 (symmetric,
+ * matches the original observed `+-3`); turn 3's ENDEAVOR inherits turn 2's
+ * DRAGON_BREATH (`.power = 60`, `battle_moves.h:2931`) -> amplitude 5 ->
+ * down=2/up=3 (asymmetric, matches the RAM-probed `+3,-2,+3,-2,...`).
  */
-const ENDEAVOR_SHAKE_STEP = 3;
+const ROCK_SLIDE_MOVE_POWER = 75;
+const DRAGON_BREATH_MOVE_POWER = 60;
+
+/** `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`'s amplitude/downStep/upStep, derived from whatever `gBattleMovePower` was left holding by the last power-calculated move (see `ROCK_SLIDE_MOVE_POWER`'s own doc comment above) - a general rule, not a per-turn literal pair. */
+function endeavorShakeSteps(stalePower: number): { downStep: number; upStep: number } {
+  const amplitude = Math.min(16, Math.max(1, Math.floor(stalePower / 12)));
+  const downStep = Math.floor(amplitude / 2);
+  const upStep = downStep + (amplitude & 1);
+  return { downStep, upStep };
+}
 /**
  * Two independent `AnimTask_ShakeTargetBasedOnMovePowerOrDmg` instances (one
  * per script round) - RAM tick each round's FIRST toggle lands on, as a
@@ -4099,14 +4115,15 @@ const ENDEAVOR_SHAKE_ALTERNATIONS = 7;
  */
 const ENDEAVOR_SHAKE_RENDER_LAG = 2;
 
-/** The target's (Onix's) own x2 shake offset at trace tick `t`, or 0 outside both rounds' windows. */
-function endeavorShakeX2(t: number, pressTick: number): number {
+/** The target's (Onix's) own x2 shake offset at trace tick `t`, or 0 outside both rounds' windows. `stalePower` is whatever `gBattleMovePower` the LAST power-calculated move (not ENDEAVOR itself) left behind - see `endeavorShakeSteps`'s own doc comment. */
+function endeavorShakeX2(t: number, pressTick: number, stalePower: number): number {
   const ramTick = t - ENDEAVOR_SHAKE_RENDER_LAG;
+  const { downStep, upStep } = endeavorShakeSteps(stalePower);
   for (const roundOffset of ENDEAVOR_SHAKE_ROUND_RAM_OFFSET) {
     const n = ramTick - pressTick - roundOffset;
     if (n < 0 || n >= ENDEAVOR_SHAKE_ALTERNATIONS * 2) continue;
     const half = Math.floor(n / 2);
-    return half % 2 === 0 ? ENDEAVOR_SHAKE_STEP : -ENDEAVOR_SHAKE_STEP;
+    return half % 2 === 0 ? upStep : -downStep;
   }
   return 0;
 }
@@ -4240,16 +4257,20 @@ function endeavorOnixInvisible(t: number, pressTick: number): boolean {
  * `kickoffBounceTick` (the idle-bounce overlay's own already-resolved tick)
  * are threaded in rather than hardcoded, so turn 3's own instance (Grovyle
  * at 88, `turn3KickoffBounceTick`) can reuse this same function verbatim -
- * every other sub-mechanism here (squish/blend/droplets/shake/hitsplat/
+ * every other sub-mechanism here (squish/blend/droplets/hitsplat/
  * healthbox-wobble/flicker) is already `pressTick`-relative and needs no
- * turn-specific change at all.
+ * turn-specific change at all. `stalePower` (Family A, `endeavorShakeSteps`'s
+ * own doc comment) DOES need a turn-specific value - each turn's ENDEAVOR
+ * inherits whatever the PRECEDING power-calculated move left in
+ * `gBattleMovePower`, so callers pass that move's own `.power`, not a shared
+ * constant.
  */
-function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number, opponentHp: number, kickoffBounceTick: number): boolean {
+function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number, opponentHp: number, kickoffBounceTick: number, stalePower: number): boolean {
   const local = t - pressTick - ENDEAVOR_SQUISH_START_DELAY;
   if (local < 0 || local >= ENDEAVOR_SQUISH_TABLE.length) return false;
   const entry = ENDEAVOR_SQUISH_TABLE[local]!;
   drawStaticBgShiftedY(fb, 0);
-  const shakeX2 = endeavorShakeX2(t, pressTick);
+  const shakeX2 = endeavorShakeX2(t, pressTick, stalePower);
   if (!endeavorOnixInvisible(t, pressTick)) {
     drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + shakeX2, ONIX_MATERIALIZE_CORNER.y);
   }
@@ -4488,9 +4509,29 @@ function dragonBreathResettledBounceTick(t: number, pressTick: number): number {
 /** S7 slice F (docs/battle-turn-notes.md §13): turn 2's own A-confirm press tick (RAM/render 2945 - matches `DRAGONBREATH_TEXT_START_DELAY`'s own doc: `2945+192=3137` is the busy-flag render tick already cited there). Needed for the same reason `TURN1_CONFIRM_PRESS_TICK` is (`battleMenu.ts`): turn 3's reopen inherits the turn-2-resettled-menu's own re-anchored bounce phase (`dragonBreathResettledBounceTick`), not a fresh mapping - reopening FIGHT doesn't reset the underlying bounce task any more than turn 2's own reopen did. */
 const TURN2_CONFIRM_PRESS_TICK = 2945;
 
-/** S7 slice F: turn 3's own reopened submenu's bounce overlay - composes `dragonBreathResettledBounceTick`'s own turn-2-resettled remap with the same `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` DMA-wait correction `turn2SubmenuBounceTick` (`battleMenu.ts`) already established for turn 2's own reopen, one level up the same chain. */
+/**
+ * S7 slice F: turn 3's own reopened submenu's bounce overlay - composes
+ * `dragonBreathResettledBounceTick`'s own turn-2-resettled remap with the
+ * same `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` DMA-wait correction
+ * `turn2SubmenuBounceTick` (`battleMenu.ts`) already established for turn
+ * 2's own reopen, one level up the same chain.
+ *
+ * Family B fix (`docs/turn3-residual-probe-notes.md` "Family B, continued"):
+ * a pointer-chase to the real invisible bouncer sprites' own raw `sSinIndex`
+ * (`gBattleSpritesDataPtr`->`healthBoxesData[0]`->bouncer sprite id->
+ * `gSprites[].data[]`) proved THIS composition's resultant phase is
+ * uniformly exactly one RAM tick more advanced than the real hardware,
+ * zero exceptions over 41 probed ticks x 2 regions
+ * (`tools/probe/verify-turn3-menu-bounce-rule.py`) - not a "hardware quirk"
+ * as previously catalogued. The extra `-1` below retards this composition's
+ * phase by that one tick. Scoped to THIS composition only, NOT the shared
+ * `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` constant: turn 2's own reopen windows
+ * (ticks 2135/3465/3721, all green) are proven correctly calibrated with
+ * `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` unshifted, and a uniform shift there
+ * would break them.
+ */
 function turn3SubmenuBounceTick(t: number): number {
-  return dragonBreathResettledBounceTick(t, TURN2_CONFIRM_PRESS_TICK) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  return dragonBreathResettledBounceTick(t, TURN2_CONFIRM_PRESS_TICK) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT - 1;
 }
 
 /**
@@ -4570,7 +4611,7 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
   // construction can't happen before the S7 slice E1 reopen sets
   // `turn1Resolved` - Grovyle's healthbox always needs its real (101) HP
   // here, never the stale full-HP harvest.
-  if (!drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurnHp, turn2KickoffBounceTick(t, pressTick))) {
+  if (!drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurnHp, turn2KickoffBounceTick(t, pressTick), ROCK_SLIDE_MOVE_POWER)) {
     if (t >= dragonBreathStart) {
       drawDragonBreathScene(fb, t, pressTick);
     } else {
@@ -4648,7 +4689,7 @@ function drawTurn3EndeavorText(fb: Uint8Array, t: number, pressTick: number): vo
   }
   const bounceTick = turn3KickoffBounceTick(t, pressTick);
   const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp);
-  if (drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurn2Hp, bounceTick)) {
+  if (drawEndeavorSquish(fb, t, pressTick, anchorOpponentAfterTurn2Hp, bounceTick, DRAGON_BREATH_MOVE_POWER)) {
     drawPlayerHealthboxHpOverlay(fb, onixHp, endeavorHealthboxBounceY2(t, pressTick));
   } else {
     drawActionMenuIdleContent(fb, bounceTick, true, true, onixHp);
