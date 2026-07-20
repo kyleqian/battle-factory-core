@@ -489,6 +489,7 @@ import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "jso
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
 import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { type: "json" };
 import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" with { type: "json" };
+import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
@@ -631,6 +632,12 @@ interface BattleAnimRocksAsset {
   palette: RgbColor[];
 }
 
+/** `sweat_drop.png` (`gFacadeSweatDropSpriteTemplate`, `ANIM_TAG_SWEAT_DROP`) - a single un-animated 8x8 tile, docs/battle-menu-notes.md §15/§15c. */
+interface BattleAnimSweatDropAsset {
+  tileset: Tileset;
+  palette: RgbColor[];
+}
+
 const battleBg = battleBgAsset as BattleBgAsset;
 const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -642,6 +649,7 @@ const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAss
 const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
+const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 
 /**
  * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
@@ -3525,33 +3533,177 @@ const ENDEAVOR_BLEND_COLOR: RgbColor = { r: 248, g: 168, b: 0 };
 const ENDEAVOR_SQUISH_START_DELAY = 55; // pressTick+55 = render tick 3000, the first visible tick of this window (blend only - see the table's own doc)
 /**
  * **The matrix (`xScale`/`yScale`/`y2`) and the blend `coeff` do NOT share
- * one render lag** - pixel-solved this session by brute-forcing every
- * `(candidate RAM matrix, coeff, y2)` triple from the probe dump against
- * each of the 8 oracle captures independently (not assumed from the
- * "render T shows RAM T-1" family every OTHER affine mechanism in this file
- * follows - that 1-tick convention turned out to only hold for `coeff`
- * here): the matrix lags the render by TWO ticks (render `3000+i` shows
- * RAM tick `2997+i`'s matrix, i.e. render 3000 is still neutral-matrix,
- * matching `2997`/`2998`'s own neutral RAM readings) while `coeff` lags by
- * the usual ONE tick (`coeff = i+1`). 7/8 render ticks matched 100% of
- * their own silhouette pixels exactly at these values (the 8th, render
- * 3006, matched 95% - a small residual, not chased further this session).
- * Net effect: the WHOLE 8-tick window everyone (§15, §15a, this section's
- * own earlier revisions) assumed was "squish alone, blend arrives later"
- * is actually squish+blend from the very first visible tick - blend's
- * coeff is already 1 by render 3000, before the matrix has even left
- * neutral.
+ * one render lag.** §15b's own prose here previously said "the matrix lags
+ * the render by TWO ticks (render `3000+i` shows RAM tick `2997+i`'s
+ * matrix)" - **corrected this session (§15c)**: a fresh RAM probe
+ * (`tools/probe/dump-endeavor-squish-blend-ext.py`, RAM ticks 2996-3055,
+ * cross-checked against the ORIGINAL committed probe dump `2996-3006`
+ * verbatim) shows the table's own actual VALUES only match `RAM = render -
+ * 2` (e.g. render 3001's `xScale=240,yScale=272,y2=2` is RAM tick 2999's
+ * own reading, and `3001-2=2999` - not `2997+1=2998` the old prose's own
+ * formula would give). The `2997+i` framing was an off-by-one in the
+ * write-up, not a second real lag value - the table's own committed numbers
+ * were always right, only the prose's restated formula was wrong. Blend
+ * `coeff` keeps its own separately-confirmed `RAM = render - 1` (one tick
+ * fresher than the matrix/`y2` - a palette-buffer write vs. sprite-position
+ * state, confirmed again this session via a DIRECT `gPlttBufferFaded`-vs-
+ * `gPlttBufferUnfaded` read solved for `coeff` per `BlendPalette`'s own
+ * exact formula, `reference/pokeemerald/src/util.c:264-278` - see
+ * `dump-endeavor-squish-blend-ext.py`'s own header - not pixel-solved
+ * against oracle PNGs as §15b's own note flagged for whoever extended past
+ * tick 3007).
+ *
+ * **Table stays `t=3000..3007`** (8 rows, unchanged from §15b) - a fresh
+ * full-window RAM probe this session (`dump-endeavor-squish-blend-ext.py`,
+ * RAM 2996-3055, both squish/blend cycles) confirmed these 8 rows exact
+ * and extended the UNDERLYING RAM data through both full cycles, but the
+ * pixel fit past row 7 is NOT yet confirmed (batch-1/cycle-2 droplet timing
+ * needed its own render-lag correction this session - see
+ * `ENDEAVOR_DROPLET_RENDER_LAG`'s own doc - and shake/hitsplat, unmodeled,
+ * may already be contributing pixels by RAM~3010+ per §15's own bbox scan).
+ * Extending this table to cover cycle 2 is real, banked, RAM-exact prep for
+ * a future session (§15c's own probe dump has it), just not landed this
+ * session per this run's "commit only what's pixel-verified" discipline.
  */
 const ENDEAVOR_SQUISH_TABLE: readonly { xScale: number; yScale: number; y2: number; coeff: number }[] = [
-  { xScale: 256, yScale: 256, y2: 0, coeff: 1 }, // matrix still neutral (RAM 2997) - blend only
-  { xScale: 240, yScale: 272, y2: 2, coeff: 2 }, // RAM tick 2999's matrix
-  { xScale: 224, yScale: 288, y2: 3, coeff: 3 }, // RAM tick 3000's matrix
-  { xScale: 208, yScale: 304, y2: 4, coeff: 4 }, // RAM tick 3001's matrix
-  { xScale: 192, yScale: 320, y2: 6, coeff: 5 }, // RAM tick 3002's matrix
-  { xScale: 176, yScale: 336, y2: 7, coeff: 6 }, // RAM tick 3003's matrix
-  { xScale: 160, yScale: 352, y2: 8, coeff: 7 }, // RAM tick 3004's matrix
-  { xScale: 176, yScale: 336, y2: 7, coeff: 8 }, // RAM tick 3005's matrix (same as 3003's - the accumulator's own symmetric trough)
+  { xScale: 256, yScale: 256, y2: 0, coeff: 1 }, // t=3000 (RAM matrix=2998, coeff=2999)
+  { xScale: 240, yScale: 272, y2: 2, coeff: 2 }, // t=3001 (RAM matrix=2999, coeff=3000)
+  { xScale: 224, yScale: 288, y2: 3, coeff: 3 }, // t=3002 (RAM matrix=3000, coeff=3001)
+  { xScale: 208, yScale: 304, y2: 4, coeff: 4 }, // t=3003 (RAM matrix=3001, coeff=3002)
+  { xScale: 192, yScale: 320, y2: 6, coeff: 5 }, // t=3004 (RAM matrix=3002, coeff=3003)
+  { xScale: 176, yScale: 336, y2: 7, coeff: 6 }, // t=3005 (RAM matrix=3003, coeff=3004)
+  { xScale: 160, yScale: 352, y2: 8, coeff: 7 }, // t=3006 (RAM matrix=3004, coeff=3005) - droplet batch 0 also becomes visible this render tick (`ENDEAVOR_DROPLET_*` below)
+  { xScale: 176, yScale: 336, y2: 7, coeff: 8 }, // t=3007 (RAM matrix=3005, coeff=3006)
 ];
+
+/**
+ * S7 slice E1d droplets increment (§15c): `CreateSweatDroplets`'s own
+ * `task->tBaseX/tBaseY` (`GetBattlerSpriteCoord(ATTACKER, ...)`, set once at
+ * squish-task setup, constant across both cycles) - RAM-confirmed via
+ * `tools/probe/dump-endeavor-droplets.py` by solving all 8 spawn positions
+ * (both batches) against `CreateSweatDroplets`'s own `xCoords`/`yCoords`
+ * formula (`battle_anim_effects_3.c:3804-3832`), exact fit.
+ */
+const ENDEAVOR_DROPLET_BASE = { x: 176, y: 40 };
+
+/**
+ * **§15's own banked table had `CreateSweatDroplets`'s two offset variants
+ * mislabeled - corrected this session.** Source
+ * (`battle_anim_effects_3.c:3765-3775` calls `CreateSweatDroplets(taskId,
+ * TRUE)` at local `tTimer==6` and `CreateSweatDroplets(taskId, FALSE)` at
+ * `tTimer==18`; inside that function (`:3804-3821`) `lowerDroplets=TRUE`
+ * selects `xOffset=30,yOffset=+20` (the LARGER-magnitude, lower-on-screen
+ * batch) and `FALSE` selects `xOffset=18,yOffset=-20` (upper). So `tTimer==6`
+ * (batch index 0 below) spawns the LOWER/+20 batch and `tTimer==18` (batch
+ * index 1) spawns the UPPER/-20 batch - the OPPOSITE of the JSON's own
+ * "tTimer==6 -> upper/-20, tTimer==18 -> lower/+20" summary
+ * (`src/data/gen/battle-move-anim-tables.json`'s `endeavor.sweatDroplets`,
+ * not corrected in-place since that file documents the ORIGINAL source
+ * reading verbatim - this doc comment is the authoritative correction).
+ * RAM-confirmed against `tools/probe/dump-endeavor-droplets.py`: all 8
+ * spawn positions across both batches match this (corrected) assignment
+ * exactly, not the JSON's original labeling.
+ */
+const ENDEAVOR_DROPLET_BATCH_OFFSETS: readonly { xOffset: number; yOffset: number }[] = [
+  { xOffset: 30, yOffset: 20 }, // batch 0 (tTimer==6) - "lower"
+  { xOffset: 18, yOffset: -20 }, // batch 1 (tTimer==18) - "upper"
+];
+
+/**
+ * Per-droplet template within a 4-droplet batch (`CreateSweatDroplets`'s own
+ * `xCoords[0..3] = base∓(xOffset[,+4])`/`yCoords[i&1] = base+yOffset[,+6]`,
+ * `i<2` travels left at `velocX=-2`, `i>=2` travels right at `velocX=+2`,
+ * `battle_anim_effects_3.c:3822-3832`).
+ */
+const ENDEAVOR_DROPLET_TEMPLATE: readonly { dxSign: -1 | 1; dxExtra: number; rowIndex: 0 | 1; velocX: -2 | 2 }[] = [
+  { dxSign: -1, dxExtra: 0, rowIndex: 0, velocX: -2 },
+  { dxSign: -1, dxExtra: 4, rowIndex: 1, velocX: -2 },
+  { dxSign: 1, dxExtra: 0, rowIndex: 0, velocX: 2 },
+  { dxSign: 1, dxExtra: 4, rowIndex: 1, velocX: 2 },
+];
+
+/**
+ * RAM-confirmed (`tools/probe/dump-endeavor-droplets.py`, RAM ticks
+ * 2995-3060) absolute-tick deltas from `pressTick` to each batch's own spawn
+ * RAM tick: cycle 0 batch 0 = RAM 3004 (`pressTick+59`), cycle 0 batch 1 =
+ * RAM 3016 (`+71`), cycle 1 batch 0 = RAM 3029 (`+84`), cycle 1 batch 1 =
+ * RAM 3041 (`+96`) - `pressTick + 59 + cycle*25 + batchIndex*12` fits all
+ * four exactly (the squish task's own cross-cycle stride is 25 RAM ticks,
+ * not the naive 24 - same "one extra tick per cycle boundary" quirk
+ * `ENDEAVOR_SQUISH_TABLE`'s own doc comment above already flags for the
+ * matrix).
+ */
+const ENDEAVOR_DROPLET_SPAWN_DELAY = 59;
+const ENDEAVOR_DROPLET_CYCLE_STRIDE = 25;
+const ENDEAVOR_DROPLET_BATCH_STRIDE = 12;
+/**
+ * Droplets are NOT visible on their own `CreateSprite` tick - pixel-solved
+ * this session, not assumed: naively using the same `RAM = render - 2` lag
+ * as the squish matrix (so the sprite's raw spawn position, `n=0`, is what
+ * render `spawnRamTick+2` shows) put every droplet exactly one physics step
+ * (`velocX`/`velocY`) AHEAD of the oracle's own pixels - e.g. render 3006
+ * showed this engine's `n=0` position while the oracle's own pixels matched
+ * RAM tick 3004's `n=1` (one step of `(velocX,velocY)` already applied).
+ * Fixed by using the fresher `RAM = render - 1` (matching blend's own lag,
+ * not the matrix's) AND requiring `n>=1` rather than `n>=0` - i.e. a newly
+ * created droplet sprite's OWN creation-tick position is written to RAM but
+ * not yet composited into that same tick's OAM/PPU output; the first
+ * frame it's actually drawn on screen already reflects one
+ * `AnimFacadeSweatDrop` motion step. This exactly reproduces the
+ * pixel-confirmed first-contaminated tick (render 3006 = RAM `3004+1`'s
+ * `n=1` position) AND the previously-confirmed clean tick (render 3005 =
+ * RAM 3004's `n=0`, not yet composited, so invisible) simultaneously -
+ * both were previously unreconciled under a single uniform lag.
+ */
+const ENDEAVOR_DROPLET_RENDER_LAG = 1;
+/** `AnimFacadeSweatDrop`'s own `sTimer` lifetime - alive for RAM ticks `n=0..6` (7 ticks: `if (++sprite->sTimer > 6) DestroySprite`, `battle_anim_effects_3.c:3848-3853`) - but see `ENDEAVOR_DROPLET_RENDER_LAG`'s own doc for why `n=0` itself is never actually rendered. */
+const ENDEAVOR_DROPLET_LIFETIME_TICKS = 7;
+
+/** A single droplet's real CENTER coordinates (GBA OAM convention) at trace tick `t`, or `null` if not yet spawned / already destroyed. */
+function endeavorDropletCenter(
+  cycle: 0 | 1,
+  batchIndex: 0 | 1,
+  dropletIndex: 0 | 1 | 2 | 3,
+  t: number,
+  pressTick: number,
+): { x: number; y: number } | null {
+  const spawnRamTick = pressTick + ENDEAVOR_DROPLET_SPAWN_DELAY + cycle * ENDEAVOR_DROPLET_CYCLE_STRIDE + batchIndex * ENDEAVOR_DROPLET_BATCH_STRIDE;
+  const ramTick = t - ENDEAVOR_DROPLET_RENDER_LAG;
+  const n = ramTick - spawnRamTick;
+  if (n < 1 || n >= ENDEAVOR_DROPLET_LIFETIME_TICKS) return null;
+  const batch = ENDEAVOR_DROPLET_BATCH_OFFSETS[batchIndex]!;
+  const tmpl = ENDEAVOR_DROPLET_TEMPLATE[dropletIndex]!;
+  const spawnX = ENDEAVOR_DROPLET_BASE.x + tmpl.dxSign * (batch.xOffset + tmpl.dxExtra);
+  const spawnY = ENDEAVOR_DROPLET_BASE.y + batch.yOffset + tmpl.rowIndex * 6;
+  return { x: spawnX + n * tmpl.velocX, y: spawnY - n };
+}
+
+/**
+ * Draws all 16 sweat-droplet sprites (2 cycles x 2 batches x 4 droplets)
+ * active at trace tick `t` - `AnimFacadeSweatDrop`'s own un-animated 8x8
+ * `ANIM_TAG_SWEAT_DROP` tile, a direct (non-affine) blit via `drawSpriteSheet`
+ * (already fully generic over tileset size) at real CENTER coordinates minus
+ * half the 8x8 frame, the same GBA OAM convention `drawRockSprite` already
+ * established. Droplets sort ABOVE the attacker (`CreateSweatDroplets`'s own
+ * `task->tSubpriority-5`, a LOWER subpriority than the attacker's own -
+ * `SortSprites`'s ascending-subpriority-draws-on-top convention,
+ * docs/battle-menu-notes.md §11's own precedent), so this is called AFTER
+ * `drawSpriteSheetAffineStretch` draws the squished attacker.
+ */
+function drawEndeavorDroplets(fb: Uint8Array, t: number, pressTick: number): void {
+  const cycles: readonly (0 | 1)[] = [0, 1];
+  const batches: readonly (0 | 1)[] = [0, 1];
+  const droplets: readonly (0 | 1 | 2 | 3)[] = [0, 1, 2, 3];
+  for (const cycle of cycles) {
+    for (const batchIndex of batches) {
+      for (const dropletIndex of droplets) {
+        const center = endeavorDropletCenter(cycle, batchIndex, dropletIndex, t, pressTick);
+        if (!center) continue;
+        drawSpriteSheet(fb, battleAnimSweatDrop.tileset, battleAnimSweatDrop.palette, center.x - 4, center.y - 4);
+      }
+    }
+  }
+}
 
 /**
  * Draws the squished attacker plus everything else the settled turn-2 idle
@@ -3562,9 +3714,12 @@ const ENDEAVOR_SQUISH_TABLE: readonly { xScale: number; yScale: number; y2: numb
  * - squish needs it for the identical reason (Grovyle's own silhouette both
  * grows past its neutral 64px box on X and shrinks below it on Y, neither
  * of which the flat `menuIdleBase` harvest, baked at the neutral pose, can
- * show or un-show). Returns `false` (drawing nothing) outside the 8-tick
+ * show or un-show). Returns `false` (drawing nothing) outside the squish
  * window so the caller can fall back to the existing `drawActionMenuIdleContent`
- * path unchanged.
+ * path unchanged. §15c: now also layers the 16 sweat-droplet sprites
+ * (`drawEndeavorDroplets`) on top - unlike the squish/blend table, droplets
+ * aren't windowed by `local`/table length, they self-gate via
+ * `endeavorDropletCenter`'s own per-droplet spawn/lifetime check.
  */
 function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boolean {
   const local = t - pressTick - ENDEAVOR_SQUISH_START_DELAY;
@@ -3588,6 +3743,7 @@ function drawEndeavorSquish(fb: Uint8Array, t: number, pressTick: number): boole
     entry.coeff,
     true,
   );
+  drawEndeavorDroplets(fb, t, pressTick);
   return true;
 }
 

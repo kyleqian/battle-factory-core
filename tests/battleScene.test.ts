@@ -909,3 +909,17 @@ describe("S7 slice E1d-retry: ENDEAVOR's attacker squish sub-window (docs/battle
     expect(before).toEqual([grovyleFirstOpaquePixel.r, grovyleFirstOpaquePixel.g, grovyleFirstOpaquePixel.b]);
   });
 });
+
+// S7 slice E1d droplets increment (docs/battle-menu-notes.md §15c): the
+// first sweat-droplet sprite (cycle 0, batch 0/"lower", droplet index 0)
+// becomes visible at render 3006 - oracle-cross-checked pixel values
+// (tools/compare's own oracle-03005/03006.png for this trace), not hand-picked.
+describe("S7 slice E1d: ENDEAVOR's sweat droplets (docs/battle-menu-notes.md §15c) - RAM-probed spawn/motion, oracle-confirmed render lag", () => {
+  it("render 3006 (the droplet's own first visible tick, one AnimFacadeSweatDrop motion step past its raw CreateSprite position) shows the droplet's own bright highlight color at (144,59)", () => {
+    expect(pixelAtTurn2(3006, 144, 59)).toEqual([206, 255, 255]);
+  });
+
+  it("render 3005 (one tick earlier - the sprite exists in RAM by then but isn't composited into OAM/PPU output yet) still shows plain background at that same pixel", () => {
+    expect(pixelAtTurn2(3005, 144, 59)).toEqual([140, 165, 115]);
+  });
+});

@@ -1,3 +1,25 @@
+---
+## 141 — Supervisor: swap-YES scout merged — **the factory swap screen is fully ground-truthed** (entry fade → party picker → popup → opponent picker → accept → completed swap → battle 2's menu: swapped-in GROVYLE 143/143 vs KABUTO); S8 ground truth is now essentially complete on both swap branches
+
+- **State:** `npm test` **669/669**, `npm run build` green, tree clean at
+  this merge; no worktrees, no unmerged branches.
+- **Did:** verified (suite in worktree, 34081-frame trace re-run, final
+  frame visually confirmed) and merged worker/wt-20260719-181044:
+  `battle1-swapyes-{a,b}.json` (30001f/235c, 34081f/194c, verbatim
+  prefix off battle1-winline-b-swap.json's committed swap-offer prompt
+  at tick 29601, both twice-run byte-identical), §17 (swap-screen UI
+  sequence + asset inventory: nearly all draft-screen assets literally
+  shared; only action-button pills + swap text bank are new). Worker
+  honestly deleted a broken `rentalMons[]` probe (offset bug, §17 open
+  item) rather than commit implausible data; YES-branch LCG ledger also
+  still open.
+- **Next:** (1) main lane: ENDEAVOR squish X-axis via RAM-probing the
+  real affine matrices (§15a's own recommendation) — second landing
+  attempt; if it fails again, park the anim and move to E2/#19/#20;
+  (2) worktree: §17 debt (rentalMons offset fix + YES-branch ledger) +
+  battle-2 opening-turns ground truth; (3) wind-down prep ~21:45.
+- **Notes:** none.
+
 ## 140 — Bounded worker: S7 slice E1d — ENDEAVOR squish wired + oracle-fitted, X-axis MISFITS — reverted, nothing landed; suite unchanged **669/669** (`docs/battle-menu-notes.md` §15a FITTED addendum has the full empirical writeup)
 
 - **State:** `npm test` **669/669** (unchanged), `npm run build` green,

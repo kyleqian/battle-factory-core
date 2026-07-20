@@ -2524,3 +2524,120 @@ own doc comments), `npm run build` green. `tools/compare`:
 `turn2-endeavor-drain.json` **111/112** (only the pre-existing #19 diff at
 frame 2906 remains), `turn2-endeavor.json` **76/77** (unchanged),
 `turn1-rockslide.json` **256/256** (unchanged) - zero regressions.
+
+### 15c. S7 slice E1d droplets increment (bounded worker, third follow-up session): the first sweat-droplet batch landed green - `turn2-endeavor-drain.json` dense window **3000-3005 → 3000-3007**; `npm test` **674/674** (+2), `npm run build` green
+
+**What landed:** `drawEndeavorDroplets` in `battleScene.ts`, called from
+`drawEndeavorSquish` after the squished attacker draws (droplets sort above
+the attacker per `CreateSweatDroplets`'s own `tSubpriority-5`). Renders 3006
+and 3007 (the first two ticks of droplet batch 0/cycle 0) are now
+pixel-exact; `tools/probe/dump-endeavor-droplets.py` and
+`tools/probe/dump-endeavor-squish-blend-ext.py` (both new) are committed.
+
+**Method, per the brief: RAM-probe first.** `dump-endeavor-droplets.py`
+identifies droplet sprites by their real `callback` field
+(`struct Sprite+0x1C`) against `AnimFacadeSweatDrop`'s own static address
+(`nm -n --defined-only pokeemerald.elf`, thumb bit added - `CreateSweatDroplets`/
+`AnimFacadeSweatDrop` are both `static`, no `bin/oracle symbols` entry) - a
+stronger filter than shape/size. Run over ticks 2995-3060, it caught all 4
+spawn events (2 cycles x 2 batches) with exact `x`/`y`/`data[]` (`sTimer`/
+`sVelocX`/`sVelocY`) reads at every tick of each droplet's 7-tick life.
+
+**Correction to §15's own banked table: the two `CreateSweatDroplets` offset
+variants were mislabeled.** Source (`battle_anim_effects_3.c:3765-3775,
+3804-3821`) calls `CreateSweatDroplets(taskId, TRUE)` at local `tTimer==6`
+and `CreateSweatDroplets(taskId, FALSE)` at `tTimer==18`; inside that
+function, `lowerDroplets=TRUE` selects `xOffset=30,yOffset=+20` (the
+LARGER-magnitude, lower-on-screen batch) and `FALSE` selects
+`xOffset=18,yOffset=-20` (upper). So `tTimer==6` spawns the LOWER/+20 batch
+and `tTimer==18` spawns the UPPER/-20 batch - the OPPOSITE of §15's own
+"tTimer==6 -> upper/-20, tTimer==18 -> lower/+20" summary
+(`src/data/gen/battle-move-anim-tables.json`'s `endeavor.sweatDroplets`, left
+as-is since it transcribes the ORIGINAL source reading verbatim - the
+correction lives in `battleScene.ts`'s own doc comment, the authoritative
+one). RAM-confirmed: solving `CreateSweatDroplets`'s own `xCoords`/`yCoords`
+formula against all 8 probed spawn positions (both batches) against a
+constant `task->tBaseX/tBaseY = (176, 40)` fits EXACTLY only with this
+(corrected) offset assignment.
+
+**A second, real bug found only by chasing the RAM-verified spawn data to
+100% pixel-exact: droplets are NOT visible on their own `CreateSprite`
+tick.** Naively reusing the squish matrix's own `RAM = render - 2` lag (so a
+droplet's raw spawn position, `n=0`, is what `render = spawnRamTick+2`
+shows) put every rendered droplet exactly one physics step
+(`velocX`/`velocY`) AHEAD of the oracle's own pixels - e.g. render 3006
+showed this engine's `n=0` position while the oracle's own pixels matched
+RAM tick 3004's `n=1` (one step of motion already applied). Fixed by using
+the fresher `RAM = render - 1` (matching the palette-blend's own lag, not
+the matrix's) AND requiring `n>=1` rather than `n>=0` - i.e. a newly-created
+droplet's own creation-tick position is written to RAM but not yet
+composited into that same tick's OAM/PPU output; the first frame it's
+actually drawn already reflects one `AnimFacadeSweatDrop` motion step. This
+simultaneously reproduces both previously-unreconciled facts: render 3006 is
+the first VISIBLE tick (matches the pixel-confirmed boundary from §15b) AND
+render 3005 stays exactly as before (still no droplet - the sprite exists in
+RAM by then but isn't composited yet). Found by brute-forcing lag=1/lag=2
+against `npm run compare`'s own per-frame diff output directly (not
+reasoned from source alone) after noticing the render-3006 diff was a small,
+suspiciously-exact one-step positional shift, not noise.
+
+**A third finding, this one a correction to §15b's own prose (not a new
+bug): the squish matrix's render lag is `RAM = render - 2`, not `render -
+3`.** §15b's own write-up said "render `3000+i` shows RAM tick `2997+i`'s
+matrix" (i.e. `RAM = render - 3`); a fresh full-window RAM probe this
+session (`dump-endeavor-squish-blend-ext.py`, RAM ticks 2996-3055) found the
+COMMITTED TABLE's own actual values only match `RAM = render - 2` (e.g.
+render 3001's `xScale=240,yScale=272` is RAM tick 2999's own reading, and
+`3001-2=2999`, not `2997+1=2998`). The table's own committed numbers were
+always right (they were RAM-probed correctly the first time); only the
+prose's restated formula had an off-by-one. `ENDEAVOR_SQUISH_TABLE`'s own
+doc comment is corrected in place.
+
+**A fourth finding (informational, not wired): both squish/blend cycles were
+fully RAM-probed this session** (`dump-endeavor-squish-blend-ext.py`, RAM
+2996-3055 - `matrixA`/`matrixD`/`y2` plus `coeff` solved directly from a live
+`gPlttBufferFaded`-vs-`gPlttBufferUnfaded` read against `BlendPalette`'s own
+exact formula, `reference/pokeemerald/src/util.c:264-278` - not pixel-solved
+against oracle PNGs as §15b's own note flagged). This confirms the squish
+task's own "one extra tick per cycle boundary" quirk applies to `coeff` too
+(cycle 2's `coeff` restarts ramping at RAM 3023, one tick before the
+matrix's own restart at RAM 3024) and gives exact ground truth for the
+WHOLE 48-ish-RAM-tick window - genuinely useful prep for a future session,
+but **not landed as active render code this session**: extending
+`ENDEAVOR_SQUISH_TABLE` to cover it was tried and reverted after `npm run
+compare` showed real residual diffs from render 3008 on (batch-1/upper
+droplet timing needed its own investigation, not yet done, and §15's own
+bbox scan flags shake/hitsplat - unmodeled - as plausibly already
+contributing pixels in that span). Landing only what's pixel-verified this
+session, per this run's own discipline, rather than shipping an
+unverified-past-3007 table as if it were confirmed.
+
+**Window grown 3000-3005 → 3000-3007 (not further):** `npm run compare`
+against the extended dense captures (3006-3050 tried) showed exact matches
+only through 3007; 3008 onward showed a small (277px) but real residual
+that widened further in (up to ~1700px) before narrowing again near each
+cycle's own end - not chased further this session (candidates: batch-1/
+upper droplet's own render-lag generalization not yet pixel-verified past
+batch 0, and/or shake/hitsplat, both plausible and both out of this
+session's scope). Trimmed to the last green tick (3007) rather than commit
+a knowingly-red window.
+
+**Verification**: `npm test` **674/674** (+2 new pixel pins in
+`battleScene.test.ts`, oracle-PNG-cross-checked, not hand-picked - see their
+own doc comments), `npm run build` green. `tools/compare`:
+`turn2-endeavor-drain.json` **113/114** (only the pre-existing #19 diff at
+frame 2906 remains - same residual as always, one more capture than before
+so the ratio shifts but the absolute mismatch count doesn't), `turn2-
+endeavor.json` **76/77** (unchanged), `turn1-rockslide.json` **256/256**
+(unchanged), `turn1-cloneanim.json` **230/230** (unchanged), `turn1-
+drain.json` **102/102** (unchanged) - zero regressions.
+
+**Next steps for whoever picks this up**: (1) batch-1 (upper, `tTimer==18`)
+droplet timing - verify whether the same `RAM=render-1`/`n>=1` convention
+generalizes, or needs its own correction, by RAM-probing/pixel-fitting
+render 3017 on (the analogous first-visible tick for batch 1); (2) once
+droplets are fully closed for both batches/both cycles, the ALREADY-BANKED
+extended `ENDEAVOR_SQUISH_TABLE` data (this session's own probe dump) can
+likely just be dropped in; (3) shake/hitsplat (`gAnimMovePower` for ENDEAVOR
+still not RAM-confirmed, §15's own flag) remain the last unmodeled
+sub-mechanisms blocking a full close of this window.
