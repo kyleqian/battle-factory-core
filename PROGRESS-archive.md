@@ -1,3 +1,30 @@
+## 171 — Worktree probe (supervisor-folded): slice G's 12-tick shake asymmetry ROOT-CAUSED (stale `gBattleMovePower` drives shake amplitude — 75→±3, 60→+3/-2, source formula reproduces BOTH turns); menu-idle ticks 3879/3888 localized but need a pointer-chase probe; merged `e8edc8d`, suite 753/753 on the merged tree
+
+- **State:** merged into master, `npm test` 753/753 + build green
+  post-merge (supervisor-verified). New: `docs/turn3-residual-probe-notes.md`,
+  probe specs + twice-run outputs under `tools/probe/specs/` /
+  `src/data/gen/`. No engine changes (by design — mechanism only).
+- **Did:** (Family A, §20's 12 excluded ticks) `AnimTask_ShakeTargetBased
+  OnMovePowerOrDmg` reads `gAnimMovePower` = stale `gBattleMovePower`,
+  written ONLY by `CalculateBaseDamage` — ENDEAVOR never calls it. Turn
+  2's shake inherited 75 (turn 1's ROCK_SLIDE) → 75/12=6 even → ±3; turn
+  3's inherited 60 (turn 2's DRAGON_BREATH) → 60/12=5 odd → down=2/up=3.
+  Supervisor re-verified the formula at `battle_anim_mon_movement.c:
+  971-998`. Predicts turn 5's ENDEAVOR shake is symmetric again (stale
+  75 from turn 4's ROCK_SLIDE). READY for a small engine fix (stale-power
+  state + restore the 12 ticks). (Family B, ticks 3879/3888) render=
+  RAM+1 confirmed; at both ticks the model's bounce-`y2` plateau
+  transition leads real hardware by exactly 1 tick; constant-offset fix
+  RULED OUT (breaks 3 passing ticks). Root cause needs the bouncer
+  sprite's raw `sSinIndex`/task state behind `gBattleSpritesDataPtr->
+  healthBoxesData[]` — a pointer-chase not reached.
+- **Next:** fold the Family A fix into the next shake-touching engine
+  slice (turn 5 needs the rule anyway); Family B pointer-chase probe is
+  a clean 30-45 min worktree step.
+- **Notes:** worker PAPERCUT (ram-probe.py spews mGBA logs to stdout,
+  docstring implies stderr) recorded in PAPERCUTS.md by supervisor.
+
+---
 ## 170 — Bounded worker: S7 slice I — turn 4's FIGHT-submenu reopen landed green (44/44, 0 diff); the DOUBLE_TEAM/ROCK_SLIDE resolution itself does NOT land — a real uncracked pixel residual, not a scope choice
 
 - **State:** `npm test` **753/753** (+4), `npm run build` green, tree

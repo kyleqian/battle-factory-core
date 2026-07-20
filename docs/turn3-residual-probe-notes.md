@@ -118,6 +118,19 @@ instantiation (at the move's own `attackanimation` script command, well
 before the shake window itself begins), not read tick-by-tick, so there was
 nothing render-lag-sensitive to re-pin here.
 
+### RESOLVED (S7 residual-cleanup slice)
+
+Applied exactly as prescribed above: `src/engine/battleScene.ts` gained
+`endeavorShakeSteps(stalePower)` (the general `downStep`/`upStep` formula)
+replacing the literal `ENDEAVOR_SHAKE_STEP` constant, plus `endeavorShakeX2`'s
+new `stalePower` parameter threaded from each ENDEAVOR call site
+(`ROCK_SLIDE_MOVE_POWER=75` at turn 2's, `DRAGON_BREATH_MOVE_POWER=60` at
+turn 3's — both named constants, not a hardcoded `±(2,3)` pair). All 12
+excluded ticks restored to `turn3-endeavor.json` (180→192 captures), 0 diff.
+Turn 2's own window stays bit-identical (75 still resolves to symmetric
+3/3). Pinned with three Tier-1 tests against all three RAM-confirmed data
+points, including the turn-5 prediction (`tests/battleScene.test.ts`).
+
 ## Family B: the two menu-idle ticks — divergence precisely localized, NOT a constant-offset bug (ruled out by direct test)
 
 ### What was probed
@@ -333,6 +346,22 @@ draw path at those two specific ticks for an unrelated reason (e.g. still
 inside a DMA-wait redraw hold) that this session didn't chase further. Flagged
 per this dossier's own no-silent-exclusion policy, not fixed or hidden.
 
+### RESOLVED (S7 residual-cleanup slice)
+
+Applied the untried direction identified above: `turn3SubmenuBounceTick`
+(`src/engine/battleScene.ts`) now subtracts one additional tick
+(`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT - 1`), scoped to this composition only —
+the shared `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` constant itself is untouched,
+so turn 2's own already-green reopen windows are unaffected. All four
+predicted crossings restored/added to `turn3-menu.json`'s `captureFrames`
+(3861, 3870, 3879, 3888 — 250→254 captures), 0 diff on all four, and the
+previously-open caveat below is closed: 3861/3870 are real, correctly-
+predicted crossings of the same mechanism, not a different draw path.
+Pinned with a Tier-1 test importing the committed
+`turn3-menu-bouncer-raw-probe.json` RAM dump directly and asserting
+`menuIdleBounce(turn3SubmenuBounceTick(t))` matches `real_screen_y2(t)` at
+every probed tick, both regions, zero exceptions (`tests/battleScene.test.ts`).
+
 ### Verification (this addendum)
 
 `ram-probe.py`'s new `path` hop is additive — every pre-existing spec's
@@ -344,6 +373,11 @@ identical output to the prior session's own committed
 needed) — run it directly to reproduce every claim above.
 
 ## Summary for the supervisor
+
+**Both families RESOLVED and applied** (S7 residual-cleanup slice — see each
+family's own "RESOLVED" subsection above for what changed where). The
+mechanism narrative below is left as originally written for the historical
+record.
 
 - **Family A (shake asymmetry): SOLVED.** Root cause is a genuine stale-global
   read in the original game (`gBattleMovePower` not reset between moves,

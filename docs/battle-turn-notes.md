@@ -3376,6 +3376,13 @@ future session should RAM-probe `menuIdleBounce`'s own bounce-task state at
 exactly these two ticks rather than re-sweep the formula (already provably
 exact at every neighboring tick).
 
+> **Correction (S7 residual-cleanup slice):** NOT a hardware quirk — a
+> pointer-chase to the real bouncer sprites' own raw `sSinIndex` proved
+> `turn3SubmenuBounceTick` was uniformly one RAM tick too advanced;
+> retarded by 1, both ticks restored to `turn3-menu.json` at 0 diff. See
+> `docs/turn3-residual-probe-notes.md` ("Family B" and its "RESOLVED"
+> subsection).
+
 ### What did NOT land — honest scope accounting
 
 This is **far short of "faint/forced-switch."** The brief's own ground
@@ -3518,6 +3525,14 @@ frames) is 0 diff. Excluded from `turn3-endeavor.json`'s own `captureFrames`
 per this run's "characterize precisely, never commit red" rule - a future
 session should RAM-probe `gAnimMovePower` directly at these ticks before
 attempting a second shake formula.
+
+> **Correction (S7 residual-cleanup slice):** RAM-probed and root-caused -
+> `gAnimMovePower`/`gBattleMovePower` is stale from the last power-
+> calculated move (`.power=60`, turn 2's own DRAGON_BREATH; ENDEAVOR never
+> writes it), giving `downStep=2`/`upStep=3` via the general
+> `endeavorShakeSteps` formula. All 12 ticks restored to `turn3-endeavor.json`
+> at 0 diff. See `docs/turn3-residual-probe-notes.md` ("Family A" and its
+> "RESOLVED" subsection).
 
 ### What landed (`src/engine/battleScene.ts`)
 
