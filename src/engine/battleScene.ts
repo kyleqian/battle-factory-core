@@ -3403,13 +3403,28 @@ function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: bool
     drawRect(fb, menuIdleBlank);
     return;
   }
-  // S7 slice F: turn 3's own reopen (unlike turn 1's very first open, or
-  // turn 2's own reopen - both oracle-confirmed fine with plain `t` here)
-  // needs the same resettled-bounce remap its later "revealed, idle" phase
-  // uses (`turn3SubmenuBounceTick`) even during this brief DMA-wait hold -
-  // pixel-confirmed via `turn3-menu.json`'s own dense probe of ticks 3847/
-  // 3848 (plain `t` mismatched there, the remap doesn't).
-  const bounceTick = turn2Resolved ? turn3SubmenuBounceTick(t) : t;
+  // S7 slice F: turn 3's own reopen needs the same resettled-bounce remap
+  // its later "revealed, idle" phase uses (`turn3SubmenuBounceTick`) even
+  // during this brief DMA-wait hold - pixel-confirmed via `turn3-menu.json`'s
+  // own dense probe of ticks 3847/3848 (plain `t` mismatched there, the
+  // remap doesn't).
+  //
+  // ISSUES #24 (docs/battle-menu-notes.md §8d): turn 2's own reopen needs
+  // the SAME treatment, via `turn2SubmenuBounceTick` - the prior "oracle-
+  // confirmed fine with plain `t`" claim here was a false negative, not a
+  // different mechanism: turn 1's *very first* open is the one case where
+  // plain `t` is correct (that epoch's bounce sprite really is anchored at
+  // `MENU_IDLE_BLANK_END_TICK+1` with no prior reset), but turn 2's reopen
+  // - like turn 3's - inherits a RESET bounce task (`EndBounceEffect`/
+  // `DoBounceEffect` re-fire between turns, `rockSlideResettledBounceTick`'s
+  // own doc), so it needs the resettled remap here too. The bug was
+  // invisible until now because this 5-tick open-DMA-wait hold only ever
+  // lands on the sine table's rare peak (`table[64]`, ISSUES #22/#19's own
+  // "1-in-256" state) at RAM-confirmed tick 2901 specifically - every OTHER
+  // tick in this hold happens to share the same state under both formulas
+  // (verified against `turn2-endeavor-drain.json`/`turn2-dragonbreath.json`,
+  // ticks 2902-2905 identical either way).
+  const bounceTick = turn2Resolved ? turn3SubmenuBounceTick(t) : turn1Resolved ? turn2SubmenuBounceTick(t) : t;
   drawActionMenuIdleContent(fb, bounceTick, turn1Resolved, turn2Resolved);
 }
 

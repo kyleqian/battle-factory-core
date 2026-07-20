@@ -59,6 +59,11 @@ import {
   TURN2_KICKOFF_TEXT_TOTAL,
   endeavorOnixHp,
   ENDEAVOR_HP_DRAIN_START_DELAY,
+  openFightSubmenu,
+  confirmFightMove,
+  turn2SubmenuBounceTick,
+  menuIdleBounce,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -636,5 +641,47 @@ describe("S7 slice E1b: ENDEAVOR's own HP-bar drain (docs/battle-menu-notes.md ย
 
   it("endeavorOnixHp's own anchor delay differs from ROCK_SLIDE's opponent-bar delay (a different move/animation window, not a shared constant)", () => {
     expect(ENDEAVOR_HP_DRAIN_START_DELAY).not.toBe(ROCK_SLIDE_HP_DRAIN_START_DELAY);
+  });
+});
+
+describe("ISSUES #24 (docs/battle-menu-notes.md ยง8d): the onix-bounce two-state selection at turn 2's OWN reopen - RAM-probed ground truth at all 4 named ticks (2901/2135/3465/3721)", () => {
+  const moveset = CLOSED_FIGHT_SUBMENU_STATE.activeMonMoveset;
+
+  it("tick 2901 (turn2-endeavor-drain.json/turn2-dragonbreath.json): turn 2's OWN reopen just registered THIS tick (openElapsed===elapsed===1861) - the open-DMA-wait hold reads turn2SubmenuBounceTick, NOT plain t, landing onixY2=1 (RAM: real pixels match the y1 patch)", () => {
+    // Same reachable state `core.ts` produces at trace tick 2901 (openFightSubmenu
+    // just fired this tick, cursor still at its post-reopen default 0, no confirm yet).
+    const sm = openFightSubmenu(1861, moveset);
+    expect(sm).toEqual({ openElapsed: 1861, cursor: 0, displayCursor: 0, closeElapsed: null, confirmElapsed: null, activeMonMoveset: moveset });
+    expect(turn2SubmenuBounceTick(2901)).toBe(2064);
+    expect(menuIdleBounce(turn2SubmenuBounceTick(2901)).onixY2).toBe(1); // FIXED: y1 state (0 or 1), matches RAM
+    // The bug this closes: the naive "plain t" formula (correct for turn 1's
+    // very first open, `battleScene.ts`'s own doc) computes the wrong state
+    // here specifically because t=2901 happens to land on the sine table's
+    // rare peak (`table[64]`, ISSUES #22/#19's own "1-in-256" state) under
+    // the UNRESET absolute-t phase - a false state that RAM disproves.
+    expect(menuIdleBounce(2901).onixY2).toBe(2); // what plain `t` (the old/wrong formula) would give
+  });
+
+  it("ticks 2902-2905 (rest of the same open-DMA-wait hold): plain `t` and turn2SubmenuBounceTick agree here - the fix is scoped to the one tick RAM actually disproves, not a blanket shift", () => {
+    for (const t of [2902, 2903, 2904, 2905]) {
+      expect(menuIdleBounce(turn2SubmenuBounceTick(t)).onixY2).toBe(menuIdleBounce(t).onixY2);
+    }
+  });
+
+  it("tick 2135 (battle1-fight-submenu-idle.json, ISSUES #22): turn 1's OWN first-ever open (never resettled, turn1Resolved=false) - untouched by this fix, still the plain `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` anchor, landing onixY2=2 (RAM: real pixels match the y2 patch)", () => {
+    const sm = openFightSubmenu(847, moveset);
+    expect(sm.cursor).toBe(0);
+    expect(menuIdleBounce(2135 - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT).onixY2).toBe(2);
+  });
+
+  it("ticks 3465/3721 (turn2-dragonbreath.json): turn 2's OWN confirm (pressTick 2945, DRAGON_BREATH) has long since redrawn the resettled turn-3 menu by these ticks - `dragonBreathResettledBounceTick`'s own anchor (battleScene.ts, unchanged by this fix) already lands the rare sine peak correctly, matching RAM", () => {
+    const sm = confirmFightMove(openFightSubmenu(1861, moveset, 2), 1905);
+    expect(sm).toEqual({ openElapsed: 1861, cursor: 2, displayCursor: 2, closeElapsed: null, confirmElapsed: 1905, activeMonMoveset: moveset });
+    // dragonBreathResettledBounceTick(t, pressTick=2945) = t - (2945+391) + (MENU_IDLE_BLANK_END_TICK+1)
+    const dragonBreathResettledBounceTick = (t: number): number => t - (2945 + 391) + (MENU_IDLE_BLANK_END_TICK + 1);
+    expect(dragonBreathResettledBounceTick(3465)).toBe(1877); // the same rare-peak tick already pinned in battleMenuIdle.test.ts
+    expect(dragonBreathResettledBounceTick(3721)).toBe(2133);
+    expect(menuIdleBounce(dragonBreathResettledBounceTick(3465)).onixY2).toBe(2);
+    expect(menuIdleBounce(dragonBreathResettledBounceTick(3721)).onixY2).toBe(2);
   });
 });

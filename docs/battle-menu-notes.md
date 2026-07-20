@@ -1353,6 +1353,101 @@ still-open family, untouched), `turn3-menu.json` 250/250, `confirm-
 flow.json` 79/95, `rent-3picks.json` 157/190, `rent-slot1.json` 125/139
 — zero regressions anywhere except the one named/scoped-out tick above.
 
+## 8d. ISSUES #24 CLOSED (bounded worker, this session) — the §8c fix's
+"tick 2901 regression" was never a second asset bug at all: `drawActionMenuIdleWindow`'s
+open-DMA-wait branch was missing the `turn1Resolved` case in its bounce-tick
+dispatch, so it fell through to a plain, never-reset `t` exactly where a
+resettled epoch was needed — `fight-submenu.json` 235/235, `turn3-menu.json`
+250/250, `s6-acceptance.json` 224/228, `sendout.json` 255/256 all unchanged;
+`turn2-endeavor.json` 77/77 (was 76/77, unexpected bonus); **all four named
+ticks correct simultaneously**: `turn2-endeavor-drain.json` **201/201**
+(2901 restored), `battle1-fight-submenu-idle.json` **256/256** (2135 stays
+fixed), `turn2-dragonbreath.json` **237/237** (3465/3721 stay fixed)
+
+**Step 0, source-read the real mechanism (not just curve-fitting the
+formula).** ISSUES #24's own brief named the free discriminator: the
+pre-§8c code got 2901 right and 2135/3465/3721 wrong; post-§8c, the exact
+reverse. Rather than grid-searching a shift constant, read
+`reference/pokeemerald/src/battle_main.c`'s actual `DoBounceEffect`/
+`SpriteCB_BounceEffect`/`EndBounceEffect` (the real bounce mechanism this
+whole file's `menuIdleBounce` closed-form models): the invisible
+bounce-driver sprite is created ONCE per "epoch" via
+`HandleInputChooseAction` (guarded idempotent — repeat calls while already
+bouncing are no-ops), and destroyed via `PlayerHandleEndBounceEffect`
+(`CONTROLLER_ENDBOUNCE`) during each turn's own resolution, before the next
+turn's `HandleInputChooseAction` creates a FRESH one (`sSinIndex` reset to
+192/128). This is exactly what `rockSlideResettledBounceTick`/
+`turn2SubmenuBounceTick`/`turn3SubmenuBounceTick` already model empirically
+(a real reset each turn, not a running absolute-`t` counter) — confirms
+those anchors are the right SHAPE of fix, not a coincidental curve-fit.
+
+**Step 1, find which code path renders each tick.** Wrote a scratch script
+replaying each trace's real button script through `core.ts`'s actual
+`tick()` (not hand-derivation) and dumping `battleScene.fightSubmenu`/
+`turn1Resolved`/`turn2Resolved` at the four named ticks:
+
+| tick | trace | `fightSubmenu` state | render path |
+|---|---|---|---|
+| **2901** | turn2-endeavor-drain / turn2-dragonbreath | `openElapsed=1861=elapsed` (turn 2's OWN reopen registers THIS tick), `cursor=0`, `confirmElapsed=null` | `drawFightSubmenuWindow`'s open-DMA-wait hold (`t < revealTick`) → `drawActionMenuIdleWindow(fb, t, turn1Resolved=true, turn2Resolved=false)` |
+| 2135 | battle1-fight-submenu-idle | `openElapsed=847`, `cursor=0`, `turn1Resolved=false` (still turn 1's OWN first-ever open) | `drawFightSubmenuWindow`'s idle-waiting branch, `turn1Resolved` false → plain `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (unchanged, already correct) |
+| 3465/3721 | turn2-dragonbreath | `openElapsed=1861`, `cursor=2`, `confirmElapsed=1905` (turn 2's OWN DRAGON_BREATH confirm, pressTick 2945), `t >= textStart` | `drawTurn2KickoffText` → `drawDragonBreathTurnEndSettledMenu` → `dragonBreathResettledBounceTick(t, 2945)` (unchanged, already correct) |
+
+**The actual bug, found by reading `drawActionMenuIdleWindow` itself, not by
+grid search.** Its bounce-tick dispatch was a 2-way switch that only knew
+about `turn2Resolved` (added for turn 3's own reopen, S7 slice F):
+```
+const bounceTick = turn2Resolved ? turn3SubmenuBounceTick(t) : t;
+```
+The `else` branch (plain `t`) is correct ONLY for the very first, never-reset
+epoch (`turn1Resolved=false`) — but it was also silently reused for turn 2's
+OWN reopen (`turn1Resolved=true, turn2Resolved=false`), which — per Step
+0 — inherits a RESET bounce task exactly like turn 3's reopen does, and
+needs the SAME kind of remap (`turn2SubmenuBounceTick`, already established
+and already used by this exact window's own "revealed, idle" phase one
+branch below). The comment above this line even asserted turn 2's reopen
+was "oracle-confirmed fine with plain `t`" — true only by coincidence: this
+5-tick open-DMA-wait hold (`t` 2901-2905) only ever disagrees between the
+two formulas at tick 2901 itself (RAM-verified: `menuIdleBounce(2901)`
+under plain `t` computes `onixY2=2`, the sine table's rare peak
+`table[64]`, ISSUES #22/#19's own "1-in-256" state; the real oracle pixels
+match `y1`). Every other tick in the same 5-tick hold (2902-2905) happens to
+agree between both formulas — the ORIGINAL verification pass for that
+comment simply never sampled a peak tick, the same "coincidentally right"
+trap §8c's own writeup already named for the pre-fix onix asset gap.
+
+**Fix.** One line, `battleScene.ts`'s `drawActionMenuIdleWindow`:
+```
+const bounceTick = turn2Resolved ? turn3SubmenuBounceTick(t) : turn1Resolved ? turn2SubmenuBounceTick(t) : t;
+```
+Reuses `turn2SubmenuBounceTick` verbatim (the same anchor this window's own
+idle-waiting branch already established and verified for turn 2's reopen) —
+not a new formula, not a magic offset. No second anchor was needed: the
+"two different bounce anchors" the brief's strong lead predicted
+(turn-2-reveal-path vs. idle-path) turned out to be the SAME anchor
+(`turn2SubmenuBounceTick`) applied to a code path that had simply never been
+given the `turn1Resolved` case at all — a missing dispatch arm, not a
+competing mechanism. `tools/compare/traces/turn2-endeavor-drain.json` tick
+2901 restored to `captureFrames`.
+
+**Verification.** `npm test` **744/744** (+4: `battleMenu.test.ts`'s new
+"ISSUES #24" describe block pins all 4 named ticks' selection against the
+RAM-probed truth — the reachable `FightSubmenuState` at each tick via
+`openFightSubmenu`/`confirmFightMove`, then the resulting `onixY2` via
+`turn2SubmenuBounceTick`/the inlined `dragonBreathResettledBounceTick`
+arithmetic — plus a regression guard on ticks 2902-2905 showing the two
+formulas agree there, proving the fix is scoped to the one tick RAM actually
+disproves). `npm run build` green. `turn2-endeavor-drain.json` **201/201**
+(was 200/200, 2901 restored), `battle1-fight-submenu-idle.json` **256/256**
+(unchanged), `turn2-dragonbreath.json` **237/237** (unchanged),
+`fight-submenu.json` 235/235, `turn3-menu.json` 250/250, `s6-acceptance.json`
+224/228, `sendout.json` 255/256, `menu-idle.json` 69/69, `turn1-kickoff.json`
+81/81, `rent-3picks.json` 157/190, `rent-slot1.json` 125/139,
+`confirm-flow.json` 79/95 — all unchanged, zero regressions. One bonus:
+`turn2-endeavor.json` **77/77** (was 76/77 per §8c/§8b — this same fix
+closes that trace's own instance of the identical bug, an untouched
+pre-existing gap this session didn't set out to fix but the same one-line
+change happens to cover).
+
 ## 9. S7 slice A: move CONFIRMATION and turn kickoff (bounded worker, this
 session - A on ROCK_SLIDE -> submenu closes -> "Foe GROVYLE used\nDOUBLE
 TEAM!" prints, ending exactly at tick 1964 where DOUBLE_TEAM's clone
