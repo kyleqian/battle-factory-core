@@ -460,6 +460,7 @@ import {
   rockSlideHealthboxWobbleY2,
   rockSlideMonBlinkInvisible,
   rockSlideMonShakeY2,
+  HIT_FLASH_RAM_ANCHOR_DELAY,
   STATS_BANNER_END_DELAY,
   rockSlideOpponentHp,
   ROCK_SLIDE_TEXT_CLEAR_DELAY,
@@ -756,6 +757,20 @@ const anchorPlayerBattler = (
 const anchorPlayerAfterTurnHp = (
   battle1Turn2RamDumpAsset as { battlerSnapshots: { after_turn2: { battler0: { hp: number } } } }
 ).battlerSnapshots.after_turn2.battler0.hp;
+
+/**
+ * S7 slice E2b: Grovyle's own post-DRAGON_BREATH HP (`battle1-turn2-ram-
+ * dump.json`'s `after_turn2.battler1.hp`, 88) - `dragonBreathGrovyleHp`'s
+ * own settled endpoint. The drain's own START endpoint is NOT a new
+ * constant: `before_turn2.battler1.hp` reads 101, identical to
+ * `anchorOpponentAfterTurnHp` (turn 1's own ROCK_SLIDE settle) - Grovyle
+ * carries no chip damage between turns, so the existing constant is reused
+ * verbatim (101-88=13, matching the damage-spread roll locked at RAM 3164,
+ * `docs/dragon-breath-notes.md`'s phase table).
+ */
+const anchorOpponentAfterTurn2Hp = (
+  battle1Turn2RamDumpAsset as { battlerSnapshots: { after_turn2: { battler1: { hp: number } } } }
+).battlerSnapshots.after_turn2.battler1.hp;
 
 const playerHealthboxHpOverlayAssets = {
   hpbar: healthboxAssemblyAssets.hpbar,
@@ -4153,26 +4168,97 @@ function dragonBreathBlendCoeff(t: number, pressTick: number): number {
  * RAM data (position table, spawn cadence, frame formula) ready for a
  * resuming worker to wire once the true rotated-affine sampling is solved.
  */
+/**
+ * S7 slice E2b (docs/dragon-breath-notes.md "Engine slice E2b"): Grovyle's
+ * own HP-bar drain (101->88) at trace tick `t` - same shape as
+ * `rockSlideOpponentHp`/`endeavorOnixHp` (1 HP unit/tick, clamped both
+ * sides, valid for every `t`, no `-1` lag - the same same-frame CPU-copy
+ * mechanism both those functions' own docs already reasoned about,
+ * independently re-confirmed here via `npm run compare` rather than
+ * assumed). Kept local to `battleScene.ts` (not `battleMenu.ts`, which is
+ * this session's sibling worktree's own file) since it's DRAGON_BREATH-
+ * specific, same reasoning `dragonBreathShakeX2`/`dragonBreathBlendCoeff`
+ * above already used.
+ */
+const DRAGONBREATH_HP_DRAIN_START_DELAY = 353; // pressTick+353 = RAM 3298 (healthBar1Curr sentinel, docs/dragon-breath-notes.md phase table)
+
+export function dragonBreathGrovyleHp(t: number, pressTick: number, startHp: number, endHp: number): number {
+  const d = t - (pressTick + DRAGONBREATH_HP_DRAIN_START_DELAY);
+  return Math.max(endHp, startHp - Math.max(d, 0));
+}
+
+/**
+ * S7 slice E2b: DRAGON_BREATH's own target hit-flash (`SpriteCB_
+ * HitAnimHealthoxEffect` + `DoHitAnimBlinkSpriteEffect`) is the SAME
+ * generic mechanism ROCK_SLIDE's own `rockSlideHealthboxWobbleY2`/
+ * `rockSlideMonBlinkInvisible` already model (both exported from
+ * `battleMenu.ts`, not rebuilt here per docs/dragon-breath-notes.md's own
+ * handoff note flagging this exact possibility) - active render ticks
+ * 3263-3283 (`docs/dragon-breath-notes.md` phase table), a 20-tick window
+ * matching `rockSlideHealthboxWobbleY2`'s own 20-tick cycle length exactly.
+ * Both functions only take a single `pressTick` input baked against
+ * `HIT_FLASH_RAM_ANCHOR_DELAY` (562, ROCK_SLIDE's own anchor) - reused here
+ * by translating the input so `pressTick_arg + HIT_FLASH_RAM_ANCHOR_DELAY`
+ * lands on DRAGON_BREATH's own anchor (RAM 3263 = `pressTick`+318) instead,
+ * rather than duplicating either function's own body.
+ */
+const DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY = 318; // pressTick+318 = RAM 3263 (target-side hit-flash start)
+const DRAGONBREATH_HIT_FLASH_OFFSET = DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY - HIT_FLASH_RAM_ANCHOR_DELAY;
+
 function drawDragonBreathScene(fb: Uint8Array, t: number, pressTick: number): void {
   drawStaticBgShiftedY(fb, 0);
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
-  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurnHp));
+  const grovyleHp = dragonBreathGrovyleHp(t, pressTick, anchorOpponentAfterTurnHp, anchorOpponentAfterTurn2Hp);
+  const grovyleContent = opponentHealthboxContentForHp(grovyleHp);
+  drawSendOutHealthbox(fb, 0, grovyleContent);
   drawMenuHealthboxPlayer(fb, 0, 0);
   drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick));
-  drawSpriteSheetAffineStretch(
-    fb,
-    grovyleFrontSprite.tileset,
-    grovyleFrontSprite.palette,
-    GROVYLE_CORNER.x,
-    GROVYLE_CORNER.y,
-    256,
-    256,
-    0,
-    DRAGON_BREATH_BLEND_COLOR,
-    dragonBreathBlendCoeff(t, pressTick),
-    false,
-    dragonBreathShakeX2(t, pressTick),
-  );
+  const hitFlashPressTick = pressTick + DRAGONBREATH_HIT_FLASH_OFFSET;
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, hitFlashPressTick);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, grovyleContent);
+  if (!rockSlideMonBlinkInvisible(t, hitFlashPressTick)) {
+    drawSpriteSheetAffineStretch(
+      fb,
+      grovyleFrontSprite.tileset,
+      grovyleFrontSprite.palette,
+      GROVYLE_CORNER.x,
+      GROVYLE_CORNER.y,
+      256,
+      256,
+      0,
+      DRAGON_BREATH_BLEND_COLOR,
+      dragonBreathBlendCoeff(t, pressTick),
+      false,
+      dragonBreathShakeX2(t, pressTick),
+    );
+  }
+}
+
+/**
+ * S7 slice E2b: DRAGON_BREATH's own turn-end resettled action menu
+ * (`pressTick`+`DRAGONBREATH_MENU_REDRAW_DELAY` on) - the turn-2->turn-3
+ * analogue of `drawTurnEndSettledMenu` (ROCK_SLIDE's own turn-1->turn-2
+ * transition), same shape (reuse `drawActionMenuIdleContent`'s flat harvest
+ * for everything but the opponent healthbox, overdraw Grovyle's own real
+ * settled HP on top) but keyed off DRAGON_BREATH's own redraw/bounce timing
+ * and Grovyle's post-DRAGON_BREATH HP (88, not ROCK_SLIDE's 101).
+ */
+const DRAGONBREATH_TEXT_CLEAR_DELAY = 384; // pressTick+384 = RAM 3329 (message box goes blank, box stays)
+const DRAGONBREATH_MENU_REDRAW_DELAY = 391; // pressTick+391 = RAM 3336 (hard cut to the resettled action menu)
+
+function dragonBreathResettledBounceTick(t: number, pressTick: number): number {
+  return t - (pressTick + DRAGONBREATH_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
+function drawDragonBreathTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
+  drawActionMenuIdleContent(fb, dragonBreathResettledBounceTick(t, pressTick), true);
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(anchorOpponentAfterTurn2Hp));
+  // Unlike `drawTurnEndSettledMenu` (ROCK_SLIDE's own turn-1->turn-2
+  // analogue, where Onix is still full HP at that transition), Onix
+  // already carries ENDEAVOR's own damage (117->101) by this point in turn
+  // 2 - `menuIdleBase`'s own flat harvest was taken pre-turn-1 (Onix full),
+  // so its digits are stale here too, not just Grovyle's bar.
+  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurnHp);
 }
 
 /**
@@ -4190,17 +4276,29 @@ function drawDragonBreathScene(fb: Uint8Array, t: number, pressTick: number): vo
  * on) - the ENDEAVOR text simply holds through the quiet 3121-3136 handoff
  * (unchanged, no new code needed for that span) and then this function
  * switches to the DRAGON_BREATH line pair once its own start tick arrives.
- * DRAGON_BREATH's own attack animation (projectiles/blend/shake/hit-flash)
- * is still out of scope here - see docs/dragon-breath-notes.md's "what's
- * left" note.
+ * DRAGON_BREATH's own attack animation (projectiles) is still out of scope
+ * here - see docs/dragon-breath-notes.md's "what's left" note. S7 slice
+ * E2b (docs/dragon-breath-notes.md "Engine slice E2b") extends this
+ * dispatcher two phases further, the same shape `drawRockSlideWindow`
+ * already uses for ROCK_SLIDE's own turn-end: the held DRAGON_BREATH text
+ * goes blank at `DRAGONBREATH_TEXT_CLEAR_DELAY` (box stays, no text - HP
+ * bar/shake/blend/hit-flash keep rendering via `drawDragonBreathScene`,
+ * unaffected by the message box toggling), then hard-cuts to the
+ * turn-3 resettled action menu at `DRAGONBREATH_MENU_REDRAW_DELAY`
+ * (`drawDragonBreathTurnEndSettledMenu`).
  */
 function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): void {
+  const dragonBreathStart = dragonBreathTextStartTick(pressTick);
+  if (t >= dragonBreathStart && t >= pressTick + DRAGONBREATH_MENU_REDRAW_DELAY) {
+    drawDragonBreathTurnEndSettledMenu(fb, t, pressTick);
+    return;
+  }
   // Only ever reached via turn 2's own confirm (cursor 2), which by
   // construction can't happen before the S7 slice E1 reopen sets
   // `turn1Resolved` - Grovyle's healthbox always needs its real (101) HP
   // here, never the stale full-HP harvest.
   if (!drawEndeavorSquish(fb, t, pressTick)) {
-    if (t >= dragonBreathTextStartTick(pressTick)) {
+    if (t >= dragonBreathStart) {
       drawDragonBreathScene(fb, t, pressTick);
     } else {
       drawActionMenuIdleContent(fb, turn2KickoffBounceTick(t, pressTick), true);
@@ -4217,9 +4315,10 @@ function drawTurn2KickoffText(fb: Uint8Array, t: number, pressTick: number): voi
   const onixHp = endeavorOnixHp(t, pressTick, anchorPlayerBattler.hp, anchorPlayerAfterTurnHp);
   drawPlayerHealthboxHpOverlay(fb, onixHp);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  const dragonBreathStart = dragonBreathTextStartTick(pressTick);
   if (t >= dragonBreathStart) {
-    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, DRAGONBREATH_KICKOFF_LINE2, dragonBreathTextVisibleChars(t, pressTick));
+    if (t < pressTick + DRAGONBREATH_TEXT_CLEAR_DELAY) {
+      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, DRAGONBREATH_KICKOFF_LINE2, dragonBreathTextVisibleChars(t, pressTick));
+    }
     return;
   }
   drawMessageTextLines(fb, TURN_KICKOFF_LINE1, TURN2_KICKOFF_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
@@ -4347,9 +4446,9 @@ function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number): void {
   }
 }
 
-/** The real opponent healthbox sprite's own `y2` wobble (`rockSlideHealthboxWobbleY2`) - same erase-then-redraw-translated shape as `drawDoubleTeamClones`' Grovyle erase, reusing `opponentHealthboxContent`/`HEALTHBOX_FRAME_ORIGIN` (`drawSendOutHealthbox`'s own asset, translated vertically here instead of horizontally). */
-function drawOpponentHealthboxWobble(fb: Uint8Array, dy: number): void {
-  const { width, height, pixels } = opponentHealthboxContent;
+/** The real opponent healthbox sprite's own `y2` wobble (`rockSlideHealthboxWobbleY2`) - same erase-then-redraw-translated shape as `drawDoubleTeamClones`' Grovyle erase, reusing `opponentHealthboxContent`/`HEALTHBOX_FRAME_ORIGIN` (`drawSendOutHealthbox`'s own asset, translated vertically here instead of horizontally). `content` defaults to the full-HP compositor result (every existing ROCK_SLIDE caller's own domain, where the wobble window falls entirely before the drain starts) - S7 slice E2b's DRAGON_BREATH caller passes Grovyle's real (already-101, not yet re-drained) content explicitly since its own hit-flash window also falls before ITS drain starts, but at a HP that isn't this module's full-send-out value. */
+function drawOpponentHealthboxWobble(fb: Uint8Array, dy: number, content: ReturnType<typeof composeOpponentHealthbox> = opponentHealthboxContent): void {
+  const { width, height, pixels } = content;
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
       const color = pixels[py * width + px];

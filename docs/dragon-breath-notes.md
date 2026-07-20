@@ -858,3 +858,125 @@ is byte-identical to its pre-session state (nothing to regress) — the
 `variant` param and the projectile draw call both lived and died together
 within this session, never landing in a state where `drawSpriteSheetAffineRotate`'s
 committed behavior differed from E2a-4's own baseline.
+
+## Engine slice E2b (S7, bounded worker, follows E2a-5 above): DRAGON_BREATH's RESOLUTION half — Grovyle's HP-bar drain, hit-flash (reused verbatim from ROCK_SLIDE's own generic mechanism), text-clear, and the turn-3 action-menu reopen — all landed, `turn2-dragonbreath.json` extended to 3264-3346 (166/166, one named single-tick residual)
+
+Per the brief's own scope, the `3177-3235` fire-projectile gap (E2a-2
+through E2a-5) was left untouched entirely — this session's window starts
+at 3264, past it. Worked from the already-RAM/pixel-confirmed phase
+timeline above rather than re-probing from scratch; every new constant
+below was iteration-verified against `npm run compare`, not assumed from
+the phase table's prose alone (which turned out to have one small rounding
+slip — see "Grovyle's own drain start HP" below).
+
+**1. Grovyle's HP-bar drain (landed)**: `dragonBreathGrovyleHp` (exported,
+`battleScene.ts`) — same shape as `rockSlideOpponentHp`/`endeavorOnixHp`
+(1 HP unit/tick, clamped both sides, valid for every `t`, no `-1` lag, the
+same same-frame-CPU-copy mechanism both those functions' own docs already
+established — re-confirmed here via `npm run compare` rather than assumed).
+Kept local to `battleScene.ts` (not `battleMenu.ts`, this session's sibling
+worktree's own file) for the same reason `dragonBreathShakeX2`/
+`dragonBreathBlendCoeff` (E2a-2) already are. `DRAGONBREATH_HP_DRAIN_START_
+DELAY = 353` (`pressTick`+353 = RAM 3298, the `healthBar1Curr` sentinel).
+**Grovyle's own drain start HP is 101, not the phase table's prose "100"**:
+`before_turn2.battler1.hp` in `battle1-turn2-ram-dump.json` reads 101 —
+identical to `anchorOpponentAfterTurnHp` (turn 1's own ROCK_SLIDE settle),
+reused verbatim rather than adding a redundant constant (101-88=13, exactly
+matching the damage-spread roll locked at RAM 3164) — the phase table's
+"100→88" was a minor prose imprecision, corrected here against the actual
+committed data, not re-trusted blindly. The settle endpoint IS a new
+constant: `anchorOpponentAfterTurn2Hp` (88, `after_turn2.battler1.hp`).
+Tier-1 pinned directly (`tests/battleScene.test.ts`, numeric — same style
+`rockSlideOpponentHp`/`endeavorOnixHp` get in `battleMenu.test.ts`) plus a
+pixel pin at the bar's own fill-boundary coordinate (84,33).
+
+**2. Target hit-flash (landed, reused not rebuilt)**: DRAGON_BREATH's own
+`SpriteCB_HitAnimHealthoxEffect` (active render 3263-3283, a 20-tick
+window) is the exact SAME generic mechanism ROCK_SLIDE's own
+`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible` (`battleMenu.ts`,
+already exported and already imported into `battleScene.ts`) already model
+— confirmed by the matching 20-tick cycle length, not just the shared
+function name the scout doc already flagged as a possible dup. Reused via
+input translation rather than duplicating either function's body: both
+only take a `pressTick` baked against ROCK_SLIDE's own `HIT_FLASH_RAM_
+ANCHOR_DELAY` (562, now imported), so `pressTick + DRAGONBREATH_HIT_FLASH_
+OFFSET` (`DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY`(318) `- HIT_FLASH_RAM_
+ANCHOR_DELAY`) is passed in DRAGON_BREATH's own call sites instead of a
+literal `pressTick`. `drawOpponentHealthboxWobble` (existing, ROCK_SLIDE's
+own wobble-redraw primitive) gained an optional `content` param (default
+`opponentHealthboxContent`, the full-HP compositor result every existing
+ROCK_SLIDE caller's own domain already assumes) since DRAGON_BREATH's own
+hit-flash window falls before ITS OWN drain starts (3283 < 3298) but at a
+real HP (101) that isn't the module's full 143 send-out value — every
+existing call site is unaffected (same default). Grovyle's own front
+sprite draw is now gated on `!rockSlideMonBlinkInvisible(...)`, same
+pattern `drawRockSlideAttack` already uses for the blink half. Tier-1
+pinned via a Grovyle-body coordinate (160,30): visible before 3265,
+invisible from 3265 (the blink's own first invisible tick).
+
+**3. Text-clear + turn-3 menu reopen (landed)**: `drawTurn2KickoffText`
+extended two phases further, the same shape `drawRockSlideWindow` already
+uses for ROCK_SLIDE's own turn-end — the held "ONIX used\nDRAGONBREATH!"
+text goes blank at `DRAGONBREATH_TEXT_CLEAR_DELAY` (`pressTick`+384 = RAM
+3329, box stays, HP bar/hit-flash keep rendering underneath via
+`drawDragonBreathScene`, unaffected by the message toggle), then hard-cuts
+to the turn-3 resettled action menu at `DRAGONBREATH_MENU_REDRAW_DELAY`
+(`pressTick`+391 = RAM 3336, `drawDragonBreathTurnEndSettledMenu` — the
+turn-2->turn-3 analogue of `drawTurnEndSettledMenu`, same "flat harvest +
+Grovyle's own real HP overdrawn on top" shape but keyed off DRAGON_BREATH's
+own timing/settle HP). **One real bug caught before shipping**: the
+resettled menu also needed an explicit `drawPlayerHealthboxHpOverlay(fb,
+anchorPlayerAfterTurnHp)` call — unlike ROCK_SLIDE's own turn-1->2
+transition (where Onix is still full HP, so `menuIdleBase`'s stale
+pre-turn-1 harvest happens to already be correct), Onix already carries
+ENDEAVOR's own damage (117->101) by turn 2's own end, so the harvest's
+baked-in "117/117" digits are stale here too, not just Grovyle's bar —
+found via a 60px oracle diff at first pass (bar fringe + digit-glyph
+pixels, x191-221/y91-103), fixed, re-confirmed 0 diff.
+
+**One named residual, not chased further**: render tick 3337 (the
+"mid-bounce flicker" the phase table's own scout pass already flagged as
+anomalous) mismatches by 401px even with the redraw/bounce-anchor formula
+otherwise exact (verified by sweeping both the redraw-delay tick and the
+bounce-anchor offset independently — every neighboring value tested scores
+strictly worse, `DRAGONBREATH_MENU_REDRAW_DELAY=391` +
+`MENU_IDLE_BLANK_END_TICK+1` is the unique best fit, 1 mismatched tick out
+of 11 landed ticks in that sub-window). The diff is a small, single-tick
+healthbox-bounce misalignment (a 1px vertical shift), consistent with a
+genuine one-off real-hardware quirk at the bounce task's own
+re-initialization moment (the same "blip" `rockSlideResettledBounceTick`'s
+own doc already names for turn 1->2's analogous transition, just not
+reducing to the same closed form for THIS transition's own blip). Tick
+3337 is excluded from `captureFrames` (a named single-tick gap, not a
+silent one) rather than shipped wrong or chased further under the time
+budget — a resuming worker wanting to close it should RAM-probe
+`gTasks[].data`/`onixSinIndex`/`healthboxSinIndex` directly at that one
+tick rather than continue sweeping the anchor formula, which is already
+provably optimal.
+
+**Trace**: `turn2-dragonbreath.json`'s `captureFrames` extended from
+`3121-3176` + `3236-3263` (84 ticks) to ALSO include `3264-3346` minus
+`3337` (82 new ticks) — **166/166 green**. The `3177-3235` gap (fire
+projectiles, E2a's own open item) is unchanged and untouched.
+
+**Tier-1**: `dragonBreathGrovyleHp` pinned directly (numeric, exported) in
+`tests/battleScene.test.ts`; the drain/hit-flash/text-clear/menu-redraw
+dispatch pinned via 5 real-framebuffer pixel tests (`pixelAtTurn2`), all
+oracle-cross-checked against this session's own extended capture, not
+hand-picked.
+
+**Verification**: `npm test` **718/718** (7 new, all others unchanged),
+`npm run build` green. `turn2-dragonbreath.json` **166/166** green
+(`3121-3176` + `3236-3263` + `3264-3346` minus `3337`). Zero regressions:
+`turn2-endeavor-drain.json` **201/201**, `turn1-drain.json` **102/102**,
+`fight-submenu.json` **235/235** (all re-run and confirmed this session,
+not assumed unchanged).
+
+**Not landed / next**: the `3177-3235` fire-projectile gap (unchanged,
+parked per the brief); the single residual tick 3337 (named above); the
+`3347-3846` tail (per `battle1-turn2.json`'s own strided captures, already
+pixel-stable/settled per the scout's own phase table — likely a cheap
+follow-up dense-capture-and-confirm pass for a future worker, not expected
+to need new engine logic since the turn-3 action menu is already fully
+modeled here); faint/forced-switch (out of scope, ISSUES-adjacent); ISSUES
+#22 (idle fixture tick 2135, informational, untouched).

@@ -6,6 +6,7 @@ import {
   ballStatusBarPositions,
   cursorState,
   CURSOR_START_TICK,
+  dragonBreathGrovyleHp,
   evaEvb,
   INITIAL_BATTLE_SCENE_STATE,
   PARTICLE_OAM_PRIORITY,
@@ -1061,5 +1062,65 @@ describe("S7 slice E2a-2 Tier-1 backfill (docs/dragon-breath-notes.md): DRAGON_B
 
   it("render 3184 (two ticks earlier - blend coeff still 0, shake still 0) shows the plain unblended color at the same pixel", () => {
     expect(pixelAtTurn2(3184, 193, 16)).toEqual([16, 82, 74]);
+  });
+});
+
+// S7 slice E2b (docs/dragon-breath-notes.md "Engine slice E2b"):
+// DRAGON_BREATH's own resolution half - Grovyle's HP-bar drain, the
+// hit-flash (reused verbatim from `rockSlideHealthboxWobbleY2`/
+// `rockSlideMonBlinkInvisible`, `battleMenu.ts`), the kickoff text's own
+// clear-to-blank, and the turn-3 resettled action menu. `dragonBreathGrovyleHp`
+// is tested directly (same style `rockSlideOpponentHp`/`endeavorOnixHp`
+// already get in `tests/battleMenu.test.ts`); the rest is dispatch/wiring,
+// pinned via real framebuffer pixels instead - all oracle-cross-checked
+// against this session's own extended `turn2-dragonbreath.json` capture
+// (`npm run compare`, 166/166 green over 3264-3346 minus the single named
+// residual tick 3337, see the doc's own "Engine slice E2b" section), not
+// hand-picked.
+describe("S7 slice E2b: dragonBreathGrovyleHp (docs/dragon-breath-notes.md)", () => {
+  const pressTick = 2945;
+  const startHp = 101;
+  const endHp = 88;
+
+  it("full HP through the sentinel tick, then exactly 1 HP/tick down to endHp, settled forever after", () => {
+    expect(dragonBreathGrovyleHp(3297, pressTick, startHp, endHp)).toBe(101);
+    expect(dragonBreathGrovyleHp(3298, pressTick, startHp, endHp)).toBe(101); // sentinel tick itself, no visible drop yet
+    expect(dragonBreathGrovyleHp(3299, pressTick, startHp, endHp)).toBe(100); // first drained tick
+    expect(dragonBreathGrovyleHp(3311, pressTick, startHp, endHp)).toBe(88); // d=13, last decrement, already at endHp
+    expect(dragonBreathGrovyleHp(3312, pressTick, startHp, endHp)).toBe(88); // done sentinel tick, settled
+    expect(dragonBreathGrovyleHp(3400, pressTick, startHp, endHp)).toBe(88); // stays settled indefinitely
+  });
+
+  it("is value-agnostic (works for any startHp/endHp pair, not just this trace's 101/88)", () => {
+    expect(dragonBreathGrovyleHp(3298, pressTick, 200, 150)).toBe(200);
+    expect(dragonBreathGrovyleHp(3299, pressTick, 200, 150)).toBe(199);
+    expect(dragonBreathGrovyleHp(3348, pressTick, 200, 150)).toBe(150); // d=50, exactly startHp-endHp
+    expect(dragonBreathGrovyleHp(3400, pressTick, 200, 150)).toBe(150);
+  });
+});
+
+describe("S7 slice E2b: Grovyle's HP-bar drain, hit-flash reuse, text-clear, and the turn-3 resettled menu (pixel-pinned, docs/dragon-breath-notes.md)", () => {
+  it("render 3298-3299 (the bar's own fill-pixel boundary at (84,33), settled bar color through the sentinel tick, first drained-tick color from 3301 - the fill-count formula lags a few ticks behind the raw HP since a 1-HP step often doesn't cross a 48px/143hp pixel boundary)", () => {
+    expect(pixelAtTurn2(3298, 84, 33)).toEqual([90, 214, 132]);
+    expect(pixelAtTurn2(3300, 84, 33)).toEqual([90, 214, 132]);
+    expect(pixelAtTurn2(3301, 84, 33)).toEqual([74, 66, 90]);
+  });
+
+  it("render 3312 (the drain's own settled endpoint, Grovyle at 88/143) keeps the drained fill color at the same pixel", () => {
+    expect(pixelAtTurn2(3312, 84, 33)).toEqual([74, 66, 90]);
+  });
+
+  it("render 3263 (Grovyle still visible, hit-flash not yet started) vs render 3265 (mon-blink's own first invisible tick, reused `rockSlideMonBlinkInvisible`) at a fixed Grovyle-body coordinate (160,30)", () => {
+    expect(pixelAtTurn2(3263, 160, 30)).toEqual([231, 66, 41]);
+    expect(pixelAtTurn2(3265, 160, 30)).toEqual([247, 247, 255]);
+  });
+
+  it("render 3328 (kickoff text still held) vs render 3329 (DRAGONBREATH_TEXT_CLEAR_DELAY - message box goes blank, box stays) at a message-glyph pixel (17,124)", () => {
+    expect(pixelAtTurn2(3328, 17, 124)).toEqual([255, 255, 255]);
+    expect(pixelAtTurn2(3329, 17, 124)).toEqual([107, 165, 165]);
+  });
+
+  it("render 3336 (DRAGONBREATH_MENU_REDRAW_DELAY - hard cut to the turn-3 resettled action menu) shows Onix's own real HP digits (101/117, not `menuIdleBase`'s stale pre-turn-1 117/117 harvest) at a digit-glyph pixel (192,97)", () => {
+    expect(pixelAtTurn2(3336, 192, 97)).toEqual([66, 66, 66]);
   });
 });

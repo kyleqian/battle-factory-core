@@ -1,3 +1,49 @@
+## 156 — Bounded worker: S7 slice E2a-4 attempt — fire-projectile attempt #3: PRIME SUSPECT (concurrent ember-palette blend) definitively RULED OUT by source+pixel evidence; residual precisely characterized (two scale-dependent artifact shapes, present from a spawn's very first tick) but NOT closed — pulled a third time; `npm test` **711/711** (unchanged), build green, zero regressions, no trace change
+
+- **State:** `npm test` 711/711, `npm run build` green, tree clean.
+  `turn2-dragonbreath.json` **unchanged** (`3121-3176` + `3236-3263`,
+  84/84 green) — `3177-3235` still open. Regression spot-checks:
+  `turn2-endeavor-drain.json` **201/201** (unchanged, ISSUES #19 already
+  closed by #155).
+- **Did:** Per the brief's mandatory method, re-wired E2a-3's exact
+  best-fit config (base=(72,88), lag=1, direct matrix, `drawSpriteSheet
+  AffineRotate`) and ran a diff-COLOR dump FIRST (`tools/compare/scratch/
+  diffdump.mjs`/`diffmap.mjs`, both new, committed, generic — reusable by
+  the next worker). Findings: (1) **prime suspect ruled out two ways** —
+  source trace shows `AnimTask_BlendBattleAnimPal`'s `F_PAL_TARGET`
+  structurally cannot reach the embers' own palette slot (unrelated gfx
+  tag), and every mismatched pixel this session sampled is a clean
+  small-ember yellow-red-ramp color, never a blended/wrong hue — this is a
+  shape defect, not a color one. (2) The residual splits into two distinct
+  scale-dependent shapes: salt-and-pepper edge over-draw when the sprite is
+  compressed (`|matrixA|>256`, small `n`) vs. one isolated ~15x15 missing
+  blob when magnified (`|matrixA|<256`, large `n`) that doesn't reduce to a
+  spawn-duration off-by-one (tested clamping `n` to 21 — made tick 3220
+  WORSE, 342px→649px, hypothesis killed and reverted within the session).
+  (3) **Caught a false claim before it shipped**: initially assumed the
+  reverted code was a no-op over the already-green `3121-3176`/`3236-3263`
+  captures; actually re-ran `npm run compare` with the code temporarily
+  back in and found it regresses `3175`/`3176` (12px/15px) — spawn 0's
+  first visible tick falls inside the currently-captured range. Docs
+  corrected to reflect the checked result, not the assumption. Pulled
+  (`git checkout -- src/engine/battleScene.ts`) per the no-wrong-pixels
+  rule — full writeup in `docs/dragon-breath-notes.md`'s new "Engine slice
+  E2a-4" section.
+- **Next:** per the brief, this was the last attempt before escalation —
+  **recommend the supervisor treat this as the escalation trigger**: three
+  bounded-worker attempts (E2a-2/E2a-3/E2a-4) have each made real, provable
+  progress (scale-only → full rotated matrix → palette ruled out + shape
+  characterized) without closing the gap, and the remaining work needs
+  either a dedicated non-bounded session (isolated single-spawn pixel
+  tracing, masking out every other draw call — sketched in the docs) or
+  accepting `3177-3235` as a permanently named remainder and moving on to
+  hit-flash (3263-3283)/E2b (HP drain 3298+, turn-end 3329+)/faint-switch,
+  none of which depend on this gap closing first.
+- **Notes:** no papercuts. `tools/compare/scratch/dragonbreath-projectile-
+  window.json` (a ready `captureFrames` 3177-3235 scratch trace) also left
+  committed for the next attempt to reuse without rebuilding the harness.
+
+---
 ## 155 — Supervisor: round 3 folded — **ISSUES #19 ROOT-CAUSED AND CLOSED (asset harvest 1 row short): fight-submenu 235/235, turn2-endeavor 77/77, turn2-endeavor-drain 201/201 — all three now PERFECT**; shake/blend Tier-1 debt backfilled (711/711); fire-projectile pulled a 2nd time (findings banked, 3rd attempt briefed with a new instrument)
 
 - **State (supervisor-verified this minute):** `npm test` **711/711**,

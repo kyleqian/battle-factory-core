@@ -4,6 +4,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 159 — Bounded worker: S7 slice E2b — DRAGON_BREATH's RESOLUTION half landed (HP-bar drain, hit-flash reuse, text-clear, turn-3 menu reopen): `turn2-dragonbreath.json` extended 3121-3176/3236-3263 (84/84) -> +3264-3346 minus one named tick, **166/166 green**; `npm test` **718/718** (+7 Tier-1), build green, zero regressions
+
+- **State:** `npm test` 718/718, `npm run build` green, tree clean.
+  `turn2-dragonbreath.json` **166/166** (`3121-3176`+`3236-3263`+`3264-3346`
+  minus `3337`). Regressions re-run and confirmed: `turn2-endeavor-drain.json`
+  **201/201**, `turn1-drain.json` **102/102**, `fight-submenu.json`
+  **235/235**. The `3177-3235` fire-projectile gap (E2a-2..E2a-5, parked)
+  is untouched, per the brief's explicit out-of-scope.
+- **Did:** Landed all four of the brief's E2b priorities. (1) **Grovyle's
+  HP-bar drain**: `dragonBreathGrovyleHp` (exported, `battleScene.ts`) —
+  same 1-HP/tick clamped shape as `rockSlideOpponentHp`/`endeavorOnixHp`,
+  start=101 (`anchorOpponentAfterTurnHp`, reused — the phase table's own
+  "100→88" prose was a minor imprecision, the committed ram-dump's
+  `before_turn2.battler1.hp` actually reads 101, matching 101-88=13 =
+  the locked damage roll), end=88 (new `anchorOpponentAfterTurn2Hp`).
+  (2) **Hit-flash**: DRAGON_BREATH's own `SpriteCB_HitAnimHealthoxEffect`
+  (3263-3283, 20 ticks) turned out to be the SAME generic mechanism
+  ROCK_SLIDE's own `rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`
+  already model — reused via input-translation (a `pressTick` offset
+  constant) rather than rebuilt, exactly the "check if already modeled
+  under a different name" the scout doc flagged. `drawOpponentHealthbox
+  Wobble` gained an optional `content` param (default unchanged) so it
+  could take Grovyle's real 101-HP content instead of the full-143 one
+  every ROCK_SLIDE caller assumes. (3) **Text-clear + (4) turn-3 menu
+  reopen**: `drawTurn2KickoffText` extended with `DRAGONBREATH_TEXT_CLEAR_
+  DELAY`(384)/`DRAGONBREATH_MENU_REDRAW_DELAY`(391), same two-phase shape
+  `drawRockSlideWindow`/`drawTurnEndSettledMenu` already use for ROCK_
+  SLIDE's own turn-end. Caught a real bug via a 60px oracle diff before
+  shipping: the resettled menu also needed an explicit Onix HP-digit
+  overlay (`drawPlayerHealthboxHpOverlay`) — unlike ROCK_SLIDE's own
+  turn-1→2 transition (Onix still full HP there), Onix already carries
+  ENDEAVOR's own damage by turn 2's end, so `menuIdleBase`'s stale
+  pre-turn-1 "117/117" harvest needed the same overdraw treatment
+  Grovyle's bar already gets. All new constants iteration-verified against
+  `npm run compare`, not assumed from prose (a `DRAGONBREATH_MENU_REDRAW_
+  DELAY` sweep of ±1/±2 confirmed 391 is the unique best fit). Full
+  writeup in `docs/dragon-breath-notes.md`'s new "Engine slice E2b"
+  section. 7 new Tier-1 tests in `tests/battleScene.test.ts` (1 numeric
+  suite for `dragonBreathGrovyleHp`, 5 real-framebuffer pixel pins for the
+  drain/hit-flash/text-clear/menu-redraw dispatch).
+- **Next:** one named single-tick residual (render 3337, the phase table's
+  own "mid-bounce flicker") excluded from `captureFrames` rather than
+  chased — the redraw-delay/bounce-anchor formula is already swept to a
+  provable optimum (1 mismatch out of 11 ticks in that sub-window; every
+  neighboring value scores strictly worse), so closing it needs a direct
+  RAM probe of the bounce task's own re-init state at that one tick, not
+  more formula sweeping. Otherwise: the `3347-3846` tail is likely a cheap
+  dense-capture-and-confirm pass (already pixel-stable per the scout's own
+  phase table, turn-3 menu already fully modeled here) for whoever picks
+  this up next; the `3177-3235` fire-projectile gap remains the standing
+  open item (per #157's escalation, still awaiting a supervisor/user call
+  on a dedicated non-bounded session vs. parking permanently); faint/
+  forced-switch and ISSUES #22 untouched.
+- **Notes:** no papercuts. File ownership respected — `src/engine/core.ts`,
+  `fightSubmenuText.ts`, `battleMenu.ts`, `docs/battle-menu-notes.md`
+  untouched (only imported two more existing exports from `battleMenu.ts`:
+  `HIT_FLASH_RAM_ANCHOR_DELAY`, already-exported `rockSlideHealthboxWobbleY2`/
+  `rockSlideMonBlinkInvisible` were already imported).
+
+---
 ## 158 — Bounded worker: S7 slice E2a-5 attempt — fire-projectile attempt #4: SUPERVISOR'S SAMPLING-CONVENTION HYPOTHESIS TESTED AND REJECTED by direct 4-variant sweep (every alternative to the current convention scored 1.4x-2.7x WORSE); pulled a fourth time, no wrong pixels shipped, `npm test` **711/711** (unchanged), build green
 
 - **State:** `npm test` 711/711, `npm run build` green, tree clean.
@@ -103,50 +163,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (idle fixture tick 2135, informational).
 - **Notes:** worker costs $5.26 + $5.10 (17/16 min). ISSUES #19's fix
   left `battle1-fight-submenu-idle.json` at 255/256 (tick 2135 = #22).
-
----
-## 156 — Bounded worker: S7 slice E2a-4 attempt — fire-projectile attempt #3: PRIME SUSPECT (concurrent ember-palette blend) definitively RULED OUT by source+pixel evidence; residual precisely characterized (two scale-dependent artifact shapes, present from a spawn's very first tick) but NOT closed — pulled a third time; `npm test` **711/711** (unchanged), build green, zero regressions, no trace change
-
-- **State:** `npm test` 711/711, `npm run build` green, tree clean.
-  `turn2-dragonbreath.json` **unchanged** (`3121-3176` + `3236-3263`,
-  84/84 green) — `3177-3235` still open. Regression spot-checks:
-  `turn2-endeavor-drain.json` **201/201** (unchanged, ISSUES #19 already
-  closed by #155).
-- **Did:** Per the brief's mandatory method, re-wired E2a-3's exact
-  best-fit config (base=(72,88), lag=1, direct matrix, `drawSpriteSheet
-  AffineRotate`) and ran a diff-COLOR dump FIRST (`tools/compare/scratch/
-  diffdump.mjs`/`diffmap.mjs`, both new, committed, generic — reusable by
-  the next worker). Findings: (1) **prime suspect ruled out two ways** —
-  source trace shows `AnimTask_BlendBattleAnimPal`'s `F_PAL_TARGET`
-  structurally cannot reach the embers' own palette slot (unrelated gfx
-  tag), and every mismatched pixel this session sampled is a clean
-  small-ember yellow-red-ramp color, never a blended/wrong hue — this is a
-  shape defect, not a color one. (2) The residual splits into two distinct
-  scale-dependent shapes: salt-and-pepper edge over-draw when the sprite is
-  compressed (`|matrixA|>256`, small `n`) vs. one isolated ~15x15 missing
-  blob when magnified (`|matrixA|<256`, large `n`) that doesn't reduce to a
-  spawn-duration off-by-one (tested clamping `n` to 21 — made tick 3220
-  WORSE, 342px→649px, hypothesis killed and reverted within the session).
-  (3) **Caught a false claim before it shipped**: initially assumed the
-  reverted code was a no-op over the already-green `3121-3176`/`3236-3263`
-  captures; actually re-ran `npm run compare` with the code temporarily
-  back in and found it regresses `3175`/`3176` (12px/15px) — spawn 0's
-  first visible tick falls inside the currently-captured range. Docs
-  corrected to reflect the checked result, not the assumption. Pulled
-  (`git checkout -- src/engine/battleScene.ts`) per the no-wrong-pixels
-  rule — full writeup in `docs/dragon-breath-notes.md`'s new "Engine slice
-  E2a-4" section.
-- **Next:** per the brief, this was the last attempt before escalation —
-  **recommend the supervisor treat this as the escalation trigger**: three
-  bounded-worker attempts (E2a-2/E2a-3/E2a-4) have each made real, provable
-  progress (scale-only → full rotated matrix → palette ruled out + shape
-  characterized) without closing the gap, and the remaining work needs
-  either a dedicated non-bounded session (isolated single-spawn pixel
-  tracing, masking out every other draw call — sketched in the docs) or
-  accepting `3177-3235` as a permanently named remainder and moving on to
-  hit-flash (3263-3283)/E2b (HP drain 3298+, turn-end 3329+)/faint-switch,
-  none of which depend on this gap closing first.
-- **Notes:** no papercuts. `tools/compare/scratch/dragonbreath-projectile-
-  window.json` (a ready `captureFrames` 3177-3235 scratch trace) also left
-  committed for the next attempt to reuse without rebuilding the harness.
-
