@@ -2297,3 +2297,258 @@ independent runs each. Both RAM dumps' constituent probe runs (`ram-probe.py`,
 `dump-battler-snapshot.py`, `dump-battler-full.py`) each independently
 re-run and diffed byte-for-byte against their own first run.
 
+## 16. Battle 1's actual WIN, the swap decline, and battle 2's first action menu — all reached in one session (S8 worktree lane, oracle scout — no engine code)
+
+**Headline result: the whole chain this dossier has chased since §12 is now
+ground-truthed end to end.** MAGBY (sent out over BAYLEEF, see below) kills
+MURKROW in **2 turns** and survives with **27/138 HP**; the full victory
+sequence (faint text → "Player defeated BUG CATCHER DESTIN!" → DESTIN's loss
+quote → attendant heal → GO ON/RECORD/REST/RETIRE → opponent-2 scouting text
+→ the swap-a-Pokémon offer, declined → "Right this way, please!" → warp →
+battle 2's opponent intro) plays out in full; battle 2 (**FISHERMAN JENSON**,
+opening **KABUTO** Lv50 — see the RNG-sensitivity finding below for why this
+identity is specific to this exact script) is reached with its **first
+action menu fully settled** ("What will ONIX do?" vs KABUTO, ONIX healed to
+117/117) at tick **33031** — **11969 ticks of headroom under the 45000 cap**,
+and comfortably under **one single trace's worth of frames** even though the
+work is committed as two chained traces (rationale below, not a tick-budget
+necessity this time). This closes every "still open" item this exact
+question has carried since §12.
+
+Committed: `tools/compare/traces-groundtruth/battle1-winline-b.json` (23601
+frames — `battle1-winline-a-murkrow.json`'s own 19990-frame prefix, **verbatim,
+byte-identical**, plus 20 new segments: the forced switch to MAGBY and the
+full 2-turn MURKROW kill, ending frozen on DESTIN's un-dismissed loss quote
+"PLEASE I NEED SOME WATER"; 118 `captureFrames`, dense around every button
+press in the new tail plus 12 sparse anchors over the old prefix) and
+`tools/compare/traces-groundtruth/battle1-winline-b-swap.json` (33031 frames —
+`battle1-winline-b.json`'s own segments, **verbatim**, plus 22 more: the rest
+of the victory sequence, the swap decline, and the transition into battle 2
+through its settled first menu; 127 `captureFrames`, same density convention).
+**Both twice-run byte-identical via `bin/oracle run`** (0/118 and 0/127 sha
+mismatches respectively across two independent runs each). New RAM dumps
+under `src/data/gen/`: `battle1-winline-b-magby-bayleef-candidates.json`
+(both switch-in candidates' full battle data, from two independent
+exploratory branches off the shared tick-19990 prefix — see the decision
+below), `battle1-winline-b-murkrow-fight-ram-dump.json` (3 `battlerSnapshots`
+via `dump-battler-full.py` at the switch-in/turn-1-end/turn-2-end ticks, plus
+a 2857-row per-tick `gRngValue`/hp/`gCurrentMove`/status watch via
+`ram-probe.py`, both against the **committed** `battle1-winline-b.json`),
+and `battle1-winline-b-battle2-opponent-ram-dump.json` (KABUTO's full battle
+data plus the no-swap evidence, via `dump-battler-full.py` against the
+committed `battle1-winline-b-swap.json`). **All three probe runs independently
+re-run and diffed byte-for-byte identical against their own first run.**
+
+### HEADLINE 1: MAGBY over BAYLEEF — an evidence-based call, not the brief's "pick the first workable" default
+
+Both candidates' full battle data were RAM-dumped at the forced-switch menu
+(tick 20192, `gPlayerParty` slots 1/2, read via `dump-battler-full.py`'s own
+`gBattleMons[0]` logic on two independent exploratory branches — one sends
+out MAGBY, the other BAYLEEF, off the identical shared prefix):
+
+| | MAGBY | BAYLEEF |
+|---|---|---|
+| species/level/HP | 240, Lv50, 138/138 | 153, Lv50, 153/153 |
+| types | FIRE/FIRE | GRASS/GRASS |
+| ability | FLAME_BODY | OVERGROW |
+| item | LAX INCENSE | BRIGHT POWDER |
+| moves | FIRE_PUNCH (75pow/100acc/10% burn), SMOKESCREEN (acc-down), CONFUSE_RAY (confuse), SMOG (20pow/70acc/40% psn) | RAZOR_LEAF (55pow/95acc), TOXIC (85acc, 100% psn), SAFEGUARD (status immunity), LIGHT_SCREEN (special-dmg half) |
+| vs MURKROW (DARK/FLYING) | FIRE_PUNCH is **neutral** (Fire resists neither of Murkrow's types) — a real, mostly-reliable damage source, plus 2 disruption tools | RAZOR_LEAF is **resisted 0.5×** by FLYING — BAYLEEF's only damaging move is weak *and* off-type; TOXIC/SAFEGUARD/LIGHT_SCREEN are non-damaging, and LIGHT_SCREEN specifically doesn't help since Murkrow's real threats (FAINT_ATTACK, FLY) are both **physical** in this generation's type-based split |
+
+**Verdict: MAGBY, decisively** — it has actual on-type-neutral damage against
+Murkrow's dual typing plus two disruption moves (SMOKESCREEN chips Murkrow's
+accuracy against FLY's 95%-accuracy strike turn; CONFUSE_RAY can make Murkrow
+hurt itself), while BAYLEEF's kit has no good answer to Murkrow at all — its
+one damaging move is resisted, and its two defensive moves don't block the
+physical damage Murkrow actually deals. This was decided from the RAM data
+alone, before either was fought — no trial-and-error needed.
+
+### HEADLINE 2: the forced-switch sequence generalizes exactly per §14 addendum, and MURKROW falls in 2 turns
+
+The dismiss/nav/select/confirm shape is **bit-for-bit the same mechanic**
+§14 addendum pinned for the ONIX→MAGBY switch after Pidgeotto (same
+`HandleChooseMonSelection` default-arm bug, same cursor-defaults-to-the-
+fainted-slot behavior, same "SEND OUT confirms → fade → ball-throw → settled
+menu" shape) — this session needed no new reverse-engineering here, just
+confirmation it holds after a **different** faint (ONIX to MURKROW, not
+ONIX to PIDGEOTTO):
+
+| press | effect | ticks (from 19990) |
+|---|---|---|
+| `A` (1f) + 199f idle | dismiss "ONIX fainted!" → "Choose a POKéMON." list, cursor on ONIX (slot 0) | 200 |
+| `DOWN` (1f) + 14f idle | cursor → MAGBY (slot 1) | 15 |
+| `A` (1f) + 39f idle | opens SEND OUT/SUMMARY/CANCEL, cursor on SEND OUT | 40 |
+| `A` (1f) + 499f idle | confirms SEND OUT → fade/ball-throw/materialize → settled "What will MAGBY do?" vs MURKROW | 500 |
+
+Settled menu at tick **20745** (MAGBY 138/138, MURKROW 142/142, both fresh).
+Then the fight itself — **FIRE_PUNCH both turns**, no move-lock/disruption
+ever actually used by MURKROW (no TORMENT, no TAUNT, no FLY charge this
+time; **HEADLINE 4** below returns to why that's genuinely a different AI
+line, not a scripting dodge):
+
+| turn | ticks | MURKROW's move | MAGBY's move | hp0 (MAGBY) | hp1 (MURKROW) |
+|---|---|---|---|---|---|
+| 1 | 20745-21774 | FAINT_ATTACK (185, always-hits, no acc roll) | FIRE_PUNCH (7, hits, **burns** — `status1` 0→**16** = `STATUS1_BURN` = `1<<4`, RAM-confirmed) | 138→**79** (−59) | 142→75 (−67 direct) →**58** (−17 more, same turn — burn's own end-of-turn residual, see below) |
+| 2 | 21774-22802 | FAINT_ATTACK (always-hits) | FIRE_PUNCH (hits, MURKROW already fainted before any 2nd burn tick could apply) | 79→**27** (−52) | 58→**0** (tick **22418**, −58, lethal) |
+
+**MURKROW faints at tick 22418** (RAM `hp1==0`), un-dismissed faint text
+frozen through this trace's own end. Two new mechanics pinned this session:
+
+1. **Burn's own residual damage, RAM-derived for the first time in this
+   dossier**: turn 1's `hp1` drops **twice** in the same turn — once for
+   FIRE_PUNCH's direct hit (142→75, −67) and again 308 ticks later within
+   the same turn window (75→58, −17) with no new `gCurrentMove` in between.
+   `142/8 = 17.75`, floored = **17** — an exact match, pinning burn's
+   end-of-turn residual as **`floor(maxHP/8)`**, applied to the *burned*
+   mon (MURKROW) at turn-end, independent of whose move caused the burn.
+2. **Burn measurably reduced MURKROW's own physical output**: turn 1's
+   FAINT_ATTACK (unburned MURKROW) hit for 59; turn 2's (burned MURKROW)
+   hit for only 52 — lower, consistent with burn's classic "halve the
+   burned mon's physical damage" rule, though the two hits aren't a clean
+   apples-to-apples comparison (different roll each time, ±15% spread) so
+   this is *suggestive*, not independently re-derived against
+   `damageCalc.ts`'s own burn branch — flagged as an open item below.
+
+Full per-tick ledger (`gRngValue`, hp0/hp1, `gCurrentMove`, MURKROW's
+`status1`) is in `src/data/gen/battle1-winline-b-murkrow-fight-ram-dump.json`
+(2857 rows, ticks 20745-23601); the table above extracts every state
+transition from it (31 total).
+
+### HEADLINE 3: the full victory sequence, page by page
+
+From MURKROW's faint (tick 22418, un-dismissed) through DESTIN's loss quote
+(this trace's own end, tick 23601):
+
+| screen | trigger | notes |
+|---|---|---|
+| "Foe MURKROW fainted!" | `A` dismiss | same button-gated-KO-text rule as every prior faint in this dossier |
+| "Player defeated BUG CATCHER DESTIN!" | `A` dismiss | `gBattleOutcome` 0→**1** the instant this screen appears (RAM-confirmed) — **this is the actual WIN flag**, not a later transition; DESTIN's trainer class (BUG CATCHER) was already known from §13 |
+| "PLEASE I NEED SOME WATER" (DESTIN's loss quote) | `A` dismiss | `battle1-winline-b.json`'s own final committed tick (23601) — frozen here, un-dismissed |
+
+Continuing into `battle1-winline-b-swap.json`'s own new tail:
+
+| screen | trigger | notes |
+|---|---|---|
+| fade to black → BattleFrontier counter, "Thank you for competing!\nLet us restore your POKéMON." | auto (no press needed once the loss quote is dismissed — this is scene-scripted, not button-gated) | free full-party heal between rounds, confirmed by battle 2's ONIX showing 117/117 (full) at the settled menu |
+| "The 2nd match is next!\nAre you ready?" GO ON/RECORD/REST/RETIRE | `A` dismiss heal text | cursor defaults to **GO ON** (top option) |
+| "I've conducted a little investigation\nabout your upcoming opponent." | `A` confirms GO ON | opponent-2 scouting text begins — same shape as the bootstrap's own pre-battle-1 scouting comments |
+| "The TRAINER appears to have no clear\nfavorites when it comes to type." | `A` dismiss | |
+| "The favorite battle style appears to\nbe weakening the foe to start." | `A` dismiss | |
+| "Before starting the battle, would you\nlike to swap a POKéMON?" YES/NO | `A` dismiss | cursor defaults to **YES** — this is the swap-offer screen priority 3 asked for |
+| "Right this way, please!" | `DOWN`+`A` selects **NO**, declines | simplest scriptable path per the brief; no swap-selection sub-screen ever opens on the NO branch, so there is nothing further to ground-truth on this path (the YES branch's own swap-picker UI is a fresh open item, not explored this session) |
+| fade → BattleFrontier battle room, "MY POKéMON WILL MAKE YOU DOWNCAST" | `A` dismiss, then auto warp | opponent 2's opening battle quote |
+| "FISHERMAN JENSON would like to battle!" | `A` dismiss | **battle 2's opponent identity**: trainer class FISHERMAN, name JENSON |
+| **settled "What will ONIX do?" vs KABUTO Lv50, ONIX 117/117** | `A` dismiss | tick **33031** — the deliverable target, fully interactive |
+
+No money/BP text of any kind appears anywhere in this sequence — between-
+round transitions in a single Battle Factory round are apparently just
+heal + continue-or-retire + opponent scouting + swap offer, with no reward
+screen (BP is presumably awarded only at 7-win round completion, out of
+this stage's scope per ROADMAP).
+
+### HEADLINE 4 (methodology, escalation-worthy): outside battle, idle-timing IS an RNG lever — the opposite of §15's own finding, and it changes which opponent battle 2 generates
+
+§15's HEADLINE 1 proved idle-timing doesn't shift RNG outcomes **inside a
+frontier battle** (`Random()` only advances on-demand there, per the
+ROADMAP domain note). This session hit the **complementary case** the same
+domain note already predicted but nobody had actually exercised: outside
+battle — the whole post-victory overworld sequence (heal text, GO ON menu,
+scouting dialogue, swap prompt, the walk into battle 2) — `Random()`
+advances **once per VBlank unconditionally** (`main.c:366`'s own gate is
+`!gMain.inBattle || !(...FRONTIER...)`, true here since we've fully exited
+the battle state). A first attempt at this exact tail (`docs`-untracked,
+built while exploring, not committed) used slightly different idle margins
+in this stretch and generated a **different battle-2 opponent entirely**
+(AROMA LADY JILLIAN, opening NIDORINO) versus this session's final,
+committed script's **FISHERMAN JENSON, opening KABUTO** — same button
+sequence in kind (dismiss/confirm/decline), different frame counts at
+several idle points, nothing else changed. **This means "generous settle
+margins" is safe for reaching a given *screen*, but NOT free with respect
+to *which opponent gets generated* for battle 2 (and probably: which
+rental-pool-adjacent RNG-seeded content follows anywhere in the overworld)
+— any future session extending this chain must treat the post-victory
+overworld tail's exact tick counts as load-bearing, not padding, the same
+way move-choice sequence is load-bearing inside a battle.** Flagged
+explicitly for the supervisor: this is a second, independent confirmation
+of the ROADMAP's own `main.c:366` domain note, but at a materially
+different consequence tier (previous sessions only worried about it
+setting the anchor's draft-screen RNG; this session shows it also
+determines a downstream *trainer identity*, several thousand frames
+removed from the anchor).
+
+### Frame-budget arithmetic and the natural chain-split points
+
+- Prefix through MURKROW's KO + full victory-text dismissal to the loss
+  quote: **23601 ticks** (`battle1-winline-b.json`).
+- Through the swap decline and battle 2's settled first menu: **33031
+  ticks** (`battle1-winline-b-swap.json`) — **11969 ticks of headroom**
+  under the 45000 cap.
+- **The whole chain (draft → battle-1 WIN → swap decline → battle-2 menu
+  settled) now fits comfortably within a single trace's frame budget**
+  (33031 ≪ 45000) — a first for this dossier, made possible entirely by
+  the frame-cap raise (ROADMAP's user decision #2, this session's own
+  starting condition), not by any new script optimization. **The two-file
+  split committed here is no longer a tick-budget necessity — it exists
+  because `maxCaptures=256` is unchanged, and 256 captures spread across
+  33031 ticks (~1 every 129 ticks) would be too sparse to densely cover
+  every button-press transition in both the Murkrow fight and the whole
+  victory/swap/battle-2-intro tail in one file.** The natural split point
+  used here (the loss-quote freeze, tick 23601) is a genuine narrative
+  boundary — the last moment before the "which path forward" branching
+  (heal → continue/retire → scout → swap) begins — not an arbitrary
+  tick-count cut. A future session extending past battle 2's own menu
+  should keep splitting at similar narrative boundaries (e.g. after
+  battle 2's own WIN-equivalent text, or after battle 2's own swap
+  offer) rather than at fixed tick intervals, both for readability and
+  because `maxCaptures` — not `maxFrames` — is now the binding constraint
+  on trace granularity.
+
+### What a resuming session needs — pinned vs. open
+
+**Pinned this session:**
+- The full, verified winning line for battle 1: MAGBY over BAYLEEF (RAM-
+  evidenced, HEADLINE 1), 2-turn MURKROW kill (HEADLINE 2), full victory
+  sequence through the swap offer (HEADLINE 3), swap declined, battle 2
+  reached with FISHERMAN JENSON/KABUTO and a fully settled first menu.
+- Burn's residual damage formula: `floor(maxHP/8)`, RAM-derived directly
+  (HEADLINE 2) — first exact pin of this mechanic in the dossier.
+- Idle-timing outside battle **is** an RNG lever with real downstream
+  consequences (opponent-2 identity) — a load-bearing methodology finding
+  for any future session extending past this point (HEADLINE 4).
+- `gBattleOutcome` flips to 1 at "Player defeated BUG CATCHER DESTIN!",
+  not later — the precise moment this dossier's various "WIN" checks
+  should watch for.
+- The whole draft→battle-1-WIN→swap→battle-2-menu chain fits in a single
+  trace's frame budget now (33031 < 45000); the 2-file split committed
+  here is a capture-density choice, not a tick-budget necessity.
+
+**Still open (in priority order for a resuming session):**
+1. The swap-offer's **YES** branch (the actual swap-picker UI) has never
+   been exercised — this session only ground-truthed the NO/decline path
+   (chosen as "simplest to script" per the brief). Its own screen shape,
+   button sequence, and tick cost are completely unknown.
+2. Burn's halving of the burned mon's own physical damage is *suggestive*
+   from this session's 2 data points (59 vs 52 damage) but not
+   independently re-derived against `damageCalc.ts`'s burn branch with
+   controlled inputs.
+3. Battle 2 itself (KABUTO and whatever follows) is entirely unfought —
+   this session's own deliverable stops at the settled first menu, per
+   the brief's own scope.
+4. BAYLEEF was never actually battle-tested (only RAM-compared against
+   MAGBY pre-decision) — if a future session ever needs BAYLEEF's actual
+   in-battle behavior (e.g. modeling the AI's move choice against a
+   Grass-type), it remains unexplored.
+5. The exact per-page minimum dismiss timings in the victory/scouting/
+   swap sequence were not bisected (generous margins used throughout,
+   consistent with §14 addendum's own finding that little slack is
+   reclaimable) — usable as-is, but not minimized.
+
+**Verification**: `npm test` and `npm run build` green (no `src/engine/`
+changes this session — only the two new committed traces under
+`tools/compare/traces-groundtruth/` and the three new RAM dumps under
+`src/data/gen/`, per the worktree brief's constraint). Both new traces
+twice-run via `bin/oracle run`, 0 sha mismatches across both (118/118 and
+127/127 captures). All three new RAM dumps' constituent probe runs
+(`dump-battler-full.py` ×2, `ram-probe.py` ×1) independently re-run and
+diffed byte-for-byte against their own first run — identical every time.
+

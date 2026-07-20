@@ -1,0 +1,784 @@
+{
+  "segments": [
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 28,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 4,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 36,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "RIGHT"
+      ]
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 28,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 4,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 36,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "RIGHT"
+      ]
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 28,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 4,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 70,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 130,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 96,
+      "buttons": []
+    },
+    {
+      "frames": 24,
+      "buttons": []
+    },
+    {
+      "frames": 162,
+      "buttons": []
+    },
+    {
+      "frames": 54,
+      "buttons": []
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 196,
+      "buttons": []
+    },
+    {
+      "frames": 14,
+      "buttons": []
+    },
+    {
+      "frames": 210,
+      "buttons": []
+    },
+    {
+      "frames": 60,
+      "buttons": []
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 144,
+      "buttons": []
+    },
+    {
+      "frames": 180,
+      "buttons": []
+    },
+    {
+      "frames": 60,
+      "buttons": []
+    },
+    {
+      "frames": 80,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 980,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 900,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 600,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 750,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "RIGHT"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1400,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1400,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1400,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 900,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1200,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 199
+    },
+    {
+      "buttons": [
+        "DOWN"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 14
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 39
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 499
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 27
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 999
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 27
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 999
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 399
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 399
+    }
+  ],
+  "captureFrames": [
+    0,
+    1665,
+    3331,
+    4997,
+    6663,
+    8329,
+    9995,
+    11660,
+    13326,
+    14992,
+    16658,
+    18324,
+    19990,
+    19992,
+    20000,
+    20010,
+    20030,
+    20060,
+    20100,
+    20150,
+    20190,
+    20192,
+    20200,
+    20205,
+    20207,
+    20210,
+    20215,
+    20225,
+    20230,
+    20245,
+    20247,
+    20255,
+    20260,
+    20265,
+    20275,
+    20285,
+    20290,
+    20300,
+    20315,
+    20350,
+    20355,
+    20365,
+    20390,
+    20405,
+    20410,
+    20425,
+    20465,
+    20490,
+    20505,
+    20545,
+    20590,
+    20605,
+    20645,
+    20745,
+    20747,
+    20755,
+    20765,
+    20773,
+    20775,
+    20783,
+    20785,
+    20793,
+    20813,
+    20815,
+    20843,
+    20855,
+    20883,
+    20905,
+    20933,
+    20965,
+    20993,
+    21045,
+    21073,
+    21145,
+    21173,
+    21773,
+    21775,
+    21783,
+    21793,
+    21801,
+    21803,
+    21811,
+    21813,
+    21821,
+    21841,
+    21843,
+    21871,
+    21883,
+    21911,
+    21933,
+    21961,
+    21993,
+    22021,
+    22073,
+    22101,
+    22173,
+    22201,
+    22801,
+    22803,
+    22811,
+    22821,
+    22841,
+    22871,
+    22911,
+    22961,
+    23021,
+    23101,
+    23201,
+    23203,
+    23211,
+    23221,
+    23241,
+    23271,
+    23311,
+    23361,
+    23421,
+    23501,
+    23600
+  ]
+}
