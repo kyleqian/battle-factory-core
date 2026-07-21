@@ -73,6 +73,14 @@ import {
   TURN6_ATKFELL_LINE1,
   TURN6_ATKFELL_LINE2,
   TURN6_ATKFELL_TEXT_TOTAL,
+  TURN6_ROCKSLIDE_PRESS_TICK,
+  TURN6_SUPER_EFFECTIVE_LINE,
+  turn6SuperEffectiveTextStartTick,
+  turn6SuperEffectiveTextVisibleChars,
+  TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY,
+  TURN6_ROCKSLIDE_MENU_REDRAW_DELAY,
+  turn6RockSlideResettledBounceTick,
+  rockSlideTextStartTick,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -551,6 +559,49 @@ describe("battleMenu: turn 6's ATK-fall flavor text (docs/turn6-notes.md §5, co
     expect(turn6AtkFellTextVisibleChars(7660, pressTick)).toBe(2);
     expect(turn6AtkFellTextVisibleChars(7684, pressTick)).toBe(26);
     expect(turn6AtkFellTextVisibleChars(7700, pressTick)).toBe(26); // clamped, holds past settle
+  });
+});
+
+describe("battleMenu: turn 6's own ROCK_SLIDE (Onix vs. Pidgeotto, docs/battle-turn-notes.md §31 - S7 slice N-4 rung (b)) - a pure parameterization of the existing ROCK_SLIDE mechanisms plus the turn's own new 'It's super effective!' message, both pinned against a fresh dense oracle capture (0 diff, `turn6-rockslide-{a,b}.json`)", () => {
+  it("TURN6_ROCKSLIDE_PRESS_TICK is the synthetic anchor landing rockSlideTextStartTick on 7765 (fresh capture: first tick of the kickoff-text transition)", () => {
+    expect(rockSlideTextStartTick(TURN6_ROCKSLIDE_PRESS_TICK)).toBe(7765);
+  });
+
+  it("'It's super effective!' text content, single line (line 2 blank), 21 chars", () => {
+    expect(TURN6_SUPER_EFFECTIVE_LINE).toBe("It’s super effective!");
+    expect(TURN6_SUPER_EFFECTIVE_LINE.length).toBe(21);
+  });
+
+  it("super-effective text starts at pressTick+646 (8018, fresh capture's own first tick of the swap from the held ROCK_SLIDE kickoff text) and settles on the last glyph's own tick (8038)", () => {
+    const pressTick = TURN6_ROCKSLIDE_PRESS_TICK;
+    expect(turn6SuperEffectiveTextStartTick(pressTick)).toBe(8018);
+    expect(turn6SuperEffectiveTextVisibleChars(8017, pressTick)).toBe(0);
+    expect(turn6SuperEffectiveTextVisibleChars(8018, pressTick)).toBe(1);
+    expect(turn6SuperEffectiveTextVisibleChars(8019, pressTick)).toBe(2);
+    expect(turn6SuperEffectiveTextVisibleChars(8038, pressTick)).toBe(21);
+    expect(turn6SuperEffectiveTextVisibleChars(8060, pressTick)).toBe(21); // clamped, holds past settle
+  });
+
+  it("text-clear (743 -> 8115) then hard-cut to the resettled menu (750 -> 8122), the same 7-tick clear-to-redraw gap ROCK_SLIDE_TEXT_CLEAR_DELAY->ROCK_SLIDE_MENU_REDRAW_DELAY established for turn 1, freshly fit this turn", () => {
+    expect(TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY).toBe(8115);
+    expect(TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY).toBe(8122);
+    expect(TURN6_ROCKSLIDE_MENU_REDRAW_DELAY - TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY).toBe(7);
+  });
+
+  it("turn6RockSlideResettledBounceTick re-initializes the bounce cycle fresh at the redraw tick, same shape as rockSlideResettledBounceTick/turn3RockSlideResettledBounceTick", () => {
+    const pressTick = TURN6_ROCKSLIDE_PRESS_TICK;
+    const redrawTick = pressTick + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY;
+    expect(turn6RockSlideResettledBounceTick(redrawTick, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 1);
+    expect(turn6RockSlideResettledBounceTick(redrawTick + 5, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 6);
+  });
+
+  it("rockSlideOpponentHp reused UNCHANGED for Pidgeotto's own 156-max-HP bar (156->113, docs/turn6-notes.md §4): value-agnostic, no new HP-drain formula needed", () => {
+    const pressTick = TURN6_ROCKSLIDE_PRESS_TICK;
+    const drainStart = pressTick + ROCK_SLIDE_HP_DRAIN_START_DELAY;
+    expect(rockSlideOpponentHp(drainStart, pressTick, 156, 113)).toBe(156); // d=0, still full
+    expect(rockSlideOpponentHp(drainStart + 1, pressTick, 156, 113)).toBe(155); // d=1, fresh capture's own first drain-visible tick
+    expect(rockSlideOpponentHp(drainStart + 43, pressTick, 156, 113)).toBe(113); // d=43, settled (matches the fresh capture's own settle tick 8012)
+    expect(rockSlideOpponentHp(drainStart + 60, pressTick, 156, 113)).toBe(113); // clamped, holds past settle
   });
 });
 

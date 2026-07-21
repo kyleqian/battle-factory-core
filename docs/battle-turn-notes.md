@@ -5300,3 +5300,168 @@ independently verified, not assumed).
 **106/106**, `turn6-featherdance.json` **90/90**, `turn6-menu.json`
 **33/33**, `turn5-rockslide.json` **256/256**, `turn1-rockslide.json`
 **256/256**, all 0 diff.
+
+## 31. Engine slice N-4 rung (b): turn 6's own ROCK_SLIDE (Onix vs. Pidgeotto), landed in full - `turn6-rockslide-a.json` **255/255**, `turn6-rockslide-b.json` **105/105**, both 0 diff, completing turn 6 end to end through the tick before turn 7's menu reopen (S7 bounded worker session, hard 60-minute cap)
+
+### Rung (a): ground-truth firm-up, done first
+
+Before writing any render code, re-ran a fresh dense oracle capture of the
+whole assigned window (`captureFrames` 7765-8124 contiguous, stride-1, 360
+frames, split into 3 requests for the oracle's own 256-frame cap) against
+`battle1-turn6-dense.json`'s own committed script - the committed trace
+itself only densely covers small slices of this range (its own gaps:
+7791-7932 and 8019-8098, 140 and 78 ticks respectively), so §30's own
+sha-sweep (done against a since-discarded scratch trace) needed independent
+reconfirmation, not just re-citation. Full sha-transition list computed
+from the fresh capture (not committed - scratch only, matching this
+dossier's own convention for throwaway probing). Net: §30's sweep was
+**accurate everywhere it went, and the fresh pass resolved its one open
+question** (the 8039-8114 "uncaptured gap" hypothesis):
+
+- **7765-7784**: message-box transition into ROCK_SLIDE's own kickoff text
+  (20 ticks, not 19 - §30 miscounted by one), settling `475609fc8c92`.
+  Char-for-char span-matched: 20 ticks = `ROCK_SLIDE_TEXT_TOTAL` (20 chars)
+  exactly, confirming (not just assuming, per rung (b) below) that this
+  transition is fully reproduced by the plain `rockSlideTextVisibleChars`
+  char-reveal already in use for turns 1/3/4/5's own kickoff text - no
+  separate "generic box-slide" model needed despite turn7-notes §5's own
+  "shared 4-frame prefix, content-dependent after" finding for the
+  ANALOGOUS turn-6/7 flavor-text-to-flavor-text transitions (that finding
+  stands for THOSE transitions; this one just happens to ALSO be well-
+  modeled by the simpler char-reveal, the same way turn 3/5's own ROCK_SLIDE
+  kickoff already was even though it's ALSO the turn's second message).
+- **7784-7801**: flat hold ("ONIX used\nROCK SLIDE!"), single-tick flicker
+  at 7802 (`24e01f8c6bed`, `rockSlideBg3Y`'s own `d=1`/`d=2` shake values
+  landing exactly here), flat again 7804.
+- **7805-7924**: the rock animation, changing every tick (120 ticks) -
+  reused verbatim.
+- **7926-7934**: flat hold (animation settle-back).
+- **7935-7967**: hit-flash window - the healthbox wobble (`rockSlideHealthbox
+  WobbleY2`, 20-tick cycle, 7935-7954) and the mon blink (`rockSlideMonBlink
+  Invisible`, 32-tick cycle, 7936-7967) overlap for their shared span then
+  the blink continues alone through 7967, producing the alternating-then-
+  4-tick-block sha pattern in the fresh capture - hand-verified tick-by-tick
+  against both existing formulas' own `d` ranges before writing any code
+  (see rung (b) below), not curve-fit after the fact.
+- **7970-8017**: HP-bar drain, changing every 3-4 ticks (156-max-HP bar,
+  3.25 HP/pixel - coarser than Grovyle's ~2.98 HP/pixel, explaining the
+  slower visible cadence turn6-notes §5 flagged), settling (holding
+  `e8811187b452`) at **8012** - RAM's own `pidgeottoHp`=113 write at 8014
+  (turn6-notes §5) is 2 ticks after the pixel settle, consistent with this
+  dossier's "RAM commits shortly after pixel settle" pattern.
+- **8018-8037**: **RESOLVES §30's own open question** - this is NOT a
+  separate uncaptured mechanism, it's the message-box swap from the held
+  ROCK_SLIDE kickoff text into "It's super effective!" (20 ticks... 21
+  chars, see below), settling (`846f9a5b4de3`) at **8038**. §30's "8039-8114
+  uncaptured gap" was the FLAT HOLD of this message, not a second unmodeled
+  transition - the fresh capture shows the message swap itself starts
+  earlier (8018) than §30's own gap boundary (8039) and was simply inside
+  a stretch the committed trace's own script never densely sampled.
+- **8038-8114**: flat hold, "It's super effective!" (77 ticks) - pixel-
+  confirmed via direct PNG read at tick 8060 (single line, `LINE1_ORIGIN`,
+  line 2 blank).
+- **8115**: text starts clearing (`a8e22ddf13b7`).
+- **8115-8121**: flat "teal blank box" hold (7 ticks).
+- **8122**: settled turn-7 menu (`492e3816c1f0`), 1-tick flicker at 8123,
+  stable from 8124.
+
+### Rung (b): landed in full - a pure parameterization, no new mechanisms
+
+Every falling-rock/shake/hit-flash/drain mechanism (`rockSlideBg3Y`/
+`rockSlideRockState`/`rockSlideDrawOrder`/`rockSlideMonShakeY2`/
+`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/`rockSlideOpponentHp`)
+is reused **completely unchanged** - all were already pure `t`/`pressTick`
+functions with the target's sprite/corner/healthbox left to the caller, per
+§30's own hand-off. The whole implementation was hand-verified against the
+fresh dense capture above BEFORE writing a line of render code (matching
+this turn's own §30 "RAM-probe before writing render code" mandate,
+extended here to "hand-verify against dense pixels before writing render
+code" since the mechanisms themselves were already RAM-derived in prior
+turns): a synthetic press anchor `TURN6_ROCKSLIDE_PRESS_TICK=7372` makes
+`rockSlideTextStartTick(7372)=7765` match the capture's own kickoff-text
+start, and every existing delay constant (`ROCK_SLIDE_RAM_ANCHOR_DELAY`=428,
+`HIT_FLASH_RAM_ANCHOR_DELAY`=562, `ROCK_SLIDE_HP_DRAIN_START_DELAY`=597)
+reproduces the fresh capture's own transition ticks exactly when hand-
+computed against this anchor - confirmed by arithmetic first, then by
+`npm run compare` (which passed FIRST attempt on the whole 255-frame rock/
+hit-flash/drain half, `turn6-rockslide-a.json`).
+
+**Genuinely new pieces**, all small parameterizations rather than new
+formulas:
+
+- Pidgeotto's own shake/blink applied to `pidgeottoFrontSprite`/
+  `PIDGEOTTO_CORNER` (already extracted from the turn-5 switch-in code) in
+  place of Grovyle's.
+- `pidgeottoHealthboxContentForHp(hp)` - a direct copy of `opponentHealthbox
+  ContentForHp`'s own memoized-by-HP shape, parameterized by `PIDGEOTTO_MAX_
+  HP` (156, RAM-confirmed via turn6-notes §4). **No new HP-drain pixel
+  formula was needed** - `calcBarFilledPixels` (`healthboxAssembly.ts`) was
+  already `maxHp`-agnostic (`floor(hpFraction*48)`), and `rockSlideOpponentHp`
+  was already value-agnostic per its OWN doc comment (`battle-turn-notes.md`
+  §9's original finding) - the brief's own "derive the real formula, don't
+  curve-fit" caution turned out to already be satisfied by existing code;
+  this session's job was confirming that (via the dense capture's own drain
+  cadence matching `156/48=3.25` HP/pixel exactly), not writing a new one.
+- "It's super effective!" (`TURN6_SUPER_EFFECTIVE_LINE`, curly apostrophe
+  `’` matching `TURN6_ATKFELL_LINE1`'s own established glyph - a straight
+  `'` mismatched 14px at the apostrophe in the first `npm run compare` pass,
+  caught and fixed immediately) - single line, 21 chars, same "1 tick/char,
+  settle on the last glyph's own tick" shape as every other message in this
+  dossier, `turn6SuperEffectiveTextStartTick`=`pressTick`+646.
+- `drawTurn6RockSlideAttack`/`drawTurn6RockSlideWindow`/`drawTurn6RockSlide
+  TurnEndSettledMenu` - new dispatcher functions following turn 3/5's own
+  "each turn's ROCK_SLIDE gets its own dedicated attack function" precedent
+  rather than over-generalizing `drawTurn6FieldBase` for a single new
+  caller. One real bug caught by `npm run compare` (not by inspection): the
+  first draft of `drawTurn6RockSlideTurnEndSettledMenu` omitted the base
+  `drawStaticBgShiftedY` background paint (every other caller gets it via
+  `drawTurn5RockSlideAttack`/`drawMenuIdleBaseWithOpponentHp`), producing a
+  47%-of-screen diff despite looking almost right in a side-by-side PNG
+  glance - fixed by adding the missing base-background call.
+- Onix's own on-field bounce stays FROZEN (the turn's original A-press
+  anchor, `TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET`) through the WHOLE attack
+  window (FEATHER_DANCE text through ROCK_SLIDE's drain) - only resets to a
+  live cycle at the turn's own redraw (`turn6RockSlideResettledBounceTick`,
+  anchored fresh at `TURN6_ROCKSLIDE_MENU_REDRAW_DELAY`), same "DoBounce
+  Effect stops being polled at the A-press, resumes at the next menu redraw"
+  rule this dossier already established.
+
+**RNG**: not separately modeled as a per-turn ledger (turnRng.ts's own
+`TURN1_RNG_STEPS` table is turn-1-specific and no turn 3/4/5 session added
+its own analogous ledger either - not this dossier's established
+convention past turn 1). All 7 of turn 6's own ROCK_SLIDE-half `Random()`
+calls (accuracy 7763, crit 7787, damage-spread 7790, secondary-effect/
+flinch 8104, turn-pass 8114, AI-cluster×5 8121, per turn6-notes §3) land
+inside already-rendered static holds and need no pixel-visible modeling,
+matching the "RNG doesn't require a pixel change" pattern this dossier has
+used since turn 1. The flinch roll at 8104 is a real `Random()` call per
+the ledger but a guaranteed no-op this turn (Pidgeotto already moved first)
+- no special-casing needed since nothing renders differently either way.
+
+### Committed traces and Tier-1 pins
+
+`tools/compare/traces/turn6-rockslide-a.json` (`captureFrames` 7765-8019,
+255 frames) and `turn6-rockslide-b.json` (8020-8124, 105 frames) - same
+script as `turn6-statfall.json`/`turn6-menu.json` verbatim (confirmed
+before relying on it, same as rung (a) of §30). **Both 255/255 and 105/105,
+0 diff, first attempt on the mechanics half** (`-a.json`); `-b.json` needed
+two small fixes (the apostrophe glyph, the missing background paint) before
+its own 105/105. `tests/battleMenu.test.ts` (+6): `TURN6_ROCKSLIDE_PRESS_
+TICK`'s own anchor identity, the super-effective text's content/timing,
+the text-clear/redraw delay pair, `turn6RockSlideResettledBounceTick`'s
+fresh-cycle-at-redraw shape, and `rockSlideOpponentHp` re-exercised at
+Pidgeotto's own 156/113 values (confirming reuse, not just asserting it).
+
+### Verification
+
+`npm test` **837/837** (+6). `npm run build` green. `turn6-rockslide-a.json`
+**255/255**, `turn6-rockslide-b.json` **105/105**, both 0 diff (7765-8124
+contiguous). Zero regressions: `turn6-statfall.json` **127/127**,
+`turn6-feathers.json` **106/106**, `turn6-featherdance.json` **90/90**,
+`turn6-menu.json` **33/33**, `turn5-rockslide.json` **256/256**,
+`turn3-rockslide.json` **256/256**, `turn1-rockslide.json` **256/256**, all
+0 diff. Turn 6 is now resolved end to end (settled menu through 8124, 222
+ticks of margin before turn 7's own 8346 button press) - the next session's
+natural next step is turn 7 as a parameterization of this turn's own
+mechanisms (per turn7-notes.md's own dossier), or turns 8-13, or the turn
+15+/16+ scout territory already banked.

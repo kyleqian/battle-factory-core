@@ -1937,6 +1937,83 @@ export function rockSlideResettledBounceTick(t: number, pressTick: number): numb
   return t - (pressTick + ROCK_SLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
+// --- S7 slice N-4 rung (b): turn 6's own ROCK_SLIDE (Onix vs. Pidgeotto,
+// docs/battle-turn-notes.md §31) - the first ROCK_SLIDE to hit Pidgeotto
+// rather than Grovyle. Every falling-rock/shake/hit-flash mechanism above
+// (`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
+// `rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
+// `rockSlideOpponentHp`) is reused UNCHANGED - all are already pure
+// `t`/`pressTick` functions with no Grovyle-specific literal baked in (the
+// target's sprite/corner/healthbox content are the caller's own concern,
+// `battleScene.ts`). Hand-verified this session against a fresh dense
+// oracle capture (`tools/compare/scratch/turn6-rs-out-{0,1,2}`, 7765-8124
+// stride-1, 360 frames) tick-for-tick before writing any render code: the
+// synthetic `TURN6_ROCKSLIDE_PRESS_TICK` below reproduces every existing
+// mechanism's own already-published delay constants (`ROCK_SLIDE_RAM_ANCHOR_
+// DELAY`=428, `HIT_FLASH_RAM_ANCHOR_DELAY`=562, `ROCK_SLIDE_HP_DRAIN_START_
+// DELAY`=597) against the fresh capture's own sha-transition ticks exactly
+// (rock animation 7805-7924, hit-flash 7935-7967, HP-drain 7970-8012) - a
+// pure parameterization, matching turn 3/5's own "same mechanism, new
+// pressTick" precedent (`TURN3_ROCKSLIDE_PRESS_TICK`/`TURN5_ROCKSLIDE_
+// PRESS_TICK`).
+
+/**
+ * A SYNTHETIC press anchor (same reasoning as `TURN3_ROCKSLIDE_PRESS_TICK`/
+ * `TURN5_ROCKSLIDE_PRESS_TICK`: FEATHER_DANCE's own kickoff-text+animation
+ * duration differs turn to turn, so ROCK_SLIDE's own kickoff text can't
+ * reuse a real button-press tick) chosen so `rockSlideTextStartTick
+ * (TURN6_ROCKSLIDE_PRESS_TICK)` lands on 7765, the fresh dense capture's
+ * own first tick of the kickoff-text transition (`927922f1...` at 7765,
+ * settling `475609fc8c92` at 7784 - `rockSlideTextStartTick`+`ROCK_SLIDE_
+ * TEXT_TOTAL`-1 = 7765+20-1 = 7784, exact).
+ */
+export const TURN6_ROCKSLIDE_PRESS_TICK = 7372; // rockSlideTextStartTick(7372) = 7765
+
+/** "It's super effective!" (ROCK vs. FLYING, 2x - pixel-confirmed via direct PNG read at tick 8060 of this session's own fresh capture, single line at `LINE1_ORIGIN`, line 2 blank). Curly apostrophe (’, U+2019), same glyph `TURN6_ATKFELL_LINE1`'s own "ONIX’s" already established for this font/charmap - a straight `'` mismatched 14px at the apostrophe glyph itself (`npm run compare` caught it directly). */
+export const TURN6_SUPER_EFFECTIVE_LINE = "It’s super effective!";
+const TURN6_SUPER_EFFECTIVE_TOTAL = TURN6_SUPER_EFFECTIVE_LINE.length;
+
+/**
+ * `TURN6_ROCKSLIDE_PRESS_TICK`+646 = 8018, the fresh capture's own first
+ * tick of the swap from the held "ONIX used\nROCK SLIDE!" text into this
+ * message (`157fbe140ac1` at 8018) - settling (`846f9a5b4de3`) at 8038,
+ * exactly `start+TOTAL-1` (8018+21-1), the same "1 tick/char, settle on the
+ * last glyph's own tick" shape every other kickoff/flavor message in this
+ * dossier already uses (`turn6AtkFellTextStartTick` et al.) - the message-
+ * box swap itself needs no separate transition model, same finding as
+ * `TURN3_ROCKSLIDE_PRESS_TICK`'s own kickoff-text reuse.
+ */
+export const TURN6_SUPER_EFFECTIVE_TEXT_DELAY = 646;
+
+export function turn6SuperEffectiveTextStartTick(pressTick: number): number {
+  return pressTick + TURN6_SUPER_EFFECTIVE_TEXT_DELAY;
+}
+
+/** Visible character count (0..TURN6_SUPER_EFFECTIVE_TOTAL) at absolute trace tick `t` - same 1-tick/char mechanism as `rockSlideTextVisibleChars`. */
+export function turn6SuperEffectiveTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn6SuperEffectiveTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN6_SUPER_EFFECTIVE_TOTAL, t - start + 1);
+}
+
+/**
+ * Turn-end: the held "It's super effective!" text goes blank (box stays, no
+ * text - same "teal blank box" shape as `ROCK_SLIDE_TEXT_CLEAR_DELAY`) at
+ * `pressTick`+743 (RAM/render tick 8115, pixel-confirmed via the fresh
+ * dense capture: `a8e22ddf13b7` from 8115), then hard-cuts to the resettled
+ * action menu at `pressTick`+750 (tick 8122, `492e3816c1f0`) - the SAME
+ * 7-tick clear-to-redraw gap turn 1's own `ROCK_SLIDE_TEXT_CLEAR_DELAY`
+ * (657) -> `ROCK_SLIDE_MENU_REDRAW_DELAY` (664) established, freshly fit
+ * this turn rather than assumed transferable.
+ */
+export const TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY = 743;
+export const TURN6_ROCKSLIDE_MENU_REDRAW_DELAY = 750;
+
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula `rockSlideResettledBounceTick`/`turn3RockSlideResettledBounceTick` already establish, keyed off this turn's own `TURN6_ROCKSLIDE_MENU_REDRAW_DELAY`. */
+export function turn6RockSlideResettledBounceTick(t: number, pressTick: number): number {
+  return t - (pressTick + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
 // --- S7 slice E1: turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff
 // text (docs/battle-turn-notes.md §12, docs/battle-menu-notes.md §13). The
 // resettled menu's own A-press (`rockSlideResettledBounceTick`'s domain)

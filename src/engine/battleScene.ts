@@ -482,6 +482,13 @@ import {
   turn6AtkFellTextVisibleChars,
   TURN6_ATKFELL_LINE1,
   TURN6_ATKFELL_LINE2,
+  TURN6_ROCKSLIDE_PRESS_TICK,
+  TURN6_SUPER_EFFECTIVE_LINE,
+  turn6SuperEffectiveTextStartTick,
+  turn6SuperEffectiveTextVisibleChars,
+  TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY,
+  TURN6_ROCKSLIDE_MENU_REDRAW_DELAY,
+  turn6RockSlideResettledBounceTick,
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import type { ActiveMonMoveset } from "./battleSetup.ts";
@@ -6169,6 +6176,36 @@ const pidgeottoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAsse
   status: "none",
 });
 
+/** S7 slice N-4 rung (b) (docs/turn6-notes.md §4, RAM-confirmed via `dump-battler-full.py`): Pidgeotto's own max HP - the ROCK_SLIDE HP-drain window's own `hpFraction` denominator. */
+const PIDGEOTTO_MAX_HP = 156;
+
+/**
+ * S7 slice N-4 rung (b): Pidgeotto's own opponent healthbox at an arbitrary
+ * integer HP - same memoized-by-HP shape as `opponentHealthboxContentForHp`
+ * (Grovyle's own analogue), needed now that turn 6's own ROCK_SLIDE
+ * actually drains Pidgeotto's bar (156->113, `docs/turn6-notes.md` §4) -
+ * `calcBarFilledPixels` (`healthboxAssembly.ts`) is already `maxHp`-agnostic
+ * (`floor(hpFraction*48)`), so this is a pure parameterization, not a new
+ * pixel formula.
+ */
+const pidgeottoHealthboxContentByHp = new Map<number, ReturnType<typeof composeOpponentHealthbox>>();
+function pidgeottoHealthboxContentForHp(hp: number): ReturnType<typeof composeOpponentHealthbox> {
+  let cached = pidgeottoHealthboxContentByHp.get(hp);
+  if (!cached) {
+    cached = hp === PIDGEOTTO_MAX_HP
+      ? pidgeottoHealthboxContent
+      : composeOpponentHealthbox(healthboxAssemblyAssets, {
+          name: "PIDGEOTTO",
+          level: PIDGEOTTO_LEVEL,
+          gender: "male",
+          hpFraction: hp / PIDGEOTTO_MAX_HP,
+          status: "none",
+        });
+    pidgeottoHealthboxContentByHp.set(hp, cached);
+  }
+  return cached;
+}
+
 /**
  * S7 slice M (docs/faint-switch-notes.md §8e, re-timed this session): Pidgeotto's
  * own healthbox slide-in - bit-for-bit the same 23-step `healthboxSlideDx`
@@ -6447,6 +6484,16 @@ function drawTurn6StatFallBanner(fb: Uint8Array, t: number, pressTick: number, e
 }
 
 function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
+  // S7 slice N-4 rung (b) (docs/battle-turn-notes.md §31): once ROCK_SLIDE's
+  // own kickoff text hard-cuts the message box (oracle-pixel-confirmed at
+  // tick 7765 - `rockSlideTextStartTick(TURN6_ROCKSLIDE_PRESS_TICK)` below),
+  // hand off to the turn's second half - same "handoff at the next move's
+  // own kickoff-text start" shape `drawTurn3EndeavorText`'s own `rockSlide
+  // TextStartTick(TURN3_ROCKSLIDE_PRESS_TICK)` check already established.
+  if (t >= rockSlideTextStartTick(TURN6_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn6RockSlideWindow(fb, t, pressTick);
+    return;
+  }
   drawTurn6FieldBase(fb, t, pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET, () => drawTurn6FeatherSprites(fb, t, true));
   drawTurn6FeatherSprites(fb, t, false);
   const eva = turn6StatFallEva(t, pressTick);
@@ -6457,6 +6504,96 @@ function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
     drawMessageTextLines(fb, TURN6_ATKFELL_LINE1, TURN6_ATKFELL_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
   } else {
     drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+  }
+}
+
+/** Pidgeotto's own HP after turn 6's ROCK_SLIDE (`docs/turn6-notes.md` §4, RAM-confirmed: 156->113, -43 - matches `gBattleMoveDamage`'s own RAM lock at tick 7790). */
+const TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 113;
+
+/**
+ * S7 slice N-4 rung (b) (docs/battle-turn-notes.md §31): turn 6's own
+ * ROCK_SLIDE (Onix vs. Pidgeotto) - same shake/rocks/hit-flash mechanisms as
+ * every prior turn's own ROCK_SLIDE attack function (`drawTurn3RockSlideAttack`/
+ * `drawTurn5RockSlideAttack`), reused with ZERO changes to the mechanisms
+ * themselves (`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
+ * `rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
+ * `rockSlideOpponentHp`, all still `pressTick`-relative) - only the target
+ * sprite/corner/healthbox (Pidgeotto, not Grovyle) and the synthetic
+ * `TURN6_ROCKSLIDE_PRESS_TICK` anchor are new, hand-verified this session
+ * against a fresh dense oracle capture before writing this function (see
+ * `TURN6_ROCKSLIDE_PRESS_TICK`'s own doc). Onix doesn't faint this turn
+ * (unlike turn 5's own analogous function), so no sink logic is needed - a
+ * plain settled sprite, same shape as `drawTurn6FieldBase`'s own idle path,
+ * using the SAME frozen `bounceTick` the FEATHER_DANCE half already held
+ * (Onix's own `DoBounceEffect` stopped being polled at the turn's real
+ * A-press, not reset again mid-turn - only the post-redraw settled menu
+ * gets a fresh cycle, `drawTurn6RockSlideTurnEndSettledMenu`).
+ */
+function drawTurn6RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number): void {
+  const pressTick = TURN6_ROCKSLIDE_PRESS_TICK;
+  const shiftY = rockSlideBg3Y(t, pressTick);
+  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
+  drawTurn5IconBar(fb, t);
+  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  }
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, PIDGEOTTO_MAX_HP, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
+  drawSendOutHealthbox(fb, 0, opponentContent);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
+  for (const i of rockSlideDrawOrder(t, pressTick)) {
+    const rock = rockSlideRockState(i, t, pressTick);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
+}
+
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" shape as `drawTurn3RockSlideTurnEndSettledMenu` - turn 6's own settled action menu, Pidgeotto's healthbox drained to its post-ROCK_SLIDE HP. */
+function drawTurn6RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
+  const bounceTick = turn6RockSlideResettledBounceTick(t, TURN6_ROCKSLIDE_PRESS_TICK);
+  const bounce = menuIdleBounce(bounceTick);
+  drawStaticBgShiftedY(fb, 0, 0);
+  drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+/**
+ * S7 slice N-4 rung (b): turn 6's own ROCK_SLIDE window dispatcher - same
+ * three-phase shape as `drawTurn3RockSlideWindow` (attack animation + held
+ * kickoff text, text-clear, hard-cut to the resettled menu), with one extra
+ * phase turn 3/5's own neutral-effectiveness hits never needed: the "It's
+ * super effective!" message (ROCK vs. FLYING, 2x) swaps in over the same
+ * open box once `turn6SuperEffectiveTextStartTick` is reached, still under
+ * the held kickoff text's own `textClearTick` ceiling.
+ */
+function drawTurn6RockSlideWindow(fb: Uint8Array, t: number, realPressTick: number): void {
+  const pressTick = TURN6_ROCKSLIDE_PRESS_TICK;
+  const redrawTick = pressTick + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurn6RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const textClearTick = pressTick + TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  drawTurn6RockSlideAttack(fb, t, realPressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t < textClearTick) {
+    const superEffectiveStart = turn6SuperEffectiveTextStartTick(pressTick);
+    if (t >= superEffectiveStart) {
+      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn6SuperEffectiveTextVisibleChars(t, pressTick));
+    } else {
+      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    }
   }
 }
 

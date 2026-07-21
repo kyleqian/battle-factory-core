@@ -4,6 +4,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 208 — Bounded worker (S7 slice N-4 rung (b)): Onix's ROCK_SLIDE vs. PIDGEOTTO landed in full — turn 6 resolved END TO END — `turn6-rockslide-a.json` **255/255**, `turn6-rockslide-b.json` **105/105**, both 0 diff, first-attempt on the mechanics half; a pure parameterization, no new HP-drain formula needed after all (S7 bounded worker session, hard 60-minute cap)
+
+- **State:** `npm test` **837/837** (+6), `npm run build` green, tree
+  clean. `turn6-rockslide-{a,b}.json` 0 diff (7765-8124 contiguous).
+  Zero regressions: `turn6-statfall.json` 127/127, `turn6-feathers.json`
+  106/106, `turn6-featherdance.json` 90/90, `turn6-menu.json` 33/33,
+  `turn5-rockslide.json` 256/256, `turn3-rockslide.json` 256/256,
+  `turn1-rockslide.json` 256/256.
+- **Did:** rung (a) first — fresh dense oracle capture of the full
+  7765-8124 window (360 frames), which RESOLVED §30's own flagged
+  "8039-8114 uncaptured gap": it's not a second unmodeled mechanism, it's
+  the flat hold of "It's super effective!" (ROCK-vs-FLYING), whose own
+  message-box swap starts at 8018, 21 ticks earlier than §30's gap
+  boundary. Rung (b): every existing ROCK_SLIDE mechanism (rocks/shake/
+  hit-flash/drain) reused UNCHANGED behind a synthetic press anchor
+  (`TURN6_ROCKSLIDE_PRESS_TICK=7372`) that reproduces the fresh capture's
+  own transition ticks exactly by hand-arithmetic before any code was
+  written. The brief's flagged "fresh HP-drain pixel formula" turned out
+  to be unnecessary — `calcBarFilledPixels` was already maxHp-agnostic
+  and `rockSlideOpponentHp` was already value-agnostic; Pidgeotto's own
+  156-max bar just needed `pidgeottoHealthboxContentForHp(hp)`, a direct
+  copy of the existing per-HP memoization. New: "It's super effective!"
+  text (curly-apostrophe fix caught by `npm run compare`'s 14px diff),
+  and the turn-end settled-menu function (a missing base-background paint
+  caught by a 47%-diff `npm run compare` failure, despite looking correct
+  in a side-by-side PNG glance — fixed immediately).
+- **Next:** turn 7 as a parameterization of turn 6's own mechanisms
+  (turn7-notes.md's dossier already exists), or turns 8-13; scout
+  territory: turn 17+ (Murkrow faints 22418 → the WIN arc, per §16);
+  ISSUES #26 probe; feather residual 7421-7549 (§29's named leads, still
+  open, low priority).
+- **Notes:** no papercuts. `npm run compare`'s pixel-diff caught both real
+  bugs immediately and precisely (apostrophe glyph, missing bg paint) —
+  hand-verifying the mechanism-reuse arithmetic BEFORE writing render code
+  (per §30's own mandate, extended to pixels not just RAM) meant the
+  mechanics half (255 frames) passed compare on the very first attempt.
+
+---
 ## 207 — Worktree scout (supervisor-folded): turn 16 ground truth BANKED — the first MAGBY-vs-MURKROW turn: speed order pinned (MURKROW 97 > MAGBY 89, acts first), FAINT_ATTACK skips accuracy entirely (source: `.accuracy=0`), FIRE_PUNCH rolls accuracy even at 100% AND **its 10% burn proc SUCCEEDS** (`status1` 0→16 at tick 21411, burn residual `floor(142/8)=17` at turn-end) — **the run's FIRST status-condition ground truth**, BRN badge PNG-pinned (absent 21540 → present 21548); `battle1-turn16-dense.json` (256 captures) + `docs/turn16-notes.md`; merged, suite 831/831 on the merged tree
 
 - **State:** merged into master post-N-4, `npm test` 831/831 + build
@@ -73,35 +111,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   sub-mechanisms (not a pure parameterization as the brief hoped) and the
   session budget was better spent banking precise ground truth than
   rushing a half-fit.
-
----
-## 205 — Worktree scout (supervisor-folded): turn 15 ground truth BANKED — **FLY's strike half rolls REAL accuracy/crit/damage (3 Random() calls — NOT RNG-free like its own charge half)**, hits for "not very effective" 11 clipped to Onix's 4 HP (hp0→0 at tick 19147), and the battle's first **PLAYER-side forced switch** is ground-truthed end to end (faint sink → button-gated "ONIX fainted!" → party-select, cursor defaulting to the fainted slot → SEND OUT → MAGBY 138/138 materialize → settled menu at 20558); `battle1-turn15-dense.json` (245 captures) + `docs/turn15-notes.md`; merged, suite 825/825 on the merged tree
-
-- **State:** merged into master post-N-3, `npm test` 825/825 + build
-  green post-merge, worktree/branch cleaned. Supervisor re-verified
-  independently: prefix chain re-flattened myself (turn14-dense ⊂
-  turn15-dense ⊂ winline-b-swap, script-exact), fresh oracle rerun
-  reproduced 16/16 cited shas at their exact ticks, and 4 label-bearing
-  PNGs read directly (incl. §5h's negative finding — the blank message
-  box where §14-addendum's trace showed the "Get 'em, MAGBY!" quip).
-- **Did:** 6 Random() calls total in 18956-20745: accuracy 19003 /
-  crit 19029 / damage-variance 19032 (the strike half joins the normal
-  hit flow at BattleScript_HitFromAtkString — each half of a two-turn
-  move must be checked independently), turn-tail bookkeeping 19240,
-  AI-prescoring pair 20550/20556. STATUS2_MULTIPLETURNS clears 19000,
-  STATUS3_ON_AIR 19004. Reuse map: faint sink SAME-SHAPE (first
-  player-side instance, battler0 params), KO hold / party-select /
-  SEND OUT VERBATIM vs §14-addendum, materialize/healthbox SAME-SHAPE
-  (honestly not byte-verified), LAX_INCENSE no proc (matches turn 13).
-  New finding: the send-out flavor quip is RNG-line-dependent, NOT
-  deterministic on matchup — absent on this exact committed line.
-- **Next:** engine critical path: turn-6 rungs (c)/(d) (stat-fall
-  anim + ATK-fall message ~7559-7684, Onix's ROCK_SLIDE), feather
-  residual 7421-7549 (§29's named leads), then turns 7-13 as
-  parameterizations; scout territory: turn 16+ (MAGBY vs MURKROW,
-  Murkrow faints 22418 per §16 → the WIN arc); ISSUES #26 probe.
-- **Notes:** scout stayed in contract (15.6 min of a 40 cap); no
-  papercuts; its brief-assumption note (two-turn-move halves are
-  asymmetric) folded into this entry's Did line.
-
----
