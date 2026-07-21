@@ -1,0 +1,787 @@
+{
+"segments": [
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 28,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"DOWN"
+]
+},
+{
+"frames": 4,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 36,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"RIGHT"
+]
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 28,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"DOWN"
+]
+},
+{
+"frames": 4,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 36,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"RIGHT"
+]
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 28,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"DOWN"
+]
+},
+{
+"frames": 4,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 70,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 130,
+"buttons": []
+},
+{
+"frames": 8,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 96,
+"buttons": []
+},
+{
+"frames": 24,
+"buttons": []
+},
+{
+"frames": 162,
+"buttons": []
+},
+{
+"frames": 54,
+"buttons": []
+},
+{
+"frames": 100,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 196,
+"buttons": []
+},
+{
+"frames": 14,
+"buttons": []
+},
+{
+"frames": 210,
+"buttons": []
+},
+{
+"frames": 60,
+"buttons": []
+},
+{
+"frames": 100,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 144,
+"buttons": []
+},
+{
+"frames": 180,
+"buttons": []
+},
+{
+"frames": 60,
+"buttons": []
+},
+{
+"frames": 80,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 980,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"DOWN"
+]
+},
+{
+"frames": 10,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 900,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"UP"
+]
+},
+{
+"frames": 10,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1000,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1000,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 600,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 26,
+"buttons": []
+},
+{
+"frames": 166,
+"buttons": []
+},
+{
+"frames": 558,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1000,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1000,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"RIGHT"
+]
+},
+{
+"frames": 10,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1400,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"LEFT"
+]
+},
+{
+"frames": 10,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1400,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1000,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1000,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1000,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 30,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"DOWN"
+]
+},
+{
+"frames": 10,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 1400,
+"buttons": []
+},
+{
+"frames": 2,
+"buttons": [
+"A"
+]
+},
+{
+"frames": 900,
+"buttons": []
+}
+],
+"watch": [
+{
+"name": "spriteSlot",
+"addr": "gBattlerSpriteIds+1",
+"size": 1
+},
+{
+"name": "mSpecies",
+"addr": "gBattleMons+0x58",
+"size": 2
+},
+{
+"name": "mHp",
+"addr": "gBattleMons+0x80",
+"size": 2
+},
+{
+"name": "mMaxHp",
+"addr": "gBattleMons+0x84",
+"size": 2
+},
+{
+"name": "callback",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 28
+}
+],
+"size": 4
+},
+{
+"name": "x",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 32
+}
+],
+"size": 2
+},
+{
+"name": "y",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 34
+}
+],
+"size": 2
+},
+{
+"name": "x2",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 36
+}
+],
+"size": 2
+},
+{
+"name": "y2",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 38
+}
+],
+"size": 2
+},
+{
+"name": "animNum",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 42
+}
+],
+"size": 1
+},
+{
+"name": "animCmdIndex",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 43
+}
+],
+"size": 1
+},
+{
+"name": "data3",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 52
+}
+],
+"size": 2
+},
+{
+"name": "data4",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 54
+}
+],
+"size": 2
+},
+{
+"name": "data5",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 56
+}
+],
+"size": 2
+},
+{
+"name": "flagsByte",
+"path": [
+{
+"symbol": "gBattlerSpriteIds"
+},
+{
+"add": 1
+},
+{
+"derefU8Scaled": 68
+},
+{
+"addSymbol": "gSprites"
+},
+{
+"add": 62
+}
+],
+"size": 1
+}
+],
+"startTick": 15850,
+"_comment": "S7/S8 turn13 scout: clone of switchin-b1-sprite.json watch fields, retargeted to the turn13 script/window (Pidgeotto faint-sink through Murkrow materialize)."
+}

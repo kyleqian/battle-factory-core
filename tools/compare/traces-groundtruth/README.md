@@ -164,3 +164,28 @@ Pidgeotto faint at turn 13 (Onix's DRAGON_BREATH) and Murkrow's switch-in
 immediately after — the natural target for a future turn-13 scout is
 `battle1-winline-b-swap.json`'s own segments[98:106]. Twice-run, 0 sha
 mismatches.
+
+`battle1-turn13-dense-a.json` / `-b.json` (docs/turn13-notes.md): turn 13
+of battle 1 — Pidgeotto's actual FAINT (Onix's DRAGON_BREATH, not the
+now-PP-exhausted ROCK_SLIDE) and MURKROW's switch-in, the event
+`turn12-notes.md` §6 located but only lightly scanned. Both reuse
+`battle1-turn12-dense.json`'s own 100-segment script extended with
+`battle1-winline-b-swap.json`'s own segments[98:106] verbatim (one `DOWN`
+nav press, confirm, the 1400-frame resolution-idle, the button-gated
+KO-dismiss `A` press, and a 900-frame post-switch-in idle — cross-checked
+byte-identical against the full 156-segment winline script across all
+17722 shared ticks). `-a` covers ticks 15374-16824 (menu through the
+gated-press boundary, 256 captures, dense over the submenu/kickoff/
+projectile/HP-drain/faint windows plus sparse KO-hold sampling); `-b`
+covers 16815-17200 (overlapping `-a` at the gate, 223 captures, dense over
+the switch-commit/sent-out-text/ball/particle/materialize/healthbox
+windows through the settled menu vs. MURKROW). Falsifies the brief's own
+"mirrored trajectory" premise for DRAGON_BREATH's fire projectiles: the
+21-entry affine table and `x2` sequence are bit-identical to turn 2's own
+(`dragon-breath-notes.md`), only the translation endpoint's `dy` differs,
+traced exactly to the target's own `yOffset` — so ISSUES #23's exclusion
+covers this turn too, not a separate problem. The full switch-in sequence
+(faint sink, ball, particles, materialize, healthbox) reuses
+`faint-switch-notes.md`'s own turn-5 closed forms verbatim with new
+anchors/species params — see turn13-notes.md §7's reuse map. Both
+twice-run, 0 sha mismatches.
