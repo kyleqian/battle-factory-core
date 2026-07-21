@@ -4,6 +4,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 234 — Supervisor merge fold: turn 10's ROCK_SLIDE half is a PROVEN pure parameterization (`worker/wt-20260721-114115` merged) — synthetic `pressTick=12169` satisfies EVERY shipped rockSlide* delay constant from turns 3/5/6/7/9 and reproduces turn 10's RAM through the real unmodified `rockSlideRockState`/`rockSlideDrawOrder` with 0 mismatches (261+125 sampled ticks); both HP drains re-pinned (Onix 24→14, Pidgeotto 61→38); dossier CORRECTED (turn-11 menu boundary has the standard idle-bounce, NOT flat); `tools/probe/verify-turn10-rockslide.ts` **44/44 supervisor-rerun** post-merge
+
+- **State (supervisor-verified post-merge):** `npm test` **936/936**,
+  `npm run build` green, verify script 44/44 fresh (145 ticks), worktree
+  cleaned up. One honest unresolved probe gap: a RAM "target invisible"
+  signal spans the rock-fall window with NO pixel effect (same family as
+  §37's invisible-bit rule — flagged so nobody models a phantom hide).
+- **Notes:** with #233's AERIAL_ACE state, turn 10's remaining work =
+  (a) mechanical ROCK_SLIDE wiring, (b) mechanism-4 palette-pulse render
+  retry (§42 handoff, pure table already Tier-1-pinned), (c) extend
+  aerialace coverage past 12362. Turn-9 gap probe (hitsplat tip +
+  hit-flash) in flight on `worker/wt-20260721-120256`.
+
+---
 ## 233 — Bounded worker (S7 slice R rung (b) implementation): all 5 AERIAL_ACE mechanisms wired; mechanism 5 (slice) fully 0-diff, mechanisms 1/3 (lunge+clones) land their own first tick with a small unresolved residual just past it, mechanism 4 (palette pulse) REVERTED as badly wrong (pure table kept) — `turn10-aerialace.json` **18/18, 0 diff** (12345-12362, smaller than the dossier's full window)
 
 - **State:** `npm test` **936/936** (921 + 15 new), `npm run build`
@@ -58,40 +72,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fold: rung c3's hitsplat fixes closed `turn2-endeavor-drain`'s last
   residual (now **201/201**, was 200/201 since S7 slice E1) — supervisor-
   rerun confirmed, no capture changes.
-
----
-## 231 — Bounded worker (S7 slice R rungs c3/c4/d): rungs (c4) and (d) LAND 0-diff (`turn9-quickattack-b.json` **77/77**, new `turn9-rockslide.json` **130/130**); rung (c3) lands Onix's own shake exactly but the hitsplat's own pixels + a pre-existing slot4-tail residual stay a named small gap, and a genuine NEW mechanism (Onix's own brief whole-sprite hit-flash, render 10983-10986) was found and left unmodeled
-
-- **State:** `npm test` **917/917** (896 + 21 new), `npm run build`
-  green, `verify-turn9-postlunge.ts` **99/99 fresh** (mandatory first
-  step, reran unchanged after implementation too). Full regression sweep
-  0 diff: `turn9-quickattack.json` **117/117** (unchanged, NOT extended —
-  see gap), `turn9-menu.json` **111/111**, `turn10-menu.json` **83/83**,
-  `turn2-endeavor-drain.json` **201/201**, `turn1-rockslide.json`
-  **256/256**.
-- **Did:** wired ep2 (healthbox y2 wobble + the SEPARATE Onix flicker,
-  two independent tables per the brief), Onix's HP drain (31→24), the
-  single-line "not very effective" reveal, the settled hold, and the full
-  ROCK_SLIDE half (synthetic `TURN9_ROCKSLIDE_PRESS_TICK=10717`,
-  cross-confirmed by 3 independent shared-constant offsets landing on
-  the dossier's own cited ticks) — new `drawTurn9QuickAttackWindow`
-  dispatcher replaces the old "kickoff text held forever" stub. Onix's
-  own x2 shake (ep1) is pixel-proven exact in isolation. The hitsplat
-  itself got 2 real RAM-grounded fixes (matrix 303 not ENDEAVOR's 372;
-  force-blended at `eva=16,evb=16` against live `fb`, not a flat
-  palette) that took its diff from ~1700px to ~150-380px/tick but not to
-  0 — a fine edge/tip residual, time-boxed. A pre-existing rung-(c2) bug
-  (afterimage clones ignoring the lunge's own ground-clip) was fixed
-  along the way (`maxY` added to `drawSpriteSheetBlendedOverFb`).
-- **Next:** (1) hitsplat tip-pixel residual — dump the exact sampled
-  source index at 2-3 mismatched tips to find the affine-scale rounding
-  fix. (2) the new hit-flash discovery (10983-10986) needs a direct
-  `gPlttBufferFaded`/OBJ-palette-bank RAM read — sampling proved it's
-  NOT a simple per-color blend or remap (position-dependent output for
-  identical input colors). (3) once both close, extend
-  `turn9-quickattack.json` into 10935-10986 for a fully contiguous
-  rung (c3)/(c4) capture.
-- **Notes:** `docs/battle-turn-notes.md` §41 has the full writeup incl.
-  every RAM probe and the exact math that solved the blend ratio. No
-  PAPERCUTS beyond the standing mgba-venv-teardown one.
-
