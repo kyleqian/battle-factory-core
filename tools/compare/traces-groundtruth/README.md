@@ -101,3 +101,20 @@ sampling of the animation holds and the turn-10 menu's own idle tail. The
 brief's pinned falsifiable test (a 4th FEATHER_DANCE triggering the "won't
 go any lower!" message) comes back **negative** — Pidgeotto's AI picks
 QUICK_ATTACK instead this turn. Twice-run, 0 sha mismatches.
+
+`battle1-turn10-dense.json` (docs/turn10-notes.md): turn 10 of battle 1 —
+reuses `battle1-turn9-dense.json`'s own 88-segment script verbatim, extended
+with `battle1-winline-b-swap.json`'s own segments[86:90] (the turn-10
+FIGHT-submenu-open and move-confirm — **zero navigation presses**, cursor
+already resting on ROCK_SLIDE — and the resolution-idle, verbatim,
+cross-checked byte-identical against that committed trace both via a full
+13306-tick per-frame button-state diff and a 12-tick pixel spot-check).
+13306 frames total, 208 `captureFrames` dense (stride-1) over eight windows
+bracketing every RAM-confirmed transition this turn (AERIAL_ACE then
+ROCK_SLIDE, both hits) plus sparse representative sampling of the animation
+holds and the turn-11 menu's own idle tail. **Both published lines
+reconverge a second turn running** (bit-identical `gRngValue` and HP
+outcomes to both `battle-turn-notes.md` sections 14 and 15's own turn-10
+rows); all three of the dossier's standing falsifiable tests (ATK-floor
+message, BIND actually hitting, the unattributed-RNG-step call site) come
+back **negative** again this turn. Twice-run, 0 sha mismatches.
