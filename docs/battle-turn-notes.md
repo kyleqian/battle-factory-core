@@ -4945,3 +4945,185 @@ bug-fix section above) and its three OTHER named bounce-extremum residuals
 `turn3-rockslide.json` **256/256**, `turn5-rockslide.json` **256/256**,
 `turn5-menu.json` **42/42**, `turn4-menu.json` **44/44**, `turn5-endeavor.json`
 **254/254**, `turn1-cloneanim.json` **230/230**.
+
+## 29. Engine slice N-3, reduced scope: FEATHER_DANCE's feather sprites landed via a RAM-table renderer (not a from-scratch port), `turn6-feathers.json` **106/106, 0 diff** covering 7307-7420 (16 new ticks past rung (b)'s 7404 cutoff); the fuller 7421-7658 window resists with a precisely characterized small residual (S7 bounded worker session, hard 60-minute cap)
+
+All four rungs of the brief's own ladder were attempted; (a)/(b)/(c) landed
+in full, (d) landed as an honest reduced-scope prefix per the brief's own
+"characterize precisely, never commit red" fallback.
+
+### Rung (a): `ANIM_TAG_WHITE_FEATHER` gfx extraction - landed in full
+
+`white_feather.png` (32x64, 2 stacked 32x32 frames - tile offset 0/16 per
+`sAnim_FallingFeather_0`/`_1`) extracted into
+`src/assets/gen/battle-anim-white-feather.json` via
+`extract-battle-move-anim-assets.ts`'s existing 2-frame-stacked convention
+(`extract-battle-mon-pics.ts`'s `loadAnimFrame2`, reimplemented inline).
+Byte-exact verified against the source PNG (both frames, all tiles, a
+throwaway python cross-check - not committed).
+
+### Rung (b): the full 7404-7658 RAM probe - landed in full, one new finding
+
+`tools/probe/dump-feather-dance-sprites.py` + `tools/probe/specs/
+turn6-feathers.json` (the trace's own `segments`, reused verbatim - no
+stitching) probed all 8 `gFallingFeatherSpriteTemplate` sprites (RAM-
+confirmed slots 3/4/7/8/9/10/11/12, template ptr `0x08596388` per-record
+cross-checked) across every tick, into `src/data/gen/
+turn6-feather-sprites-probe.json` (2040 records: 255 ticks x 8 sprites).
+Twice-run spot check (7404-7440) byte-identical. **New finding**: all 8
+sprites spawn 7404/7412/7420/7428/7436 (matching §28's group timing
+exactly) and fully DESPAWN by tick 7525-7558 (`y>=112`, the real
+`unkE_1` destroy threshold - RAM-confirmed `y2` is always 0 for this
+mechanism, so the check collapses to plain `y>=112`) - the back half of
+the brief's own 7405-7658 window (7559-7658, 100 ticks) has ZERO live
+feather sprites, just the settled kickoff-text hold continuing under
+some OTHER, still-unmodeled visual (see "What's left" below).
+
+### Rung (c): the generic affine blit primitive - already existed, newly pinned against this mechanism's own real data
+
+`drawSpriteSheetAffineRotate` (built in S7 slice M-3 for Onix's own Sitrus
+rotation) turned out to ALREADY be the "generic 2x2-matrix affine sprite
+blit" the brief asked for - it already takes any `{a,b,c,d}` + a center
+position, with no assumption of a single caller. What it lacked: a pin
+using this mechanism's OWN real RAM-probed matrix, and a MULTI-TILE
+fixture (the existing M-3 tests only ever exercise a single 8x8 tile; the
+feather sheet is 2x2 tiles, 32x32). Added both in one test using tick
+7404 slot 3's real matrix (`a=225,b=-120,c=120,d=225`) against a hand-
+solved 2x2-tile fixture with markers in different tiles.
+
+### Rung (d): reduced scope - a RAM-table renderer, not the from-scratch algorithmic port the brief anticipated
+
+**The algorithmic port was attempted first and abandoned mid-session, for
+a documented reason.** `AnimFallingFeather`/`_Step` (`battle_anim_flying.c:
+572-893`) was transcribed line-by-line into `simulateFeatherSprite`
+(including the quadrant-transition state machine's own asymmetric quirk at
+`case 3` - see the source's own "casts to u8 here are necessary for
+matching" comment) and validated against the fresh RAM probe. The phase
+accumulator (`unk2`, `x2`) matched the probe EXACTLY - `phase(f) = initialPhase
++ 2*f` reproduced 20+ consecutive `x2` values with zero mismatches,
+including through several sine-plateau steps, ruling out a coincidental
+fit. But the Y accumulator (`unk8 += 104` each tick) and the `gOamMatrices`
+write did NOT reproduce the probe tick-for-tick - a brute-force search over
+every candidate per-tick increment `K` for `unk8` found NONE that fit
+better than 156/255 mismatches, and the real matrix visibly LAGS the
+sprite's own `x2` field by several ticks in a pattern that isn't a
+constant offset (RAM shows `gOamMatrices` holding its OLD value across up
+to 4 ticks where `x2` has already moved on, then jumping - not a simple
+N-tick delay). This smells like a buffering/refresh detail in how
+`gOamMatrices` actually gets applied to OAM that isn't visible from the
+callback's own source alone (or a decompilation subtlety this session
+didn't fully untangle) - flagged here for a future session rather than
+shipped as a guessed-at, unverified port.
+
+**Pivoted to a RAM-table renderer instead** (`src/engine/featherDance.ts`):
+`turn6FeatherSprites(t)` looks up the tick directly in the committed probe
+JSON (twice-run byte-identical, i.e. real hardware state, not a curve-fit -
+same spirit as this codebase's other RAM-anchored tables, e.g.
+`GROVYLE_STRETCH_TABLE`). The genuinely-new PIECES this rung still
+contributes: the render wiring itself (8 concurrent affine draws/tick via
+the shared primitive) and two bisected facts, both oracle-verified:
+
+1. **A uniform +1 RAM-to-render lag** (`FEATHER_RENDER_LAG`), same class as
+   most mechanisms in this dossier - found by testing lag -2..2 against a
+   5-frame quick-compare scratch trace; lag 0 gave 625-958px/tick, lag +1
+   gave 46-229px/tick, confirming the class without yet fixing everything.
+2. **Z-order against Onix's own on-field sprite is priority-split, not
+   uniform**: the brief's own render-lag mandate warns not to assume a
+   neighboring mechanism's lag/compositing class, and this one needed its
+   own bisection. Drawing every feather in front of Onix (or every one
+   behind) both left a real ~700px/1.8%-per-tick residual concentrated
+   exactly on the Onix-silhouette overlap region (crop-verified: the app's
+   feather swoosh painted OVER Onix's foreleg where the oracle shows it
+   occluded, or vice versa). Splitting by the sprite's own RAM `priority`
+   (`GetBattlerSpriteBGPriority(battler)+1` while `unk2` is in [64,191],
+   base otherwise - Onix's own priority is the same base value) - drawing
+   the `+1` ("far side of the flap") group BEHIND Onix and the base-
+   priority group IN FRONT - closed the overlap-region residual to single
+   digits per tick. Wired via a new `beforeMonSprite` hook threaded through
+   `drawTurn5RockSlideAttack`/`drawTurn6FieldBase` (default no-op, every
+   pre-existing caller unaffected).
+
+**A real bug caught by the new Tier-1 test, not by compare**: the probe's
+8 slots get reused by the real game for an unrelated sprite once every
+feather despawns (by tick 7558) - `turn6FeatherSprites` was initially
+trusting raw RAM `inUse` with no upper bound, so at render tick 7600 it
+happily rendered whatever unrelated sprite now occupied slot 3 as if it
+were a feather (identity matrix, priority 0 - visibly wrong once the test
+printed it). Fixed with `FEATHER_LAST_RAM_TICK` (7557, the tick before
+slot 12's own despawn) - a hard cutoff past which the function returns
+`[]` unconditionally. This was caught by writing the Tier-1 pin BEFORE
+trusting the render at that tick, not by the pixel compare (which never
+requested a capture that far out) - exactly the kind of latent bug the
+"pin every pure-logic fix with a test" rule exists to catch early.
+
+### The precise first-divergence tick, characterized (not chased further this session)
+
+`turn6-feathers.json`'s own `captureFrames` stop at 7420 - the last tick
+this session got to exactly 0 diff. Extending one tick further (7421)
+immediately shows a residual, small but real: **1px at 7421, growing to
+1-53px (0.00-0.14%) through roughly 7549**, with several EXACT ties
+scattered inside that range (7542-7544, 7550-7558 - all clean once every
+feather but the last has despawned). Crop-inspected at tick 7480 (53px,
+0.14%, `x:30-86,y:81-97` - entirely within the feather-sprite's own
+silhouette, not Onix's): the mismatched pixels are all soft GRADIENT edge
+tones of the feather art itself (e.g. app `(206,222,255)` vs oracle
+`(255,255,255)` at one pixel, the reverse at a neighboring one) - the
+shape and position are both right; this reads as a genuine nearest-
+neighbor sampling / rounding-tie difference that only shows up once
+MULTIPLE feathers are concurrently live and overlapping (7421 is exactly
+when the 3rd spawn group, ticks 7420/7428, starts overlapping the first
+two groups' own paths) rather than a single-sprite bug - the 16-tick clean
+prefix (7405-7420) only ever has 1-2 sprites live. Tried: an independent
+matrix-only lag (`FEATHER_MLAG` scratch experiment, position lag fixed at
++1) - lag 0 and lag +2 both made every probed tick WORSE than lag +1
+matching position, ruling out "the matrix has its own separate lag class"
+(the Sitrus window's own +2-for-rotation-matrices lead, explicitly flagged
+by this session's brief as a hypothesis to check, does NOT apply here).
+Not chased further under the time cap; a future session should look at
+same-priority feather-vs-feather ordering (this session sorts only by
+priority, arbitrary tiebreak) or a half-pixel sampling-center convention
+for even-sized (32x32) affine sprites, using the 7421-7440 range (small,
+early residual) as the cheapest reproduction window.
+
+### The OTHER thing found, explicitly out of scope: an unmodeled visual starting ~7570
+
+Past every feather's own despawn (7558), pixels are flat-identical through
+7560, then a NEW flat ~1672px (4.35%) residual appears from ~7570 onward
+(sampled every 10 ticks through 7650, constant magnitude every time) -
+this is almost certainly docs/turn6-notes.md §6's own flagged-but-not-
+itemized "stat-down animation (a downward arrow or healthbox flash)" on
+Onix's healthbox, a SEPARATE mechanism from the feathers, never claimed as
+in scope by this session's brief. `turn6-feathers.json`'s own
+`captureFrames` stop at 7420, well before this, so it never contaminates
+the committed 0-diff trace - flagged here purely so a future session
+doesn't mistake it for a feather-rendering regression.
+
+### Committed artifacts
+
+- `src/assets/gen/battle-anim-white-feather.json` (rung a)
+- `tools/probe/dump-feather-dance-sprites.py`, `tools/probe/specs/
+  turn6-feathers.json`, `src/data/gen/turn6-feather-sprites-probe.json`
+  (rung b)
+- `tests/battleScene.test.ts`'s affine-sampler pin (rung c)
+- `src/engine/featherDance.ts`, `battleScene.ts`'s `drawTurn6FeatherSprites`/
+  `beforeMonSprite` hook, `battleMenu.ts`'s newly-exported
+  `GBA_SINE_TABLE_256`, 3 more `turn6FeatherSprites` pins, and
+  `tools/compare/traces/turn6-feathers.json` (rung d)
+
+### What's left
+
+The 7421-7658 window (small sampling residual 7421-~7549, the separate
+stat-flash mechanism ~7570+), rungs (c)/(d) of turn 6 itself (the ATK-fall
+message, Onix's ROCK_SLIDE), and turns 7-13 as parameterizations - all
+unchanged from §28's own list. `turn6-menu.json`'s own previously-excluded
+7348-7350 ticks were NOT re-verified/restored this session (time cap) -
+still open per §28's own note.
+
+### Verification
+
+`npm test` **825/825** (+4 this slice: 1 affine-sampler pin against this
+mechanism's own real matrix, 3 `turn6FeatherSprites` pins). `npm run build` green.
+`turn6-feathers.json` **106/106, 0 diff** (7307-7420). Zero regressions:
+`turn6-menu.json` **33/33**, `turn6-featherdance.json` **90/90**,
+`turn5-sitrus-a.json` **110/110**, `turn1-rockslide.json` **256/256**, all
+0 diff.

@@ -1,3 +1,28 @@
+---
+## 201 — Worktree scout (supervisor-folded): turn 13 ground truth BANKED — Pidgeotto FAINTS to DRAGON_BREATH, MURKROW switches in (142/142, LAX_INCENSE, NO switch-in proc), and the REUSE MAP says the whole faint/switch window is turn-5 machinery VERBATIM with new params; **the projectile table is bit-identical to turn 2's** (one closed-form dy param: target yOffset 11 vs 4) so ISSUES #23's exclusion covers turn 13 with no fresh crack; `battle1-turn13-dense-{a,b}.json` (256+223 captures) + `docs/turn13-notes.md`; merged `95524d4`, suite 821/821 on the merged tree
+
+- **State:** merged into master, `npm test` 821/821 + build green
+  post-merge. Supervisor re-verified: prefix chain (turn12 ⊂ turn13-a ⊂
+  turn13-b ⊂ winline-b-swap, script-exact), switch-commit sha (16944)
+  reproduced fresh, final capture PNG-read (settled menu vs MURKROW,
+  Onix 4/117). One "surprise" ROOT-CAUSED at the fold: the reported
+  cursor "double-decrement" (DOWN: 0→2) is the FIGHT submenu's ordinary
+  2×2 grid row move (`battleMenu.ts:981`, `cursor ^ 2`; turn 8's RIGHT
+  = +1 column move corroborates) — dossier corrected, nothing open.
+- **Reuse map (scout's verdicts):** faint sink verbatim (closed form
+  gives n=7 for Pidgeotto's yOffset), ball prop / particle burst /
+  landing-bounce verbatim byte-exact; stretch/wobble/tint + healthbox
+  slide same-shape but honestly NOT re-verified to the byte; KO-gated
+  hold verbatim, pixel-frozen. Also: 0-PP moves are never auto-skipped;
+  Onix accuracy stage 6→5 from SAND_ATTACK under the held kickoff.
+- **Next:** slice N-3 — the feather animation's affine renderer (8
+  per-tick-rotating sprites, §28's RAM ground truth + implementation
+  sketch); then rungs (c)/(d); then turn-7..13 slices are all
+  parameterizations except the #23-excluded projectile ticks. BIND-hit
+  (Test 2) never exercised on this line — battles 2-7 may exercise it.
+- **Notes:** scout stayed in contract; no papercuts.
+
+---
 ## 200 — Bounded worker (S7 slice N rung (b), reduced scope): FEATHER_DANCE's kickoff text + settled hold LANDED — `turn6-featherdance.json` 90/90, 0 diff; a real rung-(a) bug found+fixed (region-A onix-sprite bounce wasn't frozen, only region B was); the feather/starburst SPRITE ANIMATION itself deferred (genuinely new affine-rotation rendering, no precedent in this codebase) — RAM ground truth banked, not implemented
 
 - **State:** `npm test` **821/821** (+3), `npm run build` green, tree
