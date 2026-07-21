@@ -53,6 +53,8 @@ import {
   TURN8_REGIME3_TO_REGIME1_SHIFT,
   turn7KickoffBounceTick,
   turn9QuickAttackLungeOffset,
+  turn9QuickAttackSlot3Offset,
+  turn9QuickAttackSlot4Offset,
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
@@ -1924,5 +1926,41 @@ describe("S7 slice R rung (c1): turn9QuickAttackLungeOffset - the real Pidgeotto
   it("is null again from render 10935 on (real sprite back at (0,0), indistinguishable from the un-animated baseline)", () => {
     expect(turn9QuickAttackLungeOffset(10935, pressTick)).toBeNull();
     expect(turn9QuickAttackLungeOffset(11000, pressTick)).toBeNull();
+  });
+});
+
+describe("S7 slice R rung (c2): turn9QuickAttackSlot3Offset/turn9QuickAttackSlot4Offset - the two AnimTask_TraceMonBlended afterimage clones, RAM-tabled by docs/battle-turn-notes.md §36 and independently RAM-reverified this rung (§39): slot 3's second life corrects a 5-tick truncation bug in §38's own handoff ([67,69] transcribed, RAM-confirmed actually [67,74])", () => {
+  const pressTick = 10871;
+  it("slot 3 is null before its first life (render 10929, one tick before its window)", () => {
+    expect(turn9QuickAttackSlot3Offset(10929, pressTick)).toBeNull();
+  });
+  it("slot 3's first life holds (x2=-17,y2=2) for renders 10930-10936 (RAM 10928-10935, one extra creation-lag tick after the usual render=RAM+1)", () => {
+    expect(turn9QuickAttackSlot3Offset(10930, pressTick)).toEqual({ x2: -17, y2: 2 });
+    expect(turn9QuickAttackSlot3Offset(10933, pressTick)).toEqual({ x2: -17, y2: 2 });
+    expect(turn9QuickAttackSlot3Offset(10936, pressTick)).toEqual({ x2: -17, y2: 2 });
+  });
+  it("slot 3 is null across its 3-tick gap (renders 10937-10939, RAM 10936-10937 destroyed)", () => {
+    expect(turn9QuickAttackSlot3Offset(10937, pressTick)).toBeNull();
+    expect(turn9QuickAttackSlot3Offset(10938, pressTick)).toBeNull();
+    expect(turn9QuickAttackSlot3Offset(10939, pressTick)).toBeNull();
+  });
+  it("slot 3's second life holds (x2=0,y2=0) for renders 10940-10946 (RAM 10938-10945 - the corrected, RAM-reverified full span, not the handoff's own truncated [67,69])", () => {
+    expect(turn9QuickAttackSlot3Offset(10940, pressTick)).toEqual({ x2: 0, y2: 0 });
+    expect(turn9QuickAttackSlot3Offset(10943, pressTick)).toEqual({ x2: 0, y2: 0 });
+    expect(turn9QuickAttackSlot3Offset(10946, pressTick)).toEqual({ x2: 0, y2: 0 });
+  });
+  it("slot 3 is null again from render 10947 on", () => {
+    expect(turn9QuickAttackSlot3Offset(10947, pressTick)).toBeNull();
+  });
+  it("slot 4 is null before its life (render 10934, one tick before its window)", () => {
+    expect(turn9QuickAttackSlot4Offset(10934, pressTick)).toBeNull();
+  });
+  it("slot 4 holds (x2=24,y2=6) for renders 10935-10941 (RAM 10933-10940, one extra creation-lag tick after the usual render=RAM+1)", () => {
+    expect(turn9QuickAttackSlot4Offset(10935, pressTick)).toEqual({ x2: 24, y2: 6 });
+    expect(turn9QuickAttackSlot4Offset(10938, pressTick)).toEqual({ x2: 24, y2: 6 });
+    expect(turn9QuickAttackSlot4Offset(10941, pressTick)).toEqual({ x2: 24, y2: 6 });
+  });
+  it("slot 4 is null again from render 10942 on", () => {
+    expect(turn9QuickAttackSlot4Offset(10942, pressTick)).toBeNull();
   });
 });

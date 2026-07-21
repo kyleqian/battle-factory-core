@@ -7328,6 +7328,19 @@ const TURN9_QUICKATTACK_LUNGE_TABLE: readonly { x2: number; y2: number }[] = [
   { x2: 24, y2: 6 }, // RAM 10933 (render 10934)
 ];
 
+/**
+ * The lunge redraw's own ground clip - pixel-confirmed against fresh oracle
+ * PNGs (this rung's own bisection, docs/battle-turn-notes.md §39): applying
+ * the lunge table's `y2` to the sprite's LOWEST rows (feet) produces a
+ * silhouette that doesn't match the oracle at any table index past the
+ * first (`x2=-17,y2=2`) - the true render leaves everything at screen
+ * `y>=74` exactly as the settled (zero-offset) baseline throughout the
+ * whole lunge, regardless of the current `y2` (RAM-plausible: the feet stay
+ * grounded while the body/wings lift for the dash). Absolute screen `y`, not
+ * sprite-local - doesn't line up with a tile-row boundary (`74-19=55`).
+ */
+const TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y = 74;
+
 /** The real Pidgeotto sprite's own lunge offset at trace tick `t`, or `null` outside the window (the caller should draw nothing extra - the normal, already-drawn settled sprite is already correct there). */
 export function turn9QuickAttackLungeOffset(t: number, pressTick: number): { x2: number; y2: number } | null {
   const ramTick = t - TURN9_QUICKATTACK_LUNGE_RENDER_LAG;
@@ -7343,7 +7356,7 @@ export function turn9QuickAttackLungeOffset(t: number, pressTick: number): { x2:
  * opponent-side Pidgeotto sprite/corner (both sit in the same opponent-side
  * screen region, `GROVYLE_CORNER`/`PIDGEOTTO_CORNER` both `x=144`).
  */
-function erasePidgeottoFootprint(fb: Uint8Array): void {
+function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity): void {
   const { tileset } = pidgeottoFrontSprite;
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
@@ -7354,6 +7367,7 @@ function erasePidgeottoFootprint(fb: Uint8Array): void {
           if (tile[py * 8 + px] === 0) continue;
           const x = PIDGEOTTO_CORNER.x + tx * 8 + px;
           const y = PIDGEOTTO_CORNER.y + ty * 8 + py;
+          if (y >= maxY) continue;
           const bg = healthboxBackgroundColorAt(x, y);
           if (bg) setPixel(fb, x, y, bg);
         }
@@ -7362,12 +7376,142 @@ function erasePidgeottoFootprint(fb: Uint8Array): void {
   }
 }
 
-/** Draws the real Pidgeotto sprite at its lunge offset (erasing its normal-position footprint first) if the window is active - returns whether it drew anything, so the caller knows the normal draw already in `fb` needs no further changes otherwise. Afterimage clones (slots 3/4, rung (c2)) NOT modeled yet - see docs/battle-turn-notes.md §38. */
-function drawTurn9QuickAttackLunge(fb: Uint8Array, t: number, pressTick: number): boolean {
-  const offset = turn9QuickAttackLungeOffset(t, pressTick);
-  if (!offset) return false;
-  erasePidgeottoFootprint(fb);
-  drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + offset.x2, PIDGEOTTO_CORNER.y + offset.y2);
+/** Same tile-grid iteration as `drawSpriteSheet`, but skipping any pixel at screen `y >= maxY` - see `TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y`'s own doc comment for why the lunge needs this. */
+function drawSpriteSheetClippedBelow(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, maxY: number): void {
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      const rowY = oy + ty * 8;
+      if (rowY >= maxY) continue;
+      for (let px = 0; px < 8; px += 1) {
+        for (let py = 0; py < 8; py += 1) {
+          const y = rowY + py;
+          if (y >= maxY) continue;
+          const idx = tile[py * 8 + px]!;
+          if (idx === 0) continue;
+          const c = palette[idx];
+          if (!c) continue;
+          setPixel(fb, ox + tx * 8 + px, y, c);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * S7 slice R rung (c2): QUICK_ATTACK's two `AnimTask_TraceMonBlended`
+ * afterimage clones (sprite slots 3/4) - frozen (non-translating) blended
+ * copies of Pidgeotto's own settled sprite art, UNDARKENED (unlike
+ * DOUBLE_TEAM's own darkened clone palette - §36's own oracle-crop note),
+ * same flat `eva=12/evb=8` ratio `drawDoubleTeamClones` already established.
+ * RAM-tabled by §36, cross-checked by this rung's own fresh RAM re-probe
+ * (§39 - ticks 10935-10938 and 10940-10941 directly re-read, not
+ * re-transcribed): slot 3 lives RAM `[10928,10935]` at `(x2=-17,y2=2)`, a
+ * 2-tick gap (RAM 10936-10937, destroyed), then RAM `[10938,10945]` at
+ * `(0,0)` - retry #3's own handoff (§38) transcribed this SECOND life as
+ * `[67,69]` (RAM 10938-10940 only); the fresh probe shows the slot is
+ * actually still `inUse` through RAM 10945, so that was a 5-tick truncation
+ * bug, corrected here to the RAM-confirmed full span. Slot 4 lives RAM
+ * `[10933,10940]` at `(x2=24,y2=6)`, independently re-confirmed unchanged
+ * from the handoff's own value.
+ *
+ * Both clones need ONE MORE tick of lag than the usual render=RAM+1
+ * convention before their FIRST blended pixel actually appears (pixel-
+ * confirmed this rung: render 10929 is already proven 0-diff for the lunge
+ * ALONE, and slot 3's first life's own RAM window - naively `render=RAM+1`
+ * - would otherwise also cover render 10929, where its offset is IDENTICAL
+ * to the lunge table's own first entry; drawing the clone there at all
+ * regresses that tick, since `blendChannel` at `eva+evb=20` does not
+ * preserve a color blended with itself). One extra tick of creation-only
+ * latency before a freshly-allocated semi-transparent OBJ's first visible
+ * blended pixel - separate from the ordinary per-frame position-update lag
+ * every other mechanism here already carries - resolves it cleanly. Slot
+ * 4's own start and slot 3's second life both get the same treatment by the
+ * same reasoning, though the hitsplat (rung (c3), unmodeled) obscures the
+ * only render ticks that could independently pixel-confirm those two.
+ */
+const TURN9_QUICKATTACK_CLONE_RENDER_LAG = 1; // the ordinary render=RAM+1 convention
+
+/** Slot 3's own offset at trace tick `t` (either of its two lives), or `null` outside both. */
+export function turn9QuickAttackSlot3Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
+  const n = t - TURN9_QUICKATTACK_CLONE_RENDER_LAG - pressTick;
+  if (n >= 58 && n <= 64) return { x2: -17, y2: 2 }; // RAM 10928-10935, first visible render one tick after RAM creation
+  if (n >= 68 && n <= 74) return { x2: 0, y2: 0 }; // RAM 10938-10945 (corrected from the handoff's own [67,69]), first visible render one tick after RAM creation
+  return null;
+}
+
+/** Slot 4's own offset at trace tick `t`, or `null` outside its single life. */
+export function turn9QuickAttackSlot4Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
+  const n = t - TURN9_QUICKATTACK_CLONE_RENDER_LAG - pressTick;
+  if (n >= 63 && n <= 69) return { x2: 24, y2: 6 }; // RAM 10933-10940, first visible render one tick after RAM creation
+  return null;
+}
+
+/**
+ * `blendedTile`'s own target-2 always prefers the plain static field
+ * background over whatever's already in `fb` (right for DOUBLE_TEAM's
+ * clones, which never overlap another same-priority OBJ) - but QUICK_ATTACK's
+ * clones DO overlap the real sprite, and RAM confirms `BLDCNT`'s target-2
+ * mask includes OBJ (§36), i.e. on real hardware a semi-transparent OBJ
+ * blends against WHATEVER is visually beneath it, sprite or background. So
+ * these clones must draw AFTER the real sprite's own opaque redraw and
+ * blend against the live `fb` (which already has the real sprite painted in
+ * wherever it currently sits), not the static background.
+ */
+function blendedTileOverFb(fb: Uint8Array, tile: number[], palette: RgbColor[], ox: number, oy: number, eva: number, evb: number): void {
+  for (let py = 0; py < 8; py += 1) {
+    for (let px = 0; px < 8; px += 1) {
+      const idx = tile[py * 8 + px]!;
+      if (idx === 0) continue;
+      const c = palette[idx];
+      if (!c) continue;
+      const x = ox + px;
+      const y = oy + py;
+      if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      const o = (y * 240 + x) * 4;
+      const tgt2 = { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! };
+      fb[o] = blendChannel(c.r, tgt2.r, eva, evb);
+      fb[o + 1] = blendChannel(c.g, tgt2.g, eva, evb);
+      fb[o + 2] = blendChannel(c.b, tgt2.b, eva, evb);
+      fb[o + 3] = 255;
+    }
+  }
+}
+
+/** Same tile-grid iteration as `drawSpriteSheetBlended`, but through `blendedTileOverFb` instead of `blendedTile`. */
+function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, eva: number, evb: number): void {
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      blendedTileOverFb(fb, tile, palette, ox + tx * 8, oy + ty * 8, eva, evb);
+    }
+  }
+}
+
+/**
+ * Draws QUICK_ATTACK's real-sprite lunge (rung c1) plus its two afterimage
+ * clones (rung c2) for trace tick `t`, if any of the three is active -
+ * returns whether it drew anything, so the caller knows the normal draw
+ * already in `fb` needs no further changes otherwise. The real sprite is
+ * redrawn (erase-footprint-then-opaque-redraw, `eraseGrovyleFootprint`'s own
+ * shape) FIRST, both clones blended on top of it LAST (see
+ * `blendedTileOverFb`'s own doc comment for why) - both the erase and the
+ * real sprite's own redraw are clipped to `TURN9_QUICKATTACK_LUNGE_GROUND_
+ * CLIP_Y` (the feet stay grounded throughout the lunge, unmoved).
+ */
+function drawTurn9QuickAttackAnimation(fb: Uint8Array, t: number, pressTick: number): boolean {
+  const lunge = turn9QuickAttackLungeOffset(t, pressTick);
+  const slot3 = turn9QuickAttackSlot3Offset(t, pressTick);
+  const slot4 = turn9QuickAttackSlot4Offset(t, pressTick);
+  if (!lunge && !slot3 && !slot4) return false;
+  erasePidgeottoFootprint(fb, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  const { tileset, palette } = pidgeottoFrontSprite;
+  const real = lunge ?? { x2: 0, y2: 0 };
+  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  if (slot3) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8);
+  if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8);
   return true;
 }
 
@@ -7404,7 +7548,7 @@ function drawTurn9FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
     if (t >= textStart) {
       const bounceTick = turn9KickoffBounceTick(t, pressTick);
       drawTurn9FieldBase(fb, t, bounceTick);
-      drawTurn9QuickAttackLunge(fb, t, pressTick);
+      drawTurn9QuickAttackAnimation(fb, t, pressTick);
       drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
       drawMessageTextLines(fb, TURN9_QUICKATTACK_LINE1, TURN9_QUICKATTACK_LINE2, turn9QuickAttackTextVisibleChars(t, pressTick));
       return;
