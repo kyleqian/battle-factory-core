@@ -429,4 +429,39 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- white_feather.png: gFallingFeatherSpriteTemplate's tile/palette source (S7 slice N-3) ---
+//
+// graphics/battle_anims/sprites/white_feather.png, 32x64px = 4 cols x 8 rows
+// of 8x8 tiles = 32 tiles (src/graphics.c:1195-1196,
+// gBattleAnimSpriteGfx_WhiteFeather/gBattleAnimSpritePal_WhiteFeather,
+// ANIM_TAG_WHITE_FEATHER, tagged src/data/battle_anim.h:1282/1575).
+// gFallingFeatherSpriteTemplate (src/battle_anim_flying.c:171-179) uses OAM
+// shape 32x32 (gOamData_AffineNormal_ObjNormal_32x32) - so the 32 tiles form
+// 2 stacked 32x32 frames: sAnim_FallingFeather_0 (tile offset 0, animNum 0)
+// and sAnim_FallingFeather_1 (tile offset 16, animNum 1, .hFlip=TRUE in the
+// ANIMCMD_FRAME entry - but this sprite is ALWAYS affine (gDummySpriteAffineAnimTable,
+// ST_OAM_AFFINE_NORMAL per its oam template), and hardware ignores OBJ h/v-flip
+// bits for affine sprites (they're repurposed as affine-matrix-select bits
+// instead) - so this is genuinely a SECOND, separately-drawn mirrored frame,
+// not a runtime flip flag; `AnimFallingFeather`/`_Step`'s own `sprite->hFlip`
+// field only selects which of these two pre-drawn frames to show
+// (`animNum = hFlip`), never a hardware mirror. Same 2-frame stacked
+// convention as `extract-battle-mon-pics.ts`'s `loadAnimFrame2` (front-sprite
+// entrance anim), reimplemented inline here since that helper isn't exported.
+{
+  const image = decodeIndexedPng(join(REF, "graphics", "battle_anims", "sprites", "white_feather.png"));
+  const { columns, rows, tiles } = sliceTiles(image);
+  if (rows % 2 !== 0) throw new Error(`white_feather.png: expected an even row count (2 stacked frames), got ${rows}`);
+  const frameRows = rows / 2;
+  const frame0Tiles = tiles.slice(0, frameRows * columns);
+  const frame1Tiles = tiles.slice(frameRows * columns);
+  writeJson(join(ASSETS_GEN, "battle-anim-white-feather.json"), {
+    source: "graphics/battle_anims/sprites/white_feather.png (src/graphics.c:1195-1196, ANIM_TAG_WHITE_FEATHER)",
+    tileset: { columns, rows: frameRows, tiles: frame0Tiles.map((t) => [...t.pixels]) },
+    frame2: { columns, rows: frameRows, tiles: frame1Tiles.map((t) => [...t.pixels]) },
+    palette: image.palette,
+    oam: { shape: "32x32", size: "32x32", affine: true },
+  });
+}
+
 console.log("extraction complete");
