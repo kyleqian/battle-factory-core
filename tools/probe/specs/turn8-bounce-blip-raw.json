@@ -1,0 +1,794 @@
+{
+ "_comment": "ISSUES #28 root-cause probe (S7 worktree, oracle/RAM only): reuses turn8-menu.json own committed segments verbatim + turn5-menu-bouncer-raw.json own watch list verbatim (gBattlerSpriteIds/gHealthboxSpriteIds-relative, battler 0), to get raw bounce-driver sSinIndex/y2 ground truth across the turn-8 browsing window (excluded pairs 9383-9384/9392-9393/9402-9403/9411-9412/9420-9421 plus neighbors) - the cross-turn family-identity check.",
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 36,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 28,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 4,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 70,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 130,
+   "buttons": []
+  },
+  {
+   "frames": 8,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 96,
+   "buttons": []
+  },
+  {
+   "frames": 24,
+   "buttons": []
+  },
+  {
+   "frames": 162,
+   "buttons": []
+  },
+  {
+   "frames": 54,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 196,
+   "buttons": []
+  },
+  {
+   "frames": 14,
+   "buttons": []
+  },
+  {
+   "frames": 210,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 144,
+   "buttons": []
+  },
+  {
+   "frames": 180,
+   "buttons": []
+  },
+  {
+   "frames": 60,
+   "buttons": []
+  },
+  {
+   "frames": 80,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 980,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 10,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 900,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "UP"
+   ]
+  },
+  {
+   "frames": 10,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1000,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1000,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 600,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 26,
+   "buttons": []
+  },
+  {
+   "frames": 166,
+   "buttons": []
+  },
+  {
+   "frames": 558,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1000,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1000,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 10,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1400,
+   "buttons": []
+  }
+ ],
+ "watch": [
+  {
+   "name": "onixSpriteSlot",
+   "addr": "gBattlerSpriteIds+0",
+   "size": 1
+  },
+  {
+   "name": "healthboxMainSpriteSlot",
+   "addr": "gHealthboxSpriteIds+0",
+   "size": 1
+  },
+  {
+   "name": "onixDriverId",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 3
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "onixSinIndex",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 3
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 46
+    }
+   ],
+   "size": 2
+  },
+  {
+   "name": "onixDelta",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 3
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 48
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "onixAmplitude",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 3
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 50
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "onixBouncerTarget",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 3
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 52
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "onixWhich",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 3
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 54
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "onixY2",
+   "path": [
+    {
+     "symbol": "gBattlerSpriteIds"
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 38
+    }
+   ],
+   "size": 2
+  },
+  {
+   "name": "healthboxDriverId",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 2
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "healthboxSinIndex",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 2
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 46
+    }
+   ],
+   "size": 2
+  },
+  {
+   "name": "healthboxDelta",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 2
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 48
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "healthboxAmplitude",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 2
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 50
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "healthboxBouncerTarget",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 2
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 52
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "healthboxWhich",
+   "path": [
+    {
+     "symbol": "gBattleSpritesDataPtr"
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 4
+    },
+    {
+     "derefU32": true
+    },
+    {
+     "add": 2
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 54
+    }
+   ],
+   "size": 1
+  },
+  {
+   "name": "healthboxMainY2",
+   "path": [
+    {
+     "symbol": "gHealthboxSpriteIds"
+    },
+    {
+     "derefU8Scaled": 68
+    },
+    {
+     "addSymbol": "gSprites"
+    },
+    {
+     "add": 38
+    }
+   ],
+   "size": 2
+  }
+ ],
+ "startTick": 9375
+}
