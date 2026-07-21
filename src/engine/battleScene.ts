@@ -2607,12 +2607,14 @@ export function drawSpriteSheetAffineRotate(
   pb: number,
   pc: number,
   pd: number,
+  clipBottom?: number,
 ): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
   const halfW = w / 2;
   const halfH = h / 2;
   for (let dy = -h; dy < h; dy += 1) {
+    if (clipBottom !== undefined && centerY + dy >= clipBottom) continue;
     for (let dx = -w; dx < w; dx += 1) {
       const sx = ((dx * pa + dy * pb) >> 8) + halfW;
       const sy = ((dx * pc + dy * pd) >> 8) + halfH;
@@ -5844,6 +5846,48 @@ export function onixSitrusTintCoeff(t: number): number {
 }
 
 /**
+ * ISSUES #26 (docs/faint-switch-notes.md §16): the Sitrus proc's expanding
+ * THIN_RING (`gThinRingExpandingSpriteTemplate`, `gSprites[4]`,
+ * `matrixNum=2`) - RAM ground truth from the dedicated probe
+ * (`src/data/gen/turn5-sitrus-ring-probe.json`, twice-run byte-identical,
+ * all 32 live ticks match this closed form with zero mismatches). Unlike
+ * `onixSitrusRotateMatrix` above, this matrix is a pure isotropic scale
+ * (`b=c=0` always, `a=d` always) - never a rotation - so it does NOT
+ * inherit that mechanism's own +2 render lag (rotation-matrix-specific,
+ * per §13's own rationale and §29's independent confirmation it doesn't
+ * generalize); this one uses the dossier's ordinary **+1** lag instead,
+ * verified pixel-exact with zero fitted parameters at two sample ticks
+ * (6/6 opaque px at render 7042, 92/92 at render 7048). Center `(72,88)`
+ * is RAM-constant for the sprite's whole life (the ring's own sprite x/y
+ * directly - 8px below `onixSitrusRotateMatrix`'s own call-site center,
+ * from `AnimSpriteOnMonPos`'s mon-pic Y offset that Onix's own hardcoded
+ * rotation call never applies).
+ */
+const TURN5_SITRUS_RING_RENDER_LAG = 1;
+const TURN5_SITRUS_RING_RAM_START = 7040;
+const TURN5_SITRUS_RING_RAM_END = 7071;
+export const TURN5_SITRUS_RING_CENTER = { x: 72, y: 88 };
+
+/**
+ * `null` outside the ring's own live RAM window (`[7040,7071]`, i.e.
+ * render ticks `[7041,7072]` at lag +1 - the sprite is destroyed the RAM
+ * tick after 7071, matching the committed trace's own exclusion ending at
+ * render 7072). `n=1` (render tick 7041, RAM 7040) analytically produces
+ * ZERO opaque pixels - a 64x64 hollow-ring texture downscaled 16x has its
+ * own thin stroke fall entirely between sampled texel centers - which is
+ * why the pre-fix diff onset was render 7042, not 7041, despite the
+ * sprite existing in RAM from 7040: this function still returns a real
+ * (non-null) matrix there, it just happens to paint nothing.
+ */
+export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: number; pd: number } | null {
+  const ramTick = t - TURN5_SITRUS_RING_RENDER_LAG;
+  if (ramTick < TURN5_SITRUS_RING_RAM_START || ramTick > TURN5_SITRUS_RING_RAM_END) return null;
+  const n = Math.min(31, Math.max(1, ramTick - 7039));
+  const a = Math.floor(4096 / n);
+  return { pa: a, pb: 0, pc: 0, pd: a };
+}
+
+/**
  * The battlefield base for turn 5's own ROCK_SLIDE window - same shape as
  * `drawTurn3RockSlideAttack`/`drawTurn4RockSlideAttack` (shake/rocks/hit-
  * flash mechanisms reused with ZERO code changes, only the new synthetic
@@ -5900,6 +5944,30 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
     }
   }
   drawGrantingStars(fb, t);
+  const sitrusRing = turn5SitrusRingMatrix(t);
+  if (sitrusRing) {
+    // Z-order (ISSUES #26's own caveat): rows >= PLAYER_BALL_OPEN_VISIBLE_
+    // BOTTOM at the player's own field position are occluded by the
+    // battlefield's foreground terrain graphic REGARDLESS of OAM priority
+    // (the same terrain-vs-sprite compositing already established for the
+    // player's own ball-open pose/particles, `PLAYER_BALL_OPEN_VISIBLE_
+    // BOTTOM`'s own doc) - not a ring-vs-drop-shadow OAM priority contest as
+    // originally hypothesized: the probe's own residual color at rows
+    // 112-114 (`(74,66,82)`) is an exact match to that already-cited
+    // terrain color, not a distinct shadow sprite.
+    drawSpriteSheetAffineRotate(
+      fb,
+      battleAnimItemHeal.ring.tileset,
+      battleAnimItemHeal.ring.palette,
+      TURN5_SITRUS_RING_CENTER.x,
+      TURN5_SITRUS_RING_CENTER.y,
+      sitrusRing.pa,
+      sitrusRing.pb,
+      sitrusRing.pc,
+      sitrusRing.pd,
+      PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+    );
+  }
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
   const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn4Hp, anchorOpponentAfterTurn5Hp);
   if (t < GROVYLE_HEALTHBOX_VANISH_TICK) {

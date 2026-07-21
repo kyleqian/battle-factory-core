@@ -21,6 +21,7 @@ import {
   turn5SitrusHealTextVisibleChars,
   turn5SitrusOnixHp,
   turn5SitrusResettledBounceTick,
+  turn5SitrusRingMatrix,
   PARTICLE_OAM_PRIORITY,
   PARTICLE_OAM_SUBPRIORITY,
   renderBattleScene,
@@ -1671,6 +1672,27 @@ describe("S7 slice M-5 (docs/faint-switch-notes.md §15): Onix's own Sitrus tint
     expect(onixSitrusTintCoeff(7052)).toBe(3); // RAM 7051
     expect(onixSitrusTintCoeff(7057)).toBe(1); // RAM 7056
     expect(onixSitrusTintCoeff(7061)).toBe(1); // RAM 7060, last nonzero tick
+  });
+});
+
+describe("ISSUES #26 (docs/faint-switch-notes.md §16): turn5SitrusRingMatrix - the Sitrus proc's THIN_RING, a pure isotropic scale (a=d=floor(4096/n), b=c=0) RAM-pinned against the committed probe (src/data/gen/turn5-sitrus-ring-probe.json), ordinary +1 render lag (NOT onixSitrusRotateMatrix's +2 rotation-matrix class)", () => {
+  it("is null outside the ring's own live render window (renders 7041-7072, RAM 7040-7071)", () => {
+    expect(turn5SitrusRingMatrix(7040)).toBeNull(); // render 7040 -> RAM 7039, before the sprite exists
+    expect(turn5SitrusRingMatrix(7073)).toBeNull(); // render 7073 -> RAM 7072, destroyed the RAM tick after 7071
+  });
+  it("matches the probe's clamp-low end: RAM 7040 (n=1) is the sprite's very first live tick, a=4096 (1/16 native scale)", () => {
+    expect(turn5SitrusRingMatrix(7041)).toEqual({ pa: 4096, pb: 0, pc: 0, pd: 4096 }); // render 7041 -> RAM 7040
+  });
+  it("matches the probe at RAM 7041/7047 (the two pixel-bisected sample ticks, 6/6 and 92/92 opaque px exact)", () => {
+    expect(turn5SitrusRingMatrix(7042)).toEqual({ pa: 2048, pb: 0, pc: 0, pd: 2048 }); // render 7042 -> RAM 7041
+    expect(turn5SitrusRingMatrix(7048)).toEqual({ pa: 512, pb: 0, pc: 0, pd: 512 }); // render 7048 -> RAM 7047
+  });
+  it("RAM 7055 (n=16) is exactly the neutral/identity scale - the ring at its native 64x64 size", () => {
+    expect(turn5SitrusRingMatrix(7056)).toEqual({ pa: 256, pb: 0, pc: 0, pd: 256 }); // render 7056 -> RAM 7055
+  });
+  it("matches the probe's clamp-high end: n clamps at 31 (RAM 7070), and the last live tick (RAM 7071) holds the same value", () => {
+    expect(turn5SitrusRingMatrix(7071)).toEqual({ pa: 132, pb: 0, pc: 0, pd: 132 }); // render 7071 -> RAM 7070, n=31
+    expect(turn5SitrusRingMatrix(7072)).toEqual({ pa: 132, pb: 0, pc: 0, pd: 132 }); // render 7072 -> RAM 7071, held (affineAnimEnded)
   });
 });
 
