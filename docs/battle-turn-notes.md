@@ -6478,3 +6478,172 @@ diagnostic). The c2 attempt's own code was written, tested, found short of
 4. Hitsplat (slot 7, `(72,88)`-shaped per `drawEndeavorHitsplats`'s own
    10-tick precedent) and Onix's shake episode 1 remain fully unattempted
    (rung (c3)), unchanged from §37's own scope.
+
+## 39. S7 slice R rung (c2) LANDED: QUICK_ATTACK's two afterimage clones, 0-diff through the whole provable window - a boundary-transcription bug, a blend-target-2 bug, a creation-lag bug, and a "feet stay grounded" clip, all found by RAM re-probe + oracle-PNG bisection, none guessed (bounded worker session)
+
+Per the retry-#3 handoff's own mandatory first step, re-probed RAM directly
+(`dump-quickattack-anim.py` against `battle1-turn9-dense.json`, ticks
+10924-10947) before touching any render code, rather than trusting §36's
+transcribed table.
+
+### Step 1: fresh RAM re-probe - confirms the boundaries, catches a real transcription bug
+
+Slot 3/4's `inUse`/`x2`/`y2`/base `x,y`/`priority`/`objMode`/`paletteNum`/
+`hFlip`/`vFlip` re-read directly, independent of §36's own table:
+
+| RAM tick | slot 3 | slot 4 |
+|---|---|---|
+| 10928-10935 | alive, `(x2=-17,y2=2)` | - |
+| 10936-10937 | **destroyed** (gap) | - |
+| 10938-10945 | alive again, `(x2=0,y2=0)` | - |
+| 10933-10940 | (life1 above still running) | alive, `(x2=24,y2=6)` |
+| 10946 | destroyed | - |
+| 10941 | - | destroyed |
+
+This CONFIRMS the boundary ticks the brief flagged (10935-10938 gap,
+10940-10941 destruction) exactly as §36/§38 transcribed - **except slot 3's
+SECOND life**, which §38's own handoff transcribed as `n=[67,69]` (RAM
+10938-10940 only). The fresh probe shows slot 3 still `inUse` through RAM
+**10945**, a full 8-tick life, not 3 - the handoff's own range was truncated
+5 ticks short. Corrected to `n=[67,74]` (RAM 10938-10945). Slot 4's own
+range (`n=[62,69]`, RAM 10933-10940) re-confirmed exactly as transcribed.
+Base `x,y` for all three slots (3/4/5) are bit-identical (`176,51`) whenever
+`inUse`, confirming the same corner-offset formula (`PIDGEOTTO_CORNER +
+x2,y2`) applies uniformly - no per-slot mirror/scale difference.
+`hFlip`/`vFlip` are `0` throughout for all three slots (checked directly,
+not assumed) - ruling out a flip-based explanation for anything downstream.
+
+### Step 2 (isolate-then-add-back, collapsed once the real bugs were found)
+
+The brief's own plan was to isolate slot 3 alone before adding slot 4 back.
+In practice the first implementation attempt (both slots wired at once,
+corrected boundary table, `real-sprite-drawn-last` ordering per §38's own
+description of the reverted attempt) reproduced §38's EXACT prior diff
+counts at ticks 10930-10934 (705/789/429/123/39px) - proving the boundary
+fix alone doesn't move the needle, and that the residual is NOT an
+ordering/erase-clobbering issue (the leading hypothesis going in). Cropping
+`x:110-220,y:5-90` and diffing pixel-by-pixel (not eyeballing) showed every
+pixel my code's clone code actually painted (vs. a no-clone baseline)
+matched the oracle exactly (420/420) - the clone itself was already right
+wherever it drew anything. The remaining diff was a full Pidgeotto
+silhouette shape, entirely outside the clone's own painted region - i.e.
+the REAL SPRITE's own redraw, not the clone, was the dominant remaining
+bug. This resolved isolating slot 3 from slot 4 as moot (neither was the
+root cause) and pointed at two separate, independent defects instead.
+
+### Bug 1: `blendedTile`'s target-2 must be the live framebuffer, not the plain static background, when a clone overlaps the real sprite
+
+`BLDCNT=0x3f40` (§36) decodes to target-1 mask `000000` (nothing explicitly
+selected - only forced-blend semi-transparent OBJs participate) and
+target-2 mask `111111` (ALL BG layers + OBJ + backdrop). `blendedTile`
+(shared with `drawDoubleTeamClones`) prefers the plain static field
+background over `fb` for target-2 - correct for DOUBLE_TEAM, whose clones
+never overlap another same-priority OBJ, but wrong here: QUICK_ATTACK's
+clones DO overlap the real sprite, and hardware's target-2 mask says a
+semi-transparent OBJ blends against whatever's visually beneath it,
+sprite included. Fix: a new `blendedTileOverFb`/`drawSpriteSheetBlendedOverFb`
+pair (`battleScene.ts`) that blends against the CURRENT `fb` pixel
+unconditionally, and the draw order is real-sprite-first (opaque), clones
+last (blended on top) - the opposite of §38's own "real sprite drawn last"
+description of the reverted attempt, which this session's own evidence
+contradicts directly (see Bug 2 below for why the naive "clone first, real
+last" order breaks a pixel that's ALREADY proven exact).
+
+### Bug 2: a freshly-created clone needs ONE MORE tick of latency than the general render=RAM+1 lag before its first blended pixel
+
+With Bug 1's fix alone (clone-blends-over-fb, real-sprite-opaque-first),
+render 10929 - already proven exact by rung (c1) alone - REGRESSED
+(1076px). Cause: slot 3's first life's own naive window (`render=RAM+1`,
+i.e. starting render 10929) coincides EXACTLY with the lunge table's own
+first entry (`x2=-17,y2=2` at both) - drawing the clone there blends
+`blendChannel(c, c, 12, 8)` (color-with-itself), which does NOT reproduce
+`c` because `eva+evb=20≠16` (this ratio doesn't preserve identity under
+truncating integer blend math). Fix: both clone offset functions
+(`turn9QuickAttackSlot3Offset`/`turn9QuickAttackSlot4Offset`) now require
+one EXTRA tick past the ordinary render=RAM+1 lag before a life's first
+active render tick (window starts shift from RAM+1 to RAM+2; the END of
+each life is unaffected, still RAM+1 - confirmed necessary by checking the
+tail: uniformly shifting BOTH ends by the extra tick broke the
+already-correct disappearance ticks 10945-10947, so only the START needed
+it). Slot 3's own life-1 start is the only one of the three starts
+independently pixel-provable this rung (10929 must stay exact); slot 3's
+life-2 start and slot 4's own start get the same fix by the same
+reasoning (a freshly-allocated semi-transparent OBJ's OAM copy needs an
+extra frame before it's meaningful) but both fall inside rung (c3)'s own
+unmodeled hitsplat window and so are NOT independently pixel-confirmed
+this session - flagged honestly, not asserted as proven.
+
+### Bug 3: the real sprite's own feet stay grounded (unmoved) through the whole lunge
+
+Even with Bugs 1+2 fixed, ticks 10930-10934 (excluding the two endpoints,
+which happen to have small `y2`) still showed small (39-109px) residuals,
+ALL confined to screen `y>=74`, tracking the real sprite's CURRENT `x2` but
+NOT its `y2` (onset stayed fixed at `y=74` regardless of whether `y2` was 6,
+11, or 12). Diffing oracle-at-tick-10930 against oracle-at-baseline
+(10924, pre-animation) directly (not the app) confirmed: at `y>=74` the two
+are BYTE-IDENTICAL - the true render leaves the feet exactly where they
+sit in the settled baseline, never translating them, while `y<74`
+(body/head/wings) DOES move with the lunge. Fix: `TURN9_QUICKATTACK_LUNGE_
+GROUND_CLIP_Y=74` - both `erasePidgeottoFootprint` (now takes an optional
+`maxY`) and the real sprite's own redraw (`drawSpriteSheetClippedBelow`,
+new) skip any pixel at screen `y>=74`, leaving the settled draw's own feet
+untouched below that line for the whole lunge. `74` is an absolute screen
+coordinate, not a tile-row boundary (`74 - PIDGEOTTO_CORNER.y(19) = 55`,
+mid-row) - pixel-fit, not guessed from the tileset's own grid.
+
+### Result: 10930-10934 all land 0-diff, extending past this rung's actual provable ceiling
+
+With all three fixes: ticks 10924-10934 all 0-diff (a scratch 27-frame
+window, `captureFrames` override on `battle1-turn9-dense.json`, ticks
+10924-10950) - the ENTIRE window this rung can prove without rung (c3)'s
+own hitsplat (RAM-created 10934, render 10935 by the ordinary lag, per
+§36's own table) obscuring further ticks. 10935-10944 all show nonzero
+diff (1708/454/454/1708/1708/657/657/1669/1669/415px) - exactly the
+hitsplat's own unmodeled footprint, confirmed by the diff's own onset
+tick (10935) matching the hitsplat's RAM-creation+1 lag precisely, same
+"expected, out-of-scope, not a regression" call §38 already made for this
+same boundary. 10945-10950 all 0-diff again (past the hitsplat's own
+destruction). Committed `turn9-quickattack.json`'s `captureFrames`
+extended `112->117` (10930-10934 added), **117/117, 0 diff**. Regressions
+re-verified 0 diff: `turn9-menu.json` **111/111**, `turn8-menu.json`
+**88/88**, `turn1-cloneanim.json` **230/230**.
+
+### Committed code and Tier-1 pins
+
+`src/engine/battleScene.ts`: `turn9QuickAttackSlot3Offset`/
+`turn9QuickAttackSlot4Offset` (exported, RAM-tabled per above),
+`blendedTileOverFb`/`drawSpriteSheetBlendedOverFb` (blend against live
+`fb`), `drawSpriteSheetClippedBelow` (ground-clip redraw),
+`erasePidgeottoFootprint` extended with an optional `maxY`,
+`drawTurn9QuickAttackAnimation` (replaces the old `drawTurn9QuickAttack
+Lunge` name - now dispatches the lunge AND both clones together, real
+sprite opaque first, clones blended last). 8 new Tier-1 tests pin both
+offset functions' life boundaries directly against the RAM-reverified
+ranges above (`tests/battleScene.test.ts`) - suite **880->888**.
+
+### Handoff for rung (c3) (hitsplat + Onix's shake episode 1)
+
+Unattempted this session (ran out of cap after landing (c2) - the
+investigation above took the full session). Per §37/§38's own scope note:
+hitsplat is slot 7, RAM-created 10934 (render 10935 by the ordinary lag),
+center `(72,88)`, shaped per `drawEndeavorHitsplats`'s own 10-tick
+pop-then-hold precedent (same 10-tick lifetime RAM 10934-10943 per §36's
+table). Onix's shake episode 1 is slot 6, `x2` square-wave `5,5,0,0,5,5,0,0`
+over RAM 10936-10943 (this session's own fresh probe confirms this pattern
+exactly, extending one cycle further right to RAM 10940-10941 = `5,5` too -
+see the RAM table in Step 1 above). Once (c3) lands, it will ALSO
+retroactively confirm (or refute) Bug 2's own untested half (slot 3's
+second-life start, slot 4's own start) since the hitsplat's own render
+window overlaps both. Rung (d) (ROCK_SLIDE) continues to wait on (c)
+landing a correct prefix, unchanged from §36/§37/§38's own scope notes.
+
+### Verification
+
+`npm test` **888/888** (880 + 8 new), `npm run build` green.
+`tools/compare/traces/turn9-quickattack.json` **117/117, 0 diff**
+(extended from 112). `turn9-menu.json` **111/111**, `turn8-menu.json`
+**88/88**, `turn1-cloneanim.json` **230/230**, all re-verified unchanged.
+No new committed tooling this session (the RAM re-probe reused
+`tools/probe/dump-quickattack-anim.py`, already committed; the scratch
+oracle-PNG comparison trace was not committed, per the standing "scratch
+stays scratch" convention).
