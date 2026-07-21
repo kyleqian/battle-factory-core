@@ -4,6 +4,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 221 — Worktree probe (supervisor-folded): ISSUES #30's sSpriteOrder lead NARROWED TO 2 CANDIDATES — the real mechanism (source-read) is a full per-frame insertion sort whose history only matters at exact (priority, wrapped-Y) ties, and the mirrored-pair feathers make ties pervasive (why fresh Y-sorts can't model it); of the 2^3 unknowable initial pair-orders, ONLY the (4,7) pair matters — 2 live candidates, identical across turns 6/7/8; `docs/feather-order-notes.md` + rerunnable simulation script merged (supervisor-rerun reproduces), suite 877/877
+
+- **State:** merged into master post-slice-R, `npm test` 877/877 +
+  build green, worktree/branch cleaned. ISSUES #30 updated with the
+  narrowing + the named next step (render both candidates over turn
+  6's residual window, diff vs fresh oracle captures — decisive either
+  way). Probe stopped honestly at cap before the pixel test.
+- **Next:** round 10 — main: QUICK_ATTACK's animation (slice R rung
+  (c), §35's RAM-probed task inventory banked: elliptical lunge +
+  blended afterimage + shake, tasks/slots pinned) then rung (d)
+  (ROCK_SLIDE + turn-end); worktree: the #30 candidate pixel test
+  (scratch-render, no engine code). Wind-down begins ~07:45.
+- **Notes:** probe in contract (9.3 of 30 min), honest cap stop.
+
+---
 ## 220 — Bounded worker (S7 engine slice R, rungs (a)+(b)): **ISSUES #29 FIXED** (both families, all 3 menu traces restored 0 diff) **+ turn 9's menu-reopen/LEFT-nav/confirm/QUICK_ATTACK-kickoff-text chain landed clean** — `turn9-menu.json` **111/111**; QUICK_ATTACK's own animation + everything downstream (impact/drain/message/ROCK_SLIDE/turn-end) NOT modeled — RAM-probed and precisely characterized (§35), not guessed
 
 - **State:** `npm test` **877/877** (+12), `npm run build` green, tree
@@ -62,67 +77,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   in turns 1-8 now has either a root-caused fix pending (#29's 6) or
   a live named-lead investigation (#30's feather windows); no
   speculative labels remain.
-
----
-## 218 — Bounded worker (S7 engine slice Q, dedicated feathers step): rung (a) partially cracked — a real same-priority feather draw-order bug found+fixed (`compareFeatherDrawOrder`, ~2000px→425px residual on the 7421-7549 window, 9/129 ticks exact) but not a full 0-diff crack; rungs (b)/(c) landed clean — `turn7-feathers.json` **16/16**, `turn8-feathers.json` **33/33**, both 0 diff, confirming the SAME residual recurs at the identical relative offset in all three turns (ISSUES #30 filed)
-
-- **State:** `npm test` **865/865** (+6), `npm run build` green, tree
-  clean. `turn6-feathers.json` unchanged **106/106** (fix doesn't touch
-  the already-green non-overlapping prefix). Zero regressions:
-  `turn6-featherdance.json` 90/90, `turn6-menu.json` 42/42,
-  `turn7-menu.json` 91/91, `turn8-menu.json` 86/86, `turn5-sitrus-
-  a.json` 110/110, all 0 diff.
-- **Did:** rung (a) — hand-derived the real GBA tiebreak rule from
-  `reference/pokeemerald/src/sprite.c`'s `SortSprites` (lower OAM index
-  wins ties; all 8 FEATHER_DANCE spawns share one `subpriority` per
-  `Cmd_createsprite`, so this codebase's own `slot` is the practical
-  proxy) and empirically confirmed descending-slot beats both ascending-
-  slot (the old bug, reproduced exactly) and descending-Y (445px,
-  slightly worse — rules out "a fresh Y-sort every frame" as the
-  complete model). Shipped since it's strictly better and doesn't
-  regress the committed 106/106, but the residual isn't fully gone —
-  characterized precisely in §34/ISSUES #30 rather than force-fit.
-  Rungs (b)/(c) — generalized `featherDance.ts` to a small factory
-  (`makeFeatherSpriteLookup`), probed turn 7 (RAM 8434-8600) and turn 8
-  (RAM 9483-9660) with the existing `dump-feather-dance-sprites.py`
-  unchanged (both twice-run byte-identical), confirmed the identical
-  +8-tick spawn cadence/~121-tick lifetime and the shared `+1` render
-  lag (explicitly re-bisected against lag 0, which badly fails both:
-  2/16 and 18/33 matches). Landed each turn's own clean prefix up to its
-  first mismatch (turn7: 8439-8454, turn8: 9468-9500), matching turn 6's
-  own reduced-scope precedent.
-- **Next:** the ordering residual's real fix (model `sSpriteOrder`'s own
-  persistent incremental insertion-sort state, or pursue the untried
-  half-pixel sampling-center lead) — ISSUES #30. Independently: ISSUES
-  #29 (2 small bounce-blip families), turn 9+ parameterizations.
-- **Notes:** checked (not assumed) whether this crack explains ISSUES
-  #23's DRAGON_BREATH residual — it doesn't (different mechanism: #23 is
-  a single-sprite scale-regime sampling defect, not a multi-sprite
-  draw-order contest), documented in §34 per the brief's own ask.
-
----
-## 217 — Worktree scout (supervisor-folded): post-WIN scene transition ground-truthed — **the S8 dossier chain is now GAPLESS from anchor to battle 2**: `battle1-postwin-dense.json` (29601 ticks, 208 captures) joins turn17's end (23601) to §17's swap-prompt start (29601, endpoint sha byte-identical to `battle1-swapyes-a.json`'s same-tick frame); headline pins: **`gMain.inBattle` clears + per-VBlank RNG resumes at tick 23645**, and **opponent-2's identity (`rentalMons[3..5]`) is written by 23700-23750** — the timing-sensitive window §16 HEADLINE 4 warned about is now bisected to 105 ticks; `docs/postwin-notes.md` merged, suite 861/861
-
-- **State:** merged into master post-#28-fix, `npm test` 861/861 +
-  build green, worktree/branch cleaned. Supervisor re-verified:
-  prefix chain re-flattened (turn17 ⊂ postwin ⊂ winline-b-swap,
-  script-exact — the shared prefix serves BOTH swap branches since the
-  joint precedes the YES/NO divergence), fresh rerun (208 captures,
-  endpoint sha reproduced), 2 labels PNG-read (heal text in the
-  pre-battle room at 23800; the settled YES/NO swap prompt at 29601).
-  §16 HEADLINE 4 refined at this fold with the bisected window.
-- **Did:** the return is a THREE-scene sequence (fade → ~38-tick flash
-  of the S6 battle room → black → fade-in on S5's pre-battle room),
-  both scenes already extracted/modeled — no new assets needed (camera
-  path for the flash honestly flagged not re-verified). Heal RAM write
-  lands 163 ticks AFTER the heal-text dismiss (screen frozen the whole
-  gap); loss-quote cursor question remains open (honest flag).
-- **Next:** round 8 — main: feathers dedicated step (turn-7/8 tables +
-  §29 sampling-residual leads); worktree: ISSUES #29 probe (the two
-  boundary families, same RAM-first method). Then turn 9+ slices; S8
-  engine work now has complete ground truth end to end.
-- **Notes:** scout in contract (16.3 of 40 min); PAPERCUT noted in the
-  dossier (two supplementary RAM dumps run once, not twice — trace
-  itself twice-run; acceptable, flagged in-doc).
 
 ---

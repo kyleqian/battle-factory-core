@@ -23,20 +23,24 @@ this session (first mismatch always ~17 ticks after each turn's own first
 spawn) - i.e. it's a property of the shared mechanism/tiebreak, not a
 turn-6-specific artifact.
 
-**Eliminated this session**: ascending-slot (reproduces the old bug
-exactly), descending-slot (the current fix, best so far), descending-Y-at-
-current-tick (445px, slightly WORSE than slot - rules out "a fresh Y-sort
-every frame" as the complete model). **Leads for a future session**: model
-`sSpriteOrder`'s own PERSISTENT incremental insertion-sort state (it only
-re-sorts adjacent pairs when a swap condition trips, carrying history
-frame-to-frame - a fresh full resort by any single key, slot or Y, isn't
-guaranteed to match it once histories diverge) using each probe's own
-per-tick Y values; independently, the half-pixel sampling-center
-convention for even-sized (32x32) affine sprites (untried this session -
-the ordering investigation consumed the budget once it started paying
-off). `turn6/7/8-feathers.json` all stop their own `captureFrames` right
-before this residual's onset (106/16/33 frames respectively, all 0 diff) -
-extending any of them past that point is gated on this crack.
+**Eliminated**: ascending-slot (the old bug), fresh descending-Y-per-tick
+(445px, worse than descending-slot's 425px). **NARROWED by the
+sSpriteOrder simulation probe (2026-07-21, `docs/feather-order-notes.md`
++ `tools/probe/simulate-feather-sprite-order.py`, supervisor-rerun
+reproduced)**: the real mechanism (from source, `sprite.c`) is a FULL
+insertion sort every frame whose prior-frame order only matters at exact
+(priority, wrapped-Y) ties — and the 8 feathers spawn in mirrored pairs
+sharing Y, so ties are pervasive (why a fresh Y-sort can't model it).
+Parameterizing the unknowable initial slot permutation over all 2^3
+same-tick pairs: ONLY the (4,7) pair's order matters — exactly **2 live
+candidates**, identical across turns 6/7/8, each differing from the
+shipped descending-slot rule on 89/97 of ~129 residual ticks. **Next
+step (named, unstarted)**: render both candidates over turn 6's
+7421-7549 via the existing primitives and diff against fresh oracle
+captures — a winner (or double elimination) is decisive either way; the
+half-texel sampling-center lead stays queued behind it.
+`turn6/7/8-feathers.json` stop at 106/16/33, all 0 diff; extension gated
+on this crack.
 
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
