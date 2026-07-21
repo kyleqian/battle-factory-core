@@ -1,4 +1,43 @@
 ---
+## 227 — Bounded worker (S7 slice R rung (c2)): QUICK_ATTACK's two afterimage clones LAND 0-diff — three real bugs found by RAM re-probe + oracle-PNG bisection (a boundary-transcription truncation, a blend-target-2 rule, a creation-lag tick, plus a "feet stay grounded" clip), `turn9-quickattack.json` **117/117, 0 diff** (up from 112)
+
+- **State:** `npm test` **888/888** (880 + 8 new Tier-1 pins), `npm run
+  build` green, tree clean. `turn9-quickattack.json` captureFrames extended
+  112→117 (adds 10930-10934, the whole window provable before rung (c3)'s
+  unmodeled hitsplat obscures further ticks), 0 diff. Regressions
+  re-verified 0 diff: `turn9-menu.json` 111, `turn8-menu.json` 88,
+  `turn1-cloneanim.json` 230.
+- **Did:** Per the retry handoff's mandatory first step, fresh RAM re-probe
+  (`dump-quickattack-anim.py`) of the slot-3/4 boundary ticks confirmed
+  §36/§38's table EXCEPT slot 3's second life, transcribed as `[67,69]`
+  (RAM 10938-10940) but actually alive through RAM 10945 — a 5-tick
+  truncation bug, corrected to `[67,74]`. Fixing just that didn't move the
+  needle (reproduced §38's exact prior diff counts), so bisected further
+  via cropped oracle-PNG pixel diffs and found two more real bugs: (1)
+  `blendedTile`'s target-2 must be the LIVE framebuffer, not the plain
+  static background, whenever a clone overlaps the real sprite (RAM's
+  `BLDCNT` target-2 mask includes OBJ) — clones now draw AFTER the real
+  sprite's own opaque redraw, blending over `fb` (new `blendedTileOverFb`/
+  `drawSpriteSheetBlendedOverFb`); (2) a freshly-created clone needs ONE
+  MORE tick of latency than the usual render=RAM+1 lag before its first
+  blended pixel (proven via the already-exact render 10929, which
+  regresses if slot 3 draws there — blending a color with itself at
+  `eva+evb=20` doesn't preserve it); (3) the real sprite's own feet stay
+  grounded (unmoved) through the whole lunge — new `TURN9_QUICKATTACK_
+  LUNGE_GROUND_CLIP_Y=74` clips both the footprint erase and the redraw
+  below that absolute screen row. All three pixel-confirmed, not guessed.
+- **Next:** rung (c3) (hitsplat, slot 7, RAM-created 10934/render 10935,
+  `drawEndeavorHitsplats`'s own 10-tick precedent; Onix's shake episode 1,
+  slot 6, `x2` square-wave `5,5,0,0,5,5,0,0` RAM 10936-10943 — this
+  session's own fresh probe, §39) fully unattempted, ran out of cap after
+  landing (c2). Landing (c3) will also retroactively test Bug 2's
+  untested half (slot 3 life-2 start, slot 4's own start), since the
+  hitsplat's own render window overlaps both. Rung (d) ROCK_SLIDE still
+  waits on (c) finishing.
+- **Notes:** `docs/battle-turn-notes.md` §39 has the full diagnosis (RAM
+  table, all three bugs, the fix, honest scope of what's independently
+  pixel-proven vs. reasoned-by-symmetry). No PAPERCUTS this session.
+
 ## 226 — Supervisor wind-down: session end 2026-07-21 ~06:30 — **16 worker steps verified and folded** (8 main-lane + 8 worktree, 10 rounds); suite **821 → 880/880**; headlines: **turns 6-9 landed as engine slices** (turn 6 complete end to end incl. the stat-fall banner and ROCK_SLIDE vs Pidgeotto; turns 7/8 complete minus feather sub-windows; turn 9 through QUICK_ATTACK's lunge), **the dossier pipeline is GAPLESS from anchor through battle 1's WIN to battle 2's swap prompt** (turns 15/16/17 + post-WIN scouted, prefix-verified, incl. the run's first status-condition ground truth and the RNG-resume/opponent-2 window bisected to 105 ticks), and **FIVE standing issues resolved by the probe-first pattern** (#26 Sitrus ring closed via closed-form crack, #27 RNG call attributed, #28+#29 bounce-shift families root-caused AND fixed — 32 excluded ticks restored, #30 narrowed: candidate A crowned, half-texel eliminated, residual split into two named classes)
 
 - **State (verified this minute):** `npm test` **880/880**, `npm run

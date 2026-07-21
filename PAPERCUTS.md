@@ -245,3 +245,16 @@ compare run exposed the staleness.
   `run-subagent.sh -c N "$(cat brief.txt)"`, avoiding `!(`/history-
   expansion-sensitive characters in inline briefs; a launcher flag that
   reads the brief from a file (`--brief-file`) would remove the class.
+
+## RAM-probe python scripts segfault on interpreter teardown after writing valid output (2026-07-21)
+
+- **What:** `dump-quickattack-anim.py`, `dump-endeavor-tail.py`,
+  `dump-battle-bars.py` (the mGBA-core RAM probes) exit 139 (SIGSEGV
+  during Python interpreter teardown) AFTER their JSON output is fully
+  and correctly written. Two workers in one session each spent ~2 min
+  re-validating output they nearly discarded as a failed run.
+- **Cost each:** ~2 min + the risk of discarding good data.
+- **Workaround:** check the output file's validity (json.load) instead
+  of trusting the exit code; a docstring line in each script saying
+  "exit 139 on teardown is expected, validate the JSON" — or a
+  wrapper that exits 0 when the output parses — would remove the class.

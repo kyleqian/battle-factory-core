@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 230 — Supervisor merge fold: turn 9's ENTIRE post-lunge window ground-truthed by a two-probe stacked chain (`worker/wt-20260721-103557` merged, 2 commits) — shake episode 2 ROOT-CAUSED as two independent RAM+1 mechanisms (20-tick healthbox y2 wobble + a separate 3-block Onix visibility flicker; Onix's sprite never moves), episode-1/hitsplat lag classes pinned (+1 hitsplat, +2 shake incl. a creation-tick stall), and the full C4 territory pinned (HP drain 31→24 lag-free w/ band flip at 10999; message reveal 1 char/tick 11005→11028, ONE line — dossier corrected; settled hold 11028-11109 FLAT; rung-(d) transition anchor 11110). `tools/probe/verify-turn9-postlunge.ts` **99/99 supervisor-rerun** from the merged main tree
+
+- **State (supervisor-verified post-merge):** `npm test` **896/896**,
+  `npm run build` green, verify script 99/99 fresh, no worktrees, no
+  unmerged branches. Two turn9-notes.md label corrections folded with
+  my own PNG re-read at 11040 (one-line message, Onix 24/117).
+- **Notes:** probe chain = round-2 worktree (12.5 min) + stacked
+  follow-up (19 min, nested worktree base 832e65a). One mis-based
+  launch in between (my error: invoking the MAIN tree's launcher by
+  absolute path from inside a worktree bases the new worktree on
+  master, NOT the branch — nesting requires the worktree's OWN script
+  copy invoked relatively); the worker caught it and stopped honestly
+  at $0.27. PAPERCUTS: exit-139 teardown-segfault entry added (two
+  workers re-confirmed it this session). Rungs (c3)/(c4)/(d) are now
+  wiring jobs against the 99-check script.
+
+---
 ## 229 — Bounded worker (S7 slice R rung (a)): turn 10's FIGHT-submenu reopen LANDS 0-diff, zero navigation presses — `turn10-menu.json` **83/83, 0 diff**; rung (b) (AERIAL_ACE's animation) RAM-probed to a concrete 5-mechanism inventory, NOT implemented — one mechanism needs a genuinely new sprite asset, out of cap
 
 - **State:** `npm test` **896/896** (892 + 4 new), `npm run build` green,
@@ -57,43 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   param keeps every other affine caller byte-identical (ball spin
   verified via `sendout`). Dossier: `docs/feather-order-notes.md`'s
   2026-07-21 adoption section. ISSUES #30 removed this commit.
-
----
-## 227 — Bounded worker (S7 slice R rung (c2)): QUICK_ATTACK's two afterimage clones LAND 0-diff — three real bugs found by RAM re-probe + oracle-PNG bisection (a boundary-transcription truncation, a blend-target-2 rule, a creation-lag tick, plus a "feet stay grounded" clip), `turn9-quickattack.json` **117/117, 0 diff** (up from 112)
-
-- **State:** `npm test` **888/888** (880 + 8 new Tier-1 pins), `npm run
-  build` green, tree clean. `turn9-quickattack.json` captureFrames extended
-  112→117 (adds 10930-10934, the whole window provable before rung (c3)'s
-  unmodeled hitsplat obscures further ticks), 0 diff. Regressions
-  re-verified 0 diff: `turn9-menu.json` 111, `turn8-menu.json` 88,
-  `turn1-cloneanim.json` 230.
-- **Did:** Per the retry handoff's mandatory first step, fresh RAM re-probe
-  (`dump-quickattack-anim.py`) of the slot-3/4 boundary ticks confirmed
-  §36/§38's table EXCEPT slot 3's second life, transcribed as `[67,69]`
-  (RAM 10938-10940) but actually alive through RAM 10945 — a 5-tick
-  truncation bug, corrected to `[67,74]`. Fixing just that didn't move the
-  needle (reproduced §38's exact prior diff counts), so bisected further
-  via cropped oracle-PNG pixel diffs and found two more real bugs: (1)
-  `blendedTile`'s target-2 must be the LIVE framebuffer, not the plain
-  static background, whenever a clone overlaps the real sprite (RAM's
-  `BLDCNT` target-2 mask includes OBJ) — clones now draw AFTER the real
-  sprite's own opaque redraw, blending over `fb` (new `blendedTileOverFb`/
-  `drawSpriteSheetBlendedOverFb`); (2) a freshly-created clone needs ONE
-  MORE tick of latency than the usual render=RAM+1 lag before its first
-  blended pixel (proven via the already-exact render 10929, which
-  regresses if slot 3 draws there — blending a color with itself at
-  `eva+evb=20` doesn't preserve it); (3) the real sprite's own feet stay
-  grounded (unmoved) through the whole lunge — new `TURN9_QUICKATTACK_
-  LUNGE_GROUND_CLIP_Y=74` clips both the footprint erase and the redraw
-  below that absolute screen row. All three pixel-confirmed, not guessed.
-- **Next:** rung (c3) (hitsplat, slot 7, RAM-created 10934/render 10935,
-  `drawEndeavorHitsplats`'s own 10-tick precedent; Onix's shake episode 1,
-  slot 6, `x2` square-wave `5,5,0,0,5,5,0,0` RAM 10936-10943 — this
-  session's own fresh probe, §39) fully unattempted, ran out of cap after
-  landing (c2). Landing (c3) will also retroactively test Bug 2's
-  untested half (slot 3 life-2 start, slot 4's own start), since the
-  hitsplat's own render window overlaps both. Rung (d) ROCK_SLIDE still
-  waits on (c) finishing.
-- **Notes:** `docs/battle-turn-notes.md` §39 has the full diagnosis (RAM
-  table, all three bugs, the fix, honest scope of what's independently
-  pixel-proven vs. reasoned-by-symmetry). No PAPERCUTS this session.
