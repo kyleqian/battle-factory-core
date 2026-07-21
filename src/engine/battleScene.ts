@@ -6466,8 +6466,8 @@ export const TURN5_SITRUS_MENU_REOPEN_GATE_DELAY = 1348;
  * own field base plus the unchanged settled-menu chrome text (§5's own
  * "reverts to submenu-open pixels" plateau starts from this same picture).
  */
-function drawTurn6ActionMenuIdleWindow(fb: Uint8Array, t: number): void {
-  drawTurn6FieldBase(fb, t);
+function drawTurn6ActionMenuIdleWindow(fb: Uint8Array, t: number, bounceTick: number = t): void {
+  drawTurn6FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
 }
@@ -6742,7 +6742,7 @@ function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
   }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (t < revealTick) {
-    drawTurn6ActionMenuIdleWindow(fb, t);
+    drawTurn6ActionMenuIdleWindow(fb, t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
     return;
   }
   if (sm.confirmElapsed !== null) {
@@ -6794,7 +6794,7 @@ function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
  * caller either predates turn 6's own redraw or bypasses `drawTurn6FieldBase`
  * entirely once past it, e.g. `drawTurn6RockSlideTurnEndSettledMenu`).
  */
-const TURN7_REGIME2_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY);
+export const TURN7_REGIME2_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY);
 
 /**
  * `drawTurn6FieldBase` wrapper for turn 7: converts `bounceTick` from
@@ -6814,8 +6814,8 @@ function drawTurn7FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, b
 }
 
 /** `turn6KickoffBounceTick`'s own turn-7 analogue, in regime-2 space (`drawTurn7FieldBase`'s own domain) - freezes at the regime-2 anchor tick itself (`TURN6_ROCKSLIDE_PRESS_TICK+TURN6_ROCKSLIDE_MENU_REDRAW_DELAY`, i.e. local phase 0 by construction, the same "real {0,0} plateau" turn 6's own freeze anchor was independently bisected to land on). */
-function turn7KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t;
+export function turn7KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   return TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY;
 }
 
@@ -6928,8 +6928,8 @@ function drawTurn7RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number)
 }
 
 /** Same "resettled menu re-initializes its own bounce phase fresh at redraw" shape as `drawTurn6RockSlideTurnEndSettledMenu` - turn 7's own settled action menu, Pidgeotto's healthbox drained to its post-turn-7 HP. */
-function drawTurn7RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
-  const bounceTick = turn7RockSlideResettledBounceTick(t, TURN7_ROCKSLIDE_PRESS_TICK);
+function drawTurn7RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t): void {
+  const bounceTick = turn7RockSlideResettledBounceTick(bounceRawTick, TURN7_ROCKSLIDE_PRESS_TICK);
   const bounce = menuIdleBounce(bounceTick);
   drawStaticBgShiftedY(fb, 0, 0);
   drawTurn5IconBar(fb, t);
@@ -7027,7 +7027,7 @@ function drawTurn8FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
   }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (t < revealTick) {
-    drawTurn7RockSlideTurnEndSettledMenu(fb, t);
+    drawTurn7RockSlideTurnEndSettledMenu(fb, t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
     return;
   }
   if (sm.confirmElapsed !== null) {

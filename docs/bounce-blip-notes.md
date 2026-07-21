@@ -463,3 +463,64 @@ No `src/engine/` changes (out of scope per the brief — sibling worker owns
 
 `npm test` and `npm run build` unaffected (docs/probe/data-gen files only,
 `src/engine/` untouched) — re-ran to confirm green, see below.
+
+## Fix landed (S7 engine slice R rung (a), 2026-07-21)
+
+Re-ran `tools/probe/verify-issues29-rule.py` first, per policy: both
+families PASS (0 mismatches on every scanned window) before touching any
+engine code.
+
+Applied both rules named above:
+
+- **Family A**: `drawTurn6ActionMenuIdleWindow` and
+  `drawTurn7RockSlideTurnEndSettledMenu` each gained an optional
+  `bounceTick`/`bounceRawTick` parameter (default `t`, so every existing
+  unshifted caller — the genuinely-idle `openElapsed === null` branch, and
+  `drawTurn6RockSlideWindow`/`drawTurn7RockSlideWindow`'s own post-redraw
+  settled-menu calls — is unaffected). The two dispatchers'
+  `sm.openElapsed !== null && t < revealTick` branches
+  (`drawTurn6FightSubmenuWindow`, `drawTurn8FightSubmenuWindow`) now pass
+  `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` explicitly, mirroring the shift the
+  browsing ternary one branch below already applies. `drawTurn7FightSubmenuWindow`'s
+  own analogous branch (calling `drawTurn6RockSlideTurnEndSettledMenu`) was
+  **not** touched — it isn't named in this probe's evidence (no excluded
+  Family-A-shaped tick in `turn7-menu.json`) and the regression sweep below
+  shows no diff there either, so it stays unmodified per the "no pixel
+  evidence, no change" rule.
+- **Family B**: `turn7KickoffBounceTick`'s pre-freeze branch now returns
+  `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` instead of plain `t`.
+
+Restored `captureFrames` for all 6 named ticks and reran:
+
+- **turn6-menu.json**: **44/44, 0 diff** (42 base + 7315/7316).
+- **turn7-menu.json**: **93/93, 0 diff** (91 base + 8380/8381).
+- **turn8-menu.json**: **88/88, 0 diff** (86 base + 9383/9384).
+
+Tier-1 pins added (`tests/battleScene.test.ts`, "ISSUES #29 fix" describe
+block, 6 tests): each family's fixed formula matches the committed
+`turn6-/turn7-/turn8-bounce-blip-probe.json` RAM dumps exactly at all 6
+restored ticks, each paired with a companion pin proving the pre-fix
+(unshifted) formula would have mismatched at those same ticks — the fix is
+load-bearing, not a no-op. `TURN7_REGIME2_TO_REGIME1_SHIFT` and
+`turn7KickoffBounceTick` exported so the test exercises the real production
+code instead of re-deriving it.
+
+**Open flag resolved (not by code change, by evidence):** turn 6/8's own
+kickoff wrappers (`turn6KickoffBounceTick`/`turn8KickoffBounceTick`) share
+Family B's exact code shape but were flagged unprobed. Full regression
+sweep post-fix shows their own kickoff windows (`turn6-featherdance.json`,
+`turn8-bind-a.json`/`turn8-bind-b.json`) at **0 diff, unchanged counts** —
+no evidence of the same bug surfacing in either turn's currently-captured
+range, so left as-is (still not proven bug-free for ticks outside those
+captures, just not preemptively changed without pixel evidence).
+
+Regressions: zero. Full rerun clean at committed/expected counts —
+`turn6-featherdance.json` 90/90, `turn6-feathers.json` 106/106,
+`turn6-statfall.json` 127/127, `turn6-rockslide-a.json` 255/255,
+`turn6-rockslide-b.json` 105/105, `turn7-feathers.json` 16/16,
+`turn7-rockslide-a.json` 256/256, `turn7-rockslide-b.json` 256/256,
+`turn7-rockslide-c.json` 256/256, `turn7-rockslide-d.json` 19/19,
+`turn8-bind-a.json` 256/256, `turn8-bind-b.json` 66/66, `turn8-feathers.json`
+33/33. `npm test` **871/871** (+6). `npm run build` green.
+
+ISSUES #29 deleted in this docs commit.

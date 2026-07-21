@@ -38,35 +38,6 @@ off). `turn6/7/8-feathers.json` all stop their own `captureFrames` right
 before this residual's onset (106/16/33 frames respectively, all 0 diff) -
 extending any of them past that point is gated on this crack.
 
-## #29 — The two #28-adjacent boundary families: ROOT-CAUSED (2026-07-21
-  probe, bounce-blip-notes.md new section) — one implementation step owed
-
-Both families are the SAME missing-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
-mechanism as #28, one dispatch branch earlier; supervisor re-ran the
-committed verify script (`tools/probe/verify-issues29-rule.py`) — both
-families PASS with zero regressions on every RAM-covered neighbor.
-
-- **Family A** (turn6-menu 7315-7316, turn8-menu 9383-9384): the
-  pre-reveal idle window (`drawTurn6ActionMenuIdleWindow`/
-  `drawTurn7RockSlideTurnEndSettledMenu`) renders "reopen pressed,
-  awaiting revealTick" identically to "no press yet" — the shift must
-  key off `sm.openElapsed !== null`, not `t >= revealTick`. No new
-  constant needed.
-- **Family B** (turn7-menu 8380-8381): `turn7KickoffBounceTick`'s
-  pre-freeze branch returns plain `t` — needs
-  `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`, the identical bug shape #28
-  fixed in the browsing ternary. Fresh RAM probe committed
-  (`turn7-bounce-blip-raw.json`, twice-run).
-
-Remaining (one fix step): apply both rules in the engine, restore the 6
-ticks (turn6-menu 42→44, turn7-menu 91→93, turn8-menu 86→88), rerun to
-0 diff, Tier-1-pin, delete this entry. Fix worker re-runs the verify
-script FIRST (policy). **Open flag from the probe:** turn 6/8's own
-kickoff wrappers (`turn6KickoffBounceTick`/`turn8KickoffBounceTick`)
-share Family B's exact code shape but were NOT RAM-probed — not known
-buggy, just unchecked; if the fix worker's regression sweep shows any
-kickoff-window diffs, that's where to look.
-
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
   turn2-dragonbreath.json remain uncaptured after 4 bounded attempts

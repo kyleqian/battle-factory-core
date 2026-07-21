@@ -49,12 +49,22 @@ import {
   turn5PidgeottoHealthboxSlideDx,
   turn5RockSlideKoDismissEligible,
   TURN5_PIDGEOTTO_SETTLE_TICK,
+  TURN7_REGIME2_TO_REGIME1_SHIFT,
   TURN8_REGIME3_TO_REGIME1_SHIFT,
+  turn7KickoffBounceTick,
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
-import { CLOSED_FIGHT_SUBMENU_STATE, confirmFightMove, FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT, menuIdleBounce, openFightSubmenu } from "../src/engine/battleMenu.ts";
+import {
+  CLOSED_FIGHT_SUBMENU_STATE,
+  confirmFightMove,
+  FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  menuIdleBounce,
+  openFightSubmenu,
+  turn7RockSlideResettledBounceTick,
+  TURN7_ROCKSLIDE_PRESS_TICK,
+} from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
@@ -65,6 +75,7 @@ import ramDump from "../src/data/gen/battle1-turn1-ram-dump.json" with { type: "
 import speciesNames from "../src/data/gen/species-names.json" with { type: "json" };
 import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-probe.json" with { type: "json" };
 import turn6BounceBlipProbe from "../src/data/gen/turn6-bounce-blip-probe.json" with { type: "json" };
+import turn7BounceBlipProbe from "../src/data/gen/turn7-bounce-blip-probe.json" with { type: "json" };
 import turn8BounceBlipProbe from "../src/data/gen/turn8-bounce-blip-probe.json" with { type: "json" };
 import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder } from "../src/engine/featherDance.ts";
 
@@ -1191,6 +1202,82 @@ describe("ISSUES #28 fix (docs/bounce-blip-notes.md): turn-6/8 browsing-branch b
     for (const t of [9392, 9402, 9411]) {
       const buggyModel = menuIdleBounce(turn5SitrusResettledBounceTick(t + TURN8_REGIME3_TO_REGIME1_SHIFT));
       const real = { onixY2: t8Rows.get(t - 1)!.onixY2, healthboxY2: t8Rows.get(t - 1)!.healthboxMainY2 };
+      expect(buggyModel).not.toEqual(real);
+    }
+  });
+});
+
+// ISSUES #29 fix (docs/bounce-blip-notes.md's S7 worktree probe section):
+// the SAME missing-FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT mechanism as #28, one
+// dispatch branch earlier. Family A - the pre-reveal idle window
+// (`sm.openElapsed !== null && t < revealTick`) must shift its bounce tick
+// exactly like the post-reveal browsing branch does; Family B -
+// `turn7KickoffBounceTick`'s own pre-freeze branch was returning plain `t`.
+// Pinned directly against the committed RAM dumps (`turn6-/turn7-/turn8-
+// bounce-blip-probe.json`, twice-run byte-identical) at the 6 restored,
+// formerly-excluded ticks, paired with a pre-fix-mismatch proof.
+describe("ISSUES #29 fix (docs/bounce-blip-notes.md): pre-reveal idle-window + turn7KickoffBounceTick pre-freeze shift", () => {
+  const t6Rows = new Map(turn6BounceBlipProbe.ticks.map((r) => [r.tick, r]));
+  const t7Rows = new Map(turn7BounceBlipProbe.ticks.map((r) => [r.tick, r]));
+  const t8Rows = new Map(turn8BounceBlipProbe.ticks.map((r) => [r.tick, r]));
+
+  it("Family A, turn 6 pre-reveal idle window (menuIdleBounce(turn5SitrusResettledBounceTick(t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT))) matches real RAM at the restored ticks 7315/7316", () => {
+    for (const t of [7315, 7316]) {
+      const model = menuIdleBounce(turn5SitrusResettledBounceTick(t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT));
+      expect({ t, onixY2: model.onixY2, healthboxY2: model.healthboxY2 }).toEqual({
+        t,
+        onixY2: t6Rows.get(t - 1)!.onixY2,
+        healthboxY2: t6Rows.get(t - 1)!.healthboxMainY2,
+      });
+    }
+  });
+
+  it("Family A, turn 6 pre-reveal idle window WITHOUT the shift (the pre-fix bug) mismatches at the same 2 ticks", () => {
+    for (const t of [7315, 7316]) {
+      const buggyModel = menuIdleBounce(turn5SitrusResettledBounceTick(t));
+      const real = { onixY2: t6Rows.get(t - 1)!.onixY2, healthboxY2: t6Rows.get(t - 1)!.healthboxMainY2 };
+      expect(buggyModel).not.toEqual(real);
+    }
+  });
+
+  it("Family A, turn 8 pre-reveal idle window (turn7RockSlideResettledBounceTick fed a shifted raw tick) matches real RAM at the restored ticks 9383/9384", () => {
+    for (const t of [9383, 9384]) {
+      const bounceRawTick = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+      const model = menuIdleBounce(turn7RockSlideResettledBounceTick(bounceRawTick, TURN7_ROCKSLIDE_PRESS_TICK));
+      expect({ t, onixY2: model.onixY2, healthboxY2: model.healthboxY2 }).toEqual({
+        t,
+        onixY2: t8Rows.get(t - 1)!.onixY2,
+        healthboxY2: t8Rows.get(t - 1)!.healthboxMainY2,
+      });
+    }
+  });
+
+  it("Family A, turn 8 pre-reveal idle window WITHOUT the shift (the pre-fix bug) mismatches at the same 2 ticks", () => {
+    for (const t of [9383, 9384]) {
+      const buggyModel = menuIdleBounce(turn7RockSlideResettledBounceTick(t, TURN7_ROCKSLIDE_PRESS_TICK));
+      const real = { onixY2: t8Rows.get(t - 1)!.onixY2, healthboxY2: t8Rows.get(t - 1)!.healthboxMainY2 };
+      expect(buggyModel).not.toEqual(real);
+    }
+  });
+
+  it("Family B, turn 7 kickoff bounce wrapper's pre-freeze branch (turn7KickoffBounceTick, now shifted) matches real RAM at the restored ticks 8380/8381 (pressTick 8379)", () => {
+    const pressTick = 8379;
+    for (const t of [8380, 8381]) {
+      const bounceTick = turn7KickoffBounceTick(t, pressTick);
+      const model = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick + TURN7_REGIME2_TO_REGIME1_SHIFT));
+      expect({ t, onixY2: model.onixY2, healthboxY2: model.healthboxY2 }).toEqual({
+        t,
+        onixY2: t7Rows.get(t - 1)!.onixY2,
+        healthboxY2: t7Rows.get(t - 1)!.healthboxMainY2,
+      });
+    }
+  });
+
+  it("Family B, turn 7 kickoff bounce wrapper's pre-freeze branch WITHOUT the shift (the pre-fix bug, plain `t`) mismatches at the same 2 ticks", () => {
+    for (const t of [8380, 8381]) {
+      const buggyBounceTick = t; // pre-fix: `return t;`
+      const buggyModel = menuIdleBounce(turn5SitrusResettledBounceTick(buggyBounceTick + TURN7_REGIME2_TO_REGIME1_SHIFT));
+      const real = { onixY2: t7Rows.get(t - 1)!.onixY2, healthboxY2: t7Rows.get(t - 1)!.healthboxMainY2 };
       expect(buggyModel).not.toEqual(real);
     }
   });

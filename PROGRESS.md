@@ -4,6 +4,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 220 — Bounded worker (S7 engine slice R rung (a)): **ISSUES #29 FIXED** — both families landed, all 3 named menu traces restored to 0 diff at 44/93/88, 6 Tier-1 pins added, entry deleted; turn 9 slice (rungs b+) in progress this same session
+
+- **State:** `npm test` 871/871 (+6), `npm run build` green, tree
+  committed. `turn6-menu.json` 44/44, `turn7-menu.json` 93/93,
+  `turn8-menu.json` 88/88, all 0 diff — the exact restoration the
+  probe called for. Zero regressions across the full menu/kickoff/
+  rockslide/feathers sweep (`turn6-featherdance.json` 90/90,
+  `turn6-feathers.json` 106/106, `turn6-rockslide-a/b.json` 255/255 +
+  105/105, `turn7-feathers.json` 16/16, `turn7-rockslide-a/b/c/d.json`
+  256/256×3 + 19/19, `turn8-bind-a/b.json` 256/256 + 66/66,
+  `turn8-feathers.json` 33/33).
+- **Did:** verify script re-run FIRST (both families PASS) per policy.
+  Family A: `drawTurn6ActionMenuIdleWindow`/
+  `drawTurn7RockSlideTurnEndSettledMenu` gained an optional
+  `bounceTick` param (default `t`, existing unshifted callers
+  untouched); `drawTurn6FightSubmenuWindow`/`drawTurn8FightSubmenuWindow`'s
+  `openElapsed !== null && t < revealTick` branches now pass
+  `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`. Turn 7's own analogous branch
+  (`drawTurn7FightSubmenuWindow`, calling `drawTurn6RockSlideTurnEndSettledMenu`)
+  deliberately left untouched — not named in the probe's evidence, and
+  the regression sweep shows no diff there. Family B:
+  `turn7KickoffBounceTick`'s pre-freeze branch now returns
+  `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`. Open flag on turn 6/8's own
+  kickoff wrappers resolved by evidence, not code change: their
+  kickoff windows are 0 diff post-fix, so left as-is.
+- **Next:** turn 9 rungs (b)-(d) — menu reopen/LEFT-nav exercising the
+  #29 fix fresh, QUICK_ATTACK's new animation (RAM-probe first), Onix's
+  ROCK_SLIDE (82→61), turn-end boundary. `docs/turn9-notes.md` is the
+  dossier.
+- **Notes:** docs updated in the same commit — `docs/bounce-blip-
+  notes.md` "Fix landed" section, `ISSUES.md` #29 deleted.
+
+---
 ## 219 — Worktree probe (supervisor-folded): **ISSUES #29 ROOT-CAUSED, both families** — the same missing-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` mechanism as #28, one dispatch branch earlier (Family A: pre-reveal idle window must key the shift off `openElapsed !== null`, not `revealTick`; Family B: `turn7KickoffBounceTick`'s pre-freeze branch returns unshifted `t`); supervisor re-ran the committed verify script — both families PASS, zero neighbor regressions; probe scoreboard this session: **4-for-4** (#27, #26, #28, #29); merged, suite 865/865
 
 - **State:** merged into master post-feathers, `npm test` 865/865 +
