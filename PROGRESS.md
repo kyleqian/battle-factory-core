@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 198 — Bounded worker (S7 slice N rung (a) only): turn 6's FIGHT-submenu reopen + move confirm LANDED — `turn6-menu.json` 33/33, 0 diff; rungs (b)/(c)/(d) NOT attempted (60-min cap, not a resistance finding) — precisely scoped for the next session
+
+- **State:** `npm test` **818/818** (+5), `npm run build` green, tree
+  clean. New committed trace `turn6-menu.json` (33 captures, 7307-7350,
+  11 named bounce-extremum ticks excluded) 0 diff. Regression sweep:
+  `turn5-sitrus-c.json` 150/150, `turn5-sitrus-d.json` 133/133, `turn3-
+  rockslide.json` 256/256, `turn5-rockslide.json` 256/256, `turn5-menu.json`
+  42/42, `turn4-menu.json` 44/44, `turn5-endeavor.json` 254/254 — zero
+  regressions.
+- **Did:** turn 6's reopen (press 7313) + confirm (7345, cursor 0 -
+  ROCK_SLIDE, no nav needed) — the first FIGHT-submenu reopen against a
+  NEW opponent (Pidgeotto, not Grovyle), so `drawFightSubmenuWindow` now
+  short-circuits on a new `turn5Resolved` flag into a dedicated
+  `drawTurn6FightSubmenuWindow`/`drawTurn6FieldBase` (Onix/Pidgeotto's
+  own already-proven-0-diff primitives, factored out of
+  `drawTurn5RockSlideWindow`'s own tail — zero formula changes) instead of
+  threading a 5th tier through the Grovyle-shaped `menuIdleBase` helpers.
+  Two real bugs found via compare-driven bisection: (1) the window's own
+  right-edge border strip (x=232-239) wasn't filled under the reopened
+  submenu — turns 1-5 never exercised this since `menuIdleBase`'s full-
+  screen static harvest always covered it; fixed by drawing the same
+  y≥112 chrome crop before the submenu's own opaque box. (2) a chained-
+  trace stitching bug (not an engine bug) — the scratch probe silently
+  inserted 8 redundant idle frames, shifting press ticks 8 late in the
+  trace's own frame-index space (pixels still matched since oracle+app
+  replay the identical script, but citations would've been wrong); fixed
+  by trimming the overshoot so the committed trace's ticks match the
+  dossier's own cited 7313/7345 exactly.
+- **Next:** rung (b) — the FEATHER_DANCE kickoff text + feather/starburst
+  animation (~7358-7658, docs/turn6-notes.md §5/§6), genuinely new gfx-
+  extraction work, this session's own designated centerpiece, untouched.
+  Then (c) the ATK-fall message, (d) Onix's ROCK_SLIDE (parameterizable
+  from turns 1/3/4/5's own unchanged mechanism) to the settled turn-7 menu.
+- **Notes:** 3 named single-tick bounce-extremum residuals excluded from
+  `turn6-menu.json` (7315-7316, 7324-7325/7333-7334/7342-7343, 7348-7350) —
+  same well-precedented class already resolved elsewhere in this dossier
+  (ticks 3337/3465/3721/3879/3888/4934/5927); the last one (post-confirm,
+  region-A Onix-sprite bounce, NOT the healthbox) is grid-search-ruled-out
+  as the healthbox freeze and needs a direct `gSprites[onixSlot].y2` RAM
+  probe next. PAPERCUT: none this session beyond the chained-trace
+  stitching gotcha above (self-inflicted, ~15 min lost, now documented in
+  battle-turn-notes.md §27 so it isn't repeated).
+
+---
 ## 197 — Worktree scout (supervisor-folded): turn 11 ground truth BANKED — the ATK-floor falsifiable test FIRES POSITIVE ("ONIX's ATTACK won't go lower!", sText_StatsWontDecrease, PNG-read; PP charged + accuracy roll consumed but stat write blocked), and the blocked effect SKIPS the feather animation (33-tick static kickoff hold vs turns 6-8's ~290-tick animated holds — rationale corrected in the fold: animation keys on effect-success, not move class); third consecutive line reconvergence; `battle1-turn11-dense.json` (14340 frames, 256 captures) + `docs/turn11-notes.md`; merged `961344a`, suite 813/813 on the merged tree
 
 - **State:** merged into master, `npm test` 813/813 + build green
@@ -71,37 +115,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   their own four dossiers.
 - **Notes:** no papercuts this session. Docs: `faint-switch-notes.md` new
   §15 (trimmed §14's "not reached" pointer to it).
-
----
-## 195 — Worktree scout (supervisor-folded): turn 10 ground truth BANKED — SECOND consecutive full reconvergence (AERIAL_ACE + ROCK_SLIDE hit, RAM bit-identical to BOTH published lines' turn-10 rows incl. gRngValue), all three standing falsifiable tests still negative; `battle1-turn10-dense.json` (13306 frames, 208 captures) + `docs/turn10-notes.md`; merged `9834116`, suite 805/805 on the merged tree
-
-- **State:** merged into master, `npm test` 805/805 + build green
-  post-merge. Supervisor re-verified: prefix chain (turn9-dense ⊂
-  turn10-dense ⊂ winline-b-swap, script-exact), 3/4 cited shas
-  reproduced + the 4th was a tabulation slip (cited sha belongs to tick
-  12320, not 12345 — label PNG-verified correct, two fresh oracle runs
-  byte-identical; row corrected in the fold). Cursor-persistence got its
-  strongest data point: zero navigation presses this turn, cursor0
-  RAM-flat on ROCK_SLIDE across the whole window.
-- **Did:** turn 10 = AERIAL_ACE (new to arc: EFFECT_ALWAYS_HIT skips the
-  accuracy roll entirely, RAM-confirmed; slash-on-target animation shape,
-  no attacker mover) vs ROCK_SLIDE hit; Onix 24→14, Pidgeotto 61→38. The
-  unattributed +14-tick RNG step reproduced a 3rd time and one candidate
-  explanation was RULED OUT (identical-text/typing-timing — turn 2's
-  differently-typed pair hits the same offset): looks like a fixed
-  engine-level cost. Turn-9's "4-frame shared prefix" reproduction
-  attempt honestly flagged as method-incomplete (skipped the baseline
-  bisection), an open gap not a contradiction.
-- **Cross-lane note:** M-4's worker cd'd into this scout's LIVE worktree
-  early on (cwd persistence) leaving uncommitted scratch debris; scout
-  reported it, merge carries none of it, PAPERCUTS.md entry added
-  (supervisor). M-4's own deliverable verified separately in the main
-  tree (`turn5-sitrus-b.json` 82/82, suite 805/805).
-- **Next:** M-5 (Sitrus rungs d+e per faint-switch-notes §14: tint/
-  sparkle/ring/message/HP-climb, then settled menu ≥7307 — completes the
-  faint/forced-switch sequence); then turn-6..10 engine slices against
-  the five banked dossiers.
-- **Notes:** no scout papercuts; turn-11+ boundaries noted in the
-  dossier, not densely probed.
 
 ---

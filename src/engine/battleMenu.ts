@@ -1928,9 +1928,15 @@ export function currentPPForActiveMon(
   turn2Resolved: boolean = false,
   turn3Resolved: boolean = false,
   turn4Resolved: boolean = false,
+  turn5Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
-  const slot0Uses = (turn1Resolved ? 1 : 0) + (turn3Resolved ? 1 : 0) + (turn4Resolved ? 1 : 0);
+  // S7 slice N (docs/turn6-notes.md §4): turn 5's own ROCK_SLIDE (Onix's
+  // fatal hit on Grovyle) is a 4th slot-0 use, read directly from the
+  // dossier's own PP ledger (6/10 before turn 6's own confirm) - the same
+  // independent-decrement shape turn3Resolved/turn4Resolved already
+  // established.
+  const slot0Uses = (turn1Resolved ? 1 : 0) + (turn3Resolved ? 1 : 0) + (turn4Resolved ? 1 : 0) + (turn5Resolved ? 1 : 0);
   return [a - slot0Uses, b, turn2Resolved ? c - 1 : c, d];
 }
 

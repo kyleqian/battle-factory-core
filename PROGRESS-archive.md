@@ -1,3 +1,34 @@
+## 195 — Worktree scout (supervisor-folded): turn 10 ground truth BANKED — SECOND consecutive full reconvergence (AERIAL_ACE + ROCK_SLIDE hit, RAM bit-identical to BOTH published lines' turn-10 rows incl. gRngValue), all three standing falsifiable tests still negative; `battle1-turn10-dense.json` (13306 frames, 208 captures) + `docs/turn10-notes.md`; merged `9834116`, suite 805/805 on the merged tree
+
+- **State:** merged into master, `npm test` 805/805 + build green
+  post-merge. Supervisor re-verified: prefix chain (turn9-dense ⊂
+  turn10-dense ⊂ winline-b-swap, script-exact), 3/4 cited shas
+  reproduced + the 4th was a tabulation slip (cited sha belongs to tick
+  12320, not 12345 — label PNG-verified correct, two fresh oracle runs
+  byte-identical; row corrected in the fold). Cursor-persistence got its
+  strongest data point: zero navigation presses this turn, cursor0
+  RAM-flat on ROCK_SLIDE across the whole window.
+- **Did:** turn 10 = AERIAL_ACE (new to arc: EFFECT_ALWAYS_HIT skips the
+  accuracy roll entirely, RAM-confirmed; slash-on-target animation shape,
+  no attacker mover) vs ROCK_SLIDE hit; Onix 24→14, Pidgeotto 61→38. The
+  unattributed +14-tick RNG step reproduced a 3rd time and one candidate
+  explanation was RULED OUT (identical-text/typing-timing — turn 2's
+  differently-typed pair hits the same offset): looks like a fixed
+  engine-level cost. Turn-9's "4-frame shared prefix" reproduction
+  attempt honestly flagged as method-incomplete (skipped the baseline
+  bisection), an open gap not a contradiction.
+- **Cross-lane note:** M-4's worker cd'd into this scout's LIVE worktree
+  early on (cwd persistence) leaving uncommitted scratch debris; scout
+  reported it, merge carries none of it, PAPERCUTS.md entry added
+  (supervisor). M-4's own deliverable verified separately in the main
+  tree (`turn5-sitrus-b.json` 82/82, suite 805/805).
+- **Next:** M-5 (Sitrus rungs d+e per faint-switch-notes §14: tint/
+  sparkle/ring/message/HP-climb, then settled menu ≥7307 — completes the
+  faint/forced-switch sequence); then turn-6..10 engine slices against
+  the five banked dossiers.
+- **Notes:** no scout papercuts; turn-11+ boundaries noted in the
+  dossier, not densely probed.
+
 ## 194 — Bounded worker (S7 slice M-4): rung (c) LANDED — `GrantingStarsEffect`'s two star sprites RAM-probed fresh (spawn ticks 10 apart, corrects the source's own "8 ticks" framing) and byte-exact; `turn5-sitrus-b.json` 82/82, 0 diff, 6960-7041; rungs (d)/(e) NOT reached (out of session time) — precisely scoped for the next session
 
 - **State:** `npm test` **805/805** (+5), `npm run build` green, tree

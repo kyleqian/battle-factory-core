@@ -4658,3 +4658,132 @@ The coefficient ramp-down + wobble-table phases (render ~6755-6828,
 `docs/faint-switch-notes.md` §10's own itemized remainder), then healthbox
 slide-in through Sitrus/settled-menu (§8e/§2/§3e, fully spec'd, untouched
 this session).
+
+## 27. Engine slice N rung (a): turn 6's FIGHT-submenu reopen + move confirm, landed green - `turn6-menu.json` **33/33, 0 diff**, ending BEFORE the FEATHER_DANCE kickoff text (S7 bounded worker session, hard 60-minute cap)
+
+Implements rung (a) only of `docs/turn6-notes.md`'s own ladder: the FIGHT
+submenu reopen (real press tick 7313) + move confirm (7345, cursor already
+at 0 - ROCK_SLIDE, no nav needed, same "no nav needed since turn 3" finding
+every reopen since has shown) through the post-confirm hold, stopping at
+tick 7350, safely before the FEATHER_DANCE kickoff text starts (~7357-7358,
+turn6-notes.md §5). Rungs (b)/(c)/(d) - the FEATHER_DANCE animation (the
+session's own designated centerpiece), the ATK-fall message, and Onix's
+ROCK_SLIDE - were **not attempted this session**, purely a time-budget
+call (a hard 60-minute worker cap, not a resistance finding): rung (a)
+alone, done to this dossier's own verification standard, consumed the full
+session once compare-driven bisection (see the residuals below) is
+included. Per the brief's own framing (and every prior turn-boundary
+slice's precedent, §19-24): **parameterize, don't rebuild** - Onix's own
+sprite/healthbox machinery (`drawTurn5RockSlideAttack`/`drawTurn5IconBar`/
+`drawTurn5SwitchinSprite`/`turn5SitrusOnixHp`/`turn5SitrusResettledBounceTick`)
+is reused with ZERO formula changes, factored out into a new shared
+`drawTurn6FieldBase` (previously inlined only in `drawTurn5RockSlideWindow`'s
+own tail) rather than re-derived.
+
+### Why turn 6 needed a NEW base function, not just another `turnNResolved` tier
+
+Every earlier turn-boundary reopen (slices F/I/J, §19/22/23) threaded one
+more `turnNResolved` boolean through the SAME Grovyle-shaped helper chain
+(`drawMenuIdleBaseWithOpponentHp`/`drawActionMenuIdleContent`/
+`drawFightSubmenuChrome`), because the opponent was Grovyle in every case.
+Turn 6 is the first FIGHT-submenu reopen where the opponent itself changed
+(Grovyle fainted, Pidgeotto switched in) - `menuIdleBase`'s own static
+harvest bakes in GROVYLE's silhouette in its top 2/3, wrong for this turn no
+matter how many boolean tiers are threaded through it. Instead, `turn5Resolved`
+short-circuits `drawFightSubmenuWindow` at its very top into a dedicated
+`drawTurn6FightSubmenuWindow`, built from the SAME live primitives
+`drawTurn5RockSlideWindow`'s own settled tail already uses (factored into
+`drawTurn6FieldBase`, called from both places, zero behavior change -
+re-verified via the full regression sweep below).
+
+### Two real bugs found via compare-driven bisection, both fixed (not curve-fit)
+
+1. **The window's own right-edge border strip (x=232-239, the ~8px margin
+   `fightSubmenuWindow`'s own box (231px wide) doesn't cover) was NOT filled
+   under the reopened submenu** - `drawTileBg` alone leaves it in whatever
+   state the field-base draw left it in; turns 1-5 never surfaced this
+   because `menuIdleBase`'s own FULL-SCREEN static harvest (used unconditionally
+   under `drawFightSubmenuChrome` for every earlier turn) already bakes that
+   border in, so it was never separately validated. Bisected via a scratch
+   probe trace + `npm run compare`'s own diff crop (a red capsule bulge where
+   the oracle shows a clean gray/purple corner, isolated to exactly that
+   8px strip, full box height). **Fix**: call `drawTurn5SitrusSettledMenuChrome`
+   (the same y>=112 `menuIdleBase` crop the idle path already uses) BEFORE
+   `drawFightSubmenuChrome`, so the border fills first and the submenu's own
+   opaque box overwrites just its interior on top. Closed the entire 320px
+   steady-state residual across every open/confirmed tick.
+2. **A chained-trace stitching bug, not an engine bug**: the first constructed
+   probe trace (extending `turn5-sitrus-d.json`'s own script, which itself
+   idles 8 frames PAST its last captured tick 7312, with `battle1-turn6-dense.json`'s
+   own segments[68:], which ALREADY assumes a fresh start at 7312) silently
+   inserted 8 redundant idle frames, shifting the reopen/confirm press ticks
+   to 7321/7353 in the constructed trace's own frame-index space instead of
+   the dossier's cited 7313/7345. Pixels still matched (oracle and app both
+   replay the same script, so both shift consistently) but the citations
+   would have been wrong. **Fix**: trim `turn5-sitrus-d.json`'s own trailing
+   idle segment by exactly the 8-frame overshoot before appending the
+   groundtruth's press segments - `turn6-menu.json`'s own committed script
+   now lands the reopen/confirm at the dossier's own cited absolute ticks
+   (7313/7345) exactly.
+
+### Named residuals, excluded from `captureFrames` per this dossier's own "characterize precisely, never commit red" rule
+
+Both classes match this dossier's own repeatedly-documented "hardware quirk
+at a bounce extremum" signature (isolated 1-3-tick spikes, ~2-4% of frame,
+Onix-silhouette-region-only, both neighbors exact) already catalogued and
+several times later RESOLVED at ticks 3337/3465/3721/3879/3888/4934/5927 -
+not chased further this session (budget), flagged precisely for a future
+resolution pass the same way those were:
+
+- **7315-7316** (the open-DMA-wait hold, 1579px/4.11%): isolated blip inside
+  an otherwise-exact 7307-7323 span (7314 and 7317 both exact).
+- **7324-7325, 7333-7334, 7342-7343** (769px/2.00% each, periodic at a fixed
+  9-tick spacing): inside the settled-submenu dwell, before the confirm -
+  same periodic-bounce-extremum shape as ticks 3337/3465/3721.
+- **7348-7350** (769px/2.00%, steady not transient): the post-confirm hold,
+  past `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`. Grid-searched the frozen bounce
+  tick directly (`turn6KickoffBounceTick`, same "freeze past the A-press
+  hand-off" shape `turnKickoffBounceTick`/`turn5KickoffBounceTick` already
+  establish) across `d` in `[-8..8]` relative to the confirm press: the
+  769px residual is FLAT across the entire range, proving it is NOT the
+  healthbox bounce (`region B`, the only thing `turn6KickoffBounceTick`
+  controls) - it must be the on-field Onix SPRITE's own bounce (`region A`,
+  inside `drawTurn5RockSlideAttack`, not parameterized by this slice) still
+  using a live, un-frozen tick past the hand-off. A future session should
+  RAM-probe `gSprites[onixSlot].y2`'s own real bounce-task state at ticks
+  7348-7350 directly (the same "pointer-chase the real bouncer sprite" fix
+  that already resolved the 3879/3888/3958-3993 family) before attempting
+  another frozen-tick guess.
+
+### Committed trace and Tier-1 pins
+
+`tools/compare/traces/turn6-menu.json` - extends `turn5-sitrus-d.json`'s own
+script (trimmed 8 frames, see above) with `battle1-turn6-dense.json`'s own
+reopen (`A`, 7312-7314) + confirm (`A`, 7344-7346) presses, `captureFrames`
+7307-7350 minus the 11 named residual ticks above - **33/33, 0 diff**.
+`tests/fightSubmenu.test.ts` (+5): the reopen/confirm replay pin (openElapsed
+7313, confirmElapsed 7345, cursor 0, `turn5Resolved` true), the reopen-gate-
+still-closed pin, the gate-opens-exactly-at-the-delay pin, the PP-6/10 pin
+(`currentPPForActiveMon`'s new `turn5Resolved` param, a 4th independent
+slot-0 decrement), and a determinism/replay smoke check.
+
+### What's left
+
+Rungs (b)/(c)/(d) of `docs/turn6-notes.md`'s own ladder, entirely untouched:
+the FEATHER_DANCE kickoff text + its feather/starburst attack animation
+(~7358-7658, the session's own designated centerpiece - needs gfx
+extraction from `Move_FEATHER_DANCE`'s own `ANIM_TAG` plus a fresh
+sprite-timeline RAM probe, genuinely new work, not parameterizable from
+anything already built), the ATK-fall message window (7659-7684, holds
+through 7763), and Onix's own ROCK_SLIDE (7765-8122, parameterizable from
+turn 1/3/4/5's own unchanged mechanism per this file's own precedent, but
+untouched this session). The three named bounce-extremum residuals above
+are a clean, precisely-scoped follow-up independent of any of that.
+
+### Verification
+
+`npm test` **818/818** (+5). `npm run build` green. `turn6-menu.json`
+**33/33, 0 diff**. Zero regressions: `turn5-sitrus-c.json` **150/150**,
+`turn5-sitrus-d.json` **133/133**, `turn3-rockslide.json` **256/256**,
+`turn5-rockslide.json` **256/256**, `turn5-menu.json` **42/42**, `turn4-
+menu.json` **44/44**, `turn5-endeavor.json` **254/254**.

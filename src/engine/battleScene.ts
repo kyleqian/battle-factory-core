@@ -954,6 +954,19 @@ export interface BattleSceneState {
    * `turn5RockSlideKoDismissEligible`) sets this field.
    */
   turn5KoDismissElapsed: number | null;
+  /**
+   * S7 slice N (docs/turn6-notes.md, docs/battle-turn-notes.md §19-24's own
+   * "parameterize, don't rebuild" pattern): `true` once turn 5's whole
+   * faint/switch-in/Sitrus-heal sequence has settled the turn-6 action menu
+   * (vs. the switched-in PIDGEOTTO, `TURN5_SITRUS_MENU_REOPEN_GATE_DELAY`
+   * past turn 5's own real confirm) AND a fresh A-press has reopened FIGHT
+   * for turn 6 - same "created directly" idiom as `turn1Resolved`..
+   * `turn4Resolved`. Unlike every earlier turn boundary, the opponent itself
+   * changed (Grovyle fainted, Pidgeotto switched in) - distinguishes turn
+   * 6's own Onix-vs-Pidgeotto FIGHT submenu (PP 6/10, Pidgeotto's own
+   * healthbox) from turn 5's (Onix-vs-Grovyle, now moot - Grovyle fainted).
+   */
+  turn5Resolved: boolean;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -965,6 +978,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn3Resolved: false,
   turn4Resolved: false,
   turn5KoDismissElapsed: null,
+  turn5Resolved: false,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -977,6 +991,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn3Resolved: state.turn3Resolved,
     turn4Resolved: state.turn4Resolved,
     turn5KoDismissElapsed: state.turn5KoDismissElapsed,
+    turn5Resolved: state.turn5Resolved,
   };
 }
 
@@ -3710,7 +3725,16 @@ function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: bool
  * `battleMenu.ts`'s own doc comment on those two constants for why they
  * differ from a plain, unshifted `t`.
  */
-function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState, turn1Resolved: boolean, turn2Resolved: boolean, turn3Resolved: boolean = false, turn4Resolved: boolean = false): void {
+function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState, turn1Resolved: boolean, turn2Resolved: boolean, turn3Resolved: boolean = false, turn4Resolved: boolean = false, turn5Resolved: boolean = false): void {
+  if (turn5Resolved) {
+    // S7 slice N: turn 6 is a genuinely different base scene (Pidgeotto, not
+    // Grovyle, is on-field) - dispatched to its own dedicated function rather
+    // than threading a 5th tier through every Grovyle-shaped helper above
+    // (`drawMenuIdleBaseWithOpponentHp` et al. bake in `menuIdleBase`'s own
+    // Grovyle harvest, which is simply wrong for this opponent).
+    drawTurn6FightSubmenuWindow(fb, t, sm);
+    return;
+  }
   if (sm.openElapsed === null) {
     drawActionMenuIdleWindow(fb, t, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved);
     return;
@@ -3883,11 +3907,11 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
  * fightSubmenuText.test.ts`, and §13c for the state-plumbing tests proving
  * this same path end-to-end.
  */
-function drawFightSubmenuChrome(fb: Uint8Array, displayCursor: FightSubmenuSlot, turn1Resolved: boolean, turn2Resolved: boolean, moveset: ActiveMonMoveset, turn3Resolved: boolean = false, turn4Resolved: boolean = false): void {
+function drawFightSubmenuChrome(fb: Uint8Array, displayCursor: FightSubmenuSlot, turn1Resolved: boolean, turn2Resolved: boolean, moveset: ActiveMonMoveset, turn3Resolved: boolean = false, turn4Resolved: boolean = false, turn5Resolved: boolean = false): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -6224,6 +6248,82 @@ function drawTurn5SitrusSettledMenuChrome(fb: Uint8Array): void {
 }
 
 /**
+ * S7 slice N (docs/turn6-notes.md §5): the earliest tick turn 6's own FIGHT
+ * submenu reopen A-press can register, past `fightSubmenu.confirmElapsed`
+ * (turn 5's own real confirm, 5959) - same "past this resolution's own
+ * redraw" shape `TURN3_ROCKSLIDE_REOPEN_GATE_DELAY`/`TURN4_ROCKSLIDE_MENU_
+ * REDRAW_DELAY` already established, sized so the gate opens once the
+ * settled turn-6 menu is fully drawn (tick 7307, `docs/faint-switch-notes.md`
+ * §15's own cited boundary - `7307 - 5959 = 1348`), safely before the
+ * dossier's own real reopen press (7313).
+ */
+export const TURN5_SITRUS_MENU_REOPEN_GATE_DELAY = 1348;
+
+/**
+ * S7 slice N: turn 6's own settled action-menu background (before the FIGHT
+ * submenu (re)opens, and during its brief open-DMA-wait hold) - Pidgeotto's
+ * own field base plus the unchanged settled-menu chrome text (§5's own
+ * "reverts to submenu-open pixels" plateau starts from this same picture).
+ */
+function drawTurn6ActionMenuIdleWindow(fb: Uint8Array, t: number): void {
+  drawTurn6FieldBase(fb, t);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+/**
+ * S7 slice N rung (a) (docs/turn6-notes.md §5): turn 6's own FIGHT submenu -
+ * cursor rests at slot 0 (ROCK_SLIDE, unchanged since turn 3 - no nav
+ * needed, same "no nav needed" finding every reopen since has shown) with PP
+ * read 6/10 (`turn5Resolved` passed as the moveset's 4th independent slot-0
+ * decrement, `currentPPForActiveMon`'s own doc). Deliberately stops short of
+ * dispatching into the FEATHER_DANCE kickoff text (rung (b), out of this
+ * session's scope) - the confirm press and its own short post-confirm hold
+ * render identical submenu content (§5: "reverts to submenu-open pixels"),
+ * so no separate confirm branch is needed yet.
+ */
+/**
+ * S7 slice N rung (a) (docs/turn6-notes.md §5): the confirm press's own
+ * bounce-freeze - same "`DoBounceEffect` stops being polled the instant the
+ * A-press hands off" rule `turnKickoffBounceTick`/`turn5KickoffBounceTick`
+ * et al. already establish, grid-searched directly against
+ * `tools/compare/scratch/turn6-rung-a-probe.json`'s own oracle frames
+ * 7351-7360 (the post-confirm hold): `d=0` (the live formula evaluated AT
+ * the press moment itself) is exact 0-diff, the same coincidence turns 3/5's
+ * own cases already had.
+ */
+function turn6KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t;
+  return pressTick;
+}
+
+function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+  if (sm.openElapsed === null) {
+    drawTurn6ActionMenuIdleWindow(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    drawTurn6ActionMenuIdleWindow(fb, t);
+    return;
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn6KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t;
+  drawTurn6FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  // `fightSubmenuWindow`'s own box (231px) is narrower than the screen - the
+  // remaining x=232-239 strip is the outer window frame's own right-edge
+  // decoration, unaffected by open/closed state (the same reason turns 1-5's
+  // code gets away with reusing `menuIdleBase` unconditionally under
+  // `drawFightSubmenuChrome`: that static harvest's own border pixels are
+  // valid for BOTH states). `drawTileBg` alone doesn't fill it (proven only
+  // by `drawTurn5SitrusSettledMenuChrome`'s own unconditional overwrite in
+  // the idle path) - draw the same chrome crop first so the submenu box then
+  // opaquely overwrites just its own interior on top.
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true);
+}
+
+/**
  * S7 slice K's own ROCK_SLIDE/faint window dispatcher - the held kickoff
  * text (still Onix's "ONIX used\nROCK SLIDE!", drawn by `drawTurn5EndeavorText`'s
  * own handoff caller, `rockSlideTextVisibleChars` unchanged) through the
@@ -6236,8 +6336,17 @@ function drawTurn5SitrusSettledMenuChrome(fb: Uint8Array): void {
  * (6687) with no further button press needed (matching every other auto-
  * advancing text transition in this dossier).
  */
-function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
-  const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
+/**
+ * S7 slice N (docs/turn6-notes.md): the on-field background shared by turn
+ * 5's own settled tail (`drawTurn5RockSlideWindow`, below) AND turn 6's own
+ * (re)opened FIGHT submenu (`drawTurn6FightSubmenuWindow`) - Onix's own
+ * sprite/healthbox at its post-Sitrus HP (`turn5SitrusOnixHp`, flat at 31
+ * once settled) plus the switched-in Pidgeotto's own sprite/healthbox, both
+ * already oracle-proven 0-diff through tick 7312 (`turn5-sitrus-d.json`).
+ * Factored out (no behavior change) so turn 6's own render path can reuse it
+ * without re-deriving the switch-in/heal machinery.
+ */
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t): void {
   drawTurn5RockSlideAttack(fb, t);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
@@ -6249,10 +6358,20 @@ function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
   // S7 slice M-5: past the settled menu's own redraw tick, both the on-field
   // Onix sprite (region A) and its healthbox (region B, box+overlay as one
   // unit) pick up the resettled `menuIdleBounce` cycle - see
-  // `turn5SitrusResettledBounceTick`'s own doc. 0 before that tick.
-  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(t));
+  // `turn5SitrusResettledBounceTick`'s own doc. 0 before that tick. S7 slice
+  // N: `bounceTick` (default live `t`, every pre-existing caller unaffected)
+  // lets turn 6's own post-confirm hold pass a FROZEN tick instead (`DoBounce
+  // Effect` stops being polled the instant the A-press hands off - the same
+  // freeze rule `turnKickoffBounceTick` et al. already establish for turns
+  // 1-5's own confirm-wait window).
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick));
   drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
   drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
+}
+
+function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
+  drawTurn6FieldBase(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {
@@ -6701,7 +6820,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       drawRect(fb, menuIdleBlank);
       return;
     }
-    drawFightSubmenuWindow(fb, t, state.fightSubmenu, state.turn1Resolved, state.turn2Resolved, state.turn3Resolved, state.turn4Resolved);
+    drawFightSubmenuWindow(fb, t, state.fightSubmenu, state.turn1Resolved, state.turn2Resolved, state.turn3Resolved, state.turn4Resolved, state.turn5Resolved);
     return;
   }
   drawSendOutHandoff(fb, t, handoffTick);

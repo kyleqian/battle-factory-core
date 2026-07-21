@@ -24,7 +24,7 @@ import {
   turnKickoffBounceTick,
   type FightSubmenuState,
 } from "../src/engine/battleMenu.ts";
-import { TICK0 as SCENE_TICK0 } from "../src/engine/battleScene.ts";
+import { TICK0 as SCENE_TICK0, TURN5_SITRUS_MENU_REOPEN_GATE_DELAY } from "../src/engine/battleScene.ts";
 import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
 import { rockSlideOpponentHp, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
@@ -122,7 +122,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false },
   };
 }
 
@@ -317,7 +317,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: false,
-      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null
+      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false
     },
   };
 }
@@ -435,7 +435,7 @@ function stateAtTurn3Confirm(): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: true,
-      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null
+      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false
     },
   };
 }
@@ -594,7 +594,7 @@ function stateAtTurn4Confirm(): EngineState {
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: false, turn5KoDismissElapsed: null
+      turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false
     },
   };
 }
@@ -619,7 +619,7 @@ function stateAtTurn5Confirm(): EngineState {
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: true, turn5KoDismissElapsed: null
+      turn4Resolved: true, turn5KoDismissElapsed: null, turn5Resolved: false
     },
   };
 }
@@ -682,5 +682,91 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
     let replay = stateAtTurn5Confirm();
     for (let i = 0; i < 254; i += 1) replay = press(replay, []);
     expect(replay.battleScene).toEqual(state.battleScene);
+  });
+});
+
+function stateAtTurn5SitrusConfirm(): EngineState {
+  const initial = createInitialState();
+  return {
+    ...initial,
+    draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
+    battleScene: {
+      elapsed: 5959 - SCENE_TICK0,
+      sendOutPressElapsed: 380,
+      fightSubmenu: {
+        openElapsed: 5927 - SCENE_TICK0,
+        cursor: 0,
+        displayCursor: 0,
+        closeElapsed: null,
+        confirmElapsed: 5959 - SCENE_TICK0,
+        activeMonMoveset: ONIX_MOVESET,
+        reopenedFromClose: false,
+      },
+      turn1Resolved: true,
+      turn2Resolved: true,
+      turn3Resolved: true,
+      turn4Resolved: true, turn5KoDismissElapsed: 6561 - SCENE_TICK0, turn5Resolved: false
+    },
+  };
+}
+
+describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung (a), docs/turn6-notes.md §5)", () => {
+  it("replaying turn6-menu.json's own committed button script (reopen, NO nav needed, confirm) lands turn 6's own confirm at tick 7345, cursor persisted at 0 (ROCK_SLIDE, unchanged since turn 3), turn5Resolved flips true", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn6-menu.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    let state = createInitialState();
+    for (const seg of trace.segments) {
+      for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
+    }
+    expect(state.battleScene!.fightSubmenu.openElapsed).toBe(7313 - SCENE_TICK0);
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(7345 - SCENE_TICK0);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    expect(state.battleScene!.turn1Resolved).toBe(true);
+    expect(state.battleScene!.turn2Resolved).toBe(true);
+    expect(state.battleScene!.turn3Resolved).toBe(true);
+    expect(state.battleScene!.turn4Resolved).toBe(true);
+    expect(state.battleScene!.turn5Resolved).toBe(true);
+  });
+
+  it("the turn-5-resolved reopen gate stays closed before TURN5_SITRUS_MENU_REOPEN_GATE_DELAY has elapsed past turn 5's own real confirm (5959) - an early A press is simply dropped, matching turns 1-5's own reopen-gate precedent", () => {
+    let state = stateAtTurn5SitrusConfirm();
+    const confirmElapsedBefore = state.battleScene!.fightSubmenu.confirmElapsed;
+    for (let i = 0; i < 100; i += 1) state = press(state, []);
+    state = press(state, ["A"]);
+    expect(state.battleScene!.turn5Resolved).toBe(false);
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(confirmElapsedBefore);
+  });
+
+  it("the reopen gate opens exactly at TURN5_SITRUS_MENU_REOPEN_GATE_DELAY past turn 5's own confirm - idling to the eligible tick then pressing A reopens FIGHT for turn 6", () => {
+    let state = stateAtTurn5SitrusConfirm();
+    for (let i = 0; i < TURN5_SITRUS_MENU_REOPEN_GATE_DELAY; i += 1) state = press(state, []);
+    state = press(state, ["A"]);
+    expect(state.battleScene!.turn5Resolved).toBe(true);
+    expect(state.battleScene!.fightSubmenu.cursor).toBe(0);
+    expect(state.battleScene!.fightSubmenu.confirmElapsed).toBeNull();
+  });
+
+  it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 6/10 once turn5Resolved (used turns 1, 3, 4 AND 5), independent of turn2Resolved's own slot-2 DRAGON_BREATH decrement", () => {
+    const moveset = rentalMoveset("ONIX");
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true)[0]).toBe(moveset.maxPP[0] - 4);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true)[0]).toBe(6);
+    // Sanity: turn4Resolved alone (pre-turn-6) still reads 7/10, matching
+    // slice J's own pinned behavior - this test doesn't regress it.
+    expect(currentPPForActiveMon(moveset, true, true, true, true, false)[0]).toBe(7);
+  });
+
+  it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn6-menu.json (33/33, 0 diff, 11 named single-tick bounce-extremum residuals excluded, docs/battle-turn-notes.md's new §27)", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn6-menu.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    function replay(): EngineState {
+      let state = createInitialState();
+      for (const seg of trace.segments) {
+        for (let i = 0; i < seg.frames; i += 1) state = press(state, seg.buttons ?? []);
+      }
+      return state;
+    }
+    expect(replay().battleScene).toEqual(replay().battleScene);
   });
 });
