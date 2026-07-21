@@ -335,3 +335,219 @@ commit ticks). Cross-check against the already-committed `battle1-winline-
 b-swap.json` (12 spot-checked ticks plus a full 13306-tick per-frame
 button-state diff, §1) byte-identical. Healthbar color-zone RGB values were
 read directly via pixel sampling (PIL), not inferred from HP numbers alone.
+
+## 2026-07-21 addendum (bounded-worker probe session): second-half ground
+truth closed — ROCK_SLIDE is a PURE parameterization of turns 3/5/6/7/9's
+own already-shipped mechanism code, both HP drains RAM+pixel-pinned, turn-
+end/turn-11-menu boundary re-confirmed **with one real correction**
+
+Per the supervisor's brief, ground-truthed the approx-12440-13306 window
+(Onix's ROCK_SLIDE kickoff through the turn-11 menu resettle). **No `src/`
+changes.** Every fact below is re-derived fresh this session (fresh
+`dump-rockslide-sprites.py` / `dump-rockslide-slot-order.py` /
+`dump-battle-bars.py` RAM probe runs, a one-off target-sprite-y2 RAM probe,
+plus fresh `bin/oracle run` pixel captures over HTTP, twice-run for the one
+finding that mattered most) — `turn10-notes.md`'s own prose ranges above
+were treated as leads, not truth, per the standing rule. New committed
+tool: `tools/probe/verify-turn10-rockslide.ts` — pixel-only (RAM facts
+cross-cited below, not re-asserted in the script, same convention
+`verify-turn9-postlunge.ts` established) — **44/44 checks pass** against a
+fresh capture.
+
+### 1. Headline finding: a single synthetic `pressTick=12169` reproduces EVERY ROCK_SLIDE sub-mechanism bit-for-bit against turns 3/5/6/7/9's own shipped, unmodified functions
+
+`src/engine/battleMenu.ts`'s ROCK_SLIDE mechanism functions
+(`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
+`rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/
+`rockSlideMonBlinkInvisible`/`rockSlideOpponentHp`/`rockSlideTextStartTick`/
+`rockSlideTextVisibleChars`) are all pure `(t, pressTick[, ...])` functions,
+already reused unchanged across turns 3/5/6/7/9 per that file's own module
+comments (`battleScene.ts`'s own "mechanism reused with ZERO changes" notes
+at the turn6/7/9 call sites). This session fit a single candidate
+`pressTick` against this turn's own fresh RAM/pixel data and found it
+satisfies **every one** of the file's already-published delay constants
+simultaneously — strong evidence turn 10 needs no new mechanism code, only
+a new `TURN10_ROCKSLIDE_PRESS_TICK` constant + Pidgeotto's own HP endpoints
+(61→38), exactly the "wiring job" shape the brief anticipated:
+
+| constant (from `battleMenu.ts`, unmodified) | formula | predicted tick | fresh RAM/pixel tick | verdict |
+|---|---|---|---|---|
+| `ROCK_SLIDE_TEXT_DELAY`(393) | `pressTick+393` | 12562 | 12562 (fresh oracle capture's own first tick of the "ONIX used ROCK SLIDE!" box transition, pixel-confirmed) | **CONFIRMED**, exact |
+| `ROCK_SLIDE_RAM_ANCHOR_DELAY`(428) | `pressTick+428` | 12597 | 12597 (`dump-rockslide-sprites.py`: rock index 0 + shake sprite's own RAM creation tick) | **CONFIRMED**, exact |
+| `ROCK_SLIDE_MON_SHAKE_START_DELAY`(443)/`_END_DELAY`(536) | `pressTick+443`/`+536`, render = RAM+1 | 12612/12705 | 12611/12704 raw RAM (one-off `target_y2` probe, Pidgeotto's own sprite `y2`: period-4 `[5,5,0,0]`, 0 mismatches over 141 sampled ticks once the standard RAM+1 render lag is applied) | **CONFIRMED**, exact |
+| `HIT_FLASH_RAM_ANCHOR_DELAY`(562) | `pressTick+562` | 12731 | 12731 (`dump-rockslide-sprites.py`: healthbox-wobble+blink setup tick, both sub-signals) | **CONFIRMED**, exact |
+| `ROCK_SLIDE_HP_DRAIN_START_DELAY`(597) | `pressTick+597` | 12766 | 12766 (`dump-battle-bars.py`: `bar1Curr` sentinel `-32768`) | **CONFIRMED**, exact |
+
+**`rockSlideRockState`/`rockSlideDrawOrder` RAM-verified directly, not just
+via the anchor ticks**: fed `pressTick=12169` into the real, unmodified
+exported functions and diffed every prediction against
+`dump-rockslide-sprites.py`'s own per-tick rock `x+x2,y+y2,animNum` reads
+(261 RAM ticks, 12540-12800) and `dump-rockslide-slot-order.py`'s own
+per-tick `spriteOrder` reads (125 multi-rock ticks in that window, matching
+by nearest computed position after reversing `sSpriteOrder`'s own
+array-position-vs-draw-order convention) — **0 mismatches on both**,
+confirming turn 10 reuses the same 20-entry `ROCK_SLIDE_ROCK_TABLE`
+(spawn stride 4, same xOffset/animNum/velocity triples) and the same
+`SortSprites`-simulation draw-order logic bit-for-bit. (Raw sprite RAM
+fields are the base `x`/`y` with the arc motion carried entirely in
+`x2`/`y2` — the base fields stay flat at `ROCK_SLIDE_ROCK_BASE`
+(176,54)-plus-offset the whole time; this tripped up this session's first
+compare attempt, caught and corrected before writing this table.)
+
+### 2. Both HP drains this turn: RAM+pixel-pinned, matching the dossier's own §4 ledger exactly
+
+| drain | sentinel tick | flat counter | done-sentinel | `gBattleMons[].hp` commit | verdict |
+|---|---|---|---|---|---|
+| Onix (AERIAL_ACE), 24→14 | `-32768` @ 12441 | 23→14 over 12442-12451 | `0` @ 12452 | 24→14 @ 12453 (+1 lag) | **CONFIRMED**, exact match to `turn10-notes.md` §5's own citation, re-derived fresh (`dump-battle-bars.py`, `bar0Curr`) |
+| Pidgeotto (ROCK_SLIDE), 61→38 | `-32768` @ 12766 | 60→38 over 12767-12789 | `0` @ 12790 | 61→38 @ 12791 (+1 lag) | **CONFIRMED**, exact match to §5's own citation, re-derived fresh (`bar1Curr`) |
+
+Pixel side (`verify-turn10-rockslide.ts`): Onix's own overlay
+(`composePlayerHealthboxHpOverlay`, the same already-proven function
+turn9's addendum used) reproduces every sampled render tick 12442-12455
+exactly (0 mismatch), band flips to red at hp=14 (Onix's post-turn value,
+`calcBarFilledPixels`/`pickHpBarBand`, pure math, unmodified). Pidgeotto's
+own bar band stays **yellow** at both 61/156 and 38/156 (`calcBarFilledPixels`
+confirms no zone crossing, matching §5's own healthbar-color-check row) —
+**one honest scope note**: `composeOpponentHealthbox`'s own `name`/`level`/
+`gender` params are `battleScene.ts`-internal (not exported), so this
+session verified Pidgeotto's HP-bar fill/band via the exported pure math
+directly rather than a full pixel-composited overlay like Onix's side got;
+a full opponent-side overlay check is a reasonable next-session addition,
+not attempted here (time-boxed). **A real refinement caught by the verify
+script's own first failing run**: this session initially assumed the very
+first counter decrement (12767, 61→60) would already be pixel-visible —
+wrong, because Pidgeotto's 156-max-HP bar is coarser (48px/156hp ≈
+0.31px/HP) than Onix's 117-max-HP bar (≈0.41px/HP), so several ticks can
+pass before the fill-pixel count itself actually changes; the committed
+script asserts a mid-drain tick (12780) instead.
+
+### 3. ROCK_SLIDE kickoff text: two-line reveal, pixel-exact, same 1-char/tick + "space repeats a frame" shape turn 9 already established
+
+Box transition into "ONIX used\nROCK SLIDE!" is exactly **4 distinct
+frames, ticks 12562-12565** (matches `turn10-notes.md` §5's own citation
+exactly, now pixel-cross-confirmed via a fresh capture rather than trusted).
+The pre-kickoff "not very effective.." hold is confirmed static one tick
+longer than previously cited — flat through **12561** (sha
+`0802bec48f53`, §5's own cited sha for tick 12540, now confirmed to extend
+to 12561), transition starting at 12562, a minor refinement not a
+contradiction. Reveal cadence (`verify-turn10-rockslide.ts`, local
+`drawText`+charmap reconstruction, same methodology
+`verify-turn9-postlunge.ts` used): flat **1 char/tick** from **12562**
+(`ROCK_SLIDE_TEXT_DELAY`=393 past `pressTick`) through full reveal
+(20/20 chars) at **12581** — 0 mismatches at every one of 8 sampled ticks.
+Two frames repeat their neighbor exactly (chars 4→5 and chars 13→14,
+i.e. render ticks 12565→12566 and 12574→12575) because both lines'
+5th character is a literal space (`"ONIX used"`/`"ROCK SLIDE!"` each have
+their own space at position 5) — the identical "invisible character, no
+new ink" mechanism `turn9-notes.md`'s own addendum already found for a
+different message, now independently reconfirmed on a two-line message.
+Settled sha holds from **12581** through the whole animation (matches
+§5's own `6a8a21d232da` citation for "12588-~12780" — refined to the exact
+settle tick, 7 ticks earlier than the dossier's approximate PNG-read note).
+
+### 4. "It's super effective!" transition + turn-end: re-confirmed exactly, plus one real correction to §5's own final row
+
+The super-effective box transition (**12806-12815**, 10 distinct frames)
+and its settled hold (**12816-12825**, sha `c3e98a3e0f9f`) both match §5's
+own citations exactly, fresh-confirmed. Turn-end boundary ticks — text
+clearing (**12892**, `25874032e009`), turn-11 menu settled
+(**12899**, `e28bc5375a15`), the single-tick idle-bob blip
+(**12900**, `63e2d272402d`), resettling (**12901**, back to
+`e28bc5375a15`) — all match §5's own citations exactly, fresh-confirmed.
+
+**Correction**: §5's own final row claims the turn-11 menu is sha-flat
+(`e28bc5375a15` "(all)") clear out through ticks 12950/13000/13100/13200/
+13306. A fresh capture (independently reproduced twice, identical both
+times) shows this is **not** true for three of those five ticks — the
+turn-11 action menu runs its own periodic idle-bounce cycle, the same
+`menu-idle-bounce.json` family every other resting action menu in this arc
+already has (turn9's own postlunge notes explicitly contrast the *message
+box* hold, which really is flat, against the *resting action menu*, which
+isn't — §5's final row conflated the two). Bisected far enough to confirm
+the shape, not the exact period table (time-boxed): resting-phase ticks
+this session found are 12899, 12901, 12937, 12974, 13200, 13306; the
+bounce is active (non-resting sha) at 12900 (the already-known one-tick
+blip), 12910-12936ish, and 12946-12973ish — roughly a 37-38-tick cycle,
+not nailed down further. **This does not affect the RNG-flatness claim**
+(§3's "genuine RNG-free rest") — the idle-bounce is a deterministic
+animation task, not a `Random()` consumer; only the specific pixel-sha
+citation for those five sample ticks was wrong. `verify-turn10-rockslide.ts`
+asserts against the corrected resting-phase ticks (13200/13306) plus an
+explicit "the bounce is genuinely active" check (12910), rather than
+re-asserting the wrong flat claim.
+
+### 5. One named, unresolved gap: a RAM "target invisible" signal during the rock-fall window doesn't match any pixel change
+
+`dump-rockslide-sprites.py`'s `targetInvisible` field (Pidgeotto's own
+sprite, read via `gBattlerSpriteIds[1]`'s invisible bit) reads **flat
+`true` for RAM ticks 12594-12722** — almost exactly the entire rock-fall
+animation's own lifespan (first rock spawns at 12597, last rock despawns
+at 12722) and well outside `rockSlideMonBlinkInvisible`'s own modeled
+32-tick hit-flash window (12732-12763ish, confirmed correct in §1 above).
+**This does NOT correspond to any pixel change**: a fresh oracle capture at
+tick 12605 (mid-rock-fall) shows Pidgeotto's sprite fully, normally visible
+on screen (spot-checked directly, not inferred) — flatly contradicting a
+literal reading of the RAM bit. Not chased to a root cause this session
+(time-boxed) — plausible explanations include this session's probe reading
+the wrong sprite slot/field for whatever front-sprite structure is actually
+drawn, or the bit gating something that isn't the visible front sprite at
+all. **Engine implication**: do NOT add a "hide the target mon during the
+whole rock-fall" phase based on this RAM signal alone — reuse
+`rockSlideMonBlinkInvisible` unchanged (as turns 3/6/7/9 already do), since
+the actual pixels say the mon stays visible throughout. Flagged as an open
+methodology gap for whoever next wants this specific refinement, not
+mis-reported as a new mechanism.
+
+### What the turn-10-through-11 engine slice will need (per the brief's own ask)
+
+- `TURN10_ROCKSLIDE_PRESS_TICK = 12169` (synthetic anchor, same convention
+  as `TURN6_ROCKSLIDE_PRESS_TICK`/`TURN7_ROCKSLIDE_PRESS_TICK`) — every
+  existing `rockSlide*` function reused unchanged, per §1's own table.
+- Pidgeotto's own HP endpoints for `rockSlideOpponentHp`: `startHp=61,
+  endHp=38` (bar's own coarser 156-max-HP quantization noted in §2, not a
+  new code path — `calcBarFilledPixels`/`pickHpBarBand` already handle it).
+- Onix's own AERIAL_ACE-drain overlay (24→14) reuses whatever turn9's own
+  QUICK_ATTACK-equivalent player-healthbox-overlay-under-message-box
+  convention already established (composePlayerHealthboxHpOverlay,
+  `menuHealthboxPlayerAsset`) — mechanically identical, only the HP
+  endpoints and message text differ, per `turn10-notes.md` §6's own
+  "AERIAL_ACE is a plain damaging hit, no new mechanism" note.
+- AERIAL_ACE's own kickoff animation itself (approx ticks 12316-12439, the
+  "slash/claw effect on Onix" `turn10-notes.md` §5 flags as new-shape) is
+  **out of this session's scope** (brief asked for the *second* half only)
+  and still needs its own dedicated probe pass before the engine slice can
+  wire it — not addressed here.
+- The §5 gap above (target-invisible RAM/pixel mismatch) should be
+  resolved (or at least re-probed with a corrected sprite-slot read) before
+  anyone spends time trying to model an extra hide-phase from it.
+
+### Verification
+
+`npm test` and `npm run build` green, unchanged this session (no `src/`
+changes — only `tools/probe/verify-turn10-rockslide.ts` (new) and this doc
+were touched). `tools/probe/verify-turn10-rockslide.ts`: **44/44 checks
+pass**, run twice against fresh `bin/oracle` captures, identical both
+times. RAM probes (`dump-rockslide-sprites.py`, `dump-rockslide-slot-
+order.py`, `dump-battle-bars.py`, plus a one-off target-sprite-y2 script)
+each run fresh this session; the rock-table/draw-order/mon-shake
+cross-checks against the real `rockSlideRockState`/`rockSlideDrawOrder`/
+`rockSlideMonShakeY2` functions were done via disposable scratch scripts
+(not committed — the 0-mismatch results are reported here, matching the
+"RAM facts cross-cited, not re-asserted in the committed pixel-only
+script" convention `verify-turn9-postlunge.ts` already established).
+
+### Proposed next-brief bullets
+
+1. AERIAL_ACE's own kickoff animation internals (~12316-12439, the
+   slash/claw effect) — out of this session's scope, needed before the
+   engine slice can wire turn 10's first half.
+2. Root-cause §5's target-invisible RAM/pixel mismatch (read the correct
+   sprite slot, or determine the bit gates something else entirely).
+3. Bisect the turn-11 resting-menu idle-bounce's exact period/table (§4's
+   correction) if a future engine slice needs the *exact* frame content of
+   that idle rather than just its two known resting/moving phases.
+4. `rockSlideBg3Y` (BG3 shake register) was not independently RAM-verified
+   this session (no `gBattle_BG3_Y` probe run) — named gap, low risk given
+   every sibling mechanism matched exactly, but not literally re-checked.
+5. Turn 11 itself (FEATHER_DANCE / ROCK_SLIDE's own last-PP use per §7's
+   own prediction) is the natural next full-turn scout.
