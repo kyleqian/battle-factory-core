@@ -1,0 +1,434 @@
+{
+"23601": {
+"saveBlock2Base": 33704532,
+"rentalMons": [
+{
+"monId": 156,
+"personality": 1205102525,
+"ivs": 3,
+"abilityNum": 1
+},
+{
+"monId": 149,
+"personality": 1534575931,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 180,
+"personality": 1550278706,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 153,
+"personality": 0,
+"ivs": 0,
+"abilityNum": 0
+},
+{
+"monId": 179,
+"personality": 0,
+"ivs": 0,
+"abilityNum": 0
+},
+{
+"monId": 181,
+"personality": 0,
+"ivs": 0,
+"abilityNum": 0
+}
+],
+"challengeStatus": 1,
+"selectedPartyMons": [
+1,
+2,
+3
+],
+"curChallengeBattleNum": 0
+},
+"23602": {
+"saveBlock2Base": 33704532,
+"rentalMons": [
+{
+"monId": 156,
+"personality": 1205102525,
+"ivs": 3,
+"abilityNum": 1
+},
+{
+"monId": 149,
+"personality": 1534575931,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 180,
+"personality": 1550278706,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 153,
+"personality": 0,
+"ivs": 0,
+"abilityNum": 0
+},
+{
+"monId": 179,
+"personality": 0,
+"ivs": 0,
+"abilityNum": 0
+},
+{
+"monId": 181,
+"personality": 0,
+"ivs": 0,
+"abilityNum": 0
+}
+],
+"challengeStatus": 1,
+"selectedPartyMons": [
+1,
+2,
+3
+],
+"curChallengeBattleNum": 0
+},
+"23700": {
+"saveBlock2Base": 33704620,
+"rentalMons": [
+{
+"monId": 156,
+"personality": 1205102525,
+"ivs": 3,
+"abilityNum": 1
+},
+{
+"monId": 149,
+"personality": 1534575931,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 180,
+"personality": 1550278706,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 153,
+"personality": 0,
+"ivs": 0,
+"abilityNum": 0
+},
+{
+"monId": 179,
+"personality": 0,
+"ivs": 0,
+"abilityNum": 0
+},
+{
+"monId": 181,
+"personality": 0,
+"ivs": 0,
+"abilityNum": 0
+}
+],
+"challengeStatus": 1,
+"selectedPartyMons": [
+1,
+2,
+3
+],
+"curChallengeBattleNum": 1
+},
+"23750": {
+"saveBlock2Base": 33704624,
+"rentalMons": [
+{
+"monId": 156,
+"personality": 1205102525,
+"ivs": 3,
+"abilityNum": 1
+},
+{
+"monId": 149,
+"personality": 1534575931,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 180,
+"personality": 1550278706,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 188,
+"personality": 1094072807,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 184,
+"personality": 3475344024,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 135,
+"personality": 3971699699,
+"ivs": 3,
+"abilityNum": 0
+}
+],
+"challengeStatus": 1,
+"selectedPartyMons": [
+1,
+2,
+3
+],
+"curChallengeBattleNum": 1
+},
+"24000": {
+"saveBlock2Base": 33704624,
+"rentalMons": [
+{
+"monId": 156,
+"personality": 1205102525,
+"ivs": 3,
+"abilityNum": 1
+},
+{
+"monId": 149,
+"personality": 1534575931,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 180,
+"personality": 1550278706,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 188,
+"personality": 1094072807,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 184,
+"personality": 3475344024,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 135,
+"personality": 3971699699,
+"ivs": 3,
+"abilityNum": 0
+}
+],
+"challengeStatus": 1,
+"selectedPartyMons": [
+1,
+2,
+3
+],
+"curChallengeBattleNum": 1
+},
+"25802": {
+"saveBlock2Base": 33704624,
+"rentalMons": [
+{
+"monId": 156,
+"personality": 1205102525,
+"ivs": 3,
+"abilityNum": 1
+},
+{
+"monId": 149,
+"personality": 1534575931,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 180,
+"personality": 1550278706,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 188,
+"personality": 1094072807,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 184,
+"personality": 3475344024,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 135,
+"personality": 3971699699,
+"ivs": 3,
+"abilityNum": 0
+}
+],
+"challengeStatus": 1,
+"selectedPartyMons": [
+1,
+2,
+3
+],
+"curChallengeBattleNum": 1
+},
+"28002": {
+"saveBlock2Base": 33704624,
+"rentalMons": [
+{
+"monId": 156,
+"personality": 1205102525,
+"ivs": 3,
+"abilityNum": 1
+},
+{
+"monId": 149,
+"personality": 1534575931,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 180,
+"personality": 1550278706,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 188,
+"personality": 1094072807,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 184,
+"personality": 3475344024,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 135,
+"personality": 3971699699,
+"ivs": 3,
+"abilityNum": 0
+}
+],
+"challengeStatus": 1,
+"selectedPartyMons": [
+1,
+2,
+3
+],
+"curChallengeBattleNum": 1
+},
+"28010": {
+"saveBlock2Base": 33704624,
+"rentalMons": [
+{
+"monId": 156,
+"personality": 1205102525,
+"ivs": 3,
+"abilityNum": 1
+},
+{
+"monId": 149,
+"personality": 1534575931,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 180,
+"personality": 1550278706,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 188,
+"personality": 1094072807,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 184,
+"personality": 3475344024,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 135,
+"personality": 3971699699,
+"ivs": 3,
+"abilityNum": 0
+}
+],
+"challengeStatus": 1,
+"selectedPartyMons": [
+1,
+2,
+3
+],
+"curChallengeBattleNum": 1
+},
+"29601": {
+"saveBlock2Base": 33704624,
+"rentalMons": [
+{
+"monId": 156,
+"personality": 1205102525,
+"ivs": 3,
+"abilityNum": 1
+},
+{
+"monId": 149,
+"personality": 1534575931,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 180,
+"personality": 1550278706,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 188,
+"personality": 1094072807,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 184,
+"personality": 3475344024,
+"ivs": 3,
+"abilityNum": 0
+},
+{
+"monId": 135,
+"personality": 3971699699,
+"ivs": 3,
+"abilityNum": 0
+}
+],
+"challengeStatus": 1,
+"selectedPartyMons": [
+1,
+2,
+3
+],
+"curChallengeBattleNum": 1
+}
+}
