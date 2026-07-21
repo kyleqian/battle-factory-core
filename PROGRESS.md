@@ -4,6 +4,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 205 — Worktree scout (supervisor-folded): turn 15 ground truth BANKED — **FLY's strike half rolls REAL accuracy/crit/damage (3 Random() calls — NOT RNG-free like its own charge half)**, hits for "not very effective" 11 clipped to Onix's 4 HP (hp0→0 at tick 19147), and the battle's first **PLAYER-side forced switch** is ground-truthed end to end (faint sink → button-gated "ONIX fainted!" → party-select, cursor defaulting to the fainted slot → SEND OUT → MAGBY 138/138 materialize → settled menu at 20558); `battle1-turn15-dense.json` (245 captures) + `docs/turn15-notes.md`; merged, suite 825/825 on the merged tree
+
+- **State:** merged into master post-N-3, `npm test` 825/825 + build
+  green post-merge, worktree/branch cleaned. Supervisor re-verified
+  independently: prefix chain re-flattened myself (turn14-dense ⊂
+  turn15-dense ⊂ winline-b-swap, script-exact), fresh oracle rerun
+  reproduced 16/16 cited shas at their exact ticks, and 4 label-bearing
+  PNGs read directly (incl. §5h's negative finding — the blank message
+  box where §14-addendum's trace showed the "Get 'em, MAGBY!" quip).
+- **Did:** 6 Random() calls total in 18956-20745: accuracy 19003 /
+  crit 19029 / damage-variance 19032 (the strike half joins the normal
+  hit flow at BattleScript_HitFromAtkString — each half of a two-turn
+  move must be checked independently), turn-tail bookkeeping 19240,
+  AI-prescoring pair 20550/20556. STATUS2_MULTIPLETURNS clears 19000,
+  STATUS3_ON_AIR 19004. Reuse map: faint sink SAME-SHAPE (first
+  player-side instance, battler0 params), KO hold / party-select /
+  SEND OUT VERBATIM vs §14-addendum, materialize/healthbox SAME-SHAPE
+  (honestly not byte-verified), LAX_INCENSE no proc (matches turn 13).
+  New finding: the send-out flavor quip is RNG-line-dependent, NOT
+  deterministic on matchup — absent on this exact committed line.
+- **Next:** engine critical path: turn-6 rungs (c)/(d) (stat-fall
+  anim + ATK-fall message ~7559-7684, Onix's ROCK_SLIDE), feather
+  residual 7421-7549 (§29's named leads), then turns 7-13 as
+  parameterizations; scout territory: turn 16+ (MAGBY vs MURKROW,
+  Murkrow faints 22418 per §16 → the WIN arc); ISSUES #26 probe.
+- **Notes:** scout stayed in contract (15.6 min of a 40 cap); no
+  papercuts; its brief-assumption note (two-turn-move halves are
+  asymmetric) folded into this entry's Did line.
+
+---
 ## 204 — Bounded worker (S7 slice N-3): FEATHER_DANCE's feather sprites — all 4 rungs attempted, rungs (a)/(b)/(c) landed in full, rung (d) landed as a reduced-scope prefix — `turn6-feathers.json` **106/106, 0 diff** (7307-7420, 16 new ticks past the prior 7404 cutoff); the fuller 7421-7658 window has a small, precisely-characterized residual, documented not chased (S7 bounded worker session, hard 60-minute cap)
 
 - **State:** `npm test` **825/825** (+4), `npm run build` green, tree
@@ -89,27 +119,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   stops, every one with banked findings that landed next round).
 
 ---
-## 202 — Worktree scout (supervisor-folded): turn 14 ground truth BANKED — Murkrow opens with **FLY** (the arc's first two-turn semi-invulnerable move): charge half deals no damage, Onix's DRAGON_BREATH **auto-misses the airborne target at ZERO RNG cost** (`STATUS3_ON_AIR` short-circuit, `battle_script_commands.c:1061`, gRngValue flat through the miss); `battle1-turn14-dense.json` (248 captures) + `docs/turn14-notes.md`; merged `4fe427a`, suite 821/821 on the merged tree
-
-- **State:** merged into master, `npm test` 821/821 + build green
-  post-merge. Supervisor re-verified: prefix chain (turn13-b ⊂ turn14 ⊂
-  winline-b-swap, script-exact), trace rerun deterministic, and the
-  final frame PNG-read: Murkrow's healthbox full at 142/142 with its
-  SPRITE INVISIBLE (airborne) over the settled menu — the two-turn
-  state pinned visually and in RAM (STATUS2_MULTIPLETURNS set 17820,
-  STATUS3_ON_AIR set 17913, both persisting across the turn boundary
-  to the trace's last tick 18956).
-- **Did:** turn 14 = FLY charge (empty "used" string — STRINGID_
-  EMPTYSTRING3 in BattleScriptFirstChargingTurn, then "flew up high!")
-  + the auto-miss; nobody takes damage; no forced switch this turn.
-  §16's coarse ledger row fully confirmed, refined by one exact
-  bookkeeping Random() at 18079. PAPERCUT from the worker
-  (dump-battler-full.py struct offsets undocumented outside the script
-  body) recorded in PAPERCUTS.md at this fold.
-- **Next:** engine critical path unchanged (slice N-3 feather renderer
-  → rungs c/d → turns 7-13 parameterizations); dossier pipeline now
-  covers turns 6-14; turn-15+ (FLY's strike half, Onix's likely KO →
-  the first FORCED PLAYER SWITCH → the WIN arc) is the next scout
-  territory.
-- **Notes:** scout stayed in contract; 40-min cap, landed in 14.
-
