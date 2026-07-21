@@ -9,9 +9,10 @@
 You are the **supervisor**: a long-lived senior session that plans one
 increment at a time, delegates it to a disposable worker agent, verifies the
 result, and decides what happens next. You are not the implementer — workers
-(default `claude-sonnet-5`, via `tools/run-subagent.sh`) do the on-the-ground
-work and should burn most of the session's compute. You run rarely and think
-hard when you do.
+via `tools/run-subagent.sh` do the on-the-ground work and should burn most of
+the session's compute. The default Claude profile uses `claude-sonnet-5`; the
+opt-in Codex profile uses `gpt-5.6-terra` at `medium` effort. You run rarely
+and think hard when you do.
 
 Read `AGENTS.md` first. Everything it says about this run — start-of-session
 protocol, commit discipline, the two test tiers, the oracle — applies to you,
@@ -61,11 +62,14 @@ edit.
 3. **Delegate.** Launch the worker **in the background** — a foreground Bash
    call times out at 10 minutes; workers run up to 60:
    `./tools/run-subagent.sh "<brief>"` (flags: `-c/--cap-minutes`,
-   `-m/--model`), and launch it **unsandboxed** (the Bash tool's
-   `dangerouslyDisableSandbox: true`) — a sandbox-wrapped child `claude`
-   can't reach the keychain or the API and dies instantly with "Not logged
-   in". Its stdout is a compact digest; the full transcript is the
-   JSONL log it names. Wait for it to finish before launching another into
+   `-p/--provider`, `-m/--model`, and Codex-only `-e/--effort`). The launcher
+   inherits the supervisor's provider. In the default Claude profile, launch
+   it **unsandboxed** (the Bash tool's `dangerouslyDisableSandbox: true`) — a
+   sandbox-wrapped child `claude` can't reach the keychain or the API and dies
+   instantly with "Not logged in". The Codex profile instead starts a fresh,
+   ephemeral Codex worker with unattended full-workspace permissions. Its
+   stdout is a compact digest; the full event stream is in the log it names.
+   Wait for it to finish before launching another into
    the same tree — two workers in one working tree fight over it, and the
    launcher refuses a second main-lane worker mechanically (exit 4). If —
    and only if — you have two *genuinely disjoint* steps, you may run a
@@ -129,25 +133,27 @@ Escalate when:
 - A judgment call the roadmap/plan docs don't answer.
 - Usage limits (below).
 
-How: get the user's attention with the **PushNotification tool**, then ask.
-(The Bash sandbox blocks `osascript` notifications; if you additionally want
-the macOS banner, run the `osascript` command with
+How: get the user's attention with the **PushNotification tool** when it is
+available, then ask. (The Bash sandbox blocks `osascript` notifications; if
+you additionally want the macOS banner, run the `osascript` command with
 `dangerouslyDisableSandbox: true`.)
 
 In an **interactive** session (the default — your launch prompt says which),
 ask the question in the terminal and end your turn; the user answers when
-they see it. **Never end that turn unguarded**: a turn ended mid-escalation
-is only re-woken by the user's answer — even a worker you left running will
-NOT re-invoke you when it finishes (this stranded a finished worker's branch
-for four hours in pokered-pewter on 2026-07-11, until the watchdog killed
-the session). Before asking, arm a **ScheduleWakeup** fallback: 30–45
-minutes, or long enough to outlast any worker still in flight, and never
-past the session deadline. If it fires with the question still unanswered,
-switch to headless handling: verify and fold any finished worker's result,
-record the open question and its context at the top of `PROGRESS.md`, and
-wind down cleanly. In a **headless** session nobody can answer mid-run:
-record the question and its context at the top of `PROGRESS.md`, notify, and
-wind down.
+they see it. **Never end that turn unguarded**: a turn ended mid-escalation is
+only re-woken by the user's answer — even a worker you left running will NOT
+re-invoke you when it finishes (this stranded a finished worker's branch for
+four hours in pokered-pewter on 2026-07-11, until the watchdog killed the
+session). When `ScheduleWakeup` is available, arm a 30–45 minute fallback, or
+long enough to outlast any worker still in flight, and never past the session
+deadline. If it fires with the question still unanswered, switch to headless
+handling: verify and fold any finished worker's result, record the open
+question and its context at the top of `PROGRESS.md`, and wind down cleanly.
+If `ScheduleWakeup` is not available, finish or stop every worker and leave
+the tree committed and green before asking; the outer watchdog remains the
+hard safety cap but does not resume a finished turn. In a **headless** session
+nobody can answer mid-run: record the question and its context at the top of
+`PROGRESS.md`, notify when possible, and wind down.
 
 ## Deadline and usage limits
 
@@ -167,19 +173,23 @@ wind down.
 
 - Workers start with **fresh context** every time. All they inherit is git
   history and `PROGRESS.md` — your brief plus those must be self-sufficient.
-- Worker transcripts: the JSONL path each run prints (default
-  `/tmp/emerald-factory-subagent-<timestamp>.jsonl`). `grep`/`tail` them
-  during review instead of guessing what happened.
-- Everything runs with `--dangerously-skip-permissions`, same trust model as
-  `run-agent.sh` sessions.
-- **Your auto-memory directory is yours alone.** It's keyed to the repo path,
-  so workers would otherwise share it (in pokered-pewter a worker once wrote
-  a self-justifying entry into it, 2026-07-09). `run-subagent.sh` launches
-  workers with `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` and prints a WARNING plus
-  a diff if the directory changed during a worker run anyway. Writing your
-  own memory while a worker runs trips it too — the diff tells you which it
-  was. Treat an unexplained change as a worker acting out of bounds: revert
-  or rewrite anything you didn't author, and note it in your session summary.
+- Worker transcripts: the JSONL path each run prints (Claude defaults to
+  `/tmp/emerald-factory-subagent-<timestamp>.jsonl`; Codex adds the launcher
+  pid). `grep`/`tail` them during review instead of guessing what happened.
+- Both profiles preserve the existing high-trust unattended harness: Claude
+  uses `--dangerously-skip-permissions`; Codex uses
+  `--dangerously-bypass-approvals-and-sandbox`. Codex workers are ephemeral
+  and leave durable state only in git, `PROGRESS.md`, and their raw JSONL logs.
+- **Your Claude auto-memory directory is yours alone.** It's keyed to the repo
+  path, so Claude workers would otherwise share it (in pokered-pewter a worker
+  once wrote a self-justifying entry into it, 2026-07-09).
+  `run-subagent.sh` launches Claude workers with
+  `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` and prints a WARNING plus a diff if the
+  directory changed during a worker run anyway. Writing your own memory while
+  a worker runs trips it too — the diff tells you which it was. Treat an
+  unexplained change as a worker acting out of bounds: revert or rewrite
+  anything you didn't author, and note it in your session summary. Ephemeral
+  Codex workers do not use this Claude memory directory.
 - Keep your own context lean: delegate reading-heavy exploration to workers,
   prefer `grep` over full-file reads, and don't re-verify what you already
   verified last iteration.

@@ -21,10 +21,12 @@ committing and keep `PROGRESS.md` current so the next session resumes
 cleanly. Use `./run-agent.sh --interactive` for a user-driven session with no
 cap (`--help` lists the flags).
 
-**Supervised alternative:** **`./run-supervisor.sh`** runs the two-level flow —
-a supervisor session (see `SUPERVISOR.md`, default `claude-fable-5`) plans one
-increment at a time, delegates it to a capped disposable worker
-(`tools/run-subagent.sh`, default `claude-sonnet-5`), and verifies the result
+**Supervised alternative:** **`./run-supervisor.sh`** runs the two-level flow.
+Its backwards-compatible default is Claude (`claude-fable-5` supervisor,
+`claude-sonnet-5` workers). `./run-supervisor.sh --provider codex` selects the
+Codex profile (`gpt-5.6-sol`/`high` supervisor, `gpt-5.6-terra`/`medium`
+workers). Either profile plans one increment at a time, delegates it to a
+capped disposable worker via `tools/run-subagent.sh`, and verifies the result
 between steps. If your prompt says you're a bounded worker session, you are
 one of those workers: this guide applies to you in full, plus the step brief
 in your prompt — and `SUPERVISOR.md` is *not* for you. **No agent launches

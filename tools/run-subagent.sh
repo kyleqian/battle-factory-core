@@ -1,21 +1,23 @@
 #!/usr/bin/env bash
 # Run ONE bounded, disposable worker step — the supervisor's hands.
 #
-# Launches a fresh headless Claude worker (default claude-sonnet-5) on the
-# given step brief, hard-capped (default 60 min), with the same permissions
-# bypass as run-agent.sh. Stdout is a compact digest (tools/stream-summary.mjs)
-# sized for the supervisor's context; the full transcript is tee'd as raw
-# JSONL to the log file named below. Killing a worker at any point is safe —
+# Launches one fresh headless worker. The default remains the original Claude
+# worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
+# worker profile (gpt-5.6-terra at medium effort). The transcript is summarized
+# to a fixed-size handoff and retained in the log file named below.
+# Killing a worker at any point is safe —
 # workers follow AGENTS.md's commit-often discipline, so the next step resumes
 # from git + PROGRESS.md.
 #
 # Usage:
 #   tools/run-subagent.sh [options] "step brief for the worker"
 #     -c, --cap-minutes N   hard cap in minutes (default 60)
-#     -m, --model NAME      worker model (default claude-sonnet-5)
+#     -p, --provider NAME   claude (default) or codex
+#     -m, --model NAME      worker model (provider default)
+#     -e, --effort EFFORT   Codex reasoning effort (default medium)
 #     -w, --worktree        run the worker in a fresh git worktree on its own
 #                           branch (the parallel lane; see SUPERVISOR.md)
-#         --log FILE        raw JSONL log (default /tmp/emerald-factory-subagent-<timestamp>.jsonl)
+#         --log FILE        provider event log under /tmp
 #     -h, --help            show this help
 #
 # Concurrency is capped at TWO workers, mechanically: one lane for the main
@@ -28,14 +30,9 @@
 # docs into the merge. The worktree and branch survive the run for the
 # supervisor to verify and merge.
 #
-# Supervisors: run this launch UNSANDBOXED (the Bash tool's
-# dangerouslyDisableSandbox: true). A sandbox-wrapped child claude can't
-# reach the keychain or api.anthropic.com, so the worker exits immediately
-# with "Not logged in" (this launcher prints a hint when that happens).
-#
-# Workers run with auto-memory disabled (CLAUDE_CODE_DISABLE_AUTO_MEMORY=1):
-# the memory directory belongs to the supervisor alone, and a tripwire below
-# warns if it changed during the worker run anyway.
+# Each provider runs non-interactively with the same full-access trust model as
+# its supervisor. Codex workers are ephemeral; every provider uses git and
+# PROGRESS.md as the durable handoff.
 #
 # Exit status: the worker's own exit status — except 42, which means the run
 # was stopped by an account usage/rate limit (supervisor: wind down, do not
@@ -55,13 +52,18 @@ usage() {
   cat <<'EOF'
 Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -c, --cap-minutes N   hard cap in minutes (default 60)
-  -m, --model NAME      worker model (default claude-sonnet-5)
+  -p, --provider NAME   claude (default) or codex
+  -m, --model NAME      worker model (provider default)
+  -e, --effort EFFORT   Codex reasoning effort (default medium)
   -w, --worktree        run in a fresh git worktree on its own branch (parallel
                         lane: own npm install + dedicated oracle port; worker
                         must not touch shared docs; supervisor merges after
                         verifying — see SUPERVISOR.md "Parallel workers")
-      --log FILE        raw JSONL log (default /tmp/emerald-factory-subagent-<timestamp>.jsonl)
+      --log FILE        provider event log under /tmp
+      --print-config    print the resolved profile without launching
   -h, --help            show this help
+Environment overrides: WORKER_PROVIDER, WORKER_MODEL, WORKER_REASONING_EFFORT.
+Legacy MODEL remains supported for direct worker launches.
 Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the other).
 Exit 4 means the requested lane already has a live worker (max 2 concurrent:
@@ -70,20 +72,28 @@ EOF
 }
 
 CAP_MINUTES="${CAP_MINUTES:-60}"
-MODEL="${MODEL:-claude-sonnet-5}"
-AGENT_LOG="${AGENT_LOG:-/tmp/emerald-factory-subagent-$(date +%Y%m%d-%H%M%S).jsonl}"
+PROVIDER="${WORKER_PROVIDER:-${POKEBENCH_WORKER_PROVIDER:-claude}}"
+MODEL="${WORKER_MODEL:-${MODEL:-}}"
+REASONING_EFFORT="${WORKER_REASONING_EFFORT:-}"
+AGENT_LOG="${AGENT_LOG:-}"
 WORKTREE="${WORKTREE:-0}"
 BRIEF=""
+PRINT_CONFIG=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -c|--cap-minutes) CAP_MINUTES="${2:?--cap-minutes needs a number}"; shift 2 ;;
     --cap-minutes=*)  CAP_MINUTES="${1#*=}"; shift ;;
     -w|--worktree)    WORKTREE=1; shift ;;
+    -p|--provider)    PROVIDER="${2:?--provider needs a name}"; shift 2 ;;
+    --provider=*)     PROVIDER="${1#*=}"; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; shift 2 ;;
     --model=*)        MODEL="${1#*=}"; shift ;;
+    -e|--effort)      REASONING_EFFORT="${2:?--effort needs a value}"; shift 2 ;;
+    --effort=*)       REASONING_EFFORT="${1#*=}"; shift ;;
     --log)            AGENT_LOG="${2:?--log needs a path}"; shift 2 ;;
     --log=*)          AGENT_LOG="${1#*=}"; shift ;;
+    --print-config)   PRINT_CONFIG=1; shift ;;
     -h|--help)        usage; exit 0 ;;
     -*) echo "run-subagent: unknown option '$1' (try --help)" >&2; exit 2 ;;
     *)
@@ -95,13 +105,49 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$BRIEF" ]]; then
+if [[ -z "$BRIEF" && "$PRINT_CONFIG" != "1" ]]; then
   echo "run-subagent: a step brief is required (try --help)" >&2
   exit 2
 fi
 if [[ ! "$CAP_MINUTES" =~ ^[0-9]+$ || "$CAP_MINUTES" -lt 1 ]]; then
   echo "run-subagent: --cap-minutes must be a positive integer (got '$CAP_MINUTES')" >&2
   exit 2
+fi
+if [[ ! "$PROVIDER" =~ ^(claude|codex)$ ]]; then
+  echo "run-subagent: unsupported provider '$PROVIDER' (expected claude or codex)" >&2
+  exit 2
+fi
+case "$PROVIDER" in
+  claude)
+    MODEL="${MODEL:-claude-sonnet-5}"
+    if [[ -n "$REASONING_EFFORT" ]]; then
+      echo "run-subagent: --effort applies only to the codex provider" >&2
+      exit 2
+    fi
+    command -v claude >/dev/null 2>&1 || { echo "run-subagent: claude CLI not found on PATH" >&2; exit 127; }
+    ;;
+  codex)
+    MODEL="${MODEL:-gpt-5.6-terra}"
+    REASONING_EFFORT="${REASONING_EFFORT:-medium}"
+    if [[ ! "$REASONING_EFFORT" =~ ^(none|low|medium|high|xhigh|max|ultra)$ ]]; then
+      echo "run-subagent: unsupported reasoning effort '$REASONING_EFFORT'" >&2
+      exit 2
+    fi
+    command -v codex >/dev/null 2>&1 || { echo "run-subagent: codex CLI not found on PATH" >&2; exit 127; }
+    ;;
+esac
+if [[ -z "$AGENT_LOG" ]]; then
+  if [[ "$PROVIDER" == "claude" ]]; then
+    AGENT_LOG="/tmp/emerald-factory-subagent-$(date +%Y%m%d-%H%M%S).jsonl"
+  else
+    AGENT_LOG="/tmp/emerald-factory-subagent-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
+  fi
+fi
+if [[ "$PRINT_CONFIG" == "1" ]]; then
+  echo "worker_provider=$PROVIDER"
+  echo "worker_model=$MODEL"
+  echo "worker_effort=${REASONING_EFFORT:-n/a}"
+  exit 0
 fi
 
 LAUNCH_EPOCH="$(date +%s)"
@@ -177,22 +223,21 @@ if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
   exit 1
 fi
 
-# The auto-memory directory is keyed to the repo path, so the supervisor and
-# its workers would otherwise share one memory space -- and a worker once
-# wrote a self-justifying entry into it (2026-07-09; see SUPERVISOR.md).
-# Workers therefore launch with CLAUDE_CODE_DISABLE_AUTO_MEMORY=1, which
-# strips the whole memory feature from their context. The snapshot taken here
-# is the mechanical tripwire behind that: if the directory changes during the
-# worker run anyway (env var regressed, or a worker went out of bounds), the
-# supervisor gets a loud warning plus the diff after the digest.
-MEMORY_DIR="$HOME/.claude/projects/$(pwd | tr '/' '-')/memory"
+# Claude Code auto-memory is shared by repo path. Preserve the original worker
+# isolation and tripwire for Claude; Codex ephemeral workers do not use it.
+MEMORY_DIR=""
+MEM_SNAP_BEFORE=""
+MEM_SNAP_AFTER=""
 memory_snapshot() {
-  # -exec (not xargs) so an empty/missing dir yields empty output, no stdin read.
-  [[ -d "$MEMORY_DIR" ]] && find "$MEMORY_DIR" -type f -exec md5 {} + 2>/dev/null | sort
+  [[ -n "$MEMORY_DIR" && -d "$MEMORY_DIR" ]] \
+    && find "$MEMORY_DIR" -type f -exec md5 {} + 2>/dev/null | sort
 }
-MEM_SNAP_BEFORE="/tmp/emerald-factory-memsnap-$$-before.txt"
-MEM_SNAP_AFTER="/tmp/emerald-factory-memsnap-$$-after.txt"
-memory_snapshot > "$MEM_SNAP_BEFORE" || true
+if [[ "$PROVIDER" == "claude" ]]; then
+  MEMORY_DIR="$HOME/.claude/projects/$(pwd | tr '/' '-')/memory"
+  MEM_SNAP_BEFORE="/tmp/emerald-factory-memsnap-$$-before.txt"
+  MEM_SNAP_AFTER="/tmp/emerald-factory-memsnap-$$-after.txt"
+  memory_snapshot > "$MEM_SNAP_BEFORE" || true
+fi
 
 # The step brief arrives wrapped in the standing worker contract, so the
 # supervisor's briefs stay purely about the work. The worktree lane's contract
@@ -223,22 +268,37 @@ You are a worker, not the supervisor: SUPERVISOR.md is not for you, and you neve
 fi
 
 CAP_SECONDS=$(( CAP_MINUTES * 60 ))
-echo "worker: $MODEL · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
+if [[ "$PROVIDER" == "claude" ]]; then
+  echo "worker: $MODEL · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
+else
+  echo "worker: $MODEL/$REASONING_EFFORT · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
+fi
 
 WORK_DIR="$(pwd)"
 if [[ "$WORKTREE" == "1" ]]; then WORK_DIR="$WT_PATH"; fi
 
 # No process substitution here: sandboxed supervisor sessions can't open
 # /dev/fd/N. Stream straight to the log; the digest is produced after exit.
-# The subshell exec makes $! the claude pid itself (needed for the watchdog
+# The subshell exec makes $! the agent pid itself (needed for the watchdog
 # and for sibling cancellation on a usage-limit stop).
-(
-  cd "$WORK_DIR"
-  export POKEBENCH_ROLE=worker CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 POKEBENCH_ORACLE_URL="$ORACLE_URL"
-  exec claude -p --verbose --output-format stream-json \
-    --model "$MODEL" \
-    --dangerously-skip-permissions "$PROMPT"
-) >> "$AGENT_LOG" &
+if [[ "$PROVIDER" == "claude" ]]; then
+  (
+    cd "$WORK_DIR"
+    export POKEBENCH_ROLE=worker CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 POKEBENCH_ORACLE_URL="$ORACLE_URL"
+    exec claude -p --verbose --output-format stream-json \
+      --model "$MODEL" \
+      --dangerously-skip-permissions "$PROMPT"
+  ) >> "$AGENT_LOG" &
+else
+  (
+    cd "$WORK_DIR"
+    export POKEBENCH_ROLE=worker POKEBENCH_ORACLE_URL="$ORACLE_URL"
+    exec codex exec --ephemeral --json \
+      --model "$MODEL" \
+      -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
+      --dangerously-bypass-approvals-and-sandbox "$PROMPT" </dev/null
+  ) >> "$AGENT_LOG" 2>&1 &
+fi
 agent_pid=$!
 echo "$$ $agent_pid" > "$LANE_FILE"
 # The watchdog traps TERM and kills its own sleep: a plain `sleep CAP` would
@@ -262,7 +322,11 @@ wait "$watchdog_pid" 2>/dev/null || true
 # Digest the transcript for the supervisor (streamed live before the
 # no-process-substitution change; post-hoc works the same for callers).
 if [[ -f "$AGENT_LOG" ]]; then
-  node tools/stream-summary.mjs < "$AGENT_LOG" || true
+  if [[ "$PROVIDER" == "claude" ]]; then
+    node tools/stream-summary.mjs < "$AGENT_LOG" || true
+  else
+    node tools/codex-stream-summary.mjs < "$AGENT_LOG" || true
+  fi
 fi
 
 # Worktree handoff: the worktree and branch outlive this launcher on purpose —
@@ -283,32 +347,36 @@ if [[ "$WORKTREE" == "1" ]]; then
   echo "  git worktree remove ${WT_PATH#$(pwd)/} && git branch -d $WT_BRANCH"
 fi
 
-# Memory tripwire (see the snapshot above): warn the supervisor if the shared
-# auto-memory directory changed while the worker ran. Note a supervisor
-# writing its own memory during the run trips this too -- the diff says which.
-memory_snapshot > "$MEM_SNAP_AFTER" || true
-if ! cmp -s "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER"; then
-  {
-    echo "run-subagent: WARNING -- the auto-memory directory changed during this worker run: $MEMORY_DIR"
-    echo "Workers launch with CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 and must never touch it. If you (the"
-    echo "supervisor) didn't write this yourself mid-run, treat it as a worker acting out of bounds:"
-    echo "review the diff, revert/rewrite anything you didn't author, and note it in your summary."
-    diff "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER" || true
-  } >&2
+if [[ "$PROVIDER" == "claude" ]]; then
+  memory_snapshot > "$MEM_SNAP_AFTER" || true
+  if ! cmp -s "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER"; then
+    {
+      echo "run-subagent: WARNING -- the auto-memory directory changed during this Claude worker run: $MEMORY_DIR"
+      echo "Workers launch with CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 and must never touch it. If you (the"
+      echo "supervisor) didn't write this yourself mid-run, treat it as a worker acting out of bounds:"
+      echo "review the diff, revert/rewrite anything you didn't author, and note it in your summary."
+      diff "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER" || true
+    } >&2
+  fi
+  rm -f "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER"
 fi
-rm -f "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER"
 
-# The result event is the log's last line; a usage/rate-limit stop shows up in
-# its result text. Surface it as a distinct exit code so the supervisor can
-# tell "worker hit the account wall" apart from ordinary failure. The harness
-# also emits benign informational rate_limit_event lines ("status":"allowed")
-# even on fully successful runs — those must not trip this (a worker that
-# finished green was misflagged as limit-stopped on 2026-07-09), so filter
-# them out before matching.
+# Surface usage/rate-limit failures distinctly so the supervisor can stop both
+# lanes rather than repeatedly relaunching work the account cannot service.
 USAGE_STOP_MARKER="$LANE_DIR/usage-limit-stop"
-if [[ -f "$AGENT_LOG" ]] && tail -n 3 "$AGENT_LOG" \
-    | grep -v '"type":"rate_limit_event".*"status":"allowed"' \
-    | grep -qiE 'usage limit|rate.?limit'; then
+USAGE_STOPPED=0
+if [[ -f "$AGENT_LOG" ]]; then
+  if [[ "$PROVIDER" == "claude" ]]; then
+    if tail -n 3 "$AGENT_LOG" \
+        | grep -v '"type":"rate_limit_event".*"status":"allowed"' \
+        | grep -qiE 'usage limit|rate.?limit'; then
+      USAGE_STOPPED=1
+    fi
+  elif tail -n 10 "$AGENT_LOG" | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
+    USAGE_STOPPED=1
+  fi
+fi
+if [[ "$USAGE_STOPPED" == "1" ]]; then
   echo "run-subagent: worker was stopped by an account usage/rate limit" >&2
   # The limit is account-wide, so a sibling lane's worker is burning time it
   # can't use: cancel it, and leave a timestamped marker so its launcher also
@@ -332,9 +400,12 @@ if [[ "$marker_epoch" =~ ^[0-9]+$ ]] && (( marker_epoch >= LAUNCH_EPOCH )); then
   echo "run-subagent: a sibling worker hit the account usage/rate limit during this run — this worker was cancelled with it (supervisor: wind down, do not relaunch)" >&2
   exit 42
 fi
-# A sandboxed launch shows up as an instant unauthenticated death — turn that
-# into a pointed hint instead of a mystery exit 1.
-if [[ "$status" -ne 0 && -f "$AGENT_LOG" ]] && grep -qi 'not logged in' "$AGENT_LOG"; then
-  echo "run-subagent: worker exited unauthenticated — this launch was probably sandboxed. Relaunch with the Bash tool's dangerouslyDisableSandbox: true (see the header comment)." >&2
+# Turn authentication failures into a pointed hint instead of a mystery exit 1.
+if [[ "$status" -ne 0 && -f "$AGENT_LOG" ]] && grep -qiE 'not logged in|authentication required|unauthorized|401' "$AGENT_LOG"; then
+  if [[ "$PROVIDER" == "claude" ]]; then
+    echo "run-subagent: worker exited unauthenticated — this launch was probably sandboxed. Relaunch with the Bash tool's dangerouslyDisableSandbox: true (see the header comment)." >&2
+  else
+    echo "run-subagent: codex worker exited unauthenticated — log in with the codex CLI and retry" >&2
+  fi
 fi
 exit "$status"
