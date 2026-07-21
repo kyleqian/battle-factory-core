@@ -1564,6 +1564,36 @@ describe("S7 slice M-3 (docs/faint-switch-notes.md §12/§13): drawSpriteSheetAf
   });
 });
 
+describe("S7 slice N-3: drawSpriteSheetAffineRotate against FEATHER_DANCE's own real per-tick matrix (docs/turn6-notes.md §6, src/data/gen/turn6-feather-sprites-probe.json tick 7404 slot 3, a=225,b=-120,c=120,d=225) - the generic 2x2-matrix blit this slice's 8 independently-rotating feather sprites reuse, over a MULTI-TILE (2x2, 16x16) sheet (the sitrus tests above only ever exercise a single 8x8 tile)", () => {
+  // 2x2 tiles (16x16), two marked texels in DIFFERENT tiles: absolute sprite
+  // pixel (col=10,row=3) -> tile(1,0) pixel(2,3) = palette index 1; absolute
+  // (col=3,row=12) -> tile(0,1) pixel(3,4) = palette index 2.
+  const tileA = new Array(64).fill(0);
+  tileA[3 * 8 + 2] = 1;
+  const tileB = new Array(64).fill(0);
+  tileB[4 * 8 + 3] = 2;
+  const blank = new Array(64).fill(0);
+  const tileset = { columns: 2, rows: 2, tiles: [blank, tileA, tileB, blank] };
+  const palette = [
+    { r: 0, g: 0, b: 0 },
+    { r: 240, g: 90, b: 12 },
+    { r: 18, g: 160, b: 244 },
+  ];
+  const CENTER_X = 100;
+  const CENTER_Y = 70;
+
+  it("reproduces both markers at their hand-solved inverse-sampled offsets", () => {
+    const fb = new Uint8Array(240 * 160 * 4);
+    drawSpriteSheetAffineRotate(fb, tileset, palette, CENTER_X, CENTER_Y, 225, -120, 120, 225);
+    const at = (dx: number, dy: number): [number, number, number] => {
+      const o = ((CENTER_Y + dy) * 240 + (CENTER_X + dx)) * 4;
+      return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+    };
+    expect(at(0, -5)).toEqual([240, 90, 12]); // tex(10,3), tile(1,0)
+    expect(at(-2, 6)).toEqual([18, 160, 244]); // tex(3,12), tile(0,1)
+  });
+});
+
 describe("S7 slice M-3: onixSitrusRotateMatrix (docs/faint-switch-notes.md §12/§13) - RAM-read 32-entry table, anchored at RAM tick 6872 (identity), 3 cycles, +2 render-tick lag from the RAM tick (not the usual +1 - RAM-pixel-bisected this session)", () => {
   it("is null (plain static draw) before the rotation's own render window starts", () => {
     expect(onixSitrusRotateMatrix(6873)).toBeNull();
