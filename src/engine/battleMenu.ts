@@ -1292,6 +1292,118 @@ export function statsBannerBg1Y(t: number, pressTick: number): number {
   return Math.max(0, Math.min(180, 3 * d));
 }
 
+/**
+ * S7 slice N-4 rung (a) (docs/turn6-notes.md §6, docs/battle-turn-notes.md
+ * §29's "OTHER thing found"): the SAME generic `StatsChangeAnimation_Step1-3`
+ * banner `statsBannerEva`/`statsBannerBg1Y` already model for turn 1's
+ * evasion-RISE DOUBLE_TEAM, now parameterized for FEATHER_DANCE's
+ * `EFFECT_ATTACK_DOWN_2` ATK-FALL on ONIX (`aDecrease=TRUE`, `aSharply=TRUE`
+ * - the -2-stage "harshly fell" case, `tTargetBlend=13`/`tWaitTime=30` per
+ * `battle_anim_utility_funcs.c:543-552`, vs. DOUBLE_TEAM's own mild-rise
+ * `10`/`20`). RAM-truthed fresh this session directly against register
+ * values (`BLDALPHA`/`gBattle_BG1_X`/`gBattle_BG1_Y`, `tools/probe/
+ * ram-probe.py`, stride-1 7555-7700 on `battle1-turn6-dense.json`'s own
+ * script) - this was the ~7570+ residual §29 flagged as unmodeled: task
+ * slot 1 runs `StatsChangeAnimation_Step1/2/3` from RAM tick 7567 (RAM-
+ * confirmed via `tools/probe/dump-task-and-sprite-callbacks.py`), not a
+ * downward-arrow sprite or a healthbox flash as turn6-notes §6 speculated -
+ * it is the exact same full-screen OBJ-window-masked BG1 layer
+ * `drawStatsBanner` already renders, just decreasing/sharply/ATK-paletted
+ * and masked to ONIX's own silhouette (the move's target) instead of
+ * Grovyle's.
+ *
+ * `eva` schedule decoded directly from `BLDALPHA` (`eva = value & 0xFF`,
+ * `evb = value >> 8`) at every tick 7555-7700, pressTick-relative (d = t -
+ * pressTick, pressTick = turn 6's own FEATHER_DANCE confirm press, 7345):
+ * flat 0 through d=228, then +1 every 2 ticks from d=229 (RAM 7574, eva=1)
+ * to d=253 (eva=13, target reached), held flat through d=284 (RAM 7629),
+ * then -1 every 2 ticks back to 0 by d=309 (RAM 7654) - a clean, fully
+ * deterministic step function, zero fitting needed (every one of the 89
+ * sampled ticks matches this closed form exactly). No render lag (same "a
+ * different register class, apparently copied to the display pipeline on a
+ * different cadence than BG-scroll" rule `statsBannerEva`'s own doc already
+ * establishes for this identical mechanism).
+ */
+export const TURN6_STATFALL_TARGET_BLEND = 13;
+const TURN6_STATFALL_RAMP_START_DELAY = 229; // pressTick+229 = 7574 (RAM), eva=1
+const TURN6_STATFALL_HOLD_END_DELAY = 284; // pressTick+284 = 7629 (RAM), last eva=13 tick
+const TURN6_STATFALL_RAMPDOWN_ANCHOR_DELAY = 285; // pressTick+285 = 7630 (RAM), eva=12 (first post-hold tick)
+
+/** `null` outside the banner's own RAM-active window (d<229 or d>309) - a legitimate, harmless value elsewhere (0 is a mathematical no-op just like `statsBannerEva`'s own convention), kept as `null` purely so callers can skip the draw call entirely. */
+export function turn6StatFallEva(t: number, pressTick: number): number | null {
+  const d = t - pressTick;
+  if (d < TURN6_STATFALL_RAMP_START_DELAY || d > 309) return null;
+  if (d <= TURN6_STATFALL_HOLD_END_DELAY) {
+    return Math.min(TURN6_STATFALL_TARGET_BLEND, Math.floor((d - TURN6_STATFALL_RAMP_START_DELAY) / 2) + 1);
+  }
+  return Math.max(0, TURN6_STATFALL_TARGET_BLEND - (Math.floor((d - TURN6_STATFALL_RAMPDOWN_ANCHOR_DELAY) / 2) + 1));
+}
+
+/**
+ * `gBattle_BG1_Y` as it actually affects the rendered frame - same "+1
+ * render lag vs. BLDALPHA's own no-lag convention" rule `statsBannerBg1Y`'s
+ * own doc already establishes for this identical mechanism, RAM-confirmed
+ * fresh this session (the same register probe `turn6StatFallEva` cites):
+ * flat 0 through RAM tick 7571 (d=226), then a clean `-3`/tick ramp (`gTasks
+ * [taskId].tVelocity=-3` for a stat DECREASE, `battle_anim_utility_funcs.c:
+ * 536`, unconditional every Step3 tick including the eva hold - continuous,
+ * not gated) through RAM tick 7653 (d=308, value -246), holding flat one
+ * extra RAM tick (7654, d=309) before task teardown zeroes it. Clamped at
+ * -246 rather than continuing to ramp past d=309 - never observed to matter
+ * since `turn6StatFallEva` gates every caller to d<=309 anyway.
+ */
+export function turn6StatFallBg1Y(t: number, pressTick: number): number {
+  const d = t - 1 - pressTick;
+  if (d <= 226) return 0;
+  return Math.max(-246, -3 * (d - 226));
+}
+
+/**
+ * `gBattle_BG1_X` for this stat-DECREASE case (`aDecrease=TRUE` sets it to a
+ * constant 64, vs. `statsBannerBg1Y`'s own stat-INCREASE case which never
+ * moves it off 0) - RAM-confirmed flat at exactly 64 for the banner's entire
+ * active window (same register probe), never itself scrolling (only `_Y`
+ * does, every Step3 tick) - a plain constant, not a function of `t`.
+ */
+export const TURN6_STATFALL_BG1_X = 64;
+
+/**
+ * S7 slice N-4 rung (a) (docs/turn6-notes.md §5, corrected by turn7-notes.md
+ * §5): "ONIX’s ATTACK\nharshly fell!" - the flavor text for FEATHER_DANCE's
+ * `EFFECT_ATTACK_DOWN_2` stat write, which does NOT appear until the whole
+ * kickoff-text+animation hold (`turn6FeatherDanceTextStartTick` through the
+ * stat-fall banner's own teardown) finishes - pixel-confirmed this session
+ * (fresh `bin/oracle run` of `battle1-turn6-dense.json`'s own script): the
+ * held kickoff sha (`ae11c7f00fbd`) stays flat through tick 7658, the first
+ * changing tick is 7659 (already showing 1 glyph, "O" - an instant swap, NOT
+ * a separate box-close/reopen slide despite turn7-notes §5's "shared 4-frame
+ * prefix" finding, which turns out to be pure TEXT-CONTENT coincidence: both
+ * "ONIX’s ATTACK" and turn 7's own analogous "ONIX used" happen to start
+ * with the same 4 characters "ONIX", not a generic transition mechanism -
+ * re-verified directly, not assumed), and the message settles flat
+ * (`325b7b5ba26c`) at tick 7684 - exactly `7659 + 26 - 1`, the SAME "1
+ * tick/char, settle on the last glyph's own tick" mechanism as every other
+ * kickoff message in this dossier (`turn6FeatherDanceTextVisibleChars` et
+ * al.), no new timing shape needed. `’` (U+2019, not a plain ASCII
+ * apostrophe) matches this codebase's own established charmap convention
+ * (`TURN5_SITRUS_HEAL_LINE1`'s "ONIX’s SITRUS BERRY", `charmap.json`'s own
+ * `'\''`/`'’'` dual-mapped B4 entry - only the curly form survived
+ * extraction).
+ */
+export const TURN6_ATKFELL_LINE1 = "ONIX’s ATTACK";
+export const TURN6_ATKFELL_LINE2 = "harshly fell!";
+export const TURN6_ATKFELL_TEXT_TOTAL = TURN6_ATKFELL_LINE1.length + TURN6_ATKFELL_LINE2.length;
+
+export function turn6AtkFellTextStartTick(pressTick: number): number {
+  return pressTick + 314; // pressTick+314 = 7659 (pixel-confirmed above)
+}
+
+export function turn6AtkFellTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn6AtkFellTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN6_ATKFELL_TEXT_TOTAL, t - start + 1);
+}
+
 // --- S7 slice C: the ROCK_SLIDE window (docs/battle-move-anim-notes.md §9,
 // docs/battle-turn-notes.md §9) - picks up exactly where slice B's stat-
 // change banner leaves off (its own last active-but-zero-effect tick,

@@ -64,6 +64,15 @@ import {
   turn2SubmenuBounceTick,
   menuIdleBounce,
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+  turn6StatFallEva,
+  turn6StatFallBg1Y,
+  TURN6_STATFALL_TARGET_BLEND,
+  TURN6_STATFALL_BG1_X,
+  turn6AtkFellTextStartTick,
+  turn6AtkFellTextVisibleChars,
+  TURN6_ATKFELL_LINE1,
+  TURN6_ATKFELL_LINE2,
+  TURN6_ATKFELL_TEXT_TOTAL,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 
@@ -491,6 +500,57 @@ describe("battleMenu: stat-change banner BG1 scroll (docs/battle-menu-notes.md �
     expect(statsBannerBg1Y(2150, pressTick)).toBe(60); // RAM tick 2149
     expect(statsBannerBg1Y(2160, pressTick)).toBe(90); // RAM tick 2159
     expect(statsBannerBg1Y(2190, pressTick)).toBe(180); // holds at the ramp's own max past teardown
+  });
+});
+
+describe("battleMenu: turn 6's stat-fall banner (docs/turn6-notes.md §6, battle-turn-notes.md §29's 'OTHER thing found' - S7 slice N-4 rung (a)) - the SAME StatsChangeAnimation banner as above, parameterized for FEATHER_DANCE's ATK-FALL on ONIX (decrease, sharply)", () => {
+  const pressTick = 7345; // turn 6's own real FEATHER_DANCE-move-confirm press tick (docs/turn6-notes.md §5)
+
+  it("target blend is 13 (the 'sharply' case, vs. DOUBLE_TEAM's mild-rise 10)", () => {
+    expect(TURN6_STATFALL_TARGET_BLEND).toBe(13);
+  });
+
+  it("eva: null before the ramp and after full fade-out, then +1/2-ticks up to 13, held, then -1/2-ticks back to 0 - RAM-exact against a fresh BLDALPHA register probe (ticks 7555-7700)", () => {
+    expect(turn6StatFallEva(pressTick + 228, pressTick)).toBeNull(); // RAM 7573, still BLDALPHA_BLEND(0,16)
+    expect(turn6StatFallEva(pressTick + 229, pressTick)).toBe(1); // RAM 7574, first nonzero eva
+    expect(turn6StatFallEva(pressTick + 230, pressTick)).toBe(1); // RAM 7575, same eva (every-2-tick cadence)
+    expect(turn6StatFallEva(pressTick + 253, pressTick)).toBe(13); // RAM 7598, target reached
+    expect(turn6StatFallEva(pressTick + 284, pressTick)).toBe(13); // RAM 7629, last held tick
+    expect(turn6StatFallEva(pressTick + 285, pressTick)).toBe(12); // RAM 7630, first post-hold tick
+    expect(turn6StatFallEva(pressTick + 308, pressTick)).toBe(1); // RAM 7653
+    expect(turn6StatFallEva(pressTick + 309, pressTick)).toBe(0); // RAM 7654, back to 0
+    expect(turn6StatFallEva(pressTick + 310, pressTick)).toBeNull(); // RAM 7655, outside the active window
+  });
+
+  it("bg1Y: -3/tick continuous scroll (a DECREASE's own tVelocity, vs. the increase case's +3), one-tick render lag matching statsBannerBg1Y's own convention, clamped at its own teardown value", () => {
+    expect(turn6StatFallBg1Y(pressTick + 227, pressTick)).toBe(0); // RAM tick 7571 (t-1), still 0
+    expect(turn6StatFallBg1Y(pressTick + 228, pressTick)).toBe(-3); // RAM tick 7572 (t-1)
+    expect(turn6StatFallBg1Y(pressTick + 254, pressTick)).toBe(-81); // RAM tick 7598 (t-1)
+    expect(turn6StatFallBg1Y(pressTick + 309, pressTick)).toBe(-246); // RAM tick 7653 (t-1)
+    expect(turn6StatFallBg1Y(pressTick + 310, pressTick)).toBe(-246); // RAM tick 7654 (t-1), holds at the ramp's own max
+  });
+
+  it("bg1X is a flat constant 64 for the whole decrease window (RAM-confirmed, never itself scrolling)", () => {
+    expect(TURN6_STATFALL_BG1_X).toBe(64);
+  });
+});
+
+describe("battleMenu: turn 6's ATK-fall flavor text (docs/turn6-notes.md §5, corrected by turn7-notes.md §5 - S7 slice N-4 rung (a)) - 'ONIX’s ATTACK\\nharshly fell!', the SAME 1-tick/char mechanism as every other kickoff message", () => {
+  const pressTick = 7345;
+
+  it("text content and total char count", () => {
+    expect(TURN6_ATKFELL_LINE1).toBe("ONIX’s ATTACK");
+    expect(TURN6_ATKFELL_LINE2).toBe("harshly fell!");
+    expect(TURN6_ATKFELL_TEXT_TOTAL).toBe(26);
+  });
+
+  it("starts at pressTick+314 (7659, pixel-confirmed: the held FEATHERDANCE kickoff sha stays flat through 7658, first changing tick is 7659 already showing 1 glyph) and settles on the last glyph's own tick (7684)", () => {
+    expect(turn6AtkFellTextStartTick(pressTick)).toBe(7659);
+    expect(turn6AtkFellTextVisibleChars(7658, pressTick)).toBe(0);
+    expect(turn6AtkFellTextVisibleChars(7659, pressTick)).toBe(1);
+    expect(turn6AtkFellTextVisibleChars(7660, pressTick)).toBe(2);
+    expect(turn6AtkFellTextVisibleChars(7684, pressTick)).toBe(26);
+    expect(turn6AtkFellTextVisibleChars(7700, pressTick)).toBe(26); // clamped, holds past settle
   });
 });
 

@@ -475,6 +475,13 @@ import {
   endeavorOnixHp,
   currentPPForActiveMon,
   FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
+  turn6StatFallEva,
+  turn6StatFallBg1Y,
+  TURN6_STATFALL_BG1_X,
+  turn6AtkFellTextStartTick,
+  turn6AtkFellTextVisibleChars,
+  TURN6_ATKFELL_LINE1,
+  TURN6_ATKFELL_LINE2,
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import type { ActiveMonMoveset } from "./battleSetup.ts";
@@ -6394,11 +6401,63 @@ function drawTurn6FeatherSprites(fb: Uint8Array, t: number, wantBehindOnix: bool
 /** `sprite.oam.priority` (`GetBattlerSpriteBGPriority(battler)+1` while `unk2` is in [64,191], base otherwise, `src/engine/featherDance.ts`) - Onix's own on-field sprite sits at the SAME base priority; empirically bisected this session (z-order scratch compares against the oracle) that the +1 ("far side of the flap") group draws BEHIND Onix while the base-priority group draws IN FRONT, matching a real depth toggle as each feather swings past the target. */
 const FEATHER_BASE_PRIORITY_CUTOFF = 3;
 
+/**
+ * S7 slice N-4 rung (a) (docs/turn6-notes.md §6, battle-turn-notes.md §29's
+ * "OTHER thing found" resolved - see `turn6StatFallEva`'s own doc for the
+ * full RAM story): the generic `StatsChangeAnimation` banner, parameterized
+ * for FEATHER_DANCE's ATK-FALL on ONIX - same OBJ-window-masked BG1 alpha
+ * blend `drawStatsBanner` already renders for turn 1's own evasion-RISE
+ * DOUBLE_TEAM, just swapped to Onix's own sprite mask/corner, the
+ * `decrease` tilemap + `attack` palette, and `TURN6_STATFALL_BG1_X`'s own
+ * constant horizontal offset (only ever nonzero for a DECREASE, unlike
+ * `drawStatsBanner`'s always-0 increase case). `drawStatsBanner` itself is
+ * left untouched (turn 1's own trace stays byte-for-byte reliant on its
+ * exact zero-arg shape) rather than threading new optional params through
+ * it - the two are similar enough in spirit to share `statAnimBg1PixelAt`
+ * but different enough in every actual parameter that a copy is clearer
+ * than a 6-optional-parameter generalization for a single second caller.
+ */
+function drawTurn6StatFallBanner(fb: Uint8Array, t: number, pressTick: number, eva: number): void {
+  const evb = 16 - eva;
+  const bg1Y = turn6StatFallBg1Y(t, pressTick);
+  const { tileset } = onixBackSprite;
+  const bgTileset = statAnimBanner.tileset;
+  const bgTilemap = statAnimBanner.tilemaps.decrease;
+  const bgPalette = statAnimBanner.palettes.attack;
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          if (tile[py * 8 + px] === 0) continue;
+          const x = ONIX_MATERIALIZE_CORNER.x + tx * 8 + px;
+          const y = ONIX_MATERIALIZE_CORNER.y + ty * 8 + py;
+          if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+          const bg1c = statAnimBg1PixelAt(bgTilemap, bgTileset, bgPalette, x + TURN6_STATFALL_BG1_X, y + bg1Y);
+          if (!bg1c) continue;
+          const o = (y * 240 + x) * 4;
+          fb[o] = blendChannel(bg1c.r, fb[o]!, eva, evb);
+          fb[o + 1] = blendChannel(bg1c.g, fb[o + 1]!, eva, evb);
+          fb[o + 2] = blendChannel(bg1c.b, fb[o + 2]!, eva, evb);
+        }
+      }
+    }
+  }
+}
+
 function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
   drawTurn6FieldBase(fb, t, pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET, () => drawTurn6FeatherSprites(fb, t, true));
   drawTurn6FeatherSprites(fb, t, false);
+  const eva = turn6StatFallEva(t, pressTick);
+  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+  const atkFellStart = turn6AtkFellTextStartTick(pressTick);
+  if (t >= atkFellStart) {
+    drawMessageTextLines(fb, TURN6_ATKFELL_LINE1, TURN6_ATKFELL_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
+  } else {
+    drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+  }
 }
 
 function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
