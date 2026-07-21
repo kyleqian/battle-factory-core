@@ -66,7 +66,7 @@ import speciesNames from "../src/data/gen/species-names.json" with { type: "json
 import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-probe.json" with { type: "json" };
 import turn6BounceBlipProbe from "../src/data/gen/turn6-bounce-blip-probe.json" with { type: "json" };
 import turn8BounceBlipProbe from "../src/data/gen/turn8-bounce-blip-probe.json" with { type: "json" };
-import { turn6FeatherSprites, compareFeatherDrawOrder } from "../src/engine/featherDance.ts";
+import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder } from "../src/engine/featherDance.ts";
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -1665,6 +1665,21 @@ describe("S7 slice N-3: turn6FeatherSprites (src/engine/featherDance.ts) - RAM-t
   });
   it("all 8 sprites are live by render tick 7437 (RAM 7436, the last spawn group)", () => {
     expect(turn6FeatherSprites(7437)).toHaveLength(8);
+  });
+});
+
+describe("S7 engine slice Q rungs (b)/(c) (docs/battle-turn-notes.md §34): turn7FeatherSprites/turn8FeatherSprites - same RAM-table mechanism as turn6FeatherSprites, own probe tables, same +1 render lag re-verified against the oracle", () => {
+  it("turn7FeatherSprites is empty before its own window and matches turn6's own spawn snapshot at the first live tick (8439, RAM 8438)", () => {
+    expect(turn7FeatherSprites(8438)).toEqual([]);
+    const sprites = turn7FeatherSprites(8439);
+    expect(sprites).toHaveLength(1);
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3 });
+  });
+  it("turn8FeatherSprites is empty before its own window and matches turn6's own spawn snapshot at the first live tick (9485, RAM 9484)", () => {
+    expect(turn8FeatherSprites(9484)).toEqual([]);
+    const sprites = turn8FeatherSprites(9485);
+    expect(sprites).toHaveLength(1);
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3 });
   });
 });
 

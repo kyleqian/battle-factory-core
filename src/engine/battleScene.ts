@@ -498,7 +498,7 @@ import {
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import type { ActiveMonMoveset } from "./battleSetup.ts";
-import { turn6FeatherSprites, compareFeatherDrawOrder } from "./featherDance.ts";
+import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder, type FeatherRenderSprite } from "./featherDance.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimWhiteFeatherAsset from "../assets/gen/battle-anim-white-feather.json" with { type: "json" };
@@ -6563,8 +6563,8 @@ export function turn6FeatherDanceTextVisibleChars(t: number, pressTick: number):
  * after `drawTurn6FieldBase`, i.e. always in front - see battle-turn-notes.md
  * §29 for what this does and doesn't get right).
  */
-function drawTurn6FeatherSprites(fb: Uint8Array, t: number, wantBehindOnix: boolean): void {
-  const sprites = turn6FeatherSprites(t)
+function drawTurn6FeatherSprites(fb: Uint8Array, t: number, wantBehindOnix: boolean, lookup: (t: number) => FeatherRenderSprite[] = turn6FeatherSprites): void {
+  const sprites = lookup(t)
     .filter((s) => (s.priority >= FEATHER_BASE_PRIORITY_CUTOFF) === wantBehindOnix)
     .sort(compareFeatherDrawOrder);
   for (const s of sprites) {
@@ -6878,8 +6878,8 @@ function drawTurn7FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
     return;
   }
   const frozenRegime2Tick = TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY;
-  drawTurn7FieldBase(fb, t, frozenRegime2Tick, () => drawTurn6FeatherSprites(fb, t, true));
-  drawTurn6FeatherSprites(fb, t, false);
+  drawTurn7FieldBase(fb, t, frozenRegime2Tick, () => drawTurn6FeatherSprites(fb, t, true, turn7FeatherSprites));
+  drawTurn6FeatherSprites(fb, t, false, turn7FeatherSprites);
   const eva = turn6StatFallEva(t, pressTick);
   if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
@@ -7067,8 +7067,8 @@ function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
     return;
   }
   const frozenRegime3Tick = TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY;
-  drawTurn8FieldBase(fb, t, frozenRegime3Tick, () => drawTurn6FeatherSprites(fb, t, true));
-  drawTurn6FeatherSprites(fb, t, false);
+  drawTurn8FieldBase(fb, t, frozenRegime3Tick, () => drawTurn6FeatherSprites(fb, t, true, turn8FeatherSprites));
+  drawTurn6FeatherSprites(fb, t, false, turn8FeatherSprites);
   const eva = turn6StatFallEva(t, pressTick);
   if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
