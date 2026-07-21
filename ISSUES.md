@@ -23,24 +23,31 @@ this session (first mismatch always ~17 ticks after each turn's own first
 spawn) - i.e. it's a property of the shared mechanism/tiebreak, not a
 turn-6-specific artifact.
 
-**Eliminated**: ascending-slot (the old bug), fresh descending-Y-per-tick
-(445px, worse than descending-slot's 425px). **NARROWED by the
-sSpriteOrder simulation probe (2026-07-21, `docs/feather-order-notes.md`
-+ `tools/probe/simulate-feather-sprite-order.py`, supervisor-rerun
-reproduced)**: the real mechanism (from source, `sprite.c`) is a FULL
-insertion sort every frame whose prior-frame order only matters at exact
-(priority, wrapped-Y) ties — and the 8 feathers spawn in mirrored pairs
-sharing Y, so ties are pervasive (why a fresh Y-sort can't model it).
-Parameterizing the unknowable initial slot permutation over all 2^3
-same-tick pairs: ONLY the (4,7) pair's order matters — exactly **2 live
-candidates**, identical across turns 6/7/8, each differing from the
-shipped descending-slot rule on 89/97 of ~129 residual ticks. **Next
-step (named, unstarted)**: render both candidates over turn 6's
-7421-7549 via the existing primitives and diff against fresh oracle
-captures — a winner (or double elimination) is decisive either way; the
-half-texel sampling-center lead stays queued behind it.
-`turn6/7/8-feathers.json` stop at 106/16/33, all 0 diff; extension gated
-on this crack.
+**State after the three 2026-07-21 probes** (`docs/feather-order-notes.md`
+carries all evidence; every claim below pixel-tested against fresh oracle
+captures of turn 6's full 7421-7549 window):
+- **Order candidate A WINS** (sSpriteOrder simulated from source, seeded
+  `[3,4,7,8,9,10,11,12]` with spawn-pair (4,7) in that order): 425→230px,
+  ≤ candidate B on 129/129 ticks, generalizes to turns 7/8 (46→17px
+  spot). Mechanical adoption recipe in the notes doc (replace
+  `compareFeatherDrawOrder`'s tiebreak with a lookup into the simulated
+  per-tick order). NOT yet adopted in the engine — an improvement, not a
+  crack, so no trace extends yet.
+- **Half-texel sampling-center lead ELIMINATED decisively**: 11/11
+  variants (9-point ±0.5 grid + hFlip-conditional + box-origin) are
+  78-142× WORSE — the current sampler's center convention is confirmed
+  correct.
+- **The remaining ~230px is TWO independent classes** (4-pixel gated
+  forensics): (a) soft-gradient white/blue deltas — §29's original
+  signature, mechanism still unknown; (b) larger deltas in ONIX'S GRAY
+  (not in the feather palette at all) exactly at the priority-split
+  occlusion boundary — a `beforeMonSprite`/priority-split wiring error,
+  a DIFFERENT code path than the sampler. Treat as two threads.
+
+Next steps: adopt candidate A (mechanical); then chase class (b) as an
+ordinary occlusion bug (it has a locatable code path); class (a) stays
+the hard unknown. `turn6/7/8-feathers.json` stop at 106/16/33, all 0
+diff; extension gated on both classes closing.
 
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of

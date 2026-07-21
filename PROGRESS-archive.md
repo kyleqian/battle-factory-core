@@ -1,4 +1,38 @@
 ---
+## 221 — Worktree probe (supervisor-folded): ISSUES #30's sSpriteOrder lead NARROWED TO 2 CANDIDATES — the real mechanism (source-read) is a full per-frame insertion sort whose history only matters at exact (priority, wrapped-Y) ties, and the mirrored-pair feathers make ties pervasive (why fresh Y-sorts can't model it); of the 2^3 unknowable initial pair-orders, ONLY the (4,7) pair matters — 2 live candidates, identical across turns 6/7/8; `docs/feather-order-notes.md` + rerunnable simulation script merged (supervisor-rerun reproduces), suite 877/877
+
+- **State:** merged into master post-slice-R, `npm test` 877/877 +
+  build green, worktree/branch cleaned. ISSUES #30 updated with the
+  narrowing + the named next step (render both candidates over turn
+  6's residual window, diff vs fresh oracle captures — decisive either
+  way). Probe stopped honestly at cap before the pixel test.
+- **Next:** round 10 — main: QUICK_ATTACK's animation (slice R rung
+  (c), §35's RAM-probed task inventory banked: elliptical lunge +
+  blended afterimage + shake, tasks/slots pinned) then rung (d)
+  (ROCK_SLIDE + turn-end); worktree: the #30 candidate pixel test
+  (scratch-render, no engine code). Wind-down begins ~07:45.
+- **Notes:** probe in contract (9.3 of 30 min), honest cap stop.
+
+---
+## 219 — Worktree probe (supervisor-folded): **ISSUES #29 ROOT-CAUSED, both families** — the same missing-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` mechanism as #28, one dispatch branch earlier (Family A: pre-reveal idle window must key the shift off `openElapsed !== null`, not `revealTick`; Family B: `turn7KickoffBounceTick`'s pre-freeze branch returns unshifted `t`); supervisor re-ran the committed verify script — both families PASS, zero neighbor regressions; probe scoreboard this session: **4-for-4** (#27, #26, #28, #29); merged, suite 865/865
+
+- **State:** merged into master post-feathers, `npm test` 865/865 +
+  build green, worktree/branch cleaned. ISSUES #29 rewritten to
+  one-fix-step-owed with the probe's rules + the honest open flag
+  (turn 6/8 kickoff wrappers share Family B's code shape, unprobed).
+- **Next:** round 9 — main: #29 fix as rung (a) (verify-script-first,
+  restore 6 ticks: menus → 44/93/88) + turn 9 slice as rungs (b+)
+  (turn9-notes.md exists; both published lines reconverge at turn 9);
+  worktree: ISSUES #30 probe (simulate SortSprites' persistent
+  adjacent-swap order over the committed feather probe tables — all
+  inputs committed, pure computation; then the half-texel lead).
+- **Notes:** probe in contract (12.0 of 30 min). Every excluded tick
+  in turns 1-8 now has either a root-caused fix pending (#29's 6) or
+  a live named-lead investigation (#30's feather windows); no
+  speculative labels remain.
+
+---
+
 ## 220 — Bounded worker (S7 engine slice R, rungs (a)+(b)): **ISSUES #29 FIXED** (both families, all 3 menu traces restored 0 diff) **+ turn 9's menu-reopen/LEFT-nav/confirm/QUICK_ATTACK-kickoff-text chain landed clean** — `turn9-menu.json` **111/111**; QUICK_ATTACK's own animation + everything downstream (impact/drain/message/ROCK_SLIDE/turn-end) NOT modeled — RAM-probed and precisely characterized (§35), not guessed
 
 - **State:** `npm test` **877/877** (+12), `npm run build` green, tree

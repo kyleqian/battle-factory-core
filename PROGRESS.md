@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 224 — Worktree probes ×2 (supervisor-folded, stacked branches): ISSUES #30's pixel test CROWNS CANDIDATE A (425→230px, ≤B on 129/129 ticks, turns 7/8 generalize 46→17px; mechanical adoption recipe banked) and the half-texel lead is ELIMINATED DECISIVELY (11/11 variants 78-142× worse — the sampler's center convention is CONFIRMED correct); forensics splits the remaining ~230px into TWO independent classes — soft-gradient unknown (a) and an ONIX-GRAY occlusion-boundary error at the priority split (b), a different, locatable code path; merged, suite 877/877
+
+- **State:** both stacked probe branches merged in one merge, `npm
+  test` 877/877 + build green, nested worktrees cleaned inner-first.
+  ISSUES #30 rewritten with the three-probe state + the two-class
+  split. The second probe caught its own early methodology error
+  (ungated compositing patch) via palette forensics before it could
+  mislead — the gated `matchesReal` protocol held.
+- **Next:** third targeted attempt at slice R rung (c) launching now
+  (40-min cap, §37's named diagnostic first: pressTick anchor vs
+  axis/mirror); then wind-down. Future sessions: adopt candidate A
+  (mechanical), chase #30 class (b) as an ordinary occlusion bug, turn
+  9 rung (d) + turns 10-13 parameterizations, #30 class (a) + #23 stay
+  the two hard unknowns.
+- **Notes:** probes in contract (12.7 + 17.2 of 30 each).
+
+---
 ## 223 — Bounded worker (S7 engine slice R rung (c) RETRY): §36 puzzle #1 (real-sprite hide/unhide) RESOLVED by direct pixel evidence — the `invisible` RAM bit never gates rendering, real sprite draws continuously at its own x2/y2; implementation attempt hit an unresolved on-screen position bug and was **reverted rather than committed broken** — no engine code landed, `npm test` 877/877 + build green unchanged
 
 - **State:** no `src/` changes this session (written, tested against
@@ -107,38 +124,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   "never red" fallback, matching the shape of prior worktree-probe
   entries (#219/#221) even though this was a main-lane, not worktree,
   session.
-
----
-## 221 — Worktree probe (supervisor-folded): ISSUES #30's sSpriteOrder lead NARROWED TO 2 CANDIDATES — the real mechanism (source-read) is a full per-frame insertion sort whose history only matters at exact (priority, wrapped-Y) ties, and the mirrored-pair feathers make ties pervasive (why fresh Y-sorts can't model it); of the 2^3 unknowable initial pair-orders, ONLY the (4,7) pair matters — 2 live candidates, identical across turns 6/7/8; `docs/feather-order-notes.md` + rerunnable simulation script merged (supervisor-rerun reproduces), suite 877/877
-
-- **State:** merged into master post-slice-R, `npm test` 877/877 +
-  build green, worktree/branch cleaned. ISSUES #30 updated with the
-  narrowing + the named next step (render both candidates over turn
-  6's residual window, diff vs fresh oracle captures — decisive either
-  way). Probe stopped honestly at cap before the pixel test.
-- **Next:** round 10 — main: QUICK_ATTACK's animation (slice R rung
-  (c), §35's RAM-probed task inventory banked: elliptical lunge +
-  blended afterimage + shake, tasks/slots pinned) then rung (d)
-  (ROCK_SLIDE + turn-end); worktree: the #30 candidate pixel test
-  (scratch-render, no engine code). Wind-down begins ~07:45.
-- **Notes:** probe in contract (9.3 of 30 min), honest cap stop.
-
----
-## 219 — Worktree probe (supervisor-folded): **ISSUES #29 ROOT-CAUSED, both families** — the same missing-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` mechanism as #28, one dispatch branch earlier (Family A: pre-reveal idle window must key the shift off `openElapsed !== null`, not `revealTick`; Family B: `turn7KickoffBounceTick`'s pre-freeze branch returns unshifted `t`); supervisor re-ran the committed verify script — both families PASS, zero neighbor regressions; probe scoreboard this session: **4-for-4** (#27, #26, #28, #29); merged, suite 865/865
-
-- **State:** merged into master post-feathers, `npm test` 865/865 +
-  build green, worktree/branch cleaned. ISSUES #29 rewritten to
-  one-fix-step-owed with the probe's rules + the honest open flag
-  (turn 6/8 kickoff wrappers share Family B's code shape, unprobed).
-- **Next:** round 9 — main: #29 fix as rung (a) (verify-script-first,
-  restore 6 ticks: menus → 44/93/88) + turn 9 slice as rungs (b+)
-  (turn9-notes.md exists; both published lines reconverge at turn 9);
-  worktree: ISSUES #30 probe (simulate SortSprites' persistent
-  adjacent-swap order over the committed feather probe tables — all
-  inputs committed, pure computation; then the half-texel lead).
-- **Notes:** probe in contract (12.0 of 30 min). Every excluded tick
-  in turns 1-8 now has either a root-caused fix pending (#29's 6) or
-  a live named-lead investigation (#30's feather windows); no
-  speculative labels remain.
 
 ---
