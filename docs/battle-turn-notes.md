@@ -2422,7 +2422,7 @@ From MURKROW's faint (tick 22418, un-dismissed) through DESTIN's loss quote
 | screen | trigger | notes |
 |---|---|---|
 | "Foe MURKROW fainted!" | `A` dismiss | same button-gated-KO-text rule as every prior faint in this dossier |
-| "Player defeated BUG CATCHER DESTIN!" | `A` dismiss | `gBattleOutcome` 0→**1** the instant this screen appears (RAM-confirmed) — **this is the actual WIN flag**, not a later transition; DESTIN's trainer class (BUG CATCHER) was already known from §13 |
+| "Player defeated BUG CATCHER DESTIN!" | `A` dismiss | `gBattleOutcome` 0→**1** ~~the instant this screen appears~~ **CORRECTED (turn-17 scout, 2026-07-21, tick-exact): the flip is at tick 22818 — 16 ticks after the "fainted!" dismiss press (22802), while the OLD text is still on screen, ~27 ticks BEFORE "Player defeated" starts typing** (`docs/turn17-notes.md` §2/§4, sha-cited) — **this is the actual WIN flag**, not a later transition; DESTIN's trainer class (BUG CATCHER) was already known from §13 |
 | "PLEASE I NEED SOME WATER" (DESTIN's loss quote) | `A` dismiss | `battle1-winline-b.json`'s own final committed tick (23601) — frozen here, un-dismissed |
 
 Continuing into `battle1-winline-b-swap.json`'s own new tail:

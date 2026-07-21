@@ -5,6 +5,26 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #27 — Unattributed single Random() call at HP-write+5, now seen at the
+  IDENTICAL offset in two consecutive turns — suspected real per-move-
+  resolution mechanism, not noise
+
+Filed 2026-07-21 (supervisor, at the turn-17 fold). One `Random()` step
+with no attributed consumer fires exactly **5 ticks after a move's HP
+write**: turn 16 tick 21152 (FAINT_ATTACK's write at 21147) and turn 17
+tick 22173 (FAINT_ATTACK's write at 22168, per `turn17-notes.md` §2).
+Earlier dossiers logged similar "tail" rolls per turn (17105/17111, 18079,
+19240) but attributed them loosely to "turn-tail/AI bookkeeping"; the
+new pair's identical +5 offset suggests a fixed post-damage mechanism
+(candidates worth checking first: `AbilityBattleEffects`'s
+ABILITYEFFECT_ON_DAMAGE sweep — turn 16's scout source-proved the
+FLAME_BODY *branch* can't fire for FAINT_ATTACK (no contact flag), but
+the surrounding dispatcher may still consume a roll; or a held-item/
+king's-rock-style check in the same window). Matters for engine
+RNG-exactness on every turn. One dedicated probe/source-trace step should
+attribute it; the dossier chain (turns 13-17 RNG ledgers) is the
+evidence base.
+
 ## #26 — Sitrus proc's expanding THIN_RING: ticks 7042-7072 of
   turn5-sitrus-c.json excluded after 3 bounded attempts (pixel placement
   never achieved)

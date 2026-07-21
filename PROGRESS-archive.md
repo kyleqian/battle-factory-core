@@ -1,4 +1,47 @@
 ---
+## 206 — Bounded worker (S7 slice N-4, rung a): turn 6's stat-fall window landed — §29's flagged ~7570+ residual RESOLVED (it's the generic StatsChangeAnimation banner, already built for turn 1's DOUBLE_TEAM, just never parameterized for a stat DECREASE) — `turn6-statfall.json` **127/127, 0 diff**, first-attempt; rung (b) (Onix's own ROCK_SLIDE vs. Pidgeotto) NOT attempted, precise ground-truth handoff banked in battle-turn-notes.md §30 (S7 bounded worker session, hard 60-minute cap)
+
+- **State:** `npm test` **831/831** (+6), `npm run build` green, tree
+  clean. `turn6-statfall.json` **127/127, 0 diff** (7558-7684). Zero
+  regressions: `turn6-feathers.json` 106/106, `turn6-featherdance.json`
+  90/90, `turn6-menu.json` 33/33, `turn5-rockslide.json` 256/256,
+  `turn1-rockslide.json` 256/256.
+- **Did:** RAM-probed the residual (`dump-task-and-sprite-callbacks.py`)
+  and found `gTasks` slot 1 running `StatsChangeAnimation_Step1/2/3` from
+  RAM tick 7567 — the SAME OBJ-window-masked BG1 alpha-blend banner turn
+  1's own `drawStatsBanner` already renders, just for a DECREASE
+  (`aSharply=TRUE` → `tTargetBlend=13`/`tWaitTime=30`) masked to ONIX
+  instead of Grovyle. A direct register probe (`BLDALPHA`/`gBattle_BG1_X`/
+  `gBattle_BG1_Y`, stride-1) decoded a clean deterministic step function
+  that matched the oracle 0-diff on the FIRST attempt, no bisection
+  needed. Also folded a message-sequencing correction directly into
+  turn6-notes.md's own understanding (superseding turn7-notes.md §5's
+  "generic box transition" guess): the "ONIX's ATTACK harshly fell!" text
+  starts at tick 7659 as a plain instant swap, not a box-close/reopen
+  slide — the "4 shared frames" turn7-notes noticed is just both messages
+  starting with the literal characters "ONIX".
+- **Next:** rung (b) — Onix's own ROCK_SLIDE vs. Pidgeotto (7765-8122ish,
+  battle-turn-notes.md §30 has a full sha-transition sweep of the whole
+  window banked: kickoff transition/hold, rock animation ~7805-7924,
+  impact flash ~7935-7955, HP-drain ~7970-8038, an uncaptured gap
+  8039-8114 almost certainly "It's super effective!", turn-end 8115-8124).
+  Needs: Pidgeotto-parameterized shake/blink (sprite+corner already exist
+  from the switch-in code), a fresh HP-drain pixel formula (156-max bar,
+  turn6-notes §5 already flagged it's NOT 1-unit-per-tick like turn 1's),
+  and the flinch/AI RNG cluster. Pidgeotto's healthbox sits at the SAME
+  screen origin Grovyle's did once settled (`turn5PidgeottoHealthboxSlideDx`
+  → 0), so the existing wobble geometry should be directly reusable.
+  Beyond that: turns 7-13 as parameterizations, turn 15+ scout (FLY
+  strike/first forced switch — already banked per #205), ISSUES #26.
+- **Notes:** no papercuts. Session was research-heavy (RAM-probing to
+  find the real mechanism cost real time) but paid off — first-attempt
+  0-diff is rare in this dossier and validates the "RAM-probe before
+  writing render code" mandate directly. Stopped rung (b) before
+  attempting implementation once it became clear it needed several NEW
+  sub-mechanisms (not a pure parameterization as the brief hoped) and the
+  session budget was better spent banking precise ground truth than
+  rushing a half-fit.
+
 ## 205 — Worktree scout (supervisor-folded): turn 15 ground truth BANKED — **FLY's strike half rolls REAL accuracy/crit/damage (3 Random() calls — NOT RNG-free like its own charge half)**, hits for "not very effective" 11 clipped to Onix's 4 HP (hp0→0 at tick 19147), and the battle's first **PLAYER-side forced switch** is ground-truthed end to end (faint sink → button-gated "ONIX fainted!" → party-select, cursor defaulting to the fainted slot → SEND OUT → MAGBY 138/138 materialize → settled menu at 20558); `battle1-turn15-dense.json` (245 captures) + `docs/turn15-notes.md`; merged, suite 825/825 on the merged tree
 
 - **State:** merged into master post-N-3, `npm test` 825/825 + build
