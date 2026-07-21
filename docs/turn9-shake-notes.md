@@ -481,3 +481,88 @@ hardcoded `eva=16,evb=16` traces to a stale doc comment. HOWEVER:
   NOT tested — named as the next instrument: dump the hitsplat's palette
   bank from `gPlttBufferFaded` at 2-3 live ticks and compare against the
   static palette before any further blend fitting.
+
+## 2026-07-21 (fourth session, bounded-worker PROBE): the palette-fade-tint
+hypothesis is REFUTED — `gPlttBufferFaded` is byte-identical to
+`gPlttBufferUnfaded` for the hitsplat's own OBJ bank across its ENTIRE live
+span; mechanism still open
+
+Per the supervisor's brief, ran the ONE named instrument left from the third
+session's own last paragraph above: a direct RAM dump of both palette
+buffers for the hitsplat's own OBJ bank, at every RAM tick 10934-10943 (its
+full RAM-live span) plus one tick either side (10933, 10944). **No `src/`
+changes.** New script: `tools/probe/dump-turn9-hitsplat-palette.py` —
+identifies the hitsplat sprite dynamically each tick via its `affineAnims`
+field against `sAffineAnims_HitSplat`'s own address (the same identifying
+field `dump-endeavor-hitsplat-shake.py`'s own docstring already establishes
+for this exact sprite family, reused unmodified — `callback`-based lookup
+doesn't work here since `AnimHitSplatBasic` reassigns its own callback on
+the sprite's first tick), falling back to the already-RAM-confirmed
+constant bank 7 (`battleScene.ts:7708-7710`) on the two pad ticks where the
+sprite isn't alive to identify.
+
+**Result, run fresh against `bin/oracle` this session (12 ticks, RAM
+10933-10944)**:
+
+| RAM tick | sprite found (dynamic) | resolved palette bank | faded==unfaded? |
+|---|---|---|---|
+| 10933 | no (pre-spawn) | 7 (fallback) | yes |
+| 10934-10943 | **yes, every tick** | **7** (matches dynamic lookup exactly) | **yes, all 16 entries, every tick** |
+| 10944 | no (post-life) | 7 (fallback) | yes |
+
+The dynamic per-tick sprite lookup independently reconfirms the hitsplat's
+own RAM-live window (10934-10943) a THIRD way (beyond the two already-cited
+methods: `dump-hitsplat-attrs.py`'s own direct read and
+`dump-endeavor-hitsplat-shake.py`'s own matrix read) — not assumed, derived
+fresh from the `affineAnims` scan itself. Every one of the 16 palette
+entries in `gPlttBufferFaded` matches `gPlttBufferUnfaded` bit-for-bit
+(`diffIndices` empty) at **every single tick probed**, including all 10
+ticks of the sprite's full live span. **There is no per-tick palette
+schedule at all — the palette is completely static throughout.** The actual
+contents (tick 10938 shown, identical at every other live tick): raw u16
+`[31916, 0, 4729, 13116, 22527, 0×11]` → RGB8 `(99,41,255), (0,0,0),
+(206,156,33), (231,206,99), (255,255,173), (0,0,0)×11` — index 4
+`(255,255,173)` matches the prior session's own citation of the asset's
+stored color exactly, and **no index in either buffer is anywhere near the
+oracle's own observed (255,240,152)-family tip color** — confirming the
+asset/palette itself was never the source of that residual, in either its
+faded or unfaded form.
+
+**Verdict: the named hypothesis is decisively REFUTED.** A palette-space
+tint (`gPlttBufferFaded` diverging from `gPlttBufferUnfaded` on this
+sprite's own bank) is not what produces the tip/edge residual — there is
+no divergence to exploit. Since the faded buffer IS the unfaded buffer
+(byte-identical, confirmed above) at every tick the two blend-fitting
+diagnostics (`diag-turn9-hitsplat-blendfit.ts`, `diag-turn9-hitsplat-
+tips.ts`) already examined (10934/10936/10937/10944), re-running either
+diagnostic with "the faded palette" swapped in would produce numerically
+identical output to their already-reported, already-refuted runs (62.2%
+best-fit ceiling, 158/176 mismatches explained by neither floor nor round)
+— there is no new input to feed through them, so no new brute-force pass
+was run; the elimination is complete without one.
+
+**Net effect on `docs/turn9-shake-notes.md`'s own gap list**: all three
+named hypotheses for the tip/edge residual (coefficient/rounding-domain fit,
+floor-vs-round sampling, palette-space tint) are now REFUTED. The mechanism
+producing the (255,240,152)-family tip pixels remains genuinely unknown —
+this is an honest, still-open gap, not a disguised success. Candidate
+avenues NOT yet tried (flagged for the next worker, not verified as leads):
+whether `trueBg` (this session's own back-solve target, the pre-hitsplat
+oracle frame) is itself a valid stand-in at the exact tip/edge coordinates
+once the affine matrix's own edge/out-of-bounds rounding is accounted for
+(a genuinely different source-texel sampling shape than plain floor/round,
+e.g. the hardware's own OBJ affine wraparound or double-size flag
+handling), or whether the blend's own "target 2" at those specific pixels is
+something other than the plain BG this session's diagnostics assumed (e.g.
+another OBJ layer of a different apparent priority, given `BLDCNT=0x3f40`'s
+own target-2-includes-OBJ bit).
+
+### Verification
+
+`npm test` **946/946** and `npm run build` green, unchanged this session (no
+`src/` changes). `tools/probe/verify-turn9-postlunge.ts` re-run fresh
+against a live `bin/oracle` this session, unmodified — **108/108 checks
+still pass** (step 3, extending it, was not reached: the hypothesis was
+refuted, not cracked, per the brief's own "elimination is a success" rule).
+New: `tools/probe/dump-turn9-hitsplat-palette.py` (this session's only new
+artifact). No trace files changed, no `PROGRESS.md`/`ISSUES.md` edits.
