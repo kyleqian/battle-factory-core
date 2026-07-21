@@ -89,6 +89,7 @@ import {
   TURN4_ROCKSLIDE_MENU_REDRAW_DELAY,
   TURN5_SITRUS_MENU_REOPEN_GATE_DELAY,
   TURN8_MENU_REDRAW_DELAY,
+  TURN9_MENU_REDRAW_DELAY,
   turn5RockSlideKoDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
@@ -215,6 +216,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn6Resolved = battleScene.turn6Resolved;
     let turn7Resolved = battleScene.turn7Resolved;
     let turn8Resolved = battleScene.turn8Resolved;
+    let turn9Resolved = battleScene.turn9Resolved;
     if (fightSubmenu.openElapsed === null) {
       if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
         // S8 engine dependency (docs/battle-menu-notes.md §13c): the FIGHT
@@ -424,6 +426,22 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // moves it back onto ROCK_SLIDE via the generic nav branch above.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen), 1);
       turn8Resolved = true;
+    } else if (
+      turn8Resolved &&
+      !turn9Resolved &&
+      fightSubmenu.confirmElapsed !== null &&
+      newKeys.has("A") &&
+      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN9_MENU_REDRAW_DELAY
+    ) {
+      // S7 slice R rung (a) (docs/turn10-notes.md): turn 9's own whole
+      // resolution has redrawn the settled action menu by now (`TURN9_MENU_
+      // REDRAW_DELAY` past turn 9's own real confirm) - a fresh A-press
+      // reopens FIGHT for turn 10, cursor persisted at slot 0 (ROCK_SLIDE,
+      // where turn 9's own `LEFT` press + confirm left it) - zero further
+      // nav needed, docs/turn10-notes.md §4/§5's own "zero navigation
+      // presses this turn" ledger.
+      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
+      turn9Resolved = true;
     }
     battleScene = {
       ...battleScene,
@@ -436,6 +454,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn6Resolved,
       turn7Resolved,
       turn8Resolved,
+      turn9Resolved,
     };
     battleScene = advanceBattleScene(battleScene);
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };

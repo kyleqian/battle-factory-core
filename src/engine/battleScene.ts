@@ -1032,6 +1032,18 @@ export interface BattleSceneState {
    * in the other direction from turn 8's own `RIGHT`.
    */
   turn8Resolved: boolean;
+  /**
+   * S7 slice R rung (a) (docs/turn10-notes.md): `true` once turn 9's own
+   * whole resolution has redrawn the settled action menu (`TURN9_MENU_
+   * REDRAW_DELAY` past turn 9's own real confirm, `TURN9_QUICKATTACK_
+   * PRESS_TICK` - a fixed historical anchor, same "fresh `FightSubmenuState`
+   * needs its own past-turn anchor" reason `TURN8_BIND_PRESS_TICK` already
+   * establishes) AND a fresh A-press has reopened FIGHT for turn 10, cursor
+   * persisted at slot 0 (ROCK_SLIDE, where turn 9's own `LEFT` press +
+   * confirm left it) - no further nav needed, turn10-notes.md §4/§5's own
+   * "zero navigation presses this turn" ledger.
+   */
+  turn9Resolved: boolean;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -1047,6 +1059,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn6Resolved: false,
   turn7Resolved: false,
   turn8Resolved: false,
+  turn9Resolved: false,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -1063,6 +1076,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn6Resolved: state.turn6Resolved,
     turn7Resolved: state.turn7Resolved,
     turn8Resolved: state.turn8Resolved,
+    turn9Resolved: state.turn9Resolved,
   };
 }
 
@@ -3831,7 +3845,17 @@ function drawFightSubmenuWindow(
   turn6Resolved: boolean = false,
   turn7Resolved: boolean = false,
   turn8Resolved: boolean = false,
+  turn9Resolved: boolean = false,
 ): void {
+  if (turn9Resolved) {
+    // S7 slice R rung (a): turn 10 is the winning line's own SECOND
+    // reconvergence turn - zero navigation presses (cursor already rests on
+    // ROCK_SLIDE from turn 9's own confirm) - its own dedicated dispatcher,
+    // same "genuinely different PP/text" reason `turn8Resolved`'s own branch
+    // below already established for turn 9.
+    drawTurn10FightSubmenuWindow(fb, t, sm);
+    return;
+  }
   if (turn8Resolved) {
     // S7 slice R: turn 9 is the winning line's own reconvergence turn - one
     // LEFT press moves the cursor off BIND back onto ROCK_SLIDE - its own
@@ -4048,11 +4072,12 @@ function drawFightSubmenuChrome(
   turn6Resolved: boolean = false,
   turn7Resolved: boolean = false,
   turn8Resolved: boolean = false,
+  turn9Resolved: boolean = false,
 ): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -7572,6 +7597,20 @@ function drawTurn9FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
   }
   if (sm.confirmElapsed !== null) {
     const pressTick = TICK0 + sm.confirmElapsed;
+    // S7 slice R rung (a) (docs/turn10-notes.md §5): past turn 9's own real
+    // turn-end redraw (`TURN9_MENU_REDRAW_DELAY` past `pressTick`), the real
+    // oracle shows the resettled action menu, NOT a frozen kickoff-text hold
+    // - QUICK_ATTACK's own animation/impact/drain, the "not very effective"
+    // message, and ROCK_SLIDE's own kickoff/impact/drain/"It's super
+    // effective!" are NOT modeled this session (out of scope, rungs
+    // c3/c4/d), so this branch is a pure `t`-based redraw check exactly like
+    // `drawTurn7RockSlideWindow`/`drawTurn8BindWindow`'s own `redrawTick`
+    // branches - it does NOT claim 10934-11449 is modeled, only that t>=11450
+    // renders the real settled menu turn 10 actually finds on reopen.
+    if (t >= pressTick + TURN9_MENU_REDRAW_DELAY) {
+      drawTurn9TurnEndSettledMenu(fb, t);
+      return;
+    }
     const textStart = turn9QuickAttackTextStartTick(pressTick);
     if (t >= textStart) {
       const bounceTick = turn9KickoffBounceTick(t, pressTick);
@@ -7587,6 +7626,167 @@ function drawTurn9FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
   drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true);
+}
+
+/**
+ * Turn 9's own real confirm pressTick (docs/turn9-notes.md's own `LIVE
+ * pressTick` correction, §38: "the LIVE pressTick is 10871") - restated as a
+ * named constant for S7 slice R rung (a), same "past-turn anchor" reason
+ * `TURN8_BIND_PRESS_TICK` already establishes: turn 10's own idle/pre-reveal
+ * window needs turn 9's own confirm as a fixed historical anchor, since
+ * turn 10's `sm` is a FRESH `FightSubmenuState` whose own `confirmElapsed`
+ * is a later, different tick.
+ */
+export const TURN9_QUICKATTACK_PRESS_TICK = 10871;
+
+/**
+ * Turn 9's own turn-end menu-redraw delay - the bounce task's own reset
+ * anchor (`turn9ResettledBounceTick`/`TURN10_REGIME5_TO_REGIME1_SHIFT`'s own
+ * domain), NOT the same tick as the visual "settled" content swap.
+ * turn9-notes.md §5 cites the content settling by tick 11450
+ * (`11450-10871=579`), but the bounce task itself resets 5 ticks EARLIER
+ * (574) - the same small "RAM reset precedes visual settle" gap
+ * `MENU_BOUNCE_RAM_SETUP_TICK`'s own doc already flags for the very first
+ * menu. Fresh-oracle-bisected directly against this session's own
+ * `turn10-menu.json` capture (0/83 mismatches at 574, vs. 5-46 at every
+ * other delta from -5 to +8 tried) - per the fresh-oracle-constants rule,
+ * NOT taken from the dossier's own prose value uncritically. Turn 9's own
+ * QUICK_ATTACK animation/impact/drain, the "not very effective" message,
+ * ROCK_SLIDE's own kickoff/impact/drain, and "It's super effective!" are
+ * still NOT modeled this session (out of scope, rungs c3/c4/d) - only the
+ * pure-`t` redraw boundary and the resettled bounce phase are pinned here.
+ */
+export const TURN9_MENU_REDRAW_DELAY = 574;
+
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn8ResettledBounceTick`, keyed off `TURN9_MENU_REDRAW_DELAY`. */
+export function turn9ResettledBounceTick(t: number, pressTick: number): number {
+  return t - (pressTick + TURN9_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
+/**
+ * Onix's own HP entering turn 10 (docs/turn10-notes.md §4: "24 -> 14
+ * (-10, AERIAL_ACE)" - the pre-hit value), turn 9's own QUICK_ATTACK drain
+ * (31->24) landing during this session's own out-of-scope window.
+ */
+const TURN9_ONIX_AFTER_QUICKATTACK_HP = 24;
+
+/**
+ * Pidgeotto's own HP entering turn 10 (docs/turn10-notes.md §4: "61 -> 38
+ * (-23, ROCK_SLIDE)" - the pre-hit value), turn 9's own ROCK_SLIDE drain
+ * (82->61) landing during this session's own out-of-scope window.
+ */
+const TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 61;
+
+/**
+ * S7 slice R rung (a): turn 9's own settled action menu, as turn 10 finds
+ * it on reopen - Onix at its real post-QUICK_ATTACK HP (24, NOT the flat
+ * post-Sitrus 31 `drawTurn6FieldBase`'s own default still assumes),
+ * Pidgeotto at its real post-ROCK_SLIDE HP (61). Structurally identical to
+ * `drawTurn8TurnEndSettledMenu` - same shape, one redraw (`TURN9_MENU_
+ * REDRAW_DELAY`/`TURN9_QUICKATTACK_PRESS_TICK`) further.
+ */
+function drawTurn9TurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t): void {
+  const bounceTick = turn9ResettledBounceTick(bounceRawTick, TURN9_QUICKATTACK_PRESS_TICK);
+  const bounce = menuIdleBounce(bounceTick);
+  drawStaticBgShiftedY(fb, 0, 0);
+  drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, TURN9_ONIX_AFTER_QUICKATTACK_HP, bounce.healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+/**
+ * `turn9ResettledBounceTick`(regime 5)-to-regime-1 anchor shift, one redraw
+ * further than `TURN9_REGIME4_TO_REGIME1_SHIFT` - solves the same identity
+ * for the regime active from turn 9's own redraw (`TURN9_QUICKATTACK_
+ * PRESS_TICK+TURN9_MENU_REDRAW_DELAY`, 11450) onward.
+ */
+export const TURN10_REGIME5_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (TURN9_QUICKATTACK_PRESS_TICK + TURN9_MENU_REDRAW_DELAY);
+
+/**
+ * `drawTurn6FieldBase` wrapper for turn 10: converts `bounceTick` from
+ * regime-5 space via `TURN10_REGIME5_TO_REGIME1_SHIFT`, then repaints both
+ * mons' own real turn-10-opening HP (Onix 24, Pidgeotto 61 - unchanged
+ * until this turn's own AERIAL_ACE/ROCK_SLIDE hits land, rungs (b)/(c)).
+ */
+function drawTurn10FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT, beforeMonSprite, TURN9_ONIX_AFTER_QUICKATTACK_HP);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+}
+
+/** `turn9KickoffBounceTick`'s own turn-10 analogue, in regime-5 space (`drawTurn10FieldBase`'s own domain) - freezes at the regime-5 anchor tick itself (`TURN9_QUICKATTACK_PRESS_TICK+TURN9_MENU_REDRAW_DELAY`, local phase 0 by construction). */
+function turn10KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  return TURN9_QUICKATTACK_PRESS_TICK + TURN9_MENU_REDRAW_DELAY;
+}
+
+/**
+ * S7 slice R rung (a) (docs/turn10-notes.md): "Foe PIDGEOTTO used\nAERIAL
+ * ACE!" - AERIAL_ACE is `EFFECT_ALWAYS_HIT` (`accuracy: 0`,
+ * `src/data/gen/moves.json`), the first move in this dossier's arc to skip
+ * the accuracy roll entirely (§3's own RNG ledger: crit then spread only,
+ * no accuracy check). Delay fit directly against a fresh `bin/oracle run`
+ * of this session's own `turn10-menu.json` (not the dossier's own loose
+ * prose range, per the fresh-oracle-constants rule).
+ */
+export const TURN10_AERIALACE_LINE1 = "Foe PIDGEOTTO used";
+export const TURN10_AERIALACE_LINE2 = "AERIAL ACE!";
+export const TURN10_AERIALACE_TEXT_TOTAL = TURN10_AERIALACE_LINE1.length + TURN10_AERIALACE_LINE2.length;
+
+export const TURN10_AERIALACE_TEXT_DELAY = 11;
+
+export function turn10AerialAceTextStartTick(pressTick: number): number {
+  return pressTick + TURN10_AERIALACE_TEXT_DELAY;
+}
+
+export function turn10AerialAceTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn10AerialAceTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN10_AERIALACE_TEXT_TOTAL, t - start + 1);
+}
+
+/**
+ * S7 slice R rung (a): turn 10's own FIGHT submenu - cursor rests on
+ * ROCK_SLIDE (slot 0, persisted from turn 9's own confirm) with PP read
+ * 3/10 (`turn9Resolved` passed as the moveset's 7th independent slot-0
+ * decrement) - **zero navigation presses** this turn (docs/turn10-notes.md
+ * §4/§5's own ledger). Structurally identical to `drawTurn9FightSubmenu
+ * Window` - reuses `drawTurn9TurnEndSettledMenu` for the pre-open/DMA-wait/
+ * browsing phases - only the PP flag and the downstream text/AERIAL_ACE
+ * dispatch differ. AERIAL_ACE's own animation (rung (b)) is NOT modeled
+ * here - this dispatcher stops at the kickoff text's own settled plateau
+ * (one tick before the animation's first pixel change, 12345).
+ */
+function drawTurn10FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+  if (sm.openElapsed === null) {
+    drawTurn9TurnEndSettledMenu(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    drawTurn9TurnEndSettledMenu(fb, t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn10AerialAceTextStartTick(pressTick);
+    if (t >= textStart) {
+      const bounceTick = turn10KickoffBounceTick(t, pressTick);
+      drawTurn10FieldBase(fb, t, bounceTick);
+      drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+      drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
+      return;
+    }
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn10KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  drawTurn10FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true);
 }
 
 /**
@@ -7612,7 +7812,15 @@ function drawTurn9FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
  * Factored out (no behavior change) so turn 6's own render path can reuse it
  * without re-deriving the switch-in/heal machinery.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
+/**
+ * S7 slice R rung (a) (docs/turn10-notes.md §4): `onixHp` (default
+ * `turn5SitrusOnixHp(t)`, every pre-existing caller unaffected) lets turn
+ * 10's own field base pass Onix's real post-QUICK_ATTACK HP (24, turn 9's
+ * own [unmodeled this session] drain) instead of the flat post-Sitrus 31 -
+ * the same "generalize a hardcoded value into a defaulted param" idiom
+ * `drawTurn7FieldBase`'s own Pidgeotto-HP override already established.
+ */
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t)): void {
   drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
@@ -7632,7 +7840,7 @@ function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, b
   // 1-5's own confirm-wait window).
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick));
   drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
-  drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, onixHp, bounce.healthboxY2);
 }
 
 function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
@@ -8098,6 +8306,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn6Resolved,
       state.turn7Resolved,
       state.turn8Resolved,
+      state.turn9Resolved,
     );
     return;
   }
