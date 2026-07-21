@@ -4,6 +4,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 213 — Worktree probe (supervisor-folded): **ISSUES #26's THIN_RING CRACKED ANALYTICALLY** — the ring's matrix is a pure isotropic scale with a closed form (`a=d=floor(4096/n)`, `b=c=0`, `n=clamp(ramTick-7039,1,31)`, center (72,88), render lag **+1** — NOT §13's +2 rotation class), placement verified pixel-exact with ZERO fitting (6/6 px at render 7042, 92/92 at 7048, existing sampler + existing gfx verbatim); after 3 failed fitting attempts across 3 sessions, one 15-min probe made the fix MECHANICAL; `faint-switch-notes.md` §16 + committed probe JSON merged, suite 852/852
+
+- **State:** merged into master post-turn-8, `npm test` 852/852 + build
+  green, worktree/branch cleaned. Supervisor re-verified the closed form
+  myself against all 32 live ticks of the committed probe JSON (exact
+  match, center invariant (72,88)). ISSUES #26 rewritten at this fold:
+  from "excluded after 3 attempts" to "analytically placed — one
+  mechanical fix step owed" (params in the entry + §16).
+- **Did:** probe identified the sprite (slot 4, matrixNum 2, affineMode
+  3/double, 64x64, priority 2, alive 7040-7071), dumped per-tick state
+  (twice-run byte-identical), tested §13's +2-lag lead FIRST as briefed —
+  refuted it (ordinary +1 fits all samples; the +2 class is
+  rotation-specific, matching §29's independent negative). Larger-tick
+  residuals attributed to the known drop-shadow z-order at rows 112-114,
+  named as the fix's one non-mechanical caveat.
+- **Next:** round 6 launching now — main: the #26 fix + restore
+  turn5-sitrus-c.json's 7042-7072 (mechanical, params banked); worktree:
+  ISSUES #28's period-9 probe (3rd recurrence banked by turn 8, §33).
+  Then: turn 9+ parameterizations, feathers dedicated step, post-WIN
+  scene scout.
+- **Notes:** probe in contract (15.0 of 30 min). Pattern now 2-for-2
+  this session (after #27): the 30-min probe-only worktree step resolves
+  what repeated bounded fitting attempts could not — RAM-first is the
+  instrument, not the fallback.
+
+---
 ## 212 — Bounded worker (S7 engine slice P): turn 8 landed end to end minus its own feather sub-window — the winning line's own divergence turn (RIGHT onto BIND, BIND MISSES, FEATHER_DANCE proceeds) — `turn8-menu.json` **78/78**, `turn8-bind-{a,b}.json` **256+66/322**, all 0 diff, first-attempt render (S7 bounded worker session, hard 60-minute cap)
 
 - **State:** `npm test` **852/852** (+7), `npm run build` green, tree
@@ -75,47 +101,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** probe in contract (8.3 of 30 min), cleanest step of the
   session — a 30-min cap on pure-attribution probes is comfortably
   sized; keep using it.
-
----
-## 210 — Bounded worker (S7 engine slice O): turn 7 landed end to end minus its own feather sub-window — `turn7-menu.json` **85/85**, `turn7-rockslide-{a,b,c,d}.json` **256+256+256+19/787**, all 0 diff; a pure parameterization of turn 6's own N-4 rungs, one real bug found+fixed (a second bounce-reset regime turn 7's own idle window needed that turn 6 never exercised) (S7 bounded worker session, hard 60-minute cap)
-
-- **State:** `npm test` **845/845** (+8), `npm run build` green, tree
-  clean. `turn7-menu.json` 85/85 (8346-8438 minus 8 known-class residual
-  ticks) + `turn7-rockslide-{a,b,c,d}.json` 787/787 (8593-9379 contiguous),
-  all 0 diff. Zero regressions: `turn6-rockslide-a.json` 255/255,
-  `turn6-statfall.json` 127/127, `turn6-feathers.json` 106/106,
-  `turn6-menu.json` 33/33.
-- **Did:** rungs (a)+(c)+(d) of the brief's own ladder landed together
-  (turn 6's own dispatcher already unifies kickoff-text/stat-banner/ATK-fell
-  into one function, so parameterizing it lands both at once); every
-  pressTick-generic turn-6 function reused UNCHANGED, fed a fresh dense
-  oracle sweep's own real pressTick (8379) or a new synthetic ROCK_SLIDE
-  anchor (`TURN7_ROCKSLIDE_PRESS_TICK=8406`). Found and fixed a real bug
-  `npm run compare` caught immediately (6.93% diff, first attempt): turn 7's
-  own pre-confirm idle/browsing window comes AFTER turn 6's own ROCK_SLIDE
-  reset the bounce cycle fresh at ITS OWN redraw (8122) and dropped
-  Pidgeotto to 113 HP — `drawTurn6FieldBase` silently assumed neither had
-  happened (true for every turn ≤6 caller, false for turn 7). Fixed with a
-  `drawTurn7FieldBase` wrapper (an algebraic regime-1↔regime-2 anchor shift,
-  not a fitted constant) plus an explicit Pidgeotto-HP repaint. 4 new
-  literal constants for ROCK_SLIDE, none transferable from turn 6's own
-  values (freshly fit each time, matching this dossier's own convention) —
-  notably `TURN7_SUPER_EFFECTIVE_TEXT_DELAY=634` vs turn 6's 646 (the
-  smaller -31 HP delta drains faster). Text wording re-verified via direct
-  PNG read, not assumed ("harshly fell" holds for the 2nd ATK drop too).
-- **Next:** rung (b) — turn 7's own feather sub-window (8439-8592,
-  currently unrendered but harmlessly excluded, not wrongly rendered): rerun
-  `dump-feather-dance-sprites.py` against this window, commit
-  `turn7-feather-sprites-probe.json`, add a tick-range-dispatched second
-  table. Then turns 8-13 as further parameterizations, or the turn 15+/16+
-  scout territory already banked.
-- **Notes:** no papercuts; `npm run compare`'s pixel diff again caught a
-  real bug immediately and precisely (this session's own regime-2 finding),
-  same pattern §31 noted for its own two bugs — hand-verifying
-  mechanism-reuse arithmetic before writing render code catches the
-  ARITHMETIC, but genuinely NEW situations (a window past a redraw reset
-  that no prior turn's code path ever needed) still need the pixel compare
-  to surface. docs/battle-turn-notes.md §32; turn6-notes.md/turn7-notes.md
-  left untouched (ground-truth dossiers, not engine docs).
 
 ---
