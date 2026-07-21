@@ -4,6 +4,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 207 — Worktree scout (supervisor-folded): turn 16 ground truth BANKED — the first MAGBY-vs-MURKROW turn: speed order pinned (MURKROW 97 > MAGBY 89, acts first), FAINT_ATTACK skips accuracy entirely (source: `.accuracy=0`), FIRE_PUNCH rolls accuracy even at 100% AND **its 10% burn proc SUCCEEDS** (`status1` 0→16 at tick 21411, burn residual `floor(142/8)=17` at turn-end) — **the run's FIRST status-condition ground truth**, BRN badge PNG-pinned (absent 21540 → present 21548); `battle1-turn16-dense.json` (256 captures) + `docs/turn16-notes.md`; merged, suite 831/831 on the merged tree
+
+- **State:** merged into master post-N-4, `npm test` 831/831 + build
+  green post-merge, worktree/branch cleaned. Supervisor re-verified
+  independently: prefix chain re-flattened myself (turn15-dense ⊂
+  turn16-dense ⊂ winline-b-swap, script-exact), fresh oracle rerun
+  reproduced 15/15 cited shas at exact ticks, 3 label PNGs read directly
+  (MAGBY's first-ever FIGHT submenu — FIRE PUNCH/SMOKESCREEN/CONFUSE
+  RAY/SMOG, PP 15/15, TYPE/FIRE — and the BRN absent→present pair).
+  ISSUES #16 trimmed at this fold: ground truth exists now; the engine's
+  own status-icon compositor path is the open remainder.
+- **Did:** 8 Random() calls in 20745-21773 (crit+dmg for FAINT_ATTACK —
+  no accuracy roll; acc+crit+dmg+burn for FIRE_PUNCH; 1 unattributed
+  mid-turn at 21152 — FLAME_BODY hypothesis RULED OUT by source,
+  FAINT_ATTACK has no contact flag in this ROM; 2-step tail cluster
+  21719/21724 matching the "AI-prescoring" shape, first time seen
+  mid-battle). Damage: 59 (MAGBY 138→79), 67 (MURKROW 142→75), burn 17
+  (75→58). Both new move animations sketched coarse-only (open items).
+- **Next:** main lane — N-4 rung (b), Onix's ROCK_SLIDE vs Pidgeotto
+  (§30's sha-sweep handoff); scout — turn 17 (§16's "turn 2": Murkrow
+  faints 22418 → the WIN sequence); then ISSUES #26 probe, feather
+  residual 7421-7549, turns 7-13 parameterizations.
+- **Notes:** scout in contract (15.7 of 40 min); no papercuts; its
+  proposed "close #16" was corrected to a trim at the fold (ground truth
+  ≠ engine validation).
+
+---
 ## 206 — Bounded worker (S7 slice N-4, rung a): turn 6's stat-fall window landed — §29's flagged ~7570+ residual RESOLVED (it's the generic StatsChangeAnimation banner, already built for turn 1's DOUBLE_TEAM, just never parameterized for a stat DECREASE) — `turn6-statfall.json` **127/127, 0 diff**, first-attempt; rung (b) (Onix's own ROCK_SLIDE vs. Pidgeotto) NOT attempted, precise ground-truth handoff banked in battle-turn-notes.md §30 (S7 bounded worker session, hard 60-minute cap)
 
 - **State:** `npm test` **831/831** (+6), `npm run build` green, tree
@@ -76,46 +103,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** scout stayed in contract (15.6 min of a 40 cap); no
   papercuts; its brief-assumption note (two-turn-move halves are
   asymmetric) folded into this entry's Did line.
-
----
-## 204 — Bounded worker (S7 slice N-3): FEATHER_DANCE's feather sprites — all 4 rungs attempted, rungs (a)/(b)/(c) landed in full, rung (d) landed as a reduced-scope prefix — `turn6-feathers.json` **106/106, 0 diff** (7307-7420, 16 new ticks past the prior 7404 cutoff); the fuller 7421-7658 window has a small, precisely-characterized residual, documented not chased (S7 bounded worker session, hard 60-minute cap)
-
-- **State:** `npm test` **825/825** (+4), `npm run build` green, tree
-  clean. `turn6-feathers.json` **106/106, 0 diff**. Zero regressions:
-  `turn6-menu.json` 33/33, `turn6-featherdance.json` 90/90,
-  `turn5-sitrus-a.json` 110/110, `turn1-rockslide.json` 256/256.
-- **Did:** (a) extracted `ANIM_TAG_WHITE_FEATHER` gfx (byte-exact);
-  (b) RAM-probed the full 7404-7658 window for all 8 feather sprites
-  (`src/data/gen/turn6-feather-sprites-probe.json`) — new finding: all 8
-  fully despawn by 7558, so the back half of the brief's window has zero
-  live feathers; (c) pinned the ALREADY-EXISTING generic affine blit
-  (`drawSpriteSheetAffineRotate`, from S7 slice M-3) against this
-  mechanism's own real matrix + a multi-tile fixture; (d) attempted a
-  line-by-line port of `AnimFallingFeather_Step` (validated the phase
-  accumulator exactly, but the Y accumulator / `gOamMatrices` write didn't
-  reproduce the probe tick-for-tick — a genuine, documented dead end, see
-  battle-turn-notes.md §29), then pivoted to a RAM-table renderer
-  (`src/engine/featherDance.ts`) — bisected a uniform +1 render lag AND a
-  priority-split z-order against Onix's own sprite (both empirically
-  verified against the oracle), landing a 0-diff 16-tick prefix of the
-  animation. A real latent bug (slot reuse past despawn) was caught by the
-  new Tier-1 test before it ever reached a pixel compare.
-- **Next:** (1) the 7421-7658 window's own small residual (§29: likely
-  same-priority feather-vs-feather ordering, or a half-pixel affine-center
-  convention for even-sized sprites — cheapest repro is 7421-7440) and the
-  separate ~7570+ stat-flash mechanism (not itemized, out of scope this
-  session); (2) rungs (c)/(d) of turn 6 itself (ATK-fall message, Onix's
-  ROCK_SLIDE); (3) turn-7..13 as parameterizations; (4) turn-15+ scout
-  (FLY strike, Onix's likely KO → first FORCED PLAYER SWITCH → WIN arc);
-  (5) ISSUES #26 ring probe; (6) turn6-menu.json's 7348-7350 restoration
-  (still open, not attempted this session either).
-- **Notes:** no papercuts this session. The algorithmic-port dead end cost
-  real time (~20 min) before the RAM-table pivot — worth flagging for
-  whoever writes the NEXT animation-heavy brief: RAM-table-driven
-  rendering (this session's own fallback) may be the right DEFAULT for
-  sine/accumulator-heavy sprite effects in this codebase, not just a
-  fallback, given this is the second such mechanism (after the Sitrus
-  rotation table) where the real hardware's exact tick-level timing
-  resisted a straight source port within a bounded session.
 
 ---

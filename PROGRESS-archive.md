@@ -1,4 +1,46 @@
 ---
+## 204 — Bounded worker (S7 slice N-3): FEATHER_DANCE's feather sprites — all 4 rungs attempted, rungs (a)/(b)/(c) landed in full, rung (d) landed as a reduced-scope prefix — `turn6-feathers.json` **106/106, 0 diff** (7307-7420, 16 new ticks past the prior 7404 cutoff); the fuller 7421-7658 window has a small, precisely-characterized residual, documented not chased (S7 bounded worker session, hard 60-minute cap)
+
+- **State:** `npm test` **825/825** (+4), `npm run build` green, tree
+  clean. `turn6-feathers.json` **106/106, 0 diff**. Zero regressions:
+  `turn6-menu.json` 33/33, `turn6-featherdance.json` 90/90,
+  `turn5-sitrus-a.json` 110/110, `turn1-rockslide.json` 256/256.
+- **Did:** (a) extracted `ANIM_TAG_WHITE_FEATHER` gfx (byte-exact);
+  (b) RAM-probed the full 7404-7658 window for all 8 feather sprites
+  (`src/data/gen/turn6-feather-sprites-probe.json`) — new finding: all 8
+  fully despawn by 7558, so the back half of the brief's window has zero
+  live feathers; (c) pinned the ALREADY-EXISTING generic affine blit
+  (`drawSpriteSheetAffineRotate`, from S7 slice M-3) against this
+  mechanism's own real matrix + a multi-tile fixture; (d) attempted a
+  line-by-line port of `AnimFallingFeather_Step` (validated the phase
+  accumulator exactly, but the Y accumulator / `gOamMatrices` write didn't
+  reproduce the probe tick-for-tick — a genuine, documented dead end, see
+  battle-turn-notes.md §29), then pivoted to a RAM-table renderer
+  (`src/engine/featherDance.ts`) — bisected a uniform +1 render lag AND a
+  priority-split z-order against Onix's own sprite (both empirically
+  verified against the oracle), landing a 0-diff 16-tick prefix of the
+  animation. A real latent bug (slot reuse past despawn) was caught by the
+  new Tier-1 test before it ever reached a pixel compare.
+- **Next:** (1) the 7421-7658 window's own small residual (§29: likely
+  same-priority feather-vs-feather ordering, or a half-pixel affine-center
+  convention for even-sized sprites — cheapest repro is 7421-7440) and the
+  separate ~7570+ stat-flash mechanism (not itemized, out of scope this
+  session); (2) rungs (c)/(d) of turn 6 itself (ATK-fall message, Onix's
+  ROCK_SLIDE); (3) turn-7..13 as parameterizations; (4) turn-15+ scout
+  (FLY strike, Onix's likely KO → first FORCED PLAYER SWITCH → WIN arc);
+  (5) ISSUES #26 ring probe; (6) turn6-menu.json's 7348-7350 restoration
+  (still open, not attempted this session either).
+- **Notes:** no papercuts this session. The algorithmic-port dead end cost
+  real time (~20 min) before the RAM-table pivot — worth flagging for
+  whoever writes the NEXT animation-heavy brief: RAM-table-driven
+  rendering (this session's own fallback) may be the right DEFAULT for
+  sine/accumulator-heavy sprite effects in this codebase, not just a
+  fallback, given this is the second such mechanism (after the Sitrus
+  rotation table) where the real hardware's exact tick-level timing
+  resisted a straight source port within a bounded session.
+
+---
+
 ## 202 — Worktree scout (supervisor-folded): turn 14 ground truth BANKED — Murkrow opens with **FLY** (the arc's first two-turn semi-invulnerable move): charge half deals no damage, Onix's DRAGON_BREATH **auto-misses the airborne target at ZERO RNG cost** (`STATUS3_ON_AIR` short-circuit, `battle_script_commands.c:1061`, gRngValue flat through the miss); `battle1-turn14-dense.json` (248 captures) + `docs/turn14-notes.md`; merged `4fe427a`, suite 821/821 on the merged tree
 
 - **State:** merged into master, `npm test` 821/821 + build green
