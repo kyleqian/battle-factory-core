@@ -2194,3 +2194,61 @@ exact at the two cleanest sample ticks with zero residual.
 `src/data/gen/turn5-sitrus-ring-probe.json` (56 ticks, twice-run byte-
 identical). No `src/engine/` changes - `npm test`/`npm run build` unaffected
 by this probe, both still green.
+
+## 17. THIN_RING landed (ISSUES #26 CLOSED, bounded worker, this session):
+`turn5SitrusRingMatrix` implemented verbatim from §16's closed form,
+`turn5-sitrus-c.json`'s excluded 7042-7072 restored to 0 diff
+
+The mechanical fix step §16 banked: `turn5SitrusRingMatrix(t)`
+(`src/engine/battleScene.ts`) is a direct port of §16's own table - no
+re-derivation, no re-fitting. `a=d=floor(4096/n)`, `b=c=0`,
+`n=clamp(ramTick-7039,1,31)`, `ramTick=t-1` (ordinary +1 lag), `null`
+outside render ticks `[7041,7072]`. Wired into `drawTurn5RockSlideAttack`
+via one new call site using the existing `drawSpriteSheetAffineRotate`
+sampler (already double-size-aware, zero sampler changes needed) and the
+already-extracted ring gfx (`battleAnimItemHeal.ring`, §8a). Center is the
+fixed constant `(72,88)` §16 RAM-pinned, not computed from a corner +
+half-tileset-size the way `onixSitrusRotateMatrix`'s own call site is.
+
+### The z-order caveat, resolved - not a shadow-sprite priority contest
+
+§16 flagged the rows-112-114 residual at larger ring sizes as needing a
+ring-vs-drop-shadow OAM `priority` comparison. Re-reading this dossier's
+own already-committed finding (`drawPlayerBallOpenParticles`'s own doc
+comment, this file's §7.27 update) before touching pixels: the exact
+color cited for that residual, `(74,66,82)`, is the identical constant
+already named for the player's own field-position terrain occlusion
+(`PLAYER_BALL_OPEN_VISIBLE_BOTTOM=112`, `battleMenu.ts`) - "the player's
+send-out lands the ball mostly BEHIND the battlefield's foreground
+terrain tile." That mechanism is a BG-layer-over-OAM-sprite compositing
+rule tied to the player's own on-field screen position (row >= 112 is
+occluded regardless of which sprite/OAM-priority sits there), not an
+OAM-vs-OAM priority contest between two sprites - so there was never a
+literal "drop-shadow sprite" to compare priorities against; §13/§15's own
+earlier hypothesis (never itself confirmed against source or RAM) was a
+plausible-sounding guess that this session's own cross-reference
+superseded before implementing anything.
+
+Fix: `drawSpriteSheetAffineRotate` gained an optional `clipBottom` param
+(skips any destination row `>= clipBottom`, a no-op for its 2 other call
+sites which don't pass it) and the ring's own call site passes
+`PLAYER_BALL_OPEN_VISIBLE_BOTTOM` - reusing the existing constant/
+mechanism verbatim rather than inventing a new one. This is the only
+non-mechanical judgment call in the fix, and it resolved on the first
+attempt: no priority comparison, no shadow-sprite modeling, just the
+same terrain clip already proven elsewhere in this dossier.
+
+### Verification
+
+`npm run compare -- tools/compare/traces/turn5-sitrus-c.json`: **181/181
+frames matched, 0 diff** (150 prior + the 31 restored 7042-7072, ring
+alive+visible at 7042-7072 per §16's own render-window math). Zero
+regressions, all rerun at their own full committed counts: `turn5-sitrus-
+a.json` 110/110, `turn5-sitrus-b.json` 82/82, `turn5-sitrus-d.json`
+133/133, `turn5-switchin.json` 241/241, `turn6-menu.json` 33/33 - all 0
+diff. `npm test` 857/857 (+5 Tier-1 pins on `turn5SitrusRingMatrix`:
+both clamp ends, the two probe-verified sample ticks, the identity tick,
+and the lag/window cutoffs), `npm run build` green.
+
+**ISSUES #26 CLOSED** - deleted from `ISSUES.md` in the same docs commit
+per this run's own pruning rule.

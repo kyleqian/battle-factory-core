@@ -4,6 +4,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 214 — Bounded worker (S7 engine fix): **ISSUES #26 CLOSED** — Sitrus THIN_RING implemented from §16's banked closed form (`turn5SitrusRingMatrix`, first-attempt render), `turn5-sitrus-c.json`'s excluded 7042-7072 restored to **181/181 0 diff**; z-order caveat resolved by reusing the already-established terrain-occlusion clip (`PLAYER_BALL_OPEN_VISIBLE_BOTTOM`), not a shadow-sprite priority contest
+
+- **State:** `npm test` **857/857** (+5), `npm run build` green, tree
+  clean. `turn5-sitrus-c.json` 181/181 (150 prior + 31 restored), 0 diff.
+  Zero regressions, all rerun at full committed counts: `turn5-sitrus-
+  a.json` 110/110, `turn5-sitrus-b.json` 82/82, `turn5-sitrus-d.json`
+  133/133, `turn5-switchin.json` 241/241, `turn6-menu.json` 33/33.
+- **Did:** the fix was purely mechanical per the brief (§16's own closed
+  form ported verbatim, zero re-fitting): `turn5SitrusRingMatrix(t)` -
+  `a=d=floor(4096/n)`, `n=clamp(ramTick-7039,1,31)`, ordinary +1 lag,
+  fixed center (72,88), wired into `drawTurn5RockSlideAttack` via the
+  existing `drawSpriteSheetAffineRotate` sampler + the already-extracted
+  ring gfx. The one non-mechanical piece (the z-order caveat) resolved on
+  the first attempt: the probe's rows-112-114 residual color `(74,66,82)`
+  is an exact match to this dossier's own already-cited terrain-occlusion
+  color (`PLAYER_BALL_OPEN_VISIBLE_BOTTOM=112`, §7.27's "lands mostly
+  BEHIND the battlefield's foreground terrain tile") - a BG-over-sprite
+  compositing rule tied to the player's own field position, not an
+  OAM-priority contest against a literal drop-shadow sprite as §13/§15
+  had speculated. Added an optional `clipBottom` param to
+  `drawSpriteSheetAffineRotate` (no-op for its other 2 call sites) and
+  passed the existing constant through - no new mechanism invented.
+  5 Tier-1 pins added (both clamp ends, the 2 probe-verified sample
+  ticks, the identity tick, the lag/window cutoffs). `faint-switch-
+  notes.md` §17 written; ISSUES #26 deleted.
+- **Next:** engine: turn 8's own feather sub-window (out of scope this
+  step); turn 9+ parameterizations. Probes: #28 (period-9 excluded-tick
+  family, worktree-banked per PROGRESS #213, still open). Scout: post-WIN
+  scene transition dense ground truth.
+- **Notes:** landed well inside the 40-minute cap, first-attempt render
+  on both the closed form and the z-order clip - the probe step (§16)
+  and this run's own residual-elimination policy (re-reading already-
+  committed cross-file findings before touching pixels) did the actual
+  hard work; this step was exactly as mechanical as advertised.
+
+---
 ## 213 — Worktree probe (supervisor-folded): **ISSUES #26's THIN_RING CRACKED ANALYTICALLY** — the ring's matrix is a pure isotropic scale with a closed form (`a=d=floor(4096/n)`, `b=c=0`, `n=clamp(ramTick-7039,1,31)`, center (72,88), render lag **+1** — NOT §13's +2 rotation class), placement verified pixel-exact with ZERO fitting (6/6 px at render 7042, 92/92 at 7048, existing sampler + existing gfx verbatim); after 3 failed fitting attempts across 3 sessions, one 15-min probe made the fix MECHANICAL; `faint-switch-notes.md` §16 + committed probe JSON merged, suite 852/852
 
 - **State:** merged into master post-turn-8, `npm test` 852/852 + build
@@ -72,34 +108,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   notes.md §33; turn8-notes.md left untouched (ground-truth dossier, not
   engine docs).
 
----
-## 211 — Worktree probe (supervisor-folded): **ISSUES #27 RESOLVED in one 8-minute probe** — the "unattributed" HP-write+5 Random() is `Cmd_seteffectwithchance`'s UNCONDITIONAL secondary-effect roll (`battle_script_commands.c:2923`: `Random()` is the FIRST operand of the `&&` chain, consumed even at `secondaryEffectChance=0` — C evaluation order, source-verified by the supervisor directly); the offset is SCHEDULE-DEPENDENT, not fixed (+5 = 4 minimal-cost script commands; turn 15's "missing" instance was actually at +93, delayed by the faint sequence); `docs/rng-attribution-notes.md` merged, suite 845/845
-
-- **State:** merged into master post-turn-7, `npm test` 845/845 + build
-  green, worktree/branch cleaned. Supervisor verified the source claim
-  directly (read `Cmd_seteffectwithchance` — the `&&` order is exactly
-  as claimed) and the evidence table (LCG transitions for all three
-  instances). Dossier reattributions applied at this fold (turn15/16/17
-  §2 lines, strikethrough + citation); ISSUES #27 deleted.
-- **Did (the predictive rule engine work now inherits):** every damaging
-  move reaching `BattleScript_EffectHit`'s tail consumes EXACTLY ONE
-  secondary-effect roll on connect, regardless of chance — misses divert
-  before the roll, immunity is checked after it. FIRE_PUNCH's burn roll
-  (21411/22423) is the same call site with chance=10. Both prior
-  candidates ruled out (FLAME_BODY sweep; King's-Rock is a LATER stage,
-  `Cmd_moveend`). Turn 13/14's 17105/17111/18079 stay a separate
-  (AI-prescoring) family — correctly out of scope.
-- **Also at this fold:** ISSUES **#28 filed** — the period-9 excluded-
-  tick family in browsing-submenu windows has now RECURRED at turn 7
-  (8 ticks, §32, same cadence as turn 6's §27 set); upgraded from
-  dossier footnote to standing backlog per the residual-elimination
-  policy (one probe survived, no root cause yet).
-- **Next:** engine: turn 8+ parameterizations; feathers dedicated step
-  (turn-7 probe table + window, §29's sampling-residual leads); probes:
-  #28 (period-9 family), #26 (Sitrus ring); scout: post-WIN scene
-  transition dense ground truth.
-- **Notes:** probe in contract (8.3 of 30 min), cleanest step of the
-  session — a 30-min cap on pure-attribution probes is comfortably
-  sized; keep using it.
-
----

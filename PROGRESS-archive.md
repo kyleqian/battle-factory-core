@@ -1,4 +1,34 @@
 ---
+## 211 — Worktree probe (supervisor-folded): **ISSUES #27 RESOLVED in one 8-minute probe** — the "unattributed" HP-write+5 Random() is `Cmd_seteffectwithchance`'s UNCONDITIONAL secondary-effect roll (`battle_script_commands.c:2923`: `Random()` is the FIRST operand of the `&&` chain, consumed even at `secondaryEffectChance=0` — C evaluation order, source-verified by the supervisor directly); the offset is SCHEDULE-DEPENDENT, not fixed (+5 = 4 minimal-cost script commands; turn 15's "missing" instance was actually at +93, delayed by the faint sequence); `docs/rng-attribution-notes.md` merged, suite 845/845
+
+- **State:** merged into master post-turn-7, `npm test` 845/845 + build
+  green, worktree/branch cleaned. Supervisor verified the source claim
+  directly (read `Cmd_seteffectwithchance` — the `&&` order is exactly
+  as claimed) and the evidence table (LCG transitions for all three
+  instances). Dossier reattributions applied at this fold (turn15/16/17
+  §2 lines, strikethrough + citation); ISSUES #27 deleted.
+- **Did (the predictive rule engine work now inherits):** every damaging
+  move reaching `BattleScript_EffectHit`'s tail consumes EXACTLY ONE
+  secondary-effect roll on connect, regardless of chance — misses divert
+  before the roll, immunity is checked after it. FIRE_PUNCH's burn roll
+  (21411/22423) is the same call site with chance=10. Both prior
+  candidates ruled out (FLAME_BODY sweep; King's-Rock is a LATER stage,
+  `Cmd_moveend`). Turn 13/14's 17105/17111/18079 stay a separate
+  (AI-prescoring) family — correctly out of scope.
+- **Also at this fold:** ISSUES **#28 filed** — the period-9 excluded-
+  tick family in browsing-submenu windows has now RECURRED at turn 7
+  (8 ticks, §32, same cadence as turn 6's §27 set); upgraded from
+  dossier footnote to standing backlog per the residual-elimination
+  policy (one probe survived, no root cause yet).
+- **Next:** engine: turn 8+ parameterizations; feathers dedicated step
+  (turn-7 probe table + window, §29's sampling-residual leads); probes:
+  #28 (period-9 family), #26 (Sitrus ring); scout: post-WIN scene
+  transition dense ground truth.
+- **Notes:** probe in contract (8.3 of 30 min), cleanest step of the
+  session — a 30-min cap on pure-attribution probes is comfortably
+  sized; keep using it.
+
+---
 ## 210 — Bounded worker (S7 engine slice O): turn 7 landed end to end minus its own feather sub-window — `turn7-menu.json` **85/85**, `turn7-rockslide-{a,b,c,d}.json` **256+256+256+19/787**, all 0 diff; a pure parameterization of turn 6's own N-4 rungs, one real bug found+fixed (a second bounce-reset regime turn 7's own idle window needed that turn 6 never exercised) (S7 bounded worker session, hard 60-minute cap)
 
 - **State:** `npm test` **845/845** (+8), `npm run build` green, tree

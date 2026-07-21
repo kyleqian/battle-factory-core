@@ -26,32 +26,6 @@ vs its neighbors, then pixel-diff the exact regions). The
 residual-elimination policy applies: no speculative label survives
 another probe without either a root cause or an upgraded evidence file.
 
-## #26 — Sitrus proc's expanding THIN_RING: PROBED AND ANALYTICALLY
-  PLACED (2026-07-21, faint-switch-notes.md §16) — fix is now mechanical,
-  one implementation step owed
-
-Opened 2026-07-20 after 3 bounded fitting attempts; **resolved to a
-closed form by the dedicated probe step** (the residual-elimination
-policy's mandated instrument, 2026-07-21): the ring is `gSprites[4]`,
-`matrixNum=2`, alive RAM ticks 7040-7071, matrix a pure isotropic scale
-**`a=d=floor(4096/n)`, `b=c=0`, `n=clamp(ramTick-7039,1,31)`** —
-supervisor-reverified against all 32 live ticks of the committed probe
-(`src/data/gen/turn5-sitrus-ring-probe.json`, twice-run identical).
-Center fixed at **(72,88)**; render lag **+1** (ordinary class — NOT
-§13's +2 rotation-matrix class; consistent with §29's finding that class
-doesn't generalize). Analytic placement verified pixel-exact with zero
-fitting at two sample ticks (6/6 opaque px at render 7042; 92/92 at
-7048) using the existing `drawSpriteSheetAffineRotate` sampler + the
-already-extracted ring gfx verbatim; tick 7040 (1/16 scale) produces
-zero opaque pixels, explaining the diff onset at 7042. Full table +
-mechanical fix parameters: `faint-switch-notes.md` §16.
-
-Remaining (one fix step): implement `turn5SitrusRingMatrix(t)` + call
-site, mind the ring-vs-drop-shadow z-order at rows 112-114 (ring
-priority 2 — compare against the shadow sprite's), restore
-`turn5-sitrus-c.json`'s excluded 7042-7072 captureFrames, rerun to
-0 diff, Tier-1-pin the closed form.
-
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
   turn2-dragonbreath.json remain uncaptured after 4 bounded attempts
