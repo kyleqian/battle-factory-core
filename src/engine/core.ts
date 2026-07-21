@@ -90,6 +90,7 @@ import {
   TURN5_SITRUS_MENU_REOPEN_GATE_DELAY,
   TURN8_MENU_REDRAW_DELAY,
   TURN9_MENU_REDRAW_DELAY,
+  TURN10_ROCKSLIDE_MENU_REDRAW_DELAY,
   turn5RockSlideKoDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
@@ -217,6 +218,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn7Resolved = battleScene.turn7Resolved;
     let turn8Resolved = battleScene.turn8Resolved;
     let turn9Resolved = battleScene.turn9Resolved;
+    let turn10Resolved = battleScene.turn10Resolved;
     if (fightSubmenu.openElapsed === null) {
       if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
         // S8 engine dependency (docs/battle-menu-notes.md §13c): the FIGHT
@@ -442,6 +444,24 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // presses this turn" ledger.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
       turn9Resolved = true;
+    } else if (
+      turn9Resolved &&
+      !turn10Resolved &&
+      fightSubmenu.confirmElapsed !== null &&
+      newKeys.has("A") &&
+      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY
+    ) {
+      // S7 slice R rung 1 (docs/turn11-notes.md): turn 10's own whole
+      // ROCK_SLIDE resolution has redrawn the settled action menu by now
+      // (`TURN10_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 10's own SYNTHETIC
+      // `TURN10_ROCKSLIDE_PRESS_TICK` - no player press for the AI-adjacent
+      // second half of a turn, same reason every synthetic `TURNn_ROCKSLIDE_
+      // PRESS_TICK` anchor already exists) - a fresh A-press reopens FIGHT
+      // for turn 11, cursor persisted at slot 0 (ROCK_SLIDE, unchanged) -
+      // zero further nav needed, docs/turn11-notes.md §1's own "zero
+      // navigation presses this turn" ledger.
+      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
+      turn10Resolved = true;
     }
     battleScene = {
       ...battleScene,
@@ -455,6 +475,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn7Resolved,
       turn8Resolved,
       turn9Resolved,
+      turn10Resolved,
     };
     battleScene = advanceBattleScene(battleScene);
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };

@@ -2214,6 +2214,7 @@ export function currentPPForActiveMon(
   turn7Resolved: boolean = false,
   turn8Resolved: boolean = false,
   turn9Resolved: boolean = false,
+  turn10Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
   // S7 slice N (docs/turn6-notes.md §4): turn 5's own ROCK_SLIDE (Onix's
@@ -2236,6 +2237,10 @@ export function currentPPForActiveMon(
   // (cursor moved back via `LEFT`, then confirmed) is a 7th slot-0 use,
   // matching turn10-notes' own "ROCK_SLIDE(157) 3/10" ledger at turn 10's
   // own reopen.
+  // S7 slice R rung 1 (docs/turn11-notes.md §4): turn 10's own ROCK_SLIDE
+  // (zero nav needed, cursor already at slot 0) is an 8th slot-0 use,
+  // matching turn11-notes' own "ROCK_SLIDE(157) 2/10" ledger at turn 11's
+  // own reopen.
   const slot0Uses =
     (turn1Resolved ? 1 : 0) +
     (turn3Resolved ? 1 : 0) +
@@ -2243,7 +2248,8 @@ export function currentPPForActiveMon(
     (turn5Resolved ? 1 : 0) +
     (turn6Resolved ? 1 : 0) +
     (turn7Resolved ? 1 : 0) +
-    (turn9Resolved ? 1 : 0);
+    (turn9Resolved ? 1 : 0) +
+    (turn10Resolved ? 1 : 0);
   return [a - slot0Uses, turn8Resolved ? b - 1 : b, turn2Resolved ? c - 1 : c, d];
 }
 

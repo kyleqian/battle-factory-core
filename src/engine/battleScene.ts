@@ -1053,6 +1053,18 @@ export interface BattleSceneState {
    * "zero navigation presses this turn" ledger.
    */
   turn9Resolved: boolean;
+  /**
+   * S7 slice R rung 1 (docs/turn11-notes.md): `true` once turn 10's own
+   * whole ROCK_SLIDE resolution has redrawn the settled action menu
+   * (`TURN10_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 10's own SYNTHETIC
+   * `TURN10_ROCKSLIDE_PRESS_TICK` - no player press for the AI-adjacent
+   * second half of a turn, same reason every synthetic `TURNn_ROCKSLIDE_
+   * PRESS_TICK` anchor already exists) AND a fresh A-press has reopened
+   * FIGHT for turn 11, cursor persisted at slot 0 (ROCK_SLIDE, unchanged) -
+   * zero further nav needed, docs/turn11-notes.md §1's own "zero navigation
+   * presses this turn" ledger.
+   */
+  turn10Resolved: boolean;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -1069,6 +1081,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn7Resolved: false,
   turn8Resolved: false,
   turn9Resolved: false,
+  turn10Resolved: false,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -1086,6 +1099,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn7Resolved: state.turn7Resolved,
     turn8Resolved: state.turn8Resolved,
     turn9Resolved: state.turn9Resolved,
+    turn10Resolved: state.turn10Resolved,
   };
 }
 
@@ -3930,7 +3944,17 @@ function drawFightSubmenuWindow(
   turn7Resolved: boolean = false,
   turn8Resolved: boolean = false,
   turn9Resolved: boolean = false,
+  turn10Resolved: boolean = false,
 ): void {
+  if (turn10Resolved) {
+    // S7 slice R rung 1 (docs/turn11-notes.md): turn 11 is the winning
+    // line's own THIRD reconvergence turn - zero navigation presses (cursor
+    // already rests on ROCK_SLIDE from turn 10's own confirm) - its own
+    // dedicated dispatcher, same "genuinely different PP/text" reason
+    // `turn9Resolved`'s own branch below already established for turn 10.
+    drawTurn11FightSubmenuWindow(fb, t, sm);
+    return;
+  }
   if (turn9Resolved) {
     // S7 slice R rung (a): turn 10 is the winning line's own SECOND
     // reconvergence turn - zero navigation presses (cursor already rests on
@@ -4157,11 +4181,12 @@ function drawFightSubmenuChrome(
   turn7Resolved: boolean = false,
   turn8Resolved: boolean = false,
   turn9Resolved: boolean = false,
+  turn10Resolved: boolean = false,
 ): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -8458,7 +8483,7 @@ export function turn10SuperEffectiveTextVisibleChars(t: number, pressTick: numbe
  * assumed transferable.
  */
 const TURN10_ROCKSLIDE_TEXT_CLEAR_DELAY = 723;
-const TURN10_ROCKSLIDE_MENU_REDRAW_DELAY = 730;
+export const TURN10_ROCKSLIDE_MENU_REDRAW_DELAY = 730;
 
 /** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn6RockSlideResettledBounceTick`, keyed off this turn's own `TURN10_ROCKSLIDE_MENU_REDRAW_DELAY`. */
 export function turn10RockSlideResettledBounceTick(t: number, pressTick: number): number {
@@ -8470,10 +8495,17 @@ export function turn10RockSlideResettledBounceTick(t: number, pressTick: number)
  * own turn fully resolves (the "turn-11 menu" boundary, docs/turn10-notes.md
  * addendum §4 - the STANDARD idle-bounce family every other resting action
  * menu in this arc already has, NOT flat, correcting the dossier's own
- * originally-cited "sha-flat" final row).
+ * originally-cited "sha-flat" final row). `bounceRawTick` (default `t`,
+ * S7 slice R rung 1) lets turn 11's own FIGHT-submenu-open reveal phase
+ * override the tick fed into the bounce formula - same "reveal phase samples
+ * a shifted tick" idiom `drawTurn9TurnEndSettledMenu`'s own `bounceRawTick`
+ * param already established, reused here since turn 11's own pre-open/
+ * reveal window is this exact function, just extended forward in time (the
+ * resting idle-bounce oscillator never resets between turn 10's own redraw
+ * and turn 11's own fresh confirm).
  */
-function drawTurn10RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
-  const bounceTick = turn10RockSlideResettledBounceTick(t, TURN10_ROCKSLIDE_PRESS_TICK);
+function drawTurn10RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t): void {
+  const bounceTick = turn10RockSlideResettledBounceTick(bounceRawTick, TURN10_ROCKSLIDE_PRESS_TICK);
   const bounce = menuIdleBounce(bounceTick);
   drawStaticBgShiftedY(fb, 0, 0);
   drawTurn5IconBar(fb, t);
@@ -8588,6 +8620,264 @@ function drawTurn10FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
   drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true);
+}
+
+/**
+ * `turn10ResettledBounceTick`(regime 6)-to-regime-1 anchor shift, one redraw
+ * further than `TURN10_REGIME5_TO_REGIME1_SHIFT` - solves the same identity
+ * for the regime active from turn 10's own redraw (`TURN10_ROCKSLIDE_PRESS_
+ * TICK+TURN10_ROCKSLIDE_MENU_REDRAW_DELAY`, 12899) onward. `menuIdleBounce`'s
+ * underlying `DoBounceEffect` task genuinely restarts fresh at EVERY turn's
+ * own menu redraw (`MENU_BOUNCE_RAM_SETUP_TICK`'s own doc:
+ * "HandleInputChooseAction's first tick") - turn 11's own FIGHT-submenu
+ * browsing phase is driven by THIS regime, not regime 5 - reusing
+ * `drawTurn10FieldBase` (which bakes in regime 5's own shift) verbatim
+ * produced a real, pixel-confirmed 2px healthbox-bounce mismatch before this
+ * was corrected.
+ */
+export const TURN11_REGIME6_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (TURN10_ROCKSLIDE_PRESS_TICK + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY);
+
+/**
+ * `drawTurn10FieldBase`'s own turn-11 analogue: converts `bounceTick` from
+ * regime-6 space via `TURN11_REGIME6_TO_REGIME1_SHIFT`, then repaints both
+ * mons' own real turn-11-opening HP (Onix 14, Pidgeotto 38 - unchanged until
+ * this turn's own ROCK_SLIDE hit lands; FEATHER_DANCE deals no damage so
+ * there's no override needed for Onix's own side this turn).
+ */
+function drawTurn11FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN10_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN11_REGIME6_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+}
+
+/** `turn10KickoffBounceTick`'s own turn-11 analogue, in regime-6 space (`drawTurn11FieldBase`'s own domain) - freezes at the regime-6 anchor tick itself (`TURN10_ROCKSLIDE_PRESS_TICK+TURN10_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction). */
+function turn11KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  return TURN10_ROCKSLIDE_PRESS_TICK + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY;
+}
+
+/**
+ * S7 slice R rung 1 (docs/turn11-notes.md addendum §3): the ATK-floor
+ * "won't go any lower!" message - the ONE genuinely new mechanism this turn
+ * (every other sub-mechanism is a pure reuse/parameterization). Pidgeotto's
+ * own FEATHER_DANCE fires (accuracy roll consumed, PP charged) but Onix's
+ * ATK stage is already floored at 0, so the real battle script substitutes
+ * this message for the ordinary stat-drop text instead of skipping the
+ * move's resolution outright. Apostrophe is `'` (U+2019, `charmap.json` code
+ * 180), NOT ASCII - `verify-turn11.ts`'s own first run caught the wrong
+ * glyph via a full box-region mismatch before this was corrected, same "let
+ * the check catch it" discipline this codebase's other apostrophe'd
+ * messages already established. Reveal mechanism is the plain generic
+ * `min(TOTAL, t-start+1)` cap - no extra lag, unlike `turn6FeatherDanceTextStartTick`'s
+ * own sibling functions.
+ */
+export const TURN11_ATKFLOOR_LINE1 = "ONIX’s ATTACK";
+export const TURN11_ATKFLOOR_LINE2 = "won’t go lower!";
+export const TURN11_ATKFLOOR_TEXT_TOTAL = TURN11_ATKFLOOR_LINE1.length + TURN11_ATKFLOOR_LINE2.length;
+const TURN11_ATKFLOOR_TEXT_START_DELAY = 83; // render 13422 - FEATHER_PRESS_TICK(13339)
+export function turn11AtkFloorTextStartTick(pressTick: number): number {
+  return pressTick + TURN11_ATKFLOOR_TEXT_START_DELAY;
+}
+export function turn11AtkFloorTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn11AtkFloorTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN11_ATKFLOOR_TEXT_TOTAL, t - start + 1);
+}
+
+/**
+ * S7 slice R rung 1 (docs/turn11-notes.md addendum §1): turn 11's own
+ * ROCK_SLIDE (Onix vs. Pidgeotto) - every mechanism reused with ZERO changes
+ * from turns 6/7/9/10's own instances (`rockSlideBg3Y`/`rockSlideRockState`/
+ * `rockSlideDrawOrder`/`rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/
+ * `rockSlideMonBlinkInvisible`/`rockSlideOpponentHp`, all still
+ * `pressTick`-relative) - only `TURN11_ROCKSLIDE_PRESS_TICK` and Pidgeotto's
+ * own HP (38->16) are new. Onix (the attacker) stays flat at its
+ * post-AERIAL_ACE HP (14) all turn - FEATHER_DANCE deals no damage this
+ * turn, so there is no live drain to thread through, simpler than turn 10's
+ * own window (docs/turn11-notes.md §4's own ledger).
+ */
+export const TURN11_ROCKSLIDE_PRESS_TICK = 13137;
+const TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 16;
+
+function drawTurn11RockSlideAttack(fb: Uint8Array, t: number): void {
+  const pressTick = TURN11_ROCKSLIDE_PRESS_TICK;
+  const shiftY = rockSlideBg3Y(t, pressTick);
+  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
+  drawTurn5IconBar(fb, t);
+  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  }
+  const frozenBounceTick = turn10KickoffBounceTick(t, pressTick);
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenBounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
+  drawSendOutHealthbox(fb, 0, opponentContent);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
+  for (const i of rockSlideDrawOrder(t, pressTick)) {
+    const rock = rockSlideRockState(i, t, pressTick);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+  drawMenuHealthboxPlayer(fb, 0, 0);
+  drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, 0);
+}
+
+/**
+ * S7 slice R rung 1: "It's super effective!" (ROCK vs. FLYING, 2x) -
+ * fresh-oracle-pinned this turn (`verify-turn11.ts`'s own pinned check: the
+ * message-box transition begins exactly at `pressTick`+625, render 13762)
+ * - reuses `TURN6_SUPER_EFFECTIVE_LINE` verbatim (same message ID every
+ * prior turn's own super-effective hit already uses).
+ */
+const TURN11_SUPER_EFFECTIVE_TEXT_DELAY = 625; // render 13762 - pressTick(13137)
+export function turn11SuperEffectiveTextStartTick(pressTick: number): number {
+  return pressTick + TURN11_SUPER_EFFECTIVE_TEXT_DELAY;
+}
+export function turn11SuperEffectiveTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn11SuperEffectiveTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
+}
+
+/**
+ * S7 slice R rung 1: turn-end - the held "It's super effective!" text goes
+ * blank (box stays, no text) at `pressTick`+722 (render 13859, sha
+ * `cf34cbe53962`, fresh-oracle-confirmed - the held text is still fully
+ * visible one tick later than `turn11-notes.md` §5's own "13858" citation,
+ * caught by this rung's own `npm run compare` run, same "let the check catch
+ * it" discipline this codebase's other off-by-one corrections already used;
+ * holds through 13865), then the settled action menu's own idle-bounce
+ * content first appears at `pressTick`+729 (render 13866) - unlike turns
+ * 6/7/10's own single-tick hard cut, this turn's own redraw is followed by
+ * several ticks of the SAME `menuIdleBounce` oscillator settling through its
+ * own early quantized plateaus (the "9-tick flat stretch" shape
+ * `TURN2_KICKOFF_FROZEN_BOUNCE_TICK`'s own doc already names) before
+ * reaching the long-term resting cycle (`db251fad6c61`/`1b57eb51635c`/
+ * `55822ddf41b2`, matching `verify-turn11.ts`'s own `TURN12_IDLE_CYCLE_SHAS`)
+ * - modeled here as the exact same formula shape
+ * `turn10RockSlideResettledBounceTick` already uses, just this turn's own
+ * literal redraw delay, not a new mechanism - fresh-oracle-confirmed this
+ * whole span (13866-13897) reproduces 0-diff with no special-casing.
+ */
+const TURN11_ROCKSLIDE_TEXT_CLEAR_DELAY = 722; // render 13859 - pressTick(13137)
+const TURN11_ROCKSLIDE_MENU_REDRAW_DELAY = 729; // render 13866 - pressTick(13137)
+
+export function turn11RockSlideResettledBounceTick(t: number, pressTick: number): number {
+  return t - (pressTick + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
+/**
+ * S7 slice R rung 1: turn 11's own settled action menu once ROCK_SLIDE's own
+ * turn fully resolves (the "turn-12 menu" boundary, docs/turn11-notes.md §5's
+ * own "not perfectly flat, cycles among 3 shas" finding).
+ */
+function drawTurn11RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
+  const bounceTick = turn11RockSlideResettledBounceTick(t, TURN11_ROCKSLIDE_PRESS_TICK);
+  const bounce = menuIdleBounce(bounceTick);
+  drawStaticBgShiftedY(fb, 0, 0);
+  drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, bounce.healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+/**
+ * S7 slice R rung 1: turn 11's own ROCK_SLIDE window dispatcher - same
+ * three-phase shape as `drawTurn6RockSlideWindow`/`drawTurn10RockSlideWindow`
+ * (attack animation + held kickoff text, "It's super effective!" swap-in,
+ * text-clear, hand off to the resettled menu).
+ */
+function drawTurn11RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN11_ROCKSLIDE_PRESS_TICK;
+  const redrawTick = pressTick + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurn11RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const textClearTick = pressTick + TURN11_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  drawTurn11RockSlideAttack(fb, t);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t < textClearTick) {
+    const superEffectiveStart = turn11SuperEffectiveTextStartTick(pressTick);
+    if (t >= superEffectiveStart) {
+      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn11SuperEffectiveTextVisibleChars(t, pressTick));
+    } else {
+      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    }
+  }
+}
+
+/**
+ * S7 slice R rung 1 (docs/turn11-notes.md addendum §2/§3): Pidgeotto's own
+ * FEATHER_DANCE, blocked by Onix's own floored ATK stage - kickoff text is a
+ * pure parameterization of the SAME `turn6FeatherDanceTextStartTick`/
+ * `turn6FeatherDanceTextVisibleChars` turns 6/7/8 already use; the
+ * feather-sprite animation is SKIPPED entirely this turn (RAM-confirmed 0
+ * feather-template OAM hits across the whole kickoff window - the blocked
+ * stat change short-circuits the battle script before its own `createsprite`
+ * calls fire), and the ordinary stat-fall banner is replaced by the new
+ * ATK-floor message once the kickoff text settles. Hands off to
+ * `drawTurn11RockSlideWindow` at ROCK_SLIDE's own kickoff-text start, the
+ * same "handoff at the next move's own kickoff-text start" shape every prior
+ * turn's own dispatcher already establishes.
+ */
+function drawTurn11FeatherDanceWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= rockSlideTextStartTick(TURN11_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn11RockSlideWindow(fb, t);
+    return;
+  }
+  const bounceTick = turn11KickoffBounceTick(t, pressTick);
+  drawTurn11FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const atkFloorStart = turn11AtkFloorTextStartTick(pressTick);
+  if (t >= atkFloorStart) {
+    drawMessageTextLines(fb, TURN11_ATKFLOOR_LINE1, TURN11_ATKFLOOR_LINE2, turn11AtkFloorTextVisibleChars(t, pressTick));
+  } else {
+    drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+  }
+}
+
+/**
+ * S7 slice R rung 1: turn 11's own FIGHT submenu - cursor rests on
+ * ROCK_SLIDE (slot 0, persisted from turn 10's own confirm) with PP read
+ * 2/10 (`turn10Resolved` passed as the moveset's 8th independent slot-0
+ * decrement) - **zero navigation presses** this turn (docs/turn11-notes.md
+ * §1's own ledger). Structurally identical to `drawTurn10FightSubmenuWindow`
+ * - reuses `drawTurn10RockSlideTurnEndSettledMenu` for the pre-open/DMA-wait/
+ * browsing phases (turn 10's own post-resolution settled menu IS turn 11's
+ * own pre-open baseline, byte-identical per the dossier's own tick-12900
+ * cross-citation - the resting idle-bounce oscillator never resets between
+ * turn 10's own redraw and turn 11's own fresh confirm) - only the PP flag
+ * and the downstream text/FEATHER_DANCE dispatch differ.
+ */
+function drawTurn11FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+  if (sm.openElapsed === null) {
+    drawTurn10RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    drawTurn10RockSlideTurnEndSettledMenu(fb, t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn6FeatherDanceTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurn11FeatherDanceWindow(fb, t, pressTick);
+      return;
+    }
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn11KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  drawTurn11FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true);
 }
 
 /**
@@ -9118,6 +9408,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn7Resolved,
       state.turn8Resolved,
       state.turn9Resolved,
+      state.turn10Resolved,
     );
     return;
   }
