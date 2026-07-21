@@ -276,6 +276,184 @@ For the next slice to be a pure wiring job:
 - **The 12361 71px early-onset patch**: unattributed to a specific mechanism
   (named gap, not guessed).
 
+## 2026-07-21 update: mechanisms 1-3 fresh RAM re-derivation + mechanism 4's full per-tick coefficient (S7 slice R rung (b) groundwork continuation)
+
+Closes the named gaps the previous session flagged above. Per the brief's own
+mandatory-first-step rule, instrumented the LIVE dispatcher BEFORE touching
+RAM probes or source (`tools/compare/scratch/diag-aerialace-anchor.ts`, same
+pattern as §38's `diag-quickattack-anchor.ts`): turn 10's own live `pressTick`
+(the FIGHT-submenu confirm this animation window is anchored to) is
+`SCENE_TICK0(1040) + confirmElapsed(11265) = 12305`, constant across the
+whole AERIAL_ACE window (12345/12360/12380/12400/12439 all read the same
+`confirmElapsed`) - **not assumed from the predecessor dossier**, which never
+stated a pressTick at all. All tables below are RAM-tick-relative,
+`n = ramTick - 12305`, same convention §38/§39 established for QUICK_ATTACK.
+
+Fresh RAM probe: `tools/probe/dump-aerialace-anim.py` (new, extends
+`dump-quickattack-anim.py`'s own slot-scan convention with the `data[]`
+general-purpose fields needed to read the palette-blend sprite's internal
+state), run against `battle1-turn10-dense.json`, RAM ticks 12345-12395,
+output `/tmp/aerialace-anim.json` (reproducible, not committed - scratch
+data per this run's own convention). **Papercut hit again**: the probe
+process exits 139 on teardown after writing complete, valid JSON (same
+family as the brief's own flagged papercut) - validated by loading/parsing
+the output file directly rather than trusting the exit code.
+
+### Mechanism 1: Pidgeotto's elliptical lunge (slot 5, real sprite) - CORRECTED, whole window shifted +1 tick late
+
+| n (=RAM-12305) | RAM tick | x2,y2 |
+|---|---|---|
+| 55 | 12360 | (-17,2) |
+| 56 | 12361 | (-24,6) |
+| 57 | 12362 | (-17,11) |
+| 58 | 12363 | (0,12) |
+| 59 | 12364 | (16,11) |
+| 60 | 12365 | (24,6) |
+| 61 | 12366 | (0,0) - reverted |
+
+RAM 12359 independently confirmed `(0,0)` (not yet active). §40 cited this
+exact 6-value sequence at RAM 12359-12364 - the fresh probe pins it ONE
+TICK LATER, RAM 12360-12365 - a plain transcription/citation error, not a
+render-lag artifact (see the pixel-lag finding below, which is a separate
+axis). **CORRECTED**, not confirmed.
+
+### Mechanism 2: Onix's shake (slot 6, real sprite) - CONFIRMED exactly, no correction
+
+Base `(x,y)=(72,80)` fixed; `x2` stays `0` throughout (not previously
+stated explicitly, now confirmed); `y2` square-wave `3,3,0,0` repeating over
+RAM 12369-12384 (n=64-79), 4 full cycles, 16 ticks - **bit-for-bit the same
+window §40 cited**, no correction needed. `invisible` is `True`
+continuously from RAM 12357 through 12385 (a much wider span than the
+shake's own y2-active window) - per §37's already-proven rule this doesn't
+gate rendering, and is likely `monbg`/`setalpha`'s own doing at the top of
+the whole script (both apply to `ANIM_TARGET`=Onix), not the shake task
+itself - flagged as a related observation, not chased further (named gap).
+
+### Mechanism 3: the two trace/afterimage clones (slots 4 and 7) - CORRECTED, each life's END is 1 tick early in §40
+
+| slot | RAM window (n) | x2,y2 |
+|---|---|---|
+| 4, life 1 | 12360-12367 (n=55-62) | (-17,2) flat - matches the lunge's own FIRST value |
+| 4, gap | 12368-12369 (n=63-64) | not in use |
+| 4, life 2 | 12370-12377 (n=65-72) | (0,0) flat |
+| 7 | 12365-12372 (n=60-67) | (24,6) flat - matches the lunge's own LAST value |
+
+Both clones sample the lunge's own start/end extremes, exactly as §40 said.
+§40 cited slot 4's life 1 as "12360-12368", life 2 as "12370-12378", and
+slot 7 as "12365-12373" - in every case the fresh probe's last confirmed
+`inUse=True` tick is ONE EARLIER than cited (12367 not 12368, 12377 not
+12378, 12372 not 12373); every START matches exactly. A distinct correction
+shape from mechanism 1's whole-window shift - each mechanism has its own
+citation-error shape, as the brief anticipated. **CORRECTED** (ends only).
+
+### A genuine +2 pixel-visible lag for mechanisms 1/3, distinct from mechanism 5's own +1 (new finding, not root-caused)
+
+Mechanisms 1 and 3's slot-4-life-1 both go RAM-active at the SAME tick
+(12360) mechanism 5 (the slice) is created on. Mechanism 5's own pixel
+debut is already pinned at render 12361 (+1 lag, existing check). But the
+already-verified full-frame envelope shows render 12361's ENTIRE 71px diff
+confined to the slice's own small footprint (x:92-103) - **zero** diff
+anywhere in Pidgeotto's own on-screen territory (his base `x=176`, so
+x>=150 is squarely his) - and only gains pixels there at render 12362
+(1807px, bbox reaching x=197). So mechanisms 1/3's own pixel-visible onset
+is render **12362**, one tick later than mechanism 5's, despite sharing its
+RAM-active start tick. Not root-caused this session (mechanism 1's own
+sprite, slot 5, isn't even freshly created, so "freshly-created sprites get
+an extra tick" - §39 Bug 2's own explanation for QUICK_ATTACK's blended
+clones - doesn't obviously apply here) - flagged as a named gap for
+whoever implements rung (b): wire mechanisms 1/3's OWN RAM tables from
+n=55 (RAM 12360) as pinned above, but expect their first VISIBLE pixel at
+render 12362, not the naive render=RAM+1 (12361). PNG-verified via two new
+checks in `verify-turn10-aerialace.ts` (below), not guessed.
+
+### The 12361 71px onset patch: RESOLVED - mechanism 5 alone, by position + magnitude elimination (closes the named gap)
+
+At RAM 12360, three mechanisms (1, 3's slot-4-life-1, and 5) are ALL
+RAM-active for the first time, so timing alone can't attribute the patch -
+but slots 5/4 (Pidgeotto's own real sprite + its clone) sit at base
+`x=176`, while slot 3 (the slice) sits at base `(112,56)` with its own
+32x32 footprint - nowhere near overlapping. The observed 71px bbox,
+`(92,64)-(103,75)`, falls squarely inside the slice's own footprint and
+nowhere near Pidgeotto's. Magnitude corroborates this too: a moving
+Pidgeotto silhouette (mechanism 1) or its semi-transparent clone
+(mechanism 3) would produce a diff in the hundreds-to-thousands of
+pixels (as both do from render 12362 onward), not an isolated 11x11 patch
+- consistent with only a sparse corner of the slice's own frame-0 tile
+(`tileNum=305`) having opaque pixels at its very first, barely-emerged
+instant. **Mechanism 5 owns the 71px patch** - position- and
+magnitude-eliminated, not guessed; PNG-verified via the new
+`PIDGEOTTO_TERRITORY` checks below (not proven by direct code-level
+isolation, since no engine code was written this groundwork step).
+
+### Mechanism 4: full per-tick coefficient across the whole pulse (closes the brief's own named gap)
+
+The brief assumed a BLDY/BLDALPHA hardware-register read; **that assumption
+is wrong for this mechanism** - `AnimComplexPaletteBlend`/`_Step1`/`_Step2`
+(`reference/pokeemerald/src/battle_anim_normal.c:344-405`) calls
+`BlendPalette` (`src/util.c:264`) directly, a SOFTWARE per-color blend
+writing straight into `gPlttBufferFaded` (the live palette RAM mirror) -
+not the GBA's hardware brightness-fade register. Read the palette-blend
+sprite's own `data[]` fields directly (slot 8: `sTimer,sDelay,sNumBlends,
+sColor1,sBlendY1,sColor2,sBlendY2,sPaletteSelector`) plus two representative
+live palette colors (BG palette 1 color 1, and battler0/battler1's own OBJ
+palette color 1 - `selector=31` decodes to `F_PAL_BG|F_PAL_BATTLERS`
+exactly, confirmed bit-for-bit against `data[7]`):
+
+| n (=RAM-12305) | RAM tick | s8.data (sTimer,sDelay,sNumBlends,...,sBlendY1,...,sel) | bgPal1c1 | objPalB0/B1c1 | state |
+|---|---|---|---|---|---|
+| 61 | 12366 | sprite not yet created | `0x18c5` (5,6,6) | `0x7fff` (31,31,31) | baseline |
+| 62 | 12367 | `[2,3,1,0,10,0,0,31]` | `0x18c5` | `0x7fff` | baseline (write not yet visible) |
+| 63 | 12368 | `[1,3,1,0,10,0,0,31]` | `0x0841` (1,2,2) | `0x2d6b` (11,11,11) | **darkened** |
+| 64 | 12369 | `[0,3,1,0,10,0,0,31]` | `0x0841` | `0x2d6b` | **darkened** |
+| 65 | 12370 | `[3,259,0,0,10,0,0,31]` | `0x0841` | `0x2d6b` | **darkened** (restore step just fired, not yet visible) |
+| 66 | 12371 | `[2,259,0,0,10,0,0,31]` | `0x18c5` | `0x7fff` | restored |
+| 67-68 | 12372-73 | `[1..0,259,0,...]` | `0x18c5` | `0x7fff` | restored |
+| 69 | 12374 | `[0,259,0,0,10,0,0,31]` (held, `Step2` wait) | `0x18c5` | `0x7fff` | restored |
+| 70 | 12375 | destroyed | `0x18c5` | `0x7fff` | restored |
+
+The darkened colors are a bit-exact match to `BlendPalette`'s own formula
+(`out = c + ((0-c)*10)>>4`, hand-verified: `(5,6,6)->(1,2,2)`,
+`(31,31,31)->(11,11,11)`) - **not** a smooth per-tick ramp, exactly **two**
+discrete writes (coeff=10 at creation, coeff=0 exactly `delay`=3 ticks
+later per the script's own `complex_palette_blend ... delay=3, num_blends=1,
+blend_y1=10, blend_y2=0` args), confirming the predecessor's own hypothesis
+("a plateau this short suggests a small number of discrete coefficient
+steps rather than a smooth per-tick ramp") at the source+RAM level, not
+just pixel-inferred. The darkened-palette-RAM window (RAM 12368-12370,
+3 ticks) lands on the EXACT SAME absolute tick numbers as the predecessor's
+own PNG-bisected plateau (render 12368-12370) - i.e. palette-RAM visibility
+has **no** render lag here (0, not +1), unlike the OAM x2/y2 fields
+mechanisms 1/2/3/5 all show some lag class for - yet another distinct lag
+class in this one window, as the brief anticipated. **CONFIRMED + fully
+extended** (previously only the plateau window was pinned; now every tick
+of the pulse's own state machine is).
+
+### Verification (this update)
+
+`tools/probe/verify-turn10-aerialace.ts` extended with 3 new checks (the
+71px-patch attribution, the mechanisms-1/3 +2 lag, and mechanism 2's shake
+phase-alignment) - **20/20 PASS** (17 prior + 3 new), fresh run against a
+live oracle capture, zero regressions. `npm test` and `npm run build`
+unchanged-green (no `src/` changes this session). New committed tooling:
+`tools/compare/scratch/diag-aerialace-anchor.ts` (live pressTick
+instrument, reusable), `tools/probe/dump-aerialace-anim.py` (combined
+sprite-slot + palette-blend RAM probe).
+
+### What's left for rung (b) implementation (updated gap accounting)
+
+- **Mechanisms 1-5**: all five now have RAM-pinned tables + PNG-corroborated
+  pixel-visible windows. Mechanisms 1/3 need their own **+2** render lag
+  (not the naive +1) - the ONE remaining unexplained detail, named above,
+  not root-caused.
+- **Mechanism 2's own wider `invisible=True` span** (RAM 12357-12385 vs. the
+  shake's own narrower 12369-12384 active window) is unexplained (likely
+  `monbg`/`setalpha` at script start, not chased) - doesn't block
+  implementation (per §37, `invisible` never gates rendering) but flagged
+  for completeness.
+- Render routines for all five mechanisms still need writing - out of
+  scope for this worktree lane (no `src/engine/` changes made this
+  session, per the brief).
+
 ## Verification
 
 `tools/probe/verify-turn10-aerialace.ts` (rerunnable PASS/FAIL script,
