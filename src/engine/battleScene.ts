@@ -2510,7 +2510,7 @@ function drawSpriteSheetAffineTintedBlend(
  * 16x16 source isn't corner-clipped - mechanism 4/5 never needed this since
  * neither ever rotates away from its axis-aligned bounding box.
  */
-function drawSpriteSheetAffineRotate(
+export function drawSpriteSheetAffineRotate(
   fb: Uint8Array,
   tileset: Tileset,
   palette: RgbColor[],
@@ -5428,6 +5428,91 @@ function turn5BgFadeY(t: number): number {
 }
 
 /**
+ * S7 slice M-3 (docs/faint-switch-notes.md §12/§13): Onix's own Sitrus
+ * Berry proc opening stage - `General_HeldItemEffect`'s first 3
+ * `AnimTask_RotateMonToSideAndRestore` calls, a genuine GBA affine-OAM
+ * rotation of Onix's own back sprite. Table RAM-read directly
+ * (`gOamMatrices[matrixNum]`, `tools/probe/dump-onix-sitrus-rotate-matrix.py`,
+ * cross-checked twice), anchored at RAM tick 6872 (identity/cycle-start),
+ * one 32-RAM-tick cycle repeated 3x verbatim through RAM tick 6968 (all 3
+ * cycles byte-identical, RAM-diffed this session). `y2` is the
+ * `SetBattlerSpriteYOffsetFromRotation` byproduct (`|c|>>3`, RAM-confirmed
+ * 100% - not a separate table).
+ *
+ * **The render-tick offset from the RAM tick is +2, not the usual +1**
+ * (this run's ordinary OAM-shadow-buffer-to-hardware-DMA lag, e.g.
+ * `docs/battle-menu-notes.md` §10a) - RAM-pixel-bisected this session by
+ * checking exactly where the render's own full-frame sha256 first departs
+ * from the identity pose: it stays byte-identical through render tick
+ * 6874 (both RAM ticks 6872 AND 6873's matrices produce an unchanged
+ * frame at some render offset) and first visibly changes at render 6875 -
+ * `renderTick - 2 === ramTick` is the only lag consistent with BOTH that
+ * plateau's own width and its own edge. §12's own reverted attempt used
+ * lag 0 (the RAM tick's matrix applied at the SAME render tick) - **that
+ * mistiming, not a sampler rounding bug, is what regressed the healthbox
+ * trace**: re-bisected this session with a from-scratch pixel classifier
+ * (real oracle pixel vs. this function's own simulated output, background
+ * pixels resolved via the identity frame's own confirmed-transparent set
+ * rather than eyeballed) - at the correct lag, `drawSpriteSheetAffineRotate`
+ * itself needs NO change whatsoever; every remaining non-match traced to
+ * Onix's own static drop-shadow sprite (a separate element this function
+ * doesn't draw), not the rotated texture sampling. The sampler's existing
+ * floor-based (`>>8`, arithmetic shift, already floors toward -infinity in
+ * JS same as GBA's own SAR) convention was compared against half a dozen
+ * rounding/axis variants (round-to-nearest, pixel-center bias, transpose,
+ * matrix inverse) - `floor`, unchanged, was the closest to the oracle at
+ * every single one, confirming the existing convention was already right.
+ */
+const ONIX_SITRUS_RENDER_LAG = 2;
+const ONIX_SITRUS_RAM_ANCHOR_TICK = 6872;
+const ONIX_SITRUS_CYCLE_LEN = 32;
+const ONIX_SITRUS_CYCLE_COUNT = 3;
+const ONIX_SITRUS_ROTATE_TABLE: readonly (readonly [number, number, number, number])[] = [
+  [256, 0, 0, 256],
+  [255, 6, -6, 255],
+  [255, 6, -6, 255],
+  [255, 12, -12, 255],
+  [255, 12, -12, 255],
+  [255, 18, -18, 255],
+  [255, 18, -18, 255],
+  [254, 25, -25, 254],
+  [254, 25, -25, 254],
+  [254, 31, -31, 254],
+  [254, 31, -31, 254],
+  [253, 37, -37, 253],
+  [253, 37, -37, 253],
+  [252, 43, -43, 252],
+  [252, 43, -43, 252],
+  [251, 49, -49, 251],
+  [251, 49, -49, 251],
+  [251, 49, -49, 251],
+  [252, 43, -43, 252],
+  [252, 43, -43, 252],
+  [253, 37, -37, 253],
+  [253, 37, -37, 253],
+  [254, 31, -31, 254],
+  [254, 31, -31, 254],
+  [254, 25, -25, 254],
+  [254, 25, -25, 254],
+  [255, 18, -18, 255],
+  [255, 18, -18, 255],
+  [255, 12, -12, 255],
+  [255, 12, -12, 255],
+  [255, 6, -6, 255],
+  [255, 6, -6, 255],
+];
+
+/** `null` means "identity - let the plain static draw handle it" (both outside the rotation's own render window, and at the table's own identity entries). */
+export function onixSitrusRotateMatrix(t: number): { pa: number; pb: number; pc: number; pd: number; y2: number } | null {
+  const ramTick = t - ONIX_SITRUS_RENDER_LAG;
+  const offset = ramTick - ONIX_SITRUS_RAM_ANCHOR_TICK;
+  if (offset < 0 || offset >= ONIX_SITRUS_CYCLE_LEN * ONIX_SITRUS_CYCLE_COUNT) return null;
+  const [pa, pb, pc, pd] = ONIX_SITRUS_ROTATE_TABLE[offset % ONIX_SITRUS_CYCLE_LEN]!;
+  if (pb === 0 && pc === 0) return null;
+  return { pa, pb, pc, pd, y2: Math.abs(pc) >> 3 };
+}
+
+/**
  * The battlefield base for turn 5's own ROCK_SLIDE window - same shape as
  * `drawTurn3RockSlideAttack`/`drawTurn4RockSlideAttack` (shake/rocks/hit-
  * flash mechanisms reused with ZERO code changes, only the new synthetic
@@ -5448,7 +5533,22 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number): void {
   } else if (sink.keptRows > 0) {
     drawSpriteSheetTopRows(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + sink.y2, sink.keptRows);
   }
-  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  const sitrusRotate = onixSitrusRotateMatrix(t);
+  if (sitrusRotate) {
+    drawSpriteSheetAffineRotate(
+      fb,
+      onixBackSprite.tileset,
+      onixBackSprite.palette,
+      ONIX_MATERIALIZE_CORNER.x + (onixBackSprite.tileset.columns * 8) / 2,
+      ONIX_MATERIALIZE_CORNER.y + (onixBackSprite.tileset.rows * 8) / 2 + sitrusRotate.y2,
+      sitrusRotate.pa,
+      sitrusRotate.pb,
+      sitrusRotate.pc,
+      sitrusRotate.pd,
+    );
+  } else {
+    drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  }
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
   const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn4Hp, anchorOpponentAfterTurn5Hp);
   if (t < GROVYLE_HEALTHBOX_VANISH_TICK) {

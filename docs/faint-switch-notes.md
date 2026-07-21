@@ -1651,3 +1651,131 @@ coefficient - the NEXT session can go straight to fixing
 `drawSpriteSheetAffineRotate`'s small-angle rounding (or adding a
 dedicated small-angle path) and reusing the exact table/call-site above,
 rather than re-deriving the mechanism from scratch.
+
+## 13. S7 slice M-3 (bounded worker, this session): the rotation window
+LANDED - the "small-angle rounding gap" §12 flagged was a real, precisely-
+misdiagnosed bug, but NOT in the sampler - it was a render-tick lag off by
+one; `drawSpriteSheetAffineRotate` itself needed zero changes; `turn5-
+sitrus-a.json` **110/110, 0 diff**, full 47-trace sweep zero regressions
+
+### Root cause: a +2 render-tick lag from the RAM tick, not +1 - and NOT a
+sampler rounding bug at all
+
+Picked up exactly where §12 left off, per the brief: bisect
+`drawSpriteSheetAffineRotate` against the oracle at a fixed tiny angle
+(RAM tick 6873, `a=255,b=6,c=-6,d=255`) and the cycle's own peak (RAM tick
+6887, `a=251,b=49,c=-49,d=251`) before touching anything. Built a fresh RAM
+probe (`tools/probe/dump-onix-sitrus-rotate-matrix.py`, battler-0 variant of
+§12's own battler-1 probe) and re-read the full 32-entry matrix table
+directly - reproduces §12's own cited values exactly (100% match, this is a
+real re-verification, not a rehash) and confirms all 3 cycles are
+byte-identical (RAM ticks 6872-6904, 6904-6936, 6936-6968 diffed against
+each other directly, 0 mismatches).
+
+**The oracle's OWN render hash is byte-identical to the flat/identity pose
+through render tick 6874** (`shasum` on the raw `bin/oracle run` PNGs -
+render ticks 6872/6873/6874 all hash `0a112aee...`), and **first visibly
+changes at render tick 6875** (hash `ce49aa88...`). Under the render lag
+this run has used everywhere else (RAM tick `T`'s write first visible at
+render `T+1` - `docs/battle-menu-notes.md` §10a, this file's own §8/§10),
+render 6874 would already show RAM tick 6873's own non-identity matrix -
+but it doesn't (still bit-identical to identity). Only a **+2** lag
+(render tick `T` shows RAM tick `T-2`'s own matrix) is consistent with
+BOTH the plateau's own width (RAM ticks 6872 AND 6873 both landing on
+identical renders) and its own edge (render 6875 = RAM tick 6873, the
+first tick the render hash actually moves). This is a genuinely new,
+previously-unknown fact about this specific mechanism's own timing, not
+a generalization of the existing +1 convention - flagged here so a future
+"the usual +1 lag" assumption doesn't silently reapply it elsewhere without
+re-checking.
+
+**§12's reverted attempt used lag 0** (the RAM tick's own matrix, wired to
+the SAME render tick) - re-diagnosed this session with a from-scratch pixel
+classifier (`pngjs`-decoded oracle PNGs vs. this function's own simulated
+output; background pixels resolved via the identity frame's own confirmed-
+transparent set, not eyeballed or hand-copied from a prior frame) rather
+than re-running the exact same wiring blind. At lag 0, the tiny-angle tick
+alone diffs ~548px (matching §12's own cited "600px" - same bug, same
+order of magnitude) and the pattern is a genuine positional permutation
+along Onix's silhouette edge, exactly as §12 described. **At the correct
+lag (+2, plus threading the rotation's own `y2` byproduct into the sprite's
+screen Y - `SetBattlerSpriteYOffsetFromRotation`'s effect was previously
+tested as a bare translate with no rotation at all, a different, already-
+superseded §11 hypothesis; here `y2` rides ALONGSIDE the full rotation
+matrix, not instead of it), `drawSpriteSheetAffineRotate` needed ZERO
+changes.** Every one of the ~50-460px "residuals" the naive per-pixel
+classifier still flagged at the correct lag turned out to be a real,
+separately-drawn static drop-shadow sprite this function was never asked
+to model (constant color `(74,66,82)`, confined to render rows 112-113 -
+the exact bottom edge of Onix's own 64x64 bbox - regardless of rotation
+angle) - once cross-checked against `npm run compare`'s own real renderer
+(which already draws that shadow via its own separate call, unaffected by
+this session's change), the true residual is **exactly zero**.
+
+Also swept half a dozen alternate sampler conventions against the same
+oracle data before concluding the existing one was already right (not
+assumed) - round-to-nearest (`+128` bias before the shift), a pixel-center
+`+0.5` bias, `pb`/`pc` axis transpose, and the full 2x2 matrix inverse -
+every one of them was a WORSE fit than the existing plain
+floor-via-arithmetic-shift (`>>8`) convention already in
+`drawSpriteSheetAffineRotate`, at every tick tested. JS's `>>` operator on
+in-range operands already performs a true sign-propagating (floor-toward-
+negative-infinity) shift, matching GBA's own SAR semantics exactly - there
+was no `Math.trunc`/round-toward-zero bug hiding in this function, contra
+this rung's own working hypothesis. **The lesson for future sessions**:
+a regression from a newly-wired timing table can look exactly like a
+rendering-formula bug (same silhouette-edge permutation signature) when
+the real cause is upstream (which RAM tick's data reaches which render
+tick) - re-bisect the WIRING before the MATH, especially when the same
+primitive is already proven exact elsewhere in this file (the thrown
+ball's own much larger rotations, unchanged and still exact this session).
+
+### What landed
+
+`onixSitrusRotateMatrix(t)` (`battleScene.ts`) - the exact 32-entry `[pa,pb,
+pc,pd]` table `y2 = |pc|>>3`, anchored at RAM tick 6872 (identity), applied
+with the `+2` render lag derived above; `null` outside the window or at an
+identity table entry (both mean "let the plain static draw handle it" -
+the existing call site's own fall-through, unchanged pixel output at every
+other tick). Wired into `drawTurn5RockSlideAttack`'s own Onix draw call
+(the same call site §12 already identified), gated on `onixSitrusRotate-
+Matrix(t)` instead of always drawing the plain static sprite.
+
+**Acceptance, per the brief's rung (a)+(b):**
+- `turn5-sitrus-a.json` (new, committed - reuses `turn5-switchin.json`'s own
+  67-segment script + one idle-pad filler segment to tick 6980, dense
+  `captureFrames` 6860-6969): **110/110, 0 diff**, twice-run identical -
+  covers the entire flat pre-rotation lead-in AND all 3 rotation cycles
+  (both bisection ticks from the brief land inside this window, at their
+  own correct render offsets: 6875 for the tiny angle, 6889 for the peak).
+- Full 47-trace sweep (every file in `tools/compare/traces/`): every trace
+  at its own previously-established count, zero regressions - notably
+  `turn5-healthbox.json` **55/55** (the trace this exact fix regressed last
+  session), `turn5-switchin.json` **241/241**, `turn5-sentout.json`
+  **141/141**, `turn5-rockslide.json` **256/256**, `sendout.json`
+  **255/256**, `s6-acceptance.json` **224/228**, `turn2-dragonbreath.json`
+  **237/237** (ISSUES #23's own parked residual - unaffected, unsurprising
+  since `drawSpriteSheetAffineRotate` itself was never modified, only a
+  new call site was added elsewhere).
+- Tier-1 pin (`tests/battleScene.test.ts`): `drawSpriteSheetAffineRotate`
+  exported and pinned against a small hand-built 8x8 fixture at identity,
+  the tiny-angle matrix above, and a 90-degree rotation (the thrown ball's
+  own magnitude range) - 3 tests, exact expected-pixel assertions, no
+  oracle dependency. `onixSitrusRotateMatrix` exported and pinned directly
+  (null outside the window, exact table values at the tiny/peak ticks,
+  null at every cycle boundary and past the 3rd cycle) - 5 tests. `npm
+  test` **801/801** (+8 net this session), `npm run build` green.
+
+**Where the window ends**: render tick 6970 (RAM tick 6968, the table's own
+4th "identity" entry - the task genuinely ends here, `affineMode` reverts
+1<-3 in RAM) is where the NEXT, still-unmodeled stage starts
+(`GrantingStarsEffect`, §12's own flagged item) - confirmed by extending
+the probe trace two-sided (6860-6980) before trimming the committed file to
+the clean 0-diff window: renders 6970+ diff a small, stable ~75-155px
+(`ssimMin` drops to ~0.10-0.24, a real new element, not sampler noise),
+exactly matching §12's own citation of `data/battle_anim_scripts.s:10040-
+10045`'s two star sprites starting right after the 3rd rotation cycle. Out
+of this rung's own scope (rung (c)) - flagged, not chased.
+
+### Status: rungs (a)+(b) of the brief's ladder CLOSED. `npm test` 801/801,
+`npm run build` green, tree clean at commit time.

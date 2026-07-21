@@ -8,12 +8,14 @@ import {
   CURSOR_START_TICK,
   DRAGON_BREATH_MOVE_POWER,
   dragonBreathGrovyleHp,
+  drawSpriteSheetAffineRotate,
   endeavorShakeSteps,
   evaEvb,
   GROVYLE_FAINT_SINK_START_TICK,
   GROVYLE_FAINT_SINK_STEPS,
   grovyleFaintSinkRowsAndY2,
   INITIAL_BATTLE_SCENE_STATE,
+  onixSitrusRotateMatrix,
   PARTICLE_OAM_PRIORITY,
   PARTICLE_OAM_SUBPRIORITY,
   renderBattleScene,
@@ -1510,5 +1512,70 @@ describe("S7 slice M: turn5PidgeottoHealthboxSlideDx (docs/faint-switch-notes.md
     expect(turn5PidgeottoHealthboxSlideDx(6851)).toBe(0);
     expect(turn5PidgeottoHealthboxSlideDx(6852)).toBe(0);
     expect(turn5PidgeottoHealthboxSlideDx(7000)).toBe(0);
+  });
+});
+
+describe("S7 slice M-3 (docs/faint-switch-notes.md §12/§13): drawSpriteSheetAffineRotate's sampler, pinned against a small hand-built fixture at both a tiny and a large rotation angle - this session's own RAM/oracle bisection found the SAMPLER needs no change at all (the prior session's regression was a render-tick lag miswiring, not a rounding bug); this pins the sampler's own already-correct floor-based (>>8) convention so a future edit can't silently reintroduce one", () => {
+  // 1 tile (8x8), two marked texels: (col=6,row=2) -> palette index 1, (col=1,row=5) -> palette index 2.
+  const tile = new Array(64).fill(0);
+  tile[2 * 8 + 6] = 1;
+  tile[5 * 8 + 1] = 2;
+  const tileset = { columns: 1, rows: 1, tiles: [tile] };
+  const palette = [
+    { r: 0, g: 0, b: 0 },
+    { r: 200, g: 50, b: 80 },
+    { r: 10, g: 220, b: 30 },
+  ];
+  const CENTER_X = 120;
+  const CENTER_Y = 80;
+
+  function render(pa: number, pb: number, pc: number, pd: number): Uint8Array {
+    const fb = new Uint8Array(240 * 160 * 4);
+    drawSpriteSheetAffineRotate(fb, tileset, palette, CENTER_X, CENTER_Y, pa, pb, pc, pd);
+    return fb;
+  }
+  function pixelAtOffset(fb: Uint8Array, dx: number, dy: number): [number, number, number] {
+    const o = ((CENTER_Y + dy) * 240 + (CENTER_X + dx)) * 4;
+    return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+  }
+
+  it("identity (pa=pd=256, pb=pc=0) reproduces the plain tileset unrotated", () => {
+    const fb = render(256, 0, 0, 256);
+    expect(pixelAtOffset(fb, 2, -2)).toEqual([200, 50, 80]); // tex(6,2)
+    expect(pixelAtOffset(fb, -3, 1)).toEqual([10, 220, 30]); // tex(1,5)
+  });
+
+  it("a tiny rotation (a=255,b=6,c=-6,d=255 - docs/faint-switch-notes.md §12's own RAM-read tick-6873 matrix) shears both axes together, not a vertical-only translate", () => {
+    const fb = render(255, 6, -6, 255);
+    expect(pixelAtOffset(fb, 3, -1)).toEqual([200, 50, 80]); // tex(6,2)
+    expect(pixelAtOffset(fb, -3, 1)).toEqual([10, 220, 30]); // tex(1,5)
+  });
+
+  it("a large rotation (90 degrees: a=0,b=256,c=-256,d=0) stays exact - the thrown ball's own already-proven magnitude range", () => {
+    const fb = render(0, 256, -256, 0);
+    expect(pixelAtOffset(fb, 2, 2)).toEqual([200, 50, 80]); // tex(6,2)
+    expect(pixelAtOffset(fb, -1, -3)).toEqual([10, 220, 30]); // tex(1,5)
+  });
+});
+
+describe("S7 slice M-3: onixSitrusRotateMatrix (docs/faint-switch-notes.md §12/§13) - RAM-read 32-entry table, anchored at RAM tick 6872 (identity), 3 cycles, +2 render-tick lag from the RAM tick (not the usual +1 - RAM-pixel-bisected this session)", () => {
+  it("is null (plain static draw) before the rotation's own render window starts", () => {
+    expect(onixSitrusRotateMatrix(6873)).toBeNull();
+    expect(onixSitrusRotateMatrix(6874)).toBeNull(); // RAM tick 6872 (identity) - lag +2
+  });
+  it("first non-identity render tick is 6875 (RAM tick 6873's own a=255,b=6,c=-6,d=255, y2=|c|>>3=0)", () => {
+    expect(onixSitrusRotateMatrix(6875)).toEqual({ pa: 255, pb: 6, pc: -6, pd: 255, y2: 0 });
+  });
+  it("render tick 6889 is the cycle's own peak (RAM tick 6887, a=251,b=49,c=-49,d=251, y2=6)", () => {
+    expect(onixSitrusRotateMatrix(6889)).toEqual({ pa: 251, pb: 49, pc: -49, pd: 251, y2: 6 });
+  });
+  it("returns to identity/null at every cycle boundary (RAM ticks 6872/6904/6936/6968, render +2)", () => {
+    expect(onixSitrusRotateMatrix(6906)).toBeNull();
+    expect(onixSitrusRotateMatrix(6938)).toBeNull();
+    expect(onixSitrusRotateMatrix(6970)).toBeNull();
+  });
+  it("is null past the 3rd cycle (the task ends, RAM tick > 6968 - the next, still-unmodeled stage is GrantingStarsEffect)", () => {
+    expect(onixSitrusRotateMatrix(6971)).toBeNull();
+    expect(onixSitrusRotateMatrix(7000)).toBeNull();
   });
 });
