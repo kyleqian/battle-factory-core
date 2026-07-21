@@ -1,3 +1,31 @@
+## 191 — Worktree scout (supervisor-folded): turn 8 ground truth BANKED — winline-b takes **BIND, and it MISSES** (8 Random() calls, miss short-circuits crit/spread/effect); ATK stage hits its floor (2→0) yet prints the ordinary "harshly fell" (source-traced: the "won't go lower" variant needs the stat already AT floor before the attempt); `battle1-turn8-dense.json` (10826 frames, 226/226 captures) + `docs/turn8-notes.md`; merged `fc0d23c`, suite 793/793 on the merged tree
+
+- **State:** merged into master, `npm test` 793/793 + build green
+  post-merge (docs+trace only). Supervisor re-verified: prefix chain
+  (turn7-dense ⊂ turn8-dense ⊂ winline-b-swap, script-exact), 5/5 cited
+  boundary shas reproduced fresh, cursor-on-BIND submenu frame (9420, PP
+  20/20 TYPE/NORMAL) read as an image. Scout PNG-read every text label
+  per the new discipline.
+- **Did:** turn 8 on the committed line = Pidgeotto's 3rd FEATHER_DANCE
+  (Onix ATK floor 2→0) then Onix's BIND miss (acc 75 — corrects §14's
+  prose "85"; roll at RAM 9844 fires under the PREVIOUS text, 2 ticks
+  before the box transition). No HP change either side. BIND's trap
+  mechanic (EFFECT_TRAP/STATUS2_WRAPPED, maxHP/16 end-of-turn) inventoried
+  from source but NOT exercised (missed; RAM wrap-status flat). The
+  4-frame shared box-open prefix reconfirmed 3× within this turn; the
+  stat-write→"fell"-text gap is 293 ticks (vs 294/293 turns 6/7).
+  "Won't go lower" variant's real trigger pinned = a 4th FD (turn-9
+  scout's falsifiable test). Minor flag: BIND's description text
+  ("2 to 5 turns") vs source-implemented 3-6 wrap duration — noted in
+  the doc, not chased.
+- **Next:** M-3 (affine-sampler small-angle fix per §12's bisect-at-6887
+  instrument, then the Sitrus stages); turn-6/7/8 engine slices against
+  the three dossiers (turn 8 = text-only resolution, cheapest of the
+  three).
+- **Notes:** scout stayed in contract; no papercuts.
+
+---
+
 ## 190 — Bounded worker (S7 slice M-2): Onix "idle bob" ROOT-CAUSED and NAMED — it's the Sitrus proc's own opening animation stage (`General_HeldItemEffect`, a genuine GBA affine-OAM rotation), starting at tick 6869 not ~7042; render fix attempted and REVERTED (regresses the protected healthbox trace on a small-angle rounding gap) — NOT landed, no new committed traces
 
 - **State:** `npm test` 793/793 (unchanged), `npm run build` green, tree

@@ -497,6 +497,7 @@ import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" 
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
+import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import menuIdleBlankAsset from "../assets/gen/menu-idle-blank.json" with { type: "json" };
@@ -606,6 +607,19 @@ interface BattleAnimParticlesAsset {
 interface BattleBackSpriteAsset {
   tileset: Tileset;
   palette: RgbColor[];
+}
+/** `docs/faint-switch-notes.md` §8a/§14: `General_HeldItemEffect`'s own two gfx tags - `sparkle` (`ANIM_TAG_SPARKLE_2`, the granting-stars burst, byte-exact verified) and `ring` (`ANIM_TAG_THIN_RING`, the expanding ring, extracted+source-cited). */
+interface BattleAnimItemHealAsset {
+  sparkle: {
+    tileset: Tileset;
+    palette: RgbColor[];
+    grantingStarsAnim: { tile: number; duration: number }[];
+    spawns: { dx: number; dy: number; delayAfterPrev: number }[];
+  };
+  ring: {
+    tileset: Tileset;
+    palette: RgbColor[];
+  };
 }
 /** Same flat-opaque-RGB-rectangle shape as `SendOutHealthboxContentAsset` (§7.9's harvest pattern), reused here for a WHOLE-FRAME harvest (`x:0,y:0,width:240,height:160`) - see `tools/extract/extract-menu-idle-window.ts`'s own module doc for why this window harvests full frames/regions instead of layered sub-draws. */
 type MenuIdleFrameAsset = SendOutHealthboxContentAsset;
@@ -883,6 +897,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 const menuIdleBlank = menuIdleBlankAsset as MenuIdleFrameAsset;
@@ -5513,6 +5528,87 @@ export function onixSitrusRotateMatrix(t: number): { pa: number; pb: number; pc:
 }
 
 /**
+ * S7 slice M-4 (docs/faint-switch-notes.md §14): `GrantingStarsEffect`
+ * (`data/battle_anim_scripts.s:10040-10045`) - two `gGrantingStarsSprite-
+ * Template` sprites (`ANIM_TAG_SPARKLE_2`, §8a's own byte-exact-verified
+ * gfx), RAM-probed fresh this session (`gSprites[3]`/`gSprites[4]`, a
+ * 64-slot x/y/x2/y2/animCmdIndex/flags scan - not curve-fit, not assumed
+ * from the source's own "8 ticks apart" comment, which this data actually
+ * CORRECTS to 10). Both stars share the identical closed form, just at
+ * their own `spawnTick`/screen anchor:
+ * - **Spawn ticks (RAM): 6968 and 6978** - 10 ticks apart (source cites
+ *   "8 ticks apart" as a script-level delay parameter; RAM ground truth
+ *   here is 10, the two aren't the same unit/count and RAM wins).
+ * - **Fixed screen anchor**: star 0 at RAM `(57,88)`, star 1 at RAM
+ *   `(84,83)` - matches the source's own `(-15,0)`/`(12,-5)` attacker-
+ *   relative offset pair against Onix's own on-field center.
+ * - **Anim frame**: `floor(localTick/7) % 8` (8 frames, 7 ticks each, tile
+ *   offsets 0,16,...,112 - `grantingStarsAnim`, exactly the source-cited
+ *   shape).
+ * - **`y2` drift**: `floor(localTick/8)`, RAM-read (0..7 over the star's
+ *   own ~62-tick life) - a real, slow upward creep this session found by
+ *   probing `y2` directly, NOT part of any prior citation.
+ * - **Corner convention**: `(ramX - 16, ramY + y2 - 16)` - the ordinary
+ *   half-sprite (32x32) centering, y2 layered in - bisected this session
+ *   against 6 independent (tick, star, frame) triples, all 0px diff.
+ * - **Lifetime**: destroyed at `localTick===62` (RAM); the render lag from
+ *   RAM to render is the ordinary **+1** tick (bisected against oracle
+ *   PNGs directly: +0 leaves ~70-75px residual at every sampled tick, +1
+ *   is exactly 0px at all 6, +2 reintroduces a 1px residual at one of the
+ *   6 - +1 is the unambiguous fit).
+ */
+export const TURN5_SITRUS_STAR_SPAWNS: readonly { spawnTick: number; x: number; y: number }[] = [
+  { spawnTick: 6968, x: 57, y: 88 },
+  { spawnTick: 6978, x: 84, y: 83 },
+];
+const TURN5_SITRUS_STAR_LIFE = 62;
+const TURN5_SITRUS_STAR_RENDER_LAG = 1;
+
+/**
+ * Pure placement math for one star (index into `TURN5_SITRUS_STAR_SPAWNS`)
+ * at absolute render tick `t` - `null` before/after its own visible window.
+ * `local===0` (the sprite's own creation tick) never actually renders - see
+ * `drawGrantingStars`'s own doc comment for the pixel evidence.
+ */
+export function turn5GrantingStarPlacement(t: number, spawnIndex: number): { frameIndex: number; cx: number; cy: number } | null {
+  const spawn = TURN5_SITRUS_STAR_SPAWNS[spawnIndex]!;
+  const ramTick = t - TURN5_SITRUS_STAR_RENDER_LAG;
+  const local = ramTick - spawn.spawnTick;
+  if (local < 1 || local >= TURN5_SITRUS_STAR_LIFE) return null;
+  const frameIndex = Math.floor(local / 7) % 8;
+  const y2 = Math.floor(local / 8);
+  return { frameIndex, cx: spawn.x - 16, cy: spawn.y + y2 - 16 };
+}
+
+/**
+ * Drawn in REVERSE spawn order (star 1, then star 0) - GBA OAM composites
+ * lower sprite-slot indices in front; star 0 (slot 3) spawns before star 1
+ * (slot 4), so it must be the one painted LAST to win their brief overlap
+ * (pixel-isolated this session: render 7001/7002, (72,90), 1px each - app
+ * showed star 1's color painted over star 0's before this fix). `local===0`
+ * (the sprite's own creation tick) never actually renders - pixel-isolated
+ * this session (renders 6969/6979, the two stars' own spawn ticks, both
+ * show pure background where the star's own model predicted paint) - the
+ * OAM write from CreateSprite doesn't reach the shadow buffer until the
+ * FOLLOWING tick, same "spawn tick itself is invisible" shape already
+ * documented for the switch-in particle burst (`drawTurn5SwitchinParticles`'s
+ * own `age = tick - spawnTick - 1`).
+ */
+function drawGrantingStars(fb: Uint8Array, t: number): void {
+  const { tileset, palette, grantingStarsAnim } = battleAnimItemHeal.sparkle;
+  for (let i = TURN5_SITRUS_STAR_SPAWNS.length - 1; i >= 0; i -= 1) {
+    const placement = turn5GrantingStarPlacement(t, i);
+    if (!placement) continue;
+    const frame = grantingStarsAnim[placement.frameIndex]!;
+    for (let ty = 0; ty < 4; ty += 1) {
+      for (let tx = 0; tx < 4; tx += 1) {
+        drawSpriteSheetTile(fb, tileset, palette, frame.tile + ty * tileset.columns + tx, placement.cx + tx * 8, placement.cy + ty * 8);
+      }
+    }
+  }
+}
+
+/**
  * The battlefield base for turn 5's own ROCK_SLIDE window - same shape as
  * `drawTurn3RockSlideAttack`/`drawTurn4RockSlideAttack` (shake/rocks/hit-
  * flash mechanisms reused with ZERO code changes, only the new synthetic
@@ -5549,6 +5645,7 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number): void {
   } else {
     drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   }
+  drawGrantingStars(fb, t);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
   const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentAfterTurn4Hp, anchorOpponentAfterTurn5Hp);
   if (t < GROVYLE_HEALTHBOX_VANISH_TICK) {

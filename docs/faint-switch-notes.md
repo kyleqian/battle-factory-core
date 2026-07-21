@@ -1779,3 +1779,104 @@ of this rung's own scope (rung (c)) - flagged, not chased.
 
 ### Status: rungs (a)+(b) of the brief's ladder CLOSED. `npm test` 801/801,
 `npm run build` green, tree clean at commit time.
+
+## 14. S7 slice M-4 (bounded worker, this session): rung (c) LANDED -
+`GrantingStarsEffect`'s two star sprites, `turn5-sitrus-b.json` **82/82, 0
+diff, 6960-7041**; rungs (d)/(e) not reached (out of session time)
+
+Picked up exactly at rung (c) per the brief. RAM-probed the two
+`gGrantingStarsSpriteTemplate` sprites fresh (`tools/probe/specs/turn5-
+sitrus-star-scan.json`, `gSprites[3]`/`gSprites[4]` - identified by a
+broader 64-slot x/y/animNum/animCmdIndex/flags sweep first, `src/data/gen/
+battle1-turn5-sitrus-star-scan-probe.json`) rather than trusting the
+source's own "8 ticks apart" prose:
+
+- **Spawn ticks (RAM): 6968 and 6978 - 10 ticks apart, not 8.** RAM ground
+  truth corrects `General_HeldItemEffect`'s own script-level "8" parameter
+  (§12's citation) - the two aren't the same unit/count and the RAM data
+  wins. Fixed screen anchor per star: `(57,88)` and `(84,83)` (matches the
+  source's own `(-15,0)`/`(12,-5)` attacker-relative offsets against
+  Onix's on-field center).
+- **Anim frame**: `floor(localTick/7) % 8`, exactly the source-cited 8
+  frames/7 ticks-each/loop shape (`grantingStarsAnim`, already extracted
+  §8a). **`y2` drift**: `floor(localTick/8)` - RAM-read directly (0..7
+  over each star's own ~62-tick life), a genuinely new finding this
+  session (no prior citation predicted this - the stars visibly creep
+  upward as they age, not a fixed position).
+- **Corner convention**: `(ramX - 16, ramY + y2 - 16)` - ordinary
+  half-sprite (32x32) centering with `y2` layered in - bisected against 6
+  independent (tick, star, frame) triples via a brute-force pixel search
+  (`tools/compare/scratch/sitrus_sparkle_verify.mjs`'s own successor, not
+  committed - superseded by the committed trace/tests below), all landing
+  at exactly this one formula, 0px diff, at RAM-to-render lag **+1** (the
+  ordinary lag this dossier defaults to - +0 leaves ~70-75px residual at
+  every tick, +2 reintroduces a 1px residual at one of the 6 - +1 is the
+  unambiguous fit, not assumed from precedent).
+- **Two real bugs found and fixed via the committed trace, not guessed
+  up front:**
+  1. **Z-order**: the two stars briefly overlap (1px, renders 7001/7002)
+     - GBA OAM composites LOWER sprite-slot indices in front, so star 0
+       (slot 3, spawns first) must be painted LAST. Drawing in spawn
+       order (star 0 then star 1) had star 1 win the overlap pixel;
+       fixed by drawing in reverse spawn order.
+  2. **Creation-tick invisibility**: `local===0` (the sprite's own RAM
+     creation tick) never actually renders - pixel-isolated at renders
+     6969/6979 (the two stars' own nominal first-visible tick under a
+     naive `local>=0` window), both showing pure background where the
+     model predicted paint. Same shape already documented for the
+     switch-in particle burst (`drawTurn5SwitchinParticles`'s own
+     `age = tick - spawnTick - 1`) - fixed by requiring `local>=1`.
+
+**What landed**: `turn5GrantingStarPlacement(t, spawnIndex)` (pure,
+exported) + `drawGrantingStars` (`battleScene.ts`), wired into
+`drawTurn5RockSlideAttack` right after Onix's own draw call. New gen asset
+import (`battle-anim-item-heal.json`, already extracted/byte-verified for
+the sparkle half in §8a - no new extraction needed here, this session only
+added the timing/placement math and the RAM ground truth for spawn ticks/
+`y2`).
+
+**Acceptance, per the brief's rung (c):**
+- `tools/compare/traces/turn5-sitrus-b.json` (new, committed - same
+  67-segment button script as `turn5-sitrus-a.json` plus a longer idle-pad
+  filler, dense `captureFrames` 6960-7041, **overlapping the rotation
+  tail** per the brief): **82/82, 0 diff**. Window ends exactly where the
+  NEXT stage (tint/sparkle recolor + ring) begins - render 7042 diffs
+  1664px (4.33%), confirmed out of this rung's own scope, not chased this
+  session.
+- Regression sweep: `turn5-sitrus-a.json` **110/110**, `turn5-healthbox.json`
+  **55/55**, `turn5-switchin.json` **241/241**, `turn5-sentout.json`
+  **141/141** - zero regressions.
+- Tier-1 pins (`tests/battleScene.test.ts`): `turn5GrantingStarPlacement`
+  exported and pinned - null before/on each star's own spawn tick, the 6
+  independently pixel-bisected (tick,star,frame) triples above at exact
+  `{frameIndex,cx,cy}`, the anim's own loop-then-destroy boundary (local
+  56 loops back to frame 0, local 61 still live, local 62 destroyed). 5
+  new tests. `npm test` **805/805** (+5 net), `npm run build` green.
+
+### Not reached this session: rungs (d)/(e)
+
+Ran out of session time after landing (c) - the remaining work is
+precisely scoped, not re-opened from scratch:
+
+- **Tint** (Onix's own palette recolor, first diff 7042, visible-by-7045,
+  fading back by ~7075): same `gPlttBufferFaded`-read method §8c already
+  used for the materialize tint - untouched this session.
+- **Ring** (`ANIM_TAG_THIN_RING`, §8a): gfx extracted, source-cited,
+  affine-scale placement search NOT attempted this session either (§8a's
+  own open item, still open two sessions later) - per the brief, if a
+  bounded effort resists, exclude ONLY its own ticks with precise
+  documentation rather than block the rest of the window.
+- **Heal message** ("ONIX's SITRUS BERRY" / "restored health!", start
+  render 7078, 1 char/tick through 7112, held to ~7180) + **HP climb**
+  (1->31, §2's own pinned formula, needs a digit-overlay + bar-refill
+  render, timing not yet bisected) + **wait-cursor bounce** (~7180-7209,
+  period 9, `turn5FaintedCursorYOffset`'s own family - likely reusable
+  verbatim, not yet wired here).
+- **Settled turn-6 menu** (rung (e), coverage to >=7307): §11 already
+  flagged the tail is NOT a static harvest (HP digits/bounce still cycling
+  through at least 7306) - whoever resumes needs the live HP-climb formula
+  threaded all the way through, not a single frozen frame.
+
+### Status: rung (c) of the brief's ladder CLOSED. `npm test` 805/805,
+`npm run build` green, tree clean at commit time. Rungs (d)/(e) not
+attempted - precisely scoped above for the next session.

@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 194 — Bounded worker (S7 slice M-4): rung (c) LANDED — `GrantingStarsEffect`'s two star sprites RAM-probed fresh (spawn ticks 10 apart, corrects the source's own "8 ticks" framing) and byte-exact; `turn5-sitrus-b.json` 82/82, 0 diff, 6960-7041; rungs (d)/(e) NOT reached (out of session time) — precisely scoped for the next session
+
+- **State:** `npm test` **805/805** (+5), `npm run build` green, tree
+  clean. New committed trace `turn5-sitrus-b.json` (82 captures,
+  6960-7041) 0 diff. Regression sweep: `turn5-sitrus-a.json` 110/110,
+  `turn5-healthbox.json` 55/55, `turn5-switchin.json` 241/241,
+  `turn5-sentout.json` 141/141 — zero regressions.
+- **Did:** RAM-probed the two `gGrantingStarsSpriteTemplate` sprites fresh
+  (`tools/probe/specs/turn5-sitrus-star-scan.json`, a 64-slot sweep then a
+  targeted slot-3/4 x/y/x2/y2/animCmdIndex/flags trace) rather than
+  trusting `General_HeldItemEffect`'s own "8 ticks apart" prose — real
+  spawn gap is **10 ticks** (RAM 6968/6978), fixed screen anchors
+  `(57,88)`/`(84,83)`, anim frame `floor(local/7)%8` (matches the
+  source-cited 8-frame/7-tick shape exactly), and a genuinely new-this-
+  session finding: a slow `y2` creep, `floor(local/8)` (0..7 over each
+  star's own 62-tick life) — no prior citation predicted this. Corner
+  convention `(ramX-16, ramY+y2-16)`, RAM-to-render lag **+1**, bisected
+  against 6 independent (tick,star,frame) triples via brute-force pixel
+  search, all 0px. Found and fixed two real bugs via the committed trace
+  (not guessed up front): a 1px z-order overlap (GBA composites lower
+  sprite-slot indices in front — draw order reversed) and creation-tick
+  invisibility (`local===0` never renders, same shape as the switch-in
+  particle burst's own `age = tick - spawnTick - 1`). Wired
+  `turn5GrantingStarPlacement` (pure, exported) + `drawGrantingStars`
+  into `drawTurn5RockSlideAttack`. +5 Tier-1 tests.
+- **Next:** rung (d) — tint (Onix's own palette recolor, first diff 7042,
+  same `gPlttBufferFaded` method §8c already used for materialize),
+  ring (`ANIM_TAG_THIN_RING`, gfx extracted/cited two sessions running,
+  affine-scale placement search still not attempted — bounded effort,
+  exclude precisely if it resists per the brief), heal message ("ONIX's
+  SITRUS BERRY.../restored health!", start 7078, 1 char/tick to 7112) +
+  HP climb (1->31, §2's pinned formula, needs digit-overlay+bar-refill
+  render) + wait-cursor bounce (~7180-7209, period 9, `turn5Fainted-
+  CursorYOffset`'s own family, likely reusable). Then rung (e): settled
+  turn-6 menu to >=7307 — §11 already flagged the tail is NOT static (HP
+  digits/bounce still cycling at 7306), needs the live formula threaded
+  through, not a frozen harvest.
+- **Notes:** no papercuts (one self-inflicted ~10min detour: an early `cd`
+  into a stale sibling worktree left the shell's cwd there, so several
+  early probe/compare commands silently ran against that worktree's
+  unmodified tree until `pwd` caught it — no bad data landed, just lost
+  time; worth remembering `cd` in Bash calls doesn't get reset between
+  calls). Docs: `faint-switch-notes.md` §14 added.
+
+---
 ## 193 — Worktree scout (supervisor-folded): turn 9 ground truth BANKED — the pinned ATK-floor test came back NEGATIVE (Pidgeotto uses QUICK_ATTACK, not a 4th FD; "won't go lower" variant still untested) and **both published lines reconverge RNG-exactly at turn 9** (BIND-miss and ROCK_SLIDE-miss consume identical Random() counts → same gRngValue); `battle1-turn9-dense.json` (12272 frames, 256/256 captures) + `docs/turn9-notes.md`; merged `782eaab`, suite 801/801 on the merged tree
 
 - **State:** merged into master, `npm test` 801/801 + build green
@@ -84,32 +129,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   starts). Ladder rungs (a)+(b) both closed this session — (c)-(e) not
   attempted, ran out of the session's own time budget partway through
   writing up the (a)/(b) findings rather than starting (c) half-done.
-
----
-## 191 — Worktree scout (supervisor-folded): turn 8 ground truth BANKED — winline-b takes **BIND, and it MISSES** (8 Random() calls, miss short-circuits crit/spread/effect); ATK stage hits its floor (2→0) yet prints the ordinary "harshly fell" (source-traced: the "won't go lower" variant needs the stat already AT floor before the attempt); `battle1-turn8-dense.json` (10826 frames, 226/226 captures) + `docs/turn8-notes.md`; merged `fc0d23c`, suite 793/793 on the merged tree
-
-- **State:** merged into master, `npm test` 793/793 + build green
-  post-merge (docs+trace only). Supervisor re-verified: prefix chain
-  (turn7-dense ⊂ turn8-dense ⊂ winline-b-swap, script-exact), 5/5 cited
-  boundary shas reproduced fresh, cursor-on-BIND submenu frame (9420, PP
-  20/20 TYPE/NORMAL) read as an image. Scout PNG-read every text label
-  per the new discipline.
-- **Did:** turn 8 on the committed line = Pidgeotto's 3rd FEATHER_DANCE
-  (Onix ATK floor 2→0) then Onix's BIND miss (acc 75 — corrects §14's
-  prose "85"; roll at RAM 9844 fires under the PREVIOUS text, 2 ticks
-  before the box transition). No HP change either side. BIND's trap
-  mechanic (EFFECT_TRAP/STATUS2_WRAPPED, maxHP/16 end-of-turn) inventoried
-  from source but NOT exercised (missed; RAM wrap-status flat). The
-  4-frame shared box-open prefix reconfirmed 3× within this turn; the
-  stat-write→"fell"-text gap is 293 ticks (vs 294/293 turns 6/7).
-  "Won't go lower" variant's real trigger pinned = a 4th FD (turn-9
-  scout's falsifiable test). Minor flag: BIND's description text
-  ("2 to 5 turns") vs source-implemented 3-6 wrap duration — noted in
-  the doc, not chased.
-- **Next:** M-3 (affine-sampler small-angle fix per §12's bisect-at-6887
-  instrument, then the Sitrus stages); turn-6/7/8 engine slices against
-  the three dossiers (turn 8 = text-only resolution, cheapest of the
-  three).
-- **Notes:** scout stayed in contract; no papercuts.
 
 ---

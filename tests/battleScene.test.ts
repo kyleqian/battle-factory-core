@@ -16,6 +16,7 @@ import {
   grovyleFaintSinkRowsAndY2,
   INITIAL_BATTLE_SCENE_STATE,
   onixSitrusRotateMatrix,
+  turn5GrantingStarPlacement,
   PARTICLE_OAM_PRIORITY,
   PARTICLE_OAM_SUBPRIORITY,
   renderBattleScene,
@@ -1577,5 +1578,30 @@ describe("S7 slice M-3: onixSitrusRotateMatrix (docs/faint-switch-notes.md §12/
   it("is null past the 3rd cycle (the task ends, RAM tick > 6968 - the next, still-unmodeled stage is GrantingStarsEffect)", () => {
     expect(onixSitrusRotateMatrix(6971)).toBeNull();
     expect(onixSitrusRotateMatrix(7000)).toBeNull();
+  });
+});
+
+describe("S7 slice M-4: turn5GrantingStarPlacement (docs/faint-switch-notes.md §14) - GrantingStarsEffect's two star sprites, RAM-probed fresh (spawn ticks 10 apart, not the source's own '8 ticks' framing), 0px diff against the oracle at every bisected tick", () => {
+  it("is null before its own spawn tick, and on the spawn tick itself (creation-tick invisibility, pixel-isolated at renders 6969/6979)", () => {
+    expect(turn5GrantingStarPlacement(6968, 0)).toBeNull(); // render 6968 -> RAM 6967, before spawn
+    expect(turn5GrantingStarPlacement(6969, 0)).toBeNull(); // render 6969 -> RAM 6968, spawn tick itself
+    expect(turn5GrantingStarPlacement(6979, 1)).toBeNull(); // render 6979 -> RAM 6978, star 1's own spawn tick
+  });
+  it("first visible tick is spawnTick+1 (render spawnTick+2, +1 creation lag +1 RAM-to-render lag), frame 0, y2 0", () => {
+    expect(turn5GrantingStarPlacement(6970, 0)).toEqual({ frameIndex: 0, cx: 41, cy: 72 });
+    expect(turn5GrantingStarPlacement(6980, 1)).toEqual({ frameIndex: 0, cx: 68, cy: 67 });
+  });
+  it("matches the 6 independently pixel-bisected (tick, star, frame) triples this session verified at 0px diff", () => {
+    expect(turn5GrantingStarPlacement(6990, 0)).toEqual({ frameIndex: 3, cx: 41, cy: 74 });
+    expect(turn5GrantingStarPlacement(6997, 0)).toEqual({ frameIndex: 4, cx: 41, cy: 75 });
+    expect(turn5GrantingStarPlacement(7004, 0)).toEqual({ frameIndex: 5, cx: 41, cy: 76 });
+    expect(turn5GrantingStarPlacement(7000, 1)).toEqual({ frameIndex: 3, cx: 68, cy: 69 });
+    expect(turn5GrantingStarPlacement(7007, 1)).toEqual({ frameIndex: 4, cx: 68, cy: 70 });
+    expect(turn5GrantingStarPlacement(7014, 1)).toEqual({ frameIndex: 5, cx: 68, cy: 71 });
+  });
+  it("the anim loops (8 frames x 7 ticks = 56) then is destroyed at local tick 62 (render spawnTick+63)", () => {
+    expect(turn5GrantingStarPlacement(6968 + 56 + 1, 0)?.frameIndex).toBe(0); // loop restart
+    expect(turn5GrantingStarPlacement(6968 + 61 + 1, 0)).not.toBeNull(); // last live tick
+    expect(turn5GrantingStarPlacement(6968 + 62 + 1, 0)).toBeNull(); // destroyed
   });
 });
