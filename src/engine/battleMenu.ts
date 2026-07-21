@@ -2014,6 +2014,85 @@ export function turn6RockSlideResettledBounceTick(t: number, pressTick: number):
   return t - (pressTick + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
+// --- S7 slice O: turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix vs. Pidgeotto,
+// docs/turn7-notes.md, docs/battle-turn-notes.md §32) - the IDENTICAL move
+// pair as turn 6 (§31), a pure parameterization confirmed by a fresh dense
+// oracle sweep (captureFrames 8346-9380, this session): every pressTick-
+// generic turn-6 function (`turn6FeatherDanceTextStartTick`/`turn6StatFallEva`/
+// `turn6StatFallBg1Y`/`turn6AtkFellTextStartTick`/`rockSlideTextStartTick`/
+// `rockSlideBg3Y` et al.) is reused UNCHANGED, fed turn 7's own real confirm
+// pressTick (8379 - oracle-confirmed: the confirm press occupies frames
+// 8378-8379, matching `confirmFightMove`'s own `elapsed+1` registration
+// convention every prior turn's pressTick already follows) or the synthetic
+// ROCK_SLIDE anchor below. Only the per-turn literal delay/HP constants are
+// new, each oracle-confirmed against the fresh sweep (not assumed
+// transferable from turn 6's own values).
+
+/**
+ * `TURN6_ROCKSLIDE_REOPEN_GATE_DELAY`'s own turn-6-to-7 analogue: the
+ * earliest tick turn 7's own FIGHT-submenu reopen A-press (real tick 8346)
+ * can register, past turn 6's own real confirm (`fightSubmenu.confirmElapsed`,
+ * 7345) - sized so the gate opens once turn 7's own settled action menu is
+ * fully drawn (`TURN6_ROCKSLIDE_PRESS_TICK`+`TURN6_ROCKSLIDE_MENU_REDRAW_
+ * DELAY` = 7372+750 = 8122, `battle-turn-notes.md` §31's own cited redraw
+ * tick - `8122-7345=777`), safely before the dossier's own real reopen
+ * press (8346), same "past this resolution's own redraw" shape every prior
+ * turn boundary gate already establishes.
+ */
+export const TURN6_ROCKSLIDE_REOPEN_GATE_DELAY = 777;
+
+/**
+ * A SYNTHETIC press anchor, same reasoning as `TURN6_ROCKSLIDE_PRESS_TICK`
+ * (FEATHER_DANCE's own kickoff-text+animation duration differs turn to
+ * turn, so ROCK_SLIDE's own kickoff text can't reuse a real button-press
+ * tick) chosen so `rockSlideTextStartTick(TURN7_ROCKSLIDE_PRESS_TICK)`
+ * lands on 8799, this session's own fresh dense sweep's first tick of the
+ * ROCK_SLIDE kickoff-text transition (settling `e8811187b452` at 8818 -
+ * byte-identical to turn 6's own settle sha for this same fixed-content
+ * text, "ONIX used\nROCK SLIDE!").
+ */
+export const TURN7_ROCKSLIDE_PRESS_TICK = 8406; // rockSlideTextStartTick(8406) = 8799, oracle-confirmed
+
+/**
+ * `TURN7_ROCKSLIDE_PRESS_TICK`+634 = 9040, the fresh sweep's own first tick
+ * of the swap from the held "ONIX used\nROCK SLIDE!" text into "It's super
+ * effective!" (settling `92c9f9307078` at 9060 - byte-identical to
+ * turn7-notes.md §5's own already-cited sha for this exact message).
+ * Turn-specific, NOT transferable from `TURN6_SUPER_EFFECTIVE_TEXT_DELAY`
+ * (646): the HP drain reaches Pidgeotto's own post-ROCK_SLIDE HP (82, a
+ * smaller -31 delta than turn 6's -43) sooner, so the message swap starts
+ * earlier relative to its own anchor - freshly fit against this turn's own
+ * real drain duration, same "each turn gets its own literal constant"
+ * convention as every prior turn's ROCK_SLIDE super-effective delay.
+ */
+export const TURN7_SUPER_EFFECTIVE_TEXT_DELAY = 634;
+
+export function turn7SuperEffectiveTextStartTick(pressTick: number): number {
+  return pressTick + TURN7_SUPER_EFFECTIVE_TEXT_DELAY;
+}
+
+/** Visible character count (0..`TURN6_SUPER_EFFECTIVE_LINE.length`) - same text as turn 6 ("It's super effective!", ROCK vs. FLYING is unchanged), same 1-tick/char mechanism. */
+export function turn7SuperEffectiveTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn7SuperEffectiveTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
+}
+
+/**
+ * Turn-end: the held "It's super effective!" text goes blank at
+ * `pressTick`+731 (tick 9137, fresh sweep: `d3270f177537`), then hard-cuts
+ * to the resettled action menu at `pressTick`+738 (tick 9144,
+ * `15a8ef75dfb2`) - the SAME 7-tick clear-to-redraw gap every prior turn's
+ * own ROCK_SLIDE pair establishes (turn 6: 743->750), freshly fit this turn.
+ */
+export const TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY = 731;
+export const TURN7_ROCKSLIDE_MENU_REDRAW_DELAY = 738;
+
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn6RockSlideResettledBounceTick`, keyed off `TURN7_ROCKSLIDE_MENU_REDRAW_DELAY`. */
+export function turn7RockSlideResettledBounceTick(t: number, pressTick: number): number {
+  return t - (pressTick + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
 // --- S7 slice E1: turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff
 // text (docs/battle-turn-notes.md §12, docs/battle-menu-notes.md §13). The
 // resettled menu's own A-press (`rockSlideResettledBounceTick`'s domain)
@@ -2118,6 +2197,7 @@ export function currentPPForActiveMon(
   turn3Resolved: boolean = false,
   turn4Resolved: boolean = false,
   turn5Resolved: boolean = false,
+  turn6Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
   // S7 slice N (docs/turn6-notes.md §4): turn 5's own ROCK_SLIDE (Onix's
@@ -2125,7 +2205,11 @@ export function currentPPForActiveMon(
   // dossier's own PP ledger (6/10 before turn 6's own confirm) - the same
   // independent-decrement shape turn3Resolved/turn4Resolved already
   // established.
-  const slot0Uses = (turn1Resolved ? 1 : 0) + (turn3Resolved ? 1 : 0) + (turn4Resolved ? 1 : 0) + (turn5Resolved ? 1 : 0);
+  // S7 slice O (docs/turn7-notes.md §4): turn 6's own ROCK_SLIDE (Onix vs.
+  // Pidgeotto) is a 5th slot-0 use, matching turn7-notes' own "PP 5/10
+  // displayed" ledger at turn 7's own reopen.
+  const slot0Uses =
+    (turn1Resolved ? 1 : 0) + (turn3Resolved ? 1 : 0) + (turn4Resolved ? 1 : 0) + (turn5Resolved ? 1 : 0) + (turn6Resolved ? 1 : 0);
   return [a - slot0Uses, b, turn2Resolved ? c - 1 : c, d];
 }
 

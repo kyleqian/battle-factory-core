@@ -134,7 +134,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false },
   };
 }
 
@@ -329,7 +329,8 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: false,
-      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false
+      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false,
+    turn6Resolved: false,
     },
   };
 }
@@ -447,7 +448,8 @@ function stateAtTurn3Confirm(): EngineState {
       },
       turn1Resolved: true,
       turn2Resolved: true,
-      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false
+      turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false,
+    turn6Resolved: false,
     },
   };
 }
@@ -606,7 +608,8 @@ function stateAtTurn4Confirm(): EngineState {
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false
+      turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false,
+    turn6Resolved: false,
     },
   };
 }
@@ -631,7 +634,8 @@ function stateAtTurn5Confirm(): EngineState {
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: true, turn5KoDismissElapsed: null, turn5Resolved: false
+      turn4Resolved: true, turn5KoDismissElapsed: null, turn5Resolved: false,
+    turn6Resolved: false,
     },
   };
 }
@@ -717,7 +721,8 @@ function stateAtTurn5SitrusConfirm(): EngineState {
       turn1Resolved: true,
       turn2Resolved: true,
       turn3Resolved: true,
-      turn4Resolved: true, turn5KoDismissElapsed: 6561 - SCENE_TICK0, turn5Resolved: false
+      turn4Resolved: true, turn5KoDismissElapsed: 6561 - SCENE_TICK0, turn5Resolved: false,
+    turn6Resolved: false,
     },
   };
 }
@@ -766,6 +771,14 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     // Sanity: turn4Resolved alone (pre-turn-6) still reads 7/10, matching
     // slice J's own pinned behavior - this test doesn't regress it.
     expect(currentPPForActiveMon(moveset, true, true, true, true, false)[0]).toBe(7);
+  });
+
+  it("S7 slice O: currentPPForActiveMon reads 5/10 once turn6Resolved (used turns 1, 3, 4, 5 AND 6) - matches turn7-notes.md §4/§5's own 'PP 5/10 displayed' at turn 7's own reopen", () => {
+    const moveset = rentalMoveset("ONIX");
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true)[0]).toBe(moveset.maxPP[0] - 5);
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true)[0]).toBe(5);
+    // Sanity: turn5Resolved alone (pre-turn-7) still reads 6/10, unaffected.
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, false)[0]).toBe(6);
   });
 
   it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn6-menu.json (33/33, 0 diff, 11 named single-tick bounce-extremum residuals excluded, docs/battle-turn-notes.md's new §27)", () => {

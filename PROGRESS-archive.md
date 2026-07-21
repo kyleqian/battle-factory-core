@@ -1,3 +1,30 @@
+## 207 — Worktree scout (supervisor-folded): turn 16 ground truth BANKED — the first MAGBY-vs-MURKROW turn: speed order pinned (MURKROW 97 > MAGBY 89, acts first), FAINT_ATTACK skips accuracy entirely (source: `.accuracy=0`), FIRE_PUNCH rolls accuracy even at 100% AND **its 10% burn proc SUCCEEDS** (`status1` 0→16 at tick 21411, burn residual `floor(142/8)=17` at turn-end) — **the run's FIRST status-condition ground truth**, BRN badge PNG-pinned (absent 21540 → present 21548); `battle1-turn16-dense.json` (256 captures) + `docs/turn16-notes.md`; merged, suite 831/831 on the merged tree
+
+- **State:** merged into master post-N-4, `npm test` 831/831 + build
+  green post-merge, worktree/branch cleaned. Supervisor re-verified
+  independently: prefix chain re-flattened myself (turn15-dense ⊂
+  turn16-dense ⊂ winline-b-swap, script-exact), fresh oracle rerun
+  reproduced 15/15 cited shas at exact ticks, 3 label PNGs read directly
+  (MAGBY's first-ever FIGHT submenu — FIRE PUNCH/SMOKESCREEN/CONFUSE
+  RAY/SMOG, PP 15/15, TYPE/FIRE — and the BRN absent→present pair).
+  ISSUES #16 trimmed at this fold: ground truth exists now; the engine's
+  own status-icon compositor path is the open remainder.
+- **Did:** 8 Random() calls in 20745-21773 (crit+dmg for FAINT_ATTACK —
+  no accuracy roll; acc+crit+dmg+burn for FIRE_PUNCH; 1 unattributed
+  mid-turn at 21152 — FLAME_BODY hypothesis RULED OUT by source,
+  FAINT_ATTACK has no contact flag in this ROM; 2-step tail cluster
+  21719/21724 matching the "AI-prescoring" shape, first time seen
+  mid-battle). Damage: 59 (MAGBY 138→79), 67 (MURKROW 142→75), burn 17
+  (75→58). Both new move animations sketched coarse-only (open items).
+- **Next:** main lane — N-4 rung (b), Onix's ROCK_SLIDE vs Pidgeotto
+  (§30's sha-sweep handoff); scout — turn 17 (§16's "turn 2": Murkrow
+  faints 22418 → the WIN sequence); then ISSUES #26 probe, feather
+  residual 7421-7549, turns 7-13 parameterizations.
+- **Notes:** scout in contract (15.7 of 40 min); no papercuts; its
+  proposed "close #16" was corrected to a trim at the fold (ground truth
+  ≠ engine validation).
+
+---
 ---
 ## 206 — Bounded worker (S7 slice N-4, rung a): turn 6's stat-fall window landed — §29's flagged ~7570+ residual RESOLVED (it's the generic StatsChangeAnimation banner, already built for turn 1's DOUBLE_TEAM, just never parameterized for a stat DECREASE) — `turn6-statfall.json` **127/127, 0 diff**, first-attempt; rung (b) (Onix's own ROCK_SLIDE vs. Pidgeotto) NOT attempted, precise ground-truth handoff banked in battle-turn-notes.md §30 (S7 bounded worker session, hard 60-minute cap)
 

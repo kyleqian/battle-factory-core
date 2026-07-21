@@ -80,6 +80,15 @@ import {
   TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY,
   TURN6_ROCKSLIDE_MENU_REDRAW_DELAY,
   turn6RockSlideResettledBounceTick,
+  TURN6_ROCKSLIDE_REOPEN_GATE_DELAY,
+  TURN7_ROCKSLIDE_PRESS_TICK,
+  TURN7_SUPER_EFFECTIVE_TEXT_DELAY,
+  turn7SuperEffectiveTextStartTick,
+  turn7SuperEffectiveTextVisibleChars,
+  TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY,
+  TURN7_ROCKSLIDE_MENU_REDRAW_DELAY,
+  turn7RockSlideResettledBounceTick,
+  currentPPForActiveMon,
   rockSlideTextStartTick,
 } from "../src/engine/battleMenu.ts";
 import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
@@ -87,7 +96,7 @@ import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
 /** Same rig as tests/battleScene.test.ts's `pixelAtSentOut` - send-out A-press already registered at trace tick 1420 (sendOutPressElapsed=380), the fixed script every committed trace in this window shares. */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -139,16 +148,16 @@ describe("battleMenu: rendered pixels (oracle-pinned, tools/compare/traces/menu-
   it("renders byte-identical frames across the silent space tick (1565 -> 1566)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 
   it("renders byte-identical frames once static (1571 -> 1572)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 });
@@ -602,6 +611,53 @@ describe("battleMenu: turn 6's own ROCK_SLIDE (Onix vs. Pidgeotto, docs/battle-t
     expect(rockSlideOpponentHp(drainStart + 1, pressTick, 156, 113)).toBe(155); // d=1, fresh capture's own first drain-visible tick
     expect(rockSlideOpponentHp(drainStart + 43, pressTick, 156, 113)).toBe(113); // d=43, settled (matches the fresh capture's own settle tick 8012)
     expect(rockSlideOpponentHp(drainStart + 60, pressTick, 156, 113)).toBe(113); // clamped, holds past settle
+  });
+});
+
+describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix vs. Pidgeotto again, docs/turn7-notes.md, docs/battle-turn-notes.md §32) - a pure parameterization of turn 6's own N-4 rungs, every constant oracle-confirmed against a fresh dense sweep (captureFrames 8346-9380, 0 diff on turn7-menu.json/turn7-rockslide-{a,b,c,d}.json)", () => {
+  it("TURN6_ROCKSLIDE_REOPEN_GATE_DELAY opens the turn-6-to-7 reopen gate at the settled turn-6 menu's own redraw tick (8122 = TURN6_ROCKSLIDE_PRESS_TICK+750), safely before the real reopen press (8346)", () => {
+    expect(TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY - TURN6_ROCKSLIDE_REOPEN_GATE_DELAY).toBe(7345); // turn 6's own real confirm tick
+  });
+
+  it("TURN7_ROCKSLIDE_PRESS_TICK is the synthetic anchor landing rockSlideTextStartTick on 8799 (fresh sweep: first tick of the ROCK_SLIDE kickoff-text transition, settling e8811187b452 - byte-identical to turn 6's own settle sha for this fixed-content text)", () => {
+    expect(rockSlideTextStartTick(TURN7_ROCKSLIDE_PRESS_TICK)).toBe(8799);
+  });
+
+  it("super-effective text starts at TURN7_ROCKSLIDE_PRESS_TICK+634 (9040, fresh sweep's own first tick of the swap) and settles on the last glyph's own tick (9060, byte-identical to turn7-notes.md §5's own cited sha)", () => {
+    const pressTick = TURN7_ROCKSLIDE_PRESS_TICK;
+    expect(turn7SuperEffectiveTextStartTick(pressTick)).toBe(9040);
+    expect(TURN7_SUPER_EFFECTIVE_TEXT_DELAY).not.toBe(646); // turn-specific, NOT transferable from turn 6's own delay
+    expect(turn7SuperEffectiveTextVisibleChars(9039, pressTick)).toBe(0);
+    expect(turn7SuperEffectiveTextVisibleChars(9040, pressTick)).toBe(1);
+    expect(turn7SuperEffectiveTextVisibleChars(9060, pressTick)).toBe(21);
+    expect(turn7SuperEffectiveTextVisibleChars(9080, pressTick)).toBe(21); // clamped, holds past settle
+  });
+
+  it("text-clear (731 -> 9137) then hard-cut to the resettled menu (738 -> 9144), the same 7-tick clear-to-redraw gap every prior turn's own ROCK_SLIDE pair establishes, freshly fit this turn", () => {
+    expect(TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY).toBe(9137);
+    expect(TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY).toBe(9144);
+    expect(TURN7_ROCKSLIDE_MENU_REDRAW_DELAY - TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY).toBe(7);
+  });
+
+  it("turn7RockSlideResettledBounceTick re-initializes the bounce cycle fresh at the redraw tick, same shape as turn6RockSlideResettledBounceTick", () => {
+    const pressTick = TURN7_ROCKSLIDE_PRESS_TICK;
+    const redrawTick = pressTick + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY;
+    expect(turn7RockSlideResettledBounceTick(redrawTick, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 1);
+    expect(turn7RockSlideResettledBounceTick(redrawTick + 5, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 6);
+  });
+
+  it("rockSlideOpponentHp reused UNCHANGED for Pidgeotto's own post-turn-6 HP (113->82, turn7-notes.md §4): value-agnostic, no new HP-drain formula needed", () => {
+    const pressTick = TURN7_ROCKSLIDE_PRESS_TICK;
+    const drainStart = pressTick + ROCK_SLIDE_HP_DRAIN_START_DELAY;
+    expect(rockSlideOpponentHp(drainStart, pressTick, 113, 82)).toBe(113); // d=0, still at turn-6's-end HP
+    expect(rockSlideOpponentHp(drainStart + 1, pressTick, 113, 82)).toBe(112); // d=1
+    expect(rockSlideOpponentHp(drainStart + 31, pressTick, 113, 82)).toBe(82); // d=31, settled
+    expect(rockSlideOpponentHp(drainStart + 60, pressTick, 113, 82)).toBe(82); // clamped, holds past settle
+  });
+
+  it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 5/10 once turn6Resolved (used turns 1, 3, 4, 5 AND 6) - matches turn7-notes.md's own 'PP 5/10 displayed' ledger", () => {
+    const moveset = { moveIds: [157, 349, 288, 201], maxPP: [10, 15, 20, 10] } as const;
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true)).toEqual([5, 15, 19, 10]);
   });
 });
 

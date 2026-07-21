@@ -5465,3 +5465,169 @@ ticks of margin before turn 7's own 8346 button press) - the next session's
 natural next step is turn 7 as a parameterization of this turn's own
 mechanisms (per turn7-notes.md's own dossier), or turns 8-13, or the turn
 15+/16+ scout territory already banked.
+
+## 32. Engine slice O: turn 7 end to end, minus the feather sub-window - `turn7-menu.json` **85/85**, `turn7-rockslide-{a,b,c,d}.json` **256+256+256+19 = 787/787**, all 0 diff; rung (b) (the feather-sprite animation) explicitly deferred, same excluded-residual convention as turn 6's own N-3 (S7 bounded worker session, hard 60-minute cap)
+
+Turn 7 repeats turn 6's exact move pair (FEATHER_DANCE/ROCK_SLIDE, same
+battlers) per turn7-notes.md §6 ("no new mechanism this turn") - every
+pressTick-generic turn-6 function (`turn6FeatherDanceText*`/`turn6StatFallEva`/
+`turn6StatFallBg1Y`/`turn6AtkFellText*`/`rockSlideText*`/`rockSlide*` et al.)
+is reused UNCHANGED, fed turn 7's own real confirm pressTick or its own
+synthetic ROCK_SLIDE anchor. A fresh dense oracle sweep (captureFrames
+8346-9380 contiguous, this session, scratch-only) was run BEFORE writing any
+render code, per the brief's own "verify 2-3 probe ticks, bisect only on
+divergence" mandate - it resolved every constant below by direct sha
+comparison, not by trusting turn7-notes.md's own prose-only tick citations
+(which turned out imprecise in two places, see below).
+
+### Rungs (a)+(c) landed together: the dispatcher chain is naturally unified
+
+The brief's own ladder splits "(a) menu/kickoff-text" from "(c) stat-fall
+banner/message", but the ALREADY-EVOLVED `drawTurn6FeatherDanceKickoffText`
+(post turn 6's own N-4 rungs) draws the kickoff text, stat-fall banner, AND
+ATK-fall text all in one function - mirroring that shape for turn 7
+(`drawTurn7FeatherDanceKickoffText`) lands both rungs in the same commit,
+each reusing its turn-6 sibling verbatim:
+
+- Real confirm pressTick is **8379**, not 8378 as a naive `segmentStart`
+  read would suggest - the button press occupies frames 8378-8379 (2
+  frames) and `confirmFightMove(fightSubmenu, battleScene.elapsed+1)`'s own
+  `+1` registration convention (every prior turn's pressTick already
+  follows this) lands on the SECOND frame. Confirmed two independent ways:
+  arithmetic from the trace's own segment list, and the fresh sweep's own
+  first-changing tick for the FEATHER_DANCE kickoff text (8392) matching
+  `turn6FeatherDanceTextStartTick(8379)=8392` exactly (8378 would predict
+  8391, which the sweep shows still flat).
+- `turn6StatFallEva`/`turn6StatFallBg1Y`/`turn6AtkFellTextStartTick` all
+  reused with ZERO new constants - fed pressTick=8379 they reproduce the
+  fresh sweep exactly (ATK-fall text first-changing tick 8693 =
+  8379+314, matching `turn6AtkFellTextStartTick`'s own existing formula).
+- **Wording re-verified, not assumed** (the brief's own "verify" flag):
+  direct PNG reads at ticks 8730 and 9080 confirm "ONIX’s ATTACK\nharshly
+  fell!" (the SECOND -2 ATK stage-pair, cumulative from turns 6+7 per
+  turn7-notes §4, still "harshly" not "won't go any lower" - not yet at the
+  -6 floor) and "It’s super effective!" - both byte-identical text to turn
+  6's own, no new string constants needed.
+
+### A real bug found and fixed: the pre-turn-7 idle/browsing window needs a SECOND resettled-bounce regime, not turn 6's own
+
+`drawTurn6FieldBase` (reused everywhere turn ≤6 needed Onix's on-field
+sprite/healthbox) hardcodes two turn-6-only assumptions that silently broke
+for turn 7: its bounce formula (`turn5SitrusResettledBounceTick`, anchored
+to turn 5's own switch-in redraw) is the regime active only THROUGH turn
+6's own ROCK_SLIDE resolution - turn 6's OWN redraw (8122) resets the bounce
+task fresh onto a SECOND regime (`turn6RockSlideResettledBounceTick`,
+already used correctly by `drawTurn6RockSlideTurnEndSettledMenu` for ticks
+8122-8345) - and it never repaints Pidgeotto's healthbox once the slide-in
+settles (`turn5PidgeottoHealthboxSlideDx` returns `null`), relying on
+whatever static content happened to already be correct (full HP, true for
+every turn ≤6 use). Turn 7's own idle/browsing window (8346-8378, AFTER
+turn 6's redraw AND after Pidgeotto has taken real damage) breaks BOTH
+assumptions at once - caught immediately by `npm run compare` (a flat
+6.93%/2662px diff, Onix's silhouette AND Pidgeotto's healthbox both wrong)
+on the very first attempt at reusing `drawTurn6ActionMenuIdleWindow`/
+`drawTurn6FieldBase` directly for turn 7.
+
+Fixed with `drawTurn7FieldBase` (a `drawTurn6FieldBase` wrapper): converts
+`bounceTick` from regime-2 space into whatever regime-1-space value
+produces the identical `menuIdleBounce` result (`TURN7_REGIME2_TO_REGIME1_
+SHIFT`, an algebraic identity - `TURN5_SITRUS_MENU_REDRAW_TICK -
+(TURN6_ROCKSLIDE_PRESS_TICK+750)`, not a fitted constant), then repaints
+Pidgeotto's healthbox at 113 HP unconditionally. `turn7KickoffBounceTick`
+(the confirm-wait freeze) and `drawTurn7RockSlideAttack`'s own bounce line
+both freeze at the SAME known-zero plateau (the regime-2 anchor tick
+itself, `TURN6_ROCKSLIDE_PRESS_TICK+TURN6_ROCKSLIDE_MENU_REDRAW_DELAY` -
+by construction this maps to `MENU_IDLE_BLANK_END_TICK+1`, the same "real
+{0,0} plateau" class turn 6's own freeze anchor was independently
+bisected to land on, no new bisection needed). Also caught: the idle
+window's OWN early-return branches must dispatch through
+`drawTurn6RockSlideTurnEndSettledMenu` (already-proven regime 2 +
+113-HP), not `drawTurn6ActionMenuIdleWindow` (regime 1, turn-≤6-only).
+
+### Rung (d): turn 7's own ROCK_SLIDE, a pure parameterization with 4 fresh (not transferred) literal constants
+
+Every mechanism (`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
+`rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
+`rockSlideOpponentHp`) reused with ZERO changes. New constants, each
+oracle-confirmed against the fresh sweep (not copied from turn 6):
+
+- `TURN7_ROCKSLIDE_PRESS_TICK=8406` (synthetic anchor - `rockSlideTextStartTick
+  (8406)=8799`, the sweep's own first tick of the ROCK_SLIDE kickoff-text
+  transition, settling `e8811187b452` at 8818 - byte-identical to turn 6's
+  own settle sha for this fixed-content text, "ONIX used\nROCK SLIDE!").
+- `TURN7_SUPER_EFFECTIVE_TEXT_DELAY=634`, **not** turn 6's own 646 - the
+  drain reaches Pidgeotto's post-ROCK_SLIDE HP (82, a smaller -31 delta
+  than turn 6's -43) sooner, so the message swap starts earlier relative to
+  its own anchor (9040, settling `92c9f9307078` at 9060 - byte-identical to
+  turn7-notes.md §5's own already-cited sha, confirming that citation
+  despite the table's own imprecise "8686-8717"/"9052" framing elsewhere).
+- `TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY=731`/`TURN7_ROCKSLIDE_MENU_REDRAW_DELAY=738`
+  (9137/9144) - the same 7-tick clear-to-redraw gap every prior turn's own
+  ROCK_SLIDE pair establishes, freshly fit (turn7-notes.md §5's own prose
+  cited 9137/9143 - the fresh sweep corrects the second to 9144, a 1-tick
+  table imprecision, not a new finding).
+- `TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP=82` (113->82, turn7-notes.md §4).
+- `currentPPForActiveMon` gets a 6th independent slot-0 decrement
+  (`turn6Resolved`) - ROCK_SLIDE reads 5/10 at turn 7's own reopen, matching
+  turn7-notes.md's own ledger exactly.
+
+### Rung (b) NOT attempted: the feather sub-window, same excluded-residual convention as turn 6's own N-3
+
+Per the brief's own explicit plan, turn 7's own feather window (RAM/pixel
+live from ~8439 through ~8592, bracketed on both sides by ticks that are
+sha-IDENTICAL to the settled kickoff-text hold - 8422 and 8593 both read
+`2772abca5248` in the fresh sweep, confirming the flat holds immediately
+before/after are correctly covered by the existing dispatcher with NO
+feather-specific code) was left unrendered this session - `turn6FeatherSprites
+(t)` naturally returns `[]` for every tick in turn 7's own range (it's keyed
+to turn 6's own RAM ticks only), so this is a harmless no-op rather than a
+wrong render for the ticks this session's own traces DO claim. Building
+`turn7-feather-sprites-probe.json` (rerunning `tools/probe/dump-feather-
+dance-sprites.py` against 8439-8592) plus the second RAM-table + tick-range
+dispatch the brief asked for did not fit the time cap alongside rungs
+(a)/(c)/(d) and the regime-2 bug above - left for a future session, exactly
+as scoped.
+
+### A second known-class residual, same shape as turn 6's own excluded pre-confirm ticks
+
+`turn7-menu.json` excludes 8 ticks (8352-8353, 8361-8362, 8370-8371,
+8380-8381 - 2-tick gaps every ~9 ticks) from its own captureFrames, the
+SAME cadence/width as `turn6-menu.json`'s own already-excluded pre-confirm
+ticks (7315-7316/7324-7325/7333-7334/7342-7343, per §27) - a 1-tick
+bounce-phase quantization blip in the browsing-submenu window, alternating
+between Onix's on-field silhouette and the player healthbox regions. Not
+re-diagnosed this session (out of scope per the brief's own "turn6-menu.json's
+own excluded pre-confirm ticks" exclusion) - flagged here only because it's
+now confirmed to recur at turn 7, i.e. it's a property of the shared
+mechanism, not a turn-6-specific artifact.
+
+### Committed traces and Tier-1 pins
+
+`tools/compare/traces/turn7-menu.json` (captureFrames 8346-8438 minus the 8
+excluded ticks above, 85 frames) and `turn7-rockslide-{a,b,c,d}.json`
+(captureFrames 8593-9379 contiguous, split into 4 files for the oracle's
+256-capture-per-request cap: 256+256+256+19). Same 76-segment/9380-frame
+script as turn7-notes.md §1/§2 predicted (turn6-rockslide-b.json's own
+72-segment/8346-frame prefix + the menu-reopen `A`(2f)/30f-settle/confirm
+`A`(2f)/1000f-idle tail) - confirmed exact via direct diff before relying on
+it. `tests/battleMenu.test.ts` (+7): `TURN6_ROCKSLIDE_REOPEN_GATE_DELAY`'s
+own anchor identity, `TURN7_ROCKSLIDE_PRESS_TICK`'s anchor, the
+super-effective text's content/timing (explicitly asserting the delay is
+NOT 646), the text-clear/redraw pair, `turn7RockSlideResettledBounceTick`'s
+fresh-cycle shape, `rockSlideOpponentHp` re-exercised at 113/82, and
+`currentPPForActiveMon`'s 6th decrement. `tests/fightSubmenu.test.ts` (+1):
+the PP 5/10 ledger via `turn6Resolved`.
+
+### Verification
+
+`npm test` **845/845** (+8). `npm run build` green. `turn7-menu.json`
+**85/85**, `turn7-rockslide-a.json` **256/256**, `turn7-rockslide-b.json`
+**256/256**, `turn7-rockslide-c.json` **256/256**, `turn7-rockslide-d.json`
+**19/19**, all 0 diff (787+85=872 frames total, contiguously covering
+8346-9379 minus only the named feather-window exclusion 8439-8592 and the
+8-tick known-class residual above). Zero regressions: `turn6-rockslide-a.json`
+**255/255**, `turn6-statfall.json` **127/127**, `turn6-feathers.json`
+**106/106**, `turn6-menu.json` **33/33**, all 0 diff. Turn 7 is resolved end
+to end except its own feather sub-window - the next session's natural next
+step is rung (b) (the turn-7 feather probe), then turns 8-13 as further
+parameterizations, or the turn 15+/16+ scout territory already banked.

@@ -489,6 +489,12 @@ import {
   TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY,
   TURN6_ROCKSLIDE_MENU_REDRAW_DELAY,
   turn6RockSlideResettledBounceTick,
+  TURN7_ROCKSLIDE_PRESS_TICK,
+  turn7SuperEffectiveTextStartTick,
+  turn7SuperEffectiveTextVisibleChars,
+  TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY,
+  TURN7_ROCKSLIDE_MENU_REDRAW_DELAY,
+  turn7RockSlideResettledBounceTick,
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import type { ActiveMonMoveset } from "./battleSetup.ts";
@@ -991,6 +997,17 @@ export interface BattleSceneState {
    * healthbox) from turn 5's (Onix-vs-Grovyle, now moot - Grovyle fainted).
    */
   turn5Resolved: boolean;
+  /**
+   * S7 slice O (docs/turn7-notes.md, docs/battle-turn-notes.md §32): `true`
+   * once turn 6's whole ROCK_SLIDE resolution has redrawn the settled
+   * action menu (`TURN6_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 6's own real
+   * confirm) AND a fresh A-press has reopened FIGHT for turn 7 - same
+   * "created directly" idiom as `turn1Resolved`..`turn5Resolved`. Turn 7
+   * repeats turn 6's exact move pair (FEATHER_DANCE/ROCK_SLIDE, same
+   * battlers) - distinguishes turn 7's own dwell (PP 5/10, ROCK_SLIDE's 6th
+   * slot-0 decrement) from turn 6's (PP 6/10).
+   */
+  turn6Resolved: boolean;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -1003,6 +1020,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn4Resolved: false,
   turn5KoDismissElapsed: null,
   turn5Resolved: false,
+  turn6Resolved: false,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -1016,6 +1034,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn4Resolved: state.turn4Resolved,
     turn5KoDismissElapsed: state.turn5KoDismissElapsed,
     turn5Resolved: state.turn5Resolved,
+    turn6Resolved: state.turn6Resolved,
   };
 }
 
@@ -3749,7 +3768,24 @@ function drawActionMenuIdleWindow(fb: Uint8Array, t: number, turn1Resolved: bool
  * `battleMenu.ts`'s own doc comment on those two constants for why they
  * differ from a plain, unshifted `t`.
  */
-function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState, turn1Resolved: boolean, turn2Resolved: boolean, turn3Resolved: boolean = false, turn4Resolved: boolean = false, turn5Resolved: boolean = false): void {
+function drawFightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  turn1Resolved: boolean,
+  turn2Resolved: boolean,
+  turn3Resolved: boolean = false,
+  turn4Resolved: boolean = false,
+  turn5Resolved: boolean = false,
+  turn6Resolved: boolean = false,
+): void {
+  if (turn6Resolved) {
+    // S7 slice O: turn 7 repeats turn 6's exact scene (same battlers) - its
+    // own dedicated dispatcher, same "genuinely different PP/text" reason
+    // `turn5Resolved`'s own branch above already established for turn 6.
+    drawTurn7FightSubmenuWindow(fb, t, sm);
+    return;
+  }
   if (turn5Resolved) {
     // S7 slice N: turn 6 is a genuinely different base scene (Pidgeotto, not
     // Grovyle, is on-field) - dispatched to its own dedicated function rather
@@ -3931,11 +3967,21 @@ function drawFightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState
  * fightSubmenuText.test.ts`, and §13c for the state-plumbing tests proving
  * this same path end-to-end.
  */
-function drawFightSubmenuChrome(fb: Uint8Array, displayCursor: FightSubmenuSlot, turn1Resolved: boolean, turn2Resolved: boolean, moveset: ActiveMonMoveset, turn3Resolved: boolean = false, turn4Resolved: boolean = false, turn5Resolved: boolean = false): void {
+function drawFightSubmenuChrome(
+  fb: Uint8Array,
+  displayCursor: FightSubmenuSlot,
+  turn1Resolved: boolean,
+  turn2Resolved: boolean,
+  moveset: ActiveMonMoveset,
+  turn3Resolved: boolean = false,
+  turn4Resolved: boolean = false,
+  turn5Resolved: boolean = false,
+  turn6Resolved: boolean = false,
+): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -6632,6 +6678,205 @@ function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
 }
 
 /**
+ * S7 slice O (docs/turn7-notes.md, docs/battle-turn-notes.md §32): turn 7's
+ * own FIGHT submenu - cursor rests at slot 0 (ROCK_SLIDE, unchanged since
+ * turn 3, no nav needed - turn7-notes §5's own "cursor persistence
+ * confirmed") with PP read 5/10 (`turn6Resolved` passed as the moveset's
+ * 5th independent slot-0 decrement). Structurally identical to
+ * `drawTurn6FightSubmenuWindow` - reuses `drawTurn6FieldBase` UNCHANGED
+ * (same battlers, same on-field corners) - only the PP flag and the
+ * downstream text/ROCK_SLIDE dispatch (`drawTurn7FeatherDanceKickoffText`)
+ * differ.
+ */
+/**
+ * The `turn5SitrusResettledBounceTick`(regime 1)-to-`turn6RockSlideResettled
+ * BounceTick`(regime 2) anchor shift: `drawTurn6FieldBase` always applies
+ * regime 1 internally (its own fixed formula, not swappable per-caller), so
+ * this converts a regime-2-space raw tick into whatever regime-1-space
+ * value produces the SAME `menuIdleBounce` result - solving
+ * `t2 - (TURN6_ROCKSLIDE_PRESS_TICK+750) === t1 - TURN5_SITRUS_MENU_REDRAW_TICK`
+ * for the constant `t1 - t2` offset. Oracle-caught this session (turn 7's
+ * own idle/browsing window is the FIRST time this codebase has ever needed
+ * to render past a resettled-menu's OWN redraw reset while ALSO needing
+ * `drawTurn6FieldBase`'s Grovyle/Onix-only sprite layer - every earlier
+ * caller either predates turn 6's own redraw or bypasses `drawTurn6FieldBase`
+ * entirely once past it, e.g. `drawTurn6RockSlideTurnEndSettledMenu`).
+ */
+const TURN7_REGIME2_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY);
+
+/**
+ * `drawTurn6FieldBase` wrapper for turn 7: converts `bounceTick` from
+ * regime-2 space (`turn6RockSlideResettledBounceTick`'s own domain - the
+ * regime active from turn 6's own redraw, 8122, onward) via
+ * `TURN7_REGIME2_TO_REGIME1_SHIFT`, then repaints Pidgeotto's own healthbox
+ * at its real turn-7-opening HP (113, unchanged from turn 6's own
+ * ROCK_SLIDE until turn 7's own ROCK_SLIDE lands) - `drawTurn6FieldBase`
+ * itself never repaints it once the slide-in settles
+ * (`turn5PidgeottoHealthboxSlideDx` returns `null`), which was harmless for
+ * every turn-≤6 caller (Pidgeotto was always still at full HP at those
+ * points) but wrong once real damage carries forward into turn 7.
+ */
+function drawTurn7FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN7_REGIME2_TO_REGIME1_SHIFT, beforeMonSprite);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+}
+
+/** `turn6KickoffBounceTick`'s own turn-7 analogue, in regime-2 space (`drawTurn7FieldBase`'s own domain) - freezes at the regime-2 anchor tick itself (`TURN6_ROCKSLIDE_PRESS_TICK+TURN6_ROCKSLIDE_MENU_REDRAW_DELAY`, i.e. local phase 0 by construction, the same "real {0,0} plateau" turn 6's own freeze anchor was independently bisected to land on). */
+function turn7KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t;
+  return TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY;
+}
+
+function drawTurn7FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+  // NOT `drawTurn6ActionMenuIdleWindow` - unlike turn 6's own pre-any-
+  // ROCK_SLIDE idle window (regime 1, `turn5SitrusResettledBounceTick`'s
+  // live-t cycle, correct only while Pidgeotto is still at full HP), turn
+  // 7's idle window comes AFTER turn 6's own ROCK_SLIDE has already reset
+  // the bounce cycle fresh at its own redraw (8122) and dropped Pidgeotto
+  // to 113 HP - `drawTurn6RockSlideTurnEndSettledMenu` is that exact
+  // already-proven regime (reused verbatim, not re-derived), oracle-caught
+  // this session (a 6.93% diff at frame 8347 otherwise - wrong bounce phase
+  // AND a stale full-HP Pidgeotto healthbox).
+  if (sm.openElapsed === null) {
+    drawTurn6RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    drawTurn6RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn6FeatherDanceTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurn7FeatherDanceKickoffText(fb, t, pressTick);
+      return;
+    }
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn7KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t;
+  drawTurn7FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true);
+}
+
+/**
+ * S7 slice O: turn 7's own FEATHER_DANCE kickoff text ("Foe PIDGEOTTO used\n
+ * FEATHERDANCE!" - PIDGEOTTO's 2nd use, same text) through the stat-fall
+ * banner (`turn6StatFallEva`/`turn6StatFallBg1Y`, reused unchanged - the
+ * SECOND -2 ATK drop, same "harshly fell" wording, pixel-confirmed via
+ * direct PNG read this session at tick 8730) and the ATK-fall text
+ * (`turn6AtkFellTextStartTick`, reused unchanged), then handoff to turn 7's
+ * own ROCK_SLIDE window once its own synthetic anchor's kickoff text
+ * begins - the exact same dispatcher shape as `drawTurn6FeatherDanceKickoffText`,
+ * only the ROCK_SLIDE anchor differs (`TURN7_ROCKSLIDE_PRESS_TICK`). The
+ * feather/starburst sprite animation itself (turn 7's own live window,
+ * oracle-confirmed ~8439-8592) is NOT modeled this session - deferred, see
+ * battle-turn-notes.md §32 - `turn6FeatherSprites(t)` naturally returns `[]`
+ * for every tick in turn 7's own range (keyed to turn 6's own RAM ticks),
+ * so this is a harmless no-op rather than a wrong render for the ticks this
+ * dispatcher IS responsible for (the flat holds immediately before/after
+ * the feather window, oracle-confirmed sha-identical to the settled
+ * kickoff-text picture at both 8422 and 8593).
+ */
+function drawTurn7FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= rockSlideTextStartTick(TURN7_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn7RockSlideWindow(fb, t);
+    return;
+  }
+  const frozenRegime2Tick = TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY;
+  drawTurn7FieldBase(fb, t, frozenRegime2Tick, () => drawTurn6FeatherSprites(fb, t, true));
+  drawTurn6FeatherSprites(fb, t, false);
+  const eva = turn6StatFallEva(t, pressTick);
+  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const atkFellStart = turn6AtkFellTextStartTick(pressTick);
+  if (t >= atkFellStart) {
+    drawMessageTextLines(fb, TURN6_ATKFELL_LINE1, TURN6_ATKFELL_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
+  } else {
+    drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+  }
+}
+
+/** Pidgeotto's own HP after turn 7's ROCK_SLIDE (turn7-notes.md §4, RAM-confirmed: 113->82, -31). */
+const TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 82;
+
+/**
+ * S7 slice O: turn 7's own ROCK_SLIDE (Onix vs. Pidgeotto again) - every
+ * mechanism reused with ZERO changes (`rockSlideBg3Y`/`rockSlideRockState`/
+ * `rockSlideDrawOrder`/`rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/
+ * `rockSlideMonBlinkInvisible`/`rockSlideOpponentHp`, all still `pressTick`-
+ * relative) - only `TURN7_ROCKSLIDE_PRESS_TICK` and Pidgeotto's own HP
+ * (113->82) are new, hand-verified against a fresh dense oracle sweep
+ * before writing this function (docs/battle-turn-notes.md §32).
+ */
+function drawTurn7RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number): void {
+  const pressTick = TURN7_ROCKSLIDE_PRESS_TICK;
+  const shiftY = rockSlideBg3Y(t, pressTick);
+  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
+  drawTurn5IconBar(fb, t);
+  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  }
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick + TURN7_REGIME2_TO_REGIME1_SHIFT));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
+  drawSendOutHealthbox(fb, 0, opponentContent);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
+  for (const i of rockSlideDrawOrder(t, pressTick)) {
+    const rock = rockSlideRockState(i, t, pressTick);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
+}
+
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" shape as `drawTurn6RockSlideTurnEndSettledMenu` - turn 7's own settled action menu, Pidgeotto's healthbox drained to its post-turn-7 HP. */
+function drawTurn7RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
+  const bounceTick = turn7RockSlideResettledBounceTick(t, TURN7_ROCKSLIDE_PRESS_TICK);
+  const bounce = menuIdleBounce(bounceTick);
+  drawStaticBgShiftedY(fb, 0, 0);
+  drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+/**
+ * S7 slice O: turn 7's own ROCK_SLIDE window dispatcher - same three-phase
+ * shape as `drawTurn6RockSlideWindow` (attack animation + held kickoff
+ * text, text-clear, hard-cut to the resettled menu), with the same "It's
+ * super effective!" swap-in (ROCK vs. FLYING, unchanged).
+ */
+function drawTurn7RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN7_ROCKSLIDE_PRESS_TICK;
+  const redrawTick = pressTick + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurn7RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const textClearTick = pressTick + TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  drawTurn7RockSlideAttack(fb, t, TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t < textClearTick) {
+    const superEffectiveStart = turn7SuperEffectiveTextStartTick(pressTick);
+    if (t >= superEffectiveStart) {
+      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn7SuperEffectiveTextVisibleChars(t, pressTick));
+    } else {
+      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    }
+  }
+}
+
+/**
  * S7 slice K's own ROCK_SLIDE/faint window dispatcher - the held kickoff
  * text (still Onix's "ONIX used\nROCK SLIDE!", drawn by `drawTurn5EndeavorText`'s
  * own handoff caller, `rockSlideTextVisibleChars` unchanged) through the
@@ -7128,7 +7373,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       drawRect(fb, menuIdleBlank);
       return;
     }
-    drawFightSubmenuWindow(fb, t, state.fightSubmenu, state.turn1Resolved, state.turn2Resolved, state.turn3Resolved, state.turn4Resolved, state.turn5Resolved);
+    drawFightSubmenuWindow(fb, t, state.fightSubmenu, state.turn1Resolved, state.turn2Resolved, state.turn3Resolved, state.turn4Resolved, state.turn5Resolved, state.turn6Resolved);
     return;
   }
   drawSendOutHandoff(fb, t, handoffTick);

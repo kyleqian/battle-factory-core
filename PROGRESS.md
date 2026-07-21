@@ -4,6 +4,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 210 — Bounded worker (S7 engine slice O): turn 7 landed end to end minus its own feather sub-window — `turn7-menu.json` **85/85**, `turn7-rockslide-{a,b,c,d}.json` **256+256+256+19/787**, all 0 diff; a pure parameterization of turn 6's own N-4 rungs, one real bug found+fixed (a second bounce-reset regime turn 7's own idle window needed that turn 6 never exercised) (S7 bounded worker session, hard 60-minute cap)
+
+- **State:** `npm test` **845/845** (+8), `npm run build` green, tree
+  clean. `turn7-menu.json` 85/85 (8346-8438 minus 8 known-class residual
+  ticks) + `turn7-rockslide-{a,b,c,d}.json` 787/787 (8593-9379 contiguous),
+  all 0 diff. Zero regressions: `turn6-rockslide-a.json` 255/255,
+  `turn6-statfall.json` 127/127, `turn6-feathers.json` 106/106,
+  `turn6-menu.json` 33/33.
+- **Did:** rungs (a)+(c)+(d) of the brief's own ladder landed together
+  (turn 6's own dispatcher already unifies kickoff-text/stat-banner/ATK-fell
+  into one function, so parameterizing it lands both at once); every
+  pressTick-generic turn-6 function reused UNCHANGED, fed a fresh dense
+  oracle sweep's own real pressTick (8379) or a new synthetic ROCK_SLIDE
+  anchor (`TURN7_ROCKSLIDE_PRESS_TICK=8406`). Found and fixed a real bug
+  `npm run compare` caught immediately (6.93% diff, first attempt): turn 7's
+  own pre-confirm idle/browsing window comes AFTER turn 6's own ROCK_SLIDE
+  reset the bounce cycle fresh at ITS OWN redraw (8122) and dropped
+  Pidgeotto to 113 HP — `drawTurn6FieldBase` silently assumed neither had
+  happened (true for every turn ≤6 caller, false for turn 7). Fixed with a
+  `drawTurn7FieldBase` wrapper (an algebraic regime-1↔regime-2 anchor shift,
+  not a fitted constant) plus an explicit Pidgeotto-HP repaint. 4 new
+  literal constants for ROCK_SLIDE, none transferable from turn 6's own
+  values (freshly fit each time, matching this dossier's own convention) —
+  notably `TURN7_SUPER_EFFECTIVE_TEXT_DELAY=634` vs turn 6's 646 (the
+  smaller -31 HP delta drains faster). Text wording re-verified via direct
+  PNG read, not assumed ("harshly fell" holds for the 2nd ATK drop too).
+- **Next:** rung (b) — turn 7's own feather sub-window (8439-8592,
+  currently unrendered but harmlessly excluded, not wrongly rendered): rerun
+  `dump-feather-dance-sprites.py` against this window, commit
+  `turn7-feather-sprites-probe.json`, add a tick-range-dispatched second
+  table. Then turns 8-13 as further parameterizations, or the turn 15+/16+
+  scout territory already banked.
+- **Notes:** no papercuts; `npm run compare`'s pixel diff again caught a
+  real bug immediately and precisely (this session's own regime-2 finding),
+  same pattern §31 noted for its own two bugs — hand-verifying
+  mechanism-reuse arithmetic before writing render code catches the
+  ARITHMETIC, but genuinely NEW situations (a window past a redraw reset
+  that no prior turn's code path ever needed) still need the pixel compare
+  to surface. docs/battle-turn-notes.md §32; turn6-notes.md/turn7-notes.md
+  left untouched (ground-truth dossiers, not engine docs).
+
+---
 ## 209 — Worktree scout (supervisor-folded): turn 17 + the WIN ground truth BANKED — **battle 1 is now ground-truthed turn-by-turn from anchor through the victory text**, a gapless prefix-verified dense-trace chain (turns 6-17 dossiers + winline); Murkrow faints at 22418, **`gBattleOutcome` flips 0→1 at tick 22818** (16 ticks after the dismiss press, while the OLD text still shows — §16's "instant the screen appears" corrected at this fold), DESTIN's loss quote "PLEASE I NEED / SOME WATER" held un-dismissed at trace end 23601; `battle1-turn17-dense.json` (256 captures) + `docs/turn17-notes.md`; merged, suite 837/837 on the merged tree
 
 - **State:** merged into master post-rung-(b), `npm test` 837/837 +
@@ -71,32 +113,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   hand-verifying the mechanism-reuse arithmetic BEFORE writing render code
   (per §30's own mandate, extended to pixels not just RAM) meant the
   mechanics half (255 frames) passed compare on the very first attempt.
-
----
-## 207 — Worktree scout (supervisor-folded): turn 16 ground truth BANKED — the first MAGBY-vs-MURKROW turn: speed order pinned (MURKROW 97 > MAGBY 89, acts first), FAINT_ATTACK skips accuracy entirely (source: `.accuracy=0`), FIRE_PUNCH rolls accuracy even at 100% AND **its 10% burn proc SUCCEEDS** (`status1` 0→16 at tick 21411, burn residual `floor(142/8)=17` at turn-end) — **the run's FIRST status-condition ground truth**, BRN badge PNG-pinned (absent 21540 → present 21548); `battle1-turn16-dense.json` (256 captures) + `docs/turn16-notes.md`; merged, suite 831/831 on the merged tree
-
-- **State:** merged into master post-N-4, `npm test` 831/831 + build
-  green post-merge, worktree/branch cleaned. Supervisor re-verified
-  independently: prefix chain re-flattened myself (turn15-dense ⊂
-  turn16-dense ⊂ winline-b-swap, script-exact), fresh oracle rerun
-  reproduced 15/15 cited shas at exact ticks, 3 label PNGs read directly
-  (MAGBY's first-ever FIGHT submenu — FIRE PUNCH/SMOKESCREEN/CONFUSE
-  RAY/SMOG, PP 15/15, TYPE/FIRE — and the BRN absent→present pair).
-  ISSUES #16 trimmed at this fold: ground truth exists now; the engine's
-  own status-icon compositor path is the open remainder.
-- **Did:** 8 Random() calls in 20745-21773 (crit+dmg for FAINT_ATTACK —
-  no accuracy roll; acc+crit+dmg+burn for FIRE_PUNCH; 1 unattributed
-  mid-turn at 21152 — FLAME_BODY hypothesis RULED OUT by source,
-  FAINT_ATTACK has no contact flag in this ROM; 2-step tail cluster
-  21719/21724 matching the "AI-prescoring" shape, first time seen
-  mid-battle). Damage: 59 (MAGBY 138→79), 67 (MURKROW 142→75), burn 17
-  (75→58). Both new move animations sketched coarse-only (open items).
-- **Next:** main lane — N-4 rung (b), Onix's ROCK_SLIDE vs Pidgeotto
-  (§30's sha-sweep handoff); scout — turn 17 (§16's "turn 2": Murkrow
-  faints 22418 → the WIN sequence); then ISSUES #26 probe, feather
-  residual 7421-7549, turns 7-13 parameterizations.
-- **Notes:** scout in contract (15.7 of 40 min); no papercuts; its
-  proposed "close #16" was corrected to a trim at the fold (ground truth
-  ≠ engine validation).
 
 ---
