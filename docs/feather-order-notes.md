@@ -595,3 +595,141 @@ sampling, and now this forensics split) are now closed out**; the
 remaining open work is two independently-diagnosable, differently-located
 small residual classes, not one more lead to chase - a future session
 should treat them as two separate tickets/threads rather than one.
+
+## S7 worktree session, 2026-07-21 (third): candidate A ADOPTED in the engine, then class (b) - and it turns out class (a) too - FULLY CRACKED (0px)
+
+Picked up exactly where the prior two sessions left off: adopt candidate A
+(mechanical, recipe already banked above), then chase class (b). Result:
+**both queued threads closed, and closing (b) turned out to close (a) too**
+- the turn-6 7421-7549 window (and turns 7/8's own full analogues) is now a
+verified **0px** across every one of 129 ticks each, not just an
+improvement.
+
+### Part 1: candidate A adoption (mechanical, as advertised)
+
+Ported `simulate-feather-sprite-order.py`'s algorithm verbatim into
+`src/engine/featherDance.ts` (`simulateFeatherSpriteOrder`/`featherSortStep`/
+`featherWrappedY`, seeded `FEATHER_ORDER_SEED = [3,4,7,8,9,10,11,12]` -
+literally the ascending-slot skeleton, since candidate A's winning `(4,7)`
+order already matches it). Each `FeatherRenderSprite` now carries an `order`
+field (simulated front-to-back `sSpriteOrder` position for its tick);
+`compareFeatherDrawOrder`'s tiebreak changed from `b.slot - a.slot` to
+`b.order - a.order` (same shape, new source of truth). New Tier-1 test pins
+render tick 7430 (RAM 7429), the window's first tick where candidate A's
+order actually diverges from the old slot-heuristic's answer (paints slot 7
+on top instead of slot 4) - not just a tick where the two coincide.
+
+Verified via `tools/probe/render-feather-order-candidates.ts` (real
+`renderAppTrace` output vs fresh oracle captures, not a patched estimate):
+turn 6's 7421-7549 window dropped from 425px (old tiebreak) to **228px**
+(matching, even fractionally beating, the prior session's 230px
+patch-estimated floor - the real engine number is the authoritative one).
+Turn 7/8 spot checks: 46px -> 16px (prior session's patch estimate was
+17px). Full regression gate (every trace the brief listed, run individually
+via `tools/compare/run.ts`) confirmed 0 diff, no capture-count regressions,
+before committing.
+
+### Part 2: class (b) forensics - a real proportion, and a decisive lead
+
+Extended `tools/probe/forensics-feather-residual.ts` from a 4-pixel anecdote
+to a 30-pixel bucketed sample (capped 3/tick, spread across 25 distinct
+ticks of the 7421-7549 window) classified by nearest-feather-palette-entry
+distance: **40% class (a)** soft-gradient (near-white/blue, matching the
+feather art's own palette), **60% class (b)** landing on Onix's own warm
+gray, nowhere near any feather palette entry. The class (b) samples all sat
+at `dx=16` from a live feather sprite's own center - exactly one column
+outside a symmetric `+-16` (32px-wide) box.
+
+That location was the tell, not the priority-split wiring the brief
+flagged as the leading suspect. Source check: `gFallingFeatherSpriteTemplate.oam`
+is `&gOamData_AffineNormal_ObjNormal_32x32`
+(`reference/pokeemerald/src/battle_anim_flying.c:175`) - `affineMode =
+ST_OAM_AFFINE_NORMAL` (`gba/types.h:83`, value 1), **not**
+`ST_OAM_AFFINE_DOUBLE` (value 3, the thrown ball's own mode,
+`pokeball.c:95`). Real AFFINE_NORMAL sprites do NOT get AFFINE_DOUBLE's
+doubled destination scan window - their on-screen bounding box stays their
+nominal size (32x32 here) regardless of rotation, so rotated content that
+would fall outside that box is hard-clipped on real hardware (the exact
+reason AFFINE_DOUBLE exists, for sprites that need the extra room).
+`drawSpriteSheetAffineRotate` (`battleScene.ts`) was applying the doubled
+window unconditionally to every caller, feathers included - painting
+rotated corner texels beyond the feather's true box and covering Onix's
+own already-drawn sprite underneath exactly where the forensics sample
+landed.
+
+Built `tools/probe/render-feather-normalbox-candidate.ts` (local
+`drawFeatherNormalBox` copy, self-checked to agree with the real primitive
+everywhere INSIDE the non-doubled box before scoring) to test the
+hypothesis with the same `matchesReal`-gated patch discipline the other
+probes use: cut the window from 228px to a verified-lower-bound **209px**
+(19px, confirming the mechanism is real and load-bearing) before any engine
+edit.
+
+### The fix, and the surprise: it's not a partial improvement, it's 0px
+
+`drawSpriteSheetAffineRotate` gained a `doubleSizeBox` param, defaulting
+`true` (byte-for-byte unchanged for every pre-existing caller - the thrown
+ball, Onix's own sitrus rotate/ring draws). `drawTurn6FeatherSprites`'
+single call site passes `false` explicitly - the one minimal, confined
+`battleScene.ts` edit this session made outside `featherDance.ts` (flagged
+per the brief's own instruction; it only touches the feather composite
+call, nothing turn-9/QUICK_ATTACK-adjacent).
+
+Re-running the real production pipeline (`tools/compare/run.ts`, the same
+tool `npm run compare` uses) against fresh oracle captures for the FULL
+129-tick window on all three turns:
+
+| turn | window | ticks | result |
+|---|---|---|---|
+| 6 | 7421-7549 | 129 | **0px, 129/129 exact** |
+| 7 | 8455-8583 | 129 | **0px, 129/129 exact** |
+| 8 | 9501-9629 | 129 | **0px, 129/129 exact** |
+
+Not a spot check - every tick in all three turns' own full residual
+windows. Class (a)'s "soft-gradient" signature and class (b)'s "Onix-gray"
+signature turned out to be the SAME root cause (the doubled-box bug
+produces both a hard color-swap at the clipped boundary itself, which
+forensics happened to sample as "class b", and softer deltas one texel in
+from that boundary at other angles/pixels, sampled as "class a") - there
+was never a second, independent class (a) mechanism to chase.
+
+Extended `turn6/7/8-feathers.json`'s own `captureFrames` to cover these
+now-genuinely-0-diff windows (106->235, 16->145, 33->162 frames) per the
+brief's own instruction ("do NOT extend...unless ticks reach genuinely 0
+diff" - they do now). Full regression gate re-run on every other listed
+trace (turn6-menu/statfall/rockslide-a/b, turn7-menu/rockslide-a-d,
+turn8-menu/bind-a/b, plus the unlisted turn6-featherdance.json found during
+this session's sweep): all unaffected, no capture-count regressions.
+
+New Tier-1 test (`tests/battleScene.test.ts`) pins `doubleSizeBox`'s
+clipping behavior directly with a synthetic fully-opaque tileset and a real
+feather rotation matrix, independent of the oracle: a corner pixel outside
+the `+-16` box that's genuinely paintable from a valid source sample is
+shown painted under the default (`true`) and clipped under `false`, while
+an interior pixel paints identically either way.
+
+### Verdict: ISSUES #30 is CLOSED - 0px on every committed feather capture, mechanism understood end to end
+
+Both queued leads (draw order via `sSpriteOrder` simulation, sprite
+bounding-box shape via AFFINE_NORMAL-vs-DOUBLE) were real, independent,
+load-bearing bugs; fixing both together reaches exact pixel parity on
+every tested tick across all three turns' feather windows. No further
+residual is known to remain in this mechanism.
+
+### Committed artifacts (this session)
+
+- `src/engine/featherDance.ts` - candidate A's `sSpriteOrder` simulation,
+  ported from `simulate-feather-sprite-order.py`.
+- `src/engine/battleScene.ts` - `drawSpriteSheetAffineRotate`'s new
+  `doubleSizeBox` param (default `true`); `drawTurn6FeatherSprites` passes
+  `false`.
+- `tools/probe/render-feather-normalbox-candidate.ts` - the box-clip
+  hypothesis test script. Rerunnable: `npx tsx
+  tools/probe/render-feather-normalbox-candidate.ts` (needs the oracle
+  service up; 1 oracle call).
+- `tools/probe/forensics-feather-residual.ts` - extended from a 4-pixel dump
+  to a bucketed ~30-pixel sample with a palette-distance classifier.
+  Rerunnable unchanged: `npx tsx tools/probe/forensics-feather-residual.ts`.
+- `tools/compare/traces/turn6-feathers.json` / `turn7-feathers.json` /
+  `turn8-feathers.json` - `captureFrames` extended to cover the
+  now-0-diff windows.
