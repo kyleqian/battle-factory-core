@@ -5941,3 +5941,167 @@ for the new `slot` field, net of no removals). `npm run build` green.
 `turn6-featherdance.json` **90/90**, `turn6-menu.json` **42/42**,
 `turn7-menu.json` **91/91**, `turn8-menu.json` **86/86**,
 `turn5-sitrus-a.json` **110/110**, all 0 diff.
+
+## 35. Engine slice R rungs (a)+(b): ISSUES #29 fixed in full (both families) + turn 9's menu-reopen/LEFT-nav/confirm/QUICK_ATTACK-kickoff-text chain landed clean - `turn9-menu.json` **111/111, 0 diff**; QUICK_ATTACK's own animation + everything downstream (impact, drain, message, ROCK_SLIDE, turn end) NOT modeled this session - RAM-probed and precisely characterized, not guessed (S7 bounded worker session, hard 60-minute cap)
+
+### Rung (a): ISSUES #29's fix, both families
+
+Re-ran `tools/probe/verify-issues29-rule.py` first (policy) - both families
+PASS. Applied both rules named in the entry: **Family A** -
+`drawTurn6ActionMenuIdleWindow`/`drawTurn7RockSlideTurnEndSettledMenu` each
+gained an optional `bounceTick`/`bounceRawTick` param (default `t`, every
+existing unshifted caller unaffected); `drawTurn6FightSubmenuWindow`/
+`drawTurn8FightSubmenuWindow`'s own `sm.openElapsed !== null && t <
+revealTick` branches now pass `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
+explicitly instead of plain `t`. `drawTurn7FightSubmenuWindow`'s own
+analogous branch (calling `drawTurn6RockSlideTurnEndSettledMenu`) was
+deliberately left untouched - not named in the probe's own evidence, and
+this session's regression sweep shows no diff there either. **Family B** -
+`turn7KickoffBounceTick`'s pre-freeze branch now returns `t -
+FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` instead of plain `t`.
+
+Restored all 6 named ticks: `turn6-menu.json` **44/44**, `turn7-menu.json`
+**93/93**, `turn8-menu.json` **88/88**, all 0 diff. 6 new Tier-1 pins
+(`tests/battleScene.test.ts`, "ISSUES #29 fix" describe block): each
+family's fixed formula matches the committed RAM dumps exactly at all 6
+restored ticks, each paired with a pre-fix-mismatch proof. Turn 6/8's own
+kickoff wrappers (the entry's own open flag) were NOT preemptively changed -
+the full regression sweep (below) shows their own kickoff windows at 0 diff,
+unchanged counts, so the open flag resolves by evidence, not by code change.
+ISSUES #29 deleted. Full detail: `docs/bounce-blip-notes.md`'s own "Fix
+landed (S7 engine slice R rung (a))" section.
+
+### Rung (b): turn 9's own FIGHT-submenu reopen through QUICK_ATTACK's kickoff text
+
+docs/turn9-notes.md is the dossier (headline: Pidgeotto does NOT reuse
+FEATHER_DANCE a 4th time - it switches to QUICK_ATTACK, a first-time
+priority move, hit; Onix's ROCK_SLIDE also hits). This rung covers the
+reopen through the kickoff text's own settled plateau, one tick before the
+animation's first pixel change (10929) - the parameterization template is
+turn 8's own §33 slice, same "new dispatcher, mostly-reused helpers" shape.
+
+- **State plumbing**: `turn8Resolved: boolean` added to `BattleSceneState`
+  (mirrors `turn1Resolved`..`turn7Resolved` exactly) - `core.ts` sets it once
+  turn 8's own BIND-miss resolution redraws the settled menu
+  (`TURN8_MENU_REDRAW_DELAY` past turn 8's own real confirm - directly
+  usable as the reopen-gate delay too, the SAME "no synthetic anchor needed"
+  shape `TURN4_ROCKSLIDE_MENU_REDRAW_DELAY` already established, since
+  BIND's own confirm is real, not a kickoff-duration-dependent synthetic
+  anchor) AND a fresh A-press registers.
+- **Cursor persistence + LEFT nav**: `openFightSubmenu`'s existing
+  `initialCursor` param seeds cursor 1 (BIND, where turn 8 left it);
+  `moveFightCursor`'s existing `cursor^1` arithmetic (already generic since
+  slice F) moves it back to 0 (ROCK_SLIDE) on the `LEFT` press - genuinely
+  exercised in the opposite direction from turn 8's own `RIGHT`, no new nav
+  code. The confirm gate (`core.ts`, `cursor === 0 || 1 || 2`) already
+  accepted cursor 0 - no change needed.
+- **PP ledger**: `currentPPForActiveMon` gained a `turn8Resolved` param
+  decrementing slot 1 (BIND) by 1 - a miss still spends PP, matching
+  turn9-notes.md §4's own "BIND(20) 19/20 (unchanged)" ledger. ROCK_SLIDE
+  (slot 0) stays frozen at 4/10, untouched by this new independent
+  decrement.
+- **A 4th bounce regime**: turn 8's own BIND-miss resolution redraws the
+  settled menu fresh (9997), resetting `menuIdleBounce`'s own phase onto a
+  FOURTH regime - `TURN9_REGIME4_TO_REGIME1_SHIFT`/`drawTurn9FieldBase`
+  solve the same algebraic anchor-shift identity `drawTurn7FieldBase`/
+  `drawTurn8FieldBase` already establish, one redraw further; `TURN8_BIND_
+  PRESS_TICK` (9425) is the first "historical anchor" constant this session
+  needed purely so turn 9's OWN fresh `FightSubmenuState` (whose own
+  `confirmElapsed` is a LATER, different tick) can still reuse turn 8's
+  settled-menu function verbatim, the same "past-turn anchor" shape
+  `TURN6_ROCKSLIDE_PRESS_TICK`/`TURN7_ROCKSLIDE_PRESS_TICK` already
+  establish for ROCK_SLIDE.
+- **QUICK_ATTACK's kickoff text**: "Foe PIDGEOTTO used\nQUICK ATTACK!" -
+  timing fit directly against a fresh `bin/oracle run` of this session's own
+  `turn9-menu.json` (NOT hand-derived from the dossier's own loose prose
+  range, which turned out to be approximate: the doc's own "10878-10929"
+  range undershoots the real first-pixel-change tick by 4 - the actual sha
+  stays flat through 10881, first changes at 10882; `TURN9_QUICKATTACK_TEXT_
+  DELAY = 11` fit against this engine's own real pressTick, 10871, cross-
+  checked against the dossier's own PNG-read characters at 10886 ("Foe P",
+  5 chars) and 10898 ("Foe PIDGEOTTO use", 17 chars) - both match exactly
+  under the standard 1-char/tick model once the correct start tick is used).
+  A concrete instance of this dossier's own recurring caution: prose ranges
+  in ground-truth docs are for orientation, not a substitute for the oracle
+  itself when fitting an exact render constant.
+- **Turn order**: `getWhoStrikesFirst`'s own nonzero-priority branch
+  (`!bothPriorityZero && !priorityEqual`) gets its first REAL-scenario
+  exercise this arc - QUICK_ATTACK's `priority: 1` (confirmed in
+  `src/data/gen/moves.json`) forces Pidgeotto to act first regardless of
+  Onix's own Speed, RAM/pixel-confirmed (`gBattlerAttacker` flips 0->1 at
+  10876; the kickoff text reads QUICK_ATTACK before ROCK_SLIDE). 3 new
+  Tier-1 pins (`tests/turnOrder.test.ts`): the real turn-9 battler pair
+  reproduces the real order, AND a synthetic variant (Onix given an
+  inflated Speed) confirms priority decides it independent of this specific
+  pair's own 1-point speed margin (which alone doesn't distinguish "priority
+  matters" from "speed already agreed") - `turnOrder.ts` itself is NOT wired
+  into the render path yet (this session only extends the FIGHT-submenu
+  render dispatcher, not a turn-resolution engine), so this pins the pure
+  logic module only, not an end-to-end render exercise.
+
+### What was NOT modeled this session (honest scope accounting)
+
+**QUICK_ATTACK's own animation** (the brief's own "RAM-probe first"
+mandate) - `tools/probe/dump-task-and-sprite-callbacks.py` run against
+`battle1-turn9-dense.json` from tick 10870, symbols resolved via `arm-none-
+eabi-nm` against the pinned ELF. Confirmed directly against
+`reference/pokeemerald/data/battle_anim_scripts.s`'s own `Move_QUICK_
+ATTACK` script (`loadspritegfx ANIM_TAG_IMPACT`, `AnimTask_
+TranslateMonEllipticalRespectSide` (attacker lunge), `AnimTask_
+TraceMonBlended` (afterimage/streak sprites), `AnimTask_ShakeMon` (target
+shake) + a hitsplat sprite):
+
+- Task activity window: **10925-10949** (tasks 0-3 active: `AnimTask_
+  TranslateMonElliptical_Step` 10928-10933, `Task_UpdateMonBg` 10925-10946,
+  `AnimTask_TraceMonBlended_Step` 10928-10944, `AnimTask_ShakeMon_Step`
+  10934-10943).
+- Sprite slots: **2** (Pidgeotto's own real sprite) flips to `SpriteCB_
+  SetInvisible` for the duration (the real mon sprite is hidden while the
+  translate/trace effect substitutes for it - a common GBA battle-anim
+  trick); **3**/**4** host `AnimMonTrace` (the blended afterimage/streak
+  sprites, alternating as the elliptical path advances); **7** hosts a
+  helper sprite (`RunStoredCallbackWhenAffineAnimEnds` -> `DestroyAnimSprite`
+  - almost certainly the hit-splat, `create_basic_hitsplat_sprite` in the
+  script). First real pixel change: tick **10929** (confirmed both by this
+  probe and by the `turn9-menu.json` compare run's own diff onset).
+- Genuinely more involved than any prior turn's own kickoff animation
+  (elliptical translation + alpha-blended afterimage trace sprites + a
+  shake + a hitsplat, vs. the prior arc's plain stat-fall banners/rock
+  props) - not attempted this session given the remaining time budget;
+  banked here as concrete RAM ground truth (task/sprite inventory, exact
+  window) for whoever picks this up, rather than a guess.
+- Everything downstream of the animation (impact + Onix's own HP drain
+  31->24, the "It's not very effective.." message, the unattributed RNG
+  step, ROCK_SLIDE's own kickoff+resolution+drain 82->61, "It's super
+  effective!", and the turn-end redraw into turn 10) is ALSO not modeled
+  this session - it's script-sequential after the animation, so landing it
+  without the animation would mean rendering something for 10929-11450 with
+  no pixel-correctness guarantee. Deferred as one contiguous block rather
+  than guessed at piecemeal.
+- **Out of scope, per the brief**: ISSUES #30 (a sibling worktree owns it
+  this round) and #23.
+
+### Committed traces and Tier-1 pins
+
+`tools/compare/traces/turn9-menu.json` (new, 88 segments = `turn8-bind-
+b.json`'s own 82-segment/10826-frame base + `battle1-winline-b-swap.json`'s
+own segments[80:86] verbatim - the same base-script-reuse convention every
+prior turn boundary trace already follows; captureFrames 10818-10928, 111
+frames, the reopen through the kickoff text's own settled plateau one tick
+before the animation's first pixel change). `tests/battleMenu.test.ts` (+3):
+the turn-9 PP ledger, the reopen-gate-delay identity, and QUICK_ATTACK's own
+text timing (cross-checked against 2 PNG-read character counts).
+`tests/turnOrder.test.ts` (+3): the real turn-9 battler pair's own order,
+plus the priority-overrides-a-losing-pair-speed synthetic check.
+
+### Verification
+
+`npm test` **877/877** (+12: 6 ISSUES #29 pins, 3 turn-9 PP/timing pins in
+`battleMenu.test.ts`, 3 `turnOrder.test.ts` pins). `npm run build` green.
+`turn9-menu.json` **111/111, 0 diff**. Zero regressions: `turn6-menu.json`
+**44/44**, `turn7-menu.json` **93/93**, `turn8-menu.json` **88/88**,
+`turn8-bind-a.json` **256/256**, `turn8-bind-b.json` **66/66**, `turn7-
+rockslide-d.json` **19/19**, `turn6-rockslide-a.json` **255/255**,
+`turn6-feathers.json` **106/106**, `turn6-featherdance.json` **90/90**,
+`turn7-feathers.json` **16/16**, `turn8-feathers.json` **33/33**, all 0
+diff.

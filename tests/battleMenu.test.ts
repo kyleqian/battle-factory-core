@@ -111,12 +111,19 @@ import {
   TURN8_TEXT_CLEAR_DELAY,
   TURN8_MENU_REDRAW_DELAY,
   turn8ResettledBounceTick,
+  TURN8_BIND_PRESS_TICK,
+  TURN9_QUICKATTACK_LINE1,
+  TURN9_QUICKATTACK_LINE2,
+  TURN9_QUICKATTACK_TEXT_TOTAL,
+  TURN9_QUICKATTACK_TEXT_DELAY,
+  turn9QuickAttackTextStartTick,
+  turn9QuickAttackTextVisibleChars,
 } from "../src/engine/battleScene.ts";
 
 /** Same rig as tests/battleScene.test.ts's `pixelAtSentOut` - send-out A-press already registered at trace tick 1420 (sendOutPressElapsed=380), the fixed script every committed trace in this window shares. */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -168,16 +175,16 @@ describe("battleMenu: rendered pixels (oracle-pinned, tools/compare/traces/menu-
   it("renders byte-identical frames across the silent space tick (1565 -> 1566)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 
   it("renders byte-identical frames once static (1571 -> 1572)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 });
@@ -694,6 +701,31 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
   it("S7 slice P: moveFightCursor's existing cursor^1 grid arithmetic moves RIGHT from ROCK_SLIDE (0) onto BIND (1) - the winning line's own divergence turn, no new nav code needed", () => {
     expect(moveFightCursor(0, "RIGHT")).toBe(1);
     expect(moveFightCursor(1, "LEFT")).toBe(0);
+  });
+
+  it("S7 slice R: currentPPForActiveMon reads BIND 19/20 once turn8Resolved (a miss still decrements PP) - matches turn9-notes.md §4's own 'BIND(20) 19/20 (unchanged)' ledger; ROCK_SLIDE (slot 0) stays frozen at 4/10, independent of this new slot-1 decrement", () => {
+    const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true)).toEqual([4, 19, 19, 10]);
+    // Sanity: turn7Resolved alone (pre-turn-9) still reads BIND at full 20/20.
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, false)[1]).toBe(20);
+  });
+
+  it("S7 slice R: TURN8_MENU_REDRAW_DELAY doubles as the turn-8-to-9 reopen gate delay (directly usable, same 'no synthetic anchor needed' reason TURN4_ROCKSLIDE_MENU_REDRAW_DELAY already established) - opens at turn 8's own real redraw tick (9997 = TURN8_BIND_PRESS_TICK+572)", () => {
+    expect(TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY).toBe(9997);
+  });
+
+  it("S7 slice R: 'Foe PIDGEOTTO used\\nQUICK ATTACK!' (TURN9_QUICKATTACK_LINE1/2) starts at pressTick+11 and settles on the last glyph's own tick", () => {
+    const pressTick = 10871;
+    expect(TURN9_QUICKATTACK_TEXT_DELAY).toBe(11);
+    expect(turn9QuickAttackTextStartTick(pressTick)).toBe(10882);
+    expect(turn9QuickAttackTextVisibleChars(10881, pressTick)).toBe(0);
+    expect(turn9QuickAttackTextVisibleChars(10882, pressTick)).toBe(1);
+    expect(turn9QuickAttackTextVisibleChars(10886, pressTick)).toBe(5); // "Foe P", PNG-confirmed (docs/turn9-notes.md §5)
+    expect(turn9QuickAttackTextVisibleChars(10898, pressTick)).toBe(17); // "Foe PIDGEOTTO use", PNG-confirmed
+    const total = TURN9_QUICKATTACK_LINE1.length + TURN9_QUICKATTACK_LINE2.length;
+    expect(total).toBe(TURN9_QUICKATTACK_TEXT_TOTAL);
+    expect(turn9QuickAttackTextVisibleChars(pressTick + 11 + total, pressTick)).toBe(total);
+    expect(turn9QuickAttackTextVisibleChars(pressTick + 11 + total + 5, pressTick)).toBe(total); // clamped, settled
   });
 
   it("S7 slice P: BIND's own kickoff text ('ONIX used\\nBIND!', 14 chars) starts at pressTick+421 (9846, docs/turn8-notes.md §5) and settles on the last glyph's own tick", () => {

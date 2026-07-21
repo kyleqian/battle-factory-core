@@ -2212,6 +2212,7 @@ export function currentPPForActiveMon(
   turn5Resolved: boolean = false,
   turn6Resolved: boolean = false,
   turn7Resolved: boolean = false,
+  turn8Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
   // S7 slice N (docs/turn6-notes.md §4): turn 5's own ROCK_SLIDE (Onix's
@@ -2225,6 +2226,11 @@ export function currentPPForActiveMon(
   // S7 slice P (docs/turn8-notes.md §4): turn 7's own ROCK_SLIDE is a 6th
   // slot-0 use, matching turn8-notes' own "ROCK_SLIDE sits frozen at 4/10
   // through this turn" ledger at turn 8's own reopen.
+  // S7 slice R (docs/turn9-notes.md §4): turn 8's own BIND (a miss still
+  // decrements PP, same rule ROCK_SLIDE's own misses would follow) is a
+  // FIRST slot-1 use, matching turn9-notes' own "BIND(20) 19/20 (unchanged)"
+  // ledger at turn 9's own reopen - independent of `slot0Uses` (ROCK_SLIDE
+  // was frozen, unused, all through turn 8).
   const slot0Uses =
     (turn1Resolved ? 1 : 0) +
     (turn3Resolved ? 1 : 0) +
@@ -2232,7 +2238,7 @@ export function currentPPForActiveMon(
     (turn5Resolved ? 1 : 0) +
     (turn6Resolved ? 1 : 0) +
     (turn7Resolved ? 1 : 0);
-  return [a - slot0Uses, b, turn2Resolved ? c - 1 : c, d];
+  return [a - slot0Uses, turn8Resolved ? b - 1 : b, turn2Resolved ? c - 1 : c, d];
 }
 
 export function getCurrentPPToMaxPPState(currentPP: number, maxPP: number): 0 | 1 | 2 | 3 {

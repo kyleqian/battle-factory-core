@@ -4,37 +4,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 220 — Bounded worker (S7 engine slice R rung (a)): **ISSUES #29 FIXED** — both families landed, all 3 named menu traces restored to 0 diff at 44/93/88, 6 Tier-1 pins added, entry deleted; turn 9 slice (rungs b+) in progress this same session
+## 220 — Bounded worker (S7 engine slice R, rungs (a)+(b)): **ISSUES #29 FIXED** (both families, all 3 menu traces restored 0 diff) **+ turn 9's menu-reopen/LEFT-nav/confirm/QUICK_ATTACK-kickoff-text chain landed clean** — `turn9-menu.json` **111/111**; QUICK_ATTACK's own animation + everything downstream (impact/drain/message/ROCK_SLIDE/turn-end) NOT modeled — RAM-probed and precisely characterized (§35), not guessed
 
-- **State:** `npm test` 871/871 (+6), `npm run build` green, tree
+- **State:** `npm test` **877/877** (+12), `npm run build` green, tree
   committed. `turn6-menu.json` 44/44, `turn7-menu.json` 93/93,
-  `turn8-menu.json` 88/88, all 0 diff — the exact restoration the
-  probe called for. Zero regressions across the full menu/kickoff/
-  rockslide/feathers sweep (`turn6-featherdance.json` 90/90,
-  `turn6-feathers.json` 106/106, `turn6-rockslide-a/b.json` 255/255 +
-  105/105, `turn7-feathers.json` 16/16, `turn7-rockslide-a/b/c/d.json`
-  256/256×3 + 19/19, `turn8-bind-a/b.json` 256/256 + 66/66,
-  `turn8-feathers.json` 33/33).
-- **Did:** verify script re-run FIRST (both families PASS) per policy.
-  Family A: `drawTurn6ActionMenuIdleWindow`/
+  `turn8-menu.json` 88/88 (rung a's restoration), `turn9-menu.json`
+  **111/111** (new, rung b: reopen through the kickoff text's own
+  settled plateau, one tick before the animation's first pixel change
+  at 10929). Zero regressions across the full menu/kickoff/rockslide/
+  feathers sweep (`turn8-bind-a/b.json` 256/256+66/66, `turn7-
+  rockslide-d.json` 19/19, `turn6-rockslide-a.json` 255/255,
+  `turn6/7/8-feathers.json` 106/16/33, `turn6-featherdance.json`
+  90/90).
+- **Did:** Rung (a) — verify script re-run FIRST (both families PASS)
+  per policy; Family A (`drawTurn6ActionMenuIdleWindow`/
   `drawTurn7RockSlideTurnEndSettledMenu` gained an optional
-  `bounceTick` param (default `t`, existing unshifted callers
-  untouched); `drawTurn6FightSubmenuWindow`/`drawTurn8FightSubmenuWindow`'s
-  `openElapsed !== null && t < revealTick` branches now pass
-  `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`. Turn 7's own analogous branch
-  (`drawTurn7FightSubmenuWindow`, calling `drawTurn6RockSlideTurnEndSettledMenu`)
-  deliberately left untouched — not named in the probe's evidence, and
-  the regression sweep shows no diff there. Family B:
-  `turn7KickoffBounceTick`'s pre-freeze branch now returns
-  `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`. Open flag on turn 6/8's own
-  kickoff wrappers resolved by evidence, not code change: their
-  kickoff windows are 0 diff post-fix, so left as-is.
-- **Next:** turn 9 rungs (b)-(d) — menu reopen/LEFT-nav exercising the
-  #29 fix fresh, QUICK_ATTACK's new animation (RAM-probe first), Onix's
-  ROCK_SLIDE (82→61), turn-end boundary. `docs/turn9-notes.md` is the
-  dossier.
+  `bounceTick`/`bounceRawTick` param, default `t`); Family B
+  (`turn7KickoffBounceTick`'s pre-freeze branch now shifts). ISSUES
+  #29 deleted. Rung (b) — `turn8Resolved` state flag (mirrors
+  turn1-7Resolved), cursor persists at BIND(1) then `LEFT` returns it
+  to ROCK_SLIDE(0) via the already-generic `cursor^1` arithmetic, PP
+  ledger gains BIND's own miss-still-decrements-PP rule (19/20), a
+  4th bounce regime (`TURN9_REGIME4_TO_REGIME1_SHIFT`), QUICK_ATTACK's
+  own kickoff text (timing fit against a FRESH oracle run, not the
+  dossier's own loose prose range — that undershot by 4 ticks),
+  `turnOrder.ts`'s nonzero-priority branch gets its first real-scenario
+  Tier-1 pin (QUICK_ATTACK +1 forces Pidgeotto first).
+- **Next:** QUICK_ATTACK's animation (RAM ground truth already banked
+  in §35: task window 10925-10949, `AnimTask_TranslateMonElliptical_
+  Step`+`AnimTask_TraceMonBlended_Step`+`AnimTask_ShakeMon_Step`,
+  sprite slots 2/3/4/7) through the impact/drain/"not very
+  effective"/ROCK_SLIDE(82→61)/turn-end — one contiguous block, not
+  attempted this session (time). `docs/turn9-notes.md` has the full
+  ledger.
 - **Notes:** docs updated in the same commit — `docs/bounce-blip-
-  notes.md` "Fix landed" section, `ISSUES.md` #29 deleted.
+  notes.md` "Fix landed" section, `docs/battle-turn-notes.md` §35,
+  `ISSUES.md` #29 deleted. PAPERCUT: the turn9-notes.md dossier's own
+  prose timing ranges (e.g. "text typing in 10878-10929") are
+  approximate orientation, not exact render constants — cost ~5 min
+  re-fitting `TURN9_QUICKATTACK_TEXT_DELAY` against a fresh oracle run
+  instead of trusting the cited range directly.
 
 ---
 ## 219 — Worktree probe (supervisor-folded): **ISSUES #29 ROOT-CAUSED, both families** — the same missing-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` mechanism as #28, one dispatch branch earlier (Family A: pre-reveal idle window must key the shift off `openElapsed !== null`, not `revealTick`; Family B: `turn7KickoffBounceTick`'s pre-freeze branch returns unshifted `t`); supervisor re-ran the committed verify script — both families PASS, zero neighbor regressions; probe scoreboard this session: **4-for-4** (#27, #26, #28, #29); merged, suite 865/865
