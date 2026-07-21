@@ -1,3 +1,34 @@
+## 193 — Worktree scout (supervisor-folded): turn 9 ground truth BANKED — the pinned ATK-floor test came back NEGATIVE (Pidgeotto uses QUICK_ATTACK, not a 4th FD; "won't go lower" variant still untested) and **both published lines reconverge RNG-exactly at turn 9** (BIND-miss and ROCK_SLIDE-miss consume identical Random() counts → same gRngValue); `battle1-turn9-dense.json` (12272 frames, 256/256 captures) + `docs/turn9-notes.md`; merged `782eaab`, suite 801/801 on the merged tree
+
+- **State:** merged into master, `npm test` 801/801 + build green
+  post-merge (docs+trace+probe-spec only). Supervisor re-verified: prefix
+  chain (turn8-dense ⊂ turn9-dense ⊂ winline-b-swap, script-exact), cited
+  shas reproduced fresh, submenu label frames read as images. **One row
+  corrected in the fold** (supervisor pixel-diff evidence, two fresh
+  oracle runs byte-identical): the "no visible change during the press"
+  claim at 10869-10877 hid a real 5-tick healthbox-region transient
+  (bea3024eb2f3, bbox x:127-229 y:74-110, bounce-family) — turn9-notes §5
+  row now carries both shas. Verification lesson holds: representative-
+  tick sha citations can mask un-itemized sub-phases; diff the WHOLE
+  cited span when a row claims "no change".
+- **Did:** turn 9 = QUICK_ATTACK (Pidgeotto, 82→61... Onix 31→24) vs
+  ROCK_SLIDE (hit, Pidgeotto 82→61); first turn in the arc where both
+  sides land damage — first "not very effective" (0.5×) message
+  PNG-confirmed, first healthbar color-zone transitions pixel-sampled
+  (Pidgeotto green→yellow at 50%, Onix yellow→red). Cursor persistence
+  reconfirmed in RAM across the closed action menu (gMoveSelectionCursor
+  holds BIND before reopen; LEFT flips it inside the press window). The
+  turn-2 "unattributed RNG step" recurs (+14 ticks before next accuracy
+  roll) specifically when both combatants use damaging moves — still
+  unattributed to a call site. The 4-frame shared box-open prefix theory
+  refined: holds box-region-only, within matched transition categories.
+- **Next:** M-4 (Sitrus rungs c-e: GrantingStars 6970→~7040, tint/
+  sparkle/ring/message/HP-climb, settled menu ≥7307); then turn-6/7/8/9
+  engine slices against the four dossiers.
+- **Notes:** scout stayed in contract; no papercuts.
+
+---
+
 ## 192 — Bounded worker (S7 slice M-3): Sitrus rotation window LANDED — the "small-angle rounding gap" §12 flagged was actually a +2 (not +1) render-tick lag miswiring, NOT a sampler bug; `drawSpriteSheetAffineRotate` needed zero changes; `turn5-sitrus-a.json` 110/110, 0 diff; rungs (c)-(e) not attempted (out of time)
 
 - **State:** `npm test` **801/801** (+8), `npm run build` green, tree

@@ -4,6 +4,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 196 — Bounded worker (S7 slice M-5): rungs (d)+(e) LANDED — tint + heal message + HP climb + settled turn-6 menu; `turn5-sitrus-c.json` 150/150, `turn5-sitrus-d.json` 133/133, both 0 diff; ring excluded (bounded effort, 3rd resistance, precise ticks); **the faint/forced-switch sequence is COMPLETE**
+
+- **State:** `npm test` **813/813** (+8), `npm run build` green, tree
+  clean. New committed traces `turn5-sitrus-c.json` (150 captures,
+  7035-7215 excluding the ring's own 7042-7072) and `turn5-sitrus-d.json`
+  (133 captures, 7180-7312, covers past the 7307 acceptance boundary) —
+  both 0 diff. Regression sweep: `turn5-sitrus-a.json` 110/110,
+  `turn5-sitrus-b.json` 82/82, `turn5-healthbox.json` 55/55,
+  `turn5-switchin.json` 241/241 — zero regressions.
+- **Did:** Tint — RAM-probed fresh (`gPlttBufferFaded`/`Unfaded`, all 15
+  usable palette colors, Onix's own paletteNum=0 not Pidgeotto's 1),
+  brute-forced target+coeff jointly and got a UNIQUE fit: `RGB5(17,31,25)`,
+  coeff sequence 7/5/3/1/0 held 5 RAM ticks each — genuinely NOT
+  `MATERIALIZE_TINT_COLOR` reused (an initially-plausible hypothesis the
+  brute force ruled out). Heal message ("ONIX’s SITRUS BERRY"/"restored
+  health!", 7078→7112, held to 7215) PNG-diff-timed; found and fixed one
+  real bug (a straight ASCII apostrophe the charmap doesn't map — the
+  codebase's own convention is the curly `’`, per `STAT_ROSE_LINE1`). HP
+  climb: 1→31, exactly 1 unit/tick, render 7180→7209, PNG-crop-matched 0px
+  against `composePlayerHealthboxHpOverlay` at every candidate hp — this
+  **corrects §11's own hedge** ("HP digits/bar still climbing past 7306"):
+  they're not; hp is flat at 31 from 7209, every later change in that
+  region is the ordinary `menuIdleBounce` y-shift (yOffset 0/1/2, never a
+  different hp). Settled menu: chrome text cropped from `menuIdleBase`'s
+  own y≥112 (never changes across turns), bounce reuses `menuIdleBounce`
+  UNCHANGED re-anchored so tick 7222 (menu redraw) lines up with
+  `MENU_IDLE_BLANK_END_TICK+1` — grid-search found a unique shift with zero
+  mismatches across 17 samples. Tick 7307 byte-identical (full 64-hex sha)
+  to turn6-notes.md §5's own citation. Ring: excluded per the brief's own
+  allowance — with tint correct, the residual in 7042-7072 is provably
+  100% the ring (diff overlay shows a clean red ring outline, growing
+  6px→628px matching its own expand-then-fade shape) — third documented
+  resistance, still open. +8 Tier-1 tests.
+- **Next:** the turn-6 engine slice proper (FIGHT submenu open at 7317+)
+  against `turn6-notes.md`'s dossier; then turn-7/8/9/10 slices against
+  their own four dossiers.
+- **Notes:** no papercuts this session. Docs: `faint-switch-notes.md` new
+  §15 (trimmed §14's "not reached" pointer to it).
+
+---
 ## 195 — Worktree scout (supervisor-folded): turn 10 ground truth BANKED — SECOND consecutive full reconvergence (AERIAL_ACE + ROCK_SLIDE hit, RAM bit-identical to BOTH published lines' turn-10 rows incl. gRngValue), all three standing falsifiable tests still negative; `battle1-turn10-dense.json` (13306 frames, 208 captures) + `docs/turn10-notes.md`; merged `9834116`, suite 805/805 on the merged tree
 
 - **State:** merged into master, `npm test` 805/805 + build green
@@ -62,7 +102,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `turn5GrantingStarPlacement` (pure, exported) + `drawGrantingStars`
   into `drawTurn5RockSlideAttack`. +5 Tier-1 tests.
 - **Next:** rung (d) — tint (Onix's own palette recolor, first diff 7042,
-  same `gPlttBufferFaded` method §8c already used for materialize),
+  same `gPlttBufferFaded` method §8c already used for the materialize),
   ring (`ANIM_TAG_THIN_RING`, gfx extracted/cited two sessions running,
   affine-scale placement search still not attempted — bounded effort,
   exclude precisely if it resists per the brief), heal message ("ONIX's
@@ -79,35 +119,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   unmodified tree until `pwd` caught it — no bad data landed, just lost
   time; worth remembering `cd` in Bash calls doesn't get reset between
   calls). Docs: `faint-switch-notes.md` §14 added.
-
----
-## 193 — Worktree scout (supervisor-folded): turn 9 ground truth BANKED — the pinned ATK-floor test came back NEGATIVE (Pidgeotto uses QUICK_ATTACK, not a 4th FD; "won't go lower" variant still untested) and **both published lines reconverge RNG-exactly at turn 9** (BIND-miss and ROCK_SLIDE-miss consume identical Random() counts → same gRngValue); `battle1-turn9-dense.json` (12272 frames, 256/256 captures) + `docs/turn9-notes.md`; merged `782eaab`, suite 801/801 on the merged tree
-
-- **State:** merged into master, `npm test` 801/801 + build green
-  post-merge (docs+trace+probe-spec only). Supervisor re-verified: prefix
-  chain (turn8-dense ⊂ turn9-dense ⊂ winline-b-swap, script-exact), cited
-  shas reproduced fresh, submenu label frames read as images. **One row
-  corrected in the fold** (supervisor pixel-diff evidence, two fresh
-  oracle runs byte-identical): the "no visible change during the press"
-  claim at 10869-10877 hid a real 5-tick healthbox-region transient
-  (bea3024eb2f3, bbox x:127-229 y:74-110, bounce-family) — turn9-notes §5
-  row now carries both shas. Verification lesson holds: representative-
-  tick sha citations can mask un-itemized sub-phases; diff the WHOLE
-  cited span when a row claims "no change".
-- **Did:** turn 9 = QUICK_ATTACK (Pidgeotto, 82→61... Onix 31→24) vs
-  ROCK_SLIDE (hit, Pidgeotto 82→61); first turn in the arc where both
-  sides land damage — first "not very effective" (0.5×) message
-  PNG-confirmed, first healthbar color-zone transitions pixel-sampled
-  (Pidgeotto green→yellow at 50%, Onix yellow→red). Cursor persistence
-  reconfirmed in RAM across the closed action menu (gMoveSelectionCursor
-  holds BIND before reopen; LEFT flips it inside the press window). The
-  turn-2 "unattributed RNG step" recurs (+14 ticks before next accuracy
-  roll) specifically when both combatants use damaging moves — still
-  unattributed to a call site. The 4-frame shared box-open prefix theory
-  refined: holds box-region-only, within matched transition categories.
-- **Next:** M-4 (Sitrus rungs c-e: GrantingStars 6970→~7040, tint/
-  sparkle/ring/message/HP-climb, settled menu ≥7307); then turn-6/7/8/9
-  engine slices against the four dossiers.
-- **Notes:** scout stayed in contract; no papercuts.
-
----

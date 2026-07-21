@@ -16,7 +16,11 @@ import {
   grovyleFaintSinkRowsAndY2,
   INITIAL_BATTLE_SCENE_STATE,
   onixSitrusRotateMatrix,
+  onixSitrusTintCoeff,
   turn5GrantingStarPlacement,
+  turn5SitrusHealTextVisibleChars,
+  turn5SitrusOnixHp,
+  turn5SitrusResettledBounceTick,
   PARTICLE_OAM_PRIORITY,
   PARTICLE_OAM_SUBPRIORITY,
   renderBattleScene,
@@ -1603,5 +1607,52 @@ describe("S7 slice M-4: turn5GrantingStarPlacement (docs/faint-switch-notes.md �
     expect(turn5GrantingStarPlacement(6968 + 56 + 1, 0)?.frameIndex).toBe(0); // loop restart
     expect(turn5GrantingStarPlacement(6968 + 61 + 1, 0)).not.toBeNull(); // last live tick
     expect(turn5GrantingStarPlacement(6968 + 62 + 1, 0)).toBeNull(); // destroyed
+  });
+});
+
+describe("S7 slice M-5 (docs/faint-switch-notes.md §15): Onix's own Sitrus tint - RAM brute-forced against gPlttBufferFaded/Unfaded across all 15 usable palette colors x 5 time steps, uniquely pinned target RGB5(17,31,25) + coeff sequence 7/5/3/1/0", () => {
+  it("is 0 outside the RAM window (7041-7060 inclusive), +1 render lag", () => {
+    expect(onixSitrusTintCoeff(7041)).toBe(0); // render 7041 -> RAM 7040, before onset
+    expect(onixSitrusTintCoeff(7062)).toBe(0); // render 7062 -> RAM 7061, back to true color
+  });
+  it("holds each of the 4 nonzero coefficients for exactly 5 RAM ticks (a step function, not a smooth ramp)", () => {
+    expect(onixSitrusTintCoeff(7042)).toBe(7); // render 7042 -> RAM 7041
+    expect(onixSitrusTintCoeff(7046)).toBe(7); // RAM 7045, last tick of the coeff-7 step
+    expect(onixSitrusTintCoeff(7047)).toBe(5); // RAM 7046, coeff-5 step begins
+    expect(onixSitrusTintCoeff(7052)).toBe(3); // RAM 7051
+    expect(onixSitrusTintCoeff(7057)).toBe(1); // RAM 7056
+    expect(onixSitrusTintCoeff(7061)).toBe(1); // RAM 7060, last nonzero tick
+  });
+});
+
+describe("S7 slice M-5: turn5SitrusHealTextVisibleChars - \"ONIX’s SITRUS BERRY\\nrestored health!\" (35 chars, PNG-diff-confirmed char-per-tick onset/end)", () => {
+  it("is 0 before the box redraw tick (7078)", () => {
+    expect(turn5SitrusHealTextVisibleChars(7077)).toBe(0);
+  });
+  it("prints 1 char/tick including silent-but-charged spaces, clamped at the string's own 35-char total", () => {
+    expect(turn5SitrusHealTextVisibleChars(7078)).toBe(1);
+    expect(turn5SitrusHealTextVisibleChars(7112)).toBe(35);
+    expect(turn5SitrusHealTextVisibleChars(7215)).toBe(35);
+  });
+});
+
+describe("S7 slice M-5: turn5SitrusOnixHp - the heal's own 1->31 HP-bar climb, PNG-crop-matched byte-exact against composePlayerHealthboxHpOverlay's own render for every candidate hp", () => {
+  it("holds at 1 (the pre-heal hp) before the climb starts", () => {
+    expect(turn5SitrusOnixHp(7179)).toBe(1);
+  });
+  it("climbs exactly 1 hp/tick from render tick 7180 (hp=2) through 7209 (hp=31)", () => {
+    expect(turn5SitrusOnixHp(7180)).toBe(2);
+    expect(turn5SitrusOnixHp(7190)).toBe(12);
+    expect(turn5SitrusOnixHp(7209)).toBe(31);
+  });
+  it("stays clamped at 31 (settled) indefinitely past the climb - §11's own 'still climbing past 7306' hedge was a bounce-cycle illusion, not a real climb", () => {
+    expect(turn5SitrusOnixHp(7306)).toBe(31);
+    expect(turn5SitrusOnixHp(9999)).toBe(31);
+  });
+});
+
+describe("S7 slice M-5: turn5SitrusResettledBounceTick - the settled turn-6 menu reuses menuIdleBounce verbatim, re-anchored so the redraw tick (7222) lines up with MENU_IDLE_BLANK_END_TICK+1 (1748), grid-search-confirmed against a 17-sample healthboxY2 sequence with zero mismatches", () => {
+  it("maps the menu redraw tick to the shared epoch's own fresh-restart point", () => {
+    expect(turn5SitrusResettledBounceTick(7222)).toBe(1748);
   });
 });

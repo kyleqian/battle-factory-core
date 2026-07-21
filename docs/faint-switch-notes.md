@@ -1853,30 +1853,163 @@ added the timing/placement math and the RAM ground truth for spawn ticks/
   56 loops back to frame 0, local 61 still live, local 62 destroyed). 5
   new tests. `npm test` **805/805** (+5 net), `npm run build` green.
 
-### Not reached this session: rungs (d)/(e)
-
-Ran out of session time after landing (c) - the remaining work is
-precisely scoped, not re-opened from scratch:
-
-- **Tint** (Onix's own palette recolor, first diff 7042, visible-by-7045,
-  fading back by ~7075): same `gPlttBufferFaded`-read method §8c already
-  used for the materialize tint - untouched this session.
-- **Ring** (`ANIM_TAG_THIN_RING`, §8a): gfx extracted, source-cited,
-  affine-scale placement search NOT attempted this session either (§8a's
-  own open item, still open two sessions later) - per the brief, if a
-  bounded effort resists, exclude ONLY its own ticks with precise
-  documentation rather than block the rest of the window.
-- **Heal message** ("ONIX's SITRUS BERRY" / "restored health!", start
-  render 7078, 1 char/tick through 7112, held to ~7180) + **HP climb**
-  (1->31, §2's own pinned formula, needs a digit-overlay + bar-refill
-  render, timing not yet bisected) + **wait-cursor bounce** (~7180-7209,
-  period 9, `turn5FaintedCursorYOffset`'s own family - likely reusable
-  verbatim, not yet wired here).
-- **Settled turn-6 menu** (rung (e), coverage to >=7307): §11 already
-  flagged the tail is NOT a static harvest (HP digits/bounce still cycling
-  through at least 7306) - whoever resumes needs the live HP-climb formula
-  threaded all the way through, not a single frozen frame.
-
 ### Status: rung (c) of the brief's ladder CLOSED. `npm test` 805/805,
-`npm run build` green, tree clean at commit time. Rungs (d)/(e) not
-attempted - precisely scoped above for the next session.
+`npm run build` green, tree clean at commit time. Rungs (d)/(e) landed the
+following session - see §15, which also CLOSES the whole faint/forced-
+switch sequence.
+
+## 15. S7 slice M-5 (bounded worker, this session): rungs (d)+(e) LANDED -
+tint + heal message + HP climb + settled turn-6 menu, `turn5-sitrus-c.json`
+**150/150**, `turn5-sitrus-d.json` **133/133**, both 0 diff; the ring
+excluded (bounded effort, third resistance) with precise ticks; the
+faint/forced-switch sequence is COMPLETE
+
+Picked up exactly at rungs (d)/(e) per the brief. All new ground truth this
+session came from two channels: a fresh `gPlttBufferFaded`/`Unfaded` RAM
+probe for the tint (the brief's own "proven method"), and - for everything
+else (heal message timing, HP climb, the settled menu's bounce anchor) - a
+**byte-exact PNG-crop match against the engine's own existing render
+primitives** (`composePlayerHealthboxHpOverlay`, `menuIdleBounce`) rather
+than raw RAM reads, since those primitives already exist and are already
+proven byte-exact elsewhere; matching an oracle crop against every
+candidate output IS RAM-truth-equivalent ground truth (each match was 0px
+across the full overlay), not a screenshot-sampled guess. Scratch tooling:
+`tools/compare/scratch/sitrus_hp_climb_match.mjs` (not committed, same
+"scratch verify script, superseded by the committed trace/tests" precedent
+§14 already established).
+
+### Tint - RAM-probed fresh, corrects an initially-plausible reuse guess
+
+`gBattlerSpriteIds[0]`'s own sprite (`oam.attr2` bits 12-15, the same
+paletteNum-decode method §8c used for Pidgeotto) reads **paletteNum=0** for
+Onix (not 1 - a different bank than Pidgeotto's own materialize tint, as
+expected for a different mon). Probed `gPlttBufferFaded`/`gPlttBufferUnfaded`
+at bank `16+0` across **all 15 usable palette colors** (not just a
+convenient couple), every tick 7038-7066: the RAM value changes only every
+**5th tick**, a coarse step function, not a per-tick ramp (§8c's own
+materialize mechanism is a smooth 1-tick ramp - this is a genuinely
+different animation cadence, not the same code path reused). Brute-forced
+target RGB(0-31 each) x per-step coefficient(0-16) requiring every one of
+the 15 colors to agree simultaneously at every step - exactly ONE
+combination survives: target **RGB5(17,31,25)** (`(140,255,206)` 8-bit, the
+codebase's own `(v5<<3)|(v5>>2)` expansion), coefficient sequence **7, 5,
+3, 1, 0** held 5 RAM ticks each (7041-7045, 7046-7050, 7051-7055,
+7056-7060, 7061+). This is genuinely **not** `MATERIALIZE_TINT_COLOR`
+(`RGB(31,22,30)`) reused - an initially-plausible hypothesis (same mon,
+same file, same `blendComponentToward` primitive) that the brute-force
+search actively ruled out, not merely didn't need. Render lag **+1** (this
+dossier's default), confirmed against the committed trace's own first
+tint-diffed frame (7042, one past RAM's 7041 onset). Wired via
+`drawSpriteSheetAffineTintedBlend` at `accumulator=256` (an identity
+non-affine draw - the function's own affine machinery degenerates to 1:1
+sampling at the neutral scale, so no new primitive was needed).
+
+### Ring - excluded, third resistance, precisely scoped
+
+Per the brief's own bounded-effort allowance: the ring
+(`ANIM_TAG_THIN_RING`, §8a) was NOT attempted again this session (an
+affine-scale placement search is real, separate work from the tint/message/
+HP-climb pieces that all landed). With the tint correctly implemented, a
+full-window compare of the tint+ring's shared tick range isolates the ring
+as the ONLY remaining source of diff: `diff-07060.png` (scratch, this
+session's compare run) shows a clean red ring outline around Onix and
+nothing else - the tint itself is pixel-exact there. **Excluded ticks:
+7042-7072 inclusive** (31 ticks, `turn5-sitrus-c.json`'s own
+`captureFrames` gap) - the growing diff size (6px at 7042 up to 628px at
+7071/7072) matches the ring's own expand-then-fade-offscreen shape exactly.
+This is the ring's third documented resistance (§8a, §14, now here) -
+still open for a future session with the affine-scale search §8a already
+scoped.
+
+### Heal message - PNG-diff-timed, one real bug found (apostrophe glyph)
+
+"ONIX’s SITRUS BERRY" / "restored health!" (`STRINGID_ITEMHEALHP_BERRY`'s
+own two-line wrap, 19+16=35 chars) - a full diff scan of a scratch-extended
+`turn5-sitrus-b.json` script (idle-padded to 7325, not committed) pins the
+box-redraw tick at exactly **7078** (a 1206px jump, not a char-sized delta)
+then 1 visible-char/tick through **7112** (35 diffs total), with the three
+silent-but-charged spaces landing exactly where char-index arithmetic
+predicts (indices 6/13/27 -> ticks 7084/7091/7105, all three among the
+scan's own "flat" ticks). Held flat through **7215**. **One real bug found
+via this trace, not guessed up front**: the string literal used a straight
+ASCII apostrophe (`'`), which this font's charmap doesn't map, rendering as
+nothing - a 14px residual constant across every held tick until corrected
+to the curly apostrophe (`’`, U+2019) `battleMenu.ts`'s own
+`STAT_ROSE_LINE1` already established as this game's own convention two
+sessions ago (`Foe GROVYLE’s evasiveness`) - the fix was a one-character
+literal change, not a new mechanism.
+
+### HP climb - corrects §11's own "still climbing past 7306" hedge
+
+`turn5SitrusOnixHp`: Onix's own hp bar+digits climb **exactly 1 HP
+unit/tick**, render tick **7180** (hp=2) through **7209** (hp=31, settled)
+- PNG-crop-matched 0px against `composePlayerHealthboxHpOverlay`'s own
+render for every candidate hp 1-31, at EVERY captured tick 7035-7325 (not
+just the climb window). This resolves §11's own hedge ("HP digits/bar
+still climbing... OR the menuIdleBounce cycle... OR both") as **NOT still
+climbing** - hp is flat at 31 from 7209 on; re-matching with a yOffset
+search (-4..+4) at every tick that looked like a mismatch under a fixed
+crop found EXACT 0px hits at yOffset 0/1/2 only (never a different hp),
+confirming every post-7209 pixel change in that region is purely the
+ordinary idle-bounce y-shift, not a real HP change. A genuinely useful
+correction, not just a re-confirmation - the settled-menu tail IS static in
+HP terms, just not in bounce-Y terms.
+
+### Settled turn-6 menu (rung e) - reuses `menuIdleBounce` verbatim, re-anchored
+
+The message box goes blank at render tick **7216** (box stays, no text -
+the same shape every other turn-end transition in this file already uses),
+then hard-cuts to the interactive menu at **7222** (both pixel-confirmed:
+1127px then 5983px full-frame jumps). The chrome itself ("What will ONIX
+do?" + FIGHT/BAG/POKéMON/RUN + cursor) is **cropped directly from
+`menuIdleBase`'s own y>=112 region** - that text never changes across
+turns (only the two mon/healthbox regions above it do), so no new text
+extraction was needed, just a narrower blit than the full-screen harvest
+every turn-1-4 caller uses (turn 6's own top 2/3 is Pidgeotto, not Grovyle,
+drawn from the primitives `drawTurn5RockSlideWindow` already established).
+The bounce: `turn5SitrusResettledBounceTick` reuses `menuIdleBounce`
+UNCHANGED, re-anchored so redraw tick 7222 lines up with
+`MENU_IDLE_BLANK_END_TICK+1` (1748) - grid-searched
+(`tools/compare/scratch/sitrus_bounce_anchor_search.mjs`, not committed)
+against the 17-sample healthboxY2 sequence the HP-climb PNG-match
+surfaced as a side effect: exactly ONE shift (-5474) reproduces every
+sample with zero mismatches, and `7222 - 5474 === 1748` exactly - the same
+fresh-restart story `rockSlideResettledBounceTick` already established for
+every earlier turn. **Both bounce regions matter**: region B
+(`healthboxY2`) shifts the whole player healthbox (box+overlay, via
+`drawMenuHealthboxPlayer`'s own `dy` param) as one unit; region A
+(`onixY2`) shifts the on-field Onix sprite itself - initially wired for
+region B only, the compare tool's own diff overlay (`diff-07233.png`)
+pixel-isolated the miss to Onix's own sprite silhouette, confirming region
+A was also needed (not assumed from precedent - found via the same
+compare-and-bisect loop as every other fix this session).
+
+### Acceptance, per the brief's rungs (d)+(e)
+
+- `tools/compare/traces/turn5-sitrus-c.json` (new, committed - same script
+  as `turn5-sitrus-b.json`, dense `captureFrames` 7035-7215 EXCLUDING the
+  ring's own 7042-7072): **150/150, 0 diff**.
+- `tools/compare/traces/turn5-sitrus-d.json` (new, committed - same
+  script, dense `captureFrames` 7180-7312, overlapping (c)'s own tail for
+  continuity and covering past the acceptance boundary): **133/133, 0
+  diff**. Tick **7307** is byte-identical to turn6-notes.md §5's own cited
+  sha (`5881becbd1f0...`, full 64-hex-char match, not just the truncated
+  12) - "menu vs PIDGEOTTO, Onix 31/117" confirmed by direct PNG read.
+- Regression sweep: `turn5-sitrus-a.json` **110/110**,
+  `turn5-sitrus-b.json` **82/82**, `turn5-healthbox.json` **55/55**,
+  `turn5-switchin.json` **241/241** - zero regressions.
+- Tier-1 pins (`tests/battleScene.test.ts`, +8): `onixSitrusTintCoeff`
+  (window boundaries + the step-function shape), `turn5SitrusHealText
+  VisibleChars` (onset + full-length clamp), `turn5SitrusOnixHp` (pre-climb
+  hold, 1-unit/tick climb, post-climb clamp including past 7306),
+  `turn5SitrusResettledBounceTick` (the anchor mapping itself). `npm test`
+  **813/813** (+8), `npm run build` green.
+
+### Status: rungs (d)+(e) of the brief's ladder CLOSED, with the ring's own
+7042-7072 ticks excluded (documented above, third resistance). **The
+faint/forced-switch sequence (S7 slice K/L/M, turns 5->6) is COMPLETE**:
+every committed trace from the ROCK_SLIDE kickoff (turn5-rockslide.json)
+through the settled turn-6 menu (turn5-sitrus-d.json, tick 7312) is 0 diff,
+with the single documented ring exclusion. Next: the turn-6 engine slice
+proper (FIGHT submenu open at 7317+, out of this session's scope) against
+`turn6-notes.md`'s own dossier.

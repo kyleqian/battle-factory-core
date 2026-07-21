@@ -5609,6 +5609,123 @@ function drawGrantingStars(fb: Uint8Array, t: number): void {
 }
 
 /**
+ * S7 slice M-5 (docs/faint-switch-notes.md §15): "ONIX's SITRUS BERRY\n
+ * restored health!" (`STRINGID_ITEMHEALHP_BERRY`'s own two-line wrap) -
+ * pixel-confirmed this session via a full oracle diff scan of `battle1-
+ * sitrus-ext.json` (not committed - a scratch extension of `turn5-sitrus-
+ * b.json`'s own script with idle padding to 7325): text box redraw (a
+ * 1206px jump, not a char-sized delta) at render tick **7078**, then
+ * exactly 1 visible-char-count/tick through **7112** (35 diffs total,
+ * matching the string's own 19+16 length exactly, silent-but-charged
+ * spaces at chars 6/13/27 landing on the three flat ticks the scan found
+ * in between, 7084/7091/7105 - same mechanism/cadence as every other
+ * message in this dossier). Held flat 7112 through **7215** (104 ticks,
+ * matching §11's own "held" note, now bounded exactly) - the HP bar climbs
+ * DURING this hold (`turn5SitrusOnixHp` below), not after it.
+ */
+const TURN5_SITRUS_HEAL_LINE1 = "ONIX’s SITRUS BERRY";
+const TURN5_SITRUS_HEAL_LINE2 = "restored health!";
+const TURN5_SITRUS_HEAL_TEXT_TOTAL = TURN5_SITRUS_HEAL_LINE1.length + TURN5_SITRUS_HEAL_LINE2.length;
+const TURN5_SITRUS_HEAL_TEXT_START_TICK = 7078;
+
+export function turn5SitrusHealTextVisibleChars(t: number): number {
+  if (t < TURN5_SITRUS_HEAL_TEXT_START_TICK) return 0;
+  return Math.min(TURN5_SITRUS_HEAL_TEXT_TOTAL, t - TURN5_SITRUS_HEAL_TEXT_START_TICK + 1);
+}
+
+/**
+ * The message box goes blank (box stays, no text - same shape as every
+ * other turn-end transition in this file) at render tick **7216**, then
+ * hard-cuts to the interactive action menu at **7222** - both pixel-
+ * confirmed this session (full-frame diffs of 1127px then 5983px at
+ * exactly these ticks, the scan's own "big jump then HUGE jump" - a
+ * message-box-close-then-menu-reveal pair, not one atomic transition).
+ */
+const TURN5_SITRUS_TEXT_CLEAR_TICK = 7216;
+const TURN5_SITRUS_MENU_REDRAW_TICK = 7222;
+
+/**
+ * Onix's own HP climb, 1->31 (`§2`'s pinned heal formula) - RAM-truthed
+ * indirectly via a byte-exact PNG crop match against `composePlayerHealth
+ * boxHpOverlay`'s own render for every candidate hp 1-31 (`tools/compare/
+ * scratch/sitrus_hp_climb_match.mjs`, not committed): **1 HP unit per
+ * tick**, starting render tick **7180** (hp=2) through **7209** (hp=31,
+ * settled) - 0px residual at every one of the 30 climbing ticks plus every
+ * held tick through 7325 once yOffset (`menuIdleBounce`'s own healthboxY2,
+ * see `turn5SitrusResettledBounceTick`) is accounted for. This is a real,
+ * useful correction to §11's own "HP digits/bar still climbing past 7306"
+ * hedge: they're NOT still climbing - hp is flat at 31 from 7209 on, and
+ * every later pixel change in that region is purely the ordinary idle-
+ * bounce y-shift (confirmed by re-matching at 9 candidate yOffsets: exact
+ * 0-diff hits at yOffset 0/1/2 only, matching `menuIdleBounce`'s own
+ * 0..2 range, never a different hp).
+ */
+const TURN5_SITRUS_HP_CLIMB_START_TICK = 7180;
+const TURN5_SITRUS_HEAL_HP_START = 1;
+const TURN5_SITRUS_HEAL_HP_END = 31;
+
+export function turn5SitrusOnixHp(t: number): number {
+  if (t < TURN5_SITRUS_HP_CLIMB_START_TICK) return TURN5_SITRUS_HEAL_HP_START;
+  return Math.min(TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START + (t - TURN5_SITRUS_HP_CLIMB_START_TICK + 1));
+}
+
+/**
+ * The settled turn-6 menu's own idle bounce - the SAME `menuIdleBounce`
+ * cycle every other resettled menu in this file already reuses (§ `rock
+ * SlideResettledBounceTick`'s own doc), re-anchored so `TURN5_SITRUS_MENU_
+ * REDRAW_TICK` (7222, the tick the interactive chrome first appears) lines
+ * up with `MENU_IDLE_BLANK_END_TICK+1` (1748, every other epoch's own
+ * fresh-restart point) - grid-searched this session (`tools/compare/
+ * scratch/sitrus_bounce_anchor_search.mjs`) against the 17-sample healthbox
+ * y2 sequence the PNG-crop match above surfaced as a side effect
+ * (0/1/2-valued, period-9-ish): exactly ONE shift (-5474) reproduces every
+ * sample with zero mismatches, and `7222 - 5474 === 1748` exactly - not a
+ * coincidence, the same re-init story as every turn before it.
+ */
+export function turn5SitrusResettledBounceTick(t: number): number {
+  return t - TURN5_SITRUS_MENU_REDRAW_TICK + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
+/**
+ * S7 slice M-5 (docs/faint-switch-notes.md §15): Onix's own cyan/teal
+ * palette recolor during the Sitrus proc's sparkle+ring flash - RAM-probed
+ * fresh this session (`gPlttBufferFaded`/`gPlttBufferUnfaded` at bank
+ * `16+0` - Onix's own `oam.attr2` paletteNum, read the same bit12-15 way
+ * §8c already established for Pidgeotto's materialize, here **0** not 1),
+ * across all 15 usable palette colors (1-15, `battle-anim-tables.json`
+ * §8c's own two-buffer diff method) - not curve-fit from a couple of
+ * samples: brute-forced over target R/G/B (0-31 each) x per-step coeff
+ * (0-16) requiring EVERY color/step pair to agree simultaneously, and only
+ * ONE (target, coeff-sequence) combination survived across all 15 colors x
+ * 5 time steps: target **RGB5(17,31,25)** (`(140,255,206)` 8-bit, the
+ * codebase's own `(v5<<3)|(v5>>2)` expansion `blendComponentToward`
+ * already uses) - genuinely NOT `MATERIALIZE_TINT_COLOR` (`RGB(31,22,30)`)
+ * reused, a distinct target unique to this mechanism, ruling out an
+ * initially-plausible reuse hypothesis. Unlike the materialize's smooth
+ * per-tick ramp, this one is a coarse **5-RAM-tick-held step function**:
+ * coeff 7 (RAM 7041-7045), 5 (7046-7050), 3 (7051-7055), 1 (7056-7060),
+ * then 0 (7061 on, i.e. back to true color) - RAM value only changes every
+ * 5th tick, confirmed by dumping every intermediate tick, not inferred
+ * from sparse sampling. Render lag **+1** (the ordinary lag this dossier
+ * defaults to): render tick 7042 is the first pixel-diffed frame in the
+ * committed trace, one past RAM's own 7041 onset.
+ */
+const ONIX_SITRUS_TINT_COLOR: RgbColor = { r: 140, g: 255, b: 206 };
+const ONIX_SITRUS_TINT_RAM_START = 7041;
+const ONIX_SITRUS_TINT_RAM_END = 7061;
+const ONIX_SITRUS_TINT_STEP_TICKS = 5;
+const ONIX_SITRUS_TINT_COEFFS: readonly number[] = [7, 5, 3, 1];
+const ONIX_SITRUS_TINT_RENDER_LAG = 1;
+
+/** 0 outside the window (`drawSpriteSheetAffineTintedBlend`'s own no-op convention for `tintCoeff<=0`). */
+export function onixSitrusTintCoeff(t: number): number {
+  const ramTick = t - ONIX_SITRUS_TINT_RENDER_LAG;
+  if (ramTick < ONIX_SITRUS_TINT_RAM_START || ramTick >= ONIX_SITRUS_TINT_RAM_END) return 0;
+  const step = Math.floor((ramTick - ONIX_SITRUS_TINT_RAM_START) / ONIX_SITRUS_TINT_STEP_TICKS);
+  return ONIX_SITRUS_TINT_COEFFS[step]!;
+}
+
+/**
  * The battlefield base for turn 5's own ROCK_SLIDE window - same shape as
  * `drawTurn3RockSlideAttack`/`drawTurn4RockSlideAttack` (shake/rocks/hit-
  * flash mechanisms reused with ZERO code changes, only the new synthetic
@@ -5643,7 +5760,17 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number): void {
       sitrusRotate.pd,
     );
   } else {
-    drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+    // S7 slice M-5: past the settled menu's own redraw tick, Onix's own
+    // on-field sprite (region A) picks up the resettled `menuIdleBounce`
+    // cycle too - see `turn5SitrusResettledBounceTick`'s own doc (0 before
+    // that tick, so this is a no-op everywhere else in this branch).
+    const onixY2 = menuIdleBounce(turn5SitrusResettledBounceTick(t)).onixY2;
+    const tintCoeff = onixSitrusTintCoeff(t);
+    if (tintCoeff > 0) {
+      drawSpriteSheetAffineTintedBlend(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y, 256, ONIX_SITRUS_TINT_COLOR, tintCoeff, onixY2);
+    } else {
+      drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + onixY2);
+    }
   }
   drawGrantingStars(fb, t);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
@@ -6075,6 +6202,28 @@ function drawTurn5SwitchinSprite(fb: Uint8Array, t: number): void {
 }
 
 /**
+ * S7 slice M-5: the settled turn-6 menu's own bottom chrome ("What will
+ * ONIX do?" + FIGHT/BAG/POKéMON/RUN + cursor-on-FIGHT) - byte-identical to
+ * `menuIdleBase`'s own baked copy of this exact region (the chrome text
+ * never changes across turns, only the two healthboxes/on-field mons do,
+ * per every pre-existing `drawActionMenuIdleContent` caller's own doc) -
+ * cropped from y>=112 rather than reusing the WHOLE flat harvest, since
+ * `menuIdleBase`'s own top 2/3 still bakes in GROVYLE (wrong mon for turn
+ * 6 - Pidgeotto is on-field by now, drawn from primitives elsewhere in
+ * `drawTurn5RockSlideWindow`).
+ */
+function drawTurn5SitrusSettledMenuChrome(fb: Uint8Array): void {
+  const CHROME_Y = 112;
+  const { x, y, width, height, pixels } = menuIdleBase;
+  for (let py = CHROME_Y - y; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const i = (py * width + px) * 3;
+      setPixel(fb, x + px, y + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
+    }
+  }
+}
+
+/**
  * S7 slice K's own ROCK_SLIDE/faint window dispatcher - the held kickoff
  * text (still Onix's "ONIX used\nROCK SLIDE!", drawn by `drawTurn5EndeavorText`'s
  * own handoff caller, `rockSlideTextVisibleChars` unchanged) through the
@@ -6097,21 +6246,39 @@ function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {
   // (null) before the mon's own materialize settles.
   const pidgeottoHealthboxDx = turn5PidgeottoHealthboxSlideDx(t);
   if (pidgeottoHealthboxDx !== null) drawSendOutHealthbox(fb, pidgeottoHealthboxDx, pidgeottoHealthboxContent);
-  drawMenuHealthboxPlayer(fb, 0);
-  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn5Hp);
+  // S7 slice M-5: past the settled menu's own redraw tick, both the on-field
+  // Onix sprite (region A) and its healthbox (region B, box+overlay as one
+  // unit) pick up the resettled `menuIdleBounce` cycle - see
+  // `turn5SitrusResettledBounceTick`'s own doc. 0 before that tick.
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(t));
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {
     drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
     return;
   }
-  if (t >= SWITCHIN_SENTOUT_TEXT_START_TICK) {
-    drawMessageTextLines(fb, SWITCHIN_SENTOUT_LINE1, SWITCHIN_SENTOUT_LINE2, switchinSentOutTextVisibleChars(t));
+  if (t < TURN5_SITRUS_HEAL_TEXT_START_TICK) {
+    if (t >= SWITCHIN_SENTOUT_TEXT_START_TICK) {
+      drawMessageTextLines(fb, SWITCHIN_SENTOUT_LINE1, SWITCHIN_SENTOUT_LINE2, switchinSentOutTextVisibleChars(t));
+      return;
+    }
+    drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t, pressTick));
+    const cursorStart = pressTick + TURN5_FAINTED_CURSOR_START_DELAY;
+    if (t >= cursorStart) drawCursor(fb, turn5FaintedCursorYOffset(t, cursorStart), TURN5_FAINTED_CURSOR_X);
     return;
   }
-  drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t, pressTick));
-  const cursorStart = pressTick + TURN5_FAINTED_CURSOR_START_DELAY;
-  if (t >= cursorStart) drawCursor(fb, turn5FaintedCursorYOffset(t, cursorStart), TURN5_FAINTED_CURSOR_X);
+  // S7 slice M-5: the Sitrus heal message, then a blank hold, then the
+  // settled interactive turn-6 menu chrome - see the three constants' own
+  // docs (`TURN5_SITRUS_HEAL_TEXT_START_TICK`/`_TEXT_CLEAR_TICK`/`_MENU_
+  // REDRAW_TICK`) for the pixel evidence pinning each boundary.
+  if (t < TURN5_SITRUS_TEXT_CLEAR_TICK) {
+    drawMessageTextLines(fb, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, turn5SitrusHealTextVisibleChars(t));
+    return;
+  }
+  if (t < TURN5_SITRUS_MENU_REDRAW_TICK) return;
+  drawTurn5SitrusSettledMenuChrome(fb);
 }
 
 /**
