@@ -83,3 +83,21 @@ plus sparse representative sampling of the two long uneventful holds (the
 FEATHER_DANCE animation loop and the settled miss text) — BIND misses on
 this line, so there is no HP-drain/crit/damage-lock window to capture this
 turn, unlike turns 6-7. Twice-run, 0 sha mismatches.
+
+`battle1-turn9-dense.json` (docs/turn9-notes.md): turn 9 of battle 1 —
+reuses `battle1-turn8-dense.json`'s own 82-segment script verbatim,
+extended with `battle1-winline-b-swap.json`'s own segments[80:86] (the
+turn-9 FIGHT-submenu-open, one `LEFT` press back onto ROCK_SLIDE from
+BIND's own persisted cursor slot, move-confirm, and resolution-idle —
+verbatim, cross-checked byte-identical against that committed trace both
+via a full 12272-tick per-frame button-state diff and a 12-tick pixel
+spot-check). 12272 frames total, 256 `captureFrames` (the oracle's
+per-trace cap, hit exactly) dense (stride-1) over eight windows bracketing
+every RAM-confirmed transition this turn — this is the first turn in the
+6-9 arc where **both** combatants land a damaging hit (QUICK_ATTACK then
+ROCK_SLIDE), so unlike turn 8 there are two full kickoff/impact/HP-drain/
+effectiveness-message windows to capture, plus sparse representative
+sampling of the animation holds and the turn-10 menu's own idle tail. The
+brief's pinned falsifiable test (a 4th FEATHER_DANCE triggering the "won't
+go any lower!" message) comes back **negative** — Pidgeotto's AI picks
+QUICK_ATTACK instead this turn. Twice-run, 0 sha mismatches.
