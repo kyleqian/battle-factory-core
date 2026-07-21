@@ -189,3 +189,25 @@ covers this turn too, not a separate problem. The full switch-in sequence
 `faint-switch-notes.md`'s own turn-5 closed forms verbatim with new
 anchors/species params — see turn13-notes.md §7's reuse map. Both
 twice-run, 0 sha mismatches.
+
+`battle1-turn14-dense.json`: turn 14's ground truth — Murkrow's first
+turn, dossiered in `docs/turn14-notes.md`. Extends the chain at tick
+17722 (`turn13-notes.md`'s own final settled-menu boundary) with
+`battle1-winline-b-swap.json`'s own segments[106:110] verbatim
+(FIGHT-submenu-open, confirm — no nav press, cursor persisted at
+DRAGON_BREATH — then one 1200-frame resolution-idle segment), 110
+segments/18956 frames total, 248 captures (dense over the submenu
+buttons, Murkrow's FLY charge-turn animation/text, and Onix's
+DRAGON_BREATH kickoff/miss text; sparse over the closing idle hold).
+Murkrow opens with **FLY** (not FAINT_ATTACK), consuming its charge
+turn — no damage either side, Onix's own DRAGON_BREATH auto-misses the
+now-airborne (`STATUS3_ON_AIR`) target with zero RNG cost
+(`AccuracyCalcHelper`'s on-air short-circuit, source-cited). Both
+`STATUS2_MULTIPLETURNS` (Murkrow's charge lock) and `STATUS3_ON_AIR`
+(the invulnerability/sprite-hide flag) are RAM-confirmed to persist past
+the turn boundary, still set at the trace's final tick. Confirms
+`battle-turn-notes.md` §16's own coarse ledger row for this turn on
+every HP/PP/order claim, refining its "some turn-end bookkeeping" to an
+exact 1-`Random()`-call tick (18079). Twice-run, 0 sha mismatches;
+flatten-and-compare prefix check against `battle1-winline-b-swap.json`'s
+own script, 0 diffs across all 18956 shared ticks.
