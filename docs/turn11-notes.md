@@ -343,3 +343,222 @@ this session's own committed trace's own first-run manifest at exactly
 the cited tick before being written into the table, per the brief's own
 double-check instruction (both prior dossiers had exactly one sha-citation
 slip caught in supervisor verification).
+
+## 2026-07-21 addendum (bounded-worker probe session): both halves
+ground-truthed as parameterizations of already-shipped code — ONE
+genuinely new mechanism found (the ATK-floor message's own dispatch +
+delay), everything else reduces to a fresh `pressTick`/constant
+
+Per this session's own worktree brief, ground-truthed turn 11's FEATHER_
+DANCE half (blocked by Onix's floored ATK) and ROCK_SLIDE half against the
+real, unmodified `turn6FeatherSprites`-family (`src/engine/featherDance.ts`)
+and `rockSlide*` (`src/engine/battleMenu.ts`) functions, hunting 0-RAM/
+0-pixel-mismatch. **No `src/` changes.** Every fact below is re-derived
+fresh this session (fresh `dump-feather-dance-sprites.py` /
+`dump-rockslide-sprites.py` / `dump-rockslide-slot-order.py` /
+`dump-battle-bars.py` RAM probe runs, a one-off Pidgeotto-sprite-`y2` RAM
+probe via `ram-probe.py`'s generic `path` feature, plus fresh `bin/oracle
+run` pixel captures over HTTP, twice-run for the committed verify script) —
+`turn11-notes.md`'s own prose ranges above were treated as leads, not
+truth, per the standing rule. New committed tool:
+`tools/probe/verify-turn11.ts` — pixel-only (RAM facts cross-cited below,
+not re-asserted in the script, same convention `verify-turn10-rockslide.ts`
+established) — **52/52 checks pass** against a fresh capture, twice-run
+identical.
+
+### 1. ROCK_SLIDE half: a single synthetic `pressTick=13137` reproduces EVERY sub-mechanism bit-for-bit, matching turn 10's own methodology exactly
+
+`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
+`rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
+`rockSlideOpponentHp`/`rockSlideTextStartTick` are all pure
+`(t, pressTick[, ...])` functions, already reused unchanged across turns
+3/5/6/7/9/10. This session fit `pressTick=13137` against fresh RAM/pixel
+data and it satisfies **every one** of the file's already-published delay
+constants simultaneously:
+
+| constant (from `battleMenu.ts`, unmodified) | formula | predicted tick | fresh RAM/pixel tick | verdict |
+|---|---|---|---|---|
+| `ROCK_SLIDE_TEXT_DELAY`(393) | `pressTick+393` | 13530 | 13530 (fresh oracle capture's own first tick of the "ONIX used ROCK SLIDE!" box transition — `sha(13529)≠sha(13530)`, pixel-confirmed) | **CONFIRMED**, exact |
+| `ROCK_SLIDE_RAM_ANCHOR_DELAY`(428) | `pressTick+428` | 13565 | 13565 (`dump-rockslide-sprites.py`: first live rock AND first live shake sprite both appear this RAM tick) | **CONFIRMED**, exact |
+| `ROCK_SLIDE_MON_SHAKE_START_DELAY`(443)/`_END_DELAY`(536) | `pressTick+443`/`+536`, render = RAM+1 | 13580/13673 | 13579/13672 raw RAM (one-off `ram-probe.py` path probe chasing `gBattlerSpriteIds[1]`→sprite→`y2`: period-4 `[5,5,0,0]` pattern, matches the formula exactly once the standard +1 render lag is applied — recomputed directly, not eyeballed) | **CONFIRMED**, exact |
+| `HIT_FLASH_RAM_ANCHOR_DELAY`(562) | `pressTick+562` | 13699 | 13699 (`dump-rockslide-sprites.py`: `blinkActive`/`healthboxWobbleActive` both first flip true this RAM tick) | **CONFIRMED**, exact |
+| `ROCK_SLIDE_HP_DRAIN_START_DELAY`(597) | `pressTick+597` | 13734 | 13734 (`dump-battle-bars.py`: `bar1Curr` sentinel `-32768`) | **CONFIRMED**, exact |
+
+**`rockSlideRockState`/`rockSlideDrawOrder` RAM-verified directly, not just
+via the anchor ticks**: fed `pressTick=13137` into the real, unmodified
+exported functions and diffed every prediction against
+`dump-rockslide-sprites.py`'s own per-tick rock `x+x2,y+y2,animNum` reads
+(336 RAM ticks, 13515-13850, 980 individual rock-sighting comparisons) —
+**0 mismatches**. Went one step further than a same-tick alive-set check:
+matched each RAM slot to its predicted `ROCK_SLIDE_ROCK_TABLE` index via
+exact center-position identity, then cross-checked the **full background-
+to-foreground draw-order sequence** (not just which rocks are alive) against
+`dump-rockslide-slot-order.py`'s own real `sSpriteOrder` reads at every
+multi-rock RAM tick (117 ticks) — **0 mismatches** on the complete ordered
+sequence. Confirms turn 11 reuses the same 20-entry `ROCK_SLIDE_ROCK_TABLE`
+and the same `SortSprites`-simulation draw-order logic bit-for-bit, same as
+every prior turn.
+
+Pidgeotto's own HP drain (38→16, sentinel@13734, flat counter 37→16 over
+13735-13756, done-sentinel@13757) matches `rockSlideOpponentHp(t, 13137,
+38, 16)` exactly, including the same "sentinel tick itself still reads
+`startHp` unchanged, first decrement effective one tick later" rule
+`turn10-notes.md`'s own addendum first caught (re-verified fresh here, not
+assumed). Healthbar color-zone crossing (§5's own "20.5%-21.2%" bracket)
+re-confirmed via `calcBarFilledPixels`/`pickHpBarBand`: 33/156 yellow,
+32/156 red — pure math, no new code needed.
+
+### 2. FEATHER_DANCE half: kickoff text is a pure parameterization; the feather-sprite animation is confirmed to NEVER FIRE this turn (RAM-verified, not just pixel-inferred)
+
+`turn6FeatherDanceTextStartTick`/`turn6FeatherDanceTextVisibleChars`
+(`battleScene.ts`, unmodified, the same functions turns 6/7/8 already use)
+reproduce turn 11's own kickoff text (`FEATHER_PRESS_TICK=13339`, the REAL
+A-confirm press tick — not synthetic, since this half is the player's own
+move) pixel-exact at every one of 7 sampled reveal ticks (13352-13384) plus
+the settled hold (13385-13421, sha `492ccf070e80`, matching the dossier's
+own citation) — **0 mismatches**.
+
+**The genuinely new RAM confirmation this session adds**: `dump-feather-
+dance-sprites.py` (the same probe turns 6/7/8 used to build their own
+per-turn `turnNFeatherSprites` probe tables) scanned all 8 `gFallingFeather
+SpriteTemplate` OAM slots (3/4/7/8/9/10/11/12) across the ENTIRE kickoff
+window (ticks 13330-13430, spanning the press through the full 33-tick
+blocked-hold) and found **0 hits** for the feather template pointer
+(`0x08596388`) anywhere in that window — every one of those 8 slots is
+either unallocated or hosts an unrelated sprite the whole time. This is
+direct RAM confirmation (not inferred from timing/pixel-hold-length alone)
+of `turn11-notes.md`'s own §5 rationale correction: **the blocked stat
+change genuinely short-circuits the battle script before the animation's
+own `createsprite` calls ever execute** — there is no turn-11 feather
+probe table to build (unlike turns 6/7/8, which each got their own),
+because the mechanism this turn is "don't call `turn6FeatherSprites` at
+all," not "call it with an empty/different table."
+
+**Parameterization verdict for this half**: the kickoff-text half of
+`drawTurn6/7/8FeatherDanceKickoffText` reuses unchanged
+(`turn6FeatherDanceTextStartTick`/`turn6FeatherDanceTextVisibleChars`,
+same text constants); the feather-sprite draw calls
+(`drawTurn6FeatherSprites`) must be **skipped entirely** this turn — an
+engine slice needs an explicit "effect blocked" branch that omits the
+`drawTurn6FeatherSprites` calls, not a turn-11-specific empty probe table
+(there's nothing to probe: the real hardware never creates the sprites).
+
+### 3. The ATK-floor message: the ONE piece that is NOT pure reuse — a new dispatch branch + one new delay constant
+
+Unlike every other mechanism this turn, the "ONIX's ATTACK\nwon't go
+lower!" message has no existing analog to parameterize — turns 6-8's own
+`drawTurn6/7/8FeatherDanceKickoffText` dispatchers always continue straight
+into the ~270-tick feather/starburst animation + stat-fall banner once the
+kickoff text finishes, because their own stat changes land. Turn 11's
+doesn't (floored), so the real battle script substitutes this message
+instead. Fresh-pinned this session, pixel-only (no RAM correlate needed,
+same as every other message-text mechanism in this codebase):
+
+- **Transition start**: tick **13422** exactly (`sha(13421)≠sha(13422)`,
+  fresh-confirmed, matches `turn11-notes.md` §5's own citation exactly) —
+  83 ticks past `FEATHER_PRESS_TICK` (13339), or equivalently 37 ticks past
+  the feather-kickoff-text's own settle tick (13385). Pinned as
+  `ATKFLOOR_TEXT_START_DELAY = 83` (relative to the SAME real press tick
+  the feather kickoff text uses — no new anchor needed, just a new offset).
+- **Text**: "ONIX’s ATTACK" / "won’t go lower!" (28 chars total) — the
+  apostrophe is `’` (U+2019, `charmap.json` code 180), **not** ASCII `'`;
+  this session's own verify script caught the wrong glyph on its first run
+  (full box-region mismatch) before correcting it, same "let the check
+  catch it" discipline `verify-turn10-rockslide.ts` used for its HP-bar
+  assumption.
+- **Reveal mechanism**: the plain generic `min(TOTAL, t-start+1)` cap
+  (same shape `rockSlideTextVisibleChars`/every other kickoff-text formula
+  in this codebase already uses) — settle lands exactly at `start+TOTAL-1`
+  (13449) with **no extra lag**, unlike `turn6FeatherDanceTextStartTick`'s
+  own sibling functions which include a "+1 past start+TOTAL" fudge in
+  their own doc comments. Fresh-verified pixel-exact at 6 sampled reveal
+  ticks plus the settled hold (13449-13529, 80 ticks, sha `82aa7ca871df`,
+  matching the dossier's own citation) — 0 mismatches.
+- **Engine-slice implication**: this needs one new two-line message-text
+  constant pair + one new delay constant, dispatched from a NEW branch in
+  the FEATHER_DANCE kickoff handler (triggered when the effect is blocked),
+  reusing the same generic message-draw primitive (`drawMessageTextLines`)
+  every other message in this codebase already uses — no new rendering
+  primitive, no new text-reveal mechanism, just new content + new timing.
+
+### 4. Turn-end → turn-12 menu boundary: matches `turn11-notes.md` §5's own citations, re-confirmed fresh
+
+Turn-end text-clear (13859, sha `cf34cbe53962`) and turn-12 menu settle
+(13897, sha `db251fad6c61`) both match §5's own citations exactly. The
+turn-12 menu's own idle-bounce (§5's own "not perfectly flat, cycles among
+3 shas" finding, itself following `turn10-notes.md`'s own correction for
+its equivalent resting menu) re-confirmed at a sparse sample (14000 lands
+on one of the three known cycle shas; 14340, the trace's own final tick,
+lands back on the settled/resting sha) — the exact period/phase table is
+still not bisected further this session (time-boxed, same open note §5
+already flagged).
+
+### What the turn-11 engine slice will need (per the brief's own ask)
+
+- `TURN11_FEATHERDANCE_PRESS_TICK = 13339` (the real A-confirm press tick)
+  for the kickoff-text half — `turn6FeatherDanceTextStartTick`/
+  `turn6FeatherDanceTextVisibleChars` reused unchanged.
+- An explicit "effect blocked, skip the feather-sprite draw calls" branch
+  — RAM-confirmed the real hardware never creates the 8 feather sprites
+  this turn, so this is a control-flow omission, not a new probe table.
+- One new message-text pair + one new delay constant for the ATK-floor
+  message (`ATKFLOOR_TEXT_START_DELAY = 83` past the same press tick,
+  "ONIX’s ATTACK"/"won’t go lower!", U+2019 apostrophe), dispatched via the
+  existing generic message-draw primitive.
+- `TURN11_ROCKSLIDE_PRESS_TICK = 13137` (synthetic anchor, same convention
+  as `TURN6_ROCKSLIDE_PRESS_TICK`/.../`TURN10_ROCKSLIDE_PRESS_TICK`) — every
+  existing `rockSlide*` function reused unchanged, per §1's own table.
+- Pidgeotto's own HP endpoints for `rockSlideOpponentHp`: `startHp=38,
+  endHp=16`.
+- Onix's own HP stays flat (14→14, FEATHER_DANCE deals no damage) — no
+  drain overlay needed for Onix's own side this turn, simpler than turn 10.
+
+### Named gaps (honest partial, not chased further this session — time-boxed)
+
+- The mon-shake `y2` mechanism was RAM-verified via a disposable one-off
+  probe (not a committed script) — a reusable, generic "battler sprite
+  field" probe (parameterized battler index + field offset) would save the
+  next session from re-deriving the same `gBattlerSpriteIds`→`gSprites`
+  path chase from scratch; not built this session (out of scope).
+- The turn-12 menu idle-bounce's exact period/phase table is still open
+  (§4) — same gap `turn10-notes.md` §4 flagged for its own equivalent
+  menu, still not resolved two sessions later.
+- The ATK-floor message's own box-transition sub-frames (13422-13429, the
+  multi-tick reveal-in before the first sampled 9-char tick) weren't
+  densely diffed frame-by-frame — the 6-point reveal-tick sample plus the
+  exact boundary ticks (13421/13422/13448/13449) is enough to pin the
+  formula, but a full stride-1 sweep of that span wasn't run.
+
+### Verification
+
+`npm test` and `npm run build` green, unchanged this session (no `src/`
+changes — only `tools/probe/verify-turn11.ts` (new) and this doc were
+touched). `tools/probe/verify-turn11.ts`: **52/52 checks pass**, run twice
+against fresh `bin/oracle` captures, identical both times. RAM probes
+(`dump-feather-dance-sprites.py`, `dump-rockslide-sprites.py`,
+`dump-rockslide-slot-order.py`, `dump-battle-bars.py`, plus a one-off
+`ram-probe.py`-based mon-shake-`y2` path probe) each run fresh this
+session; the rock-table/draw-order cross-checks against the real
+`rockSlideRockState`/`rockSlideDrawOrder` functions were done via
+disposable scratch scripts (not committed — the 0-mismatch results are
+reported here, matching the "RAM facts cross-cited, not re-asserted in the
+committed pixel-only script" convention `verify-turn9-postlunge.ts`/
+`verify-turn10-rockslide.ts` already established).
+
+### Proposed next-brief bullets
+
+1. Wire turn 11's engine slice per §"What the turn-11 engine slice will
+   need" above — this is now a pure wiring job for the ROCK_SLIDE half and
+   the kickoff-text half of FEATHER_DANCE, plus one small new branch +
+   constant pair for the ATK-floor message.
+2. Build a reusable generic "battler sprite field" RAM probe (parameterized
+   battler index + struct-field offset) so future mon-shake/sprite-state
+   chases don't need a fresh one-off `ram-probe.py` path spec each time.
+3. Bisect the turn-12 (and turn-11's own, and every prior resettled menu's)
+   idle-bounce period/phase table exactly, if a future engine slice needs
+   the *exact* frame content of the idle rather than just its known
+   resting/cycling shas — a standing gap across at least two sessions now.
+4. Turn 12 itself (`battle-turn-notes.md` §15's own predicted ROCK_SLIDE
+   miss, PP 1/10→0/10, the first ROCK_SLIDE miss since turn 8's own BIND
+   miss) is the natural next full-turn scout, per `turn11-notes.md` §7's
+   own prediction — still needs RAM/pixel verification, not assumption.
