@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 202 — Worktree scout (supervisor-folded): turn 14 ground truth BANKED — Murkrow opens with **FLY** (the arc's first two-turn semi-invulnerable move): charge half deals no damage, Onix's DRAGON_BREATH **auto-misses the airborne target at ZERO RNG cost** (`STATUS3_ON_AIR` short-circuit, `battle_script_commands.c:1061`, gRngValue flat through the miss); `battle1-turn14-dense.json` (248 captures) + `docs/turn14-notes.md`; merged `4fe427a`, suite 821/821 on the merged tree
+
+- **State:** merged into master, `npm test` 821/821 + build green
+  post-merge. Supervisor re-verified: prefix chain (turn13-b ⊂ turn14 ⊂
+  winline-b-swap, script-exact), trace rerun deterministic, and the
+  final frame PNG-read: Murkrow's healthbox full at 142/142 with its
+  SPRITE INVISIBLE (airborne) over the settled menu — the two-turn
+  state pinned visually and in RAM (STATUS2_MULTIPLETURNS set 17820,
+  STATUS3_ON_AIR set 17913, both persisting across the turn boundary
+  to the trace's last tick 18956).
+- **Did:** turn 14 = FLY charge (empty "used" string — STRINGID_
+  EMPTYSTRING3 in BattleScriptFirstChargingTurn, then "flew up high!")
+  + the auto-miss; nobody takes damage; no forced switch this turn.
+  §16's coarse ledger row fully confirmed, refined by one exact
+  bookkeeping Random() at 18079. PAPERCUT from the worker
+  (dump-battler-full.py struct offsets undocumented outside the script
+  body) recorded in PAPERCUTS.md at this fold.
+- **Next:** engine critical path unchanged (slice N-3 feather renderer
+  → rungs c/d → turns 7-13 parameterizations); dossier pipeline now
+  covers turns 6-14; turn-15+ (FLY's strike half, Onix's likely KO →
+  the first FORCED PLAYER SWITCH → the WIN arc) is the next scout
+  territory.
+- **Notes:** scout stayed in contract; 40-min cap, landed in 14.
+
+---
 ## 201 — Worktree scout (supervisor-folded): turn 13 ground truth BANKED — Pidgeotto FAINTS to DRAGON_BREATH, MURKROW switches in (142/142, LAX_INCENSE, NO switch-in proc), and the REUSE MAP says the whole faint/switch window is turn-5 machinery VERBATIM with new params; **the projectile table is bit-identical to turn 2's** (one closed-form dy param: target yOffset 11 vs 4) so ISSUES #23's exclusion covers turn 13 with no fresh crack; `battle1-turn13-dense-{a,b}.json` (256+223 captures) + `docs/turn13-notes.md`; merged `95524d4`, suite 821/821 on the merged tree
 
 - **State:** merged into master, `npm test` 821/821 + build green

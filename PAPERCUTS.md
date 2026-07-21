@@ -12,6 +12,18 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## dump-battler-full.py struct offsets live only in the script body (2026-07-20)
+
+- **What:** the per-field battler struct offsets (species +0x00, pp
+  +0x24, hp +0x28, status1 +0x4C, status2 +0x50, stride 0x58) aren't
+  documented anywhere outside the script's own source — deriving a
+  one-off address for a field not in the existing watch-spec columns
+  means reading the script body first.
+- **Hits:** 1.
+- **Cost each:** ~3-5 min.
+- **Workaround:** read the script body; or a future session adds an
+  `--offsets` help dump / a comment table at the top of the script.
+
 ## Chained-trace stitching silently inserts redundant idle frames (2026-07-20)
 
 - **What:** concatenating two independently idle-padded trace scripts
