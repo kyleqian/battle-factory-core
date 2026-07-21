@@ -118,3 +118,27 @@ outcomes to both `battle-turn-notes.md` sections 14 and 15's own turn-10
 rows); all three of the dossier's standing falsifiable tests (ATK-floor
 message, BIND actually hitting, the unattributed-RNG-step call site) come
 back **negative** again this turn. Twice-run, 0 sha mismatches.
+
+`battle1-turn11-dense.json` (docs/turn11-notes.md): turn 11 of battle 1 —
+reuses `battle1-turn10-dense.json`'s own 92-segment script verbatim,
+extended with `battle1-winline-b-swap.json`'s own segments[90:94] (the
+turn-11 FIGHT-submenu-open and move-confirm — again **zero navigation
+presses** — and the resolution-idle, verbatim, cross-checked byte-identical
+against that committed trace both via a full 14340-tick per-frame
+button-state diff and an 11-tick pixel spot-check). 14340 frames total, 256
+`captureFrames` (the oracle's per-trace cap, hit exactly) dense (stride-1)
+over six windows bracketing every RAM-confirmed transition this turn
+(FEATHER_DANCE then ROCK_SLIDE) plus sparse representative sampling of the
+uneventful holds and the turn-12 menu's own idle tail. **Falsifiable test 1
+(the ATK-floor "won't go any lower!" message) finally fires positive**:
+Pidgeotto's AI reselects FEATHER_DANCE for the first time since turn 7,
+against Onix's ATK stage already floored since turn 8, and the game prints
+`sText_StatsWontDecrease` verbatim, PP-charged, stat-write blocked, all
+RAM- and pixel-confirmed. ROCK_SLIDE then hits Pidgeotto for the third
+consecutive turn of bit-identical reconvergence between both published
+lines. A second finding falls out of this turn's own structure: the
+"unattributed RNG step" turns 9-10 both recorded does not fire at all this
+turn, narrowing its likely call site to a damaging move's own HP-commit
+path (absent here since FEATHER_DANCE deals no damage) rather than a fixed
+per-turn cost. Pidgeotto's own healthbar also crosses yellow→red for the
+first time in this sub-chain. Twice-run, 0 sha mismatches.

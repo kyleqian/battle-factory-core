@@ -1,0 +1,22 @@
+{
+  "_comment": "S7/S8 worktree scout, turn 11: watch spec for tools/probe/ram-probe.py, identical column set to turn10-rng-watch.json (same falsifiable-test/cursor-persistence columns still open this turn). segments = battle1-turn11-dense.json's own 96 segments (battle1-turn10-dense.json's 92 + battle1-winline-b-swap.json's segments[90:94]), copied in verbatim before running.",
+  "watch": [
+    { "name": "rng", "addr": "gRngValue", "size": 4 },
+    { "name": "hp0", "addr": "gBattleMons+0x28", "size": 2 },
+    { "name": "hp1", "addr": "gBattleMons+0x80", "size": 2 },
+    { "name": "mainFunc", "addr": "gBattleMainFunc", "size": 4 },
+    { "name": "execFlags", "addr": "gBattleControllerExecFlags", "size": 4 },
+    { "name": "curMove", "addr": "gCurrentMove", "size": 2 },
+    { "name": "attacker", "addr": "gBattlerAttacker", "size": 1 },
+    { "name": "target", "addr": "gBattlerTarget", "size": 1 },
+    { "name": "critMult", "addr": "gCritMultiplier", "size": 1 },
+    { "name": "moveDmg", "addr": "gBattleMoveDamage", "size": 4 },
+    { "name": "atkStage0", "addr": "gBattleMons+0x19", "size": 1 },
+    { "name": "atkStage1", "addr": "gBattleMons+0x71", "size": 1 },
+    { "name": "bg0y", "addr": "gBattle_BG0_Y", "size": 2 },
+    { "name": "status2_0", "addr": "gBattleMons+0x50", "size": 4 },
+    { "name": "status2_1", "addr": "gBattleMons+0xA8", "size": 4 },
+    { "name": "cursor0", "addr": "gMoveSelectionCursor+0", "size": 1 }
+  ],
+  "startTick": 13200
+}
