@@ -4,6 +4,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 232 — Supervisor merge fold: AERIAL_ACE fully RAM-pinned and asset-ready (stacked chain `worker/wt-20260721-111226`+`112501` merged, 3 commits) — cutting-slice sheet extracted + **VRAM-verified 0 mismatches** (OAM is AFFINE-OFF + OBJ-BLEND, checked not assumed), all FIVE mechanisms pinned in `docs/aerial-ace-notes.md` (live pressTick 12305 instrumented; two §40 corrections: lunge window +1 tick, clone life-ends +1 tick; mechanisms 1/3 need **+2** render lag vs 5's +1; mechanism 4 is a SOFTWARE `BlendPalette()` 2-step, not BLDY hardware — the brief's own assumption falsified with evidence; 71px onset patch attributed to mechanism 5). `tools/probe/verify-turn10-aerialace.ts` **20/20 supervisor-rerun** post-merge
+
+- **State (supervisor-verified post-merge):** `npm test` **921/921**
+  (917 + 4 asset pins), `npm run build` green, verify script 20/20
+  fresh from the main tree, worktree chain cleaned up. Turn-10 rung-(c)
+  probe (ROCK_SLIDE/turn-end) in flight on `worker/wt-20260721-114115`.
+- **Notes:** next engine slice (AERIAL_ACE wiring) is a wiring job:
+  asset + all tables banked, verify script gates it. Also verified this
+  fold: rung c3's hitsplat fixes closed `turn2-endeavor-drain`'s last
+  residual (now **201/201**, was 200/201 since S7 slice E1) — supervisor-
+  rerun confirmed, no capture changes.
+
+---
 ## 231 — Bounded worker (S7 slice R rungs c3/c4/d): rungs (c4) and (d) LAND 0-diff (`turn9-quickattack-b.json` **77/77**, new `turn9-rockslide.json` **130/130**); rung (c3) lands Onix's own shake exactly but the hitsplat's own pixels + a pre-existing slot4-tail residual stay a named small gap, and a genuine NEW mechanism (Onix's own brief whole-sprite hit-flash, render 10983-10986) was found and left unmodeled
 
 - **State:** `npm test` **917/917** (896 + 21 new), `npm run build`
@@ -56,42 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   at $0.27. PAPERCUTS: exit-139 teardown-segfault entry added (two
   workers re-confirmed it this session). Rungs (c3)/(c4)/(d) are now
   wiring jobs against the 99-check script.
-
----
-## 229 — Bounded worker (S7 slice R rung (a)): turn 10's FIGHT-submenu reopen LANDS 0-diff, zero navigation presses — `turn10-menu.json` **83/83, 0 diff**; rung (b) (AERIAL_ACE's animation) RAM-probed to a concrete 5-mechanism inventory, NOT implemented — one mechanism needs a genuinely new sprite asset, out of cap
-
-- **State:** `npm test` **896/896** (892 + 4 new), `npm run build` green,
-  tree clean. `turn10-menu.json` (new, 83/83, 0 diff) covers the reopen
-  (12262) through AERIAL_ACE's own kickoff text settling (12344), one
-  tick before the animation's first pixel change. Full regression sweep
-  (~35 traces incl. `turn9-menu` 111, `turn9-quickattack` 117,
-  `turn6-feathers` 235, `turn1-rockslide` 256) all re-verified 0 diff,
-  unchanged counts.
-- **Did:** `turn9Resolved` state flag (mirrors turn1..turn8Resolved),
-  cursor persists ROCK_SLIDE(0), PP ledger gains a 7th slot-0 decrement
-  (3/10). Real bug found and fixed along the way: the settled menu for
-  the gap between turn 9's own (unmodeled) resolution and turn 10's own
-  press isn't gated by a button-press flag — it's a pure-`t` redraw check
-  inside turn 9's OWN dispatcher (same shape `drawTurn7RockSlideWindow`/
-  `drawTurn8BindWindow` already establish), safe since it only fires past
-  `turn9-quickattack.json`'s own committed window. `TURN9_MENU_REDRAW_
-  DELAY` fresh-oracle-bisected to 574 (NOT the dossier's own prose value
-  579 — the bounce task resets 5 ticks before the visual settle, per
-  `MENU_BOUNCE_RAM_SETUP_TICK`'s own precedent) against the new trace's
-  own capture, 0/83 mismatches vs. 5-46 at every other delta from -5 to
-  +8 tried. Then RAM-probed rung (b) (mandatory first step, per the
-  brief): `Move_AERIAL_ACE`'s script is FIVE concurrent mechanisms
-  (Pidgeotto's own short elliptical lunge, Onix's own shake, two blended
-  trace/afterimage clones — parameterizable from QUICK_ATTACK's own
-  code, a background palette-blend pulse, and a "cutting slice" sprite
-  that needs a genuinely new asset+render routine) — exact RAM tables for
-  all five banked in battle-turn-notes.md §40, none implemented.
-- **Next:** rung (b)'s 4 parameterizable mechanisms could land quickly;
-  the cutting-slice sprite (asset extraction + new draw routine) is
-  comparable scope to this whole session's rung (a) on its own. Rung (c)
-  (ROCK_SLIDE + both HP drains + turn-end through turn-11's own menu)
-  entirely unattempted.
-- **Notes:** `docs/battle-turn-notes.md` §40 has the full RAM probe
-  (task/sprite tables, exact x2/y2 sequences per mechanism, source script
-  cross-read). No PAPERCUTS this session.
-

@@ -1,4 +1,41 @@
 ---
+## 229 — Bounded worker (S7 slice R rung (a)): turn 10's FIGHT-submenu reopen LANDS 0-diff, zero navigation presses — `turn10-menu.json` **83/83, 0 diff**; rung (b) (AERIAL_ACE's animation) RAM-probed to a concrete 5-mechanism inventory, NOT implemented — one mechanism needs a genuinely new sprite asset, out of cap
+
+- **State:** `npm test` **896/896** (892 + 4 new), `npm run build` green,
+  tree clean. `turn10-menu.json` (new, 83/83, 0 diff) covers the reopen
+  (12262) through AERIAL_ACE's own kickoff text settling (12344), one
+  tick before the animation's first pixel change. Full regression sweep
+  (~35 traces incl. `turn9-menu` 111, `turn9-quickattack` 117,
+  `turn6-feathers` 235, `turn1-rockslide` 256) all re-verified 0 diff,
+  unchanged counts.
+- **Did:** `turn9Resolved` state flag (mirrors turn1..turn8Resolved),
+  cursor persists ROCK_SLIDE(0), PP ledger gains a 7th slot-0 decrement
+  (3/10). Real bug found and fixed along the way: the settled menu for
+  the gap between turn 9's own (unmodeled) resolution and turn 10's own
+  press isn't gated by a button-press flag — it's a pure-`t` redraw check
+  inside turn 9's OWN dispatcher (same shape `drawTurn7RockSlideWindow`/
+  `drawTurn8BindWindow` already establish), safe since it only fires past
+  `turn9-quickattack.json`'s own committed window. `TURN9_MENU_REDRAW_
+  DELAY` fresh-oracle-bisected to 574 (NOT the dossier's own prose value
+  579 — the bounce task resets 5 ticks before the visual settle, per
+  `MENU_BOUNCE_RAM_SETUP_TICK`'s own precedent) against the new trace's
+  own capture, 0/83 mismatches vs. 5-46 at every other delta from -5 to
+  +8 tried. Then RAM-probed rung (b) (mandatory first step, per the
+  brief): `Move_AERIAL_ACE`'s script is FIVE concurrent mechanisms
+  (Pidgeotto's own short elliptical lunge, Onix's own shake, two blended
+  trace/afterimage clones — parameterizable from QUICK_ATTACK's own
+  code, a background palette-blend pulse, and a "cutting slice" sprite
+  that needs a genuinely new asset+render routine) — exact RAM tables for
+  all five banked in battle-turn-notes.md §40, none implemented.
+- **Next:** rung (b)'s 4 parameterizable mechanisms could land quickly;
+  the cutting-slice sprite (asset extraction + new draw routine) is
+  comparable scope to this whole session's rung (a) on its own. Rung (c)
+  (ROCK_SLIDE + both HP drains + turn-end through turn-11's own menu)
+  entirely unattempted.
+- **Notes:** `docs/battle-turn-notes.md` §40 has the full RAM probe
+  (task/sprite tables, exact x2/y2 sequences per mechanism, source script
+  cross-read). No PAPERCUTS this session.
+
 ## 228 — Supervisor merge fold: **ISSUES #30 FULLY CRACKED and closed** by the round-1 worktree worker (branch `worker/wt-20260721-095153` merged) — candidate A's sSpriteOrder draw-order adopted AND the real root cause of BOTH residual classes found: feathers are `ST_OAM_AFFINE_NORMAL` (not `_DOUBLE`), so `drawSpriteSheetAffineRotate`'s unconditional doubled destination box painted rotated feather corners over Onix; new `doubleSizeBox=false` param at the feather call only. Turn-6 residual window 425px → **0px on all 129 ticks**, turns 7/8 likewise; feather traces extended **106→235, 16→145, 33→162**, suite **892/892**
 
 - **State (all supervisor-verified post-merge, main tree):** `npm test`
