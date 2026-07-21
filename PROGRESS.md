@@ -4,6 +4,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 191 — Worktree scout (supervisor-folded): turn 8 ground truth BANKED — winline-b takes **BIND, and it MISSES** (8 Random() calls, miss short-circuits crit/spread/effect); ATK stage hits its floor (2→0) yet prints the ordinary "harshly fell" (source-traced: the "won't go lower" variant needs the stat already AT floor before the attempt); `battle1-turn8-dense.json` (10826 frames, 226/226 captures) + `docs/turn8-notes.md`; merged `fc0d23c`, suite 793/793 on the merged tree
+
+- **State:** merged into master, `npm test` 793/793 + build green
+  post-merge (docs+trace only). Supervisor re-verified: prefix chain
+  (turn7-dense ⊂ turn8-dense ⊂ winline-b-swap, script-exact), 5/5 cited
+  boundary shas reproduced fresh, cursor-on-BIND submenu frame (9420, PP
+  20/20 TYPE/NORMAL) read as an image. Scout PNG-read every text label
+  per the new discipline.
+- **Did:** turn 8 on the committed line = Pidgeotto's 3rd FEATHER_DANCE
+  (Onix ATK floor 2→0) then Onix's BIND miss (acc 75 — corrects §14's
+  prose "85"; roll at RAM 9844 fires under the PREVIOUS text, 2 ticks
+  before the box transition). No HP change either side. BIND's trap
+  mechanic (EFFECT_TRAP/STATUS2_WRAPPED, maxHP/16 end-of-turn) inventoried
+  from source but NOT exercised (missed; RAM wrap-status flat). The
+  4-frame shared box-open prefix reconfirmed 3× within this turn; the
+  stat-write→"fell"-text gap is 293 ticks (vs 294/293 turns 6/7).
+  "Won't go lower" variant's real trigger pinned = a 4th FD (turn-9
+  scout's falsifiable test). Minor flag: BIND's description text
+  ("2 to 5 turns") vs source-implemented 3-6 wrap duration — noted in
+  the doc, not chased.
+- **Next:** M-3 (affine-sampler small-angle fix per §12's bisect-at-6887
+  instrument, then the Sitrus stages); turn-6/7/8 engine slices against
+  the three dossiers (turn 8 = text-only resolution, cheapest of the
+  three).
+- **Notes:** scout stayed in contract; no papercuts.
+
+---
 ## 190 — Bounded worker (S7 slice M-2): Onix "idle bob" ROOT-CAUSED and NAMED — it's the Sitrus proc's own opening animation stage (`General_HeldItemEffect`, a genuine GBA affine-OAM rotation), starting at tick 6869 not ~7042; render fix attempted and REVERTED (regresses the protected healthbox trace on a small-angle rounding gap) — NOT landed, no new committed traces
 
 - **State:** `npm test` 793/793 (unchanged), `npm run build` green, tree
@@ -82,53 +109,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** scout stayed in contract; no papercuts. Turn-6 engine slice
   must budget for the FEATHER_DANCE attack animation (feathers/starburst,
   ~7450-7658) that the original dossier's mislabeled table hid.
-
----
-## 188 — Bounded worker (S7 slice M): Pidgeotto's healthbox slide-in LANDED (`turn5-healthbox.json` 55/55, 0 diff, 6820-6874) — Sitrus proc + settled menu NOT landed, blocked on a newly-discovered Onix on-field idle-bob (RAM table pinned, screen mapping unresolved)
-
-- **State:** `npm test` **793/793** (+3), `npm run build` green, tree clean.
-  New committed trace `turn5-healthbox.json` (55 captures, 6820-6874) 0
-  diff. Regression clean: `turn5-switchin.json` 241/241, `turn5-sentout.json`
-  141/141, `turn5-rockslide.json` 256/256.
-- **Did:** assigned the full 6828→~7307 window (healthbox slide-in, Sitrus
-  proc, settled menu vs PIDGEOTTO). Landed the healthbox slide-in cleanly:
-  Pidgeotto's own opponent healthbox was never drawn at all past 6828 (a
-  real gap, not just unverified) — composited (name/level/gender, gender
-  pixel-confirmed male via an oracle crop) and wired in with the same
-  23-step slide `healthboxSlideDx` (now generalized to an arbitrary anchor)
-  already used for S6's own send-out. Found and fixed a real off-by-one:
-  the naive anchor (matching §8e's own cited RAM tick, 6828) reproduces the
-  oracle's slide sequence exactly one tick early throughout — needs the
-  ordinary +1 RAM-to-render lag every other mechanism in this dossier
-  carries, isolated via a diff-vs-fixed-background pixel scan applied
-  identically to oracle and app frames. +3 Tier-1 pins. Then RAM-probed
-  past the slide (`tools/probe/specs/switchin-b0-sprite.json`, twice-run
-  identical) and found the "flat" window right after settle (6852-7040) is
-  NOT actually static: Onix's own sprite (the player's battler, not
-  Pidgeotto's) plays a continuous idle vertical bob on a clean 32-tick
-  period starting RAM tick 6870 — a genuinely new mechanism (Onix is drawn
-  perfectly static through the whole already-verified 6588-6828 span, so
-  this only engages once it's just standing idle). The RAM table itself is
-  solid (pixel bbox of the affected region matches Onix's sprite footprint
-  exactly, nothing else). But applying it as a direct render-tick `y2`
-  offset does NOT reproduce the oracle (large residual diffs both signs
-  tried) — tried and reverted rather than ship red, per this run's own
-  discipline. Also ran a fresh full-window oracle diff scan sharpening
-  §3e's own `~`-estimates to exact ticks (sparkle/tint window ~7042-7075,
-  Sitrus message exact 7078-7112 (35 chars, byte-length-matched), a big
-  redraw at 7222, and — new finding — the HP-climb/menu window keeps
-  visibly changing all the way to the 7307 acceptance boundary, so a
-  single flat "final frame" harvest won't work for the settled menu).
-- **Next:** re-derive the Onix idle-bob's RAM→screen mapping (three
-  hypotheses banked in `docs/faint-switch-notes.md` §11 — scale factor,
-  wrong sprite-slot assumption, or a second uncontrolled simultaneous
-  change) before the Sitrus sparkle/tint/ring/message/HP-climb/settled-menu
-  chain can proceed, since the idle-bob renders underneath all of it. The
-  Sitrus ring gfx (§8a) also still needs its own pixel-placement pass,
-  unchanged from before this session.
-- **Notes:** no papercuts. Docs: `faint-switch-notes.md` §11 added (both
-  the landed piece and the precise blocker, with the exact pixel/RAM data
-  needed to resume without re-deriving); archived #185 to keep the ledger
-  to 3 entries.
 
 ---

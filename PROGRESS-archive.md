@@ -1,3 +1,53 @@
+## 188 — Bounded worker (S7 slice M): Pidgeotto's healthbox slide-in LANDED (`turn5-healthbox.json` 55/55, 0 diff, 6820-6874) — Sitrus proc + settled menu NOT landed, blocked on a newly-discovered Onix on-field idle-bob (RAM table pinned, screen mapping unresolved)
+
+- **State:** `npm test` **793/793** (+3), `npm run build` green, tree clean.
+  New committed trace `turn5-healthbox.json` (55 captures, 6820-6874) 0
+  diff. Regression clean: `turn5-switchin.json` 241/241, `turn5-sentout.json`
+  141/141, `turn5-rockslide.json` 256/256.
+- **Did:** assigned the full 6828→~7307 window (healthbox slide-in, Sitrus
+  proc, settled menu vs PIDGEOTTO). Landed the healthbox slide-in cleanly:
+  Pidgeotto's own opponent healthbox was never drawn at all past 6828 (a
+  real gap, not just unverified) — composited (name/level/gender, gender
+  pixel-confirmed male via an oracle crop) and wired in with the same
+  23-step slide `healthboxSlideDx` (now generalized to an arbitrary anchor)
+  already used for S6's own send-out. Found and fixed a real off-by-one:
+  the naive anchor (matching §8e's own cited RAM tick, 6828) reproduces the
+  oracle's slide sequence exactly one tick early throughout — needs the
+  ordinary +1 RAM-to-render lag every other mechanism in this dossier
+  carries, isolated via a diff-vs-fixed-background pixel scan applied
+  identically to oracle and app frames. +3 Tier-1 pins. Then RAM-probed
+  past the slide (`tools/probe/specs/switchin-b0-sprite.json`, twice-run
+  identical) and found the "flat" window right after settle (6852-7040) is
+  NOT actually static: Onix's own sprite (the player's battler, not
+  Pidgeotto's) plays a continuous idle vertical bob on a clean 32-tick
+  period starting RAM tick 6870 — a genuinely new mechanism (Onix is drawn
+  perfectly static through the whole already-verified 6588-6828 span, so
+  this only engages once it's just standing idle). The RAM table itself is
+  solid (pixel bbox of the affected region matches Onix's sprite footprint
+  exactly, nothing else). But applying it as a direct render-tick `y2`
+  offset does NOT reproduce the oracle (large residual diffs both signs
+  tried) — tried and reverted rather than ship red, per this run's own
+  discipline. Also ran a fresh full-window oracle diff scan sharpening
+  §3e's own `~`-estimates to exact ticks (sparkle/tint window ~7042-7075,
+  Sitrus message exact 7078-7112 (35 chars, byte-length-matched), a big
+  redraw at 7222, and — new finding — the HP-climb/menu window keeps
+  visibly changing all the way to the 7307 acceptance boundary, so a
+  single flat "final frame" harvest won't work for the settled menu).
+- **Next:** re-derive the Onix idle-bob's RAM→screen mapping (three
+  hypotheses banked in `docs/faint-switch-notes.md` §11 — scale factor,
+  wrong sprite-slot assumption, or a second uncontrolled simultaneous
+  change) before the Sitrus sparkle/tint/ring/message/HP-climb/settled-menu
+  chain can proceed, since the idle-bob renders underneath all of it. The
+  Sitrus ring gfx (§8a) also still needs its own pixel-placement pass,
+  unchanged from before this session.
+- **Notes:** no papercuts. Docs: `faint-switch-notes.md` §11 added (both
+  the landed piece and the precise blocker, with the exact pixel/RAM data
+  needed to resume without re-deriving); archived #185 to keep the ledger
+  to 3 entries.
+
+---
+
+---
 ## 187 — Worktree scout (supervisor-folded): turn 6 ground truth BANKED — prefix consistency of the whole engine chain vs the WIN line CONFIRMED (one line, no divergence through turn 7); `battle1-turn6-dense.json` (8346 frames, 251 captures, twice-run identical) + `docs/turn6-notes.md`; merged `858f482`, suite 790/790 on the merged tree
 
 - **State:** merged into master, `npm test` 790/790 + build green
