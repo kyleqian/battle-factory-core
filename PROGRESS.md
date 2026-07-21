@@ -4,6 +4,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 238 — Supervisor merge fold ×3 + ISSUES #31 filed: (1) turn-12 probe (`wt-125234`): AERIAL_ACE recurs **bit-exact at +2068 RAM ticks** off turn 10's 5-mechanism tables (pressTick=14373, zero corrections); ROCK_SLIDE-miss half RAM-proven **zero-animation** (pressTick=14237; kickoff text only, hit mechanisms never fire — bit-exact to turn 8's BIND-miss precedent incl. the identical 95-tick miss→clear gap); `verify-turn12.ts` **20/20** — turn 12 is pure wiring, both halves. (2) hitsplat palette-tint probe (`wt-130606`): REFUTED — `gPlttBufferFaded` byte-identical to unfaded, bank 7, every live tick (supervisor-rerun) — third refuted hypothesis, filed as **ISSUES #31** with the two untested avenues. (3) turn-13 probe (`wt-131215`): `verify-turn13.ts` **46/46**, wiring-only verdict, 3 dossier §4 corrections (6 idle-bounce phases not one plateau; cursor-jump at exactly 15408; a previously-missed ~90-tick SAND_ATTACK mid-message animation 15540-15629 = the ONE real unknown before that half renders)
+
+- **State (supervisor-verified post-merges):** `npm test` **957/957**,
+  `npm run build` green; verify scripts fresh from main tree: turn12
+  20/20, turn13 46/46 (turn9-postlunge 108/108 + turn11 52/52 an hour
+  earlier). No worktrees, no unmerged branches. Turns 9/10/11 traces all
+  supervisor-rerun this hour: 159+77+163 / 83+18+220 / 56+178+163.
+- **Notes:** probe scoreboard this session: turn-10-rockslide,
+  turn-11, turn-12, turn-13 all "pure wiring" verdicts with PASS/FAIL
+  scripts; the three hitsplat refutations close every named lead — #31
+  carries the avenue list so nobody re-fits blends. Turn-13's probe also
+  demonstrated the verify-script convention retrofits onto an
+  already-folded dossier cleanly.
+
+---
 ## 237 — Bounded worker (S7 slice R rung 0 + turn 11 rungs 1-3): turn 9's flicker gap CLOSED (20→32-tick table extension, `turn9-quickattack.json` 159/159) and turn 11's whole arc (menu reopen, FEATHER_DANCE-blocked half, ROCK_SLIDE half) LANDS 0-diff through the turn-12 menu boundary — new `turn11-menu.json` **56/56**, `turn11-featherdance.json` **178/178**, `turn11-rockslide.json` **163/163**; one genuine cross-regime idle-bounce bug found + fixed along the way
 
 - **State:** `npm test` **957/957** (946 + 11 new), `npm run build`
@@ -60,36 +75,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   append from its in-code comments + script outputs, committed on its
   branch with provenance noted. Both diagnostics' NEGATIVES (coefficient
   + rounding) are the load-bearing finding — do NOT re-brief a blend-fit.
-
----
-## 235 — Bounded worker (S7 slice R rung (a)): turn 10's ROCK_SLIDE half LANDS 0-diff end-to-end (kickoff through the turn-11 menu boundary) — `TURN10_ROCKSLIDE_PRESS_TICK=12169` wired through the existing turns-6/7/9-style dispatcher parameterization, plus Onix's own AERIAL_ACE-drain aftermath (HP drain 24→14 + "not very effective" text, both fresh-oracle-bisected); new `turn10-rockslide.json` **220/220, 0 diff**; rungs (b)/(c)/(d) NOT attempted this session (time-boxed), gaps unchanged from §42
-
-- **State:** `npm test` **946/946** (936 + 10 new), `npm run build`
-  green, both mandatory verify scripts (`verify-turn10-rockslide.ts`,
-  `verify-turn10-aerialace.ts`) still fully passing, unchanged. Full
-  regression sweep 0 diff: `turn10-menu.json` **83/83**,
-  `turn10-aerialace.json` **18/18**, `turn9-quickattack.json`
-  **117/117**, `turn9-quickattack-b.json` **77/77**, `turn9-rockslide.json`
-  **130/130**, `turn1-rockslide.json` **256/256**.
-- **Did:** `drawTurn10RockSlideAttack`/`Window`/`TurnEndSettledMenu`
-  mirror `drawTurn9RockSlideAttack`/`Window` exactly, reusing every
-  `rockSlide*` mechanism function unchanged with turn 10's own synthetic
-  pressTick + Pidgeotto's 61→38 drain. `drawTurn10AerialAceWindow` now
-  threads Onix's live draining HP (`turn10AerialAceOnixHp`, 24→14)
-  through a new `onixHp` param on `drawTurn10FieldBase` (defaulted,
-  every pre-existing caller unaffected), swaps to "It's not very
-  effective..." once the drain settles, then hands off to the ROCK_SLIDE
-  window at its own kickoff text start. Three new turn-end delay
-  constants (super-effective text, text-clear, menu-redraw) each
-  fresh-bisected via a scratch `drawText`+charmap probe against a live
-  oracle capture, not assumed transferable from prior turns' own values.
-- **Next:** rungs (b)/(c)/(d) — see §42's own handoff, unchanged: (1)
-  mechanism 3's residual (renders 12363-12366, bisect the LUNGE table's
-  early entries), (2) mechanism 4 (re-derive the live BG palette BANK
-  NUMBER via direct RAM read, `dump-aerialace-anim.py` precedent, before
-  retrying the darken render), (3) once both close, extend
-  `turn10-aerialace.json` past 12362 through the dossier's own 12389
-  settle boundary. No `src/` code for mechanisms 3/4 touched this
-  session (nothing to revert).
-- **Notes:** `docs/battle-turn-notes.md` §43 has the full writeup. No
-  PAPERCUTS beyond the standing mgba-venv-teardown one.

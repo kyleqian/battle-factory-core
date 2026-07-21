@@ -5,6 +5,35 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #31 — Turn 9 QUICK_ATTACK hitsplat: tip/edge residual, three hypotheses
+  refuted, renders 10935-10944 excluded from `turn9-quickattack.json`
+
+Opened 2026-07-21 (supervisor, after one engine attempt + two probe passes).
+The hitsplat (sprite slot 7, RAM-live 10934-10943, render +1) renders with a
+~150-380px/tick tip/edge residual after two real RAM-grounded fixes (matrix
+303, force-blend over live fb). Turn 9 is otherwise COMPLETE: 159/159 +
+77/77 + 163/163 captures, only this 10-render window stays excluded.
+
+**Refuted with committed instruments (do NOT re-attempt):**
+- Coefficient fit: brute force over every (eva,evb) in 8-bit AND 5-bit
+  domains tops out at 62.2% of 1263 samples; the RAM-true eva=12/evb=8
+  (BLDALPHA=0x080c, objMode=1, BLDCNT=0x3f40 — all RAM-banked) scores
+  WORSE than the current 16/16 (`diag-turn9-hitsplat-blendfit.ts`).
+- Floor-vs-round source-texel sampling with true coefficients: 158/176
+  mismatches under both (`diag-turn9-hitsplat-tips.ts`).
+- Palette-fade tint: `gPlttBufferFaded` byte-identical to unfaded for
+  bank 7 at every live tick, supervisor-rerun confirmed
+  (`dump-turn9-hitsplat-palette.py`).
+
+**Untested avenues (named by the probes):** (a) the affine edge/
+out-of-bounds sampling shape at the sprite's own boundary (tips are by
+definition edge texels); (b) what target-2 actually contains at those
+pixels — BLDCNT's target-2 mask includes OBJ, and the ep1 shake moves
+Onix's sprite under the hitsplat during exactly this window. Evidence
+pattern worth carrying: oracle tips sit in a saturated (255,240,152)
+family the app never produces. Full dossier:
+`docs/turn9-shake-notes.md` (all three dated sections).
+
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
   turn2-dragonbreath.json remain uncaptured after 4 bounded attempts
