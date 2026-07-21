@@ -2448,6 +2448,14 @@ this stage's scope per ROADMAP).
 
 ### HEADLINE 4 (methodology, escalation-worthy): outside battle, idle-timing IS an RNG lever — the opposite of §15's own finding, and it changes which opponent battle 2 generates
 
+**Refined (post-WIN scout, 2026-07-21, `docs/postwin-notes.md`):** the
+sensitive window is now BISECTED, not "somewhere in the post-victory
+tail" — `gMain.inBattle` clears and the per-VBlank advance resumes at
+tick **23645** (43 ticks after the loss-quote dismiss, mid-fade), and
+opponent-2's `rentalMons[3..5]` identity is already WRITTEN by ticks
+**23700-23750** — well before the GO ON menu or scouting text. Only
+idle-timing inside 23645-23750 can move battle 2's opponent.
+
 §15's HEADLINE 1 proved idle-timing doesn't shift RNG outcomes **inside a
 frontier battle** (`Random()` only advances on-demand there, per the
 ROADMAP domain note). This session hit the **complementary case** the same

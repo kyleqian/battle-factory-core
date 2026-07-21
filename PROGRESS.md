@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 217 — Worktree scout (supervisor-folded): post-WIN scene transition ground-truthed — **the S8 dossier chain is now GAPLESS from anchor to battle 2**: `battle1-postwin-dense.json` (29601 ticks, 208 captures) joins turn17's end (23601) to §17's swap-prompt start (29601, endpoint sha byte-identical to `battle1-swapyes-a.json`'s same-tick frame); headline pins: **`gMain.inBattle` clears + per-VBlank RNG resumes at tick 23645**, and **opponent-2's identity (`rentalMons[3..5]`) is written by 23700-23750** — the timing-sensitive window §16 HEADLINE 4 warned about is now bisected to 105 ticks; `docs/postwin-notes.md` merged, suite 861/861
+
+- **State:** merged into master post-#28-fix, `npm test` 861/861 +
+  build green, worktree/branch cleaned. Supervisor re-verified:
+  prefix chain re-flattened (turn17 ⊂ postwin ⊂ winline-b-swap,
+  script-exact — the shared prefix serves BOTH swap branches since the
+  joint precedes the YES/NO divergence), fresh rerun (208 captures,
+  endpoint sha reproduced), 2 labels PNG-read (heal text in the
+  pre-battle room at 23800; the settled YES/NO swap prompt at 29601).
+  §16 HEADLINE 4 refined at this fold with the bisected window.
+- **Did:** the return is a THREE-scene sequence (fade → ~38-tick flash
+  of the S6 battle room → black → fade-in on S5's pre-battle room),
+  both scenes already extracted/modeled — no new assets needed (camera
+  path for the flash honestly flagged not re-verified). Heal RAM write
+  lands 163 ticks AFTER the heal-text dismiss (screen frozen the whole
+  gap); loss-quote cursor question remains open (honest flag).
+- **Next:** round 8 — main: feathers dedicated step (turn-7/8 tables +
+  §29 sampling-residual leads); worktree: ISSUES #29 probe (the two
+  boundary families, same RAM-first method). Then turn 9+ slices; S8
+  engine work now has complete ground truth end to end.
+- **Notes:** scout in contract (16.3 of 40 min); PAPERCUT noted in the
+  dossier (two supplementary RAM dumps run once, not twice — trace
+  itself twice-run; acceptable, flagged in-doc).
+
+---
 ## 216 — Bounded worker (S7 engine fix): **ISSUES #28 CLOSED** — `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` applied at the 3 turn-6/7/8 browsing-branch call sites; 20 of 26 named ticks restored 0-diff, 6 more surfaced as TWO DIFFERENT out-of-domain families (filed ISSUES #29) rather than force-fit
 
 - **State:** `npm test` **861/861** (+4), `npm run build` green, tree
@@ -72,41 +97,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   scout (loss quote 23601 → §17's swap-offer joint). Then: feathers
   dedicated step (turns 6/7/8 tables + §29's sampling-residual leads),
   turn 9+.
-
----
-## 214 — Bounded worker (S7 engine fix): **ISSUES #26 CLOSED** — Sitrus THIN_RING implemented from §16's banked closed form (`turn5SitrusRingMatrix`, first-attempt render), `turn5-sitrus-c.json`'s excluded 7042-7072 restored to **181/181 0 diff**; z-order caveat resolved by reusing the already-established terrain-occlusion clip (`PLAYER_BALL_OPEN_VISIBLE_BOTTOM`), not a shadow-sprite priority contest
-
-- **State:** `npm test` **857/857** (+5), `npm run build` green, tree
-  clean. `turn5-sitrus-c.json` 181/181 (150 prior + 31 restored), 0 diff.
-  Zero regressions, all rerun at full committed counts: `turn5-sitrus-
-  a.json` 110/110, `turn5-sitrus-b.json` 82/82, `turn5-sitrus-d.json`
-  133/133, `turn5-switchin.json` 241/241, `turn6-menu.json` 33/33.
-- **Did:** the fix was purely mechanical per the brief (§16's own closed
-  form ported verbatim, zero re-fitting): `turn5SitrusRingMatrix(t)` -
-  `a=d=floor(4096/n)`, `n=clamp(ramTick-7039,1,31)`, ordinary +1 lag,
-  fixed center (72,88), wired into `drawTurn5RockSlideAttack` via the
-  existing `drawSpriteSheetAffineRotate` sampler + the already-extracted
-  ring gfx. The one non-mechanical piece (the z-order caveat) resolved on
-  the first attempt: the probe's rows-112-114 residual color `(74,66,82)`
-  is an exact match to this dossier's own already-cited terrain-occlusion
-  color (`PLAYER_BALL_OPEN_VISIBLE_BOTTOM=112`, §7.27's "lands mostly
-  BEHIND the battlefield's foreground terrain tile") - a BG-over-sprite
-  compositing rule tied to the player's own field position, not an
-  OAM-priority contest against a literal drop-shadow sprite as §13/§15
-  had speculated. Added an optional `clipBottom` param to
-  `drawSpriteSheetAffineRotate` (no-op for its other 2 call sites) and
-  passed the existing constant through - no new mechanism invented.
-  5 Tier-1 pins added (both clamp ends, the 2 probe-verified sample
-  ticks, the identity tick, the lag/window cutoffs). `faint-switch-
-  notes.md` §17 written; ISSUES #26 deleted.
-- **Next:** engine: turn 8's own feather sub-window (out of scope this
-  step); turn 9+ parameterizations. Probes: #28 (period-9 excluded-tick
-  family, worktree-banked per PROGRESS #213, still open). Scout: post-WIN
-  scene transition dense ground truth.
-- **Notes:** landed well inside the 40-minute cap, first-attempt render
-  on both the closed form and the z-order clip - the probe step (§16)
-  and this run's own residual-elimination policy (re-reading already-
-  committed cross-file findings before touching pixels) did the actual
-  hard work; this step was exactly as mechanical as advertised.
 
 ---

@@ -1,4 +1,41 @@
 ---
+## 214 — Bounded worker (S7 engine fix): **ISSUES #26 CLOSED** — Sitrus THIN_RING implemented from §16's banked closed form (`turn5SitrusRingMatrix`, first-attempt render), `turn5-sitrus-c.json`'s excluded 7042-7072 restored to **181/181 0 diff**; z-order caveat resolved by reusing the already-established terrain-occlusion clip (`PLAYER_BALL_OPEN_VISIBLE_BOTTOM`), not a shadow-sprite priority contest
+
+- **State:** `npm test` **857/857** (+5), `npm run build` green, tree
+  clean. `turn5-sitrus-c.json` 181/181 (150 prior + 31 restored), 0 diff.
+  Zero regressions, all rerun at full committed counts: `turn5-sitrus-
+  a.json` 110/110, `turn5-sitrus-b.json` 82/82, `turn5-sitrus-d.json`
+  133/133, `turn5-switchin.json` 241/241, `turn6-menu.json` 33/33.
+- **Did:** the fix was purely mechanical per the brief (§16's own closed
+  form ported verbatim, zero re-fitting): `turn5SitrusRingMatrix(t)` -
+  `a=d=floor(4096/n)`, `n=clamp(ramTick-7039,1,31)`, ordinary +1 lag,
+  fixed center (72,88), wired into `drawTurn5RockSlideAttack` via the
+  existing `drawSpriteSheetAffineRotate` sampler + the already-extracted
+  ring gfx. The one non-mechanical piece (the z-order caveat) resolved on
+  the first attempt: the probe's rows-112-114 residual color `(74,66,82)`
+  is an exact match to this dossier's own already-cited terrain-occlusion
+  color (`PLAYER_BALL_OPEN_VISIBLE_BOTTOM=112`, §7.27's "lands mostly
+  BEHIND the battlefield's foreground terrain tile") - a BG-over-sprite
+  compositing rule tied to the player's own field position, not an
+  OAM-priority contest against a literal drop-shadow sprite as §13/§15
+  had speculated. Added an optional `clipBottom` param to
+  `drawSpriteSheetAffineRotate` (no-op for its other 2 call sites) and
+  passed the existing constant through - no new mechanism invented.
+  5 Tier-1 pins added (both clamp ends, the 2 probe-verified sample
+  ticks, the identity tick, the lag/window cutoffs). `faint-switch-
+  notes.md` §17 written; ISSUES #26 deleted.
+- **Next:** engine: turn 8's own feather sub-window (out of scope this
+  step); turn 9+ parameterizations. Probes: #28 (period-9 excluded-tick
+  family, worktree-banked per PROGRESS #213, still open). Scout: post-WIN
+  scene transition dense ground truth.
+- **Notes:** landed well inside the 40-minute cap, first-attempt render
+  on both the closed form and the z-order clip - the probe step (§16)
+  and this run's own residual-elimination policy (re-reading already-
+  committed cross-file findings before touching pixels) did the actual
+  hard work; this step was exactly as mechanical as advertised.
+
+---
+
 ## 213 — Worktree probe (supervisor-folded): **ISSUES #26's THIN_RING CRACKED ANALYTICALLY** — the ring's matrix is a pure isotropic scale with a closed form (`a=d=floor(4096/n)`, `b=c=0`, `n=clamp(ramTick-7039,1,31)`, center (72,88), render lag **+1** — NOT §13's +2 rotation class), placement verified pixel-exact with ZERO fitting (6/6 px at render 7042, 92/92 at 7048, existing sampler + existing gfx verbatim); after 3 failed fitting attempts across 3 sessions, one 15-min probe made the fix MECHANICAL; `faint-switch-notes.md` §16 + committed probe JSON merged, suite 852/852
 
 - **State:** merged into master post-turn-8, `npm test` 852/852 + build
