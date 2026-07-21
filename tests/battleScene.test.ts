@@ -66,7 +66,7 @@ import speciesNames from "../src/data/gen/species-names.json" with { type: "json
 import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-probe.json" with { type: "json" };
 import turn6BounceBlipProbe from "../src/data/gen/turn6-bounce-blip-probe.json" with { type: "json" };
 import turn8BounceBlipProbe from "../src/data/gen/turn8-bounce-blip-probe.json" with { type: "json" };
-import { turn6FeatherSprites } from "../src/engine/featherDance.ts";
+import { turn6FeatherSprites, compareFeatherDrawOrder } from "../src/engine/featherDance.ts";
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -1661,10 +1661,31 @@ describe("S7 slice N-3: turn6FeatherSprites (src/engine/featherDance.ts) - RAM-t
   it("the first visible tick (7405, RAM 7404) is exactly slot 3's own spawn snapshot", () => {
     const sprites = turn6FeatherSprites(7405);
     expect(sprites).toHaveLength(1);
-    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3 });
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3 });
   });
   it("all 8 sprites are live by render tick 7437 (RAM 7436, the last spawn group)", () => {
     expect(turn6FeatherSprites(7437)).toHaveLength(8);
+  });
+});
+
+describe("S7 engine slice Q rung (a) (docs/battle-turn-notes.md §29/§34): compareFeatherDrawOrder - real per-tick same-priority overlap from the 7421-7549 residual window (RAM tick 7428, render 7429), lower slot drawn LAST (on top)", () => {
+  it("sorts the base-priority group at render tick 7429 (4 overlapping same-priority feathers) with the lowest slot drawn last (on top)", () => {
+    // src/data/gen/turn6-feather-sprites-probe.json tick 7428: slots 4/7/8/10
+    // are all priority 2 and overlap on-screen by render tick 7429 (+1 lag) -
+    // this is the group whose draw order this session's oracle bisection
+    // (battle-turn-notes.md §29/§34) found flips the residual's worst frames
+    // from ~30px wrong to near-0.
+    const sprites = turn6FeatherSprites(7429).filter((s) => s.priority === 2);
+    const slots = sprites.map((s) => s.slot).sort((a, b) => a - b);
+    expect(slots).toEqual([4, 7, 8, 10]);
+    const sorted = [...sprites].sort(compareFeatherDrawOrder);
+    expect(sorted[sorted.length - 1]!.slot).toBe(4); // lowest slot drawn last -> on top
+    expect(sorted[0]!.slot).toBe(10); // highest slot drawn first -> backmost
+  });
+  it("orders by priority first, slot only as the same-priority tiebreak", () => {
+    const a = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 2, slot: 3 };
+    const b = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 3, slot: 12 };
+    expect(compareFeatherDrawOrder(a, b)).toBeGreaterThan(0); // b (higher priority number) sorts first
   });
 });
 

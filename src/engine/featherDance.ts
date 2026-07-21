@@ -66,6 +66,7 @@ export interface FeatherRenderSprite {
   pd: number;
   animNum: 0 | 1;
   priority: number;
+  slot: number;
 }
 
 /** RAM-to-render lag for this mechanism (bisected this session against the oracle at several probe ticks, same "+1 for most mechanisms" class the rest of this dossier finds - see battle-turn-notes.md §29). */
@@ -92,7 +93,28 @@ export function turn6FeatherSprites(t: number): FeatherRenderSprite[] {
       pd: rec.d,
       animNum: rec.animNum ? 1 : 0,
       priority: rec.priority,
+      slot: rec.slot,
     });
   }
   return out;
+}
+
+/**
+ * Draw-order tiebreak for same-priority feathers (battle-turn-notes.md §29/§34):
+ * pokeemerald's `SortSprites` (`reference/pokeemerald/src/sprite.c`) sorts the
+ * real OAM buffer by `(subpriority, oam.priority)` ascending, and lower-index
+ * OAM slots draw IN FRONT of higher-index slots at equal priority. All 8
+ * `gFallingFeatherSpriteTemplate` spawns share the same `subpriority`
+ * (`Cmd_createsprite`'s `subpriority_offset` is 0 for every spawn line in
+ * `data/battle_anim_scripts.s`'s `Move_FEATHER_DANCE`), so this codebase's
+ * own `slot` (== `gSprites[]` index, the same value used for real OAM order
+ * here) is the tiebreak that matters - lower slot drawn LAST (on top). Bisected
+ * empirically against the oracle on the 7421-7549 residual window (the
+ * cheapest repro): this ordering cut the mismatched-pixel total from ~2000+px
+ * (arbitrary ascending-slot draw, i.e. HIGHER slot on top) to 425px, with 9
+ * frames landing exact - a real, load-bearing fix, not yet a full crack (a
+ * smaller residual remains, characterized in §34 as still-open).
+ */
+export function compareFeatherDrawOrder(a: FeatherRenderSprite, b: FeatherRenderSprite): number {
+  return b.priority - a.priority || b.slot - a.slot;
 }

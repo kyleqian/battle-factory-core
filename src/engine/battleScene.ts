@@ -498,7 +498,7 @@ import {
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import type { ActiveMonMoveset } from "./battleSetup.ts";
-import { turn6FeatherSprites } from "./featherDance.ts";
+import { turn6FeatherSprites, compareFeatherDrawOrder } from "./featherDance.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimWhiteFeatherAsset from "../assets/gen/battle-anim-white-feather.json" with { type: "json" };
@@ -6566,7 +6566,7 @@ export function turn6FeatherDanceTextVisibleChars(t: number, pressTick: number):
 function drawTurn6FeatherSprites(fb: Uint8Array, t: number, wantBehindOnix: boolean): void {
   const sprites = turn6FeatherSprites(t)
     .filter((s) => (s.priority >= FEATHER_BASE_PRIORITY_CUTOFF) === wantBehindOnix)
-    .sort((a, b) => b.priority - a.priority);
+    .sort(compareFeatherDrawOrder);
   for (const s of sprites) {
     const tileset = s.animNum === 1 ? battleAnimWhiteFeather.frame2 : battleAnimWhiteFeather.tileset;
     drawSpriteSheetAffineRotate(fb, tileset, battleAnimWhiteFeather.palette, s.centerX, s.centerY, s.pa, s.pb, s.pc, s.pd);
