@@ -142,3 +142,25 @@ turn, narrowing its likely call site to a damaging move's own HP-commit
 path (absent here since FEATHER_DANCE deals no damage) rather than a fixed
 per-turn cost. Pidgeotto's own healthbar also crosses yellow→red for the
 first time in this sub-chain. Twice-run, 0 sha mismatches.
+
+`battle1-turn12-dense.json` (docs/turn12-notes.md): turn 12 of battle 1 —
+reuses `battle1-turn11-dense.json`'s own 96-segment script verbatim,
+extended with `battle1-winline-b-swap.json`'s own segments[94:98] (again
+**zero navigation presses**, cursor still on ROCK_SLIDE, verbatim,
+cross-checked byte-identical via a full 15374-tick per-frame button-state
+diff and an 8-tick pixel spot-check). 15374 frames total, 252
+`captureFrames` dense (stride-1) over seven windows bracketing every
+RAM-confirmed transition this turn (AERIAL_ACE then ROCK_SLIDE) plus sparse
+representative sampling of the uneventful holds and the turn-13 menu's own
+idle tail. **Corrects this session's own worktree brief**: turn 12 is
+*not* Pidgeotto's faint — ROCK_SLIDE is already down to 1/10 PP entering
+the turn (not the brief's assumed 2/10) and it **misses**, while
+Pidgeotto's AERIAL_ACE hits Onix 14→4, bit-exact to `battle-turn-notes.md`
+§15's own published turn-12 row, a 4th-turn reconvergence extending through
+ROCK_SLIDE's own PP-exhaustion boundary. The "unattributed RNG step"
+positively re-confirms a 4th time at the exact turns-9/10 offsets. A light
+(unverified, not densely probed) RAM-only look ahead locates the actual
+Pidgeotto faint at turn 13 (Onix's DRAGON_BREATH) and Murkrow's switch-in
+immediately after — the natural target for a future turn-13 scout is
+`battle1-winline-b-swap.json`'s own segments[98:106]. Twice-run, 0 sha
+mismatches.
