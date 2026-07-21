@@ -1,4 +1,17 @@
 ---
+## 232 — Supervisor merge fold: AERIAL_ACE fully RAM-pinned and asset-ready (stacked chain `worker/wt-20260721-111226`+`112501` merged, 3 commits) — cutting-slice sheet extracted + **VRAM-verified 0 mismatches** (OAM is AFFINE-OFF + OBJ-BLEND, checked not assumed), all FIVE mechanisms pinned in `docs/aerial-ace-notes.md` (live pressTick 12305 instrumented; two §40 corrections: lunge window +1 tick, clone life-ends +1 tick; mechanisms 1/3 need **+2** render lag vs 5's +1; mechanism 4 is a SOFTWARE `BlendPalette()` 2-step, not BLDY hardware — the brief's own assumption falsified with evidence; 71px onset patch attributed to mechanism 5). `tools/probe/verify-turn10-aerialace.ts` **20/20 supervisor-rerun** post-merge
+
+- **State (supervisor-verified post-merge):** `npm test` **921/921**
+  (917 + 4 asset pins), `npm run build` green, verify script 20/20
+  fresh from the main tree, worktree chain cleaned up. Turn-10 rung-(c)
+  probe (ROCK_SLIDE/turn-end) in flight on `worker/wt-20260721-114115`.
+- **Notes:** next engine slice (AERIAL_ACE wiring) is a wiring job:
+  asset + all tables banked, verify script gates it. Also verified this
+  fold: rung c3's hitsplat fixes closed `turn2-endeavor-drain`'s last
+  residual (now **201/201**, was 200/201 since S7 slice E1) — supervisor-
+  rerun confirmed, no capture changes.
+
+---
 ## 231 — Bounded worker (S7 slice R rungs c3/c4/d): rungs (c4) and (d) LAND 0-diff (`turn9-quickattack-b.json` **77/77**, new `turn9-rockslide.json` **130/130**); rung (c3) lands Onix's own shake exactly but the hitsplat's own pixels + a pre-existing slot4-tail residual stay a named small gap, and a genuine NEW mechanism (Onix's own brief whole-sprite hit-flash, render 10983-10986) was found and left unmodeled
 
 - **State:** `npm test` **917/917** (896 + 21 new), `npm run build`
