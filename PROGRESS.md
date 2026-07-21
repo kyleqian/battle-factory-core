@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 228 — Supervisor merge fold: **ISSUES #30 FULLY CRACKED and closed** by the round-1 worktree worker (branch `worker/wt-20260721-095153` merged) — candidate A's sSpriteOrder draw-order adopted AND the real root cause of BOTH residual classes found: feathers are `ST_OAM_AFFINE_NORMAL` (not `_DOUBLE`), so `drawSpriteSheetAffineRotate`'s unconditional doubled destination box painted rotated feather corners over Onix; new `doubleSizeBox=false` param at the feather call only. Turn-6 residual window 425px → **0px on all 129 ticks**, turns 7/8 likewise; feather traces extended **106→235, 16→145, 33→162**, suite **892/892**
+
+- **State (all supervisor-verified post-merge, main tree):** `npm test`
+  **892/892**, `npm run build` green. Supervisor-rerun 0 diff:
+  `turn6-feathers` 235/235, `turn7-feathers` 145/145, `turn8-feathers`
+  162/162, `turn9-quickattack` 117/117, plus spot-checks `sendout`
+  255/256 (ISSUES #18's settled tick), `turn6-rockslide-a` 255/255,
+  `turn8-bind-a` 256/256, `turn6-statfall` 127/127. Source claim
+  independently verified (`battle_anim_flying.c:175`,
+  `gOamData_AffineNormal_ObjNormal_32x32`). Worktree + branch cleaned up.
+- **Notes:** the "two independent residual classes" forensic split (#224)
+  dissolved — one box-clip bug explained both signatures. The default-true
+  param keeps every other affine caller byte-identical (ball spin
+  verified via `sendout`). Dossier: `docs/feather-order-notes.md`'s
+  2026-07-21 adoption section. ISSUES #30 removed this commit.
+
+---
 ## 227 — Bounded worker (S7 slice R rung (c2)): QUICK_ATTACK's two afterimage clones LAND 0-diff — three real bugs found by RAM re-probe + oracle-PNG bisection (a boundary-transcription truncation, a blend-target-2 rule, a creation-lag tick, plus a "feet stay grounded" clip), `turn9-quickattack.json` **117/117, 0 diff** (up from 112)
 
 - **State:** `npm test` **888/888** (880 + 8 new Tier-1 pins), `npm run
@@ -78,55 +95,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   memory updated). Interactive session; no escalations needed — the
   one near-trigger (slice R's consecutive non-landings) resolved under
   the established convergence-counting convention (§35→§36→§37→landed).
-
----
-## 225 — Bounded worker (S7 engine slice R rung (c) RETRY #3): mandatory diagnostic CONFIRMS the LIVE pressTick (10871) mismatches §36/§37's assumed anchor (10867) by 4 ticks — rung (c1) (lunge + erase-footprint) LANDS clean, `turn9-quickattack.json` **112/112, 0 diff**; rung (c2) (afterimage clones) gets close (diff shrinks to single digits % at every tick) but not 0-diff, reverted honestly
-
-- **State:** `src/engine/battleScene.ts` has rung (c1) only (lunge table +
-  `erasePidgeottoFootprint` + `drawTurn9QuickAttackLunge`, wired into
-  `drawTurn9FightSubmenuWindow`). `npm test` **880/880** (877+3 new
-  Tier-1 pins), `npm run build` green. New `tools/compare/traces/
-  turn9-quickattack.json` committed, **112/112, 0 diff** (extends
-  `turn9-menu.json`'s own 10818-10928 boundary one tick to 10929, the
-  animation's own first active render). Regressions unchanged:
-  `turn9-menu.json` **111/111**, `turn8-menu.json` **88/88**,
-  `turn1-cloneanim.json` **230/230**.
-- **Did:** Per the retry brief's mandatory first step, instrumented the
-  LIVE dispatcher (`tools/compare/scratch/diag-quickattack-anchor.ts`,
-  committed) instead of re-guessing — ran `battle1-turn9-dense.json`'s
-  own script through the real `core.ts` `tick()` and printed
-  `fightSubmenu.confirmElapsed` at the key ticks: constant `9831`
-  throughout, so `pressTick = TICK0+confirmElapsed = 10871`, not
-  §36/§37's assumed `10867`. **This confirms suspect (1) outright** (a
-  4-tick anchor error, not eliminated as a red herring). Re-wrote the
-  lunge table's delay constant from the correct algebra (`57 =
-  10928-10871`, not the reverted attempt's `61 = 10928-10867`) — same
-  RAM-tabled offsets from §36, same erase/redraw shape as the reverted
-  attempt, only the anchor fixed. Suspect (2) (axis/mirror) never needed
-  invoking — checked by precedent first (`drawDoubleTeamClones`/
-  `endeavorShakeX2` both apply RAM `x2` via plain addition to the
-  opponent-side corner, no mirror; this fix uses the same convention)
-  and confirmed sufficient by the clean pixel match. Landed (c1) fully
-  green (0 diff 10924-10929, the lunge's first active tick). Attempted
-  (c2) (the two `TraceMonBlended` afterimage clones, `drawSpriteSheetBlended`
-  reused verbatim, undarkened per §36): diff pixel counts shrank
-  substantially at every touched tick (e.g. 10933: 1180→123px, 10934:
-  1125→39px) confirming the general approach right, but none reached 0
-  — ruled out the healthbox-skip-mask as the cause (removing it left
-  diff counts byte-identical), crop-diffed tick 10930 and found the
-  afterimage's own rendered detail looks flatter than the oracle's, not
-  root-caused before the cap — reverted rather than commit a
-  shrunk-but-nonzero diff as if it were a landed rung.
-- **Next:** round 13 — rung (c2) retry: `docs/battle-turn-notes.md` §38
-  has the full diagnostic (live-pressTick console output, the c1 table,
-  the c2 diff-shrinkage data, the ruled-out skip-mask candidate, and a
-  4-step bisection plan — RAM-reverify the slot-3/4 lifetime boundary
-  ticks first, then isolate slot 3 alone before debugging both
-  afterimages together). Rungs (c3) (hitsplat + shake episode 1) and
-  (c4) (drain/text) remain fully unattempted. Rung (d) (ROCK_SLIDE)
-  still waits on (c) landing a correct prefix.
-- **Notes:** the mandatory-diagnostic-first discipline the brief
-  demanded paid off directly — a 5-minute `console.log` harness found
-  the exact 4-tick anchor bug the PRIOR session's retry (#223) spent its
-  whole cap failing to root-cause blind. PAPERCUT: none beyond prior
-  sessions' own.

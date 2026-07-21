@@ -5,50 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #30 — FEATHER_DANCE's same-priority feather draw-order residual (turns
-  6/7/8, same relative offset each time): partially fixed, not cracked
-
-Surfaced 2026-07-21 (docs/battle-turn-notes.md §29), partially fixed +
-generalized to turns 7/8 same session (§34). `drawTurn6FeatherSprites`'
-tiebreak for same-OAM-priority feathers was arbitrary (ascending slot,
-i.e. highest slot drawn last/on top) - backwards from pokeemerald's own
-`SortSprites` (`reference/pokeemerald/src/sprite.c`), which draws lower
-OAM-index sprites on top at equal priority. Reversing the tiebreak
-(`compareFeatherDrawOrder`, `src/engine/featherDance.ts`) cut the
-7421-7549 residual window's total mismatched pixels from ~2000+ to 425
-across 129 ticks (9 exact), a real load-bearing fix - but not a full
-crack. Confirmed (not assumed) to recur at the identical relative offset
-in turns 7/8's own feather windows once their probe tables were built
-this session (first mismatch always ~17 ticks after each turn's own first
-spawn) - i.e. it's a property of the shared mechanism/tiebreak, not a
-turn-6-specific artifact.
-
-**State after the three 2026-07-21 probes** (`docs/feather-order-notes.md`
-carries all evidence; every claim below pixel-tested against fresh oracle
-captures of turn 6's full 7421-7549 window):
-- **Order candidate A WINS** (sSpriteOrder simulated from source, seeded
-  `[3,4,7,8,9,10,11,12]` with spawn-pair (4,7) in that order): 425→230px,
-  ≤ candidate B on 129/129 ticks, generalizes to turns 7/8 (46→17px
-  spot). Mechanical adoption recipe in the notes doc (replace
-  `compareFeatherDrawOrder`'s tiebreak with a lookup into the simulated
-  per-tick order). NOT yet adopted in the engine — an improvement, not a
-  crack, so no trace extends yet.
-- **Half-texel sampling-center lead ELIMINATED decisively**: 11/11
-  variants (9-point ±0.5 grid + hFlip-conditional + box-origin) are
-  78-142× WORSE — the current sampler's center convention is confirmed
-  correct.
-- **The remaining ~230px is TWO independent classes** (4-pixel gated
-  forensics): (a) soft-gradient white/blue deltas — §29's original
-  signature, mechanism still unknown; (b) larger deltas in ONIX'S GRAY
-  (not in the feather palette at all) exactly at the priority-split
-  occlusion boundary — a `beforeMonSprite`/priority-split wiring error,
-  a DIFFERENT code path than the sampler. Treat as two threads.
-
-Next steps: adopt candidate A (mechanical); then chase class (b) as an
-ordinary occlusion bug (it has a locatable code path); class (a) stays
-the hard unknown. `turn6/7/8-feathers.json` stop at 106/16/33, all 0
-diff; extension gated on both classes closing.
-
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
   turn2-dragonbreath.json remain uncaptured after 4 bounded attempts

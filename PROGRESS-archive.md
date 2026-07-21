@@ -1,4 +1,55 @@
 ---
+## 225 — Bounded worker (S7 engine slice R rung (c) RETRY #3): mandatory diagnostic CONFIRMS the LIVE pressTick (10871) mismatches §36/§37's assumed anchor (10867) by 4 ticks — rung (c1) (lunge + erase-footprint) LANDS clean, `turn9-quickattack.json` **112/112, 0 diff**; rung (c2) (afterimage clones) gets close (diff shrinks to single digits % at every tick) but not 0-diff, reverted honestly
+
+- **State:** `src/engine/battleScene.ts` has rung (c1) only (lunge table +
+  `erasePidgeottoFootprint` + `drawTurn9QuickAttackLunge`, wired into
+  `drawTurn9FightSubmenuWindow`). `npm test` **880/880** (877+3 new
+  Tier-1 pins), `npm run build` green. New `tools/compare/traces/
+  turn9-quickattack.json` committed, **112/112, 0 diff** (extends
+  `turn9-menu.json`'s own 10818-10928 boundary one tick to 10929, the
+  animation's own first active render). Regressions unchanged:
+  `turn9-menu.json` **111/111**, `turn8-menu.json` **88/88**,
+  `turn1-cloneanim.json` **230/230**.
+- **Did:** Per the retry brief's mandatory first step, instrumented the
+  LIVE dispatcher (`tools/compare/scratch/diag-quickattack-anchor.ts`,
+  committed) instead of re-guessing — ran `battle1-turn9-dense.json`'s
+  own script through the real `core.ts` `tick()` and printed
+  `fightSubmenu.confirmElapsed` at the key ticks: constant `9831`
+  throughout, so `pressTick = TICK0+confirmElapsed = 10871`, not
+  §36/§37's assumed `10867`. **This confirms suspect (1) outright** (a
+  4-tick anchor error, not eliminated as a red herring). Re-wrote the
+  lunge table's delay constant from the correct algebra (`57 =
+  10928-10871`, not the reverted attempt's `61 = 10928-10867`) — same
+  RAM-tabled offsets from §36, same erase/redraw shape as the reverted
+  attempt, only the anchor fixed. Suspect (2) (axis/mirror) never needed
+  invoking — checked by precedent first (`drawDoubleTeamClones`/
+  `endeavorShakeX2` both apply RAM `x2` via plain addition to the
+  opponent-side corner, no mirror; this fix uses the same convention)
+  and confirmed sufficient by the clean pixel match. Landed (c1) fully
+  green (0 diff 10924-10929, the lunge's first active tick). Attempted
+  (c2) (the two `TraceMonBlended` afterimage clones, `drawSpriteSheetBlended`
+  reused verbatim, undarkened per §36): diff pixel counts shrank
+  substantially at every touched tick (e.g. 10933: 1180→123px, 10934:
+  1125→39px) confirming the general approach right, but none reached 0
+  — ruled out the healthbox-skip-mask as the cause (removing it left
+  diff counts byte-identical), crop-diffed tick 10930 and found the
+  afterimage's own rendered detail looks flatter than the oracle's, not
+  root-caused before the cap — reverted rather than commit a
+  shrunk-but-nonzero diff as if it were a landed rung.
+- **Next:** round 13 — rung (c2) retry: `docs/battle-turn-notes.md` §38
+  has the full diagnostic (live-pressTick console output, the c1 table,
+  the c2 diff-shrinkage data, the ruled-out skip-mask candidate, and a
+  4-step bisection plan — RAM-reverify the slot-3/4 lifetime boundary
+  ticks first, then isolate slot 3 alone before debugging both
+  afterimages together). Rungs (c3) (hitsplat + shake episode 1) and
+  (c4) (drain/text) remain fully unattempted. Rung (d) (ROCK_SLIDE)
+  still waits on (c) landing a correct prefix.
+- **Notes:** the mandatory-diagnostic-first discipline the brief
+  demanded paid off directly — a 5-minute `console.log` harness found
+  the exact 4-tick anchor bug the PRIOR session's retry (#223) spent its
+  whole cap failing to root-cause blind. PAPERCUT: none beyond prior
+  sessions' own.
+
 ## 224 — Worktree probes ×2 (supervisor-folded, stacked branches): ISSUES #30's pixel test CROWNS CANDIDATE A (425→230px, ≤B on 129/129 ticks, turns 7/8 generalize 46→17px; mechanical adoption recipe banked) and the half-texel lead is ELIMINATED DECISIVELY (11/11 variants 78-142× worse — the sampler's center convention is CONFIRMED correct); forensics splits the remaining ~230px into TWO independent classes — soft-gradient unknown (a) and an ONIX-GRAY occlusion-boundary error at the priority split (b), a different, locatable code path; merged, suite 877/877
 
 - **State:** both stacked probe branches merged in one merge, `npm
