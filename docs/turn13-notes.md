@@ -101,21 +101,20 @@ confirmation that a 0-PP move can sit under the cursor with **no
 auto-skip**, answering the brief's own "does 0-PP interact with
 selection" question: **no**, the UI never prevents resting on an
 exhausted move). After the single scripted `DOWN` press (ticks
-15406-15408), the cursor reads **2** (DRAGON_BREATH), not 1 (BIND) — a
-genuine double decrement from one press, RAM-confirmed at every
-sampled tick (no intermediate tick reads 1). PNG-confirmed at tick
-15374-15420 the FIGHT submenu shows all four moves with DRAGON_BREATH's
-own row highlighted at 19/20 PP once the press lands. **This is not
-cosmetic**: DRAGON_BREATH is exactly the move the winline needs this
-turn (ROCK_SLIDE is PP-exhausted, BIND was never re-verified as
-"actually hits" — Test 2 from `turn11-notes.md`/`turn12-notes.md`,
-**still unexercised**), so the double-decrement is load-bearing for the
-scripted line, not an incidental artifact. **Not root-caused to a
-specific source line this session** (would need instruction-level
-tracing of the menu's own input-repeat/edge-detection logic, out of
-this harness's RAM-probing toolkit) — flagged precisely, not guessed at,
-matching this dossier chain's standing discipline for unresolved
-sub-mechanisms.
+15406-15408), the cursor reads **2** (DRAGON_BREATH), not 1 (BIND) —
+RAM-confirmed at every sampled tick (no intermediate tick reads 1).
+PNG-confirmed at tick 15374-15420 the FIGHT submenu shows all four moves
+with DRAGON_BREATH's own row highlighted at 19/20 PP once the press
+lands. **[ROOT-CAUSED AT THE FOLD, supervisor 2026-07-20]** This is not
+a "double decrement" — the FIGHT submenu is a **2×2 grid** (0=top-left
+ROCK SLIDE, 1=top-right BIND, 2=bottom-left DRAGONBREATH,
+3=bottom-right SANDSTORM): `DOWN` moves one ROW (+2), `RIGHT` moves one
+COLUMN (+1). Turn 8's own dossier already exercised the +1 case (one
+`RIGHT` press, cursor 0→1 to BIND); this is the +2 row move, exactly
+as the on-screen layout shows (the engine's own fight-submenu cursor already implements this grid —
+`battleMenu.ts:981`'s `cursor ^ 2` row toggle for UP/DOWN). Nothing is unresolved; the winline simply needs
+the bottom-left move this turn (ROCK_SLIDE PP-exhausted, BIND's
+"actually hits" — Test 2 — still unexercised).
 
 ### Damage and effectiveness (PNG-confirmed)
 

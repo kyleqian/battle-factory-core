@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 201 — Worktree scout (supervisor-folded): turn 13 ground truth BANKED — Pidgeotto FAINTS to DRAGON_BREATH, MURKROW switches in (142/142, LAX_INCENSE, NO switch-in proc), and the REUSE MAP says the whole faint/switch window is turn-5 machinery VERBATIM with new params; **the projectile table is bit-identical to turn 2's** (one closed-form dy param: target yOffset 11 vs 4) so ISSUES #23's exclusion covers turn 13 with no fresh crack; `battle1-turn13-dense-{a,b}.json` (256+223 captures) + `docs/turn13-notes.md`; merged `95524d4`, suite 821/821 on the merged tree
+
+- **State:** merged into master, `npm test` 821/821 + build green
+  post-merge. Supervisor re-verified: prefix chain (turn12 ⊂ turn13-a ⊂
+  turn13-b ⊂ winline-b-swap, script-exact), switch-commit sha (16944)
+  reproduced fresh, final capture PNG-read (settled menu vs MURKROW,
+  Onix 4/117). One "surprise" ROOT-CAUSED at the fold: the reported
+  cursor "double-decrement" (DOWN: 0→2) is the FIGHT submenu's ordinary
+  2×2 grid row move (`battleMenu.ts:981`, `cursor ^ 2`; turn 8's RIGHT
+  = +1 column move corroborates) — dossier corrected, nothing open.
+- **Reuse map (scout's verdicts):** faint sink verbatim (closed form
+  gives n=7 for Pidgeotto's yOffset), ball prop / particle burst /
+  landing-bounce verbatim byte-exact; stretch/wobble/tint + healthbox
+  slide same-shape but honestly NOT re-verified to the byte; KO-gated
+  hold verbatim, pixel-frozen. Also: 0-PP moves are never auto-skipped;
+  Onix accuracy stage 6→5 from SAND_ATTACK under the held kickoff.
+- **Next:** slice N-3 — the feather animation's affine renderer (8
+  per-tick-rotating sprites, §28's RAM ground truth + implementation
+  sketch); then rungs (c)/(d); then turn-7..13 slices are all
+  parameterizations except the #23-excluded projectile ticks. BIND-hit
+  (Test 2) never exercised on this line — battles 2-7 may exercise it.
+- **Notes:** scout stayed in contract; no papercuts.
+
+---
 ## 200 — Bounded worker (S7 slice N rung (b), reduced scope): FEATHER_DANCE's kickoff text + settled hold LANDED — `turn6-featherdance.json` 90/90, 0 diff; a real rung-(a) bug found+fixed (region-A onix-sprite bounce wasn't frozen, only region B was); the feather/starburst SPRITE ANIMATION itself deferred (genuinely new affine-rotation rendering, no precedent in this codebase) — RAM ground truth banked, not implemented
 
 - **State:** `npm test` **821/821** (+3), `npm run build` green, tree
@@ -61,78 +85,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   turn6-dense.json`'s own script has zero button presses between the turn-6
   confirm and turn 7's reopen, so `turn6-menu.json`'s already-committed
   idle tail already covered the whole window — no stitching needed at all).
-
----
-## 199 — Worktree scout (supervisor-folded): turn 12 ground truth BANKED — the scout CORRECTLY FALSIFIED the brief's premise (supervisor transcription slip: ROCK_SLIDE entered at 1/10 not 2/10): turn 12 = AERIAL_ACE hit (Onix 14→4) + ROCK_SLIDE **MISS** (PP-exhausted at 0/10), NOBODY faints; the real faint is **turn 13 via DRAGON_BREATH** (tick 15887, Murkrow in at 16944, light RAM scan, unverified); 4th consecutive line reconvergence; `battle1-turn12-dense.json` (252/252 captures) + `docs/turn12-notes.md`; merged `0a3ccf4`, suite 818/818 on the merged tree
-
-- **State:** merged into master, `npm test` 818/818 + build green
-  post-merge. Supervisor re-verified: prefix chain (turn11 ⊂ turn12 ⊂
-  winline-b-swap, script-exact), miss-hold sha reproduced fresh, PNG-read
-  the held "ONIX used ROCK SLIDE!" frame with Onix at 4/117. Scout
-  discipline was exemplary: did the assigned turn-12 work as it ACTUALLY
-  happens, added only a clearly-labeled unverified turn-13 scan, deferred
-  the reuse map to the turn-13 session with three sharp bullets.
-- **Did:** turn 12 both-halves ledger RAM-truthed (AERIAL_ACE 0.5× vs
-  ROCK/GROUND — PNG-caught, easy to misremember; ROCK_SLIDE's miss = 1
-  Random() only). The unattributed RNG step re-confirmed a 4th time at
-  bit-exact offsets (93 after HP-commit, 9 before curMove) — solidly tied
-  to the damaging-move HP-commit path now. Murkrow snapshot RAM-confirmed
-  3rd time; held item corrected to LAX_INCENSE (no switch-in proc,
-  unlike Sitrus).
-- **Planning implication (supervisor):** turn 13's faint arrives via
-  DRAGON_BREATH — ISSUES #23's PARKED projectile animation is therefore
-  ON the winline. The turn-13 engine slice will need #23's exclusion
-  treatment for the projectile ticks unless #23 is cracked first;
-  sequence a dedicated #23 probe (its named "isolate a single spawn"
-  instrument, never attempted) before or alongside that slice.
-- **Next:** slice N rung (b) — FEATHER_DANCE's animated path (turn 6,
-  7358-7658), per §27's precise scoping; then rungs (c)/(d); then
-  turn-13 scout (faint + Murkrow switch-in reuse map).
-- **Notes:** scout stayed in contract; no scout papercuts (the main-lane
-  stitching papercut recorded separately).
-
----
-## 198 — Bounded worker (S7 slice N rung (a) only): turn 6's FIGHT-submenu reopen + move confirm LANDED — `turn6-menu.json` 33/33, 0 diff; rungs (b)/(c)/(d) NOT attempted (60-min cap, not a resistance finding) — precisely scoped for the next session
-
-- **State:** `npm test` **818/818** (+5), `npm run build` green, tree
-  clean. New committed trace `turn6-menu.json` (33 captures, 7307-7350,
-  11 named bounce-extremum ticks excluded) 0 diff. Regression sweep:
-  `turn5-sitrus-c.json` 150/150, `turn5-sitrus-d.json` 133/133, `turn3-
-  rockslide.json` 256/256, `turn5-rockslide.json` 256/256, `turn5-menu.json`
-  42/42, `turn4-menu.json` 44/44, `turn5-endeavor.json` 254/254 — zero
-  regressions.
-- **Did:** turn 6's reopen (press 7313) + confirm (7345, cursor 0 -
-  ROCK_SLIDE, no nav needed) — the first FIGHT-submenu reopen against a
-  NEW opponent (Pidgeotto, not Grovyle), so `drawFightSubmenuWindow` now
-  short-circuits on a new `turn5Resolved` flag into a dedicated
-  `drawTurn6FightSubmenuWindow`/`drawTurn6FieldBase` (Onix/Pidgeotto's
-  own already-proven-0-diff primitives, factored out of
-  `drawTurn5RockSlideWindow`'s own tail — zero formula changes) instead of
-  threading a 5th tier through the Grovyle-shaped `menuIdleBase` helpers.
-  Two real bugs found via compare-driven bisection: (1) the window's own
-  right-edge border strip (x=232-239) wasn't filled under the reopened
-  submenu — turns 1-5 never exercised this since `menuIdleBase`'s full-
-  screen static harvest always covered it; fixed by drawing the same
-  y≥112 chrome crop before the submenu's own opaque box. (2) a chained-
-  trace stitching bug (not an engine bug) — the scratch probe silently
-  inserted 8 redundant idle frames, shifting press ticks 8 late in the
-  trace's own frame-index space (pixels still matched since oracle+app
-  replay the identical script, but citations would've been wrong); fixed
-  by trimming the overshoot so the committed trace's ticks match the
-  dossier's own cited 7313/7345 exactly.
-- **Next:** rung (b) — the FEATHER_DANCE kickoff text + feather/starburst
-  animation (~7358-7658, docs/turn6-notes.md §5/§6), genuinely new gfx-
-  extraction work, this session's own designated centerpiece, untouched.
-  Then (c) the ATK-fall message, (d) Onix's ROCK_SLIDE (parameterizable
-  from turns 1/3/4/5's own unchanged mechanism) to the settled turn-7 menu.
-- **Notes:** 3 named single-tick bounce-extremum residuals excluded from
-  `turn6-menu.json` (7315-7316, 7324-7325/7333-7334/7342-7343, 7348-7350) —
-  same well-precedented class already resolved elsewhere in this dossier
-  (ticks 3337/3465/3721/3879/3888/4934/5927); the last one (post-confirm,
-  region-A Onix-sprite bounce, NOT the healthbox) is grid-search-ruled-out
-  as the healthbox freeze and needs a direct `gSprites[onixSlot].y2` RAM
-  probe next. PAPERCUT: none this session beyond the chained-trace
-  stitching gotcha above (self-inflicted, ~15 min lost, now documented in
-  battle-turn-notes.md §27 so it isn't repeated).
 
 ---
