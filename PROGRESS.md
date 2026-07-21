@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 206 — Bounded worker (S7 slice N-4, rung a): turn 6's stat-fall window landed — §29's flagged ~7570+ residual RESOLVED (it's the generic StatsChangeAnimation banner, already built for turn 1's DOUBLE_TEAM, just never parameterized for a stat DECREASE) — `turn6-statfall.json` **127/127, 0 diff**, first-attempt; rung (b) (Onix's own ROCK_SLIDE vs. Pidgeotto) NOT attempted, precise ground-truth handoff banked in battle-turn-notes.md §30 (S7 bounded worker session, hard 60-minute cap)
+
+- **State:** `npm test` **831/831** (+6), `npm run build` green, tree
+  clean. `turn6-statfall.json` **127/127, 0 diff** (7558-7684). Zero
+  regressions: `turn6-feathers.json` 106/106, `turn6-featherdance.json`
+  90/90, `turn6-menu.json` 33/33, `turn5-rockslide.json` 256/256,
+  `turn1-rockslide.json` 256/256.
+- **Did:** RAM-probed the residual (`dump-task-and-sprite-callbacks.py`)
+  and found `gTasks` slot 1 running `StatsChangeAnimation_Step1/2/3` from
+  RAM tick 7567 — the SAME OBJ-window-masked BG1 alpha-blend banner turn
+  1's own `drawStatsBanner` already renders, just for a DECREASE
+  (`aSharply=TRUE` → `tTargetBlend=13`/`tWaitTime=30`) masked to ONIX
+  instead of Grovyle. A direct register probe (`BLDALPHA`/`gBattle_BG1_X`/
+  `gBattle_BG1_Y`, stride-1) decoded a clean deterministic step function
+  that matched the oracle 0-diff on the FIRST attempt, no bisection
+  needed. Also folded a message-sequencing correction directly into
+  turn6-notes.md's own understanding (superseding turn7-notes.md §5's
+  "generic box transition" guess): the "ONIX's ATTACK harshly fell!" text
+  starts at tick 7659 as a plain instant swap, not a box-close/reopen
+  slide — the "4 shared frames" turn7-notes noticed is just both messages
+  starting with the literal characters "ONIX".
+- **Next:** rung (b) — Onix's own ROCK_SLIDE vs. Pidgeotto (7765-8122ish,
+  battle-turn-notes.md §30 has a full sha-transition sweep of the whole
+  window banked: kickoff transition/hold, rock animation ~7805-7924,
+  impact flash ~7935-7955, HP-drain ~7970-8038, an uncaptured gap
+  8039-8114 almost certainly "It's super effective!", turn-end 8115-8124).
+  Needs: Pidgeotto-parameterized shake/blink (sprite+corner already exist
+  from the switch-in code), a fresh HP-drain pixel formula (156-max bar,
+  turn6-notes §5 already flagged it's NOT 1-unit-per-tick like turn 1's),
+  and the flinch/AI RNG cluster. Pidgeotto's healthbox sits at the SAME
+  screen origin Grovyle's did once settled (`turn5PidgeottoHealthboxSlideDx`
+  → 0), so the existing wobble geometry should be directly reusable.
+  Beyond that: turns 7-13 as parameterizations, turn 15+ scout (FLY
+  strike/first forced switch — already banked per #205), ISSUES #26.
+- **Notes:** no papercuts. Session was research-heavy (RAM-probing to
+  find the real mechanism cost real time) but paid off — first-attempt
+  0-diff is rare in this dossier and validates the "RAM-probe before
+  writing render code" mandate directly. Stopped rung (b) before
+  attempting implementation once it became clear it needed several NEW
+  sub-mechanisms (not a pure parameterization as the brief hoped) and the
+  session budget was better spent banking precise ground truth than
+  rushing a half-fit.
+
+---
 ## 205 — Worktree scout (supervisor-folded): turn 15 ground truth BANKED — **FLY's strike half rolls REAL accuracy/crit/damage (3 Random() calls — NOT RNG-free like its own charge half)**, hits for "not very effective" 11 clipped to Onix's 4 HP (hp0→0 at tick 19147), and the battle's first **PLAYER-side forced switch** is ground-truthed end to end (faint sink → button-gated "ONIX fainted!" → party-select, cursor defaulting to the fainted slot → SEND OUT → MAGBY 138/138 materialize → settled menu at 20558); `battle1-turn15-dense.json` (245 captures) + `docs/turn15-notes.md`; merged, suite 825/825 on the merged tree
 
 - **State:** merged into master post-N-3, `npm test` 825/825 + build
@@ -73,49 +117,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fallback, given this is the second such mechanism (after the Sitrus
   rotation table) where the real hardware's exact tick-level timing
   resisted a straight source port within a bounded session.
-
----
-## 203 — Supervisor wind-down: session end 2026-07-20 ~20:45 — **17 worker steps verified and folded** (8 main-lane + 9 worktree scouts, 9 rounds); suite **787 → 821/821**; headlines: **the faint/forced-switch sequence is COMPLETE end to end** (ball prop through the settled turn-6 menu, tick 7307 byte-identical — six traces, three sessions' worth of blockers root-caused), **the turn-6 engine slice has begun** (submenu reopen 33/33 + FEATHER_DANCE kickoff 90/90), and **the ground-truth dossier pipeline now covers turns 6-14** (9 dossiers + 10 dense traces, every one prefix-verified against the WIN line)
-
-- **State (verified this minute):** `npm test` **821/821**, `npm run
-  build` green, tree clean, no worktrees, no unmerged branches. Engine
-  traces this session: `turn5-switchin` 167→241, `turn5-healthbox` 55,
-  `turn5-sitrus-{a,b,c,d}` 110/82/150/133, `turn6-menu` 33,
-  `turn6-featherdance` 90 — all 0 diff, supervisor-rerun.
-- **The Sitrus saga (session's centerpiece, slices L-4→M-5):** the
-  materialize ramp-down "hardware quirk" fell as a corrupted coefficient
-  table (degenerate palette-offset decode); the "idle bob" fell as the
-  Sitrus proc's own opening rotation (AnimTask_RotateMonToSideAndRestore,
-  y2 a matrix byproduct — why y-only fits failed both signs); the
-  "sampler rounding gap" fell as a +2 render lag (sampler was never
-  wrong); GrantingStars spawn spacing corrected 8→10 vs source (RAM
-  wins); healthboxes draw above battle-anim particles
-  (UpdateOamPriorityInAllHealthboxes). Sole remainder: ISSUES #26 (the
-  THIN_RING, 7042-7072 excluded, 3 attempts, untried +2-lag lead).
-- **Dossier pipeline discoveries (turns 6-14):** both published lines
-  reconverge RNG-exactly at turn 9 (and stay converged through a
-  PP-exhaustion boundary); the ATK-floor "won't go lower!" fired and a
-  blocked stat change PROVABLY skips the move's animation (33-tick vs
-  ~290-tick holds — engine must gate animation on effect-success);
-  BIND misses at 8 Random() calls; AERIAL_ACE skips accuracy entirely;
-  turn 13's faint arrives via DRAGON_BREATH with the projectile table
-  bit-identical to turn 2's (ISSUES #23's exclusion covers it — no
-  fresh crack needed) and the Murkrow switch-in is turn-5 machinery
-  verbatim; FLY's charge half auto-misses DRAGON_BREATH at ZERO RNG
-  cost (STATUS3_ON_AIR short-circuit). Five dossier slips caught and
-  corrected at folds (each with supervisor PNG/pixel-diff evidence).
-- **Next:** (1) slice N-3 — the feather animation's affine renderer (8
-  per-tick-rotating sprites; §28 has RAM ground truth + sketch; needs a
-  fresh 60-min cap); (2) rungs (c)/(d) of turn 6, then turns 7-13 as
-  parameterizations; (3) turn-15+ scout (FLY strike, Onix's likely KO →
-  first FORCED PLAYER SWITCH, the WIN arc); (4) ISSUES #26 ring probe;
-  (5) turn6-menu's 8 excluded period-9 ticks (tested this session
-  post-bounce-fix: still real, still named).
-- **Notes:** no usage-limit events; zero merge conflicts across 9
-  worktree merges; 3 new PAPERCUTS entries (cwd persistence — bit a
-  worker AND the supervisor, trace-stitching, struct offsets); one
-  supervisor brief slip (turn-12 PP) gracefully falsified by the scout;
-  worker discipline strong all session (three honest reduced-scope
-  stops, every one with banked findings that landed next round).
 
 ---

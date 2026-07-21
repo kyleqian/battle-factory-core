@@ -5127,3 +5127,176 @@ mechanism's own real matrix, 3 `turn6FeatherSprites` pins). `npm run build` gree
 `turn6-menu.json` **33/33**, `turn6-featherdance.json` **90/90**,
 `turn5-sitrus-a.json` **110/110**, `turn1-rockslide.json` **256/256**, all
 0 diff.
+
+## 30. Engine slice N-4 rung (a): turn 6's stat-fall window - §29's flagged ~7570+ residual RESOLVED (it's the generic StatsChangeAnimation banner, already built for turn 1, just never parameterized for a DECREASE) - `turn6-statfall.json` **127/127, 0 diff**; rung (b) (Onix's own ROCK_SLIDE) NOT attempted, precise ground-truth handoff below (S7 bounded worker session, hard 60-minute cap)
+
+### Rung (a): landed in full, first-attempt 0-diff
+
+RAM-probed the ~7570+ residual §29 flagged as unmodeled (`tools/probe/
+dump-task-and-sprite-callbacks.py`, fresh run against a trimmed `battle1-
+turn6-dense.json` prefix): `gTasks` slot 1 runs `StatsChangeAnimation_
+Step1/2/3` from RAM tick 7567 - **the exact same mechanism** turn 1's own
+`drawStatsBanner` already renders for DOUBLE_TEAM's evasion RISE (§10a/§10c/
+§10d of `battle-menu-notes.md`), not a downward-arrow sprite or a healthbox
+flash as turn6-notes §6 speculated. `extract-stat-anim.ts` had already
+pulled the full 8-palette/2-tilemap asset family (a prior session's own
+forward-looking extraction, `src/assets/gen/stat-anim-banner.json`) but
+nothing had ever wired up the `decrease` tilemap / `attack` palette / a
+non-Grovyle target - this session did exactly that (`drawTurn6StatFallBanner`,
+`battleScene.ts`, a parallel function to `drawStatsBanner` rather than a
+generalization of it - different target sprite, tilemap, palette, AND a
+nonzero `BG1_X`, enough parameters that a copy reads clearer than a 6-arg
+generalization for a single second caller).
+
+**RAM-exact timing, zero fitting needed**: a direct register probe
+(`ram-probe.py`, watching `BLDALPHA`/`gBattle_BG1_X`/`gBattle_BG1_Y`,
+stride-1 across ticks 7555-7700) decoded `eva`/`evb` straight from
+`BLDALPHA`'s packed value and found a clean, fully deterministic step
+function - `+1` every 2 ticks from d=229 (pressTick-relative, pressTick=7345)
+to the "sharply" target 13 (`tTargetBlend=13`/`tWaitTime=30` for `aSharply=
+TRUE`, vs. DOUBLE_TEAM's mild-rise 10/20), held through d=284, then `-1`
+every 2 ticks back to 0 by d=309. `gBattle_BG1_Y` scrolls continuously at
+-3/tick (the decrease case's own `tVelocity`) through the ENTIRE window
+including the hold (matching `statsBannerBg1Y`'s own "keeps scrolling
+through the flat-eva hold" finding), one-tick render lag (same convention).
+`gBattle_BG1_X` is a flat constant 64 the whole window (`TURN6_STATFALL_
+BG1_X`) - a stat DECREASE's own horizontal picture, never scrolling itself.
+Every one of these closed forms matched the oracle **on the first attempt**
+(`npm run compare`, 127/127, 0 diff) - no bisection needed, a rare case in
+this dossier where a direct register probe was sufficient without any
+render-lag hunting beyond reapplying `statsBannerBg1Y`'s own already-
+established convention.
+
+**A message-sequencing correction to turn6-notes.md §5, folded in directly
+this session** (not just noted): the "ONIX's ATTACK harshly fell!" text does
+NOT start until pixel tick **7659** (the held FEATHERDANCE-kickoff sha stays
+flat through 7658, matching turn7-notes §5's own correction of the original
+§5 table), and it is a plain **instant swap** - box stays open, first glyph
+("O") appears the same tick the old text disappears - NOT a generic box-
+close/reopen slide as turn7-notes §5 speculated from its own "4 shared
+frames" observation. Re-verified directly this session (fresh oracle PNG
+reads at 7658/7659/7660/7661): that 4-frame overlap is pure TEXT-CONTENT
+coincidence - "ONIX's ATTACK" (this message) and "ONIX used" (the following
+ROCK_SLIDE kickoff, turn7-notes' own comparison point) both happen to start
+with the literal 4 characters "ONIX", not a shared transition mechanism.
+Settles at 7684 (`start + TOTAL - 1` = `7659 + 26 - 1`), the same "1
+tick/char, settle on the last glyph's own tick" shape as every other
+kickoff message in this dossier - no new timing primitive needed, just
+`turn6AtkFellTextStartTick`/`turn6AtkFellTextVisibleChars` alongside the
+existing ones. Text itself: **"ONIX's ATTACK" / "harshly fell!"**
+(pixel-confirmed via direct PNG read at 7685) - "harshly fell" (not
+"sharply fell", which is reserved for RISES) is the correct Gen 3 wording
+for a -2-stage drop, matching `EFFECT_ATTACK_DOWN_2`.
+
+### Committed trace and Tier-1 pins
+
+`tools/compare/traces/turn6-statfall.json` - **same script as `turn6-
+featherdance.json`/`turn6-menu.json` verbatim** (the same already-committed
+1000-frame idle tail covers this window too, confirmed before relying on
+it), `captureFrames` 7558-7684 (picking up exactly where §29 pinned "flat-
+identical through 7560" - the 7421-7557 feather-sampling residual stays a
+separate, untouched, out-of-scope named exclusion) - **127/127, 0 diff**.
+`tests/battleMenu.test.ts` (+6): `turn6StatFallEva`'s RAM-exact ramp/hold/
+ramp-down schedule (9 sampled ticks against the register probe), `turn6Stat
+FallBg1Y`'s one-tick-lag scroll, `TURN6_STATFALL_BG1_X`'s constant, and the
+ATK-fall text's timing/content/settle.
+
+### Rung (b): NOT attempted - precise ground-truth handoff
+
+Time-boxed out after rung (a)'s own mechanism-identification + implementation
+consumed the full session (per the brief's own explicit permission: "a green
+(a) plus a precise (b) handoff beats two half-fits"). Extra dense oracle
+probing was done anyway (cheap, no engine code) to leave the next session a
+fast start - sha-transition sweep of `battle1-turn6-dense.json`'s own script,
+`captureFrames` 7684-8135 in two 256-frame batches, scratch-only, not
+committed:
+
+- **7684-7764**: flat hold, "ONIX's ATTACK harshly fell!" continues (81
+  ticks, matching rung (a)'s own settle sha `325b7b5ba26c`).
+- **7765-7783**: message-box transition into ROCK_SLIDE's own kickoff text
+  (19 ticks) - suspiciously exactly the same DURATION as turn7-notes §5's
+  own analogous transition (8799-8817, also 19 ticks) despite that section's
+  own finding that the two transitions are NOT byte-identical past their
+  first few frames; worth checking whether the transition's own LENGTH
+  (unlike its pixel content) is a fixed, content-independent constant.
+- **7784**: "ONIX used\nROCK SLIDE!" settles (`475609fc8c92`).
+- **7784-7801**: flat hold - PP decrement, accuracy roll (7763 per turn6-
+  notes §3, actually WITHIN the 7765-7783 transition, not this hold -
+  worth re-checking against the RNG ledger directly), crit roll (7787),
+  damage-spread lock 43 (7790) all resolve silently underneath, same "RNG
+  doesn't require a pixel change" pattern as every other kickoff hold in
+  this dossier.
+- **7802**: a single-tick flicker (`24e01f8c6bed`), back to the flat sha at
+  7804 - same shape as the turn-end flickers already catalogued elsewhere
+  (7804-7801 gap, i.e. tick 7803 not independently sampled this pass).
+- **7805-7924**: the ROCK_SLIDE attack animation itself, continuously
+  changing every tick (~120 ticks) - almost certainly `rockSlideRockState`/
+  `rockSlideDrawOrder`/`drawRockSprite`/`rockSlideBg3Y` reused verbatim
+  (pressTick-relative, target-agnostic per every prior turn's own
+  parameterization precedent), but the TARGET-side hit-flash needs NEW
+  parameters this turn: Pidgeotto's own sprite (`pidgeottoFrontSprite`,
+  `PIDGEOTTO_CORNER`, both already extracted/used by the switch-in
+  materialize code) for the shake/blink (currently `rockSlideMonShakeY2`/
+  `rockSlideMonBlinkInvisible` are applied to `grovyleFrontSprite`/
+  `GROVYLE_CORNER` only), and Pidgeotto's own healthbox content
+  (`pidgeottoHealthboxContent`'s own hp-fraction variant, analogous to
+  `opponentHealthboxContentForHp`) for the wobble/drain - **but
+  `turn5PidgeottoHealthboxSlideDx` settles to a steady value once past
+  `TURN5_PIDGEOTTO_SETTLE_TICK` (6851)**, meaning Pidgeotto's healthbox
+  sits at the SAME screen origin (`HEALTHBOX_FRAME_ORIGIN`) Grovyle's
+  always occupied - `drawOpponentHealthboxWobble`'s existing pixel geometry
+  should be directly reusable, only the HP-fraction content needs a fresh
+  compositor call per tick.
+- **7926-7934**: flat again, same sha as the pre-animation hold
+  (`475609fc8c92`) - the rock animation's own settle-back, matching every
+  prior turn's "attack animation ends, kickoff text still held" shape.
+- **7935-7955**: impact/hit-flash window, alternating shas (a blink pattern,
+  3-4 distinct frames cycling) - `rockSlideHealthboxWobbleY2`'s own shape,
+  needs re-pinning against Pidgeotto's healthbox position (same origin per
+  above, but a fresh RAM/pixel bisection for the timing offset, not assumed
+  transferable from Grovyle's turn 1-5 numbers without checking).
+- **7956-7969ish**: flat hold again.
+- **7970-8038**: HP-bar drain window, continuously changing (69 ticks,
+  turn6-notes §5 cited "7970-8019" as the drain proper - this session's own
+  sweep shows changes continuing to ~8038, worth reconciling; `pidgeottoHp`
+  itself commits 156->113 per RAM at tick 8014 per turn6-notes §3/§5).
+  Pidgeotto's healthbar is a 156-max-HP bar (unlike Grovyle's smaller max),
+  so `rockSlideOpponentHp`'s own per-tick HP-unit-to-pixel mapping needs a
+  fresh derivation, not a direct reuse (turn6-notes §5 already flagged this:
+  "not 1-RAM-unit-per-tick like turn 1's drain... the healthbar's own pixel
+  resolution doesn't resolve every individual HP unit for a 156-max-HP bar").
+- **8039-8114 (not densely captured, a 76-tick gap)**: almost certainly "It's
+  super effective!" holding flat, per turn7-notes §5's own newly-itemized
+  analogous message (turn 7's own equivalent gap, 9040-9059->9060, IS
+  exactly this) - turn6-notes §5 flagged this exact gap (8019-8115) as
+  uncaptured; a future session should densely capture it directly rather
+  than assume the turn-7 analogy, but the analogy is strong (ROCK-vs-FLYING
+  is 2x either turn, same move, same target type).
+- **8115**: text starts clearing.
+- **8122**: turn-7's own settled menu (`492e3816c1f0`, matching turn6-notes
+  §5's own already-cited sha for this exact tick).
+- **8123**: 1-tick flicker, back to `492e3816c1f0` at 8124, stable from
+  there (matches turn6-notes §5's own cited flicker pattern) - a change at
+  8133 is almost certainly the resettled idle-bounce cycle resuming, not a
+  new mechanism, but not independently confirmed this session.
+
+**RNG to model** (turn6-notes §3, verify against the ledger once rung (b) is
+actually implemented, not just cited): accuracy roll (7763), crit roll
+(7787), damage-spread roll locking `gBattleMoveDamage`=43 (7790), secondary-
+effect/flinch roll (8104, 30% chance - Pidgeotto already moved this turn so
+a flinch would be a no-op either way, but the brief's own RNG-discipline
+instruction is to model the CALL regardless of whether the outcome matters),
+turn-pass bookkeeping (8114), AI-scoring cluster (8121, 5 steps).
+
+**Text**: "ONIX used\nROCK SLIDE!" (kickoff, pixel-confirmed), then "It's
+super effective!" (per the gap analysis above, not yet pixel-confirmed
+directly for turn 6 - the turn7-notes §5 analogy is strong but should be
+independently verified, not assumed).
+
+### Verification
+
+`npm test` **831/831** (+6). `npm run build` green. `turn6-statfall.json`
+**127/127, 0 diff** (7558-7684). Zero regressions: `turn6-feathers.json`
+**106/106**, `turn6-featherdance.json` **90/90**, `turn6-menu.json`
+**33/33**, `turn5-rockslide.json` **256/256**, `turn1-rockslide.json`
+**256/256**, all 0 diff.
