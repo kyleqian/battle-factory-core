@@ -5,25 +5,26 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #27 — Unattributed single Random() call at HP-write+5, now seen at the
-  IDENTICAL offset in two consecutive turns — suspected real per-move-
-  resolution mechanism, not noise
+## #28 — Recurring period-9 excluded-tick family in browsing-submenu
+  windows: 8 ticks at turn 6 (§27) + 8 more at turn 7 (§32), same
+  cadence/shape — label is still "bounce-phase quantization blip",
+  survived one probe
 
-Filed 2026-07-21 (supervisor, at the turn-17 fold). One `Random()` step
-with no attributed consumer fires exactly **5 ticks after a move's HP
-write**: turn 16 tick 21152 (FAINT_ATTACK's write at 21147) and turn 17
-tick 22173 (FAINT_ATTACK's write at 22168, per `turn17-notes.md` §2).
-Earlier dossiers logged similar "tail" rolls per turn (17105/17111, 18079,
-19240) but attributed them loosely to "turn-tail/AI bookkeeping"; the
-new pair's identical +5 offset suggests a fixed post-damage mechanism
-(candidates worth checking first: `AbilityBattleEffects`'s
-ABILITYEFFECT_ON_DAMAGE sweep — turn 16's scout source-proved the
-FLAME_BODY *branch* can't fire for FAINT_ATTACK (no contact flag), but
-the surrounding dispatcher may still consume a roll; or a held-item/
-king's-rock-style check in the same window). Matters for engine
-RNG-exactness on every turn. One dedicated probe/source-trace step should
-attribute it; the dossier chain (turns 13-17 RNG ledgers) is the
-evidence base.
+Filed 2026-07-21 (supervisor, at the turn-7 fold). Both turn-6 and
+turn-7 FIGHT-submenu browsing windows exclude 2-tick pairs every ~9
+ticks (turn 6: 7315-7316/7324-7325/7333-7334/7342-7343; turn 7:
+8352-8353/8361-8362/8370-8371/8380-8381) from their committed traces'
+captureFrames. The diff alternates between Onix's on-field silhouette
+and the player-healthbox regions (§32). One dedicated probe (2026-07-20
+session, post-bounce-fix — PROGRESS #203 Notes) confirmed the residual
+is real and not the then-fixed bounce-phase bug, but did not root-cause
+it. Now that the family provably RECURS at the same cadence in a second
+turn's window, it is a property of the shared browsing-submenu
+render path, not a per-trace fluke — worth one more dedicated probe
+with fresh eyes (per-tick RAM y2/matrix dump across one excluded pair
+vs its neighbors, then pixel-diff the exact regions). The
+residual-elimination policy applies: no speculative label survives
+another probe without either a root cause or an upgraded evidence file.
 
 ## #26 — Sitrus proc's expanding THIN_RING: ticks 7042-7072 of
   turn5-sitrus-c.json excluded after 3 bounded attempts (pixel placement

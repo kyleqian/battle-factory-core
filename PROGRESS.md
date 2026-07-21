@@ -4,6 +4,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 211 — Worktree probe (supervisor-folded): **ISSUES #27 RESOLVED in one 8-minute probe** — the "unattributed" HP-write+5 Random() is `Cmd_seteffectwithchance`'s UNCONDITIONAL secondary-effect roll (`battle_script_commands.c:2923`: `Random()` is the FIRST operand of the `&&` chain, consumed even at `secondaryEffectChance=0` — C evaluation order, source-verified by the supervisor directly); the offset is SCHEDULE-DEPENDENT, not fixed (+5 = 4 minimal-cost script commands; turn 15's "missing" instance was actually at +93, delayed by the faint sequence); `docs/rng-attribution-notes.md` merged, suite 845/845
+
+- **State:** merged into master post-turn-7, `npm test` 845/845 + build
+  green, worktree/branch cleaned. Supervisor verified the source claim
+  directly (read `Cmd_seteffectwithchance` — the `&&` order is exactly
+  as claimed) and the evidence table (LCG transitions for all three
+  instances). Dossier reattributions applied at this fold (turn15/16/17
+  §2 lines, strikethrough + citation); ISSUES #27 deleted.
+- **Did (the predictive rule engine work now inherits):** every damaging
+  move reaching `BattleScript_EffectHit`'s tail consumes EXACTLY ONE
+  secondary-effect roll on connect, regardless of chance — misses divert
+  before the roll, immunity is checked after it. FIRE_PUNCH's burn roll
+  (21411/22423) is the same call site with chance=10. Both prior
+  candidates ruled out (FLAME_BODY sweep; King's-Rock is a LATER stage,
+  `Cmd_moveend`). Turn 13/14's 17105/17111/18079 stay a separate
+  (AI-prescoring) family — correctly out of scope.
+- **Also at this fold:** ISSUES **#28 filed** — the period-9 excluded-
+  tick family in browsing-submenu windows has now RECURRED at turn 7
+  (8 ticks, §32, same cadence as turn 6's §27 set); upgraded from
+  dossier footnote to standing backlog per the residual-elimination
+  policy (one probe survived, no root cause yet).
+- **Next:** engine: turn 8+ parameterizations; feathers dedicated step
+  (turn-7 probe table + window, §29's sampling-residual leads); probes:
+  #28 (period-9 family), #26 (Sitrus ring); scout: post-WIN scene
+  transition dense ground truth.
+- **Notes:** probe in contract (8.3 of 30 min), cleanest step of the
+  session — a 30-min cap on pure-attribution probes is comfortably
+  sized; keep using it.
+
+---
 ## 210 — Bounded worker (S7 engine slice O): turn 7 landed end to end minus its own feather sub-window — `turn7-menu.json` **85/85**, `turn7-rockslide-{a,b,c,d}.json` **256+256+256+19/787**, all 0 diff; a pure parameterization of turn 6's own N-4 rungs, one real bug found+fixed (a second bounce-reset regime turn 7's own idle window needed that turn 6 never exercised) (S7 bounded worker session, hard 60-minute cap)
 
 - **State:** `npm test` **845/845** (+8), `npm run build` green, tree
@@ -75,43 +105,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the dossier (256-capture budget forced an uncommitted stride-2
   side-probe for the faint-sink boundary — an accepted convention, not
   tooling friction; no PAPERCUTS.md change).
-
----
-## 208 — Bounded worker (S7 slice N-4 rung (b)): Onix's ROCK_SLIDE vs. PIDGEOTTO landed in full — turn 6 resolved END TO END — `turn6-rockslide-a.json` **255/255**, `turn6-rockslide-b.json` **105/105**, both 0 diff, first-attempt on the mechanics half; a pure parameterization, no new HP-drain formula needed after all (S7 bounded worker session, hard 60-minute cap)
-
-- **State:** `npm test` **837/837** (+6), `npm run build` green, tree
-  clean. `turn6-rockslide-{a,b}.json` 0 diff (7765-8124 contiguous).
-  Zero regressions: `turn6-statfall.json` 127/127, `turn6-feathers.json`
-  106/106, `turn6-featherdance.json` 90/90, `turn6-menu.json` 33/33,
-  `turn5-rockslide.json` 256/256, `turn3-rockslide.json` 256/256,
-  `turn1-rockslide.json` 256/256.
-- **Did:** rung (a) first — fresh dense oracle capture of the full
-  7765-8124 window (360 frames), which RESOLVED §30's own flagged
-  "8039-8114 uncaptured gap": it's not a second unmodeled mechanism, it's
-  the flat hold of "It's super effective!" (ROCK-vs-FLYING), whose own
-  message-box swap starts at 8018, 21 ticks earlier than §30's gap
-  boundary. Rung (b): every existing ROCK_SLIDE mechanism (rocks/shake/
-  hit-flash/drain) reused UNCHANGED behind a synthetic press anchor
-  (`TURN6_ROCKSLIDE_PRESS_TICK=7372`) that reproduces the fresh capture's
-  own transition ticks exactly by hand-arithmetic before any code was
-  written. The brief's flagged "fresh HP-drain pixel formula" turned out
-  to be unnecessary — `calcBarFilledPixels` was already maxHp-agnostic
-  and `rockSlideOpponentHp` was already value-agnostic; Pidgeotto's own
-  156-max bar just needed `pidgeottoHealthboxContentForHp(hp)`, a direct
-  copy of the existing per-HP memoization. New: "It's super effective!"
-  text (curly-apostrophe fix caught by `npm run compare`'s 14px diff),
-  and the turn-end settled-menu function (a missing base-background paint
-  caught by a 47%-diff `npm run compare` failure, despite looking correct
-  in a side-by-side PNG glance — fixed immediately).
-- **Next:** turn 7 as a parameterization of turn 6's own mechanisms
-  (turn7-notes.md's dossier already exists), or turns 8-13; scout
-  territory: turn 17+ (Murkrow faints 22418 → the WIN arc, per §16);
-  ISSUES #26 probe; feather residual 7421-7549 (§29's named leads, still
-  open, low priority).
-- **Notes:** no papercuts. `npm run compare`'s pixel-diff caught both real
-  bugs immediately and precisely (apostrophe glyph, missing bg paint) —
-  hand-verifying the mechanism-reuse arithmetic BEFORE writing render code
-  (per §30's own mandate, extended to pixels not just RAM) meant the
-  mechanics half (255 frames) passed compare on the very first attempt.
 
 ---

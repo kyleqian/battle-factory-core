@@ -1,3 +1,43 @@
+---
+## 208 — Bounded worker (S7 slice N-4 rung (b)): Onix's ROCK_SLIDE vs. PIDGEOTTO landed in full — turn 6 resolved END TO END — `turn6-rockslide-a.json` **255/255**, `turn6-rockslide-b.json` **105/105**, both 0 diff, first-attempt on the mechanics half; a pure parameterization, no new HP-drain formula needed after all (S7 bounded worker session, hard 60-minute cap)
+
+- **State:** `npm test` **837/837** (+6), `npm run build` green, tree
+  clean. `turn6-rockslide-{a,b}.json` 0 diff (7765-8124 contiguous).
+  Zero regressions: `turn6-statfall.json` 127/127, `turn6-feathers.json`
+  106/106, `turn6-featherdance.json` 90/90, `turn6-menu.json` 33/33,
+  `turn5-rockslide.json` 256/256, `turn3-rockslide.json` 256/256,
+  `turn1-rockslide.json` 256/256.
+- **Did:** rung (a) first — fresh dense oracle capture of the full
+  7765-8124 window (360 frames), which RESOLVED §30's own flagged
+  "8039-8114 uncaptured gap": it's not a second unmodeled mechanism, it's
+  the flat hold of "It's super effective!" (ROCK-vs-FLYING), whose own
+  message-box swap starts at 8018, 21 ticks earlier than §30's gap
+  boundary. Rung (b): every existing ROCK_SLIDE mechanism (rocks/shake/
+  hit-flash/drain) reused UNCHANGED behind a synthetic press anchor
+  (`TURN6_ROCKSLIDE_PRESS_TICK=7372`) that reproduces the fresh capture's
+  own transition ticks exactly by hand-arithmetic before any code was
+  written. The brief's flagged "fresh HP-drain pixel formula" turned out
+  to be unnecessary — `calcBarFilledPixels` was already maxHp-agnostic
+  and `rockSlideOpponentHp` was already value-agnostic; Pidgeotto's own
+  156-max bar just needed `pidgeottoHealthboxContentForHp(hp)`, a direct
+  copy of the existing per-HP memoization. New: "It's super effective!"
+  text (curly-apostrophe fix caught by `npm run compare`'s 14px diff),
+  and the turn-end settled-menu function (a missing base-background paint
+  caught by a 47%-diff `npm run compare` failure, despite looking correct
+  in a side-by-side PNG glance — fixed immediately).
+- **Next:** turn 7 as a parameterization of turn 6's own mechanisms
+  (turn7-notes.md's dossier already exists), or turns 8-13; scout
+  territory: turn 17+ (Murkrow faints 22418 → the WIN arc, per §16);
+  ISSUES #26 probe; feather residual 7421-7549 (§29's named leads, still
+  open, low priority).
+- **Notes:** no papercuts. `npm run compare`'s pixel-diff caught both real
+  bugs immediately and precisely (apostrophe glyph, missing bg paint) —
+  hand-verifying the mechanism-reuse arithmetic BEFORE writing render code
+  (per §30's own mandate, extended to pixels not just RAM) meant the
+  mechanics half (255 frames) passed compare on the very first attempt.
+
+---
+
 ## 207 — Worktree scout (supervisor-folded): turn 16 ground truth BANKED — the first MAGBY-vs-MURKROW turn: speed order pinned (MURKROW 97 > MAGBY 89, acts first), FAINT_ATTACK skips accuracy entirely (source: `.accuracy=0`), FIRE_PUNCH rolls accuracy even at 100% AND **its 10% burn proc SUCCEEDS** (`status1` 0→16 at tick 21411, burn residual `floor(142/8)=17` at turn-end) — **the run's FIRST status-condition ground truth**, BRN badge PNG-pinned (absent 21540 → present 21548); `battle1-turn16-dense.json` (256 captures) + `docs/turn16-notes.md`; merged, suite 831/831 on the merged tree
 
 - **State:** merged into master post-N-4, `npm test` 831/831 + build
