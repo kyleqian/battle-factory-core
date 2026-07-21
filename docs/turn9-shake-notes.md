@@ -257,3 +257,178 @@ reverified here.
 session). New: `tools/probe/verify-turn9-postlunge.ts`, run fresh against
 `bin/oracle` this session — **71/71 checks pass**. No trace files changed,
 no `PROGRESS.md`/`ISSUES.md` edits.
+
+## 2026-07-21 addendum (bounded-worker probe session): C4-territory ground
+truth closed — HP drain, message-box reveal cadence (a real correction),
+settled hold, all RAM/pixel-pinned fresh
+
+Per the supervisor's brief, ground-truthed exactly the three gaps §3 named
+("NOT probed this session"). **No `src/` changes.** All facts below are
+re-derived fresh (fresh `tools/probe/dump-battle-bars.py` RAM probe run +
+fresh `bin/oracle run` pixel captures over HTTP, both this session's own
+runs) — `docs/turn9-notes.md` §5's own prose ranges were, again, treated as
+leads, not truth. **Branch-aware**: every pixel claim below is attributed to
+the specific already-proven engine function that renders it
+(`composePlayerHealthboxHpOverlay`/`calcBarFilledPixels` for the HP bar,
+`drawText`+`drawTileBg(battleWindow)`+the `drawMessageTextLines` line1/line2-
+split convention for the message text) — these functions are reused
+unmodified from turn 2/6/7's own already-landed code, not reimplemented; this
+session's own scratch tooling (`tools/compare/scratch/diag-turn9-hpdrain.ts`,
+`tools/compare/scratch/diag-turn9-msgtext.ts`) calls them directly to
+generate 0-mismatch candidate renders against fresh oracle pixels, the same
+methodology `endeavorOnixHp`'s own turn-2 fit and every kickoff-text delay
+constant in this codebase already established.
+
+### 1. HP-drain window (RAM 10992-11000, Onix 31→24): fully RAM+pixel-pinned, same "no extra lag" family as `endeavorOnixHp`
+
+Fresh RAM read (`dump-battle-bars.py`, re-run this session, `bar0Curr`
+column): sentinel **-32768 at RAM 10992**, flat 1-HP-unit-per-tick counter
+**30→24 over RAM 10993-10999**, done-sentinel **0 at RAM 11000** — byte-for-
+byte the same shape `turn9-notes.md` §5 already claimed, now independently
+re-confirmed via a fresh probe run rather than trusted from the doc.
+
+**Pixel cross-check, exact (`diag-turn9-hpdrain.ts`)**: for each candidate HP
+value 24-31, built the expected healthbox-region frame via
+`composePlayerHealthboxHpOverlay(assets, hp, 117)` (Onix's own real
+`maxHP`, `battle1-turn2-ram-dump.json`) blitted onto a real pre-drain oracle
+capture (tick 10985, hp still 31), then diffed against fresh oracle captures
+at every tick 10985-11006. **0 mismatches at every tick, matching RAM tick
+directly (no render lag at all)**:
+
+| render tick | RAM tick | displayed HP | bar filled px | band |
+|---|---|---|---|---|
+| 10985-10992 | 10985-10992 (sentinel at 10992) | 31 (unchanged) | 12 | yellow |
+| 10993 | 10993 | 30 | 12 | yellow |
+| 10994 | 10994 | 29 | 11 | yellow |
+| 10995 | 10995 | 28 | 11 | yellow |
+| 10996 | 10996 | 27 | 11 | yellow |
+| 10997 | 10997 | 26 | 10 | yellow |
+| 10998 | 10998 | 25 | 10 | yellow |
+| 10999+ | 10999-11000 (done sentinel 11000) | 24 | **9** | **red** |
+
+This is the **same family** `endeavorOnixHp`'s own doc already names ("the
+render tick uses `t` directly, no `-1` lag... same-frame CPU-copy mechanism")
+— turn 9's HP-bar redraw uses this exact convention too, independently
+re-confirmed here rather than assumed by analogy. A future
+`turn9OnixHp(t, pressTick, startHp, endHp)` (identical shape to
+`endeavorOnixHp`) would use **`TURN9_HP_DRAIN_START_DELAY = 121`**
+(`pressTick(10871)+121 = 10992`, the RAM sentinel tick itself — same
+"delay anchors to the sentinel tick, first real decrement lands one tick
+later" convention `ENDEAVOR_HP_DRAIN_START_DELAY`'s own doc already
+establishes) with `startHp=31, endHp=24`.
+
+`calcBarFilledPixels`/`pickHpBarBand` (unmodified, already-shipped code)
+reproduce the filled-pixel/band sequence above exactly from the raw HP
+values and `maxHP=117` with **zero new logic needed** — this window is a
+pure parameterization of already-proven code, same as every prior turn's HP
+drain. The **yellow→red crossover fires at render tick 10999** (hp=24,
+9px — `pickHpBarBand`'s own `>` — not `>=` — threshold means exactly-9px is
+red, not yellow, pinned by an existing test already), matching
+`turn9-notes.md` §5's own "yellow/red between 10990-11002" claim, now pinned
+to the exact tick.
+
+### 2. Message-box text: a real correction — single line, not two, plus the exact reveal cadence
+
+**`turn9-notes.md` §5's own "It's not\nvery effective.." (two-line)
+transcription is wrong** — direct pixel evidence this session (scanning the
+rightmost non-background pixel column in BOTH the line-1 row band
+(y:121-135) and the line-2 row band (y:137-151) at every tick 11005-11035)
+shows **zero ink ever appears in the line-2 band** at any tick; the entire
+string prints on **one line** at `LINE1_ORIGIN`, line 2 staying blank
+throughout — the **same single-line shape** `TURN6_SUPER_EFFECTIVE_LINE`
+already established for "It's super effective!", **not**
+`TURN6_ATKFELL_LINE1`/`LINE2`'s genuine two-line shape. A crop at tick 11040
+(`/tmp/turn9-msg-11040.png`, this session) directly confirms: **"It's not
+very effective.."** rendered on a single row. (The doc's own sha for this
+tick, `12b7204322f9`, is unaffected by the correction — only the prose
+transcription of what the sha's pixels show was wrong.)
+
+**Text reveal, pixel-exact (`diag-turn9-msgtext.ts`)**: built candidate
+frames for every visible-char count 0-24 via `drawTileBg(battleWindow)` (the
+static box, unmodified existing code) + the same `drawMessageTextLines`
+line1/line2-split logic already used for every prior turn's kickoff/
+effectiveness text, with `LINE1 = "It’s not very effective…"` (24 chars,
+curly apostrophe + the single-glyph `…` = charmap code 176, both already-
+proven glyphs) and `LINE2 = ""` (never used, `chars` never exceeds 24).
+Diffed each candidate against fresh oracle captures at every tick
+11003-11032 (box-region only, y:112-160): **0 mismatches at every tick**,
+confirming:
+
+- **Start**: render tick **11005** (`pressTick(10871)+134`) shows char 1
+  ("I"); 11003-11004 are still box-closed (1040px mismatch vs. any
+  candidate, i.e. box not open yet — matches this doc's §3 "screen static
+  10999-11004, first diff at 11005" claim exactly, now cross-confirmed via
+  the text-candidate model too, not just a raw pixel-diff).
+- **Cadence**: flat **1 char/tick**, `visibleChars(t) = min(24, t-11005+1)`
+  — the identical formula shape as `turn7SuperEffectiveTextVisibleChars`.
+  Three ticks (11008/11009, 11012/11013, 11017/11018) each show the SAME
+  rendered content as their neighbor — **not real stalls**: each coincides
+  exactly with the next revealed character being a space (glyph code 0,
+  pure background fill, no ink), so both the `n` and `n+1` char-count
+  candidates render pixel-identically at that tick. Confirmed non-ambiguous
+  neighbors on both sides advance normally (e.g. 11007→11008→11009→11010 is
+  3,4,4,6 — the space is char 5, invisible, landing at 11009), ruling out a
+  genuine typewriter pause.
+- **Fully revealed**: render tick **11028** (`pressTick+157`, char 24/24,
+  the `…` glyph), settled sha `12b7204322f9` from here on (see §3 below).
+
+### 3. Settled hold: boundary corrected, sha pinned, confirmed non-periodic (flat, no breathe/bounce)
+
+**`turn9-notes.md` §5's own "11018" hold-START claim is also wrong** — tick
+11018 is still **mid-typing** (`visibleChars(11018) = min(24, 11018-11005+1)
+= 14`, i.e. "It's not very e" — the doc's own cited sha `09694bd0d0da` for
+that tick is correct, it's just NOT the settled/held sha, only a
+transient mid-reveal frame). The genuine settle begins the tick text
+finishes: **render 11028**, sha **`12b7204322f9`** (matches this doc's own
+other citation, "12b7204322f9-family through 11109" — that second claim was
+right).
+
+**Densely re-scanned every tick 11028-11109 (82 ticks, not sparse
+sampling)**: exactly **one** distinct sha (`12b7204322f9`) the entire span —
+genuinely flat/static, confirming there is **no** periodic breathe/bounce
+content in this hold (unlike the action-menu idle-bounce family
+`menu-idle-bounce.json`/`turn6/7/8-menu-notes` establish for the *resting*
+action menu) — a message-box hold is simply frozen until the next script
+step advances it, no independent animation task ticks underneath it here.
+
+**Hold end / transition boundary**: first tick differing from the held sha
+is render **11110** (`95efd4fe0a13`), matching `turn9-notes.md` §5's own
+"message-box transition into 'ONIX used ROCK SLIDE!' | 11110-11113" claim
+exactly — cross-confirmed fresh, box-region shas re-read this session:
+`95efd4fe0a13`/`0b427db7f25f`/`bb950968bec3`/`4c8e2657b02b`, then held at
+`4c8e2657b02b` from 11113 on (matches the doc's own next-cited sha for the
+ROCK_SLIDE kickoff text hold, `81aaa90be45f`, is a few ticks further in,
+past this session's scope).
+
+### Rung (d) transition (item 4, NOT attempted — out of time)
+
+The press-segment boundary into ROCK_SLIDE's own kickoff (rung (d)'s
+anchor) was not probed this session — priorities 1-3 filled the full time
+budget. The hold-end tick (11110, above) is the correct starting point for
+whoever picks this up: the transition's own 4-frame box-open shape
+(`95efd4fe0a13`/`0b427db7f25f`/`bb950968bec3`/`4c8e2657b02b`) is already
+RAM/pixel-cited above and in `turn9-notes.md` §5, just not yet decomposed
+into a text-reveal-cadence table the way §2 above does for the first
+message — likely the same `drawMessageTextLines`+1-char/tick shape, given
+every other message this dossier has ever pinned uses it, but **not
+verified**, flag this as an assumption for the next worker to check, not a
+given.
+
+### Verification
+
+`npm test` **880/880** and `npm run build` green, unchanged this session (no
+`src/` changes). `tools/probe/verify-turn9-postlunge.ts` extended with 28 new
+checks (10 HP-drain per-tick displayed-HP checks + 1 band-flip check, 7
+message-text per-tick reveal checks + 1 single-line-correction check, 4
+settled-hold sha checks) — **99/99 checks pass** against a fresh
+`bin/oracle` capture (71 prior + 28 new, all green).
+New scratch tooling (not required deliverables, kept for reuse):
+`tools/compare/scratch/diag-turn9-hpdrain.ts`,
+`tools/compare/scratch/diag-turn9-msgtext.ts`,
+`tools/compare/scratch/dump-turn9-msgcrops.ts`.
+
+**Gaps still open for the next worker** (honest, time-boxed):
+- Rung (d)'s own transition/kickoff-text cadence (item 4 above) — untouched.
+- The ROCK_SLIDE kickoff text hold onward (past 11113) and everything after
+  — entirely out of this session's reach, unchanged from the predecessor's
+  own gap list.

@@ -12,6 +12,13 @@
 import { readFileSync } from "node:fs";
 import { PNG } from "pngjs";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
+import { drawText, type FontData } from "../../src/engine/font.ts";
+import { composePlayerHealthboxHpOverlay, calcBarFilledPixels, pickHpBarBand } from "../../src/engine/healthboxAssembly.ts";
+import battleHealthboxAsset from "../../src/assets/gen/battle-healthbox.json" with { type: "json" };
+import menuHealthboxPlayerAsset from "../../src/assets/gen/menu-healthbox-player.json" with { type: "json" };
+import battleWindowAsset from "../../src/assets/gen/battle-window.json" with { type: "json" };
+import fontNormalData from "../../src/data/gen/font-normal.json" with { type: "json" };
+import charmapData from "../../src/data/gen/charmap.json" with { type: "json" };
 
 const TRACE_PATH = "tools/compare/traces-groundtruth/battle1-turn9-dense.json";
 const trace = JSON.parse(readFileSync(TRACE_PATH, "utf8")) as Trace;
@@ -20,7 +27,12 @@ const trace = JSON.parse(readFileSync(TRACE_PATH, "utf8")) as Trace;
 const EP1_RANGE = range(10924, 10950);
 const EP2_RANGE = range(10945, 10986);
 const MSG_RANGE = range(10999, 11006);
-const captureFrames = Array.from(new Set([...EP1_RANGE, ...EP2_RANGE, ...MSG_RANGE])).sort((a, b) => a - b);
+// 2026-07-21 addendum: HP-drain (§1), message-text-reveal (§2), settled-hold
+// (§3) ranges - see docs/turn9-shake-notes.md's own dated section.
+const HP_RANGE = range(10985, 11002);
+const TEXT_RANGE = range(11003, 11032);
+const HOLD_RANGE = [11018, 11028, 11060, 11109, 11110, 11113];
+const captureFrames = Array.from(new Set([...EP1_RANGE, ...EP2_RANGE, ...MSG_RANGE, ...HP_RANGE, ...TEXT_RANGE, ...HOLD_RANGE])).sort((a, b) => a - b);
 trace.captureFrames = captureFrames;
 
 function range(a: number, b: number): number[] {
@@ -163,6 +175,168 @@ async function main() {
     check(`still static pre-message at ${t}`, msg(t).other === 0, `got ${msg(t).other}`);
   }
   check("message-box transition begins at 11005 (not 11004 or 11006)", msg(11004).other === 0 && msg(11005).other > 0, `10999-11004 flat=${msg(11004).other===0}, 11005 diff=${msg(11005).other}`);
+
+  // --- §1 (2026-07-21 addendum): HP-drain per-tick displayed HP + bar band,
+  // RAM tick == render tick directly (same "no extra lag" family as
+  // endeavorOnixHp), using composePlayerHealthboxHpOverlay (already-proven,
+  // unmodified code) as the candidate generator. ---
+  const HB = menuHealthboxPlayerAsset as { x: number; y: number; width: number; height: number };
+  const ONIX_MAX_HP = 117;
+  const hpOverlayAssets = {
+    hpbar: (battleHealthboxAsset as { hpbar: unknown }).hpbar as Parameters<typeof composePlayerHealthboxHpOverlay>[0]["hpbar"],
+    hpbarAnim: (battleHealthboxAsset as { hpbarAnim: unknown }).hpbarAnim as Parameters<typeof composePlayerHealthboxHpOverlay>[0]["hpbarAnim"],
+    textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: unknown } }).singlesPlayer.palette as Parameters<typeof composePlayerHealthboxHpOverlay>[0]["textPalette"],
+  };
+  function diffInBox(a: Buffer, b: Buffer, box: { x: number; y: number; width: number; height: number }): number {
+    let diffs = 0;
+    for (let y = box.y; y < box.y + box.height; y++) {
+      for (let x = box.x; x < box.x + box.width; x++) {
+        const i = (y * 240 + x) * 4;
+        if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) diffs++;
+      }
+    }
+    return diffs;
+  }
+  function buildHpExpected(baseRgba: Buffer, hp: number): Buffer {
+    const out = Buffer.from(baseRgba);
+    const { width, height, pixels } = composePlayerHealthboxHpOverlay(hpOverlayAssets, hp, ONIX_MAX_HP);
+    for (let py = 0; py < height; py++) {
+      for (let px = 0; px < width; px++) {
+        const color = pixels[py * width + px];
+        if (!color) continue;
+        const i = ((HB.y + py) * 240 + (HB.x + px)) * 4;
+        out[i] = color.r;
+        out[i + 1] = color.g;
+        out[i + 2] = color.b;
+        out[i + 3] = 255;
+      }
+    }
+    return out;
+  }
+  const hpBaseRgba = PNG.sync.read(get(10985).png).data as unknown as Buffer;
+  const HP_TABLE: [tick: number, hp: number][] = [
+    [10992, 31],
+    [10993, 30],
+    [10994, 29],
+    [10995, 28],
+    [10996, 27],
+    [10997, 26],
+    [10998, 25],
+    [10999, 24],
+    [11000, 24],
+    [11002, 24],
+  ];
+  for (const [t, hp] of HP_TABLE) {
+    const actual = PNG.sync.read(get(t).png).data as unknown as Buffer;
+    const expected = buildHpExpected(hpBaseRgba, hp);
+    const mismatch = diffInBox(actual, expected, HB);
+    check(`HP drain: render ${t} shows hp=${hp} exactly (composePlayerHealthboxHpOverlay)`, mismatch === 0, `mismatch=${mismatch}`);
+  }
+  check("HP drain: band flips yellow->red exactly at hp=24 (9px)", pickHpBarBand(calcBarFilledPixels(24 / ONIX_MAX_HP).filledPixels) === "red" && pickHpBarBand(calcBarFilledPixels(25 / ONIX_MAX_HP).filledPixels) === "yellow", "calcBarFilledPixels/pickHpBarBand mismatch");
+
+  // --- §2 (2026-07-21 addendum): message text is a SINGLE line (correcting
+  // turn9-notes.md §5's "It's not\nvery effective.." two-line transcription),
+  // 1 char/tick from render 11005, fully revealed at render 11028. ---
+  const font = fontNormalData as unknown as FontData;
+  const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
+  const battleWindow = battleWindowAsset as { tileset: unknown; tilemap: { entries: ({ tile: number; palette: number; hFlip: boolean; vFlip: boolean } | null)[]; width: number }; palette: { r: number; g: number; b: number }[][] };
+  const MESSAGE_PALETTE = battleWindow.palette[0]!;
+  const MESSAGE_TEXT_COLORS = { fg: 1, bg: 15, shadow: 6 };
+  const LINE1_ORIGIN = { x: 16, y: 121 };
+  const NOT_VERY_EFFECTIVE_LINE = "It’s not very effective…";
+  function drawTileBg(fb: Buffer): void {
+    const { tileset, tilemap, palette } = battleWindow;
+    const tiles = (tileset as { tiles: number[][] }).tiles;
+    for (let screenY = 0; screenY < 160; screenY++) {
+      const tileRow = Math.floor(screenY / 8);
+      const inTileY = screenY % 8;
+      for (let screenX = 0; screenX < 240; screenX++) {
+        const tileCol = Math.floor(screenX / 8);
+        const inTileX = screenX % 8;
+        const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+        if (!entry) continue;
+        const tile = tiles[entry.tile];
+        if (!tile) continue;
+        const sx = entry.hFlip ? 7 - inTileX : inTileX;
+        const sy = entry.vFlip ? 7 - inTileY : inTileY;
+        const idx = tile[sy * 8 + sx]!;
+        if (idx === 0) continue;
+        const c = palette[entry.palette]?.[idx];
+        if (!c) continue;
+        const i = (screenY * 240 + screenX) * 4;
+        fb[i] = c.r;
+        fb[i + 1] = c.g;
+        fb[i + 2] = c.b;
+        fb[i + 3] = 255;
+      }
+    }
+  }
+  function buildTextExpected(chars: number): Buffer {
+    const fb = Buffer.alloc(240 * 160 * 4);
+    drawTileBg(fb);
+    if (chars > 0) {
+      const l1 = NOT_VERY_EFFECTIVE_LINE.slice(0, Math.min(chars, NOT_VERY_EFFECTIVE_LINE.length));
+      drawText(fb as unknown as Uint8Array, font, charmap, l1, LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+    }
+    return fb;
+  }
+  function diffBoxRegion(a: Buffer, b: Buffer): number {
+    let diffs = 0;
+    for (let y = 112; y < 160; y++) {
+      for (let x = 0; x < 240; x++) {
+        const i = (y * 240 + x) * 4;
+        if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) diffs++;
+      }
+    }
+    return diffs;
+  }
+  const TEXT_TABLE: [tick: number, chars: number][] = [
+    [11005, 1],
+    [11010, 6],
+    [11014, 10],
+    [11020, 16],
+    [11027, 23],
+    [11028, 24],
+    [11032, 24],
+  ];
+  for (const [t, chars] of TEXT_TABLE) {
+    const actual = PNG.sync.read(get(t).png).data as unknown as Buffer;
+    const expected = buildTextExpected(chars);
+    const mismatch = diffBoxRegion(actual, expected);
+    check(`message text: render ${t} shows ${chars}/24 chars of the SINGLE-line "It’s not very effective…" exactly`, mismatch === 0, `mismatch=${mismatch}`);
+  }
+  // The single-line correction itself: line-2's row band (y:137-151) must
+  // show pure background at every text-reveal tick, since the (wrong) doc
+  // claim would have put line2 content there by ~11014.
+  {
+    const bgSample = PNG.sync.read(get(11004).png).data;
+    const bgIdx = (137 * 240 + 20) * 4;
+    const bgColor = [bgSample[bgIdx], bgSample[bgIdx + 1], bgSample[bgIdx + 2]];
+    let line2HasInk = false;
+    for (const t of [11014, 11020, 11028]) {
+      const png = PNG.sync.read(get(t).png).data;
+      for (let y = 137; y < 152 && !line2HasInk; y++) {
+        for (let x = 10; x < 230; x++) {
+          const i = (y * 240 + x) * 4;
+          if (png[i] !== bgColor[0] || png[i + 1] !== bgColor[1] || png[i + 2] !== bgColor[2]) {
+            line2HasInk = true;
+            break;
+          }
+        }
+      }
+    }
+    check("message text is SINGLE-line: line-2 row band never gets ink (corrects turn9-notes.md §5)", !line2HasInk, `line2HasInk=${line2HasInk}`);
+  }
+
+  // --- §3 (2026-07-21 addendum): settled hold is flat (no periodic content),
+  // sha-identical 11028-11109; transition to ROCK_SLIDE kickoff begins 11110.
+  // Corrects turn9-notes.md §5's "11018" hold-start claim (still mid-typing). ---
+  const holdSha = get(11028).sha256;
+  check("settled hold: render 11018 is still mid-typing, NOT yet the held sha (corrects turn9-notes.md §5)", get(11018).sha256 !== holdSha, `11018 sha ${get(11018).sha256.slice(0, 12)} unexpectedly matches hold`);
+  for (const t of [11060, 11109]) {
+    check(`settled hold: render ${t} byte-identical to render 11028 (flat, no periodic content)`, get(t).sha256 === holdSha, `11028=${holdSha.slice(0, 12)}, ${t}=${get(t).sha256.slice(0, 12)}`);
+  }
+  check("settled hold ends: render 11110 differs from the held sha (ROCK_SLIDE-kickoff transition begins)", get(11110).sha256 !== holdSha, `got ${get(11110).sha256.slice(0, 12)}`);
 
   console.log(`\n${captureFrames.length} ticks captured, ${failures === 0 ? "ALL CHECKS PASSED" : `${failures} CHECK(S) FAILED`}`);
   process.exit(failures === 0 ? 0 : 1);
