@@ -4,6 +4,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 188 — Bounded worker (S7 slice M): Pidgeotto's healthbox slide-in LANDED (`turn5-healthbox.json` 55/55, 0 diff, 6820-6874) — Sitrus proc + settled menu NOT landed, blocked on a newly-discovered Onix on-field idle-bob (RAM table pinned, screen mapping unresolved)
+
+- **State:** `npm test` **793/793** (+3), `npm run build` green, tree clean.
+  New committed trace `turn5-healthbox.json` (55 captures, 6820-6874) 0
+  diff. Regression clean: `turn5-switchin.json` 241/241, `turn5-sentout.json`
+  141/141, `turn5-rockslide.json` 256/256.
+- **Did:** assigned the full 6828→~7307 window (healthbox slide-in, Sitrus
+  proc, settled menu vs PIDGEOTTO). Landed the healthbox slide-in cleanly:
+  Pidgeotto's own opponent healthbox was never drawn at all past 6828 (a
+  real gap, not just unverified) — composited (name/level/gender, gender
+  pixel-confirmed male via an oracle crop) and wired in with the same
+  23-step slide `healthboxSlideDx` (now generalized to an arbitrary anchor)
+  already used for S6's own send-out. Found and fixed a real off-by-one:
+  the naive anchor (matching §8e's own cited RAM tick, 6828) reproduces the
+  oracle's slide sequence exactly one tick early throughout — needs the
+  ordinary +1 RAM-to-render lag every other mechanism in this dossier
+  carries, isolated via a diff-vs-fixed-background pixel scan applied
+  identically to oracle and app frames. +3 Tier-1 pins. Then RAM-probed
+  past the slide (`tools/probe/specs/switchin-b0-sprite.json`, twice-run
+  identical) and found the "flat" window right after settle (6852-7040) is
+  NOT actually static: Onix's own sprite (the player's battler, not
+  Pidgeotto's) plays a continuous idle vertical bob on a clean 32-tick
+  period starting RAM tick 6870 — a genuinely new mechanism (Onix is drawn
+  perfectly static through the whole already-verified 6588-6828 span, so
+  this only engages once it's just standing idle). The RAM table itself is
+  solid (pixel bbox of the affected region matches Onix's sprite footprint
+  exactly, nothing else). But applying it as a direct render-tick `y2`
+  offset does NOT reproduce the oracle (large residual diffs both signs
+  tried) — tried and reverted rather than ship red, per this run's own
+  discipline. Also ran a fresh full-window oracle diff scan sharpening
+  §3e's own `~`-estimates to exact ticks (sparkle/tint window ~7042-7075,
+  Sitrus message exact 7078-7112 (35 chars, byte-length-matched), a big
+  redraw at 7222, and — new finding — the HP-climb/menu window keeps
+  visibly changing all the way to the 7307 acceptance boundary, so a
+  single flat "final frame" harvest won't work for the settled menu).
+- **Next:** re-derive the Onix idle-bob's RAM→screen mapping (three
+  hypotheses banked in `docs/faint-switch-notes.md` §11 — scale factor,
+  wrong sprite-slot assumption, or a second uncontrolled simultaneous
+  change) before the Sitrus sparkle/tint/ring/message/HP-climb/settled-menu
+  chain can proceed, since the idle-bob renders underneath all of it. The
+  Sitrus ring gfx (§8a) also still needs its own pixel-placement pass,
+  unchanged from before this session.
+- **Notes:** no papercuts. Docs: `faint-switch-notes.md` §11 added (both
+  the landed piece and the precise blocker, with the exact pixel/RAM data
+  needed to resume without re-deriving); archived #185 to keep the ledger
+  to 3 entries.
+
+---
 ## 187 — Worktree scout (supervisor-folded): turn 6 ground truth BANKED — prefix consistency of the whole engine chain vs the WIN line CONFIRMED (one line, no divergence through turn 7); `battle1-turn6-dense.json` (8346 frames, 251 captures, twice-run identical) + `docs/turn6-notes.md`; merged `858f482`, suite 790/790 on the merged tree
 
 - **State:** merged into master, `npm test` 790/790 + build green
@@ -77,56 +125,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   looked plausible from a degenerate RAM decode but was caught by a direct
   oracle pixel cross-check before it was ever committed.
 
----
-## 185 — Supervisor wind-down: session end 2026-07-20 ~16:00 — **15 worker steps verified and folded** (9 main-lane + 6 worktree, 41 commits); suite **744 → 787/787**; headlines: **turns 3, 4, and 5 of battle 1 are COMPLETE and pixel-exact through Grovyle's faint** (11 new committed traces), **every excluded residual tick in turns 1-5 is now RESTORED and GREEN** (four separate root-caused engine bugs, zero "hardware quirk" labels left standing), and the **user-reported FIGHT B-close/reopen strand (ISSUES #25) was root-caused, oracle-verified, and fixed same-day**
-
-- **State (verified this minute):** `npm test` **787/787**, `npm run
-  build` green, tree clean at `a05e9d0`+docs, no worktrees, no unmerged
-  branches. Full sweep spot-rechecked by supervisor this hour:
-  `turn4-doubleteam` 250/250, `turn5-menu` 42/42, `fight-submenu-reopen`
-  90/90, `fight-submenu` 235/235, `turn3-menu` 254/254, `turn5-switchin`
-  167/167, `turn5-sentout` 141/141 — all 0 diff; `sendout` 255/256 and
-  `s6-acceptance` 224/228 unchanged (#5/#18 policy-settled).
-- **Session narrative (~09:30-16:00, 8 rounds, two lanes):** turn 3
-  (slices G/H), turn 4 (I, I-2 after a characterized-not-committed first
-  attempt), turn 5 through the KO (J, K) all landed by the
-  "parameterize, don't rebuild" pattern — every slice RAM-probed anchors
-  before render code. The switch-in tail landed in three rungs (L
-  no-land with findings banked → L-2 resolved the 6727 icon-bar
-  transient → L-3 landed ball/particles/materialize-growth); its
-  remainder (materialize ramp-down residual ~6768-6782, healthbox
-  slide-in, Sitrus, settled menu) is precisely bounded in
-  faint-switch-notes §10 / battle-turn-notes §26. Worktree lane ran 6
-  scouts/probes: faint/switch-in AI rule + Sitrus formula, switch-in
-  itemization + Pidgeotto verification, shake/bounce residual probes
-  (Families A/B), slice-L gap closure (4/5), and the extremum probe —
-  each folded with supervisor re-verification of a central claim.
-- **The residual-elimination thread (session's best result):** four
-  independent excluded-tick families were root-caused as REAL,
-  small engine bugs and fixed with all ticks restored: stale
-  `gBattleMovePower` shake amplitude (general rule + a turn-5
-  prediction pinned BEFORE its window rendered — confirmed live);
-  turn-3 bounce composition uniformly +1 tick (visible only at sine
-  plateau crossings); the turn-4 kickoff-text delay-family gate; the
-  turn-5 reopen's same-tick phase switch. Turns 1-5 traces now capture
-  every tick of their windows except ISSUES #23's parked projectile span.
-- **User interaction:** mid-session bug report (FIGHT → B → A dead) —
-  supervisor root-caused the state-machine strand + banked oracle ground
-  truth (reopen + cursor persistence) within the hour; fix landed as
-  ISSUES #25 (filed → fixed → deleted same day), `fight-submenu-reopen
-  .json` 90/90.
-- **Next:** (1) finish the switch-in tail from §10's bounded remainder
-  (ramp-down residual first — RAM palette-buffer approach per the
-  PAPERCUTS note); (2) then turn 6+ toward battle 1's WIN (§14-§16
-  ground truth banked); (3) ISSUES #23 stays parked; (4) the §ISSUES-25
-  "sine quantization edge" family in the reopened submenu's later dwell
-  is the one new named-open residual (same family as the pre-existing
-  resumed-menu tick 2073 note).
-- **Notes:** no usage-limit events; one launcher failure (inline brief
-  with `!(` — zsh parse, papercut recorded, relaunched via brief file);
-  4 new PAPERCUTS entries total this session. Worker discipline was
-  strong: two honest no-lands (slice L attempt 1, slice I attempt 1)
-  both banked findings instead of shipping red, and both windows landed
-  on the sharpened retry.
-
----

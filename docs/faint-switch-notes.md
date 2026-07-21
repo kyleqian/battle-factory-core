@@ -1319,3 +1319,140 @@ territory in the whole faint/forced-switch sequence is past
 `TURN5_PIDGEOTTO_SETTLE_TICK`: healthbox slide-in, Sitrus proc, and the
 settled menu vs. PIDGEOTTO (§8e/§2/§3e, all still fully spec'd, untouched
 by this slice).
+
+## 11. S7 slice M (bounded worker, this session): Pidgeotto's healthbox
+slide-in LANDED (`turn5-healthbox.json` 55/55, 0 diff, 6820-6874); the
+Sitrus proc + settled menu NOT landed - a new blocker found and precisely
+located
+
+Picked up exactly where §10 left off (past `TURN5_PIDGEOTTO_SETTLE_TICK`).
+Landed the first, fully-spec'd piece (§8e's own healthbox slide-in) and
+made real headway on the rest, but ran out of the 60-minute cap before the
+Sitrus proc + settled menu closed - see "What's landed" and "What's
+blocking the rest" below, both precise, neither curve-fit.
+
+### What's landed, byte-exact
+
+- **Pidgeotto's opponent healthbox was never drawn at all past 6828** -
+  `drawTurn5RockSlideWindow` only drew the sprite/ball/particles, never the
+  healthbox itself, a real gap (not just an unverified mechanism). Now
+  composited via `composeOpponentHealthbox` (`PIDGEOTTO`, level 50, gender
+  `"male"` - pixel-confirmed this session by cropping/zooming the oracle's
+  own frame 6900 of `battle1-switchin-dense-c.json`: the gender glyph next
+  to the name reads unambiguously blue/male, `/tmp` scratch crop, not
+  committed) and wired into `drawTurn5RockSlideWindow` right after
+  `drawTurn5SwitchinSprite`.
+- **`healthboxSlideDx` generalized** to take an arbitrary anchor tick
+  (default unchanged, `HEALTHBOX_SLIDE_START_TICK`, for S6's own send-out
+  caller) instead of being hardcoded to 1495 - `turn5PidgeottoHealthboxSlideDx`
+  reuses it verbatim, anchored at `TURN5_PIDGEOTTO_SETTLE_TICK + 1`.
+- **A real off-by-one found and fixed**: the naive anchor
+  (`TURN5_PIDGEOTTO_SETTLE_TICK` itself, 6828, matching §8e's own cited RAM
+  tick for the slide task's `callback` flip) reproduces the oracle's slide
+  sequence exactly **one tick early** throughout, not just at one boundary -
+  pixel-isolated via a diff-vs-fixed-pre-slide-background scan applied
+  identically to both the oracle's own frames and the app's own rendered
+  frames (method: `np.any(frame[y,x] != prevslide_frame[y,x])` summed over a
+  crop, giving the exact tick each column of the healthbox's content first
+  becomes visible): oracle's own content-visible-onset is render tick 6831,
+  settle (position stops changing) render tick 6852; a naive `t >=
+  TURN5_PIDGEOTTO_SETTLE_TICK` anchor produces onset 6830 / settle 6851 - a
+  constant 1-tick gap at every sample. This is the ordinary RAM-tick-T-shows-
+  at-render-T+1 lag every other mechanism in this dossier already carries;
+  §8e's own RAM probe just hadn't been cross-checked against a render-tick
+  pixel scan yet. Fixed by anchoring at `TURN5_PIDGEOTTO_SETTLE_TICK + 1`
+  (6829) - `turn5-healthbox.json` (55 captures, 6820-6874) is 55/55, 0 diff.
+  3 new Tier-1 pins.
+
+### What's blocking the rest: Onix's own on-field idle bob, a genuinely new
+mechanism, sign/scale not yet resolved
+
+The flat window right after the healthbox settles (roughly 6852-7040, well
+before the Sitrus proc's own sparkle) is NOT actually static - a fresh RAM
+probe this session (`tools/probe/specs/switchin-b0-sprite.json`, watching
+`gBattlerSpriteIds[0]`'s own sprite fields - i.e. **Onix's own sprite**, the
+player's battler, not Pidgeotto's or either healthbox's) found its `y2`
+field oscillating on a clean, literal 32-tick period starting RAM/probe
+tick 6870, flat 0 before that (matching the fact that `turn5-switchin.json`
+already covers 6588-6828 at 0 diff with Onix drawn perfectly static there -
+this bob genuinely only engages once Onix is just standing idle, not during
+its own turns 1-5 ROCK_SLIDE attacking). The table (probe-tick aligned
+1:1 with render tick, no extra lag needed - cross-checked directly against
+a pixel diff scan, both agree the first visible change is render tick
+6875):
+
+```
+offset 0..31 (t - 6870):
+0 0 0 0 0 1 1 2 2 3 3 3 3 4 4 5 5 6 6 6 5 5 4 4 3 3 3 3 2 2 1 1
+```
+
+Twice-run byte-identical (`src/data/gen/battle1-switchin-b0-sprite-probe.json`).
+Pixel bbox of the affected region (`np.where` on a consecutive-frame diff
+between render ticks 6875/6877) is `x:43-100, y:49-111` - exactly Onix's
+own sprite footprint at `ONIX_MATERIALIZE_CORNER` (`{x:40,y:48}`), nothing
+else (not the healthbox, not Pidgeotto) - so this is unambiguously Onix's
+own sprite moving, not a different element.
+
+**What's NOT resolved**: applying this table as a direct `y2` pixel offset
+to Onix's sprite draw call (`ONIX_MATERIALIZE_CORNER.y + onixFieldBounceY2(t)`)
+does NOT reproduce the oracle - large residual diffs remain (580-1300px,
+worse than the ~0px expected), and flipping the sign (`- onixFieldBounceY2(t)`)
+made it WORSE, not better, ruling out a simple sign flip as the fix. Tried
+and reverted this session (not committed to `src/`, per this run's own "no
+red trace" discipline) rather than ship a wrong mechanism. Open hypotheses
+for whoever picks this up: (a) the RAM `y2` value may need a different
+scale factor before becoming a screen-pixel offset (GBA sprite `y2` fields
+are normally 1:1 px, but this specific field/slot pairing hasn't been
+cross-checked against a KNOWN-correct case the way e.g. `rockSlideMonShakeY2`
+was), (b) `gBattlerSpriteIds[0]` at this point in the trace might not be
+the sprite object I assumed (worth re-deriving from a fresh `dump-battler-
+full.py` cross-check rather than trusting the existing `switchin-b1-sprite.json`
+spec's own path pattern by analogy), or (c) there may be a SECOND
+simultaneous change (background dither, shadow sprite, or the ball-icon-bar
+area) contributing to the same diff magnitude that needs isolating first
+with a narrower crop before the sprite-only hypothesis can be cleanly
+tested. The probe data itself (the table, the bbox, the twice-run
+determinism) is solid ground truth either way - only the RENDER mapping is
+unresolved.
+
+### Also not reached this session (unchanged from §3e/§8a, re-timed only)
+
+A fresh full-window diff scan (oracle-only, `battle1-switchin-dense-{c,d}.json`
+regenerated and frame-to-frame diffed) sharpened §3e's own `~` estimates to
+exact render ticks, banked here for whoever resumes:
+
+- Sparkle+Onix-cyan-tint window: first diff 7042, tint clearly visible by
+  7045 (oracle crop confirms Onix's whole sprite reads pale cyan/teal), fading
+  back to normal gray by ~7075.
+- Ring (expanding, `ANIM_TAG_THIN_RING`, §8a): visibly a small ring at 7045,
+  roughly Onix-sized by 7060, expanding off-crop by 7070, gone by 7075 -
+  still NOT pixel-placed/verified this session (§8a's own gap), only
+  re-confirmed visually.
+- Sitrus heal message ("ONIX's SITRUS BERRY" / "restored health!"): exact
+  start render tick **7078** (full-frame diff jumps 1206px here, a message-
+  box redraw, not a char-print-sized delta), then 1 char/tick through
+  **7112** (35 total diffs 7078-7112 inclusive = 35 chars, matching the
+  string's own length exactly: 19 + 16). Held flat 7112-~7180 (matches
+  §3e's own "held" note).
+- A small (~5-35px) cyclic diff resumes ~7180-7209 (period 9, likely the
+  wait-cursor's own bounce, same family as `turn5FaintedCursorYOffset` -
+  not itemized further this session).
+- Big jump at **7216** (1127px) then a HUGE jump at **7222** (5983px, almost
+  certainly the message box disappearing and the interactive menu appearing
+  in one shot) - the HP-bar-climb window itself shows a period-9 alternating
+  cycle (769px/1579px) through at least tick 7306, meaning the settled menu
+  is STILL actively changing (the HP digits/bar climbing, or the choose-
+  action `menuIdleBounce` cycle, or both) all the way out to the acceptance
+  boundary (7307) - a single flat "final frame" harvest would NOT work for
+  this tail; whoever implements the settled menu needs either the live HP-
+  climb formula wired all the way through, or to confirm the bounce/climb
+  has genuinely finished by the exact tick a static harvest gets taken.
+
+### Status: PARTIAL - one clean sub-window landed, the rest precisely scoped
+
+`turn5-healthbox.json` (55/55, 0 diff, 6820-6874) is the only new committed
+trace this session. `turn5-sitrus.json` was drafted but not committed - none
+of that window renders correctly yet (blocked on the idle-bob mapping
+above, which affects everything downstream). No ticks were excluded from
+any committed trace (the committed trace's own scope was kept to exactly
+what's landed, rather than claiming a wider window with exclusions).
