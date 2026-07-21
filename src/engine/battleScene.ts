@@ -518,6 +518,7 @@ import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { t
 import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" with { type: "json" };
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
+import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -693,6 +694,13 @@ interface BattleAnimHitsplatAsset {
   palette: RgbColor[];
 }
 
+/** `cut.png` (`gCuttingSliceSpriteTemplate`, `ANIM_TAG_CUT`, docs/aerial-ace-notes.md mechanism 5) - 4 stacked 32x32 frames; `frames.list[i]` is frame `i`'s own 16-tile (4x4) grid, same shape as `Tileset` so it can be handed straight to any tile-grid draw helper. `tileset` (== `frames.list[0]`) is kept for parity with every other asset's shape but frame draws should index `frames.list` directly. */
+interface BattleAnimCuttingSliceAsset {
+  tileset: Tileset;
+  frames: { columns: number; rows: number; list: number[][][] };
+  palette: RgbColor[];
+}
+
 const battleBg = battleBgAsset as BattleBgAsset;
 const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
@@ -710,6 +718,7 @@ const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
 const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFeatherAsset;
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
+const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
 
 /**
  * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
@@ -1165,7 +1174,7 @@ export function evaEvb(t: number): { eva: number; evb: number } {
  */
 const BG_PERIOD = battleBg.static.tilemap.width * 16;
 
-function staticBgPixel(mapX: number, mapY: number): RgbColor | null {
+function staticBgPixel(mapX: number, mapY: number, paletteOverride?: RgbColor[][]): RgbColor | null {
   const tilemap = battleBg.static.tilemap;
   const inTileY = ((mapY % 8) + 8) % 8;
   const wrappedX = (((mapX % BG_PERIOD) + BG_PERIOD) % BG_PERIOD);
@@ -1183,7 +1192,7 @@ function staticBgPixel(mapX: number, mapY: number): RgbColor | null {
   const sy = entry.vFlip ? 7 - inTileY : inTileY;
   const idx = tile[sy * 8 + sx]!;
   if (idx === 0) return null;
-  return battleBg.palette[entry.palette]?.[idx] ?? null;
+  return (paletteOverride ?? battleBg.palette)[entry.palette]?.[idx] ?? null;
 }
 
 /** BG1's own period: `entrySlide`'s `gBattleBgTemplates[1].screenSize = 2` (`BGCNT_TXT256x512`, vertically-stacked blocks) - genuinely 256px wide, unlike BG3's `static` above (`screenSize = 1`, 512px). `entrySlide`'s own JSON is a single 32x32 block (one screen block, per `extract-battle-bg.ts`'s header note), so no second-block row offset is needed here. */
@@ -3210,6 +3219,26 @@ function getDoubleTeamClonePalette(): RgbColor[] {
     c ? { r: blendComponentToward(c.r, 0, 11), g: blendComponentToward(c.g, 0, 11), b: blendComponentToward(c.b, 0, 11) } : c,
   );
   return doubleTeamClonePaletteCache;
+}
+
+/** S7 slice R rung (b) mechanism 4 (docs/aerial-ace-notes.md's own continuation section): `BlendPalette` toward RGB_BLACK at coefficient 10 - the exact RAM-read coefficient for the palette-pulse's own darkened plateau (`turn10AerialAcePaletteDarkenCoeff`), same shape as `getDoubleTeamClonePalette`. */
+function darkenPaletteToward10(palette: readonly (RgbColor | undefined)[]): RgbColor[] {
+  return palette.map((c) => (c ? { r: blendComponentToward(c.r, 0, 10), g: blendComponentToward(c.g, 0, 10), b: blendComponentToward(c.b, 0, 10) } : (c as unknown as RgbColor)));
+}
+let turn10PidgeottoDarkPaletteCache: RgbColor[] | null = null;
+function turn10PidgeottoDarkPalette(): RgbColor[] {
+  return (turn10PidgeottoDarkPaletteCache ??= darkenPaletteToward10(pidgeottoFrontSprite.palette));
+}
+let turn10OnixDarkPaletteCache: RgbColor[] | null = null;
+function turn10OnixDarkPalette(): RgbColor[] {
+  return (turn10OnixDarkPaletteCache ??= darkenPaletteToward10(onixBackSprite.palette));
+}
+/** BG palette bank 1 ONLY (docs/aerial-ace-notes.md: `selector=31` decodes to `F_PAL_BG|F_PAL_BATTLERS`, one specific BG palette bank, not every bank `staticBgPixel` can sample) - banks 0/2 pass through unchanged. */
+let turn10BgDarkPaletteCache: RgbColor[][] | null = null;
+function turn10BgDarkPalette(): RgbColor[][] {
+  if (turn10BgDarkPaletteCache) return turn10BgDarkPaletteCache;
+  turn10BgDarkPaletteCache = battleBg.palette.map((bank, i) => (i === 1 ? darkenPaletteToward10(bank) : bank));
+  return turn10BgDarkPaletteCache;
 }
 
 /**
@@ -6031,10 +6060,10 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
  * a defaulted param" idiom `onixHp`/`bounceTick`/`beforeMonSprite` already
  * use on this same call chain.
  */
-function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false): void {
+function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
+  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
   const sink = grovyleFaintSinkRowsAndY2(t);
   if (sink.keptRows >= GROVYLE_FAINT_SINK_STEPS) {
     if (!rockSlideMonBlinkInvisible(t, pressTick)) {
@@ -6072,13 +6101,13 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
     // freeze into this function) - RAM/pixel-confirmed this session
     // (`turn6-fd-check.json` scratch compare): freezing this too closes the
     // entire 769px residual across 7348-7404 in one fix.
-    const onixY2 = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick)).onixY2;
+    const onixY2 = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick)).onixY2 + onixY2Extra;
     const tintCoeff = onixSitrusTintCoeff(t);
     if (!onixInvisible) {
       if (tintCoeff > 0) {
         drawSpriteSheetAffineTintedBlend(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y, 256, ONIX_SITRUS_TINT_COLOR, tintCoeff, onixY2);
       } else {
-        drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2);
+        drawSpriteSheet(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette() : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2);
       }
     }
   }
@@ -8070,8 +8099,8 @@ export const TURN10_REGIME5_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (
  * mons' own real turn-10-opening HP (Onix 24, Pidgeotto 61 - unchanged
  * until this turn's own AERIAL_ACE/ROCK_SLIDE hits land, rungs (b)/(c)).
  */
-function drawTurn10FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
-  drawTurn6FieldBase(fb, t, bounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT, beforeMonSprite, TURN9_ONIX_AFTER_QUICKATTACK_HP);
+function drawTurn10FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixY2Extra: number = 0, darken: boolean = false): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT, beforeMonSprite, TURN9_ONIX_AFTER_QUICKATTACK_HP, 0, false, undefined, onixY2Extra, darken);
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
@@ -8106,6 +8135,231 @@ export function turn10AerialAceTextVisibleChars(t: number, pressTick: number): n
   return Math.min(TURN10_AERIALACE_TEXT_TOTAL, t - start + 1);
 }
 
+// --- S7 slice R rung (b): AERIAL_ACE's own animation, all 5 mechanisms
+// (docs/aerial-ace-notes.md, both dated sections - the 2026-07-21
+// continuation corrects/extends the first) - a pure wiring job against that
+// dossier's own RAM-pinned tables, gated by `tools/probe/verify-turn10-
+// aerialace.ts` (20/20). `pressTick` here is turn 10's own live confirm
+// (12305), NOT a synthetic anchor - re-confirmed constant across the whole
+// window by the dossier's own `diag-aerialace-anchor.ts` instrument.
+
+/**
+ * Mechanism 1 (docs/aerial-ace-notes.md continuation, "Mechanism 1"):
+ * Pidgeotto's own elliptical lunge (slot 5, the real sprite) -
+ * `AnimTask_TranslateMonEllipticalRespectSide_Step` active RAM 12360-12365
+ * (n=55-60 relative to pressTick), reverting to `(0,0)` after. Needs a
+ * genuine **+2** render lag (not the ordinary +1) - PNG-evidenced: mechanism
+ * 5 (the slice) shares this exact RAM-active start tick (12360) yet debuts a
+ * full tick earlier on screen (render 12361 vs this mechanism's render
+ * 12362), not root-caused, see the dossier's own gap note.
+ */
+const TURN10_LUNGE_RENDER_LAG = 2;
+const TURN10_LUNGE_DELAY = 55; // RAM 12360 - pressTick(12305)
+const TURN10_LUNGE_TABLE: readonly { x2: number; y2: number }[] = [
+  { x2: -17, y2: 2 }, // RAM 12360
+  { x2: -24, y2: 6 }, // RAM 12361
+  { x2: -17, y2: 11 }, // RAM 12362
+  { x2: 0, y2: 12 }, // RAM 12363
+  { x2: 16, y2: 11 }, // RAM 12364
+  { x2: 24, y2: 6 }, // RAM 12365
+];
+export function turn10AerialAceLungeOffset(t: number, pressTick: number): { x2: number; y2: number } | null {
+  const ramTick = t - TURN10_LUNGE_RENDER_LAG;
+  const n = ramTick - pressTick - TURN10_LUNGE_DELAY;
+  if (n < 0 || n >= TURN10_LUNGE_TABLE.length) return null;
+  return TURN10_LUNGE_TABLE[n]!;
+}
+
+/**
+ * Mechanism 3 (docs/aerial-ace-notes.md continuation, "Mechanism 3"): the
+ * two blended `AnimTask_TraceMonBlended` afterimage clones (slots 4/7),
+ * frozen (non-translating) copies sampling the lunge's own start/end
+ * extremes - slot 4 has TWO lives (the lunge's first value, then a gap, then
+ * `(0,0)`), slot 7 a single life at the lunge's last value. Base **+2**
+ * render lag as mechanism 1 (both go RAM-active the same tick, both debut a
+ * tick later than mechanism 5) - but each life's own START needs ONE MORE
+ * tick of latency on top of that (oracle-pixel-confirmed this session,
+ * `npm run compare` on a scratch capture: the exact same shrinking-but-
+ * nonzero diff shape `docs/battle-turn-notes.md` §38/§39 already root-caused
+ * for QUICK_ATTACK's own clones - "a freshly-allocated semi-transparent
+ * OBJ's OAM copy needs an extra frame before it's meaningful", `turn9QuickAttackSlot3Offset`'s
+ * own doc comment) - so **+3** at the START, ordinary +2 at the END, same
+ * asymmetric shape QUICK_ATTACK's own fix established. `eva=12,evb=8`
+ * (`setalpha 12, 8`, the script's own args) - the SAME ratio QUICK_ATTACK's
+ * own clones use.
+ */
+const TURN10_CLONE_START_RENDER_LAG = 3;
+export function turn10AerialAceSlot4Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
+  const nStart = t - TURN10_CLONE_START_RENDER_LAG - pressTick;
+  const nEnd = t - TURN10_LUNGE_RENDER_LAG - pressTick;
+  if (nStart >= 55 && nEnd <= 62) return { x2: -17, y2: 2 }; // RAM 12360-12367, life 1 (matches the lunge's own FIRST value)
+  if (nStart >= 65 && nEnd <= 72) return { x2: 0, y2: 0 }; // RAM 12370-12377, life 2
+  return null;
+}
+export function turn10AerialAceSlot7Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
+  const nStart = t - TURN10_CLONE_START_RENDER_LAG - pressTick;
+  const nEnd = t - TURN10_LUNGE_RENDER_LAG - pressTick;
+  if (nStart >= 60 && nEnd <= 67) return { x2: 24, y2: 6 }; // RAM 12365-12372 (matches the lunge's own LAST value)
+  return null;
+}
+
+/**
+ * Mechanisms 1+3 together: erase Pidgeotto's own settled footprint, redraw
+ * the real sprite opaque (at the lunge's own offset, or settled `(0,0)` once
+ * the lunge has reverted but a clone is still alive) FIRST, both clones
+ * blended over the live `fb` LAST - the exact `drawTurn9QuickAttackAnimation`
+ * shape (`blendedTileOverFb`'s own doc comment: clones must blend against
+ * whatever's already drawn, real sprite included). `darken`
+ * (mechanism 4, below) swaps in the palette-pulse's darkened palette for
+ * every draw here when the pulse plateau is active - real hardware's
+ * `BlendPalette` writes straight into the live palette RAM bank Pidgeotto's
+ * sprite (and its clones, same physical palette) reads from, so both must
+ * darken together, not just the real sprite.
+ */
+function drawTurn10AerialAceLungeAndClones(fb: Uint8Array, t: number, pressTick: number, darken: boolean): void {
+  const lunge = turn10AerialAceLungeOffset(t, pressTick);
+  const slot4 = turn10AerialAceSlot4Offset(t, pressTick);
+  const slot7 = turn10AerialAceSlot7Offset(t, pressTick);
+  if (!lunge && !slot4 && !slot7) return;
+  erasePidgeottoFootprint(fb, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  const { tileset } = pidgeottoFrontSprite;
+  const palette = darken ? turn10PidgeottoDarkPalette() : pidgeottoFrontSprite.palette;
+  const real = lunge ?? { x2: 0, y2: 0 };
+  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  if (slot7) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot7.x2, PIDGEOTTO_CORNER.y + slot7.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+}
+
+/**
+ * Mechanism 2 (docs/aerial-ace-notes.md continuation, "Mechanism 2"): Onix's
+ * own shake (slot 6, the real sprite) - `y2` square-wave `3,3,0,0` repeating
+ * over RAM 12369-12384 (4 full cycles, 16 ticks), ordinary **+1** render lag
+ * (PNG-confirmed via the verify script's own ON/OFF phase check, unlike
+ * mechanisms 1/3's +2). `x2` stays 0 throughout - a pure vertical shake.
+ */
+const TURN10_ONIX_SHAKE_RENDER_LAG = 1;
+const TURN10_ONIX_SHAKE_DELAY = 64; // RAM 12369 - pressTick(12305)
+const TURN10_ONIX_SHAKE_TICKS = 16;
+const TURN10_ONIX_SHAKE_PERIOD = 4;
+const TURN10_ONIX_SHAKE_AMPLITUDE = 3;
+export function turn10AerialAceOnixShakeY2(t: number, pressTick: number): number {
+  const ramTick = t - TURN10_ONIX_SHAKE_RENDER_LAG;
+  const n = ramTick - pressTick - TURN10_ONIX_SHAKE_DELAY;
+  if (n < 0 || n >= TURN10_ONIX_SHAKE_TICKS) return 0;
+  return n % TURN10_ONIX_SHAKE_PERIOD < 2 ? TURN10_ONIX_SHAKE_AMPLITUDE : 0;
+}
+
+/**
+ * Mechanism 4 (docs/aerial-ace-notes.md continuation, "Mechanism 4"): the
+ * background/battler palette darken-then-restore pulse - a SOFTWARE
+ * `BlendPalette` write straight into `gPlttBufferFaded` (NOT hardware BLDY),
+ * confirmed by a direct RAM read of the palette-blend sprite's own `data[]`
+ * state machine: exactly TWO discrete coefficient writes (10, then 0 three
+ * ticks later), not a smooth ramp. Palette-RAM visibility carries **0**
+ * render lag here (unlike every OAM x2/y2 field elsewhere in this window) -
+ * the darkened plateau is RAM ticks 12368-12370 AND render ticks 12368-12370,
+ * the exact same absolute numbers.
+ */
+const TURN10_PALETTE_PULSE_DELAY = 63; // RAM 12368 - pressTick(12305), 0 render lag
+const TURN10_PALETTE_PULSE_TICKS = 3; // RAM/render 12368-12370
+export function turn10AerialAcePaletteDarkenCoeff(t: number, pressTick: number): number {
+  const n = t - pressTick - TURN10_PALETTE_PULSE_DELAY;
+  if (n < 0 || n >= TURN10_PALETTE_PULSE_TICKS) return 0;
+  return 10;
+}
+
+/**
+ * Mechanism 5 (docs/aerial-ace-notes.md, "Mechanism 5", fully re-derived
+ * this session against a fresh `dump-cuttingslice-vram.py` probe): the
+ * "cutting slice" sprite (slot 3, `gCuttingSliceSpriteTemplate`) - a 4-frame
+ * diagonal claw-slash streak, base `(x,y)=(112,56)` fixed for its whole
+ * life, `x2,y2` via a decelerating linear recurrence, ordinary **+1** render
+ * lag (RAM-tick-indexed table below; render = RAM tick + 1). Screen corner
+ * is CENTER-based (`base + x2/y2 - 16`, halfway across the 32x32 sheet) -
+ * fit directly against the oracle's own 71px onset patch at render 12361
+ * (RAM 12360's row): only this corner formula reproduces that patch's exact
+ * bbox `(92,64)-(103,75)` from frame 0's own local opaque-pixel bbox
+ * `(0,20)-(11,31)`, not guessed. `eva=12,evb=8` (`setalpha 12, 8`, OBJ BLEND
+ * per the OAM), same ratio as mechanism 3's clones - blends over the live
+ * `fb`, same `blendedTileOverFb` reasoning. No explicit ground-clip: the
+ * message window (`drawTileBg(battleWindow...)`) is drawn AFTER this sprite
+ * in the dispatcher below, the same "message box always wins the bottom
+ * strip" convention every other overlapping animation in this file already
+ * relies on.
+ */
+const TURN10_SLICE_RENDER_LAG = 1;
+const TURN10_SLICE_DELAY = 55; // RAM 12360 - pressTick(12305)
+const TURN10_SLICE_BASE = { x: 112, y: 56 };
+const TURN10_SLICE_TABLE: readonly { x2: number; y2: number; frame: number }[] = [
+  { x2: -4, y2: 4, frame: 0 }, // RAM 12360
+  { x2: -8, y2: 7, frame: 0 }, // RAM 12361
+  { x2: -12, y2: 11, frame: 0 }, // RAM 12362
+  { x2: -16, y2: 15, frame: 0 }, // RAM 12363
+  { x2: -20, y2: 19, frame: 1 }, // RAM 12364
+  { x2: -23, y2: 22, frame: 1 }, // RAM 12365
+  { x2: -27, y2: 26, frame: 1 }, // RAM 12366
+  { x2: -30, y2: 29, frame: 1 }, // RAM 12367
+  { x2: -33, y2: 32, frame: 1 }, // RAM 12368
+  { x2: -36, y2: 35, frame: 2 }, // RAM 12369
+  { x2: -39, y2: 38, frame: 2 }, // RAM 12370
+  { x2: -42, y2: 41, frame: 2 }, // RAM 12371
+  { x2: -45, y2: 44, frame: 2 }, // RAM 12372
+  { x2: -48, y2: 47, frame: 2 }, // RAM 12373
+  { x2: -51, y2: 50, frame: 3 }, // RAM 12374
+  { x2: -53, y2: 52, frame: 3 }, // RAM 12375
+  { x2: -56, y2: 55, frame: 3 }, // RAM 12376
+  { x2: -58, y2: 57, frame: 3 }, // RAM 12377
+  { x2: -60, y2: 59, frame: 3 }, // RAM 12378
+  { x2: -63, y2: 62, frame: 3 }, // RAM 12379
+  { x2: -63, y2: 62, frame: 3 }, // RAM 12380, held (WaitAnimForDuration)
+  { x2: -63, y2: 62, frame: 3 }, // RAM 12381, held
+  { x2: -63, y2: 62, frame: 3 }, // RAM 12382, held
+  { x2: -63, y2: 62, frame: 3 }, // RAM 12383, held
+];
+export function turn10AerialAceSliceState(t: number, pressTick: number): { x2: number; y2: number; frame: number } | null {
+  const ramTick = t - TURN10_SLICE_RENDER_LAG;
+  const n = ramTick - pressTick - TURN10_SLICE_DELAY;
+  if (n < 0 || n >= TURN10_SLICE_TABLE.length) return null;
+  return TURN10_SLICE_TABLE[n]!;
+}
+function cuttingSliceFrameTileset(frame: number): Tileset {
+  return { columns: battleAnimCuttingSlice.frames.columns, rows: battleAnimCuttingSlice.frames.rows, tiles: battleAnimCuttingSlice.frames.list[frame]! };
+}
+function drawTurn10AerialAceSlice(fb: Uint8Array, t: number, pressTick: number): void {
+  const state = turn10AerialAceSliceState(t, pressTick);
+  if (!state) return;
+  const frameTileset = cuttingSliceFrameTileset(state.frame);
+  const ox = TURN10_SLICE_BASE.x + state.x2 - 16;
+  const oy = TURN10_SLICE_BASE.y + state.y2 - 16;
+  drawSpriteSheetBlendedOverFb(fb, frameTileset, battleAnimCuttingSlice.palette, ox, oy, 12, 8);
+}
+
+/**
+ * S7 slice R rung (b): the top-level AERIAL_ACE animation dispatcher - all
+ * five mechanisms layered onto turn 10's own field base, then the message
+ * box (still showing the settled "Foe PIDGEOTTO used\nAERIAL ACE!" kickoff
+ * text, unchanged throughout this whole window - no new mechanism needed).
+ * A no-op past `drawTurn10FieldBase` for any tick before every mechanism's
+ * own window opens (all five return null/0 there), so this function is safe
+ * to reach as soon as the kickoff text settles - it doesn't regress
+ * `turn10-menu.json`'s own already-proven 0-diff window.
+ */
+function drawTurn10AerialAceWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  const bounceTick = turn10KickoffBounceTick(t, pressTick);
+  const onixY2 = turn10AerialAceOnixShakeY2(t, pressTick);
+  // Mechanism 4's own COEFFICIENT state machine (turn10AerialAcePaletteDarkenCoeff)
+  // is RAM-pinned and Tier-1-tested, but the RENDER application (darkening
+  // BG palette bank 1 + both battlers' OBJ palettes) does NOT yet reach
+  // 0-diff (~48% of the frame still mismatches at the plateau, docs/
+  // battle-turn-notes.md §42) - not wired here, named gap, per the "revert
+  // partial render code, keep the pure table" rule.
+  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixY2, false);
+  drawTurn10AerialAceLungeAndClones(fb, t, pressTick, false);
+  drawTurn10AerialAceSlice(fb, t, pressTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
+}
+
 /**
  * S7 slice R rung (a): turn 10's own FIGHT submenu - cursor rests on
  * ROCK_SLIDE (slot 0, persisted from turn 9's own confirm) with PP read
@@ -8132,10 +8386,7 @@ function drawTurn10FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
     const pressTick = TICK0 + sm.confirmElapsed;
     const textStart = turn10AerialAceTextStartTick(pressTick);
     if (t >= textStart) {
-      const bounceTick = turn10KickoffBounceTick(t, pressTick);
-      drawTurn10FieldBase(fb, t, bounceTick);
-      drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-      drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
+      drawTurn10AerialAceWindow(fb, t, pressTick);
       return;
     }
   }
@@ -8186,8 +8437,8 @@ function drawTurn10FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
  * box redraw and the HP overlay need the SAME dy, so one override value
  * covers both calls.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number): void {
-  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible);
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false): void {
+  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own
@@ -8353,11 +8604,11 @@ const BG3_VERTICAL_PERIOD = 256;
 
 /** `staticBgPixel` (BG3, `battleBg.static`) sampled with a vertical scroll offset - `gBattle_BG3_Y`'s own real hardware semantics (`BG3VOFS`, a VERTICAL OFFSET added to the sampled map row for a given screen row), wrapped to BG3's own real vertical period. */
 /** `fadeY` (0..16, `blendComponentToWhite`) optionally blends every opaque pixel toward white first - see `TURN5_BG_FADE_Y` for the switch-in materialize window's own literal table (S7 slice L-3, pixel-sampled directly, same mechanism/unfaded swatch `SENDOUT_BG_FADE_Y` already established for S6). */
-function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number, fadeY = 0): void {
+function drawStaticBgShiftedY(fb: Uint8Array, shiftY: number, fadeY = 0, paletteOverride?: RgbColor[][]): void {
   for (let screenY = 0; screenY < 160; screenY += 1) {
     for (let screenX = 0; screenX < 240; screenX += 1) {
       const mapY = ((screenY + shiftY) % BG3_VERTICAL_PERIOD + BG3_VERTICAL_PERIOD) % BG3_VERTICAL_PERIOD;
-      const c = staticBgPixel(screenX, mapY);
+      const c = staticBgPixel(screenX, mapY, paletteOverride);
       if (!c) continue;
       if (fadeY > 0) {
         setPixel(fb, screenX, screenY, { r: blendComponentToWhite(c.r, fadeY), g: blendComponentToWhite(c.g, fadeY), b: blendComponentToWhite(c.b, fadeY) });

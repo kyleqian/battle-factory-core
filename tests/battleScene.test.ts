@@ -65,6 +65,12 @@ import {
   turn9SuperEffectiveTextVisibleChars,
   TURN9_ROCKSLIDE_PRESS_TICK,
   windowRange,
+  turn10AerialAceLungeOffset,
+  turn10AerialAceSlot4Offset,
+  turn10AerialAceSlot7Offset,
+  turn10AerialAceOnixShakeY2,
+  turn10AerialAcePaletteDarkenCoeff,
+  turn10AerialAceSliceState,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
@@ -2149,5 +2155,97 @@ describe("S7 slice R rung (d): turn9SuperEffectiveTextStartTick/turn9SuperEffect
     expect(turn9SuperEffectiveTextVisibleChars(11340, pressTick)).toBe(0);
     expect(turn9SuperEffectiveTextVisibleChars(11341, pressTick)).toBe(1);
     expect(turn9SuperEffectiveTextVisibleChars(11400, pressTick)).toBe(21);
+  });
+});
+
+describe("S7 slice R rung (b): turn10AerialAceLungeOffset - Pidgeotto's own elliptical lunge (docs/aerial-ace-notes.md continuation, RAM 12360-12365 relative to the live pressTick 12305, +2 render lag - a genuinely different table/lag class than QUICK_ATTACK's own turn9QuickAttackLungeOffset)", () => {
+  const pressTick = 12305;
+  it("is null before the window (RAM 12360's own render, 12362, is the first active tick)", () => {
+    expect(turn10AerialAceLungeOffset(12361, pressTick)).toBeNull();
+  });
+  it("matches the RAM-tabled x2/y2 sequence at render = RAM tick + 2", () => {
+    expect(turn10AerialAceLungeOffset(12362, pressTick)).toEqual({ x2: -17, y2: 2 });
+    expect(turn10AerialAceLungeOffset(12363, pressTick)).toEqual({ x2: -24, y2: 6 });
+    expect(turn10AerialAceLungeOffset(12364, pressTick)).toEqual({ x2: -17, y2: 11 });
+    expect(turn10AerialAceLungeOffset(12365, pressTick)).toEqual({ x2: 0, y2: 12 });
+    expect(turn10AerialAceLungeOffset(12366, pressTick)).toEqual({ x2: 16, y2: 11 });
+    expect(turn10AerialAceLungeOffset(12367, pressTick)).toEqual({ x2: 24, y2: 6 });
+  });
+  it("reverts to null (settled) past the window", () => {
+    expect(turn10AerialAceLungeOffset(12368, pressTick)).toBeNull();
+    expect(turn10AerialAceLungeOffset(12400, pressTick)).toBeNull();
+  });
+});
+
+describe("S7 slice R rung (b): turn10AerialAceSlot4Offset/turn10AerialAceSlot7Offset - the two AnimTask_TraceMonBlended clones, RAM-tabled by docs/aerial-ace-notes.md continuation - each life's START needs one extra tick of lag past the shared +2 (oracle-pixel-confirmed this session, the same 'freshly-allocated semi-transparent OBJ' shape docs/battle-turn-notes.md §39 already root-caused for QUICK_ATTACK), the END stays at the ordinary +2", () => {
+  const pressTick = 12305;
+  it("slot4 life 1: active render 12363-12369 at (-17,2), null just outside", () => {
+    expect(turn10AerialAceSlot4Offset(12362, pressTick)).toBeNull();
+    expect(turn10AerialAceSlot4Offset(12363, pressTick)).toEqual({ x2: -17, y2: 2 });
+    expect(turn10AerialAceSlot4Offset(12369, pressTick)).toEqual({ x2: -17, y2: 2 });
+    expect(turn10AerialAceSlot4Offset(12370, pressTick)).toBeNull();
+  });
+  it("slot4 life 2: active render 12373-12379 at (0,0)", () => {
+    expect(turn10AerialAceSlot4Offset(12372, pressTick)).toBeNull();
+    expect(turn10AerialAceSlot4Offset(12373, pressTick)).toEqual({ x2: 0, y2: 0 });
+    expect(turn10AerialAceSlot4Offset(12379, pressTick)).toEqual({ x2: 0, y2: 0 });
+    expect(turn10AerialAceSlot4Offset(12380, pressTick)).toBeNull();
+  });
+  it("slot7: active render 12368-12374 at (24,6)", () => {
+    expect(turn10AerialAceSlot7Offset(12367, pressTick)).toBeNull();
+    expect(turn10AerialAceSlot7Offset(12368, pressTick)).toEqual({ x2: 24, y2: 6 });
+    expect(turn10AerialAceSlot7Offset(12374, pressTick)).toEqual({ x2: 24, y2: 6 });
+    expect(turn10AerialAceSlot7Offset(12375, pressTick)).toBeNull();
+  });
+});
+
+describe("S7 slice R rung (b): turn10AerialAceOnixShakeY2 - Onix's own shake (docs/aerial-ace-notes.md continuation, RAM 12369-12384 relative to pressTick, ordinary +1 render lag, y2 square wave 3,3,0,0 x4 cycles)", () => {
+  const pressTick = 12305;
+  it("is 0 before the window", () => {
+    expect(turn10AerialAceOnixShakeY2(12369, pressTick)).toBe(0);
+  });
+  it("follows the 3,3,0,0 square wave from render 12370", () => {
+    expect(turn10AerialAceOnixShakeY2(12370, pressTick)).toBe(3);
+    expect(turn10AerialAceOnixShakeY2(12371, pressTick)).toBe(3);
+    expect(turn10AerialAceOnixShakeY2(12372, pressTick)).toBe(0);
+    expect(turn10AerialAceOnixShakeY2(12373, pressTick)).toBe(0);
+    expect(turn10AerialAceOnixShakeY2(12374, pressTick)).toBe(3);
+  });
+  it("is 0 again past the window (render 12386 on)", () => {
+    expect(turn10AerialAceOnixShakeY2(12385, pressTick)).toBe(0);
+    expect(turn10AerialAceOnixShakeY2(12386, pressTick)).toBe(0);
+  });
+});
+
+describe("S7 slice R rung (b): turn10AerialAcePaletteDarkenCoeff - mechanism 4's own state machine (docs/aerial-ace-notes.md continuation: a SOFTWARE BlendPalette write, exactly two discrete coefficient steps, 0 render lag) - pinned here even though the RENDER application isn't wired (see battle-turn-notes.md §42)", () => {
+  const pressTick = 12305;
+  it("is 0 before the plateau", () => {
+    expect(turn10AerialAcePaletteDarkenCoeff(12367, pressTick)).toBe(0);
+  });
+  it("is 10 for exactly render 12368-12370", () => {
+    expect(turn10AerialAcePaletteDarkenCoeff(12368, pressTick)).toBe(10);
+    expect(turn10AerialAcePaletteDarkenCoeff(12369, pressTick)).toBe(10);
+    expect(turn10AerialAcePaletteDarkenCoeff(12370, pressTick)).toBe(10);
+  });
+  it("is 0 again from render 12371", () => {
+    expect(turn10AerialAcePaletteDarkenCoeff(12371, pressTick)).toBe(0);
+  });
+});
+
+describe("S7 slice R rung (b): turn10AerialAceSliceState - the cutting-slice sprite's own x2/y2/frame table (docs/aerial-ace-notes.md, VRAM-verified asset + RAM-tabled positions, ordinary +1 render lag)", () => {
+  const pressTick = 12305;
+  it("is null before the window", () => {
+    expect(turn10AerialAceSliceState(12360, pressTick)).toBeNull();
+  });
+  it("matches the RAM-tabled x2/y2/frame at render = RAM tick + 1, onset render 12361", () => {
+    expect(turn10AerialAceSliceState(12361, pressTick)).toEqual({ x2: -4, y2: 4, frame: 0 });
+    expect(turn10AerialAceSliceState(12364, pressTick)).toEqual({ x2: -16, y2: 15, frame: 0 });
+    expect(turn10AerialAceSliceState(12369, pressTick)).toEqual({ x2: -33, y2: 32, frame: 1 });
+    expect(turn10AerialAceSliceState(12374, pressTick)).toEqual({ x2: -48, y2: 47, frame: 2 });
+  });
+  it("holds the final frame render 12380-12384 then is gone from render 12385", () => {
+    expect(turn10AerialAceSliceState(12380, pressTick)).toEqual({ x2: -63, y2: 62, frame: 3 });
+    expect(turn10AerialAceSliceState(12384, pressTick)).toEqual({ x2: -63, y2: 62, frame: 3 });
+    expect(turn10AerialAceSliceState(12385, pressTick)).toBeNull();
   });
 });

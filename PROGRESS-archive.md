@@ -1,4 +1,21 @@
 ---
+## 230 — Supervisor merge fold: turn 9's ENTIRE post-lunge window ground-truthed by a two-probe stacked chain (`worker/wt-20260721-103557` merged, 2 commits) — shake episode 2 ROOT-CAUSED as two independent RAM+1 mechanisms (20-tick healthbox y2 wobble + a separate 3-block Onix visibility flicker; Onix's sprite never moves), episode-1/hitsplat lag classes pinned (+1 hitsplat, +2 shake incl. a creation-tick stall), and the full C4 territory pinned (HP drain 31→24 lag-free w/ band flip at 10999; message reveal 1 char/tick 11005→11028, ONE line — dossier corrected; settled hold 11028-11109 FLAT; rung-(d) transition anchor 11110). `tools/probe/verify-turn9-postlunge.ts` **99/99 supervisor-rerun** from the merged main tree
+
+- **State (supervisor-verified post-merge):** `npm test` **896/896**,
+  `npm run build` green, verify script 99/99 fresh, no worktrees, no
+  unmerged branches. Two turn9-notes.md label corrections folded with
+  my own PNG re-read at 11040 (one-line message, Onix 24/117).
+- **Notes:** probe chain = round-2 worktree (12.5 min) + stacked
+  follow-up (19 min, nested worktree base 832e65a). One mis-based
+  launch in between (my error: invoking the MAIN tree's launcher by
+  absolute path from inside a worktree bases the new worktree on
+  master, NOT the branch — nesting requires the worktree's OWN script
+  copy invoked relatively); the worker caught it and stopped honestly
+  at $0.27. PAPERCUTS: exit-139 teardown-segfault entry added (two
+  workers re-confirmed it this session). Rungs (c3)/(c4)/(d) are now
+  wiring jobs against the 99-check script.
+
+---
 ## 229 — Bounded worker (S7 slice R rung (a)): turn 10's FIGHT-submenu reopen LANDS 0-diff, zero navigation presses — `turn10-menu.json` **83/83, 0 diff**; rung (b) (AERIAL_ACE's animation) RAM-probed to a concrete 5-mechanism inventory, NOT implemented — one mechanism needs a genuinely new sprite asset, out of cap
 
 - **State:** `npm test` **896/896** (892 + 4 new), `npm run build` green,
