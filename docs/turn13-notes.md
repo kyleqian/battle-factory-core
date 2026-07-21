@@ -314,3 +314,159 @@ generic probes (`ram-probe.py`'s spec format, `dump-battler-full.py`,
 reused unchanged across four different probe runs with only
 segments/startTick/tick-range edits, exactly as this dossier chain's
 own tooling investment was supposed to pay off.
+
+## 2026-07-21 — worktree lane: `tools/probe/verify-turn13.ts` lands; the
+dossier's own row 2 and the SAND_ATTACK "held" claim were APPROXIMATE
+(three genuine corrections), everything else re-confirms byte-exact
+
+**Verdict, stated up front**: turn 13's engine slice is confirmed a pure
+wiring job — no genuinely new mechanism, every reused constant/function
+either (a) already generic enough to parameterize directly
+(`moveFightCursor`'s 2x2 grid, `dragonBreathGrovyleHp`'s pressTick/
+startHp/endHp closed form, `cursorState`'s startTick-parameterized
+bounce, `calcBarFilledPixels`/`pickHpBarBand`) or (b) needs only new
+per-turn text constants + a new anchor tick (same pattern every prior
+turn's own `turnNFoo` functions in `battleScene.ts`/`battleMenu.ts`
+already establish) — confirmed by writing a pixel-only verify script
+(`node --experimental-strip-types tools/probe/verify-turn13.ts`, no
+`src/` changes, no trace changes) against a **fresh** `bin/oracle run`
+of the already-committed `battle1-turn13-dense-a.json` (its own 108
+segments are byte-identical to `-b.json`'s, asserted programmatically —
+both traces really do encode ONE 17722-frame script, just split
+`captureFrames` subsets, so either file's segments serve for the whole
+span in a single round trip). **46/46 checks pass, twice-run
+identical** (re-run back to back, same result both times).
+
+### Three corrections to this dossier's own §4 (the brief's own "prose
+APPROXIMATE... re-verify all state from RAM" premise, confirmed true)
+
+1. **§4's row 2 ("submenu open, DOWN nav, confirm... one static
+   plateau | 15376-15420 | 4 shas") was never one plateau.** Dense
+   stride-1 re-bisection (15373-15421) resolves it to **(at least) 6
+   distinct idle-bounce phases** of the FIGHT submenu's own box
+   animation, cycling completely independently of the cursor: `882e3c818195`
+   (15375-15379) → `8906ff14f3a1` (15380-15385, **not previously
+   cited anywhere**) → `e3588ddcf2cd` (15386-15394, **not previously
+   cited**) → `41067e0b8723` (15395-15403, **not previously cited**) →
+   `7585463c4ba2` (15404-15407, spans the DOWN press itself, unaffected)
+   → `55f04a5701aa` (15408-15412, cursor now on DRAGON_BREATH) →
+   `7922d883bcb6` (15413-15421, spans the CONFIRM press, still
+   unaffected). The **cursor-jump itself pins to exactly tick 15408** —
+   one tick after the DOWN press's own last frame (15407), the same
+   "+1 after last press frame" lag this dossier chain always finds,
+   now nailed to the single tick instead of a named-but-unattributed
+   sha. Confirm (15418-15419) produces zero additional visible change,
+   consistent with every prior turn's own "instant handoff, no
+   submenu-close redraw" rule.
+2. **§4's SAND_ATTACK row ("held 15460-15690, `73709be10f05`
+   representative sample") conflated three separate things.**
+   `73709be10f05` (tick 15460, the row's own cited sha) is actually a
+   **mid-typing frame, one glyph short of the full text** — the "!"
+   glyph (a narrow 2px-wide column) hadn't drawn yet, which is exactly
+   why an earlier draft of this session's own pixel-exact check saw a
+   spurious ~20px mismatch localized to that one column before this was
+   caught and corrected. The TRUE settled/held sha is **`502ba75ebb7a`**
+   (flat 15462 through at least 15470, confirmed **pixel-exact** against
+   `drawText`+`moves.json`'s own display name "SAND-ATTACK!", 0px
+   mismatch). Then, **a real ~90-tick animation plays 15540-15629**
+   (every sampled tick distinct, near-continuous motion) that the
+   dossier's sparse 15460/15550/15650 sampling entirely missed —
+   SAND_ATTACK deals no damage and has no hit-flash (§2's own RNG
+   ledger), so this is almost certainly the move's own "throw sand"
+   visual effect; **not re-identified frame-by-frame this session**
+   (flagged, not chased — out of the SCOPE-2 budget). The message box
+   then goes **blank** (15630-15699, sha `19fb94d8802c`) — the same
+   blank sha DRAGON_BREATH's own kickoff starts from (point 3 below),
+   confirming "blank box, zero chars, before either move's text starts
+   typing" is one shared state, not two coincidentally-identical ones.
+3. **§4's DRAGON_BREATH row ("kickoff text held ... 15699-15744 |
+   `19fb94d8802c` → `c35307432880`") already showed a sub-transition in
+   its own two cited shas, but its own prose framed the row as one
+   "held" window.** Resolved precisely: 15699 is the **blank pre-typing
+   state** (shared with SAND_ATTACK's own tail, point 2), text is
+   genuinely mid-typing at 15720 (matching the dossier's own "ONIX used
+   / DRAG" citation exactly — not wrong, just non-final), and is
+   **fully settled by 15740**, flat through at least 15747
+   (`c35307432880`, within 3 ticks of the dossier's own "full text
+   confirmed by 15757" note). Pixel-exact against `drawText` at tick
+   15744 (fully typed, not 15720): **0px mismatch.**
+
+None of these three corrections change any verdict in §3/§5/§6/§7 above
+— they only replace three approximate/conflated rows with exact
+per-tick pins. **KO-gated hold, HP-drain, faint sink, sent-out text,
+ball/materialize/stretch, healthbox slide-in, and the turn-14 menu
+boundary all re-confirmed byte-exact against their own §4 citations on
+this fresh run**, including one more small correction along the way:
+the KO-gated hold's own pre-press window (16810-16819) is **still
+cycling through the fainted-message's own idle-bounce phases**
+(matching one of `633ba603de70`/`4a61b37a14b7`/`99f977da6802`/
+`f5b0b49f7869` per tick, not flat at a single sha) — RAM-frozen per §2,
+but not pixel-frozen at one value until the press's own first frame
+(16820), where it locks to `633ba603de70` (§4's own cited sha) and
+holds through 16824. `battle1-turn13-dense-a.json`'s own 108 segments,
+walked programmatically (not hand-copied from prose), pin the exact
+press-tick boundaries used throughout: submenu-open A = 15374-15375,
+DOWN = 15406-15407, confirm A = 15418-15419, the button-gated
+KO-dismiss A = **16820-16821** (not a segment-104-in-the-original-156-
+script number — 106 in this trace's own local 108-segment indexing).
+
+### Parameterization verdict (per the brief's own ask)
+
+- **2x2 FIGHT-submenu cursor grid**: `battleMenu.ts`'s own
+  `moveFightCursor` (unmodified) reproduces the RAM-observed single-DOWN
+  jump (`moveFightCursor(0, "DOWN") === 2`) directly — no new code
+  needed, confirming the supervisor's own 2026-07-20 root-cause fold.
+- **DRAGON_BREATH's own HP-drain closed form**
+  (`dragonBreathGrovyleHp`, genuinely generic despite the name) clamps
+  correctly for Pidgeotto's own 16→0 endpoints with an arbitrary
+  `pressTick` — reused verbatim, only a new anchor tick is a wiring
+  concern for later, not a new formula.
+- **HP-bar color bands** (`calcBarFilledPixels`/`pickHpBarBand`,
+  unmodified): Pidgeotto 16/156 and 0/156 both red, Murkrow 142/142
+  green — matches turn10/turn11's own already-exercised bands for this
+  same Pidgeotto.
+- **SAND_ATTACK's own kickoff text/message-box mechanism** needs only a
+  new two-line text constant + a fresh anchor tick — same
+  `drawText`+`charmap`+battle-window-tile harness every prior turn's
+  kickoff message already uses, **plus** a genuinely-new-this-turn
+  ~90-tick "throw sand" animation whose own frame table is **not yet
+  characterized** (named gap, see next-brief bullets).
+- **Everything itemized in §7's own REUSE MAP re-confirms unchanged**
+  this session (faint sink, ball, particles, materialize, healthbox
+  slide, held-item absence, icon-bar/sent-out text, KO-gated hold) — no
+  new findings there beyond the pixel-exactness check above.
+
+### Honest gaps (named, not guessed at)
+
+- **SAND_ATTACK's own ~90-tick mid-message animation (15540-15629,
+  every-tick-distinct) is entirely new to this dossier chain and not
+  characterized** — not identified frame-by-frame, no sprite/table
+  extracted, not cross-referenced against any existing
+  `AnimTask_*`-family mechanism. This is the one genuinely open item a
+  wiring pass will need before SAND_ATTACK's own half can render
+  correctly (the message-box text itself is already fully pinned and
+  pixel-exact).
+- The REUSE MAP's own two "not re-verified to the byte" rows (§7:
+  materialize stretch/wobble fine detail, tint coefficient ramp,
+  healthbox slide exact per-tick table) remain unverified to that same
+  depth this session too — this session's own healthbox-slide check
+  only confirms the window animates (start≠end), not its exact
+  per-tick `x2` table.
+- Fire-projectile geometry table and target-shake cadence (§5) were
+  **not** re-derived from RAM this session (pixel-only script, per
+  convention) — spot-checked only for "the animation visibly
+  progresses, one frame per spawn tick, no repeats"; the full
+  bit-exact table match is still §5's own (prior session's) claim,
+  not re-verified here.
+
+### Verification
+
+`node --experimental-strip-types tools/probe/verify-turn13.ts`: **46/46
+checks pass**, run twice back to back, identical both times (single
+`bin/oracle run` per invocation, 246 captured ticks, well under the
+256-per-run cap — both committed dense traces' identical `segments`
+mean either file's own script covers the whole 15373-17200 span
+requested). `npm test` (946 tests) and `npm run build` green, unchanged
+from before this session. No `src/` changes, no trace changes — new
+artifacts are `tools/probe/verify-turn13.ts` and this doc section only,
+per the brief's own constraint.
