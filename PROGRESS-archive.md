@@ -1,4 +1,35 @@
 ---
+## 209 — Worktree scout (supervisor-folded): turn 17 + the WIN ground truth BANKED — **battle 1 is now ground-truthed turn-by-turn from anchor through the victory text**, a gapless prefix-verified dense-trace chain (turns 6-17 dossiers + winline); Murkrow faints at 22418, **`gBattleOutcome` flips 0→1 at tick 22818** (16 ticks after the dismiss press, while the OLD text still shows — §16's "instant the screen appears" corrected at this fold), DESTIN's loss quote "PLEASE I NEED / SOME WATER" held un-dismissed at trace end 23601; `battle1-turn17-dense.json` (256 captures) + `docs/turn17-notes.md`; merged, suite 837/837 on the merged tree
+
+- **State:** merged into master post-rung-(b), `npm test` 837/837 +
+  build green post-merge, worktree/branch cleaned. Supervisor
+  re-verified independently: prefix chain re-flattened (turn16 ⊂ turn17
+  ⊂ winline-b-swap, script-exact), fresh rerun reproduced 11/11 cited
+  shas at exact ticks, 2 climax labels PNG-read ("Player defeated BUG
+  CATCHER DESTIN!♥" at 22885; the held quote + trainer sprite at 23601).
+- **Did (the 7 briefed questions, all answered):** burn roll STILL
+  FIRES vs an already-burned+fainted target (`Cmd_seteffectwithchance`
+  unconditional; `SetMoveEffect`'s hp==0 gate short-circuits after the
+  roll — both source-cited); burn residual absent this turn
+  (`ENDTURN_BURN` gates on hp!=0); BRN badge rides with the healthbox
+  (both vanish at 22508, same tick status1 clears); faint sink VERBATIM
+  vs turns 13/15, novelty = post-dismiss branches to the win sequence
+  (last mon); MAGBY exits 27/138, FIRE_PUNCH PP 13. ISSUES **#27 filed
+  at this fold**: the unattributed Random() at HP-write+5 has now
+  appeared twice at the IDENTICAL offset (21152, 22173) — upgraded from
+  "tail noise" to suspected fixed mechanism, one probe step owed.
+- **Next:** engine: turns 7-13 as parameterizations (turn 6 is complete
+  end to end per #208), then turn-14+ (FLY halves, player switch, win
+  seq — all ground-truthed); probes: ISSUES #27 (RNG attribution), #26
+  (Sitrus ring), feather residual 7421-7549; scout territory: the
+  post-WIN scene transition (§17's swap screen is next unscouted dense
+  ground).
+- **Notes:** scout in contract (16.0 of 40 min); 1 PAPERCUT noted in
+  the dossier (256-capture budget forced an uncommitted stride-2
+  side-probe for the faint-sink boundary — an accepted convention, not
+  tooling friction; no PAPERCUTS.md change).
+
+---
 ## 208 — Bounded worker (S7 slice N-4 rung (b)): Onix's ROCK_SLIDE vs. PIDGEOTTO landed in full — turn 6 resolved END TO END — `turn6-rockslide-a.json` **255/255**, `turn6-rockslide-b.json` **105/105**, both 0 diff, first-attempt on the mechanics half; a pure parameterization, no new HP-drain formula needed after all (S7 bounded worker session, hard 60-minute cap)
 
 - **State:** `npm test` **837/837** (+6), `npm run build` green, tree

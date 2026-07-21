@@ -2093,6 +2093,19 @@ export function turn7RockSlideResettledBounceTick(t: number, pressTick: number):
   return t - (pressTick + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
 }
 
+/**
+ * `TURN6_ROCKSLIDE_REOPEN_GATE_DELAY`'s own turn-7-to-8 analogue: the
+ * earliest tick turn 8's own FIGHT-submenu reopen A-press (real tick 9381)
+ * can register, past turn 7's own real confirm (`fightSubmenu.confirmElapsed`,
+ * 8379) - sized so the gate opens once turn 7's own settled action menu is
+ * fully drawn (`TURN7_ROCKSLIDE_PRESS_TICK`+`TURN7_ROCKSLIDE_MENU_REDRAW_
+ * DELAY` = 8406+738 = 9144, `docs/battle-turn-notes.md` §32's own cited
+ * redraw tick - `9144-8379=765`), safely before the dossier's own real
+ * reopen press (9381), same "past this resolution's own redraw" shape every
+ * prior turn boundary gate already establishes.
+ */
+export const TURN7_ROCKSLIDE_REOPEN_GATE_DELAY = 765;
+
 // --- S7 slice E1: turn 2's FIGHT-submenu reopen through ENDEAVOR's kickoff
 // text (docs/battle-turn-notes.md §12, docs/battle-menu-notes.md §13). The
 // resettled menu's own A-press (`rockSlideResettledBounceTick`'s domain)
@@ -2198,6 +2211,7 @@ export function currentPPForActiveMon(
   turn4Resolved: boolean = false,
   turn5Resolved: boolean = false,
   turn6Resolved: boolean = false,
+  turn7Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
   // S7 slice N (docs/turn6-notes.md §4): turn 5's own ROCK_SLIDE (Onix's
@@ -2208,8 +2222,16 @@ export function currentPPForActiveMon(
   // S7 slice O (docs/turn7-notes.md §4): turn 6's own ROCK_SLIDE (Onix vs.
   // Pidgeotto) is a 5th slot-0 use, matching turn7-notes' own "PP 5/10
   // displayed" ledger at turn 7's own reopen.
+  // S7 slice P (docs/turn8-notes.md §4): turn 7's own ROCK_SLIDE is a 6th
+  // slot-0 use, matching turn8-notes' own "ROCK_SLIDE sits frozen at 4/10
+  // through this turn" ledger at turn 8's own reopen.
   const slot0Uses =
-    (turn1Resolved ? 1 : 0) + (turn3Resolved ? 1 : 0) + (turn4Resolved ? 1 : 0) + (turn5Resolved ? 1 : 0) + (turn6Resolved ? 1 : 0);
+    (turn1Resolved ? 1 : 0) +
+    (turn3Resolved ? 1 : 0) +
+    (turn4Resolved ? 1 : 0) +
+    (turn5Resolved ? 1 : 0) +
+    (turn6Resolved ? 1 : 0) +
+    (turn7Resolved ? 1 : 0);
   return [a - slot0Uses, b, turn2Resolved ? c - 1 : c, d];
 }
 

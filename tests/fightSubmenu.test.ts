@@ -134,7 +134,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false },
   };
 }
 
@@ -201,16 +201,18 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     expect(sm.cursor).toBe(0);
   });
 
-  it("A on a different slot does NOT confirm (this slice only models ROCK_SLIDE) - it's simply ignored, the submenu stays open and interactive", () => {
+  it("A on a still-unmodeled slot does NOT confirm (SANDSTORM's own confirm timing/text is unverified) - it's simply ignored, the submenu stays open and interactive", () => {
     let state = stateAtTick(1887);
     state = press(state, ["A"]);
     for (let i = 0; i < 5; i += 1) state = press(state, []);
     state = press(state, ["RIGHT"]); // -> BIND (cursor 1)
     state = press(state, []);
-    state = press(state, ["A"]); // confirm attempt on a non-ROCK_SLIDE slot
+    state = press(state, ["DOWN"]); // -> SANDSTORM (cursor 3)
+    state = press(state, []);
+    state = press(state, ["A"]); // confirm attempt on a non-ROCK_SLIDE/BIND/DRAGON_BREATH slot
     const sm = state.battleScene!.fightSubmenu;
     expect(sm.confirmElapsed).toBeNull();
-    expect(sm.cursor).toBe(1);
+    expect(sm.cursor).toBe(3);
   });
 
   it("once confirmed, no further input (nav, B) mutates the submenu - HandleInputChooseMove is no longer polling (source-confirmed, battleMenu.ts's Slice 7 doc)", () => {
@@ -331,6 +333,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
       turn2Resolved: false,
       turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false,
     turn6Resolved: false,
+    turn7Resolved: false,
     },
   };
 }
@@ -450,6 +453,7 @@ function stateAtTurn3Confirm(): EngineState {
       turn2Resolved: true,
       turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false,
     turn6Resolved: false,
+    turn7Resolved: false,
     },
   };
 }
@@ -610,6 +614,7 @@ function stateAtTurn4Confirm(): EngineState {
       turn3Resolved: true,
       turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false,
     turn6Resolved: false,
+    turn7Resolved: false,
     },
   };
 }
@@ -636,6 +641,7 @@ function stateAtTurn5Confirm(): EngineState {
       turn3Resolved: true,
       turn4Resolved: true, turn5KoDismissElapsed: null, turn5Resolved: false,
     turn6Resolved: false,
+    turn7Resolved: false,
     },
   };
 }
@@ -723,6 +729,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
       turn3Resolved: true,
       turn4Resolved: true, turn5KoDismissElapsed: 6561 - SCENE_TICK0, turn5Resolved: false,
     turn6Resolved: false,
+    turn7Resolved: false,
     },
   };
 }

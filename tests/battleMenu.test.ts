@@ -88,15 +88,35 @@ import {
   TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY,
   TURN7_ROCKSLIDE_MENU_REDRAW_DELAY,
   turn7RockSlideResettledBounceTick,
+  TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
   currentPPForActiveMon,
   rockSlideTextStartTick,
+  moveFightCursor,
 } from "../src/engine/battleMenu.ts";
-import { renderBattleScene, TICK0 } from "../src/engine/battleScene.ts";
+import {
+  renderBattleScene,
+  TICK0,
+  TURN8_BIND_LINE1,
+  TURN8_BIND_LINE2,
+  TURN8_BIND_TEXT_TOTAL,
+  TURN8_BIND_TEXT_DELAY,
+  turn8BindTextStartTick,
+  turn8BindTextVisibleChars,
+  TURN8_MISS_LINE1,
+  TURN8_MISS_LINE2,
+  TURN8_MISS_TEXT_TOTAL,
+  TURN8_MISS_TEXT_DELAY,
+  turn8MissTextStartTick,
+  turn8MissTextVisibleChars,
+  TURN8_TEXT_CLEAR_DELAY,
+  TURN8_MENU_REDRAW_DELAY,
+  turn8ResettledBounceTick,
+} from "../src/engine/battleScene.ts";
 
 /** Same rig as tests/battleScene.test.ts's `pixelAtSentOut` - send-out A-press already registered at trace tick 1420 (sendOutPressElapsed=380), the fixed script every committed trace in this window shares. */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -148,16 +168,16 @@ describe("battleMenu: rendered pixels (oracle-pinned, tools/compare/traces/menu-
   it("renders byte-identical frames across the silent space tick (1565 -> 1566)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 
   it("renders byte-identical frames once static (1571 -> 1572)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 });
@@ -658,6 +678,62 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
   it("currentPPForActiveMon: ROCK_SLIDE (slot 0) reads 5/10 once turn6Resolved (used turns 1, 3, 4, 5 AND 6) - matches turn7-notes.md's own 'PP 5/10 displayed' ledger", () => {
     const moveset = { moveIds: [157, 349, 288, 201], maxPP: [10, 15, 20, 10] } as const;
     expect(currentPPForActiveMon(moveset, true, true, true, true, true, true)).toEqual([5, 15, 19, 10]);
+  });
+
+  it("S7 slice P: TURN7_ROCKSLIDE_REOPEN_GATE_DELAY opens the turn-7-to-8 reopen gate at the settled turn-7 menu's own redraw tick (9144 = TURN7_ROCKSLIDE_PRESS_TICK+738), safely before the real reopen press (9381)", () => {
+    expect(TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY - TURN7_ROCKSLIDE_REOPEN_GATE_DELAY).toBe(8379); // turn 7's own real confirm tick
+  });
+
+  it("S7 slice P: currentPPForActiveMon reads 4/10 once turn7Resolved (used turns 1, 3, 4, 5, 6 AND 7) - matches turn8-notes.md §4's own 'ROCK_SLIDE sits frozen at 4/10' ledger; BIND (slot 1) is untouched by this ledger, still fresh", () => {
+    const moveset = { moveIds: [157, 20, 288, 201], maxPP: [10, 20, 20, 10] } as const;
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true)).toEqual([4, 20, 19, 10]);
+    // Sanity: turn6Resolved alone (pre-turn-8) still reads 5/10, unaffected.
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, false)[0]).toBe(5);
+  });
+
+  it("S7 slice P: moveFightCursor's existing cursor^1 grid arithmetic moves RIGHT from ROCK_SLIDE (0) onto BIND (1) - the winning line's own divergence turn, no new nav code needed", () => {
+    expect(moveFightCursor(0, "RIGHT")).toBe(1);
+    expect(moveFightCursor(1, "LEFT")).toBe(0);
+  });
+
+  it("S7 slice P: BIND's own kickoff text ('ONIX used\\nBIND!', 14 chars) starts at pressTick+421 (9846, docs/turn8-notes.md §5) and settles on the last glyph's own tick", () => {
+    const pressTick = 9425; // this turn's own real confirm tick (A held 9424-9425)
+    expect(TURN8_BIND_LINE1).toBe("ONIX used");
+    expect(TURN8_BIND_LINE2).toBe("BIND!");
+    expect(TURN8_BIND_TEXT_TOTAL).toBe(14);
+    expect(TURN8_BIND_TEXT_DELAY).toBe(421);
+    expect(turn8BindTextStartTick(pressTick)).toBe(9846);
+    expect(turn8BindTextVisibleChars(9845, pressTick)).toBe(0);
+    expect(turn8BindTextVisibleChars(9846, pressTick)).toBe(1);
+    expect(turn8BindTextVisibleChars(9859, pressTick)).toBe(14); // settled, matches docs/turn8-notes.md §5's own "holds 9859-9895"
+    expect(turn8BindTextVisibleChars(9895, pressTick)).toBe(14); // clamped, holds past settle
+  });
+
+  it("S7 slice P: the miss message ('ONIX’s\\nattack missed!', 20 chars, matches sText_AttackMissed exactly) starts at pressTick+471 (9896) and settles at 9915 - the FIRST miss this engine ever renders, no move animation plays", () => {
+    const pressTick = 9425;
+    expect(TURN8_MISS_LINE1).toBe("ONIX’s");
+    expect(TURN8_MISS_LINE2).toBe("attack missed!");
+    expect(TURN8_MISS_TEXT_TOTAL).toBe(20);
+    expect(TURN8_MISS_TEXT_DELAY).toBe(471);
+    expect(turn8MissTextStartTick(pressTick)).toBe(9896);
+    expect(turn8MissTextVisibleChars(9895, pressTick)).toBe(0);
+    expect(turn8MissTextVisibleChars(9896, pressTick)).toBe(1);
+    expect(turn8MissTextVisibleChars(9915, pressTick)).toBe(20); // settled, matches docs/turn8-notes.md §5's own "holds 9915-9990"
+    expect(turn8MissTextVisibleChars(9990, pressTick)).toBe(20); // clamped, holds past settle
+  });
+
+  it("S7 slice P: turn-end - the held miss text clears at pressTick+566 (9991) then hard-cuts to the resettled menu at pressTick+572 (9997), a 6-tick gap (one shorter than every prior turn's own 7-tick gap, freshly fit not assumed transferable)", () => {
+    const pressTick = 9425;
+    expect(pressTick + TURN8_TEXT_CLEAR_DELAY).toBe(9991);
+    expect(pressTick + TURN8_MENU_REDRAW_DELAY).toBe(9997);
+    expect(TURN8_MENU_REDRAW_DELAY - TURN8_TEXT_CLEAR_DELAY).toBe(6);
+  });
+
+  it("turn8ResettledBounceTick re-initializes the bounce cycle fresh at the redraw tick, same shape as turn7RockSlideResettledBounceTick", () => {
+    const pressTick = 9425;
+    const redrawTick = pressTick + TURN8_MENU_REDRAW_DELAY;
+    expect(turn8ResettledBounceTick(redrawTick, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 1);
+    expect(turn8ResettledBounceTick(redrawTick + 5, pressTick)).toBe(MENU_IDLE_BLANK_END_TICK + 6);
   });
 });
 

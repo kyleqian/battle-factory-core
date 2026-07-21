@@ -5631,3 +5631,147 @@ the PP 5/10 ledger via `turn6Resolved`.
 to end except its own feather sub-window - the next session's natural next
 step is rung (b) (the turn-7 feather probe), then turns 8-13 as further
 parameterizations, or the turn 15+/16+ scout territory already banked.
+
+## 33. Engine slice P: turn 8 end to end, minus the feather sub-window - the winning line's own divergence turn (RIGHT onto BIND, BIND MISSES) - `turn8-menu.json` **78/78**, `turn8-bind-{a,b}.json` **256+66 = 322/322**, all 0 diff (S7 bounded worker session, hard 60-minute cap)
+
+Turn 8 is docs/turn8-notes.md's own subject: Onix's cursor moves one `RIGHT`
+press off ROCK_SLIDE onto BIND (slot 1, `moveFightCursor`'s existing
+`cursor^1` grid arithmetic - already generic since turn 3's slice F, so no
+new nav code was needed), BIND's accuracy check misses (the first miss this
+engine ever renders), and Pidgeotto's FEATHER_DANCE (3rd use, ATK hits its
+stage floor with no visible message difference) proceeds as usual. Every
+pressTick-generic turn-6 function (`turn6FeatherDanceTextStartTick`/
+`turn6StatFallEva`/`turn6StatFallBg1Y`/`turn6AtkFellTextStartTick`) is reused
+UNCHANGED, fed this turn's own real confirm pressTick (9425 - the confirm
+press occupies frames 9424-9425, same `+1` registration convention every
+prior turn's pressTick already follows). A fresh dense oracle sweep was NOT
+re-run wholesale this session (unlike turn 7's own N-4/O sessions) - the
+already-committed `battle1-turn8-dense.json` ground-truth dossier (this
+session's own worktree-probe predecessor, docs/turn8-notes.md) already
+covers every needed boundary sha-cited and twice-run-verified, so this
+session went straight to writing render code against its own cited ticks,
+verifying via `npm run compare` rather than re-sweeping.
+
+### Rungs (a)+(b)+(c) landed together: the same "dispatcher chain naturally unifies" shape as turn 7's own rungs (a)+(c)
+
+The brief's own ladder splits "(a) menu/RIGHT/confirm/BIND-kickoff" from "(b)
+the miss window" from "(c) the FEATHER_DANCE chain + turn-end", but the
+actual code shape (mirroring turn 7's own `drawTurn7FeatherDanceKickoffText`/
+`drawTurn7RockSlideWindow` split) naturally unifies (b)+(c) into one
+dispatcher pair (`drawTurn8FeatherDanceKickoffText` -> `drawTurn8BindWindow`),
+so only rung (a) (the menu/nav/confirm window, `turn8-menu.json`) ended up as
+a genuinely separate trace file - the rest landed and verified together in
+one pass (`turn8-bind-{a,b}.json`).
+
+- **Rung (a)** (`turn8-menu.json`, captureFrames 9380-9467 minus 10 excluded
+  ticks below): the reopen (cursor persisted at slot 0, ROCK_SLIDE, unchanged
+  from turn 7), one `RIGHT` press (cursor 0->1, BIND - `moveFightCursor`
+  unchanged), confirm (`core.ts`'s own confirm gate extended from
+  `cursor === 0 || cursor === 2` to also accept `cursor === 1`, the ONLY
+  input-handling code change this session), and the start of FEATHER_DANCE's
+  kickoff text typing-in - ending at 9467, one tick before the feather
+  sub-window begins (9468, docs/turn8-notes.md §5).
+- **Rungs (b)+(c)** (`turn8-bind-{a,b}.json`, captureFrames 9739-10060
+  contiguous): resumes right at the ATK-fell message's own start (the
+  feather sub-window's own far bracket, excluded below) through the
+  stat-fall banner/ATK-fell text (reused unchanged), BIND's own kickoff text
+  ("ONIX used\nBIND!"), the miss message ("ONIX’s\nattack missed!",
+  `sText_AttackMissed` exactly), and turn-end into the settled, pixel-
+  identical-to-turn-8's-own-baseline turn-9 menu (confirmed static/idle-
+  cycling through 10060, matching docs/turn8-notes.md §5's own scouted
+  range).
+
+### What's genuinely new this turn
+
+- **BIND's own kickoff text + miss message** (`drawTurn8BindWindow`,
+  `battleScene.ts`): a pure text-swap dispatcher over `drawTurn8FieldBase`'s
+  own frozen static scene - **no move animation plays on a miss** (no shake,
+  no rocks, no hit-flash, no HP drain), confirmed both from source
+  (docs/turn8-notes.md §3's "misses divert BEFORE the roll") and pixels (the
+  compare run's own first-attempt 0 diff across the whole window). BIND's
+  text ("ONIX used"/"BIND!", 14 chars) starts at pressTick+421 (9846); the
+  miss message ("ONIX’s"/"attack missed!", 20 chars, `battle_message.c:68`'s
+  `sText_AttackMissed` resolved for Onix with no "Foe " prefix) starts at
+  pressTick+471 (9896) - both freshly fit literal delays, not derived from
+  any prior turn's ROCK_SLIDE-shaped constant (there's no ROCK_SLIDE-style
+  reused sub-mechanism to anchor against here, so no synthetic press-tick
+  anchor was needed either - BIND/miss just use the real confirm pressTick
+  directly, same as `turn6AtkFellTextStartTick` already does).
+- **Turn-end gap is 6 ticks, not 7**: `TURN8_TEXT_CLEAR_DELAY`(566)/
+  `TURN8_MENU_REDRAW_DELAY`(572) - one tick shorter than every prior turn's
+  own clear-to-redraw gap (turn 6: 743->750, turn 7: 731->738). Not chased
+  further (the miss's own shorter resolution script plausibly drops one tick
+  somewhere upstream of this gap) - flagged, not root-caused, matching this
+  dossier's own "unexplained magnitude, not resolved" convention for minor
+  timing quirks that don't change what to render. `npm run compare` caught
+  this immediately (a diff at the 7-tick-gap guess) before it was fit fresh
+  against the dossier's own cited ticks (9991/9997).
+- **`drawTurn8FieldBase`/`TURN8_REGIME3_TO_REGIME1_SHIFT`**: the SAME
+  algebraic anchor-shift trick `drawTurn7FieldBase`/`TURN7_REGIME2_TO_
+  REGIME1_SHIFT` established, one redraw further (turn 7's own redraw,
+  9144, resets the bounce cycle onto a third regime) - solved the same way,
+  not fitted.
+- **The confirm gate now accepts BIND (cursor 1)**: `core.ts`'s own
+  `newKeys.has("A") && (cursor === 0 || cursor === 2)` guard (dated back to
+  slice A/E1, when only ROCK_SLIDE and DRAGON_BREATH had ever been
+  oracle-verified) extended to `cursor === 1` - SANDSTORM (slot 3) remains
+  the only unconfirmable slot, still correctly out of scope
+  (`tests/fightSubmenu.test.ts`'s own "different slot" test updated to
+  exercise SANDSTORM instead of BIND, since BIND is no longer unmodeled).
+- **The ATK-stage floor-clamp (docs/turn8-notes.md §4)**: produces NO visible
+  difference this turn (the ordinary "ONIX’s ATTACK\nharshly fell!" message
+  plays, same wording/timing as turns 6-7, `turn6AtkFellTextStartTick`
+  reused with zero changes) - confirmed by the compare run's own 0 diff
+  across this exact span, not just trusted from the dossier's prose. The
+  "won't go any lower!" variant is turn 9+'s own concern (out of scope,
+  Onix's ATK stage sits at the floor entering turn 9 per §7 of the dossier).
+
+### A third recurrence of ISSUES #28's own period-9 residual class
+
+`turn8-menu.json` excludes 10 ticks (9383-9384, 9392-9393, 9402-9403,
+9411-9412, 9420-9421 - 2-tick gaps every ~9-10 ticks) from its own
+captureFrames, the SAME cadence/shape as `turn6-menu.json`'s (8 ticks,
+§27) and `turn7-menu.json`'s (8 ticks, §32) own already-excluded
+pre-confirm-window ticks - caught by `npm run compare`'s own first attempt
+(5 paired 2-tick diffs, 2-4% each, all within the pre-confirm browsing/nav
+window) and immediately recognized as this same known-class residual rather
+than a new bug, per the brief's own explicit expectation ("if it recurs,
+note it in §33 for the #28 evidence file - expected, given #28 says it's a
+shared-path property"). Not re-diagnosed this session (ISSUES #28 fixes are
+explicitly out of scope) - a third same-shape instance banked as further
+evidence for whoever picks up #28.
+
+### Committed traces and Tier-1 pins
+
+`tools/compare/traces/turn8-menu.json` (captureFrames 9380-9467 minus the 10
+excluded ticks above, 78 frames) and `turn8-bind-{a,b}.json` (captureFrames
+9739-10060 contiguous, split into 2 files for the oracle's 256-capture-per-
+request cap: 256+66). Same 82-segment/10826-frame script as
+`battle1-turn8-dense.json`'s own committed ground-truth trace (reused
+verbatim as the base script for both working traces, confirmed exact before
+relying on it - the brief's own "confirm segment coverage" instruction).
+`tests/battleMenu.test.ts` (+7): `TURN7_ROCKSLIDE_REOPEN_GATE_DELAY`'s own
+anchor identity, the turn-8 PP ledger (ROCK_SLIDE 4/10 via `turn7Resolved`,
+BIND untouched/still fresh), `moveFightCursor`'s RIGHT-onto-BIND arithmetic,
+BIND's own kickoff-text content/timing, the miss message's own content/
+timing (word-for-word against `sText_AttackMissed`), the turn-end 6-tick
+clear-to-redraw gap, and `turn8ResettledBounceTick`'s fresh-cycle shape.
+`tests/fightSubmenu.test.ts` (+0 net, 1 updated): the "different slot
+doesn't confirm" test now exercises SANDSTORM (cursor 3) instead of BIND,
+since BIND is confirmable as of this session.
+
+### Verification
+
+`npm test` **852/852** (+7, net of the one updated test above). `npm run
+build` green. `turn8-menu.json` **78/78**, `turn8-bind-a.json` **256/256**,
+`turn8-bind-b.json` **66/66**, all 0 diff (322+78=400 frames total,
+contiguously covering 9380-10060 minus only the named feather-window
+exclusion 9468-9738 and the 10-tick known-class residual above). Zero
+regressions: `turn7-menu.json` **85/85**, `turn7-rockslide-{a,b,c,d}.json`
+**256/256/256/19**, `turn6-rockslide-a.json` **255/255**, `turn6-menu.json`
+**33/33**, all 0 diff. Turn 8 is resolved end to end except its own feather
+sub-window - the next session's natural next step is rung (b) analogues for
+BOTH turns 7 and 8's own feather probes (still deferred, banked together),
+then turn 9 (ROCK_SLIDE's own return, one `LEFT` press back from BIND, per
+docs/turn8-notes.md §7) as the next parameterization, or the turn 15+/16+
+scout territory already banked.

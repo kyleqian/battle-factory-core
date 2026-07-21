@@ -1008,6 +1008,18 @@ export interface BattleSceneState {
    * slot-0 decrement) from turn 6's (PP 6/10).
    */
   turn6Resolved: boolean;
+  /**
+   * S7 slice P (docs/turn8-notes.md, docs/battle-turn-notes.md §33): `true`
+   * once turn 7's whole ROCK_SLIDE resolution has redrawn the settled
+   * action menu (`TURN7_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 7's own real
+   * confirm) AND a fresh A-press has reopened FIGHT for turn 8 - same
+   * "created directly" idiom as `turn1Resolved`..`turn6Resolved`. Turn 8 is
+   * the winning line's own divergence turn: one `RIGHT` press moves the
+   * cursor onto BIND (slot 1) instead of ROCK_SLIDE - distinguishes turn 8's
+   * own dwell (PP 4/10, ROCK_SLIDE's 6th slot-0 decrement, frozen unused
+   * this turn) from turn 7's (PP 5/10).
+   */
+  turn7Resolved: boolean;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -1021,6 +1033,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn5KoDismissElapsed: null,
   turn5Resolved: false,
   turn6Resolved: false,
+  turn7Resolved: false,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -1035,6 +1048,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn5KoDismissElapsed: state.turn5KoDismissElapsed,
     turn5Resolved: state.turn5Resolved,
     turn6Resolved: state.turn6Resolved,
+    turn7Resolved: state.turn7Resolved,
   };
 }
 
@@ -3778,7 +3792,16 @@ function drawFightSubmenuWindow(
   turn4Resolved: boolean = false,
   turn5Resolved: boolean = false,
   turn6Resolved: boolean = false,
+  turn7Resolved: boolean = false,
 ): void {
+  if (turn7Resolved) {
+    // S7 slice P: turn 8 is the winning line's own divergence turn - one
+    // RIGHT press onto BIND instead of ROCK_SLIDE, its own dedicated
+    // dispatcher, same "genuinely different PP/text" reason `turn6Resolved`'s
+    // own branch below already established for turn 7.
+    drawTurn8FightSubmenuWindow(fb, t, sm);
+    return;
+  }
   if (turn6Resolved) {
     // S7 slice O: turn 7 repeats turn 6's exact scene (same battlers) - its
     // own dedicated dispatcher, same "genuinely different PP/text" reason
@@ -3977,11 +4000,12 @@ function drawFightSubmenuChrome(
   turn4Resolved: boolean = false,
   turn5Resolved: boolean = false,
   turn6Resolved: boolean = false,
+  turn7Resolved: boolean = false,
 ): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -6877,6 +6901,229 @@ function drawTurn7RockSlideWindow(fb: Uint8Array, t: number): void {
 }
 
 /**
+ * S7 slice P (docs/turn8-notes.md, docs/battle-turn-notes.md §33): turn 8's
+ * own FIGHT submenu - cursor persists at slot 0 (ROCK_SLIDE) from turn 7's
+ * own reopen, then one `RIGHT` press moves it onto BIND (slot 1, `moveFightCursor`'s
+ * existing `cursor^1` grid arithmetic, unchanged - turn 8 is simply the
+ * first time this engine actually EXERCISES that generic nav for a real
+ * confirm rather than just browsing). PP read 4/10 (`turn7Resolved` passed
+ * as the moveset's 6th independent slot-0 decrement, ROCK_SLIDE frozen
+ * unused this turn). Structurally identical to `drawTurn7FightSubmenuWindow` -
+ * reuses `drawTurn7RockSlideTurnEndSettledMenu` UNCHANGED for the pre-open/
+ * DMA-wait/browsing phases (turn 8's own reopen browses the SAME settled
+ * scene turn 7's own ROCK_SLIDE left behind - nothing has changed yet) -
+ * only the PP flag and the downstream text/BIND dispatch
+ * (`drawTurn8FeatherDanceKickoffText`) differ.
+ */
+/**
+ * `turn7RockSlideResettledBounceTick`(regime 2)-to-regime-1 anchor shift,
+ * turn 8's own analogue of `TURN7_REGIME2_TO_REGIME1_SHIFT` - solves the
+ * same identity one redraw further: turn 7's own redraw (`TURN7_ROCKSLIDE_
+ * PRESS_TICK+TURN7_ROCKSLIDE_MENU_REDRAW_DELAY`, 9144) resets the bounce
+ * cycle fresh onto a THIRD regime, which `drawTurn6FieldBase` (still only
+ * ever applying regime 1 internally) needs converted the same way turn 7's
+ * own wrapper already converts regime 2.
+ */
+const TURN8_REGIME3_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY);
+
+/**
+ * `drawTurn6FieldBase` wrapper for turn 8: converts `bounceTick` from
+ * regime-3 space (`turn7RockSlideResettledBounceTick`'s own domain - the
+ * regime active from turn 7's own redraw, 9144, onward) via
+ * `TURN8_REGIME3_TO_REGIME1_SHIFT`, then repaints Pidgeotto's own healthbox
+ * at its real turn-8-opening HP (82, unchanged all turn - BIND misses, see
+ * docs/turn8-notes.md §4) - same "drawTurn6FieldBase itself never repaints
+ * past the slide-in settle" fix `drawTurn7FieldBase` already established.
+ */
+function drawTurn8FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN8_REGIME3_TO_REGIME1_SHIFT, beforeMonSprite);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+}
+
+/** `turn7KickoffBounceTick`'s own turn-8 analogue, in regime-3 space (`drawTurn8FieldBase`'s own domain) - freezes at the regime-3 anchor tick itself (`TURN7_ROCKSLIDE_PRESS_TICK+TURN7_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction). */
+function turn8KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t;
+  return TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY;
+}
+
+function drawTurn8FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+  // Same "NOT the plain idle window, the already-redrawn turn's own
+  // resettled-menu function" rule `drawTurn7FightSubmenuWindow` established -
+  // turn 8's own idle/browsing window comes after turn 7's own ROCK_SLIDE
+  // already reset the bounce cycle at its own redraw (9144); Pidgeotto's HP
+  // (82) hasn't changed since, so `drawTurn7RockSlideTurnEndSettledMenu` is
+  // still the correct, already-proven regime to reuse verbatim.
+  if (sm.openElapsed === null) {
+    drawTurn7RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    drawTurn7RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn6FeatherDanceTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurn8FeatherDanceKickoffText(fb, t, pressTick);
+      return;
+    }
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn8KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t;
+  drawTurn8FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true);
+}
+
+/**
+ * S7 slice P: turn 8's own FEATHER_DANCE kickoff text (Pidgeotto's 3rd use,
+ * same text) through the stat-fall banner/ATK-fall text (`turn6StatFallEva`/
+ * `turn6StatFallBg1Y`/`turn6AtkFellTextStartTick`, reused unchanged - the
+ * THIRD -2 ATK drop, landing exactly on the stage floor per docs/turn8-
+ * notes.md §4, but the "won't go any lower!" message variant does NOT fire
+ * this turn: the clamp is checked BEFORE this application's own decrement,
+ * so the ordinary "harshly fell" text plays, identical wording to turns 6-7),
+ * then handoff to turn 8's own BIND kickoff once its own text start is
+ * reached - the exact same dispatcher shape as `drawTurn7FeatherDanceKickoffText`,
+ * only the downstream move (BIND, not ROCK_SLIDE) differs. The feather/
+ * starburst sprite animation itself is NOT modeled this session (deferred,
+ * see battle-turn-notes.md §33) - `turn6FeatherSprites(t)` naturally returns
+ * `[]` for every tick in turn 8's own range (keyed to turn 6's own RAM
+ * ticks), same harmless-no-op reasoning turn 7's own dispatcher relies on.
+ */
+function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= turn8BindTextStartTick(pressTick)) {
+    drawTurn8BindWindow(fb, t, pressTick);
+    return;
+  }
+  const frozenRegime3Tick = TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY;
+  drawTurn8FieldBase(fb, t, frozenRegime3Tick, () => drawTurn6FeatherSprites(fb, t, true));
+  drawTurn6FeatherSprites(fb, t, false);
+  const eva = turn6StatFallEva(t, pressTick);
+  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const atkFellStart = turn6AtkFellTextStartTick(pressTick);
+  if (t >= atkFellStart) {
+    drawMessageTextLines(fb, TURN6_ATKFELL_LINE1, TURN6_ATKFELL_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
+  } else {
+    drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+  }
+}
+
+/**
+ * `STRINGID_USEDMOVE` resolved for Onix's own turn 8: "ONIX used\nBIND!"
+ * (docs/turn8-notes.md §5, pixel-confirmed `fa8e70f4e678` at tick 9880).
+ * Delay fit directly against `battle1-turn8-dense.json`'s own real script
+ * (this turn's real confirm pressTick is 9425 - the confirm press occupies
+ * frames 9424-9425, same `+1` registration convention every prior turn's
+ * pressTick already follows): the fresh sweep's first tick of this
+ * transition is 9846 (`9846-9425=421`).
+ */
+export const TURN8_BIND_LINE1 = "ONIX used";
+export const TURN8_BIND_LINE2 = "BIND!";
+export const TURN8_BIND_TEXT_TOTAL = TURN8_BIND_LINE1.length + TURN8_BIND_LINE2.length;
+export const TURN8_BIND_TEXT_DELAY = 421;
+
+export function turn8BindTextStartTick(pressTick: number): number {
+  return pressTick + TURN8_BIND_TEXT_DELAY;
+}
+
+export function turn8BindTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn8BindTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN8_BIND_TEXT_TOTAL, t - start + 1);
+}
+
+/**
+ * `sText_AttackMissed` (`reference/pokeemerald/src/battle_message.c:68`,
+ * `"{B_ATK_NAME_WITH_PREFIX}'s\nattack missed!"`) resolved for Onix (the
+ * player's own mon, no "Foe " prefix): "ONIX's\nattack missed!" - BIND's own
+ * accuracy check misses (docs/turn8-notes.md §3/§5, the FIRST miss this
+ * engine ever renders - no move animation plays, the battle script branches
+ * straight from the kickoff text to this message). Delay fit the same way as
+ * `TURN8_BIND_TEXT_DELAY`: the fresh sweep's first tick of this transition
+ * is 9896 (`9896-9425=471`).
+ */
+export const TURN8_MISS_LINE1 = "ONIX’s";
+export const TURN8_MISS_LINE2 = "attack missed!";
+export const TURN8_MISS_TEXT_TOTAL = TURN8_MISS_LINE1.length + TURN8_MISS_LINE2.length;
+export const TURN8_MISS_TEXT_DELAY = 471;
+
+export function turn8MissTextStartTick(pressTick: number): number {
+  return pressTick + TURN8_MISS_TEXT_DELAY;
+}
+
+export function turn8MissTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn8MissTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN8_MISS_TEXT_TOTAL, t - start + 1);
+}
+
+/**
+ * Turn-end: the held "ONIX's\nattack missed!" text goes blank at
+ * `pressTick`+566 (tick 9991, docs/turn8-notes.md §5: `d3270f177537`), then
+ * hard-cuts to the resettled action menu at `pressTick`+572 (tick 9997,
+ * settled) - a 6-tick clear-to-redraw gap, one shorter than every prior
+ * turn's own 7-tick gap (turn 6: 743->750, turn 7: 731->738) - freshly fit
+ * this turn, not assumed transferable (§33's own "verify, don't fit"
+ * mandate - the miss's own shorter resolution script plausibly drops one
+ * tick somewhere upstream of this gap, not chased further since it doesn't
+ * change what to render).
+ */
+export const TURN8_TEXT_CLEAR_DELAY = 566;
+export const TURN8_MENU_REDRAW_DELAY = 572;
+
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn7RockSlideResettledBounceTick`, keyed off `TURN8_MENU_REDRAW_DELAY`. */
+export function turn8ResettledBounceTick(t: number, pressTick: number): number {
+  return t - (pressTick + TURN8_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
+/**
+ * S7 slice P: turn 8's own BIND/miss window dispatcher - no move animation
+ * plays on a miss (docs/turn8-notes.md §3's "misses divert BEFORE the roll"
+ * finding, re-confirmed pixel-side here: no shake/rock/hit-flash/drain, just
+ * the static field held throughout), so this is a pure text-swap dispatcher
+ * over `drawTurn8FieldBase`'s own frozen static scene, unlike `drawTurn7RockSlideWindow`'s
+ * three-phase attack-animation shape.
+ */
+function drawTurn8BindWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  const redrawTick = pressTick + TURN8_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurn8TurnEndSettledMenu(fb, t, pressTick);
+    return;
+  }
+  const frozenRegime3Tick = TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY;
+  drawTurn8FieldBase(fb, t, frozenRegime3Tick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const textClearTick = pressTick + TURN8_TEXT_CLEAR_DELAY;
+  if (t < textClearTick) {
+    const missStart = turn8MissTextStartTick(pressTick);
+    if (t >= missStart) {
+      drawMessageTextLines(fb, TURN8_MISS_LINE1, TURN8_MISS_LINE2, turn8MissTextVisibleChars(t, pressTick));
+    } else {
+      drawMessageTextLines(fb, TURN8_BIND_LINE1, TURN8_BIND_LINE2, turn8BindTextVisibleChars(t, pressTick));
+    }
+  }
+}
+
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" shape as `drawTurn7RockSlideTurnEndSettledMenu` - turn 8's own settled action menu, Pidgeotto's healthbox UNCHANGED at 82 HP (BIND missed - no drain this turn). */
+function drawTurn8TurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
+  const bounceTick = turn8ResettledBounceTick(t, pressTick);
+  const bounce = menuIdleBounce(bounceTick);
+  drawStaticBgShiftedY(fb, 0, 0);
+  drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+/**
  * S7 slice K's own ROCK_SLIDE/faint window dispatcher - the held kickoff
  * text (still Onix's "ONIX used\nROCK SLIDE!", drawn by `drawTurn5EndeavorText`'s
  * own handoff caller, `rockSlideTextVisibleChars` unchanged) through the
@@ -7373,7 +7620,18 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       drawRect(fb, menuIdleBlank);
       return;
     }
-    drawFightSubmenuWindow(fb, t, state.fightSubmenu, state.turn1Resolved, state.turn2Resolved, state.turn3Resolved, state.turn4Resolved, state.turn5Resolved, state.turn6Resolved);
+    drawFightSubmenuWindow(
+      fb,
+      t,
+      state.fightSubmenu,
+      state.turn1Resolved,
+      state.turn2Resolved,
+      state.turn3Resolved,
+      state.turn4Resolved,
+      state.turn5Resolved,
+      state.turn6Resolved,
+      state.turn7Resolved,
+    );
     return;
   }
   drawSendOutHandoff(fb, t, handoffTick);

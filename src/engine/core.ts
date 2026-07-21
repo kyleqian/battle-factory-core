@@ -102,6 +102,7 @@ import {
   openFightSubmenu,
   ROCK_SLIDE_MENU_REDRAW_DELAY,
   TURN6_ROCKSLIDE_REOPEN_GATE_DELAY,
+  TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
 } from "./battleMenu.ts";
 import { activeMonMoveset } from "./battleSetup.ts";
 
@@ -211,6 +212,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn4Resolved = battleScene.turn4Resolved;
     let turn5Resolved = battleScene.turn5Resolved;
     let turn6Resolved = battleScene.turn6Resolved;
+    let turn7Resolved = battleScene.turn7Resolved;
     if (fightSubmenu.openElapsed === null) {
       if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
         // S8 engine dependency (docs/battle-menu-notes.md §13c): the FIGHT
@@ -232,10 +234,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // doc), so no further input (nav, B) is read at all - matching that,
       // this whole branch's own guard excludes `confirmElapsed !== null`
       // above rather than re-checking it per input case. Gated to cursor 0
-      // (ROCK_SLIDE, turn 1) or 2 (DRAGON_BREATH, turn 2, S7 slice E1) - the
-      // only two moves this trace's own oracle ground truth covers; the
-      // other 2 slots' confirm timing/text is unverified and out of scope.
-      if (newKeys.has("A") && (fightSubmenu.cursor === 0 || fightSubmenu.cursor === 2)) {
+      // (ROCK_SLIDE, turn 1), 1 (BIND, turn 8, S7 slice P), or 2
+      // (DRAGON_BREATH, turn 2, S7 slice E1) - the only three moves this
+      // trace's own oracle ground truth covers; SANDSTORM's own confirm
+      // timing/text is unverified and out of scope.
+      if (newKeys.has("A") && (fightSubmenu.cursor === 0 || fightSubmenu.cursor === 1 || fightSubmenu.cursor === 2)) {
         fightSubmenu = confirmFightMove(fightSubmenu, battleScene.elapsed + 1);
       } else if (newKeys.has("B")) {
         fightSubmenu = closeFightSubmenu(fightSubmenu, battleScene.elapsed + 1);
@@ -386,8 +389,34 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // turn7-notes §5's own "cursor persistence confirmed" ledger.
       fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
       turn6Resolved = true;
+    } else if (
+      turn6Resolved &&
+      !turn7Resolved &&
+      fightSubmenu.confirmElapsed !== null &&
+      newKeys.has("A") &&
+      sceneT >= SCENE_TICK0 + fightSubmenu.confirmElapsed + TURN7_ROCKSLIDE_REOPEN_GATE_DELAY
+    ) {
+      // S7 slice P (docs/turn8-notes.md, docs/battle-turn-notes.md §33):
+      // turn 7's whole ROCK_SLIDE resolution has redrawn the settled action
+      // menu by now (`TURN7_ROCKSLIDE_REOPEN_GATE_DELAY` past turn 7's own
+      // real confirm) - a fresh A-press reopens FIGHT for turn 8, cursor
+      // persisted at slot 0 (ROCK_SLIDE, unchanged) - the winning line's own
+      // divergence happens via the nav branch above (one RIGHT press onto
+      // BIND), not at reopen.
+      fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
+      turn7Resolved = true;
     }
-    battleScene = { ...battleScene, fightSubmenu, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved };
+    battleScene = {
+      ...battleScene,
+      fightSubmenu,
+      turn1Resolved,
+      turn2Resolved,
+      turn3Resolved,
+      turn4Resolved,
+      turn5Resolved,
+      turn6Resolved,
+      turn7Resolved,
+    };
     battleScene = advanceBattleScene(battleScene);
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
   }
