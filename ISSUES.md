@@ -38,40 +38,34 @@ off). `turn6/7/8-feathers.json` all stop their own `captureFrames` right
 before this residual's onset (106/16/33 frames respectively, all 0 diff) -
 extending any of them past that point is gated on this crack.
 
-## #29 — Two DIFFERENT small residual families surfaced restoring #28: a
-  pre-reveal reopen-window blip (turn 6/8) and a post-confirm-press blip
-  (turn 7)
+## #29 — The two #28-adjacent boundary families: ROOT-CAUSED (2026-07-21
+  probe, bounce-blip-notes.md new section) — one implementation step owed
 
-Surfaced 2026-07-21 landing #28's fix. Both are OUTSIDE #28's own browsing-
-branch shift (confirmed by domain, not guessed) — restoring #28's 26 named
-ticks left these 6 freshly isolated, still excluded from their traces'
-`captureFrames`:
+Both families are the SAME missing-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
+mechanism as #28, one dispatch branch earlier; supervisor re-ran the
+committed verify script (`tools/probe/verify-issues29-rule.py`) — both
+families PASS with zero regressions on every RAM-covered neighbor.
 
-- **turn6-menu.json 7315-7316** and **turn8-menu.json 9383-9384**: land
-  BEFORE `revealTick` (`TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY`,
-  ~5 ticks after each turn's own submenu-reopen press at 7312-7314/9380-9382)
-  — still inside `drawTurn6ActionMenuIdleWindow`/`drawTurn7RockSlideTurnEnd
-  SettledMenu` (the pre-reveal idle window), NOT the browsing branch #28's
-  shift touches. `docs/bounce-blip-notes.md`'s own regression check already
-  flagged the same domain boundary at turn 6's tick 7307 as "an ARTIFACT...
-  testing outside its own domain" — same family, same root cause candidate
-  (the reopen-DMA-wait stall's visual, still unmodeled in the idle branch).
-  1579px/4.11% diff, same signature as #28's own worst pair.
-- **turn7-menu.json 8380-8381**: the OPPOSITE boundary — lands right AFTER
-  a confirm press (`A` at 8378-8380 in `turn7-menu.json`'s own script),
-  inside the confirm/kickoff branch (`turn7KickoffBounceTick`), not the
-  browsing branch either. `docs/bounce-blip-notes.md`'s own turn-7
-  retrodiction assumed the whole 8320-8405 dwell was browsing without
-  checking for a confirm press inside that window — this is exactly where
-  that assumption breaks. Same 1579px/4.11% signature.
+- **Family A** (turn6-menu 7315-7316, turn8-menu 9383-9384): the
+  pre-reveal idle window (`drawTurn6ActionMenuIdleWindow`/
+  `drawTurn7RockSlideTurnEndSettledMenu`) renders "reopen pressed,
+  awaiting revealTick" identically to "no press yet" — the shift must
+  key off `sm.openElapsed !== null`, not `t >= revealTick`. No new
+  constant needed.
+- **Family B** (turn7-menu 8380-8381): `turn7KickoffBounceTick`'s
+  pre-freeze branch returns plain `t` — needs
+  `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`, the identical bug shape #28
+  fixed in the browsing ternary. Fresh RAM probe committed
+  (`turn7-bounce-blip-raw.json`, twice-run).
 
-Not chased further this session (out of scope for #28's fix step - the
-brief was explicit: restore #28's named ticks only, leave anything
-unexpected excluded and named). Leads for a future probe: RAM-dump both
-driver sprites' `y2` directly across each window (same `ram-probe.py` +
-spec-copy method #28's own probe used) to see whether the idle-branch and
-kickoff-branch bounce composers have their OWN missing shift, analogous to
-#28's but on a different anchor.
+Remaining (one fix step): apply both rules in the engine, restore the 6
+ticks (turn6-menu 42→44, turn7-menu 91→93, turn8-menu 86→88), rerun to
+0 diff, Tier-1-pin, delete this entry. Fix worker re-runs the verify
+script FIRST (policy). **Open flag from the probe:** turn 6/8's own
+kickoff wrappers (`turn6KickoffBounceTick`/`turn8KickoffBounceTick`)
+share Family B's exact code shape but were NOT RAM-probed — not known
+buggy, just unchecked; if the fix worker's regression sweep shows any
+kickoff-window diffs, that's where to look.
 
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of

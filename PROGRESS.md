@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 219 — Worktree probe (supervisor-folded): **ISSUES #29 ROOT-CAUSED, both families** — the same missing-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` mechanism as #28, one dispatch branch earlier (Family A: pre-reveal idle window must key the shift off `openElapsed !== null`, not `revealTick`; Family B: `turn7KickoffBounceTick`'s pre-freeze branch returns unshifted `t`); supervisor re-ran the committed verify script — both families PASS, zero neighbor regressions; probe scoreboard this session: **4-for-4** (#27, #26, #28, #29); merged, suite 865/865
+
+- **State:** merged into master post-feathers, `npm test` 865/865 +
+  build green, worktree/branch cleaned. ISSUES #29 rewritten to
+  one-fix-step-owed with the probe's rules + the honest open flag
+  (turn 6/8 kickoff wrappers share Family B's code shape, unprobed).
+- **Next:** round 9 — main: #29 fix as rung (a) (verify-script-first,
+  restore 6 ticks: menus → 44/93/88) + turn 9 slice as rungs (b+)
+  (turn9-notes.md exists; both published lines reconverge at turn 9);
+  worktree: ISSUES #30 probe (simulate SortSprites' persistent
+  adjacent-swap order over the committed feather probe tables — all
+  inputs committed, pure computation; then the half-texel lead).
+- **Notes:** probe in contract (12.0 of 30 min). Every excluded tick
+  in turns 1-8 now has either a root-caused fix pending (#29's 6) or
+  a live named-lead investigation (#30's feather windows); no
+  speculative labels remain.
+
+---
 ## 218 — Bounded worker (S7 engine slice Q, dedicated feathers step): rung (a) partially cracked — a real same-priority feather draw-order bug found+fixed (`compareFeatherDrawOrder`, ~2000px→425px residual on the 7421-7549 window, 9/129 ticks exact) but not a full 0-diff crack; rungs (b)/(c) landed clean — `turn7-feathers.json` **16/16**, `turn8-feathers.json` **33/33**, both 0 diff, confirming the SAME residual recurs at the identical relative offset in all three turns (ISSUES #30 filed)
 
 - **State:** `npm test` **865/865** (+6), `npm run build` green, tree
@@ -64,53 +82,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** scout in contract (16.3 of 40 min); PAPERCUT noted in the
   dossier (two supplementary RAM dumps run once, not twice — trace
   itself twice-run; acceptable, flagged in-doc).
-
----
-## 216 — Bounded worker (S7 engine fix): **ISSUES #28 CLOSED** — `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` applied at the 3 turn-6/7/8 browsing-branch call sites; 20 of 26 named ticks restored 0-diff, 6 more surfaced as TWO DIFFERENT out-of-domain families (filed ISSUES #29) rather than force-fit
-
-- **State:** `npm test` **861/861** (+4), `npm run build` green, tree
-  clean. `turn6-menu.json` **42/42** (33 base + 6 period-9 + the separate
-  7348-7350 set, 0 diff), `turn7-menu.json` **91/91** (85 base + 6, 0
-  diff), `turn8-menu.json` **86/86** (78 base + 10, all 10 named ticks
-  landed clean, 0 diff). Zero regressions across 12 rerun traces
-  (`turn6-featherdance` 90/90, `turn6-feathers` 106/106, `turn6-statfall`
-  127/127, `turn8-bind-a` 256/256, `turn8-bind-b` 66/66, `turn5-menu`
-  42/42, `turn6/7-rockslide-*` all at committed counts).
-- **Did:** re-ran `tools/probe/verify-bounce-blip-rule.py` FIRST per its
-  own policy — 18/18 named ticks reproduced exactly, confirming the root
-  cause before touching code. Fix: `battleScene.ts`'s 3 browsing-branch
-  ternaries (`drawTurn6/7/8FightSubmenuWindow`, the `: t` arm) changed to
-  `: t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` — the one-token change the probe
-  banked. Restoring `captureFrames` then showed the model check (which
-  computes the formula directly, blind to actual branch dispatch) had
-  over-claimed 6 of the 26: **7315-7316** (turn 6) and **9383-9384** (turn
-  8) land BEFORE `revealTick`, still in the pre-reveal idle window, not
-  the browsing branch this fix touches; **8380-8381** (turn 7) lands right
-  AFTER a confirm press inside `turn7-menu.json`'s own script, in the
-  confirm/kickoff branch instead. Per the brief's own instruction, kept
-  these 6 excluded rather than force-fitting, and filed them precisely as
-  **ISSUES #29** (two distinct sub-families, both plausibly the same
-  "missing shift" shape on a different anchor — a future probe's lead, not
-  chased this session). 4 Tier-1 pins added (`tests/battleScene.test.ts`,
-  new "ISSUES #28 fix" describe block): the shifted formula matches the
-  committed RAM dumps at 3 restored ticks per turn (6 and 8), paired with
-  a same-ticks pin proving the pre-fix unshifted formula would have
-  mismatched — the fix is demonstrably load-bearing. Exported
-  `TURN8_REGIME3_TO_REGIME1_SHIFT` (one word) so the turn-8 pin could
-  reuse the real composition instead of re-deriving it. ISSUES #28
-  deleted; `docs/bounce-blip-notes.md` got a "Fix landed" section with the
-  full per-turn breakdown.
-- **Next:** ISSUES #29 (the 2 newly-surfaced small families - a probe
-  step, RAM-dump both driver sprites' y2 across the idle-branch reopen
-  window and the kickoff-branch post-confirm window). Engine: turn 8's own
-  feather sub-window, turn 9+ parameterizations. Then: feathers dedicated
-  step (turns 6/7/8 tables), post-WIN scene-transition scout.
-- **Notes:** landed in ~25 of the 30-minute cap. The brief's own
-  "restore ALL the excluded ticks... if it does NOT pass, leave it
-  excluded and say so precisely" fallback fired for real, twice, on ticks
-  the prior probe step's own model check had marked as clean — a useful
-  reminder that a pure-arithmetic model check doesn't see which code
-  branch a tick is actually rendered through; pixel compare remains the
-  final arbiter.
 
 ---
