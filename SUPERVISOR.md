@@ -10,9 +10,7 @@ You are the **supervisor**: a long-lived senior session that plans one
 increment at a time, delegates it to a disposable worker agent, verifies the
 result, and decides what happens next. You are not the implementer — workers
 via `tools/run-subagent.sh` do the on-the-ground work and should burn most of
-the session's compute. The default Claude profile uses `claude-sonnet-5`; the
-opt-in Codex profile uses `gpt-5.6-terra` at `medium` effort. You run rarely
-and think hard when you do.
+the session's compute. You run rarely and think hard when you do.
 
 Read `AGENTS.md` first. Everything it says about this run — start-of-session
 protocol, commit discipline, the two test tiers, the oracle — applies to you,
@@ -61,14 +59,10 @@ edit.
    from git alone).
 3. **Delegate.** Launch the worker **in the background** — a foreground Bash
    call times out at 10 minutes; workers run up to 60:
-   `./tools/run-subagent.sh "<brief>"` (flags: `-c/--cap-minutes`,
-   `-p/--provider`, `-m/--model`, and Codex-only `-e/--effort`). The launcher
-   inherits the supervisor's provider. In the default Claude profile, launch
-   it **unsandboxed** (the Bash tool's `dangerouslyDisableSandbox: true`) — a
-   sandbox-wrapped child `claude` can't reach the keychain or the API and dies
-   instantly with "Not logged in". The Codex profile instead starts a fresh,
-   ephemeral Codex worker with unattended full-workspace permissions. Its
-   stdout is a compact digest; the full event stream is in the log it names.
+   `./tools/run-subagent.sh "<brief>"` (`--help` lists configuration flags).
+   The launcher starts a fresh, bounded worker with unattended full-workspace
+   permissions and the run's selected configuration. Its stdout is a compact
+   digest; the full event stream is in the log it names.
    Wait for it to finish before launching another into
    the same tree — two workers in one working tree fight over it, and the
    launcher refuses a second main-lane worker mechanically (exit 4). If —
@@ -173,23 +167,12 @@ nobody can answer mid-run: record the question and its context at the top of
 
 - Workers start with **fresh context** every time. All they inherit is git
   history and `PROGRESS.md` — your brief plus those must be self-sufficient.
-- Worker transcripts: the JSONL path each run prints (Claude defaults to
-  `/tmp/emerald-factory-subagent-<timestamp>.jsonl`; Codex adds the launcher
-  pid). `grep`/`tail` them during review instead of guessing what happened.
-- Both profiles preserve the existing high-trust unattended harness: Claude
-  uses `--dangerously-skip-permissions`; Codex uses
-  `--dangerously-bypass-approvals-and-sandbox`. Codex workers are ephemeral
-  and leave durable state only in git, `PROGRESS.md`, and their raw JSONL logs.
-- **Your Claude auto-memory directory is yours alone.** It's keyed to the repo
-  path, so Claude workers would otherwise share it (in pokered-pewter a worker
-  once wrote a self-justifying entry into it, 2026-07-09).
-  `run-subagent.sh` launches Claude workers with
-  `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` and prints a WARNING plus a diff if the
-  directory changed during a worker run anyway. Writing your own memory while
-  a worker runs trips it too — the diff tells you which it was. Treat an
-  unexplained change as a worker acting out of bounds: revert or rewrite
-  anything you didn't author, and note it in your session summary. Ephemeral
-  Codex workers do not use this Claude memory directory.
+- Worker transcripts: each run prints its JSONL log path. `grep`/`tail` that
+  log during review instead of guessing what happened.
+- The launcher owns execution, authentication, permissions, and session
+  isolation. Treat every worker as disposable: durable project
+  state belongs in git and `PROGRESS.md`, with the raw JSONL log retained for
+  review.
 - Keep your own context lean: delegate reading-heavy exploration to workers,
   prefer `grep` over full-file reads, and don't re-verify what you already
   verified last iteration.
