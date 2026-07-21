@@ -53,6 +53,9 @@ top entry of `PROGRESS.md` — uncommitted work is lost work.
 - Keep the tree green at each commit (`npm test` + `npm run build` pass) so *every*
   commit is a safe resume point. Say in the message what changed and how you
   verified it.
+- Preserve agent attribution. If the runtime does not add its own attribution,
+  append `Generated-by: <agent>` and `Agent-model: <model>` trailers to every
+  agent-authored commit.
 - **Keep `PROGRESS.md` current:** update its top entry whenever you finish a
   meaningful chunk, and *always* before you stop — State / Did / Next / Notes, with
   oracle-diff numbers — so a fresh agent can resume from that entry alone. Tick

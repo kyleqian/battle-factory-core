@@ -136,6 +136,11 @@ case "$PROVIDER" in
     command -v codex >/dev/null 2>&1 || { echo "run-subagent: codex CLI not found on PATH" >&2; exit 127; }
     ;;
 esac
+if [[ "$PROVIDER" != "codex" ]]; then
+  # A mixed-provider worker may inherit these from a Codex supervisor; ensure
+  # attribution follows the worker that actually creates the commit.
+  unset POKEBENCH_COMMIT_GENERATOR POKEBENCH_COMMIT_MODEL
+fi
 if [[ -z "$AGENT_LOG" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
     AGENT_LOG="/tmp/emerald-factory-subagent-$(date +%Y%m%d-%H%M%S).jsonl"
@@ -276,6 +281,12 @@ fi
 
 WORK_DIR="$(pwd)"
 if [[ "$WORKTREE" == "1" ]]; then WORK_DIR="$WT_PATH"; fi
+
+if [[ "$PROVIDER" == "codex" ]]; then
+  # Attribute commits in either lane without changing persistent git config.
+  source tools/codex-git-attribution.sh
+  codex_git_attribution_enable "$WORK_DIR" "$MODEL"
+fi
 
 # No process substitution here: sandboxed supervisor sessions can't open
 # /dev/fd/N. Stream straight to the log; the digest is produced after exit.

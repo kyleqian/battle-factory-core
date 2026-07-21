@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Append machine-readable attribution to commits made inside a launched Codex
+# process. Human and other-provider commits do not enable this hook.
+set -euo pipefail
+
+message_file="${1:?commit message file is required}"
+[[ "${POKEBENCH_COMMIT_GENERATOR:-}" == "Codex" ]] || exit 0
+
+model="${POKEBENCH_COMMIT_MODEL:-unknown}"
+trailers=()
+if ! grep -qiE '^Generated-by:[[:space:]]*Codex[[:space:]]*$' "$message_file"; then
+  trailers+=(--trailer "Generated-by: Codex")
+fi
+if ! grep -qiE '^Agent-model:[[:space:]]*' "$message_file"; then
+  trailers+=(--trailer "Agent-model: $model")
+fi
+
+if (( ${#trailers[@]} )); then
+  git interpret-trailers --in-place "${trailers[@]}" "$message_file"
+fi

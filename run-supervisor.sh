@@ -104,6 +104,10 @@ case "$PROVIDER" in
     ;;
 esac
 
+if [[ "$PROVIDER" != "codex" ]]; then
+  unset POKEBENCH_COMMIT_GENERATOR POKEBENCH_COMMIT_MODEL
+fi
+
 # Workers inherit the selected provider unless WORKER_PROVIDER explicitly
 # requests a mixed-provider setup.
 export POKEBENCH_WORKER_PROVIDER="$PROVIDER"
@@ -113,6 +117,13 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "supervisor_effort=${REASONING_EFFORT:-n/a}"
   echo "worker_provider=${WORKER_PROVIDER:-$POKEBENCH_WORKER_PROVIDER}"
   exit 0
+fi
+
+if [[ "$PROVIDER" == "codex" ]]; then
+  # Git subprocesses created by this supervisor automatically record Codex and
+  # the resolved model in their commit trailers.
+  source tools/codex-git-attribution.sh
+  codex_git_attribution_enable "$(pwd)" "$MODEL"
 fi
 
 HARNESS_ROOT="${POKEBENCH_HARNESS_ROOT:-$(cd ../.. && pwd)}"
