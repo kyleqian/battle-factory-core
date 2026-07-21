@@ -432,3 +432,52 @@ New scratch tooling (not required deliverables, kept for reuse):
 - The ROCK_SLIDE kickoff text hold onward (past 11113) and everything after
   — entirely out of this session's reach, unchanged from the predecessor's
   own gap list.
+
+## 2026-07-21 (third session, cap-killed mid-writeup; salvaged + folded by the supervisor): §41's two named residuals — the "hit-flash" DISSOLVED as a misdiagnosis, the hitsplat's coefficient hypothesis REFUTED decisively
+
+**Provenance note:** the probe worker hit its 30-min cap after finishing the
+work but before committing; the supervisor verified every claim below by
+rerunning the extended verify script (108/108, fresh oracle captures) and
+both diagnostics, then wrote this section from the worker's own committed-in-
+code comments and script outputs. Scripts: `tools/probe/dump-turn9-hitflash.py`,
+`tools/compare/scratch/diag-turn9-hitsplat-tips.ts`,
+`tools/compare/scratch/diag-turn9-hitsplat-blendfit.ts`.
+
+### The 10983-10986 "whole-sprite hit-flash" (§41) is NOT a new mechanism
+
+Fresh RAM re-probe of Onix's sprite `data[1]`/`invisible` fields
+(`dump-turn9-hitflash.py`): the flicker task (`DoHitAnimBlinkSpriteEffect`,
+`battle_controller_player.c:1401`) toggles every 4 ticks of its own counter
+for **32 ticks total = FOUR 4-tick invisible blocks**, not three. The earlier
+probe (first section of this file) stopped sampling at RAM 10977 and missed
+block 4 (RAM 10982-10985, render 10983-10986, same RAM+1 lag; task completes
+and forces `invisible=false` at RAM 10989/render 10990). §41's "position-
+dependent recolor" reading was the striped-wall/ground background showing
+through the erased silhouette — pixel-sampled this session, block 4 is
+**pixel-identical plain erasure, mechanistically identical to blocks 1-3**.
+9 new verify checks pin all four blocks (108/108 total).
+**Fix shape:** extend the engine's existing flicker gate table to 4 blocks +
+the 10990 force-visible tick. No new mechanism code.
+
+### The hitsplat tip/edge residual: two decisive eliminations, mechanism still open
+
+Fresh RAM (`dump-hitsplat-attrs.py` this probe's run): the hitsplat sprite is
+genuinely `objMode=1` (semi-transparent), `BLDCNT=0x3f40`, `BLDALPHA=0x080c`
+→ **eva=12, evb=8** for its whole live span (10934-10943) — the engine's
+hardcoded `eva=16,evb=16` traces to a stale doc comment. HOWEVER:
+- **Brute force over every (eva,evb) pair in both 8-bit and 5-bit blend
+  domains** (`diag-turn9-hitsplat-blendfit.ts`, 1263 opaque samples over 3
+  ticks): best fit is only 62.2% (8bit 14/15); the RAM-true 12/8 scores far
+  WORSE than the current 16/16 (108 vs 735 matches). **No pure coefficient
+  pair explains the residual — the "stale constant" hypothesis is REFUTED.**
+- **Floor-vs-round source-texel sampling** with the RAM-true coefficients
+  (`diag-turn9-hitsplat-tips.ts`): of 176 old mismatches at tick 10944,
+  floor+new matches 18, round+new matches 2, **neither matches 158**. Also
+  refuted.
+- Suggestive unexplained pattern in the dumps: oracle tip colors sit in a
+  saturated (255,240,152)-family the app never produces — consistent with a
+  palette-space effect (e.g. `gPlttBufferFaded` tint on the hitsplat's own
+  palette during the flash window) rather than any per-pixel blend variant.
+  NOT tested — named as the next instrument: dump the hitsplat's palette
+  bank from `gPlttBufferFaded` at 2-3 live ticks and compare against the
+  static palette before any further blend fitting.

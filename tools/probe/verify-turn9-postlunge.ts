@@ -25,7 +25,7 @@ const trace = JSON.parse(readFileSync(TRACE_PATH, "utf8")) as Trace;
 
 // Union of every tick this script's assertions touch, across both windows.
 const EP1_RANGE = range(10924, 10950);
-const EP2_RANGE = range(10945, 10986);
+const EP2_RANGE = range(10945, 10992);
 const MSG_RANGE = range(10999, 11006);
 // 2026-07-21 addendum: HP-drain (§1), message-text-reveal (§2), settled-hold
 // (§3) ranges - see docs/turn9-shake-notes.md's own dated section.
@@ -146,26 +146,53 @@ async function main() {
 
   // Onix's own sprite: NOT a positional shift (RAM x2=y2=0 throughout episode 2,
   // tools/probe/dump-endeavor-tail.py) — the only thing gating the onix bbox is
-  // the independent invisible-flicker, three 4-tick blocks at render
-  // 10959-10962/10967-10970/10975-10978 (RAM+1 lag off RAM 10958-61/66-69/74-77).
-  const invisibleBlocks = [range(10959, 10962), range(10967, 10970), range(10975, 10978)];
+  // the independent invisible-flicker task (`DoHitAnimBlinkSpriteEffect`,
+  // battle_controller_player.c:1401 — toggles every 4 ticks of its own `data[1]`
+  // counter for 32 ticks total, i.e. FOUR 4-tick on-blocks, not three).
+  // 2026-07-21 addendum (this session): a fresh RAM re-probe
+  // (tools/probe/dump-turn9-hitflash.py, reading Onix's own `data[1]`/
+  // `invisible` fields directly) found a FOURTH on-block at RAM 10982-10985
+  // (render 10983-10986, same RAM+1 lag) that §2's own "three blocks... then
+  // staying visible for good after RAM 10977" claim missed — the probe that
+  // produced that claim stopped sampling at RAM 10977. This block is what
+  // §41 (docs/battle-turn-notes.md) misidentified as a brand-new "whole-
+  // sprite hit-flash" mechanism: pixel-sampled directly this session
+  // (/tmp diff crops, see docs/turn9-shake-notes.md's dated append) and
+  // confirmed to be the IDENTICAL plain-erasure visibility gate as blocks
+  // 1-3, not a recolor/blend of any kind — RGB values that looked like a
+  // "recolor" in the §41 write-up were simply the striped-wall/ground
+  // background showing through where Onix's silhouette used to be, which
+  // varies by screen position (hence the false "position-dependent output"
+  // read). Render 10987 onward is flat/settled for good (task completes,
+  // forces `invisible=false`, at RAM 10989/render 10990).
+  const invisibleBlocks = [range(10959, 10962), range(10967, 10970), range(10975, 10978), range(10983, 10986)];
   for (const block of invisibleBlocks) {
     for (const t of block) check(`onix hidden (flicker) at ${t}`, ep2(t).onix > 0, `got ${ep2(t).onix}`);
   }
-  for (const t of [10963, 10964, 10965, 10966, 10971, 10972, 10973, 10974]) {
+  for (const t of [10963, 10964, 10965, 10966, 10971, 10972, 10973, 10974, 10979, 10980, 10981, 10982]) {
     check(`onix visible (between flicker blocks) at ${t}`, ep2(t).onix === 0, `got ${ep2(t).onix}`);
   }
-  // The three invisible blocks are pixel-identical to each other (same erasure,
-  // no residual y2 dependence) — confirms the onix bbox is gated by visibility
-  // alone, not by the healthbox's own y2 parity.
-  check("flicker erasure identical across all 3 blocks", ep2(10959).onix === ep2(10967).onix && ep2(10967).onix === ep2(10975).onix, `${ep2(10959).onix}, ${ep2(10967).onix}, ${ep2(10975).onix}`);
+  // All four invisible blocks are pixel-identical to each other (same erasure,
+  // no residual y2/background dependence) — confirms the onix bbox is gated by
+  // visibility alone, not by the healthbox's own y2 parity, and that the 4th
+  // block (§41's "hit-flash") is mechanistically identical to the first 3.
+  check(
+    "flicker erasure identical across all 4 blocks (incl. the 4th, §41's misdiagnosed 'hit-flash')",
+    ep2(10959).onix === ep2(10967).onix && ep2(10967).onix === ep2(10975).onix && ep2(10975).onix === ep2(10983).onix,
+    `${ep2(10959).onix}, ${ep2(10967).onix}, ${ep2(10975).onix}, ${ep2(10983).onix}`,
+  );
 
   // (`.other` stays nonzero here — Pidgeotto's own still-unmodeled animation
   // loop, rung (c2)'s territory, keeps churning throughout; out of scope.)
   check(
-    "episode 2 (onix+healthbox) fully settled by 10979",
+    "episode 2's OWN healthbox wobble settled by 10979 (the flicker task itself keeps running through its 4th block, see below)",
     ep2(10979).onix === 0 && ep2(10979).healthbox === 0,
     `got onix=${ep2(10979).onix} healthbox=${ep2(10979).healthbox}`,
+  );
+  check(
+    "flicker task truly done for good by 10987 (past the 4th on-block, task completion tick)",
+    ep2(10987).onix === 0,
+    `got onix=${ep2(10987).onix}`,
   );
 
   // --- HP-drain / message-box transition boundary (C4 territory, partial) ---
