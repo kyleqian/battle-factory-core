@@ -2013,3 +2013,184 @@ through the settled turn-6 menu (turn5-sitrus-d.json, tick 7312) is 0 diff,
 with the single documented ring exclusion. Next: the turn-6 engine slice
 proper (FIGHT submenu open at 7317+, out of this session's scope) against
 `turn6-notes.md`'s own dossier.
+
+## 16. THIN_RING probe (ISSUES #26, worktree lane, oracle/RAM only - no
+engine code): the ring's own slot/matrix trajectory RAM-pinned end to end;
+analytic placement FITS at ordinary +1 lag - the ring's own "sub-pixel-
+invisible" first tick, not a lag-class exception, explains the exclusion's
+own 7042 (not 7040) onset
+
+Per the run's residual-elimination policy (ISSUES #26's own text), this is
+the dedicated probe for the Sitrus proc's expanding ring - the sole
+un-landed piece of the otherwise-complete faint/forced-switch sequence
+(§15). Goal was RAM ground truth + an analytic verdict, not a fix; no
+`src/engine/` changes.
+
+### Method: slot discovery by full scan, not assumed
+
+Unlike the feather probe (§29 of `battle-turn-notes.md`, whose 8 slots were
+already known from a prior session), the ring's own sprite slot was NOT
+pinned anywhere in this dossier. New probe
+`tools/probe/dump-sitrus-ring-sprite.py` scans **all 64** `gSprites[]`
+slots every tick and keeps only whichever slot(s) have a template pointer
+matching `gThinRingExpandingSpriteTemplate` (`0x0859381c`, oracle-resolved
+this session via `bin/oracle symbols`) - the same
+`struct Sprite`/`OamData`/`OamMatrix` field layout every prior probe in
+this directory already uses. Spec `tools/probe/specs/turn5-sitrus-ring.json`
+reuses `turn5-sitrus-c.json`'s own committed trace `segments` verbatim (no
+re-authoring), run over RAM ticks 7030-7085 (padding both sides of the
+brief's 7038-7082 window). Output `src/data/gen/turn5-sitrus-ring-probe.json`
+(56 ticks) - **twice-run byte-identical** (full deep-equal, not spot-check).
+
+### RAM ground truth
+
+The ring is **slot 4**, `matrixNum=2`, for its entire life - never
+reallocated. Constant OAM fields the whole time: `affineMode=3` (AFFINE_
+DOUBLE, matches the template's `gOamData_AffineDouble_ObjNormal_64x64`),
+`shape=0`/`size=3` (64x64 square), `objMode=0` (**Normal**, not Blend -
+rules out an alpha-blend hypothesis raised while investigating a residual
+below), `priority=2`, `paletteNum=7`. Position `x=72,y=88` and `x2=y2=0`
+are **constant** for the sprite's entire life (a fixed center, not a moving
+one) - notably **NOT** the same center `onixSitrusRotateMatrix`'s own call
+site uses for Onix's own sprite (`ONIX_MATERIALIZE_CORNER` + half-size =
+`(72,80)`, byte-exact-verified in §13): the ring's own Y is a real, RAM-
+measured **8px lower**, consistent with `AnimSpriteOnMonPos`'s
+`respectMonPicOffsets=TRUE` path (`gBattleAnimArgs[3]=0` in the
+`createsprite` call, `data/battle_anim_scripts.s:10459`) applying a
+species-specific mon-pic Y adjustment that Onix's own hardcoded rotation
+call never needed - not re-derived to its own source formula this session,
+just RAM-confirmed as a real, fixed 8px offset to use verbatim.
+
+**The matrix itself is a pure isotropic scale, never a rotation**: `b=c=0`
+at every single tick; `a=d` always. The sprite is alive (`inUse=1`) from
+RAM tick **7040** through **7071** (32 ticks), with `affineAnimEnded`
+flipping `0->1` exactly at 7071 (the last tick the matrix updates), and is
+**gone** (not in any slot) by tick **7072** - matching `DestroySpriteAndMatrix`
+firing once `AnimSpriteOnMonPos` sees `affineAnimEnded`. The per-tick `a`/`d`
+sequence (`b=c=0` throughout, omitted from the table) is an **exact closed
+form**, checked at all 32 live ticks with zero mismatches:
+
+```
+a = d = floor(4096 / n),  where n = clamp(ramTick - 7039, 1, 31)
+  ramTick 7040 (n=1):  a=4096   ramTick 7056 (n=17): a=240
+  ramTick 7041 (n=2):  a=2048   ramTick 7060 (n=21): a=195
+  ramTick 7047 (n=8):  a=512    ramTick 7063 (n=24): a=170
+  ramTick 7055 (n=16): a=256    ramTick 7070 (n=31): a=132
+  ramTick 7071: a=132 (held - affineAnimEnded, last computed value repeats)
+```
+
+(`a=256` at `n=16`, i.e. RAM tick 7055, is exactly the neutral/identity
+scale - the ring is at its **native** 64x64 size there; every earlier tick
+is shrunk, every later tick is enlarged past native - the growing-past-
+native-size phase is what makes the ring eventually dwarf Onix's own
+sprite, matching §11/§15's own "roughly Onix-sized by ~7060... expanding
+off-crop by 7070" eyeballed read.)
+
+### Analytic placement: FITS, ordinary +1 lag - exact, not fitted
+
+Verification method: the ring's own gfx (`src/assets/gen/battle-anim-item-
+heal.json`'s `ring` key, byte-exact-extracted per §8a) was fed through a
+line-for-line port of the **existing, already-proven** sampler
+(`drawSpriteSheetAffineRotate`'s own `sx=((dx*pa+dy*pb)>>8)+halfW` inverse-
+transform, already double-size-aware) using the RAM matrix/center **directly**
+- zero fitted parameters - for RAM ticks 7041/7047/7055/7063/7070, then the
+predicted opaque pixels (position + exact palette RGB) were checked against
+a freshly regenerated oracle capture (`bin/oracle run`, same trace script,
+`captureFrames` 7038-7085) at each of the three candidate lags. Result:
+
+- **RAM tick 7041 -> render tick 7042 (lag +1)**: the simulation predicts
+  **exactly 6 opaque pixels** at positions `(69-75, 85-91)` - **all 6 match
+  the oracle's real pixel colors exactly** (0 mismatches). This is not just
+  a count coincidence: **6px is the exact number ISSUES #26 itself already
+  cited** for render tick 7042's own first diff - independently confirming
+  both the pixel count AND (newly) their exact positions/colors.
+- **RAM tick 7047 -> render tick 7048 (lag +1)**: 92 predicted opaque
+  pixels, **92/92 exact match** (position + color), 0 mismatches.
+- **RAM tick 7040 (the sprite's very first live tick, `n=1`, `a=4096`,
+  1/16 native scale) analytically produces ZERO opaque pixels** - at that
+  extreme a 64x64 "thin ring" (a hollow annulus, not a filled disc) downscaled
+  to a ~4x4px footprint has its own thin stroke fall entirely between the
+  sampled texel centers. This is the real, previously-unexplained reason
+  the exclusion/diff window starts at render tick **7042**, not 7041 or
+  7040, despite the sprite existing in RAM from 7040: under lag +1, RAM
+  7040 would render at 7041 - which the already-committed
+  `turn5-sitrus-c.json` trace already has as a **clean, included** (non-
+  excluded) tick, exactly consistent with a genuinely-zero-opaque-pixel
+  render there. **Lag 0 and lag +2 are both ruled out** by this same
+  boundary logic: lag 0 would put RAM 7071's own large, still-live matrix
+  at render 7071 (one tick before the oracle still shows a big diff at
+  7072, per ISSUES #26's own "628px at 7071/7072"); lag +2 would push the
+  destroy-triggered "gone" frame to render 7073, but the committed trace's
+  own exclusion already ends at 7072 with 7073 clean/included - only **+1**
+  lands the RAM-destroy-to-clean-render boundary exactly on the existing
+  trace's own exclusion edge.
+- **This mechanism does NOT inherit §13's own "+2 for rotation matrices"
+  lag class** (the brief's own flagged first hypothesis) - consistent with
+  §29's own independent finding that the same +2 class didn't generalize to
+  the feather sprites' matrices either. Sensible in hindsight: the ring's
+  own matrix is a pure scale (`b=c=0` always, never a rotation) - §13's
+  rationale was specific to a genuinely rotating matrix's own extra
+  buffering hop, so it was never a strong prior for this mechanism to begin
+  with, only the brief's own explicitly-flagged hypothesis to rule out.
+
+### Residual at larger ring sizes - explained, not a placement error
+
+At RAM ticks 7055/7063/7070 (native size and past it), the same lag-+1
+check finds real per-pixel mismatches (368->306 exact, 840->575 exact,
+1408->628 exact) - but every mismatch is attributable to **already-known,
+separately-documented facts**, not evidence against the placement/scale
+formula itself (which the two clean small-tick checks above pin exactly,
+0 residual):
+
+- A cluster of mismatches sits at render rows **112-114**, and their
+  observed (non-ring) color is **exactly `(74,66,82)`** - §13's own already-
+  cited constant drop-shadow-sprite color ("confined to render rows 112-113
+  - the exact bottom edge of Onix's own 64x64 bbox"). This is a **z-order/
+  compositing** question (does the shadow draw over the ring or vice versa,
+  by OAM `priority` - the ring's own is `priority=2`, the shadow's own
+  value wasn't re-derived this session) for whoever implements the fix, not
+  a placement bug.
+- At the ring's largest sampled size (RAM 7070, bbox extending to
+  `y:32-144`, well above/below Onix's own `48-112` bbox), the remaining
+  mismatches sit at the ring's own outer edge (`y:32-43` and `y:115-144`)
+  against various other already-present screen colors - this single-sprite
+  simulation never composites the full scene (background tiles, the
+  sparkle remnants, etc.), so pixels where the ring's own predicted color
+  should legitimately be **occluded or interleaved** by other already-
+  correct scene content will show as "mismatches" here without being
+  placement errors. Not chased further under this probe's own oracle/RAM-
+  only, no-engine-code scope - flagged precisely for the fix worker rather
+  than guessed at.
+
+### Verdict: FITS - exact parameters, mechanical to implement
+
+```
+render tick T shows RAM tick (T-1)'s matrix (lag +1, same class as the
+already-landed tint - NOT the +2 rotation-matrix class)
+center: (x=72, y=88) fixed for the sprite's whole life (RAM sprite x/y,
+  8px below Onix's own drawSpriteSheetAffineRotate call-site center)
+matrix: pa=pd=floor(4096/n), pb=pc=0, n=clamp(ramTick-7039, 1, 31)
+  ramTick = T-1; live RAM window 7040-7071 inclusive; sprite gone by 7072
+gfx: src/assets/gen/battle-anim-item-heal.json's `ring` key (already
+  extracted, byte-exact per §8a) - no new asset needed
+primitive: drawSpriteSheetAffineRotate verbatim (already double-size-
+  aware) - no new rendering code needed, only a new call site + this
+  table's formula (the same shape as `onixSitrusRotateMatrix`)
+```
+
+The fix becomes mechanical: a `turn5SitrusRingMatrix(t)`-shaped table
+function (RAM tick = `t-1`, `null` outside `[7040,7071]`) plus a new
+`drawSpriteSheetAffineRotate` call site at the fixed center above, wired
+into `drawTurn5RockSlideAttack` alongside the existing tint. The one real
+follow-up needed before a 0-diff trace is achievable: resolve the ring-vs-
+drop-shadow z-order at render rows 112-114 (a `priority` comparison, not a
+placement question) - everything else in the formula above is oracle-
+exact at the two cleanest sample ticks with zero residual.
+
+### Committed artifacts
+
+`tools/probe/dump-sitrus-ring-sprite.py`,
+`tools/probe/specs/turn5-sitrus-ring.json`,
+`src/data/gen/turn5-sitrus-ring-probe.json` (56 ticks, twice-run byte-
+identical). No `src/engine/` changes - `npm test`/`npm run build` unaffected
+by this probe, both still green.

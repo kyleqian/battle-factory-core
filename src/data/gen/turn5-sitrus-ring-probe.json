@@ -1,0 +1,1093 @@
+{
+"templatePtrExpected": 140064796,
+"ticks": [
+{
+"tick": 7030,
+"ringSprites": []
+},
+{
+"tick": 7031,
+"ringSprites": []
+},
+{
+"tick": 7032,
+"ringSprites": []
+},
+{
+"tick": 7033,
+"ringSprites": []
+},
+{
+"tick": 7034,
+"ringSprites": []
+},
+{
+"tick": 7035,
+"ringSprites": []
+},
+{
+"tick": 7036,
+"ringSprites": []
+},
+{
+"tick": 7037,
+"ringSprites": []
+},
+{
+"tick": 7038,
+"ringSprites": []
+},
+{
+"tick": 7039,
+"ringSprites": []
+},
+{
+"tick": 7040,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 4096,
+"b": 0,
+"c": 0,
+"d": 4096
+}
+]
+},
+{
+"tick": 7041,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 2048,
+"b": 0,
+"c": 0,
+"d": 2048
+}
+]
+},
+{
+"tick": 7042,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 1365,
+"b": 0,
+"c": 0,
+"d": 1365
+}
+]
+},
+{
+"tick": 7043,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 1024,
+"b": 0,
+"c": 0,
+"d": 1024
+}
+]
+},
+{
+"tick": 7044,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 819,
+"b": 0,
+"c": 0,
+"d": 819
+}
+]
+},
+{
+"tick": 7045,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 682,
+"b": 0,
+"c": 0,
+"d": 682
+}
+]
+},
+{
+"tick": 7046,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 585,
+"b": 0,
+"c": 0,
+"d": 585
+}
+]
+},
+{
+"tick": 7047,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 512,
+"b": 0,
+"c": 0,
+"d": 512
+}
+]
+},
+{
+"tick": 7048,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 455,
+"b": 0,
+"c": 0,
+"d": 455
+}
+]
+},
+{
+"tick": 7049,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 409,
+"b": 0,
+"c": 0,
+"d": 409
+}
+]
+},
+{
+"tick": 7050,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 372,
+"b": 0,
+"c": 0,
+"d": 372
+}
+]
+},
+{
+"tick": 7051,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 341,
+"b": 0,
+"c": 0,
+"d": 341
+}
+]
+},
+{
+"tick": 7052,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 315,
+"b": 0,
+"c": 0,
+"d": 315
+}
+]
+},
+{
+"tick": 7053,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 292,
+"b": 0,
+"c": 0,
+"d": 292
+}
+]
+},
+{
+"tick": 7054,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 273,
+"b": 0,
+"c": 0,
+"d": 273
+}
+]
+},
+{
+"tick": 7055,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 256,
+"b": 0,
+"c": 0,
+"d": 256
+}
+]
+},
+{
+"tick": 7056,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 240,
+"b": 0,
+"c": 0,
+"d": 240
+}
+]
+},
+{
+"tick": 7057,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 227,
+"b": 0,
+"c": 0,
+"d": 227
+}
+]
+},
+{
+"tick": 7058,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 215,
+"b": 0,
+"c": 0,
+"d": 215
+}
+]
+},
+{
+"tick": 7059,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 204,
+"b": 0,
+"c": 0,
+"d": 204
+}
+]
+},
+{
+"tick": 7060,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 195,
+"b": 0,
+"c": 0,
+"d": 195
+}
+]
+},
+{
+"tick": 7061,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 186,
+"b": 0,
+"c": 0,
+"d": 186
+}
+]
+},
+{
+"tick": 7062,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 178,
+"b": 0,
+"c": 0,
+"d": 178
+}
+]
+},
+{
+"tick": 7063,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 170,
+"b": 0,
+"c": 0,
+"d": 170
+}
+]
+},
+{
+"tick": 7064,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 163,
+"b": 0,
+"c": 0,
+"d": 163
+}
+]
+},
+{
+"tick": 7065,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 157,
+"b": 0,
+"c": 0,
+"d": 157
+}
+]
+},
+{
+"tick": 7066,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 151,
+"b": 0,
+"c": 0,
+"d": 151
+}
+]
+},
+{
+"tick": 7067,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 146,
+"b": 0,
+"c": 0,
+"d": 146
+}
+]
+},
+{
+"tick": 7068,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 141,
+"b": 0,
+"c": 0,
+"d": 141
+}
+]
+},
+{
+"tick": 7069,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 136,
+"b": 0,
+"c": 0,
+"d": 136
+}
+]
+},
+{
+"tick": 7070,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 0,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 132,
+"b": 0,
+"c": 0,
+"d": 132
+}
+]
+},
+{
+"tick": 7071,
+"ringSprites": [
+{
+"slot": 4,
+"template": 140064796,
+"inUse": 1,
+"invisible": 0,
+"affineMode": 3,
+"objMode": 0,
+"shape": 0,
+"size": 3,
+"matrixNum": 2,
+"priority": 2,
+"paletteNum": 7,
+"hFlip": 0,
+"affineAnimBeginning": 0,
+"affineAnimEnded": 1,
+"animNum": 0,
+"animCmdIndex": 0,
+"x": 72,
+"y": 88,
+"x2": 0,
+"y2": 0,
+"a": 132,
+"b": 0,
+"c": 0,
+"d": 132
+}
+]
+},
+{
+"tick": 7072,
+"ringSprites": []
+},
+{
+"tick": 7073,
+"ringSprites": []
+},
+{
+"tick": 7074,
+"ringSprites": []
+},
+{
+"tick": 7075,
+"ringSprites": []
+},
+{
+"tick": 7076,
+"ringSprites": []
+},
+{
+"tick": 7077,
+"ringSprites": []
+},
+{
+"tick": 7078,
+"ringSprites": []
+},
+{
+"tick": 7079,
+"ringSprites": []
+},
+{
+"tick": 7080,
+"ringSprites": []
+},
+{
+"tick": 7081,
+"ringSprites": []
+},
+{
+"tick": 7082,
+"ringSprites": []
+},
+{
+"tick": 7083,
+"ringSprites": []
+},
+{
+"tick": 7084,
+"ringSprites": []
+},
+{
+"tick": 7085,
+"ringSprites": []
+}
+]
+}
