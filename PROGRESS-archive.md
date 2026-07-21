@@ -1,3 +1,55 @@
+## 190 — Bounded worker (S7 slice M-2): Onix "idle bob" ROOT-CAUSED and NAMED — it's the Sitrus proc's own opening animation stage (`General_HeldItemEffect`, a genuine GBA affine-OAM rotation), starting at tick 6869 not ~7042; render fix attempted and REVERTED (regresses the protected healthbox trace on a small-angle rounding gap) — NOT landed, no new committed traces
+
+- **State:** `npm test` 793/793 (unchanged), `npm run build` green, tree
+  clean. No `src/` changes committed (one attempted engine change was
+  tried, found to regress `turn5-healthbox.json`, and reverted per this
+  run's own no-red-trace discipline). Regression check clean:
+  `turn5-healthbox.json` 55/55, `turn5-switchin.json` 241/241,
+  `turn5-sentout.json` 141/141, `turn5-rockslide.json` 256/256, all still
+  0 diff/unchanged.
+- **Did:** ladder rung (a) ("NAME the bob mechanism") fully closed, source-
+  cited AND RAM-verified 100%. §11's "idle bob" isn't idle - it's the
+  OPENING stage of the Sitrus Berry proc's own battle animation
+  (`General_HeldItemEffect`, `B_ANIM_HELD_ITEM_EFFECT`), launched at RAM
+  tick 6869 via `TryHandleLaunchBattleTableAnimation`
+  (`battle_gfx_sfx_util.c`) - ~170 ticks before the sparkle/tint every
+  prior session assumed was the proc's start. Its first 3 steps
+  (`AnimTask_RotateMonToSideAndRestore` x3) are a genuine GBA affine-OAM
+  ROTATION of Onix's sprite, not a y-only bounce: `y2 = |gOamMatrices[
+  matrixNum].c| >> 3` is a BYPRODUCT of the rotation matrix
+  (`SetBattlerSpriteYOffsetFromRotation`, `battle_anim_mons.c`), RAM-
+  verified exact at every probed tick (matrix `(a,b,c,d)` cross-read
+  directly against `y2`, 100% match). This is exactly why the prior
+  session's "apply y2 as a signed pixel offset" attempt failed BOTH
+  directions - a rotation shears every row horizontally too; §11's own
+  hypotheses (a)/(b)/(c) are superseded, not confirmed. 3 back-to-back
+  32-tick rotation cycles (identity at RAM ticks 6872/6904/6936/6968),
+  then a genuinely new, still-unitemized `GrantingStarsEffect` stage
+  (~6968-~7040) BEFORE the tint/ring/message stage §11 already scoped -
+  the "flat window" framing is gone entirely; the whole 6869-7222+ span is
+  actively animating. Attempted to wire the fix in (reusing the engine's
+  existing, already-proven `drawSpriteSheetAffineRotate` primitive built
+  for the thrown ball's own spin - no new renderer needed, just a 32-entry
+  RAM-read table) - but it regresses the PROTECTED `turn5-healthbox.json`
+  (ticks 6873/6874 go from 0 diff to 600px), a genuine small-angle
+  sub-pixel rounding gap in the existing sampler (ruled out a simple
+  pb/pc axis swap as the cause). Reverted rather than ship red.
+- **Next:** audit `drawSpriteSheetAffineRotate`'s nearest-neighbor
+  rounding at SMALL rotation magnitudes specifically (bisect against the
+  oracle at a fixed large-in-cycle tick like 6887 first, `a=251,b=49,
+  c=-49,d=251`), then reuse the table/call-site banked in
+  `faint-switch-notes.md` §12 verbatim - no need to re-derive the
+  mechanism. After that: `GrantingStarsEffect` gfx/timing (unitemized),
+  then §11's own tint/sparkle/ring/message/HP-climb/settled-menu chain.
+- **Notes:** no papercuts. Docs: `faint-switch-notes.md` §12 added (full
+  mechanism, RAM proof, the reverted attempt's exact diagnostic data, and
+  the corrected 3-stage timeline); small dev-tool addition (`isActive`
+  field in `tools/probe/dump-task-and-sprite-callbacks.py`, not `src/`);
+  archived #187 to keep the ledger to 3 entries.
+
+---
+
+---
 ## 189 — Worktree scout (supervisor-folded): turn 7 ground truth BANKED + two REAL corrections to the turn-6 dossier — `battle1-turn7-dense.json` (9380 frames, 256/256 captures, twice-run identical, verbatim winline extension) + `docs/turn7-notes.md`; **turn 7 brings NO new mechanism** (repeats turn 6's FEATHER_DANCE/ROCK_SLIDE pair); merged `af7a3e3`, suite 793/793 on the merged tree
 
 - **State:** merged into master, `npm test` 793/793 + build green

@@ -4,6 +4,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 193 — Worktree scout (supervisor-folded): turn 9 ground truth BANKED — the pinned ATK-floor test came back NEGATIVE (Pidgeotto uses QUICK_ATTACK, not a 4th FD; "won't go lower" variant still untested) and **both published lines reconverge RNG-exactly at turn 9** (BIND-miss and ROCK_SLIDE-miss consume identical Random() counts → same gRngValue); `battle1-turn9-dense.json` (12272 frames, 256/256 captures) + `docs/turn9-notes.md`; merged `782eaab`, suite 801/801 on the merged tree
+
+- **State:** merged into master, `npm test` 801/801 + build green
+  post-merge (docs+trace+probe-spec only). Supervisor re-verified: prefix
+  chain (turn8-dense ⊂ turn9-dense ⊂ winline-b-swap, script-exact), cited
+  shas reproduced fresh, submenu label frames read as images. **One row
+  corrected in the fold** (supervisor pixel-diff evidence, two fresh
+  oracle runs byte-identical): the "no visible change during the press"
+  claim at 10869-10877 hid a real 5-tick healthbox-region transient
+  (bea3024eb2f3, bbox x:127-229 y:74-110, bounce-family) — turn9-notes §5
+  row now carries both shas. Verification lesson holds: representative-
+  tick sha citations can mask un-itemized sub-phases; diff the WHOLE
+  cited span when a row claims "no change".
+- **Did:** turn 9 = QUICK_ATTACK (Pidgeotto, 82→61... Onix 31→24) vs
+  ROCK_SLIDE (hit, Pidgeotto 82→61); first turn in the arc where both
+  sides land damage — first "not very effective" (0.5×) message
+  PNG-confirmed, first healthbar color-zone transitions pixel-sampled
+  (Pidgeotto green→yellow at 50%, Onix yellow→red). Cursor persistence
+  reconfirmed in RAM across the closed action menu (gMoveSelectionCursor
+  holds BIND before reopen; LEFT flips it inside the press window). The
+  turn-2 "unattributed RNG step" recurs (+14 ticks before next accuracy
+  roll) specifically when both combatants use damaging moves — still
+  unattributed to a call site. The 4-frame shared box-open prefix theory
+  refined: holds box-region-only, within matched transition categories.
+- **Next:** M-4 (Sitrus rungs c-e: GrantingStars 6970→~7040, tint/
+  sparkle/ring/message/HP-climb, settled menu ≥7307); then turn-6/7/8/9
+  engine slices against the four dossiers.
+- **Notes:** scout stayed in contract; no papercuts.
+
+---
 ## 192 — Bounded worker (S7 slice M-3): Sitrus rotation window LANDED — the "small-angle rounding gap" §12 flagged was actually a +2 (not +1) render-tick lag miswiring, NOT a sampler bug; `drawSpriteSheetAffineRotate` needed zero changes; `turn5-sitrus-a.json` 110/110, 0 diff; rungs (c)-(e) not attempted (out of time)
 
 - **State:** `npm test` **801/801** (+8), `npm run build` green, tree
@@ -83,54 +113,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** scout stayed in contract; no papercuts.
 
 ---
-## 190 — Bounded worker (S7 slice M-2): Onix "idle bob" ROOT-CAUSED and NAMED — it's the Sitrus proc's own opening animation stage (`General_HeldItemEffect`, a genuine GBA affine-OAM rotation), starting at tick 6869 not ~7042; render fix attempted and REVERTED (regresses the protected healthbox trace on a small-angle rounding gap) — NOT landed, no new committed traces
-
-- **State:** `npm test` 793/793 (unchanged), `npm run build` green, tree
-  clean. No `src/` changes committed (one attempted engine change was
-  tried, found to regress `turn5-healthbox.json`, and reverted per this
-  run's own no-red-trace discipline). Regression check clean:
-  `turn5-healthbox.json` 55/55, `turn5-switchin.json` 241/241,
-  `turn5-sentout.json` 141/141, `turn5-rockslide.json` 256/256, all still
-  0 diff/unchanged.
-- **Did:** ladder rung (a) ("NAME the bob mechanism") fully closed, source-
-  cited AND RAM-verified 100%. §11's "idle bob" isn't idle - it's the
-  OPENING stage of the Sitrus Berry proc's own battle animation
-  (`General_HeldItemEffect`, `B_ANIM_HELD_ITEM_EFFECT`), launched at RAM
-  tick 6869 via `TryHandleLaunchBattleTableAnimation`
-  (`battle_gfx_sfx_util.c`) - ~170 ticks before the sparkle/tint every
-  prior session assumed was the proc's start. Its first 3 steps
-  (`AnimTask_RotateMonToSideAndRestore` x3) are a genuine GBA affine-OAM
-  ROTATION of Onix's sprite, not a y-only bounce: `y2 = |gOamMatrices[
-  matrixNum].c| >> 3` is a BYPRODUCT of the rotation matrix
-  (`SetBattlerSpriteYOffsetFromRotation`, `battle_anim_mons.c`), RAM-
-  verified exact at every probed tick (matrix `(a,b,c,d)` cross-read
-  directly against `y2`, 100% match). This is exactly why the prior
-  session's "apply y2 as a signed pixel offset" attempt failed BOTH
-  directions - a rotation shears every row horizontally too; §11's own
-  hypotheses (a)/(b)/(c) are superseded, not confirmed. 3 back-to-back
-  32-tick rotation cycles (identity at RAM ticks 6872/6904/6936/6968),
-  then a genuinely new, still-unitemized `GrantingStarsEffect` stage
-  (~6968-~7040) BEFORE the tint/ring/message stage §11 already scoped -
-  the "flat window" framing is gone entirely; the whole 6869-7222+ span is
-  actively animating. Attempted to wire the fix in (reusing the engine's
-  existing, already-proven `drawSpriteSheetAffineRotate` primitive built
-  for the thrown ball's own spin - no new renderer needed, just a 32-entry
-  RAM-read table) - but it regresses the PROTECTED `turn5-healthbox.json`
-  (ticks 6873/6874 go from 0 diff to 600px), a genuine small-angle
-  sub-pixel rounding gap in the existing sampler (ruled out a simple
-  pb/pc axis swap as the cause). Reverted rather than ship red.
-- **Next:** audit `drawSpriteSheetAffineRotate`'s nearest-neighbor
-  rounding at SMALL rotation magnitudes specifically (bisect against the
-  oracle at a fixed large-in-cycle tick like 6887 first, `a=251,b=49,
-  c=-49,d=251`), then reuse the table/call-site banked in
-  `faint-switch-notes.md` §12 verbatim - no need to re-derive the
-  mechanism. After that: `GrantingStarsEffect` gfx/timing (unitemized),
-  then §11's own tint/sparkle/ring/message/HP-climb/settled-menu chain.
-- **Notes:** no papercuts. Docs: `faint-switch-notes.md` §12 added (full
-  mechanism, RAM proof, the reverted attempt's exact diagnostic data, and
-  the corrected 3-stage timeline); small dev-tool addition (`isActive`
-  field in `tools/probe/dump-task-and-sprite-callbacks.py`, not `src/`);
-  archived #187 to keep the ledger to 3 entries.
-
----
-
