@@ -2079,23 +2079,30 @@ describe("S7 slice R rung (c4): turn9Ep2HealthboxWobbleY2 - the 20-tick healthbo
   });
 });
 
-describe("S7 slice R rung (c4): turn9Ep2OnixInvisible - the SEPARATE 3-block Onix visibility flicker (RAM 10958-10977, render=RAM+1), own timing vs. the healthbox wobble above - do NOT couple them (docs/turn9-shake-notes.md §2)", () => {
+describe("S7 slice R rung (c4): turn9Ep2OnixInvisible - the FOUR-block Onix visibility flicker (RAM 10958-10989, render=RAM+1), own timing vs. the healthbox wobble above - do NOT couple them (docs/turn9-shake-notes.md §2 + the 2026-07-21 (third session) addendum's block-4 correction)", () => {
   const pressTick = 10871;
   it("is false before the window (render 10958)", () => {
     expect(turn9Ep2OnixInvisible(10958, pressTick)).toBe(false);
   });
-  it("is true for each 4-tick on block (10959-10962, 10967-10970, 10975-10978)", () => {
-    for (const t of [10959, 10960, 10961, 10962, 10967, 10968, 10969, 10970, 10975, 10976, 10977, 10978]) {
+  it("is true for each 4-tick on block (10959-10962, 10967-10970, 10975-10978, 10983-10986)", () => {
+    for (const t of [
+      10959, 10960, 10961, 10962,
+      10967, 10968, 10969, 10970,
+      10975, 10976, 10977, 10978,
+      10983, 10984, 10985, 10986,
+    ]) {
       expect(turn9Ep2OnixInvisible(t, pressTick)).toBe(true);
     }
   });
-  it("is false for each 4-tick off gap (10963-10966, 10971-10974)", () => {
-    for (const t of [10963, 10964, 10965, 10966, 10971, 10972, 10973, 10974]) {
+  it("is false for each 4-tick off gap (10963-10966, 10971-10974, 10979-10982)", () => {
+    for (const t of [10963, 10964, 10965, 10966, 10971, 10972, 10973, 10974, 10979, 10980, 10981, 10982]) {
       expect(turn9Ep2OnixInvisible(t, pressTick)).toBe(false);
     }
   });
-  it("is false again from render 10979 on", () => {
-    expect(turn9Ep2OnixInvisible(10979, pressTick)).toBe(false);
+  it("is false again from render 10987 through the task's own force-visible tick (render 10990) and beyond", () => {
+    for (const t of [10987, 10988, 10989, 10990, 10991, 11000]) {
+      expect(turn9Ep2OnixInvisible(t, pressTick)).toBe(false);
+    }
   });
 });
 

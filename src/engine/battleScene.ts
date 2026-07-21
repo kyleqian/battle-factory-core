@@ -7777,19 +7777,23 @@ export function turn9Ep2HealthboxWobbleY2(t: number, pressTick: number): number 
 }
 
 /**
- * S7 slice R rung (c4) (docs/turn9-shake-notes.md §2): episode 2's Onix
- * visibility flicker - a SEPARATE mechanism from the healthbox wobble above
- * (own timing, own 20-tick span one RAM tick later: RAM 10958-10977), three
- * 4-tick **on** (invisible) blocks separated by 4-tick **off** gaps -
- * `floor(n/8)`... expressed here the same `n % PERIOD < ON` shape
- * `endeavorOnixInvisible` already uses, just capped at 20 ticks instead of a
- * full `PERIOD*CYCLES` multiple (RAM-confirmed: `x2`/`y2` stay flat 0 for
- * Onix's own sprite this whole episode - this is a pure visibility gate, not
- * a position shake).
+ * S7 slice R rung (c4) (docs/turn9-shake-notes.md §2, extended by the
+ * 2026-07-21 (third session) addendum): episode 2's Onix visibility
+ * flicker - a SEPARATE mechanism from the healthbox wobble above (own
+ * timing, one RAM tick later: RAM 10958 onward), FOUR 4-tick **on**
+ * (invisible) blocks separated by 4-tick **off** gaps - `DoHitAnimBlink
+ * SpriteEffect` runs 32 ticks of its own counter total (RAM 10958-10989),
+ * not the 3-block/20-tick span the first probe session sampled (it stopped
+ * at RAM 10977 and missed block 4, RAM 10982-10985; the task then forces
+ * `invisible=false` for good at RAM 10989, which this formula's own cutoff
+ * already yields since 10989 falls in an off-phase) - expressed here the
+ * same `n % PERIOD < ON` shape `endeavorOnixInvisible` already uses
+ * (RAM-confirmed: `x2`/`y2` stay flat 0 for Onix's own sprite this whole
+ * episode - this is a pure visibility gate, not a position shake).
  */
 const TURN9_EP2_FLICKER_RENDER_LAG = 1;
 const TURN9_EP2_FLICKER_START = 87; // RAM 10958 - pressTick(10871)
-const TURN9_EP2_FLICKER_TOTAL_TICKS = 20; // RAM 10958-10977 inclusive
+const TURN9_EP2_FLICKER_TOTAL_TICKS = 32; // RAM 10958-10989 inclusive (4 blocks of 4-on/4-off)
 const TURN9_EP2_FLICKER_PERIOD = 8;
 const TURN9_EP2_FLICKER_ON_TICKS = 4;
 export function turn9Ep2OnixInvisible(t: number, pressTick: number): boolean {
