@@ -8096,11 +8096,16 @@ export const TURN10_REGIME5_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (
 /**
  * `drawTurn6FieldBase` wrapper for turn 10: converts `bounceTick` from
  * regime-5 space via `TURN10_REGIME5_TO_REGIME1_SHIFT`, then repaints both
- * mons' own real turn-10-opening HP (Onix 24, Pidgeotto 61 - unchanged
- * until this turn's own AERIAL_ACE/ROCK_SLIDE hits land, rungs (b)/(c)).
+ * mons' own real turn-10-opening HP (Onix 24 by default, Pidgeotto 61 -
+ * unchanged until this turn's own AERIAL_ACE/ROCK_SLIDE hits land). `onixHp`
+ * (default `TURN9_ONIX_AFTER_QUICKATTACK_HP`, every pre-existing caller
+ * unaffected) lets rung (b)'s own AERIAL_ACE-drain window pass Onix's live
+ * draining HP - the same "generalize a hardcoded value into a defaulted
+ * param" idiom `drawTurn7FieldBase`'s own Pidgeotto-HP override already
+ * established.
  */
-function drawTurn10FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixY2Extra: number = 0, darken: boolean = false): void {
-  drawTurn6FieldBase(fb, t, bounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT, beforeMonSprite, TURN9_ONIX_AFTER_QUICKATTACK_HP, 0, false, undefined, onixY2Extra, darken);
+function drawTurn10FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN9_ONIX_AFTER_QUICKATTACK_HP, onixY2Extra: number = 0, darken: boolean = false): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken);
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
@@ -8133,6 +8138,41 @@ export function turn10AerialAceTextVisibleChars(t: number, pressTick: number): n
   const start = turn10AerialAceTextStartTick(pressTick);
   if (t < start) return 0;
   return Math.min(TURN10_AERIALACE_TEXT_TOTAL, t - start + 1);
+}
+
+/**
+ * S7 slice R rung (a) (docs/turn10-notes.md's 2026-07-21 addendum §2): Onix's
+ * own AERIAL_ACE drain (24->14), same shape as `turn9OnixHp`/`endeavorOnixHp`
+ * (1 HP unit/tick, clamped, render tick == RAM tick directly) but its own
+ * named delay - RAM sentinel `-32768` @ 12441, `pressTick`(12305)+136.
+ */
+const TURN10_AERIALACE_HP_DRAIN_START_DELAY = 136;
+/** Onix's own HP after turn 10's AERIAL_ACE hit (docs/turn10-notes.md addendum §2: 24->14, -10). */
+const TURN10_ONIX_AFTER_AERIALACE_HP = 14;
+export function turn10AerialAceOnixHp(t: number, pressTick: number, startHp: number, endHp: number): number {
+  const d = t - (pressTick + TURN10_AERIALACE_HP_DRAIN_START_DELAY);
+  return Math.max(endHp, startHp - Math.max(d, 0));
+}
+
+/**
+ * S7 slice R rung (a): `sText_NotVeryEffective` ("It's not very
+ * effective…", reusing `TURN9_NOTVERYEFFECTIVE_LINE` verbatim - the same
+ * message ID, single line, turn9's own transcription already corrected).
+ * Start tick fresh-oracle-bisected this session (scratch probe against a
+ * live `turn10-aerialace.json` capture, 0/24 mismatches at every sampled
+ * tick 12457-12561 via the same `drawText`+charmap reconstruction
+ * `verify-turn10-rockslide.ts`'s own ROCK_SLIDE-text check uses) - NOT
+ * assumed transferable from turn 9's own `+134` value, per the "each turn
+ * gets its own literal constant" convention.
+ */
+const TURN10_NOTVERYEFFECTIVE_TEXT_DELAY = 152; // render 12457 - pressTick(12305)
+export function turn10NotVeryEffectiveTextStartTick(pressTick: number): number {
+  return pressTick + TURN10_NOTVERYEFFECTIVE_TEXT_DELAY;
+}
+export function turn10NotVeryEffectiveTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn10NotVeryEffectiveTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN9_NOTVERYEFFECTIVE_LINE.length, t - start + 1);
 }
 
 // --- S7 slice R rung (b): AERIAL_ACE's own animation, all 5 mechanisms
@@ -8335,29 +8375,178 @@ function drawTurn10AerialAceSlice(fb: Uint8Array, t: number, pressTick: number):
 }
 
 /**
+ * S7 slice R rung (a) (docs/turn10-notes.md's 2026-07-21 addendum): a
+ * SYNTHETIC press anchor for Onix's own ROCK_SLIDE half of this turn, same
+ * reasoning as `TURN9_ROCKSLIDE_PRESS_TICK` - fit to satisfy EVERY one of
+ * `battleMenu.ts`'s already-shipped `rockSlide*` delay constants
+ * simultaneously (addendum §1's own table: `ROCK_SLIDE_TEXT_DELAY`(393)->
+ * 12562, `ROCK_SLIDE_RAM_ANCHOR_DELAY`(428)->12597, `ROCK_SLIDE_MON_SHAKE_
+ * START/END_DELAY`(443/536)->12612/12705, `HIT_FLASH_RAM_ANCHOR_DELAY`(562)->
+ * 12731, `ROCK_SLIDE_HP_DRAIN_START_DELAY`(597)->12766 - all five land
+ * exactly, 0 mismatches against fresh RAM/pixel captures).
+ */
+export const TURN10_ROCKSLIDE_PRESS_TICK = 12169;
+
+/** Pidgeotto's own HP after turn 10's ROCK_SLIDE (docs/turn10-notes.md addendum §2: 61->38, -23). */
+const TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP = 38;
+
+/**
+ * S7 slice R rung (a): turn 10's own ROCK_SLIDE (Onix vs. Pidgeotto) - every
+ * mechanism reused with ZERO changes from turns 6/7/9's own instances
+ * (`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
+ * `rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
+ * `rockSlideOpponentHp`, all still `pressTick`-relative) - only
+ * `TURN10_ROCKSLIDE_PRESS_TICK` and Pidgeotto's own HP (61->38) are new. Onix
+ * (the attacker) is already at its final post-AERIAL_ACE HP (14) and doesn't
+ * move - same frozen idle-bounce anchor the AERIAL_ACE window already holds
+ * (`turn10KickoffBounceTick`, exactly `drawTurn9RockSlideAttack`'s own shape).
+ */
+function drawTurn10RockSlideAttack(fb: Uint8Array, t: number): void {
+  const pressTick = TURN10_ROCKSLIDE_PRESS_TICK;
+  const shiftY = rockSlideBg3Y(t, pressTick);
+  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
+  drawTurn5IconBar(fb, t);
+  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  }
+  const frozenBounceTick = turn10KickoffBounceTick(t, TURN10_ROCKSLIDE_PRESS_TICK);
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenBounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
+  drawSendOutHealthbox(fb, 0, opponentContent);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
+  for (const i of rockSlideDrawOrder(t, pressTick)) {
+    const rock = rockSlideRockState(i, t, pressTick);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+  drawMenuHealthboxPlayer(fb, 0, 0);
+  drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, 0);
+}
+
+/**
+ * S7 slice R rung (a): "It's super effective!" (ROCK vs. FLYING, 2x) -
+ * fresh-oracle-bisected this session (scratch probe, `drawText`+charmap
+ * reconstruction, 0/21 mismatches at every sampled tick 12795-12830) -
+ * reuses `TURN6_SUPER_EFFECTIVE_LINE` verbatim (same message ID every prior
+ * turn's own super-effective hit already uses).
+ */
+const TURN10_SUPER_EFFECTIVE_TEXT_DELAY = 626; // render 12795 - pressTick(12169)
+export function turn10SuperEffectiveTextStartTick(pressTick: number): number {
+  return pressTick + TURN10_SUPER_EFFECTIVE_TEXT_DELAY;
+}
+export function turn10SuperEffectiveTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn10SuperEffectiveTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
+}
+
+/**
+ * S7 slice R rung (a): turn-end - the held "It's super effective!" text goes
+ * blank (box stays, no text) at `pressTick`+723 (render 12892, sha
+ * `25874032e009`, fresh-oracle-confirmed), then hard-cuts to the resettled
+ * action menu at `pressTick`+730 (render 12899, sha `e28bc5375a15`) - the
+ * SAME 7-tick clear-to-redraw gap `TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY`->
+ * `TURN6_ROCKSLIDE_MENU_REDRAW_DELAY` (743->750) and `TURN7_ROCKSLIDE_*`
+ * (731->738) both already establish, freshly fit this turn rather than
+ * assumed transferable.
+ */
+const TURN10_ROCKSLIDE_TEXT_CLEAR_DELAY = 723;
+const TURN10_ROCKSLIDE_MENU_REDRAW_DELAY = 730;
+
+/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn6RockSlideResettledBounceTick`, keyed off this turn's own `TURN10_ROCKSLIDE_MENU_REDRAW_DELAY`. */
+export function turn10RockSlideResettledBounceTick(t: number, pressTick: number): number {
+  return t - (pressTick + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
+}
+
+/**
+ * S7 slice R rung (a): turn 10's own settled action menu once ROCK_SLIDE's
+ * own turn fully resolves (the "turn-11 menu" boundary, docs/turn10-notes.md
+ * addendum §4 - the STANDARD idle-bounce family every other resting action
+ * menu in this arc already has, NOT flat, correcting the dossier's own
+ * originally-cited "sha-flat" final row).
+ */
+function drawTurn10RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number): void {
+  const bounceTick = turn10RockSlideResettledBounceTick(t, TURN10_ROCKSLIDE_PRESS_TICK);
+  const bounce = menuIdleBounce(bounceTick);
+  drawStaticBgShiftedY(fb, 0, 0);
+  drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, bounce.healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+/**
+ * S7 slice R rung (a): turn 10's own ROCK_SLIDE window dispatcher - same
+ * three-phase shape as `drawTurn6RockSlideWindow`/`drawTurn7RockSlideWindow`
+ * (attack animation + held kickoff text, "It's super effective!" swap-in,
+ * text-clear, hard-cut to the resettled menu).
+ */
+function drawTurn10RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN10_ROCKSLIDE_PRESS_TICK;
+  const redrawTick = pressTick + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurn10RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const textClearTick = pressTick + TURN10_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  drawTurn10RockSlideAttack(fb, t);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t < textClearTick) {
+    const superEffectiveStart = turn10SuperEffectiveTextStartTick(pressTick);
+    if (t >= superEffectiveStart) {
+      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn10SuperEffectiveTextVisibleChars(t, pressTick));
+    } else {
+      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    }
+  }
+}
+
+/**
  * S7 slice R rung (b): the top-level AERIAL_ACE animation dispatcher - all
- * five mechanisms layered onto turn 10's own field base, then the message
- * box (still showing the settled "Foe PIDGEOTTO used\nAERIAL ACE!" kickoff
- * text, unchanged throughout this whole window - no new mechanism needed).
- * A no-op past `drawTurn10FieldBase` for any tick before every mechanism's
- * own window opens (all five return null/0 there), so this function is safe
- * to reach as soon as the kickoff text settles - it doesn't regress
- * `turn10-menu.json`'s own already-proven 0-diff window.
+ * five mechanisms layered onto turn 10's own field base (Onix's own live
+ * draining HP threaded through), then the message box - either the held
+ * "Foe PIDGEOTTO used\nAERIAL ACE!" kickoff text, or (rung (a)) "It's not
+ * very effective…" once Onix's own drain settles. Once ROCK_SLIDE's own
+ * kickoff text starts (`TURN10_ROCKSLIDE_PRESS_TICK`, a wholly independent
+ * synthetic anchor from this window's own live `pressTick`), hands off to
+ * `drawTurn10RockSlideWindow` - the same "handoff at the next move's own
+ * kickoff-text start" shape `drawTurn9QuickAttackWindow`'s own `rockSlideTextStartTick`
+ * check already establishes. A no-op past `drawTurn10FieldBase` for any tick
+ * before every mechanism's own window opens (all five return null/0 there),
+ * so this function is safe to reach as soon as the kickoff text settles - it
+ * doesn't regress `turn10-menu.json`'s own already-proven 0-diff window.
  */
 function drawTurn10AerialAceWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= rockSlideTextStartTick(TURN10_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn10RockSlideWindow(fb, t);
+    return;
+  }
   const bounceTick = turn10KickoffBounceTick(t, pressTick);
   const onixY2 = turn10AerialAceOnixShakeY2(t, pressTick);
+  const onixHp = turn10AerialAceOnixHp(t, pressTick, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN10_ONIX_AFTER_AERIALACE_HP);
   // Mechanism 4's own COEFFICIENT state machine (turn10AerialAcePaletteDarkenCoeff)
   // is RAM-pinned and Tier-1-tested, but the RENDER application (darkening
   // BG palette bank 1 + both battlers' OBJ palettes) does NOT yet reach
   // 0-diff (~48% of the frame still mismatches at the plateau, docs/
   // battle-turn-notes.md §42) - not wired here, named gap, per the "revert
   // partial render code, keep the pure table" rule.
-  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixY2, false);
+  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixHp, onixY2, false);
   drawTurn10AerialAceLungeAndClones(fb, t, pressTick, false);
   drawTurn10AerialAceSlice(fb, t, pressTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
+  const notVeryEffectiveStart = turn10NotVeryEffectiveTextStartTick(pressTick);
+  if (t >= notVeryEffectiveStart) {
+    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn10NotVeryEffectiveTextVisibleChars(t, pressTick));
+  } else {
+    drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
+  }
 }
 
 /**

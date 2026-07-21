@@ -71,6 +71,13 @@ import {
   turn10AerialAceOnixShakeY2,
   turn10AerialAcePaletteDarkenCoeff,
   turn10AerialAceSliceState,
+  turn10AerialAceOnixHp,
+  turn10NotVeryEffectiveTextStartTick,
+  turn10NotVeryEffectiveTextVisibleChars,
+  TURN10_ROCKSLIDE_PRESS_TICK,
+  turn10SuperEffectiveTextStartTick,
+  turn10SuperEffectiveTextVisibleChars,
+  turn10RockSlideResettledBounceTick,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
@@ -2247,5 +2254,72 @@ describe("S7 slice R rung (b): turn10AerialAceSliceState - the cutting-slice spr
     expect(turn10AerialAceSliceState(12380, pressTick)).toEqual({ x2: -63, y2: 62, frame: 3 });
     expect(turn10AerialAceSliceState(12384, pressTick)).toEqual({ x2: -63, y2: 62, frame: 3 });
     expect(turn10AerialAceSliceState(12385, pressTick)).toBeNull();
+  });
+});
+
+describe("S7 slice R rung (a): turn10AerialAceOnixHp - Onix's own AERIAL_ACE drain (24->14), same no-extra-lag family as turn9OnixHp (docs/turn10-notes.md 2026-07-21 addendum §2)", () => {
+  const pressTick = 12305;
+  it("stays at startHp through the sentinel tick (12441 = pressTick+136)", () => {
+    expect(turn10AerialAceOnixHp(12430, pressTick, 24, 14)).toBe(24);
+    expect(turn10AerialAceOnixHp(12441, pressTick, 24, 14)).toBe(24);
+  });
+  it("decrements 1 HP/tick from 12442, clamping at endHp", () => {
+    expect(turn10AerialAceOnixHp(12442, pressTick, 24, 14)).toBe(23);
+    expect(turn10AerialAceOnixHp(12446, pressTick, 24, 14)).toBe(19);
+    expect(turn10AerialAceOnixHp(12451, pressTick, 24, 14)).toBe(14);
+    expect(turn10AerialAceOnixHp(12453, pressTick, 24, 14)).toBe(14);
+    expect(turn10AerialAceOnixHp(12500, pressTick, 24, 14)).toBe(14);
+  });
+});
+
+describe("S7 slice R rung (a): turn10NotVeryEffectiveTextStartTick/turn10NotVeryEffectiveTextVisibleChars - the SINGLE-line 'It's not very effective...' reveal, fresh-oracle-bisected this session (0/24 mismatches at every sampled tick 12457-12561, own delay from turn9's +134)", () => {
+  const pressTick = 12305;
+  it("starts at render 12457", () => {
+    expect(turn10NotVeryEffectiveTextStartTick(pressTick)).toBe(12457);
+  });
+  it("reveals 1 char/tick, fully typed (24/24) by 12480, held after", () => {
+    expect(turn10NotVeryEffectiveTextVisibleChars(12456, pressTick)).toBe(0);
+    expect(turn10NotVeryEffectiveTextVisibleChars(12457, pressTick)).toBe(1);
+    expect(turn10NotVeryEffectiveTextVisibleChars(12464, pressTick)).toBe(8);
+    expect(turn10NotVeryEffectiveTextVisibleChars(12480, pressTick)).toBe(24);
+    expect(turn10NotVeryEffectiveTextVisibleChars(12561, pressTick)).toBe(24);
+  });
+});
+
+describe("S7 slice R rung (a): TURN10_ROCKSLIDE_PRESS_TICK - the synthetic anchor chosen so EVERY shipped rockSlide* delay constant lands on this session's own fresh RAM/pixel ticks simultaneously (docs/turn10-notes.md addendum §1)", () => {
+  it("rockSlideTextStartTick lands on the fresh-oracle-pinned render 12562", () => {
+    expect(rockSlideTextStartTick(TURN10_ROCKSLIDE_PRESS_TICK)).toBe(12562);
+  });
+  it("rockSlideOpponentHp(pressTick, 61, 38) stays at 61 through the sentinel (12766) and settles at 38", () => {
+    expect(rockSlideOpponentHp(12766, TURN10_ROCKSLIDE_PRESS_TICK, 61, 38)).toBe(61);
+    expect(rockSlideOpponentHp(12789, TURN10_ROCKSLIDE_PRESS_TICK, 61, 38)).toBe(38);
+    expect(rockSlideOpponentHp(12793, TURN10_ROCKSLIDE_PRESS_TICK, 61, 38)).toBe(38);
+  });
+});
+
+describe("S7 slice R rung (a): turn10SuperEffectiveTextStartTick/turn10SuperEffectiveTextVisibleChars - 'It's super effective!', fresh-oracle-bisected this session (0/21 mismatches at every sampled tick 12795-12830), turn-specific delay per the standing 'each turn gets its own literal constant' convention", () => {
+  const pressTick = TURN10_ROCKSLIDE_PRESS_TICK;
+  it("starts at render 12795", () => {
+    expect(turn10SuperEffectiveTextStartTick(pressTick)).toBe(12795);
+  });
+  it("reveals 1 char/tick, fully typed (21/21) by 12815, held after", () => {
+    expect(turn10SuperEffectiveTextVisibleChars(12794, pressTick)).toBe(0);
+    expect(turn10SuperEffectiveTextVisibleChars(12795, pressTick)).toBe(1);
+    expect(turn10SuperEffectiveTextVisibleChars(12815, pressTick)).toBe(21);
+    expect(turn10SuperEffectiveTextVisibleChars(12830, pressTick)).toBe(21);
+  });
+});
+
+describe("S7 slice R rung (a): turn10RockSlideResettledBounceTick - the resettled turn-11 menu reuses menuIdleBounce verbatim, re-anchored so the redraw tick (12899) lines up with MENU_IDLE_BLANK_END_TICK+1 (1748), fresh-oracle-confirmed against the addendum's own resting/active tick citations", () => {
+  it("maps the redraw tick itself to phase 1748 (matches turn5SitrusResettledBounceTick's own precedent)", () => {
+    expect(turn10RockSlideResettledBounceTick(12899, TURN10_ROCKSLIDE_PRESS_TICK)).toBe(1748);
+  });
+  it("resting-phase ticks (12899, 12901, 13200, 13306) all produce the identical bounce state", () => {
+    const at = (t: number) => menuIdleBounce(turn10RockSlideResettledBounceTick(t, TURN10_ROCKSLIDE_PRESS_TICK));
+    const resting = at(12899);
+    expect(at(12901)).toEqual(resting);
+    expect(at(13200)).toEqual(resting);
+    expect(at(13306)).toEqual(resting);
+    expect(at(12900)).not.toEqual(resting);
   });
 });
