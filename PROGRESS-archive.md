@@ -1,3 +1,45 @@
+## 196 — Bounded worker (S7 slice M-5): rungs (d)+(e) LANDED — tint + heal message + HP climb + settled turn-6 menu; `turn5-sitrus-c.json` 150/150, `turn5-sitrus-d.json` 133/133, both 0 diff; ring excluded (bounded effort, 3rd resistance, precise ticks); **the faint/forced-switch sequence is COMPLETE**
+
+- **State:** `npm test` **813/813** (+8), `npm run build` green, tree
+  clean. New committed traces `turn5-sitrus-c.json` (150 captures,
+  7035-7215 excluding the ring's own 7042-7072) and `turn5-sitrus-d.json`
+  (133 captures, 7180-7312, covers past the 7307 acceptance boundary) —
+  both 0 diff. Regression sweep: `turn5-sitrus-a.json` 110/110,
+  `turn5-sitrus-b.json` 82/82, `turn5-healthbox.json` 55/55,
+  `turn5-switchin.json` 241/241 — zero regressions.
+- **Did:** Tint — RAM-probed fresh (`gPlttBufferFaded`/`Unfaded`, all 15
+  usable palette colors, Onix's own paletteNum=0 not Pidgeotto's 1),
+  brute-forced target+coeff jointly and got a UNIQUE fit: `RGB5(17,31,25)`,
+  coeff sequence 7/5/3/1/0 held 5 RAM ticks each — genuinely NOT
+  `MATERIALIZE_TINT_COLOR` reused (an initially-plausible hypothesis the
+  brute force ruled out). Heal message ("ONIX’s SITRUS BERRY"/"restored
+  health!", 7078→7112, held to 7215) PNG-diff-timed; found and fixed one
+  real bug (a straight ASCII apostrophe the charmap doesn't map — the
+  codebase's own convention is the curly `’`, per `STAT_ROSE_LINE1`). HP
+  climb: 1→31, exactly 1 unit/tick, render 7180→7209, PNG-crop-matched 0px
+  against `composePlayerHealthboxHpOverlay` at every candidate hp — this
+  **corrects §11's own hedge** ("HP digits/bar still climbing past 7306"):
+  they're not; hp is flat at 31 from 7209, every later change in that
+  region is the ordinary `menuIdleBounce` y-shift (yOffset 0/1/2, never a
+  different hp). Settled menu: chrome text cropped from `menuIdleBase`'s
+  own y≥112 (never changes across turns), bounce reuses `menuIdleBounce`
+  UNCHANGED re-anchored so tick 7222 (menu redraw) lines up with
+  `MENU_IDLE_BLANK_END_TICK+1` — grid-search found a unique shift with zero
+  mismatches across 17 samples. Tick 7307 byte-identical (full 64-hex sha)
+  to turn6-notes.md §5's own citation. Ring: excluded per the brief's own
+  allowance — with tint correct, the residual in 7042-7072 is provably
+  100% the ring (diff overlay shows a clean red ring outline, growing
+  6px→628px matching its own expand-then-fade shape) — third documented
+  resistance, still open. +8 Tier-1 tests.
+- **Next:** the turn-6 engine slice proper (FIGHT submenu open at 7317+)
+  against `turn6-notes.md`'s dossier; then turn-7/8/9/10 slices against
+  their own four dossiers.
+- **Notes:** no papercuts this session. Docs: `faint-switch-notes.md` new
+  §15 (trimmed §14's "not reached" pointer to it).
+
+---
+
+---
 ## 195 — Worktree scout (supervisor-folded): turn 10 ground truth BANKED — SECOND consecutive full reconvergence (AERIAL_ACE + ROCK_SLIDE hit, RAM bit-identical to BOTH published lines' turn-10 rows incl. gRngValue), all three standing falsifiable tests still negative; `battle1-turn10-dense.json` (13306 frames, 208 captures) + `docs/turn10-notes.md`; merged `9834116`, suite 805/805 on the merged tree
 
 - **State:** merged into master, `npm test` 805/805 + build green

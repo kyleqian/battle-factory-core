@@ -4,6 +4,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 199 — Worktree scout (supervisor-folded): turn 12 ground truth BANKED — the scout CORRECTLY FALSIFIED the brief's premise (supervisor transcription slip: ROCK_SLIDE entered at 1/10 not 2/10): turn 12 = AERIAL_ACE hit (Onix 14→4) + ROCK_SLIDE **MISS** (PP-exhausted at 0/10), NOBODY faints; the real faint is **turn 13 via DRAGON_BREATH** (tick 15887, Murkrow in at 16944, light RAM scan, unverified); 4th consecutive line reconvergence; `battle1-turn12-dense.json` (252/252 captures) + `docs/turn12-notes.md`; merged `0a3ccf4`, suite 818/818 on the merged tree
+
+- **State:** merged into master, `npm test` 818/818 + build green
+  post-merge. Supervisor re-verified: prefix chain (turn11 ⊂ turn12 ⊂
+  winline-b-swap, script-exact), miss-hold sha reproduced fresh, PNG-read
+  the held "ONIX used ROCK SLIDE!" frame with Onix at 4/117. Scout
+  discipline was exemplary: did the assigned turn-12 work as it ACTUALLY
+  happens, added only a clearly-labeled unverified turn-13 scan, deferred
+  the reuse map to the turn-13 session with three sharp bullets.
+- **Did:** turn 12 both-halves ledger RAM-truthed (AERIAL_ACE 0.5× vs
+  ROCK/GROUND — PNG-caught, easy to misremember; ROCK_SLIDE's miss = 1
+  Random() only). The unattributed RNG step re-confirmed a 4th time at
+  bit-exact offsets (93 after HP-commit, 9 before curMove) — solidly tied
+  to the damaging-move HP-commit path now. Murkrow snapshot RAM-confirmed
+  3rd time; held item corrected to LAX_INCENSE (no switch-in proc,
+  unlike Sitrus).
+- **Planning implication (supervisor):** turn 13's faint arrives via
+  DRAGON_BREATH — ISSUES #23's PARKED projectile animation is therefore
+  ON the winline. The turn-13 engine slice will need #23's exclusion
+  treatment for the projectile ticks unless #23 is cracked first;
+  sequence a dedicated #23 probe (its named "isolate a single spawn"
+  instrument, never attempted) before or alongside that slice.
+- **Next:** slice N rung (b) — FEATHER_DANCE's animated path (turn 6,
+  7358-7658), per §27's precise scoping; then rungs (c)/(d); then
+  turn-13 scout (faint + Murkrow switch-in reuse map).
+- **Notes:** scout stayed in contract; no scout papercuts (the main-lane
+  stitching papercut recorded separately).
+
+---
 ## 198 — Bounded worker (S7 slice N rung (a) only): turn 6's FIGHT-submenu reopen + move confirm LANDED — `turn6-menu.json` 33/33, 0 diff; rungs (b)/(c)/(d) NOT attempted (60-min cap, not a resistance finding) — precisely scoped for the next session
 
 - **State:** `npm test` **818/818** (+5), `npm run build` green, tree
@@ -75,45 +104,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   turn6-notes + the corrected §5 rows); turn-12 scout (the faint/Murkrow
   switch-in window).
 - **Notes:** scout stayed in contract; no papercuts.
-
----
-## 196 — Bounded worker (S7 slice M-5): rungs (d)+(e) LANDED — tint + heal message + HP climb + settled turn-6 menu; `turn5-sitrus-c.json` 150/150, `turn5-sitrus-d.json` 133/133, both 0 diff; ring excluded (bounded effort, 3rd resistance, precise ticks); **the faint/forced-switch sequence is COMPLETE**
-
-- **State:** `npm test` **813/813** (+8), `npm run build` green, tree
-  clean. New committed traces `turn5-sitrus-c.json` (150 captures,
-  7035-7215 excluding the ring's own 7042-7072) and `turn5-sitrus-d.json`
-  (133 captures, 7180-7312, covers past the 7307 acceptance boundary) —
-  both 0 diff. Regression sweep: `turn5-sitrus-a.json` 110/110,
-  `turn5-sitrus-b.json` 82/82, `turn5-healthbox.json` 55/55,
-  `turn5-switchin.json` 241/241 — zero regressions.
-- **Did:** Tint — RAM-probed fresh (`gPlttBufferFaded`/`Unfaded`, all 15
-  usable palette colors, Onix's own paletteNum=0 not Pidgeotto's 1),
-  brute-forced target+coeff jointly and got a UNIQUE fit: `RGB5(17,31,25)`,
-  coeff sequence 7/5/3/1/0 held 5 RAM ticks each — genuinely NOT
-  `MATERIALIZE_TINT_COLOR` reused (an initially-plausible hypothesis the
-  brute force ruled out). Heal message ("ONIX’s SITRUS BERRY"/"restored
-  health!", 7078→7112, held to 7215) PNG-diff-timed; found and fixed one
-  real bug (a straight ASCII apostrophe the charmap doesn't map — the
-  codebase's own convention is the curly `’`, per `STAT_ROSE_LINE1`). HP
-  climb: 1→31, exactly 1 unit/tick, render 7180→7209, PNG-crop-matched 0px
-  against `composePlayerHealthboxHpOverlay` at every candidate hp — this
-  **corrects §11's own hedge** ("HP digits/bar still climbing past 7306"):
-  they're not; hp is flat at 31 from 7209, every later change in that
-  region is the ordinary `menuIdleBounce` y-shift (yOffset 0/1/2, never a
-  different hp). Settled menu: chrome text cropped from `menuIdleBase`'s
-  own y≥112 (never changes across turns), bounce reuses `menuIdleBounce`
-  UNCHANGED re-anchored so tick 7222 (menu redraw) lines up with
-  `MENU_IDLE_BLANK_END_TICK+1` — grid-search found a unique shift with zero
-  mismatches across 17 samples. Tick 7307 byte-identical (full 64-hex sha)
-  to turn6-notes.md §5's own citation. Ring: excluded per the brief's own
-  allowance — with tint correct, the residual in 7042-7072 is provably
-  100% the ring (diff overlay shows a clean red ring outline, growing
-  6px→628px matching its own expand-then-fade shape) — third documented
-  resistance, still open. +8 Tier-1 tests.
-- **Next:** the turn-6 engine slice proper (FIGHT submenu open at 7317+)
-  against `turn6-notes.md`'s dossier; then turn-7/8/9/10 slices against
-  their own four dossiers.
-- **Notes:** no papercuts this session. Docs: `faint-switch-notes.md` new
-  §15 (trimmed §14's "not reached" pointer to it).
 
 ---

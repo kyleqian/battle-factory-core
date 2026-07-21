@@ -12,6 +12,21 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Chained-trace stitching silently inserts redundant idle frames (2026-07-20)
+
+- **What:** concatenating two independently idle-padded trace scripts
+  (extending a committed trace with the next window's segments) inserts
+  redundant idle frames at the seam — pixels still match (idle frames are
+  idempotent there) so compares stay green, but every absolute tick
+  citation downstream of the seam shifts (8 frames in the case that bit),
+  silently desynchronizing doc tables from the trace.
+- **Hits:** 1.
+- **Cost each:** ~15 min.
+- **Workaround:** when extending a chain trace, take the extension's
+  segments verbatim from the reference groundtruth trace (they already
+  share the prefix), never re-pad; after stitching, verify one known
+  boundary sha at its documented absolute tick before citing anything.
+
 ## Bash-session cwd silently persists into stale/sibling worktrees (2026-07-20)
 
 - **What:** a shell session's working directory persists across commands;
