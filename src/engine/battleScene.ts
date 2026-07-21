@@ -478,8 +478,10 @@ import {
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import type { ActiveMonMoveset } from "./battleSetup.ts";
+import { turn6FeatherSprites } from "./featherDance.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
+import battleAnimWhiteFeatherAsset from "../assets/gen/battle-anim-white-feather.json" with { type: "json" };
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
 import statAnimBannerAsset from "../assets/gen/stat-anim-banner.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
@@ -653,6 +655,13 @@ interface BattleAnimRocksAsset {
   palette: RgbColor[];
 }
 
+/** `white_feather.png` (`gFallingFeatherSpriteTemplate`, `ANIM_TAG_WHITE_FEATHER`) - 2 stacked 32x32 frames (`tileset`=animNum 0, `frame2`=animNum 1), same shape as `OpponentFrontSpriteAsset`. */
+interface BattleAnimWhiteFeatherAsset {
+  tileset: Tileset;
+  frame2: Tileset;
+  palette: RgbColor[];
+}
+
 /** `sweat_drop.png` (`gFacadeSweatDropSpriteTemplate`, `ANIM_TAG_SWEAT_DROP`) - a single un-animated 8x8 tile, docs/battle-menu-notes.md §15/§15c. */
 interface BattleAnimSweatDropAsset {
   tileset: Tileset;
@@ -678,6 +687,7 @@ const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, Oppone
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
+const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFeatherAsset;
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
 
@@ -5758,7 +5768,7 @@ export function onixSitrusTintCoeff(t: number): number {
  * plain sprite draw once active, and the opponent healthbox stops drawing
  * entirely past its own vanish tick.
  */
-function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t): void {
+function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
   drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
@@ -5770,6 +5780,7 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
   } else if (sink.keptRows > 0) {
     drawSpriteSheetTopRows(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + sink.y2, sink.keptRows);
   }
+  beforeMonSprite?.();
   const sitrusRotate = onixSitrusRotateMatrix(t);
   if (sitrusRotate) {
     drawSpriteSheetAffineRotate(
@@ -6358,8 +6369,34 @@ export function turn6FeatherDanceTextVisibleChars(t: number, pressTick: number):
  * session (docs/turn6-notes.md §6 - genuinely new affine-sprite rendering,
  * out of scope, see battle-turn-notes.md §28).
  */
+/**
+ * S7 slice N-3: the 8 `gFallingFeatherSpriteTemplate` sprites, RAM-table
+ * driven (`turn6FeatherSprites`, `src/engine/featherDance.ts`'s own module
+ * doc explains why a table instead of a from-scratch port). Drawn via the
+ * shared generic affine blit (`drawSpriteSheetAffineRotate`), sorted back-
+ * to-front by OAM `priority` (higher number = further back, same
+ * `SortSprites` convention this codebase's other multi-sprite compositing
+ * already follows) so ties/crossings against each other land correctly;
+ * ordering against Onix's own on-field sprite is not yet modeled (drawn
+ * after `drawTurn6FieldBase`, i.e. always in front - see battle-turn-notes.md
+ * §29 for what this does and doesn't get right).
+ */
+function drawTurn6FeatherSprites(fb: Uint8Array, t: number, wantBehindOnix: boolean): void {
+  const sprites = turn6FeatherSprites(t)
+    .filter((s) => (s.priority >= FEATHER_BASE_PRIORITY_CUTOFF) === wantBehindOnix)
+    .sort((a, b) => b.priority - a.priority);
+  for (const s of sprites) {
+    const tileset = s.animNum === 1 ? battleAnimWhiteFeather.frame2 : battleAnimWhiteFeather.tileset;
+    drawSpriteSheetAffineRotate(fb, tileset, battleAnimWhiteFeather.palette, s.centerX, s.centerY, s.pa, s.pb, s.pc, s.pd);
+  }
+}
+
+/** `sprite.oam.priority` (`GetBattlerSpriteBGPriority(battler)+1` while `unk2` is in [64,191], base otherwise, `src/engine/featherDance.ts`) - Onix's own on-field sprite sits at the SAME base priority; empirically bisected this session (z-order scratch compares against the oracle) that the +1 ("far side of the flap") group draws BEHIND Onix while the base-priority group draws IN FRONT, matching a real depth toggle as each feather swings past the target. */
+const FEATHER_BASE_PRIORITY_CUTOFF = 3;
+
 function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
-  drawTurn6FieldBase(fb, t, pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET);
+  drawTurn6FieldBase(fb, t, pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET, () => drawTurn6FeatherSprites(fb, t, true));
+  drawTurn6FeatherSprites(fb, t, false);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
 }
@@ -6421,8 +6458,8 @@ function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
  * Factored out (no behavior change) so turn 6's own render path can reuse it
  * without re-deriving the switch-in/heal machinery.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t): void {
-  drawTurn5RockSlideAttack(fb, t, bounceTick);
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
+  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own

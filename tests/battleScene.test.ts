@@ -62,6 +62,7 @@ import battleHealthboxAsset from "../src/assets/gen/battle-healthbox.json" with 
 import ramDump from "../src/data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import speciesNames from "../src/data/gen/species-names.json" with { type: "json" };
 import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-probe.json" with { type: "json" };
+import { turn6FeatherSprites } from "../src/engine/featherDance.ts";
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -1591,6 +1592,21 @@ describe("S7 slice N-3: drawSpriteSheetAffineRotate against FEATHER_DANCE's own 
     };
     expect(at(0, -5)).toEqual([240, 90, 12]); // tex(10,3), tile(1,0)
     expect(at(-2, 6)).toEqual([18, 160, 244]); // tex(3,12), tile(0,1)
+  });
+});
+
+describe("S7 slice N-3: turn6FeatherSprites (src/engine/featherDance.ts) - RAM-table-driven (not a from-scratch port, see the module's own doc for why), +1 render lag bisected against the oracle this session", () => {
+  it("is empty before the window and once every feather has despawned", () => {
+    expect(turn6FeatherSprites(7404)).toEqual([]); // render 7404 -> RAM 7403, before spawn
+    expect(turn6FeatherSprites(7600)).toEqual([]); // well past every sprite's own despawn tick
+  });
+  it("the first visible tick (7405, RAM 7404) is exactly slot 3's own spawn snapshot", () => {
+    const sprites = turn6FeatherSprites(7405);
+    expect(sprites).toHaveLength(1);
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3 });
+  });
+  it("all 8 sprites are live by render tick 7437 (RAM 7436, the last spawn group)", () => {
+    expect(turn6FeatherSprites(7437)).toHaveLength(8);
   });
 });
 
