@@ -2610,6 +2610,22 @@ function drawSpriteSheetAffineTintedBlend(
  * window to 32x32 (still centered on the sprite's real x/y) so a rotated
  * 16x16 source isn't corner-clipped - mechanism 4/5 never needed this since
  * neither ever rotates away from its axis-aligned bounding box.
+ *
+ * `doubleSizeBox` (ISSUES #30 class (b) forensics, docs/feather-order-notes.md's
+ * 2026-07-21 "normal-box clipping" session): defaults to `true`, preserving
+ * every existing caller's behavior unchanged (this primitive's original
+ * design target, the thrown ball, genuinely IS `ST_OAM_AFFINE_DOUBLE`). Pass
+ * `false` for a sprite whose real OAM data is `ST_OAM_AFFINE_NORMAL` (NOT
+ * double) - e.g. `gFallingFeatherSpriteTemplate`
+ * (`gOamData_AffineNormal_ObjNormal_32x32`,
+ * `reference/pokeemerald/src/battle_anim_flying.c:175`): real AFFINE_NORMAL
+ * hardware does NOT get the doubled destination window, so rotated content
+ * that would fall outside the sprite's own nominal WxH box is hard-clipped
+ * (this is exactly the case AFFINE_DOUBLE exists to avoid) - verified
+ * (`tools/probe/render-feather-normalbox-candidate.ts`) to cut the turn-6
+ * 7421-7549 window's post-candidate-A residual from 228px to a verified-
+ * lower-bound 209px by correctly clipping rotated feather corners that were
+ * painting over Onix's own already-drawn sprite.
  */
 export function drawSpriteSheetAffineRotate(
   fb: Uint8Array,
@@ -2622,14 +2638,19 @@ export function drawSpriteSheetAffineRotate(
   pc: number,
   pd: number,
   clipBottom?: number,
+  doubleSizeBox: boolean = true,
 ): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
   const halfW = w / 2;
   const halfH = h / 2;
-  for (let dy = -h; dy < h; dy += 1) {
+  const dyStart = doubleSizeBox ? -h : -halfH;
+  const dyEnd = doubleSizeBox ? h : halfH;
+  const dxStart = doubleSizeBox ? -w : -halfW;
+  const dxEnd = doubleSizeBox ? w : halfW;
+  for (let dy = dyStart; dy < dyEnd; dy += 1) {
     if (clipBottom !== undefined && centerY + dy >= clipBottom) continue;
-    for (let dx = -w; dx < w; dx += 1) {
+    for (let dx = dxStart; dx < dxEnd; dx += 1) {
       const sx = ((dx * pa + dy * pb) >> 8) + halfW;
       const sy = ((dx * pc + dy * pd) >> 8) + halfH;
       if (sx < 0 || sx >= w || sy < 0 || sy >= h) continue;
@@ -6579,13 +6600,20 @@ export function turn6FeatherDanceTextVisibleChars(t: number, pressTick: number):
  * S7 slice N-3: the 8 `gFallingFeatherSpriteTemplate` sprites, RAM-table
  * driven (`turn6FeatherSprites`, `src/engine/featherDance.ts`'s own module
  * doc explains why a table instead of a from-scratch port). Drawn via the
- * shared generic affine blit (`drawSpriteSheetAffineRotate`), sorted back-
- * to-front by OAM `priority` (higher number = further back, same
+ * shared generic affine blit (`drawSpriteSheetAffineRotate`, `doubleSizeBox:
+ * false` - ISSUES #30 class (b): real `gFallingFeatherSpriteTemplate` OAM
+ * data is `ST_OAM_AFFINE_NORMAL`, not `_DOUBLE`, so rotated corners that
+ * exceed the sprite's own 32x32 box are hard-clipped on real hardware, same
+ * as any other AFFINE_NORMAL sprite - see the primitive's own doc), sorted
+ * back-to-front by OAM `priority` (higher number = further back, same
  * `SortSprites` convention this codebase's other multi-sprite compositing
- * already follows) so ties/crossings against each other land correctly;
- * ordering against Onix's own on-field sprite is not yet modeled (drawn
- * after `drawTurn6FieldBase`, i.e. always in front - see battle-turn-notes.md
- * §29 for what this does and doesn't get right).
+ * already follows) so ties/crossings against each other land correctly.
+ * Ordering against Onix's own on-field sprite is handled by the caller's
+ * `wantBehindOnix` split (`FEATHER_BASE_PRIORITY_CUTOFF`, below) - a
+ * per-sprite-group approximation of the real per-OAM-index sort, not a true
+ * unified sSpriteOrder placement of Onix alongside the 8 feather slots
+ * (docs/feather-order-notes.md's 2026-07-21 sessions have the residual
+ * this leaves open).
  */
 function drawTurn6FeatherSprites(fb: Uint8Array, t: number, wantBehindOnix: boolean, lookup: (t: number) => FeatherRenderSprite[] = turn6FeatherSprites): void {
   const sprites = lookup(t)
@@ -6593,7 +6621,7 @@ function drawTurn6FeatherSprites(fb: Uint8Array, t: number, wantBehindOnix: bool
     .sort(compareFeatherDrawOrder);
   for (const s of sprites) {
     const tileset = s.animNum === 1 ? battleAnimWhiteFeather.frame2 : battleAnimWhiteFeather.tileset;
-    drawSpriteSheetAffineRotate(fb, tileset, battleAnimWhiteFeather.palette, s.centerX, s.centerY, s.pa, s.pb, s.pc, s.pd);
+    drawSpriteSheetAffineRotate(fb, tileset, battleAnimWhiteFeather.palette, s.centerX, s.centerY, s.pa, s.pb, s.pc, s.pd, undefined, false);
   }
 }
 

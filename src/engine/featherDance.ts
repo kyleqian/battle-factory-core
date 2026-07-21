@@ -59,10 +59,117 @@ export interface FeatherRenderSprite {
   animNum: 0 | 1;
   priority: number;
   slot: number;
+  /** Candidate A's simulated `sSpriteOrder` front-to-back position at this
+   * tick, restricted to the live feather slots (see
+   * `simulateFeatherSpriteOrder` below) - lower = drawn ON TOP, matching
+   * `AddSpritesToOamBuffer`'s real "lower sSpriteOrder position = lower OAM
+   * index = on top" rule. Used only as `compareFeatherDrawOrder`'s
+   * same-priority tiebreak. */
+  order: number;
 }
 
 /** RAM-to-render lag for this mechanism (bisected this session against the oracle at several probe ticks, same "+1 for most mechanisms" class the rest of this dossier finds - see battle-turn-notes.md §29). Re-verified per-turn (§34) to carry unchanged to turns 7/8's own probe tables. */
 const FEATHER_RENDER_LAG = 1;
+
+/** The 8 `gFallingFeatherSpriteTemplate` OAM slots, ascending - also
+ * candidate A's `sSpriteOrder` seed (ISSUES #30 adoption,
+ * docs/feather-order-notes.md's "candidate A wins" section): the winning
+ * seed is the plain ascending-slot skeleton with the same-tick `(4,7)` spawn
+ * pair landing in that order, which IS this array unmodified - the `(8,9)`/
+ * `(10,11)` pairs' own initial relative order is confirmed fully redundant
+ * (no simulated tick ever differs), so no special-casing is needed. */
+const FEATHER_ORDER_SEED = [3, 4, 7, 8, 9, 10, 11, 12];
+
+const FEATHER_SORT_DISPLAY_HEIGHT = 160;
+
+/** `sprite->oam.y` wraparound applied by `SortSprites` (`sprite.c`):
+ * `y >= DISPLAY_HEIGHT` wraps to `y - 256`. The extra `> 128` wrap for
+ * `ST_OAM_AFFINE_DOUBLE + ST_OAM_SIZE_3` sprites does not apply here -
+ * `gFallingFeatherSpriteTemplate` is `ST_OAM_SIZE_2` (32x32), confirmed from
+ * `reference/pokeemerald/src/battle_anim_flying.c:171-180`. */
+function featherWrappedY(rec: FeatherProbeRecord): number {
+  const y = rec.y + rec.y2;
+  return y >= FEATHER_SORT_DISPLAY_HEIGHT ? y - 256 : y;
+}
+
+/**
+ * One exact `SortSprites` pass (`reference/pokeemerald/src/sprite.c`,
+ * restricted to the 8 feather slots): a full insertion sort, run every
+ * tick, comparator `swap when priority1 > priority2, OR (priority1 ==
+ * priority2 AND y1 < y2)`. Ports `simulate-feather-sprite-order.py`'s
+ * `sort_step` verbatim.
+ */
+function featherSortStep(order: number[], recs: Map<number, FeatherProbeRecord>): number[] {
+  const out = order.slice();
+  for (let i = 1; i < out.length; i += 1) {
+    let j = i;
+    while (j > 0) {
+      const s1 = out[j - 1]!;
+      const s2 = out[j]!;
+      const r1 = recs.get(s1)!;
+      const r2 = recs.get(s2)!;
+      const y1 = featherWrappedY(r1);
+      const y2 = featherWrappedY(r2);
+      if (r1.priority > r2.priority || (r1.priority === r2.priority && y1 < y2)) {
+        out[j - 1] = s2;
+        out[j] = s1;
+        j -= 1;
+      } else {
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * ISSUES #30 candidate A: simulates pokeemerald's real, PERSISTENT
+ * `sSpriteOrder` insertion sort (`sprite.c`: `BuildSpritePriorities` →
+ * `SortSprites` → `AddSpritesToOamBuffer`, run every frame) over one turn's
+ * own probe table, restricted to the 8 `gFallingFeatherSpriteTemplate`
+ * slots - the other ~56 `gSprites[]` entries aren't RAM-probed, but per
+ * docs/feather-order-notes.md's decisive finding, only the `(4,7)` spawn
+ * pair's initial relative order ever changes a predicted draw order, and
+ * `FEATHER_ORDER_SEED`'s ascending-slot skeleton already encodes the
+ * winning `(4,7)`-before choice. Returns RAM tick -> live feather slots in
+ * front-to-back `sSpriteOrder` position (index 0 = frontmost/on-top).
+ * Ports `tools/probe/simulate-feather-sprite-order.py`'s `simulate()`
+ * verbatim (same comparator, same persistent-order threading tick to tick,
+ * same not-yet-appeared-slot splicing) - not a reimplementation from
+ * scratch, and pinned against that script's own output in
+ * `tests/featherDance.test.ts`.
+ */
+function simulateFeatherSpriteOrder(byTick: Map<number, FeatherProbeRecord[]>): Map<number, number[]> {
+  const ticks = [...byTick.keys()].sort((a, b) => a - b);
+  let order = FEATHER_ORDER_SEED.slice();
+  const lastRec = new Map<number, FeatherProbeRecord>();
+  const out = new Map<number, number[]>();
+  for (const t of ticks) {
+    const recsAtTick = new Map<number, FeatherProbeRecord>();
+    for (const rec of byTick.get(t) ?? []) recsAtTick.set(rec.slot, rec);
+    for (const slot of FEATHER_ORDER_SEED) {
+      const rec = recsAtTick.get(slot);
+      if (rec) lastRec.set(slot, rec);
+    }
+    const recs = new Map<number, FeatherProbeRecord>();
+    for (const slot of FEATHER_ORDER_SEED) {
+      const rec = lastRec.get(slot);
+      if (rec) recs.set(slot, rec);
+    }
+    const activeOrder = order.filter((s) => recs.has(s));
+    if (activeOrder.length > 0) {
+      const sorted = featherSortStep(activeOrder, recs);
+      let idx = 0;
+      order = order.map((s) => (recs.has(s) ? sorted[idx++]! : s));
+    }
+    const live = order.filter((s) => {
+      const rec = recsAtTick.get(s);
+      return rec !== undefined && rec.inUse !== 0 && !rec.invisible;
+    });
+    out.set(t, live);
+  }
+  return out;
+}
 
 /**
  * A RAM-table-driven feather-sprite lookup (battle-turn-notes.md §29/§34):
@@ -86,11 +193,13 @@ function makeFeatherSpriteLookup(probe: { ticks: FeatherProbeRecord[] }, lastRam
     }
     list.push(rec);
   }
+  const simOrderByTick = simulateFeatherSpriteOrder(byTick);
   return function featherSprites(t: number): FeatherRenderSprite[] {
     const ramTick = t - FEATHER_RENDER_LAG;
     if (ramTick > lastRamTick) return [];
     const recs = byTick.get(ramTick);
     if (!recs) return [];
+    const simOrder = simOrderByTick.get(ramTick) ?? [];
     const out: FeatherRenderSprite[] = [];
     for (const rec of recs) {
       if (!rec.inUse || rec.invisible) continue;
@@ -104,6 +213,7 @@ function makeFeatherSpriteLookup(probe: { ticks: FeatherProbeRecord[] }, lastRam
         animNum: rec.animNum ? 1 : 0,
         priority: rec.priority,
         slot: rec.slot,
+        order: simOrder.indexOf(rec.slot),
       });
     }
     return out;
@@ -120,21 +230,28 @@ export const turn7FeatherSprites = makeFeatherSpriteLookup(turn7FeatherProbe as 
 export const turn8FeatherSprites = makeFeatherSpriteLookup(turn8FeatherProbe as { ticks: FeatherProbeRecord[] }, 9637);
 
 /**
- * Draw-order tiebreak for same-priority feathers (battle-turn-notes.md §29/§34):
- * pokeemerald's `SortSprites` (`reference/pokeemerald/src/sprite.c`) sorts the
- * real OAM buffer by `(subpriority, oam.priority)` ascending, and lower-index
- * OAM slots draw IN FRONT of higher-index slots at equal priority. All 8
- * `gFallingFeatherSpriteTemplate` spawns share the same `subpriority`
- * (`Cmd_createsprite`'s `subpriority_offset` is 0 for every spawn line in
- * `data/battle_anim_scripts.s`'s `Move_FEATHER_DANCE`), so this codebase's
- * own `slot` (== `gSprites[]` index, the same value used for real OAM order
- * here) is the tiebreak that matters - lower slot drawn LAST (on top). Bisected
- * empirically against the oracle on the 7421-7549 residual window (the
- * cheapest repro): this ordering cut the mismatched-pixel total from ~2000+px
- * (arbitrary ascending-slot draw, i.e. HIGHER slot on top) to 425px, with 9
- * frames landing exact - a real, load-bearing fix, not yet a full crack (a
- * smaller residual remains, characterized in §34 as still-open).
+ * Draw-order tiebreak for same-priority feathers (ISSUES #30, "candidate A"
+ * adoption - docs/feather-order-notes.md's 2026-07-21 "candidate A wins"
+ * session has the full derivation and pixel-diff evidence). Differing-
+ * priority sprites are already correctly ordered by `priority` alone
+ * (pokeemerald's `SortSprites`, `reference/pokeemerald/src/sprite.c`, sorts
+ * `oam.priority` dominant) - this only breaks EXACT-priority ties, which the
+ * simple "lower slot on top" heuristic (the previous tiebreak, ~2000+px  ->
+ * 425px over the residual window) got only partly right, because the real
+ * hardware's tiebreak is the PERSISTENT `sSpriteOrder` array's own insertion-
+ * sort history, not the raw slot number. `order` (attached per-sprite by
+ * `makeFeatherSpriteLookup`, via `simulateFeatherSpriteOrder`) is that
+ * simulated front-to-back position for the tick; lower `order` = drawn ON
+ * TOP, same "on top" polarity the old slot-based heuristic used, so the
+ * tiebreak term keeps the same shape (`b.X - a.X`), only `X` changes from
+ * `slot` to the simulated `order`. Verified (fresh oracle render+diff,
+ * `tools/probe/render-feather-order-candidates.ts`): cuts the turn-6
+ * 7421-7549 window from 425px to a 230px verified-lower-bound floor, ≤
+ * shipped on 129/129 ticks; generalizes to turns 7/8 (46px -> 17px spot
+ * checks). Residual beyond 230px is NOT this tiebreak - see
+ * docs/feather-order-notes.md's forensics sections for the two remaining
+ * signature classes.
  */
 export function compareFeatherDrawOrder(a: FeatherRenderSprite, b: FeatherRenderSprite): number {
-  return b.priority - a.priority || b.slot - a.slot;
+  return b.priority - a.priority || b.order - a.order;
 }

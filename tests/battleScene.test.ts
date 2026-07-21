@@ -1744,6 +1744,40 @@ describe("S7 slice N-3: drawSpriteSheetAffineRotate against FEATHER_DANCE's own 
   });
 });
 
+describe("ISSUES #30 class (b) fix: drawSpriteSheetAffineRotate's doubleSizeBox param (docs/feather-order-notes.md's 2026-07-21 'normal-box clipping' session) - gFallingFeatherSpriteTemplate is ST_OAM_AFFINE_NORMAL (reference/pokeemerald/src/battle_anim_flying.c:175), not _DOUBLE, so real hardware hard-clips rotated content beyond the sprite's own 32x32 box", () => {
+  // A fully-opaque 32x32 (4x4 tile) source and a real feather rotation matrix
+  // (the same a=225,b=-120,c=120,d=225 the tests above use) - opaque
+  // everywhere so any painted-vs-clipped difference is visible regardless of
+  // the real feather art's own transparent regions.
+  const opaqueTile = new Array(64).fill(1);
+  const tileset = { columns: 4, rows: 4, tiles: new Array(16).fill(opaqueTile) };
+  const palette = [{ r: 0, g: 0, b: 0 }, { r: 255, g: 255, b: 255 }];
+  const CENTER_X = 100;
+  const CENTER_Y = 70;
+  const at = (fb: Uint8Array, dx: number, dy: number): boolean => fb[((CENTER_Y + dy) * 240 + (CENTER_X + dx)) * 4 + 3] === 255;
+
+  it("defaults to the doubled (AFFINE_DOUBLE) box, painting rotated content beyond the nominal +-16 box - unchanged for every pre-existing caller", () => {
+    const fb = new Uint8Array(240 * 160 * 4);
+    drawSpriteSheetAffineRotate(fb, tileset, palette, CENTER_X, CENTER_Y, 225, -120, 120, 225);
+    expect(at(fb, 6, -21)).toBe(true); // dy=-21 is outside the +-16 normal box but a valid, opaque source sample
+  });
+
+  it("doubleSizeBox=false (feather sprites) clips that same rotated corner pixel - real AFFINE_NORMAL hardware never paints outside the sprite's own nominal box", () => {
+    const fb = new Uint8Array(240 * 160 * 4);
+    drawSpriteSheetAffineRotate(fb, tileset, palette, CENTER_X, CENTER_Y, 225, -120, 120, 225, undefined, false);
+    expect(at(fb, 6, -21)).toBe(false);
+  });
+
+  it("doubleSizeBox=false still paints pixels genuinely inside the nominal box identically to the default", () => {
+    const fbDouble = new Uint8Array(240 * 160 * 4);
+    const fbNormal = new Uint8Array(240 * 160 * 4);
+    drawSpriteSheetAffineRotate(fbDouble, tileset, palette, CENTER_X, CENTER_Y, 225, -120, 120, 225);
+    drawSpriteSheetAffineRotate(fbNormal, tileset, palette, CENTER_X, CENTER_Y, 225, -120, 120, 225, undefined, false);
+    expect(at(fbDouble, 0, 0)).toBe(true);
+    expect(at(fbNormal, 0, 0)).toBe(true);
+  });
+});
+
 describe("S7 slice N-3: turn6FeatherSprites (src/engine/featherDance.ts) - RAM-table-driven (not a from-scratch port, see the module's own doc for why), +1 render lag bisected against the oracle this session", () => {
   it("is empty before the window and once every feather has despawned", () => {
     expect(turn6FeatherSprites(7404)).toEqual([]); // render 7404 -> RAM 7403, before spawn
@@ -1752,7 +1786,7 @@ describe("S7 slice N-3: turn6FeatherSprites (src/engine/featherDance.ts) - RAM-t
   it("the first visible tick (7405, RAM 7404) is exactly slot 3's own spawn snapshot", () => {
     const sprites = turn6FeatherSprites(7405);
     expect(sprites).toHaveLength(1);
-    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3 });
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3, order: 0 });
   });
   it("all 8 sprites are live by render tick 7437 (RAM 7436, the last spawn group)", () => {
     expect(turn6FeatherSprites(7437)).toHaveLength(8);
@@ -1764,13 +1798,13 @@ describe("S7 engine slice Q rungs (b)/(c) (docs/battle-turn-notes.md §34): turn
     expect(turn7FeatherSprites(8438)).toEqual([]);
     const sprites = turn7FeatherSprites(8439);
     expect(sprites).toHaveLength(1);
-    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3 });
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3, order: 0 });
   });
   it("turn8FeatherSprites is empty before its own window and matches turn6's own spawn snapshot at the first live tick (9485, RAM 9484)", () => {
     expect(turn8FeatherSprites(9484)).toEqual([]);
     const sprites = turn8FeatherSprites(9485);
     expect(sprites).toHaveLength(1);
-    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3 });
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3, order: 0 });
   });
 });
 
@@ -1780,7 +1814,10 @@ describe("S7 engine slice Q rung (a) (docs/battle-turn-notes.md §29/§34): comp
     // are all priority 2 and overlap on-screen by render tick 7429 (+1 lag) -
     // this is the group whose draw order this session's oracle bisection
     // (battle-turn-notes.md §29/§34) found flips the residual's worst frames
-    // from ~30px wrong to near-0.
+    // from ~30px wrong to near-0. At this specific tick candidate A's
+    // simulated sSpriteOrder (ISSUES #30 adoption, below) happens to agree
+    // with the old descending-slot heuristic - see the next test for a tick
+    // where the two rules actually diverge.
     const sprites = turn6FeatherSprites(7429).filter((s) => s.priority === 2);
     const slots = sprites.map((s) => s.slot).sort((a, b) => a - b);
     expect(slots).toEqual([4, 7, 8, 10]);
@@ -1788,10 +1825,26 @@ describe("S7 engine slice Q rung (a) (docs/battle-turn-notes.md §29/§34): comp
     expect(sorted[sorted.length - 1]!.slot).toBe(4); // lowest slot drawn last -> on top
     expect(sorted[0]!.slot).toBe(10); // highest slot drawn first -> backmost
   });
-  it("orders by priority first, slot only as the same-priority tiebreak", () => {
-    const a = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 2, slot: 3 };
-    const b = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 3, slot: 12 };
+  it("orders by priority first, simulated sSpriteOrder position only as the same-priority tiebreak", () => {
+    const a = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 2, slot: 3, order: 0 };
+    const b = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 3, slot: 12, order: 0 };
     expect(compareFeatherDrawOrder(a, b)).toBeGreaterThan(0); // b (higher priority number) sorts first
+  });
+  it("ISSUES #30 candidate A adoption: render tick 7430 (RAM 7429) is the window's first tick where the simulated sSpriteOrder tiebreak diverges from the old descending-slot heuristic, and the engine now follows the simulation", () => {
+    // Per docs/feather-order-notes.md's "candidate A wins" derivation: at RAM
+    // tick 7429 the persistent-insertion-sort simulation's front-to-back
+    // sSpriteOrder for the live priority-2 group {4,7,8,10} is [7,4,8,10]
+    // (position 0 = frontmost/on top), which paints (first..last) as
+    // [10,8,4,7] - slot 7 ends up on top. The old ascending-slot-skeleton-
+    // unaware "lower slot on top" heuristic instead painted [10,8,7,4] (slot
+    // 4 on top). This is a real, verified (tools/probe/dump-feather-order-
+    // candidates.py) divergence point, not a coincidence like tick 7429
+    // above - pins the actual algorithm swap, not just its output shape.
+    const sprites = turn6FeatherSprites(7430).filter((s) => s.priority === 2);
+    const slots = sprites.map((s) => s.slot).sort((a, b) => a - b);
+    expect(slots).toEqual([4, 7, 8, 10]);
+    const sorted = [...sprites].sort(compareFeatherDrawOrder);
+    expect(sorted.map((s) => s.slot)).toEqual([10, 8, 4, 7]); // paint order: 7 on top, NOT 4 (the old rule's answer)
   });
 });
 
