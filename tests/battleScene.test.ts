@@ -1742,6 +1742,40 @@ describe("S7 slice N-3: drawSpriteSheetAffineRotate against FEATHER_DANCE's own 
   });
 });
 
+describe("ISSUES #30 class (b) fix: drawSpriteSheetAffineRotate's doubleSizeBox param (docs/feather-order-notes.md's 2026-07-21 'normal-box clipping' session) - gFallingFeatherSpriteTemplate is ST_OAM_AFFINE_NORMAL (reference/pokeemerald/src/battle_anim_flying.c:175), not _DOUBLE, so real hardware hard-clips rotated content beyond the sprite's own 32x32 box", () => {
+  // A fully-opaque 32x32 (4x4 tile) source and a real feather rotation matrix
+  // (the same a=225,b=-120,c=120,d=225 the tests above use) - opaque
+  // everywhere so any painted-vs-clipped difference is visible regardless of
+  // the real feather art's own transparent regions.
+  const opaqueTile = new Array(64).fill(1);
+  const tileset = { columns: 4, rows: 4, tiles: new Array(16).fill(opaqueTile) };
+  const palette = [{ r: 0, g: 0, b: 0 }, { r: 255, g: 255, b: 255 }];
+  const CENTER_X = 100;
+  const CENTER_Y = 70;
+  const at = (fb: Uint8Array, dx: number, dy: number): boolean => fb[((CENTER_Y + dy) * 240 + (CENTER_X + dx)) * 4 + 3] === 255;
+
+  it("defaults to the doubled (AFFINE_DOUBLE) box, painting rotated content beyond the nominal +-16 box - unchanged for every pre-existing caller", () => {
+    const fb = new Uint8Array(240 * 160 * 4);
+    drawSpriteSheetAffineRotate(fb, tileset, palette, CENTER_X, CENTER_Y, 225, -120, 120, 225);
+    expect(at(fb, 6, -21)).toBe(true); // dy=-21 is outside the +-16 normal box but a valid, opaque source sample
+  });
+
+  it("doubleSizeBox=false (feather sprites) clips that same rotated corner pixel - real AFFINE_NORMAL hardware never paints outside the sprite's own nominal box", () => {
+    const fb = new Uint8Array(240 * 160 * 4);
+    drawSpriteSheetAffineRotate(fb, tileset, palette, CENTER_X, CENTER_Y, 225, -120, 120, 225, undefined, false);
+    expect(at(fb, 6, -21)).toBe(false);
+  });
+
+  it("doubleSizeBox=false still paints pixels genuinely inside the nominal box identically to the default", () => {
+    const fbDouble = new Uint8Array(240 * 160 * 4);
+    const fbNormal = new Uint8Array(240 * 160 * 4);
+    drawSpriteSheetAffineRotate(fbDouble, tileset, palette, CENTER_X, CENTER_Y, 225, -120, 120, 225);
+    drawSpriteSheetAffineRotate(fbNormal, tileset, palette, CENTER_X, CENTER_Y, 225, -120, 120, 225, undefined, false);
+    expect(at(fbDouble, 0, 0)).toBe(true);
+    expect(at(fbNormal, 0, 0)).toBe(true);
+  });
+});
+
 describe("S7 slice N-3: turn6FeatherSprites (src/engine/featherDance.ts) - RAM-table-driven (not a from-scratch port, see the module's own doc for why), +1 render lag bisected against the oracle this session", () => {
   it("is empty before the window and once every feather has despawned", () => {
     expect(turn6FeatherSprites(7404)).toEqual([]); // render 7404 -> RAM 7403, before spawn
