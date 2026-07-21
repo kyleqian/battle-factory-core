@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 203 — Supervisor wind-down: session end 2026-07-20 ~20:45 — **17 worker steps verified and folded** (8 main-lane + 9 worktree scouts, 9 rounds); suite **787 → 821/821**; headlines: **the faint/forced-switch sequence is COMPLETE end to end** (ball prop through the settled turn-6 menu, tick 7307 byte-identical — six traces, three sessions' worth of blockers root-caused), **the turn-6 engine slice has begun** (submenu reopen 33/33 + FEATHER_DANCE kickoff 90/90), and **the ground-truth dossier pipeline now covers turns 6-14** (9 dossiers + 10 dense traces, every one prefix-verified against the WIN line)
+
+- **State (verified this minute):** `npm test` **821/821**, `npm run
+  build` green, tree clean, no worktrees, no unmerged branches. Engine
+  traces this session: `turn5-switchin` 167→241, `turn5-healthbox` 55,
+  `turn5-sitrus-{a,b,c,d}` 110/82/150/133, `turn6-menu` 33,
+  `turn6-featherdance` 90 — all 0 diff, supervisor-rerun.
+- **The Sitrus saga (session's centerpiece, slices L-4→M-5):** the
+  materialize ramp-down "hardware quirk" fell as a corrupted coefficient
+  table (degenerate palette-offset decode); the "idle bob" fell as the
+  Sitrus proc's own opening rotation (AnimTask_RotateMonToSideAndRestore,
+  y2 a matrix byproduct — why y-only fits failed both signs); the
+  "sampler rounding gap" fell as a +2 render lag (sampler was never
+  wrong); GrantingStars spawn spacing corrected 8→10 vs source (RAM
+  wins); healthboxes draw above battle-anim particles
+  (UpdateOamPriorityInAllHealthboxes). Sole remainder: ISSUES #26 (the
+  THIN_RING, 7042-7072 excluded, 3 attempts, untried +2-lag lead).
+- **Dossier pipeline discoveries (turns 6-14):** both published lines
+  reconverge RNG-exactly at turn 9 (and stay converged through a
+  PP-exhaustion boundary); the ATK-floor "won't go lower!" fired and a
+  blocked stat change PROVABLY skips the move's animation (33-tick vs
+  ~290-tick holds — engine must gate animation on effect-success);
+  BIND misses at 8 Random() calls; AERIAL_ACE skips accuracy entirely;
+  turn 13's faint arrives via DRAGON_BREATH with the projectile table
+  bit-identical to turn 2's (ISSUES #23's exclusion covers it — no
+  fresh crack needed) and the Murkrow switch-in is turn-5 machinery
+  verbatim; FLY's charge half auto-misses DRAGON_BREATH at ZERO RNG
+  cost (STATUS3_ON_AIR short-circuit). Five dossier slips caught and
+  corrected at folds (each with supervisor PNG/pixel-diff evidence).
+- **Next:** (1) slice N-3 — the feather animation's affine renderer (8
+  per-tick-rotating sprites; §28 has RAM ground truth + sketch; needs a
+  fresh 60-min cap); (2) rungs (c)/(d) of turn 6, then turns 7-13 as
+  parameterizations; (3) turn-15+ scout (FLY strike, Onix's likely KO →
+  first FORCED PLAYER SWITCH, the WIN arc); (4) ISSUES #26 ring probe;
+  (5) turn6-menu's 8 excluded period-9 ticks (tested this session
+  post-bounce-fix: still real, still named).
+- **Notes:** no usage-limit events; zero merge conflicts across 9
+  worktree merges; 3 new PAPERCUTS entries (cwd persistence — bit a
+  worker AND the supervisor, trace-stitching, struct offsets); one
+  supervisor brief slip (turn-12 PP) gracefully falsified by the scout;
+  worker discipline strong all session (three honest reduced-scope
+  stops, every one with banked findings that landed next round).
+
+---
 ## 202 — Worktree scout (supervisor-folded): turn 14 ground truth BANKED — Murkrow opens with **FLY** (the arc's first two-turn semi-invulnerable move): charge half deals no damage, Onix's DRAGON_BREATH **auto-misses the airborne target at ZERO RNG cost** (`STATUS3_ON_AIR` short-circuit, `battle_script_commands.c:1061`, gRngValue flat through the miss); `battle1-turn14-dense.json` (248 captures) + `docs/turn14-notes.md`; merged `4fe427a`, suite 821/821 on the merged tree
 
 - **State:** merged into master, `npm test` 821/821 + build green
@@ -51,64 +95,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   parameterizations except the #23-excluded projectile ticks. BIND-hit
   (Test 2) never exercised on this line — battles 2-7 may exercise it.
 - **Notes:** scout stayed in contract; no papercuts.
-
----
-## 200 — Bounded worker (S7 slice N rung (b), reduced scope): FEATHER_DANCE's kickoff text + settled hold LANDED — `turn6-featherdance.json` 90/90, 0 diff; a real rung-(a) bug found+fixed (region-A onix-sprite bounce wasn't frozen, only region B was); the feather/starburst SPRITE ANIMATION itself deferred (genuinely new affine-rotation rendering, no precedent in this codebase) — RAM ground truth banked, not implemented
-
-- **State:** `npm test` **821/821** (+3), `npm run build` green, tree
-  clean. New committed trace `turn6-featherdance.json` (90 captures,
-  7307-7404, same 4 pre-confirm residual pairs excluded as §27, zero new
-  exclusions) **0 diff**. Regression sweep: `turn6-menu.json` 33/33,
-  `turn5-sitrus-c.json` 150/150, `turn5-sitrus-d.json` 133/133, `turn3-
-  rockslide.json` 256/256, `turn5-rockslide.json` 256/256, `turn5-menu.json`
-  42/42, `turn4-menu.json` 44/44, `turn5-endeavor.json` 254/254, `turn1-
-  cloneanim.json` 230/230 — zero regressions.
-- **Did:** kickoff text ("Foe PIDGEOTTO used FEATHERDANCE!") timing
-  RAM/pixel-nailed (`turn6FeatherDanceTextStartTick = pressTick+13` = 7358,
-  settles 7388, oracle-reprobed fresh — NOT either of the two existing
-  generic-kickoff delay constants, both checked and ruled out). Extending
-  the captured window past rung (a)'s own 7350 cutoff immediately exposed
-  rung (a)'s named "region A" residual on EVERY subsequent tick — RAM-
-  probed (`gSprites[gBattlerSpriteIds[0]]`/`[gHealthboxSpriteIds[0]]`'s own
-  `y2`, both flat 0 for the whole post-confirm hold) and fixed: (1)
-  `drawTurn5RockSlideAttack` never threaded its own `bounceTick` param for
-  the on-field Onix sprite's bounce (always used live `t`, even when
-  called from a frozen-hold context) — added one, default-preserves every
-  other caller; (2) the frozen anchor itself (`pressTick`) sat on a
-  `{onixY2:1, healthboxY2:0}` point in `menuIdleBounce`'s own cycle, not
-  the real `{0,0}` — moved to `pressTick - 4`, a scanned `{0,0}` plateau.
-  This retroactively fixes rung (a)'s own 7348-7350 exclusion too (not
-  applied to the already-shipped `turn6-menu.json` this session, to avoid
-  churning it under time pressure — noted as an optional cleanup).
-  Determined the animation's own true first pixel-change tick is **7405**
-  (RAM/pixel-confirmed, earlier than the brief's "~7450" eyeball estimate)
-  — `turn6-featherdance.json`'s captureFrames stop there.
-- **Did NOT land (scope call, not a resistance-with-no-findings):** the
-  feather/starburst sprite animation (7405-7658). RAM-probed the spawn
-  timeline (8 `gFallingFeatherSpriteTemplate` sprites, groups of 1/2/2/2/1
-  at 8-tick spacing, all spawning at (72,64) — script-confirmed against
-  `Move_FEATHER_DANCE`/`data/battle_anim_scripts.s:3975`) and read the
-  render mechanism (`AnimFallingFeather`/`_Step`,
-  `src/battle_anim_flying.c:572`): each sprite writes an independent
-  rotation+scale matrix into `gOamMatrices` every tick from a sine-table
-  phase accumulator — a genuinely new affine-rotation sprite primitive
-  this codebase has no precedent for (existing affine helpers only ever do
-  a single uniform scale or a single externally-supplied static matrix).
-  Per the brief's own explicit permission ("if they resist wholesale, stop
-  and document rather than shipping a half-fit"), stopped here rather than
-  force a bounded-effort implementation that wouldn't reach this dossier's
-  0-diff/RAM-verified standard in the remaining time. Full writeup +
-  banked RAM data: `docs/battle-turn-notes.md` §28.
-- **Next:** the feather/starburst animation itself (§28's own sketch: a
-  generic affine-matrix sprite blitter, a full per-tick RAM probe of
-  `gOamMatrices`/sprite state across 7405-7658, and `ANIM_TAG_WHITE_FEATHER`
-  gfx extraction via `extract-battle-move-anim-assets.ts`'s convention —
-  none attempted this session beyond the spawn-timeline scan). Then rung
-  (c) (ATK-fall message) and rung (d) (Onix's ROCK_SLIDE, parameterizable).
-- **Notes:** PAPERCUT: none new this session — the chained-trace-stitching
-  risk flagged in §27 turned out to be moot here (verified `battle1-
-  turn6-dense.json`'s own script has zero button presses between the turn-6
-  confirm and turn 7's reopen, so `turn6-menu.json`'s already-committed
-  idle tail already covered the whole window — no stitching needed at all).
 
 ---
