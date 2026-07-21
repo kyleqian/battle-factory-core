@@ -4,6 +4,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 197 — Worktree scout (supervisor-folded): turn 11 ground truth BANKED — the ATK-floor falsifiable test FIRES POSITIVE ("ONIX's ATTACK won't go lower!", sText_StatsWontDecrease, PNG-read; PP charged + accuracy roll consumed but stat write blocked), and the blocked effect SKIPS the feather animation (33-tick static kickoff hold vs turns 6-8's ~290-tick animated holds — rationale corrected in the fold: animation keys on effect-success, not move class); third consecutive line reconvergence; `battle1-turn11-dense.json` (14340 frames, 256 captures) + `docs/turn11-notes.md`; merged `961344a`, suite 813/813 on the merged tree
+
+- **State:** merged into master, `npm test` 813/813 + build green
+  post-merge. Supervisor re-verified: prefix chain (turn10 ⊂ turn11 ⊂
+  winline-b-swap, script-exact), 5/5 cited shas reproduced fresh, the
+  headline message PNG-read directly ("won't go lowe[r]" mid-typing at
+  13447, Onix 14/117). One rationale corrected in the fold (see headline;
+  observation was right, generalization was wrong and would have broken
+  turns 6/7 engine slices).
+- **Did:** turn 11 = FEATHER_DANCE reselected at ATK floor (first
+  positive on standing test 1; PP 12→11, accuracy roll consumed, stat
+  write silently blocked) + ROCK_SLIDE hit (Pidgeotto 38→16). The
+  unattributed +14-tick RNG step is ABSENT this turn — narrows its call
+  site to a damaging move's HP-commit path (test 3 sharpened, still
+  open). Pidgeotto crosses yellow→red at tick 13740 (~20.5%, matches
+  turn 9's Onix threshold). Turn 12 is near-certain to hold Pidgeotto's
+  faint + MURKROW switch-in (16/156 vs ~22/hit ROCK_SLIDE).
+- **Also this fold:** ISSUES #26 filed (Sitrus THIN_RING exclusion,
+  7042-7072, 3 bounded attempts, leads incl. the untried +2-lag class);
+  M-5's stray scratch script removed; scout's .gitignore note (the
+  `reference` symlink pattern) left as-is — cosmetic, not worth a churn
+  commit.
+- **Next:** turn-6 engine slice (FIGHT submenu at 7317 through turn 6's
+  full resolution — FEATHER_DANCE's REAL animated path this time, per
+  turn6-notes + the corrected §5 rows); turn-12 scout (the faint/Murkrow
+  switch-in window).
+- **Notes:** scout stayed in contract; no papercuts.
+
+---
 ## 196 — Bounded worker (S7 slice M-5): rungs (d)+(e) LANDED — tint + heal message + HP climb + settled turn-6 menu; `turn5-sitrus-c.json` 150/150, `turn5-sitrus-d.json` 133/133, both 0 diff; ring excluded (bounded effort, 3rd resistance, precise ticks); **the faint/forced-switch sequence is COMPLETE**
 
 - **State:** `npm test` **813/813** (+8), `npm run build` green, tree
@@ -76,46 +105,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   dossier, not densely probed.
 
 ---
-## 194 — Bounded worker (S7 slice M-4): rung (c) LANDED — `GrantingStarsEffect`'s two star sprites RAM-probed fresh (spawn ticks 10 apart, corrects the source's own "8 ticks" framing) and byte-exact; `turn5-sitrus-b.json` 82/82, 0 diff, 6960-7041; rungs (d)/(e) NOT reached (out of session time) — precisely scoped for the next session
-
-- **State:** `npm test` **805/805** (+5), `npm run build` green, tree
-  clean. New committed trace `turn5-sitrus-b.json` (82 captures,
-  6960-7041) 0 diff. Regression sweep: `turn5-sitrus-a.json` 110/110,
-  `turn5-healthbox.json` 55/55, `turn5-switchin.json` 241/241,
-  `turn5-sentout.json` 141/141 — zero regressions.
-- **Did:** RAM-probed the two `gGrantingStarsSpriteTemplate` sprites fresh
-  (`tools/probe/specs/turn5-sitrus-star-scan.json`, a 64-slot sweep then a
-  targeted slot-3/4 x/y/x2/y2/animCmdIndex/flags trace) rather than
-  trusting `General_HeldItemEffect`'s own "8 ticks apart" prose — real
-  spawn gap is **10 ticks** (RAM 6968/6978), fixed screen anchors
-  `(57,88)`/`(84,83)`, anim frame `floor(local/7)%8` (matches the
-  source-cited 8-frame/7-tick shape exactly), and a genuinely new-this-
-  session finding: a slow `y2` creep, `floor(local/8)` (0..7 over each
-  star's own 62-tick life) — no prior citation predicted this. Corner
-  convention `(ramX-16, ramY+y2-16)`, RAM-to-render lag **+1**, bisected
-  against 6 independent (tick,star,frame) triples via brute-force pixel
-  search, all 0px. Found and fixed two real bugs via the committed trace
-  (not guessed up front): a 1px z-order overlap (GBA composites lower
-  sprite-slot indices in front — draw order reversed) and creation-tick
-  invisibility (`local===0` never renders, same shape as the switch-in
-  particle burst's own `age = tick - spawnTick - 1`). Wired
-  `turn5GrantingStarPlacement` (pure, exported) + `drawGrantingStars`
-  into `drawTurn5RockSlideAttack`. +5 Tier-1 tests.
-- **Next:** rung (d) — tint (Onix's own palette recolor, first diff 7042,
-  same `gPlttBufferFaded` method §8c already used for the materialize),
-  ring (`ANIM_TAG_THIN_RING`, gfx extracted/cited two sessions running,
-  affine-scale placement search still not attempted — bounded effort,
-  exclude precisely if it resists per the brief), heal message ("ONIX's
-  SITRUS BERRY.../restored health!", start 7078, 1 char/tick to 7112) +
-  HP climb (1->31, §2's pinned formula, needs digit-overlay+bar-refill
-  render) + wait-cursor bounce (~7180-7209, period 9, `turn5Fainted-
-  CursorYOffset`'s own family, likely reusable). Then rung (e): settled
-  turn-6 menu to >=7307 — §11 already flagged the tail is NOT static (HP
-  digits/bounce still cycling at 7306), needs the live formula threaded
-  through, not a frozen harvest.
-- **Notes:** no papercuts (one self-inflicted ~10min detour: an early `cd`
-  into a stale sibling worktree left the shell's cwd there, so several
-  early probe/compare commands silently ran against that worktree's
-  unmodified tree until `pwd` caught it — no bad data landed, just lost
-  time; worth remembering `cd` in Bash calls doesn't get reset between
-  calls). Docs: `faint-switch-notes.md` §14 added.
