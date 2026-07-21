@@ -5,6 +5,8 @@
 /reference/
 /oracle-output/
 /tools/compare/out/
+/tools/probe/out/
+/tools/probe/__pycache__/
 /.worktrees/
 tsconfig.tsbuildinfo
 .env
