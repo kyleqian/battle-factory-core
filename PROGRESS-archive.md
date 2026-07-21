@@ -1,4 +1,18 @@
 ---
+## 234 — Supervisor merge fold: turn 10's ROCK_SLIDE half is a PROVEN pure parameterization (`worker/wt-20260721-114115` merged) — synthetic `pressTick=12169` satisfies EVERY shipped rockSlide* delay constant from turns 3/5/6/7/9 and reproduces turn 10's RAM through the real unmodified `rockSlideRockState`/`rockSlideDrawOrder` with 0 mismatches (261+125 sampled ticks); both HP drains re-pinned (Onix 24→14, Pidgeotto 61→38); dossier CORRECTED (turn-11 menu boundary has the standard idle-bounce, NOT flat); `tools/probe/verify-turn10-rockslide.ts` **44/44 supervisor-rerun** post-merge
+
+- **State (supervisor-verified post-merge):** `npm test` **936/936**,
+  `npm run build` green, verify script 44/44 fresh (145 ticks), worktree
+  cleaned up. One honest unresolved probe gap: a RAM "target invisible"
+  signal spans the rock-fall window with NO pixel effect (same family as
+  §37's invisible-bit rule — flagged so nobody models a phantom hide).
+- **Notes:** with #233's AERIAL_ACE state, turn 10's remaining work =
+  (a) mechanical ROCK_SLIDE wiring, (b) mechanism-4 palette-pulse render
+  retry (§42 handoff, pure table already Tier-1-pinned), (c) extend
+  aerialace coverage past 12362. Turn-9 gap probe (hitsplat tip +
+  hit-flash) in flight on `worker/wt-20260721-120256`.
+
+---
 ## 233 — Bounded worker (S7 slice R rung (b) implementation): all 5 AERIAL_ACE mechanisms wired; mechanism 5 (slice) fully 0-diff, mechanisms 1/3 (lunge+clones) land their own first tick with a small unresolved residual just past it, mechanism 4 (palette pulse) REVERTED as badly wrong (pure table kept) — `turn10-aerialace.json` **18/18, 0 diff** (12345-12362, smaller than the dossier's full window)
 
 - **State:** `npm test` **936/936** (921 + 15 new), `npm run build`
