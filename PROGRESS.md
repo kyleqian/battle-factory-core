@@ -4,6 +4,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 226 — Supervisor wind-down: session end 2026-07-21 ~06:30 — **16 worker steps verified and folded** (8 main-lane + 8 worktree, 10 rounds); suite **821 → 880/880**; headlines: **turns 6-9 landed as engine slices** (turn 6 complete end to end incl. the stat-fall banner and ROCK_SLIDE vs Pidgeotto; turns 7/8 complete minus feather sub-windows; turn 9 through QUICK_ATTACK's lunge), **the dossier pipeline is GAPLESS from anchor through battle 1's WIN to battle 2's swap prompt** (turns 15/16/17 + post-WIN scouted, prefix-verified, incl. the run's first status-condition ground truth and the RNG-resume/opponent-2 window bisected to 105 ticks), and **FIVE standing issues resolved by the probe-first pattern** (#26 Sitrus ring closed via closed-form crack, #27 RNG call attributed, #28+#29 bounce-shift families root-caused AND fixed — 32 excluded ticks restored, #30 narrowed: candidate A crowned, half-texel eliminated, residual split into two named classes)
+
+- **State (verified this minute):** `npm test` **880/880**, `npm run
+  build` green, tree clean, no worktrees, no unmerged branches. Traces
+  landed/extended this session (all supervisor-rerun 0 diff):
+  turn5-sitrus-c 150→181, turn6-menu 33→44, turn6-statfall 127,
+  turn6-rockslide-{a,b} 255+105, turn6-feathers 106, turn7-menu 85→93,
+  turn7-rockslide-{a-d} 787, turn7-feathers 16, turn8-menu 78→88,
+  turn8-bind-{a,b} 322, turn8-feathers 33, turn9-menu 111,
+  turn9-quickattack 112. Groundtruth: battle1-turn{15,16,17}-dense +
+  battle1-postwin-dense (854 captures total, all prefix-chain-verified).
+- **The probe pattern was the session's engine:** five 30-min
+  RAM/source-first worktree probes (8-17 min each) resolved what
+  repeated bounded fitting could not — every "quirk" label fell to a
+  small real engine bug or a closed form. Two fix steps then restored
+  37 previously-excluded ticks across 4 traces. The pattern is now
+  standard: probe ships a verify script, fix worker re-runs it first.
+- **Next:** (1) slice R rung (c2)+(d) — afterimage clones (§38's
+  bisection plan: single-digit-% per-tick diffs, skip-mask ruled out)
+  then ROCK_SLIDE/turn-end to finish turn 9; (2) turns 10-13 as
+  parameterizations (dossiers exist); (3) adopt #30's candidate A
+  (mechanical recipe banked) + chase its class-(b) occlusion bug; (4)
+  turn 9's shake-episode-2 parity + #30 class (a) + #23 remain the hard
+  unknowns; (5) S8 engine slices (win sequence → post-WIN scenes →
+  swap) now have complete ground truth.
+- **Notes:** no usage-limit events; zero merge conflicts across 8
+  worktree merges (incl. one intentional stacked/nested pair, folded in
+  one merge, cleaned inner-first); no PAPERCUTS.md changes (three
+  in-dossier notes, none tooling-class); worker discipline strong (three
+  honest no-land stops, every one with banked findings the next attempt
+  landed on; the cwd-persistence gotcha bit the SUPERVISOR twice —
+  memory updated). Interactive session; no escalations needed — the
+  one near-trigger (slice R's consecutive non-landings) resolved under
+  the established convergence-counting convention (§35→§36→§37→landed).
+
+---
 ## 225 — Bounded worker (S7 engine slice R rung (c) RETRY #3): mandatory diagnostic CONFIRMS the LIVE pressTick (10871) mismatches §36/§37's assumed anchor (10867) by 4 ticks — rung (c1) (lunge + erase-footprint) LANDS clean, `turn9-quickattack.json` **112/112, 0 diff**; rung (c2) (afterimage clones) gets close (diff shrinks to single digits % at every tick) but not 0-diff, reverted honestly
 
 - **State:** `src/engine/battleScene.ts` has rung (c1) only (lunge table +
@@ -54,68 +90,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the exact 4-tick anchor bug the PRIOR session's retry (#223) spent its
   whole cap failing to root-cause blind. PAPERCUT: none beyond prior
   sessions' own.
-
----
-## 224 — Worktree probes ×2 (supervisor-folded, stacked branches): ISSUES #30's pixel test CROWNS CANDIDATE A (425→230px, ≤B on 129/129 ticks, turns 7/8 generalize 46→17px; mechanical adoption recipe banked) and the half-texel lead is ELIMINATED DECISIVELY (11/11 variants 78-142× worse — the sampler's center convention is CONFIRMED correct); forensics splits the remaining ~230px into TWO independent classes — soft-gradient unknown (a) and an ONIX-GRAY occlusion-boundary error at the priority split (b), a different, locatable code path; merged, suite 877/877
-
-- **State:** both stacked probe branches merged in one merge, `npm
-  test` 877/877 + build green, nested worktrees cleaned inner-first.
-  ISSUES #30 rewritten with the three-probe state + the two-class
-  split. The second probe caught its own early methodology error
-  (ungated compositing patch) via palette forensics before it could
-  mislead — the gated `matchesReal` protocol held.
-- **Next:** third targeted attempt at slice R rung (c) launching now
-  (40-min cap, §37's named diagnostic first: pressTick anchor vs
-  axis/mirror); then wind-down. Future sessions: adopt candidate A
-  (mechanical), chase #30 class (b) as an ordinary occlusion bug, turn
-  9 rung (d) + turns 10-13 parameterizations, #30 class (a) + #23 stay
-  the two hard unknowns.
-- **Notes:** probes in contract (12.7 + 17.2 of 30 each).
-
----
-## 223 — Bounded worker (S7 engine slice R rung (c) RETRY): §36 puzzle #1 (real-sprite hide/unhide) RESOLVED by direct pixel evidence — the `invisible` RAM bit never gates rendering, real sprite draws continuously at its own x2/y2; implementation attempt hit an unresolved on-screen position bug and was **reverted rather than committed broken** — no engine code landed, `npm test` 877/877 + build green unchanged
-
-- **State:** no `src/` changes this session (written, tested against
-  fresh oracle PNGs, found wrong, `git checkout`-reverted). `npm test`
-  **877/877**, `npm run build` green, both unchanged from #222's own
-  state. `turn9-menu.json` still 111/111 (untouched). Rung (c) is
-  **still not landed** — no `turn9-quickattack.json` committed.
-- **Did:** Per the retry brief, pulled fresh `bin/oracle run` PNGs
-  (scratch trace, not committed) at every tick 10924-10950 and
-  4x-upscaled crops of the Pidgeotto region — **directly answers §36's
-  own puzzle #1**: at RAM 10925-10927 (`invisible=true`), rendered
-  pixels are byte-identical to the pre-lunge baseline (not hidden); at
-  render 10933, the PNG shows TWO distinct opaque-looking Pidgeotto
-  shapes overlapping — impossible if the real sprite were actually
-  hidden. Conclusion: `invisible` doesn't gate rendering here at all;
-  the real sprite draws continuously at its own `x2`/`y2` (§36's
-  table), same "render = RAM+1" lag as the afterimages — one lag
-  convention for the whole mechanism, not a distinct 3rd class.
-  Implemented `erasePidgeottoFootprint` (mirrors `eraseGrovyleFootprint`,
-  reusing `healthboxBackgroundColorAt` as-is) + lunge/afterimage offset
-  tables keyed off `pressTick=10867` (§36's own anchor), wired into
-  `drawTurn9FightSubmenuWindow`. Type-checked clean, but pixel-compared
-  wrong inside the window (10929-10946 all DIFF) — the offset barely
-  showed up on screen at all at 10929, not a subtle sign flip. Not
-  root-caused before the cap (likely `pressTick` mismatch between §36's
-  probe anchor and the dispatcher's live `sm.confirmElapsed`-derived
-  value, unverified — or an axis/mirror error for the opponent side).
-  Reverted `src/engine/battleScene.ts` outright per the "never commit a
-  red step" rule rather than land broken pixels.
-- **Next:** round 12 — rung (c1)/(c2) retry #2: **first** instrument the
-  LIVE `pressTick` this dispatcher branch actually computes and diff it
-  against `10867` directly (this session skipped that one cheap check
-  and paid for it) — battle-turn-notes.md §37 has the full precise
-  handoff (exact table values, the 3 diagnostic ticks to re-check
-  first, and the still-unattempted-but-in-range hitsplat/shake-episode-1
-  sub-rungs). Once the position bug is fixed, hitsplat (slot 7, 10-tick
-  `drawEndeavorHitsplats`-shaped precedent) and Onix's shake episode 1
-  are both within the already-probed window and cheap next adds. Rung
-  (d) (ROCK_SLIDE) still waits on (c) landing a correct prefix.
-- **Notes:** `docs/battle-turn-notes.md` §37 (new) has the full
-  derivation + precise handoff. PAPERCUT: none beyond #222's own —
-  the puzzle #1 resolution itself took ~25 min of PNG-crop-eyeballing
-  that a tighter "diff the live pressTick first" discipline could have
-  front-loaded before writing any table code.
-
----
