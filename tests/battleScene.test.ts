@@ -1750,7 +1750,7 @@ describe("S7 slice N-3: turn6FeatherSprites (src/engine/featherDance.ts) - RAM-t
   it("the first visible tick (7405, RAM 7404) is exactly slot 3's own spawn snapshot", () => {
     const sprites = turn6FeatherSprites(7405);
     expect(sprites).toHaveLength(1);
-    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3 });
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3, order: 0 });
   });
   it("all 8 sprites are live by render tick 7437 (RAM 7436, the last spawn group)", () => {
     expect(turn6FeatherSprites(7437)).toHaveLength(8);
@@ -1762,13 +1762,13 @@ describe("S7 engine slice Q rungs (b)/(c) (docs/battle-turn-notes.md §34): turn
     expect(turn7FeatherSprites(8438)).toEqual([]);
     const sprites = turn7FeatherSprites(8439);
     expect(sprites).toHaveLength(1);
-    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3 });
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3, order: 0 });
   });
   it("turn8FeatherSprites is empty before its own window and matches turn6's own spawn snapshot at the first live tick (9485, RAM 9484)", () => {
     expect(turn8FeatherSprites(9484)).toEqual([]);
     const sprites = turn8FeatherSprites(9485);
     expect(sprites).toHaveLength(1);
-    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3 });
+    expect(sprites[0]).toEqual({ centerX: 112, centerY: 64, pa: 225, pb: -120, pc: 120, pd: 225, animNum: 1, priority: 3, slot: 3, order: 0 });
   });
 });
 
@@ -1778,7 +1778,10 @@ describe("S7 engine slice Q rung (a) (docs/battle-turn-notes.md §29/§34): comp
     // are all priority 2 and overlap on-screen by render tick 7429 (+1 lag) -
     // this is the group whose draw order this session's oracle bisection
     // (battle-turn-notes.md §29/§34) found flips the residual's worst frames
-    // from ~30px wrong to near-0.
+    // from ~30px wrong to near-0. At this specific tick candidate A's
+    // simulated sSpriteOrder (ISSUES #30 adoption, below) happens to agree
+    // with the old descending-slot heuristic - see the next test for a tick
+    // where the two rules actually diverge.
     const sprites = turn6FeatherSprites(7429).filter((s) => s.priority === 2);
     const slots = sprites.map((s) => s.slot).sort((a, b) => a - b);
     expect(slots).toEqual([4, 7, 8, 10]);
@@ -1786,10 +1789,26 @@ describe("S7 engine slice Q rung (a) (docs/battle-turn-notes.md §29/§34): comp
     expect(sorted[sorted.length - 1]!.slot).toBe(4); // lowest slot drawn last -> on top
     expect(sorted[0]!.slot).toBe(10); // highest slot drawn first -> backmost
   });
-  it("orders by priority first, slot only as the same-priority tiebreak", () => {
-    const a = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 2, slot: 3 };
-    const b = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 3, slot: 12 };
+  it("orders by priority first, simulated sSpriteOrder position only as the same-priority tiebreak", () => {
+    const a = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 2, slot: 3, order: 0 };
+    const b = { centerX: 0, centerY: 0, pa: 256, pb: 0, pc: 0, pd: 256, animNum: 0 as const, priority: 3, slot: 12, order: 0 };
     expect(compareFeatherDrawOrder(a, b)).toBeGreaterThan(0); // b (higher priority number) sorts first
+  });
+  it("ISSUES #30 candidate A adoption: render tick 7430 (RAM 7429) is the window's first tick where the simulated sSpriteOrder tiebreak diverges from the old descending-slot heuristic, and the engine now follows the simulation", () => {
+    // Per docs/feather-order-notes.md's "candidate A wins" derivation: at RAM
+    // tick 7429 the persistent-insertion-sort simulation's front-to-back
+    // sSpriteOrder for the live priority-2 group {4,7,8,10} is [7,4,8,10]
+    // (position 0 = frontmost/on top), which paints (first..last) as
+    // [10,8,4,7] - slot 7 ends up on top. The old ascending-slot-skeleton-
+    // unaware "lower slot on top" heuristic instead painted [10,8,7,4] (slot
+    // 4 on top). This is a real, verified (tools/probe/dump-feather-order-
+    // candidates.py) divergence point, not a coincidence like tick 7429
+    // above - pins the actual algorithm swap, not just its output shape.
+    const sprites = turn6FeatherSprites(7430).filter((s) => s.priority === 2);
+    const slots = sprites.map((s) => s.slot).sort((a, b) => a - b);
+    expect(slots).toEqual([4, 7, 8, 10]);
+    const sorted = [...sprites].sort(compareFeatherDrawOrder);
+    expect(sorted.map((s) => s.slot)).toEqual([10, 8, 4, 7]); // paint order: 7 on top, NOT 4 (the old rule's answer)
   });
 });
 
