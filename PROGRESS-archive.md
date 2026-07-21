@@ -1,4 +1,63 @@
 ---
+## 222 — Bounded worker (S7 engine slice R rungs (c)+(d), QUICK_ATTACK animation + ROCK_SLIDE): **NOT LANDED** — RAM-probed the animation window exhaustively (new `dump-quickattack-anim.py`) and found 3-4 CONCURRENT lag classes plus a §35 sprite-slot correction (real Pidgeotto sprite is slot 5, not 2), but could not resolve a pixel-exact render within the cap; no engine code changed, no traces committed — banked as §36 (battle-turn-notes.md) for the next session, `npm test` 877/877 + build green unchanged
+
+- **State:** no `src/` changes this session. `npm test` **877/877**,
+  `npm run build` green (both unchanged from #220's own state — this
+  session made zero engine edits, only a new probe script and docs).
+  `turn9-menu.json` still **111/111** (untouched). Rungs (c)/(d) from
+  the supervisor's brief are **NOT landed**: no `turn9-quickattack.json`
+  or `turn9-rockslide*.json` committed.
+- **Did:** RAM-probed QUICK_ATTACK's animation window exhaustively
+  (`tools/probe/dump-quickattack-anim.py`, new, committed — dumps
+  x/y/x2/y2/invisible/objMode/paletteNum for an explicit sprite-slot
+  list + BLDCNT/BLDALPHA + `gBattlerSpriteIds`, over any tick range),
+  cross-checked against 20 spot pixel captures (sha256 + connected-
+  component diffs, not eyeballed). Found: (1) §35's own sprite-slot
+  claim was wrong — direct `gBattlerSpriteIds` read shows Pidgeotto's
+  real sprite is slot **5**, not 2 (slot 2 is unrelated, untouched all
+  window); slots 3/4 are the `TraceMonBlended` afterimage copies, slot
+  7 the hitsplat (both confirmed right). (2) The blend registers
+  (`BLDCNT=0x3f40`/`BLDALPHA=0x080c`, EVA=12/EVB=8) match
+  `drawSpriteSheetBlended`'s existing DOUBLE_TEAM-clone blend ratio
+  EXACTLY — no new blend primitive needed. (3) A full per-tick table
+  for the 10925-10946 lunge/trace/hitsplat window is now banked (§36).
+  (4) The real sprite's own hide (RAM 10925) and un-hide (RAM 10946→
+  10947) instants do NOT fit either a 0-tick or 1-tick render lag
+  against the observed 0-diff-through-10928/first-diff-10929/0-diff-
+  again-10947 pixel evidence — a genuine 3rd(+) lag class this session
+  ran out of time bisecting. (5) A second shake episode (~10957-10976,
+  Onix's healthbox wobbling in lockstep, ENDEAVOR's own "3 sprites at
+  once" shape) shows RAM alternating every tick while three sampled
+  render ticks spanning both parities are PIXEL-IDENTICAL — RAM change
+  doesn't always cross a rendered pixel boundary. Wrote up the full
+  ledger as `docs/battle-turn-notes.md` §36 rather than guess at a
+  render and risk red captures.
+- **Next:** round 11 — the render-lag puzzle above is the concrete
+  next step (§36 has the full per-tick table + the exact contradiction
+  to resolve — likely needs 2-3 more spot pixel probes right at the
+  10925-10928 and 10946-10947 boundaries specifically, not a re-run of
+  the wide sweep this session already did). Once resolved,
+  `drawSpriteSheetBlended`/`drawPlayerHealthboxHpOverlay` are both
+  already-generic and ready to wire in with zero new primitives. Rung
+  (d) (ROCK_SLIDE) is unblocked by strong precedent (turn 6/7's own
+  `drawTurn6RockSlideAttack`/`drawTurn7RockSlideAttack`) but
+  structurally waits on rung (c) landing a correct prefix first.
+- **Notes:** PAPERCUT: none of the existing probe scripts dumped an
+  explicit, arbitrary sprite-slot list cross-checked against
+  `gBattlerSpriteIds` — every prior one either hardcoded a slot or
+  resolved it from `gBattleAnimAttacker`'s own single-attacker
+  assumption, which is why §35's own slot-2 mislabel went unnoticed
+  for a full session; the new `dump-quickattack-anim.py` fixes this
+  generally, worth reusing as-is for future multi-sprite windows.
+  Session spent most of its 60-minute cap on RAM/pixel investigation
+  (deep multi-sprite/multi-lag animation, genuinely harder than any
+  prior single-mechanism window in this arc) rather than code -
+  landed a probe-only "scout" outcome per the brief's own explicit
+  "never red" fallback, matching the shape of prior worktree-probe
+  entries (#219/#221) even though this was a main-lane, not worktree,
+  session.
+
+---
 ## 221 — Worktree probe (supervisor-folded): ISSUES #30's sSpriteOrder lead NARROWED TO 2 CANDIDATES — the real mechanism (source-read) is a full per-frame insertion sort whose history only matters at exact (priority, wrapped-Y) ties, and the mirrored-pair feathers make ties pervasive (why fresh Y-sorts can't model it); of the 2^3 unknowable initial pair-orders, ONLY the (4,7) pair matters — 2 live candidates, identical across turns 6/7/8; `docs/feather-order-notes.md` + rerunnable simulation script merged (supervisor-rerun reproduces), suite 877/877
 
 - **State:** merged into master post-slice-R, `npm test` 877/877 +

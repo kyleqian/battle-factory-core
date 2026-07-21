@@ -4,6 +4,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 225 — Bounded worker (S7 engine slice R rung (c) RETRY #3): mandatory diagnostic CONFIRMS the LIVE pressTick (10871) mismatches §36/§37's assumed anchor (10867) by 4 ticks — rung (c1) (lunge + erase-footprint) LANDS clean, `turn9-quickattack.json` **112/112, 0 diff**; rung (c2) (afterimage clones) gets close (diff shrinks to single digits % at every tick) but not 0-diff, reverted honestly
+
+- **State:** `src/engine/battleScene.ts` has rung (c1) only (lunge table +
+  `erasePidgeottoFootprint` + `drawTurn9QuickAttackLunge`, wired into
+  `drawTurn9FightSubmenuWindow`). `npm test` **880/880** (877+3 new
+  Tier-1 pins), `npm run build` green. New `tools/compare/traces/
+  turn9-quickattack.json` committed, **112/112, 0 diff** (extends
+  `turn9-menu.json`'s own 10818-10928 boundary one tick to 10929, the
+  animation's own first active render). Regressions unchanged:
+  `turn9-menu.json` **111/111**, `turn8-menu.json` **88/88**,
+  `turn1-cloneanim.json` **230/230**.
+- **Did:** Per the retry brief's mandatory first step, instrumented the
+  LIVE dispatcher (`tools/compare/scratch/diag-quickattack-anchor.ts`,
+  committed) instead of re-guessing — ran `battle1-turn9-dense.json`'s
+  own script through the real `core.ts` `tick()` and printed
+  `fightSubmenu.confirmElapsed` at the key ticks: constant `9831`
+  throughout, so `pressTick = TICK0+confirmElapsed = 10871`, not
+  §36/§37's assumed `10867`. **This confirms suspect (1) outright** (a
+  4-tick anchor error, not eliminated as a red herring). Re-wrote the
+  lunge table's delay constant from the correct algebra (`57 =
+  10928-10871`, not the reverted attempt's `61 = 10928-10867`) — same
+  RAM-tabled offsets from §36, same erase/redraw shape as the reverted
+  attempt, only the anchor fixed. Suspect (2) (axis/mirror) never needed
+  invoking — checked by precedent first (`drawDoubleTeamClones`/
+  `endeavorShakeX2` both apply RAM `x2` via plain addition to the
+  opponent-side corner, no mirror; this fix uses the same convention)
+  and confirmed sufficient by the clean pixel match. Landed (c1) fully
+  green (0 diff 10924-10929, the lunge's first active tick). Attempted
+  (c2) (the two `TraceMonBlended` afterimage clones, `drawSpriteSheetBlended`
+  reused verbatim, undarkened per §36): diff pixel counts shrank
+  substantially at every touched tick (e.g. 10933: 1180→123px, 10934:
+  1125→39px) confirming the general approach right, but none reached 0
+  — ruled out the healthbox-skip-mask as the cause (removing it left
+  diff counts byte-identical), crop-diffed tick 10930 and found the
+  afterimage's own rendered detail looks flatter than the oracle's, not
+  root-caused before the cap — reverted rather than commit a
+  shrunk-but-nonzero diff as if it were a landed rung.
+- **Next:** round 13 — rung (c2) retry: `docs/battle-turn-notes.md` §38
+  has the full diagnostic (live-pressTick console output, the c1 table,
+  the c2 diff-shrinkage data, the ruled-out skip-mask candidate, and a
+  4-step bisection plan — RAM-reverify the slot-3/4 lifetime boundary
+  ticks first, then isolate slot 3 alone before debugging both
+  afterimages together). Rungs (c3) (hitsplat + shake episode 1) and
+  (c4) (drain/text) remain fully unattempted. Rung (d) (ROCK_SLIDE)
+  still waits on (c) landing a correct prefix.
+- **Notes:** the mandatory-diagnostic-first discipline the brief
+  demanded paid off directly — a 5-minute `console.log` harness found
+  the exact 4-tick anchor bug the PRIOR session's retry (#223) spent its
+  whole cap failing to root-cause blind. PAPERCUT: none beyond prior
+  sessions' own.
+
+---
 ## 224 — Worktree probes ×2 (supervisor-folded, stacked branches): ISSUES #30's pixel test CROWNS CANDIDATE A (425→230px, ≤B on 129/129 ticks, turns 7/8 generalize 46→17px; mechanical adoption recipe banked) and the half-texel lead is ELIMINATED DECISIVELY (11/11 variants 78-142× worse — the sampler's center convention is CONFIRMED correct); forensics splits the remaining ~230px into TWO independent classes — soft-gradient unknown (a) and an ONIX-GRAY occlusion-boundary error at the priority split (b), a different, locatable code path; merged, suite 877/877
 
 - **State:** both stacked probe branches merged in one merge, `npm
@@ -65,64 +117,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the puzzle #1 resolution itself took ~25 min of PNG-crop-eyeballing
   that a tighter "diff the live pressTick first" discipline could have
   front-loaded before writing any table code.
-
----
-## 222 — Bounded worker (S7 engine slice R rungs (c)+(d), QUICK_ATTACK animation + ROCK_SLIDE): **NOT LANDED** — RAM-probed the animation window exhaustively (new `dump-quickattack-anim.py`) and found 3-4 CONCURRENT lag classes plus a §35 sprite-slot correction (real Pidgeotto sprite is slot 5, not 2), but could not resolve a pixel-exact render within the cap; no engine code changed, no traces committed — banked as §36 (battle-turn-notes.md) for the next session, `npm test` 877/877 + build green unchanged
-
-- **State:** no `src/` changes this session. `npm test` **877/877**,
-  `npm run build` green (both unchanged from #220's own state — this
-  session made zero engine edits, only a new probe script and docs).
-  `turn9-menu.json` still **111/111** (untouched). Rungs (c)/(d) from
-  the supervisor's brief are **NOT landed**: no `turn9-quickattack.json`
-  or `turn9-rockslide*.json` committed.
-- **Did:** RAM-probed QUICK_ATTACK's animation window exhaustively
-  (`tools/probe/dump-quickattack-anim.py`, new, committed — dumps
-  x/y/x2/y2/invisible/objMode/paletteNum for an explicit sprite-slot
-  list + BLDCNT/BLDALPHA + `gBattlerSpriteIds`, over any tick range),
-  cross-checked against 20 spot pixel captures (sha256 + connected-
-  component diffs, not eyeballed). Found: (1) §35's own sprite-slot
-  claim was wrong — direct `gBattlerSpriteIds` read shows Pidgeotto's
-  real sprite is slot **5**, not 2 (slot 2 is unrelated, untouched all
-  window); slots 3/4 are the `TraceMonBlended` afterimage copies, slot
-  7 the hitsplat (both confirmed right). (2) The blend registers
-  (`BLDCNT=0x3f40`/`BLDALPHA=0x080c`, EVA=12/EVB=8) match
-  `drawSpriteSheetBlended`'s existing DOUBLE_TEAM-clone blend ratio
-  EXACTLY — no new blend primitive needed. (3) A full per-tick table
-  for the 10925-10946 lunge/trace/hitsplat window is now banked (§36).
-  (4) The real sprite's own hide (RAM 10925) and un-hide (RAM 10946→
-  10947) instants do NOT fit either a 0-tick or 1-tick render lag
-  against the observed 0-diff-through-10928/first-diff-10929/0-diff-
-  again-10947 pixel evidence — a genuine 3rd(+) lag class this session
-  ran out of time bisecting. (5) A second shake episode (~10957-10976,
-  Onix's healthbox wobbling in lockstep, ENDEAVOR's own "3 sprites at
-  once" shape) shows RAM alternating every tick while three sampled
-  render ticks spanning both parities are PIXEL-IDENTICAL — RAM change
-  doesn't always cross a rendered pixel boundary. Wrote up the full
-  ledger as `docs/battle-turn-notes.md` §36 rather than guess at a
-  render and risk red captures.
-- **Next:** round 11 — the render-lag puzzle above is the concrete
-  next step (§36 has the full per-tick table + the exact contradiction
-  to resolve — likely needs 2-3 more spot pixel probes right at the
-  10925-10928 and 10946-10947 boundaries specifically, not a re-run of
-  the wide sweep this session already did). Once resolved,
-  `drawSpriteSheetBlended`/`drawPlayerHealthboxHpOverlay` are both
-  already-generic and ready to wire in with zero new primitives. Rung
-  (d) (ROCK_SLIDE) is unblocked by strong precedent (turn 6/7's own
-  `drawTurn6RockSlideAttack`/`drawTurn7RockSlideAttack`) but
-  structurally waits on rung (c) landing a correct prefix first.
-- **Notes:** PAPERCUT: none of the existing probe scripts dumped an
-  explicit, arbitrary sprite-slot list cross-checked against
-  `gBattlerSpriteIds` — every prior one either hardcoded a slot or
-  resolved it from `gBattleAnimAttacker`'s own single-attacker
-  assumption, which is why §35's own slot-2 mislabel went unnoticed
-  for a full session; the new `dump-quickattack-anim.py` fixes this
-  generally, worth reusing as-is for future multi-sprite windows.
-  Session spent most of its 60-minute cap on RAM/pixel investigation
-  (deep multi-sprite/multi-lag animation, genuinely harder than any
-  prior single-mechanism window in this arc) rather than code -
-  landed a probe-only "scout" outcome per the brief's own explicit
-  "never red" fallback, matching the shape of prior worktree-probe
-  entries (#219/#221) even though this was a main-lane, not worktree,
-  session.
 
 ---

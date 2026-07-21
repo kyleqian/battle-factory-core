@@ -7298,6 +7298,80 @@ export function turn9QuickAttackTextVisibleChars(t: number, pressTick: number): 
 }
 
 /**
+ * S7 slice R rung (c1): the real Pidgeotto sprite's own (slot 5) lunge -
+ * out toward Onix and back - during QUICK_ATTACK's animation, RAM-tabled by
+ * `docs/battle-turn-notes.md` §36 (RAM ticks 10928-10933, x2/y2 nonzero;
+ * 10934 on, back to (0,0) - a 6-tick out-and-back curve, not a ramp to a
+ * held extreme). **Retry #3's own diagnostic (§38) corrects §36/§37's own
+ * assumed anchor**: RAM ticks are absolute (this table's own indices, valid
+ * as probed), but the delay from `pressTick` to the window's first nonzero
+ * tick is NOT `61` (`10928-10867`, §36/§37's assumed anchor) - the LIVE
+ * `pressTick` this dispatcher actually computes for this trace
+ * (`TICK0 + sm.confirmElapsed`) is `10871`, four ticks later than assumed,
+ * so the correct delay is `57` (`10928-10871`), fit directly against the
+ * live value (an `console.log` in a scratch harness against
+ * `battle1-turn9-dense.json`'s own script, not re-guessed) rather than
+ * reused from the earlier probe's own mislabeled anchor. `invisible`
+ * doesn't matter here (§37's own puzzle-#1 resolution) - the real sprite
+ * draws continuously at its own x2/y2, which happen to be (0,0) - i.e.
+ * indistinguishable from the un-animated baseline - everywhere outside
+ * this 6-tick window, so no special-casing is needed past it.
+ */
+const TURN9_QUICKATTACK_LUNGE_RENDER_LAG = 1; // render = RAM tick + 1, same family as every other creation/position lag this dossier has established (§36/§37)
+const TURN9_QUICKATTACK_LUNGE_DELAY = 57; // RAM 10928 (first nonzero x2/y2) - live pressTick 10871
+const TURN9_QUICKATTACK_LUNGE_TABLE: readonly { x2: number; y2: number }[] = [
+  { x2: -17, y2: 2 }, // RAM 10928 (render 10929)
+  { x2: -24, y2: 6 }, // RAM 10929 (render 10930)
+  { x2: -17, y2: 11 }, // RAM 10930 (render 10931)
+  { x2: 0, y2: 12 }, // RAM 10931 (render 10932)
+  { x2: 16, y2: 11 }, // RAM 10932 (render 10933)
+  { x2: 24, y2: 6 }, // RAM 10933 (render 10934)
+];
+
+/** The real Pidgeotto sprite's own lunge offset at trace tick `t`, or `null` outside the window (the caller should draw nothing extra - the normal, already-drawn settled sprite is already correct there). */
+export function turn9QuickAttackLungeOffset(t: number, pressTick: number): { x2: number; y2: number } | null {
+  const ramTick = t - TURN9_QUICKATTACK_LUNGE_RENDER_LAG;
+  const n = ramTick - pressTick - TURN9_QUICKATTACK_LUNGE_DELAY;
+  if (n < 0 || n >= TURN9_QUICKATTACK_LUNGE_TABLE.length) return null;
+  return TURN9_QUICKATTACK_LUNGE_TABLE[n]!;
+}
+
+/**
+ * Erases Pidgeotto's own real-sprite footprint (only the settled tileset's
+ * opaque pixels, not the whole bounding box) back to the true field
+ * background - `eraseGrovyleFootprint`'s own shape, mirrored for the
+ * opponent-side Pidgeotto sprite/corner (both sit in the same opponent-side
+ * screen region, `GROVYLE_CORNER`/`PIDGEOTTO_CORNER` both `x=144`).
+ */
+function erasePidgeottoFootprint(fb: Uint8Array): void {
+  const { tileset } = pidgeottoFrontSprite;
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          if (tile[py * 8 + px] === 0) continue;
+          const x = PIDGEOTTO_CORNER.x + tx * 8 + px;
+          const y = PIDGEOTTO_CORNER.y + ty * 8 + py;
+          const bg = healthboxBackgroundColorAt(x, y);
+          if (bg) setPixel(fb, x, y, bg);
+        }
+      }
+    }
+  }
+}
+
+/** Draws the real Pidgeotto sprite at its lunge offset (erasing its normal-position footprint first) if the window is active - returns whether it drew anything, so the caller knows the normal draw already in `fb` needs no further changes otherwise. Afterimage clones (slots 3/4, rung (c2)) NOT modeled yet - see docs/battle-turn-notes.md §38. */
+function drawTurn9QuickAttackLunge(fb: Uint8Array, t: number, pressTick: number): boolean {
+  const offset = turn9QuickAttackLungeOffset(t, pressTick);
+  if (!offset) return false;
+  erasePidgeottoFootprint(fb);
+  drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + offset.x2, PIDGEOTTO_CORNER.y + offset.y2);
+  return true;
+}
+
+/**
  * S7 slice R rung (b): turn 9's own FIGHT submenu - cursor enters at BIND
  * (slot 1, persisted from turn 8's own confirm) with PP read 19/20 (turn
  * 8's own miss still decremented it, `turn8Resolved` passed as
@@ -7330,6 +7404,7 @@ function drawTurn9FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
     if (t >= textStart) {
       const bounceTick = turn9KickoffBounceTick(t, pressTick);
       drawTurn9FieldBase(fb, t, bounceTick);
+      drawTurn9QuickAttackLunge(fb, t, pressTick);
       drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
       drawMessageTextLines(fb, TURN9_QUICKATTACK_LINE1, TURN9_QUICKATTACK_LINE2, turn9QuickAttackTextVisibleChars(t, pressTick));
       return;

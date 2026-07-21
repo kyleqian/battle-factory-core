@@ -6339,3 +6339,142 @@ shape as §36. `npm test` 877/877, `npm run build` green, both re-verified
 post-revert. No new committed tooling this session (the scratch trace used
 for the PNG comparisons was not committed, matching every prior session's
 "scratch stays scratch" convention).
+
+## 38. S7 slice R rung (c) RETRY #3: the mandatory diagnostic CONFIRMS suspect (1) - the LIVE `pressTick` is 10871, not §36/§37's assumed 10867 - rung (c1) (lunge + erase-footprint) lands clean, `turn9-quickattack.json` **112/112, 0 diff**; rung (c2) (afterimage clones) attempted, gets close but NOT 0-diff, reverted rather than committed broken (bounded worker)
+
+Per the retry brief's own mandatory first step, instrumented the LIVE
+dispatcher (`tools/compare/scratch/diag-quickattack-anchor.ts`, committed -
+runs `battle1-turn9-dense.json`'s own script through the real `core.ts`
+`tick()`, printing `battleScene.fightSubmenu.confirmElapsed` at the key
+render ticks) instead of re-guessing:
+
+```
+frame=10929 confirmElapsed=9831 openElapsed=9787 closeElapsed=null
+frame=10933 confirmElapsed=9831 openElapsed=9787 closeElapsed=null
+frame=10940 confirmElapsed=9831 openElapsed=9787 closeElapsed=null
+frame=10946 confirmElapsed=9831 openElapsed=9787 closeElapsed=null
+```
+
+`TICK0(1040) + confirmElapsed(9831) = 10871`, confirmed constant across the
+whole window (`confirmElapsed` is a one-time snapshot at confirm, not a
+live counter - `battleMenu.ts:956`). **This IS suspect (1), confirmed, not
+eliminated**: §36/§37's own anchor (10867) is 4 ticks early. Cross-checked
+that `turn9-menu.json` and `battle1-turn9-dense.json` share byte-identical
+`segments` (same button script, only `captureFrames` differs) - so this
+10871 is the correct anchor for BOTH traces, not a script mismatch.
+(§37's own doc-comment claim that the shipped `TURN9_QUICKATTACK_TEXT_DELAY`
+=11 was fit against a "10878 first-changing-tick" observation at assumed
+pressTick 10867 doesn't algebraically reconcile with the live 10871 either -
+not re-derived this session, flagged for whoever next touches that comment,
+but doesn't block this rung since the shipped constant is empirically
+correct regardless of the comment's own arithmetic.)
+
+**Suspect (2) (axis/mirror error) was checked by precedent, not empirically
+needed**: `drawDoubleTeamClones` (`GROVYLE_CORNER.x + offsets.a`) and
+`endeavorShakeX2`'s own call site (`ONIX_MATERIALIZE_CORNER.x + shakeX2`)
+both apply RAM-read `x2` via plain addition to the opponent-side corner,
+no mirror - the same convention this session's own fix uses
+(`PIDGEOTTO_CORNER.x + offset.x2`). This turned out sufficient (see
+results below) - suspect (2) never needed invoking.
+
+### Rung (c1): lunge + erase-footprint - LANDED
+
+`turn9QuickAttackLungeOffset` (a 6-entry `x2`/`y2` table, RAM 10928-10933,
+the real sprite's own out-and-back curve) + `erasePidgeottoFootprint`
+(`eraseGrovyleFootprint`'s own shape, `pidgeottoFrontSprite`/
+`PIDGEOTTO_CORNER` swapped in) + `drawTurn9QuickAttackLunge` (erase, redraw
+opaque at the offset) wired into `drawTurn9FightSubmenuWindow`'s
+post-text-settle branch, keyed off the LIVE `pressTick` (already correctly
+computed in that scope) with delay constant `57` (`10928-10871`, NOT the
+reverted attempt's `61`). `npx tsc --noEmit` clean, `npm test` **880/880**
+(3 new Tier-1 tests pinning the offset table against the RAM ground truth
+directly), `npm run build` green.
+
+Compared against fresh oracle PNGs (scratch trace, ticks 10924-10950,
+`captureFrames` override on `battle1-turn9-dense.json`'s own script, not
+committed): **0 diff at every tick 10924-10929** (previously the reverted
+attempt's own failure point) - the lunge's own FIRST active tick (render
+10929, table index 0) is now pixel-exact. Committed `tools/compare/traces/
+turn9-quickattack.json` (`turn9-menu.json`'s own script, `captureFrames`
+extended from its 10928 boundary to 10929) - **112/112, 0 diff**, one tick
+past every prior session's own boundary and the first tick this whole rung
+has ever landed. Regressions all still green: `turn9-menu.json` **111/111**,
+`turn8-menu.json` **88/88**, `turn1-cloneanim.json` **230/230** (the last
+two exercise the same `drawDoubleTeamClones`/`eraseGrovyleFootprint`-shaped
+machinery this session's own new code mirrors).
+
+**Honest scope of what's proven**: only render 10929 (table index 0) is
+independently pixel-verified in isolation - table indices 1-5 (renders
+10930-10934) only become verifiable once the afterimage clones (below) are
+also modeled, since real hardware shows BOTH at once past 10929. The c2
+diagnostic below is strong circumstantial evidence the lunge table's
+remaining entries are also correct (diff shrinks to near-zero once
+afterimages are added, not just "still wrong") but this is not a proof.
+
+### Rung (c2): afterimage clones - attempted, NOT landed, reverted
+
+Added the two `AnimTask_TraceMonBlended` clones (slots 3/4) via
+`drawSpriteSheetBlended` (same `eva=12/evb=8` `drawDoubleTeamClones`
+already established, undarkened palette per §36's own note), fixed
+(non-translating) positions per §36's table, delays fit the same
+live-pressTick-relative way as the lunge (`n = ramTick - 10871`, ranges
+`[57,64]`+`[67,69]` for slot 3's two lives, `[62,69]` for slot 4).
+`npx tsc --noEmit` clean. Compared against the same fresh-PNG scratch
+window: **diff pixel counts shrank substantially at every tick this change
+touches** (10930: 1125->705px, 10931: 1181->789px, 10932: 1195->429px,
+10933: 1180->123px, 10934: 1125->39px) - confirming the general approach
+(delays, positions, blend ratio, real-sprite-drawn-last ordering) is
+directionally correct, but **none reached 0** - not a clean rung. Tick
+10935 gained a large NEW diff (2308px) matching the hitsplat's own creation
+tick (RAM 10934, render 10934+1) - expected/out-of-scope (rung (c3)), not
+a regression from this change.
+
+Ruled out one candidate before reverting: the `isOpponentHealthboxOpaqueAt`
+skip mask on the blended clone draws - removed it entirely, diff counts
+were byte-for-byte IDENTICAL (705px etc., unchanged) at every tick, so the
+mask isn't gating anything in this region; not the cause.
+
+4x-cropped tick 10930 (`x:110-220,y:5-90`) side-by-side: the real sprite's
+own silhouette/position looks right, but the region where the trace-1
+afterimage should show through renders as a flatter, less-detailed brown
+patch versus the oracle's own finer striped wing detail at the same spot -
+suggestive of either a wrong blend target-2 sample (background color read
+at the wrong pixel) or a subtly wrong afterimage position/timing (the
+"frozen" window boundaries weren't independently re-verified against fresh
+RAM, only transcribed from §36's own table) - **not root-caused before
+time ran out**, reverted (`erasePidgeottoFootprint`'s caller now only
+draws the lunge again, matching the "never commit an unverified/partial
+rung as if it were green" rule) rather than land a shrunk-but-nonzero diff.
+
+### Verification
+
+`npm test` **880/880** (877 + 3 new), `npm run build` green.
+`tools/compare/traces/turn9-quickattack.json` (new, committed) **112/112,
+0 diff**. `turn9-menu.json` **111/111**, `turn8-menu.json` **88/88**,
+`turn1-cloneanim.json` **230/230**, all re-verified unchanged. New
+committed tooling: `tools/compare/scratch/diag-quickattack-anchor.ts` (the
+live-pressTick instrument - reusable for any future turn's own anchor
+diagnostic). The c2 attempt's own code was written, tested, found short of
+0-diff, and reverted - not committed broken.
+
+### Handoff for rung (c2) retry
+
+1. The delay constants transcribed above (`[57,64]`, `[67,69]`, `[62,69]`,
+   all relative to live pressTick 10871) are believed right (same fit
+   methodology as the now-proven lunge table) but were NOT independently
+   RAM-reverified this session - worth a fresh RAM probe at exactly the
+   boundary ticks (10935/10936/10937/10938 for slot 3's gap, 10940/10941
+   for both slots' final destruction) before assuming the residual is a
+   position bug rather than a boundary-tick bug.
+2. The blend math itself (`blendedTile`/`drawSpriteSheetBlended`) is
+   unchanged, proven code (turn 1/4's own `turn1-cloneanim.json` 230/230
+   still green) - the residual is more likely in WHICH pixels get blended
+   (position/timing) than the blend formula.
+3. Bisect fast the same way this session did: scratch `captureFrames`
+   override on `battle1-turn9-dense.json` + `npm run compare` + 4x `PIL`
+   crops at `x:110-220,y:5-90` for ticks 10930/10933/10935 (before slot
+   4/hitsplat get involved) - isolate slot 3 alone first (temporarily
+   stub slot 4 out) before debugging both afterimages at once.
+4. Hitsplat (slot 7, `(72,88)`-shaped per `drawEndeavorHitsplats`'s own
+   10-tick precedent) and Onix's shake episode 1 remain fully unattempted
+   (rung (c3)), unchanged from §37's own scope.

@@ -52,6 +52,7 @@ import {
   TURN7_REGIME2_TO_REGIME1_SHIFT,
   TURN8_REGIME3_TO_REGIME1_SHIFT,
   turn7KickoffBounceTick,
+  turn9QuickAttackLungeOffset,
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
@@ -1904,5 +1905,24 @@ describe("S7 slice M-5: turn5SitrusOnixHp - the heal's own 1->31 HP-bar climb, P
 describe("S7 slice M-5: turn5SitrusResettledBounceTick - the settled turn-6 menu reuses menuIdleBounce verbatim, re-anchored so the redraw tick (7222) lines up with MENU_IDLE_BLANK_END_TICK+1 (1748), grid-search-confirmed against a 17-sample healthboxY2 sequence with zero mismatches", () => {
   it("maps the menu redraw tick to the shared epoch's own fresh-restart point", () => {
     expect(turn5SitrusResettledBounceTick(7222)).toBe(1748);
+  });
+});
+
+describe("S7 slice R rung (c1): turn9QuickAttackLungeOffset - the real Pidgeotto sprite's own lunge, RAM-tabled (docs/battle-turn-notes.md §36/§38), fit against the LIVE pressTick this dispatcher actually computes for battle1-turn9-dense.json (10871, not §36/§37's assumed 10867 - retry #3's own diagnostic correction)", () => {
+  const pressTick = 10871;
+  it("is null before the window (render 10928, the last unshifted tick)", () => {
+    expect(turn9QuickAttackLungeOffset(10928, pressTick)).toBeNull();
+  });
+  it("matches the RAM table's own 6-tick out-and-back curve at renders 10929-10934", () => {
+    expect(turn9QuickAttackLungeOffset(10929, pressTick)).toEqual({ x2: -17, y2: 2 });
+    expect(turn9QuickAttackLungeOffset(10930, pressTick)).toEqual({ x2: -24, y2: 6 });
+    expect(turn9QuickAttackLungeOffset(10931, pressTick)).toEqual({ x2: -17, y2: 11 });
+    expect(turn9QuickAttackLungeOffset(10932, pressTick)).toEqual({ x2: 0, y2: 12 });
+    expect(turn9QuickAttackLungeOffset(10933, pressTick)).toEqual({ x2: 16, y2: 11 });
+    expect(turn9QuickAttackLungeOffset(10934, pressTick)).toEqual({ x2: 24, y2: 6 });
+  });
+  it("is null again from render 10935 on (real sprite back at (0,0), indistinguishable from the un-animated baseline)", () => {
+    expect(turn9QuickAttackLungeOffset(10935, pressTick)).toBeNull();
+    expect(turn9QuickAttackLungeOffset(11000, pressTick)).toBeNull();
   });
 });
