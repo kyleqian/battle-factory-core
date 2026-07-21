@@ -344,3 +344,199 @@ instruction. Every PNG text claim in §4-§5 was read directly from a
 rendered frame (several via a zoomed PIL crop for small HP-digit text),
 not inferred from RAM or `src/data/gen/moves.json` alone. §6 is explicitly
 flagged as light/unverified lookahead, not held to the same bar.
+
+## 2026-07-21 update: engine-readiness probe — parameterization verdict, pressTicks, mechanism-carryover table, ROCK_SLIDE-miss zero-animation proof (worktree lane, PROBE step — no `src/` changes)
+
+Closes the specific gap the S7/S8 dispatcher-wiring lane needs before turn
+12 is a pure wiring job: exact `pressTick`s for both halves (not just
+approximate tick ranges), a mechanism-by-mechanism AERIAL_ACE carryover
+verdict against `docs/aerial-ace-notes.md`'s own turn-10 tables, a
+pixel-band-verified (not assumed) read on Onix's HP drain, and — the
+genuinely new part — RAM-level proof of exactly what does and doesn't
+happen on ROCK_SLIDE's own miss. Per this run's fresh-oracle-constants
+rule, nothing below is trusted from this doc's own earlier §1-§7 prose
+unchanged — every constant was independently re-derived this session
+against a fresh `bin/oracle run` and/or fresh RAM probe, then cross-checked
+against the earlier session's own citations (all of which held up).
+**PAPERCUT re-hit**: both `dump-aerialace-anim.py` and
+`dump-battle-bars.py` exit 139 after writing complete, valid JSON on this
+trace too — validated by loading/parsing the output file directly, same
+workaround as every prior session's own note on this.
+
+### 1. AERIAL_ACE half: `pressTick`, mechanism carryover — CONFIRMED as a pure +2068-tick parameterization of turn 10's own tables
+
+**Live-instrument method unavailable this turn** (unlike turn 10's own
+derivation): per the brief's own mandatory-first-step rule, instrumented
+the live dispatcher first (`tools/compare/scratch/diag-turn12-anchor.ts`,
+same pattern as `diag-aerialace-anchor.ts`) — `fightSubmenu.confirmElapsed`
+reads **frozen at turn 10's own settled value (11265)** across the ENTIRE
+turn-12 window (14338 through 15374, every watched tick identical). The
+engine's own dispatch simply doesn't extend rendering past turn 10 yet, so
+there is no live confirm-press state to read for turn 11/12 — this method,
+which worked for turn 10 precisely because turn 10's own window WAS the
+live dispatch target at the time, does not generalize to an unwired turn.
+Falls back to the fit method instead (same one `TURN10_ROCKSLIDE_PRESS_
+TICK` already used for its own synthetic anchor).
+
+**`TURN12_AERIALACE_PRESS_TICK = 14373`**, cross-validated three
+independent ways, all converging exactly:
+1. `TURN10_AERIALACE_TEXT_DELAY`(11) fit against this session's own fresh
+   kickoff-text-typing-start tick — a per-tick `bin/oracle run` over
+   14370-14392 finds the box transition begins at **14384** (static
+   through 14383, first differing frame at 14384, PASS-checked in
+   `verify-turn12.ts`) → `14384-11=14373`.
+2. `gBattlerAttacker`'s own flip tick, **14378** (RAM-cross-cited from this
+   doc's own §4 above, itself already fresh-oracle-derived last session)
+   is exactly `pressTick+5` — the SAME offset turn 10's own flip tick
+   (12310 = 12305+5) shows.
+3. **The full AERIAL_ACE mechanism RAM table is IDENTICAL to turn 10's own
+   table (`docs/aerial-ace-notes.md`), shifted by a CONSTANT +2068 RAM
+   ticks at every single sampled value** — fresh `dump-aerialace-anim.py`
+   run, RAM ticks 14400-14460 (`/tmp/turn12-aerialace-anim.json`,
+   reproducible, not committed per this run's own scratch-data
+   convention):
+
+   | mechanism | turn 10 (RAM, `aerial-ace-notes.md`) | turn 12 (RAM, this session, fresh) | offset |
+   |---|---|---|---|
+   | 5 (slice, slot 3): x2/y2/tileNum table | 12360:(-4,4)t305 → 12374:(-51,50)t353 → held (-63,62)t353 from 12379 | 14428:(-4,4)t305 → 14442:(-51,50)t353 → held (-63,62)t353 from 14447 | **+2068**, every single tick |
+   | 1 (Pidgeotto's lunge, slot 5) | 12360:(-17,2)→12361:(-24,6)→12362:(-17,11)→12363:(0,12)→12364:(16,11)→12365:(24,6)→12366:(0,0) [CORRECTED table] | 14428:(-17,2)→14429:(-24,6)→14430:(-17,11)→14431:(0,12)→14432:(16,11)→14433:(24,6)→14434:(0,0) | **+2068** — matches the dated-section's own CORRECTED table exactly, not the original §40 (turn10-notes.md) mis-citation |
+   | 3 (clones, slots 4/7) | slot4 life1 12360-12367 (-17,2); slot7 12365-12372 (24,6) | slot4 life1 14428-14435 (-17,2); slot7 14433-14440 (24,6) | **+2068** both |
+   | 2 (Onix shake, slot 6) | y2 square-wave 3,3,0,0 onset RAM 12369 | y2 square-wave 3,3,0,0 onset RAM 14437 | **+2068** |
+   | 4 (palette pulse, slot 8) | darkened palette RAM (BLDY software blend) exactly 12368-12370 (3 ticks), sprite created 12367, destroyed 12375 | darkened palette RAM exactly 14436-14438 (3 ticks), sprite created 14435, destroyed 14443 | **+2068** |
+
+**Verdict: CONFIRMED — all five mechanisms carry over as a pure
+parameterization**, zero exceptions, zero new mechanism code needed. The
+whole window is just turn 10's own already-extracted tables plus a single
+new anchor constant (`+2068`, equivalently `TURN12_AERIALACE_PRESS_TICK -
+TURN10_AERIALACE_PRESS_TICK = 14373-12305 = 2068`) and turn 12's own new HP
+endpoints (14→4, vs. turn 10's 24→14). No table needed re-deriving from
+first principles — every value above is a straight lookup from the already
+-shipped turn-10 tables at a shifted tick.
+
+### 2. Onix's HP drain (14→4): RED band throughout, pixel-verified, not assumed
+
+Entering turn 12 Onix is already red (14/117=12.0%, established
+`docs/turn11-notes.md`); this session verifies the drain to 4/117=3.4%
+**stays red the whole way**, both via the pure math and via real pixels:
+
+- `calcBarFilledPixels(14/117).filledPixels === 5`,
+  `calcBarFilledPixels(4/117).filledPixels === 1` — both `<= HP_BAR_
+  YELLOW_THRESHOLD(9)` → `pickHpBarBand` returns `"red"` for both
+  endpoints, no crossing (`src/engine/healthboxAssembly.ts`).
+- **Direct pixel sample** (fresh `bin/oracle run`, PIL crop of the player
+  healthbox's own fill region, screen x:174-221/y:88-95): at tick 14508
+  (hp=14, pre-drain) the region contains **5px** of the red fill pair
+  `(173,66,74)`/`(255,90,57)` (the same RGB pair `docs/turn11-notes.md` §5
+  cites for Pidgeotto's own red band) and **0px** of any yellow/green fill
+  color; at tick 14520 (hp=4, post-drain settle) exactly **1px** of the
+  same pair — bit-exact to the `calcBarFilledPixels` counts above (5→1),
+  not just consistent with them.
+- `verify-turn12.ts` additionally re-composites the FULL player-healthbox
+  overlay (`composePlayerHealthboxHpOverlay`) at both hp values and
+  diffs the entire 103x36 region against the fresh capture — **0
+  mismatches at both 14508 and 14520**, the same double-check discipline
+  `verify-turn10-rockslide.ts` established.
+
+### 3. ROCK_SLIDE half: `pressTick`, and the shared kickoff parameterization diverges IMMEDIATELY after the kickoff text — RAM-proven, not pixel-inferred
+
+**`TURN12_ROCKSLIDE_PRESS_TICK = 14237`**, fit the same way `TURN10_
+ROCKSLIDE_PRESS_TICK` was: `ROCK_SLIDE_TEXT_DELAY`(393, the shared constant
+already established turns 6/7/9/10) against this session's own fresh
+box-transition-begin tick — a per-tick `bin/oracle run` over 14620-14692
+finds the transition begins at **14630** (static through 14629, first
+differing frame at 14630) → `14630-393=14237`.
+
+**How far the shared parameterization carries — exactly one constant, then
+stops**: of `battleMenu.ts`'s six already-shipped `rockSlide*`-family
+delay constants, only `ROCK_SLIDE_TEXT_DELAY`(393, the kickoff text itself)
+fits anything this turn. The other five — `ROCK_SLIDE_RAM_ANCHOR_DELAY`
+(428), `ROCK_SLIDE_MON_SHAKE_START/END_DELAY`(443/536), `HIT_FLASH_RAM_
+ANCHOR_DELAY`(562), `ROCK_SLIDE_HP_DRAIN_START_DELAY`(597) — **never fire**.
+This isn't inferred from their absence in the pixel record; it's directly
+RAM-proven: a fresh `dump-rockslide-sprites.py` run over RAM 14615-14790
+(176 ticks, spanning the entire kickoff-text hold through the miss-text
+hold through turn-end) reads **zero active rocks, zero shakes, zero
+hit-flash blink, zero healthbox wobble, `healthboxY2==0` and
+`targetInvisible==0` at every single sampled tick** — not a pixel
+coincidence, the underlying game-state mechanisms this turn's engine slice
+would otherwise need to drive (rock sprite creation, target shake, hit
+flash, healthbox wobble) are simply never invoked by the game at all.
+
+**Bit-exact to turn 8's own BIND-miss finding** ("misses divert BEFORE the
+roll" — no move animation plays, `src/engine/battleScene.ts`'s own
+`drawTurn8BindWindow` comment) — now confirmed a SECOND time, on a
+structurally different move (ROCK_SLIDE, a multi-mechanism attack
+animation when it hits, vs. BIND, which has no attack-animation mechanism
+of its own even on a hit) via RAM rather than pixels alone. **The engine
+slice for this half needs zero rock/shake/flash/wobble code at all** — a
+pure text-swap dispatcher over the frozen field, structurally identical
+to `drawTurn8BindWindow`, just with ROCK_SLIDE's own kickoff text and
+`sText_AttackMissed` resolved for Onix.
+
+**Text timing** (all fresh-fit against `TURN12_ROCKSLIDE_PRESS_TICK`,
+`verify-turn12.ts`-checked):
+
+| event | delay from pressTick | tick | note |
+|---|---|---|---|
+| kickoff text box transition begins | +393 | 14630 | `ROCK_SLIDE_TEXT_DELAY`, shared constant, reused verbatim |
+| "ONIX used\nROCK SLIDE!" held, pixel-flat | — | 14649-14685 | verified flat at every one of 6 sampled ticks (14649/14655/14660/14670/14680/14685), not just endpoints |
+| transition into "ONIX's\nattack missed!" begins | +449 | 14686 | freshly fit — NOT turn 8's own 471 (BIND's own kickoff text is shorter, so its own held-window length differs; not assumed transferable) |
+| "ONIX's\nattack missed!" held, pixel-flat | — | 14705-14780 | matches this doc's own earlier §5 citation exactly |
+| text clears | +544 | 14781 | miss→clear gap = 544-449=**95 ticks**, bit-exact to turn 8's own BIND-miss gap (566-471=95) — a genuine new cross-move finding: the "message held then clear" duration for A MISS looks like a fixed ~95-tick constant independent of which move misses |
+| resettled turn-13 menu visible | +551 | 14788 | clear→redraw gap = **7 ticks**, the STANDARD gap turns 6/7/9/10 all show (turn 8's own 6-tick gap is the outlier, not this turn) |
+
+The message text itself, PNG-confirmed by the predecessor session (§5) and
+unchanged: `sText_AttackMissed` resolved for Onix, "ONIX's\nattack
+missed!" — the SAME string family `TURN8_MISS_LINE1`/`TURN8_MISS_LINE2`
+already export (`src/engine/battleScene.ts`), reusable verbatim rather
+than needing a new text constant.
+
+### 4. Turn-end → turn-13 menu boundary: idle-bounce, not flat (re-confirmed, not re-litigated)
+
+`verify-turn12.ts` re-confirms the turn-13 menu tail is NOT a single flat
+sha (14790 vs. 15374 differ) — consistent with this doc's own §5 citation
+("cycles among... at coarser-than-stride-1 sampled intervals") and with
+the now-established pattern (fb7d690, 4a21a46) that every resettled action
+menu in this arc idle-bounces rather than sitting flat. Not re-derived to
+an exact period this session (out of scope — the wiring lane can reuse
+`menuIdleBounce`/`turn10RockSlideResettledBounceTick`'s own formula
+shape, re-anchored to `TURN12_ROCKSLIDE_PRESS_TICK+551`, the same
+"resettled menu re-initializes its own bounce phase fresh at redraw"
+convention every prior turn's own equivalent constant already uses).
+
+### 5. Parameterization verdict for the wiring lane
+
+**Both halves are pure wiring jobs against already-shipped code +
+constants** — no new mechanism, no new asset, no new render routine needed
+anywhere in this turn:
+- **AERIAL_ACE half**: reuse turn 10's own five mechanism tables verbatim,
+  re-anchored to `TURN12_AERIALACE_PRESS_TICK=14373` (`+2068` from turn
+  10's own `12305`), with Onix's own HP endpoints changed to 14→4 (§1-§2).
+- **ROCK_SLIDE half**: reuse `drawTurn8BindWindow`'s own STRUCTURE (a pure
+  text-swap dispatcher over a frozen field, no attack-animation code path
+  at all), re-parameterized with `TURN12_ROCKSLIDE_PRESS_TICK=14237`,
+  ROCK_SLIDE's own kickoff text (already exported: `ROCK_SLIDE_LINE1/2`),
+  the freshly-fit miss-text/clear/redraw delays in §3's table, and the
+  already-exported `TURN8_MISS_LINE1/2` text (§3).
+- **Frozen-field anchor**: same shape every prior "attacker frozen at
+  post-first-move idle" window uses — Onix (this turn's second actor) is
+  already at its final post-AERIAL_ACE HP (4) and doesn't move again.
+
+### Verification
+
+`node --experimental-strip-types tools/probe/verify-turn12.ts` — **20/20
+PASS**, fresh oracle run, 112 captured ticks, 0 mismatches. New committed
+tooling: `tools/probe/verify-turn12.ts` (this session's primary
+deliverable) and `tools/compare/scratch/diag-turn12-anchor.ts` (the
+live-dispatcher instrument, committed per this run's own convention even
+though its result was a negative one — confirming the method's own
+inapplicability here is itself load-bearing for whoever wires this turn
+next, so they don't waste time re-attempting it). `npm test` and `npm run
+build` unchanged-green (no `src/` changes this session — the worktree
+brief's own PROBE-step constraint). No trace changes:
+`battle1-turn12-dense.json` (already committed by the predecessor session)
+is reused unmodified. RAM probes (`dump-aerialace-anim.py`,
+`dump-rockslide-sprites.py`, `dump-battle-bars.py`) each hit the known
+exit-139-after-valid-JSON papercut — validated by loading/parsing the
+output file directly each time, per this run's own established
+workaround.
