@@ -291,3 +291,175 @@ b.json` 66/66, `turn5-menu.json` 42/42, `turn6-rockslide-a.json` 255/255,
 `turn7-rockslide-b.json` 256/256, `turn7-rockslide-c.json` 256/256,
 `turn7-rockslide-d.json` 19/19. `npm test` **861/861** (+4). `npm run
 build` green.
+
+## S7 worktree probe: ISSUES #29 (2026-07-21, oracle/RAM only — no engine code)
+
+### Verdict: BOTH families ROOT-CAUSED. Same mechanism as #28 (a missing `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`), recurring one dispatch branch earlier than #28's own fix touched. Modelable rule for each, verified with zero regressions on every RAM-covered neighboring tick.
+
+#28's fix scoped `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` to the **post-reveal
+browsing** ternary arm only (`sm.confirmElapsed === null`, past `revealTick`).
+Restoring `captureFrames` surfaced 6 ticks just *outside* that domain, filed
+as two sub-families here. Both turn out to be the **identical missing-shift
+shape**, just living in a different function each:
+
+- **Family A** (`turn6-menu.json` 7315-7316, `turn8-menu.json` 9383-9384):
+  the **pre-reveal idle window** — `drawTurn6ActionMenuIdleWindow` (turn 6)
+  and `drawTurn7RockSlideTurnEndSettledMenu` (reused unchanged by turn 7 AND
+  turn 8's own pre-reveal branch) — is called identically for two different
+  real states that the function itself can't distinguish: **(a)** genuinely
+  idle, no reopen press yet (`sm.openElapsed === null`, correctly unshifted)
+  and **(b)** reopen pressed, waiting for the submenu to redraw
+  (`sm.openElapsed !== null && t < revealTick`, which should be shifted the
+  same way the post-reveal browsing branch is, but isn't). The dispatcher
+  (`drawTurn6/7/8FightSubmenuWindow`) already has these as two separate `if`
+  blocks — both currently call the idle-window function the same unshifted
+  way.
+- **Family B** (`turn7-menu.json` 8380-8381): `turn7KickoffBounceTick`'s own
+  pre-freeze branch (`t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`)
+  `return`s plain `t` — the exact same unshifted-`t` shape the browsing
+  ternary had before #28's fix, just one function over (the confirm/kickoff
+  bounce wrapper instead of the browsing arm itself). Lands right after the
+  ROCK_SLIDE confirm press (`TURN7_ROCKSLIDE_PRESS_TICK`'s own doc,
+  `battleMenu.ts:2054`, states the real confirm pressTick outright: **8379**
+  — "the confirm press occupies frames 8378-8379, matching `confirmFightMove`'s
+  own `elapsed+1` registration convention").
+
+### Method
+
+Same discipline as the #28 probe:
+
+- **Family A**: reused the already-committed `src/data/gen/turn6-bounce-blip-
+  probe.json` / `turn8-bounce-blip-probe.json` RAM dumps verbatim (already
+  twice-run byte-identical by the #28 probe, cover ticks 7300-8346 /
+  9375-10826 — both windows already include the pre-reveal range, no new RAM
+  probe needed).
+- **Family B**: turn 7 had no prior RAM probe (the #28 probe's own doc
+  flagged turn 7 as retrodiction-only). New spec
+  `tools/probe/specs/turn7-bounce-blip-raw.json` — `segments` copied
+  verbatim from `tools/compare/traces/turn7-menu.json` (the same script the
+  green trace itself replays), `watch` list copied verbatim from
+  `turn6-bounce-blip-raw.json` (the same dynamic driver-resolving spec both
+  #28 probes already used), `startTick: 8370`. Run via
+  `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+  tools/probe/ram-probe.py tools/probe/specs/turn7-bounce-blip-raw.json
+  <out>`, **twice independently, byte-identical both times** (`diff`, 0
+  bytes) — committed: `src/data/gen/turn7-bounce-blip-probe.json` (1011
+  ticks, 8370-9380).
+- **Branch-aware dispatch reading FIRST** (the brief's own requirement, and
+  the #28 probe's own blind spot): read `drawTurn6/7/8FightSubmenuWindow`'s
+  actual `if` chain in `src/engine/battleScene.ts` (~6738-7050) before
+  writing any model, to identify which function renders each tick and what
+  its real bounce-tick argument is — not just the composed closed-form
+  formula in isolation (exactly the mistake that produced #28's own
+  overclaim).
+- **Analysis**: `tools/probe/verify-issues29-rule.py` (plain `python3`, no
+  mGBA needed, imports `verify-bounce-blip-rule.py`'s own primitives by path
+  rather than re-copying them) — run it directly to reproduce every number
+  below. It caught its own first-draft bug: an initial family-A model reused
+  the turn6/8 **browsing**-branch chain (`turn5SitrusResettledBounceTick`)
+  for turn 8's idle case too, which is wrong — turn 8's own pre-reveal
+  branch actually reuses turn 7's `drawTurn7RockSlideTurnEndSettledMenu`
+  verbatim, whose real chain is `turn7RockSlideResettledBounceTick` (a
+  different anchor, `TURN7_ROCKSLIDE_PRESS_TICK`/`_MENU_REDRAW_DELAY`, not
+  `TURN5_SITRUS_MENU_REDRAW_TICK`). The bug surfaced as an outright FAIL
+  (turn 8's excluded-pair check failed even at shift=2), not a false PASS —
+  caught before being reported here, not after.
+
+### Family A: RAM vs current model (shift=0) vs fixed model (shift=2)
+
+Both regions' `y2`, `real(T) = probed y2 at RAM tick T-1` (the established
++1 render lag, same convention #28's own tables use).
+
+**Turn 6** (`turn6-bounce-blip-probe.json`, already-committed dump; pressTick
+7313 — RAM-confirmed: `onixSinIndex`/`healthboxSinIndex` both frozen across
+RAM ticks 7313-7315, the already-cataloged reopen-DMA-wait stall):
+
+| tick | real (onix,hb) | shift=0 (current) | shift=2 (fixed) | phase |
+|---|---|---|---|---|
+| 7301-7305 | (0,0) | (0,0) ✓ | — (pre-press, untested) | idle, no press |
+| 7306-7307 | (1,0) | (1,0) ✓ | (0,0) ✗ if misapplied | idle, no press — **shift=2 here is the exact #28-noted artifact** |
+| 7308-7314 | (1,0) | (1,0) ✓ | (1,0) ✓ | ambiguous (both match; pressed, pre-reveal) |
+| **7315-7316** | **(1,0)** | **(1,**1**) ✗** | **(1,0) ✓** | pressed, pre-reveal — **the named excluded pair** |
+| 7317-7322 | (1,1)/(1,1) | ✓ | ✓ | ambiguous (both match) |
+
+**Turn 8** (`turn8-bounce-blip-probe.json`, already-committed dump; pressTick
+~9380, within the ISSUES-cited 9380-9382 reopen-press window):
+
+| tick | real (onix,hb) | shift=0 (current) | shift=2 (fixed) |
+|---|---|---|---|
+| 9376-9382 | (1,0) | ✓ | ✓ (ambiguous band) |
+| **9383-9384** | **(1,0)** | **(1,**1**) ✗** | **(1,0) ✓** |
+| 9385-9396 | (1,1)→(0,1) | ✓ | ✓ |
+
+**The rule**: `shift = FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT if t >= pressTick else
+0` — i.e., **the shift should key off `sm.openElapsed !== null` (the reopen
+having registered at all), not off `t >= revealTick`** (a later, purely
+cosmetic threshold for when the submenu's *content* redraws — the underlying
+bounce-driver phase reference doesn't care about that boundary). Since
+`sm.openElapsed !== null` is only ever true once `t` has already reached
+`pressTick` (state is monotonic, set once and never unset within a window),
+`t >= pressTick` is trivially implied by `sm.openElapsed !== null` at the
+call site — **no new constant or threading of `pressTick` into the idle-
+window functions is needed**; the fix is exactly "pass a shifted `t` from
+the `sm.openElapsed !== null && t < revealTick` branch, unshifted `t` from
+the `sm.openElapsed === null` branch," mirroring the two `if` blocks already
+in each dispatcher.
+
+Verified by `verify-issues29-rule.py`'s window scans: **0 mismatches** for
+turn 6 (scan [7303,7322]) and turn 8 (scan [9376,9390]) under this exact
+rule, including the pre-press sanity tick 7307 (which must — and does —
+stay unshifted, confirming the fix must not apply before `openElapsed` goes
+non-null, the precise scoping #28's own regression check already flagged as
+required).
+
+### Family B: RAM vs current model (shift=0) vs fixed model (shift=2)
+
+**Turn 7** (`turn7-bounce-blip-probe.json`, freshly probed this session;
+pressTick 8379, source-cited in `battleMenu.ts:2054`'s own comment):
+
+| tick | real (onix,hb) | shift=0 (current) | shift=2 (fixed) |
+|---|---|---|---|
+| 8379 | (0,1) | ✓ | ✓ |
+| **8380-8381** | **(0,1)** | **(0,**0**) ✗** | **(0,1) ✓** |
+| 8382-8391 | (0,0) | ✓ | ✓ |
+
+**The rule**: in `turn7KickoffBounceTick`'s pre-freeze branch (`t < pressTick
++ FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`), return `t -
+FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` instead of plain `t` — the exact same
+one-token fix shape #28 already applied to the browsing ternary, just in
+this sibling function. The post-freeze branch (`return
+TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY`, a fixed
+constant) is shift-invariant by construction, so it can never regress from
+this change — confirmed by the full in-domain scan (`t` in
+[8379,8391]) showing **0 mismatches** under the fix, including every tick
+past the freeze boundary.
+
+Note this pre-freeze branch is structurally identical across all three
+kickoff wrappers (`turn6KickoffBounceTick`/`turn7KickoffBounceTick`/
+`turn8KickoffBounceTick`, `battleScene.ts` ~6509/6817/7012) — turn 6/8's own
+analogues were **not** RAM-probed this session (out of scope: ISSUES #29
+only names turn 7's 8380-8381 in this branch; turn 6/8's post-confirm ticks
+were already validated 0-diff by #28's own fix). If turn 6/8's kickoff
+wrappers have the same bug, it's simply not yet visible in either turn's own
+currently-captured window — flagged as an open question, not claimed fixed
+or ruled out here.
+
+### Files committed this session
+
+- `tools/probe/specs/turn7-bounce-blip-raw.json` (new probe spec, `segments`
+  copied verbatim from `tools/compare/traces/turn7-menu.json`, `watch`
+  copied verbatim from `turn6-bounce-blip-raw.json`).
+- `src/data/gen/turn7-bounce-blip-probe.json` (RAM dump, twice-run
+  byte-identical, 1011 ticks, 8370-9380).
+- `tools/probe/verify-issues29-rule.py` (the analysis script — run it
+  directly to reproduce every number in this section; PASS/FAIL gated,
+  exits 1 on any regression).
+- This section.
+
+No `src/engine/` changes (out of scope per the brief — sibling worker owns
+`battleScene.ts` this round). No existing `tools/compare/` trace changed.
+
+### Verification
+
+`npm test` and `npm run build` unaffected (docs/probe/data-gen files only,
+`src/engine/` untouched) — re-ran to confirm green, see below.
