@@ -1,4 +1,20 @@
 ---
+## 236 — Supervisor merge fold ×2: (1) turn-9 gap-probe SALVAGE (`wt-120256`, cap-killed mid-writeup, supervisor verified+committed its work): §41's "new hit-flash mechanism" DISSOLVED — it's the flicker task's FOURTH 4-tick block (`DoHitAnimBlinkSpriteEffect` runs 32 ticks = 4 blocks; the earlier probe stopped sampling at RAM 10977; the "position-dependent recolor" was background showing through the erasure) — `verify-turn9-postlunge.ts` now **108/108**; hitsplat stale-coefficient hypothesis REFUTED decisively (best brute-force (eva,evb) fit 62.2%; RAM-true 12/8 scores WORSE than current 16/16; floor-vs-round also refuted; RAM attrs banked: objMode=1, BLDCNT=0x3f40, BLDALPHA=0x080c; next instrument named: gPlttBufferFaded tint dump). (2) turn-11 probe (`wt-123722`): BOTH halves pure parameterizations — ROCK_SLIDE pressTick=13137 (full draw-order sequence verified vs real sSpriteOrder, 0/117 + 0/980 mismatches), FEATHER_DANCE pressTick=13339 with **0 feather-template OAM hits — direct RAM proof the blocked stat change short-circuits before createsprite**, so no feather table needed; ONE new branch (ATK-floor "won't go lower!" message, +83 delay, real apostrophe U+2019); `verify-turn11.ts` **52/52**
+
+- **State (supervisor-verified post-merges):** `npm test` **946/946**,
+  `npm run build` green, verify scripts fresh: turn9-postlunge 108/108,
+  turn11 52/52 (plus turn10-rockslide 44/44, turn10-aerialace 20/20
+  earlier this hour). Turn-12 probe in flight on `wt-20260721-123745`-
+  family branch. Turn-9's capture gap (10945-10986) is now closeable:
+  the 4th-block fix is a table extension; only hitsplat-live renders
+  10935-10944 stay blocked (palette-tint instrument named).
+- **Notes:** salvage protocol: verified the killed worker's uncommitted
+  verify-script/diagnostics by rerunning them myself, wrote the dossier
+  append from its in-code comments + script outputs, committed on its
+  branch with provenance noted. Both diagnostics' NEGATIVES (coefficient
+  + rounding) are the load-bearing finding — do NOT re-brief a blend-fit.
+
+---
 ## 235 — Bounded worker (S7 slice R rung (a)): turn 10's ROCK_SLIDE half LANDS 0-diff end-to-end (kickoff through the turn-11 menu boundary) — `TURN10_ROCKSLIDE_PRESS_TICK=12169` wired through the existing turns-6/7/9-style dispatcher parameterization, plus Onix's own AERIAL_ACE-drain aftermath (HP drain 24→14 + "not very effective" text, both fresh-oracle-bisected); new `turn10-rockslide.json` **220/220, 0 diff**; rungs (b)/(c)/(d) NOT attempted this session (time-boxed), gaps unchanged from §42
 
 - **State:** `npm test` **946/946** (936 + 10 new), `npm run build`

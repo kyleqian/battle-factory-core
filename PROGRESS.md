@@ -4,6 +4,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 239 — Bounded worker (S7/S8, turn 12 wiring): both halves LAND 0-diff — Pidgeotto's 2nd AERIAL_ACE (pure +2068-tick re-anchor of turn 10's 5-mechanism tables, zero new mechanism code) and the arc's FIRST ROCK_SLIDE MISS (zero-animation text-swap, structurally = turn 8's BIND-miss) — new `turn12-menu.json` **46/46**, `turn12-aerialace.json` **56/56**, `turn12-rockslide-miss.json` **38/38**, all 0 diff
+
+- **State:** `npm test` **966/966** (957 + 9 new), `npm run build`
+  green, `verify-turn12.ts` unchanged **20/20**. Full regression sweep 0
+  diff, every count matches the acceptance criteria exactly:
+  `turn11-menu.json` **56/56**, `turn11-featherdance.json` **178/178**,
+  `turn11-rockslide.json` **163/163**, `turn10-aerialace.json` **18/18**,
+  `turn10-rockslide.json` **220/220**, `turn8-bind-a.json` **256/256**.
+- **Did:** added `turn11Resolved` as a new `BattleSceneState` field
+  threaded through the FULL existing reopen-gate chain (mirroring every
+  prior `turnNResolved` flag verbatim) — ROCK_SLIDE now a 9th slot-0 PP
+  use, 1/10 entering turn 12 (corrects the brief's own stale "2/10").
+  `drawTurn12AerialAceWindow` calls turn 10's own five mechanism
+  functions VERBATIM (re-anchored to a fresh live `pressTick`, Onix's HP
+  14→4) via a new `drawTurn12FieldBase`/`turn12KickoffBounceTick` regime-7
+  wrapper — no new mechanism code anywhere. `drawTurn12RockSlideWindow`
+  mirrors `drawTurn8BindWindow`'s own text-swap-over-frozen-field
+  structure exactly (synthetic `TURN12_ROCKSLIDE_PRESS_TICK=14237`,
+  reused `ROCK_SLIDE_LINE1/2`→`TURN8_MISS_LINE1/2` swap, 95-tick
+  miss-hold, 7-tick clear-to-redraw). One real gap correctly EXCLUDED not
+  fixed: turn 10's own committed traces leave RAM 12363-12437
+  uncaptured (mechanism-3 residual + an unmodeled hit-flash flicker); the
+  first `turn12-aerialace.json` draft sampled inside the +2068-shifted
+  equivalent and showed real diffs (up to 4.33%) — corrected by excluding
+  that same relative range, per the brief's own explicit instruction.
+- **Next:** turn 13 — its probe/verify script (`verify-turn13.ts`,
+  46/46) already landed two sessions ago; natural next step is wiring it
+  the same way, adding a `turn12Resolved` flag off
+  `TURN12_ROCKSLIDE_MENU_REDRAW_DELAY` (already exported).
+- **Notes:** `docs/battle-turn-notes.md` §45 has the full writeup.
+  AERIAL_ACE mechanisms 3/4 (§42/§43) and the hitsplat (ISSUES #31)
+  remain untouched, out of scope. No PAPERCUTS beyond the standing
+  mgba-venv-teardown one.
+
+---
 ## 238 — Supervisor merge fold ×3 + ISSUES #31 filed: (1) turn-12 probe (`wt-125234`): AERIAL_ACE recurs **bit-exact at +2068 RAM ticks** off turn 10's 5-mechanism tables (pressTick=14373, zero corrections); ROCK_SLIDE-miss half RAM-proven **zero-animation** (pressTick=14237; kickoff text only, hit mechanisms never fire — bit-exact to turn 8's BIND-miss precedent incl. the identical 95-tick miss→clear gap); `verify-turn12.ts` **20/20** — turn 12 is pure wiring, both halves. (2) hitsplat palette-tint probe (`wt-130606`): REFUTED — `gPlttBufferFaded` byte-identical to unfaded, bank 7, every live tick (supervisor-rerun) — third refuted hypothesis, filed as **ISSUES #31** with the two untested avenues. (3) turn-13 probe (`wt-131215`): `verify-turn13.ts` **46/46**, wiring-only verdict, 3 dossier §4 corrections (6 idle-bounce phases not one plateau; cursor-jump at exactly 15408; a previously-missed ~90-tick SAND_ATTACK mid-message animation 15540-15629 = the ONE real unknown before that half renders)
 
 - **State (supervisor-verified post-merges):** `npm test` **957/957**,
@@ -59,19 +94,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (§42/§43's gaps, untouched this session, out of scope).
 - **Notes:** `docs/battle-turn-notes.md` §44 has the full writeup. No
   PAPERCUTS beyond the standing mgba-venv-teardown one.
-
----
-## 236 — Supervisor merge fold ×2: (1) turn-9 gap-probe SALVAGE (`wt-120256`, cap-killed mid-writeup, supervisor verified+committed its work): §41's "new hit-flash mechanism" DISSOLVED — it's the flicker task's FOURTH 4-tick block (`DoHitAnimBlinkSpriteEffect` runs 32 ticks = 4 blocks; the earlier probe stopped sampling at RAM 10977; the "position-dependent recolor" was background showing through the erasure) — `verify-turn9-postlunge.ts` now **108/108**; hitsplat stale-coefficient hypothesis REFUTED decisively (best brute-force (eva,evb) fit 62.2%; RAM-true 12/8 scores WORSE than current 16/16; floor-vs-round also refuted; RAM attrs banked: objMode=1, BLDCNT=0x3f40, BLDALPHA=0x080c; next instrument named: gPlttBufferFaded tint dump). (2) turn-11 probe (`wt-123722`): BOTH halves pure parameterizations — ROCK_SLIDE pressTick=13137 (full draw-order sequence verified vs real sSpriteOrder, 0/117 + 0/980 mismatches), FEATHER_DANCE pressTick=13339 with **0 feather-template OAM hits — direct RAM proof the blocked stat change short-circuits before createsprite**, so no feather table needed; ONE new branch (ATK-floor "won't go lower!" message, +83 delay, real apostrophe U+2019); `verify-turn11.ts` **52/52**
-
-- **State (supervisor-verified post-merges):** `npm test` **946/946**,
-  `npm run build` green, verify scripts fresh: turn9-postlunge 108/108,
-  turn11 52/52 (plus turn10-rockslide 44/44, turn10-aerialace 20/20
-  earlier this hour). Turn-12 probe in flight on `wt-20260721-123745`-
-  family branch. Turn-9's capture gap (10945-10986) is now closeable:
-  the 4th-block fix is a table extension; only hitsplat-live renders
-  10935-10944 stay blocked (palette-tint instrument named).
-- **Notes:** salvage protocol: verified the killed worker's uncommitted
-  verify-script/diagnostics by rerunning them myself, wrote the dossier
-  append from its in-code comments + script outputs, committed on its
-  branch with provenance noted. Both diagnostics' NEGATIVES (coefficient
-  + rounding) are the load-bearing finding — do NOT re-brief a blend-fit.

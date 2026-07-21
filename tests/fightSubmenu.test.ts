@@ -134,7 +134,7 @@ function stateAtTick(firstTickAbsolute: number): EngineState {
   return {
     ...initial,
     draftScreen: { ...initial.draftScreen, selectedIds: [1, 2, 3, 0, 0, 0] },
-    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false },
+    battleScene: { elapsed: firstTickAbsolute - SCENE_TICK0 - 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false },
   };
 }
 
@@ -335,7 +335,7 @@ function stateAtTurn3Reopen(firstTickAbsolute: number): EngineState {
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
-    turn9Resolved: false, turn10Resolved: false,
+    turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     },
   };
 }
@@ -457,7 +457,7 @@ function stateAtTurn3Confirm(): EngineState {
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
-    turn9Resolved: false, turn10Resolved: false,
+    turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     },
   };
 }
@@ -620,7 +620,7 @@ function stateAtTurn4Confirm(): EngineState {
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
-    turn9Resolved: false, turn10Resolved: false,
+    turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     },
   };
 }
@@ -649,7 +649,7 @@ function stateAtTurn5Confirm(): EngineState {
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
-    turn9Resolved: false, turn10Resolved: false,
+    turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     },
   };
 }
@@ -739,7 +739,7 @@ function stateAtTurn5SitrusConfirm(): EngineState {
     turn6Resolved: false,
     turn7Resolved: false,
     turn8Resolved: false,
-    turn9Resolved: false, turn10Resolved: false,
+    turn9Resolved: false, turn10Resolved: false, turn11Resolved: false,
     },
   };
 }
