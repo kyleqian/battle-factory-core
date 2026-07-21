@@ -2554,6 +2554,61 @@ function drawSpriteSheetAffineStretch(
 }
 
 /**
+ * Same affine sampling as `drawSpriteSheetAffineStretch`, but each opaque
+ * source pixel is FORCE-BLENDED against the LIVE `fb` pixel already at its
+ * destination (`blendedTileOverFb`'s own reasoning: `BLDCNT`'s target-2 mask
+ * here is ALL BG+OBJ+backdrop, so a forced-blend semi-transparent OBJ blends
+ * against whatever's visually beneath it) instead of tinting toward a fixed
+ * color. Needed for turn 9's own hitsplat (docs/turn9-shake-notes.md §1
+ * addendum): oracle-pixel-caught via `npm run compare` - the flat-palette
+ * `drawSpriteSheetAffineStretch` call (ENDEAVOR's own precedent, `tintCoeff
+ * =0`) undershoots the real hitsplat's brightness (its own palette's
+ * brightest entry is `(255,255,173)`, but the real screen shows pure white
+ * `(255,255,255)` at the same pixel, every tick this hitsplat is alive) -
+ * `blendChannel(255,255,173}, {underlying fb color}, 12, 8)` reproduces the
+ * exact observed RGB (checked directly against several sampled pixels),
+ * the SAME `eva=12,evb=8` ratio this scene's own `BLDCNT` already
+ * establishes for the QUICK_ATTACK clones (`drawSpriteSheetBlendedOverFb`).
+ */
+function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, xScale: number, yScale: number, eva: number, evb: number, doubled = false): void {
+  const w = tileset.columns * 8;
+  const h = tileset.rows * 8;
+  const halfW = w / 2;
+  const halfH = h / 2;
+  const dyStart = doubled ? -halfH : 0;
+  const dyEnd = doubled ? h + halfH : h;
+  const dxStart = doubled ? -halfW : 0;
+  const dxEnd = doubled ? w + halfW : w;
+  for (let dy = dyStart; dy < dyEnd; dy += 1) {
+    const ry = dy - halfH;
+    const sy = ((ry * yScale) >> 8) + halfH;
+    if (sy < 0 || sy >= h) continue;
+    const tileRow = Math.floor(sy / 8);
+    const inTileY = sy % 8;
+    for (let dx = dxStart; dx < dxEnd; dx += 1) {
+      const rx = dx - halfW;
+      const sx = ((rx * xScale) >> 8) + halfW;
+      if (sx < 0 || sx >= w) continue;
+      const tile = tileset.tiles[tileRow * tileset.columns + Math.floor(sx / 8)];
+      if (!tile) continue;
+      const idx = tile[inTileY * 8 + (sx % 8)]!;
+      if (idx === 0) continue;
+      const c = palette[idx];
+      if (!c) continue;
+      const x = ox + dx;
+      const y = oy + dy;
+      if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      const o = (y * 240 + x) * 4;
+      const tgt2 = { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! };
+      fb[o] = blendChannel(c.r, tgt2.r, eva, evb);
+      fb[o + 1] = blendChannel(c.g, tgt2.g, eva, evb);
+      fb[o + 2] = blendChannel(c.b, tgt2.b, eva, evb);
+      fb[o + 3] = 255;
+    }
+  }
+}
+
+/**
  * S7 slice L-4: same accumulator-based shrink-sampling as `drawSpriteSheetAffineTinted`
  * (`matrixParam = 0x10000 / accumulator`, the emerge/materialize sequence's own
  * convention), but blends each sampled texel's OWN palette color toward
@@ -5966,7 +6021,17 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
  * plain sprite draw once active, and the opponent healthbox stops drawing
  * entirely past its own vanish tick.
  */
-function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
+/**
+ * S7 slice R rung (c3)/(c4): `onixX2`/`onixInvisible` (both default to the
+ * neutral no-op value, every pre-existing caller unaffected) let turn 9's
+ * own post-QUICK_ATTACK window drive Onix's own on-field sprite (region A,
+ * the SAME explicit-redraw call the doc above already establishes is never
+ * baked into the static harvest) through its own x2 shake (episode 1) and
+ * visibility flicker (episode 2) - same "generalize a hardcoded value into
+ * a defaulted param" idiom `onixHp`/`bounceTick`/`beforeMonSprite` already
+ * use on this same call chain.
+ */
+function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
   drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
@@ -5981,17 +6046,19 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
   beforeMonSprite?.();
   const sitrusRotate = onixSitrusRotateMatrix(t);
   if (sitrusRotate) {
-    drawSpriteSheetAffineRotate(
-      fb,
-      onixBackSprite.tileset,
-      onixBackSprite.palette,
-      ONIX_MATERIALIZE_CORNER.x + (onixBackSprite.tileset.columns * 8) / 2,
-      ONIX_MATERIALIZE_CORNER.y + (onixBackSprite.tileset.rows * 8) / 2 + sitrusRotate.y2,
-      sitrusRotate.pa,
-      sitrusRotate.pb,
-      sitrusRotate.pc,
-      sitrusRotate.pd,
-    );
+    if (!onixInvisible) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        onixBackSprite.tileset,
+        onixBackSprite.palette,
+        ONIX_MATERIALIZE_CORNER.x + onixX2 + (onixBackSprite.tileset.columns * 8) / 2,
+        ONIX_MATERIALIZE_CORNER.y + (onixBackSprite.tileset.rows * 8) / 2 + sitrusRotate.y2,
+        sitrusRotate.pa,
+        sitrusRotate.pb,
+        sitrusRotate.pc,
+        sitrusRotate.pd,
+      );
+    }
   } else {
     // S7 slice M-5: past the settled menu's own redraw tick, Onix's own
     // on-field sprite (region A) picks up the resettled `menuIdleBounce`
@@ -6007,10 +6074,12 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
     // entire 769px residual across 7348-7404 in one fix.
     const onixY2 = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick)).onixY2;
     const tintCoeff = onixSitrusTintCoeff(t);
-    if (tintCoeff > 0) {
-      drawSpriteSheetAffineTintedBlend(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y, 256, ONIX_SITRUS_TINT_COLOR, tintCoeff, onixY2);
-    } else {
-      drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + onixY2);
+    if (!onixInvisible) {
+      if (tintCoeff > 0) {
+        drawSpriteSheetAffineTintedBlend(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y, 256, ONIX_SITRUS_TINT_COLOR, tintCoeff, onixY2);
+      } else {
+        drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2);
+      }
     }
   }
   drawGrantingStars(fb, t);
@@ -7311,8 +7380,8 @@ export const TURN9_REGIME4_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (T
  * "drawTurn6FieldBase itself never repaints past the slide-in settle" fix
  * `drawTurn7FieldBase`/`drawTurn8FieldBase` already establish.
  */
-function drawTurn9FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
-  drawTurn6FieldBase(fb, t, bounceTick + TURN9_REGIME4_TO_REGIME1_SHIFT, beforeMonSprite);
+function drawTurn9FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN9_REGIME4_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, onixX2, onixInvisible, healthboxY2Override);
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
@@ -7533,12 +7602,35 @@ function blendedTileOverFb(fb: Uint8Array, tile: number[], palette: RgbColor[], 
 }
 
 /** Same tile-grid iteration as `drawSpriteSheetBlended`, but through `blendedTileOverFb` instead of `blendedTile`. */
-function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, eva: number, evb: number): void {
+function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, eva: number, evb: number, maxY: number = Infinity): void {
   for (let ty = 0; ty < tileset.rows; ty += 1) {
+    const rowY = oy + ty * 8;
+    if (rowY >= maxY) continue;
     for (let tx = 0; tx < tileset.columns; tx += 1) {
       const tile = tileset.tiles[ty * tileset.columns + tx];
       if (!tile) continue;
-      blendedTileOverFb(fb, tile, palette, ox + tx * 8, oy + ty * 8, eva, evb);
+      if (rowY + 8 <= maxY) {
+        blendedTileOverFb(fb, tile, palette, ox + tx * 8, rowY, eva, evb);
+        continue;
+      }
+      for (let py = 0; py < 8; py += 1) {
+        const y = rowY + py;
+        if (y >= maxY) continue;
+        for (let px = 0; px < 8; px += 1) {
+          const idx = tile[py * 8 + px]!;
+          if (idx === 0) continue;
+          const c = palette[idx];
+          if (!c) continue;
+          const x = ox + tx * 8 + px;
+          if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+          const o = (y * 240 + x) * 4;
+          const tgt2 = { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! };
+          fb[o] = blendChannel(c.r, tgt2.r, eva, evb);
+          fb[o + 1] = blendChannel(c.g, tgt2.g, eva, evb);
+          fb[o + 2] = blendChannel(c.b, tgt2.b, eva, evb);
+          fb[o + 3] = 255;
+        }
+      }
     }
   }
 }
@@ -7563,9 +7655,282 @@ function drawTurn9QuickAttackAnimation(fb: Uint8Array, t: number, pressTick: num
   const { tileset, palette } = pidgeottoFrontSprite;
   const real = lunge ?? { x2: 0, y2: 0 };
   drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
-  if (slot3) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8);
-  if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8);
+  if (slot3) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
   return true;
+}
+
+/**
+ * S7 slice R rung (c3) (docs/turn9-shake-notes.md §1): the `AnimHitSplatBasic`
+ * sprite over Onix (the QUICK_ATTACK TARGET this time, unlike ENDEAVOR's own
+ * two-round table) - a single round, RAM-live 10934-10943 (10 ticks,
+ * `ENDEAVOR_HITSPLAT_VISIBLE_TICKS`'s own convention exactly), render=RAM+1
+ * (`ENDEAVOR_HITSPLAT_RENDER_LAG`'s own family), fixed screen center
+ * `(72,88)`. **The affine matrix is NOT the same constant as ENDEAVOR's own
+ * hitsplat** - fresh RAM read this session (`dump-endeavor-hitsplat-shake.py`
+ * against `battle1-turn9-dense.json`, ticks 10930-10946): `matrixA=matrixD=
+ * 303` throughout this hitsplat's whole life (ENDEAVOR's own instance reads
+ * 372 - the two hitsplats' own affine "pop" anim apparently settles at a
+ * different per-instance scale, not a shared engine constant as first
+ * assumed; oracle-pixel-caught via `npm run compare` before this fresh RAM
+ * read - the 372 guess undersized the starburst by ~20%). Same RAM read also
+ * cross-confirms the shake table above bit-for-bit (`targetX2` 5 at RAM
+ * 10936/10937/10940/10941, 0 elsewhere) and the hitsplat's own RAM span
+ * (10934-10943, empty by 10944). Also RAM-confirmed the palette bank itself
+ * (`PALRAM_OBJ` bank 7) matches `battle-anim-hitsplat.json`'s own stored
+ * colors exactly (index 4 = `(255,255,173)`) - the asset is NOT the bug.
+ * **The visible color is still pure white throughout**, oracle-pixel-sampled
+ * at multiple points against multiple distinct underlying backgrounds
+ * (`(189,181,181)` and `(132,123,123)`, both saturate to `(255,255,255)`) -
+ * only reproduced by `drawSpriteSheetAffineStretchBlendedOverFb`'s own
+ * `blendChannel` at `eva=16,evb=16` (i.e. `min(255, fg+bg)`, a full-weight
+ * additive "lighten" rather than a normal-weight alpha blend) - solved
+ * directly from the two sampled bg/fg/result triples, not guessed.
+ */
+const TURN9_HITSPLAT_CENTER = { x: 72, y: 88 };
+const TURN9_HITSPLAT_MATRIX = 303;
+const TURN9_HITSPLAT_RAM_OFFSET = 63; // RAM 10934 - pressTick(10871)
+function drawTurn9Hitsplat(fb: Uint8Array, t: number, pressTick: number): void {
+  const ramTick = t - ENDEAVOR_HITSPLAT_RENDER_LAG;
+  const n = ramTick - pressTick - TURN9_HITSPLAT_RAM_OFFSET;
+  if (n < 0 || n >= ENDEAVOR_HITSPLAT_VISIBLE_TICKS) return;
+  drawSpriteSheetAffineStretchBlendedOverFb(
+    fb,
+    battleAnimHitsplat.tileset,
+    battleAnimHitsplat.palette,
+    TURN9_HITSPLAT_CENTER.x - 16,
+    TURN9_HITSPLAT_CENTER.y - 16,
+    TURN9_HITSPLAT_MATRIX,
+    TURN9_HITSPLAT_MATRIX,
+    16,
+    16,
+    true,
+  );
+}
+
+/**
+ * S7 slice R rung (c3) (docs/turn9-shake-notes.md §1): Onix's own episode-1
+ * `x2` shake (`AnimTask_ShakeTargetBasedOnMovePowerOrDmg`, slot 6) -
+ * RAM-confirmed square wave `5,5,0,0,5,5,0,0` over RAM 10936-10943 (`y2`
+ * flat 0 throughout - this shake never moves Onix vertically). Render lag is
+ * `RAM+2` (the shake/squish family, `ENDEAVOR_SHAKE_RENDER_LAG`'s own
+ * convention - NOT the hitsplat's own separate `RAM+1` family), **plus one
+ * genuine extra stall tick at render 10935** (the shake task's own
+ * creation-tick quirk, matching `battle-menu-notes.md` §15f's "fade-out
+ * task's own creation-tick stall" precedent) - modeled as a literal extra
+ * table row (render offset 64) rather than a formula tweak, per that same
+ * precedent's own doc comment. Render ticks showing `x2=5` (offsets from
+ * `pressTick`): `{64,67,68,71,72}` = render `{10935,10938,10939,10942,
+ * 10943}` - every other tick in and around this window is `0`.
+ */
+const TURN9_EP1_ONIX_SHAKE_X2 = 5;
+const TURN9_EP1_ONIX_SHAKE_RENDER_OFFSETS: ReadonlySet<number> = new Set([64, 67, 68, 71, 72]);
+export function turn9Ep1OnixShakeX2(t: number, pressTick: number): number {
+  return TURN9_EP1_ONIX_SHAKE_RENDER_OFFSETS.has(t - pressTick) ? TURN9_EP1_ONIX_SHAKE_X2 : 0;
+}
+
+/**
+ * S7 slice R rung (c4) (docs/turn9-shake-notes.md §2): episode 2's
+ * healthbox/border `y2` wobble - RAM-confirmed alternating `+1,-1,...` for
+ * exactly 20 ticks (RAM 10957-10976), render=RAM+1, same shape as ENDEAVOR's
+ * own `endeavorHealthboxBounceY2` but its OWN table (different start tick,
+ * genuinely independent mechanism from the flicker below - "do NOT couple
+ * them" per the brief).
+ */
+const TURN9_EP2_HEALTHBOX_WOBBLE_RENDER_LAG = 1;
+const TURN9_EP2_HEALTHBOX_WOBBLE_START = 86; // RAM 10957 - pressTick(10871)
+const TURN9_EP2_HEALTHBOX_WOBBLE_TICKS = 20;
+export function turn9Ep2HealthboxWobbleY2(t: number, pressTick: number): number {
+  const ramTick = t - TURN9_EP2_HEALTHBOX_WOBBLE_RENDER_LAG;
+  const n = ramTick - pressTick - TURN9_EP2_HEALTHBOX_WOBBLE_START;
+  if (n < 0 || n >= TURN9_EP2_HEALTHBOX_WOBBLE_TICKS) return 0;
+  return n % 2 === 0 ? 1 : -1;
+}
+
+/**
+ * S7 slice R rung (c4) (docs/turn9-shake-notes.md §2): episode 2's Onix
+ * visibility flicker - a SEPARATE mechanism from the healthbox wobble above
+ * (own timing, own 20-tick span one RAM tick later: RAM 10958-10977), three
+ * 4-tick **on** (invisible) blocks separated by 4-tick **off** gaps -
+ * `floor(n/8)`... expressed here the same `n % PERIOD < ON` shape
+ * `endeavorOnixInvisible` already uses, just capped at 20 ticks instead of a
+ * full `PERIOD*CYCLES` multiple (RAM-confirmed: `x2`/`y2` stay flat 0 for
+ * Onix's own sprite this whole episode - this is a pure visibility gate, not
+ * a position shake).
+ */
+const TURN9_EP2_FLICKER_RENDER_LAG = 1;
+const TURN9_EP2_FLICKER_START = 87; // RAM 10958 - pressTick(10871)
+const TURN9_EP2_FLICKER_TOTAL_TICKS = 20; // RAM 10958-10977 inclusive
+const TURN9_EP2_FLICKER_PERIOD = 8;
+const TURN9_EP2_FLICKER_ON_TICKS = 4;
+export function turn9Ep2OnixInvisible(t: number, pressTick: number): boolean {
+  const ramTick = t - TURN9_EP2_FLICKER_RENDER_LAG;
+  const n = ramTick - pressTick - TURN9_EP2_FLICKER_START;
+  if (n < 0 || n >= TURN9_EP2_FLICKER_TOTAL_TICKS) return false;
+  return n % TURN9_EP2_FLICKER_PERIOD < TURN9_EP2_FLICKER_ON_TICKS;
+}
+
+/**
+ * S7 slice R rung (c4) (docs/turn9-shake-notes.md 2026-07-21 addendum §1):
+ * Onix's own HP-bar drain (31->24), same shape as `endeavorOnixHp` (1 HP
+ * unit/tick, clamped, render tick == RAM tick directly - NO extra lag, the
+ * same "same-frame CPU-copy" mechanism, independently re-confirmed for this
+ * turn rather than assumed). `TURN9_HP_DRAIN_START_DELAY=121` anchors to the
+ * RAM sentinel tick itself (`pressTick+121=10992`); the first real
+ * decrement lands the next tick (10993), matching `ENDEAVOR_HP_DRAIN_START_
+ * DELAY`'s own convention.
+ */
+const TURN9_HP_DRAIN_START_DELAY = 121;
+/** Onix's own HP entering turn 9 (flat 31, unchanged since turn 5's own Sitrus heal - `turn5SitrusOnixHp`'s own settled endpoint) - `turn9OnixHp`'s own `startHp`. */
+const TURN9_ONIX_BEFORE_QUICKATTACK_HP = 31;
+export function turn9OnixHp(t: number, pressTick: number, startHp: number, endHp: number): number {
+  const d = t - (pressTick + TURN9_HP_DRAIN_START_DELAY);
+  return Math.max(endHp, startHp - Math.max(d, 0));
+}
+
+/**
+ * S7 slice R rung (c4) (docs/turn9-shake-notes.md 2026-07-21 addendum §2):
+ * `sText_NotVeryEffective` - a SINGLE line (turn9-notes.md §5's own
+ * two-line transcription was wrong, corrected by fresh pixel probing: line 2
+ * never gets ink), same `TURN6_SUPER_EFFECTIVE_LINE`-shaped single-line
+ * reveal. First char at render 11005 (`pressTick+134`), fully typed at
+ * render 11028 (24/24 chars, the `…` glyph), then a flat, non-periodic hold
+ * through 11109.
+ */
+export const TURN9_NOTVERYEFFECTIVE_LINE = "It’s not very effective…";
+
+export function turn9NotVeryEffectiveTextStartTick(pressTick: number): number {
+  return pressTick + 134;
+}
+
+export function turn9NotVeryEffectiveTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn9NotVeryEffectiveTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN9_NOTVERYEFFECTIVE_LINE.length, t - start + 1);
+}
+
+/**
+ * S7 slice R rung (d): turn 9's own QUICK_ATTACK-resolution window - ep1
+ * (hitsplat+shake), ep2 (healthbox wobble+Onix flicker), Onix's own HP
+ * drain, the "not very effective" message, its settled hold, then handoff to
+ * ROCK_SLIDE once its own kickoff text begins - same "handoff at the next
+ * move's own kickoff-text start" shape `drawTurn6FeatherDanceKickoffText`'s
+ * own `rockSlideTextStartTick(TURN6_ROCKSLIDE_PRESS_TICK)` check already
+ * establishes.
+ */
+function drawTurn9QuickAttackWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= rockSlideTextStartTick(TURN9_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn9RockSlideWindow(fb, t);
+    return;
+  }
+  const bounceTick = turn9KickoffBounceTick(t, pressTick);
+  const onixX2 = turn9Ep1OnixShakeX2(t, pressTick);
+  const onixInvisible = turn9Ep2OnixInvisible(t, pressTick);
+  const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick);
+  const onixHp = turn9OnixHp(t, pressTick, TURN9_ONIX_BEFORE_QUICKATTACK_HP, TURN9_ONIX_AFTER_QUICKATTACK_HP);
+  drawTurn9FieldBase(fb, t, bounceTick, undefined, onixHp, onixX2, onixInvisible, healthboxY2);
+  drawTurn9QuickAttackAnimation(fb, t, pressTick);
+  drawTurn9Hitsplat(fb, t, pressTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const notVeryEffectiveStart = turn9NotVeryEffectiveTextStartTick(pressTick);
+  if (t >= notVeryEffectiveStart) {
+    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn9NotVeryEffectiveTextVisibleChars(t, pressTick));
+  } else {
+    drawMessageTextLines(fb, TURN9_QUICKATTACK_LINE1, TURN9_QUICKATTACK_LINE2, turn9QuickAttackTextVisibleChars(t, pressTick));
+  }
+}
+
+/**
+ * S7 slice R rung (d): a SYNTHETIC press anchor (same reasoning as
+ * `TURN6_ROCKSLIDE_PRESS_TICK`/`TURN7_ROCKSLIDE_PRESS_TICK`), chosen so
+ * `rockSlideTextStartTick(TURN9_ROCKSLIDE_PRESS_TICK)` lands on render
+ * 11110 - the fresh-oracle-pinned first tick of the "ONIX used\nROCK
+ * SLIDE!" transition (`verify-turn9-postlunge.ts`'s own "settled hold ends"
+ * check; docs/turn9-shake-notes.md's 2026-07-21 addendum §3).
+ * `11110 - ROCK_SLIDE_TEXT_DELAY(393) = 10717`.
+ */
+export const TURN9_ROCKSLIDE_PRESS_TICK = 10717;
+
+/**
+ * Turn-specific, NOT transferable from `TURN6_SUPER_EFFECTIVE_TEXT_DELAY`/
+ * `TURN7_SUPER_EFFECTIVE_TEXT_DELAY` (same "each turn gets its own literal
+ * constant" convention those two doc comments already establish - Pidgeotto's
+ * own HP-drain duration differs turn to turn). `turn9-notes.md` §5's own
+ * table cites the transition's first tick at 11341
+ * (`TURN9_ROCKSLIDE_PRESS_TICK(10717)+624`).
+ */
+const TURN9_SUPER_EFFECTIVE_TEXT_DELAY = 624;
+
+export function turn9SuperEffectiveTextStartTick(pressTick: number): number {
+  return pressTick + TURN9_SUPER_EFFECTIVE_TEXT_DELAY;
+}
+
+export function turn9SuperEffectiveTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn9SuperEffectiveTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN6_SUPER_EFFECTIVE_LINE.length, t - start + 1);
+}
+
+/**
+ * S7 slice R rung (d): turn 9's own ROCK_SLIDE (Onix vs. Pidgeotto) - every
+ * mechanism reused with ZERO changes from turns 6/7's own instances
+ * (`rockSlideBg3Y`/`rockSlideRockState`/`rockSlideDrawOrder`/
+ * `rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`/`rockSlideMonBlinkInvisible`/
+ * `rockSlideOpponentHp`, all still `pressTick`-relative) - only
+ * `TURN9_ROCKSLIDE_PRESS_TICK` and Pidgeotto's own HP (82->61) are new. Onix
+ * (the attacker this time) is already at its final post-QUICK_ATTACK HP
+ * (24) and doesn't move - drawn via `drawTurn9FieldBase`'s own plain settled
+ * path (no shake/invisible override needed, ep1/ep2 are long over).
+ */
+function drawTurn9RockSlideAttack(fb: Uint8Array, t: number): void {
+  const pressTick = TURN9_ROCKSLIDE_PRESS_TICK;
+  const shiftY = rockSlideBg3Y(t, pressTick);
+  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
+  drawTurn5IconBar(fb, t);
+  if (!rockSlideMonBlinkInvisible(t, pressTick)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y + rockSlideMonShakeY2(t, pressTick));
+  }
+  // Onix's own DoBounceEffect stopped being polled at turn 9's real A-press
+  // (`turn9KickoffBounceTick`'s own frozen anchor) and never resets mid-turn
+  // - the SAME frozen tick QUICK_ATTACK's own window already uses, converted
+  // regime-4 -> regime-1 the same way `drawTurn7RockSlideAttack` converts
+  // regime-2 (`TURN7_REGIME2_TO_REGIME1_SHIFT`'s own precedent).
+  const frozenBounceTick = turn9KickoffBounceTick(t, TURN9_QUICKATTACK_PRESS_TICK);
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenBounceTick + TURN9_REGIME4_TO_REGIME1_SHIFT));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
+  drawSendOutHealthbox(fb, 0, opponentContent);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
+  for (const i of rockSlideDrawOrder(t, pressTick)) {
+    const rock = rockSlideRockState(i, t, pressTick);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+  drawMenuHealthboxPlayer(fb, 0, 0);
+  drawPlayerHealthboxHpOverlay(fb, TURN9_ONIX_AFTER_QUICKATTACK_HP, 0);
+}
+
+/**
+ * S7 slice R rung (d): turn 9's own ROCK_SLIDE window - kickoff text, attack
+ * animation, "It's super effective!" message, settled hold. Unlike turns
+ * 6/7's own top-level ROCK_SLIDE dispatchers, this one does NOT need its own
+ * redraw-tick/turn-end branch: the OUTER dispatcher
+ * (`drawTurn9FightSubmenuWindow`) already hands off to `drawTurn9TurnEndSettledMenu`
+ * at `TURN9_QUICKATTACK_PRESS_TICK+TURN9_MENU_REDRAW_DELAY` (11445) before
+ * this function is ever reached for `t` past that point.
+ */
+function drawTurn9RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN9_ROCKSLIDE_PRESS_TICK;
+  drawTurn9RockSlideAttack(fb, t);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const superEffectiveStart = turn9SuperEffectiveTextStartTick(pressTick);
+  if (t >= superEffectiveStart) {
+    drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn9SuperEffectiveTextVisibleChars(t, pressTick));
+  } else {
+    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+  }
 }
 
 /**
@@ -7597,27 +7962,19 @@ function drawTurn9FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
   }
   if (sm.confirmElapsed !== null) {
     const pressTick = TICK0 + sm.confirmElapsed;
-    // S7 slice R rung (a) (docs/turn10-notes.md §5): past turn 9's own real
-    // turn-end redraw (`TURN9_MENU_REDRAW_DELAY` past `pressTick`), the real
-    // oracle shows the resettled action menu, NOT a frozen kickoff-text hold
-    // - QUICK_ATTACK's own animation/impact/drain, the "not very effective"
-    // message, and ROCK_SLIDE's own kickoff/impact/drain/"It's super
-    // effective!" are NOT modeled this session (out of scope, rungs
-    // c3/c4/d), so this branch is a pure `t`-based redraw check exactly like
-    // `drawTurn7RockSlideWindow`/`drawTurn8BindWindow`'s own `redrawTick`
-    // branches - it does NOT claim 10934-11449 is modeled, only that t>=11450
-    // renders the real settled menu turn 10 actually finds on reopen.
+    // Past turn 9's own real turn-end redraw (`TURN9_MENU_REDRAW_DELAY` past
+    // `pressTick`), the real oracle shows the resettled action menu - a pure
+    // `t`-based redraw check exactly like `drawTurn7RockSlideWindow`/
+    // `drawTurn8BindWindow`'s own `redrawTick` branches. Everything from
+    // QUICK_ATTACK's own kickoff text through ROCK_SLIDE's own settled hold
+    // (rungs c3/c4/d) is modeled by `drawTurn9QuickAttackWindow` below.
     if (t >= pressTick + TURN9_MENU_REDRAW_DELAY) {
       drawTurn9TurnEndSettledMenu(fb, t);
       return;
     }
     const textStart = turn9QuickAttackTextStartTick(pressTick);
     if (t >= textStart) {
-      const bounceTick = turn9KickoffBounceTick(t, pressTick);
-      drawTurn9FieldBase(fb, t, bounceTick);
-      drawTurn9QuickAttackAnimation(fb, t, pressTick);
-      drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-      drawMessageTextLines(fb, TURN9_QUICKATTACK_LINE1, TURN9_QUICKATTACK_LINE2, turn9QuickAttackTextVisibleChars(t, pressTick));
+      drawTurn9QuickAttackWindow(fb, t, pressTick);
       return;
     }
   }
@@ -7820,8 +8177,17 @@ function drawTurn10FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
  * the same "generalize a hardcoded value into a defaulted param" idiom
  * `drawTurn7FieldBase`'s own Pidgeotto-HP override already established.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t)): void {
-  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite);
+/**
+ * S7 slice R rung (c3)/(c4): `onixX2`/`onixInvisible` thread straight
+ * through to `drawTurn5RockSlideAttack` (region A). `healthboxY2Override`
+ * (default `undefined`, every pre-existing caller unaffected) lets turn 9's
+ * own episode-2 wobble (`turn9Ep2HealthboxWobbleY2`) replace region B's own
+ * frozen `bounce.healthboxY2` for exactly the ticks it's active - both the
+ * box redraw and the HP overlay need the SAME dy, so one override value
+ * covers both calls.
+ */
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number): void {
+  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own
@@ -7839,8 +8205,9 @@ function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, b
   // freeze rule `turnKickoffBounceTick` et al. already establish for turns
   // 1-5's own confirm-wait window).
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick));
-  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
-  drawPlayerHealthboxHpOverlay(fb, onixHp, bounce.healthboxY2);
+  const healthboxY2 = healthboxY2Override ?? bounce.healthboxY2;
+  drawMenuHealthboxPlayer(fb, 0, healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, onixHp, healthboxY2);
 }
 
 function drawTurn5RockSlideWindow(fb: Uint8Array, t: number): void {

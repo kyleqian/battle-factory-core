@@ -1,4 +1,21 @@
 ---
+## 228 — Supervisor merge fold: **ISSUES #30 FULLY CRACKED and closed** by the round-1 worktree worker (branch `worker/wt-20260721-095153` merged) — candidate A's sSpriteOrder draw-order adopted AND the real root cause of BOTH residual classes found: feathers are `ST_OAM_AFFINE_NORMAL` (not `_DOUBLE`), so `drawSpriteSheetAffineRotate`'s unconditional doubled destination box painted rotated feather corners over Onix; new `doubleSizeBox=false` param at the feather call only. Turn-6 residual window 425px → **0px on all 129 ticks**, turns 7/8 likewise; feather traces extended **106→235, 16→145, 33→162**, suite **892/892**
+
+- **State (all supervisor-verified post-merge, main tree):** `npm test`
+  **892/892**, `npm run build` green. Supervisor-rerun 0 diff:
+  `turn6-feathers` 235/235, `turn7-feathers` 145/145, `turn8-feathers`
+  162/162, `turn9-quickattack` 117/117, plus spot-checks `sendout`
+  255/256 (ISSUES #18's settled tick), `turn6-rockslide-a` 255/255,
+  `turn8-bind-a` 256/256, `turn6-statfall` 127/127. Source claim
+  independently verified (`battle_anim_flying.c:175`,
+  `gOamData_AffineNormal_ObjNormal_32x32`). Worktree + branch cleaned up.
+- **Notes:** the "two independent residual classes" forensic split (#224)
+  dissolved — one box-clip bug explained both signatures. The default-true
+  param keeps every other affine caller byte-identical (ball spin
+  verified via `sendout`). Dossier: `docs/feather-order-notes.md`'s
+  2026-07-21 adoption section. ISSUES #30 removed this commit.
+
+---
 ## 227 — Bounded worker (S7 slice R rung (c2)): QUICK_ATTACK's two afterimage clones LAND 0-diff — three real bugs found by RAM re-probe + oracle-PNG bisection (a boundary-transcription truncation, a blend-target-2 rule, a creation-lag tick, plus a "feet stay grounded" clip), `turn9-quickattack.json` **117/117, 0 diff** (up from 112)
 
 - **State:** `npm test` **888/888** (880 + 8 new Tier-1 pins), `npm run

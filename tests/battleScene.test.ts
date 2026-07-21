@@ -55,6 +55,15 @@ import {
   turn9QuickAttackLungeOffset,
   turn9QuickAttackSlot3Offset,
   turn9QuickAttackSlot4Offset,
+  turn9Ep1OnixShakeX2,
+  turn9Ep2HealthboxWobbleY2,
+  turn9Ep2OnixInvisible,
+  turn9OnixHp,
+  turn9NotVeryEffectiveTextStartTick,
+  turn9NotVeryEffectiveTextVisibleChars,
+  turn9SuperEffectiveTextStartTick,
+  turn9SuperEffectiveTextVisibleChars,
+  TURN9_ROCKSLIDE_PRESS_TICK,
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
@@ -67,6 +76,8 @@ import {
   openFightSubmenu,
   turn7RockSlideResettledBounceTick,
   TURN7_ROCKSLIDE_PRESS_TICK,
+  rockSlideOpponentHp,
+  rockSlideTextStartTick,
 } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
@@ -2016,5 +2027,127 @@ describe("S7 slice R rung (c2): turn9QuickAttackSlot3Offset/turn9QuickAttackSlot
   });
   it("slot 4 is null again from render 10942 on", () => {
     expect(turn9QuickAttackSlot4Offset(10942, pressTick)).toBeNull();
+  });
+});
+
+describe("S7 slice R rung (c3): turn9Ep1OnixShakeX2 - Onix's own episode-1 x2 shake, RAM-tabled and independently RAM-reverified this rung (dump-endeavor-hitsplat-shake.py against battle1-turn9-dense.json): x2=5 at render offsets 64/67/68/71/72 only, including the shake task's own creation-tick stall (offset 64, one tick ahead of the plain RAM+2 lag's own prediction)", () => {
+  const pressTick = 10871;
+  it("is 0 outside the five active render ticks", () => {
+    expect(turn9Ep1OnixShakeX2(10934, pressTick)).toBe(0);
+    expect(turn9Ep1OnixShakeX2(10936, pressTick)).toBe(0);
+    expect(turn9Ep1OnixShakeX2(10937, pressTick)).toBe(0);
+    expect(turn9Ep1OnixShakeX2(10941, pressTick)).toBe(0);
+    expect(turn9Ep1OnixShakeX2(10944, pressTick)).toBe(0);
+  });
+  it("is 5 at exactly the five RAM-confirmed render ticks", () => {
+    expect(turn9Ep1OnixShakeX2(10935, pressTick)).toBe(5);
+    expect(turn9Ep1OnixShakeX2(10938, pressTick)).toBe(5);
+    expect(turn9Ep1OnixShakeX2(10939, pressTick)).toBe(5);
+    expect(turn9Ep1OnixShakeX2(10942, pressTick)).toBe(5);
+    expect(turn9Ep1OnixShakeX2(10943, pressTick)).toBe(5);
+  });
+});
+
+describe("S7 slice R rung (c4): turn9Ep2HealthboxWobbleY2 - the 20-tick healthbox y2 wobble (RAM 10957-10976, render=RAM+1), independent of the flicker gate below (docs/turn9-shake-notes.md §2)", () => {
+  const pressTick = 10871;
+  it("is 0 before the window (render 10957)", () => {
+    expect(turn9Ep2HealthboxWobbleY2(10957, pressTick)).toBe(0);
+  });
+  it("alternates +1/-1 starting render 10958", () => {
+    expect(turn9Ep2HealthboxWobbleY2(10958, pressTick)).toBe(1);
+    expect(turn9Ep2HealthboxWobbleY2(10959, pressTick)).toBe(-1);
+    expect(turn9Ep2HealthboxWobbleY2(10960, pressTick)).toBe(1);
+    expect(turn9Ep2HealthboxWobbleY2(10961, pressTick)).toBe(-1);
+  });
+  it("holds the alternation through its last tick (render 10977) then stops", () => {
+    expect(turn9Ep2HealthboxWobbleY2(10976, pressTick)).toBe(1);
+    expect(turn9Ep2HealthboxWobbleY2(10977, pressTick)).toBe(-1);
+    expect(turn9Ep2HealthboxWobbleY2(10978, pressTick)).toBe(0);
+  });
+});
+
+describe("S7 slice R rung (c4): turn9Ep2OnixInvisible - the SEPARATE 3-block Onix visibility flicker (RAM 10958-10977, render=RAM+1), own timing vs. the healthbox wobble above - do NOT couple them (docs/turn9-shake-notes.md §2)", () => {
+  const pressTick = 10871;
+  it("is false before the window (render 10958)", () => {
+    expect(turn9Ep2OnixInvisible(10958, pressTick)).toBe(false);
+  });
+  it("is true for each 4-tick on block (10959-10962, 10967-10970, 10975-10978)", () => {
+    for (const t of [10959, 10960, 10961, 10962, 10967, 10968, 10969, 10970, 10975, 10976, 10977, 10978]) {
+      expect(turn9Ep2OnixInvisible(t, pressTick)).toBe(true);
+    }
+  });
+  it("is false for each 4-tick off gap (10963-10966, 10971-10974)", () => {
+    for (const t of [10963, 10964, 10965, 10966, 10971, 10972, 10973, 10974]) {
+      expect(turn9Ep2OnixInvisible(t, pressTick)).toBe(false);
+    }
+  });
+  it("is false again from render 10979 on", () => {
+    expect(turn9Ep2OnixInvisible(10979, pressTick)).toBe(false);
+  });
+});
+
+describe("S7 slice R rung (c4): turn9OnixHp - Onix's own HP-bar drain (31->24), same no-extra-lag family as endeavorOnixHp (docs/turn9-shake-notes.md 2026-07-21 addendum §1)", () => {
+  const pressTick = 10871;
+  it("holds startHp through the sentinel tick (render 10992)", () => {
+    expect(turn9OnixHp(10985, pressTick, 31, 24)).toBe(31);
+    expect(turn9OnixHp(10992, pressTick, 31, 24)).toBe(31);
+  });
+  it("drains 1 HP-unit/tick over renders 10993-10999", () => {
+    expect(turn9OnixHp(10993, pressTick, 31, 24)).toBe(30);
+    expect(turn9OnixHp(10996, pressTick, 31, 24)).toBe(27);
+    expect(turn9OnixHp(10999, pressTick, 31, 24)).toBe(24);
+  });
+  it("clamps at endHp from render 11000 on", () => {
+    expect(turn9OnixHp(11000, pressTick, 31, 24)).toBe(24);
+    expect(turn9OnixHp(11050, pressTick, 31, 24)).toBe(24);
+  });
+});
+
+describe("S7 slice R rung (c4): turn9NotVeryEffectiveTextStartTick/turn9NotVeryEffectiveTextVisibleChars - the SINGLE-line 'It's not very effective...' reveal (corrects turn9-notes.md §5's own two-line transcription), 1 char/tick from render 11005, fully typed at 11028", () => {
+  const pressTick = 10871;
+  it("starts at pressTick+134 (render 11005)", () => {
+    expect(turn9NotVeryEffectiveTextStartTick(pressTick)).toBe(11005);
+  });
+  it("reveals 1 char/tick", () => {
+    expect(turn9NotVeryEffectiveTextVisibleChars(11004, pressTick)).toBe(0);
+    expect(turn9NotVeryEffectiveTextVisibleChars(11005, pressTick)).toBe(1);
+    expect(turn9NotVeryEffectiveTextVisibleChars(11010, pressTick)).toBe(6);
+  });
+  it("is fully typed (24/24) at render 11028 and stays clamped after", () => {
+    expect(turn9NotVeryEffectiveTextVisibleChars(11028, pressTick)).toBe(24);
+    expect(turn9NotVeryEffectiveTextVisibleChars(11060, pressTick)).toBe(24);
+  });
+});
+
+describe("S7 slice R rung (d): TURN9_ROCKSLIDE_PRESS_TICK - the synthetic anchor chosen so rockSlideTextStartTick lands on the fresh-oracle-pinned render 11110", () => {
+  it("rockSlideTextStartTick(TURN9_ROCKSLIDE_PRESS_TICK) is 11110", () => {
+    expect(rockSlideTextStartTick(TURN9_ROCKSLIDE_PRESS_TICK)).toBe(11110);
+  });
+});
+
+describe("S7 slice R rung (d): rockSlideOpponentHp parameterized for turn 9 (Pidgeotto 82->61) - the SAME generic function turns 6/7 already use, only pressTick/startHp/endHp differ", () => {
+  const pressTick = TURN9_ROCKSLIDE_PRESS_TICK;
+  it("holds startHp before the drain sentinel (pressTick+597=11314)", () => {
+    expect(rockSlideOpponentHp(11314, pressTick, 82, 61)).toBe(82);
+  });
+  it("drains 1 HP-unit/tick starting the next tick", () => {
+    expect(rockSlideOpponentHp(11315, pressTick, 82, 61)).toBe(81);
+    expect(rockSlideOpponentHp(11335, pressTick, 82, 61)).toBe(61);
+  });
+  it("clamps at endHp from there on", () => {
+    expect(rockSlideOpponentHp(11336, pressTick, 82, 61)).toBe(61);
+    expect(rockSlideOpponentHp(11400, pressTick, 82, 61)).toBe(61);
+  });
+});
+
+describe("S7 slice R rung (d): turn9SuperEffectiveTextStartTick/turn9SuperEffectiveTextVisibleChars - 'It's super effective!' (turn9-notes.md §5's own cited transition tick, 11341), turn-specific delay per the standing 'each turn gets its own literal constant' convention", () => {
+  const pressTick = TURN9_ROCKSLIDE_PRESS_TICK;
+  it("starts at pressTick+624 (render 11341)", () => {
+    expect(turn9SuperEffectiveTextStartTick(pressTick)).toBe(11341);
+  });
+  it("reveals 1 char/tick and clamps once fully typed", () => {
+    expect(turn9SuperEffectiveTextVisibleChars(11340, pressTick)).toBe(0);
+    expect(turn9SuperEffectiveTextVisibleChars(11341, pressTick)).toBe(1);
+    expect(turn9SuperEffectiveTextVisibleChars(11400, pressTick)).toBe(21);
   });
 });
