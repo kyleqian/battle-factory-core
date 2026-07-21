@@ -4,6 +4,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 229 — Bounded worker (S7 slice R rung (a)): turn 10's FIGHT-submenu reopen LANDS 0-diff, zero navigation presses — `turn10-menu.json` **83/83, 0 diff**; rung (b) (AERIAL_ACE's animation) RAM-probed to a concrete 5-mechanism inventory, NOT implemented — one mechanism needs a genuinely new sprite asset, out of cap
+
+- **State:** `npm test` **896/896** (892 + 4 new), `npm run build` green,
+  tree clean. `turn10-menu.json` (new, 83/83, 0 diff) covers the reopen
+  (12262) through AERIAL_ACE's own kickoff text settling (12344), one
+  tick before the animation's first pixel change. Full regression sweep
+  (~35 traces incl. `turn9-menu` 111, `turn9-quickattack` 117,
+  `turn6-feathers` 235, `turn1-rockslide` 256) all re-verified 0 diff,
+  unchanged counts.
+- **Did:** `turn9Resolved` state flag (mirrors turn1..turn8Resolved),
+  cursor persists ROCK_SLIDE(0), PP ledger gains a 7th slot-0 decrement
+  (3/10). Real bug found and fixed along the way: the settled menu for
+  the gap between turn 9's own (unmodeled) resolution and turn 10's own
+  press isn't gated by a button-press flag — it's a pure-`t` redraw check
+  inside turn 9's OWN dispatcher (same shape `drawTurn7RockSlideWindow`/
+  `drawTurn8BindWindow` already establish), safe since it only fires past
+  `turn9-quickattack.json`'s own committed window. `TURN9_MENU_REDRAW_
+  DELAY` fresh-oracle-bisected to 574 (NOT the dossier's own prose value
+  579 — the bounce task resets 5 ticks before the visual settle, per
+  `MENU_BOUNCE_RAM_SETUP_TICK`'s own precedent) against the new trace's
+  own capture, 0/83 mismatches vs. 5-46 at every other delta from -5 to
+  +8 tried. Then RAM-probed rung (b) (mandatory first step, per the
+  brief): `Move_AERIAL_ACE`'s script is FIVE concurrent mechanisms
+  (Pidgeotto's own short elliptical lunge, Onix's own shake, two blended
+  trace/afterimage clones — parameterizable from QUICK_ATTACK's own
+  code, a background palette-blend pulse, and a "cutting slice" sprite
+  that needs a genuinely new asset+render routine) — exact RAM tables for
+  all five banked in battle-turn-notes.md §40, none implemented.
+- **Next:** rung (b)'s 4 parameterizable mechanisms could land quickly;
+  the cutting-slice sprite (asset extraction + new draw routine) is
+  comparable scope to this whole session's rung (a) on its own. Rung (c)
+  (ROCK_SLIDE + both HP drains + turn-end through turn-11's own menu)
+  entirely unattempted.
+- **Notes:** `docs/battle-turn-notes.md` §40 has the full RAM probe
+  (task/sprite tables, exact x2/y2 sequences per mechanism, source script
+  cross-read). No PAPERCUTS this session.
+
+---
 ## 228 — Supervisor merge fold: **ISSUES #30 FULLY CRACKED and closed** by the round-1 worktree worker (branch `worker/wt-20260721-095153` merged) — candidate A's sSpriteOrder draw-order adopted AND the real root cause of BOTH residual classes found: feathers are `ST_OAM_AFFINE_NORMAL` (not `_DOUBLE`), so `drawSpriteSheetAffineRotate`'s unconditional doubled destination box painted rotated feather corners over Onix; new `doubleSizeBox=false` param at the feather call only. Turn-6 residual window 425px → **0px on all 129 ticks**, turns 7/8 likewise; feather traces extended **106→235, 16→145, 33→162**, suite **892/892**
 
 - **State (all supervisor-verified post-merge, main tree):** `npm test`
@@ -59,39 +97,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** `docs/battle-turn-notes.md` §39 has the full diagnosis (RAM
   table, all three bugs, the fix, honest scope of what's independently
   pixel-proven vs. reasoned-by-symmetry). No PAPERCUTS this session.
-
----
-## 226 — Supervisor wind-down: session end 2026-07-21 ~06:30 — **16 worker steps verified and folded** (8 main-lane + 8 worktree, 10 rounds); suite **821 → 880/880**; headlines: **turns 6-9 landed as engine slices** (turn 6 complete end to end incl. the stat-fall banner and ROCK_SLIDE vs Pidgeotto; turns 7/8 complete minus feather sub-windows; turn 9 through QUICK_ATTACK's lunge), **the dossier pipeline is GAPLESS from anchor through battle 1's WIN to battle 2's swap prompt** (turns 15/16/17 + post-WIN scouted, prefix-verified, incl. the run's first status-condition ground truth and the RNG-resume/opponent-2 window bisected to 105 ticks), and **FIVE standing issues resolved by the probe-first pattern** (#26 Sitrus ring closed via closed-form crack, #27 RNG call attributed, #28+#29 bounce-shift families root-caused AND fixed — 32 excluded ticks restored, #30 narrowed: candidate A crowned, half-texel eliminated, residual split into two named classes)
-
-- **State (verified this minute):** `npm test` **880/880**, `npm run
-  build` green, tree clean, no worktrees, no unmerged branches. Traces
-  landed/extended this session (all supervisor-rerun 0 diff):
-  turn5-sitrus-c 150→181, turn6-menu 33→44, turn6-statfall 127,
-  turn6-rockslide-{a,b} 255+105, turn6-feathers 106, turn7-menu 85→93,
-  turn7-rockslide-{a-d} 787, turn7-feathers 16, turn8-menu 78→88,
-  turn8-bind-{a,b} 322, turn8-feathers 33, turn9-menu 111,
-  turn9-quickattack 112. Groundtruth: battle1-turn{15,16,17}-dense +
-  battle1-postwin-dense (854 captures total, all prefix-chain-verified).
-- **The probe pattern was the session's engine:** five 30-min
-  RAM/source-first worktree probes (8-17 min each) resolved what
-  repeated bounded fitting could not — every "quirk" label fell to a
-  small real engine bug or a closed form. Two fix steps then restored
-  37 previously-excluded ticks across 4 traces. The pattern is now
-  standard: probe ships a verify script, fix worker re-runs it first.
-- **Next:** (1) slice R rung (c2)+(d) — afterimage clones (§38's
-  bisection plan: single-digit-% per-tick diffs, skip-mask ruled out)
-  then ROCK_SLIDE/turn-end to finish turn 9; (2) turns 10-13 as
-  parameterizations (dossiers exist); (3) adopt #30's candidate A
-  (mechanical recipe banked) + chase its class-(b) occlusion bug; (4)
-  turn 9's shake-episode-2 parity + #30 class (a) + #23 remain the hard
-  unknowns; (5) S8 engine slices (win sequence → post-WIN scenes →
-  swap) now have complete ground truth.
-- **Notes:** no usage-limit events; zero merge conflicts across 8
-  worktree merges (incl. one intentional stacked/nested pair, folded in
-  one merge, cleaned inner-first); no PAPERCUTS.md changes (three
-  in-dossier notes, none tooling-class); worker discipline strong (three
-  honest no-land stops, every one with banked findings the next attempt
-  landed on; the cwd-persistence gotcha bit the SUPERVISOR twice —
-  memory updated). Interactive session; no escalations needed — the
-  one near-trigger (slice R's consecutive non-landings) resolved under
-  the established convergence-counting convention (§35→§36→§37→landed).

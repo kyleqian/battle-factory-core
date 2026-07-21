@@ -6647,3 +6647,189 @@ No new committed tooling this session (the RAM re-probe reused
 `tools/probe/dump-quickattack-anim.py`, already committed; the scratch
 oracle-PNG comparison trace was not committed, per the standing "scratch
 stays scratch" convention).
+
+## 40. S7 slice R rung (a) LANDED: turn 10's FIGHT-submenu reopen, zero-nav, `turn10-menu.json` **83/83, 0 diff**; rung (b) (AERIAL_ACE's animation) RAM-probed to a concrete 5-mechanism inventory but NOT implemented - one mechanism (a "cutting slice" sprite) needs a genuinely new asset, out of this session's remaining cap (bounded worker session)
+
+### Rung (a): the reopen, landed clean
+
+`docs/turn10-notes.md` is the dossier (headline: both published lines
+reconverge a second turn running - Pidgeotto's AERIAL_ACE hits Onix
+24->14, Onix's ROCK_SLIDE hits Pidgeotto 61->38). This rung covers just
+the FIGHT-submenu reopen through AERIAL_ACE's own kickoff text settling
+(12262-12344), one tick before the animation's first pixel change (12345,
+rung (b)) - the same "new dispatcher, mostly-reused helpers" shape
+turns 8/9's own slices established.
+
+- **State plumbing**: `turn9Resolved: boolean` added to `BattleSceneState`
+  (mirrors `turn1Resolved`..`turn8Resolved`), gated in `core.ts` on
+  `fightSubmenu.confirmElapsed` (turn 9's own live confirm, LEFT+A) plus
+  `TURN9_MENU_REDRAW_DELAY` - a fresh A-press reopens FIGHT for turn 10 at
+  cursor 0 (default, ROCK_SLIDE - **zero navigation presses**, matching
+  the dossier's own headline finding).
+- **PP ledger**: `currentPPForActiveMon` gained a `turn9Resolved` param
+  decrementing slot 0 (ROCK_SLIDE) a 7th time - `turn10-notes.md` §4's own
+  "ROCK_SLIDE(157) 3/10" ledger, PNG-confirmed directly against a fresh
+  `turn10-menu.json` capture (12281: "PP 3/10").
+- **A real bug found along the way**: the settled-menu content for the GAP
+  between turn 9's own (unmodeled, out-of-scope) resolution and turn 10's
+  own button press is **not** gated by `turn9Resolved` at all (a button-
+  press flag can't explain a redraw that happens automatically, with no
+  player input, mid-resolution) - it's a pure-`t` redraw check inside turn
+  9's OWN existing dispatcher (`drawTurn9FightSubmenuWindow`), the exact
+  same shape `drawTurn7RockSlideWindow`/`drawTurn8BindWindow`'s own
+  `redrawTick` branches already establish. First attempt wired the
+  settled-menu render behind `turn9Resolved` alone and produced a 19-24%
+  diff at every pre-press tick (the app kept showing turn 9's own frozen
+  "Foe PIDGEOTTO used\nQUICK ATTACK!" text all the way to 12272) - caught
+  immediately by comparing the app's own rendered PNG against the oracle's
+  at tick 12262, not guessed. Fixed by adding a `t >= pressTick +
+  TURN9_MENU_REDRAW_DELAY` branch inside `drawTurn9FightSubmenuWindow`
+  itself (dispatching to a new `drawTurn9TurnEndSettledMenu`) - safe
+  because it only fires for `t >= 11445`, far past `turn9-quickattack.
+  json`'s own committed window (ends at 10934), so it cannot regress that
+  trace's own 0-diff status, and it does NOT claim 10934-11444 (QUICK_
+  ATTACK's impact/drain/ROCK_SLIDE/turn-end) is modeled - still entirely
+  out of scope (rungs c3/c4/d).
+- **`TURN9_MENU_REDRAW_DELAY` fresh-oracle-bisected, not taken from prose**:
+  `turn9-notes.md` §5 cites the visual settle at tick 11450
+  (`11450-10871=579`), but the underlying bounce TASK resets 5 ticks
+  EARLIER (574) - the same small "RAM reset precedes visual settle" gap
+  `MENU_BOUNCE_RAM_SETUP_TICK`'s own doc already flags for the very first
+  menu ever drawn. Found by bisecting: tried every delta from -5 to +8
+  against a fresh `turn10-menu.json` capture (a scratch script re-rendering
+  the app side against the already-captured oracle PNGs, no need to re-hit
+  the oracle service per candidate) - only delta -5 (574) produced 0/83
+  mismatches; every other value produced 5-46. A repeat of turn 9's own
+  §38 lesson (a 4-tick anchor error burned two sessions) - caught this time
+  in one bisection pass instead of a guess.
+- **AERIAL_ACE's own kickoff text**: "Foe PIDGEOTTO used\nAERIAL ACE!" -
+  `TURN10_AERIALACE_TEXT_DELAY=11` fit directly against the fresh capture
+  (first char at 12316, fully typed and settled by 12344 - the SAME
+  11-tick delay QUICK_ATTACK's own kickoff text used, `TURN9_QUICKATTACK_
+  TEXT_DELAY`, not re-derived from scratch since both are the standard
+  "used move" message cadence).
+
+**Committed**: `tools/compare/traces/turn10-menu.json` (92 segments =
+`turn9-quickattack.json`'s own 88-segment/12272-frame base + `battle1-
+turn10-dense.json`'s own segments[88:92] verbatim - the turn-10 submenu-
+open `A`, 30f settle, confirm `A` with no navigation press, and a 1000f
+idle; captureFrames 12262-12344, 83 frames). 4 new Tier-1 pins (`tests/
+battleMenu.test.ts`): the PP ledger, the bounce-reset anchor identity,
+`turn9ResettledBounceTick`'s own re-init shape, and AERIAL_ACE's text
+timing (cross-checked against the PNG-read settle tick).
+
+### Rung (b): RAM-probed, NOT implemented - a concrete 5-mechanism inventory, one needs a new asset
+
+Per the brief's own mandatory-first-step rule, RAM-probed BEFORE reading
+source or attempting any render code (`tools/probe/dump-task-and-sprite-
+callbacks.py` then `tools/probe/dump-quickattack-anim.py`, both reused
+unchanged, against `battle1-turn10-dense.json` ticks 12340-12440),
+cross-read against `Move_AERIAL_ACE`'s own battle-anim script
+(`reference/pokeemerald/data/battle_anim_scripts.s:4350`):
+
+```
+Move_AERIAL_ACE:
+	loadspritegfx ANIM_TAG_CUT
+	monbg ANIM_TARGET
+	setalpha 12, 8
+	createvisualtask AnimTask_TranslateMonEllipticalRespectSide, 2, ANIM_ATTACKER, 24, 6, 1, 5
+	createvisualtask AnimTask_TraceMonBlended, 2, 0, 4, 7, 3
+	createsprite gCuttingSliceSpriteTemplate, ANIM_ATTACKER, 2, 40, -32, 0
+	playsewithpan SE_M_RAZOR_WIND2, SOUND_PAN_ATTACKER
+	delay 5
+	createvisualtask AnimTask_ShakeMon, 2, ANIM_TARGET, 0, 3, 10, 1
+	complex_palette_blend ... color1=RGB_BLACK, blend_y1=10, color2=RGB_BLACK, blend_y2=0
+	playsewithpan SE_M_RAZOR_WIND, SOUND_PAN_TARGET
+	waitforvisualfinish
+	clearmonbg ANIM_TARGET
+	blendoff
+	end
+```
+
+Battler sprite slots this turn: **battler0 (Onix) = slot 6, battler1
+(Pidgeotto) = slot 5** - genuinely different slots than turn 9's own
+QUICK_ATTACK window (slot 2 was Pidgeotto there); slot 2 is allocated but
+inert (`inv=1`, x2/y2 flat 0) throughout this whole window, not reused
+this turn. Five distinct concurrent mechanisms, task/sprite RAM-tabled
+exactly (render tick = RAM tick + 1, the standing convention):
+
+1. **Pidgeotto's own elliptical lunge** (slot 5, the REAL sprite, never
+   invisible) - `AnimTask_TranslateMonElliptical_Step` active RAM
+   12359-12364 (render 12360-12365, 6 ticks): `x2,y2` = `(-17,2), (-24,6),
+   (-17,11), (0,12), (16,11), (24,6)`, back to `(0,0)` at render 12366 - a
+   symmetric out-and-back arc, SHORTER and shaped differently than QUICK_
+   ATTACK's own lunge table (script params `24, 6, 1, 5` vs. QUICK_ATTACK's
+   own different args) - needs its own fresh table, not a parameterization
+   of `TURN9_QUICKATTACK_LUNGE_TABLE`.
+2. **Onix's own shake** (slot 6, the REAL sprite - `invisible` toggles
+   true/false across this window but, per §37's already-proven "the
+   `invisible` bit never gates rendering" rule, this is NOT evidence the
+   sprite stops drawing) - `AnimTask_ShakeMon_Step` active RAM 12366-12384
+   (render 12367-12385); `y2` square-wave `3,3,0,0` repeating over render
+   12369-12384 (4 full cycles, 16 ticks) - matches the script's own
+   `AnimTask_ShakeMon, ..., 0, 3, 10, 1` params (amplitude 3). Simpler than
+   turn 9's own shake episode (§39), a clean 2-tick-on/2-tick-off square
+   wave, no ramp.
+3. **Two blended trace/afterimage clones** (slots 4 and 7, `AnimMonTrace` -
+   the SAME task/sprite mechanism `turn9QuickAttackSlot3Offset`/
+   `drawSpriteSheetBlendedOverFb` already model for QUICK_ATTACK, plausibly
+   parameterizable): slot 4 active render 12360-12368 then 12370-12378 (two
+   short lives, `x2,y2` flat `(-17,2)` first life then `(0,0)` second -
+   distinct from slot 5's own moving lunge, confirms clones sample a FIXED
+   pose, not a live copy); slot 7 active render 12365-12373 only, `x2,y2`
+   flat `(24,6)` - the two clones sample the lunge's own start/end
+   extremes, not its middle.
+4. **A background palette-blend pulse** (slot 8's own callback,
+   `AnimComplexPaletteBlend_Step1`->`Step2`, render 12367-12375, matching
+   `complex_palette_blend ... color1=RGB_BLACK, blend_y1=10, blend_y2=0` -
+   NOT a sprite at all, an IO-register-driven background darken-then-
+   restore, same family as `evaEvb`/`complex_palette_blend` mechanisms
+   this codebase already models elsewhere for other moves, unconfirmed
+   whether an existing helper covers this exact shape).
+5. **A "cutting slice" sprite** (slot 3, `gCuttingSliceSpriteTemplate`,
+   `AnimSlice_Step` - **genuinely new to this dossier's arc, no existing
+   mechanism to parameterize**): active render 12360-12378 (`AnimSlice_
+   Step`), then `WaitAnimForDuration` 12379-12382, `DestroyAnimSprite` at
+   12383, gone by 12384. `x2,y2` moves LINEARLY diagonal, `(-4,4)` at
+   12360 stepping ~`(-4,+4)`/tick out to a held `(-63,62)` from 12379-12383
+   (a straight claw-slash streak across the screen, not an arc). Needs its
+   own sprite graphic extracted (`ANIM_TAG_CUT`'s own graphics, not yet in
+   `src/assets/gen/`) plus its own render routine - this is the one piece
+   of the five that cannot be built by parameterizing existing code, and
+   is why this rung was not attempted further this session (asset
+   extraction + a new draw routine + its own render-lag/lifetime fit is a
+   comparable scope to this whole rung (a), not a quick add-on).
+
+**A second, independent hint for rung (c)**: the same probe shows sprite
+slot 3 gets REUSED at render tick 12406 for `SpriteCB_HitAnimHealthbox
+Effect` (through 12425) - a hit-flash effect starting well before the
+dossier's own cited HP-drain window (12440-12452), useful ground truth for
+whoever picks up rung (c) next, not chased further here (out of scope).
+
+### What was NOT modeled this session (honest scope accounting)
+
+Rung (b) (AERIAL_ACE's animation, 12345-12439) and rung (c) (ROCK_SLIDE +
+both HP drains + turn-end through the turn-11 menu boundary, 12440-13306)
+are both entirely unattempted past the RAM probe above - **no `src/`
+render code was written or reverted for either**, since the probe above
+was the only work done past rung (a)'s own landing; nothing was left
+half-wired. The gap is now a NAMED, strictly smaller one than "all of turn
+10 past the reopen": mechanisms 1-4 above are plausibly quick
+parameterizations of existing code (elliptical translate, shake, blended
+trace clones, palette pulse - all have a direct precedent elsewhere in
+this file), mechanism 5 (the cutting-slice sprite) is the one genuinely
+new asset+render piece blocking a full rung (b) landing.
+
+### Verification
+
+`npm test` **896/896** (892 + 4 new Tier-1 pins), `npm run build` green.
+`turn10-menu.json` **83/83, 0 diff** (twice-verified: the official `npm
+run compare` run and an independent scratch pixel-diff script against the
+same captured oracle PNGs, both 0 mismatches). Zero regressions across the
+full menu/rockslide/feathers/bind/cloneanim sweep: `turn9-menu.json`
+**111/111**, `turn9-quickattack.json` **117/117**, `turn6-feathers.json`
+**235/235**, `turn1-rockslide.json` **256/256**, `turn8-menu.json`
+**88/88**, `turn7-menu.json` **93/93**, `turn6-menu.json` **44/44**,
+`turn8-bind-{a,b}.json` **256+66**, plus every turn1-8 rockslide/endeavor/
+feathers/sitrus/switchin/faint trace (32 more traces), all re-verified 0
+diff at their existing counts - none reduced. No PAPERCUTS this session.
