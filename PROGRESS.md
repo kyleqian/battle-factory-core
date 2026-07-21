@@ -4,6 +4,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 236 — Supervisor merge fold ×2: (1) turn-9 gap-probe SALVAGE (`wt-120256`, cap-killed mid-writeup, supervisor verified+committed its work): §41's "new hit-flash mechanism" DISSOLVED — it's the flicker task's FOURTH 4-tick block (`DoHitAnimBlinkSpriteEffect` runs 32 ticks = 4 blocks; the earlier probe stopped sampling at RAM 10977; the "position-dependent recolor" was background showing through the erasure) — `verify-turn9-postlunge.ts` now **108/108**; hitsplat stale-coefficient hypothesis REFUTED decisively (best brute-force (eva,evb) fit 62.2%; RAM-true 12/8 scores WORSE than current 16/16; floor-vs-round also refuted; RAM attrs banked: objMode=1, BLDCNT=0x3f40, BLDALPHA=0x080c; next instrument named: gPlttBufferFaded tint dump). (2) turn-11 probe (`wt-123722`): BOTH halves pure parameterizations — ROCK_SLIDE pressTick=13137 (full draw-order sequence verified vs real sSpriteOrder, 0/117 + 0/980 mismatches), FEATHER_DANCE pressTick=13339 with **0 feather-template OAM hits — direct RAM proof the blocked stat change short-circuits before createsprite**, so no feather table needed; ONE new branch (ATK-floor "won't go lower!" message, +83 delay, real apostrophe U+2019); `verify-turn11.ts` **52/52**
+
+- **State (supervisor-verified post-merges):** `npm test` **946/946**,
+  `npm run build` green, verify scripts fresh: turn9-postlunge 108/108,
+  turn11 52/52 (plus turn10-rockslide 44/44, turn10-aerialace 20/20
+  earlier this hour). Turn-12 probe in flight on `wt-20260721-123745`-
+  family branch. Turn-9's capture gap (10945-10986) is now closeable:
+  the 4th-block fix is a table extension; only hitsplat-live renders
+  10935-10944 stay blocked (palette-tint instrument named).
+- **Notes:** salvage protocol: verified the killed worker's uncommitted
+  verify-script/diagnostics by rerunning them myself, wrote the dossier
+  append from its in-code comments + script outputs, committed on its
+  branch with provenance noted. Both diagnostics' NEGATIVES (coefficient
+  + rounding) are the load-bearing finding — do NOT re-brief a blend-fit.
+
+---
 ## 235 — Bounded worker (S7 slice R rung (a)): turn 10's ROCK_SLIDE half LANDS 0-diff end-to-end (kickoff through the turn-11 menu boundary) — `TURN10_ROCKSLIDE_PRESS_TICK=12169` wired through the existing turns-6/7/9-style dispatcher parameterization, plus Onix's own AERIAL_ACE-drain aftermath (HP drain 24→14 + "not very effective" text, both fresh-oracle-bisected); new `turn10-rockslide.json` **220/220, 0 diff**; rungs (b)/(c)/(d) NOT attempted this session (time-boxed), gaps unchanged from §42
 
 - **State:** `npm test` **946/946** (936 + 10 new), `npm run build`
@@ -49,46 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   retry (§42 handoff, pure table already Tier-1-pinned), (c) extend
   aerialace coverage past 12362. Turn-9 gap probe (hitsplat tip +
   hit-flash) in flight on `worker/wt-20260721-120256`.
-
----
-## 233 — Bounded worker (S7 slice R rung (b) implementation): all 5 AERIAL_ACE mechanisms wired; mechanism 5 (slice) fully 0-diff, mechanisms 1/3 (lunge+clones) land their own first tick with a small unresolved residual just past it, mechanism 4 (palette pulse) REVERTED as badly wrong (pure table kept) — `turn10-aerialace.json` **18/18, 0 diff** (12345-12362, smaller than the dossier's full window)
-
-- **State:** `npm test` **936/936** (921 + 15 new), `npm run build`
-  green, `verify-turn10-aerialace.ts` **20/20 fresh** (mandatory first
-  step, rerun unchanged after implementation). Full regression sweep 0
-  diff, unchanged counts: `turn10-menu.json` **83/83**,
-  `turn9-quickattack.json` **117/117**, `turn9-quickattack-b.json`
-  **77/77**, `turn9-rockslide.json` **130/130**, `turn1-cloneanim.json`
-  **230/230**.
-- **Did:** wired all 5 mechanisms into a new `drawTurn10AerialAceWindow`
-  dispatcher (`turn10AerialAceLungeOffset`/`Slot4Offset`/`Slot7Offset`/
-  `OnixShakeY2`/`PaletteDarkenCoeff`/`SliceState`), loaded the
-  cutting-slice asset (`battleAnimCuttingSlice`), and threaded
-  `onixY2Extra`/`darken`/`paletteOverride` params through
-  `drawTurn5RockSlideAttack`/`drawTurn6FieldBase`/`drawTurn10FieldBase`/
-  `staticBgPixel` (all defaulted no-ops, confirmed by the sweep). The
-  slice sprite's own per-tick table turned out RAM-tick-indexed despite
-  its own "render tick" column header — resolved by matching the
-  oracle's own 71px onset patch pixel-for-pixel against the asset's
-  frame-0 opacity mask (a CENTER-based OAM corner, uniform +1 lag).
-  Mechanism 3 needed the SAME asymmetric "+1 extra tick at each life's
-  START only" fix §39 already root-caused for QUICK_ATTACK's own
-  clones, plus QUICK_ATTACK's own ground-clip constant reused verbatim
-  — closed the worst of the residual but not all of it (small residual
-  renders 12363-12366, shrinking 666→29px, NOT feet-related, not
-  root-caused). Mechanism 4's render application came out badly wrong
-  (~48-54% of the whole frame mismatches at the plateau) — reverted
-  per the brief's own "revert partial render code, keep the pure
-  table" rule; `darken` is hardcoded false in the dispatcher now.
-- **Next:** (1) mechanism 3's residual — bisect the lunge table's own
-  early entries (indices 0-2) first, a "disable clones" experiment this
-  session ran rules out a pure clone-position bug. (2) mechanism 4 —
-  re-derive the live BG palette BANK NUMBER via direct RAM read (this
-  session guessed by RGB-proximity against the extracted static asset,
-  which is why it's wrong). (3) once both close, extend
-  `turn10-aerialace.json` past 12362 through the dossier's own 12389
-  settle boundary in one pass (mechanism 2 becomes independently
-  provable there too, since its own window opens right after).
-- **Notes:** `docs/battle-turn-notes.md` §42 has the full writeup incl.
-  the exact pixel evidence for both the landed mechanisms and the two
-  named gaps. No PAPERCUTS beyond the standing mgba-venv-teardown one.
