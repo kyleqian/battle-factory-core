@@ -170,26 +170,20 @@ battle1-turn6-dense.json -o <dir>`).
 | FIGHT submenu opens | 7317 | `82a50d963410` | matches RAM `gBattle_BG0_Y` 160->320 at the **identical tick**, no render lag this time (unusual — most other boundaries in this dossier lag RAM by 1-2 ticks) |
 | move confirmed (`A` held 7344-7346) | 7344 | `aee2f00d9db2` | transient press-frame, reverts to submenu-open pixels at 7345-7348 before the kickoff sequence begins |
 | FEATHER_DANCE kickoff text visible | ~7358-7360 (text fully in by 7360) | `fc848f13d635` | "Foe PIDGEOTTO used FEATHERDANCE!" — pixel-confirmed via direct PNG read; RAM's own controller-func flip for this text is at 7357, 1-3 ticks earlier, same small render-lag pattern as turns 1-5 |
-| ATK-fall message window starts | 7385-7388 | `ae11c7f00fbd` (settled by 7388) | RAM: `onixAtkStage` 6->4 at 7391, mid-window — the stat actually changes **while** this message is already showing, not before it starts |
-| ATK-fall message window ends / text-clear | 7558-7559 | `582f26434019` -> `ae11c7f00fbd` | reverts to the *same* pixel state as the kickoff-text's own settled frame (`ae11c7f00fbd`, tick 7388) — i.e. the message box returns to an identical resting frame between phases |
-| generic message-box transition animation (characterized, not fully attributed) | 7659-7684 | (26-frame sequence) | **same sha256 sequence** (byte-for-byte, not just similar) as tick 7765-7784's own sequence, 106 ticks later — see note below |
-| ROCK_SLIDE kickoff text visible | ~7770-7784 | (shares the 7659-7684 sequence, offset +106) | "ONIX used ROCK SLIDE!" — pixel-confirmed via direct PNG read at 7940/8005, still showing this exact text through the whole animation+drain window |
+| ~~ATK-fall message window starts~~ **[CORRECTED 2026-07-20, turn7-notes §5 + supervisor PNG verification]** kickoff text still showing; FEATHER_DANCE attack animation plays during this hold | 7385-7388 | `ae11c7f00fbd` (settled by 7388) | Direct PNG reads at 7390/7450/7657 all still show "Foe PIDGEOTTO used FEATHERDANCE!" — NOT the ATK-fall text this row originally claimed. The kickoff message holds ~7358-7658 with a feather/starburst attack animation over Pidgeotto's sprite region (visible from ~7450). RAM: `onixAtkStage` 6->4 at 7391 — the stat write is its own early battle-script step, ~294 ticks before the "fell" flavor text ever renders; the two are NOT one message+effect unit |
+| ~~ATK-fall message window ends / text-clear~~ **[CORRECTED, same evidence]** mid-hold pixel transition within the kickoff/animation span | 7558-7559 | `582f26434019` -> `ae11c7f00fbd` | reverts to the kickoff text's own settled frame (`ae11c7f00fbd`) — consistent with an animation-driven transient inside the hold, not a message change |
+| ATK-fall message actually appears (msgbox close/reopen transition, then text) | 7659-7684 | (26-frame sequence) | the transition closes the kickoff msgbox; "ONIX's ATTACK harshly fell!" is fully drawn by 7684 (supervisor-verified PNG). **[CORRECTED]** the original "byte-for-byte identical to 7765-7784" claim is wrong — only the first 4 frames of the two sequences match (turn7-notes §5, re-verified directly), consistent with a shared box-close start followed by content-dependent frames |
+| ROCK_SLIDE kickoff text visible | ~7770-7784 | (first 4 frames shared with 7659-7684's box-close start, then diverges — see correction above) | "ONIX used ROCK SLIDE!" — pixel-confirmed via direct PNG read at 7940/8005, still showing this exact text through the whole animation+drain window |
 | ROCK_SLIDE impact/animation window | 7935-7956 | 22 distinct frames in 21 ticks | rock-hit animation on Pidgeotto's sprite region, RAM-bracketed by the second `battler1ControllerFunc` phase (7934-7967) |
 | HP-bar drain window | 7970-8019 | 16 distinct frames over 49 ticks (~1 visible pixel-column change per ~3 ticks) | **not** 1-RAM-unit-per-tick like turn 1's drain (§5 of `battle-turn-notes.md`) — the healthbar's own pixel resolution doesn't resolve every individual HP unit for a 156-max-HP bar the way it did for smaller max-HP bars; `pidgeottoHp` itself updates 156->113 at tick 8014, 1 tick after the drain window's own RAM controller-func phase ends (8013) |
 | secondary-effect/turn-end, text clears, turn-7 menu reopens | 8115 (partial) -> 8122 (settled, 1-tick render lag behind RAM's own `bg0y` flip at 8121) | `a8e22ddf13b7` -> `492e3816c1f0` | a 1-frame flicker at 8123 (`6c17c3df0551`) between two otherwise-identical frames, then stable; pixel-confirmed "What will ONIX do?" vs PIDGEOTTO (113/156 HP) via direct PNG read at 8129 |
 
-**The 7659-7684 / 7765-7784 sha-identical pair is a genuine, precisely
-characterized-but-not-fully-explained finding**, flagged per this dossier's
-own "characterize, don't curve-fit" convention (cf. §20 of
-`battle-turn-notes.md`'s shake-asymmetry note): the simplest explanation is
-that pokeemerald reuses one generic message-box open/close slide routine
-(fixed border artwork, content-independent) for **both** the ATK-fall
-message's own close and the ROCK_SLIDE kickoff message's own open — i.e. the
-identical pixel sequence is expected precisely *because* the routine doesn't
-know or care what text follows, not evidence of a probe error. Not chased to
-a source-level function this session (time-boxed) — RAM shows both windows
-share `gBattlerControllerFuncs[1]` value `134609789`, which is a reusable
-lead for whoever picks this up.
+**[SUPERSEDED 2026-07-20 — see the corrected table rows above and
+turn7-notes §5]** The original "sha-identical 26-frame pair" framing was
+wrong (only the first 4 frames of 7659-7684 and 7765-7784 match — a shared
+box-close start, then content-dependent divergence). The
+`gBattlerControllerFuncs[1]` = `134609789` shared-value observation stands
+as a lead for attributing the generic box-close routine.
 
 **Turn-7's own menu is fully settled by tick 8122** (222 ticks of margin
 before `battle1-winline-b-swap.json`'s own next button press at 8346) —

@@ -4,6 +4,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 189 — Worktree scout (supervisor-folded): turn 7 ground truth BANKED + two REAL corrections to the turn-6 dossier — `battle1-turn7-dense.json` (9380 frames, 256/256 captures, twice-run identical, verbatim winline extension) + `docs/turn7-notes.md`; **turn 7 brings NO new mechanism** (repeats turn 6's FEATHER_DANCE/ROCK_SLIDE pair); merged `af7a3e3`, suite 793/793 on the merged tree
+
+- **State:** merged into master, `npm test` 793/793 + build green
+  post-merge (docs+trace only). Supervisor re-verified: prefix check
+  (turn6-dense ⊂ turn7-dense ⊂ winline-b-swap, script-exact), 4/4 cited
+  boundary shas reproduced on a fresh oracle run, and the label-bearing
+  frames READ as images (8354: submenu with cursor persisted on ROCK
+  SLIDE, PP 5/10 — §19's rule exercised at a real turn boundary).
+- **Did:** turn 7 ledger RAM-confirmed on the winline (Pidgeotto 113→82,
+  −31; PP ROCK_SLIDE 5→4, FD 14→13; ATK stage 4→2; 11 Random() calls,
+  same shape as turn 6). Turn-8 divergence state pinned (BIND vs
+  ROCK_SLIDE choice). **Corrections (supervisor PNG-verified against the
+  regenerated turn-6 captures, then folded into turn6-notes §5):** (1)
+  turn 6's "ATK-fall message window 7385-7558" rows were mislabeled — the
+  FEATHERDANCE kickoff text holds ~7358-7658 with the feather attack
+  animation playing during the hold; the RAM `onixAtkStage` write (7391)
+  precedes the "harshly fell!" text by ~294 ticks (separate battle-script
+  steps, not one unit); the ATK-fall text is fully drawn at 7684. (2) the
+  "byte-identical 26-frame msgbox pair" claim shrank to first-4-frames
+  under re-verification. Lesson recorded: sha reproduction validates
+  determinism, NOT semantic labels — supervisor label-checks now read
+  the PNGs.
+- **Next:** slice M-2 (Onix idle-bob root cause + Sitrus window, §11's
+  three hypotheses); then turn-6/turn-7 engine slices against the two
+  dossiers (turn 7 = pure parameterization of turn 6).
+- **Notes:** scout stayed in contract; no papercuts. Turn-6 engine slice
+  must budget for the FEATHER_DANCE attack animation (feathers/starburst,
+  ~7450-7658) that the original dossier's mislabeled table hid.
+
+---
 ## 188 — Bounded worker (S7 slice M): Pidgeotto's healthbox slide-in LANDED (`turn5-healthbox.json` 55/55, 0 diff, 6820-6874) — Sitrus proc + settled menu NOT landed, blocked on a newly-discovered Onix on-field idle-bob (RAM table pinned, screen mapping unresolved)
 
 - **State:** `npm test` **793/793** (+3), `npm run build` green, tree clean.
@@ -78,50 +108,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   papercuts.
 
 ---
-## 186 — Bounded worker (S7 slice L-4): materialize ramp-down + wobble phase CLOSED, `turn5-switchin.json` extended **167→241** (6588-6828, full ball-to-settle window), **0 diff, ZERO exclusions** — two independent bugs root-caused (a corrupted coefficient table + a healthbox Z-order miss)
-
-- **State:** `npm test` **790/790** (+3), `npm run build` green, tree clean
-  at `9faddea`. No worktrees. `turn5-switchin.json` now covers the FULL
-  ball-to-settle window, 0 diff, no excluded ticks.
-- **Did:** assigned to close the ramp-down residual (~1100-1350px/frame,
-  render 6768-6782) and verify the wobble phase. RAM-probed `oam.affineMode`/
-  `gOamMatrices` directly (new `tools/probe/dump-switchin-materialize-
-  affine.py`) across the ramp window — matrix pinned at pure identity,
-  `affineMode=NORMAL` throughout, ruling out geometry entirely. Root cause
-  was the palette coefficient itself: the PRIOR session's own
-  `TURN5_MATERIALIZE_RAMP_COEFF` table and its "same render tick" lag
-  finding were BOTH corrupted — decoded from a degenerate `gPlttBufferFaded`
-  offset (`+0x222..0x228`) where `BlendPalette`'s integer truncation
-  collapses several coefficients onto identical output. Reprobed at
-  `+0x230` (a non-degenerate color, cross-checked against 3 independent
-  oracle pixels) and found the REAL sequence: flat coefficient 16 through
-  render 6767, then a perfectly linear 15->0 countdown from render 6768,
-  with the ORDINARY +1 RAM-to-render lag (not same-tick as previously
-  believed). Unified growing+ramp into one draw call via new
-  `drawSpriteSheetAffineTintedBlend` (identical to the old flat-tint call
-  at coeff=16, no seam). Wobble phase needed `doubled=true`
-  (`ST_OAM_AFFINE_DOUBLE`, RAM-confirmed) threaded into
-  `drawSpriteSheetAffineStretch` — verified as its own isolated 0-diff
-  span. A SEPARATE bug surfaced once the window widened past 6754: the
-  opponent's own particle burst painted over the player's healthbox UI —
-  real hardware sets ALL healthbox pieces to OAM priority 0 during battle
-  animations (`LaunchBattleAnimation`/`UpdateOamPriorityInAllHealthboxes(0)`,
-  `battle_anim.c`), unconditionally on top; moved `drawMenuHealthboxPlayer`/
-  `drawPlayerHealthboxHpOverlay` to draw after `drawTurn5SwitchinSprite` in
-  `drawTurn5RockSlideWindow`. +3 Tier-1 pins (`turn5MaterializeCoeff`).
-  Regression-swept clean at unchanged counts: `turn5-sentout` 141/141,
-  `turn5-rockslide` 256/256, `turn4-doubleteam` 250/250, `turn5-menu`
-  42/42, `fight-submenu-reopen` 90/90, `turn3-menu` 254/254,
-  `turn4-rockslide` 250/250, `turn5-endeavor` 254/254. Docs:
-  `faint-switch-notes.md` §10 rewritten (both prior "not landed" items
-  closed, the Z-order finding added, status CLOSED); archived #183 to
-  `PROGRESS-archive.md` to keep the ledger to 3 entries.
-- **Next:** the faint/forced-switch sequence's last unexplored territory
-  is past `TURN5_PIDGEOTTO_SETTLE_TICK`(6828) — healthbox slide-in, Sitrus
-  proc, settled menu vs PIDGEOTTO (§8e/§2/§3e, fully spec'd, untouched).
-  Then turn 6+ toward battle 1's WIN.
-- **Notes:** no new papercuts. One self-corrected false start: an
-  intermediate "constant coefficient 15" hypothesis for the flat span
-  looked plausible from a degenerate RAM decode but was caught by a direct
-  oracle pixel cross-check before it was ever committed.
-
