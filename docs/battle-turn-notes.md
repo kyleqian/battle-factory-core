@@ -6105,3 +6105,132 @@ rockslide-d.json` **19/19**, `turn6-rockslide-a.json` **255/255**,
 `turn6-feathers.json` **106/106**, `turn6-featherdance.json` **90/90**,
 `turn7-feathers.json` **16/16**, `turn8-feathers.json` **33/33**, all 0
 diff.
+
+## 36. S7 slice R rungs (c)+(d) scout: QUICK_ATTACK's animation window RAM-probed exhaustively - a §35 sprite-slot CORRECTION plus 3-4 distinct concurrent lag classes found, none resolved to a pixel-exact render this session (bounded worker, hard-cap reached during probing) - no `src/` changes, `npm test`/`npm run build` unchanged-green
+
+Per the standing RAM-probe-first mandate, this session built and ran a new
+probe (`tools/probe/dump-quickattack-anim.py`, committed - dumps x/y/x2/y2/
+`invisible`/`objMode`/`matrixNum`/`paletteNum`/`inUse` for an explicit sprite-
+slot list, plus `BLDCNT`/`BLDALPHA`, plus `gBattlerSpriteIds[0..1]`, over any
+tick range) against `battle1-turn9-dense.json`'s own committed ticks
+10870-10995, cross-checked against fresh `bin/oracle run` pixel captures at
+20 spot ticks (sha256 + connected-component pixel-diff analysis, not
+eyeballed). **Ran out of session time bisecting the render-lag puzzle below
+before landing any new engine code** - this section banks the ground truth
+so the next session can skip re-probing.
+
+### Correction to §35: the real sprite is slot 5, not slot 2
+
+§35's own `dump-task-and-sprite-callbacks.py` run inferred "sprite slot 2 =
+Pidgeotto's own real sprite" from symbol-name proximity in that script's
+output. This session RAM-read `gBattlerSpriteIds` directly (the authoritative
+battler-to-sprite-slot map) at every tick 10870-10995: **battler 1
+(Pidgeotto) = slot 5, battler 0 (Onix) = slot 6**, constant throughout.
+Slot 2 is unrelated - `inv=1`/`x2=y2=0` for the ENTIRE probed window
+(10870-10995), never touched by this animation at all. Corrected inventory:
+**slot 5** = Pidgeotto's real sprite (goes invisible for the window), **slots
+3/4** = the `AnimTask_TraceMonBlended` afterimage copies (matches §35's
+count, wrong slot numbers), **slot 7** = the hitsplat (§35 had this one
+right). Lesson for future probes: cross-check a task/callback-pointer probe's
+own slot inference against `gBattlerSpriteIds` directly before trusting it -
+symbol-proximity in a raw pointer dump is not the same as confirming which
+slot a given battler's sprite actually occupies.
+
+### The lunge/trace/hitsplat window (RAM ticks 10925-10946, `pressTick`=10867 confirmed)
+
+Per-tick table (RAM, not yet render-lag-adjusted):
+
+| RAM tick | slot 5 (real, Pidgeotto) | slot 3 | slot 4 | slot 6 (Onix) | slot 7 (hitsplat) |
+|---|---|---|---|---|---|
+| 10924 | visible, x2=y2=0 | - | - | x2=y2=0 | - |
+| 10925-10927 | **invisible**, x2=y2=0 | - | - | x2=y2=0 | - |
+| 10928 | invisible, x2=-17,y2=2 | **created**, x2=-17,y2=2, objMode=1 | - | x2=y2=0 | - |
+| 10929 | invisible, x2=-24,y2=6 | frozen at -17,2 | - | x2=y2=0 | - |
+| 10930 | invisible, x2=-17,y2=11 | frozen at -17,2 | - | x2=y2=0 | - |
+| 10931 | invisible, x2=0,y2=12 | frozen at -17,2 | - | x2=y2=0 | - |
+| 10932 | invisible, x2=16,y2=11 | frozen at -17,2 | - | x2=y2=0 | - |
+| 10933 | invisible, x2=24,y2=6 | frozen at -17,2 | **created**, x2=24,y2=6, objMode=1 | x2=y2=0 | - |
+| 10934 | invisible, x2=0,y2=0 | frozen at -17,2 | frozen at 24,6 | x2=y2=0 | **created**, (72,88), objMode=1 |
+| 10935 | invisible, 0,0 | frozen at -17,2 | frozen at 24,6 | x2=y2=0 | present |
+| 10936-10937 | invisible, 0,0 | **destroyed** | frozen at 24,6 | x2=**5**,y2=0 | present |
+| 10938-10939 | invisible, 0,0 | **recreated**, x2=0,y2=0 | frozen at 24,6 | x2=0,y2=0 | present |
+| 10940 | invisible, 0,0 | frozen at 0,0 | frozen at 24,6 | x2=5,y2=0 | present |
+| 10941 | invisible, 0,0 | frozen at 0,0 | **destroyed** | x2=5,y2=0 | present |
+| 10942-10943 | invisible, 0,0 | frozen at 0,0 | - | x2=y2=0 | present |
+| 10944-10945 | invisible, 0,0 | frozen at 0,0 | - | x2=y2=0 | **destroyed** |
+| 10946 | invisible, 0,0 | **destroyed** | - | x2=y2=0 | - |
+| 10947 | **visible**, 0,0 | - | - | x2=y2=0 | - |
+
+`BLDCNT`=`0x3f40` / `BLDALPHA`=`0x080c` (EVA=12, EVB=8) RAM-flat for the
+WHOLE 10928-10946 span, 0/0 outside it. **This is exactly the `eva=12,
+evb=8` ratio `drawSpriteSheetBlended`/`blendedTile` already implement
+verbatim for DOUBLE_TEAM's own clone** (`docs/battle-menu-notes.md` §10) -
+no new blend primitive is needed, only a timing table plus Pidgeotto's own
+(undarkened - QUICK_ATTACK's trace, unlike DOUBLE_TEAM's clone, is not
+palette-tinted, per the oracle captures below) palette.
+
+**The render-lag puzzle that ran out the clock**: pixel-diffed 20 spot
+captures against a 10924 baseline (sha256 + connected-component bboxes, not
+eyeballed).  Observed pixel truth: **0 diff through render tick 10928**,
+first diff at **10929** (matching slot 3's RAM creation at 10928 via the
+usual "render = RAM+1 creation lag" rule this codebase already established
+elsewhere), diffs continue through **10946**, then **0 diff again at
+10947**. But slot 5's own `invisible` flag flips in RAM at **10925**, three
+ticks before any pixel evidence of Pidgeotto changing at all - and slot 3's
+own destruction (10946) leaves NOTHING drawn for Pidgeotto in RAM, yet the
+render at 10947 already shows Pidgeotto fully normal again. **Neither a
+uniform 0-tick nor 1-tick lag reconciles both ends** - the real sprite's own
+hide and un-hide instants appear to lag differently from the trace sprites'
+own creation/destruction, a genuinely distinct 3rd (or 4th) lag class this
+session could not isolate before the cap. Flagged, not guessed at.
+
+### The target-shake's second episode (RAM ticks ~10957-10976): RAM alternates, pixels don't always
+
+A second, later shake episode was RAM-confirmed on slot 6: **`y2` alternates
++1/-1 every tick**, not the earlier episode's `x2=+5/0`. Component-labeled
+pixel diffs (connected-component analysis, not just whole-frame sha) show
+Onix's own sprite bbox (`44,49-99,111`) changing as expected, PLUS a cluster
+of small pieces in `x=127-229,y=74-110` (Onix's own healthbox + border
+sub-pieces moving in lockstep) - the same "three sprites shake together"
+shape `docs/battle-menu-notes.md` §15f's own ENDEAVOR healthbox-wobble/
+flicker tail already established, not re-derived from source this session.
+**Surprising finding**: three widely-spaced sample ticks (10960, 10970,
+10977 - spanning both RAM parities of the `y2` alternation) produced
+**pixel-identical diff counts (3243) at all three**, meaning this
+particular 1px `y2` alternation does not always cross a rendered pixel
+boundary for this sprite/region - don't assume "RAM value changes every
+tick" implies "rendered pixels change every tick" without checking.
+
+### Not probed this session (time-boxed, honestly deferred)
+
+HP drain (Onix 31->24, dossier's approximate window 10986-11001), the
+message-box-open transition into "It's not very effective.." (dossier's
+approximate 11005-11008), and the settled hold itself (11018-11092) were
+NOT RAM/pixel-fit this session - `docs/turn9-notes.md`'s own prose ranges
+remain the best starting point but are explicitly approximate per the
+standing fresh-oracle-constants rule (§35's own papercut), not to be trusted
+directly. **`drawPlayerHealthboxHpOverlay`/`playerHealthboxHpOverlayForHp`
+(`battleScene.ts`) are already generic over arbitrary HP** and ready to show
+Onix's own first-ever damage this arc (`drawPlayerHealthboxHpOverlay(fb,
+24)`) once the transition timing is fit - no new HP-bar code needed, same
+`calcBarFilledPixels`/`pickHpBarBand` machinery already drives the
+green->yellow->red color transition purely from `hpFraction` (confirmed by
+inspection this session, not re-derived).
+
+### Rung (d) (ROCK_SLIDE) not attempted
+
+Structurally depends on rung (c) landing first (the trace script's own
+render must reach a correct prefix before ROCK_SLIDE's own kickoff can be
+appended and pixel-verified) - not started this session. Precedent is strong
+and ready to reuse once rung (c) lands: turn 6/7's own `drawTurn6RockSlide
+Attack`/`drawTurn7RockSlideAttack` (§§ around `TURN6_ROCKSLIDE_PRESS_TICK`/
+`TURN7_ROCKSLIDE_PRESS_TICK`) are the same Onix-vs-Pidgeotto ROCK_SLIDE
+parameterization this turn needs again, and `calcBarFilledPixels`'s already-
+generic color bands mean Pidgeotto's own green->yellow crossing (82->61,
+first sub-50% HP pixel-confirmed in this arc per `turn9-notes.md` §5) needs
+no new UI code either.
+
+### Verification
+
+No `src/` changes. `npm test`/`npm run build` unchanged from §35's own
+green state. New: `tools/probe/dump-quickattack-anim.py` (committed).
