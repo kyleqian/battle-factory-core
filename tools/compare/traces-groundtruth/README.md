@@ -66,3 +66,20 @@ windows bracketing every RAM-confirmed transition this turn, plus a
 correction to turn6-notes.md §5's own message-window boundaries (see
 docs/turn7-notes.md §5 — re-verified directly against the already-committed
 turn6-dense.json, not assumed). Twice-run, 0 sha mismatches.
+
+`battle1-turn8-dense.json` (docs/turn8-notes.md): turn 8 of battle 1 — the
+**first turn this dossier's two published lines diverge**, following
+`battle1-winline-b-swap.json`'s own winning-line move choice (**BIND**, not
+`battle-turn-notes.md` §14's "always ROCK_SLIDE" line's ROCK_SLIDE) — reuses
+`battle1-turn7-dense.json`'s own 76-segment script verbatim, extended with
+`battle1-winline-b-swap.json`'s own segments[74:80] (the turn-8 FIGHT-
+submenu-open, one `RIGHT` press onto BIND, move-confirm, and resolution-idle
+— verbatim, cross-checked byte-identical against that committed trace both
+via a full per-frame button-state diff and a 10-tick pixel spot-check).
+10826 frames total, 226 `captureFrames` dense (stride-1) over the eventful
+transitions (submenu/cursor/confirm/kickoff-text-typing, the ATK-stat-floor
+message, the BIND-miss kickoff/miss-message pair, the turn-9 menu resettle)
+plus sparse representative sampling of the two long uneventful holds (the
+FEATHER_DANCE animation loop and the settled miss text) — BIND misses on
+this line, so there is no HP-drain/crit/damage-lock window to capture this
+turn, unlike turns 6-7. Twice-run, 0 sha mismatches.
