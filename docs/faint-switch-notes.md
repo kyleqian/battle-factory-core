@@ -1456,3 +1456,198 @@ of that window renders correctly yet (blocked on the idle-bob mapping
 above, which affects everything downstream). No ticks were excluded from
 any committed trace (the committed trace's own scope was kept to exactly
 what's landed, rather than claiming a wider window with exclusions).
+
+## 12. S7 slice M-2 (bounded worker, this session): the "idle bob" root-
+caused and NAMED - it isn't idle, it's the Sitrus proc's own opening
+animation stage - but the render fix regresses the protected healthbox
+trace and was reverted; NOT landed, blocked on a genuine renderer
+sub-pixel-rounding gap
+
+Picked up §11's own blocker exactly as scoped: rung (a) of the brief's
+ladder ("NAME the bob mechanism before fitting anything"). Fully answered,
+with both source and RAM cross-verification - this supersedes §11's own
+hypotheses (a)/(b)/(c) (scale factor, wrong sprite slot, second
+uncontrolled element), all three of which were WRONG framings, not just
+unconfirmed ones.
+
+### The mechanism, named and cited
+
+`gSprites[gBattlerSpriteIds[0]].callback` (Onix's own sprite) reads
+**`SpriteCallbackDummy` for the entire probed window (6800-7000)** - RAM-
+confirmed via the already-committed `battle1-switchin-b0-sprite-probe.json`
+(callback field, offset `0x1C`), resolved against `nm`'d ELF symbols
+(`arm-none-eabi-nm -n --defined-only pokeemerald.elf`). This immediately
+rules out §11's own framing ("a standard idle bounce routine" running via
+the sprite's own callback) - no callback ever runs on this sprite in this
+window. The real driver is a TASK, found by dumping every `gTasks[]`
+slot's own `isActive`/`func` fields per tick (reusable
+`tools/probe/dump-task-and-sprite-callbacks.py`, extended this session
+with an `isActive` read to separate genuinely-running tasks from stale/
+freed slots that still show old byte garbage): `Task_ClearBitWhenBattle-
+TableAnimDone` (`battle_gfx_sfx_util.c:493-500`) goes ACTIVE at RAM tick
+**6869** and stays active through at least tick 6920. This task is created
+by `TryHandleLaunchBattleTableAnimation` (`battle_gfx_sfx_util.c:478-489`)
+- the general entry point for "table" battle animations
+(`gBattleAnims_General[tableId]`, `data/battle_anim_scripts.s:389-411`).
+
+The launched script is **`General_HeldItemEffect`** (index 7,
+`B_ANIM_HELD_ITEM_EFFECT`, `data/battle_anim_scripts.s:10440-10460`) - this
+IS the Sitrus Berry proc's own animation script, and it starts at **tick
+6869, not ~7042** as every prior session assumed (the sparkle/tint is the
+script's LAST third, not its start - ~170 ticks were mislabeled "idle").
+Its first 3 steps are identical: `playsewithpan SE_M_TAKE_DOWN` +
+`createvisualtask AnimTask_RotateMonToSideAndRestore, 2, 16, 128,
+ANIM_ATTACKER, 2` + `waitforvisualfinish`, run three times back to back.
+
+`AnimTask_RotateMonToSideAndRestore` / its step function
+`AnimTask_RotateMonSpriteToSide_Step` (`battle_anim_mon_movement.c:
+907-968`) is a genuine **GBA affine-OAM ROTATION** of Onix's own sprite:
+`PrepareBattlerSpriteForRotScale` sets `oam.affineMode = ST_OAM_AFFINE_
+DOUBLE`, then each tick calls `SetSpriteRotScale(spriteId, 0x100, 0x100,
+angle)` (rotate, no scale change) followed by `SetBattlerSpriteYOffset-
+FromRotation(spriteId)` (`battle_anim_mons.c:1318-1328`):
+
+```c
+void SetBattlerSpriteYOffsetFromRotation(u8 spriteId)
+{
+    u16 matrixNum = gSprites[spriteId].oam.matrixNum;
+    s16 c = gOamMatrices[matrixNum].c;
+    if (c < 0) c = -c;
+    gSprites[spriteId].y2 = c >> 3;
+}
+```
+
+i.e. **`y2` is a BYPRODUCT of the rotation matrix's own `c` component, not
+an independent vertical bounce** - `y2 = |gOamMatrices[matrixNum].c| >> 3`.
+RAM-verified exact this session (a fresh probe reading `gSprites[6].oam.
+matrixNum` and `gOamMatrices[matrixNum].{a,b,c,d}` directly, cross-checked
+against the sprite's own `y2` field at every tick 6865-6975): **100% match,
+every single tick**, e.g. tick 6887: `a=251,b=49,c=-49,d=251` ->
+`|-49|>>3=6` -> observed `y2=6`, exact. This is the closed form §11 asked
+for, sourced AND RAM-confirmed, not curve-fit.
+
+Each `AnimTask_RotateMonToSideAndRestore` call is a **complete, self-
+contained 32-tick cycle** (accumulate rotation 16 ticks one direction,
+16 ticks back, then `ResetSpriteRotScale` returns the matrix to identity
+before the task destroys itself) - matching the script's own
+`waitforvisualfinish`-gated triple call exactly. RAM-confirmed (two
+independent probe runs this session agree, and the overlapping `y2` column
+matches the already twice-run-verified `battle1-switchin-b0-sprite-
+probe.json` once re-anchored): the full matrix `(a,b,c,d)` returns to pure
+identity `(256,0,0,256)` at RAM ticks **6872, 6904, 6936, 6968** - i.e.
+three 32-tick rotation cycles back-to-back, THEN genuinely flat (no
+further rotation) until the granting-stars/tint/ring stage. The previously
+published 32-tick `y2` table (§11, anchored at 6870) is a real sub-sequence
+of this - it just couldn't see the first ~2 ticks of each cycle, since
+`|c|>>3` rounds tiny `c` values (0..7) to `y2=0`, same as true identity.
+
+**Why the both-signs-worse failure happened**: a ROTATION shears every row
+of the sprite horizontally (via the matrix's `b`/`c` off-diagonal terms),
+not just vertically. Patching only `y2` (a vertical translation) - in
+either sign - can never reproduce a rotation's pixel footprint; the
+residual isn't a sign error, it's a wrong transform class entirely. §11's
+hypotheses (a) (wrong scale factor) and (b) (wrong sprite slot) are both
+answered NO by this session's own data (slot 6 confirmed correct via a
+direct `gBattlerSpriteIds` read; the "scale" was never the issue, the
+whole transform type was) - and (c) (a second uncontrolled element) is
+also not needed to explain the failure, though see the granting-stars
+finding below for a genuinely separate, real second element later in the
+window.
+
+### Attempted this session: wiring the fix in, REVERTED (regresses the
+protected trace)
+
+The engine already has a proven, byte-exact GBA affine-OAM rotation
+sampler - `drawSpriteSheetAffineRotate` (`battleScene.ts`, built for the
+thrown ball's own spin, `battleMenu.ts`'s `playerThrowBallSpin`) - so this
+did NOT need a new renderer primitive, just a table + a call-site swap.
+Built `onixSitrusRotateMatrix(t)` (32-entry `[pa,pb,pc,pd]` table, RAM-read
+directly, anchored at tick 6872, 3 cycles) and wired it into
+`drawTurn5RockSlideAttack`'s existing static `drawSpriteSheet(...
+onixBackSprite...)` call, gated to fall through to the plain static draw
+whenever the table entry is identity.
+
+**Regression found before commit** (`npm run compare` against the
+PROTECTED `turn5-healthbox.json`, 6820-6874, previously 55/55 0 diff):
+ticks 6873/6874 (the cycle's own tiny-rotation lead-in, `a=255,b=6,c=-6,
+d=255`, `y2=0`) now DIFF at 600px (1.56%), confined exactly to Onix's own
+sprite bbox. The real oracle frame at these ticks is pixel-identical to a
+plain static draw (that's WHY the prior static implementation was already
+0 diff there) - but this session's affine-rotated render is NOT identical
+to the oracle's own output at this same tiny rotation, meaning
+`drawSpriteSheetAffineRotate`'s nearest-neighbor sampling doesn't
+reproduce the real hardware's rounding at this specific magnitude/sprite
+size, even though the same primitive is proven exact for the thrown ball
+elsewhere. Diagnosed one level deeper (pixel-level diff dump): the
+mismatch isn't blur/noise, it's a small positional PERMUTATION of the same
+3-4 palette colors along Onix's own left silhouette edge (e.g. row y=49:
+app has colors `[A,B,C]` at columns 58-60, oracle has `[B,C,A]` at the same
+columns) - the signature of an off-by-one in the sampling's own center/
+rounding convention for THIS sprite's dimensions (`onixBackSprite.tileset`
+is a clean 8x8-tile/64x64px grid, ruling out a fractional-halfW cause).
+Tried swapping the `pb`/`pc` argument order (a plausible axis-mixup) as a
+quick check - diff shrank only slightly (600px -> 575px), ruling out a
+simple transpose/sign bug and confirming this is a genuine sub-pixel
+rounding-precision gap, not a wiring mistake. **Reverted the engine change
+entirely** (`git checkout src/engine/battleScene.ts`) rather than ship a
+regression on a trace this brief marks "do not touch" - `npm test` (793/
+793) and the 4 regression traces (`turn5-healthbox` 55/55,
+`turn5-switchin` 241/241, `turn5-sentout` 141/141, `turn5-rockslide`
+256/256) are all still green, unchanged, at this session's end. No `src/`
+changes are in this session's commit - the table/finding above is banked
+here in docs for whoever resumes, so the exact same naive wiring attempt
+isn't repeated blind.
+
+**What's needed before this can land**: `drawSpriteSheetAffineRotate`'s
+own nearest-neighbor sampling needs a byte-exact audit against the oracle
+at SMALL rotation magnitudes specifically (this session only exercised it
+at the thrown ball's much larger rotation angles) - likely a center-
+alignment or rounding-direction nuance (floor vs round-half-up on the
+`>>8` step, or a half-pixel center convention for even-sized sprites) that
+only shows up once the rotated displacement is sub-pixel at some sampled
+rows and super-pixel at others. Suggest bisecting against the oracle at
+one single fixed tick (e.g. 6887, the cycle's peak, `a=251,b=49,c=-49,
+d=251` - a large enough rotation to be unambiguous but still isolated from
+the granting-stars stage) before attempting the full window again.
+
+### New-this-session: the "flat window" between the rotation and the
+tint/ring is ALSO not flat - `GrantingStarsEffect` (not yet itemized)
+
+Past the 3rd rotation cycle (tick 6968), `General_HeldItemEffect`
+continues: `playsewithpan SE_M_MORNING_SUN` then `call
+GrantingStarsEffect`, then `waitforvisualfinish` BEFORE the tint/sparkle/
+ring stage (§11's own ~7042 start). `GrantingStarsEffect`
+(`data/battle_anim_scripts.s:10040-10045`) creates two
+`gGrantingStarsSpriteTemplate` sprites, 8 ticks apart, at offsets
+`(-15,0)` and `(12,-5)` relative to Onix. Neither the sprite template nor
+its own gfx/anim timing were extracted or pixel-verified this session -
+purely a source read, flagged so the next session doesn't re-assume
+6968-~7040 is flat either. This pushes the Sitrus proc's own true total
+span to three stages: rotation (~6869-6968, this session's own subject),
+granting stars (~6968-~7040, unitemized), tint/sparkle/ring/message/HP-
+climb (~7040-7222+, §11's own scope, still unlanded).
+
+### Unverified lead for a DIFFERENT session/window (flagged, not chased)
+
+`battleScene.ts`'s own `drawPlayerMaterialize` doc comment (near
+`ONIX_MATERIALIZE_CORNER`) already flags a separate, still-unresolved
+"idle-bob mechanism starting ~1670" during S6's own send-out window. That
+is a different battler/trigger/tick range (Sitrus can't fire that early,
+HP is full) - NOT assumed to be the same mechanism as this section's own
+finding, just worth a fresh RAM probe (this session's `dump-task-and-
+sprite-callbacks.py` + the `isActive` extension) before assuming either
+way. Out of this slice's scope.
+
+### Status: rung (a) of the brief's ladder CLOSED (mechanism named, source-
+cited, RAM-verified 100%); rungs (c)/(d)/(e) still blocked, now on a
+precisely-scoped renderer bug instead of an unknown mechanism
+
+No new committed traces this session (the one attempted change was
+reverted). `npm test` 793/793, `npm run build` green, tree clean at commit
+time. This is a real, hard-won unblock even without landing pixels: the
+brief's own §11 blocker ("sign/scale not yet resolved") is now understood
+to be a category error (translation vs. rotation), not a missing
+coefficient - the NEXT session can go straight to fixing
+`drawSpriteSheetAffineRotate`'s small-angle rounding (or adding a
+dedicated small-angle path) and reusing the exact table/call-site above,
+rather than re-deriving the mechanism from scratch.

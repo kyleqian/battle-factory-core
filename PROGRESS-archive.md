@@ -1,3 +1,30 @@
+## 187 — Worktree scout (supervisor-folded): turn 6 ground truth BANKED — prefix consistency of the whole engine chain vs the WIN line CONFIRMED (one line, no divergence through turn 7); `battle1-turn6-dense.json` (8346 frames, 251 captures, twice-run identical) + `docs/turn6-notes.md`; merged `858f482`, suite 790/790 on the merged tree
+
+- **State:** merged into master, `npm test` 790/790 + build green
+  post-merge (docs+trace only, no src changes). Supervisor re-verified
+  independently: script-level prefix check (turn5-switchin ⊂ turn6-dense ⊂
+  winline-b-swap, exact) and 4/4 cited boundary shas reproduced on a fresh
+  oracle run.
+- **Did:** turn 6 = FEATHER_DANCE (Pidgeotto acts first, speed 77 vs 76 —
+  RAM-confirmed, previously unpublished) then Onix's ROCK_SLIDE (43 dmg,
+  Pidgeotto 156→113, drain window ~7970-8019 at ~3 ticks/pixel-column —
+  NOT the 1-unit-per-tick pattern of small bars). RNG ledger: 11
+  `Random()` calls, LCG-step-verified. Boundaries sha-cited: menu 7307,
+  submenu 7317, confirm 7344, FD kickoff ~7358, ATK-fall msg 7385-7558,
+  RS kickoff ~7770, impact 7935-7956, turn-7 menu settled 8122 (+222
+  ticks margin to the next winline press). New-to-turn-6 mechanism
+  inventoried: FEATHER_DANCE (EFFECT_ATTACK_DOWN_2, two chained message
+  phases, `statStages` write mid-message at 7391, no HP drain). One
+  characterized-not-attributed find: ticks 7659-7684 and 7765-7784 are a
+  byte-identical 26-frame msgbox open/close sequence (likely one generic
+  slide routine; lead: shared `gBattlerControllerFuncs[1]`=134609789).
+- **Next:** unchanged from #186 — healthbox slide-in/Sitrus/settled-menu
+  slice (§8e/§2/§3e), then a turn-6 engine slice against this dossier.
+- **Notes:** scout stayed in contract (no src/, no ledger edits); no
+  papercuts.
+
+---
+
 ## 186 — Bounded worker (S7 slice L-4): materialize ramp-down + wobble phase CLOSED, `turn5-switchin.json` extended **167→241** (6588-6828, full ball-to-settle window), **0 diff, ZERO exclusions** — two independent bugs root-caused (a corrupted coefficient table + a healthbox Z-order miss)
 
 - **State:** `npm test` **790/790** (+3), `npm run build` green, tree clean

@@ -88,6 +88,12 @@ def main() -> None:
         row: dict = {"tick": tick}
         for i in range(NUM_TASKS):
             row[f"t{i}func"] = oracle.read_u32(GTASKS + i * TASK_SIZE)
+            # isActive (struct Task, offset 4): a task slot can keep showing a
+            # stale (already-destroyed) func/data byte pattern after
+            # DestroyTask - S7 slice M-2 found this the hard way chasing a
+            # task that looked alive for 70+ ticks but was actually dead.
+            # Always read this alongside func before trusting a slot is live.
+            row[f"t{i}active"] = oracle.read_u8(GTASKS + i * TASK_SIZE + 4)
         for i in range(MAX_SPRITES):
             row[f"s{i}cb"] = oracle.read_u32(GSPRITES + i * SPRITE_SIZE + SPRITE_CALLBACK_OFFSET)
         return row
