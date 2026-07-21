@@ -6234,3 +6234,108 @@ no new UI code either.
 
 No `src/` changes. `npm test`/`npm run build` unchanged from §35's own
 green state. New: `tools/probe/dump-quickattack-anim.py` (committed).
+
+## 37. S7 slice R rung (c) RETRY: puzzle #1 (real-sprite hide/unhide) RESOLVED by direct pixel evidence - the `invisible` RAM bit never gates rendering at all; implementation attempt hit a still-unfixed position bug and was reverted rather than committed broken (bounded worker, ran out of cap mid-bisection)
+
+Per the retry brief's own mandate ("instrument, don't guess"), pulled fresh
+`bin/oracle run` PNGs (not just sha256) at every tick 10924-10950 of
+`battle1-turn9-dense.json`'s own script (captureFrames override, scratch
+trace, not committed) and eyeballed 4x-upscaled crops of the Pidgeotto
+region (`x:130-215,y:10-90`) at the key transition ticks. **This directly
+answers §36's own puzzle #1**: at RAM ticks 10925-10927 (`invisible=true`
+in RAM, `x2=y2=0`), the rendered pixels are BYTE-IDENTICAL to the
+pre-lunge baseline (10924) - not a blank/hidden sprite. And at render tick
+10933, the PNG shows **two distinct, both fully-opaque-looking Pidgeotto
+shapes** overlapping (one at the frozen afterimage's own position, one at
+the real sprite's own translating position) - impossible if the real
+sprite were actually hidden by its own `invisible` bit, since a hidden
+real sprite would leave only ONE shape (the afterimage) on screen, not
+two. **Conclusion, pixel-proven not guessed**: the `invisible` RAM field
+this arc's probes have been reading does not correspond to on-screen
+sprite visibility for this animation at all - the real sprite (slot 5) is
+drawn continuously for the WHOLE window, at its own `x2`/`y2` (§36's
+table), same "render = RAM tick + 1" lag already established from the
+afterimage creation boundary (10928 creates -> 10929 first pixel diff).
+There is no 3rd/4th lag class for the real sprite specifically - one lag
+convention covers the real sprite AND both afterimages, once `invisible`
+is correctly discarded as a red herring. This closes puzzle #1 outright;
+do NOT re-probe it.
+
+### The implementation attempt: wrong on-screen position, reverted honestly
+
+Wrote `erasePidgeottoFootprint` (`eraseGrovyleFootprint`'s own DOUBLE_TEAM-
+proven shape, reusing `healthboxBackgroundColorAt` as-is - it is already
+generic over any screen `(x,y)`, confirmed by reading it, not assumed) plus
+a lunge-offset table and an afterimage-offset table, both keyed by
+`ramTick - pressTick` off `pressTick=10867` (§36's own "confirmed" anchor),
+applied at the established +1 render lag, real sprite drawn last (on top of
+both blended afterimages) so same-position overlaps come out opaque, which
+DOES match the tick-10929 single-solid-shape PNG evidence structurally.
+**Wired into `drawTurn9FightSubmenuWindow`'s post-text-settle branch,
+`npx tsc --noEmit` clean, then compared against fresh oracle PNGs
+(scratch trace, ticks 10924-10950): 0 diff outside the window exactly as
+expected (10924-10928, 10947-10950 all match), but WRONG inside it
+(10929-10946 all DIFF, ~1000-4300px each)** - a 4x-upscaled crop at 10929
+showed the oracle's Pidgeotto shifted visibly up-left (crest nearly
+touching the frame top) while this implementation's own render at the same
+tick came out nearly indistinguishable from the unshifted baseline -
+**not a subtle sign flip, the offset is barely showing up on screen at
+all**, suggesting either (a) `pressTick=10867` doesn't actually line up
+with the LIVE `sm.confirmElapsed`-derived `pressTick` this dispatcher
+branch actually receives (§36's own probe may have anchored "10867" to a
+different reference event than the real `A`-press tick the engine uses -
+not cross-checked this session), or (b) an axis/scale error in how `x2`/
+`y2` map onto this engine's `ox`/`oy` sprite-sheet corner (untested:
+whether the opponent side needs an X-mirror the player side wouldn't, the
+same category of gotcha `battle-menu-notes.md` has flagged for other
+per-side sprite transforms before). **Not root-caused before the cap** -
+reverted `src/engine/battleScene.ts` outright rather than commit a
+0%-passing rung, per the standing "never commit a red/wrong step" rule.
+`git status` confirms clean revert; `npm test` 877/877 and `npm run build`
+both re-verified unchanged-green post-revert.
+
+### Precise handoff for the next attempt
+
+1. **First**, before touching the offset tables again: instrument the
+   ACTUAL live `pressTick` value this dispatcher branch computes for this
+   exact trace (`TICK0 + sm.confirmElapsed` at the real turn-9 confirm) and
+   diff it against `10867` directly - a `console.log`/tiny unit assertion
+   is cheap and would have caught a mismatch in seconds; this session
+   skipped it and paid for the omission.
+2. The lunge table (RAM-tick-keyed, `x2`/`y2` from §36's own per-tick
+   table) and the afterimage lifetime ranges (slot 3: RAM 10928-10935 at
+   (-17,2), gap 10936-10937, RAM 10938-10945 at (0,0); slot 4: RAM
+   10933-10940 at (24,6)) are believed RAM-accurate (straight transcription
+   of §36's own table, not re-derived) - the bug is in how they're
+   *applied* to screen coordinates, not in the table values themselves.
+3. Bisect fast with the same tool this session used: a scratch trace
+   (`captureFrames` override on the committed `battle1-turn9-dense.json`
+   script, NOT committed) + `npm run compare` + 4x `PIL` crops of
+   `x:130-215,y:10-90` at ticks 10929/10933/10935 - those three alone
+   distinguish "no offset applied," "offset applied but mirrored/scaled
+   wrong," and "offset applied correctly but afterimage z-order wrong."
+4. `erasePidgeottoFootprint`/the two offset-table functions/the dispatcher
+   wiring are all straightforward to re-add (this doc's own prose above has
+   the exact shape) - the fix is very likely a one-constant or one-sign
+   change once (1) is answered, not a rewrite.
+5. Hitsplat (slot 7, center `(72,88)`, `ANIM_TAG_IMPACT`-shaped per
+   `drawEndeavorHitsplats`'s own 10-tick pop-then-hold precedent - §36's
+   table shows the SAME 10-tick lifetime, RAM 10934-10943) and Onix's
+   shake episode 1 (`x2` square-wave `5,5,0,0,5,5,0,0` over RAM
+   10936-10945, slot 6) are both still within this session's already-probed
+   10924-10950 window and were NOT attempted (time) - natural next
+   sub-rungs once the real-sprite position bug is fixed, same "verify
+   against fresh PNGs, not the dossier's prose" rule. Shake episode 2
+   (~10957-10976, the parity puzzle) and (c4)/(d) remain fully unprobed
+   this session, unchanged from §36's own scope.
+
+### Verification
+
+`erasePidgeottoFootprint`/lunge-table/afterimage-table code was written,
+type-checked clean, pixel-compared against fresh oracle PNGs, found wrong,
+and reverted (`git checkout -- src/engine/battleScene.ts`) rather than
+committed - **no `src/` changes landed this session**, same honest-scout
+shape as §36. `npm test` 877/877, `npm run build` green, both re-verified
+post-revert. No new committed tooling this session (the scratch trace used
+for the PNG comparisons was not committed, matching every prior session's
+"scratch stays scratch" convention).

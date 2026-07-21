@@ -4,6 +4,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 223 — Bounded worker (S7 engine slice R rung (c) RETRY): §36 puzzle #1 (real-sprite hide/unhide) RESOLVED by direct pixel evidence — the `invisible` RAM bit never gates rendering, real sprite draws continuously at its own x2/y2; implementation attempt hit an unresolved on-screen position bug and was **reverted rather than committed broken** — no engine code landed, `npm test` 877/877 + build green unchanged
+
+- **State:** no `src/` changes this session (written, tested against
+  fresh oracle PNGs, found wrong, `git checkout`-reverted). `npm test`
+  **877/877**, `npm run build` green, both unchanged from #222's own
+  state. `turn9-menu.json` still 111/111 (untouched). Rung (c) is
+  **still not landed** — no `turn9-quickattack.json` committed.
+- **Did:** Per the retry brief, pulled fresh `bin/oracle run` PNGs
+  (scratch trace, not committed) at every tick 10924-10950 and
+  4x-upscaled crops of the Pidgeotto region — **directly answers §36's
+  own puzzle #1**: at RAM 10925-10927 (`invisible=true`), rendered
+  pixels are byte-identical to the pre-lunge baseline (not hidden); at
+  render 10933, the PNG shows TWO distinct opaque-looking Pidgeotto
+  shapes overlapping — impossible if the real sprite were actually
+  hidden. Conclusion: `invisible` doesn't gate rendering here at all;
+  the real sprite draws continuously at its own `x2`/`y2` (§36's
+  table), same "render = RAM+1" lag as the afterimages — one lag
+  convention for the whole mechanism, not a distinct 3rd class.
+  Implemented `erasePidgeottoFootprint` (mirrors `eraseGrovyleFootprint`,
+  reusing `healthboxBackgroundColorAt` as-is) + lunge/afterimage offset
+  tables keyed off `pressTick=10867` (§36's own anchor), wired into
+  `drawTurn9FightSubmenuWindow`. Type-checked clean, but pixel-compared
+  wrong inside the window (10929-10946 all DIFF) — the offset barely
+  showed up on screen at all at 10929, not a subtle sign flip. Not
+  root-caused before the cap (likely `pressTick` mismatch between §36's
+  probe anchor and the dispatcher's live `sm.confirmElapsed`-derived
+  value, unverified — or an axis/mirror error for the opponent side).
+  Reverted `src/engine/battleScene.ts` outright per the "never commit a
+  red step" rule rather than land broken pixels.
+- **Next:** round 12 — rung (c1)/(c2) retry #2: **first** instrument the
+  LIVE `pressTick` this dispatcher branch actually computes and diff it
+  against `10867` directly (this session skipped that one cheap check
+  and paid for it) — battle-turn-notes.md §37 has the full precise
+  handoff (exact table values, the 3 diagnostic ticks to re-check
+  first, and the still-unattempted-but-in-range hitsplat/shake-episode-1
+  sub-rungs). Once the position bug is fixed, hitsplat (slot 7, 10-tick
+  `drawEndeavorHitsplats`-shaped precedent) and Onix's shake episode 1
+  are both within the already-probed window and cheap next adds. Rung
+  (d) (ROCK_SLIDE) still waits on (c) landing a correct prefix.
+- **Notes:** `docs/battle-turn-notes.md` §37 (new) has the full
+  derivation + precise handoff. PAPERCUT: none beyond #222's own —
+  the puzzle #1 resolution itself took ~25 min of PNG-crop-eyeballing
+  that a tighter "diff the live pressTick first" discipline could have
+  front-loaded before writing any table code.
+
+---
 ## 222 — Bounded worker (S7 engine slice R rungs (c)+(d), QUICK_ATTACK animation + ROCK_SLIDE): **NOT LANDED** — RAM-probed the animation window exhaustively (new `dump-quickattack-anim.py`) and found 3-4 CONCURRENT lag classes plus a §35 sprite-slot correction (real Pidgeotto sprite is slot 5, not 2), but could not resolve a pixel-exact render within the cap; no engine code changed, no traces committed — banked as §36 (battle-turn-notes.md) for the next session, `npm test` 877/877 + build green unchanged
 
 - **State:** no `src/` changes this session. `npm test` **877/877**,
@@ -76,48 +122,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (ROCK_SLIDE + turn-end); worktree: the #30 candidate pixel test
   (scratch-render, no engine code). Wind-down begins ~07:45.
 - **Notes:** probe in contract (9.3 of 30 min), honest cap stop.
-
----
-## 220 — Bounded worker (S7 engine slice R, rungs (a)+(b)): **ISSUES #29 FIXED** (both families, all 3 menu traces restored 0 diff) **+ turn 9's menu-reopen/LEFT-nav/confirm/QUICK_ATTACK-kickoff-text chain landed clean** — `turn9-menu.json` **111/111**; QUICK_ATTACK's own animation + everything downstream (impact/drain/message/ROCK_SLIDE/turn-end) NOT modeled — RAM-probed and precisely characterized (§35), not guessed
-
-- **State:** `npm test` **877/877** (+12), `npm run build` green, tree
-  committed. `turn6-menu.json` 44/44, `turn7-menu.json` 93/93,
-  `turn8-menu.json` 88/88 (rung a's restoration), `turn9-menu.json`
-  **111/111** (new, rung b: reopen through the kickoff text's own
-  settled plateau, one tick before the animation's first pixel change
-  at 10929). Zero regressions across the full menu/kickoff/rockslide/
-  feathers sweep (`turn8-bind-a/b.json` 256/256+66/66, `turn7-
-  rockslide-d.json` 19/19, `turn6-rockslide-a.json` 255/255,
-  `turn6/7/8-feathers.json` 106/16/33, `turn6-featherdance.json`
-  90/90).
-- **Did:** Rung (a) — verify script re-run FIRST (both families PASS)
-  per policy; Family A (`drawTurn6ActionMenuIdleWindow`/
-  `drawTurn7RockSlideTurnEndSettledMenu` gained an optional
-  `bounceTick`/`bounceRawTick` param, default `t`); Family B
-  (`turn7KickoffBounceTick`'s pre-freeze branch now shifts). ISSUES
-  #29 deleted. Rung (b) — `turn8Resolved` state flag (mirrors
-  turn1-7Resolved), cursor persists at BIND(1) then `LEFT` returns it
-  to ROCK_SLIDE(0) via the already-generic `cursor^1` arithmetic, PP
-  ledger gains BIND's own miss-still-decrements-PP rule (19/20), a
-  4th bounce regime (`TURN9_REGIME4_TO_REGIME1_SHIFT`), QUICK_ATTACK's
-  own kickoff text (timing fit against a FRESH oracle run, not the
-  dossier's own loose prose range — that undershot by 4 ticks),
-  `turnOrder.ts`'s nonzero-priority branch gets its first real-scenario
-  Tier-1 pin (QUICK_ATTACK +1 forces Pidgeotto first).
-- **Next:** QUICK_ATTACK's animation (RAM ground truth already banked
-  in §35: task window 10925-10949, `AnimTask_TranslateMonElliptical_
-  Step`+`AnimTask_TraceMonBlended_Step`+`AnimTask_ShakeMon_Step`,
-  sprite slots 2/3/4/7) through the impact/drain/"not very
-  effective"/ROCK_SLIDE(82→61)/turn-end — one contiguous block, not
-  attempted this session (time). `docs/turn9-notes.md` has the full
-  ledger.
-- **Notes:** docs updated in the same commit — `docs/bounce-blip-
-  notes.md` "Fix landed" section, `docs/battle-turn-notes.md` §35,
-  `ISSUES.md` #29 deleted. PAPERCUT: the turn9-notes.md dossier's own
-  prose timing ranges (e.g. "text typing in 10878-10929") are
-  approximate orientation, not exact render constants — cost ~5 min
-  re-fitting `TURN9_QUICKATTACK_TEXT_DELAY` against a fresh oracle run
-  instead of trusting the cited range directly.
 
 ---
 ## 219 — Worktree probe (supervisor-folded): **ISSUES #29 ROOT-CAUSED, both families** — the same missing-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` mechanism as #28, one dispatch branch earlier (Family A: pre-reveal idle window must key the shift off `openElapsed !== null`, not `revealTick`; Family B: `turn7KickoffBounceTick`'s pre-freeze branch returns unshifted `t`); supervisor re-ran the committed verify script — both families PASS, zero neighbor regressions; probe scoreboard this session: **4-for-4** (#27, #26, #28, #29); merged, suite 865/865
