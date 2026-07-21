@@ -5,26 +5,33 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #28 — Recurring period-9 excluded-tick family in browsing-submenu
-  windows: 8 ticks at turn 6 (§27) + 8 more at turn 7 (§32), same
-  cadence/shape — label is still "bounce-phase quantization blip",
-  survived one probe
+## #28 — Period-9 excluded-tick family in turn-6/7/8 browsing-submenu
+  windows: ROOT-CAUSED (2026-07-21, `docs/bounce-blip-notes.md`) — one
+  implementation step owed
 
-Filed 2026-07-21 (supervisor, at the turn-7 fold). Both turn-6 and
-turn-7 FIGHT-submenu browsing windows exclude 2-tick pairs every ~9
-ticks (turn 6: 7315-7316/7324-7325/7333-7334/7342-7343; turn 7:
-8352-8353/8361-8362/8370-8371/8380-8381) from their committed traces'
-captureFrames. The diff alternates between Onix's on-field silhouette
-and the player-healthbox regions (§32). One dedicated probe (2026-07-20
-session, post-bounce-fix — PROGRESS #203 Notes) confirmed the residual
-is real and not the then-fixed bounce-phase bug, but did not root-cause
-it. Now that the family provably RECURS at the same cadence in a second
-turn's window, it is a property of the shared browsing-submenu
-render path, not a per-trace fluke — worth one more dedicated probe
-with fresh eyes (per-tick RAM y2/matrix dump across one excluded pair
-vs its neighbors, then pixel-diff the exact regions). The
-residual-elimination policy applies: no speculative label survives
-another probe without either a root cause or an upgraded evidence file.
+The 26 excluded ticks (turn 6: 8, turn 7: 8, turn 8: 10) are ONE
+mechanism and it is an engine bug, not a hardware quirk: the turn-6+
+FIGHT-submenu BROWSING branch feeds `bounceTick = t` without applying
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (battleMenu.ts:843, value 2) — the
+exact correction every turn-1-5 reopened-submenu wrapper already
+applies (e.g. `turn2ReopenedSubmenuBounceTick`). Turn 6's slice N
+rebuilt the dispatch from scratch and dropped the shift; turns 7/8
+inherited it. Probe evidence (twice-run RAM on turns 6+8): raw
+`sSinIndex` has zero stalls; shift=0 mismatches at EXACTLY the 18
+probed named ticks; applying the existing constant fixes 18/18 with
+zero new mismatches on currently-green ticks; turn 7 retrodicts by
+identical footprint. The ~9-tick cadence = sinIndex stepping +7/tick
+across a ~64-wide plateau (64/7≈9.1), Onix (seed 192) and healthbox
+(seed 128) crossing boundaries on different ticks — hence the region
+alternation. Verify script committed: `tools/probe/
+verify-bounce-blip-rule.py` (fix worker re-runs it first, per policy).
+
+Remaining (one fix step): apply the shift at the 3 browsing-branch call
+sites (turn 6/7/8 dispatch), restore all 26 excluded ticks across
+`turn6-menu.json`/`turn7-menu.json`/`turn8-menu.json`, rerun to 0 diff,
+Tier-1-pin. Also then re-check §28's note about turn6-menu's other
+excluded set (7348-7350 — a DIFFERENT, already-fixed-but-unrestored
+item per §28's bug-fix section).
 
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of

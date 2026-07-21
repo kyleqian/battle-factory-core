@@ -4,6 +4,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 215 — Worktree probe (supervisor-folded): **ISSUES #28 ROOT-CAUSED** — the 26 period-9 excluded ticks across turns 6/7/8 are ONE engine bug: the turn-6+ browsing-branch dispatch drops `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (the existing constant every turn-1-5 wrapper applies); probe model-check fixes 18/18 RAM-probed named ticks with zero new mismatches, turn 7 retrodicts; the ~9 cadence is sinIndex(+7/tick) crossing ~64-wide plateaus, two seeds (192/128) → the region alternation; `docs/bounce-blip-notes.md` + verify script merged, suite 857/857
+
+- **State:** merged into master post-#26-fix, `npm test` 857/857 +
+  build green, worktree/branch cleaned. Supervisor verified the
+  constant's existence and turns-1-5 usage in code directly
+  (battleMenu.ts:843, `turn2ReopenedSubmenuBounceTick` et al.); pixel
+  proof comes with the fix step's compare runs. ISSUES #28 rewritten:
+  root-caused, one implementation step owed
+  (`tools/probe/verify-bounce-blip-rule.py` committed for the fix
+  worker to re-run first, per the residual-elimination policy).
+- **Notes:** probe in contract (13.6 of 30 min). The session's probe
+  scoreboard is now 3-for-3 (#27 attributed, #26 cracked+closed, #28
+  root-caused) — every "quirk-at-an-extremum" label so far has fallen
+  to a small real engine bug, none survived a dedicated probe.
+- **Next:** round 7 — main: the #28 fix (3 call sites + restore 26
+  ticks across turn6/7/8-menu traces + the separate 7348-7350
+  restoration §28 already enabled); worktree: post-WIN scene-transition
+  scout (loss quote 23601 → §17's swap-offer joint). Then: feathers
+  dedicated step (turns 6/7/8 tables + §29's sampling-residual leads),
+  turn 9+.
+
+---
 ## 214 — Bounded worker (S7 engine fix): **ISSUES #26 CLOSED** — Sitrus THIN_RING implemented from §16's banked closed form (`turn5SitrusRingMatrix`, first-attempt render), `turn5-sitrus-c.json`'s excluded 7042-7072 restored to **181/181 0 diff**; z-order caveat resolved by reusing the already-established terrain-occlusion clip (`PLAYER_BALL_OPEN_VISIBLE_BOTTOM`), not a shadow-sprite priority contest
 
 - **State:** `npm test` **857/857** (+5), `npm run build` green, tree
@@ -66,45 +88,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   instrument, not the fallback.
 
 ---
-## 212 — Bounded worker (S7 engine slice P): turn 8 landed end to end minus its own feather sub-window — the winning line's own divergence turn (RIGHT onto BIND, BIND MISSES, FEATHER_DANCE proceeds) — `turn8-menu.json` **78/78**, `turn8-bind-{a,b}.json` **256+66/322**, all 0 diff, first-attempt render (S7 bounded worker session, hard 60-minute cap)
-
-- **State:** `npm test` **852/852** (+7), `npm run build` green, tree
-  clean. `turn8-menu.json` 78/78 (9380-9467 minus 10 known-class residual
-  ticks) + `turn8-bind-{a,b}.json` 322/322 (9739-10060 contiguous), all
-  0 diff. Zero regressions: `turn7-menu.json` 85/85, `turn7-rockslide-
-  {a,b,c,d}.json` 256/256/256/19, `turn6-rockslide-a.json` 255/255,
-  `turn6-menu.json` 33/33.
-- **Did:** a pure parameterization of turn 7's own dispatcher shape
-  (`drawTurn7FeatherDanceKickoffText`/`drawTurn7RockSlideWindow`), fed
-  this turn's own real confirm pressTick (9425). The 3 genuinely-new
-  pieces the brief flagged: (1) the FIGHT-submenu RIGHT nav onto BIND —
-  `moveFightCursor`'s existing `cursor^1` grid arithmetic needed ZERO new
-  code (already generic since turn 3), only `core.ts`'s own confirm gate
-  needed extending (`cursor===0||cursor===2` → also `cursor===1`); (2)
-  BIND's own kickoff text + the first-ever-rendered MISS message
-  (`sText_AttackMissed`, no move animation plays on a miss — pure
-  text-swap over a frozen static field, no new attack-animation function
-  needed); (3) the ATK-stage floor-clamp — confirmed (both from source
-  and a 0-diff compare run) to produce NO visible message difference this
-  turn, matching the dossier's own finding. One real find: the turn-end
-  clear-to-redraw gap is 6 ticks here, not every prior turn's own 7 —
-  freshly fit, not chased further (flagged, doesn't change what renders).
-  A 3rd recurrence of ISSUES #28's period-9 residual class (10 ticks
-  excluded from `turn8-menu.json`, same shape as turns 6/7's own 8-tick
-  instances) — banked as further evidence, not re-diagnosed (out of
-  scope).
-- **Next:** rung (b) analogues for turn 7 AND turn 8's own feather
-  sub-windows (both still deferred, bankable together); then turn 9
-  (ROCK_SLIDE's own return, one `LEFT` press back from BIND, per
-  docs/turn8-notes.md §7) as the next parameterization, or the turn
-  15+/16+ scout territory already banked.
-- **Notes:** no papercuts; `battle1-turn8-dense.json`'s own already-
-  committed ground-truth dossier (docs/turn8-notes.md, a prior
-  worktree-probe session) was thorough enough that NO fresh oracle sweep
-  was needed this session — went straight from its own cited sha/tick
-  table to render code, verified via `npm run compare` (which passed the
-  BIND/miss window first-attempt; only the known-class #28 residual and
-  the 6-vs-7-tick gap needed one correction each). docs/battle-turn-
-  notes.md §33; turn8-notes.md left untouched (ground-truth dossier, not
-  engine docs).
-
