@@ -53,3 +53,16 @@ every RAM-confirmed transition (submenu open, FEATHER_DANCE kickoff/stat-
 fall text, ROCK_SLIDE kickoff/impact/HP-drain, turn-7 menu reopen) — the
 6350-7312 settle window is intentionally not re-captured here, already
 covered by the `-switchin-dense-*` files above. Twice-run, 0 sha mismatches.
+
+`battle1-turn7-dense.json` (docs/turn7-notes.md): turn 7 of battle 1 (same
+matchup as turn 6, repeating the identical FEATHER_DANCE/ROCK_SLIDE move
+pair) — reuses `battle1-turn6-dense.json`'s own 72-segment script verbatim,
+extended with `battle1-winline-b-swap.json`'s own segments[70:74] (the
+turn-7 FIGHT-submenu-open, move-confirm, and resolution-idle — verbatim,
+cross-checked byte-identical against that committed trace, same convention
+as turn6-dense.json's own §1). 9380 frames total, 256 `captureFrames`
+(the oracle's per-trace cap, hit exactly) dense (stride-1) over nine
+windows bracketing every RAM-confirmed transition this turn, plus a
+correction to turn6-notes.md §5's own message-window boundaries (see
+docs/turn7-notes.md §5 — re-verified directly against the already-committed
+turn6-dense.json, not assumed). Twice-run, 0 sha mismatches.
