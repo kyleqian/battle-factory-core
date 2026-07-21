@@ -4787,3 +4787,161 @@ are a clean, precisely-scoped follow-up independent of any of that.
 `turn5-sitrus-d.json` **133/133**, `turn3-rockslide.json` **256/256**,
 `turn5-rockslide.json` **256/256**, `turn5-menu.json` **42/42**, `turn4-
 menu.json` **44/44**, `turn5-endeavor.json` **254/254**.
+
+## 28. Engine slice N rung (b), reduced scope: FEATHER_DANCE's kickoff text + settled hold, landed - `turn6-featherdance.json` **90/90, 0 diff**; the feather/starburst sprite animation itself deferred, with concrete RAM ground truth banked (S7 bounded worker session, hard 60-minute cap)
+
+Rung (b) was scoped by the brief as "Foe PIDGEOTTO used FEATHERDANCE!"'s
+kickoff typing + settled hold (~7358-7388) **and** the feather/starburst
+attack animation that plays over the hold (~7405-7658, docs/turn6-notes.md
+§5/§6) - the session's own designated centerpiece. This session lands the
+first half only: the kickoff text (typing + settled hold) through the tick
+immediately before the animation's own first RAM-confirmed pixel change
+(7405). The animation itself - 8 independently-rotating affine sprites
+(`gFallingFeatherSpriteTemplate`, `AnimFallingFeather`/`_Step`,
+`src/battle_anim_flying.c:572-`) - was investigated (RAM-probed, gfx
+identified) but **not implemented**, per the brief's own explicit
+permission ("if the feather sprites resist wholesale, stop and document
+rather than shipping a half-fit"): this is genuinely new rendering work
+(a rotating-matrix affine sprite renderer this codebase has no precedent
+for - the existing `drawSpriteSheetAffineTinted`/`drawSpriteSheetAffineRotate`
+helpers only ever handle a single uniform scale or a single externally-
+supplied matrix, not 8 independently-animated per-tick rotation matrices
+driven by a sine-table phase accumulator), and a bounded attempt this
+session would not have reached this dossier's own 0-diff/RAM-verified
+standard.
+
+### A real bug found and fixed along the way: rung (a)'s own named 7348-7350 residual
+
+Extending the captured window past rung (a)'s own 7350 cutoff immediately
+exposed rung (a)'s own named "region A" residual (battle-turn-notes.md §27)
+across EVERY subsequent tick, not just the 3 it had captured - 769px flat,
+same shape, for the entire post-confirm hold. RAM-probed fresh this session
+(`gSprites[gBattlerSpriteIds[0]]`/`gSprites[gHealthboxSpriteIds[0]]`'s own
+`y2`, both flat **0** for ticks 7347 onward - a genuine bounce-task reset,
+not a mid-cycle pause): `menuIdleBounce(turn5SitrusResettledBounceTick(t))`
+evaluated at rung (a)'s own frozen anchor (`pressTick`, 7345) gives
+`{onixY2: 1, healthboxY2: 0}` - region B matched by coincidence, region A
+did not, and rung (a) never isolated which region caused its own named
+residual (it just excluded the 3 ticks it had captured). Two fixes, both
+verified via the regression sweep below:
+
+1. **`drawTurn5RockSlideAttack` never took a `bounceTick` parameter** - its
+   own on-field Onix sprite render always used live `t` for region A's
+   bounce, even when called from a context (`drawTurn6FieldBase`) that
+   passes a FROZEN tick for region B. Added `bounceTick: number = t`
+   (default preserves every pre-existing caller's behavior byte-for-byte)
+   and threaded it into the one place that reads `menuIdleBounce`.
+2. **The frozen anchor itself was wrong** - `turn6KickoffBounceTick`'s
+   `pressTick` anchor lands on a `{onixY2:1, healthboxY2:0}` point in
+   `menuIdleBounce`'s own cycle, not the real `{0,0}` RAM shows. Scanned
+   the cycle directly (`tools/compare/scratch/scan-bounce.mjs`, not
+   committed - trivial one-off) for a `{0,0}` plateau near `pressTick`:
+   7333-7341 and 7370-7378 both qualify. `pressTick -
+   TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET` (4) lands in the first - correct
+   AND covers rung (a)'s own previously-excluded 7348-7350 (now includable,
+   left in rung (a)'s own committed `turn6-menu.json` as an option for a
+   future docs-only cleanup pass, not touched this session to avoid
+   churning an already-shipped file under time pressure).
+
+### The kickoff text itself
+
+`turn6FeatherDanceTextStartTick(pressTick) = pressTick + 13` (7358,
+oracle-confirmed this session against a fresh `bin/oracle run` of
+`turn6-menu.json`'s own script with `captureFrames` 7345-7395 - the
+post-confirm hold sha `b0b3f93f96f2` stays flat through 7357, first
+changing tick is 7358) - **not** `turnKickoffTextStartTick`'s generic
+`pressTick+10`, nor `turn2KickoffTextStartTick`'s reopened-submenu
+`pressTick+9`: turn 6 dispatches through its own dedicated function
+(rung (a), §27), not the Grovyle-shaped `turn2KickoffText` chain, so
+there's no a priori reason to expect either constant, and neither
+matched. Same "1 tick per char, clamped at the total" mechanism as every
+other kickoff message in this dossier. "Foe PIDGEOTTO used" (19 chars) +
+"FEATHERDANCE!" (13 chars) = 32 total; the message settles flat
+(`ae11c7f00fbd`) at tick 7388, matching the brief's own cited settle tick
+exactly.
+
+### The settled hold's real extent
+
+RAM/pixel-confirmed this session (`bin/oracle run`, captureFrames
+7388-7459): the kickoff message holds **completely flat** 7388-7404, and
+the FIRST pixel change (the feather animation's own opening frame) is
+tick **7405** - earlier than the brief's own approximate "visible from
+~7450" (that estimate was for when the feathers become clearly visible to
+a human eye reading a PNG, not the first RAM-driven pixel change; the true
+first divergence is 51 ticks earlier). `turn6-featherdance.json`'s own
+`captureFrames` stop at 7404, the last tick provably before the animation
+begins.
+
+### Feather sprite ground truth banked for the next session (not implemented)
+
+- **Script** (`data/battle_anim_scripts.s:3975-3995`, `Move_FEATHER_DANCE`):
+  loads `ANIM_TAG_WHITE_FEATHER`, plays `SE_M_PETAL_DANCE`, then spawns 8
+  `gFallingFeatherSpriteTemplate` sprites in groups of 1/2/2/2/1 with a
+  fixed delay between groups.
+- **RAM-confirmed spawn timeline** (`gSprites[]`, matched by `.template`
+  pointer `0x08596388`, fresh probe this session): group ticks **7404
+  (1 sprite, slot 3), 7412 (2, slots 4/7), 7420 (2, slots 8/9), 7428 (2,
+  slots 10/11), 7436 (1, slot 12)** - 8 ticks apart per group, matching the
+  script's own group structure exactly (confirms the script's "delay 6"
+  unit = 8 real ticks in this build, not a 1:1 mapping - not cross-checked
+  against another delay-6 script this session). All 8 spawn at the
+  identical initial position **(x=72, y=64)** - the per-sprite variation is
+  in `gBattleAnimArgs[2]` (the rotation phase angle, `data->unk2`), not the
+  spawn coordinate.
+- **Rendering primitive needed, genuinely new**: `AnimFallingFeather`/
+  `_Step` (`src/battle_anim_flying.c:572-`) writes a full rotation+scale
+  matrix into `gOamMatrices[matrixNum]` every step, driven by a sine-table
+  phase accumulator (`data->unk2`) independently per sprite, with `hFlip`/
+  OAM-priority toggling on top - not a uniform-scale-only affine (this
+  codebase's existing `drawSpriteSheetAffineTinted`/
+  `drawSpriteSheetAffineRotate` helpers, built for the materialize/Sitrus-
+  rotate effects) and not a plain-translate sprite (the existing
+  `gFallingRockSpriteTemplate` ROCK_SLIDE renderer, `AffineOff`). A future
+  session should: (1) build a generic 2x2-matrix affine sprite blit
+  (nearest-neighbor, matching GBA OBJ hardware - `ConvertScaleParam`'s
+  inverse-transform sampling convention this codebase already follows for
+  the existing affine helpers), (2) RAM-probe `gOamMatrices[matrixNum]`'s
+  own `{a,b,c,d}` and each sprite's `x2`/`y2`/`hFlip`/priority per-tick
+  across the full 7405-7658 window (only the spawn moment was probed this
+  session), (3) extract `ANIM_TAG_WHITE_FEATHER`'s gfx/palette via
+  `tools/extract/extract-battle-move-anim-assets.ts`'s own convention
+  (not attempted this session - no `src/assets/gen/` output exists yet
+  for this tag).
+
+### Committed trace and Tier-1 pins
+
+`tools/compare/traces/turn6-featherdance.json` - **same script as
+`turn6-menu.json` verbatim, zero segment changes** (confirmed via
+`battle1-turn6-dense.json`'s own segments: zero button presses occur
+between the turn-6 confirm and turn 7's own reopen at 8346, so
+`turn6-menu.json`'s already-committed 1000-frame idle tail already covers
+this entire window - no stitching needed, sidestepping the PAPERCUTS.md
+chained-trace-stitching gotcha entirely). `captureFrames` extended to
+7307-7404, still minus the 4 pre-confirm residual pairs named in §27
+(7315-7316/7324-7325/7333-7334/7342-7343 - unrelated mechanism, untouched)
+- **90/90, 0 diff**. `tests/fightSubmenu.test.ts` (+3): the text-timing
+pin (start tick 7358, 1-char/tick, clamped at 32), the bounce-freeze-fix
+pin (both regions land on `menuIdleBounce`'s `{0,0}` plateau, with an
+explicit regression-proof of the OLD wrong anchor), and a boundary pin
+(`turn6-featherdance.json`'s own `captureFrames` cap at 7404, so a future
+session's animation work can't silently regress this session's own
+coverage without updating this test too).
+
+### What's left
+
+The feather/starburst animation itself (7405-7658) - genuinely new affine-
+sprite rendering, sketched above, next session's own designated work. The
+ATK-fall message (rung (c), 7659-7684) and Onix's ROCK_SLIDE (rung (d),
+parameterizable from turns 1/3/4/5) remain entirely untouched, as does
+rung (a)'s own now-fixable-but-unfixed `turn6-menu.json` cleanup (see the
+bug-fix section above) and its three OTHER named bounce-extremum residuals
+(pre-confirm, unrelated mechanism).
+
+### Verification
+
+`npm test` **821/821** (+3). `npm run build` green. `turn6-featherdance.json`
+**90/90, 0 diff**. Zero regressions: `turn6-menu.json` **33/33**,
+`turn5-sitrus-c.json` **150/150**, `turn5-sitrus-d.json` **133/133**,
+`turn3-rockslide.json` **256/256**, `turn5-rockslide.json` **256/256**,
+`turn5-menu.json` **42/42**, `turn4-menu.json` **44/44**, `turn5-endeavor.json`
+**254/254**, `turn1-cloneanim.json` **230/230**.

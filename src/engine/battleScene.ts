@@ -5758,7 +5758,7 @@ export function onixSitrusTintCoeff(t: number): number {
  * plain sprite draw once active, and the opponent healthbox stops drawing
  * entirely past its own vanish tick.
  */
-function drawTurn5RockSlideAttack(fb: Uint8Array, t: number): void {
+function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
   drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t));
@@ -5787,8 +5787,16 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number): void {
     // S7 slice M-5: past the settled menu's own redraw tick, Onix's own
     // on-field sprite (region A) picks up the resettled `menuIdleBounce`
     // cycle too - see `turn5SitrusResettledBounceTick`'s own doc (0 before
-    // that tick, so this is a no-op everywhere else in this branch).
-    const onixY2 = menuIdleBounce(turn5SitrusResettledBounceTick(t)).onixY2;
+    // that tick, so this is a no-op everywhere else in this branch). S7
+    // slice N rung (b): `bounceTick` (default live `t`, every pre-existing
+    // caller unaffected) lets turn 6's own post-confirm hold pass a FROZEN
+    // tick here too - this region's own bounce was still live past the
+    // hand-off (rung (a)'s own named 7348-7350 residual, `drawTurn6FieldBase`
+    // already freezes region B/the healthbox but never threaded the same
+    // freeze into this function) - RAM/pixel-confirmed this session
+    // (`turn6-fd-check.json` scratch compare): freezing this too closes the
+    // entire 769px residual across 7348-7404 in one fix.
+    const onixY2 = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick)).onixY2;
     const tintCoeff = onixSitrusTintCoeff(t);
     if (tintCoeff > 0) {
       drawSpriteSheetAffineTintedBlend(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y, 256, ONIX_SITRUS_TINT_COLOR, tintCoeff, onixY2);
@@ -6286,15 +6294,74 @@ function drawTurn6ActionMenuIdleWindow(fb: Uint8Array, t: number): void {
  * S7 slice N rung (a) (docs/turn6-notes.md §5): the confirm press's own
  * bounce-freeze - same "`DoBounceEffect` stops being polled the instant the
  * A-press hands off" rule `turnKickoffBounceTick`/`turn5KickoffBounceTick`
- * et al. already establish, grid-searched directly against
- * `tools/compare/scratch/turn6-rung-a-probe.json`'s own oracle frames
- * 7351-7360 (the post-confirm hold): `d=0` (the live formula evaluated AT
- * the press moment itself) is exact 0-diff, the same coincidence turns 3/5's
- * own cases already had.
+ * et al. already establish. **[CORRECTED, S7 slice N rung (b)]** rung (a)'s
+ * own anchor (`pressTick`, `d=0`) only happened to be right for region B
+ * (the healthbox) - RAM-probed fresh this session
+ * (`gSprites[gBattlerSpriteIds[0]]`/`gSprites[gHealthboxSpriteIds[0]]`'s own
+ * `y2`, both flat **0** for the entire post-confirm hold, 7347 onward) and
+ * cross-checked against this file's own closed-form `menuIdleBounce`: at
+ * `pressTick` (7345) the formula gives `{onixY2:1, healthboxY2:0}` - region
+ * B matches by coincidence, region A (the on-field ONIX sprite itself) does
+ * not, and was silently masked because rung (a) excluded exactly the ticks
+ * this shows on (7348-7350) rather than diagnosing it. `pressTick -
+ * TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET` lands both regions on the SAME 0/0
+ * plateau `menuIdleBounce`'s own cycle already has nearby (scanned
+ * `tools/compare/scratch/scan-bounce.mjs`, 7333-7341 and 7370-7378 both
+ * all-zero) - closes the entire named residual, not just this session's own
+ * new ticks (verified: 7348-7350 now 0-diff too, see battle-turn-notes.md
+ * §28).
  */
-function turn6KickoffBounceTick(t: number, pressTick: number): number {
+export const TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET = 4;
+
+export function turn6KickoffBounceTick(t: number, pressTick: number): number {
   if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t;
-  return pressTick;
+  return pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET;
+}
+
+/**
+ * S7 slice N rung (b) (docs/turn6-notes.md §5/§6): "Foe PIDGEOTTO used\nFEATHERDANCE!" -
+ * the FIRST opponent-targeted stat-down kickoff this dossier models
+ * end-to-end. Timing constant fit directly against
+ * `battle1-turn6-dense.json`'s own real script (re-probed this session,
+ * `tools/compare/scratch/turn6-fd-probe-out/manifest.json`): the confirm
+ * hold (`b0b3f93f96f2`) stays flat through 7357, the FIRST changing tick is
+ * 7358, and the message settles to its held sha (`ae11c7f00fbd`) at 7388
+ * flat - NOT `turn2KickoffTextStartTick`'s own reopened-submenu `pressTick+9`
+ * correction (would start at 7354, 4 ticks early - turn 6's own reopen
+ * dispatches through a dedicated function, not the Grovyle-shaped
+ * `turn2KickoffText` chain, so there's no reason to expect the same fixed
+ * offset without checking, and it doesn't match here).
+ */
+export const TURN6_FEATHERDANCE_LINE1 = "Foe PIDGEOTTO used";
+export const TURN6_FEATHERDANCE_LINE2 = "FEATHERDANCE!";
+export const TURN6_FEATHERDANCE_TEXT_TOTAL = TURN6_FEATHERDANCE_LINE1.length + TURN6_FEATHERDANCE_LINE2.length;
+
+export function turn6FeatherDanceTextStartTick(pressTick: number): number {
+  return pressTick + 13;
+}
+
+/** Visible character count (0..TURN6_FEATHERDANCE_TEXT_TOTAL) of "Foe PIDGEOTTO used\nFEATHERDANCE!" at absolute trace tick `t` - same 1-tick/char mechanism as `turnKickoffTextVisibleChars`, calibrated start (`turn6FeatherDanceTextStartTick`). */
+export function turn6FeatherDanceTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn6FeatherDanceTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN6_FEATHERDANCE_TEXT_TOTAL, t - start + 1);
+}
+
+/**
+ * Tick the kickoff message settles flat (`ae11c7f00fbd`, oracle-confirmed
+ * held 7388-7404 before the feather animation's own first pixel change at
+ * 7405, docs/turn6-notes.md §5's "settled by 7388" row) - a fixed +1 lag
+ * past the last still-typing tick (`start + TOTAL`), same "settle lands a
+ * tick after the last glyph" shape this dossier's other kickoff messages
+ * show. Used only to cap this session's own static-hold rendering; the
+ * feather/starburst animation itself (7405 onward) is NOT modeled this
+ * session (docs/turn6-notes.md §6 - genuinely new affine-sprite rendering,
+ * out of scope, see battle-turn-notes.md §28).
+ */
+function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
+  drawTurn6FieldBase(fb, t, pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
 }
 
 function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
@@ -6306,6 +6373,14 @@ function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
   if (t < revealTick) {
     drawTurn6ActionMenuIdleWindow(fb, t);
     return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn6FeatherDanceTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurn6FeatherDanceKickoffText(fb, t, pressTick);
+      return;
+    }
   }
   const bounceTick = sm.confirmElapsed !== null ? turn6KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t;
   drawTurn6FieldBase(fb, t, bounceTick);
@@ -6347,7 +6422,7 @@ function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
  * without re-deriving the switch-in/heal machinery.
  */
 function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t): void {
-  drawTurn5RockSlideAttack(fb, t);
+  drawTurn5RockSlideAttack(fb, t, bounceTick);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own

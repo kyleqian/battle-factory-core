@@ -24,7 +24,19 @@ import {
   turnKickoffBounceTick,
   type FightSubmenuState,
 } from "../src/engine/battleMenu.ts";
-import { TICK0 as SCENE_TICK0, TURN5_SITRUS_MENU_REOPEN_GATE_DELAY } from "../src/engine/battleScene.ts";
+import {
+  TICK0 as SCENE_TICK0,
+  TURN5_SITRUS_MENU_REOPEN_GATE_DELAY,
+  TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET,
+  TURN6_FEATHERDANCE_LINE1,
+  TURN6_FEATHERDANCE_LINE2,
+  TURN6_FEATHERDANCE_TEXT_TOTAL,
+  turn6FeatherDanceTextStartTick,
+  turn6FeatherDanceTextVisibleChars,
+  turn6KickoffBounceTick,
+  turn5SitrusResettledBounceTick,
+} from "../src/engine/battleScene.ts";
+import { menuIdleBounce } from "../src/engine/battleMenu.ts";
 import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
 import { rockSlideOpponentHp, currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
@@ -768,5 +780,40 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
       return state;
     }
     expect(replay().battleScene).toEqual(replay().battleScene);
+  });
+});
+
+describe("battleScene: turn 6's FEATHER_DANCE kickoff text + the region-A bounce-freeze fix (S7 slice N rung (b), docs/turn6-notes.md §5/§6, battle-turn-notes.md §28)", () => {
+  const PRESS_TICK = 7345;
+
+  it("turn6FeatherDanceTextStartTick/turn6FeatherDanceTextVisibleChars: 0 chars before the oracle-confirmed first-changing tick (7358 = pressTick+13), then 1 tick/char through both lines, clamped at the total (docs/turn6-notes.md §5, re-probed this session - tools/compare/scratch/turn6-fd-probe-out)", () => {
+    const start = turn6FeatherDanceTextStartTick(PRESS_TICK);
+    expect(start).toBe(7358);
+    expect(turn6FeatherDanceTextVisibleChars(start - 1, PRESS_TICK)).toBe(0);
+    expect(turn6FeatherDanceTextVisibleChars(start, PRESS_TICK)).toBe(1);
+    expect(TURN6_FEATHERDANCE_LINE1).toBe("Foe PIDGEOTTO used");
+    expect(TURN6_FEATHERDANCE_LINE2).toBe("FEATHERDANCE!");
+    expect(TURN6_FEATHERDANCE_TEXT_TOTAL).toBe(TURN6_FEATHERDANCE_LINE1.length + TURN6_FEATHERDANCE_LINE2.length);
+    expect(turn6FeatherDanceTextVisibleChars(start + TURN6_FEATHERDANCE_TEXT_TOTAL - 1, PRESS_TICK)).toBe(TURN6_FEATHERDANCE_TEXT_TOTAL);
+    expect(turn6FeatherDanceTextVisibleChars(start + 1000, PRESS_TICK)).toBe(TURN6_FEATHERDANCE_TEXT_TOTAL);
+  });
+
+  it("the region-A/region-B bounce-freeze fix: freezing at pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET lands BOTH gSprites regions on menuIdleBounce's own {0,0} plateau, closing rung (a)'s own named 7348-7350 residual (RAM-probed fresh this session: gSprites[gBattlerSpriteIds[0]] AND gSprites[gHealthboxSpriteIds[0]]'s own y2 are both flat 0 for the entire post-confirm hold, 7347 onward - the raw pressTick anchor rung (a) shipped only matched region B by coincidence, giving region A onixY2=1 instead of the real 0)", () => {
+    const frozenAnchor = turn6KickoffBounceTick(PRESS_TICK + 1000, PRESS_TICK);
+    expect(frozenAnchor).toBe(PRESS_TICK - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET);
+    const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenAnchor));
+    expect(bounce).toEqual({ onixY2: 0, healthboxY2: 0 });
+    // Sanity: the OLD (rung (a)) anchor, still exported as `pressTick` itself,
+    // is the wrong value this fix moved away from - regression-proofs the fix
+    // rather than just re-asserting the new constant.
+    const oldAnchorBounce = menuIdleBounce(turn5SitrusResettledBounceTick(PRESS_TICK));
+    expect(oldAnchorBounce.onixY2).toBe(1);
+  });
+
+  it("effect-success animation gate (docs/turn11-notes.md §5's corrected rationale): FEATHER_DANCE's own feather/starburst animation is NOT modeled this session (genuinely new affine-rotation sprite rendering, gFallingFeatherSpriteTemplate - see battle-turn-notes.md §28's 'what's left') - this session only lands the kickoff text + the settled hold up to the animation's own first RAM-confirmed pixel change (7405, tools/compare/traces/turn6-featherdance.json's own captureFrames stop at 7404). Pin the boundary itself so a future session's animation work can't silently regress this session's own text/hold coverage.", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn6-featherdance.json", import.meta.url), "utf8")) as {
+      captureFrames: number[];
+    };
+    expect(Math.max(...trace.captureFrames)).toBe(7404);
   });
 });
