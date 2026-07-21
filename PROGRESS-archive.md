@@ -1,3 +1,57 @@
+## 192 — Bounded worker (S7 slice M-3): Sitrus rotation window LANDED — the "small-angle rounding gap" §12 flagged was actually a +2 (not +1) render-tick lag miswiring, NOT a sampler bug; `drawSpriteSheetAffineRotate` needed zero changes; `turn5-sitrus-a.json` 110/110, 0 diff; rungs (c)-(e) not attempted (out of time)
+
+- **State:** `npm test` **801/801** (+8), `npm run build` green, tree
+  clean. New committed trace `turn5-sitrus-a.json` (110 captures,
+  6860-6969) 0 diff, twice-run identical. Full 47-trace sweep: every trace
+  at its own previously-established count, zero regressions —
+  `turn5-healthbox.json` 55/55 (the trace this exact change regressed last
+  session), `turn5-switchin.json` 241/241, `turn5-sentout.json` 141/141,
+  `turn5-rockslide.json` 256/256, `sendout.json` 255/256,
+  `s6-acceptance.json` 224/228, `turn2-dragonbreath.json` 237/237 (ISSUES
+  #23's parked residual — unaffected, as expected: the sampler itself
+  wasn't touched).
+- **Did:** RAM-probed the full 32-entry Sitrus rotation matrix table fresh
+  (`tools/probe/dump-onix-sitrus-rotate-matrix.py`, battler-0 variant of
+  §12's own probe) — reproduces §12's cited values exactly. Bisected the
+  render-vs-RAM tick correspondence directly against oracle PNG hashes
+  (not assumed): the render stays byte-identical to the flat pose through
+  tick 6874 and first visibly changes at 6875, which pins the lag at **+2**
+  (not this run's usual +1) — RAM tick `T`'s matrix first shows at render
+  `T+2`. §12's reverted attempt used lag 0, which is the actual root cause
+  of last session's regression — **not** a sampler rounding bug. Re-verified
+  with a from-scratch pixel classifier (oracle PNG vs. simulated output,
+  background resolved via the identity frame's own confirmed-transparent
+  set): at the correct lag + `y2` threaded alongside the full matrix (not
+  instead of it), `drawSpriteSheetAffineRotate` reproduces the oracle
+  exactly — every residual the naive classifier still flagged traced to a
+  separately-drawn drop-shadow sprite (constant color, bottom-edge rows
+  only) this function was never asked to model, confirmed zero via the
+  real `npm run compare` renderer. Swept 6 alternate sampler conventions
+  (round-to-nearest, pixel-center bias, axis transpose, matrix inverse)
+  against the oracle — the existing plain floor (`>>8`) convention was
+  already the best fit at every one, confirming no sampler change was
+  needed. Wired `onixSitrusRotateMatrix(t)` into `drawTurn5RockSlideAttack`'s
+  existing Onix draw call, identity/null fall-through to the unchanged
+  plain static draw. +8 Tier-1 tests (`drawSpriteSheetAffineRotate` pinned
+  against a hand-built fixture at identity/tiny/90° angles;
+  `onixSitrusRotateMatrix` pinned at the window edges and both bisection
+  ticks).
+- **Next:** rung (c) `GrantingStarsEffect` (~6968-~7040, confirmed this
+  session to start exactly at render 6970 where the rotation's own window
+  ends — probed the boundary two-sided before trimming the committed trace,
+  diffs there are a real new element, not sampler noise) — two
+  `gGrantingStarsSpriteTemplate` sprites, gfx not yet extracted. Then rung
+  (d) (tint/sparkle/ring/message/HP-climb, §11's own scope) and rung (e)
+  (settled turn-6 menu, coverage to ≥7307).
+- **Notes:** no papercuts. Docs: `faint-switch-notes.md` §13 added (root
+  cause, the lag bisection method, what landed, exactly where rung (c)
+  starts). Ladder rungs (a)+(b) both closed this session — (c)-(e) not
+  attempted, ran out of the session's own time budget partway through
+  writing up the (a)/(b) findings rather than starting (c) half-done.
+
+---
+
+---
 ## 191 — Worktree scout (supervisor-folded): turn 8 ground truth BANKED — winline-b takes **BIND, and it MISSES** (8 Random() calls, miss short-circuits crit/spread/effect); ATK stage hits its floor (2→0) yet prints the ordinary "harshly fell" (source-traced: the "won't go lower" variant needs the stat already AT floor before the attempt); `battle1-turn8-dense.json` (10826 frames, 226/226 captures) + `docs/turn8-notes.md`; merged `fc0d23c`, suite 793/793 on the merged tree
 
 - **State:** merged into master, `npm test` 793/793 + build green

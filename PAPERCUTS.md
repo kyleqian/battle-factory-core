@@ -12,6 +12,23 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Bash-session cwd silently persists into stale/sibling worktrees (2026-07-20)
+
+- **What:** a shell session's working directory persists across commands;
+  after any `cd` into a worktree (or a worktree path left in a reused
+  session), later commands silently run there — against the WRONG HEAD and
+  the wrong npm install. Bit a main-lane worker (several early commands ran
+  inside the live scout lane's worktree, leaving scratch debris the scout
+  then had to report around) and the supervisor's own verification pass
+  (`git log`/`npm test` reported the scout branch's state as if it were
+  master) in the same session.
+- **Hits:** 2 (same session).
+- **Cost each:** ~5-10 min re-verifying, plus cross-lane debris confusion.
+- **Workaround:** start every verification/command block with an absolute
+  `cd` to the intended tree; `pwd`-check before trusting any `git`/`npm`
+  output; workers should never `cd` into `.worktrees/` paths they don't
+  own.
+
 ## Reference-header block parsing: last array entry has no trailing comma (2026-07-17)
 
 - **What:** `species_info.h`'s final entry (SPECIES_CHIMECHO) and

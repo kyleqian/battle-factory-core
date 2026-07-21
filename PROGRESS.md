@@ -4,6 +4,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 195 — Worktree scout (supervisor-folded): turn 10 ground truth BANKED — SECOND consecutive full reconvergence (AERIAL_ACE + ROCK_SLIDE hit, RAM bit-identical to BOTH published lines' turn-10 rows incl. gRngValue), all three standing falsifiable tests still negative; `battle1-turn10-dense.json` (13306 frames, 208 captures) + `docs/turn10-notes.md`; merged `9834116`, suite 805/805 on the merged tree
+
+- **State:** merged into master, `npm test` 805/805 + build green
+  post-merge. Supervisor re-verified: prefix chain (turn9-dense ⊂
+  turn10-dense ⊂ winline-b-swap, script-exact), 3/4 cited shas
+  reproduced + the 4th was a tabulation slip (cited sha belongs to tick
+  12320, not 12345 — label PNG-verified correct, two fresh oracle runs
+  byte-identical; row corrected in the fold). Cursor-persistence got its
+  strongest data point: zero navigation presses this turn, cursor0
+  RAM-flat on ROCK_SLIDE across the whole window.
+- **Did:** turn 10 = AERIAL_ACE (new to arc: EFFECT_ALWAYS_HIT skips the
+  accuracy roll entirely, RAM-confirmed; slash-on-target animation shape,
+  no attacker mover) vs ROCK_SLIDE hit; Onix 24→14, Pidgeotto 61→38. The
+  unattributed +14-tick RNG step reproduced a 3rd time and one candidate
+  explanation was RULED OUT (identical-text/typing-timing — turn 2's
+  differently-typed pair hits the same offset): looks like a fixed
+  engine-level cost. Turn-9's "4-frame shared prefix" reproduction
+  attempt honestly flagged as method-incomplete (skipped the baseline
+  bisection), an open gap not a contradiction.
+- **Cross-lane note:** M-4's worker cd'd into this scout's LIVE worktree
+  early on (cwd persistence) leaving uncommitted scratch debris; scout
+  reported it, merge carries none of it, PAPERCUTS.md entry added
+  (supervisor). M-4's own deliverable verified separately in the main
+  tree (`turn5-sitrus-b.json` 82/82, suite 805/805).
+- **Next:** M-5 (Sitrus rungs d+e per faint-switch-notes §14: tint/
+  sparkle/ring/message/HP-climb, then settled menu ≥7307 — completes the
+  faint/forced-switch sequence); then turn-6..10 engine slices against
+  the five banked dossiers.
+- **Notes:** no scout papercuts; turn-11+ boundaries noted in the
+  dossier, not densely probed.
+
+---
 ## 194 — Bounded worker (S7 slice M-4): rung (c) LANDED — `GrantingStarsEffect`'s two star sprites RAM-probed fresh (spawn ticks 10 apart, corrects the source's own "8 ticks" framing) and byte-exact; `turn5-sitrus-b.json` 82/82, 0 diff, 6960-7041; rungs (d)/(e) NOT reached (out of session time) — precisely scoped for the next session
 
 - **State:** `npm test` **805/805** (+5), `npm run build` green, tree
@@ -77,57 +109,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   sparkle/ring/message/HP-climb, settled menu ≥7307); then turn-6/7/8/9
   engine slices against the four dossiers.
 - **Notes:** scout stayed in contract; no papercuts.
-
----
-## 192 — Bounded worker (S7 slice M-3): Sitrus rotation window LANDED — the "small-angle rounding gap" §12 flagged was actually a +2 (not +1) render-tick lag miswiring, NOT a sampler bug; `drawSpriteSheetAffineRotate` needed zero changes; `turn5-sitrus-a.json` 110/110, 0 diff; rungs (c)-(e) not attempted (out of time)
-
-- **State:** `npm test` **801/801** (+8), `npm run build` green, tree
-  clean. New committed trace `turn5-sitrus-a.json` (110 captures,
-  6860-6969) 0 diff, twice-run identical. Full 47-trace sweep: every trace
-  at its own previously-established count, zero regressions —
-  `turn5-healthbox.json` 55/55 (the trace this exact change regressed last
-  session), `turn5-switchin.json` 241/241, `turn5-sentout.json` 141/141,
-  `turn5-rockslide.json` 256/256, `sendout.json` 255/256,
-  `s6-acceptance.json` 224/228, `turn2-dragonbreath.json` 237/237 (ISSUES
-  #23's parked residual — unaffected, as expected: the sampler itself
-  wasn't touched).
-- **Did:** RAM-probed the full 32-entry Sitrus rotation matrix table fresh
-  (`tools/probe/dump-onix-sitrus-rotate-matrix.py`, battler-0 variant of
-  §12's own probe) — reproduces §12's cited values exactly. Bisected the
-  render-vs-RAM tick correspondence directly against oracle PNG hashes
-  (not assumed): the render stays byte-identical to the flat pose through
-  tick 6874 and first visibly changes at 6875, which pins the lag at **+2**
-  (not this run's usual +1) — RAM tick `T`'s matrix first shows at render
-  `T+2`. §12's reverted attempt used lag 0, which is the actual root cause
-  of last session's regression — **not** a sampler rounding bug. Re-verified
-  with a from-scratch pixel classifier (oracle PNG vs. simulated output,
-  background resolved via the identity frame's own confirmed-transparent
-  set): at the correct lag + `y2` threaded alongside the full matrix (not
-  instead of it), `drawSpriteSheetAffineRotate` reproduces the oracle
-  exactly — every residual the naive classifier still flagged traced to a
-  separately-drawn drop-shadow sprite (constant color, bottom-edge rows
-  only) this function was never asked to model, confirmed zero via the
-  real `npm run compare` renderer. Swept 6 alternate sampler conventions
-  (round-to-nearest, pixel-center bias, axis transpose, matrix inverse)
-  against the oracle — the existing plain floor (`>>8`) convention was
-  already the best fit at every one, confirming no sampler change was
-  needed. Wired `onixSitrusRotateMatrix(t)` into `drawTurn5RockSlideAttack`'s
-  existing Onix draw call, identity/null fall-through to the unchanged
-  plain static draw. +8 Tier-1 tests (`drawSpriteSheetAffineRotate` pinned
-  against a hand-built fixture at identity/tiny/90° angles;
-  `onixSitrusRotateMatrix` pinned at the window edges and both bisection
-  ticks).
-- **Next:** rung (c) `GrantingStarsEffect` (~6968-~7040, confirmed this
-  session to start exactly at render 6970 where the rotation's own window
-  ends — probed the boundary two-sided before trimming the committed trace,
-  diffs there are a real new element, not sampler noise) — two
-  `gGrantingStarsSpriteTemplate` sprites, gfx not yet extracted. Then rung
-  (d) (tint/sparkle/ring/message/HP-climb, §11's own scope) and rung (e)
-  (settled turn-6 menu, coverage to ≥7307).
-- **Notes:** no papercuts. Docs: `faint-switch-notes.md` §13 added (root
-  cause, the lag bisection method, what landed, exactly where rung (c)
-  starts). Ladder rungs (a)+(b) both closed this session — (c)-(e) not
-  attempted, ran out of the session's own time budget partway through
-  writing up the (a)/(b) findings rather than starting (c) half-done.
 
 ---
