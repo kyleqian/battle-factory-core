@@ -235,3 +235,59 @@ trace changed.
 
 `npm test` and `npm run build` unaffected (docs/probe/data-gen files only,
 `src/engine/` untouched) — re-ran to confirm no regression, both green.
+
+## Fix landed (S7 engine fix, 2026-07-21)
+
+Re-ran `tools/probe/verify-bounce-blip-rule.py` first, per this file's own
+policy: 18/18 named ticks reproduced exactly (shift=0 mismatches all 18,
+shift=2 matches all 18, zero new mismatches) — the probe's rule confirmed
+before touching code. Applied the one-token fix at all 3 call sites named
+above (`battleScene.ts` ~6756/6849/7041, the browsing-branch `: t` ternary
+arm changed to `: t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`).
+
+Restoring `captureFrames` surfaced that **not all 26 named ticks are
+actually in the browsing branch's own domain** - `bounce-blip-notes.md`'s
+own model check (above) computes the composed formula directly, without
+checking whether the real per-tick dispatch has even reached the browsing
+branch yet (past `revealTick`, before any confirm press). Pixel compare is
+the ground truth the model check couldn't see:
+
+- **turn6-menu.json**: restored 6/8 named ticks (7324-7325/7333-7334/
+  7342-7343) + the separate 7348-7350 set (already-fixed per battle-turn-
+  notes.md §28's bug-fix section, just unrestored) - **42/42, 0 diff** (33
+  base + 9). **7315-7316 excluded** (unexpected fail, kept excluded per the
+  brief's own instruction): both ticks land BEFORE `revealTick` (~7318),
+  still inside the pre-reveal idle window (`drawTurn6ActionMenuIdleWindow`),
+  not the browsing branch this fix touches - filed as ISSUES #29.
+- **turn7-menu.json**: restored 6/8 named ticks (8352-8353/8361-8362/
+  8370-8371) - **91/91, 0 diff** (85 base + 6). **8380-8381 excluded**
+  (unexpected fail): `turn7-menu.json`'s own script presses `A` at 8378-8380
+  (the ROCK_SLIDE confirm) - these two ticks land just past that press,
+  inside the confirm/kickoff branch (`turn7KickoffBounceTick`), not the
+  browsing branch either. The retrodiction above assumed the whole
+  8320-8405 dwell was browsing without checking for a confirm press inside
+  it; this is exactly where that assumption breaks. Filed as ISSUES #29
+  (same entry, different sub-family).
+- **turn8-menu.json**: restored all 10/10 named ticks - **86/86, 0 diff**
+  (78 base + 10, after also excluding the analogous pre-reveal pair
+  9383-9384 - filed as ISSUES #29, third confirmation of the reopen-window
+  family alongside turn 6's own 7315-7316).
+
+Tier-1 pins added (`tests/battleScene.test.ts`, "ISSUES #28 fix" describe
+block): the browsing-model formula (with the shift) matches the committed
+`turn6-bounce-blip-probe.json`/`turn8-bounce-blip-probe.json` RAM dumps
+exactly at 3 restored ticks per turn (7324/7333/7342, 9392/9402/9411), and
+a companion pin proves the pre-fix (unshifted) formula would have
+mismatched at those same ticks - the fix is load-bearing, not a no-op.
+`TURN8_REGIME3_TO_REGIME1_SHIFT` exported (one word) so the test can
+reproduce turn 8's own regime composition directly instead of re-deriving
+it.
+
+Regressions: zero. Full rerun clean at committed/expected counts -
+`turn6-featherdance.json` 90/90, `turn6-feathers.json` 106/106,
+`turn6-statfall.json` 127/127, `turn8-bind-a.json` 256/256, `turn8-bind-
+b.json` 66/66, `turn5-menu.json` 42/42, `turn6-rockslide-a.json` 255/255,
+`turn6-rockslide-b.json` 105/105, `turn7-rockslide-a.json` 256/256,
+`turn7-rockslide-b.json` 256/256, `turn7-rockslide-c.json` 256/256,
+`turn7-rockslide-d.json` 19/19. `npm test` **861/861** (+4). `npm run
+build` green.

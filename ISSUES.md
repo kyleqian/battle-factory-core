@@ -5,33 +5,40 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #28 — Period-9 excluded-tick family in turn-6/7/8 browsing-submenu
-  windows: ROOT-CAUSED (2026-07-21, `docs/bounce-blip-notes.md`) — one
-  implementation step owed
+## #29 — Two DIFFERENT small residual families surfaced restoring #28: a
+  pre-reveal reopen-window blip (turn 6/8) and a post-confirm-press blip
+  (turn 7)
 
-The 26 excluded ticks (turn 6: 8, turn 7: 8, turn 8: 10) are ONE
-mechanism and it is an engine bug, not a hardware quirk: the turn-6+
-FIGHT-submenu BROWSING branch feeds `bounceTick = t` without applying
-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (battleMenu.ts:843, value 2) — the
-exact correction every turn-1-5 reopened-submenu wrapper already
-applies (e.g. `turn2ReopenedSubmenuBounceTick`). Turn 6's slice N
-rebuilt the dispatch from scratch and dropped the shift; turns 7/8
-inherited it. Probe evidence (twice-run RAM on turns 6+8): raw
-`sSinIndex` has zero stalls; shift=0 mismatches at EXACTLY the 18
-probed named ticks; applying the existing constant fixes 18/18 with
-zero new mismatches on currently-green ticks; turn 7 retrodicts by
-identical footprint. The ~9-tick cadence = sinIndex stepping +7/tick
-across a ~64-wide plateau (64/7≈9.1), Onix (seed 192) and healthbox
-(seed 128) crossing boundaries on different ticks — hence the region
-alternation. Verify script committed: `tools/probe/
-verify-bounce-blip-rule.py` (fix worker re-runs it first, per policy).
+Surfaced 2026-07-21 landing #28's fix. Both are OUTSIDE #28's own browsing-
+branch shift (confirmed by domain, not guessed) — restoring #28's 26 named
+ticks left these 6 freshly isolated, still excluded from their traces'
+`captureFrames`:
 
-Remaining (one fix step): apply the shift at the 3 browsing-branch call
-sites (turn 6/7/8 dispatch), restore all 26 excluded ticks across
-`turn6-menu.json`/`turn7-menu.json`/`turn8-menu.json`, rerun to 0 diff,
-Tier-1-pin. Also then re-check §28's note about turn6-menu's other
-excluded set (7348-7350 — a DIFFERENT, already-fixed-but-unrestored
-item per §28's bug-fix section).
+- **turn6-menu.json 7315-7316** and **turn8-menu.json 9383-9384**: land
+  BEFORE `revealTick` (`TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY`,
+  ~5 ticks after each turn's own submenu-reopen press at 7312-7314/9380-9382)
+  — still inside `drawTurn6ActionMenuIdleWindow`/`drawTurn7RockSlideTurnEnd
+  SettledMenu` (the pre-reveal idle window), NOT the browsing branch #28's
+  shift touches. `docs/bounce-blip-notes.md`'s own regression check already
+  flagged the same domain boundary at turn 6's tick 7307 as "an ARTIFACT...
+  testing outside its own domain" — same family, same root cause candidate
+  (the reopen-DMA-wait stall's visual, still unmodeled in the idle branch).
+  1579px/4.11% diff, same signature as #28's own worst pair.
+- **turn7-menu.json 8380-8381**: the OPPOSITE boundary — lands right AFTER
+  a confirm press (`A` at 8378-8380 in `turn7-menu.json`'s own script),
+  inside the confirm/kickoff branch (`turn7KickoffBounceTick`), not the
+  browsing branch either. `docs/bounce-blip-notes.md`'s own turn-7
+  retrodiction assumed the whole 8320-8405 dwell was browsing without
+  checking for a confirm press inside that window — this is exactly where
+  that assumption breaks. Same 1579px/4.11% signature.
+
+Not chased further this session (out of scope for #28's fix step - the
+brief was explicit: restore #28's named ticks only, leave anything
+unexpected excluded and named). Leads for a future probe: RAM-dump both
+driver sprites' `y2` directly across each window (same `ram-probe.py` +
+spec-copy method #28's own probe used) to see whether the idle-branch and
+kickoff-branch bounce composers have their OWN missing shift, analogous to
+#28's but on a different anchor.
 
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of

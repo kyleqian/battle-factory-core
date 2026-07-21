@@ -49,11 +49,12 @@ import {
   turn5PidgeottoHealthboxSlideDx,
   turn5RockSlideKoDismissEligible,
   TURN5_PIDGEOTTO_SETTLE_TICK,
+  TURN8_REGIME3_TO_REGIME1_SHIFT,
   windowRange,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
-import { CLOSED_FIGHT_SUBMENU_STATE, confirmFightMove, menuIdleBounce, openFightSubmenu } from "../src/engine/battleMenu.ts";
+import { CLOSED_FIGHT_SUBMENU_STATE, confirmFightMove, FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT, menuIdleBounce, openFightSubmenu } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
@@ -63,6 +64,8 @@ import battleHealthboxAsset from "../src/assets/gen/battle-healthbox.json" with 
 import ramDump from "../src/data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import speciesNames from "../src/data/gen/species-names.json" with { type: "json" };
 import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-probe.json" with { type: "json" };
+import turn6BounceBlipProbe from "../src/data/gen/turn6-bounce-blip-probe.json" with { type: "json" };
+import turn8BounceBlipProbe from "../src/data/gen/turn8-bounce-blip-probe.json" with { type: "json" };
 import { turn6FeatherSprites } from "../src/engine/featherDance.ts";
 
 function pixelAt(t: number, x: number, y: number): [number, number, number] {
@@ -1138,6 +1141,58 @@ describe("S7 residual cleanup (docs/turn3-residual-probe-notes.md, Family B): tu
   it("the two named residuals (3879 onix, 3888 healthbox) individually match post-fix, not just in aggregate", () => {
     expect(menuIdleBounce(turn3SubmenuBounceTick(3879)).onixY2).toBe(rows.get(3878)!.onixY2);
     expect(menuIdleBounce(turn3SubmenuBounceTick(3888)).healthboxY2).toBe(rows.get(3887)!.healthboxMainY2);
+  });
+});
+
+// ISSUES #28 fix (docs/bounce-blip-notes.md): the turn-6+ FIGHT-submenu
+// BROWSING branch (`sm.confirmElapsed === null`, past `revealTick`) was
+// feeding `bounceTick = t` instead of applying `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
+// - the exact correction turns 1-5's own reopened-submenu wrappers (e.g.
+// `turn3SubmenuBounceTick` above) already apply. Pinned directly against the
+// committed RAM dumps (`turn6-bounce-blip-probe.json`/`turn8-bounce-blip-
+// probe.json`, twice-run byte-identical) at the restored, formerly-excluded
+// ticks - same `real_screen_y2(t) == probed_y2(t-1)` convention as Family B.
+describe("ISSUES #28 fix (docs/bounce-blip-notes.md): turn-6/8 browsing-branch bounce shift", () => {
+  const t6Rows = new Map(turn6BounceBlipProbe.ticks.map((r) => [r.tick, r]));
+  const t8Rows = new Map(turn8BounceBlipProbe.ticks.map((r) => [r.tick, r]));
+
+  it("turn 6 browsing model (menuIdleBounce(turn5SitrusResettledBounceTick(t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT)))) matches real RAM at the 3 restored period-9 ticks 7324/7333/7342", () => {
+    for (const t of [7324, 7333, 7342]) {
+      const model = menuIdleBounce(turn5SitrusResettledBounceTick(t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT));
+      expect({ t, onixY2: model.onixY2, healthboxY2: model.healthboxY2 }).toEqual({
+        t,
+        onixY2: t6Rows.get(t - 1)!.onixY2,
+        healthboxY2: t6Rows.get(t - 1)!.healthboxMainY2,
+      });
+    }
+  });
+
+  it("turn 6 browsing model WITHOUT the shift (the pre-fix bug) mismatches at the same 3 ticks - proves the fix is load-bearing, not a no-op", () => {
+    for (const t of [7324, 7333, 7342]) {
+      const buggyModel = menuIdleBounce(turn5SitrusResettledBounceTick(t));
+      const real = { onixY2: t6Rows.get(t - 1)!.onixY2, healthboxY2: t6Rows.get(t - 1)!.healthboxMainY2 };
+      expect(buggyModel).not.toEqual(real);
+    }
+  });
+
+  it("turn 8 browsing model (regime-3-shifted through TURN8_REGIME3_TO_REGIME1_SHIFT) matches real RAM at the 3 restored period-9 ticks 9392/9402/9411", () => {
+    for (const t of [9392, 9402, 9411]) {
+      const bounceTick = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+      const model = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick + TURN8_REGIME3_TO_REGIME1_SHIFT));
+      expect({ t, onixY2: model.onixY2, healthboxY2: model.healthboxY2 }).toEqual({
+        t,
+        onixY2: t8Rows.get(t - 1)!.onixY2,
+        healthboxY2: t8Rows.get(t - 1)!.healthboxMainY2,
+      });
+    }
+  });
+
+  it("turn 8 browsing model WITHOUT the shift (the pre-fix bug) mismatches at the same 3 ticks", () => {
+    for (const t of [9392, 9402, 9411]) {
+      const buggyModel = menuIdleBounce(turn5SitrusResettledBounceTick(t + TURN8_REGIME3_TO_REGIME1_SHIFT));
+      const real = { onixY2: t8Rows.get(t - 1)!.onixY2, healthboxY2: t8Rows.get(t - 1)!.healthboxMainY2 };
+      expect(buggyModel).not.toEqual(real);
+    }
   });
 });
 

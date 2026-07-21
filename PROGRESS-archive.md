@@ -1,4 +1,30 @@
 ---
+## 213 — Worktree probe (supervisor-folded): **ISSUES #26's THIN_RING CRACKED ANALYTICALLY** — the ring's matrix is a pure isotropic scale with a closed form (`a=d=floor(4096/n)`, `b=c=0`, `n=clamp(ramTick-7039,1,31)`, center (72,88), render lag **+1** — NOT §13's +2 rotation class), placement verified pixel-exact with ZERO fitting (6/6 px at render 7042, 92/92 at 7048, existing sampler + existing gfx verbatim); after 3 failed fitting attempts across 3 sessions, one 15-min probe made the fix MECHANICAL; `faint-switch-notes.md` §16 + committed probe JSON merged, suite 852/852
+
+- **State:** merged into master post-turn-8, `npm test` 852/852 + build
+  green, worktree/branch cleaned. Supervisor re-verified the closed form
+  myself against all 32 live ticks of the committed probe JSON (exact
+  match, center invariant (72,88)). ISSUES #26 rewritten at this fold:
+  from "excluded after 3 attempts" to "analytically placed — one
+  mechanical fix step owed" (params in the entry + §16).
+- **Did:** probe identified the sprite (slot 4, matrixNum 2, affineMode
+  3/double, 64x64, priority 2, alive 7040-7071), dumped per-tick state
+  (twice-run byte-identical), tested §13's +2-lag lead FIRST as briefed —
+  refuted it (ordinary +1 fits all samples; the +2 class is
+  rotation-specific, matching §29's independent negative). Larger-tick
+  residuals attributed to the known drop-shadow z-order at rows 112-114,
+  named as the fix's one non-mechanical caveat.
+- **Next:** round 6 launching now — main: the #26 fix + restore
+  turn5-sitrus-c.json's 7042-7072 (mechanical, params banked); worktree:
+  ISSUES #28's period-9 probe (3rd recurrence banked by turn 8, §33).
+  Then: turn 9+ parameterizations, feathers dedicated step, post-WIN
+  scene scout.
+- **Notes:** probe in contract (15.0 of 30 min). Pattern now 2-for-2
+  this session (after #27): the 30-min probe-only worktree step resolves
+  what repeated bounded fitting attempts could not — RAM-first is the
+  instrument, not the fallback.
+
+---
 ## 212 — Bounded worker (S7 engine slice P): turn 8 landed end to end minus its own feather sub-window — the winning line's own divergence turn (RIGHT onto BIND, BIND MISSES, FEATHER_DANCE proceeds) — `turn8-menu.json` **78/78**, `turn8-bind-{a,b}.json` **256+66/322**, all 0 diff, first-attempt render (S7 bounded worker session, hard 60-minute cap)
 
 - **State:** `npm test` **852/852** (+7), `npm run build` green, tree

@@ -6753,7 +6753,7 @@ function drawTurn6FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
       return;
     }
   }
-  const bounceTick = sm.confirmElapsed !== null ? turn6KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t;
+  const bounceTick = sm.confirmElapsed !== null ? turn6KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   drawTurn6FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   // `fightSubmenuWindow`'s own box (231px) is narrower than the screen - the
@@ -6846,7 +6846,7 @@ function drawTurn7FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
       return;
     }
   }
-  const bounceTick = sm.confirmElapsed !== null ? turn7KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t;
+  const bounceTick = sm.confirmElapsed !== null ? turn7KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   drawTurn7FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
@@ -6992,7 +6992,7 @@ function drawTurn7RockSlideWindow(fb: Uint8Array, t: number): void {
  * ever applying regime 1 internally) needs converted the same way turn 7's
  * own wrapper already converts regime 2.
  */
-const TURN8_REGIME3_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY);
+export const TURN8_REGIME3_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY);
 
 /**
  * `drawTurn6FieldBase` wrapper for turn 8: converts `bounceTick` from
@@ -7038,7 +7038,7 @@ function drawTurn8FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenu
       return;
     }
   }
-  const bounceTick = sm.confirmElapsed !== null ? turn8KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t;
+  const bounceTick = sm.confirmElapsed !== null ? turn8KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   drawTurn8FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
