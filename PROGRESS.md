@@ -4,6 +4,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 218 — Bounded worker (S7 engine slice Q, dedicated feathers step): rung (a) partially cracked — a real same-priority feather draw-order bug found+fixed (`compareFeatherDrawOrder`, ~2000px→425px residual on the 7421-7549 window, 9/129 ticks exact) but not a full 0-diff crack; rungs (b)/(c) landed clean — `turn7-feathers.json` **16/16**, `turn8-feathers.json` **33/33**, both 0 diff, confirming the SAME residual recurs at the identical relative offset in all three turns (ISSUES #30 filed)
+
+- **State:** `npm test` **865/865** (+6), `npm run build` green, tree
+  clean. `turn6-feathers.json` unchanged **106/106** (fix doesn't touch
+  the already-green non-overlapping prefix). Zero regressions:
+  `turn6-featherdance.json` 90/90, `turn6-menu.json` 42/42,
+  `turn7-menu.json` 91/91, `turn8-menu.json` 86/86, `turn5-sitrus-
+  a.json` 110/110, all 0 diff.
+- **Did:** rung (a) — hand-derived the real GBA tiebreak rule from
+  `reference/pokeemerald/src/sprite.c`'s `SortSprites` (lower OAM index
+  wins ties; all 8 FEATHER_DANCE spawns share one `subpriority` per
+  `Cmd_createsprite`, so this codebase's own `slot` is the practical
+  proxy) and empirically confirmed descending-slot beats both ascending-
+  slot (the old bug, reproduced exactly) and descending-Y (445px,
+  slightly worse — rules out "a fresh Y-sort every frame" as the
+  complete model). Shipped since it's strictly better and doesn't
+  regress the committed 106/106, but the residual isn't fully gone —
+  characterized precisely in §34/ISSUES #30 rather than force-fit.
+  Rungs (b)/(c) — generalized `featherDance.ts` to a small factory
+  (`makeFeatherSpriteLookup`), probed turn 7 (RAM 8434-8600) and turn 8
+  (RAM 9483-9660) with the existing `dump-feather-dance-sprites.py`
+  unchanged (both twice-run byte-identical), confirmed the identical
+  +8-tick spawn cadence/~121-tick lifetime and the shared `+1` render
+  lag (explicitly re-bisected against lag 0, which badly fails both:
+  2/16 and 18/33 matches). Landed each turn's own clean prefix up to its
+  first mismatch (turn7: 8439-8454, turn8: 9468-9500), matching turn 6's
+  own reduced-scope precedent.
+- **Next:** the ordering residual's real fix (model `sSpriteOrder`'s own
+  persistent incremental insertion-sort state, or pursue the untried
+  half-pixel sampling-center lead) — ISSUES #30. Independently: ISSUES
+  #29 (2 small bounce-blip families), turn 9+ parameterizations.
+- **Notes:** checked (not assumed) whether this crack explains ISSUES
+  #23's DRAGON_BREATH residual — it doesn't (different mechanism: #23 is
+  a single-sprite scale-regime sampling defect, not a multi-sprite
+  draw-order contest), documented in §34 per the brief's own ask.
+
+---
 ## 217 — Worktree scout (supervisor-folded): post-WIN scene transition ground-truthed — **the S8 dossier chain is now GAPLESS from anchor to battle 2**: `battle1-postwin-dense.json` (29601 ticks, 208 captures) joins turn17's end (23601) to §17's swap-prompt start (29601, endpoint sha byte-identical to `battle1-swapyes-a.json`'s same-tick frame); headline pins: **`gMain.inBattle` clears + per-VBlank RNG resumes at tick 23645**, and **opponent-2's identity (`rentalMons[3..5]`) is written by 23700-23750** — the timing-sensitive window §16 HEADLINE 4 warned about is now bisected to 105 ticks; `docs/postwin-notes.md` merged, suite 861/861
 
 - **State:** merged into master post-#28-fix, `npm test` 861/861 +
@@ -75,27 +112,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   reminder that a pure-arithmetic model check doesn't see which code
   branch a tick is actually rendered through; pixel compare remains the
   final arbiter.
-
----
-## 215 — Worktree probe (supervisor-folded): **ISSUES #28 ROOT-CAUSED** — the 26 period-9 excluded ticks across turns 6/7/8 are ONE engine bug: the turn-6+ browsing-branch dispatch drops `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (the existing constant every turn-1-5 wrapper applies); probe model-check fixes 18/18 RAM-probed named ticks with zero new mismatches, turn 7 retrodicts; the ~9 cadence is sinIndex(+7/tick) crossing ~64-wide plateaus, two seeds (192/128) → the region alternation; `docs/bounce-blip-notes.md` + verify script merged, suite 857/857
-
-- **State:** merged into master post-#26-fix, `npm test` 857/857 +
-  build green, worktree/branch cleaned. Supervisor verified the
-  constant's existence and turns-1-5 usage in code directly
-  (battleMenu.ts:843, `turn2ReopenedSubmenuBounceTick` et al.); pixel
-  proof comes with the fix step's compare runs. ISSUES #28 rewritten:
-  root-caused, one implementation step owed
-  (`tools/probe/verify-bounce-blip-rule.py` committed for the fix
-  worker to re-run first, per the residual-elimination policy).
-- **Notes:** probe in contract (13.6 of 30 min). The session's probe
-  scoreboard is now 3-for-3 (#27 attributed, #26 cracked+closed, #28
-  root-caused) — every "quirk-at-an-extremum" label so far has fallen
-  to a small real engine bug, none survived a dedicated probe.
-- **Next:** round 7 — main: the #28 fix (3 call sites + restore 26
-  ticks across turn6/7/8-menu traces + the separate 7348-7350
-  restoration §28 already enabled); worktree: post-WIN scene-transition
-  scout (loss quote 23601 → §17's swap-offer joint). Then: feathers
-  dedicated step (turns 6/7/8 tables + §29's sampling-residual leads),
-  turn 9+.
 
 ---

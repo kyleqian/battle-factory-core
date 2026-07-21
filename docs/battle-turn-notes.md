@@ -5783,3 +5783,161 @@ BOTH turns 7 and 8's own feather probes (still deferred, banked together),
 then turn 9 (ROCK_SLIDE's own return, one `LEFT` press back from BIND, per
 docs/turn8-notes.md §7) as the next parameterization, or the turn 15+/16+
 scout territory already banked.
+
+## 34. Engine slice Q (dedicated feathers step): rung (a) partially cracked - a real same-priority draw-order bug found and fixed (425px residual, down from ~2000+px, 9/129 ticks exact) but NOT a full 0-diff crack; rungs (b)/(c) landed - `turn7-feathers.json` **16/16**, `turn8-feathers.json` **33/33**, both 0 diff (S7 bounded worker session, hard 60-minute cap)
+
+### Rung (a): cracked partially - real bug, not yet the full fix
+
+Per the brief's own method discipline (hand-derive one mismatched pixel,
+then generalize): `drawTurn6FeatherSprites`' sort was `.sort((a,b) =>
+b.priority - a.priority)`, a no-op tiebreak for same-priority feathers
+(`Array.sort` is stable, so ties kept the probe's own ascending-slot
+insertion order - meaning the HIGHEST slot in a same-priority group was
+always drawn last, i.e. on top). Checked against real hardware semantics
+(`reference/pokeemerald/src/sprite.c`'s `SortSprites`/`BuildSpritePriorities`):
+the real OAM buffer sorts by `(subpriority, oam.priority)` ascending, and
+lower-index OAM slots draw IN FRONT at equal priority. All 8
+`gFallingFeatherSpriteTemplate` spawns share one `subpriority`
+(`Cmd_createsprite`'s `subpriority_offset` argument is 0 on every
+`createsprite` line in `data/battle_anim_scripts.s`'s `Move_FEATHER_DANCE`),
+so ties fall through to `SortSprites`' own secondary key: sprite Y position
+(ascending-Y sprites end up LATER in the sort for a genuine tie, i.e. the
+LARGER-Y sprite draws in front) - **but this is for a truly fresh sort each
+frame**, and the real `sSpriteOrder` array is persistent/incremental
+(`SortSprites` runs a single insertion-sort PASS over the PREVIOUS frame's
+own order every `BuildOamBuffer` call, not a fresh full resort), so neither
+a pure "current Y" model nor a pure "creation-order/slot" model is
+guaranteed to reproduce it exactly - the true state depends on the entire
+history of swaps since each sprite's own creation.
+
+Tested empirically on the cheapest repro window (7421-7440, then the fuller
+7421-7549):
+- **Descending-slot tiebreak** (lower slot drawn last/on top - matching the
+  hardware's own "lower OAM index wins ties" rule, using this codebase's own
+  `slot` as a stand-in for OAM index since it IS the real per-spawn OAM
+  index here): cut the window's total mismatched pixels from ~2000+ (the
+  old ascending-slot behavior, growing 1-53px/tick) to **425px across 129
+  ticks, 9 ticks landing exact matches** (`compareFeatherDrawOrder`,
+  `src/engine/featherDance.ts`) - shipped, since it strictly beats the old
+  arbitrary tiebreak and doesn't touch the already-green 7307-7420 prefix
+  (re-verified 106/106 unchanged).
+- **Ascending-slot tiebreak** (the opposite direction): reproduces the OLD
+  behavior exactly (byte-identical results) - confirms the fix is a real
+  direction call, not noise.
+- **Descending-Y tiebreak** (current RAM `y+y2`, larger Y drawn last/on
+  top - the theoretically "more correct" rule per `SortSprites`' own
+  secondary key, ASSUMING a fresh resort every frame): 445px total, only 8
+  exact ticks - slightly WORSE than the slot-based fix, and the residual's
+  worst spikes simply MOVED to different ticks (7430's 30px spike vanished,
+  but 7446-7450/7512-7516 gained new ~15-30px spikes) rather than shrinking.
+  This is the single most informative negative result: it rules out "a
+  fresh per-tick Y-sort" as the complete model, and is consistent with the
+  `sSpriteOrder` persistence theory above (a fresh resort each tick
+  necessarily disagrees with an incrementally-maintained array once their
+  histories diverge).
+- **Lead (b) (half-pixel sampling-center convention) was NOT tested** this
+  session - the ordering investigation (lead (a)) consumed the rung's
+  budget once it started paying off. Flagged for whoever picks this up
+  next: the remaining residual's pixels are still soft blend-looking edge
+  tones (same signature §29 first noted), consistent with lead (b) still
+  being live independently of the ordering question.
+
+**Verdict**: rung (a) is a real, evidence-based, load-bearing fix (kept),
+but not the full crack the brief hoped for. `turn6-feathers.json` stays
+at its committed **106/106** (extending it is still not achievable at 0
+diff - the first extended tick, 7421, still mismatches by 1px under the
+fix). Pinned with 2 new tests against real probe data (tick 7429's 4-way
+same-priority overlap in `turn6-feather-sprites-probe.json`) plus the
+comparator's own priority-first ordering.
+
+### ISSUES #23 check (per the brief's own instruction)
+
+Does NOT obviously explain #23's signature - checked, not assumed. #23's
+own residual (`docs/dragon-breath-notes.md`, ISSUES.md) is characterized as
+a **single-sprite, scale-regime** defect (salt-and-pepper over-draw when
+`|matrixA|>256`, an isolated missing blob when `|matrixA|<256`, with a
+4-variant sampling-convention sweep already ruling out a rounding-offset
+fix) - there is no mention of multiple concurrently-live same-priority
+DRAGON_BREATH projectiles competing for the same pixel the way FEATHER_DANCE's
+8 feathers do, and a draw-ORDER fix cannot produce a "missing blob" (only a
+"wrong winner" where two sprites already both cover the same pixel). Different
+mechanism, not generalized.
+
+### Rungs (b)/(c): turn 7 and turn 8's own feather tables + windows, landed
+
+`tools/probe/dump-feather-dance-sprites.py` reused verbatim (no changes)
+against fresh spec copies of each turn's own real script
+(`tools/probe/specs/turn7-feathers.json`/`turn8-feathers.json`, each just
+`{segments}` sliced from that turn's own already-committed trace - confirmed
+byte-identical to `turn7-rockslide-a.json`/`turn8-bind-a.json`'s own
+segments before reuse). Both twice-run byte-identical
+(`src/data/gen/turn7-feather-sprites-probe.json`, RAM 8434-8600;
+`turn8-feather-sprites-probe.json`, RAM 9483-9660).
+
+**New finding, same shape both turns**: the exact same +8-tick spawn-group
+cadence and ~121-tick per-sprite lifetime turn 6's own table established
+recur unchanged - turn 7 spawns at RAM 8438/8446/8454/8462/8470 (turn 6:
+7404/7412/7420/7428/7436, a flat +1034 shift matching the press-tick
+delta), despawns complete by RAM 8591; turn 8 spawns at RAM
+9484/9492/9500/9508/9516, despawns complete by RAM 9637. Both confirmed via
+the same `inUse && template===0x08596388` filter turn 6's own probe used
+(naively trusting raw `inUse` alone is wrong here too - both slots get
+reused by an unrelated sprite well before each probe's own end tick, same
+caveat `FEATHER_LAST_RAM_TICK` already existed to guard against).
+
+`featherDance.ts` generalized from one hardcoded table to a small factory
+(`makeFeatherSpriteLookup(probe, lastRamTick)`) so `turn6FeatherSprites`'
+own shape instantiates twice more (`turn7FeatherSprites`/
+`turn8FeatherSprites`, cutoffs 8591/9637) with no duplicated lookup logic.
+`drawTurn6FeatherSprites` (`battleScene.ts`) takes an optional lookup
+function (default `turn6FeatherSprites`) so `drawTurn7FeatherDanceKickoffText`/
+`drawTurn8FeatherDanceKickoffText` pass their own turn's table instead of
+turn 6's own (which silently returned `[]` for their ticks before this
+session - a harmless no-op, now a real render).
+
+**Render-lag re-verified, not assumed**: bisected `FEATHER_RENDER_LAG=0`
+against both new windows explicitly (not just trusted from turn 6) -
+badly wrong both times (2/16 and 18/33 matches, vs. 16/16 and 33/33 at the
+shared `+1`), confirming the same lag class carries over unchanged.
+
+**Both new windows hit the identical residual rung (a) characterizes above**,
+at the same relative offset from each turn's own spawn timeline (first
+mismatch at turn7 render tick 8455 = 17 ticks after first spawn 8439, vs.
+turn 6's own first mismatch at 7421 = 17 ticks after 7405; turn 8's first
+mismatch at 9501 = 17 ticks after 9485) - concrete confirmation this is a
+property of the SHARED mechanism/ordering rule, not a turn-6-specific
+artifact, exactly as `docs/battle-turn-notes.md §29` predicted it would be
+if unfixed. Matching turn 6's own reduced-scope precedent, each new trace
+covers only the clean prefix before its own first mismatch:
+`tools/compare/traces/turn7-feathers.json` (captureFrames 8439-8454, 16
+frames) and `turn8-feathers.json` (captureFrames 9468-9500, 33 frames),
+both **0 diff**. 2 new Tier-1 pins mirror the existing `turn6FeatherSprites`
+first-live-tick pin.
+
+### What's left
+
+The same-priority draw-order residual (rung (a), all three turns now share
+it at the same relative offset) - still open, with a sharper set of
+eliminated conventions than before (ascending-slot, descending-slot,
+descending-Y all tried; the half-pixel sampling-center lead untried). A
+future session's best lead: model `sSpriteOrder`'s own PERSISTENT
+insertion-sort state directly (seed an order at each sprite's own spawn
+tick, apply `SortSprites`' real swap condition per tick using the probe's
+own Y values) rather than a fresh full resort by any single key - or
+pursue the half-pixel lead independently, since it may be a second,
+additive effect on top of whatever the ordering rule turns out to be.
+Extending `turn6/7/8-feathers.json` past their own residual onset is
+gated on that crack. `turn6-menu.json`'s own previously-excluded 7348-7350
+ticks remain unverified (unchanged from §28/§29). Turns 9+ as further
+parameterizations, unchanged.
+
+### Verification
+
+`npm test` **865/865** (+6: 2 `compareFeatherDrawOrder` pins, 2
+`turn7FeatherSprites`/`turn8FeatherSprites` pins, 1 updated exact-equal pin
+for the new `slot` field, net of no removals). `npm run build` green.
+`turn6-feathers.json` **106/106** (unchanged), `turn7-feathers.json`
+**16/16**, `turn8-feathers.json` **33/33**, all 0 diff. Zero regressions:
+`turn6-featherdance.json` **90/90**, `turn6-menu.json` **42/42**,
+`turn7-menu.json` **91/91**, `turn8-menu.json` **86/86**,
+`turn5-sitrus-a.json` **110/110**, all 0 diff.

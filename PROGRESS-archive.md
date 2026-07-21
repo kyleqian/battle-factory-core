@@ -1,4 +1,26 @@
 ---
+## 215 — Worktree probe (supervisor-folded): **ISSUES #28 ROOT-CAUSED** — the 26 period-9 excluded ticks across turns 6/7/8 are ONE engine bug: the turn-6+ browsing-branch dispatch drops `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (the existing constant every turn-1-5 wrapper applies); probe model-check fixes 18/18 RAM-probed named ticks with zero new mismatches, turn 7 retrodicts; the ~9 cadence is sinIndex(+7/tick) crossing ~64-wide plateaus, two seeds (192/128) → the region alternation; `docs/bounce-blip-notes.md` + verify script merged, suite 857/857
+
+- **State:** merged into master post-#26-fix, `npm test` 857/857 +
+  build green, worktree/branch cleaned. Supervisor verified the
+  constant's existence and turns-1-5 usage in code directly
+  (battleMenu.ts:843, `turn2ReopenedSubmenuBounceTick` et al.); pixel
+  proof comes with the fix step's compare runs. ISSUES #28 rewritten:
+  root-caused, one implementation step owed
+  (`tools/probe/verify-bounce-blip-rule.py` committed for the fix
+  worker to re-run first, per the residual-elimination policy).
+- **Notes:** probe in contract (13.6 of 30 min). The session's probe
+  scoreboard is now 3-for-3 (#27 attributed, #26 cracked+closed, #28
+  root-caused) — every "quirk-at-an-extremum" label so far has fallen
+  to a small real engine bug, none survived a dedicated probe.
+- **Next:** round 7 — main: the #28 fix (3 call sites + restore 26
+  ticks across turn6/7/8-menu traces + the separate 7348-7350
+  restoration §28 already enabled); worktree: post-WIN scene-transition
+  scout (loss quote 23601 → §17's swap-offer joint). Then: feathers
+  dedicated step (turns 6/7/8 tables + §29's sampling-residual leads),
+  turn 9+.
+
+---
 ## 214 — Bounded worker (S7 engine fix): **ISSUES #26 CLOSED** — Sitrus THIN_RING implemented from §16's banked closed form (`turn5SitrusRingMatrix`, first-attempt render), `turn5-sitrus-c.json`'s excluded 7042-7072 restored to **181/181 0 diff**; z-order caveat resolved by reusing the already-established terrain-occlusion clip (`PLAYER_BALL_OPEN_VISIBLE_BOTTOM`), not a shadow-sprite priority contest
 
 - **State:** `npm test` **857/857** (+5), `npm run build` green, tree

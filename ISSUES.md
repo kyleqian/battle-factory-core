@@ -5,6 +5,39 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #30 — FEATHER_DANCE's same-priority feather draw-order residual (turns
+  6/7/8, same relative offset each time): partially fixed, not cracked
+
+Surfaced 2026-07-21 (docs/battle-turn-notes.md §29), partially fixed +
+generalized to turns 7/8 same session (§34). `drawTurn6FeatherSprites`'
+tiebreak for same-OAM-priority feathers was arbitrary (ascending slot,
+i.e. highest slot drawn last/on top) - backwards from pokeemerald's own
+`SortSprites` (`reference/pokeemerald/src/sprite.c`), which draws lower
+OAM-index sprites on top at equal priority. Reversing the tiebreak
+(`compareFeatherDrawOrder`, `src/engine/featherDance.ts`) cut the
+7421-7549 residual window's total mismatched pixels from ~2000+ to 425
+across 129 ticks (9 exact), a real load-bearing fix - but not a full
+crack. Confirmed (not assumed) to recur at the identical relative offset
+in turns 7/8's own feather windows once their probe tables were built
+this session (first mismatch always ~17 ticks after each turn's own first
+spawn) - i.e. it's a property of the shared mechanism/tiebreak, not a
+turn-6-specific artifact.
+
+**Eliminated this session**: ascending-slot (reproduces the old bug
+exactly), descending-slot (the current fix, best so far), descending-Y-at-
+current-tick (445px, slightly WORSE than slot - rules out "a fresh Y-sort
+every frame" as the complete model). **Leads for a future session**: model
+`sSpriteOrder`'s own PERSISTENT incremental insertion-sort state (it only
+re-sorts adjacent pairs when a swap condition trips, carrying history
+frame-to-frame - a fresh full resort by any single key, slot or Y, isn't
+guaranteed to match it once histories diverge) using each probe's own
+per-tick Y values; independently, the half-pixel sampling-center
+convention for even-sized (32x32) affine sprites (untried this session -
+the ordering investigation consumed the budget once it started paying
+off). `turn6/7/8-feathers.json` all stop their own `captureFrames` right
+before this residual's onset (106/16/33 frames respectively, all 0 diff) -
+extending any of them past that point is gated on this crack.
+
 ## #29 — Two DIFFERENT small residual families surfaced restoring #28: a
   pre-reveal reopen-window blip (turn 6/8) and a post-confirm-press blip
   (turn 7)
