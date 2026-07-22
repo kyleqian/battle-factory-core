@@ -306,3 +306,143 @@ exploratory probe run to pin the badge/box-removal boundary tightly. Cost
 another faint-heavy turn should budget for this ahead of time (e.g. request
 a `maxCaptures` bump alongside the existing `maxFrames` one) rather than
 discovering the squeeze mid-session.
+
+## 6. Worktree-lane retrofit — wiring-ready standard (S7/S8 worktree scout, no engine code)
+
+Shipped **`tools/probe/verify-turn17.ts`** (same convention as
+`verify-turn13.ts`/`verify-turn15.ts`: re-derives every pinned fact from a
+FRESH `bin/oracle run` against the already-committed `battle1-turn17-
+dense.json`, pixel-only, no RAM reads at runtime — `verify-turn16.ts` lives
+on a sibling worktree branch not yet merged into this one as of this
+session; its content was read via `git show` for precedent/convention only,
+never copied or edited). **245 curated captures** (under the 256 cap),
+**twice-run byte-identical** (two independent `node` invocations, full
+stdout diffed, 0 differences), **all checks PASS**. RAM cross-check for the
+faint-sink family confirmation (§6b) used a new committed spec,
+**`tools/probe/specs/turn17-faintsink-watch.json`** (extends `turn17-rng-
+watch.json`'s own committed segments with `gBattlerSpriteIds[1]`/
+`gHealthboxSpriteIds[1]`-indexed sprite-slot reads via `ram-probe.py`'s
+generic `path`-hop mechanism — no new Python needed).
+
+### 6a. §4 corrections (dense re-bisection of every "~" / wide-range / exploratory-probe-sourced row)
+
+Same non-destructive slip class turns 13-15's own retrofits found (turn16's
+found 0); none change any §1/§2/§3/§5 headline verdict:
+
+| §4 row (original) | correction | evidence |
+|---|---|---|
+| "steady through 22486" (sprite+healthbox+badge all present) | Actual steady window runs **6 ticks further, through 22492** — the visible sink motion doesn't start until 22493 | dense pixel bisection, `verify-turn17.ts` |
+| "sprite fully gone by ~22500" (approximate, exploratory-probe-sourced) | The sink motion is pixel-dynamic 22493-22502 (5 distinct frames), then the rendered frame **freezes 5 ticks early**, at 22503-22507 (flat `aea330242515`) — the sprite is already fully off-screen/clipped several ticks *before* its RAM `inUse` flag actually clears at 22506 (§6b). A distinct render-lag shape from every other case in this dossier: elsewhere RAM changes *precede* an unchanged pixel; here the pixel *freezes early* while RAM still churns underneath it | dense pixel bisection + `turn17-faintsink-watch.json` RAM cross-check, `verify-turn17.ts` |
+| "Foe MURKROW\nfainted!" text starts typing "~22510-22530" (exploratory-probe-sourced range) | Now **committed and dense-pinned**: per-glyph typing 22510-22527 (18 ticks, near-per-tick-unique), a 2-tick settle transient (22528-22529), fully-typed idle-bounce plateau reached **exactly by 22530**, matching the dossier's own "by 22530" framing precisely rather than approximately | dense pixel bisection, `verify-turn17.ts` |
+| "Foe MURKROW fainted!" held, cited via a single dismiss-press-tick sha (implies a flat hold) | Actual hold is a **3-phase idle bounce**: a long default phase (`187cfc5c6179`) interrupted by a brief double-blink cluster (`6addb90d4a77`→`bc9dfd1849f7`→`6addb90d4a77`, ~8-9 ticks/phase) — same idle-bounce family turns13-16 already documented for menu/faint-text holds, confirmed still recurring at tick 22750 (default phase) and 22800/the dismiss-press tick itself (blink phase, matches §4's own cited sha there) | dense pixel bisection (22540-22570) + far spot checks, `verify-turn17.ts` |
+| "unchanged through 22818/22822/22825" / typing-onset "between 22825 and 22845" | **Pinned exactly**: pixel-identical across the ENTIRE 22802-22826 span (25 ticks, including tick 22818 where `gBattleOutcome` flips in RAM with zero visible effect, §2) — first divergence is **tick 22827**. §4's own cited sha (`73d52db2a5df`) for "22845" actually **first appears at tick 22844**, one tick earlier — same off-by-one-citation class turns13-15 each found | dense pixel bisection, `verify-turn17.ts` |
+| "Player defeated\nBUG CATCHER DESTIN!♥" held, cited via a single tick's sha | Same **3-phase idle-bounce shape** as the fainted-text hold above: settle-transient phase (`c19836f8def9`, 22885-22888) → default phase (`7f80a2343a29`) → blink-cluster phase (`2d8341bfa9dc`, 22898-22906) → back to default — confirmed recurring far into the hold (23100 = settle-transient sha again, a second blink-cluster onset; 23195 = default phase, right up to the dismiss press) | dense pixel bisection (22885-22915) + far spot checks, `verify-turn17.ts` |
+| **DESTIN trainer-pic slide-in transition** — §4 has NO row at all for this; it is a gap between the "held" row (22885) and the "typing in" row (23260) | **NEW, characterized this session** — see §6c below | dense pixel bisection (23220-23260), `verify-turn17.ts` |
+| loss-quote settle tick — only "this trace's own scripted end (23601)" was cited, no settle boundary | Typing continues glyph-by-glyph through 23278, **settles 2 ticks earlier than a coarser first pass found, at tick 23279** — held pixel-identical for the remaining 322 ticks through 23601 | dense pixel bisection, `verify-turn17.ts` |
+
+### 6b. Faint sink, confirmed bit-exact to the known formula (mission item: "confirm which function family")
+
+Murkrow is DESTIN's (the opponent's) own Pokémon, the same ownership side as
+turn13's Pidgeotto — so by the same source-level reasoning `turn13-notes.md`
+§(Faint sink row) already established (opponent-side faints resolve through
+`SpriteCB_FaintOpponentMon`/`SpriteCB_AnimFaintOpponent`, `faint-switch-
+notes.md` §3a/§7a/§(0x08039934/0x08039a49)), this faint is expected to be
+the **same family**, not turn15's separate player-side case (whose own
+function name was left unresolved). Confirmed this session, RAM-exact, via
+`turn17-faintsink-watch.json` (new spec, `gBattlerSpriteIds[1]`-indexed mon
+sprite + `gHealthboxSpriteIds[1]`-indexed healthbox sprite, `ram-probe.py`):
+
+| tick | event |
+|---|---|
+| 22470-22491 | Murkrow's own mon sprite (dynamic slot, resolved via `gBattlerSpriteIds+1`): `inUse=true`, `y2=0` — unchanged |
+| 22492, 22494, 22496, 22498, 22500, 22502, 22504 | `y2` steps **8,16,24,32,40,48,56** — exactly the `S+1, S+3, ..., S+2n-1` cadence with **S=22491, n=7** |
+| **22506** | mon sprite `inUse→false` (destroyed) — exactly `S+2n+1 = 22491+15 = 22506`, **bit-exact to the closed form**, zero deviation |
+| 22507 | healthbox sprite (`gHealthboxSpriteIds+1`-indexed) sets `invisible→true` — **1 tick after** the mon sprite's own destroy |
+| 22508 | `status1_1` (Murkrow) clears `16→0` — **2 ticks after** the mon sprite's own destroy, exactly matching §2's own independently-run RAM ledger (cross-validates this session's own RAM read pipeline) |
+
+The formula's own `n = 8 - floor(yOffset/8)` predicts n=7 from a yOffset in
+`[8,15]`; Murkrow's own **front**-pic yOffset (`src/data/gen/mon-pic-
+coords.json`, `front.MURKROW.yOffset`) is **11** — identical to turn13's own
+cited Pidgeotto yOffset (also front-pic 11, `front.PIDGEOTTO.yOffset`) —
+giving `n = 8 - floor(11/8) = 8-1 = 7`, matching the RAM-observed step count
+exactly. **Confirmed bit-exact to the same closed form turn13 pinned**, not
+merely "same shape" — the strongest confirmation of this family in the
+dossier chain so far (stronger than turn15's own player-side case, whose
+function-name-level confirmation is still open). §5f's "SAME-SHAPE" verdict
+is upgraded to **formula-exact**.
+
+### 6c. DESTIN trainer-pic slide-in transition, characterized (mission's own top new-item candidate)
+
+The single largest gap §4 left untabled: the dismiss press at 23201 to
+DESTIN's trainer sprite + "PLEA" typing-in at 23260 (§4's own next row).
+Dense pixel re-bisection (`verify-turn17.ts`) finds:
+
+| window | shape |
+|---|---|
+| 23201-23228 (28 ticks, including the dismiss press itself) | **pixel-frozen** at the old "Player defeated..." screen's own sha — the press produces zero same-tick visible effect, the same RAM-ahead-of-pixel convention this whole dossier chain established for every other dismiss/state transition |
+| 23229-23253 (25 ticks) | **genuinely dynamic, every tick a distinct frame** — the fade/wipe of the old screen composited with DESTIN's trainer-sprite slide-in; NOT separable into sub-phases at pixel-only sampling density (same "coarse sketch, not frame-exact" honesty convention §4/§5 already used for other animation windows — RAM/task-callback decomposition of this transition was not attempted, time-boxed, flagged open) |
+| 23254-23256 (3 ticks) | a brief flat pause mid-transition (`0fececf28e02`) |
+| 23257-23259 (3 ticks) | dynamic again, resuming the transition |
+| 23260 | DESTIN's trainer sprite + "PLEA" typing-in — matches §4's own citation (`5dab75716557`) exactly, landing right after the transition characterized above |
+
+**New finding for the reuse map**: the WIN sequence's own screen-to-screen
+handoff (battle-text screen → trainer-quote screen) is a **distinct,
+non-trivial ~31-tick composite transition**, not a simple instant cut or a
+plain fade — an engine port needs to budget for this as its own animated
+step, not assume the loss-quote screen simply appears.
+
+### 6d. Loss-quote's "no blinking cursor" open item, narrowed (not resolved)
+
+§4's own final row flagged the absence of a blinking heart/cursor icon on
+DESTIN's held loss-quote screen as unexplained (both prior WIN-sequence
+screens showed one, this one didn't, in a handful of samples). Dense
+re-bisection (`verify-turn17.ts`) confirms **zero pixel change** across the
+entire settled hold — tick 23279 (settle) through 23601 (this trace's own
+scripted end), at every one of the far-spot ticks sampled (23300, 23320-
+23322, 23350, 23400, 23450, 23500, 23550, 23600 — including a 3-tick
+consecutive burst at 23320-23322 that would catch a short-period blink like
+the ~8-9-tick ones found in §6a above). This is stronger evidence than §4's
+own "4 preceding sparse samples," but **still does not conclusively prove**
+no cursor exists at every unsampled tick across the full 322-tick hold —
+narrowed, not resolved, same honesty convention §4's own caveat already
+used. Plausible explanation (not source-confirmed this session): this
+screen's textbox is a different class (a standalone trainer-quote box, not
+a battle-message box with its own "waiting for input" heart icon) — flagged
+open for a future session with RAM/task-callback access.
+
+### 6e. Render-lag ledger (this session's additions)
+
+| RAM event | pixel-confirmed tick | lag |
+|---|---|---|
+| mon sprite `inUse→false` (faint-sink destroy, 22506, §6b) | rendered sink motion actually **freezes early**, at 22503 — 3 ticks *before* the RAM destroy | **-3 ticks (pixel leads RAM)** — the one case in this dossier chain where the render is NOT lagging the RAM write, because the sprite is already fully clipped off-screen before its `inUse` flag clears |
+| healthbox sprite `invisible→true` (22507) | pixel-confirmed both sprite+healthbox+badge gone (22508, §4) | **+1 tick** |
+| `status1_1` clears (22508, §2/§6b) | same tick, badge/box already pixel-gone (22508) | **0 ticks** (coincident) |
+| `gBattleOutcome` 0→1 (22818, §2) | old "fainted!" text still pixel-identical through 22826 | **+8 ticks minimum** (RAM leads pixel by at least this much — the flip itself has no dedicated pixel signature, it only matters for the later branch) |
+| dismiss press, "Player defeated..." → loss-quote screen (23201) | old screen pixel-identical through 23228, transition starts 23229 | **+27 ticks** (the largest RAM-to-pixel gap in this dossier — a genuine multi-tick composite transition, not a simple lag, §6c) |
+
+### 6f. Per-phase wiring verdict (engine planning payload, supersedes/extends §5)
+
+| phase | verdict |
+|---|---|
+| FIGHT submenu (turn 17) | **pure wiring reuse**, verbatim (§5a) |
+| FAINT_ATTACK / FIRE_PUNCH dispatch, crit/damage rolls | **pure wiring reuse**, verbatim per-move roll-shape AND exact dispatch-constant timing vs. turn16 (§5b) |
+| Burn's physical-damage halving | **pure wiring reuse**, now independently reconfirmed (not just suggestive) (§5c) |
+| FIRE_PUNCH's secondary-effect roll at an already-fainted target | **new-to-this-dossier finding, pure wiring** — the roll is unconditional per source and must be replicated even when its outcome is a guaranteed no-op (§5d) |
+| Burn's end-of-turn residual, correctly absent | **new-to-this-dossier finding, pure wiring** — needs the `hp != 0` liveness gate explicitly (§5e) |
+| Faint sink (sprite sink + healthbox/badge teardown) | **pure wiring reuse, now formula-exact** — `SpriteCB_FaintOpponentMon`/`AnimFaintOpponent`, RAM-confirmed bit-exact to the same closed form turn13 pinned (§6b, upgraded from §5f's "same-shape") |
+| "Foe MURKROW fainted!" button-gated hold | **pure wiring reuse** of the verbatim faint-hold mechanic (§5g) — its own idle-bounce is a **new-to-this-dossier 3-phase cycle** (§6a) |
+| Post-faint branch: win-sequence vs. forced send-out | **new mechanism, this dossier's own headline structural finding** — needs an explicit "any Pokémon left?" branch condition (§5h) |
+| `gBattleOutcome` timing | **corrected timing fact, pure wiring** — flips mid-hold of the OLD text, well before the new screen appears (§5i) |
+| "Player defeated BUG CATCHER DESTIN!♥" held | **pure wiring reuse** of the same button-gated-hold mechanic — its own idle-bounce is the **same 3-phase-family shape** as the fainted-text hold (§6a), not independently novel |
+| DESTIN trainer-pic slide-in transition | **new mechanism, characterized this session** (§6c) — a ~31-tick composite fade+slide-in transition between the WIN-outcome text screen and the trainer-quote screen; not previously tabled at all |
+| DESTIN's loss quote, button-gated | **pure wiring reuse** of the standard button-gated-text mechanic (§5j); its own missing cursor-blink remains an open, narrowed-not-resolved item (§6d) |
+
+### Verification (this retrofit)
+
+`npm test` (986/986) and `npm run build` green — no `src/` changes.
+New/changed artifacts this session: `tools/probe/verify-turn17.ts` (245
+curated captures, single oracle round trip, twice-run byte-identical, all
+checks PASS), `tools/probe/specs/turn17-faintsink-watch.json` (new RAM-watch
+spec, `ram-probe.py`, reused unmodified), and this doc's own §6 append. No
+existing committed file (turn13-16 notes/scripts, `battle-turn-notes.md`,
+`postwin-notes.md`, any `src/` file, any prior trace) was touched.
