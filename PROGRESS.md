@@ -6,16 +6,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 264 — Bounded worker (ISSUES #37 entry transition): **CHECKPOINT — OBJ ownership narrowed to BAYLEEF's initial icon frame**
 
-- **State:** committed at `4d997f0`; `npm test` **1003/1003**, build
+- **State:** committed at `c13f645`; supervisor independently reproduced
+  `npm test` **1003/1003**, build
   green (production JS **5.16 MB**), composite **5/5 PASS**. Both dense
   compares are **135/143** (same eight residual frames, delayed +30).
 - **Did:** corrected the press-relative phase boundary (fade begins rendered
   elapsed 21), and added source-derived OAM ownership masks for MURKROW,
   healthbox, all party balls, FNT/status, held-item sprites, and live icons.
   All fade-out frames are now exact; only fade-in 20061–68 retains 48px.
-- **Next:** inspect BAYLEEF's initial live OBJ frame/VRAM ownership at those
-  eight frames; do not coordinate-patch it. Post-SEND OUT remains separate.
-- **Notes:** PAPERCUT: none.
+- **Next:** **ESCALATION QUESTION (two consecutive workers missed the same
+  143/143 bar):** authorize a third, probe-only-first worker to dump BAYLEEF's
+  live OBJ tile/anim state at canonical 20061-20068 (delayed +30) and then
+  wire the derived initial-frame rule, or park these eight 48px frames and
+  proceed to the separate post-SEND OUT path? Supervisor recommends the
+  targeted third attempt because the residual is isolated and both timing
+  variants agree exactly; no coordinate patch is acceptable.
+- **Notes:** Independent compares are **135/143** each with only the named
+  eight frames red; all other entry and settled frames are exact. PAPERCUT:
+  none.
 
 ---
 ## 262 — Bounded worker (ISSUES #37 icon/OAM half): **CLOSED** — live icon-free party compositor; canonical + delayed traces **62/62, 0 diff**
