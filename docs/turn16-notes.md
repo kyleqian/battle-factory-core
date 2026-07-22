@@ -246,3 +246,208 @@ cross-check RAM-observed behavior — no `src/` files were touched.
 open items (animation frame-exactness, the unattributed tick-21152 roll,
 the BRN badge's un-pinned exact render tick) — none cost meaningful time,
 they're honest scope boundaries given the 40-minute cap, not friction.
+
+## 6. Worktree retrofit (2026-07-21, S7/S8 wiring-ready pass): BRN badge exact
+   tick PINNED + both animations' task lifetimes RAM-confirmed against source
+
+Ships `tools/probe/verify-turn16.ts` (233 captures, single oracle round trip,
+twice-run byte-identical) — same convention as `verify-turn13.ts`/
+`verify-turn14.ts`/`verify-turn15.ts`: re-derives every §4 citation from a
+fresh `bin/oracle run` against the committed `battle1-turn16-dense.json`
+(unmodified), dense-rebisecting every approximate/sparse-sampled row. **No
+citation slips found this pass** (unlike turn13-15's retrofits, which each
+found 1-7) — every previously-exact §4 sha still reads at its cited tick.
+Two genuine gaps were closed:
+
+### 6.1 MISSION 1 — the BRN badge's exact appearance tick: **21542**
+
+Stride-1 capture across 21535-21555 (`bin/oracle run`, twice-run identical)
+finds a **clean single-tick swap**: tick 21541 still reads the absent sha
+(`b8c88efbcf21`, matching §4's own 21540 citation), tick **21542** is the
+FIRST tick reading the present sha (`2c52a3119ee4`, matching §4's own 21548
+citation) — every tick in the sampled window is one or the other, **no
+third transitional/partial-draw state exists**. This **closes ISSUES #16's
+named sparse-capture gap** exactly: the badge is drawn in one frame, not
+faded or wiped in.
+
+**Source-confirmed mechanism** (`battle_interface.c:1993`,
+`UpdateStatusIconInHealthbox`, called from `UpdateHealthboxAttribute(...,
+HEALTHBOX_STATUS_ICON)` — battle_interface.c:1408/1433/2209/2230): for
+`STATUS1_BURN` this is a **direct `CpuCopy32` VRAM tile blit** (3 tiles ×
+32 bytes = 96 bytes, at `gSprites[healthboxSpriteId].oam.tileNum +
+tileNumAdder`, `tileNumAdder = 0x11` for an opponent-side singles
+healthbox) plus a **single OBJ-palette-slot recolor** (`FillPalette` with
+`sStatusIconColors[PAL_STATUS_BRN] = RGB(28,14,10)` — GBA 15-bit color;
+its 24-bit expansion, `(231,115,82)`, is exactly the badge-interior color
+sampled from the oracle's own PNG, confirming the palette-index match, not
+just a visual guess). This is a synchronous memory write, not a
+sprite/task animation — **RAM-confirmed independently**: a full
+`gTasks[]`/`gSprites[]` callback dump (`dump-task-and-sprite-callbacks.py`,
+20770-21773) shows **zero active tasks at tick 21542** (the nearest task,
+`Task_DoStatusAnimation` — `battle_anim_status_effects.c:554`, created at
+tick 21412 right after the burn-proc roll — already finished by tick 21449,
+93 ticks *before* the badge draws), so the badge's own delayed appearance
+(21411 RNG roll → ~21465 message-typing → 21542 badge → its own message
+box logic, not any lingering animation task) is driven by the
+message/script controller's own pacing, not a task lifetime. **CORRECTS
+§4/§5g's own "badge appears with a several-tick delay after ... the 'was
+burned!' message" framing**: the delay from message-typing-start (~21465)
+to badge (21542) is **77 ticks**, not "several" — a full extra beat after
+the message, not incidental to it. Not independently root-caused *which*
+script step fires the `UpdateHealthboxAttribute` call at exactly 21542 (no
+`BattleScript_*` step was traced this session) — flagged open, but the
+call site and VRAM-write mechanics are now fully source-pinned.
+
+**Badge geometry + healthbox layout-shift question (the mission's own
+second ask), pixel-measured**: diffing the oracle's own rendered frames at
+21540 (absent) vs 21548 (present, held) gives a diff bounding box of
+**x=[20,51] y=[30,37] (32×8 px), 183 changed px** — entirely to the LEFT of
+the health bar's own first rendered (green) pixel column, which is
+**x=52 in BOTH frames, bit-identical** (`cropDiffCount` over x∈[52,239]
+y∈[29,39] = 0). **The health bar itself does NOT move, shrink, or
+recompress** — CORRECTS this dossier's own §4/headline description ("a
+small orange badge left of the level number"): pixel evidence shows the
+badge does not appear near "Lv" at all — it **REPLACES the "HP" icon-label
+glyph in the same fixed 32×8 box immediately left of the bar** (matching
+source exactly: the `else` branch of `UpdateStatusIconInHealthbox`, taken
+when `status == 0`, draws `HEALTHBOX_GFX_39` — a plain "HP" glyph — into
+this identical tile range; the STATUS1_BURN branch overwrites the same
+tiles with the BRN glyph via the same `tileNumAdder` offset, so it's a
+content swap of one fixed slot, confirmed both ways). One source-level
+nuance the pixel diff alone doesn't show: for `IsDoubleBattle() == TRUE ||
+GetBattlerSide(battler) == B_SIDE_OPPONENT` (true here — MURKROW is the
+opponent), the same function ALSO `CpuCopy32`s two replacement tiles
+(`HEALTHBOX_GFX_0`/`HEALTHBOX_GFX_65`) into the health bar sprite's own
+leftmost tiles — a **cosmetic end-cap tile redraw**, source-confirmed to
+run every time `UpdateStatusIconInHealthbox` fires for an opponent-side
+battler (both the "gained a status" and "status cleared" directions), but
+one that provably does NOT move the bar's visible fill (0-diff check
+above) — engine spec takeaway: **implement this as two independent fixed
+regions (label-icon box + bar) with the bar's cap tiles re-blitted on every
+status-icon update, not as a single repositioned bar**.
+
+**Static vs. blinking, once shown**: the badge's own 32×8 region is
+**pixel-identical** (0-diff `cropDiffCount`) across ticks 21548→21600→
+21714→21725→21773 (spanning the burn-residual message, the settle into
+turn 17's menu, and the trace's own scripted end) — **the badge is
+static once drawn, no blink/animation cycle**, confirming §5g's own
+qualitative claim with an exact 0-diff pixel measurement instead of a
+visual read.
+
+### 6.2 MISSION 2 — FAINT_ATTACK's and FIRE_PUNCH's animations: task
+    lifetimes RAM-confirmed exactly against their own battle-anim scripts
+
+Both `Move_FAINT_ATTACK` (`battle_anim_scripts.s:5156`) and
+`Move_FIRE_PUNCH` (`battle_anim_scripts.s:6959`) are **multi-sprite/
+multi-task composites, NOT the ISSUES-#23 linear-translation-projectile
+family** — confirmed by source read, then independently RAM-confirmed via
+a full `gTasks[]` func-pointer dump (`dump-task-and-sprite-callbacks.py`
+over 20770-21773, function pointers resolved against
+`arm-none-eabi-nm -n --defined-only pokeemerald.elf`, Thumb bit masked).
+
+**FAINT_ATTACK task-lifetime ledger** (RAM-confirmed, tick-exact):
+
+| tick range | task (resolved symbol) | matches script step |
+|---|---|---|
+| 20826-21008 (with gaps) | `Task_UpdateMonBg` | `monbg ANIM_ATTACKER`/`monbg ANIM_TARGET` |
+| 20829-20866, 21008-21046 | `Task_FadeToBg` | `fadetobg BG_DARK` ... `restorebg`/`waitbgfadein` (fires TWICE — in, then back out) |
+| 20869-20899 | `AnimTask_TranslateMonElliptical_Step` | `AnimTask_TranslateMonEllipticalRespectSide` — the attacker's own lunge |
+| 20869-20899 (concurrent) | `AnimTask_AttackerFadeToInvisible_Step` | `attacker_fade_to_invisible step_delay=1` |
+| 20901, 21003 | `Task_ClearMonBg` | `clearmonbg` |
+| 20906-20934 | `AnimTask_WaitAndRestoreVisibility` | `AnimTask_SetAttackerInvisibleWaitForSignal` (script mnemonic; resolves to this symbol) |
+| 20912-20928 | `AnimTask_ShakeMon2_Step` | `AnimTask_ShakeMon2` on the target (hit reaction) |
+| 20971-21002 | `AnimTask_AttackerFadeFromInvisible_Step` | `attacker_fade_from_invisible step_delay=1` |
+
+Every dispatched task in this window resolves to a symbol the script
+itself names or calls into — **zero unexplained task activity**. This
+independently confirms the "reddish-pink screen tint" is exactly
+`fadetobg BG_DARK` (a genuine BG-palette fade task, firing twice — in then
+out — not a one-shot flash), and the "lunge" is exactly
+`AnimTask_TranslateMonEllipticalRespectSide`'s own elliptical translate,
+running concurrently with the attacker's fade-to-invisible — matching
+§5c's coarse sketch exactly, now with RAM-timed task boundaries instead of
+a stride-18 PNG guess.
+
+**FIRE_PUNCH task-lifetime ledger** (RAM-confirmed, tick-exact):
+
+| tick range | task (resolved symbol) | matches script step |
+|---|---|---|
+| 21207-21291 (with gaps) | `Task_UpdateMonBg` | `monbg ANIM_DEF_PARTNER` |
+| 21210-21238, 21283-21291 | `AnimTask_BlendSpriteColor_Step2` | `AnimTask_BlendBattleAnimPal ... RGB_RED` (the red target-flash, fires twice — matches the script's own pre-hit ramp-in and post-hit ramp-out calls) |
+| 21241-21269 | `AnimTask_ShakeMon_Step` | `AnimTask_ShakeMon` on the target |
+| 21292 | `Task_ClearMonBg` | `clearmonbg ANIM_DEF_PARTNER` |
+| 21412-21449 | `Task_DoStatusAnimation` (`battle_anim_status_effects.c:554`) | the burn's own status-affliction animation task, created immediately after the 21411 RNG roll — **ends 93 ticks before the BRN badge draws (21542)**, confirming the badge is NOT gated on this task's completion in any tight coupling, just downstream of it in the script's overall pacing |
+
+Source (`Move_FIRE_PUNCH`) additionally names **4× `gFireSpiralInwardSpriteTemplate`**
+(spiraling onto the target at 4 phase offsets: 0/64/128/196 of a 256-unit
+rotation, i.e. evenly-spaced quarter-turns) and **`FireSpreadEffect`'s own
+7× `gFireSpreadSpriteTemplate`** (a burst radiating from the target at 7
+distinct x/y/duration triples) plus a thrown `create_fist_sprite` and a
+`create_basic_hitsplat_sprite` — all `createsprite`-dispatched (not
+`createvisualtask`), so they don't show up in the task ledger above; this
+session's RAM probe only captured `gSprites[].callback` pointers, which
+read as non-null across all 64 slots at every sampled tick (the engine
+keeps every slot's callback populated regardless of logical "in use" state
+— the `inUse` bit isn't exposed by the existing `dump-task-and-sprite-
+callbacks.py`), so per-slot sprite-template attribution for the fire
+spiral/spread sprites specifically is **not resolved this session** —
+flagged open for a probe that also reads each sprite's `inUse`/template
+tag, same honesty convention as this dossier's other open items. The
+dense PNG pass (233-capture `verify-turn16.ts`, `FIRE_CAST_DENSE`,
+21170-21405 stride 4) independently confirms the window is genuinely
+dynamic (46 distinct frames of 59 sampled), consistent with this
+multi-sprite composite, not a static hold.
+
+**Verdict for both**: genuinely new, multi-primitive composite animations
+— reusing already-wired primitives (`ShakeMon`/`ShakeMon2`, `clearmonbg`/
+`monbg`, hitsplat sprites, palette-blend tasks — all seen in prior turns'
+dossiers) in move-specific combinations, **not a plain reuse of any single
+already-fully-wired family** and **not the ISSUES-#23 linear-translation
+projectile shape** either. An engine slice implementing these should
+budget for: FAINT_ATTACK = BG palette fade (×2, in/out) + elliptical
+sprite translate + fade-to/from-invisible + target shake + hitsplat.
+FIRE_PUNCH = BG palette fade + 4-phase spiral-inward burst + thrown fist +
+hitsplat + target shake + red palette blend (×2) + 7-point spread burst.
+
+### 6.3 Dense re-bisection of §4's approximate boundaries — no slips found
+
+Re-bisected every stride-18/wide-range row this session (`verify-turn16.ts`'s
+own `FAINT_TINT_DENSE`/`FIRE_CAST_DENSE`/`BURN_TEXT_DENSE`/`BADGE_DENSE`
+capture sets, 233 total captures, single oracle round trip, twice-run
+byte-identical): **all previously-cited exact shas (5950e7b3d8ba,
+533d43f7a773, 557d261b5dba, 9042f3f1afe1, e4a415cb85ad, d28dd01e52fd,
+5123afd2b167, 84551bcb11c3, 06888de6033d, 74fd1d0f11f9, 0b1748b6c28c)
+still read at their originally-cited ticks — 0 slips this pass**, unlike
+turn13-15's own retrofits (each found 1-7). The one genuinely-unpinned
+boundary this dossier itself flagged open — "Foe MURKROW was burned!"
+typing-in, bracketed only "between 21450 (absent) and 21465 (typing)" — is
+now pinned exactly: **tick 21465 IS the first-typing tick** (dense stride-1
+across 21445-21466 confirms 21445 does not yet show it and 21465 is the
+earliest match), so §4's own citation was already exact, just not
+previously proven tight.
+
+### Verification
+
+`npm test` and `npm run build` green — no `src/` changes this session.
+New artifacts: `tools/probe/verify-turn16.ts` (233 captures, single oracle
+round trip, twice-run byte-identical via two independent
+`node --experimental-strip-types tools/probe/verify-turn16.ts` runs, stdout
+diffed identical) and this doc append. RAM: `dump-task-and-sprite-
+callbacks.py` (pre-existing, unmodified, generic gTasks/gSprites dumper)
+run once over `battle1-turn16-dense.json` from tick 20770, all resolved
+function-pointer symbols cross-checked against
+`arm-none-eabi-nm -n --defined-only reference/pokeemerald/pokeemerald.elf`
+(exact address matches, not fuzzy/nearest-symbol guesses). Source
+citations (`battle_interface.c`, `battle_anim_scripts.s`,
+`battle_anim_status_effects.c`) are read-only references — no `src/`
+files touched. Pixel claims (badge bbox, bar-unaffected check, static-hold
+check) computed programmatically inside `verify-turn16.ts` from the
+oracle's own PNG captures, not eyeballed.
+
+**PAPERCUT**: none — the existing `dump-task-and-sprite-callbacks.py` and
+`arm-none-eabi-nm` (already on PATH) covered this session's RAM needs with
+zero new tooling required. The one real gap found (sprite-level `inUse`
+bit not exposed by the existing dumper, needed to attribute the
+FIRE_PUNCH fire-spiral/spread sprites to specific slots) is flagged above
+as an open item, not a papercut — a deliberate scope boundary given the
+35-minute cap, not friction.
