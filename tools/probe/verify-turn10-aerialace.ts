@@ -22,6 +22,7 @@ import { readFileSync } from "node:fs";
 import { PNG } from "pngjs";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
 import opponentFrontSpritesAsset from "../../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import battleBgAsset from "../../src/assets/gen/battle-bg.json" with { type: "json" };
 
 const TRACE_PATH = "tools/compare/traces-groundtruth/battle1-turn10-dense.json";
 const trace = JSON.parse(readFileSync(TRACE_PATH, "utf8")) as Trace;
@@ -34,8 +35,10 @@ function range(a: number, b: number): number[] {
 
 // The whole AERIAL_ACE animation window, per docs/aerial-ace-notes.md's own
 // fresh full-frame diff pass (flat through 12360, dense 12361-12384, flat
-// again from 12385).
-const WINDOW = range(12355, 12389);
+// again from 12385). Plus Mission B's own flicker window (12404-12437,
+// worktree PROBE follow-up) — a separate, later span past the main
+// animation's own settle.
+const WINDOW = [...range(12355, 12389), ...range(12404, 12437)];
 trace.captureFrames = WINDOW;
 
 function diffCount(png: Buffer, basePng: Buffer, box?: { x0: number; y0: number; x1: number; y1: number }): number {
@@ -209,6 +212,112 @@ async function main() {
     !closeToRealPlain,
     `oracle=(${sample.r},${sample.g},${sample.b}), real-plain-idx5=(${REAL_PLAIN_COLOR_IDX5.r},${REAL_PLAIN_COLOR_IDX5.g},${REAL_PLAIN_COLOR_IDX5.b})`,
   );
+
+  // --- 2026-07-21 Mission A2 (worktree PROBE follow-up): the winner/blend
+  // rule is now SOLVED for the plain (non-darken) overlap window, RAM-pinned
+  // by reading the ACTUAL final OAM buffer (`gMain.oamBuffer`, tools/probe/
+  // dump-aerialace-oam.py — NOT gSprites[]): slot 7 (the clone at offset
+  // (24,6)) sits at final OAM index 10, the real sprite (slot 5) at 11 (or
+  // 12, depending on tick) — STABLE across the ENTIRE overlap window
+  // (12367-12373), never flips. Lower OAM index wins ties on real hardware
+  // (GBATEK: same-priority sprites, lower OAM number displayed on top), so
+  // the clone wins wherever ITS texel is opaque; the real sprite, having
+  // lost the OBJ-layer contest outright, contributes NOTHING (GBA/mGBA's
+  // OBJ layer outputs exactly one color per pixel — a losing same-layer
+  // sprite can never be blend target 2) — target2 is the static FIELD pixel
+  // underneath. predicted = floor((winnerTexel_8bit*eva + target2_8bit*evb)
+  // / 16), eva=12/evb=8 (BLDALPHA=0x080c, RAM-confirmed), saturating at 255
+  // — the same 8-bit-domain formula docs/battle-scene-notes.md's own
+  // PROGRESS #68 pinned for BG alpha blend. Verified EXACT (0 tolerance) at
+  // 6 sample pixels across renders 12371-12373 (see docs/aerial-ace-notes.md
+  // for the full derivation and the darken-plateau's own remaining gap).
+  const PIDGEOTTO_FIELD_CORNER = { x: 144, y: 19 }; // slot 5's offset (0,0) corner throughout this window
+  const CLONE7_OFFSET = { x: 24, y: 6 };
+  const EVA = 12, EVB = 8;
+  function blend8bit(top: { r: number; g: number; b: number }, bottom: { r: number; g: number; b: number }, eva: number, evb: number) {
+    const b = (t: number, btm: number) => Math.min(255, Math.floor((t * eva + btm * evb) / 16));
+    return { r: b(top.r, bottom.r), g: b(top.g, bottom.g), b: b(top.b, bottom.b) };
+  }
+  const bgAsset = battleBgAsset as any;
+  function staticFieldPixel(x: number, y: number): { r: number; g: number; b: number } {
+    const tilemap = bgAsset.static.tilemap;
+    const inTileY = ((y % 8) + 8) % 8;
+    const blockWidth = tilemap.width * 8;
+    const period = blockWidth * 2;
+    const wrappedX = ((x % period) + period) % period;
+    const block = wrappedX >= blockWidth ? 1 : 0;
+    const localX = wrappedX % blockWidth;
+    const tileRow = Math.floor(y / 8) + block * 32;
+    const tileCol = Math.floor(localX / 8);
+    const inTileX = localX % 8;
+    const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+    const tile = bgAsset.static.tileset.tiles[entry.tile];
+    const sx = entry.hFlip ? 7 - inTileX : inTileX;
+    const sy = entry.vFlip ? 7 - inTileY : inTileY;
+    const idx = tile[sy * 8 + sx];
+    return bgAsset.palette[entry.palette][idx];
+  }
+  const SOLVED_RULE_SAMPLES: readonly [number, number][] = [
+    [181, 41], [182, 41], [180, 42], [183, 44], [186, 44], [187, 44],
+  ];
+  for (const tick of [12371, 12372, 12373]) {
+    const img = PNG.sync.read(get(tick).png);
+    let allExact = true;
+    const details: string[] = [];
+    for (const [x, y] of SOLVED_RULE_SAMPLES) {
+      const cloneLocal = { x: x - PIDGEOTTO_FIELD_CORNER.x - CLONE7_OFFSET.x, y: y - PIDGEOTTO_FIELD_CORNER.y - CLONE7_OFFSET.y };
+      const cloneIdx = texelAt(cloneLocal.x, cloneLocal.y);
+      if (!cloneIdx) continue; // clone transparent here — not a blend case, real wins outright, not this rule's claim
+      const winnerTexel = pidgeotto.palette[cloneIdx]!;
+      const target2 = staticFieldPixel(x, y);
+      const predicted = blend8bit(winnerTexel, target2, EVA, EVB);
+      const o2 = (y * 240 + x) * 4;
+      const oracleRgb = { r: img.data[o2]!, g: img.data[o2 + 1]!, b: img.data[o2 + 2]! };
+      const exact = predicted.r === oracleRgb.r && predicted.g === oracleRgb.g && predicted.b === oracleRgb.b;
+      if (!exact) allExact = false;
+      details.push(`(${x},${y}) predicted=(${predicted.r},${predicted.g},${predicted.b}) oracle=(${oracleRgb.r},${oracleRgb.g},${oracleRgb.b}) ${exact ? "OK" : "MISMATCH"}`);
+    }
+    check(
+      `render ${tick}: solved winner-is-clone blend rule predicts every sample pixel EXACTLY (clone OAM idx 10 < real's 11/12, target2=field, floor((texel*12+field*8)/16))`,
+      allExact,
+      details.join("; "),
+    );
+  }
+  // --- 2026-07-21 Mission B (worktree PROBE follow-up): the 12371-12437
+  // flicker window. RAM-probed (tools/probe/dump-aerialace-anim.py, RAM
+  // 12371-12437, reused verbatim): Onix's real sprite (slot 6, battler 0 —
+  // this run's OWN player mon, taking the hit) toggles `invisible` in 4
+  // blocks of 4-invisible/4-visible (period 8), RAM 12407-12434, delay 102
+  // from press (12305) — the EXACT SAME shape (RENDER_LAG=1, PERIOD=8,
+  // ON_TICKS=4, TOTAL_TICKS=32) as the already-wired `turn9Ep2OnixInvisible`
+  // (battleScene.ts:7858-7867) — a REUSE verdict, not a new mechanism: only
+  // the anchor delay (102 vs turn 9's 87) differs, both hang off their own
+  // turn's pressTick. This is NOT mechanism 2's shake (`invisible` stays
+  // wide-true 12357-12385 there, per the doc's own prior section) — this is
+  // a later, separate, genuinely-toggling flicker, confirmed pixel-side
+  // below with its own local baseline (12404, well after mechanism 2's own
+  // window closes at 12386).
+  const FLICKER_ONIX_BOX = { x0: 44, y0: 49, x1: 99, y1: 111 };
+  const flickerBase = get(12404).png;
+  const flickerDiff = (t: number) => diffCount(get(t).png, flickerBase, FLICKER_ONIX_BOX);
+  for (const t of [12405, 12406, 12407]) {
+    check(`Onix box flat vs the 12404 baseline at render ${t} (pre-flicker)`, flickerDiff(t) === 0, `got ${flickerDiff(t)}`);
+  }
+  for (const t of [12408, 12409, 12410, 12411]) {
+    check(`Onix box differs at render ${t} — flicker block 1 ON (RAM 12407-12410, +1 render lag)`, flickerDiff(t) > 0, `got ${flickerDiff(t)}`);
+  }
+  for (const t of [12412, 12413, 12414, 12415]) {
+    check(`Onix box flat again at render ${t} — flicker block 1 OFF gap`, flickerDiff(t) === 0, `got ${flickerDiff(t)}`);
+  }
+  for (const t of [12416, 12417, 12418, 12419]) {
+    check(`Onix box differs at render ${t} — flicker block 2 ON`, flickerDiff(t) > 0, `got ${flickerDiff(t)}`);
+  }
+  for (const t of [12432, 12433, 12434, 12435]) {
+    check(`Onix box differs at render ${t} — flicker block 4 ON (RAM 12431-12434, +1 render lag; the 4th block a naive 5-tick-short probe would miss, same lesson as turn9Ep2OnixInvisible's own history)`, flickerDiff(t) > 0, `got ${flickerDiff(t)}`);
+  }
+  for (const t of [12436, 12437]) {
+    check(`Onix box flat again at render ${t} — flicker fully done after 4 blocks (TOTAL_TICKS=32, RAM 12435 already back to visible)`, flickerDiff(t) === 0, `got ${flickerDiff(t)}`);
+  }
 
   console.log(`\n${WINDOW.length} ticks captured, ${failures === 0 ? "ALL CHECKS PASSED" : `${failures} CHECK(S) FAILED`}`);
   process.exit(failures === 0 ? 0 : 1);

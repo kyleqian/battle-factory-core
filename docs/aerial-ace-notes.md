@@ -711,3 +711,208 @@ prior + 2 new), run twice back to back, identical results. `npm test` and
 committed tooling: `tools/compare/scratch/aerialace-overlap-diag.ts` (the
 per-pixel diff-and-classify instrument Mission A's step 1 used, reusable
 for the next session's own bisection once the winner rule is known).
+
+## 2026-07-21 PROBE follow-up: Mission A2 SOLVES the plain-overlap rule (0-tolerance pixel-exact) + a named darken residual; Mission B SOLVES the flicker (RAM+pixel corroborated, reuse verdict)
+
+Worktree PROBE follow-up, stacked on the prior probe's branch. Both
+missions reached a decisive, cited result within the 35-minute cap; A2's
+own darken-plateau refinement is the one honest open gap, named below
+rather than curve-fit.
+
+### Mission A2: the OAM-index winner, RAM-read directly (not `gSprites[]`)
+
+New tool `tools/probe/dump-aerialace-oam.py` reads `gMain.oamBuffer[128]`
+(`include/main.h:34`, IWRAM base `gMain=0x030022c0` per `bin/oracle symbols
+gMain` - **not** EWRAM, despite `gSprites` living there) directly - the
+exact buffer `sprite.c:643`'s `CpuCopy32(gMain.oamBuffer, (void*)OAM,
+sizeof(gMain.oamBuffer))` DMAs to real hardware OAM every vblank, so
+reading it from IWRAM is equivalent to reading `0x07000000` and sidesteps
+any DMA-timing ambiguity about which frame's copy is currently live there.
+Cross-referenced `sprite.c`'s own `SortSprites`/`AddSpritesToOamBuffer`:
+`sSpriteOrder` is walked in ascending-combined-priority order and assigned
+**strictly increasing** OAM indices, so an entry's ARRAY POSITION in
+`gMain.oamBuffer` directly IS its final hardware OAM index - no need to
+separately re-derive `subpriority`/`sSpriteOrder` history, matching by
+`(y,x,tileNum,objMode,paletteNum)` against `gSprites[5]`/`gSprites[7]`'s
+own embedded `oam` struct settles it by direct observation.
+
+**Result, RAM ticks 12367-12373 (the whole overlap window), matched by
+attribute against every `oamBuffer` entry**: slot 7 (the clone at offset
+`(24,6)`) sits at final OAM index **10** for its ENTIRE active lifetime in
+this window; the real sprite (slot 5) sits at index **11** (12369-12372) or
+**12** (12367, briefly outranked by the OLD slot-4 clone too) or **10**
+(12373, after slot 7 dies). **The clone's index is NEVER higher than the
+real sprite's, at any sampled tick - stable, does not flip.** Per GBATEK
+("same-priority sprites: lower OAM number displayed on top"), **the clone
+wins the tie throughout the whole window**, not the real sprite - the
+"real always wins" rule this doc's own prior section falsified is replaced
+by "the clone (lower final OAM index) wins."
+
+A THIRD sprite was found in the same RAM probe, not previously accounted
+for: slot 4 (the OTHER `AnimTask_TraceMonBlended` clone) is destroyed at
+RAM 12368-12369, then **recreated at RAM 12370 landing at the exact same
+offset as the real sprite, `(0,0)`** - i.e. pixel-for-pixel co-located with
+slot 5 for the rest of the window. Its own OAM index (12 at 12371-12372,
+11 at 12373) is always numerically BELOW slot 5's precedence (i.e. slot 5
+beats it, or ties it, at their shared footprint) - since slot 4 is
+opaque-identical to slot 5's own silhouette, it can **never** win a single
+visible pixel regardless of exact ordering (whichever of {slot4,slot5}
+"wins" produces indistinguishable output at every pixel they both cover,
+since they're the same source tile). Confirmed a genuine third sprite, not
+a red herring worth modeling separately - it is a structural no-op.
+
+### Mission A2: the blend, solved pixel-exact (0 tolerance) for the plain (non-darken) window
+
+With the winner pinned (clone, slot 7), solved target2 empirically against
+6 sample pixels across renders 12371-12373 (`tools/compare/scratch/
+aerialace-blend-solve.ts`). The FIRST attempt (target2 = an oracle pixel
+sampled from a pre-move "baseline" tick, 12355) systematically failed -
+root cause: Pidgeotto's own SETTLED position is `(144,19)`, the SAME corner
+its idle/pre-move sprite already occupies, so every candidate "clean"
+oracle frame in this trace is already contaminated by the real sprite's
+own texel at exactly these pixels - there is no oracle frame in this
+window where these specific pixels are BG-only. Fix: computed target2
+directly from the static-field asset (`battle-bg.json`), re-deriving
+`staticBgPixel`'s own formula (`battleScene.ts:1205`) read-only in the
+scratch script (not imported - not exported, and this lane doesn't touch
+`src/`), confirming first that `shiftY`/`fadeY` are both 0 by turn 10
+(`rockSlideBg3Y`/`turn5BgFadeY` both hang off turn 5's own press tick and
+have long since fallen outside their tables' active ranges, returning
+their `0` defaults) - so the formula reduces to a direct tilemap lookup at
+`(screenX, screenY)`.
+
+**predicted = `Math.min(255, Math.floor((winnerTexel_8bit*eva +
+target2_8bit*evb) / 16))`, target2 = the static-field pixel (undarkened),
+`eva=12, evb=8`** (`BLDALPHA=0x080c`, RAM-confirmed, matches `docs/battle-
+scene-notes.md`'s own PROGRESS #68 8-bit-domain formula) - **exact (0
+tolerance) at all 6 sample pixels, at renders 12371, 12372, AND 12373**
+(18/18 pixel-tick pairs, `tools/probe/verify-turn10-aerialace.ts`'s own new
+checks below). The real sprite (and the co-located, structurally-hidden
+slot 4) contribute **nothing** to the blend - consistent with GBA/mGBA's
+OBJ layer outputting exactly one color per pixel (a losing same-layer
+sprite is never a valid blend target 2; target2 can only be a genuinely
+lower layer - here, the field).
+
+**Fix shape for the engine step**: at true real+clone overlap pixels
+(where BOTH texels are opaque), the CLONE wins outright (draw it LAST, on
+top, wherever its own texel is opaque) and its blend must be computed
+against the FIELD-ONLY color at that pixel (i.e. compute/composite the
+clone's blended output BEFORE drawing the real sprite - not "over fb" once
+the real sprite is already painted there, and not using the real sprite's
+own color as target2). The real sprite draws PLAIN/opaque everywhere the
+clone's own texel is transparent. This is the literal opposite of rung
+(a)'s own QUICK_ATTACK-style fix ("real always wins, drawn last") - the
+two windows are NOT the same rule; whichever mechanism reintroduces this
+render code must special-case AERIAL_ACE's own clone-wins order rather
+than copy QUICK_ATTACK's.
+
+### Mission A2: the darken-plateau residual (12368-12370) - NOT closed, an honest gap
+
+Applying the SAME rule (clone wins, blend against field) with BOTH
+inputs' obvious darkened analogues (`BlendPalette` toward black at the
+already-pinned coefficient 10, both the clone's own texel AND the field
+target2) does **not** reach 0 tolerance - predicted is systematically a
+few units low across R/G/B at every sampled darken-window pixel (e.g.
+`(181,41)`: predicted `(106,59,54)` vs oracle `(100,57,51)`, off by
+`(6,2,3)`). A brute-force integer sweep of independent darken coefficients
+for the texel vs. the field target2 (0-16 each, `/tmp/darken-brute.mjs`,
+not committed - ad hoc, superseded by this paragraph) found NO integer
+coefficient pair reaching 0 total error across 3 sample pixels (best:
+texel-coeff 10/field-coeff 11, total error 25 across 3 pixels' RGB, still
+off by 2-5 per channel) - the two-independent-flat-coefficients model
+itself is likely wrong for this window, not just mis-tuned. Time-boxed
+(Mission A2's own ~20-minute budget, already exceeded solving the winner +
+plain-window blend) rather than curve-fit further. **Named as the one
+remaining gap**: the darken window likely needs its OWN RAM-read (the
+actual post-darken OBJ palette bytes at `OBJ_PLTT + paletteNum*32 +
+2*idx`, not an assumed `BlendPalette(plain, BLACK, 10)` re-derivation) to
+close - not attempted this session, the asset-only/formula-only approach
+that closed the plain window doesn't extend cleanly here.
+
+### Mission B: the 12371-12437 flicker - SOLVED (RAM-pinned, pixel-corroborated, reuse verdict)
+
+RAM-probed (`tools/probe/dump-aerialace-anim.py`, RAM 12371-12437, reused
+verbatim). Checked the named family FIRST per the brief: this is genuinely
+**Onix's own post-hit flicker** (slot 6, `invisible` flag toggling) - NOT
+mechanism 2's shake (that's `y2` wiggling while `invisible` stays
+wide-true the whole time, a already-documented and unrelated span that
+ends by RAM 12386, well before this flicker starts).
+
+**Table** (RAM ticks, `gSprites[6].invisible`):
+- Pre-flicker: `invisible=false` from RAM 12386 (mechanism 2's own end)
+  through RAM 12406.
+- 4 blocks of 4-invisible/4-visible, period 8, starting RAM **12407**:
+  `[12407-12410]`, `[12415-12418]`, `[12423-12426]`, `[12431-12434]`
+  invisible; visible in the 4-tick gaps between and after.
+- Fully done (visible) from RAM 12435 onward, through the window's own end
+  (12437).
+
+This is **structurally identical** to the ALREADY-WIRED `turn9Ep2OnixInvisible`
+(`battleScene.ts:7858-7867`: `RENDER_LAG=1, PERIOD=8, ON_TICKS=4,
+TOTAL_TICKS=32`, `n%PERIOD<ON_TICKS` gated by `0<=n<TOTAL_TICKS`) - the
+ONLY difference is the anchor delay (turn 9's own `START=87` vs. this
+window's own `102`, i.e. RAM tick `pressTick+102` vs. `pressTick(10871)
++87`, both turns' own press ticks). This is the SAME hit-flash flicker
+task, re-triggered for turn 10's own hit, not a new mechanism - confirms
+the brief's own "check the known family first" instinct, and directly
+resolves prior probes' warning about a naive short probe missing the 4th
+block (this session's own probe intentionally covered the full 12371-12437
+span up front, catching all 4 blocks including the 4th).
+
+**Render lag**: ordinary **+1** (pixel-bisected: RAM-invisible block 1 is
+`12407-12410`, first pixel-visible diff in Onix's own box is render
+`12408`, back to flat at render `12412` - exactly RAM+1 at both edges,
+confirmed identically at blocks 2 and 4 too). Same lag class as mechanism
+2's own shake, NOT mechanisms 1/3's +2.
+
+**Reuse-vs-new verdict**: REUSE. `turn9Ep2OnixInvisible`'s own shape
+(period 8, on 4, total 32, lag +1) reproduces this window exactly once its
+hardcoded `START` constant is parameterized per-turn (it's currently a
+turn-9-specific literal, not a function argument) - the underlying game
+mechanism is almost certainly the identical pokeemerald hit-flash task,
+just re-anchored to turn 10's own press tick. No new render logic needed,
+only a generalized delay constant when this gets wired.
+
+**Not checked this session** (named gap, not a guess): the brief's own
+"player-healthbox wobble" companion (ENDEAVOR §15f's own precedent) was
+not independently probed in this window - time-boxed after the flicker's
+own table converged cleanly. Whoever wires rung (c) should RAM-check
+`gTasks[]`/`gSprites[].data[]` for a healthbox `y2` wobble concurrent with
+this flicker before assuming there isn't one.
+
+### Verification (this update)
+
+`tools/probe/verify-turn10-aerialace.ts` extended with 3 new pixel-exact
+blend checks (Mission A2, renders 12371-12373, 6 sample pixels each) and
+14 new pixel-onset/offset checks (Mission B, the flicker's own 4-block
+window plus its own local baseline) - **34/34 PASS** (22 prior + 12 new,
+one count fixed mid-session: an initial off-by-one at the 4th block's own
+render-lag boundary, render 12435 still ON not OFF, caught by the FIRST
+run and corrected before the "twice, identical" pass below), run twice
+back to back, identical results. `npm test` and `npm run build` unchanged-
+green (no `src/` changes this session - worktree PROBE lane). New
+committed tooling: `tools/probe/dump-aerialace-oam.py` (the `gMain.
+oamBuffer` RAM reader Mission A2's step 1 used), `tools/compare/scratch/
+aerialace-blend-solve.ts` (the blend-formula solver Mission A2's steps 2-3
+used, reusable for whoever picks up the darken-window gap),
+`tools/compare/scratch/aerialace-flicker-lag.ts` (Mission B's own render-
+lag bisector).
+
+### Updated gap accounting for rungs (b)/(c)/(d)
+
+- **Rung (b)**: the plain-overlap rule (renders 12370-12373 outside the
+  darken plateau) is now SOLVED pixel-exact - "clone wins outright at true
+  overlap, blends against the field, real sprite shows only where the
+  clone's own texel is transparent." The darken-plateau's own residual
+  (12368-12370) is the ONE remaining named gap - likely needs the OBJ
+  palette's own actual post-darken RAM bytes rather than a re-derived
+  `BlendPalette` formula (see Mission A2's own section above). Still not
+  0-diff; `turn10-aerialace.json`'s capture window is unchanged (through
+  12367) pending that close.
+- **Rung (c)** (the 12371-12437 flicker): SOLVED - Onix's own post-hit
+  flicker, a REUSE of `turn9Ep2OnixInvisible`'s own shape with a
+  generalized delay constant, RAM+pixel corroborated end to end. The
+  player-healthbox-wobble sub-question is unchecked (named above, not
+  assumed absent).
+- **Rung (d)** (turn 12's +2068 mirror): blocked transitively on (b)'s
+  darken-window close, unchanged otherwise.
