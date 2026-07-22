@@ -1,4 +1,42 @@
 ---
+## 254 — Bounded worker (turn-14 wiring step, ISSUES #34 close-out): wired the probe-confirmed menu-redraw blank hold + bounce-regime RESET — `turn14-fly-miss.json` **165/165, 0 diff** (was 150/150; all 15 predicted ticks restored, exact first try); cheap conditional check on the FIGHT-submenu reopen family (17722-17768) came back 0/43 pass — trimmed ISSUES #34 to that honest remainder, not deleted
+
+- **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run
+  build` green, tree clean. `verify-turn14-bounce.ts` **24/24 PASS**
+  (mandatory-first-step rerun, oracle-only, unaffected by `src/`).
+  Regression sweep 0 diff: `turn13-switchin` 240/240, `turn13-menu` 57/57,
+  `turn12-menu` 46/46, `turn13-dragonbreath-faint` 141/141.
+- **Did:** Wired `docs/turn13-bounce-notes.md` §10d exactly: new
+  `TURN14_MENU_TEXT_CLEAR_TICK=18080` + `TURN14_MENU_REDRAW_RESET_SHIFT =
+  TURN5_SITRUS_MENU_REDRAW_TICK - TURN14_MENU_REDRAW_TICK`, swapped into
+  `drawTurn14FlyMissWindow`'s settled branch (was borrowing
+  `TURN13_SWITCHIN_RESET_SHIFT`, which the probe proved wrong — 871/871 RAM
+  mismatches vs. 0/871 for the fresh-reset model) plus a new blank-hold
+  branch above it. `drawTurn14FightSubmenuWindow`'s own pre-reveal call
+  sites left untouched, per the brief. Restored the 15 predicted ticks
+  (18080-18090/18095/18415/18815/18956) to `turn14-fly-miss.json`:
+  150→165/165, 0 diff, no gap this time between the RAM/sha probe and real
+  pixel compare (unlike 3 of the 4 prior sessions in this chain). Cheap
+  conditional check (brief step 5, scratch trace only): restored all 43
+  still-untested ticks of 17722-17768 and ran `npm run compare` — **0/43
+  pass** (6px smallest diff, up to 2331px), refuting the "may already be
+  right" theory; nothing restored, scratch file discarded, real trace
+  untouched for that span. ISSUES #34 rewritten from "found, uncharacterized"
+  to its honest remainder: 17722-17768 (43 ticks, needs its own RAM probe of
+  the actual — earlier, unprobed — reopen-reveal instant), 17781-17787 (7
+  ticks, same probable class), 17822-17845 (24 ticks, kerning-class, already
+  flagged separately) — not deleted, since real excluded ticks remain.
+- **Next:** ISSUES #34's own remainder (17722-17768's reopen-reveal probe,
+  same two-independent-methods bar); #33's tiny 2-tick remainder
+  (17019/17034); ISSUES #32; turn 15+ wiring.
+- **Notes:** Full writeup `docs/turn13-bounce-notes.md` §11 (owned this
+  round). No Tier-1 pin forced — no existing precedent for unit-testing
+  these per-turn window-selector closures in isolation, same call every
+  prior session in this chain made. No PAPERCUTS beyond the standing
+  mgba-venv-teardown one.
+
+---
+---
 ## 253 — Bounded worker (turn-13 wiring step, ISSUES #33a close-out): wired the probe-confirmed closed-window frame-selection fix — `turn13-switchin.json` **240/240, 0 diff** (was 191/191; 49 of 51 excluded ticks restored); the exact 2 ticks the probe flagged in advance (17019, 17034) survive as a new, much smaller, separate residual — trimmed ISSUES #33 to just that, not deleted
 
 - **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run

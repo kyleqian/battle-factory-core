@@ -4,6 +4,70 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 257 — Bounded worker (rider fix + turn-15 wiring iii-partial): wired the banked `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` fix (closing ISSUES #35 in full and ISSUES #34's entire 43-tick family, not just its 9-tick subset) — `turn15-fly-strike.json` **218/218** (extended 19141→19308 with HP-drain + "not very effective" text), `turn14-fly-miss.json` **185/185**
+
+- **State:** `npm test` **993/993**, `npm run build` green, tree clean.
+  `verify-submenu-bounce.ts` re-run first (mandatory step): 22/22 PASS.
+  Regression sweep 0 diff: `turn13-switchin` 240/240, `turn13-menu` 57/57.
+- **Did (rider, GOAL B):** Wired `docs/turn13-bounce-notes.md` §12e's fix
+  shape (4 call sites: `drawTurn14/15FightSubmenuWindow`'s post-reveal arms
+  + `turn14/15KickoffBounceTick`'s pre-freeze arms, all missing the
+  `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` correction). That alone didn't reach
+  0 diff — two more findings, both oracle-verified, both documented in
+  `docs/turn13-bounce-notes.md` §13: (1) `drawTurn14FightSubmenuWindow`'s
+  own pre-reveal branch ALSO needs the shift once a real FIGHT-open press
+  has registered (§12e's "pre-reveal untouched" claim was only evidenced
+  against a degenerate 2-tick turn-15 sanity window where it doesn't
+  matter either way); (2) a genuinely separate, adjacent bug — that same
+  function's `drawFightSubmenuChrome` call was missing one `true`
+  (`turn13Resolved`), undercounting DRAGON_BREATH's PP by 1 for the WHOLE
+  FIGHT-submenu-open span (19/20 rendered vs. oracle's 18/20) — found by
+  grepping every `drawFightSubmenuChrome(` call site's own ascending
+  "one more `true` than the previous turn" pattern. Fixing both closed
+  turn 14's own 9 named ticks AND, as a verified bonus (scratch-trace
+  checked before committing), the previously-unexplained 11-tick
+  `17758-17768` remainder ISSUES #34 had ruled out of the shift rule's own
+  scope — its ENTIRE 43-tick family is now closed, not just the subset the
+  brief asked for. `turn15-fly-strike.json` 176→183/183 (7 ticks restored,
+  ISSUES #35 DELETED — its whole family closes under this one rule).
+  `turn14-fly-miss.json` 165→185/185 (20 ticks restored: the 9 named +
+  the 11-tick bonus). ISSUES #34 trimmed to just `17781-17787`/
+  `17822-17845` (kerning-class), untouched per scope.
+- **Did (GOAL A, turn-15 boundary iii, partial):** Dense oracle-pixel
+  bisection (scratch stride-1 capture 19140-19160) wired the HP-drain
+  (plain 1-HP/tick countdown, anchor 19141, reusing the already-validated
+  player-side HP-digit/band overlay machinery verbatim — `onixHp` param
+  added to `drawTurn13SwitchinFieldBase`, default-unchanged for every
+  pre-existing caller) and "It's not very effective..." text
+  (`TURN9_NOTVERYEFFECTIVE_LINE` reused verbatim, start tick bisected to
+  19151, independently cross-checked against `docs/turn15-notes.md` §6a's
+  own "held window starts at 19174" finding: 19151+24-1=19174 exactly).
+  `turn15-fly-strike.json` extended 19141→19308, **218/218, 0 diff** (2
+  new exclusions, 19143/19144, a 2px HP-bar band-edge rounding gap at
+  hp=2/hp=1 — named, not chased, same shared-primitive-risk class as the
+  pre-existing 19059-19061 exclusion).
+- **Next:** ISSUES #36's own remainder — dense-bisect 19308-19330 fresh
+  (don't assume the original dossier's citations for that span, the same
+  "verify don't assume" discipline that already corrected two of this
+  window's own citations), then the player-side faint sink (stat-stage
+  reset + sprite/healthbox teardown, RAM 19325/19326, pixel vanish 19330),
+  then the "ONIX fainted!" button-gated hold through its own dismiss at
+  ~19990. ISSUES #34's own tiny remainder (`17781-17787`/`17822-17845`);
+  #33's tiny remainder (17019/17034); ISSUES #32.
+- **Notes:** Full writeups `docs/turn13-bounce-notes.md` §13 (rider) and
+  `docs/turn15-notes.md` §9 (boundary iii partial). The rider ran over its
+  own "small fix" billing once the literal 4-edit fix didn't reach 0 diff
+  on its own — both extra findings were verified via real oracle pixel
+  diffs (not guessed), and fixing them closed MORE ground truth than
+  asked (ISSUES #34's full family, not just the shift subset), so the
+  extra time bought real, committed progress rather than a stall. GOAL A's
+  faint-sink/fainted-hold phases (the bulk of ISSUES #36's own remaining
+  scope) were not reached this session — ran out of safe budget after the
+  rider's own unplanned depth; the drain/text half that WAS reached is
+  fully verified and committed, not a rushed partial. No PAPERCUTS beyond
+  the standing mgba-venv-teardown one.
+
+---
 ## 256 — Bounded worker (turn-15 wiring step, boundary (ii) of 3): both probes run first, then wired the FLY strike animation core (ball descent + impact sprite + Onix hit-flash/shake/healthbox-wobble) — `turn15-fly-strike.json` **176/176, 0 diff** (was 82/82, extended 19045→19141); ISSUES #36 trimmed to boundary (iii) only
 
 - **State:** `npm test` **993/993**, `npm run build` green, tree clean.
@@ -91,43 +155,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   than rush an asset extraction and risk an unclean stop, this session
   banked one clean, tested, fully green commit and scoped the remainder
   precisely for the next session. No PAPERCUTS beyond the standing
-  mgba-venv-teardown one.
-
----
-## 254 — Bounded worker (turn-14 wiring step, ISSUES #34 close-out): wired the probe-confirmed menu-redraw blank hold + bounce-regime RESET — `turn14-fly-miss.json` **165/165, 0 diff** (was 150/150; all 15 predicted ticks restored, exact first try); cheap conditional check on the FIGHT-submenu reopen family (17722-17768) came back 0/43 pass — trimmed ISSUES #34 to that honest remainder, not deleted
-
-- **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run
-  build` green, tree clean. `verify-turn14-bounce.ts` **24/24 PASS**
-  (mandatory-first-step rerun, oracle-only, unaffected by `src/`).
-  Regression sweep 0 diff: `turn13-switchin` 240/240, `turn13-menu` 57/57,
-  `turn12-menu` 46/46, `turn13-dragonbreath-faint` 141/141.
-- **Did:** Wired `docs/turn13-bounce-notes.md` §10d exactly: new
-  `TURN14_MENU_TEXT_CLEAR_TICK=18080` + `TURN14_MENU_REDRAW_RESET_SHIFT =
-  TURN5_SITRUS_MENU_REDRAW_TICK - TURN14_MENU_REDRAW_TICK`, swapped into
-  `drawTurn14FlyMissWindow`'s settled branch (was borrowing
-  `TURN13_SWITCHIN_RESET_SHIFT`, which the probe proved wrong — 871/871 RAM
-  mismatches vs. 0/871 for the fresh-reset model) plus a new blank-hold
-  branch above it. `drawTurn14FightSubmenuWindow`'s own pre-reveal call
-  sites left untouched, per the brief. Restored the 15 predicted ticks
-  (18080-18090/18095/18415/18815/18956) to `turn14-fly-miss.json`:
-  150→165/165, 0 diff, no gap this time between the RAM/sha probe and real
-  pixel compare (unlike 3 of the 4 prior sessions in this chain). Cheap
-  conditional check (brief step 5, scratch trace only): restored all 43
-  still-untested ticks of 17722-17768 and ran `npm run compare` — **0/43
-  pass** (6px smallest diff, up to 2331px), refuting the "may already be
-  right" theory; nothing restored, scratch file discarded, real trace
-  untouched for that span. ISSUES #34 rewritten from "found, uncharacterized"
-  to its honest remainder: 17722-17768 (43 ticks, needs its own RAM probe of
-  the actual — earlier, unprobed — reopen-reveal instant), 17781-17787 (7
-  ticks, same probable class), 17822-17845 (24 ticks, kerning-class, already
-  flagged separately) — not deleted, since real excluded ticks remain.
-- **Next:** ISSUES #34's own remainder (17722-17768's reopen-reveal probe,
-  same two-independent-methods bar); #33's tiny 2-tick remainder
-  (17019/17034); ISSUES #32; turn 15+ wiring.
-- **Notes:** Full writeup `docs/turn13-bounce-notes.md` §11 (owned this
-  round). No Tier-1 pin forced — no existing precedent for unit-testing
-  these per-turn window-selector closures in isolation, same call every
-  prior session in this chain made. No PAPERCUTS beyond the standing
   mgba-venv-teardown one.
 
 ---
