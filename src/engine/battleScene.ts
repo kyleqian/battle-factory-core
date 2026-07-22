@@ -1077,6 +1077,17 @@ export interface BattleSceneState {
    * reopen, out of this session's scope.
    */
   turn11Resolved: boolean;
+  /**
+   * S7/S8 (docs/turn13-notes.md): `true` once turn 12's own whole ROCK_SLIDE
+   * (miss) resolution has redrawn the settled action menu
+   * (`TURN12_ROCKSLIDE_MENU_REDRAW_DELAY` past turn 12's own synthetic
+   * `TURN12_ROCKSLIDE_PRESS_TICK`) AND a fresh A-press has reopened FIGHT for
+   * turn 13, cursor persisted at slot 0 (ROCK_SLIDE, unchanged) - a single
+   * `DOWN` press then moves it to slot 2 (DRAGON_BREATH, the 2x2 grid's
+   * row-move case, `moveFightCursor`) before the real confirm. ROCK_SLIDE
+   * reads 0/10 (exhausted) this turn (its 10th slot-0 use).
+   */
+  turn12Resolved: boolean;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -1095,6 +1106,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn9Resolved: false,
   turn10Resolved: false,
   turn11Resolved: false,
+  turn12Resolved: false,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -1114,6 +1126,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn9Resolved: state.turn9Resolved,
     turn10Resolved: state.turn10Resolved,
     turn11Resolved: state.turn11Resolved,
+    turn12Resolved: state.turn12Resolved,
   };
 }
 
@@ -3974,7 +3987,18 @@ function drawFightSubmenuWindow(
   turn9Resolved: boolean = false,
   turn10Resolved: boolean = false,
   turn11Resolved: boolean = false,
+  turn12Resolved: boolean = false,
 ): void {
+  if (turn12Resolved) {
+    // S7/S8 (docs/turn13-notes.md): turn 13 is the winning line's own FIFTH
+    // reconvergence turn - a single `DOWN` press moves the cursor off
+    // ROCK_SLIDE onto DRAGON_BREATH (slot 2, the 2x2 grid's row-move case) -
+    // its own dedicated dispatcher, same "genuinely different PP/text"
+    // reason `turn11Resolved`'s own branch below already established for
+    // turn 12.
+    drawTurn13FightSubmenuWindow(fb, t, sm);
+    return;
+  }
   if (turn11Resolved) {
     // S7/S8 (docs/turn12-notes.md): turn 12 is the winning line's own
     // FOURTH reconvergence turn - zero navigation presses (cursor already
@@ -4221,11 +4245,12 @@ function drawFightSubmenuChrome(
   turn9Resolved: boolean = false,
   turn10Resolved: boolean = false,
   turn11Resolved: boolean = false,
+  turn12Resolved: boolean = false,
 ): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -9135,6 +9160,86 @@ function drawTurn12FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
 }
 
 /**
+ * `TURN12_REGIME7_TO_REGIME1_SHIFT`'s own turn-13 analogue, one redraw
+ * further: solves the same identity for the regime active from turn 12's
+ * own redraw (`TURN12_ROCKSLIDE_PRESS_TICK+TURN12_ROCKSLIDE_MENU_REDRAW_
+ * DELAY`, 14788) onward - turn 13's own FIGHT-submenu browsing/nav/confirm
+ * window is driven by THIS regime.
+ */
+export const TURN13_REGIME8_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (TURN12_ROCKSLIDE_PRESS_TICK + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY);
+
+/**
+ * `drawTurn12FieldBase`'s own turn-13 analogue: converts `bounceTick` from
+ * regime-8 space via `TURN13_REGIME8_TO_REGIME1_SHIFT`, then repaints both
+ * mons' own real turn-13-opening HP (Onix 4, unchanged since turn 12's own
+ * AERIAL_ACE hit; Pidgeotto 16, unchanged - turn 12's own ROCK_SLIDE missed).
+ */
+function drawTurn13FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN13_REGIME8_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+}
+
+/**
+ * `turn12KickoffBounceTick`'s own turn-13 analogue, in regime-8 space
+ * (`drawTurn13FieldBase`'s own domain) - freezes at the regime-8 anchor tick
+ * itself (`TURN12_ROCKSLIDE_PRESS_TICK+TURN12_ROCKSLIDE_MENU_REDRAW_DELAY`,
+ * local phase 0 by construction) - the SAME universal frozen mid-resolution
+ * bounce phase every prior turn's own equivalent freeze already reduces to.
+ * Used for the confirm-press transient (docs/turn13-notes.md §4's own
+ * "submenu STILL fully shown" row, sha `7922d883bcb6` steady from 15421) -
+ * unlike prior turns, this freeze ALSO covers the DOWN-nav's own destination
+ * cursor draw (the submenu's box-bounce cycle is independent of the cursor,
+ * §4's own "6 idle-bounce phases" correction), so nothing extra is needed for
+ * that.
+ */
+function turn13KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  return TURN12_ROCKSLIDE_PRESS_TICK + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY;
+}
+
+/**
+ * S7/S8 (docs/turn13-notes.md): turn 13's own FIGHT submenu - cursor rests
+ * on ROCK_SLIDE (slot 0, persisted from turn 12's own confirm) with PP read
+ * 0/10 (`turn11Resolved` passed as the moveset's 10th independent slot-0
+ * decrement) - a single `DOWN` press then moves the cursor to slot 2
+ * (DRAGON_BREATH, `moveFightCursor`'s own 2x2-grid row-move, no new code -
+ * docs/turn13-notes.md §3's "ROOT-CAUSED AT THE FOLD" finding), confirmed
+ * from there. Structurally identical to `drawTurn12FightSubmenuWindow` -
+ * reuses `drawTurn12TurnEndSettledMenu` for the pre-open/DMA-wait/browsing
+ * phases. Rung 1 scope only: stops at the confirm-press transient (frozen
+ * bounce, `turn13KickoffBounceTick`) - SAND_ATTACK's own kickoff dispatch is
+ * added by a later rung, same "caller/trace never captures past the
+ * oracle-confirmed safe boundary" convention `drawTurn3EndeavorText`'s own
+ * doc already established.
+ */
+function drawTurn13FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+  if (sm.openElapsed === null) {
+    drawTurn12TurnEndSettledMenu(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    // Oracle-pixel-confirmed this session (turn13-menu.json bisection): this
+    // specific DMA-wait window needs an UNSHIFTED raw `t` here, not the
+    // usual `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` every other turn's analogous
+    // branch uses - the underlying `menuIdleBounce` table's own plateau
+    // boundary for THIS regime (anchored off `TURN12_ROCKSLIDE_PRESS_TICK+
+    // TURN12_ROCKSLIDE_MENU_REDRAW_DELAY`) lands 2 ticks earlier than the
+    // shifted formula predicts - not assumed transferable from turn 12's own
+    // instance, which uses a different regime anchor and DOES need the -2
+    // shift; a real per-turn residue difference, not a bug in the shared
+    // constant.
+    drawTurn12TurnEndSettledMenu(fb, t);
+    return;
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn13KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  drawTurn13FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true);
+}
+
+/**
  * S7 slice K's own ROCK_SLIDE/faint window dispatcher - the held kickoff
  * text (still Onix's "ONIX used\nROCK SLIDE!", drawn by `drawTurn5EndeavorText`'s
  * own handoff caller, `rockSlideTextVisibleChars` unchanged) through the
@@ -9664,6 +9769,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn9Resolved,
       state.turn10Resolved,
       state.turn11Resolved,
+      state.turn12Resolved,
     );
     return;
   }

@@ -132,7 +132,7 @@ import {
 /** Same rig as tests/battleScene.test.ts's `pixelAtSentOut` - send-out A-press already registered at trace tick 1420 (sendOutPressElapsed=380), the fixed script every committed trace in this window shares. */
 function pixelAtSentOut(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
-  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false });
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false });
   const o = (y * 240 + x) * 4;
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
@@ -184,16 +184,16 @@ describe("battleMenu: rendered pixels (oracle-pinned, tools/compare/traces/menu-
   it("renders byte-identical frames across the silent space tick (1565 -> 1566)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1565 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1566 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 
   it("renders byte-identical frames once static (1571 -> 1572)", () => {
     const fb1 = new Uint8Array(240 * 160 * 4);
     const fb2 = new Uint8Array(240 * 160 * 4);
-    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false });
-    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false });
+    renderBattleScene(fb1, { elapsed: 1571 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false });
+    renderBattleScene(fb2, { elapsed: 1572 - TICK0, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false });
     expect(fb2).toEqual(fb1);
   });
 });
@@ -796,6 +796,18 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
     expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, true, true)).toEqual([1, 19, 19, 10]);
     // Sanity: turn10Resolved alone (pre-turn-12) still reads ROCK_SLIDE at 2/10.
     expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, true, false)[0]).toBe(2);
+  });
+
+  it("S7/S8: currentPPForActiveMon reads ROCK_SLIDE 0/10 (exhausted) once turn12Resolved (turn 12's own confirmed ROCK_SLIDE miss is a 10th slot-0 use) - matches turn13-notes.md §3's own 'ROCK_SLIDE 0/10 (exhausted, confirmed)' entering-turn-13 ledger; BIND (slot 1, 19/20) and DRAGON_BREATH (slot 2, 19/20) stay at their own already-used PP, independent of this new slot-0 decrement", () => {
+    const moveset = { moveIds: [157, 20, 225, 201], maxPP: [10, 20, 20, 10] } as const;
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, true, true, true)).toEqual([0, 19, 19, 10]);
+    // Sanity: turn11Resolved alone (pre-turn-13) still reads ROCK_SLIDE at 1/10.
+    expect(currentPPForActiveMon(moveset, true, true, true, true, true, true, true, true, true, true, true, false)[0]).toBe(1);
+  });
+
+  it("S7/S8 (docs/turn13-notes.md §3): moveFightCursor's own 2x2-grid DOWN press moves ROCK_SLIDE (0, top-left) onto DRAGON_BREATH (2, bottom-left) - the double-decrement the dossier root-caused as a plain row move, no new nav code needed", () => {
+    expect(moveFightCursor(0, "DOWN")).toBe(2);
+    expect(moveFightCursor(2, "UP")).toBe(0);
   });
 
   it("S7 slice R rung (a): TURN9_QUICKATTACK_PRESS_TICK+TURN9_MENU_REDRAW_DELAY is the turn-9-to-10 bounce-reset anchor (574, NOT the same tick as the visual settle turn9-notes.md §5 cites, 579 - fresh-oracle-bisected against turn10-menu.json, see the constant's own doc)", () => {
