@@ -283,6 +283,64 @@ async function main() {
       details.join("; "),
     );
   }
+  // --- 2026-07-21 Mission A (worktree PROBE follow-up #2, docs/aerial-ace-
+  // notes.md's "darken-plateau residual, NOT closed" section): the darken
+  // window (render 12368-12370) closes with the SAME winner/blend rule as
+  // the plain window above, once the darken step itself is corrected. The
+  // prior session's `BlendPalette(plain, BLACK, 10)` re-derivation was off
+  // by a few units/channel because it darkened the already-8-bit-EXPANDED
+  // asset color; a fresh RAM read of the actual post-darken bytes
+  // (tools/probe/dump-aerialace-darken-palette.py, gPlttBufferFaded for
+  // Pidgeotto's OBJ bank 1 + BG hardware bank 2) proved the real hardware
+  // darkens in the native 5-BIT BGR555 domain, THEN expands to 8-bit — a
+  // distinct bit-domain bug, not a coefficient-fit problem (coefficient 10
+  // was already correct). Since every asset color here is an exact 5-bit
+  // expansion, `>>3` recovers the source 5-bit value losslessly, so this
+  // closes with a FORMULA-ONLY fix (no RAM table needed at engine time):
+  // darken5(c,coeff) = expand(to5bit(c) + ((0-to5bit(c))*coeff)>>4).
+  // Verified exact (0 tolerance) against BOTH the RAM-read bytes directly
+  // AND this formula-only reproduction, 6 sample pixels x 3 ticks = 18/18
+  // (tools/compare/scratch/aerialace-darken-solve.ts, this session).
+  function to5bit(v8: number): number {
+    return v8 >> 3;
+  }
+  function from5bit(v5: number): number {
+    return (v5 << 3) | (v5 >> 2);
+  }
+  function darken5(c: { r: number; g: number; b: number }, coeff: number) {
+    const d = (ch: number) => {
+      const v5 = to5bit(ch);
+      return from5bit(v5 + (((0 - v5) * coeff) >> 4));
+    };
+    return { r: d(c.r), g: d(c.g), b: d(c.b) };
+  }
+  const DARKEN_SAMPLES: readonly [number, number][] = [
+    [181, 41], [182, 41], [180, 42], [183, 44], [186, 44], [187, 44],
+  ];
+  for (const tick of [12368, 12369, 12370]) {
+    const img = PNG.sync.read(get(tick).png);
+    let allExact = true;
+    const details: string[] = [];
+    for (const [x, y] of DARKEN_SAMPLES) {
+      const cloneLocal = { x: x - PIDGEOTTO_FIELD_CORNER.x - CLONE7_OFFSET.x, y: y - PIDGEOTTO_FIELD_CORNER.y - CLONE7_OFFSET.y };
+      const cloneIdx = texelAt(cloneLocal.x, cloneLocal.y);
+      if (!cloneIdx) continue;
+      const winnerTexel = darken5(pidgeotto.palette[cloneIdx]!, 10);
+      const plainField = staticFieldPixel(x, y);
+      const target2 = darken5(plainField, 10);
+      const predicted = blend8bit(winnerTexel, target2, EVA, EVB);
+      const o2 = (y * 240 + x) * 4;
+      const oracleRgb = { r: img.data[o2]!, g: img.data[o2 + 1]!, b: img.data[o2 + 2]! };
+      const exact = predicted.r === oracleRgb.r && predicted.g === oracleRgb.g && predicted.b === oracleRgb.b;
+      if (!exact) allExact = false;
+      details.push(`(${x},${y}) predicted=(${predicted.r},${predicted.g},${predicted.b}) oracle=(${oracleRgb.r},${oracleRgb.g},${oracleRgb.b}) ${exact ? "OK" : "MISMATCH"}`);
+    }
+    check(
+      `render ${tick} (darken plateau): solved rule + 5-bit-domain darken predicts every sample pixel EXACTLY, formula-only (clone wins, both texel+field darkened in native 5-bit space then expanded, then blended eva=12/evb=8)`,
+      allExact,
+      details.join("; "),
+    );
+  }
   // --- 2026-07-21 Mission B (worktree PROBE follow-up): the 12371-12437
   // flicker window. RAM-probed (tools/probe/dump-aerialace-anim.py, RAM
   // 12371-12437, reused verbatim): Onix's real sprite (slot 6, battler 0 —

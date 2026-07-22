@@ -566,3 +566,118 @@ still pass** (step 3, extending it, was not reached: the hypothesis was
 refuted, not cracked, per the brief's own "elimination is a success" rule).
 New: `tools/probe/dump-turn9-hitsplat-palette.py` (this session's only new
 artifact). No trace files changed, no `PROGRESS.md`/`ISSUES.md` edits.
+
+## 2026-07-21 PROBE (rule-transfer session): ISSUES #31 SOLVES completely —
+the hitsplat wins its OAM tie unconditionally, the "blend over live fb"
+target2 was the bug, not any coefficient/sampling/palette hypothesis
+
+Worktree PROBE step (no `src/` changes), tasked with transferring
+`docs/aerial-ace-notes.md`'s own newly-solved two-OBJ overlap rule (winner =
+lower final `gMain.oamBuffer` index, blends against the field WITHOUT the
+loser, `eva`/`evb` in the 8-bit domain) to this hitsplat. All three
+previously-refuted hypotheses (coefficient brute-force, floor-vs-round
+sampling, palette-fade tint) stay refuted and were NOT re-attempted, per the
+brief.
+
+### Step 1: RAM-read the actual final OAM order (new `dump-quickattack-
+hitsplat-oam.py`, direct port of `dump-aerialace-oam.py`'s own `gMain.
+oamBuffer` method to turn 9's hitsplat/Onix pair)
+
+Ran against `battle1-turn9-dense.json`, RAM ticks 10933-10944 (the
+hitsplat's own RAM-live span, 10934-10943, plus one pad tick either side).
+**Result: the hitsplat (slot 7) sits at final OAM index 9; Onix's own real
+mon sprite (slot 6) sits at index 10 — for the hitsplat's ENTIRE live span,
+every single tick, never flips.** Per the same GBATEK rule Mission A2 cited
+("same-priority sprites: lower OAM number displayed on top"), **the
+hitsplat wins the tie against Onix unconditionally** — not just at some
+pixels, at every pixel, for the sprite's whole life.
+
+### Step 2 (folded into step 3): the "blend over live fb" bug, root-caused
+
+The committed engine (`drawTurn9Hitsplat`/`drawSpriteSheetAffineStretchBlendedOverFb`,
+`battleScene.ts:7811`) composites the hitsplat over whatever's ALREADY drawn
+in the framebuffer at that pixel — which, wherever Onix's own sprite is
+opaque there too, is Onix's own drawn body color. Per the RAM fact above,
+that's exactly backwards: Onix LOST the OAM tie, so it must contribute
+NOTHING at those pixels — target2 should be the field beneath the ENTIRE
+OBJ layer (the static battle terrain), never Onix's own texel, regardless
+of the shake offset or whether Onix's own texel happens to be opaque there.
+This also explains why the third session's own `eva=16,evb=16` "additive
+lighten" fit scored so much better than the RAM-true `eva=12,evb=8` in the
+earlier coefficient brute-force (`diag-turn9-hitsplat-blendfit.ts`): that
+brute-force was implicitly fit AGAINST THE WRONG TARGET2 (live fb,
+contaminated by Onix wherever both sprites overlap) — a coefficient sweep
+compensating for a target2 error converges on a different, spurious
+"best fit," not the real hardware constant. The floor-vs-round diagnostic
+(`diag-turn9-hitsplat-tips.ts`) hit the identical trap Mission A2 already
+named for AERIAL_ACE: its own `trueBg` was sampled from a pre-hitsplat
+ORACLE frame (tick 10934) — which still has Onix's own sprite drawn there,
+not a genuine field-only baseline.
+
+### Step 3: apply the crack end-to-end — SOLVED, 0 tolerance, the ENTIRE
+hitsplat footprint (not just tips)
+
+New diagnostic `tools/compare/scratch/diag-turn9-hitsplat-field.ts`:
+predicted = `floor((hitsplatTexel_8bit*eva + fieldTexel_8bit*evb)/16)`,
+where `fieldTexel` is computed **directly from `battle-bg.json`'s static
+tilemap/tileset/palette** (the same asset-only helper Mission A2's own
+`staticFieldPixel` established — no oracle sampling, sidestepping the
+Onix-contamination trap above entirely) at every pixel where the hitsplat's
+own affine-sampled texel (`drawSpriteSheetAffineStretchBlendedOverFb`'s own
+matrix-303 sampling, replicated read-only) is opaque, tested against 4
+candidate coefficient/domain combos (`eva=16/evb=16` and `eva=12/evb=8`,
+each in both 8-bit and 5-bit blend domains) across the hitsplat's own full
+32×32 footprint (421 opaque pixels/tick), at EVERY render tick in its
+RAM+1-lag-visible span (10935-10944, 10 ticks):
+
+**`eva=12, evb=8` in the 8-bit domain (the SAME formula as AERIAL_ACE's own
+solved rule, and the RAM-true `BLDALPHA=0x080c`) scores 0 mismatches at
+EVERY tick — 421 opaque pixels × 10 ticks = 4210/4210 pixel-tick pairs
+exact.** The other 3 combos (including the engine's current `eva=16/evb=16`)
+each score 116/421 mismatches at every tick, unchanged across the whole
+window — confirming this isn't a tip/edge-only residual once target2 is
+fixed, it's a uniform, total win: **the ENTIRE hitsplat, not just its own
+edges, was being computed against the wrong target2**; the "only the
+tips/edges mismatch" symptom in the ORIGINAL bug report was itself an
+artifact of the old (wrong) rule's target2 happening to coincide with the
+correct field color over most of the hitsplat's interior (where Onix's own
+silhouette and the terrain color are similar), while diverging sharply
+right at the edges where Onix's silhouette has gaps or fine detail against
+the terrain.
+
+### Fix shape for the engine step
+
+Replace `drawTurn9Hitsplat`'s "additive blend over live fb, `eva=16/evb=16`"
+with: **compute the static field/terrain pixel directly from the
+`battle-bg` asset at each opaque hitsplat pixel** (same helper AERIAL_ACE's
+own render code needs for its own field target2 — worth sharing, not
+reimplementing per-mechanism), then blend the hitsplat's own palette texel
+against that field with **`eva=12, evb=8`** (RAM-true `BLDALPHA`, 8-bit
+domain, `Math.min(255, floor((texel*eva + field*evb)/16))`) — Onix's own
+sprite is drawn separately, underneath, and simply never shows through
+anywhere the hitsplat's own texel is opaque (the hitsplat wins its OAM tie
+unconditionally for its whole life, so no per-pixel Onix-opacity check is
+even needed at implementation time). No affine-sampling change needed
+(matrix 303, `>>8` floor truncation — both already correct, per the earlier
+refuted-hypotheses list).
+
+**ISSUES #31 is ready to move to a wiring step** (the supervisor updates
+`ISSUES.md`) — the winner rule, field recipe, and blend coefficients are
+all pixel-exact-verified across the sprite's entire footprint and full RAM-
+live span, not a partial or tip-only fix.
+
+### Verification
+
+New `tools/probe/verify-turn9-hitsplat.ts` (pixel-only, no RAM reads — the
+OAM-order fact above is cross-cited from `dump-quickattack-hitsplat-oam.py`'s
+own committed run, not re-asserted since that needs the mgba-venv python
+interpreter): 12 checks (bracketing, 10 per-tick full-footprint exact-match
+checks covering all 421 opaque pixels each, 1 falsification pin against the
+old `eva=16/evb=16` coefficient) — **12/12 PASS**, run twice back to back
+against a fresh `bin/oracle` capture, identical results both times. `npm
+test` and `npm run build` unchanged-green (no `src/` changes this session).
+New committed tooling: `tools/probe/dump-quickattack-hitsplat-oam.py` (the
+`gMain.oamBuffer` OAM-order reader), `tools/compare/scratch/
+diag-turn9-hitsplat-field.ts` (the coefficient/domain sweep that found the
+0-mismatch combo). No trace files changed, no `PROGRESS.md`/`ISSUES.md`
+edits (per the worktree-lane constraint — the supervisor folds this in).
