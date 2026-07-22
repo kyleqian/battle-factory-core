@@ -6230,10 +6230,10 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
  * a defaulted param" idiom `onixHp`/`bounceTick`/`beforeMonSprite` already
  * use on this same call chain.
  */
-function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false): void {
+function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY, turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
+  drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
   const sink = grovyleFaintSinkRowsAndY2(t);
   if (sink.keptRows >= GROVYLE_FAINT_SINK_STEPS) {
     if (!rockSlideMonBlinkInvisible(t, pressTick)) {
@@ -6816,22 +6816,21 @@ function drawTurn5SwitchinSprite(fb: Uint8Array, t: number, pidgeottoX2: number 
 }
 
 /**
- * S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own
- * switch-in - DESTIN's SECOND switch, reusing turn 5's whole materialize/
- * settle mechanism VERBATIM (same tables: `MATERIALIZE_Y2_TABLE`,
- * `affineEmergeAccumulator`, `TURN5_MATERIALIZE_RAMP_COEFF`,
- * `TURN5_STRETCH_TABLE`) at a new anchor - the REUSE MAP's own "(i)
- * verbatim, new params" verdict for materialize landing-bounce (byte-exact
- * per §7's own RAM cross-check) and "(i) same shape, not re-verified to the
- * byte" for the stretch/wobble fine detail (flagged, not chased, per this
- * session's own time-box - see docs/turn13-notes.md's newest section).
- * `TURN13_BALL_HANDOFF_TICK` is oracle-pixel-bisected (first visible closed-
- * ball pixel at render 16987, `handoffTick + BALL_CLOSED_START_OFFSET(2)`,
- * the identical relationship `TURN5_BALL_HANDOFF_TICK` uses); every other
- * anchor below (`materializeStart`/ramp-render-start/`STRETCH_TICK`/
- * `SETTLE_TICK`) reuses turn 5's own exact tick DELTAS off that new anchor,
- * not re-derived from scratch, per the brief's own "turn 5's machinery
- * carries its own encoded render lags - reuse, don't re-derive" guidance.
+ * S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7, wobble table wired
+ * 2026-07-21): MURKROW's own switch-in - DESTIN's SECOND switch. The
+ * growing-silhouette phase reuses turn 5's mechanism VERBATIM (same tables:
+ * `MATERIALIZE_Y2_TABLE`, `affineEmergeAccumulator`,
+ * `TURN5_MATERIALIZE_RAMP_COEFF`) - byte-exact per §7's own RAM cross-check.
+ * The stretch/wobble phase does NOT reuse `TURN5_STRETCH_TABLE`: RAM proved
+ * a genuinely different driver (Murkrow's own linear angle counter vs.
+ * Pidgeotto's literal scale curve), so it gets its own RAM-derived
+ * `TURN13_MURKROW_WOBBLE_TABLE` at its own RAM-confirmed anchor (17020, not
+ * a `SETTLE_TICK`-minus-table-length reuse) - see that table's own doc
+ * comment. `TURN13_BALL_HANDOFF_TICK` is oracle-pixel-bisected (first
+ * visible closed-ball pixel at render 16987, `handoffTick +
+ * BALL_CLOSED_START_OFFSET(2)`, the identical relationship
+ * `TURN5_BALL_HANDOFF_TICK` uses); `materializeStart`/ramp-render-start
+ * still reuse turn 5's own exact tick DELTAS off that new anchor.
  */
 export const TURN13_BALL_HANDOFF_TICK = 16985;
 const TURN13_MURKROW_MATERIALIZE_START = TURN13_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET;
@@ -6840,16 +6839,107 @@ function turn13MurkrowMaterializeCoeff(t: number): number {
   if (t < TURN13_MURKROW_RAMP_RENDER_START) return TURN5_MATERIALIZE_FLAT_COEFF;
   return TURN5_MATERIALIZE_RAMP_COEFF[t - TURN13_MURKROW_RAMP_RENDER_START] ?? 0;
 }
-export const TURN13_MURKROW_SETTLE_TICK = 17070;
-export const TURN13_MURKROW_STRETCH_TICK = TURN13_MURKROW_SETTLE_TICK - TURN5_STRETCH_TABLE.length;
 /**
- * Front-sprite frame selection, same "no species-specific frame-duration
- * table extracted" empirical-parity approach `turn5PidgeottoFrame` already
- * establishes (its own doc) - reuses that function's exact tick DELTAS off
- * `TURN13_BALL_HANDOFF_TICK` instead of `TURN5_BALL_HANDOFF_TICK`.
+ * The switch-in ball/materialize window's own BG-to-white dither
+ * (`TURN5_BG_FADE_Y`'s own doc: `BeginNormalPaletteFade`, a generic
+ * per-switch-in mechanism, "the SAME mechanism SENDOUT_BG_FADE_Y already
+ * established for S6" - species/window-independent by that dossier's own
+ * confirmation) was never re-anchored for MURKROW's own switch-in -
+ * `drawTurn5RockSlideAttack`'s hardcoded `turn5BgFadeY(t)` only covers
+ * turn 5's own tick range (6746-6781), so it silently no-ops for every
+ * turn-13 tick, leaving the background unfaded during 17004-~17039 (the
+ * uniform ~9-unit RGB residual on Onix/the ball shadow/healthbox pixels
+ * this session's own `npm run compare` isolated once the wobble table
+ * alone didn't close the window). Reuses `TURN5_BG_FADE_Y` verbatim (same
+ * table, not re-derived) at the new anchor, mirroring the exact
+ * `materializeStart`-relative-delta pattern `TURN13_MURKROW_RAMP_RENDER_
+ * START` already established one line above.
  */
+const TURN13_MURKROW_BG_FADE_START_TICK = TURN13_MURKROW_MATERIALIZE_START + (TURN5_BG_FADE_START_TICK - (TURN5_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET));
+function turn13MurkrowBgFadeY(t: number): number {
+  return TURN5_BG_FADE_Y[t - TURN13_MURKROW_BG_FADE_START_TICK] ?? 0;
+}
+export const TURN13_MURKROW_SETTLE_TICK = 17070;
+/**
+ * docs/turn13-notes.md, "MURKROW's own materialize/wobble table" (2026-07-21
+ * worktree probe): the real double-affine wobble engages RAM 17019, visible
+ * render 17020 - NOT `SETTLE_TICK`-minus-table-length (17030), which was
+ * Pidgeotto's own anchor math reused without RAM confirmation.
+ */
+export const TURN13_MURKROW_STRETCH_TICK = 17020;
+/**
+ * RAM-read directly off `pa`/`pd`/`y2` (the literal affine-matrix registers,
+ * the same representation `drawSpriteSheetAffineStretch`'s `xScale`/
+ * `yScale`/`y2` params consume) - Murkrow's own front-sprite entrance is
+ * driven by a linear angle counter (`data4` +8/tick), a genuinely different
+ * mechanism than Pidgeotto's `TURN5_STRETCH_TABLE` literal scale curve, not
+ * the same table at a new anchor. Entries 0-48 are RAM 17019-17067 read
+ * directly; entry 49 is RAM 17068's own flat identity, appended explicitly
+ * so the table spans exactly through render 17069 (the last tick before
+ * `TURN13_MURKROW_SETTLE_TICK`) - clamp-repeating entry 48 instead regresses
+ * 17069 by 1px (`y2=-1` instead of the oracle's flat `0`).
+ */
+const TURN13_MURKROW_WOBBLE_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
+  { xScale: 256, yScale: 256, y2: 0 },
+  { xScale: 250, yScale: 262, y2: 0 },
+  { xScale: 244, yScale: 268, y2: 1 },
+  { xScale: 239, yScale: 273, y2: 2 },
+  { xScale: 234, yScale: 278, y2: 2 },
+  { xScale: 230, yScale: 282, y2: 3 },
+  { xScale: 227, yScale: 285, y2: 3 },
+  { xScale: 225, yScale: 287, y2: 3 },
+  { xScale: 224, yScale: 288, y2: 4 },
+  { xScale: 225, yScale: 287, y2: 3 },
+  { xScale: 227, yScale: 285, y2: 3 },
+  { xScale: 230, yScale: 282, y2: 3 },
+  { xScale: 234, yScale: 278, y2: 2 },
+  { xScale: 239, yScale: 273, y2: 2 },
+  { xScale: 244, yScale: 268, y2: 1 },
+  { xScale: 250, yScale: 262, y2: 0 },
+  { xScale: 256, yScale: 256, y2: 0 },
+  { xScale: 263, yScale: 249, y2: -1 },
+  { xScale: 269, yScale: 243, y2: -3 },
+  { xScale: 274, yScale: 238, y2: -5 },
+  { xScale: 279, yScale: 233, y2: -7 },
+  { xScale: 283, yScale: 229, y2: -8 },
+  { xScale: 286, yScale: 226, y2: -9 },
+  { xScale: 288, yScale: 224, y2: -9 },
+  { xScale: 288, yScale: 224, y2: -10 },
+  { xScale: 288, yScale: 224, y2: -9 },
+  { xScale: 286, yScale: 226, y2: -9 },
+  { xScale: 283, yScale: 229, y2: -8 },
+  { xScale: 279, yScale: 233, y2: -7 },
+  { xScale: 274, yScale: 238, y2: -5 },
+  { xScale: 269, yScale: 243, y2: -3 },
+  { xScale: 263, yScale: 249, y2: -1 },
+  { xScale: 256, yScale: 256, y2: -1 },
+  { xScale: 250, yScale: 262, y2: -1 },
+  { xScale: 244, yScale: 268, y2: 0 },
+  { xScale: 239, yScale: 273, y2: 1 },
+  { xScale: 234, yScale: 278, y2: 1 },
+  { xScale: 230, yScale: 282, y2: 2 },
+  { xScale: 227, yScale: 285, y2: 2 },
+  { xScale: 225, yScale: 287, y2: 2 },
+  { xScale: 224, yScale: 288, y2: 3 },
+  { xScale: 225, yScale: 287, y2: 2 },
+  { xScale: 227, yScale: 285, y2: 2 },
+  { xScale: 230, yScale: 282, y2: 2 },
+  { xScale: 234, yScale: 278, y2: 1 },
+  { xScale: 239, yScale: 273, y2: 1 },
+  { xScale: 244, yScale: 268, y2: 0 },
+  { xScale: 250, yScale: 262, y2: -1 },
+  { xScale: 256, yScale: 256, y2: -1 },
+  { xScale: 256, yScale: 256, y2: 0 },
+];
+/**
+ * Front-sprite frame selection: Murkrow's own `animCmdIndex` flips exactly
+ * ONCE in this whole window (RAM 17033, visible render 17034), unlike
+ * Pidgeotto's reused 5-breakpoint cycle (`turn5PidgeottoFrame`), which does
+ * not transfer - docs/turn13-notes.md's own materialize-table section.
+ */
+const TURN13_MURKROW_FRAME_FLIP_TICK = 17034;
 function turn13MurkrowFrame(t: number): 0 | 1 {
-  return turn5PidgeottoFrame(t - TURN13_BALL_HANDOFF_TICK + TURN5_BALL_HANDOFF_TICK);
+  return t < TURN13_MURKROW_FRAME_FLIP_TICK ? 0 : 1;
 }
 function drawTurn13MurkrowMaterialize(fb: Uint8Array, t: number): void {
   if (t < TURN13_MURKROW_MATERIALIZE_START || t >= TURN13_MURKROW_SETTLE_TICK) return;
@@ -6863,8 +6953,9 @@ function drawTurn13MurkrowMaterialize(fb: Uint8Array, t: number): void {
     drawSpriteSheetAffineTintedBlend(fb, tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, coeff, y2);
     return;
   }
-  const entry = TURN5_STRETCH_TABLE[Math.min(t - TURN13_MURKROW_STRETCH_TICK, TURN5_STRETCH_TABLE.length - 1)]!;
-  drawSpriteSheetAffineStretch(fb, tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y, entry.xScale, entry.yScale, entry.y2, MATERIALIZE_TINT_COLOR, 0, true);
+  const entry = TURN13_MURKROW_WOBBLE_TABLE[Math.min(t - TURN13_MURKROW_STRETCH_TICK, TURN13_MURKROW_WOBBLE_TABLE.length - 1)]!;
+  const wobbleCoeff = turn13MurkrowMaterializeCoeff(t);
+  drawSpriteSheetAffineStretch(fb, tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y, entry.xScale, entry.yScale, entry.y2, MATERIALIZE_TINT_COLOR, wobbleCoeff, true);
 }
 /** MURKROW's settled front sprite, no affine transform - see `TURN13_MURKROW_SETTLE_TICK`. */
 function drawTurn13MurkrowSettled(fb: Uint8Array): void {
@@ -6918,7 +7009,7 @@ export function turn13SwitchinSentOutTextVisibleChars(t: number): number {
  * sprite draw is suppressed).
  */
 function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number, murkrowInvisible: boolean = false): void {
-  drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, 0, false, 0, false);
+  drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, 0, false, 0, false, turn13MurkrowBgFadeY(t));
   drawTurn5IconBar(fb, t, TURN13_ICONBAR_CREATE_TICK, TURN13_ICONBAR_FADE_START_TICK, TURN13_ICONBAR_DESTROY_TICK, TURN13_OPPONENT_ICON_STATES);
   if (!murkrowInvisible) drawTurn13MurkrowSwitchinSprite(fb, t);
   const murkrowHealthboxDx = healthboxSlideDx(t, TURN13_MURKROW_SETTLE_TICK + 1);
