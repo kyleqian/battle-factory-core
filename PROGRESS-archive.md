@@ -1,4 +1,56 @@
 ---
+## 249 — Bounded worker (S7/S8 engine step): turn 14 wired end-to-end — Murkrow's FLY charge-half + Onix's DRAGON_BREATH auto-miss (STATUS3_ON_AIR) through the settled turn-15 menu — `turn14-fly-miss.json` **149/149, 0 diff**; a pre-existing shared-regime residual (battle-turn-notes §50's family, now filed as ISSUES #33) resurfaces at 51 ticks, named and excluded per the brief's own instruction, NOT chased
+
+- **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run build`
+  green, tree clean. `verify-turn14.ts` **28/28** (mandatory-first-step
+  rerun, unaffected). New trace `tools/compare/traces/turn14-fly-miss.json`
+  **149/149, 0 diff** (`npm run compare`), reusing `battle1-turn14-
+  dense.json`'s full 110-segment script, dense on every genuinely-0-diff
+  span (the whole DRAGONBREATH-kickoff/held/transition/missed-text/held
+  window 17916-18079 gapless, plus FLY-up/submenu/settled-menu spot
+  ticks). Full regression sweep 0 diff: `turn13-switchin` **156/156**,
+  `turn13-menu` **57/57**, `turn12-menu` **46/46**, `turn10-aerialace`
+  **93/93**.
+- **Did:** `core.ts` gained `turn13Resolved` (mirrors `turn12Resolved`
+  exactly — new reopen-gate branch `turn12Resolved && !turn13Resolved`,
+  cursor persists at slot 2/DRAGON_BREATH, no `DOWN` nav, gated on new
+  `TURN13_DRAGONBREATH_MENU_REDRAW_DELAY`). New render dispatch
+  (`drawTurn14FightSubmenuWindow`/`drawTurn14FlyMissWindow`) reuses
+  `drawTurn13SwitchinFieldBase` throughout (generalized with a new
+  `murkrowInvisible` param) — no fresh switch-in regime this turn, so the
+  bounce cycle continues turn 13's own "switchin-reset" regime, frozen
+  during the resolution at `TURN5_SITRUS_MENU_REDRAW_TICK` ("phase 0" by
+  construction). One genuinely new mechanism: the FLY-up "round shadow"
+  ball sprite (`gFlyBallUpSpriteTemplate`) — new asset extractor
+  (`tools/extract/extract-fly-ball.ts`, `round_shadow.png`) + new render fn
+  (`drawTurn14FlyBall`, reusing the EXISTING `drawSpriteSheetAffineStretch
+  (doubled=true)` primitive, no new primitive needed) driven by a literal
+  24-entry RAM-truthed per-tick affine table (fresh `dump-fly-anim.py`
+  re-run this session). Three literal-anchored kickoff/miss texts, all
+  solved cleanly from `settle - (total-1)` under the ordinary 1-char/tick
+  formula (no new text mechanism). `currentPPForActiveMon`/
+  `drawFightSubmenuChrome` gained a `turn13Resolved` param (DRAGON_BREATH
+  PP's second decrement, 20→18, matching the dossier's own ledger).
+- **Next:** turn 15+ wiring (Murkrow's FLY strike half, unconditional hit,
+  forces the switch to MAGBY) — `battle-turn-notes.md` §16/§50 already
+  preview this; nothing new to probe for the reopen-gate shape itself
+  (mirror `turn13Resolved` again). Also: §50's own original bounce-regime
+  bug (materialize/wobble RAM re-probe) would likely close most of this
+  session's own 51 excluded ticks for free if fixed upstream.
+- **Notes:** Full writeup in `docs/battle-turn-notes.md` §52. Named,
+  excluded residual (NOT this session's own bug, time-boxed per the
+  brief's explicit instruction): 51 of 200 originally-sampled ticks
+  (submenu-open/confirm-transient 17722-17768, a handful of FLY-up-
+  adjacent ticks 17781-17787, "flew up high!" mid-typing kerning-class
+  ticks 17822-17845, the menu-redraw transition 18080-18090, two
+  settled-tail spot ticks 18815/18956) show diffs (629-1562px, isolated to
+  Onix's own sprite/healthbox) whose pixel counts land exactly inside the
+  range `battle-turn-notes.md` §50 already characterized as a pre-existing,
+  not-a-pure-additive-shift bug in the shared settled-menu bounce regime —
+  excluded from `captureFrames` rather than faked, matching this dossier's
+  "exclude, don't fake" convention. No PAPERCUTS beyond the standing
+  mgba-venv-teardown one.
+---
 ## 248 — Bounded worker (S7 engine step): AERIAL_ACE + hitsplat CLOSE-OUT — all 4 parts LAND: turn-10 window gapless 0-diff 12345-12437 (overlap rule + darken + flicker + a newly-discovered player-healthbox wobble), ISSUES #31 hitsplat SOLVED and deleted (167/167, was 159/159), turn-12 mirror gapless 0-diff over its own +2068 shift (131/131); one NEW residual found and honestly excluded (ISSUES #32, a different bug from #31, NOT chased)
 
 - **State:** `npm test` **993/993** (986 + 7 new Tier-1), `npm run build`

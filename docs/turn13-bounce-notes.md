@@ -238,3 +238,72 @@ residual (17106-17111) at all — which is why "best -6, still 13408px"
 was the ceiling of that approach. The real fix needed is two coupled
 changes to the SAME constant's role (the reveal dispatch boundary AND the
 bounce anchor), not a free-standing tick-shift parameter.
+
+## 9. Wiring close-out (main-lane worker, 2026-07-21/22)
+
+`verify-turn13-bounce.ts` reran 14/14 PASS unchanged (oracle-only, no
+`src/` dependency) before any edit, per this run's mandatory-first-step
+convention. Wired exactly the §6 fix shape, no deviation: new
+`TURN13_SWITCHIN_TEXT_CLEAR_TICK = 17106`; `TURN13_SWITCHIN_MENU_REDRAW_
+TICK` moved `17106 → 17112`; a new blank-hold branch in
+`drawTurn13SwitchinWindow` between the sent-out-text branch and the
+`settled` dispatch, mirroring `drawTurn5RockSlideWindow`'s own no-op gap
+(the existing unconditional `drawTileBg` call supplies the teal fill).
+`TURN13_SWITCHIN_RESET_SHIFT` picked up the corrected anchor automatically
+(no separate edit). `turn13-switchin.json` restored to **191/191, 0
+diff** — the full named family (17106-17111/17113/17117-17122/17126-
+17130) plus spot ticks 17175/17200, all `ssimMean=1.0000`. ISSUES #33(b)
+deleted (this section supersedes it).
+
+### Turn 14: the fix surfaced a SEPARATE, previously-undetected instance of the same bug class
+
+§7's predictions did not hold as stated. Testing them directly against
+`npm run compare` (not just RAM-only) found:
+
+- **18080-18090, 18815, 18956** (the "likely closes" family): **0 of 13
+  pass**. Stay excluded.
+- **17722-17768, 17781-17787** (the "flagged-maybe" families): only
+  **17722-17725 (4 ticks) pass** (restored); the remaining 50 stay
+  excluded — sizes range 6-2331px, the same 769/1562/2325px-family
+  signature as the rest of this dossier, not the kerning-class residual.
+- **Regression, not predicted by §7 at all**: applying the corrected
+  `TURN13_SWITCHIN_RESET_SHIFT` to the SAME-anchor continuation formula
+  turn 14's own settled tail reuses (`drawTurn14FightSubmenuWindow`/
+  `drawTurn14FlyMissWindow`, both `t + TURN13_SWITCHIN_RESET_SHIFT`) shifts
+  every downstream bounce phase by the same 6 ticks — and three
+  previously-*passing* ticks (**18087, 18095, 18415**) go red as a result.
+  Direct fresh oracle sha probe (curated capture, ticks 17722-17725 +
+  18078-18095) of `TURN14_MENU_REDRAW_TICK`'s own neighborhood shows the
+  identical structural signature turn 13 had: 18078-18079 one sha (held
+  text), **18080-18085 a second sha, six ticks, unmodeled** (the app
+  currently holds the fully-typed "ONIX's attack missed!" text straight
+  through this span with no gap), 18086 a third sha (chrome reveal —
+  already correctly anchored, does NOT need to move), 18087 a fourth,
+  one-tick sha (a blip, same role as turn 13's own 17113), 18088+ settling
+  into a repeating group. That the *pre-existing* `TURN14_MENU_REDRAW_TICK
+  = 18086` was already sitting exactly on the real reveal tick (unlike
+  turn 13's own conflated constant) is exactly why this was invisible
+  before: the missing 6-tick blank hold was masked by the held-text branch
+  running straight through it, and the post-reveal bounce phase happened
+  to line up under the OLD (wrong) `TURN13_SWITCHIN_RESET_SHIFT` by the
+  same kind of coincidence already documented for 17112/17114-17116 in §3a
+  — fixing turn 13's own anchor removed that coincidence downstream
+  without providing the compensating turn-14-local fix.
+  **Not wired this session** — the regime-reset-vs-continuation question
+  (does turn 14's own menu-redraw reset the bounce phase fresh, the way
+  turn 13's own switch-in resets against turn 12's, or does it genuinely
+  continue turn 13's live cycle once the missing blank hold is added?)
+  needs the same two-independent-methods confirmation this dossier's own
+  §2 used, not a guess from pixel data alone. `18087`, `18095`, `18415`
+  are excluded from `turn14-fly-miss.json` pending that probe (a real,
+  if small, backslide from the previous session's 149/149 — documented,
+  not silently dropped).
+
+`turn14-fly-miss.json` final count: **150/150, 0 diff** (149 base − 3
+newly-excluded regressions + 4 newly-restored `17722-17725`). Filed as a
+new backlog entry (see `ISSUES.md`) rather than re-deriving in this
+wiring-scoped session.
+
+Regression sweep (`turn13-menu` 57/57, `turn13-sandattack` 190/190,
+`turn13-dragonbreath-faint` 141/141, `turn12-menu` 46/46), `npm test`
+993/993, `npm run build` all green.
