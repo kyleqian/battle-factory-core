@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, partySelectEntryPhase } from "../src/engine/partySelect.ts";
+import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutPhase, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_FADE_OUT_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
 import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 
 describe("forced turn-15 party select", () => {
@@ -37,10 +37,22 @@ describe("forced turn-15 party select", () => {
 
   it("moves DOWN to MAGBY, opens SEND OUT, then confirms it", () => {
     const magby = advancePartySelect({ ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 }, new Set(["DOWN"]));
-    expect(magby).toEqual({ elapsed: PARTY_LIST_INPUT_ELAPSED, cursor: "magby", submenuOpen: false, sendOutConfirmed: false });
+    expect(magby).toEqual({ elapsed: PARTY_LIST_INPUT_ELAPSED, cursor: "magby", submenuOpen: false, sendOutElapsed: null });
     const submenu = advancePartySelect(magby, new Set(["A"]));
-    expect(submenu).toEqual({ elapsed: PARTY_LIST_INPUT_ELAPSED + 1, cursor: "magby", submenuOpen: true, sendOutConfirmed: false });
-    expect(advancePartySelect(submenu, new Set(["A"])).sendOutConfirmed).toBe(true);
+    expect(submenu).toEqual({ elapsed: PARTY_LIST_INPUT_ELAPSED + 1, cursor: "magby", submenuOpen: true, sendOutElapsed: null });
+    expect(advancePartySelect(submenu, new Set(["A"])).sendOutElapsed).toBe(0);
+  });
+
+  it("keeps the SEND OUT exit clock relative to its own confirmation edge", () => {
+    expect(PARTY_SENDOUT_FADE_OUT_START).toBe(1);
+    expect(PARTY_SENDOUT_BLACK_START).toBe(17);
+    expect(PARTY_SENDOUT_BATTLE_FADE_IN_START).toBe(56);
+    expect(partySendOutPhase(0)).toBe("submenuHold");
+    expect(partySendOutPhase(1)).toBe("fadingOut");
+    expect(partySendOutPhase(16)).toBe("fadingOut");
+    expect(partySendOutPhase(17)).toBe("black");
+    expect(partySendOutPhase(55)).toBe("black");
+    expect(partySendOutPhase(56)).toBe("battleFadeIn");
   });
 
   it("uses the RAM-derived 30/31 ONIX hop and 7/8 full-icon frame cadence", () => {

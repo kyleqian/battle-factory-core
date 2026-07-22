@@ -12,6 +12,17 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Dense compare output obscures the failure summary (2026-07-22)
+
+- **What:** `npm run compare` prints one line per captured frame, so a
+  200-frame dense trace buries the final mismatch summary; piping through
+  `tail` then masks the compare's nonzero exit status unless `pipefail` is set.
+- **Hits:** 1.
+- **Cost each:** ~2 min.
+- **Workaround:** run the command unpiped for acceptance and query
+  `tools/compare/out/latest/manifest.json` with `jq` for a compact residual
+  list.
+
 ## dump-battler-full.py struct offsets live only in the script body (2026-07-20)
 
 - **What:** the per-field battler struct offsets (species +0x00, pp

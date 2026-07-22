@@ -56,6 +56,14 @@ const TICKS = {
   listOnixMidHop: 20158,
   listMagbyMidHop: 20196,
   listOnixFrame1: 20076,
+  // First SUBMENU->party-list VBlank. The window disappears before the
+  // palette worker's first coefficient update, making this the unfaded
+  // source chrome for the entire exit fade.
+  sendOutExit: 20247,
+  // First frame after the live selected icon advances to frame 0.  Its
+  // coefficient-4 BG palette is restored below so this remains a reusable
+  // source chrome layer, not a pre-faded replay image.
+  sendOutExitFrame0: 20251,
 } as const;
 
 type Tileset = { columns: number; rows: number; tiles: number[][] };
@@ -120,9 +128,21 @@ const SOURCE_LAYERS: Record<keyof typeof TICKS, { icons: IconLayer[]; status: Ov
       { species: "MAGBY", frame: 1, selected: true, phase: "plus1" }, { species: "BAYLEEF", frame: 1, selected: false },
     ], status: magbyStatusOverlay,
   },
+  sendOutExit: {
+    icons: [
+      { species: "ONIX", frame: 0, selected: false },
+      { species: "MAGBY", frame: 1, selected: true, phase: "plus1" }, { species: "BAYLEEF", frame: 1, selected: false },
+    ], status: magbyStatusOverlay,
+  },
+  sendOutExitFrame0: {
+    icons: [
+      { species: "ONIX", frame: 0, selected: false },
+      { species: "MAGBY", frame: 0, selected: true, phase: "minus3" }, { species: "BAYLEEF", frame: 0, selected: false },
+    ], status: statusOverlay,
+  },
 };
 
-trace.captureFrames = Object.values(TICKS);
+trace.captureFrames = [...Object.values(TICKS), 20252];
 const result = await runOracleTrace(trace);
 const byTick = new Map(result.captures.map((c) => [c.frame, c]));
 
@@ -181,9 +201,46 @@ function indexedFrame(rgba: Buffer): { palette: number[]; indices: string } {
   return { palette, indices: Buffer.from(indices).toString("base64") };
 }
 
+function fadeToBlackComponent(component: number, y: number): number {
+  const c5 = component >> 3;
+  const faded5 = Math.floor((c5 * (16 - y)) / 16);
+  return (faded5 << 3) | (faded5 >> 2);
+}
+
+function restoreFadedSourcePalette(rgba: Buffer, y: number, nextRgba: Buffer, nextY: number): void {
+  const source = need(TICKS.sendOutExit).rgba;
+  const candidates = new Map<string, Array<[number, number, number]>>();
+  for (let p = 0; p < 240 * 160; p += 1) {
+    const o = p * 4;
+    const c: [number, number, number] = [source[o]!, source[o + 1]!, source[o + 2]!];
+    const key = `${fadeToBlackComponent(c[0], y)},${fadeToBlackComponent(c[1], y)},${fadeToBlackComponent(c[2], y)}`;
+    const bucket = candidates.get(key) ?? [];
+    if (!bucket.some((v) => v[0] === c[0] && v[1] === c[1] && v[2] === c[2])) bucket.push(c);
+    candidates.set(key, bucket);
+  }
+  for (let p = 0; p < 240 * 160; p += 1) {
+    const o = p * 4;
+    const bucket = candidates.get(`${rgba[o]},${rgba[o + 1]},${rgba[o + 2]}`);
+    if (!bucket?.length) continue;
+    // A single faded coefficient can collapse neighbouring 5-bit palette
+    // entries.  The next VBlank's coefficient disambiguates those entries
+    // without baking either frame into production data.
+    const next = [nextRgba[o]!, nextRgba[o + 1]!, nextRgba[o + 2]!];
+    const exact = bucket.filter((value) =>
+      fadeToBlackComponent(value[0], nextY) === next[0]
+      && fadeToBlackComponent(value[1], nextY) === next[1]
+      && fadeToBlackComponent(value[2], nextY) === next[2],
+    );
+    const pool = exact.length ? exact : bucket;
+    const c = pool.reduce((best, value) => value[0] + value[1] + value[2] > best[0] + best[1] + best[2] ? value : best);
+    rgba[o] = c[0]; rgba[o + 1] = c[1]; rgba[o + 2] = c[2];
+  }
+}
+
 const frames: Record<string, { tick: number; width: number; height: number; palette: number[]; indices: string }> = {};
 for (const [name, tick] of Object.entries(TICKS)) {
   const rgba = Buffer.from(need(tick).rgba);
+  if (name === "sendOutExitFrame0") restoreFadedSourcePalette(rgba, 4, need(20252).rgba, 6);
   const layers = SOURCE_LAYERS[name as keyof typeof TICKS];
   for (const icon of layers.icons) eraseIcon(rgba, icon);
   eraseStatus(rgba, layers.status);

@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 267 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — palette source blocker**
+
+- **State:** supervisor independently verified and banked the safe partial
+  implementation: Tier-1 **1005/1005**, build green at **5.32 MB**, oracle
+  verifier **17/17**, compositor **5/5**. Canonical and delayed are both
+  **192/200**, with the same eight frames at +30; rung 1 is not complete.
+- **Did:** added a SEND OUT-edge-relative phase clock (hold → 16-frame
+  fade → 39-frame generated black hold), live exit chrome/icon-frame logic,
+  and the +57 dense capture windows in both party traces. Canonical confirms
+  20245–47 and 20249/51/52/55–57/59/61/63–301 exactly; no absolute tick
+  branch or full-screen replay asset was added.
+- **Next:** corrective worker must probe real faded/unfaded palette and OAM
+  state at the eight residual frames before editing. Close canonical + delayed
+  to **200/200**; do not screenshot-fit or add absolute timing.
+- **Notes:** residuals are 5px at 20248/50/58/60/62, 273px at 20253/54,
+  and full-frame at 20302 (delayed +30). PAPERCUT: verbose compare output,
+  ~2 min.
+
+---
 ## 266 — Bounded characterization worker (ISSUES #37 post-SEND OUT): **READY FOR IMPLEMENTATION**
 
 - **State:** **SUPERVISOR ACCEPTED** — post-confirm path is oracle/RAM-
@@ -38,23 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the new chrome is source-erased per a live icon frame. Build JS **5.21 MB**
   (gzip **237.51 kB**). PAPERCUT: mGBA probe emits megabytes of harmless
   diagnostics unless redirected, ~2 min.
-
----
-## 264 — Bounded worker (ISSUES #37 entry transition): **CHECKPOINT — OBJ ownership narrowed to BAYLEEF's initial icon frame**
-
-- **State:** committed at `c13f645`; supervisor independently reproduced
-  `npm test` **1003/1003**, build
-  green (production JS **5.16 MB**), composite **5/5 PASS**. Both dense
-  compares are **135/143** (same eight residual frames, delayed +30).
-- **Did:** corrected the press-relative phase boundary (fade begins rendered
-  elapsed 21), and added source-derived OAM ownership masks for MURKROW,
-  healthbox, all party balls, FNT/status, held-item sprites, and live icons.
-  All fade-out frames are now exact; only fade-in 20061–68 retains 48px.
-- **Next:** **USER DECISION 2026-07-22:** use supervisor judgment; authorized
-  the recommended third, probe-first attempt. Dump BAYLEEF's live OBJ
-  tile/anim state at canonical 20061-20068 (delayed +30), then wire only the
-  derived initial-frame rule. If direct evidence does not close 143/143,
-  park these eight frames and proceed to post-SEND OUT; no coordinate patch.
-- **Notes:** Independent compares are **135/143** each with only the named
-  eight frames red; all other entry and settled frames are exact. PAPERCUT:
-  none.

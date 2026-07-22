@@ -1,4 +1,18 @@
 ---
+## 264 — Bounded worker (ISSUES #37 entry transition): **CHECKPOINT — OBJ ownership narrowed to BAYLEEF's initial icon frame**
+
+- **State:** committed at `c13f645`; supervisor independently reproduced
+  `npm test` **1003/1003**, build green (production JS **5.16 MB**), composite
+  **5/5 PASS**. Both dense compares are **135/143** (same eight residual
+  frames, delayed +30).
+- **Did:** corrected the press-relative phase boundary and added source-derived
+  OAM ownership masks. All fade-out frames became exact; only fade-in
+  20061–68 retained 48px.
+- **Next:** user authorized a third, probe-first attempt; direct BAYLEEF OBJ
+  evidence subsequently closed this in entry 265.
+- **Notes:** no coordinate patch or absolute-tick branch.
+
+---
 ## 262 — Bounded worker (ISSUES #37 icon/OAM half): **CLOSED** — live icon-free party compositor; canonical + delayed traces **62/62, 0 diff**
 
 - **State:** `npm test` **1001/1001**, `npm run build` green; production JS

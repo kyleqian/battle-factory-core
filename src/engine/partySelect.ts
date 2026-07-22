@@ -3,7 +3,7 @@
 import type { GbaButton } from "../input.ts";
 
 export type PartySelectCursor = "onix" | "magby";
-export type PartyMenuChromeKey = "listOnix" | "listOnixFrame1" | "listOnixMidHop" | "listMagby" | "listMagbyMidHop" | "submenu";
+export type PartyMenuChromeKey = "listOnix" | "listOnixFrame1" | "listOnixMidHop" | "listMagby" | "listMagbyMidHop" | "submenu" | "sendOutExit" | "sendOutExitFrame0";
 export type PartyMenuIconLayer = {
   species: "ONIX" | "MAGBY" | "BAYLEEF";
   frame: 0 | 1;
@@ -22,7 +22,8 @@ export interface PartySelectState {
   elapsed: number;
   cursor: PartySelectCursor;
   submenuOpen: boolean;
-  sendOutConfirmed: boolean;
+  /** Null until SEND OUT is confirmed; then frames since that input edge. */
+  sendOutElapsed: number | null;
 }
 
 /**
@@ -57,8 +58,32 @@ export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
   elapsed: 0,
   cursor: "onix",
   submenuOpen: false,
-  sendOutConfirmed: false,
+  sendOutElapsed: null,
 };
+
+/**
+ * SEND OUT's own transition is separate from menu entry.  The source leaves
+ * the confirmed submenu visible for two rendered frames, fades it for 16,
+ * then holds generated black until the battle palette's first fade-in step.
+ * Every boundary is relative to the confirming A edge (not battle time).
+ */
+export type PartySendOutPhase = "submenuHold" | "fadingOut" | "black" | "battleFadeIn";
+// The A edge is observed on the following rendered VBlank: elapsed 0 is
+// canonical frame 20246 (the last held submenu frame), so the fade itself
+// begins at elapsed 1 / canonical 20247.
+export const PARTY_SENDOUT_SUBMENU_HOLD_FRAMES = 1;
+export const PARTY_SENDOUT_FADE_OUT_FRAMES = 16;
+export const PARTY_SENDOUT_BLACK_FRAMES = 39;
+export const PARTY_SENDOUT_FADE_OUT_START = PARTY_SENDOUT_SUBMENU_HOLD_FRAMES;
+export const PARTY_SENDOUT_BLACK_START = PARTY_SENDOUT_FADE_OUT_START + PARTY_SENDOUT_FADE_OUT_FRAMES;
+export const PARTY_SENDOUT_BATTLE_FADE_IN_START = PARTY_SENDOUT_BLACK_START + PARTY_SENDOUT_BLACK_FRAMES;
+
+export function partySendOutPhase(elapsed: number): PartySendOutPhase {
+  if (elapsed < PARTY_SENDOUT_FADE_OUT_START) return "submenuHold";
+  if (elapsed < PARTY_SENDOUT_BLACK_START) return "fadingOut";
+  if (elapsed < PARTY_SENDOUT_BATTLE_FADE_IN_START) return "black";
+  return "battleFadeIn";
+}
 
 /** The list is usable only after its press-relative fade-in has settled. */
 export const PARTY_LIST_INPUT_ELAPSED = PARTY_ENTRY_SETTLED_START;
@@ -98,6 +123,22 @@ export function onixSelectedHopY2(elapsed: number): -3 | 1 {
  */
 export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
   const fullFrame = fullPartyIconFrame(state.elapsed);
+  // `Task_HandleChooseMonInput` removes the SEND OUT window on the first
+  // fade VBlank but leaves the party rows and their live OBJ icons in place.
+  // The exit chrome is source-erased like the settled variants; it is not a
+  // transition screenshot and is still fed through the palette fade below.
+  if (state.sendOutElapsed !== null && state.sendOutElapsed >= PARTY_SENDOUT_FADE_OUT_START) {
+    const y2: -3 | 1 = fullFrame === 1 ? 1 : -3;
+    return {
+      chromeKey: fullFrame === 1 ? "sendOutExit" : "sendOutExitFrame0",
+      icons: [
+        { species: "ONIX", frame: 0, selected: false, x2: 0, y2: -4 },
+        { species: "MAGBY", frame: fullFrame, selected: true, x2: 0, y2 },
+        { species: "BAYLEEF", frame: fullFrame, selected: false, x2: -4, y2: 0 },
+      ],
+      status: fullFrame === 1 ? "magby" : "normal",
+    };
+  }
   if (state.submenuOpen) {
     return {
       chromeKey: "submenu",
@@ -140,11 +181,15 @@ export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
 }
 
 export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet<GbaButton>): PartySelectState {
-  const next = { ...state, elapsed: state.elapsed + 1 };
-  if (next.sendOutConfirmed || next.elapsed < PARTY_LIST_INPUT_ELAPSED) return next;
+  const next = {
+    ...state,
+    elapsed: state.elapsed + 1,
+    sendOutElapsed: state.sendOutElapsed === null ? null : state.sendOutElapsed + 1,
+  };
+  if (next.sendOutElapsed !== null || next.elapsed < PARTY_LIST_INPUT_ELAPSED) return next;
   if (!next.submenuOpen && newKeys.has("DOWN")) return { ...next, cursor: "magby" };
   if (newKeys.has("A")) {
-    return next.submenuOpen ? { ...next, sendOutConfirmed: true } : { ...next, submenuOpen: true };
+    return next.submenuOpen ? { ...next, sendOutElapsed: 0 } : { ...next, submenuOpen: true };
   }
   return next;
 }

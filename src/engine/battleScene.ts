@@ -534,7 +534,7 @@ import partyMenuChromeAsset from "../assets/gen/party-menu-chrome.json" with { t
 import partyMonIconsAsset from "../assets/gen/party-mon-icons.json" with { type: "json" };
 import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay.json" with { type: "json" };
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
-import { partyMenuLayers, partySelectEntryPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, partySendOutPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
@@ -11659,6 +11659,24 @@ function fadeTurn15PartyFramebuffer(fb: Uint8Array, bgY: number, objMask: Uint8A
   }
 }
 
+/** The field's first fade-in VBlank rounds its 5-bit palette ramp upward
+ * (`BlendPalette`'s signed fade-in path), unlike the menu's fade-out floor.
+ * At coefficient 15 this leaves palette value 2 visible from white (16 in
+ * mGBA RGB), while all OBJ banks are still at black. */
+function fadeTurn15BattleFirstFrame(fb: Uint8Array, objMask: Uint8Array): void {
+  const source = fb.slice();
+  for (let p = 0; p < 240 * 160; p += 1) {
+    const o = p * 4;
+    if (objMask[o + 3] !== 0) { fb[o] = 0; fb[o + 1] = 0; fb[o + 2] = 0; fb[o + 3] = 255; continue; }
+    for (let c = 0; c < 3; c += 1) {
+      const component = source[o + c]! >> 3;
+      const faded5 = Math.ceil(component / 16);
+      fb[o + c] = (faded5 << 3) | (faded5 >> 2);
+    }
+    fb[o + 3] = 255;
+  }
+}
+
 /** Live OBJ ownership for the frozen "ONIX fainted!" battle frame. */
 function drawTurn15FaintFrameObjMask(mask: Uint8Array): void {
   // `drawTurn15FlyStrikeWindow`'s frozen frame has only these three OBJ
@@ -11696,12 +11714,12 @@ function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySele
   const layers = partyMenuLayers(state);
   for (const icon of layers.icons) drawTurn15PartyIcon(mask, icon);
   drawTurn15PartyStatus(mask, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
-  // Every party box owns a MenuPokeball OBJ; ONIX's selected box uses the
-  // open animation, the other two are closed, and CANCEL owns its own
-  // closed instance.  ONIX's faint-status badge is a fourth, independent
-  // status OBJ (the existing overlay helper covers BAYLEEF's live badge).
-  drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_OPEN_MASK, 32, 32, 16, 34);
-  drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 102, 25);
+  // Every party box owns a MenuPokeball OBJ.  Its open pose follows the
+  // selected live party slot, including MAGBY during the SEND OUT exit; the
+  // prior entry-only mask incorrectly left MAGBY's open-ball texels owned by
+  // the BG palette on alternating fade VBlanks.
+  drawPartyMenuSourceMask(mask, layers.icons[0]!.selected ? PARTY_MENU_BALL_OPEN_MASK : PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 16, 34);
+  drawPartyMenuSourceMask(mask, layers.icons[1]!.selected ? PARTY_MENU_BALL_OPEN_MASK : PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 102, 25);
   drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 102, 49);
   drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 198, 148);
   drawPartyMenuSourceMask(mask, PARTY_MENU_FNT_MASK, 32, 8, 50, 52);
@@ -11711,10 +11729,40 @@ function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySele
 
 const PARTY_ENTRY_FADE_OUT: FadeTiming = { startDelay: 0, startY: 0, targetY: 16 };
 const PARTY_ENTRY_FADE_IN: FadeTiming = { startDelay: 0, startY: 16, targetY: 0 };
+// SEND OUT clears its submenu one VBlank before UpdateNormalPaletteFade's
+// first BG coefficient change.  The first visible exit frame is therefore
+// structurally new but still uses coefficient zero.
+const PARTY_SENDOUT_FADE_OUT: FadeTiming = { startDelay: 1, startY: 0, targetY: 16 };
 
 /** Returns true once the party transition owns the framebuffer. */
 function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, party: import("./partySelect.ts").PartySelectState): boolean {
-  if (party.sendOutConfirmed) return false;
+  if (party.sendOutElapsed !== null) {
+    const phase = partySendOutPhase(party.sendOutElapsed);
+    if (phase === "submenuHold") {
+      drawTurn15PartySelectList(fb, party);
+      return true;
+    }
+    if (phase === "fadingOut") {
+      drawTurn15PartySelectList(fb, party);
+      const mask = new Uint8Array(fb.length);
+      drawTurn15PartyListObjMask(mask, party);
+      fadeTurn15PartyFramebuffer(fb, bgFadeY(party.sendOutElapsed - PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT), mask, objFadeY(party.sendOutElapsed - PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT));
+      return true;
+    }
+    if (phase === "black") return true;
+    // Rung 1 ends at this first visible battle palette step.  Reuse the live
+    // faint-frame field compositor, clear its old message text with the live
+    // battle window tilemap, then apply the same alternating BG/OBJ palette
+    // fade machinery as the party menu.
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawTurn13MurkrowSettled(fb);
+    drawSendOutHealthbox(fb, 0, murkrowHealthboxContent);
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    const mask = new Uint8Array(fb.length);
+    drawTurn15FaintFrameObjMask(mask);
+    fadeTurn15BattleFirstFrame(fb, mask);
+    return true;
+  }
   const phase = partySelectEntryPhase(party.elapsed);
   // The faint-message controller is torn down on the dismiss edge: its
   // cursor/bounce presentation freezes at that exact rendered battle frame
