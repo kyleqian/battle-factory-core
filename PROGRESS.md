@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 269 — Bounded worker (ISSUES #37 rung 1): **PARKED GREEN — raw field asset still required**
+
+- **State:** restored and committed-green at the existing rung-1 checkpoint:
+  canonical **192/200** (5px 20248/50/58/60/62; 273px 20253/54; 38400px
+  20302). The palette-only experiment did not reduce this set safely.
+- **Did:** re-ran the direct probe (valid 1.5 MB JSON despite expected exit
+  139) and traced the five pixels to the top MAGBY/status overlap and the
+  273px family to party-menu ball bank1/index15. A direct blue substitution
+  merely shifted that family to 20252/53; swapping the screenshot overlays
+  expanded it into 13--204px sprite diffs. Both were reverted.
+- **Next:** extract the real party-menu OAM tile/palette bank (not a
+  screenshot-restored chrome color) and compose it by raw index/priority;
+  then extract BG3 charbase2/screenbase26 plus field OAM for 20302. Do not
+  use overlay/mask or RGB-candidate fitting.
+- **Notes:** no production changes shipped. PAPERCUT: valid mGBA probe ends
+  SIGSEGV 139, ~3 min.
+
+---
 ## 268 — Bounded worker (ISSUES #37 rung 1): **GREEN PROBE CHECKPOINT — exact palette/field blocker**
 
 - **State:** baseline green: Tier-1 **1005/1005**, build **5.32 MB**.
@@ -43,22 +61,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** residuals are 5px at 20248/50/58/60/62, 273px at 20253/54,
   and full-frame at 20302 (delayed +30). PAPERCUT: verbose compare output,
   ~2 min.
-
----
-## 266 — Bounded characterization worker (ISSUES #37 post-SEND OUT): **READY FOR IMPLEMENTATION**
-
-- **State:** **SUPERVISOR ACCEPTED** — post-confirm path is oracle/RAM-
-  characterized only; no `src/` engine change. Independently reproduced
-  **17/17 PASS** over 316 fresh dense oracle captures; party canonical +
-  delayed remain **143/143**, Tier-1 **1004/1004**, build green.
-- **Did:** added `docs/turn15-sendout-notes.md`, dense pixel verifier and
-  RAM/OAM/VRAM dump. Pinned confirm/fade/black, field/text, Brendan+ball,
-  particles/MAGBY tint, healthbox 268→158 slide, blank 20551–56, settled
-  menu 20557 + bounce; recorded exact primitive-by-primitive reuse map.
-- **Next:** implement #37 rung 1 only (submenu exit/fade/black), using its
-  documented dense capture range; preserve no absolute tables/assets rule.
-- **Notes:** RAM settles MAGBY 138/138, PP 15/20/10/20, cursor 0; healthbox
-  pieces 1/63/62 slide -5 px/tick. PAPERCUT: mGBA emits megabytes of
-  diagnostics unless redirected, ~2 min.
 
 ---

@@ -1,4 +1,21 @@
 ---
+## 266 — Bounded characterization worker (ISSUES #37 post-SEND OUT): **READY FOR IMPLEMENTATION**
+
+- **State:** **SUPERVISOR ACCEPTED** — post-confirm path is oracle/RAM-
+  characterized only; no `src/` engine change. Independently reproduced
+  **17/17 PASS** over 316 fresh dense oracle captures; party canonical +
+  delayed remain **143/143**, Tier-1 **1004/1004**, build green.
+- **Did:** added `docs/turn15-sendout-notes.md`, dense pixel verifier and
+  RAM/OAM/VRAM dump. Pinned confirm/fade/black, field/text, Brendan+ball,
+  particles/MAGBY tint, healthbox 268→158 slide, blank 20551–56, settled
+  menu 20557 + bounce; recorded exact primitive-by-primitive reuse map.
+- **Next:** implement #37 rung 1 only (submenu exit/fade/black), using its
+  documented dense capture range; preserve no absolute tables/assets rule.
+- **Notes:** RAM settles MAGBY 138/138, PP 15/20/10/20, cursor 0; healthbox
+  pieces 1/63/62 slide -5 px/tick. PAPERCUT: mGBA emits megabytes of
+  diagnostics unless redirected, ~2 min.
+
+---
 ## 265 — Bounded worker (ISSUES #37 entry residual): **CLOSED — user-authorized probe outcome**
 
 - **State:** committed at `d0f843c`; direct sprite/VRAM/palette probe closed
