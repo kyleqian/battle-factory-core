@@ -7032,16 +7032,36 @@ export function turn13SwitchinSentOutTextVisibleChars(t: number): number {
  * cross-turn-boundary invisibility), the healthbox is UNCHANGED (docs/
  * turn14-notes.md's own "no separate check needed" finding - only the mon
  * sprite draw is suppressed).
+ *
+ * S7/S8 turn 15 boundary (ii) (docs/turn15-notes.md §6b/§8): `onixInvisible`
+ * (default `false`, every pre-existing call site unaffected) threads
+ * straight through to `drawTurn5RockSlideAttack`'s own existing
+ * `onixInvisible` param (already used by turn 9/10's own hit-flash
+ * mechanisms) - same "healthbox unaffected, only the mon sprite draw is
+ * suppressed" rule `murkrowInvisible` above already establishes.
+ * `healthboxY2Extra` (default 0) additively layers the hit-flash's own
+ * companion healthbox wobble (`DoHitAnimHealthboxEffect`) on top of the
+ * settled-menu idle bounce - same two-independent-mechanisms shape
+ * `turn9Ep2HealthboxWobbleY2`/`turn9Ep2OnixInvisible` already established
+ * for turn 9's own QUICK_ATTACK hit-flash (oracle-pixel-caught this
+ * session: without it, the player healthbox border/HP-text mismatches by a
+ * few hundred px for the wobble's own 20-tick RAM span, even though the
+ * mon sprite's own invisible toggle was already exactly right). `onixX2`
+ * (default 0) threads through to `drawTurn5RockSlideAttack`'s own existing
+ * `onixX2` param - `FlyUnleash`'s own `createvisualtask AnimTask_ShakeMon,
+ * 5, ANIM_TARGET, 6, 0, 8, 1` shakes Onix's own sprite horizontally
+ * (RAM-confirmed 6px pulses, not a formula fit).
  */
-function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number, murkrowInvisible: boolean = false): void {
-  drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, 0, false, 0, false, turn13MurkrowBgFadeY(t));
+function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number, murkrowInvisible: boolean = false, onixInvisible: boolean = false, healthboxY2Extra: number = 0, onixX2: number = 0): void {
+  drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, onixX2, onixInvisible, 0, false, turn13MurkrowBgFadeY(t));
   drawTurn5IconBar(fb, t, TURN13_ICONBAR_CREATE_TICK, TURN13_ICONBAR_FADE_START_TICK, TURN13_ICONBAR_DESTROY_TICK, TURN13_OPPONENT_ICON_STATES);
   if (!murkrowInvisible) drawTurn13MurkrowSwitchinSprite(fb, t);
   const murkrowHealthboxDx = healthboxSlideDx(t, TURN13_MURKROW_SETTLE_TICK + 1);
   if (murkrowHealthboxDx !== null) drawSendOutHealthbox(fb, murkrowHealthboxDx, murkrowHealthboxContent);
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(shiftedBounceTick));
-  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
-  drawPlayerHealthboxHpOverlay(fb, TURN12_ONIX_AFTER_AERIALACE_HP, bounce.healthboxY2);
+  const healthboxY2 = bounce.healthboxY2 + healthboxY2Extra;
+  drawMenuHealthboxPlayer(fb, 0, healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, TURN12_ONIX_AFTER_AERIALACE_HP, healthboxY2);
 }
 
 /**
@@ -11000,6 +11020,228 @@ function turn15KickoffBounceTick(t: number, pressTick: number): number {
   return TURN5_SITRUS_MENU_REDRAW_TICK;
 }
 
+// --- S7/S8 turn 15 boundary (ii) (docs/turn15-notes.md §6b/§8, ISSUES #36):
+// the FLY strike-half ANIMATION CORE - `AnimFlyBallAttack`'s own diagonal
+// translate ball (slot 3), Onix's own pre/post-impact invisible windows plus
+// the hit-flash toggle proper (slot 6), and the impact sprite (slot 4).
+// PROBE 1 verdict (source + RAM, this session): the impact sprite IS the
+// ALREADY-WIRED `gBasicHitSplatSpriteTemplate`/`ANIM_TAG_IMPACT` family
+// ISSUES #31 solved for turn 9's own QUICK_ATTACK - `Move_FLY`'s own
+// `FlyUnleash` script literally calls `create_basic_hitsplat_sprite
+// ANIM_ATTACKER, 2, x=0, y=0, relative_to=ANIM_TARGET, animation=0`
+// (`data/battle_anim_scripts.s:6417`), confirmed further by RAM: the
+// sprite's own OAM matrix reads a CONSTANT neutral `{256,0,0,256}` for its
+// entire 9-tick life, matching `sAffineAnim_HitSplat_0`'s own flat
+// `AFFINEANIMCMD_FRAME(0,0,0,8)` (no zoom-in pop, unlike turn 9's own
+// zoomed `animation=1` instance, matrix 303) - and the exact same (72,88)
+// screen center turn 9's own hitsplat already uses (both are
+// `relative_to=ANIM_TARGET,x=0,y=0` against the same player-side Onix).
+// Pure re-anchor of existing machinery, no new asset extraction needed.
+// Render lag: `TURN15_STRIKE_RENDER_LAG=1` (RAM+1), the dominant family
+// convention this file already establishes for freshly-spawned-sprite
+// mechanisms (kickoff text, blend, flicker, hitsplat all RAM+1) -
+// oracle-pixel-verified against `turn15-fly-strike.json`, not assumed
+// blind. ---
+
+const TURN15_STRIKE_RENDER_LAG = 1;
+
+/**
+ * `AnimFlyBallAttack`'s own diagonal linear-translate ball sprite (slot 3) -
+ * literal RAM-truthed per-tick table (`dump-fly-anim.py` re-run this
+ * session, ticks 19035-19150 against the committed `battle1-turn15-dense.json`
+ * groundtruth), same "no formula fitting" convention `TURN14_FLY_BALL_TABLE`
+ * already establishes, even though the underlying motion here (`AnimTranslate
+ * Linear`, `battle_anim_flying.c:518-528`) is perfectly linear (x -10/tick,
+ * y +6/tick) and a formula would reproduce it exactly - kept literal for the
+ * same audit-ability precedent. `x`/`y` are the sprite's own real CENTER
+ * coordinate (`sprite->x + sprite->x2`, `sprite->y + sprite->y2`) - the
+ * mid-flight base-x "snap" at RAM 19065 the dossier's own §6b already flags
+ * is pure bookkeeping (`AnimFlyBallAttack_Step` flushes `x2` into `x` once
+ * its own fixed-point accumulator's integer part exceeds 200), continuous
+ * on screen, RAM-confirmed exactly (no jump in `x+x2`). Rotation is a SINGLE
+ * constant matrix for the sprite's entire life (RAM-confirmed unchanging
+ * 19045-19074), not a per-tick affine table like turn 14's own squash/
+ * stretch ball - `sAffineAnim_FlyBallAttack_1`'s own single
+ * `AFFINEANIMCMD_FRAME(0,0,-40,1)` sets a ONE-TIME ~-56.25° rotation then
+ * ends, matching the RAM-read `{a:142,b:212,c:-212,d:142}` exactly
+ * (`cos(-56.25°)*256≈142`, `sin(-56.25°)*256≈-213`). `gFlyBallAttackSprite
+ * Template` uses `gOamData_AffineNormal_ObjNormal_64x64` - AFFINE_NORMAL,
+ * NOT double - so real hardware hard-clips rotated corners outside the
+ * native 64x64 box, the same `doubleSizeBox=false` rule
+ * `gFallingFeatherSpriteTemplate`'s own precedent already established.
+ */
+const TURN15_FLY_BALL_RAM_START = 19045;
+const TURN15_FLY_BALL_TABLE: readonly { x: number; y: number }[] = [
+  { x: 262, y: -26 }, // RAM 19045
+  { x: 252, y: -20 }, // RAM 19046
+  { x: 242, y: -14 }, // RAM 19047
+  { x: 232, y: -8 }, // RAM 19048
+  { x: 222, y: -2 }, // RAM 19049
+  { x: 212, y: 4 }, // RAM 19050
+  { x: 202, y: 10 }, // RAM 19051
+  { x: 192, y: 16 }, // RAM 19052
+  { x: 182, y: 22 }, // RAM 19053
+  { x: 172, y: 28 }, // RAM 19054
+  { x: 162, y: 34 }, // RAM 19055
+  { x: 152, y: 40 }, // RAM 19056
+  { x: 142, y: 46 }, // RAM 19057
+  { x: 132, y: 52 }, // RAM 19058
+  { x: 122, y: 58 }, // RAM 19059
+  { x: 112, y: 64 }, // RAM 19060
+  { x: 102, y: 70 }, // RAM 19061
+  { x: 92, y: 76 }, // RAM 19062
+  { x: 82, y: 82 }, // RAM 19063
+  { x: 72, y: 88 }, // RAM 19064
+  { x: 62, y: 94 }, // RAM 19065
+  { x: 52, y: 100 }, // RAM 19066
+  { x: 42, y: 106 }, // RAM 19067
+  { x: 32, y: 112 }, // RAM 19068
+  { x: 22, y: 118 }, // RAM 19069
+  { x: 12, y: 124 }, // RAM 19070
+  { x: 2, y: 130 }, // RAM 19071
+  { x: -8, y: 136 }, // RAM 19072
+  { x: -18, y: 142 }, // RAM 19073
+  { x: -28, y: 148 }, // RAM 19074
+];
+const TURN15_FLY_BALL_MATRIX = { pa: 142, pb: 212, pc: -212, pd: 142 };
+
+function drawTurn15FlyBallDescent(fb: Uint8Array, t: number): void {
+  const ramTick = t - TURN15_STRIKE_RENDER_LAG;
+  const entry = TURN15_FLY_BALL_TABLE[ramTick - TURN15_FLY_BALL_RAM_START];
+  if (!entry) return;
+  drawSpriteSheetAffineRotate(
+    fb,
+    battleAnimFlyBall.tileset,
+    battleAnimFlyBall.palette,
+    entry.x,
+    entry.y,
+    TURN15_FLY_BALL_MATRIX.pa,
+    TURN15_FLY_BALL_MATRIX.pb,
+    TURN15_FLY_BALL_MATRIX.pc,
+    TURN15_FLY_BALL_MATRIX.pd,
+    undefined,
+    false,
+  );
+}
+
+/**
+ * Onix's own mon sprite (slot 6) `invisible` flag is RAM-true 19042-19081
+ * (spanning the ball's whole flight plus the impact sprite's own lead-in) -
+ * BUT oracle pixels prove Onix stays visibly ON SCREEN, unchanged,
+ * throughout that whole span (dense re-check this session, e.g. render
+ * 19050: oracle shows Onix's ordinary silhouette, byte-identical to the
+ * settled baseline - NOT hidden). This is `FlyUnleash`'s own `monbg
+ * ANIM_DEF_PARTNER` at work (`data/battle_anim_scripts.s:6412`): the real
+ * OBJ sprite is swapped for a BG-layer-composited copy (the same "convert
+ * to BG so `setalpha`'s own OBJ<->BG blend can apply" trick
+ * `battle-move-anim-tables.json`'s own `doubleTeam` entry documents
+ * elsewhere in this file) - the OBJ-level `invisible` bit hides the
+ * now-redundant original sprite while the BG copy renders the identical
+ * pixels in its place, so this window needs NO visibility change at the
+ * engine level (only the LATER, genuine hit-flash toggle - RAM 19107
+ * onward, once `clearmonbg`'s own BG-copy teardown has happened - actually
+ * suppresses pixels). Not independently source-traced past the script
+ * read above (§6f's own "pure wiring reusing the standard hit-flash
+ * family" flag, function-name-level confirmation of the toggle itself
+ * still open) - toggle shape modeled literally from RAM: 4 distinct
+ * ~4-tick invisible pulses (19107-110/115-118/123-126/131-134), settling
+ * visible for good at 19135.
+ */
+function turn15OnixInvisible(t: number): boolean {
+  const ramTick = t - TURN15_STRIKE_RENDER_LAG;
+  if (ramTick < 19107) return false;
+  if (ramTick <= 19134) return Math.floor((ramTick - 19107) / 4) % 2 === 0;
+  return false;
+}
+
+/**
+ * Murkrow's own mon sprite (slot 5) flips `invisible->false` at RAM 19075,
+ * the SAME tick the ball sprite is destroyed (`AnimFlyBallAttack_Step`'s
+ * own source-code branch, both in the same `if` block - RAM-confirmed
+ * simultaneous, §6b).
+ */
+function turn15MurkrowInvisible(t: number): boolean {
+  return t - TURN15_STRIKE_RENDER_LAG < 19075;
+}
+
+/**
+ * Onix's own `x2` shake, `AnimTask_ShakeMon`'s own instance from
+ * `FlyUnleash`'s script (`createvisualtask AnimTask_ShakeMon, 5,
+ * ANIM_TARGET, 6, 0, 8, 1`) - literal RAM-truthed set (same "no formula
+ * fitting" convention as `TURN15_FLY_BALL_TABLE`, mirroring
+ * `TURN9_EP1_ONIX_SHAKE_RENDER_OFFSETS`'s own shape): `x2=6` for RAM
+ * 19069-19070/19073-19074/19077-19078 (three 2-tick pulses), `0`
+ * everywhere else - oracle-pixel-caught this session (without it, the
+ * hitsplat's own live-fb blend target reads Onix's UNSHIFTED body color,
+ * mismatching by ~1600px for 6 of the hitsplat's 9 live ticks).
+ */
+const TURN15_ONIX_SHAKE_X2 = 6;
+const TURN15_ONIX_SHAKE_RAM_TICKS: ReadonlySet<number> = new Set([19069, 19070, 19073, 19074, 19077, 19078]);
+function turn15OnixShakeX2(t: number): number {
+  return TURN15_ONIX_SHAKE_RAM_TICKS.has(t - TURN15_STRIKE_RENDER_LAG) ? TURN15_ONIX_SHAKE_X2 : 0;
+}
+
+/**
+ * The hit-flash's own companion healthbox wobble (`DoHitAnimHealthboxEffect`,
+ * `src/pokeball.c:1284-1291`) - a SEPARATE mechanism from the sprite
+ * invisible toggle above, same two-independent-effects shape
+ * `turn9Ep2HealthboxWobbleY2`/`turn9Ep2OnixInvisible` already established
+ * (turn 9's own `-1` RAM-tick offset between the two: healthbox starts one
+ * tick before the sprite flicker). Oracle-pixel-bisected this session (not
+ * assumed from turn 9's own constant): diff starts render 19107, ends
+ * render 19127 (20 ticks, matching turn 9's own 20-tick span, not the
+ * generic doc entry's "21 ticks") - RAM start = 19107 - `TURN15_STRIKE_
+ * RENDER_LAG` - 1 = 19105... but the ALREADY-established render-lag
+ * convention (`ramTick = t - TURN15_STRIKE_RENDER_LAG`) applied to the
+ * render window directly gives RAM 19106-19125, one tick before the
+ * flicker's own RAM 19107 start - exactly turn 9's own offset.
+ */
+const TURN15_HEALTHBOX_WOBBLE_RAM_START = 19106;
+const TURN15_HEALTHBOX_WOBBLE_TICKS = 20;
+function turn15OnixHealthboxWobbleY2(t: number): number {
+  const ramTick = t - TURN15_STRIKE_RENDER_LAG;
+  const n = ramTick - TURN15_HEALTHBOX_WOBBLE_RAM_START;
+  if (n < 0 || n >= TURN15_HEALTHBOX_WOBBLE_TICKS) return 0;
+  return n % 2 === 0 ? 1 : -1;
+}
+
+/**
+ * The impact sprite (slot 4) - see this section's own module doc above for
+ * the identity verdict (PROBE 1). Reuses `battleAnimHitsplat` verbatim
+ * (turn 9's own ISSUES #31 asset), but NOT its own `drawSpriteSheetAffine
+ * StretchBlendedOverFb`-against-the-STATIC-FIELD blend target - oracle-
+ * pixel-solved this session (not assumed from turn 9's own precedent):
+ * sampling the exact center pixel (72,88) during the hitsplat's own life
+ * gives `(255,255,220)`, which only reproduces exactly (`eva=12,evb=8`
+ * against `src=(255,255,173)` = the sprite's own brightest palette entry)
+ * when the blend TARGET is Onix's own already-rendered body color at that
+ * pixel (`(189,181,181)`, sampled from an adjacent frame with the hitsplat
+ * absent) - NOT the static background (`(255,255,255)` there, which would
+ * blend to pure white, the wrong, too-bright result this session's first
+ * attempt produced). Unlike turn 9's own QUICK_ATTACK instance (RAM-proven
+ * to unconditionally win its OAM tie and exclude Onix from the blend),
+ * FLY's own hitsplat blends against the LIVE, already-composited
+ * framebuffer - matrix is neutral (256, no zoom) so the plain non-affine
+ * `drawSpriteSheetBlendedOverFb` (corner-based, live-fb blend) is both
+ * simpler and correct here, no rotate/scale sampling needed.
+ */
+const TURN15_HITSPLAT_CENTER = { x: 72, y: 88 };
+const TURN15_HITSPLAT_RAM_START = 19067;
+const TURN15_HITSPLAT_RAM_END = 19075;
+function drawTurn15ImpactHitsplat(fb: Uint8Array, t: number): void {
+  const ramTick = t - TURN15_STRIKE_RENDER_LAG;
+  if (ramTick < TURN15_HITSPLAT_RAM_START || ramTick > TURN15_HITSPLAT_RAM_END) return;
+  drawSpriteSheetBlendedOverFb(
+    fb,
+    battleAnimHitsplat.tileset,
+    battleAnimHitsplat.palette,
+    TURN15_HITSPLAT_CENTER.x - 16,
+    TURN15_HITSPLAT_CENTER.y - 16,
+    12,
+    8,
+  );
+}
+
 /**
  * Murkrow's own FLY strike-half kickoff text, "Foe MURKROW used\nFLY!"
  * (docs/turn15-notes.md §4). Unlike every prior turn's own kickoff (a real
@@ -11013,15 +11255,18 @@ function turn15KickoffBounceTick(t: number, pressTick: number): number {
  * itself gates straight on `TURN15_FLY_STRIKE_TEXT_START_TICK`, and this
  * function only ever renders from that tick on. Onix's own on-field bounce
  * stays FROZEN throughout (`turn15KickoffBounceTick`, same rule every prior
- * turn's own resolution window establishes); Murkrow's own mon sprite stays
- * invisible (carried from turn 14's own FLY-up hide, persisted through
- * `STATUS3_ON_AIR` - docs/turn15-notes.md §3) through this entire
- * boundary-(i) window - it doesn't reappear until the strike animation's own
- * impact tick (19075, boundary (ii), out of this function's scope).
+ * turn's own resolution window establishes). Boundary (ii) (this session):
+ * the strike animation core - ball descent, Onix's own invisible/hit-flash
+ * windows (plus the hit-flash's own companion healthbox wobble), the
+ * impact sprite, and Murkrow's own re-reveal at 19075 - layers on top of
+ * the same field base via `onixInvisible`/`murkrowInvisible`/
+ * `healthboxY2Extra`.
  */
 function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number): void {
   const frozenBounceTick = turn15KickoffBounceTick(t, pressTick);
-  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, true);
+  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, turn15MurkrowInvisible(t), turn15OnixInvisible(t), turn15OnixHealthboxWobbleY2(t), turn15OnixShakeX2(t));
+  drawTurn15ImpactHitsplat(fb, t);
+  drawTurn15FlyBallDescent(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, turn15SimpleVisibleChars(t, TURN15_FLY_STRIKE_TEXT_START_TICK, TURN15_FLY_STRIKE_TEXT_TOTAL));
 }
