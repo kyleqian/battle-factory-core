@@ -10896,7 +10896,7 @@ export const TURN14_DRAGONBREATH_MENU_REDRAW_DELAY = TURN14_MENU_REDRAW_TICK - T
  * REDRAW_TICK`, yields exactly `TURN5_SITRUS_MENU_REDRAW_TICK`).
  */
 function turn14KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t + TURN13_SWITCHIN_RESET_SHIFT;
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN13_SWITCHIN_RESET_SHIFT;
   return TURN5_SITRUS_MENU_REDRAW_TICK;
 }
 
@@ -10963,7 +10963,7 @@ function drawTurn14FlyMissWindow(fb: Uint8Array, t: number, pressTick: number): 
 function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (sm.openElapsed === null || t < revealTick) {
-    const shiftedBounceTick = t + TURN13_SWITCHIN_RESET_SHIFT;
+    const shiftedBounceTick = sm.openElapsed === null ? t + TURN13_SWITCHIN_RESET_SHIFT : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN13_SWITCHIN_RESET_SHIFT;
     drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawTurn5SitrusSettledMenuChrome(fb);
@@ -10976,11 +10976,15 @@ function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
       return;
     }
   }
-  const shiftedBounceTick = sm.confirmElapsed !== null ? turn14KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t + TURN13_SWITCHIN_RESET_SHIFT;
+  const shiftedBounceTick = sm.confirmElapsed !== null ? turn14KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN13_SWITCHIN_RESET_SHIFT;
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
-  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true);
+  // turn13Resolved must be true here (turn 13 has already resolved by this
+  // reopen) while turn14Resolved stays at its default false (this turn's
+  // own confirm hasn't happened yet) - matches the (N-1)-trues pattern
+  // every other turnN's own analogous call already establishes.
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true);
 }
 
 // --- S7/S8 turn 15 (docs/turn15-notes.md): Murkrow's FLY strike-half kickoff
@@ -11016,7 +11020,7 @@ function turn15SimpleVisibleChars(t: number, start: number, total: number): numb
  * exactly, one level deeper than turn 14's own identity.
  */
 function turn15KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t + TURN14_MENU_REDRAW_RESET_SHIFT;
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN14_MENU_REDRAW_RESET_SHIFT;
   return TURN5_SITRUS_MENU_REDRAW_TICK;
 }
 
@@ -11303,7 +11307,7 @@ function drawTurn15FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
       return;
     }
   }
-  const shiftedBounceTick = sm.confirmElapsed !== null ? turn15KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t + TURN14_MENU_REDRAW_RESET_SHIFT;
+  const shiftedBounceTick = sm.confirmElapsed !== null ? turn15KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN14_MENU_REDRAW_RESET_SHIFT;
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);

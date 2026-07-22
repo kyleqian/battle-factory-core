@@ -13,9 +13,11 @@ Opened 2026-07-22 (wiring step), trimmed same day (boundary (ii) close-out,
 `docs/turn15-notes.md` §8). Boundaries (i) (reopen gate/submenu/confirm/
 kickoff text) and (ii) (the FLY strike animation core — ball descent,
 impact sprite, Onix's own hit-flash/shake/healthbox-wobble) are wired and
-committed, `turn15-fly-strike.json` 176/176 0 diff over 18956-19141 (3
+committed, `turn15-fly-strike.json` **183/183** 0 diff over 18956-19141 (3
 ticks excluded, 19059-19061, a small rotated-affine corner-rounding
-residual — see §8, not chased further, shared-primitive risk).
+residual — see §8, not chased further, shared-primitive risk; the
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` rider fix — ISSUES #35's old family —
+restored the other 7, `docs/turn13-bounce-notes.md` §13).
 
 **Still not started**: the "Foe MURKROW's attack was\nnot very effective..."
 text, the HP-drain-to-0 bar (§8 close-out found this starts at RAM 19142,
@@ -34,31 +36,6 @@ new derivation expected, unlike boundary (ii)'s own two probes.
 oracle-pixel-bisected), then the HP-drain bar/text countdown from 19142,
 then the faint-sink teardown, then the fainted-hold — extending
 `turn15-fly-strike.json` through ~19990, 0 diff.
-
-## #35 — Turn 15 boundary (i): 7-tick sine-bounce "extremum" mismatch on
-  Onix's own idle sprite during the FIGHT-submenu open/pre-confirm wait,
-  excluded from `turn15-fly-strike.json` (82/82)
-
-Opened 2026-07-22 (wiring step). While wiring turn 15's own FIGHT-submenu
-reopen (cursor persisted at DRAGON_BREATH, `TURN14_MENU_REDRAW_RESET_SHIFT`-
-based bounce, structurally identical to turn 14's own analogous window),
-7 specific ticks — 18965/18966, 18974/18975, 18983/18984/18985 — show a
-1500-2300px diff isolated entirely to Onix's own on-field sprite silhouette
-(healthbox/submenu/Murkrow all pixel-exact). Same `menuIdleBounce`/
-`turn5SitrusResettledBounceTick` sine-table composition turn 13/14 already
-use unchanged; the failing ticks cluster in tight 2-3-tick groups spaced
-~9 ticks apart, the same shape as the already-documented "extremum class"
-bug (`docs/turn3-residual-probe-notes.md`, the `turn5SubmenuBounceTick`
-`-2`-tick phase-correction fix cited inline in `battleScene.ts` around
-`turn5SubmenuBounceTick`) — plausibly a pre-existing quantization edge in
-the shared sine table that turn 13/14's own denser capture windows just
-never happened to sample, not a bug in this session's new turn-15 code.
-**Not root-caused this session** (would need the same two-independent-
-methods RAM/pixel bar this dossier chain holds itself to, pointed at the
-sine table's own index math right at these 7 ticks). Excluded from
-`turn15-fly-strike.json`'s boundary-(i) capture set rather than guessed at.
-**Next step:** RAM-probe `menuIdleBounce`'s own sine index at these exact
-ticks before proposing a fix shape.
 
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
@@ -95,10 +72,9 @@ or the tint coefficient right at those two specific ticks. **Next step**:
 a fresh probe (RAM/VRAM, same two-independent-methods bar) pointed at
 just those two ticks — do not re-guess a fix without it.
 
-## #34 — Turn 14's FIGHT-submenu reopen family (`17722-17768`, 43 ticks) and
-  the separate `17781-17787` (7 ticks) window still excluded from
-  `turn14-fly-miss.json`; both plausibly the same 6-tick-blank-hold bug
-  class as the now-fixed settled-menu redraw, neither characterized
+## #34 — Turn 14's `17781-17787` (7 ticks) and `17822-17845` (24 ticks,
+  kerning-class) windows still excluded from `turn14-fly-miss.json`;
+  the `17722-17768` reopen family (43 ticks) is now FULLY CLOSED
 
 Opened 2026-07-21/22, **core fixed 2026-07-22** (wiring step,
 `docs/turn13-bounce-notes.md` §§10-11): turn 14's own settled-menu redraw
@@ -113,25 +89,26 @@ branch. `turn14-fly-miss.json` **165/165, 0 diff** (was 150/150; the 15
 predicted ticks 18080-18090/18095/18415/18815/18956 all restored clean,
 first try).
 
-**Remaining** (this entry's own honest scope now): the brief's cheap
-conditional check (restore-and-test 17722-17768 against a scratch trace,
-not committed) came back **0/43 pass** - smallest diff 6px, several far
-larger (up to 2331px at 17753) - so the "may already be right, artifact of
-un-applied `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`" theory does NOT hold under a
-real pixel check. This family (the FIGHT-submenu reopen, a DIFFERENT
-reveal event than the now-fixed settled-menu redraw,
-`TURN13_DRAGONBREATH_MENU_REDRAW_DELAY`-gated) and `17781-17787` (7 ticks,
-0/7 pass, same probable bug class, not separately characterized) both stay
-excluded from `turn14-fly-miss.json`. A RAM probe (17640-17800) shows the
-bounce driver already active at the earliest point probed, i.e. this
-family's own reveal instant happened even earlier than currently modeled,
-with no gap visible in the already-probed span - the fix, if this really
-is the same bug class, needs its own dedicated RAM probe of the actual
-(earlier, unprobed) reopen-reveal instant before a fix shape can be named.
-**Next step:** that probe, same two-independent-methods bar this dossier
-holds itself to, not a re-guess. `17822-17845` (24 ticks, kerning-class,
-per #33(b)'s own dossier) is a separate, already-flagged issue - stays
-excluded untested, do not test it without re-scoping.
+**`17722-17768` (43 ticks) CLOSED 2026-07-22** (rider fix, `docs/turn13-
+bounce-notes.md` §13): the missing `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
+correction (§12's root cause) plus one adjacent, independently-discovered
+bug — `drawTurn14FightSubmenuWindow`'s own `drawFightSubmenuChrome` call
+was missing one `true` (`turn13Resolved`), under-counting DRAGON_BREATH's
+PP by 1 (19/20 rendered vs. oracle's 18/20) for the ENTIRE FIGHT-submenu-
+open span, independent of the bounce formula — together close all 43
+ticks, including the 11 (`17758-17768`) previously ruled OUT of the
+shift rule's own scope (RAM-correctly predicted the frozen bounce there,
+but rendered the same wrong PP digit) and the single-tick confirm-press
+blip (17755). `turn14-fly-miss.json`: **185/185, 0 diff**.
+
+**Remaining** (this entry's own honest scope now): `17781-17787` (7 ticks)
+and `17822-17845` (24 ticks, kerning-class, per #33(b)'s own dossier) —
+neither touched or re-tested this session, per the brief's explicit scope
+fence. Stay excluded from `turn14-fly-miss.json`. **Next step:** a fresh
+RAM/pixel probe of `17781-17787` (same two-independent-methods bar this
+dossier holds itself to — it may or may not share the now-fixed PP bug,
+untested); `17822-17845` needs its own kerning-specific investigation,
+unrelated to either bug fixed this session.
 
 ## #32 — Turn 9 QUICK_ATTACK clones (slots 3/4): 203px residual at renders
   10940-10941 only, excluded from `turn9-quickattack.json`

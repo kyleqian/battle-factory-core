@@ -749,3 +749,79 @@ formula-transcription/model-fit script was a scratch tool (not committed,
 same precedent §8/§10's own scratch fits set - the COMMITTED, re-runnable
 pin is the oracle-only `verify-submenu-bounce.ts`). `npm test` 993/993
 (unchanged, no `src/` touched), `npm run build` green.
+
+## 13. Wiring close-out (main-lane worker, 2026-07-22) — §12's fix landed,
+plus one adjacent bug it exposed
+
+Mandatory-first-step re-run: `verify-submenu-bounce.ts` 22/22 PASS
+(unaffected, oracle-only). Wired §12e's fix shape exactly: `turn14Kickoff
+BounceTick`'s and `turn15KickoffBounceTick`'s own pre-freeze arms, plus
+`drawTurn14FightSubmenuWindow`'s and `drawTurn15FightSubmenuWindow`'s own
+post-reveal/pre-confirm arms, all four now read `t - FIGHT_SUBMENU_OPEN_
+BOUNCE_SHIFT + <turn's own RESET_SHIFT>` in place of the bare `t + <RESET_
+SHIFT>` §12a found missing.
+
+**Turn 15**: `turn15-fly-strike.json` restored all 7 named ticks (18965,
+18966, 18974, 18975, 18983, 18984, 18985) clean first try — **183/183, 0
+diff**. ISSUES #35 (the "extremum" mismatch this same 7-tick family was
+filed under before §12 root-caused it) is now DELETED, not just trimmed —
+its whole family closes under this one rule.
+
+**Turn 14 needed two more findings beyond §12e's own literal text** before
+its own 9 named ticks (17726, 17727, 17735, 17736, 17744, 17745, 17753,
+17754, 17755) actually hit 0 diff:
+
+1. **The pre-reveal branch needs the shift too, when a real press has
+   already registered.** §12e's own point 4 says "the PRE-reveal branches
+   ... are NOT touched," verified only against turn 15's own 2-tick sanity
+   window (18956-18957) where `sm.openElapsed` is null (FIGHT hasn't even
+   been pressed yet) — a degenerate case where shifted and unshifted
+   formulas coincide, so that evidence never actually constrained the
+   OTHER sub-case: `sm.openElapsed !== null && t < revealTick` (FIGHT
+   already pressed, chrome not yet visually revealed 5 ticks later). Turn
+   14's own real button script presses FIGHT open at 17723 and its own
+   chrome doesn't reveal until 17728 (`FIGHT_SUBMENU_OPEN_DELAY`=5) — so
+   17726/17727 (2 of the 9 named ticks) render DURING that gap, still
+   through the OLD unshifted formula, still 769px wrong, completely
+   unmoved by §12e's literal 4-edit fix. Oracle pixels (not just the RAM
+   composed-tuple check §12d already ran) prove the shift is live from the
+   real open press itself, not from the later chrome-reveal event — split
+   `drawTurn14FightSubmenuWindow`'s combined `sm.openElapsed === null ||
+   t < revealTick` branch in two, applying the shift only when `sm.openElapsed
+   !== null` (post-press, pre-reveal). Closed 17726/17727 exactly, 0
+   regression across `turn13-switchin.json`/`turn13-menu.json` (both
+   still 240/240, 57/57 — their own analogous pre-reveal windows have
+   `sm.openElapsed === null` throughout, so the split is a no-op there).
+2. **A genuinely separate, adjacent bug**: `drawTurn14FightSubmenuWindow`'s
+   own `drawFightSubmenuChrome` call was passing only 10 `true`s after
+   `moveset` where the established per-turn pattern (`turn3Resolved` through
+   `turn13Resolved`, one more `true` than the previous turn's own call,
+   confirmed by grepping every `drawFightSubmenuChrome(` call site in
+   ascending turn order) calls for 11 — `turn13Resolved` itself was silently
+   defaulting to `false`. `currentPPForActiveMon`'s own `slot2Uses` therefore
+   undercounted DRAGON_BREATH's PP by 1 (19/20 rendered, oracle's real
+   18/20) for the WHOLE FIGHT-submenu-open span of turn 14's own reopen —
+   a static, per-tick-constant 6px text diff, unrelated to the bounce
+   formula, that's why it showed up as an identical 6px/0.02% diff at every
+   one of the remaining 7 named ticks (17735-17755) regardless of t. Fixed
+   by adding the missing `true` (leaving `turn14Resolved` at its own correct
+   default `false` — this turn hasn't resolved yet at any of these ticks).
+   This ALSO explained the previously-uncharacterized 11-tick remainder
+   (`17758-17768`) ISSUES #34 had ruled OUT of the shift rule's own scope
+   (§12d's RAM proved the frozen bounce branch already renders those
+   correctly) — same call site, same missing argument, affects every tick
+   in the FIGHT-submenu-open window regardless of confirm state. A scratch-
+   trace check (not initially part of this rider's scope, run because the
+   PP fix was clearly adjacent and cheap to verify) confirmed 11/11 clean;
+   folded into the committed trace rather than left stale.
+
+`turn14-fly-miss.json`: **185/185, 0 diff** (was 165/165) — the ENTIRE
+43-tick `17722-17768` family ISSUES #34 named is now closed, not just the
+9-tick shift subset. `17781-17787` and `17822-17845` (kerning-class) are
+untouched, per this session's own scope fence — ISSUES #34 trimmed to
+just those two windows.
+
+Verified: `verify-submenu-bounce.ts` 22/22 PASS (re-run, unaffected).
+Regression sweep 0 diff: `turn13-switchin.json` 240/240, `turn13-menu.json`
+57/57. `npm test` 993/993 (unchanged — no test-literal call sites reference
+either fix), `npm run build` green.
