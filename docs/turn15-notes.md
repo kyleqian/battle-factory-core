@@ -428,3 +428,44 @@ the fainted-text hold, 4 for both the party-list and the settled-MAGBY-menu
 holds) was higher than either prior retrofit found, suggesting future
 dossier sessions should default to assuming 3-4+ phase bounces on any
 button-gated hold rather than checking just 2 shas.
+
+## 7. Engine wiring, boundary (i) close-out (bounded worker, 2026-07-22)
+
+Wired the reopen gate + FIGHT submenu + confirm + kickoff-text window
+(18956-19044) per §5/§6's own reuse map. New `turn14Resolved` state flag
+(`src/engine/battleScene.ts`/`core.ts`) mirrors `turn13Resolved` exactly:
+`TURN14_DRAGONBREATH_MENU_REDRAW_DELAY` (= `TURN14_MENU_REDRAW_TICK` -
+`TURN14_DRAGONBREATH_PRESS_TICK` = 331) gates the reopen, cursor persisted
+at slot 2 (no nav), `currentPPForActiveMon` gets a 3rd slot-2 decrement
+(turn 14's own auto-missed DRAGON_BREATH still costs PP — 20→17, matching
+§4's own "PP 17/20" citation exactly).
+
+One correction to this dossier's own §4 table found in the process: the
+"confirm-press transient, submenu still on screen" row (18988→19003) is
+NOT followed by a bare/blank-box gap like turn 14's own charge-half kickoff
+(`turn14BareSceneStartTick`) — a fresh dense sha-transition probe (tick-by-
+tick, 18985-19080) shows the FIGHT submenu chrome holds byte-identical all
+the way through **19006**, then hard-cuts directly to the kickoff text's
+own first glyph at **19007** — no intervening blank tick at all. The
+kickoff text itself is 20 printable chars (not 21 as a naive line-length
+sum might suggest — "Foe MURKROW used" is 16 chars, not 17), oracle-pixel-
+bisected exact via the two space characters' own "no visible change" ticks
+(chars 3→4 at 19009/19010, chars 11→12 at 19017/19018) as an independent
+cross-check on top of the settle tick.
+
+Committed `tools/compare/traces/turn15-fly-strike.json`: 82/82, 0 diff,
+18956-19044 stride-1 minus 7 excluded ticks (a pre-existing sine-bounce
+"extremum" mismatch on Onix's own idle sprite, unrelated to this session's
+own new code — **ISSUES #35**). Regression sweep 0 diff: `turn14-fly-miss`
+165/165, `turn13-switchin` 240/240, `turn13-menu` 57/57. `npm test` 993/993
+(27 existing test-literal call sites across 5 files threaded the new
+`turn14Resolved` field), `npm run build` green.
+
+**Not attempted this session** (boundaries (ii)/(iii): the FLY strike
+animation core, not-very-effective text, HP drain, faint sink, fainted-hold
+— ticks 19045-19990): the ball-descent trajectory and the new impact
+sprite's own asset both need a dedicated RAM/VRAM probe pass this session's
+remaining budget didn't cover — **ISSUES #36** has the full scope and next
+steps. Everything else in §6f's reuse table (hit-flash, faint sink, fainted-
+hold, HP drain) is flagged "pure wiring reusing" an existing mechanism and
+should be mechanical once (ii)'s two new-derivation items land.

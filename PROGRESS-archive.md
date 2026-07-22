@@ -1,4 +1,52 @@
 ---
+## 252 — Bounded worker (turn-13 wiring step, ISSUES #33b): wired the probe-confirmed switch-in text-clear/menu-redraw split — `turn13-switchin.json` **191/191, 0 diff** (was 171/171); found a NEW regression in turn 14's own downstream reuse while restoring the probe's turn-14 predictions, filed as ISSUES #34 rather than re-derived on the spot — `turn14-fly-miss.json` **150/150, 0 diff** (net +1 from 149: +4 restored, -3 excluded as a real regression)
+
+- **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run
+  build` green, tree clean. `verify-turn13-bounce.ts` **14/14 PASS**
+  (mandatory-first-step rerun, both before and after the edit — oracle-
+  only, unaffected by `src/`). Regression sweep 0 diff: `turn13-menu`
+  57/57, `turn13-sandattack` 190/190, `turn13-dragonbreath-faint` 141/141,
+  `turn12-menu` 46/46.
+- **Did:** Wired `docs/turn13-bounce-notes.md` §6 exactly: new
+  `TURN13_SWITCHIN_TEXT_CLEAR_TICK=17106`; `TURN13_SWITCHIN_MENU_REDRAW_
+  TICK` moved `17106→17112`; new blank-hold branch in
+  `drawTurn13SwitchinWindow` mirroring `drawTurn5RockSlideWindow`'s own
+  no-op gap. `turn13-switchin.json` restored to 191/191 (the named
+  17106-17111/17113/17117-17122/17126-17130 family + spot ticks
+  17175/17200). Testing turn 14's predicted restores directly against
+  `npm run compare` (not just RAM) found they mostly don't hold: 0/13 of
+  the "likely closes" family (18080-18090/18815/18956) pass; only 4/54 of
+  the "flagged-maybe" families (17722-17768, 17781-17787) pass
+  (17722-17725). Worse, applying the corrected `TURN13_SWITCHIN_RESET_
+  SHIFT` to turn 14's own continuation formula regressed 3 previously-
+  passing ticks (18087/18095/18415) — a fresh oracle sha probe of
+  `TURN14_MENU_REDRAW_TICK`'s (18086) own neighborhood shows the SAME
+  structural signature #33(b) had (a 6-tick unmodeled blank hold at
+  18080-18085, before an already-correctly-anchored reveal at 18086) plus
+  an unresolved regime-reset-vs-continuation question for the bounce phase
+  from 18086 on. Did not re-derive this in-session (needs its own RAM
+  probe, same two-independent-methods bar this dossier holds itself to) —
+  filed as **ISSUES #34**, excluded the 3 regressed ticks + the tested-
+  and-failed families, restored the 4 that passed. ISSUES #33(b) deleted
+  (fixed); #33(a) untouched (sibling probe's own remainder, not touched
+  this session).
+- **Next:** ISSUES #34 (turn 14's own menu-redraw blank-hold + regime
+  question — needs `dump-turn13-bounce-driver.py`'s own method re-pointed
+  at 18086, then likely a small wiring pass much like this one); #33(a)'s
+  VRAM tile dump (frame2 asset); ISSUES #32; turn 15+ wiring.
+- **Notes:** Full writeup `docs/turn13-bounce-notes.md` §9 (owned this
+  round, per the brief). Third session in a row where a "banked, probe-
+  confirmed, pure wiring" derivation was locally exact (2 independent
+  methods, RAM+sha) yet still surfaced a genuinely new bug on contact with
+  a wider `npm run compare` sweep — this time one turn downstream, not in
+  the fix's own window. The fix itself is not in question (turn13-
+  switchin.json's own 191/191 is exact); the lesson is that shared
+  constants (`TURN13_SWITCHIN_RESET_SHIFT`) need their OWN reuse sites
+  re-verified, not just their defining window, before a session can claim
+  "no other constants change." No PAPERCUTS beyond the standing
+  mgba-venv-teardown one.
+
+---
 ## 251 — Bounded worker (turn-13 wiring step, ISSUES #33a): wired the banked MURKROW wobble table — RAM-cross-checked byte-exact fresh, anchor/frame-flip confirmed — but wiring alone didn't reach 0-diff; found+fixed 2 more real bugs (BG-fade never re-anchored for turn 13; tint-ramp needs to keep running into the wobble draw, unlike Pidgeotto's); `turn13-switchin.json` 156→**171/171**, 15 of 66 excluded ticks restored (17004-17018); remaining 51 ticks (17019-17069) re-excluded under a narrower, colors-now-ruled-out residual (likely the reused `frame2` asset is wrong art) — #33a NOT closed, trimmed not deleted
 
 - **State:** `npm test` **993/993** (unchanged), `npm run build` green, tree

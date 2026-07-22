@@ -5,6 +5,68 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #36 — Turn 15 boundary (ii)/(iii): FLY strike animation core (ball
+  descent + impact sprite + hit flash), not-very-effective text, HP drain,
+  faint sink, and the fainted-hold not yet wired — `turn15-fly-strike.json`
+  covers only boundary (i) (18956-19044)
+
+Opened 2026-07-22 (wiring step). Boundary (i) — reopen gate, FIGHT submenu,
+confirm, "Foe MURKROW used\nFLY!" kickoff text — is wired and committed,
+82/82 0 diff. The rest of `docs/turn15-notes.md`'s window (19045-19990) is
+**not started**: no `src/` code exists yet for the ball-descent animation,
+the new impact sprite, Onix's hit-flash, the "not very effective..." text,
+the HP-drain-to-0 bar, the first-ever player-side faint sink, or the
+button-gated "ONIX fainted!" hold. Ground truth for all of it is already
+banked in `docs/turn15-notes.md` §2-§4/§6b (RAM-exact ticks: ball spawns
+19045 at (272,-32) off-screen, translates via `AnimTranslateLinear` to
+Onix's position, base x snaps 272→62 at 19065; impact sprite (slot 4)
+spawns 19067 at (72,88), tile 433; ball destroyed + Murkrow visible again,
+simultaneous, at 19075; Onix hit-flash 19102-19135 (~4-tick invisible
+toggle, reuses the turn-9 hitflash family per §6f); faint-sink teardown at
+RAM 19325 (stat reset 19326, pixel vanish 19330); "ONIX fainted!" hold is a
+3-phase idle bounce, button-gated dismiss at 19990).
+
+**What's missing before this can be wired (not attempted this session,
+would need its own probe pass):** (1) the ball's own per-tick trajectory —
+dossier gives qualitative RAM notes (linear translation, an x-snap at
+19065) but no per-tick position table like turn 14's own
+`TURN14_FLY_BALL_TABLE` — needs `dump-fly-anim.py` re-run over 19045-19075
+against the committed `battle1-turn15-dense.json`. (2) the impact sprite's
+own asset (tile 433) was explicitly NOT source-traced or extracted by the
+scout (`docs/turn15-notes.md`'s own flag) — needs VRAM tile identification
++ extraction, the same class of work `extract-fly-ball.ts` did for the
+charge half's own ball. Both are real, bounded RAM/asset-extraction tasks,
+not blocked on anything else — just out of this session's remaining budget.
+**Next step:** a dedicated probe session for (1)+(2), then wire per the
+dossier's §6b/§6f tables (mechanically — every OTHER phase in that table
+is flagged "pure wiring reusing" an existing mechanism, no new derivation
+needed there).
+
+## #35 — Turn 15 boundary (i): 7-tick sine-bounce "extremum" mismatch on
+  Onix's own idle sprite during the FIGHT-submenu open/pre-confirm wait,
+  excluded from `turn15-fly-strike.json` (82/82)
+
+Opened 2026-07-22 (wiring step). While wiring turn 15's own FIGHT-submenu
+reopen (cursor persisted at DRAGON_BREATH, `TURN14_MENU_REDRAW_RESET_SHIFT`-
+based bounce, structurally identical to turn 14's own analogous window),
+7 specific ticks — 18965/18966, 18974/18975, 18983/18984/18985 — show a
+1500-2300px diff isolated entirely to Onix's own on-field sprite silhouette
+(healthbox/submenu/Murkrow all pixel-exact). Same `menuIdleBounce`/
+`turn5SitrusResettledBounceTick` sine-table composition turn 13/14 already
+use unchanged; the failing ticks cluster in tight 2-3-tick groups spaced
+~9 ticks apart, the same shape as the already-documented "extremum class"
+bug (`docs/turn3-residual-probe-notes.md`, the `turn5SubmenuBounceTick`
+`-2`-tick phase-correction fix cited inline in `battleScene.ts` around
+`turn5SubmenuBounceTick`) — plausibly a pre-existing quantization edge in
+the shared sine table that turn 13/14's own denser capture windows just
+never happened to sample, not a bug in this session's new turn-15 code.
+**Not root-caused this session** (would need the same two-independent-
+methods RAM/pixel bar this dossier chain holds itself to, pointed at the
+sine table's own index math right at these 7 ticks). Excluded from
+`turn15-fly-strike.json`'s boundary-(i) capture set rather than guessed at.
+**Next step:** RAM-probe `menuIdleBounce`'s own sine index at these exact
+ticks before proposing a fix shape.
+
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
   (240/240)
