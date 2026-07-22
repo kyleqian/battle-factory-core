@@ -534,7 +534,9 @@ import partyMenuChromeAsset from "../assets/gen/party-menu-chrome.json" with { t
 import partyMonIconsAsset from "../assets/gen/party-mon-icons.json" with { type: "json" };
 import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay.json" with { type: "json" };
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
-import { partyMenuLayers, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
+import { bgFadeY, type FadeTiming } from "./paletteFade.ts";
+import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
@@ -11628,8 +11630,7 @@ function drawTurn15PartyStatus(fb: Uint8Array, topOverlay: PartyStatusOverlay): 
  * before the settled list is ready we leave the scene black, and the open
  * debt is documented in ISSUES.md rather than hidden in a frame table.
  */
-function drawTurn15PartySelectWindow(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): boolean {
-  if (state.elapsed < 80 || state.sendOutConfirmed) return false;
+function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   const layers = partyMenuLayers(state);
   const pixels = partyChromePixels(layers.chromeKey);
   for (let p = 0, o = 0; p < 240 * 160; p += 1, o += 4) {
@@ -11638,13 +11639,54 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: import("./partySelec
   }
   for (const icon of layers.icons) drawTurn15PartyIcon(fb, icon);
   drawTurn15PartyStatus(fb, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
+}
+
+function fadeTurn15PartyFramebuffer(fb: Uint8Array, y: number): void {
+  for (let p = 0; p < 240 * 160; p += 1) {
+    const o = p * 4;
+    const faded = fadeColor({ r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! }, y);
+    fb[o] = faded.r; fb[o + 1] = faded.g; fb[o + 2] = faded.b; fb[o + 3] = 255;
+  }
+}
+
+const PARTY_ENTRY_FADE_OUT: FadeTiming = { startDelay: 0, startY: 0, targetY: 16 };
+const PARTY_ENTRY_FADE_IN: FadeTiming = { startDelay: 0, startY: 16, targetY: 0 };
+
+/** Returns true once the party transition owns the framebuffer. */
+function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, party: import("./partySelect.ts").PartySelectState): boolean {
+  if (party.sendOutConfirmed) return false;
+  const phase = partySelectEntryPhase(party.elapsed);
+  // The faint-message controller is torn down on the dismiss edge: its
+  // cursor/bounce presentation freezes at that exact rendered battle frame
+  // for the hold and for every source frame fed into the fade.  Deriving the
+  // entry tick from current scene elapsed keeps delayed A presses honest.
+  const entryTick = TICK0 + state.elapsed - party.elapsed;
+  const pressTick = state.fightSubmenu.confirmElapsed === null ? TURN15_FLY_STRIKE_TEXT_START_TICK : TICK0 + state.fightSubmenu.confirmElapsed;
+  if (phase === "battleHold") {
+    drawTurn15FlyStrikeWindow(fb, entryTick, pressTick);
+    return true;
+  }
+  if (phase === "fadingOut") {
+    drawTurn15FlyStrikeWindow(fb, entryTick, pressTick);
+    const local = party.elapsed - PARTY_ENTRY_FADE_OUT_START;
+    const y = bgFadeY(local, PARTY_ENTRY_FADE_OUT);
+    fadeTurn15PartyFramebuffer(fb, y);
+    return true;
+  }
+  if (phase === "black") return true;
+  drawTurn15PartySelectList(fb, party);
+  if (phase === "fadingIn") {
+    const local = party.elapsed - PARTY_ENTRY_FADE_IN_START;
+    const y = bgFadeY(local, PARTY_ENTRY_FADE_IN);
+    fadeTurn15PartyFramebuffer(fb, y);
+  }
   return true;
 }
 
 /** Renders the full battle-scene-assembly frame for `state` (elapsed since TICK0). */
 export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void {
   const t = TICK0 + state.elapsed;
-  if (state.turn15PartySelect && drawTurn15PartySelectWindow(fb, state.turn15PartySelect)) return;
+  if (state.turn15PartySelect && drawTurn15PartySelectWindow(fb, state, state.turn15PartySelect)) return;
   const win = windowRange(t);
   if (!win) return; // solid black
   if (t < SLIDE_END_TICK) {

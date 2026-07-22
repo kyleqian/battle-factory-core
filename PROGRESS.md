@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 263 — Bounded worker (ISSUES #37 entry transition): **CHECKPOINT — palette-bank compositor remains**
+
+- **State:** `npm test` **1002/1002**, `npm run build` green; production JS
+  **5.16 MB**. Source-icon composition remains **5/5 PASS, 0/38400 each**.
+- **Did:** Oracle-confirmed the supervisor sequence exactly: canonical
+  dismiss trace tick 19990 (human frame 19991), held 19990–20011,
+  fade-out 20012–20026, black 20027–20054, fade-in 20055–20070, settled
+  20071; the delayed trace is the same sequence +30. Added press-relative
+  phase API/tests, dense 143-capture windows to both traces, and froze the
+  source battle presentation from the actual dismiss edge. Both compares
+  now prove every hold/black/settled frame exact, **123/143** each.
+- **Next:** finish only the 20 alternating fade-palette frames. The failed
+  direct whole-frame blend proves the hardware alternates palette banks:
+  the fade-out's odd frames and fade-in's even frames are exact; do not
+  reuse the reverted OBJ-mask experiment without deriving the actual bank
+  ownership. Then rerun both dense compares to 143/143 and trim #37.
+- **Notes:** No commit yet: acceptance’s 0-diff bar is not met. No PAPERCUTS.
+
+---
 ## 262 — Bounded worker (ISSUES #37 icon/OAM half): **CLOSED** — live icon-free party compositor; canonical + delayed traces **62/62, 0 diff**
 
 - **State:** `npm test` **1001/1001**, `npm run build` green; production JS

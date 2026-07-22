@@ -25,6 +25,31 @@ export interface PartySelectState {
   sendOutConfirmed: boolean;
 }
 
+/**
+ * The forced-switch transition is anchored to the A edge that dismisses
+ * "ONIX fainted!", never to an absolute battle tick.  The boundaries are
+ * oracle-pinned for the canonical trace and repeat unchanged when that A is
+ * delayed: 21 held battle frames, 15 fade-out frames, 28 black frames, then
+ * 16 fade-in frames before the live party list is usable.
+ */
+export type PartySelectEntryPhase = "battleHold" | "fadingOut" | "black" | "fadingIn" | "settled";
+export const PARTY_ENTRY_BATTLE_HOLD_FRAMES = 22;
+export const PARTY_ENTRY_FADE_OUT_FRAMES = 15;
+export const PARTY_ENTRY_BLACK_FRAMES = 28;
+export const PARTY_ENTRY_FADE_IN_FRAMES = 16;
+export const PARTY_ENTRY_FADE_OUT_START = PARTY_ENTRY_BATTLE_HOLD_FRAMES;
+export const PARTY_ENTRY_BLACK_START = PARTY_ENTRY_FADE_OUT_START + PARTY_ENTRY_FADE_OUT_FRAMES;
+export const PARTY_ENTRY_FADE_IN_START = PARTY_ENTRY_BLACK_START + PARTY_ENTRY_BLACK_FRAMES;
+export const PARTY_ENTRY_SETTLED_START = PARTY_ENTRY_FADE_IN_START + PARTY_ENTRY_FADE_IN_FRAMES;
+
+export function partySelectEntryPhase(elapsed: number): PartySelectEntryPhase {
+  if (elapsed < PARTY_ENTRY_FADE_OUT_START) return "battleHold";
+  if (elapsed < PARTY_ENTRY_BLACK_START) return "fadingOut";
+  if (elapsed < PARTY_ENTRY_FADE_IN_START) return "black";
+  if (elapsed < PARTY_ENTRY_SETTLED_START) return "fadingIn";
+  return "settled";
+}
+
 export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
   elapsed: 0,
   cursor: "onix",
@@ -33,7 +58,7 @@ export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
 };
 
 /** The list is usable only after its press-relative fade-in has settled. */
-export const PARTY_LIST_INPUT_ELAPSED = 80;
+export const PARTY_LIST_INPUT_ELAPSED = PARTY_ENTRY_SETTLED_START;
 
 // RAM-derived from `dump-party-icon-bounce.py`, documented in
 // docs/party-menu-notes.md.  The normal full-HP icon animation has a

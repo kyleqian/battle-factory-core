@@ -1,9 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, PARTY_LIST_INPUT_ELAPSED } from "../src/engine/partySelect.ts";
+import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, partySelectEntryPhase } from "../src/engine/partySelect.ts";
 
 describe("forced turn-15 party select", () => {
   it("ignores list navigation during the fade and defaults to fainted ONIX", () => {
     expect(advancePartySelect({ ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED - 2 }, new Set(["DOWN"]))).toMatchObject({ cursor: "onix" });
+  });
+
+  it("uses press-relative entry phase boundaries for both canonical and delayed dismisses", () => {
+    expect(PARTY_ENTRY_FADE_OUT_START).toBe(22);
+    expect(PARTY_ENTRY_BLACK_START).toBe(37);
+    expect(PARTY_ENTRY_FADE_IN_START).toBe(65);
+    expect(PARTY_ENTRY_SETTLED_START).toBe(81);
+    for (const dismissTick of [19990, 20020]) {
+      expect(partySelectEntryPhase(0)).toBe("battleHold");
+      expect(partySelectEntryPhase(21)).toBe("battleHold");
+      expect(partySelectEntryPhase(22)).toBe("fadingOut");
+      expect(partySelectEntryPhase(36)).toBe("fadingOut");
+      expect(partySelectEntryPhase(37)).toBe("black");
+      expect(partySelectEntryPhase(64)).toBe("black");
+      expect(partySelectEntryPhase(65)).toBe("fadingIn");
+      expect(partySelectEntryPhase(80)).toBe("fadingIn");
+      expect(partySelectEntryPhase(81)).toBe("settled");
+      expect(dismissTick + PARTY_ENTRY_SETTLED_START).toBe(dismissTick + 81);
+    }
   });
 
   it("moves DOWN to MAGBY, opens SEND OUT, then confirms it", () => {
