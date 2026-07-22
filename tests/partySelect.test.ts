@@ -68,4 +68,21 @@ describe("forced turn-15 party select", () => {
     expect(magbyHop.status).toBe("magby");
     expect(partyMenuLayers({ ...magbyState, submenuOpen: true }).chromeKey).toBe("submenu");
   });
+
+  it("uses the frame-1 icon-free layer once the entry-time OBJ copy becomes visible", () => {
+    // Direct oracle VRAM probe: after the dismiss-edge-relative construction,
+    // BAYLEEF's source frame-1 bytes own rendered elapsed 70..77 (canonical
+    // 20061..20068; delayed trace shifts the same window by +30). Frame 1
+    // has transparent texels where frame 0 was opaque, so it must pair with
+    // its matching icon-free chrome rather than exposing the frame-0 erase.
+    for (const elapsed of [70, 77]) {
+      const layers = partyMenuLayers({ ...INITIAL_PARTY_SELECT_STATE, elapsed });
+      expect(layers.chromeKey).toBe("listOnixFrame1");
+      expect(layers.icons.slice(1)).toEqual([
+        expect.objectContaining({ species: "MAGBY", frame: 1 }),
+        expect.objectContaining({ species: "BAYLEEF", frame: 1 }),
+      ]);
+    }
+    expect(partyMenuLayers({ ...INITIAL_PARTY_SELECT_STATE, elapsed: 78 }).chromeKey).toBe("listOnix");
+  });
 });

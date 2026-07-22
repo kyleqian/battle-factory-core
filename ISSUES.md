@@ -5,13 +5,11 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #37 — Turn-15 forced party menu: BAYLEEF entry-frame OBJ ownership and
-  post-confirm SEND OUT remain
+## #37 — Turn-15 forced party menu: post-confirm SEND OUT remains
 
-Entry is press-relative and its fades are now source-layer masked; both dense
-traces are 135/143. The only entry residual is BAYLEEF's 48px initial OBJ
-frame at fade-in 20061–68 (delayed +30). Separately, post-SEND OUT
-ball/materialization/healthbox/menu is still unimplemented. Do not use
+The press-relative entry fades and live icon compositor are now exact:
+canonical and delayed party-select traces are both 143/143. Remaining scope is
+only the post-SEND-OUT ball/materialization/healthbox/menu path. Do not use
 per-frame assets, absolute tick tables, or coordinate patches.
 
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's

@@ -341,3 +341,36 @@ each (formerly 46): both add eight-frame representative ONIX-selected and
 MAGBY-selected frame-flip/hop plateaus, and both are **62/62, 0 diff**. The
 remaining party-menu debt is intentionally out of this rung: entry fade/black
 and the post-SEND-OUT path.
+
+## 8. 2026-07-22 user-authorized third attempt: entry-frame BAYLEEF probe and closure
+
+The eight fade-in residuals were investigated before production timing changed.
+`tools/probe/dump-party-entry-bayleef.py` replays either committed party trace,
+locates BAYLEEF by its live `(x+x2,y+y2)=(100,42)` menu position, and dumps
+`gSprites` plus its actual 16 OBJ-VRAM tiles and active OBJ palette bank.
+
+Canonical RAM ticks `20055..20070` identify slot 8 throughout: `animNum=0`,
+`tileNum=122`, `paletteNum=4`, base `(104,42)`, offsets `(-4,0)`. Its
+`animCmdIndex` advances to 2 at 20060, but the queued copy reaches OBJ VRAM at
+20061: the 512-byte VRAM SHA switches from source BAYLEEF frame0
+`0a168962…` to byte-exact source frame1 `5b5d6e3a…` for 20061–68, then returns
+to frame0 at 20069. The same slot, command/delay sequence, tile bytes, and
+palette-bank ownership repeat at delayed `20091..20098` (+30). Palette bank 4
+also ramps normally through the fade, ruling out bank ownership; no tile upload
+is partial, and all bytes equal one of the two extracted frames.
+
+Root cause: the live compositor was already selecting source frame1 by its
+menu-relative animation rule, but its `listOnix` icon-free chrome had been
+harvested with frame0 erased. Frame1-transparent texels therefore exposed the
+deliberate magenta erase sentinel (48 pixels across MAGBY/BAYLEEF), not a bad
+sprite image. `listOnixFrame1` is a separately source-erased chrome layer
+captured at the same selected-ONIX/hop state with full icons on frame1; the
+state-derived selector chooses it whenever `fullPartyIconFrame(elapsed) == 1`.
+This is menu-relative and therefore shifts identically under a delayed dismiss;
+it is not an absolute trace-tick rule.
+
+Verification after the user-authorized probe: canonical
+`turn15-party-select.json` **143/143**, delayed trace **143/143**, and
+`composite-party-menu.ts` remains **5/5 exact**. The direct VRAM comparison
+rules out frame selection, partial construction, and palette-bank defects;
+the delivered change fixes only icon-free chrome/frame compatibility.

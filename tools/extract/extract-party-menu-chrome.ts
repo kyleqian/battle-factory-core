@@ -31,6 +31,10 @@
 //     for every icon's own timer, not just ONIX's.
 //   - LIST_MAGBY_MIDHOP_TICK 20196 - a genuine list plateau before the
 //     later A press opens SEND OUT: MAGBY's selected y2=+1/frame-1 state.
+//   - LIST_ONIX_FRAME1_TICK 20076 - the same selected-ONIX/y2=-3 chrome as
+//     LIST_ONIX_TICK, but with both full-HP icons displaying frame 1.  This
+//     is the construction state that first becomes visible during the entry
+//     fade (RAM/VRAM-probed in docs/party-menu-notes.md §8).
 //
 // Regenerate: requires the live oracle service (POKEBENCH_ORACLE_URL).
 //   node --experimental-strip-types tools/extract/extract-party-menu-chrome.ts
@@ -51,6 +55,7 @@ const TICKS = {
   submenu: 20220,
   listOnixMidHop: 20158,
   listMagbyMidHop: 20196,
+  listOnixFrame1: 20076,
 } as const;
 
 type Tileset = { columns: number; rows: number; tiles: number[][] };
@@ -86,6 +91,12 @@ const SOURCE_LAYERS: Record<keyof typeof TICKS, { icons: IconLayer[]; status: Ov
   listOnixMidHop: {
     icons: [
       { species: "ONIX", frame: 0, selected: true, phase: "plus1" },
+      { species: "MAGBY", frame: 1, selected: false }, { species: "BAYLEEF", frame: 1, selected: false },
+    ], status: statusOverlay,
+  },
+  listOnixFrame1: {
+    icons: [
+      { species: "ONIX", frame: 0, selected: true, phase: "minus3" },
       { species: "MAGBY", frame: 1, selected: false }, { species: "BAYLEEF", frame: 1, selected: false },
     ], status: statusOverlay,
   },

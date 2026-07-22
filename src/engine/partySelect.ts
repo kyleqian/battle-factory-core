@@ -3,7 +3,7 @@
 import type { GbaButton } from "../input.ts";
 
 export type PartySelectCursor = "onix" | "magby";
-export type PartyMenuChromeKey = "listOnix" | "listOnixMidHop" | "listMagby" | "listMagbyMidHop" | "submenu";
+export type PartyMenuChromeKey = "listOnix" | "listOnixFrame1" | "listOnixMidHop" | "listMagby" | "listMagbyMidHop" | "submenu";
 export type PartyMenuIconLayer = {
   species: "ONIX" | "MAGBY" | "BAYLEEF";
   frame: 0 | 1;
@@ -112,7 +112,13 @@ export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
   if (state.cursor === "onix") {
     const y2 = onixSelectedHopY2(state.elapsed);
     return {
-      chromeKey: y2 === 1 && fullFrame === 1 ? "listOnixMidHop" : "listOnix",
+      // The persisted chrome is deliberately icon-free only at the source
+      // frame it was harvested from.  During entry, UpdateMonIconFrame's
+      // queued copy reaches OBJ VRAM one VBlank after its command advance:
+      // the first visible BAYLEEF/MAGBY frame is frame 1, so use the
+      // matching, still press-relative chrome layer rather than exposing a
+      // frame-0 erase sentinel through frame-1 transparency.
+      chromeKey: y2 === 1 && fullFrame === 1 ? "listOnixMidHop" : fullFrame === 1 ? "listOnixFrame1" : "listOnix",
       icons: [
         { species: "ONIX", frame: 0, selected: true, x2: 0, y2 },
         { species: "MAGBY", frame: fullFrame, selected: false, x2: -4, y2: 0 },
