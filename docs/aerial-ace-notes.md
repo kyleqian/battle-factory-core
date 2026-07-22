@@ -463,3 +463,98 @@ plateau window fresh against `battle1-turn10-dense.json`, asserting every
 pinned constant in this doc against a live oracle run - the fix worker
 should run this FIRST before implementing rung (b)'s render code, same
 convention as `verify-turn9-postlunge.ts`.
+
+## 2026-07-21 rung (a) CLOSES + rung (b) partial (S7 engine step)
+
+Rung (a) (mechanisms 1/3's residual, renders 12363-12366) is now **0-diff**,
+`turn10-aerialace.json` **23/23** (extended through render 12367, the tick
+before the palette pulse). Verified: `verify-turn10-aerialace.ts` 20/20
+unchanged, `npm test` 966/966, `npm run build` green, every neighbor trace
+re-run 0-diff (turn10-rockslide 220/220, turn12-aerialace 56/56,
+turn12-rockslide-miss 38/38, turn9-quickattack 159/159, turn11-menu 56/56,
+turn11-featherdance 178/178, turn11-rockslide 163/163).
+
+**The root cause was NOT the RAM tables** - both this doc's own mechanism-1
+table and mechanism-3's window bounds were ALREADY correct in the committed
+engine code (landed by the session that wrote `c52045e`, timestamped AFTER
+this doc's own 2026-07-21 correction pass) - confirmed by brute-force
+fitting each offset independently against a fresh oracle capture (every
+neighboring (dx,dy) candidate scored far worse than the committed value).
+The bug was **compositing order**: `drawTurn10AerialAceLungeAndClones` drew
+the real sprite first and blended both `AnimTask_TraceMonBlended` clones "over
+fb" last - the exact shape QUICK_ATTACK's own clones use (§39) - but for
+THIS window that leaves the real sprite's own moving silhouette exposed to
+being blended-over by a clone that's landed at a nearby-but-different
+offset, producing the shrinking-but-nonzero residual (666→29px) both this
+session's fresh probe AND §42/§43's own prior attempt hit. Swapping the
+order - both clones blended against the static field FIRST, real sprite
+OPAQUE on top LAST, so it always wins wherever it covers a clone - closes it
+to exactly 0. Also corrected slot 7's own END lag from the assumed +2 to the
+ordinary +1 (RAM end 12372 needs render 12373, not 12374; RAM-pixel-bisected
+by disabling/re-enabling slot 7 and watching render 12374 flip between
+match and a regression).
+
+**Rung (b) (mechanism 4, the palette darken) is wired but NOT 0-diff yet.**
+`turn10AerialAcePaletteDarkenCoeff`'s coefficient was already RAM-pinned and
+Tier-1-tested; wiring its boolean (`coeff > 0`) into the render path (the
+`darken` parameter `drawTurn10FieldBase`/`drawTurn10AerialAceLungeAndClones`
+already carried, unused, from an earlier revert) found and fixed two real
+bugs:
+
+1. `turn10BgDarkPalette` darkened LOCAL palette index **1** - a literal
+   transcription of the hardware BG_PLTT bank number cited in this doc's own
+   RAM table. But `battleBg.palette` (`extract-battle-bg.ts`) is a COMPACT
+   array of only the palettes the static tilemap's own tiles actually
+   reference - every one of its 2048 tile entries uses local index **0**
+   (`python3 -c "...Counter(e['palette'] for e in entries)"` on the
+   committed asset JSON). Darkening index 1 was a no-op; the field never
+   visibly darkened. Cross-checked against the ROM source
+   (`UnpackSelectedBattlePalettes`/`GetBattlePalettesMask`,
+   `reference/pokeemerald/src/battle_anim_mons.c:1402-1410`): `F_PAL_BG`
+   actually selects hardware BG_PLTT banks 1/2/3 (mask `0xe`) outside a
+   Contest, not the single bank this doc's RAM table implied - that only
+   clarifies the HARDWARE side; the actual engine fix is mapping to the
+   asset's own local index 0.
+2. `erasePidgeottoFootprint`/`healthboxBackgroundColorAt` never accounted
+   for `darken`, so erasing Pidgeotto's static footprint mid-pulse
+   repainted it with the UNDARKENED field color before the real/clone
+   sprites redrew over it. Threaded an optional palette override through
+   both (turned out not to be the source of the remaining residual below,
+   but is a genuine latent bug fixed regardless).
+
+Net effect: the darken plateau's mismatch dropped from **~48% of the whole
+frame** (20921px) to a small, localized residual confined to Pidgeotto's own
+silhouette - 600px (1.56%) at render 12368, 893px (2.33%) at 12369, then
+back down to the SAME 203px (0.53%) residual that persists at 12370-12371
+regardless of darken (see below). Bisected without finding the remaining
+cause: swapping slot4/slot7's own relative draw order (no effect - they
+don't overlap each other); the erase-background darken fix above (no
+effect); sampled pixel colors directly (both sides darkened, in the right
+ballpark, but not bit-identical - not a "forgot to darken this element"
+bug, something more precise). Time-boxed - **not chased further this
+session**; `turn10-aerialace.json`'s `captureFrames` stays at its rung (a)
+boundary (12367, the last tick before the pulse) rather than claim a false
+0-diff pass past it.
+
+**A separate, smaller pre-existing residual, independent of darken**: even
+past the pulse (render 12370-12373, `darken` already back to `false`),
+there's a persistent 203px residual confined to Pidgeotto's silhouette
+(bbox `(178,41)-(190,62)`) whenever the real sprite (settled) and slot 7
+(still alive, offset `(24,6)`) overlap. Brute-force-confirmed slot 7's own
+offset value is already optimal (any neighboring (dx,dy) scores 900px+
+worse); swapping draw order relative to the real sprite made no difference
+either. Smaller and more precisely bisected than the pre-session gap, but
+still unresolved - flagged here rather than blind-fit further.
+
+### Handoff for whoever picks up rung (b)'s remaining tail + rung (c)
+
+- The darken window's own residual (600/893px at 12368/12369) and the
+  independent 203px residual (12370+, whenever real+slot7 overlap) may
+  share a root cause (both are "real sprite + a `TraceMonBlended` clone,
+  simultaneously visible, small persistent mismatch confined to the
+  overlap") - worth checking together rather than as two separate bugs.
+- Neither blocks rung (c) (the 12371-12437 flicker, still fully unstarted -
+  RAM-probe it fresh per the brief before touching render code) or rung
+  (d) (turn 12's mirror at +2068) in principle, but rung (b)'s own
+  acceptance (0-diff through 12371) is not yet met, so `turn10-aerialace.json`
+  cannot be extended past 12367 until this closes.

@@ -6987,3 +6987,21 @@ All three reuse `battle1-turn12-dense.json`'s own committed 100-segment script v
 ### Out of scope, unchanged
 
 AERIAL_ACE mechanisms 3/4 root causes (§42/§43's own gaps, ISSUES-adjacent); the hitsplat (ISSUES #31); turn 13+ (its probe/verify script landed last session - the natural next wiring target, reusing this session's own `turn11Resolved`-style flag pattern for a new `turn12Resolved`).
+
+## 46. S7 engine step: AERIAL_ACE excluded-window close-out - rung (a) LANDS 0-diff (mechanisms 1/3's residual), rung (b) wired but NOT 0-diff (mechanism 4's darken - two real bugs fixed, ~48% mismatch down to a small unresolved residual), rungs (c)/(d) not attempted (S7 bounded worker session)
+
+Full writeup in `docs/aerial-ace-notes.md`'s own "2026-07-21 rung (a) CLOSES + rung (b) partial" section - not re-narrated here in full, just the headline shape:
+
+**Rung (a)**: §42/§43's own standing "mechanism-3 residual" (renders 12363-12366, shrinking 666->29px) was NOT a bad RAM table - both this arc's mechanism-1 table and mechanism-3's window bounds were already correct (independently brute-force-confirmed against a fresh oracle capture). The bug was compositing ORDER: `drawTurn10AerialAceLungeAndClones` drew the real sprite first and blended both `AnimTask_TraceMonBlended` clones over it last (QUICK_ATTACK's own precedent shape) - reversing that (clones blended against the field first, real sprite opaque on top last) closes the residual to exactly 0. Also corrected slot 7's own END lag from an assumed +2 to the ordinary +1 (RAM-pixel-bisected). `turn10-aerialace.json` now **23/23**, 0 diff (was 18/18, excluding renders 12363-12366 entirely).
+
+**Rung (b)**: mechanism 4's coefficient state machine was already RAM-pinned and Tier-1-tested (§42); wiring its boolean into the existing (unused, from an earlier revert) `darken` render plumbing found two real bugs - `turn10BgDarkPalette` was darkening the wrong LOCAL palette index (a literal hardware-bank-number transcription that doesn't match the compact asset's own indexing; every static-bg tile actually uses local index 0, not 1), and `erasePidgeottoFootprint` never darkened its own erase-background color. Fixing both dropped the darken plateau's mismatch from ~48% of the whole frame to a small residual confined to Pidgeotto's own silhouette (600-893px, 1.5-2.3%) - NOT yet 0-diff, so `turn10-aerialace.json`'s `captureFrames` stays at its rung (a) boundary (through render 12367, the tick before the pulse) rather than claim a false pass. A second, smaller, SEPARATE 203px residual (independent of darken - present at 12370-12373 too, whenever the real sprite and slot 7 simultaneously overlap) was also bisected without resolution; docs/aerial-ace-notes.md flags both for whoever picks this back up, with a note that they may share a root cause.
+
+**Rungs (c)/(d)**: not attempted - time-boxed by the rung (a)/(b) investigation above, no code touched. §45's own AERIAL_ACE +2068-shift exclusion (`turn12-aerialace.json`'s own 14431-14505 gap) is therefore also unchanged this session.
+
+### Verification
+
+`npm test` **966/966** (one existing Tier-1 test updated for slot 7's corrected end lag, no new tests this session - the darken coefficient's own pins already existed from §42). `npm run build` green. Full regression sweep 0 diff: `turn10-rockslide.json` **220/220**, `turn12-aerialace.json` **56/56**, `turn12-rockslide-miss.json` **38/38**, `turn9-quickattack.json` **159/159**, `turn11-menu.json` **56/56**, `turn11-featherdance.json` **178/178**, `turn11-rockslide.json` **163/163**. `verify-turn10-aerialace.ts` unchanged, 20/20.
+
+### Out of scope, unchanged
+
+Rungs (c) (the 12371-12437 flicker/hit-flash) and (d) (turn 12's own +2068 mirror) untouched - blocked behind rung (b)'s own remaining residual per the brief's own ordering. QUICK_ATTACK's hitsplat (ISSUES #31); turn 13+ wiring; SAND_ATTACK; ROADMAP.md.

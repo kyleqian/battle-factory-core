@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 241 — Bounded worker (S7 engine step, AERIAL_ACE excluded-window close-out): rung (a) LANDS 0-diff (mechanisms 1/3's residual - a compositing-ORDER bug, not a bad table), rung (b) wired but NOT 0-diff (mechanism 4's darken - two real bugs fixed, ~48% mismatch down to a small residual); rungs (c)/(d) not attempted
+
+- **State:** `npm test` **966/966**, `npm run build` green, tree clean.
+  `turn10-aerialace.json` **23/23** (was 18/18) — extended through render
+  12367, 0 diff. Full regression sweep re-verified 0 diff: `turn10-rockslide`
+  **220/220**, `turn12-aerialace` **56/56**, `turn12-rockslide-miss`
+  **38/38**, `turn9-quickattack` **159/159**, `turn11-menu` **56/56**,
+  `turn11-featherdance` **178/178**, `turn11-rockslide` **163/163**.
+  `verify-turn10-aerialace.ts` unchanged **20/20**.
+- **Did:** (rung a) found the REAL cause of §42/§43's own standing
+  "mechanism-3 residual" (renders 12363-12366): the lunge/clone RAM tables
+  were already correct (brute-force-confirmed against a fresh oracle
+  capture — every neighboring offset scores far worse), the bug was
+  `drawTurn10AerialAceLungeAndClones`'s compositing ORDER — drawing the real
+  sprite first and blending both clones over it (QUICK_ATTACK's own
+  precedent shape) left the moving real silhouette exposed to being
+  ghosted-over. Reversing the order (clones blended against the field
+  first, real sprite opaque on top last) closes it to 0. Also fixed slot 7's
+  own END lag (+2 → ordinary +1, RAM-pixel-bisected). (rung b) wired
+  mechanism 4's already-RAM-pinned darken coefficient into the existing
+  (previously unused) `darken` render plumbing; found two real bugs along
+  the way — `turn10BgDarkPalette` was darkening the wrong LOCAL palette
+  index (a hardware-bank-number transcription that doesn't match the
+  compact asset's own indexing; every static-bg tile actually uses local
+  index 0), and `erasePidgeottoFootprint` never darkened its own erase
+  background. Fixed both — darken plateau mismatch dropped from **~48% of
+  the whole frame** to a small residual confined to Pidgeotto's own
+  silhouette (600-893px, 1.5-2.3%), still not 0-diff, so the trace's
+  `captureFrames` stays at the rung (a) boundary rather than claim a false
+  pass.
+- **Next:** rung (b)'s own remaining residual (600/893px at 12368/12369,
+  plus a separate smaller 203px residual at 12370+ whenever real+slot7
+  overlap — may share a root cause, see the handoff note below) blocks
+  extending `turn10-aerialace.json` past render 12367; once closed, rung
+  (c) (the 12371-12437 flicker/hit-flash, RAM-probe fresh first) and rung
+  (d) (turn 12's own +2068 mirror, `turn12-aerialace.json`'s own excluded
+  14431-14505 gap) are next in this window's own ordering.
+- **Notes:** `docs/aerial-ace-notes.md`'s "2026-07-21 rung (a) CLOSES + rung
+  (b) partial" section has the full writeup + an explicit handoff note for
+  whoever picks up the remaining residual. `docs/battle-turn-notes.md` §46
+  mirrors it briefly. No PAPERCUTS beyond the standing mgba-venv-teardown
+  one.
+
+---
 ## 240 — Supervisor wind-down: session end 2026-07-21 ~14:20 — **17 productive worker steps verified and folded** (7 rounds, 6 main-lane engine slices + 9 worktree probes + 2 salvage/dud events); suite **880 → 966/966**; headlines: **turns 9-12 landed end-to-end 0-diff** (turn 9: clones/shake/wobble/flicker/drain/text/hold/ROCK_SLIDE incl. the flicker gap closed at 159/159; turn 10: menu/AERIAL_ACE/ROCK_SLIDE; turn 11: menu/FEATHER_DANCE-blocked/ROCK_SLIDE; turn 12: menu/AERIAL_ACE-reanchor/ROCK_SLIDE-miss), **ISSUES #30 CLOSED by a full crack** (feather draw-order candidate A + the AFFINE_NORMAL box-clip root cause, 425px→0 on all three turns, traces 106/16/33→235/145/162), **ISSUES #31 filed** (hitsplat: 3 hypotheses refuted with committed instruments), and **the probe→wiring pipeline ran at full cadence** — every landed window was pre-probed with a PASS/FAIL verify script and every "pure wiring" verdict held on landing
 
 - **State (verified this minute):** `npm test` **966/966**, `npm run
@@ -69,18 +113,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   AERIAL_ACE mechanisms 3/4 (§42/§43) and the hitsplat (ISSUES #31)
   remain untouched, out of scope. No PAPERCUTS beyond the standing
   mgba-venv-teardown one.
-
----
-## 238 — Supervisor merge fold ×3 + ISSUES #31 filed: (1) turn-12 probe (`wt-125234`): AERIAL_ACE recurs **bit-exact at +2068 RAM ticks** off turn 10's 5-mechanism tables (pressTick=14373, zero corrections); ROCK_SLIDE-miss half RAM-proven **zero-animation** (pressTick=14237; kickoff text only, hit mechanisms never fire — bit-exact to turn 8's BIND-miss precedent incl. the identical 95-tick miss→clear gap); `verify-turn12.ts` **20/20** — turn 12 is pure wiring, both halves. (2) hitsplat palette-tint probe (`wt-130606`): REFUTED — `gPlttBufferFaded` byte-identical to unfaded, bank 7, every live tick (supervisor-rerun) — third refuted hypothesis, filed as **ISSUES #31** with the two untested avenues. (3) turn-13 probe (`wt-131215`): `verify-turn13.ts` **46/46**, wiring-only verdict, 3 dossier §4 corrections (6 idle-bounce phases not one plateau; cursor-jump at exactly 15408; a previously-missed ~90-tick SAND_ATTACK mid-message animation 15540-15629 = the ONE real unknown before that half renders)
-
-- **State (supervisor-verified post-merges):** `npm test` **957/957**,
-  `npm run build` green; verify scripts fresh from main tree: turn12
-  20/20, turn13 46/46 (turn9-postlunge 108/108 + turn11 52/52 an hour
-  earlier). No worktrees, no unmerged branches. Turns 9/10/11 traces all
-  supervisor-rerun this hour: 159+77+163 / 83+18+220 / 56+178+163.
-- **Notes:** probe scoreboard this session: turn-10-rockslide,
-  turn-11, turn-12, turn-13 all "pure wiring" verdicts with PASS/FAIL
-  scripts; the three hitsplat refutations close every named lead — #31
-  carries the avenue list so nobody re-fits blends. Turn-13's probe also
-  demonstrated the verify-script convention retrofits onto an
-  already-folded dossier cleanly.

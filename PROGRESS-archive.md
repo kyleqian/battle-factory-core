@@ -1,4 +1,19 @@
 ---
+## 238 — Supervisor merge fold ×3 + ISSUES #31 filed: (1) turn-12 probe (`wt-125234`): AERIAL_ACE recurs **bit-exact at +2068 RAM ticks** off turn 10's 5-mechanism tables (pressTick=14373, zero corrections); ROCK_SLIDE-miss half RAM-proven **zero-animation** (pressTick=14237; kickoff text only, hit mechanisms never fire — bit-exact to turn 8's BIND-miss precedent incl. the identical 95-tick miss→clear gap); `verify-turn12.ts` **20/20** — turn 12 is pure wiring, both halves. (2) hitsplat palette-tint probe (`wt-130606`): REFUTED — `gPlttBufferFaded` byte-identical to unfaded, bank 7, every live tick (supervisor-rerun) — third refuted hypothesis, filed as **ISSUES #31** with the two untested avenues. (3) turn-13 probe (`wt-131215`): `verify-turn13.ts` **46/46**, wiring-only verdict, 3 dossier §4 corrections (6 idle-bounce phases not one plateau; cursor-jump at exactly 15408; a previously-missed ~90-tick SAND_ATTACK mid-message animation 15540-15629 = the ONE real unknown before that half renders)
+
+- **State (supervisor-verified post-merges):** `npm test` **957/957**,
+  `npm run build` green; verify scripts fresh from main tree: turn12
+  20/20, turn13 46/46 (turn9-postlunge 108/108 + turn11 52/52 an hour
+  earlier). No worktrees, no unmerged branches. Turns 9/10/11 traces all
+  supervisor-rerun this hour: 159+77+163 / 83+18+220 / 56+178+163.
+- **Notes:** probe scoreboard this session: turn-10-rockslide,
+  turn-11, turn-12, turn-13 all "pure wiring" verdicts with PASS/FAIL
+  scripts; the three hitsplat refutations close every named lead — #31
+  carries the avenue list so nobody re-fits blends. Turn-13's probe also
+  demonstrated the verify-script convention retrofits onto an
+  already-folded dossier cleanly.
+
+---
 ## 237 — Bounded worker (S7 slice R rung 0 + turn 11 rungs 1-3): turn 9's flicker gap CLOSED (20→32-tick table extension, `turn9-quickattack.json` 159/159) and turn 11's whole arc (menu reopen, FEATHER_DANCE-blocked half, ROCK_SLIDE half) LANDS 0-diff through the turn-12 menu boundary — new `turn11-menu.json` **56/56**, `turn11-featherdance.json` **178/178**, `turn11-rockslide.json` **163/163**; one genuine cross-regime idle-bounce bug found + fixed along the way
 
 - **State:** `npm test` **957/957** (946 + 11 new), `npm run build`
