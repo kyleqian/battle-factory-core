@@ -469,3 +469,159 @@ remaining budget didn't cover — **ISSUES #36** has the full scope and next
 steps. Everything else in §6f's reuse table (hit-flash, faint sink, fainted-
 hold, HP drain) is flagged "pure wiring reusing" an existing mechanism and
 should be mechanical once (ii)'s two new-derivation items land.
+
+## 8. Engine wiring, boundary (ii) close-out (bounded worker, 2026-07-22)
+
+Wired the FLY strike-half **animation core** (ball descent, impact sprite,
+Onix's own hit-flash) per ISSUES #36's own two-probe plan. Both probes ran
+first, per the step brief, before any `src/` code was touched.
+
+**PROBE 1 (impact sprite identity) — VERDICT: it IS the hitsplat.** Source
+first: `Move_FLY`'s own `FlyUnleash` script (`data/battle_anim_scripts.s:6417`)
+calls `create_basic_hitsplat_sprite ANIM_ATTACKER, 2, x=0, y=0,
+relative_to=ANIM_TARGET, animation=0` — the exact same
+`gBasicHitSplatSpriteTemplate`/`ANIM_TAG_IMPACT` macro `QUICK_ATTACK`'s own
+script uses (ISSUES #31's already-wired family), just a **different
+`animation` argument** (0 vs QUICK_ATTACK's 1): `sAffineAnim_HitSplat_0`
+(`battle_anim_normal.c:134-137`) is a single flat
+`AFFINEANIMCMD_FRAME(0,0,0,8)` — **no zoom-in "pop" at all**, unlike every
+other hitsplat instance this dossier chain has wired so far. RAM confirms
+this exactly: the sprite's own OAM matrix (`gOamMatrices`) reads a CONSTANT
+neutral `{a:256,b:0,c:0,d:256}` for its entire 9-tick life (RAM 19067-19075
+inclusive, destroyed 19076) — never zooms. Same screen center `(72,88)` as
+turn 9's own hitsplat (both are `relative_to=ANIM_TARGET,x=0,y=0` against
+the same player-side Onix). A fresh VRAM/palette dump at RAM 19068
+(`dump_turn15_hitsplat_vram.py`, ad hoc this session, same 4bpp-OBJ
+addressing recipe `dump-cuttingslice-vram.py` established) confirms the
+tile pixel data and palette (`index4 = (255,255,173)` after mGBA's 15→24
+expansion) are **bit-for-bit identical** to the already-extracted
+`battle-anim-hitsplat.json` asset — pure re-anchor, no new asset work
+needed. (Tile number 433 here vs turn 9's own 305 is NOT a contradiction —
+turn 9's own trace confirmed OBJ VRAM tile numbers are dynamically
+allocated per-battle-session load order, not a stable per-asset ID; QUICK_
+ATTACK's own hitsplat read tile 305 in that same trace, so tile-number
+comparison across traces was never going to be meaningful on its own —
+identity was confirmed via source + affine-anim shape + VRAM content, not
+tile-number matching.)
+
+**PROBE 2 (ball-descent table) — literal RAM-truthed, `dump-fly-anim.py`
+re-run 19035-19150 against the committed `battle1-turn15-dense.json`.**
+`AnimFlyBallAttack`'s own ball (slot 3) turns out to be perfectly linear:
+effective screen position (`sprite->x + sprite->x2`, `sprite->y +
+sprite->y2`) moves exactly `(-10,+6)` px/tick for its entire 30-tick flight
+(RAM 19045-19074), continuous straight through the mid-flight base-`x`
+"snap" (`272→62` at RAM 19065) the original scout dossier's §6b already
+flagged — RAM-confirmed that snap is pure `x`/`x2` bookkeeping
+(`AnimFlyBallAttack_Step` flushes `x2` into `x` once its own fixed-point
+accumulator's integer part exceeds 200), not a visual jump. Rotation is a
+**single constant matrix** (`{142,212,-212,142}`, ≈-56.25° at neutral
+scale) for the sprite's whole life, not a per-tick affine table like turn
+14's own squash/stretch ball — `sAffineAnim_FlyBallAttack_1`'s own single
+one-tick rotation frame, confirmed exactly against RAM. Banked as a literal
+30-row table (`TURN15_FLY_BALL_TABLE`), same "no formula fitting"
+convention as `TURN14_FLY_BALL_TABLE` even though a formula would
+reproduce it exactly here.
+
+**Render lag:** `TURN15_STRIKE_RENDER_LAG=1` (render *t* shows RAM *t-1*)
+holds for every mechanism in this window (ball, hitsplat, hit-flash toggle,
+healthbox wobble, shake) — the dominant family convention this file already
+uses (kickoff text/blend/flicker/hitsplat), oracle-pixel-verified across
+the whole extended window, not assumed.
+
+**Three findings this session's own dense oracle-pixel bisection turned up
+that the original scout dossier's RAM-only read didn't catch** (RAM alone
+was misleading in all three — pixels were the tiebreaker):
+
+1. **Onix's own RAM-`invisible=true` span (19042-19081) does NOT hide it on
+   screen.** `FlyUnleash`'s own `monbg ANIM_DEF_PARTNER` (called before the
+   ball even spawns) swaps Onix's real OBJ sprite for a BG-layer-composited
+   copy — same "convert to BG so `setalpha`'s own OBJ↔BG blend can apply"
+   trick this file's own `doubleTeam` mechanism doc already describes
+   elsewhere — so the copy renders pixel-identical content while the
+   now-redundant OBJ sprite sits invisible underneath. Oracle-pixel-proven
+   (render 19050 shows Onix's ordinary, unchanged silhouette). The engine
+   needs **no visibility change at all** for this span — `turn15OnixInvisible`
+   only gates the genuine post-`clearmonbg` hit-flash toggle (RAM
+   19107-19134, 4 distinct ~4-tick pulses, settling visible at 19135).
+2. **The impact sprite's own blend target is the LIVE framebuffer (Onix's
+   own already-rendered body), not the static field.** Turn 9's own
+   QUICK_ATTACK hitsplat was RAM-proven to win its OAM tie against Onix
+   unconditionally, excluding Onix from the blend entirely
+   (`drawSpriteSheetAffineStretchBlendedOverFb` against `staticBgPixel`
+   alone). FLY's own hitsplat does NOT follow that rule — solving the
+   blend equation backward from the oracle's own observed pixel
+   (`(255,255,220)` at the sprite's exact center) only reproduces exactly
+   against Onix's own real body color (`(189,181,181)`, sampled from a
+   frame with the hitsplat absent) at `eva=12,evb=8`; blending the same
+   source texel against the static sky background there (`(255,255,255)`)
+   overshoots to pure white. Rewired onto the plain, live-fb
+   `drawSpriteSheetBlendedOverFb` (matrix is neutral, so no affine sampling
+   is even needed) — a genuine per-move OAM-ordering difference from turn
+   9, not a mistake in turn 9's own already-verified fix.
+3. **Onix's own `AnimTask_ShakeMon` x2 shake** (`FlyUnleash`'s own
+   `createvisualtask AnimTask_ShakeMon, 5, ANIM_TARGET, 6, 0, 8, 1`) is real
+   and visible during the hitsplat's own life — RAM shows three 2-tick `x2=6`
+   pulses (19069-19070/19073-19074/19077-19078), not the 8-tick/1-cycle
+   shape the macro's own literal arguments might suggest. Banked literally
+   (`TURN15_ONIX_SHAKE_RAM_TICKS`, a `Set`), same convention as turn 9's own
+   `TURN9_EP1_ONIX_SHAKE_RENDER_OFFSETS`. Missing this caused an exact
+   period-4 (2-match/2-diff) oracle mismatch pattern that made the root
+   cause obvious once plotted.
+
+Also needed: a **z-order fix** (hitsplat must draw BEFORE the ball, not
+after — oracle shows the ball's own opaque silhouette winning the overlap
+at their shared corner, RAM-consistent with the ball's earlier creation
+tick giving it a lower `gMain.oamBuffer` slot, the same tie-break rule this
+dossier chain's `dump-quickattack-hitsplat-oam.py` already established), and
+a **healthbox wobble** (`DoHitAnimHealthboxEffect`, `+-1 y2` alternating,
+20 ticks, RAM starting 19106 — one tick before the sprite-flicker's own RAM
+19107 start, exactly turn 9's own `TURN9_EP2_HEALTHBOX_WOBBLE_START` vs
+`TURN9_EP2_FLICKER_START` offset) that the brief's own scope list didn't
+separately name but is part of the same generic `hitanimation` hit-flash
+combo turn 9 already established (two independent concurrent effects, not
+one).
+
+**New `src/` surface**: `TURN15_FLY_BALL_TABLE`/`drawTurn15FlyBallDescent`,
+`turn15OnixInvisible`, `turn15MurkrowInvisible`, `turn15OnixShakeX2`,
+`turn15OnixHealthboxWobbleY2`, `drawTurn15ImpactHitsplat`.
+`drawTurn13SwitchinFieldBase` gains `onixInvisible`/`healthboxY2Extra`/
+`onixX2` (all default-false/0, every pre-existing call site unaffected).
+
+**`turn15-fly-strike.json`**: extended 19045-19141 (was 19044 — boundary
+(i)'s own endpoint), 176/176, 0 diff. Two exclusions, both named:
+
+- **19059-19061** (≤10px, ~0.03%): a tiny corner-rounding residual on the
+  ball's own rotated-affine edge where it clips against Murkrow's
+  healthbox — same residual CLASS this codebase already has open
+  elsewhere (e.g. the ENDEAVOR hitsplat's own documented "tips/edges"
+  fine-affine-rounding gap, `battle-turn-notes.md`), not chased further
+  this session (shared-primitive risk: `drawSpriteSheetAffineRotate` is
+  used by several other already-verified 0-diff callers, so tweaking its
+  rounding to chase a 3-tick/10px residual risked a wider regression for a
+  disproportionately small win).
+- **19142 onward is out of this rung's scope, not excluded-and-padded.**
+  Dense oracle bisection (not assumed from the original dossier's own
+  "HP-write at 19147" citation) pins the HP digit text ALREADY changing
+  (`4/117`→`3/117`) starting exactly at render 19142 — 5 ticks earlier than
+  the dossier's own citation, and squarely boundary (iii)'s own HP-drain
+  mechanism (explicitly out of scope for this rung). Rather than pad the
+  trace to a round "~19150" with a block of out-of-scope exclusions, the
+  trace stops cleanly at 19141, the true end of boundary (ii)'s own
+  content — a useful correction for boundary (iii)'s own future session
+  (its HP-drain window starts at 19142, not ~19147).
+
+Verified: `verify-turn15.ts` 59/59 PASS (twice — mandatory-first-step
+re-run, unaffected since it's oracle-only). Regression sweep 0 diff:
+`turn14-fly-miss` 165/165, `turn13-switchin` 240/240, `turn13-menu` 57/57.
+`npm test` 993/993 (unchanged — no test-literal call sites reference the
+new optional params), `npm run build` green.
+
+**PAPERCUT**: none new — both probes were real, bounded RAM work exactly as
+scoped, and the oracle-round-trip iteration loop (extend scratch
+captureFrames → compare → crop/diff the PNGs → adjust one constant → repeat)
+was fast each cycle. The one time cost worth flagging for future sessions:
+tile-number equality is NOT a valid identity test across different battle
+traces (VRAM OBJ tile allocation is dynamic, load-order-dependent) — Probe
+1's own brief suggested checking it as a cheap first pass, and it would
+have been actively misleading here (433 vs 305) if source + affine-anim
+shape + a fresh VRAM dump hadn't been used as the real tiebreakers instead.

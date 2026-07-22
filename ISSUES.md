@@ -5,42 +5,35 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #36 — Turn 15 boundary (ii)/(iii): FLY strike animation core (ball
-  descent + impact sprite + hit flash), not-very-effective text, HP drain,
-  faint sink, and the fainted-hold not yet wired — `turn15-fly-strike.json`
-  covers only boundary (i) (18956-19044)
+## #36 — Turn 15 boundary (iii): "not very effective" text, HP drain, faint
+  sink, and the fainted-hold not yet wired — `turn15-fly-strike.json`
+  covers boundaries (i)+(ii) (18956-19141)
 
-Opened 2026-07-22 (wiring step). Boundary (i) — reopen gate, FIGHT submenu,
-confirm, "Foe MURKROW used\nFLY!" kickoff text — is wired and committed,
-82/82 0 diff. The rest of `docs/turn15-notes.md`'s window (19045-19990) is
-**not started**: no `src/` code exists yet for the ball-descent animation,
-the new impact sprite, Onix's hit-flash, the "not very effective..." text,
-the HP-drain-to-0 bar, the first-ever player-side faint sink, or the
-button-gated "ONIX fainted!" hold. Ground truth for all of it is already
-banked in `docs/turn15-notes.md` §2-§4/§6b (RAM-exact ticks: ball spawns
-19045 at (272,-32) off-screen, translates via `AnimTranslateLinear` to
-Onix's position, base x snaps 272→62 at 19065; impact sprite (slot 4)
-spawns 19067 at (72,88), tile 433; ball destroyed + Murkrow visible again,
-simultaneous, at 19075; Onix hit-flash 19102-19135 (~4-tick invisible
-toggle, reuses the turn-9 hitflash family per §6f); faint-sink teardown at
-RAM 19325 (stat reset 19326, pixel vanish 19330); "ONIX fainted!" hold is a
-3-phase idle bounce, button-gated dismiss at 19990).
+Opened 2026-07-22 (wiring step), trimmed same day (boundary (ii) close-out,
+`docs/turn15-notes.md` §8). Boundaries (i) (reopen gate/submenu/confirm/
+kickoff text) and (ii) (the FLY strike animation core — ball descent,
+impact sprite, Onix's own hit-flash/shake/healthbox-wobble) are wired and
+committed, `turn15-fly-strike.json` 176/176 0 diff over 18956-19141 (3
+ticks excluded, 19059-19061, a small rotated-affine corner-rounding
+residual — see §8, not chased further, shared-primitive risk).
 
-**What's missing before this can be wired (not attempted this session,
-would need its own probe pass):** (1) the ball's own per-tick trajectory —
-dossier gives qualitative RAM notes (linear translation, an x-snap at
-19065) but no per-tick position table like turn 14's own
-`TURN14_FLY_BALL_TABLE` — needs `dump-fly-anim.py` re-run over 19045-19075
-against the committed `battle1-turn15-dense.json`. (2) the impact sprite's
-own asset (tile 433) was explicitly NOT source-traced or extracted by the
-scout (`docs/turn15-notes.md`'s own flag) — needs VRAM tile identification
-+ extraction, the same class of work `extract-fly-ball.ts` did for the
-charge half's own ball. Both are real, bounded RAM/asset-extraction tasks,
-not blocked on anything else — just out of this session's remaining budget.
-**Next step:** a dedicated probe session for (1)+(2), then wire per the
-dossier's §6b/§6f tables (mechanically — every OTHER phase in that table
-is flagged "pure wiring reusing" an existing mechanism, no new derivation
-needed there).
+**Still not started**: the "Foe MURKROW's attack was\nnot very effective..."
+text, the HP-drain-to-0 bar (§8 close-out found this starts at RAM 19142,
+NOT the original dossier's own "~19147" citation — 5 ticks earlier), the
+first-ever player-side faint sink (RAM teardown 19325/19326, pixel vanish
+19330, §6c — the turn-5 `SpriteCB_FaintOpponentMon`/`AnimFaintOpponent`
+family applied to the player's own slot, function-name-level confirmation
+still open), and the button-gated "ONIX fainted!" hold (3-phase idle
+bounce, dismiss at 19990). Ground truth for all of it is banked in
+`docs/turn15-notes.md` §2-§4/§6b/§6c/§6f — every phase in §6f's own reuse
+table is flagged "pure wiring reusing" an existing mechanism (the turn-5
+faint-sink family, the standard button-gated-hold idle-bounce shape), no
+new derivation expected, unlike boundary (ii)'s own two probes.
+**Next step:** wire the "not very effective" text (straightforward,
+`turn15SimpleVisibleChars`-style, once its own literal start tick is
+oracle-pixel-bisected), then the HP-drain bar/text countdown from 19142,
+then the faint-sink teardown, then the fainted-hold — extending
+`turn15-fly-strike.json` through ~19990, 0 diff.
 
 ## #35 — Turn 15 boundary (i): 7-tick sine-bounce "extremum" mismatch on
   Onix's own idle sprite during the FIGHT-submenu open/pre-confirm wait,

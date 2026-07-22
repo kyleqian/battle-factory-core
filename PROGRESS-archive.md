@@ -1,4 +1,37 @@
 ---
+## 253 — Bounded worker (turn-13 wiring step, ISSUES #33a close-out): wired the probe-confirmed closed-window frame-selection fix — `turn13-switchin.json` **240/240, 0 diff** (was 191/191; 49 of 51 excluded ticks restored); the exact 2 ticks the probe flagged in advance (17019, 17034) survive as a new, much smaller, separate residual — trimmed ISSUES #33 to just that, not deleted
+
+- **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run
+  build` green, tree clean. `verify-turn13-frame2.ts` **11/11 PASS**
+  (mandatory-first-step rerun — oracle-only, unaffected by `src/`).
+  Regression sweep 0 diff: `turn14-fly-miss` 150/150, `turn13-menu`
+  57/57, `turn13-sandattack` 190/190, `turn13-dragonbreath-faint` 141/141.
+  Turn 5's own materialize trace needed no rerun: `turn13MurkrowFrame` is
+  called only from `drawTurn13MurkrowMaterialize` (MURKROW/turn-13-only),
+  entirely separate from `turn5PidgeottoFrame` — confirmed by grep.
+- **Did:** Replaced `turn13MurkrowFrame`'s open-ended step (`t < 17034 ?
+  0 : 1`) with the probe's exact closed-interval fix (`t >=
+  TURN13_MURKROW_STRETCH_TICK && t <= TURN13_MURKROW_FRAME_FLIP_TICK ? 1
+  : 0`, `src/engine/battleScene.ts`). Restored ticks 17019-17069 to
+  `turn13-switchin.json` (191→242) and ran `npm run compare`: 240/242,
+  diff landing at EXACTLY the two boundary ticks the probe's dossier
+  pre-flagged (17019: 418px; 17034: 828px), both bboxes confined to
+  Murkrow's own silhouette, nowhere else in the window. Excluded just
+  those 2 per the pre-authorized caveat (242→240, 0 diff) rather than
+  guessing at a fix. No Tier-1 pin forced — no existing precedent of
+  unit-testing these per-turn frame-selector closures in isolation, same
+  as `turn5PidgeottoFrame` before it.
+- **Next:** ISSUES #33's own tiny remainder (17019/17034, needs a fresh
+  probe — wobble table index math or tint coefficient right at those two
+  ticks, not re-guessed); ISSUES #34 (turn 14's own menu-redraw blank-hold
+  + regime question); ISSUES #32; turn 15+ wiring.
+- **Notes:** Full writeup `docs/turn13-notes.md`'s newest section (owned
+  this round). Fourth session in a row where a "banked, probe-confirmed"
+  fix landed almost-but-not-quite gapless on contact with `npm run
+  compare` — this time the probe itself had already flagged the exact
+  failure mode in advance, so no time was lost chasing it blind. No
+  PAPERCUTS beyond the standing mgba-venv-teardown one.
+
 ## 252 — Bounded worker (turn-13 wiring step, ISSUES #33b): wired the probe-confirmed switch-in text-clear/menu-redraw split — `turn13-switchin.json` **191/191, 0 diff** (was 171/171); found a NEW regression in turn 14's own downstream reuse while restoring the probe's turn-14 predictions, filed as ISSUES #34 rather than re-derived on the spot — `turn14-fly-miss.json` **150/150, 0 diff** (net +1 from 149: +4 restored, -3 excluded as a real regression)
 
 - **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run
