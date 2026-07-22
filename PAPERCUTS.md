@@ -198,7 +198,7 @@ compare run exposed the staleness.
 - **What:** the generic probe's docstring phrasing suggests redirecting
   stderr silences the mGBA BIOS/DMA trace spew; it actually lands on
   stdout, so `2>log` still buries results under megabytes of log lines.
-- **Hits:** 3 sessions (the first hit twice within its session).
+- **Hits:** 4 sessions (the first hit twice within its session).
 - **Cost each:** ~2-5 min.
 - **Workaround:** `>out 2>&1` and read the results FILE the probe
   writes (never parse stdout) — consistent with the ROADMAP recipe's
@@ -264,6 +264,7 @@ compare run exposed the staleness.
   during Python interpreter teardown) AFTER their JSON output is fully
   and correctly written. Two workers in one session each spent ~2 min
   re-validating output they nearly discarded as a failed run.
+- **Hits:** 2 sessions (multiple probe processes in each).
 - **Cost each:** ~2 min + the risk of discarding good data.
 - **Workaround:** check the output file's validity (json.load) instead
   of trusting the exit code; a docstring line in each script saying

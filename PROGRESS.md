@@ -16,11 +16,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`74,74,99 -> 41,41,57`), while the 5px is MAGBY icon bank4 entries 4/5.
   20302 proves the field compositor has switched to `DISPCNT=1f40`, BG3
   charbase 2/screenbase 26, not the frozen faint frame.
-- **Next:** supervisor escalation: decide whether to fund a source/VRAM
-  extracted party-ball palette layer plus a real register-derived 20302
-  field compositor. Do not alter phase timing or ship color/mask fitting.
+- **Next — INTERACTIVE ESCALATION QUESTION:** authorize one further bounded,
+  probe-guided worker to fix the two RAM-proven party palette entries and
+  extract/compose the real register-derived 20302 field, or park these eight
+  residual frames and proceed with them excluded? **Supervisor recommends
+  authorize:** the field is also prerequisite to rung 2, and the new dump
+  removes the prior architectural ambiguity. Do not alter phase timing or
+  ship color/mask fitting.
 - **Notes:** production untouched; probe tool and docs are committed green.
-  PAPERCUT: mGBA native diagnostics ignored shell redirection, ~3 min.
+  Supervisor independently reproduced the register/palette dump, Tier-1, and
+  build. PAPERCUT: mGBA diagnostics + teardown SIGSEGV, ~3 min.
 
 ---
 ## 267 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — palette source blocker**
