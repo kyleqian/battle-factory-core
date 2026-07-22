@@ -14,13 +14,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   elapsed 21), and added source-derived OAM ownership masks for MURKROW,
   healthbox, all party balls, FNT/status, held-item sprites, and live icons.
   All fade-out frames are now exact; only fade-in 20061–68 retains 48px.
-- **Next:** **ESCALATION QUESTION (two consecutive workers missed the same
-  143/143 bar):** authorize a third, probe-only-first worker to dump BAYLEEF's
-  live OBJ tile/anim state at canonical 20061-20068 (delayed +30) and then
-  wire the derived initial-frame rule, or park these eight 48px frames and
-  proceed to the separate post-SEND OUT path? Supervisor recommends the
-  targeted third attempt because the residual is isolated and both timing
-  variants agree exactly; no coordinate patch is acceptable.
+- **Next:** **USER DECISION 2026-07-22:** use supervisor judgment; authorized
+  the recommended third, probe-first attempt. Dump BAYLEEF's live OBJ
+  tile/anim state at canonical 20061-20068 (delayed +30), then wire only the
+  derived initial-frame rule. If direct evidence does not close 143/143,
+  park these eight frames and proceed to post-SEND OUT; no coordinate patch.
 - **Notes:** Independent compares are **135/143** each with only the named
   eight frames red; all other entry and settled frames are exact. PAPERCUT:
   none.
