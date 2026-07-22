@@ -304,6 +304,191 @@ newly-excluded regressions + 4 newly-restored `17722-17725`). Filed as a
 new backlog entry (see `ISSUES.md`) rather than re-deriving in this
 wiring-scoped session.
 
+## 10. ISSUES #34 characterization (worktree-lane probe, 2026-07-22)
+
+Scope: turn 14's own settled-menu blank hold (18080-18085) + the
+reset-vs-continue question for the bounce regime from `TURN14_MENU_REDRAW_
+TICK`(18086) onward. Same two-independent-methods bar §2 established,
+re-pointed at turn 14's own window. No `src/engine` edits, no trace edits
+this session - characterization only.
+
+### 10a. Method
+
+1. **RAM probe**: `tools/probe/dump-turn14-bounce-driver.py`, a direct port
+   of `dump-turn13-bounce-driver.py` (byte-identical addressing - Onix is
+   still battler 0, never re-switches-in between turn 13 and turn 14, so
+   the SAME `gBattleSpritesDataPtr` -> `healthBoxesData[0]` -> driver-sprite
+   chain applies unchanged). Reuses `tools/compare/traces/turn14-fly-miss.
+   json`'s own 110-segment button script verbatim (spans the full trace,
+   render tick 0-18956 - long enough to reach every spot tick named in the
+   brief, including the settled-tail `18956` itself). Two runs: a full
+   sweep of RAM ticks 18070-18956 (887 rows, one pass, ~8s), plus a second
+   sweep of 17640-17800 to inspect the FIGHT-submenu reopen family.
+2. **Oracle pixel/sha probe**: `tools/probe/verify-turn14-bounce.ts`, fresh
+   `bin/oracle run` capture (24 curated ticks, sha256-only, no `src/`
+   dependency) - same structure as `verify-turn13-bounce.ts`.
+
+### 10b. The blank hold (18080-18085) - confirmed, same shape as #33(b)
+
+RAM: the bounce driver (`onixAmplitude`/`healthboxAmplitude`) is fully
+`0` (inactive) through RAM tick 18085, then goes active at RAM tick 18086
+in the same probe-tick as the reveal - identical shape to turn 13's own
+17106-17111 gap. Oracle (`verify-turn14-bounce.ts`, fresh run, 2026-07-22):
+`18078==18079` (held "ONIX's attack missed!" text), `18079!=18080` (clears
+to blank), `18080..18085` all byte-identical (6-tick hold), `18085!=18086`
+(reveal). All PASS. This confirms the brief's "already settled" framing
+exactly - no new derivation needed here, just the missing `TEXT_CLEAR_TICK`
+branch (§10d gives the exact fix shape).
+
+### 10c. Reset vs. continue - decisively RESET, not continue
+
+Fit two candidate closed-form models against the RAM-probed raw `y2` fields
+(`gBattlerSpriteIds[0]`/`gHealthboxSpriteIds[0]`, `+38(s16)`) across every
+one of the 871 RAM-probed ticks 18086-18956, using this dossier's own
+established render-lag convention (screen tick `T`'s rendered `y2` equals
+the RAW RAM `y2` probed at probe-tick `T-1`):
+
+- **CONTINUE** (current code, `drawTurn14FlyMissWindow`'s
+  `shiftedBounceTick = t + TURN13_SWITCHIN_RESET_SHIFT`, i.e. the settled
+  tail is one single unbroken cycle starting at turn 13's own 17112
+  reveal): **871/871 mismatches - fails EVERY probed tick**, not a close
+  fit at all.
+- **RESET** (a fresh reset at `TURN14_MENU_REDRAW_TICK` itself, identical
+  formula SHAPE to `TURN13_SWITCHIN_RESET_SHIFT`'s own definition, just
+  re-anchored: `TURN14_MENU_REDRAW_RESET_SHIFT = TURN5_SITRUS_MENU_REDRAW_
+  TICK - TURN14_MENU_REDRAW_TICK` in place of `TURN13_SWITCHIN_MENU_REDRAW_
+  TICK`, fed into the SAME `turn5SitrusResettledBounceTick`/`menuIdleBounce`
+  pipeline): **0/871 mismatches - exact**.
+
+This is not a close call - CONTINUE fails literally every tick (the two
+models' predicted `(onixY2, healthboxY2)` pairs disagree at 18086 itself:
+CONTINUE predicts a non-`(0,0)` phase already in progress, RESET predicts
+`(0,0)` - matching what RAM actually shows). **Turn 14's own menu-redraw
+resets the bounce regime fresh, the same way turn 13's own switch-in resets
+against turn 12's**, per the doc's own precedent (§5) - it is NOT a
+continuation of turn 13's live cycle, despite `drawTurn14FlyMissWindow`'s
+own module-doc comment (`battleScene.ts:10727-10736`) asserting otherwise.
+
+Cross-checked against a fresh oracle sha probe (`verify-turn14-bounce.ts`,
+24/24 PASS, 2026-07-22): the RESET model's predicted phase groups
+(`18086==18088==18089==18095`, `18097==18104`, `18106==18113`,
+`18115==18123`, `18124==18086` a full local cycle later) all hold exactly,
+AND the three ticks #33(b)'s own fix regressed (**18087, 18095, 18415**)
+are all accounted for - 18087 is the RESET model's own one-tick `(0,1)`
+blip (same role as turn 13's 17113), 18095 shares the reveal's own `(0,0)`
+phase group, and 18415 shares the SAME `(0,1)` phase group as 18115 - a
+claim independently re-confirmed by two MORE far ticks, **18815 and 18956**
+(the settled-tail spot ticks named in the brief), both byte-identical to
+18115/18415 despite being 700/841 ticks later. Four widely-separated ticks
+sharing one sha is what rules out coincidence here, the same bar §3b's own
+cross-period check set.
+
+### 10d. Fix shape (for the wiring worker - pure wiring, no new derivation)
+
+1. In `src/engine/battleScene.ts`, next to `TURN14_MENU_REDRAW_TICK`
+   (currently line 10816), add:
+   ```ts
+   const TURN14_MENU_TEXT_CLEAR_TICK = 18080;
+   const TURN14_MENU_REDRAW_RESET_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - TURN14_MENU_REDRAW_TICK;
+   ```
+   (`TURN5_SITRUS_MENU_REDRAW_TICK` is already in scope, defined at
+   `battleScene.ts:6089`.)
+2. In `drawTurn14FlyMissWindow` (`battleScene.ts:10845-10852`), the
+   `if (t >= TURN14_MENU_REDRAW_TICK)` branch currently reads:
+   ```ts
+   if (t >= TURN14_MENU_REDRAW_TICK) {
+     const shiftedBounceTick = t + TURN13_SWITCHIN_RESET_SHIFT;
+     drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
+     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+     drawTurn5SitrusSettledMenuChrome(fb);
+     return;
+   }
+   ```
+   Change the shift constant (`TURN13_SWITCHIN_RESET_SHIFT` ->
+   `TURN14_MENU_REDRAW_RESET_SHIFT`) and add the blank-hold branch ABOVE it,
+   mirroring `drawTurn13SwitchinWindow`'s own §6 fix exactly:
+   ```ts
+   if (t >= TURN14_MENU_REDRAW_TICK) {
+     const shiftedBounceTick = t + TURN14_MENU_REDRAW_RESET_SHIFT;
+     drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
+     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+     drawTurn5SitrusSettledMenuChrome(fb);
+     return;
+   }
+   if (t >= TURN14_MENU_TEXT_CLEAR_TICK) {
+     // TEXT_CLEAR_TICK <= t < MENU_REDRAW_TICK: blank hold, mirrors
+     // drawTurn13SwitchinWindow's own gap - drawTileBg below already
+     // paints the message box's own flat teal fill.
+     drawTurn13SwitchinFieldBase(fb, t, turn14KickoffBounceTick(t, pressTick), turn14MurkrowInvisible(t));
+     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+     return;
+   }
+   if (t >= TURN14_MISSED_TEXT_START_TICK) {
+   ```
+   (the existing `if (t >= TURN14_MISSED_TEXT_START_TICK)` branch below
+   needs no change - it already naturally stops being reached once
+   `TURN14_MENU_TEXT_CLEAR_TICK` intercepts first, same "fall through
+   descending-tick branches" shape every other window in this file uses.
+   The field-base/tile-bg calls in the new branch mirror the ones already
+   present in the miss-text branch immediately below it - RAM-confirmed the
+   on-field composition doesn't change shape across this seam, only the
+   message-box content does.)
+3. `drawTurn14FightSubmenuWindow`'s OWN two `t + TURN13_SWITCHIN_RESET_
+   SHIFT` call sites (`battleScene.ts:10888, 10901`) and `turn14KickoffBounceTick`
+   (`battleScene.ts:10828-10831`) are **NOT** touched by this fix - they
+   govern the pre-`TURN14_MENU_REDRAW_TICK` window (turn 13's own settled
+   tail through turn 14's confirm-and-resolve), which this session did NOT
+   find to be wrong (no RAM evidence gathered against that specific span
+   this session; #33(b)'s own dossier already validated `TURN13_SWITCHIN_
+   RESET_SHIFT` there). Only the POST-`TURN14_MENU_REDRAW_TICK` settled
+   tail in `drawTurn14FlyMissWindow` gets the new anchor.
+4. Re-run `verify-turn13-bounce.ts` (still 14/14, unaffected) and
+   `verify-turn14-bounce.ts` (this session's own, 24/24 PASS, oracle-only)
+   as the mandatory-first-step rerun before touching `src/`. Then re-run
+   `npm run compare` on `turn14-fly-miss.json` with the predicted-closing
+   ticks (§10e) folded into `captureFrames`.
+
+### 10e. Predictions - which of turn 14's excluded ticks this closes
+
+- **Closes (15 ticks)**: `18080-18090` (the 11-tick blank-hold-plus-early-
+  reveal family, including the previously-regressed `18087`) + `18095` +
+  `18415` (the other two #33(b)-regressed ticks) + `18815`/`18956` (the
+  settled-tail spot ticks) - every one of these is directly covered by the
+  RESET model's 0/871 RAM mismatch result and independently re-confirmed
+  against fresh oracle shas in `verify-turn14-bounce.ts` (24/24 PASS).
+- **Does NOT close, NOT the same bug**: `17781-17787` (7 ticks) - untouched
+  this session, per the existing doc's own "likely a distinct minor issue"
+  hedge (§7); no new evidence gathered either way.
+- **Does NOT close, generalization test came back negative** (this
+  session's own spot-check, per the brief's step 4): `17722-17768`. A cheap
+  RAM probe (17640-17800) shows the bounce driver is **already active**
+  at RAM tick 17640, the earliest point probed - i.e. this family's own
+  reopen reveal happened even earlier, with NO additional inactive/blank
+  gap visible anywhere in 17640-17756 (the driver runs continuously until
+  the confirm-press freeze at 17757). So the "every fresh menu reveal has a
+  6-tick blank hold" pattern does NOT generalize to a second missing gap
+  inside this already-probed span - there is no gap left to find here. The
+  9/66 mismatches this session found by naively extending the CONTINUE
+  formula across 17691-17756 are NOT explained by this session's fix
+  either (`TURN14_MENU_REDRAW_TICK`'s reset is a different anchor entirely,
+  never reached in this span) - and are plausibly just an artifact of NOT
+  applying `battleMenu.ts`'s own already-documented `FIGHT_SUBMENU_OPEN_
+  BOUNCE_SHIFT`(=2) correction (a known, pre-existing DMA-wait shift the
+  submenu-open overlay needs) to this naive test, not a newly-discovered
+  bug. **Genuinely not characterized past this spot-check** - the brief's
+  own "do not fully characterize" scope, taken literally: this family
+  needs its own dedicated RAM probe of its own (earlier, currently
+  un-probed) reveal instant before any fix shape can be named.
+
+### 10f. Verification artifacts
+
+`tools/probe/dump-turn14-bounce-driver.py` (RAM probe, ports `dump-turn13-
+bounce-driver.py` verbatim, re-pointed via CLI args at turn 14's window and
+`turn14-fly-miss.json`'s own segments) + `tools/probe/verify-turn14-bounce.
+ts` (oracle-only sha pin, 24/24 PASS this session, committed). Both rerun
+clean this session; neither depends on `src/`, so both remain valid
+regardless of when the §10d fix actually lands.
+
 Regression sweep (`turn13-menu` 57/57, `turn13-sandattack` 190/190,
 `turn13-dragonbreath-faint` 141/141, `turn12-menu` 46/46), `npm test`
 993/993, `npm run build` all green.
