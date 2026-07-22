@@ -4,6 +4,51 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 251 — Bounded worker (turn-13 wiring step, ISSUES #33a): wired the banked MURKROW wobble table — RAM-cross-checked byte-exact fresh, anchor/frame-flip confirmed — but wiring alone didn't reach 0-diff; found+fixed 2 more real bugs (BG-fade never re-anchored for turn 13; tint-ramp needs to keep running into the wobble draw, unlike Pidgeotto's); `turn13-switchin.json` 156→**171/171**, 15 of 66 excluded ticks restored (17004-17018); remaining 51 ticks (17019-17069) re-excluded under a narrower, colors-now-ruled-out residual (likely the reused `frame2` asset is wrong art) — #33a NOT closed, trimmed not deleted
+
+- **State:** `npm test` **993/993** (unchanged), `npm run build` green, tree
+  clean. `verify-turn13-materialize.ts` 20/20 (mandatory-first-step rerun,
+  unaffected — RAM/oracle-only, doesn't assert app pixels). Regression
+  sweep 0 diff: `turn14-fly-miss` 149/149, `turn13-menu` 57/57,
+  `turn13-dragonbreath-faint` 141/141.
+- **Did:** Transcribed `TURN13_MURKROW_WOBBLE_TABLE` (50 entries) into
+  `battleScene.ts`, anchored `TURN13_MURKROW_STRETCH_TICK=17020` (not the
+  old `SETTLE_TICK`-minus-table-length 17030), `TURN13_MURKROW_FRAME_FLIP_
+  TICK=17034` (single flip, not Pidgeotto's reused 5-breakpoint cycle) —
+  then re-ran the RAM probe fresh this session and confirmed all 50 entries
+  byte-exact, so the table/anchor were never the problem. Wiring alone left
+  the ENTIRE restored window red; found two more bugs by direct pixel
+  diffing: (1) `turn5BgFadeY(t)` (the switch-in's own BG-to-white dither)
+  was hardcoded to turn 5's own tick range, silently 0 for all of turn 13 —
+  added a `bgFadeYOverride` param to `drawTurn5RockSlideAttack` + a
+  `turn13MurkrowBgFadeY` reusing `TURN5_BG_FADE_Y` verbatim at a freshly
+  re-derived anchor; (2) the wobble draw hardcoded `tintCoeff=0` (copied
+  from Pidgeotto, where the ramp always finishes before the stretch phase
+  starts) but MURKROW's own ramp-render-start (17026) falls AFTER its own
+  wobble start (17020) — fixed by computing `turn13MurkrowMaterializeCoeff
+  (t)` in the wobble branch too. Closed 17004-17018 (15 ticks) to 0-diff.
+  Remaining 17019-17069: colors now correct (pixel-sampled) but MURKROW's
+  own leg/lower-body shape stays mismatched even at near-identity table
+  entries — `pa/pb/pc/pd` RAM-exact, `pb=pc=0` (no dropped rotation term),
+  frame timing RAM-exact — points at the reused `frame2` asset itself,
+  which `drawTurn13MurkrowSettled` never actually exercises (always draws
+  `tileset`), so it's never been oracle-validated in any passing trace.
+- **Next:** #33a's own concrete next step: fresh VRAM tile dump at a
+  materialize-window tick with `animCmdIndex=1` (e.g. RAM 17040, same
+  addressing `dump-turn13-murkrow-materialize.py` already established),
+  diffed byte-for-byte against the extracted `frame2` tiles. #33b (settled-
+  menu bounce, Mission B) still needs its own characterization probe,
+  untouched this session. ISSUES #32 and turn-15+ wiring both still open.
+- **Notes:** Full writeup `docs/turn13-notes.md`'s newest section (owned
+  this round). This is the second time a "banked, pure wiring" derivation
+  turned out incomplete on contact with `npm run compare` (cf. #249's own
+  51-tick surprise) — the mandatory RAM-only verify script is necessary but
+  not sufficient to guarantee 0-diff; only a real oracle pixel compare over
+  the restored window catches gaps like the BG-fade anchor and tint-ramp
+  duration, which no RAM-only check was set up to see. No PAPERCUTS beyond
+  the standing mgba-venv-teardown one.
+
+---
 ## 250 — Supervisor wind-down: session end 2026-07-21 ~23:05 — **12 verified worker steps folded across 6 rounds** (5 main-lane engine slices incl. 2 cap-kill salvages + 7 worktree probes, zero dud steps); suite **966 → 993/993**; headlines: **turns 13 AND 14 wired end-to-end** (13: menu/SAND_ATTACK/DRAGON_BREATH-faint/MURKROW-switch-in, traces 57+190+141+156; 14: FLY-charge + auto-miss, 149/149), **the AERIAL_ACE window closed GAPLESS** (93/93 + turn-12 mirror 131/131) via a 3-probe crack chain (OAM-winner overlap rule → 5-bit-domain darken → both verified pixel-exact), **ISSUES #31 hitsplat SOLVED + deleted** (wrong target2 — 4210/4210 exact; trace 167/167), **retrofit pipeline completed through the WIN** (verify-turn14/15/16/17 all banked, BRN badge pinned at 21542), #32+#33 filed with named instruments
 
 - **State (verified this minute):** `npm test` **993/993**, `npm run

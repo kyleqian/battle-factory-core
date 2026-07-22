@@ -5,24 +5,46 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #33 — Turn 13 post-switch-in residual pair: Murkrow materialize/wobble
-  (fix table BANKED, wiring-ready) + settled-menu bounce subset
-  (uncharacterized), excluded from `turn13-switchin.json` (156/156) and
+## #33 — Turn 13 post-switch-in residual pair: Murkrow wobble-phase frame
+  asset (shape-only, colors now correct) + settled-menu bounce subset
+  (uncharacterized), excluded from `turn13-switchin.json` (171/171) and
   `turn14-fly-miss.json` (149/149, 51 ticks)
 
 Opened 2026-07-21 wind-down (supervisor), consolidating `battle-turn-notes.md`
-§50's two named residuals so they don't live only in a dossier:
+§50's two named residuals so they don't live only in a dossier. Part (a)
+was wired 2026-07-21 (wiring session) and narrowed considerably; part (b)
+is untouched.
 
-(a) **Materialize/wobble, renders 17004-17069**: turn 5's Pidgeotto tables
-don't transfer. **SOLVED at probe level, not yet wired**: a fresh RAM probe
-(`tools/probe/dump-turn13-murkrow-materialize.py`) derived Murkrow's OWN
-50-entry wobble table (`{xScale,yScale,y2}` shape the existing render
-function already consumes; wobble starts render 17020, a linear
-angle-counter, NOT Pidgeotto's scale table; frame flips ONCE at 17034;
-growing-silhouette 17004-17019 is ALREADY correct via the species-agnostic
-accumulator). `verify-turn13-materialize.ts` 20/20 pins it. Trap flagged:
-the table needs an explicit 50th "flat" entry, not clamp-repeat, or 17069
-regresses 1px. This is pure wiring now.
+(a) **Wobble-phase shape mismatch, renders 17019-17069** (was 17004-17069;
+the growing-silhouette sub-phase 17004-17018 is now wired and green). The
+banked `TURN13_MURKROW_WOBBLE_TABLE`/anchor (17020)/frame-flip (17034) are
+now wired AND cross-checked byte-exact against a fresh RAM probe this
+session (not just the prior session's transcription) - the table itself is
+not the bug. Wiring it surfaced two more real bugs, both fixed this
+session: (1) the switch-in's own BG-to-white materialize dither
+(`TURN5_BG_FADE_Y`) was never re-anchored off `TURN13_BALL_HANDOFF_TICK`,
+silently zero for every turn-13 tick; (2) the materialize tint-fade
+coefficient ramp needs to keep applying into the wobble draw call for
+MURKROW (unlike Pidgeotto, whose ramp always finishes before its own
+stretch phase begins) - hardcoding `tintCoeff=0` there (copied from
+Pidgeotto's call site) rendered MURKROW in full color several ticks before
+the real game does. Both fixes are wired (`docs/turn13-notes.md`'s newest
+section). **Remaining, after both fixes**: colors are now confirmed
+correct (direct pixel sampling), but MURKROW's own leg/lower-body
+silhouette is genuinely shape-mismatched at every tick from ~17026 on, not
+shrinking as the wobble scale returns near identity - `pa/pb/pc/pd` are
+RAM-exact to the table (`pb=pc=0` throughout, no dropped
+rotation/shear term) and frame-flip timing is RAM-exact too, so by
+elimination the reused `frame2` sprite asset is the likely culprit: it's
+never actually exercised by MURKROW's own settled draw path
+(`drawTurn13MurkrowSettled` always draws `tileset`, never `frame2`), so
+despite living in the asset file it has never been pixel-validated against
+the oracle in any currently-passing trace. **Next step**: a fresh VRAM
+tile dump at a materialize-window tick with `animCmdIndex=1` (e.g. RAM
+17040, same battler-1/`gSprites` addressing `dump-turn13-murkrow-
+materialize.py` already established) compared byte-for-byte against the
+currently-extracted `frame2` tiles - confirm or refute the wrong-asset
+theory directly rather than guessing further.
 
 (b) **Settled-menu bounce subset after the switch-in reset** (e.g.
 17106-17111/17113/17117-17122/17126-17130/17175/17200, 769-2325px,

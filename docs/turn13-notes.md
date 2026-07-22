@@ -1102,3 +1102,100 @@ the growing-silhouette phase's own monotonic-distinct shas, and that
 render 17069/17070 are 0-diff (the table's own closing boundary). Does
 **not** re-assert Mission B (not reached). `npm test`/`npm run build`
 unaffected — no `src/` changes this session, docs + probe tooling only.
+
+## 2026-07-21 — wiring session: `TURN13_MURKROW_WOBBLE_TABLE` wired, growing-silhouette window (17004-17018) restored to 0-diff; wobble sub-window (17019-17069) re-excluded under a NEW, narrower residual — colors now correct, shape isn't
+
+Picked up ISSUES #33(a) as "pure wiring" per the supervisor brief. Ran
+`verify-turn13-materialize.ts` first (mandatory, all 20 checks PASS,
+unchanged) then transcribed the 50-entry table from the section above into
+`battleScene.ts` (`TURN13_MURKROW_WOBBLE_TABLE`, anchored
+`TURN13_MURKROW_STRETCH_TICK=17020`, frame flip at a new
+`TURN13_MURKROW_FRAME_FLIP_TICK=17034`) and restored ticks 17004-17069 to
+`turn13-switchin.json`. **The wiring alone did NOT reach 0-diff** — two
+further, previously-unbanked bugs had to be found and fixed before ANY of
+the restored window went green, and one more real residual remains after
+those fixes. Re-ran `dump-turn13-murkrow-materialize.py` fresh this session
+(RAM ticks 17000-17075) specifically to cross-check the banked table
+byte-for-byte against ground truth before trusting it further — it matches
+exactly, all 50 entries, confirming the table/anchor transcription itself
+was never the problem.
+
+**Bug 1 (found, fixed): the switch-in's own BG-to-white materialize dither
+was never re-anchored for MURKROW.** `drawTurn5RockSlideAttack` (reused
+verbatim by `drawTurn13SwitchinFieldBase`) hardcodes
+`turn5BgFadeY(t)`/`turn5BgFadeY` only covers turn 5's own tick range
+(6746-6781); every turn-13 tick silently got `fadeY=0` (no background
+fade). This alone explained the bulk of the ~44% diff at renders
+17018-17025 the ORIGINAL (17030-anchored) code produced — not just the
+anchor error the previous session found. Fixed by threading a new optional
+`bgFadeYOverride` param through `drawTurn5RockSlideAttack` (default
+`undefined`, every pre-existing call site unaffected) and a new
+`turn13MurkrowBgFadeY(t)` that reuses `TURN5_BG_FADE_Y` verbatim (the
+dossier's own "SAME mechanism, species/window-independent" confirmation)
+at a freshly re-derived anchor
+(`TURN13_MURKROW_BG_FADE_START_TICK = TURN13_MURKROW_MATERIALIZE_START`,
+mirroring the exact relationship `TURN5_BG_FADE_START_TICK` has to its own
+materialize start).
+
+**Bug 2 (found, fixed): the materialize tint-fade coefficient ramp needs
+to keep running into the wobble sub-phase for MURKROW, unlike Pidgeotto.**
+`TURN5_MATERIALIZE_RAMP_COEFF`'s own 16-tick ramp-down finishes
+(render 6768-6783) *before* Pidgeotto's own `TURN5_STRETCH_TICK` (6786)
+even begins — so hardcoding `tintCoeff=0` in the stretch-table draw call is
+correct **for Pidgeotto only**, coincidentally, because the ramp is already
+over by the time that branch runs. For MURKROW the anchors don't have the
+same ordering: the reused-delta `TURN13_MURKROW_RAMP_RENDER_START` (17026)
+falls **after** `TURN13_MURKROW_STRETCH_TICK` (17020) — the wobble phase
+starts while the tint is still fading, so the old hardcoded-0 (copied from
+Pidgeotto's call site) rendered MURKROW in its true colors several ticks
+before the real game does, producing a distinctly pink/washed-out oracle
+frame vs. a full-color app frame (directly pixel-sampled: oracle
+`(231,231,214)`/`(198,156,198)`-family blended-toward-white tones where
+app already showed true body colors). Fixed by computing
+`turn13MurkrowMaterializeCoeff(t)` in the wobble branch too (same function
+the accumulator branch already calls) instead of a bare `0`. This closed
+renders 17019-17025 to a small residual (418-470px, likely ordinary
+edge/AA noise) and meaningfully reduced 17026+ as well (e.g. 17026:
+945px→701px).
+
+**Residual, NOT closed, re-excluded (17019-17069, 51 ticks): a shape-only
+mismatch, isolated to MURKROW's own silhouette, that does NOT shrink as
+the wobble scale returns near identity.** After both fixes above, colors
+are now genuinely correct throughout (direct pixel sampling at several
+ticks, including render 17036 where the table entry is `{256,256,0}` -
+nominal identity - confirms both sides show real MURKROW body-palette
+colors, not tint-blended ones) but the LEGS/lower-body silhouette is
+visibly stretched/skewed in the oracle relative to the app at every
+sampled tick from 17026 on, cropped side-by-side confirms it's a genuine
+pose difference, not anti-aliasing. `pa/pb/pc/pd` are RAM-confirmed
+byte-exact to the wired table (this session's own fresh probe, not
+reused from the prior session) and `pb=pc=0` throughout (pure isotropic
+scale, no shear/rotation term being dropped). Frame timing is also
+RAM-confirmed exact (`animCmdIndex` flips 0->1 at RAM 17033 only, visible
+render 17034, matching `TURN13_MURKROW_FRAME_FLIP_TICK`). The remaining
+suspect, by elimination: **the reused `frame2` sprite asset is the wrong
+art for this specific entrance animation.** `frame2` was extracted for
+(and, per this session's own check, is NEVER actually exercised by)
+MURKROW's settled/idle draw path (`drawTurn13MurkrowSettled` always draws
+`tileset`, never `frame2`) — so despite living in the same asset file,
+`frame2`'s content has never been pixel-validated against the oracle in
+ANY currently-passing trace. `tileNum`(473)/`paletteNum`(1)/`spriteId`(5)
+all stay constant across the whole window (RAM-confirmed this session too,
+not just asserted), consistent with the dossier's "VRAM-content technique,
+not an OAM tileNum change" finding - meaning if `frame2`'s bytes are wrong,
+a fresh VRAM tile dump at a materialize-window tick with `animCmdIndex=1`
+(e.g. RAM 17040) compared byte-for-byte against the currently-extracted
+`frame2` tiles would confirm or refute this directly. Excluded from
+`turn13-switchin.json` rather than faked, matching this dossier's own
+"exclude, don't fake" convention - **narrower** than before (51 ticks, all
+concentrated in the wobble sub-phase, vs. the previous session's 66-tick
+whole-window exclusion) and with color eliminated as a variable.
+
+**Net for this session**: `turn13-switchin.json` 156→**171/171**, 0 diff
+(15 of the 66 previously-excluded ticks, 17004-17018, now restored and
+green - the entire growing-silhouette accumulator sub-phase). Regression
+sweep unaffected (`turn14-fly-miss` 149/149, `turn13-menu` 57/57,
+`turn13-dragonbreath-faint` 141/141). `npm test` 993/993 unchanged (pure
+render wiring, no engine-logic surface changed). `verify-turn13-
+materialize.ts` still 20/20 (RAM/oracle-only, doesn't assert app pixels,
+unaffected by any of this session's `src/` changes).
