@@ -2143,6 +2143,40 @@ describe("S7 slice R rung (c4): turn9Ep2OnixInvisible - the FOUR-block Onix visi
   });
 });
 
+describe("S7 engine step PART 2 (docs/aerial-ace-notes.md's own 'Mission B: SOLVED' section): turn10's own re-anchored flicker (start=102, render 12408-12435) - reuses turn9Ep2OnixInvisible verbatim, only the start delay differs", () => {
+  const pressTick = 12305;
+  it("is false before the window (render 12407)", () => {
+    expect(turn9Ep2OnixInvisible(12407, pressTick, 102)).toBe(false);
+  });
+  it("is true for each 4-tick on block (12408-12411, 12416-12419, 12424-12427, 12432-12435)", () => {
+    for (const t of [12408, 12409, 12410, 12411, 12416, 12417, 12418, 12419, 12424, 12425, 12426, 12427, 12432, 12433, 12434, 12435]) {
+      expect(turn9Ep2OnixInvisible(t, pressTick, 102)).toBe(true);
+    }
+  });
+  it("is false for each 4-tick off gap (12412-12415, 12420-12423, 12428-12431) and after the last block (12436+)", () => {
+    for (const t of [12412, 12413, 12414, 12415, 12420, 12421, 12422, 12423, 12428, 12429, 12430, 12431, 12436, 12437]) {
+      expect(turn9Ep2OnixInvisible(t, pressTick, 102)).toBe(false);
+    }
+  });
+});
+
+describe("S7 engine step PART 2 (npm run compare pixel-bisected, not previously pinned by any probe session): turn10's own player-healthbox y2 wobble - the ENDEAVOR §15f companion to the flicker above, reuses turn9Ep2HealthboxWobbleY2 verbatim at its own start=101 (1 tick before the flicker, mirroring turn9's own 86-vs-87 relative offset)", () => {
+  const pressTick = 12305;
+  it("is 0 before the window (render 12406)", () => {
+    expect(turn9Ep2HealthboxWobbleY2(12406, pressTick, 101)).toBe(0);
+  });
+  it("alternates +1/-1 starting render 12407", () => {
+    expect(turn9Ep2HealthboxWobbleY2(12407, pressTick, 101)).toBe(1);
+    expect(turn9Ep2HealthboxWobbleY2(12408, pressTick, 101)).toBe(-1);
+    expect(turn9Ep2HealthboxWobbleY2(12409, pressTick, 101)).toBe(1);
+  });
+  it("holds the alternation through its last tick (render 12426) then stops", () => {
+    expect(turn9Ep2HealthboxWobbleY2(12425, pressTick, 101)).toBe(1);
+    expect(turn9Ep2HealthboxWobbleY2(12426, pressTick, 101)).toBe(-1);
+    expect(turn9Ep2HealthboxWobbleY2(12427, pressTick, 101)).toBe(0);
+  });
+});
+
 describe("S7 slice R rung (c4): turn9OnixHp - Onix's own HP-bar drain (31->24), same no-extra-lag family as endeavorOnixHp (docs/turn9-shake-notes.md 2026-07-21 addendum §1)", () => {
   const pressTick = 10871;
   it("holds startHp through the sentinel tick (render 10992)", () => {

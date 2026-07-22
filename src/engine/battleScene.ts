@@ -8095,9 +8095,10 @@ export function turn9Ep1OnixShakeX2(t: number, pressTick: number): number {
 const TURN9_EP2_HEALTHBOX_WOBBLE_RENDER_LAG = 1;
 const TURN9_EP2_HEALTHBOX_WOBBLE_START = 86; // RAM 10957 - pressTick(10871)
 const TURN9_EP2_HEALTHBOX_WOBBLE_TICKS = 20;
-export function turn9Ep2HealthboxWobbleY2(t: number, pressTick: number): number {
+/** `start` defaults to turn 9's own anchor (every pre-existing caller unaffected) - see `turn9Ep2OnixInvisible`'s own doc comment for why this generalization exists (turn 10's own re-trigger of the same ENDEAVOR §15f-precedented companion mechanism). */
+export function turn9Ep2HealthboxWobbleY2(t: number, pressTick: number, start: number = TURN9_EP2_HEALTHBOX_WOBBLE_START): number {
   const ramTick = t - TURN9_EP2_HEALTHBOX_WOBBLE_RENDER_LAG;
-  const n = ramTick - pressTick - TURN9_EP2_HEALTHBOX_WOBBLE_START;
+  const n = ramTick - pressTick - start;
   if (n < 0 || n >= TURN9_EP2_HEALTHBOX_WOBBLE_TICKS) return 0;
   return n % 2 === 0 ? 1 : -1;
 }
@@ -8122,9 +8123,18 @@ const TURN9_EP2_FLICKER_START = 87; // RAM 10958 - pressTick(10871)
 const TURN9_EP2_FLICKER_TOTAL_TICKS = 32; // RAM 10958-10989 inclusive (4 blocks of 4-on/4-off)
 const TURN9_EP2_FLICKER_PERIOD = 8;
 const TURN9_EP2_FLICKER_ON_TICKS = 4;
-export function turn9Ep2OnixInvisible(t: number, pressTick: number): boolean {
+/**
+ * `start` defaults to turn 9's own anchor (every pre-existing caller
+ * unaffected) - S7 engine step PART 2 (docs/aerial-ace-notes.md's own
+ * "Mission B: SOLVED" section) generalizes this so turn 10's own re-trigger
+ * of the SAME hit-flash task (Onix's post-AERIAL_ACE-hit flicker, RAM
+ * `pressTick+102` vs. turn 9's `pressTick+87`, identical period/on-ticks/
+ * total-ticks/render-lag shape) can reuse it verbatim rather than forking a
+ * near-duplicate function.
+ */
+export function turn9Ep2OnixInvisible(t: number, pressTick: number, start: number = TURN9_EP2_FLICKER_START): boolean {
   const ramTick = t - TURN9_EP2_FLICKER_RENDER_LAG;
-  const n = ramTick - pressTick - TURN9_EP2_FLICKER_START;
+  const n = ramTick - pressTick - start;
   if (n < 0 || n >= TURN9_EP2_FLICKER_TOTAL_TICKS) return false;
   return n % TURN9_EP2_FLICKER_PERIOD < TURN9_EP2_FLICKER_ON_TICKS;
 }
@@ -8434,8 +8444,8 @@ export const TURN10_REGIME5_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (
  * param" idiom `drawTurn7FieldBase`'s own Pidgeotto-HP override already
  * established.
  */
-function drawTurn10FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN9_ONIX_AFTER_QUICKATTACK_HP, onixY2Extra: number = 0, darken: boolean = false): void {
-  drawTurn6FieldBase(fb, t, bounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken);
+function drawTurn10FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN9_ONIX_AFTER_QUICKATTACK_HP, onixY2Extra: number = 0, darken: boolean = false, onixInvisible: boolean = false, healthboxY2Override?: number): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, onixInvisible, healthboxY2Override, onixY2Extra, darken);
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
@@ -8712,6 +8722,17 @@ export function turn10AerialAceOnixShakeY2(t: number, pressTick: number): number
 }
 
 /**
+ * S7 engine step PART 2 (docs/aerial-ace-notes.md's own "Mission B: SOLVED"
+ * section): Onix's own post-AERIAL_ACE-hit invisibility flicker (renders
+ * 12408-12435, RAM 12407-12434 +1 lag) - the EXACT SAME `turn9Ep2OnixInvisible`
+ * task re-triggered for this turn's own hit, a reuse not new code, only the
+ * anchor delay differs (turn 9's own `START=87` vs. this window's `102`, both
+ * relative to each turn's own live `pressTick`).
+ */
+const TURN10_ONIX_FLICKER_START = 102; // RAM 12407 - pressTick(12305)
+const TURN10_ONIX_HEALTHBOX_WOBBLE_START = 101; // TEST HYPOTHESIS - 1 tick before the flicker, mirroring turn9's own 86-vs-87 relative offset
+
+/**
  * Mechanism 4 (docs/aerial-ace-notes.md continuation, "Mechanism 4"): the
  * background/battler palette darken-then-restore pulse - a SOFTWARE
  * `BlendPalette` write straight into `gPlttBufferFaded` (NOT hardware BLDY),
@@ -8969,7 +8990,9 @@ function drawTurn10AerialAceWindow(fb: Uint8Array, t: number, pressTick: number)
   // Onix, via the same field-base chain, and Pidgeotto, via the lunge/clone
   // drawer) in one flag - no new palette code needed, a pure wiring job.
   const darken = turn10AerialAcePaletteDarkenCoeff(t, pressTick) > 0;
-  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixHp, onixY2, darken);
+  const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN10_ONIX_FLICKER_START);
+  const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN10_ONIX_HEALTHBOX_WOBBLE_START);
+  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixHp, onixY2, darken, onixInvisible, healthboxY2);
   drawTurn10AerialAceLungeAndClones(fb, t, pressTick, darken);
   drawTurn10AerialAceSlice(fb, t, pressTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
