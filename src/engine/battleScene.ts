@@ -8265,6 +8265,72 @@ function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette:
 }
 
 /**
+ * ISSUES #32 fix (docs/turn9-shake-notes.md's 2026-07-22 PROBE, "Model F",
+ * verified pixel-exact across the whole animated window): the only render
+ * ticks where slot 3's second life and slot 4 are simultaneously active,
+ * their footprints overlap. RAM (`tools/probe/turn9-clone-oam-dump.json`)
+ * shows slot 4 wins that OAM tie unconditionally there - so slot 3 must not
+ * be allowed to blend AT ALL under any pixel slot 4's own texel will also
+ * cover, else slot 4 ends up blending against slot 3's own already-blended
+ * result (a double-blend) instead of the plain post-real framebuffer. This
+ * mask records exactly which pixels a sprite instance's texels are opaque
+ * at, so slot 3's draw can skip them - same tile-grid walk as
+ * `drawSpriteSheetBlendedOverFb`, but recording coverage instead of blending.
+ */
+export function turn9QuickAttackOpaqueMask(tileset: Tileset, ox: number, oy: number, maxY: number): Uint8Array {
+  const mask = new Uint8Array(240 * 160);
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    const rowY = oy + ty * 8;
+    if (rowY >= maxY) continue;
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        const y = rowY + py;
+        if (y < 0 || y >= 160 || y >= maxY) continue;
+        for (let px = 0; px < 8; px += 1) {
+          if (tile[py * 8 + px] === 0) continue;
+          const x = ox + tx * 8 + px;
+          if (x < 0 || x >= 240) continue;
+          mask[y * 240 + x] = 1;
+        }
+      }
+    }
+  }
+  return mask;
+}
+
+/** Same tile-grid iteration as `drawSpriteSheetBlendedOverFb`, but skipping any pixel already set in `skipMask` (the OAM-tie loser's own suppression, see `turn9QuickAttackOpaqueMask`'s doc comment). */
+export function drawSpriteSheetBlendedOverFbSkipping(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, eva: number, evb: number, maxY: number, skipMask: Uint8Array): void {
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    const rowY = oy + ty * 8;
+    if (rowY >= maxY) continue;
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        const y = rowY + py;
+        if (y < 0 || y >= 160 || y >= maxY) continue;
+        for (let px = 0; px < 8; px += 1) {
+          const idx = tile[py * 8 + px]!;
+          if (idx === 0) continue;
+          const x = ox + tx * 8 + px;
+          if (x < 0 || x >= 240 || skipMask[y * 240 + x]) continue;
+          const c = palette[idx];
+          if (!c) continue;
+          const o = (y * 240 + x) * 4;
+          const tgt2 = { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! };
+          fb[o] = blendChannel(c.r, tgt2.r, eva, evb);
+          fb[o + 1] = blendChannel(c.g, tgt2.g, eva, evb);
+          fb[o + 2] = blendChannel(c.b, tgt2.b, eva, evb);
+          fb[o + 3] = 255;
+        }
+      }
+    }
+  }
+}
+
+/**
  * Draws QUICK_ATTACK's real-sprite lunge (rung c1) plus its two afterimage
  * clones (rung c2) for trace tick `t`, if any of the three is active -
  * returns whether it drew anything, so the caller knows the normal draw
@@ -8273,7 +8339,11 @@ function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette:
  * shape) FIRST, both clones blended on top of it LAST (see
  * `blendedTileOverFb`'s own doc comment for why) - both the erase and the
  * real sprite's own redraw are clipped to `TURN9_QUICKATTACK_LUNGE_GROUND_
- * CLIP_Y` (the feet stay grounded throughout the lunge, unmoved).
+ * CLIP_Y` (the feet stay grounded throughout the lunge, unmoved). Wherever
+ * slot 3 and slot 4 are simultaneously active and overlap (ISSUES #32, see
+ * `turn9QuickAttackOpaqueMask`'s doc comment), slot 4's own opaque texels
+ * suppress slot 3's blend there entirely, since slot 4 wins that OAM tie
+ * unconditionally.
  */
 function drawTurn9QuickAttackAnimation(fb: Uint8Array, t: number, pressTick: number): boolean {
   const lunge = turn9QuickAttackLungeOffset(t, pressTick);
@@ -8284,7 +8354,14 @@ function drawTurn9QuickAttackAnimation(fb: Uint8Array, t: number, pressTick: num
   const { tileset, palette } = pidgeottoFrontSprite;
   const real = lunge ?? { x2: 0, y2: 0 };
   drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
-  if (slot3) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  if (slot3) {
+    const slot4Mask = slot4 ? turn9QuickAttackOpaqueMask(tileset, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y) : null;
+    if (slot4Mask) {
+      drawSpriteSheetBlendedOverFbSkipping(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y, slot4Mask);
+    } else {
+      drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+    }
+  }
   if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
   return true;
 }
