@@ -223,3 +223,205 @@ stride 0x58) would save a few minutes for whoever next needs a
 one-off RAM address the existing watch-spec columns don't already cover
 (this dossier chain's own `turnN-rng-watch.json` files only expose a
 fixed column subset).
+
+## 2026-07-21 — worktree lane: wiring-readiness retrofit — `tools/probe/
+verify-turn14.ts` lands (28/28 checks, twice-run identical), FLY-up
+squash/stretch fully characterized from RAM, four §4 citation corrections
+
+**Verdict, stated up front**: turn 14's engine slice is confirmed a pure
+wiring job for every sub-phase except the FLY-up animation, which needs
+**one small new mechanism** — everything else reuses already-shipped
+generic machinery (see the wiring-verdict table below). This session
+followed the `verify-turn13.ts` retrofit precedent: a pixel-only PASS/FAIL
+script (`node --experimental-strip-types tools/probe/verify-turn14.ts`)
+against a **fresh** `bin/oracle run` of the already-committed
+`battle1-turn14-dense.json` (asserts its own 110-segment/18956-frame
+structure programmatically, not hand-copied from prose), plus one new RAM
+probe (`tools/probe/dump-fly-anim.py`, modeled on `dump-aerialace-anim.py`'s
+own sprite/OAM convention, extended with `gOamMatrices` affine-coefficient
+reads) for the one genuinely-unknown mechanism. **28/28 checks pass,
+twice-run identical** (re-run back to back, byte-identical output both
+times), single oracle round trip (200 captured ticks, under the 256 cap).
+
+### FLY-up squash/stretch, fully characterized (RAM-truthed, source-cited)
+
+**Source-read first** (`reference/pokeemerald/src/battle_anim_flying.c`,
+`data/battle_anim_scripts.s:6398-6423`): `Move_FLY`'s charge half
+(`FlySetUp`) calls `createsprite gFlyBallUpSpriteTemplate, ANIM_ATTACKER,
+2, 0, 0, 13, 336` — a **separate "round shadow" ball sprite**
+(`ANIM_TAG_ROUND_SHADOW`, `gOamData_AffineDouble_ObjNormal_64x64`), not
+Murkrow's own mon sprite, drives the visible squash/stretch via its own
+affine anim table (`sAffineAnim_FlyBallUp`, 4 keyframes). `AnimFlyBallUp`
+(the ball sprite's spawn callback) does two things **the same tick**:
+positions the ball at the attacker's own location
+(`InitSpritePosToAnimAttacker`) and sets
+`gSprites[GetAnimBattlerSpriteId(ANIM_ATTACKER)].invisible = TRUE` — i.e.
+**Murkrow's own mon sprite is hidden by the animation script itself**, not
+by `STATUS3_ON_AIR` (that flag sets later, at 17913, and is a battle-logic
+semi-invulnerability flag consumed by `AccuracyCalcHelper` — its *own*
+rendering consequence is separately confirmed at the end of this section,
+after the animation is long over).
+
+**RAM table** (`dump-fly-anim.py`, ticks 17780-17805, battler1 slot = 5,
+ball sprite = slot 3, `gOamMatrices[2]`, `mgba-venv python`, exit 139
+teardown benign):
+
+| tick | ball `a` (x-scale) | ball `d` (y-scale) | ball `y2` | ball `inUse` | Murkrow mon-sprite `invisible` |
+|---|---|---|---|---|---|
+| 17779 | — | — | — | — | **False** (last visible tick) |
+| **17780** | 1170 | 256 | 0 | **True** (spawn tick) | **True** (flips same tick) |
+| 17781 | 682 | 256 | 0 | True | True |
+| 17782-17784 | 481→303 | 256 | 0 | True | True |
+| 17785 | 256 | 256 | 0 | True | True |
+| 17786-17790 | 256 | 292→682 | 0 | True | True |
+| 17791-17795 | 273→372 | 512→256 | 0→-6 | True | True |
+| 17796-17800 | 409→682 | 227→157 | -11→-43 | True | True |
+| 17801-17803 | 682 (frozen) | 157 (frozen) | -54→-81 (still falling) | True | True |
+| **17804** | — | — | — | **False** (destroyed) | True |
+
+Both the ball-sprite spawn and the mon-sprite invisible flip land on the
+exact **same RAM tick (17780)** — one function, one write, confirmed by
+source (`AnimFlyBallUp`'s own two-line body). The ball is destroyed
+(`inUse` false) by tick 17804 — `AnimFlyBallUp_Step`'s own exit condition
+(`sprite->y + sprite->y2 < -32`) fires once the cumulative `y2` fall
+(driven by `data[2] += data[1]` each tick, a simple accelerating integrator
+once the initial `data[0]` countdown reaches 0 at 17792-ish, matching the
+`y2` column's own visible acceleration above) crosses the threshold.
+
+**Render-lag class**: the RAM-pinned spawn/invisible-flip tick (17780) and
+the first *pixel-visibly-different* tick are **not the same** —
+`verify-turn14.ts`'s own dense bisection (baseline = tick 17775, well
+before spawn) finds the first divergent pixel at **17781, a 1-tick render
+lag**, the same "+1 after the RAM write" class this dossier chain's
+turn10-13 sessions already established for other sprite/state transitions
+(never assumed, always bisected against a fresh oracle capture — this
+session's own explicit re-confirmation of the brief's "never assume a
+neighbor's lag" instruction).
+
+**Wiring verdict for this mechanism**: needs **one new function**, not a
+reuse of an existing engine primitive — nothing in `src/engine/` currently
+models a two-turn move's own transient "round shadow" sprite with a
+4-keyframe affine ramp independent of the attacker's own mon sprite. The
+per-tick `a`/`d`/`y2` table above is the exact reference data a wiring
+step would parameterize against (closed-form or literal per-tick table,
+implementer's choice — not decided by this probe session, out of SCOPE).
+Contrast: the *invisibility* half (`invisible = TRUE`) is a one-line
+reusable primitive, not a new mechanism.
+
+**Post-animation, cross-turn-boundary invisibility** (separately
+RAM-confirmed, `ram-probe.py` + the existing `turn14-rng-watch.json`
+spec, not re-derived this session — cited for completeness): after the
+ball is destroyed (17804) Murkrow's own mon sprite *stays* invisible for
+the entire rest of the trace, now for a **second, independent reason** —
+`STATUS3_ON_AIR` sets at 17913 (§3) and the settled end-of-turn menu at
+18086-18956 (§4) shows Murkrow's front sprite genuinely absent, not just
+coincidentally still hidden by the anim script's own now-defunct flag
+write. Both mechanisms produce the same visible symptom (no front sprite)
+but are RAM-distinguishable: the anim script's own `invisible=TRUE` write
+(17780) predates `STATUS3_ON_AIR` (17913) by 133 ticks and would, on its
+own, only last as long as the anim script's own sprite lifetime — the
+semi-invulnerability flag is what actually keeps it hidden afterward.
+
+### Four corrections to this dossier's own §4 (dense re-bisection, per the
+brief's own "prose approximate, expect ~1 citation slip" premise)
+
+1. **Submenu-clear boundary was "~17789"; dense bisection pins it to
+   17769**, 20 ticks earlier — the bare-scene sha (`5e5283bf92c2`, §4's own
+   citation) is already the frame at 17769, the confirm-press transient's
+   own very next tick. No new sub-phase found here (contrast turn13's own
+   6-phase submenu-open bounce) — just a looser original estimate.
+2. **"Flew up high!" typing-settle was "~17838"; dense bisection pins it
+   to 17846**, 8 ticks later — pixel-exact against `drawText`+charmap at
+   17846, not yet settled at 17838-17845.
+3. **"ONIX used DRAGONBREATH!" typing-settle was "~17921-17930"; dense
+   bisection pins it to 17949**, ~20-28 ticks later than the original
+   estimate — but *matches* §4's own separately-cited hold sha
+   (`1f3c3523520d @ 17950`), so this is a prose-range error, not a wrong
+   sha.
+4. **Real mislabeling, not just a loose range**: §4's DRAGONBREATH-held
+   row cites `ad5ee5aa59cc (18000)` as still-held "ONIX used
+   DRAGONBREATH!" text. It is not — dense re-bisection shows a **new
+   message-box transition already starts by 17986** (its own first
+   transition frame, `20e72b3c096e`, is sha-**identical** to the
+   DRAGONBREATH-kickoff's own transition frame at 17928, confirming the
+   message-box open/close transition is one shared generic mechanism, not
+   turn-specific), and tick 18000 (`ad5ee5aa59cc`) is a **mid-typing frame
+   of "ONIX's attack missed!"**, not held DRAGONBREATH text. The true
+   "attack missed!" settle tick is **18005** (sha `19b7891a40bf`, matching
+   §4's own *separate* citation for that row). `verify-turn14.ts` asserts
+   both the shared-transition-sha fact and the non-match at 18000 directly.
+5. **(minor, not a correction, a refinement)** §4's final settled-menu row
+   ("18086-18956 | `ffc7639da02c`") is not perfectly flat — dense sampling
+   across the 861-tick hold finds a **2-phase idle-bounce cycle**
+   (`ffc7639da02c` / `f0b62ede0c4a`), the same "settled menu box has its
+   own independent idle bounce" shape `turn13-notes.md`'s own worktree-lane
+   session already found for the FIGHT submenu box. RAM-frozen throughout
+   (no state change), just not pixel-frozen at one sha the whole time.
+
+None of these five corrections change any §2/§3/§5 verdict — RNG ledger
+(1 roll, tick 18079), turn order, PP/HP/status deltas, and the two
+source-cited mechanisms (empty-string kickoff, `STATUS3_ON_AIR` auto-miss)
+all re-confirm unchanged.
+
+### Other mission items, confirmed cheaply (per the brief's "mostly
+confirmable by PNG/sha" framing)
+
+- **Empty-string kickoff box content** (17769-17820): the bare-scene sha
+  (`5e5283bf92c2`) is genuinely a **no-message-box frame** — same sha the
+  settled pre-turn menu independently produces (§4's own note, re-verified
+  this session) — confirming visually, not just via the source-read
+  `printstring STRINGID_EMPTYSTRING3` citation, that nothing renders in
+  the box window during the entire charge kickoff.
+- **Murkrow-invisible rendering, layer-by-layer**: front sprite absent
+  (RAM-confirmed above); healthbox unchanged — no separate check needed
+  this session, `gBattlerSpriteIds`/healthbox sprite slots are untouched
+  by `AnimFlyBallUp`'s own single invisibility write (source-read, only
+  one sprite's `invisible` field is touched).
+
+### Wiring verdict table (per the brief's own ask)
+
+| phase | verdict | reused primitive / new mechanism |
+|---|---|---|
+| FIGHT-submenu reopen, cursor persisted at DRAGON_BREATH, confirm | pure wiring | `moveFightCursor`/`cursorState` family (turns 10-13, unmodified) |
+| empty-string kickoff (no message box) | pure wiring | new per-turn anchor tick only — box stays empty, no text-render call needed at all |
+| FLY-up squash/stretch (ball sprite + mon-invisible) | **new mechanism** | one new sprite-anim function (4-keyframe affine ramp + accelerating `y2` fall, table above); mon-sprite `invisible=TRUE` write is a 1-line reusable primitive |
+| "Foe MURKROW flew\nup high!" text | pure wiring | `drawText`+charmap+battle-window harness (turns 9-13, unmodified), new text constant + anchor tick |
+| `STATUS2_MULTIPLETURNS`/`STATUS3_ON_AIR` flag sets | pure wiring (state-only, no new render) | existing status-flag storage, new bit constants only |
+| "ONIX used\nDRAGONBREATH!" kickoff text | pure wiring | same text harness, new constant |
+| no fire-projectile/shake animation (accuracy fails pre-animation) | pure wiring | **absence** of a call — `AccuracyCalcHelper`'s early-return means the engine's own turn-14 script simply never reaches an animation-trigger step; no new suppression logic needed |
+| "ONIX's\nattack missed!" text | pure wiring | same text harness, new constant |
+| menu-box reopen slide | pure wiring | existing `gBattle_BG0_Y`-driven slide (turns 1-13 family, unmodified) |
+| settled-menu idle bounce (2-phase, corrected above) | pure wiring | same generic idle-bounce mechanism turn13's own worktree-lane session already found for the FIGHT submenu box |
+
+**Turn 15 continuity** (trivially visible, per the brief's own ask):
+`STATUS3_ON_AIR` (`status3_1`) is still `64` at this trace's own final RAM
+read (tick 18900, §3, unchanged this session) and the final captured pixel
+tick (18956) still shows Murkrow's front sprite absent in the settled
+menu — both facts carry forward into turn 15's own charge-half-complete
+resolution unmodified from the original dossier's own claim, just now with
+the settled-menu's own 2-phase idle-bounce correction folded in (item 5
+above) so a future wiring session doesn't chase a phantom mid-hold pixel
+diff.
+
+### Verification
+
+`node --experimental-strip-types tools/probe/verify-turn14.ts`: **28/28
+checks pass**, run twice back to back, byte-identical output both times
+(single `bin/oracle run` per invocation, 200 captured ticks, under the
+256-per-run cap). New RAM probe `tools/probe/dump-fly-anim.py` run twice
+across two constant-address fixes (the second run's `status2_1`/
+`status3_1` addressing corrected from an initial wrong guess — caught by
+this session's own cross-check against the already-established RAM facts
+in §3/§4 above before being trusted, not assumed correct on the first
+try). `npm test` and `npm run build` green, unchanged from before this
+session — no `src/` changes. New artifacts: `tools/probe/verify-turn14.ts`,
+`tools/probe/dump-fly-anim.py`, this doc section.
+
+**PAPERCUT**: none beyond the one already logged above. The
+`dump-aerialace-anim.py` convention this session extended doesn't itself
+document `gOamMatrices`' address/stride (`0x02021bc0`, `struct OamMatrix {
+s16 a,b,c,d}`, 8 bytes/entry, indexed by each sprite's own
+`oam.matrixNum`) anywhere reusable — had to be found fresh via
+`include/sprite.h` and `bin/oracle symbols`. Worth a one-line addition to
+whichever dump script conventions doc exists, for the next affine-anim
+probe session.
