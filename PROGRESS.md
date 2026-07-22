@@ -6,8 +6,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 265 — Bounded worker (ISSUES #37 entry residual): **CLOSED — user-authorized probe outcome**
 
-- **State:** ready to commit: direct sprite/VRAM/palette probe closed the
-  eight initial-icon residuals; canonical + delayed dense compares are
+- **State:** committed at `d0f843c`: direct sprite/VRAM/palette probe closed
+  the eight initial-icon residuals; canonical + delayed dense compares are
   **143/143**, composite **5/5**, and Tier-1 **1004/1004**.
 - **Did:** BAYLEEF slot 8 is live through black; source frame1 bytes reach
   OBJ VRAM one VBlank after its command advance and own canonical 20061–68
@@ -15,8 +15,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   source-erased `listOnixFrame1` chrome layer, selected only from existing
   menu-relative frame state; documented reproducible probe in
   `docs/party-menu-notes.md` §8. Trimmed #37 to post-SEND OUT only.
-- **Next:** commit this green entry and hand off #37's post-SEND OUT path;
-  do not implement it in this worker.
+- **Next:** hand off #37's post-SEND OUT path; do not implement it in this
+  worker.
 - **Notes:** no coordinate patch, absolute tick branch, or frame asset added;
   the new chrome is source-erased per a live icon frame. Build JS **5.21 MB**
   (gzip **237.51 kB**). PAPERCUT: mGBA probe emits megabytes of harmless
