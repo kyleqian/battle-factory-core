@@ -17,7 +17,7 @@
 #     -e, --effort EFFORT   Codex reasoning effort (default medium)
 #     -w, --worktree        run the worker in a fresh git worktree on its own
 #                           branch (the parallel lane; see SUPERVISOR.md)
-#         --log FILE        provider event log under /tmp
+#         --log FILE        provider event log path
 #     -h, --help            show this help
 #
 # Concurrency is capped at TWO workers, mechanically: one lane for the main
@@ -31,8 +31,8 @@
 # supervisor to verify and merge.
 #
 # Each provider runs non-interactively with the same full-access trust model as
-# its supervisor. Codex workers are ephemeral; every provider uses git and
-# PROGRESS.md as the durable handoff.
+# its supervisor. Every provider uses git and PROGRESS.md as the durable
+# handoff, and each worker keeps its event log for later inspection.
 #
 # Exit status: the worker's own exit status — except 42, which means the run
 # was stopped by an account usage/rate limit (supervisor: wind down, do not
@@ -59,7 +59,7 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
                         lane: own npm install + dedicated oracle port; worker
                         must not touch shared docs; supervisor merges after
                         verifying — see SUPERVISOR.md "Parallel workers")
-      --log FILE        provider event log under /tmp
+      --log FILE        provider event log path
       --print-config    print the resolved profile without launching
   -h, --help            show this help
 Environment overrides: WORKER_PROVIDER, WORKER_MODEL, WORKER_REASONING_EFFORT.
@@ -145,7 +145,7 @@ if [[ -z "$AGENT_LOG" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
     AGENT_LOG="/tmp/emerald-factory-subagent-$(date +%Y%m%d-%H%M%S).jsonl"
   else
-    AGENT_LOG="/tmp/emerald-factory-subagent-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
+    AGENT_LOG="${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.agent-logs}/workers/worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
   fi
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
@@ -154,6 +154,7 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "worker_effort=${REASONING_EFFORT:-n/a}"
   exit 0
 fi
+mkdir -p "$(dirname "$AGENT_LOG")"
 
 LAUNCH_EPOCH="$(date +%s)"
 
@@ -231,7 +232,7 @@ if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
 fi
 
 # Claude Code auto-memory is shared by repo path. Preserve the original worker
-# isolation and tripwire for Claude; Codex ephemeral workers do not use it.
+# isolation and tripwire for Claude; Codex workers do not use it.
 MEMORY_DIR=""
 MEM_SNAP_BEFORE=""
 MEM_SNAP_AFTER=""
@@ -306,7 +307,7 @@ else
   (
     cd "$WORK_DIR"
     export POKEBENCH_ROLE=worker POKEBENCH_ORACLE_URL="$ORACLE_URL"
-    exec codex exec --ephemeral --json \
+    exec codex exec --json \
       --model "$MODEL" \
       -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
       --dangerously-bypass-approvals-and-sandbox "$PROMPT" </dev/null

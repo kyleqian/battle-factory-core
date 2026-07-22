@@ -8,6 +8,7 @@
 /tools/probe/out/
 /tools/probe/__pycache__/
 /.worktrees/
+/.agent-logs/
 tsconfig.tsbuildinfo
 .env
 .DS_Store

@@ -41,7 +41,7 @@ Usage: ./run-supervisor.sh [options]
   -p, --provider NAME   claude (default) or codex
   -m, --model NAME      supervisor model (provider default)
   -e, --effort EFFORT   Codex reasoning effort (default high)
-      --log FILE        raw JSONL log for --headless (default /tmp/emerald-factory-supervisor.jsonl)
+      --log FILE        raw JSONL log for --headless (provider default)
       --print-config    print the resolved profile without launching
   -h, --help            show this help
 Environment overrides: SUPERVISOR_PROVIDER, SUPERVISOR_MODEL,
@@ -54,7 +54,7 @@ CAP_HOURS="${CAP_HOURS:-6}"
 PROVIDER="${SUPERVISOR_PROVIDER:-claude}"
 MODEL="${SUPERVISOR_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${SUPERVISOR_REASONING_EFFORT:-}"
-SUPERVISOR_LOG="${SUPERVISOR_LOG:-/tmp/emerald-factory-supervisor.jsonl}"
+SUPERVISOR_LOG="${SUPERVISOR_LOG:-}"
 PRINT_CONFIG=0
 
 while [[ $# -gt 0 ]]; do
@@ -103,6 +103,15 @@ case "$PROVIDER" in
     command -v codex >/dev/null 2>&1 || { echo "run-supervisor: codex CLI not found on PATH" >&2; exit 127; }
     ;;
 esac
+
+AGENT_LOG_ROOT="${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.agent-logs}"
+if [[ -z "$SUPERVISOR_LOG" ]]; then
+  if [[ "$PROVIDER" == "codex" ]]; then
+    SUPERVISOR_LOG="$AGENT_LOG_ROOT/supervisor/headless-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
+  else
+    SUPERVISOR_LOG="/tmp/emerald-factory-supervisor.jsonl"
+  fi
+fi
 
 if [[ "$PROVIDER" != "codex" ]]; then
   unset POKEBENCH_COMMIT_GENERATOR POKEBENCH_COMMIT_MODEL
@@ -164,6 +173,7 @@ fi
 PROMPT="You are the supervisor for this run. Read SUPERVISOR.md and follow it exactly: plan one increment at a time, delegate it to a worker via ./tools/run-subagent.sh (launched in the background — foreground Bash times out long before a worker finishes), verify each result yourself, and continue, fix, or escalate. Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${MODE_NOTE}"
 
 if [[ "$HEADLESS" == "1" ]]; then
+  mkdir -p "$(dirname "$SUPERVISOR_LOG")"
   if [[ "$PROVIDER" == "claude" ]]; then
     echo "Headless supervisor on $MODEL, hard cap ${CAP_HOURS}h (deadline $DEADLINE_HUMAN)."
   else
@@ -176,7 +186,7 @@ if [[ "$HEADLESS" == "1" ]]; then
       --dangerously-skip-permissions "$PROMPT" \
       > >(tee -a "$SUPERVISOR_LOG" | node tools/stream-pretty.mjs) &
   else
-    POKEBENCH_ROLE=supervisor codex exec --ephemeral --json \
+    POKEBENCH_ROLE=supervisor codex exec --json \
       --model "$MODEL" \
       -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
       --dangerously-bypass-approvals-and-sandbox "$PROMPT" \
@@ -198,12 +208,17 @@ else
     TIMEOUT_MESSAGE="run-supervisor: ${CAP_HOURS}h cap reached — stopping supervisor"
     # Codex's Crossterm TUI must stay in the terminal's foreground process
     # group. The wrapper owns the deadline without backgrounding Codex.
+    CODEX_SESSION_START_EPOCH="$(date +%s)"
+    status=0
     POKEBENCH_ROLE=supervisor python3 tools/run-with-deadline.py \
       "$CAP_SECONDS" "$TIMEOUT_MESSAGE" -- \
       codex --model "$MODEL" \
         -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
-        --dangerously-bypass-approvals-and-sandbox "$PROMPT"
-    exit $?
+        --dangerously-bypass-approvals-and-sandbox "$PROMPT" || status=$?
+    python3 tools/archive-codex-sessions.py \
+      --since "$CODEX_SESSION_START_EPOCH" --cwd "$(pwd)" \
+      --dest "$AGENT_LOG_ROOT/supervisor" --originator codex-tui || true
+    exit "$status"
   fi
 fi
 # Headless supervisors and interactive Claude retain the original lightweight

@@ -71,7 +71,13 @@ def main() -> int:
     finally:
         if terminal_fd is not None and terminal_state is not None:
             try:
+                # A TUI can have terminal-query replies queued as input when a
+                # watchdog stops it. If they reach the shell they appear as
+                # garbage keystrokes, so discard them before and after putting
+                # the terminal back into the state in which we found it.
+                termios.tcflush(terminal_fd, termios.TCIFLUSH)
                 termios.tcsetattr(terminal_fd, termios.TCSANOW, terminal_state)
+                termios.tcflush(terminal_fd, termios.TCIFLUSH)
             except (OSError, termios.error):
                 pass
 
