@@ -145,7 +145,8 @@ if [[ -z "$AGENT_LOG" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
     AGENT_LOG="/tmp/emerald-factory-subagent-$(date +%Y%m%d-%H%M%S).jsonl"
   else
-    AGENT_LOG="${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.agent-logs}/workers/worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
+    CODEX_LOG_ROOT="${POKEBENCH_CODEX_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
+    AGENT_LOG="$CODEX_LOG_ROOT/workers/worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
   fi
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then

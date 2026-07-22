@@ -104,10 +104,10 @@ case "$PROVIDER" in
     ;;
 esac
 
-AGENT_LOG_ROOT="${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.agent-logs}"
+CODEX_LOG_ROOT="${POKEBENCH_CODEX_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
 if [[ -z "$SUPERVISOR_LOG" ]]; then
   if [[ "$PROVIDER" == "codex" ]]; then
-    SUPERVISOR_LOG="$AGENT_LOG_ROOT/supervisor/headless-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
+    SUPERVISOR_LOG="$CODEX_LOG_ROOT/supervisor/headless-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
   else
     SUPERVISOR_LOG="/tmp/emerald-factory-supervisor.jsonl"
   fi
@@ -217,7 +217,7 @@ else
         --dangerously-bypass-approvals-and-sandbox "$PROMPT" || status=$?
     python3 tools/archive-codex-sessions.py \
       --since "$CODEX_SESSION_START_EPOCH" --cwd "$(pwd)" \
-      --dest "$AGENT_LOG_ROOT/supervisor" --originator codex-tui || true
+      --dest "$CODEX_LOG_ROOT/supervisor" --originator codex-tui || true
     exit "$status"
   fi
 fi
