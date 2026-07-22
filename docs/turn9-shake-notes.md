@@ -717,3 +717,127 @@ of this same session — see `docs/battle-turn-notes.md` §51). `npm run
 build` green. Full regression sweep 0 diff: `turn9-quickattack-b` **77/77**,
 `turn9-rockslide` **130/130**, `turn10-rockslide` **220/220**,
 `turn12-rockslide-miss` **38/38**, `turn13-switchin` **156/156**.
+
+## 2026-07-22 PROBE (worktree, ISSUES #32): CRACKED — real is invisible and
+absent from `gMain.oamBuffer` entirely; the actual tie is clone-vs-clone
+(slot 4 beats slot 3), and the currently-wired code's bug is a
+double-blend, not a wrong target2 family
+
+Per the brief's own named instrument: a direct port of
+`dump-quickattack-hitsplat-oam.py`/`dump-aerialace-oam.py` to this exact
+overlap, run against `tools/compare/traces/turn9-quickattack.json` at RAM
+ticks 10937-10942 (bracketing the two RAM ticks that render the residual,
+10939 -> render 10940 and 10940 -> render 10941, the same clone-family
+render=RAM+1 lag `turn9QuickAttackSlot3Offset`/`turn9QuickAttackSlot4Offset`
+already use). **No `src/` changes.**
+
+### The structural surprise (a decisive outcome the brief explicitly named as valid)
+
+Every prior attempt (this file's own "REFUTED" paragraph, and the wiring
+session's own tried-and-reverted attempt) assumed the tie at renders
+10940-10941 was **clone (slot 4) vs the REAL Pidgeotto sprite** — the exact
+AERIAL_ACE/hitsplat shape. The fresh RAM read shows this premise was wrong:
+**the real sprite (slot 5) has `invisible=true` for this ENTIRE window
+(RAM 10937-10942, i.e. its whole overlap with both clones) and NEVER
+appears anywhere in the 128-entry `gMain.oamBuffer`** — scanned every tick,
+matching on `(x,y,tileNum,paletteNum)`, zero hits. It contributes **nothing
+whatsoever** to the composited frame here, on real hardware. The genuine
+tie is between **the two clones themselves**: slot 4 sits at `oamBuffer`
+index **11**, slot 3's second life (offset `(0,0)`, RAM-recreated at 10938
+per this file's own §36 table) sits at index **12**, at **both** RAM ticks
+that render the residual (10939 and 10940) — slot 4's lower index wins
+**unconditionally**, same GBATEK same-priority rule as every prior
+overlap this run has solved. Both are `objMode=1` (semi-transparent) —
+translucent-vs-translucent, not opaque-vs-translucent like AERIAL_ACE/the
+hitsplat. Banked: `tools/probe/turn9-clone-oam-dump.json` (trimmed —
+per-slot decoded OAM attrs + resolved `oamBuffer` index, not the full
+128-entry array every tick, most of which is empty/irrelevant sentinel
+slots).
+
+### Why "clone wins, blends against the field alone" (the AERIAL_ACE rule, verbatim) does NOT reach 0 tolerance here
+
+This is the exact rule this file's own "REFUTED" paragraph already tried
+and reverted (predicted `(255,160,145)`, oracle wants `(255,127,55)` at
+`(181,41)`/render 10940) — re-confirmed by this session's own diagnostic
+(`tools/compare/scratch/diag-turn9-clone-oam-blend.ts`, "Model B"): only
+9/251 bbox pixels match. The reason: **the currently-wired code's own
+"draw real opaque first" step is NOT a bug to be removed** — it's already
+proven correct by the 8 already-0-diff renders in this same window
+(10935-10939, 10942-10944), independently re-confirmed this session by
+faithfully replaying `drawTurn9QuickAttackAnimation`'s own draw order in
+the diagnostic ("Model A"): it reproduces the oracle **exactly** (2622/2622
+opaque pixels at 10935/10936, 1932/1932 at 10937-10939, 1087/1087 at
+10942-10944) everywhere **except** the two residual ticks, where it
+reproduces the cited **203px mismatch exactly** (1729/1932 — 1932−1729 =
+**203**, matching the bug report's own pixel count precisely, confirming
+the mismatch is genuinely isolated to this specific double-active window
+and nothing else in the reconstruction is off). Discarding the real-opaque
+step (as the field-alone rule does) throws away a step that's independently
+proven necessary.
+
+### The actual bug and fix: a double-blend, not a wrong target2
+
+`drawTurn9QuickAttackAnimation` (`battleScene.ts:8181`) draws real opaque,
+then blends slot 3 over it (if active), then blends slot 4 over *that*
+result (if active) — unconditional, sequential. At the two residual ticks
+**both clones are simultaneously active and their footprints overlap**
+(slot 3's second life at `(0,0)`, slot 4 at `(24,6)`, `64×64` each) — this
+is the ONLY window in the whole animation where that's true (RAM/render
+tables re-confirmed this session: slot 3's first life ends before slot 4's
+life-end tail, and slot 3's second life doesn't turn visible until the
+render tick right after slot 4's own window opens — see the per-tick
+gating below). Wherever both are opaque, the wired code blends slot 4
+against **slot 3's own already-blended result** (a double-blend,
+`floor(1.25×texel)`-shaped contamination) instead of against the plain
+post-real framebuffer — since slot 4 wins the OAM tie unconditionally, slot
+3 should not have been allowed to blend at that pixel **at all**.
+
+**The fix** (`tools/compare/scratch/diag-turn9-clone-oam-blend.ts`'s own
+"Model F", 100% verified): real drawn opaque first, UNCHANGED from today.
+Then, per pixel: if slot 4's own texel is opaque there, it is the **only**
+clone that blends, directly against whatever's beneath (the real sprite's
+opaque redraw, or the field where real isn't opaque either) — slot 3 is
+**fully suppressed** at that exact pixel, not merely drawn-under. Where
+slot 4 is NOT opaque but slot 3 is, slot 3 blends normally (unchanged from
+today). Verified **pixel-exact across the ENTIRE animated window's full
+sprite footprint** (both corners' `64×64` area, ground-clipped at `y<74`
+same as the existing lunge clip) — **1932/1932 opaque pixels match at
+every one of renders 10935-10944** (not just the originally-cited bbox),
+confirmingly zero regression risk anywhere else in the window. Smoking-gun
+pixel `(181,41)`/render 10940: predicted `(255,127,55)`, exact match to the
+oracle's own cited value.
+
+**Fix shape for the engine step**: in `drawTurn9QuickAttackAnimation`,
+compute slot 4's own opacity mask before drawing slot 3, and skip slot 3's
+blend at any pixel slot 4 will also cover (equivalently: compute both
+sprites' predicted colors independently against the same post-real
+baseline, then pick slot 4's wherever it's opaque, else slot 3's, else
+leave the post-real baseline untouched) — no new blend primitive, no new
+target2 recipe, just per-pixel suppression of the OAM-tie loser. The
+`eva=12,evb=8` coefficient and the real-opaque-first step are both already
+correct and unchanged.
+
+### Verification
+
+New `tools/probe/dump-turn9-clone-oam.py` (direct port of
+`dump-quickattack-hitsplat-oam.py`, slots `[3,4,5,6,7]`), run against
+`turn9-quickattack.json` RAM ticks 10937-10942 — output banked as
+`tools/probe/turn9-clone-oam-dump.json` (segfaults on interpreter teardown
+same as every prior probe in this family, JSON written correctly before
+the crash, verified well-formed). New `tools/probe/verify-turn9-clone-oam.ts`
+— **25/25 checks pass**, run twice back-to-back against a fresh
+`bin/oracle` capture (`tools/compare/traces-groundtruth/battle1-turn9-dense.json`),
+identical both times: 2 OAM-order facts re-asserted against the committed
+dump JSON, 10 full-footprint-exact-match checks (one per render tick
+10935-10944), 6 named-probe-pixel checks (3 pixels × the 2 residual ticks),
+1 falsification pin (the currently-wired sequential-blend does NOT match
+oracle at the smoking-gun pixel, confirming the fix is a genuine behavior
+change). `npm test` **993/993** and `npm run build` green, unchanged this
+session (no `src/` changes — this is a PROBE step; the fix above is ready
+for a wiring step to land verbatim).
+
+**ISSUES #32 is ready to move to a wiring step** — the winner rule (slot 4
+beats slot 3, real contributes nothing), the double-blend root cause, and
+the per-pixel suppression fix are all pixel-exact-verified across the
+overlap's entire footprint and full RAM-live span, not a partial or
+bbox-only fix.
