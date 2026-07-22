@@ -916,3 +916,112 @@ lag bisector).
   assumed absent).
 - **Rung (d)** (turn 12's +2068 mirror): blocked transitively on (b)'s
   darken-window close, unchanged otherwise.
+
+## 2026-07-21 PROBE (rule-transfer session): Mission A CLOSES the darken-
+plateau — a formula-only fix, no RAM table needed at engine time
+
+Worktree PROBE step (no `src/` changes), tasked with transferring the
+plain-overlap blend rule (solved above, Mission A2) to the one remaining
+named gap: the darken-plateau residual (render 12368-12370), which the prior
+session left off-by-several-units/channel using a `BlendPalette(plain,
+BLACK, 10)` re-derivation of the darkened colors.
+
+**Named instrument run first, per the brief**: new RAM probe
+`tools/probe/dump-aerialace-darken-palette.py` reads `gPlttBufferFaded` (the
+live palette RAM mirror) for BOTH Pidgeotto's own OBJ bank (dynamically
+confirmed bank **1** for both slot 5 and slot 7 — same bank, as expected for
+a same-species clone) and the BG hardware bank the static field's local
+palette index 0 actually resolves to (bank **2** — `tools/extract/
+extract-battle-bg.ts:86`'s own `normalizePaletteOffset(..., 2)`, confirmed
+by cross-checking this probe's own baseline-tick readback against the
+committed asset JSON byte-for-byte, both `PIDGEOTTO.palette` and
+`battle-bg.json`'s own `palette[0]`).
+
+**A genuine NEW lag class found**: `gPlttBufferFaded`'s software write at
+RAM tick T is NOT visible in the rendered pixel until render tick **T+1** —
+distinct from (and easily confused with) the prior session's "palette-RAM
+visibility has ZERO render lag" finding, which compared the palette-blend
+TASK's own `data[]` state-machine tick against a DIRECT HARDWARE PALRAM read
+(`0x05000200`/`0x05000000`) at the same tick — the hardware register (what
+actually feeds the pixel pipeline) is a full tick BEHIND the software mirror
+this probe reads, because the mirror is written eagerly during the CPU
+frame but only DMA'd to hardware at the next vblank — the exact same
+"software buffer precedes hardware/pixels by one tick" shape `gMain.
+oamBuffer` vs. hardware OAM already established for Mission A2's own OAM
+read. Confirmed directly: this probe's own tick 12367 read is ALREADY
+darkened while the prior session's hardware-PALRAM table shows baseline at
+12367 (darkening starts hardware/pixel-side at 12368) — a full-tick,
+RAM-tick-numbered discrepancy between the two buffers, not a bug in either
+reading.
+
+**Re-ran the overlap-blend solve (Mission A2's exact formula, `predicted =
+floor((winnerTexel*eva + target2*evb)/16)`, `eva=12,evb=8`) at the same 6
+sample pixels used for the plain window, feeding it render tick T's palette
+from RAM tick T-1** (`tools/compare/scratch/aerialace-darken-solve.ts`):
+**18/18 pixel-tick pairs (6 pixels × renders 12368/12369/12370) match
+EXACTLY (0 tolerance)** using the RAM-read bytes directly. Example:
+`(181,41)` at render 12368 — winner (clone) texel from RAM `(74,16,8)`,
+field from RAM `(90,90,90)`, predicted `(100,57,51)` = oracle `(100,57,51)`
+exactly (the prior session's own `BlendPalette`-recompute attempt at this
+exact pixel got `(106,59,54)`, off by `(6,2,3)`).
+
+**Root cause of the prior recompute's failure, isolated (not just patched
+over by reading RAM)**: `BlendPalette` operates on the **native 5-bit BGR555
+palette components**, not on the already-8-bit-expanded asset/RGB colors —
+hand-verified bit-for-bit against the RAM dump (e.g. OBJ palette idx 8:
+unfaded raw 5-bit `(26,6,3)`, `BlendPalette`'s own formula
+`c5 + ((0-c5)*10)>>4` gives `(9,2,1)` — EXACT match to the RAM-read faded
+5-bit value; the same formula applied directly to the 8-bit-expanded
+`(214,49,24)` gives `(80,18,9)`, close but NOT equal to the real 8-bit
+result `(74,16,8)` — this multi-unit gap is exactly the "off by several
+units/channel" symptom the prior session hit and couldn't close by
+adjusting the coefficient, because the coefficient (10) was never the
+problem — the bit domain was).
+
+**This closes with a FORMULA-ONLY fix, no RAM table needed at engine
+implementation time**: since every asset color here is an exact 5-bit
+expansion (`(v5<<3)|(v5>>2)`), inverting via plain integer `>>3` recovers
+the original 5-bit value losslessly (the low 3 bits an expansion adds are
+always `< 8`, so dividing by 8 discards exactly them, verified on every
+sampled palette entry). `darken5(c, coeff) = expand(to5bit(c) +
+((0-to5bit(c))*coeff)>>4)`, applied to BOTH the clone's own winner texel and
+the static field pixel (both via the SAME asset-only lookups the plain
+window already uses — `pidgeotto.palette`/`battle-bg.json`'s own
+`palette[0]`, no RAM, no oracle sampling), then blended with the
+already-established `eva=12,evb=8` 8-bit formula: **18/18 pixel-tick pairs
+match EXACTLY**, cross-verified independently from the RAM-read version
+above and reported separately in
+`tools/compare/scratch/aerialace-darken-solve.ts`'s own output.
+
+**Fix shape for the engine step**: at the darken plateau, apply the SAME
+winner/blend rule as the plain window (clone wins outright wherever its
+texel is opaque, blends against the field, real sprite contributes
+nothing) — the ONLY change from the plain-window formula is that BOTH the
+winner's texel color and the field's color must be darkened via
+`darken5(c, 10)` (5-bit-domain `BlendPalette`, then re-expanded to 8-bit)
+BEFORE the `eva=12/evb=8` blend, not via a naive 8-bit-domain
+`BlendPalette` re-derivation. This closes **rung (b) completely** —
+`turn10-aerialace.json`'s capture window can now be extended through at
+least render 12373 (the whole overlap+darken span this dossier has
+solved), pending the actual engine wiring (out of scope for this worktree
+lane).
+
+### Verification
+
+`tools/probe/verify-turn10-aerialace.ts` extended with 3 new checks (the
+darken-plateau blend, renders 12368/12369/12370, 6 sample pixels each,
+formula-only — no RAM dependency in the committed check itself) —
+**49 PASS, 0 FAIL**, run twice back to back, identical. `npm test` and
+`npm run build` unchanged-green (no `src/` changes this session). New
+committed tooling: `tools/probe/dump-aerialace-darken-palette.py` (the
+`gPlttBufferFaded` OBJ+BG bank reader this session's own root-cause
+isolation used), `tools/compare/scratch/aerialace-darken-solve.ts` (both
+the RAM-read cross-check AND the formula-only reproduction, in one script).
+
+### Updated gap accounting
+
+- **Rung (b)**: CLOSED. Both the plain-overlap window (Mission A2) and the
+  darken-plateau window (this session) are now solved pixel-exact with one
+  unified rule. No open gap remains for rung (b)'s own blend mechanics —
+  only the actual `src/engine/` wiring is outstanding (out of scope here).
+- **Rung (c)/(d)**: unchanged from Mission A2's own accounting above.
