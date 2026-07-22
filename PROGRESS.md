@@ -4,6 +4,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 247 — Supervisor fold: turn-13 rung 4 SALVAGED+LANDED (`turn13-switchin.json` **156/156**, cap-killed pre-commit — supervisor verified + committed with provenance; turn 13 NOT fully green, two named residuals excluded per §50), turn-16 + turn-17 retrofit probes verified+merged (**every banked dossier turn 13→WIN now has a PASS/FAIL verify script**), overlap-rule transfer probe folded earlier (AERIAL_ACE darken = 5-bit-domain formula fix, 18/18 exact; ISSUES #31 hitsplat SOLVED 4210/4210 — wrong target2, wiring-ready)
+
+- **State (supervisor-verified):** `npm test` **986/986**, `npm run build`
+  green, tree clean, no unmerged branches. Traces this hour (all
+  supervisor-rerun 0 diff): turn13-menu 57/57, turn13-sandattack 190/190,
+  turn13-dragonbreath-faint 141/141, turn13-switchin 156/156. Verify
+  scripts from main tree: turn13 60/60, turn14 28/28, turn15 58/58,
+  turn16 233-cap PASS, turn17 245-cap PASS, turn10-aerialace 49/49,
+  turn9-hitsplat 12/12.
+- **Did:** rung 4's worker finished the engine work + §50 writeup but was
+  cap-killed before committing — supervisor reran suite/build/trace/
+  regression sweep and committed (`battleScene.ts` +251 lines,
+  icon-bar/particles generalized with new anchor params; frozen wait-
+  cursor + double-shift bugs found by compare and fixed). §50's honest
+  remainders: (1) Murkrow's materialize/wobble 17004-17069 needs its OWN
+  RAM table (Pidgeotto's deltas don't transfer; settle tick corrected to
+  17070); (2) settled-menu bounce subset 17106-17130+ — reset shift is
+  NOT purely additive, suspect a fresh-menu-open-style blank transient.
+  BRN badge pinned at tick 21542 (replaces HP label glyph, no layout
+  shift, static). Turn-17 retrofit: 7 corrections incl. a unique
+  pixel-leads-RAM faint-sink freeze; DESTIN trainer-pic slide-in (~31
+  ticks) characterized; faint-sink family now formula-exact.
+- **Next:** (1) AERIAL_ACE + hitsplat close-out engine step (launching
+  now): rung-b darken via the 5-bit-domain formula, rung-c flicker =
+  turn9Ep2OnixInvisible re-anchor, overlap compositing rule (OAM-winner +
+  BG-composite target2) in the turn-10 window AND the turn-9 hitsplat
+  (restore #31's excluded 10935-10944), rung-d turn-12 mirror at +2068.
+  (2) turn-13's two §50 residuals (materialize RAM probe first). (3)
+  turn-14 wiring off verify-turn14 (28/28) — dossiers/scripts wiring-ready
+  through the WIN.
+
+---
 ## 246 — Bounded worker (S7/S8 turn 13 engine step, rung 3 of 4): DRAGON_BREATH re-targeted at Pidgeotto LANDS 0-diff — kickoff text, HP drain 16→0, faint sink, "Foe PIDGEOTTO fainted!" + button-gated KO hold all wired; rung 4 (MURKROW switch-in) NOT attempted, out of scope this session
 
 - **State:** `npm test` **986/986** (978 + 8 new Tier-1), `npm run build`
