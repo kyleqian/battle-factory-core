@@ -281,3 +281,150 @@ two-turn move's second half is RNG-free by analogy to its first half —
 each half has to be independently checked (this session's own instruction
 already said as much — "expectation to VERIFY, not assume" — and that
 discipline paid off directly here).
+
+## 6. Worktree-lane retrofit — wiring-ready standard (S7/S8 worktree scout, no engine code)
+
+Shipped **`tools/probe/verify-turn15.ts`** (same convention as
+`verify-turn13.ts`/`verify-turn14.ts`: re-derives every pinned fact from a
+FRESH `bin/oracle run` against the already-committed `battle1-turn15-
+dense.json`, pixel-only, no RAM reads at runtime). 225 curated captures
+(under the 256 cap), **twice-run byte-identical** (two independent `node`
+invocations, full stdout diffed, 0 differences), **58/58 checks PASS**.
+RAM cross-checks for the corrections below used `dump-fly-anim.py` (generic
+sprite/OAM/status dump, reused unmodified over ticks 18995-19340 against
+the committed trace) plus fresh dense oracle pixel re-bisections (one-off,
+uncommitted `node` snippets against the committed trace — same discipline
+as the committed script, just not saved as a file).
+
+### 6a. §4 corrections (dense re-bisection of every "~" / wide-range row)
+
+Exactly the "1-4 citation slips" class the brief predicted, all pixel- or
+RAM-confirmed, none large enough to change any headline verdict:
+
+| §4 row (original) | correction | evidence |
+|---|---|---|
+| "Murkrow's sprite briefly occupies/overlaps Onix's own sprite position around tick 19110" | **Not an overlap.** RAM (`dump-fly-anim.py`) shows Murkrow's own mon sprite stationary at `(176,51)` the entire window from its reappear tick (19075) onward, ~40px+ from Onix's `(72,80)` — never coincident. What's actually visible at 19102-19135 is a plain **hit-flash blink on ONIX's own sprite** (`invisible` toggling true/false every ~4 ticks, 4 distinct rendered frames sampled) — a normal "took damage" flash, misread as a Murkrow/Onix overlap | RAM sprite-slot dump (slot 6 = Onix, slot 5 = Murkrow) + `verify-turn15.ts`'s own hit-flash check (4 distinct alternating frames, 19102-19135) |
+| "not very effective..." held sha `48472e3852a7` cited at "19195-19301" | Actual held window is **19174-19308** — starts 21 ticks earlier, ends 7 ticks later than cited | dense pixel bisection, `verify-turn15.ts` |
+| transition sha `e699bba4ad9c` cited at "19325" | Actual tick is **19321** — 4 ticks earlier | dense pixel bisection, `verify-turn15.ts` |
+| fade-to-black cited as "~20020-20040" (approximate) | Exact pure-black window: **20027-20040** (flagged by the brief as the one literal "~" row) | dense pixel bisection, `verify-turn15.ts` |
+| "Choose a POKéMON." list cited as a flat 2-sha plateau (`2945edd25751`/`aea9c5c07c9c`) | Actual plateau **idle-bounces through 4 phases**: `{2945edd25751 (first settle), bce90c709d33, aea9c5c07c9c, 35a120289fcc, f0ff81cff21d}` — same "settled screen has its own idle bounce" family turn13/14 already found for menu boxes, richer here | dense pixel bisection over 20064-20189, `verify-turn15.ts` |
+| **"cursor moved to MAGBY after DOWN" cited as `bce90c709d33` (20191) → `1e158bc9fb46`** | **False-positive attribution.** `bce90c709d33` is one of the 4 pre-existing party-list idle-bounce phases (row above) — it recurs repeatedly well *before* the DOWN press (e.g. tick 20070, 20115, 20144, 20176, 20189, all pre-press) and is *not* caused by the press at all. The genuinely new, uniquely-post-DOWN state is `1e158bc9fb46` (absent from the entire pre-DOWN bounce set), dense-bisected to first appear at **tick 20204** | dense pixel bisection across both windows, `verify-turn15.ts` |
+| settled "What will MAGBY do?" menu cited as settling at "20558", held flat at `5950e7b3d8ba` | Settle actually lands **1 tick earlier, at 20557**; the hold is a **4-phase idle bounce** `{5950e7b3d8ba, 083f11ed7f87, d725501bc9e3, 6e2f6409169f}` (period ~37 ticks), not a flat single sha — same family as the party-list and fainted-text idle bounces above | dense pixel bisection over 20555-20744, `verify-turn15.ts` |
+| "ONIX\nfainted!♥" held cited as 2 shas (`2d6c41d94131` @ 19365, `ef43e683de1a` @ 19990) | Actual hold is a **3-phase idle bounce**: `ef43e683de1a` → `b27912b6eda4` → `2d6c41d94131`, ~9 ticks per phase, repeating — likely the "♥" heart icon blinking on its own sub-cycle independent of the box itself | dense pixel bisection over 19341-19370 + spot-checked at 19980-19990, `verify-turn15.ts` |
+
+None of these change any §1/§2/§3/§5 headline verdict — every correction is a
+tighter boundary or a richer-than-cited idle-bounce set, the same
+non-destructive class of slip `verify-turn13.ts`/`verify-turn14.ts` each
+found ~1-4 of.
+
+### 6b. FLY strike-half animation, characterized (mission item (a))
+
+Source-confirmed: the strike half uses **`gFlyBallAttackSpriteTemplate`/
+`AnimFlyBallAttack`** (`battle_anim_flying.c:142-150,495-528`) — a sibling
+of the charge half's `gFlyBallUpSpriteTemplate`/`AnimFlyBallUp`
+(`turn14-notes.md`'s own subject), sharing the same `ANIM_TAG_ROUND_SHADOW`
+tile tag but a **distinct sprite template, affine table, and trajectory**
+(diagonal linear translation into the target, not a vertical squash/
+stretch) — genuinely a different mechanism, not a reuse of the charge
+half's own sprite. Per-tick RAM (`dump-fly-anim.py`, ticks 18995-19340,
+generic sprite-slot/OAM dump, no modification needed):
+
+| tick | event |
+|---|---|
+| 19000 | `STATUS2_MULTIPLETURNS` clears (matches §3) |
+| 19004 | `STATUS3_ON_AIR` clears (matches §3); Murkrow's own mon sprite (slot 5) still `invisible=true` |
+| 19035 | Both battlers' sprites drop to `affineMode=0` (identity, no matrix) — the submenu-clear transition |
+| 19042 | Onix's own sprite (slot 6) sets `invisible=true` briefly (pre-hit-flash lead-in) |
+| 19045 | **New sprite (slot 3)** spawns at `(272,-32)` — off-screen top-right, `AnimFlyBallAttack`'s own opponent-side spawn point (`DISPLAY_WIDTH+32, -32`) |
+| 19060-19074 | slot 3 translates via `AnimTranslateLinear` (sub-pixel `x2`/`y2` accumulate every tick; base `x` snaps `272→62` at 19065 mid-flight) toward Onix's target coordinates |
+| 19067 | **New sprite (slot 4)** spawns at `(72,88)`, tile 433 — an impact/contact effect coincident with the ball's approach to Onix's position (not independently source-traced this session — flagged open) |
+| **19075** | slot 3 (`AnimFlyBallAttack`'s sprite) is **destroyed** (`inUse→false`) **the same tick** Murkrow's own mon sprite (slot 5) flips `invisible→false` — exactly `AnimFlyBallAttack_Step`'s own source-code branch (`gSprites[ANIM_ATTACKER].invisible = FALSE; DestroyAnimSprite(sprite);`, same `if` block), RAM-confirmed as simultaneous, not approximated |
+| 19102-19135 | Onix's own sprite (slot 6) hit-flash-blinks (`invisible` toggles ~every 4 ticks, 4 distinct rendered frames) — the "took damage" flash, **not** a Murkrow/Onix overlap (§4 correction above) |
+| 19325 | Onix's mon sprite (slot 6) destroyed (`inUse→false`) **and** its healthbox sprite (slot 0, tile 28) sets `invisible→true` — the RAM-level faint-sink teardown, both in the same tick |
+
+### 6c. Faint-vanish render-lag, resolved (mission item (c) + headline correction)
+
+The headline's own parenthetical ("healthbox/sprite vanish...5 ticks after
+the HP write") is **imprecise about *which* event the 5 ticks are measured
+from**. RAM (§6b above) pins the actual sprite/healthbox teardown at tick
+**19325** — **178 ticks after** the HP-write (19147), not 5, and 1 tick
+*before* the stat-stage reset (19326, §3). The pixel-confirmed vanish
+(§4, tick 19330) lands **exactly 5 ticks after the RAM teardown (19325)**,
+not after the HP write. **Corrected framing: "healthbox/sprite go
+RAM-invisible at 19325 (178 ticks after the HP write, 1 tick before the
+stat-stage reset); the rendered frame follows 5 ticks later, at 19330 — a
+plain RAM-ahead-of-pixel render lag, the same shape this whole dossier
+chain already documents at every other state transition, not a new
+mechanism."** This is the **faint-sink family already known from turn-5**
+(`faint-switch-notes.md` §3a/§7a, `SpriteCB_FaintOpponentMon`/
+`AnimFaintOpponent`) applied to the player's own slot — this session did
+not re-derive a player-side function name (not source-traced), but the
+RAM-observed shape (stat reset + sprite/healthbox teardown in one tick,
+5-tick pixel lag) matches that family's own signature exactly; flagged
+open (function-name-level confirmation) same honesty standard §5 already
+used.
+
+### 6d. Party/switch screen reuse — turn-5 vs §14-addendum, resolved (mission item (b))
+
+The mission asked to double-check whether turn-5's own forced switch was
+player-side too (which would contradict §5(a)'s "first time on the
+player's own side" claim). Cross-referencing the existing, already-landed
+ground truth (no new probing needed — this is a documentation
+cross-check, not a RAM question): **turn-5's forced switch is
+opponent-side** — DESTIN's own Grovyle faints, DESTIN's AI sends out
+Pidgeotto (`faint-switch-notes.md` §3a/§7a/§10, `battle-turn-notes.md`
+§24/§26, all describing DESTIN's/the opponent's own party). **§14-addendum's
+own SEND OUT-confirm sequence (Onix→MAGBY) is the player-side precedent**
+— its own `battle1-victory.json`/`battle1-switch.json` trace explicitly
+walks the *player's* `gPlayerParty`/"Choose a POKéMON." list. This turn's
+own switch (Onix→MAGBY, §1) reuses **§14-addendum's own player-side
+machinery**, not turn-5's opponent-side one — §5(a)/(c)'s claims stand
+confirmed, no contradiction found.
+
+### 6e. Render-lag ledger (this session's additions)
+
+| RAM event | pixel-confirmed tick | lag |
+|---|---|---|
+| sprite/healthbox teardown (19325) | vanish frame (19330) | **5 ticks** |
+| `AnimFlyBallAttack` sprite destroy + Murkrow visible (19075, simultaneous in RAM) | (not independently pixel-bisected to a sub-tick lag this session — the sprite itself IS the pixel content, so RAM and pixel are definitionally coincident here) | 0 (by construction) |
+
+### 6f. Per-phase wiring verdict (engine planning payload, supersedes/extends §5)
+
+| phase | verdict |
+|---|---|
+| FLY strike-half attack-ball sprite (`AnimFlyBallAttack`) | **new mechanism** — diagonal linear-translation "round shadow" sprite from the attacker's off-screen corner to the target, distinct affine table from the charge half's vertical squash/stretch; shares only the tile tag with `AnimFlyBallUp` |
+| Onix hit-flash (post-impact) | **pure wiring reusing** the standard damage-taken sprite-invisible-toggle family (same shape as turn9's own hitsplat/hitflash convention, `dump-turn9-hitflash.py`) — not independently re-diffed against that file this session, flagged open |
+| Onix faint sink (stat reset + sprite/healthbox teardown) | **pure wiring reusing** the turn-5 faint-sink family (`SpriteCB_FaintOpponentMon`/`AnimFaintOpponent`), applied to the player's own slot; RAM shape matches exactly (§6c), function-name-level confirmation still open |
+| "ONIX fainted!" button-gated hold | **pure wiring reusing** the verbatim faint-hold mechanism (§5b) — its own idle-bounce animation is a **new-to-this-dossier 3-phase cycle**, not previously characterized in that much detail elsewhere |
+| "Choose a POKéMON." party-select screen | **pure wiring reusing** §14-addendum's own player-side machinery verbatim (§5c, §6d) — its own idle-bounce is a **new-to-this-dossier 4-phase cycle** |
+| SEND OUT/SUMMARY/CANCEL submenu | **pure wiring reusing** §14-addendum verbatim (§5d) |
+| Ball-throw/materialize | **same-shape reuse** of `turn5-switchin.json`'s own mechanism (§5e) — still not independently byte-verified against that file, open per §5e |
+| Healthbox slide-in | not independently isolated this session either (§5f still open) |
+| Settled "What will MAGBY do?" menu | **pure wiring reusing** the standard settled-menu idle-bounce family (turn13/14) — a **new-to-this-dossier 4-phase cycle**, richer than the usual 2 |
+
+### Verification (this session)
+
+`npm test` and `npm run build` green — no `src/` changes. New artifact:
+`tools/probe/verify-turn15.ts` (225 curated captures per run, single
+`bin/oracle run` round trip, 58/58 checks PASS, **twice-run byte-identical**
+— two independent `node --experimental-strip-types` invocations, full
+stdout diffed, 0 differences). RAM cross-checks used `dump-fly-anim.py`
+(existing tool, reused unmodified with new tick-range arguments against the
+already-committed `battle1-turn15-dense.json`) plus uncommitted one-off
+dense pixel re-bisections (`node --experimental-strip-types -e '...'`
+snippets against the same committed trace, same oracle round-trip
+discipline as the committed script). No new trace files needed — every
+correction and characterization above is derived from the already-committed
+`battle1-turn15-dense.json`. Source citations
+(`battle_anim_flying.c`, `faint-switch-notes.md`, `battle-turn-notes.md`
+§14-addendum) are read-only references used to explain RAM-observed
+behavior — no `src/` files touched.
+
+**PAPERCUT**: none new this session beyond what §5h/the original dossier
+already flagged — the dense re-bisection work here was straightforward
+(same oracle round-trip methodology as turn13/turn14's own retrofits),
+though the number of previously-uncharacterized idle-bounce phases (3 for
+the fainted-text hold, 4 for both the party-list and the settled-MAGBY-menu
+holds) was higher than either prior retrofit found, suggesting future
+dossier sessions should default to assuming 3-4+ phase bounces on any
+button-gated hold rather than checking just 2 shas.
