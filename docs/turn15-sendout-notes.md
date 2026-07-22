@@ -78,3 +78,42 @@ New data genuinely needed before code: MAGBY's player-front asset/frame
 selection and its palette identity, and any MAGBY-only post-release
 wobble/animation table. Everything else above is an anchor/species/HP
 parameterization of already-owned mechanisms.
+
+## Rung-1 corrective palette/OAM probe (2026-07-22)
+
+Reproduce with the checked-in direct probe (mGBA diagnostics can be safely
+discarded):
+
+```sh
+/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  tools/probe/dump-turn15-sendout.py \
+  tools/compare/traces/turn15-party-select.json \
+  /tmp/turn15-rung1-palette-oam.json 20248 20302
+```
+
+The dump now stores all 16 BG + 16 OBJ `gPlttBufferUnfaded` and
+`gPlttBufferFaded` banks as BGR555, each live `gSprites` identity and VRAM
+sheet hash, the PPU's actual OAM, and display/BG-control/VRAM hashes. This
+is intentionally direct state, not a screenshot-color fit.
+
+- The 5px residual at 20248/50/58/60/62 is the top MAGBY icon's palette-4
+  entries 4/5. At 20248, their direct palette values are `173,239,255` /
+  `123,214,239` unfaded and `148,206,222` / `107,181,206` faded. The live
+  icon is gSprite 4 (tile 106, bank 4); it remains PPU OAM entry 5 on those
+  ticks. The old screenshot-derived status overlay treats its transparent
+  backing as opaque, so only those bank-4 colors expose the ownership error.
+- The 273px residual at 20253/54 is one exact rendered color,
+  `41,41,66` vs hardware `41,41,57`. The latter is OBJ palette bank 1
+  (global bank 17), index 15: direct state gives unfaded `74,74,99` and
+  faded `41,41,57`. The four live menu Poké Ball sprites use that bank (PPU
+  entries 6--9); `sendOutExitFrame0`'s palette restoration chose the
+  ambiguous blue candidate ending in 115 instead of this RAM-proven entry.
+  This is an extracted palette-bank correction, not a mask/diff exception.
+- 20302 is not the frozen faint frame under a simple global fade. Hardware
+  has switched to `DISPCNT=0x1f40`, `BLDCNT=0x00ff`, `BLDY=15`; BG controls
+  are `9800/9c00/5e01/5a0b` and BG3 uses char base 2/screen base 26.
+  The live OAM is field ownership (MURKROW tile 273/pal1 plus opponent
+  healthbox pieces), while the old compositor instead draws its stale
+  faint-frame field/window arrangement. A correct implementation must
+  compose this register/VRAM-derived battle field and then use the real
+  per-bank fade; `fadeTurn15BattleFirstFrame` is only an approximation.

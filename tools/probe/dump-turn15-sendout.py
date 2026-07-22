@@ -41,6 +41,8 @@ from emerald_core import EmeraldOracle  # noqa: E402
 REF = (ROOT / "reference" / "pokeemerald").resolve()
 SPRITE_SIZE, TASK_SIZE = 0x44, 0x28
 OBJ_VRAM, OBJ_PLTT = 0x06010000, 0x05000200
+BG_VRAM = 0x06000000
+OAM = 0x07000000
 TILE_BYTES = 32
 
 def main() -> None:
@@ -49,6 +51,7 @@ def main() -> None:
     oracle.new_session()
     syms = oracle.symbols
     gs, gh, gbm, gt, gm = syms["gSprites"], syms["gHealthboxSpriteIds"], syms["gBattleMons"], syms["gTasks"], syms["gOamMatrices"]
+    pltt_faded, pltt_unfaded = syms["gPlttBufferFaded"], syms["gPlttBufferUnfaded"]
 
     def u16(addr: int) -> int:
         return oracle.read_u8(addr) | oracle.read_u8(addr + 1) << 8
@@ -57,6 +60,38 @@ def main() -> None:
         return n - 0x10000 if n & 0x8000 else n
     def u32(addr: int) -> int:
         return sum(oracle.read_u8(addr + i) << (8 * i) for i in range(4))
+    def bytes_at(addr: int, count: int) -> bytes:
+        return bytes(oracle.read_u8(addr + i) for i in range(count))
+    def palette_banks(addr: int) -> list[list[int]]:
+        return [[u16(addr + bank * 32 + color * 2) for color in range(16)] for bank in range(32)]
+    def bg_display() -> dict:
+        # The real display registers and their selected VRAM blocks are
+        # sufficient to identify the field/window layers without screenshot
+        # fitting.  A text BG's screen size determines its map byte length.
+        controls = [u16(0x04000008 + bg * 2) for bg in range(4)]
+        maps = []
+        for bg, control in enumerate(controls):
+            size = (control >> 14) & 3
+            map_bytes = (0x800, 0x800, 0x1000, 0x2000)[size]
+            char_base, screen_base = ((control >> 2) & 3), ((control >> 8) & 31)
+            maps.append({"bg": bg, "control": hex(control), "charBase": char_base,
+                         "screenBase": screen_base, "mapSha12": hashlib.sha256(bytes_at(BG_VRAM + screen_base * 0x800, map_bytes)).hexdigest()[:12],
+                         "charSha12": hashlib.sha256(bytes_at(BG_VRAM + char_base * 0x4000, 0x4000)).hexdigest()[:12],
+                         "hofs": u16(0x04000010 + bg * 4), "vofs": u16(0x04000012 + bg * 4)})
+        return {"dispcnt": hex(u16(0x04000000)), "bg": maps,
+                "bldcnt": hex(u16(0x04000050)), "bldalpha": hex(u16(0x04000052)), "bldy": hex(u16(0x04000054))}
+    def hardware_oam() -> list[dict]:
+        # gSprites is the game's future OAM model; this is the actual OAM
+        # array seen by the PPU after the VBlank transfer.
+        rows = []
+        for index in range(128):
+            a0, a1, a2 = u16(OAM + index * 8), u16(OAM + index * 8 + 2), u16(OAM + index * 8 + 4)
+            if a0 & 0x0200:  # disabled affine-off sprite
+                continue
+            rows.append({"index": index, "a0": hex(a0), "a1": hex(a1), "a2": hex(a2),
+                         "x": a1 & 0x1ff, "y": a0 & 0xff, "tile": a2 & 0x3ff,
+                         "palette": a2 >> 12, "priority": (a2 >> 10) & 3})
+        return rows
     def sprite(slot: int) -> dict:
         base = gs + slot * SPRITE_SIZE
         a0, a1, a2 = u16(base), u16(base + 2), u16(base + 4)
@@ -64,6 +99,7 @@ def main() -> None:
         # One 32x32 sheet is enough to identify all observed props/mons here;
         # healthbox components additionally expose their tile numbers below.
         sheet = bytes(oracle.read_u8(OBJ_VRAM + (tile + i) * TILE_BYTES + j) for i in range(16) for j in range(TILE_BYTES))
+        tile0 = bytes_at(OBJ_VRAM + tile * TILE_BYTES, TILE_BYTES)
         palette = bytes(oracle.read_u8(OBJ_PLTT + pal * 32 + i) for i in range(32))
         matrix = (a1 >> 9) & 31
         return {"slot": slot, "callback": hex(u32(base + 0x1c)), "inUse": bool(flags & 1), "invisible": bool(flags & 4),
@@ -72,6 +108,11 @@ def main() -> None:
                 "affine": (a0 >> 8) & 3, "objMode": (a0 >> 10) & 3, "matrix": matrix,
                 "matrixValues": [s16(gm + matrix * 8 + off) for off in (0, 2, 4, 6)],
                 "tile": tile, "palette": pal, "anim": oracle.read_u8(base + 0x2a), "animCmd": oracle.read_u8(base + 0x2b),
+                # 4bpp indices of the first 8x8 tile: exact transparency
+                # ownership for 8x8 status/held-item sprites (and a compact
+                # identity lead for larger OAM).
+                "tile0Indices": [nibble for byte in tile0 for nibble in (byte & 0xF, byte >> 4)],
+                "sheetNonzeroTiles": [i for i in range(16) if any(sheet[i * TILE_BYTES:(i + 1) * TILE_BYTES])],
                 "data": [s16(base + 0x2e + 2 * i) for i in range(8)],
                 "vramSha12": hashlib.sha256(sheet).hexdigest()[:12], "paletteSha12": hashlib.sha256(palette).hexdigest()[:12]}
     def row(tick: int) -> dict:
@@ -82,6 +123,11 @@ def main() -> None:
         # component; data[5] stores the HP-bar component (battle_interface.c).
         right, bar = u16(gs + hb * SPRITE_SIZE + 6) & 0xff, hb_left["data"][5] & 0xff
         return {"tick": tick, "controllerExec": hex(u32(syms["gBattleControllerExecFlags"])),
+                # All 16 BG and all 16 OBJ palette banks, held as BGR555
+                # words so the dump directly records hardware ownership.
+                "palette": {"unfaded": palette_banks(pltt_unfaded), "faded": palette_banks(pltt_faded)},
+                "display": bg_display(),
+                "hardwareOam": hardware_oam(),
                 "battler0": {"species": u16(gbm), "hp": u16(gbm + 0x28), "maxHp": u16(gbm + 0x2c), "movePp": [oracle.read_u8(gbm + 0x24 + i) for i in range(4)]},
                 "moveCursor": oracle.read_u8(syms["gMoveSelectionCursor"]), "healthbox": {"left": hb, "right": right, "bar": bar, "sprites": [hb_left, sprite(right), sprite(bar)]},
                 "tasks": [{"slot": i, "func": hex(u32(gt + i * TASK_SIZE)), "active": oracle.read_u8(gt + i * TASK_SIZE + 4)} for i in range(16) if oracle.read_u8(gt + i * TASK_SIZE + 4)],

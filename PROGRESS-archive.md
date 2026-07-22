@@ -1,4 +1,15 @@
 ---
+## 265 — Bounded worker (ISSUES #37 entry residual): **CLOSED — user-authorized probe outcome**
+
+- **State:** committed at `d0f843c`; direct sprite/VRAM/palette probe closed
+  the eight initial-icon residuals; canonical + delayed dense compares were
+  **143/143**, composite **5/5**, and Tier-1 **1004/1004**.
+- **Did:** BAYLEEF slot 8 stayed live through black; source frame1 bytes
+  reached OBJ VRAM one VBlank after command advance and owned 20061--68.
+  Added matching source-erased `listOnixFrame1` chrome; no coordinate patch,
+  absolute branch, or replay asset.
+
+---
 ## 264 — Bounded worker (ISSUES #37 entry transition): **CHECKPOINT — OBJ ownership narrowed to BAYLEEF's initial icon frame**
 
 - **State:** committed at `c13f645`; supervisor independently reproduced

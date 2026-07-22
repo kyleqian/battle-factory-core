@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 268 — Bounded worker (ISSUES #37 rung 1): **GREEN PROBE CHECKPOINT — exact palette/field blocker**
+
+- **State:** baseline green: Tier-1 **1005/1005**, build **5.32 MB**.
+  Rung 1 remains **192/200** in both party traces (delayed exactly +30):
+  5px at 20248/50/58/60/62, 273px at 20253/54, full frame at 20302.
+- **Did:** extended `dump-turn15-sendout.py` with all 32 unfaded/faded
+  palette banks, actual PPU OAM, BG controls/scrolls and VRAM hashes; wrote
+  the direct-state reproduction and attribution in
+  `docs/turn15-sendout-notes.md`. The 273px pair is OBJ bank1/index15
+  (`74,74,99 -> 41,41,57`), while the 5px is MAGBY icon bank4 entries 4/5.
+  20302 proves the field compositor has switched to `DISPCNT=1f40`, BG3
+  charbase 2/screenbase 26, not the frozen faint frame.
+- **Next:** supervisor escalation: decide whether to fund a source/VRAM
+  extracted party-ball palette layer plus a real register-derived 20302
+  field compositor. Do not alter phase timing or ship color/mask fitting.
+- **Notes:** production untouched; probe tool and docs are committed green.
+  PAPERCUT: mGBA native diagnostics ignored shell redirection, ~3 min.
+
+---
 ## 267 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — palette source blocker**
 
 - **State:** supervisor independently verified and banked the safe partial
@@ -40,20 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   diagnostics unless redirected, ~2 min.
 
 ---
-## 265 — Bounded worker (ISSUES #37 entry residual): **CLOSED — user-authorized probe outcome**
-
-- **State:** committed at `d0f843c`: direct sprite/VRAM/palette probe closed
-  the eight initial-icon residuals; canonical + delayed dense compares are
-  **143/143**, composite **5/5**, and Tier-1 **1004/1004**.
-- **Did:** BAYLEEF slot 8 is live through black; source frame1 bytes reach
-  OBJ VRAM one VBlank after its command advance and own canonical 20061–68
-  (delayed +30), with palette bank 4 fading normally. Added a matching
-  source-erased `listOnixFrame1` chrome layer, selected only from existing
-  menu-relative frame state; documented reproducible probe in
-  `docs/party-menu-notes.md` §8. Trimmed #37 to post-SEND OUT only.
-- **Next:** hand off #37's post-SEND OUT path; do not implement it in this
-  worker.
-- **Notes:** no coordinate patch, absolute tick branch, or frame asset added;
-  the new chrome is source-erased per a live icon frame. Build JS **5.21 MB**
-  (gzip **237.51 kB**). PAPERCUT: mGBA probe emits megabytes of harmless
-  diagnostics unless redirected, ~2 min.
