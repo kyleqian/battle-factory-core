@@ -264,7 +264,7 @@ compare run exposed the staleness.
   during Python interpreter teardown) AFTER their JSON output is fully
   and correctly written. Two workers in one session each spent ~2 min
   re-validating output they nearly discarded as a failed run.
-- **Hits:** 2 sessions (multiple probe processes in each).
+- **Hits:** 3 sessions (multiple probe processes in some).
 - **Cost each:** ~2 min + the risk of discarding good data.
 - **Workaround:** check the output file's validity (json.load) instead
   of trusting the exit code; a docstring line in each script saying

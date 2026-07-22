@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 269 — Bounded worker (ISSUES #37 rung 1): **PARKED GREEN — raw field asset still required**
+## 269 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — raw field asset still required**
 
 - **State:** restored and committed-green at the existing rung-1 checkpoint:
   canonical **192/200** (5px 20248/50/58/60/62; 273px 20253/54; 38400px
@@ -14,10 +14,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   273px family to party-menu ball bank1/index15. A direct blue substitution
   merely shifted that family to 20252/53; swapping the screenshot overlays
   expanded it into 13--204px sprite diffs. Both were reverted.
-- **Next:** extract the real party-menu OAM tile/palette bank (not a
-  screenshot-restored chrome color) and compose it by raw index/priority;
-  then extract BG3 charbase2/screenbase26 plus field OAM for 20302. Do not
-  use overlay/mask or RGB-candidate fitting.
+- **Next — SUPERVISOR DECISION:** the authorized worker stopped before the
+  central field task, so split it out: extract/compose BG char/map/palette +
+  field OAM for 20302 only and improve both traces **192→193/200**. Party-
+  menu OAM/palette residuals are a later increment. Do not use screenshot,
+  overlay/mask, or RGB-candidate fitting.
 - **Notes:** no production changes shipped. PAPERCUT: valid mGBA probe ends
   SIGSEGV 139, ~3 min.
 
