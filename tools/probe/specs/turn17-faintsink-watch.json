@@ -1,0 +1,746 @@
+{
+  "_comment": "S7/S8 worktree scout, turn 17 faint-sink shape probe (Murkrow, opponent slot 1): confirms the SpriteCB_FaintOpponentMon/AnimFaintOpponent family (same as turn13 Pidgeotto) by watching the mon sprite (gBattlerSpriteIds[1]) y2/flags step-climb-then-destroy shape and the healthbox sprite (gHealthboxSpriteIds[1]) flags, tick-by-tick, around the faint-sink window. segments carried verbatim from turn17-rng-watch.json (same committed trace).",
+  "segments": [
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 28,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 4,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 36,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "RIGHT"
+      ]
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 28,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 4,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 36,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "RIGHT"
+      ]
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 28,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 4,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 70,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 130,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 96,
+      "buttons": []
+    },
+    {
+      "frames": 24,
+      "buttons": []
+    },
+    {
+      "frames": 162,
+      "buttons": []
+    },
+    {
+      "frames": 54,
+      "buttons": []
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 196,
+      "buttons": []
+    },
+    {
+      "frames": 14,
+      "buttons": []
+    },
+    {
+      "frames": 210,
+      "buttons": []
+    },
+    {
+      "frames": 60,
+      "buttons": []
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 144,
+      "buttons": []
+    },
+    {
+      "frames": 180,
+      "buttons": []
+    },
+    {
+      "frames": 60,
+      "buttons": []
+    },
+    {
+      "frames": 80,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 980,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 900,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 600,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 750,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "RIGHT"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1400,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1400,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 10,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1400,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 900,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1200,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 30,
+      "buttons": []
+    },
+    {
+      "frames": 2,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 1000,
+      "buttons": []
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 199
+    },
+    {
+      "buttons": [
+        "DOWN"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 14
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 39
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 499
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 27
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 999
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 27
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 999
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 399
+    },
+    {
+      "buttons": [
+        "A"
+      ],
+      "frames": 1
+    },
+    {
+      "buttons": [],
+      "frames": 399
+    }
+  ],
+  "watch": [
+    {
+      "name": "battler1Slot",
+      "addr": "gBattlerSpriteIds+1",
+      "size": 1
+    },
+    {
+      "name": "healthbox1Slot",
+      "addr": "gHealthboxSpriteIds+1",
+      "size": 1
+    },
+    {
+      "name": "mon1Flags",
+      "path": [
+        {
+          "symbol": "gBattlerSpriteIds"
+        },
+        {
+          "add": 1
+        },
+        {
+          "derefU8Scaled": 68
+        },
+        {
+          "addSymbol": "gSprites"
+        },
+        {
+          "add": 62
+        }
+      ],
+      "size": 2
+    },
+    {
+      "name": "mon1Y2",
+      "path": [
+        {
+          "symbol": "gBattlerSpriteIds"
+        },
+        {
+          "add": 1
+        },
+        {
+          "derefU8Scaled": 68
+        },
+        {
+          "addSymbol": "gSprites"
+        },
+        {
+          "add": 38
+        }
+      ],
+      "size": 2
+    },
+    {
+      "name": "hb1Flags",
+      "path": [
+        {
+          "symbol": "gHealthboxSpriteIds"
+        },
+        {
+          "add": 1
+        },
+        {
+          "derefU8Scaled": 68
+        },
+        {
+          "addSymbol": "gSprites"
+        },
+        {
+          "add": 62
+        }
+      ],
+      "size": 2
+    },
+    {
+      "name": "status1_1",
+      "addr": "gBattleMons+0xA4",
+      "size": 4
+    }
+  ],
+  "startTick": 22470
+}
