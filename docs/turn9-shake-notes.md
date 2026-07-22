@@ -841,3 +841,42 @@ beats slot 3, real contributes nothing), the double-blend root cause, and
 the per-pixel suppression fix are all pixel-exact-verified across the
 overlap's entire footprint and full RAM-live span, not a partial or
 bbox-only fix.
+
+## 2026-07-22 WIRING (worktree, ISSUES #32): CLOSED — per-pixel suppression
+landed verbatim from the probe above, `turn9-quickattack.json` 167→169/169
+
+`verify-turn9-clone-oam.ts` re-run first (mandatory step): 25/25 PASS,
+identical to the probe's own run. No re-derivation — the fix shape above
+("compute slot 4's own opacity mask first, skip slot 3's blend at any pixel
+slot 4 will also cover") landed exactly as specified, in
+`drawTurn9QuickAttackAnimation` (`battleScene.ts`) and two new immediate
+helpers alongside it: `turn9QuickAttackOpaqueMask` (walks a sprite
+instance's own tile grid the same way `drawSpriteSheetBlendedOverFb` does,
+but records opaque-texel coverage into a 240×160 mask instead of blending)
+and `drawSpriteSheetBlendedOverFbSkipping` (the same blend loop, skipping
+any pixel already set in a caller-supplied mask). `drawTurn9QuickAttackAnimation`
+now computes slot 4's own mask (only when slot 4 is active) before drawing
+slot 3, and routes slot 3's draw through the skipping variant when that mask
+exists; slot 4's own draw call is completely unchanged (still the plain
+`drawSpriteSheetBlendedOverFb` against the live `fb`, unmasked — it's the
+unconditional OAM-tie winner, nothing suppresses it). Neither the shared
+`blendedTileOverFb`/`drawSpriteSheetBlendedOverFb` primitives nor any other
+region of `battleScene.ts` were touched.
+
+`tools/compare/traces/turn9-quickattack.json`: restored renders 10940/10941
+into `captureFrames` (167→169 total) — `npm run compare` **169/169, 0 diff**.
+Regression sweep, all 0 diff, unchanged: `turn9-quickattack-b.json` 77/77,
+`turn10-aerialace.json` 93/93, `turn12-aerialace.json` 131/131 (the
+AERIAL_ACE windows share the clone-blend machinery and were the main
+regression risk — confirmed clean), `turn9-menu.json` 111/111,
+`turn9-rockslide.json` 130/130. `npm test` 993→**997/997** (4 new Tier-1
+tests, `tests/turn9QuickAttackCloneMask.test.ts` — pins the mask-suppression
+logic directly on a synthetic overlap: opaque-mask correctness including the
+ground clip, the skipping blend leaving masked pixels fully untouched vs.
+blending unmasked ones with the documented `eva=12,evb=8` formula, and an
+end-to-end synthetic double-blend regression pin proving the fixed order's
+result differs from the old buggy sequential order at the same pixel).
+`npm run build` green.
+
+**ISSUES #32 is fully closed** — ready for deletion from `ISSUES.md` (not
+edited here per this session's own scope contract).
