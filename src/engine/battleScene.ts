@@ -7052,7 +7052,7 @@ export function turn13SwitchinSentOutTextVisibleChars(t: number): number {
  * 5, ANIM_TARGET, 6, 0, 8, 1` shakes Onix's own sprite horizontally
  * (RAM-confirmed 6px pulses, not a formula fit).
  */
-function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number, murkrowInvisible: boolean = false, onixInvisible: boolean = false, healthboxY2Extra: number = 0, onixX2: number = 0): void {
+function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number, murkrowInvisible: boolean = false, onixInvisible: boolean = false, healthboxY2Extra: number = 0, onixX2: number = 0, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP): void {
   drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, onixX2, onixInvisible, 0, false, turn13MurkrowBgFadeY(t));
   drawTurn5IconBar(fb, t, TURN13_ICONBAR_CREATE_TICK, TURN13_ICONBAR_FADE_START_TICK, TURN13_ICONBAR_DESTROY_TICK, TURN13_OPPONENT_ICON_STATES);
   if (!murkrowInvisible) drawTurn13MurkrowSwitchinSprite(fb, t);
@@ -7061,7 +7061,7 @@ function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTic
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(shiftedBounceTick));
   const healthboxY2 = bounce.healthboxY2 + healthboxY2Extra;
   drawMenuHealthboxPlayer(fb, 0, healthboxY2);
-  drawPlayerHealthboxHpOverlay(fb, TURN12_ONIX_AFTER_AERIALACE_HP, healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, onixHp, healthboxY2);
 }
 
 /**
@@ -11266,12 +11266,55 @@ function drawTurn15ImpactHitsplat(fb: Uint8Array, t: number): void {
  * the same field base via `onixInvisible`/`murkrowInvisible`/
  * `healthboxY2Extra`.
  */
+/**
+ * Onix's own HP-bar drain (4->0), the player-side HP-digit/band overlay
+ * machinery `endeavorOnixHp`/`turn9OnixHp` already establish (1 HP/tick,
+ * clamped both ends) - already validated across the WHOLE 0-117 domain
+ * (ISSUES #16 history: the yellow/red bands, the hp=1 red sliver, the
+ * truly-empty bar), so this turn just plugs in the real start/end values.
+ * Oracle-pixel-bisected exact this session (dense capture 19140-19160
+ * against `turn15-fly-strike.json`'s own committed button script): HP
+ * reads 4/117 through 19141 (matching boundary (ii)'s own stopping point),
+ * then steps down exactly 1/tick - 3 (19142), 2 (19143), 1 (19144), 0
+ * (19145) - settling 2 ticks BEFORE RAM's own atomic hp0 write (19147,
+ * §3) - the same "pixel drain settles ahead of the RAM commit" shape
+ * already flagged as an open item in docs/turn15-notes.md §5(a) (this
+ * turn's own faint-sink delay), not a new render-lag family.
+ */
+const TURN15_HP_DRAIN_START_TICK = 19141;
+function turn15OnixHp(t: number): number {
+  const d = t - TURN15_HP_DRAIN_START_TICK;
+  return Math.max(0, TURN12_ONIX_AFTER_AERIALACE_HP - Math.max(d, 0));
+}
+
+/**
+ * "It's not very effective..." (FLYING vs. Onix's ROCK/GROUND typing, 0.5x
+ * - docs/turn15-notes.md §3) - `TURN9_NOTVERYEFFECTIVE_LINE`'s own single-
+ * line asset reused VERBATIM (identical string, no new text), same
+ * `turn15SimpleVisibleChars` 1-char/tick mechanism every other message in
+ * this turn's own window already uses. Start tick oracle-pixel-bisected
+ * exact (dense capture 19145-19155): the kickoff text ("Foe MURKROW used
+ * \nFLY!") holds unchanged through 19150 (matching docs/turn15-notes.md
+ * §4's own "19150" citation for this text's FIRST sha, which turns out to
+ * still be the OLD kickoff text, not this one), hard-cutting to this
+ * message's own first glyph at 19151 - independently cross-checked by the
+ * total length (24 chars): 19151+24-1 = 19174, exactly matching §6a's own
+ * corrected "held window starts at 19174" finding, not just fit to one
+ * boundary.
+ */
+const TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK = 19151;
+
 function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number): void {
   const frozenBounceTick = turn15KickoffBounceTick(t, pressTick);
-  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, turn15MurkrowInvisible(t), turn15OnixInvisible(t), turn15OnixHealthboxWobbleY2(t), turn15OnixShakeX2(t));
+  const onixHp = turn15OnixHp(t);
+  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, turn15MurkrowInvisible(t), turn15OnixInvisible(t), turn15OnixHealthboxWobbleY2(t), turn15OnixShakeX2(t), onixHp);
   drawTurn15ImpactHitsplat(fb, t);
   drawTurn15FlyBallDescent(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t >= TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK) {
+    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn15SimpleVisibleChars(t, TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK, TURN9_NOTVERYEFFECTIVE_LINE.length));
+    return;
+  }
   drawMessageTextLines(fb, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, turn15SimpleVisibleChars(t, TURN15_FLY_STRIKE_TEXT_START_TICK, TURN15_FLY_STRIKE_TEXT_TOTAL));
 }
 

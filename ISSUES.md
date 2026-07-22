@@ -5,23 +5,23 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #36 — Turn 15 boundary (iii): "not very effective" text, HP drain, faint
-  sink, and the fainted-hold not yet wired — `turn15-fly-strike.json`
-  covers boundaries (i)+(ii) (18956-19141)
+## #36 — Turn 15 boundary (iii) remainder: faint sink + fainted-hold not yet
+  wired — `turn15-fly-strike.json` covers boundaries (i)+(ii) and the
+  HP-drain/"not very effective" text (18956-19308)
 
 Opened 2026-07-22 (wiring step), trimmed same day (boundary (ii) close-out,
-`docs/turn15-notes.md` §8). Boundaries (i) (reopen gate/submenu/confirm/
-kickoff text) and (ii) (the FLY strike animation core — ball descent,
-impact sprite, Onix's own hit-flash/shake/healthbox-wobble) are wired and
-committed, `turn15-fly-strike.json` **183/183** 0 diff over 18956-19141 (3
-ticks excluded, 19059-19061, a small rotated-affine corner-rounding
-residual — see §8, not chased further, shared-primitive risk; the
-`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` rider fix — ISSUES #35's old family —
-restored the other 7, `docs/turn13-bounce-notes.md` §13).
+`docs/turn15-notes.md` §8) and again (§9: HP drain + "not very effective"
+text wired). Boundaries (i)/(ii) and the drain/text half of (iii) are wired
+and committed, `turn15-fly-strike.json` **218/218** 0 diff over
+18956-19308 (5 ticks excluded, all named, shared-primitive residuals not
+chased: 19059-19061 a rotated-affine corner-rounding gap [§8]; 19143/19144
+a 2px HP-bar band-edge rounding gap at hp=2/hp=1 [§9]).
 
-**Still not started**: the "Foe MURKROW's attack was\nnot very effective..."
-text, the HP-drain-to-0 bar (§8 close-out found this starts at RAM 19142,
-NOT the original dossier's own "~19147" citation — 5 ticks earlier), the
+**Still not started**: the transition out of the "not very effective" hold
+(somewhere in 19309-19330 — text presumably clears before the sprite/
+healthbox teardown, RAM 19325, and pixel vanish, 19330, §6b/§6c — NOT
+independently bisected yet, §9 flags this as the honest next step rather
+than assuming any of §4's original citations for that span), the
 first-ever player-side faint sink (RAM teardown 19325/19326, pixel vanish
 19330, §6c — the turn-5 `SpriteCB_FaintOpponentMon`/`AnimFaintOpponent`
 family applied to the player's own slot, function-name-level confirmation
@@ -31,11 +31,11 @@ bounce, dismiss at 19990). Ground truth for all of it is banked in
 table is flagged "pure wiring reusing" an existing mechanism (the turn-5
 faint-sink family, the standard button-gated-hold idle-bounce shape), no
 new derivation expected, unlike boundary (ii)'s own two probes.
-**Next step:** wire the "not very effective" text (straightforward,
-`turn15SimpleVisibleChars`-style, once its own literal start tick is
-oracle-pixel-bisected), then the HP-drain bar/text countdown from 19142,
-then the faint-sink teardown, then the fainted-hold — extending
-`turn15-fly-strike.json` through ~19990, 0 diff.
+**Next step:** dense oracle-pixel bisect 19308-19330 fresh (the same
+"verify, don't assume" discipline that already corrected two of this
+window's own citations twice over), then wire the faint-sink teardown,
+then the fainted-hold — extending `turn15-fly-strike.json` through
+~19990, 0 diff.
 
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`

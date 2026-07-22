@@ -625,3 +625,70 @@ traces (VRAM OBJ tile allocation is dynamic, load-order-dependent) — Probe
 1's own brief suggested checking it as a cheap first pass, and it would
 have been actively misleading here (433 vs 305) if source + affine-anim
 shape + a fresh VRAM dump hadn't been used as the real tiebreakers instead.
+
+## 9. Engine wiring, boundary (iii) partial close-out (bounded worker,
+2026-07-22): HP drain + "not very effective" text wired; faint sink +
+fainted-hold NOT reached this session
+
+Dense oracle-pixel bisection (fresh `bin/oracle run`, scratch trace reusing
+`turn15-fly-strike.json`'s own committed 20745-frame button script, stride-1
+over 19140-19160) pinned two things §8 left as boundary (iii)'s own next
+step:
+
+1. **HP drain start tick, corrected once more.** §8's own correction found
+   the HP digit "already changing" at render 19142; this session's dense
+   read shows the drain is a plain 1-HP/tick countdown with anchor
+   **19141** (`d = t - 19141`, `hp(t) = max(0, 4 - max(d,0))`): 4/117 held
+   through 19141, then 3/2/1/0 at 19142/19143/19144/19145, flat at 0
+   thereafter — reusing the ALREADY-VALIDATED player-side HP-digit/band
+   overlay machinery (`endeavorOnixHp`'s own shape, `playerHealthboxHpOverlayForHp`'s
+   compositor) verbatim, just a fresh anchor + start/end pair (4→0), no new
+   derivation. Settles 2 ticks before RAM's own atomic `hp0` write (19147,
+   §3) — pixel-ahead-of-RAM, not RAM-ahead-of-pixel like most of this
+   dossier's other transitions; flagged as this specific transition's own
+   shape, not assumed transferable.
+2. **"It's not very effective..." start tick.** The kickoff text ("Foe
+   MURKROW used\nFLY!") holds unchanged through render **19150** (§4's own
+   citation for this tick's sha turns out to still be the OLD kickoff text,
+   not this message — a one-more citation-slip in the same class §6a
+   already found several of), hard-cutting to this message's own first
+   glyph at **19151**. `TURN9_NOTVERYEFFECTIVE_LINE` ("It's not very
+   effective…", single line, curly apostrophe + ellipsis) reused VERBATIM,
+   zero new asset — same string, same type matchup shape (a 0.5x
+   not-very-effective result), `turn15SimpleVisibleChars`' own 1-char/tick
+   mechanism. Cross-checked independently against §6a's own correction
+   (not just fit to the start boundary): 24 total chars, `19151+24-1 =
+   19174`, exactly matching §6a's own dense-bisected "held window starts at
+   19174" finding.
+
+**New `src/` surface**: `TURN15_HP_DRAIN_START_TICK`/`turn15OnixHp`,
+`TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK`, `drawTurn15FlyStrikeWindow`'s own
+new text branch. `drawTurn13SwitchinFieldBase` gains an `onixHp` param
+(default `TURN12_ONIX_AFTER_AERIALACE_HP`, every pre-existing call site
+unaffected) — the same "generalize a hardcoded value into a defaulted
+param" idiom every other reused mechanism in this file already uses.
+
+**`turn15-fly-strike.json`**: extended 19141→19308 (stride-1 through
+19142-19174, sparse spot-checks at 19200/19250/19300/19308 confirming the
+hold stays flat), **218/218, 0 diff**. One new exclusion: **19143/19144**
+(hp=2 and hp=1, 2px each) — a tiny HP-bar band-edge rounding residual at
+the two lowest nonzero HP values, the same "don't chase a sub-3px
+shared-primitive residual" class already established for the 19059-19061
+ball-edge gap (§8) — not chased further this session.
+
+**Not reached this session** (still boundary (iii)'s own remaining scope,
+ISSUES #36 kept open for it): the transition out of this hold (somewhere
+in 19309-19330, where the text presumably clears before the sprite/
+healthbox teardown at RAM 19325 and pixel vanish at 19330, §6b/§6c), the
+player-side faint sink itself (stat-stage reset, sprite/healthbox erase),
+and the "ONIX fainted!" button-gated hold through its own dismiss at
+~19990. None of these were probed this session — the next session should
+dense-bisect 19308-19330 fresh rather than assume any of §4's original
+citations for that span, the same "verify, don't assume" discipline that
+already paid off twice in this same window (§8's HP-drain-start
+correction, this session's own text-start correction).
+
+Verified: regression sweep 0 diff (`turn14-fly-miss` 185/185,
+`turn13-switchin` 240/240, `turn13-menu` 57/57). `npm test` 993/993
+(unchanged — no test-literal call sites reference the new optional
+`onixHp` param), `npm run build` green.
