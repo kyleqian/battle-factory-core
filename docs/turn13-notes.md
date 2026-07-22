@@ -1199,3 +1199,125 @@ sweep unaffected (`turn14-fly-miss` 149/149, `turn13-menu` 57/57,
 render wiring, no engine-logic surface changed). `verify-turn13-
 materialize.ts` still 20/20 (RAM/oracle-only, doesn't assert app pixels,
 unaffected by any of this session's `src/` changes).
+
+## 2026-07-22 — worktree lane (diagnostic probe, ISSUES #33(a)): wrong-asset
+theory REFUTED by direct VRAM byte comparison — `frame2` is pixel-exact;
+the real bug is `turn13MurkrowFrame`'s selection WINDOW, not the asset
+
+Named instrument from the prior session's own dossier entry: a fresh VRAM
+tile dump at a materialize-window tick with `animCmdIndex=1` (RAM 17040),
+compared byte-for-byte against the currently-extracted `frame2` tiles.
+Ran it, then widened to a full sweep once the first result was
+surprising, to pin the real mechanism precisely instead of stopping at
+"confirmed/refuted."
+
+### Method
+New `tools/probe/dump-turn13-frame2-vram.py`, porting the addressing
+`dump-turn13-murkrow-materialize.py` already established for battler 1's
+OAM fields (`gBattlerSpriteIds+1` -> `gSprites` sprite base, `tileNum =
+attr2 & 0x3FF`) plus the OBJ VRAM base/tile-size `tools/compare/scratch/
+probe_grovyle_vram.py` already validated for GROVYLE (`OBJ_VRAM0 =
+0x06010000`, 4bpp/32-bytes-per-tile, 1D obj-mapping sequential tile
+numbering — confirmed still 4bpp here too, `bpp=0` read directly from
+attr0 bit13 at every sampled tick). Decodes each of the 64 tiles at
+`tileNum..tileNum+63` into the same row-major 0-15-per-pixel shape
+`tools/extract/tiles.ts`'s `sliceTiles` produces, so the dump is directly
+diffable against `battle-opponent-front-sprites.json`'s `tileset`/
+`frame2` fields with no re-encoding.
+
+First ran the two named ticks (RAM 17040 and 17050, both squarely inside
+the "animCmdIndex=1" region `turn13MurkrowFrame` currently maps to
+`frame2`): **both read VRAM = `tileset` (64/64 tiles exact), NOT `frame2`
+(38/64)**. That's the opposite of what the current code draws there — so
+rather than stop at "refuted, something else is wrong," swept every RAM
+tick 17010-17074 (one probe run, `tick in TARGET_TICKS` filter) to find
+where `frame2` actually IS live, since the asset clearly exists and is
+used by something.
+
+### The real tick-by-tick VRAM story (`spriteId=5`, `tileNum=473` constant
+throughout — same VRAM slot, no relocation; RAM tick, render = RAM+1,
+same render-lag convention as every other citation in this file)
+
+| RAM ticks   | animNum | animCmdIndex | VRAM content        |
+|-------------|---------|--------------|----------------------|
+| 17010-17017 | 0       | 0            | `tileset` (64/64)    |
+| 17018       | 1       | 0            | `tileset` (64/64)    |
+| **17019-17032** | 1   | 0            | **`frame2` (64/64)** |
+| 17033       | 1       | 1            | `frame2` (64/64)     |
+| **17034-17069** | 1   | 1            | **`tileset` (64/64)**|
+| 17070+      | 0       | 0            | `tileset` (settled)  |
+
+Every single sampled tick is a clean 64/64 exact match to ONE of the two
+extracted assets, never a partial/fuzzy match to either — both `tileset`
+and `frame2`'s extracted bytes are byte-perfect against fresh hardware
+VRAM whenever the real game actually displays them. **`frame2` was never
+wrong.** It just isn't live where the current code thinks it is: real
+`frame2` is a closed window from RAM 17019 to RAM 17033 inclusive (render
+**17020 to 17034 inclusive** — exactly bounded by the two constants
+already named in the code, `TURN13_MURKROW_STRETCH_TICK`(17020) and
+`TURN13_MURKROW_FRAME_FLIP_TICK`(17034)), with `tileset` everywhere else
+in the whole materialize+wobble+settle span.
+
+Current code (`turn13MurkrowFrame`, `src/engine/battleScene.ts:6941`):
+```ts
+function turn13MurkrowFrame(t: number): 0 | 1 {
+  return t < TURN13_MURKROW_FRAME_FLIP_TICK ? 0 : 1;
+}
+```
+This is an open-ended step function, not the real closed window: it
+draws `tileset` for render 17020-17033 (14 ticks) where the real game
+shows `frame2`, and `frame2` for render 17035-17069 (35 ticks) where the
+real game has already reverted to `tileset` — only render 17034 itself
+happens to land right, by coincidence of the threshold's placement. This
+fully accounts for the "MURKROW's own leg/lower-body silhouette is
+genuinely shape-mismatched... not shrinking as the wobble scale returns
+near identity" symptom from the prior entry: `tileset` and `frame2` are
+two real animation frames (38/64 tiles identical, 26/64 genuinely
+differing — matching the VRAM sweep's own 38/64 partial-match figure
+above), with the differing tiles concentrated in exactly the leg/lower-
+body region (`{12,30,38}` nonzero only in `tileset`, `{41,42,50}` nonzero
+only in `frame2`, sharing the same other 20 nonzero tile positions), so
+drawing the wrong one reads as a persistent silhouette skew that tracks
+the wobble scale instead of shrinking with it. Tick-by-tick, the current
+step function disagrees with the real window on exactly **49 of the 51**
+excluded render ticks (17020-17033 and 17035-17069) — the two boundary
+ticks 17019 and 17034 already happen to draw the right frame under the
+current code (the `t < 17034` threshold coincidentally lands correctly
+there), so if any residual survives at just those two ticks after the fix
+below, it's a separate, much smaller issue, not this one.
+
+### Fix shape (pure wiring, next step — NOT applied this session, no
+src/engine edits per this probe's scope): replace the body of
+`turn13MurkrowFrame` with the closed-interval check the VRAM sweep
+pins, reusing the two existing named constants — no new table, no new
+asset data, no extractor change:
+```ts
+function turn13MurkrowFrame(t: number): 0 | 1 {
+  return t >= TURN13_MURKROW_STRETCH_TICK && t <= TURN13_MURKROW_FRAME_FLIP_TICK ? 1 : 0;
+}
+```
+Expected to close some/most of the remaining 17019-17069 exclusion in
+`turn13-switchin.json` (still needs an end-to-end oracle diff to confirm
+0-diff, and to check whether the shape residual was the ONLY remaining
+defect in that window or whether one more is hiding behind it — this
+probe only established the frame-selection ground truth, it did not
+re-run the trace against a patched engine).
+
+### Verification
+`tools/probe/verify-turn13-frame2.ts` (byte checks, no oracle round trip,
+no mgba-venv needed at verify time): loads the banked 3-tick ground-truth
+dump (`src/data/gen/turn13-murkrow-frame2-vram-dump.json`, RAM ticks
+17010/17019/17034 — the pre-intro baseline, the first live `frame2` tick,
+and the first reverted-to-`tileset` tick, each a full 64-tile VRAM
+capture from this session's probe run) against the current
+`battle-opponent-front-sprites.json` MURKROW asset. 11/11 checks pass:
+RAM facts at each banked tick (animNum/animCmdIndex/tileNum/bpp) plus the
+three decisive 64/64-exact-match assertions. Re-run:
+`node --experimental-strip-types tools/probe/verify-turn13-frame2.ts`.
+
+### Scope note
+This was a diagnostic probe only (worktree lane, contract-bound against
+`src/engine` edits) — the fix above is banked for the next wiring step,
+not applied here. `npm test` 993/993 and `npm run build` unaffected (no
+engine/trace files touched, only a new probe script + a new verify
+script + a new committed dump fixture).
