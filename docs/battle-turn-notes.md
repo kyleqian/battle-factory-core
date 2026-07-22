@@ -7005,3 +7005,25 @@ Full writeup in `docs/aerial-ace-notes.md`'s own "2026-07-21 rung (a) CLOSES + r
 ### Out of scope, unchanged
 
 Rungs (c) (the 12371-12437 flicker/hit-flash) and (d) (turn 12's own +2068 mirror) untouched - blocked behind rung (b)'s own remaining residual per the brief's own ordering. QUICK_ATTACK's hitsplat (ISSUES #31); turn 13+ wiring; SAND_ATTACK; ROADMAP.md.
+
+## 47. S7/S8 turn 13 rung 1 (reopen gate) + rung 2 (SAND_ATTACK text/banner) LAND 0-diff; rungs 3-4 (DRAGON_BREATH+faint+KO-hold, MURKROW switch-in) NOT attempted this session
+
+**Rung 1** (prior session, §-none/PROGRESS #243): `turn12Resolved` threaded through the reopen-gate chain, `drawTurn13FightSubmenuWindow` (own regime-8 field-base pair), the DOWN-nav cursor jump needing zero new code (`moveFightCursor(0,"DOWN")===2`, the 2x2-grid root cause the supervisor already folded). `turn13-menu.json` 57/57.
+
+**Rung 2** (this session): `drawTurn13SandAttackWindow` dispatches SAND_ATTACK's own kickoff text ("Foe PIDGEOTTO used\nSAND-ATTACK!"), a new accuracy-drop stat banner (`turn13SandAttackAccEva`/`Bg1Y` - a THIRD parameter combination of the generic `StatsChangeAnimation` banner: non-sharply target/wait (10/20, DOUBLE_TEAM's own shape) crossed with a DECREASE direction (turn 6's own shape) and the `accuracy` palette - no new asset extraction needed, `stat-anim-banner.json` already has it), and "ONIX’s accuracy fell!" (curly apostrophe, matching `TURN6_ATKFELL_LINE1`'s own font/charmap pin). All pure wiring per `docs/turn13-notes.md`'s own SAND_ATTACK characterization section.
+
+**A real bug found and fixed via oracle bisection, not guessed**: `pressTick` (`TICK0+sm.confirmElapsed`) is **15419** at runtime for this trace, not 15418 (the confirm A-press's own segment-start tick, which is what a first-pass reading of the dossier's own tick citations suggests). A fresh `npm run compare` caught this directly - every mid-typing frame showed a small (~30-50px) diff localized to exactly one trailing glyph, and the transition frame itself (submenu-chrome to message-box) showed a huge (28%) diff - the classic "off by one tick" signature. Rebased all three new delay constants (kickoff text, banner ramp, "accuracy fell" text) off the real 15419 anchor; closed to 0 diff immediately.
+
+**(a) dirt-throw + attacker-slide is NOT rendered** - `docs/turn13-notes.md`'s own dossier RAM-pins it exactly (30 dirt sprites launched from one shared attacker-relative origin via dead script args, `Random2()&0x1F` per-sprite target jitter, regenerable via the committed `tools/probe/dump-sandattack-anim.py`) but implementing it needs a new sprite-sheet asset extraction (no `ANIM_TAG_MUD_SAND` graphic exists in `src/assets/gen/` yet), which didn't fit this session's remaining time. Named gap, not guessed at: `turn13-sandattack.json`'s own `captureFrames` excludes exactly that window (15476-15521) rather than claim a false 0-diff pass, the same "exclude, don't fake" convention ISSUES #23's own projectile-flight exclusion already establishes. **(b) the silent monbg-cleanup gap needed zero special-case code** - `turn13SandAttackAccEva` is naturally `null` there, so the settled kickoff-text baseline already renders it correctly by construction.
+
+### Traces: `turn13-sandattack.json` 185/185, 0 diff
+
+Reuses `battle1-turn13-dense-a.json`'s own committed 108-segment script verbatim, spanning 15420-15475 (confirm-transient tail through the settled kickoff text, excluding 15476-15521's dirt-throw) and 15522-15650 (silent gap, banner, "accuracy fell" typing + hold).
+
+### Verification
+
+`npm test` **978/978** (969 + 9 new Tier-1: `turn13SandAttackTextStartTick`/`VisibleChars`, `turn13SandAttackAccEva`/`Bg1Y`, `turn13AccFellTextStartTick`/`VisibleChars`, the LINE1/LINE2 string pins). `npm run build` green. `verify-turn13.ts` unchanged 60/60. Full regression sweep 0 diff: `turn13-menu.json` **57/57**, `turn12-menu.json` **46/46**, `turn12-aerialace.json` **56/56**, `turn11-menu.json` **56/56**, `turn10-aerialace.json` **23/23**.
+
+### Out of scope, unchanged
+
+Rung 3 (DRAGON_BREATH re-targeted at Pidgeotto, HP-drain, faint sink reused from turn 5, the button-gated KO-hold cycling 4 idle-bounce shas - needs a new `turn13KoDismissElapsed`-style field threaded through `core.ts`, mirroring `turn5KoDismissElapsed`'s own pattern) and rung 4 (MURKROW switch-in, turn 5's faint-switch machinery re-anchored - needs Murkrow's own front-sprite asset, not yet extracted) - both time-boxed out of this session, full ground truth already banked in `docs/turn13-notes.md` §4-§7, nothing left to probe. AERIAL_ACE mechanisms 3/4 root causes; the hitsplat (ISSUES #31).
