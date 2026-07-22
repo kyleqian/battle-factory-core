@@ -10816,6 +10816,17 @@ function turn14BareSceneStartTick(pressTick: number): number {
 
 /** First observed sha of the settled "What will ONIX do?" vs. an ABSENT Murkrow idle-cycle (docs/turn14-notes.md §4: `gBattle_BG0_Y` flips at 18085, redraw settles by 18086). */
 const TURN14_MENU_REDRAW_TICK = 18086;
+/** The miss text clears to a blank message box here, six ticks before the chrome reveal - same shape as `TURN13_SWITCHIN_TEXT_CLEAR_TICK`'s own gap, oracle-pixel-confirmed (docs/turn13-bounce-notes.md §10b). */
+const TURN14_MENU_TEXT_CLEAR_TICK = 18080;
+/**
+ * Turn 14's own menu-redraw RESETS the bounce regime fresh (does NOT
+ * continue turn 13's live cycle, despite this file's own prior module doc
+ * asserting otherwise) - RAM-confirmed 0/871 mismatches for RESET vs.
+ * 871/871 for CONTINUE across the whole settled tail (docs/turn13-bounce-
+ * notes.md §10c). Mirrors `TURN13_SWITCHIN_RESET_SHIFT`'s own formula shape,
+ * re-anchored to this turn's own redraw tick.
+ */
+const TURN14_MENU_REDRAW_RESET_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - TURN14_MENU_REDRAW_TICK;
 
 /**
  * `turn13KickoffBounceTick`'s own turn-14 analogue, in switchin-reset space
@@ -10846,10 +10857,18 @@ function turn14KickoffBounceTick(t: number, pressTick: number): number {
  */
 function drawTurn14FlyMissWindow(fb: Uint8Array, t: number, pressTick: number): void {
   if (t >= TURN14_MENU_REDRAW_TICK) {
-    const shiftedBounceTick = t + TURN13_SWITCHIN_RESET_SHIFT;
+    const shiftedBounceTick = t + TURN14_MENU_REDRAW_RESET_SHIFT;
     drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawTurn5SitrusSettledMenuChrome(fb);
+    return;
+  }
+  if (t >= TURN14_MENU_TEXT_CLEAR_TICK) {
+    // TEXT_CLEAR_TICK <= t < MENU_REDRAW_TICK: blank hold, mirrors
+    // drawTurn13SwitchinWindow's own gap - drawTileBg below already paints
+    // the message box's own flat teal fill.
+    drawTurn13SwitchinFieldBase(fb, t, turn14KickoffBounceTick(t, pressTick), turn14MurkrowInvisible(t));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     return;
   }
   const frozenBounceTick = turn14KickoffBounceTick(t, pressTick);
