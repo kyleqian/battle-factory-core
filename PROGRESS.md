@@ -13,9 +13,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   window registers and OBJ VRAM; added compact extractor + generic tested
   mode-0 tile/OAM/BLDY compositor. Attempted 20302 integration, observed
   **38400px** mismatch, and reverted it rather than ship a regression.
-- **Next:** determine mGBA’s exact BGR555→display blend/color transfer at
-  BLDY=15 from emulator/PPU behavior, then reconnect the indexed asset. Do
-  not screenshot-fit a color table; party residuals remain out of scope.
+- **Next — SUPERVISOR SOURCE CHECK:** reconnect the indexed asset using
+  mGBA `software-private.h`'s exact 32-bit `_darken`: `mColorFrom555` expands
+  first, then each packed byte is darkened/masked in place. At BLDY 15 this
+  makes white `255,255,255 -> 16,15,15` (red rounds up; shifted green/blue
+  truncate), exactly the oracle histogram. Also fix size-1 BG map extraction
+  to 0x1000 bytes. Party residuals remain out of scope.
 - **Notes:** raw dump JSON validates despite expected exit 139. PAPERCUT:
   mGBA diagnostics/teardown SIGSEGV, ~4 min.
 
