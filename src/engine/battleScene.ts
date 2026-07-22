@@ -1124,6 +1124,16 @@ export interface BattleSceneState {
    * exactly (the brief's own instruction).
    */
   turn13Resolved: boolean;
+  /**
+   * S7/S8 turn 15 (docs/turn15-notes.md): `true` once turn 14's own whole
+   * DRAGON_BREATH-auto-miss resolution has redrawn the settled action menu
+   * (`TURN14_DRAGONBREATH_MENU_REDRAW_DELAY` past turn 14's own real
+   * confirm) AND a fresh A-press has reopened FIGHT for turn 15, cursor
+   * persisted at slot 2 (DRAGON_BREATH, unchanged since turn 13/14) - no
+   * `DOWN` nav needed. Mirrors `turn13Resolved`'s own pattern exactly (the
+   * brief's own instruction).
+   */
+  turn14Resolved: boolean;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -1145,6 +1155,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn12Resolved: false,
   turn13KoDismissElapsed: null,
   turn13Resolved: false,
+  turn14Resolved: false,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -1167,6 +1178,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn12Resolved: state.turn12Resolved,
     turn13KoDismissElapsed: state.turn13KoDismissElapsed,
     turn13Resolved: state.turn13Resolved,
+    turn14Resolved: state.turn14Resolved,
   };
 }
 
@@ -4045,7 +4057,17 @@ function drawFightSubmenuWindow(
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
   turn13KoDismissTick: number | null = null,
+  turn14Resolved: boolean = false,
 ): void {
+  if (turn14Resolved) {
+    // S7/S8 (docs/turn15-notes.md): turn 15 is Murkrow's own FLY strike
+    // half (Onix's own re-selected DRAGON_BREATH never executes - Murkrow
+    // acts first and faints Onix outright) - its own dedicated dispatcher,
+    // same "genuinely different PP/text" reason `turn12Resolved`'s own
+    // branch below already established for turn 13.
+    drawTurn15FightSubmenuWindow(fb, t, sm);
+    return;
+  }
   if (turn13Resolved) {
     // S7/S8 (docs/turn14-notes.md): turn 14 is the FLY charge turn - its
     // own dedicated dispatcher, same "genuinely different PP/text" reason
@@ -4311,11 +4333,12 @@ function drawFightSubmenuChrome(
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
+  turn14Resolved: boolean = false,
 ): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, turn14Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -10808,8 +10831,10 @@ function turn14SimpleVisibleChars(t: number, start: number, total: number): numb
   return Math.min(total, t - start + 1);
 }
 
-/** Bare-scene boundary: the confirm-press transient clears to the bare battle scene with NO message box at all (`printstring STRINGID_EMPTYSTRING3`, docs/turn14-notes.md §5a) - oracle-pixel-bisected exact (worktree-lane correction: was "~17789", dense re-bisection pins 17769). `pressTick` is the real button confirm press (`TICK0+sm.confirmElapsed`, 17755 in the canonical trace - segment start 17754, the same "+1 after last press frame" convention every other confirm anchor in this file uses). */
-const TURN14_BARE_SCENE_DELAY = 17769 - 17755;
+/** The real button confirm press for turn 14's own DRAGON_BREATH re-selection (`TICK0+sm.confirmElapsed`, 17755 in the canonical trace - segment start 17754, the same "+1 after last press frame" convention every other confirm anchor in this file uses). Named (unlike the inline literal `TURN14_BARE_SCENE_DELAY` below already used) so `TURN14_DRAGONBREATH_MENU_REDRAW_DELAY` (docs/turn15-notes.md) can reference it directly, mirroring `TURN13_DRAGONBREATH_PRESS_TICK`'s own pattern. */
+const TURN14_DRAGONBREATH_PRESS_TICK = 17755;
+/** Bare-scene boundary: the confirm-press transient clears to the bare battle scene with NO message box at all (`printstring STRINGID_EMPTYSTRING3`, docs/turn14-notes.md §5a) - oracle-pixel-bisected exact (worktree-lane correction: was "~17789", dense re-bisection pins 17769). */
+const TURN14_BARE_SCENE_DELAY = 17769 - TURN14_DRAGONBREATH_PRESS_TICK;
 function turn14BareSceneStartTick(pressTick: number): number {
   return pressTick + TURN14_BARE_SCENE_DELAY;
 }
@@ -10827,6 +10852,18 @@ const TURN14_MENU_TEXT_CLEAR_TICK = 18080;
  * re-anchored to this turn's own redraw tick.
  */
 const TURN14_MENU_REDRAW_RESET_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - TURN14_MENU_REDRAW_TICK;
+/**
+ * S7/S8 turn 15 (docs/turn15-notes.md): turn 14's own whole DRAGON_BREATH-
+ * auto-miss resolution has redrawn the settled action menu by now (past
+ * `TURN14_MENU_REDRAW_TICK`, reached from turn 14's own real confirm press
+ * `TURN14_DRAGONBREATH_PRESS_TICK`) - mirrors `TURN13_DRAGONBREATH_MENU_
+ * REDRAW_DELAY`'s own formula shape exactly (redraw tick minus that turn's
+ * own confirm press), gating core.ts's new `turn14Resolved`-setting reopen
+ * branch. The real reopen press (18956 in the canonical trace) lands well
+ * after this threshold, same "armed well in advance of the real press"
+ * shape every prior turn-epoch delay already shows.
+ */
+export const TURN14_DRAGONBREATH_MENU_REDRAW_DELAY = TURN14_MENU_REDRAW_TICK - TURN14_DRAGONBREATH_PRESS_TICK;
 
 /**
  * `turn13KickoffBounceTick`'s own turn-14 analogue, in switchin-reset space
@@ -10926,6 +10963,108 @@ function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
   drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true);
 }
 
+// --- S7/S8 turn 15 (docs/turn15-notes.md): Murkrow's FLY strike-half kickoff
+// window (boundary (i): reopen gate + submenu + confirm + kickoff text).
+// Onix's own re-selected DRAGON_BREATH (cursor persisted from turn 14) never
+// executes this turn - Murkrow, still locked in by STATUS2_MULTIPLETURNS,
+// acts first and resolves FLY's strike half instead (docs/turn15-notes.md
+// §1/§3). Unlike the charge half's empty-string kickoff (turn14-notes.md
+// §5a), the strike half DOES print a real attack string - joins the normal
+// flow at BattleScript_HitFromAtkString (docs/turn15-notes.md §2, tick
+// 19003's own RNG-already-resolved accuracy roll). ---
+
+/** "Foe MURKROW used\nFLY!" - reuses `TURN14_FLYUP_LINE1`'s own string shape (no new asset), FLY's own display name for line 2. Oracle-pixel-bisected exact (dense sha-transition probe, boundary (i) this session): first char 19007, 20 total chars (16+4) - independently confirmed by BOTH of the space characters producing a "no visible change" repeat tick exactly where the formula predicts (chars 3->4, the space after "Foe", at ticks 19009/19010; chars 11->12, the space after "MURKROW", at ticks 19017/19018) - not just fit to the settle tick. */
+export const TURN15_FLY_STRIKE_LINE1 = "Foe MURKROW used";
+export const TURN15_FLY_STRIKE_LINE2 = "FLY!";
+const TURN15_FLY_STRIKE_TEXT_TOTAL = TURN15_FLY_STRIKE_LINE1.length + TURN15_FLY_STRIKE_LINE2.length;
+const TURN15_FLY_STRIKE_TEXT_START_TICK = 19007;
+
+/** Same 1-char/tick mechanism every other message window in this file uses. */
+function turn15SimpleVisibleChars(t: number, start: number, total: number): number {
+  if (t < start) return 0;
+  return Math.min(total, t - start + 1);
+}
+
+/**
+ * `turn14KickoffBounceTick`'s own turn-15 analogue - turn 15 needs NO fresh
+ * regime reset either (Onix's own faint/MAGBY's switch-in, out of this
+ * session's boundary-(i)/(ii) scope, is the next reset event) - freezes at
+ * `TURN5_SITRUS_MENU_REDRAW_TICK` itself, the same "local phase 0" identity
+ * `turn14KickoffBounceTick`'s own doc establishes: this regime's own shift
+ * (`TURN14_MENU_REDRAW_RESET_SHIFT`), evaluated at its own defining anchor
+ * (`TURN14_MENU_REDRAW_TICK`), also yields `TURN5_SITRUS_MENU_REDRAW_TICK`
+ * exactly, one level deeper than turn 14's own identity.
+ */
+function turn15KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t + TURN14_MENU_REDRAW_RESET_SHIFT;
+  return TURN5_SITRUS_MENU_REDRAW_TICK;
+}
+
+/**
+ * Murkrow's own FLY strike-half kickoff text, "Foe MURKROW used\nFLY!"
+ * (docs/turn15-notes.md §4). Unlike every prior turn's own kickoff (a real
+ * confirm-to-bare-scene transient gap before text starts, e.g. `turn14Bare
+ * SceneStartTick`), this turn's own FIGHT submenu chrome stays on screen
+ * UNCHANGED all the way through the tick before the text's own first glyph
+ * (oracle-pixel-confirmed dense sha-transition probe, boundary (i) this
+ * session: `6fabb2bc7338`-family submenu chrome holds byte-identical through
+ * 19006, then hard-cuts directly to the first glyph at 19007 - no
+ * intervening blank-box tick at all) - so `drawTurn15FightSubmenuWindow`
+ * itself gates straight on `TURN15_FLY_STRIKE_TEXT_START_TICK`, and this
+ * function only ever renders from that tick on. Onix's own on-field bounce
+ * stays FROZEN throughout (`turn15KickoffBounceTick`, same rule every prior
+ * turn's own resolution window establishes); Murkrow's own mon sprite stays
+ * invisible (carried from turn 14's own FLY-up hide, persisted through
+ * `STATUS3_ON_AIR` - docs/turn15-notes.md §3) through this entire
+ * boundary-(i) window - it doesn't reappear until the strike animation's own
+ * impact tick (19075, boundary (ii), out of this function's scope).
+ */
+function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  const frozenBounceTick = turn15KickoffBounceTick(t, pressTick);
+  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, true);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, turn15SimpleVisibleChars(t, TURN15_FLY_STRIKE_TEXT_START_TICK, TURN15_FLY_STRIKE_TEXT_TOTAL));
+}
+
+/**
+ * S7/S8 (docs/turn15-notes.md): turn 14's own whole DRAGON_BREATH-auto-miss
+ * resolution has redrawn the settled action menu by now (`core.ts`'s own
+ * `turn14Resolved` gate) - cursor persisted at slot 2 (DRAGON_BREATH,
+ * unchanged since turn 13/14, NO `DOWN` nav this turn). Structurally
+ * identical to `drawTurn14FightSubmenuWindow` (reuses `drawTurn13Switchin
+ * FieldBase` throughout, Murkrow held invisible - no fresh switch-in regime
+ * this turn), just dispatching into `drawTurn15FlyStrikeWindow` once the
+ * kickoff text's own literal start tick is reached (NOT a confirm-relative
+ * bare-scene gap like turn 14's own - this turn's submenu chrome holds
+ * unchanged right up to the text's first glyph, docs/turn15-notes.md §4),
+ * and using `TURN14_MENU_REDRAW_RESET_SHIFT` (not `TURN13_SWITCHIN_RESET_
+ * SHIFT`) for the live bounce - turn 14's own redraw reset the regime one
+ * level deeper than turn 13's did (docs/turn13-bounce-notes.md §10c), and
+ * turn 15 is downstream of THAT reset, not turn 13's.
+ */
+function drawTurn15FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+  const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (sm.openElapsed === null || t < revealTick) {
+    const shiftedBounceTick = t + TURN14_MENU_REDRAW_RESET_SHIFT;
+    drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawTurn5SitrusSettledMenuChrome(fb);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    if (t >= TURN15_FLY_STRIKE_TEXT_START_TICK) {
+      drawTurn15FlyStrikeWindow(fb, t, pressTick);
+      return;
+    }
+  }
+  const shiftedBounceTick = sm.confirmElapsed !== null ? turn15KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t + TURN14_MENU_REDRAW_RESET_SHIFT;
+  drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true, true);
+}
+
 /** Renders the full battle-scene-assembly frame for `state` (elapsed since TICK0). */
 export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void {
   const t = TICK0 + state.elapsed;
@@ -10987,6 +11126,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn12Resolved,
       state.turn13Resolved,
       state.turn13KoDismissElapsed === null ? null : TICK0 + state.turn13KoDismissElapsed,
+      state.turn14Resolved,
     );
     return;
   }
