@@ -9365,8 +9365,8 @@ export const TURN12_REGIME7_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (
  * this turn's own AERIAL_ACE hit lands on Onix's side; ROCK_SLIDE misses
  * this turn, so there's no override needed for Pidgeotto's own side).
  */
-function drawTurn12FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN10_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false): void {
-  drawTurn6FieldBase(fb, t, bounceTick + TURN12_REGIME7_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken);
+function drawTurn12FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN10_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false, onixInvisible: boolean = false, healthboxY2Override?: number): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN12_REGIME7_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, onixInvisible, healthboxY2Override, onixY2Extra, darken);
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
@@ -9380,16 +9380,20 @@ function turn12KickoffBounceTick(t: number, pressTick: number): number {
 const TURN12_ONIX_AFTER_AERIALACE_HP = 4;
 
 /**
- * S7/S8 (docs/turn12-notes.md's 2026-07-21 update §1): Pidgeotto's SECOND
- * AERIAL_ACE use - RAM-PROVEN a bit-exact +2068-tick re-anchor of turn 10's
- * own five-mechanism dispatch (`drawTurn10AerialAceLungeAndClones`/
- * `drawTurn10AerialAceSlice`/`turn10AerialAceOnixShakeY2`, every one of them
- * already `pressTick`-relative and reused here VERBATIM, not forked) - only
- * `pressTick` (this turn's own live confirm) and Onix's own HP endpoints
- * (14->4, vs turn 10's 24->14) are new. Mechanism 4's own darkened-palette
- * render and mechanism 3's own small residual (docs/battle-turn-notes.md
- * §42/§43) are turn 10's own STANDING gaps, inherited unchanged at this same
- * +2068 offset - NOT attempted here, out of this session's own scope.
+ * S7/S8 (docs/turn12-notes.md's 2026-07-21 update §1, closed out by the S7
+ * engine step's own PART 4): Pidgeotto's SECOND AERIAL_ACE use - RAM-PROVEN
+ * a bit-exact +2068-tick re-anchor of turn 10's own five-mechanism dispatch
+ * (`drawTurn10AerialAceLungeAndClones`/`drawTurn10AerialAceSlice`/
+ * `turn10AerialAceOnixShakeY2`, every one of them already `pressTick`-
+ * relative and reused here VERBATIM, not forked) - only `pressTick` (this
+ * turn's own live confirm) and Onix's own HP endpoints (14->4, vs turn 10's
+ * 24->14) are new. Mechanism 4's own darkened-palette render, the flicker
+ * (PART 2), and the player-healthbox wobble (PART 2's own companion finding)
+ * are ALL now wired here too, at the SAME `pressTick`-relative anchors turn
+ * 10 uses (`turn10AerialAcePaletteDarkenCoeff`/`TURN10_ONIX_FLICKER_START`/
+ * `TURN10_ONIX_HEALTHBOX_WOBBLE_START`) - since every one of those functions
+ * is already purely `(t, pressTick)`-relative, the same verbatim-reuse shape
+ * this whole window already establishes applies to them too.
  */
 function drawTurn12AerialAceWindow(fb: Uint8Array, t: number, pressTick: number): void {
   if (t >= rockSlideTextStartTick(TURN12_ROCKSLIDE_PRESS_TICK)) {
@@ -9399,8 +9403,11 @@ function drawTurn12AerialAceWindow(fb: Uint8Array, t: number, pressTick: number)
   const bounceTick = turn12KickoffBounceTick(t, pressTick);
   const onixY2 = turn10AerialAceOnixShakeY2(t, pressTick);
   const onixHp = turn10AerialAceOnixHp(t, pressTick, TURN10_ONIX_AFTER_AERIALACE_HP, TURN12_ONIX_AFTER_AERIALACE_HP);
-  drawTurn12FieldBase(fb, t, bounceTick, undefined, onixHp, onixY2, false);
-  drawTurn10AerialAceLungeAndClones(fb, t, pressTick, false);
+  const darken = turn10AerialAcePaletteDarkenCoeff(t, pressTick) > 0;
+  const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN10_ONIX_FLICKER_START);
+  const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN10_ONIX_HEALTHBOX_WOBBLE_START);
+  drawTurn12FieldBase(fb, t, bounceTick, undefined, onixHp, onixY2, darken, onixInvisible, healthboxY2);
+  drawTurn10AerialAceLungeAndClones(fb, t, pressTick, darken);
   drawTurn10AerialAceSlice(fb, t, pressTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const notVeryEffectiveStart = turn10NotVeryEffectiveTextStartTick(pressTick);
