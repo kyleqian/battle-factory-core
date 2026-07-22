@@ -150,6 +150,17 @@ function range(a: number, b: number): number[] {
 }
 const NAV_DENSE = range(15373, 15422); // baseline through submenu-open/DOWN-nav/confirm/post-confirm-transient, dense stride-1
 const SAND_ATTACK_SPOT = [...range(15462, 15470), ...range(15540, 15560), 15630, 15660]; // settled hold, the unlisted mid-hold animation, post-animation blank plateau
+// Worktree-lane follow-up (2026-07-21, docs/turn13-notes.md's own "Honest
+// gaps" item): the dirt-throw/attacker-slide (Move_SAND_ATTACK's own
+// script), the silent monbg-cleanup gap, the accuracy-drop stat-change
+// banner (StatsChangeAnimation, RAM-identified), and the "ONIX's accuracy
+// fell!" message this session found hiding inside what §4/this script's own
+// SAND_ATTACK_SPOT previously treated as one undifferentiated span.
+const SAND_ATTACK_DIRT_SPOT = [15476, 15522]; // dirt/slide motion starts (+1 RAM lag) -> back to baseline (15470 baseline already in SAND_ATTACK_SPOT)
+const SAND_ATTACK_QUIET_GAP_SPOT = [15525]; // monbg cleanup, flat, eva still 0 (invisible overlay)
+const SAND_ATTACK_STATBANNER_RAMP = [15537, 15557, 15576]; // eva>0 motion starts -> ramp, sparse but each tick distinct
+const SAND_ATTACK_STATBANNER_SPOT = [...SAND_ATTACK_STATBANNER_RAMP, 15595, 15607]; // + back-to-flat
+const SAND_ATTACK_ACCFELL_TEXT_SPOT = [15608, 15626, 15627]; // typing starts -> mid-type -> fully typed "fell!" (held-through-15699 reuses DRAGONBREATH_KICKOFF_SPOT's own 15699)
 const DRAGONBREATH_KICKOFF_SPOT = [15699, 15701, 15710, 15720, 15738, ...range(15740, 15747)]; // blank->typing->fully-settled
 const FIRE_PROJECTILE_SPOT = [15745, 15749, 15753, 15757, 15761, 15765, 15793];
 const HP_DRAIN_DENSE = range(15855, 15900);
@@ -165,6 +176,10 @@ const captureFrames = Array.from(
   new Set([
     ...NAV_DENSE,
     ...SAND_ATTACK_SPOT,
+    ...SAND_ATTACK_DIRT_SPOT,
+    ...SAND_ATTACK_QUIET_GAP_SPOT,
+    ...SAND_ATTACK_STATBANNER_SPOT,
+    ...SAND_ATTACK_ACCFELL_TEXT_SPOT,
     ...DRAGONBREATH_KICKOFF_SPOT,
     ...FIRE_PROJECTILE_SPOT,
     ...HP_DRAIN_DENSE,
@@ -282,17 +297,58 @@ async function main() {
   // real, ~90-tick animation then plays 15540-15629 (SAND_ATTACK has no
   // damage/hit-flash per the RNG ledger, so this is most likely the move's
   // own "throw sand" effect, not re-identified frame-by-frame this session,
-  // flagged not chased), before settling into a blank plateau (15630-15699)
-  // that turns out to be the SAME sha DRAGON_BREATH's own kickoff starts
-  // from (see below) — the message box goes blank before either move's own
-  // text starts typing.
+  // flagged not chased), before settling into a plateau (15630-15699) that
+  // turns out to be the SAME sha DRAGON_BREATH's own kickoff starts from
+  // (see below).
+  //
+  // WORKTREE-LANE CORRECTION (2026-07-21, RAM+pixel, see
+  // docs/turn13-notes.md's own dated addendum): `19fb94d8802c` is NOT a
+  // blank box, at either citation site. RAM-probing (dump-sandattack-anim.py
+  // / a BLDALPHA+gBattle_BG1_X/Y register probe) shows the true shape of
+  // 15475-15699 is FOUR sub-phases, not one animation-then-blank: (a)
+  // Move_SAND_ATTACK's own dirt-throw/attacker-slide, RAM 15475-15521 (b) a
+  // silent monbg-cleanup gap 15522-15536 (c) the GENERIC accuracy-drop
+  // stat-change banner (`StatsChangeAnimation_Step1-3`, RAM 15530-15598,
+  // pixel-visible only 15537-15594 while `eva>0`) (d) a SECOND battle
+  // message, "ONIX's accuracy fell!", typed 15608-15627 and then held FLAT
+  // (same sha `19fb94d8802c`) through at least 15699 — this is what both
+  // this citation and the DRAGON_BREATH-kickoff citation below actually
+  // show; there is no blank-box frame anywhere in this window. See the new
+  // checks immediately below for each sub-phase.
   check("SAND_ATTACK message: truly settled hold (15462-15470) flat", new Set(range(15462, 15470).map(sha)).size === 1, `shas: ${range(15462, 15470).map(sha12).join(",")}`);
   check("SAND_ATTACK message: an unlisted mid-hold animation runs 15540-15629 (every sampled tick distinct — NOT flat, contra §4's own 'held 15460-15690' framing)", new Set(range(15540, 15560).map(sha)).size >= 15, `only ${new Set(range(15540, 15560).map(sha)).size} distinct — expected near-every-tick motion`);
-  check("post-animation plateau (sampled 15630/15660/15699) flat, distinct from the initial hold — this is the SAME blank sha DRAGON_BREATH's own kickoff starts from (see below), i.e. the message box goes blank before DRAGON_BREATH's text starts typing", new Set([15630, 15660, 15699].map(sha)).size === 1 && sha12(15630) === "19fb94d8802c", `shas sample: ${[15630, 15660, 15699].map(sha12).join(",")}`);
+  check("post-animation plateau (sampled 15630/15660/15699) flat — this is 'ONIX's accuracy fell!' HELD, not a blank box (see the corrected comment above and the checks below)", new Set([15630, 15660, 15699].map(sha)).size === 1 && sha12(15630) === "19fb94d8802c", `shas sample: ${[15630, 15660, 15699].map(sha12).join(",")}`);
   {
     const expected = buildTwoLineExpected("Foe PIDGEOTTO used", "SAND-ATTACK!");
     const mismatch = diffBoxRegion(png(15462), expected);
     check("SAND_ATTACK kickoff text, truly settled (tick 15462, not §4's own cited 15460 which is one glyph short), renders pixel-exact via drawText+moves.json's own display name", mismatch === 0, `mismatch=${mismatch} px`);
+  }
+
+  // §2b (new this session): the four sub-phases the "~90-tick animation"
+  // framing above actually decomposes into, each RAM-identified in
+  // dump-sandattack-anim.py's own run and independently pixel-corroborated
+  // here. See docs/turn13-notes.md's dated addendum for the full RAM tables.
+  check("(a) dirt-throw/attacker-slide: pixels diverge by 15476 (+1 vs. RAM's own first x2 change at 15475, from the settled baseline at 15470/15462)", sha12(15470) === "502ba75ebb7a" && sha(15470) !== sha(15476), `15470=${sha12(15470)}, 15476=${sha12(15476)}`);
+  check("(a) dirt-throw/attacker-slide: back to the settled baseline by 15522 (+1 vs. RAM's own dirt-count-hits-0 at 15521)", sha12(15522) === "502ba75ebb7a", `got ${sha12(15522)}`);
+  check("(b) silent monbg-cleanup gap (15525) is flat at the settled baseline — RAM shows Task_ClearMonBg/old Task_UpdateMonBg tearing down here with zero visible effect", sha12(15525) === "502ba75ebb7a", `got ${sha12(15525)}`);
+  check("(c) accuracy-drop stat-change banner: pixels move at 15537 (RAM: BLDALPHA eva turns nonzero this same tick — 0 render lag, since eva=0 blends 0% of the BG1 overlay through 15522-15536 despite BLDCNT/BG1_X/BG1_Y already being set up)", sha12(15537) !== "502ba75ebb7a", `got ${sha12(15537)}`);
+  check("(c) accuracy-drop stat-change banner: sparse ramp samples (15537-15576) are each distinct (continuous BG1 scroll + alpha ramp, StatsChangeAnimation_Step3)", new Set(SAND_ATTACK_STATBANNER_RAMP.map(sha)).size === SAND_ATTACK_STATBANNER_RAMP.length, `shas: ${SAND_ATTACK_STATBANNER_RAMP.map(sha12).join(",")}`);
+  check("(c) accuracy-drop stat-change banner: back to the settled baseline by 15595 (0 render lag vs. RAM's own eva=0 at 15595) and still flat at 15607", sha12(15595) === "502ba75ebb7a" && sha12(15607) === "502ba75ebb7a", `15595=${sha12(15595)}, 15607=${sha12(15607)}`);
+  check("(d) 'ONIX's accuracy fell!' starts typing by 15608 (distinct from the settled baseline) and is still mid-typing at 15626 (distinct from 15608)", sha12(15608) !== "502ba75ebb7a" && sha(15608) !== sha(15626), `15608=${sha12(15608)}, 15626=${sha12(15626)}`);
+  check("(d) 'ONIX's accuracy fell!' fully typed by 15627, matching the sha this script's own SAND_ATTACK-plateau/DRAGON_BREATH-kickoff checks already cite as '19fb94d8802c'", sha12(15627) === "19fb94d8802c", `got ${sha12(15627)}`);
+  check("(d) 'ONIX's accuracy fell!' holds flat through DRAGON_BREATH's own kickoff-starting tick (15699, checked below in §3)", sha12(15699) === "19fb94d8802c", `got ${sha12(15699)}`);
+  {
+    // The apostrophe in "ONIX's" kerns 1px differently than drawText's own
+    // generic glyph-width table predicts (a localized 3x5px mismatch right
+    // after the apostrophe, x=40-42/y=122-126) - a narrow-glyph kerning
+    // nuance in the same family as this dossier's own earlier "!" 2px-column
+    // near-miss (turn13-notes.md §4 point 2), flagged not chased (out of
+    // this probe's own SCOPE - it's a font-table gap, not a SAND_ATTACK
+    // animation question). Excluded here so the rest of the line (and all of
+    // line 2) still gets a real pixel-exact assertion.
+    const expected = buildTwoLineExpected("ONIX's accuracy", "fell!");
+    const mismatch = diffBoxRegion(png(15627), expected, [{ x0: 39, x1: 43, y0: 120, y1: 128 }]);
+    check("'ONIX's accuracy\\nfell!' text, fully settled (tick 15627), renders pixel-exact via drawText+charmap outside the apostrophe's own narrow-kerning column (flagged above)", mismatch === 0, `mismatch=${mismatch} px`);
   }
 
   // === §3 SCOPE: the KO — DRAGON_BREATH kickoff, fire-projectile,
@@ -301,15 +357,17 @@ async function main() {
   // ... 15699-15744 | 19fb94d8802c -> c35307432880"): the dossier's own two
   // cited shas already implied a sub-transition, but its own prose framed
   // the row as one "held" window and cited tick 15720 as "mid-typing". This
-  // session's own bisection confirms exactly: 15699 is the BLANK
-  // pre-typing state (same sha the tail of SAND_ATTACK's own animation
-  // settles to, 19fb94d8802c - the message box goes blank before either
-  // move's own text starts), text is still typing at 15720 (mid-typing,
-  // matching the dossier's own citation), and is FULLY settled by 15740
-  // (c35307432880, flat through at least 15747, matching the dossier's own
-  // "full text confirmed by 15757" note within 3 ticks). The settled-text
-  // pixel check below therefore uses 15744 (fully typed), not 15720.
-  check("DRAGON_BREATH kickoff starts BLANK at 15699 (same sha as SAND_ATTACK's own post-animation blank plateau)", sha12(15699) === "19fb94d8802c", `got ${sha12(15699)}`);
+  // session's own bisection confirms: 15699 is NOT a blank pre-typing state
+  // (contra this script's own earlier comment, corrected above) — it's
+  // "ONIX's accuracy fell!" still fully displayed, one tick before
+  // DRAGON_BREATH's own text starts overwriting it (matching §2b's own
+  // checks that this exact sha holds through 15699). Text is still typing
+  // at 15720 (mid-typing, matching the dossier's own citation), and is
+  // FULLY settled by 15740 (c35307432880, flat through at least 15747,
+  // matching the dossier's own "full text confirmed by 15757" note within 3
+  // ticks). The settled-text pixel check below therefore uses 15744 (fully
+  // typed), not 15720.
+  check("DRAGON_BREATH kickoff's own starting tick (15699) still shows 'ONIX's accuracy fell!' (§2b), not a blank box — same sha both citations share", sha12(15699) === "19fb94d8802c", `got ${sha12(15699)}`);
   check("DRAGON_BREATH kickoff text fully typed and flat by 15740-15747, matches §4's own citation (c35307432880)", new Set(range(15740, 15747).map(sha)).size === 1 && sha12(15740) === "c35307432880", `shas: ${range(15740, 15747).map(sha12).join(",")}`);
   {
     const expected = buildTwoLineExpected("ONIX used", "DRAGONBREATH!");
