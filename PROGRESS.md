@@ -4,6 +4,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 242 — Supervisor fold (evening session round 1): SAND_ATTACK probe merged — turn 13 is now FULLY pure wiring (last unknown characterized); AERIAL_ACE rung (a) verified landed, rung (b) residual queued for a targeted probe
+
+- **State (supervisor-verified post-merge):** `npm test` **966/966**,
+  `npm run build` green, tree clean, no worktrees/unmerged branches.
+  `verify-turn13.ts` (now **60 checks**: 46 + 14 SAND_ATTACK) passes from
+  the main tree, supervisor-rerun. `turn10-aerialace.json` 23/23
+  supervisor-rerun, plus neighbors 220/220, 56/56, 159/159.
+- **Did:** verified + merged `worker/wt-20260721-182214` (SAND_ATTACK
+  ~90-tick window decomposes into 4 sub-phases, ALL pure wiring: dirt-throw
+  via unmodified `AnimDirtScatter`/`SlideMonToOffset` (+1 lag; per-call
+  scatter offsets are DEAD script args — all 30 sprites share one origin,
+  only `Random2()` target jitter differs; regenerate tables via committed
+  `dump-sandattack-anim.py`), silent monbg gap, turn-6-family stat banner
+  (0 lag, assets already extracted), "ONIX's accuracy fell!" text — the
+  prior "blank 15630-15699" label was WRONG, that sha is the held
+  accuracy-fell text). Probe was cap-killed mid-final-message but its
+  commit was complete — no salvage needed. Verified #241's engine work
+  (see below).
+- **Next:** round 2 in flight — main lane wires turn 13 end-to-end;
+  worktree probes AERIAL_ACE's overlap residual (#241's handoff) + the
+  12371-12437 flicker (rung (c) precondition). Then turn 14+.
+
+---
 ## 241 — Bounded worker (S7 engine step, AERIAL_ACE excluded-window close-out): rung (a) LANDS 0-diff (mechanisms 1/3's residual - a compositing-ORDER bug, not a bad table), rung (b) wired but NOT 0-diff (mechanism 4's darken - two real bugs fixed, ~48% mismatch down to a small residual); rungs (c)/(d) not attempted
 
 - **State:** `npm test` **966/966**, `npm run build` green, tree clean.
@@ -78,38 +101,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   its branch — the "hit-flash mechanism" it dissolved was folded intact).
   PAPERCUTS: exit-139-teardown entry added and re-confirmed by three
   workers. Interactive session; no escalations needed.
-
----
-## 239 — Bounded worker (S7/S8, turn 12 wiring): both halves LAND 0-diff — Pidgeotto's 2nd AERIAL_ACE (pure +2068-tick re-anchor of turn 10's 5-mechanism tables, zero new mechanism code) and the arc's FIRST ROCK_SLIDE MISS (zero-animation text-swap, structurally = turn 8's BIND-miss) — new `turn12-menu.json` **46/46**, `turn12-aerialace.json` **56/56**, `turn12-rockslide-miss.json` **38/38**, all 0 diff
-
-- **State:** `npm test` **966/966** (957 + 9 new), `npm run build`
-  green, `verify-turn12.ts` unchanged **20/20**. Full regression sweep 0
-  diff, every count matches the acceptance criteria exactly:
-  `turn11-menu.json` **56/56**, `turn11-featherdance.json` **178/178**,
-  `turn11-rockslide.json` **163/163**, `turn10-aerialace.json` **18/18**,
-  `turn10-rockslide.json` **220/220**, `turn8-bind-a.json` **256/256**.
-- **Did:** added `turn11Resolved` as a new `BattleSceneState` field
-  threaded through the FULL existing reopen-gate chain (mirroring every
-  prior `turnNResolved` flag verbatim) — ROCK_SLIDE now a 9th slot-0 PP
-  use, 1/10 entering turn 12 (corrects the brief's own stale "2/10").
-  `drawTurn12AerialAceWindow` calls turn 10's own five mechanism
-  functions VERBATIM (re-anchored to a fresh live `pressTick`, Onix's HP
-  14→4) via a new `drawTurn12FieldBase`/`turn12KickoffBounceTick` regime-7
-  wrapper — no new mechanism code anywhere. `drawTurn12RockSlideWindow`
-  mirrors `drawTurn8BindWindow`'s own text-swap-over-frozen-field
-  structure exactly (synthetic `TURN12_ROCKSLIDE_PRESS_TICK=14237`,
-  reused `ROCK_SLIDE_LINE1/2`→`TURN8_MISS_LINE1/2` swap, 95-tick
-  miss-hold, 7-tick clear-to-redraw). One real gap correctly EXCLUDED not
-  fixed: turn 10's own committed traces leave RAM 12363-12437
-  uncaptured (mechanism-3 residual + an unmodeled hit-flash flicker); the
-  first `turn12-aerialace.json` draft sampled inside the +2068-shifted
-  equivalent and showed real diffs (up to 4.33%) — corrected by excluding
-  that same relative range, per the brief's own explicit instruction.
-- **Next:** turn 13 — its probe/verify script (`verify-turn13.ts`,
-  46/46) already landed two sessions ago; natural next step is wiring it
-  the same way, adding a `turn12Resolved` flag off
-  `TURN12_ROCKSLIDE_MENU_REDRAW_DELAY` (already exported).
-- **Notes:** `docs/battle-turn-notes.md` §45 has the full writeup.
-  AERIAL_ACE mechanisms 3/4 (§42/§43) and the hitsplat (ISSUES #31)
-  remain untouched, out of scope. No PAPERCUTS beyond the standing
-  mgba-venv-teardown one.
