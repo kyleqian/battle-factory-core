@@ -714,6 +714,9 @@ const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponent
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
+/** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
+const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
+const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
 const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFeatherAsset;
@@ -4009,6 +4012,7 @@ function drawFightSubmenuWindow(
   turn10Resolved: boolean = false,
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
+  turn13KoDismissTick: number | null = null,
 ): void {
   if (turn12Resolved) {
     // S7/S8 (docs/turn13-notes.md): turn 13 is the winning line's own FIFTH
@@ -4017,7 +4021,7 @@ function drawFightSubmenuWindow(
     // its own dedicated dispatcher, same "genuinely different PP/text"
     // reason `turn11Resolved`'s own branch below already established for
     // turn 12.
-    drawTurn13FightSubmenuWindow(fb, t, sm);
+    drawTurn13FightSubmenuWindow(fb, t, sm, turn13KoDismissTick);
     return;
   }
   if (turn11Resolved) {
@@ -6379,21 +6383,44 @@ export const TURN5_ICONBAR_DESTROY_TICK = 6742;
 /** GROVYLE's own former slot (index 5) flips `"Full"` -> `"Statused"` (docs §9's own pixel correction) - the other 5 slots are unchanged from `ballIcons`' own opponent-side array. */
 export const TURN5_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Full", "Full", "Statused"];
 
-export function turn5IconBarEva(t: number): number | null {
+export function turn5IconBarEva(t: number, fadeStartTick: number = TURN5_ICONBAR_FADE_START_TICK): number | null {
   const rt = t - 1;
-  if (rt < TURN5_ICONBAR_FADE_START_TICK) return null;
-  return Math.max(0, 16 - (rt - TURN5_ICONBAR_FADE_START_TICK));
+  if (rt < fadeStartTick) return null;
+  return Math.max(0, 16 - (rt - fadeStartTick));
 }
 
-/** Draws the switch-in icon-bar re-trigger (bar + 6 icons, uniform `x2` slide-in, then the shared alpha-blend fade-out) - a no-op outside `[TURN5_ICONBAR_CREATE_TICK, TURN5_ICONBAR_DESTROY_TICK)` (RAM ticks, `rt = t - 1` convention per `ballIcons`' own doc). */
-function drawTurn5IconBar(fb: Uint8Array, t: number): void {
+/**
+ * Draws the switch-in icon-bar re-trigger (bar + 6 icons, uniform `x2`
+ * slide-in, then the shared alpha-blend fade-out) - a no-op outside
+ * `[createTick, destroyTick)` (RAM ticks, `rt = t - 1` convention per
+ * `ballIcons`' own doc). S7/S8 turn 13 rung 4 (docs/turn13-notes.md §7):
+ * `createTick`/`fadeStartTick`/`destroyTick`/`states` (all defaulted to
+ * turn 5's own constants, every pre-existing call site unaffected) let
+ * MURKROW's own switch-in re-trigger this exact mechanism at a new anchor
+ * with a new per-slot states array (Pidgeotto's own former slot also
+ * flips to `"Statused"` now) - oracle-pixel-bisected new anchors: first
+ * visible slide pixel at render 16848 (`createTick+1`, the SAME "+1"
+ * relationship turn 5's own `TURN5_ICONBAR_CREATE_TICK`/6588 pin
+ * establishes) puts `createTick=16847`; first visible fade-blend pixel at
+ * render 16985 (`fadeStartTick+2`, matching turn 5's own exact relation)
+ * puts `fadeStartTick=16983`; `destroyTick=fadeStartTick+17` reuses turn
+ * 5's own exact 17-tick gap (pixel-unobservable past eva=0 either way).
+ */
+function drawTurn5IconBar(
+  fb: Uint8Array,
+  t: number,
+  createTick: number = TURN5_ICONBAR_CREATE_TICK,
+  fadeStartTick: number = TURN5_ICONBAR_FADE_START_TICK,
+  destroyTick: number = TURN5_ICONBAR_DESTROY_TICK,
+  states: readonly string[] = TURN5_OPPONENT_ICON_STATES,
+): void {
   const rt = t - 1;
-  if (rt < TURN5_ICONBAR_CREATE_TICK || rt >= TURN5_ICONBAR_DESTROY_TICK) return;
-  const x2 = tableX2(OPP_BAR_X2, TURN5_ICONBAR_CREATE_TICK, rt);
-  const eva = turn5IconBarEva(t);
+  if (rt < createTick || rt >= destroyTick) return;
+  const x2 = tableX2(OPP_BAR_X2, createTick, rt);
+  const eva = turn5IconBarEva(t, fadeStartTick);
   drawBallStatusBar(fb, -24 + x2, 40, true, eva);
   for (let i = 0; i < 6; i += 1) {
-    const tile = ballDisplay.tileset.tiles[ballStateTileIndex(TURN5_OPPONENT_ICON_STATES[i]!)];
+    const tile = ballDisplay.tileset.tiles[ballStateTileIndex(states[i]!)];
     if (!tile) continue;
     const x = 26 + 10 * i + x2;
     for (let py = 0; py < 8; py += 1) {
@@ -6407,6 +6434,13 @@ function drawTurn5IconBar(fb: Uint8Array, t: number): void {
     }
   }
 }
+
+/** S7/S8 turn 13 rung 4: MURKROW's own icon-bar retrigger anchors - see `drawTurn5IconBar`'s own doc for the oracle-pixel derivation. */
+export const TURN13_ICONBAR_CREATE_TICK = 16847;
+export const TURN13_ICONBAR_FADE_START_TICK = 16983;
+export const TURN13_ICONBAR_DESTROY_TICK = 17000;
+/** Pidgeotto's own former slot (index 3, DESTIN's SECOND fainted mon) flips `"Full"` -> `"Statused"` - oracle-pixel-confirmed (0-diff tile match against `battle-interface-ball-display.json`'s own 4 states at the settled tick 16900) directly against `TURN5_OPPONENT_ICON_STATES`: index 3 flips, index 4 (MURKROW, freshly sent out) stays `"Full"`, index 5 (GROVYLE) stays `"Statused"` unchanged from turn 5. */
+export const TURN13_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Statused", "Full", "Statused"];
 
 /** "BUG CATCHER DESTIN sent\nout PIDGEOTTO!" (docs §9, `sText_Trainer1SentOutPkmn` family, same line 1 as `SENDOUT_LINE1`) - starts printing at the oracle-pixel-confirmed absolute tick 6687, 1 char/tick. */
 const SWITCHIN_SENTOUT_LINE1 = "BUG CATCHER DESTIN sent";
@@ -6714,8 +6748,8 @@ function drawTurn5PidgeottoSettled(fb: Uint8Array, x2: number = 0, sink: { keptR
  * `PARTICLE_MAX_AGE`, `sortAliveParticlesByScreenY`) - species/window-
  * independent per §8d.
  */
-function drawTurn5SwitchinParticles(fb: Uint8Array, t: number): void {
-  const logicalT = t - TURN5_BALL_HANDOFF_TICK - BALL_OPEN_START_OFFSET - 1;
+function drawTurn5SwitchinParticles(fb: Uint8Array, t: number, handoffTick: number = TURN5_BALL_HANDOFF_TICK): void {
+  const logicalT = t - handoffTick - BALL_OPEN_START_OFFSET - 1;
   if (logicalT < 0) return;
   const anim = battleAnimParticles.regularBallAnim;
   const alive: AliveParticle[] = [];
@@ -6739,6 +6773,151 @@ function drawTurn5SwitchinSprite(fb: Uint8Array, t: number, pidgeottoX2: number 
   drawSendOutBall(fb, t, TURN5_BALL_HANDOFF_TICK);
   drawTurn5SwitchinParticles(fb, t);
   if (t >= TURN5_PIDGEOTTO_SETTLE_TICK) drawTurn5PidgeottoSettled(fb, pidgeottoX2, sink);
+}
+
+/**
+ * S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own
+ * switch-in - DESTIN's SECOND switch, reusing turn 5's whole materialize/
+ * settle mechanism VERBATIM (same tables: `MATERIALIZE_Y2_TABLE`,
+ * `affineEmergeAccumulator`, `TURN5_MATERIALIZE_RAMP_COEFF`,
+ * `TURN5_STRETCH_TABLE`) at a new anchor - the REUSE MAP's own "(i)
+ * verbatim, new params" verdict for materialize landing-bounce (byte-exact
+ * per §7's own RAM cross-check) and "(i) same shape, not re-verified to the
+ * byte" for the stretch/wobble fine detail (flagged, not chased, per this
+ * session's own time-box - see docs/turn13-notes.md's newest section).
+ * `TURN13_BALL_HANDOFF_TICK` is oracle-pixel-bisected (first visible closed-
+ * ball pixel at render 16987, `handoffTick + BALL_CLOSED_START_OFFSET(2)`,
+ * the identical relationship `TURN5_BALL_HANDOFF_TICK` uses); every other
+ * anchor below (`materializeStart`/ramp-render-start/`STRETCH_TICK`/
+ * `SETTLE_TICK`) reuses turn 5's own exact tick DELTAS off that new anchor,
+ * not re-derived from scratch, per the brief's own "turn 5's machinery
+ * carries its own encoded render lags - reuse, don't re-derive" guidance.
+ */
+export const TURN13_BALL_HANDOFF_TICK = 16985;
+const TURN13_MURKROW_MATERIALIZE_START = TURN13_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET;
+const TURN13_MURKROW_RAMP_RENDER_START = TURN13_MURKROW_MATERIALIZE_START + (TURN5_MATERIALIZE_RAMP_RENDER_START - (TURN5_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET));
+function turn13MurkrowMaterializeCoeff(t: number): number {
+  if (t < TURN13_MURKROW_RAMP_RENDER_START) return TURN5_MATERIALIZE_FLAT_COEFF;
+  return TURN5_MATERIALIZE_RAMP_COEFF[t - TURN13_MURKROW_RAMP_RENDER_START] ?? 0;
+}
+export const TURN13_MURKROW_SETTLE_TICK = 17070;
+export const TURN13_MURKROW_STRETCH_TICK = TURN13_MURKROW_SETTLE_TICK - TURN5_STRETCH_TABLE.length;
+/**
+ * Front-sprite frame selection, same "no species-specific frame-duration
+ * table extracted" empirical-parity approach `turn5PidgeottoFrame` already
+ * establishes (its own doc) - reuses that function's exact tick DELTAS off
+ * `TURN13_BALL_HANDOFF_TICK` instead of `TURN5_BALL_HANDOFF_TICK`.
+ */
+function turn13MurkrowFrame(t: number): 0 | 1 {
+  return turn5PidgeottoFrame(t - TURN13_BALL_HANDOFF_TICK + TURN5_BALL_HANDOFF_TICK);
+}
+function drawTurn13MurkrowMaterialize(fb: Uint8Array, t: number): void {
+  if (t < TURN13_MURKROW_MATERIALIZE_START || t >= TURN13_MURKROW_SETTLE_TICK) return;
+  const frame = turn13MurkrowFrame(t);
+  const tileset = frame === 0 ? murkrowFrontSprite.tileset : murkrowFrontSprite.frame2;
+  if (t < TURN13_MURKROW_STRETCH_TICK) {
+    const local = t - TURN13_MURKROW_MATERIALIZE_START;
+    const accumulator = affineEmergeAccumulator(local + 1);
+    const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
+    const coeff = turn13MurkrowMaterializeCoeff(t);
+    drawSpriteSheetAffineTintedBlend(fb, tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, coeff, y2);
+    return;
+  }
+  const entry = TURN5_STRETCH_TABLE[Math.min(t - TURN13_MURKROW_STRETCH_TICK, TURN5_STRETCH_TABLE.length - 1)]!;
+  drawSpriteSheetAffineStretch(fb, tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y, entry.xScale, entry.yScale, entry.y2, MATERIALIZE_TINT_COLOR, 0, true);
+}
+/** MURKROW's settled front sprite, no affine transform - see `TURN13_MURKROW_SETTLE_TICK`. */
+function drawTurn13MurkrowSettled(fb: Uint8Array): void {
+  drawSpriteSheet(fb, murkrowFrontSprite.tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y);
+}
+/** Ball prop + open-particle burst (both already window/species-independent, reused verbatim off the new `TURN13_BALL_HANDOFF_TICK` anchor) plus MURKROW's own materialize/settle - a no-op before `TURN13_BALL_HANDOFF_TICK`. */
+function drawTurn13MurkrowSwitchinSprite(fb: Uint8Array, t: number): void {
+  if (t < TURN13_BALL_HANDOFF_TICK) return;
+  drawTurn13MurkrowMaterialize(fb, t);
+  drawSendOutBall(fb, t, TURN13_BALL_HANDOFF_TICK);
+  drawTurn5SwitchinParticles(fb, t, TURN13_BALL_HANDOFF_TICK);
+  if (t >= TURN13_MURKROW_SETTLE_TICK) drawTurn13MurkrowSettled(fb);
+}
+
+/** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6): MURKROW's own opponent healthbox, Lv50 (docs/turn15-notes.md §own re-confirmation, unchanged across the whole battle), full HP (142/142 switch-in, `pickHpBarBand` green per `verify-turn13.ts`'s own check). */
+const MURKROW_LEVEL = 50;
+const murkrowHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
+  name: "MURKROW",
+  level: MURKROW_LEVEL,
+  gender: "male",
+  hpFraction: 1,
+  status: "none",
+});
+
+/** "BUG CATCHER DESTIN sent\nout MURKROW!" - same line 1 as `SWITCHIN_SENTOUT_LINE1`/`SENDOUT_LINE1` (`sText_Trainer1SentOutPkmn` family), oracle-pixel-bisected start tick: flat at the icon-bar-retrigger's own settled sha through render 16946, first distinct glyph at 16947. */
+const TURN13_SWITCHIN_SENTOUT_LINE2 = "out MURKROW!";
+const TURN13_SWITCHIN_SENTOUT_TEXT_TOTAL = SWITCHIN_SENTOUT_LINE1.length + TURN13_SWITCHIN_SENTOUT_LINE2.length;
+export const TURN13_SWITCHIN_SENTOUT_TEXT_START_TICK = 16947;
+export function turn13SwitchinSentOutTextVisibleChars(t: number): number {
+  if (t < TURN13_SWITCHIN_SENTOUT_TEXT_START_TICK) return 0;
+  return Math.min(TURN13_SWITCHIN_SENTOUT_TEXT_TOTAL, t - TURN13_SWITCHIN_SENTOUT_TEXT_START_TICK + 1);
+}
+
+/**
+ * S7/S8 turn 13 rung 4: the switch-in's own on-field base - Onix (frozen
+ * bounce throughout, live once the turn-14 menu is truly interactive, same
+ * "frozen through the whole resolution" rule rung 3 established) + the
+ * icon-bar retrigger + MURKROW's own switch-in sprite/healthbox slide-in -
+ * structurally the same composition `drawTurn6FieldBase` established for
+ * Pidgeotto's own switch-in, just without a fainted mon still needing to be
+ * drawn (Pidgeotto is off-field entirely by this point, unlike turn 5's own
+ * window which never needed to draw two switch sequences back to back).
+ */
+function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number): void {
+  drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, 0, false, 0, false);
+  drawTurn5IconBar(fb, t, TURN13_ICONBAR_CREATE_TICK, TURN13_ICONBAR_FADE_START_TICK, TURN13_ICONBAR_DESTROY_TICK, TURN13_OPPONENT_ICON_STATES);
+  drawTurn13MurkrowSwitchinSprite(fb, t);
+  const murkrowHealthboxDx = healthboxSlideDx(t, TURN13_MURKROW_SETTLE_TICK + 1);
+  if (murkrowHealthboxDx !== null) drawSendOutHealthbox(fb, murkrowHealthboxDx, murkrowHealthboxContent);
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(shiftedBounceTick));
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, TURN12_ONIX_AFTER_AERIALACE_HP, bounce.healthboxY2);
+}
+
+/** First observed sha of the settled "What will ONIX do?" vs. MURKROW idle-cycle family (docs/turn13-notes.md §4's own citation, oracle-pixel-bisected this session: dense scan lands on `5e5283bf92c2` starting exactly here). */
+const TURN13_SWITCHIN_MENU_REDRAW_TICK = 17106;
+/**
+ * DESTIN's own switch-in RESETS the idle-bounce regime, the same way turn
+ * 5's own Sitrus-heal switch-in did (`turn5SitrusResettledBounceTick`'s own
+ * doc: "the same re-init story as every turn before it") - NOT a
+ * continuation of the regime-8 chain every ROCK_SLIDE-only turn transition
+ * (turns 7-13) reuses via `TURN13_REGIME8_TO_REGIME1_SHIFT`. Oracle-pixel-
+ * confirmed this session: continuing regime 8 through the settled turn-14
+ * menu regressed a real, non-constant residual (769-2325px depending on
+ * cycle phase, `npm run compare` isolated to Onix's own sprite/healthbox
+ * bounce) - a fresh reset closes it. Mirrors `turn5SitrusResettledBounceTick`'s
+ * own formula exactly, just re-anchored to THIS switch-in's own redraw tick.
+ */
+const TURN13_SWITCHIN_RESET_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - TURN13_SWITCHIN_MENU_REDRAW_TICK;
+
+function drawTurn13SwitchinWindow(fb: Uint8Array, t: number, frozenBounceTick: number, cursorStart: number, koDismissTick: number): void {
+  const settled = t >= TURN13_SWITCHIN_MENU_REDRAW_TICK;
+  const shiftedBounceTick = settled ? t + TURN13_SWITCHIN_RESET_SHIFT : frozenBounceTick + TURN13_REGIME8_TO_REGIME1_SHIFT;
+  drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (settled) {
+    drawTurn5SitrusSettledMenuChrome(fb);
+    return;
+  }
+  if (t < TURN13_SWITCHIN_SENTOUT_TEXT_START_TICK) {
+    // The button-gated fainted message's own wait-cursor stays frozen in
+    // place (same locked phase the press itself established) all the way
+    // through the icon-bar retrigger and species-flip, right up until the
+    // sent-out text hard-cuts over it - oracle-pixel-confirmed this session
+    // (a first attempt dropped the cursor entirely here, regressing a
+    // constant 37px diff, exactly one glyph's worth, isolated to the
+    // cursor's own bbox at every sampled tick 16847-16946).
+    drawMessageTextLines(fb, TURN13_FAINTED_LINE1, TURN13_FAINTED_LINE2, TURN13_FAINTED_TEXT_TOTAL);
+    const cursor = cursorState(koDismissTick, cursorStart);
+    if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN13_FAINTED_CURSOR_X);
+    return;
+  }
+  drawMessageTextLines(fb, SWITCHIN_SENTOUT_LINE1, TURN13_SWITCHIN_SENTOUT_LINE2, turn13SwitchinSentOutTextVisibleChars(t));
 }
 
 /**
@@ -9279,7 +9458,7 @@ function turn13KickoffBounceTick(t: number, pressTick: number): number {
  * oracle-confirmed safe boundary" convention `drawTurn3EndeavorText`'s own
  * doc already established.
  */
-function drawTurn13FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+function drawTurn13FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState, koDismissTick: number | null): void {
   if (sm.openElapsed === null) {
     drawTurn12TurnEndSettledMenu(fb, t);
     return;
@@ -9303,7 +9482,7 @@ function drawTurn13FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
     const pressTick = TICK0 + sm.confirmElapsed;
     const textStart = turn13SandAttackTextStartTick(pressTick);
     if (t >= textStart) {
-      drawTurn13SandAttackWindow(fb, t, pressTick);
+      drawTurn13SandAttackWindow(fb, t, pressTick, koDismissTick);
       return;
     }
   }
@@ -9583,9 +9762,9 @@ function drawTurn13SandAttackDirt(fb: Uint8Array, t: number, pressTick: number):
  * `null` there, so the settled kickoff-text baseline already renders it
  * correctly by construction.
  */
-function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number): void {
+function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number, koDismissTick: number | null): void {
   if (t >= dragonBreathTextStartTick(TURN13_DRAGONBREATH_PRESS_TICK)) {
-    drawTurn13DragonBreathWindow(fb, t, pressTick);
+    drawTurn13DragonBreathWindow(fb, t, pressTick, koDismissTick);
     return;
   }
   const frozenBounceTick = turn13KickoffBounceTick(t, pressTick);
@@ -9635,10 +9814,10 @@ export const TURN13_HEALTHBOX_VANISH_TICK = faintHealthboxVanishTick(TURN13_FAIN
 /** Same `pressTick+318`-relative anchor `drawDragonBreathScene` (turn 2's own DRAGON_BREATH) uses for Grovyle's own target hit-flash (`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`, both already generic, reused verbatim - see `DRAGONBREATH_HIT_FLASH_OFFSET`'s own module doc) - re-anchored to `TURN13_DRAGONBREATH_PRESS_TICK`. Oracle-pixel-confirmed this session: omitting this (drawing Pidgeotto solid throughout) regressed a ~1085px diff at 15855-15863, isolated by `npm run compare` to exactly Pidgeotto's own on-field sprite - the SAME blink window turn 2's own target already exercises, not a new mechanism. */
 const TURN13_HIT_FLASH_PRESS_TICK = TURN13_DRAGONBREATH_PRESS_TICK + DRAGONBREATH_HIT_FLASH_OFFSET;
 
-function drawTurn13DragonBreathWindow(fb: Uint8Array, t: number, sandAttackPressTick: number): void {
+function drawTurn13DragonBreathWindow(fb: Uint8Array, t: number, sandAttackPressTick: number, koDismissTick: number | null): void {
   const dbPressTick = TURN13_DRAGONBREATH_PRESS_TICK;
   if (t >= turn13FaintedTextStartTick(dbPressTick)) {
-    drawTurn13FaintedWindow(fb, t, dbPressTick, sandAttackPressTick);
+    drawTurn13FaintedWindow(fb, t, dbPressTick, sandAttackPressTick, koDismissTick);
     return;
   }
   const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
@@ -9713,13 +9892,40 @@ export function turn13KoDismissEligible(t: number): boolean {
   return t >= TURN13_DRAGONBREATH_PRESS_TICK + TURN13_FAINTED_CURSOR_START_DELAY;
 }
 
-function drawTurn13FaintedWindow(fb: Uint8Array, t: number, pressTick: number, sandAttackPressTick: number): void {
+/**
+ * S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): `koDismissTick` (the
+ * real `TICK0 + turn13KoDismissElapsed` trace tick, `null` before the press
+ * registers) - once set, this is the FIRST place this dossier's own render
+ * path actually consults a KO-dismiss elapsed field (every earlier "the
+ * render path does NOT consult this field" precedent, `turn5KoDismissElapsed`'s
+ * own module doc included, held only because those windows' committed
+ * traces always dismissed immediately upon eligibility; THIS turn's own
+ * script deliberately idles ~819 ticks past eligibility before pressing -
+ * `battle1-turn13-dense-a.json`'s own segment 105, a 1400-frame idle - so
+ * the freeze/handoff genuinely needs the real variable press tick, not a
+ * synthetic eligibility-derived one). Freezes the wait-cursor's own bounce
+ * phase at the real press tick (oracle-pixel-confirmed: the press LOCKS the
+ * screen to one fixed sha, not a continued live bounce) and, past
+ * `TURN13_ICONBAR_CREATE_TICK`, hands off to `drawTurn13SwitchinWindow` for
+ * the whole post-press sequence (icon-bar retrigger, species-flip/sent-out
+ * text, ball/particles/materialize, healthbox slide-in, settled turn-14
+ * menu) - every one of those phases still keyed off ABSOLUTE anchor ticks
+ * re-derived from THIS committed trace's own real press (16820), the same
+ * "committed trace's own button always lands at the right real-world tick"
+ * convention every other post-press window in this file already relies on.
+ */
+function drawTurn13FaintedWindow(fb: Uint8Array, t: number, pressTick: number, sandAttackPressTick: number, koDismissTick: number | null = null): void {
   const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
+  if (koDismissTick !== null && t >= TURN13_ICONBAR_CREATE_TICK) {
+    drawTurn13SwitchinWindow(fb, t, frozenBounceTick, pressTick + TURN13_FAINTED_CURSOR_START_DELAY, koDismissTick);
+    return;
+  }
   drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, TURN13_PIDGEOTTO_FAINT_HP, { keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 }, false);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(fb, TURN13_FAINTED_LINE1, TURN13_FAINTED_LINE2, turn13FaintedTextVisibleChars(t, pressTick));
   const cursorStart = pressTick + TURN13_FAINTED_CURSOR_START_DELAY;
-  const cursor = cursorState(t, cursorStart);
+  const cursorT = koDismissTick !== null ? Math.min(t, koDismissTick) : t;
+  const cursor = cursorState(cursorT, cursorStart);
   if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN13_FAINTED_CURSOR_X);
 }
 
@@ -10263,6 +10469,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn10Resolved,
       state.turn11Resolved,
       state.turn12Resolved,
+      state.turn13KoDismissElapsed === null ? null : TICK0 + state.turn13KoDismissElapsed,
     );
     return;
   }
