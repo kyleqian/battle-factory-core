@@ -5,6 +5,28 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #37 — Turn-15 forced party menu: press-relative settled state is live, but
+  fade/OAM reconstruction is not yet pixel-exact
+
+Opened 2026-07-22 corrective follow-up. The rejected 13 MB absolute-tick
+full-frame replay is deleted. `partySelect.ts` now owns elapsed time from the
+actual ONIX-fainted dismiss edge; its DOWN/A reducer and `battleScene.ts`
+choose stable list/submenu chrome from that state, not absolute trace time.
+Both `turn15-party-select.json` and its new 30-frame delayed-dismiss variant
+exercise the same list → DOWN → submenu path at **46/46, 0 diff** settled
+checkpoints. `composite-party-menu.ts` remains **5/5 PASS**, but its current
+transparent-tile overwrite still preserves source-harvested pixels beneath
+the icons, so it is not yet sufficient as the required erase/reconstruct
+acceptance proof.
+
+Remaining: faithfully composite the list chrome without its source-harvested
+icon pixels (and make the 5/5 composite prove that), then redraw the three
+source-extracted icons/status OBJ from the banked hop model; model the
+80-frame fade/black entry and post-SEND-OUT path.
+Until then, the canonical trace intentionally captures only verified settled
+representatives (not the old 256-frame claim). Do not re-add per-frame assets
+or absolute-tick lookup tables.
+
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
   (240/240)

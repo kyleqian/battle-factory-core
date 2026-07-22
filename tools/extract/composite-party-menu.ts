@@ -32,8 +32,18 @@ import iconAsset from "../../src/assets/gen/party-mon-icons.json" with { type: "
 import statusOverlayAsset from "../../src/assets/gen/party-menu-status-overlay.json" with { type: "json" };
 import magbyStatusOverlayAsset from "../../src/assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
 
-type ChromeFrame = { tick: number; width: number; height: number; pixels: number[] };
+type ChromeFrame = { tick: number; width: number; height: number; palette: number[]; indices: string };
 const chrome = chromeAsset as unknown as Record<string, ChromeFrame>;
+
+function chromePixels(frame: ChromeFrame): number[] {
+  const indices = Buffer.from(frame.indices, "base64");
+  const pixels: number[] = new Array(indices.length * 3);
+  for (let p = 0, o = 0; p < indices.length; p += 1, o += 3) {
+    const c = indices[p]! * 3;
+    pixels[o] = frame.palette[c]!; pixels[o + 1] = frame.palette[c + 1]!; pixels[o + 2] = frame.palette[c + 2]!;
+  }
+  return pixels;
+}
 
 type Tileset = { columns: number; rows: number; tiles: number[][] };
 type IconAsset = { frame0: Tileset; frame1: Tileset; palette: { r: number; g: number; b: number }[] };
@@ -185,7 +195,7 @@ async function main() {
   // 1. "list, cursor on ONIX" (tick 20070): ONIX selected/phase -3,
   // MAGBY+BAYLEEF deselected/frame0 (RAM-confirmed, docs/party-menu-notes.md).
   {
-    const fb = [...chrome.listOnix!.pixels];
+    const fb = chromePixels(chrome.listOnix!);
     pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: true, phase: "minus3" });
     pasteIcon(fb, 240, 160, { species: "MAGBY", frame: 0, selected: false });
     pasteIcon(fb, 240, 160, { species: "BAYLEEF", frame: 0, selected: false });
@@ -196,7 +206,7 @@ async function main() {
   // 4. mid-hop: same screen, ONIX selected/phase +1 (tick 20150, RAM-confirmed).
   // MAGBY/BAYLEEF have independently advanced to frame1 by this tick.
   {
-    const fb = [...chrome.listOnixMidHop!.pixels];
+    const fb = chromePixels(chrome.listOnixMidHop!);
     pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: true, phase: "plus1" });
     pasteIcon(fb, 240, 160, { species: "MAGBY", frame: 1, selected: false });
     pasteIcon(fb, 240, 160, { species: "BAYLEEF", frame: 1, selected: false });
@@ -207,7 +217,7 @@ async function main() {
   // 2. "list, cursor on MAGBY" (tick 20206): MAGBY selected/phase -3,
   // ONIX deselected (fixed y2=-4), BAYLEEF deselected/frame0.
   {
-    const fb = [...chrome.listMagby!.pixels];
+    const fb = chromePixels(chrome.listMagby!);
     pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: false });
     pasteIcon(fb, 240, 160, { species: "MAGBY", frame: 0, selected: true, phase: "minus3" });
     pasteIcon(fb, 240, 160, { species: "BAYLEEF", frame: 0, selected: false });
@@ -217,7 +227,7 @@ async function main() {
 
   // 5. mid-hop: same screen, MAGBY selected/phase +1 (tick 20215, RAM-confirmed).
   {
-    const fb = [...chrome.listMagbyMidHop!.pixels];
+    const fb = chromePixels(chrome.listMagbyMidHop!);
     pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: false });
     pasteIcon(fb, 240, 160, { species: "MAGBY", frame: 1, selected: true, phase: "plus1" });
     pasteIcon(fb, 240, 160, { species: "BAYLEEF", frame: 1, selected: false });
@@ -225,7 +235,7 @@ async function main() {
     report("list, cursor on MAGBY, MID-HOP (selected hop phase +1, off-sample tick)", fb, ticks.listMagbyMidHop, 38400);
   }
 
-  report("submenu SEND OUT/SUMMARY/CANCEL (harvested chrome, round-trip check)", [...chrome.submenu!.pixels], ticks.submenu, 38400);
+  report("submenu SEND OUT/SUMMARY/CANCEL (harvested chrome, round-trip check)", chromePixels(chrome.submenu!), ticks.submenu, 38400);
 
   console.log(`\n${failures === 0 ? "ALL COMPOSITES PASSED" : `${failures} COMPOSITE(S) FAILED`}`);
   process.exit(failures === 0 ? 0 : 1);

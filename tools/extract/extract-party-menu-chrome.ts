@@ -61,17 +61,28 @@ function need(tick: number) {
   return c;
 }
 
-function fullFrameRgb(rgba: Buffer): number[] {
-  const pixels: number[] = [];
-  for (let i = 0; i < 240 * 160; i += 1) {
-    pixels.push(rgba[i * 4]!, rgba[i * 4 + 1]!, rgba[i * 4 + 2]!);
+function indexedFrame(rgba: Buffer): { palette: number[]; indices: string } {
+  const palette: number[] = [];
+  const indexByRgb = new Map<string, number>();
+  const indices = new Uint8Array(240 * 160);
+  for (let p = 0; p < indices.length; p += 1) {
+    const i = p * 4;
+    const key = `${rgba[i]},${rgba[i + 1]},${rgba[i + 2]}`;
+    let index = indexByRgb.get(key);
+    if (index === undefined) {
+      index = palette.length / 3;
+      if (index >= 256) throw new Error("party chrome frame has >256 colors");
+      indexByRgb.set(key, index);
+      palette.push(rgba[i]!, rgba[i + 1]!, rgba[i + 2]!);
+    }
+    indices[p] = index;
   }
-  return pixels;
+  return { palette, indices: Buffer.from(indices).toString("base64") };
 }
 
-const frames: Record<string, { tick: number; width: number; height: number; pixels: number[] }> = {};
+const frames: Record<string, { tick: number; width: number; height: number; palette: number[]; indices: string }> = {};
 for (const [name, tick] of Object.entries(TICKS)) {
-  frames[name] = { tick, width: 240, height: 160, pixels: fullFrameRgb(need(tick).rgba) };
+  frames[name] = { tick, width: 240, height: 160, ...indexedFrame(need(tick).rgba) };
 }
 
 writeFileSync("src/assets/gen/party-menu-chrome.json", `${JSON.stringify(frames)}\n`);

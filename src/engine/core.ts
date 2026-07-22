@@ -223,7 +223,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     } else if (battleScene.turn15PartySelect) {
       battleScene = {
         ...battleScene,
-        turn15PartySelect: advancePartySelect(battleScene.turn15PartySelect, SCENE_TICK0 + battleScene.elapsed + 1, newKeys),
+        turn15PartySelect: advancePartySelect(battleScene.turn15PartySelect, newKeys),
       };
     }
     // S7 FIGHT-submenu slice (docs/battle-turn-notes.md §11): the settled

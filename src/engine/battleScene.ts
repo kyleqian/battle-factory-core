@@ -530,8 +530,7 @@ import menuIdleBaseAsset from "../assets/gen/menu-idle-base.json" with { type: "
 import menuIdleOnixBounceAsset from "../assets/gen/menu-idle-onix-bounce.json" with { type: "json" };
 import menuIdleHealthboxBounceAsset from "../assets/gen/menu-idle-healthbox-bounce.json" with { type: "json" };
 import fightSubmenuWindowAsset from "../assets/gen/fight-submenu-window.json" with { type: "json" };
-import turn15PartySelectFramesAsset from "../assets/gen/turn15-party-select-frames.json" with { type: "json" };
-import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay.json" with { type: "json" };
+import partyMenuChromeAsset from "../assets/gen/party-menu-chrome.json" with { type: "json" };
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
@@ -11572,49 +11571,37 @@ function drawTurn15FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
   drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true, true, true);
 }
 
-type PartyFrame = { palette: number[]; indices: string };
-const turn15PartyFrames = (turn15PartySelectFramesAsset as unknown as { start: number; end: number; frames: Record<string, PartyFrame> });
-const partyStatusOverlay = partyMenuStatusOverlayAsset as { x: number; y: number; width: number; height: number; pixels: number[] };
+type PartyChromeFrame = { palette: number[]; indices: string };
+const partyMenuChrome = partyMenuChromeAsset as unknown as Record<string, PartyChromeFrame>;
+const partyChromeCache = new Map<string, Uint8Array>();
 
-function decodePartyIndices(encoded: string): Uint8Array {
-  // `atob` is available in browsers and current Node, keeping this generated
-  // production asset independent of Node's Buffer API.
-  const binary = atob(encoded);
-  const out = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) out[i] = binary.charCodeAt(i);
-  return out;
+function partyChromePixels(key: string): Uint8Array {
+  const cached = partyChromeCache.get(key);
+  if (cached) return cached;
+  const frame = partyMenuChrome[key]!;
+  const indices = atob(frame.indices);
+  const pixels = new Uint8Array(240 * 160 * 3);
+  for (let p = 0, o = 0; p < indices.length; p += 1, o += 3) {
+    const c = indices.charCodeAt(p) * 3;
+    pixels[o] = frame.palette[c]!; pixels[o + 1] = frame.palette[c + 1]!; pixels[o + 2] = frame.palette[c + 2]!;
+  }
+  partyChromeCache.set(key, pixels);
+  return pixels;
 }
-const decodedPartyFrameCache = new Map<number, Uint8Array>();
 
-/** Draw the oracle-extracted transition/chrome frame, then explicitly redraw
- * BAYLEEF's independent ailment overlay. The latter is a real per-slot OBJ
- * sprite, not part of the icon bitmap (party-menu-notes §6). */
-function drawTurn15PartySelectWindow(fb: Uint8Array, t: number): boolean {
-  const frame = turn15PartyFrames.frames[String(t)];
-  if (!frame) return false;
-  let indices = decodedPartyFrameCache.get(t);
-  if (!indices) {
-    indices = decodePartyIndices(frame.indices);
-    decodedPartyFrameCache.set(t, indices);
-  }
-  for (let p = 0, o = 0; p < indices.length; p += 1, o += 4) {
-    const c = indices[p]! * 3;
-    fb[o] = frame.palette[c]!;
-    fb[o + 1] = frame.palette[c + 1]!;
-    fb[o + 2] = frame.palette[c + 2]!;
-    fb[o + 3] = 255;
-  }
-  // Its palette is independently extracted and the normal list idle at
-  // 20070 is the non-faded, non-highlighted reference placement. Other
-  // frames already carry the same OBJ through their exact palette/fade path.
-  if (t === 20070) for (let y = 0; y < partyStatusOverlay.height; y += 1) for (let x = 0; x < partyStatusOverlay.width; x += 1) {
-    const src = (y * partyStatusOverlay.width + x) * 4;
-    const dst = ((partyStatusOverlay.y + y) * 240 + partyStatusOverlay.x + x) * 4;
-    if (partyStatusOverlay.pixels[src + 3] === 0) continue;
-    fb[dst] = partyStatusOverlay.pixels[src]!;
-    fb[dst + 1] = partyStatusOverlay.pixels[src + 1]!;
-    fb[dst + 2] = partyStatusOverlay.pixels[src + 2]!;
-    fb[dst + 3] = partyStatusOverlay.pixels[src + 3]!;
+/**
+ * Stable party-menu chrome is selected by live party state, never by trace
+ * tick. The in/out fade and icon OAM animation are deliberately not faked:
+ * before the settled list is ready we leave the scene black, and the open
+ * debt is documented in ISSUES.md rather than hidden in a frame table.
+ */
+function drawTurn15PartySelectWindow(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): boolean {
+  if (state.elapsed < 80 || state.sendOutConfirmed) return false;
+  const key = state.submenuOpen ? "submenu" : state.cursor === "magby" ? "listMagby" : "listOnix";
+  const pixels = partyChromePixels(key);
+  for (let p = 0, o = 0; p < 240 * 160; p += 1, o += 4) {
+    const c = p * 3;
+    fb[o] = pixels[c]!; fb[o + 1] = pixels[c + 1]!; fb[o + 2] = pixels[c + 2]!; fb[o + 3] = 255;
   }
   return true;
 }
@@ -11622,7 +11609,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, t: number): boolean {
 /** Renders the full battle-scene-assembly frame for `state` (elapsed since TICK0). */
 export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void {
   const t = TICK0 + state.elapsed;
-  if (state.turn15PartySelect && drawTurn15PartySelectWindow(fb, t)) return;
+  if (state.turn15PartySelect && drawTurn15PartySelectWindow(fb, state.turn15PartySelect)) return;
   const win = windowRange(t);
   if (!win) return; // solid black
   if (t < SLIDE_END_TICK) {
