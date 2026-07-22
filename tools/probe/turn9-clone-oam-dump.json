@@ -1,0 +1,444 @@
+{
+  "_comment": "ISSUES #32 (worktree PROBE): trimmed gMain.oamBuffer facts for turn 9 QUICK_ATTACK slot3/slot4/real, RAM ticks 10937-10942 (dump-turn9-clone-oam.py, tools/compare/traces/turn9-quickattack.json). Full 128-entry oamBuffer omitted per tick (mostly irrelevant/empty slots) - only the fields the fix depends on are kept: each named slot's own decoded OAM attrs plus its resolved index within gMain.oamBuffer (the hardware tie-break - lower index wins a same-priority overlap), found by matching (x,y,tileNum,paletteNum) against every one of the 128 entries.",
+  "slots": {
+    "3": "slot 3 - AnimTask_TraceMonBlended clone A",
+    "4": "slot 4 - AnimTask_TraceMonBlended clone B",
+    "5": "real Pidgeotto sprite (battler 1)",
+    "6": "Onix real sprite (context)",
+    "7": "hitsplat (context)"
+  },
+  "ticks": [
+    {
+      "tick": 10937,
+      "bldcnt": 16192,
+      "bldalpha": 2060,
+      "sprites": {
+        "3": {
+          "inUse": false,
+          "invisible": false,
+          "objMode": 0,
+          "x": 304,
+          "y": 160,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 0,
+          "paletteNum": 0,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 116
+        },
+        "4": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 168,
+          "y": 25,
+          "x2": 24,
+          "y2": 6,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": 11,
+          "oamBufferMatchCount": 1
+        },
+        "5": {
+          "inUse": true,
+          "invisible": true,
+          "objMode": 0,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 0
+        },
+        "6": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 0,
+          "x": 45,
+          "y": 48,
+          "x2": 5,
+          "y2": 0,
+          "tileNum": 369,
+          "paletteNum": 0,
+          "oamBufferIndex": 10,
+          "oamBufferMatchCount": 1
+        },
+        "7": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 56,
+          "y": 72,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 305,
+          "paletteNum": 7,
+          "oamBufferIndex": 9,
+          "oamBufferMatchCount": 1
+        }
+      }
+    },
+    {
+      "tick": 10938,
+      "bldcnt": 16192,
+      "bldalpha": 2060,
+      "sprites": {
+        "3": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 0
+        },
+        "4": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 168,
+          "y": 25,
+          "x2": 24,
+          "y2": 6,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": 11,
+          "oamBufferMatchCount": 1
+        },
+        "5": {
+          "inUse": true,
+          "invisible": true,
+          "objMode": 0,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 0
+        },
+        "6": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 0,
+          "x": 45,
+          "y": 48,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 369,
+          "paletteNum": 0,
+          "oamBufferIndex": 10,
+          "oamBufferMatchCount": 1
+        },
+        "7": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 56,
+          "y": 72,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 305,
+          "paletteNum": 7,
+          "oamBufferIndex": 9,
+          "oamBufferMatchCount": 1
+        }
+      }
+    },
+    {
+      "tick": 10939,
+      "bldcnt": 16192,
+      "bldalpha": 2060,
+      "sprites": {
+        "3": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": 12,
+          "oamBufferMatchCount": 1
+        },
+        "4": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 168,
+          "y": 25,
+          "x2": 24,
+          "y2": 6,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": 11,
+          "oamBufferMatchCount": 1
+        },
+        "5": {
+          "inUse": true,
+          "invisible": true,
+          "objMode": 0,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 0
+        },
+        "6": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 0,
+          "x": 40,
+          "y": 48,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 369,
+          "paletteNum": 0,
+          "oamBufferIndex": 10,
+          "oamBufferMatchCount": 1
+        },
+        "7": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 56,
+          "y": 72,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 305,
+          "paletteNum": 7,
+          "oamBufferIndex": 9,
+          "oamBufferMatchCount": 1
+        }
+      }
+    },
+    {
+      "tick": 10940,
+      "bldcnt": 16192,
+      "bldalpha": 2060,
+      "sprites": {
+        "3": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": 12,
+          "oamBufferMatchCount": 1
+        },
+        "4": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 168,
+          "y": 25,
+          "x2": 24,
+          "y2": 6,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": 11,
+          "oamBufferMatchCount": 1
+        },
+        "5": {
+          "inUse": true,
+          "invisible": true,
+          "objMode": 0,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 0
+        },
+        "6": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 0,
+          "x": 40,
+          "y": 48,
+          "x2": 5,
+          "y2": 0,
+          "tileNum": 369,
+          "paletteNum": 0,
+          "oamBufferIndex": 10,
+          "oamBufferMatchCount": 1
+        },
+        "7": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 56,
+          "y": 72,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 305,
+          "paletteNum": 7,
+          "oamBufferIndex": 9,
+          "oamBufferMatchCount": 1
+        }
+      }
+    },
+    {
+      "tick": 10941,
+      "bldcnt": 16192,
+      "bldalpha": 2060,
+      "sprites": {
+        "3": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": 11,
+          "oamBufferMatchCount": 1
+        },
+        "4": {
+          "inUse": false,
+          "invisible": false,
+          "objMode": 0,
+          "x": 304,
+          "y": 160,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 0,
+          "paletteNum": 0,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 116
+        },
+        "5": {
+          "inUse": true,
+          "invisible": true,
+          "objMode": 0,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 0
+        },
+        "6": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 0,
+          "x": 45,
+          "y": 48,
+          "x2": 5,
+          "y2": 0,
+          "tileNum": 369,
+          "paletteNum": 0,
+          "oamBufferIndex": 10,
+          "oamBufferMatchCount": 1
+        },
+        "7": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 56,
+          "y": 72,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 305,
+          "paletteNum": 7,
+          "oamBufferIndex": 9,
+          "oamBufferMatchCount": 1
+        }
+      }
+    },
+    {
+      "tick": 10942,
+      "bldcnt": 16192,
+      "bldalpha": 2060,
+      "sprites": {
+        "3": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": 11,
+          "oamBufferMatchCount": 1
+        },
+        "4": {
+          "inUse": false,
+          "invisible": false,
+          "objMode": 0,
+          "x": 304,
+          "y": 160,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 0,
+          "paletteNum": 0,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 116
+        },
+        "5": {
+          "inUse": true,
+          "invisible": true,
+          "objMode": 0,
+          "x": 144,
+          "y": 19,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 473,
+          "paletteNum": 1,
+          "oamBufferIndex": null,
+          "oamBufferMatchCount": 0
+        },
+        "6": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 0,
+          "x": 45,
+          "y": 48,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 369,
+          "paletteNum": 0,
+          "oamBufferIndex": 10,
+          "oamBufferMatchCount": 1
+        },
+        "7": {
+          "inUse": true,
+          "invisible": false,
+          "objMode": 1,
+          "x": 56,
+          "y": 72,
+          "x2": 0,
+          "y2": 0,
+          "tileNum": 305,
+          "paletteNum": 7,
+          "oamBufferIndex": 9,
+          "oamBufferMatchCount": 1
+        }
+      }
+    }
+  ]
+}
