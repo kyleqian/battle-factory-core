@@ -1,4 +1,50 @@
 ---
+## 255 — Bounded worker (turn-15 wiring step, boundary (i) of 3): wired the reopen gate + FIGHT submenu + confirm + FLY-strike kickoff text — `turn15-fly-strike.json` **82/82, 0 diff** (new trace, first commit toward turn 15); boundaries (ii)/(iii) — the strike animation core, faint sink, fainted-hold — NOT attempted this session, scoped and filed as ISSUES #36
+
+- **State:** `npm test` **993/993**, `npm run build` green, tree clean.
+  `verify-turn15.ts` re-run first (mandatory step): 59 PASS / 0 FAIL (the
+  brief said "58/58"; the script prints 59 PASS lines with 0 failures —
+  same "ALL CHECKS PASSED" gate, no discrepancy in substance). Regression
+  sweep 0 diff: `turn14-fly-miss` 165/165, `turn13-switchin` 240/240,
+  `turn13-menu` 57/57.
+- **Did:** New `turn14Resolved` state flag end-to-end (mirrors
+  `turn13Resolved` exactly): `BattleSceneState` field, `core.ts`'s new
+  reopen branch (`TURN14_DRAGONBREATH_MENU_REDRAW_DELAY`-gated, cursor
+  persisted at slot 2/DRAGON_BREATH, no nav), `currentPPForActiveMon`'s 3rd
+  slot-2 PP decrement (20→17, turn 14's own auto-missed DRAGON_BREATH still
+  costs PP), and `drawTurn15FightSubmenuWindow`/`drawTurn15FlyStrikeWindow`
+  (new functions, `battleScene.ts`). Found and corrected one dossier slip
+  along the way (now in `docs/turn15-notes.md` §7): the confirm-press
+  transient does NOT clear to a bare/blank box before the kickoff text like
+  turn 14's own charge half did — the submenu chrome holds unchanged
+  through tick 19006, then hard-cuts straight to the text's own first
+  glyph at 19007 (dense sha-transition probe, oracle round-trip); kickoff
+  text is 20 chars total (not 21), cross-checked via both embedded spaces'
+  own "no visible pixel change" ticks landing exactly where the formula
+  predicts. Committed `tools/compare/traces/turn15-fly-strike.json`:
+  82/82, 0 diff over 18956-19044, excluding 7 ticks (18965-66/74-75/83-85)
+  — a pre-existing sine-bounce "extremum" mismatch on Onix's own idle
+  sprite, same bug class as the already-documented `turn5SubmenuBounceTick`
+  fix, unrelated to this session's new code — named and excluded, filed as
+  **ISSUES #35** (not guessed at, not faked).
+- **Next:** ISSUES #36 (this same turn's own boundaries (ii)/(iii): ball-
+  descent trajectory needs a fresh `dump-fly-anim.py` run over 19045-19075
+  against the already-committed groundtruth trace; the new impact sprite
+  at tile 433 needs VRAM identification+extraction — both real, bounded,
+  RAM/asset tasks, not blocked on anything; everything else in
+  `docs/turn15-notes.md` §6f's reuse table is flagged pure wiring once
+  those two land). ISSUES #35's own extremum probe; #34's own remainder
+  (17722-17768); #33's tiny remainder (17019/17034); ISSUES #32.
+- **Notes:** Full writeup `docs/turn15-notes.md` §7 (owned this round).
+  Ran out of safe remaining budget before boundaries (ii)/(iii) — both
+  need real RAM/VRAM probing (not just wiring already-banked constants,
+  unlike every session in the turn13/14 chain before this one), so rather
+  than rush an asset extraction and risk an unclean stop, this session
+  banked one clean, tested, fully green commit and scoped the remainder
+  precisely for the next session. No PAPERCUTS beyond the standing
+  mgba-venv-teardown one.
+
+---
 ## 254 — Bounded worker (turn-14 wiring step, ISSUES #34 close-out): wired the probe-confirmed menu-redraw blank hold + bounce-regime RESET — `turn14-fly-miss.json` **165/165, 0 diff** (was 150/150; all 15 predicted ticks restored, exact first try); cheap conditional check on the FIGHT-submenu reopen family (17722-17768) came back 0/43 pass — trimmed ISSUES #34 to that honest remainder, not deleted
 
 - **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run

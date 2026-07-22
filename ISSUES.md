@@ -5,38 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #36 — Turn 15 boundary (iii) remainder: faint sink + fainted-hold not yet
-  wired — `turn15-fly-strike.json` covers boundaries (i)+(ii) and the
-  HP-drain/"not very effective" text (18956-19308)
-
-Opened 2026-07-22 (wiring step), trimmed same day (boundary (ii) close-out,
-`docs/turn15-notes.md` §8) and again (§9: HP drain + "not very effective"
-text wired). Boundaries (i)/(ii) and the drain/text half of (iii) are wired
-and committed, `turn15-fly-strike.json` **218/218** 0 diff over
-18956-19308 (5 ticks excluded, all named, shared-primitive residuals not
-chased: 19059-19061 a rotated-affine corner-rounding gap [§8]; 19143/19144
-a 2px HP-bar band-edge rounding gap at hp=2/hp=1 [§9]).
-
-**Still not started**: the transition out of the "not very effective" hold
-(somewhere in 19309-19330 — text presumably clears before the sprite/
-healthbox teardown, RAM 19325, and pixel vanish, 19330, §6b/§6c — NOT
-independently bisected yet, §9 flags this as the honest next step rather
-than assuming any of §4's original citations for that span), the
-first-ever player-side faint sink (RAM teardown 19325/19326, pixel vanish
-19330, §6c — the turn-5 `SpriteCB_FaintOpponentMon`/`AnimFaintOpponent`
-family applied to the player's own slot, function-name-level confirmation
-still open), and the button-gated "ONIX fainted!" hold (3-phase idle
-bounce, dismiss at 19990). Ground truth for all of it is banked in
-`docs/turn15-notes.md` §2-§4/§6b/§6c/§6f — every phase in §6f's own reuse
-table is flagged "pure wiring reusing" an existing mechanism (the turn-5
-faint-sink family, the standard button-gated-hold idle-bounce shape), no
-new derivation expected, unlike boundary (ii)'s own two probes.
-**Next step:** dense oracle-pixel bisect 19308-19330 fresh (the same
-"verify, don't assume" discipline that already corrected two of this
-window's own citations twice over), then wire the faint-sink teardown,
-then the fainted-hold — extending `turn15-fly-strike.json` through
-~19990, 0 diff.
-
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
   (240/240)

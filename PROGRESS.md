@@ -4,6 +4,60 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 258 — Bounded worker (turn-15 wiring, boundary (iii) close-out, ISSUES #36 DELETED): wired the player-side faint sink + button-gated "ONIX fainted!" hold — `turn15-fly-strike.json` **256/256, 0 diff** (extended 19308→19990, the entire turn-15 window 18956-19990 now wired end-to-end through the fainted hold, right up to the dismiss press)
+
+- **State:** `npm test` **993/993**, `npm run build` green, tree clean.
+  Regression sweep 0 diff: `turn14-fly-miss` 185/185, `turn13-switchin`
+  240/240, `turn13-menu` 57/57.
+- **Did:** Fresh dense oracle-pixel bisection (stride-1, 19300-19406, not
+  assumed from any prior citation) found the real sequence: the held "not
+  very effective..." text survives unchanged through 19308, Onix's own
+  sprite sinks 19309→19321 fully gone, the player healthbox (box + HP
+  overlay) vanishes **entirely in one tick at 19326** (a separate teardown
+  step from the sprite, not atomic), text hard-cuts to "ONIX\nfainted!"'s
+  own first glyph at 19328 (no blank gap), finishes printing at 19339, and
+  the wait-cursor appears at 19341 bouncing through `cursorState`'s own
+  generic 4-phase/9-tick cycle VERBATIM, unchanged through the dismiss tick
+  (19990, still un-dismissed — out of scope). One real correction along the
+  way: the sink is the SAME family as opponent-side `grovyleFaintSinkRowsAndY2`
+  (keep the sprite's own top artwork, shift it down, ground-contact edge
+  fixed) but at a continuous 5px/tick rate instead of that family's
+  8px/2-tick quantization — a first implementation draft got the shift
+  direction backwards (cropped the top, kept the bottom fixed instead of
+  the reverse), caught immediately by `npm run compare` (a whole-band 4.5%
+  diff, not a boundary residual) and fixed before committing. New `src/`
+  surface: `drawSpriteSheetTopClipped` (pixel-granular sibling of
+  `drawSpriteSheetTopRows`), `turn15OnixSinkSkipRows`,
+  `TURN15_ONIX_HEALTHBOX_VANISH_TICK`, `TURN15_FAINTED_LINE1/2`/
+  `_TEXT_START_TICK`/`_CURSOR_START_TICK`; `drawTurn5RockSlideAttack` gains
+  `onixSinkSkipRows`, `drawTurn13SwitchinFieldBase` gains
+  `onixSinkSkipRows`/`onixHealthboxVisible` (both defaulted, every
+  pre-existing call site unaffected). No Tier-1 pin added (RAM-only
+  stat-stage reset, no pixel effect, no pure-logic module to pin against —
+  consistent with every prior session in this whole turn-15 chain).
+  `turn15-fly-strike.json` extended 19308→19990 (218→256 captures, exactly
+  at the ≤256 budget ceiling), stride-1 over the vanish+teardown+full-text
+  span plus 7 sparse hold spot-checks. **256/256, 0 diff, no new
+  exclusions.** **ISSUES #36 DELETED.**
+- **Next:** The party-select engine rung. ALL its groundwork is already
+  banked: `docs/party-menu-notes.md` covers the chrome/icons/hop model/
+  palettes plus a composite script; the one open extraction is the
+  per-slot overlay sprite in bbox x105-111 — the composite script's own
+  FAIL lines pin it exactly, no fresh probing needed. Sequence: SEND OUT →
+  MAGBY materialize → settled "What will MAGBY do?" menu completes turn
+  15's own full window. After that: ISSUES #34's own tiny remainder
+  (17781-17787/17822-17845, kerning-class); #33's tiny remainder
+  (17019/17034); ISSUES #32 (sibling worker's own scope).
+- **Notes:** Full writeup `docs/turn15-notes.md` §10. The wrong-direction
+  sink draft is a useful cautionary note for future sink-family reuses:
+  `npm run compare`'s own per-frame diff-percentage output (not just PASS/
+  FAIL) was what made the bug obvious — a boundary-off-by-one residual
+  would show a small, shrinking diff near the edges; a direction bug shows
+  a large diff across the WHOLE remaining band, a distinct signature worth
+  recognizing early rather than tweaking constants blindly. No PAPERCUTS
+  beyond the standing mgba-venv-teardown one.
+
+---
 ## 257 — Bounded worker (rider fix + turn-15 wiring iii-partial): wired the banked `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` fix (closing ISSUES #35 in full and ISSUES #34's entire 43-tick family, not just its 9-tick subset) — `turn15-fly-strike.json` **218/218** (extended 19141→19308 with HP-drain + "not very effective" text), `turn14-fly-miss.json` **185/185**
 
 - **State:** `npm test` **993/993**, `npm run build` green, tree clean.
@@ -110,51 +164,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   in-budget with room to also chase 3 oracle-pixel-only residuals RAM
   alone would never have caught. No PAPERCUTS beyond the standing
   mgba-venv-teardown one.
-
----
-## 255 — Bounded worker (turn-15 wiring step, boundary (i) of 3): wired the reopen gate + FIGHT submenu + confirm + FLY-strike kickoff text — `turn15-fly-strike.json` **82/82, 0 diff** (new trace, first commit toward turn 15); boundaries (ii)/(iii) — the strike animation core, faint sink, fainted-hold — NOT attempted this session, scoped and filed as ISSUES #36
-
-- **State:** `npm test` **993/993**, `npm run build` green, tree clean.
-  `verify-turn15.ts` re-run first (mandatory step): 59 PASS / 0 FAIL (the
-  brief said "58/58"; the script prints 59 PASS lines with 0 failures —
-  same "ALL CHECKS PASSED" gate, no discrepancy in substance). Regression
-  sweep 0 diff: `turn14-fly-miss` 165/165, `turn13-switchin` 240/240,
-  `turn13-menu` 57/57.
-- **Did:** New `turn14Resolved` state flag end-to-end (mirrors
-  `turn13Resolved` exactly): `BattleSceneState` field, `core.ts`'s new
-  reopen branch (`TURN14_DRAGONBREATH_MENU_REDRAW_DELAY`-gated, cursor
-  persisted at slot 2/DRAGON_BREATH, no nav), `currentPPForActiveMon`'s 3rd
-  slot-2 PP decrement (20→17, turn 14's own auto-missed DRAGON_BREATH still
-  costs PP), and `drawTurn15FightSubmenuWindow`/`drawTurn15FlyStrikeWindow`
-  (new functions, `battleScene.ts`). Found and corrected one dossier slip
-  along the way (now in `docs/turn15-notes.md` §7): the confirm-press
-  transient does NOT clear to a bare/blank box before the kickoff text like
-  turn 14's own charge half did — the submenu chrome holds unchanged
-  through tick 19006, then hard-cuts straight to the text's own first
-  glyph at 19007 (dense sha-transition probe, oracle round-trip); kickoff
-  text is 20 chars total (not 21), cross-checked via both embedded spaces'
-  own "no visible pixel change" ticks landing exactly where the formula
-  predicts. Committed `tools/compare/traces/turn15-fly-strike.json`:
-  82/82, 0 diff over 18956-19044, excluding 7 ticks (18965-66/74-75/83-85)
-  — a pre-existing sine-bounce "extremum" mismatch on Onix's own idle
-  sprite, same bug class as the already-documented `turn5SubmenuBounceTick`
-  fix, unrelated to this session's new code — named and excluded, filed as
-  **ISSUES #35** (not guessed at, not faked).
-- **Next:** ISSUES #36 (this same turn's own boundaries (ii)/(iii): ball-
-  descent trajectory needs a fresh `dump-fly-anim.py` run over 19045-19075
-  against the already-committed groundtruth trace; the new impact sprite
-  at tile 433 needs VRAM identification+extraction — both real, bounded,
-  RAM/asset tasks, not blocked on anything; everything else in
-  `docs/turn15-notes.md` §6f's reuse table is flagged pure wiring once
-  those two land). ISSUES #35's own extremum probe; #34's own remainder
-  (17722-17768); #33's tiny remainder (17019/17034); ISSUES #32.
-- **Notes:** Full writeup `docs/turn15-notes.md` §7 (owned this round).
-  Ran out of safe remaining budget before boundaries (ii)/(iii) — both
-  need real RAM/VRAM probing (not just wiring already-banked constants,
-  unlike every session in the turn13/14 chain before this one), so rather
-  than rush an asset extraction and risk an unclean stop, this session
-  banked one clean, tested, fully green commit and scoped the remainder
-  precisely for the next session. No PAPERCUTS beyond the standing
-  mgba-venv-teardown one.
-
----

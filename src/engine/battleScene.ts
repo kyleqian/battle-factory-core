@@ -5884,6 +5884,46 @@ function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbCo
 }
 
 /**
+ * Same shape as `grovyleFaintSinkRowsAndY2`+`drawSpriteSheetTopRows` (keep
+ * the artwork's own TOP portion, shift it down, drop the bottom - the
+ * sprite's own ground-contact edge stays fixed while it visually sinks),
+ * but at PIXEL granularity instead of that pair's 8px-tile-row/2-tick
+ * quantization - Turn 15's own player-side faint sink (docs/turn15-notes.md
+ * §10) oracle-pixel-fits to a continuous 5px/tick rate, not the tile-row
+ * cadence Grovyle's own family uses. `skipPixelRows` PIXEL rows are dropped
+ * from the artwork's own BOTTOM, and the kept top portion is drawn shifted
+ * down by `skipPixelRows` (so the sprite's own bottom edge - `oy + height`
+ * - stays fixed, same invariant as the tile-quantized family). Same family,
+ * different quantization, not a genuinely new mechanism - an earlier draft
+ * of this function wrongly cropped the TOP and kept the bottom fixed in
+ * place, which oracle pixels refuted (the sliver right before the mon
+ * fully vanishes is a tiny ground-level nub, not a floating head).
+ */
+function drawSpriteSheetTopClipped(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, skipPixelRows: number): void {
+  const keptPixelRows = tileset.rows * 8 - skipPixelRows;
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    const tileTop = ty * 8;
+    if (tileTop >= keptPixelRows) continue;
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        const artworkRow = tileTop + py;
+        if (artworkRow >= keptPixelRows) continue;
+        const destY = oy + skipPixelRows + artworkRow;
+        for (let px = 0; px < 8; px += 1) {
+          const idx = tile[py * 8 + px]!;
+          if (idx === 0) continue;
+          const c = palette[idx];
+          if (!c) continue;
+          setPixel(fb, ox + tx * 8 + px, destY, c);
+        }
+      }
+    }
+  }
+}
+
+/**
  * S7 slice L-3: the switch-in ball/materialize window's own BG-to-white
  * dither - pixel-sampled directly this session against a HIGH-resolution
  * ground swatch `(150,60)` (unfaded `(189,189,156)`, `battle1-switchin-
@@ -6253,7 +6293,7 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
  * a defaulted param" idiom `onixHp`/`bounceTick`/`beforeMonSprite` already
  * use on this same call chain.
  */
-function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number): void {
+function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
   drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
@@ -6296,9 +6336,12 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
     // entire 769px residual across 7348-7404 in one fix.
     const onixY2 = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick)).onixY2 + onixY2Extra;
     const tintCoeff = onixSitrusTintCoeff(t);
-    if (!onixInvisible) {
+    const onixSpriteHeight = onixBackSprite.tileset.rows * 8;
+    if (!onixInvisible && onixSinkSkipRows < onixSpriteHeight) {
       if (tintCoeff > 0) {
         drawSpriteSheetAffineTintedBlend(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y, 256, ONIX_SITRUS_TINT_COLOR, tintCoeff, onixY2);
+      } else if (onixSinkSkipRows > 0) {
+        drawSpriteSheetTopClipped(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette() : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2, onixSinkSkipRows);
       } else {
         drawSpriteSheet(fb, onixBackSprite.tileset, darken ? turn10OnixDarkPalette() : onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x + onixX2, ONIX_MATERIALIZE_CORNER.y + onixY2);
       }
@@ -7051,17 +7094,28 @@ export function turn13SwitchinSentOutTextVisibleChars(t: number): number {
  * `onixX2` param - `FlyUnleash`'s own `createvisualtask AnimTask_ShakeMon,
  * 5, ANIM_TARGET, 6, 0, 8, 1` shakes Onix's own sprite horizontally
  * (RAM-confirmed 6px pulses, not a formula fit).
+ *
+ * S7/S8 turn 15 boundary (iii) close-out (docs/turn15-notes.md §10):
+ * `onixSinkSkipRows` (default 0, every pre-existing call site unaffected)
+ * threads straight through to `drawTurn5RockSlideAttack`'s own new
+ * `onixSinkSkipRows` param - the player-side faint sink's own top-down
+ * wipe. `onixHealthboxVisible` (default `true`) drops the player healthbox
+ * (both the name/level/HP-bar box and its HP overlay) entirely once Onix's
+ * own faint has torn it down - oracle-pixel-confirmed a single-tick vanish,
+ * no gradual animation (unlike the sprite's own sink).
  */
-function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number, murkrowInvisible: boolean = false, onixInvisible: boolean = false, healthboxY2Extra: number = 0, onixX2: number = 0, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP): void {
-  drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, onixX2, onixInvisible, 0, false, turn13MurkrowBgFadeY(t));
+function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number, murkrowInvisible: boolean = false, onixInvisible: boolean = false, healthboxY2Extra: number = 0, onixX2: number = 0, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP, onixSinkSkipRows: number = 0, onixHealthboxVisible: boolean = true): void {
+  drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, onixX2, onixInvisible, 0, false, turn13MurkrowBgFadeY(t), onixSinkSkipRows);
   drawTurn5IconBar(fb, t, TURN13_ICONBAR_CREATE_TICK, TURN13_ICONBAR_FADE_START_TICK, TURN13_ICONBAR_DESTROY_TICK, TURN13_OPPONENT_ICON_STATES);
   if (!murkrowInvisible) drawTurn13MurkrowSwitchinSprite(fb, t);
   const murkrowHealthboxDx = healthboxSlideDx(t, TURN13_MURKROW_SETTLE_TICK + 1);
   if (murkrowHealthboxDx !== null) drawSendOutHealthbox(fb, murkrowHealthboxDx, murkrowHealthboxContent);
-  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(shiftedBounceTick));
-  const healthboxY2 = bounce.healthboxY2 + healthboxY2Extra;
-  drawMenuHealthboxPlayer(fb, 0, healthboxY2);
-  drawPlayerHealthboxHpOverlay(fb, onixHp, healthboxY2);
+  if (onixHealthboxVisible) {
+    const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(shiftedBounceTick));
+    const healthboxY2 = bounce.healthboxY2 + healthboxY2Extra;
+    drawMenuHealthboxPlayer(fb, 0, healthboxY2);
+    drawPlayerHealthboxHpOverlay(fb, onixHp, healthboxY2);
+  }
 }
 
 /**
@@ -11304,13 +11358,87 @@ function turn15OnixHp(t: number): number {
  */
 const TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK = 19151;
 
+/**
+ * Onix's own player-side faint sink (docs/turn15-notes.md §10, closing
+ * ISSUES #36) - a pure linear top-down wipe, oracle-pixel-fit directly
+ * (dense per-tick crop-diff of Onix's own 64x64 back-sprite bbox against
+ * `battle1-turn15-dense.json`'s own already-committed run): full sprite
+ * visible through the last tick of the held "not very effective..." text
+ * (19308), then 5 PIXEL rows erase from the top each following tick -
+ * `drawSpriteSheetTopClipped`'s own doc has the "genuinely different from
+ * the opponent-side family" finding. Fully gone (skip exceeds the sprite's
+ * own 64px height) from tick 19321 on - the last tick with any visible
+ * sliver is 19320 (skip=60, a 4px remainder).
+ */
+const TURN15_ONIX_SINK_START_TICK = 19308;
+const TURN15_ONIX_SINK_RATE = 5;
+function turn15OnixSinkSkipRows(t: number): number {
+  return Math.max(0, TURN15_ONIX_SINK_RATE * (t - TURN15_ONIX_SINK_START_TICK));
+}
+
+/**
+ * Onix's own player healthbox (name/level/HP-bar box plus its HP-digit
+ * overlay) vanishes ENTIRELY in a single tick, no gradual animation -
+ * oracle-pixel-confirmed (crop-diff of `menuHealthboxPlayer`'s own bbox
+ * against a confirmed-empty reference frame): present through 19325 (5
+ * ticks after the sprite itself has already fully sunk), gone from 19326
+ * on - 1 tick before the fainted text's own hard-cut-in (19328), matching
+ * this dossier's usual "distinct sequential teardown steps, not one atomic
+ * event" shape.
+ */
+const TURN15_ONIX_HEALTHBOX_VANISH_TICK = 19326;
+
+/**
+ * "ONIX\nfainted!" (no "Foe " prefix - the player's own mon, docs/
+ * turn15-notes.md §5b/§10) - `STRINGID_FAINTED` template reused verbatim
+ * (same shape as `TURN5_FAINTED_LINE1`/`TURN13_FAINTED_LINE1`, just this
+ * mon's own bare name). Start tick oracle-pixel-bisected exact: the held
+ * "not very effective..." text survives the ENTIRE sink+healthbox teardown
+ * underneath it (19309-19327) unchanged, then hard-cuts directly to this
+ * text's own first glyph at 19328 - no intervening blank tick, the same
+ * "hard cut, no blank gap" convention boundary (i)'s own kickoff-text
+ * transition already established (§7).
+ */
+const TURN15_FAINTED_LINE1 = "ONIX";
+const TURN15_FAINTED_LINE2 = "fainted!";
+const TURN15_FAINTED_TEXT_TOTAL = TURN15_FAINTED_LINE1.length + TURN15_FAINTED_LINE2.length;
+const TURN15_FAINTED_TEXT_START_TICK = 19328;
+/** Identical line2 content ("fainted!") to every prior faint text in this dossier gives an identical cursor X - reused directly rather than recomputed. */
+const TURN15_FAINTED_CURSOR_X = TURN5_FAINTED_CURSOR_X;
+/**
+ * `cursorState`'s own generic 4-phase/9-tick-per-phase bounce (§3.3),
+ * re-anchored - oracle-pixel-confirmed exact via a dense 19335-19405
+ * re-sample: first visible tick 19341 (= `TURN15_FAINTED_TEXT_START_TICK` +
+ * `TURN15_FAINTED_TEXT_TOTAL` + 1, the same "one tick after the last
+ * glyph's own text-complete tick" convention `TURN5_FAINTED_CURSOR_START_
+ * DELAY`'s own doc describes), cycling through exactly the 3 distinct shas
+ * docs/turn15-notes.md §6a's own dense re-bisection found (`ef43e683de1a`
+ * -> `b27912b6eda4` -> `2d6c41d94131` -> `b27912b6eda4` -> repeat, 9 ticks/
+ * phase) - `CURSOR_Y_OFFSETS`'s own `[0,1,2,1]` shape renders offset 1
+ * identically both times it recurs, which is exactly why the oracle only
+ * ever shows 3 distinct frames despite the underlying cycle having 4
+ * phase-slots. VERBATIM reuse, not a new derivation - button-gated (no
+ * further state change) all the way through the dismiss press at 19990
+ * (docs/turn15-notes.md §4's own "still un-dismissed" citation), which is
+ * out of this rung's own scope.
+ */
+const TURN15_FAINTED_CURSOR_START_TICK = TURN15_FAINTED_TEXT_START_TICK + TURN15_FAINTED_TEXT_TOTAL + 1;
+
 function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number): void {
   const frozenBounceTick = turn15KickoffBounceTick(t, pressTick);
   const onixHp = turn15OnixHp(t);
-  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, turn15MurkrowInvisible(t), turn15OnixInvisible(t), turn15OnixHealthboxWobbleY2(t), turn15OnixShakeX2(t), onixHp);
+  const onixSinkSkipRows = turn15OnixSinkSkipRows(t);
+  const onixHealthboxVisible = t < TURN15_ONIX_HEALTHBOX_VANISH_TICK;
+  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, turn15MurkrowInvisible(t), turn15OnixInvisible(t), turn15OnixHealthboxWobbleY2(t), turn15OnixShakeX2(t), onixHp, onixSinkSkipRows, onixHealthboxVisible);
   drawTurn15ImpactHitsplat(fb, t);
   drawTurn15FlyBallDescent(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t >= TURN15_FAINTED_TEXT_START_TICK) {
+    drawMessageTextLines(fb, TURN15_FAINTED_LINE1, TURN15_FAINTED_LINE2, turn15SimpleVisibleChars(t, TURN15_FAINTED_TEXT_START_TICK, TURN15_FAINTED_TEXT_TOTAL));
+    const cursor = cursorState(t, TURN15_FAINTED_CURSOR_START_TICK);
+    if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN15_FAINTED_CURSOR_X);
+    return;
+  }
   if (t >= TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK) {
     drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn15SimpleVisibleChars(t, TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK, TURN9_NOTVERYEFFECTIVE_LINE.length));
     return;

@@ -692,3 +692,98 @@ Verified: regression sweep 0 diff (`turn14-fly-miss` 185/185,
 `turn13-switchin` 240/240, `turn13-menu` 57/57). `npm test` 993/993
 (unchanged — no test-literal call sites reference the new optional
 `onixHp` param), `npm run build` green.
+
+## 10. Engine wiring, boundary (iii) close-out (bounded worker, 2026-07-22):
+the player-side faint sink + "ONIX fainted!" hold wired, closing ISSUES #36
+
+Dense fresh oracle-pixel bisection (stride-1 `bin/oracle run` captures,
+19300-19406, against `turn15-fly-strike.json`'s own committed button
+script — not assumed from any of §4's original citations for this span,
+per §9's own explicit next-step instruction) resolved the entire remaining
+transition, tick-exact:
+
+**Sequence (all pixel-confirmed, not RAM-inferred):** the held "not very
+effective..." text (§9) survives unchanged through **19308**; from
+**19309** Onix's own sprite sinks (see below) with the player healthbox
+still fully on screen; the sprite is fully gone by **19321** (a 3-tick
+sliver is the last visible remnant, 19318-19320); the player healthbox
+(name/level/HP-bar box **and** its HP-digit overlay) then vanishes
+**entirely in one tick, no gradual animation, at 19326** — 5 ticks after
+the sprite finishes sinking, a separate teardown step, not one atomic
+event; the "not very effective..." text holds unchanged through **19327**
+(surviving the whole teardown underneath it) and hard-cuts — no
+intervening blank tick, the same convention §7's own kickoff-text
+transition established — directly to "ONIX\nfainted!"'s own first glyph
+at **19328**; the text finishes printing at **19339** (12 chars, 1/tick);
+the wait-cursor first appears at **19341** (= textStart+total+1, the
+established convention) and bounces through `cursorState`'s own generic
+4-phase/9-tick cycle, VERBATIM, unchanged all the way to the dismiss press
+at 19990 (out of this rung's scope).
+
+**Correction to the dossier's own §5(a)/§6c framing.** The sink is the
+**same family** as the opponent-side `grovyleFaintSinkRowsAndY2` (keep the
+artwork's own top portion, shift it down, drop the bottom — the sprite's
+ground-contact edge stays fixed while it visually sinks) — §6c's "same
+faint-sink family" verdict holds — but **not at the same quantization**:
+Grovyle's own family steps 8px/tile-row every 2 ticks; Onix's own
+player-side instance is a **continuous 5px/tick linear rate**, oracle-fit
+directly (dense per-tick crop-diff of Onix's own 64x64 back-sprite bbox
+against a confirmed-empty reference frame: top edge of visible content
+moves 49→109 in exactly 5px steps per tick, 19309-19320, bottom edge fixed
+at 111 throughout). A first implementation draft got the SHAPE backwards
+(cropped the sprite's own top and kept the bottom fixed in place, i.e. the
+opposite of what actually happens) — `npm run compare` caught it
+immediately (a 4.5%-frame diff at tick 19312, non-zero across the entire
+remaining band, not a boundary-only residual) and a side-by-side oracle
+frame strip (19305/19308/19310/19312/.../19325) made the correct direction
+visually obvious: the head shrinks and slides down toward the ground line;
+the last visible sliver before the mon fully vanishes is a ground-level
+nub, not a floating disembodied head.
+
+**New `src/` surface**: `drawSpriteSheetTopClipped` (generic primitive,
+PIXEL-granular sibling of `drawSpriteSheetTopRows`+`grovyleFaintSinkRowsAndY2`),
+`TURN15_ONIX_SINK_START_TICK`/`TURN15_ONIX_SINK_RATE`/`turn15OnixSinkSkipRows`,
+`TURN15_ONIX_HEALTHBOX_VANISH_TICK`, `TURN15_FAINTED_LINE1`/`_LINE2`/
+`_TEXT_TOTAL`/`_TEXT_START_TICK`/`_CURSOR_X`/`_CURSOR_START_TICK`.
+`drawTurn5RockSlideAttack` gains `onixSinkSkipRows` (default 0);
+`drawTurn13SwitchinFieldBase` gains `onixSinkSkipRows`/`onixHealthboxVisible`
+(defaults 0/`true`) — every pre-existing call site unaffected, the same
+"generalize a hardcoded value into a defaulted param" idiom this whole file
+already uses. The fainted-text hold reuses `cursorState`/`drawCursor`
+VERBATIM, re-anchored to `TURN15_FAINTED_CURSOR_START_TICK` — no new cursor
+logic; its own `[0,1,2,1]` 4-phase shape renders offset-1 identically both
+times it recurs, which is exactly why the oracle only ever shows 3 distinct
+frames per cycle (matching §6a's own "3-phase idle bounce" description)
+despite the underlying mechanism having 4 phase-slots.
+
+**No Tier-1 pin added** for the stat-stage-reset/move-cursor-reset RAM
+transition (§3's own "RAM-only, no expected pixel effect" framing,
+re-confirmed: the dense 19300-19406 pixel sweep shows nothing attributable
+to it) — this whole turn-15 dossier chain (boundaries (i)/(ii)/(iii)) is
+pixel-rendering work with no separate pure-logic module to pin against,
+consistent with every prior session in this chain (§7/§8/§9 all landed
+`npm test` unchanged); Tier 2 (this rung's own 0-diff oracle trace) is the
+correct and sufficient tier here, per `AGENTS.md`'s own "reserve Tier 2 for
+parity that genuinely needs the emulator or exact pixels" guidance.
+
+**`turn15-fly-strike.json`**: extended 19308→19990 (218→256 captures, the
+exact ≤256 budget ceiling), stride-1 over 19309-19339 (the vanish+teardown+
+full text-typing span) plus 7 sparse spot-checks across the hold
+(19341/19440/19540/19640/19740/19840/19990, the dismiss-press tick itself
+— still-undismissed content only, confirming the hold survives unchanged
+right up to but not through the press). **256/256, 0 diff, no new
+exclusions.**
+
+Verified: regression sweep 0 diff (`turn14-fly-miss` 185/185,
+`turn13-switchin` 240/240, `turn13-menu` 57/57). `npm test` 993/993
+(unchanged). `npm run build` green.
+
+**ISSUES #36 DELETED** — turn 15's own full window (18956-19990, boundaries
+(i) through (iii)) is now wired end-to-end through the fainted hold, right
+up to the dismiss press. The dismiss press's own effect (fade to black,
+party-select screen, SEND OUT, MAGBY's materialize, the settled "What will
+MAGBY do?" menu) is a NEW rung, not this issue's scope — ground truth for
+all of it is already banked in §4/§5(c-e)/§6d/§6f above (every phase
+flagged "pure wiring reusing" an existing mechanism, cross-checked against
+§14-addendum's own player-side party-select precedent) — genuinely
+unstarted engine-side, no probes expected.
