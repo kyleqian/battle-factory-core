@@ -2217,6 +2217,7 @@ export function currentPPForActiveMon(
   turn10Resolved: boolean = false,
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
+  turn13Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
   // S7 slice N (docs/turn6-notes.md §4): turn 5's own ROCK_SLIDE (Onix's
@@ -2260,7 +2261,13 @@ export function currentPPForActiveMon(
     (turn10Resolved ? 1 : 0) +
     (turn11Resolved ? 1 : 0) +
     (turn12Resolved ? 1 : 0);
-  return [a - slot0Uses, turn8Resolved ? b - 1 : b, turn2Resolved ? c - 1 : c, d];
+  // S7/S8 turn 14 (docs/turn14-notes.md §3): `turn13Resolved` adds a SECOND
+  // slot-2 decrement - turn 13 also used DRAGON_BREATH (re-targeted at
+  // Pidgeotto), so by turn 14's own reopen it's been used twice (turns 2
+  // and 13, PP 20->18), matching docs/turn14-notes.md's own "PP shows
+  // 18/20 for DRAGON_BREATH" ledger exactly.
+  const slot2Uses = (turn2Resolved ? 1 : 0) + (turn13Resolved ? 1 : 0);
+  return [a - slot0Uses, turn8Resolved ? b - 1 : b, c - slot2Uses, d];
 }
 
 export function getCurrentPPToMaxPPState(currentPP: number, maxPP: number): 0 | 1 | 2 | 3 {

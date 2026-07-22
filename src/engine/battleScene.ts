@@ -520,6 +520,7 @@ import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" 
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
+import battleAnimFlyBallAsset from "../assets/gen/battle-anim-fly-ball.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -725,6 +726,8 @@ const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
 /** S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section): `gSandAttackDirtSpriteTemplate`'s single static 8x8 tile - see `tools/extract/extract-sandattack-dirt.ts`. */
 const battleAnimMudSand = battleAnimMudSandAsset as { tileset: Tileset; palette: RgbColor[] };
+/** S7/S8 turn 14 (docs/turn14-notes.md's worktree-lane addendum): `gFlyBallUpSpriteTemplate`'s "round shadow" ball sprite (`ANIM_TAG_ROUND_SHADOW`, `round_shadow.png`, 64x64) - see `tools/extract/extract-fly-ball.ts`. */
+const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette: RgbColor[] };
 
 /**
  * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
@@ -1110,6 +1113,17 @@ export interface BattleSceneState {
    * press, not just elapsed time), matching the established idiom.
    */
   turn13KoDismissElapsed: number | null;
+  /**
+   * S7/S8 turn 14 (docs/turn14-notes.md): `true` once turn 13's own whole
+   * DRAGON_BREATH-faint/MURKROW-switch-in resolution has redrawn the
+   * settled action menu (`TURN13_DRAGONBREATH_MENU_REDRAW_DELAY` past turn
+   * 13's own real confirm) AND a fresh A-press has reopened FIGHT for turn
+   * 14, cursor persisted at slot 2 (DRAGON_BREATH, unchanged since turn 13)
+   * - no `DOWN` nav needed, docs/turn14-notes.md's own "cursor persisted...
+   * NO DOWN press this turn" ledger. Mirrors `turn12Resolved`'s own pattern
+   * exactly (the brief's own instruction).
+   */
+  turn13Resolved: boolean;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -1130,6 +1144,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn11Resolved: false,
   turn12Resolved: false,
   turn13KoDismissElapsed: null,
+  turn13Resolved: false,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -1151,6 +1166,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn11Resolved: state.turn11Resolved,
     turn12Resolved: state.turn12Resolved,
     turn13KoDismissElapsed: state.turn13KoDismissElapsed,
+    turn13Resolved: state.turn13Resolved,
   };
 }
 
@@ -4027,8 +4043,16 @@ function drawFightSubmenuWindow(
   turn10Resolved: boolean = false,
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
+  turn13Resolved: boolean = false,
   turn13KoDismissTick: number | null = null,
 ): void {
+  if (turn13Resolved) {
+    // S7/S8 (docs/turn14-notes.md): turn 14 is the FLY charge turn - its
+    // own dedicated dispatcher, same "genuinely different PP/text" reason
+    // `turn12Resolved`'s own branch below already established for turn 13.
+    drawTurn14FightSubmenuWindow(fb, t, sm);
+    return;
+  }
   if (turn12Resolved) {
     // S7/S8 (docs/turn13-notes.md): turn 13 is the winning line's own FIFTH
     // reconvergence turn - a single `DOWN` press moves the cursor off
@@ -4286,11 +4310,12 @@ function drawFightSubmenuChrome(
   turn10Resolved: boolean = false,
   turn11Resolved: boolean = false,
   turn12Resolved: boolean = false,
+  turn13Resolved: boolean = false,
 ): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -6883,10 +6908,19 @@ export function turn13SwitchinSentOutTextVisibleChars(t: number): number {
  * drawn (Pidgeotto is off-field entirely by this point, unlike turn 5's own
  * window which never needed to draw two switch sequences back to back).
  */
-function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number): void {
+/**
+ * S7/S8 turn 14 (docs/turn14-notes.md): `murkrowInvisible` (default `false`,
+ * every pre-existing call site unaffected) - once turn 14's own FLY-up
+ * animation script hides Murkrow's mon sprite (RAM tick 17780, persisted
+ * for the rest of the trace, including `STATUS3_ON_AIR`'s own later
+ * cross-turn-boundary invisibility), the healthbox is UNCHANGED (docs/
+ * turn14-notes.md's own "no separate check needed" finding - only the mon
+ * sprite draw is suppressed).
+ */
+function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number, murkrowInvisible: boolean = false): void {
   drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, 0, false, 0, false);
   drawTurn5IconBar(fb, t, TURN13_ICONBAR_CREATE_TICK, TURN13_ICONBAR_FADE_START_TICK, TURN13_ICONBAR_DESTROY_TICK, TURN13_OPPONENT_ICON_STATES);
-  drawTurn13MurkrowSwitchinSprite(fb, t);
+  if (!murkrowInvisible) drawTurn13MurkrowSwitchinSprite(fb, t);
   const murkrowHealthboxDx = healthboxSlideDx(t, TURN13_MURKROW_SETTLE_TICK + 1);
   if (murkrowHealthboxDx !== null) drawSendOutHealthbox(fb, murkrowHealthboxDx, murkrowHealthboxContent);
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(shiftedBounceTick));
@@ -9962,6 +9996,23 @@ function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number
  * 15979 this session).
  */
 export const TURN13_DRAGONBREATH_PRESS_TICK = 15516; // dragonBreathTextStartTick(P) = P+192 = 15708, oracle-bisected exact (chars=1 first appears at render tick 15708)
+
+/**
+ * S7/S8 turn 14 (docs/turn14-notes.md): `core.ts`'s own reopen-gate delay
+ * for turn 13's own REAL button confirm press (`TICK0+sm.confirmElapsed`,
+ * the player's own DRAGON_BREATH selection that also drives this same
+ * `TURN13_DRAGONBREATH_PRESS_TICK` synthetic-anchor value below, per
+ * `drawTurn13SandAttackWindow`'s own caller - the button press and Onix's
+ * own synthetic second-half anchor happen to share one tick this turn, same
+ * as every other turn where the player's own move IS Onix's own move) to
+ * turn 14's settled menu redraw (`TURN13_SWITCHIN_MENU_REDRAW_TICK`, 17106
+ * - the same "redraw ready" anchor `drawTurn13SwitchinWindow`'s own settled
+ * branch already uses). `battle1-turn14-dense.json`'s own real reopen press
+ * (~17722) lands ~1600 ticks past this, comfortably past the gate, matching
+ * every prior turn's "the trace idles well past the redraw-ready tick
+ * before actually pressing" shape.
+ */
+export const TURN13_DRAGONBREATH_MENU_REDRAW_DELAY = TURN13_SWITCHIN_MENU_REDRAW_TICK - TURN13_DRAGONBREATH_PRESS_TICK;
 const TURN13_PIDGEOTTO_STARTING_HP = 16;
 const TURN13_PIDGEOTTO_FAINT_HP = 0;
 export const TURN13_FAINT_SINK_START_TICK = 15960; // S - oracle-pixel-bisected (first sink-visible sha change at render 15962, matching S+2 under grovyleFaintSinkRowsAndY2's own d=t-1-S formula), matches docs/turn13-notes.md §7's own RAM-derived value exactly
@@ -10567,6 +10618,187 @@ function drawSlideScene(fb: Uint8Array, t: number, win: { top: number; bottom: n
   }
 }
 
+// --- S7/S8 turn 14 (docs/turn14-notes.md): Murkrow's FLY charge-half (empty-
+// string kickoff, the FLY-up ball-sprite squash/stretch, mon sprite hidden
+// PERSISTENTLY) + Onix's own DRAGON_BREATH auto-missing an airborne target
+// (STATUS3_ON_AIR, no animation at all - accuracy short-circuits before any
+// anim stage) through the settled turn-15 menu boundary. Reuses turn 13's
+// own switch-in field base (`drawTurn13SwitchinFieldBase`, generalized above
+// with `murkrowInvisible`) throughout - no new switch-in happens this turn,
+// so the underlying bounce regime is the SAME "switchin-reset" one turn 13's
+// own settled tail already established (`TURN13_SWITCHIN_RESET_SHIFT`), not
+// a fresh reset. ---
+
+/**
+ * FLY-up ball sprite per-tick affine table (RAM-truthed,
+ * `tools/probe/dump-fly-anim.py` re-run this session, docs/turn14-notes.md's
+ * worktree-lane addendum). Index 0 = RAM tick 17780 (ball spawn/Murkrow's
+ * own mon sprite invisible-flip, same tick, one function's own two-line
+ * body per source); index 23 = RAM tick 17803 (last tick alive - destroyed
+ * by RAM 17804). `x2` is always 0 (no horizontal motion) - only `a`
+ * (x-scale)/`d` (y-scale)/`y2` (vertical offset) vary. Render tick `t` shows
+ * RAM tick `t-1` (this session's own dense bisection: pixel first diverges
+ * at render 17781, one tick after the RAM-pinned spawn at 17780 - the same
+ * "render T shows RAM T-1" lag class `GROVYLE_STRETCH_TABLE`'s own doc
+ * already established for a different affine mechanism).
+ */
+const TURN14_FLY_BALL_RAM_START = 17780;
+const TURN14_FLY_BALL_TABLE: readonly { a: number; d: number; y2: number }[] = [
+  { a: 1170, d: 256, y2: 0 }, // RAM 17780
+  { a: 682, d: 256, y2: 0 }, // RAM 17781
+  { a: 481, d: 256, y2: 0 }, // RAM 17782
+  { a: 372, d: 256, y2: 0 }, // RAM 17783
+  { a: 303, d: 256, y2: 0 }, // RAM 17784
+  { a: 256, d: 256, y2: 0 }, // RAM 17785
+  { a: 256, d: 292, y2: 0 }, // RAM 17786
+  { a: 256, d: 341, y2: 0 }, // RAM 17787
+  { a: 256, d: 409, y2: 0 }, // RAM 17788
+  { a: 256, d: 512, y2: 0 }, // RAM 17789
+  { a: 256, d: 682, y2: 0 }, // RAM 17790
+  { a: 273, d: 512, y2: 0 }, // RAM 17791
+  { a: 292, d: 409, y2: 0 }, // RAM 17792
+  { a: 315, d: 341, y2: -1 }, // RAM 17793
+  { a: 341, d: 292, y2: -3 }, // RAM 17794
+  { a: 372, d: 256, y2: -6 }, // RAM 17795
+  { a: 409, d: 227, y2: -11 }, // RAM 17796
+  { a: 455, d: 204, y2: -17 }, // RAM 17797
+  { a: 512, d: 186, y2: -24 }, // RAM 17798
+  { a: 585, d: 170, y2: -33 }, // RAM 17799
+  { a: 682, d: 157, y2: -43 }, // RAM 17800
+  { a: 682, d: 157, y2: -54 }, // RAM 17801
+  { a: 682, d: 157, y2: -67 }, // RAM 17802
+  { a: 682, d: 157, y2: -81 }, // RAM 17803
+];
+/** Murkrow's own on-field position (`InitSpritePosToAnimAttacker`, the ball spawns at the exact same corner every tick it's alive, RAM-confirmed - reuses `MURKROW_CORNER` verbatim, same corner-vs-OAM-center convention every other affine draw in this file already uses). */
+function drawTurn14FlyBall(fb: Uint8Array, t: number): void {
+  const ramTick = t - 1;
+  const entry = TURN14_FLY_BALL_TABLE[ramTick - TURN14_FLY_BALL_RAM_START];
+  if (!entry) return;
+  drawSpriteSheetAffineStretch(fb, battleAnimFlyBall.tileset, battleAnimFlyBall.palette, MURKROW_CORNER.x, MURKROW_CORNER.y, entry.a, entry.d, entry.y2, { r: 0, g: 0, b: 0 }, 0, true);
+}
+/** Murkrow's own mon sprite goes invisible the SAME tick the ball spawns (`AnimFlyBallUp`'s own two-line body) and stays that way PERSISTENTLY (this turn's own charge half never un-hides it; `STATUS3_ON_AIR`'s later set at 17913 keeps it hidden into the settled turn-15 menu for an independent, cross-boundary reason - docs/turn14-notes.md's own §5(c)). */
+function turn14MurkrowInvisible(t: number): boolean {
+  return t - 1 >= TURN14_FLY_BALL_RAM_START;
+}
+
+/** "Foe MURKROW flew\nup high!" (`gFirstTurnOfTwoStringIds[B_MSG_TURN1_FLY]`) - prints only AFTER the FLY-up animation completes (docs/turn14-notes.md §5a); oracle-pixel-bisected literal start tick (not press-relative - this line has no button press of its own, same "synthetic/literal anchor" convention every AI-adjacent second-half text in this dossier chain uses): settle pinned at 17846 (`verify-turn14.ts`), 25 total chars, so first-char tick = 17846-24 = 17822. */
+export const TURN14_FLYUP_LINE1 = "Foe MURKROW flew";
+export const TURN14_FLYUP_LINE2 = "up high!";
+const TURN14_FLYUP_TEXT_TOTAL = TURN14_FLYUP_LINE1.length + TURN14_FLYUP_LINE2.length;
+const TURN14_FLYUP_TEXT_START_TICK = 17822;
+
+/** "ONIX used\nDRAGONBREATH!" (Onix's own second-half kickoff, no button press - reuses `ROCK_SLIDE_LINE1`/`DRAGONBREATH_KICKOFF_LINE2` verbatim, the SAME strings turn 13's own re-targeted DRAGON_BREATH already established). Literal start tick, oracle-pixel-bisected: settle pinned at 17949, 22 total chars, first-char tick = 17949-21 = 17928 (this tick's own sha is shared with `TURN14_MISSED_TEXT_START_TICK`'s own first-char tick below - both lines start with "ONIX", not a coincidence, both render pixel-identically for their shared first glyph). */
+const TURN14_DRAGONBREATH_TEXT_TOTAL = ROCK_SLIDE_LINE1.length + DRAGONBREATH_KICKOFF_LINE2.length;
+const TURN14_DRAGONBREATH_TEXT_START_TICK = 17928;
+
+/** "ONIX's\nattack missed!" (`STATUS3_ON_AIR`'s own auto-miss, §5b) - reuses `TURN8_MISS_LINE1`/`TURN8_MISS_LINE2` verbatim (the SAME `"{B_ATK_NAME_WITH_PREFIX}'s\nattack missed!"` template turn 8's own BIND-miss and turn 12's own ROCK_SLIDE-miss already established). Literal start tick, oracle-pixel-bisected: settle pinned at 18005, `TURN8_MISS_TEXT_TOTAL`(20) total chars, first-char tick = 18005-19 = 17986. */
+const TURN14_MISSED_TEXT_START_TICK = 17986;
+
+/** Same 1-char/tick mechanism every other message window in this file uses - a small local helper since this window's three texts are each literal-anchored (no shared pressTick-relative formula). */
+function turn14SimpleVisibleChars(t: number, start: number, total: number): number {
+  if (t < start) return 0;
+  return Math.min(total, t - start + 1);
+}
+
+/** Bare-scene boundary: the confirm-press transient clears to the bare battle scene with NO message box at all (`printstring STRINGID_EMPTYSTRING3`, docs/turn14-notes.md §5a) - oracle-pixel-bisected exact (worktree-lane correction: was "~17789", dense re-bisection pins 17769). `pressTick` is the real button confirm press (`TICK0+sm.confirmElapsed`, 17755 in the canonical trace - segment start 17754, the same "+1 after last press frame" convention every other confirm anchor in this file uses). */
+const TURN14_BARE_SCENE_DELAY = 17769 - 17755;
+function turn14BareSceneStartTick(pressTick: number): number {
+  return pressTick + TURN14_BARE_SCENE_DELAY;
+}
+
+/** First observed sha of the settled "What will ONIX do?" vs. an ABSENT Murkrow idle-cycle (docs/turn14-notes.md §4: `gBattle_BG0_Y` flips at 18085, redraw settles by 18086). */
+const TURN14_MENU_REDRAW_TICK = 18086;
+
+/**
+ * `turn13KickoffBounceTick`'s own turn-14 analogue, in switchin-reset space
+ * (`drawTurn13SwitchinFieldBase`'s own domain via `TURN13_SWITCHIN_RESET_
+ * SHIFT` - turn 14 needs NO fresh regime reset, unlike the switch-in itself:
+ * no new mon comes out this turn) - freezes at `TURN5_SITRUS_MENU_REDRAW_
+ * TICK` itself, "local phase 0" by construction (the same identity
+ * `turn13KickoffBounceTick`'s own doc already establishes: evaluating the
+ * switchin-reset shift AT its own defining anchor, `TURN13_SWITCHIN_MENU_
+ * REDRAW_TICK`, yields exactly `TURN5_SITRUS_MENU_REDRAW_TICK`).
+ */
+function turn14KickoffBounceTick(t: number, pressTick: number): number {
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t + TURN13_SWITCHIN_RESET_SHIFT;
+  return TURN5_SITRUS_MENU_REDRAW_TICK;
+}
+
+/**
+ * Onix's own DRAGON_BREATH kickoff through the miss text and back to the
+ * settled turn-15 menu - dispatched once `t >= turn14BareSceneStartTick
+ * (pressTick)` (docs/turn14-notes.md §4/§5). Onix's own on-field bounce
+ * stays FROZEN throughout this whole resolution (`turn14KickoffBounceTick`,
+ * same "DoBounceEffect stops being polled" rule every prior turn's own
+ * resolution window already establishes), then picks the live switchin-
+ * reset cycle back up once the settled menu redraws (`TURN14_MENU_REDRAW_
+ * TICK`) - the SAME "freeze through resolution, resettle live after" shape
+ * `drawTurn13SwitchinWindow`'s own settled branch already established for
+ * turn 13's tail.
+ */
+function drawTurn14FlyMissWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= TURN14_MENU_REDRAW_TICK) {
+    const shiftedBounceTick = t + TURN13_SWITCHIN_RESET_SHIFT;
+    drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawTurn5SitrusSettledMenuChrome(fb);
+    return;
+  }
+  const frozenBounceTick = turn14KickoffBounceTick(t, pressTick);
+  const murkrowInvisible = turn14MurkrowInvisible(t);
+  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, murkrowInvisible);
+  drawTurn14FlyBall(fb, t);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t >= TURN14_MISSED_TEXT_START_TICK) {
+    drawMessageTextLines(fb, TURN8_MISS_LINE1, TURN8_MISS_LINE2, turn14SimpleVisibleChars(t, TURN14_MISSED_TEXT_START_TICK, TURN8_MISS_TEXT_TOTAL));
+    return;
+  }
+  if (t >= TURN14_DRAGONBREATH_TEXT_START_TICK) {
+    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, DRAGONBREATH_KICKOFF_LINE2, turn14SimpleVisibleChars(t, TURN14_DRAGONBREATH_TEXT_START_TICK, TURN14_DRAGONBREATH_TEXT_TOTAL));
+    return;
+  }
+  if (t >= TURN14_FLYUP_TEXT_START_TICK) {
+    drawMessageTextLines(fb, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, turn14SimpleVisibleChars(t, TURN14_FLYUP_TEXT_START_TICK, TURN14_FLYUP_TEXT_TOTAL));
+    return;
+  }
+  // Bare scene, no message box content at all (the empty-string kickoff
+  // quirk, §5a) - field base + ball (if alive) + tile bg above already
+  // cover the whole frame.
+}
+
+/**
+ * S7/S8 turn 14 (docs/turn14-notes.md): turn 13's own whole DRAGON_BREATH-
+ * faint/MURKROW-switch-in resolution has redrawn the settled action menu by
+ * now (`core.ts`'s own `turn13Resolved` gate) - cursor persisted at slot 2
+ * (DRAGON_BREATH, unchanged since turn 13, NO `DOWN` nav this turn).
+ * Structurally identical to `drawTurn13FightSubmenuWindow` (reuses
+ * `drawTurn13SwitchinFieldBase` throughout - no fresh switch-in regime this
+ * turn), just dispatching into `drawTurn14FlyMissWindow` once the confirm's
+ * own bare-scene boundary is reached instead of `drawTurn13SandAttackWindow`.
+ */
+function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
+  const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (sm.openElapsed === null || t < revealTick) {
+    const shiftedBounceTick = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN13_SWITCHIN_RESET_SHIFT;
+    drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawTurn5SitrusSettledMenuChrome(fb);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    if (t >= turn14BareSceneStartTick(pressTick)) {
+      drawTurn14FlyMissWindow(fb, t, pressTick);
+      return;
+    }
+  }
+  const shiftedBounceTick = sm.confirmElapsed !== null ? turn14KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN13_SWITCHIN_RESET_SHIFT;
+  drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true);
+}
+
 /** Renders the full battle-scene-assembly frame for `state` (elapsed since TICK0). */
 export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void {
   const t = TICK0 + state.elapsed;
@@ -10626,6 +10858,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.turn10Resolved,
       state.turn11Resolved,
       state.turn12Resolved,
+      state.turn13Resolved,
       state.turn13KoDismissElapsed === null ? null : TICK0 + state.turn13KoDismissElapsed,
     );
     return;
