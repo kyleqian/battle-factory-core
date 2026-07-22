@@ -3,7 +3,7 @@
 #
 # Launches one fresh headless worker. The default remains the original Claude
 # worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
-# worker profile (gpt-5.6-terra at medium effort). The transcript is summarized
+# worker profile (gpt-5.6-terra at high effort). The transcript is summarized
 # to a fixed-size handoff and retained in the log file named below.
 # Killing a worker at any point is safe —
 # workers follow AGENTS.md's commit-often discipline, so the next step resumes
@@ -14,7 +14,7 @@
 #     -c, --cap-minutes N   hard cap in minutes (default 60)
 #     -p, --provider NAME   claude (default) or codex
 #     -m, --model NAME      worker model (provider default)
-#     -e, --effort EFFORT   Codex reasoning effort (default medium)
+#     -e, --effort EFFORT   Codex reasoning effort (default high)
 #     -w, --worktree        run the worker in a fresh git worktree on its own
 #                           branch (the parallel lane; see SUPERVISOR.md)
 #         --log FILE        provider event log path
@@ -54,7 +54,7 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -c, --cap-minutes N   hard cap in minutes (default 60)
   -p, --provider NAME   claude (default) or codex
   -m, --model NAME      worker model (provider default)
-  -e, --effort EFFORT   Codex reasoning effort (default medium)
+  -e, --effort EFFORT   Codex reasoning effort (default high)
   -w, --worktree        run in a fresh git worktree on its own branch (parallel
                         lane: own npm install + dedicated oracle port; worker
                         must not touch shared docs; supervisor merges after
@@ -128,7 +128,7 @@ case "$PROVIDER" in
     ;;
   codex)
     MODEL="${MODEL:-gpt-5.6-terra}"
-    REASONING_EFFORT="${REASONING_EFFORT:-medium}"
+    REASONING_EFFORT="${REASONING_EFFORT:-high}"
     if [[ ! "$REASONING_EFFORT" =~ ^(none|low|medium|high|xhigh|max|ultra)$ ]]; then
       echo "run-subagent: unsupported reasoning effort '$REASONING_EFFORT'" >&2
       exit 2

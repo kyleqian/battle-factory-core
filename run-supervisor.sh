@@ -4,7 +4,7 @@
 # the result, and continues, fixes, or escalates — per SUPERVISOR.md. The
 # default remains the original Claude flow (claude-fable-5 supervisor,
 # claude-sonnet-5 workers). Pass --provider codex for the Codex profile
-# (gpt-5.6-sol/high supervisor, gpt-5.6-terra/medium workers).
+# (gpt-5.6-sol/high supervisor, gpt-5.6-terra/high workers).
 #
 # By default the supervisor runs in the interactive CLI: it works mostly
 # autonomously, but when it needs a decision it asks in the
@@ -19,7 +19,7 @@
 #   ./run-supervisor.sh               # interactive supervisor, 6h hard cap
 #   ./run-supervisor.sh -c 4          # different cap          (--cap-hours 4)
 #   ./run-supervisor.sh --headless    # unattended, stream view like run-agent.sh
-#   ./run-supervisor.sh --provider codex  # Sol/high supervisor + Terra/medium workers
+#   ./run-supervisor.sh --provider codex  # Sol/high supervisor + Terra/high workers
 #   ./run-supervisor.sh -m NAME       # override the selected profile's model
 #   ./run-supervisor.sh -e EFFORT     # Codex reasoning effort override
 #   ./run-supervisor.sh -h            # help
