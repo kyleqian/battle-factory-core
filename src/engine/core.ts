@@ -94,6 +94,7 @@ import {
   TURN11_ROCKSLIDE_MENU_REDRAW_DELAY,
   TURN12_ROCKSLIDE_MENU_REDRAW_DELAY,
   turn5RockSlideKoDismissEligible,
+  turn13KoDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
 import {
@@ -189,6 +190,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn5RockSlideKoDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
     ) {
       battleScene = { ...battleScene, turn5KoDismissElapsed: battleScene.elapsed + 1 };
+    }
+    // S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§7): Pidgeotto's own
+    // DRAGON_BREATH-faint KO-text dismiss - mirrors the `turn5KoDismissElapsed`
+    // block above EXACTLY (same gating shape, same "created directly, same
+    // tick already reflects it" idiom). Gated on `turn12Resolved` (we can
+    // only be inside turn 13's own window once turn 12's reopen has
+    // happened) rather than any turn13Resolved flag (that flag doesn't
+    // exist yet - the reopen-for-turn-14 transition is a later rung's job).
+    if (
+      battleScene.turn12Resolved &&
+      battleScene.turn13KoDismissElapsed === null &&
+      newKeys.has("A") &&
+      turn13KoDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
+    ) {
+      battleScene = { ...battleScene, turn13KoDismissElapsed: battleScene.elapsed + 1 };
     }
     // S7 FIGHT-submenu slice (docs/battle-turn-notes.md §11): the settled
     // action menu's own A-press opens it (FIGHT presumed already

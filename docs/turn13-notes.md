@@ -813,3 +813,76 @@ prior battle-anim sprite extraction) cost ~10 minutes of investigation
 before confirming the raw-4bpp path was the actual intended source, not
 a missing/misplaced asset - worth flagging for the next raw-`.4bpp`-only
 extraction so it isn't re-discovered from scratch.
+
+## 2026-07-21 — bounded worker (S7/S8 turn 13 engine step, rung 3): DRAGON_BREATH re-targeted at Pidgeotto LANDS 0-diff - two corrections to this dossier's own §7 REUSE MAP, both oracle-bisected not guessed
+
+**Verdict**: rung 3 is confirmed a pure wiring job, exactly as §7's REUSE MAP
+predicted, with two corrections to that map's own precision (not its
+verdicts - every mechanism it named as "(i) verbatim, new params" really
+was, once anchored correctly):
+
+1. **The target hit-flash (blink + healthbox wobble) is ALSO needed here**,
+   not itemized separately in §7 (folded implicitly into the "same table,
+   reused verbatim" verdict of §5, which scoped itself to the *projectile*
+   geometry only). Turn 2's own `drawDragonBreathScene` already draws its
+   target (Grovyle) through `rockSlideMonBlinkInvisible`/
+   `rockSlideHealthboxWobbleY2` (`pressTick+DRAGONBREATH_HIT_FLASH_OFFSET`
+   anchor) - re-anchoring both to Pidgeotto's own synthetic press tick and
+   threading the blink through `battleScene.ts`'s newly-generalized
+   `pidgeottoSink` param (reusing that mechanism's own `{keptRows:0}` shape
+   as a plain visibility toggle) was needed to close a real, oracle-found
+   ~1085px diff (15855-15863, isolated by `npm run compare`'s own diff crop
+   to exactly Pidgeotto's own sprite silhouette) - not guessed at, not
+   assumed transferable, found by the diff itself.
+2. **Onix's own on-field bounce stays FROZEN through the fainted-message
+   hold, unlike turn 5's own analogous window.** `drawTurn5RockSlideWindow`
+   reverts to a LIVE `bounceTick=t` once past Grovyle's own fainted text
+   (`drawTurn6FieldBase(fb, t)`, no override) - a first attempt mirrored
+   that shape for turn 13 and regressed a real ~2325px diff at 15979,
+   isolated to Onix's own sprite/healthbox region. Turn 13's own
+   `turn13KickoffBounceTick` (frozen at the regime-8 anchor) needs to stay
+   in effect through the ENTIRE resolution, including the fainted-text
+   hold - a genuine per-turn difference, not a bug in the turn-5 precedent.
+
+**New exact anchors, oracle-bisected this session** (a small scratch
+pixel-bisection script against a fresh `bin/oracle run`, not committed,
+superseded by `turn13-dragonbreath-faint.json`'s own compare-verified
+0-diff): `TURN13_DRAGONBREATH_PRESS_TICK=15516` (`dragonBreathTextStartTick`
+lands on render 15708 exactly - chars=1 first visible there, chars=22/22
+flat from 15729); `TURN13_FAINT_SINK_START_TICK=15960`/`STEPS=7` (matches
+this dossier's own §7 citation exactly, now render-confirmed: first
+sink-visible sha change at 15962, matching `S+2` under
+`grovyleFaintSinkRowsAndY2`'s own `d=t-1-S` formula); healthbox vanish at
+15977 (`S+2*steps+3`, the SAME formula `GROVYLE_HEALTHBOX_VANISH_TICK`
+already encodes, now generalized into `faintHealthboxVanishTick`);
+`turn13FaintedTextStartTick` lands on render **15979** exactly (15978
+still shows the OLD DRAGON_BREATH kickoff text pixel-for-pixel, matching
+this dossier's own "hasn't started printing yet" §4 citation) -
+`TURN13_FAINTED_TEXT_DELAY=463`; the wait-cursor's own start needed ONE
+extra tick of lag beyond `TURN5_FAINTED_CURSOR_START_DELAY`'s own "+1
+after last glyph" convention (`TURN13_FAINTED_CURSOR_START_DELAY=485`, not
+484) - oracle-bisected via two mismatched phase-boundary ticks
+(16810/16819), not assumed transferable byte-for-byte from turn 5's own
+constant.
+
+**Named, excluded residual (not chased)**: a 2px diff at 15882-15884,
+isolated to Pidgeotto's own HP-bar fill color. `dragonBreathGrovyleHp`'s
+own 1-unit/tick drain touches hp=3,2,1 across exactly those three ticks;
+`calcBarFilledPixels`/`pickHpBarBand` render all three identically (1
+filled red pixel, the bar's own quantization floor) but the oracle's real
+pixel at that column doesn't match this session's rendering. Time-boxed,
+<0.01% of the frame - excluded from `turn13-dragonbreath-faint.json`'s own
+`captureFrames`. A resuming worker: RAM-probe `gBattleMons[1].hp` (or
+whatever register drives the real bar-fill column) at exactly 15882-15884
+to see whether the true hp differs from this drain formula's own
+prediction at that narrow span, or whether it's a `calcBarFilledPixels`
+rounding-rule gap.
+
+### Verification
+
+`npm test` **986/986** (978 + 8 new Tier-1). `npm run build` green.
+`verify-turn13.ts` (mandatory first-step rerun, unaffected by this
+session's own `src/` changes) **60/60**. New trace
+`turn13-dragonbreath-faint.json` **141/141, 0 diff**, twice-run identical.
+Regression sweep clean: `turn13-sandattack` 190/190, `turn13-menu` 57/57,
+`turn12-menu` 46/46.

@@ -1091,6 +1091,22 @@ export interface BattleSceneState {
    * reads 0/10 (exhausted) this turn (its 10th slot-0 use).
    */
   turn12Resolved: boolean;
+  /**
+   * S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§7): `elapsed` value of
+   * the KO-text dismiss A-press for Pidgeotto's own DRAGON_BREATH faint
+   * (`TICK0 + turn13KoDismissElapsed` is the actual trace tick), `null`
+   * before - mirrors `turn5KoDismissElapsed`'s own pattern EXACTLY (same
+   * "created directly, same tick already reflects it" idiom, same "tick()
+   * must never auto-advance past this point on its own" rule, gated by
+   * `turn13KoDismissEligible`). As with `turn5KoDismissElapsed`, the render
+   * path itself does NOT consult this field (turn5's own precedent: the
+   * fainted-text-hold window renders as a pure function of `t`, since the
+   * committed trace's own button always lands at the right real-world
+   * tick) - this field exists for state-machine correctness (so a future
+   * `turn13Resolved`-style reopen-gate transition can require the real
+   * press, not just elapsed time), matching the established idiom.
+   */
+  turn13KoDismissElapsed: number | null;
 }
 
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
@@ -1110,6 +1126,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn10Resolved: false,
   turn11Resolved: false,
   turn12Resolved: false,
+  turn13KoDismissElapsed: null,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -1130,6 +1147,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn10Resolved: state.turn10Resolved,
     turn11Resolved: state.turn11Resolved,
     turn12Resolved: state.turn12Resolved,
+    turn13KoDismissElapsed: state.turn13KoDismissElapsed,
   };
 }
 
@@ -5762,16 +5780,32 @@ const anchorOpponentAfterTurn5Hp = 0;
 export const GROVYLE_FAINT_SINK_START_TICK = 6502; // S
 export const GROVYLE_FAINT_SINK_STEPS = 8; // n = 8 - floor(yOffset/8), Grovyle yOffset=4 (mon-pic-coords.json)
 
-/** `{ keptRows, y2 }` for Grovyle's own faint sink at render tick `t` - `keptRows` of `grovyleFrontSprite.tileset`'s own 8 tile-rows (top-down, `0` meaning fully erased/gone) remain to draw, shifted down by `y2` px. Pure closed form, no table. */
-export function grovyleFaintSinkRowsAndY2(t: number): { keptRows: number; y2: number } {
-  const d = t - 1 - GROVYLE_FAINT_SINK_START_TICK;
-  if (d <= 0) return { keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 };
-  const k = Math.min(GROVYLE_FAINT_SINK_STEPS, Math.ceil(d / 2));
-  return { keptRows: GROVYLE_FAINT_SINK_STEPS - k, y2: k * 8 };
+/**
+ * `{ keptRows, y2 }` for a fainting mon's own sink at render tick `t` -
+ * `keptRows` of the front sprite's own 8 tile-rows (top-down, `0` meaning
+ * fully erased/gone) remain to draw, shifted down by `y2` px. Pure closed
+ * form, no table. `startTick`/`steps` default to Grovyle's own turn-5
+ * values (every pre-existing call site unaffected) - S7/S8 turn 13 rung 3
+ * (docs/turn13-notes.md §7): Pidgeotto's own faint reuses this same closed
+ * form verbatim, re-anchored (`S=15960`, `n=7` for `yOffset=11`, vs.
+ * Grovyle's `n=8` for `yOffset=4`) - the same "generalize a hardcoded value
+ * into a defaulted param" idiom every other reused mechanism in this file
+ * already uses.
+ */
+export function grovyleFaintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = GROVYLE_FAINT_SINK_STEPS): { keptRows: number; y2: number } {
+  const d = t - 1 - startTick;
+  if (d <= 0) return { keptRows: steps, y2: 0 };
+  const k = Math.min(steps, Math.ceil(d / 2));
+  return { keptRows: steps - k, y2: k * 8 };
 }
 
 /** Grovyle's own opponent healthbox vanishes entirely 2 ticks after the sink's own last visible erase-step (`GROVYLE_FAINT_SINK_START_TICK + 2*GROVYLE_FAINT_SINK_STEPS + 3` = 6521) - pixel-confirmed this session (dense oracle sweep of the healthbox's own crop: byte-identical bare background from tick 6521 on, a 7064px whole-healthbox-region diff the tick before). A distinct UI element from the sprite sink above (different screen region), not itemized in docs/faint-switch-notes.md §3/§7 - this session's own re-probe answers the brief's own "what happens to Grovyle's healthbox" question directly. */
 const GROVYLE_HEALTHBOX_VANISH_TICK = GROVYLE_FAINT_SINK_START_TICK + 19; // 6521
+
+/** `faintSinkStartTick + 2*steps + 3` - the same "healthbox vanishes 2 ticks after the sink's own last visible erase-step" formula `GROVYLE_HEALTHBOX_VANISH_TICK` bakes in for Grovyle (`19 = 2*8+3`), generalized for reuse. S7/S8 turn 13 rung 3: oracle-pixel-confirmed for Pidgeotto (`S=15960, n=7` gives 15977, matching the fresh sha transition to `02e2544a49ca`, the same sha docs/turn13-notes.md §4 already cites for "healthbox gone" at 15978). */
+function faintHealthboxVanishTick(startTick: number, steps: number): number {
+  return startTick + 2 * steps + 3;
+}
 
 /** Same tile-grid walk as `drawSpriteSheet`, but only the top `keptRows` of `tileset.rows` (the faint sink's own progressive bottom-up erase, `grovyleFaintSinkRowsAndY2`) - `oy` already includes any `y2` shift, same convention every other sprite draw in this file uses. */
 function drawSpriteSheetTopRows(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, keptRows: number): void {
@@ -6648,7 +6682,19 @@ function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
  * same "reused, just parameterized" shape `onixX2` already established for
  * the player side).
  */
-function drawTurn5PidgeottoSettled(fb: Uint8Array, x2: number = 0): void {
+/**
+ * S7/S8 turn 13 rung 3 (docs/turn13-notes.md §7): `sink` (default `null`,
+ * every pre-existing caller unaffected) lets DRAGON_BREATH's own faint
+ * replace the plain sprite draw with `grovyleFaintSinkRowsAndY2`'s own
+ * progressive bottom-up erase, the same "generalize into a defaulted param"
+ * idiom `drawTurn5RockSlideAttack`'s own Grovyle-side sink branch already
+ * established.
+ */
+function drawTurn5PidgeottoSettled(fb: Uint8Array, x2: number = 0, sink: { keptRows: number; y2: number } | null = null): void {
+  if (sink) {
+    if (sink.keptRows > 0) drawSpriteSheetTopRows(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2, PIDGEOTTO_CORNER.y + sink.y2, sink.keptRows);
+    return;
+  }
   drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2, PIDGEOTTO_CORNER.y);
 }
 
@@ -6686,13 +6732,13 @@ function drawTurn5SwitchinParticles(fb: Uint8Array, t: number): void {
   }
 }
 
-/** Ball prop (`drawSendOutBall`, reused verbatim, S6's own species-independent mechanism) + the switch-in's own particle burst plus Pidgeotto's own materialize/settle - a no-op before `TURN5_BALL_HANDOFF_TICK`. `pidgeottoX2` - see `drawTurn5PidgeottoSettled`'s own doc. */
-function drawTurn5SwitchinSprite(fb: Uint8Array, t: number, pidgeottoX2: number = 0): void {
+/** Ball prop (`drawSendOutBall`, reused verbatim, S6's own species-independent mechanism) + the switch-in's own particle burst plus Pidgeotto's own materialize/settle - a no-op before `TURN5_BALL_HANDOFF_TICK`. `pidgeottoX2`/`sink` - see `drawTurn5PidgeottoSettled`'s own doc. */
+function drawTurn5SwitchinSprite(fb: Uint8Array, t: number, pidgeottoX2: number = 0, sink: { keptRows: number; y2: number } | null = null): void {
   if (t < TURN5_BALL_HANDOFF_TICK) return;
   drawTurn5PidgeottoMaterialize(fb, t);
   drawSendOutBall(fb, t, TURN5_BALL_HANDOFF_TICK);
   drawTurn5SwitchinParticles(fb, t);
-  if (t >= TURN5_PIDGEOTTO_SETTLE_TICK) drawTurn5PidgeottoSettled(fb, pidgeottoX2);
+  if (t >= TURN5_PIDGEOTTO_SETTLE_TICK) drawTurn5PidgeottoSettled(fb, pidgeottoX2, sink);
 }
 
 /**
@@ -9186,9 +9232,18 @@ export const TURN13_REGIME8_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (
  * mons' own real turn-13-opening HP (Onix 4, unchanged since turn 12's own
  * AERIAL_ACE hit; Pidgeotto 16, unchanged - turn 12's own ROCK_SLIDE missed).
  */
-function drawTurn13FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0): void {
-  drawTurn6FieldBase(fb, t, bounceTick + TURN13_REGIME8_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken, pidgeottoX2);
-  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+/**
+ * S7/S8 turn 13 rung 3: `pidgeottoHp` (default `TURN11_PIDGEOTTO_AFTER_
+ * ROCKSLIDE_HP`, unchanged for every pre-existing call site) lets
+ * DRAGON_BREATH's own drain (`dragonBreathGrovyleHp`, reused verbatim) feed
+ * Pidgeotto's own healthbox a live 16->0 value instead of the flat entering
+ * value; `pidgeottoSink`/`pidgeottoHealthboxVisible` thread straight
+ * through to `drawTurn6FieldBase` (region A/B, opponent side) - see that
+ * function's own doc.
+ */
+function drawTurn13FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoHp: number = TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN13_REGIME8_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken, pidgeottoX2, pidgeottoSink, pidgeottoHealthboxVisible);
+  if (pidgeottoHealthboxVisible) drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(pidgeottoHp));
 }
 
 /**
@@ -9529,6 +9584,10 @@ function drawTurn13SandAttackDirt(fb: Uint8Array, t: number, pressTick: number):
  * correctly by construction.
  */
 function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= dragonBreathTextStartTick(TURN13_DRAGONBREATH_PRESS_TICK)) {
+    drawTurn13DragonBreathWindow(fb, t, pressTick);
+    return;
+  }
   const frozenBounceTick = turn13KickoffBounceTick(t, pressTick);
   drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, turn13SandAttackPidgeottoX2(t, pressTick));
   drawTurn13SandAttackDirt(fb, t, pressTick);
@@ -9541,6 +9600,127 @@ function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number
     return;
   }
   drawMessageTextLines(fb, TURN13_SANDATTACK_LINE1, TURN13_SANDATTACK_LINE2, turn13SandAttackTextVisibleChars(t, pressTick));
+}
+
+/**
+ * S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): Onix's own
+ * DRAGON_BREATH, re-targeted at Pidgeotto - kickoff text reuses
+ * `dragonBreathTextStartTick`/`dragonBreathTextVisibleChars` VERBATIM
+ * (already fully generic, turn 2's own functions despite the name) with a
+ * NEW synthetic anchor (`TURN13_DRAGONBREATH_PRESS_TICK`, oracle-bisected
+ * this session - no real button press precedes Onix's own second move this
+ * turn, so this is a synthetic anchor exactly like `TURNn_ROCKSLIDE_PRESS_
+ * TICK` for the AI-adjacent second half of a turn); HP-drain reuses
+ * `dragonBreathGrovyleHp` VERBATIM (Pidgeotto's own 16->0, the same 1-unit/
+ * tick drain, `DRAGONBREATH_HP_DRAIN_START_DELAY` unchanged - the RNG
+ * ledger's own "+3 tick" secondary-roll offset is fully explained by the
+ * longer drain alone, docs/turn13-notes.md §2). The fire-projectile/shake/
+ * red-blend window (ISSUES #23) is deliberately NOT rendered here - same
+ * "exclude, don't fake" convention this dossier chain already established
+ * for that mechanism's own unresolved sampler defect; this window just
+ * shows the static field base underneath the held text for that span,
+ * excluded from this session's own `captureFrames`. Once `t` reaches the
+ * fainted-message's own start tick, hands off to `drawTurn13FaintedWindow`
+ * (docs/turn13-notes.md §4's own "the fainted message hasn't started
+ * printing yet" / "starts by 15980" boundary, oracle-bisected exact to
+ * 15979 this session).
+ */
+export const TURN13_DRAGONBREATH_PRESS_TICK = 15516; // dragonBreathTextStartTick(P) = P+192 = 15708, oracle-bisected exact (chars=1 first appears at render tick 15708)
+const TURN13_PIDGEOTTO_STARTING_HP = 16;
+const TURN13_PIDGEOTTO_FAINT_HP = 0;
+export const TURN13_FAINT_SINK_START_TICK = 15960; // S - oracle-pixel-bisected (first sink-visible sha change at render 15962, matching S+2 under grovyleFaintSinkRowsAndY2's own d=t-1-S formula), matches docs/turn13-notes.md §7's own RAM-derived value exactly
+export const TURN13_FAINT_SINK_STEPS = 7; // n = 8 - floor(yOffset/8), Pidgeotto yOffset=11 (mon-pic-coords.json)
+export const TURN13_HEALTHBOX_VANISH_TICK = faintHealthboxVanishTick(TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS); // 15977, oracle-pixel-confirmed (sha transitions to 02e2544a49ca, docs/turn13-notes.md §4's own "healthbox gone" citation) at exactly this tick
+
+/** Same `pressTick+318`-relative anchor `drawDragonBreathScene` (turn 2's own DRAGON_BREATH) uses for Grovyle's own target hit-flash (`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`, both already generic, reused verbatim - see `DRAGONBREATH_HIT_FLASH_OFFSET`'s own module doc) - re-anchored to `TURN13_DRAGONBREATH_PRESS_TICK`. Oracle-pixel-confirmed this session: omitting this (drawing Pidgeotto solid throughout) regressed a ~1085px diff at 15855-15863, isolated by `npm run compare` to exactly Pidgeotto's own on-field sprite - the SAME blink window turn 2's own target already exercises, not a new mechanism. */
+const TURN13_HIT_FLASH_PRESS_TICK = TURN13_DRAGONBREATH_PRESS_TICK + DRAGONBREATH_HIT_FLASH_OFFSET;
+
+function drawTurn13DragonBreathWindow(fb: Uint8Array, t: number, sandAttackPressTick: number): void {
+  const dbPressTick = TURN13_DRAGONBREATH_PRESS_TICK;
+  if (t >= turn13FaintedTextStartTick(dbPressTick)) {
+    drawTurn13FaintedWindow(fb, t, dbPressTick, sandAttackPressTick);
+    return;
+  }
+  const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
+  const hp = dragonBreathGrovyleHp(t, dbPressTick, TURN13_PIDGEOTTO_STARTING_HP, TURN13_PIDGEOTTO_FAINT_HP);
+  const sink =
+    t >= TURN13_FAINT_SINK_START_TICK
+      ? grovyleFaintSinkRowsAndY2(t, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)
+      : rockSlideMonBlinkInvisible(t, TURN13_HIT_FLASH_PRESS_TICK)
+        ? { keptRows: 0, y2: 0 }
+        : null;
+  const healthboxVisible = t < TURN13_HEALTHBOX_VANISH_TICK;
+  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, hp, sink, healthboxVisible);
+  if (healthboxVisible) {
+    const healthboxY2 = rockSlideHealthboxWobbleY2(t, TURN13_HIT_FLASH_PRESS_TICK);
+    if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, pidgeottoHealthboxContentForHp(hp));
+  }
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, ROCK_SLIDE_LINE1, DRAGONBREATH_KICKOFF_LINE2, dragonBreathTextVisibleChars(t, dbPressTick));
+}
+
+/**
+ * S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§7): "Foe PIDGEOTTO\nfainted!"
+ * - same `STRINGID_FAINTED` template `TURN5_FAINTED_LINE1`/`_LINE2` already
+ * establish for Grovyle, new species text + a fresh anchor
+ * (`turn13FaintedTextStartTick`, oracle-bisected exact to 15979: 15978
+ * still shows the old DRAGON_BREATH kickoff text, matching docs/turn13-
+ * notes.md §4's own "hasn't started printing yet" citation). Unlike turn
+ * 5's own short window (too brief to observe more than a climb-then-hold),
+ * this hold runs ~840 ticks (15980-16820) - long enough to exercise
+ * `cursorState`'s own FULL perpetual 4-phase/9-tick bounce (reused
+ * verbatim, new anchor - the same cycle the S6 intro's own wait-cursor
+ * already uses), matching the dossier's own "cycles 4 idle-bounce shas"
+ * finding (own module doc: "turn 5's own post-faint hold re-triggers this
+ * same 4-phase cycle... reused verbatim, just re-anchored" - turn 5's own
+ * window was simply too short to confirm that; turn 13's is). UNLIKE turn
+ * 5's own post-fainted-text tail (`drawTurn5RockSlideWindow`'s bare
+ * `drawTurn6FieldBase(fb, t)` call, live bounceTick) - Onix's own on-field
+ * bounce here STAYS FROZEN at the same `turn13KickoffBounceTick` value the
+ * whole rest of turn 13's resolution uses; oracle-pixel-confirmed this
+ * session (a first attempt using a live bounceTick regressed Onix's own
+ * sprite/healthbox region, `npm run compare`'s own diff isolated to
+ * exactly that crop, 0 diff once reverted to frozen) - a real per-turn
+ * difference, not assumed transferable from turn 5's own precedent (the
+ * same class of trap this dossier chain's own "KNOWN TRAPS" keeps
+ * flagging). The live wait-cursor ALONE is what produces the dossier's own
+ * cited 4 distinct cycling shas. The KO-gated hold itself needs NO special-case press-driven
+ * freeze: `turn13KoDismissElapsed` (core.ts) exists for state-machine
+ * correctness only, mirroring `turn5KoDismissElapsed`'s own precedent that
+ * the render path stays a pure function of `t` - the "locks... holds
+ * through 16824" shape docs/turn13-notes.md §4 cites falls out naturally
+ * from the live cursor's own 9-tick phase boundaries (16819-16827 all share
+ * one phase), not a press-triggered freeze.
+ */
+export const TURN13_FAINTED_LINE1 = "Foe PIDGEOTTO";
+export const TURN13_FAINTED_LINE2 = "fainted!";
+const TURN13_FAINTED_TEXT_TOTAL = TURN13_FAINTED_LINE1.length + TURN13_FAINTED_LINE2.length;
+const TURN13_FAINTED_TEXT_DELAY = 463; // dbPressTick+463 = 15979, oracle-bisected exact (chars=1 first appears at render tick 15979; 15978 still shows the old DRAGON_BREATH text)
+export function turn13FaintedTextStartTick(pressTick: number): number {
+  return pressTick + TURN13_FAINTED_TEXT_DELAY;
+}
+export function turn13FaintedTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn13FaintedTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN13_FAINTED_TEXT_TOTAL, t - start + 1);
+}
+const TURN13_FAINTED_CURSOR_X = LINE2_ORIGIN.x + measureText(font, charmap, TURN13_FAINTED_LINE2);
+const TURN13_FAINTED_CURSOR_START_DELAY = TURN13_FAINTED_TEXT_DELAY + TURN13_FAINTED_TEXT_TOTAL + 1; // 485 -> trace tick 16001, oracle-pixel-confirmed this session: the naive "+1 after last glyph" tick (16000) put every one of cursorState's own perpetual-cycle phase transitions exactly 1 tick early (npm run compare isolated two mismatches, 16810 and 16819, both exactly at a phase-boundary tick) - one more tick of render lag than TURN5_FAINTED_CURSOR_START_DELAY's own convention, consistent with this being a re-anchored instance of a generic mechanism, not a byte-identical constant
+
+
+/** Trace tick `t` is eligible to register turn 13's own KO-text dismiss A-press - same "message settled" gate `turn5RockSlideKoDismissEligible`/`sendOutPressEligible` already establish, re-anchored to this turn's own cursor start. */
+export function turn13KoDismissEligible(t: number): boolean {
+  return t >= TURN13_DRAGONBREATH_PRESS_TICK + TURN13_FAINTED_CURSOR_START_DELAY;
+}
+
+function drawTurn13FaintedWindow(fb: Uint8Array, t: number, pressTick: number, sandAttackPressTick: number): void {
+  const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
+  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, TURN13_PIDGEOTTO_FAINT_HP, { keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 }, false);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(fb, TURN13_FAINTED_LINE1, TURN13_FAINTED_LINE2, turn13FaintedTextVisibleChars(t, pressTick));
+  const cursorStart = pressTick + TURN13_FAINTED_CURSOR_START_DELAY;
+  const cursor = cursorState(t, cursorStart);
+  if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN13_FAINTED_CURSOR_X);
 }
 
 /**
@@ -9583,15 +9763,24 @@ function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number
  * box redraw and the HP overlay need the SAME dy, so one override value
  * covers both calls.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0): void {
+/**
+ * S7/S8 turn 13 rung 3: `pidgeottoSink` (default `null`) and
+ * `pidgeottoHealthboxVisible` (default `true`) - both every pre-existing
+ * call site unaffected - let DRAGON_BREATH's own faint drive Pidgeotto's
+ * on-field sprite through its sink erase and suppress its healthbox
+ * entirely past `faintHealthboxVanishTick`, the same "generalize a
+ * hardcoded value into a defaulted param" idiom every other reused
+ * mechanism in this file already uses.
+ */
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true): void {
   drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken);
   drawTurn5IconBar(fb, t);
-  drawTurn5SwitchinSprite(fb, t, pidgeottoX2);
+  drawTurn5SwitchinSprite(fb, t, pidgeottoX2, pidgeottoSink);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own
   // healthbox slide-in, anchored at TURN5_PIDGEOTTO_SETTLE_TICK - a no-op
   // (null) before the mon's own materialize settles.
   const pidgeottoHealthboxDx = turn5PidgeottoHealthboxSlideDx(t);
-  if (pidgeottoHealthboxDx !== null) drawSendOutHealthbox(fb, pidgeottoHealthboxDx, pidgeottoHealthboxContent);
+  if (pidgeottoHealthboxVisible && pidgeottoHealthboxDx !== null) drawSendOutHealthbox(fb, pidgeottoHealthboxDx, pidgeottoHealthboxContent);
   // S7 slice M-5: past the settled menu's own redraw tick, both the on-field
   // Onix sprite (region A) and its healthbox (region B, box+overlay as one
   // unit) pick up the resettled `menuIdleBounce` cycle - see

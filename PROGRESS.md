@@ -4,7 +4,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 245 — Bounded worker (S7/S8 turn 13 engine step, Part A of 3): SAND_ATTACK's attacker-slide sub-phase LANDS 0-diff; the dirt-cloud's own closed form is derived + RAM-verified but keeps a small OAM-order residual (excluded, not faked); Parts B (DRAGON_BREATH+faint+KO-hold) and C (MURKROW switch-in) NOT attempted — this session's whole budget went to Part A's asset/formula work
+## 246 — Bounded worker (S7/S8 turn 13 engine step, rung 3 of 4): DRAGON_BREATH re-targeted at Pidgeotto LANDS 0-diff — kickoff text, HP drain 16→0, faint sink, "Foe PIDGEOTTO fainted!" + button-gated KO hold all wired; rung 4 (MURKROW switch-in) NOT attempted, out of scope this session
+
+- **State:** `npm test` **986/986** (978 + 8 new Tier-1), `npm run build`
+  green, tree clean. `verify-turn13.ts` **60/60** (mandatory-first-step
+  rerun, unaffected). New trace `turn13-dragonbreath-faint.json`
+  **141/141, 0 diff**, twice-run byte-identical (15699-15745 kickoff
+  typing, 15855-15900 HP drain, 15955-15985 faint sink + fainted-text
+  start, 16300/16600/16800 sparse KO-hold samples, 16808-16824 dense
+  gated-press boundary — stops at the rung-4 handoff, per the brief).
+  Regression sweep clean: `turn13-sandattack` 190/190, `turn13-menu`
+  57/57, `turn12-menu` 46/46.
+- **Did:** new `turn13KoDismissElapsed` state field threaded through
+  `core.ts`'s `tick()`, mirroring `turn5KoDismissElapsed`'s pattern
+  EXACTLY (eligibility-gated single-set idiom; render stays a pure
+  function of `t`, same as turn 5's own precedent — the "locks... holds
+  through 16824" shape falls out of the live wait-cursor's own 9-tick
+  phase boundaries, no press-driven freeze needed). Reused verbatim:
+  `dragonBreathTextStartTick`/`Chars` (new synthetic
+  `TURN13_DRAGONBREATH_PRESS_TICK=15516`, oracle-bisected exact),
+  `dragonBreathGrovyleHp` (16→0, `DRAGONBREATH_HP_DRAIN_START_DELAY=353`
+  unchanged), `cursorState` (the fainted-message wait-cursor's own FULL
+  perpetual 4-phase bounce — turn 5's own window was too short to
+  exercise this, turn 13's ~840-tick hold does). Generalized (new
+  optional params, every pre-existing call site unaffected):
+  `grovyleFaintSinkRowsAndY2` (now takes `startTick`/`steps` — Pidgeotto
+  `S=15960,n=7` vs. Grovyle `S=6502,n=8`), `drawTurn5PidgeottoSettled`/
+  `drawTurn5SwitchinSprite`/`drawTurn6FieldBase`/`drawTurn13FieldBase`
+  (new `pidgeottoSink`/`pidgeottoHealthboxVisible`/`pidgeottoHp` params).
+  **Two real bugs found via `npm run compare`, not guessed**: (1)
+  Pidgeotto's own target hit-flash (blink + healthbox wobble) — turn 2's
+  own DRAGON_BREATH scene already reuses `rockSlideMonBlinkInvisible`/
+  `rockSlideHealthboxWobbleY2` for its target; omitting it regressed
+  ~1085px at 15855-15863, isolated by the diff crop to Pidgeotto's own
+  sprite — re-anchoring both closed it. (2) Onix's own on-field bounce
+  must stay FROZEN through the fainted-message hold here, unlike turn 5's
+  own analogous window (`drawTurn5RockSlideWindow` reverts to live
+  `bounceTick=t` there) — a first attempt mirrored turn 5 and regressed
+  ~2325px at 15979 on Onix's own sprite/healthbox; reverting to the
+  frozen `turn13KickoffBounceTick` throughout closed it. A third, tiny
+  fix: the wait-cursor's own start needed one MORE tick of lag than
+  `TURN5_FAINTED_CURSOR_START_DELAY`'s own "+1" convention
+  (`TURN13_FAINTED_CURSOR_START_DELAY=485`), found via two mismatched
+  phase-boundary ticks (16810/16819).
+- **Next:** rung 4 (MURKROW switch-in) — turn 5's faint-switch machinery
+  re-anchored per `docs/turn13-notes.md` §6-§7's REUSE MAP; asset already
+  extracted (§48's own correction: MURKROW's front sprite has been in
+  `FRONT_SPECIES`/`battle-opponent-front-sprites.json` since commit
+  `c170d68`) — pure wiring from here, nothing left to probe.
+- **Notes:** `docs/battle-turn-notes.md` §49 and `docs/turn13-notes.md`'s
+  newest dated section have the full writeup. **Named, excluded
+  residual** (not chased, time-boxed): a 2px diff at ticks 15882-15884,
+  isolated to Pidgeotto's own HP-bar fill color (`calcBarFilledPixels`
+  renders hp=1,2,3 identically — a bar-quantization floor — but the
+  oracle's own pixel there doesn't match either candidate this session
+  checked); excluded from `turn13-dragonbreath-faint.json`'s own
+  `captureFrames` rather than faked. No PAPERCUTS beyond the standing
+  mgba-venv-teardown one.
 
 - **State:** `npm test` **978/978** (unchanged), `npm run build` green,
   tree clean. `turn13-sandattack.json` **190/190, 0 diff** (185 -> 190,
@@ -96,61 +152,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   than claim a false 0-diff pass, matching the "exclude, don't fake"
   convention ISSUES #23's own projectile exclusion already establishes.
   No PAPERCUTS beyond the standing mgba-venv-teardown one.
-
----
-## 243 — Bounded worker (S7/S8 turn 13 engine step, rung 1 of 4): turn 12->13 FIGHT-submenu reopen gate LANDS 0-diff; rungs 2-4 (SAND_ATTACK, DRAGON_BREATH+faint, MURKROW switch-in) NOT attempted this session - out of the remaining time budget
-
-- **State:** `npm test` **969/969** (966 + 3 new Tier-1), `npm run build`
-  green, tree clean. `verify-turn13.ts` **60/60** (mandatory-first-step
-  rerun, unaffected). New trace `turn13-menu.json` **57/57, 0 diff**
-  (ticks 15374-15430: reopen, DOWN nav, cursor jump at 15408, confirm,
-  confirm-press transient hold - stops just before SAND_ATTACK's own
-  kickoff text starts at 15431, out of this rung's scope). Regression
-  sweep clean: `turn12-menu` 46/46, `turn12-aerialace` 56/56,
-  `turn12-rockslide-miss` 38/38, `turn11-menu` 56/56, `turn10-aerialace`
-  23/23.
-- **Did:** threaded `turn12Resolved` through the FULL reopen-gate chain
-  (`core.ts`, mirroring every prior `turnNResolved` flag verbatim),
-  `currentPPForActiveMon`'s 10th independent slot-0 decrement
-  (ROCK_SLIDE reads 0/10 exhausted, matching turn13-notes.md §3), and a
-  new `drawTurn13FightSubmenuWindow` dispatcher (own regime-8
-  field-base/kickoff-bounce-freeze pair, `TURN13_REGIME8_TO_REGIME1_SHIFT`,
-  reusing `drawTurn12TurnEndSettledMenu` verbatim for the pre-open/
-  DMA-wait baseline - the established "reuse the prior turn's own
-  TurnEndSettledMenu" pattern). The DOWN-nav cursor jump (0->2,
-  DRAGON_BREATH) needed **zero new code** - `moveFightCursor`'s existing
-  2x2-grid arithmetic already reproduces it, confirming the supervisor's
-  prior root-cause fold. One genuine per-turn residue found by oracle
-  bisection (not assumed, not guessed): the open-DMA-wait branch needs
-  an **unshifted** raw tick for this regime's own `menuIdleBounce`
-  plateau boundary, NOT the usual `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
-  every other turn's analogous branch uses - a real quantization-residue
-  difference specific to this regime's anchor tick, pixel-fit directly
-  (debugged via a throwaway script driving `core.ts`'s `tick`/`render`
-  directly to inspect `fightSubmenu.openElapsed` per-frame, since the
-  oracle-diff alone didn't distinguish "wrong regime" from "wrong
-  shift").
-- **Next:** rung 2 (SAND_ATTACK's 4 sub-phases: dirt-throw+slide via
-  `dump-sandattack-anim.py`'s pinned tables, silent monbg gap, the
-  accuracy-drop stat banner - needs a `turn6StatFallEva`/
-  `turn6StatFallBg1Y` generalization or sibling for the
-  non-sharply/decrease/accuracy parameter combo, "ONIX's accuracy
-  fell!" text), then rung 3 (DRAGON_BREATH re-targeted at Pidgeotto via
-  turn 2's own reused mechanism functions, HP-drain, faint sink reused
-  from turn 5, KO-gated hold cycling 4 idle-bounce shas), then rung 4
-  (MURKROW switch-in, turn 5's faint-switch machinery re-anchored). All
-  four sub-steps and their exact ground truth are in
-  `docs/turn13-notes.md`'s "SAND_ATTACK characterization" section and
-  §5-§7 - nothing left to probe, this is pure wiring from here. Rung 1's
-  own `drawTurn13FightSubmenuWindow` deliberately does NOT dispatch past
-  the confirm-press transient yet (same "caller/trace never captures
-  past the oracle-confirmed safe boundary" convention `drawTurn3Endeavor
-  Text` established) - rung 2 adds that forward branch.
-- **Notes:** not a blocked/mis-scoped step - genuinely just larger than
-  one bounded session (menu + 4-phase SAND_ATTACK + re-targeted
-  DRAGON_BREATH + faint-switch reuse + KO-gate + Murkrow switch-in, vs.
-  turn 12's much smaller "AERIAL_ACE reanchor + one miss text-swap").
-  Stopped at a clean, fully-verified rung boundary per AGENTS.md rather
-  than leaving rung 2 half-wired. No PAPERCUTS beyond the standing
-  mgba-venv-teardown one.
-
