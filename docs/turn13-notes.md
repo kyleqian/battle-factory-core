@@ -470,3 +470,263 @@ requested). `npm test` (946 tests) and `npm run build` green, unchanged
 from before this session. No `src/` changes, no trace changes — new
 artifacts are `tools/probe/verify-turn13.ts` and this doc section only,
 per the brief's own constraint.
+
+## 2026-07-21 — worktree lane (probe 2): SAND_ATTACK's own "~90-tick
+mid-message animation" fully characterized — it isn't one animation, it's
+**four** sub-phases, three of them already-generic engine mechanisms and
+the fourth a second battle message the prior session mislabeled "blank"
+
+**Assignment**: characterize the one open item the prior worktree-lane
+session's own "Honest gaps" flagged — SAND_ATTACK's real ~90-tick
+mid-message animation, RAM 15540-15629 — so turn 13's wiring step can
+render it. No engine code, groundwork only (per this session's own brief).
+
+**Method**: source-first (`Move_SAND_ATTACK`, `data/battle_anim_scripts.s:
+5192-5218`, and every function it names — `SlideMonToOffset`/
+`SlideMonToOriginalPos` in `src/battle_anim_mon_movement.c`, `AnimDirtScatter`
+in `src/battle_anim_ground.c`), then a new RAM probe
+(`tools/probe/dump-sandattack-anim.py`, committed — sprite-slot scan by
+`template` pointer, same convention `dump-rockslide-sprites.py` established,
+plus `gAnimVisualTaskCount`/`gTasks[]` func-pointer scans and a
+BLDALPHA/`gBattle_BG1_X`/`gBattle_BG1_Y`/`statStages` register probe) over
+the full 15400-15650 span (widened past the flagged window per the brief's
+own "sample the full lifetime, don't stop early" instruction), then dense
+pixel corroboration via scratch `bin/oracle run` traces (not committed,
+reusing the committed trace's own `segments` verbatim with custom
+`captureFrames`, per the brief).
+
+**Verdict, stated up front**: the flagged "~90-tick" span is not one
+mechanism. It decomposes into four sub-phases, RAM- and pixel-pinned
+independently. **Three of the four are PURE WIRING reusing
+already-generic/already-wired engine machinery; the fourth is a plain
+text message the prior session's own sha-citation mislabeled "blank."**
+Nothing in this window is a genuinely new rendering mechanism.
+
+### (a) Dirt-throw + attacker slide — `Move_SAND_ATTACK`'s own script, RAM 15475-15521
+
+Source inventory: `loadspritegfx ANIM_TAG_MUD_SAND` → `monbg
+ANIM_ATK_PARTNER` (in a single battle, resolves to the attacker itself —
+`Cmd_monbg`'s own `animBattler & ANIM_TARGET` test doesn't distinguish
+`ANIM_ATK_PARTNER` from `ANIM_ATTACKER`, both branch to `battler =
+gBattleAnimAttacker` for the first of its two checks) → `splitbgprio` →
+`setalpha 12,8` → `playsewithpan` → `createsprite
+gSlideMonToOffsetSpriteTemplate` (dx=-10,dy=0,dur=3, mirrored to +10 for
+Pidgeotto's own opponent-side battler) → `waitforvisualfinish` →
+`createsprite gSlideMonToOriginalPosSpriteTemplate` (dur=2) → **6x `call
+SandAttackDirt`** (each call spawns 5 `gSandAttackDirtSpriteTemplate` dirt
+sprites at fixed offsets `(0,0)/(10,10)/(-10,-10)/(20,5)/(-20,-5)`, then
+`delay 2`) → `waitforvisualfinish` → `clearmonbg`/`blendoff`/`end`.
+
+**Source-level surprise, RAM-confirmed**: `AnimDirtScatter`
+(`battle_anim_ground.c:203-224`) reads `InitSpritePosToAnimAttacker(sprite,
+TRUE)` for its own start position and only ever reads `gBattleAnimArgs[0..2]`
+(x-offset, y-offset, duration — all IDENTICAL across all 30 spawns: 15,
+15, 20) — **the per-call `(0,0)/(10,10)/(-10,-10)/(20,5)/(-20,-5)` offsets
+passed as `gBattleAnimArgs[3]`/`[4]` are dead script args, never read by
+this callback.** All 30 dirt sprites launch from the SAME attacker-relative
+point; the only per-sprite divergence is `AnimDirtScatter`'s own
+`Random2()&0x1F` (clamped to ±16) jitter on the TARGET endpoint. RAM-exact
+(`dump-sandattack-anim.py`, ticks 15400-15650): attacker's own sprite `x2`
+climbs `3,6,9` over 15475-15477 (slide-offset, `dur=3`, matches
+`InitSpriteDataForLinearTranslation`'s own fixed-point math for a
+`10<<8/3` per-tick delta truncated to `>>8`), `gAnimVisualTaskCount` peaks
+at exactly **30** at tick 15500 (6 waves of 5, spawn cadence **4 ticks**
+apart: 15480/15484/15488/15492/15496/15500 — not the naive "2-tick delay"
+a literal script read might predict, since `RunAnimScriptCommand`'s own
+do-while loop runs multiple free (non-frame-consuming) commands per tick;
+empirical cadence, not hand-derived), then destroys in the same 4-tick
+cadence starting 15501, hitting 0 at **15521**. Pixel-confirmed: **+1 tick
+render lag** on both ends (first visible divergence 15476, back to the
+flat baseline sha `502ba75ebb7a` at 15522) — the same lag class this
+dossier chain's linear-translation sprites (DRAGON_BREATH's fire
+projectiles, §5) already established.
+
+**Verdict: (i) pure wiring, verbatim.** Reuses `gSlideMonToOffsetSpriteTemplate`/
+`gSlideMonToOriginalPosSpriteTemplate` (`SlideMonToOffset`/
+`SlideMonToOriginalPos`) and `gSandAttackDirtSpriteTemplate`
+(`AnimDirtScatter`) — the same `AnimTranslateLinear`/
+`StartAnimLinearTranslation`/`InitSpriteDataForLinearTranslation` linear-
+translation infrastructure this dossier chain already renders for
+DRAGON_BREATH's own fire projectiles (§5) and other moves. No new sprite
+motion primitive.
+
+### (b) Silent monbg-cleanup gap, RAM+pixel 15522-15536
+
+`gTasks[]` func-pointer scan (`Task_ClearMonBg` + the OLD `Task_UpdateMonBg`,
+addresses from `arm-none-eabi-nm`, thumb bit added) shows both tearing
+down by ~15525; zero visible pixel effect (flat at the settled baseline
+sha the whole gap). Not a new mechanism — ordinary `clearmonbg` cleanup,
+already implicit in the move-anim-script contract every other move's own
+`clearmonbg`/`blendoff` pair already exercises.
+
+### (c) The accuracy-drop stat-change banner, RAM 15530-15598, pixel-visible 15537-15594
+
+RAM-identified precisely (`gTasks[]` func-pointer scan, `arm-none-eabi-nm`
+address lookup): task slot 1 runs `StatsChangeAnimation_Step1` →
+`_Step2` → `_Step3` (`src/battle_anim_utility_funcs.c:415-628`), task slot
+0 runs `Task_ClearBitWhenBattleTableAnimDone`
+(`src/battle_gfx_sfx_util.c:493`) — **the exact same generic,
+move-independent stat-stage-change flash/BG-scroll effect this dossier
+chain already root-caused for DOUBLE_TEAM's own evasion-up case**
+(`docs/battle-move-anim-notes.md`'s own "RESOLVED (S7 worktree lane,
+RNG/BG3_Y follow-up session)" entry) **and that is already wired into this
+engine** for a *different* stat/direction combo: turn 6's own FEATHER_DANCE
+-triggered ATK-fall-2 (`src/engine/battleMenu.ts`'s `turn6StatFallEva`/
+`turn6StatFallBg1Y`, reused by 3 existing call sites in
+`src/engine/battleScene.ts`). SAND_ATTACK's own instance is a THIRD,
+previously-unexercised parameter combination of the same formula family:
+**decrease** (like turn 6: `gBattle_BG1_X=64`, `tVelocity=-3`) crossed with
+**non-sharply** (like DOUBLE_TEAM's own increase case: `tTargetBlend=10`,
+`tWaitTime=20`, not turn 6's own `13`/`30` sharply case) plus the
+**accuracy** palette (not attack or evasion).
+
+RAM register table (`BLDALPHA` eva/evb, `gBattle_BG1_X`/`_Y`, this
+session's own probe): `BLDCNT`/`BLDALPHA=(0,16)` set up by 15532, `BG1_X=64`
+at 15534, `BG1_Y` starts ramping `-3`/tick at 15535 (reaching `-180` by
+15594 — shorter than turn 6's own `-246` clamp, since the non-sharply
+window is shorter); `eva` ramps `0→10` in 1-step-per-2-ticks from 15537 to
+15555 (9 steps, matching `StatsChangeAnimation_Step3`'s own `tFadeTimer++
+>0` 2-tick gate), **holds at 10 from 15555-15576** (≈20-tick
+`tWaitTime`, matches the non-sharply constant), ramps back `10→0` by
+15595, full register reset by 15598. **Total register-active envelope:
+~66 ticks (15532-15598)** — bit-for-bit the same total length
+`docs/battle-move-anim-notes.md` already cites for DOUBLE_TEAM's own
+non-sharply case, cross-turn-consistent.
+
+**Render-lag, pixel-confirmed (not assumed)**: pixels stay flat at the
+settled baseline through 15536 even though `BLDCNT`/`BG1_X`/`BG1_Y` are
+already active from 15530-15536 — **this is not a render lag, it's the
+mathematically correct result of `eva=0`** (0% alpha blend renders 0% of
+the new BG1 overlay, regardless of how far it's already scrolled
+underneath). The instant `eva` turns nonzero (RAM tick 15537), pixels
+diverge the SAME tick — **0 lag**. Same 0-lag on the tail (RAM `eva=0` at
+15595 == pixel-flat at 15595).
+
+**Verdict: (i) pure wiring, new parameter combination.** `stat-anim-banner
+.json` (`src/assets/gen/`) already has the `accuracy` palette and
+`decrease` tilemap extracted (`tools/extract/extract-stat-anim.ts`, both
+present — **no new asset extraction needed**, confirmed by inspecting the
+committed JSON's own `palettes`/`tilemaps` keys directly). The wiring step
+needs: a new `turn13StatFallEva`-shape helper (or a generalized
+`statFallEva(t, anchorTick, targetBlend, waitTime)` covering both turn 6's
+sharply=13/30 and this turn's non-sharply=10/20 cases — `turn6StatFallEva`
+already hardcodes `13`/`30` as module constants, so either a sibling
+function or a parameterized rewrite is the wiring call, not something this
+probe should decide) + the accuracy palette/decrease tilemap selectors +
+a new anchor tick (RAM 15530, i.e. the tick `TryHandleLaunchBattleTableAnimation`
+fires) — no new render primitive, `statAnimBg1PixelAt`'s own existing BG1
+compositor handles it unchanged.
+
+### (d) A second, previously mislabeled battle message: "ONIX's accuracy fell!" — RAM+pixel 15464 (stat-stage RAM commit) / typed 15608-15627, held through 15699
+
+**Correction to this dossier's own prior citations** (§4's original table
+and the "2026-07-21 — worktree lane" section above, both of which label
+sha `19fb94d8802c` "blank"): **it is not blank.** PNG-read directly (fresh
+`bin/oracle run` captures, not inferred): frame 15627 reads **"ONIX's
+accuracy\nfell!"**, fully typed, and this is the SAME sha both the
+original SAND_ATTACK-plateau citation (15630-15699) and the DRAGON_BREATH-
+kickoff-starts-here citation (15699) actually point at. There is no blank
+frame anywhere in the 15475-15699 span — the "blank box" claim was an
+inference from "held flat for a long time," never visually confirmed
+against the actual PNG.
+
+Two RAM findings pin this precisely:
+- **The RAM stat-stage write itself** (`gBattleMons[0].statStages[6]`,
+  Onix's own accuracy, offset `0x18+6` per `dump-battler-full.py`'s own
+  convention) commits **6→5 at exactly tick 15464** — bisected tick-by-tick
+  (`dump-battler-full.py`, 15420-15464) — dramatically earlier than this
+  dossier's own original §3 citation of "tick 16000" (that number was
+  simply the next available sparse snapshot after the write had already
+  landed; the true commit is **536 ticks earlier**, right as SAND_ATTACK's
+  own kickoff text settles). The RAM write is silent — no pixel or
+  register change accompanies it; it's ordinary battle-script bookkeeping
+  (`statbuffchange`-family), well before either the visual banner (c) or
+  the text message (d) plays.
+- **The message TEXT is deferred** until after the stat-banner (c)
+  finishes: typing starts ~15608 (first partial glyph — a narrow-column
+  render mid-draw, the same "glyph draws over a few ticks" shape this
+  dossier's own §4 point 2 already found for SAND_ATTACK's own "!"),
+  reads "ONIX's accuracy fel" by 15625, fully typed "ONIX's accuracy
+  fell!" by **15627**, then holds flat (same sha) through at least 15699
+  (DRAGON_BREATH's own kickoff text starts overwriting it immediately
+  after). Pixel-exact against `drawText`+`charmap` (source: `sText_DefendersStatFell`
+  = `"{B_DEF_NAME_WITH_PREFIX}'s {B_BUFF1}\n{B_BUFF2}"`,
+  `battle_message.c:308`, `B_BUFF2`=`sText_StatFell`=`"fell!"`,
+  `battle_message.c:303`): 0px mismatch outside one narrow 3x5px column
+  right after the apostrophe in "ONIX's" (a kerning-table nuance, flagged
+  not chased, same family as the dossier's own prior "!" near-miss — a
+  font-table gap, not a SAND_ATTACK-specific question).
+
+**Verdict: (i) pure wiring, verbatim.** Same `drawText`+`charmap`+
+battle-window-tile harness every other message in this whole dossier
+chain already renders — needs only the new two-line string constant
+("ONIX's accuracy" / "fell!") + a new anchor tick (RAM 15608). No new
+mechanism.
+
+### Full timeline, RAM+pixel cross-checked (both twice-run identical)
+
+| ticks | phase | verdict |
+|---|---|---|
+| 15464 | Onix's `statStages[6]` (accuracy) commits 6→5, silent | RAM only, no pixel/register effect |
+| 15475-15521 | dirt-throw + attacker slide (Move_SAND_ATTACK's own script) | (a) pure wiring — `SlideMonToOffset`/`SlideMonToOriginalPos`/`AnimDirtScatter`, unmodified |
+| 15476-15521 (pixel, +1 lag) | visible dirt-cloud/slide motion | pixel-confirmed, +1 tick lag |
+| 15522-15536 | silent monbg-cleanup gap | (b) ordinary `clearmonbg` teardown, no pixel effect |
+| 15530-15598 (RAM) / 15537-15594 (pixel, 0 lag) | accuracy-drop stat-change banner | (c) pure wiring — `StatsChangeAnimation_Step1-3`, already wired in-engine for a different stat/direction (turn 6), needs a new param combo + anchor tick only |
+| 15608-15627 | "ONIX's accuracy fell!" types out | (d) pure wiring — same generic text harness, new string + anchor tick |
+| 15627-15699 | "ONIX's accuracy fell!" held flat | same sha `19fb94d8802c` DRAGON_BREATH's own kickoff starts from |
+| 15699+ | DRAGON_BREATH's own kickoff text begins (§4, unchanged) | already characterized |
+
+**Nothing in this window is a genuinely new rendering mechanism.** All
+four sub-phases are either already-generic engine functions (a, c, d) or
+trivial cleanup with no visible effect (b). The wiring step's own
+per-phase needs: (a) new anchor tick only (already-generic sprite
+templates), (c) new anchor tick + accuracy/decrease palette selectors +
+either a sibling `turn13StatFallEva`-shape helper or a parameterized
+generalization of `turn6StatFallEva`/`turn6StatFallBg1Y` (assets already
+extracted, no new extraction needed), (d) new two-line string constant +
+new anchor tick (no new render code).
+
+### Assets
+
+**No new extraction needed.** `src/assets/gen/stat-anim-banner.json`
+(`tools/extract/extract-stat-anim.ts`, already committed from a prior
+session) already contains the `accuracy` palette and `decrease` tilemap
+this turn's own banner needs — confirmed by inspecting the committed
+JSON's own `palettes`/`tilemaps` keys directly (`attack, defense,
+accuracy, speed, evasion, spAttack, spDefense, multiple` /
+`increase, decrease`).
+
+### Verification
+
+New probe script `tools/probe/dump-sandattack-anim.py` (committed) —
+sprite-slot scan by `template` pointer (`gSandAttackDirtSpriteTemplate`/
+`gSlideMonToOffsetSpriteTemplate`/`gSlideMonToOriginalPosSpriteTemplate`,
+addresses from `bin/oracle symbols`, no thumb-bit adjustment needed for
+data labels) plus the attacker/target real sprites and
+`gAnimVisualTaskCount`, run once over RAM ticks 15400-15650 (full margin
+past the flagged window, per the brief's "sample the full lifetime, don't
+stop early" instruction). Cross-checked with ad hoc `gTasks[]` func-pointer
+and BLDALPHA/`gBattle_BG1_X`/`_Y`/`statStages` register scans (not
+committed — pure diagnostic, superseded by the committed probe + the
+`tools/probe/verify-turn13.ts` pixel assertions below, which are the
+actual regression-checked artifact).
+
+`tools/probe/verify-turn13.ts` (extended this session, not replaced) —
+**14 new checks** covering all four sub-phases above (dirt-throw motion
+window, monbg-cleanup flat gap, stat-banner motion window with 0-lag
+boundary assertions on both ends, "ONIX's accuracy fell!" typing + pixel-
+exact settled text), plus corrected two pre-existing comments that had
+mislabeled sha `19fb94d8802c` "blank." **All 60 checks (46 pre-existing +
+14 new) pass, run twice back to back, identical both times** — single
+`bin/oracle run` per invocation, 256/256 captures (right at the cap, no
+headroom left in this script — a future extension will need to trim
+elsewhere first). `npm test` (966 tests) and `npm run build` green,
+unchanged from before this session. No `src/` changes, no trace changes —
+new artifacts are `tools/probe/dump-sandattack-anim.py`, the
+`tools/probe/verify-turn13.ts` extension, and this doc section.
+
+**PAPERCUT**: none of significant note — the existing RAM-probe
+conventions (`dump-rockslide-sprites.py`'s own `template`-pointer
+identification pattern, `dump-battler-full.py`'s `statStages` offset,
+`arm-none-eabi-nm` for static-function addresses) all reused directly,
+no new tooling gaps hit.
