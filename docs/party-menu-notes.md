@@ -201,3 +201,119 @@ files touched. Both extractors and the composite script require the live
 oracle service (`POKEBENCH_ORACLE_URL`) to regenerate; none are imported
 at runtime. `battle1-turn15-dense.json` was rerun via fresh oracle round
 trips with overridden `captureFrames` only — never edited.
+
+## 6. 2026-07-22 worktree probe: the three open items closed
+
+Bounded worker (WORKTREE lane, stacked on §1-5's groundwork). Closes all
+three items named in this doc as blocking the party-select ENGINE rung.
+New probe: `tools/probe/dump-party-icon-bounce.py` (all 64 `gSprites[]`
+slots' x/y/x2/y2/animNum/animCmdIndex/animDelayCounter, reusing
+`battle1-turn15-dense.json`'s own segments verbatim, same convention as
+`dump-turn14-bounce-driver.py`/`dump-fly-anim.py`).
+
+**Item 1 — selected-icon bounce hop: DERIVED, formula-general, verified
+at off-sample ticks.** Full model banked in
+`src/data/gen/party-menu-icon-animation.json` (`mechanism.hopModel` +
+`.renderLag`), summary:
+
+- Each icon sprite's `struct Sprite` x/y (RAM-confirmed) is its OAM
+  **center**, not top-left; top-left = `(x+x2-16, y+y2-16)`. Base x/y is
+  constant per icon all turn: ONIX (16,40), MAGBY (104,18), BAYLEEF
+  (104,42).
+- Deselected: a **permanent fixed offset** (`AnimateSelectedPartyIcon`,
+  `animNum` param 0) — box1/"current" slot (sprite x==16) gets y2=-4;
+  every other box gets x2=-4. No further animation once set.
+- Selected: x2 stays 0 (no horizontal hop — refutes nothing, just confirms
+  the hop is purely vertical); y2 alternates -3/+1, changing only on an
+  actual `UpdateMonIconFrame` frame-advance event. For animNum N (per-frame
+  delay `D_N` from the existing speed table: 6/8/14/22/29), **y2=-3 holds
+  for `D_N+1` ticks, y2=+1 holds for `D_N+2` ticks, full period =
+  `2*D_N+3`** — the asymmetry is `sMonIconAnims`'s own trailing `JUMP(0)`
+  re-arming the cycle one tick early without touching y2. RAM-verified
+  against ONIX (animNum 4, D=29: flip ticks 20114→20144→20175, deltas
+  30/31) and MAGBY post-select (animNum 0, D=6: flip ticks
+  20195→20203→20212→20220, deltas 8/7/8) — both exactly `D+1`/`D+2`, not
+  curve-fit to one instance.
+- **Render lag, bisected (not assumed)**: the y2/bitmap effects of
+  `UpdateMonIconFrame`'s delay-driven redraw lag the RAM's own bookkeeping
+  by **exactly 1 tick** in the rendered PNG (confirmed independently for
+  ONIX's y2 flip at RAM-tick 20144/visible-tick 20145, and MAGBY's frame
+  flip at RAM-tick 20150+20212/visible-tick 20151+20213) — a GBA-generic
+  one-VBlank pipeline delay, same class this run's ledger has bisected
+  elsewhere. The SELECT/DESELECT position jump itself has **zero** lag
+  (DOWN pressed at trace-tick 20191; the x2/y2 swap is visible in that same
+  tick) since it's applied synchronously by `AnimateSelectedPartyIcon` on
+  the input tick, unrelated to the delay counter.
+- Also found (bonus, not chased further): a 2-tick global stall
+  (20205-20207) where BOTH ONIX's and MAGBY's independent
+  `animDelayCounter`s freeze simultaneously instead of decrementing — noted
+  as a real, probed artifact of this mechanism's own timing, cause not
+  pinned down (out of scope: no engine rendering this session).
+- The old "ONIX's y2 hop doesn't show for a fainted mon" claim is
+  **refuted**: it does hop (bitmap frozen, position doesn't), the earlier
+  121-tick "zero pixel change" capture just never sampled a phase-changed
+  tick.
+
+**Item 2 — ONIX's fainted-icon palette: REFUTED, no table exists.**
+Direct RAM dump of OBJ palette slot 5 (ONIX's icon sprite, tick 20150) is
+byte-identical (5-bit↔8-bit expansion aside) to
+`graphics/pokemon/icon_palettes/icon_palette_2.pal` — ONIX's perfectly
+normal species table, **already** the one embedded in
+`party-mon-icons.json`. `PARTY_PAL_FAINTED` (`party_menu.c:2244-2256`)
+only ever loads into the box panel's own **BG** palette
+(`LoadPartyBoxPalette` → `BG_PLTT_ID(...)`) — background palette memory,
+never the icon's own OBJ-palette slot. The earlier "~400/1024px mismatch,
+confirming the palette-swap theory" was actually the unmodeled bounce hop
+(item 1) shifting ONIX's position by up to 4px, misread as a color
+problem. No new palette table needed or banked; the existing ONIX icon
+entry is correct as-is.
+
+**Item 3 — the 19/38400px BAYLEEF-corner residual: root cause named,
+NOT extractor-side.** RAM-probed at tick 20070: `gSprites` slot 9 — an
+always-created per-slot sprite (`sSpriteTemplate_StatusIcons`,
+`CreatePartyMonStatusSprite`/`UpdatePartyMonAilmentGfx`,
+`party_menu.c:4184-4221`, hidden only when `GetMonAilment(mon) ==
+AILMENT_NONE`) — is **in-use and not invisible** at BAYLEEF's icon's
+bottom-right corner: BAYLEEF is carrying a status ailment this turn, and
+its indicator draws on top of the icon there. Its 8x8 tile (OBJ palette
+slot 0, VRAM tile 0) decodes to colors ((248,240,152)/(216,216,112)/
+(240,80,40)/(160,88,80) in 15-bit RAM) that match the residual's actual
+oracle pixels **exactly** once expanded to 24-bit. This is candidate 1
+from §3, confirmed, not candidate 2: the icon extraction/decode is
+correct; a genuinely separate, correctly-behaving UI sprite (out of the
+icon asset's own scope) draws over that exact corner. No extractor fix
+applies — extending the composite to also model the status-icon sprite
+would be a new (4th) asset, out of this step's scope.
+
+**Composite results** (`composite-party-menu.ts`, extended to decompose
+**all three** icons, not just the unselected two, plus 2 new off-sample
+mid-hop ticks — 5/5 checks, fresh independent oracle round trip):
+
+```
+FAIL  list, cursor on ONIX (chrome + all 3 icons decomposed, selected hop phase -3) (tick 20070): 19/38400
+FAIL  list, cursor on ONIX, MID-HOP (selected hop phase +1, off-sample tick) (tick 20158): 30/38400
+FAIL  list, cursor on MAGBY (chrome + all 3 icons decomposed, selected hop phase -3) (tick 20206): 34/38400
+FAIL  list, cursor on MAGBY, MID-HOP (selected hop phase +1, off-sample tick) (tick 20215): 54/38400
+PASS  submenu SEND OUT/SUMMARY/CANCEL (harvested chrome, round-trip check) (tick 20220): 0/38400
+```
+
+Every non-zero residual's bbox lands in the same x105-111,y25-26 window —
+the item-3 status-icon corner, confirmed identical cause each time
+(including the MAGBY-selected cases, where MAGBY's own expanded/shifted
+bbox now additionally clips into that same corner — a second confirming
+data point for item 3, not a new bug). **Decisive outcome**: items 1 and 2
+fully closed (hop model exact and formula-general, verified off-sample;
+fainted palette theory refuted with direct evidence); item 3's exact
+blocker is named precisely with RAM+source evidence and is not
+extractor-side, so no extractor fix applies — a true engine-wiring rung
+would need a 4th "status icon" asset to reach a clean 0/38400 on the
+ONIX/MAGBY composites, which is new scope, not a residual bug.
+
+Verification: `npm test` **993/993**, `npm run build` green. New/changed
+files this session: `tools/probe/dump-party-icon-bounce.py`,
+`tools/extract/extract-party-menu-chrome.ts` (2 new harvested ticks),
+`tools/extract/composite-party-menu.ts` (rewritten: all-3-icon
+decomposition + 2 new mid-hop checks), `src/assets/gen/party-menu-
+chrome.json` (regenerated, 5 frames), `src/data/gen/party-menu-icon-
+animation.json` (hop model + render-lag + fainted-palette + status-icon
+findings), this doc. No `src/engine/` files touched.

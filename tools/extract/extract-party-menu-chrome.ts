@@ -19,6 +19,19 @@
 //     press); MAGBY's icon is now the selected/bouncing one.
 //   - SUBMENU_TICK     20220 - "Do what with this Pokémon?" SEND
 //     OUT/SUMMARY/CANCEL, cursor on SEND OUT.
+//   - LIST_ONIX_MIDHOP_TICK  20158 - same "cursor on ONIX" screen as
+//     LIST_ONIX_TICK, but sampled mid-hop: RAM-probed (`dump-party-icon-
+//     bounce.py`, docs/party-menu-notes.md's newest section) selected-icon
+//     y2=+1 (vs. LIST_ONIX_TICK's y2=-3) - the OTHER half of the bounce
+//     cycle, used to decomposition-test the derived hop model itself
+//     (not just round-trip stability). Deliberately NOT 20150-20151 or
+//     20165-20166 (MAGBY/BAYLEEF's own frame-flip transition instants,
+//     which land 1 render tick later than the RAM's own bookkeeping - see
+//     docs/party-menu-notes.md's render-lag finding) - picked mid-plateau
+//     for every icon's own timer, not just ONIX's.
+//   - LIST_MAGBY_MIDHOP_TICK 20215 - same "cursor on MAGBY" screen as
+//     LIST_MAGBY_TICK, RAM-probed selected-icon (now MAGBY) y2=+1 (vs.
+//     LIST_MAGBY_TICK's y2=-3) - same purpose, for MAGBY's own bounce.
 //
 // Regenerate: requires the live oracle service (POKEBENCH_ORACLE_URL).
 //   node --experimental-strip-types tools/extract/extract-party-menu-chrome.ts
@@ -34,6 +47,8 @@ const TICKS = {
   listOnix: 20070,
   listMagby: 20206,
   submenu: 20220,
+  listOnixMidHop: 20158,
+  listMagbyMidHop: 20215,
 } as const;
 
 trace.captureFrames = Object.values(TICKS);
