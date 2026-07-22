@@ -558,3 +558,156 @@ still unresolved - flagged here rather than blind-fit further.
   (d) (turn 12's mirror at +2068) in principle, but rung (b)'s own
   acceptance (0-diff through 12371) is not yet met, so `turn10-aerialace.json`
   cannot be extended past 12367 until this closes.
+
+## 2026-07-21 PROBE: Mission A verdict (current rule falsified, replacement not yet closed) + Mission B not reached (time-boxed, honest gap)
+
+Worktree PROBE step (no `src/` changes). Time-boxed hard at 35 minutes;
+Mission A (the priority) consumed the whole window with a decisive,
+pixel-cited result. **Mission B (the 12371-12437 flicker) was NOT
+reached** - RAM-probing it fresh, as the brief required as a first step,
+did not fit in the remaining time after Mission A's evidence chain. Stated
+here honestly rather than padded with a guess; the brief's own reproduction
+recipe (`dump-aerialace-anim.py` over that span, checking the ENDEAVOR §15f
+/ turn-9-flicker-task family first) is unchanged and ready for the next
+session to run directly.
+
+### Mission A: RAM semantics confirmed, but the "real always wins" rule is FALSIFIED by direct pixel evidence - the replacement rule is a named, open gap
+
+**Step 1 - RAM probe of the overlap window** (`dump-aerialace-anim.py`,
+RAM 12363-12376, reused verbatim - scratch, not committed since the tool
+already exists): both the real sprite (slot 5) and the clone (slot 7)
+carry the **identical OAM `priority` field (2)** for the whole overlap
+span (RAM 12365-12372) - confirmed fresh, not assumed. `objMode`: slot 5 =
+0 (Normal, opaque, NOT a blend source); slot 7 = 1 (semi-transparent
+blend source) whenever `inUse`. `BLDCNT` = `0x3f40` for the entire window:
+target-2 mask (bits 8-13) = `0x3f` - **every** layer, BG0-3/OBJ/backdrop,
+is a valid blend target 2, OBJ included. This is the exact
+"OBJ-blend-target-2-can-include-another-OBJ" configuration the brief's own
+2026-07-19 precedent addresses.
+
+**Step 2 - direct tileset lookup confirms TRUE overlap, ruling out a
+position bug.** At render 12371/12372 (darken long restored, real sprite
+settled at `(0,0)`, slot 7 alive at offset `(24,6)`), sampling
+`opponentFrontSpritesAsset.PIDGEOTTO.tileset` directly at both sprites' own
+local coordinates for six pixels inside the residual's own bbox
+`(178,41)-(190,62)` shows **both** the real sprite's own texel AND slot
+7's own texel are non-transparent (opaque) at the identical absolute
+screen pixel, e.g. `(181,41)`: real's own local `(37,22)` = palette idx 5,
+slot 7's own local `(13,16)` = palette idx 8. Every one of six sampled
+pixels confirms this. **This rules out a lunge/clone offset or position
+bug** (already brute-force-eliminated per the handoff) **as the residual's
+cause - it is a genuine two-OBJ pixel-level conflict**, pinned by asset
+data alone (no oracle capture needed - now a permanent, cheap check in
+`verify-turn10-aerialace.ts`, see below).
+
+**Step 3 - pixel-color evidence FALSIFIES the current resolution rule.**
+The current engine (`drawTurn10AerialAceLungeAndClones`) resolves every
+such conflict as "real sprite, opaque, drawn last, always wins" - which
+would put Pidgeotto's own **plain, undarkened** palette color #5,
+`(231,181,74)`, at screen pixel `(181,41)` for render 12371. The live
+oracle instead shows `(255,160,145)` at that exact pixel - not within
+plausible PNG-quantization tolerance of `(231,181,74)` (each channel off
+by 24-107). **The "real always wins outright, no blend" rule is
+concretely false for these pixels** - now pinned as a permanent check in
+`verify-turn10-aerialace.ts` (a falsification pin: asserts the oracle
+pixel is NOT close to the real sprite's own plain color, so a future
+implementation that reintroduces this exact bug will fail loudly).
+
+**Step 4 - does this explain BOTH residuals?** Very likely yes, structurally:
+at render 12368 (the darken-plateau residual, 600px), the SAME real+slot-7
+overlap is active (plus slot 4's own second clone and the darken palette
+swap layered on top) - same code path (`drawTurn10AerialAceLungeAndClones`),
+same "real always wins opaque" rule, same physical sprites. Not
+independently pixel-fitted this session (time-boxed after the decisive
+12371 case), but the shape (both residuals confined to Pidgeotto's own
+silhouette, both vanish when either the darken or the overlap is absent)
+is consistent with one root cause, per the handoff's own hypothesis - now
+upgraded from "worth checking together" to "structurally confirmed to share
+the same falsified rule," short of an independent pixel fit at 12368/12369.
+
+**Step 5 - what the replacement rule actually is: NOT closed this
+session, an honest negative.** I could NOT pin down, within the time box,
+which sprite wins the tie (both share OAM `priority=2`) or what the winner
+blends against. The brief's own cited hardware rule ("lower OAM index wins
+at equal priority, blending winners then fall through to whatever's below
+the OBJ layer, never another OBJ") predicts real (slot 5, presumably lower
+final OAM index than slot 7 if pokeemerald's OAM-copy order matches
+`gSprites` index order) should still win outright - but that contradicts
+the pixel evidence above just as much as the current code does, UNLESS the
+actual copy-to-OAM order does NOT match `gSprites` index order for these
+two sprites (an assumption this session never independently verified -
+the RAM probe reads `gSprites[]` fields directly, not the final
+`gMain.oamBuffer`/hardware OAM array). Hand-solving candidate blend
+formulas (clone's own color blended at `eva=12,evb=8` toward a plain-BG
+target2, or toward the real sprite's own would-be color as target2)
+against several sampled pixels did not converge on one consistent target2
+color across pixels within the time available - flagged as unresolved
+rather than curve-fit.
+
+**Fix-shape recommendation for the next engine session** (evidence-backed,
+but the winner/blend-target must be nailed down first via the instrument
+below - do NOT reintroduce "real always wins" verbatim, it is now
+pixel-disproven):
+
+1. Read the ACTUAL final OAM buffer (`0x07000000` + 8 bytes/entry, NOT
+   `gSprites[]`) at a RAM tick inside the overlap window, and locate the
+   two entries matching slot 5's and slot 7's own known `(x,y)` (real at
+   `x=176,y=51`; clone at `x=200,y=57` per the RAM table above) - this
+   settles, by direct observation rather than assumption, which one has
+   the lower final OAM index and therefore actually wins the tie.
+2. Once the winner is known: if it's the CLONE (not real) that wins in the
+   true-overlap region, the fix shape is "per-pixel winner resolution
+   between real+clone: at each absolute screen pixel, if the CLONE's own
+   texel is opaque there, draw the clone's blended pixel LAST (on top),
+   even where real's texel is also opaque; real only shows through where
+   the clone's own texel is transparent." If BLDCNT's target-2-includes-OBJ
+   turns out to be a red herring for the LOSING sprite (i.e. the loser
+   never contributes color at all, win-or-lose is binary), re-derive the
+   winning clone's own target-2 (BG-only vs. something else) from a clean,
+   single-clone-no-darken pixel set (render 12371's own bbox is exactly
+   that - already isolated, reuse it) before generalizing to the
+   darken-plateau case.
+3. Re-verify against BOTH residual windows (12368/12369 darken-plateau AND
+   12370-12372 plain overlap) once the rule is nailed down - per Step 4
+   above, one fix is expected to close both, but this is not yet proven.
+
+### Mission B: NOT reached - time-boxed, no code or RAM probe run this session
+
+Per the brief's own honesty framing: this is a genuine gap, not a
+disguised guess. The reproduction recipe is unchanged from the brief:
+extend `dump-aerialace-anim.py` (or reuse verbatim) over RAM 12371-12437,
+check the ENDEAVOR §15f (turn 2, Onix post-hit flicker + player-healthbox
+wobble) and the turn-9 flicker task's own "4th block" precedent FIRST
+before assuming a new mechanism, then dense-capture renders 12371-12437 to
+bisect the render-lag class and phase boundaries. None of this was run
+this session - `turn10-aerialace.json`'s own `captureFrames` is unchanged
+(still ends at 12367), and no claim is made about the flicker's identity,
+lag class, or phase boundaries here.
+
+### Updated gap accounting for rungs (b)/(c)/(d)
+
+- **Rung (b)**: the darken-plateau residual (600/893px) and the
+  independent 203px residual are now understood to be the SAME class of
+  bug (a falsified compositing rule at true real+clone OBJ overlap, Mission
+  A above) rather than two unrelated small bugs - concretely narrows the
+  next session's work to "find the correct winner/blend-target rule, apply
+  it once" rather than two separate bisections. Still not 0-diff;
+  `turn10-aerialace.json` capture window is unchanged (through 12367).
+- **Rung (c)** (the 12371-12437 flicker): fully unstarted, as before this
+  session - Mission B's own reproduction recipe above is the next action,
+  unchanged from the original brief.
+- **Rung (d)** (turn 12's +2068 mirror): blocked transitively on (b)/(c),
+  unchanged.
+
+### Verification (this update)
+
+`tools/probe/verify-turn10-aerialace.ts` extended with 2 new checks (both
+pure Mission-A pixel/asset-data pins, no new oracle capture beyond the
+window it already fetches): the true-overlap texel fact (asset-data only,
+no oracle needed) and the falsification pin (oracle pixel at render 12371
+is NOT close to the real sprite's own plain color) - **22/22 PASS** (20
+prior + 2 new), run twice back to back, identical results. `npm test` and
+`npm run build` unchanged-green (no `src/` changes this session). New
+committed tooling: `tools/compare/scratch/aerialace-overlap-diag.ts` (the
+per-pixel diff-and-classify instrument Mission A's step 1 used, reusable
+for the next session's own bisection once the winner rule is known).

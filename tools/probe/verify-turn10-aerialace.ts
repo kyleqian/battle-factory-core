@@ -21,6 +21,7 @@
 import { readFileSync } from "node:fs";
 import { PNG } from "pngjs";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
+import opponentFrontSpritesAsset from "../../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 
 const TRACE_PATH = "tools/compare/traces-groundtruth/battle1-turn10-dense.json";
 const trace = JSON.parse(readFileSync(TRACE_PATH, "utf8")) as Trace;
@@ -145,6 +146,68 @@ async function main() {
     "Onix's shake alternates ON/OFF in Onix's own box (render 12374 'y2=3 ON' diff > render 12376 'y2=0 OFF' diff), confirming the RAM-confirmed 3,3,0,0 square wave's render-side phase",
     onixOnDiff > onixOffDiff,
     `12374=${onixOnDiff}, 12376=${onixOffDiff}`,
+  );
+
+  // --- 2026-07-21 Mission A extension (worktree PROBE step, docs/aerial-ace-
+  // notes.md's "rung (b) residual" section): the independent 203px residual
+  // at render 12370+ (bbox (178,41)-(190,62), real sprite settled at (0,0)
+  // vs slot 7's clone at offset (24,6)) is confirmed to sit in a region
+  // where BOTH the real sprite's own texel AND slot 7's clone texel (sampled
+  // from the SAME committed tileset, at their own respective offsets) are
+  // OPAQUE at the identical absolute screen pixel — a genuine simultaneous
+  // two-OBJ overlap, not a position/offset bug. This check is pure asset
+  // data (no oracle capture) — see the doc's own dossier section for the
+  // pixel-classification evidence that falsifies "real always wins opaque,
+  // drawn last" as the resolution rule for these pixels.
+  const PIDGEOTTO_CORNER = { x: 144, y: 19 };
+  const pidgeotto = (opponentFrontSpritesAsset as Record<string, { tileset: { rows: number; columns: number; tiles: (number[] | null)[] } }>).PIDGEOTTO!;
+  function texelAt(localX: number, localY: number): number | undefined {
+    const tx = Math.floor(localX / 8);
+    const ty = Math.floor(localY / 8);
+    if (tx < 0 || ty < 0 || tx >= pidgeotto.tileset.columns || ty >= pidgeotto.tileset.rows) return undefined;
+    const tile = pidgeotto.tileset.tiles[ty * pidgeotto.tileset.columns + tx];
+    if (!tile) return 0;
+    return tile[localY % 8 * 8 + (localX % 8)];
+  }
+  const OVERLAP_SAMPLE_PIXELS: readonly [number, number][] = [
+    [181, 41], [182, 41], [180, 42], [183, 44], [186, 44], [187, 44],
+  ];
+  const bothOpaque = OVERLAP_SAMPLE_PIXELS.every(([x, y]) => {
+    const realIdx = texelAt(x - PIDGEOTTO_CORNER.x, y - PIDGEOTTO_CORNER.y);
+    const cloneIdx = texelAt(x - PIDGEOTTO_CORNER.x - 24, y - PIDGEOTTO_CORNER.y - 6);
+    return !!realIdx && !!cloneIdx;
+  });
+  check(
+    "the 203px residual's own bbox sits where BOTH the real sprite's texel AND slot 7's clone texel are opaque at the same screen pixel (true two-OBJ overlap, not a position bug)",
+    bothOpaque,
+    `sampled pixels' real/clone texel opacity: ${JSON.stringify(
+      OVERLAP_SAMPLE_PIXELS.map(([x, y]) => [
+        texelAt(x - PIDGEOTTO_CORNER.x, y - PIDGEOTTO_CORNER.y),
+        texelAt(x - PIDGEOTTO_CORNER.x - 24, y - PIDGEOTTO_CORNER.y - 6),
+      ]),
+    )}`,
+  );
+
+  // "real always wins opaque, drawn last" (the current engine rule) predicts
+  // the oracle's own pixel at (181,41) at render 12371 (darken long since
+  // restored, real sprite settled at (0,0)) should be EXACTLY Pidgeotto's
+  // own plain palette color #5 (231,181,74) - the real sprite's own texel
+  // there. Real hardware shows something else entirely (a much paler
+  // color), falsifying that rule for true-overlap pixels - the replacement
+  // rule is a NAMED, OPEN gap (see the dossier), not guessed here.
+  const px181x41 = get(12371).png;
+  const img181 = PNG.sync.read(px181x41);
+  const o = (41 * 240 + 181) * 4;
+  const sample = { r: img181.data[o]!, g: img181.data[o + 1]!, b: img181.data[o + 2]! };
+  const REAL_PLAIN_COLOR_IDX5 = { r: 231, g: 181, b: 74 };
+  const closeToRealPlain =
+    Math.abs(sample.r - REAL_PLAIN_COLOR_IDX5.r) <= 4 &&
+    Math.abs(sample.g - REAL_PLAIN_COLOR_IDX5.g) <= 4 &&
+    Math.abs(sample.b - REAL_PLAIN_COLOR_IDX5.b) <= 4;
+  check(
+    "render 12371 pixel (181,41): oracle's real color is NOT Pidgeotto's own plain undarkened palette entry #5, falsifying 'real always wins opaque, drawn last' at true real+clone overlap pixels",
+    !closeToRealPlain,
+    `oracle=(${sample.r},${sample.g},${sample.b}), real-plain-idx5=(${REAL_PLAIN_COLOR_IDX5.r},${REAL_PLAIN_COLOR_IDX5.g},${REAL_PLAIN_COLOR_IDX5.b})`,
   );
 
   console.log(`\n${WINDOW.length} ticks captured, ${failures === 0 ? "ALL CHECKS PASSED" : `${failures} CHECK(S) FAILED`}`);
