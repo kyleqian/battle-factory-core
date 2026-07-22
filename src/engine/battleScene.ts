@@ -8270,19 +8270,19 @@ export function turn10AerialAceLungeOffset(t: number, pressTick: number): { x2: 
  * frozen (non-translating) copies sampling the lunge's own start/end
  * extremes - slot 4 has TWO lives (the lunge's first value, then a gap, then
  * `(0,0)`), slot 7 a single life at the lunge's last value. Base **+2**
- * render lag as mechanism 1 (both go RAM-active the same tick, both debut a
- * tick later than mechanism 5) - but each life's own START needs ONE MORE
- * tick of latency on top of that (oracle-pixel-confirmed this session,
- * `npm run compare` on a scratch capture: the exact same shrinking-but-
- * nonzero diff shape `docs/battle-turn-notes.md` §38/§39 already root-caused
- * for QUICK_ATTACK's own clones - "a freshly-allocated semi-transparent
- * OBJ's OAM copy needs an extra frame before it's meaningful", `turn9QuickAttackSlot3Offset`'s
- * own doc comment) - so **+3** at the START, ordinary +2 at the END, same
- * asymmetric shape QUICK_ATTACK's own fix established. `eva=12,evb=8`
- * (`setalpha 12, 8`, the script's own args) - the SAME ratio QUICK_ATTACK's
- * own clones use.
+ * render lag as mechanism 1 for the START (both go RAM-active the same tick,
+ * both debut a tick later than mechanism 5) plus ONE MORE tick of latency on
+ * top of that ("a freshly-allocated semi-transparent OBJ's OAM copy needs an
+ * extra frame before it's meaningful", `turn9QuickAttackSlot3Offset`'s own
+ * doc comment) - so **+3** at the START. The END, however, is the ORDINARY
+ * **+1** lag (RAM-pixel-bisected this session, `tools/compare/scratch/quick-
+ * diff.ts`: slot 7's own RAM-confirmed end (12372) needs render 12373, not
+ * 12374 - the naive +2-at-both-ends guess left slot 7 visible one tick too
+ * long and regressed render 12374). `eva=12,evb=8` (`setalpha 12, 8`, the
+ * script's own args) - the SAME ratio QUICK_ATTACK's own clones use.
  */
 const TURN10_CLONE_START_RENDER_LAG = 3;
+const TURN10_CLONE_END_RENDER_LAG = 1;
 export function turn10AerialAceSlot4Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
   const nStart = t - TURN10_CLONE_START_RENDER_LAG - pressTick;
   const nEnd = t - TURN10_LUNGE_RENDER_LAG - pressTick;
@@ -8292,23 +8292,33 @@ export function turn10AerialAceSlot4Offset(t: number, pressTick: number): { x2: 
 }
 export function turn10AerialAceSlot7Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
   const nStart = t - TURN10_CLONE_START_RENDER_LAG - pressTick;
-  const nEnd = t - TURN10_LUNGE_RENDER_LAG - pressTick;
+  const nEnd = t - TURN10_CLONE_END_RENDER_LAG - pressTick;
   if (nStart >= 60 && nEnd <= 67) return { x2: 24, y2: 6 }; // RAM 12365-12372 (matches the lunge's own LAST value)
   return null;
 }
 
 /**
  * Mechanisms 1+3 together: erase Pidgeotto's own settled footprint, redraw
- * the real sprite opaque (at the lunge's own offset, or settled `(0,0)` once
- * the lunge has reverted but a clone is still alive) FIRST, both clones
- * blended over the live `fb` LAST - the exact `drawTurn9QuickAttackAnimation`
- * shape (`blendedTileOverFb`'s own doc comment: clones must blend against
- * whatever's already drawn, real sprite included). `darken`
- * (mechanism 4, below) swaps in the palette-pulse's darkened palette for
- * every draw here when the pulse plateau is active - real hardware's
- * `BlendPalette` writes straight into the live palette RAM bank Pidgeotto's
- * sprite (and its clones, same physical palette) reads from, so both must
- * darken together, not just the real sprite.
+ * BOTH blended clones FIRST (against the static field, still in `fb` at this
+ * point), then the real sprite OPAQUE on top LAST - the OPPOSITE compositing
+ * order from QUICK_ATTACK's own clones (`drawTurn9QuickAttackAnimation`,
+ * which draws its real sprite first and blends clones "over fb" last).
+ * RAM-pixel-bisected this session (`tools/compare/scratch/quick-diff.ts`
+ * against a fresh oracle capture): with the real sprite drawn FIRST and
+ * clones blended on top (QUICK_ATTACK's own order), renders 12363-12367
+ * showed a real, non-positional residual (666->29px, shrinking but never 0 -
+ * the exact shape `docs/battle-turn-notes.md` §42/§43 flagged as unresolved)
+ * that persisted no matter how the clones' own offset/window/lag were
+ * bisected (both independently confirmed already-optimal against RAM/pixel
+ * ground truth). Reversing the order - opaque real always wins wherever it
+ * covers a clone, blended clone only shows in the sliver where it extends
+ * beyond the real sprite's own footprint - closes that residual to exactly
+ * 0 for the whole 12363-12367 window. `darken` (mechanism 4, below) swaps in
+ * the palette-pulse's darkened palette for every draw here when the pulse
+ * plateau is active - real hardware's `BlendPalette` writes straight into
+ * the live palette RAM bank Pidgeotto's sprite (and its clones, same
+ * physical palette) reads from, so both must darken together, not just the
+ * real sprite.
  */
 function drawTurn10AerialAceLungeAndClones(fb: Uint8Array, t: number, pressTick: number, darken: boolean): void {
   const lunge = turn10AerialAceLungeOffset(t, pressTick);
@@ -8319,9 +8329,9 @@ function drawTurn10AerialAceLungeAndClones(fb: Uint8Array, t: number, pressTick:
   const { tileset } = pidgeottoFrontSprite;
   const palette = darken ? turn10PidgeottoDarkPalette() : pidgeottoFrontSprite.palette;
   const real = lunge ?? { x2: 0, y2: 0 };
-  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
   if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
   if (slot7) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot7.x2, PIDGEOTTO_CORNER.y + slot7.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
 }
 
 /**

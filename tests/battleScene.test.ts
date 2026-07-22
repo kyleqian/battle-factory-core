@@ -2206,7 +2206,7 @@ describe("S7 slice R rung (b): turn10AerialAceLungeOffset - Pidgeotto's own elli
   });
 });
 
-describe("S7 slice R rung (b): turn10AerialAceSlot4Offset/turn10AerialAceSlot7Offset - the two AnimTask_TraceMonBlended clones, RAM-tabled by docs/aerial-ace-notes.md continuation - each life's START needs one extra tick of lag past the shared +2 (oracle-pixel-confirmed this session, the same 'freshly-allocated semi-transparent OBJ' shape docs/battle-turn-notes.md §39 already root-caused for QUICK_ATTACK), the END stays at the ordinary +2", () => {
+describe("S7 slice R rung (b): turn10AerialAceSlot4Offset/turn10AerialAceSlot7Offset - the two AnimTask_TraceMonBlended clones, RAM-tabled by docs/aerial-ace-notes.md continuation - each life's START needs one extra tick of lag past the shared +2 (the same 'freshly-allocated semi-transparent OBJ' shape docs/battle-turn-notes.md §39 already root-caused for QUICK_ATTACK); the END is the ORDINARY +1 lag (RAM-pixel-bisected this session, docs/aerial-ace-notes.md's 2026-07-21 rung-(a) close-out - the naive +2-at-both-ends guess left slot 7 visible one tick too long, regressing render 12374)", () => {
   const pressTick = 12305;
   it("slot4 life 1: active render 12363-12369 at (-17,2), null just outside", () => {
     expect(turn10AerialAceSlot4Offset(12362, pressTick)).toBeNull();
@@ -2220,11 +2220,11 @@ describe("S7 slice R rung (b): turn10AerialAceSlot4Offset/turn10AerialAceSlot7Of
     expect(turn10AerialAceSlot4Offset(12379, pressTick)).toEqual({ x2: 0, y2: 0 });
     expect(turn10AerialAceSlot4Offset(12380, pressTick)).toBeNull();
   });
-  it("slot7: active render 12368-12374 at (24,6)", () => {
+  it("slot7: active render 12368-12373 at (24,6)", () => {
     expect(turn10AerialAceSlot7Offset(12367, pressTick)).toBeNull();
     expect(turn10AerialAceSlot7Offset(12368, pressTick)).toEqual({ x2: 24, y2: 6 });
-    expect(turn10AerialAceSlot7Offset(12374, pressTick)).toEqual({ x2: 24, y2: 6 });
-    expect(turn10AerialAceSlot7Offset(12375, pressTick)).toBeNull();
+    expect(turn10AerialAceSlot7Offset(12373, pressTick)).toEqual({ x2: 24, y2: 6 });
+    expect(turn10AerialAceSlot7Offset(12374, pressTick)).toBeNull();
   });
 });
 
