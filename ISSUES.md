@@ -5,48 +5,40 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #33 — Turn 13 post-switch-in residual: Murkrow wobble-phase frame asset
-  (shape-only, colors now correct), excluded from `turn13-switchin.json`
-  (191/191)
+## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
+  own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
+  (240/240)
 
 Opened 2026-07-21 wind-down (supervisor), consolidating `battle-turn-notes.md`
-§50's two named residuals so they don't live only in a dossier. Part (a)
-was wired 2026-07-21 (wiring session) and narrowed considerably; part (b)
+§50's two named residuals so they don't live only in a dossier. Part (b)
 (the settled-menu bounce subset after the switch-in reset) was root-caused
-and wired 2026-07-21/22 (`docs/turn13-bounce-notes.md` §§3-9,
-`turn13-switchin.json` now 191/191) — see #34 for the SEPARATE, related
-finding that fix surfaced in turn 14's own downstream reuse.
+and wired 2026-07-21/22 (`docs/turn13-bounce-notes.md` §§3-9) — see #34 for
+the SEPARATE, related finding that fix surfaced in turn 14's own downstream
+reuse. Part (a) (this entry) is now trimmed to its own tiny remainder below
+— the frame-selection bug itself is CLOSED.
 
-(a) **Wobble-phase shape mismatch, renders 17019-17069** (was 17004-17069;
-the growing-silhouette sub-phase 17004-17018 is now wired and green). The
-banked `TURN13_MURKROW_WOBBLE_TABLE`/anchor (17020)/frame-flip (17034) are
-now wired AND cross-checked byte-exact against a fresh RAM probe this
-session (not just the prior session's transcription) - the table itself is
-not the bug. Wiring it surfaced two more real bugs, both fixed this
-session: (1) the switch-in's own BG-to-white materialize dither
-(`TURN5_BG_FADE_Y`) was never re-anchored off `TURN13_BALL_HANDOFF_TICK`,
-silently zero for every turn-13 tick; (2) the materialize tint-fade
-coefficient ramp needs to keep applying into the wobble draw call for
-MURKROW (unlike Pidgeotto, whose ramp always finishes before its own
-stretch phase begins) - hardcoding `tintCoeff=0` there (copied from
-Pidgeotto's call site) rendered MURKROW in full color several ticks before
-the real game does. Both fixes are wired (`docs/turn13-notes.md`'s newest
-section). **Remaining, after both fixes**: colors are now confirmed
-correct (direct pixel sampling), but MURKROW's own leg/lower-body
-silhouette is genuinely shape-mismatched at every tick from ~17026 on, not
-shrinking as the wobble scale returns near identity - `pa/pb/pc/pd` are
-RAM-exact to the table (`pb=pc=0` throughout, no dropped
-rotation/shear term) and frame-flip timing is RAM-exact too, so by
-elimination the reused `frame2` sprite asset is the likely culprit: it's
-never actually exercised by MURKROW's own settled draw path
-(`drawTurn13MurkrowSettled` always draws `tileset`, never `frame2`), so
-despite living in the asset file it has never been pixel-validated against
-the oracle in any currently-passing trace. **Next step**: a fresh VRAM
-tile dump at a materialize-window tick with `animCmdIndex=1` (e.g. RAM
-17040, same battler-1/`gSprites` addressing `dump-turn13-murkrow-
-materialize.py` already established) compared byte-for-byte against the
-currently-extracted `frame2` tiles - confirm or refute the wrong-asset
-theory directly rather than guessing further.
+**Closed 2026-07-22** (wiring step): a direct VRAM dump
+(`docs/turn13-notes.md`'s dated append, `verify-turn13-frame2.ts` 11/11
+PASS) refuted the "wrong asset" theory outright — both `tileset` and
+`frame2` are byte-exact against hardware whenever each is genuinely live.
+The real bug was `turn13MurkrowFrame`'s own open-ended step function
+(`t < 17034 ? 0 : 1`), instead of the real closed window `frame2` is live
+in (`[TURN13_MURKROW_STRETCH_TICK, TURN13_MURKROW_FRAME_FLIP_TICK]`
+inclusive). Wired verbatim; restored 49 of the 51 excluded ticks
+(17019-17069) to 0-diff.
+
+**Remaining** (a much smaller, separate residual than the one this entry
+used to describe): renders **17019 and 17034 only** — the exact two ticks
+the probe's own dossier flagged in advance as a coincidental artifact of
+the OLD code — still show a small shape residual (418px/828px, both
+bboxes confined to Murkrow's own silhouette). The frame CHOICE at both
+ticks is already the one the RAM-confirmed window calls for, so this is
+NOT a frame-selection bug — something else differs at exactly the
+window's two boundary ticks (one tick before it opens, and its own
+closing tick). Likely candidates, untested: the wobble table's index math
+or the tint coefficient right at those two specific ticks. **Next step**:
+a fresh probe (RAM/VRAM, same two-independent-methods bar) pointed at
+just those two ticks — do not re-guess a fix without it.
 
 ## #34 — Turn 14's own settled-menu redraw (`TURN14_MENU_REDRAW_TICK`=18086)
   has a separate, same-class instance of #33(b)'s bug, plus an unresolved

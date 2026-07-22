@@ -6932,14 +6932,16 @@ const TURN13_MURKROW_WOBBLE_TABLE: readonly { xScale: number; yScale: number; y2
   { xScale: 256, yScale: 256, y2: 0 },
 ];
 /**
- * Front-sprite frame selection: Murkrow's own `animCmdIndex` flips exactly
- * ONCE in this whole window (RAM 17033, visible render 17034), unlike
+ * Front-sprite frame selection: `frame2` is live only for the closed window
+ * [TURN13_MURKROW_STRETCH_TICK, TURN13_MURKROW_FRAME_FLIP_TICK] inclusive
+ * (direct VRAM dump, docs/turn13-notes.md's newest append) - `tileset`
+ * everywhere else in the whole materialize+wobble+settle span. Unlike
  * Pidgeotto's reused 5-breakpoint cycle (`turn5PidgeottoFrame`), which does
- * not transfer - docs/turn13-notes.md's own materialize-table section.
+ * not transfer here.
  */
 const TURN13_MURKROW_FRAME_FLIP_TICK = 17034;
 function turn13MurkrowFrame(t: number): 0 | 1 {
-  return t < TURN13_MURKROW_FRAME_FLIP_TICK ? 0 : 1;
+  return t >= TURN13_MURKROW_STRETCH_TICK && t <= TURN13_MURKROW_FRAME_FLIP_TICK ? 1 : 0;
 }
 function drawTurn13MurkrowMaterialize(fb: Uint8Array, t: number): void {
   if (t < TURN13_MURKROW_MATERIALIZE_START || t >= TURN13_MURKROW_SETTLE_TICK) return;

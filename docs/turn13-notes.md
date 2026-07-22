@@ -1321,3 +1321,53 @@ This was a diagnostic probe only (worktree lane, contract-bound against
 not applied here. `npm test` 993/993 and `npm run build` unaffected (no
 engine/trace files touched, only a new probe script + a new verify
 script + a new committed dump fixture).
+
+## 2026-07-22 — bounded worker (wiring step, ISSUES #33(a) close-out): closed-window fix wired, `turn13-switchin.json` **240/240** — 49 of 51 excluded ticks restored; the flagged 17019/17034 pair survives as its own tiny residual
+
+Mandatory-first-step rerun of `verify-turn13-frame2.ts`: **11/11 PASS**
+(unchanged — oracle-only, unaffected by `src/`). Wired the probe's exact
+fix shape verbatim into `turn13MurkrowFrame` (`src/engine/battleScene.ts`):
+```ts
+function turn13MurkrowFrame(t: number): 0 | 1 {
+  return t >= TURN13_MURKROW_STRETCH_TICK && t <= TURN13_MURKROW_FRAME_FLIP_TICK ? 1 : 0;
+}
+```
+Restored all 51 excluded ticks (17019-17069) to `turn13-switchin.json`'s
+`captureFrames` (191→242) and ran `npm run compare`: **240/242**, with
+the diff landing at EXACTLY the two ticks the probe's own dossier flagged
+in advance as a possible coincidence artifact of the OLD code — 17019
+(418px, ssimMean 0.9787) and 17034 (828px, ssimMean 0.9671) — and
+nowhere else in the whole 242-tick window (49/51 of the restored ticks
+are clean 0-diff). Both residual bboxes are confined to Murkrow's own
+silhouette (`(154,30)-(196,71)` and `(153,32)-(198,72)`, both squarely
+inside `MURKROW_CORNER`'s sprite box), so this is NOT a healthbox/text/
+other-element regression — it's a small, separate defect co-located with
+the same sprite, exactly at the window's own two boundary ticks (one tick
+before the window opens, and the window's own closing tick). Per the
+probe's own pre-authorized caveat, excluded just those two ticks
+(242→240) rather than guessing at a fix — this is a distinct, much
+smaller open question (edge-of-window shape residual, 2 ticks, not a
+frame-selection bug — the frame choice at both ticks is already the one
+the RAM-confirmed window calls for) and would need its own probe
+(likely the wobble table's index math or the tint coefficient right at
+`t===TURN13_MURKROW_STRETCH_TICK-1`/`t===TURN13_MURKROW_FRAME_FLIP_TICK`)
+to root-cause rather than re-guess here.
+
+`turn13-switchin.json`: **240/240, 0 diff** (was 191/191 pre-fix).
+Regression sweep, all unchanged and 0 diff: `turn14-fly-miss.json`
+150/150, `turn13-menu.json` 57/57, `turn13-sandattack.json` 190/190,
+`turn13-dragonbreath-faint.json` 141/141. `turn13MurkrowFrame` is called
+only from `drawTurn13MurkrowMaterialize`, itself MURKROW/turn-13-only —
+entirely separate from `turn5PidgeottoFrame` (Pidgeotto's own reused
+5-breakpoint cycle, a different function) — so turn 5's own materialize
+trace needed no rerun; confirmed by grep, not just by inspection. No
+Tier-1 pin: this run has no existing precedent of unit-testing these
+per-turn frame-selector closures in isolation (they're `function`-scoped,
+not exported, and validated entirely through oracle trace parity, same as
+`turn5PidgeottoFrame` before it) — forcing an export+test here would be
+against the grain, not a natural fit. `npm test` 993/993, `npm run build`
+green.
+
+ISSUES #33 trimmed to exactly the surviving 2-tick caveat (see
+`ISSUES.md`) rather than deleted outright — part (a)'s frame-selection
+bug itself is fully closed.

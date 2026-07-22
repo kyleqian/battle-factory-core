@@ -4,6 +4,40 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 253 — Bounded worker (turn-13 wiring step, ISSUES #33a close-out): wired the probe-confirmed closed-window frame-selection fix — `turn13-switchin.json` **240/240, 0 diff** (was 191/191; 49 of 51 excluded ticks restored); the exact 2 ticks the probe flagged in advance (17019, 17034) survive as a new, much smaller, separate residual — trimmed ISSUES #33 to just that, not deleted
+
+- **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run
+  build` green, tree clean. `verify-turn13-frame2.ts` **11/11 PASS**
+  (mandatory-first-step rerun — oracle-only, unaffected by `src/`).
+  Regression sweep 0 diff: `turn14-fly-miss` 150/150, `turn13-menu`
+  57/57, `turn13-sandattack` 190/190, `turn13-dragonbreath-faint` 141/141.
+  Turn 5's own materialize trace needed no rerun: `turn13MurkrowFrame` is
+  called only from `drawTurn13MurkrowMaterialize` (MURKROW/turn-13-only),
+  entirely separate from `turn5PidgeottoFrame` — confirmed by grep.
+- **Did:** Replaced `turn13MurkrowFrame`'s open-ended step (`t < 17034 ?
+  0 : 1`) with the probe's exact closed-interval fix (`t >=
+  TURN13_MURKROW_STRETCH_TICK && t <= TURN13_MURKROW_FRAME_FLIP_TICK ? 1
+  : 0`, `src/engine/battleScene.ts`). Restored ticks 17019-17069 to
+  `turn13-switchin.json` (191→242) and ran `npm run compare`: 240/242,
+  diff landing at EXACTLY the two boundary ticks the probe's dossier
+  pre-flagged (17019: 418px; 17034: 828px), both bboxes confined to
+  Murkrow's own silhouette, nowhere else in the window. Excluded just
+  those 2 per the pre-authorized caveat (242→240, 0 diff) rather than
+  guessing at a fix. No Tier-1 pin forced — no existing precedent of
+  unit-testing these per-turn frame-selector closures in isolation, same
+  as `turn5PidgeottoFrame` before it.
+- **Next:** ISSUES #33's own tiny remainder (17019/17034, needs a fresh
+  probe — wobble table index math or tint coefficient right at those two
+  ticks, not re-guessed); ISSUES #34 (turn 14's own menu-redraw blank-hold
+  + regime question); ISSUES #32; turn 15+ wiring.
+- **Notes:** Full writeup `docs/turn13-notes.md`'s newest section (owned
+  this round). Fourth session in a row where a "banked, probe-confirmed"
+  fix landed almost-but-not-quite gapless on contact with `npm run
+  compare` — this time the probe itself had already flagged the exact
+  failure mode in advance, so no time was lost chasing it blind. No
+  PAPERCUTS beyond the standing mgba-venv-teardown one.
+
+---
 ## 252 — Bounded worker (turn-13 wiring step, ISSUES #33b): wired the probe-confirmed switch-in text-clear/menu-redraw split — `turn13-switchin.json` **191/191, 0 diff** (was 171/171); found a NEW regression in turn 14's own downstream reuse while restoring the probe's turn-14 predictions, filed as ISSUES #34 rather than re-derived on the spot — `turn14-fly-miss.json` **150/150, 0 diff** (net +1 from 149: +4 restored, -3 excluded as a real regression)
 
 - **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run
@@ -95,32 +129,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the restored window catches gaps like the BG-fade anchor and tint-ramp
   duration, which no RAM-only check was set up to see. No PAPERCUTS beyond
   the standing mgba-venv-teardown one.
-
----
-## 250 — Supervisor wind-down: session end 2026-07-21 ~23:05 — **12 verified worker steps folded across 6 rounds** (5 main-lane engine slices incl. 2 cap-kill salvages + 7 worktree probes, zero dud steps); suite **966 → 993/993**; headlines: **turns 13 AND 14 wired end-to-end** (13: menu/SAND_ATTACK/DRAGON_BREATH-faint/MURKROW-switch-in, traces 57+190+141+156; 14: FLY-charge + auto-miss, 149/149), **the AERIAL_ACE window closed GAPLESS** (93/93 + turn-12 mirror 131/131) via a 3-probe crack chain (OAM-winner overlap rule → 5-bit-domain darken → both verified pixel-exact), **ISSUES #31 hitsplat SOLVED + deleted** (wrong target2 — 4210/4210 exact; trace 167/167), **retrofit pipeline completed through the WIN** (verify-turn14/15/16/17 all banked, BRN badge pinned at 21542), #32+#33 filed with named instruments
-
-- **State (verified this minute):** `npm test` **993/993**, `npm run
-  build` green, tree clean, no worktrees, no unmerged branches. Traces
-  new/extended this session (all supervisor-rerun 0 diff):
-  turn13-menu 57, turn13-sandattack 190, turn13-dragonbreath-faint 141,
-  turn13-switchin 156, turn14-fly-miss 149, turn10-aerialace 23→93,
-  turn9-quickattack 159→167, turn12-aerialace 56→131. Verify scripts all
-  passing from main tree: turn13 60/60, turn13-materialize 20/20,
-  turn14 28/28, turn15 58/58, turn16, turn17, turn10-aerialace 49/49,
-  turn9-hitsplat 12/12.
-- **Next:** (1) turn-13 finish via ISSUES #33 — (a) is pure wiring (the
-  banked Murkrow wobble table, mind the 50th-entry trap), (b) needs its
-  one characterization probe first; (2) ISSUES #32 (named instrument:
-  gMain.oamBuffer probe of slots 3/4 at RAM 10939-10940); (3) turn-15
-  wiring off verify-turn15 (58/58) — then 16/17/WIN, all retrofit-ready;
-  (4) ISSUES #23 stays parked.
-- **Notes:** zero merge conflicts across 8 merges. Two cap-kills, both
-  salvaged cleanly (SAND_ATTACK probe committed pre-kill; rung 4
-  finished work+§50 but not the commit — supervisor verified and
-  committed with provenance). Three consecutive early-stop workers
-  (~20 of 60 min) fixed by switching to single-rung 40-min briefs —
-  later workers then used 30-35 min productively. The probe→wiring
-  pipeline went 7-for-7 again; the overlap-rule crack transferred
-  across three windows (AERIAL_ACE plain → darken → hitsplat) but #32
-  proved "wins its OAM tie" is tick-dependent, not shape-transferable.
-  Interactive session; no escalations needed; no usage-limit events.
