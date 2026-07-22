@@ -67,6 +67,7 @@ import {
   windowRange,
   turn10AerialAceLungeOffset,
   turn10AerialAceSlot4Offset,
+  turn10AerialAceSlot4WinsAtLifeEnd,
   turn10AerialAceSlot7Offset,
   turn10AerialAceOnixShakeY2,
   turn10AerialAcePaletteDarkenCoeff,
@@ -2229,17 +2230,22 @@ describe("S7 slice R rung (b): turn10AerialAceLungeOffset - Pidgeotto's own elli
 
 describe("S7 slice R rung (b): turn10AerialAceSlot4Offset/turn10AerialAceSlot7Offset - the two AnimTask_TraceMonBlended clones, RAM-tabled by docs/aerial-ace-notes.md continuation - each life's START needs one extra tick of lag past the shared +2 (the same 'freshly-allocated semi-transparent OBJ' shape docs/battle-turn-notes.md §39 already root-caused for QUICK_ATTACK); the END is the ORDINARY +1 lag (RAM-pixel-bisected this session, docs/aerial-ace-notes.md's 2026-07-21 rung-(a) close-out - the naive +2-at-both-ends guess left slot 7 visible one tick too long, regressing render 12374)", () => {
   const pressTick = 12305;
-  it("slot4 life 1: active render 12363-12369 at (-17,2), null just outside", () => {
+  it("slot4 life 1: active render 12363-12368 at (-17,2), null just outside (PART 1 close-out this session: corrected from the prior +1-too-long 12369 end, per npm run compare's own pixel-exact evidence that render 12369 already shows slot 4 fully gone)", () => {
     expect(turn10AerialAceSlot4Offset(12362, pressTick)).toBeNull();
     expect(turn10AerialAceSlot4Offset(12363, pressTick)).toEqual({ x2: -17, y2: 2 });
-    expect(turn10AerialAceSlot4Offset(12369, pressTick)).toEqual({ x2: -17, y2: 2 });
-    expect(turn10AerialAceSlot4Offset(12370, pressTick)).toBeNull();
+    expect(turn10AerialAceSlot4Offset(12368, pressTick)).toEqual({ x2: -17, y2: 2 });
+    expect(turn10AerialAceSlot4Offset(12369, pressTick)).toBeNull();
   });
   it("slot4 life 2: active render 12373-12379 at (0,0)", () => {
     expect(turn10AerialAceSlot4Offset(12372, pressTick)).toBeNull();
     expect(turn10AerialAceSlot4Offset(12373, pressTick)).toEqual({ x2: 0, y2: 0 });
     expect(turn10AerialAceSlot4Offset(12379, pressTick)).toEqual({ x2: 0, y2: 0 });
     expect(turn10AerialAceSlot4Offset(12380, pressTick)).toBeNull();
+  });
+  it("slot4 wins its own OAM tie against the real sprite ONLY at the very last tick of life 1, render 12368 (PART 1 close-out, npm run compare pixel-bisected)", () => {
+    expect(turn10AerialAceSlot4WinsAtLifeEnd(12367, pressTick)).toBe(false);
+    expect(turn10AerialAceSlot4WinsAtLifeEnd(12368, pressTick)).toBe(true);
+    expect(turn10AerialAceSlot4WinsAtLifeEnd(12369, pressTick)).toBe(false);
   });
   it("slot7: active render 12368-12373 at (24,6)", () => {
     expect(turn10AerialAceSlot7Offset(12367, pressTick)).toBeNull();

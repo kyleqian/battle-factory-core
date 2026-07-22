@@ -8561,10 +8561,31 @@ const TURN10_CLONE_START_RENDER_LAG = 3;
 const TURN10_CLONE_END_RENDER_LAG = 1;
 export function turn10AerialAceSlot4Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
   const nStart = t - TURN10_CLONE_START_RENDER_LAG - pressTick;
-  const nEnd = t - TURN10_LUNGE_RENDER_LAG - pressTick;
-  if (nStart >= 55 && nEnd <= 62) return { x2: -17, y2: 2 }; // RAM 12360-12367, life 1 (matches the lunge's own FIRST value)
-  if (nStart >= 65 && nEnd <= 72) return { x2: 0, y2: 0 }; // RAM 12370-12377, life 2
+  const nEnd = t - TURN10_CLONE_END_RENDER_LAG - pressTick;
+  if (nStart >= 55 && nEnd <= 62) return { x2: -17, y2: 2 }; // RAM 12360-12367, life 1 (matches the lunge's own FIRST value); render 12363-12368, ordinary +1 end lag (corrected this session - see turn10AerialAceSlot4WinsAtLifeEnd's own doc comment, the borrowed +2 lunge-lag left this alive one tick too long, render 12369 pixel-confirmed already gone)
+  const nEndLife2 = t - TURN10_LUNGE_RENDER_LAG - pressTick;
+  if (nStart >= 65 && nEndLife2 <= 72) return { x2: 0, y2: 0 }; // RAM 12370-12377, life 2
   return null;
+}
+/**
+ * PART 1 close-out finding (S7 engine step, this session, `npm run compare`
+ * pixel-bisected against `docs/aerial-ace-notes.md`'s own OVERLAP RULE):
+ * slot 4's own OAM tie against the real sprite is NOT constant across its
+ * life - it LOSES for renders 12363-12367 (rung (a)'s own proven order:
+ * blended against the field, drawn BEFORE the real sprite's opaque redraw)
+ * but WINS outright at the very last tick of its life, render **12368**
+ * only (pixel-exact match to slot 4's own blend-against-field formula at
+ * multiple sample pixels with differing underlying real-sprite indices,
+ * `tools/compare/scratch/diag-aerialace-overlap-window.ts`) - render 12369
+ * (one tick later) shows slot 4 already fully gone (oracle reverts to the
+ * untouched PLAIN field, not even the darkened erase color), confirming its
+ * true RAM death falls between those two render ticks, consistent with the
+ * corrected ordinary +1 end lag above. Not curve-fit further: this one-tick
+ * flip is odd but the pixel evidence at both boundary ticks is unambiguous
+ * and independently confirmed by `npm run compare` twice.
+ */
+export function turn10AerialAceSlot4WinsAtLifeEnd(t: number, pressTick: number): boolean {
+  return t - pressTick === 63; // render 12368 only
 }
 export function turn10AerialAceSlot7Offset(t: number, pressTick: number): { x2: number; y2: number } | null {
   const nStart = t - TURN10_CLONE_START_RENDER_LAG - pressTick;
@@ -8575,22 +8596,23 @@ export function turn10AerialAceSlot7Offset(t: number, pressTick: number): { x2: 
 
 /**
  * Mechanisms 1+3 together: erase Pidgeotto's own settled footprint, redraw
- * BOTH blended clones FIRST (against the static field, still in `fb` at this
- * point), then the real sprite OPAQUE on top LAST - the OPPOSITE compositing
- * order from QUICK_ATTACK's own clones (`drawTurn9QuickAttackAnimation`,
- * which draws its real sprite first and blends clones "over fb" last).
- * RAM-pixel-bisected this session (`tools/compare/scratch/quick-diff.ts`
- * against a fresh oracle capture): with the real sprite drawn FIRST and
- * clones blended on top (QUICK_ATTACK's own order), renders 12363-12367
- * showed a real, non-positional residual (666->29px, shrinking but never 0 -
- * the exact shape `docs/battle-turn-notes.md` §42/§43 flagged as unresolved)
- * that persisted no matter how the clones' own offset/window/lag were
- * bisected (both independently confirmed already-optimal against RAM/pixel
- * ground truth). Reversing the order - opaque real always wins wherever it
- * covers a clone, blended clone only shows in the sliver where it extends
- * beyond the real sprite's own footprint - closes that residual to exactly
- * 0 for the whole 12363-12367 window. `darken` (mechanism 4, below) swaps in
- * the palette-pulse's darkened palette for every draw here when the pulse
+ * slot 4 blended FIRST (against the static field, still in `fb` at this
+ * point), then the real sprite OPAQUE on top, then slot 7 LAST via
+ * `drawTurn10AerialAceCloneWinsOverField` (wins its own OAM tie against the
+ * real sprite UNCONDITIONALLY, blended against the field alone, never the
+ * live `fb`). The two clones do NOT share one rule: rung (a)'s own session
+ * RAM-pixel-bisected that reversing QUICK_ATTACK's own "real first, clones
+ * blended over fb last" order for BOTH clones (real always wins) closes the
+ * 12363-12367 residual (666->29px, `docs/battle-turn-notes.md` §42/§43) to
+ * exactly 0 - independently reconfirmed by `npm run compare` this session
+ * (forcing slot 4 to win unconditionally like slot 7 regresses this exact
+ * window straight back to that same residual). Slot 7 is a genuinely
+ * different case (this session's own Mission A2 + rule-transfer PROBE,
+ * `docs/aerial-ace-notes.md`): RAM-proven (`gMain.oamBuffer`) to sit at a
+ * stably lower OAM index than the real sprite for its ENTIRE life
+ * (12368-12373), never flipping - it wins outright, drawn last, wherever its
+ * own texel is opaque. `darken` (mechanism 4, below) swaps in the
+ * palette-pulse's darkened palette for every draw here when the pulse
  * plateau is active - real hardware's `BlendPalette` writes straight into
  * the live palette RAM bank Pidgeotto's sprite (and its clones, same
  * physical palette) reads from, so both must darken together, not just the
@@ -8604,10 +8626,70 @@ function drawTurn10AerialAceLungeAndClones(fb: Uint8Array, t: number, pressTick:
   erasePidgeottoFootprint(fb, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y, darken ? turn10BgDarkPalette() : undefined);
   const { tileset } = pidgeottoFrontSprite;
   const palette = darken ? turn10PidgeottoDarkPalette() : pidgeottoFrontSprite.palette;
+  const bgPaletteOverride = darken ? turn10BgDarkPalette() : undefined;
   const real = lunge ?? { x2: 0, y2: 0 };
-  if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
-  if (slot7) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot7.x2, PIDGEOTTO_CORNER.y + slot7.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  // Slot 4 keeps rung (a)'s own proven order for MOST of its life (blended
+  // against the field, drawn BEFORE the real sprite's own opaque redraw
+  // covers it) - RAM-pixel-bisected in an earlier session for renders
+  // 12363-12367 and independently reconfirmed by `npm run compare` this
+  // session (forcing it to win unconditionally like slot 7 regresses this
+  // exact window back to the pre-fix 666/695/320/29px residual) - EXCEPT the
+  // very last tick of its life, render 12368, where it flips to winning (see
+  // `turn10AerialAceSlot4WinsAtLifeEnd`'s own doc comment).
+  const slot4WinsNow = slot4 !== null && turn10AerialAceSlot4WinsAtLifeEnd(t, pressTick);
+  if (slot4 && !slot4WinsNow) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
   drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  // OVERLAP RULE (docs/aerial-ace-notes.md's Mission A2 + rule-transfer PROBE
+  // sessions): slot 7 wins its own OAM tie against the real sprite
+  // UNCONDITIONALLY, for its whole life (RAM-proven stably lower
+  // `gMain.oamBuffer` index, never flips) - drawn LAST, on top of the
+  // just-drawn real sprite, wherever its own texel is opaque, blended
+  // against the field alone (never the live `fb`, which already has the
+  // real sprite's own redraw painted into it here). Slot 4 joins it here
+  // ONLY at its own life-end tick (`slot4WinsNow`, above).
+  if (slot4WinsNow) drawTurn10AerialAceCloneWinsOverField(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4!.x2, PIDGEOTTO_CORNER.y + slot4!.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y, bgPaletteOverride);
+  if (slot7) drawTurn10AerialAceCloneWinsOverField(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot7.x2, PIDGEOTTO_CORNER.y + slot7.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y, bgPaletteOverride);
+}
+
+/**
+ * The clone's own blend target2 at true overlap pixels: the static field
+ * ALONE, computed directly from the BG asset (`staticBgPixel`, shiftY=0/
+ * fadeY=0 by turn 10 so screen (x,y) maps straight to BG map (x,y)) - never
+ * sampled from the live `fb`, which by this point already has the real
+ * sprite's own opaque redraw painted into it (the exact "blend over live fb"
+ * bug ISSUES #31's hitsplat had, docs/turn9-shake-notes.md's own solved
+ * rule). Only touches pixels where the clone's own texel is opaque, so the
+ * real sprite drawn just before this call shows through everywhere else
+ * automatically. Ground-clipped at `maxY` same as the real sprite's own
+ * redraw (the feet stay grounded throughout the lunge, unmoved) - confirmed
+ * needed by `npm run compare`: without it a clone's own texel below the
+ * real sprite's foot line painted over the static field there instead of
+ * leaving it untouched.
+ */
+function drawTurn10AerialAceCloneWinsOverField(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, eva: number, evb: number, maxY: number, bgPaletteOverride?: RgbColor[][]): void {
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    const rowY = oy + ty * 8;
+    if (rowY >= maxY) continue;
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        const y = rowY + py;
+        if (y >= maxY) continue;
+        for (let px = 0; px < 8; px += 1) {
+          const idx = tile[py * 8 + px]!;
+          if (idx === 0) continue;
+          const c = palette[idx];
+          if (!c) continue;
+          const x = ox + tx * 8 + px;
+          if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+          const field = staticBgPixel(x, y, bgPaletteOverride);
+          if (!field) continue;
+          setPixel(fb, x, y, { r: blendChannel(c.r, field.r, eva, evb), g: blendChannel(c.g, field.g, eva, evb), b: blendChannel(c.b, field.b, eva, evb) });
+        }
+      }
+    }
+  }
 }
 
 /**
