@@ -7019,8 +7019,16 @@ function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTic
   drawPlayerHealthboxHpOverlay(fb, TURN12_ONIX_AFTER_AERIALACE_HP, bounce.healthboxY2);
 }
 
-/** First observed sha of the settled "What will ONIX do?" vs. MURKROW idle-cycle family (docs/turn13-notes.md §4's own citation, oracle-pixel-bisected this session: dense scan lands on `5e5283bf92c2` starting exactly here). */
-const TURN13_SWITCHIN_MENU_REDRAW_TICK = 17106;
+/**
+ * The sent-out text clears to a blank message box here (docs/turn13-bounce-
+ * notes.md §3a) - plays `TURN5_SITRUS_TEXT_CLEAR_TICK`'s own role. The sha
+ * `5e5283bf92c2` a prior session bisected and attributed to the settled-menu
+ * family is actually THIS blank box's own sha, not the interactive chrome's
+ * (see the constant below for the real chrome-reveal tick).
+ */
+const TURN13_SWITCHIN_TEXT_CLEAR_TICK = 17106;
+/** The interactive "What will ONIX do?" chrome actually reveals here - six ticks after the text-clear blank hold begins, oracle-pixel-confirmed this session (docs/turn13-bounce-notes.md §3a/§4): first tick whose sha diverges from the blank box's `5e5283bf92c2`. Also the correct anchor for `TURN13_SWITCHIN_RESET_SHIFT`. */
+const TURN13_SWITCHIN_MENU_REDRAW_TICK = 17112;
 /**
  * DESTIN's own switch-in RESETS the idle-bounce regime, the same way turn
  * 5's own Sitrus-heal switch-in did (`turn5SitrusResettledBounceTick`'s own
@@ -7057,7 +7065,14 @@ function drawTurn13SwitchinWindow(fb: Uint8Array, t: number, frozenBounceTick: n
     if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN13_FAINTED_CURSOR_X);
     return;
   }
-  drawMessageTextLines(fb, SWITCHIN_SENTOUT_LINE1, TURN13_SWITCHIN_SENTOUT_LINE2, turn13SwitchinSentOutTextVisibleChars(t));
+  if (t < TURN13_SWITCHIN_TEXT_CLEAR_TICK) {
+    drawMessageTextLines(fb, SWITCHIN_SENTOUT_LINE1, TURN13_SWITCHIN_SENTOUT_LINE2, turn13SwitchinSentOutTextVisibleChars(t));
+    return;
+  }
+  // TEXT_CLEAR_TICK <= t < MENU_REDRAW_TICK: blank hold, mirrors
+  // drawTurn5RockSlideWindow's own TEXT_CLEAR->MENU_REDRAW gap - the
+  // unconditional drawTileBg call above already painted the message box's
+  // own flat teal fill, nothing else to draw here.
 }
 
 /**
