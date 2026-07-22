@@ -9232,11 +9232,176 @@ function drawTurn13FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
     drawTurn12TurnEndSettledMenu(fb, t);
     return;
   }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn13SandAttackTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurn13SandAttackWindow(fb, t, pressTick);
+      return;
+    }
+  }
   const bounceTick = sm.confirmElapsed !== null ? turn13KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   drawTurn13FieldBase(fb, t, bounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
   drawFightSubmenuChrome(fb, sm.displayCursor, true, true, sm.activeMonMoveset, true, true, true, true, true, true, true, true, true, true);
+}
+
+/**
+ * S7/S8 rung 2 (docs/turn13-notes.md's "SAND_ATTACK characterization"
+ * section): "Foe PIDGEOTTO used\nSAND-ATTACK!" - Pidgeotto acts FIRST this
+ * turn (1-point Speed margin, same as every prior turn), so this kickoff
+ * plays before the player's own confirmed DRAGON_BREATH. `pressTick` here
+ * is still the player's own DRAGON_BREATH confirm tick (`TICK0+sm.
+ * confirmElapsed`, 15419 at runtime in the canonical trace - one past the
+ * confirm press's own segment-start tick 15418, the usual "last frame of
+ * press+1" convention) - SAND_ATTACK has no button press of its own, same
+ * "anchor off the nearest real press" convention every AI-side second-half
+ * move in this dossier chain already uses. Delay oracle-pixel-bisected
+ * (a fresh `npm run compare` catches a 1-tick-late mismatch directly,
+ * localized to a single trailing glyph per frame - the classic "off by one
+ * character" signature): tick 15460 shows 29 of 30 chars (the "!" not yet
+ * drawn), so the text is fully typed one tick later (15461) and holds flat
+ * through 15470 (oracle-confirmed, `turn13-sandattack.json` 185/185).
+ */
+export const TURN13_SANDATTACK_LINE1 = "Foe PIDGEOTTO used";
+export const TURN13_SANDATTACK_LINE2 = "SAND-ATTACK!";
+const TURN13_SANDATTACK_TEXT_TOTAL = TURN13_SANDATTACK_LINE1.length + TURN13_SANDATTACK_LINE2.length;
+const TURN13_SANDATTACK_TEXT_DELAY = 13; // pressTick+13 = 15432 (first glyph) - pressTick=15419 at runtime (TICK0+sm.confirmElapsed), oracle-pixel-bisected (app was 1 tick late vs a fresh compare run before this fit)
+export function turn13SandAttackTextStartTick(pressTick: number): number {
+  return pressTick + TURN13_SANDATTACK_TEXT_DELAY;
+}
+export function turn13SandAttackTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn13SandAttackTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN13_SANDATTACK_TEXT_TOTAL, t - start + 1);
+}
+
+/**
+ * SAND_ATTACK's own accuracy-drop banner on ONIX (the move's target) - the
+ * SAME generic `StatsChangeAnimation` banner `turn6StatFallEva`/
+ * `turn6StatFallBg1Y` already model for FEATHER_DANCE's ATK-fall, now the
+ * "non-sharply" target/wait pair (`tTargetBlend=10`, `tWaitTime=20` -
+ * `statsBannerEva`'s own DOUBLE_TEAM-increase constants) crossed with a
+ * DECREASE direction (`BG1_X=64`, `tVelocity=-3`, matching turn 6's own
+ * decrease case) and the `accuracy` palette - docs/turn13-notes.md's own
+ * "(c) accuracy-drop stat-change banner" section, RAM-pinned via a
+ * BLDALPHA/`gBattle_BG1_X`/`_Y` register scan: `eva` steps 0->1 first at
+ * RAM 15537 (`pressTick`+118, `pressTick`=15419 at runtime), reaches target
+ * 10 at RAM 15555 (+136), holds through RAM 15576 (+157), ramps back to 0
+ * by RAM 15595 (+176), register reset by RAM 15598 (+179). `BG1_Y` starts
+ * its `-3`/tick ramp at
+ * RAM 15535 (one render-tick-lag convention, same as `turn6StatFallBg1Y`),
+ * reaching -180 by RAM 15594 (vs. turn 6's own -246 - this window is
+ * shorter, matching the non-sharply `tWaitTime`).
+ */
+const TURN13_SANDATTACK_ACC_TARGET_BLEND = 10;
+const TURN13_SANDATTACK_ACC_RAMP_START_DELAY = 118; // pressTick+118 = 15537 (RAM), eva=1 (pressTick=15419 at runtime, oracle-pixel-bisected same as the kickoff text's own -1 fit)
+const TURN13_SANDATTACK_ACC_HOLD_END_DELAY = 157; // pressTick+157 = 15576 (RAM), last eva=10 tick
+const TURN13_SANDATTACK_ACC_RAMPDOWN_ANCHOR_DELAY = 158; // pressTick+158 = 15577 (RAM), eva=9 (first post-hold tick)
+
+export function turn13SandAttackAccEva(t: number, pressTick: number): number | null {
+  const d = t - pressTick;
+  if (d < TURN13_SANDATTACK_ACC_RAMP_START_DELAY || d > 180) return null;
+  if (d <= TURN13_SANDATTACK_ACC_HOLD_END_DELAY) {
+    return Math.min(TURN13_SANDATTACK_ACC_TARGET_BLEND, Math.floor((d - TURN13_SANDATTACK_ACC_RAMP_START_DELAY) / 2) + 1);
+  }
+  return Math.max(0, TURN13_SANDATTACK_ACC_TARGET_BLEND - (Math.floor((d - TURN13_SANDATTACK_ACC_RAMPDOWN_ANCHOR_DELAY) / 2) + 1));
+}
+
+/** Same "+1 render lag vs. BLDALPHA's own no-lag convention" rule `turn6StatFallBg1Y` already establishes. Clamped at -180 (this window's own shorter non-sharply ramp, vs. turn 6's -246). */
+export function turn13SandAttackAccBg1Y(t: number, pressTick: number): number {
+  const d = t - 1 - pressTick;
+  if (d <= 115) return 0;
+  return Math.max(-180, -3 * (d - 115));
+}
+const TURN13_SANDATTACK_ACC_BG1_X = 64; // same as TURN6_STATFALL_BG1_X - both decrease cases
+
+/** `drawTurn6StatFallBanner`'s own turn-13 analogue - same OBJ-window mask (ONIX is this move's own target too) and compositing, just the `accuracy` palette (vs. turn 6's `attack`) and this window's own `eva`/`bg1Y` schedule. */
+function drawTurn13SandAttackAccBanner(fb: Uint8Array, t: number, pressTick: number, eva: number): void {
+  const evb = 16 - eva;
+  const bg1Y = turn13SandAttackAccBg1Y(t, pressTick);
+  const { tileset } = onixBackSprite;
+  const bgTileset = statAnimBanner.tileset;
+  const bgTilemap = statAnimBanner.tilemaps.decrease;
+  const bgPalette = statAnimBanner.palettes.accuracy;
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          if (tile[py * 8 + px] === 0) continue;
+          const x = ONIX_MATERIALIZE_CORNER.x + tx * 8 + px;
+          const y = ONIX_MATERIALIZE_CORNER.y + ty * 8 + py;
+          if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+          const bg1c = statAnimBg1PixelAt(bgTilemap, bgTileset, bgPalette, x + TURN13_SANDATTACK_ACC_BG1_X, y + bg1Y);
+          if (!bg1c) continue;
+          const o = (y * 240 + x) * 4;
+          fb[o] = blendChannel(bg1c.r, fb[o]!, eva, evb);
+          fb[o + 1] = blendChannel(bg1c.g, fb[o + 1]!, eva, evb);
+          fb[o + 2] = blendChannel(bg1c.b, fb[o + 2]!, eva, evb);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * `sText_DefendersStatFell` resolved for ONIX/accuracy ("ONIX’s accuracy" /
+ * "fell!", curly apostrophe - same glyph `TURN6_ATKFELL_LINE1`'s own
+ * "ONIX’s" already established for this font/charmap): deferred until the
+ * stat banner above finishes (docs/turn13-notes.md's own "(d)" section) -
+ * typing starts at RAM/render 15608 (`pressTick`+189, `pressTick`=15419 at
+ * runtime, reads "...accuracy fel" by 15625, fully typed "...fell!" by
+ * 15627, then holds flat (same
+ * sha DRAGON_BREATH's own kickoff starts from - rung 3's concern, not
+ * drawn here).
+ */
+export const TURN13_ACCFELL_LINE1 = "ONIX’s accuracy";
+export const TURN13_ACCFELL_LINE2 = "fell!";
+const TURN13_ACCFELL_TEXT_TOTAL = TURN13_ACCFELL_LINE1.length + TURN13_ACCFELL_LINE2.length;
+const TURN13_ACCFELL_TEXT_DELAY = 189; // pressTick+189 = 15608 (pressTick=15419 at runtime)
+export function turn13AccFellTextStartTick(pressTick: number): number {
+  return pressTick + TURN13_ACCFELL_TEXT_DELAY;
+}
+export function turn13AccFellTextVisibleChars(t: number, pressTick: number): number {
+  const start = turn13AccFellTextStartTick(pressTick);
+  if (t < start) return 0;
+  return Math.min(TURN13_ACCFELL_TEXT_TOTAL, t - start + 1);
+}
+
+/**
+ * S7/S8 rung 2's own SAND_ATTACK dispatcher: the frozen on-field base (same
+ * frozen bounce phase the confirm-press transient already established,
+ * `turn13KickoffBounceTick`'s own post-freeze constant) plus the held
+ * kickoff text, the accuracy-drop banner once its own window opens, then
+ * the "ONIX’s accuracy fell!" text once the banner tears down. **The (a)
+ * dirt-throw/attacker-slide sub-phase (RAM 15475-15521, docs/turn13-notes.md's
+ * own dossier - 30 dirt sprites + a 2-stage attacker slide, exact per-tick
+ * positions regenerable via the committed `tools/probe/dump-sandattack-
+ * anim.py`) is NOT rendered here - out of this session's remaining time
+ * (needs a new sprite-sheet asset extraction, not just wiring) - named gap,
+ * not guessed at; `turn13-sandattack.json`'s own `captureFrames` excludes
+ * that exact window rather than claim a false 0-diff, same "exclude, don't
+ * fake" convention this dossier chain already establishes elsewhere (e.g.
+ * ISSUES #23's own projectile-flight exclusion). (b) the silent monbg-
+ * cleanup gap needs no special-case code - `turn13SandAttackAccEva` is
+ * naturally `null` there, so the settled kickoff-text baseline already
+ * renders it correctly by construction.
+ */
+function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  const frozenBounceTick = turn13KickoffBounceTick(t, pressTick);
+  drawTurn13FieldBase(fb, t, frozenBounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const accEva = turn13SandAttackAccEva(t, pressTick);
+  if (accEva !== null) drawTurn13SandAttackAccBanner(fb, t, pressTick, accEva);
+  const accFellStart = turn13AccFellTextStartTick(pressTick);
+  if (t >= accFellStart) {
+    drawMessageTextLines(fb, TURN13_ACCFELL_LINE1, TURN13_ACCFELL_LINE2, turn13AccFellTextVisibleChars(t, pressTick));
+    return;
+  }
+  drawMessageTextLines(fb, TURN13_SANDATTACK_LINE1, TURN13_SANDATTACK_LINE2, turn13SandAttackTextVisibleChars(t, pressTick));
 }
 
 /**

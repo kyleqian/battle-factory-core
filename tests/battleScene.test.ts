@@ -93,6 +93,16 @@ import {
   turn12MissTextStartTick,
   turn12MissTextVisibleChars,
   turn12RockSlideResettledBounceTick,
+  TURN13_SANDATTACK_LINE1,
+  TURN13_SANDATTACK_LINE2,
+  turn13SandAttackTextStartTick,
+  turn13SandAttackTextVisibleChars,
+  turn13SandAttackAccEva,
+  turn13SandAttackAccBg1Y,
+  TURN13_ACCFELL_LINE1,
+  TURN13_ACCFELL_LINE2,
+  turn13AccFellTextStartTick,
+  turn13AccFellTextVisibleChars,
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
@@ -2452,5 +2462,67 @@ describe("S7/S8: turn12RockSlideResettledBounceTick - the resettled turn-13 menu
     const at = (t: number) => menuIdleBounce(turn12RockSlideResettledBounceTick(t, TURN12_ROCKSLIDE_PRESS_TICK));
     expect(at(15374)).toEqual(at(15000));
     expect(at(14790)).not.toEqual(at(14799));
+  });
+});
+
+// S7/S8 rung 2 (docs/turn13-notes.md's SAND_ATTACK characterization
+// section): text/banner sub-phases, `turn13-sandattack.json` 185/185 0-diff.
+// `pressTick` below (15419) is the real runtime value of `TICK0+sm.
+// confirmElapsed` for this trace - one past the confirm A-press's own
+// segment-start tick (15418) - oracle-pixel-bisected this session (a fresh
+// `npm run compare` caught a 1-tick-late mismatch localized to a single
+// trailing glyph per frame, the classic "off by one character" signature).
+describe("S7/S8: turn13SandAttackTextStartTick/turn13SandAttackTextVisibleChars - 'Foe PIDGEOTTO used\\nSAND-ATTACK!' - oracle-pixel-fit start (pressTick+13), fully typed (30/30) by pressTick+42, tick 15460 (pressTick+41) still one glyph short (29/30) per the dossier's own correction", () => {
+  const pressTick = 15419;
+  it("starts at render 15432 (pressTick+13)", () => {
+    expect(turn13SandAttackTextStartTick(pressTick)).toBe(15432);
+  });
+  it("reveals 1 char/tick; 15460 shows 29/30 (the dossier's own pin), fully typed (30/30) by 15461, held after", () => {
+    expect(turn13SandAttackTextVisibleChars(15431, pressTick)).toBe(0);
+    expect(turn13SandAttackTextVisibleChars(15432, pressTick)).toBe(1);
+    expect(turn13SandAttackTextVisibleChars(15460, pressTick)).toBe(29);
+    expect(turn13SandAttackTextVisibleChars(15461, pressTick)).toBe(30);
+    expect(turn13SandAttackTextVisibleChars(15470, pressTick)).toBe(30);
+  });
+  it("LINE1/LINE2 match AERIAL_ACE's own opponent-kickoff line1 shape (same Pidgeotto, same 'Foe ... used' convention) plus the move's own display name", () => {
+    expect(TURN13_SANDATTACK_LINE1).toBe("Foe PIDGEOTTO used");
+    expect(TURN13_SANDATTACK_LINE2).toBe("SAND-ATTACK!");
+  });
+});
+
+describe("S7/S8: turn13SandAttackAccEva/Bg1Y - the accuracy-drop banner on ONIX, a non-sharply(10/20)+decrease+accuracy parameter combo of the generic StatsChangeAnimation banner - null outside its own RAM-active window, ramps 0->10->0 matching docs/turn13-notes.md's own RAM register table", () => {
+  const pressTick = 15419;
+  it("null before the banner's own register-active window and past its own reset", () => {
+    expect(turn13SandAttackAccEva(15536, pressTick)).toBeNull();
+    expect(turn13SandAttackAccEva(15600, pressTick)).toBeNull();
+  });
+  it("steps 0->1 first at RAM/render 15537 (pressTick+118), reaches target 10 by RAM 15555, holds through RAM 15576, back to 0 by RAM 15595", () => {
+    expect(turn13SandAttackAccEva(15537, pressTick)).toBe(1);
+    expect(turn13SandAttackAccEva(15555, pressTick)).toBe(10);
+    expect(turn13SandAttackAccEva(15576, pressTick)).toBe(10);
+    expect(turn13SandAttackAccEva(15595, pressTick)).toBe(0);
+  });
+  it("Bg1Y ramps -3/tick from render 15536 (one-tick BLDALPHA-vs-BG-scroll lag, same rule turn6StatFallBg1Y establishes), clamped at -180", () => {
+    expect(turn13SandAttackAccBg1Y(15535, pressTick)).toBe(0);
+    expect(turn13SandAttackAccBg1Y(15536, pressTick)).toBe(-3);
+    expect(turn13SandAttackAccBg1Y(15595, pressTick)).toBe(-180);
+    expect(turn13SandAttackAccBg1Y(15650, pressTick)).toBe(-180);
+  });
+});
+
+describe("S7/S8: turn13AccFellTextStartTick/turn13AccFellTextVisibleChars - 'ONIX’s accuracy\\nfell!' (sText_DefendersStatFell resolved for ONIX/accuracy, curly apostrophe matching TURN6_ATKFELL_LINE1's own font/charmap pin), deferred until the banner tears down - typing starts at RAM/render 15608 (pressTick+189), fully typed by 15627", () => {
+  const pressTick = 15419;
+  it("starts at render 15608 (pressTick+189), matching docs/turn13-notes.md's own RAM pin exactly", () => {
+    expect(turn13AccFellTextStartTick(pressTick)).toBe(15608);
+  });
+  it("reveals 1 char/tick, fully typed (20/20) by 15627, held after", () => {
+    expect(turn13AccFellTextVisibleChars(15607, pressTick)).toBe(0);
+    expect(turn13AccFellTextVisibleChars(15608, pressTick)).toBe(1);
+    expect(turn13AccFellTextVisibleChars(15627, pressTick)).toBe(20);
+    expect(turn13AccFellTextVisibleChars(15699, pressTick)).toBe(20);
+  });
+  it("LINE1 uses the curly apostrophe (U+2019), same glyph TURN6_ATKFELL_LINE1 already established for this font/charmap", () => {
+    expect(TURN13_ACCFELL_LINE1).toBe("ONIX’s accuracy");
+    expect(TURN13_ACCFELL_LINE2).toBe("fell!");
   });
 });
