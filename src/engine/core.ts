@@ -97,8 +97,10 @@ import {
   TURN14_DRAGONBREATH_MENU_REDRAW_DELAY,
   turn5RockSlideKoDismissEligible,
   turn13KoDismissEligible,
+  turn15KoDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
+import { advancePartySelect, INITIAL_PARTY_SELECT_STATE } from "./partySelect.ts";
 import {
   advanceFightSubmenuDisplay,
   closeFightSubmenu,
@@ -207,6 +209,22 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn13KoDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
     ) {
       battleScene = { ...battleScene, turn13KoDismissElapsed: battleScene.elapsed + 1 };
+    }
+    // Turn 15's player-side faint is the first forced party-select path.
+    // Register the same A edge that dismisses the fully printed ONIX text;
+    // subsequent DOWN/A edges are reduced independently by partySelect.ts.
+    if (
+      battleScene.turn14Resolved &&
+      battleScene.turn15PartySelect === undefined &&
+      newKeys.has("A") &&
+      turn15KoDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
+    ) {
+      battleScene = { ...battleScene, turn15PartySelect: INITIAL_PARTY_SELECT_STATE };
+    } else if (battleScene.turn15PartySelect) {
+      battleScene = {
+        ...battleScene,
+        turn15PartySelect: advancePartySelect(battleScene.turn15PartySelect, SCENE_TICK0 + battleScene.elapsed + 1, newKeys),
+      };
     }
     // S7 FIGHT-submenu slice (docs/battle-turn-notes.md §11): the settled
     // action menu's own A-press opens it (FIGHT presumed already

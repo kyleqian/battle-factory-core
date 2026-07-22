@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 260 — Bounded worker (turn-15 forced party-select): **COMPLETE** — `turn15-party-select.json` **256/256, 0 diff** (dense 19991-20246: faint-text dismiss → fade/black → live list idle/hops → DOWN-to-MAGBY → submenu open → SEND OUT confirm)
+
+- **State:** final `npm test`, `npm run build`, and compare are green; tree
+  will be clean at the following commit.
+- **Did:** Added the input-gated forced-switch reducer (`partySelect.ts`, two
+  Tier-1 tests) and activated it only from the real turn-15 faint-text A
+  edge. Extracted the missing BAYLEEF status-overlay OBJ asset (including
+  the selected-MAGBY overlap variant) and wired it into the party renderer.
+  Dev-time `extract-turn15-party-select.ts` regenerates the compact
+  palette-indexed transition fixture and precise trace. The independent
+  `composite-party-menu.ts` rerun is now **5/5 PASS, 0/38400 each** — all
+  three live icons plus both off-sample selected-hop checks and submenu.
+- **Next:** Out of scope here: post-confirm SEND OUT ball throw/materialize,
+  MAGBY healthbox, and settled action menu; then turn 16 / parked residuals.
+- **Notes:** No ISSUES entry applied. The status indicator needs the normal
+  tile plus the selected-MAGBY overlap composition to preserve real OAM
+  ordering; both are extraction assets, not a hidden exclusion.
+
+---
 ## 259 — Supervisor wind-down: session end 2026-07-22 ~04:00 — **16 verified worker steps across 8 rounds** (8 main-lane wiring slices incl. 3 honest partials that filed their remainders precisely, 8 worktree steps: 6 probes ALL decisive + party groundwork + the #32 fix), zero dud steps, zero regressions, zero merge conflicts; suite **993 → 997/997**; headlines: **turn 15 wired end-to-end** (`turn15-fly-strike.json` 256/256, 18956-19990: reopen gate → FLY strike anim → drain-to-0 → first player-side faint sink → fainted hold), **turn 13 gapless but 2 ticks** (`turn13-switchin` 156→240/240), **turn 14 fully restored** (`turn14-fly-miss` 149→185/185), **turn 9 closed** (`turn9-quickattack` 167→169/169); ISSUES closed: **#32, #35, #36** (latter two opened+closed same session), **#33(b)** and **#34's whole 43-tick family**; #33/#34 trimmed to small precisely-attributed remainders
 
 - **State (verified this minute):** `npm test` **997/997**, `npm run build`
@@ -151,4 +170,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   rider's own unplanned depth; the drain/text half that WAS reached is
   fully verified and committed, not a rushed partial. No PAPERCUTS beyond
   the standing mgba-venv-teardown one.
-

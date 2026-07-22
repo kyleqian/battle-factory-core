@@ -29,6 +29,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
 import chromeAsset from "../../src/assets/gen/party-menu-chrome.json" with { type: "json" };
 import iconAsset from "../../src/assets/gen/party-mon-icons.json" with { type: "json" };
+import statusOverlayAsset from "../../src/assets/gen/party-menu-status-overlay.json" with { type: "json" };
+import magbyStatusOverlayAsset from "../../src/assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
 
 type ChromeFrame = { tick: number; width: number; height: number; pixels: number[] };
 const chrome = chromeAsset as unknown as Record<string, ChromeFrame>;
@@ -36,6 +38,24 @@ const chrome = chromeAsset as unknown as Record<string, ChromeFrame>;
 type Tileset = { columns: number; rows: number; tiles: number[][] };
 type IconAsset = { frame0: Tileset; frame1: Tileset; palette: { r: number; g: number; b: number }[] };
 const icons = iconAsset as unknown as Record<string, IconAsset>;
+const statusOverlay = statusOverlayAsset as { x: number; y: number; width: number; height: number; pixels: number[] };
+const magbyStatusOverlay = magbyStatusOverlayAsset as typeof statusOverlay;
+
+function pasteStatusOverlay(fb: number[], topOverlay = statusOverlay): void {
+  // Party layout keeps the ailment tile adjacent to the wide row's upper
+  // right edge; the same OBJ tile also covers the lower icon-corner pixels
+  // in this capture's subsprite arrangement.
+  for (const [baseY, overlay] of [[24, topOverlay], [statusOverlay.y, statusOverlay]] as const) {
+  for (let y = 0; y < statusOverlay.height; y += 1) for (let x = 0; x < statusOverlay.width; x += 1) {
+    const src = (y * overlay.width + x) * 4;
+    if (overlay.pixels[src + 3] === 0) continue;
+    const dst = ((baseY + y) * 240 + overlay.x + x) * 3;
+    fb[dst] = overlay.pixels[src]!;
+    fb[dst + 1] = overlay.pixels[src + 1]!;
+    fb[dst + 2] = overlay.pixels[src + 2]!;
+  }
+  }
+}
 
 // Each icon sprite's BASE (x, y) is its OAM *center* coordinate (confirmed
 // this session via tools/probe/dump-party-icon-bounce.py - a 32x32 icon's
@@ -169,6 +189,7 @@ async function main() {
     pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: true, phase: "minus3" });
     pasteIcon(fb, 240, 160, { species: "MAGBY", frame: 0, selected: false });
     pasteIcon(fb, 240, 160, { species: "BAYLEEF", frame: 0, selected: false });
+    pasteStatusOverlay(fb);
     report("list, cursor on ONIX (chrome + all 3 icons decomposed, selected hop phase -3)", fb, ticks.listOnix, 38400);
   }
 
@@ -179,6 +200,7 @@ async function main() {
     pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: true, phase: "plus1" });
     pasteIcon(fb, 240, 160, { species: "MAGBY", frame: 1, selected: false });
     pasteIcon(fb, 240, 160, { species: "BAYLEEF", frame: 1, selected: false });
+    pasteStatusOverlay(fb);
     report("list, cursor on ONIX, MID-HOP (selected hop phase +1, off-sample tick)", fb, ticks.listOnixMidHop, 38400);
   }
 
@@ -189,6 +211,7 @@ async function main() {
     pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: false });
     pasteIcon(fb, 240, 160, { species: "MAGBY", frame: 0, selected: true, phase: "minus3" });
     pasteIcon(fb, 240, 160, { species: "BAYLEEF", frame: 0, selected: false });
+    pasteStatusOverlay(fb);
     report("list, cursor on MAGBY (chrome + all 3 icons decomposed, selected hop phase -3)", fb, ticks.listMagby, 38400);
   }
 
@@ -198,6 +221,7 @@ async function main() {
     pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: false });
     pasteIcon(fb, 240, 160, { species: "MAGBY", frame: 1, selected: true, phase: "plus1" });
     pasteIcon(fb, 240, 160, { species: "BAYLEEF", frame: 1, selected: false });
+    pasteStatusOverlay(fb, magbyStatusOverlay);
     report("list, cursor on MAGBY, MID-HOP (selected hop phase +1, off-sample tick)", fb, ticks.listMagbyMidHop, 38400);
   }
 
