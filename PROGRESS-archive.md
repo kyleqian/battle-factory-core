@@ -1,4 +1,13 @@
 ---
+## 261 — Corrective follow-up: **SUPERSEDED BY 262** — removed the rejected replay; retained only settled live checkpoints
+
+- **State:** then `npm test` 999/999 and build green.
+- **Did:** Deleted the absolute-tick replay and made party selection
+  press-relative. This was the safe base for 262, but icon pixels still lived
+  in chrome; do not use its former 46/46 result as completion evidence.
+- **Next:** Superseded by 262.
+
+---
 ## 256 — Bounded worker (turn-15 wiring step, boundary (ii) of 3): both probes run first, then wired the FLY strike animation core (ball descent + impact sprite + Onix hit-flash/shake/healthbox-wobble) — `turn15-fly-strike.json` **176/176, 0 diff** (was 82/82, extended 19045→19141); ISSUES #36 trimmed to boundary (iii) only
 
 - **State:** `npm test` **993/993**, `npm run build` green, tree clean.

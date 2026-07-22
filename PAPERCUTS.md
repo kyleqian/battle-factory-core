@@ -187,8 +187,8 @@ compare run exposed the staleness.
 - **What:** the generic probe's docstring phrasing suggests redirecting
   stderr silences the mGBA BIOS/DMA trace spew; it actually lands on
   stdout, so `2>log` still buries results under megabytes of log lines.
-- **Hits:** 1 session (twice within it).
-- **Cost each:** ~5 min, twice.
+- **Hits:** 2 sessions (the first hit twice within its session).
+- **Cost each:** ~2-5 min.
 - **Workaround:** `>out 2>&1` and read the results FILE the probe
   writes (never parse stdout) — consistent with the ROADMAP recipe's
   existing "write JSON results to a file" rule; fixing the docstring

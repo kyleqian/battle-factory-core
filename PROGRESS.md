@@ -59,14 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   assets out.
 - **Notes:** `docs/party-menu-notes.md` §7 explains the auditable no-baked-
   icon proof. No PAPERCUTS.
-
----
-## 261 — Corrective follow-up: **SUPERSEDED BY 262** — removed the rejected replay; retained only settled live checkpoints
-
-- **State:** then `npm test` 999/999 and build green.
-- **Did:** Deleted the absolute-tick replay and made party selection
-  press-relative. This was the safe base for 262, but icon pixels still lived
-  in chrome; do not use its former 46/46 result as completion evidence.
-- **Next:** Superseded by 262.
-
----
