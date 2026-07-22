@@ -4,7 +4,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 244 — Bounded worker (S7/S8 turn 13 engine step, rung 2 of 4): SAND_ATTACK's text/banner sub-phases LAND 0-diff (dirt-throw sub-phase excluded, named gap); rungs 3-4 (DRAGON_BREATH+faint+KO-hold, MURKROW switch-in) NOT attempted this session — out of the remaining time budget
+## 245 — Bounded worker (S7/S8 turn 13 engine step, Part A of 3): SAND_ATTACK's attacker-slide sub-phase LANDS 0-diff; the dirt-cloud's own closed form is derived + RAM-verified but keeps a small OAM-order residual (excluded, not faked); Parts B (DRAGON_BREATH+faint+KO-hold) and C (MURKROW switch-in) NOT attempted — this session's whole budget went to Part A's asset/formula work
+
+- **State:** `npm test` **978/978** (unchanged), `npm run build` green,
+  tree clean. `turn13-sandattack.json` **190/190, 0 diff** (185 -> 190,
+  adds render 15476-15480, the attacker-slide-only span). Regression
+  sweep clean: `turn13-menu` 57/57, `turn12-menu` 46/46, `turn12-aerialace`
+  56/56, `turn11-menu` 56/56, `turn10-aerialace` 23/23.
+- **Did:** extracted `gBattleAnimSpriteGfx_MudSand` (no `.png` source in
+  this reference tree, unlike every prior battle-anim asset — only the
+  raw pre-compression `mud_sand.4bpp`; new `tools/extract/
+  extract-sandattack-dirt.ts` decodes tile 0 directly). Ran the committed
+  `dump-sandattack-anim.py` fresh against `battle1-turn13-dense-a.json`
+  15470-15525 and derived TWO closed forms directly from RAM (not
+  guessed): (1) Pidgeotto's own attacker-slide `x2` (a 7-tick pinned
+  table) — wired (`turn13SandAttackPidgeottoX2`, threaded through 4
+  existing draw functions as a new trailing param) and **oracle-confirmed
+  0-diff** on its own; (2) all 30 dirt sprites' own linear-translation
+  motion (`x2/y2 = ∓floor(min(n,20)*step/256)` off one shared RAM origin,
+  `xStep`/`yStep` per sprite RAM-exact) — wired with an OAM draw order
+  sorted by descending spawn slot (closed most, not all, of the diff: 41
+  -> 37/231 mismatched frames). The remaining residual (small, <0.2%/frame,
+  concentrated where 3+ sprites' cells overlap right after each wave's
+  spawn) wasn't chased further — likely needs a fuller `SortSprites`-style
+  per-tick simulation (`rockSlideDrawOrder`'s own precedent), not just a
+  spawn-order sort. **Correction to §47/PROGRESS #244's own assumption**:
+  MURKROW's front sprite is **already extracted** (`FRONT_SPECIES` in
+  `extract-battle-mon-pics.ts` has included it since commit `c170d68`) —
+  Part C's own asset-extraction need was smaller than previously thought.
+- **Next:** Part A's dirt-cloud residual is a named, well-characterized
+  gap (full derivation + pinned table in `docs/turn13-notes.md`'s newest
+  section) — a resuming worker can either chase the OAM-order fix or just
+  leave it excluded and move to Parts B/C, both of which are still fully
+  pure wiring per `docs/turn13-notes.md` §4-§7's REUSE MAP (nothing left
+  to probe): Part B needs a new `turn13KoDismissElapsed`-style field
+  mirroring `turn5KoDismissElapsed`'s pattern in `core.ts`; Part C is
+  turn 5's faint-switch machinery re-anchored (asset already exists per
+  the correction above).
+- **Notes:** `docs/battle-turn-notes.md` §48 has the full writeup, plus
+  `docs/turn13-notes.md`'s newest "bounded worker... Part A" section (the
+  authoritative ground truth: pinned 30-entry dirt table, exact formula,
+  residual characterization). PAPERCUT: `mud_sand.4bpp` having no `.png`
+  companion cost ~10 min of investigation before confirming the raw-4bpp
+  path was correct, not a missing asset.
 
 - **State:** `npm test` **978/978** (969 + 9 new Tier-1), `npm run build`
   green, tree clean. `verify-turn13.ts` **60/60** (mandatory-first-step
@@ -112,25 +154,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   than leaving rung 2 half-wired. No PAPERCUTS beyond the standing
   mgba-venv-teardown one.
 
----
-## 242 — Supervisor fold (evening session round 1): SAND_ATTACK probe merged — turn 13 is now FULLY pure wiring (last unknown characterized); AERIAL_ACE rung (a) verified landed, rung (b) residual queued for a targeted probe
-
-- **State (supervisor-verified post-merge):** `npm test` **966/966**,
-  `npm run build` green, tree clean, no worktrees/unmerged branches.
-  `verify-turn13.ts` (now **60 checks**: 46 + 14 SAND_ATTACK) passes from
-  the main tree, supervisor-rerun. `turn10-aerialace.json` 23/23
-  supervisor-rerun, plus neighbors 220/220, 56/56, 159/159.
-- **Did:** verified + merged `worker/wt-20260721-182214` (SAND_ATTACK
-  ~90-tick window decomposes into 4 sub-phases, ALL pure wiring: dirt-throw
-  via unmodified `AnimDirtScatter`/`SlideMonToOffset` (+1 lag; per-call
-  scatter offsets are DEAD script args — all 30 sprites share one origin,
-  only `Random2()` target jitter differs; regenerate tables via committed
-  `dump-sandattack-anim.py`), silent monbg gap, turn-6-family stat banner
-  (0 lag, assets already extracted), "ONIX's accuracy fell!" text — the
-  prior "blank 15630-15699" label was WRONG, that sha is the held
-  accuracy-fell text). Probe was cap-killed mid-final-message but its
-  commit was complete — no salvage needed. Verified #241's engine work
-  (see below).
-- **Next:** round 2 in flight — main lane wires turn 13 end-to-end;
-  worktree probes AERIAL_ACE's overlap residual (#241's handoff) + the
-  12371-12437 flicker (rung (c) precondition). Then turn 14+.

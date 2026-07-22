@@ -730,3 +730,86 @@ conventions (`dump-rockslide-sprites.py`'s own `template`-pointer
 identification pattern, `dump-battler-full.py`'s `statStages` offset,
 `arm-none-eabi-nm` for static-function addresses) all reused directly,
 no new tooling gaps hit.
+
+## 2026-07-21 — bounded worker (S7/S8 turn 13 engine step, Part A): the dirt-throw closed form, extracted and RAM-verified to the byte; attacker slide LANDS 0-diff, the dirt cloud itself gets a small unresolved OAM-order residual
+
+**Asset**: `gBattleAnimSpriteGfx_MudSand` (`src/graphics.c:502`) has **no
+`.png` source** in this reference tree, unlike every other battle-anim
+sprite extracted so far - only the pre-compression raw
+`graphics/battle_anims/sprites/mud_sand.4bpp` (160 bytes = 5 raw 4bpp 8x8
+tiles) and `mud_sand.pal` (JASC-PAL, 16 colors). `gSandAttackDirtSpriteTemplate`
+(`battle_anim_ground.c:74-83`) uses `gOamData_AffineOff_ObjNormal_8x8` with
+`.anims = gDummySpriteAnimTable`/`.images = NULL` - only tile 0 is ever
+shown. New extractor `tools/extract/extract-sandattack-dirt.ts` decodes
+tile 0 directly (a small inline 4bpp-planar decoder, low nibble = left
+pixel) + the JASC palette via the existing `loadJascPal` - committed as
+`src/assets/gen/battle-anim-mud-sand.json`.
+
+**Attacker slide, LANDS 0-diff**: `turn13SandAttackPidgeottoX2` (RAM-read
+directly, `dump-sandattack-anim.py` against `battle1-turn13-dense-a.json`
+15470-15525) - a 7-entry pinned table, RAM ticks `pressTick`+56..+62
+(`pressTick`=15419 at runtime): `x2 = 3,6,9,9,9,4,0` (out over `dur=3`
++1 hold tick, back over `dur=2`). Threaded through `drawTurn5PidgeottoSettled`/
+`drawTurn5SwitchinSprite`/`drawTurn6FieldBase`/`drawTurn13FieldBase` as a
+new trailing `pidgeottoX2`/`x2` param (every pre-existing call site
+unaffected, same "reused, just parameterized" shape `onixX2` already
+established for the player side). Oracle-pixel-CONFIRMED 0-diff on its
+own (render 15476-15480, the span before any dirt sprite spawns) -
+`turn13-sandattack.json` now includes this window (185 -> 190/190, still
+0 diff).
+
+**Dirt cloud, closed form derived and RAM-verified, but NOT 0-diff -
+named gap**: all 30 `AnimDirtScatter` sprites (`gSandAttackDirtSpriteTemplate`)
+launch from the identical RAM origin `(x,y)=(161,66)` (confirms this
+dossier's own prior "one shared attacker-relative origin" finding, now
+RAM-exact not just source-inferred) - `x/y` never change, only `x2`/`y2`
+animate via a plain `InitSpriteDataForLinearTranslation`-style linear
+ramp: `x2 = -floor(min(n,20)*xStep/256)`, `y2 = floor(min(n,20)*yStep/256)`,
+`n = ramTick - spawnRamTick + 1`, valid `n` in `[1,21]` (the 21st tick
+re-uses the `n=20` value - one held tick after the countdown hits 0,
+same shape `rockSlideRockState`'s own `n=48`/`n=15` holds already
+establish). `xStep`/`yStep` (`gSprites[].data[1]`/`data[2]` at each
+sprite's own spawn tick, `Random2()&0x1F` jitter already baked in) are a
+pinned 30-entry table, RAM-exact - cross-checked bit-for-bit against a
+held-out sample (slot 4 at RAM 15500, `n=21`: predicted `x2=-76,y2=18`,
+RAM-read `x2=-76,y2=18`, exact). 6 waves of 5, spawn stride 4 RAM ticks,
+wave 1 anchor `pressTick`+61 (RAM 15480).
+
+Wired (`drawTurn13SandAttackDirt`, draw order sorted by descending RAM
+`slot` per sprite so the lowest slot ends up on top - `TURN13_SANDATTACK_
+DIRT_TABLE`'s own `slot` field, RAM-exact: monotonic ascending per wave
+EXCEPT wave 2's first sprite, slot 3, reused from the attacker's own
+freed `SlideMonToOriginalPos` scratch sprite) but the oracle diff did
+**not** close to 0 with this ordering alone - it improved (`npm run
+compare`: 41/231 mismatched frames with naive spawn-order painting, down
+to 37/231 with descending-slot painting) but left a small residual
+(dozens of px, <0.2% per frame, `ssimMin` as low as ~0.46 at the worst
+sampled tick) concentrated in ticks where 3+ sprites' 8x8 cells overlap
+heavily (right after each wave's own spawn, before `Random2()` jitter has
+separated them). **Not guessed at further this session** - time-boxed;
+the likely next step is a full `SortSprites`-style simulation
+(`rockSlideDrawOrder`'s own precedent) rather than the simpler
+"sort once by spawn slot" this session tried, since real hardware
+re-sorts every tick as sprites' own subpriority/y ties shift, not just
+once at spawn. **Excluded, not faked**: `turn13-sandattack.json`'s own
+`captureFrames` excludes exactly render 15481-15521 (the dirt-affected
+window) - the slide-only span (15476-15480) is included and verified.
+
+### Verification
+
+`npm test` 978/978 (unchanged), `npm run build` green. `npm run compare`
+on `turn13-sandattack.json`: **190/190, 0 diff** (185 baseline + the 5
+newly-included slide-only ticks). Regression sweep clean: `turn13-menu`
+57/57, `turn12-menu` 46/46, `turn12-aerialace` 56/56, `turn11-menu`
+56/56, `turn10-aerialace` 23/23. New artifacts: `tools/extract/
+extract-sandattack-dirt.ts`, `src/assets/gen/battle-anim-mud-sand.json`,
+the `battleScene.ts` additions (`turn13SandAttackPidgeottoX2`,
+`TURN13_SANDATTACK_DIRT_TABLE`/`drawTurn13SandAttackDirt`, `pidgeottoX2`
+threaded through 4 existing functions), `turn13-sandattack.json`'s
+extended `captureFrames`, this doc section.
+
+**PAPERCUT**: `mud_sand.4bpp` lacking a `.png` companion (unlike every
+prior battle-anim sprite extraction) cost ~10 minutes of investigation
+before confirming the raw-4bpp path was the actual intended source, not
+a missing/misplaced asset - worth flagging for the next raw-`.4bpp`-only
+extraction so it isn't re-discovered from scratch.

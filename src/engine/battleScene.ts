@@ -501,6 +501,7 @@ import type { ActiveMonMoveset } from "./battleSetup.ts";
 import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder, type FeatherRenderSprite } from "./featherDance.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
+import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
 import battleAnimWhiteFeatherAsset from "../assets/gen/battle-anim-white-feather.json" with { type: "json" };
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
 import statAnimBannerAsset from "../assets/gen/stat-anim-banner.json" with { type: "json" };
@@ -719,6 +720,8 @@ const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFea
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
+/** S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section): `gSandAttackDirtSpriteTemplate`'s single static 8x8 tile - see `tools/extract/extract-sandattack-dirt.ts`. */
+const battleAnimMudSand = battleAnimMudSandAsset as { tileset: Tileset; palette: RgbColor[] };
 
 /**
  * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
@@ -6635,9 +6638,18 @@ function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
   drawSpriteSheetAffineStretch(fb, tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, entry.xScale, entry.yScale, entry.y2, MATERIALIZE_TINT_COLOR, 0, true);
 }
 
-/** Pidgeotto's settled front sprite, no affine transform - see `TURN5_PIDGEOTTO_SETTLE_TICK`. */
-function drawTurn5PidgeottoSettled(fb: Uint8Array): void {
-  drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y);
+/**
+ * Pidgeotto's settled front sprite, no affine transform - see
+ * `TURN5_PIDGEOTTO_SETTLE_TICK`. `x2` (S7/S8 turn 13 Part A,
+ * docs/turn13-notes.md's own dirt-throw sub-section): Pidgeotto is this
+ * turn's SAND_ATTACK attacker - `Move_SAND_ATTACK`'s own `createsprite
+ * gSlideMonToOffsetSpriteTemplate`/`gSlideMonToOriginalPosSpriteTemplate`
+ * drive the real mon sprite's `x2` directly (0 outside that window, the
+ * same "reused, just parameterized" shape `onixX2` already established for
+ * the player side).
+ */
+function drawTurn5PidgeottoSettled(fb: Uint8Array, x2: number = 0): void {
+  drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x + x2, PIDGEOTTO_CORNER.y);
 }
 
 /**
@@ -6674,13 +6686,13 @@ function drawTurn5SwitchinParticles(fb: Uint8Array, t: number): void {
   }
 }
 
-/** Ball prop (`drawSendOutBall`, reused verbatim, S6's own species-independent mechanism) + the switch-in's own particle burst plus Pidgeotto's own materialize/settle - a no-op before `TURN5_BALL_HANDOFF_TICK`. */
-function drawTurn5SwitchinSprite(fb: Uint8Array, t: number): void {
+/** Ball prop (`drawSendOutBall`, reused verbatim, S6's own species-independent mechanism) + the switch-in's own particle burst plus Pidgeotto's own materialize/settle - a no-op before `TURN5_BALL_HANDOFF_TICK`. `pidgeottoX2` - see `drawTurn5PidgeottoSettled`'s own doc. */
+function drawTurn5SwitchinSprite(fb: Uint8Array, t: number, pidgeottoX2: number = 0): void {
   if (t < TURN5_BALL_HANDOFF_TICK) return;
   drawTurn5PidgeottoMaterialize(fb, t);
   drawSendOutBall(fb, t, TURN5_BALL_HANDOFF_TICK);
   drawTurn5SwitchinParticles(fb, t);
-  if (t >= TURN5_PIDGEOTTO_SETTLE_TICK) drawTurn5PidgeottoSettled(fb);
+  if (t >= TURN5_PIDGEOTTO_SETTLE_TICK) drawTurn5PidgeottoSettled(fb, pidgeottoX2);
 }
 
 /**
@@ -9174,8 +9186,8 @@ export const TURN13_REGIME8_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (
  * mons' own real turn-13-opening HP (Onix 4, unchanged since turn 12's own
  * AERIAL_ACE hit; Pidgeotto 16, unchanged - turn 12's own ROCK_SLIDE missed).
  */
-function drawTurn13FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false): void {
-  drawTurn6FieldBase(fb, t, bounceTick + TURN13_REGIME8_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken);
+function drawTurn13FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN13_REGIME8_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken, pidgeottoX2);
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
@@ -9372,27 +9384,154 @@ export function turn13AccFellTextVisibleChars(t: number, pressTick: number): num
 }
 
 /**
- * S7/S8 rung 2's own SAND_ATTACK dispatcher: the frozen on-field base (same
- * frozen bounce phase the confirm-press transient already established,
- * `turn13KickoffBounceTick`'s own post-freeze constant) plus the held
- * kickoff text, the accuracy-drop banner once its own window opens, then
- * the "ONIX’s accuracy fell!" text once the banner tears down. **The (a)
- * dirt-throw/attacker-slide sub-phase (RAM 15475-15521, docs/turn13-notes.md's
- * own dossier - 30 dirt sprites + a 2-stage attacker slide, exact per-tick
- * positions regenerable via the committed `tools/probe/dump-sandattack-
- * anim.py`) is NOT rendered here - out of this session's remaining time
- * (needs a new sprite-sheet asset extraction, not just wiring) - named gap,
- * not guessed at; `turn13-sandattack.json`'s own `captureFrames` excludes
- * that exact window rather than claim a false 0-diff, same "exclude, don't
- * fake" convention this dossier chain already establishes elsewhere (e.g.
- * ISSUES #23's own projectile-flight exclusion). (b) the silent monbg-
- * cleanup gap needs no special-case code - `turn13SandAttackAccEva` is
- * naturally `null` there, so the settled kickoff-text baseline already
- * renders it correctly by construction.
+ * S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section,
+ * `Move_SAND_ATTACK`'s script, `battle_anim_ground.c`): Pidgeotto's own
+ * (this turn's attacker) `x2` slide, RAM-read directly (`tools/probe/
+ * dump-sandattack-anim.py` against the committed `battle1-turn13-dense-a.json`,
+ * ticks 15470-15525) - `gSlideMonToOffsetSpriteTemplate` slides it out
+ * (dur=3, `x2` climbing 3,6,9) then holds 2 ticks before
+ * `gSlideMonToOriginalPosSpriteTemplate` slides it back (dur=2, `9,4,0`),
+ * exactly coincident with the dirt sprites' own wave-1 spawn (RAM 15480).
+ * 7-entry pinned table (RAM ticks 15475-15481, `pressTick`+56..+62,
+ * `pressTick`=15419 at runtime) - not curve-fit, RAM ground truth. `t` is
+ * a RENDER tick; RAM tick = `t-1`, same universal lag this whole dossier
+ * chain uses for sprite `x2`/`y2` state.
+ */
+const TURN13_SANDATTACK_SLIDE_START_OFFSET = 56; // pressTick+56 = RAM 15475 (SlideMonToOffset's own first observed step)
+const TURN13_SANDATTACK_SLIDE_X2: readonly number[] = [3, 6, 9, 9, 9, 4, 0];
+function turn13SandAttackPidgeottoX2(t: number, pressTick: number): number {
+  const ramTick = t - 1;
+  const i = ramTick - (pressTick + TURN13_SANDATTACK_SLIDE_START_OFFSET);
+  if (i < 0) return 0;
+  return TURN13_SANDATTACK_SLIDE_X2[i] ?? 0;
+}
+
+/**
+ * S7/S8 turn 13 Part A: the 30 `AnimDirtScatter` dirt sprites
+ * (`gSandAttackDirtSpriteTemplate`), grouped into 6 waves of 5 (one
+ * `call SandAttackDirt` per wave, `SANDATTACK_DIRT_SPAWN_STRIDE` RAM ticks
+ * apart). RAM-read directly (same probe/trace as the slide table above):
+ * each sprite's own start position is the SAME shared attacker-relative
+ * origin (`TURN13_SANDATTACK_DIRT_ORIGIN`, RAM `(x,y)=(161,66)` for every
+ * one of the 30 - confirming docs/turn13-notes.md's own "dead script args,
+ * one shared origin" finding) - only the linear-translation endpoint
+ * (`xStep`/`yStep`, `InitSpriteDataForLinearTranslation`'s own Q8.8
+ * per-tick velocity, `AnimDirtScatter`'s `Random2()&0x1F` jitter already
+ * baked in) differs per sprite, RAM-exact (`gSprites[].data[1]`/`data[2]`
+ * at each sprite's own spawn tick). Motion: `x2 = -floor(min(n,20)*xStep/256)`,
+ * `y2 = floor(min(n,20)*yStep/256)`, `n = ramTick - spawnRamTick + 1`,
+ * valid for `n` in `[1,21]` (the 21st tick RE-USES the `n=20` value - the
+ * same "one HELD tick after the countdown hits 0" shape `rockSlideRockState`'s
+ * own `n=48`/`n=15` holds already establish) - cross-checked exactly
+ * against RAM (`slot 4`'s own `x2=-76,y2=18` at RAM 15500, `n=21`: `floor
+ * (20*985/256)=76`, `floor(20*242/256)=18`, both bit-exact).
+ */
+const TURN13_SANDATTACK_DIRT_ORIGIN = { x: 161, y: 66 };
+const TURN13_SANDATTACK_DIRT_WAVE_ANCHOR_OFFSET = 61; // pressTick+61 = RAM 15480 (wave 1's own spawn tick)
+const TURN13_SANDATTACK_DIRT_SPAWN_STRIDE = 4;
+const TURN13_SANDATTACK_DIRT_LIFETIME = 21; // n in [1,21], n>20 clamped (held frame)
+/**
+ * `slot` is the real `gSprites[]` index each dirt sprite RAM-occupied at
+ * its own spawn tick (`dump-sandattack-anim.py`'s own per-tick scan) -
+ * needed for OAM draw order (`SortSprites`'s own "lower slot renders on
+ * top" rule, same convention `rockSlideDrawOrder`'s own doc already
+ * establishes): monotonically increasing spawn-order EXCEPT wave 2's first
+ * sprite (slot 3, freed by the attacker's own `SlideMonToOriginalPos`
+ * scratch sprite finishing right before wave 2 spawns) - RAM-exact, not
+ * assumed sequential.
+ */
+const TURN13_SANDATTACK_DIRT_TABLE: readonly { slot: number; xStep: number; yStep: number }[] = [
+  // wave 1 (RAM 15480)
+  { slot: 4, xStep: 985, yStep: 242 },
+  { slot: 7, xStep: 1267, yStep: 230 },
+  { slot: 8, xStep: 1217, yStep: 256 },
+  { slot: 9, xStep: 1063, yStep: 408 },
+  { slot: 10, xStep: 1191, yStep: 216 },
+  // wave 2 (RAM 15484)
+  { slot: 3, xStep: 1089, yStep: 344 },
+  { slot: 11, xStep: 1217, yStep: 242 },
+  { slot: 12, xStep: 999, yStep: 280 },
+  { slot: 13, xStep: 1319, yStep: 216 },
+  { slot: 14, xStep: 1305, yStep: 102 },
+  // wave 3 (RAM 15488)
+  { slot: 15, xStep: 947, yStep: 192 },
+  { slot: 16, xStep: 1331, yStep: 128 },
+  { slot: 17, xStep: 1177, yStep: 306 },
+  { slot: 18, xStep: 947, yStep: 204 },
+  { slot: 19, xStep: 935, yStep: 434 },
+  // wave 4 (RAM 15492)
+  { slot: 20, xStep: 1305, yStep: 344 },
+  { slot: 21, xStep: 1037, yStep: 358 },
+  { slot: 22, xStep: 1063, yStep: 166 },
+  { slot: 23, xStep: 1229, yStep: 486 },
+  { slot: 24, xStep: 1089, yStep: 448 },
+  // wave 5 (RAM 15496)
+  { slot: 25, xStep: 1063, yStep: 128 },
+  { slot: 26, xStep: 1025, yStep: 242 },
+  { slot: 27, xStep: 1267, yStep: 320 },
+  { slot: 28, xStep: 1075, yStep: 344 },
+  { slot: 29, xStep: 1241, yStep: 486 },
+  // wave 6 (RAM 15500)
+  { slot: 30, xStep: 1127, yStep: 216 },
+  { slot: 31, xStep: 1255, yStep: 408 },
+  { slot: 32, xStep: 1011, yStep: 294 },
+  { slot: 33, xStep: 999, yStep: 472 },
+  { slot: 34, xStep: 1011, yStep: 408 },
+];
+/** Draw order: descending slot (painter's algorithm, last-drawn-on-top) so the lowest slot ends up visually on top - matches the real hardware's OAM order. Computed once (the table is a module constant). */
+const TURN13_SANDATTACK_DIRT_DRAW_ORDER: readonly number[] = TURN13_SANDATTACK_DIRT_TABLE.map((_, i) => i).sort(
+  (a, b) => TURN13_SANDATTACK_DIRT_TABLE[b]!.slot - TURN13_SANDATTACK_DIRT_TABLE[a]!.slot,
+);
+
+/** Draws every dirt sprite alive at render tick `t` - a no-op outside the whole window (RAM 15480-15520, render 15481-15521). */
+function drawTurn13SandAttackDirt(fb: Uint8Array, t: number, pressTick: number): void {
+  const ramTick = t - 1;
+  const waveAnchor = pressTick + TURN13_SANDATTACK_DIRT_WAVE_ANCHOR_OFFSET;
+  for (const i of TURN13_SANDATTACK_DIRT_DRAW_ORDER) {
+    const wave = Math.floor(i / 5);
+    const spawnRamTick = waveAnchor + wave * TURN13_SANDATTACK_DIRT_SPAWN_STRIDE;
+    const n = ramTick - spawnRamTick + 1;
+    if (n < 1 || n > TURN13_SANDATTACK_DIRT_LIFETIME) continue;
+    const nClamped = Math.min(n, 20);
+    const { xStep, yStep } = TURN13_SANDATTACK_DIRT_TABLE[i]!;
+    const x2 = -Math.floor((nClamped * xStep) / 256);
+    const y2 = Math.floor((nClamped * yStep) / 256);
+    drawSpriteSheet(fb, battleAnimMudSand.tileset, battleAnimMudSand.palette, TURN13_SANDATTACK_DIRT_ORIGIN.x - 4 + x2, TURN13_SANDATTACK_DIRT_ORIGIN.y - 4 + y2);
+  }
+}
+
+/**
+ * S7/S8 rung 2+Part A's own SAND_ATTACK dispatcher: the frozen on-field base
+ * (same frozen bounce phase the confirm-press transient already
+ * established, `turn13KickoffBounceTick`'s own post-freeze constant) plus
+ * the held kickoff text, the accuracy-drop banner once its own window
+ * opens, then the "ONIX’s accuracy fell!" text once the banner tears down.
+ * **Part A**: Pidgeotto's own attacker slide (`turn13SandAttackPidgeottoX2`,
+ * threaded into `drawTurn13FieldBase`'s own `pidgeottoX2`) - RAM-exact,
+ * oracle-pixel-CONFIRMED 0-diff on its own (render 15476-15480, before any
+ * dirt sprite spawns) - plus the 30 dirt sprites (`drawTurn13SandAttackDirt`,
+ * layered on top of the field base, OAM draw order sorted by descending
+ * RAM slot per sprite so the lowest slot ends up on top, same
+ * `SortSprites` rule `rockSlideDrawOrder`'s own doc establishes). The dirt
+ * cloud's own closed form (linear translation, RAM-exact `xStep`/`yStep`
+ * per sprite - see `TURN13_SANDATTACK_DIRT_TABLE`'s own doc) reduces the
+ * per-sprite motion to 0 diff at MOST sampled ticks, but a small residual
+ * remains at ticks where 3+ sprites' 8x8 cells genuinely overlap (RAM
+ * ties beyond the simple per-spawn slot order this session modeled,
+ * possibly a real `SortSprites` insertion-sort effect like
+ * `rockSlideDrawOrder`'s own full simulation, not yet re-derived here) -
+ * named gap, not guessed at: `turn13-sandattack.json`'s own `captureFrames`
+ * excludes exactly the dirt-affected window (render 15481-15521) rather
+ * than claim a false 0-diff, same "exclude, don't fake" convention this
+ * dossier chain already establishes elsewhere. (b) the silent monbg-cleanup
+ * gap needs no special-case code - `turn13SandAttackAccEva` is naturally
+ * `null` there, so the settled kickoff-text baseline already renders it
+ * correctly by construction.
  */
 function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number): void {
   const frozenBounceTick = turn13KickoffBounceTick(t, pressTick);
-  drawTurn13FieldBase(fb, t, frozenBounceTick);
+  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, turn13SandAttackPidgeottoX2(t, pressTick));
+  drawTurn13SandAttackDirt(fb, t, pressTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const accEva = turn13SandAttackAccEva(t, pressTick);
   if (accEva !== null) drawTurn13SandAttackAccBanner(fb, t, pressTick, accEva);
@@ -9444,10 +9583,10 @@ function drawTurn13SandAttackWindow(fb: Uint8Array, t: number, pressTick: number
  * box redraw and the HP overlay need the SAME dy, so one override value
  * covers both calls.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false): void {
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0): void {
   drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken);
   drawTurn5IconBar(fb, t);
-  drawTurn5SwitchinSprite(fb, t);
+  drawTurn5SwitchinSprite(fb, t, pidgeottoX2);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own
   // healthbox slide-in, anchored at TURN5_PIDGEOTTO_SETTLE_TICK - a no-op
   // (null) before the mon's own materialize settles.

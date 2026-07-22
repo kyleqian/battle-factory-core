@@ -1,4 +1,27 @@
 ---
+## 242 — Supervisor fold (evening session round 1): SAND_ATTACK probe merged — turn 13 is now FULLY pure wiring (last unknown characterized); AERIAL_ACE rung (a) verified landed, rung (b) residual queued for a targeted probe
+
+- **State (supervisor-verified post-merge):** `npm test` **966/966**,
+  `npm run build` green, tree clean, no worktrees/unmerged branches.
+  `verify-turn13.ts` (now **60 checks**: 46 + 14 SAND_ATTACK) passes from
+  the main tree, supervisor-rerun. `turn10-aerialace.json` 23/23
+  supervisor-rerun, plus neighbors 220/220, 56/56, 159/159.
+- **Did:** verified + merged `worker/wt-20260721-182214` (SAND_ATTACK
+  ~90-tick window decomposes into 4 sub-phases, ALL pure wiring: dirt-throw
+  via unmodified `AnimDirtScatter`/`SlideMonToOffset` (+1 lag; per-call
+  scatter offsets are DEAD script args — all 30 sprites share one origin,
+  only `Random2()` target jitter differs; regenerate tables via committed
+  `dump-sandattack-anim.py`), silent monbg gap, turn-6-family stat banner
+  (0 lag, assets already extracted), "ONIX's accuracy fell!" text — the
+  prior "blank 15630-15699" label was WRONG, that sha is the held
+  accuracy-fell text). Probe was cap-killed mid-final-message but its
+  commit was complete — no salvage needed. Verified #241's engine work
+  (see below).
+- **Next:** round 2 in flight — main lane wires turn 13 end-to-end;
+  worktree probes AERIAL_ACE's overlap residual (#241's handoff) + the
+  12371-12437 flicker (rung (c) precondition). Then turn 14+.
+
+---
 ## 241 — Bounded worker (S7 engine step, AERIAL_ACE excluded-window close-out): rung (a) LANDS 0-diff (mechanisms 1/3's residual - a compositing-ORDER bug, not a bad table), rung (b) wired but NOT 0-diff (mechanism 4's darken - two real bugs fixed, ~48% mismatch down to a small residual); rungs (c)/(d) not attempted
 
 - **State:** `npm test` **966/966**, `npm run build` green, tree clean.
