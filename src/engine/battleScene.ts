@@ -535,7 +535,7 @@ import partyMonIconsAsset from "../assets/gen/party-mon-icons.json" with { type:
 import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay.json" with { type: "json" };
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
-import { bgFadeY, type FadeTiming } from "./paletteFade.ts";
+import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
@@ -11641,12 +11641,72 @@ function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.
   drawTurn15PartyStatus(fb, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
 }
 
-function fadeTurn15PartyFramebuffer(fb: Uint8Array, y: number): void {
+/**
+ * `UpdateNormalPaletteFade` updates BG and OBJ palette banks on alternating
+ * VBlanks.  The source renderer composes them into one RGBA framebuffer, so
+ * retain an auditable OBJ occupancy pass from the same live draw functions
+ * and apply each bank's coefficient after composition.  This is deliberately
+ * occupancy, not a colour test: shared RGB values and transparent healthbox
+ * bleed make colour-based ownership unsound.
+ */
+function fadeTurn15PartyFramebuffer(fb: Uint8Array, bgY: number, objMask: Uint8Array, objY: number): void {
+  const source = fb.slice();
   for (let p = 0; p < 240 * 160; p += 1) {
     const o = p * 4;
-    const faded = fadeColor({ r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! }, y);
+    const y = objMask[o + 3] !== 0 ? objY : bgY;
+    const faded = fadeColor({ r: source[o]!, g: source[o + 1]!, b: source[o + 2]! }, y);
     fb[o] = faded.r; fb[o + 1] = faded.g; fb[o + 2] = faded.b; fb[o + 3] = 255;
   }
+}
+
+/** Live OBJ ownership for the frozen "ONIX fainted!" battle frame. */
+function drawTurn15FaintFrameObjMask(mask: Uint8Array): void {
+  // `drawTurn15FlyStrikeWindow`'s frozen frame has only these three OBJ
+  // producers: MURKROW, its opponent healthbox, and the wait-arrow.  ONIX,
+  // its healthbox, and the party-status bar have already been removed.
+  drawTurn13MurkrowSettled(mask);
+  drawSendOutHealthbox(mask, 0, murkrowHealthboxContent);
+}
+
+// Source-extracted 4bpp transparency masks for party_menu's 32x32 menu
+// Poké Ball (closed/open frames) and interface/status_icons' 32x8 FNT
+// frame.  These are masks, not captured pixels: their placements come from
+// sPartyMenuSpriteCoords[PARTY_LAYOUT_SINGLE] and CreatePokeballButtonSprite
+// in party_menu.c, and preserve the original OAM ownership during a fade.
+const PARTY_MENU_BALL_CLOSED_MASK = "AAAAAAAAAAAAfgAAgP8BAMD/AwDg/wcA8P8PAPj/HwD4/x8A/P8/APz/PwD8/z8A/P8/APz/PwD8/z8A+P8fAPj/HwDw/w8A4P8HAMD/AwCA/wEAAH4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+const PARTY_MENU_BALL_OPEN_MASK = "AH4AAID/AQDA/wMA4P8HAPD/DwD4/x8A+P8fAPz/PwD8/z8A/P8/APz/PwAA/wAAAH4AAPy9PwD8wz8A/P8/APz/PwD4/x8A+P8fAPD/DwDg/wcAwP8DAID/AQAAfgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+const PARTY_MENU_FNT_MASK = "gP//AcD//wPA//8DwP//A8D//wPA//8DwP//A4D//wE=";
+const PARTY_MENU_HELD_ITEM_MASK = "AH7+/v7+/vw=";
+
+function drawPartyMenuSourceMask(mask: Uint8Array, encoded: string, width: number, height: number, centerX: number, centerY: number): void {
+  const bytes = atob(encoded);
+  const originX = centerX - Math.floor(width / 2);
+  const originY = centerY - Math.floor(height / 2);
+  for (let p = 0; p < width * height; p += 1) {
+    if ((bytes.charCodeAt(p >> 3) & (1 << (p & 7))) === 0) continue;
+    const x = originX + (p % width);
+    const y = originY + Math.floor(p / width);
+    if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+    mask[(y * 240 + x) * 4 + 3] = 255;
+  }
+}
+
+/** Live OBJ ownership for the party list (three icons plus two status OBJ instances). */
+function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
+  const layers = partyMenuLayers(state);
+  for (const icon of layers.icons) drawTurn15PartyIcon(mask, icon);
+  drawTurn15PartyStatus(mask, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
+  // Every party box owns a MenuPokeball OBJ; ONIX's selected box uses the
+  // open animation, the other two are closed, and CANCEL owns its own
+  // closed instance.  ONIX's faint-status badge is a fourth, independent
+  // status OBJ (the existing overlay helper covers BAYLEEF's live badge).
+  drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_OPEN_MASK, 32, 32, 16, 34);
+  drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 102, 25);
+  drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 102, 49);
+  drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 198, 148);
+  drawPartyMenuSourceMask(mask, PARTY_MENU_FNT_MASK, 32, 8, 50, 52);
+  drawPartyMenuSourceMask(mask, PARTY_MENU_HELD_ITEM_MASK, 8, 8, 108, 28);
+  drawPartyMenuSourceMask(mask, PARTY_MENU_HELD_ITEM_MASK, 8, 8, 108, 52);
 }
 
 const PARTY_ENTRY_FADE_OUT: FadeTiming = { startDelay: 0, startY: 0, targetY: 16 };
@@ -11669,16 +11729,18 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
   if (phase === "fadingOut") {
     drawTurn15FlyStrikeWindow(fb, entryTick, pressTick);
     const local = party.elapsed - PARTY_ENTRY_FADE_OUT_START;
-    const y = bgFadeY(local, PARTY_ENTRY_FADE_OUT);
-    fadeTurn15PartyFramebuffer(fb, y);
+    const mask = new Uint8Array(fb.length);
+    drawTurn15FaintFrameObjMask(mask);
+    fadeTurn15PartyFramebuffer(fb, bgFadeY(local, PARTY_ENTRY_FADE_OUT), mask, objFadeY(local, PARTY_ENTRY_FADE_OUT));
     return true;
   }
   if (phase === "black") return true;
   drawTurn15PartySelectList(fb, party);
   if (phase === "fadingIn") {
     const local = party.elapsed - PARTY_ENTRY_FADE_IN_START;
-    const y = bgFadeY(local, PARTY_ENTRY_FADE_IN);
-    fadeTurn15PartyFramebuffer(fb, y);
+    const mask = new Uint8Array(fb.length);
+    drawTurn15PartyListObjMask(mask, party);
+    fadeTurn15PartyFramebuffer(fb, bgFadeY(local, PARTY_ENTRY_FADE_IN), mask, objFadeY(local, PARTY_ENTRY_FADE_IN));
   }
   return true;
 }

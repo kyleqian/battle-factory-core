@@ -5,31 +5,14 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #37 — Turn-15 forced party menu: only entry fade/black and post-confirm
-  SEND OUT remain
+## #37 — Turn-15 forced party menu: BAYLEEF entry-frame OBJ ownership and
+  post-confirm SEND OUT remain
 
-Opened 2026-07-22 corrective follow-up. The rejected 13 MB absolute-tick
-full-frame replay is deleted. `partySelect.ts` now owns elapsed time from the
-actual ONIX-fainted dismiss edge; its DOWN/A reducer and `battleScene.ts`
-choose stable list/submenu chrome from that state, not absolute trace time.
-Both `turn15-party-select.json` and its new 30-frame delayed-dismiss variant
-exercise the same list → DOWN → submenu path at **46/46, 0 diff** settled
-checkpoints. `composite-party-menu.ts` remains **5/5 PASS**, but its current
-transparent-tile overwrite still preserves source-harvested pixels beneath
-the icons, so it is not yet sufficient as the required erase/reconstruct
-acceptance proof.
-
-Closed in the corrective compositor rung: each persisted chrome frame is now
-icon-free (every source-icon/status opaque texel is erased before asset
-generation), and production redraws ONIX/MAGBY/BAYLEEF plus BAYLEEF's status
-OBJ from `PartySelectState.elapsed/cursor` using the RAM-derived hop/frame
-schedule and selection palette/panel base. The independent composition proof
-is **5/5 PASS, 0/38400 each**; canonical and 30-frame delayed traces are
-both **62/62, 0 diff**, including selected ONIX and MAGBY hop/frame plateaus.
-
-Remaining: model the 80-frame entry fade/black span and the post-SEND-OUT
-ball/materialization/healthbox/menu path. Do not re-add per-frame assets or
-absolute-tick lookup tables.
+Entry is press-relative and its fades are now source-layer masked; both dense
+traces are 135/143. The only entry residual is BAYLEEF's 48px initial OBJ
+frame at fade-in 20061–68 (delayed +30). Separately, post-SEND OUT
+ball/materialization/healthbox/menu is still unimplemented. Do not use
+per-frame assets, absolute tick tables, or coordinate patches.
 
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`

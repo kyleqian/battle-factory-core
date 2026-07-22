@@ -33,7 +33,10 @@ export interface PartySelectState {
  * 16 fade-in frames before the live party list is usable.
  */
 export type PartySelectEntryPhase = "battleHold" | "fadingOut" | "black" | "fadingIn" | "settled";
-export const PARTY_ENTRY_BATTLE_HOLD_FRAMES = 22;
+// `elapsed` is advanced on the first VBlank after the A edge.  The frozen
+// source therefore owns rendered elapsed 0..20; rendered elapsed 21 is the
+// first palette-update frame (canonical trace 20012, delayed trace +30).
+export const PARTY_ENTRY_BATTLE_HOLD_FRAMES = 21;
 export const PARTY_ENTRY_FADE_OUT_FRAMES = 15;
 export const PARTY_ENTRY_BLACK_FRAMES = 28;
 export const PARTY_ENTRY_FADE_IN_FRAMES = 16;
@@ -81,6 +84,7 @@ export function fullPartyIconFrame(elapsed: number): 0 | 1 {
   const runningElapsed = elapsed - (elapsed >= PARTY_ICON_GLOBAL_STALL_START + PARTY_ICON_GLOBAL_STALL_FRAMES ? PARTY_ICON_GLOBAL_STALL_FRAMES : 0);
   return mod(runningElapsed - FULL_ICON_FRAME1_START, FULL_ICON_PERIOD) < FULL_ICON_FRAME1_HOLD ? 1 : 0;
 }
+
 
 /** ONIX animNum=4's selected y2 bounce: -3 for 30 frames, +1 for 31. */
 export function onixSelectedHopY2(elapsed: number): -3 | 1 {

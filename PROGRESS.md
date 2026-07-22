@@ -4,23 +4,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 263 — Bounded worker (ISSUES #37 entry transition): **CHECKPOINT — palette-bank compositor remains**
+## 264 — Bounded worker (ISSUES #37 entry transition): **CHECKPOINT — OBJ ownership narrowed to BAYLEEF's initial icon frame**
 
-- **State:** `npm test` **1002/1002**, `npm run build` green; production JS
-  **5.16 MB**. Source-icon composition remains **5/5 PASS, 0/38400 each**.
-- **Did:** Oracle-confirmed the supervisor sequence exactly: canonical
-  dismiss trace tick 19990 (human frame 19991), held 19990–20011,
-  fade-out 20012–20026, black 20027–20054, fade-in 20055–20070, settled
-  20071; the delayed trace is the same sequence +30. Added press-relative
-  phase API/tests, dense 143-capture windows to both traces, and froze the
-  source battle presentation from the actual dismiss edge. Both compares
-  now prove every hold/black/settled frame exact, **123/143** each.
-- **Next:** finish only the 20 alternating fade-palette frames. The failed
-  direct whole-frame blend proves the hardware alternates palette banks:
-  the fade-out's odd frames and fade-in's even frames are exact; do not
-  reuse the reverted OBJ-mask experiment without deriving the actual bank
-  ownership. Then rerun both dense compares to 143/143 and trim #37.
-- **Notes:** No commit yet: acceptance’s 0-diff bar is not met. No PAPERCUTS.
+- **State:** committed at `4d997f0`; `npm test` **1003/1003**, build
+  green (production JS **5.16 MB**), composite **5/5 PASS**. Both dense
+  compares are **135/143** (same eight residual frames, delayed +30).
+- **Did:** corrected the press-relative phase boundary (fade begins rendered
+  elapsed 21), and added source-derived OAM ownership masks for MURKROW,
+  healthbox, all party balls, FNT/status, held-item sprites, and live icons.
+  All fade-out frames are now exact; only fade-in 20061–68 retains 48px.
+- **Next:** inspect BAYLEEF's initial live OBJ frame/VRAM ownership at those
+  eight frames; do not coordinate-patch it. Post-SEND OUT remains separate.
+- **Notes:** PAPERCUT: none.
 
 ---
 ## 262 — Bounded worker (ISSUES #37 icon/OAM half): **CLOSED** — live icon-free party compositor; canonical + delayed traces **62/62, 0 diff**
@@ -50,9 +45,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** Superseded by 262.
 
 ---
-## 260 — Forced party-select implementation: **SUPERSEDED** — its dense result depended on a prohibited replay
-
-- **State:** historical 999/999 and build green at `d5ac217`.
-- **Did:** Established the reducer and extracted status assets; the replay
-  itself was later removed in 261.
-- **Next:** Superseded by 261/262.

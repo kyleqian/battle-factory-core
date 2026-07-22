@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, partySelectEntryPhase } from "../src/engine/partySelect.ts";
+import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 
 describe("forced turn-15 party select", () => {
   it("ignores list navigation during the fade and defaults to fainted ONIX", () => {
@@ -7,22 +8,31 @@ describe("forced turn-15 party select", () => {
   });
 
   it("uses press-relative entry phase boundaries for both canonical and delayed dismisses", () => {
-    expect(PARTY_ENTRY_FADE_OUT_START).toBe(22);
-    expect(PARTY_ENTRY_BLACK_START).toBe(37);
-    expect(PARTY_ENTRY_FADE_IN_START).toBe(65);
-    expect(PARTY_ENTRY_SETTLED_START).toBe(81);
+    expect(PARTY_ENTRY_FADE_OUT_START).toBe(21);
+    expect(PARTY_ENTRY_BLACK_START).toBe(36);
+    expect(PARTY_ENTRY_FADE_IN_START).toBe(64);
+    expect(PARTY_ENTRY_SETTLED_START).toBe(80);
     for (const dismissTick of [19990, 20020]) {
       expect(partySelectEntryPhase(0)).toBe("battleHold");
-      expect(partySelectEntryPhase(21)).toBe("battleHold");
-      expect(partySelectEntryPhase(22)).toBe("fadingOut");
-      expect(partySelectEntryPhase(36)).toBe("fadingOut");
-      expect(partySelectEntryPhase(37)).toBe("black");
-      expect(partySelectEntryPhase(64)).toBe("black");
-      expect(partySelectEntryPhase(65)).toBe("fadingIn");
-      expect(partySelectEntryPhase(80)).toBe("fadingIn");
-      expect(partySelectEntryPhase(81)).toBe("settled");
-      expect(dismissTick + PARTY_ENTRY_SETTLED_START).toBe(dismissTick + 81);
+      expect(partySelectEntryPhase(20)).toBe("battleHold");
+      expect(partySelectEntryPhase(21)).toBe("fadingOut");
+      expect(partySelectEntryPhase(35)).toBe("fadingOut");
+      expect(partySelectEntryPhase(36)).toBe("black");
+      expect(partySelectEntryPhase(63)).toBe("black");
+      expect(partySelectEntryPhase(64)).toBe("fadingIn");
+      expect(partySelectEntryPhase(79)).toBe("fadingIn");
+      expect(partySelectEntryPhase(80)).toBe("settled");
+      expect(dismissTick + PARTY_ENTRY_SETTLED_START).toBe(dismissTick + 80);
     }
+  });
+
+  it("alternates BG then OBJ coefficients on the first entry-fade VBlank", () => {
+    const out = { startDelay: 0, startY: 0, targetY: 16 };
+    const backIn = { startDelay: 0, startY: 16, targetY: 0 };
+    // The phase begins at rendered elapsed 21, so local 0 is exactly the
+    // hardware's BG half; OBJ retains the prior coefficient until local 1.
+    expect([bgFadeY(0, out), objFadeY(0, out), bgFadeY(1, out), objFadeY(1, out)]).toEqual([2, 0, 2, 2]);
+    expect([bgFadeY(0, backIn), objFadeY(0, backIn), bgFadeY(1, backIn), objFadeY(1, backIn)]).toEqual([14, 16, 14, 14]);
   });
 
   it("moves DOWN to MAGBY, opens SEND OUT, then confirms it", () => {
