@@ -188,21 +188,26 @@ else
   else
     echo "Interactive supervisor on $MODEL/$REASONING_EFFORT, hard cap ${CAP_HOURS}h (deadline $DEADLINE_HUMAN)."
   fi
-  # Scripts run without job control, so this '&' child stays in our process
-  # group. Bash otherwise replaces a background command's stdin with
-  # /dev/null; reconnect /dev/tty so the interactive TUI can start while we
-  # still retain its pid for the watchdog (exec would lose the cap).
+  TIMEOUT_MESSAGE="run-supervisor: ${CAP_HOURS}h cap reached — stopping supervisor"
+  # Keep the TUI in the terminal's foreground process group. The wrapper owns
+  # the deadline without backgrounding the interactive child.
   if [[ "$PROVIDER" == "claude" ]]; then
-    POKEBENCH_ROLE=supervisor claude --remote-control \
-      --remote-control-session-name-prefix emerald-factory \
-      --model "$MODEL" --dangerously-skip-permissions "$PROMPT" < /dev/tty &
+    POKEBENCH_ROLE=supervisor python3 tools/run-with-deadline.py \
+      "$CAP_SECONDS" "$TIMEOUT_MESSAGE" -- \
+      claude --remote-control \
+        --remote-control-session-name-prefix emerald-factory \
+        --model "$MODEL" --dangerously-skip-permissions "$PROMPT"
   else
-    POKEBENCH_ROLE=supervisor codex \
-      --model "$MODEL" \
-      -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
-      --dangerously-bypass-approvals-and-sandbox "$PROMPT" < /dev/tty &
+    POKEBENCH_ROLE=supervisor python3 tools/run-with-deadline.py \
+      "$CAP_SECONDS" "$TIMEOUT_MESSAGE" -- \
+      codex --model "$MODEL" \
+        -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
+        --dangerously-bypass-approvals-and-sandbox "$PROMPT"
   fi
+  exit $?
 fi
+# Headless supervisors do not own a TTY, so retain the lightweight shell
+# watchdog used by the streaming launch above.
 agent_pid=$!
 ( sleep "$CAP_SECONDS"
   echo "run-supervisor: ${CAP_HOURS}h cap reached — stopping supervisor"
