@@ -9,8 +9,18 @@ symptom, what's confirmed from the reference/oracle, and any leads.
 
 The press-relative entry fades and live icon compositor are now exact:
 canonical and delayed party-select traces are both 143/143. Remaining scope is
-only the post-SEND-OUT ball/materialization/healthbox/menu path. Do not use
-per-frame assets, absolute tick tables, or coordinate patches.
+only the post-SEND-OUT path. `docs/turn15-sendout-notes.md` now splits it
+into implementation rungs: (1) submenu exit/fade/black, (2) battle fade +
+Go! MAGBY text, (3) Brendan throw/closed ball, (4) clean open-particles +
+MAGBY materialize/tint, (5) create/populate/slide the 138/138 player
+healthbox, and (6) blank hold + re-anchored MAGBY action-menu bounce.
+
+Reuse is explicit: parameterize the initial ONIX player-sendout helpers and
+turn-5's clean switch-in primitives; do **not** copy turn-13 Murkrow's
+species-specific wobble table. New data is only MAGBY's front asset/frame
+identity and any MAGBY-only wobble table. Start with rung 1 and verify the
+documented dense range before each subsequent rung. Do not use per-frame
+assets, absolute tick tables, or coordinate patches.
 
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
