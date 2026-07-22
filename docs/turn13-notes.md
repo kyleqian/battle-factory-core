@@ -886,3 +886,219 @@ session's own `src/` changes) **60/60**. New trace
 `turn13-dragonbreath-faint.json` **141/141, 0 diff**, twice-run identical.
 Regression sweep clean: `turn13-sandattack` 190/190, `turn13-menu` 57/57,
 `turn12-menu` 46/46.
+
+## 2026-07-21 — worktree lane (probe): MURKROW's own materialize/wobble table, RAM-derived to the byte — §50's residual 1 closed to a wiring-ready table (a real, confirmed mistransfer from Pidgeotto's own table, not the same mechanism at a new anchor); residual 2 (settled-menu transient) NOT reached, time-boxed
+
+**Mission**: RAM-probe render 17004-17069 (Murkrow's own materialize
+growing-silhouette + stretch/wobble sub-phase, `battle-turn-notes.md` §50's
+named residual 1) fresh, per `faint-switch-notes.md`'s own Pidgeotto
+precedent (§3c/§7b/§8) — do NOT assume `TURN5_STRETCH_TABLE`'s own values
+transfer byte-for-byte, confirm or correct. Probe-only worktree, no `src/`
+changes: this section hands a wiring-ready table + exact anchors to the next
+session, it does not wire them in.
+
+**New tool**: `tools/probe/dump-turn13-murkrow-materialize.py` — same
+`gBattlerSpriteIds+1`/`gSprites`/`gOamMatrices` addressing
+`dump-switchin-materialize-affine.py` already established (battler 1 is the
+opponent slot both Pidgeotto's and Murkrow's own switch-ins use), extended
+to read `oam` byte 0/1/3 (`affineMode`, `objMode`, `matrixNum`), the OAM
+word-2 `tileNum`/`paletteNum`, the live `gOamMatrices[matrixNum]` `pa/pb/pc/
+pd` registers, `x2/y2`, `animNum/animCmdIndex`, and `data[3..6]` — one row
+per RAM tick, combining what the two Pidgeotto-era probes each did
+separately since this mission needs both the affine-identity check AND the
+wobble table in the same pass. Run:
+`/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+tools/probe/dump-turn13-murkrow-materialize.py
+tools/probe/specs/turn13-b1-sprite.json <out.json> 16980 17080` (that spec's
+own 108 segments are byte-identical to `battle1-turn13-dense-a.json`'s own,
+confirmed programmatically — reused verbatim as the trace source, per this
+worktree's own oracle-shared/serialized convention). Exit 139 at teardown is
+the documented benign mGBA segfault; the output file is complete before it
+fires.
+
+### Render-lag class: HOLDS (RAM tick T -> render tick T+1), same family as turn 5's own materialize — does NOT need its own re-derivation
+
+Confirmed at three independent seams, not assumed:
+1. **Materialize onset**: RAM 17002 (`accumulator`-equivalent `pa=pd=1638`,
+   `invisible=1`) -> RAM 17003 (`pa=pd=1129`, `invisible=0`, `y2=14`) is the
+   FIRST tick the sprite becomes visible+scaled. A fresh `bin/oracle run`
+   over this exact window confirms render 17003 still matches the existing
+   dossier's own cited pre-growth sha (`9262e5b26ab8`) while render 17004
+   is the first visibly-different frame (`dd6b22f971bc`) — i.e. RAM 17003's
+   state is what render 17004 shows, the ordinary +1.
+2. **Wobble onset**: RAM 17018 (`animNum` flips 0->1, still `affineMode=1`
+   NORMAL, `pa=pd=256` identity) -> RAM 17019 (`affineMode=3` DOUBLE,
+   `data4` starts incrementing) is where the double-affine wobble engages.
+   Render 17019 (`8795532c4717`) -> render 17020 (`2d0641fcc68a`) is the
+   first visible transition — again RAM T visible at render T+1.
+3. **Settle**: RAM 17067 is the LAST tick with nonzero `y2`/non-identity
+   `pa,pd`/`affineMode=3`; RAM 17068 already reads flat identity
+   (`pa=pd=256,y2=0,affineMode=1` NORMAL). A fresh oracle capture shows
+   render **17069** (`504aa59db260`) is ALREADY pixel-identical to render
+   17070 (`504aa59db260`, the same sha, 0-diff) — matching RAM 17068's
+   flat state visible at render 17069, one tick BEFORE
+   `TURN13_MURKROW_SETTLE_TICK=17070` (§50's own, unchanged, still correct)
+   takes over. Render 17068 (`0af7a9599157`) differs from both — the last
+   genuinely wobble-affected frame.
+
+### Phase 1 — growing silhouette (render 17004-~17019): the EXISTING generic mechanism holds byte-exact, no new table needed
+
+RAM 17003-17014's `pa`/`pd` (both always equal — a pure isotropic scale, no
+rotation) decode as `round(65536 / accumulator)` for
+`accumulator = 40,58,76,94,112,130,148,166,184,202,220,238,256` — **exactly**
+`affineEmergeAccumulator(1..12)` off `battle-anim-tables.json`'s own
+generic `affineEmerge` step table (`neutralScale=256`, steps
+`[{xScale:40,duration:0},{xScale:18,duration:12}]`, species-agnostic by
+construction — `sAffineAnim_Battler_Emerge` has no per-species term). The
+paired `y2` reads (14,13,12,11,10,9,8,7,5,4,3,2,0,0,...) are byte-exact to
+`MATERIALIZE_Y2_TABLE` at the same offsets. `TURN13_MURKROW_MATERIALIZE_START
+= TURN13_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET = 17004` (the
+existing constant) lands exactly on RAM 17003's own +1 render — **confirmed
+correct as-is, this session's own fresh RAM matches it to the tick**. The
+brief's own "not re-verified to the byte" flag on this specific sub-phase
+(§7) is now resolved: it verifies. RAM 17015-17018 (render 17016-17019)
+holds flat at the saturated identity (`pa=pd=256,y2=0`, still
+`affineMode=1` NORMAL — the accumulator's own natural saturation, no
+separate "hold" table needed) before the wobble engages. Palette/tint
+coefficient during this whole phase was **not** independently re-probed
+this session (same honest gap `faint-switch-notes.md` §7b already flags
+for Pidgeotto's own tint ramp) — `objMode` read `0` (`ST_OAM_OBJ_NORMAL`)
+at every sampled tick, confirming no hardware blend mode is in play
+(consistent with the existing software-blend `drawSpriteSheetAffineTintedBlend`
+approach, not a new finding).
+
+### Phase 2 — the REAL bug: the wobble/stretch phase is a DIFFERENT mechanism than Pidgeotto's own, not the same table at a new anchor
+
+Current code (`drawTurn13MurkrowMaterialize`, `battleScene.ts:6814-6828`)
+switches from the accumulator draw to `TURN5_STRETCH_TABLE` (Pidgeotto's
+own 40-entry, non-monotonic `{xScale,yScale,y2}` table, values 256-272)
+at `TURN13_MURKROW_STRETCH_TICK = TURN13_MURKROW_SETTLE_TICK -
+TURN5_STRETCH_TABLE.length = 17030`. **Both the anchor and the table
+content are wrong**, confirmed by RAM, not inferred from the pixel diff
+alone:
+
+- **Anchor**: the real wobble (`affineMode` flips to `3`/DOUBLE, `pa`/`pd`
+  first move off identity) starts RAM 17019, visible render **17020** —
+  **10 renders earlier** than the current `17030` anchor. This alone
+  explains the bulk of §50's own cited "~44% diff at 17018-17025" — the
+  current code is still in the flat post-accumulator hold there while the
+  real sprite has already started a large-amplitude double-affine wobble.
+- **Content**: Murkrow's own `data4` field does **not** read like
+  Pidgeotto's own captured `data4` (which started at 256 and drifted by
+  single digits, byte-exact to `GROVYLE_STRETCH_TABLE`'s literal
+  `xScale` column, `faint-switch-notes.md` §7b). Murkrow's `data4` instead
+  reads a plain **linear angle-like counter incrementing by exactly +8 every
+  tick** (`8,16,24,...,248,0(wrap mod 256),8,16,...,136`), `data5` staying
+  `0` throughout — i.e. Murkrow's own front-sprite entrance plays a
+  genuinely different animation command (most likely a rotation/pulse-style
+  `ObjAffineSet` driver keyed by this angle counter, not `Anim_
+  VerticalStretch`'s own literal per-tick scale table) — **not the same
+  mechanism re-anchored, a different one**, confirming the brief's own
+  suspicion precisely. The **rendered result** (`pa`/`pd`/`y2` — the actual
+  GBA affine-matrix registers, i.e. the same representation
+  `drawSpriteSheetAffineStretch`'s `xScale`/`yScale`/`y2` parameters already
+  consume) is still a clean, low-amplitude, non-monotonic wobble — so the
+  EXISTING render function needs no change, only its table argument and
+  anchor tick.
+
+**`TURN13_MURKROW_WOBBLE_TABLE`** (RAM-read directly off `pa`/`pd`/`y2` —
+skips the intermediate `data4`/`data5` interpretation question entirely,
+since these ARE the literal register values the render function needs),
+applied starting render tick **17020** (`TURN13_MURKROW_STRETCH_TICK` should
+become `17020`, not `17030`), one entry per render tick, index `i` = RAM
+tick `17019+i`:
+
+```
+i   xScale yScale y2   i   xScale yScale y2   i   xScale yScale y2
+0   256    256    0    17  263    249    -1   34  244    268    0
+1   250    262    0    18  269    243    -3   35  239    273    1
+2   244    268    1    19  274    238    -5   36  234    278    1
+3   239    273    2    20  279    233    -7   37  230    282    2
+4   234    278    2    21  283    229    -8   38  227    285    2
+5   230    282    3    22  286    226    -9   39  225    287    2
+6   227    285    3    23  288    224    -9   40  224    288    3
+7   225    287    3    24  288    224    -10  41  225    287    2
+8   224    288    4    25  288    224    -9   42  227    285    2
+9   225    287    3    26  286    226    -9   43  230    282    2
+10  227    285    3    27  283    229    -8   44  234    278    1
+11  230    282    3    28  279    233    -7   45  239    273    1
+12  234    278    2    29  274    238    -5   46  244    268    0
+13  239    273    2    30  269    243    -3   47  250    262    -1
+14  244    268    1    31  263    249    -1   48  256    256    -1
+15  250    262    0    32  256    256    -1   49  256    256    0
+16  256    256    0    33  250    262    -1
+```
+
+(50 entries, `i=0..49`, covering render 17020-17069 inclusive — entries
+0-48 are RAM 17019-17067 read directly; entry 49 is RAM 17068's own flat
+identity, appended so the table's own natural length exactly spans through
+render 17069, the last tick before `TURN13_MURKROW_SETTLE_TICK=17070`
+takes over via `drawTurn13MurkrowSettled`. This closes a genuine
+**off-by-one wiring trap**: without entry 49, a `Math.min(t-17020,
+table.length-1)`-style clamp (the same idiom `TURN5_STRETCH_TABLE`'s own
+call site already uses) would repeat entry 48's `y2=-1` at render 17069
+too, regressing a 1px vertical residual against the confirmed-flat oracle
+frame there — append the extra entry rather than adding a special-cased
+branch, the same "literal table, not curve-fit" precedent this whole
+dossier already follows.) The shape itself: two 16-tick half-periods of a
+period-32-tick, amplitude-32 (in 8.8 fixed-point, i.e. ~12.5%) oscillation
+in `xScale`/`yScale` (mirror images of each other — first half dips
+`xScale` down/`yScale` up, second half the reverse), riding a slower `y2`
+drift that dips negative during the second half and doesn't fully recover
+— RAM ground truth, not curve-fit, same precedent as `GROVYLE_STRETCH_
+TABLE`/`TURN5_STRETCH_TABLE` themselves.
+
+**Frame selection is also a confirmed mistransfer, smaller but real**:
+`turn13MurkrowFrame` currently reuses `turn5PidgeottoFrame`'s own tick
+DELTAS off `TURN13_BALL_HANDOFF_TICK` (predicting flips at render 17019,
+17024, 17034, 17044, 17079). Real RAM shows Murkrow's own `animCmdIndex`
+(the front-sprite two-image alternation index) flips **exactly once** in
+this whole window, `0->1` at RAM 17033, visible render **17034** — one of
+the five reused breakpoints happens to land on the right tick by
+coincidence, but the other four (17019/17024/17044/17079) do not correspond
+to any real transition; Murkrow's own front-sprite stays on its second
+image continuously from render 17034 through at least render 17075 (this
+session's own capture ceiling), it does not flip back like the reused
+5-breakpoint formula predicts. `tileNum` (`473`) and `paletteNum` (`1`) stay
+constant across the ENTIRE window (materialize through settle) — the
+two-image swap is a VRAM-content technique (same pre-extracted-tileset/
+`frame2` pair the existing code already draws from), not an OAM `tileNum`
+change, consistent with how the code already models it; only the
+**timing** needs correcting (a single render-tick boundary, `17034`, not
+`turn5PidgeottoFrame`'s reused 5-breakpoint cycle). Which physical image
+(`tileset` vs `frame2`) each `animCmdIndex` value maps to was **not**
+independently pixel-cross-validated this session (assumed to follow the
+same `0="tileset"`/`1="frame2"` convention the code already uses for
+Pidgeotto) — flagged, not glossed.
+
+### Delta-vs-turn-5 statement (the brief's own explicit ask)
+
+| sub-mechanism | verdict |
+|---|---|
+| Ball handoff -> materialize-start offset (`MATERIALIZE_START_OFFSET=19`) | **holds** (species-agnostic anchor math, RAM-confirmed fresh) |
+| Growing-silhouette accumulator (`affineEmergeAccumulator`) | **holds byte-exact** (species-agnostic engine table, RAM-confirmed fresh, 13/13 values) |
+| Growing-silhouette `y2` (`MATERIALIZE_Y2_TABLE`) | **holds byte-exact** (12/12 values) |
+| Stretch/wobble anchor tick | **does NOT hold** — real is render 17020, not the `SETTLE_TICK`-minus-table-length derivation currently coded (17030) |
+| Stretch/wobble table content | **does NOT hold** — a different underlying driver (linear angle counter vs. Pidgeotto's own literal scale table), though the RESULTING register shape (a clean, table-able wobble) is structurally similar and the render function needs no change, only its table argument |
+| Front-sprite frame-alternation timing | **does NOT hold** — real is a single flip at render 17034, not the reused 5-breakpoint cycle |
+| Settle tick (`TURN13_MURKROW_SETTLE_TICK=17070`) | **holds** (§50's own prior-session fix, re-confirmed this session via the 17069==17070 sha match) |
+
+### Mission B (settled-menu transient): NOT REACHED — time-boxed
+
+Per the brief's own priority ("commit Mission A's append before chasing
+Mission B") and this session's 30-minute cap, Mission B (the settled
+turn-14 menu's own remaining bounce-tick residual, §50's residual 2) was
+not started. `MENU_IDLE_BLANK_END_TICK`'s own role as the named suspect
+remains exactly as §50 left it — unconfirmed, unchased, a concrete next
+step for a resuming session.
+
+### Verification
+
+`tools/probe/verify-turn13-materialize.ts` — fresh single-round-trip
+oracle capture, asserts (twice-run identical, matching every other
+`verify-turn13*.ts` convention in this dossier): the three render-lag seams
+above (materialize onset, wobble onset, settle boundary) by exact sha256,
+the growing-silhouette phase's own monotonic-distinct shas, and that
+render 17069/17070 are 0-diff (the table's own closing boundary). Does
+**not** re-assert Mission B (not reached). `npm test`/`npm run build`
+unaffected — no `src/` changes this session, docs + probe tooling only.
