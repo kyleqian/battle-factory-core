@@ -10779,7 +10779,7 @@ function drawTurn14FlyMissWindow(fb: Uint8Array, t: number, pressTick: number): 
 function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmenuState): void {
   const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (sm.openElapsed === null || t < revealTick) {
-    const shiftedBounceTick = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN13_SWITCHIN_RESET_SHIFT;
+    const shiftedBounceTick = t + TURN13_SWITCHIN_RESET_SHIFT;
     drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawTurn5SitrusSettledMenuChrome(fb);
@@ -10792,7 +10792,7 @@ function drawTurn14FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
       return;
     }
   }
-  const shiftedBounceTick = sm.confirmElapsed !== null ? turn14KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN13_SWITCHIN_RESET_SHIFT;
+  const shiftedBounceTick = sm.confirmElapsed !== null ? turn14KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t + TURN13_SWITCHIN_RESET_SHIFT;
   drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
