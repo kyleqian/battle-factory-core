@@ -6,9 +6,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 266 — Bounded characterization worker (ISSUES #37 post-SEND OUT): **READY FOR IMPLEMENTATION**
 
-- **State:** post-confirm path is oracle/RAM-characterized only; no `src/`
-  engine change. New verifier is **17/17 PASS** over 316 fresh dense oracle
-  captures; party canonical + delayed remain **143/143**.
+- **State:** **SUPERVISOR ACCEPTED** — post-confirm path is oracle/RAM-
+  characterized only; no `src/` engine change. Independently reproduced
+  **17/17 PASS** over 316 fresh dense oracle captures; party canonical +
+  delayed remain **143/143**, Tier-1 **1004/1004**, build green.
 - **Did:** added `docs/turn15-sendout-notes.md`, dense pixel verifier and
   RAM/OAM/VRAM dump. Pinned confirm/fade/black, field/text, Brendan+ball,
   particles/MAGBY tint, healthbox 268→158 slide, blank 20551–56, settled
@@ -57,21 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** Independent compares are **135/143** each with only the named
   eight frames red; all other entry and settled frames are exact. PAPERCUT:
   none.
-
----
-## 262 — Bounded worker (ISSUES #37 icon/OAM half): **CLOSED** — live icon-free party compositor; canonical + delayed traces **62/62, 0 diff**
-
-- **State:** `npm test` **1001/1001**, `npm run build` green; production JS
-  **5.16 MB** (<6 MB). `composite-party-menu.ts` **5/5 PASS, 0/38400 each**.
-- **Did:** Regenerated persistent chrome with every source icon/status texel
-  erased; production redraws source-extracted ONIX/MAGBY/BAYLEEF + BAYLEEF
-  status OBJ over it from `PartySelectState.elapsed/cursor`, including
-  selection panel state, 30/31 ONIX hop, full-icon 7/8 frame cadence, and
-  the documented two-frame stall. Added Tier-1 layer/schedule tests. Both
-  party traces gained 16 representative ONIX/MAGBY selected plateau captures
-  (**46→62**) and remain 0 diff.
-- **Next:** ISSUES #37 only: 80-frame entry fade/black and post-SEND-OUT
-  ball/materialization/healthbox/menu. Keep per-tick replays and absolute-tick
-  assets out.
-- **Notes:** `docs/party-menu-notes.md` §7 explains the auditable no-baked-
-  icon proof. No PAPERCUTS.
