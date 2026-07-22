@@ -189,17 +189,18 @@ else
     echo "Interactive supervisor on $MODEL/$REASONING_EFFORT, hard cap ${CAP_HOURS}h (deadline $DEADLINE_HUMAN)."
   fi
   # Scripts run without job control, so this '&' child stays in our process
-  # group and can still own the terminal for its TUI — backgrounding it only
-  # serves to hold its pid for the watchdog (exec would lose the cap).
+  # group. Bash otherwise replaces a background command's stdin with
+  # /dev/null; reconnect /dev/tty so the interactive TUI can start while we
+  # still retain its pid for the watchdog (exec would lose the cap).
   if [[ "$PROVIDER" == "claude" ]]; then
     POKEBENCH_ROLE=supervisor claude --remote-control \
       --remote-control-session-name-prefix emerald-factory \
-      --model "$MODEL" --dangerously-skip-permissions "$PROMPT" &
+      --model "$MODEL" --dangerously-skip-permissions "$PROMPT" < /dev/tty &
   else
     POKEBENCH_ROLE=supervisor codex \
       --model "$MODEL" \
       -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
-      --dangerously-bypass-approvals-and-sandbox "$PROMPT" &
+      --dangerously-bypass-approvals-and-sandbox "$PROMPT" < /dev/tty &
   fi
 fi
 agent_pid=$!
