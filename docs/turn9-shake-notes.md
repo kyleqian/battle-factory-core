@@ -681,3 +681,39 @@ New committed tooling: `tools/probe/dump-quickattack-hitsplat-oam.py` (the
 diag-turn9-hitsplat-field.ts` (the coefficient/domain sweep that found the
 0-mismatch combo). No trace files changed, no `PROGRESS.md`/`ISSUES.md`
 edits (per the worktree-lane constraint — the supervisor folds this in).
+
+## 2026-07-21 S7 engine step: ISSUES #31 WIRED and CLOSED — hitsplat is genuinely 0-diff; a SEPARATE, previously-unprobed bug found one layer deeper (ISSUES #32, opened, not the hitsplat's own bug)
+
+Engine step (not a PROBE lane). Wired exactly the solved rule above:
+`drawSpriteSheetAffineStretchBlendedOverFb` (the hitsplat's sole caller)
+now computes target2 from `staticBgPixel` (the BG asset, never `fb`) and
+blends at `eva=12,evb=8` instead of the old `eva=16,evb=16` "additive
+lighten over live fb" guess. `tools/probe/verify-turn9-hitsplat.ts` reran
+unchanged, still **12/12**.
+
+Restored `turn9-quickattack.json`'s own excluded 10935-10944 span: 8 of the
+10 renders (10935-10939, 10942-10944) came back pixel-exact immediately,
+confirming the hitsplat rule itself needed no adjustment. The remaining 2
+(10940-10941) are NOT the hitsplat — they're a 203px residual confined to
+Pidgeotto's OWN silhouette (bbox `(178,41)-(190,62)`, nowhere near the
+hitsplat/Onix region), structurally similar in shape to `docs/aerial-ace-
+notes.md`'s own solved clone-overlap rule (Pidgeotto's own QUICK_ATTACK
+slot 4 sits at its own life-end at exactly this tick) but pixel-testing
+that EXACT formula here does not reach 0 tolerance — tried and reverted
+this session rather than curve-fit past the mismatch. Named `ISSUES.md`
+**#32**, a fresh and separate entry (this is a different bug from #31's
+own hitsplat target2 bug, sitting one layer deeper in the same trace).
+
+**Trace**: `turn9-quickattack.json` **167/167, 0 diff** (was 159/159; the
+brief's own "~169" estimate assumed the 2 newly-discovered #32 ticks would
+also close, which they didn't — excluded honestly rather than faked).
+`ISSUES.md` #31 deleted per the "delete on fix" convention (its own
+mechanism IS fully solved); #32 opened for the newly-discovered gap.
+
+### Verification
+
+`npm test` **993/993** (+7 new Tier-1 tests, mostly for the AERIAL_ACE side
+of this same session — see `docs/battle-turn-notes.md` §51). `npm run
+build` green. Full regression sweep 0 diff: `turn9-quickattack-b` **77/77**,
+`turn9-rockslide` **130/130**, `turn10-rockslide` **220/220**,
+`turn12-rockslide-miss` **38/38**, `turn13-switchin` **156/156**.

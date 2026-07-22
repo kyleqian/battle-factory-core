@@ -1025,3 +1025,58 @@ the RAM-read cross-check AND the formula-only reproduction, in one script).
   unified rule. No open gap remains for rung (b)'s own blend mechanics —
   only the actual `src/engine/` wiring is outstanding (out of scope here).
 - **Rung (c)/(d)**: unchanged from Mission A2's own accounting above.
+
+## 2026-07-21 S7 engine step: ALL rungs WIRED and CLOSED (turn-10 window gapless 12345-12437, turn-12 mirror gapless over the +2068 shift) — one genuine new finding, one falsified transfer
+
+Engine step (not a PROBE lane) — every rule this doc pinned above was applied
+as-is; see `docs/battle-turn-notes.md` §51 for the full writeup and pixel
+counts. Summary for this doc's own record:
+
+- **The OVERLAP RULE transferred exactly as solved for slot 7** (wins its
+  OAM tie unconditionally, blends against the field, drawn last) — `npm run
+  compare` 0-diff at every render 12368-12373 once wired.
+- **Slot 4 did NOT follow the same unconditional rule** — falsified both
+  directions by `npm run compare` (always-wins regresses 12363-12367,
+  always-loses mismatches 12368-12369). The actual shape: loses its whole
+  life except the VERY LAST tick (render 12368), where it flips to winning,
+  matching slot 7's own formula exactly at that one tick. Not predicted by
+  this doc's own prior sessions (which only examined slot 4's OAM order
+  during its SECOND life, co-located with the real sprite) — a genuinely new
+  finding, RAM-unconfirmed (pixel-only), named here for whoever next probes
+  `gMain.oamBuffer` at RAM 10939-10940-equivalent ticks.
+- **The DARKEN RULE (5-bit-domain `BlendPalette`) needed zero changes** —
+  the engine's own pre-existing `darkenPaletteToward10`/`blendComponentToward`
+  helper was ALREADY in the correct 5-bit domain (it long predates this
+  session); only the SCRATCH probe script's own separate, simplified
+  reimplementation had the 8-bit-domain bug this doc's own prior section
+  root-caused. Wiring was a pure no-op on the darken formula itself.
+- **Turn 12's own mirror needed active wiring**, not just verbatim reuse:
+  mechanism 4's darken, the flicker, and its healthbox-wobble companion
+  (below) had never been threaded through `drawTurn12FieldBase`/
+  `drawTurn12AerialAceWindow` at all — added this session, confirming the
+  "+2068 bit-exact re-anchor" characterization extends to these three
+  mechanisms too once wired.
+
+**Verification**: `tools/probe/verify-turn10-aerialace.ts` unchanged, still
+**49/49**. `turn10-aerialace.json` now gapless **12345-12437, 93/93 0-diff**.
+`turn12-aerialace.json` now gapless over its own +2068-shifted equivalent,
+**131/131 0-diff**. `npm test` **993/993**, `npm run build` green.
+
+### The flicker's own companion, finally probed: a player-healthbox `y2` wobble (ENDEAVOR §15f) — SOLVED via direct oracle test, not RAM
+
+The prior session's own Mission B named this as unchecked ("the brief's own
+'player-healthbox wobble' companion... was not independently probed in this
+window"). Extending `turn10-aerialace.json` to gapless coverage exposed a
+real, constant (not flicker-coupled) 1580px residual at renders 12407-12426
+— `menuHealthboxPlayer`'s own asset bbox `(127,74)-(229,109)` matches it
+pixel-for-pixel. Reused `turn9Ep2HealthboxWobbleY2` (turn 9's own already-
+solved ±1 alternation, 20 ticks) generalized the same way as the flicker,
+tested `start=101` (one tick before the flicker's own 102, mirroring turn
+9's own 86-vs-87 relative offset) directly against the oracle — **closes to
+0 diff exactly**, confirmed by `npm run compare`, not derived from the
+ENDEAVOR precedent's shape alone. This companion mechanism was NOT
+previously RAM-probed for turn 10 — the fix is empirically validated (both
+timing and the fact that it's needed at all), not RAM-grounded; a future
+session could still RAM-confirm `gTasks[]`/`gSprites[].data[]` directly if
+that matters for confidence, but is not required — the pixel match is
+already exact across the whole 20-tick window at every sampled pixel.

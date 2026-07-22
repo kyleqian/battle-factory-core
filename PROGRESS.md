@@ -4,6 +4,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 248 — Bounded worker (S7 engine step): AERIAL_ACE + hitsplat CLOSE-OUT — all 4 parts LAND: turn-10 window gapless 0-diff 12345-12437 (overlap rule + darken + flicker + a newly-discovered player-healthbox wobble), ISSUES #31 hitsplat SOLVED and deleted (167/167, was 159/159), turn-12 mirror gapless 0-diff over its own +2068 shift (131/131); one NEW residual found and honestly excluded (ISSUES #32, a different bug from #31, NOT chased)
+
+- **State:** `npm test` **993/993** (986 + 7 new Tier-1), `npm run build`
+  green, tree clean, 4 commits this session (one per part, each green).
+  `verify-turn10-aerialace.ts` **49/49**, `verify-turn9-hitsplat.ts`
+  **12/12** (both mandatory-first-step reruns, unchanged throughout).
+  Traces: `turn10-aerialace.json` **93/93** (was 23/23, now gapless
+  12345-12437 — `turn10-rockslide.json` still owns 12438+), `turn9-
+  quickattack.json` **167/167** (was 159/159, restores 8 of the 10
+  previously-excluded 10935-10944 renders), `turn12-aerialace.json`
+  **131/131** (was 56/56, closes the +2068-shifted 14431-14505 gap). Full
+  regression sweep 0 diff: `turn10-rockslide` 220/220, `turn9-quickattack-b`
+  77/77, `turn9-rockslide` 130/130, `turn12-rockslide-miss` 38/38,
+  `turn13-switchin` 156/156.
+- **Did:** wired every rule the dossiers had already pinned — PART 1: slot 7
+  wins its OAM tie against the real sprite unconditionally (blends against
+  the field, never live `fb`); slot 4 does NOT share that rule (falsified
+  both "always wins" and "always loses" via `npm run compare` — the truth is
+  a one-tick flip, wins ONLY at its own life's last tick, render 12368,
+  corrected its life-1 window's end lag along the way, updated the stale
+  Tier-1 pin). PART 2: turn 9's flicker reused verbatim at a new anchor;
+  extending to gapless coverage surfaced a SECOND unpinned mechanism
+  (`docs/aerial-ace-notes.md`'s own named-but-unchecked "player-healthbox
+  wobble" gap) — reused `turn9Ep2HealthboxWobbleY2` the same way, tested the
+  reuse hypothesis directly against the oracle (not derived from the shape
+  alone), closes exactly. PART 3: fixed the hitsplat's target2 (field, not
+  live fb, `eva=12/evb=8`) — genuinely solved, but restoring the excluded
+  window exposed a DIFFERENT bug one layer deeper (Pidgeotto's own
+  QUICK_ATTACK clone overlap, 2 ticks, 203px) — tried transferring
+  AERIAL_ACE's exact formula, it didn't fit; reverted rather than curve-fit,
+  named `ISSUES.md` #32. PART 4: turn 12's own dispatcher had never wired
+  mechanism 4/flicker/wobble at all — added, using the SAME `(t,pressTick)`-
+  relative anchors turn 10 uses, confirming the "+2068 bit-exact re-anchor"
+  claim extends to these three mechanisms too.
+- **Next:** ISSUES #32 (turn 9 QUICK_ATTACK slot 3/4 overlap, 10940-10941) —
+  needs a fresh `gMain.oamBuffer` RAM probe of those two sprites specifically
+  before the next attempt, per the "wiring not derivation" convention (this
+  session deliberately did not re-derive without that ground truth). Turn
+  13's own §50 residuals (materialize/wobble, settled-menu subset) and turn
+  14+ wiring remain the next natural targets, unchanged from #247's own
+  handoff.
+- **Notes:** Full writeup in `docs/battle-turn-notes.md` §51 +
+  `docs/aerial-ace-notes.md`'s + `docs/turn9-shake-notes.md`'s own newest
+  dated sections. No PAPERCUTS beyond the standing mgba-venv-teardown one.
+
+---
 ## 247 — Supervisor fold: turn-13 rung 4 SALVAGED+LANDED (`turn13-switchin.json` **156/156**, cap-killed pre-commit — supervisor verified + committed with provenance; turn 13 NOT fully green, two named residuals excluded per §50), turn-16 + turn-17 retrofit probes verified+merged (**every banked dossier turn 13→WIN now has a PASS/FAIL verify script**), overlap-rule transfer probe folded earlier (AERIAL_ACE darken = 5-bit-domain formula fix, 18/18 exact; ISSUES #31 hitsplat SOLVED 4210/4210 — wrong target2, wiring-ready)
 
 - **State (supervisor-verified):** `npm test` **986/986**, `npm run build`
