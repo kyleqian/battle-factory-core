@@ -3,16 +3,11 @@
 // a FRESH, independent oracle round trip (docs/party-menu-notes.md §4).
 //
 // Five composites:
-//   1. "list, cursor on ONIX"   - decomposition: harvested chrome base
-//      (src/assets/gen/party-menu-chrome.json) with ALL THREE icons
-//      (ONIX/MAGBY/BAYLEEF) overwritten from src/assets/gen/party-mon-
-//      icons.json at their own derived anchor+hop position - this only
-//      passes if icon extraction+placement+the selected-icon hop model is
-//      itself pixel-exact, not merely because the chrome already had the
-//      right pixels underneath.
-//   2. "list, cursor on MAGBY" and 3. "submenu" - the harvested chrome frame
-//      used as-is: round-trip stability checks (these exact ticks are
-//      hardware-reproducible, not a one-off transient).
+//   1. "list, cursor on ONIX", 2. "list, cursor on MAGBY", and 3.
+//      "submenu" all start from an ICON-FREE chrome frame.  The extractor
+//      replaces every opaque source icon/status texel with a sentinel; this
+//      script must reconstruct every such texel from the source-extracted
+//      icon/status layers before it can pass.
 //   4. "list, cursor on ONIX, mid-hop" and 5. "list, cursor on MAGBY,
 //      mid-hop" - NEW this session: same decomposition idea as (1) but at
 //      the OTHER half of the selected icon's bounce cycle (y2=+1 instead of
@@ -129,7 +124,9 @@ function pasteTileset(fb: number[], fbWidth: number, fbHeight: number, ts: Tiles
       for (let y = 0; y < 8; y += 1) {
         for (let x = 0; x < 8; x += 1) {
           const idx = tile[y * 8 + x]!;
-          if (idx === 0) continue; // transparent - leave the chrome base pixel as-is
+          // The icon-free base carries real reconstructed panel chrome at
+          // transparent texels; it never carries this tick's icon pixels.
+          if (idx === 0) continue;
           const px = ox + tx * 8 + x;
           const py = oy + ty * 8 + y;
           if (px < 0 || py < 0 || px >= fbWidth || py >= fbHeight) continue;
@@ -225,7 +222,7 @@ async function main() {
     report("list, cursor on MAGBY (chrome + all 3 icons decomposed, selected hop phase -3)", fb, ticks.listMagby, 38400);
   }
 
-  // 5. mid-hop: same screen, MAGBY selected/phase +1 (tick 20215, RAM-confirmed).
+  // 5. mid-hop: a real pre-confirm list plateau, MAGBY selected/phase +1.
   {
     const fb = chromePixels(chrome.listMagbyMidHop!);
     pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: false });
@@ -235,7 +232,16 @@ async function main() {
     report("list, cursor on MAGBY, MID-HOP (selected hop phase +1, off-sample tick)", fb, ticks.listMagbyMidHop, 38400);
   }
 
-  report("submenu SEND OUT/SUMMARY/CANCEL (harvested chrome, round-trip check)", chromePixels(chrome.submenu!), ticks.submenu, 38400);
+  // 3. The action window lands during MAGBY's rendered +1/frame-1 phase
+  // (the RAM flip is one VBlank ahead); it is still a full decomposition.
+  {
+    const fb = chromePixels(chrome.submenu!);
+    pasteIcon(fb, 240, 160, { species: "ONIX", frame: 0, selected: false });
+    pasteIcon(fb, 240, 160, { species: "MAGBY", frame: 1, selected: true, phase: "plus1" });
+    pasteIcon(fb, 240, 160, { species: "BAYLEEF", frame: 1, selected: false });
+    pasteStatusOverlay(fb, magbyStatusOverlay);
+    report("submenu SEND OUT/SUMMARY/CANCEL (icon-free chrome + all icon/status layers)", fb, ticks.submenu, 38400);
+  }
 
   console.log(`\n${failures === 0 ? "ALL COMPOSITES PASSED" : `${failures} COMPOSITE(S) FAILED`}`);
   process.exit(failures === 0 ? 0 : 1);

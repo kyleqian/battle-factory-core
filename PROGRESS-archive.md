@@ -11560,3 +11560,11 @@ archived entry on top. Git history has the full detail regardless.
   stops, every one with banked findings that landed next round).
 
 ---
+## 259–257 — Supervisor/worker turn-15 wind-down (archived 2026-07-22)
+
+Historical ledger detail moved out of `PROGRESS.md` to preserve its three-entry
+resume window. These entries cover the completed turn-13/14 bounce fixes and
+turn-15 FLY strike/faint-text wiring; their full contemporaneous text remains
+in git history immediately before corrective commits `d5ac217` and `9942a8d`.
+
+---

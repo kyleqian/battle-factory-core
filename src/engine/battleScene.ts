@@ -531,6 +531,10 @@ import menuIdleOnixBounceAsset from "../assets/gen/menu-idle-onix-bounce.json" w
 import menuIdleHealthboxBounceAsset from "../assets/gen/menu-idle-healthbox-bounce.json" with { type: "json" };
 import fightSubmenuWindowAsset from "../assets/gen/fight-submenu-window.json" with { type: "json" };
 import partyMenuChromeAsset from "../assets/gen/party-menu-chrome.json" with { type: "json" };
+import partyMonIconsAsset from "../assets/gen/party-mon-icons.json" with { type: "json" };
+import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay.json" with { type: "json" };
+import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
+import { partyMenuLayers, type PartyMenuIconLayer } from "./partySelect.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
@@ -11574,6 +11578,11 @@ function drawTurn15FightSubmenuWindow(fb: Uint8Array, t: number, sm: FightSubmen
 type PartyChromeFrame = { palette: number[]; indices: string };
 const partyMenuChrome = partyMenuChromeAsset as unknown as Record<string, PartyChromeFrame>;
 const partyChromeCache = new Map<string, Uint8Array>();
+type PartyIconAsset = { frame0: Tileset; frame1: Tileset; palette: RgbColor[] };
+const partyMonIcons = partyMonIconsAsset as unknown as Record<string, PartyIconAsset>;
+type PartyStatusOverlay = { x: number; y: number; width: number; height: number; pixels: number[] };
+const partyMenuStatusOverlay = partyMenuStatusOverlayAsset as PartyStatusOverlay;
+const partyMenuStatusOverlayMagby = partyMenuStatusOverlayMagbyAsset as PartyStatusOverlay;
 
 function partyChromePixels(key: string): Uint8Array {
   const cached = partyChromeCache.get(key);
@@ -11589,6 +11598,30 @@ function partyChromePixels(key: string): Uint8Array {
   return pixels;
 }
 
+const PARTY_ICON_BASE: Record<PartyMenuIconLayer["species"], { x: number; y: number }> = {
+  ONIX: { x: 16, y: 40 }, MAGBY: { x: 104, y: 18 }, BAYLEEF: { x: 104, y: 42 },
+};
+
+function drawTurn15PartyIcon(fb: Uint8Array, layer: PartyMenuIconLayer): void {
+  const asset = partyMonIcons[layer.species]!;
+  const base = PARTY_ICON_BASE[layer.species];
+  // Base x/y is OAM center; offsets are the RAM-derived selected hop or
+  // AnimateSelectedPartyIcon's permanent deselected offset.
+  drawSpriteSheet(fb, layer.frame === 0 ? asset.frame0 : asset.frame1, asset.palette, base.x + layer.x2 - 16, base.y + layer.y2 - 16);
+}
+
+function drawTurn15PartyStatus(fb: Uint8Array, topOverlay: PartyStatusOverlay): void {
+  // This turn uses the same OBJ tile twice; the selected-MAGBY overlap has a
+  // separately extracted top instance.  Draw after icons, matching OAM order.
+  for (const [baseY, overlay] of [[24, topOverlay], [partyMenuStatusOverlay.y, partyMenuStatusOverlay]] as const) {
+    for (let y = 0; y < overlay.height; y += 1) for (let x = 0; x < overlay.width; x += 1) {
+      const src = (y * overlay.width + x) * 4;
+      if (overlay.pixels[src + 3] === 0) continue;
+      setPixel(fb, overlay.x + x, baseY + y, { r: overlay.pixels[src]!, g: overlay.pixels[src + 1]!, b: overlay.pixels[src + 2]! });
+    }
+  }
+}
+
 /**
  * Stable party-menu chrome is selected by live party state, never by trace
  * tick. The in/out fade and icon OAM animation are deliberately not faked:
@@ -11597,12 +11630,14 @@ function partyChromePixels(key: string): Uint8Array {
  */
 function drawTurn15PartySelectWindow(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): boolean {
   if (state.elapsed < 80 || state.sendOutConfirmed) return false;
-  const key = state.submenuOpen ? "submenu" : state.cursor === "magby" ? "listMagby" : "listOnix";
-  const pixels = partyChromePixels(key);
+  const layers = partyMenuLayers(state);
+  const pixels = partyChromePixels(layers.chromeKey);
   for (let p = 0, o = 0; p < 240 * 160; p += 1, o += 4) {
     const c = p * 3;
     fb[o] = pixels[c]!; fb[o + 1] = pixels[c + 1]!; fb[o + 2] = pixels[c + 2]!; fb[o + 3] = 255;
   }
+  for (const icon of layers.icons) drawTurn15PartyIcon(fb, icon);
+  drawTurn15PartyStatus(fb, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
   return true;
 }
 

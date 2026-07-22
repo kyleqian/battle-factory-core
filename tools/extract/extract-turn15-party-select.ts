@@ -19,6 +19,12 @@ const SETTLED_OFFSETS = [
   153, 185, 186, 187, 188, 189, 198, 199, 213, 214, 222, 223, 224,
   225, 226, 227, 228, 237, 238, 239, 240, 241, 242, 243, 244,
   252, 253, 254,
+  // RAM-derived OAM proof windows: ONIX selected at its +1/frame-1 hop
+  // plateau, then MAGBY selected at its own +1/frame-1 plateau.  These are
+  // press-relative, so the 30-frame delayed-dismiss trace exercises exactly
+  // the same compositor schedule rather than an absolute trace-tick table.
+  160, 161, 162, 163, 164, 165, 166, 167,
+  205, 206, 207, 208, 209, 210, 211, 212,
 ];
 
 function delayedSegments(delay: number): Segment[] {
@@ -38,7 +44,10 @@ function writeTrace(path: string, delay = 0): void {
   const pressTick = DISMISS_TICK + delay;
   const trace: Trace = {
     segments: delayedSegments(delay),
-    captureFrames: SETTLED_OFFSETS.map((offset) => pressTick + offset),
+    // Oracle captures are keyed by frame but the app-side trace helper streams
+    // them in chronological order; keep the proof windows sorted after adding
+    // the off-sample OAM plateaus above.
+    captureFrames: SETTLED_OFFSETS.map((offset) => pressTick + offset).sort((a, b) => a - b),
   };
   writeFileSync(path, `${JSON.stringify(trace, null, 2)}\n`);
 }

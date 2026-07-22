@@ -317,3 +317,27 @@ decomposition + 2 new mid-hop checks), `src/assets/gen/party-menu-
 chrome.json` (regenerated, 5 frames), `src/data/gen/party-menu-icon-
 animation.json` (hop model + render-lag + fainted-palette + status-icon
 findings), this doc. No `src/engine/` files touched.
+
+## 7. 2026-07-22 corrective wiring: icon-free chrome is now a live compositor
+
+This section supersedes the historical §4/§5 caveat above. The production
+renderer now calls `partyMenuLayers(PartySelectState)` and composes the
+source-extracted ONIX/MAGBY/BAYLEEF tiles, extracted BAYLEEF status OBJ, and
+RAM-derived selected-hop/deselected-offset state over an **icon-free** chrome
+base. `extract-party-menu-chrome.ts` replaces every opaque source icon/status
+texel in each persisted base with a conspicuous sentinel before
+palette-indexing it; transparent icon texels retain only underlying panel/BG
+chrome. Neither production nor the proof can reveal a harvested source icon
+through transparency.
+
+`composite-party-menu.ts` starts from that erased base and redraws all three
+icons plus status before every comparison. Fresh oracle result: **5/5 PASS,
+0/38400 px each** at list-ONIX `20070`, ONIX mid-hop `20158`, list-MAGBY
+`20206`, genuine pre-confirm MAGBY mid-hop `20196` (replaces the old,
+incorrectly-labelled post-confirm `20215` sample), and submenu `20220`.
+
+The live canonical and 30-frame delayed-dismiss traces now capture 62 frames
+each (formerly 46): both add eight-frame representative ONIX-selected and
+MAGBY-selected frame-flip/hop plateaus, and both are **62/62, 0 diff**. The
+remaining party-menu debt is intentionally out of this rung: entry fade/black
+and the post-SEND-OUT path.

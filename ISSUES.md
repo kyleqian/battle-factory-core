@@ -5,8 +5,8 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #37 — Turn-15 forced party menu: press-relative settled state is live, but
-  fade/OAM reconstruction is not yet pixel-exact
+## #37 — Turn-15 forced party menu: only entry fade/black and post-confirm
+  SEND OUT remain
 
 Opened 2026-07-22 corrective follow-up. The rejected 13 MB absolute-tick
 full-frame replay is deleted. `partySelect.ts` now owns elapsed time from the
@@ -19,13 +19,17 @@ transparent-tile overwrite still preserves source-harvested pixels beneath
 the icons, so it is not yet sufficient as the required erase/reconstruct
 acceptance proof.
 
-Remaining: faithfully composite the list chrome without its source-harvested
-icon pixels (and make the 5/5 composite prove that), then redraw the three
-source-extracted icons/status OBJ from the banked hop model; model the
-80-frame fade/black entry and post-SEND-OUT path.
-Until then, the canonical trace intentionally captures only verified settled
-representatives (not the old 256-frame claim). Do not re-add per-frame assets
-or absolute-tick lookup tables.
+Closed in the corrective compositor rung: each persisted chrome frame is now
+icon-free (every source-icon/status opaque texel is erased before asset
+generation), and production redraws ONIX/MAGBY/BAYLEEF plus BAYLEEF's status
+OBJ from `PartySelectState.elapsed/cursor` using the RAM-derived hop/frame
+schedule and selection palette/panel base. The independent composition proof
+is **5/5 PASS, 0/38400 each**; canonical and 30-frame delayed traces are
+both **62/62, 0 diff**, including selected ONIX and MAGBY hop/frame plateaus.
+
+Remaining: model the 80-frame entry fade/black span and the post-SEND-OUT
+ball/materialization/healthbox/menu path. Do not re-add per-frame assets or
+absolute-tick lookup tables.
 
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
