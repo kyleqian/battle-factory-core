@@ -188,26 +188,26 @@ else
   else
     echo "Interactive supervisor on $MODEL/$REASONING_EFFORT, hard cap ${CAP_HOURS}h (deadline $DEADLINE_HUMAN)."
   fi
-  TIMEOUT_MESSAGE="run-supervisor: ${CAP_HOURS}h cap reached — stopping supervisor"
-  # Keep the TUI in the terminal's foreground process group. The wrapper owns
-  # the deadline without backgrounding the interactive child.
   if [[ "$PROVIDER" == "claude" ]]; then
-    POKEBENCH_ROLE=supervisor python3 tools/run-with-deadline.py \
-      "$CAP_SECONDS" "$TIMEOUT_MESSAGE" -- \
-      claude --remote-control \
-        --remote-control-session-name-prefix emerald-factory \
-        --model "$MODEL" --dangerously-skip-permissions "$PROMPT"
+    # Preserve warm-bison's original Claude Remote Control launch and shell
+    # watchdog path exactly.
+    POKEBENCH_ROLE=supervisor claude --remote-control \
+      --remote-control-session-name-prefix emerald-factory \
+      --model "$MODEL" --dangerously-skip-permissions "$PROMPT" &
   else
+    TIMEOUT_MESSAGE="run-supervisor: ${CAP_HOURS}h cap reached — stopping supervisor"
+    # Codex's Crossterm TUI must stay in the terminal's foreground process
+    # group. The wrapper owns the deadline without backgrounding Codex.
     POKEBENCH_ROLE=supervisor python3 tools/run-with-deadline.py \
       "$CAP_SECONDS" "$TIMEOUT_MESSAGE" -- \
       codex --model "$MODEL" \
         -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
         --dangerously-bypass-approvals-and-sandbox "$PROMPT"
+    exit $?
   fi
-  exit $?
 fi
-# Headless supervisors do not own a TTY, so retain the lightweight shell
-# watchdog used by the streaming launch above.
+# Headless supervisors and interactive Claude retain the original lightweight
+# shell watchdog. Interactive Codex exits through the foreground wrapper.
 agent_pid=$!
 ( sleep "$CAP_SECONDS"
   echo "run-supervisor: ${CAP_HOURS}h cap reached — stopping supervisor"
