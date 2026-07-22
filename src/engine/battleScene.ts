@@ -3261,11 +3261,25 @@ let turn10OnixDarkPaletteCache: RgbColor[] | null = null;
 function turn10OnixDarkPalette(): RgbColor[] {
   return (turn10OnixDarkPaletteCache ??= darkenPaletteToward10(onixBackSprite.palette));
 }
-/** BG palette bank 1 ONLY (docs/aerial-ace-notes.md: `selector=31` decodes to `F_PAL_BG|F_PAL_BATTLERS`, one specific BG palette bank, not every bank `staticBgPixel` can sample) - banks 0/2 pass through unchanged. */
+/**
+ * Hardware `F_PAL_BG` selects BG_PLTT banks 1/2/3 (`UnpackSelectedBattlePalettes`/
+ * `GetBattlePalettesMask`, `reference/pokeemerald/src/battle_anim_mons.c:1402-1410`:
+ * mask `0xe` outside a Contest), but `battleBg.palette` (`extract-battle-bg.ts`)
+ * is a COMPACT array of only the palettes actually referenced by the static
+ * tilemap's own tile entries, indexed locally (0..N), NOT the hardware bank
+ * numbers directly - every tile entry in `battleBg.static.tilemap` uses local
+ * palette index **0** (RAM/asset-confirmed this session, `python3 -c
+ * "...Counter(e['palette'] for e in entries)"` on the committed JSON: all
+ * 2048 entries, one distinct value). Darkening local indices 1/2/3 (the
+ * naive hardware-bank-number transcription) is therefore a no-op - the
+ * asset's own local index 0 is the one every visible field tile actually
+ * samples, and RAM confirms IT is the one that darkens (`bgPal1Color1`,
+ * hardware bank 1, `dump-aerialace-anim.py`).
+ */
 let turn10BgDarkPaletteCache: RgbColor[][] | null = null;
 function turn10BgDarkPalette(): RgbColor[][] {
   if (turn10BgDarkPaletteCache) return turn10BgDarkPaletteCache;
-  turn10BgDarkPaletteCache = battleBg.palette.map((bank, i) => (i === 1 ? darkenPaletteToward10(bank) : bank));
+  turn10BgDarkPaletteCache = battleBg.palette.map((bank, i) => (i === 0 ? darkenPaletteToward10(bank) : bank));
   return turn10BgDarkPaletteCache;
 }
 
@@ -3659,7 +3673,7 @@ function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number)
   }
 }
 
-function healthboxBackgroundColorAt(x: number, y: number): RgbColor | undefined {
+function healthboxBackgroundColorAt(x: number, y: number, paletteOverride?: RgbColor[][]): RgbColor | undefined {
   const tilemap = battleBg.static.tilemap;
   const tileset = battleBg.static.tileset;
   const tileRow = Math.floor(y / 8);
@@ -3674,7 +3688,7 @@ function healthboxBackgroundColorAt(x: number, y: number): RgbColor | undefined 
   const sy = entry.vFlip ? 7 - inTileY : inTileY;
   const idx = tile[sy * 8 + sx]!;
   if (idx === 0) return undefined;
-  return battleBg.palette[entry.palette]?.[idx];
+  return (paletteOverride ?? battleBg.palette)[entry.palette]?.[idx];
 }
 
 /**
@@ -7557,7 +7571,7 @@ export function turn9QuickAttackLungeOffset(t: number, pressTick: number): { x2:
  * opponent-side Pidgeotto sprite/corner (both sit in the same opponent-side
  * screen region, `GROVYLE_CORNER`/`PIDGEOTTO_CORNER` both `x=144`).
  */
-function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity): void {
+function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity, bgPaletteOverride?: RgbColor[][]): void {
   const { tileset } = pidgeottoFrontSprite;
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
@@ -7569,7 +7583,7 @@ function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity): void 
           const x = PIDGEOTTO_CORNER.x + tx * 8 + px;
           const y = PIDGEOTTO_CORNER.y + ty * 8 + py;
           if (y >= maxY) continue;
-          const bg = healthboxBackgroundColorAt(x, y);
+          const bg = healthboxBackgroundColorAt(x, y, bgPaletteOverride);
           if (bg) setPixel(fb, x, y, bg);
         }
       }
@@ -8325,7 +8339,7 @@ function drawTurn10AerialAceLungeAndClones(fb: Uint8Array, t: number, pressTick:
   const slot4 = turn10AerialAceSlot4Offset(t, pressTick);
   const slot7 = turn10AerialAceSlot7Offset(t, pressTick);
   if (!lunge && !slot4 && !slot7) return;
-  erasePidgeottoFootprint(fb, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  erasePidgeottoFootprint(fb, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y, darken ? turn10BgDarkPalette() : undefined);
   const { tileset } = pidgeottoFrontSprite;
   const palette = darken ? turn10PidgeottoDarkPalette() : pidgeottoFrontSprite.palette;
   const real = lunge ?? { x2: 0, y2: 0 };
@@ -8602,14 +8616,17 @@ function drawTurn10AerialAceWindow(fb: Uint8Array, t: number, pressTick: number)
   const bounceTick = turn10KickoffBounceTick(t, pressTick);
   const onixY2 = turn10AerialAceOnixShakeY2(t, pressTick);
   const onixHp = turn10AerialAceOnixHp(t, pressTick, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN10_ONIX_AFTER_AERIALACE_HP);
-  // Mechanism 4's own COEFFICIENT state machine (turn10AerialAcePaletteDarkenCoeff)
-  // is RAM-pinned and Tier-1-tested, but the RENDER application (darkening
-  // BG palette bank 1 + both battlers' OBJ palettes) does NOT yet reach
-  // 0-diff (~48% of the frame still mismatches at the plateau, docs/
-  // battle-turn-notes.md §42) - not wired here, named gap, per the "revert
-  // partial render code, keep the pure table" rule.
-  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixHp, onixY2, false);
-  drawTurn10AerialAceLungeAndClones(fb, t, pressTick, false);
+  // Mechanism 4 (docs/aerial-ace-notes.md's own continuation section): the
+  // palette-pulse's own coefficient state machine (turn10AerialAcePaletteDarkenCoeff)
+  // is RAM-pinned; `darken` gates the SAME BG/Onix/Pidgeotto darkened-palette
+  // plumbing `drawTurn5RockSlideAttack`/`drawTurn10AerialAceLungeAndClones`
+  // already carry for turn 5's own sitrus darken, covering selector 31's
+  // F_PAL_BG (drawTurn10FieldBase's own static BG) + F_PAL_BATTLERS (both
+  // Onix, via the same field-base chain, and Pidgeotto, via the lunge/clone
+  // drawer) in one flag - no new palette code needed, a pure wiring job.
+  const darken = turn10AerialAcePaletteDarkenCoeff(t, pressTick) > 0;
+  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixHp, onixY2, darken);
+  drawTurn10AerialAceLungeAndClones(fb, t, pressTick, darken);
   drawTurn10AerialAceSlice(fb, t, pressTick);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const notVeryEffectiveStart = turn10NotVeryEffectiveTextStartTick(pressTick);
