@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
-import { brightnessDecreaseBgr555, drawMode0Ppu, type Mode0State } from "../src/engine/gbaPpu.ts";
+import { mgbaColorFromBgr555, mgbaDarkenColor, drawMode0Ppu, type Mode0State } from "../src/engine/gbaPpu.ts";
 
 function b64(bytes: Uint8Array): string { return btoa(String.fromCharCode(...bytes)); }
 function stateFor(entries: number[], tilePixels: Record<number, number[]>): Mode0State {
@@ -23,9 +23,13 @@ describe("mode-0 raw tile compositor", () => {
     expect(pixel(fb, 0, 0)).toEqual([0, 255, 0]);
   });
 
-  it("uses GBA BLDY brightness decrease in 5-bit color space", () => {
-    expect(brightnessDecreaseBgr555(0x7fff, 15)).toBe(0x0842); // 31 - floor(31*15/16) = 2 per channel
-    expect(brightnessDecreaseBgr555(0x4210, 0)).toBe(0x4210);
-    expect(brightnessDecreaseBgr555(0x4210, 16)).toBe(0);
+  it("uses mGBA's packed expanded-RGB BLDY darken transfer", () => {
+    // `_darken` works after mColorFrom555, not on BGR555 channels.  The
+    // packed-byte divisions retain different discarded low bits for R/G/B.
+    expect(mgbaDarkenColor(mgbaColorFromBgr555(0x7fff), 15)).toBe(0x0f0f10);
+    expect(mgbaDarkenColor(mgbaColorFromBgr555(0x7fff), 15)).toEqual(0x0f0f10); // RGB = 16,15,15
+    // A non-white palette word pins the same upstream arithmetic directly.
+    expect(mgbaDarkenColor(mgbaColorFromBgr555(0x4210), 15)).toBe(0x080809); // RGB = 9,8,8
+    expect(mgbaDarkenColor(mgbaColorFromBgr555(0x4210), 0)).toBe(0x848484);
   });
 });

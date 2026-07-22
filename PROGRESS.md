@@ -4,23 +4,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 270 — Bounded worker (ISSUES #37 rung 1): **GREEN HELPER CHECKPOINT — field transfer blocked**
+## 271 — Bounded worker (ISSUES #37 rung 1): **GREEN TRANSFER CHECKPOINT — raw field asset next**
 
 - **State:** safe baseline retained: canonical/delayed **192/200**; the same
   seven party frames plus 20302/20332 remain. Tier-1 **1007/1007**, build
   **5.32 MB**, verifier **17/17**, party compositor **5/5**.
-- **Did:** direct probe now captures selected raw BG char/map, palette RAM,
-  window registers and OBJ VRAM; added compact extractor + generic tested
-  mode-0 tile/OAM/BLDY compositor. Attempted 20302 integration, observed
-  **38400px** mismatch, and reverted it rather than ship a regression.
-- **Next — SUPERVISOR SOURCE CHECK:** reconnect the indexed asset using
-  mGBA `software-private.h`'s exact 32-bit `_darken`: `mColorFrom555` expands
-  first, then each packed byte is darkened/masked in place. At BLDY 15 this
-  makes white `255,255,255 -> 16,15,15` (red rounds up; shifted green/blue
-  truncate), exactly the oracle histogram. Also fix size-1 BG map extraction
-  to 0x1000 bytes. Party residuals remain out of scope.
-- **Notes:** raw dump JSON validates despite expected exit 139. PAPERCUT:
-  mGBA diagnostics/teardown SIGSEGV, ~4 min.
+- **Did:** replaced the misleading 5-bit BLDY helper with source-pinned mGBA
+  expanded packed-RGB `_darken` semantics (tests pin white `16,15,15` and a
+  non-white BGR555 case); corrected the size-1 text-BG map capture to 0x1000.
+- **Next:** run direct 20302 probe, regenerate the compact indexed asset, wire
+  it only at the party send-out battle-fade boundary, then compare both traces.
+- **Notes:** Tier-1 PPU test and build green. The direct probe can validly
+  write JSON despite its expected mGBA teardown SIGSEGV.
 
 ---
 ## 269 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — raw field asset still required**

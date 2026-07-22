@@ -74,7 +74,7 @@ def main() -> None:
         maps = []
         for bg, control in enumerate(controls):
             size = (control >> 14) & 3
-            map_bytes = (0x800, 0x800, 0x1000, 0x2000)[size]
+            map_bytes = (0x800, 0x1000, 0x1000, 0x2000)[size]
             char_base, screen_base = ((control >> 2) & 3), ((control >> 8) & 31)
             map_data = bytes_at(BG_VRAM + screen_base * 0x800, map_bytes)
             char_data = bytes_at(BG_VRAM + char_base * 0x4000, 0x4000)

@@ -21,16 +21,31 @@ function bytes(b64: string): Uint8Array {
   return Uint8Array.from(text, (c) => c.charCodeAt(0));
 }
 function rgb5(c: number): number { return (c << 3) | (c >> 2); }
-function decrease5(c: number, y: number): number { return c - Math.floor(c * Math.min(16, Math.max(0, y)) / 16); }
 
-/** GBA brightness-decrease equation used when BLDCNT's effect is 3. */
-export function brightnessDecreaseBgr555(color: number, bldy: number): number {
-  return decrease5(color & 31, bldy) | (decrease5((color >>> 5) & 31, bldy) << 5) | (decrease5((color >>> 10) & 31, bldy) << 10);
+/** mGBA's `mColorFrom555`: packed low-byte R, then G and B. */
+export function mgbaColorFromBgr555(color: number): number {
+  return rgb5(color & 31) | (rgb5((color >>> 5) & 31) << 8) | (rgb5((color >>> 10) & 31) << 16);
+}
+
+/**
+ * mGBA software renderer `_darken` (software-private.h), verbatim in
+ * arithmetic shape.  It darkens each *packed expanded* component before
+ * masking it back into place; that is deliberately not the GBA's 5-bit
+ * `BlendPalette` equation.  At BLDY=15 white therefore becomes 16,15,15.
+ */
+export function mgbaDarkenColor(color: number, bldy: number): number {
+  const y = Math.min(16, Math.max(0, bldy));
+  let out = 0;
+  for (const mask of [0x0000ff, 0x00ff00, 0xff0000]) {
+    const component = color & mask;
+    out |= (component - Math.floor(component * y / 16)) & mask;
+  }
+  return out;
 }
 function color(state: Mode0State, bank: number, index: number, targetBit: number): [number, number, number] {
-  let bgr = state.paletteBgr555[bank]?.[index] ?? 0;
-  if (((state.bldcnt >>> 6) & 3) === 3 && (state.bldcnt & targetBit) !== 0) bgr = brightnessDecreaseBgr555(bgr, state.bldy);
-  return [rgb5(bgr & 31), rgb5((bgr >>> 5) & 31), rgb5((bgr >>> 10) & 31)];
+  let packed = mgbaColorFromBgr555(state.paletteBgr555[bank]?.[index] ?? 0);
+  if (((state.bldcnt >>> 6) & 3) === 3 && (state.bldcnt & targetBit) !== 0) packed = mgbaDarkenColor(packed, state.bldy);
+  return [packed & 0xff, (packed >>> 8) & 0xff, (packed >>> 16) & 0xff];
 }
 function mapDimensions(size: number): [number, number] { return [[32, 32], [64, 32], [32, 64], [64, 64]][size] as [number, number]; }
 function mapEntry(map: Uint8Array, width: number, x: number, y: number): number {
