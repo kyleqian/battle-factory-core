@@ -530,3 +530,222 @@ session in this chain made). `npm run build` green.
 ISSUES #34's core (the blank hold + regime reset) is fixed; trimmed to its
 honest remainder in `ISSUES.md` (17722-17768's 43 still-failing ticks,
 17781-17787, 17822-17845) rather than deleted.
+
+## 12. ISSUES #35 root-caused; ISSUES #34's 43-tick remainder partially
+explained by the SAME rule (worktree-lane probe, 2026-07-22)
+
+Scope: ISSUES #35 (turn 15's 7-tick FIGHT-submenu-open residual) and a
+generalization test against ISSUES #34's own still-open 43-tick remainder
+(17722-17768). No `src/engine` edits, no trace edits this session -
+characterization only, per the brief. **Decisive outcome: one rule closes
+turn 15's full 7-tick family exactly, and the SAME rule closes a 9-tick
+subset of turn 14's 43-tick family exactly; the remaining 11 ticks of that
+family (17758-17768) are conclusively NOT explained by this rule (RAM shows
+the code's own existing frozen-phase branch already predicts them
+correctly) - a genuinely separate, still-uncharacterized issue.**
+
+### 12a. The lead: every OTHER turn's analogous branch already has a
+correction turn 14/15 are missing
+
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (`battleMenu.ts:843`, value 2) models a
+real, previously-established mechanism: the FIGHT submenu's own DMA-wait
+reveal costs the shared (never-reset-while-FIGHT-is-open) idle-bounce
+sprite 2 extra ticks of drift relative to a plain `t`-driven formula.
+Turns 2-13's own "submenu open, waiting for the confirm press" branches all
+apply this correction (`battleScene.ts`'s own `t - FIGHT_SUBMENU_OPEN_
+BOUNCE_SHIFT` idiom - e.g. `drawTurn13FightSubmenuWindow` line 9811:
+`const bounceTick = sm.confirmElapsed !== null ? turn13KickoffBounceTick(...) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;`).
+
+`drawTurn14FightSubmenuWindow` (`battleScene.ts:10943-10964`) and
+`drawTurn15FightSubmenuWindow` (`battleScene.ts:11045-11066`) both have the
+STRUCTURALLY IDENTICAL branch - but it reads `t + TURN13_SWITCHIN_RESET_
+SHIFT` / `t + TURN14_MENU_REDRAW_RESET_SHIFT` respectively, with **no
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` term at all**. Same omission in both
+turns' own `turn14KickoffBounceTick`/`turn15KickoffBounceTick` (`battleScene.
+ts:10878-10881`, `10998-11001`) pre-freeze branches (`t < pressTick +
+FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`). This is exactly the brief's own named
+suspect ("does the FIGHT-SUBMENU OPEN itself perturb the bounce regime in a
+way the engine mis-models") - not a sine-table defect, a missing correction
+this file's own later turns simply never carried forward from turn 13's own
+still-current window (the one BEFORE the switch-in reset, which HAS it).
+
+### 12b. Method
+
+1. **RAM probe**: `dump-turn14-bounce-driver.py` reused VERBATIM (no edits -
+   generic over any spec with a `"segments"` array), re-pointed via CLI args
+   at `tools/compare/traces/turn15-fly-strike.json`'s own 122-segment button
+   script (confirmed byte-identical to `turn14-fly-miss.json`'s own first
+   110 segments via a direct array diff - 0 differences, both sum to 18956
+   frames - so reusing this one trace's segments covers BOTH turns' windows
+   with a single script, no divergence risk). Two ranges dumped: 17700-18995
+   (one pass, ~8s, covers turn 14's 17700-17770 AND turn 15's 18950-18995)
+   plus a 18090-18200 sanity window (used to calibrate the analysis - see
+   12c). Same addressing `dump-turn13/14-bounce-driver.py` already
+   established (`gBattleSpritesDataPtr` -> `healthBoxesData[0]` ->
+   driver sprite chain, PLUS `gBattlerSpriteIds[0]`/`gHealthboxSpriteIds[0]`'s
+   own raw `y2`).
+2. **Formula transcription**: `menuIdleBounce`/`bounceSin`/`GBA_SINE_TABLE_
+   256` (`battleMenu.ts`) and `turn5SitrusResettledBounceTick` (`battleScene.
+   ts:6152`) transcribed verbatim into a standalone Python script (read-only,
+   not committed - the committed artifact is the oracle-only verify script,
+   §12d) - two candidate models tested per window: **CURRENT** (`t +
+   RESET_SHIFT`, matches the code today) vs. **CANDIDATE** (`(t -
+   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT) + RESET_SHIFT`), both fed through the
+   SAME `turn5SitrusResettledBounceTick` -> `menuIdleBounce` double
+   composition `drawTurn13SwitchinFieldBase` actually uses
+   (`battleScene.ts:7042`) - an early transcription that skipped this middle
+   step gave nonsense (109/109 mismatches even on the ALREADY-PROVEN-EXACT
+   18090-18200 window from §10c); re-deriving the composition correctly
+   dropped that sanity check to 0/109, confirming the transcription before
+   trusting it against the actual target windows.
+3. **Oracle sha probe**: `tools/probe/verify-submenu-bounce.ts` (new,
+   committed) - a fresh `bin/oracle run` capture, sha256-only, no RAM and no
+   `src/` dependency, checking the plateau/transition SHAPE the CANDIDATE
+   model predicts (which ticks share a sha, which don't) against real
+   hardware directly - the same style `verify-turn13/14-bounce.ts` already
+   established for this exact class of claim.
+
+### 12c. Turn 15 (ISSUES #35): the CANDIDATE model is exact, 0 mismatches,
+across the ENTIRE post-reveal window
+
+RAM (`predict(t) = menuIdleBounce(turn5SitrusResettledBounceTick((t - 2) +
+TURN14_MENU_REDRAW_RESET_SHIFT))` vs. probed raw `(onixY2, healthboxMainY2)`
+at every screen tick 18958-18991, using this dossier's own established
+render-lag convention baked into `menuIdleBounce` itself - no extra manual
+shift needed once the double composition is right):
+
+| model | mismatches | which ticks |
+|---|---|---|
+| CURRENT (no shift) | **7 / 34** | exactly `18965, 18966, 18974, 18975, 18983, 18984, 18985` - ISSUES #35's own named family, 1:1, no more no less |
+| CANDIDATE (`-2` shift) | **0 / 34** | none |
+
+Ticks 18956-18957 (before the chrome reveal at 18962, see below) still
+correctly use the UNSHIFTED formula - both models agree there, so this
+finding doesn't touch the pre-reveal branch at all.
+
+**Independent oracle-only confirmation** (`verify-submenu-bounce.ts`, no
+RAM): real hardware holds ONE flat sha across `18962-18966` (chrome reveals
+at 18962 = `pressTick(18957) + FIGHT_SUBMENU_OPEN_DELAY(5)`, confirmed by a
+dense 18955-18967 sha scan - `18956==...==18961` one sha, `18962==...
+==18966` a DIFFERENT sha, `18967` a third) - i.e. **18965 and 18966 render
+byte-identical to 18962-18964 in real life**; the CURRENT engine's own
+premature transition at 18965 is the entire bug. Same shape confirmed at
+the other two named clusters: `18967-18975` one flat sha (CURRENT wrongly
+transitions at 18974), `18976-18984` one flat sha (CURRENT wrongly
+transitions at 18983), and `18985` is a genuine one-tick blip (its own sha,
+distinct from both neighbors - the same "one-tick blip at the confirm-
+adjacent tick" shape this dossier already documented at turn 13's 17113 and
+turn 14's 18087). `verify-submenu-bounce.ts`: **22/22 PASS**.
+
+### 12d. Turn 14 (ISSUES #34's 43-tick remainder): the SAME rule closes a
+9-tick subset exactly; 11 ticks are conclusively NOT this bug
+
+Same method, re-pointed at `TURN13_SWITCHIN_RESET_SHIFT` (turn 14's own
+pre-confirm anchor) over screen ticks 17719-17758:
+
+| model | mismatches (17722-17757, the pre-confirm/pre-freeze span) | which ticks |
+|---|---|---|
+| CURRENT (no shift) | **9 / 36** | `17726, 17727, 17735, 17736, 17744, 17745, 17753, 17754, 17755` |
+| CANDIDATE (`-2` shift) | **0 / 36** | none |
+
+The confirm press itself (17755) is the single-tick blip (real `(2,1)`,
+CURRENT predicts `(1,1)` - one tick too late catching up to the settled
+value); `17726/27`, `17735/36`, `17744/45`, `17753/54` are the same
+"CURRENT transitions 2 ticks early" shape as turn 15's own three clusters -
+five plateaus of ~9 ticks each plus one blip, the SAME shape in both turns
+(turn 14's own window is turn 15's, shifted ~1234-1236 ticks earlier -
+`18956 - 17722 = 1234`, consistent with the two turns' own different
+`RESET_SHIFT` anchors plus ordinary turn-to-turn drift).
+
+**Past 17757, this rule stops applying.** RAM: `turn14KickoffBounceTick`'s
+own frozen branch (`t >= pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`,
+i.e. `t >= 17758`) returns the CONSTANT `TURN5_SITRUS_MENU_REDRAW_TICK`,
+which composes to `(onixY2, healthboxY2) = (0,0)` - and RAM shows real
+hardware sits at flat `(0,0)` for the entire probed 17758-17770 span. This
+is **already exactly correct in the CURRENT code**, with or without this
+session's fix (the frozen constant never used `RESET_SHIFT` or
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` in the first place - it's a bare anchor
+tick, unaffected by either). So ISSUES #34's own 43-tick family splits
+cleanly:
+
+- **Explained by this rule (9 ticks, all within 17722-17757)**: `17726,
+  17727, 17735, 17736, 17744, 17745, 17753, 17754, 17755` - the CANDIDATE
+  model is exact here (0/36 mismatches across the WHOLE 17722-17757 span,
+  not just these 9 - the other 27 ticks in that span already coincidentally
+  render correctly under the CURRENT unshifted formula too, since shifted
+  and unshifted agree there, so they're unaffected by this fix either way).
+- **NOT explained (11 ticks, 17758-17768)**: RAM conclusively rules this
+  rule out - the governing branch is already provably correct there. A
+  genuinely separate, still-uncharacterized bug (large diffs like 2331px at
+  17753 turned out to be explained -17753 IS in the 9-tick list above - but
+  whatever causes 17758-17768's own pixel mismatches, per #254's own 0/43
+  cheap check, remains open).
+- `17781-17787` (7 ticks) and `17822-17845` (24 ticks, kerning-class) -
+  untouched this session, per ISSUES #34's own existing scope notes.
+
+**Independent oracle-only confirmation** (`verify-submenu-bounce.ts`):
+`17722==17727` (CURRENT wrongly transitions at 17726), `17728==17736`
+(CURRENT wrongly transitions at 17735), `17737==17745` (CURRENT wrongly
+transitions at 17744), `17746==17754` (CURRENT wrongly transitions at
+17753), `17755` a genuine one-tick blip, `17756==17757`, and `17757!=17758`
+(the freeze boundary, explicitly checked and confirmed OUT of this rule's
+scope) - all PASS.
+
+### 12e. The rule (confirmed, not guessed) and fix shape (for the wiring
+worker - pure wiring, no new derivation)
+
+**Rule**: `drawTurn14FightSubmenuWindow`'s and `drawTurn15FightSubmenuWindow`'s
+own post-reveal, pre-confirm-freeze bounce formula is missing the SAME
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` correction every other turn's structurally
+identical branch already applies. Three call sites need it, all read-shift
+only (no anchor/constant changes):
+
+1. `drawTurn14FightSubmenuWindow` (`battleScene.ts:10959-10960`):
+   ```ts
+   const shiftedBounceTick = sm.confirmElapsed !== null ? turn14KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t + TURN13_SWITCHIN_RESET_SHIFT;
+   ```
+   -> the `: t + TURN13_SWITCHIN_RESET_SHIFT` arm becomes
+   `: (t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT) + TURN13_SWITCHIN_RESET_SHIFT`.
+2. `turn14KickoffBounceTick` (`battleScene.ts:10878-10881`):
+   ```ts
+   function turn14KickoffBounceTick(t: number, pressTick: number): number {
+     if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t + TURN13_SWITCHIN_RESET_SHIFT;
+     return TURN5_SITRUS_MENU_REDRAW_TICK;
+   }
+   ```
+   -> the pre-freeze `return` becomes `return (t - FIGHT_SUBMENU_OPEN_BOUNCE_
+   SHIFT) + TURN13_SWITCHIN_RESET_SHIFT;` (confirmed load-bearing by 17755's
+   own blip - §12d). The frozen `return TURN5_SITRUS_MENU_REDRAW_TICK;` arm
+   is UNTOUCHED (§12d's own RAM evidence: already exact).
+3. `drawTurn15FightSubmenuWindow` (`battleScene.ts:11061`) and
+   `turn15KickoffBounceTick` (`battleScene.ts:10998-11001`): the SAME two
+   edits, `TURN14_MENU_REDRAW_RESET_SHIFT` in place of `TURN13_SWITCHIN_
+   RESET_SHIFT`.
+4. The PRE-reveal branches in both functions (`t < revealTick`, currently
+   `t + <RESET_SHIFT>` with no shift) are **NOT** touched - confirmed
+   correct as-is by both RAM (§12c's own 18956-18957 sanity ticks) and
+   oracle (`18956==...==18961`, the flat pre-reveal chrome sha, unaffected).
+   `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` is imported already (`battleScene.ts`
+   line 435) - no new import needed.
+5. Re-run `verify-submenu-bounce.ts` first (mandatory-first-step, oracle-
+   only, unaffected by `src/`) - should stay 22/22 PASS. Then fold the
+   predicted-closing ticks into `captureFrames`:
+   - `turn15-fly-strike.json`: restore all 7 (`18965, 18966, 18974, 18975,
+     18983, 18984, 18985`) - ISSUES #35 predicted CLOSED in full.
+   - `turn14-fly-miss.json`: restore the 9 named in §12d
+     (`17726, 17727, 17735, 17736, 17744, 17745, 17753, 17754, 17755`) -
+     ISSUES #34's own 43-tick family trims to its own honest 34-tick
+     remainder (17758-17768 stays excluded, `17781-17787`/`17822-17845`
+     untouched).
+
+### 12f. Verification artifacts
+
+`tools/probe/verify-submenu-bounce.ts` (new, committed, oracle-only,
+22/22 PASS this session, rerunnable with plain `node --experimental-strip-
+types`, no mGBA needed). RAM probe reused `dump-turn14-bounce-driver.py`
+verbatim (no new probe script needed - re-pointed via its existing CLI args
+at `turn15-fly-strike.json` and different tick ranges); its own Python
+formula-transcription/model-fit script was a scratch tool (not committed,
+same precedent §8/§10's own scratch fits set - the COMMITTED, re-runnable
+pin is the oracle-only `verify-submenu-bounce.ts`). `npm test` 993/993
+(unchanged, no `src/` touched), `npm run build` green.
