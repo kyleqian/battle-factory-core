@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sys
+import base64
 from pathlib import Path
 
 if len(sys.argv) != 5:
@@ -41,6 +42,7 @@ from emerald_core import EmeraldOracle  # noqa: E402
 REF = (ROOT / "reference" / "pokeemerald").resolve()
 SPRITE_SIZE, TASK_SIZE = 0x44, 0x28
 OBJ_VRAM, OBJ_PLTT = 0x06010000, 0x05000200
+PLTT_RAM = 0x05000000
 BG_VRAM = 0x06000000
 OAM = 0x07000000
 TILE_BYTES = 32
@@ -74,11 +76,20 @@ def main() -> None:
             size = (control >> 14) & 3
             map_bytes = (0x800, 0x800, 0x1000, 0x2000)[size]
             char_base, screen_base = ((control >> 2) & 3), ((control >> 8) & 31)
+            map_data = bytes_at(BG_VRAM + screen_base * 0x800, map_bytes)
+            char_data = bytes_at(BG_VRAM + char_base * 0x4000, 0x4000)
             maps.append({"bg": bg, "control": hex(control), "charBase": char_base,
                          "screenBase": screen_base, "mapSha12": hashlib.sha256(bytes_at(BG_VRAM + screen_base * 0x800, map_bytes)).hexdigest()[:12],
                          "charSha12": hashlib.sha256(bytes_at(BG_VRAM + char_base * 0x4000, 0x4000)).hexdigest()[:12],
-                         "hofs": u16(0x04000010 + bg * 4), "vofs": u16(0x04000012 + bg * 4)})
+                         "hofs": u16(0x04000010 + bg * 4), "vofs": u16(0x04000012 + bg * 4),
+                         # Raw blocks, not an image: enough to reproduce the
+                         # mode-0 text layers selected by BGCNT exactly.
+                         "mapB64": base64.b64encode(map_data).decode(),
+                         "charB64": base64.b64encode(char_data).decode()})
         return {"dispcnt": hex(u16(0x04000000)), "bg": maps,
+                "win0h": hex(u16(0x04000040)), "win1h": hex(u16(0x04000042)),
+                "win0v": hex(u16(0x04000044)), "win1v": hex(u16(0x04000046)),
+                "winin": hex(u16(0x04000048)), "winout": hex(u16(0x0400004a)),
                 "bldcnt": hex(u16(0x04000050)), "bldalpha": hex(u16(0x04000052)), "bldy": hex(u16(0x04000054))}
     def hardware_oam() -> list[dict]:
         # gSprites is the game's future OAM model; this is the actual OAM
@@ -125,9 +136,18 @@ def main() -> None:
         return {"tick": tick, "controllerExec": hex(u32(syms["gBattleControllerExecFlags"])),
                 # All 16 BG and all 16 OBJ palette banks, held as BGR555
                 # words so the dump directly records hardware ownership.
-                "palette": {"unfaded": palette_banks(pltt_unfaded), "faded": palette_banks(pltt_faded)},
+                "palette": {"unfaded": palette_banks(pltt_unfaded), "faded": palette_banks(pltt_faded),
+                            # Palette RAM is the PPU source.  The game-side
+                            # buffers can be one transfer behind at a VBlank
+                            # edge, so preserve both rather than conflating
+                            # them with the displayed state.
+                            "hardware": palette_banks(PLTT_RAM)},
                 "display": bg_display(),
                 "hardwareOam": hardware_oam(),
+                # The PPU's 1D OBJ tile address space.  Storing the raw 32KiB
+                # once per requested frame keeps this probe self-contained;
+                # the extractor retains only OAM-referenced tiles.
+                "objVramB64": base64.b64encode(bytes_at(OBJ_VRAM, 0x8000)).decode(),
                 "battler0": {"species": u16(gbm), "hp": u16(gbm + 0x28), "maxHp": u16(gbm + 0x2c), "movePp": [oracle.read_u8(gbm + 0x24 + i) for i in range(4)]},
                 "moveCursor": oracle.read_u8(syms["gMoveSelectionCursor"]), "healthbox": {"left": hb, "right": right, "bar": bar, "sprites": [hb_left, sprite(right), sprite(bar)]},
                 "tasks": [{"slot": i, "func": hex(u32(gt + i * TASK_SIZE)), "active": oracle.read_u8(gt + i * TASK_SIZE + 4)} for i in range(16) if oracle.read_u8(gt + i * TASK_SIZE + 4)],

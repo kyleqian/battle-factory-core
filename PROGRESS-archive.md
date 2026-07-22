@@ -1,3 +1,14 @@
+## 267 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — palette source blocker**
+
+- **State:** Tier-1 **1005/1005**, build **5.32 MB**, verifier **17/17**,
+  compositor **5/5**; both party traces **192/200** with the same residuals.
+- **Did:** banked SEND OUT-edge-relative hold/fade/black timing and live
+  chrome/icon rendering; no absolute tick branch or full-screen replay.
+- **Next:** probe real palette/OAM state before corrective field work.
+- **Notes:** residuals: 5px at 20248/50/58/60/62, 273px at 20253/54, full
+  frame at 20302. PAPERCUT: verbose compare output, ~2 min.
+
+---
 ---
 ## 266 — Bounded characterization worker (ISSUES #37 post-SEND OUT): **READY FOR IMPLEMENTATION**
 

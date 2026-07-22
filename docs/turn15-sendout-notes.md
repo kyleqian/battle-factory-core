@@ -117,3 +117,20 @@ is intentionally direct state, not a screenshot-color fit.
   faint-frame field/window arrangement. A correct implementation must
   compose this register/VRAM-derived battle field and then use the real
   per-bank fade; `fadeTurn15BattleFirstFrame` is only an approximation.
+
+### Rung-1 raw compositor attempt (2026-07-22)
+
+`dump-turn15-sendout.py` now also saves selected BG character/map blocks,
+palette RAM, window registers, and 1D OBJ VRAM.  The new dev-time extractor
+`extract-turn15-field-ppu.ts` retains only OAM-referenced indexed OBJ tiles;
+`src/engine/gbaPpu.ts` composes mode-0 text BG priority/flips/transparency,
+OAM priority/order, and BLDY decrease, with Tier-1 coverage.
+
+The 20302 integration was deliberately not shipped: its direct indexed
+composition differed at all pixels, while the seven party residuals stayed
+unchanged.  The direct state proves zero-sized windows and normal BG/OAM
+selection; the remaining blocker is the exact mGBA display-color/blend
+transfer from BGR555 palette RAM at this frame (the raw white BG entry is
+`0x7fff`, whereas the oracle output is channel-asymmetric after BLDY=15).
+Resolve that transfer from emulator/PPU behavior before reconnecting this
+generic helper; do not screenshot-fit a color table.

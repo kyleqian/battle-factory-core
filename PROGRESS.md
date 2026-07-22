@@ -4,6 +4,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 270 — Bounded worker (ISSUES #37 rung 1): **GREEN HELPER CHECKPOINT — field transfer blocked**
+
+- **State:** safe baseline retained: canonical/delayed **192/200**; the same
+  seven party frames plus 20302/20332 remain. Tier-1 **1007/1007**, build
+  **5.32 MB**, verifier **17/17**, party compositor **5/5**.
+- **Did:** direct probe now captures selected raw BG char/map, palette RAM,
+  window registers and OBJ VRAM; added compact extractor + generic tested
+  mode-0 tile/OAM/BLDY compositor. Attempted 20302 integration, observed
+  **38400px** mismatch, and reverted it rather than ship a regression.
+- **Next:** determine mGBA’s exact BGR555→display blend/color transfer at
+  BLDY=15 from emulator/PPU behavior, then reconnect the indexed asset. Do
+  not screenshot-fit a color table; party residuals remain out of scope.
+- **Notes:** raw dump JSON validates despite expected exit 139. PAPERCUT:
+  mGBA diagnostics/teardown SIGSEGV, ~4 min.
+
+---
 ## 269 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — raw field asset still required**
 
 - **State:** restored and committed-green at the existing rung-1 checkpoint:
@@ -44,23 +60,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Supervisor independently reproduced the register/palette dump, Tier-1, and
   build. PAPERCUT: mGBA diagnostics + teardown SIGSEGV, ~3 min.
 
----
-## 267 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — palette source blocker**
-
-- **State:** supervisor independently verified and banked the safe partial
-  implementation: Tier-1 **1005/1005**, build green at **5.32 MB**, oracle
-  verifier **17/17**, compositor **5/5**. Canonical and delayed are both
-  **192/200**, with the same eight frames at +30; rung 1 is not complete.
-- **Did:** added a SEND OUT-edge-relative phase clock (hold → 16-frame
-  fade → 39-frame generated black hold), live exit chrome/icon-frame logic,
-  and the +57 dense capture windows in both party traces. Canonical confirms
-  20245–47 and 20249/51/52/55–57/59/61/63–301 exactly; no absolute tick
-  branch or full-screen replay asset was added.
-- **Next:** corrective worker must probe real faded/unfaded palette and OAM
-  state at the eight residual frames before editing. Close canonical + delayed
-  to **200/200**; do not screenshot-fit or add absolute timing.
-- **Notes:** residuals are 5px at 20248/50/58/60/62, 273px at 20253/54,
-  and full-frame at 20302 (delayed +30). PAPERCUT: verbose compare output,
-  ~2 min.
 
 ---
