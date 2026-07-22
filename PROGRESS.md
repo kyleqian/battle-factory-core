@@ -4,6 +4,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 259 — Supervisor wind-down: session end 2026-07-22 ~04:00 — **16 verified worker steps across 8 rounds** (8 main-lane wiring slices incl. 3 honest partials that filed their remainders precisely, 8 worktree steps: 6 probes ALL decisive + party groundwork + the #32 fix), zero dud steps, zero regressions, zero merge conflicts; suite **993 → 997/997**; headlines: **turn 15 wired end-to-end** (`turn15-fly-strike.json` 256/256, 18956-19990: reopen gate → FLY strike anim → drain-to-0 → first player-side faint sink → fainted hold), **turn 13 gapless but 2 ticks** (`turn13-switchin` 156→240/240), **turn 14 fully restored** (`turn14-fly-miss` 149→185/185), **turn 9 closed** (`turn9-quickattack` 167→169/169); ISSUES closed: **#32, #35, #36** (latter two opened+closed same session), **#33(b)** and **#34's whole 43-tick family**; #33/#34 trimmed to small precisely-attributed remainders
+
+- **State (verified this minute):** `npm test` **997/997**, `npm run build`
+  green, tree clean, no worktrees, no unmerged branches. Traces
+  new/extended this session (all supervisor-rerun 0 diff):
+  turn15-fly-strike 0→256, turn13-switchin 156→240, turn14-fly-miss
+  149→185, turn9-quickattack 167→169. Verify scripts banked+passing:
+  verify-turn13-bounce (14), verify-turn13-frame2 (11),
+  verify-turn14-bounce (24), verify-turn9-clone-oam (25),
+  verify-submenu-bounce (22), composite-party-menu (submenu 0/38400;
+  list checks FAIL only in the named overlay-sprite corner x105-111).
+- **Next:** (1) **party-select engine rung** — ALL groundwork banked in
+  `docs/party-menu-notes.md` (chrome frames, 3 icons, hop model
+  off-sample-verified, palettes); its ONE open extraction is the
+  per-slot overlay sprite (composite FAIL bbox x105-111 pins it; RAM
+  evidence says tile+palette content banked in the dossier probe); then
+  (2) SEND OUT → MAGBY materialize → settled menu completes turn 15;
+  (3) turn 16 off verify-turn16 (BRN badge = ISSUES #16's remaining
+  engine work); (4) small residuals: #33 (2 ticks, 17019/17034), #34
+  (two attributed families), #23 parked.
+- **Notes:** the probe→wiring pipeline went 6-for-6 on decisive probes;
+  three "speculative labels" fell to direct evidence again (frame2
+  wrong-asset → selection window; #35 "extremum" → missing shift
+  constant; fainted-icon palette → unmodeled hop). The #33(b) crack
+  (text-clear vs chrome-reveal 6-tick blank hold) recurred at turn 14's
+  own anchor (#34) — expect the same class at every future fresh menu
+  reveal. Two boundary-(i)/(iii) partials were continuation-style stops
+  with exact remainders filed (ISSUES #35/#36), not failures.
+  Interactive session; no escalations needed; no usage-limit events.
+
+---
 ## 258 — Bounded worker (turn-15 wiring, boundary (iii) close-out, ISSUES #36 DELETED): wired the player-side faint sink + button-gated "ONIX fainted!" hold — `turn15-fly-strike.json` **256/256, 0 diff** (extended 19308→19990, the entire turn-15 window 18956-19990 now wired end-to-end through the fainted hold, right up to the dismiss press)
 
 - **State:** `npm test` **993/993**, `npm run build` green, tree clean.
@@ -121,46 +152,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fully verified and committed, not a rushed partial. No PAPERCUTS beyond
   the standing mgba-venv-teardown one.
 
----
-## 256 — Bounded worker (turn-15 wiring step, boundary (ii) of 3): both probes run first, then wired the FLY strike animation core (ball descent + impact sprite + Onix hit-flash/shake/healthbox-wobble) — `turn15-fly-strike.json` **176/176, 0 diff** (was 82/82, extended 19045→19141); ISSUES #36 trimmed to boundary (iii) only
-
-- **State:** `npm test` **993/993**, `npm run build` green, tree clean.
-  `verify-turn15.ts` re-run first (mandatory step): 59/59 PASS. Regression
-  sweep 0 diff: `turn14-fly-miss` 165/165, `turn13-switchin` 240/240,
-  `turn13-menu` 57/57.
-- **Did:** PROBE 1 (source + fresh VRAM dump) confirmed the impact sprite
-  (slot 4, tile 433) IS the already-wired `gBasicHitSplatSpriteTemplate`
-  family (ISSUES #31), just `animation=0` (flat, no zoom-pop) instead of
-  turn 9's own zoomed variant — pure re-anchor, no new asset. PROBE 2
-  (`dump-fly-anim.py` re-run 19035-19150) found the ball's own motion is
-  perfectly linear (`x -10/tick, y +6/tick`) under one constant rotation
-  matrix — banked as a literal table (`TURN15_FLY_BALL_TABLE`), no formula
-  fit. Wired `drawTurn15FlyBallDescent`, `drawTurn15ImpactHitsplat`,
-  `turn15OnixInvisible`/`turn15OnixShakeX2`/`turn15OnixHealthboxWobbleY2`,
-  new `drawTurn13SwitchinFieldBase` params (`onixInvisible`/
-  `healthboxY2Extra`/`onixX2`, all default-off). Dense oracle-pixel
-  bisection (not just RAM) surfaced 3 real corrections to the original
-  scout dossier's own RAM-only read: (1) Onix's RAM-`invisible` span
-  19042-19081 does NOT hide it on screen (`monbg` swaps in a pixel-
-  identical BG copy) — only the genuine hit-flash toggle (19107-19134)
-  needs a visibility change; (2) the hitsplat blends against the LIVE
-  framebuffer (Onix's own body), not the static field turn 9's own
-  instance used — a real per-move OAM-ordering difference, solved by
-  back-solving the blend equation against oracle pixels; (3) Onix's own
-  `AnimTask_ShakeMon` x2 shake (3× 2-tick 6px pulses) is real and needed
-  fixing a period-4 match/mismatch oracle pattern. `turn15-fly-strike.json`
-  extended 19045→19141, 176/176, 0 diff — excludes 3 ticks (19059-19061,
-  ≤10px ball-edge rounding residual, shared-primitive risk not chased) and
-  stops cleanly at 19141 rather than padding to ~19150, since dense
-  bisection found HP-drain text already changing at 19142 (boundary
-  (iii)'s own scope, 5 ticks earlier than the dossier's "~19147" citation).
-- **Next:** ISSUES #36's own remainder (boundary (iii): "not very
-  effective" text, HP-drain-from-19142, first player-side faint sink,
-  "ONIX fainted!" hold — every phase flagged pure-wiring-reuse, no new
-  probes expected). ISSUES #35's own extremum probe; #34's own remainder
-  (17722-17768); #33's tiny remainder (17019/17034); ISSUES #32.
-- **Notes:** Full writeup `docs/turn15-notes.md` §8 (owned this round).
-  Both probes were real, bounded RAM/VRAM work exactly as scoped — landed
-  in-budget with room to also chase 3 oracle-pixel-only residuals RAM
-  alone would never have caught. No PAPERCUTS beyond the standing
-  mgba-venv-teardown one.

@@ -78,38 +78,6 @@ dossier holds itself to — it may or may not share the now-fixed PP bug,
 untested); `17822-17845` needs its own kerning-specific investigation,
 unrelated to either bug fixed this session.
 
-## #32 — Turn 9 QUICK_ATTACK clones (slots 3/4): 203px residual at renders
-  10940-10941 only, excluded from `turn9-quickattack.json`
-
-Opened 2026-07-21 (S7 engine step, restoring #31's own excluded window).
-Once the hitsplat's own target2 bug was fixed (was #31, see PROGRESS/git
-history for the fix), renders 10935-10939 and 10942-10944 came back 0-diff,
-but 10940-10941 still show a 203px residual confined to Pidgeotto's own
-silhouette, bbox `(178,41)-(190,62)` — structurally the SAME SHAPE as
-AERIAL_ACE's own solved clone-vs-real overlap (turn 10's `docs/aerial-ace-
-notes.md`): slot 4 sits at its own life-end here too (`n=68,69` per
-`turn9QuickAttackSlot4Offset`'s own render-tick math), and slot 3's second
-life (offset `(0,0)`, co-located with the real sprite) is concurrently
-active.
-
-**Tried and reverted this session (do NOT re-attempt verbatim):** applying
-AERIAL_ACE's own solved rule (the later-active clone wins its OAM tie
-unconditionally, blends against the field alone) to slot 4 at its own
-life-end ticks — predicted colors do NOT match oracle (e.g. app produced
-`(255,160,145)`, oracle wants `(255,127,55)` at `(181,41)`/render 10940),
-unlike AERIAL_ACE's own pixel-exact fit at the analogous pixel. Also tried
-applying the rule unconditionally to slot 3+slot 4's WHOLE lives — regresses
-14 previously-passing frames elsewhere in the trace (167→153/169), same
-lesson AERIAL_ACE's own slot 4 already taught: "does it win" is genuinely
-tick-dependent, not a blanket rule transferable by shape alone.
-
-**Next step**: a fresh RAM probe of slot 3/slot 4's own final
-`gMain.oamBuffer` order specifically at RAM 10939-10940 (the
-`dump-quickattack-hitsplat-oam.py`/`dump-aerialace-oam.py` precedent,
-direct port) — this session did NOT re-derive a new formula without that
-ground truth, per the "wiring not derivation" convention. Full dossier:
-`docs/turn9-shake-notes.md`.
-
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
   turn2-dragonbreath.json remain uncaptured after 4 bounded attempts
