@@ -213,7 +213,9 @@ fi
 # root): it is stateless per request — every trace replays from the identical
 # canonical snapshot and requests serialize inside the service — so concurrent
 # workers are safe. Bootstrapping the emulator takes a few seconds on first start.
-HARNESS_ROOT="${POKEBENCH_HARNESS_ROOT:-$(cd ../.. && pwd)}"
+source tools/resolve-harness-root.sh
+HARNESS_ROOT="$(pokebench_resolve_harness_root)"
+export POKEBENCH_HARNESS_ROOT="$HARNESS_ROOT"
 ORACLE_URL="${POKEBENCH_ORACLE_URL:-http://127.0.0.1:8012}"
 if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
   echo "Starting oracle service ($HARNESS_ROOT/run-oracle.sh) ..."

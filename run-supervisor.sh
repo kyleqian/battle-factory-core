@@ -126,7 +126,9 @@ if [[ "$PROVIDER" == "codex" ]]; then
   codex_git_attribution_enable "$(pwd)" "$MODEL"
 fi
 
-HARNESS_ROOT="${POKEBENCH_HARNESS_ROOT:-$(cd ../.. && pwd)}"
+source tools/resolve-harness-root.sh
+HARNESS_ROOT="$(pokebench_resolve_harness_root)"
+export POKEBENCH_HARNESS_ROOT="$HARNESS_ROOT"
 ORACLE_URL="${POKEBENCH_ORACLE_URL:-http://127.0.0.1:8012}"
 
 if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
