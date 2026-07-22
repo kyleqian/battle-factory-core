@@ -6,8 +6,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 260 — Bounded worker (turn-15 forced party-select): **COMPLETE** — `turn15-party-select.json` **256/256, 0 diff** (dense 19991-20246: faint-text dismiss → fade/black → live list idle/hops → DOWN-to-MAGBY → submenu open → SEND OUT confirm)
 
-- **State:** final `npm test`, `npm run build`, and compare are green; tree
-  will be clean at the following commit.
+- **State:** final `npm test` **999/999**, `npm run build`, and compare are
+  green; committed at `d5ac217`, tree clean.
 - **Did:** Added the input-gated forced-switch reducer (`partySelect.ts`, two
   Tier-1 tests) and activated it only from the real turn-15 faint-text A
   edge. Extracted the missing BAYLEEF status-overlay OBJ asset (including
