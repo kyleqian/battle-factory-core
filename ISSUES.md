@@ -5,6 +5,35 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #33 — Turn 13 post-switch-in residual pair: Murkrow materialize/wobble
+  (fix table BANKED, wiring-ready) + settled-menu bounce subset
+  (uncharacterized), excluded from `turn13-switchin.json` (156/156) and
+  `turn14-fly-miss.json` (149/149, 51 ticks)
+
+Opened 2026-07-21 wind-down (supervisor), consolidating `battle-turn-notes.md`
+§50's two named residuals so they don't live only in a dossier:
+
+(a) **Materialize/wobble, renders 17004-17069**: turn 5's Pidgeotto tables
+don't transfer. **SOLVED at probe level, not yet wired**: a fresh RAM probe
+(`tools/probe/dump-turn13-murkrow-materialize.py`) derived Murkrow's OWN
+50-entry wobble table (`{xScale,yScale,y2}` shape the existing render
+function already consumes; wobble starts render 17020, a linear
+angle-counter, NOT Pidgeotto's scale table; frame flips ONCE at 17034;
+growing-silhouette 17004-17019 is ALREADY correct via the species-agnostic
+accumulator). `verify-turn13-materialize.ts` 20/20 pins it. Trap flagged:
+the table needs an explicit 50th "flat" entry, not clamp-repeat, or 17069
+regresses 1px. This is pure wiring now.
+
+(b) **Settled-menu bounce subset after the switch-in reset** (e.g.
+17106-17111/17113/17117-17122/17126-17130/17175/17200, 769-2325px,
+~9-tick period; same family excluded turn 14's 51 pre/post-idle ticks):
+a pure additive reset-shift is REFUTED (-6..+6 sweep, best still
+13408px). Named suspect, untested: a fresh-menu-open-style blank
+transient at the reset instant (`MENU_IDLE_BLANK_END_TICK`'s role in
+every fresh menu-open). Needs one characterization probe (the planned
+Mission B that ran out of session), then likely a one-line/small-table
+fix.
+
 ## #32 — Turn 9 QUICK_ATTACK clones (slots 3/4): 203px residual at renders
   10940-10941 only, excluded from `turn9-quickattack.json`
 
