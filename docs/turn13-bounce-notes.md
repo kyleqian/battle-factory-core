@@ -492,3 +492,41 @@ regardless of when the §10d fix actually lands.
 Regression sweep (`turn13-menu` 57/57, `turn13-sandattack` 190/190,
 `turn13-dragonbreath-faint` 141/141, `turn12-menu` 46/46), `npm test`
 993/993, `npm run build` all green.
+
+## 11. Wiring close-out (main-lane worker, 2026-07-22)
+
+Wired §10d exactly, no deviation: `TURN14_MENU_TEXT_CLEAR_TICK = 18080`,
+`TURN14_MENU_REDRAW_RESET_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK -
+TURN14_MENU_REDRAW_TICK`, `drawTurn14FlyMissWindow`'s settled branch swapped
+to the new shift constant, new blank-hold branch added above it.
+`drawTurn14FightSubmenuWindow`'s own two `TURN13_SWITCHIN_RESET_SHIFT` call
+sites and `turn14KickoffBounceTick` left untouched, per §10d point 3.
+
+Restored the predicted 15 ticks (§10e) to `turn14-fly-miss.json`'s
+`captureFrames`: 150/150 → **165/165, 0 diff**, exact, first try — every
+`verify-turn14-bounce.ts` PASS held under real pixel comparison, no gap
+between the RAM/sha probe and `npm run compare` this time (unlike three of
+the four prior wiring sessions in this chain, #251/#252/#253's own PROGRESS
+entries).
+
+**Cheap conditional check (§10e's own "does the reopen family generalize"
+question, brief step 5):** restored all 43 still-untested ticks of
+17722-17768 to a scratch trace copy (not committed) and ran `npm run
+compare`. **0/43 pass** — smallest diff 6px (0.02%), several far larger (up
+to 2331px/6.07% at 17753). The "artifact of the un-applied
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` correction" theory from §10e's own hedge
+does NOT hold up under a real pixel check: this family needs its own
+dedicated RAM probe of its own (still-unprobed) reopen-reveal instant
+before any fix shape can be named, exactly as §10e already said. Nothing
+restored; `turn14-fly-miss.json`'s `captureFrames` for this span is
+unchanged from before this session.
+
+Regression sweep, all 0 diff: `turn13-switchin` 240/240, `turn13-menu`
+57/57, `turn12-menu` 46/46, `turn13-dragonbreath-faint` 141/141. `npm test`
+993/993 (unchanged — pure wiring, no existing precedent for pinning these
+per-turn window-selector closures with a Tier-1 test, same call every prior
+session in this chain made). `npm run build` green.
+
+ISSUES #34's core (the blank hold + regime reset) is fixed; trimmed to its
+honest remainder in `ISSUES.md` (17722-17768's 43 still-failing ticks,
+17781-17787, 17822-17845) rather than deleted.

@@ -4,6 +4,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 254 — Bounded worker (turn-14 wiring step, ISSUES #34 close-out): wired the probe-confirmed menu-redraw blank hold + bounce-regime RESET — `turn14-fly-miss.json` **165/165, 0 diff** (was 150/150; all 15 predicted ticks restored, exact first try); cheap conditional check on the FIGHT-submenu reopen family (17722-17768) came back 0/43 pass — trimmed ISSUES #34 to that honest remainder, not deleted
+
+- **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run
+  build` green, tree clean. `verify-turn14-bounce.ts` **24/24 PASS**
+  (mandatory-first-step rerun, oracle-only, unaffected by `src/`).
+  Regression sweep 0 diff: `turn13-switchin` 240/240, `turn13-menu` 57/57,
+  `turn12-menu` 46/46, `turn13-dragonbreath-faint` 141/141.
+- **Did:** Wired `docs/turn13-bounce-notes.md` §10d exactly: new
+  `TURN14_MENU_TEXT_CLEAR_TICK=18080` + `TURN14_MENU_REDRAW_RESET_SHIFT =
+  TURN5_SITRUS_MENU_REDRAW_TICK - TURN14_MENU_REDRAW_TICK`, swapped into
+  `drawTurn14FlyMissWindow`'s settled branch (was borrowing
+  `TURN13_SWITCHIN_RESET_SHIFT`, which the probe proved wrong — 871/871 RAM
+  mismatches vs. 0/871 for the fresh-reset model) plus a new blank-hold
+  branch above it. `drawTurn14FightSubmenuWindow`'s own pre-reveal call
+  sites left untouched, per the brief. Restored the 15 predicted ticks
+  (18080-18090/18095/18415/18815/18956) to `turn14-fly-miss.json`:
+  150→165/165, 0 diff, no gap this time between the RAM/sha probe and real
+  pixel compare (unlike 3 of the 4 prior sessions in this chain). Cheap
+  conditional check (brief step 5, scratch trace only): restored all 43
+  still-untested ticks of 17722-17768 and ran `npm run compare` — **0/43
+  pass** (6px smallest diff, up to 2331px), refuting the "may already be
+  right" theory; nothing restored, scratch file discarded, real trace
+  untouched for that span. ISSUES #34 rewritten from "found, uncharacterized"
+  to its honest remainder: 17722-17768 (43 ticks, needs its own RAM probe of
+  the actual — earlier, unprobed — reopen-reveal instant), 17781-17787 (7
+  ticks, same probable class), 17822-17845 (24 ticks, kerning-class, already
+  flagged separately) — not deleted, since real excluded ticks remain.
+- **Next:** ISSUES #34's own remainder (17722-17768's reopen-reveal probe,
+  same two-independent-methods bar); #33's tiny 2-tick remainder
+  (17019/17034); ISSUES #32; turn 15+ wiring.
+- **Notes:** Full writeup `docs/turn13-bounce-notes.md` §11 (owned this
+  round). No Tier-1 pin forced — no existing precedent for unit-testing
+  these per-turn window-selector closures in isolation, same call every
+  prior session in this chain made. No PAPERCUTS beyond the standing
+  mgba-venv-teardown one.
+
+---
 ## 253 — Bounded worker (turn-13 wiring step, ISSUES #33a close-out): wired the probe-confirmed closed-window frame-selection fix — `turn13-switchin.json` **240/240, 0 diff** (was 191/191; 49 of 51 excluded ticks restored); the exact 2 ticks the probe flagged in advance (17019, 17034) survive as a new, much smaller, separate residual — trimmed ISSUES #33 to just that, not deleted
 
 - **State:** `npm test` **993/993** (unchanged, pure wiring), `npm run
@@ -85,47 +122,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   "no other constants change." No PAPERCUTS beyond the standing
   mgba-venv-teardown one.
 
----
-## 251 — Bounded worker (turn-13 wiring step, ISSUES #33a): wired the banked MURKROW wobble table — RAM-cross-checked byte-exact fresh, anchor/frame-flip confirmed — but wiring alone didn't reach 0-diff; found+fixed 2 more real bugs (BG-fade never re-anchored for turn 13; tint-ramp needs to keep running into the wobble draw, unlike Pidgeotto's); `turn13-switchin.json` 156→**171/171**, 15 of 66 excluded ticks restored (17004-17018); remaining 51 ticks (17019-17069) re-excluded under a narrower, colors-now-ruled-out residual (likely the reused `frame2` asset is wrong art) — #33a NOT closed, trimmed not deleted
-
-- **State:** `npm test` **993/993** (unchanged), `npm run build` green, tree
-  clean. `verify-turn13-materialize.ts` 20/20 (mandatory-first-step rerun,
-  unaffected — RAM/oracle-only, doesn't assert app pixels). Regression
-  sweep 0 diff: `turn14-fly-miss` 149/149, `turn13-menu` 57/57,
-  `turn13-dragonbreath-faint` 141/141.
-- **Did:** Transcribed `TURN13_MURKROW_WOBBLE_TABLE` (50 entries) into
-  `battleScene.ts`, anchored `TURN13_MURKROW_STRETCH_TICK=17020` (not the
-  old `SETTLE_TICK`-minus-table-length 17030), `TURN13_MURKROW_FRAME_FLIP_
-  TICK=17034` (single flip, not Pidgeotto's reused 5-breakpoint cycle) —
-  then re-ran the RAM probe fresh this session and confirmed all 50 entries
-  byte-exact, so the table/anchor were never the problem. Wiring alone left
-  the ENTIRE restored window red; found two more bugs by direct pixel
-  diffing: (1) `turn5BgFadeY(t)` (the switch-in's own BG-to-white dither)
-  was hardcoded to turn 5's own tick range, silently 0 for all of turn 13 —
-  added a `bgFadeYOverride` param to `drawTurn5RockSlideAttack` + a
-  `turn13MurkrowBgFadeY` reusing `TURN5_BG_FADE_Y` verbatim at a freshly
-  re-derived anchor; (2) the wobble draw hardcoded `tintCoeff=0` (copied
-  from Pidgeotto, where the ramp always finishes before the stretch phase
-  starts) but MURKROW's own ramp-render-start (17026) falls AFTER its own
-  wobble start (17020) — fixed by computing `turn13MurkrowMaterializeCoeff
-  (t)` in the wobble branch too. Closed 17004-17018 (15 ticks) to 0-diff.
-  Remaining 17019-17069: colors now correct (pixel-sampled) but MURKROW's
-  own leg/lower-body shape stays mismatched even at near-identity table
-  entries — `pa/pb/pc/pd` RAM-exact, `pb=pc=0` (no dropped rotation term),
-  frame timing RAM-exact — points at the reused `frame2` asset itself,
-  which `drawTurn13MurkrowSettled` never actually exercises (always draws
-  `tileset`), so it's never been oracle-validated in any passing trace.
-- **Next:** #33a's own concrete next step: fresh VRAM tile dump at a
-  materialize-window tick with `animCmdIndex=1` (e.g. RAM 17040, same
-  addressing `dump-turn13-murkrow-materialize.py` already established),
-  diffed byte-for-byte against the extracted `frame2` tiles. #33b (settled-
-  menu bounce, Mission B) still needs its own characterization probe,
-  untouched this session. ISSUES #32 and turn-15+ wiring both still open.
-- **Notes:** Full writeup `docs/turn13-notes.md`'s newest section (owned
-  this round). This is the second time a "banked, pure wiring" derivation
-  turned out incomplete on contact with `npm run compare` (cf. #249's own
-  51-tick surprise) — the mandatory RAM-only verify script is necessary but
-  not sufficient to guarantee 0-diff; only a real oracle pixel compare over
-  the restored window catches gaps like the BG-fade anchor and tint-ramp
-  duration, which no RAM-only check was set up to see. No PAPERCUTS beyond
-  the standing mgba-venv-teardown one.

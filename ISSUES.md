@@ -40,50 +40,43 @@ or the tint coefficient right at those two specific ticks. **Next step**:
 a fresh probe (RAM/VRAM, same two-independent-methods bar) pointed at
 just those two ticks — do not re-guess a fix without it.
 
-## #34 — Turn 14's own settled-menu redraw (`TURN14_MENU_REDRAW_TICK`=18086)
-  has a separate, same-class instance of #33(b)'s bug, plus an unresolved
-  bounce regime question; 63 ticks tested-and-still-excluded from
-  `turn14-fly-miss.json` (150/150 as committed) this session, plus 2 more
-  (18095/18415) newly regressed by #33(b)'s own fix
+## #34 — Turn 14's FIGHT-submenu reopen family (`17722-17768`, 43 ticks) and
+  the separate `17781-17787` (7 ticks) window still excluded from
+  `turn14-fly-miss.json`; both plausibly the same 6-tick-blank-hold bug
+  class as the now-fixed settled-menu redraw, neither characterized
 
-Found 2026-07-21/22 while restoring #33(b)'s turn-14 predictions
-(`docs/turn13-bounce-notes.md` §9 has the full writeup). Fresh oracle sha
-probe of ticks 18078-18095 shows the identical structural signature #33(b)
-had: 18078-18079 one sha (held "ONIX's attack missed!" text), **18080-
-18085 a second sha, six ticks, currently unmodeled** (the app's
-`drawTurn14FlyMissWindow` holds the fully-typed text straight through this
-span, no gap), 18086 a third sha (chrome reveal - this tick itself is
-already correctly anchored, does NOT need to move, unlike #33(b)'s own
-constant), 18087 a one-tick blip, 18088+ settling into a repeating bounce
-group. Unlike #33(b), the anchor value doesn't need to change - just a new
-`TURN14_..._TEXT_CLEAR_TICK`-style blank-hold branch ~6 ticks before it.
+Opened 2026-07-21/22, **core fixed 2026-07-22** (wiring step,
+`docs/turn13-bounce-notes.md` §§10-11): turn 14's own settled-menu redraw
+(`TURN14_MENU_REDRAW_TICK`=18086) had the same missing 6-tick blank hold
+#33(b) found at turn 13's own switch-in, PLUS the bounce regime turned out
+to RESET fresh at the redraw rather than continue turn 13's live cycle
+(0/871 RAM mismatches for RESET vs. 871/871 for CONTINUE, §10c). Wired
+verbatim per §10d: new `TURN14_MENU_TEXT_CLEAR_TICK`(18080) blank-hold
+branch + `TURN14_MENU_REDRAW_RESET_SHIFT` replacing the borrowed
+`TURN13_SWITCHIN_RESET_SHIFT` in `drawTurn14FlyMissWindow`'s settled
+branch. `turn14-fly-miss.json` **165/165, 0 diff** (was 150/150; the 15
+predicted ticks 18080-18090/18095/18415/18815/18956 all restored clean,
+first try).
 
-Separately, and NOT yet understood: applying #33(b)'s corrected
-`TURN13_SWITCHIN_RESET_SHIFT` to the continuation formula turn 14's
-settled tail reuses verbatim (`t + TURN13_SWITCHIN_RESET_SHIFT`, both
-`drawTurn14FightSubmenuWindow` and `drawTurn14FlyMissWindow`) shifts every
-downstream bounce phase by 6 ticks and regresses 3 previously-passing
-ticks (18087/18095/18415) - suggesting turn 14's own menu-redraw may
-RESET the bounce regime fresh (the same way turn 13's own switch-in resets
-against turn 12's, per #33(b)'s own doc) rather than genuinely continuing
-turn 13's live cycle, OR the two are coupled some other way. Needs the
-same two-independent-methods confirmation (RAM `sSinIndex`/`sDelta` probe
-+ oracle sha, `docs/turn13-bounce-notes.md` §2's own method, re-pointed at
-`TURN14_MENU_REDRAW_TICK`) before wiring - pixel data alone isn't enough
-to distinguish "reset" from "continue with a different shift."
-
-Tested-and-still-excluded from `turn14-fly-miss.json` this session:
-`18080-18090`/`18815`/`18956` (this residual's own 13-tick predicted
-family, 0 pass) + `17722-17768` (47 ticks, only `17722-17725` pass -
-43 stay excluded) + `17781-17787` (7 ticks, 0 pass) - the latter two are
-the FIGHT-submenu reopen's own probable instance of the same bug (a
-different reopen event, `TURN13_DRAGONBREATH_MENU_REDRAW_DELAY`-gated),
-same 6-2331px family signature, not separately characterized. Also newly
-excluded, a pure regression from #33(b)'s own fix (previously passing
-under the OLD, now-corrected anchor): `18087` (already counted above),
-`18095`, `18415`. `17822-17845` (kerning-class, #33(b)'s own dossier)
-stays excluded untested per that session's own instruction - do not test
-it without re-scoping.
+**Remaining** (this entry's own honest scope now): the brief's cheap
+conditional check (restore-and-test 17722-17768 against a scratch trace,
+not committed) came back **0/43 pass** - smallest diff 6px, several far
+larger (up to 2331px at 17753) - so the "may already be right, artifact of
+un-applied `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`" theory does NOT hold under a
+real pixel check. This family (the FIGHT-submenu reopen, a DIFFERENT
+reveal event than the now-fixed settled-menu redraw,
+`TURN13_DRAGONBREATH_MENU_REDRAW_DELAY`-gated) and `17781-17787` (7 ticks,
+0/7 pass, same probable bug class, not separately characterized) both stay
+excluded from `turn14-fly-miss.json`. A RAM probe (17640-17800) shows the
+bounce driver already active at the earliest point probed, i.e. this
+family's own reveal instant happened even earlier than currently modeled,
+with no gap visible in the already-probed span - the fix, if this really
+is the same bug class, needs its own dedicated RAM probe of the actual
+(earlier, unprobed) reopen-reveal instant before a fix shape can be named.
+**Next step:** that probe, same two-independent-methods bar this dossier
+holds itself to, not a re-guess. `17822-17845` (24 ticks, kerning-class,
+per #33(b)'s own dossier) is a separate, already-flagged issue - stays
+excluded untested, do not test it without re-scoping.
 
 ## #32 — Turn 9 QUICK_ATTACK clones (slots 3/4): 203px residual at renders
   10940-10941 only, excluded from `turn9-quickattack.json`
