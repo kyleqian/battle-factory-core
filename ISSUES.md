@@ -5,34 +5,37 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #31 — Turn 9 QUICK_ATTACK hitsplat: tip/edge residual, three hypotheses
-  refuted, renders 10935-10944 excluded from `turn9-quickattack.json`
+## #32 — Turn 9 QUICK_ATTACK clones (slots 3/4): 203px residual at renders
+  10940-10941 only, excluded from `turn9-quickattack.json`
 
-Opened 2026-07-21 (supervisor, after one engine attempt + two probe passes).
-The hitsplat (sprite slot 7, RAM-live 10934-10943, render +1) renders with a
-~150-380px/tick tip/edge residual after two real RAM-grounded fixes (matrix
-303, force-blend over live fb). Turn 9 is otherwise COMPLETE: 159/159 +
-77/77 + 163/163 captures, only this 10-render window stays excluded.
+Opened 2026-07-21 (S7 engine step, restoring #31's own excluded window).
+Once the hitsplat's own target2 bug was fixed (was #31, see PROGRESS/git
+history for the fix), renders 10935-10939 and 10942-10944 came back 0-diff,
+but 10940-10941 still show a 203px residual confined to Pidgeotto's own
+silhouette, bbox `(178,41)-(190,62)` — structurally the SAME SHAPE as
+AERIAL_ACE's own solved clone-vs-real overlap (turn 10's `docs/aerial-ace-
+notes.md`): slot 4 sits at its own life-end here too (`n=68,69` per
+`turn9QuickAttackSlot4Offset`'s own render-tick math), and slot 3's second
+life (offset `(0,0)`, co-located with the real sprite) is concurrently
+active.
 
-**Refuted with committed instruments (do NOT re-attempt):**
-- Coefficient fit: brute force over every (eva,evb) in 8-bit AND 5-bit
-  domains tops out at 62.2% of 1263 samples; the RAM-true eva=12/evb=8
-  (BLDALPHA=0x080c, objMode=1, BLDCNT=0x3f40 — all RAM-banked) scores
-  WORSE than the current 16/16 (`diag-turn9-hitsplat-blendfit.ts`).
-- Floor-vs-round source-texel sampling with true coefficients: 158/176
-  mismatches under both (`diag-turn9-hitsplat-tips.ts`).
-- Palette-fade tint: `gPlttBufferFaded` byte-identical to unfaded for
-  bank 7 at every live tick, supervisor-rerun confirmed
-  (`dump-turn9-hitsplat-palette.py`).
+**Tried and reverted this session (do NOT re-attempt verbatim):** applying
+AERIAL_ACE's own solved rule (the later-active clone wins its OAM tie
+unconditionally, blends against the field alone) to slot 4 at its own
+life-end ticks — predicted colors do NOT match oracle (e.g. app produced
+`(255,160,145)`, oracle wants `(255,127,55)` at `(181,41)`/render 10940),
+unlike AERIAL_ACE's own pixel-exact fit at the analogous pixel. Also tried
+applying the rule unconditionally to slot 3+slot 4's WHOLE lives — regresses
+14 previously-passing frames elsewhere in the trace (167→153/169), same
+lesson AERIAL_ACE's own slot 4 already taught: "does it win" is genuinely
+tick-dependent, not a blanket rule transferable by shape alone.
 
-**Untested avenues (named by the probes):** (a) the affine edge/
-out-of-bounds sampling shape at the sprite's own boundary (tips are by
-definition edge texels); (b) what target-2 actually contains at those
-pixels — BLDCNT's target-2 mask includes OBJ, and the ep1 shake moves
-Onix's sprite under the hitsplat during exactly this window. Evidence
-pattern worth carrying: oracle tips sit in a saturated (255,240,152)
-family the app never produces. Full dossier:
-`docs/turn9-shake-notes.md` (all three dated sections).
+**Next step**: a fresh RAM probe of slot 3/slot 4's own final
+`gMain.oamBuffer` order specifically at RAM 10939-10940 (the
+`dump-quickattack-hitsplat-oam.py`/`dump-aerialace-oam.py` precedent,
+direct port) — this session did NOT re-derive a new formula without that
+ground truth, per the "wiring not derivation" convention. Full dossier:
+`docs/turn9-shake-notes.md`.
 
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of

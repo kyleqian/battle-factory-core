@@ -2644,6 +2644,20 @@ function drawSpriteSheetAffineStretch(
  * the SAME `eva=12,evb=8` ratio this scene's own `BLDCNT` already
  * establishes for the QUICK_ATTACK clones (`drawSpriteSheetBlendedOverFb`).
  */
+/**
+ * PART 3 close-out fix (S7 engine step, docs/turn9-shake-notes.md's own
+ * "ISSUES #31 SOLVES completely" section): target2 is the static field
+ * ALONE, computed directly from the BG asset (`staticBgPixel`) - NEVER
+ * sampled from the live `fb`. The hitsplat wins its own OAM tie against
+ * Onix (RAM-proven, `gMain.oamBuffer`: hitsplat index 9, Onix index 10,
+ * unconditionally for the hitsplat's whole life) - Onix's own drawn body,
+ * which the old "blend over fb" version sampled wherever both overlapped,
+ * must contribute NOTHING to the blend, exactly the same crack AERIAL_ACE's
+ * own clone-vs-real overlap had (`drawTurn10AerialAceCloneWinsOverField`).
+ * The sole remaining caller (`drawTurn9Hitsplat`) always passes `doubled`
+ * false in practice today, but the doubled-footprint math is kept general
+ * since nothing here is doubled-specific.
+ */
 function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, xScale: number, yScale: number, eva: number, evb: number, doubled = false): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
@@ -2672,11 +2686,12 @@ function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tile
       const x = ox + dx;
       const y = oy + dy;
       if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      const field = staticBgPixel(x, y);
+      if (!field) continue;
       const o = (y * 240 + x) * 4;
-      const tgt2 = { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! };
-      fb[o] = blendChannel(c.r, tgt2.r, eva, evb);
-      fb[o + 1] = blendChannel(c.g, tgt2.g, eva, evb);
-      fb[o + 2] = blendChannel(c.b, tgt2.b, eva, evb);
+      fb[o] = blendChannel(c.r, field.r, eva, evb);
+      fb[o + 1] = blendChannel(c.g, field.g, eva, evb);
+      fb[o + 2] = blendChannel(c.b, field.b, eva, evb);
       fb[o + 3] = 255;
     }
   }
@@ -7924,6 +7939,26 @@ export function turn9QuickAttackSlot4Offset(t: number, pressTick: number): { x2:
   if (n >= 63 && n <= 69) return { x2: 24, y2: 6 }; // RAM 10933-10940, first visible render one tick after RAM creation
   return null;
 }
+/**
+ * PART 3 close-out finding, NOT closed (S7 engine step, this session):
+ * restoring the excluded 10935-10944 span into `turn9-quickattack.json`
+ * (per ISSUES #31's own hitsplat fix) exposed a SEPARATE, previously-
+ * unprobed 203px residual at renders 10940-10941 only, confined to
+ * Pidgeotto's own silhouette (bbox `(178,41)-(190,62)`) - structurally the
+ * same SHAPE as AERIAL_ACE's own solved clone-vs-real overlap (slot 4 sits
+ * at its own life-end here too, `n=68,69`), but applying that exact solved
+ * rule (clone wins, blends against the field) here does NOT reach 0
+ * tolerance (tried and reverted this session - predicted colors don't match
+ * oracle, unlike AERIAL_ACE's own pixel-exact fit). Not curve-fit further:
+ * this is a genuinely different, unpinned mechanism that happens to share
+ * AERIAL_ACE's general shape, not the identical rule - named here rather
+ * than guessed. `turn9-quickattack.json`'s own `captureFrames` restores
+ * 10935-10939 and 10942-10944 (matching the hitsplat's own solved rule
+ * exactly, 0 diff) but excludes 10940-10941 specifically, pending a fresh
+ * RAM probe of slot 3/slot 4's own OAM order in this window (the same
+ * `dump-quickattack-hitsplat-oam.py`-style instrument, not yet run for
+ * these two sprites).
+ */
 
 /**
  * `blendedTile`'s own target-2 always prefers the plain static field
@@ -8034,13 +8069,23 @@ function drawTurn9QuickAttackAnimation(fb: Uint8Array, t: number, pressTick: num
  * (10934-10943, empty by 10944). Also RAM-confirmed the palette bank itself
  * (`PALRAM_OBJ` bank 7) matches `battle-anim-hitsplat.json`'s own stored
  * colors exactly (index 4 = `(255,255,173)`) - the asset is NOT the bug.
- * **The visible color is still pure white throughout**, oracle-pixel-sampled
- * at multiple points against multiple distinct underlying backgrounds
- * (`(189,181,181)` and `(132,123,123)`, both saturate to `(255,255,255)`) -
- * only reproduced by `drawSpriteSheetAffineStretchBlendedOverFb`'s own
- * `blendChannel` at `eva=16,evb=16` (i.e. `min(255, fg+bg)`, a full-weight
- * additive "lighten" rather than a normal-weight alpha blend) - solved
- * directly from the two sampled bg/fg/result triples, not guessed.
+ *
+ * ISSUES #31 close-out (S7 engine step PART 3, docs/turn9-shake-notes.md's
+ * own "ISSUES #31 SOLVES completely" section): the hitsplat (OAM index 9)
+ * wins its own OAM tie against Onix (index 10) UNCONDITIONALLY for its
+ * whole life (RAM-proven, `dump-quickattack-hitsplat-oam.py`, never flips) -
+ * Onix's own drawn body must contribute NOTHING to the blend. The prior
+ * `eva=16,evb=16` "additive lighten over live fb" coefficient was a
+ * plausible-looking but ultimately WRONG fit: it was fit against a target2
+ * contaminated by Onix's own texel wherever both sprites overlapped (the
+ * exact "blend over live fb" bug AERIAL_ACE's own clone-vs-real overlap
+ * had), which is why it only ever matched near the hitsplat's own edges, not
+ * its full footprint. The RAM-true blend is `eva=12,evb=8` (`BLDALPHA=
+ * 0x080c`, the SAME ratio AERIAL_ACE's own solved rule uses) against the
+ * static field ALONE, computed from the BG asset
+ * (`drawSpriteSheetAffineStretchBlendedOverFb`'s own doc comment) - verified
+ * 0-tolerance across the hitsplat's entire 421-opaque-pixel footprint, all
+ * 10 live ticks (4210/4210 pixel-tick pairs exact).
  */
 const TURN9_HITSPLAT_CENTER = { x: 72, y: 88 };
 const TURN9_HITSPLAT_MATRIX = 303;
@@ -8057,8 +8102,8 @@ function drawTurn9Hitsplat(fb: Uint8Array, t: number, pressTick: number): void {
     TURN9_HITSPLAT_CENTER.y - 16,
     TURN9_HITSPLAT_MATRIX,
     TURN9_HITSPLAT_MATRIX,
-    16,
-    16,
+    12,
+    8,
     true,
   );
 }
