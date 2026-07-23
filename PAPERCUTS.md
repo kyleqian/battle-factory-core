@@ -12,16 +12,6 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
-## Worker-lane lifecycle can take down shared oracle profiles (2026-07-23)
-
-- **What:** both Battle Scene ON and OFF services disappeared while worker
-  lanes were cycling; supervisor compares failed with `ECONNREFUSED` until
-  each profile was restarted in a retained direct session.
-- **Hits:** 1.
-- **Cost each:** ~5 min.
-- **Workaround:** check both named profile health after lane teardown and keep
-  replacement service sessions alive through supervisor verification.
-
 ## Temporary compare traces resolve `sourceTrace` relative to themselves (2026-07-23)
 
 - **What:** moving an ad hoc trace to `/tmp` broke its relative `sourceTrace`

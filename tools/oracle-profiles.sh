@@ -27,7 +27,15 @@ pokebench_ensure_oracle_profile() {
   echo "Starting $profile oracle at $url ..."
   local port="${url##*:}"
   port="${port%%/*}"
-  PORT="$port" "$harness_root/run-oracle.sh" --profile "$profile" >"$log_file" 2>&1 &
+  local tools_dir
+  tools_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local oracle_pid
+  if ! oracle_pid="$(python3 "$tools_dir/start-oracle-service.py" \
+      "$harness_root" "$profile" "$port" "$log_file")"; then
+    echo "$profile oracle failed to launch; see $log_file" >&2
+    return 1
+  fi
+  echo "Started $profile oracle as lifecycle-independent pid $oracle_pid"
   for _ in $(seq 1 90); do
     actual="$(pokebench_oracle_profile "$url" || true)"
     [[ "$actual" == "$profile" ]] && return 0
