@@ -4256,12 +4256,13 @@ function drawBattle2ActionMenuWindow(
   fb: Uint8Array,
   t: number,
   handoffTick: number,
+  bounceShift = 0,
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
   const revealed = age > ACTION_MENU_BLANK_END_OFFSET;
   const bounce = revealed
-    ? menuIdleBounce(actionMenuBounceTick(t, handoffTick))
+    ? menuIdleBounce(actionMenuBounceTick(t, handoffTick) - bounceShift)
     : { onixY2: 0, healthboxY2: 0 };
 
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
@@ -4284,6 +4285,40 @@ function drawBattle2ActionMenuWindow(
   // live; no Grovyle/full-frame Battle-1 base participates.
   if (revealed) drawTurn5SitrusSettledMenuChrome(fb);
   else drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+}
+
+/**
+ * Battle 2's first FIGHT interaction uses the generic submenu state/chrome
+ * but composes the JENSON field live.  All clocks are relative to this
+ * submenu instance: opening keeps the action-menu phase during the DMA wait,
+ * the revealed submenu applies the shared two-tick drift, and B-close
+ * resumes the action menu with the shared cumulative four-tick drift.
+ */
+function drawBattle2FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  sm: FightSubmenuState,
+): void {
+  if (sm.openElapsed === null) {
+    drawBattle2ActionMenuWindow(fb, t, handoffTick);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    drawBattle2ActionMenuWindow(fb, t, handoffTick);
+    return;
+  }
+  if (
+    sm.closeElapsed !== null &&
+    t >= TICK0 + sm.closeElapsed + FIGHT_SUBMENU_CLOSE_DELAY
+  ) {
+    drawBattle2ActionMenuWindow(fb, t, handoffTick, FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT);
+    return;
+  }
+
+  drawBattle2ActionMenuWindow(fb, t, handoffTick, FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+  drawFightSubmenuChrome(fb, sm.displayCursor, false, false, sm.activeMonMoveset);
 }
 
 /** Opaque flat-RGB rectangle blit, no transparency/masking (every pixel in the harvest is real content - see `tools/extract/extract-menu-idle-window.ts`'s own doc for why this window's harvests don't need `getHealthboxContentMask`'s bleed handling: none of these ticks are mid-fade, so there's no stale-background risk). */
@@ -13411,7 +13446,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     state.encounter === "jenson" &&
     actionMenuAge(t, handoffTick) >= ACTION_MENU_BLANK_START_OFFSET
   ) {
-    drawBattle2ActionMenuWindow(fb, t, handoffTick);
+    drawBattle2FightSubmenuWindow(fb, t, handoffTick, state.fightSubmenu);
     return;
   }
   if (t >= MENU_IDLE_BLANK_START_TICK) {

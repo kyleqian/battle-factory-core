@@ -16,7 +16,14 @@ import {
   TICK0,
   sendOutHandoffTick,
 } from "../src/engine/battleScene.ts";
-import { CLOSED_FIGHT_SUBMENU_STATE } from "../src/engine/battleMenu.ts";
+import {
+  CLOSED_FIGHT_SUBMENU_STATE,
+  FIGHT_SUBMENU_CLOSE_DELAY,
+  FIGHT_SUBMENU_OPEN_DELAY,
+} from "../src/engine/battleMenu.ts";
+import { rentalMoveset } from "../src/engine/battleSetup.ts";
+import { buildFightMoveset } from "../src/engine/fightSubmenuText.ts";
+import { ANCHOR_DRAFT_SCREEN_STATE } from "../src/engine/factoryDraftScreen.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 
 describe("Battle 2 first action-menu controller boundaries", () => {
@@ -112,5 +119,74 @@ describe("Battle 2 pre-first-turn RNG and exec state", () => {
     expect(state.rngValue).toBe(3530724670);
     expect(state.battleControllerExecFlags).toBe(1);
     expect(state.battleScene?.fightSubmenu).toEqual(CLOSED_FIGHT_SUBMENU_STATE);
+  });
+});
+
+describe("Battle 2 FIGHT submenu interaction", () => {
+  const localPressTick = 1326;
+  const handoffTick = sendOutHandoffTick(localPressTick, "jenson");
+
+  function battle2StateBefore(sceneT: number): EngineState {
+    return {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      draftScreen: {
+        ...ANCHOR_DRAFT_SCREEN_STATE,
+        selectedIds: [1, 2, 3, 0, 0, 0],
+      },
+      battleScene: {
+        ...INITIAL_BATTLE_SCENE_STATE,
+        encounter: "jenson",
+        elapsed: sceneT - TICK0 - 1,
+        sendOutPressElapsed: localPressTick - TICK0,
+      },
+    };
+  }
+
+  it("rejects A before the corrected reveal and accepts it at the input-ready edge", () => {
+    const early = tick(battle2StateBefore(handoffTick + 330), new Set(["A"]));
+    expect(early.battleScene?.fightSubmenu.openElapsed).toBeNull();
+
+    const accepted = tick(battle2StateBefore(handoffTick + 331), new Set(["A"]));
+    expect(accepted.battleScene?.fightSubmenu.openElapsed).toBe(handoffTick + 331 - TICK0);
+    expect(accepted.battleScene?.fightSubmenu.cursor).toBe(0);
+    expect(accepted.battleScene?.fightSubmenu.displayCursor).toBe(0);
+  });
+
+  it("opens with ONIX's live four-move set and full Battle-2 PP", () => {
+    const state = tick(battle2StateBefore(handoffTick + 331), new Set(["A"]));
+    const submenu = state.battleScene!.fightSubmenu;
+    const onix = rentalMoveset("ONIX");
+    expect(submenu.activeMonMoveset).toEqual(onix);
+    expect(buildFightMoveset(onix.moveIds, onix.maxPP).map((move) => [
+      move.name,
+      move.currentPP,
+      move.maxPP,
+    ])).toEqual([
+      ["ROCK SLIDE", 10, 10],
+      ["BIND", 20, 20],
+      ["DRAGONBREATH", 20, 20],
+      ["SANDSTORM", 10, 10],
+    ]);
+    expect(TICK0 + submenu.openElapsed! + FIGHT_SUBMENU_OPEN_DELAY)
+      .toBe(handoffTick + 336);
+  });
+
+  it("lags a row navigation draw by one tick and B-closes to the same action epoch", () => {
+    let state = tick(battle2StateBefore(handoffTick + 331), new Set(["A"]));
+    for (let i = 0; i < FIGHT_SUBMENU_OPEN_DELAY; i += 1) state = tick(state, new Set());
+    state = tick(state, new Set(["DOWN"]));
+    expect(state.battleScene?.fightSubmenu.cursor).toBe(2);
+    expect(state.battleScene?.fightSubmenu.displayCursor).toBe(0);
+    state = tick(state, new Set());
+    expect(state.battleScene?.fightSubmenu.displayCursor).toBe(2);
+    state = tick(state, new Set(["B"]));
+    const closed = state.battleScene!.fightSubmenu;
+    expect(closed.closeElapsed).not.toBeNull();
+    expect(closed.confirmElapsed).toBeNull();
+    for (let i = 0; i < FIGHT_SUBMENU_CLOSE_DELAY; i += 1) state = tick(state, new Set());
+    expect(state.battleScene?.fightSubmenu.closeElapsed).toBe(closed.closeElapsed);
+    expect(state.battleScene?.turn1Resolved).toBe(false);
+    expect(state.battleScene?.fightSubmenu.cursor).toBe(2);
   });
 });
