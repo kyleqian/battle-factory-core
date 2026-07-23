@@ -398,7 +398,7 @@ burned-message typing/hold, the reusable BRN healthbox compositor at 21542,
 `gCurrentMove` reset, and the first four residual-message handoff ticks.
 ISSUES #16 is closed; burn damage and tick 21561 onward remain untouched.
 See `docs/turn16-notes.md` §6.7.
-**Worker factual status proposal for supervisor review (2026-07-23):**
+**Turn-16 completion accepted by the supervisor (2026-07-23):**
 Turn 16 is complete through its turn-17 menu handoff:
 `turn16-rung5.json` is **175/175 exact** for every canonical tick
 `21561-21735`, covering the second Status_Burn animation,

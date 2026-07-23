@@ -21,6 +21,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** implementation commit `5cbcd69`; all timing is local
   FIRE_PUNCH/action-menu age. No forbidden framebuffer, absolute-tick,
   per-frame table, trace branch, fitted color/coordinate, or excluded capture.
+  Supervisor independently reverified the dense tail, predecessor rung,
+  verifier, full Tier-1 suite, and build; the ROADMAP status is accepted.
 
 ---
 ## 289 — Bounded worker (S7 turn 16 rung 4): **GREEN — burn proc + BRN badge**
