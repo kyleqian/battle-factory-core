@@ -74,9 +74,9 @@
     {
       "move": "MOVE_FIRE_PUNCH",
       "status": "partial",
-      "covered": ["player-back MAGBY to opponent-front MURKROW", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense ages 0-224 (225/225) through the shared Scene-ON adapter"],
-      "evidence": ["tools/compare/traces/turn16-rung3.json", "tools/compare/traces/turn17-rung4.json", "tools/compare/fixtures/fire-punch-onix-grovyle.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/fire-punch-portable-staging-probe.md"],
-      "remaining": "Audit and stage the opposite-attacker-side geometry through the same relative Scene-ON adapter; portable ONIX→GROVYLE itself is complete at 225/225."
+      "covered": ["player-back MAGBY to opponent-front MURKROW", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense ages 0-224 (225/225) through the shared Scene-ON adapter", "staged synthetic opponent-front GROVYLE to player-back ONIX, dense oracle frames 2081-2357 with source-pinned geometry and burn outcome (app comparison not yet run)"],
+      "evidence": ["tools/compare/traces/turn16-rung3.json", "tools/compare/traces/turn17-rung4.json", "tools/compare/fixtures/fire-punch-onix-grovyle.json", "tools/compare/fixtures/fire-punch-grovyle-onix.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/fire-punch-portable-staging-probe.md"],
+      "remaining": "Run the dense GROVYLE→ONIX fixture through the existing relative Scene-ON adapter and make it green before any exact claim; player-back ONIX→GROVYLE itself is complete at 225/225."
     },
     {
       "move": "MOVE_FAINT_ATTACK",

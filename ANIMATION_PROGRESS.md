@@ -38,19 +38,23 @@ remainder.
 - **State:** 12 Level 50 moves have strong canonical evidence but remain
   `partial` under the new portability definition; none is yet claimed generic
   `exact`.
-- **Did:** the new relative Scene-ON adapter consumes explicit attacker/target
-  side, sprite-corner, animation-center geometry, and an immutable FIRE_PUNCH
-  resolution profile. The live compositor reuses the shared reducer, particles,
-  impact priority, palette blend, battler sheets, healthboxes, and printer.
-  `npm run compare:fire-punch-portable` runs the committed synthetic mGBA stage
-  into a fresh temp-only RGB directory and is **225/225 exact** (frames
-  2313–2537, reducer ages 0–224) for **ONIX (back) → GROVYLE (front)** through
-  the completed super-effective printer; no screenshots or oracle pixels are
-  committed or consulted at runtime.
-- **Next:** audit and stage the opposite-attacker-side FIRE_PUNCH geometry.
-  Keep the move `partial` until that evidence-required orientation also has a
-  complete dense window through this same adapter.
-- **Boundary:** portable ONIX→GROVYLE is complete, not a canonical-only claim.
-  FIRE_PUNCH remains `partial` solely because the opposite attacker side is
-  unaudited. Canonical regressions remain turn16-rung3 **227/236** (known
-  21397–21405 residual) and turn17-rung4 **200/200**. Tier-1 is **1193/1193**.
+- **Did:** the relative Scene-ON adapter's existing player-side FIRE_PUNCH
+  stage remains **225/225 exact** for **ONIX (back) → GROVYLE (front)**
+  (frames 2313–2537 / ages 0–224). The new opponent route in
+  `stage-fire-punch-portable-on.py` stages only GROVYLE's stock AI-selected
+  slot 3 (`DOUBLE_TEAM→FIRE_PUNCH`) at tick 1886; two fresh Scene-ON probes
+  were byte-identical. It pins **GROVYLE (front) → ONIX (back)** geometry
+  (corners `(144,12)/(40,48)`, animation centers `(176,44)/(72,88)`), epoch
+  frame 2081, and its stock-controller outcome: PP 15→14 at 2080, ONIX
+  117→96 at 2130, burn status1 0→16 at 2223, controller release 2358. The
+  dense 2081–2357 fixture is committed; RGB remains temporary-only.
+- **Next:** wire that committed GROVYLE→ONIX fixture through the existing
+  generic relative adapter and run its complete dense comparison. Do not claim
+  FIRE_PUNCH `exact` unless it is green; its large ONIX target geometry and
+  target-side compositing are a real evidence variant.
+- **Boundary:** FIRE_PUNCH remains `partial`: the player-back portable
+  comparison is complete, but the opposite-side **app** comparison is not yet
+  run. Canonical controls remain turn16-rung3 **227/236** (known
+  21397–21405 residual) and turn17-rung4 **200/200**. This probe does not
+  alter runtime/compositor, battle logic, RNG, damage, turn order, or facility
+  state.

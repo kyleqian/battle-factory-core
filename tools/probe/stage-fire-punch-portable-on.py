@@ -8,11 +8,13 @@ already-loaded `struct BattlePokemon` move/PP slot before the normal FIGHT
 controller asks for its move list.  The game itself subsequently executes its
 ordinary controller, battle script, and `Move_FIRE_PUNCH` animation.
 
-The resulting portable geometry case is ONIX (player-back) -> GROVYLE
-(opponent-front).  It differs from the canonical MAGBY -> MURKROW evidence,
-but is intentionally not presented as a Factory-legal team pairing: it pins
-the smallest existing presentation-seam construction while proper arbitrary
-scenario compilation remains unimplemented.
+The default portable geometry case is ONIX (player-back) -> GROVYLE
+(opponent-front). Passing ``opponent`` as the final argument stages the
+opposite attacker side, GROVYLE (opponent-front) -> ONIX (player-back), by
+replacing only the AI's known selected move slot. Both routes differ from the
+canonical MAGBY -> MURKROW evidence, but are intentionally not presented as
+Factory-legal team pairings: they pin the smallest existing presentation-seam
+construction while proper arbitrary scenario compilation remains unimplemented.
 
 Run via the validation wrapper (from repository root):
 
@@ -32,11 +34,16 @@ import sys
 from pathlib import Path
 
 
-if len(sys.argv) not in (2, 3):
-    raise SystemExit(f"usage: {sys.argv[0]} <fresh-output.json> [fresh-rgb-dir]")
+if len(sys.argv) not in (2, 3, 4):
+    raise SystemExit(
+        f"usage: {sys.argv[0]} <fresh-output.json> [fresh-rgb-dir] [player|opponent]"
+    )
 
 OUTPUT_PATH = Path(sys.argv[1])
-RGB_DIR = Path(sys.argv[2]) if len(sys.argv) == 3 else None
+RGB_DIR = Path(sys.argv[2]) if len(sys.argv) >= 3 else None
+ATTACKER_SIDE = sys.argv[3] if len(sys.argv) == 4 else "player"
+if ATTACKER_SIDE not in ("player", "opponent"):
+    raise SystemExit(f"attacker side must be player or opponent, got {ATTACKER_SIDE!r}")
 HERE = Path(__file__).resolve().parent
 WORKTREE_ROOT = HERE.parent.parent
 
@@ -66,6 +73,31 @@ BATTLE_MON_SIZE = 0x58
 BATTLE_MON_MOVES = 0x0C
 BATTLE_MON_PP = 0x24
 PLAYER_BATTLER = 0
+OPPONENT_BATTLER = 1
+# GROVYLE's slot 3 is the deterministic Battle AI choice in the untouched
+# canonical turn. Replacing that one already-loaded slot preserves normal AI
+# selection and controller emission while directing the existing choice to
+# FIRE PUNCH; no chosen-action or turn-order state is written.
+OPPONENT_AI_SLOT = 3
+
+# These are the decoder corners used by the native compositor's 64x64 battler
+# sheets. Centers mirror GetBattlerSpriteCoord(battler, X_2/Y_PIC_OFFSET):
+# singles bases are (72, 80)/(176, 40); ONIX's back offset is 0 (+8 for the
+# player PIC_OFFSET convention), while GROVYLE's front offset is 4.
+BATTLER_GEOMETRY = {
+    PLAYER_BATTLER: {
+        "species": "ONIX",
+        "side": "player-back",
+        "spriteCorner": {"x": 40, "y": 48},
+        "animationCenter": {"x": 72, "y": 88},
+    },
+    OPPONENT_BATTLER: {
+        "species": "GROVYLE",
+        "side": "opponent-front",
+        "spriteCorner": {"x": 144, "y": 12},
+        "animationCenter": {"x": 176, "y": 44},
+    },
+}
 
 # `battle1-turn1.json` reaches the action menu at the end of segment 39
 # (tick 1886). Segment 40 is the normal FIGHT press, so this is the last
@@ -86,6 +118,11 @@ def write_u16(oracle: EmeraldOracle, addr: int, value: int) -> None:
     oracle.write_u8(addr + 1, (value >> 8) & 0xFF)
 
 
+def s16(oracle: EmeraldOracle, addr: int) -> int:
+    value = u16(oracle, addr)
+    return value - 0x10000 if value & 0x8000 else value
+
+
 def battle_mon(oracle: EmeraldOracle, battler: int) -> dict[str, object]:
     base = oracle.symbols["gBattleMons"] + battler * BATTLE_MON_SIZE
     return {
@@ -101,6 +138,19 @@ def battle_mon(oracle: EmeraldOracle, battler: int) -> dict[str, object]:
     }
 
 
+def battler_sprite(oracle: EmeraldOracle, battler: int) -> dict[str, int]:
+    sprite_id = oracle.read_u8(oracle.symbols["gBattlerSpriteIds"] + battler)
+    # struct Sprite: x/y at +0x20, x2/y2 at +0x24, sizeof 0x44.
+    base = oracle.symbols["gSprites"] + sprite_id * 0x44
+    return {
+        "id": sprite_id,
+        "x": s16(oracle, base + 0x20),
+        "y": s16(oracle, base + 0x22),
+        "x2": s16(oracle, base + 0x24),
+        "y2": s16(oracle, base + 0x26),
+    }
+
+
 def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
     rgb = oracle.screen_rgb()
     if RGB_DIR is not None:
@@ -111,8 +161,15 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
         "currentMove": u16(oracle, oracle.symbols["gCurrentMove"]),
         "attacker": oracle.read_u8(oracle.symbols["gBattlerAttacker"]),
         "target": oracle.read_u8(oracle.symbols["gBattlerTarget"]),
+        "doingBattleAnim": oracle.read_u8(oracle.symbols["gDoingBattleAnim"]),
+        "battleAnimAttacker": oracle.read_u8(oracle.symbols["gBattleAnimAttacker"]),
+        "battleAnimTarget": oracle.read_u8(oracle.symbols["gBattleAnimTarget"]),
         "player": battle_mon(oracle, 0),
         "opponent": battle_mon(oracle, 1),
+        "sprites": {
+            "player": battler_sprite(oracle, PLAYER_BATTLER),
+            "opponent": battler_sprite(oracle, OPPONENT_BATTLER),
+        },
     }
 
 
@@ -141,12 +198,14 @@ def main() -> None:
     if tick != STAGE_TICK:
         raise AssertionError(f"expected stage tick {STAGE_TICK}, got {tick}")
 
-    before = battle_mon(oracle, PLAYER_BATTLER)
-    player_base = oracle.symbols["gBattleMons"] + PLAYER_BATTLER * BATTLE_MON_SIZE
-    write_u16(oracle, player_base + BATTLE_MON_MOVES, FIRE_PUNCH)
-    oracle.write_u8(player_base + BATTLE_MON_PP, 15)
-    after = battle_mon(oracle, PLAYER_BATTLER)
-    if after["moves"][0] != FIRE_PUNCH or after["pp"][0] != 15:
+    staged_battler = PLAYER_BATTLER if ATTACKER_SIDE == "player" else OPPONENT_BATTLER
+    staged_slot = 0 if ATTACKER_SIDE == "player" else OPPONENT_AI_SLOT
+    before = battle_mon(oracle, staged_battler)
+    battler_base = oracle.symbols["gBattleMons"] + staged_battler * BATTLE_MON_SIZE
+    write_u16(oracle, battler_base + BATTLE_MON_MOVES + staged_slot * 2, FIRE_PUNCH)
+    oracle.write_u8(battler_base + BATTLE_MON_PP + staged_slot, 15)
+    after = battle_mon(oracle, staged_battler)
+    if after["moves"][staged_slot] != FIRE_PUNCH or after["pp"][staged_slot] != 15:
         raise AssertionError(f"move-slot stage failed: {after}")
 
     # Keep the normal FIGHT press, move confirmation, and controller pacing.
@@ -158,23 +217,94 @@ def main() -> None:
     for _ in range(680):
         advance([])
 
+    target_battler = OPPONENT_BATTLER if staged_battler == PLAYER_BATTLER else PLAYER_BATTLER
+    first_fire = next(
+        capture
+        for capture in captures
+        if capture["currentMove"] == FIRE_PUNCH
+        and capture["attacker"] == staged_battler
+        and capture["target"] == target_battler
+    )
+    staged_pp = after["pp"][staged_slot]
+    pp_spent = next(
+        capture
+        for capture in captures
+        if capture["player" if staged_battler == PLAYER_BATTLER else "opponent"]["pp"][staged_slot] < staged_pp
+    )
+    target_hp_before = battle_mon(oracle, target_battler)["maxHp"]
+    target_start_hp = first_fire["player" if target_battler == PLAYER_BATTLER else "opponent"]["hp"]
+    hp_changed = next(
+        capture
+        for capture in captures
+        if capture["player" if target_battler == PLAYER_BATTLER else "opponent"]["hp"] < target_start_hp
+    )
+    status_changed = next(
+        (
+            capture
+            for capture in captures
+            if capture["player" if target_battler == PLAYER_BATTLER else "opponent"]["status1"] != 0
+        ),
+        None,
+    )
+    move_cleared = next(
+        (
+            capture
+            for capture in captures
+            if capture["tick"] > first_fire["tick"] and capture["currentMove"] == 0
+        ),
+        None,
+    )
+
     output = {
-        "schema": "fire-punch-portable-stage/v1",
+        "schema": "fire-punch-portable-stage/v2",
         "oracleProfile": "battle-scene-on",
         "sourceTrace": str(TRACE_PATH.relative_to(WORKTREE_ROOT)),
         "construction": {
             "stageTick": STAGE_TICK,
             "boundary": "after canonical action-menu settle; before its FIGHT press",
             "patch": {
-                "battler": PLAYER_BATTLER,
-                "struct": "gBattleMons[0]",
-                "fields": {"moves[0]": FIRE_PUNCH, "pp[0]": 15},
+                "battler": staged_battler,
+                "struct": f"gBattleMons[{staged_battler}]",
+                "fields": {f"moves[{staged_slot}]": FIRE_PUNCH, f"pp[{staged_slot}]": 15},
             },
-            "pair": "ONIX (player-back) -> GROVYLE (opponent-front)",
+            "pair": (
+                "ONIX (player-back) -> GROVYLE (opponent-front)"
+                if ATTACKER_SIDE == "player"
+                else "GROVYLE (opponent-front) -> ONIX (player-back)"
+            ),
+            "geometry": {
+                "attacker": BATTLER_GEOMETRY[staged_battler],
+                "target": BATTLER_GEOMETRY[target_battler],
+            },
+            "relativeReducerEpoch": {
+                "oracleFrame": 2313 if ATTACKER_SIDE == "player" else 2081,
+                "age": 0,
+                "definition": "first post-controller framebuffer owned by the move's printer/animation seam",
+            },
             "scope": "synthetic presentation-seam probe; not a Factory-legal party claim",
         },
         "before": before,
         "after": after,
+        "outcome": {
+            "firstFireDispatch": first_fire["tick"],
+            "ppSpent": pp_spent["tick"],
+            "targetHp": {
+                "before": target_start_hp,
+                "after": hp_changed["player" if target_battler == PLAYER_BATTLER else "opponent"]["hp"],
+                "tick": hp_changed["tick"],
+            },
+            "targetStatus": {
+                "before": 0,
+                "after": (
+                    status_changed["player" if target_battler == PLAYER_BATTLER else "opponent"]["status1"]
+                    if status_changed is not None
+                    else 0
+                ),
+                "tick": status_changed["tick"] if status_changed is not None else None,
+            },
+            "moveCleared": move_cleared["tick"] if move_cleared is not None else None,
+            "targetMaxHp": target_hp_before,
+        },
         "captures": captures,
     }
     OUTPUT_PATH.write_text(json.dumps(output, indent=2) + "\n")
