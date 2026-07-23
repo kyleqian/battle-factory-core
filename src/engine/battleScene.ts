@@ -12164,6 +12164,14 @@ export const TURN17_OUTCOME_CURSOR_START_DELAY =
   TURN17_OUTCOME_INPUT_READY_DELAY + 2;
 /** The old outcome framebuffer remains owned through second-dismiss +27. */
 export const TURN17_FIRST_TRAINER_RENDER_DELAY = 28;
+/** Shared SpriteCB_TrainerSlideIn reaches x2=0 on this relative age. */
+export const TURN17_TRAINER_SLIDE_SETTLE_DELAY = 53;
+/** Controller waitstate completes, then the loss printer clears and writes its first glyph. */
+export const TURN17_LOSS_TEXT_START_DELAY = 56;
+export const TURN17_LOSS_LINE1 = "PLEASE I NEED";
+export const TURN17_LOSS_LINE2 = "SOME WATER";
+export const TURN17_LOSS_TEXT_TOTAL =
+  TURN17_LOSS_LINE1.length + TURN17_LOSS_LINE2.length;
 
 export interface Turn17PostDismissState {
   age: number;
@@ -12239,6 +12247,44 @@ export function turn17OutcomeDismissEligible(
     faintDismissElapsed,
     null,
   )?.inputReady ?? false;
+}
+
+export interface Turn17TrainerLossState {
+  age: number;
+  trainerX: number;
+  visibleChars: number;
+  inputReady: boolean;
+  cursorVisible: false;
+}
+
+/**
+ * DESTIN's post-win presentation, entirely relative to the stored outcome
+ * dismiss. OpponentHandleTrainerSlide creates the 64px trainer at x2=96 and
+ * SpriteCB_TrainerSlideIn subtracts 2 per callback; only its final 26 poses
+ * intersect the 240px display. The expanded frontier lose text appends
+ * PAUSE_UNTIL_PRESS, whose RENDER_STATE_WAIT uses TextPrinterWait (a real
+ * A/B gate with no down-arrow draw), unlike end-of-string CLEAR state.
+ */
+export function turn17TrainerLossState(
+  sceneElapsed: number,
+  outcomeDismissElapsed: number | null,
+): Turn17TrainerLossState | null {
+  if (outcomeDismissElapsed === null) return null;
+  const age = sceneElapsed - outcomeDismissElapsed;
+  if (age < TURN17_FIRST_TRAINER_RENDER_DELAY) return null;
+  const slideAge = Math.min(age, TURN17_TRAINER_SLIDE_SETTLE_DELAY);
+  const visibleChars = Math.max(0, Math.min(
+    TURN17_LOSS_TEXT_TOTAL,
+    age - TURN17_LOSS_TEXT_START_DELAY + 1,
+  ));
+  return {
+    age,
+    trainerX:
+      176 + 2 * (TURN17_TRAINER_SLIDE_SETTLE_DELAY - slideAge),
+    visibleChars,
+    inputReady: visibleChars === TURN17_LOSS_TEXT_TOTAL,
+    cursorVisible: false,
+  };
 }
 
 /** FIRE_PUNCH reducer age derived from the stored Turn 17 confirmation. */
@@ -12586,6 +12632,47 @@ function drawTurn16FightSubmenuWindow(
         turn17OutcomeDismissElapsed,
       );
       if (outcome !== null) {
+        const trainerLoss = turn17TrainerLossState(
+          t - TICK0 + 1,
+          turn17OutcomeDismissElapsed,
+        );
+        if (trainerLoss !== null) {
+          drawSpriteSheet(
+            fb,
+            bugCatcher.tileset,
+            bugCatcher.palette,
+            trainerLoss.trainerX,
+            OPPONENT_CORNER.y,
+          );
+          if (trainerLoss.visibleChars === 0) {
+            // `trainerslidein`/`waitstate` do not own BG0: the defeated
+            // message and its last DMA-visible arrow pose remain intact
+            // until the following `printstring` clears the window.
+            drawMessageTextLines(
+              fb,
+              TURN17_OUTCOME_LINE1,
+              TURN17_OUTCOME_LINE2,
+              outcome.visibleChars,
+            );
+            const cursor = cursorState(
+              outcome.displayAge,
+              TURN17_OUTCOME_CURSOR_START_DELAY,
+            );
+            drawCursor(
+              fb,
+              cursor.yOffset,
+              LINE2_ORIGIN.x + measureText(font, charmap, TURN17_OUTCOME_LINE2),
+            );
+            return;
+          }
+          drawMessageTextLines(
+            fb,
+            TURN17_LOSS_LINE1,
+            TURN17_LOSS_LINE2,
+            trainerLoss.visibleChars,
+          );
+          return;
+        }
         drawMessageTextLines(
           fb,
           TURN17_OUTCOME_LINE1,

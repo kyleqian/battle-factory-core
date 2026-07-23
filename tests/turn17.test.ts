@@ -12,16 +12,20 @@ import {
   TURN17_FIRE_PUNCH_CONFIRM_TO_EPOCH_DELAY,
   TURN17_FIRST_OUTCOME_RENDER_DELAY,
   TURN17_FIRST_TRAINER_RENDER_DELAY,
+  TURN17_LOSS_TEXT_START_DELAY,
+  TURN17_LOSS_TEXT_TOTAL,
   TURN17_OUTCOME_CURSOR_START_DELAY,
   TURN17_OUTCOME_INPUT_READY_DELAY,
   TURN17_OUTCOME_TEXT_TOTAL,
   TURN17_OUTCOME_FLIP_DELAY,
+  TURN17_TRAINER_SLIDE_SETTLE_DELAY,
   advanceBattleScene,
   turn17FirePunchAge,
   turn17KoDismissEligible,
   turn17OutcomeDismissEligible,
   turn17OutcomeMessageState,
   turn17PostDismissState,
+  turn17TrainerLossState,
 } from "../src/engine/battleScene.ts";
 import {
   TURN17_FIRE_PUNCH_RESOLUTION,
@@ -231,5 +235,61 @@ describe("turn 17 faint hold and outcome latency", () => {
     expect(delayed.trainerTransitionReady).toBe(true);
     expect(turn17OutcomeMessageState(537, faintDismiss, outcomeDismiss + 10)!
       .trainerTransitionReady).toBe(false);
+  });
+
+  it("ports the source trainer slide, three-frame settled pause, and quote cadence", () => {
+    const edge = 500;
+    expect(TURN17_TRAINER_SLIDE_SETTLE_DELAY).toBe(53);
+    expect(TURN17_LOSS_TEXT_START_DELAY).toBe(56);
+    expect(turn17TrainerLossState(edge + 27, edge)).toBeNull();
+    expect(turn17TrainerLossState(edge + 28, edge)).toMatchObject({
+      trainerX: 226,
+      visibleChars: 0,
+    });
+    expect(turn17TrainerLossState(edge + 53, edge)).toMatchObject({
+      trainerX: 176,
+      visibleChars: 0,
+    });
+    expect(turn17TrainerLossState(edge + 54, edge)).toMatchObject({
+      trainerX: 176,
+      visibleChars: 0,
+    });
+    expect(turn17TrainerLossState(edge + 55, edge)).toMatchObject({
+      trainerX: 176,
+      visibleChars: 0,
+    });
+    expect(turn17TrainerLossState(edge + 56, edge)).toMatchObject({
+      trainerX: 176,
+      visibleChars: 1,
+    });
+    expect(turn17TrainerLossState(edge + 56 + TURN17_LOSS_TEXT_TOTAL - 1, edge))
+      .toMatchObject({
+        visibleChars: TURN17_LOSS_TEXT_TOTAL,
+        inputReady: true,
+        cursorVisible: false,
+      });
+  });
+
+  it("shifts every trainer/quote edge with the real stored dismiss and holds without a cursor", () => {
+    const edge = 700;
+    const shift = 11;
+    for (const age of [27, 28, 53, 54, 55, 56, 78, 400]) {
+      expect(turn17TrainerLossState(edge + age, edge))
+        .toEqual(turn17TrainerLossState(edge + shift + age, edge + shift));
+    }
+    expect(turn17TrainerLossState(edge + 77, edge)).toMatchObject({
+      inputReady: false,
+      cursorVisible: false,
+    });
+    const settled = turn17TrainerLossState(edge + 78, edge);
+    expect(settled).toMatchObject({
+      visibleChars: TURN17_LOSS_TEXT_TOTAL,
+      inputReady: true,
+      cursorVisible: false,
+    });
+    expect(turn17TrainerLossState(edge + 400, edge)).toEqual({
+      ...settled,
+      age: 400,
+    });
   });
 });
