@@ -39,7 +39,7 @@ healthbox, and (6) blank hold + re-anchored MAGBY action-menu bounce.
 Reuse is explicit: parameterize the initial ONIX player-sendout helpers and
 turn-5's clean switch-in primitives; do **not** copy turn-13 Murkrow's
 species-specific wobble table. New data is only MAGBY's front asset/frame
-identity and any MAGBY-only wobble table. Start with rung 3 and verify the
+identity and any MAGBY-only wobble table. Start with rung 4 and verify the
 documented dense range before each subsequent rung. Do not use per-frame
 assets, absolute tick tables, or coordinate patches.
 

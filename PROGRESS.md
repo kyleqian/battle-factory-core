@@ -4,9 +4,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 276 — Bounded worker (ISSUES #37 rung 3): **GREEN — visible forced-switch player ball only**
+## 276 — Supervisor accepted (ISSUES #37 rung 3): **GREEN — visible forced-switch player ball only**
 
-- **State:** canonical `turn15-sendout-rung3.json` is **46/46 exact**
+- **State:** independently accepted: canonical `turn15-sendout-rung3.json` is **46/46 exact**
   (20345--20390); delayed counterpart is **46/46 exact** (20375--20420).
   The frozen party traces remain 200/200 and rung-2 traces 43/43.
 - **Did:** corrected the dossier's owner conflict from fresh OAM/callback/
@@ -17,7 +17,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** #37 rung 4 only: MAGBY/materialization/particles. Rendered
   MAGBY pixels already begin at 20391 (delayed 20421), so do not reopen this
   ball-only endpoint or rely on the dossier's old 20400 label.
-- **Notes:** Tier-1 **1011/1011**, build (**5.400 MB**), verifier **17/17**,
+- **Notes:** supervisor reran Tier-1 **1011/1011**, build (**5.400 MB**), verifier **17/17**,
   compositor **5/5**, frozen party **200/200** each, and frozen rung-2
   **43/43** each are all green. PAPERCUT: the direct OAM probe emits
   multi-megabyte mGBA diagnostics despite producing valid JSON, ~2 min.

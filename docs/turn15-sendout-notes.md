@@ -51,7 +51,8 @@ the RAM boundary; this is rung 3's ball/trainer handoff, not text work.
 43 frames through that endpoint and both compare **43/43 exact**. The engine
 uses no global trace tick: `PartySelectState.sendOutElapsed` selects the
 transferred field's BLDY coefficient and the existing font primitives type
-the text. Brendan, ball, materialization, and healthbox remain rung 3+.
+the text. At rung-2 closure, ball, materialization, and healthbox remained
+rung 3+; later evidence established there is no Brendan sprite in this path.
 
 ## RAM/OAM/VRAM facts
 

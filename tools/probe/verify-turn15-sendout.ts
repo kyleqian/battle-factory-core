@@ -34,8 +34,8 @@ async function main() {
   check("fade-in advances each frame through 20317", new Set(range(20302, 20317).map(sha)).size === 16);
   check("Go! MAGBY typing handoff begins at 20330", sha(20330) === "9bdfaa907a11" && sha(20330) !== sha(20329), `${sha(20329)} -> ${sha(20330)}`);
   check("text/throw handoff remains dynamic across 20330-20339", new Set(range(20330, 20339).map(sha)).size >= 8);
-  check("RAM-only Brendan/closed-ball handoff is pixel-silent through 20390", sha(20388) === sha(20389) && sha(20389) === sha(20390), `${sha(20388)} -> ${sha(20389)} -> ${sha(20390)}`);
-  check("ball-open/materialize pixels first appear at 20400", sha(20400) === "07d53943f65a", sha(20400));
+  check("post-ball field is pixel-static through 20390 before MAGBY ownership", sha(20388) === sha(20389) && sha(20389) === sha(20390), `${sha(20388)} -> ${sha(20389)} -> ${sha(20390)}`);
+  check("later ball-open/materialize anchor at 20400 is stable", sha(20400) === "07d53943f65a", sha(20400));
   check("materialize has a non-plateau growing run 20400-20430", new Set(range(20400, 20430).map(sha)).size >= 25);
   check("mid-materialize anchor 20456 is stable", sha(20456) === "0f9a943dbb41", sha(20456));
   check("final materialize hold starts at 20534", sha(20534) === "4f63d4696c93" && range(20534, 20550).every((t) => sha(t) === "4f63d4696c93"));
