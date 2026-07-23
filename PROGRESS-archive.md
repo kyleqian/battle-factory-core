@@ -1,3 +1,20 @@
+## 281 — Uninterrupted supervisor policy: **GREEN**
+
+- **State:** game code and accepted rung-3 renderer are unchanged. The latest
+  full verification remains Tier-1 **1011/1011**, build (**5.400 MB**), and
+  deadline-helper tests **5/5** green.
+- **Did:** made both Claude and Codex supervisors autonomous through the full
+  cap: they exercise best judgment instead of asking mid-session, record only
+  genuinely unsafe-to-guess decisions in `DEFERRED.md`, continue independent
+  safe work, and summarize deferred questions at wind-down. An open deferred
+  entry now blocks the next supervisor launch for both providers.
+- **Next:** resume #37 rung 4a under the existing Codex tier policy; do not
+  interrupt the session for judgment calls.
+- **Notes:** `ISSUES.md` remains the confirmed bug/debt backlog.
+  `DEFERRED.md` is currently empty. Direct sessions without injected model
+  metadata use `Agent-model: unknown` rather than guessing.
+
+---
 ## 280 — Codex supervised-run hardening: **GREEN**
 
 - **State:** game code and accepted rung-3 renderer are unchanged. Tier-1

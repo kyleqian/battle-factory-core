@@ -5,19 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #37 — Turn-15 forced SEND OUT: blank hold/action-menu redraw remains
-
-**Rungs 1--5 CLOSED 2026-07-22:** the confirmation-relative party exit,
-field/text handoff, player ball, MAGBY release, populated healthbox slide, and
-MAGBY `BACK_ANIM_SHAKE_GLOW_RED` now match their committed canonical/delayed
-dense traces. Rung 5 covers canonical `20407--20550` and delayed
-`20437--20580`, both **144/144 exact**; rung 4a remains **16/16** each.
-
-**Remaining rung 6:** begin at blank-box ownership (canonical **20551**,
-delayed **20581**), then reproduce its hold and the re-anchored MAGBY
-action-menu redraw/bounce. Do not reopen exact rungs 1--5 or use per-frame
-assets, absolute tick tables, coordinate patches, or trace branches.
-
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
   (240/240)

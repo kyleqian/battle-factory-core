@@ -7258,8 +7258,10 @@ function drawTurn5SitrusSettledMenuChrome(fb: Uint8Array): void {
  * is formatted from the active battler's name.  Reuse the accepted chrome
  * and the accepted blank-window backing, replacing the complete second text
  * row (window tile row 17) before drawing MAGBY's prompt with the normal
- * battle font.  This is window-template composition, not a captured frame
- * lookup: the same semantic 14-tile text row is valid for every player name.
+ * battle font. `sStandardBattleWindowTemplates[B_WIN_ACTION_PROMPT]` gives
+ * tilemapLeft=1/width=14 and `sBattleWindowTextColors` gives x=1, hence the
+ * source-derived screen x of 1*8+1=9 below. This is window-template
+ * composition, not a captured-frame lookup or coordinate fit.
  */
 function drawTurn15MagbySettledMenuChrome(fb: Uint8Array): void {
   drawTurn5SitrusSettledMenuChrome(fb);
