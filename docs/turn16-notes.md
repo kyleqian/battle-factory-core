@@ -451,3 +451,43 @@ bit not exposed by the existing dumper, needed to attribute the
 FIRE_PUNCH fire-spiral/spread sprites to specific slots) is flagged above
 as an open item, not a papercut — a deliberate scope boundary given the
 35-minute cap, not friction.
+
+### 6.4 Rung 2a implementation and the +30 register-visibility exception
+
+The source-derived live implementation now reproduces canonical
+**20826-21046 at 221/221 exact**. It uses `Move_FAINT_ATTACK`'s actual
+composition: source-extracted `BG_DARK` char/map/palette data; BG3-only
+hardware-darken fades; the literal `gSineTable` ellipse; the two
+attacker-alpha tasks; the generic animation-1 impact sprite; and
+`AnimTask_ShakeMon2`. No framebuffer asset or absolute-tick table is used.
+
+The requested premise that the +30 twin has an identical relative SHA
+stream is refuted by a fresh two-oracle run: **220/221 relative SHAs are
+identical**, with the sole exception at relative age 150:
+canonical **20976** is `c54a68c1654a…`, while delayed **21006** is
+`9730d67429ad…` (the canonical age-151/152 coefficient). Direct
+`ram-probe.py` reads establish that this is not different animation-task
+state:
+
+| run / relative age 150 | fade task `data[1]` | `data[2]` | hardware `BLDALPHA` |
+|---|---:|---:|---:|
+| canonical 20976 | `0x0d03` | 0 | **`0x0e02`** |
+| +30 delayed 21006 | `0x0d03` | 0 | **`0x0d03`** |
+
+Both runs have the same active task functions and the same task-data
+sequence on surrounding ticks. A fresh delay sweep at
+`+0,+1,…,+8,+15,+16,+30,+31,+32` found the early hardware-register
+exposure **only at +30**; +29 was not sampled, while +31/+32 immediately
+return to the ordinary two-VBlank coefficient cadence. Thus neither the
+turn-16 open/confirm/SEND-OUT-relative state nor the general animation task
+clock distinguishes the two frames. The remaining difference is a
+one-frame hardware-register visibility/cycle race below this engine's
+tick-state abstraction, analogous in kind (not pixel pattern) to the
+already-settled cycle-timing family in ISSUES #5.
+
+**First unresolved boundary:** delayed tick **21006 only**. An
+absolute-battle-tick check, a `+30` trace branch, or a baked replacement
+frame would make the acceptance number green but violate the run's
+guardrails, so none is committed. The delayed 221-capture app trace is
+also not committed red. Canonical `turn16-rung2a.json` remains a dense,
+prefix-verbatim 221-capture acceptance trace.

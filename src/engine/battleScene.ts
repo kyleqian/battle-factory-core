@@ -537,12 +537,20 @@ import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
 import partyExitObjAsset from "../assets/gen/turn15-party-exit-obj.json" with { type: "json" };
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
+import faintAttackDarkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
-import { drawMode0Objects, drawMode0Ppu, type Mode0Oam } from "./gbaPpu.ts";
+import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
+import {
+  faintAttackAttackerEva,
+  faintAttackAttackerOffset,
+  faintAttackBgState,
+  faintAttackHitsplatVisible,
+  faintAttackTargetShakeX2,
+} from "./faintAttack.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
 import battle1GrovyleFaintRamDumpAsset from "../data/gen/battle1-grovyle-faint-ram-dump.json" with { type: "json" };
@@ -2726,7 +2734,7 @@ function drawSpriteSheetAffineStretch(
  * false in practice today, but the doubled-footprint math is kept general
  * since nothing here is doubled-specific.
  */
-function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, xScale: number, yScale: number, eva: number, evb: number, doubled = false): void {
+function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, xScale: number, yScale: number, eva: number, evb: number, doubled = false, target: "static" | "live" = "static"): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
   const halfW = w / 2;
@@ -2754,9 +2762,11 @@ function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tile
       const x = ox + dx;
       const y = oy + dy;
       if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
-      const field = staticBgPixel(x, y);
-      if (!field) continue;
       const o = (y * 240 + x) * 4;
+      const field = target === "live"
+        ? { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! }
+        : staticBgPixel(x, y);
+      if (!field) continue;
       fb[o] = blendChannel(c.r, field.r, eva, evb);
       fb[o + 1] = blendChannel(c.g, field.g, eva, evb);
       fb[o + 2] = blendChannel(c.b, field.b, eva, evb);
@@ -11912,7 +11922,7 @@ function turn15ReleaseFieldPalette(logicalTick: number): number[][] {
   ));
 }
 
-function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, y2Extra: number = 0): void {
+function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, y2Extra: number = 0, x2Extra: number = 0): void {
   if (logicalTick <= 16) {
     drawPlayerSideAffineMaterialize(fb, magbyBackSprite.tileset, FORCED_SWITCH_MAGBY_CORNER, logicalTick, 1, PLAYER_BALL_OPEN_VISIBLE_BOTTOM);
   } else {
@@ -11928,7 +11938,7 @@ function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, y2Ex
       tintColor,
       animation.tint.coeff,
       y2Extra,
-      animation.x2,
+      animation.x2 + x2Extra,
       PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
     );
   }
@@ -11963,6 +11973,43 @@ const TURN16_BOUNCE_FREEZE_DELAY = 3;
 const TURN16_FAINT_ATTACK_LINE1 = "Foe MURKROW used";
 const TURN16_FAINT_ATTACK_LINE2 = "FAINT ATTACK!";
 const TURN16_FAINT_ATTACK_TEXT_TOTAL = TURN16_FAINT_ATTACK_LINE1.length + TURN16_FAINT_ATTACK_LINE2.length;
+/** First Move_FAINT_ATTACK script-owned render, relative to stored confirm. */
+const TURN16_FAINT_ATTACK_ANIM_DELAY = 52;
+/** Bounded rung 2a owns kickoff ages 0..220 (canonical 20826..21046). */
+const TURN16_FAINT_ATTACK_RUNG2A_LAST_AGE = 220;
+
+type FaintAttackDarkBgAsset = {
+  charBlock2B64: string;
+  screenBlock26B64: string;
+  paletteBank2Bgr555: number[];
+};
+const faintAttackDarkBg = faintAttackDarkBgAsset as FaintAttackDarkBgAsset;
+
+function replaceB64Prefix(baseB64: string, prefixB64: string): string {
+  const base = Uint8Array.from(atob(baseB64), (c) => c.charCodeAt(0));
+  const prefix = Uint8Array.from(atob(prefixB64), (c) => c.charCodeAt(0));
+  base.set(prefix);
+  let binary = "";
+  for (const byte of base) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
+/** BG_DARK is loaded into the same charblock/screenblock/palette slots as BG3. */
+const turn16DarkFieldPpu: Mode0State = {
+  ...(turn15FieldPpuAsset as Mode0State),
+  bg: (turn15FieldPpuAsset as Mode0State).bg.map((bg, index) => (
+    index === 3
+      ? { ...bg, mapB64: replaceB64Prefix(bg.mapB64, faintAttackDarkBg.screenBlock26B64) }
+      : bg
+  )),
+  charBases: {
+    ...(turn15FieldPpuAsset as Mode0State).charBases,
+    "2": replaceB64Prefix((turn15FieldPpuAsset as Mode0State).charBases["2"]!, faintAttackDarkBg.charBlock2B64),
+  },
+  paletteBgr555: (turn15FieldPpuAsset as Mode0State).paletteBgr555.map((bank, index) => (
+    index === 2 ? faintAttackDarkBg.paletteBank2Bgr555 : bank
+  )),
+};
 
 function turn16PartyElapsedAtTick(partyElapsed: number, t: number, anchorTick: number): number {
   return partyElapsed - (t - anchorTick);
@@ -11972,18 +12019,66 @@ function drawTurn16PostSwitchField(
   fb: Uint8Array,
   partyElapsed: number,
   bounceTick: number,
+  faintAttackAge: number | null = null,
 ): void {
   const releaseTick = partySendOutReleaseLogicalTick(partyElapsed);
   const bounce = menuIdleBounce(bounceTick);
+  const animBg = faintAttackAge === null ? null : faintAttackBgState(faintAttackAge);
+  const sourcePpu = animBg?.background === "dark" ? turn16DarkFieldPpu : turn15FieldPpuAsset;
+  const releasedPalette = releaseTick === null
+    ? sourcePpu.paletteBgr555
+    : turn15ReleaseFieldPalette(releaseTick).map((bank, index) => (
+      animBg?.background === "dark" && index === 2 ? faintAttackDarkBg.paletteBank2Bgr555 : bank
+    ));
   drawMode0Ppu(fb, {
-    ...turn15FieldPpuAsset,
-    bldy: partySendOutBattleFadeBldy(partyElapsed),
-    paletteBgr555: releaseTick === null ? turn15FieldPpuAsset.paletteBgr555 : turn15ReleaseFieldPalette(releaseTick),
+    ...sourcePpu,
+    // Task_FadeToBg uses hardware BLDCNT=0x00E8: darken BG3 only.
+    bldcnt: animBg && animBg.bldy > 0 ? 0x00e8 : sourcePpu.bldcnt,
+    bldy: animBg?.bldy ?? partySendOutBattleFadeBldy(partyElapsed),
+    // During `monbg ANIM_ATTACKER`, the real OBJ is hidden and an identical
+    // BG copy is composited below. Exclude only Murkrow's final OAM entry.
+    oam: faintAttackAge === null ? sourcePpu.oam : sourcePpu.oam.slice(0, -1),
+    paletteBgr555: releasedPalette,
   });
+  if (faintAttackAge !== null) {
+    const eva = faintAttackAttackerEva(faintAttackAge);
+    if (eva > 0) {
+      const offset = faintAttackAttackerOffset(faintAttackAge);
+      if (eva === 16) {
+        drawSpriteSheet(fb, murkrowFrontSprite.tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x + offset.x2, MURKROW_CORNER.y + offset.y2);
+      } else {
+        drawSpriteSheetBlendedOverFb(
+          fb,
+          murkrowFrontSprite.tileset,
+          murkrowFrontSprite.palette,
+          MURKROW_CORNER.x + offset.x2,
+          MURKROW_CORNER.y + offset.y2,
+          eva,
+          16 - eva,
+        );
+      }
+    }
+  }
   drawTurn15ForcedSwitchBall(fb, partyElapsed);
-  if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2);
+  const targetX2 = faintAttackAge === null ? 0 : faintAttackTargetShakeX2(faintAttackAge);
+  if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2, targetX2);
   const healthboxDx = partySendOutHealthboxDx(partyElapsed);
   if (healthboxDx !== null) drawTurn15MagbyHealthbox(fb, healthboxDx, bounce.healthboxY2);
+  if (faintAttackAge !== null && faintAttackHitsplatVisible(faintAttackAge)) {
+    drawSpriteSheetAffineStretchBlendedOverFb(
+      fb,
+      battleAnimHitsplat.tileset,
+      battleAnimHitsplat.palette,
+      72 - 16,
+      99 - 16,
+      TURN9_HITSPLAT_MATRIX,
+      TURN9_HITSPLAT_MATRIX,
+      12,
+      8,
+      true,
+      "live",
+    );
+  }
 }
 
 /**
@@ -12019,7 +12114,17 @@ function drawTurn16FightSubmenuWindow(
       // the callback's just-written pose is displayed on that VBlank.
       ? turn16PartyElapsedAtTick(partyElapsed, t, freezeTick) + 1
       : partyElapsed - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  drawTurn16PostSwitchField(fb, partyElapsed, partySendOutMenuBounceTick(bouncePartyElapsed));
+  const animationAge = confirmTick === null ? null : t - (confirmTick + TURN16_FAINT_ATTACK_ANIM_DELAY);
+  const ownedAnimationAge =
+    animationAge !== null && animationAge >= 0 && animationAge <= TURN16_FAINT_ATTACK_RUNG2A_LAST_AGE
+      ? animationAge
+      : null;
+  drawTurn16PostSwitchField(
+    fb,
+    partyElapsed,
+    partySendOutMenuBounceTick(bouncePartyElapsed),
+    ownedAnimationAge,
+  );
 
   if (confirmTick !== null && t >= confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY) {
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
