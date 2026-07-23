@@ -23,6 +23,11 @@ export interface Trace {
    * New main/round-loop traces must opt into battle-scene-off explicitly.
    */
   oracleProfile?: OracleProfile;
+  /** Dev-only named state injection consumed by appTrace and stripped here. */
+  appStage?: {
+    readonly id: string;
+    readonly frame: number;
+  };
 }
 
 export interface OracleCapture {
@@ -48,10 +53,11 @@ export async function oracleInfo(
 
 export async function runOracleTrace(trace: Trace): Promise<OracleRunResult> {
   const profile = trace.oracleProfile ?? "battle-scene-on";
+  const { appStage: _appStage, ...oracleTrace } = trace;
   const response = await fetch(`${oracleUrlForProfile(profile)}/v1/run`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(trace),
+    body: JSON.stringify(oracleTrace),
   });
   if (!response.ok) {
     throw new Error(`oracle /v1/run failed: HTTP ${response.status}: ${await response.text()}`);

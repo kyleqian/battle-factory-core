@@ -186,6 +186,10 @@ import {
   createRoundController,
   type RoundControllerState,
 } from "./roundController.ts";
+import {
+  advanceStagedBattleTurn,
+  type StagedBattleTurnState,
+} from "./stagedBattleTurn.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -217,6 +221,8 @@ export interface EngineState {
    * injection. The canonical pixel path remains unwired and therefore null.
    */
   roundController: RoundControllerState | null;
+  /** Dev-probe staged battle port; null on the canonical production path. */
+  stagedBattleTurn: StagedBattleTurnState | null;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -252,6 +258,7 @@ export function createInitialState(
     roundController: options.battleScenario
       ? createRoundController(options.battleScenario)
       : null,
+    stagedBattleTurn: null,
   };
 }
 
@@ -282,6 +289,28 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleSetup: BattleSetupState | null = state.battleSetup;
   let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
   let battle2Turn1 = state.battle2Turn1 ?? null;
+
+  if (state.stagedBattleTurn) {
+    const stagedBattleTurn = advanceStagedBattleTurn(
+      state.stagedBattleTurn,
+      newKeys.has("A"),
+    );
+    return {
+      ...state,
+      frame: state.frame + 1,
+      keyRepeat,
+      stagedBattleTurn,
+      rngMode: "frontierBattle",
+      rngValue:
+        stagedBattleTurn.presentation?.resolved.state.rngValue ??
+        state.rngValue,
+      battleControllerExecFlags:
+        stagedBattleTurn.phase === "inputReady" ? 1 : 0,
+      battleScene: state.battleScene
+        ? advanceBattleScene(state.battleScene)
+        : state.battleScene,
+    };
+  }
 
   if (postwin) {
     let nextPostwin = advancePostwin(postwin);

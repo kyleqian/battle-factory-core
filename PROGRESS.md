@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 320 — S8 OFF turn portability seam: **GREEN — logic/staging checkpoint**
+
+- **State:** the staged Battle-2 turn now resolves through a reusable logical
+  event → relative Scene-OFF command → completion-ack queue. Tier-1 is
+  **1156/1156** and build passes (**5.535 MB**). Pixel acceptance is not yet
+  claimed.
+- **Did:** added a data-driven two-action turn resolver, explicit RNG ledger,
+  typed text/PP/HP/stat/turn-end/menu commands, paced OFF adapter, and staged
+  next-input gate. Added dev-only named `appStage` compare metadata (stripped
+  before oracle replay) and injected the source/RAM-pinned ONIX/KABUTO state
+  immediately before confirm.
+- **Next:** add the staged OFF renderer/timing profile, commit a short explicit
+  OFF app trace only once every selected capture is exact, and verify
+  confirm+407 input readiness. Do not extend the canonical ON tick ladder.
+- **Notes:** logical result is PP **10→9 / 15→14**, KABUTO **91→63**, ONIX
+  accuracy **6→5**, HP/status otherwise unchanged, with all 12 RNG values and
+  final **3121225034** pinned. Early/out-of-order completion is rejected;
+  1×/4× presentation pacing produces identical rules/RNG.
+
+---
 ## 319 — S8 Factory trainer schedule/RNG port: **GREEN — source selection live**
 
 - **State:** the generic controller now has a source-exact, policy-driven
@@ -61,24 +81,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **242/242** and `turn14-fly-miss.json` **185/185**; the direct seven-frame
   RAM/VRAM verifier is also 0 diff. No OFF oracle trace or renderer work was
   performed.
-
----
-## 317 — User-directed Stage 8 reset: **READY — finite, staged completion**
-
-- **State:** canonical Battle 2 remains exact through tick **33331** at
-  `b5be9b6`; the baseline is **1128/1128** with build green (**5.522 MB**).
-  S8 is now `[~]` under a finite completion contract rather than an open-ended
-  battle/turn replay.
-- **Did:** retired 33332/SAND ATTACK as the next milestone; defined a generic
-  seven-battle round core, unique swap/end UI, and one staged OFF-profile
-  Battle 2 portability proof as the only S8 gates. Added dual oracle routing
-  and main/side/animation worker-lane guidance.
-- **Next:** first land the `BattleScenario`/presentation seam and generic
-  round-controller state model with Tier-1 tests. Then stage a representative
-  Battle 2 turn under Battle Scene OFF. Do **not** resume the canonical
-  turn-by-turn ladder.
-- **Notes:** main + side use `battle-scene-off` (8014); optional animation work
-  uses `battle-scene-on` (8012). Historical traces default ON; every new trace
-  names its profile. Both profiles pass harness smoke; `turn1-cloneanim.json`
-  confirms their battle presentation diverges while the anchor SHA is shared.
-  `WORKSTREAMS.md` owns lane/file boundaries.

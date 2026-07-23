@@ -1,3 +1,24 @@
+## 317 — User-directed Stage 8 reset: **READY — finite, staged completion**
+
+- **State:** canonical Battle 2 remains exact through tick **33331** at
+  `b5be9b6`; the baseline is **1128/1128** with build green (**5.522 MB**).
+  S8 is now `[~]` under a finite completion contract rather than an open-ended
+  battle/turn replay.
+- **Did:** retired 33332/SAND ATTACK as the next milestone; defined a generic
+  seven-battle round core, unique swap/end UI, and one staged OFF-profile
+  Battle 2 portability proof as the only S8 gates. Added dual oracle routing
+  and main/side/animation worker-lane guidance.
+- **Next:** first land the `BattleScenario`/presentation seam and generic
+  round-controller state model with Tier-1 tests. Then stage a representative
+  Battle 2 turn under Battle Scene OFF. Do **not** resume the canonical
+  turn-by-turn ladder.
+- **Notes:** main + side use `battle-scene-off` (8014); optional animation work
+  uses `battle-scene-on` (8012). Historical traces default ON; every new trace
+  names its profile. Both profiles pass harness smoke; `turn1-cloneanim.json`
+  confirms their battle presentation diverges while the anchor SHA is shared.
+  `WORKSTREAMS.md` owns lane/file boundaries.
+
+---
 ## 316 — S8 Battle 2 turn 1 ROCK SLIDE: **GREEN — through 33331**
 
 - **State:** `battle2-turn1-rockslide.json` is **191/191 exact** through the
