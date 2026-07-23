@@ -61,6 +61,13 @@ const SPREAD_VELOCITIES = [
 export interface FirePunchTargetGeometry {
   /** Battle-animation target center (`GetBattlerSpriteCoord(..., 2/3)`). */
   readonly center: Readonly<{ x: number; y: number }>;
+  /** Source BATTLER_COORD_X/Y base used by status-animation sprites. */
+  readonly statusBaseCenter?: Readonly<{ x: number; y: number }>;
+  /**
+   * Horizontal status-flame travel after side-aware animation-argument
+   * transforms: +1 for opponent-front, -1 for player-back.
+   */
+  readonly horizontalDirection?: 1 | -1;
 }
 
 export const DEFAULT_FIRE_PUNCH_TARGET_GEOMETRY: FirePunchTargetGeometry = {
@@ -211,13 +218,25 @@ export interface FirePunchResolutionProfile {
   endHp: number;
   initialStatus: "none" | "burn";
   hpCommitAge: number;
+  /** First displayed one-HP drain step; defaults to the canonical cast. */
+  hpDrainFirstAge?: number;
+  /** Side/controller-specific generic hit wobble and blink ownership. */
+  hitWobbleFirstAge?: number;
+  hitWobbleTicks?: number;
+  hitBlinkFirstAge?: number;
+  hitBlinkTicks?: number;
   secondaryRollAge?: number;
   secondaryRollSucceeded?: boolean;
+  /** Synchronous healthbox status-tile update, distinct from status1. */
+  healthboxStatusAge?: number;
+  /** First status-flame and "was burned" printer frames for a burn proc. */
+  burnFlameFirstAge?: number;
+  burnMessageTextStartAge?: number;
   currentMoveResetAge?: number;
   rngBeforeSecondary?: number;
   /** Optional post-damage effectiveness printer, relative to this cast. */
   effectivenessMessage?: {
-    readonly kind: "superEffective";
+    readonly kind: "superEffective" | "notVeryEffective";
     readonly textStartAge: number;
   };
   faint?: FirePunchFaintProfile;
@@ -325,8 +344,15 @@ export function firePunchResolutionState(
     && (profile.secondaryRollSucceeded ?? profile.initialStatus === "none");
   const currentMoveResetAge =
     profile.currentMoveResetAge ?? FIRE_PUNCH_CURRENT_MOVE_RESET_AGE;
-  const wobble = age - FIRE_PUNCH_HIT_WOBBLE_FIRST_AGE;
-  const blink = age - FIRE_PUNCH_HIT_BLINK_FIRST_AGE;
+  const wobble = age - (
+    profile.hitWobbleFirstAge ?? FIRE_PUNCH_HIT_WOBBLE_FIRST_AGE
+  );
+  const wobbleTicks =
+    profile.hitWobbleTicks ?? FIRE_PUNCH_HIT_WOBBLE_TICKS;
+  const blink = age - (
+    profile.hitBlinkFirstAge ?? FIRE_PUNCH_HIT_BLINK_FIRST_AGE
+  );
+  const blinkTicks = profile.hitBlinkTicks ?? 32;
   const burned = profile.initialStatus === "burn" || secondaryRollSucceeded;
   // The status-turn script's first visible controller frame follows two
   // MoveBattleBar calls; subsequent frames decrement currValue once.
@@ -352,18 +378,26 @@ export function firePunchResolutionState(
               ? "BLANK"
               : "ACTION_MENU";
   return {
-    healthboxY2: wobble >= 0 && wobble < FIRE_PUNCH_HIT_WOBBLE_TICKS
+    healthboxY2: wobble >= 0 && wobble < wobbleTicks
       ? (wobble % 2 === 0 ? 1 : -1)
       : 0,
-    targetInvisible: blink >= 0 && blink < 32 && blink % 8 < 4,
-    displayedHp: age < FIRE_PUNCH_HP_DRAIN_FIRST_AGE
-      ? profile.startHp
-      : residualDrain > 0
-        ? Math.max(58, 75 - residualDrain)
-        : Math.max(
-            profile.endHp,
-            profile.startHp - (age - FIRE_PUNCH_HP_DRAIN_FIRST_AGE + 1),
-          ),
+    targetInvisible: blink >= 0 && blink < blinkTicks && blink % 8 < 4,
+    displayedHp:
+      profile.hpDrainFirstAge !== undefined
+        ? age < profile.hpDrainFirstAge
+          ? profile.startHp
+          : Math.max(
+              profile.endHp,
+              profile.startHp - (age - profile.hpDrainFirstAge + 1),
+            )
+        : age < FIRE_PUNCH_HP_DRAIN_FIRST_AGE
+          ? profile.startHp
+          : residualDrain > 0
+            ? Math.max(58, 75 - residualDrain)
+            : Math.max(
+                profile.endHp,
+                profile.startHp - (age - FIRE_PUNCH_HP_DRAIN_FIRST_AGE + 1),
+              ),
     battleHp:
       age >= FIRE_PUNCH_RESIDUAL_HP_COMMIT_AGE
         ? 58
@@ -379,7 +413,8 @@ export function firePunchResolutionState(
     healthboxStatus:
       profile.faint && age >= profile.faint.statusClearAge
         ? "none"
-        : profile.initialStatus === "burn" || age >= FIRE_PUNCH_BURN_BADGE_AGE
+        : profile.initialStatus === "burn"
+          || age >= (profile.healthboxStatusAge ?? FIRE_PUNCH_BURN_BADGE_AGE)
         ? "burn"
         : "none",
     currentMove: age >= currentMoveResetAge ? null : "FIRE_PUNCH",
@@ -426,6 +461,10 @@ const BURN_FLAME_VISIBLE_TICKS = 22;
 // StartAnimLinearTranslation stores an 8.8 delta:
 // ((200 - 152) << 8) / 20 = 614 after integer truncation.
 const BURN_FLAME_X_DELTA_FIXED8 = 614;
+// InitAnimLinearTranslation stores direction in the low bit. Moving left
+// therefore uses 614|1 = 615 before the unsigned accumulator shift.
+const BURN_FLAME_X_DELTA_LEFT_FIXED8 =
+  BURN_FLAME_X_DELTA_FIXED8 | 1;
 
 /**
  * Status_Burn's three `gBurnFlameSpriteTemplate` sprites. The source script
@@ -438,13 +477,19 @@ export function firePunchBurnFlames(
   geometry: FirePunchTargetGeometry = DEFAULT_FIRE_PUNCH_TARGET_GEOMETRY,
 ): BurnFlameParticle[] {
   const particles: BurnFlameParticle[] = [];
+  const direction = geometry.horizontalDirection ?? 1;
+  const xDelta = direction === -1
+    ? BURN_FLAME_X_DELTA_LEFT_FIXED8
+    : BURN_FLAME_X_DELTA_FIXED8;
+  const statusBase = geometry.statusBaseCenter;
   for (let i = BURN_FLAME_START_AGES.length - 1; i >= 0; i -= 1) {
     const n = age - BURN_FLAME_START_AGES[i]!;
     if (n < 0 || n >= BURN_FLAME_VISIBLE_TICKS) continue;
     particles.push({
-      x: geometry.center.x - 24
-        + ((BURN_FLAME_X_DELTA_FIXED8 * Math.min(n, 20)) >> 8),
-      y: geometry.center.y + 13,
+      x: (statusBase?.x ?? geometry.center.x) - direction * 24
+        + direction
+          * ((xDelta * Math.min(n, 20)) >> 8),
+      y: statusBase ? statusBase.y + 24 : geometry.center.y + 13,
       frame: (Math.floor((n + 1) / 4) % 5) as 0 | 1 | 2 | 3 | 4,
     });
   }

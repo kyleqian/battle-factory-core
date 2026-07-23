@@ -89,6 +89,7 @@ describe("composePlayerHealthbox (ISSUES #37 rung 5)", () => {
     hpbar: battleHealthbox.hpbar,
     hpbarAnim: battleHealthbox.hpbarAnim,
     expbar: battleHealthbox.expbar,
+    statusIcons: battleHealthbox.status,
     textPalette: battleHealthbox.singlesPlayer.palette,
   };
 
@@ -124,6 +125,41 @@ describe("composePlayerHealthbox (ISSUES #37 rung 5)", () => {
     });
     expect(magby.pixels).not.toEqual(onix.pixels);
     expect(magby.pixels.filter(Boolean).length).toBeGreaterThan(3000);
+  });
+
+  it("places battler-0 BRN at source tile 0x1A without moving the HP bar", () => {
+    const common = {
+      name: "ONIX",
+      level: 50,
+      gender: "male" as const,
+      hpFraction: 96 / 117,
+      currentHp: 96,
+      maxHp: 117,
+    };
+    const plain = composePlayerHealthbox(playerAssets, {
+      ...common,
+      status: "none",
+    });
+    const burned = composePlayerHealthbox(playerAssets, {
+      ...common,
+      status: "burn",
+    });
+    const changed: Array<{ x: number; y: number }> = [];
+    for (let y = 0; y < burned.height; y += 1) {
+      for (let x = 0; x < burned.width; x += 1) {
+        const i = y * burned.width + x;
+        if (JSON.stringify(plain.pixels[i]) !== JSON.stringify(burned.pixels[i])) {
+          changed.push({ x, y });
+        }
+      }
+    }
+    expect(changed).toHaveLength(113);
+    expect({
+      minX: Math.min(...changed.map(({ x }) => x)),
+      maxX: Math.max(...changed.map(({ x }) => x)),
+      minY: Math.min(...changed.map(({ y }) => y)),
+      maxY: Math.max(...changed.map(({ y }) => y)),
+    }).toEqual({ minX: 16, maxX: 35, minY: 24, maxY: 31 });
   });
 });
 

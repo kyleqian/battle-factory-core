@@ -222,7 +222,15 @@ function hpBarLocalTiles(
  * opaque) naturally clips that shared column in the bar's favor, with no new
  * z-order assumption needed.
  */
-const STATUS_ICON_DEST = { x: 8, y: 16 };
+const OPPONENT_STATUS_ICON_DEST = { x: 8, y: 16 };
+/**
+ * Singles-player `tileNumAdder = 0x1A` in
+ * `UpdateStatusIconInHealthbox`. The player healthbox's main sprite uses
+ * the same 8-tile row stride as the opponent, so tile 26 is local
+ * `(16,24)`. The opposite-side FIRE_PUNCH fixture independently pins the
+ * resulting screen box at x=142..165, y=96..103.
+ */
+const PLAYER_STATUS_ICON_DEST = { x: 16, y: 24 };
 
 /** Row order within `status2` (3 cols x 5 rows) - matches the enum order PSN,PRZ,SLP,FRZ,BRN (battle_interface.c:112-126). */
 const STATUS_ICON_ROWS: Record<Exclude<HealthboxContentParams["status"], "none">, number> = {
@@ -249,7 +257,8 @@ function expandGbaChannel(c5: number): number {
  * the runtime-substituted color). For the opponent healthbox, `battler` is
  * always 1 in a singles battle, so the dynamic slot is fixed at index 13.
  */
-const STATUS_ICON_DYNAMIC_PALETTE_INDEX = 13;
+const OPPONENT_STATUS_ICON_DYNAMIC_PALETTE_INDEX = 13;
+const PLAYER_STATUS_ICON_DYNAMIC_PALETTE_INDEX = 12;
 const STATUS_ICON_COLORS: Record<Exclude<HealthboxContentParams["status"], "none">, RgbColor> = {
   poison: { r: expandGbaChannel(24), g: expandGbaChannel(12), b: expandGbaChannel(24) },
   paralysis: { r: expandGbaChannel(23), g: expandGbaChannel(23), b: expandGbaChannel(3) },
@@ -258,19 +267,27 @@ const STATUS_ICON_COLORS: Record<Exclude<HealthboxContentParams["status"], "none
   burn: { r: expandGbaChannel(28), g: expandGbaChannel(14), b: expandGbaChannel(10) },
 };
 
-/** Draws the opponent's 3-tile status icon (see `STATUS_ICON_DEST`), substituting the status-specific color into the sheet's dynamic palette slot. */
-function drawStatusIcon(canvas: (RgbColor | null)[], canvasWidth: number, canvasHeight: number, sheet: SheetAsset, status: Exclude<HealthboxContentParams["status"], "none">): void {
+/** Draws a battler's 3-tile status icon, substituting its runtime color. */
+function drawStatusIcon(
+  canvas: (RgbColor | null)[],
+  canvasWidth: number,
+  canvasHeight: number,
+  sheet: SheetAsset,
+  status: Exclude<HealthboxContentParams["status"], "none">,
+  dest: Readonly<{ x: number; y: number }>,
+  dynamicPaletteIndex: number,
+): void {
   const row = STATUS_ICON_ROWS[status];
   const palette = sheet.palette.slice();
-  palette[STATUS_ICON_DYNAMIC_PALETTE_INDEX] = STATUS_ICON_COLORS[status];
+  palette[dynamicPaletteIndex] = STATUS_ICON_COLORS[status];
   for (let i = 0; i < 3; i += 1) {
     const tile = sheet.tileset.tiles[row * 3 + i]!;
     for (let y = 0; y < 8; y += 1) {
       for (let x = 0; x < 8; x += 1) {
         const idx = tile[y * 8 + x]!;
         if (idx === 0) continue;
-        const px = STATUS_ICON_DEST.x + i * 8 + x;
-        const py = STATUS_ICON_DEST.y + y;
+        const px = dest.x + i * 8 + x;
+        const py = dest.y + y;
         if (px < 0 || px >= canvasWidth || py < 0 || py >= canvasHeight) continue;
         canvas[py * canvasWidth + px] = palette[idx] ?? null;
       }
@@ -456,7 +473,15 @@ export function composeOpponentHealthbox(assets: HealthboxAssets, params: Health
   // with the bar's leftmost tile.
   drawTileset(canvas, width, height, assets.frame, 0, 0);
   if (params.status !== "none") {
-    drawStatusIcon(canvas, width, height, assets.statusIcons, params.status);
+    drawStatusIcon(
+      canvas,
+      width,
+      height,
+      assets.statusIcons,
+      params.status,
+      OPPONENT_STATUS_ICON_DEST,
+      OPPONENT_STATUS_ICON_DYNAMIC_PALETTE_INDEX,
+    );
   }
 
   // HP bar drawn on top of the frame layer (wherever the bar's own tiles
@@ -593,6 +618,8 @@ export interface PlayerHealthboxAssets extends PlayerHealthboxHpOverlayAssets {
   frame: SheetAsset;
   /** `battle-healthbox.json`'s 0px..8px EXP-bar tiles. */
   expbar: SheetAsset;
+  /** `battle-healthbox.json`'s battler-0 status sheet. */
+  statusIcons: SheetAsset;
 }
 
 /**
@@ -680,14 +707,25 @@ export function composePlayerHealthbox(
   if (!(params.currentHp >= 0 && params.currentHp <= params.maxHp) || params.maxHp <= 0) {
     throw new Error(`composePlayerHealthbox: invalid HP ${params.currentHp}/${params.maxHp}`);
   }
-  if (params.status !== "none") {
-    throw new Error(`composePlayerHealthbox: player status ${params.status} is not implemented`);
+  if (params.status !== "none" && !(params.status in STATUS_ICON_ROWS)) {
+    throw new Error(`composePlayerHealthbox: unknown status ${params.status}`);
   }
 
   const width = 128;
   const height = 64;
   const canvas: (RgbColor | null)[] = new Array(width * height).fill(null);
   drawTileset(canvas, width, height, assets.frame, 0, 0);
+  if (params.status !== "none") {
+    drawStatusIcon(
+      canvas,
+      width,
+      height,
+      assets.statusIcons,
+      params.status,
+      PLAYER_STATUS_ICON_DEST,
+      PLAYER_STATUS_ICON_DYNAMIC_PALETTE_INDEX,
+    );
+  }
 
   // `sHealthBar_Subsprites_Player`: two adjacent 32x8 pieces at canvas
   // x=32. The first two tiles are HP; the remaining six are the fill.

@@ -9,6 +9,26 @@
     "oracleFrame": 2313,
     "presentationAge": 0
   },
+  "geometry": {
+    "attacker": {
+      "species": "ONIX",
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    },
+    "target": {
+      "species": "GROVYLE",
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 12 },
+      "animationCenter": { "x": 176, "y": 44 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "presentation": {
+    "animationAgeOffset": 0,
+    "moveTextStartAge": -1
+  },
   "denseWindow": {
     "startFrame": 2313,
     "endFrame": 2537
@@ -16,8 +36,13 @@
   "profile": {
     "startHp": 143,
     "endHp": 112,
+    "initialStatus": "none",
     "hpCommitAge": 200,
     "secondaryRollAge": 205,
-    "secondaryRollSucceeded": false
+    "secondaryRollSucceeded": false,
+    "effectivenessMessage": {
+      "kind": "superEffective",
+      "textStartAge": 204
+    }
   }
 }
