@@ -225,12 +225,13 @@ compare run exposed the staleness.
   numeric pixel probes (which is what actually worked) over visual
   sheets entirely.
 
-## ram-probe.py's mGBA log spew goes to STDOUT, not stderr (2026-07-20)
+## mGBA probe log spew goes to STDOUT, not stderr (2026-07-20)
 
-- **What:** the generic probe's docstring phrasing suggests redirecting
-  stderr silences the mGBA BIOS/DMA trace spew; it actually lands on
-  stdout, so `2>log` still buries results under megabytes of log lines.
-- **Hits:** 7 sessions (the first hit twice within its session).
+- **What:** probe-script docstrings suggest redirecting stderr silences the
+  mGBA BIOS/DMA trace spew; it actually lands on stdout, so `2>log` still
+  buries results under megabytes of log lines. The latest
+  `dump-turn15-sendout.py` run also exited 139 after writing valid JSON.
+- **Hits:** 8 sessions (the first hit twice within its session).
 - **Cost each:** ~2-5 min.
 - **Workaround:** `>out 2>&1` and read the results FILE the probe
   writes (never parse stdout) — consistent with the ROADMAP recipe's
