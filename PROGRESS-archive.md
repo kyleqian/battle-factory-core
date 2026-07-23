@@ -1,3 +1,17 @@
+## 271 — Bounded worker (ISSUES #37 rung 1): **GREEN TRANSFER CHECKPOINT — raw field asset next**
+
+- **State:** safe baseline retained: canonical/delayed **192/200**; the same
+  seven party frames plus 20302/20332 remain. Tier-1 **1007/1007**, build
+  **5.32 MB**, verifier **17/17**, party compositor **5/5**.
+- **Did:** replaced the misleading 5-bit BLDY helper with source-pinned mGBA
+  expanded packed-RGB `_darken` semantics (tests pin white `16,15,15` and a
+  non-white BGR555 case); corrected the size-1 text-BG map capture to 0x1000.
+- **Next:** run direct 20302 probe, regenerate the compact indexed asset, wire
+  it only at the party send-out battle-fade boundary, then compare both traces.
+- **Notes:** Tier-1 PPU test and build green. The direct probe can validly
+  write JSON despite its expected mGBA teardown SIGSEGV.
+
+---
 ## 269 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — raw field asset still required**
 
 - **State:** restored and committed-green at the existing rung-1 checkpoint:

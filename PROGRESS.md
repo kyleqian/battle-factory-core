@@ -4,6 +4,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 274 — Bounded worker (ISSUES #37 rung 1): **CLOSED — raw split exit OBJ composition**
+
+- **State:** canonical and delayed dense party traces are both **200/200 exact**;
+  the 20302/20332 raw field boundary remains exact. Tier-1 **1009/1009**,
+  build green, SEND OUT verifier **17/17**, party compositor **5/5**.
+- **Did:** extracted 33 indexed OBJ tiles, raw BGR555 palette and transferred OAM
+  for exit status 1--2 / balls 6--9; erased those ownership pixels from only
+  exit chrome. Composed balls → live icons → status; the fade mask uses raw
+  transparency too, fixing the five status-backing pixels and ball palette family.
+- **Next:** #37 rung 2 only: battle fade + `Go! MAGBY!` text, after fresh dense
+  ground truth. Do not reopen rung 1.
+- **Notes:** Tier-1 pins lower-index-wins OBJ ordering. PAPERCUT: direct mGBA
+  probe emits megabytes of diagnostics, ~2 min.
+
+---
 ## 273 — Supervisor accepted (ISSUES #37 rung 1): **GREEN EVIDENCE CHECKPOINT — live OBJ transfer not yet safely wired**
 
 - **State:** independently verified accepted baseline: canonical/delayed party traces **193/200**; only
@@ -46,15 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   geometry resolved it to 0px without a coordinate patch.
 
 ---
-## 271 — Bounded worker (ISSUES #37 rung 1): **GREEN TRANSFER CHECKPOINT — raw field asset next**
-
-- **State:** safe baseline retained: canonical/delayed **192/200**; the same
-  seven party frames plus 20302/20332 remain. Tier-1 **1007/1007**, build
-  **5.32 MB**, verifier **17/17**, party compositor **5/5**.
-- **Did:** replaced the misleading 5-bit BLDY helper with source-pinned mGBA
-  expanded packed-RGB `_darken` semantics (tests pin white `16,15,15` and a
-  non-white BGR555 case); corrected the size-1 text-BG map capture to 0x1000.
-- **Next:** run direct 20302 probe, regenerate the compact indexed asset, wire
-  it only at the party send-out battle-fade boundary, then compare both traces.
-- **Notes:** Tier-1 PPU test and build green. The direct probe can validly
-  write JSON despite its expected mGBA teardown SIGSEGV.

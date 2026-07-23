@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
-import { mgbaColorFromBgr555, mgbaDarkenColor, drawMode0Ppu, type Mode0State } from "../src/engine/gbaPpu.ts";
+import { mgbaColorFromBgr555, mgbaDarkenColor, drawMode0Objects, drawMode0Ppu, type Mode0State } from "../src/engine/gbaPpu.ts";
 
 function b64(bytes: Uint8Array): string { return btoa(String.fromCharCode(...bytes)); }
 function stateFor(entries: number[], tilePixels: Record<number, number[]>): Mode0State {
@@ -44,5 +44,19 @@ describe("mode-0 raw tile compositor", () => {
     const fb = createFramebuffer(); drawMode0Ppu(fb, base);
     expect(pixel(fb, 7, 7)).toEqual([255, 0, 0]);
     expect(pixel(fb, 0, 0)).toEqual([0, 0, 0]);
+  });
+
+  it("keeps lower OAM indices in front at equal OBJ priority", () => {
+    const tiles = new Uint8Array(64); tiles[0] = 0x11; tiles[32] = 0x11;
+    const fb = createFramebuffer();
+    drawMode0Objects(fb, {
+      bldcnt: 0, bldy: 0,
+      paletteBgr555: Array.from({ length: 18 }, (_, i) => i === 16 ? [0, 31] : i === 17 ? [0, 31 << 5] : [0]),
+      // The first entry must win even though the renderer visits entry 1
+      // first, matching the GBA's lower-index OAM tie rule.
+      oam: [{ a0: 0, a1: 0, a2: 0 }, { a0: 0, a1: 0, a2: 0x1001 }],
+      objTileIds: [0, 1], objTilesB64: b64(tiles),
+    });
+    expect(pixel(fb, 0, 0)).toEqual([255, 0, 0]);
   });
 });

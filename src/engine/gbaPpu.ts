@@ -42,7 +42,8 @@ export function mgbaDarkenColor(color: number, bldy: number): number {
   }
   return out;
 }
-function color(state: Mode0State, bank: number, index: number, targetBit: number): [number, number, number] {
+type PaletteState = Pick<Mode0State, "bldcnt" | "bldy" | "paletteBgr555">;
+function color(state: PaletteState, bank: number, index: number, targetBit: number): [number, number, number] {
   let packed = mgbaColorFromBgr555(state.paletteBgr555[bank]?.[index] ?? 0);
   if (((state.bldcnt >>> 6) & 3) === 3 && (state.bldcnt & targetBit) !== 0) packed = mgbaDarkenColor(packed, state.bldy);
   return [packed & 0xff, (packed >>> 8) & 0xff, (packed >>> 16) & 0xff];
@@ -74,7 +75,8 @@ function objDimensions(a0: number, a1: number): [number, number] {
   const shape = (a0 >>> 14) & 3, size = (a1 >>> 14) & 3;
   return ([[[8, 8], [16, 16], [32, 32], [64, 64]], [[16, 8], [32, 8], [32, 16], [64, 32]], [[8, 16], [8, 32], [16, 32], [32, 64]]][shape]?.[size] ?? [0, 0]) as [number, number];
 }
-function drawObj(fb: Uint8Array, state: Mode0State, entry: Mode0Oam, tiles: Map<number, Uint8Array>): void {
+type ObjState = PaletteState;
+function drawObj(fb: Uint8Array, state: ObjState, entry: Mode0Oam, tiles: Map<number, Uint8Array>): void {
   const [w, h] = objDimensions(entry.a0, entry.a1);
   const affine = ((entry.a0 >>> 8) & 3) !== 0;
   let ox = entry.a1 & 0x1ff, oy = entry.a0 & 0xff;
@@ -98,14 +100,25 @@ function drawObj(fb: Uint8Array, state: Mode0State, entry: Mode0Oam, tiles: Map<
   }
 }
 
+/** Draw an OAM subset with the PPU's priority and lower-index tie order. */
+export function drawMode0Objects(fb: Uint8Array, state: Pick<Mode0State, "bldcnt" | "bldy" | "paletteBgr555" | "objTileIds" | "objTilesB64"> & { oam: Mode0Oam[] }): void {
+  const tileBytes = bytes(state.objTilesB64), tiles = new Map<number, Uint8Array>();
+  state.objTileIds.forEach((id, i) => tiles.set(id, tileBytes.subarray(i * 32, i * 32 + 32)));
+  for (let priority = 3; priority >= 0; priority -= 1) {
+    for (let i = state.oam.length - 1; i >= 0; i -= 1) if (((state.oam[i]!.a2 >>> 10) & 3) === priority) drawObj(fb, state, state.oam[i]!, tiles);
+  }
+}
+
 /** Draw a static mode-0 state, honoring text-BG priority, flips, OBJ OAM order and BLDY decrease. */
 export function drawMode0Ppu(fb: Uint8Array, state: Mode0State): void {
   const [r, g, b] = color(state, 0, 0, 0); fillFramebuffer(fb, r, g, b);
   const layers = state.bg.map((bg, index) => ({ bg, index, priority: bg.control & 3, chars: bytes(state.charBases[String((bg.control >>> 2) & 3)] ?? ""), map: bytes(bg.mapB64) }));
-  const tileBytes = bytes(state.objTilesB64), tiles = new Map<number, Uint8Array>();
-  state.objTileIds.forEach((id, i) => tiles.set(id, tileBytes.subarray(i * 32, i * 32 + 32)));
   for (let priority = 3; priority >= 0; priority -= 1) {
     for (const layer of [...layers].sort((a, b) => b.index - a.index)) if (layer.priority === priority) drawBg(fb, state, layer.index, layer.bg, layer.chars, layer.map);
+    // Object layers are composited after same-priority BGs.  Keep the OAM
+    // subset local here because full mode-0 rendering interleaves BG/OBJ.
+    const tileBytes = bytes(state.objTilesB64), tiles = new Map<number, Uint8Array>();
+    state.objTileIds.forEach((id, i) => tiles.set(id, tileBytes.subarray(i * 32, i * 32 + 32)));
     for (let i = state.oam.length - 1; i >= 0; i -= 1) if (((state.oam[i]!.a2 >>> 10) & 3) === priority) drawObj(fb, state, state.oam[i]!, tiles);
   }
 }

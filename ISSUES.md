@@ -7,12 +7,13 @@ symptom, what's confirmed from the reference/oracle, and any leads.
 
 ## #37 — Turn-15 forced party menu: post-confirm SEND OUT remains
 
-The press-relative entry fades and live icon compositor are now exact. Rung 1's
-first battle-field boundary is also exact: canonical/delayed traces are both
-**193/200**, including 20302/20332. The only rung-1 remainder is seven existing
-party residuals: 5px at 20248/50/58/60/62 and 273px at 20253/54 (delayed +30).
-Do not reopen the raw field transfer for those menu-owned pixels. The later
-post-SEND-OUT path remains split into rungs: (2) battle fade +
+**Rung 1 CLOSED 2026-07-22:** direct indexed exit OBJ composition now draws
+balls (OAM 6--9) before the live icons (3--5), then status (1--2), preserving
+same-priority lower-index wins and the existing press-relative OBJ fade. Both
+canonical/delayed dense party traces are **200/200 exact**, including
+20302/20332. The screenshot-derived status backing is no longer allowed to
+claim transparent pixels during the fade. Do not reopen this raw field/menu
+transfer. The remaining post-SEND-OUT path begins at rung (2): battle fade +
 Go! MAGBY text, (3) Brendan throw/closed ball, (4) clean open-particles +
 MAGBY materialize/tint, (5) create/populate/slide the 138/138 player
 healthbox, and (6) blank hold + re-anchored MAGBY action-menu bounce.
@@ -20,7 +21,7 @@ healthbox, and (6) blank hold + re-anchored MAGBY action-menu bounce.
 Reuse is explicit: parameterize the initial ONIX player-sendout helpers and
 turn-5's clean switch-in primitives; do **not** copy turn-13 Murkrow's
 species-specific wobble table. New data is only MAGBY's front asset/frame
-identity and any MAGBY-only wobble table. Start with rung 1 and verify the
+identity and any MAGBY-only wobble table. Start with rung 2 and verify the
 documented dense range before each subsequent rung. Do not use per-frame
 assets, absolute tick tables, or coordinate patches.
 

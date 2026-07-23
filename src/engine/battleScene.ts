@@ -534,12 +534,13 @@ import partyMenuChromeAsset from "../assets/gen/party-menu-chrome.json" with { t
 import partyMonIconsAsset from "../assets/gen/party-mon-icons.json" with { type: "json" };
 import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay.json" with { type: "json" };
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
+import partyExitObjAsset from "../assets/gen/turn15-party-exit-obj.json" with { type: "json" };
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
-import { drawMode0Ppu } from "./gbaPpu.ts";
+import { drawMode0Objects, drawMode0Ppu, type Mode0Oam } from "./gbaPpu.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
 import battle1GrovyleFaintRamDumpAsset from "../data/gen/battle1-grovyle-faint-ram-dump.json" with { type: "json" };
@@ -11587,6 +11588,8 @@ const partyMonIcons = partyMonIconsAsset as unknown as Record<string, PartyIconA
 type PartyStatusOverlay = { x: number; y: number; width: number; height: number; pixels: number[] };
 const partyMenuStatusOverlay = partyMenuStatusOverlayAsset as PartyStatusOverlay;
 const partyMenuStatusOverlayMagby = partyMenuStatusOverlayMagbyAsset as PartyStatusOverlay;
+type PartyExitObjAsset = { paletteBgr555: number[][]; oam: { balls: Mode0Oam[]; status: Mode0Oam[] }; objTileIds: number[]; objTilesB64: string };
+const partyExitObj = partyExitObjAsset as PartyExitObjAsset;
 
 function partyChromePixels(key: string): Uint8Array {
   const cached = partyChromeCache.get(key);
@@ -11632,6 +11635,19 @@ function drawTurn15PartyStatus(fb: Uint8Array, topOverlay: PartyStatusOverlay): 
  * before the settled list is ready we leave the scene black, and the open
  * debt is documented in ISSUES.md rather than hidden in a frame table.
  */
+function drawTurn15ExitObjSubset(fb: Uint8Array, oam: Mode0Oam[]): void {
+  drawMode0Objects(fb, {
+    // The party menu's normal fade mutates these OBJ banks.  These are the
+    // captured unfaded BGR555 values. The existing press-relative OBJ fade
+    // runs after this ordered composition, exactly as it does for live icons.
+    bldcnt: 0, bldy: 0,
+    paletteBgr555: partyExitObj.paletteBgr555,
+    oam,
+    objTileIds: partyExitObj.objTileIds,
+    objTilesB64: partyExitObj.objTilesB64,
+  });
+}
+
 function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   const layers = partyMenuLayers(state);
   const pixels = partyChromePixels(layers.chromeKey);
@@ -11639,8 +11655,20 @@ function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.
     const c = p * 3;
     fb[o] = pixels[c]!; fb[o + 1] = pixels[c + 1]!; fb[o + 2] = pixels[c + 2]!; fb[o + 3] = 255;
   }
+  const exitFading = state.sendOutElapsed !== null && partySendOutPhase(state.sendOutElapsed) === "fadingOut";
+  if (exitFading) {
+    // OAM entries 6-9 (balls) are behind the live icon entries 3-5.  Entry
+    // order is preserved inside the raw subset; do not collapse this into a
+    // post-icon object pass.
+    drawTurn15ExitObjSubset(fb, partyExitObj.oam.balls);
+  }
   for (const icon of layers.icons) drawTurn15PartyIcon(fb, icon);
-  drawTurn15PartyStatus(fb, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
+  if (exitFading) {
+    // Status entries 1-2 win the same-priority tie above every icon.
+    drawTurn15ExitObjSubset(fb, partyExitObj.oam.status);
+  } else {
+    drawTurn15PartyStatus(fb, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
+  }
 }
 
 /**
@@ -11687,16 +11715,27 @@ function drawPartyMenuSourceMask(mask: Uint8Array, encoded: string, width: numbe
 /** Live OBJ ownership for the party list (three icons plus two status OBJ instances). */
 function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   const layers = partyMenuLayers(state);
+  const exitFading = state.sendOutElapsed !== null && partySendOutPhase(state.sendOutElapsed) === "fadingOut";
   for (const icon of layers.icons) drawTurn15PartyIcon(mask, icon);
-  drawTurn15PartyStatus(mask, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
+  if (exitFading) {
+    // Match the split draw path's raw texel occupancy.  In particular, do
+    // not let the old status-overlay backing claim BG pixels during OBJ's
+    // alternating palette fade.
+    drawTurn15ExitObjSubset(mask, partyExitObj.oam.balls);
+    drawTurn15ExitObjSubset(mask, partyExitObj.oam.status);
+  } else {
+    drawTurn15PartyStatus(mask, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
+  }
   // Every party box owns a MenuPokeball OBJ.  Its open pose follows the
   // selected live party slot, including MAGBY during the SEND OUT exit; the
   // prior entry-only mask incorrectly left MAGBY's open-ball texels owned by
   // the BG palette on alternating fade VBlanks.
-  drawPartyMenuSourceMask(mask, layers.icons[0]!.selected ? PARTY_MENU_BALL_OPEN_MASK : PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 16, 34);
-  drawPartyMenuSourceMask(mask, layers.icons[1]!.selected ? PARTY_MENU_BALL_OPEN_MASK : PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 102, 25);
-  drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 102, 49);
-  drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 198, 148);
+  if (!exitFading) {
+    drawPartyMenuSourceMask(mask, layers.icons[0]!.selected ? PARTY_MENU_BALL_OPEN_MASK : PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 16, 34);
+    drawPartyMenuSourceMask(mask, layers.icons[1]!.selected ? PARTY_MENU_BALL_OPEN_MASK : PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 102, 25);
+    drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 102, 49);
+    drawPartyMenuSourceMask(mask, PARTY_MENU_BALL_CLOSED_MASK, 32, 32, 198, 148);
+  }
   drawPartyMenuSourceMask(mask, PARTY_MENU_FNT_MASK, 32, 8, 50, 52);
   drawPartyMenuSourceMask(mask, PARTY_MENU_HELD_ITEM_MASK, 8, 8, 108, 28);
   drawPartyMenuSourceMask(mask, PARTY_MENU_HELD_ITEM_MASK, 8, 8, 108, 52);

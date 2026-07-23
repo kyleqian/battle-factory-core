@@ -138,3 +138,19 @@ battle-fade boundary, replacing `fadeTurn15BattleFirstFrame`; no screenshot,
 fullscreen RGBA pixels, per-frame replay, trace-name branch or global tick is
 stored. Both party compares are now 193/200 with 20302/20332 exact; the seven
 remaining red frames are the menu-owned residuals recorded above.
+
+### Rung-1 exit OBJ closure (2026-07-22)
+
+The last seven menu-owned residual frames are closed without a framebuffer,
+coordinate patch, or tick table. A direct PPU dump over 20247--62 showed that
+the exit OAM is stable: status objects are entries 1--2, live party icons are
+3--5, and the four menu balls are 6--9. Equal-priority ties therefore require
+balls behind the existing live icon compositor and status in front (lower OAM
+index wins). `extract-turn15-party-exit-obj.ts` retains only their 33 indexed
+OBJ tiles, transferred attributes, and BGR555 palette source. Exit chrome
+erases precisely those raw opaque texels; its old status screenshot overlay is
+not used as an opacity source because it falsely claims five transparent
+backing pixels. The existing press-relative OBJ fade applies after the ordered
+raw composition. Canonical and delayed dense traces both finish **200/200**;
+Tier-1 is 1009/1009, verifier 17/17, and the independent normal-menu
+compositor remains 5/5.

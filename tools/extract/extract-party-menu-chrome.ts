@@ -46,6 +46,7 @@ import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
 import iconAsset from "../../src/assets/gen/party-mon-icons.json" with { type: "json" };
 import statusOverlayAsset from "../../src/assets/gen/party-menu-status-overlay.json" with { type: "json" };
 import magbyStatusOverlayAsset from "../../src/assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
+import partyExitObjAsset from "../../src/assets/gen/turn15-party-exit-obj.json" with { type: "json" };
 
 const trace = JSON.parse(readFileSync("tools/compare/traces-groundtruth/battle1-turn15-dense.json", "utf8")) as Trace;
 
@@ -72,6 +73,11 @@ type Overlay = { x: number; y: number; width: number; height: number; pixels: nu
 const icons = iconAsset as unknown as Record<string, IconAsset>;
 const statusOverlay = statusOverlayAsset as Overlay;
 const magbyStatusOverlay = magbyStatusOverlayAsset as Overlay;
+type RawExitOam = { index: number; a0: number; a1: number; a2: number; matrix: number[] | null };
+type RawExitObj = { oam: { balls: RawExitOam[]; status: RawExitOam[] }; objTileIds: number[]; objTilesB64: string };
+const partyExitObj = partyExitObjAsset as RawExitObj;
+const partyExitTiles = Buffer.from(partyExitObj.objTilesB64, "base64");
+const partyExitTileOffset = new Map(partyExitObj.objTileIds.map((id, index) => [id, index * 32]));
 
 /**
  * The persisted frame is deliberately icon-free.  We replace the opaque
@@ -182,6 +188,27 @@ function eraseStatus(rgba: Buffer, topOverlay: Overlay): void {
   }
 }
 
+function objDimensions(a0: number, a1: number): [number, number] {
+  const shape = (a0 >>> 14) & 3, size = (a1 >>> 14) & 3;
+  return ([[[8, 8], [16, 16], [32, 32], [64, 64]], [[16, 8], [32, 8], [32, 16], [64, 32]], [[8, 16], [8, 32], [16, 32], [32, 64]]][shape]?.[size] ?? [0, 0]) as [number, number];
+}
+
+/** Remove only raw OAM-owned texels from the two exit chrome bases. */
+function eraseExitObjects(rgba: Buffer, entries: RawExitOam[]): void {
+  for (const entry of entries) {
+    const [width, height] = objDimensions(entry.a0, entry.a1);
+    const baseTile = entry.a2 & 0x3ff, ox = entry.a1 & 0x1ff, oy = entry.a0 & 0xff;
+    const hFlip = (entry.a1 & 0x1000) !== 0, vFlip = (entry.a1 & 0x2000) !== 0;
+    for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+      const sx = hFlip ? width - 1 - x : x, sy = vFlip ? height - 1 - y : y;
+      const offset = partyExitTileOffset.get(baseTile + (sy >>> 3) * (width >>> 3) + (sx >>> 3));
+      const packed = offset === undefined ? 0 : partyExitTiles[offset + (sy & 7) * 4 + ((sx & 7) >>> 1)]!;
+      const index = (sx & 1) ? packed >>> 4 : packed & 15;
+      if (index !== 0) erasePixel(rgba, ox + x, oy + y);
+    }
+  }
+}
+
 function indexedFrame(rgba: Buffer): { palette: number[]; indices: string } {
   const palette: number[] = [];
   const indexByRgb = new Map<string, number>();
@@ -242,8 +269,15 @@ for (const [name, tick] of Object.entries(TICKS)) {
   const rgba = Buffer.from(need(tick).rgba);
   if (name === "sendOutExitFrame0") restoreFadedSourcePalette(rgba, 4, need(20252).rgba, 6);
   const layers = SOURCE_LAYERS[name as keyof typeof TICKS];
+  const rawExit = name === "sendOutExit" || name === "sendOutExitFrame0";
+  if (rawExit) {
+    eraseExitObjects(rgba, partyExitObj.oam.balls);
+    eraseExitObjects(rgba, partyExitObj.oam.status);
+  }
   for (const icon of layers.icons) eraseIcon(rgba, icon);
-  eraseStatus(rgba, layers.status);
+  // The old screenshot-derived status overlay marks its transparent backing
+  // opaque.  Exit chrome must retain that BG beneath the direct status OBJ.
+  if (!rawExit) eraseStatus(rgba, layers.status);
   frames[name] = { tick, width: 240, height: 160, iconFree: true, ...indexedFrame(rgba) };
 }
 
