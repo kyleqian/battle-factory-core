@@ -1,3 +1,24 @@
+## 289 — Bounded worker (S7 turn 16 rung 4): **GREEN — burn proc + BRN badge**
+
+- **State:** canonical `21406--21560` is **155/155 exact**, every tick
+  captured. Rung 3 is **236/236**, rung 2b **123/123**, rung 2a **221/221**,
+  rung 1 canonical/delayed **81/81** each, verifier **233/233**, Tier-1
+  **1037/1037**, and build (**5.455 MB**) pass.
+- **Did:** added local-age atomic HP/status/RNG/reset state, the source/RAM
+  three-flame burn animation, exact burned/residual-message handoff, and the
+  reusable opponent BRN compositor including `HEALTHBOX_GFX_0/65` end caps.
+  Committed dense `turn16-rung4.json`; closed and deleted ISSUE #16.
+- **Next:** resume S7 at canonical **21561** with the already-started burn-
+  residual message, then residual HP damage/turn-end. Do not reopen exact
+  turn-16 rungs 1--4; #38 remains parked.
+- **Notes:** implementation commit `f7a8629`; every-tick comparison corrected
+  the old dossier/verifier label: first burned-message `F` is 21453, while
+  21465 is only its cited partial-text SHA. No forbidden pixel/trace mechanism
+  or excluded capture. Supervisor independently reverified the dense window,
+  predecessor rung, verifier, full Tier-1 suite, and production build; the
+  factual ROADMAP status note and ISSUE #16 deletion are accepted.
+
+---
 ## 288 — Bounded worker (S7 turn 16 rung 3): **GREEN — complete FIRE_PUNCH cast**
 
 - **State:** canonical `21170--21405` is **236/236 exact**, every tick

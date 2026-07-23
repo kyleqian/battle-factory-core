@@ -446,3 +446,31 @@ checks PASS), `tools/probe/specs/turn17-faintsink-watch.json` (new RAM-watch
 spec, `ram-probe.py`, reused unmodified), and this doc's own §6 append. No
 existing committed file (turn13-16 notes/scripts, `battle-turn-notes.md`,
 `postwin-notes.md`, any `src/` file, any prior trace) was touched.
+
+## 7. Engine rung 2: repeated FAINT_ATTACK animation body
+
+Canonical renders **21854-22074** are implemented and committed in
+`turn17-rung2.json` at **221/221 exact**, every tick captured. Its input
+stream is prefix-identical to `turn17-rung1.json` for all 21,854 preceding
+frames and appends 221 input-free frames.
+
+The first owned render is confirmation age 0 at 21854. `Move_FAINT_ATTACK`
+then reuses the exact source-derived turn-16 composition: both `BG_DARK`
+fades, Murkrow's ellipse and alpha tasks, Magby's `ShakeMon2` response,
+the animation-1 hitsplat, and the existing live field renderer. The
+script's final restore write remains displayed for one VBlank after `end`,
+so age 220 at tick 22074 is the last animation-owned render; age 221 is
+outside this rung. Tier-1 tests pin both sides of that ownership boundary.
+
+The shared field compositor now takes the occurrence's target HP interval
+and explicit opponent healthbox state. Turn 17 therefore retains MAGBY at
+`79/138` throughout this animation body and composes MURKROW at `58/142`
+with the BRN badge, without duplicating any animation reducer. Post-hit
+wobble/blink, HP drain, move handoff, FIRE_PUNCH, and all later ticks remain
+unmodeled by this rung.
+
+Regression verdict: turn17 rung 1 **118/118**, turn16 rung 2a **221/221**,
+turn16 rung 5 **175/175**, turn16 verifier **233/233**, turn17 verifier all
+**245** checks, Tier-1 **1049/1049**, and production build **5.457 MB**.
+No absolute battle tick, framebuffer/screenshot asset, per-frame pixel/SHA
+table, trace branch, coordinate/RGB fitting, or excluded capture was added.

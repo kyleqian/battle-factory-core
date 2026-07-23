@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 292 — Bounded worker (S7 turn 17 rung 2): **GREEN — repeated FAINT_ATTACK body exact**
+
+- **State:** canonical `21854--22074` is **221/221 exact**, every tick
+  captured. Turn-17 rung 1 remains **118/118**; turn-16 rung 2a is
+  **221/221**, rung 5 **175/175**; verifiers pass **233/233** (turn 16)
+  and all **245** turn-17 checks; Tier-1 is **1049/1049** and build passes
+  (**5.457 MB**).
+- **Did:** reused the confirmation-relative FAINT_ATTACK BG_DARK fades,
+  Murkrow ellipse/alpha, Magby shake, hitsplat, and source field compositor;
+  parameterized MAGBY `79→27` and explicit MURKROW `58/142 BRN` state.
+  Pinned animation ownership ages `0..220` and committed dense
+  `turn17-rung2.json`.
+- **Next:** resume at **22075**, after the final animation-owned VBlank.
+  Post-hit wobble/blink, MAGBY HP drain/handoff, FIRE_PUNCH response,
+  faint/WIN flow, and later ticks remain untouched; #38 stays parked.
+- **Notes:** implementation commit `4dcdcaf`; no absolute battle tick,
+  framebuffer/screenshot asset, per-frame table, trace branch,
+  coordinate/RGB fitting, or excluded capture.
+
+---
 ## 291 — Bounded worker (S7 turn 17 rung 1): **GREEN — dispatch prefix exact**
 
 - **State:** canonical `21736--21853` is **118/118 exact**, every tick
@@ -47,24 +67,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   per-frame table, trace branch, fitted color/coordinate, or excluded capture.
   Supervisor independently reverified the dense tail, predecessor rung,
   verifier, full Tier-1 suite, and build; the ROADMAP status is accepted.
-
----
-## 289 — Bounded worker (S7 turn 16 rung 4): **GREEN — burn proc + BRN badge**
-
-- **State:** canonical `21406--21560` is **155/155 exact**, every tick
-  captured. Rung 3 is **236/236**, rung 2b **123/123**, rung 2a **221/221**,
-  rung 1 canonical/delayed **81/81** each, verifier **233/233**, Tier-1
-  **1037/1037**, and build (**5.455 MB**) pass.
-- **Did:** added local-age atomic HP/status/RNG/reset state, the source/RAM
-  three-flame burn animation, exact burned/residual-message handoff, and the
-  reusable opponent BRN compositor including `HEALTHBOX_GFX_0/65` end caps.
-  Committed dense `turn16-rung4.json`; closed and deleted ISSUE #16.
-- **Next:** resume S7 at canonical **21561** with the already-started burn-
-  residual message, then residual HP damage/turn-end. Do not reopen exact
-  turn-16 rungs 1--4; #38 remains parked.
-- **Notes:** implementation commit `f7a8629`; every-tick comparison corrected
-  the old dossier/verifier label: first burned-message `F` is 21453, while
-  21465 is only its cited partial-text SHA. No forbidden pixel/trace mechanism
-  or excluded capture. Supervisor independently reverified the dense window,
-  predecessor rung, verifier, full Tier-1 suite, and production build; the
-  factual ROADMAP status note and ISSUE #16 deletion are accepted.
