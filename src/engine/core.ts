@@ -132,6 +132,8 @@ import {
 import { activeMonMoveset, rentalMoveset } from "./battleSetup.ts";
 import {
   advancePostwin,
+  acceptPostwinContinuation,
+  acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
   INITIAL_POSTWIN_STATE,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
@@ -144,7 +146,14 @@ import {
   POSTWIN_NEXT_LINE1,
   POSTWIN_NEXT_LINE2,
   POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
+  POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY,
+  POSTWIN_DIALOGUE_BLANK_DELAY,
+  POSTWIN_SCOUTING_LINES,
+  POSTWIN_SWAP_MENU_VISIBLE_DELAY,
   POSTWIN_IN_BATTLE_CLEAR_AGE,
+  postwinDialogueDelay,
+  postwinDialogueInputReady,
+  postwinDialogueVisibleChars,
   postwinHealVisibleChars,
   movePostwinContinuationCursor,
   postwinContinuationInputReady,
@@ -237,11 +246,24 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         nextPostwin = movePostwinContinuationCursor(nextPostwin, 1);
       } else if (newAndRepeatedKeys.has("UP")) {
         nextPostwin = movePostwinContinuationCursor(nextPostwin, -1);
+      } else if (newKeys.has("A")) {
+        nextPostwin = acceptPostwinContinuation(nextPostwin);
       }
+    }
+    if (
+      nextPostwin.dialoguePage >= 1 &&
+      nextPostwin.dialoguePage <= 3 &&
+      postwinDialogueInputReady(nextPostwin) &&
+      newKeys.has("A")
+    ) {
+      nextPostwin = acceptPostwinDialoguePage(nextPostwin);
     }
     // The generic VBlank call above already supplied one step after the
     // mode has resumed. Before the clear tick it supplied none.
-    const totalSteps = postwinRngSteps(nextPostwin.elapsed);
+    const totalSteps = postwinRngSteps(
+      nextPostwin.elapsed,
+      nextPostwin.continuationConfirmElapsed,
+    );
     const alreadyAdvanced = rngMode === "vblank" ? 1 : 0;
     for (let i = alreadyAdvanced; i < totalSteps; i += 1) {
       rngValue = advanceRngValue(rngValue);
@@ -1296,15 +1318,11 @@ function renderPostwinState(state: EngineState): Uint8Array {
   if (age >= POSTWIN_HEAL_BOX_AGE) {
     drawMessageBoxFrame(fb);
     const healDismiss = postwin.healDismissElapsed;
-    const showingHeal =
+    const beforeContinuation =
       healDismiss === null ||
       age < healDismiss + POSTWIN_NEXT_BOX_CLEAR_DELAY;
-    const chars = showingHeal
-      ? postwinHealVisibleChars(age)
-      : postwinNextVisibleChars(postwin);
-    if (chars > 0) {
-      const line1 = showingHeal ? POSTWIN_HEAL_LINE1 : POSTWIN_NEXT_LINE1;
-      const line2 = showingHeal ? POSTWIN_HEAL_LINE2 : POSTWIN_NEXT_LINE2;
+    const drawLines = (line1: string, line2: string, chars: number): void => {
+      if (chars <= 0) return;
       drawMessageBoxText(
         fb,
         line1.slice(0, Math.min(chars, line1.length)),
@@ -1319,10 +1337,55 @@ function renderPostwinState(state: EngineState): Uint8Array {
           137,
         );
       }
+    };
+
+    if (beforeContinuation) {
+      drawLines(
+        POSTWIN_HEAL_LINE1,
+        POSTWIN_HEAL_LINE2,
+        postwinHealVisibleChars(age),
+      );
+    } else if (postwin.dialoguePage === 0) {
+      drawLines(
+        POSTWIN_NEXT_LINE1,
+        POSTWIN_NEXT_LINE2,
+        postwinNextVisibleChars(postwin),
+      );
+    } else {
+      const delay = postwinDialogueDelay(postwin)!;
+      if (delay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
+        if (postwin.dialoguePage === 1) {
+          drawLines(
+            POSTWIN_NEXT_LINE1,
+            POSTWIN_NEXT_LINE2,
+            POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length,
+          );
+        } else {
+          const previous = POSTWIN_SCOUTING_LINES[postwin.dialoguePage - 2]!;
+          drawLines(
+            previous[0],
+            previous[1],
+            previous[0].length + previous[1].length,
+          );
+        }
+      } else if (delay !== POSTWIN_DIALOGUE_BLANK_DELAY) {
+        const lines = POSTWIN_SCOUTING_LINES[postwin.dialoguePage - 1]!;
+        drawLines(
+          lines[0],
+          lines[1],
+          postwinDialogueVisibleChars(postwin),
+        );
+      }
     }
+
+    const dialogueDelay = postwinDialogueDelay(postwin);
     if (
       healDismiss !== null &&
-      age >= healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY
+      age >= healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY &&
+      (
+        postwin.dialoguePage === 0 ||
+        (postwin.dialoguePage === 1 && dialogueDelay === 0)
+      )
     ) {
       drawStandardWindowFrame(fb, 152, 32, 6, 8);
       const choices = ["GO ON", "RECORD", "REST", "RETIRE"];
@@ -1334,6 +1397,21 @@ function renderPostwinState(state: EngineState): Uint8Array {
         "▶",
         160,
         41 + (postwin.continuationCursorPos ?? 0) * 16,
+      );
+    }
+    if (
+      postwin.dialoguePage === 4 &&
+      dialogueDelay !== null &&
+      dialogueDelay >= POSTWIN_SWAP_MENU_VISIBLE_DELAY
+    ) {
+      drawStandardWindowFrame(fb, 160, 64, 5, 4);
+      drawStandardWindowText(fb, "YES", 176, 73);
+      drawStandardWindowText(fb, "NO", 176, 89);
+      drawStandardWindowText(
+        fb,
+        "▶",
+        168,
+        73 + (postwin.swapCursorPos ?? 0) * 16,
       );
     }
   }

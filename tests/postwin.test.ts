@@ -14,6 +14,8 @@ import { advanceRngValue } from "../src/engine/rng.ts";
 import { opponentSetupExtraRngSteps } from "../src/engine/battleRoom.ts";
 import {
   advancePostwin,
+  acceptPostwinContinuation,
+  acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
   INITIAL_POSTWIN_STATE,
   POSTWIN_BATTLE_BLACK_AGE,
@@ -34,10 +36,15 @@ import {
   POSTWIN_NEXT_TEXT_SETTLED_DELAY,
   POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
   POSTWIN_CONTINUATION_INPUT_READY_DELAY,
+  POSTWIN_SCOUTING_INPUT_READY_DELAYS,
+  POSTWIN_SWAP_INPUT_READY_DELAY,
+  POSTWIN_SWAP_MENU_VISIBLE_DELAY,
   POSTWIN_SECOND_BLACK_AGE,
   postwinHealInputReady,
   postwinHealVisibleChars,
   postwinContinuationInputReady,
+  postwinDialogueInputReady,
+  postwinDialogueVisibleChars,
   postwinNextVisibleChars,
   postwinPhase,
   postwinRngSteps,
@@ -273,5 +280,109 @@ describe("S8 Battle-1 postwin transition", () => {
       continuationCursorPos: null,
     });
     expect(menuShown.continuationCursorPos).toBe(0);
+  });
+
+  it("accepts GO ON only at the stored menu edge, including arbitrary delayed confirmation", () => {
+    const healEdge = 2_000;
+    const ready = healEdge + POSTWIN_CONTINUATION_INPUT_READY_DELAY;
+    const menuState = {
+      ...INITIAL_POSTWIN_STATE,
+      elapsed: ready - 1,
+      healDismissElapsed: healEdge,
+      continuationCursorPos: 0 as const,
+    };
+    expect(acceptPostwinContinuation(menuState)).toBe(menuState);
+
+    const accepted = tick({
+      ...createInitialState(),
+      postwin: menuState,
+    }, new Set(["A"])).postwin!;
+    expect(accepted.elapsed).toBe(ready);
+    expect(accepted.continuationConfirmElapsed).toBe(ready);
+    expect(accepted.dialoguePage).toBe(1);
+    expect(accepted.dialoguePageEdgeElapsed).toBe(ready);
+
+    const delayedReady = ready + 500;
+    const delayed = tick({
+      ...createInitialState(),
+      postwin: {
+        ...menuState,
+        elapsed: delayedReady - 1,
+      },
+    }, new Set(["A"])).postwin!;
+    expect(delayed.continuationConfirmElapsed).toBe(delayedReady);
+    expect(delayed.dialoguePageEdgeElapsed).toBe(delayedReady);
+  });
+
+  it("pins each scouting page's final-glyph handoff and true A boundary relative to its own stored edge", () => {
+    for (let page = 1; page <= 3; page += 1) {
+      const edge = 10_000 + page * 1_000;
+      const readyDelay = POSTWIN_SCOUTING_INPUT_READY_DELAYS[page - 1]!;
+      const at = (delay: number) => ({
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: edge + delay,
+        continuationConfirmElapsed: page === 1 ? edge : edge - 500,
+        dialoguePage: page as 1 | 2 | 3,
+        dialoguePageEdgeElapsed: edge,
+      });
+      expect(postwinDialogueVisibleChars(at(3))).toBe(0);
+      expect(postwinDialogueVisibleChars(at(4))).toBe(1);
+      expect(postwinDialogueInputReady(at(readyDelay - 1))).toBe(false);
+      expect(acceptPostwinDialoguePage(at(readyDelay - 1)))
+        .toEqual(at(readyDelay - 1));
+      expect(postwinDialogueInputReady(at(readyDelay))).toBe(true);
+      const accepted = acceptPostwinDialoguePage(at(readyDelay));
+      expect(accepted.dialoguePage).toBe(page + 1);
+      expect(accepted.dialoguePageEdgeElapsed).toBe(edge + readyDelay);
+    }
+  });
+
+  it("separates swap-offer menu visibility from its later input-ready boundary", () => {
+    const edge = 20_000;
+    const at = (delay: number) => ({
+      ...INITIAL_POSTWIN_STATE,
+      elapsed: edge + delay,
+      continuationConfirmElapsed: edge - 1_000,
+      dialoguePage: 4 as const,
+      dialoguePageEdgeElapsed: edge,
+      swapCursorPos: null,
+    });
+    expect(POSTWIN_SWAP_MENU_VISIBLE_DELAY).toBe(66);
+    expect(POSTWIN_SWAP_INPUT_READY_DELAY).toBe(70);
+    expect(postwinDialogueInputReady(at(POSTWIN_SWAP_MENU_VISIBLE_DELAY)))
+      .toBe(false);
+    expect(postwinDialogueInputReady(at(POSTWIN_SWAP_INPUT_READY_DELAY - 1)))
+      .toBe(false);
+    expect(postwinDialogueInputReady(at(POSTWIN_SWAP_INPUT_READY_DELAY)))
+      .toBe(true);
+    const visible = advancePostwin(at(POSTWIN_SWAP_MENU_VISIBLE_DELAY - 1));
+    expect(visible.swapCursorPos).toBe(0);
+  });
+
+  it("keeps VBlank ownership and applies the GO ON source burst relative to the accepted edge", () => {
+    const edge = 10_000;
+    expect(postwinRngSteps(edge, edge)).toBe(1);
+    expect(postwinRngSteps(edge + 1, edge)).toBe(5);
+    expect(postwinRngSteps(edge + 2, edge)).toBe(1);
+
+    const seed = 0x91a2b3c4;
+    const next = tick({
+      ...createInitialState(),
+      rngMode: "vblank",
+      rngValue: seed,
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: edge,
+        healDismissElapsed: 1,
+        continuationCursorPos: 0,
+        continuationConfirmElapsed: edge,
+        dialoguePage: 1,
+        dialoguePageEdgeElapsed: edge,
+      },
+    }, new Set());
+    let expected = seed;
+    for (let i = 0; i < 5; i += 1) expected = advanceRngValue(expected);
+    expect(next.rngMode).toBe("vblank");
+    expect(next.rngValue).toBe(expected);
   });
 });

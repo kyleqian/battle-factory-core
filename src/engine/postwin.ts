@@ -23,6 +23,14 @@ export interface PostwinState {
   playerPartyHp: readonly [number, number, number];
   /** MULTI_GO_ON_RECORD_REST_RETIRE cursor; null until the menu exists. */
   continuationCursorPos: 0 | 1 | 2 | 3 | null;
+  /** Accepted GO ON edge; every following dialogue clock is edge-relative. */
+  continuationConfirmElapsed: number | null;
+  /** 0 = continuation menu, 1..3 = scouting pages, 4 = swap offer. */
+  dialoguePage: 0 | 1 | 2 | 3 | 4;
+  /** Accepted edge which opened the current dialogue page. */
+  dialoguePageEdgeElapsed: number | null;
+  /** MSGBOX_YESNO cursor; null until the swap menu is visibly created. */
+  swapCursorPos: 0 | 1 | null;
 }
 
 export const INITIAL_POSTWIN_STATE: PostwinState = {
@@ -32,6 +40,10 @@ export const INITIAL_POSTWIN_STATE: PostwinState = {
   healDismissElapsed: null,
   playerPartyHp: [0, 27, 153],
   continuationCursorPos: null,
+  continuationConfirmElapsed: null,
+  dialoguePage: 0,
+  dialoguePageEdgeElapsed: null,
+  swapCursorPos: null,
 };
 
 /** gMain.inBattle clears and outside-battle VBlank RNG resumes at dismiss+43. */
@@ -70,6 +82,33 @@ export const POSTWIN_NEXT_LINE2 = "Are you ready?";
 export const POSTWIN_NEXT_TEXT_TOTAL =
   POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length;
 
+export const POSTWIN_DIALOGUE_TEXT_FIRST_DELAY = 4;
+export const POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY = 2;
+export const POSTWIN_DIALOGUE_BLANK_DELAY = 3;
+export const POSTWIN_SCOUTING_LINES = [
+  [
+    "I’ve conducted a little investigation",
+    "about your upcoming opponent.",
+  ],
+  [
+    "The TRAINER appears to have no clear",
+    "favorites when it comes to type.",
+  ],
+  [
+    "The favorite battle style appears",
+    "to be weakening the foe to start.",
+  ],
+  [
+    "Before starting the battle, would you",
+    "like to swap a POKéMON?",
+  ],
+] as const;
+/** MSGBOX_DEFAULT: final glyph plus the source's three-frame WAIT handoff. */
+export const POSTWIN_SCOUTING_INPUT_READY_DELAYS = [72, 74, 72] as const;
+/** MSGBOX_YESNO: text settles at +63, menu copies at +66, accepts at +70. */
+export const POSTWIN_SWAP_MENU_VISIBLE_DELAY = 66;
+export const POSTWIN_SWAP_INPUT_READY_DELAY = 70;
+
 // Exact write ages are filled by the dense RAM audit accompanying this
 // slice. They remain relative state boundaries, never canonical ticks.
 export const POSTWIN_CHALLENGE_BATTLE_WRITE_AGE = 79;
@@ -87,13 +126,22 @@ export function postwinPhase(age: number): PostwinPhase {
 }
 
 /** Number of LCG calls made while advancing into this relative age. */
-export function postwinRngSteps(age: number): number {
+export function postwinRngSteps(
+  age: number,
+  continuationConfirmElapsed: number | null = null,
+): number {
   if (age < POSTWIN_IN_BATTLE_CLEAR_AGE) return 0;
   // Baseline outside-battle VBlank call plus source-observed transition
   // bursts at 23645/23647/23648 and 23707/23708.
   if (age === 43 || age === 45) return 2;
   if (age === 46 || age === 105) return 3;
   if (age === 106) return 4;
+  // `factory_getopponentintro`'s four on-demand draws occur one tick after
+  // GO ON, on top of the ordinary outside-battle VBlank call.
+  if (
+    continuationConfirmElapsed !== null &&
+    age === continuationConfirmElapsed + 1
+  ) return 5;
   return 1;
 }
 
@@ -117,6 +165,10 @@ export function advancePostwin(state: PostwinState): PostwinState {
   const menuVisible =
     state.healDismissElapsed !== null &&
     elapsed >= state.healDismissElapsed + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY;
+  const swapMenuVisible =
+    state.dialoguePage === 4 &&
+    state.dialoguePageEdgeElapsed !== null &&
+    elapsed >= state.dialoguePageEdgeElapsed + POSTWIN_SWAP_MENU_VISIBLE_DELAY;
   return {
     elapsed,
     challengeBattleNum:
@@ -131,6 +183,13 @@ export function advancePostwin(state: PostwinState): PostwinState {
       menuVisible && state.continuationCursorPos === null
         ? 0
         : state.continuationCursorPos,
+    continuationConfirmElapsed: state.continuationConfirmElapsed,
+    dialoguePage: state.dialoguePage,
+    dialoguePageEdgeElapsed: state.dialoguePageEdgeElapsed,
+    swapCursorPos:
+      swapMenuVisible && state.swapCursorPos === null
+        ? 0
+        : state.swapCursorPos,
   };
 }
 
@@ -168,5 +227,63 @@ export function movePostwinContinuationCursor(
     ...state,
     continuationCursorPos:
       ((state.continuationCursorPos + direction + 4) % 4) as 0 | 1 | 2 | 3,
+  };
+}
+
+export function acceptPostwinContinuation(
+  state: PostwinState,
+): PostwinState {
+  if (
+    state.dialoguePage !== 0 ||
+    state.continuationConfirmElapsed !== null ||
+    state.continuationCursorPos !== 0 ||
+    !postwinContinuationInputReady(state)
+  ) return state;
+  return {
+    ...state,
+    continuationConfirmElapsed: state.elapsed,
+    dialoguePage: 1,
+    dialoguePageEdgeElapsed: state.elapsed,
+  };
+}
+
+export function postwinDialogueDelay(state: PostwinState): number | null {
+  return state.dialoguePageEdgeElapsed === null
+    ? null
+    : state.elapsed - state.dialoguePageEdgeElapsed;
+}
+
+export function postwinDialogueVisibleChars(state: PostwinState): number {
+  const delay = postwinDialogueDelay(state);
+  if (delay === null || delay < POSTWIN_DIALOGUE_TEXT_FIRST_DELAY) return 0;
+  const lines = POSTWIN_SCOUTING_LINES[state.dialoguePage - 1];
+  if (!lines) return 0;
+  return Math.min(
+    lines[0].length + lines[1].length,
+    delay - POSTWIN_DIALOGUE_TEXT_FIRST_DELAY + 1,
+  );
+}
+
+export function postwinDialogueInputReady(state: PostwinState): boolean {
+  const delay = postwinDialogueDelay(state);
+  if (delay === null) return false;
+  if (state.dialoguePage >= 1 && state.dialoguePage <= 3) {
+    return delay >= POSTWIN_SCOUTING_INPUT_READY_DELAYS[state.dialoguePage - 1]!;
+  }
+  if (state.dialoguePage === 4) return delay >= POSTWIN_SWAP_INPUT_READY_DELAY;
+  return false;
+}
+
+export function acceptPostwinDialoguePage(state: PostwinState): PostwinState {
+  if (
+    state.dialoguePage < 1 ||
+    state.dialoguePage > 3 ||
+    !postwinDialogueInputReady(state)
+  ) return state;
+  return {
+    ...state,
+    dialoguePage: (state.dialoguePage + 1) as 2 | 3 | 4,
+    dialoguePageEdgeElapsed: state.elapsed,
+    swapCursorPos: null,
   };
 }
