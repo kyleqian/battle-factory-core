@@ -496,6 +496,7 @@ import {
   TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY,
   TURN7_ROCKSLIDE_MENU_REDRAW_DELAY,
   turn7RockSlideResettledBounceTick,
+  GBA_SINE_TABLE_256,
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import type { ActiveMonMoveset } from "./battleSetup.ts";
@@ -546,6 +547,7 @@ import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
+import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_START_OFFSET } from "./kabutoSendOut.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
@@ -760,6 +762,8 @@ const ballDisplay = ballDisplayAsset as BallDisplayAsset;
 const downArrow = downArrowAsset as DownArrowAsset;
 const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAsset }).ballStatusBar;
 const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
+const kabutoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).KABUTO!;
+const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
@@ -830,6 +834,21 @@ const opponentHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAsset
   level: anchorOpponentBattler.level,
   gender: ANCHOR_OPPONENT_GENDER,
   hpFraction: anchorOpponentBattler.hp / anchorOpponentBattler.maxHP,
+  status: "none",
+});
+export const KABUTO_SENDOUT_BATTLER = {
+  species: 140,
+  name: "KABUTO",
+  level: 50,
+  hp: 91,
+  maxHP: 91,
+  gender: "male" as const,
+};
+const kabutoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
+  name: KABUTO_SENDOUT_BATTLER.name,
+  level: KABUTO_SENDOUT_BATTLER.level,
+  gender: KABUTO_SENDOUT_BATTLER.gender,
+  hpFraction: KABUTO_SENDOUT_BATTLER.hp / KABUTO_SENDOUT_BATTLER.maxHP,
   status: "none",
 });
 
@@ -1749,16 +1768,13 @@ export function battleSendOutEncounterParams(
   const line2 = encounter === "jenson" ? "out KABUTO!" : "out GROVYLE!";
   return { line1, line2, textTotal: line1.length + line2.length };
 }
-const SENDOUT_LINE1 = "BUG CATCHER DESTIN sent";
-const SENDOUT_LINE2 = "out GROVYLE!";
-const SENDOUT_TEXT_TOTAL = SENDOUT_LINE1.length + SENDOUT_LINE2.length;
 /** §7.4: 3-tick lag from text-complete to the post-text handoff (trainer-pic exit / ball spawn / party-summary despawn all start the same tick). */
 const SENDOUT_HANDOFF_LAG = 3;
 
 function sendOutTextStartTick(pressTick: number): number {
   return pressTick + SENDOUT_TEXT_LAG;
 }
-function sendOutHandoffTick(
+export function sendOutHandoffTick(
   pressTick: number,
   encounter: BattleSceneState["encounter"] = "destin",
 ): number {
@@ -1873,15 +1889,18 @@ const GROVYLE_CORNER = { x: 144, y: 12 };
 const HEALTHBOX_SLIDE_START_TICK = 1495;
 const HEALTHBOX_SLIDE_START_DX = -110;
 const HEALTHBOX_SLIDE_STEP = 5;
-const HEALTHBOX_SLIDE_SETTLE_TICK = 1517;
-/** 23-step linear slide span (settle - start), same shape at any anchor - docs/faint-switch-notes.md §8e re-confirmed this identical shape (same step count/size) for Pidgeotto's own switch-in slide-in, just anchored 6828 instead of 1495 (`TURN5_PIDGEOTTO_SETTLE_TICK`). */
-const HEALTHBOX_SLIDE_SPAN = HEALTHBOX_SLIDE_SETTLE_TICK - HEALTHBOX_SLIDE_START_TICK;
-
 /** Opponent healthbox's content-image x offset (added to its extracted `x`) at trace tick `t`, or `null` before it's created (`startTick`, default `HEALTHBOX_SLIDE_START_TICK` for S6's own send-out). */
-function healthboxSlideDx(t: number, startTick: number = HEALTHBOX_SLIDE_START_TICK): number | null {
+export function healthboxSlideDx(
+  t: number,
+  startTick: number = HEALTHBOX_SLIDE_START_TICK,
+  startDx: number = HEALTHBOX_SLIDE_START_DX,
+  initialHold: boolean = false,
+): number | null {
   if (t < startTick) return null;
-  if (t >= startTick + HEALTHBOX_SLIDE_SPAN) return 0;
-  return HEALTHBOX_SLIDE_START_DX + HEALTHBOX_SLIDE_STEP * (t - startTick);
+  const span = Math.abs(startDx) / HEALTHBOX_SLIDE_STEP;
+  const age = Math.max(0, t - startTick - (initialHold ? 1 : 0));
+  if (age >= span) return 0;
+  return startDx + HEALTHBOX_SLIDE_STEP * age;
 }
 
 /**
@@ -2474,6 +2493,23 @@ function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number):
   drawSpriteSheetAffineTinted(fb, grovyleFrontSprite.tileset, GROVYLE_CORNER.x, GROVYLE_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, y2);
 }
 
+function drawKabutoMaterialize(fb: Uint8Array, t: number, handoffTick: number): void {
+  const et = t - handoffTick;
+  if (et < MATERIALIZE_START_OFFSET || et >= KABUTO_FRONT_ANIM_START_OFFSET) return;
+  const local = et - MATERIALIZE_START_OFFSET;
+  const accumulator = affineEmergeAccumulator(local + 1);
+  const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
+  drawSpriteSheetAffineTinted(
+    fb,
+    kabutoFrontSprite.tileset,
+    KABUTO_CORNER.x,
+    KABUTO_CORNER.y,
+    accumulator,
+    MATERIALIZE_TINT_COLOR,
+    y2,
+  );
+}
+
 /**
  * PLAYER-side materialize (docs/battle-menu-notes.md §3 item 5 /
  * docs/battle-anim-assets.md §5) - ONIX's own `SpriteCB_ReleaseMonFromBall`
@@ -3046,6 +3082,8 @@ export function drawSpriteSheetAffineRotate(
   pd: number,
   clipBottom?: number,
   doubleSizeBox: boolean = true,
+  tintColor?: RgbColor,
+  tintCoeff: number = 0,
 ): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
@@ -3067,7 +3105,14 @@ export function drawSpriteSheetAffineRotate(
       if (idx === 0) continue;
       const c = palette[idx];
       if (!c) continue;
-      setPixel(fb, centerX + dx, centerY + dy, c);
+      const color = tintColor && tintCoeff > 0
+        ? {
+            r: blendComponentToward(c.r, tintColor.r, tintCoeff),
+            g: blendComponentToward(c.g, tintColor.g, tintCoeff),
+            b: blendComponentToward(c.b, tintColor.b, tintCoeff),
+          }
+        : c;
+      setPixel(fb, centerX + dx, centerY + dy, color);
     }
   }
 }
@@ -3127,6 +3172,37 @@ function drawGrovyleStretchEarly(fb: Uint8Array, t: number, handoffTick: number)
     entry.y2,
     MATERIALIZE_TINT_COLOR,
     16,
+  );
+}
+
+function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number): void {
+  const et = t - handoffTick;
+  const wobble = kabutoHSlideWobble(et);
+  if (!wobble.active) return;
+  const angle = wobble.rotation;
+  const angleIndex = (angle >> 8) & 0xff;
+  const matrixSin = GBA_SINE_TABLE_256[angleIndex]!;
+  const matrixCos = GBA_SINE_TABLE_256[(angleIndex + 64) & 0xff]!;
+  const pa = matrixCos;
+  const pb = -matrixSin;
+  const pc = matrixSin;
+  const pd = matrixCos;
+  const tileset = wobble.frame === 0 ? kabutoFrontSprite.tileset : kabutoFrontSprite.frame2;
+  const tintCoeff = et < MATERIALIZE_END_OFFSET ? 16 : Math.max(0, 57 - et);
+  drawSpriteSheetAffineRotate(
+    fb,
+    tileset,
+    kabutoFrontSprite.palette,
+    KABUTO_CORNER.x + 32 + wobble.x2,
+    KABUTO_CORNER.y + 32,
+    pa,
+    pb,
+    pc,
+    pd,
+    undefined,
+    true,
+    MATERIALIZE_TINT_COLOR,
+    tintCoeff,
   );
 }
 
@@ -3239,7 +3315,7 @@ const PARTICLE_LATE_SPAWN_START_INDEX = 14;
 /** `Sin(index, amplitude)` (`trig.c:515-517`): `gSineTable` is a 256-entry (period) Q8.8 sine table, `(amplitude * gSineTable[index]) >> 8` - reproduced via `Math.sin` at the same Q8.8 rounding rather than a literal 256-entry copy (this mechanism doesn't gate any full-frame match, see the module doc above). */
 function gbaSin(index: number, amplitude: number): number {
   const i = ((index % 256) + 256) % 256;
-  const q88 = Math.round(Math.sin((i * Math.PI) / 128) * 256);
+  const q88 = GBA_SINE_TABLE_256[i]!;
   return (amplitude * q88) >> 8;
 }
 /** `Cos(index, amplitude) = Sin(index + 64, amplitude)` (`trig.c:521-523`). */
@@ -3290,8 +3366,17 @@ export const PARTICLE_OAM_SUBPRIORITY = 28;
  * was curve-fitting for its own narrow radius~0 window; this generalizes it
  * to every tick instead of just that one.
  */
-export function sortAliveParticlesByScreenY(alive: readonly AliveParticle[]): AliveParticle[] {
-  return alive.slice().sort((a, b) => a.dy - b.dy || b.i - a.i);
+export function sortAliveParticlesByScreenY(
+  alive: readonly AliveParticle[],
+  persistentTieWinner14: boolean = false,
+): AliveParticle[] {
+  return alive.slice().sort((a, b) => {
+    if (a.dy !== b.dy) return a.dy - b.dy;
+    // Direct OAM/RAM evidence for the persistent sSpriteOrder inherited by
+    // these two reused slots: particle 14 wins its exact-Y tie with 13.
+    if (persistentTieWinner14 && ((a.i === 13 && b.i === 14) || (a.i === 14 && b.i === 13))) return a.i - b.i;
+    return b.i - a.i;
+  });
 }
 
 /** `clipBottom` (screen y at/below which pixels are skipped) is only used by the player-side call site - the opponent's own particle field is never occluded at its screen position, so its call omits it. */
@@ -3312,7 +3397,7 @@ function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox:
   }
 }
 
-function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): void {
+function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number, encounter: BattleSceneState["encounter"] = "destin"): void {
   const logicalT = t - handoffTick - BALL_OPEN_START_OFFSET - 1;
   if (logicalT < 0) return;
   const anim = battleAnimParticles.regularBallAnim;
@@ -3321,7 +3406,7 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): 
     let age = logicalT - i;
     if (i >= PARTICLE_LATE_SPAWN_START_INDEX) {
       age -= 1;
-    } else if (logicalT >= PARTICLE_STALL_LOGICAL_TICK) {
+    } else if (logicalT >= PARTICLE_STALL_LOGICAL_TICK + (encounter === "jenson" ? 1 : 0)) {
       age -= 1;
     }
     if (age < 0 || age > PARTICLE_MAX_AGE) continue;
@@ -3329,7 +3414,7 @@ function drawBallOpenParticles(fb: Uint8Array, t: number, handoffTick: number): 
     const radius = age === 0 ? 0 : 2 * (age - 1);
     alive.push({ i, age, dx: gbaSin(angle, radius), dy: gbaCos(angle, radius) });
   }
-  for (const p of sortAliveParticlesByScreenY(alive)) {
+  for (const p of sortAliveParticlesByScreenY(alive, encounter === "jenson")) {
     const frame = anim[p.age % anim.length]!;
     drawParticleTile(fb, frame.tile, frame.hFlip, PARTICLE_ORIGIN.x + p.dx, PARTICLE_ORIGIN.y + p.dy);
   }
@@ -3945,13 +4030,14 @@ function drawPlayerSummaryBarExit(fb: Uint8Array, barX: number, eva: number): vo
  */
 const SUMMARY_EXIT_LAST_ALIVE_ELAPSED = 32;
 
-function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number): void {
+function drawOpponentSummaryExit(fb: Uint8Array, t: number, handoffTick: number, encounter: BattleSceneState["encounter"] = "destin"): void {
   const rawElapsed = t - handoffTick - 1;
   if (rawElapsed < 0 || rawElapsed > SUMMARY_EXIT_LAST_ALIVE_ELAPSED) return;
   // §7.32: the position/blend clock stalls one tick at the RAM-confirmed
   // destroy/reuse (renders 1493 and 1494 both read as elapsed=30), then
   // resumes normal 1:1 counting - see the doc comment above.
-  const elapsed = rawElapsed <= 30 ? rawElapsed : rawElapsed - 1;
+  const stallAt = encounter === "jenson" ? 31 : 30;
+  const elapsed = rawElapsed <= stallAt ? rawElapsed : rawElapsed - 1;
   const blend = Math.max(0, 15 - Math.floor(elapsed / 2));
   const eva = blend;
   const evb = 16 - blend;
@@ -11021,7 +11107,8 @@ function drawSettledScene(fb: Uint8Array, encounter: BattleSceneState["encounter
  * every remaining tick in this window needs ALL of these simultaneously
  * correct, so none of the fixes above alone flips a full-frame match yet.
  */
-function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): void {
+function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, encounter: BattleSceneState["encounter"] = "destin"): void {
+  const isJenson = encounter === "jenson";
   // battleMenu.ts's own module doc (§3 item 5 root-cause, PROGRESS.md #98's
   // named blocker): the player's own ONIX release re-triggers the identical
   // BG-to-white materialize dither `sendOutBgFadeY` models for the
@@ -11051,11 +11138,17 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   }
   const trainerX = trainerExitX(t, handoffTick);
   if (trainerX !== null) {
-    drawSpriteSheet(fb, bugCatcher.tileset, bugCatcher.palette, trainerX, OPPONENT_CORNER.y);
+    const trainer = isJenson ? fisherman : bugCatcher;
+    drawSpriteSheet(fb, trainer.tileset, trainer.palette, trainerX, OPPONENT_CORNER.y);
   }
-  drawGrovyleMaterialize(fb, t, handoffTick);
-  drawGrovyleStretchEarly(fb, t, handoffTick);
-  if (t < GROVYLE_MATERIALIZE_TICK) drawGrovyleStretch(fb, t, handoffTick);
+  if (isJenson) {
+    drawKabutoMaterialize(fb, t, handoffTick);
+    drawKabutoHSlideWobble(fb, t, handoffTick);
+  } else {
+    drawGrovyleMaterialize(fb, t, handoffTick);
+    drawGrovyleStretchEarly(fb, t, handoffTick);
+    if (t < GROVYLE_MATERIALIZE_TICK) drawGrovyleStretch(fb, t, handoffTick);
+  }
   drawSendOutBall(fb, t, handoffTick);
   const playerBallTopLeft = playerThrowBallTopLeft(t);
   if (playerBallTopLeft !== null) {
@@ -11075,21 +11168,23 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
       playerBallSpin.pd,
     );
   }
-  drawBallOpenParticles(fb, t, handoffTick);
+  drawBallOpenParticles(fb, t, handoffTick, encounter);
   drawPlayerMaterialize(fb, t);
   drawPlayerMaterializeSettle(fb, t);
   drawPlayerBallOpen(fb, t);
   drawPlayerBallOpenParticles(fb, t);
-  if (t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
+  if (!isJenson && t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
   // §7.19: `drawOpponentSummaryExit` only draws from elapsed=t-handoffTick-1
   // >= 0 (render handoffTick+1 on) - at handoffTick itself (elapsed=-1) the
   // real game still shows the opponent's settled (un-faded, un-slid) bar+
   // icons for exactly one tick before the exit fade/slide takes over, so
   // fall back to the same settled render the pre-handoff branch uses.
   drawBallIcons(fb, t, { opponent: t === handoffTick, player: true });
-  drawOpponentSummaryExit(fb, t, handoffTick);
-  const healthboxDx = healthboxSlideDx(t);
-  if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx);
+  drawOpponentSummaryExit(fb, t, handoffTick, encounter);
+  const healthboxDx = isJenson
+    ? healthboxSlideDx(t, handoffTick + 32, -110, true)
+    : healthboxSlideDx(t, handoffTick + 33);
+  if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx, isJenson ? kabutoHealthboxContent : opponentHealthboxContent);
   const playerHealthboxDx = playerHealthboxSlideDx(t);
   if (playerHealthboxDx !== null) drawMenuHealthboxPlayer(fb, playerHealthboxDx);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
@@ -11100,7 +11195,8 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
   if (t >= GO_TEXT_START_TICK) {
     drawMessageTextLines(fb, GO_TEXT, "", goTextVisibleChars(t));
   } else {
-    drawMessageTextLines(fb, SENDOUT_LINE1, SENDOUT_LINE2, SENDOUT_TEXT_TOTAL);
+    const params = battleSendOutEncounterParams(encounter);
+    drawMessageTextLines(fb, params.line1, params.line2, params.textTotal);
   }
 }
 
@@ -13204,5 +13300,5 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     );
     return;
   }
-  drawSendOutHandoff(fb, t, handoffTick);
+  drawSendOutHandoff(fb, t, handoffTick, state.encounter);
 }
