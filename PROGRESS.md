@@ -16,12 +16,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   with RIGHT accepted at +114. The selected-ball and species-breathe tasks
   retain their own clocks; the ball callbacks now continue through the full
   source animation command stream, and generic category/species/OAM cursor
-  copies retain their observed VBlank ordering.
-- **Next:** choose a distinct remaining unique-UI path (summary or
-  player-SWAP/enemy picker). The next player-picker A/options reentry is not
-  part of this increment.
-- **Notes:** Tier-1 **1196/1196**, build **5.551 MB**, commit `85bf16a`.
-  No issue pruned; no absolute tick, battle-number branch, or captured asset.
+  copies retain their observed VBlank ordering. Parallel source/RAM probes pin
+  the enemy accept YES commit at tick 30021 and NO/B return at 30087, and stage
+  the opposite-side GROVYLE→ONIX FIRE PUNCH geometry/outcome.
+- **Next:** implement the distinct SWAP transition into the input-ready enemy
+  picker through canonical tick 29935; stop before accept-prompt rendering.
+- **Notes:** supervisor verification is Tier-1 **1196/1196**, build
+  **5.551 MB**, B-close **59/59**, portable FIRE PUNCH **225/225**. The
+  opposite-side move remains evidence-only/`partial`; no deferred decision.
 
 ---
 ## 329 — S8 OFF popup B-close: **GREEN evidence checkpoint**

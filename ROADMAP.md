@@ -541,15 +541,19 @@ and the settled options popup/cursor is now **44/44 exact** with a generic
 state handoff at +57, first sampled input at +58, default `SUMMARY`, and
 phase-relative B/DOWN/A dispatch. Screen-ball and selected-ball animation
 epochs remain independent. Source/RAM evidence now pins B-close back to the
-player picker at +113 (next sampled input +114), and SWAP into the enemy
-picker at canonical tick 29886 / input 29935 / accept-ready 29999.
+player picker at +113 (next sampled input +114); that return is now **59/59
+exact**. SWAP evidence pins enemy mode at canonical tick 29886, picker input
+at 29935, and accept-ready state at 29999 / first sampled prompt input 30000.
+YES commits ONIX→GROVYLE at 30021 and exits at 30041; NO/B return to enemy
+picker input at 30087 without mutation.
 Source extraction now also pins the terminal field-message gates and the
 seventh-win `MSGBOX_GETPOINTS` fanfare/wait path, but no ending pixels are
 claimed. Summary/B-close/enemy selection presentation, accept/exit, loss
 ending, and seventh-win ending still need dense OFF-profile UI proofs. The
 parallel Scene-ON adapter has a portable ONIX→GROVYLE FIRE PUNCH case at
-**225/225**, while the move remains `partial` pending the opposite attacker
-side. S8 therefore remains `[~]`.
+**225/225**. The opposite GROVYLE→ONIX orientation is now deterministically
+staged with source geometry and outcome, but still lacks an app comparison,
+so the move remains `partial`. S8 therefore remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
 Historical traces below remain Battle Scene ON regression evidence. The

@@ -14,6 +14,23 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## `bin/oracle run` always prints the full capture manifest
+
+- **What:** targeted oracle probes with dense captures flood the terminal with
+  the complete manifest even when only the written artifacts are needed.
+- **Hits:** 1.
+- **Cost each:** ~2 min.
+- **Workaround:** redirect successful oracle stdout to `/dev/null` and inspect
+  the named manifest or RAM probe output directly.
+
+## ImageMagick unavailable for raw-frame inspection
+
+- **What:** an animation probe expected ImageMagick for converting raw RGB
+  frames, but it is not installed in the run environment.
+- **Hits:** 1.
+- **Cost each:** ~1 min.
+- **Workaround:** use the available `ffmpeg` rawvideo conversion path.
+
 ## Popup evidence used “input gate” for a state handoff, not a sampled key edge
 
 - **What:** the first popup probe called +56 the controller input gate, but
