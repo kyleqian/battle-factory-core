@@ -412,6 +412,7 @@ import {
   BRENDAN_THROW_START_TICK,
   brendanThrowFrame,
   brendanThrowDx,
+  PLAYER_THROW_BALL_START_TICK,
   playerThrowBallTopLeft,
   playerThrowBallSpin,
   PLAYER_THROW_BALL_SPIN_START_TICK,
@@ -547,7 +548,7 @@ import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
-import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_START_OFFSET } from "./kabutoSendOut.ts";
+import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET, KABUTO_FRONT_ANIM_START_OFFSET } from "./kabutoSendOut.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
@@ -1781,6 +1782,17 @@ export function sendOutHandoffTick(
   return sendOutTextStartTick(pressTick)
     + battleSendOutEncounterParams(encounter).textTotal - 1
     + SENDOUT_HANDOFF_LAG;
+}
+
+/** Rebase a later encounter onto Battle 1's proven player-send-out clock. */
+export function playerSendOutClock(t: number, handoffTick: number): number {
+  return t + (1462 - handoffTick);
+}
+
+/** Battle 2's inherited trainer/summary callback becomes visible 45 ticks later. */
+export function playerTrainerSendOutClock(t: number, handoffTick: number, encounter: BattleSceneState["encounter"]): number {
+  const playerT = playerSendOutClock(t, handoffTick);
+  return encounter === "jenson" ? playerT - 45 : playerT;
 }
 
 /** Visible character count (0..35) of the "sent\nout GROVYLE!" message at trace tick `t`, given the press tick. Same 1-tick/char mechanism as `textVisibleChars` (§3.2/§7.3). */
@@ -3178,7 +3190,12 @@ function drawGrovyleStretchEarly(fb: Uint8Array, t: number, handoffTick: number)
 function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: number): void {
   const et = t - handoffTick;
   const wobble = kabutoHSlideWobble(et);
-  if (!wobble.active) return;
+  if (!wobble.active) {
+    if (et >= KABUTO_FRONT_ANIM_END_OFFSET) {
+      drawSpriteSheet(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER.x, KABUTO_CORNER.y);
+    }
+    return;
+  }
   const angle = wobble.rotation;
   const angleIndex = (angle >> 8) & 0xff;
   const matrixSin = GBA_SINE_TABLE_256[angleIndex]!;
@@ -11109,12 +11126,24 @@ function drawSettledScene(fb: Uint8Array, encounter: BattleSceneState["encounter
  */
 function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, encounter: BattleSceneState["encounter"] = "destin"): void {
   const isJenson = encounter === "jenson";
+  // PlayerHandleIntroTrainerBallThrow is scheduled from the opponent
+  // send-out handoff, not from the battle scene's absolute clock.  Battle 1
+  // established handoff=1462; rebasing onto that proven clock keeps every
+  // Brendan/ball/ONIX helper unchanged while allowing later encounters to
+  // start their send-out at a different scene elapsed.
+  const playerT = playerSendOutClock(t, handoffTick);
+  // In the subsequent-battle intro, the already-created player trainer and
+  // party summary retain their controller delay while the generic ball
+  // task proceeds on the ordinary handoff-relative clock.  The first live
+  // trainer/summary callback is 45 ticks later, pinned by the dense trace's
+  // last unchanged settled pose (32726) and first changed pose (32727).
+  const playerTrainerT = playerTrainerSendOutClock(t, handoffTick, encounter);
   // battleMenu.ts's own module doc (§3 item 5 root-cause, PROGRESS.md #98's
   // named blocker): the player's own ONIX release re-triggers the identical
   // BG-to-white materialize dither `sendOutBgFadeY` models for the
   // opponent's own send-out - the two windows never overlap, so only one of
   // the two is ever nonzero at a given tick.
-  const bgFadeY = sendOutBgFadeY(t, handoffTick) || playerMaterializeBgFadeY(t);
+  const bgFadeY = sendOutBgFadeY(t, handoffTick) || playerMaterializeBgFadeY(playerT);
   drawTileBgFaded(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette, bgFadeY);
   // battleMenu.ts: Brendan's throw pose-swap + exit translation start at
   // BRENDAN_THROW_START_TICK - before that he's still the settled slide-in
@@ -11129,11 +11158,11 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, enco
   // ONIX-missing gap it happened to overlap) and surfaced only once ONIX's
   // own real transparency let Brendan's incorrectly-redrawn settled sprite
   // show through at render tick 1690+ (`BRENDAN_THROW_START_TICK`+116).
-  const throwFrame = brendanThrowFrame(t);
-  if (t < BRENDAN_THROW_START_TICK) {
+  const throwFrame = brendanThrowFrame(playerTrainerT);
+  if (playerTrainerT < BRENDAN_THROW_START_TICK) {
     drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
   } else if (throwFrame !== null) {
-    const dx = brendanThrowDx(t) ?? 0;
+    const dx = brendanThrowDx(playerTrainerT) ?? 0;
     drawSpriteSheet(fb, brendanThrowTilesets[throwFrame]!, brendan.palette, PLAYER_CORNER.x + dx, PLAYER_CORNER.y);
   }
   const trainerX = trainerExitX(t, handoffTick);
@@ -11150,11 +11179,15 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, enco
     if (t < GROVYLE_MATERIALIZE_TICK) drawGrovyleStretch(fb, t, handoffTick);
   }
   drawSendOutBall(fb, t, handoffTick);
-  const playerBallTopLeft = playerThrowBallTopLeft(t);
+  const playerBallTopLeft = !isJenson || playerTrainerT >= BRENDAN_THROW_START_TICK
+    ? playerThrowBallTopLeft(playerT)
+    : null;
   if (playerBallTopLeft !== null) {
     drawSpriteSheet(fb, BALL_CLOSED_TILESET, summaryBall.palette, playerBallTopLeft.x, playerBallTopLeft.y);
   }
-  const playerBallSpin = playerThrowBallSpin(t);
+  const playerBallSpin = !isJenson || playerTrainerT >= BRENDAN_THROW_START_TICK
+    ? playerThrowBallSpin(playerT)
+    : null;
   if (playerBallSpin !== null) {
     drawSpriteSheetAffineRotate(
       fb,
@@ -11169,31 +11202,38 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, enco
     );
   }
   drawBallOpenParticles(fb, t, handoffTick, encounter);
-  drawPlayerMaterialize(fb, t);
-  drawPlayerMaterializeSettle(fb, t);
-  drawPlayerBallOpen(fb, t);
-  drawPlayerBallOpenParticles(fb, t);
+  drawPlayerMaterialize(fb, playerT);
+  drawPlayerMaterializeSettle(fb, playerT);
+  drawPlayerBallOpen(fb, playerT);
+  drawPlayerBallOpenParticles(fb, playerT);
   if (!isJenson && t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
   // §7.19: `drawOpponentSummaryExit` only draws from elapsed=t-handoffTick-1
   // >= 0 (render handoffTick+1 on) - at handoffTick itself (elapsed=-1) the
   // real game still shows the opponent's settled (un-faded, un-slid) bar+
   // icons for exactly one tick before the exit fade/slide takes over, so
   // fall back to the same settled render the pre-handoff branch uses.
-  drawBallIcons(fb, t, { opponent: t === handoffTick, player: true });
+  drawBallIcons(fb, playerTrainerT, { opponent: t === handoffTick, player: true });
   drawOpponentSummaryExit(fb, t, handoffTick, encounter);
   const healthboxDx = isJenson
     ? healthboxSlideDx(t, handoffTick + 32, -110, true)
     : healthboxSlideDx(t, handoffTick + 33);
   if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx, isJenson ? kabutoHealthboxContent : opponentHealthboxContent);
-  const playerHealthboxDx = playerHealthboxSlideDx(t);
+  const playerHealthboxDx = playerHealthboxSlideDx(playerT);
   if (playerHealthboxDx !== null) drawMenuHealthboxPlayer(fb, playerHealthboxDx);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   // battleMenu.ts §1/§2: the box clears (no blank-box frame - a bare
   // `drawTileBg` above already redraws it empty) and "Go! ONIX!" starts
   // printing the same tick the opponent's held "sent\nout GROVYLE!" text
   // would otherwise still be drawn.
-  if (t >= GO_TEXT_START_TICK) {
-    drawMessageTextLines(fb, GO_TEXT, "", goTextVisibleChars(t));
+  if (isJenson && playerT >= PLAYER_THROW_BALL_START_TICK + 1) {
+    drawMessageTextLines(
+      fb,
+      GO_TEXT,
+      "",
+      Math.min(GO_TEXT.length, playerT - (PLAYER_THROW_BALL_START_TICK + 1) + 1),
+    );
+  } else if (!isJenson && playerT >= GO_TEXT_START_TICK) {
+    drawMessageTextLines(fb, GO_TEXT, "", goTextVisibleChars(playerT));
   } else {
     const params = battleSendOutEncounterParams(encounter);
     drawMessageTextLines(fb, params.line1, params.line2, params.textTotal);

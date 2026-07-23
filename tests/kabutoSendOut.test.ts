@@ -6,7 +6,21 @@ import {
   kabutoBallPhase,
   kabutoHSlideWobble,
 } from "../src/engine/kabutoSendOut.ts";
-import { KABUTO_SENDOUT_BATTLER, healthboxSlideDx, sendOutHandoffTick } from "../src/engine/battleScene.ts";
+import {
+  KABUTO_SENDOUT_BATTLER,
+  healthboxSlideDx,
+  playerSendOutClock,
+  playerTrainerSendOutClock,
+  sendOutHandoffTick,
+} from "../src/engine/battleScene.ts";
+import {
+  PLAYER_BALL_OPEN_START_TICK,
+  PLAYER_HEALTHBOX_SLIDE_START_TICK,
+  PLAYER_HEALTHBOX_SLIDE_SETTLE_TICK,
+  PLAYER_MATERIALIZE_SETTLE_TICK,
+  PLAYER_THROW_BALL_SPIN_START_TICK,
+  playerHealthboxSlideDx,
+} from "../src/engine/battleMenu.ts";
 
 describe("Battle 2 KABUTO send-out", () => {
   it("pins the encounter battler and healthbox values", () => {
@@ -69,5 +83,25 @@ describe("Battle 2 KABUTO send-out", () => {
       x2: 8,
     });
     expect(kabutoHSlideWobble(KABUTO_FRONT_ANIM_START_OFFSET + 13).rotation).not.toBe(0);
+  });
+
+  it("reanchors the proven player ball/materialize clock from Battle 2's handoff", () => {
+    const handoff = 1365;
+    expect(playerSendOutClock(handoff, handoff)).toBe(1462);
+    expect(playerSendOutClock(handoff + 153, handoff)).toBe(PLAYER_THROW_BALL_SPIN_START_TICK);
+    expect(playerSendOutClock(handoff + 190, handoff)).toBe(PLAYER_BALL_OPEN_START_TICK);
+    expect(playerSendOutClock(handoff + 240, handoff)).toBe(PLAYER_MATERIALIZE_SETTLE_TICK);
+  });
+
+  it("keeps Battle 2's inherited trainer callback separate from the ball clock", () => {
+    const handoff = 1365;
+    expect(playerTrainerSendOutClock(handoff + 157, handoff, "jenson")).toBe(1574);
+    expect(playerTrainerSendOutClock(1574, 1462, "destin")).toBe(1574);
+  });
+
+  it("pins ONIX's full-health slide boundaries", () => {
+    expect(playerHealthboxSlideDx(PLAYER_HEALTHBOX_SLIDE_START_TICK - 1)).toBeNull();
+    expect(playerHealthboxSlideDx(PLAYER_HEALTHBOX_SLIDE_START_TICK)).toBe(110);
+    expect(playerHealthboxSlideDx(PLAYER_HEALTHBOX_SLIDE_SETTLE_TICK)).toBe(0);
   });
 });
