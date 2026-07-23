@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 329 — S8 OFF popup B-close: **GREEN evidence checkpoint**
+
+- **State:** the source-relative B-close → restored player-picker boundary is
+  pinned without runtime changes. The true menu-state handoff is +57, with
+  the first injectable B on the next frame (+58 / tick 29760); the generic
+  return reaches `HandleChooseMons` at +113 / tick 29815.
+- **Did:** captured every frame 29759--29981 from the committed prefix,
+  inspected `Task_CloseMonPic`, `Swap_Task_ScreenInfoTransitionIn`, live
+  task callbacks, WIN0V/DISPCNT, and proved a delayed RIGHT changes the
+  restored picker cursor. Documented the separate selected-ball and
+  species-breathe task ownership in
+  `docs/factory-swap-player-options-b-close-probe.md`.
+- **Next:** implement only this generic phase-relative close/return seam;
+  then leave the next player-picker-A/options boundary distinct. Preserve
+  popup **44/44**, options **58/58**, and picker **101/101** regressions.
+- **Notes:** B at the previous presentation-labelled +56 is not a sampled
+  `JOY_NEW`; source/RAM show it is the final show-options update. No
+  acceptance trace, runtime change, or absolute-tick rule was added.
+
+---
 ## 328 — S8 player-options popup: **GREEN — 44/44 exact**
 
 - **State:** the source-relative player-options seam is complete through the
