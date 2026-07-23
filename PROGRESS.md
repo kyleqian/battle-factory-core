@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 330 — S8 OFF popup B-close/player-picker return: **GREEN — 59/59 exact**
+
+- **State:** the evidence-pinned B path is complete from the `playerOptions`
+  ready edge through restored `HandleChooseMons` input. The dense OFF trace
+  `battle1-swap-player-options-b-close.json` is **59/59 exact**; popup,
+  options, and picker regressions remain **44/44**, **58/58**, and **101/101**.
+- **Did:** reject B through +57, accept at +58, run source-named
+  `Task_CloseMonPic` → `SpriteCB_CloseMonPic` →
+  `Swap_Task_ScreenInfoTransitionIn`, and restore `playerPicker` at +113
+  with RIGHT accepted at +114. The selected-ball and species-breathe tasks
+  retain their own clocks; the ball callbacks now continue through the full
+  source animation command stream, and generic category/species/OAM cursor
+  copies retain their observed VBlank ordering.
+- **Next:** choose a distinct remaining unique-UI path (summary or
+  player-SWAP/enemy picker). The next player-picker A/options reentry is not
+  part of this increment.
+- **Notes:** Tier-1 **1196/1196**, build **5.551 MB**, commit `85bf16a`.
+  No issue pruned; no absolute tick, battle-number branch, or captured asset.
+
+---
 ## 329 — S8 OFF popup B-close: **GREEN evidence checkpoint**
 
 - **State:** the source-relative B-close → restored player-picker boundary is
@@ -45,21 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** supervisor merged/verified all three lanes: Tier-1 **1189/1189**,
   build **5.547 MB**; FIRE PUNCH canonical regressions **227/236** (known
   residual) and **200/200**. No deferred decision or absolute-tick branch.
-
----
-## 327 — S8 player-options popup handoff: **GREEN evidence checkpoint**
-
-- **State:** the next OFF mechanism is source/oracle pinned without runtime
-  changes. The popup first draws at options edge **+58** / tick **29760**
-  with `SUMMARY / SWAP / RECHOOSE` and default `SUMMARY`; the controller
-  input gate opens at **+56**.
-- **Did:** dense edge probes prove +55 B rejected, +56 A/B accepted, DOWN at
-  +79 with visible cursor response at +80, and SWAP A at +99. Documented the
-  exact `Swap_Task_HandleMenu`, summary, B-close, cursor, and enemy-screen
-  dispatch paths in `docs/factory-swap-player-options-popup-probe.md`.
-- **Next:** implement this single popup seam phase-relatively, preserving
-  `battle1-swap-player-options.json` **58/58** and the picker **101/101**.
-  Stop at the next distinct summary/B-close/enemy-screen presentation path.
-- **Notes:** supervisor corrected one evidence-table tick typo (`29782`, not
-  `29802`) against the probe's stated +80 offset. No deferred decision; S8
-  unique-UI gate 2 remains the only reset gate open.

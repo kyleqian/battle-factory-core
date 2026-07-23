@@ -1,3 +1,21 @@
+## 327 — S8 player-options popup handoff: **GREEN evidence checkpoint**
+
+- **State:** the next OFF mechanism is source/oracle pinned without runtime
+  changes. The popup first draws at options edge **+58** / tick **29760**
+  with `SUMMARY / SWAP / RECHOOSE` and default `SUMMARY`; the controller
+  input gate opens at **+56**.
+- **Did:** dense edge probes prove +55 B rejected, +56 A/B accepted, DOWN at
+  +79 with visible cursor response at +80, and SWAP A at +99. Documented the
+  exact `Swap_Task_HandleMenu`, summary, B-close, cursor, and enemy-screen
+  dispatch paths in `docs/factory-swap-player-options-popup-probe.md`.
+- **Next:** implement this single popup seam phase-relatively, preserving
+  `battle1-swap-player-options.json` **58/58** and the picker **101/101**.
+  Stop at the next distinct summary/B-close/enemy-screen presentation path.
+- **Notes:** supervisor corrected one evidence-table tick typo (`29782`, not
+  `29802`) against the probe's stated +80 offset. No deferred decision; S8
+  unique-UI gate 2 remains the only reset gate open.
+
+---
 ## 326 — S8 swap player mon-picture reveal: **GREEN — 58/58 exact**
 
 - **State:** `battle1-swap-player-options.json` is now **58/58 exact** from
