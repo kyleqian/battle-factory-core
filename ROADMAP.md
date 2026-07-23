@@ -453,6 +453,16 @@ the earlier shared `turn5-faint.json` path remains **110/110**; the Turn-17
 verifier, Tier-1 suite, and build pass, all independently reverified by the
 supervisor. See `docs/turn17-notes.md` §10. S7 remains `[~]`; tick 22531
 onward, the long hold/dismiss, and victory flow remain open.
+**Proposed Turn-17 rung 6 status (2026-07-23 bounded worker; supervisor
+acceptance pending):** `turn17-rung6a.json` and `turn17-rung6b.json`
+gaplessly cover every canonical tick `22531-22826` at **255/255** and
+**41/41 exact**. The confirmation-relative faint gate remains idle until
+the real A edge, freezes its live cursor phase on dismissal, writes
+`gBattleOutcome=B_OUTCOME_WON` at dismiss+17 with no visible change, and
+retains the old faint framebuffer through dismiss+25. Rung 5 stays
+**113/113**, the Turn-17 verifier passes **245/245**, and Tier-1/build are
+green. See `docs/turn17-notes.md` §11. S7 remains `[~]`; tick 22827 onward
+and the visible victory/trainer flow remain open.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

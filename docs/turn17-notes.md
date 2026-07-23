@@ -617,3 +617,65 @@ shared faint path `turn5-faint.json` **110/110**, all 0 diff.
 passing; Tier-1 is **1056/1056** and production build is **5.460 MB**.
 The long faint-text hold, its dismiss at 22801, battle outcome/victory flow,
 and tick 22531 onward remain deliberately untouched. S7 remains in progress.
+
+## 11. Engine rung 6: input-gated faint hold through frozen outcome latency
+
+Canonical renders **22531-22826** are implemented gaplessly in two adjacent
+dense traces, respecting the oracle's 256-capture ceiling:
+
+| trace | captures | result |
+|---|---:|---:|
+| `turn17-rung6a.json` | 22531-22785, every tick (255) | **255/255 exact** |
+| `turn17-rung6b.json` | 22786-22826, every tick (41) | **41/41 exact** |
+
+The first trace ends immediately before the second begins: there is no gap,
+overlap, excluded capture, or thinning. Together they cover the live
+wait-cursor's complete recurring bounce phases, the real A edge at 22801,
+and the pixel-frozen post-dismiss tail through 22826. Rung 5 remains
+**113/113 exact** and `verify-turn17.ts` still passes all **245** checks.
+
+The reducer now stores `turn17KoDismissElapsed` only when a fresh A edge
+arrives after the confirmation-relative FIRE_PUNCH faint cursor epoch. An A
+one tick before eligibility is dropped, idling never advances the message,
+and a second A cannot replace the stored edge. The cursor continues from the
+shared FIRE_PUNCH epoch until that edge, then its displayed phase freezes at
+the edge. No canonical battle tick is present in the gate or latency model.
+
+Source explains the hidden branch. `BattleScript_HandleFaintedMon`
+(`data/battle_scripts_1.s:2830`) executes `checkteamslost` before testing
+`gBattleOutcome`; `Cmd_checkteamslost`
+(`battle_script_commands.c:3533-3580`) totals the enemy party HP and ORs
+`B_OUTCOME_WON` when it reaches zero. The frontier win handler then selects
+`BattleScript_FrontierTrainerBattleWon`
+(`battle_main.c:4960-4978`), whose first visible command is
+`STRINGID_PLAYERDEFEATEDTRAINER1` (`battle_scripts_1.s:3027-3034`).
+That sequencing is why the outcome write can lead the next text renderer.
+
+Fresh RAM/oracle evidence pins the relative epochs:
+
+| dismiss-relative age | canonical tick | result |
+|---:|---:|---|
+| 0 | 22801 | eligible A edge stored; the current faint frame is retained |
+| 17 | 22818 | `gBattleOutcome 0→B_OUTCOME_WON`; framebuffer unchanged |
+| 25 | 22826 | last pixel-identical faint-message frame |
+| 26 | 22827 | first outcome-render-owned frame (boundary only; out of this rung) |
+
+The engine exposes those as `TURN17_OUTCOME_FLIP_DELAY=17` and
+`TURN17_FIRST_OUTCOME_RENDER_DELAY=26`, both measured from the stored edge.
+Tier-1 tests pin input readiness, early-edge dropping, indefinite idle,
+one-shot dismissal, the explicit outcome write, and the first-render
+boundary. Delaying the A edge shifts every one of these epochs together.
+
+Dense comparison also caught a shared-tail error outside the prior rung's
+short window: ages 489-522 attempted to draw Status_Burn's residual flame
+sprites even on the lethal faint profile, producing exactly 34 dynamic
+frames at 22680-22713. The faint script never runs the burn end-turn effect;
+the profile now suppresses that residual animation while preserving the
+ordinary nonlethal Turn-16 path. This is source/state branching, not a
+frame-range patch.
+
+Regression verdict: rung 6a **255/255**, rung 6b **41/41**, rung 5
+**113/113**, `verify-turn17.ts` **245/245**, Tier-1 **1061/1061**, and the
+production build (**5.460 MB**) all pass. Tick 22827 and all visible
+`"Player defeated..."` typing/hold, its later dismiss, trainer transition,
+and loss quote remain deliberately out of scope. S7 remains in progress.

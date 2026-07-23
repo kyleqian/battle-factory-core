@@ -4,6 +4,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 296 — Bounded worker (S7 turn 17 rung 6): **GREEN — faint hold/dismiss latency exact**
+
+- **State:** canonical `22531--22826` is gaplessly **296/296 exact** in
+  adjacent dense traces (**255/255 + 41/41**). Rung 5 remains **113/113**,
+  `verify-turn17.ts` passes **245/245**, Tier-1 is **1061/1061**, and build
+  passes (**5.460 MB**).
+- **Did:** added confirmation-relative faint input readiness, dropped early
+  edges/indefinite idle, stored the real dismiss A, froze its cursor phase,
+  modeled the dismiss+17 WIN write and dismiss+26 first-render boundary, and
+  suppressed the impossible post-KO residual-burn flame. Committed both
+  fully dense adjacent traces.
+- **Next:** resume at **22827**, the first visible `"Player defeated..."`
+  typing frame. Its typing/hold, second dismiss, trainer transition/loss
+  quote, and #38 remain untouched; S7 stays `[~]`.
+- **Notes:** implementation commit `ed2b46a`. Source chain:
+  `BattleScript_HandleFaintedMon` → `Cmd_checkteamslost` →
+  `HandleEndTurn_BattleWon`/frontier win script; RAM pins outcome 0→1 at
+  22818 with frozen pixels through 22826. No forbidden absolute tick,
+  framebuffer/per-frame table, fitted geometry/color, trace branch,
+  excluded capture, or thinning.
+
+---
 ## 295 — Bounded worker (S7 turn 17 rung 5): **GREEN — lethal faint through typed gate exact**
 
 - **State:** canonical `22418--22530` is **113/113 exact**, every tick
@@ -47,27 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   or thinned trace. Supervisor independently reverified the dense window,
   both reuse regressions, turn-17 verifier, full Tier-1 suite, and production
   build; ROADMAP status accepted.
-
----
-## 293 — Bounded worker (S7 turn 17 rung 3): **GREEN — FAINT_ATTACK resolution exact**
-
-- **State:** canonical `22075--22217` is **143/143 exact**, every tick
-  captured. Turn-17 rungs 2/1 remain **221/221** and **118/118**;
-  `verify-turn17.ts` passes all **245** checks; Tier-1 is **1052/1052** and
-  build passes (**5.458 MB**).
-- **Did:** parameterized the shared tail by the actual `79→27` HP delta,
-  reproducing wobble/blink, visible drain, tick-22168 atomic HP write,
-  secondary/accuracy/crit/damage RNG, battler/target/currentMove and PP
-  handoffs, plus FIRE_PUNCH text/controller lead-in. Committed dense
-  `turn17-rung3.json`.
-- **Next:** resume at **22218**, freshly proven as the first
-  FIRE_PUNCH-animation-owned displayed state. Animation body, lethal hit,
-  faint/WIN flow, and later ticks remain untouched; #38 stays parked.
-- **Notes:** implementation commits `d147fa6` and `ff3bc44`. Fresh
-  `gBattleBufferA`/animation RAM plus source corrected the expected ~22197
-  endpoint: PRINTSTRING still owns that lead-in; MOVEANIMATION queues at
-  22216 and `gAnimScriptActive` first displays at 22218. No forbidden
-  framebuffer/absolute-tick/per-frame/trace-fitting mechanism or excluded
-  capture. Supervisor independently reverified the dense window, predecessor
-  rung, turn-17 verifier, full Tier-1 suite, and production build; ROADMAP
-  status accepted. S7 remains `[~]`.

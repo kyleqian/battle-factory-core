@@ -1,3 +1,27 @@
+## 293 — Bounded worker (S7 turn 17 rung 3): **GREEN — FAINT_ATTACK resolution exact**
+
+- **State:** canonical `22075--22217` is **143/143 exact**, every tick
+  captured. Turn-17 rungs 2/1 remain **221/221** and **118/118**;
+  `verify-turn17.ts` passes all **245** checks; Tier-1 is **1052/1052** and
+  build passes (**5.458 MB**).
+- **Did:** parameterized the shared tail by the actual `79→27` HP delta,
+  reproducing wobble/blink, visible drain, tick-22168 atomic HP write,
+  secondary/accuracy/crit/damage RNG, battler/target/currentMove and PP
+  handoffs, plus FIRE_PUNCH text/controller lead-in. Committed dense
+  `turn17-rung3.json`.
+- **Next:** resume at **22218**, freshly proven as the first
+  FIRE_PUNCH-animation-owned displayed state. Animation body, lethal hit,
+  faint/WIN flow, and later ticks remain untouched; #38 stays parked.
+- **Notes:** implementation commits `d147fa6` and `ff3bc44`. Fresh
+  `gBattleBufferA`/animation RAM plus source corrected the expected ~22197
+  endpoint: PRINTSTRING still owns that lead-in; MOVEANIMATION queues at
+  22216 and `gAnimScriptActive` first displays at 22218. No forbidden
+  framebuffer/absolute-tick/per-frame/trace-fitting mechanism or excluded
+  capture. Supervisor independently reverified the dense window, predecessor
+  rung, turn-17 verifier, full Tier-1 suite, and production build; ROADMAP
+  status accepted. S7 remains `[~]`.
+
+---
 ## 291 — Bounded worker (S7 turn 17 rung 1): **GREEN — dispatch prefix exact**
 
 - **State:** canonical `21736--21853` is **118/118 exact**, every tick
