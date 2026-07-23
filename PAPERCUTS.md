@@ -243,7 +243,7 @@ compare run exposed the staleness.
   mGBA BIOS/DMA trace spew; it actually lands on stdout, so `2>log` still
   buries results under megabytes of log lines. The latest
   `dump-turn15-sendout.py` run also exited 139 after writing valid JSON.
-- **Hits:** 12 sessions (the first hit twice within its session).
+- **Hits:** 13 sessions (the first hit twice within its session).
 - **Cost each:** ~2-5 min.
 - **Workaround:** `>out 2>&1` and read the results FILE the probe
   writes (never parse stdout) — consistent with the ROADMAP recipe's
