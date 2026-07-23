@@ -1,3 +1,21 @@
+## 315 — S8 Battle 2 turn 1 33030-prefix probe: **GREEN — evidence only**
+
+- **State:** oracle-only Battle 2 first-turn evidence is committed; no
+  runtime engine/test/accepted-trace changes. Baseline remains **1118/1118**
+  and build green.
+- **Did:** normalized `battle2-turn1.json` to the exact action-menu prefix
+  ending 33030 (never inherits the later DOWN/B round trip), then fresh
+  twice-ran oracle/RAM/task/bar/AI probes. Edges are A 33031 (open) and A
+  33071 (confirm ROCK SLIDE); ROCK SLIDE hits KABUTO 91→63, KABUTO uses
+  SAND ATTACK (ONIX accuracy 6→5, no damage), next menu reveals/input-ready
+  at 33614. 169 capture manifest is twice-run identical to 33671.
+- **Next:** S8 stays `[ ]`; do not implement this turn from this worker
+  checkpoint without a separately assigned engine step.
+- **Notes:** trace `tools/compare/traces-groundtruth/battle2-turn1.json`,
+  source/RAM ledger `docs/battle2-opening-notes.md`; no fitting, harvest,
+  absolute-tick lookup, capture thinning, or second-turn input.
+
+---
 ## 314 — S8 Battle 2 FIGHT submenu round-trip: **GREEN — 32848-33056 exact**
 
 - **State:** extended `battle2-action-menu-dense.json` is **209/209 exact**

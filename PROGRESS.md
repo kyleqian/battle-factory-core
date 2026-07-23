@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 318 — S8 generic round/presentation core: **GREEN — architecture gate landed**
+
+- **State:** a pure scenario-driven controller now covers battle indexes
+  **0–6**; Tier-1 is **1143/1143** and build passes (**5.525 MB**).
+  Canonical pixel behavior remains unchanged and intentionally unwired.
+- **Did:** added deterministic no-repeat opponent selection, party HP/status
+  healing, win/loss/swap transitions, seventh-win completion, and typed
+  presentation commands with idempotent completion acknowledgements that
+  cannot mutate rules/RNG. `createInitialState({ battleScenario })` exposes
+  opt-in fixtures while its default remains `null`.
+- **Next:** the generic core gate is ready for supervisor review. Remaining S8
+  gates are swap-YES/loss/round-summary UI and one staged OFF-profile Battle 2
+  turn through this seam; do not resume the canonical tick-33332 march.
+- **Notes:** commits `3aee24e`, `bae76ea`; tests cover seven sequential wins,
+  accepted/declined swaps, inter-battle healing, deterministic no-repeat
+  inputs, loss at every index, invalid transitions, and presentation
+  completion/RNG isolation. No oracle trace or renderer work was performed.
+
+---
 ## 317 — User-directed Stage 8 reset: **READY — finite, staged completion**
 
 - **State:** canonical Battle 2 remains exact through tick **33331** at
@@ -40,21 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   sparse mid-animation anchors. Battle-2 action/menu/send-outs/intro/
   transition/rooms remain exact; Battle-1 send-out remains **255/256**
   (#18 only). No framebuffer lookup, harvest, fitting, or thinning.
-
----
-## 315 — S8 Battle 2 turn 1 33030-prefix probe: **GREEN — evidence only**
-
-- **State:** oracle-only Battle 2 first-turn evidence is committed; no
-  runtime engine/test/accepted-trace changes. Baseline remains **1118/1118**
-  and build green.
-- **Did:** normalized `battle2-turn1.json` to the exact action-menu prefix
-  ending 33030 (never inherits the later DOWN/B round trip), then fresh
-  twice-ran oracle/RAM/task/bar/AI probes. Edges are A 33031 (open) and A
-  33071 (confirm ROCK SLIDE); ROCK SLIDE hits KABUTO 91→63, KABUTO uses
-  SAND ATTACK (ONIX accuracy 6→5, no damage), next menu reveals/input-ready
-  at 33614. 169 capture manifest is twice-run identical to 33671.
-- **Next:** S8 stays `[ ]`; do not implement this turn from this worker
-  checkpoint without a separately assigned engine step.
-- **Notes:** trace `tools/compare/traces-groundtruth/battle2-turn1.json`,
-  source/RAM ledger `docs/battle2-opening-notes.md`; no fitting, harvest,
-  absolute-tick lookup, capture thinning, or second-turn input.
