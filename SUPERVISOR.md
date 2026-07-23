@@ -140,12 +140,21 @@ seam. The animation lane is encouraged when a bounded module is ready, but do
 not invent filler work just to occupy it. There is still one supervisor and
 one integration plan—not independent supervisors racing branches.
 
+For animation, read `ANIMATION_PROGRESS.md`, run `npm run
+animation:coverage`, and select a bounded item from `ANIMATION_COVERAGE.json`.
+Keep that lane replenished while independent main work remains. A good step
+stages one short ON-profile scenario or advances one reusable animation
+family—not “implement the next N moves.” Require the worker to update the
+animation ledgers with its evidence. `exact` means a complete dense window
+through the shared seam with every evidence-required variant covered; a
+canonical battle window alone remains `partial`.
+
 What makes the worktree lanes safe:
 
-- **Docs are yours on both worktree lanes.** Their workers are contract-bound not
-  to edit `PROGRESS.md`/`ISSUES.md` (two branches rewriting the same ledger
-  top entry is a guaranteed conflict); they report in their final messages,
-  and you write the docs update when you merge.
+- **Shared docs are yours on both worktree lanes.** Their workers are
+  contract-bound not to edit `PROGRESS.md`/`ISSUES.md` (two branches rewriting
+  the same ledger top entry is a guaranteed conflict). The animation worker
+  does own `ANIMATION_PROGRESS.md` and `ANIMATION_COVERAGE.json`.
 - **Verify in the worktree, then merge.** Run the step's acceptance checks
   inside the worktree (`git -C .worktrees/<id> log`, run tests there), then
   from the main tree: `git merge worker/<id>`, re-run `npm test` and

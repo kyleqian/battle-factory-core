@@ -44,10 +44,17 @@ This is the stable ownership contract; current state remains in `PROGRESS.md`.
 
 - Main defines shared interfaces before another lane depends on them.
 - Scene mode may change presentation timing, never logical outcomes or RNG.
+- Animation works the queue in `ANIMATION_COVERAGE.json`; its concise handoff
+  is `ANIMATION_PROGRESS.md`. Level 50 moves come first, then Open-only, then
+  the rest. Report coverage with `npm run animation:coverage`.
+- Track coverage by move, but implement shared script/effect primitives. Start
+  with one representative matchup; add side/species variants only when source
+  or oracle evidence shows a dependency.
 - The supervisor/solo launcher owns oracle lifecycle; workers only validate
   their selected profile and never start or stop a shared oracle.
 - Side and animation use separate worktrees and do not edit `PROGRESS.md` or
-  `ISSUES.md`; the supervisor verifies and merges them one at a time.
+  `ISSUES.md`; animation owns its two animation ledgers, and the supervisor
+  verifies and merges worktrees one at a time.
 - Parallel capacity is optional: launch only bounded, independent work.
 
 ## Start-of-session protocol (do this first, every session)
@@ -57,7 +64,9 @@ This is the stable ownership contract; current state remains in `PROGRESS.md`.
    stages and their oracle acceptance criteria (authored by this run's
    supervisor on iteration 0 — until then it says PLAN PENDING).
 3. Skim **`ISSUES.md`** — the standing backlog of known-open bugs/debts you can pick from.
-4. Confirm the baseline is green: `npm test` and `npm run build` pass, and
+4. Animation workers also read **`ANIMATION_PROGRESS.md`** and run
+   `npm run animation:coverage`.
+5. Confirm the baseline is green: `npm test` and `npm run build` pass, and
    `bin/oracle info` answers. If not, fixing that is the next action.
 
 ## Commit often & survive interruption (important)

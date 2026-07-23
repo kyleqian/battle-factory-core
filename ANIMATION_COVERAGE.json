@@ -1,0 +1,106 @@
+{
+  "schema": "factory-animation-coverage/v1",
+  "entries": [
+    {
+      "move": "MOVE_DOUBLE_TEAM",
+      "status": "partial",
+      "covered": ["opponent-front GROVYLE"],
+      "evidence": ["tools/compare/traces/turn1-cloneanim.json"],
+      "remaining": "Prove the timeline through a portable staged scenario and audit attacker-side geometry."
+    },
+    {
+      "move": "MOVE_ROCK_SLIDE",
+      "status": "partial",
+      "covered": ["player-back ONIX to opponent-front targets"],
+      "evidence": ["tools/compare/traces/turn1-rockslide.json", "tools/compare/traces/battle2-turn1-rockslide.json"],
+      "remaining": "Remove canonical-battle coupling and exercise the opposite attacker side."
+    },
+    {
+      "move": "MOVE_ENDEAVOR",
+      "status": "partial",
+      "covered": ["opponent-front GROVYLE to player-back ONIX"],
+      "evidence": ["tools/compare/traces/turn2-endeavor-drain.json"],
+      "remaining": "Prove a portable staged case and audit geometry-sensitive attacker/target variants."
+    },
+    {
+      "move": "MOVE_DRAGON_BREATH",
+      "status": "partial",
+      "covered": ["player-back ONIX hit and airborne-target miss"],
+      "evidence": ["tools/compare/traces/turn2-dragonbreath.json", "tools/compare/traces/turn14-fly-miss.json"],
+      "remaining": "Close or explicitly accept ISSUES #23's compressed projectile remainder, then prove portability."
+    },
+    {
+      "move": "MOVE_FEATHER_DANCE",
+      "status": "partial",
+      "covered": ["opponent-front PIDGEOTTO to player-back ONIX"],
+      "evidence": ["tools/compare/traces/turn6-featherdance.json"],
+      "remaining": "Prove a portable staged case and audit the opposite attacker side."
+    },
+    {
+      "move": "MOVE_BIND",
+      "status": "partial",
+      "covered": ["player-back ONIX miss"],
+      "evidence": ["tools/compare/traces/turn8-bind-a.json", "tools/compare/traces/turn8-bind-b.json"],
+      "remaining": "Stage and match the actual hit animation and residual-damage lifecycle."
+    },
+    {
+      "move": "MOVE_QUICK_ATTACK",
+      "status": "partial",
+      "covered": ["opponent-front PIDGEOTTO to player-back ONIX"],
+      "evidence": ["tools/compare/traces/turn9-quickattack.json"],
+      "remaining": "Prove portability and the player-back attacker orientation."
+    },
+    {
+      "move": "MOVE_AERIAL_ACE",
+      "status": "partial",
+      "covered": ["opponent-front PIDGEOTTO to player-back ONIX"],
+      "evidence": ["tools/compare/traces/turn10-aerialace.json"],
+      "remaining": "Prove portability and the player-back attacker orientation."
+    },
+    {
+      "move": "MOVE_SAND_ATTACK",
+      "status": "partial",
+      "covered": ["opponent-front PIDGEOTTO to player-back ONIX"],
+      "evidence": ["tools/compare/traces/turn13-sandattack.json"],
+      "remaining": "Prove a portable staged case and audit the opposite attacker side."
+    },
+    {
+      "move": "MOVE_FLY",
+      "status": "partial",
+      "covered": ["opponent-front MURKROW charge and strike"],
+      "evidence": ["tools/compare/traces/turn14-fly-miss.json", "tools/compare/traces/turn15-fly-strike.json"],
+      "remaining": "Prove portability, audit player-back geometry, and retain ISSUES #34's bounded affine exclusion."
+    },
+    {
+      "move": "MOVE_FIRE_PUNCH",
+      "status": "partial",
+      "covered": ["player-back MAGBY to opponent-front MURKROW"],
+      "evidence": ["tools/compare/traces/turn16-rung3.json", "tools/compare/traces/turn17-rung4.json"],
+      "remaining": "Extract the shared timeline from canonical turn clocks and exercise the opposite attacker side."
+    },
+    {
+      "move": "MOVE_FAINT_ATTACK",
+      "status": "partial",
+      "covered": ["opponent-front MURKROW to player-back MAGBY"],
+      "evidence": ["tools/compare/traces/turn17-rung2.json"],
+      "remaining": "Extract the shared timeline from canonical turn clocks and audit the opposite attacker side; retain ISSUES #38."
+    }
+  ],
+  "queue": [
+    "MOVE_FIRE_PUNCH",
+    "MOVE_FAINT_ATTACK",
+    "MOVE_ROCK_SLIDE",
+    "MOVE_DOUBLE_TEAM",
+    "MOVE_ENDEAVOR",
+    "MOVE_FEATHER_DANCE",
+    "MOVE_QUICK_ATTACK",
+    "MOVE_AERIAL_ACE",
+    "MOVE_SAND_ATTACK",
+    "MOVE_FLY",
+    "MOVE_DRAGON_BREATH",
+    "MOVE_BIND"
+  ],
+  "variantAudits": {
+    "openLevelSpecies": []
+  }
+}

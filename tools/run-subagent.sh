@@ -301,13 +301,13 @@ fi
 # and the supervisor folds docs into the merge.
 if [[ "$IS_WORKTREE" == "1" ]]; then
   if [[ "$LANE" == "animation" ]]; then
-    LANE_CONTRACT="This is the animation/presentation lane. Keep move-animation rendering modular behind the battle presentation seam; do not take ownership of facility progression or shared battle-state architecture. Use the Battle Scene ON oracle for animation evidence."
+    LANE_CONTRACT="This is the animation/presentation lane. Read ANIMATION_PROGRESS.md and run npm run animation:coverage before changing code. Work the assigned Level 50 coverage case through reusable animation primitives behind the battle presentation seam; do not take ownership of facility progression or shared battle-state architecture. Use the Battle Scene ON oracle for animation evidence. You own ANIMATION_PROGRESS.md and ANIMATION_COVERAGE.json: keep their handoff, status, evidence, and queue current before finishing. A canonical battle window alone is partial; exact requires a complete dense window through the shared seam and every evidence-required variant."
   else
     LANE_CONTRACT="This is the side implementation lane. Prefer source extraction, deterministic scenario staging, data breadth, or another file-disjoint task assigned by the supervisor. Use the Battle Scene OFF oracle."
   fi
   PROMPT="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step.
 
-You are in the ${LANE} lane, a git worktree on branch ${WT_BRANCH}; sibling workers may be active in other lanes. Work only inside this worktree and commit only to this branch. Do NOT edit PROGRESS.md or ISSUES.md (reading them is fine): docs for this lane belong to the supervisor, who folds them in when merging your branch — report your results fully in your final message instead. ${LANE_CONTRACT}
+You are in the ${LANE} lane, a git worktree on branch ${WT_BRANCH}; sibling workers may be active in other lanes. Work only inside this worktree and commit only to this branch. Do NOT edit PROGRESS.md or ISSUES.md (reading them is fine): shared docs for this lane belong to the supervisor, who folds them in when merging your branch — report your results fully in your final message instead. ${LANE_CONTRACT}
 
 Your selected oracle is ${ORACLE_PROFILE} at ${ORACLE_URL}, exported as POKEBENCH_ORACLE_URL and POKEBENCH_ORACLE_PROFILE. Both named oracle URLs are also exported for compare traces.
 
