@@ -1,0 +1,63 @@
+{
+  "profile": "battle-scene-off",
+  "canonicalTrace": "tools/compare/traces-groundtruth/battle1-swapyes-b.json",
+  "generator": "tools/probe/derive-swap-enemy-picker-trace.mjs",
+  "ramProbe": "tools/probe/dump-swap-enemy-picker.py",
+  "route": {
+    "selectedPlayer": { "slot": 0, "species": "ONIX", "speciesId": 95, "personality": 1205102525 },
+    "selectedEnemy": { "slot": 0, "species": "GROVYLE", "speciesId": 278, "monId": 188, "personality": 1094072807 },
+    "promptState5Snapshot": 29999,
+    "firstProcessedPromptInput": 30000
+  },
+  "state5EdgeCheck": {
+    "scenario": "accept-state5-a",
+    "input": [{ "tick": 29999, "buttons": ["A"] }],
+    "result": "rejected; snapshot ends in Swap_Task_HandleYesNo state 5 with ONIX still selected"
+  },
+  "branches": {
+    "yes": {
+      "input": [{ "tick": 30000, "buttons": ["A"] }],
+      "taskBoundaries": {
+        "acceptResponse": 30000,
+        "exit": 30001,
+        "specialResultFalse": 30020,
+        "copySwappedMonData": 30021,
+        "returnToFieldContinueScript": 30041
+      },
+      "result": {
+        "specialVarResult": 0,
+        "playerParty0": { "species": "GROVYLE", "speciesId": 278, "personality": 1094072807, "friendship": 0, "maxHp": 143 }
+      }
+    },
+    "no": {
+      "input": [{ "tick": 30000, "buttons": ["DOWN"] }, { "tick": 30020, "buttons": ["A"] }],
+      "taskBoundaries": {
+        "cursorNo": 30000,
+        "acceptResponse": 30020,
+        "transitionIn": 30021,
+        "enemyPickerInputReady": 30087
+      },
+      "result": {
+        "specialVarResult": 1,
+        "playerParty0": { "species": "ONIX", "speciesId": 95, "personality": 1205102525, "friendship": 0, "maxHp": 117 }
+      }
+    },
+    "b": {
+      "input": [{ "tick": 30020, "buttons": ["B"] }],
+      "taskBoundaries": {
+        "acceptResponse": 30020,
+        "transitionIn": 30021,
+        "enemyPickerInputReady": 30087
+      },
+      "result": {
+        "specialVarResult": 1,
+        "playerParty0": { "species": "ONIX", "speciesId": 95, "personality": 1205102525, "friendship": 0, "maxHp": 117 }
+      }
+    }
+  },
+  "continuousTasks": {
+    "promptAndReturn": ["Swap_Task_FadeSpeciesName", "Swap_Task_HandleYesNo|Swap_HandleAcceptMonResponse|Swap_Task_ScreenInfoTransitionIn|Swap_Task_HandleChooseMons"],
+    "yesExit": ["Swap_Task_FadeSpeciesName", "Swap_Task_Exit"]
+  },
+  "note": "monSwapped remains 1 after accept prompt entry on all three branches; only Swap_Task_Exit's YES path copies the party and sets gSpecialVar_Result FALSE."
+}

@@ -11,6 +11,10 @@
  *   node tools/probe/derive-swap-enemy-picker-trace.mjs earliest-swap-a > /tmp/t.json
  *   node tools/probe/derive-swap-enemy-picker-trace.mjs earliest-picker-right > /tmp/t.json
  *   node tools/probe/derive-swap-enemy-picker-trace.mjs earliest-accept-a > /tmp/t.json
+ *   node tools/probe/derive-swap-enemy-picker-trace.mjs accept-state5-a > /tmp/t.json
+ *   node tools/probe/derive-swap-enemy-picker-trace.mjs accept-yes > /tmp/t.json
+ *   node tools/probe/derive-swap-enemy-picker-trace.mjs accept-no > /tmp/t.json
+ *   node tools/probe/derive-swap-enemy-picker-trace.mjs accept-b > /tmp/t.json
  *
  * Optional two integer arguments replace the default inclusive capture range.
  */
@@ -30,6 +34,10 @@ const defaults = {
   'earliest-swap-a': [29780, 29935],
   'earliest-picker-right': [29930, 29942],
   'earliest-accept-a': [29930, 30005],
+  'accept-state5-a': [29996, 30020],
+  'accept-yes': [29996, 30251],
+  'accept-no': [29996, 30251],
+  'accept-b': [30016, 30271],
 };
 
 if (!(scenario in defaults)) {
@@ -48,6 +56,18 @@ if (captureEnd - captureStart + 1 > 256) {
 
 const cloned = structuredClone(base);
 let segments;
+// Through tick 29802, this is the committed route's SWAP press.  The picker
+// task becomes HandleChooseMons at snapshot 29935, so the first processed A
+// edge is 29936.  The accept task reaches its input-ready state at snapshot
+// 29999; the first processed prompt edge is consequently 30000.  Keeping
+// this construction in one place makes accept variants phase-relative
+// evidence, rather than a copied long trace.
+const toPrompt = [
+  ...cloned.segments.slice(0, 153),
+  { buttons: [], frames: 133 },
+  { buttons: ['A'], frames: 1 },
+  { buttons: [], frames: 63 },
+];
 switch (scenario) {
   case 'canonical':
     segments = cloned.segments;
@@ -65,6 +85,25 @@ switch (scenario) {
   case 'earliest-accept-a':
     // Same first picker-ready edge, selecting enemy slot 0 (GROVYLE).
     segments = [...cloned.segments.slice(0, 153), { buttons: [], frames: 133 }, { buttons: ['A'], frames: 1 }, { buttons: [], frames: 250 }];
+    break;
+  case 'accept-yes':
+    // First processed HandleYesNo edge: A selects the default YES cursor.
+    segments = [...toPrompt, { buttons: ['A'], frames: 1 }, { buttons: [], frames: 800 }];
+    break;
+  case 'accept-state5-a':
+    // State 5 first appears in the snapshot after tick 29999's task run;
+    // this A edge is deliberately one frame too early and is rejected.
+    segments = [...cloned.segments.slice(0, 153), { buttons: [], frames: 133 }, { buttons: ['A'], frames: 1 }, { buttons: [], frames: 62 }, { buttons: ['A'], frames: 1 }, { buttons: [], frames: 100 }];
+    break;
+  case 'accept-no':
+    // DOWN is accepted at the first processed prompt edge.  The deliberately delayed
+    // A proves NO is an ordinary input-ready branch, not a one-frame edge.
+    segments = [...toPrompt, { buttons: ['DOWN'], frames: 1 }, { buttons: [], frames: 19 }, { buttons: ['A'], frames: 1 }, { buttons: [], frames: 500 }];
+    break;
+  case 'accept-b':
+    // B is deliberately delayed 20 frames after the first processed edge and still follows
+    // the same no-mutation return path as A on NO.
+    segments = [...toPrompt, { buttons: [], frames: 20 }, { buttons: ['B'], frames: 1 }, { buttons: [], frames: 500 }];
     break;
 }
 
