@@ -391,6 +391,13 @@ Remaining known residual classes: the isolated redraw-extremum ticks
 fist/hitsplat/shake, seven-ember spread, generic hit response, and visible
 HP drain. Exact predecessor rungs remain green; the next boundary is the
 atomic opponent-HP write at **21406**. See `docs/turn16-notes.md` §6.6.
+**Turn-16 burn resolution landed (2026-07-23 bounded worker):**
+`turn16-rung4.json` is **155/155 exact** for every canonical tick
+`21406-21560`: atomic HP/status/RNG writes, the three-flame status animation,
+burned-message typing/hold, the reusable BRN healthbox compositor at 21542,
+`gCurrentMove` reset, and the first four residual-message handoff ticks.
+ISSUES #16 is closed; burn damage and tick 21561 onward remain untouched.
+See `docs/turn16-notes.md` §6.7.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

@@ -16,13 +16,10 @@
 // window-printer path, replicated pixel-for-pixel including the
 // dynamic-color gender-symbol override).
 //
-// Round 3 (ISSUES #16): hpFraction != 1 and status != "none" are now
-// implemented too - source-decoded (CalcBarFilledPixels' fill-pixel/color-
-// band math, UpdateStatusIconInHealthbox's status-icon placement), pinned
-// by hermetic Tier-1 tests only. No oracle pixels exist yet for partial HP
-// or status (the canonical trace never reaches that state before the first
-// action menu) - that validation is deferred to S7's first HP-drain trace,
-// see docs/healthbox-assembly-notes.md.
+// Round 3/Turn 16 (ISSUES #16, now closed): hpFraction != 1 and status !=
+// "none" are source-decoded (CalcBarFilledPixels plus
+// UpdateStatusIconInHealthbox's icon/palette/end-cap blits) and live
+// oracle-validated across turn16-rung4's whole 155-frame window.
 
 import type { RgbColor } from "./bg.ts";
 import fontSmallData from "../data/gen/font-small.json" with { type: "json" };

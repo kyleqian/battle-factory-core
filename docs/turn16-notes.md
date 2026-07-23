@@ -420,11 +420,10 @@ byte-identical): **all previously-cited exact shas (5950e7b3d8ba,
 still read at their originally-cited ticks — 0 slips this pass**, unlike
 turn13-15's own retrofits (each found 1-7). The one genuinely-unpinned
 boundary this dossier itself flagged open — "Foe MURKROW was burned!"
-typing-in, bracketed only "between 21450 (absent) and 21465 (typing)" — is
-now pinned exactly: **tick 21465 IS the first-typing tick** (dense stride-1
-across 21445-21466 confirms 21445 does not yet show it and 21465 is the
-earliest match), so §4's own citation was already exact, just not
-previously proven tight.
+typing-in — was initially mislabeled by this verifier: tick 21465 is the
+first frame matching §4's cited *partial-text SHA*, not the first glyph.
+Rung 4's every-tick live-app pass corrects the boundary below: FIRE PUNCH
+holds through 21452 and the replacement message's first `F` is at 21453.
 
 ### Verification
 
@@ -567,3 +566,34 @@ remain outside this increment. Regression verdict: rung 2b **123/123**, rung
 `verify-turn16.ts` **233/233**, Tier-1 **1034/1034**, and build
 **5.454 MB**. No excluded captures or forbidden pixel/trace mechanism was
 used.
+
+### 6.7 Rung 4 implementation: burn resolution through the residual-message handoff
+
+Canonical renders **21406-21560** are committed in `turn16-rung4.json` at
+**155/155 exact**, every tick captured. All behavior is expressed at local
+FIRE_PUNCH ages from the confirmation-relative animation owner:
+
+- age 236 atomically commits MURKROW HP `142→75`;
+- age 241 consumes `2840502189→2012156700`; the upper-half roll is `2`,
+  successfully setting `STATUS1_BURN`;
+- ages 247-280 render `Status_Burn`'s three source
+  `gBurnFlameSpriteTemplate` sprites. Direct RAM reads pin their six-tick
+  displayed spacing, source 8.8 translation, five-frame cycle, lifetimes,
+  and OAM order;
+- age 283 replaces the held FIRE PUNCH text with the first `F` of
+  `Foe MURKROW was burned!`; the full line then holds through age 386;
+- age 372 performs the atomic BRN healthbox swap. The reusable compositor
+  uses the extracted battler-1 BRN row, runtime palette color
+  `RGB(28,14,10)`, and source-mandated `HEALTHBOX_GFX_0/65` end caps;
+- age 383 clears `gCurrentMove`; age 387 hands the message controller to
+  `Foe MURKROW is hurt...`, whose first four character ticks are included
+  through the assigned endpoint. Damage and all behavior from 21561 onward
+  remain out of scope.
+
+This closes ISSUES #16: the engine status-icon variant is both implemented
+and pixel-validated across the entire scoped window. Regression verdict:
+rung 3 **236/236**, rung 2b **123/123**, rung 2a **221/221**, rung 1
+canonical/delayed **81/81** each, `verify-turn16.ts` **233/233**, Tier-1
+**1037/1037**, and build **5.455 MB**. No framebuffer asset, absolute-tick
+condition, trace branch, per-frame table, coordinate/RGB fitting, or excluded
+capture is used.

@@ -185,25 +185,6 @@ stall). What remains is exactly one tick:
 Affects: `sendout.json` 255/256, `s6-acceptance.json` 224/228 (3 frames are
 ISSUES #5's settled pattern, x88-151-confirmed; 1 frame is #18's own 1496).
 
-## #16 — Healthbox compositor: status-icon variant still unimplemented/
-  unvalidated in the ENGINE (ground truth now BANKED — turn 16's BRN badge)
-
-Trimmed 2026-07-19 (S7 slice D): partial-HP green-band drain validated
-(`turn1-drain.json`, Grovyle 143→101, 0 residual). Trimmed again
-2026-07-20 (supervisor, after S7 slices I-2/J/K): band coverage
-oracle-confirmed on BOTH sides (yellow/red bands, the hp=1 red sliver,
-the truly EMPTY bar — Tier-1 pins added). Trimmed again 2026-07-21
-(supervisor, at the turn-16 scout fold): the "battle 1 never inflicts a
-status" blocker is GONE — turn 16's FIRE_PUNCH burn proc puts a BRN
-badge on MURKROW's healthbox, ground-truthed in
-`battle1-turn16-dense.json` + `docs/turn16-notes.md` §4 (badge absent at
-tick 21540, present at 21548, both PNG-verified; exact appearance tick
-inside 21541-21547 unpinned — sparse capture gap). Remainder: the engine's
-own `UpdateStatusIconInHealthbox` equivalent (placement/
-color-substitution math) has never been written or pixel-validated — the
-turn-16/17 engine slices (S8 territory) will exercise it against the
-banked ground truth.
-
 ## #5 — [POLICY SETTLED 2026-07-17, user-delegated] mon-pic close WIN0V
   jitter: 0-diff stays the bar; re-time trace interactions into clean
   windows where feasible; otherwise ship with each non-matching frame

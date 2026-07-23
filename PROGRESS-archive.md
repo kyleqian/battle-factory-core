@@ -1,3 +1,31 @@
+## 286 — Supervisor wind-down (S7 turn 16 rung 2a): **CANONICAL GREEN; +30 REGISTER-RACE FRAME PARKED AS #38**
+
+- **State:** canonical `20826--21046` is **221/221 exact**. The requested
+  delayed twin is **220/221**: only delayed tick **21006** differs. Rung 1
+  remains **81/81** each, frozen send-out rung 6 **195/195** each,
+  turn-16 verifier **233/233**, Tier-1 **1024/1024**, and build
+  (**5.430 MB**) pass.
+- **Did:** implemented source-extracted `BG_DARK`, BG3 darken/restore,
+  Murkrow's source sine ellipse and alpha handoffs, Magby shake, and the
+  generic hitsplat; added pure boundary reducers/tests and a dense,
+  prefix-verbatim canonical trace. A fresh two-oracle SHA comparison and
+  direct RAM/register probes falsified relative identity at age 150:
+  animation task state is identical, but canonical hardware `BLDALPHA` is
+  `0x0e02` while delayed is `0x0d03`.
+- **Next:** resume S7 at canonical **21047** with FAINT_ATTACK's HP-drain/
+  move-handoff tail. Do not reopen exact canonical rung 2a; #38 parks the
+  extra delayed-control frame unless a general cycle/register-queue model is
+  introduced.
+- **Notes:** implementation/evidence commit `d74ab10`; the delay sweep
+  `+0..+8,+15,+16,+30,+31,+32` reproduced the early register exposure only
+  at +30. No framebuffer assets, per-frame tables, RGB/coordinate fitting,
+  absolute-tick lookup, trace branch, or red delayed trace was committed.
+  Supervisor independently reverified every number above. The launcher's
+  first post-run verdict was a false usage-limit positive: its broad regex
+  matched `--no-rate-limit` inside a late `ps` listing; no provider limit
+  occurred, and the detector is now hardened.
+
+---
 ## 284 — Bounded worker (ISSUES #37 rung 6): **GREEN — issue closed**
 
 - **State:** canonical `20551--20745` and delayed `20581--20775` are both

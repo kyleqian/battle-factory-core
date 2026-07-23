@@ -99,8 +99,9 @@ const HP_DRAIN_SPOT = [21131];
 // gFireSpreadSpriteTemplate burst, plus a red palette blend on the target).
 // §4's own row sampled this at a single spot tick (21218) — dense re-bisect.
 const FIRE_CAST_DENSE = range(21170, 21405, 4);
-// "Foe MURKROW was burned!" typing-in boundary — §4 says "first appears
-// between 21450 (absent) and 21465 (typing)" without pinning the exact tick.
+// "Foe MURKROW was burned!" typing-in boundary. Rung 4's every-tick pass
+// corrected the older §4 bracket: FIRE PUNCH holds through 21452 and the
+// replacement message's first "F" is visible at 21453.
 const BURN_TEXT_DENSE = range(21445, 21466, 1);
 // MISSION 1: the BRN badge's exact appearance tick. §4/ISSUES #16 leave this
 // unpinned inside the 21541-21547 window (21540 absent, 21548 present).
@@ -210,14 +211,12 @@ async function main() {
   check("FIRE_PUNCH HP write (21406) matches §4's own citation (84551bcb11c3)", sha12(21406) === "84551bcb11c3", `got ${sha12(21406)}`);
   check("burn-proc tick (21411) identical sha to 21406 (roll invisible until the message prints)", sha12(21411) === "84551bcb11c3", `got ${sha12(21411)}`);
 
-  // === §4 row 8: "Foe MURKROW was burned!" typing-in — dense re-bisection of
-  // the "first appears between 21450 (absent) and 21465 (typing)" window. ===
+  // === §4 row 8: "Foe MURKROW was burned!" typing-in. ===
   {
-    const absentSha = "4417d12683c8" === sha12(21465) ? undefined : sha12(21450); // baseline read below
     const typingSha = "4417d12683c8"; // §4's own cited "typing" sha at 21465
-    const firstTyping = BURN_TEXT_DENSE.find((t) => sha12(t) === typingSha);
-    check(`"Foe MURKROW was burned!" typing-in: dense-bisected first tick pinned at ${firstTyping} (§4's own row only bracketed 21450-21465)`, firstTyping !== undefined, `no match for ${typingSha} found in 21445-21466; shas: ${BURN_TEXT_DENSE.map(sha12).join(",")}`);
-    check("tick 21445 (before the bracket) does NOT yet show the typing sha", sha12(21445) !== typingSha, `got ${sha12(21445)}`);
+    check("§4's cited partial-text frame at 21465 remains exact", sha12(21465) === typingSha, `got ${sha12(21465)}`);
+    check("FIRE PUNCH text holds identically through 21451/21452", sha12(21451) === sha12(21452), `21451=${sha12(21451)} 21452=${sha12(21452)}`);
+    check(`"Foe MURKROW was burned!" first glyph replaces FIRE PUNCH exactly at 21453`, sha12(21453) !== sha12(21452), `both read ${sha12(21452)}`);
   }
 
   // === MISSION 1: the BRN badge — exact appearance tick, bbox, blink/static,
