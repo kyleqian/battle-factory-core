@@ -1,0 +1,25 @@
+{
+  "profile": "battle-scene-off",
+  "canonicalTrace": "tools/compare/traces-groundtruth/battle1-swapyes-b.json",
+  "selectedPlayerSlot": 0,
+  "enemyRentalOrder": [
+    { "slot": 0, "monId": 188, "species": "GROVYLE" },
+    { "slot": 1, "monId": 184, "species": "MURKROW" },
+    { "slot": 2, "monId": 135, "species": "PIDGEOTTO" }
+  ],
+  "boundaries": {
+    "swapCursorVisible": 29782,
+    "earliestSwapA": 29782,
+    "canonicalSwitchTask": 29802,
+    "enemyScreenInitialized": 29886,
+    "enemyPickerInputReady": 29935,
+    "firstPickerCursorResponse": 29936,
+    "firstAcceptTask": 29975,
+    "acceptPromptInputReady": 29999
+  },
+  "source": {
+    "switch": "Swap_OptionSwap -> Swap_Task_SwitchPartyScreen -> Swap_InitActions(SWAP_ENEMY_SCREEN)",
+    "picker": "Swap_Task_HandleChooseMons",
+    "accept": "Swap_ActionMon -> Swap_Task_ScreenInfoTransitionOut -> Swap_AskAcceptMon -> Swap_Task_HandleYesNo"
+  }
+}
