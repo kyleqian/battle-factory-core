@@ -1229,6 +1229,19 @@ export interface BattleSceneState {
    * bounce continuous without an absolute battle tick.
    */
   turn17MenuRedrawElapsed?: number | null;
+  /**
+   * Turn 17's opponent-faint message dismiss edge, in battle-scene elapsed
+   * coordinates.  This is set only by a fresh A edge after the faint
+   * controller's own input-ready epoch; delaying that edge delays every
+   * post-dismiss boundary by the same amount.
+   */
+  turn17KoDismissElapsed?: number | null;
+  /**
+   * RAM-equivalent gBattleOutcome for the first battle.  The WIN write is
+   * intentionally state-only during this slice: the old faint message
+   * remains frozen until the later outcome renderer takes ownership.
+   */
+  battleOutcome?: 0 | 1;
   /** Forced player-switch menu, created only by the real turn-15 faint-text A press. */
   turn15PartySelect?: import("./partySelect.ts").PartySelectState | null;
 }
@@ -1255,11 +1268,18 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn14Resolved: false,
   turn16Resolved: false,
   turn17MenuRedrawElapsed: null,
+  turn17KoDismissElapsed: null,
+  battleOutcome: 0,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
+  const elapsed = state.elapsed + 1;
+  const postDismiss = turn17PostDismissState(
+    elapsed,
+    state.turn17KoDismissElapsed ?? null,
+  );
   return {
-    elapsed: state.elapsed + 1,
+    elapsed,
     sendOutPressElapsed: state.sendOutPressElapsed,
     fightSubmenu: state.fightSubmenu,
     turn1Resolved: state.turn1Resolved,
@@ -1280,6 +1300,9 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn14Resolved: state.turn14Resolved,
     turn16Resolved: state.turn16Resolved ?? false,
     turn17MenuRedrawElapsed: state.turn17MenuRedrawElapsed ?? null,
+    turn17KoDismissElapsed: state.turn17KoDismissElapsed ?? null,
+    battleOutcome:
+      postDismiss === null ? (state.battleOutcome ?? 0) : postDismiss.battleOutcome,
     turn15PartySelect: state.turn15PartySelect,
   };
 }
@@ -12118,6 +12141,58 @@ const TURN16_SETTLED_OWNED_AGE =
   TURN16_FIRE_PUNCH_FIRST_OWNED_AGE + FIRE_PUNCH_TURN17_MENU_REDRAW_AGE;
 const FIRE_PUNCH_RED: RgbColor = { r: 248, g: 0, b: 0 };
 
+/** Dismiss-relative WIN write and first visible outcome-controller boundary. */
+export const TURN17_OUTCOME_FLIP_DELAY = 17;
+export const TURN17_FIRST_OUTCOME_RENDER_DELAY = 26;
+
+export interface Turn17PostDismissState {
+  age: number;
+  battleOutcome: 0 | 1;
+  firstOutcomeRender: boolean;
+}
+
+/**
+ * Hidden post-dismiss state, expressed only in elapsed values from the real
+ * A edge.  The canonical edge therefore yields outcome=WIN at +17 while
+ * leaving the faint framebuffer owned through +25; a delayed edge shifts
+ * both boundaries without any trace-tick knowledge.
+ */
+export function turn17PostDismissState(
+  sceneElapsed: number,
+  dismissElapsed: number | null,
+): Turn17PostDismissState | null {
+  if (dismissElapsed === null || sceneElapsed < dismissElapsed) return null;
+  const age = sceneElapsed - dismissElapsed;
+  return {
+    age,
+    battleOutcome: age >= TURN17_OUTCOME_FLIP_DELAY ? 1 : 0,
+    firstOutcomeRender: age >= TURN17_FIRST_OUTCOME_RENDER_DELAY,
+  };
+}
+
+/** FIRE_PUNCH reducer age derived from the stored Turn 17 confirmation. */
+export const TURN17_FIRE_PUNCH_CONFIRM_TO_EPOCH_DELAY =
+  TURN16_FAINT_ATTACK_ANIM_DELAY
+  + (TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE - TURN17_FIRE_PUNCH_ENTRY_AGE);
+
+export function turn17FirePunchAge(
+  sceneElapsed: number,
+  confirmElapsed: number,
+): number {
+  return sceneElapsed
+    - confirmElapsed
+    - TURN17_FIRE_PUNCH_CONFIRM_TO_EPOCH_DELAY;
+}
+
+/** The faint-message A gate opens with its own wait cursor, never by time alone. */
+export function turn17KoDismissEligible(
+  sceneElapsed: number,
+  confirmElapsed: number,
+): boolean {
+  return turn17FirePunchAge(sceneElapsed, confirmElapsed)
+    >= TURN17_FIRE_PUNCH_RESOLUTION.faint!.cursorStartAge;
+}
+
 function firePunchTargetShakeY2(age: number): number {
   const n = age - 72;
   if (n < 0 || n >= 28) return 0;
@@ -12144,10 +12219,11 @@ function drawFirePunchBurnFlames(
   fb: Uint8Array,
   age: number,
   primaryEffectSucceeded: boolean = true,
+  residualEffectApplies: boolean = true,
 ): void {
   for (const particle of [
     ...(primaryEffectSucceeded ? firePunchBurnFlames(age) : []),
-    ...firePunchResidualBurnFlames(age),
+    ...(residualEffectApplies ? firePunchResidualBurnFlames(age) : []),
   ]) {
     drawSpriteSheet(
       fb,
@@ -12267,6 +12343,7 @@ function drawTurn16PostSwitchField(
       fb,
       firePunchAge,
       resolution.secondaryRollSucceeded,
+      !firePunchProfile?.faint,
     );
     const frontEffects = beforeEffects.slice();
     const frontCoverage = new Uint8Array(240 * 160);
@@ -12367,6 +12444,7 @@ function drawTurn16FightSubmenuWindow(
   partyElapsed: number,
   turn16Resolved: boolean,
   turn17MenuRedrawElapsed: number | null,
+  turn17KoDismissElapsed: number | null,
 ): void {
   if (sm.openElapsed === null) return;
   const openTick = TICK0 + sm.openElapsed;
@@ -12392,15 +12470,20 @@ function drawTurn16FightSubmenuWindow(
       confirmTick === null
         ? null
         : t - (confirmTick + TURN16_FAINT_ATTACK_ANIM_DELAY);
-    const resolutionAge =
+    const frozenAnimationAge =
       animationAge !== null
-      && animationAge >= 0
-      && animationAge
-        < TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE
-          - TURN17_FIRE_PUNCH_ENTRY_AGE
-          + TURN17_FIRE_PUNCH_RESOLUTION.faint!.cursorStartAge
-          + 1
-        ? animationAge
+      && turn17KoDismissElapsed !== null
+      && sm.confirmElapsed !== null
+        ? Math.min(
+            animationAge,
+            turn17KoDismissElapsed
+              - sm.confirmElapsed
+              - TURN16_FAINT_ATTACK_ANIM_DELAY,
+          )
+        : animationAge;
+    const resolutionAge =
+      frozenAnimationAge !== null && frozenAnimationAge >= 0
+        ? frozenAnimationAge
         : null;
     const targetHp = { startHp: 79, endHp: 27 };
     drawTurn16PostSwitchField(
@@ -12603,6 +12686,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
         party.sendOutElapsed,
         state.turn16Resolved ?? false,
         state.turn17MenuRedrawElapsed ?? null,
+        state.turn17KoDismissElapsed ?? null,
       );
       return true;
     }

@@ -99,6 +99,7 @@ import {
   turn5RockSlideKoDismissEligible,
   turn13KoDismissEligible,
   turn15KoDismissEligible,
+  turn17KoDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
 import { advancePartySelect, INITIAL_PARTY_SELECT_STATE, partySendOutBattleMenuReady } from "./partySelect.ts";
@@ -241,6 +242,24 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         ...battleScene,
         fightSubmenu,
         turn15PartySelect: nextParty,
+      };
+    }
+    // Turn 17's opponent-faint text is a genuine input gate.  Register only
+    // a fresh A edge after the confirmation-relative wait-cursor epoch; an
+    // early edge is dropped, and idle time alone can never dismiss it.
+    if (
+      (battleScene.turn16Resolved ?? false) &&
+      (battleScene.turn17KoDismissElapsed ?? null) === null &&
+      battleScene.fightSubmenu.confirmElapsed !== null &&
+      newKeys.has("A") &&
+      turn17KoDismissEligible(
+        battleScene.elapsed + 1,
+        battleScene.fightSubmenu.confirmElapsed,
+      )
+    ) {
+      battleScene = {
+        ...battleScene,
+        turn17KoDismissElapsed: battleScene.elapsed + 1,
       };
     }
     // S7 FIGHT-submenu slice (docs/battle-turn-notes.md §11): the settled
