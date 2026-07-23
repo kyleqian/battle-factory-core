@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 304 — Bounded S8 Battle 2 opening: **GREEN evidence/setup checkpoint; pixels incomplete**
+## 304 — Supervisor-accepted S8 Battle 2 opening: **GREEN setup; pixels incomplete**
 
 - **State:** the assigned 33030/33031 pixel endpoint is **not complete**.
   The last committed exact endpoint remains JENSON's held quote at 32031
@@ -28,6 +28,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `+50/+22/+4/+1`, selecting Frontier transition index 10; battle-scene
   elapsed zero is 32245 and in-battle freeze is 32250. No new pixel trace is
   claimed exact; no screenshot/tick lookup, fitting, or disguised chrome.
+  Supervisor independently reviewed the encounter-relative setup/core path
+  and reverified both predecessor traces, all 1089 Tier-1 tests, and build.
 
 ---
 ## 303 — Supervisor-accepted S8 postwin increment: **GREEN — Battle 2 opening quote exact**

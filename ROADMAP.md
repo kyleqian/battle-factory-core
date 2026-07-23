@@ -617,7 +617,7 @@ S8 stays `[ ]`.
 The supervisor independently reviewed the postwin-to-room state/render/RNG
 handoff and reverified the 225/225 + 131/131 new traces, 73/73 + 125/125
 regressions, all 1086 Tier-1 tests, and production build.
-**Sixth postwin worker checkpoint (2026-07-23, bounded partial):**
+**Sixth postwin checkpoint (2026-07-23, supervisor-accepted partial):**
 fresh edge probes pin the JENSON quote's first accepted A at **30383**
 (30382 rejected; canonical 32031 delayed) and the trainer-intro first
 accepted A at **32479** (32478 rejected; canonical 32531 delayed). A fresh
@@ -632,6 +632,10 @@ sequential spiral, parameterized intro/send-outs, KABUTO healthbox, and
 composed Battle 2 menu remain. No Battle 1 full-frame menu harvest was reused
 as Battle 2 chrome. Battle 2 actions, battles 3-7, swap YES, and round
 completion also remain open, so S8 stays `[ ]`.
+The supervisor independently reviewed the encounter-relative state/RNG/setup
+handoff and reverified the 131/131 + 73/73 predecessor traces, all 1089
+Tier-1 tests, and production build; no new endpoint pixel acceptance is
+implied.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
