@@ -12,6 +12,20 @@ describe("factory terminal-endpoint extraction", () => {
     expect(policy.loss).toMatchObject({ transition: { map: "MAP_BATTLE_FRONTIER_BATTLE_FACTORY_LOBBY", singlesWarp: { x: 4, y: 8 } } });
     expect(policy.loss.mutations).toContain("battleNumber is not incremented");
     expect(policy.loss.lobby.text).toContain("Thank you for participating!");
+    expect(policy.loss.lobby.text).toBe(
+      "Thank you for participating!\\pI will return your POKéMON in exchange\\nfor our rental POKéMON.\\pI must also save the event results.\\nPlease wait.$",
+    );
+    expect(policy.loss.lobby.operations).toEqual([
+      "message ReturnMonsSaveResults",
+      "waitmessage",
+      "frontier_checkairshow",
+      "LoadPlayerParty",
+      "set FACTORY_DATA_WIN_STREAK_ACTIVE FALSE",
+      "factory_save 0",
+      "playse SE_SAVE",
+      "waitse",
+      "AskRecordBattle",
+    ]);
     expect(policy.seventhWin.beforeLobby).toContain("challengeStatus = WON");
     expect(policy.seventhWin.lobby.regularText).toContain("seven\\nstraight Battle Swap matches!");
     expect(policy.seventhWin.battlePoints).toMatchObject({ brainBonus: 10, cap: 9999, firstSevenWinAward: 3 });
@@ -24,6 +38,12 @@ describe("factory terminal-endpoint extraction", () => {
       getPointsMsgbox: ["message", "playfanfare MUS_OBTAIN_B_POINTS", "waitfanfare", "waitmessage"],
     });
     expect(policy.presentation.lossOrder[2]).toContain("LoadPlayerParty");
+    expect(policy.presentation.gates.recordPrompt).toEqual([
+      "message RecordLastMatch",
+      "waitmessage",
+      "multichoicedefault (20,8), default choice 1",
+      "A/B/choice dispatch",
+    ]);
     expect(policy.presentation.seventhWinOrder[1]).toContain("A/B-gated");
   });
 
