@@ -529,3 +529,48 @@ rung 2 **221/221**, rung 1 **118/118**, `verify-turn17.ts` all **245**
 checks, Tier-1 **1052/1052**, and production build **5.458 MB**.
 No absolute battle tick, framebuffer/screenshot asset, per-frame lookup,
 trace branch, coordinate/RGB fitting, or excluded capture was added.
+
+## 9. Engine rung 4: FIRE_PUNCH cast through the lethal pre-write frame
+
+Canonical renders **22218-22417** are implemented in
+`turn17-rung4.json` at **200/200 exact**, every tick captured. The trace
+retains rung 3's full input prefix verbatim and appends only 200 input-free
+frames.
+
+Turn 17's first animation-owned VBlank enters the already-exact shared
+FIRE_PUNCH reducer at age **27**. This is an occurrence parameter on the
+confirmation/animation epoch, not a battle-tick branch: ages 27 onward reuse
+Turn 16's source-derived red palette ramp, four spiral embers, fist,
+hitsplat, target shake, seven spread embers with stable OAM ordering, and
+generic hit wobble/blink without new geometry or color constants. A first
+comparison with an incorrect entry-age hypothesis matched only the static
+prefix; the age-27 mapping then reproduced the entire dynamic cast.
+
+The resolution profile carries the actual entering state
+`MURKROW 58/142 BRN` and lethal endpoint 0. The visible controller drains
+58→0 while battle HP remains atomically 58 throughout this rung. The final
+two positive controller values also exposed a source rule that the earlier
+nonlethal compositor had not needed: `CalcBarFilledPixels` decides whether
+to force its 1-pixel low-HP sliver from `newValue`, not `currValue`.
+Because this drain's `newValue` is already 0, ticks 22414-22415 render a
+fully empty bar even while the controller still holds a positive fractional
+value. `healthboxAssembly.ts` now accepts that destination separately, with
+Tier-1 coverage for both lethal and nonlethal behavior.
+
+The boundary was checked rather than inferred. Fresh oracle capture keeps
+the held pre-write framebuffer SHA `63600c307d1c...` through **22418**, while
+the existing RAM dossier and `verify-turn17.ts` independently place the
+`gBattleMons[1].hp 58→0` write at tick 22418. A two-frame app comparison
+matched **22417** and intentionally diverged at **22418**, proving that the
+committed dense interval stops at the largest implemented contiguous frame
+before the atomic write. In shared reducer coordinates, entry age 27 plus
+200 displayed frames places that unimplemented write at age **227**.
+
+Tier-1 tests pin the Turn 17 entry/write-age distance, lethal profile,
+carried BRN state, pre/post atomic boundary, and the source lethal-bar rule.
+Regression verdict: rung 4 **200/200**, rung 3 **143/143**, Turn 16 rung 3
+**236/236**, `verify-turn17.ts` all **245** checks, Tier-1 **1054/1054**,
+and production build **5.458 MB**. Tick 22418's atomic HP write and
+everything after it remain intentionally untouched. No absolute battle
+tick, framebuffer/screenshot asset, per-frame lookup, trace branch,
+coordinate/RGB fitting, excluded capture, or thinned prior trace was added.

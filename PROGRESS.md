@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 294 — Bounded worker (S7 turn 17 rung 4): **GREEN — lethal FIRE_PUNCH pre-write exact**
+
+- **State:** canonical `22218--22417` is **200/200 exact**, every tick
+  captured. Turn-17 rung 3 remains **143/143**, Turn-16 rung 3 remains
+  **236/236**, `verify-turn17.ts` passes all **245** checks, Tier-1 is
+  **1054/1054**, and build passes (**5.458 MB**).
+- **Did:** reused the shared FIRE_PUNCH cast at confirmation-relative reducer
+  age 27, parameterized MURKROW's `58→0 BRN` resolution profile, and modeled
+  source `CalcBarFilledPixels` lethal-target behavior so the final positive
+  controller values do not force a 1px sliver. Committed dense
+  `turn17-rung4.json`.
+- **Next:** resume at **22418**, the atomic `gBattleMons[1].hp 58→0` write.
+  Secondary roll/no-op, faint sink/text, victory flow, and later ticks remain
+  untouched; #38 stays parked.
+- **Notes:** implementation commit `aad02b4`. Fresh two-frame comparison
+  matched 22417 and intentionally diverged at 22418, independently confirming
+  the RAM/verifier write boundary. No forbidden framebuffer, absolute tick,
+  per-frame table, trace branch, fitted coordinate/color, excluded capture,
+  or thinned trace.
+
+---
 ## 293 — Bounded worker (S7 turn 17 rung 3): **GREEN — FAINT_ATTACK resolution exact**
 
 - **State:** canonical `22075--22217` is **143/143 exact**, every tick
@@ -48,27 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   coordinate/RGB fitting, or excluded capture. Supervisor independently
   reverified the dense window, predecessor rung, turn-17 verifier, full
   Tier-1 suite, and production build; ROADMAP status accepted.
-
----
-## 291 — Bounded worker (S7 turn 17 rung 1): **GREEN — dispatch prefix exact**
-
-- **State:** canonical `21736--21853` is **118/118 exact**, every tick
-  captured. Turn-16 rungs 5/4 remain **175/175** and **155/155**; verifiers
-  pass **233/233** (turn 16) and all turn-17 checks (**245 captures**);
-  Tier-1 is **1048/1048** and build passes (**5.457 MB**).
-- **Did:** added honest turn-17 epoch/redraw state, preserved MAGBY
-  `79/138` and MURKROW `58/142 BRN`, reopened FIRE_PUNCH at `14/15` PP,
-  accepted the 21801 confirm, and pinned MURKROW-first ownership,
-  FAINT_ATTACK currentMove, no-crit RNG, and the RAM `52` damage roll.
-  Added a direct source-accurate burned-physical-damage regression and
-  committed dense `turn17-rung1.json`.
-- **Next:** resume at **21854**, confirmed as the first FAINT_ATTACK
-  animation-owned render. Animation body, HP drain, FIRE_PUNCH response,
-  faint/WIN flow, and everything later remain untouched; #38 stays parked.
-- **Notes:** implementation commit `210ace5`; all scheduling derives from
-  the stored turn-16/17 confirmation and redraw ages. No absolute battle
-  tick, framebuffer/screenshot asset, per-frame table, trace branch,
-  coordinate/RGB fitting, or excluded capture. Supervisor independently
-  reverified the dense window, both oracle verifiers, full Tier-1 suite, and
-  build; ROADMAP status accepted. The dossier's old burn-halving inference
-  is corrected: DARK is special in Gen 3, so the exact 52 is variance.

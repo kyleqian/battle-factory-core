@@ -1,3 +1,27 @@
+## 291 — Bounded worker (S7 turn 17 rung 1): **GREEN — dispatch prefix exact**
+
+- **State:** canonical `21736--21853` is **118/118 exact**, every tick
+  captured. Turn-16 rungs 5/4 remain **175/175** and **155/155**; verifiers
+  pass **233/233** (turn 16) and all turn-17 checks (**245 captures**);
+  Tier-1 is **1048/1048** and build passes (**5.457 MB**).
+- **Did:** added honest turn-17 epoch/redraw state, preserved MAGBY
+  `79/138` and MURKROW `58/142 BRN`, reopened FIRE_PUNCH at `14/15` PP,
+  accepted the 21801 confirm, and pinned MURKROW-first ownership,
+  FAINT_ATTACK currentMove, no-crit RNG, and the RAM `52` damage roll.
+  Added a direct source-accurate burned-physical-damage regression and
+  committed dense `turn17-rung1.json`.
+- **Next:** resume at **21854**, confirmed as the first FAINT_ATTACK
+  animation-owned render. Animation body, HP drain, FIRE_PUNCH response,
+  faint/WIN flow, and everything later remain untouched; #38 stays parked.
+- **Notes:** implementation commit `210ace5`; all scheduling derives from
+  the stored turn-16/17 confirmation and redraw ages. No absolute battle
+  tick, framebuffer/screenshot asset, per-frame table, trace branch,
+  coordinate/RGB fitting, or excluded capture. Supervisor independently
+  reverified the dense window, both oracle verifiers, full Tier-1 suite, and
+  build; ROADMAP status accepted. The dossier's old burn-halving inference
+  is corrected: DARK is special in Gen 3, so the exact 52 is variance.
+
+---
 ## 290 — Bounded worker (S7 turn 16 rung 5): **GREEN — turn complete**
 
 - **State:** canonical `21561--21735` is **175/175 exact**, every tick
