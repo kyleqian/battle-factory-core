@@ -1,3 +1,19 @@
+## 282 — Bounded worker (ISSUES #37 rung 4a): **GREEN — MAGBY release**
+
+- **State:** canonical `20391--20406` and delayed `20421--20436` are both
+  **16/16 exact**. Frozen rung-2 traces remain **43/43** each and rung-3
+  traces **46/46** each. Tier-1 **1012/1012** and build (**5.409 MB**) pass.
+- **Did:** landed a SEND-OUT-relative release reducer (logical tick 0 at
+  elapsed 145) that parameterizes the initial ONIX affine materializer and
+  turn-5 clean particle/palette-fade mechanisms for MAGBY. Raw BG banks use
+  source `BlendPalette`; player terrain occlusion remains at the established
+  row 112 boundary. Committed dense canonical/delayed 16-frame traces.
+- **Next:** #37 rung 5 begins with healthbox ownership at canonical **20407**
+  (delayed **20437**). Do not reopen exact rung 1--4a windows.
+- **Notes:** commit `3222c92`; no per-frame assets, absolute-tick lookup,
+  screenshot harvesting, coordinate fitting, or trace-specific branching.
+
+---
 ## 281 — Uninterrupted supervisor policy: **GREEN**
 
 - **State:** game code and accepted rung-3 renderer are unchanged. The latest

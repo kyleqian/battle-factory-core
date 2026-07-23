@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 285 — Bounded worker (S7 turn 16 rung 1): **GREEN — cross-layer handoff**
+
+- **State:** canonical `20745--20825` and delayed `20775--20855` are both
+  **81/81 exact**. Rung 6 remains **195/195** each, rung 5 **144/144** each,
+  rung 4a **16/16** each; turn-16 verifier (233 captures), Tier-1
+  **1019/1019**, and build (**5.415 MB**) pass.
+- **Did:** made completed forced SEND OUT reset turn 15's stale choice and
+  return input to ordinary FIGHT state with MAGBY's real moveset; added
+  open/confirm-relative submenu, bounce-freeze, and FAINT_ATTACK kickoff
+  rendering plus contiguous canonical/+30 traces.
+- **Next:** supervisor chooses the next increment. Scoped remainder begins at
+  canonical **20826** / delayed **20856** (FAINT_ATTACK animation body);
+  do not reopen exact send-out or rung-1 windows.
+- **Notes:** implementation commit `de7e334`; both traces preserve their
+  122-segment prefixes verbatim and the oracle-relative SHA streams are
+  **0/81 mismatched**. No framebuffer assets, absolute-tick lookup, RGB
+  fitting, trace branch, or excluded capture.
+
+---
 ## 284 — Bounded worker (ISSUES #37 rung 6): **GREEN — issue closed**
 
 - **State:** canonical `20551--20745` and delayed `20581--20775` are both
@@ -33,19 +52,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   do not reopen exact rungs 1--5.
 - **Notes:** unmodified A/B was **0/144** each; no screenshots, per-frame RGB,
   absolute battle-tick tables, coordinate patches, or trace branches.
-
----
-## 282 — Bounded worker (ISSUES #37 rung 4a): **GREEN — MAGBY release**
-
-- **State:** canonical `20391--20406` and delayed `20421--20436` are both
-  **16/16 exact**. Frozen rung-2 traces remain **43/43** each and rung-3
-  traces **46/46** each. Tier-1 **1012/1012** and build (**5.409 MB**) pass.
-- **Did:** landed a SEND-OUT-relative release reducer (logical tick 0 at
-  elapsed 145) that parameterizes the initial ONIX affine materializer and
-  turn-5 clean particle/palette-fade mechanisms for MAGBY. Raw BG banks use
-  source `BlendPalette`; player terrain occlusion remains at the established
-  row 112 boundary. Committed dense canonical/delayed 16-frame traces.
-- **Next:** #37 rung 5 begins with healthbox ownership at canonical **20407**
-  (delayed **20437**). Do not reopen exact rung 1--4a windows.
-- **Notes:** commit `3222c92`; no per-frame assets, absolute-tick lookup,
-  screenshot harvesting, coordinate fitting, or trace-specific branching.
