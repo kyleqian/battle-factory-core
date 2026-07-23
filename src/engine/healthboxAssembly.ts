@@ -56,6 +56,11 @@ export interface HealthboxContentParams {
   gender: "male" | "female" | "none";
   /** currentHP/maxHP, 0-1. */
   hpFraction: number;
+  /**
+   * Healthbar controller destination. During a lethal drain this is already
+   * zero while `hpFraction` still walks through its final positive values.
+   */
+  hpTargetFraction?: number;
   status: "none" | "sleep" | "poison" | "burn" | "freeze" | "paralysis";
 }
 
@@ -144,10 +149,13 @@ const HP_BAR_RED_BASE = 9;
 export type HpBarBand = "green" | "yellow" | "red";
 
 /** `CalcBarFilledPixels` (battle_interface.c:2413-2456), specialized to the settled (non-mid-animation) case where `currValue` has already converged to `newValue` and `maxValue >= totalPixels` (true for every real Pokemon's max HP vs. this bar's 48px) - so `pixels = floor(hpFraction * totalPixels)` stands in for the source's `currValue * totalPixels / maxValue` integer division. Floating-point `hpFraction` (vs. the source's exact integer ratio) can differ by 1px right at a truncation boundary for some HP pairs - accepted per the ISSUES #16 ground-truth caveat (no oracle pixels to pin this against yet). The `filledPixels==0 && hp>0 -> force 1px` rule (source lines 2436-2440) is the "never show a fully-empty bar for a Pokemon that isn't fainted" sliver case. */
-export function calcBarFilledPixels(hpFraction: number): { filledPixels: number; columns: number[] } {
+export function calcBarFilledPixels(
+  hpFraction: number,
+  hpTargetFraction: number = hpFraction,
+): { filledPixels: number; columns: number[] } {
   const rawPixels = Math.floor(hpFraction * HP_BAR_TOTAL_PIXELS);
   const columns = [0, 0, 0, 0, 0, 0];
-  if (rawPixels === 0 && hpFraction > 0) {
+  if (rawPixels === 0 && hpTargetFraction > 0) {
     columns[0] = 1;
     return { filledPixels: 1, columns };
   }
@@ -183,8 +191,9 @@ function hpBarLocalTiles(
   assets: Pick<HealthboxAssets, "hpbar" | "hpbarAnim"> & Partial<Pick<HealthboxAssets, "frameEnd">>,
   hpFraction: number,
   hasStatus: boolean = false,
+  hpTargetFraction: number = hpFraction,
 ): { sheet: SheetAsset; tileIndex: number }[] {
-  const { filledPixels, columns } = calcBarFilledPixels(hpFraction);
+  const { filledPixels, columns } = calcBarFilledPixels(hpFraction, hpTargetFraction);
   const band = pickHpBarBand(filledPixels);
   const fillSheet = band === "green" ? assets.hpbar : assets.hpbarAnim;
   const fillBase = band === "green" ? HP_BAR_GREEN_BASE : band === "yellow" ? HP_BAR_YELLOW_BASE : HP_BAR_RED_BASE;
@@ -454,7 +463,12 @@ export function composeOpponentHealthbox(assets: HealthboxAssets, params: Health
   // are opaque it wins over the frame beneath - confirmed by direct pixel
   // diff against the harvested block; this corrects round 1's speculative
   // OAM-index z-order guess, which had it backwards for this pair).
-  const hpBarTiles = hpBarLocalTiles(assets, params.hpFraction, params.status !== "none");
+  const hpBarTiles = hpBarLocalTiles(
+    assets,
+    params.hpFraction,
+    params.status !== "none",
+    params.hpTargetFraction,
+  );
   for (let i = 0; i < HP_BAR_SUBSPRITE_CORNERS.length; i += 1) {
     const { cornerX, cornerY } = HP_BAR_SUBSPRITE_CORNERS[i]!;
     drawHpBarSubsprite(canvas, width, height, hpBarTiles.slice(i * 4, i * 4 + 4), cornerX, cornerY);

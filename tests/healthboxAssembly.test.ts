@@ -149,6 +149,12 @@ describe("calcBarFilledPixels (ISSUES #16 round 3)", () => {
     expect(columns).toEqual([1, 0, 0, 0, 0, 0]);
   });
 
+  it("a lethal drain uses newValue=0 and does not force the final positive-HP sliver", () => {
+    const { filledPixels, columns } = calcBarFilledPixels(1 / 700, 0);
+    expect(filledPixels).toBe(0);
+    expect(columns).toEqual([0, 0, 0, 0, 0, 0]);
+  });
+
   it("50% HP is exactly the green/yellow boundary and lands on the yellow side (> 50%, not >=)", () => {
     expect(calcBarFilledPixels(0.5).filledPixels).toBe(24);
     expect(pickHpBarBand(24)).toBe("yellow");

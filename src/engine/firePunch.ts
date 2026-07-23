@@ -33,6 +33,10 @@ export const FIRE_PUNCH_TAIL_RNG_FIRST_AGE = 549;
 export const FIRE_PUNCH_RESIDUAL_MESSAGE_CLEAR_AGE = 550;
 export const FIRE_PUNCH_TAIL_RNG_SECOND_AGE = 554;
 export const FIRE_PUNCH_TURN17_MENU_REDRAW_AGE = 555;
+/** Shared reducer age displayed on Turn 17's first animation-owned VBlank. */
+export const TURN17_FIRE_PUNCH_ENTRY_AGE = 27;
+/** Fresh RAM boundary: the lethal BattleMon write is the following age. */
+export const TURN17_FIRE_PUNCH_HP_COMMIT_AGE = 227;
 
 const FIRE_PUNCH_AFTER_BURN_RNG_VALUE = 2012156700;
 const FIRE_PUNCH_AFTER_TAIL_RNG_1 = advanceRngValue(FIRE_PUNCH_AFTER_BURN_RNG_VALUE);
@@ -180,16 +184,46 @@ export interface FirePunchResolutionState {
   rngValue: number | null;
 }
 
+export interface FirePunchResolutionProfile {
+  startHp: number;
+  endHp: number;
+  initialStatus: "none" | "burn";
+  hpCommitAge: number;
+}
+
+export const TURN16_FIRE_PUNCH_RESOLUTION: FirePunchResolutionProfile = {
+  startHp: 142,
+  endHp: 75,
+  initialStatus: "none",
+  hpCommitAge: FIRE_PUNCH_HP_COMMIT_AGE,
+};
+
+/**
+ * Turn 17 enters the shared cast after its controller's longer PRINTSTRING
+ * lead-in.  The already-burned target has only 58 HP, and RAM places the
+ * atomic write at shared reducer age 227.  That write is intentionally
+ * outside the implemented pre-write interval.
+ */
+export const TURN17_FIRE_PUNCH_RESOLUTION: FirePunchResolutionProfile = {
+  startHp: 58,
+  endHp: 0,
+  initialStatus: "burn",
+  hpCommitAge: TURN17_FIRE_PUNCH_HP_COMMIT_AGE,
+};
+
 /** `DoBattlerEndTurnEffects`'s source formula, with its 1-HP floor. */
 export function burnResidualDamage(maxHp: number): number {
   return Math.max(1, Math.floor(maxHp / 8));
 }
 
 /** Generic hit resolution, burn residual, and next-action-menu handoff. */
-export function firePunchResolutionState(age: number): FirePunchResolutionState {
+export function firePunchResolutionState(
+  age: number,
+  profile: FirePunchResolutionProfile = TURN16_FIRE_PUNCH_RESOLUTION,
+): FirePunchResolutionState {
   const wobble = age - FIRE_PUNCH_HIT_WOBBLE_FIRST_AGE;
   const blink = age - FIRE_PUNCH_HIT_BLINK_FIRST_AGE;
-  const burned = age >= FIRE_PUNCH_SECONDARY_ROLL_AGE;
+  const burned = profile.initialStatus === "burn" || age >= FIRE_PUNCH_SECONDARY_ROLL_AGE;
   // The status-turn script's first visible controller frame follows two
   // MoveBattleBar calls; subsequent frames decrement currValue once.
   const residualDrain =
@@ -215,20 +249,27 @@ export function firePunchResolutionState(age: number): FirePunchResolutionState 
       : 0,
     targetInvisible: blink >= 0 && blink < 32 && blink % 8 < 4,
     displayedHp: age < FIRE_PUNCH_HP_DRAIN_FIRST_AGE
-      ? 142
+      ? profile.startHp
       : residualDrain > 0
         ? Math.max(58, 75 - residualDrain)
-        : Math.max(75, 142 - (age - FIRE_PUNCH_HP_DRAIN_FIRST_AGE + 1)),
+        : Math.max(
+            profile.endHp,
+            profile.startHp - (age - FIRE_PUNCH_HP_DRAIN_FIRST_AGE + 1),
+          ),
     battleHp:
       age >= FIRE_PUNCH_RESIDUAL_HP_COMMIT_AGE
         ? 58
-        : age >= FIRE_PUNCH_HP_COMMIT_AGE
-          ? 75
-          : 142,
-    secondaryRollConsumed: burned,
-    secondaryRollSucceeded: burned,
+        : age >= profile.hpCommitAge
+          ? profile.endHp
+          : profile.startHp,
+    secondaryRollConsumed: age >= FIRE_PUNCH_SECONDARY_ROLL_AGE,
+    secondaryRollSucceeded:
+      profile.initialStatus === "none" && age >= FIRE_PUNCH_SECONDARY_ROLL_AGE,
     status: burned ? "burn" : "none",
-    healthboxStatus: age >= FIRE_PUNCH_BURN_BADGE_AGE ? "burn" : "none",
+    healthboxStatus:
+      profile.initialStatus === "burn" || age >= FIRE_PUNCH_BURN_BADGE_AGE
+        ? "burn"
+        : "none",
     currentMove: age >= FIRE_PUNCH_CURRENT_MOVE_RESET_AGE ? null : "FIRE_PUNCH",
     message,
     attacker:

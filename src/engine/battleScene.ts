@@ -563,6 +563,9 @@ import {
   FIRE_PUNCH_BURN_MESSAGE_AGE,
   FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE,
   FIRE_PUNCH_TURN17_MENU_REDRAW_AGE,
+  TURN17_FIRE_PUNCH_ENTRY_AGE,
+  TURN17_FIRE_PUNCH_HP_COMMIT_AGE,
+  TURN17_FIRE_PUNCH_RESOLUTION,
   firePunchFistVisible,
   firePunchBurnFlames,
   firePunchHitsplatVisible,
@@ -7182,8 +7185,9 @@ const murkrowHealthboxContentByHp = new Map<string, ReturnType<typeof composeOpp
 function murkrowHealthboxContentForHp(
   hp: number,
   status: "none" | "burn" = "none",
+  targetHp: number = hp,
 ): ReturnType<typeof composeOpponentHealthbox> {
-  const key = `${hp}:${status}`;
+  const key = `${hp}:${status}:${targetHp}`;
   let cached = murkrowHealthboxContentByHp.get(key);
   if (!cached) {
     cached = hp === 142 && status === "none"
@@ -7193,6 +7197,7 @@ function murkrowHealthboxContentForHp(
           level: MURKROW_LEVEL,
           gender: "male",
           hpFraction: hp / 142,
+          hpTargetFraction: targetHp / 142,
           status,
         });
     murkrowHealthboxContentByHp.set(key, cached);
@@ -12180,11 +12185,13 @@ function drawTurn16PostSwitchField(
   faintAttackAge: number | null = null,
   faintAttackTargetHp: FaintAttackResolutionHp = { startHp: 138, endHp: 79 },
   explicitOpponent: { hp: number; status: "none" | "burn" } | null = null,
+  firePunchEpochAge: number = TURN16_FIRE_PUNCH_FIRST_OWNED_AGE,
+  firePunchProfile: import("./firePunch.ts").FirePunchResolutionProfile | null = null,
 ): void {
   const releaseTick = partySendOutReleaseLogicalTick(partyElapsed);
   const bounce = menuIdleBounce(bounceTick);
   const animBg = faintAttackAge === null ? null : faintAttackBgState(faintAttackAge);
-  const firePunchAge = faintAttackAge === null ? null : faintAttackAge - TURN16_FIRE_PUNCH_FIRST_OWNED_AGE;
+  const firePunchAge = faintAttackAge === null ? null : faintAttackAge - firePunchEpochAge;
   const ownsFirePunch = firePunchAge !== null && firePunchAge >= 0;
   const sourcePpu = animBg?.background === "dark" ? turn16DarkFieldPpu : turn15FieldPpuAsset;
   const releasedPalette = releaseTick === null
@@ -12209,7 +12216,10 @@ function drawTurn16PostSwitchField(
     paletteBgr555: releasedPalette,
   });
   if (ownsFirePunch) {
-    const resolution = firePunchResolutionState(firePunchAge);
+    const resolution = firePunchResolutionState(
+      firePunchAge,
+      firePunchProfile ?? undefined,
+    );
     const coeff = firePunchTargetBlendCoeff(firePunchAge);
     const palette = coeff === 0
       ? murkrowFrontSprite.palette
@@ -12248,8 +12258,9 @@ function drawTurn16PostSwitchField(
       fb,
       resolution.healthboxY2,
       murkrowHealthboxContentForHp(
-        explicitOpponent?.hp ?? resolution.displayedHp,
-        explicitOpponent?.status ?? resolution.healthboxStatus,
+        resolution.displayedHp,
+        resolution.healthboxStatus,
+        firePunchProfile?.endHp ?? resolution.displayedHp,
       ),
     );
   } else if (faintAttackAge !== null) {
@@ -12354,7 +12365,10 @@ function drawTurn16FightSubmenuWindow(
     const resolutionAge =
       animationAge !== null
       && animationAge >= 0
-      && animationAge < TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE
+      && animationAge
+        < TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE
+          + TURN17_FIRE_PUNCH_HP_COMMIT_AGE
+          - TURN17_FIRE_PUNCH_ENTRY_AGE
         ? animationAge
         : null;
     const targetHp = { startHp: 79, endHp: 27 };
@@ -12365,6 +12379,8 @@ function drawTurn16FightSubmenuWindow(
       resolutionAge ?? TURN16_SETTLED_OWNED_AGE,
       resolutionAge === null ? undefined : targetHp,
       resolutionAge === null ? null : { hp: 58, status: "burn" },
+      TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE - TURN17_FIRE_PUNCH_ENTRY_AGE,
+      resolutionAge === null ? null : TURN17_FIRE_PUNCH_RESOLUTION,
     );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 

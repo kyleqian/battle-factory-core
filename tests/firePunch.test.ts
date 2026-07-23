@@ -10,6 +10,9 @@ import {
   firePunchSpreadParticles,
   firePunchTargetBlendCoeff,
   firePunchTurn17MenuBounceTick,
+  TURN17_FIRE_PUNCH_ENTRY_AGE,
+  TURN17_FIRE_PUNCH_HP_COMMIT_AGE,
+  TURN17_FIRE_PUNCH_RESOLUTION,
 } from "../src/engine/firePunch.ts";
 import ember from "../src/assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import hands from "../src/assets/gen/battle-anim-hands-and-feet.json" with { type: "json" };
@@ -52,6 +55,19 @@ describe("FIRE_PUNCH source-derived reducers", () => {
     expect(firePunchResolutionState(168).displayedHp).toBe(141);
     expect(firePunchResolutionState(234).displayedHp).toBe(75);
     expect(firePunchResolutionState(235).displayedHp).toBe(75);
+  });
+
+  it("pins Turn 17's shared-entry age, lethal drain, carried BRN, and atomic boundary", () => {
+    expect(TURN17_FIRE_PUNCH_ENTRY_AGE).toBe(27);
+    expect(TURN17_FIRE_PUNCH_HP_COMMIT_AGE - TURN17_FIRE_PUNCH_ENTRY_AGE).toBe(200);
+    expect(firePunchResolutionState(226, TURN17_FIRE_PUNCH_RESOLUTION)).toMatchObject({
+      displayedHp: 0,
+      battleHp: 58,
+      status: "burn",
+      healthboxStatus: "burn",
+      secondaryRollConsumed: false,
+    });
+    expect(firePunchResolutionState(227, TURN17_FIRE_PUNCH_RESOLUTION).battleHp).toBe(0);
   });
 
   it("pins the atomic HP write, successful secondary roll/status, badge, message, and move reset", () => {
