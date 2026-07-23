@@ -4,6 +4,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 301 — Bounded S8 postwin increment: **GREEN — GO ON through swap prompt ready**
+
+- **State:** canonical **26009-29601** is extended through the held,
+  input-ready swap-offer YES/NO prompt. Adjacent traces are **171/171 +
+  164/164 exact**, with every dynamic tick captured; predecessor is
+  **216/216 exact**. Tier-1 is **1080/1080** and build passes
+  (**5.471 MB**).
+- **Did:** stored canonical GO ON/page edges, ported all three source scouting
+  strings and swap offer through live field window/font pipelines, separated
+  swap text settle/menu-visible/input-ready, and pinned the edge-relative
+  five-call GO ON RNG burst under continuing VBlank ownership. Fresh paired
+  input sweeps and a compact RAM/task ledger pin readiness.
+- **Next:** resume after **29601** with canonical YES at 29602 or NO-path
+  selection; this worker intentionally stopped before choosing. Swap UI/
+  decline, Battle 2, battles 3-7, and round completion remain open; S8 stays
+  `[ ]`.
+- **Notes:** implementation `9b747fe`, dense traces `a542eb8`; evidence/docs
+  commit follows this entry. True accepted A ticks: menu 26009, scouting
+  28074/28476/28874, swap 29272 (text final 29265, menu visible 29268).
+  Ground-truth segments `[0:146]` are byte-identical. No forbidden frame
+  asset/table, canonical-tick branch, fitting, exclusion, or thinning.
+
+---
 ## 300 — Supervisor-accepted S8 postwin increment: **GREEN — heal dismiss through next-match input ready**
 
 - **State:** canonical dynamic ticks **25800-26009** are gaplessly
@@ -53,26 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   thinning. Supervisor independently reverified the 199/199 dense window,
   the 118/118 predecessor, the 245-tick Turn-17 verifier, all 1073 Tier-1
   tests, and the production build.
-
----
-## 298 — Supervisor-accepted S7 completion: **GREEN — Battle 1 win endpoint exact**
-
-- **State:** canonical `23229--23601` is gaplessly **373/373 exact** in two
-  adjacent dense traces (**255/255 + 118/118**). Rung 7b remains **147/147**,
-  `verify-turn17.ts` passes **245/245**, Tier-1 is **1067/1067**, and build
-  passes (**5.462 MB**).
-- **Did:** ported the source `-2px/callback` DESTIN trainer slide, retained
-  the frozen outcome text/arrow through the three-frame settled pause, then
-  switched to source-expanded Easy Chat loss text with exact glyph cadence,
-  real `PAUSE_UNTIL_PRESS` gate, no cursor, and stable hold through 23601.
-- **Next:** begin S8 only after tick **23601** with the loss-quote dismiss
-  and post-battle swap/round flow. Parked/unrelated issues, including #38,
-  remain untouched.
-- **Notes:** implementation begins at `366234e`; a final fresh printer-RAM
-  audit distinguishes glyph settle at 23279 from the real WAIT gate at
-  23280. All timing is relative to the stored second outcome-dismiss edge
-  and shifts under delayed-edge Tier-1 coverage. No framebuffer/screenshot
-  asset, absolute-tick/trace branch, per-frame table, fitted geometry/color,
-  excluded capture, or thinning. Supervisor independently reverified both
-  dense windows, predecessor, turn-17 verifier, full Tier-1 suite, and
-  production build; ROADMAP S7 marked complete.

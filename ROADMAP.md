@@ -567,6 +567,21 @@ menu hold/GO ON at 28002, scouting pages, swap decision/UI, Battle 2, and
 the rest of the round remain open; S8 stays `[ ]`. The supervisor
 independently reviewed the timing-relative implementation and reverified
 the new trace, predecessor, full Tier-1 suite, and production build.
+**Third postwin engine increment (2026-07-23, bounded worker checkpoint):**
+the canonical continuation-menu hold, GO ON at 28002, all three opponent
+scouting pages, and the swap offer now extend the modeled endpoint through
+**29601**, the held/input-ready YES/NO prompt before a choice. Adjacent
+verbatim-prefix traces `battle1-postwin-scout-a.json` and `-b.json` are
+**171/171 + 164/164 exact** and capture every tick of every dynamic
+transition/typing/menu span; `battle1-postwin-next-prompt.json` remains
+**216/216 exact**. Fresh input sweeps and RAM/source evidence pin true A
+readiness at 26009, 28074, 28476, 28874, and 29272 (swap text final 29265,
+menu visible 29268). Tier-1 stores all accepted edges, rejects adjacent early
+edges, shifts under delayed GO ON, and pins the edge-relative 28003-equivalent
+five-call RNG burst while retaining outside-battle VBlank ownership. This is
+still **partial S8**: neither YES nor NO is selected, and swap UI/decline,
+Battle 2, battles 3-7, and round completion remain open; S8 stays `[ ]`
+pending supervisor review.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by

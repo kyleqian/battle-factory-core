@@ -433,3 +433,57 @@ clear, and exactly the ordinary outside-battle VBlank RNG ownership through
 
 No screenshot/framebuffer asset, per-tick table, absolute-tick/trace branch,
 coordinate/RGB fitting, exclusion, or dynamic capture thinning was added.
+
+## 9. S8 engine evidence — GO ON through input-ready swap offer (2026-07-23)
+
+This bounded increment extends the accepted endpoint from canonical 26009
+through **29601**, stopping on the held, input-ready
+`"Before starting the battle..."` YES/NO prompt before either answer is
+selected. Both committed traces carry the existing 146-segment ground-truth
+prefix verbatim:
+
+- `battle1-postwin-scout-a.json`: **171/171 exact**, with every tick
+  28000-28075 and 28400-28477 captured.
+- `battle1-postwin-scout-b.json`: **164/164 exact**, with every tick
+  28800-28875 and 29200-29273 captured.
+
+Together they capture every tick of all four live box transitions, every
+printed glyph, the swap menu's visible/readiness gap, and sparse anchors over
+the byte-static holds. `battle1-postwin-next-prompt.json` was independently
+rechecked at **216/216 exact**.
+
+Fresh paired input sweeps and the compact RAM ledger
+`battle1-postwin-readiness-dump.json` pin these boundaries:
+
+| accepted edge / page | final glyph | first accepted A | source/RAM ownership |
+|---|---:|---:|---|
+| continuation menu | menu visible 26008 | **26009** | `Task_HandleMultichoiceInput`; `sProcessInputDelay` 1→0 at 26007→26008, so task ordering first reads a new key at 26009 |
+| investigation page | 28071 | **28074** | `Task_DrawFieldMessage` and text printer active through 28070, both inactive at 28071; `MSGBOX_DEFAULT` wait handoff follows |
+| type page | 28473 | **28476** | same `MSGBOX_DEFAULT` pipeline |
+| style page | 28871 | **28874** | same `MSGBOX_DEFAULT` pipeline |
+| swap offer | text final 29265; YES/NO visible 29268 | **29272** | `Task_HandleYesNoInput` appears at 29267; its source `tRight < 5` guard reaches 5 at 29271 and first processes input at 29272 |
+
+Each early tick above was rejected in a separate oracle replay and the
+adjacent boundary accepted. The canonical stored edges remain GO ON 28002,
+page dismissals 28402/28802/29202, and all implementation clocks derive from
+those stored edges. A delayed GO ON edge and every early/delayed page edge are
+Tier-1 covered; there is no canonical-tick dispatch.
+
+Every page transition retains the old text for edge+0..+2, clears to a blank
+live field message box at +3, and prints its first glyph at +4. The four
+strings come verbatim from
+`BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc`; the renderer reuses
+the existing prebattle-room map, message window, standard-window, and normal
+font/charmap pipelines. The source-encoded right apostrophe in `I’ve` is
+rendered through `CHAR_SGL_QUOTE_RIGHT`, not approximated with an ASCII glyph.
+
+Outside-battle VBlank RNG ownership remains active throughout. The one new
+source/RAM-observed burst is canonical 28003, one tick after the stored GO ON
+edge: five total LCG advances (the ordinary VBlank call plus four on-demand
+factory-intro draws). The engine models it as `confirmEdge + 1`; Tier-1 pins
+five calls from an arbitrary seed and baseline one-call ownership on both
+adjacent ticks.
+
+No screenshot/framebuffer asset, per-frame lookup table, absolute canonical
+tick or trace branch, fitted coordinate/color, excluded dynamic frame, or
+capture thinning was introduced.

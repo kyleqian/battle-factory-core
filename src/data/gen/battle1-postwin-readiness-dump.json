@@ -1,0 +1,295 @@
+{
+  "source": {
+    "trace": "tools/compare/traces-groundtruth/battle1-winline-b-swap.json segments[0:146]",
+    "symbols": {
+      "sProcessInputDelay": "0x02039f90",
+      "sTextPrinters": "0x020201b0",
+      "Task_DrawFieldMessage": "0x08098154",
+      "Task_HandleMultichoiceInput": "0x080e2058",
+      "Task_HandleYesNoInput": "0x080e215c"
+    }
+  },
+  "rows": [
+    {
+      "tick": 26007,
+      "inputDelay": 1,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleMultichoiceInput",
+        "data2": 0
+      }
+    },
+    {
+      "tick": 26008,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleMultichoiceInput",
+        "data2": 0
+      }
+    },
+    {
+      "tick": 26009,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleMultichoiceInput",
+        "data2": 0
+      }
+    },
+    {
+      "tick": 28001,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleMultichoiceInput",
+        "data2": 0
+      }
+    },
+    {
+      "tick": 28002,
+      "inputDelay": 0,
+      "specialVarResult": 0,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28003,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 1,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_DrawFieldMessage",
+        "data2": 0
+      }
+    },
+    {
+      "tick": 28070,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 1,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_DrawFieldMessage",
+        "data2": 0
+      }
+    },
+    {
+      "tick": 28071,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28072,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28073,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28074,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28472,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 1,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_DrawFieldMessage",
+        "data2": 0
+      }
+    },
+    {
+      "tick": 28473,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28474,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28475,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28476,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28870,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 1,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_DrawFieldMessage",
+        "data2": 0
+      }
+    },
+    {
+      "tick": 28871,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28872,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28873,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 28874,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 29264,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 1,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_DrawFieldMessage",
+        "data2": 0
+      }
+    },
+    {
+      "tick": 29265,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 29266,
+      "inputDelay": 0,
+      "specialVarResult": 5,
+      "textPrinterActive": 0,
+      "readinessTask": null
+    },
+    {
+      "tick": 29267,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleYesNoInput",
+        "data2": 1
+      }
+    },
+    {
+      "tick": 29268,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleYesNoInput",
+        "data2": 2
+      }
+    },
+    {
+      "tick": 29269,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleYesNoInput",
+        "data2": 3
+      }
+    },
+    {
+      "tick": 29270,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleYesNoInput",
+        "data2": 4
+      }
+    },
+    {
+      "tick": 29271,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleYesNoInput",
+        "data2": 5
+      }
+    },
+    {
+      "tick": 29272,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleYesNoInput",
+        "data2": 5
+      }
+    },
+    {
+      "tick": 29601,
+      "inputDelay": 0,
+      "specialVarResult": 255,
+      "textPrinterActive": 0,
+      "readinessTask": {
+        "slot": 4,
+        "func": "Task_HandleYesNoInput",
+        "data2": 5
+      }
+    }
+  ]
+}
