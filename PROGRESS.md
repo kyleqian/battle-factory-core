@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 307 — S8 Battle 2 opening probe: **GREEN evidence checkpoint; no runtime change**
+
+- **State:** exact renderer endpoint remains **32280--32530 = 251/251**;
+  canonical 33030 is documented only, not claimed pixel-exact. Tier-1 is
+  **1098/1098** and build passes (**5.496 MB**).
+- **Did:** replayed canonical segments 154--155 unchanged and added the
+  source/RAM/OAM-ready 32531--33030 ledger in `docs/battle2-opening-notes.md`:
+  JENSON handoff 32570; KABUTO ball/healthbox/species H-slide; ONIX throw,
+  materialize, and menu blank/draw 32850--32856; 33030 full-HP FIGHT menu.
+  Sparse app samples are exact at 32531/32533 then rank the remaining live
+  gap (peak 11,210 px at 32831), without an acceptance claim or harvest.
+- **Next:** implement only the ledgered live Battle-2 send-outs/menu in a
+  later scoped increment; S8 stays `[ ].`
+- **Notes:** `gMain.inBattle=2` from 32250; no ordinary VBlank or send-out
+  RNG calls through the menu, except the source `TryDoEventsBeforeFirstTurn`
+  on-demand turn-number call before choose-action. No trace/assets/runtime
+  changes, screenshot lookup, tick fitting, or dynamic thinning.
+
+---
 ## 306 — Supervisor-accepted S8 Battle 2 trainer intro: **GREEN — 32280-32530 exact**
 
 - **State:** canonical **32280-32530** is **251/251 exact**, every frame

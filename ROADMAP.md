@@ -665,6 +665,15 @@ round completion remain open, so S8 stays `[ ]`.
 The supervisor independently reviewed encounter preservation and the shared
 trainer/text/cursor selection, then reverified the 251/251 new trace,
 249/249 + 256/256 regressions, all 1098 Tier-1 tests, and build.
+**S8 opening evidence checkpoint (2026-07-23, worker probe; no engine change):**
+the canonical segments 154--155 boundary ledger is recorded in
+`docs/battle2-opening-notes.md`: JENSON's accepted A at 32531 hands off at
+32570; KABUTO uses the shared ball/healthbox mechanics but species-specific
+`ANIM_H_SLIDE_WOBBLE`; ONIX's inherited throw anchor is 32682; the six-tick
+blank menu is 32850--32855 and the input-ready atomic menu starts 32856.
+Frame 33030 is the held KABUTO 91/91 vs ONIX 117/117 FIGHT-menu endpoint.
+Sparse app diagnostics rank only live-render gaps (max 11,210 px at 32831),
+not an acceptance claim.  S8 remains `[ ]`.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by

@@ -106,3 +106,36 @@ at 1272; the controller's first accepted input remains 1274, matching the
 width-derived `16 + measureText("would like to battle!") = 123`.
 `scene-assembly.json` remains **256/256**, proving the BUG CATCHER DESTIN
 defaults are unchanged.
+
+## 32531--33030 boundary ledger (S8 probe, 2026-07-23)
+
+This is a source-relative implementation ledger, not a new pixel acceptance
+window.  It replays the committed `battle1-winline-b-swap.json` segments 154
+(`A`, frame 32531) and 155 (499 idle frames) unchanged.  A fresh oracle run
+confirms the canonical endpoint is frame **33030**: KABUTO Lv50 and ONIX
+Lv50, both full, with the FIGHT/BAG/POKeMON/RUN action menu visible and its
+cursor on FIGHT.  The held 32531/32533 SHA is identical; the existing app is
+also exact at those two samples.  It diverges at every later sampled frame;
+the largest sparse diagnostic is 11,210 px at 32831 (then 9,824 at 32931 and
+4,786 at 33030).  That ranks missing live composition only; it asserts no
+pixel-exactness.
+
+| canonical boundary | mechanism / source and RAM/OAM implication | renderer disposition |
+| --- | --- | --- |
+| 32531 accepted delayed A; 32531--32535 held visual | `BattleIntroPrintOpponentSendsOut` -> opponent controller (`battle_main.c:3583,3642`; `battle_controller_opponent.c:1867`) accepts the old PAUSE_UNTIL_PRESS, then retains the frame through the shared five-tick printer registration lag. | Reuse shared Battle-1 text/input state unchanged, parameterized by JENSON's text length. |
+| 32536--32567 | `"FISHERMAN JENSON sent\nout KABUTO!"` is 32 glyphs at one glyph/tick.  The final glyph is 32567; the shared three-tick post-text wait makes the visual handoff 32570. | Parameterize shared send-out text (trainer/species); no new component. |
+| 32570--32606 | Fisherman trainer begins the same `StartAnimLinearTranslation` exit at handoff; its 37-entry fixed-point exit table is the Battle-1 `SpriteCB_FreeOpponentSprite` mechanism (`battle_controller_opponent.c:1867-1892`, `battle_gfx_sfx_util.c:396-407`).  Trainer OAM is freed immediately after its final translation callback. | Reuse motion unchanged, parameterized by Fisherman art; the current Bug Catcher-only paint must not be reused unchanged. |
+| 32572--32587; 32588--32592; 32593--32598; gone 32599 | KABUTO ball is closed, open, open-final, then hidden.  This is `Task_DoPokeballSendOutAnim` + `SpriteCB_OpponentMonSendOut` / `SpriteCB_ReleaseMonFromBall` (`pokeball.c:363-405,991-1003,758-806`): handoff +2/+18/+23/+29, with the normal 16-tick wait and `sBallAnimSeq1`. | Reuse the Battle-1 ball/particle state unchanged, parameterized only by handoff and battler. |
+| 32589--32604; 32605--32706 | KABUTO materializes at handoff+19.  At +35 its species entrance starts: `sMonFrontAnimIdsTable[SPECIES_KABUTO-1] = ANIM_H_SLIDE_WOBBLE` (`pokemon.c:1546`; `pokemon_animation.c:1803-1829`), whose `data[2]` runs 0..100 before reset.  It overlaps later player work; it is not a blocking substitute for a generic settled sprite. | Ball-affine/materialize path is reusable parameterized by KABUTO asset; KABUTO's 101-callback H-slide-wobble needs a live species-animation component (not Grovyle's V-stretch table). |
+| 32603--32625 | Opponent healthbox begins at handoff+33, x offset -110 then +5 each tick, settling at +55.  It is the singles opponent healthbox created/filled by `BattleInitAllSprites` / `CreateBattlerHealthboxSprites` and `InitBattlerHealthboxCoords` (`battle_gfx_sfx_util.c:831-913`; `battle_interface.c:869,1078-1081`). | Reuse slide/chrome unchanged, parameterized as **KABUTO Lv50, 91/91 HP** (species 140); party summary exit remains shared. |
+| 32682; 32723--32759; 32760--32770; 32761--32810 | Player `IntroTrainerBallThrow` starts at handoff+112 (`battle_controller_player.c:2931-3017`), then Brendan's ball spin, open, ONIX materialize and back-sprite shake use the already-proven Battle-1 offsets +153, +190, +191, permanent settle +240.  These overlap KABUTO's last front-animation callbacks. | Reuse the Battle-1 player throw/ONIX materialize/healthbox path unchanged after making its anchor encounter-relative; its parameters are **ONIX Lv50, 117/117 HP**. |
+| 32850--32855; 32856 onward | The message box is blank for six ticks, then `PlayerHandleChooseAction`'s off-screen BG0 composition is revealed atomically by `HandleChooseActionAfterDma3` (`battle_controller_player.c:2565-2573`); cursor is the BG0 tile at FIGHT.  This is input-ready at the reveal and remains so through 33030. | Requires a new live composed Battle-2 action-menu base: the existing Battle-1 harvested Grovyle base cannot be reused.  Window/cursor/text primitives may be reused parameterized by ONIX/KABUTO. |
+
+RAM ownership is already independently fixed for this exact prefix: `gMain.inBattle`
+becomes 2 at 32250 and stays nonzero; therefore `main.c`'s ordinary VBlank
+`Random()` gate is closed.  No on-demand `Random()` call is made by the
+intro/controller/ball/menu chain above; the next relevant on-demand call is
+the pre-first-turn `gRandomTurnNumber = Random()` in
+`TryDoEventsBeforeFirstTurn` (`battle_main.c:3841-3923`), before the
+choose-action command.  This matches the flat in-battle RNG ownership rule,
+while preserving the earlier 32020--32250 setup ledger.
