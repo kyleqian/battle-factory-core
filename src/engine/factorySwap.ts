@@ -1,4 +1,16 @@
-import type { BattleParty } from "./battleScenario.ts";
+import type { BattleMon } from "./battleScenario.ts";
+
+export interface FactorySwapMon extends BattleMon {
+  readonly personality: number;
+  readonly abilityNum: number;
+  readonly friendship: number;
+}
+
+export type FactorySwapParty = readonly [
+  FactorySwapMon,
+  FactorySwapMon,
+  FactorySwapMon,
+];
 
 export interface FactoryRentalMon {
   readonly monId: number;
@@ -21,13 +33,14 @@ export type FactorySwapPhase =
   | "playerOptions"
   | "enemyPicker"
   | "acceptPrompt"
+  | "quitPrompt"
   | "duplicateSpecies"
   | "complete";
 
 export interface FactorySwapState {
   readonly phase: FactorySwapPhase;
-  readonly playerParty: BattleParty;
-  readonly enemyParty: BattleParty;
+  readonly playerParty: FactorySwapParty;
+  readonly enemyParty: FactorySwapParty;
   readonly rentalMons: FactoryRentalRoster;
   readonly cursor: 0 | 1 | 2;
   readonly displayCursor: 0 | 1 | 2;
@@ -35,6 +48,7 @@ export interface FactorySwapState {
   readonly yesNoCursor: 0 | 1;
   readonly playerMonId: 0 | 1 | 2 | null;
   readonly enemyMonId: 0 | 1 | 2 | null;
+  readonly quitReturnPhase: "playerPicker" | "enemyPicker" | null;
   /**
    * Set only when the presentation adapter acknowledges that the current
    * transition/animation has completed. Inputs never age themselves ready.
@@ -60,14 +74,14 @@ function move3(value: 0 | 1 | 2, delta: -1 | 1): 0 | 1 | 2 {
 }
 
 export function createFactorySwapState(
-  playerParty: BattleParty,
-  enemyParty: BattleParty,
+  playerParty: FactorySwapParty,
+  enemyParty: FactorySwapParty,
   rentalMons: FactoryRentalRoster,
 ): FactorySwapState {
   return {
     phase: "playerPicker",
-    playerParty: playerParty.map((mon) => ({ ...mon })) as unknown as BattleParty,
-    enemyParty: enemyParty.map((mon) => ({ ...mon })) as unknown as BattleParty,
+    playerParty: playerParty.map((mon) => ({ ...mon })) as unknown as FactorySwapParty,
+    enemyParty: enemyParty.map((mon) => ({ ...mon })) as unknown as FactorySwapParty,
     rentalMons: rentalMons.map((mon) => ({ ...mon })) as unknown as FactoryRentalRoster,
     cursor: 0,
     displayCursor: 0,
@@ -75,6 +89,7 @@ export function createFactorySwapState(
     yesNoCursor: 0,
     playerMonId: null,
     enemyMonId: null,
+    quitReturnPhase: null,
     inputReady: false,
     result: null,
   };
@@ -126,8 +141,8 @@ export function applyFactorySwapMutation(state: FactorySwapState): FactorySwapSt
   rentalMons[state.playerMonId] = {
     monId: offered.monId,
     ivs: offered.ivs,
-    personality: offered.personality,
-    abilityNum: offered.abilityNum,
+    personality: replacement.personality,
+    abilityNum: replacement.abilityNum,
   };
   return {
     ...state,
@@ -155,9 +170,10 @@ export function handleFactorySwapInput(
       if (input === "B") {
         return {
           ...state,
-          phase: "complete",
+          phase: "quitPrompt",
           inputReady: false,
-          result: "keptParty",
+          yesNoCursor: 0,
+          quitReturnPhase: state.phase,
         };
       }
       if (input !== "A") return state;
@@ -220,6 +236,28 @@ export function handleFactorySwapInput(
         };
       }
       return input === "A" ? applyFactorySwapMutation(state) : state;
+    }
+    case "quitPrompt": {
+      if (input === "UP" || input === "DOWN") {
+        return { ...state, yesNoCursor: state.yesNoCursor === 0 ? 1 : 0 };
+      }
+      if (input === "A" && state.yesNoCursor === 0) {
+        return {
+          ...state,
+          phase: "complete",
+          inputReady: false,
+          result: "keptParty",
+        };
+      }
+      if (input === "A" || input === "B") {
+        return {
+          ...state,
+          phase: state.quitReturnPhase ?? "playerPicker",
+          inputReady: false,
+          quitReturnPhase: null,
+        };
+      }
+      return state;
     }
     case "duplicateSpecies":
       return input === "A" || input === "B"

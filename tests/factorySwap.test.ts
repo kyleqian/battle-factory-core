@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import fixtureJson from "../src/data/gen/battle1-swap-rentalmons-dump.json" with { type: "json" };
-import type { BattleMon, BattleParty } from "../src/engine/battleScenario.ts";
+import type { BattleMon } from "../src/engine/battleScenario.ts";
 import {
   acknowledgeFactorySwapPresentation,
   applyFactorySwapMutation,
@@ -9,22 +9,38 @@ import {
   factorySwapAlreadyHasSpecies,
   handleFactorySwapInput,
   type FactoryRentalRoster,
+  type FactorySwapMon,
+  type FactorySwapParty,
   type FactorySwapState,
 } from "../src/engine/factorySwap.ts";
 
-function mon(id: string, species = id.toUpperCase()): BattleMon {
-  return { id, species, hp: 100, maxHp: 100, status: "none" };
+function mon(
+  id: string,
+  species = id.toUpperCase(),
+  personality = 0,
+  abilityNum = 0,
+): FactorySwapMon {
+  return {
+    id,
+    species,
+    hp: 100,
+    maxHp: 100,
+    status: "none",
+    personality,
+    abilityNum,
+    friendship: 255,
+  };
 }
 
-const player: BattleParty = [
+const player: FactorySwapParty = [
   mon("onix", "ONIX"),
   mon("magby", "MAGBY"),
   mon("bayleef", "BAYLEEF"),
 ];
-const enemy: BattleParty = [
-  mon("grovyle", "GROVYLE"),
-  mon("murkrow", "MURKROW"),
-  mon("pidgeotto", "PIDGEOTTO"),
+const enemy: FactorySwapParty = [
+  mon("grovyle", "GROVYLE", 1094072807, 0),
+  mon("murkrow", "MURKROW", 3475344024, 0),
+  mon("pidgeotto", "PIDGEOTTO", 3971699699, 0),
 ];
 const fixture = fixtureJson as unknown as {
   yesBranch: { ticks: Record<string, { rentalMons: FactoryRentalRoster }> };
@@ -105,7 +121,7 @@ describe("Factory swap state/input contract", () => {
   });
 
   it("rejects an enemy species already held in either non-replaced player slot", () => {
-    const duplicateEnemy: BattleParty = [
+    const duplicateEnemy: FactorySwapParty = [
       mon("other-magby", "MAGBY"),
       enemy[1],
       enemy[2],
@@ -126,7 +142,7 @@ describe("Factory swap state/input contract", () => {
   });
 
   it("does not reject the species in the slot being replaced", () => {
-    const sameAsReplaced: BattleParty = [
+    const sameAsReplaced: FactorySwapParty = [
       mon("other-onix", "ONIX"),
       enemy[1],
       enemy[2],
@@ -142,7 +158,9 @@ describe("Factory swap state/input contract", () => {
 
   it("B from a picker keeps the party and direct mutation rejects missing selections", () => {
     const state = ready(createFactorySwapState(player, enemy, rentals));
-    const quit = handleFactorySwapInput(state, "B");
+    const quitPrompt = handleFactorySwapInput(state, "B");
+    expect(quitPrompt).toMatchObject({ phase: "quitPrompt", result: null });
+    const quit = handleFactorySwapInput(ready(quitPrompt), "A");
     expect(quit).toMatchObject({ phase: "complete", result: "keptParty" });
     expect(quit.playerParty).toEqual(player);
     expect(() => applyFactorySwapMutation(state)).toThrow(/both selected/);
