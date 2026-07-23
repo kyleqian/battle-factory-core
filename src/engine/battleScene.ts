@@ -1237,6 +1237,12 @@ export interface BattleSceneState {
    */
   turn17KoDismissElapsed?: number | null;
   /**
+   * The separately input-gated "Player defeated..." dismiss edge. It is
+   * one-shot and freezes the outcome framebuffer until trainer-slide
+   * ownership begins at its own relative +28 boundary.
+   */
+  turn17OutcomeDismissElapsed?: number | null;
+  /**
    * RAM-equivalent gBattleOutcome for the first battle.  The WIN write is
    * intentionally state-only during this slice: the old faint message
    * remains frozen until the later outcome renderer takes ownership.
@@ -1269,6 +1275,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn16Resolved: false,
   turn17MenuRedrawElapsed: null,
   turn17KoDismissElapsed: null,
+  turn17OutcomeDismissElapsed: null,
   battleOutcome: 0,
 };
 
@@ -1301,6 +1308,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn16Resolved: state.turn16Resolved ?? false,
     turn17MenuRedrawElapsed: state.turn17MenuRedrawElapsed ?? null,
     turn17KoDismissElapsed: state.turn17KoDismissElapsed ?? null,
+    turn17OutcomeDismissElapsed: state.turn17OutcomeDismissElapsed ?? null,
     battleOutcome:
       postDismiss === null ? (state.battleOutcome ?? 0) : postDismiss.battleOutcome,
     turn15PartySelect: state.turn15PartySelect,
@@ -12144,6 +12152,18 @@ const FIRE_PUNCH_RED: RgbColor = { r: 248, g: 0, b: 0 };
 /** Dismiss-relative WIN write and first visible outcome-controller boundary. */
 export const TURN17_OUTCOME_FLIP_DELAY = 17;
 export const TURN17_FIRST_OUTCOME_RENDER_DELAY = 26;
+export const TURN17_OUTCOME_LINE1 = "Player defeated";
+export const TURN17_OUTCOME_LINE2 = "BUG CATCHER DESTIN!";
+export const TURN17_OUTCOME_TEXT_TOTAL =
+  TURN17_OUTCOME_LINE1.length + TURN17_OUTCOME_LINE2.length;
+/** The printer consumes the final glyph at +59 and can accept A immediately. */
+export const TURN17_OUTCOME_INPUT_READY_DELAY =
+  TURN17_FIRST_OUTCOME_RENDER_DELAY + TURN17_OUTCOME_TEXT_TOTAL - 1;
+/** The down arrow's first DMA-visible frame trails input readiness by two ticks. */
+export const TURN17_OUTCOME_CURSOR_START_DELAY =
+  TURN17_OUTCOME_INPUT_READY_DELAY + 2;
+/** The old outcome framebuffer remains owned through second-dismiss +27. */
+export const TURN17_FIRST_TRAINER_RENDER_DELAY = 28;
 
 export interface Turn17PostDismissState {
   age: number;
@@ -12168,6 +12188,57 @@ export function turn17PostDismissState(
     battleOutcome: age >= TURN17_OUTCOME_FLIP_DELAY ? 1 : 0,
     firstOutcomeRender: age >= TURN17_FIRST_OUTCOME_RENDER_DELAY,
   };
+}
+
+export interface Turn17OutcomeMessageState {
+  age: number;
+  displayAge: number;
+  visibleChars: number;
+  inputReady: boolean;
+  trainerTransitionReady: boolean;
+}
+
+/**
+ * Outcome presentation derived only from the stored faint dismiss and the
+ * later, separately stored outcome dismiss. The second edge freezes the old
+ * message/cursor pose while the script/controller advances invisibly.
+ */
+export function turn17OutcomeMessageState(
+  sceneElapsed: number,
+  faintDismissElapsed: number | null,
+  outcomeDismissElapsed: number | null,
+): Turn17OutcomeMessageState | null {
+  const postDismiss = turn17PostDismissState(sceneElapsed, faintDismissElapsed);
+  if (postDismiss === null || !postDismiss.firstOutcomeRender) return null;
+  const dismissAge =
+    outcomeDismissElapsed === null ? null : outcomeDismissElapsed - faintDismissElapsed!;
+  const displayAge = dismissAge === null
+    ? postDismiss.age
+    : Math.min(postDismiss.age, dismissAge);
+  return {
+    age: postDismiss.age,
+    displayAge,
+    visibleChars: Math.min(
+      TURN17_OUTCOME_TEXT_TOTAL,
+      displayAge - TURN17_FIRST_OUTCOME_RENDER_DELAY + 1,
+    ),
+    inputReady: displayAge >= TURN17_OUTCOME_INPUT_READY_DELAY,
+    trainerTransitionReady:
+      outcomeDismissElapsed !== null
+      && sceneElapsed - outcomeDismissElapsed >= TURN17_FIRST_TRAINER_RENDER_DELAY,
+  };
+}
+
+/** The second A is accepted only after the outcome printer enters its input wait. */
+export function turn17OutcomeDismissEligible(
+  sceneElapsed: number,
+  faintDismissElapsed: number | null,
+): boolean {
+  return turn17OutcomeMessageState(
+    sceneElapsed,
+    faintDismissElapsed,
+    null,
+  )?.inputReady ?? false;
 }
 
 /** FIRE_PUNCH reducer age derived from the stored Turn 17 confirmation. */
@@ -12445,6 +12516,7 @@ function drawTurn16FightSubmenuWindow(
   turn16Resolved: boolean,
   turn17MenuRedrawElapsed: number | null,
   turn17KoDismissElapsed: number | null,
+  turn17OutcomeDismissElapsed: number | null,
 ): void {
   if (sm.openElapsed === null) return;
   const openTick = TICK0 + sm.openElapsed;
@@ -12506,6 +12578,33 @@ function drawTurn16FightSubmenuWindow(
         firePunchAge,
         TURN17_FIRE_PUNCH_RESOLUTION,
       );
+      const outcome = turn17OutcomeMessageState(
+        // Battle script/controller writes become DMA-visible on this path
+        // one reducer step ahead of the field clock used above.
+        t - TICK0 + 1,
+        turn17KoDismissElapsed,
+        turn17OutcomeDismissElapsed,
+      );
+      if (outcome !== null) {
+        drawMessageTextLines(
+          fb,
+          TURN17_OUTCOME_LINE1,
+          TURN17_OUTCOME_LINE2,
+          outcome.visibleChars,
+        );
+        if (outcome.displayAge >= TURN17_OUTCOME_CURSOR_START_DELAY) {
+          const cursor = cursorState(
+            outcome.displayAge,
+            TURN17_OUTCOME_CURSOR_START_DELAY,
+          );
+          drawCursor(
+            fb,
+            cursor.yOffset,
+            LINE2_ORIGIN.x + measureText(font, charmap, TURN17_OUTCOME_LINE2),
+          );
+        }
+        return;
+      }
       if (faint && faint.textVisibleChars > 0) {
         drawMessageTextLines(
           fb,
@@ -12687,6 +12786,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
         state.turn16Resolved ?? false,
         state.turn17MenuRedrawElapsed ?? null,
         state.turn17KoDismissElapsed ?? null,
+        state.turn17OutcomeDismissElapsed ?? null,
       );
       return true;
     }

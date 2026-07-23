@@ -100,6 +100,7 @@ import {
   turn13KoDismissEligible,
   turn15KoDismissEligible,
   turn17KoDismissEligible,
+  turn17OutcomeDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
 import { advancePartySelect, INITIAL_PARTY_SELECT_STATE, partySendOutBattleMenuReady } from "./partySelect.ts";
@@ -260,6 +261,23 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       battleScene = {
         ...battleScene,
         turn17KoDismissElapsed: battleScene.elapsed + 1,
+      };
+    }
+    // The frontier-win printstring is a second, independent input gate.
+    // Store its real A edge once; rendering freezes that exact cursor pose
+    // until the trainer-slide controller becomes visible.
+    if (
+      (battleScene.turn17KoDismissElapsed ?? null) !== null &&
+      (battleScene.turn17OutcomeDismissElapsed ?? null) === null &&
+      newKeys.has("A") &&
+      turn17OutcomeDismissEligible(
+        battleScene.elapsed + 1,
+        battleScene.turn17KoDismissElapsed ?? null,
+      )
+    ) {
+      battleScene = {
+        ...battleScene,
+        turn17OutcomeDismissElapsed: battleScene.elapsed + 1,
       };
     }
     // S7 FIGHT-submenu slice (docs/battle-turn-notes.md §11): the settled

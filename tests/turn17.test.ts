@@ -11,10 +11,16 @@ import {
   INITIAL_BATTLE_SCENE_STATE,
   TURN17_FIRE_PUNCH_CONFIRM_TO_EPOCH_DELAY,
   TURN17_FIRST_OUTCOME_RENDER_DELAY,
+  TURN17_FIRST_TRAINER_RENDER_DELAY,
+  TURN17_OUTCOME_CURSOR_START_DELAY,
+  TURN17_OUTCOME_INPUT_READY_DELAY,
+  TURN17_OUTCOME_TEXT_TOTAL,
   TURN17_OUTCOME_FLIP_DELAY,
   advanceBattleScene,
   turn17FirePunchAge,
   turn17KoDismissEligible,
+  turn17OutcomeDismissEligible,
+  turn17OutcomeMessageState,
   turn17PostDismissState,
 } from "../src/engine/battleScene.ts";
 import {
@@ -143,5 +149,85 @@ describe("turn 17 faint hold and outcome latency", () => {
     const after = advanceBattleScene(before);
     expect(after.elapsed).toBe(117);
     expect(after.battleOutcome).toBe(1);
+  });
+
+  it("types one glyph per controller tick, settles, then opens the second input gate", () => {
+    const faintDismiss = 100;
+    expect(turn17OutcomeMessageState(125, faintDismiss, null)).toBeNull();
+    expect(turn17OutcomeMessageState(126, faintDismiss, null)).toMatchObject({
+      visibleChars: 1,
+      inputReady: false,
+    });
+    expect(turn17OutcomeMessageState(159, faintDismiss, null)).toMatchObject({
+      visibleChars: TURN17_OUTCOME_TEXT_TOTAL,
+      inputReady: true,
+    });
+    expect(TURN17_OUTCOME_INPUT_READY_DELAY).toBe(59);
+    expect(TURN17_OUTCOME_CURSOR_START_DELAY).toBe(61);
+    expect(turn17OutcomeDismissEligible(158, faintDismiss)).toBe(false);
+    expect(turn17OutcomeDismissEligible(159, faintDismiss)).toBe(true);
+  });
+
+  it("rejects an early second A and holds indefinitely without input", () => {
+    const faintDismiss = eligibleElapsed - 400;
+    const base: ReturnType<typeof createInitialState> = {
+      ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 2),
+      battleScene: {
+        ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 2).battleScene!,
+        turn17KoDismissElapsed: faintDismiss,
+      },
+    };
+    const early = tick(base, new Set(["A"]));
+    expect(early.battleScene!.turn17OutcomeDismissElapsed).toBeNull();
+
+    let idle: ReturnType<typeof createInitialState> = {
+      ...base,
+      battleScene: {
+        ...base.battleScene!,
+        elapsed: faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY + 500,
+      },
+    };
+    for (let i = 0; i < 40; i += 1) idle = tick(idle, new Set());
+    expect(idle.battleScene!.turn17OutcomeDismissElapsed).toBeNull();
+  });
+
+  it("registers the real second A once and freezes that outcome pose", () => {
+    const faintDismiss = eligibleElapsed - 400;
+    let state: ReturnType<typeof createInitialState> = {
+      ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 1),
+      battleScene: {
+        ...battleStateAt(faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY - 1).battleScene!,
+        turn17KoDismissElapsed: faintDismiss,
+      },
+    };
+    state = tick(state, new Set(["A"]));
+    const outcomeDismiss = faintDismiss + TURN17_OUTCOME_INPUT_READY_DELAY;
+    expect(state.battleScene!.turn17OutcomeDismissElapsed).toBe(outcomeDismiss);
+    state = tick(state, new Set());
+    state = tick(state, new Set(["A"]));
+    expect(state.battleScene!.turn17OutcomeDismissElapsed).toBe(outcomeDismiss);
+
+    const frozen = turn17OutcomeMessageState(
+      outcomeDismiss + 20,
+      faintDismiss,
+      outcomeDismiss,
+    )!;
+    expect(frozen.displayAge).toBe(TURN17_OUTCOME_INPUT_READY_DELAY);
+    expect(frozen.visibleChars).toBe(TURN17_OUTCOME_TEXT_TOTAL);
+  });
+
+  it("keeps the old outcome framebuffer through +27 and exposes the trainer boundary at +28", () => {
+    expect(TURN17_FIRST_TRAINER_RENDER_DELAY).toBe(28);
+    const faintDismiss = 100;
+    const outcomeDismiss = 500;
+    expect(turn17OutcomeMessageState(527, faintDismiss, outcomeDismiss))
+      .toMatchObject({ trainerTransitionReady: false, displayAge: 400 });
+    expect(turn17OutcomeMessageState(528, faintDismiss, outcomeDismiss))
+      .toMatchObject({ trainerTransitionReady: true, displayAge: 400 });
+
+    const delayed = turn17OutcomeMessageState(538, faintDismiss, outcomeDismiss + 10)!;
+    expect(delayed.trainerTransitionReady).toBe(true);
+    expect(turn17OutcomeMessageState(537, faintDismiss, outcomeDismiss + 10)!
+      .trainerTransitionReady).toBe(false);
   });
 });
