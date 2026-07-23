@@ -38,16 +38,19 @@ function writeJson(path: string, data: unknown): void {
 // for every single trainer class incl. BUG_CATCHER - literally 64x64/8px,
 // not a MON_COORDS_SIZE-packed value like the mon tables - so there is no
 // meaningful "whole table" to extract here beyond this one constant.
-{
-  const img = decodeIndexedPng(join(REF, "graphics", "trainers", "front_pics", "bug_catcher.png"));
+for (const [file, output] of [
+  ["bug_catcher", "bug-catcher"],
+  ["fisherman", "fisherman"],
+] as const) {
+  const img = decodeIndexedPng(join(REF, "graphics", "trainers", "front_pics", `${file}.png`));
   if (img.width !== 64 || img.height !== 64) {
-    throw new Error(`bug_catcher.png: expected 64x64, got ${img.width}x${img.height}`);
+    throw new Error(`${file}.png: expected 64x64, got ${img.width}x${img.height}`);
   }
   const { columns, rows, tiles } = sliceTiles(img);
-  writeJson(join(ASSETS_GEN, "trainer-pic-bug-catcher.json"), {
+  writeJson(join(ASSETS_GEN, `trainer-pic-${output}.json`), {
     tileset: { columns, rows, tiles: tiles.map((t) => [...t.pixels]) },
     palette: img.palette,
-    yOffsetPx: 8, // gTrainerFrontPicCoords[TRAINER_PIC_BUG_CATCHER].y_offset=1 * 8px
+    yOffsetPx: 8, // gTrainerFrontPicCoords entries use y_offset=1.
   });
 }
 

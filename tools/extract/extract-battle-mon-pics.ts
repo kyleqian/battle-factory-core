@@ -87,6 +87,7 @@ const FRONT_SPECIES: Record<string, string> = {
   GROVYLE: "grovyle",
   MURKROW: "murkrow",
   PIDGEOTTO: "pidgeotto",
+  KABUTO: "kabuto",
 };
 
 const backSprites: Record<string, Sprite> = {};
