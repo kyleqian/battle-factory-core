@@ -11674,11 +11674,11 @@ function turn14MurkrowInvisible(t: number): boolean {
   return t - 1 >= TURN14_FLY_BALL_RAM_START;
 }
 
-/** "Foe MURKROW flew\nup high!" (`gFirstTurnOfTwoStringIds[B_MSG_TURN1_FLY]`) - prints only AFTER the FLY-up animation completes (docs/turn14-notes.md §5a); oracle-pixel-bisected literal start tick (not press-relative - this line has no button press of its own, same "synthetic/literal anchor" convention every AI-adjacent second-half text in this dossier chain uses): settle pinned at 17846 (`verify-turn14.ts`), 25 total chars, so first-char tick = 17846-24 = 17822. */
+/** "Foe MURKROW flew\nup high!" (`gFirstTurnOfTwoStringIds[B_MSG_TURN1_FLY]`) uses the ordinary one-character-per-frame printer, but its first visible glyph is render tick 17823. Fresh per-glyph diffs show the former 17822 anchor led the oracle by exactly one character (the three space ticks were consequently already exact); the completed string remains exact at 17846. */
 export const TURN14_FLYUP_LINE1 = "Foe MURKROW flew";
 export const TURN14_FLYUP_LINE2 = "up high!";
 const TURN14_FLYUP_TEXT_TOTAL = TURN14_FLYUP_LINE1.length + TURN14_FLYUP_LINE2.length;
-const TURN14_FLYUP_TEXT_START_TICK = 17822;
+const TURN14_FLYUP_TEXT_START_TICK = 17823;
 
 /** "ONIX used\nDRAGONBREATH!" (Onix's own second-half kickoff, no button press - reuses `ROCK_SLIDE_LINE1`/`DRAGONBREATH_KICKOFF_LINE2` verbatim, the SAME strings turn 13's own re-targeted DRAGON_BREATH already established). Literal start tick, oracle-pixel-bisected: settle pinned at 17949, 22 total chars, first-char tick = 17949-21 = 17928 (this tick's own sha is shared with `TURN14_MISSED_TEXT_START_TICK`'s own first-char tick below - both lines start with "ONIX", not a coincidence, both render pixel-identically for their shared first glyph). */
 const TURN14_DRAGONBREATH_TEXT_TOTAL = ROCK_SLIDE_LINE1.length + DRAGONBREATH_KICKOFF_LINE2.length;
