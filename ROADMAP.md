@@ -443,6 +443,16 @@ which remains untouched. Turn-17 rung 3 and Turn-16 rung 3 remain exact,
 the Turn-17 verifier passes, and Tier-1/build are green; the supervisor
 independently reverified each of those claims. S7 remains `[~]`; atomic
 HP/status/faint/victory flow remains open.
+**Turn-17 rung 5 proposed for supervisor acceptance (2026-07-23 bounded
+worker):** `turn17-rung5.json` is **113/113 exact** for every canonical
+tick `22418-22530`: atomic lethal HP state, unconditional-but-blocked
+secondary roll, steady hold, formula-reused seven-step MURKROW sink,
+healthbox/BRN teardown and status clear, faint-text glyph cadence, settle,
+and the fully typed wait-cursor/input gate. Rung 4 remains **200/200** and
+the earlier shared `turn5-faint.json` path remains **110/110**; the Turn-17
+verifier, Tier-1 suite, and build pass. See `docs/turn17-notes.md` §10.
+S7 remains `[~]`; tick 22531 onward, the long hold/dismiss, and victory flow
+remain open.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

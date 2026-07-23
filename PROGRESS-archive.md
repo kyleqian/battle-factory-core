@@ -12034,3 +12034,15 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   absolute-tick mechanism.
 
 ---
+## 292 — Bounded worker (S7 turn 17 rung 2): **GREEN — repeated FAINT_ATTACK body exact**
+
+- **State:** canonical `21854--22074` was **221/221 exact**, every tick
+  captured; Turn-17 verifier, Tier-1, and build passed.
+- **Did:** reused the confirmation-relative FAINT_ATTACK body with MAGBY
+  `79→27` and explicit MURKROW `58/142 BRN`, pinning ownership ages
+  `0..220` in `turn17-rung2.json`.
+- **Next at archive time:** canonical **22075**, the post-hit tail.
+- **Notes:** implementation commit `4dcdcaf`; no forbidden pixel or
+  absolute-tick mechanism.
+
+---

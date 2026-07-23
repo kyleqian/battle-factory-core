@@ -574,3 +574,46 @@ and production build **5.458 MB**. Tick 22418's atomic HP write and
 everything after it remain intentionally untouched. No absolute battle
 tick, framebuffer/screenshot asset, per-frame lookup, trace branch,
 coordinate/RGB fitting, excluded capture, or thinned prior trace was added.
+
+## 10. Engine rung 5: lethal commit through the fully typed faint gate
+
+Canonical renders **22418-22530** are implemented in
+`turn17-rung5.json` at **113/113 exact**, with every tick captured. The
+trace retains rung 4's complete input prefix and only extends its final
+input-free segment; no capture was removed or thinned.
+
+Fresh `ram-probe.py` replays of both committed Turn-17 watch specs confirmed
+the boundaries before wiring:
+
+| FIRE_PUNCH age | canonical tick | state |
+|---:|---:|---|
+| 226→227 | 22417→22418 | atomic `gBattleMons[1].hp 58→0`; `gCurrentMove=FIRE_PUNCH`, attacker/target remain MAGBY/MURKROW |
+| 231→232 | 22422→22423 | unconditional secondary roll advances RNG `1102173384→2185030043`; effect is a no-op because the target is already at 0 HP, so no second burn animation/message |
+| 300 | 22491 | `SpriteCB_FaintOpponentMon` sink epoch `S`, `y2=0` |
+| 302,304,…314 | 22493,22495,…22505 | seven-step opponent sink render, the shared `ceil((age-1-S)/2)` closed form with MURKROW's front-pic `yOffset=11` |
+| 317 | 22508 | healthbox and BRN badge are gone; `status1` clears `16→0` |
+| 319 | 22510 | controller hard-cuts from the held FIRE_PUNCH message to the first faint-text glyph |
+| 339 | 22530 | `"Foe MURKROW\nfainted!"` is fully typed and its wait cursor/input gate is live |
+
+The sink is not rebuilt: the FIRE_PUNCH occurrence profile supplies the
+same seven-step timing data already exercised by Pidgeotto, and the renderer
+reuses `drawSpriteSheetTopRows` plus the standard text cursor. The profile
+also makes the lethal secondary behavior explicit: the RNG call is consumed,
+but `secondaryRollSucceeded=false`, which suppresses the otherwise shared
+Status_Burn flames. Healthbox teardown removes both underlying OAM pieces,
+not only the live overlay; the old FIRE_PUNCH text correctly remains visible
+through tick 22509.
+
+All scheduling is relative to the shared FIRE_PUNCH reducer epoch: HP commit
+at age 227, sink `+73`, teardown `+90`, text `+92`, and input gate `+112`.
+There is no absolute battle-tick or trace-specific dispatch. Source evidence
+is `battle_script_commands.c`'s `Cmd_seteffectwithchance`/fainted-target
+guard and `battle_main.c`'s `SpriteCB_FaintOpponentMon`/
+`SpriteCB_AnimFaintOpponent`; fresh RAM reproduces the source cadence exactly.
+
+Regression verdict: rung 5 **113/113**, rung 4 **200/200**, and the earlier
+shared faint path `turn5-faint.json` **110/110**, all 0 diff.
+`verify-turn17.ts` captures all **245** curated ticks with every check
+passing; Tier-1 is **1056/1056** and production build is **5.460 MB**.
+The long faint-text hold, its dismiss at 22801, battle outcome/victory flow,
+and tick 22531 onward remain deliberately untouched. S7 remains in progress.

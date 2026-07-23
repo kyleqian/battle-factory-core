@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 295 — Bounded worker (S7 turn 17 rung 5): **GREEN — lethal faint through typed gate exact**
+
+- **State:** canonical `22418--22530` is **113/113 exact**, every tick
+  captured. Turn-17 rung 4 remains **200/200**, `turn5-faint.json` remains
+  **110/110**, `verify-turn17.ts` passes all **245** checks, Tier-1 is
+  **1056/1056**, and build passes (**5.460 MB**).
+- **Did:** parameterized the shared FIRE_PUNCH profile for the atomic
+  `58→0` write, lethal secondary RNG/no-op, seven-step opponent sink,
+  healthbox+BRN teardown/status clear, faint glyph cadence, settle, and
+  fully typed wait-cursor/input gate. Committed dense `turn17-rung5.json`.
+- **Next:** resume at **22531**. The long button-gated faint-text hold,
+  dismiss A at 22801, battle outcome/victory/trainer transition, and #38
+  remain untouched; S7 stays `[~]`.
+- **Notes:** implementation commit `de79bdf`. Fresh RAM replays confirmed
+  HP age 227, secondary +5, sink S=KO+73/n=7, teardown +90, text +92, and
+  gate +112. No forbidden framebuffer/absolute-tick/per-frame/trace branch,
+  fitted coordinate/color, excluded capture, or thinned trace.
+
+---
 ## 294 — Bounded worker (S7 turn 17 rung 4): **GREEN — lethal FIRE_PUNCH pre-write exact**
 
 - **State:** canonical `22218--22417` is **200/200 exact**, every tick
@@ -49,25 +68,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   capture. Supervisor independently reverified the dense window, predecessor
   rung, turn-17 verifier, full Tier-1 suite, and production build; ROADMAP
   status accepted. S7 remains `[~]`.
-
----
-## 292 — Bounded worker (S7 turn 17 rung 2): **GREEN — repeated FAINT_ATTACK body exact**
-
-- **State:** canonical `21854--22074` is **221/221 exact**, every tick
-  captured. Turn-17 rung 1 remains **118/118**; turn-16 rung 2a is
-  **221/221**, rung 5 **175/175**; verifiers pass **233/233** (turn 16)
-  and all **245** turn-17 checks; Tier-1 is **1049/1049** and build passes
-  (**5.457 MB**).
-- **Did:** reused the confirmation-relative FAINT_ATTACK BG_DARK fades,
-  Murkrow ellipse/alpha, Magby shake, hitsplat, and source field compositor;
-  parameterized MAGBY `79→27` and explicit MURKROW `58/142 BRN` state.
-  Pinned animation ownership ages `0..220` and committed dense
-  `turn17-rung2.json`.
-- **Next:** resume at **22075**, after the final animation-owned VBlank.
-  Post-hit wobble/blink, MAGBY HP drain/handoff, FIRE_PUNCH response,
-  faint/WIN flow, and later ticks remain untouched; #38 stays parked.
-- **Notes:** implementation commit `4dcdcaf`; no absolute battle tick,
-  framebuffer/screenshot asset, per-frame table, trace branch,
-  coordinate/RGB fitting, or excluded capture. Supervisor independently
-  reverified the dense window, predecessor rung, turn-17 verifier, full
-  Tier-1 suite, and production build; ROADMAP status accepted.
