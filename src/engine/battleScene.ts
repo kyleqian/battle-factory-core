@@ -1243,6 +1243,12 @@ export interface BattleSceneState {
    */
   turn17OutcomeDismissElapsed?: number | null;
   /**
+   * The no-cursor DESTIN loss-quote dismiss edge.  Stored only after its
+   * PAUSE_UNTIL_PRESS controller enters WAIT; S8's postwin clocks are
+   * derived exclusively from this edge.
+   */
+  turn17LossDismissElapsed?: number | null;
+  /**
    * RAM-equivalent gBattleOutcome for the first battle.  The WIN write is
    * intentionally state-only during this slice: the old faint message
    * remains frozen until the later outcome renderer takes ownership.
@@ -1276,6 +1282,7 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn17MenuRedrawElapsed: null,
   turn17KoDismissElapsed: null,
   turn17OutcomeDismissElapsed: null,
+  turn17LossDismissElapsed: null,
   battleOutcome: 0,
 };
 
@@ -1309,6 +1316,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn17MenuRedrawElapsed: state.turn17MenuRedrawElapsed ?? null,
     turn17KoDismissElapsed: state.turn17KoDismissElapsed ?? null,
     turn17OutcomeDismissElapsed: state.turn17OutcomeDismissElapsed ?? null,
+    turn17LossDismissElapsed: state.turn17LossDismissElapsed ?? null,
     battleOutcome:
       postDismiss === null ? (state.battleOutcome ?? 0) : postDismiss.battleOutcome,
     turn15PartySelect: state.turn15PartySelect,
@@ -11897,6 +11905,112 @@ function fadeTurn15PartyFramebuffer(fb: Uint8Array, bgY: number, objMask: Uint8A
   }
 }
 
+function fastFadeComponentToBlack(component8: number, updates: number): number {
+  const c5 = Math.max(0, (component8 >> 3) - 2 * updates);
+  return (c5 << 3) | (c5 >> 2);
+}
+
+/**
+ * BeginFastPaletteFade(FAST_FADE_OUT_TO_BLACK), used only after the accepted
+ * DESTIN loss-quote dismiss. Unlike BeginNormalPaletteFade, fast fade
+ * subtracts two directly from each 5-bit channel on alternating BG/OBJ
+ * updates (palette.c:548-711). The source frame is the still-live battle
+ * composition; OBJ ownership is rebuilt from the same state/primitives.
+ */
+export function applyTurn17PostwinFastFade(
+  fb: Uint8Array,
+  state: BattleSceneState,
+  age: number,
+): void {
+  if (age < 7) return;
+  if (age >= 37) {
+    fb.fill(0);
+    for (let i = 3; i < fb.length; i += 4) fb[i] = 255;
+    return;
+  }
+
+  const party = state.turn15PartySelect;
+  const confirmElapsed = state.fightSubmenu.confirmElapsed;
+  const koDismissElapsed = state.turn17KoDismissElapsed ?? null;
+  const outcomeDismissElapsed = state.turn17OutcomeDismissElapsed ?? null;
+  if (!party || party.sendOutElapsed === null || confirmElapsed === null
+      || koDismissElapsed === null || outcomeDismissElapsed === null) {
+    throw new Error("postwin fade requires the settled Turn 17 battle state");
+  }
+
+  const t = TICK0 + state.elapsed;
+  const confirmTick = TICK0 + confirmElapsed;
+  const redrawTick = TICK0 + (state.turn17MenuRedrawElapsed ?? 0);
+  const freezeTick = confirmTick + TURN16_BOUNCE_FREEZE_DELAY;
+  const bounceTick = 1748 + freezeTick - redrawTick + 1;
+  const animationAge = t - (confirmTick + TURN16_FAINT_ATTACK_ANIM_DELAY);
+  const frozenAnimationAge = Math.min(
+    animationAge,
+    koDismissElapsed - confirmElapsed - TURN16_FAINT_ATTACK_ANIM_DELAY,
+  );
+  const targetHp = { startHp: 79, endHp: 27 };
+  const resolution = faintAttackResolutionState(frozenAnimationAge, targetHp);
+  const releaseTick = partySendOutReleaseLogicalTick(party.sendOutElapsed);
+  const bounce = menuIdleBounce(bounceTick);
+
+  const objMask = new Uint8Array(fb.length);
+  // The lethal FIRE_PUNCH endpoint has already removed Murkrow and its
+  // healthbox from the extracted OAM set. MAGBY and its healthbox remain
+  // live through the same source-relative SEND OUT primitives.
+  drawTurn15ForcedSwitchBall(objMask, party.sendOutElapsed);
+  if (releaseTick !== null && !resolution.targetInvisible) {
+    drawTurn15ForcedSwitchRelease(
+      objMask,
+      releaseTick,
+      bounce.onixY2,
+      faintAttackTargetShakeX2(frozenAnimationAge),
+    );
+  }
+  const healthboxDx = partySendOutHealthboxDx(party.sendOutElapsed);
+  if (healthboxDx !== null) {
+    drawTurn15MagbyHealthbox(
+      objMask,
+      healthboxDx,
+      bounce.healthboxY2 + resolution.targetHealthboxY2,
+      resolution.displayedHp,
+    );
+  }
+  const trainerLoss = turn17TrainerLossState(
+    state.elapsed,
+    outcomeDismissElapsed,
+  );
+  if (trainerLoss !== null) {
+    drawSpriteSheet(
+      objMask,
+      bugCatcher.tileset,
+      bugCatcher.palette,
+      trainerLoss.trainerX,
+      OPPONENT_CORNER.y,
+    );
+  }
+  // BG0's opaque battle message window is copied after field/OAM assembly.
+  // It therefore owns the complete bottom strip even where a healthbox
+  // exists underneath it.
+  for (let y = 112; y < 160; y += 1) {
+    objMask.fill(0, y * 240 * 4, (y + 1) * 240 * 4);
+  }
+
+  const local = age - 6;
+  // BeginFastPaletteFadeInternal performs one update immediately. The
+  // inherited toggle then gives BG the next (even-local) update while OBJ
+  // resumes on odd-local updates.
+  const bgUpdates = Math.floor(local / 2) + 1;
+  const objUpdates = Math.ceil(local / 2);
+  for (let p = 0; p < 240 * 160; p += 1) {
+    const o = p * 4;
+    const updates = objMask[o + 3] !== 0 ? objUpdates : bgUpdates;
+    fb[o] = fastFadeComponentToBlack(fb[o]!, updates);
+    fb[o + 1] = fastFadeComponentToBlack(fb[o + 1]!, updates);
+    fb[o + 2] = fastFadeComponentToBlack(fb[o + 2]!, updates);
+    fb[o + 3] = 255;
+  }
+}
+
 // Source-extracted 4bpp transparency masks for party_menu's 32x32 menu
 // Poké Ball (closed/open frames) and interface/status_icons' 32x8 FNT
 // frame.  These are masks, not captured pixels: their placements come from
@@ -12287,6 +12401,17 @@ export function turn17TrainerLossState(
     inputReady: age >= TURN17_LOSS_INPUT_READY_DELAY,
     cursorVisible: false,
   };
+}
+
+/** The third A is accepted only by the loss quote's real no-cursor WAIT. */
+export function turn17LossDismissEligible(
+  sceneElapsed: number,
+  outcomeDismissElapsed: number | null,
+): boolean {
+  return turn17TrainerLossState(
+    sceneElapsed,
+    outcomeDismissElapsed,
+  )?.inputReady ?? false;
 }
 
 /** FIRE_PUNCH reducer age derived from the stored Turn 17 confirmation. */

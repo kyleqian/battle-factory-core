@@ -426,7 +426,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, turn13KoDismissElapsed: null, turn13Resolved: false, turn14Resolved: false, turn16Resolved: false, turn17MenuRedrawElapsed: null, turn17KoDismissElapsed: null, turn17OutcomeDismissElapsed: null, battleOutcome: 0, turn15PartySelect: undefined });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, turn1Resolved: false, turn2Resolved: false, turn3Resolved: false, turn4Resolved: false, turn5KoDismissElapsed: null, turn5Resolved: false, turn6Resolved: false, turn7Resolved: false, turn8Resolved: false, turn9Resolved: false, turn10Resolved: false, turn11Resolved: false, turn12Resolved: false, turn13KoDismissElapsed: null, turn13Resolved: false, turn14Resolved: false, turn16Resolved: false, turn17MenuRedrawElapsed: null, turn17KoDismissElapsed: null, turn17OutcomeDismissElapsed: null, turn17LossDismissElapsed: null, battleOutcome: 0, turn15PartySelect: undefined });
   });
 });
 

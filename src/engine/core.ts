@@ -66,7 +66,13 @@ import {
   walkVisual,
   type PrebattleRoomState,
 } from "./prebattleRoom.ts";
-import { drawMessageBox, renderPrebattleRoomScene, renderPrebattleRoomWalkScene } from "./prebattleRoomRender.ts";
+import {
+  drawMessageBox,
+  drawMessageBoxFrame,
+  drawMessageBoxText,
+  renderPrebattleRoomScene,
+  renderPrebattleRoomWalkScene,
+} from "./prebattleRoomRender.ts";
 import {
   advanceBattleRoom,
   entryStep,
@@ -80,6 +86,7 @@ import { renderBattleRoomEntryScene } from "./battleRoomRender.ts";
 import { applyBattleTransitionOverlay, exitFadeY } from "./battleTransition.ts";
 import {
   advanceBattleScene,
+  applyTurn17PostwinFastFade,
   DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
@@ -100,6 +107,7 @@ import {
   turn13KoDismissEligible,
   turn15KoDismissEligible,
   turn17KoDismissEligible,
+  turn17LossDismissEligible,
   turn17OutcomeDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
@@ -119,6 +127,21 @@ import {
   TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
 } from "./battleMenu.ts";
 import { activeMonMoveset, rentalMoveset } from "./battleSetup.ts";
+import {
+  advancePostwin,
+  INITIAL_POSTWIN_STATE,
+  POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
+  POSTWIN_BATTLE_ROOM_FIRST_AGE,
+  POSTWIN_COUNTER_ROOM_FIRST_AGE,
+  POSTWIN_HEAL_BOX_AGE,
+  POSTWIN_HEAL_LINE1,
+  POSTWIN_HEAL_LINE2,
+  POSTWIN_IN_BATTLE_CLEAR_AGE,
+  postwinHealVisibleChars,
+  postwinPhase,
+  postwinRngSteps,
+  type PostwinState,
+} from "./postwin.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -133,7 +156,11 @@ export interface EngineState {
   battleRoom: BattleRoomState | null;
   /** null until battleRoom's "settled" phase (the CIRCLES_MEET transition's own indefinite post-fade black hold) reaches BATTLE_SCENE_HANDOFF_ELAPSED (S6 scene-assembly slice); see battleScene.ts. Once set, no input is processed and this owns rendering exclusively. */
   battleScene: BattleSceneState | null;
-  /** gRngValue (src/random.c) - advances once per VBlank always (main.c:366); see rng.ts. */
+  /** Non-null from the accepted Battle-1 loss quote through the counter flow. */
+  postwin: PostwinState | null;
+  /** gMain.inBattle-equivalent RNG ownership. */
+  rngMode: "vblank" | "frontierBattle";
+  /** gRngValue (src/random.c). */
   rngValue: number;
 }
 
@@ -149,6 +176,8 @@ export function createInitialState(): EngineState {
     prebattleRoom: null,
     battleRoom: null,
     battleScene: null,
+    postwin: null,
+    rngMode: "vblank",
     rngValue: ANCHOR_RNG_VALUE,
   };
 }
@@ -166,12 +195,45 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   const { newKeys, newAndRepeatedKeys, next: keyRepeat } = readKeys(buttons, state.keyRepeat);
   let draftScreen = state.draftScreen;
   let summaryScreen = advanceSummaryScreen(state.summaryScreen);
-  // main.c:366 - Random() advances once per VBlank unconditionally outside
-  // frontier battles, so this always happens before any ball-roll draw below.
-  let rngValue = advanceRngValue(state.rngValue);
+  // main.c:366: frontier battles freeze the per-VBlank call. Postwin handles
+  // its clear tick and small teardown bursts explicitly below.
+  let rngValue =
+    state.rngMode === "vblank"
+      ? advanceRngValue(state.rngValue)
+      : state.rngValue;
+  let rngMode = state.rngMode;
   let prebattleRoom: PrebattleRoomState | null = state.prebattleRoom;
   let battleRoom: BattleRoomState | null = state.battleRoom;
   let battleScene: BattleSceneState | null = state.battleScene;
+  let postwin: PostwinState | null = state.postwin;
+
+  if (postwin) {
+    const nextPostwin = advancePostwin(postwin);
+    // The generic VBlank call above already supplied one step after the
+    // mode has resumed. Before the clear tick it supplied none.
+    const totalSteps = postwinRngSteps(nextPostwin.elapsed);
+    const alreadyAdvanced = rngMode === "vblank" ? 1 : 0;
+    for (let i = alreadyAdvanced; i < totalSteps; i += 1) {
+      rngValue = advanceRngValue(rngValue);
+    }
+    if (nextPostwin.elapsed >= POSTWIN_IN_BATTLE_CLEAR_AGE) {
+      rngMode = "vblank";
+      battleScene = null;
+    }
+    return {
+      ...state,
+      frame: state.frame + 1,
+      draftScreen,
+      keyRepeat,
+      summaryScreen,
+      prebattleRoom,
+      battleRoom,
+      battleScene,
+      postwin: nextPostwin,
+      rngMode,
+      rngValue,
+    };
+  }
 
   if (battleScene) {
     // S6 send-out slice: the only input this window ever reads is A-press
@@ -278,6 +340,38 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       battleScene = {
         ...battleScene,
         turn17OutcomeDismissElapsed: battleScene.elapsed + 1,
+      };
+    }
+    // DESTIN's expanded Easy Chat quote ends in PAUSE_UNTIL_PRESS. Unlike
+    // the prior battle printers this wait draws no cursor, but it remains a
+    // genuine one-shot A gate. The accepted edge starts every postwin clock.
+    if (
+      (battleScene.turn17OutcomeDismissElapsed ?? null) !== null &&
+      (battleScene.turn17LossDismissElapsed ?? null) === null &&
+      newKeys.has("A") &&
+      turn17LossDismissEligible(
+        battleScene.elapsed + 1,
+        battleScene.turn17OutcomeDismissElapsed ?? null,
+      )
+    ) {
+      battleScene = {
+        ...battleScene,
+        turn17LossDismissElapsed: battleScene.elapsed + 1,
+      };
+      postwin = INITIAL_POSTWIN_STATE;
+      battleScene = advanceBattleScene(battleScene);
+      return {
+        ...state,
+        frame: state.frame + 1,
+        draftScreen,
+        keyRepeat,
+        summaryScreen,
+        prebattleRoom,
+        battleRoom,
+        battleScene,
+        postwin,
+        rngMode,
+        rngValue,
       };
     }
     // S7 FIGHT-submenu slice (docs/battle-turn-notes.md §11): the settled
@@ -675,7 +769,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn17MenuRedrawElapsed,
     };
     battleScene = advanceBattleScene(battleScene);
-    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, postwin, rngMode, rngValue };
   }
 
   if (battleRoom) {
@@ -687,6 +781,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // battleRoom.ts's §8.3 doc for the close-latency derivation.
     if (battleRoom.phase === "msgboxIdle" && newKeys.has("A")) {
       battleRoom = { phase: "msgboxClosing", elapsed: 0 };
+      rngMode = "frontierBattle";
     } else {
       battleRoom = advanceBattleRoom(battleRoom);
       // S6 scene-assembly handoff (battleScene.ts doc): the CIRCLES_MEET
@@ -698,7 +793,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         battleScene = INITIAL_BATTLE_SCENE_STATE;
       }
     }
-    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngValue };
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngMode, rngValue };
   }
 
   if (prebattleRoom) {
@@ -1114,7 +1209,77 @@ function renderPrebattleRoomState(state: EngineState): Uint8Array {
   return fb;
 }
 
+const POSTWIN_ROOM_FADE_OUT = {
+  startDelay: 0,
+  startY: 0,
+  targetY: 16,
+} as const;
+
+function renderPostwinState(state: EngineState): Uint8Array {
+  const postwin = state.postwin!;
+  const age = postwin.elapsed;
+  const phase = postwinPhase(age);
+  if (phase === "battleHold" || phase === "battleFade") {
+    const fb = createFramebuffer();
+    if (!state.battleScene) return blackFrame();
+    renderBattleScene(fb, state.battleScene);
+    applyTurn17PostwinFastFade(fb, state.battleScene, age);
+    return fb;
+  }
+  if (phase === "blackAfterBattle" || phase === "blackBeforeCounter") {
+    return blackFrame();
+  }
+  if (phase === "battleRoom") {
+    const fb = createFramebuffer();
+    const sceneElapsed = SETTLED_SCENE_ELAPSED;
+    const step = entryStep(sceneElapsed);
+    const fadingOut = age >= POSTWIN_BATTLE_ROOM_FADE_OUT_AGE;
+    const local = fadingOut
+      ? age - POSTWIN_BATTLE_ROOM_FADE_OUT_AGE
+      : age - POSTWIN_BATTLE_ROOM_FIRST_AGE;
+    const timing = fadingOut ? POSTWIN_ROOM_FADE_OUT : FADE_IN;
+    renderBattleRoomEntryScene(
+      fb,
+      step,
+      sceneElapsed,
+      bgFadeY(local, timing),
+      objFadeY(local, timing),
+    );
+    return fb;
+  }
+
+  const fb = createFramebuffer();
+  const fadeLocal = age - POSTWIN_COUNTER_ROOM_FIRST_AGE;
+  renderPrebattleRoomScene(
+    fb,
+    bgFadeY(fadeLocal, FADE_IN),
+    objFadeY(fadeLocal, FADE_IN),
+  );
+  if (age >= POSTWIN_HEAL_BOX_AGE) {
+    drawMessageBoxFrame(fb);
+    const chars = postwinHealVisibleChars(age);
+    if (chars > 0) {
+      drawMessageBoxText(
+        fb,
+        POSTWIN_HEAL_LINE1.slice(0, Math.min(chars, POSTWIN_HEAL_LINE1.length)),
+        16,
+        121,
+      );
+      if (chars > POSTWIN_HEAL_LINE1.length) {
+        drawMessageBoxText(
+          fb,
+          POSTWIN_HEAL_LINE2.slice(0, chars - POSTWIN_HEAL_LINE1.length),
+          16,
+          137,
+        );
+      }
+    }
+  }
+  return fb;
+}
+
 export function render(state: EngineState): Uint8Array {
+  if (state.postwin) return renderPostwinState(state);
   if (state.battleScene) {
     const fb = createFramebuffer();
     renderBattleScene(fb, state.battleScene);
