@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ## 321 — S8 swap-YES controller prefix: **GREEN — state/mutation only**
 
 - **State:** source-driven swap interaction and mutation are implemented as a
-  pure presentation-acknowledged controller. Tier-1 is **1168/1168** and build
+  pure presentation-acknowledged controller. Tier-1 is **1170/1170** and build
   passes (**5.537 MB**). Canonical pixels remain exact only through the
   already accepted swap-offer endpoint **29601**.
 - **Did:** modeled player picker → option popup → enemy picker → accept YES/NO,
@@ -19,7 +19,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   assets and wire offer-YES into this controller. Then generalize Battle-2
   setup/render identity beyond its hard-coded ONIX lead so accepted GROVYLE
   can continue honestly; add dense explicit-OFF traces only when green.
-- **Notes:** commits `09fa56a`, `f266d1f`. No runtime wiring, new compare
+- **Notes:** commits `09fa56a`, `f266d1f`, `5ed10b5`. No runtime wiring, new compare
   trace, screenshot chrome, tick branch, or animation-lane change was made.
 
 ---
