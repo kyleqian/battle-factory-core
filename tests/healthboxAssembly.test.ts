@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { calcBarFilledPixels, composeOpponentHealthbox, composePlayerHealthboxHpOverlay, HEALTHBOX_FRAME_ORIGIN, HP_BAR_FULL_TILES, pickHpBarBand, rightAlign3GlyphCodes } from "../src/engine/healthboxAssembly.ts";
+import { calcBarFilledPixels, composeOpponentHealthbox, composePlayerHealthbox, composePlayerHealthboxHpOverlay, HEALTHBOX_FRAME_ORIGIN, HP_BAR_FULL_TILES, pickHpBarBand, PLAYER_HEALTHBOX_FRAME_ORIGIN, rightAlign3GlyphCodes } from "../src/engine/healthboxAssembly.ts";
 import { CHAR_SPACER } from "../src/engine/battleMenu.ts";
 import battleHealthbox from "../src/assets/gen/battle-healthbox.json" with { type: "json" };
 import harvested from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
+import playerHarvested from "../src/assets/gen/menu-healthbox-player.json" with { type: "json" };
 
 // ISSUES #16 - see docs/healthbox-assembly-notes.md for the full root-cause
 // dossier (RAM/VRAM-confirmed) and what landed.
@@ -78,6 +79,50 @@ describe("composeOpponentHealthbox (ISSUES #16)", () => {
     expect(female.width).toBe(128);
     expect(female.pixels.some((p) => p !== null)).toBe(true);
     expect(none.pixels.some((p) => p !== null)).toBe(true);
+  });
+});
+
+describe("composePlayerHealthbox (ISSUES #37 rung 5)", () => {
+  const playerAssets = {
+    frame: battleHealthbox.singlesPlayer,
+    hpbar: battleHealthbox.hpbar,
+    hpbarAnim: battleHealthbox.hpbarAnim,
+    expbar: battleHealthbox.expbar,
+    textPalette: battleHealthbox.singlesPlayer.palette,
+  };
+
+  it("assembles the established ONIX fixture from raw tiles and data", () => {
+    const result = composePlayerHealthbox(playerAssets, {
+      name: "ONIX", level: 50, gender: "male", hpFraction: 1, status: "none", currentHp: 117, maxHp: 117,
+    });
+    expect([result.width, result.height]).toEqual([128, 64]);
+    expect(PLAYER_HEALTHBOX_FRAME_ORIGIN).toEqual({ x: 126, y: 72 });
+    let checked = 0;
+    for (let y = 0; y < playerHarvested.height; y += 1) {
+      for (let x = 0; x < playerHarvested.width; x += 1) {
+        const cx = x + playerHarvested.x - PLAYER_HEALTHBOX_FRAME_ORIGIN.x;
+        const cy = y + playerHarvested.y - PLAYER_HEALTHBOX_FRAME_ORIGIN.y;
+        const color = result.pixels[cy * result.width + cx];
+        if (!color) continue;
+        const i = (y * playerHarvested.width + x) * 3;
+        expect([color.r, color.g, color.b], `mismatch at (${cx},${cy})`).toEqual(
+          [playerHarvested.pixels[i], playerHarvested.pixels[i + 1], playerHarvested.pixels[i + 2]],
+        );
+        checked += 1;
+      }
+    }
+    expect(checked).toBeGreaterThan(3000);
+  });
+
+  it("is species/data driven for MAGBY's female full-HP state", () => {
+    const onix = composePlayerHealthbox(playerAssets, {
+      name: "ONIX", level: 50, gender: "male", hpFraction: 1, status: "none", currentHp: 117, maxHp: 117,
+    });
+    const magby = composePlayerHealthbox(playerAssets, {
+      name: "MAGBY", level: 50, gender: "female", hpFraction: 1, status: "none", currentHp: 138, maxHp: 138,
+    });
+    expect(magby.pixels).not.toEqual(onix.pixels);
+    expect(magby.pixels.filter(Boolean).length).toBeGreaterThan(3000);
   });
 });
 

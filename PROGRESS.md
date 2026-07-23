@@ -4,6 +4,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 283 — Bounded worker (ISSUES #37 rung 5): **GREEN — MAGBY healthbox/send-out**
+
+- **State:** canonical `20407--20550` and delayed `20437--20580` are both
+  **144/144 exact**. Rung 4a remains **16/16** each, verifier **17/17**,
+  Tier-1 **1017/1017**, and build (**5.413 MB**) pass.
+- **Did:** added a data-driven player-healthbox compositor (MAGBY, Lv50,
+  female, 138/138), confirmation-relative create/populate/110→0 slide, and
+  source `BACK_ANIM_SHAKE_GLOW_RED` reducer. Preserved the release particle
+  stall/order and added task-data probing plus dense canonical/delayed traces.
+- **Next:** #37 rung 6 starts at blank-box ownership: canonical **20551**,
+  delayed **20581**. Build the blank hold and re-anchored action-menu bounce;
+  do not reopen exact rungs 1--5.
+- **Notes:** unmodified A/B was **0/144** each; no screenshots, per-frame RGB,
+  absolute battle-tick tables, coordinate patches, or trace branches.
+
+---
 ## 282 — Bounded worker (ISSUES #37 rung 4a): **GREEN — MAGBY release**
 
 - **State:** canonical `20391--20406` and delayed `20421--20436` are both
@@ -35,22 +51,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** `ISSUES.md` remains the confirmed bug/debt backlog.
   `DEFERRED.md` is currently empty. Direct sessions without injected model
   metadata use `Agent-model: unknown` rather than guessing.
-
----
-## 280 — Codex supervised-run hardening: **GREEN**
-
-- **State:** game code and accepted rung-3 renderer are unchanged. Tier-1
-  **1011/1011**, build (**5.400 MB**), and deadline-helper tests **5/5** are
-  green.
-- **Did:** made Codex workers default to Sol/medium, added supervisor-directed
-  Sol/high escalation for cross-layer or failed repairs, enforced Codex caps
-  over the full process group, separated JSONL from stderr, fixed managed
-  launch instructions, and added clean-start/commit/clean-finish checks plus
-  Codex-only anti-overfit acceptance guardrails. Claude defaults and launch
-  behavior remain unchanged.
-- **Next:** resume #37 rung 4a under a Sol/high Codex supervisor. The authorized
-  repair qualifies for a Sol/high worker; ordinary later implementation should
-  return to Sol/medium.
-- **Notes:** keep the supervisor at Sol/high. Both Codex launchers cap Sol at
-  high; Terra/xhigh remains available only as an explicit override; max and
-  ultra are refused.

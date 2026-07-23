@@ -180,7 +180,7 @@ export function pickHpBarBand(filledPixels: number): HpBarBand {
  * fill columns, sourced from `hpbar` (green) or `hpbarAnim` (yellow/red) per
  * the selected band.
  */
-function hpBarLocalTiles(assets: HealthboxAssets, hpFraction: number): { sheet: SheetAsset; tileIndex: number }[] {
+function hpBarLocalTiles(assets: Pick<HealthboxAssets, "hpbar" | "hpbarAnim">, hpFraction: number): { sheet: SheetAsset; tileIndex: number }[] {
   const { filledPixels, columns } = calcBarFilledPixels(hpFraction);
   const band = pickHpBarBand(filledPixels);
   const fillSheet = band === "green" ? assets.hpbar : assets.hpbarAnim;
@@ -567,6 +567,13 @@ export interface PlayerHealthboxHpOverlayAssets {
   textPalette: RgbColor[];
 }
 
+export interface PlayerHealthboxAssets extends PlayerHealthboxHpOverlayAssets {
+  /** `battle-healthbox.json`'s raw `singlesPlayer` frame sheet. */
+  frame: SheetAsset;
+  /** `battle-healthbox.json`'s 0px..8px EXP-bar tiles. */
+  expbar: SheetAsset;
+}
+
 /**
  * The player healthbox's own dynamic overlay (HP bar fill + HP digit text)
  * at an arbitrary current/max HP, in the SAME local coordinate system as
@@ -638,3 +645,64 @@ export function composePlayerHealthboxHpOverlay(assets: PlayerHealthboxHpOverlay
 
   return { width, height, pixels: canvas };
 }
+
+/**
+ * Singles-player healthbox assembled from raw frame tiles and runtime data.
+ * The game changes each 64x32 template to square OAM without recalculating
+ * its center-to-corner vector, so the shared canvas origin at `(158,88)` is
+ * screen `(126,72)`, not `(126,56)`.
+ */
+export function composePlayerHealthbox(
+  assets: PlayerHealthboxAssets,
+  params: HealthboxContentParams & { currentHp: number; maxHp: number },
+): { width: number; height: number; pixels: (RgbColor | null)[] } {
+  if (!(params.currentHp >= 0 && params.currentHp <= params.maxHp) || params.maxHp <= 0) {
+    throw new Error(`composePlayerHealthbox: invalid HP ${params.currentHp}/${params.maxHp}`);
+  }
+  if (params.status !== "none") {
+    throw new Error(`composePlayerHealthbox: player status ${params.status} is not implemented`);
+  }
+
+  const width = 128;
+  const height = 64;
+  const canvas: (RgbColor | null)[] = new Array(width * height).fill(null);
+  drawTileset(canvas, width, height, assets.frame, 0, 0);
+
+  // `sHealthBar_Subsprites_Player`: two adjacent 32x8 pieces at canvas
+  // x=32. The first two tiles are HP; the remaining six are the fill.
+  drawHpBarSubsprite(canvas, width, height, hpBarLocalTiles(assets, params.currentHp / params.maxHp), 32, 16);
+  // Rental mons enter at their level's exact base experience, so the
+  // 64-pixel EXP strip is eight copies of the sheet's 0px tile.
+  drawHpBarSubsprite(
+    canvas,
+    width,
+    height,
+    Array.from({ length: 8 }, () => ({
+      // EXP tiles are CPU-copied into the frame sprites' VRAM, so they use
+      // TAG_HEALTHBOX_PAL rather than the separate HP-bar sprite palette.
+      sheet: { tileset: assets.expbar.tileset, palette: assets.frame.palette },
+      tileIndex: 0,
+    })),
+    32,
+    32,
+  );
+
+  // `UpdateNickInHealthbox` copies six tiles into the left object and one
+  // into the right; `UpdateLvlInHealthbox` begins at the next right tile.
+  drawHealthboxText(canvas, width, height, assets.frame.palette, nameGlyphRun(params.name, params.gender), 0, 16, 56);
+  const { run: levelRun, printX: levelPrintX } = levelGlyphRun(params.level);
+  drawHealthboxText(canvas, width, height, assets.frame.palette, levelRun, levelPrintX, 72, 24);
+
+  // Reuse the already oracle-pinned player bar/digit overlay. Its historic
+  // tight-crop coordinates begin one pixel right and two down from canvas.
+  const overlay = composePlayerHealthboxHpOverlay(assets, params.currentHp, params.maxHp);
+  for (let py = 0; py < overlay.height; py += 1) {
+    for (let px = 0; px < overlay.width; px += 1) {
+      const color = overlay.pixels[py * overlay.width + px];
+      if (color) canvas[(py + 2) * width + px + 1] = color;
+    }
+  }
+  return { width, height, pixels: canvas };
+}
+
+export const PLAYER_HEALTHBOX_FRAME_ORIGIN = { x: 126, y: 72 };

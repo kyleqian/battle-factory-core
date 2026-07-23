@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
+import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
 import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 
 describe("forced turn-15 party select", () => {
@@ -79,6 +79,15 @@ describe("forced turn-15 party select", () => {
     expect(partySendOutReleaseLogicalTick(160)).toBe(15);
     expect(20246 + PARTY_SENDOUT_RELEASE_VISIBLE_START).toBe(20391);
     expect(20276 + PARTY_SENDOUT_RELEASE_VISIBLE_START).toBe(20421);
+  });
+
+  it("derives the populated player healthbox's 110-to-0 slide from SEND OUT", () => {
+    expect(partySendOutHealthboxDx(160)).toBeNull();
+    expect(partySendOutHealthboxDx(161)).toBeNull();
+    expect(partySendOutHealthboxDx(162)).toBe(110);
+    expect(partySendOutHealthboxDx(183)).toBe(5);
+    expect(partySendOutHealthboxDx(184)).toBe(0);
+    expect(partySendOutHealthboxDx(240)).toBe(0);
   });
 
   it("uses the RAM-derived 30/31 ONIX hop and 7/8 full-icon frame cadence", () => {

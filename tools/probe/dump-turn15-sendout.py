@@ -158,7 +158,9 @@ def main() -> None:
                 "objVramB64": base64.b64encode(bytes_at(OBJ_VRAM, 0x8000)).decode(),
                 "battler0": {"species": u16(gbm), "hp": u16(gbm + 0x28), "maxHp": u16(gbm + 0x2c), "movePp": [oracle.read_u8(gbm + 0x24 + i) for i in range(4)]},
                 "moveCursor": oracle.read_u8(syms["gMoveSelectionCursor"]), "healthbox": {"left": hb, "right": right, "bar": bar, "sprites": [hb_left, sprite(right), sprite(bar)]},
-                "tasks": [{"slot": i, "func": hex(u32(gt + i * TASK_SIZE)), "active": oracle.read_u8(gt + i * TASK_SIZE + 4)} for i in range(16) if oracle.read_u8(gt + i * TASK_SIZE + 4)],
+                "tasks": [{"slot": i, "func": hex(u32(gt + i * TASK_SIZE)), "active": oracle.read_u8(gt + i * TASK_SIZE + 4),
+                           "data": [s16(gt + i * TASK_SIZE + 8 + 2 * j) for j in range(16)]}
+                          for i in range(16) if oracle.read_u8(gt + i * TASK_SIZE + 4)],
                 "live": live}
 
     out, tick = [], 0

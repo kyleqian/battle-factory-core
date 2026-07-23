@@ -537,10 +537,11 @@ import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
 import partyExitObjAsset from "../assets/gen/turn15-party-exit-obj.json" with { type: "json" };
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
-import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
+import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
+import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam } from "./gbaPpu.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
@@ -909,6 +910,17 @@ const playerHealthboxHpOverlayAssets = {
   hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
   textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
 };
+
+const magbyPlayerHealthboxContent = composePlayerHealthbox(
+  {
+    frame: (battleHealthboxAsset as { singlesPlayer: HealthboxAssets["frame"] }).singlesPlayer,
+    hpbar: healthboxAssemblyAssets.hpbar,
+    hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
+    expbar: (battleHealthboxAsset as { expbar: HealthboxAssets["hpbar"] }).expbar,
+    textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
+  },
+  { name: "MAGBY", level: 50, gender: "female", hpFraction: 1, status: "none", currentHp: 138, maxHp: 138 },
+);
 
 /** Same memoization shape as `opponentHealthboxContentByHp` - only the 17 distinct integer HPs `endeavorOnixHp` ever produces (117 down to 101) are ever requested. */
 const playerHealthboxHpOverlayByHp = new Map<number, ReturnType<typeof composePlayerHealthboxHpOverlay>>();
@@ -2778,6 +2790,8 @@ function drawSpriteSheetAffineTintedBlend(
   tintColor: RgbColor,
   tintCoeff: number,
   y2 = 0,
+  x2 = 0,
+  clipBottom?: number,
 ): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
@@ -2803,7 +2817,9 @@ function drawSpriteSheetAffineTintedBlend(
       const color = tintCoeff > 0
         ? { r: blendComponentToward(c.r, tintColor.r, tintCoeff), g: blendComponentToward(c.g, tintColor.g, tintCoeff), b: blendComponentToward(c.b, tintColor.b, tintCoeff) }
         : c;
-      setPixel(fb, ox + dx, oy + dy + y2, color);
+      const screenY = oy + dy + y2;
+      if (clipBottom !== undefined && screenY >= clipBottom) continue;
+      setPixel(fb, ox + dx + x2, screenY, color);
     }
   }
 }
@@ -6890,12 +6906,14 @@ function drawCleanSwitchinParticles(
   logicalT: number,
   origin: { x: number; y: number },
   clipBottom?: number,
+  stallLogicalTick: number | null = null,
 ): void {
   if (logicalT < 0) return;
   const anim = battleAnimParticles.regularBallAnim;
   const alive: AliveParticle[] = [];
   for (let i = 0; i < PARTICLE_SPAWN_COUNT; i += 1) {
-    const age = logicalT - i;
+    let age = logicalT - i;
+    if (stallLogicalTick !== null && logicalT >= stallLogicalTick) age -= 1;
     if (age < 0 || age > PARTICLE_MAX_AGE) continue;
     const angle = (i % 8) * 32;
     const radius = age === 0 ? 0 : 2 * (age - 1);
@@ -11837,6 +11855,8 @@ function drawTurn15ForcedSwitchBall(fb: Uint8Array, elapsed: number): void {
 
 const FORCED_SWITCH_MAGBY_CORNER = { x: 40, y: 59 };
 const FORCED_SWITCH_PARTICLE_ORIGIN = { x: 68, y: 117 };
+/** One duplicated particle-task state, measured from this release clock. */
+const FORCED_SWITCH_PARTICLE_STALL_LOGICAL_TICK = 16;
 
 /** `BlendPalette`'s source-exact 5-bit channel blend toward RGB(31,31,31). */
 function blendBgr555TowardWhite(color: number, coeff: number): number {
@@ -11850,7 +11870,11 @@ function blendBgr555TowardWhite(color: number, coeff: number): number {
  * their own palettes and are composed below in OAM priority order.
  */
 function turn15ReleaseFieldPalette(logicalTick: number): number[][] {
-  const coeff = cleanSwitchinBgFadeY(logicalTick);
+  // The fade-up half is already active when ReleaseMonFromBall becomes
+  // visible.  Its fade-down writes, beginning at logical tick 22, reach
+  // the displayed BG palette one VBlank later.
+  const paletteTick = logicalTick >= 22 ? logicalTick - 1 : logicalTick;
+  const coeff = cleanSwitchinBgFadeY(paletteTick);
   if (coeff === 0) return turn15FieldPpuAsset.paletteBgr555;
   return turn15FieldPpuAsset.paletteBgr555.map((bank, index) => (
     index >= 1 && index <= 3 ? bank.map((color) => blendBgr555TowardWhite(color, coeff)) : bank
@@ -11858,8 +11882,44 @@ function turn15ReleaseFieldPalette(logicalTick: number): number[][] {
 }
 
 function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number): void {
-  drawPlayerSideAffineMaterialize(fb, magbyBackSprite.tileset, FORCED_SWITCH_MAGBY_CORNER, logicalTick, 1, PLAYER_BALL_OPEN_VISIBLE_BOTTOM);
-  drawCleanSwitchinParticles(fb, logicalTick, FORCED_SWITCH_PARTICLE_ORIGIN, PLAYER_BALL_OPEN_VISIBLE_BOTTOM);
+  if (logicalTick <= 16) {
+    drawPlayerSideAffineMaterialize(fb, magbyBackSprite.tileset, FORCED_SWITCH_MAGBY_CORNER, logicalTick, 1, PLAYER_BALL_OPEN_VISIBLE_BOTTOM);
+  } else {
+    const animation = magbySendOutAnimation(logicalTick);
+    const tintColor = animation.tint.kind === "ball" ? MATERIALIZE_TINT_COLOR : { r: 255, g: 0, b: 0 };
+    drawSpriteSheetAffineTintedBlend(
+      fb,
+      magbyBackSprite.tileset,
+      magbyBackSprite.palette,
+      FORCED_SWITCH_MAGBY_CORNER.x,
+      FORCED_SWITCH_MAGBY_CORNER.y,
+      256,
+      tintColor,
+      animation.tint.coeff,
+      0,
+      animation.x2,
+      PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+    );
+  }
+  // The particle sprites share priority 1 with the battler and win their
+  // OAM-order tie throughout this release.
+  drawCleanSwitchinParticles(
+    fb,
+    logicalTick,
+    FORCED_SWITCH_PARTICLE_ORIGIN,
+    PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+    FORCED_SWITCH_PARTICLE_STALL_LOGICAL_TICK,
+  );
+}
+
+function drawTurn15MagbyHealthbox(fb: Uint8Array, dx: number): void {
+  const { width, height, pixels } = magbyPlayerHealthboxContent;
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const color = pixels[py * width + px];
+      if (color) setPixel(fb, PLAYER_HEALTHBOX_FRAME_ORIGIN.x + dx + px, PLAYER_HEALTHBOX_FRAME_ORIGIN.y + py, color);
+    }
+  }
 }
 
 const PARTY_ENTRY_FADE_OUT: FadeTiming = { startDelay: 0, startY: 0, targetY: 16 };
@@ -11896,6 +11956,8 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
     });
     drawTurn15ForcedSwitchBall(fb, party.sendOutElapsed);
     if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick);
+    const healthboxDx = partySendOutHealthboxDx(party.sendOutElapsed);
+    if (healthboxDx !== null) drawTurn15MagbyHealthbox(fb, healthboxDx);
     drawMessageTextLines(fb, PARTY_SENDOUT_GO_TEXT, "", partySendOutGoTextVisibleChars(party.sendOutElapsed));
     return true;
   }

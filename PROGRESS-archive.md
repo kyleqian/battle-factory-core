@@ -1,3 +1,22 @@
+## 280 — Codex supervised-run hardening: **GREEN**
+
+- **State:** game code and accepted rung-3 renderer are unchanged. Tier-1
+  **1011/1011**, build (**5.400 MB**), and deadline-helper tests **5/5** are
+  green.
+- **Did:** made Codex workers default to Sol/medium, added supervisor-directed
+  Sol/high escalation for cross-layer or failed repairs, enforced Codex caps
+  over the full process group, separated JSONL from stderr, fixed managed
+  launch instructions, and added clean-start/commit/clean-finish checks plus
+  Codex-only anti-overfit acceptance guardrails. Claude defaults and launch
+  behavior remain unchanged.
+- **Next:** resume #37 rung 4a under a Sol/high Codex supervisor. The authorized
+  repair qualifies for a Sol/high worker; ordinary later implementation should
+  return to Sol/medium.
+- **Notes:** keep the supervisor at Sol/high. Both Codex launchers cap Sol at
+  high; Terra/xhigh remains available only as an explicit override; max and
+  ultra are refused.
+
+---
 ## 279 — Supervisor wind-down (ISSUES #37 rung 4a): **GREEN, RETRY AUTHORIZED**
 
 - **State:** accepted rung-3 renderer is unchanged and the tree is clean.

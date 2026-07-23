@@ -92,6 +92,12 @@ export const PARTY_SENDOUT_BALL_SPIN_START = PARTY_SENDOUT_BALL_VISIBLE_START + 
 export const PARTY_SENDOUT_BALL_LAST_VISIBLE = PARTY_SENDOUT_BALL_VISIBLE_START + 43;
 /** First displayed VBlank owned by MAGBY's release task and particles. */
 export const PARTY_SENDOUT_RELEASE_VISIBLE_START = PARTY_SENDOUT_BALL_LAST_VISIBLE + 3;
+/** Populated player-healthbox slide, using StartHealthboxSlideIn's 23 poses. */
+export const PARTY_SENDOUT_HEALTHBOX_VISIBLE_START = PARTY_SENDOUT_RELEASE_VISIBLE_START + 16;
+export const PARTY_SENDOUT_HEALTHBOX_SLIDE_START = PARTY_SENDOUT_HEALTHBOX_VISIBLE_START + 1;
+export const PARTY_SENDOUT_HEALTHBOX_SLIDE_SPAN = 22;
+export const PARTY_SENDOUT_HEALTHBOX_START_DX = 110;
+export const PARTY_SENDOUT_HEALTHBOX_STEP = 5;
 
 export type PartySendOutBallPhase = "none" | "closed" | "spin" | "landed";
 
@@ -111,6 +117,16 @@ export function partySendOutBallPhase(elapsed: number): PartySendOutBallPhase {
 export function partySendOutReleaseLogicalTick(elapsed: number): number | null {
   if (elapsed < PARTY_SENDOUT_RELEASE_VISIBLE_START) return null;
   return elapsed - PARTY_SENDOUT_RELEASE_VISIBLE_START;
+}
+
+/** SEND-OUT-relative player-healthbox x2, or null before first visibility. */
+export function partySendOutHealthboxDx(elapsed: number): number | null {
+  // Creation/population occurs on VISIBLE_START while the objects remain
+  // wholly offscreen; x2=110 reaches the display on the next VBlank.
+  if (elapsed < PARTY_SENDOUT_HEALTHBOX_SLIDE_START) return null;
+  const age = elapsed - PARTY_SENDOUT_HEALTHBOX_SLIDE_START;
+  if (age >= PARTY_SENDOUT_HEALTHBOX_SLIDE_SPAN) return 0;
+  return PARTY_SENDOUT_HEALTHBOX_START_DX - PARTY_SENDOUT_HEALTHBOX_STEP * age;
 }
 
 /**

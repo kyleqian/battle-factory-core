@@ -5,52 +5,18 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #37 — Turn-15 forced party menu: post-confirm SEND OUT remains
+## #37 — Turn-15 forced SEND OUT: blank hold/action-menu redraw remains
 
-**Rung 2 CLOSED 2026-07-22:** the confirmation-relative field compositor now
-uses the 20302 indexed PPU transfer with its directly observed BLDY sequence
-15→0, retains its blank message box, and types `Go! MAGBY!` at FAST speed.
-Fresh every-frame oracle capture plus direct OAM state establishes that the
-new slot at 20343--44 owns no pixels; its first visible 111px are the affine
-closed ball at 20345. Both canonical and delayed rung-2 traces stop at the
-preceding complete-text-only frame (43/43 exact). Rung 3 begins at that
-visible ball/trainer handoff; it must not assume RAM existence is visual
-ownership.
+**Rungs 1--5 CLOSED 2026-07-22:** the confirmation-relative party exit,
+field/text handoff, player ball, MAGBY release, populated healthbox slide, and
+MAGBY `BACK_ANIM_SHAKE_GLOW_RED` now match their committed canonical/delayed
+dense traces. Rung 5 covers canonical `20407--20550` and delayed
+`20437--20580`, both **144/144 exact**; rung 4a remains **16/16** each.
 
-**Rung 3 CLOSED 2026-07-22:** fresh direct OAM/callback/VRAM evidence
-corrects the inherited label: slot 6/tile 405/palette 6 is the player Poké
-Ball, not Brendan; no Brendan sprite exists in this forced replacement.
-Its visible, confirmation-relative closed/spin path is exact in committed
-46-frame canonical (`20345--20390`) and delayed (`20375--20420`) traces.
-The first rendered MAGBY pixels are already at 20391 (not the dossier's old
-20400 label), so the traces stop before that ownership boundary. Rung 4 now
-starts with MAGBY/materialization/particles only.
-
-**Rung 4a CLOSED 2026-07-22:** the confirmation-relative release clock starts
-at elapsed 145 and parameterizes the initial ONIX player-side affine
-materializer plus turn-5's clean particle and normal-palette-fade reducers.
-MAGBY uses its extracted battle-back sprite and the established player terrain
-occlusion boundary. Committed canonical `20391--20406` and delayed
-`20421--20436` traces are both **16/16 exact**. The next ownership boundary is
-the player healthbox at canonical 20407 (delayed 20437); do not extend rung 4a
-into it.
-
-**Rung 1 CLOSED 2026-07-22:** direct indexed exit OBJ composition now draws
-balls (OAM 6--9) before the live icons (3--5), then status (1--2), preserving
-same-priority lower-index wins and the existing press-relative OBJ fade. Both
-canonical/delayed dense party traces are **200/200 exact**, including
-20302/20332. The screenshot-derived status backing is no longer allowed to
-claim transparent pixels during the fade. Do not reopen this raw field/menu
-transfer. The remaining post-SEND-OUT path continues at rung (5):
-create/populate/slide the 138/138 player healthbox, then (6) blank hold +
-re-anchored MAGBY action-menu bounce.
-
-Reuse is explicit: parameterize the initial ONIX player-sendout helpers and
-turn-5's clean switch-in primitives; do **not** copy turn-13 Murkrow's
-species-specific wobble table. New data is only MAGBY's front asset/frame
-identity and any MAGBY-only wobble table. Continue with rung 5 and verify the
-documented dense range before each subsequent rung. Do not use per-frame
-assets, absolute tick tables, or coordinate patches.
+**Remaining rung 6:** begin at blank-box ownership (canonical **20551**,
+delayed **20581**), then reproduce its hold and the re-anchored MAGBY
+action-menu redraw/bounce. Do not reopen exact rungs 1--5 or use per-frame
+assets, absolute tick tables, coordinate patches, or trace branches.
 
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
