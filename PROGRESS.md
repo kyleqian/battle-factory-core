@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 300 — Bounded worker S8 postwin increment: **GREEN — heal dismiss through next-match input ready**
+## 300 — Supervisor-accepted S8 postwin increment: **GREEN — heal dismiss through next-match input ready**
 
 - **State:** canonical dynamic ticks **25800-26009** are gaplessly
   **210/210 exact**, with six earlier static-hold anchors; the committed
@@ -22,7 +22,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   is byte-identical to the committed 6007-row ledger; fresh DOWN sweep proves
   26008 is visible-but-rejecting and 26009 first accepts input. No forbidden
   framebuffer asset/table, absolute-tick/trace branch, fitting, exclusion,
-  or dynamic capture thinning.
+  or dynamic capture thinning. Supervisor independently reviewed the
+  edge-relative state/render path and reverified the 216/216 new trace,
+  199/199 predecessor, all 1076 Tier-1 tests, and production build.
 
 ---
 ## 299 — Supervisor-accepted S8 first postwin increment: **GREEN — loss dismiss through heal prompt exact**

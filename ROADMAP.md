@@ -551,7 +551,7 @@ party heal write, continuation menu, swap paths, battles 2-7, and round
 completion remain open, so S8 stays `[ ]`. The supervisor independently
 reverified the dense window, its predecessor, the Turn-17 verifier, full
 Tier-1 suite, and production build before accepting the increment.
-**Second postwin engine increment (2026-07-23, bounded worker):**
+**Second postwin engine increment (2026-07-23, supervisor-accepted):**
 the canonical input-gated heal hold, dismiss, delayed party heal, and
 second-match prompt now extend the modeled endpoint through **26009**, the
 true first continuation-menu input tick. `battle1-postwin-next-prompt.json`
@@ -564,7 +564,9 @@ pins early/delayed heal A edges and shifts every downstream boundary from
 the stored edge. The source-backed continuation menu is visible at 26008
 but first accepts input at 26009. This remains **partial S8**: canonical
 menu hold/GO ON at 28002, scouting pages, swap decision/UI, Battle 2, and
-the rest of the round remain open; S8 stays `[ ]`.
+the rest of the round remain open; S8 stays `[ ]`. The supervisor
+independently reviewed the timing-relative implementation and reverified
+the new trace, predecessor, full Tier-1 suite, and production build.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
