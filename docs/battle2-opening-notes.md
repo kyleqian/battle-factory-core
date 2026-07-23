@@ -131,11 +131,13 @@ pixel-exactness.
 | 32682; 32723--32759; 32760--32770; 32761--32810 | Player `IntroTrainerBallThrow` starts at handoff+112 (`battle_controller_player.c:2931-3017`), then Brendan's ball spin, open, ONIX materialize and back-sprite shake use the already-proven Battle-1 offsets +153, +190, +191, permanent settle +240.  These overlap KABUTO's last front-animation callbacks. | Reuse the Battle-1 player throw/ONIX materialize/healthbox path unchanged after making its anchor encounter-relative; its parameters are **ONIX Lv50, 117/117 HP**. |
 | 32850--32855; 32856 onward | The message box is blank for six ticks, then `PlayerHandleChooseAction`'s off-screen BG0 composition is revealed atomically by `HandleChooseActionAfterDma3` (`battle_controller_player.c:2565-2573`); cursor is the BG0 tile at FIGHT.  This is input-ready at the reveal and remains so through 33030. | Requires a new live composed Battle-2 action-menu base: the existing Battle-1 harvested Grovyle base cannot be reused.  Window/cursor/text primitives may be reused parameterized by ONIX/KABUTO. |
 
-RAM ownership is already independently fixed for this exact prefix: `gMain.inBattle`
-becomes 2 at 32250 and stays nonzero; therefore `main.c`'s ordinary VBlank
-`Random()` gate is closed.  No on-demand `Random()` call is made by the
-intro/controller/ball/menu chain above; the next relevant on-demand call is
-the pre-first-turn `gRandomTurnNumber = Random()` in
-`TryDoEventsBeforeFirstTurn` (`battle_main.c:3841-3923`), before the
-choose-action command.  This matches the flat in-battle RNG ownership rule,
-while preserving the earlier 32020--32250 setup ledger.
+Fresh lightweight RAM replay over 32530--33031 reads `gMain.inBattle = 2`
+throughout, so `main.c`'s ordinary VBlank `Random()` gate is closed.  It also
+pins stable player/opponent battle mons (95/117/117 and 140/91/91), healthbox
+ids 0/1, and KABUTO's mon-sprite slot change 4->8 at handoff.  `gRngValue`
+is flat at 812598902 through 32893, then advances on demand at 32894 (+1),
+32898 (+2), and 32900 (+5): this is the pre-first-turn
+`TryDoEventsBeforeFirstTurn` / choose-action and opponent-AI work
+(`battle_main.c:3841-4168`), not per-VBlank advancement.  Endpoint 33030
+therefore has RNG 3530724670, `gBattleControllerExecFlags = 1`, and the same
+full-HP battlers.  This preserves the earlier 32020--32250 setup ledger.

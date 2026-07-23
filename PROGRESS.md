@@ -17,9 +17,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   gap (peak 11,210 px at 32831), without an acceptance claim or harvest.
 - **Next:** implement only the ledgered live Battle-2 send-outs/menu in a
   later scoped increment; S8 stays `[ ].`
-- **Notes:** `gMain.inBattle=2` from 32250; no ordinary VBlank or send-out
-  RNG calls through the menu, except the source `TryDoEventsBeforeFirstTurn`
-  on-demand turn-number call before choose-action. No trace/assets/runtime
+- **Notes:** fresh RAM has `gMain.inBattle=2` throughout; no ordinary VBlank
+  RNG. On-demand RNG is flat to 32893 then +1/+2/+5 at 32894/32898/32900
+  (pre-turn/AI); 33030 is 3530724670 with execFlags=1. No trace/assets/runtime
   changes, screenshot lookup, tick fitting, or dynamic thinning.
 
 ---
