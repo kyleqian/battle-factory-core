@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 291 — Bounded worker (S7 turn 17 rung 1): **GREEN — dispatch prefix exact**
+
+- **State:** canonical `21736--21853` is **118/118 exact**, every tick
+  captured. Turn-16 rungs 5/4 remain **175/175** and **155/155**; verifiers
+  pass **233/233** (turn 16) and all turn-17 checks (**245 captures**);
+  Tier-1 is **1048/1048** and build passes (**5.457 MB**).
+- **Did:** added honest turn-17 epoch/redraw state, preserved MAGBY
+  `79/138` and MURKROW `58/142 BRN`, reopened FIRE_PUNCH at `14/15` PP,
+  accepted the 21801 confirm, and pinned MURKROW-first ownership,
+  FAINT_ATTACK currentMove, no-crit RNG, and the RAM `52` damage roll.
+  Added a direct source-accurate burned-physical-damage regression and
+  committed dense `turn17-rung1.json`.
+- **Next:** resume at **21854**, confirmed as the first FAINT_ATTACK
+  animation-owned render. Animation body, HP drain, FIRE_PUNCH response,
+  faint/WIN flow, and everything later remain untouched; #38 stays parked.
+- **Notes:** implementation commit `210ace5`; all scheduling derives from
+  the stored turn-16/17 confirmation and redraw ages. No absolute battle
+  tick, framebuffer/screenshot asset, per-frame table, trace branch,
+  coordinate/RGB fitting, or excluded capture.
+
+---
 ## 290 — Bounded worker (S7 turn 16 rung 5): **GREEN — turn complete**
 
 - **State:** canonical `21561--21735` is **175/175 exact**, every tick
@@ -44,22 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   or excluded capture. Supervisor independently reverified the dense window,
   predecessor rung, verifier, full Tier-1 suite, and production build; the
   factual ROADMAP status note and ISSUE #16 deletion are accepted.
-
----
-## 288 — Bounded worker (S7 turn 16 rung 3): **GREEN — complete FIRE_PUNCH cast**
-
-- **State:** canonical `21170--21405` is **236/236 exact**, every tick
-  captured. Rung 2b remains **123/123**, rung 2a **221/221**, rung 1
-  canonical/delayed **81/81** each, turn-16 verifier **233/233**, Tier-1
-  **1034/1034**, and build (**5.454 MB**) pass.
-- **Did:** source-extracted FIRE_PUNCH's shared ember and fist assets and
-  added confirmation-relative reducers for target red blend/restore, four
-  spiral embers, fist + hitsplat, target shake, seven spread embers with
-  RAM-backed stable OAM ordering, generic hit wobble/blink, and the visible
-  `142→75` HP drain. Committed dense `turn16-rung3.json`.
-- **Next:** resume S7 at canonical **21406**, FIRE_PUNCH's atomic opponent-HP
-  write. Secondary burn roll/message, BRN badge, burn residual, and turn-end
-  are also untouched; #38 remains parked.
-- **Notes:** implementation commit `acd37de`; no framebuffer/screenshots,
-  absolute-tick lookup, per-frame pixel/SHA table, trace branch,
-  coordinate/RGB fitting, or excluded capture.

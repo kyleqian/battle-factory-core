@@ -406,6 +406,13 @@ Turn 16 is complete through its turn-17 menu handoff:
 message clear, and the freshly-bouncing `What will MAGBY do?` redraw.
 All turn-16 rungs 1-5 and verifier regressions remain exact; see
 `docs/turn16-notes.md` §6.8. This does not propose ticking S7 complete.
+**Turn-17 rung 1 factual status proposal (2026-07-23 bounded worker):**
+`turn17-rung1.json` is **118/118 exact** for every canonical tick
+`21736-21853`, covering the settled menu, turn-17 FIGHT reopen with
+FIRE_PUNCH `14/15`, confirmation, MURKROW-first/currentMove dispatch, and
+the no-crit/RAM-pinned `52` damage roll. Source/RAM confirms **21854** is
+the first FAINT_ATTACK animation-owned render and therefore the next
+boundary. This does not propose ticking S7 complete.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

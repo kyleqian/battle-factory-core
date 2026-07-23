@@ -1,3 +1,22 @@
+## 288 — Bounded worker (S7 turn 16 rung 3): **GREEN — complete FIRE_PUNCH cast**
+
+- **State:** canonical `21170--21405` is **236/236 exact**, every tick
+  captured. Rung 2b remains **123/123**, rung 2a **221/221**, rung 1
+  canonical/delayed **81/81** each, turn-16 verifier **233/233**, Tier-1
+  **1034/1034**, and build (**5.454 MB**) pass.
+- **Did:** source-extracted FIRE_PUNCH's shared ember and fist assets and
+  added confirmation-relative reducers for target red blend/restore, four
+  spiral embers, fist + hitsplat, target shake, seven spread embers with
+  RAM-backed stable OAM ordering, generic hit wobble/blink, and the visible
+  `142→75` HP drain. Committed dense `turn16-rung3.json`.
+- **Next:** resume S7 at canonical **21406**, FIRE_PUNCH's atomic opponent-HP
+  write. Secondary burn roll/message, BRN badge, burn residual, and turn-end
+  are also untouched; #38 remains parked.
+- **Notes:** implementation commit `acd37de`; no framebuffer/screenshots,
+  absolute-tick lookup, per-frame pixel/SHA table, trace branch,
+  coordinate/RGB fitting, or excluded capture.
+
+---
 ## 287 — Bounded worker (S7 turn 16 rung 2b): **GREEN — FAINT_ATTACK resolution tail**
 
 - **State:** canonical `21047--21169` is **123/123 exact**. Rung 2a remains
