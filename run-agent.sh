@@ -81,7 +81,7 @@ export POKEBENCH_ORACLE_URL="$MAIN_ORACLE_URL"
 export POKEBENCH_ORACLE_PROFILE=battle-scene-off
 echo "Main oracle (Battle Scene OFF) up at $MAIN_ORACLE_URL"
 
-PROMPT="Follow AGENTS.md. Read the top entry of PROGRESS.md, WORKSTREAMS.md, and the authoritative Stage 8 reset in ROADMAP.md. Continue with staged scenarios and the generic round/presentation architecture against the Battle Scene OFF oracle; do not resume the retired canonical Battle 2 turn march. Commit after every green step and keep PROGRESS.md current; you may be stopped at any time."
+PROMPT="Follow AGENTS.md. Read the top entry of PROGRESS.md and the authoritative Stage 8 reset in ROADMAP.md. Continue with staged scenarios and the generic round/presentation architecture against the Battle Scene OFF oracle; do not resume the retired canonical Battle 2 turn march. Commit after every green step and keep PROGRESS.md current; you may be stopped at any time."
 
 if [[ "$INTERACTIVE" == "1" ]]; then
   POKEBENCH_ROLE=agent exec claude --model "$MODEL" --dangerously-skip-permissions "$PROMPT"

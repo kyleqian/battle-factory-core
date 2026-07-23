@@ -320,7 +320,7 @@ Your assigned step (from the supervisor):
 ${BRIEF}
 ${CODEX_ACCEPTANCE_GUARDRAILS}
 
-This main lane uses the Battle Scene OFF oracle. Follow the finite Stage 8 reset in ROADMAP.md and the ownership boundaries in WORKSTREAMS.md; do not resume the retired canonical Battle 2 turn-by-turn march.
+This main lane uses the Battle Scene OFF oracle. Follow the finite Stage 8 reset in ROADMAP.md and the worker-lane ownership contract in AGENTS.md; do not resume the retired canonical Battle 2 turn-by-turn march.
 
 Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message and in PROGRESS.md instead of improvising a different plan. Before finishing: npm test and npm run build green, work committed, PROGRESS.md updated.
 

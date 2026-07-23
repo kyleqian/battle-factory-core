@@ -546,8 +546,9 @@ remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
 Historical traces below remain Battle Scene ON regression evidence. The
-animation-on workstream may improve move presentation in parallel under
-`WORKSTREAMS.md`, but it does not block functional seven-battle completion.
+animation-on lane may improve move presentation in parallel under the
+`AGENTS.md` worker-lane contract, but it does not block functional
+seven-battle completion.
 
 **Acceptance (re-scoped by user decision, 2026-07-19):** battle 1's win and
 the swap traversal into battle 2's first action menu are pinned by a

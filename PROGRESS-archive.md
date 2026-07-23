@@ -132,7 +132,7 @@
   uses `battle-scene-on` (8012). Historical traces default ON; every new trace
   names its profile. Both profiles pass harness smoke; `turn1-cloneanim.json`
   confirms their battle presentation diverges while the anchor SHA is shared.
-  `WORKSTREAMS.md` owns lane/file boundaries.
+  `AGENTS.md` owns lane/file boundaries.
 
 ---
 ## 316 — S8 Battle 2 turn 1 ROCK SLIDE: **GREEN — through 33331**

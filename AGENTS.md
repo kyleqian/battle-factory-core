@@ -32,16 +32,30 @@ another full session**: the launchers refuse nested calls (via the
 `POKEBENCH_ROLE` env var each one exports); only the supervisor delegates,
 and only via `tools/run-subagent.sh`.
 
+## Worker lanes
+
+This is the stable ownership contract; current state remains in `PROGRESS.md`.
+
+| Lane | Oracle | Owns | Must not own |
+| --- | --- | --- | --- |
+| **Main** | Battle Scene OFF | `BattleScenario`, round/battle core, facility progression, presentation seam | Another canonical Battle 2 turn/window after tick 33331 |
+| **Side** | Battle Scene OFF | Source extraction, generated data, staged fixtures, file-disjoint tests | Shared controller interfaces or supervisor ledgers |
+| **Animation** | Battle Scene ON | Move timelines, particles, sprites, presentation assets and traces | Damage, RNG, turn order, round advancement, or facility state |
+
+- Main defines shared interfaces before another lane depends on them.
+- Scene mode may change presentation timing, never logical outcomes or RNG.
+- Side and animation use separate worktrees and do not edit `PROGRESS.md` or
+  `ISSUES.md`; the supervisor verifies and merges them one at a time.
+- Parallel capacity is optional: launch only bounded, independent work.
+
 ## Start-of-session protocol (do this first, every session)
 1. Read **`PROGRESS.md`** — the top entry is the current state and the next
    action. This is the source of truth for "where are we."
 2. Read **`ROADMAP.md`** — the fixed mission brief up top, then the ordered
    stages and their oracle acceptance criteria (authored by this run's
    supervisor on iteration 0 — until then it says PLAN PENDING).
-3. Read **`WORKSTREAMS.md`** — it defines the main, side, and animation
-   ownership boundaries and which oracle profile each uses.
-4. Skim **`ISSUES.md`** — the standing backlog of known-open bugs/debts you can pick from.
-5. Confirm the baseline is green: `npm test` and `npm run build` pass, and
+3. Skim **`ISSUES.md`** — the standing backlog of known-open bugs/debts you can pick from.
+4. Confirm the baseline is green: `npm test` and `npm run build` pass, and
    `bin/oracle info` answers. If not, fixing that is the next action.
 
 ## Commit often & survive interruption (important)

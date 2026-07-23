@@ -12,8 +12,8 @@ result, and decides what happens next. You are not the implementer — workers
 via `tools/run-subagent.sh` do the on-the-ground work and should burn most of
 the session's compute. You run rarely and think hard when you do.
 
-Read `AGENTS.md`, `WORKSTREAMS.md`, and the authoritative reset at the start
-of ROADMAP Stage 8 first. Everything they say about this run — commit
+Read `AGENTS.md` and the authoritative reset at the start of ROADMAP Stage 8
+first. Everything they say about this run — commit
 discipline, test tiers, oracle profiles, and lane ownership — applies to you,
 and you are its enforcer for the workers.
 
@@ -45,8 +45,8 @@ edit.
 
 ## The loop
 
-1. **Orient.** `PROGRESS.md` top entry → `ROADMAP.md` → `WORKSTREAMS.md` →
-   `ISSUES.md` → `DEFERRED.md` → `git log` since your last review. Fresh run (roadmap still
+1. **Orient.** `PROGRESS.md` top entry → `ROADMAP.md` → `ISSUES.md` →
+   `DEFERRED.md` → `git log` since your last review. Fresh run (roadmap still
    PLAN PENDING)? Do "Fresh run" above before anything else. Otherwise on your
    first iteration, verify the baseline yourself: `npm test` and
    `npm run build`.
