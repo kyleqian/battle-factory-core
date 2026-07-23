@@ -651,7 +651,7 @@ and all visible Battle 2 battle-scene rendering remain open, as do battles
 The supervisor independently reviewed the encounter-selected live geometry,
 OAM ordering, and compositor integration, then reverified the 249/249 new
 trace, 131/131 + 206/206 regressions, all 1095 Tier-1 tests, and build.
-**Eighth postwin increment (2026-07-23):** canonical **32280-32530** is now
+**Eighth postwin increment (2026-07-23, supervisor-accepted):** canonical **32280-32530** is now
 **251/251 exact** in `battle2-intro-dense.json`, with every frame captured
 from the first visible Battle 2 framebuffer through FISHERMAN JENSON's held,
 input-ready intro immediately before A at 32531. The shared
@@ -662,6 +662,9 @@ JENSON's two-character-shorter first line reanchors only the cursor start.
 remains **256/256**, Tier-1 is **1098/1098**, and build passes. KABUTO/ONIX
 send-outs, the Battle 2 action menu and turns, battles 3-7, swap YES, and
 round completion remain open, so S8 stays `[ ]`.
+The supervisor independently reviewed encounter preservation and the shared
+trainer/text/cursor selection, then reverified the 251/251 new trace,
+249/249 + 256/256 regressions, all 1098 Tier-1 tests, and build.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by

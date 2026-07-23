@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 306 — S8 Battle 2 trainer intro: **GREEN — 32280-32530 exact**
+## 306 — Supervisor-accepted S8 Battle 2 trainer intro: **GREEN — 32280-32530 exact**
 
 - **State:** canonical **32280-32530** is **251/251 exact**, every frame
   captured from the first visible Battle 2 framebuffer through the held,
@@ -23,7 +23,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   encounters; JENSON's 37 characters create the visible cursor at 1272,
   while its controller first accepts input at 1274. Cursor X remains
   width-derived 123. No absolute trace-time branch/table, framebuffer
-  harvest, fitting, excluded capture, or thinning.
+  harvest, fitting, excluded capture, or thinning. Supervisor independently
+  reviewed identity preservation and shared renderer selection, then
+  reverified all three traces, all 1098 Tier-1 tests, and build.
 
 ---
 ## 305 — Supervisor-accepted S8 Battle 2 transition: **GREEN — 32031-32279 exact**
