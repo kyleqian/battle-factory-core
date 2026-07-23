@@ -522,6 +522,8 @@ import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json"
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
 import battleAnimFlyBallAsset from "../assets/gen/battle-anim-fly-ball.json" with { type: "json" };
+import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
+import battleAnimHandsAndFeetAsset from "../assets/gen/battle-anim-hands-and-feet.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -553,6 +555,13 @@ import {
   faintAttackResolutionState,
   faintAttackTargetShakeX2,
 } from "./faintAttack.ts";
+import {
+  firePunchFistVisible,
+  firePunchHitsplatVisible,
+  firePunchParticlesInDrawOrder,
+  firePunchResolutionState,
+  firePunchTargetBlendCoeff,
+} from "./firePunch.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
 import battle1GrovyleFaintRamDumpAsset from "../data/gen/battle1-grovyle-faint-ram-dump.json" with { type: "json" };
@@ -750,6 +759,8 @@ const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingS
 const battleAnimMudSand = battleAnimMudSandAsset as { tileset: Tileset; palette: RgbColor[] };
 /** S7/S8 turn 14 (docs/turn14-notes.md's worktree-lane addendum): `gFlyBallUpSpriteTemplate`'s "round shadow" ball sprite (`ANIM_TAG_ROUND_SHADOW`, `round_shadow.png`, 64x64) - see `tools/extract/extract-fly-ball.ts`. */
 const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette: RgbColor[] };
+const battleAnimSmallEmber = battleAnimSmallEmberAsset as { tileset: Tileset; palette: RgbColor[] };
+const battleAnimHandsAndFeet = battleAnimHandsAndFeetAsset as { tileset: Tileset; palette: RgbColor[] };
 
 /**
  * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
@@ -2757,7 +2768,7 @@ function drawSpriteSheetAffineStretch(
  * false in practice today, but the doubled-footprint math is kept general
  * since nothing here is doubled-specific.
  */
-function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, xScale: number, yScale: number, eva: number, evb: number, doubled = false, target: "static" | "live" = "static"): void {
+function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, xScale: number, yScale: number, eva: number, evb: number, doubled = false, target: "static" | "live" = "static", coverageMask?: Uint8Array): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
   const halfW = w / 2;
@@ -2786,6 +2797,7 @@ function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tile
       const y = oy + dy;
       if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
       const o = (y * 240 + x) * 4;
+      if (coverageMask) coverageMask[y * 240 + x] = 1;
       const field = target === "live"
         ? { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! }
         : staticBgPixel(x, y);
@@ -7137,6 +7149,23 @@ const murkrowHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets
   hpFraction: 1,
   status: "none",
 });
+const murkrowHealthboxContentByHp = new Map<number, ReturnType<typeof composeOpponentHealthbox>>();
+function murkrowHealthboxContentForHp(hp: number): ReturnType<typeof composeOpponentHealthbox> {
+  let cached = murkrowHealthboxContentByHp.get(hp);
+  if (!cached) {
+    cached = hp === 142
+      ? murkrowHealthboxContent
+      : composeOpponentHealthbox(healthboxAssemblyAssets, {
+          name: "MURKROW",
+          level: MURKROW_LEVEL,
+          gender: "male",
+          hpFraction: hp / 142,
+          status: "none",
+        });
+    murkrowHealthboxContentByHp.set(hp, cached);
+  }
+  return cached;
+}
 
 /** "BUG CATCHER DESTIN sent\nout MURKROW!" - same line 1 as `SWITCHIN_SENTOUT_LINE1`/`SENDOUT_LINE1` (`sText_Trainer1SentOutPkmn` family), oracle-pixel-bisected start tick: flat at the icon-bar-retrigger's own settled sha through render 16946, first distinct glyph at 16947. */
 const TURN13_SWITCHIN_SENTOUT_LINE2 = "out MURKROW!";
@@ -12039,6 +12068,57 @@ function turn16PartyElapsedAtTick(partyElapsed: number, t: number, anchorTick: n
   return partyElapsed - (t - anchorTick);
 }
 
+/** FIRE_PUNCH's first owned frame is faint-attack kickoff age 344. */
+const TURN16_FIRE_PUNCH_FIRST_OWNED_AGE = 344;
+const FIRE_PUNCH_RED: RgbColor = { r: 248, g: 0, b: 0 };
+
+function firePunchTargetShakeY2(age: number): number {
+  const n = age - 72;
+  if (n < 0 || n >= 28) return 0;
+  return Math.floor(n / 2) % 2 === 1 ? 3 : 0;
+}
+
+function firePunchEmberTileset(frame: 1 | 2 | 3): Tileset {
+  return subTileset(battleAnimSmallEmber.tileset, frame * 4, 4);
+}
+
+function drawFirePunchEmbers(fb: Uint8Array, age: number): void {
+  for (const particle of firePunchParticlesInDrawOrder(age)) {
+    drawSpriteSheet(
+      fb,
+      firePunchEmberTileset(particle.frame),
+      battleAnimSmallEmber.palette,
+      particle.x - 16,
+      particle.y - 16,
+    );
+  }
+}
+
+function drawFirePunchImpact(fb: Uint8Array, age: number, coverageMask: Uint8Array): void {
+  if (firePunchHitsplatVisible(age)) {
+    drawSpriteSheetAffineStretchBlendedOverFb(
+      fb,
+      battleAnimHitsplat.tileset,
+      battleAnimHitsplat.palette,
+      160,
+      35,
+      TURN9_HITSPLAT_MATRIX,
+      TURN9_HITSPLAT_MATRIX,
+      12,
+      8,
+      true,
+      "live",
+      coverageMask,
+    );
+  }
+  if (firePunchFistVisible(age)) {
+    const fist = subTileset(battleAnimHandsAndFeet.tileset, 0, 4);
+    drawSpriteSheet(fb, fist, battleAnimHandsAndFeet.palette, 160, 35);
+    const fistMask = turn9QuickAttackOpaqueMask(fist, 160, 35, Infinity);
+    for (let i = 0; i < coverageMask.length; i += 1) coverageMask[i] |= fistMask[i]!;
+  }
+}
+
 function drawTurn16PostSwitchField(
   fb: Uint8Array,
   partyElapsed: number,
@@ -12048,6 +12128,8 @@ function drawTurn16PostSwitchField(
   const releaseTick = partySendOutReleaseLogicalTick(partyElapsed);
   const bounce = menuIdleBounce(bounceTick);
   const animBg = faintAttackAge === null ? null : faintAttackBgState(faintAttackAge);
+  const firePunchAge = faintAttackAge === null ? null : faintAttackAge - TURN16_FIRE_PUNCH_FIRST_OWNED_AGE;
+  const ownsFirePunch = firePunchAge !== null && firePunchAge >= 0;
   const sourcePpu = animBg?.background === "dark" ? turn16DarkFieldPpu : turn15FieldPpuAsset;
   const releasedPalette = releaseTick === null
     ? sourcePpu.paletteBgr555
@@ -12061,10 +12143,54 @@ function drawTurn16PostSwitchField(
     bldy: animBg?.bldy ?? partySendOutBattleFadeBldy(partyElapsed),
     // During `monbg ANIM_ATTACKER`, the real OBJ is hidden and an identical
     // BG copy is composited below. Exclude only Murkrow's final OAM entry.
-    oam: faintAttackAge === null ? sourcePpu.oam : sourcePpu.oam.slice(0, -1),
+    oam: faintAttackAge === null
+      ? sourcePpu.oam
+      : ownsFirePunch
+        ? sourcePpu.oam.slice(3, -1)
+        : sourcePpu.oam.slice(0, -1),
     paletteBgr555: releasedPalette,
   });
-  if (faintAttackAge !== null) {
+  if (ownsFirePunch) {
+    const resolution = firePunchResolutionState(firePunchAge);
+    const coeff = firePunchTargetBlendCoeff(firePunchAge);
+    const palette = coeff === 0
+      ? murkrowFrontSprite.palette
+      : murkrowFrontSprite.palette.map((c) => ({
+          r: blendComponentToward(c.r, FIRE_PUNCH_RED.r, coeff),
+          g: blendComponentToward(c.g, FIRE_PUNCH_RED.g, coeff),
+          b: blendComponentToward(c.b, FIRE_PUNCH_RED.b, coeff),
+        }));
+    if (!resolution.targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        murkrowFrontSprite.tileset,
+        palette,
+        MURKROW_CORNER.x,
+        MURKROW_CORNER.y + firePunchTargetShakeY2(firePunchAge),
+      );
+    }
+    const beforeEffects = fb.slice();
+    drawFirePunchEmbers(fb, firePunchAge);
+    const frontEffects = beforeEffects.slice();
+    const frontCoverage = new Uint8Array(240 * 160);
+    drawFirePunchImpact(frontEffects, firePunchAge, frontCoverage);
+    // Fist/hitsplat have the winning subpriorities. Their semitransparent
+    // pixels blend with the battler BG copy, not the lower-priority ember
+    // OBJs, which are suppressed anywhere a front effect is opaque.
+    for (let i = 0; i < fb.length; i += 4) {
+      if (frontCoverage[i / 4]) {
+        fb[i] = frontEffects[i]!;
+        fb[i + 1] = frontEffects[i + 1]!;
+        fb[i + 2] = frontEffects[i + 2]!;
+        fb[i + 3] = frontEffects[i + 3]!;
+      }
+    }
+    drawOpponentHealthboxWobble(
+      fb,
+      resolution.healthboxY2,
+      murkrowHealthboxContentForHp(resolution.displayedHp),
+    );
+  } else if (faintAttackAge !== null) {
     const eva = faintAttackAttackerEva(faintAttackAge);
     if (eva > 0) {
       const offset = faintAttackAttackerOffset(faintAttackAge);

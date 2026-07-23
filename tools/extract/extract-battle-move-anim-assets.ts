@@ -167,9 +167,38 @@ function writeJson(path: string, data: unknown): void {
       variant0: "attacker on the opponent side (unmirrored)",
       variant1: "attacker on the player side (vFlip+hFlip) - Onix's own case this trace",
     },
+    firePunchAnims: {
+      source: "src/battle_anim_fire.c:39-84,466-488 (sAnim_FireSpiralSpread, gFireSpiralInwardSpriteTemplate, gFireSpreadSpriteTemplate)",
+      frames: [1, 2, 3],
+      frameDurationTicks: 4,
+      spiral: { durationTicks: 30, radiusStart: 60, radiusDeltaFixed8: -512, angleStep: 9 },
+      spread: { startYOffset: 10, durationTicks: 40 },
+    },
     otherFramesNeedsOnly: {
       note: "frames 0,4 belong to sibling moves sharing ANIM_TAG_SMALL_EMBER (OUTRAGE/DRAGON_RAGE fire templates, same file) - out of scope for DRAGON_BREATH, not decoded this session",
       frames: [0, 4],
+    },
+  });
+}
+
+// --- FIRE_PUNCH's basic fist ------------------------------------------------
+//
+// `create_fist_sprite` expands to gFistFootSpriteTemplate with anim 0.
+// The template uses the first 32x32 frame (16 tiles) of hands_and_feet.png;
+// the remaining three frames are sibling foot/hand animations.
+{
+  const hands = decodeIndexedPng(join(REF, "graphics", "battle_anims", "sprites", "hands_and_feet.png"));
+  const handTiles = sliceTiles(hands);
+  writeJson(join(ASSETS_GEN, "battle-anim-hands-and-feet.json"), {
+    source: "graphics/battle_anims/sprites/hands_and_feet.png (src/graphics.c:847-848, ANIM_TAG_HANDS_AND_FEET)",
+    tileset: { columns: handTiles.columns, rows: handTiles.rows, tiles: handTiles.tiles.map((t) => [...t.pixels]) },
+    palette: hands.palette,
+    oam: { shape: "32x32", size: "32x32", affine: false },
+    frameSizeTiles: 16,
+    firePunchFist: {
+      source: "asm/macros/battle_anim_script.inc:create_fist_sprite; src/battle_anim_fight.c:sAnim_Fist,gFistFootSpriteTemplate,AnimBasicFistOrFoot",
+      frame: 0,
+      durationArg: 8,
     },
   });
 }
