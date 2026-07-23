@@ -4,23 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 318 — S8 generic round/presentation core: **GREEN — architecture gate landed**
+## 318 — S8 generic round/presentation core: **GREEN — architecture foundation landed**
 
 - **State:** a pure scenario-driven controller now covers battle indexes
-  **0–6**; Tier-1 is **1143/1143** and build passes (**5.525 MB**).
+  **0–6**; the source-exact Factory round policy is also mechanically
+  extracted. Tier-1 is **1145/1145** and build passes (**5.525 MB**).
   Canonical pixel behavior remains unchanged and intentionally unwired.
 - **Did:** added deterministic no-repeat opponent selection, party HP/status
   healing, win/loss/swap transitions, seventh-win completion, and typed
   presentation commands with idempotent completion acknowledgements that
   cannot mutate rules/RNG. `createInitialState({ battleScenario })` exposes
-  opt-in fixtures while its default remains `null`.
-- **Next:** the generic core gate is ready for supervisor review. Remaining S8
-  gates are swap-YES/loss/round-summary UI and one staged OFF-profile Battle 2
-  turn through this seam; do not resume the canonical tick-33332 march.
+  opt-in fixtures while its default remains `null`. Added reproducible
+  `factory-round-policy.json` plus a cited source dossier covering trainer/
+  rental rejection rules, healing, swap mutation, and terminal counters.
+- **Next:** wire the extracted trainer ranges/retry policy and an explicit RNG
+  port into scenario generation, then stage one OFF-profile Battle 2 turn
+  through the seam. Unique swap-YES/loss/round-summary UI remains open. Do not
+  resume the canonical tick-33332 march.
 - **Notes:** commits `3aee24e`, `bae76ea`; tests cover seven sequential wins,
   accepted/declined swaps, inter-battle healing, deterministic no-repeat
   inputs, loss at every index, invalid transitions, and presentation
-  completion/RNG isolation. No oracle trace or renderer work was performed.
+  completion/RNG isolation. Source policy extraction is `2f10f68` (merged);
+  it deliberately leaves retry-draw counts and the pinned `BUGFIX` IV branch
+  as explicit implementation inputs. No OFF oracle trace or renderer work was
+  performed.
 
 ---
 ## 317 — User-directed Stage 8 reset: **READY — finite, staged completion**
