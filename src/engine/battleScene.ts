@@ -562,8 +562,10 @@ import {
   firePunchBurnFlames,
   firePunchHitsplatVisible,
   firePunchParticlesInDrawOrder,
+  firePunchResidualBurnFlames,
   firePunchResolutionState,
   firePunchTargetBlendCoeff,
+  firePunchTurn17MenuBounceTick,
 } from "./firePunch.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
@@ -12103,7 +12105,10 @@ function drawFirePunchEmbers(fb: Uint8Array, age: number): void {
 }
 
 function drawFirePunchBurnFlames(fb: Uint8Array, age: number): void {
-  for (const particle of firePunchBurnFlames(age)) {
+  for (const particle of [
+    ...firePunchBurnFlames(age),
+    ...firePunchResidualBurnFlames(age),
+  ]) {
     drawSpriteSheet(
       fb,
       firePunchEmberTileset(particle.frame),
@@ -12297,16 +12302,21 @@ function drawTurn16FightSubmenuWindow(
       : partyElapsed - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   const animationAge = confirmTick === null ? null : t - (confirmTick + TURN16_FAINT_ATTACK_ANIM_DELAY);
   const ownedAnimationAge = animationAge !== null && animationAge >= 0 ? animationAge : null;
+  const firePunchAge =
+    ownedAnimationAge !== null
+      ? ownedAnimationAge - TURN16_FIRE_PUNCH_FIRST_OWNED_AGE
+      : null;
+  const turn17BounceTick =
+    firePunchAge === null ? null : firePunchTurn17MenuBounceTick(firePunchAge);
   drawTurn16PostSwitchField(
     fb,
     partyElapsed,
-    partySendOutMenuBounceTick(bouncePartyElapsed),
+    turn17BounceTick ?? partySendOutMenuBounceTick(bouncePartyElapsed),
     ownedAnimationAge,
   );
 
   if (ownedAnimationAge !== null && faintAttackResolutionState(ownedAnimationAge).message === "FIRE_PUNCH") {
-    const firePunchAge = ownedAnimationAge - TURN16_FIRE_PUNCH_FIRST_OWNED_AGE;
-    const resolution = firePunchResolutionState(firePunchAge);
+    const resolution = firePunchResolutionState(firePunchAge!);
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     if (resolution.message === "FIRE_PUNCH") {
       drawMessageTextLines(
@@ -12325,17 +12335,19 @@ function drawTurn16FightSubmenuWindow(
         fb,
         line,
         "",
-        Math.min(line.length, firePunchAge - FIRE_PUNCH_BURN_MESSAGE_AGE + 1),
+        Math.min(line.length, firePunchAge! - FIRE_PUNCH_BURN_MESSAGE_AGE + 1),
       );
-    } else {
+    } else if (resolution.message === "BURN_RESIDUAL") {
       const line1 = "Foe MURKROW is hurt";
       const line2 = "by its burn!";
       drawMessageTextLines(
         fb,
         line1,
         line2,
-        firePunchAge - FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE + 1,
+        firePunchAge! - FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE + 1,
       );
+    } else if (resolution.message === "ACTION_MENU") {
+      drawTurn15MagbySettledMenuChrome(fb);
     }
     return;
   }

@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  burnResidualDamage,
   firePunchFistVisible,
   firePunchBurnFlames,
   firePunchParticlesInDrawOrder,
+  firePunchResidualBurnFlames,
   firePunchResolutionState,
   firePunchSpiralParticles,
   firePunchSpreadParticles,
   firePunchTargetBlendCoeff,
+  firePunchTurn17MenuBounceTick,
 } from "../src/engine/firePunch.ts";
 import ember from "../src/assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import hands from "../src/assets/gen/battle-anim-hands-and-feet.json" with { type: "json" };
@@ -101,6 +104,63 @@ describe("FIRE_PUNCH source-derived reducers", () => {
     ]);
     expect(firePunchBurnFlames(280)).toEqual([{ x: 199, y: 64, frame: 0 }]);
     expect(firePunchBurnFlames(281)).toEqual([]);
+  });
+
+  it("pins source-accurate burn residual damage, display drain, and atomic HP write", () => {
+    expect(burnResidualDamage(142)).toBe(17);
+    expect(burnResidualDamage(7)).toBe(1);
+    expect(firePunchResolutionState(526)).toMatchObject({ displayedHp: 75, battleHp: 75 });
+    expect(firePunchResolutionState(527)).toMatchObject({ displayedHp: 73, battleHp: 75 });
+    expect(firePunchResolutionState(543)).toMatchObject({ displayedHp: 58, battleHp: 75 });
+    expect(firePunchResolutionState(544)).toMatchObject({ displayedHp: 58, battleHp: 58 });
+  });
+
+  it("pins the residual status animation and two tail RNG/ownership boundaries", () => {
+    expect(firePunchResidualBurnFlames(488)).toEqual([]);
+    expect(firePunchResidualBurnFlames(489)).toEqual([{ x: 152, y: 64, frame: 0 }]);
+    expect(firePunchResidualBurnFlames(522)).toEqual([{ x: 199, y: 64, frame: 0 }]);
+    expect(firePunchResidualBurnFlames(523)).toEqual([]);
+
+    expect(firePunchResolutionState(384)).toMatchObject({
+      attacker: "MAGBY",
+      target: "MURKROW",
+      moveDamage: 0,
+    });
+    expect(firePunchResolutionState(385)).toMatchObject({
+      attacker: "MURKROW",
+      target: "MAGBY",
+      moveDamage: 17,
+    });
+    expect(firePunchResolutionState(548)).toMatchObject({
+      attacker: "MURKROW",
+      target: "MAGBY",
+      moveDamage: 17,
+      tailRngCallsConsumed: 0,
+      rngValue: 2012156700,
+    });
+    expect(firePunchResolutionState(549)).toMatchObject({
+      attacker: "MAGBY",
+      target: "MURKROW",
+      moveDamage: 0,
+      tailRngCallsConsumed: 1,
+      rngValue: 3427142495,
+    });
+    expect(firePunchResolutionState(554)).toMatchObject({
+      attacker: "MAGBY",
+      target: "MAGBY",
+      tailRngCallsConsumed: 6,
+      rngValue: 1239728170,
+    });
+  });
+
+  it("pins message clear and fresh action-menu bounce handoff", () => {
+    expect(firePunchResolutionState(549).message).toBe("BURN_RESIDUAL");
+    expect(firePunchResolutionState(550).message).toBe("BLANK");
+    expect(firePunchResolutionState(554).message).toBe("BLANK");
+    expect(firePunchResolutionState(555).message).toBe("ACTION_MENU");
+    expect(firePunchTurn17MenuBounceTick(554)).toBeNull();
+    expect(firePunchTurn17MenuBounceTick(555)).toBe(1748);
+    expect(firePunchTurn17MenuBounceTick(556)).toBe(1749);
   });
 });
 

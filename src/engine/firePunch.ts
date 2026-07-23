@@ -2,6 +2,7 @@
 // FIRE_PUNCH render (docs/turn16-notes.md §6.5), never absolute battle ticks.
 
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
+import { advanceRngValue } from "./rng.ts";
 
 export const FIRE_PUNCH_SPIRAL_FIRST_AGE = 41;
 export const FIRE_PUNCH_SPIRAL_TICKS = 30;
@@ -21,6 +22,26 @@ export const FIRE_PUNCH_BURN_MESSAGE_AGE = 283;
 export const FIRE_PUNCH_BURN_BADGE_AGE = 372;
 export const FIRE_PUNCH_CURRENT_MOVE_RESET_AGE = 383;
 export const FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE = 387;
+/** BattleMon status-turn bookkeeping: MURKROW becomes its own attacker. */
+export const FIRE_PUNCH_RESIDUAL_PREPARE_AGE = 385;
+/** `statusanimation BS_ATTACKER` reuses Status_Burn after the message hold. */
+export const FIRE_PUNCH_RESIDUAL_FLAME_FIRST_AGE = 489;
+/** Healthbar controller drains one HP per displayed VBlank, before RAM. */
+export const FIRE_PUNCH_RESIDUAL_HP_DRAIN_FIRST_AGE = 527;
+export const FIRE_PUNCH_RESIDUAL_HP_COMMIT_AGE = 544;
+export const FIRE_PUNCH_TAIL_RNG_FIRST_AGE = 549;
+export const FIRE_PUNCH_RESIDUAL_MESSAGE_CLEAR_AGE = 550;
+export const FIRE_PUNCH_TAIL_RNG_SECOND_AGE = 554;
+export const FIRE_PUNCH_TURN17_MENU_REDRAW_AGE = 555;
+
+const FIRE_PUNCH_AFTER_BURN_RNG_VALUE = 2012156700;
+const FIRE_PUNCH_AFTER_TAIL_RNG_1 = advanceRngValue(FIRE_PUNCH_AFTER_BURN_RNG_VALUE);
+// Battle AI seeds four `simulatedRNG` slots, then chooses among the best
+// moves: the second bookkeeping event therefore advances the LCG five times.
+let FIRE_PUNCH_AFTER_TAIL_RNG_2 = FIRE_PUNCH_AFTER_TAIL_RNG_1;
+for (let i = 0; i < 5; i += 1) {
+  FIRE_PUNCH_AFTER_TAIL_RNG_2 = advanceRngValue(FIRE_PUNCH_AFTER_TAIL_RNG_2);
+}
 
 const SPIRAL_PHASES = [0, 64, 128, 196] as const;
 const SPREAD_VELOCITIES = [
@@ -151,20 +172,43 @@ export interface FirePunchResolutionState {
   status: "none" | "burn";
   healthboxStatus: "none" | "burn";
   currentMove: "FIRE_PUNCH" | null;
-  message: "FIRE_PUNCH" | "BURNED" | "BURN_RESIDUAL";
+  message: "FIRE_PUNCH" | "BURNED" | "BURN_RESIDUAL" | "BLANK" | "ACTION_MENU";
+  attacker: "MAGBY" | "MURKROW";
+  target: "MAGBY" | "MURKROW";
+  moveDamage: number;
+  tailRngCallsConsumed: 0 | 1 | 6;
+  rngValue: number | null;
 }
 
-/** Generic hit blink/wobble followed by the 142→75 display drain. */
+/** `HandleTurnActionSelectionState`'s source formula, with its 1-HP floor. */
+export function burnResidualDamage(maxHp: number): number {
+  return Math.max(1, Math.floor(maxHp / 8));
+}
+
+/** Generic hit resolution, burn residual, and next-action-menu handoff. */
 export function firePunchResolutionState(age: number): FirePunchResolutionState {
   const wobble = age - FIRE_PUNCH_HIT_WOBBLE_FIRST_AGE;
   const blink = age - FIRE_PUNCH_HIT_BLINK_FIRST_AGE;
   const burned = age >= FIRE_PUNCH_SECONDARY_ROLL_AGE;
+  // The status-turn script's first visible controller frame follows two
+  // MoveBattleBar calls; subsequent frames decrement currValue once.
+  const residualDrain =
+    age < FIRE_PUNCH_RESIDUAL_HP_DRAIN_FIRST_AGE
+      ? 0
+      : age - FIRE_PUNCH_RESIDUAL_HP_DRAIN_FIRST_AGE + 2;
+  const residualPrepared = age >= FIRE_PUNCH_RESIDUAL_PREPARE_AGE;
+  const firstTailRoll = age >= FIRE_PUNCH_TAIL_RNG_FIRST_AGE;
+  const secondTailRoll = age >= FIRE_PUNCH_TAIL_RNG_SECOND_AGE;
   const message: FirePunchResolutionState["message"] =
     age < FIRE_PUNCH_TEXT_CLEAR_AGE
       ? "FIRE_PUNCH"
       : age < FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE
           ? "BURNED"
-          : "BURN_RESIDUAL";
+          : age < FIRE_PUNCH_RESIDUAL_MESSAGE_CLEAR_AGE
+            ? "BURN_RESIDUAL"
+            : age < FIRE_PUNCH_TURN17_MENU_REDRAW_AGE
+              ? "BLANK"
+              : "ACTION_MENU";
   return {
     healthboxY2: wobble >= 0 && wobble < FIRE_PUNCH_HIT_WOBBLE_TICKS
       ? (wobble % 2 === 0 ? 1 : -1)
@@ -172,14 +216,41 @@ export function firePunchResolutionState(age: number): FirePunchResolutionState 
     targetInvisible: blink >= 0 && blink < 32 && blink % 8 < 4,
     displayedHp: age < FIRE_PUNCH_HP_DRAIN_FIRST_AGE
       ? 142
-      : Math.max(75, 142 - (age - FIRE_PUNCH_HP_DRAIN_FIRST_AGE + 1)),
-    battleHp: age >= FIRE_PUNCH_HP_COMMIT_AGE ? 75 : 142,
+      : residualDrain > 0
+        ? Math.max(58, 75 - residualDrain)
+        : Math.max(75, 142 - (age - FIRE_PUNCH_HP_DRAIN_FIRST_AGE + 1)),
+    battleHp:
+      age >= FIRE_PUNCH_RESIDUAL_HP_COMMIT_AGE
+        ? 58
+        : age >= FIRE_PUNCH_HP_COMMIT_AGE
+          ? 75
+          : 142,
     secondaryRollConsumed: burned,
     secondaryRollSucceeded: burned,
     status: burned ? "burn" : "none",
     healthboxStatus: age >= FIRE_PUNCH_BURN_BADGE_AGE ? "burn" : "none",
     currentMove: age >= FIRE_PUNCH_CURRENT_MOVE_RESET_AGE ? null : "FIRE_PUNCH",
     message,
+    attacker:
+      residualPrepared && !firstTailRoll
+        ? "MURKROW"
+        : "MAGBY",
+    target:
+      secondTailRoll
+        ? "MAGBY"
+        : firstTailRoll || !residualPrepared
+          ? "MURKROW"
+          : "MAGBY",
+    moveDamage: residualPrepared && !firstTailRoll ? burnResidualDamage(142) : 0,
+    tailRngCallsConsumed: secondTailRoll ? 6 : firstTailRoll ? 1 : 0,
+    rngValue:
+      !burned
+        ? null
+        : secondTailRoll
+          ? FIRE_PUNCH_AFTER_TAIL_RNG_2
+          : firstTailRoll
+            ? FIRE_PUNCH_AFTER_TAIL_RNG_1
+            : FIRE_PUNCH_AFTER_BURN_RNG_VALUE,
   };
 }
 
@@ -217,4 +288,17 @@ export function firePunchBurnFlames(age: number): BurnFlameParticle[] {
     });
   }
   return particles;
+}
+
+/** The end-turn burn script invokes the same Status_Burn animation again. */
+export function firePunchResidualBurnFlames(age: number): BurnFlameParticle[] {
+  return firePunchBurnFlames(
+    age - FIRE_PUNCH_RESIDUAL_FLAME_FIRST_AGE + FIRE_PUNCH_BURN_FLAME_FIRST_AGE,
+  );
+}
+
+/** Fresh `DoBounceEffect` phase for the turn-17 action menu. */
+export function firePunchTurn17MenuBounceTick(age: number): number | null {
+  if (age < FIRE_PUNCH_TURN17_MENU_REDRAW_AGE) return null;
+  return 1748 + age - FIRE_PUNCH_TURN17_MENU_REDRAW_AGE;
 }
