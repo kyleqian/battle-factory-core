@@ -16,6 +16,15 @@ describe("factory terminal-endpoint extraction", () => {
     expect(policy.seventhWin.lobby.regularText).toContain("seven\\nstraight Battle Swap matches!");
     expect(policy.seventhWin.battlePoints).toMatchObject({ brainBonus: 10, cap: 9999, firstSevenWinAward: 3 });
     expect(policy.seventhWin.battlePoints.factorySinglesByAwardRow).toHaveLength(30);
+    expect(policy.presentation.commonHandoff).toContain(
+      "the battle-room script waits for map state; lobby OnWarp turns the player north",
+    );
+    expect(policy.presentation.gates).toMatchObject({
+      defaultMsgbox: ["message", "waitmessage", "waitbuttonpress"],
+      getPointsMsgbox: ["message", "playfanfare MUS_OBTAIN_B_POINTS", "waitfanfare", "waitmessage"],
+    });
+    expect(policy.presentation.lossOrder[2]).toContain("LoadPlayerParty");
+    expect(policy.presentation.seventhWinOrder[1]).toContain("A/B-gated");
   });
 
   it("reproduces the committed artifact byte-for-byte", () => {

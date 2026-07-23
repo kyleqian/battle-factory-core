@@ -54,6 +54,21 @@ const battleRoom = read("data", "maps", "BattleFrontier_BattleFactoryBattleRoom"
 const lobby = read("data", "maps", "BattleFrontier_BattleFactoryLobby", "scripts.inc");
 const factory = read("src", "battle_factory.c");
 const frontierUtil = read("src", "frontier_util.c");
+const stdMsgbox = read("data", "scripts", "std_msgbox.inc");
+
+function requiredSource(source: string, fragment: string): void {
+  if (!source.includes(fragment)) throw new Error(`source contract changed: ${fragment}`);
+}
+
+// These are controller/presentation boundaries, not guessed frame counts.
+// Terminal routes cannot be reached from the canonical anchor within a bounded
+// replay without staging six extra battles, so keep the source's blocking
+// commands explicit for the eventual OFF-profile probe.
+requiredSource(battleRoom, "warp MAP_BATTLE_FRONTIER_BATTLE_FACTORY_LOBBY, 4, 8");
+requiredSource(battleRoom, "waitstate");
+requiredSource(lobby, "multichoicedefault 20, 8, MULTI_YESNO, 1, FALSE");
+requiredSource(stdMsgbox, "Std_MsgboxDefault:");
+requiredSource(stdMsgbox, "Std_MsgboxGetPoints:");
 
 const stagesPerChallenge = numberDefine(battleFrontier, "FRONTIER_STAGES_PER_CHALLENGE");
 const maxStreak = numberDefine(battleFrontier, "MAX_STREAK");
@@ -66,6 +81,7 @@ const policy = {
       "include/constants/battle_factory.h",
       "src/battle_factory.c",
       "src/frontier_util.c",
+      "data/scripts/std_msgbox.inc",
       "data/maps/BattleFrontier_BattleFactoryBattleRoom/scripts.inc",
       "data/maps/BattleFrontier_BattleFactoryLobby/scripts.inc",
     ],
@@ -75,6 +91,8 @@ const policy = {
       winStreak: "src/frontier_util.c:2111-2157",
       battlePoints: "src/frontier_util.c:500-592,1853-1910",
       lobbyTerminal: "data/maps/BattleFrontier_BattleFactoryLobby/scripts.inc:15-94",
+      terminalWarp: "data/maps/BattleFrontier_BattleFactoryBattleRoom/scripts.inc:222-232",
+      messageGates: "data/scripts/std_msgbox.inc:18-35",
     },
   },
   constants: {
@@ -94,7 +112,7 @@ const policy = {
     lobby: {
       lockAll: true,
       text: sourceString(lobby, "BattleFrontier_BattleFactoryLobby_Text_ReturnMonsSaveResults"),
-      operations: ["frontier_checkairshow", "LoadPlayerParty", "set FACTORY_DATA_WIN_STREAK_ACTIVE FALSE", "factory_save 0", "playse SE_SAVE", "AskRecordBattle"],
+      operations: ["message ReturnMonsSaveResults", "waitmessage", "frontier_checkairshow", "LoadPlayerParty", "set FACTORY_DATA_WIN_STREAK_ACTIVE FALSE", "factory_save 0", "playse SE_SAVE", "waitse", "AskRecordBattle"],
     },
   },
   seventhWin: {
@@ -121,6 +139,32 @@ const policy = {
       cap: maxBattlePoints,
       firstSevenWinAward: 3,
     },
+  },
+  presentation: {
+    commonHandoff: [
+      "terminal room script writes challengeStatus before the singles warp to lobby (4,8)",
+      "the battle-room script waits for map state; lobby OnWarp turns the player north",
+      "the lobby OnFrame status reader copies only WON or LOST into VAR_TEMP_CHALLENGE_STATUS, which selects the terminal route on a later map-script dispatch",
+    ],
+    gates: {
+      defaultMsgbox: ["message", "waitmessage", "waitbuttonpress"],
+      getPointsMsgbox: ["message", "playfanfare MUS_OBTAIN_B_POINTS", "waitfanfare", "waitmessage"],
+      scriptedMessage: ["message", "waitmessage"],
+      recordPrompt: ["message RecordLastMatch", "waitmessage", "multichoicedefault (20,8), default choice 1", "A/B/choice dispatch"],
+    },
+    lossOrder: [
+      "battle result != 1 -> status LOST -> lobby handoff",
+      "ReturnMonsSaveResults scripted message completes",
+      "air-show check -> LoadPlayerParty -> clear Factory active-streak bit -> factory_save -> save SE/wait",
+      "optional record prompt (or final next-visit message when recording is disabled)",
+    ],
+    seventhWinOrder: [
+      "battle result == 1 -> optional performed-swap rent persistence -> capped Factory streak increment -> battle number becomes 7 -> status WON -> lobby handoff",
+      "regular seven-win DEFAULT msgbox (or Factory Head DEFAULT variant) is A/B-gated after text completion",
+      "award DEFAULT msgbox is A/B-gated after text completion",
+      "frontier_givepoints -> GETPOINTS fanfare/message completion -> ExchangeMonsAndSave scripted message completion",
+      "air-show check -> LoadPlayerParty -> factory_save -> save SE/wait -> optional record prompt",
+    ],
   },
 };
 
