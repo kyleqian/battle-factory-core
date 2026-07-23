@@ -43,6 +43,11 @@ export interface FactorySwapPresentationState {
   readonly speciesNameFade: SpeciesNameFadeState;
 }
 
+export interface FactorySwapBallCycleVisual {
+  readonly centerX: number;
+  readonly cycledToEnemy: boolean;
+}
+
 const anchor = anchorState as {
   rentals: Array<{
     species: string;
@@ -165,6 +170,46 @@ export function advanceFactorySwapPresentation(
     speciesNameFade = activateSpeciesNameFade(speciesNameFade);
   }
   let controller = copyFactorySwapCursor(state.controller);
+  if (controller.phase === "enemySwitch" && phaseElapsed === 84) {
+    controller = {
+      ...controller,
+      actionsCount: 5,
+      cursor: 0,
+      infoCursor: 0,
+      displayCursor: 0,
+      arrowCursor: 0,
+      cursorCopyPending: false,
+    };
+    // Swap_Task_SwitchPartyScreen reuses the one existing species-name task,
+    // resetting its fields for the enemy-side fade-in.
+    speciesNameFade = {
+      ...speciesNameFade,
+      active: false,
+      tState: "run",
+      coeffDelay: 0,
+      coeff: 6,
+      fadeOut: false,
+      delay: 0,
+      renderCoeff: 16,
+    };
+  }
+  if (controller.phase === "enemySwitch" && phaseElapsed >= 133) {
+    controller = acknowledgeFactorySwapPresentation({
+      ...controller,
+      phase: "enemyPicker",
+    });
+    return {
+      controller,
+      elapsed,
+      phaseElapsed: 0,
+      selectedBallClock,
+      selectedBallIndex: state.selectedBallIndex,
+      speciesNameFade: {
+        ...speciesNameFade,
+        active: true,
+      },
+    };
+  }
   if (controller.phase === "playerPickerReturn" && phaseElapsed >= 55) {
     controller = {
       ...controller,
@@ -218,7 +263,7 @@ export function handleFactorySwapPresentationInput(
       controller.phase === state.controller.phase ? state.phaseElapsed : 0,
     selectedBallClock: enteredPlayerOptions ? 0 : state.selectedBallClock,
     selectedBallIndex: enteredPlayerOptions
-      ? state.controller.cursor
+      ? state.controller.cursor as 0 | 1 | 2
       : state.selectedBallIndex,
     speciesNameFade: pausedSpeciesName,
   };
@@ -399,4 +444,98 @@ export function factorySwapPlayerReturnActionFadeY(
 ): number {
   if (phaseElapsed < 31) return 16;
   return Math.max(0, 16 - (Math.floor((phaseElapsed - 31) / 2) + 1) * 2);
+}
+
+export type FactorySwapEnemySwitchMechanism =
+  | "Task_CloseMonPic"
+  | "SpriteCB_CloseMonPic"
+  | "Swap_Task_SwitchPartyScreen"
+  | "Swap_Task_ScreenInfoTransitionIn"
+  | "Swap_Task_HandleChooseMons";
+
+/** Source callback owning each phase-relative part of player -> enemy. */
+export function factorySwapEnemySwitchMechanism(
+  phaseElapsed: number,
+): FactorySwapEnemySwitchMechanism {
+  if (phaseElapsed <= 7) return "Task_CloseMonPic";
+  if (phaseElapsed <= 18) return "SpriteCB_CloseMonPic";
+  if (phaseElapsed <= 84) return "Swap_Task_SwitchPartyScreen";
+  if (phaseElapsed <= 132) return "Swap_Task_ScreenInfoTransitionIn";
+  return "Swap_Task_HandleChooseMons";
+}
+
+/**
+ * Swap_Task_SlideCycleBalls, including its three independent tBallCycled
+ * flags. The task's first visible movement is switch edge +24 and it
+ * destroys itself after movement 28, when all three destinations settle.
+ */
+export function factorySwapEnemyBallCycleVisuals(
+  phaseElapsed: number,
+): readonly [
+  FactorySwapBallCycleVisual,
+  FactorySwapBallCycleVisual,
+  FactorySwapBallCycleVisual,
+] {
+  const centers = [72, 120, 168];
+  const cycled = [false, false, false];
+  const movements = Math.max(0, Math.min(28, phaseElapsed - 23));
+  for (let movement = 0; movement < movements; movement += 1) {
+    let lastX = 0;
+    for (let i = 2; i >= 0; i -= 1) {
+      if (i === 2) {
+        lastX = centers[i]!;
+        centers[i]! += 10;
+      } else {
+        // The source stores this spacing in u8.
+        const spacing = (lastX - centers[i]!) & 0xff;
+        if (spacing === 16 || cycled[i + 1]) {
+          lastX = centers[i]!;
+          centers[i]! += 10;
+        } else if (spacing > 16) {
+          centers[i] = centers[i + 1]! - 48;
+        }
+      }
+      if (cycled[i]) {
+        const destination = i * 48 + 72;
+        if (centers[i]! >= destination) centers[i] = destination;
+      }
+      if (centers[i]! - 16 > 240) {
+        lastX = centers[i]!;
+        centers[i] = -16;
+        cycled[i] = true;
+      }
+    }
+  }
+  return centers.map((centerX, index) => ({
+    centerX,
+    cycledToEnemy: cycled[index]!,
+  })) as unknown as readonly [
+    FactorySwapBallCycleVisual,
+    FactorySwapBallCycleVisual,
+    FactorySwapBallCycleVisual,
+  ];
+}
+
+/** First enemy action button's source six-pixel slide from x=240 to x=160. */
+export function factorySwapEnemyPkmnButtonX(phaseElapsed: number): number {
+  if (phaseElapsed < 88) return 240;
+  if (phaseElapsed >= 101) return 160;
+  return 240 - (phaseElapsed - 87) * 6;
+}
+
+/** CANCEL's delayed source six-pixel slide from x=240 to x=192. */
+export function factorySwapEnemyCancelButtonX(phaseElapsed: number): number {
+  if (phaseElapsed < 99) return 240;
+  return Math.max(192, 240 - (phaseElapsed - 98) * 6);
+}
+
+/** Shared PALNUM_FADE_TEXT transition after both enemy buttons settle. */
+export function factorySwapEnemyActionFadeY(phaseElapsed: number): number {
+  return factorySwapPlayerReturnActionFadeY(phaseElapsed - 78);
+}
+
+/** The old player species is driven to black once the ball-cycle task starts. */
+export function factorySwapEnemySpeciesRenderCoeff(phaseElapsed: number): number {
+  if (phaseElapsed < 24) return 0;
+  return Math.min(16, Math.floor((phaseElapsed - 20) / 4));
 }

@@ -6,6 +6,11 @@ import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts
 import {
   factorySwapActionFadeY,
   factorySwapCancelButtonX,
+  factorySwapEnemyActionFadeY,
+  factorySwapEnemyBallCycleVisuals,
+  factorySwapEnemyCancelButtonX,
+  factorySwapEnemyPkmnButtonX,
+  factorySwapEnemySpeciesRenderCoeff,
   factorySwapPlayerMonPicVisual,
   factorySwapPlayerReturnActionFadeY,
   factorySwapPlayerReturnCancelButtonX,
@@ -19,6 +24,7 @@ import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
 import arrowData from "../assets/gen/arrow.json" with { type: "json" };
 import actionBoxData from "../assets/gen/action-box.json" with { type: "json" };
+import actionHighlightData from "../assets/gen/action-highlight.json" with { type: "json" };
 import menuHighlightData from "../assets/gen/menu-highlight.json" with { type: "json" };
 import textPaletteData from "../assets/gen/text-palette.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -40,6 +46,12 @@ const actionBox = actionBoxData as {
   right: { columns: number; rows: number; tiles: number[][] };
   palette: RgbColor[];
 };
+const actionHighlight = actionHighlightData as {
+  left: { columns: number; rows: number; tiles: number[][] };
+  middle: { columns: number; rows: number; tiles: number[][] };
+  right: { columns: number; rows: number; tiles: number[][] };
+  palette: RgbColor[];
+};
 const menuHighlight = menuHighlightData as {
   left: { tileset: { columns: number; rows: number; tiles: number[][] } };
   right: { tileset: { columns: number; rows: number; tiles: number[][] } };
@@ -54,6 +66,8 @@ const fontSmall = {
 const charmap = new Map<string, number>(
   (charmapData as { entries: [string, number][] }).entries,
 );
+charmap.set("\uE053", 0x53);
+charmap.set("\uE054", 0x54);
 
 const DEFAULT_TEXT_COLORS = { fg: 2, bg: 1, shadow: 3 };
 const SPECIES_TEXT_COLORS = { fg: 4, bg: 0, shadow: 0 };
@@ -87,11 +101,12 @@ function drawActionPiece(
   originX: number,
   originY: number,
   objFadeY: number,
+  palette: RgbColor[] = actionBox.palette,
 ): void {
   drawSpriteFaded(
     fb,
     { tileset: piece },
-    actionBox.palette,
+    palette,
     originX + piece.columns * 4,
     originY + piece.rows * 4,
     piece.columns,
@@ -107,11 +122,31 @@ function drawCancelButton(
   objFadeY: number,
   actionFadeY: number,
   buttonX: number,
+  labelVisible = true,
+  highlighted = false,
 ): void {
   drawActionPiece(fb, actionBox.left, buttonX, 144, objFadeY);
   drawActionPiece(fb, actionBox.right, buttonX + 16, 144, objFadeY);
+  if (highlighted) {
+    drawActionPiece(
+      fb,
+      actionHighlight.left,
+      buttonX,
+      144,
+      objFadeY,
+      actionHighlight.palette,
+    );
+    drawActionPiece(
+      fb,
+      actionHighlight.right,
+      buttonX + 16,
+      144,
+      objFadeY,
+      actionHighlight.palette,
+    );
+  }
   // The BG2 fade window is cleared when the child slide task is created.
-  if (buttonX > 192) return;
+  if (buttonX > 192 || !labelVisible) return;
   const label = "CANCEL";
   const x = 168 + rightAlignXOffset(fontSmall, charmap, label, 70);
   if (actionFadeY > 0) {
@@ -146,20 +181,114 @@ function drawCancelButton(
   );
 }
 
+function drawPkmnForSwapButton(
+  fb: Uint8Array,
+  bgFadeY: number,
+  objFadeY: number,
+  actionFadeY: number,
+  buttonX: number,
+  labelVisible: boolean,
+  highlighted: boolean,
+): void {
+  drawActionPiece(fb, actionBox.left, buttonX, 120, objFadeY);
+  drawActionPiece(fb, actionBox.right, buttonX + 16, 120, objFadeY);
+  drawActionPiece(fb, actionBox.right, buttonX + 48, 120, objFadeY);
+  if (highlighted) {
+    drawActionPiece(
+      fb,
+      actionHighlight.left,
+      buttonX,
+      120,
+      objFadeY,
+      actionHighlight.palette,
+    );
+    drawActionPiece(
+      fb,
+      actionHighlight.middle,
+      buttonX + 16,
+      120,
+      objFadeY,
+      actionHighlight.palette,
+    );
+    drawActionPiece(
+      fb,
+      actionHighlight.right,
+      buttonX + 48,
+      120,
+      objFadeY,
+      actionHighlight.palette,
+    );
+  }
+  if (buttonX > 160 || !labelVisible) return;
+  const label = "\uE053\uE054 FOR SWAP";
+  const x = 168 + rightAlignXOffset(fontSmall, charmap, label, 70);
+  if (actionFadeY > 0) {
+    const target = actionBox.palette[3]!;
+    const palette = textPalette.map((color) => ({
+      r: blendComponentToward(color.r, target.r, actionFadeY),
+      g: blendComponentToward(color.g, target.g, actionFadeY),
+      b: blendComponentToward(color.b, target.b, actionFadeY),
+    }));
+    drawText(fb, fontSmall, charmap, label, x, 120, palette, MENU_TEXT_COLORS);
+    return;
+  }
+  drawTextFaded(
+    fb,
+    fontSmall,
+    charmap,
+    label,
+    x,
+    120,
+    textPalette,
+    MENU_TEXT_COLORS,
+    bgFadeY,
+  );
+}
+
 /** State-driven settled player/enemy picker composition. */
 export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array {
   const fb = createFramebuffer();
   const { state } = view;
-  const enemy = state.phase === "enemyPicker" || state.playerMonId !== null;
+  const enemy =
+    state.phase === "enemyPicker" ||
+    state.phase === "acceptPrompt" ||
+    state.phase === "duplicateSpecies" ||
+    (state.phase === "quitPrompt" && state.quitReturnPhase === "enemyPicker");
+  const enemySwitch = state.phase === "enemySwitch";
+  const phaseElapsed = view.phaseElapsed ?? 0;
   const bgFade = view.bgFadeY ?? 0;
   const objFade = view.objFadeY ?? 0;
   const party = enemy ? state.enemyParty : state.playerParty;
-  const selected = party[state.cursor];
-  const infoSelected = party[state.infoCursor];
-  const displaySelected = party[state.displayCursor];
+  const selected = party[Math.min(state.cursor, 2)]!;
+  const infoIndex = state.infoCursor < 3
+    ? state.infoCursor as 0 | 1 | 2
+    : null;
+  const displayIndex = state.displayCursor < 3
+    ? state.displayCursor as 0 | 1 | 2
+    : null;
+  const infoSelected = infoIndex === null ? null : party[infoIndex];
+  const displaySelected =
+    infoIndex !== null &&
+    displayIndex !== null &&
+    !(enemy && phaseElapsed === 0)
+      ? party[displayIndex]
+      : null;
+  const speciesColor =
+    enemy && phaseElapsed === 1
+      ? { r: 8, g: 0, b: 0 }
+      : speciesNameColor(
+          enemySwitch
+            ? factorySwapEnemySpeciesRenderCoeff(phaseElapsed)
+            : view.speciesRenderCoeff,
+        );
   const renderedBallTiles = [...view.ballTiles] as [number, number, number];
+  const ballCycle = enemySwitch
+    ? factorySwapEnemyBallCycleVisuals(phaseElapsed)
+    : null;
   let actionFadeY = 0;
   let cancelButtonX = 192;
+  let pkmnButtonX = 240;
+  let actionLabelsVisible = true;
   if (
     view.selectedBallIndex !== undefined &&
     view.selectedBallIndex !== null &&
@@ -173,9 +302,15 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     actionFadeY = factorySwapActionFadeY(phaseElapsed);
     cancelButtonX = factorySwapCancelButtonX(phaseElapsed);
   } else if (state.phase === "playerPickerReturn") {
-    const phaseElapsed = view.phaseElapsed ?? 0;
     actionFadeY = factorySwapPlayerReturnActionFadeY(phaseElapsed);
     cancelButtonX = factorySwapPlayerReturnCancelButtonX(phaseElapsed);
+  } else if (enemySwitch) {
+    actionFadeY = factorySwapEnemyActionFadeY(phaseElapsed);
+    cancelButtonX = factorySwapEnemyCancelButtonX(phaseElapsed);
+    pkmnButtonX = factorySwapEnemyPkmnButtonX(phaseElapsed);
+    actionLabelsVisible = phaseElapsed >= 107;
+  } else if (enemy) {
+    pkmnButtonX = 160;
   }
 
   if (bgFade === 0) drawTileBg(fb, menuBg);
@@ -192,7 +327,9 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     DEFAULT_TEXT_COLORS,
     bgFade,
   );
-  const categoryText = `${CATEGORY_BY_SPECIES[infoSelected.species] ?? ""} POKéMON`;
+  const categoryText = infoSelected
+    ? `${CATEGORY_BY_SPECIES[infoSelected.species] ?? ""} POKéMON`
+    : "";
   drawTextFaded(
     fb,
     font,
@@ -208,12 +345,12 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     fb,
     font,
     charmap,
-    displaySelected.species,
-    152 + rightAlignXOffset(font, charmap, displaySelected.species, 86),
+    displaySelected?.species ?? "",
+    152 + rightAlignXOffset(font, charmap, displaySelected?.species ?? "", 86),
     17,
     [
       ...textPalette.slice(0, 4),
-      speciesNameColor(view.speciesRenderCoeff),
+      speciesColor,
     ],
     SPECIES_TEXT_COLORS,
     bgFade,
@@ -231,49 +368,84 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
   );
 
   for (let i = 0; i < 3; i += 1) {
+    const gray = ballCycle?.[i].cycledToEnemy ?? enemy;
+    const firstTile = gray ? 0 : renderedBallTiles[i]!;
     drawSpriteFaded(
       fb,
       { tileset: pokeball.tileset },
-      enemy ? pokeball.grayPalette : pokeball.selectedPalette,
-      48 * i + 72,
+      gray ? pokeball.grayPalette : pokeball.selectedPalette,
+      ballCycle?.[i].centerX ?? 48 * i + 72,
       64,
       4,
       4,
-      renderedBallTiles[i]! / 4,
+      firstTile / 4,
       objFade,
     );
   }
-  drawSpriteFaded(
+  const arrowVisible =
+    state.displayCursor < 3 &&
+    state.arrowCursor < 3 &&
+    (!enemySwitch || phaseElapsed <= 21) &&
+    (!enemy || phaseElapsed >= 1);
+  if (arrowVisible) {
+    drawSpriteFaded(
+      fb,
+      { tileset: arrow.tileset },
+      arrow.palette,
+      ballCycle?.[state.arrowCursor as 0 | 1 | 2]?.centerX ??
+        48 * state.arrowCursor + 72,
+      88,
+      2,
+      2,
+      0,
+      objFade,
+    );
+  }
+  drawPkmnForSwapButton(
     fb,
-    { tileset: arrow.tileset },
-    arrow.palette,
-    48 * state.displayCursor + 72,
-    88,
-    2,
-    2,
-    0,
+    bgFade,
     objFade,
+    actionFadeY,
+    pkmnButtonX,
+    actionLabelsVisible,
+    enemy && state.displayCursor === 3,
   );
-  drawCancelButton(fb, bgFade, objFade, actionFadeY, cancelButtonX);
+  drawCancelButton(
+    fb,
+    bgFade,
+    objFade,
+    actionFadeY,
+    cancelButtonX,
+    actionLabelsVisible,
+    enemy && state.displayCursor === 4,
+  );
 
-  if (state.phase === "playerOptions" || state.phase === "playerPickerReturn") {
+  if (
+    state.phase === "playerOptions" ||
+    state.phase === "playerPickerReturn" ||
+    enemySwitch
+  ) {
     const returning = state.phase === "playerPickerReturn";
     const ballVisuals: BallVisual[] = renderedBallTiles.map((firstTile, index) => ({
       palette: pokeball.selectedPalette,
       firstTileRow: firstTile / 4,
       centerX: 48 * index + 72,
     }));
-    const monPic = returning
-      ? factorySwapPlayerReturnMonPicVisual(view.phaseElapsed ?? 0)
+    const monPic = returning || enemySwitch
+      ? factorySwapPlayerReturnMonPicVisual(phaseElapsed)
       : factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0);
+    const adjustedMonPic =
+      enemySwitch && phaseElapsed === 0
+        ? { ...monPic, menuHighlightVisible: true }
+        : monPic;
     drawMonPic(
       fb,
-      monPic,
+      adjustedMonPic,
       selected.species,
       48 * state.displayCursor + 72,
       ballVisuals,
     );
-    if (monPic.menuHighlightVisible) {
+    if (adjustedMonPic.menuHighlightVisible) {
       const highlightY = PLAYER_OPTIONS_ORIGIN.y +
         state.playerOptionDisplayCursor * 16 + 8;
       drawSpriteFaded(
@@ -299,7 +471,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
         objFade,
       );
     }
-    if (monPic.menuTextVisible) {
+    if (adjustedMonPic.menuTextVisible) {
       for (let i = 0; i < PLAYER_OPTION_LABELS.length; i += 1) {
         drawTextFaded(
           fb,

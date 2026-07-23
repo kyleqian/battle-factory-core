@@ -7,6 +7,11 @@ import {
   factorySwapActionFadeY,
   factorySwapBallTile,
   factorySwapCancelButtonX,
+  factorySwapEnemyActionFadeY,
+  factorySwapEnemyBallCycleVisuals,
+  factorySwapEnemyCancelButtonX,
+  factorySwapEnemyPkmnButtonX,
+  factorySwapEnemySwitchMechanism,
   factorySwapPlayerMonPicVisual,
   factorySwapPlayerOptionBallTile,
   factorySwapPlayerReturnActionFadeY,
@@ -296,5 +301,106 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapPlayerReturnActionFadeY(31)).toBe(14);
     expect(factorySwapPlayerReturnActionFadeY(32)).toBe(14);
     expect(factorySwapPlayerReturnActionFadeY(45)).toBe(0);
+  });
+
+  it("runs Swap_Task_SwitchPartyScreen into the five-action enemy HandleChooseMons boundary", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 58);
+    state = handleFactorySwapPresentationInput(state, "DOWN");
+    state = advance(state, 2);
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "enemySwitch",
+        actionsCount: 3,
+        playerMonId: 0,
+        inputReady: false,
+      },
+    });
+    expect(state.controller.enemyParty.map(({ species }) => species)).toEqual([
+      "GROVYLE",
+      "MURKROW",
+      "PIDGEOTTO",
+    ]);
+    const selectedBallClock = state.selectedBallClock;
+
+    state = advance(state, 83);
+    expect(state.controller.actionsCount).toBe(3);
+    state = advance(state, 1);
+    expect(state.controller).toMatchObject({
+      phase: "enemySwitch",
+      actionsCount: 5,
+      cursor: 0,
+      inputReady: false,
+    });
+
+    state = advance(state, 48);
+    expect(state.phaseElapsed).toBe(132);
+    expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
+    state = advance(state, 1);
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "enemyPicker",
+        actionsCount: 5,
+        inputReady: true,
+      },
+    });
+    state = handleFactorySwapPresentationInput(state, "RIGHT");
+    expect(state.controller).toMatchObject({
+      cursor: 1,
+      infoCursor: 0,
+      displayCursor: 0,
+    });
+    state = advance(state, 1);
+    expect(state.controller).toMatchObject({
+      cursor: 1,
+      infoCursor: 1,
+      displayCursor: 0,
+    });
+    state = advance(state, 1);
+    expect(state.controller.displayCursor).toBe(1);
+    expect(state.selectedBallClock).toBe((selectedBallClock ?? 0) + 135);
+  });
+
+  it("pins the source-named enemy switch callbacks, independent ball cycles, and two-button transition", () => {
+    expect(factorySwapEnemySwitchMechanism(0)).toBe("Task_CloseMonPic");
+    expect(factorySwapEnemySwitchMechanism(8)).toBe("SpriteCB_CloseMonPic");
+    expect(factorySwapEnemySwitchMechanism(19))
+      .toBe("Swap_Task_SwitchPartyScreen");
+    expect(factorySwapEnemySwitchMechanism(85))
+      .toBe("Swap_Task_ScreenInfoTransitionIn");
+    expect(factorySwapEnemySwitchMechanism(133))
+      .toBe("Swap_Task_HandleChooseMons");
+
+    expect(factorySwapEnemyBallCycleVisuals(23)).toEqual([
+      { centerX: 72, cycledToEnemy: false },
+      { centerX: 120, cycledToEnemy: false },
+      { centerX: 168, cycledToEnemy: false },
+    ]);
+    expect(factorySwapEnemyBallCycleVisuals(32)).toEqual([
+      { centerX: 162, cycledToEnemy: false },
+      { centerX: 210, cycledToEnemy: false },
+      { centerX: -16, cycledToEnemy: true },
+    ]);
+    expect(factorySwapEnemyBallCycleVisuals(37).map((ball) => ball.cycledToEnemy))
+      .toEqual([false, true, true]);
+    expect(factorySwapEnemyBallCycleVisuals(42).map((ball) => ball.cycledToEnemy))
+      .toEqual([true, true, true]);
+    expect(factorySwapEnemyBallCycleVisuals(51).map((ball) => ball.centerX))
+      .toEqual([72, 120, 168]);
+
+    expect(factorySwapEnemyPkmnButtonX(87)).toBe(240);
+    expect(factorySwapEnemyPkmnButtonX(88)).toBe(234);
+    expect(factorySwapEnemyPkmnButtonX(101)).toBe(160);
+    expect(factorySwapEnemyCancelButtonX(98)).toBe(240);
+    expect(factorySwapEnemyCancelButtonX(99)).toBe(234);
+    expect(factorySwapEnemyCancelButtonX(106)).toBe(192);
+    expect(factorySwapEnemyActionFadeY(108)).toBe(16);
+    expect(factorySwapEnemyActionFadeY(109)).toBe(14);
+    expect(factorySwapEnemyActionFadeY(123)).toBe(0);
   });
 });

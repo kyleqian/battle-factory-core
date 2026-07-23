@@ -242,4 +242,42 @@ describe("Factory swap state/input contract", () => {
       playerOptionDisplayCursor: 2,
     }, "A").phase).toBe("playerPickerReturn");
   });
+
+  it("wraps LEFT/RIGHT across all five enemy actions with the shared two-copy display lag", () => {
+    let state: FactorySwapState = {
+      ...createFactorySwapState(player, enemy, rentals),
+      phase: "enemyPicker",
+      playerMonId: 0,
+      actionsCount: 5,
+      inputReady: true,
+    };
+    state = handleFactorySwapInput(state, "LEFT");
+    expect(state).toMatchObject({
+      cursor: 4,
+      infoCursor: 0,
+      displayCursor: 0,
+    });
+    state = copyFactorySwapCursor(state);
+    expect(state).toMatchObject({
+      cursor: 4,
+      infoCursor: 4,
+      displayCursor: 0,
+    });
+    state = copyFactorySwapCursor(state);
+    expect(state.displayCursor).toBe(4);
+    expect(state.arrowCursor).toBe(0);
+    state = copyFactorySwapCursor(state);
+    expect(state.arrowCursor).toBe(4);
+    state = handleFactorySwapInput(state, "RIGHT");
+    expect(state.cursor).toBe(0);
+    state = copyFactorySwapCursor(
+      copyFactorySwapCursor(copyFactorySwapCursor(state)),
+    );
+    expect(state).toMatchObject({
+      cursor: 0,
+      infoCursor: 0,
+      displayCursor: 0,
+      arrowCursor: 0,
+    });
+  });
 });

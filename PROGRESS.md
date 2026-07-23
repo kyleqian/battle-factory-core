@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 331 — S8 OFF enemy-screen switch/picker: **GREEN — 130/130 exact**
+
+- **State:** SWAP now reaches the input-ready five-action enemy picker and
+  stops before mon selection. Dense OFF trace
+  `battle1-swap-enemy-picker.json` is **130/130 exact**, including the first
+  accepted LEFT edge and its action-4 highlight.
+- **Did:** implemented source-named `Swap_Task_SwitchPartyScreen`, three
+  independent ball cycles, `Swap_InitActions(SWAP_ENEMY_SCREEN)` (3→5),
+  GROVYLE/MURKROW/PIDGEOTTO identity/order, staggered PKMN-FOR-SWAP/CANCEL
+  slides, labels/category/species, and
+  `Swap_Task_ScreenInfoTransitionIn` → `HandleChooseMons`. LEFT/RIGHT wraps
+  all five actions with category/species/OAM copy lag; the selected-ball and
+  species tasks retain ownership.
+- **Next:** implement the distinct eligible enemy-mon A path through
+  `Swap_AskAcceptMon`; stop at its input-ready YES/NO prompt before a choice.
+- **Notes:** Tier-1 **1199/1199**, build **5.556 MB**. B-close, popup,
+  options, and picker remain **59/59**, **44/44**, **58/58**, **101/101**.
+  No absolute-tick, battle-number, screenshot, or captured-asset path.
+
+---
 ## 330 — S8 OFF popup B-close/player-picker return: **GREEN — 59/59 exact**
 
 - **State:** the evidence-pinned B path is complete from the `playerOptions`
@@ -47,23 +67,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** supervisor verification is Tier-1 **1193/1193**, build
   **5.549 MB**; canonical FIRE PUNCH controls remain **227/236** (known
   residual) and **200/200**. No deferred decision or absolute-tick rule.
-
----
-## 328 — S8 player-options popup: **GREEN — 44/44 exact**
-
-- **State:** the source-relative player-options seam is complete through the
-  settled popup and DOWN cursor response. The new dense OFF trace
-  `battle1-swap-player-options-popup.json` is **44/44 exact**; prior options
-  and picker traces remain **58/58** and **101/101**.
-- **Did:** opened input at `playerOptions +56`, reused the mon-picture clock
-  for popup text at `+58` and highlight settle at `+59`, added the one-VBlank
-  logical/display cursor handoff, and dispatched A/B to `summaryFade`,
-  `playerPickerReturn`, or `enemySwitch`. Screen-ball and selected-ball loops
-  remain separate phase-relative clocks. Merged source-extracted terminal
-  message/fanfare gates and a deterministic ONIX→GROVYLE Scene-ON FIRE PUNCH
-  staging probe; the latter remains `partial`, not a pixel-acceptance claim.
-- **Next:** implement exactly one next distinct path: summary fade/screen,
-  popup B-close/player-picker return, or enemy-screen switch presentation.
-- **Notes:** supervisor merged/verified all three lanes: Tier-1 **1189/1189**,
-  build **5.547 MB**; FIRE PUNCH canonical regressions **227/236** (known
-  residual) and **200/200**. No deferred decision or absolute-tick branch.

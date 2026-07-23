@@ -40,17 +40,23 @@ export type FactorySwapPhase =
   | "duplicateSpecies"
   | "complete";
 
+export type FactorySwapCursor = 0 | 1 | 2 | 3 | 4;
+
 export interface FactorySwapState {
   readonly phase: FactorySwapPhase;
   readonly playerParty: FactorySwapParty;
   readonly enemyParty: FactorySwapParty;
   readonly rentalMons: FactoryRentalRoster;
-  readonly cursor: 0 | 1 | 2;
+  readonly cursor: FactorySwapCursor;
   /** Window-copy-visible category cursor, one VBlank behind `cursor`. */
-  readonly infoCursor: 0 | 1 | 2;
+  readonly infoCursor: FactorySwapCursor;
   /** OAM/species-window-visible cursor, one further VBlank behind. */
-  readonly displayCursor: 0 | 1 | 2;
+  readonly displayCursor: FactorySwapCursor;
+  /** Final OAM-visible arrow/action highlight, one VBlank behind the species window. */
+  readonly arrowCursor: FactorySwapCursor;
   readonly cursorCopyPending: boolean;
+  /** Swap_InitActions' live action span: three player balls, then five enemy actions. */
+  readonly actionsCount: 3 | 5;
   readonly playerOptionCursor: 0 | 1 | 2;
   /** OAM-visible option cursor, copied one VBlank after the logical cursor. */
   readonly playerOptionDisplayCursor: 0 | 1 | 2;
@@ -83,6 +89,14 @@ function move3(value: 0 | 1 | 2, delta: -1 | 1): 0 | 1 | 2 {
   return wrap3(value + delta);
 }
 
+function moveAction(
+  value: FactorySwapCursor,
+  delta: -1 | 1,
+  actionsCount: 3 | 5,
+): FactorySwapCursor {
+  return ((value + delta + actionsCount) % actionsCount) as FactorySwapCursor;
+}
+
 export function createFactorySwapState(
   playerParty: FactorySwapParty,
   enemyParty: FactorySwapParty,
@@ -96,7 +110,9 @@ export function createFactorySwapState(
     cursor: 0,
     infoCursor: 0,
     displayCursor: 0,
+    arrowCursor: 0,
     cursorCopyPending: false,
+    actionsCount: 3,
     playerOptionCursor: 0,
     playerOptionDisplayCursor: 0,
     playerOptionCursorCopyPending: false,
@@ -125,6 +141,10 @@ export function copyFactorySwapCursor(
     state.cursorCopyPending || state.displayCursor === state.cursor
       ? state.displayCursor
       : state.cursor;
+  const arrowCursor =
+    state.arrowCursor === state.displayCursor
+      ? state.arrowCursor
+      : state.displayCursor;
   const playerOptionDisplayCursor =
     state.playerOptionCursorCopyPending ||
     state.playerOptionDisplayCursor === state.playerOptionCursor
@@ -135,6 +155,7 @@ export function copyFactorySwapCursor(
   if (
     infoCursor === state.infoCursor &&
     displayCursor === state.displayCursor &&
+    arrowCursor === state.arrowCursor &&
     cursorCopyPending === state.cursorCopyPending &&
     playerOptionDisplayCursor === state.playerOptionDisplayCursor &&
     playerOptionCursorCopyPending === state.playerOptionCursorCopyPending
@@ -143,6 +164,7 @@ export function copyFactorySwapCursor(
     ...state,
     infoCursor,
     displayCursor,
+    arrowCursor,
     cursorCopyPending,
     playerOptionDisplayCursor,
     playerOptionCursorCopyPending,
@@ -151,7 +173,7 @@ export function copyFactorySwapCursor(
 
 export function factorySwapAlreadyHasSpecies(
   state: FactorySwapState,
-  enemyMonId: 0 | 1 | 2 = state.cursor,
+  enemyMonId: 0 | 1 | 2 = state.cursor as 0 | 1 | 2,
 ): boolean {
   if (state.playerMonId === null) return false;
   const species = state.enemyParty[enemyMonId].species;
@@ -204,7 +226,11 @@ export function handleFactorySwapInput(
     case "playerPicker":
     case "enemyPicker": {
       if (input === "LEFT" || input === "RIGHT") {
-        const cursor = move3(state.cursor, input === "LEFT" ? -1 : 1);
+        const cursor = moveAction(
+          state.cursor,
+          input === "LEFT" ? -1 : 1,
+          state.actionsCount,
+        );
         return { ...state, cursor, cursorCopyPending: true };
       }
       if (input === "B") {
@@ -217,6 +243,7 @@ export function handleFactorySwapInput(
         };
       }
       if (input !== "A") return state;
+      if (state.cursor >= 3) return state;
       if (state.phase === "playerPicker") {
         return {
           ...state,
@@ -233,7 +260,7 @@ export function handleFactorySwapInput(
       return {
         ...state,
         phase: "acceptPrompt",
-        enemyMonId: state.cursor,
+        enemyMonId: state.cursor as 0 | 1 | 2,
         yesNoCursor: 0,
         inputReady: false,
       };
@@ -259,10 +286,11 @@ export function handleFactorySwapInput(
       return {
         ...state,
         phase: "enemySwitch",
-        playerMonId: state.cursor,
+        playerMonId: state.cursor as 0 | 1 | 2,
         cursor: 0,
         infoCursor: 0,
         displayCursor: 0,
+        arrowCursor: 0,
         cursorCopyPending: false,
         inputReady: false,
       };
