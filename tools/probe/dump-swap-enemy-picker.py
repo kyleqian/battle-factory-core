@@ -3,9 +3,9 @@
 
 This is deliberately an evidence probe, not a renderer input.  It replays a
 normal oracle trace from the canonical Battle Scene OFF bootstrap and records
-only changes to the live FactorySwapScreen fields plus its owning task.  That
-makes the two useful boundaries (switch input readiness and accept-popup
-entry) reproducible without harvesting any framebuffer data.
+only changes to the live FactorySwapScreen fields, its owning task, and the
+selected party record.  That makes picker readiness and accept/return
+boundaries reproducible without harvesting any framebuffer data.
 
 Run through the teardown-safe wrapper, for example:
 
@@ -65,6 +65,10 @@ TASK_FUNC = 0x00
 TASK_ACTIVE = 0x04
 TASK_DATA = 0x08
 SFACTORY_SWAP_SCREEN = 0x03001284
+GPLAYERPARTY = 0x020244EC
+GMAIN = 0x030022C0
+GSPECIALVAR_RESULT = 0x020375F0
+PARTY_MON_SIZE = 0x64
 
 # FactorySwapScreen: fields before the first pointer are byte-packed; the
 # actionsData pointer is naturally aligned at +24.  Only state fields that
@@ -79,14 +83,32 @@ SWAP_ACTIONS_COUNT = 0x17
 SWAP_MON_SWAPPED = 0x20
 
 FUNCTIONS = {
+    0x0819CA08: "Swap_Task_Exit",
     0x0819CB1C: "Swap_Task_HandleYesNo",
+    0x0819CC74: "Swap_HandleAcceptMonResponse",
     0x0819CCD4: "Swap_AskAcceptMon",
     0x0819CE40: "Swap_Task_HandleChooseMons",
+    0x0819CF54: "Swap_Task_FadeSpeciesName",
     0x0819D12C: "Swap_Task_SlideCycleBalls",
     0x0819D588: "Swap_Task_ScreenInfoTransitionOut",
     0x0819D770: "Swap_Task_ScreenInfoTransitionIn",
     0x0819D9EC: "Swap_Task_SwitchPartyScreen",
 }
+
+CALLBACKS = {
+    0x080861B0: "CB2_ReturnToFieldContinueScript",
+}
+
+# GetSubstruct's personality % 24 cases, copied from pokemon.c:3607-3632.
+# Each tuple gives the physical secure[] slot for type0..type3 respectively.
+SUBSTRUCT_ORDERS = (
+    (0, 1, 2, 3), (0, 1, 3, 2), (0, 2, 1, 3), (0, 3, 1, 2),
+    (0, 2, 3, 1), (0, 3, 2, 1), (1, 0, 2, 3), (1, 0, 3, 2),
+    (2, 0, 1, 3), (3, 0, 1, 2), (2, 0, 3, 1), (3, 0, 2, 1),
+    (1, 2, 0, 3), (1, 3, 0, 2), (2, 1, 0, 3), (3, 1, 0, 2),
+    (2, 3, 0, 1), (3, 2, 0, 1), (1, 2, 3, 0), (1, 3, 2, 0),
+    (2, 1, 3, 0), (3, 1, 2, 0), (2, 3, 1, 0), (3, 2, 1, 0),
+)
 
 
 def u16(oracle: EmeraldOracle, addr: int) -> int:
@@ -102,6 +124,26 @@ def u32(oracle: EmeraldOracle, addr: int) -> int:
     )
 
 
+def party_mon(oracle: EmeraldOracle, slot: int) -> dict:
+    """Read the selected party mon without relying on a framebuffer label."""
+    base = GPLAYERPARTY + slot * PARTY_MON_SIZE
+    personality = u32(oracle, base)
+    ot_id = u32(oracle, base + 4)
+    key = personality ^ ot_id
+    type0 = SUBSTRUCT_ORDERS[personality % 24][0]
+    type0_base = base + 0x20 + type0 * 12
+    word0 = u32(oracle, type0_base) ^ key
+    word2 = u32(oracle, type0_base + 8) ^ key
+    return {
+        "species": word0 & 0xFFFF,
+        "friendship": (word2 >> 8) & 0xFF,
+        "personality": personality,
+        "level": oracle.read_u8(base + 0x54),
+        "hp": u16(oracle, base + 0x56),
+        "maxHp": u16(oracle, base + 0x58),
+    }
+
+
 def main() -> None:
     trace = json.loads(TRACE_PATH.read_text())
     oracle = EmeraldOracle(ROM_PATH, MAP_PATH, BOOTSTRAP_PATH)
@@ -109,7 +151,15 @@ def main() -> None:
 
     def snapshot(tick: int) -> dict:
         screen = u32(oracle, SFACTORY_SWAP_SCREEN)
-        result = {"tick": tick, "swapScreen": None, "swapTasks": []}
+        callback = u32(oracle, GMAIN + 4) & ~1
+        result = {
+            "tick": tick,
+            "callback2": CALLBACKS.get(callback, f"0x{callback:08x}"),
+            "specialVarResult": u16(oracle, GSPECIALVAR_RESULT),
+            "playerParty0": party_mon(oracle, 0),
+            "swapScreen": None,
+            "swapTasks": [],
+        }
         if screen:
             result["swapScreen"] = {
                 "address": f"0x{screen:08x}",
