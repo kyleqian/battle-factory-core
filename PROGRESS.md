@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 288 — Bounded worker (S7 turn 16 rung 3): **GREEN — complete FIRE_PUNCH cast**
+
+- **State:** canonical `21170--21405` is **236/236 exact**, every tick
+  captured. Rung 2b remains **123/123**, rung 2a **221/221**, rung 1
+  canonical/delayed **81/81** each, turn-16 verifier **233/233**, Tier-1
+  **1034/1034**, and build (**5.454 MB**) pass.
+- **Did:** source-extracted FIRE_PUNCH's shared ember and fist assets and
+  added confirmation-relative reducers for target red blend/restore, four
+  spiral embers, fist + hitsplat, target shake, seven spread embers with
+  RAM-backed stable OAM ordering, generic hit wobble/blink, and the visible
+  `142→75` HP drain. Committed dense `turn16-rung3.json`.
+- **Next:** resume S7 at canonical **21406**, FIRE_PUNCH's atomic opponent-HP
+  write. Secondary burn roll/message, BRN badge, burn residual, and turn-end
+  are also untouched; #38 remains parked.
+- **Notes:** implementation commit `acd37de`; no framebuffer/screenshots,
+  absolute-tick lookup, per-frame pixel/SHA table, trace branch,
+  coordinate/RGB fitting, or excluded capture.
+
+---
 ## 287 — Bounded worker (S7 turn 16 rung 2b): **GREEN — FAINT_ATTACK resolution tail**
 
 - **State:** canonical `21047--21169` is **123/123 exact**. Rung 2a remains
@@ -53,22 +72,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   first post-run verdict was a false usage-limit positive: its broad regex
   matched `--no-rate-limit` inside a late `ps` listing; no provider limit
   occurred, and the detector is now hardened.
-
----
-## 285 — Bounded worker (S7 turn 16 rung 1): **GREEN — cross-layer handoff**
-
-- **State:** canonical `20745--20825` and delayed `20775--20855` are both
-  **81/81 exact**. Rung 6 remains **195/195** each, rung 5 **144/144** each,
-  rung 4a **16/16** each; turn-16 verifier (233 captures), Tier-1
-  **1019/1019**, and build (**5.415 MB**) pass.
-- **Did:** made completed forced SEND OUT reset turn 15's stale choice and
-  return input to ordinary FIGHT state with MAGBY's real moveset; added
-  open/confirm-relative submenu, bounce-freeze, and FAINT_ATTACK kickoff
-  rendering plus contiguous canonical/+30 traces.
-- **Next:** supervisor chooses the next increment. Scoped remainder begins at
-  canonical **20826** / delayed **20856** (FAINT_ATTACK animation body);
-  do not reopen exact send-out or rung-1 windows.
-- **Notes:** implementation commit `de7e334`; both traces preserve their
-  122-segment prefixes verbatim and the oracle-relative SHA streams are
-  **0/81 mismatched**. No framebuffer assets, absolute-tick lookup, RGB
-  fitting, trace branch, or excluded capture.

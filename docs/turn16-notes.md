@@ -525,3 +525,45 @@ and delayed **81/81** each, `verify-turn16.ts` **233/233**, Tier-1
 **1028/1028**, build **5.432 MB**. No framebuffer assets, absolute-tick
 lookups, per-frame pixel tables, trace branches, coordinate/RGB fitting, or
 excluded captures were used.
+
+### 6.6 Rung 3 implementation: complete FIRE_PUNCH cast through the
+    pre-HP-write frame
+
+Canonical renders **21170-21405** are committed in `turn16-rung3.json` at
+**236/236 exact**, with every tick captured and the accepted rung-2b prefix
+preserved. The renderer enters this slice from the existing confirmation
+timeline at age 344; all FIRE_PUNCH state below is expressed as a local
+animation age, never as an absolute battle-tick condition.
+
+The implementation follows `Move_FIRE_PUNCH` and its named callbacks. A
+dev-time extractor now emits the hands-and-feet sheet used by the thrown fist
+and records FIRE_PUNCH's animation metadata on the shared small-ember sheet.
+Pure reducers reproduce:
+
+- `AnimTask_BlendBattleAnimPal`'s delay-2 red ramp and delay-0 restore;
+- four `TranslateSpriteInGrowingCircle` embers at source phases
+  `0/64/128/196`, radius `60→2`, angle step 9, and the source 4-tick
+  three-frame cycle;
+- the thrown fist, generic hitsplat, `AnimTask_ShakeMon`, and mon-BG
+  handoff at impact;
+- `FireSpreadEffect`'s seven literal fixed-point velocity pairs for 40
+  ticks, including stable `SortSprites` Y ordering. A direct RAM probe pinned
+  the inherited spread-order seed as slots `8,7,13,12,11,10,9`; this is one
+  allocator-state constant, not a per-frame ordering table;
+- the already-generalized post-hit healthbox wobble/target blink, followed by
+  the visible HP-bar drain from `142` to `75`.
+
+Sprite callback identities and live positions/offsets/lifetimes were checked
+with direct RAM reads. Software compositing also honors opaque OAM coverage:
+an affine sprite pixel whose resolved color equals the background still masks
+a lower-priority ember, matching hardware ordering without inspecting any
+oracle framebuffer at runtime.
+
+The endpoint is intentionally strict: **21405** is the last visible drain
+frame; **21406**, the atomic opponent-HP write, is the first unresolved tick.
+The move's secondary burn roll/message, BRN badge, burn residual, and turn-end
+remain outside this increment. Regression verdict: rung 2b **123/123**, rung
+2a **221/221**, rung 1 canonical/delayed **81/81** each,
+`verify-turn16.ts` **233/233**, Tier-1 **1034/1034**, and build
+**5.454 MB**. No excluded captures or forbidden pixel/trace mechanism was
+used.

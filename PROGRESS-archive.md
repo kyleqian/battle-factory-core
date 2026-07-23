@@ -11885,3 +11885,16 @@ turn-15 FLY strike/faint-text wiring; their full contemporaneous text remains
 in git history immediately before corrective commits `d5ac217` and `9942a8d`.
 
 ---
+## 285 — Bounded worker (S7 turn 16 rung 1): **GREEN — cross-layer handoff**
+
+- **State:** canonical `20745--20825` and delayed `20775--20855` both
+  **81/81 exact**; turn-16 verifier **233/233**, Tier-1 **1019/1019**, and
+  build (**5.415 MB**) passed.
+- **Did:** reset stale turn-15 choice after forced SEND OUT, restored MAGBY's
+  real moveset, and added confirmation-relative submenu, bounce-freeze, and
+  FAINT_ATTACK kickoff rendering with canonical/+30 traces.
+- **Next at archive time:** canonical **20826** / delayed **20856**.
+- **Notes:** implementation commit `de7e334`; no forbidden pixel or
+  absolute-tick mechanism.
+
+---

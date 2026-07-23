@@ -385,6 +385,12 @@ slide-in → Sitrus proc → settled menu vs PIDGEOTTO) is in flight with
 all formulas/assets banked (`docs/faint-switch-notes.md` §3-§8).
 Remaining known residual classes: the isolated redraw-extremum ticks
 (4934, 5927 — same documented class), ISSUES #23 (parked).
+**Turn-16 FIRE_PUNCH cast landed (2026-07-23 bounded worker):**
+`turn16-rung3.json` is **236/236 exact** for every canonical tick
+`21170-21405`, source/RAM-derived through red blend, four spiral embers,
+fist/hitsplat/shake, seven-ember spread, generic hit response, and visible
+HP drain. Exact predecessor rungs remain green; the next boundary is the
+atomic opponent-HP write at **21406**. See `docs/turn16-notes.md` §6.6.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin
