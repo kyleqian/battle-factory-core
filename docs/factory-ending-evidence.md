@@ -8,6 +8,34 @@ Scene OFF traces. The reproducible artifact is
 `tools/extract/extract-factory-ending-policy.ts` and integrity-tested in
 `tests/factoryEndingPolicy.test.ts`.
 
+## Controller and presentation boundaries
+
+The terminal room script writes `challengeStatus` **before** the singles
+`warp MAP_BATTLE_FRONTIER_BATTLE_FACTORY_LOBBY, 4, 8`, then `waitstate`s
+(`BattleFactoryBattleRoom/scripts.inc:222-227`). The lobby's warp script turns
+the player north; only its subsequent `OnFrame` status read selects `WON` or
+`LOST` (`BattleFactoryLobby/scripts.inc:6-20`; `frontier_util.c:792-816`).
+That gives the implementation a source-relative seam: battle teardown → map
+load/warp settle → lobby status dispatch. There is no source support for
+reusing battle chrome or for a terminal-only static screen.
+
+Message gates are also explicit and must remain relative to the preceding
+message/map handoff, never to a battle number or an absolute tick:
+
+- `MSGBOX_DEFAULT` expands to `message`, `waitmessage`, then
+  `waitbuttonpress` (`data/scripts/std_msgbox.inc:18-22`): the regular
+  seventh-win (or Factory Head) congrats and BP-award messages are A/B-gated
+  only after their printer completes.
+- `MSGBOX_GETPOINTS` is `message` → Battle Point fanfare → `waitfanfare` →
+  `waitmessage` (`:30-35`); it is distinct from a default message and is not
+  followed by its own `waitbuttonpress` in that standard script.
+- The loss return/save and both branches' exchange/save text use plain
+  `message` + `waitmessage`; after that scripted completion the save sequence
+  runs without a new terminal results screen.
+- The shared record prompt is plain `message` + `waitmessage`, then
+  `multichoicedefault 20, 8, MULTI_YESNO, 1, FALSE`: default index **1**;
+  its choice/B dispatch is the next player-input gate.
+
 ## Loss ending
 
 `BattleFactoryBattleRoom/scripts.inc:74-90` calls `DoSpecialTrainerBattle`.
@@ -35,12 +63,14 @@ script increments `FRONTIER_DATA_BATTLE_NUM`; value 7 selects status
 `CHALLENGE_STATUS_WON` (3) and the same lobby warp.
 
 The lobby's status-3 route (`BattleFactoryLobby/scripts.inc:40-63`) is the
-round-summary UI: it locks, chooses the normal seven-wins congratulation or
-the Factory Head variant, prints the BP award text, calls `frontier_givepoints`
-and its `MSGBOX_GETPOINTS` result, then restores the personal party and saves
-before the optional record prompt. For a first Level-50 singles round the
-source table awards 3 BP; the extractor preserves all 30 Factory-singles rows,
-the 10-BP Frontier Brain bonus, and the 9999 cap.
+round-summary UI in this order: it locks, chooses the normal seven-wins
+congratulation or the Factory Head variant (a default/A-B-gated message),
+prints the separately A/B-gated BP-award text, calls `frontier_givepoints`,
+waits through the distinct `MSGBOX_GETPOINTS` result/fanfare, then prints the
+exchange/save text, restores the personal party, saves, and finally reaches
+the optional record prompt. For a first Level-50 singles round the source
+table awards 3 BP; the extractor preserves all 30 Factory-singles rows, the
+10-BP Frontier Brain bonus, and the 9999 cap.
 
 ## Assets and remaining oracle work
 
@@ -63,4 +93,25 @@ The precise remaining OFF probes are:
 
 These need controlled script/RAM staging or an approved deterministic
 scenario; replaying six prior battles is neither required nor evidence of the
-endpoint mechanism.
+endpoint mechanism. The currently committed reproducibility checkpoint is:
+
+```sh
+node --experimental-strip-types tools/extract/extract-factory-ending-policy.ts
+npx vitest run tests/factoryEndingPolicy.test.ts --pool=forks
+```
+
+For the later RAM pass, use the OFF-profile generic reader through the required
+wrapper (with a new staging trace/spec, never a stale output):
+
+```sh
+scratch_dir=$(mktemp -d)
+python3 tools/run-mgba-probe.py "$scratch_dir/ending.json" -- \
+  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  tools/probe/ram-probe.py <terminal-off-spec.json> "$scratch_dir/ending.json"
+```
+
+The terminal spec must watch `gSaveBlock2Ptr+0xCA8` (challenge status),
+`+0xCB2` (battle number), `+0xCDC` (active streak flags), `+0xDE2`
+(Factory singles Level-50 streak), `+0xDF6` (rent count), and `+0xEB8`
+(Battle Points); it must start from a deliberately staged terminal handoff.
+No such staged OFF trace is claimed or fabricated by this checkpoint.
