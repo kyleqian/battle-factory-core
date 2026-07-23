@@ -525,9 +525,15 @@ live 101-callback H-slide-wobble and Lv50 91/91 healthbox. S8 remains open;
 **170/170 exact**. The independently queued `Go! ONIX!` printer stays
 opponent-handoff-relative, while Brendan, player summary, ball/open/
 particles, ONIX materialize/back animation, and the Lv50 117/117 healthbox
-reuse Battle 1 through one inherited visual delay. The next bounded frame
-is the blank action-menu handoff at 32850. That menu, swap YES, and battles
-3-7 remain open.
+reuse Battle 1 through one inherited visual delay.
+`battle2-action-menu-dense.json` now captures every canonical frame
+32848-33030 at **183/183 exact**, with a live KABUTO 91/91 vs. healed ONIX
+117/117 field and held FIGHT menu. Exact replay corrected the earlier
+boundary ledger: ONIX's inherited shake finishes 32850-32854, `Go! ONIX!`
+holds through 32894, the six clear frames are 32895-32900, and the atomic
+input-ready menu begins 32901. The endpoint RNG is 3530724670 with
+controller exec flags 1. S8 remains open for Battle 2 actions/turns, swap
+YES, and battles 3-7.
 **Frame cap raised (user decision #2, 2026-07-19 ~17:00):** §15's scout
 proved the WIN unreachable under the 20000-frame cap for ANY plausible
 line (best verified line: Onix faints at 19147 with Murkrow untouched at
@@ -678,11 +684,12 @@ The supervisor independently reviewed encounter preservation and the shared
 trainer/text/cursor selection, then reverified the 251/251 new trace,
 249/249 + 256/256 regressions, all 1098 Tier-1 tests, and build.
 **S8 opening evidence checkpoint (2026-07-23, supervisor-accepted; no engine change):**
-the canonical segments 154--155 boundary ledger is recorded in
+the canonical segments 154--155 boundary ledger was recorded in
 `docs/battle2-opening-notes.md`: JENSON's accepted A at 32531 hands off at
 32570; KABUTO uses the shared ball/healthbox mechanics but species-specific
-`ANIM_H_SLIDE_WOBBLE`; ONIX's inherited throw anchor is 32682; the six-tick
-blank menu is 32850--32855 and the input-ready atomic menu starts 32856.
+`ANIM_H_SLIDE_WOBBLE`; ONIX's inherited throw anchor is 32682. Its earlier
+32850/32856 menu-boundary claim is superseded by the every-frame checkpoint
+above: clear 32895-32900, atomic input-ready reveal 32901.
 Frame 33030 is the held KABUTO 91/91 vs ONIX 117/117 FIGHT-menu endpoint.
 Sparse app diagnostics rank only live-render gaps (max 11,210 px at 32831),
 not an acceptance claim.  S8 remains `[ ]`.

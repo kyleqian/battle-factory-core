@@ -68,20 +68,15 @@ ONIX/MAGBY/BAYLEEF HP tuple `[117, 138, 153]`, and ONIX's real move IDs
 `[157, 20, 225, 201]` into `EngineState`; the FIGHT submenu no longer has to
 fall back to Battle 1's unrelated fixed setup.
 
-## Exact remaining render work
+## Exact opening status
 
-The room dismissal, transition, and trainer intro through canonical 32530
-are exact.
-To reach 33030/33031 without forbidden framebuffer harvests, the live
-renderer still needs:
-
-1. encounter-parameterized KABUTO send-out animation/healthbox;
-2. press-relative ONIX send-out timing; and
-3. a composed Battle 2 action-menu base, replacing the Battle 1-only
-   full-frame Grovyle idle base for this encounter.
-
-Those dynamic spans must then be committed in capture-cap-sized dense traces.
-Only a separately proven byte-static hold may be thinned.
+The room dismissal, transition, trainer intro, both send-outs, and first
+action-menu hold are now exact through canonical 33030. The overlapping dense
+traces are `battle2-intro-dense.json` (251/251),
+`battle2-kabuto-sendout-dense.json` (151/151),
+`battle2-player-sendout-dense.json` (170/170), and
+`battle2-action-menu-dense.json` (183/183). The latter captures every frame
+32848-33030; no dynamic span is thinned.
 
 ## Fisherman trainer intro
 
@@ -129,7 +124,7 @@ pixel-exactness.
 | 32589--32604; 32605--32706 | KABUTO materializes at handoff+19.  At +35 its species entrance starts: `sMonFrontAnimIdsTable[SPECIES_KABUTO-1] = ANIM_H_SLIDE_WOBBLE` (`pokemon.c:1546`; `pokemon_animation.c:1803-1829`), whose `data[2]` runs 0..100 before reset.  It overlaps later player work; it is not a blocking substitute for a generic settled sprite. | Ball-affine/materialize path is reusable parameterized by KABUTO asset; KABUTO's 101-callback H-slide-wobble needs a live species-animation component (not Grovyle's V-stretch table). |
 | 32603--32625 | Opponent healthbox begins at handoff+33, x offset -110 then +5 each tick, settling at +55.  It is the singles opponent healthbox created/filled by `BattleInitAllSprites` / `CreateBattlerHealthboxSprites` and `InitBattlerHealthboxCoords` (`battle_gfx_sfx_util.c:831-913`; `battle_interface.c:869,1078-1081`). | Reuse slide/chrome unchanged, parameterized as **KABUTO Lv50, 91/91 HP** (species 140); party summary exit remains shared. |
 | queued at 32682; visual 32727--32849 | Player `IntroTrainerBallThrow` is queued at handoff+112 (`battle_controller_player.c:2931-3017`), but the already-created player controller retains a 45-callback visual delay. Brendan's first pose is 32727; ball arc 32760, affine spin 32768, open 32805, ONIX materialize 32806, and healthbox slide 32820--32842. The independently queued `Go! ONIX!` printer does not share this delay. | Reuse the entire Battle-1 player throw/ONIX materialize/healthbox visual path through the inherited +45 relative clock; parameters are **ONIX Lv50, 117/117 HP**. |
-| 32850--32855; 32856 onward | The message box is blank for six ticks, then `PlayerHandleChooseAction`'s off-screen BG0 composition is revealed atomically by `HandleChooseActionAfterDma3` (`battle_controller_player.c:2565-2573`); cursor is the BG0 tile at FIGHT.  This is input-ready at the reveal and remains so through 33030. | Requires a new live composed Battle-2 action-menu base: the existing Battle-1 harvested Grovyle base cannot be reused.  Window/cursor/text primitives may be reused parameterized by ONIX/KABUTO. |
+| 32850--32854; 32855--32894; 32895--32900; 32901 onward | **Corrected by exact replay:** ONIX finishes its inherited `BACK_ANIM_V_SHAKE`, then the settled `Go! ONIX!` frame holds through the first on-demand RNG call. The message window clears for six frames only at 32895-32900. `PlayerHandleChooseAction`'s off-screen BG0 composition is revealed atomically by `HandleChooseActionAfterDma3` (`battle_controller_player.c:2565-2573`) at 32901; cursor is the BG0 tile at FIGHT and input is ready. | Live KABUTO/ONIX sprites and 91/91 + 117/117 healthboxes are composed from encounter state. Only the shared y>=112 action-window chrome is reused; the Battle-1 Grovyle full-frame base is never drawn. |
 
 Fresh lightweight RAM replay over 32530--33031 reads `gMain.inBattle = 2`
 throughout, so `main.c`'s ordinary VBlank `Random()` gate is closed.  It also
@@ -141,6 +136,27 @@ is flat at 812598902 through 32893, then advances on demand at 32894 (+1),
 (`battle_main.c:3841-4168`), not per-VBlank advancement.  Endpoint 33030
 therefore has RNG 3530724670, `gBattleControllerExecFlags = 1`, and the same
 full-HP battlers.  This preserves the earlier 32020--32250 setup ledger.
+
+### Boundary correction and dense action-menu checkpoint
+
+A fresh replay of the exact `battle1-winline-b-swap.json` segments disproved
+this note's earlier coarse 32850/32856 menu boundary. The earlier sparse
+probe had mistaken the first post-send-out frame for the controller clear.
+Every-frame capture establishes:
+
+- 32850-32854: ONIX's inherited back-sprite shake tail;
+- 32855-32894: settled `Go! ONIX!` hold;
+- 32895-32900: six clear-window frames; and
+- 32901-33030: atomic, input-ready FIGHT menu and live idle bounce.
+
+`battle2-action-menu-dense.json` captures 32848-33030 and is **183/183
+exact**. The field is composed from extracted battle BG, KABUTO/ONIX mon
+sprites, and the healthbox compositors (KABUTO Lv50 91/91; ONIX Lv50
+117/117). The shared bottom action-window chrome is reused as chrome only;
+no Grovyle/full-frame menu base, per-tick framebuffer, absolute canonical
+tick lookup, fitting, or capture thinning is used. Pure tests pin the menu
+model/boundaries and the on-demand +1/+2/+5 RNG calls, ending at 3530724670
+with controller exec flags 1.
 
 ## Player send-out dense checkpoint
 

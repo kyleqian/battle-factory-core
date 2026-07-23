@@ -1,3 +1,23 @@
+## 310 — S8 Battle 2 KABUTO opponent send-out: **GREEN — 32570-32681 exact**
+
+- **State:** `battle2-kabuto-sendout-dense.json` is **151/151 exact**
+  across canonical **32531-32681**, including the assigned **112/112**
+  frames 32570-32681. Battle 2 intro remains **251/251**; Battle 1 send-out
+  remains its accepted **255/256** (#18 only). Tier-1 is **1106/1106** and
+  build passes (**5.517 MB**).
+- **Did:** encounter-parameterized trainer exit, ball/particles, affine
+  materialize, summary exit, and healthbox slide; added KABUTO's real
+  two-frame 101-callback H-slide-wobble, tint ownership, and literal GBA
+  sine table. Pinned handoff, ball/materialize/hide, 91/91 Lv50 healthbox,
+  and species-animation boundaries.
+- **Next:** resume S8 at canonical **32682** with Brendan/player ball, ONIX
+  materialization/player healthbox, then the Battle 2 action menu. S8
+  remains `[ ]`.
+- **Notes:** JENSON's particle callback stall is encounter-relative +1;
+  KABUTO healthbox first appears at handoff+32 at dx=-110, holds one render,
+  then advances +5. No harvest, absolute tick lookup, fitting, or thinning.
+
+---
 ## 306 — Supervisor-accepted S8 Battle 2 trainer intro: **GREEN — 32280-32530 exact**
 
 - **State:** canonical **32280-32530** is **251/251 exact**, every frame
