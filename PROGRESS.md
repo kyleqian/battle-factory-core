@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 298 — Bounded worker (S7 turn 17 rung 8): **GREEN — DESTIN loss quote endpoint exact**
+## 298 — Supervisor-accepted S7 completion: **GREEN — Battle 1 win endpoint exact**
 
 - **State:** canonical `23229--23601` is gaplessly **373/373 exact** in two
   adjacent dense traces (**255/255 + 118/118**). Rung 7b remains **147/147**,
@@ -14,15 +14,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the frozen outcome text/arrow through the three-frame settled pause, then
   switched to source-expanded Easy Chat loss text with exact glyph cadence,
   real `PAUSE_UNTIL_PRESS` gate, no cursor, and stable hold through 23601.
-- **Next:** supervisor review of the S7 completion proposal. If accepted,
-  S8 begins only after tick 23601 with the loss-quote dismiss and post-battle
-  swap/round flow. Parked/unrelated issues, including #38, are untouched.
+- **Next:** begin S8 only after tick **23601** with the loss-quote dismiss
+  and post-battle swap/round flow. Parked/unrelated issues, including #38,
+  remain untouched.
 - **Notes:** implementation begins at `366234e`; a final fresh printer-RAM
   audit distinguishes glyph settle at 23279 from the real WAIT gate at
   23280. All timing is relative to the stored second outcome-dismiss edge
   and shifts under delayed-edge Tier-1 coverage. No framebuffer/screenshot
   asset, absolute-tick/trace branch, per-frame table, fitted geometry/color,
-  excluded capture, or thinning.
+  excluded capture, or thinning. Supervisor independently reverified both
+  dense windows, predecessor, turn-17 verifier, full Tier-1 suite, and
+  production build; ROADMAP S7 marked complete.
 
 ---
 ## 297 — Bounded worker (S7 turn 17 rung 7): **GREEN — outcome message through frozen second dismiss**

@@ -298,7 +298,7 @@ send-out window 1300-1560 (`docs/battle-scene-notes.md` §7) and player
 send-out + action menu 1560-1810 (`docs/battle-menu-notes.md`), then the
 S6 acceptance trace end-to-end.
 
-### [~] S7 — Turn resolution: the anchor round's first battle exact
+### [x] S7 — Turn resolution: the anchor round's first battle exact
 Move selection UI, turn order, damage, accuracy/crit rolls, HP-bar drain
 timing, battle text, faint/switch/win — with move animations for the
 movesets actually in play, added until full capture windows pass.
@@ -476,17 +476,17 @@ verifier passes **245/245**, and Tier-1/build are green, all independently
 reverified by the supervisor. See `docs/turn17-notes.md` §12. S7 remains
 `[~]`; tick 23229 onward, the trainer transition/loss quote, and post-battle
 flow remain open.
-**Turn-17 rung 8 worker completion proposal (2026-07-23; supervisor review
-pending):** `turn17-rung8a.json` and `turn17-rung8b.json` gaplessly cover
+**Turn-17 rung 8 accepted; S7 complete (supervisor, 2026-07-23):**
+`turn17-rung8a.json` and `turn17-rung8b.json` gaplessly cover
 every canonical tick `23229-23601` at **255/255** and **118/118 exact**.
 The source-derived DESTIN slide, old-message ownership through the pause,
 loss-quote printer, real no-arrow input wait, and stable endpoint are all
 Tier-1 pinned relative to the stored second dismiss edge. Rung 7b remains
 **147/147**, the Turn-17 verifier passes **245/245**, and Tier-1/build are
-green. This worker proposes S7 completion because its stated committed-
-trace and Tier-1 acceptance is now met, but deliberately leaves S7 `[~]`
-for the supervisor's decision. Input after 23601 and post-battle flow are
-S8. See `docs/turn17-notes.md` §13.
+green, all independently reverified by the supervisor. S7's committed-trace
+and Tier-1 acceptance is met; parked #38 explicitly does not block canonical
+acceptance. Input after 23601 and post-battle flow are S8. See
+`docs/turn17-notes.md` §13.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin
