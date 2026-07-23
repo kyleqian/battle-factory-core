@@ -175,3 +175,48 @@ default.
 Nothing at 32850 or later belongs to this checkpoint. No capture thinning,
 framebuffer harvest, absolute canonical-tick lookup, or coordinate/RGB
 fitting is used.
+
+### Independent RAM audit — player-summary eva phase boundary (2026-07-23)
+
+**Verdict: `SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE = 14` is correct.**  This
+is a real one-display-frame register-visibility difference, not a different
+summary sprite clock.  A fresh replay of the committed every-frame Battle-2
+trace scanned all task slots/callbacks, then read the live task, summary
+sprites, GPU register buffer, waiting-list, and hardware IO around the
+boundary.  The player summary is task slot 0 throughout: function
+`0x08073e09` (`Task_HidePartyStatusSummary_BattleStart_1`), bar slot 5, and
+task icon ids `[59,58,57,56,55,54]`.  Bar and icon callbacks are respectively
+`0x08074091` (`SpriteCB_StatusSummaryBar_Exit`) and `0x08074159`
+(`SpriteCB_StatusSummaryBalls_Exit`) while live.
+
+| canonical tick | task `data[11]` | `tBlend` (`data[15]`) | bar `x2` | icon slots 54..59 `x2` | `BLDCNT` / hardware `BLDALPHA` |
+| --- | ---: | ---: | ---: | --- | --- |
+| 32740 | 14 | 9 | -28 | `[0,0,0,0,-84,-198]` | `0x3f40` / `0x0709` |
+| **32741** | **15** | **8** | **-30** | **`[0,0,0,-3,-108,-198]`** | `0x3f40` / **`0x0808`** |
+| 32742 | 16 | 8 | -32 | `[0,0,0,-9,-135,-198]` | `0x3f40` / `0x0808` |
+
+The mapped Battle-1 visual state is exactly 45 ticks earlier: 1587, 1588,
+1589 respectively.  Its task pointer, `data[11]`, `tBlend`, summary-bar
+`x2`, and every listed icon `x2` are byte-for-byte the same as the three rows
+above.  Crucially, its hardware-alpha sequence is `0x0709`, **`0x0709`**,
+`0x0808`: at Battle-1 **1588** (the comparison requested for canonical
+32741), the software GPU buffer already holds `0x0808` and its waiting list
+contains `0x52` (`REG_OFFSET_BLDALPHA`), while hardware still shows `0x0709`.
+At Battle-2 32741 both buffer and hardware are `0x0808` and the waiting list
+is empty.  The next callback reconverges at Battle-1 1589 / Battle-2 32742.
+
+This follows the source without inventing a separate sprite phase.
+`Task_HidePartyStatusSummary_BattleStart_1`
+(`battle_interface.c:1727-1738`) increments `data[11]`, decrements `tBlend`
+on the old-even callbacks, and calls `SetGpuReg(BLDALPHA, blend(eb, 16-eb))`.
+`BattleMainCB2` runs `AnimateSprites()` before `RunTasks()`
+(`battle_main.c:1863-1869`), so the bar/icon translations advance on their
+ordinary shared callback regardless of this task write.  Outside VBlank,
+`SetGpuReg` buffers a register and queues its offset (`gpu_regs.c:66-92`);
+the VBlank interrupt later drains that list (`main.c:340-370`).  The Battle-1
+1588 write took that buffered path, whereas Battle-2 32741 ran during the
+immediate VBlank-safe interval.  Therefore only the coefficient exposed to
+that display frame advances one step; positions never diverge, and the next
+VBlank restores the common sequence.  This is exactly the narrow `-1` eva
+offset at callback age 14 used by `playerSummaryEvaOffset`, not a
+canonical-tick or framebuffer lookup.

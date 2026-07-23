@@ -16,6 +16,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   thrown-ball arc/spin/open/hide, ONIX materialize/back animation, particles,
   and the 117/117 healthbox all reuse the Battle-1 mechanisms at visual
   delay +45; callback-age 14 advances only the summary eva coefficient.
+- **Audit:** independent live RAM/IO replay now proves that sole exception:
+  32741 has the shared task/sprite state but immediate `BLDALPHA=0x0808`;
+  mapped Battle-1 1588 has its `0x0808` write buffered behind live `0x0709`,
+  reconverging at the next callback. See `battle2-opening-notes.md`.
 - **Next:** resume at **32850**, the first six-tick blank action-menu frame,
   then compose the Battle 2 ONIX/KABUTO action menu. Do not reopen the exact
   send-out span. S8 remains `[ ]`.
