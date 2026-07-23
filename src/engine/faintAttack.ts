@@ -36,12 +36,13 @@ export const FIRE_PUNCH_CLEAR_CURRENT_MOVE_AGE = 334;
 export const FIRE_PUNCH_OWNERSHIP_AGE = 335;
 export const FIRE_PUNCH_ACCURACY_ROLL_AGE = 340;
 export const FIRE_PUNCH_TEXT_AGE = 342;
+/** Existing FIRE_PUNCH reducer epoch; its first 20 ages are text/controller lead-in. */
+export const FIRE_PUNCH_REDUCER_EPOCH_AGE = 344;
 /**
- * Both observed occurrences reach the next move's first renderer-owned
- * VBlank at this confirmation-relative age.  The shorter turn-17 HP drain
- * leaves a longer script/text lead-in; it does not move this boundary.
+ * Fresh turn-17 controller/RAM evidence: CONTROLLER_MOVEANIMATION is queued
+ * at age 362 and `gAnimScriptActive` first owns the displayed state at 364.
  */
-export const FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE = 344;
+export const TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE = 364;
 
 const HIT_HEALTHBOX_WOBBLE_TICKS = 20;
 const HIT_TARGET_BLINK_PERIOD = 8;
@@ -59,7 +60,12 @@ export interface FaintAttackResolutionState {
   currentMove: "FAINT_ATTACK" | "FIRE_PUNCH" | null;
   faintAttackSecondaryRollConsumed: boolean;
   firePunchAccuracyRollConsumed: boolean;
-  rngCallsConsumed: 0 | 1 | 2;
+  firePunchPpReduced: boolean;
+  firePunchCriticalRollConsumed: boolean;
+  firePunchDamageRollConsumed: boolean;
+  firePunchMoveAnimationQueued: boolean;
+  firePunchAnimationOwned: boolean;
+  rngCallsConsumed: 0 | 1 | 2 | 3 | 4;
   message: "FAINT_ATTACK" | "FIRE_PUNCH";
 }
 
@@ -78,6 +84,11 @@ export interface FaintAttackResolutionTiming {
   firePunchOwnershipAge: number;
   firePunchAccuracyRollAge: number;
   firePunchTextAge: number;
+  firePunchPpWriteAge: number;
+  firePunchCriticalRollAge: number;
+  firePunchDamageRollAge: number;
+  firePunchMoveAnimationCommandAge: number;
+  firePunchAnimationOwnedAge: number;
 }
 
 /**
@@ -98,6 +109,11 @@ export function faintAttackResolutionTiming(
     firePunchOwnershipAge: hpCommitAge + 14,
     firePunchAccuracyRollAge: hpCommitAge + 19,
     firePunchTextAge: hpCommitAge + 21,
+    firePunchPpWriteAge: hpCommitAge + 43,
+    firePunchCriticalRollAge: hpCommitAge + 44,
+    firePunchDamageRollAge: hpCommitAge + 47,
+    firePunchMoveAnimationCommandAge: hpCommitAge + 48,
+    firePunchAnimationOwnedAge: hpCommitAge + 50,
   };
 }
 
@@ -186,6 +202,8 @@ export function faintAttackResolutionState(
   const firePunchOwned = age >= timing.firePunchOwnershipAge;
   const secondaryRollConsumed = age >= timing.secondaryRollAge;
   const accuracyRollConsumed = age >= timing.firePunchAccuracyRollAge;
+  const criticalRollConsumed = age >= timing.firePunchCriticalRollAge;
+  const damageRollConsumed = age >= timing.firePunchDamageRollAge;
 
   return {
     displayedHp: Math.max(hp.endHp, hp.startHp - drained),
@@ -208,7 +226,21 @@ export function faintAttackResolutionState(
           : "FAINT_ATTACK",
     faintAttackSecondaryRollConsumed: secondaryRollConsumed,
     firePunchAccuracyRollConsumed: accuracyRollConsumed,
-    rngCallsConsumed: accuracyRollConsumed ? 2 : secondaryRollConsumed ? 1 : 0,
+    firePunchPpReduced: age >= timing.firePunchPpWriteAge,
+    firePunchCriticalRollConsumed: criticalRollConsumed,
+    firePunchDamageRollConsumed: damageRollConsumed,
+    firePunchMoveAnimationQueued: age >= timing.firePunchMoveAnimationCommandAge,
+    firePunchAnimationOwned: age >= timing.firePunchAnimationOwnedAge,
+    rngCallsConsumed:
+      damageRollConsumed
+        ? 4
+        : criticalRollConsumed
+          ? 3
+          : accuracyRollConsumed
+            ? 2
+            : secondaryRollConsumed
+              ? 1
+              : 0,
     message: age >= timing.firePunchTextAge ? "FIRE_PUNCH" : "FAINT_ATTACK",
   };
 }

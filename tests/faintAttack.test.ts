@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
+  FIRE_PUNCH_REDUCER_EPOCH_AGE,
+  TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
   faintAttackAttackerEva,
   faintAttackAttackerOffset,
   faintAttackBgState,
@@ -119,8 +120,14 @@ describe("FAINT_ATTACK pure animation reducers", () => {
       firePunchOwnershipAge: 328,
       firePunchAccuracyRollAge: 333,
       firePunchTextAge: 335,
+      firePunchPpWriteAge: 357,
+      firePunchCriticalRollAge: 358,
+      firePunchDamageRollAge: 361,
+      firePunchMoveAnimationCommandAge: 362,
+      firePunchAnimationOwnedAge: 364,
     });
-    expect(FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE).toBe(344);
+    expect(FIRE_PUNCH_REDUCER_EPOCH_AGE).toBe(344);
+    expect(TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE).toBe(364);
   });
 
   it("pins the silent chance-0 secondary roll and FIRE_PUNCH accuracy roll to the RAM RNG stream", () => {
@@ -189,5 +196,38 @@ describe("FAINT_ATTACK pure animation reducers", () => {
     expect(faintAttackResolutionState(333, hp).rngCallsConsumed).toBe(2);
     expect(faintAttackResolutionState(334, hp).message).toBe("FAINT_ATTACK");
     expect(faintAttackResolutionState(335, hp).message).toBe("FIRE_PUNCH");
+    expect(faintAttackResolutionState(356, hp)).toMatchObject({
+      firePunchPpReduced: false,
+      firePunchCriticalRollConsumed: false,
+      firePunchDamageRollConsumed: false,
+      firePunchMoveAnimationQueued: false,
+      firePunchAnimationOwned: false,
+      rngCallsConsumed: 2,
+    });
+    expect(faintAttackResolutionState(357, hp).firePunchPpReduced).toBe(true);
+    expect(faintAttackResolutionState(358, hp)).toMatchObject({
+      firePunchCriticalRollConsumed: true,
+      rngCallsConsumed: 3,
+    });
+    expect(faintAttackResolutionState(361, hp)).toMatchObject({
+      firePunchDamageRollConsumed: true,
+      rngCallsConsumed: 4,
+    });
+    expect(faintAttackResolutionState(362, hp).firePunchMoveAnimationQueued).toBe(true);
+    expect(faintAttackResolutionState(363, hp).firePunchAnimationOwned).toBe(false);
+    expect(faintAttackResolutionState(364, hp).firePunchAnimationOwned).toBe(true);
+  });
+
+  it("pins turn 17's four post-hit RNG transitions through FIRE_PUNCH damage", () => {
+    const afterSecondary = advanceRngValue(1115590820);
+    const afterAccuracy = advanceRngValue(afterSecondary);
+    const afterCritical = advanceRngValue(afterAccuracy);
+    const afterDamage = advanceRngValue(afterCritical);
+    expect([afterSecondary, afterAccuracy, afterCritical, afterDamage]).toEqual([
+      1657663047,
+      573732526,
+      3896110217,
+      1102173384,
+    ]);
   });
 });

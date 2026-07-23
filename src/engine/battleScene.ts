@@ -547,7 +547,8 @@ import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbo
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
-  FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
+  FIRE_PUNCH_REDUCER_EPOCH_AGE,
+  TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
   FIRE_PUNCH_TEXT_AGE,
   faintAttackAttackerEva,
   faintAttackAttackerOffset,
@@ -12099,8 +12100,8 @@ function turn16PartyElapsedAtTick(partyElapsed: number, t: number, anchorTick: n
   return partyElapsed - (t - anchorTick);
 }
 
-/** FIRE_PUNCH's first owned frame is faint-attack kickoff age 344. */
-const TURN16_FIRE_PUNCH_FIRST_OWNED_AGE = FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE;
+/** Existing FIRE_PUNCH reducer epoch, including its controller/text lead-in. */
+const TURN16_FIRE_PUNCH_FIRST_OWNED_AGE = FIRE_PUNCH_REDUCER_EPOCH_AGE;
 /** Turn-16 confirm to its fresh turn-17 action-menu redraw. */
 export const TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY =
   TURN16_FAINT_ATTACK_ANIM_DELAY
@@ -12246,7 +12247,10 @@ function drawTurn16PostSwitchField(
     drawOpponentHealthboxWobble(
       fb,
       resolution.healthboxY2,
-      murkrowHealthboxContentForHp(resolution.displayedHp, resolution.healthboxStatus),
+      murkrowHealthboxContentForHp(
+        explicitOpponent?.hp ?? resolution.displayedHp,
+        explicitOpponent?.status ?? resolution.healthboxStatus,
+      ),
     );
   } else if (faintAttackAge !== null) {
     const eva = faintAttackAttackerEva(faintAttackAge);
@@ -12350,7 +12354,7 @@ function drawTurn16FightSubmenuWindow(
     const resolutionAge =
       animationAge !== null
       && animationAge >= 0
-      && animationAge < FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE
+      && animationAge < TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE
         ? animationAge
         : null;
     const targetHp = { startHp: 79, endHp: 27 };
