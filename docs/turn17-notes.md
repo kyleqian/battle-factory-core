@@ -474,3 +474,58 @@ turn16 rung 5 **175/175**, turn16 verifier **233/233**, turn17 verifier all
 **245** checks, Tier-1 **1049/1049**, and production build **5.457 MB**.
 No absolute battle tick, framebuffer/screenshot asset, per-frame pixel/SHA
 table, trace branch, coordinate/RGB fitting, or excluded capture was added.
+
+## 8. Engine rung 3: FAINT_ATTACK resolution through the proven FIRE_PUNCH animation boundary
+
+Canonical renders **22075-22217** are implemented in
+`turn17-rung3.json` at **143/143 exact**, every tick captured. The trace
+retains rung 2's input stream verbatim and only appends input-free frames.
+
+The shared FAINT_ATTACK tail is now damage-parameterized instead of
+inheriting turn 16's 59-point drain length. With turn 17's `79→27` hit,
+the visible bar begins draining at kickoff age 261, reaches 27 at age 312,
+and the atomic battle-HP write follows at age 314 (**tick 22168**).
+Source-command spacing from `BattleScript_EffectHit` plus the fresh RAM
+replay then gives:
+
+| age | tick | state |
+|---:|---:|---|
+| 319 | 22173 | chance-0 FAINT_ATTACK secondary roll; RNG `1115590820→1657663047` |
+| 326 | 22180 | target becomes MURKROW |
+| 327 | 22181 | `gCurrentMove` clears |
+| 328 | 22182 | MAGBY owns the turn; `gCurrentMove=FIRE_PUNCH` |
+| 333 | 22187 | FIRE_PUNCH accuracy roll; RNG `1657663047→573732526` |
+| 335 | 22189 | first FIRE_PUNCH text glyph |
+| 357 | 22211 | FIRE_PUNCH PP `14→13` |
+| 358 | 22212 | critical roll; RNG `573732526→3896110217` |
+| 361 | 22215 | damage roll settles at 78; RNG `3896110217→1102173384` |
+
+### 8.1 Corrected animation-ownership boundary
+
+The brief's expected endpoint near 22197 was tested rather than assumed.
+A fresh dense oracle replay showed ticks 22198 onward were still ordinary
+FIRE_PUNCH text/controller lead-in. A second fresh `ram-probe.py` replay
+watched `gBattleBufferA[0]`, `gBattleControllerExecFlags`,
+`gAnimScriptActive`, `gBattleAnimAttacker`, and `gBattleAnimTarget`:
+
+- tick **22188** queues controller command 16 (`CONTROLLER_PRINTSTRING`)
+  with move 7 and remains in that command through the text lead-in;
+- tick **22216** queues command 15 (`CONTROLLER_MOVEANIMATION`);
+- tick **22218** is the first displayed state with
+  `gAnimScriptActive=1` and animation attacker/target `0/1`.
+
+This matches the source chain
+`BtlController_EmitMoveAnimation` → `PlayerHandleMoveAnimation` →
+`PlayerDoMoveAnimation` → `DoMoveAnim` in `battle_controllers.c` and
+`battle_controller_player.c`. Therefore **22217 is the largest clean
+contiguous pre-animation boundary**, and **22218 is the first
+FIRE_PUNCH-animation-owned displayed frame**. FIRE_PUNCH's animation body
+is intentionally not claimed or captured by this rung.
+
+Tier-1 tests pin the HP-derived command schedule, all four post-hit RNG
+transitions, PP/crit/damage/controller boundaries, and both sides of the
+age-364 animation-ownership edge. Regression verdict: rung 3 **143/143**,
+rung 2 **221/221**, rung 1 **118/118**, `verify-turn17.ts` all **245**
+checks, Tier-1 **1052/1052**, and production build **5.458 MB**.
+No absolute battle tick, framebuffer/screenshot asset, per-frame lookup,
+trace branch, coordinate/RGB fitting, or excluded capture was added.
