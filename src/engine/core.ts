@@ -191,6 +191,14 @@ import {
   advanceStagedBattleTurn,
   type StagedBattleTurnState,
 } from "./stagedBattleTurn.ts";
+import {
+  advanceFactorySwapPresentation,
+  createCanonicalFactorySwapPresentation,
+  factorySwapBallTile,
+  handleFactorySwapPresentationInput,
+  type FactorySwapPresentationState,
+} from "./factorySwapPresentation.ts";
+import { renderFactorySwapPicker } from "./factorySwapRender.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -224,6 +232,8 @@ export interface EngineState {
   roundController: RoundControllerState | null;
   /** Dev-probe staged battle port; null on the canonical production path. */
   stagedBattleTurn: StagedBattleTurnState | null;
+  /** Live Factory swap-YES controller + presentation adapter. */
+  factorySwap: FactorySwapPresentationState | null;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -260,6 +270,7 @@ export function createInitialState(
       ? createRoundController(options.battleScenario)
       : null,
     stagedBattleTurn: null,
+    factorySwap: null,
   };
 }
 
@@ -290,6 +301,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleSetup: BattleSetupState | null = state.battleSetup;
   let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
   let battle2Turn1 = state.battle2Turn1 ?? null;
+  let factorySwap = state.factorySwap ?? null;
 
   if (state.stagedBattleTurn) {
     const stagedBattleTurn = advanceStagedBattleTurn(
@@ -315,6 +327,32 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
 
   if (postwin) {
     let nextPostwin = advancePostwin(postwin);
+    if (factorySwap) {
+      let nextFactorySwap = advanceFactorySwapPresentation(factorySwap);
+      const directional = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
+        .find((button) => newAndRepeatedKeys.has(button));
+      const action = (["A", "B"] as const).find((button) => newKeys.has(button));
+      if (directional) {
+        nextFactorySwap = handleFactorySwapPresentationInput(
+          nextFactorySwap,
+          directional,
+        );
+      } else if (action) {
+        nextFactorySwap = handleFactorySwapPresentationInput(
+          nextFactorySwap,
+          action,
+        );
+      }
+      return {
+        ...state,
+        frame: state.frame + 1,
+        keyRepeat,
+        postwin: nextPostwin,
+        factorySwap: nextFactorySwap,
+        rngMode,
+        rngValue,
+      };
+    }
     if (prebattleRoom) {
       const advancedPrebattleRoom = advancePrebattleRoom(prebattleRoom)!;
       prebattleRoom = advancedPrebattleRoom;
@@ -399,7 +437,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       } else if (newAndRepeatedKeys.has("UP")) {
         nextPostwin = movePostwinSwapCursor(nextPostwin, -1);
       } else if (newKeys.has("A")) {
-        nextPostwin = acceptPostwinSwapDecline(nextPostwin);
+        if (nextPostwin.swapCursorPos === 0) {
+          factorySwap = createCanonicalFactorySwapPresentation();
+        } else {
+          nextPostwin = acceptPostwinSwapDecline(nextPostwin);
+        }
       }
     }
     // The generic VBlank call above already supplied one step after the
@@ -433,6 +475,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       battleSetup,
       rngMode,
       rngValue,
+      factorySwap,
     };
   }
 
@@ -1659,6 +1702,20 @@ function renderPostwinState(state: EngineState): Uint8Array {
 }
 
 export function render(state: EngineState): Uint8Array {
+  if (state.factorySwap) {
+    const swap = state.factorySwap;
+    if (swap.elapsed === 0) return renderPostwinState(state);
+    if (swap.elapsed < 44) return blackFrame();
+    const tile = factorySwapBallTile(swap.elapsed);
+    const fadeLocal = swap.elapsed - 44;
+    return renderFactorySwapPicker({
+      state: swap.controller,
+      ballTiles: [tile, tile, tile],
+      speciesRenderCoeff: 0,
+      bgFadeY: bgFadeY(fadeLocal, FADE_IN),
+      objFadeY: objFadeY(fadeLocal, FADE_IN),
+    });
+  }
   if (state.postwin) return renderPostwinState(state);
   if (state.stagedBattleTurn) {
     const fb = createFramebuffer();

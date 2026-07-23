@@ -4,23 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 321 — S8 swap-YES controller prefix: **GREEN — state/mutation only**
+## 322 — S8 live swap-YES player-picker prefix: **GREEN — 84/84 exact**
 
-- **State:** source-driven swap interaction and mutation are implemented as a
-  pure presentation-acknowledged controller. Tier-1 is **1170/1170** and build
-  passes (**5.537 MB**). Canonical pixels remain exact only through the
-  already accepted swap-offer endpoint **29601**.
-- **Did:** modeled player picker → option popup → enemy picker → accept YES/NO,
-  cursor wrapping/display-copy separation, RECHOOSE, quit confirmation,
-  accept-NO return, and non-replaced-party duplicate-species rejection.
-  ONIX slot 0 → GROVYLE slot 0 matches the tick-30681 RAM rental mutation;
-  copied friendship is zero, and rental metadata uses the source-exact split.
-- **Next:** build the live swap compositor/transition adapter from extracted
-  assets and wire offer-YES into this controller. Then generalize Battle-2
-  setup/render identity beyond its hard-coded ONIX lead so accepted GROVYLE
-  can continue honestly; add dense explicit-OFF traces only when green.
-- **Notes:** commits `09fa56a`, `f266d1f`, `5ed10b5`. No runtime wiring, new compare
-  trace, screenshot chrome, tick branch, or animation-lane change was made.
+- **State:** offer YES now enters the presentation-acknowledged swap controller;
+  the explicit-OFF `battle1-swap-player-picker.json` is **84/84 exact** over
+  offer/edge plus every frame from first black through the input-ready player
+  picker. Tier-1 is **1175/1175** and build passes (**5.545 MB**).
+- **Did:** added a relative accepted-edge adapter, source-table ball motion,
+  code-native/extracted picker compositor, canonical player/offered parties,
+  and live input wiring. The entry gate (+99), player-options (+79),
+  enemy-picker (+199), accept (+99), mutation, and preserved NO path are
+  Tier-1 pinned. No screenshots or absolute-tick render branches were added.
+- **Next:** render the still-open offer-to-black frames **29603-29619**, then
+  extend the same state-driven adapter through player options, party slide,
+  enemy picker, accept popup, accepted exit/message, and continuation. Do not
+  expose hard-coded ONIX after the accepted GROVYLE mutation.
+- **Notes:** the committed exact trace intentionally does not claim the
+  29603-29619 field fade, options/enemy/accept/exit pixels, or post-swap
+  Battle-2 identity. Controller state already reaches accepted GROVYLE.
 
 ---
 ## 320 — S8 OFF turn portability proof: **GREEN — 16/16 exact**
