@@ -201,10 +201,12 @@ describe("S8 Battle-1 postwin transition", () => {
     expect(early.postwin!.elapsed).toBe(POSTWIN_HEAL_INPUT_READY_AGE - 1);
     expect(early.postwin!.healDismissElapsed).toBeNull();
 
-    const firstReady = tick(early, new Set());
-    const firstAccepted = tick(firstReady, new Set(["A"]));
+    const firstAccepted = tick({
+      ...early,
+      keyRepeat: createInitialState().keyRepeat,
+    }, new Set(["A"]));
     expect(firstAccepted.postwin!.healDismissElapsed)
-      .toBe(POSTWIN_HEAL_INPUT_READY_AGE + 1);
+      .toBe(POSTWIN_HEAL_INPUT_READY_AGE);
 
     const delayedAge = 2_000;
     const delayed = tick({

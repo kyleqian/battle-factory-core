@@ -381,3 +381,55 @@ outcomes visually/statefully without replaying every explicit in-battle
 `Random()` call. This increment pins ownership changes and their local call
 counts from arbitrary seeds; it does not hide that broader pre-existing
 state gap by assigning the canonical seed.
+
+## 8. S8 engine evidence — input-gated heal through next-match readiness (2026-07-23)
+
+This bounded increment extends the implemented canonical endpoint from
+23800 through **26009**, the true first input-ready tick of the four-choice
+continuation menu. `battle1-postwin-next-prompt.json` keeps all 146 segments
+verbatim-equal to `battle1-postwin-heal.json`: it anchors the visually static
+heal hold at 23800/24000/24400/24800/25200/25600, then captures **every tick
+25800-26009**. Fresh compare is **216/216 exact**; the predecessor remains
+**199/199 exact**.
+
+The accepted canonical heal A is tick 25802. All timings below are stored-edge
+relative, not canonical-tick branches:
+
+| relative to heal A | canonical | state / pixels |
+|---:|---:|---|
+| +0..+162 | 25802-25964 | old heal message remains byte-frozen |
+| +163 | 25965 | `HealPlayerParty`: HP `[0,27,153]` → `[117,138,153]` atomically |
+| +164..+165 | 25966-25967 | healed state, old message still byte-frozen |
+| +166 | 25968 | old text clears; empty dialogue box |
+| +167..+202 | 25969-26004 | `"The 2nd match is next!" / "Are you ready?"`, one character per tick |
+| +203..+205 | 26005-26007 | fully typed prompt, no choice menu yet |
+| +206 | 26008 | `GO ON / RECORD / REST / RETIRE` menu first visible |
+| +207 | 26009 | menu first accepts input |
+
+The input boundary is behavioral. Fresh isolated DOWN-edge oracle runs over
+26002-26010 show all edges through 26008 dropped; 26009 is the first edge
+that moves the cursor, visible at 26010. The dynamic canonical window and a
+separate accepted-edge control both compare at 0 diff (256/256 and 7/7
+respectively). Tier-1 covers an early heal A being swallowed, the first
+eligible edge, a much later accepted edge, and every downstream boundary
+shifting with that stored edge.
+
+Source identifies the long hold rather than leaving it as an unexplained
+delay: `ReturnToRoomFromBattle` runs the heal message, `playfanfare MUS_HEAL`,
+then blocks in `waitfanfare`; only after the fanfare ends does it call
+`special HealPlayerParty`, obtain the battle number, print the second-match
+message, and invoke `multichoice 19, 4, MULTI_GO_ON_RECORD_REST_RETIRE`.
+The menu renderer uses the extracted source `text_window/1.png` 3×3 tile
+frame plus the live normal-font pipeline; it is not harvested framebuffer
+chrome.
+
+A fresh rerun of `postwin-rng-watch.json` is byte-identical to the committed
+6007-row ledger (SHA-256
+`03eb8a983757df6241d23f920615e82327a57ef4b1d961d7586f1c3b8ff67f50`).
+It reconfirms HP unchanged through 25964, the simultaneous ONIX/MAGBY write
+at 25965, all three statuses remaining zero, `gMain.inBattle` remaining
+clear, and exactly the ordinary outside-battle VBlank RNG ownership through
+26009 (no new burst or mode handoff in this increment).
+
+No screenshot/framebuffer asset, per-tick table, absolute-tick/trace branch,
+coordinate/RGB fitting, exclusion, or dynamic capture thinning was added.

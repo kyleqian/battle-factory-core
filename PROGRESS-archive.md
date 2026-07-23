@@ -12109,3 +12109,25 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   absolute-tick mechanism.
 
 ---
+## 297 — Bounded worker (S7 turn 17 rung 7): **GREEN — outcome message through frozen second dismiss**
+
+- **State:** canonical `22827--23228` is gaplessly **402/402 exact** in two
+  adjacent dense traces (**255/255 + 147/147**). Rung 6b remains **41/41**,
+  `verify-turn17.ts` passes **245/245**, Tier-1 is **1065/1065**, and build
+  passes (**5.461 MB**).
+- **Did:** added faint-dismiss-relative 34-glyph outcome typing, separated
+  the true +59 input gate from the +61 visible cursor, stored the real
+  second A once, froze its live pose, and pinned the old framebuffer through
+  second-dismiss +27 / first trainer render at +28.
+- **Next:** resume at **23229**, the first trainer-transition frame. The
+  trainer slide, DESTIN loss-quote typing/hold, post-battle swap/round flow,
+  and #38 remain untouched; S7 stays `[~]`.
+- **Notes:** implementation commit `c431bb3`. Fresh RAM pins the printer's
+  final glyph/state at 22860, controller hold through the A, script handoff,
+  and trainer controller ownership; fresh early-A oracle sweeps pin true
+  readiness. No forbidden screenshot/table, absolute-tick/trace branch,
+  fitted color/coordinate, excluded capture, or thinning. Supervisor
+  independently reverified both dense windows, predecessor, turn-17
+  verifier, full Tier-1 suite, and production build; ROADMAP status accepted.
+
+---

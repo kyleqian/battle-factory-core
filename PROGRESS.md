@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 300 — Bounded worker S8 postwin increment: **GREEN — heal dismiss through next-match input ready**
+
+- **State:** canonical dynamic ticks **25800-26009** are gaplessly
+  **210/210 exact**, with six earlier static-hold anchors; the committed
+  trace is **216/216**. `battle1-postwin-heal.json` remains **199/199**.
+  Tier-1 is **1076/1076** and build passes (**5.469 MB**).
+- **Did:** made the ~2000-frame heal hold a genuine stored A gate, modeled
+  source `MUS_HEAL`/`waitfanfare` timing, atomic party HP restoration
+  `[0,27,153]→[117,138,153]` at dismiss+163, box clear, 36-glyph next-match
+  printer, and the source-tile four-choice menu through its true +207 input
+  boundary. Early/delayed edges and VBlank RNG ownership are Tier-1 pinned.
+- **Next:** resume after canonical **26009** if extending the input-ready
+  menu hold, or at the canonical GO ON A **28002**. Scouting pages, swap
+  paths, Battle 2, and the round loop remain open; S8 stays `[ ]`.
+- **Notes:** implementation `dd76bc1`, dense trace `ef43ad6`. Fresh RAM dump
+  is byte-identical to the committed 6007-row ledger; fresh DOWN sweep proves
+  26008 is visible-but-rejecting and 26009 first accepts input. No forbidden
+  framebuffer asset/table, absolute-tick/trace branch, fitting, exclusion,
+  or dynamic capture thinning.
+
+---
 ## 299 — Supervisor-accepted S8 first postwin increment: **GREEN — loss dismiss through heal prompt exact**
 
 - **State:** canonical `23602--23800` is **199/199 exact**, every tick
@@ -53,25 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   excluded capture, or thinning. Supervisor independently reverified both
   dense windows, predecessor, turn-17 verifier, full Tier-1 suite, and
   production build; ROADMAP S7 marked complete.
-
----
-## 297 — Bounded worker (S7 turn 17 rung 7): **GREEN — outcome message through frozen second dismiss**
-
-- **State:** canonical `22827--23228` is gaplessly **402/402 exact** in two
-  adjacent dense traces (**255/255 + 147/147**). Rung 6b remains **41/41**,
-  `verify-turn17.ts` passes **245/245**, Tier-1 is **1065/1065**, and build
-  passes (**5.461 MB**).
-- **Did:** added faint-dismiss-relative 34-glyph outcome typing, separated
-  the true +59 input gate from the +61 visible cursor, stored the real
-  second A once, froze its live pose, and pinned the old framebuffer through
-  second-dismiss +27 / first trainer render at +28.
-- **Next:** resume at **23229**, the first trainer-transition frame. The
-  trainer slide, DESTIN loss-quote typing/hold, post-battle swap/round flow,
-  and #38 remain untouched; S7 stays `[~]`.
-- **Notes:** implementation commit `c431bb3`. Fresh RAM pins the printer's
-  final glyph/state at 22860, controller hold through the A, script handoff,
-  and trainer controller ownership; fresh early-A oracle sweeps pin true
-  readiness. No forbidden screenshot/table, absolute-tick/trace branch,
-  fitted color/coordinate, excluded capture, or thinning. Supervisor
-  independently reverified both dense windows, predecessor, turn-17
-  verifier, full Tier-1 suite, and production build; ROADMAP status accepted.

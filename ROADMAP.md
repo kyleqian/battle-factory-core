@@ -551,6 +551,20 @@ party heal write, continuation menu, swap paths, battles 2-7, and round
 completion remain open, so S8 stays `[ ]`. The supervisor independently
 reverified the dense window, its predecessor, the Turn-17 verifier, full
 Tier-1 suite, and production build before accepting the increment.
+**Second postwin engine increment (2026-07-23, bounded worker):**
+the canonical input-gated heal hold, dismiss, delayed party heal, and
+second-match prompt now extend the modeled endpoint through **26009**, the
+true first continuation-menu input tick. `battle1-postwin-next-prompt.json`
+reuses the committed 146-segment script verbatim, anchors the static
+23800-25801 hold, and captures every tick 25800-26009 at **216/216 exact**;
+`battle1-postwin-heal.json` remains **199/199 exact**. Fresh RAM reconfirms
+the atomic 25965 HP write `[0,27,153]→[117,138,153]`, unchanged zero
+statuses, and uninterrupted outside-battle VBlank RNG ownership. Tier-1
+pins early/delayed heal A edges and shifts every downstream boundary from
+the stored edge. The source-backed continuation menu is visible at 26008
+but first accepts input at 26009. This remains **partial S8**: canonical
+menu hold/GO ON at 28002, scouting pages, swap decision/UI, Battle 2, and
+the rest of the round remain open; S8 stays `[ ]`.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
