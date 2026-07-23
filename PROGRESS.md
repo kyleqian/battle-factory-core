@@ -20,7 +20,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** implementation commit `f7a8629`; every-tick comparison corrected
   the old dossier/verifier label: first burned-message `F` is 21453, while
   21465 is only its cited partial-text SHA. No forbidden pixel/trace mechanism
-  or excluded capture.
+  or excluded capture. Supervisor independently reverified the dense window,
+  predecessor rung, verifier, full Tier-1 suite, and production build; the
+  factual ROADMAP status note and ISSUE #16 deletion are accepted.
 
 ---
 ## 288 — Bounded worker (S7 turn 16 rung 3): **GREEN — complete FIRE_PUNCH cast**
