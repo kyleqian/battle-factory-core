@@ -617,6 +617,21 @@ S8 stays `[ ]`.
 The supervisor independently reviewed the postwin-to-room state/render/RNG
 handoff and reverified the 225/225 + 131/131 new traces, 73/73 + 125/125
 regressions, all 1086 Tier-1 tests, and production build.
+**Sixth postwin worker checkpoint (2026-07-23, bounded partial):**
+fresh edge probes pin the JENSON quote's first accepted A at **30383**
+(30382 rejected; canonical 32031 delayed) and the trainer-intro first
+accepted A at **32479** (32478 rejected; canonical 32531 delayed). A fresh
+32020-33031 RAM replay pins field VBlank RNG ownership, relative setup bursts
+`+50/+22/+4/+1`, transition-table index 10
+(`FRONTIER_CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ`), Battle 2 scene handoff at
+32245, and `gMain.inBattle` freeze at 32250. Engine state now preserves
+FISHERMAN JENSON/KABUTO, the healed ONIX/MAGBY/BAYLEEF party, and ONIX's real
+moveset across setup; source trainer and KABUTO assets are extracted. This is
+an evidence/setup checkpoint, **not** endpoint pixel acceptance: the live
+sequential spiral, parameterized intro/send-outs, KABUTO healthbox, and
+composed Battle 2 menu remain. No Battle 1 full-frame menu harvest was reused
+as Battle 2 chrome. Battle 2 actions, battles 3-7, swap YES, and round
+completion also remain open, so S8 stays `[ ]`.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by

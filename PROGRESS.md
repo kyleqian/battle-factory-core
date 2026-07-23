@@ -4,6 +4,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 304 — Bounded S8 Battle 2 opening: **GREEN evidence/setup checkpoint; pixels incomplete**
+
+- **State:** the assigned 33030/33031 pixel endpoint is **not complete**.
+  The last committed exact endpoint remains JENSON's held quote at 32031
+  (**131/131**); predecessor decline remains **73/73**. Battle 2 identity,
+  party, moves, room-to-scene RNG ownership, and input gates are now modeled
+  and Tier-1 pinned. Full Tier-1 is **1089/1089** and build passes
+  (**5.485 MB**).
+- **Did:** freshly bisected quote and trainer-intro A gates; RAM-audited
+  32020-33031 RNG/inBattle ownership; source-selected the sequential
+  asymmetric-spiral transition; extracted Fisherman/KABUTO sprites; carried
+  JENSON/KABUTO, healed `[117,138,153]`, and ONIX moves
+  `[157,20,225,201]` through `EngineState`. Commits `012161f` and `d2d905f`.
+- **Next:** implement the live three-circle sequential spiral, then
+  encounter-parameterize Fisherman/KABUTO intro and both send-outs; compose
+  the Battle 2 menu without Battle 1's harvested Grovyle base. Dense-capture
+  all dynamic frames through 33030/33031 in ≤256-frame trace pieces. Stop
+  before menu input. S8 stays `[ ]`.
+- **Notes:** first accepted room-quote A starts at 30383 (30382 rejects);
+  first accepted intro A starts at 32479 (32478 rejects). Canonical
+  32031/32531 edges are delayed-valid. Setup RNG extras are
+  `+50/+22/+4/+1`, selecting Frontier transition index 10; battle-scene
+  elapsed zero is 32245 and in-battle freeze is 32250. No new pixel trace is
+  claimed exact; no screenshot/tick lookup, fitting, or disguised chrome.
+
+---
 ## 303 — Supervisor-accepted S8 postwin increment: **GREEN — Battle 2 opening quote exact**
 
 - **State:** canonical **30031-32031** now reaches FISHERMAN JENSON's held,
@@ -53,29 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   logical/display cursor handoff and edge-relative message path, then
   reverified the 73/73 trace, 164/164 predecessor, all 1083 Tier-1 tests,
   and production build.
-
----
-## 301 — Supervisor-accepted S8 postwin increment: **GREEN — GO ON through swap prompt ready**
-
-- **State:** canonical **26009-29601** is extended through the held,
-  input-ready swap-offer YES/NO prompt. Adjacent traces are **171/171 +
-  164/164 exact**, with every dynamic tick captured; predecessor is
-  **216/216 exact**. Tier-1 is **1080/1080** and build passes
-  (**5.471 MB**).
-- **Did:** stored canonical GO ON/page edges, ported all three source scouting
-  strings and swap offer through live field window/font pipelines, separated
-  swap text settle/menu-visible/input-ready, and pinned the edge-relative
-  five-call GO ON RNG burst under continuing VBlank ownership. Fresh paired
-  input sweeps and a compact RAM/task ledger pin readiness.
-- **Next:** resume after **29601** with canonical YES at 29602 or NO-path
-  selection; this worker intentionally stopped before choosing. Swap UI/
-  decline, Battle 2, battles 3-7, and round completion remain open; S8 stays
-  `[ ]`.
-- **Notes:** implementation `9b747fe`, dense traces `a542eb8`; evidence/docs
-  commit follows this entry. True accepted A ticks: menu 26009, scouting
-  28074/28476/28874, swap 29272 (text final 29265, menu visible 29268).
-  Ground-truth segments `[0:146]` are byte-identical. No forbidden frame
-  asset/table, canonical-tick branch, fitting, exclusion, or thinning.
-  Supervisor independently reviewed the stored-edge state/RNG/render paths
-  and reverified the 171/171 + 164/164 traces, 216/216 predecessor, all
-  1080 Tier-1 tests, and production build.

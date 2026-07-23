@@ -1,3 +1,30 @@
+## 301 — Supervisor-accepted S8 postwin increment: **GREEN — GO ON through swap prompt ready**
+
+- **State:** canonical **26009-29601** is extended through the held,
+  input-ready swap-offer YES/NO prompt. Adjacent traces are **171/171 +
+  164/164 exact**, with every dynamic tick captured; predecessor is
+  **216/216 exact**. Tier-1 is **1080/1080** and build passes
+  (**5.471 MB**).
+- **Did:** stored canonical GO ON/page edges, ported all three source scouting
+  strings and swap offer through live field window/font pipelines, separated
+  swap text settle/menu-visible/input-ready, and pinned the edge-relative
+  five-call GO ON RNG burst under continuing VBlank ownership. Fresh paired
+  input sweeps and a compact RAM/task ledger pin readiness.
+- **Next:** resume after **29601** with canonical YES at 29602 or NO-path
+  selection; this worker intentionally stopped before choosing. Swap UI/
+  decline, Battle 2, battles 3-7, and round completion remain open; S8 stays
+  `[ ]`.
+- **Notes:** implementation `9b747fe`, dense traces `a542eb8`; evidence/docs
+  commit follows this entry. True accepted A ticks: menu 26009, scouting
+  28074/28476/28874, swap 29272 (text final 29265, menu visible 29268).
+  Ground-truth segments `[0:146]` are byte-identical. No forbidden frame
+  asset/table, canonical-tick branch, fitting, exclusion, or thinning.
+  Supervisor independently reviewed the stored-edge state/RNG/render paths
+  and reverified the 171/171 + 164/164 traces, 216/216 predecessor, all
+  1080 Tier-1 tests, and production build.
+
+---
+
 ## 300 — Supervisor-accepted S8 postwin increment: **GREEN — heal dismiss through next-match input ready**
 
 - **State:** canonical dynamic ticks **25800-26009** are gaplessly
