@@ -536,9 +536,11 @@ and is **16/16 exact** through the next accepted input. Gate 2 remains open:
 the pure swap controller and source-extracted loss/seventh-win policies are
 banked, while the live swap-YES presentation is exact through its input-ready
 player picker (**101/101**) and the complete action fade/slide (**36/36**).
-The next distinct mechanism is the mon-picture aperture at options edge +36;
-enemy selection, accept/exit, loss ending, and seventh-win ending still need
-dense OFF-profile UI proofs. S8 therefore remains `[~]`.
+The source-relative mon-picture open is now exact as well, extending the
+options trace to **58/58** through tick 29759. The next distinct mechanism is
+the settled options popup at tick 29760; enemy selection, accept/exit, loss
+ending, and seventh-win ending still need dense OFF-profile UI proofs. S8
+therefore remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
 Historical traces below remain Battle Scene ON regression evidence. The

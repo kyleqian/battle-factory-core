@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 326 — S8 swap player mon-picture reveal: **GREEN — 58/58 exact**
+
+- **State:** `battle1-swap-player-options.json` is now **58/58 exact** from
+  the selected-player A edge through the complete mon-picture aperture/reveal.
+  Supervisor verification is **1178/1178**, build **5.546 MB**, the player
+  picker remains **101/101**, and shared draft mon-picture regression is
+  **38/38**.
+- **Did:** reused the source-relative `OpenMonPic` task cadence with the swap
+  screen's first-open flat flash, one-pixel WIN0 aperture, vertical reveal,
+  and screen-local three-ball centers. The shared renderer keeps its existing
+  six-ball defaults.
+- **Next:** continue at tick **29760** / options edge **+58**, where the
+  distinct settled options popup first appears. Then cover option input,
+  enemy picker, accept/exit/message, and post-swap identity.
+- **Notes:** S8 gates 1 and 3 remain complete; unique-UI gate 2 remains open.
+  Preserve both exact swap prefixes and keep presentation clocks phase-relative.
+
+---
 ## 325 — S8 reset gates 1/3 complete; swap UI advancing: **GREEN**
 
 - **State:** the generic seven-battle core and staged OFF portability proof
@@ -41,24 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** first excluded frame 29738 differs by exactly 1 pixel in the new
   mon-picture aperture. No screenshot assets, absolute ticks, battle/turn
   render branches, trace thinning, controller changes, or Battle-2 work.
-
----
-## 323 — S8 swap player-options opening edge: **GREEN — 6/6 exact**
-
-- **State:** the live relative adapter now carries the player-options phase
-  clock into rendering and starts the selected slot-0 ball's source-table
-  animation after the input-ready picker. The explicit-OFF
-  `battle1-swap-player-options.json` is **6/6 exact** for every frame
-  currently claimed (A edge through the last unchanged CANCEL frame).
-  Tier-1 is **1175/1175** and build passes (**5.545 MB**).
-- **Did:** added a phase-relative selected-ball epoch, live render wiring,
-  and Tier-1 coverage. No screenshots, absolute ticks, or controller changes.
-- **Next:** continue at player-options edge **+6** (oracle tick 29708):
-  `SWAP_WIN_ACTION_FADE` begins fading CANCEL toward gray, followed by its
-  source `tXIncrement=6` offscreen slide, then the mon-pic/popup reveal.
-  Do not reuse the draft mon-pic clock from edge 0; the swap task has this
-  distinct pre-reveal transition.
-- **Notes:** a broader local reuse attempt was rejected and removed after
-  dense comparison exposed the separate action-fade phase. Enemy picker,
-  accept popup, accepted exit/message, and post-swap GROVYLE continuation
-  remain open.

@@ -1,3 +1,24 @@
+## 323 — S8 swap player-options opening edge: **GREEN — 6/6 exact**
+
+- **State:** the live relative adapter now carries the player-options phase
+  clock into rendering and starts the selected slot-0 ball's source-table
+  animation after the input-ready picker. The explicit-OFF
+  `battle1-swap-player-options.json` is **6/6 exact** for every frame
+  currently claimed (A edge through the last unchanged CANCEL frame).
+  Tier-1 is **1175/1175** and build passes (**5.545 MB**).
+- **Did:** added a phase-relative selected-ball epoch, live render wiring,
+  and Tier-1 coverage. No screenshots, absolute ticks, or controller changes.
+- **Next:** continue at player-options edge **+6** (oracle tick 29708):
+  `SWAP_WIN_ACTION_FADE` begins fading CANCEL toward gray, followed by its
+  source `tXIncrement=6` offscreen slide, then the mon-pic/popup reveal.
+  Do not reuse the draft mon-pic clock from edge 0; the swap task has this
+  distinct pre-reveal transition.
+- **Notes:** a broader local reuse attempt was rejected and removed after
+  dense comparison exposed the separate action-fade phase. Enemy picker,
+  accept popup, accepted exit/message, and post-swap GROVYLE continuation
+  remain open.
+
+---
 ## 322 — S8 live swap-YES player-picker prefix: **GREEN — 101/101 exact**
 
 - **State:** offer YES now enters the presentation-acknowledged swap controller;
