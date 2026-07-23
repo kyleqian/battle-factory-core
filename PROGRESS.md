@@ -4,6 +4,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 306 — S8 Battle 2 trainer intro: **GREEN — 32280-32530 exact**
+
+- **State:** canonical **32280-32530** is **251/251 exact**, every frame
+  captured from the first visible Battle 2 framebuffer through the held,
+  input-ready FISHERMAN JENSON intro before A at 32531. Battle 2 transition
+  remains **249/249** and Battle 1 scene assembly remains **256/256**.
+  Tier-1 is **1098/1098**; build passes (**5.496 MB**).
+- **Did:** preserved encounter identity across battle-scene advances and
+  parameterized the shared BattleIntroSlide3/reveal/settled trainer/text/
+  cursor renderer for Fisherman Jenson. Added `battle2-intro-dense.json`
+  with all 251 captures and three encounter-selection Tier-1 pins.
+- **Next:** resume at canonical A **32531**; reuse the shared send-out path
+  for JENSON/KABUTO, then ONIX and the composed Battle 2 action menu. S8
+  stays `[ ]`.
+- **Notes:** scene elapsed zero remains 32245, so the shared local visual
+  clock maps first visible 1075→32280. Text starts at local 1234 for both
+  encounters; JENSON's 37 characters create the visible cursor at 1272,
+  while its controller first accepts input at 1274. Cursor X remains
+  width-derived 123. No absolute trace-time branch/table, framebuffer
+  harvest, fitting, excluded capture, or thinning.
+
+---
 ## 305 — Supervisor-accepted S8 Battle 2 transition: **GREEN — 32031-32279 exact**
 
 - **State:** canonical **32031-32279** is **249/249 exact**, every frame
@@ -52,29 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   claimed exact; no screenshot/tick lookup, fitting, or disguised chrome.
   Supervisor independently reviewed the encounter-relative setup/core path
   and reverified both predecessor traces, all 1089 Tier-1 tests, and build.
-
----
-## 303 — Supervisor-accepted S8 postwin increment: **GREEN — Battle 2 opening quote exact**
-
-- **State:** canonical **30031-32031** now reaches FISHERMAN JENSON's held,
-  input-ready `"MY POKéMON WILL MAKE YOU DOWNCAST"` quote without dismissing
-  it. Prefix-identical traces are **225/225 + 131/131 exact**, predecessor
-  decline is **73/73**, Tier-1 is **1086/1086**, and build passes
-  (**5.484 MB**).
-- **Did:** stored the canonical 30032 guide dismiss edge, reused the shared
-  close/walk/warp/camera/room/message machinery, source-selected Fisherman
-  gfx + JENSON's Easy Chat quote, and modeled the returning attendant's real
-  standard-animation alternation. Fresh RAM pins room/sprite boundaries and
-  relative +109/+110 RNG bursts.
-- **Next:** resume from held **32031**; freshly bisect the quote-dismiss
-  gate, then implement Battle 2's trainer-intro transition toward the first
-  action menu. This worker intentionally did not dismiss the quote. Battle
-  2+, swap YES, and round completion remain open; S8 stays `[ ]`.
-- **Notes:** implementation/traces `e149116`; evidence/docs commit follows.
-  Every dynamic frame 30031-30382 is captured, with byte-static anchors
-  through 32031. Gate: frame 29660 ready/first accepted press start, stored
-  edge 29661; canonical starts 30031/stores 30032. No forbidden asset,
-  lookup/table, tick/trace branch, fitting, exclusion, or thinning. Supervisor
-  independently reviewed the cross-layer state/render/RNG handoff, then
-  reverified both new traces, both regressions, all 1086 Tier-1 tests, and
-  production build.

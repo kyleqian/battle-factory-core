@@ -23,6 +23,32 @@
   and production build.
 
 ---
+## 303 — Supervisor-accepted S8 postwin increment: **GREEN — Battle 2 opening quote exact**
+
+- **State:** canonical **30031-32031** now reaches FISHERMAN JENSON's held,
+  input-ready `"MY POKéMON WILL MAKE YOU DOWNCAST"` quote without dismissing
+  it. Prefix-identical traces are **225/225 + 131/131 exact**, predecessor
+  decline is **73/73**, Tier-1 is **1086/1086**, and build passes
+  (**5.484 MB**).
+- **Did:** stored the canonical 30032 guide dismiss edge, reused the shared
+  close/walk/warp/camera/room/message machinery, source-selected Fisherman
+  gfx + JENSON's Easy Chat quote, and modeled the returning attendant's real
+  standard-animation alternation. Fresh RAM pins room/sprite boundaries and
+  relative +109/+110 RNG bursts.
+- **Next:** resume from held **32031**; freshly bisect the quote-dismiss
+  gate, then implement Battle 2's trainer-intro transition toward the first
+  action menu. This worker intentionally did not dismiss the quote. Battle
+  2+, swap YES, and round completion remain open; S8 stays `[ ]`.
+- **Notes:** implementation/traces `e149116`; evidence/docs commit follows.
+  Every dynamic frame 30031-30382 is captured, with byte-static anchors
+  through 32031. Gate: frame 29660 ready/first accepted press start, stored
+  edge 29661; canonical starts 30031/stores 30032. No forbidden asset,
+  lookup/table, tick/trace branch, fitting, exclusion, or thinning. Supervisor
+  independently reviewed the cross-layer state/render/RNG handoff, then
+  reverified both new traces, both regressions, all 1086 Tier-1 tests, and
+  production build.
+
+---
 
 ## 301 — Supervisor-accepted S8 postwin increment: **GREEN — GO ON through swap prompt ready**
 

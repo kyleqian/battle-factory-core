@@ -70,15 +70,39 @@ fall back to Battle 1's unrelated fixed setup.
 
 ## Exact remaining render work
 
-The room dismissal and transition through the final black frame are exact.
+The room dismissal, transition, and trainer intro through canonical 32530
+are exact.
 To reach 33030/33031 without forbidden framebuffer harvests, the live
 renderer still needs:
 
-1. encounter-parameterized Fisherman intro text/sprite and KABUTO send-out
-   animation/healthbox;
+1. encounter-parameterized KABUTO send-out animation/healthbox;
 2. press-relative ONIX send-out timing; and
 3. a composed Battle 2 action-menu base, replacing the Battle 1-only
    full-frame Grovyle idle base for this encounter.
 
 Those dynamic spans must then be committed in capture-cap-sized dense traces.
 Only a separately proven byte-static hold may be thinned.
+
+## Fisherman trainer intro
+
+`battle2-intro-dense.json` captures every frame **32280-32530** and is
+**251/251 exact**. Battle-scene elapsed zero is 32245, so the existing shared
+BattleIntroSlide3 clock maps local first-visible tick 1075 directly to 32280;
+the reveal/window/scanline shift, status summaries, and message window need
+no encounter-specific timing branch.
+
+The identity input is `BattleSceneState.encounter`, copied from
+`BattleSetupState`. A state-advance audit found that the handoff set
+`"jenson"` correctly but `advanceBattleScene` dropped it after one tick,
+silently selecting DESTIN thereafter. Preserving the field lets the same
+renderer select the extracted Fisherman trainer pic and source-expanded
+`"FISHERMAN JENSON" / "would like to battle!"` text.
+
+Both texts start at local 1234 and print one character per tick. JENSON's
+class/name line is two characters shorter than DESTIN's, so its 37th
+character finishes at 1270 and the visible PAUSE_UNTIL_PRESS cursor begins
+at 1272; the controller's first accepted input remains 1274, matching the
+32478 reject / 32479 accept probe. The cursor X remains the shared
+width-derived `16 + measureText("would like to battle!") = 123`.
+`scene-assembly.json` remains **256/256**, proving the BUG CATCHER DESTIN
+defaults are unchanged.
