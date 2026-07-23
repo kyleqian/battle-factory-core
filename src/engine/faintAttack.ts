@@ -28,6 +28,7 @@ export const FAINT_ATTACK_LAST_ANIMATION_OWNED_AGE = FAINT_ATTACK_DONE_AGE + 1;
 export const FAINT_ATTACK_HIT_HEALTHBOX_WOBBLE_AGE = 226;
 export const FAINT_ATTACK_HIT_TARGET_BLINK_AGE = 227;
 export const FAINT_ATTACK_HP_DRAIN_AGE = 260;
+/** Turn 16's 59-point hit; retained as the default occurrence constants. */
 export const FAINT_ATTACK_HP_COMMIT_AGE = 321;
 export const FAINT_ATTACK_SECONDARY_ROLL_AGE = 326;
 export const FIRE_PUNCH_TARGET_HANDOFF_AGE = 333;
@@ -35,6 +36,12 @@ export const FIRE_PUNCH_CLEAR_CURRENT_MOVE_AGE = 334;
 export const FIRE_PUNCH_OWNERSHIP_AGE = 335;
 export const FIRE_PUNCH_ACCURACY_ROLL_AGE = 340;
 export const FIRE_PUNCH_TEXT_AGE = 342;
+/**
+ * Both observed occurrences reach the next move's first renderer-owned
+ * VBlank at this confirmation-relative age.  The shorter turn-17 HP drain
+ * leaves a longer script/text lead-in; it does not move this boundary.
+ */
+export const FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE = 344;
 
 const HIT_HEALTHBOX_WOBBLE_TICKS = 20;
 const HIT_TARGET_BLINK_PERIOD = 8;
@@ -62,6 +69,37 @@ export interface FaintAttackResolutionHp {
 }
 
 const TURN16_MAGBY_HP: FaintAttackResolutionHp = { startHp: 138, endHp: 79 };
+
+export interface FaintAttackResolutionTiming {
+  hpCommitAge: number;
+  secondaryRollAge: number;
+  targetHandoffAge: number;
+  clearCurrentMoveAge: number;
+  firePunchOwnershipAge: number;
+  firePunchAccuracyRollAge: number;
+  firePunchTextAge: number;
+}
+
+/**
+ * `healthbarupdate` runs for the actual displayed HP delta.  The commands
+ * after it have fixed source/RAM-confirmed spacing, so their ages must move
+ * with damage rather than inheriting turn 16's 59-point literal.
+ */
+export function faintAttackResolutionTiming(
+  hp: FaintAttackResolutionHp = TURN16_MAGBY_HP,
+): FaintAttackResolutionTiming {
+  const hpDelta = Math.max(0, hp.startHp - hp.endHp);
+  const hpCommitAge = FAINT_ATTACK_HP_DRAIN_AGE + hpDelta + 2;
+  return {
+    hpCommitAge,
+    secondaryRollAge: hpCommitAge + 5,
+    targetHandoffAge: hpCommitAge + 12,
+    clearCurrentMoveAge: hpCommitAge + 13,
+    firePunchOwnershipAge: hpCommitAge + 14,
+    firePunchAccuracyRollAge: hpCommitAge + 19,
+    firePunchTextAge: hpCommitAge + 21,
+  };
+}
 
 export interface FaintAttackBgState {
   background: "default" | "dark";
@@ -141,16 +179,17 @@ export function faintAttackResolutionState(
   age: number,
   hp: FaintAttackResolutionHp = TURN16_MAGBY_HP,
 ): FaintAttackResolutionState {
+  const timing = faintAttackResolutionTiming(hp);
   const wobbleAge = age - FAINT_ATTACK_HIT_HEALTHBOX_WOBBLE_AGE;
   const blinkAge = age - FAINT_ATTACK_HIT_TARGET_BLINK_AGE;
   const drained = Math.max(0, age - FAINT_ATTACK_HP_DRAIN_AGE);
-  const firePunchOwned = age >= FIRE_PUNCH_OWNERSHIP_AGE;
-  const secondaryRollConsumed = age >= FAINT_ATTACK_SECONDARY_ROLL_AGE;
-  const accuracyRollConsumed = age >= FIRE_PUNCH_ACCURACY_ROLL_AGE;
+  const firePunchOwned = age >= timing.firePunchOwnershipAge;
+  const secondaryRollConsumed = age >= timing.secondaryRollAge;
+  const accuracyRollConsumed = age >= timing.firePunchAccuracyRollAge;
 
   return {
     displayedHp: Math.max(hp.endHp, hp.startHp - drained),
-    battleHp: age >= FAINT_ATTACK_HP_COMMIT_AGE ? hp.endHp : hp.startHp,
+    battleHp: age >= timing.hpCommitAge ? hp.endHp : hp.startHp,
     targetInvisible:
       blinkAge >= 0
       && blinkAge < HIT_TARGET_BLINK_PERIOD * HIT_TARGET_BLINK_CYCLES
@@ -160,16 +199,16 @@ export function faintAttackResolutionState(
         ? (wobbleAge % 2 === 0 ? 1 : -1)
         : 0,
     attacker: firePunchOwned ? "MAGBY" : "MURKROW",
-    target: age >= FIRE_PUNCH_TARGET_HANDOFF_AGE ? "MURKROW" : "MAGBY",
+    target: age >= timing.targetHandoffAge ? "MURKROW" : "MAGBY",
     currentMove:
-      age >= FIRE_PUNCH_OWNERSHIP_AGE
+      age >= timing.firePunchOwnershipAge
         ? "FIRE_PUNCH"
-        : age >= FIRE_PUNCH_CLEAR_CURRENT_MOVE_AGE
+        : age >= timing.clearCurrentMoveAge
           ? null
           : "FAINT_ATTACK",
     faintAttackSecondaryRollConsumed: secondaryRollConsumed,
     firePunchAccuracyRollConsumed: accuracyRollConsumed,
     rngCallsConsumed: accuracyRollConsumed ? 2 : secondaryRollConsumed ? 1 : 0,
-    message: age >= FIRE_PUNCH_TEXT_AGE ? "FIRE_PUNCH" : "FAINT_ATTACK",
+    message: age >= timing.firePunchTextAge ? "FIRE_PUNCH" : "FAINT_ATTACK",
   };
 }

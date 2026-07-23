@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
   faintAttackAttackerEva,
   faintAttackAttackerOffset,
   faintAttackBgState,
   faintAttackHitsplatVisible,
   faintAttackOwnsAnimationRender,
   faintAttackResolutionState,
+  faintAttackResolutionTiming,
   faintAttackTargetShakeX2,
 } from "../src/engine/faintAttack.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
@@ -98,10 +100,27 @@ describe("FAINT_ATTACK pure animation reducers", () => {
       displayedHp: 8,
       battleHp: 10,
     });
-    expect(faintAttackResolutionState(220, { startHp: 79, endHp: 27 })).toMatchObject({
-      displayedHp: 79,
+    expect(faintAttackResolutionState(313, { startHp: 79, endHp: 27 })).toMatchObject({
+      displayedHp: 27,
       battleHp: 79,
     });
+    expect(faintAttackResolutionState(314, { startHp: 79, endHp: 27 })).toMatchObject({
+      displayedHp: 27,
+      battleHp: 27,
+    });
+  });
+
+  it("derives turn 17's shorter post-drain command schedule from its 52-point hit", () => {
+    expect(faintAttackResolutionTiming({ startHp: 79, endHp: 27 })).toEqual({
+      hpCommitAge: 314,
+      secondaryRollAge: 319,
+      targetHandoffAge: 326,
+      clearCurrentMoveAge: 327,
+      firePunchOwnershipAge: 328,
+      firePunchAccuracyRollAge: 333,
+      firePunchTextAge: 335,
+    });
+    expect(FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE).toBe(344);
   });
 
   it("pins the silent chance-0 secondary roll and FIRE_PUNCH accuracy roll to the RAM RNG stream", () => {
@@ -153,5 +172,22 @@ describe("FAINT_ATTACK pure animation reducers", () => {
     });
     expect(faintAttackResolutionState(341).message).toBe("FAINT_ATTACK");
     expect(faintAttackResolutionState(342).message).toBe("FIRE_PUNCH");
+  });
+
+  it("pins turn 17's state/RNG handoffs while retaining the age-344 animation boundary", () => {
+    const hp = { startHp: 79, endHp: 27 };
+    expect(faintAttackResolutionState(318, hp).rngCallsConsumed).toBe(0);
+    expect(faintAttackResolutionState(319, hp).rngCallsConsumed).toBe(1);
+    expect(faintAttackResolutionState(325, hp).target).toBe("MAGBY");
+    expect(faintAttackResolutionState(326, hp).target).toBe("MURKROW");
+    expect(faintAttackResolutionState(327, hp).currentMove).toBeNull();
+    expect(faintAttackResolutionState(328, hp)).toMatchObject({
+      attacker: "MAGBY",
+      currentMove: "FIRE_PUNCH",
+    });
+    expect(faintAttackResolutionState(332, hp).rngCallsConsumed).toBe(1);
+    expect(faintAttackResolutionState(333, hp).rngCallsConsumed).toBe(2);
+    expect(faintAttackResolutionState(334, hp).message).toBe("FAINT_ATTACK");
+    expect(faintAttackResolutionState(335, hp).message).toBe("FIRE_PUNCH");
   });
 });

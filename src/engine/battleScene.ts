@@ -547,13 +547,14 @@ import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbo
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
+  FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
   FIRE_PUNCH_TEXT_AGE,
   faintAttackAttackerEva,
   faintAttackAttackerOffset,
   faintAttackBgState,
   faintAttackHitsplatVisible,
-  faintAttackOwnsAnimationRender,
   faintAttackResolutionState,
+  faintAttackResolutionTiming,
   faintAttackTargetShakeX2,
   type FaintAttackResolutionHp,
 } from "./faintAttack.ts";
@@ -12099,7 +12100,7 @@ function turn16PartyElapsedAtTick(partyElapsed: number, t: number, anchorTick: n
 }
 
 /** FIRE_PUNCH's first owned frame is faint-attack kickoff age 344. */
-const TURN16_FIRE_PUNCH_FIRST_OWNED_AGE = 344;
+const TURN16_FIRE_PUNCH_FIRST_OWNED_AGE = FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE;
 /** Turn-16 confirm to its fresh turn-17 action-menu redraw. */
 export const TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY =
   TURN16_FAINT_ATTACK_ANIM_DELAY
@@ -12346,19 +12347,40 @@ function drawTurn16FightSubmenuWindow(
       confirmTick === null
         ? null
         : t - (confirmTick + TURN16_FAINT_ATTACK_ANIM_DELAY);
-    const ownedAnimationAge =
-      animationAge !== null && faintAttackOwnsAnimationRender(animationAge)
+    const resolutionAge =
+      animationAge !== null
+      && animationAge >= 0
+      && animationAge < FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE
         ? animationAge
         : null;
+    const targetHp = { startHp: 79, endHp: 27 };
     drawTurn16PostSwitchField(
       fb,
       partyElapsed,
       bounceTick,
-      ownedAnimationAge ?? TURN16_SETTLED_OWNED_AGE,
-      ownedAnimationAge === null ? undefined : { startHp: 79, endHp: 27 },
-      ownedAnimationAge === null ? null : { hp: 58, status: "burn" },
+      resolutionAge ?? TURN16_SETTLED_OWNED_AGE,
+      resolutionAge === null ? undefined : targetHp,
+      resolutionAge === null ? null : { hp: 58, status: "burn" },
     );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+
+    if (
+      resolutionAge !== null
+      && faintAttackResolutionState(resolutionAge, targetHp).message === "FIRE_PUNCH"
+    ) {
+      drawMessageTextLines(
+        fb,
+        TURN16_FIRE_PUNCH_LINE1,
+        TURN16_FIRE_PUNCH_LINE2,
+        turn15SimpleVisibleChars(
+          t,
+          confirmTick! + TURN16_FAINT_ATTACK_ANIM_DELAY
+            + faintAttackResolutionTiming(targetHp).firePunchTextAge,
+          TURN16_FIRE_PUNCH_TEXT_TOTAL,
+        ),
+      );
+      return;
+    }
 
     if (confirmTick !== null && t >= confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY) {
       drawMessageTextLines(
