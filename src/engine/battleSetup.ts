@@ -41,6 +41,17 @@ export interface ActiveMonMoveset {
   readonly maxPP: readonly [number, number, number, number];
 }
 
+export interface BattleSetupState {
+  readonly battleNumber: 1 | 2;
+  readonly encounter: "destin" | "jenson";
+  readonly trainerClass: "BUG CATCHER" | "FISHERMAN";
+  readonly trainerName: "DESTIN" | "JENSON";
+  readonly opponentLead: "GROVYLE" | "KABUTO";
+  readonly playerParty: readonly ["ONIX", "MAGBY", "BAYLEEF"];
+  readonly playerPartyHp: readonly [number, number, number];
+  readonly activeMonMoveset: ActiveMonMoveset;
+}
+
 function moveIdForName(name: string): number {
   const id = MOVE_ID_BY_NAME.get(name);
   if (id === undefined) throw new Error(`battleSetup: unknown move ${name}`);
@@ -75,4 +86,22 @@ export function activeMonMoveset(draftScreen: DraftScreenState): ActiveMonMovese
   const [lead] = chosenMonSpecies(draftScreen);
   if (!lead) throw new Error("activeMonMoveset: no confirmed rental picks");
   return rentalMoveset(lead);
+}
+
+export function createBattleSetup(
+  draftScreen: DraftScreenState,
+  encounter: "destin" | "jenson",
+  playerPartyHp: readonly [number, number, number] = [117, 138, 153],
+): BattleSetupState {
+  const jenson = encounter === "jenson";
+  return {
+    battleNumber: jenson ? 2 : 1,
+    encounter,
+    trainerClass: jenson ? "FISHERMAN" : "BUG CATCHER",
+    trainerName: jenson ? "JENSON" : "DESTIN",
+    opponentLead: jenson ? "KABUTO" : "GROVYLE",
+    playerParty: ["ONIX", "MAGBY", "BAYLEEF"],
+    playerPartyHp,
+    activeMonMoveset: activeMonMoveset(draftScreen),
+  };
 }

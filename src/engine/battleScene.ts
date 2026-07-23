@@ -1042,6 +1042,9 @@ export const TICK0 = 1040;
 export interface BattleSceneState {
   /** Ticks since trace tick 1040. No phase split - every visual is a pure function of `TICK0 + elapsed` (see module doc); this must keep advancing (and rendering correctly) indefinitely past tick 1295, since the next slice's window starts mid-idle-cycle. */
   elapsed: number;
+  /** Encounter identity survives the room/setup handoff; render
+   * parameterization consumes this instead of consulting trace time. */
+  encounter?: "destin" | "jenson";
   /**
    * `elapsed` value of the A-PRESS-#3 tick (docs/battle-scene-notes.md §7.2)
    * once registered (`TICK0 + sendOutPressElapsed` is the actual trace

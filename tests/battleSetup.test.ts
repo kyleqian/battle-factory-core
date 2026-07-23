@@ -20,7 +20,7 @@
 //    independently-assembled expected image byte-for-byte.
 
 import { describe, expect, it } from "vitest";
-import { activeMonMoveset, rentalMoveset, type ActiveMonMoveset } from "../src/engine/battleSetup.ts";
+import { activeMonMoveset, createBattleSetup, rentalMoveset, type ActiveMonMoveset } from "../src/engine/battleSetup.ts";
 import { ANCHOR_DRAFT_SCREEN_STATE, type DraftScreenState } from "../src/engine/factoryDraftScreen.ts";
 import { createFramebuffer, SCREEN_WIDTH } from "../src/engine/framebuffer.ts";
 import { renderBattleScene } from "../src/engine/battleScene.ts";
@@ -46,6 +46,20 @@ const dump = (
 const CONFIRMED_DRAFT_SCREEN: DraftScreenState = { ...ANCHOR_DRAFT_SCREEN_STATE, selectedIds: [1, 2, 3, 0, 0, 0] };
 
 describe("battleSetup: activeMonMoveset/rentalMoveset (S8 engine dependency, docs/battle-menu-notes.md §13c)", () => {
+  it("preserves Battle 2 identity, healed party, and ONIX's actual moves through immutable setup state", () => {
+    const setup = createBattleSetup(CONFIRMED_DRAFT_SCREEN, "jenson");
+    expect(setup).toMatchObject({
+      battleNumber: 2,
+      encounter: "jenson",
+      trainerClass: "FISHERMAN",
+      trainerName: "JENSON",
+      opponentLead: "KABUTO",
+      playerParty: ["ONIX", "MAGBY", "BAYLEEF"],
+      playerPartyHp: [117, 138, 153],
+    });
+    expect(setup.activeMonMoveset.moveIds).toEqual(dump.battler0.moves);
+    expect(setup.activeMonMoveset.maxPP).toEqual(dump.battler0.pp);
+  });
   it("battle 1: the engine's own derivation equals the RAM-dumped gBattleMons moveset (battle2-turn1-battler-dump.json's battler0), not a hand-copied literal", () => {
     const moveset = activeMonMoveset(CONFIRMED_DRAFT_SCREEN);
     expect(moveset.moveIds).toEqual(dump.battler0.moves);

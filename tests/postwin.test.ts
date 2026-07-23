@@ -12,11 +12,14 @@ import {
 } from "../src/engine/core.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
 import {
+  BATTLE_2_SCENE_HANDOFF_ELAPSED,
+  INITIAL_BATTLE_2_ROOM_STATE,
   JENSON_MSGBOX_LINE1,
   JENSON_MSGBOX_LINE2,
   MSGBOX_APPEAR_ELAPSED,
   WARP_FADE_TO_ROOM_ELAPSED,
   battleRoomQuote,
+  battleRoomQuoteInputReady,
   msgboxPrintCompleteElapsed,
   opponentSetupExtraRngSteps,
 } from "../src/engine/battleRoom.ts";
@@ -618,5 +621,103 @@ describe("S8 Battle-1 postwin transition", () => {
     for (let i = 0; i < 5; i += 1) expected = advanceRngValue(expected);
     expect(next.rngMode).toBe("vblank");
     expect(next.rngValue).toBe(expected);
+  });
+
+  it("rejects the early JENSON quote edge, accepts the first ready and delayed edges, and preserves encounter identity", () => {
+    expect(battleRoomQuoteInputReady({
+      ...INITIAL_BATTLE_2_ROOM_STATE,
+      phase: "msgboxIdle",
+      elapsed: 1,
+    })).toBe(false);
+    expect(battleRoomQuoteInputReady({
+      ...INITIAL_BATTLE_2_ROOM_STATE,
+      phase: "msgboxIdle",
+      elapsed: 2,
+    })).toBe(true);
+
+    const base: EngineState = {
+      ...createInitialState(),
+      draftScreen: {
+        ...createInitialState().draftScreen,
+        selectedIds: [1, 2, 3, 0, 0, 0],
+      },
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: 10_000,
+        playerPartyHp: POSTWIN_HEALED_PARTY_HP,
+        rightThisWayDismissElapsed: 9_000,
+      },
+    };
+    const early = tick({
+      ...base,
+      battleRoom: { ...INITIAL_BATTLE_2_ROOM_STATE, phase: "msgboxIdle", elapsed: 1 },
+    }, new Set(["A"]));
+    expect(early.battleRoom).toEqual({
+      ...INITIAL_BATTLE_2_ROOM_STATE,
+      phase: "msgboxIdle",
+      elapsed: 2,
+    });
+
+    for (const elapsed of [2, 500]) {
+      const accepted = tick({
+        ...base,
+        battleRoom: { ...INITIAL_BATTLE_2_ROOM_STATE, phase: "msgboxIdle", elapsed },
+      }, new Set(["A"]));
+      expect(accepted.battleRoom).toEqual({
+        ...INITIAL_BATTLE_2_ROOM_STATE,
+        phase: "msgboxClosing",
+        elapsed: 0,
+      });
+    }
+  });
+
+  it("pins JENSON's rejection loops and carries genuine Battle 2 identity, healed party, and ONIX moves through the setup handoff", () => {
+    const steps = (elapsed: number) => opponentSetupExtraRngSteps({
+      ...INITIAL_BATTLE_2_ROOM_STATE,
+      phase: "settled",
+      elapsed,
+    });
+    expect([steps(0), steps(8), steps(15), steps(23)])
+      .toEqual([50, 22, 4, 1]);
+    expect(steps(1)).toBe(0);
+    expect(BATTLE_2_SCENE_HANDOFF_ELAPSED).toBe(209);
+
+    let state: EngineState = {
+      ...createInitialState(),
+      draftScreen: {
+        ...createInitialState().draftScreen,
+        selectedIds: [1, 2, 3, 0, 0, 0],
+      },
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: 20_000,
+        playerPartyHp: POSTWIN_HEALED_PARTY_HP,
+        rightThisWayDismissElapsed: 19_000,
+      },
+      battleRoom: {
+        ...INITIAL_BATTLE_2_ROOM_STATE,
+        phase: "settled",
+        elapsed: 0,
+      },
+    };
+    for (let i = 0; i < BATTLE_2_SCENE_HANDOFF_ELAPSED; i += 1) {
+      state = tick(state, new Set());
+    }
+    expect(state.postwin).toBeNull();
+    expect(state.battleRoom).toBeNull();
+    expect(state.battleScene?.encounter).toBe("jenson");
+    expect(state.battleSetup).toMatchObject({
+      battleNumber: 2,
+      encounter: "jenson",
+      trainerClass: "FISHERMAN",
+      trainerName: "JENSON",
+      opponentLead: "KABUTO",
+      playerParty: ["ONIX", "MAGBY", "BAYLEEF"],
+      playerPartyHp: [117, 138, 153],
+    });
+    expect(state.battleSetup?.activeMonMoveset.moveIds)
+      .toEqual([157, 20, 225, 201]);
+    expect(state.battleScene?.fightSubmenu.activeMonMoveset.moveIds)
+      .toEqual([157, 20, 225, 201]);
   });
 });

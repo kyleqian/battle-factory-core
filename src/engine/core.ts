@@ -77,9 +77,11 @@ import {
 } from "./prebattleRoomRender.ts";
 import {
   advanceBattleRoom,
+  battleRoomQuoteInputReady,
   entryStep,
   INITIAL_BATTLE_2_ROOM_STATE,
   INITIAL_BATTLE_ROOM_STATE,
+  BATTLE_2_SCENE_HANDOFF_ELAPSED,
   msgboxVisual,
   opponentSetupExtraRngSteps,
   SETTLED_SCENE_ELAPSED,
@@ -130,7 +132,7 @@ import {
   TURN6_ROCKSLIDE_REOPEN_GATE_DELAY,
   TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
 } from "./battleMenu.ts";
-import { activeMonMoveset, rentalMoveset } from "./battleSetup.ts";
+import { activeMonMoveset, createBattleSetup, rentalMoveset, type BattleSetupState } from "./battleSetup.ts";
 import {
   advancePostwin,
   acceptPostwinContinuation,
@@ -185,6 +187,8 @@ export interface EngineState {
   battleScene: BattleSceneState | null;
   /** Non-null from the accepted Battle-1 loss quote through the counter flow. */
   postwin: PostwinState | null;
+  /** Immutable identity/party/moveset selected for the current battle. */
+  battleSetup: BattleSetupState | null;
   /** gMain.inBattle-equivalent RNG ownership. */
   rngMode: "vblank" | "frontierBattle";
   /** gRngValue (src/random.c). */
@@ -210,6 +214,7 @@ export function createInitialState(): EngineState {
     battleRoom: null,
     battleScene: null,
     postwin: null,
+    battleSetup: null,
     rngMode: "vblank",
     rngValue: ANCHOR_RNG_VALUE,
   };
@@ -239,6 +244,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleRoom: BattleRoomState | null = state.battleRoom;
   let battleScene: BattleSceneState | null = state.battleScene;
   let postwin: PostwinState | null = state.postwin;
+  let battleSetup: BattleSetupState | null = state.battleSetup;
 
   if (postwin) {
     let nextPostwin = advancePostwin(postwin);
@@ -253,7 +259,39 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         battleRoom = INITIAL_BATTLE_2_ROOM_STATE;
       }
     } else if (battleRoom) {
-      battleRoom = advanceBattleRoom(battleRoom);
+      if (battleRoomQuoteInputReady(battleRoom) && newKeys.has("A")) {
+        battleRoom = {
+          ...battleRoom,
+          phase: "msgboxClosing",
+          elapsed: 0,
+        };
+      } else {
+        battleRoom = advanceBattleRoom(battleRoom);
+        for (let i = 0; i < opponentSetupExtraRngSteps(battleRoom); i += 1) {
+          rngValue = advanceRngValue(rngValue);
+        }
+        if (
+          battleRoom.phase === "settled" &&
+          battleRoom.encounter === "jenson" &&
+          battleRoom.elapsed === BATTLE_2_SCENE_HANDOFF_ELAPSED
+        ) {
+          battleSetup = createBattleSetup(
+            draftScreen,
+            "jenson",
+            nextPostwin.playerPartyHp,
+          );
+          battleRoom = null;
+          battleScene = {
+            ...INITIAL_BATTLE_SCENE_STATE,
+            encounter: "jenson",
+            fightSubmenu: {
+              ...CLOSED_FIGHT_SUBMENU_STATE,
+              activeMonMoveset: battleSetup.activeMonMoveset,
+            },
+          };
+          postwin = null;
+        }
+      }
     } else if (
       nextPostwin.healDismissElapsed === null &&
       newKeys.has("A")
@@ -308,7 +346,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     for (let i = alreadyAdvanced; i < totalSteps; i += 1) {
       rngValue = advanceRngValue(rngValue);
     }
-    if (nextPostwin.elapsed >= POSTWIN_IN_BATTLE_CLEAR_AGE) {
+    if (
+      postwin !== null &&
+      nextPostwin.elapsed >= POSTWIN_IN_BATTLE_CLEAR_AGE
+    ) {
       rngMode = "vblank";
       battleScene = null;
     }
@@ -321,7 +362,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       prebattleRoom,
       battleRoom,
       battleScene,
-      postwin: nextPostwin,
+      postwin: postwin === null ? null : nextPostwin,
+      battleSetup,
       rngMode,
       rngValue,
     };
@@ -877,8 +919,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // "idle" -> "messageClosing" gate: created directly (not via
     // advanceBattleRoom) so this same tick already reflects it - see
     // battleRoom.ts's §8.3 doc for the close-latency derivation.
-    if (battleRoom.phase === "msgboxIdle" && newKeys.has("A")) {
-      battleRoom = { phase: "msgboxClosing", elapsed: 0 };
+    if (battleRoomQuoteInputReady(battleRoom) && newKeys.has("A")) {
+      battleRoom = { ...battleRoom, phase: "msgboxClosing", elapsed: 0 };
     } else {
       battleRoom = advanceBattleRoom(battleRoom);
       for (let i = 0; i < opponentSetupExtraRngSteps(battleRoom); i += 1) {
@@ -889,11 +931,19 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // indefinite on its own - this is the fixed elapsed count matching
       // the ground-truth trace's own window start (trace tick 1040).
       if (battleRoom?.phase === "settled" && battleRoom.elapsed === BATTLE_SCENE_HANDOFF_ELAPSED) {
+        battleSetup = createBattleSetup(draftScreen, battleRoom.encounter ?? "destin");
         battleRoom = null;
-        battleScene = INITIAL_BATTLE_SCENE_STATE;
+        battleScene = {
+          ...INITIAL_BATTLE_SCENE_STATE,
+          encounter: battleSetup.encounter,
+          fightSubmenu: {
+            ...CLOSED_FIGHT_SUBMENU_STATE,
+            activeMonMoveset: battleSetup.activeMonMoveset,
+          },
+        };
       }
     }
-    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, rngMode, rngValue };
+    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, battleSetup, rngMode, rngValue };
   }
 
   if (prebattleRoom) {

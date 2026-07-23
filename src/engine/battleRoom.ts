@@ -85,6 +85,10 @@ export const INITIAL_BATTLE_2_ROOM_STATE: BattleRoomState = {
   encounter: "jenson",
 };
 
+/** Battle 2's ASYMMETRIC_SPIRAL_IN_SEQ transition reaches the battle-scene
+ * black hold at this encounter-relative settled age. */
+export const BATTLE_2_SCENE_HANDOFF_ELAPSED = 209;
+
 /**
  * Extra, non-VBlank Random() calls made while the opponent party and battle
  * transition are prepared. `settled.elapsed === 0` is the frame the first
@@ -99,6 +103,20 @@ export const INITIAL_BATTLE_2_ROOM_STATE: BattleRoomState = {
  */
 export function opponentSetupExtraRngSteps(state: BattleRoomState): number {
   if (state.phase !== "settled") return 0;
+  if (state.encounter === "jenson") {
+    switch (state.elapsed) {
+      case 0:
+        return 25 * 2;
+      case 8:
+        return 11 * 2;
+      case 15:
+        return 2 * 2;
+      case 23:
+        return 1;
+      default:
+        return 0;
+    }
+  }
   switch (state.elapsed) {
     case 0:
       return 28 * 2;
@@ -142,7 +160,9 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
       // MSGBOX_DEFAULT blocks on player A - core.ts detects the press and
       // starts "msgboxClosing" directly (see that section's doc); this case
       // only covers ticks with no press yet, holding byte-identical.
-      return state;
+      return state.encounter === "jenson"
+        ? { ...state, elapsed: state.elapsed + 1 }
+        : state;
     case "msgboxClosing": {
       const elapsed = state.elapsed + 1;
       if (elapsed >= MSGBOX_CLOSE_TICKS) return { ...state, phase: "settled", elapsed: 0 };
@@ -151,6 +171,11 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
     case "settled":
       return { ...state, phase: "settled", elapsed: state.elapsed + 1 };
   }
+}
+
+export function battleRoomQuoteInputReady(state: BattleRoomState): boolean {
+  if (state.phase !== "msgboxIdle") return false;
+  return state.encounter !== "jenson" || state.elapsed >= 2;
 }
 
 /**
