@@ -583,6 +583,7 @@ import {
   FIRE_PUNCH_BURN_MESSAGE_AGE,
   FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE,
   FIRE_PUNCH_TURN17_MENU_REDRAW_AGE,
+  TURN16_FIRE_PUNCH_RESOLUTION,
   TURN17_FIRE_PUNCH_ENTRY_AGE,
   TURN17_FIRE_PUNCH_RESOLUTION,
   TURN17_FAINTED_LINE1,
@@ -13053,9 +13054,11 @@ function drawTurn16PostSwitchField(
   const animBg = faintAttackAge === null ? null : faintAttackBgState(faintAttackAge);
   const firePunchAge = faintAttackAge === null ? null : faintAttackAge - firePunchEpochAge;
   const ownsFirePunch = firePunchAge !== null && firePunchAge >= 0;
+  const firePunchResolutionProfile =
+    firePunchProfile ?? TURN16_FIRE_PUNCH_RESOLUTION;
   const firePunchFaint =
     ownsFirePunch
-      ? firePunchFaintState(firePunchAge, firePunchProfile ?? undefined)
+      ? firePunchFaintState(firePunchAge, firePunchResolutionProfile)
       : null;
   const sourcePpu = animBg?.background === "dark" ? turn16DarkFieldPpu : turn15FieldPpuAsset;
   const releasedPalette = releaseTick === null
@@ -13084,7 +13087,7 @@ function drawTurn16PostSwitchField(
   if (ownsFirePunch) {
     const resolution = firePunchResolutionState(
       firePunchAge,
-      firePunchProfile ?? undefined,
+      firePunchResolutionProfile,
     );
     const coeff = firePunchTargetBlendCoeff(firePunchAge);
     const palette = coeff === 0

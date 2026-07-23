@@ -302,7 +302,7 @@ export const TURN17_FAINTED_TEXT_TOTAL =
  */
 export function firePunchFaintState(
   age: number,
-  profile: FirePunchResolutionProfile = TURN17_FIRE_PUNCH_RESOLUTION,
+  profile: FirePunchResolutionProfile,
 ): FirePunchFaintState | null {
   const faint = profile.faint;
   if (!faint || age < profile.hpCommitAge) return null;

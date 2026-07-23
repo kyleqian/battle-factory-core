@@ -14,6 +14,7 @@ import {
   TURN17_FIRE_PUNCH_ENTRY_AGE,
   TURN17_FIRE_PUNCH_HP_COMMIT_AGE,
   TURN17_FIRE_PUNCH_RESOLUTION,
+  TURN16_FIRE_PUNCH_RESOLUTION,
   TURN17_FAINTED_TEXT_TOTAL,
 } from "../src/engine/firePunch.ts";
 import ember from "../src/assets/gen/battle-anim-small-ember.json" with { type: "json" };
@@ -97,6 +98,7 @@ describe("FIRE_PUNCH source-derived reducers", () => {
   });
 
   it("pins Turn 17's sink, teardown, text cadence, and input gate", () => {
+    expect(firePunchFaintState(1_000, TURN16_FIRE_PUNCH_RESOLUTION)).toBeNull();
     expect(firePunchFaintState(226, TURN17_FIRE_PUNCH_RESOLUTION)).toBeNull();
     expect(firePunchFaintState(227, TURN17_FIRE_PUNCH_RESOLUTION)).toMatchObject({
       sink: null,
