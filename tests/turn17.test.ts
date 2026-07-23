@@ -166,6 +166,8 @@ describe("turn 17 faint hold and outcome latency", () => {
     expect(TURN17_OUTCOME_CURSOR_START_DELAY).toBe(61);
     expect(turn17OutcomeDismissEligible(158, faintDismiss)).toBe(false);
     expect(turn17OutcomeDismissEligible(159, faintDismiss)).toBe(true);
+    expect(turn17OutcomeMessageState(169, faintDismiss + 10, null))
+      .toEqual(turn17OutcomeMessageState(159, faintDismiss, null));
   });
 
   it("rejects an early second A and holds indefinitely without input", () => {
