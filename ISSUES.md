@@ -27,59 +27,44 @@ delay-specific, or baked-frame patch. Reopen only if the engine gains a
 general cycle/register-queue model; this extra delayed-control frame does not
 block the roadmap's canonical S7 acceptance.
 
-## #34 — Turn 14's `17781-17787` (7 ticks) and `17822-17845` (24 ticks,
-  kerning-class) windows still excluded from `turn14-fly-miss.json`;
-  the `17722-17768` reopen family (43 ticks) is now FULLY CLOSED
+## #34 — Turn 14 FLY-up affine coverage at `17781-17787` remains excluded
 
-Opened 2026-07-21/22, **core fixed 2026-07-22** (wiring step,
-`docs/turn13-bounce-notes.md` §§10-11): turn 14's own settled-menu redraw
-(`TURN14_MENU_REDRAW_TICK`=18086) had the same missing 6-tick blank hold
-#33(b) found at turn 13's own switch-in, PLUS the bounce regime turned out
-to RESET fresh at the redraw rather than continue turn 13's live cycle
-(0/871 RAM mismatches for RESET vs. 871/871 for CONTINUE, §10c). Wired
-verbatim per §10d: new `TURN14_MENU_TEXT_CLEAR_TICK`(18080) blank-hold
-branch + `TURN14_MENU_REDRAW_RESET_SHIFT` replacing the borrowed
-`TURN13_SWITCHIN_RESET_SHIFT` in `drawTurn14FlyMissWindow`'s settled
-branch. `turn14-fly-miss.json` **165/165, 0 diff** (was 150/150; the 15
-predicted ticks 18080-18090/18095/18415/18815/18956 all restored clean,
-first try).
+The separate `17822-17845` one-glyph timing family is **closed
+2026-07-23**: its source-timed printer repair extends
+`turn14-fly-miss.json` from 185 to **206/206 exact**. The earlier
+`17722-17768` PP/redraw/bounce family also remains closed.
 
-**`17722-17768` (43 ticks) CLOSED 2026-07-22** (rider fix, `docs/turn13-
-bounce-notes.md` §13): the missing `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
-correction (§12's root cause) plus one adjacent, independently-discovered
-bug — `drawTurn14FightSubmenuWindow`'s own `drawFightSubmenuChrome` call
-was missing one `true` (`turn13Resolved`), under-counting DRAGON_BREATH's
-PP by 1 (19/20 rendered vs. oracle's 18/20) for the ENTIRE FIGHT-submenu-
-open span, independent of the bounce formula — together close all 43
-ticks, including the 11 (`17758-17768`) previously ruled OUT of the
-shift rule's own scope (RAM-correctly predicted the frozen bounce there,
-but rendered the same wrong PP digit) and the single-tick confirm-press
-blip (17755). `turn14-fly-miss.json`: **185/185, 0 diff**.
+Fresh RAM, final-OAM, VRAM, palette, and baseline-subtracted framebuffer
+evidence isolates the only remainder to the first seven visible FLY-ball
+frames. Whole-frame residuals are ball-footprint-only
+**22/42/58/76/94/112/40 px**. The source/OAM-proven object is affine-double
+**64x64** (not 32x32), and the verifier reconstructs its full 2048-byte live
+transfer in the 128x128 destination box. The existing generic
+floor/destination-center-64/source-center-32 convention is the strict best of
+six plausible variants: aggregate **TP 8404, FP 444, FN 0**, with each
+frame's false-positive count exactly equal to the whole-frame residual.
+Alternative rounding and half-pixel centers are all worse.
 
-**`17781-17787` probed 2026-07-23, still open:** fresh RAM/OAM/VRAM/palette
-and framebuffer methods rule out PP, menu redraw, bounce, transfer, palette,
-position, lifetime, and matrix timing. These are the first seven visible FLY
-ball frames; residuals are ball-footprint-only (22/42/58/76/94/112/40 px)
-while the renderer already consumes the exact live affine-double matrices.
-This is a bounded high-compression/high-stretch affine-sampler defect. Exact
-next instrument: `docs/turn14-flyup-opening-probe.md`'s blank-frame,
-baseline-subtracted final-OAM experiment. Do not fit a tick patch.
+This proves the current sampler is already the best tested general rule and
+rules out timeline, matrix, object size, iteration box, transfer, palette,
+position, and the tested center/rounding variants. Do not add a FLY,
+tick, or matrix exception. Reopen only with an independently justified GBA
+PPU coverage rule, first evaluated by
+`tools/probe/verify-turn14-flyup-affine-sampler.ts` and then against
+`turn14-fly-miss.json` (**206/206**) and `turn13-switchin.json`
+(**242/242**). Full evidence: `docs/turn14-flyup-opening-probe.md`.
 
-**`17822-17845` remains separate and unprobed:** 24 kerning-class ticks per
-#33(b)'s dossier. Both windows stay excluded from `turn14-fly-miss.json`
-(185/185); neither is related to the now-closed PP/redraw family.
-
-## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
-  escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of
-  turn2-dragonbreath.json remain uncaptured after 4 bounded attempts
+## #23 — [PARKED 2026-07-20, supervisor decision] DRAGON_BREATH compressed
+  fire-projectile overdraw: renders 3177-3235 remain uncaptured
 
 Opened 2026-07-20 (supervisor). The 8 fire-projectile sprites of
 `Move_DRAGON_BREATH` (small_ember gfx, spawn every 4 ticks, 20-tick life)
 are the sole un-landed mechanism of turn 2; `turn2-dragonbreath.json` ships
-**166/166** with 3177-3235 excluded from `captureFrames` (this run's
+**235/235** with 3177-3235 excluded from `captureFrames` (this run's
 standard treatment of un-green spans — never committed red). Everything
 around it is green: kickoff text 3121-3176, shake/blend 3236-3263,
-resolution half 3264-3346.
+resolution 3264-3346, and the settled tail through 3846 apart from its
+three separately documented single-tick bounce exclusions.
 
 **Settled by the four attempts (do NOT re-derive):**
 - Geometry: 21-entry `gOamMatrices` table (`a===d`, `b===-c`, identical
@@ -101,19 +86,25 @@ resolution half 3264-3346.
 - An extra-tick-of-life hypothesis was tested and made tick 3220 worse
   (342→649px); reverted.
 
-**Residual, precisely characterized:** salt-and-pepper edge OVER-DRAW when
-the sprite is compressed (`|matrixA|>256`) versus an isolated MISSING blob
-when magnified (`|matrixA|<256`), with a correctly-matching core in both
-regimes — possibly TWO separate defects. Note the working ball-spin
-precedent never exceeds `|pa|=255` while DRAGON_BREATH starts at 703, so
-this scale regime is genuinely unexercised elsewhere in the engine.
+**Fresh sole-sprite isolation (2026-07-23) narrows the residual:** the prior
+render-3223/RAM-3222 magnified case was invalid because four projectiles were
+live. An exhaustive 3168-3234 RAM scan finds the sole magnified window at
+RAM 3231-3234. The repaired verifier reports:
 
-**Named next instrument (never attempted):** isolate a single spawn —
-render spawn 7 alone to a blank canvas and diff against an oracle capture
-with all other content subtracted — rather than fitting against
-whole-scene diffs, which is what defeated the "which n" arithmetic in
-attempt #3. Full derivations: `docs/dragon-breath-notes.md`, sections
-"Engine slice E2a-3", "E2a-4", "E2a-5".
+- compressed render 3177/RAM 3176: oracle mask 10 px, **TP 10, FP 34,
+  FN 0**;
+- sole-live magnified render 3232/RAM 3231: oracle mask 128 px,
+  **TP 128, FP 0, FN 0**.
+
+The claimed magnified missing blob is therefore falsified. The shared sampler
+is pixel-exact when genuinely isolated in the magnified regime; only bounded
+compressed overdraw remains. Do not change the generic affine sampler from
+this evidence. The next useful probe is source-data decomposition within the
+compressed regime (native sheet/frame selection and coverage before scene
+composition), using the repaired sole-live candidate audit as a guard.
+Full evidence and runnable verifier:
+`docs/dragon-breath-notes.md` and
+`tools/probe/verify-dragonbreath-spawn7-isolation.ts`.
 
 ## #18 — [POLICY SETTLED 2026-07-19, user decision] sendout tick 1496
   (particle z-order, 3px): accepted/parked permanently; S6 ticked [x] with

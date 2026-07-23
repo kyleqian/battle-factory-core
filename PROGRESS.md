@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 325 — S8 reset gates 1/3 complete; swap UI advancing: **GREEN**
+
+- **State:** the generic seven-battle core and staged OFF portability proof
+  complete reset gates **1 and 3**. Gate 2 is partial: the live swap-YES
+  presentation is **101/101** through the input-ready player picker and
+  **36/36** through its action fade/slide. Supervisor verification is
+  **1177/1177**, build **5.546 MB**, and the staged turn is **16/16**.
+- **Did:** landed source-exact indexes 0–6 trainer scheduling/RNG, round
+  healing/win/loss/swap/completion control, source swap/terminal contracts,
+  and a relative Scene-OFF staged turn seam. Closed the swap entry and action
+  transition. The ON lane closed Murkrow transfer and FLY text timing
+  (`turn14-fly-miss` **206/206**), proved the seven-frame FLY affine remainder
+  unsafe to patch, and narrowed DRAGON_BREATH to compressed-only overdraw.
+- **Next:** continue the OFF swap options at edge **+36** / tick **29738**:
+  implement the mon-picture aperture, settled options, enemy picker,
+  accept/exit/message, and post-swap identity. Then render the source-extracted
+  loss and seventh-win endings. Do not resume the canonical Battle-2 march.
+- **Notes:** no deferred decision. S8 remains `[~]` with only unique-UI gate 2
+  open. Keep all clocks phase-relative and preserve the two exact swap prefixes.
+
+---
 ## 324 — S8 swap action fade/slide: **GREEN — 36/36 exact**
 
 - **State:** `battle1-swap-player-options.json` now captures every frame from
@@ -41,22 +62,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   dense comparison exposed the separate action-fade phase. Enemy picker,
   accept popup, accepted exit/message, and post-swap GROVYLE continuation
   remain open.
-
----
-## 322 — S8 live swap-YES player-picker prefix: **GREEN — 101/101 exact**
-
-- **State:** offer YES now enters the presentation-acknowledged swap controller;
-  the explicit-OFF `battle1-swap-player-picker.json` is **101/101 exact** over
-  every frame from the held offer through the input-ready player picker.
-  Tier-1 is **1175/1175** and build passes (**5.545 MB**).
-- **Did:** added a relative accepted-edge adapter, source-table ball motion,
-  code-native/extracted picker compositor, canonical player/offered parties,
-  and live input wiring. The entry gate (+99), player-options (+79),
-  enemy-picker (+199), accept (+99), mutation, and preserved NO path are
-  Tier-1 pinned. No screenshots or absolute-tick render branches were added.
-- **Next:** extend the same state-driven adapter through player options, party
-  slide, enemy picker, accept popup, accepted exit/message, and continuation.
-  Do not expose hard-coded ONIX after the accepted GROVYLE mutation.
-- **Notes:** the committed exact trace claims the complete entry/picker dynamic
-  window only; options/enemy/accept/exit pixels and post-swap Battle-2 identity
-  remain open. Controller state already reaches accepted GROVYLE.

@@ -509,22 +509,36 @@ targeted oracle probes instead of replaying the complete prefix.
 
 Stage 8 has three finite completion gates:
 
-1. **Generic round core:** a pure, data-driven controller supports battle
+1. [x] **Generic round core:** a pure, data-driven controller supports battle
    indexes 0–6, deterministic opponent generation/no-repeat rules, per-battle
    healing, swap accept/decline party changes, advancement after wins, loss
    from every index, and seventh-win completion. Tier-1 scenario tests cover
    all seven wins plus representative losses/swaps without battle-number,
    turn-number, or absolute-tick rendering branches.
-2. **Unique remaining UI:** the swap-YES screen and interactions, loss ending,
+2. [ ] **Unique remaining UI:** the swap-YES screen and interactions, loss ending,
    and seventh-win/round-summary ending are implemented and proven with
    committed dense OFF-profile traces over their unique dynamic windows.
    Repeated inter-battle NO traversal may reuse the generic controller and
    needs state coverage, not six full pixel replays.
-3. **Portability proof:** one staged Battle 2 turn runs end-to-end through the
+3. [x] **Portability proof:** one staged Battle 2 turn runs end-to-end through the
    generic battle/presentation seam under Battle Scene OFF, from action choice
    through logical resolution and the next input-ready state. Its core outcome
    is source/RAM pinned, and a short representative trace passes compare. This
    is one proof, not the start of another turn-by-turn ladder.
+
+**Reset-gate checkpoint (2026-07-23, supervisor-accepted):** gates 1 and 3
+are complete. `roundController.ts` and the source-derived Factory trainer
+schedule cover indexes 0–6, healing, accept/decline swaps, all seven wins,
+representative losses, no-repeat selection, and terminal completion through
+pure scenario tests. The staged OFF-profile ROCK SLIDE proof consumes the
+source/RAM-pinned 12-call RNG sequence, reaches the exact logical outcome,
+and is **16/16 exact** through the next accepted input. Gate 2 remains open:
+the pure swap controller and source-extracted loss/seventh-win policies are
+banked, while the live swap-YES presentation is exact through its input-ready
+player picker (**101/101**) and the complete action fade/slide (**36/36**).
+The next distinct mechanism is the mon-picture aperture at options edge +36;
+enemy selection, accept/exit, loss ending, and seventh-win ending still need
+dense OFF-profile UI proofs. S8 therefore remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
 Historical traces below remain Battle Scene ON regression evidence. The

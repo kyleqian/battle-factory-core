@@ -12,6 +12,25 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Worker-lane lifecycle can take down shared oracle profiles (2026-07-23)
+
+- **What:** both Battle Scene ON and OFF services disappeared while worker
+  lanes were cycling; supervisor compares failed with `ECONNREFUSED` until
+  each profile was restarted in a retained direct session.
+- **Hits:** 1.
+- **Cost each:** ~5 min.
+- **Workaround:** check both named profile health after lane teardown and keep
+  replacement service sessions alive through supervisor verification.
+
+## Temporary compare traces resolve `sourceTrace` relative to themselves (2026-07-23)
+
+- **What:** moving an ad hoc trace to `/tmp` broke its relative `sourceTrace`
+  reference even though the referenced committed trace still existed.
+- **Hits:** 1.
+- **Cost each:** ~1 min.
+- **Workaround:** keep temporary derived traces beside the committed traces,
+  or rewrite `sourceTrace` to a valid path before moving them.
+
 ## Sparse boundary ledger survived after dense replay contradicted it (2026-07-23)
 
 - **What:** the Battle-2 opening ledger labeled the action-menu clear/reveal
@@ -255,7 +274,7 @@ compare run exposed the staleness.
   mGBA BIOS/DMA trace spew; it actually lands on stdout, so `2>log` still
   buries results under megabytes of log lines. The latest
   `dump-turn15-sendout.py` run also exited 139 after writing valid JSON.
-- **Hits:** 14 sessions (the first hit twice within its session).
+- **Hits:** 15 sessions (the first hit twice within its session).
 - **Cost each:** ~2-5 min.
 - **Workaround:** `>out 2>&1` and read the results FILE the probe
   writes (never parse stdout) — consistent with the ROADMAP recipe's
@@ -321,7 +340,7 @@ compare run exposed the staleness.
   during Python interpreter teardown) AFTER their JSON output is fully
   and correctly written. Two workers in one session each spent ~2 min
   re-validating output they nearly discarded as a failed run.
-- **Hits:** 8 sessions (multiple probe processes in some).
+- **Hits:** 9 sessions (multiple probe processes in some).
 - **Cost each:** ~2 min + the risk of discarding good data.
 - **Workaround:** check the output file's validity (json.load) instead
   of trusting the exit code; a docstring line in each script saying

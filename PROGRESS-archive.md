@@ -1,3 +1,22 @@
+## 322 — S8 live swap-YES player-picker prefix: **GREEN — 101/101 exact**
+
+- **State:** offer YES now enters the presentation-acknowledged swap controller;
+  the explicit-OFF `battle1-swap-player-picker.json` is **101/101 exact** over
+  every frame from the held offer through the input-ready player picker.
+  Tier-1 is **1175/1175** and build passes (**5.545 MB**).
+- **Did:** added a relative accepted-edge adapter, source-table ball motion,
+  code-native/extracted picker compositor, canonical player/offered parties,
+  and live input wiring. The entry gate (+99), player-options (+79),
+  enemy-picker (+199), accept (+99), mutation, and preserved NO path are
+  Tier-1 pinned. No screenshots or absolute-tick render branches were added.
+- **Next:** extend the same state-driven adapter through player options, party
+  slide, enemy picker, accept popup, accepted exit/message, and continuation.
+  Do not expose hard-coded ONIX after the accepted GROVYLE mutation.
+- **Notes:** the committed exact trace claims the complete entry/picker dynamic
+  window only; options/enemy/accept/exit pixels and post-swap Battle-2 identity
+  remain open. Controller state already reaches accepted GROVYLE.
+
+---
 ## 320 — S8 OFF turn portability proof: **GREEN — 16/16 exact**
 
 - **State:** the staged Battle-2 turn resolves through a reusable logical
