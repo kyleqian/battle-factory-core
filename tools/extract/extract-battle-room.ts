@@ -234,10 +234,16 @@ function writeJson(path: string, data: unknown): void {
   // OBJ_EVENT_PAL_TAG_NPC_1, also the standard 9-frame sheet.
   const opponentFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "bug_catcher.png"));
   const opponentPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_1.pal"));
+  // Battle 2's canonical opponent JENSON is FACILITY_CLASS_FISHERMAN.
+  // The same SetBattleFacilityTrainerGfxId lookup resolves that class to
+  // OBJ_EVENT_GFX_FISHERMAN (battle_tower.c's parallel class/gfx tables).
+  const fishermanFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "fisherman.png"));
+  const fishermanPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_2.pal"));
 
   writeJson(join(ASSETS_GEN, "battle-room-npcs.json"), {
     player: { frames: playerFrames, palette: playerPalette },
     scientist: { frames: scientistFrames, palette: scientistPalette },
     opponent: { frames: opponentFrames, palette: opponentPalette },
+    fisherman: { frames: fishermanFrames, palette: fishermanPalette },
   });
 }

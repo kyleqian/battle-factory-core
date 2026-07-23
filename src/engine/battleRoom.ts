@@ -73,10 +73,17 @@ export interface BattleRoomState {
   phase: BattleRoomPhase;
   /** Ticks since the first visible room frame (0 = trace tick 520, the ground-truth trace's own frame boundary - docs/battle-bringup-notes.md "Slice-0 ground truth" §2). */
   elapsed: number;
+  /** Encounter-selected overworld gfx and Easy Chat opening quote. */
+  encounter?: "destin" | "jenson";
 }
 
 /** core.ts creates this the tick prebattleRoom's "warpFade" phase reaches the fixed elapsed count matching trace tick 520 (see core.ts's handoff). */
 export const INITIAL_BATTLE_ROOM_STATE: BattleRoomState = { phase: "entering", elapsed: 0 };
+export const INITIAL_BATTLE_2_ROOM_STATE: BattleRoomState = {
+  phase: "entering",
+  elapsed: 0,
+  encounter: "jenson",
+};
 
 /**
  * Extra, non-VBlank Random() calls made while the opponent party and battle
@@ -126,8 +133,10 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
   switch (state.phase) {
     case "entering": {
       const elapsed = state.elapsed + 1;
-      if (elapsed >= MSGBOX_PRINT_COMPLETE_ELAPSED) return { phase: "msgboxIdle", elapsed: 0 };
-      return { phase: "entering", elapsed };
+      if (elapsed >= msgboxPrintCompleteElapsed(state)) {
+        return { ...state, phase: "msgboxIdle", elapsed: 0 };
+      }
+      return { ...state, phase: "entering", elapsed };
     }
     case "msgboxIdle":
       // MSGBOX_DEFAULT blocks on player A - core.ts detects the press and
@@ -136,11 +145,11 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
       return state;
     case "msgboxClosing": {
       const elapsed = state.elapsed + 1;
-      if (elapsed >= MSGBOX_CLOSE_TICKS) return { phase: "settled", elapsed: 0 };
-      return { phase: "msgboxClosing", elapsed };
+      if (elapsed >= MSGBOX_CLOSE_TICKS) return { ...state, phase: "settled", elapsed: 0 };
+      return { ...state, phase: "msgboxClosing", elapsed };
     }
     case "settled":
-      return { phase: "settled", elapsed: state.elapsed + 1 };
+      return { ...state, phase: "settled", elapsed: state.elapsed + 1 };
   }
 }
 
@@ -451,6 +460,8 @@ export const MSGBOX_APPEAR_ELAPSED = 198;
 /** BattleFrontier_BattleFactoryBattleRoom_EventScript_BattleOpponent's palace_getopponentintro-buffered speech (docs/battle-room-notes.md §8.2) - the curly apostrophe is charmap code 180, the plain ASCII "'" isn't in the charmap. */
 export const MSGBOX_LINE1 = "IT’S WAY TOO";
 export const MSGBOX_LINE2 = "HOT HERE";
+export const JENSON_MSGBOX_LINE1 = "MY POKéMON WILL";
+export const JENSON_MSGBOX_LINE2 = "MAKE YOU DOWNCAST";
 /** Total printable characters across both lines - the print's own duration in ticks (1 tick/char, including space ticks). */
 export const MSGBOX_PRINT_TICKS = MSGBOX_LINE1.length + MSGBOX_LINE2.length;
 /** First elapsed tick of "msgboxIdle" (fully printed, static) - trace tick 738. */
@@ -473,9 +484,22 @@ export interface MsgboxVisual {
   chars: number;
 }
 
-const MSGBOX_HIDDEN: MsgboxVisual = { visible: false, chars: 0 };
-const MSGBOX_FULL: MsgboxVisual = { visible: true, chars: MSGBOX_PRINT_TICKS };
+export function battleRoomQuote(state: BattleRoomState): readonly [string, string] {
+  return state.encounter === "jenson"
+    ? [JENSON_MSGBOX_LINE1, JENSON_MSGBOX_LINE2]
+    : [MSGBOX_LINE1, MSGBOX_LINE2];
+}
 
+export function msgboxPrintTicks(state: BattleRoomState): number {
+  const [line1, line2] = battleRoomQuote(state);
+  return line1.length + line2.length;
+}
+
+export function msgboxPrintCompleteElapsed(state: BattleRoomState): number {
+  return MSGBOX_APPEAR_ELAPSED + msgboxPrintTicks(state);
+}
+
+const MSGBOX_HIDDEN: MsgboxVisual = { visible: false, chars: 0 };
 /** "entering" phase's own msgbox visual - a pure function of the (still-global) elapsed counter, matching scientistTurnFrame/opponentStep's own convention. */
 function enteringMsgboxVisual(elapsed: number): MsgboxVisual {
   if (elapsed < MSGBOX_APPEAR_ELAPSED) return MSGBOX_HIDDEN;
@@ -484,12 +508,13 @@ function enteringMsgboxVisual(elapsed: number): MsgboxVisual {
 
 /** Per-phase message-box visual (battleRoomRender.ts/core.ts consume this directly - see module doc for the per-phase derivation). */
 export function msgboxVisual(state: BattleRoomState): MsgboxVisual {
+  const full = { visible: true, chars: msgboxPrintTicks(state) };
   switch (state.phase) {
     case "entering":
       return enteringMsgboxVisual(state.elapsed);
     case "msgboxIdle":
     case "msgboxClosing":
-      return MSGBOX_FULL;
+      return full;
     case "settled":
       return MSGBOX_HIDDEN;
   }

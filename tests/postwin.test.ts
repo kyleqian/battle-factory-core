@@ -11,13 +11,27 @@ import {
   type EngineState,
 } from "../src/engine/core.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
-import { opponentSetupExtraRngSteps } from "../src/engine/battleRoom.ts";
+import {
+  JENSON_MSGBOX_LINE1,
+  JENSON_MSGBOX_LINE2,
+  MSGBOX_APPEAR_ELAPSED,
+  WARP_FADE_TO_ROOM_ELAPSED,
+  battleRoomQuote,
+  msgboxPrintCompleteElapsed,
+  opponentSetupExtraRngSteps,
+} from "../src/engine/battleRoom.ts";
+import {
+  MESSAGE_CLOSING_TICKS,
+  WALK_TICKS,
+  walkVisual,
+} from "../src/engine/prebattleRoom.ts";
 import {
   advancePostwin,
   acceptPostwinContinuation,
   acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
   acceptPostwinSwapDecline,
+  acceptPostwinRightThisWayDismiss,
   INITIAL_POSTWIN_STATE,
   POSTWIN_BATTLE_BLACK_AGE,
   POSTWIN_BATTLE_FADE_FIRST_AGE,
@@ -464,6 +478,119 @@ describe("S8 Battle-1 postwin transition", () => {
     expect(held.postwin!.playerPartyHp).toEqual(POSTWIN_HEALED_PARTY_HP);
     expect(held.rngValue).toBe(advanceRngValue(advanceRngValue(seed)));
     expect(postwinRngSteps(held.postwin!.elapsed)).toBe(1);
+  });
+
+  it("rejects the tick before the guide-message gate, stores arbitrary accepted/delayed edges, and starts the shared walk clock", () => {
+    const declineEdge = 1_000;
+    const guideState = (elapsed: number): EngineState => ({
+      ...createInitialState(),
+      rngMode: "vblank",
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed,
+        healDismissElapsed: 1,
+        playerPartyHp: POSTWIN_HEALED_PARTY_HP,
+        dialoguePage: 4,
+        dialoguePageEdgeElapsed: 900,
+        swapCursorPos: 1,
+        swapCursorDisplayPos: 1,
+        swapDeclineElapsed: declineEdge,
+      },
+    });
+
+    const early = tick(
+      guideState(declineEdge + POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY - 1),
+      new Set(["A"]),
+    );
+    expect(early.postwin!.rightThisWayDismissElapsed).toBeNull();
+    expect(early.prebattleRoom).toBeNull();
+
+    const accepted = tick(
+      guideState(declineEdge + POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY),
+      new Set(["A"]),
+    );
+    expect(accepted.postwin!.rightThisWayDismissElapsed)
+      .toBe(declineEdge + POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY + 1);
+    expect(accepted.prebattleRoom)
+      .toEqual({ phase: "messageClosing", elapsed: 0 });
+
+    const delayedBase = declineEdge + 200;
+    const delayed = tick(guideState(delayedBase), new Set(["A"]));
+    expect(delayed.postwin!.rightThisWayDismissElapsed).toBe(delayedBase + 1);
+    expect(acceptPostwinRightThisWayDismiss({
+      ...delayed.postwin!,
+      elapsed: delayedBase + 20,
+    }).rightThisWayDismissElapsed).toBe(delayedBase + 1);
+  });
+
+  it("reuses relative close/walk/warp/room clocks and settles on JENSON's input-ready quote", () => {
+    const declineEdge = 4_000;
+    let state = tick({
+      ...createInitialState(),
+      rngMode: "vblank",
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: declineEdge + POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY,
+        healDismissElapsed: 1,
+        playerPartyHp: POSTWIN_HEALED_PARTY_HP,
+        dialoguePage: 4,
+        dialoguePageEdgeElapsed: declineEdge - 100,
+        swapCursorPos: 1,
+        swapCursorDisplayPos: 1,
+        swapDeclineElapsed: declineEdge,
+      },
+    }, new Set(["A"]));
+    const dismissEdge = state.postwin!.rightThisWayDismissElapsed!;
+
+    for (let i = 1; i < MESSAGE_CLOSING_TICKS; i += 1) {
+      state = tick(state, new Set());
+    }
+    expect(state.prebattleRoom).toEqual({ phase: "messageClosing", elapsed: 1 });
+    state = tick(state, new Set());
+    expect(state.prebattleRoom).toEqual({ phase: "walking", elapsed: 0 });
+
+    for (let i = 0; i < WALK_TICKS; i += 1) state = tick(state, new Set());
+    expect(state.prebattleRoom).toEqual({ phase: "warpFade", elapsed: 0 });
+    for (let i = 0; i < WARP_FADE_TO_ROOM_ELAPSED; i += 1) {
+      state = tick(state, new Set());
+    }
+    expect(state.prebattleRoom).toBeNull();
+    expect(state.battleRoom).toEqual({
+      phase: "entering",
+      elapsed: 0,
+      encounter: "jenson",
+    });
+
+    expect(battleRoomQuote(state.battleRoom!))
+      .toEqual([JENSON_MSGBOX_LINE1, JENSON_MSGBOX_LINE2]);
+    expect(msgboxPrintCompleteElapsed(state.battleRoom!))
+      .toBe(MSGBOX_APPEAR_ELAPSED + 32);
+    const quoteReady = msgboxPrintCompleteElapsed(state.battleRoom!);
+    for (let i = 0; i < quoteReady; i += 1) state = tick(state, new Set(["A"]));
+    expect(state.battleRoom).toEqual({
+      phase: "msgboxIdle",
+      elapsed: 0,
+      encounter: "jenson",
+    });
+    expect(state.postwin!.rightThisWayDismissElapsed).toBe(dismissEdge);
+  });
+
+  it("pins the return-path attendant animation alternation and relative warp RNG bursts", () => {
+    expect(walkVisual(0).attendantFrame).toBe(7);
+    expect(walkVisual(0, true).attendantFrame).toBe(8);
+    expect(walkVisual(16).attendantFrame).toBe(8);
+    expect(walkVisual(16, true).attendantFrame).toBe(7);
+    expect(walkVisual(32).attendantFrame).toBe(5);
+    expect(walkVisual(32, true).attendantFrame).toBe(6);
+    expect(walkVisual(48).attendantFrame).toBe(6);
+    expect(walkVisual(48, true).attendantFrame).toBe(5);
+    expect(walkVisual(64, true).attendantVisible).toBe(false);
+
+    const edge = 12_000;
+    expect(postwinRngSteps(edge + 108, null, edge)).toBe(1);
+    expect(postwinRngSteps(edge + 109, null, edge)).toBe(3);
+    expect(postwinRngSteps(edge + 110, null, edge)).toBe(4);
+    expect(postwinRngSteps(edge + 111, null, edge)).toBe(1);
   });
 
   it("keeps VBlank ownership and applies the GO ON source burst relative to the accepted edge", () => {

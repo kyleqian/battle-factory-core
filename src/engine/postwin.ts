@@ -37,6 +37,8 @@ export interface PostwinState {
   swapCursorMoveElapsed: number | null;
   /** Accepted NO edge; the following field-message clock is edge-relative. */
   swapDeclineElapsed: number | null;
+  /** Accepted "Right this way" dismiss edge; walk/warp clocks derive from it. */
+  rightThisWayDismissElapsed: number | null;
 }
 
 export const INITIAL_POSTWIN_STATE: PostwinState = {
@@ -53,6 +55,7 @@ export const INITIAL_POSTWIN_STATE: PostwinState = {
   swapCursorDisplayPos: null,
   swapCursorMoveElapsed: null,
   swapDeclineElapsed: null,
+  rightThisWayDismissElapsed: null,
 };
 
 /** gMain.inBattle clears and outside-battle VBlank RNG resumes at dismiss+43. */
@@ -146,6 +149,7 @@ export function postwinPhase(age: number): PostwinPhase {
 export function postwinRngSteps(
   age: number,
   continuationConfirmElapsed: number | null = null,
+  rightThisWayDismissElapsed: number | null = null,
 ): number {
   if (age < POSTWIN_IN_BATTLE_CLEAR_AGE) return 0;
   // Baseline outside-battle VBlank call plus source-observed transition
@@ -159,6 +163,16 @@ export function postwinRngSteps(
     continuationConfirmElapsed !== null &&
     age === continuationConfirmElapsed + 1
   ) return 5;
+  // Field warp/map-load init: two source-observed bursts, relative to the
+  // accepted guide-message dismiss edge (ordinary VBlank call included).
+  if (
+    rightThisWayDismissElapsed !== null &&
+    age === rightThisWayDismissElapsed + 109
+  ) return 3;
+  if (
+    rightThisWayDismissElapsed !== null &&
+    age === rightThisWayDismissElapsed + 110
+  ) return 4;
   return 1;
 }
 
@@ -216,6 +230,7 @@ export function advancePostwin(state: PostwinState): PostwinState {
           : state.swapCursorDisplayPos,
     swapCursorMoveElapsed: state.swapCursorMoveElapsed,
     swapDeclineElapsed: state.swapDeclineElapsed,
+    rightThisWayDismissElapsed: state.rightThisWayDismissElapsed,
   };
 }
 
@@ -314,6 +329,7 @@ export function acceptPostwinDialoguePage(state: PostwinState): PostwinState {
     swapCursorDisplayPos: null,
     swapCursorMoveElapsed: null,
     swapDeclineElapsed: null,
+    rightThisWayDismissElapsed: null,
   };
 }
 
@@ -356,4 +372,14 @@ export function postwinRightThisWayInputReady(state: PostwinState): boolean {
   return state.swapDeclineElapsed !== null &&
     state.elapsed >=
       state.swapDeclineElapsed + POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY;
+}
+
+export function acceptPostwinRightThisWayDismiss(
+  state: PostwinState,
+): PostwinState {
+  if (
+    state.rightThisWayDismissElapsed !== null ||
+    !postwinRightThisWayInputReady(state)
+  ) return state;
+  return { ...state, rightThisWayDismissElapsed: state.elapsed };
 }

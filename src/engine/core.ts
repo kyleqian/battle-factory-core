@@ -78,6 +78,7 @@ import {
 import {
   advanceBattleRoom,
   entryStep,
+  INITIAL_BATTLE_2_ROOM_STATE,
   INITIAL_BATTLE_ROOM_STATE,
   msgboxVisual,
   opponentSetupExtraRngSteps,
@@ -153,6 +154,7 @@ import {
   POSTWIN_RIGHT_THIS_WAY,
   POSTWIN_IN_BATTLE_CLEAR_AGE,
   acceptPostwinSwapDecline,
+  acceptPostwinRightThisWayDismiss,
   postwinDialogueDelay,
   postwinDialogueInputReady,
   postwinDialogueVisibleChars,
@@ -163,6 +165,7 @@ import {
   postwinNextVisibleChars,
   postwinPhase,
   postwinRightThisWayVisibleChars,
+  postwinRightThisWayInputReady,
   postwinRngSteps,
   type PostwinState,
 } from "./postwin.ts";
@@ -239,13 +242,32 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
 
   if (postwin) {
     let nextPostwin = advancePostwin(postwin);
-    if (
+    if (prebattleRoom) {
+      const advancedPrebattleRoom = advancePrebattleRoom(prebattleRoom)!;
+      prebattleRoom = advancedPrebattleRoom;
+      if (
+        advancedPrebattleRoom.phase === "warpFade" &&
+        advancedPrebattleRoom.elapsed === WARP_FADE_TO_ROOM_ELAPSED
+      ) {
+        prebattleRoom = null;
+        battleRoom = INITIAL_BATTLE_2_ROOM_STATE;
+      }
+    } else if (battleRoom) {
+      battleRoom = advanceBattleRoom(battleRoom);
+    } else if (
       nextPostwin.healDismissElapsed === null &&
       newKeys.has("A")
     ) {
       nextPostwin = acceptPostwinHealDismiss(nextPostwin);
-    }
-    if (postwinContinuationInputReady(nextPostwin)) {
+    } else if (
+      nextPostwin.swapDeclineElapsed !== null &&
+      nextPostwin.rightThisWayDismissElapsed === null &&
+      postwinRightThisWayInputReady(postwin) &&
+      newKeys.has("A")
+    ) {
+      nextPostwin = acceptPostwinRightThisWayDismiss(nextPostwin);
+      prebattleRoom = { phase: "messageClosing", elapsed: 0 };
+    } else if (postwinContinuationInputReady(nextPostwin)) {
       if (newAndRepeatedKeys.has("DOWN")) {
         nextPostwin = movePostwinContinuationCursor(nextPostwin, 1);
       } else if (newAndRepeatedKeys.has("UP")) {
@@ -280,6 +302,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     const totalSteps = postwinRngSteps(
       nextPostwin.elapsed,
       nextPostwin.continuationConfirmElapsed,
+      nextPostwin.rightThisWayDismissElapsed,
     );
     const alreadyAdvanced = rngMode === "vblank" ? 1 : 0;
     for (let i = alreadyAdvanced; i < totalSteps; i += 1) {
@@ -1218,13 +1241,15 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
     objY = exitFadeY(b.elapsed - 1);
   }
   const fb = createFramebuffer();
-  renderBattleRoomEntryScene(fb, step, sceneElapsed, bgY, objY, msgboxVisual(b));
+  renderBattleRoomEntryScene(fb, step, sceneElapsed, bgY, objY, msgboxVisual(b), b);
   if (b.phase === "settled") applyBattleTransitionOverlay(fb, b.elapsed);
   return fb;
 }
 
 function renderPrebattleRoomState(state: EngineState): Uint8Array {
   const p = state.prebattleRoom!;
+  const returningFromBattle =
+    state.postwin?.rightThisWayDismissElapsed != null;
   if (p.phase === "fadingOut") {
     const ticks = p.elapsed + 1;
     const bgY = bgFadeY(ticks, EXIT_FADE_OUT);
@@ -1252,7 +1277,7 @@ function renderPrebattleRoomState(state: EngineState): Uint8Array {
     return fb;
   }
   if (p.phase === "walking") {
-    const v = walkVisual(p.elapsed);
+    const v = walkVisual(p.elapsed, returningFromBattle);
     const fb = createFramebuffer();
     renderPrebattleRoomWalkScene(
       fb,
@@ -1294,6 +1319,10 @@ const POSTWIN_ROOM_FADE_OUT = {
 
 function renderPostwinState(state: EngineState): Uint8Array {
   const postwin = state.postwin!;
+  if (postwin.rightThisWayDismissElapsed !== null) {
+    if (state.prebattleRoom) return renderPrebattleRoomState(state);
+    if (state.battleRoom) return renderBattleRoomState(state);
+  }
   const age = postwin.elapsed;
   const phase = postwinPhase(age);
   if (phase === "battleHold" || phase === "battleFade") {

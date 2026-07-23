@@ -254,8 +254,24 @@ function stepToVisual(row: readonly [number, number, number, number, number, num
 }
 
 /** WALK_STEPS[elapsed], clamped to the last (frozen) row - "warpFade" reads the same clamp implicitly via WALK_TICKS-1. */
-export function walkVisual(elapsed: number): WalkVisual {
-  return stepToVisual(WALK_STEPS[Math.min(elapsed, WALK_STEPS.length - 1)]!);
+export function walkVisual(
+  elapsed: number,
+  attendantAlternateLead = false,
+): WalkVisual {
+  const visual = stepToVisual(
+    WALK_STEPS[Math.min(elapsed, WALK_STEPS.length - 1)]!,
+  );
+  if (!attendantAlternateLead) return visual;
+  // Re-entering after battle recreates the field objects with the
+  // attendant's step-animation alternation bit inverted. Source's standard
+  // walk anim therefore selects the other leg frame for each movement
+  // action's leading 8 ticks; face frames (1/2) are unchanged.
+  const alternateFrame = new Map([[5, 6], [6, 5], [7, 8], [8, 7]]);
+  return {
+    ...visual,
+    attendantFrame:
+      alternateFrame.get(visual.attendantFrame) ?? visual.attendantFrame,
+  };
 }
 
 /** The walk's frozen final position (data/maps/.../scripts.inc:50's shared `waitmovement 0` settling) - "warpFade" renders this unchanged under the fade. */

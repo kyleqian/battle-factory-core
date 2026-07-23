@@ -29,7 +29,7 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { type EntryStep, type MsgboxVisual, MSGBOX_LINE1, MSGBOX_LINE2, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
 import { drawMessageBoxFrame, drawMessageBoxText } from "./prebattleRoomRender.ts";
 
 import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
@@ -80,7 +80,7 @@ interface NpcSprite {
 
 const roomLayout = layout as RoomLayout;
 const roomTileset = tileset as RoomTileset;
-const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; opponent: NpcSprite };
+const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; opponent: NpcSprite; fisherman: NpcSprite };
 
 function drawBlockLayer(fb: Uint8Array, entries: TileEntry[], screenX: number, screenY: number, fadeY: number): void {
   for (let i = 0; i < 4; i += 1) {
@@ -201,14 +201,19 @@ const opponentScreenX = tileScreenPos(roomLayout.objects.opponent.settleTile, IN
 const MSGBOX_LINE1_ORIGIN = { x: 16, y: 121 };
 const MSGBOX_LINE2_ORIGIN = { x: 16, y: 137 };
 
-function drawOpponentMsgbox(fb: Uint8Array, msgbox: MsgboxVisual): void {
+function drawOpponentMsgbox(
+  fb: Uint8Array,
+  msgbox: MsgboxVisual,
+  lines: readonly [string, string],
+): void {
   if (!msgbox.visible) return;
   drawMessageBoxFrame(fb);
   if (msgbox.chars <= 0) return;
-  const line1 = MSGBOX_LINE1.slice(0, Math.min(msgbox.chars, MSGBOX_LINE1.length));
+  const [messageLine1, messageLine2] = lines;
+  const line1 = messageLine1.slice(0, Math.min(msgbox.chars, messageLine1.length));
   drawMessageBoxText(fb, line1, MSGBOX_LINE1_ORIGIN.x, MSGBOX_LINE1_ORIGIN.y);
-  if (msgbox.chars > MSGBOX_LINE1.length) {
-    const line2 = MSGBOX_LINE2.slice(0, msgbox.chars - MSGBOX_LINE1.length);
+  if (msgbox.chars > messageLine1.length) {
+    const line2 = messageLine2.slice(0, msgbox.chars - messageLine1.length);
     drawMessageBoxText(fb, line2, MSGBOX_LINE2_ORIGIN.x, MSGBOX_LINE2_ORIGIN.y);
   }
 }
@@ -232,6 +237,7 @@ export function renderBattleRoomEntryScene(
   bgFadeY = 0,
   objFadeY = 0,
   msgbox: MsgboxVisual = { visible: false, chars: 0 },
+  state: BattleRoomState = INITIAL_RENDER_STATE,
 ): void {
   const origin = { x: roomLayout.initialCameraOriginPx.x, y: roomLayout.initialCameraOriginPx.y - step.camPanY };
   drawRoomTiles(fb, origin, bgFadeY);
@@ -244,7 +250,10 @@ export function renderBattleRoomEntryScene(
   drawNpcFrame(fb, roomNpcs.player, step.decoyFrame, decoyScreenPos, step.decoyHFlip, objFadeY);
   const opponent = opponentStep(elapsed);
   if (opponent.visible) {
-    drawNpcFrame(fb, roomNpcs.opponent, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
+    const npc = state.encounter === "jenson" ? roomNpcs.fisherman : roomNpcs.opponent;
+    drawNpcFrame(fb, npc, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
   }
-  drawOpponentMsgbox(fb, msgbox);
+  drawOpponentMsgbox(fb, msgbox, battleRoomQuote(state));
 }
+
+const INITIAL_RENDER_STATE: BattleRoomState = { phase: "entering", elapsed: 0 };
