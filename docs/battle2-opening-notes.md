@@ -128,7 +128,7 @@ pixel-exactness.
 | 32572--32587; 32588--32592; 32593--32598; gone 32599 | KABUTO ball is closed, open, open-final, then hidden.  This is `Task_DoPokeballSendOutAnim` + `SpriteCB_OpponentMonSendOut` / `SpriteCB_ReleaseMonFromBall` (`pokeball.c:363-405,991-1003,758-806`): handoff +2/+18/+23/+29, with the normal 16-tick wait and `sBallAnimSeq1`. | Reuse the Battle-1 ball/particle state unchanged, parameterized only by handoff and battler. |
 | 32589--32604; 32605--32706 | KABUTO materializes at handoff+19.  At +35 its species entrance starts: `sMonFrontAnimIdsTable[SPECIES_KABUTO-1] = ANIM_H_SLIDE_WOBBLE` (`pokemon.c:1546`; `pokemon_animation.c:1803-1829`), whose `data[2]` runs 0..100 before reset.  It overlaps later player work; it is not a blocking substitute for a generic settled sprite. | Ball-affine/materialize path is reusable parameterized by KABUTO asset; KABUTO's 101-callback H-slide-wobble needs a live species-animation component (not Grovyle's V-stretch table). |
 | 32603--32625 | Opponent healthbox begins at handoff+33, x offset -110 then +5 each tick, settling at +55.  It is the singles opponent healthbox created/filled by `BattleInitAllSprites` / `CreateBattlerHealthboxSprites` and `InitBattlerHealthboxCoords` (`battle_gfx_sfx_util.c:831-913`; `battle_interface.c:869,1078-1081`). | Reuse slide/chrome unchanged, parameterized as **KABUTO Lv50, 91/91 HP** (species 140); party summary exit remains shared. |
-| 32682; 32723--32759; 32760--32770; 32761--32810 | Player `IntroTrainerBallThrow` starts at handoff+112 (`battle_controller_player.c:2931-3017`), then Brendan's ball spin, open, ONIX materialize and back-sprite shake use the already-proven Battle-1 offsets +153, +190, +191, permanent settle +240.  These overlap KABUTO's last front-animation callbacks. | Reuse the Battle-1 player throw/ONIX materialize/healthbox path unchanged after making its anchor encounter-relative; its parameters are **ONIX Lv50, 117/117 HP**. |
+| queued at 32682; visual 32727--32849 | Player `IntroTrainerBallThrow` is queued at handoff+112 (`battle_controller_player.c:2931-3017`), but the already-created player controller retains a 45-callback visual delay. Brendan's first pose is 32727; ball arc 32760, affine spin 32768, open 32805, ONIX materialize 32806, and healthbox slide 32820--32842. The independently queued `Go! ONIX!` printer does not share this delay. | Reuse the entire Battle-1 player throw/ONIX materialize/healthbox visual path through the inherited +45 relative clock; parameters are **ONIX Lv50, 117/117 HP**. |
 | 32850--32855; 32856 onward | The message box is blank for six ticks, then `PlayerHandleChooseAction`'s off-screen BG0 composition is revealed atomically by `HandleChooseActionAfterDma3` (`battle_controller_player.c:2565-2573`); cursor is the BG0 tile at FIGHT.  This is input-ready at the reveal and remains so through 33030. | Requires a new live composed Battle-2 action-menu base: the existing Battle-1 harvested Grovyle base cannot be reused.  Window/cursor/text primitives may be reused parameterized by ONIX/KABUTO. |
 
 Fresh lightweight RAM replay over 32530--33031 reads `gMain.inBattle = 2`
@@ -145,17 +145,33 @@ full-HP battlers.  This preserves the earlier 32020--32250 setup ledger.
 ## Player send-out dense checkpoint
 
 `battle2-player-sendout-dense.json` captures every frame 32680--32849. The
-current implementation is **47/170 exact**, with one continuous exact prefix
-32680--32726. It proves that the reusable ball/materialize/healthbox clock is
-opponent-handoff-relative, while the already-created Battle 2 Brendan sprite
-and player party summary retain a distinct inherited callback clock: their
-last settled frame is 32726 and first changed pose is 32727. `Go! ONIX!`
-clears the old message at 32715 and prints one glyph per frame from 32716,
-fully visible at 32723.
+implementation is **170/170 exact**. The earlier partial's split-clock
+interpretation was half-right: the independently queued `Go! ONIX!` printer
+does retain the ordinary opponent-handoff-relative clock, clearing at 32715
+and printing one glyph per frame from 32716 through 32723. The entire visual
+player-controller chain instead retains the inherited 45-callback delay:
+Brendan, player party summary, thrown ball, open particles, ONIX
+materialize/back animation, and the 117/117 healthbox all map to the already
+proven Battle-1 visual helpers through that single relative clock.
 
-The next bounded task starts at 32727: derive the inherited Brendan pose/
-translation and its live overlap with the already-running ball, then verify
-the ONIX materialize/back-animation and 117/117 healthbox through 32849.
-Nothing at 32850 or later is part of this checkpoint. The dense mismatching
-tail is retained verbatim; no capture thinning, framebuffer harvest, absolute
-canonical-tick lookup, or coordinate/RGB fitting is used.
+The exact source-shaped mappings are:
+
+- 32727 maps to Battle-1 visual tick 1574, Brendan's first throw pose and
+  translation callback;
+- 32760 maps to 1607, the closed ball's first visible arc frame;
+- 32768 maps to 1615, the first affine-spin frame;
+- 32805 maps to 1652, the ball-open frame;
+- 32806 maps to 1653, the materialize/particle/BG-fade start; and
+- 32820 maps to 1667, the 117/117 player healthbox's first visible slide
+  frame (settled at 32842).
+
+One coefficient-only inherited-state boundary is independently required:
+at player callback age 14 (canonical 32741), the alternating player-summary
+fade advances its eva coefficient one step early while the bar/icon sprite
+translations remain on their ordinary age. The next callback reconverges.
+Tier-1 pins this age locally and proves DESTIN/Battle 1 keeps the shared
+default.
+
+Nothing at 32850 or later belongs to this checkpoint. No capture thinning,
+framebuffer harvest, absolute canonical-tick lookup, or coordinate/RGB
+fitting is used.

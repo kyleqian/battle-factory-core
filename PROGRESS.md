@@ -4,6 +4,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 312 — S8 Battle 2 player send-out: **GREEN — 32680-32849 exact**
+
+- **State:** `battle2-player-sendout-dense.json` is **170/170 exact**
+  across canonical 32680-32849. Predecessors remain KABUTO **151/151** and
+  intro **251/251**; Battle 1 send-out remains accepted at **255/256**
+  (frame 1496, 3px, #18 only). Tier-1 is **1110/1110** and build passes
+  (**5.517 MB**).
+- **Did:** separated the handoff-relative `Go! ONIX!` printer from Battle
+  2's inherited player-controller visual clock. Brendan, party summary,
+  thrown-ball arc/spin/open/hide, ONIX materialize/back animation, particles,
+  and the 117/117 healthbox all reuse the Battle-1 mechanisms at visual
+  delay +45; callback-age 14 advances only the summary eva coefficient.
+- **Next:** resume at **32850**, the first six-tick blank action-menu frame,
+  then compose the Battle 2 ONIX/KABUTO action menu. Do not reopen the exact
+  send-out span. S8 remains `[ ]`.
+- **Notes:** visual mappings are 32727→1574 (throw starts), 32760→1607
+  (ball first visible), 32768→1615 (spin), 32805→1652 (open), and
+  32820→1667 (healthbox first visible); summary eva's sole phase boundary is
+  canonical 32741 / callback age 14. No harvest, absolute-tick lookup,
+  fitting, thinning, or work at 32850+.
+
+---
 ## 311 — S8 Battle 2 player send-out: **PARTIAL — 32680-32726 exact**
 
 - **State:** new every-frame `battle2-player-sendout-dense.json` is
@@ -44,20 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** JENSON's particle callback stall is encounter-relative +1;
   KABUTO healthbox first appears at handoff+32 at dx=-110, holds one render,
   then advances +5. No harvest, absolute tick lookup, fitting, or thinning.
-
----
-## 309 — Codex launcher attribution: **GREEN — mechanical and model-authoritative**
-
-- **State:** Codex supervisor/worker launchers now pass their resolved model
-  and effort to a Codex-only commit-message hook. Hook regression tests are
-  **3/3** in both this run and the factory template; Tier-1 remains
-  **1099/1099** and build passes (**5.497 MB**).
-- **Did:** made launcher metadata replace any guessed/manual attribution,
-  added the mechanical `Agent-effort` trailer, retained `unknown` fallbacks,
-  and removed attribution instructions from agent-facing Markdown. Claude
-  launches do not enable the hook and retain their provider-owned attribution.
-- **Next:** resume S8 at **32570** with trainer exit/ball/KABUTO materialize
-  and healthbox only; do not reopen exact Battle 2 send-out text.
-- **Notes:** `tools/test-codex-git-attribution.sh` proves exact replacement,
-  unknown fallback, and an untouched Claude commit. Shell syntax, resolved
-  launcher configs, Codex deadline tests (**3/3**), Tier-1, and build pass.

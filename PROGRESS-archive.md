@@ -12397,3 +12397,20 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   1098 Tier-1 tests and build.
 
 ---
+## 309 — Codex launcher attribution: **GREEN — mechanical and model-authoritative**
+
+- **State:** Codex supervisor/worker launchers now pass their resolved model
+  and effort to a Codex-only commit-message hook. Hook regression tests are
+  **3/3** in both this run and the factory template; Tier-1 remains
+  **1099/1099** and build passes (**5.497 MB**).
+- **Did:** made launcher metadata replace any guessed/manual attribution,
+  added the mechanical `Agent-effort` trailer, retained `unknown` fallbacks,
+  and removed attribution instructions from agent-facing Markdown. Claude
+  launches do not enable the hook and retain their provider-owned attribution.
+- **Next:** resume S8 at **32570** with trainer exit/ball/KABUTO materialize
+  and healthbox only; do not reopen exact Battle 2 send-out text.
+- **Notes:** `tools/test-codex-git-attribution.sh` proves exact replacement,
+  unknown fallback, and an untouched Claude commit. Shell syntax, resolved
+  launcher configs, Codex deadline tests (**3/3**), Tier-1, and build pass.
+
+---

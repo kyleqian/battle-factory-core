@@ -521,13 +521,13 @@ swap-YES branch (factory swap screen UI) and battle 2 itself.
 `battle2-kabuto-sendout-dense.json`. Shared send-out mechanisms are
 encounter-parameterized for FISHERMAN JENSON/KABUTO, including KABUTO's
 live 101-callback H-slide-wobble and Lv50 91/91 healthbox. S8 remains open;
-the next dense trace, `battle2-player-sendout-dense.json`, covers every
-frame 32680-32849 and is presently **47/170 exact**, with the exact prefix
-extended through 32726. The player ball/materialize/healthbox clock is now
-encounter-handoff-relative and KABUTO persists after its animation tail;
-the precisely bounded remainder begins at Brendan's first inherited visible
-pose, 32727. Frames 32727-32849, the 32850 menu handoff, swap YES, and
-battles 3-7 remain open.
+`battle2-player-sendout-dense.json` now covers every frame 32680-32849 at
+**170/170 exact**. The independently queued `Go! ONIX!` printer stays
+opponent-handoff-relative, while Brendan, player summary, ball/open/
+particles, ONIX materialize/back animation, and the Lv50 117/117 healthbox
+reuse Battle 1 through one inherited visual delay. The next bounded frame
+is the blank action-menu handoff at 32850. That menu, swap YES, and battles
+3-7 remain open.
 **Frame cap raised (user decision #2, 2026-07-19 ~17:00):** §15's scout
 proved the WIN unreachable under the 20000-frame cap for ANY plausible
 line (best verified line: Onix faints at 19147 with Murkrow untouched at
