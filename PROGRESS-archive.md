@@ -1,3 +1,21 @@
+## 279 — Supervisor wind-down (ISSUES #37 rung 4a): **GREEN, RETRY AUTHORIZED**
+
+- **State:** accepted rung-3 renderer is unchanged and the tree is clean.
+  Supervisor Tier-1 **1011/1011** and build (**5.400 MB**) remain green; the
+  six frozen traces were exact at the preceding checkpoint.
+- **Did:** a second consecutive worker did not land rung 4a. It confirmed the
+  particle ownership as OAM slots 5--16, palette 7, tiles 417--419 around
+  (68,117), but its 38-minute cap failed to stop it and it produced no commit;
+  supervisor interrupted it during deadline wind-down.
+- **Next:** resume with one narrow worker deriving the
+  stagger/identity reducer from those transferred OAM rows, still requiring
+  canonical/delayed 20391--20406 to be 16/16 exact before healthbox work.
+- **Direction:** user authorized one more OAM-derived rung-4a repair attempt
+  in the next supervised session.
+- **Notes:** no uncommitted worker edits existed when stopped. Worker logs:
+  `/tmp/warm-bison-sendout-rung4a.jsonl` and `...-repair.jsonl`.
+
+---
 ## 278 — Supervisor accepted (ISSUES #37 rung 4a): **GREEN EVIDENCE CHECKPOINT**
 
 - **State:** renderer remains at accepted rung-3 baseline; independent Tier-1

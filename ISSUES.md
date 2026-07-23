@@ -26,20 +26,29 @@ The first rendered MAGBY pixels are already at 20391 (not the dossier's old
 20400 label), so the traces stop before that ownership boundary. Rung 4 now
 starts with MAGBY/materialization/particles only.
 
+**Rung 4a CLOSED 2026-07-22:** the confirmation-relative release clock starts
+at elapsed 145 and parameterizes the initial ONIX player-side affine
+materializer plus turn-5's clean particle and normal-palette-fade reducers.
+MAGBY uses its extracted battle-back sprite and the established player terrain
+occlusion boundary. Committed canonical `20391--20406` and delayed
+`20421--20436` traces are both **16/16 exact**. The next ownership boundary is
+the player healthbox at canonical 20407 (delayed 20437); do not extend rung 4a
+into it.
+
 **Rung 1 CLOSED 2026-07-22:** direct indexed exit OBJ composition now draws
 balls (OAM 6--9) before the live icons (3--5), then status (1--2), preserving
 same-priority lower-index wins and the existing press-relative OBJ fade. Both
 canonical/delayed dense party traces are **200/200 exact**, including
 20302/20332. The screenshot-derived status backing is no longer allowed to
 claim transparent pixels during the fade. Do not reopen this raw field/menu
-transfer. The remaining post-SEND-OUT path continues at rung (4): clean open-particles +
-MAGBY materialize/tint, (5) create/populate/slide the 138/138 player
-healthbox, and (6) blank hold + re-anchored MAGBY action-menu bounce.
+transfer. The remaining post-SEND-OUT path continues at rung (5):
+create/populate/slide the 138/138 player healthbox, then (6) blank hold +
+re-anchored MAGBY action-menu bounce.
 
 Reuse is explicit: parameterize the initial ONIX player-sendout helpers and
 turn-5's clean switch-in primitives; do **not** copy turn-13 Murkrow's
 species-specific wobble table. New data is only MAGBY's front asset/frame
-identity and any MAGBY-only wobble table. Start with rung 4 and verify the
+identity and any MAGBY-only wobble table. Continue with rung 5 and verify the
 documented dense range before each subsequent rung. Do not use per-frame
 assets, absolute tick tables, or coordinate patches.
 
