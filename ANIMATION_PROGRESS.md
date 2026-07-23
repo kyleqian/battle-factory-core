@@ -38,10 +38,18 @@ remainder.
 - **State:** 12 Level 50 moves have strong canonical evidence but remain
   `partial` under the new portability definition; none is yet claimed generic
   `exact`.
-- **Next:** establish the smallest deterministic ON-profile staged scenario,
-  then extract `FIRE_PUNCH` or `FAINT_ATTACK` from canonical turn clocks into
-  the shared presentation seam. Re-run its existing canonical traces plus one
-  portable case.
-- **Boundary:** the canonical app fixture is easy to stage; arbitrary oracle
-  state is not yet a solved compiler. Prove the workflow on a few moves before
-  generalizing oracle scenario construction.
+- **Did:** `tools/probe/stage-fire-punch-portable-on.py` establishes the
+  smallest reproducible ON-profile stage: at settled action-menu tick 1886 it
+  changes only `gBattleMons[0].moves[0]/pp[0]`, then lets the stock controller
+  execute FIRE PUNCH. Two fresh mGBA runs are byte-identical and pin synthetic
+  **ONIX (back) → GROVYLE (front)** ownership (`gCurrentMove=7` by 2312, PP
+  15→14 by 2336, target HP 143→112 by 2520). Evidence and exact scope:
+  `docs/fire-punch-portable-staging-probe.md`.
+- **Next:** add a relative Scene-ON presentation stage that consumes explicit
+  attacker/target geometry and a FIRE_PUNCH resolution profile, then compare a
+  complete dense ONIX→GROVYLE window. Do not couple it to the RAM patch or
+  absolute battle ticks.
+- **Boundary:** `appTrace.ts` currently stages only Scene-OFF
+  `stageBattleTurn`, so the oracle construction has no honest app compare yet;
+  FIRE_PUNCH remains `partial`. Canonical regression at this checkpoint:
+  turn16-rung3 227/236 (21397–21405 residual), turn17-rung4 200/200.
