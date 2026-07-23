@@ -7,6 +7,7 @@
 /tools/compare/out/
 /tools/probe/out/
 /tools/probe/__pycache__/
+/tools/__pycache__/
 /.worktrees/
 /.codex-logs/
 tsconfig.tsbuildinfo

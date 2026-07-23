@@ -9,6 +9,49 @@ import sys
 import termios
 
 
+# These are terminal-emulator modes, not termios flags. A TUI normally undoes
+# them itself, but SIGTERM/SIGKILL can interrupt that cleanup. In particular,
+# leaving focus reporting or the kitty keyboard protocol enabled makes the
+# parent shell print escape-encoded key/focus events and can make Ctrl+C appear
+# ineffective.
+TERMINAL_MODE_RESET = (
+    b"\x1b[?1006l"  # SGR mouse
+    b"\x1b[?1015l"  # RXVT mouse
+    b"\x1b[?1003l"  # any-event mouse
+    b"\x1b[?1002l"  # button-event mouse
+    b"\x1b[?1000l"  # normal mouse
+    b"\x1b[?1004l"  # focus reporting
+    b"\x1b[?2004l"  # bracketed paste
+    b"\x1b[<1u"  # pop one kitty keyboard-enhancement level
+    b"\x1b[?2026l"  # synchronized output
+    b"\x1b[?1049l"  # alternate screen
+    b"\x1b[?25h"  # show cursor
+    b"\x1b[0 q"  # default cursor shape
+    b"\x1b[0m"  # reset rendition
+)
+
+
+def find_terminal_output_fd() -> int | None:
+    """Return a writable inherited terminal fd, preferring stdout."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            candidate_fd = stream.fileno()
+            if os.isatty(candidate_fd):
+                return candidate_fd
+        except (AttributeError, OSError):
+            pass
+    return None
+
+
+def reset_terminal_modes(terminal_output_fd: int | None) -> None:
+    if terminal_output_fd is None:
+        return
+    try:
+        os.write(terminal_output_fd, TERMINAL_MODE_RESET)
+    except OSError:
+        pass
+
+
 def main() -> int:
     if len(sys.argv) < 5 or sys.argv[3] != "--":
         print(
@@ -31,6 +74,7 @@ def main() -> int:
 
     terminal_fd: int | None = None
     terminal_state: list[object] | None = None
+    terminal_output_fd = find_terminal_output_fd()
     try:
         candidate_fd = sys.stdin.fileno()
         if os.isatty(candidate_fd):
@@ -69,6 +113,10 @@ def main() -> int:
                     child.wait()
                 return 130
     finally:
+        # tcsetattr below cannot affect DEC private modes or the kitty keyboard
+        # stack. Reset those explicitly even after a nominally clean child exit:
+        # cleanup may have been only partially written while the child died.
+        reset_terminal_modes(terminal_output_fd)
         if terminal_fd is not None and terminal_state is not None:
             try:
                 # A TUI can have terminal-query replies queued as input when a
