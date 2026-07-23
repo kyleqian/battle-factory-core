@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 317 — User-directed Stage 8 reset: **READY — finite, staged completion**
+
+- **State:** canonical Battle 2 remains exact through tick **33331** at
+  `b5be9b6`; the baseline is **1128/1128** with build green (**5.522 MB**).
+  S8 is now `[~]` under a finite completion contract rather than an open-ended
+  battle/turn replay.
+- **Did:** retired 33332/SAND ATTACK as the next milestone; defined a generic
+  seven-battle round core, unique swap/end UI, and one staged OFF-profile
+  Battle 2 portability proof as the only S8 gates. Added dual oracle routing
+  and main/side/animation worker-lane guidance.
+- **Next:** first land the `BattleScenario`/presentation seam and generic
+  round-controller state model with Tier-1 tests. Then stage a representative
+  Battle 2 turn under Battle Scene OFF. Do **not** resume the canonical
+  turn-by-turn ladder.
+- **Notes:** main + side use `battle-scene-off` (8014); optional animation work
+  uses `battle-scene-on` (8012). Historical traces default ON; every new trace
+  names its profile. Both profiles pass harness smoke; `turn1-cloneanim.json`
+  confirms their battle presentation diverges while the anchor SHA is shared.
+  `WORKSTREAMS.md` owns lane/file boundaries.
+
+---
 ## 316 — S8 Battle 2 turn 1 ROCK SLIDE: **GREEN — through 33331**
 
 - **State:** `battle2-turn1-rockslide.json` is **191/191 exact** through the
@@ -37,22 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** trace `tools/compare/traces-groundtruth/battle2-turn1.json`,
   source/RAM ledger `docs/battle2-opening-notes.md`; no fitting, harvest,
   absolute-tick lookup, capture thinning, or second-turn input.
-
----
-## 314 — S8 Battle 2 FIGHT submenu round-trip: **GREEN — 32848-33056 exact**
-
-- **State:** extended `battle2-action-menu-dense.json` is **209/209 exact**
-  through the resettled Battle-2 action menu. Intro remains **251/251**,
-  KABUTO **151/151**, player send-out **170/170**, and Battle-1 send-out
-  **255/256** (#18 only). Tier-1 is **1118/1118**; build passes
-  (**5.519 MB**).
-- **Did:** reused generic FIGHT state/chrome/text with menu-relative clocks
-  on the live JENSON field; canonical A opens ONIX's full-PP moves, DOWN
-  transitions ROCK SLIDE→DRAGONBREATH, and B closes without confirming.
-  Added Tier-1 pins for the 32901 A gate, moves/PP, display lag, and close.
-- **Next:** S8 stays `[ ]`; continue only with a separately assigned
-  Battle-2 turn, swap-YES, or later round-loop increment.
-- **Notes:** canonical interaction edges: A 33031, submenu blank 33036,
-  reveal 33037, DOWN 33040/display 33042, B 33044, action-menu return
-  33051. Commits `33bd561`, `94f6c31`; no harvest, fitting, thinning,
-  confirm, or absolute-tick framebuffer cases.

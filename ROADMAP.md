@@ -492,10 +492,45 @@ compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin
 damage/order/RNG-consumption values against a RAM dump of the same turns.
 
-### [ ] S8 — Post-battle swap + the 7-battle round loop
+### [~] S8 — Post-battle swap + the 7-battle round loop
 Victory flow, the swap offer + factory swap screen, chaining into battles
 2–7, round completion and loss endings (BP beyond the single round stays out
 of scope).
+
+**Authoritative completion reset (user decision, 2026-07-23):** this paragraph
+supersedes the older incremental commentary below. The first complete battle,
+post-win NO path, Battle 2 setup/action menu, and one shared ROCK SLIDE
+mechanic through tick **33331** are sufficient vertical-slice and portability
+evidence. **Stop the canonical Battle 2 turn march there.** Tick 33332/SAND
+ATTACK, later turns, and Battles 3–7 must not become sequential pixel-window
+milestones. Repeated battles are now staged state/controller coverage; use
+deterministic scenarios, controlled seeds, source-derived state, or short
+targeted oracle probes instead of replaying the complete prefix.
+
+Stage 8 has three finite completion gates:
+
+1. **Generic round core:** a pure, data-driven controller supports battle
+   indexes 0–6, deterministic opponent generation/no-repeat rules, per-battle
+   healing, swap accept/decline party changes, advancement after wins, loss
+   from every index, and seventh-win completion. Tier-1 scenario tests cover
+   all seven wins plus representative losses/swaps without battle-number,
+   turn-number, or absolute-tick rendering branches.
+2. **Unique remaining UI:** the swap-YES screen and interactions, loss ending,
+   and seventh-win/round-summary ending are implemented and proven with
+   committed dense OFF-profile traces over their unique dynamic windows.
+   Repeated inter-battle NO traversal may reuse the generic controller and
+   needs state coverage, not six full pixel replays.
+3. **Portability proof:** one staged Battle 2 turn runs end-to-end through the
+   generic battle/presentation seam under Battle Scene OFF, from action choice
+   through logical resolution and the next input-ready state. Its core outcome
+   is source/RAM pinned, and a short representative trace passes compare. This
+   is one proof, not the start of another turn-by-turn ladder.
+
+New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
+Historical traces below remain Battle Scene ON regression evidence. The
+animation-on workstream may improve move presentation in parallel under
+`WORKSTREAMS.md`, but it does not block functional seven-battle completion.
+
 **Acceptance (re-scoped by user decision, 2026-07-19):** battle 1's win and
 the swap traversal into battle 2's first action menu are pinned by a
 **chain of overlapping committed traces** (each ≤ the oracle's frame cap,
@@ -721,15 +756,23 @@ The supervisor independently reviewed the encounter-relative send-out
 printer and reverified the 39/39 new trace, 251/251 predecessor, all 1099
 Tier-1 tests, and build.
 
-### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
-Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
-the eligible pools), input-fuzz hardening.
-**Acceptance:** a committed set of ≥10 varied/fuzz traces (different draft
-orders, menu detours, battle lines) all pass compare with 0 diff; `npm
-test`/`npm run build` green.
+### [ ] S9 — Deferred interface and breadth workstreams (non-blocking)
 
-Stages ship in order; later stages may begin only when every earlier stage
-is `[x]` or its remainder is explicitly re-scoped here by the supervisor.
+Finish the intentionally deferred S4 summary-screen interactions, then add
+bounded data/input breadth where it exercises shared mechanisms. Move-animation
+breadth is a parallel optional workstream against the Battle Scene ON oracle,
+not a requirement to replay every eligible matchup before the round loop can
+be called complete.
+
+**Acceptance:** S4's named remaining summary routes have committed targeted
+traces; ≥10 deterministic scenario/fuzz cases cover varied draft orders,
+menu detours, opponents, swaps, wins, and losses at the state layer; selected
+unique UI windows pass compare; `npm test`/`npm run build` are green.
+
+Stages ship in order for the main functional lane. The animation lane may run
+in parallel behind the presentation seam, and later scenario/data groundwork
+may begin early when it is file-disjoint and does not redefine an unfinished
+earlier-stage interface.
 
 ## Domain notes (verified during iteration 0 unless cited)
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Thin client for the pokeemerald-factory oracle (local HTTP service).
 
-Start the service first:  ./run-oracle.sh   (listens on 127.0.0.1:8012)
+Start the services first: ./run-oracle.sh --profile battle-scene-on
+                          ./run-oracle.sh --profile battle-scene-off
 Then:                     bin/oracle info
                           bin/oracle example > /tmp/trace.json
                           bin/oracle run /tmp/trace.json -o /tmp/ref-frames
@@ -21,7 +22,17 @@ import urllib.parse
 import urllib.request
 
 
-BASE_URL = os.environ.get("POKEBENCH_ORACLE_URL", "http://127.0.0.1:8012").rstrip("/")
+BASE_URL = ""
+
+
+def profile_url(profile: str) -> str:
+    legacy = os.environ.get("POKEBENCH_ORACLE_URL")
+    if profile == "battle-scene-off":
+        return os.environ.get("POKEBENCH_MAIN_ORACLE_URL", legacy or "http://127.0.0.1:8014").rstrip("/")
+    return os.environ.get(
+        "POKEBENCH_ANIMATION_ORACLE_URL",
+        legacy or "http://127.0.0.1:8012",
+    ).rstrip("/")
 
 
 def request(method: str, path: str, value: object | None = None) -> object:
@@ -97,9 +108,16 @@ def command_example(_: argparse.Namespace) -> None:
 
 
 def main() -> None:
+    global BASE_URL
     parser = argparse.ArgumentParser(
         prog="oracle",
         description="Query the deterministic pokeemerald-factory reference.",
+    )
+    parser.add_argument(
+        "--profile",
+        choices=("battle-scene-on", "battle-scene-off"),
+        default=os.environ.get("POKEBENCH_ORACLE_PROFILE", "battle-scene-off"),
+        help="oracle profile (default: battle-scene-off)",
     )
     commands = parser.add_subparsers(dest="command", required=True)
     info = commands.add_parser("info", help="show the oracle contract")
@@ -116,6 +134,7 @@ def main() -> None:
     example = commands.add_parser("example", help="print an example trace")
     example.set_defaults(function=command_example)
     args = parser.parse_args()
+    BASE_URL = profile_url(args.profile)
     args.function(args)
 
 

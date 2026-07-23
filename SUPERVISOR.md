@@ -12,8 +12,9 @@ result, and decides what happens next. You are not the implementer — workers
 via `tools/run-subagent.sh` do the on-the-ground work and should burn most of
 the session's compute. You run rarely and think hard when you do.
 
-Read `AGENTS.md` first. Everything it says about this run — start-of-session
-protocol, commit discipline, the two test tiers, the oracle — applies to you,
+Read `AGENTS.md`, `WORKSTREAMS.md`, and the authoritative reset at the start
+of ROADMAP Stage 8 first. Everything they say about this run — commit
+discipline, test tiers, oracle profiles, and lane ownership — applies to you,
 and you are its enforcer for the workers.
 
 ## Fresh run: bootstrap your own plan (iteration 0)
@@ -44,8 +45,8 @@ edit.
 
 ## The loop
 
-1. **Orient.** `PROGRESS.md` top entry → `ROADMAP.md` → `ISSUES.md` →
-   `DEFERRED.md` → `git log` since your last review. Fresh run (roadmap still
+1. **Orient.** `PROGRESS.md` top entry → `ROADMAP.md` → `WORKSTREAMS.md` →
+   `ISSUES.md` → `DEFERRED.md` → `git log` since your last review. Fresh run (roadmap still
    PLAN PENDING)? Do "Fresh run" above before anything else. Otherwise on your
    first iteration, verify the baseline yourself: `npm test` and
    `npm run build`.
@@ -73,6 +74,11 @@ edit.
    Terra tier still defaults to high. Max and ultra are refused globally. This
    routing does not apply to Claude—the established Claude model and launch
    flow stay unchanged.
+   Before every Stage 8 brief, apply the **novelty gate**: name the new
+   reusable mechanism, unique screen, or generic state transition it adds.
+   "The next canonical Battle 2 turn/window" is not a mechanism and must not
+   be dispatched. Use a staged scenario or controlled seed to prove repeated
+   battle behavior without replaying the complete canonical prefix.
 3. **Delegate.** `./tools/run-subagent.sh "<brief>"` (`--help` lists
    configuration flags). Provider-specific launch mechanics are load-bearing:
    - **Claude supervisor:** launch it in the background; a foreground Bash
@@ -88,8 +94,8 @@ edit.
    Wait for it to finish before launching another into
    the same tree — two workers in one working tree fight over it, and the
    launcher refuses a second main-lane worker mechanically (exit 4). If —
-   and only if — you have two *genuinely disjoint* steps, you may run a
-   second worker in parallel with `--worktree` (see "Parallel workers").
+   and only if — you have genuinely disjoint steps, you may use the side and
+   animation worktrees (see "Parallel workers").
 4. **Verify — trust nothing.** When it finishes:
    - `git log` / `git diff` the new commits. No commits = a failed step.
    - Run `npm test` and `npm run build` yourself.
@@ -110,34 +116,41 @@ edit.
    - Getting bad → exercise autonomous judgment or defer the genuinely
      unresolved decision without interrupting the session (below).
 
-## Parallel workers (max 2: one main lane, one worktree lane)
+## Parallel workers (max 3: main, side, animation)
 
-`./tools/run-subagent.sh --worktree "<brief>"` runs a worker in a fresh
-`git worktree` under `.worktrees/` on its own `worker/<id>` branch, with its
-own npm install. Both lanes share the harness-level oracle service — it is
-stateless per request (every trace replays from the identical canonical
-snapshot) and serializes requests, so concurrent workers are safe. The
-launcher enforces the cap: one worker per lane, two lanes total — a third
-launch is refused with exit 4.
+The launcher exposes:
 
-Parallelize only when two steps are genuinely disjoint: different files, no
-shared fixtures/traces, neither depends on the other's findings (e.g. a
-freestanding data-extraction milestone alongside critical-path engine work).
-When in doubt, stay serial — your verification is the bottleneck, not launch
-capacity, and a second lane doubles what you must verify.
+- `./tools/run-subagent.sh "<brief>"` — main tree, Battle Scene OFF;
+- `./tools/run-subagent.sh --lane side "<brief>"` — side worktree, Battle
+  Scene OFF (`--worktree` remains an alias);
+- `./tools/run-subagent.sh --lane animation "<brief>"` — animation worktree,
+  Battle Scene ON (`--animation-worktree` is an alias).
 
-What makes the parallel lane safe:
-- **Docs are yours on the worktree lane.** Its worker is contract-bound not
+The launcher enforces one worker per lane and three total. Side and animation
+each get a fresh `git worktree` under `.worktrees/`, their own branch and npm
+install. Each oracle is stateless per request and serializes its trace calls.
+
+Parallelize only genuinely disjoint steps: different files and fixtures,
+neither depending on the other's unmerged interface work. The natural split
+is main owning the round/core interface, side owning staged scenarios or
+source-derived data, and animation owning modules behind the presentation
+seam. The animation lane is encouraged when a bounded module is ready, but do
+not invent filler work just to occupy it. There is still one supervisor and
+one integration plan—not independent supervisors racing branches.
+
+What makes the worktree lanes safe:
+
+- **Docs are yours on both worktree lanes.** Their workers are contract-bound not
   to edit `PROGRESS.md`/`ISSUES.md` (two branches rewriting the same ledger
-  top entry is a guaranteed conflict); it reports in its final message, and
-  you write the docs update when you merge.
+  top entry is a guaranteed conflict); they report in their final messages,
+  and you write the docs update when you merge.
 - **Verify in the worktree, then merge.** Run the step's acceptance checks
   inside the worktree (`git -C .worktrees/<id> log`, run tests there), then
   from the main tree: `git merge worker/<id>`, re-run `npm test` and
   `npm run build` on the merged result, update `PROGRESS.md`, and clean up:
   `git worktree remove .worktrees/<id> && git branch -d worker/<id>`.
-- **Exit 42 cancels the sibling.** A usage/rate-limit stop in either lane
-  TERMs the other worker and both launchers exit 42 — wind down. An unmerged
+- **Exit 42 cancels the siblings.** A usage/rate-limit stop in any lane
+  TERMs the other workers and every launcher exits 42 — wind down. An unmerged
   `worker/<id>` branch survives for the next session; say so in the
   `PROGRESS.md` wind-down entry so it isn't orphaned.
 

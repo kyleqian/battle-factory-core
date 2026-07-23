@@ -64,27 +64,24 @@ if [[ "$INTERACTIVE" != "1" && ! "$CAP_HOURS" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
   exit 2
 fi
 
-# The oracle service is shared by the whole harness (all runs of this demo);
-# it lives two levels up, next to _template/ and runs/.
+# The oracle services are shared by the whole harness (all runs of this demo);
+# the solo lane defaults to Battle Scene OFF while retaining the ON service
+# for legacy trace regression and animation work.
 HARNESS_ROOT="${POKEBENCH_HARNESS_ROOT:-$(cd ../.. && pwd)}"
-ORACLE_URL="${POKEBENCH_ORACLE_URL:-http://127.0.0.1:8012}"
+source tools/oracle-profiles.sh
+MAIN_ORACLE_URL="${POKEBENCH_MAIN_ORACLE_URL:-http://127.0.0.1:8014}"
+ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"
+pokebench_ensure_oracle_profile "$HARNESS_ROOT" battle-scene-off \
+  "$MAIN_ORACLE_URL" /tmp/emerald-factory-oracle-off.log
+pokebench_ensure_oracle_profile "$HARNESS_ROOT" battle-scene-on \
+  "$ANIMATION_ORACLE_URL" /tmp/emerald-factory-oracle-on.log
+export POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL"
+export POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL"
+export POKEBENCH_ORACLE_URL="$MAIN_ORACLE_URL"
+export POKEBENCH_ORACLE_PROFILE=battle-scene-off
+echo "Main oracle (Battle Scene OFF) up at $MAIN_ORACLE_URL"
 
-if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
-  echo "Starting oracle service ($HARNESS_ROOT/run-oracle.sh) ..."
-  "$HARNESS_ROOT/run-oracle.sh" >/tmp/emerald-factory-oracle.log 2>&1 &
-  for _ in $(seq 1 90); do
-    curl -sf "$ORACLE_URL/health" >/dev/null 2>&1 && break
-    sleep 1
-  done
-fi
-if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
-  echo "Oracle failed to start; see /tmp/emerald-factory-oracle.log" >&2
-  exit 1
-fi
-echo "Oracle up at $ORACLE_URL"
-export POKEBENCH_ORACLE_URL="$ORACLE_URL"
-
-PROMPT="Follow AGENTS.md. Read the top entry of PROGRESS.md and continue the Battle Factory roadmap from there. Commit after every green step and keep PROGRESS.md current; you may be stopped at any time."
+PROMPT="Follow AGENTS.md. Read the top entry of PROGRESS.md, WORKSTREAMS.md, and the authoritative Stage 8 reset in ROADMAP.md. Continue with staged scenarios and the generic round/presentation architecture against the Battle Scene OFF oracle; do not resume the retired canonical Battle 2 turn march. Commit after every green step and keep PROGRESS.md current; you may be stopped at any time."
 
 if [[ "$INTERACTIVE" == "1" ]]; then
   POKEBENCH_ROLE=agent exec claude --model "$MODEL" --dangerously-skip-permissions "$PROMPT"

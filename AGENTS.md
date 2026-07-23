@@ -38,8 +38,10 @@ and only via `tools/run-subagent.sh`.
 2. Read **`ROADMAP.md`** — the fixed mission brief up top, then the ordered
    stages and their oracle acceptance criteria (authored by this run's
    supervisor on iteration 0 — until then it says PLAN PENDING).
-3. Skim **`ISSUES.md`** — the standing backlog of known-open bugs/debts you can pick from.
-4. Confirm the baseline is green: `npm test` and `npm run build` pass, and
+3. Read **`WORKSTREAMS.md`** — it defines the main, side, and animation
+   ownership boundaries and which oracle profile each uses.
+4. Skim **`ISSUES.md`** — the standing backlog of known-open bugs/debts you can pick from.
+5. Confirm the baseline is green: `npm test` and `npm run build` pass, and
    `bin/oracle info` answers. If not, fixing that is the next action.
 
 ## Commit often & survive interruption (important)
@@ -88,13 +90,16 @@ top entry of `PROGRESS.md` — uncommitted work is lost work.
 
 ## The oracle is ground truth
 The oracle is the source-built Pokémon Emerald ROM running headless in mGBA
-behind a local HTTP service **shared by all runs of this harness** (default
-`http://127.0.0.1:8012`; honor `POKEBENCH_ORACLE_URL` if set). Every trace
-replays from the same canonical snapshot — see `bin/oracle info` for the
-contract, the canonical-state description, and its caveats.
+behind local HTTP services shared by all runs of this harness. The main and
+side lanes use **Battle Scene OFF** at `http://127.0.0.1:8014`; the animation
+lane and legacy traces use **Battle Scene ON** at
+`http://127.0.0.1:8012`. Every trace replays from its profile's canonical
+snapshot — see `bin/oracle info` for the selected main contract, or pass
+`--profile battle-scene-on` for the animation contract.
 
 ```sh
-bin/oracle info                 # the contract (scope, canonical state, caveats)
+bin/oracle info                 # main Battle Scene OFF contract
+bin/oracle --profile battle-scene-on info
 bin/oracle example > t.json     # example trace
 bin/oracle run t.json -o ref/   # run a trace; writes PNG captures + manifest
 bin/oracle symbols gMain        # linker-map symbol addresses (RAM inspection aid)
@@ -107,6 +112,12 @@ to your engine. Compare whole windows, not just endpoint frames. **Gotcha:**
 the oracle captures *only the final frame* unless your trace's `captureFrames`
 lists the frames you want — request every frame you intend to compare, or
 you'll fool yourself by fitting a single endpoint.
+
+New compare traces set `"oracleProfile": "battle-scene-off"` or
+`"battle-scene-on"` explicitly. Historical traces without that field remain
+ON-profile traces so their established frame contract does not silently
+change. The selected worker lane exports both named URLs and makes
+`POKEBENCH_ORACLE_URL` point at its own profile.
 
 **Oracle specifics worth knowing**
 - Screen is **240×160**; buttons are `A B SELECT START RIGHT LEFT UP DOWN R L`.
@@ -150,3 +161,10 @@ you'll fool yourself by fitting a single endpoint.
 - The engine architecture is yours to choose — but keep it testable (pure
   tick/render split), keep the test ABI honest, and pin every pure-logic fix
   with a Tier-1 test.
+- After the first-battle vertical slice, prefer deterministic staged battle
+  scenarios, controlled seeds, source-derived state, and short targeted oracle
+  windows. Repeated Battles 2–7 are controller/data coverage, not seven
+  canonical input replays.
+- Never add another battle-number/turn-number/absolute-tick rendering branch to
+  extend the retired Battle 2 march. Generalize the mechanism or leave a
+  bounded evidence checkpoint.

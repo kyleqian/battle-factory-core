@@ -154,22 +154,23 @@ fi
 source tools/resolve-harness-root.sh
 HARNESS_ROOT="$(pokebench_resolve_harness_root)"
 export POKEBENCH_HARNESS_ROOT="$HARNESS_ROOT"
-ORACLE_URL="${POKEBENCH_ORACLE_URL:-http://127.0.0.1:8012}"
-
-if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
-  echo "Starting oracle service ($HARNESS_ROOT/run-oracle.sh) ..."
-  "$HARNESS_ROOT/run-oracle.sh" >/tmp/emerald-factory-oracle.log 2>&1 &
-  for _ in $(seq 1 90); do
-    curl -sf "$ORACLE_URL/health" >/dev/null 2>&1 && break
-    sleep 1
-  done
-fi
-if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
-  echo "Oracle failed to start; see /tmp/emerald-factory-oracle.log" >&2
-  exit 1
-fi
-echo "Oracle up at $ORACLE_URL"
-export POKEBENCH_ORACLE_URL="$ORACLE_URL"
+source tools/oracle-profiles.sh
+MAIN_ORACLE_URL="${POKEBENCH_MAIN_ORACLE_URL:-http://127.0.0.1:8014}"
+ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"
+pokebench_ensure_oracle_profile \
+  "$HARNESS_ROOT" battle-scene-off "$MAIN_ORACLE_URL" \
+  /tmp/emerald-factory-oracle-off.log
+pokebench_ensure_oracle_profile \
+  "$HARNESS_ROOT" battle-scene-on "$ANIMATION_ORACLE_URL" \
+  /tmp/emerald-factory-oracle-on.log
+echo "Main oracle (Battle Scene OFF) up at $MAIN_ORACLE_URL"
+echo "Animation oracle (Battle Scene ON) up at $ANIMATION_ORACLE_URL"
+export POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL"
+export POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL"
+# Direct bin/oracle/probe calls in the supervisor default to the main OFF
+# profile. Profile-aware compare traces still route legacy/ON traces to 8012.
+export POKEBENCH_ORACLE_URL="$MAIN_ORACLE_URL"
+export POKEBENCH_ORACLE_PROFILE=battle-scene-off
 
 CAP_SECONDS="$(awk "BEGIN { printf \"%d\", $CAP_HOURS * 3600 }")"
 DEADLINE_EPOCH=$(( $(date +%s) + CAP_SECONDS ))
@@ -179,11 +180,11 @@ DEADLINE_HUMAN="$(date -r "$DEADLINE_EPOCH" '+%Y-%m-%d %H:%M' 2>/dev/null \
 CONTINUITY_NOTE="Run autonomously through the full session cap while useful in-scope work remains. Do not ask the user questions mid-session, send decision notifications, or end a turn awaiting a reply. Exercise your best evidence-backed judgment for reversible on-scope choices. If a material choice genuinely cannot be made safely, record it in DEFERRED.md, continue independent safe work, and summarize it only at wind-down."
 
 if [[ "$PROVIDER" == "codex" ]]; then
-  DELEGATION_NOTE="For Codex workers, choose the worker tier by task: Terra/high only for bounded probes, extraction, or mechanical docs; Sol/medium for normal implementation; Sol/high for cross-layer architecture or the first evidence-driven repair after a failed worker. Invoke ./tools/run-subagent.sh directly in the execution tool without shell backgrounding, '&', or nohup. The execution tool yields a managed cell/session while the launcher runs; retain that handle and wait on it. Never relaunch merely because the first call yielded."
+  DELEGATION_NOTE="For Codex workers, choose the worker tier by task: Terra/high only for bounded probes, extraction, or mechanical docs; Sol/medium for normal implementation; Sol/high for cross-layer architecture or the first evidence-driven repair after a failed worker. The launcher offers main, side-worktree, and animation-worktree lanes; use parallel lanes when their ownership is genuinely disjoint, especially to keep modular animation work moving beside the OFF-profile round-loop. Invoke each ./tools/run-subagent.sh call directly in its own execution-tool session without shell backgrounding, '&', or nohup. A yielded call is still running; retain its handle and launch another lane only when the briefs are independent."
 else
-  DELEGATION_NOTE="Launch ./tools/run-subagent.sh in the background — foreground Bash times out long before a worker finishes."
+  DELEGATION_NOTE="Launch ./tools/run-subagent.sh workers in the background. The main, side-worktree, and animation-worktree lanes may run concurrently when their briefs and files are genuinely disjoint."
 fi
-PROMPT="You are the supervisor for this run. Read SUPERVISOR.md and follow it exactly: plan one increment at a time, delegate it to a worker via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or defer a genuinely unresolved decision without interrupting the session. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${CONTINUITY_NOTE}"
+PROMPT="You are the supervisor for this run. Read SUPERVISOR.md, WORKSTREAMS.md, and the authoritative reset at the top of ROADMAP S8 before dispatching anything. The old canonical Battle-2 turn march is stopped: drive the generic seven-battle round controller and presentation seam against the Battle Scene OFF oracle, while modular animation work may proceed independently in the animation lane against the ON oracle. Delegate bounded steps via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or defer a genuinely unresolved decision without interrupting the session. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${CONTINUITY_NOTE}"
 
 if [[ "$HEADLESS" == "1" ]]; then
   mkdir -p "$(dirname "$SUPERVISOR_LOG")"

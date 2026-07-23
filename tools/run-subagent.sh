@@ -15,20 +15,20 @@
 #     -p, --provider NAME   claude (default) or codex
 #     -m, --model NAME      worker model (provider default)
 #     -e, --effort EFFORT   Codex reasoning effort (default medium)
-#     -w, --worktree        run the worker in a fresh git worktree on its own
-#                           branch (the parallel lane; see SUPERVISOR.md)
+#     -w, --worktree        alias for --lane side
+#         --animation-worktree
+#                           alias for --lane animation
+#         --lane NAME       main, side, or animation
 #         --log FILE        provider event log path
 #     -h, --help            show this help
 #
-# Concurrency is capped at TWO workers, mechanically: one lane for the main
-# working tree, one for a worktree. Each lane is a pidfile in
-# /tmp/pokebench-worker-lanes-<run>/; a second launch into a live lane is
-# refused (exit 4). The worktree lane gets its own npm install, a symlink to
-# the main tree's read-only reference/, and shares the harness-level oracle
-# service (exported to the worker as POKEBENCH_ORACLE_URL). Its worker is
-# contract-bound NOT to touch PROGRESS.md/ISSUES.md — the supervisor folds
-# docs into the merge. The worktree and branch survive the run for the
-# supervisor to verify and merge.
+# Concurrency is capped at THREE workers, mechanically: main, side, and
+# animation. Side and animation each use a fresh worktree. Main and side use
+# the Battle Scene OFF oracle; animation uses the Battle Scene ON oracle. Each
+# lane is a pidfile in /tmp/pokebench-worker-lanes-<run>/; a second launch into
+# a live lane is refused (exit 4). Worktree workers are contract-bound NOT to
+# touch PROGRESS.md/ISSUES.md — the supervisor folds docs into each merge. The
+# worktrees and branches survive the run for supervisor verification.
 #
 # Each provider runs non-interactively with the same full-access trust model as
 # its supervisor. Every provider uses git and PROGRESS.md as the durable
@@ -55,19 +55,20 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -p, --provider NAME   claude (default) or codex
   -m, --model NAME      worker model (provider default)
   -e, --effort EFFORT   Codex reasoning effort (default medium)
-  -w, --worktree        run in a fresh git worktree on its own branch (parallel
-                        lane: own npm install + dedicated oracle port; worker
-                        must not touch shared docs; supervisor merges after
-                        verifying — see SUPERVISOR.md "Parallel workers")
+  -w, --worktree        alias for --lane side
+      --animation-worktree
+                        alias for --lane animation
+      --lane NAME       main, side, or animation. Side/animation use fresh
+                        worktrees and must not touch shared docs.
       --log FILE        provider event log path
       --print-config    print the resolved profile without launching
   -h, --help            show this help
 Environment overrides: WORKER_PROVIDER, WORKER_MODEL, WORKER_REASONING_EFFORT.
 Legacy MODEL remains supported for direct worker launches.
 Exits with the worker's status; 42 means an account usage/rate limit stopped it
-(either this worker's own, or a sibling's — a 42 in one lane cancels the other).
-Exit 4 means the requested lane already has a live worker (max 2 concurrent:
-one main-tree, one worktree).
+(either this worker's own, or a sibling's — a 42 in one lane cancels the others).
+Exit 4 means the requested lane already has a live worker (max 3 concurrent:
+one each in main, side, and animation).
 Exit 5 means a Codex worker violated the clean/committed postflight contract.
 EOF
 }
@@ -77,7 +78,8 @@ PROVIDER="${WORKER_PROVIDER:-${POKEBENCH_WORKER_PROVIDER:-claude}}"
 MODEL="${WORKER_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${WORKER_REASONING_EFFORT:-}"
 AGENT_LOG="${AGENT_LOG:-}"
-WORKTREE="${WORKTREE:-0}"
+LANE="${WORKER_LANE:-main}"
+if [[ "${WORKTREE:-0}" == "1" ]]; then LANE="side"; fi
 BRIEF=""
 PRINT_CONFIG=0
 
@@ -85,7 +87,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -c|--cap-minutes) CAP_MINUTES="${2:?--cap-minutes needs a number}"; shift 2 ;;
     --cap-minutes=*)  CAP_MINUTES="${1#*=}"; shift ;;
-    -w|--worktree)    WORKTREE=1; shift ;;
+    -w|--worktree)    LANE="side"; shift ;;
+    --animation-worktree|--animation-lane) LANE="animation"; shift ;;
+    --lane)           LANE="${2:?--lane needs main, side, or animation}"; shift 2 ;;
+    --lane=*)         LANE="${1#*=}"; shift ;;
     -p|--provider)    PROVIDER="${2:?--provider needs a name}"; shift 2 ;;
     --provider=*)     PROVIDER="${1#*=}"; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; shift 2 ;;
@@ -116,6 +121,10 @@ if [[ ! "$CAP_MINUTES" =~ ^[0-9]+$ || "$CAP_MINUTES" -lt 1 ]]; then
 fi
 if [[ ! "$PROVIDER" =~ ^(claude|codex)$ ]]; then
   echo "run-subagent: unsupported provider '$PROVIDER' (expected claude or codex)" >&2
+  exit 2
+fi
+if [[ ! "$LANE" =~ ^(main|side|animation)$ ]]; then
+  echo "run-subagent: unsupported lane '$LANE' (expected main, side, or animation)" >&2
   exit 2
 fi
 case "$PROVIDER" in
@@ -167,6 +176,12 @@ if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "worker_provider=$PROVIDER"
   echo "worker_model=$MODEL"
   echo "worker_effort=${REASONING_EFFORT:-n/a}"
+  echo "worker_lane=$LANE"
+  if [[ "$LANE" == "animation" ]]; then
+    echo "oracle_profile=battle-scene-on"
+  else
+    echo "oracle_profile=battle-scene-off"
+  fi
   exit 0
 fi
 mkdir -p "$(dirname "$AGENT_LOG")"
@@ -174,20 +189,19 @@ mkdir -p "$(dirname "$AGENT_LOG")"
 LAUNCH_EPOCH="$(date +%s)"
 
 # Concurrency cap, enforced mechanically (SUPERVISOR.md states the rule; this
-# makes it stick): at most one worker per lane, two lanes total. A lane file
+# makes it stick): at most one worker per lane, three lanes total. A lane file
 # holds "<launcher_pid> <worker_pid>"; a live launcher pid means the lane is
 # taken. A dead one is a stale lock from a killed run — take it over.
 # Lanes are scoped per RUN: several runs of this harness can be active in
-# parallel, and each gets its own two lanes.
+# parallel, and each gets its own three lanes.
 RUN_KEY="$(pwd | shasum | cut -c1-12)"
 LANE_DIR="/tmp/pokebench-worker-lanes-$RUN_KEY"
 mkdir -p "$LANE_DIR"
-if [[ "$WORKTREE" == "1" ]]; then LANE="worktree"; else LANE="main"; fi
 LANE_FILE="$LANE_DIR/$LANE.pid"
 if [[ -f "$LANE_FILE" ]]; then
   read -r other_launcher _other_agent < "$LANE_FILE" || true
   if [[ -n "${other_launcher:-}" ]] && kill -0 "$other_launcher" 2>/dev/null; then
-    echo "run-subagent: the $LANE lane already has a live worker (launcher pid $other_launcher) — max 2 concurrent workers, one per lane. Wait for it or use the other lane." >&2
+    echo "run-subagent: the $LANE lane already has a live worker (launcher pid $other_launcher) — max 3 concurrent workers, one per lane. Wait for it or use another lane." >&2
     exit 4
   fi
 fi
@@ -206,6 +220,8 @@ trap cleanup EXIT
 WT_PATH=""
 WT_BRANCH=""
 WT_BASE=""
+IS_WORKTREE=0
+if [[ "$LANE" != "main" ]]; then IS_WORKTREE=1; fi
 CODEX_ACCEPTANCE_GUARDRAILS=""
 if [[ "$PROVIDER" == "codex" ]]; then
   CODEX_ACCEPTANCE_GUARDRAILS="
@@ -218,8 +234,8 @@ commit only a clean evidence checkpoint or honest partial and record the
 precisely bounded remainder."
 fi
 
-if [[ "$WORKTREE" == "1" ]]; then
-  WT_ID="wt-$(date +%Y%m%d-%H%M%S)"
+if [[ "$IS_WORKTREE" == "1" ]]; then
+  WT_ID="${LANE}-$(date +%Y%m%d-%H%M%S)"
   WT_BRANCH="worker/$WT_ID"
   WT_PATH="$(pwd)/.worktrees/$WT_ID"
   WT_BASE="$(git rev-parse HEAD)"
@@ -237,25 +253,23 @@ if [[ "$WORKTREE" == "1" ]]; then
   fi
 fi
 
-# Both lanes share the harness-level oracle service (two levels above the run
-# root): it is stateless per request — every trace replays from the identical
-# canonical snapshot and requests serialize inside the service — so concurrent
-# workers are safe. Bootstrapping the emulator takes a few seconds on first start.
+# The harness exposes two canonical snapshots: Battle Scene OFF for main/side
+# work and Battle Scene ON for the isolated animation lane. Each service is
+# stateless per request and serializes its own trace requests.
 source tools/resolve-harness-root.sh
+source tools/oracle-profiles.sh
 HARNESS_ROOT="$(pokebench_resolve_harness_root)"
 export POKEBENCH_HARNESS_ROOT="$HARNESS_ROOT"
-ORACLE_URL="${POKEBENCH_ORACLE_URL:-http://127.0.0.1:8012}"
-if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
-  echo "Starting oracle service ($HARNESS_ROOT/run-oracle.sh) ..."
-  "$HARNESS_ROOT/run-oracle.sh" >/tmp/emerald-factory-oracle.log 2>&1 &
-  for _ in $(seq 1 90); do
-    curl -sf "$ORACLE_URL/health" >/dev/null 2>&1 && break
-    sleep 1
-  done
-fi
-if ! curl -sf "$ORACLE_URL/health" >/dev/null 2>&1; then
-  echo "Oracle failed to start; see /tmp/emerald-factory-oracle.log" >&2
-  exit 1
+MAIN_ORACLE_URL="${POKEBENCH_MAIN_ORACLE_URL:-http://127.0.0.1:8014}"
+ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"
+pokebench_ensure_oracle_profile "$HARNESS_ROOT" battle-scene-off "$MAIN_ORACLE_URL" /tmp/emerald-factory-oracle-off.log
+pokebench_ensure_oracle_profile "$HARNESS_ROOT" battle-scene-on "$ANIMATION_ORACLE_URL" /tmp/emerald-factory-oracle-on.log
+if [[ "$LANE" == "animation" ]]; then
+  ORACLE_URL="$ANIMATION_ORACLE_URL"
+  ORACLE_PROFILE="battle-scene-on"
+else
+  ORACLE_URL="$MAIN_ORACLE_URL"
+  ORACLE_PROFILE="battle-scene-off"
 fi
 
 # Claude Code auto-memory is shared by repo path. Preserve the original worker
@@ -280,10 +294,17 @@ fi
 # to the supervisor there — two branches rewriting the same ledger top entry
 # is a guaranteed merge conflict — so the worker reports in its final message
 # and the supervisor folds docs into the merge.
-if [[ "$WORKTREE" == "1" ]]; then
+if [[ "$IS_WORKTREE" == "1" ]]; then
+  if [[ "$LANE" == "animation" ]]; then
+    LANE_CONTRACT="This is the animation/presentation lane. Keep move-animation rendering modular behind the battle presentation seam; do not take ownership of facility progression or shared battle-state architecture. Use the Battle Scene ON oracle for animation evidence."
+  else
+    LANE_CONTRACT="This is the side implementation lane. Prefer source extraction, deterministic scenario staging, data breadth, or another file-disjoint task assigned by the supervisor. Use the Battle Scene OFF oracle."
+  fi
   PROMPT="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step.
 
-You are in a git worktree on branch ${WT_BRANCH}; a sibling worker may be active in the main tree. Work only inside this worktree and commit only to this branch. Do NOT edit PROGRESS.md or ISSUES.md (reading them is fine): docs for this lane belong to the supervisor, who folds them in when merging your branch — report your results fully in your final message instead. The shared oracle service is at ${ORACLE_URL}, already exported as POKEBENCH_ORACLE_URL — bin/oracle and the compare tools need no extra setup.
+You are in the ${LANE} lane, a git worktree on branch ${WT_BRANCH}; sibling workers may be active in other lanes. Work only inside this worktree and commit only to this branch. Do NOT edit PROGRESS.md or ISSUES.md (reading them is fine): docs for this lane belong to the supervisor, who folds them in when merging your branch — report your results fully in your final message instead. ${LANE_CONTRACT}
+
+Your selected oracle is ${ORACLE_PROFILE} at ${ORACLE_URL}, exported as POKEBENCH_ORACLE_URL and POKEBENCH_ORACLE_PROFILE. Both named oracle URLs are also exported for compare traces.
 
 Your assigned step (from the supervisor):
 ${BRIEF}
@@ -299,6 +320,8 @@ Your assigned step (from the supervisor):
 ${BRIEF}
 ${CODEX_ACCEPTANCE_GUARDRAILS}
 
+This main lane uses the Battle Scene OFF oracle. Follow the finite Stage 8 reset in ROADMAP.md and the ownership boundaries in WORKSTREAMS.md; do not resume the retired canonical Battle 2 turn-by-turn march.
+
 Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message and in PROGRESS.md instead of improvising a different plan. Before finishing: npm test and npm run build green, work committed, PROGRESS.md updated.
 
 You are a worker, not the supervisor: SUPERVISOR.md is not for you, and you never launch other agents (run-agent.sh, run-supervisor.sh, tools/run-subagent.sh are off-limits and will refuse you)."
@@ -306,13 +329,13 @@ fi
 
 CAP_SECONDS=$(( CAP_MINUTES * 60 ))
 if [[ "$PROVIDER" == "claude" ]]; then
-  echo "worker: $MODEL · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
+  echo "worker: $MODEL · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
 else
-  echo "worker: $MODEL/$REASONING_EFFORT · cap ${CAP_MINUTES}min · raw JSONL: $AGENT_LOG · stderr: $CODEX_STDERR_LOG"
+  echo "worker: $MODEL/$REASONING_EFFORT · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw JSONL: $AGENT_LOG · stderr: $CODEX_STDERR_LOG"
 fi
 
 WORK_DIR="$(pwd)"
-if [[ "$WORKTREE" == "1" ]]; then WORK_DIR="$WT_PATH"; fi
+if [[ "$IS_WORKTREE" == "1" ]]; then WORK_DIR="$WT_PATH"; fi
 
 if [[ "$PROVIDER" == "codex" ]]; then
   CODEX_START_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
@@ -333,7 +356,9 @@ fi
 if [[ "$PROVIDER" == "claude" ]]; then
   (
     cd "$WORK_DIR"
-    export POKEBENCH_ROLE=worker CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 POKEBENCH_ORACLE_URL="$ORACLE_URL"
+    export POKEBENCH_ROLE=worker CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 \
+      POKEBENCH_ORACLE_URL="$ORACLE_URL" POKEBENCH_ORACLE_PROFILE="$ORACLE_PROFILE" \
+      POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL" POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL"
     exec claude -p --verbose --output-format stream-json \
       --model "$MODEL" \
       --dangerously-skip-permissions "$PROMPT"
@@ -341,7 +366,9 @@ if [[ "$PROVIDER" == "claude" ]]; then
 else
   (
     cd "$WORK_DIR"
-    export POKEBENCH_ROLE=worker POKEBENCH_ORACLE_URL="$ORACLE_URL"
+    export POKEBENCH_ROLE=worker POKEBENCH_ORACLE_URL="$ORACLE_URL" \
+      POKEBENCH_ORACLE_PROFILE="$ORACLE_PROFILE" \
+      POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL" POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL"
     exec python3 tools/run-codex-worker-with-deadline.py \
       "$CAP_SECONDS" \
       "run-subagent: ${CAP_MINUTES}min cap reached — stopping Codex worker process group" -- \
@@ -404,9 +431,9 @@ fi
 
 # Worktree handoff: the worktree and branch outlive this launcher on purpose —
 # the supervisor verifies inside it, merges, updates docs, then removes it.
-if [[ "$WORKTREE" == "1" ]]; then
+if [[ "$IS_WORKTREE" == "1" ]]; then
   echo
-  echo "worktree lane done: branch $WT_BRANCH at $WT_PATH (base ${WT_BASE:0:7})"
+  echo "$LANE worktree lane done: branch $WT_BRANCH at $WT_PATH (base ${WT_BASE:0:7})"
   echo "commits on the branch:"
   wt_commits="$(git -C "$WT_PATH" log --oneline "${WT_BASE}..HEAD" 2>/dev/null || true)"
   if [[ -n "$wt_commits" ]]; then echo "$wt_commits" | sed 's/^/  /'; else echo "  (none — for an implementation step, that means it failed)"; fi

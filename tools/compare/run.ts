@@ -15,7 +15,12 @@ import { PNG } from "pngjs";
 import { diffPngs } from "./diff.ts";
 import { computeSSIM } from "./ssim.ts";
 import { renderAppTrace } from "./appTrace.ts";
-import { runOracleTrace, type Trace } from "./oracleClient.ts";
+import {
+  oracleUrlForProfile,
+  runOracleTrace,
+  type OracleProfile,
+  type Trace,
+} from "./oracleClient.ts";
 
 const WIDTH = 240;
 const HEIGHT = 160;
@@ -26,6 +31,7 @@ if (!tracePath) {
   process.exit(2);
 }
 const trace = JSON.parse(readFileSync(tracePath, "utf8")) as Trace;
+const oracleProfile: OracleProfile = trace.oracleProfile ?? "battle-scene-on";
 mkdirSync(outDir, { recursive: true });
 
 function rgbaToPng(rgba: Buffer | Uint8Array): Buffer {
@@ -69,6 +75,14 @@ for (const oracleCapture of oracleResult.captures) {
   manifest.push({ frame: oracleCapture.frame, diffPixels: diff.diffPixels, ssimMean: ssim.meanSSIM, ssimMin: ssim.minSSIM });
 }
 
-writeFileSync(join(outDir, "manifest.json"), JSON.stringify({ trace: tracePath, frames: manifest }, null, 2));
+writeFileSync(
+  join(outDir, "manifest.json"),
+  JSON.stringify({
+    trace: tracePath,
+    oracleProfile,
+    oracleUrl: oracleUrlForProfile(oracleProfile),
+    frames: manifest,
+  }, null, 2),
+);
 console.log(`${oracleResult.captures.length - mismatched}/${oracleResult.captures.length} frames matched -> ${outDir}`);
 process.exit(mismatched === 0 ? 0 : 1);

@@ -1,3 +1,22 @@
+## 314 — S8 Battle 2 FIGHT submenu round-trip: **GREEN — 32848-33056 exact**
+
+- **State:** extended `battle2-action-menu-dense.json` is **209/209 exact**
+  through the resettled Battle-2 action menu. Intro remains **251/251**,
+  KABUTO **151/151**, player send-out **170/170**, and Battle-1 send-out
+  **255/256** (#18 only). Tier-1 is **1118/1118**; build passes
+  (**5.519 MB**).
+- **Did:** reused generic FIGHT state/chrome/text with menu-relative clocks
+  on the live JENSON field; canonical A opens ONIX's full-PP moves, DOWN
+  transitions ROCK SLIDE→DRAGONBREATH, and B closes without confirming.
+  Added Tier-1 pins for the 32901 A gate, moves/PP, display lag, and close.
+- **Next:** S8 stays `[ ]`; continue only with a separately assigned
+  Battle-2 turn, swap-YES, or later round-loop increment.
+- **Notes:** canonical interaction edges: A 33031, submenu blank 33036,
+  reveal 33037, DOWN 33040/display 33042, B 33044, action-menu return
+  33051. Commits `33bd561`, `94f6c31`; no harvest, fitting, thinning,
+  confirm, or absolute-tick framebuffer cases.
+
+---
 ## 313 — S8 Battle 2 first action menu: **GREEN — 32848-33030 exact**
 
 - **State:** `battle2-action-menu-dense.json` is **183/183 exact** across

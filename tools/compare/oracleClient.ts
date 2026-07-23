@@ -3,6 +3,12 @@
 // an mGBA-backed Python service — so the compare tooling always talks HTTP.
 
 import { PNG } from "pngjs";
+import {
+  oracleUrlForProfile,
+  type OracleProfile,
+} from "./oracleProfiles.ts";
+
+export { oracleUrlForProfile, type OracleProfile } from "./oracleProfiles.ts";
 
 export interface TraceSegment {
   frames: number;
@@ -12,6 +18,11 @@ export interface TraceSegment {
 export interface Trace {
   segments: TraceSegment[];
   captureFrames?: number[];
+  /**
+   * Existing traces predate profiles and therefore default to Battle Scene ON.
+   * New main/round-loop traces must opt into battle-scene-off explicitly.
+   */
+  oracleProfile?: OracleProfile;
 }
 
 export interface OracleCapture {
@@ -27,16 +38,17 @@ export interface OracleRunResult {
   captures: OracleCapture[];
 }
 
-export const ORACLE_URL = (process.env.POKEBENCH_ORACLE_URL ?? "http://127.0.0.1:8012").replace(/\/$/, "");
-
-export async function oracleInfo(): Promise<Record<string, unknown>> {
-  const response = await fetch(`${ORACLE_URL}/v1/info`);
+export async function oracleInfo(
+  profile: OracleProfile = "battle-scene-on",
+): Promise<Record<string, unknown>> {
+  const response = await fetch(`${oracleUrlForProfile(profile)}/v1/info`);
   if (!response.ok) throw new Error(`oracle /v1/info failed: HTTP ${response.status}`);
   return (await response.json()) as Record<string, unknown>;
 }
 
 export async function runOracleTrace(trace: Trace): Promise<OracleRunResult> {
-  const response = await fetch(`${ORACLE_URL}/v1/run`, {
+  const profile = trace.oracleProfile ?? "battle-scene-on";
+  const response = await fetch(`${oracleUrlForProfile(profile)}/v1/run`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(trace),
