@@ -887,6 +887,7 @@ const playerHealthboxAssets = {
   hpbar: healthboxAssemblyAssets.hpbar,
   hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
   expbar: (battleHealthboxAsset as { expbar: HealthboxAssets["hpbar"] }).expbar,
+  statusIcons: (battleHealthboxAsset as { status: HealthboxAssets["statusIcons"] }).status,
   textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
 };
 const onixPlayerHealthboxContent = composePlayerHealthbox(playerHealthboxAssets, {
@@ -898,6 +899,30 @@ const onixPlayerHealthboxContent = composePlayerHealthbox(playerHealthboxAssets,
   currentHp: ONIX_MENU_BATTLER.hp,
   maxHp: ONIX_MENU_BATTLER.maxHP,
 });
+const onixPlayerHealthboxContentByState = new Map<
+  string,
+  ReturnType<typeof composePlayerHealthbox>
+>([["117:none", onixPlayerHealthboxContent]]);
+function onixPlayerHealthboxContentForState(
+  hp: number,
+  status: "none" | "burn",
+): ReturnType<typeof composePlayerHealthbox> {
+  const key = `${hp}:${status}`;
+  let cached = onixPlayerHealthboxContentByState.get(key);
+  if (!cached) {
+    cached = composePlayerHealthbox(playerHealthboxAssets, {
+      name: ONIX_MENU_BATTLER.name,
+      level: ONIX_MENU_BATTLER.level,
+      gender: ONIX_MENU_BATTLER.gender,
+      hpFraction: hp / ONIX_MENU_BATTLER.maxHP,
+      status,
+      currentHp: hp,
+      maxHp: ONIX_MENU_BATTLER.maxHP,
+    });
+    onixPlayerHealthboxContentByState.set(key, cached);
+  }
+  return cached;
+}
 
 /**
  * S7 slice D (ISSUES #16's own deferred-validation window): the opponent
@@ -1022,6 +1047,7 @@ const magbyPlayerHealthboxContent = composePlayerHealthbox(
     hpbar: healthboxAssemblyAssets.hpbar,
     hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
     expbar: (battleHealthboxAsset as { expbar: HealthboxAssets["hpbar"] }).expbar,
+    statusIcons: (battleHealthboxAsset as { status: HealthboxAssets["statusIcons"] }).status,
     textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
   },
   { name: "MAGBY", level: 50, gender: "female", hpFraction: 1, status: "none", currentHp: 138, maxHp: 138 },
@@ -1039,6 +1065,7 @@ function magbyPlayerHealthboxContentForHp(hp: number): typeof magbyPlayerHealthb
         hpbar: healthboxAssemblyAssets.hpbar,
         hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
         expbar: (battleHealthboxAsset as { expbar: HealthboxAssets["hpbar"] }).expbar,
+        statusIcons: (battleHealthboxAsset as { status: HealthboxAssets["statusIcons"] }).status,
         textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
       },
       { name: "MAGBY", level: 50, gender: "female", hpFraction: hp / 138, status: "none", currentHp: hp, maxHp: 138 },
@@ -12933,12 +12960,15 @@ function firePunchEmberTileset(frame: 0 | 1 | 2 | 3 | 4): Tileset {
   return subTileset(battleAnimSmallEmber.tileset, frame * 4, 4);
 }
 
-function drawFirePunchEmbers(
+function drawFirePunchParticleList(
   fb: Uint8Array,
-  age: number,
-  targetCenter: Readonly<{ x: number; y: number }> = { x: 176, y: 51 },
+  particles: readonly {
+    x: number;
+    y: number;
+    frame: 0 | 1 | 2 | 3 | 4;
+  }[],
 ): void {
-  for (const particle of firePunchParticlesInDrawOrder(age, { center: targetCenter })) {
+  for (const particle of particles) {
     drawSpriteSheet(
       fb,
       firePunchEmberTileset(particle.frame),
@@ -12949,6 +12979,17 @@ function drawFirePunchEmbers(
   }
 }
 
+function drawFirePunchEmbers(
+  fb: Uint8Array,
+  age: number,
+  targetCenter: Readonly<{ x: number; y: number }> = { x: 176, y: 51 },
+): void {
+  drawFirePunchParticleList(
+    fb,
+    firePunchParticlesInDrawOrder(age, { center: targetCenter }),
+  );
+}
+
 function drawFirePunchBurnFlames(
   fb: Uint8Array,
   age: number,
@@ -12957,18 +12998,10 @@ function drawFirePunchBurnFlames(
   targetCenter: Readonly<{ x: number; y: number }> = { x: 176, y: 51 },
 ): void {
   const geometry = { center: targetCenter };
-  for (const particle of [
+  drawFirePunchParticleList(fb, [
     ...(primaryEffectSucceeded ? firePunchBurnFlames(age, geometry) : []),
     ...(residualEffectApplies ? firePunchResidualBurnFlames(age, geometry) : []),
-  ]) {
-    drawSpriteSheet(
-      fb,
-      firePunchEmberTileset(particle.frame),
-      battleAnimSmallEmber.palette,
-      particle.x - 16,
-      particle.y - 16,
-    );
-  }
+  ]);
 }
 
 function drawFirePunchImpact(
@@ -13653,53 +13686,62 @@ export function renderSceneOnMovePresentation(
 ): void {
   const view = sceneOnFirePunchView(state);
   const { attacker, target, resolution } = view;
-  if (attacker.species !== "ONIX" || target.species !== "GROVYLE") {
+  const player = attacker.geometry.side === "player" ? attacker : target;
+  const opponent = attacker.geometry.side === "opponent" ? attacker : target;
+  if (player.species !== "ONIX" || opponent.species !== "GROVYLE") {
     throw new Error(
       `unsupported staged FIRE_PUNCH pair ${attacker.species}->${target.species}`,
     );
   }
 
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-  drawSpriteSheet(
-    fb,
-    onixBackSprite.tileset,
-    onixBackSprite.palette,
-    attacker.geometry.spriteCorner.x,
-    attacker.geometry.spriteCorner.y,
-  );
-
-  const coeff = firePunchTargetBlendCoeff(view.age);
-  const targetPalette = coeff === 0
-    ? grovyleFrontSprite.palette
-    : grovyleFrontSprite.palette.map((color) => ({
+  const coeff = firePunchTargetBlendCoeff(view.animationAge);
+  const blendedTargetPalette = (palette: RgbColor[]): RgbColor[] => (
+    coeff === 0
+      ? palette
+      : palette.map((color) => ({
         r: blendComponentToward(color.r, FIRE_PUNCH_RED.r, coeff),
         g: blendComponentToward(color.g, FIRE_PUNCH_RED.g, coeff),
         b: blendComponentToward(color.b, FIRE_PUNCH_RED.b, coeff),
-      }));
-  if (!resolution.targetInvisible) {
+      }))
+  );
+  if (target.geometry.side !== "player" || !resolution.targetInvisible) {
+    drawSpriteSheet(
+      fb,
+      onixBackSprite.tileset,
+      target.geometry.side === "player"
+        ? blendedTargetPalette(onixBackSprite.palette)
+        : onixBackSprite.palette,
+      player.geometry.spriteCorner.x,
+      player.geometry.spriteCorner.y
+        + (target.geometry.side === "player"
+          ? firePunchTargetShakeY2(view.animationAge)
+          : 0),
+    );
+  }
+  if (target.geometry.side !== "opponent" || !resolution.targetInvisible) {
     drawSpriteSheet(
       fb,
       grovyleFrontSprite.tileset,
-      targetPalette,
-      target.geometry.spriteCorner.x,
-      target.geometry.spriteCorner.y + firePunchTargetShakeY2(view.age),
+      target.geometry.side === "opponent"
+        ? blendedTargetPalette(grovyleFrontSprite.palette)
+        : grovyleFrontSprite.palette,
+      opponent.geometry.spriteCorner.x,
+      opponent.geometry.spriteCorner.y
+        + (target.geometry.side === "opponent"
+          ? firePunchTargetShakeY2(view.animationAge)
+          : 0),
     );
   }
 
   const beforeEffects = fb.slice();
-  drawFirePunchEmbers(fb, view.age, target.geometry.animationCenter);
-  drawFirePunchBurnFlames(
-    fb,
-    view.age,
-    resolution.secondaryRollSucceeded,
-    false,
-    target.geometry.animationCenter,
-  );
+  drawFirePunchParticleList(fb, view.particles);
+  drawFirePunchParticleList(fb, view.burnFlames);
   const frontEffects = beforeEffects.slice();
   const impactCoverage = new Uint8Array(240 * 160);
   drawFirePunchImpact(
     frontEffects,
-    view.age,
+    view.animationAge,
     impactCoverage,
     target.geometry.animationCenter,
   );
@@ -13711,16 +13753,46 @@ export function renderSceneOnMovePresentation(
     fb[i + 3] = frontEffects[i + 3]!;
   }
 
-  drawOpponentHealthboxWobble(
-    fb,
-    resolution.healthboxY2,
-    opponentHealthboxContentForHp(resolution.displayedHp),
+  const opponentContent = opponentHealthboxContentForHp(
+    target.geometry.side === "opponent"
+      ? resolution.displayedHp
+      : anchorOpponentBattler.hp,
   );
-  drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent);
+  if (target.geometry.side === "opponent") {
+    drawOpponentHealthboxWobble(fb, resolution.healthboxY2, opponentContent);
+  } else {
+    drawSendOutHealthbox(fb, 0, opponentContent);
+  }
+  const playerContent = onixPlayerHealthboxContentForState(
+    target.geometry.side === "player"
+      ? resolution.displayedHp
+      : ONIX_MENU_BATTLER.hp,
+    target.geometry.side === "player"
+      ? resolution.healthboxStatus
+      : "none",
+  );
+  drawComposedPlayerHealthbox(
+    fb,
+    playerContent,
+    0,
+    target.geometry.side === "player" ? resolution.healthboxY2 : 0,
+  );
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const effectiveness = state.config.resolutionProfile.effectivenessMessage;
-  if (effectiveness && view.age >= effectiveness.textStartAge) {
-    const line = "It’s super effective!";
+  const burnMessageStart =
+    state.config.resolutionProfile.burnMessageTextStartAge;
+  if (burnMessageStart !== undefined && view.age >= burnMessageStart) {
+    const line = `${target.species} was burned!`;
+    drawMessageTextLines(
+      fb,
+      line,
+      "",
+      Math.min(line.length, view.age - burnMessageStart + 1),
+    );
+  } else if (effectiveness && view.age >= effectiveness.textStartAge) {
+    const line = effectiveness.kind === "superEffective"
+      ? "It’s super effective!"
+      : "It’s not very effective…";
     drawMessageTextLines(
       fb,
       line,
@@ -13728,11 +13800,16 @@ export function renderSceneOnMovePresentation(
       Math.min(line.length, view.age - effectiveness.textStartAge + 1),
     );
   } else {
+    const line1 = attacker.geometry.side === "opponent"
+      ? `Foe ${attacker.species} used`
+      : `${attacker.species} used`;
+    const line2 = "FIRE PUNCH!";
+    const textStartAge = state.config.moveTextStartAge ?? -1;
     drawMessageTextLines(
       fb,
-      "ONIX used",
-      "FIRE PUNCH!",
-      Math.min("ONIX usedFIRE PUNCH!".length, view.age + 2),
+      line1,
+      line2,
+      Math.min(line1.length + line2.length, view.age - textStartAge + 1),
     );
   }
 }

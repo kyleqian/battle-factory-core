@@ -1,4 +1,5 @@
 import {
+  FIRE_PUNCH_BURN_FLAME_FIRST_AGE,
   firePunchBurnFlames,
   firePunchParticlesInDrawOrder,
   firePunchResidualBurnFlames,
@@ -16,6 +17,8 @@ export interface SceneOnBattlerGeometry {
   readonly spriteCorner: Readonly<{ x: number; y: number }>;
   /** Source `GetBattlerSpriteCoord(..., 2/3)` animation center. */
   readonly animationCenter: Readonly<{ x: number; y: number }>;
+  /** Source singles BATTLER_COORD_X/Y base for status-animation creation. */
+  readonly battlePositionCenter: Readonly<{ x: number; y: number }>;
 }
 
 export interface SceneOnPresentationBattler {
@@ -28,6 +31,13 @@ export interface SceneOnFirePunchConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly resolutionProfile: FirePunchResolutionProfile;
+  /**
+   * Move-animation script age displayed at presentation age zero. Controller
+   * printers can hand ownership over at different script phases by side.
+   */
+  readonly animationAgeOffset?: number;
+  /** Relative first printer age; negative means text predates this seam. */
+  readonly moveTextStartAge?: number;
 }
 
 export interface SceneOnMovePresentationState {
@@ -37,6 +47,7 @@ export interface SceneOnMovePresentationState {
 
 export interface SceneOnFirePunchView {
   readonly age: number;
+  readonly animationAge: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly resolution: FirePunchResolutionState;
@@ -66,8 +77,10 @@ export function createSceneOnMovePresentation(
   }
   assertIntegerPoint("attacker spriteCorner", config.attacker.geometry.spriteCorner);
   assertIntegerPoint("attacker animationCenter", config.attacker.geometry.animationCenter);
+  assertIntegerPoint("attacker battlePositionCenter", config.attacker.geometry.battlePositionCenter);
   assertIntegerPoint("target spriteCorner", config.target.geometry.spriteCorner);
   assertIntegerPoint("target animationCenter", config.target.geometry.animationCenter);
+  assertIntegerPoint("target battlePositionCenter", config.target.geometry.battlePositionCenter);
   if (
     config.resolutionProfile.startHp < config.resolutionProfile.endHp
     || config.resolutionProfile.endHp < 0
@@ -87,19 +100,34 @@ export function sceneOnFirePunchView(
   state: SceneOnMovePresentationState,
 ): SceneOnFirePunchView {
   const geometry = { center: state.config.target.geometry.animationCenter };
+  const burnGeometry = {
+    ...geometry,
+    statusBaseCenter: state.config.target.geometry.battlePositionCenter,
+    horizontalDirection:
+      state.config.target.geometry.side === "player" ? -1 : 1,
+  } as const;
+  const animationAge =
+    state.age + (state.config.animationAgeOffset ?? 0);
   const resolution = firePunchResolutionState(
     state.age,
     state.config.resolutionProfile,
   );
   return {
     age: state.age,
+    animationAge,
     attacker: state.config.attacker,
     target: state.config.target,
     resolution,
-    particles: firePunchParticlesInDrawOrder(state.age, geometry),
+    particles: firePunchParticlesInDrawOrder(animationAge, geometry),
     burnFlames: [
       ...(resolution.secondaryRollSucceeded
-        ? firePunchBurnFlames(state.age, geometry)
+        ? firePunchBurnFlames(
+            state.age
+              - (state.config.resolutionProfile.burnFlameFirstAge
+                ?? FIRE_PUNCH_BURN_FLAME_FIRST_AGE)
+              + FIRE_PUNCH_BURN_FLAME_FIRST_AGE,
+            burnGeometry,
+          )
         : []),
       ...(!state.config.resolutionProfile.faint
         ? firePunchResidualBurnFlames(state.age, geometry)
@@ -115,6 +143,7 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY = {
       side: "player",
       spriteCorner: { x: 40, y: 48 },
       animationCenter: { x: 72, y: 88 },
+      battlePositionCenter: { x: 72, y: 80 },
     },
   },
   target: {
@@ -125,6 +154,7 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY = {
       // GetBattlerSpriteFinal_Y: singles opponent base 40 + Grovyle's
       // source-extracted front y_offset 4 (elevation 0).
       animationCenter: { x: 176, y: 44 },
+      battlePositionCenter: { x: 176, y: 40 },
     },
   },
 } as const satisfies Pick<SceneOnFirePunchConfig, "attacker" | "target">;
@@ -142,3 +172,61 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE: FirePunchResolutionProfile = {
     textStartAge: 204,
   },
 };
+
+export const GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY = {
+  attacker: {
+    species: "GROVYLE",
+    geometry: {
+      side: "opponent",
+      spriteCorner: { x: 144, y: 12 },
+      animationCenter: { x: 176, y: 44 },
+      battlePositionCenter: { x: 176, y: 40 },
+    },
+  },
+  target: {
+    species: "ONIX",
+    geometry: {
+      side: "player",
+      spriteCorner: { x: 40, y: 48 },
+      // Player singles base y=80; GetBattlerSpriteCoord Y_PIC_OFFSET adds 8.
+      animationCenter: { x: 72, y: 88 },
+      battlePositionCenter: { x: 72, y: 80 },
+    },
+  },
+} as const satisfies Pick<SceneOnFirePunchConfig, "attacker" | "target">;
+
+/**
+ * Immutable stock-controller result from the committed opposite-side stage.
+ * Presentation ages are relative to oracle frame 2081, never battle ticks.
+ */
+export const GROVYLE_TO_ONIX_FIRE_PUNCH_PROFILE: FirePunchResolutionProfile = {
+  startHp: 117,
+  endHp: 96,
+  initialStatus: "none",
+  hpDrainFirstAge: 27,
+  hpCommitAge: 49,
+  hitWobbleFirstAge: 0,
+  hitWobbleTicks: 12,
+  hitBlinkFirstAge: 1,
+  hitBlinkTicks: 20,
+  secondaryRollAge: 142,
+  secondaryRollSucceeded: true,
+  burnFlameFirstAge: 148,
+  burnMessageTextStartAge: 184,
+  healthboxStatusAge: 266,
+  currentMoveResetAge: 277,
+  effectivenessMessage: {
+    kind: "notVeryEffective",
+    textStartAge: 53,
+  },
+};
+
+export const GROVYLE_TO_ONIX_FIRE_PUNCH_PRESENTATION = {
+  // The opponent controller printed the used-move line before this seam and
+  // hands over after Move_FIRE_PUNCH's particle task has completed.
+  animationAgeOffset: 123,
+  moveTextStartAge: -26,
+} as const satisfies Pick<
+  SceneOnFirePunchConfig,
+  "animationAgeOffset" | "moveTextStartAge"
+>;

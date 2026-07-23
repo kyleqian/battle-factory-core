@@ -114,7 +114,7 @@ pixels are committed or available to production.
 Before the checkpoint below, FIRE_PUNCH remained **partial**, not `exact`,
 because the opposite-attacker-side geometry had not yet been staged.
 
-## Opposite-side evidence checkpoint (2026-07-23)
+## Opposite-side completion (2026-07-23)
 
 Two fresh runs of the command above produced byte-identical JSON. Its dense
 capture range is frames **2080–2700**, retaining the whole FIRE_PUNCH-owned
@@ -133,9 +133,21 @@ The unmodified controller's observable result is pinned in the JSON:
 | FIRE_PUNCH controller release (`gCurrentMove=0`) | 2358 |
 
 `tools/compare/fixtures/fire-punch-grovyle-onix.json` records the exact
-geometry, epoch, outcome profile, and dense **2081–2357** app-comparison
-window for the existing generic Scene-ON adapter. No opposite-side app
-comparison was run or claimed in this bounded probe step; in particular this
-does **not** upgrade FIRE_PUNCH from `partial` to `exact`. The strongly
-different large ONIX target silhouette and target-side compositing must be
-compared through that adapter before any such claim.
+geometry, epoch, immutable outcome profile, and dense **2081–2357**
+app-comparison window. The shared Scene-ON adapter now compares all **277**
+frames exactly (0 aggregate differing pixels). The reusable mechanisms added
+for this orientation are:
+
+- separate source BATTLER_COORD bases `(176,40)/(72,80)` from animation
+  centers `(176,44)/(72,88)`, because status sprites are created from the
+  former;
+- side-aware Status_Burn travel, including the moving-left low direction bit
+  in `InitAnimLinearTranslation` (`614 | 1 = 615`);
+- player-side target blink/wobble, HP drain, battler-0 BRN tile/palette
+  ownership, and not-very-effective/burn printer timing.
+
+The original portable case remains **225/225**, canonical turn17-rung4
+remains **200/200**, and canonical turn16-rung3 remains **227/236** with only
+the already-known 21397–21405 residual (183 pixels each). FIRE_PUNCH therefore
+remains `partial`, not `exact`, until that known canonical remainder is closed
+or explicitly settled under the coverage definition.

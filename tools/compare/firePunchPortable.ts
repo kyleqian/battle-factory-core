@@ -11,12 +11,21 @@ import { createHash } from "node:crypto";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import {
   createSceneOnMovePresentation,
-  ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
-  ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
+  type SceneOnFirePunchConfig,
 } from "../../src/engine/sceneOnPresentation.ts";
 
 interface PortableFixture {
   readonly probe: string;
+  readonly probeArguments?: readonly string[];
+  readonly geometry: {
+    readonly attacker: PortableBattler;
+    readonly target: PortableBattler;
+  };
+  readonly presentation?: {
+    readonly animationAgeOffset?: number;
+    readonly moveTextStartAge?: number;
+  };
+  readonly profile: SceneOnFirePunchConfig["resolutionProfile"];
   readonly appStage: {
     readonly oracleFrame: number;
     readonly presentationAge: number;
@@ -25,6 +34,26 @@ interface PortableFixture {
     readonly startFrame: number;
     readonly endFrame: number;
   };
+}
+
+interface PortableBattler {
+  readonly species: "ONIX" | "GROVYLE";
+  readonly side: "player" | "opponent";
+  readonly spriteCorner: Readonly<{ x: number; y: number }>;
+  readonly animationCenter: Readonly<{ x: number; y: number }>;
+  readonly battlePositionCenter: Readonly<{ x: number; y: number }>;
+}
+
+function presentationBattler(battler: PortableBattler) {
+  return {
+    species: battler.species,
+    geometry: {
+      side: battler.side,
+      spriteCorner: battler.spriteCorner,
+      animationCenter: battler.animationCenter,
+      battlePositionCenter: battler.battlePositionCenter,
+    },
+  } as const;
 }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
@@ -42,7 +71,16 @@ const probe = resolve(root, fixture.probe);
 const wrapper = join(root, "tools/run-mgba-probe.py");
 const run = spawnSync(
   "python3",
-  [wrapper, probeOutput, "--", mgbaPython, probe, probeOutput, rgbDir],
+  [
+    wrapper,
+    probeOutput,
+    "--",
+    mgbaPython,
+    probe,
+    probeOutput,
+    rgbDir,
+    ...(fixture.probeArguments ?? []),
+  ],
   { cwd: root, encoding: "utf8" },
 );
 if (run.stdout) process.stdout.write(run.stdout);
@@ -54,8 +92,10 @@ let state: EngineState = {
   rngMode: "frontierBattle",
   sceneOnPresentation: createSceneOnMovePresentation({
     move: "FIRE_PUNCH",
-    ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
-    resolutionProfile: ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
+    attacker: presentationBattler(fixture.geometry.attacker),
+    target: presentationBattler(fixture.geometry.target),
+    resolutionProfile: fixture.profile,
+    ...fixture.presentation,
   }),
 };
 for (let age = 0; age < fixture.appStage.presentationAge; age += 1) {

@@ -175,6 +175,26 @@ describe("FIRE_PUNCH source-derived reducers", () => {
     expect(firePunchBurnFlames(281)).toEqual([]);
   });
 
+  it("mirrors player-back Status_Burn with the source direction bit and status base", () => {
+    const playerTarget = {
+      center: { x: 72, y: 88 },
+      statusBaseCenter: { x: 72, y: 80 },
+      horizontalDirection: -1 as const,
+    };
+    expect(firePunchBurnFlames(247, playerTarget)).toEqual([
+      { x: 96, y: 104, frame: 0 },
+    ]);
+    // InitAnimLinearTranslation stores moving-left in the delta low bit:
+    // (614 | 1) * 5 >> 8 = 12, not the rightward path's 11.
+    expect(firePunchBurnFlames(252, playerTarget)).toEqual([
+      { x: 84, y: 104, frame: 1 },
+    ]);
+    expect(firePunchBurnFlames(253, playerTarget)).toEqual([
+      { x: 96, y: 104, frame: 0 },
+      { x: 82, y: 104, frame: 1 },
+    ]);
+  });
+
   it("pins source-accurate burn residual damage, display drain, and atomic HP write", () => {
     expect(burnResidualDamage(142)).toBe(17);
     expect(burnResidualDamage(7)).toBe(1);

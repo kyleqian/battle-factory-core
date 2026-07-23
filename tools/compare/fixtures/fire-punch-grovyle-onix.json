@@ -15,14 +15,20 @@
       "species": "GROVYLE",
       "side": "opponent",
       "spriteCorner": { "x": 144, "y": 12 },
-      "animationCenter": { "x": 176, "y": 44 }
+      "animationCenter": { "x": 176, "y": 44 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
     },
     "target": {
       "species": "ONIX",
       "side": "player",
       "spriteCorner": { "x": 40, "y": 48 },
-      "animationCenter": { "x": 72, "y": 88 }
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
     }
+  },
+  "presentation": {
+    "animationAgeOffset": 123,
+    "moveTextStartAge": -26
   },
   "denseWindow": {
     "startFrame": 2081,
@@ -31,11 +37,23 @@
   "profile": {
     "startHp": 117,
     "endHp": 96,
+    "initialStatus": "none",
+    "hpDrainFirstAge": 27,
     "hpCommitAge": 49,
+    "hitWobbleFirstAge": 0,
+    "hitWobbleTicks": 12,
+    "hitBlinkFirstAge": 1,
+    "hitBlinkTicks": 20,
     "secondaryRollAge": 142,
     "secondaryRollSucceeded": true,
-    "status": "burn",
-    "currentMoveResetAge": 277
+    "burnFlameFirstAge": 148,
+    "burnMessageTextStartAge": 184,
+    "healthboxStatusAge": 266,
+    "currentMoveResetAge": 277,
+    "effectivenessMessage": {
+      "kind": "notVeryEffective",
+      "textStartAge": 53
+    }
   },
   "statusOutcome": {
     "status1": 16,
