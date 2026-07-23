@@ -1,13 +1,16 @@
 import {
   assertBattleParty,
   cloneBattleParty,
+  cloneOpponent,
   healBattleParty,
   prepareBattleScenario,
   type BattleIndex,
   type BattleOpponent,
   type BattleParty,
   type BattleScenario,
+  type PreparedOpponentSelection,
 } from "./battleScenario.ts";
+import { selectFactoryTrainer } from "./factoryTrainerSchedule.ts";
 import type {
   BattlePresentationCommand,
   BattlePresentationCompletion,
@@ -48,15 +51,9 @@ export interface RoundRulesState {
 
 export interface RoundControllerState {
   readonly scenarioId: string;
-  readonly opponentSchedule: readonly [
-    BattleOpponent,
-    BattleOpponent,
-    BattleOpponent,
-    BattleOpponent,
-    BattleOpponent,
-    BattleOpponent,
-    BattleOpponent,
-  ];
+  /** Fixture scenarios start complete; Factory scenarios append as trainers are selected. */
+  readonly opponentSchedule: readonly BattleOpponent[];
+  readonly opponentSelection: PreparedOpponentSelection;
   readonly rules: RoundRulesState;
   readonly presentation: PendingBattlePresentation | null;
   readonly nextPresentationCommandId: number;
@@ -108,6 +105,7 @@ export function createRoundController(scenario: BattleScenario): RoundController
   const base = {
     scenarioId: prepared.id,
     opponentSchedule: prepared.opponents,
+    opponentSelection: prepared.opponentSelection,
     rules: {
       phase: "presentingBattleStart" as const,
       battleIndex: 0 as const,
@@ -168,6 +166,54 @@ function nextBattleIndex(index: BattleIndex): BattleIndex {
   return (index + 1) as BattleIndex;
 }
 
+function selectNextOpponent(
+  state: RoundControllerState,
+  battleIndex: BattleIndex,
+): {
+  readonly opponent: BattleOpponent;
+  readonly opponentSchedule: readonly BattleOpponent[];
+  readonly opponentSelection: PreparedOpponentSelection;
+  readonly rngValue: number;
+} {
+  if (state.opponentSelection.type === "fixture") {
+    const opponent = state.opponentSchedule[battleIndex];
+    if (opponent === undefined) fail(`fixture has no opponent for battle index ${battleIndex}`);
+    return {
+      opponent,
+      opponentSchedule: state.opponentSchedule,
+      opponentSelection: state.opponentSelection,
+      rngValue: state.rules.rngValue,
+    };
+  }
+
+  const strategy = state.opponentSelection;
+  const selection = selectFactoryTrainer(
+    strategy.factoryWinStreak + battleIndex,
+    battleIndex,
+    strategy.storedTrainerIds,
+    state.rules.rngValue,
+  );
+  const selectedFixture = strategy.opponentPool.find(
+    (opponent) => opponent.trainerId === selection.trainerId,
+  );
+  if (selectedFixture === undefined) {
+    return fail(
+      `opponentPool has no fixture for selected Factory trainer ${selection.trainerId}`,
+    );
+  }
+  const opponent = cloneOpponent(selectedFixture);
+  return {
+    opponent,
+    opponentSchedule: [...state.opponentSchedule, opponent],
+    opponentSelection: {
+      ...strategy,
+      storedTrainerIds: selection.storedTrainerIds,
+      ledger: [...strategy.ledger, ...selection.ledger],
+    },
+    rngValue: selection.rngValue,
+  };
+}
+
 /**
  * Advances only after the adapter has acknowledged the pending command.
  * Core mutations remain explicit here rather than occurring in the
@@ -205,7 +251,8 @@ export function advanceRoundController(state: RoundControllerState): RoundContro
     case "presentingSwapResult": {
       requireCompletedPresentation(state, "swapResolved");
       const battleIndex = nextBattleIndex(state.rules.battleIndex);
-      const opponent = state.opponentSchedule[battleIndex];
+      const selection = selectNextOpponent(state, battleIndex);
+      const opponent = selection.opponent;
       if (state.rules.opponentHistory.includes(opponent.id)) {
         return fail(`opponent ${opponent.id} would repeat`);
       }
@@ -213,6 +260,8 @@ export function advanceRoundController(state: RoundControllerState): RoundContro
       return issueCommand(
         {
           ...state,
+          opponentSchedule: selection.opponentSchedule,
+          opponentSelection: selection.opponentSelection,
           rules: {
             ...state.rules,
             phase: "presentingBattleStart",
@@ -220,6 +269,7 @@ export function advanceRoundController(state: RoundControllerState): RoundContro
             playerParty,
             currentOpponent: opponent,
             opponentHistory: [...state.rules.opponentHistory, opponent.id],
+            rngValue: selection.rngValue,
             lastBattle: null,
           },
         },

@@ -1,3 +1,8 @@
+import {
+  selectFactoryTrainer,
+  type FactoryTrainerDrawLedgerEntry,
+} from "./factoryTrainerSchedule.ts";
+
 export const BATTLES_PER_ROUND = 7;
 
 export type BattleIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -29,17 +34,42 @@ export interface BattleOpponent {
 }
 
 /**
- * A deterministic round fixture. `opponentSelectionInputs` are already-drawn
- * inputs (from a seeded generator, source-derived fixture, or test); selecting
- * an opponent consumes no RNG inside the round controller.
+ * Explicit deterministic fixture ABI retained for tests and staged probes.
+ * `opponentSelectionInputs` are already drawn, so this strategy consumes no
+ * RNG inside the round controller.
  */
-export interface BattleScenario {
+export interface FixtureBattleScenario {
   readonly id: string;
   readonly playerParty: BattleParty;
   readonly opponentPool: readonly BattleOpponent[];
   readonly opponentSelectionInputs: readonly number[];
   readonly initialRngValue: number;
+  readonly opponentSelectionStrategy?: undefined;
 }
+
+export interface FactoryTrainerOpponent extends BattleOpponent {
+  /** gBattleFrontierTrainers index selected by the Factory source routine. */
+  readonly trainerId: number;
+}
+
+/**
+ * Source-exact trainer-selection scenario. Opponent parties remain explicit
+ * fixtures until the later opponent-mon generation increment; trainer
+ * identity and RNG/history behavior are live.
+ */
+export interface FactoryTrainerBattleScenario {
+  readonly id: string;
+  readonly playerParty: BattleParty;
+  readonly opponentPool: readonly FactoryTrainerOpponent[];
+  readonly initialRngValue: number;
+  readonly opponentSelectionStrategy: {
+    readonly type: "factoryTrainer";
+    /** Factory streak at battle index 0 (normally a multiple of seven). */
+    readonly factoryWinStreak: number;
+  };
+}
+
+export type BattleScenario = FixtureBattleScenario | FactoryTrainerBattleScenario;
 
 function assertNonempty(value: string, label: string): void {
   if (value.length === 0) throw new Error(`${label} must not be empty`);
@@ -74,8 +104,21 @@ export function cloneBattleParty(party: BattleParty): BattleParty {
   return [cloneMon(party[0]), cloneMon(party[1]), cloneMon(party[2])];
 }
 
-function cloneOpponent(opponent: BattleOpponent): BattleOpponent {
+export function cloneOpponent(opponent: BattleOpponent): BattleOpponent {
   return { ...opponent, party: cloneBattleParty(opponent.party) };
+}
+
+function assertOpponentPool(opponentPool: readonly BattleOpponent[]): void {
+  const poolIds = new Set<string>();
+  opponentPool.forEach((opponent, index) => {
+    assertNonempty(opponent.id, `opponentPool[${index}].id`);
+    assertNonempty(opponent.trainerName, `opponentPool[${index}].trainerName`);
+    assertBattleParty(opponent.party, `opponentPool[${index}].party`);
+    if (poolIds.has(opponent.id)) {
+      throw new Error(`opponentPool contains duplicate opponent id ${opponent.id}`);
+    }
+    poolIds.add(opponent.id);
+  });
 }
 
 /**
@@ -102,16 +145,7 @@ export function selectRoundOpponents(
     throw new Error(`opponentSelectionInputs must contain exactly ${BATTLES_PER_ROUND} values`);
   }
 
-  const poolIds = new Set<string>();
-  opponentPool.forEach((opponent, index) => {
-    assertNonempty(opponent.id, `opponentPool[${index}].id`);
-    assertNonempty(opponent.trainerName, `opponentPool[${index}].trainerName`);
-    assertBattleParty(opponent.party, `opponentPool[${index}].party`);
-    if (poolIds.has(opponent.id)) {
-      throw new Error(`opponentPool contains duplicate opponent id ${opponent.id}`);
-    }
-    poolIds.add(opponent.id);
-  });
+  assertOpponentPool(opponentPool);
 
   const remaining = opponentPool.map(cloneOpponent);
   const selected: BattleOpponent[] = [];
@@ -134,25 +168,85 @@ export function selectRoundOpponents(
   ];
 }
 
+export interface PreparedFixtureSelection {
+  readonly type: "fixture";
+}
+
+export interface PreparedFactoryTrainerSelection {
+  readonly type: "factoryTrainer";
+  readonly factoryWinStreak: number;
+  readonly opponentPool: readonly FactoryTrainerOpponent[];
+  readonly storedTrainerIds: readonly number[];
+  readonly ledger: readonly FactoryTrainerDrawLedgerEntry[];
+}
+
+export type PreparedOpponentSelection =
+  | PreparedFixtureSelection
+  | PreparedFactoryTrainerSelection;
+
 export function prepareBattleScenario(scenario: BattleScenario): {
   readonly id: string;
   readonly playerParty: BattleParty;
-  readonly opponents: ReturnType<typeof selectRoundOpponents>;
+  readonly opponents: readonly BattleOpponent[];
   readonly initialRngValue: number;
+  readonly opponentSelection: PreparedOpponentSelection;
 } {
   assertNonempty(scenario.id, "scenario.id");
   assertBattleParty(scenario.playerParty, "scenario.playerParty");
   if (!Number.isSafeInteger(scenario.initialRngValue) || scenario.initialRngValue < 0) {
     throw new Error("scenario.initialRngValue must be a non-negative safe integer");
   }
+  if (scenario.opponentSelectionStrategy === undefined) {
+    return {
+      id: scenario.id,
+      playerParty: cloneBattleParty(scenario.playerParty),
+      opponents: selectRoundOpponents(
+        scenario.opponentPool,
+        scenario.opponentSelectionInputs,
+      ),
+      initialRngValue: scenario.initialRngValue >>> 0,
+      opponentSelection: { type: "fixture" },
+    };
+  }
+
+  assertOpponentPool(scenario.opponentPool);
+  const trainerIds = new Set<number>();
+  const opponentPool = scenario.opponentPool.map((opponent, index) => {
+    if (!Number.isInteger(opponent.trainerId) || opponent.trainerId < 0) {
+      throw new Error(`opponentPool[${index}].trainerId must be a non-negative integer`);
+    }
+    if (trainerIds.has(opponent.trainerId)) {
+      throw new Error(`opponentPool contains duplicate trainerId ${opponent.trainerId}`);
+    }
+    trainerIds.add(opponent.trainerId);
+    return { ...cloneOpponent(opponent), trainerId: opponent.trainerId };
+  });
+  const firstSelection = selectFactoryTrainer(
+    scenario.opponentSelectionStrategy.factoryWinStreak,
+    0,
+    [],
+    scenario.initialRngValue,
+  );
+  const firstOpponent = opponentPool.find(
+    (opponent) => opponent.trainerId === firstSelection.trainerId,
+  );
+  if (firstOpponent === undefined) {
+    throw new Error(
+      `opponentPool has no fixture for selected Factory trainer ${firstSelection.trainerId}`,
+    );
+  }
   return {
     id: scenario.id,
     playerParty: cloneBattleParty(scenario.playerParty),
-    opponents: selectRoundOpponents(
-      scenario.opponentPool,
-      scenario.opponentSelectionInputs,
-    ),
-    initialRngValue: scenario.initialRngValue >>> 0,
+    opponents: [firstOpponent],
+    initialRngValue: firstSelection.rngValue,
+    opponentSelection: {
+      type: "factoryTrainer",
+      factoryWinStreak: scenario.opponentSelectionStrategy.factoryWinStreak,
+      opponentPool,
+      storedTrainerIds: firstSelection.storedTrainerIds,
+      ledger: firstSelection.ledger,
+    },
   };
 }
 

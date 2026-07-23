@@ -3,7 +3,8 @@ import type {
   BattleMon,
   BattleOpponent,
   BattleParty,
-  BattleScenario,
+  FactoryTrainerBattleScenario,
+  FixtureBattleScenario,
 } from "../src/engine/battleScenario.ts";
 import {
   advanceRoundController,
@@ -24,7 +25,7 @@ function party(prefix: string): BattleParty {
   return [mon(`${prefix}-0`), mon(`${prefix}-1`), mon(`${prefix}-2`)];
 }
 
-function scenario(selectionInputs = [0, 0, 0, 0, 0, 0, 0]): BattleScenario {
+function scenario(selectionInputs = [0, 0, 0, 0, 0, 0, 0]): FixtureBattleScenario {
   const opponentPool: BattleOpponent[] = Array.from({ length: 9 }, (_, index) => ({
     id: `trainer-${index}`,
     trainerName: `TRAINER ${index}`,
@@ -36,6 +37,24 @@ function scenario(selectionInputs = [0, 0, 0, 0, 0, 0, 0]): BattleScenario {
     opponentPool,
     opponentSelectionInputs: selectionInputs,
     initialRngValue: 0x12345678,
+  };
+}
+
+function factoryScenario(): FactoryTrainerBattleScenario {
+  return {
+    id: "source-trainer-schedule",
+    playerParty: party("player"),
+    opponentPool: Array.from({ length: 300 }, (_, trainerId) => ({
+      id: `factory-trainer-${trainerId}`,
+      trainerId,
+      trainerName: `FACTORY TRAINER ${trainerId}`,
+      party: party(`factory-foe-${trainerId}`),
+    })),
+    initialRngValue: 0x12345678,
+    opponentSelectionStrategy: {
+      type: "factoryTrainer",
+      factoryWinStreak: 0,
+    },
   };
 }
 
@@ -120,6 +139,42 @@ describe("BattleScenario opponent selection", () => {
 });
 
 describe("generic seven-battle RoundController", () => {
+  it("selects all seven trainers live through the source strategy and carries final RNG/history", () => {
+    let state = acknowledgeAndAdvance(createRoundController(factoryScenario()));
+    for (let battleIndex = 0; battleIndex < 7; battleIndex += 1) {
+      expect(state.rules.battleIndex).toBe(battleIndex);
+      if (battleIndex < 6) {
+        state = declineAndStartNextBattle(
+          winCurrentBattle(state, state.rules.rngValue),
+        );
+      } else {
+        state = winCurrentBattle(state, state.rules.rngValue);
+      }
+    }
+
+    expect(state.opponentSchedule.map((opponent) => opponent.id)).toEqual([
+      "factory-trainer-29",
+      "factory-trainer-26",
+      "factory-trainer-90",
+      "factory-trainer-88",
+      "factory-trainer-60",
+      "factory-trainer-67",
+      "factory-trainer-112",
+    ]);
+    expect(state.rules.opponentHistory).toEqual(
+      state.opponentSchedule.map((opponent) => opponent.id),
+    );
+    expect(state.rules.rngValue).toBe(2443977505);
+    expect(state.opponentSelection).toMatchObject({
+      type: "factoryTrainer",
+      storedTrainerIds: [29, 26, 90, 88, 60, 67],
+    });
+    if (state.opponentSelection.type !== "factoryTrainer") {
+      throw new Error("expected Factory trainer selection");
+    }
+    expect(state.opponentSelection.ledger).toHaveLength(7);
+  });
+
   it("advances all seven sequential wins and completes the round", () => {
     let state = acknowledgeAndAdvance(createRoundController(scenario()));
     for (let battleIndex = 0; battleIndex < 7; battleIndex += 1) {
@@ -211,6 +266,17 @@ describe("generic seven-battle RoundController", () => {
 });
 
 describe("BattlePresentation command/completion seam", () => {
+  it("does not consume Factory trainer RNG when acknowledging presentation", () => {
+    const initial = createRoundController(factoryScenario());
+    expect(initial.rules.rngValue).toBe(192004491);
+    const completed = completeBattlePresentation(initial, {
+      commandId: initial.presentation!.command.commandId,
+    });
+    expect(completed.rules.rngValue).toBe(initial.rules.rngValue);
+    expect(completed.opponentSelection).toBe(initial.opponentSelection);
+    expect(completed.opponentSchedule).toBe(initial.opponentSchedule);
+  });
+
   it("acknowledges idempotently without mutating rules or RNG", () => {
     const initial = createRoundController(scenario());
     const rules = initial.rules;
