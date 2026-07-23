@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 302 — Bounded worker S8 postwin increment: **GREEN — NO through held guide message**
+## 302 — Supervisor-accepted S8 postwin increment: **GREEN — NO through held guide message**
 
 - **State:** canonical **29601-30031** now reaches the settled/input-ready
   `"Right this way, please!"` message without dismissing it. The committed
@@ -23,7 +23,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   True edges: swap input 29272; canonical DOWN 29602 (visible 29603); NO
   29632; text final 29658; message input-ready 29660. Prefix `[0:146]` is
   byte-identical. No forbidden asset/table, tick/trace branch, fitting,
-  exclusion, or dynamic thinning.
+  exclusion, or dynamic thinning. Supervisor independently reviewed the
+  logical/display cursor handoff and edge-relative message path, then
+  reverified the 73/73 trace, 164/164 predecessor, all 1083 Tier-1 tests,
+  and production build.
 
 ---
 ## 301 — Supervisor-accepted S8 postwin increment: **GREEN — GO ON through swap prompt ready**
