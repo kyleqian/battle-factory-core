@@ -56,14 +56,18 @@ shift rule's own scope (RAM-correctly predicted the frozen bounce there,
 but rendered the same wrong PP digit) and the single-tick confirm-press
 blip (17755). `turn14-fly-miss.json`: **185/185, 0 diff**.
 
-**Remaining** (this entry's own honest scope now): `17781-17787` (7 ticks)
-and `17822-17845` (24 ticks, kerning-class, per #33(b)'s own dossier) —
-neither touched or re-tested this session, per the brief's explicit scope
-fence. Stay excluded from `turn14-fly-miss.json`. **Next step:** a fresh
-RAM/pixel probe of `17781-17787` (same two-independent-methods bar this
-dossier holds itself to — it may or may not share the now-fixed PP bug,
-untested); `17822-17845` needs its own kerning-specific investigation,
-unrelated to either bug fixed this session.
+**`17781-17787` probed 2026-07-23, still open:** fresh RAM/OAM/VRAM/palette
+and framebuffer methods rule out PP, menu redraw, bounce, transfer, palette,
+position, lifetime, and matrix timing. These are the first seven visible FLY
+ball frames; residuals are ball-footprint-only (22/42/58/76/94/112/40 px)
+while the renderer already consumes the exact live affine-double matrices.
+This is a bounded high-compression/high-stretch affine-sampler defect. Exact
+next instrument: `docs/turn14-flyup-opening-probe.md`'s blank-frame,
+baseline-subtracted final-OAM experiment. Do not fit a tick patch.
+
+**`17822-17845` remains separate and unprobed:** 24 kerning-class ticks per
+#33(b)'s dossier. Both windows stay excluded from `turn14-fly-miss.json`
+(185/185); neither is related to the now-closed PP/redraw family.
 
 ## #23 — [PARKED 2026-07-20, supervisor decision under the unanswered-
   escalation default] DRAGON_BREATH fire projectiles: renders 3177-3235 of

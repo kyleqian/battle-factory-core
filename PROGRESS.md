@@ -9,7 +9,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **State:** the generic controller now has a source-exact, policy-driven
   Factory trainer selection strategy for battle indexes **0–6**. Tier-1 is
   **1152/1152** and build passes (**5.531 MB**); canonical pixels remain
-  unchanged and intentionally unwired.
+  unchanged and intentionally unwired. The staged Battle-2 OFF target is now
+  banked through its next input-ready menu.
 - **Did:** ported `GetRandomScaledFrontierTrainerId` plus
   `GenerateOpponentMons`' trainer retry/history loop using
   `factory-round-policy.json`: streak/7 challenge rows, battle-6 hard range,
@@ -17,14 +18,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and the omitted final save-history write. Added an explicit RNG port and
   per-draw ledger, deterministic seven-trainer schedule/final-RNG tests, and
   live scenario/controller selection while preserving fixture injection.
+  Added an explicit OFF-profile oracle fixture and RAM ledger for ONIX ROCK
+  SLIDE / KABUTO SAND ATTACK from confirm through the next menu.
 - **Next:** stage one representative Battle 2 turn through the generic
   OFF-profile presentation seam. Unique swap-YES/loss/round-summary UI and
   later opponent-mon/rental rejection generation remain open; do not resume
   tick 33332/SAND ATTACK.
 - **Notes:** commits `14e9f39`, `13652f5`; forced retries pin draw count/final
   RNG, source history stays six entries after the seventh selection, and
-  presentation acknowledgements do not consume selection RNG. No oracle,
-  renderer, `BUGFIX` IV-branch, or opponent-party generation work was done.
+  presentation acknowledgements do not consume selection RNG. OFF ground
+  truth is 179 deterministic captures, confirm+407 input-ready, ONIX 117,
+  KABUTO 91→63, ONIX accuracy 6→5, and 12 RNG calls. No renderer, `BUGFIX`
+  IV-branch, or opponent-party generation work was done. The ON animation
+  probe also isolated ISSUES #34's seven FLY-up frames to the affine sampler.
 
 ---
 ## 318 — S8 generic round/presentation core: **GREEN — architecture foundation landed**
