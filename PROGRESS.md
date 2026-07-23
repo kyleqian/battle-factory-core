@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 303 — Bounded S8 postwin increment: **GREEN — Battle 2 opening quote exact**
+## 303 — Supervisor-accepted S8 postwin increment: **GREEN — Battle 2 opening quote exact**
 
 - **State:** canonical **30031-32031** now reaches FISHERMAN JENSON's held,
   input-ready `"MY POKéMON WILL MAKE YOU DOWNCAST"` quote without dismissing
@@ -24,7 +24,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Every dynamic frame 30031-30382 is captured, with byte-static anchors
   through 32031. Gate: frame 29660 ready/first accepted press start, stored
   edge 29661; canonical starts 30031/stores 30032. No forbidden asset,
-  lookup/table, tick/trace branch, fitting, exclusion, or thinning.
+  lookup/table, tick/trace branch, fitting, exclusion, or thinning. Supervisor
+  independently reviewed the cross-layer state/render/RNG handoff, then
+  reverified both new traces, both regressions, all 1086 Tier-1 tests, and
+  production build.
 
 ---
 ## 302 — Supervisor-accepted S8 postwin increment: **GREEN — NO through held guide message**
