@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 328 — S8 player-options popup: **GREEN — 44/44 exact**
+
+- **State:** the source-relative player-options seam is complete through the
+  settled popup and DOWN cursor response. The new dense OFF trace
+  `battle1-swap-player-options-popup.json` is **44/44 exact**; prior options
+  and picker traces remain **58/58** and **101/101**.
+- **Did:** opened input at `playerOptions +56`, reused the mon-picture clock
+  for popup text at `+58` and highlight settle at `+59`, added the one-VBlank
+  logical/display cursor handoff, and dispatched A/B to `summaryFade`,
+  `playerPickerReturn`, or `enemySwitch`. Screen-ball and selected-ball loops
+  remain separate phase-relative clocks.
+- **Next:** implement exactly one next distinct path: summary fade/screen,
+  popup B-close/player-picker return, or enemy-screen switch presentation.
+- **Notes:** Tier-1 **1189/1189**, build **5.547 MB**. No absolute tick,
+  battle-number, screenshot, or captured-frame branch.
+
+---
 ## 327 — S8 player-options popup handoff: **GREEN evidence checkpoint**
 
 - **State:** the next OFF mechanism is source/oracle pinned without runtime
@@ -38,24 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   enemy picker, accept/exit/message, and post-swap identity.
 - **Notes:** S8 gates 1 and 3 remain complete; unique-UI gate 2 remains open.
   Preserve both exact swap prefixes and keep presentation clocks phase-relative.
-
----
-## 325 — S8 reset gates 1/3 complete; swap UI advancing: **GREEN**
-
-- **State:** the generic seven-battle core and staged OFF portability proof
-  complete reset gates **1 and 3**. Gate 2 is partial: the live swap-YES
-  presentation is **101/101** through the input-ready player picker and
-  **36/36** through its action fade/slide. Supervisor verification is
-  **1177/1177**, build **5.546 MB**, and the staged turn is **16/16**.
-- **Did:** landed source-exact indexes 0–6 trainer scheduling/RNG, round
-  healing/win/loss/swap/completion control, source swap/terminal contracts,
-  and a relative Scene-OFF staged turn seam. Closed the swap entry and action
-  transition. The ON lane closed Murkrow transfer and FLY text timing
-  (`turn14-fly-miss` **206/206**), proved the seven-frame FLY affine remainder
-  unsafe to patch, and narrowed DRAGON_BREATH to compressed-only overdraw.
-- **Next:** continue the OFF swap options at edge **+36** / tick **29738**:
-  implement the mon-picture aperture, settled options, enemy picker,
-  accept/exit/message, and post-swap identity. Then render the source-extracted
-  loss and seventh-win endings. Do not resume the canonical Battle-2 march.
-- **Notes:** no deferred decision. S8 remains `[~]` with only unique-UI gate 2
-  open. Keep all clocks phase-relative and preserve the two exact swap prefixes.

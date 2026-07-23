@@ -31,6 +31,9 @@ export type FactoryRentalRoster = readonly [
 export type FactorySwapPhase =
   | "playerPicker"
   | "playerOptions"
+  | "summaryFade"
+  | "playerPickerReturn"
+  | "enemySwitch"
   | "enemyPicker"
   | "acceptPrompt"
   | "quitPrompt"
@@ -45,6 +48,9 @@ export interface FactorySwapState {
   readonly cursor: 0 | 1 | 2;
   readonly displayCursor: 0 | 1 | 2;
   readonly playerOptionCursor: 0 | 1 | 2;
+  /** OAM-visible option cursor, copied one VBlank after the logical cursor. */
+  readonly playerOptionDisplayCursor: 0 | 1 | 2;
+  readonly playerOptionCursorCopyPending: boolean;
   readonly yesNoCursor: 0 | 1;
   readonly playerMonId: 0 | 1 | 2 | null;
   readonly enemyMonId: 0 | 1 | 2 | null;
@@ -86,6 +92,8 @@ export function createFactorySwapState(
     cursor: 0,
     displayCursor: 0,
     playerOptionCursor: 0,
+    playerOptionDisplayCursor: 0,
+    playerOptionCursorCopyPending: false,
     yesNoCursor: 0,
     playerMonId: null,
     enemyMonId: null,
@@ -105,8 +113,25 @@ export function acknowledgeFactorySwapPresentation(
 export function copyFactorySwapCursor(
   state: FactorySwapState,
 ): FactorySwapState {
-  if (state.displayCursor === state.cursor) return state;
-  return { ...state, displayCursor: state.cursor };
+  const displayCursor =
+    state.displayCursor === state.cursor ? state.displayCursor : state.cursor;
+  const playerOptionDisplayCursor =
+    state.playerOptionCursorCopyPending ||
+    state.playerOptionDisplayCursor === state.playerOptionCursor
+      ? state.playerOptionDisplayCursor
+      : state.playerOptionCursor;
+  const playerOptionCursorCopyPending = false;
+  if (
+    displayCursor === state.displayCursor &&
+    playerOptionDisplayCursor === state.playerOptionDisplayCursor &&
+    playerOptionCursorCopyPending === state.playerOptionCursorCopyPending
+  ) return state;
+  return {
+    ...state,
+    displayCursor,
+    playerOptionDisplayCursor,
+    playerOptionCursorCopyPending,
+  };
 }
 
 export function factorySwapAlreadyHasSpecies(
@@ -182,6 +207,8 @@ export function handleFactorySwapInput(
           ...state,
           phase: "playerOptions",
           playerOptionCursor: 0,
+          playerOptionDisplayCursor: 0,
+          playerOptionCursorCopyPending: false,
           inputReady: false,
         };
       }
@@ -204,25 +231,29 @@ export function handleFactorySwapInput(
             state.playerOptionCursor,
             input === "UP" ? -1 : 1,
           ),
+          playerOptionCursorCopyPending: true,
         };
       }
       if (input === "B" || (input === "A" && state.playerOptionCursor === 2)) {
-        return { ...state, phase: "playerPicker", inputReady: false };
+        return { ...state, phase: "playerPickerReturn", inputReady: false };
       }
       if (input !== "A") return state;
       if (state.playerOptionCursor === 0) {
-        // SUMMARY owns its own screen; returning preserves the picker choice.
-        return { ...state, inputReady: false };
+        return { ...state, phase: "summaryFade", inputReady: false };
       }
       return {
         ...state,
-        phase: "enemyPicker",
+        phase: "enemySwitch",
         playerMonId: state.cursor,
         cursor: 0,
         displayCursor: 0,
         inputReady: false,
       };
     }
+    case "summaryFade":
+    case "playerPickerReturn":
+    case "enemySwitch":
+      return state;
     case "acceptPrompt": {
       if (input === "UP" || input === "DOWN") {
         return { ...state, yesNoCursor: state.yesNoCursor === 0 ? 1 : 0 };

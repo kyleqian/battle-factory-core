@@ -1,3 +1,24 @@
+## 325 — S8 reset gates 1/3 complete; swap UI advancing: **GREEN**
+
+- **State:** the generic seven-battle core and staged OFF portability proof
+  complete reset gates **1 and 3**. Gate 2 is partial: the live swap-YES
+  presentation is **101/101** through the input-ready player picker and
+  **36/36** through its action fade/slide. Supervisor verification is
+  **1177/1177**, build **5.546 MB**, and the staged turn is **16/16**.
+- **Did:** landed source-exact indexes 0–6 trainer scheduling/RNG, round
+  healing/win/loss/swap/completion control, source swap/terminal contracts,
+  and a relative Scene-OFF staged turn seam. Closed the swap entry and action
+  transition. The ON lane closed Murkrow transfer and FLY text timing
+  (`turn14-fly-miss` **206/206**), proved the seven-frame FLY affine remainder
+  unsafe to patch, and narrowed DRAGON_BREATH to compressed-only overdraw.
+- **Next:** continue the OFF swap options at edge **+36** / tick **29738**:
+  implement the mon-picture aperture, settled options, enemy picker,
+  accept/exit/message, and post-swap identity. Then render the source-extracted
+  loss and seventh-win endings. Do not resume the canonical Battle-2 march.
+- **Notes:** no deferred decision. S8 remains `[~]` with only unique-UI gate 2
+  open. Keep all clocks phase-relative and preserve the two exact swap prefixes.
+
+---
 ## 324 — S8 swap action fade/slide: **GREEN — 36/36 exact**
 
 - **State:** `battle1-swap-player-options.json` now captures every frame from

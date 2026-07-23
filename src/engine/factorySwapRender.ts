@@ -17,6 +17,7 @@ import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
 import arrowData from "../assets/gen/arrow.json" with { type: "json" };
 import actionBoxData from "../assets/gen/action-box.json" with { type: "json" };
+import menuHighlightData from "../assets/gen/menu-highlight.json" with { type: "json" };
 import textPaletteData from "../assets/gen/text-palette.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import fontSmallData from "../data/gen/font-small.json" with { type: "json" };
@@ -37,6 +38,11 @@ const actionBox = actionBoxData as {
   right: { columns: number; rows: number; tiles: number[][] };
   palette: RgbColor[];
 };
+const menuHighlight = menuHighlightData as {
+  left: { tileset: { columns: number; rows: number; tiles: number[][] } };
+  right: { tileset: { columns: number; rows: number; tiles: number[][] } };
+  palette: RgbColor[];
+};
 const textPalette = (textPaletteData as { colors: RgbColor[] }).colors;
 const font = fontNormalData as unknown as FontData;
 const fontSmall = {
@@ -50,6 +56,8 @@ const charmap = new Map<string, number>(
 const DEFAULT_TEXT_COLORS = { fg: 2, bg: 1, shadow: 3 };
 const SPECIES_TEXT_COLORS = { fg: 4, bg: 0, shadow: 0 };
 const MENU_TEXT_COLORS = { fg: 2, bg: 0, shadow: 0 };
+const PLAYER_OPTION_LABELS = ["SUMMARY", "SWAP", "RECHOOSE"] as const;
+const PLAYER_OPTIONS_ORIGIN = { x: 21 * 8, y: 14 * 8 } as const;
 
 const CATEGORY_BY_SPECIES: Readonly<Record<string, string>> = {
   ONIX: "ROCK SNAKE",
@@ -245,6 +253,48 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
       48 * state.displayCursor + 72,
       ballVisuals,
     );
+    const monPic = factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0);
+    if (monPic.menuHighlightVisible) {
+      const highlightY = PLAYER_OPTIONS_ORIGIN.y +
+        state.playerOptionDisplayCursor * 16 + 8;
+      drawSpriteFaded(
+        fb,
+        { tileset: menuHighlight.left.tileset },
+        menuHighlight.palette,
+        192,
+        highlightY,
+        4,
+        2,
+        0,
+        objFade,
+      );
+      drawSpriteFaded(
+        fb,
+        { tileset: menuHighlight.right.tileset },
+        menuHighlight.palette,
+        224,
+        highlightY,
+        4,
+        2,
+        0,
+        objFade,
+      );
+    }
+    if (monPic.menuTextVisible) {
+      for (let i = 0; i < PLAYER_OPTION_LABELS.length; i += 1) {
+        drawTextFaded(
+          fb,
+          font,
+          charmap,
+          PLAYER_OPTION_LABELS[i]!,
+          PLAYER_OPTIONS_ORIGIN.x + 15,
+          PLAYER_OPTIONS_ORIGIN.y + 1 + i * 16,
+          textPalette,
+          MENU_TEXT_COLORS,
+          bgFade,
+        );
+      }
+    }
   }
 
   // Keep the small-font metric live in production and make accidental

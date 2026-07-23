@@ -80,9 +80,9 @@ describe("Factory swap state/input contract", () => {
     state = ready(state);
     state = handleFactorySwapInput(state, "DOWN");
     state = handleFactorySwapInput(state, "A");
-    expect(state.phase).toBe("enemyPicker");
+    expect(state.phase).toBe("enemySwitch");
     expect(state.playerMonId).toBe(0);
-    state = ready(state);
+    state = ready({ ...state, phase: "enemyPicker" });
     state = handleFactorySwapInput(state, "A");
     expect(state.phase).toBe("acceptPrompt");
     state = ready(state);
@@ -215,5 +215,28 @@ describe("Factory swap state/input contract", () => {
       inputReady: false,
       result: null,
     });
+  });
+
+  it("dispatches player options to the source-named next mechanisms", () => {
+    const options: FactorySwapState = {
+      ...createFactorySwapState(player, enemy, rentals),
+      phase: "playerOptions",
+      inputReady: true,
+    };
+    expect(handleFactorySwapInput(options, "A").phase).toBe("summaryFade");
+    expect(handleFactorySwapInput(options, "B").phase).toBe("playerPickerReturn");
+    expect(handleFactorySwapInput({
+      ...options,
+      playerOptionCursor: 1,
+      playerOptionDisplayCursor: 1,
+    }, "A")).toMatchObject({
+      phase: "enemySwitch",
+      playerMonId: 0,
+    });
+    expect(handleFactorySwapInput({
+      ...options,
+      playerOptionCursor: 2,
+      playerOptionDisplayCursor: 2,
+    }, "A").phase).toBe("playerPickerReturn");
   });
 });

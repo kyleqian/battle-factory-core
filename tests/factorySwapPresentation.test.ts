@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import {
   FACTORY_SWAP_ENTRY_READY_DELAY,
-  FACTORY_SWAP_PHASE_READY_DELAYS,
   advanceFactorySwapPresentation,
   createCanonicalFactorySwapPresentation,
   factorySwapActionFadeY,
@@ -73,32 +72,31 @@ describe("live Factory swap presentation adapter", () => {
       phaseElapsed: 0,
       controller: { phase: "playerOptions", inputReady: false },
     });
-    state = advance(
-      state,
-      FACTORY_SWAP_PHASE_READY_DELAYS.playerOptions!,
-    );
+    state = advance(state, 55);
+    expect(state.controller.inputReady).toBe(false);
+    expect(handleFactorySwapPresentationInput(state, "B")).toBe(state);
+    state = advance(state, 1);
+    expect(state.controller.inputReady).toBe(true);
+    expect(state.controller.playerOptionCursor).toBe(0);
+    expect(handleFactorySwapPresentationInput(state, "A").controller.phase)
+      .toBe("summaryFade");
+    expect(handleFactorySwapPresentationInput(state, "B").controller.phase)
+      .toBe("playerPickerReturn");
     state = handleFactorySwapPresentationInput(state, "DOWN");
+    expect(state.controller).toMatchObject({
+      playerOptionCursor: 1,
+      playerOptionDisplayCursor: 0,
+    });
+    state = advance(state, 1);
+    expect(state.controller.playerOptionDisplayCursor).toBe(0);
+    state = advance(state, 1);
+    expect(state.controller.playerOptionDisplayCursor).toBe(1);
     state = handleFactorySwapPresentationInput(state, "A");
     expect(state.controller).toMatchObject({
-      phase: "enemyPicker",
+      phase: "enemySwitch",
       playerMonId: 0,
       inputReady: false,
     });
-
-    state = advance(state, FACTORY_SWAP_PHASE_READY_DELAYS.enemyPicker!);
-    state = handleFactorySwapPresentationInput(state, "A");
-    expect(state.controller.phase).toBe("acceptPrompt");
-    state = advance(state, FACTORY_SWAP_PHASE_READY_DELAYS.acceptPrompt!);
-    state = handleFactorySwapPresentationInput(state, "A");
-    expect(state.controller).toMatchObject({
-      phase: "complete",
-      result: "accepted",
-    });
-    expect(state.controller.playerParty.map(({ species }) => species)).toEqual([
-      "GROVYLE",
-      "MAGBY",
-      "BAYLEEF",
-    ]);
   });
 
   it("pins the source moving-ball table to the relative entry epoch", () => {
@@ -115,6 +113,8 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapPlayerOptionBallTile(14)).toBe(16);
     expect(factorySwapPlayerOptionBallTile(15)).toBe(0);
     expect(factorySwapPlayerOptionBallTile(23)).toBe(32);
+    expect(factorySwapPlayerOptionBallTile(72)).toBe(0);
+    expect(factorySwapPlayerOptionBallTile(73)).toBe(16);
   });
 
   it("pins the action-palette fade and six-pixel CANCEL slide to the player-options edge", () => {
@@ -142,5 +142,16 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapPlayerMonPicVisual(49).window).toEqual({ top: 60, bottom: 69 });
     expect(factorySwapPlayerMonPicVisual(57).window).toEqual({ top: 32, bottom: 96 });
     expect(factorySwapPlayerMonPicVisual(57).spriteVisible).toBe(false);
+    expect(factorySwapPlayerMonPicVisual(57).menuTextVisible).toBe(false);
+    expect(factorySwapPlayerMonPicVisual(58)).toMatchObject({
+      spriteVisible: true,
+      menuTextVisible: true,
+      menuHighlightVisible: false,
+    });
+    expect(factorySwapPlayerMonPicVisual(59)).toMatchObject({
+      spriteVisible: true,
+      menuTextVisible: true,
+      menuHighlightVisible: true,
+    });
   });
 });

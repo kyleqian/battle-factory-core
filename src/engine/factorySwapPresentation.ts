@@ -84,7 +84,7 @@ export const FACTORY_SWAP_ENTRY_READY_DELAY = 99;
 export const FACTORY_SWAP_PHASE_READY_DELAYS: Readonly<
   Partial<Record<FactorySwapPhase, number>>
 > = {
-  playerOptions: 79,
+  playerOptions: 56,
   enemyPicker: 199,
   acceptPrompt: 99,
   quitPrompt: 99,
@@ -161,7 +161,15 @@ export function factorySwapBallTile(elapsed: number): 0 | 16 | 32 {
     [32, 8],
     [0, 8],
   ] as const;
-  let age = local;
+  // The one-shot lead-in finishes before the source animation jumps back to
+  // its four-command rocking loop.
+  let age = local <= 128 ? local : (local - 129) % 16;
+  if (local > 128) {
+    if (age < 4) return 16;
+    if (age < 8) return 0;
+    if (age < 12) return 32;
+    return 0;
+  }
   for (const [tile, duration] of commands) {
     if (age < duration) return tile;
     age -= duration;
@@ -170,7 +178,9 @@ export function factorySwapBallTile(elapsed: number): 0 | 16 | 32 {
 }
 
 /** Selected-player ball epoch after A, before the option popup reveal. */
-export function factorySwapPlayerOptionBallTile(phaseElapsed: number): 0 | 16 | 32 {
+export function factorySwapPlayerOptionBallTile(
+  phaseElapsed: number,
+): 0 | 16 | 32 {
   const local = phaseElapsed - 7;
   if (local < 0) return 0;
   const commands = [
@@ -188,6 +198,13 @@ export function factorySwapPlayerOptionBallTile(phaseElapsed: number): 0 | 16 | 
     if (age < duration) return tile;
     age -= duration;
   }
+  // This sprite owns a separately restarted animation clock after OpenMonPic.
+  // Its loop begins three task ticks after the one-shot table completes.
+  if (local < 66) return 0;
+  const loopAge = (local - 66) % 16;
+  if (loopAge < 4) return 16;
+  if (loopAge < 8) return 0;
+  if (loopAge < 12) return 32;
   return 0;
 }
 
