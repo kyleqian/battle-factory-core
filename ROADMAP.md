@@ -636,7 +636,7 @@ The supervisor independently reviewed the encounter-relative state/RNG/setup
 handoff and reverified the 131/131 + 73/73 predecessor traces, all 1089
 Tier-1 tests, and production build; no new endpoint pixel acceptance is
 implied.
-**Seventh postwin increment (2026-07-23, bounded worker):**
+**Seventh postwin increment (2026-07-23, supervisor-accepted):**
 canonical **32031-32279** is now **249/249 exact** in
 `battle2-transition.json`, capturing every frame from JENSON's held quote
 through delayed-A close/setup, the shared gray intro, the live three-circle
@@ -648,6 +648,9 @@ shared renderer; `Sin2`/`Cos2` geometry, 16-tick creation staggering, and
 remains **206/206**, Tier-1 is **1095/1095**, and build passes. Frame 32280
 and all visible Battle 2 battle-scene rendering remain open, as do battles
 3-7, swap YES, and round completion; S8 stays `[ ]`.
+The supervisor independently reviewed the encounter-selected live geometry,
+OAM ordering, and compositor integration, then reverified the 249/249 new
+trace, 131/131 + 206/206 regressions, all 1095 Tier-1 tests, and build.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
