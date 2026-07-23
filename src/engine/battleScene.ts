@@ -564,8 +564,10 @@ import {
   FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE,
   FIRE_PUNCH_TURN17_MENU_REDRAW_AGE,
   TURN17_FIRE_PUNCH_ENTRY_AGE,
-  TURN17_FIRE_PUNCH_HP_COMMIT_AGE,
   TURN17_FIRE_PUNCH_RESOLUTION,
+  TURN17_FAINTED_LINE1,
+  TURN17_FAINTED_LINE2,
+  firePunchFaintState,
   firePunchFistVisible,
   firePunchBurnFlames,
   firePunchHitsplatVisible,
@@ -12138,9 +12140,13 @@ function drawFirePunchEmbers(fb: Uint8Array, age: number): void {
   }
 }
 
-function drawFirePunchBurnFlames(fb: Uint8Array, age: number): void {
+function drawFirePunchBurnFlames(
+  fb: Uint8Array,
+  age: number,
+  primaryEffectSucceeded: boolean = true,
+): void {
   for (const particle of [
-    ...firePunchBurnFlames(age),
+    ...(primaryEffectSucceeded ? firePunchBurnFlames(age) : []),
     ...firePunchResidualBurnFlames(age),
   ]) {
     drawSpriteSheet(
@@ -12193,6 +12199,10 @@ function drawTurn16PostSwitchField(
   const animBg = faintAttackAge === null ? null : faintAttackBgState(faintAttackAge);
   const firePunchAge = faintAttackAge === null ? null : faintAttackAge - firePunchEpochAge;
   const ownsFirePunch = firePunchAge !== null && firePunchAge >= 0;
+  const firePunchFaint =
+    ownsFirePunch
+      ? firePunchFaintState(firePunchAge, firePunchProfile ?? undefined)
+      : null;
   const sourcePpu = animBg?.background === "dark" ? turn16DarkFieldPpu : turn15FieldPpuAsset;
   const releasedPalette = releaseTick === null
     ? sourcePpu.paletteBgr555
@@ -12209,7 +12219,9 @@ function drawTurn16PostSwitchField(
     oam: faintAttackAge === null
       ? sourcePpu.oam
       : ownsFirePunch
-        ? sourcePpu.oam.slice(3, -1)
+        ? firePunchFaint && !firePunchFaint.healthboxVisible
+          ? []
+          : sourcePpu.oam.slice(3, -1)
         : explicitOpponent === null
           ? sourcePpu.oam.slice(0, -1)
           : sourcePpu.oam.slice(3, -1),
@@ -12228,18 +12240,34 @@ function drawTurn16PostSwitchField(
           g: blendComponentToward(c.g, FIRE_PUNCH_RED.g, coeff),
           b: blendComponentToward(c.b, FIRE_PUNCH_RED.b, coeff),
         }));
+    const faint = firePunchFaint;
     if (!resolution.targetInvisible) {
-      drawSpriteSheet(
-        fb,
-        murkrowFrontSprite.tileset,
-        palette,
-        MURKROW_CORNER.x,
-        MURKROW_CORNER.y + firePunchTargetShakeY2(firePunchAge),
-      );
+      if (faint?.sink) {
+        drawSpriteSheetTopRows(
+          fb,
+          murkrowFrontSprite.tileset,
+          palette,
+          MURKROW_CORNER.x,
+          MURKROW_CORNER.y + faint.sink.y2,
+          faint.sink.keptRows,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          murkrowFrontSprite.tileset,
+          palette,
+          MURKROW_CORNER.x,
+          MURKROW_CORNER.y + firePunchTargetShakeY2(firePunchAge),
+        );
+      }
     }
     const beforeEffects = fb.slice();
     drawFirePunchEmbers(fb, firePunchAge);
-    drawFirePunchBurnFlames(fb, firePunchAge);
+    drawFirePunchBurnFlames(
+      fb,
+      firePunchAge,
+      resolution.secondaryRollSucceeded,
+    );
     const frontEffects = beforeEffects.slice();
     const frontCoverage = new Uint8Array(240 * 160);
     drawFirePunchImpact(frontEffects, firePunchAge, frontCoverage);
@@ -12254,15 +12282,17 @@ function drawTurn16PostSwitchField(
         fb[i + 3] = frontEffects[i + 3]!;
       }
     }
-    drawOpponentHealthboxWobble(
-      fb,
-      resolution.healthboxY2,
-      murkrowHealthboxContentForHp(
-        resolution.displayedHp,
-        resolution.healthboxStatus,
-        firePunchProfile?.endHp ?? resolution.displayedHp,
-      ),
-    );
+    if (!faint || faint.healthboxVisible) {
+      drawOpponentHealthboxWobble(
+        fb,
+        resolution.healthboxY2,
+        murkrowHealthboxContentForHp(
+          resolution.displayedHp,
+          faint?.status ?? resolution.healthboxStatus,
+          firePunchProfile?.endHp ?? resolution.displayedHp,
+        ),
+      );
+    }
   } else if (faintAttackAge !== null) {
     const eva = faintAttackAttackerEva(faintAttackAge);
     if (eva > 0) {
@@ -12367,8 +12397,9 @@ function drawTurn16FightSubmenuWindow(
       && animationAge >= 0
       && animationAge
         < TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE
-          + TURN17_FIRE_PUNCH_HP_COMMIT_AGE
           - TURN17_FIRE_PUNCH_ENTRY_AGE
+          + TURN17_FIRE_PUNCH_RESOLUTION.faint!.cursorStartAge
+          + 1
         ? animationAge
         : null;
     const targetHp = { startHp: 79, endHp: 27 };
@@ -12384,10 +12415,31 @@ function drawTurn16FightSubmenuWindow(
     );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
-    if (
-      resolutionAge !== null
-      && faintAttackResolutionState(resolutionAge, targetHp).message === "FIRE_PUNCH"
-    ) {
+    if (resolutionAge !== null) {
+      const firePunchAge =
+        resolutionAge
+        - (TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE - TURN17_FIRE_PUNCH_ENTRY_AGE);
+      const faint = firePunchFaintState(
+        firePunchAge,
+        TURN17_FIRE_PUNCH_RESOLUTION,
+      );
+      if (faint && faint.textVisibleChars > 0) {
+        drawMessageTextLines(
+          fb,
+          TURN17_FAINTED_LINE1,
+          TURN17_FAINTED_LINE2,
+          faint.textVisibleChars,
+        );
+        if (faint.inputReady) {
+          const cursor = cursorState(
+            firePunchAge,
+            TURN17_FIRE_PUNCH_RESOLUTION.faint!.cursorStartAge,
+          );
+          drawCursor(fb, cursor.yOffset, TURN5_FAINTED_CURSOR_X);
+        }
+        return;
+      }
+      if (faintAttackResolutionState(resolutionAge, targetHp).message !== "FIRE_PUNCH") return;
       drawMessageTextLines(
         fb,
         TURN16_FIRE_PUNCH_LINE1,

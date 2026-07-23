@@ -176,7 +176,7 @@ export interface FirePunchResolutionState {
   status: "none" | "burn";
   healthboxStatus: "none" | "burn";
   currentMove: "FIRE_PUNCH" | null;
-  message: "FIRE_PUNCH" | "BURNED" | "BURN_RESIDUAL" | "BLANK" | "ACTION_MENU";
+  message: "FIRE_PUNCH" | "BURNED" | "BURN_RESIDUAL" | "FAINTED" | "BLANK" | "ACTION_MENU";
   attacker: "MAGBY" | "MURKROW";
   target: "MAGBY" | "MURKROW";
   moveDamage: number;
@@ -189,6 +189,28 @@ export interface FirePunchResolutionProfile {
   endHp: number;
   initialStatus: "none" | "burn";
   hpCommitAge: number;
+  secondaryRollAge?: number;
+  secondaryRollSucceeded?: boolean;
+  currentMoveResetAge?: number;
+  rngBeforeSecondary?: number;
+  faint?: FirePunchFaintProfile;
+}
+
+export interface FirePunchFaintProfile {
+  sinkStartAge: number;
+  sinkSteps: number;
+  healthboxVanishAge: number;
+  statusClearAge: number;
+  textStartAge: number;
+  cursorStartAge: number;
+}
+
+export interface FirePunchFaintState {
+  sink: { keptRows: number; y2: number } | null;
+  healthboxVisible: boolean;
+  status: "none" | "burn";
+  textVisibleChars: number;
+  inputReady: boolean;
 }
 
 export const TURN16_FIRE_PUNCH_RESOLUTION: FirePunchResolutionProfile = {
@@ -201,15 +223,62 @@ export const TURN16_FIRE_PUNCH_RESOLUTION: FirePunchResolutionProfile = {
 /**
  * Turn 17 enters the shared cast after its controller's longer PRINTSTRING
  * lead-in.  The already-burned target has only 58 HP, and RAM places the
- * atomic write at shared reducer age 227.  That write is intentionally
- * outside the implemented pre-write interval.
+ * atomic write at shared reducer age 227.
  */
 export const TURN17_FIRE_PUNCH_RESOLUTION: FirePunchResolutionProfile = {
   startHp: 58,
   endHp: 0,
   initialStatus: "burn",
   hpCommitAge: TURN17_FIRE_PUNCH_HP_COMMIT_AGE,
+  secondaryRollAge: TURN17_FIRE_PUNCH_HP_COMMIT_AGE + 5,
+  secondaryRollSucceeded: false,
+  currentMoveResetAge: Number.POSITIVE_INFINITY,
+  rngBeforeSecondary: 1102173384,
+  faint: {
+    sinkStartAge: TURN17_FIRE_PUNCH_HP_COMMIT_AGE + 73,
+    sinkSteps: 7,
+    healthboxVanishAge: TURN17_FIRE_PUNCH_HP_COMMIT_AGE + 90,
+    statusClearAge: TURN17_FIRE_PUNCH_HP_COMMIT_AGE + 90,
+    textStartAge: TURN17_FIRE_PUNCH_HP_COMMIT_AGE + 92,
+    cursorStartAge: TURN17_FIRE_PUNCH_HP_COMMIT_AGE + 112,
+  },
 };
+
+export const TURN17_FAINTED_LINE1 = "Foe MURKROW";
+export const TURN17_FAINTED_LINE2 = "fainted!";
+export const TURN17_FAINTED_TEXT_TOTAL =
+  TURN17_FAINTED_LINE1.length + TURN17_FAINTED_LINE2.length;
+
+/**
+ * Opponent-faint state parameterized by the FIRE_PUNCH occurrence epoch.
+ * The seven-step sink is the same closed form used by the earlier
+ * Grovyle/Pidgeotto opponent faints.
+ */
+export function firePunchFaintState(
+  age: number,
+  profile: FirePunchResolutionProfile = TURN17_FIRE_PUNCH_RESOLUTION,
+): FirePunchFaintState | null {
+  const faint = profile.faint;
+  if (!faint || age < profile.hpCommitAge) return null;
+  const d = age - 1 - faint.sinkStartAge;
+  const erased = d <= 0 ? 0 : Math.min(faint.sinkSteps, Math.ceil(d / 2));
+  return {
+    sink:
+      age < faint.sinkStartAge + 2
+        ? null
+        : { keptRows: faint.sinkSteps - erased, y2: erased * 8 },
+    healthboxVisible: age < faint.healthboxVanishAge,
+    status:
+      age < faint.statusClearAge && profile.initialStatus === "burn"
+        ? "burn"
+        : "none",
+    textVisibleChars:
+      age < faint.textStartAge
+        ? 0
+        : Math.min(TURN17_FAINTED_TEXT_TOTAL, age - faint.textStartAge + 1),
+    inputReady: age >= faint.cursorStartAge,
+  };
+}
 
 /** `DoBattlerEndTurnEffects`'s source formula, with its 1-HP floor. */
 export function burnResidualDamage(maxHp: number): number {
@@ -221,9 +290,17 @@ export function firePunchResolutionState(
   age: number,
   profile: FirePunchResolutionProfile = TURN16_FIRE_PUNCH_RESOLUTION,
 ): FirePunchResolutionState {
+  const secondaryRollAge =
+    profile.secondaryRollAge ?? FIRE_PUNCH_SECONDARY_ROLL_AGE;
+  const secondaryRollConsumed = age >= secondaryRollAge;
+  const secondaryRollSucceeded =
+    secondaryRollConsumed
+    && (profile.secondaryRollSucceeded ?? profile.initialStatus === "none");
+  const currentMoveResetAge =
+    profile.currentMoveResetAge ?? FIRE_PUNCH_CURRENT_MOVE_RESET_AGE;
   const wobble = age - FIRE_PUNCH_HIT_WOBBLE_FIRST_AGE;
   const blink = age - FIRE_PUNCH_HIT_BLINK_FIRST_AGE;
-  const burned = profile.initialStatus === "burn" || age >= FIRE_PUNCH_SECONDARY_ROLL_AGE;
+  const burned = profile.initialStatus === "burn" || secondaryRollSucceeded;
   // The status-turn script's first visible controller frame follows two
   // MoveBattleBar calls; subsequent frames decrement currValue once.
   const residualDrain =
@@ -234,7 +311,11 @@ export function firePunchResolutionState(
   const firstTailRoll = age >= FIRE_PUNCH_TAIL_RNG_FIRST_AGE;
   const secondTailRoll = age >= FIRE_PUNCH_TAIL_RNG_SECOND_AGE;
   const message: FirePunchResolutionState["message"] =
-    age < FIRE_PUNCH_TEXT_CLEAR_AGE
+    profile.faint && age >= profile.faint.textStartAge
+      ? "FAINTED"
+      : profile.faint
+        ? "FIRE_PUNCH"
+        : age < FIRE_PUNCH_TEXT_CLEAR_AGE
       ? "FIRE_PUNCH"
       : age < FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE
           ? "BURNED"
@@ -262,15 +343,19 @@ export function firePunchResolutionState(
         : age >= profile.hpCommitAge
           ? profile.endHp
           : profile.startHp,
-    secondaryRollConsumed: age >= FIRE_PUNCH_SECONDARY_ROLL_AGE,
-    secondaryRollSucceeded:
-      profile.initialStatus === "none" && age >= FIRE_PUNCH_SECONDARY_ROLL_AGE,
-    status: burned ? "burn" : "none",
-    healthboxStatus:
-      profile.initialStatus === "burn" || age >= FIRE_PUNCH_BURN_BADGE_AGE
+    secondaryRollConsumed,
+    secondaryRollSucceeded,
+    status:
+      burned && (!profile.faint || age < profile.faint.statusClearAge)
         ? "burn"
         : "none",
-    currentMove: age >= FIRE_PUNCH_CURRENT_MOVE_RESET_AGE ? null : "FIRE_PUNCH",
+    healthboxStatus:
+      profile.faint && age >= profile.faint.statusClearAge
+        ? "none"
+        : profile.initialStatus === "burn" || age >= FIRE_PUNCH_BURN_BADGE_AGE
+        ? "burn"
+        : "none",
+    currentMove: age >= currentMoveResetAge ? null : "FIRE_PUNCH",
     message,
     attacker:
       residualPrepared && !firstTailRoll
@@ -285,13 +370,17 @@ export function firePunchResolutionState(
     moveDamage: residualPrepared && !firstTailRoll ? burnResidualDamage(142) : 0,
     tailRngCallsConsumed: secondTailRoll ? 6 : firstTailRoll ? 1 : 0,
     rngValue:
-      !burned
-        ? null
-        : secondTailRoll
-          ? FIRE_PUNCH_AFTER_TAIL_RNG_2
-          : firstTailRoll
-            ? FIRE_PUNCH_AFTER_TAIL_RNG_1
-            : FIRE_PUNCH_AFTER_BURN_RNG_VALUE,
+      profile.rngBeforeSecondary !== undefined
+        ? secondaryRollConsumed
+          ? advanceRngValue(profile.rngBeforeSecondary)
+          : profile.rngBeforeSecondary
+        : !burned
+          ? null
+          : secondTailRoll
+            ? FIRE_PUNCH_AFTER_TAIL_RNG_2
+            : firstTailRoll
+              ? FIRE_PUNCH_AFTER_TAIL_RNG_1
+              : FIRE_PUNCH_AFTER_BURN_RNG_VALUE,
   };
 }
 

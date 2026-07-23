@@ -3,6 +3,7 @@ import {
   burnResidualDamage,
   firePunchFistVisible,
   firePunchBurnFlames,
+  firePunchFaintState,
   firePunchParticlesInDrawOrder,
   firePunchResidualBurnFlames,
   firePunchResolutionState,
@@ -13,6 +14,7 @@ import {
   TURN17_FIRE_PUNCH_ENTRY_AGE,
   TURN17_FIRE_PUNCH_HP_COMMIT_AGE,
   TURN17_FIRE_PUNCH_RESOLUTION,
+  TURN17_FAINTED_TEXT_TOTAL,
 } from "../src/engine/firePunch.ts";
 import ember from "../src/assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import hands from "../src/assets/gen/battle-anim-hands-and-feet.json" with { type: "json" };
@@ -68,6 +70,57 @@ describe("FIRE_PUNCH source-derived reducers", () => {
       secondaryRollConsumed: false,
     });
     expect(firePunchResolutionState(227, TURN17_FIRE_PUNCH_RESOLUTION).battleHp).toBe(0);
+  });
+
+  it("pins Turn 17's lethal secondary no-op and current-move ownership", () => {
+    expect(firePunchResolutionState(231, TURN17_FIRE_PUNCH_RESOLUTION)).toMatchObject({
+      secondaryRollConsumed: false,
+      currentMove: "FIRE_PUNCH",
+      rngValue: 1102173384,
+    });
+    expect(firePunchResolutionState(232, TURN17_FIRE_PUNCH_RESOLUTION)).toMatchObject({
+      secondaryRollConsumed: true,
+      secondaryRollSucceeded: false,
+      status: "burn",
+      currentMove: "FIRE_PUNCH",
+      rngValue: 2185030043,
+    });
+    expect(firePunchResolutionState(339, TURN17_FIRE_PUNCH_RESOLUTION).currentMove)
+      .toBe("FIRE_PUNCH");
+    expect(firePunchResolutionState(318, TURN17_FIRE_PUNCH_RESOLUTION).message)
+      .toBe("FIRE_PUNCH");
+    expect(firePunchResolutionState(319, TURN17_FIRE_PUNCH_RESOLUTION)).toMatchObject({
+      message: "FAINTED",
+      status: "none",
+      healthboxStatus: "none",
+    });
+  });
+
+  it("pins Turn 17's sink, teardown, text cadence, and input gate", () => {
+    expect(firePunchFaintState(226, TURN17_FIRE_PUNCH_RESOLUTION)).toBeNull();
+    expect(firePunchFaintState(227, TURN17_FIRE_PUNCH_RESOLUTION)).toMatchObject({
+      sink: null,
+      healthboxVisible: true,
+      status: "burn",
+      textVisibleChars: 0,
+      inputReady: false,
+    });
+    expect(firePunchFaintState(301, TURN17_FIRE_PUNCH_RESOLUTION)!.sink).toBeNull();
+    expect(firePunchFaintState(302, TURN17_FIRE_PUNCH_RESOLUTION)!.sink)
+      .toEqual({ keptRows: 6, y2: 8 });
+    expect(firePunchFaintState(312, TURN17_FIRE_PUNCH_RESOLUTION)!.sink)
+      .toEqual({ keptRows: 1, y2: 48 });
+    expect(firePunchFaintState(317, TURN17_FIRE_PUNCH_RESOLUTION)).toMatchObject({
+      healthboxVisible: false,
+      status: "none",
+      textVisibleChars: 0,
+    });
+    expect(firePunchFaintState(318, TURN17_FIRE_PUNCH_RESOLUTION)!.textVisibleChars).toBe(0);
+    expect(firePunchFaintState(319, TURN17_FIRE_PUNCH_RESOLUTION)!.textVisibleChars).toBe(1);
+    expect(firePunchFaintState(337, TURN17_FIRE_PUNCH_RESOLUTION)!.textVisibleChars)
+      .toBe(TURN17_FAINTED_TEXT_TOTAL);
+    expect(firePunchFaintState(338, TURN17_FIRE_PUNCH_RESOLUTION)!.inputReady).toBe(false);
+    expect(firePunchFaintState(339, TURN17_FIRE_PUNCH_RESOLUTION)!.inputReady).toBe(true);
   });
 
   it("pins the atomic HP write, successful secondary roll/status, badge, message, and move reset", () => {
