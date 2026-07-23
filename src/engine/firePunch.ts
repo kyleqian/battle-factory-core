@@ -58,6 +58,15 @@ const SPREAD_VELOCITIES = [
   [112, -128],
 ] as const;
 
+export interface FirePunchTargetGeometry {
+  /** Battle-animation target center (`GetBattlerSpriteCoord(..., 2/3)`). */
+  readonly center: Readonly<{ x: number; y: number }>;
+}
+
+export const DEFAULT_FIRE_PUNCH_TARGET_GEOMETRY: FirePunchTargetGeometry = {
+  center: { x: 176, y: 51 },
+};
+
 function sin(index: number, amplitude: number): number {
   const value = GBA_SINE_TABLE_256[((index % 256) + 256) % 256]!;
   return Math.floor((amplitude * value) / 256);
@@ -80,7 +89,10 @@ export interface FirePunchParticle {
 }
 
 /** Four source-phase `TranslateSpriteInGrowingCircle` embers. */
-export function firePunchSpiralParticles(age: number): FirePunchParticle[] {
+export function firePunchSpiralParticles(
+  age: number,
+  geometry: FirePunchTargetGeometry = DEFAULT_FIRE_PUNCH_TARGET_GEOMETRY,
+): FirePunchParticle[] {
   const n = age - FIRE_PUNCH_SPIRAL_FIRST_AGE;
   if (n < 0 || n >= FIRE_PUNCH_SPIRAL_TICKS) return [];
   // The callback has already run twice by the RAM state displayed on the
@@ -91,8 +103,8 @@ export function firePunchSpiralParticles(age: number): FirePunchParticle[] {
   return SPIRAL_PHASES.map((phase) => {
     const angle = phase + step * 9;
     return {
-      x: 176 + sin(angle, radius),
-      y: 51 + sin(angle + 64, radius),
+      x: geometry.center.x + sin(angle, radius),
+      y: geometry.center.y + sin(angle + 64, radius),
       frame,
       hFlip: false,
       vFlip: false,
@@ -101,14 +113,17 @@ export function firePunchSpiralParticles(age: number): FirePunchParticle[] {
 }
 
 /** Seven fixed-point `TranslateSpriteLinearFixedPoint` spread embers. */
-export function firePunchSpreadParticles(age: number): FirePunchParticle[] {
+export function firePunchSpreadParticles(
+  age: number,
+  geometry: FirePunchTargetGeometry = DEFAULT_FIRE_PUNCH_TARGET_GEOMETRY,
+): FirePunchParticle[] {
   const n = age - FIRE_PUNCH_IMPACT_FIRST_AGE;
   if (n < 0 || n > FIRE_PUNCH_SPREAD_TICKS) return [];
   const step = Math.min(n + 1, FIRE_PUNCH_SPREAD_TICKS);
   const frame = (1 + (Math.floor((n + 1) / 4) % 3)) as 1 | 2 | 3;
   return SPREAD_VELOCITIES.map(([vx, vy]) => ({
-    x: 176 + ((vx * step) >> 8),
-    y: 61 + ((vy * step) >> 8),
+    x: geometry.center.x + ((vx * step) >> 8),
+    y: geometry.center.y + 10 + ((vy * step) >> 8),
     frame,
     hFlip: false,
     vFlip: false,
@@ -134,24 +149,31 @@ function stableOamOrder(
  * ties. The spread seed is the allocator's inherited `sSpriteOrder` at this
  * script step (RAM: slots 8,7,13,12,11,10,9), not a per-frame pixel table.
  */
-export function firePunchParticlesInDrawOrder(age: number): FirePunchParticle[] {
-  const spiral = firePunchSpiralParticles(age);
+export function firePunchParticlesInDrawOrder(
+  age: number,
+  geometry: FirePunchTargetGeometry = DEFAULT_FIRE_PUNCH_TARGET_GEOMETRY,
+): FirePunchParticle[] {
+  const spiralAt = (taskAge: number) =>
+    firePunchSpiralParticles(taskAge, geometry);
+  const spreadAt = (taskAge: number) =>
+    firePunchSpreadParticles(taskAge, geometry);
+  const spiral = spiralAt(age);
   if (spiral.length) {
     const oam = stableOamOrder(
       FIRE_PUNCH_SPIRAL_FIRST_AGE,
       age,
       [0, 1, 2, 3],
-      firePunchSpiralParticles,
+      spiralAt,
     );
     return oam.reverse().map((index) => spiral[index]!);
   }
-  const spread = firePunchSpreadParticles(age);
+  const spread = spreadAt(age);
   if (spread.length) {
     const oam = stableOamOrder(
       FIRE_PUNCH_IMPACT_FIRST_AGE,
       age,
       [1, 0, 6, 5, 4, 3, 2],
-      firePunchSpreadParticles,
+      spreadAt,
     );
     return oam.reverse().map((index) => spread[index]!);
   }
@@ -193,6 +215,11 @@ export interface FirePunchResolutionProfile {
   secondaryRollSucceeded?: boolean;
   currentMoveResetAge?: number;
   rngBeforeSecondary?: number;
+  /** Optional post-damage effectiveness printer, relative to this cast. */
+  effectivenessMessage?: {
+    readonly kind: "superEffective";
+    readonly textStartAge: number;
+  };
   faint?: FirePunchFaintProfile;
 }
 
@@ -406,14 +433,18 @@ const BURN_FLAME_X_DELTA_FIXED8 = 614;
  * displayed VBlanks apart. Returned in back-to-front software draw order:
  * later sprite slots lose equal-subpriority OAM ties to the first flame.
  */
-export function firePunchBurnFlames(age: number): BurnFlameParticle[] {
+export function firePunchBurnFlames(
+  age: number,
+  geometry: FirePunchTargetGeometry = DEFAULT_FIRE_PUNCH_TARGET_GEOMETRY,
+): BurnFlameParticle[] {
   const particles: BurnFlameParticle[] = [];
   for (let i = BURN_FLAME_START_AGES.length - 1; i >= 0; i -= 1) {
     const n = age - BURN_FLAME_START_AGES[i]!;
     if (n < 0 || n >= BURN_FLAME_VISIBLE_TICKS) continue;
     particles.push({
-      x: 152 + ((BURN_FLAME_X_DELTA_FIXED8 * Math.min(n, 20)) >> 8),
-      y: 64,
+      x: geometry.center.x - 24
+        + ((BURN_FLAME_X_DELTA_FIXED8 * Math.min(n, 20)) >> 8),
+      y: geometry.center.y + 13,
       frame: (Math.floor((n + 1) / 4) % 5) as 0 | 1 | 2 | 3 | 4,
     });
   }
@@ -421,9 +452,13 @@ export function firePunchBurnFlames(age: number): BurnFlameParticle[] {
 }
 
 /** The end-turn burn script invokes the same Status_Burn animation again. */
-export function firePunchResidualBurnFlames(age: number): BurnFlameParticle[] {
+export function firePunchResidualBurnFlames(
+  age: number,
+  geometry: FirePunchTargetGeometry = DEFAULT_FIRE_PUNCH_TARGET_GEOMETRY,
+): BurnFlameParticle[] {
   return firePunchBurnFlames(
     age - FIRE_PUNCH_RESIDUAL_FLAME_FIRST_AGE + FIRE_PUNCH_BURN_FLAME_FIRST_AGE,
+    geometry,
   );
 }
 

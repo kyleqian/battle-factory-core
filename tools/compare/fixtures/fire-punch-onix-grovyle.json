@@ -1,0 +1,23 @@
+{
+  "schema": "scene-on-portable-compare/v1",
+  "oracleProfile": "battle-scene-on",
+  "probe": "tools/probe/stage-fire-punch-portable-on.py",
+  "pair": "ONIX (player-back) -> GROVYLE (opponent-front)",
+  "move": "FIRE_PUNCH",
+  "appStage": {
+    "id": "fire-punch-onix-grovyle-animation-owned",
+    "oracleFrame": 2313,
+    "presentationAge": 0
+  },
+  "denseWindow": {
+    "startFrame": 2313,
+    "endFrame": 2537
+  },
+  "profile": {
+    "startHp": 143,
+    "endHp": 112,
+    "hpCommitAge": 200,
+    "secondaryRollAge": 205,
+    "secondaryRollSucceeded": false
+  }
+}

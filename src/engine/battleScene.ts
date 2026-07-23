@@ -563,6 +563,10 @@ import {
 } from "./battle2Turn1.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
+  sceneOnFirePunchView,
+  type SceneOnMovePresentationState,
+} from "./sceneOnPresentation.ts";
+import {
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
   TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
   FIRE_PUNCH_TEXT_AGE,
@@ -12929,8 +12933,12 @@ function firePunchEmberTileset(frame: 0 | 1 | 2 | 3 | 4): Tileset {
   return subTileset(battleAnimSmallEmber.tileset, frame * 4, 4);
 }
 
-function drawFirePunchEmbers(fb: Uint8Array, age: number): void {
-  for (const particle of firePunchParticlesInDrawOrder(age)) {
+function drawFirePunchEmbers(
+  fb: Uint8Array,
+  age: number,
+  targetCenter: Readonly<{ x: number; y: number }> = { x: 176, y: 51 },
+): void {
+  for (const particle of firePunchParticlesInDrawOrder(age, { center: targetCenter })) {
     drawSpriteSheet(
       fb,
       firePunchEmberTileset(particle.frame),
@@ -12946,10 +12954,12 @@ function drawFirePunchBurnFlames(
   age: number,
   primaryEffectSucceeded: boolean = true,
   residualEffectApplies: boolean = true,
+  targetCenter: Readonly<{ x: number; y: number }> = { x: 176, y: 51 },
 ): void {
+  const geometry = { center: targetCenter };
   for (const particle of [
-    ...(primaryEffectSucceeded ? firePunchBurnFlames(age) : []),
-    ...(residualEffectApplies ? firePunchResidualBurnFlames(age) : []),
+    ...(primaryEffectSucceeded ? firePunchBurnFlames(age, geometry) : []),
+    ...(residualEffectApplies ? firePunchResidualBurnFlames(age, geometry) : []),
   ]) {
     drawSpriteSheet(
       fb,
@@ -12961,14 +12971,23 @@ function drawFirePunchBurnFlames(
   }
 }
 
-function drawFirePunchImpact(fb: Uint8Array, age: number, coverageMask: Uint8Array): void {
+function drawFirePunchImpact(
+  fb: Uint8Array,
+  age: number,
+  coverageMask: Uint8Array,
+  targetCenter: Readonly<{ x: number; y: number }> = { x: 176, y: 51 },
+): void {
+  const corner = {
+    x: targetCenter.x - 16,
+    y: targetCenter.y - 16,
+  };
   if (firePunchHitsplatVisible(age)) {
     drawSpriteSheetAffineStretchBlendedOverFb(
       fb,
       battleAnimHitsplat.tileset,
       battleAnimHitsplat.palette,
-      160,
-      35,
+      corner.x,
+      corner.y,
       TURN9_HITSPLAT_MATRIX,
       TURN9_HITSPLAT_MATRIX,
       12,
@@ -12980,8 +12999,8 @@ function drawFirePunchImpact(fb: Uint8Array, age: number, coverageMask: Uint8Arr
   }
   if (firePunchFistVisible(age)) {
     const fist = subTileset(battleAnimHandsAndFeet.tileset, 0, 4);
-    drawSpriteSheet(fb, fist, battleAnimHandsAndFeet.palette, 160, 35);
-    const fistMask = turn9QuickAttackOpaqueMask(fist, 160, 35, Infinity);
+    drawSpriteSheet(fb, fist, battleAnimHandsAndFeet.palette, corner.x, corner.y);
+    const fistMask = turn9QuickAttackOpaqueMask(fist, corner.x, corner.y, Infinity);
     for (let i = 0; i < coverageMask.length; i += 1) coverageMask[i] |= fistMask[i]!;
   }
 }
@@ -13621,6 +13640,101 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     return;
   }
   drawSendOutHandoff(fb, t, handoffTick, state.encounter);
+}
+
+/**
+ * Live compositor for a relative Scene-ON move stage. The battler sheets,
+ * particles, palette effects, healthboxes, and text are assembled from
+ * explicit geometry/profile inputs; no canonical battle clock participates.
+ */
+export function renderSceneOnMovePresentation(
+  fb: Uint8Array,
+  state: SceneOnMovePresentationState,
+): void {
+  const view = sceneOnFirePunchView(state);
+  const { attacker, target, resolution } = view;
+  if (attacker.species !== "ONIX" || target.species !== "GROVYLE") {
+    throw new Error(
+      `unsupported staged FIRE_PUNCH pair ${attacker.species}->${target.species}`,
+    );
+  }
+
+  drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+  drawSpriteSheet(
+    fb,
+    onixBackSprite.tileset,
+    onixBackSprite.palette,
+    attacker.geometry.spriteCorner.x,
+    attacker.geometry.spriteCorner.y,
+  );
+
+  const coeff = firePunchTargetBlendCoeff(view.age);
+  const targetPalette = coeff === 0
+    ? grovyleFrontSprite.palette
+    : grovyleFrontSprite.palette.map((color) => ({
+        r: blendComponentToward(color.r, FIRE_PUNCH_RED.r, coeff),
+        g: blendComponentToward(color.g, FIRE_PUNCH_RED.g, coeff),
+        b: blendComponentToward(color.b, FIRE_PUNCH_RED.b, coeff),
+      }));
+  if (!resolution.targetInvisible) {
+    drawSpriteSheet(
+      fb,
+      grovyleFrontSprite.tileset,
+      targetPalette,
+      target.geometry.spriteCorner.x,
+      target.geometry.spriteCorner.y + firePunchTargetShakeY2(view.age),
+    );
+  }
+
+  const beforeEffects = fb.slice();
+  drawFirePunchEmbers(fb, view.age, target.geometry.animationCenter);
+  drawFirePunchBurnFlames(
+    fb,
+    view.age,
+    resolution.secondaryRollSucceeded,
+    false,
+    target.geometry.animationCenter,
+  );
+  const frontEffects = beforeEffects.slice();
+  const impactCoverage = new Uint8Array(240 * 160);
+  drawFirePunchImpact(
+    frontEffects,
+    view.age,
+    impactCoverage,
+    target.geometry.animationCenter,
+  );
+  for (let i = 0; i < fb.length; i += 4) {
+    if (!impactCoverage[i / 4]) continue;
+    fb[i] = frontEffects[i]!;
+    fb[i + 1] = frontEffects[i + 1]!;
+    fb[i + 2] = frontEffects[i + 2]!;
+    fb[i + 3] = frontEffects[i + 3]!;
+  }
+
+  drawOpponentHealthboxWobble(
+    fb,
+    resolution.healthboxY2,
+    opponentHealthboxContentForHp(resolution.displayedHp),
+  );
+  drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const effectiveness = state.config.resolutionProfile.effectivenessMessage;
+  if (effectiveness && view.age >= effectiveness.textStartAge) {
+    const line = "It’s super effective!";
+    drawMessageTextLines(
+      fb,
+      line,
+      "",
+      Math.min(line.length, view.age - effectiveness.textStartAge + 1),
+    );
+  } else {
+    drawMessageTextLines(
+      fb,
+      "ONIX used",
+      "FIRE PUNCH!",
+      Math.min("ONIX usedFIRE PUNCH!".length, view.age + 2),
+    );
+  }
 }
 
 export interface SceneOffTurnView {

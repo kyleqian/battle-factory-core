@@ -32,10 +32,11 @@ import sys
 from pathlib import Path
 
 
-if len(sys.argv) != 2:
-    raise SystemExit(f"usage: {sys.argv[0]} <fresh-output.json>")
+if len(sys.argv) not in (2, 3):
+    raise SystemExit(f"usage: {sys.argv[0]} <fresh-output.json> [fresh-rgb-dir]")
 
 OUTPUT_PATH = Path(sys.argv[1])
+RGB_DIR = Path(sys.argv[2]) if len(sys.argv) == 3 else None
 HERE = Path(__file__).resolve().parent
 WORKTREE_ROOT = HERE.parent.parent
 
@@ -71,7 +72,9 @@ PLAYER_BATTLER = 0
 # safe frame to alter the move list that BtlController_EmitChooseMove copies.
 STAGE_TICK = 1886
 CAPTURE_TICKS = {1886, 1887, 1888, 1918, 1919, 1920, 1921, 1922}
-CAPTURE_TICKS.update(range(2080, 2601, 8))
+# Dense hashes make the move-owned boundary and complete portable window
+# independently bisectable without committing or consulting screenshots.
+CAPTURE_TICKS.update(range(2080, 2701))
 
 
 def u16(oracle: EmeraldOracle, addr: int) -> int:
@@ -91,11 +94,17 @@ def battle_mon(oracle: EmeraldOracle, battler: int) -> dict[str, object]:
         "pp": [oracle.read_u8(base + BATTLE_MON_PP + slot) for slot in range(4)],
         "hp": u16(oracle, base + 0x28),
         "maxHp": u16(oracle, base + 0x2C),
+        "status1": oracle.read_u8(base + 0x4C)
+        | (oracle.read_u8(base + 0x4D) << 8)
+        | (oracle.read_u8(base + 0x4E) << 16)
+        | (oracle.read_u8(base + 0x4F) << 24),
     }
 
 
 def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
     rgb = oracle.screen_rgb()
+    if RGB_DIR is not None:
+        (RGB_DIR / f"{tick:05d}.rgb").write_bytes(rgb)
     return {
         "tick": tick,
         "sha256": hashlib.sha256(rgb).hexdigest(),
@@ -112,6 +121,9 @@ def main() -> None:
     segments = trace["segments"]
     oracle = EmeraldOracle(ROM_PATH, MAP_PATH, BOOTSTRAP_PATH)
     oracle.new_session()
+    if RGB_DIR is not None:
+        if not RGB_DIR.is_dir() or any(RGB_DIR.iterdir()):
+            raise AssertionError(f"RGB output directory must exist and be empty: {RGB_DIR}")
     tick = 0
     captures: list[dict[str, object]] = []
 

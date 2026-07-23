@@ -38,18 +38,19 @@ remainder.
 - **State:** 12 Level 50 moves have strong canonical evidence but remain
   `partial` under the new portability definition; none is yet claimed generic
   `exact`.
-- **Did:** `tools/probe/stage-fire-punch-portable-on.py` establishes the
-  smallest reproducible ON-profile stage: at settled action-menu tick 1886 it
-  changes only `gBattleMons[0].moves[0]/pp[0]`, then lets the stock controller
-  execute FIRE PUNCH. Two fresh mGBA runs are byte-identical and pin synthetic
-  **ONIX (back) → GROVYLE (front)** ownership (`gCurrentMove=7` by 2312, PP
-  15→14 by 2336, target HP 143→112 by 2520). Evidence and exact scope:
-  `docs/fire-punch-portable-staging-probe.md`.
-- **Next:** add a relative Scene-ON presentation stage that consumes explicit
-  attacker/target geometry and a FIRE_PUNCH resolution profile, then compare a
-  complete dense ONIX→GROVYLE window. Do not couple it to the RAM patch or
-  absolute battle ticks.
-- **Boundary:** `appTrace.ts` currently stages only Scene-OFF
-  `stageBattleTurn`, so the oracle construction has no honest app compare yet;
-  FIRE_PUNCH remains `partial`. Canonical regression at this checkpoint:
-  turn16-rung3 227/236 (21397–21405 residual), turn17-rung4 200/200.
+- **Did:** the new relative Scene-ON adapter consumes explicit attacker/target
+  side, sprite-corner, animation-center geometry, and an immutable FIRE_PUNCH
+  resolution profile. The live compositor reuses the shared reducer, particles,
+  impact priority, palette blend, battler sheets, healthboxes, and printer.
+  `npm run compare:fire-punch-portable` runs the committed synthetic mGBA stage
+  into a fresh temp-only RGB directory and is **225/225 exact** (frames
+  2313–2537, reducer ages 0–224) for **ONIX (back) → GROVYLE (front)** through
+  the completed super-effective printer; no screenshots or oracle pixels are
+  committed or consulted at runtime.
+- **Next:** audit and stage the opposite-attacker-side FIRE_PUNCH geometry.
+  Keep the move `partial` until that evidence-required orientation also has a
+  complete dense window through this same adapter.
+- **Boundary:** portable ONIX→GROVYLE is complete, not a canonical-only claim.
+  FIRE_PUNCH remains `partial` solely because the opposite attacker side is
+  unaudited. Canonical regressions remain turn16-rung3 **227/236** (known
+  21397–21405 residual) and turn17-rung4 **200/200**. Tier-1 is **1193/1193**.
