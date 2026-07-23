@@ -4,9 +4,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 272 — Bounded worker (ISSUES #37 rung 1): **CLOSED FIELD BOUNDARY — GREEN**
+## 272 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED FIELD BOUNDARY — GREEN**
 
-- **State:** canonical and delayed party traces are **193/200**; 20302 and
+- **State:** independently accepted: canonical and delayed party traces are **193/200**; 20302 and
   delayed 20332 are byte-exact. The only red frames are party residuals:
   5px at 20248/50/58/60/62 and 273px at 20253/54 (delayed +30). Tier-1 is
   **1008/1008**; build is **5.393 MB** (<6 MB); verifier **17/17** and
@@ -20,10 +20,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** #37 rung 1 has only the seven named party residuals left; do not
   reopen the exact 20302 field boundary. Later SEND OUT animation rungs stay
   separately scoped.
-- **Notes:** direct probe exits 139 after valid JSON. Initial raw integration
+- **Notes:** supervisor reran both dense compares, Tier-1 **1008/1008**, build,
+  verifier **17/17**, and compositor **5/5**; asset audit confirms indexed
+  PPU inputs only. Direct probe exits 139 after valid JSON. Initial raw integration
   exposed a 1551px MURKROW shift (bbox 123,0–196,71); transferred affine
-  geometry resolved it to 0px without a coordinate patch. Final commands:
-  canonical/delayed compares 193/200 each; one full test/build pass green.
+  geometry resolved it to 0px without a coordinate patch.
 
 ---
 ## 271 — Bounded worker (ISSUES #37 rung 1): **GREEN TRANSFER CHECKPOINT — raw field asset next**
