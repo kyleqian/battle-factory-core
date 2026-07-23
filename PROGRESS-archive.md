@@ -12096,3 +12096,16 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   absolute-tick mechanism.
 
 ---
+## 296 — Bounded worker (S7 turn 17 rung 6): **GREEN — faint hold/dismiss latency exact**
+
+- **State:** canonical `22531--22826` was gaplessly **296/296 exact** in
+  adjacent dense traces (**255/255 + 41/41**). Rung 5 remained **113/113**,
+  the Turn-17 verifier, Tier-1 suite, and build passed.
+- **Did:** added confirmation-relative faint input readiness, stored the real
+  dismiss A, froze its cursor phase, and modeled the +17 WIN write/+26
+  render boundary.
+- **Next at archive time:** canonical **22827**, the victory-text printer.
+- **Notes:** implementation commit `ed2b46a`; no forbidden pixel or
+  absolute-tick mechanism.
+
+---

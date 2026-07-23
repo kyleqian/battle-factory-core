@@ -4,6 +4,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 299 — Bounded worker (S8 first postwin increment): **GREEN — loss dismiss through heal prompt exact**
+
+- **State:** canonical `23602--23800` is **199/199 exact**, every tick
+  captured in `battle1-postwin-heal.json`; `turn17-rung8b.json` remains
+  **118/118**. Tier-1 is **1073/1073** and build passes (**5.465 MB**).
+- **Did:** added the real no-cursor DESTIN quote gate/stored edge,
+  source-relative fast fade, battle teardown and +43 `inBattle`/RNG-mode
+  handoff, battle-room flash, second black hold, counter-room fade/attendant
+  composition, and both heal-message lines through the true +194 input
+  boundary. State pins challenge battle 0→1 at +79 and opponent rental IDs
+  `[188,184,135]` at +137.
+- **Next:** resume at **23801** only if extending the held prompt, or at the
+  explicitly out-of-scope heal dismiss **25802** for the next S8 slice;
+  delayed party heal write 25965, continuation menu, swap flow, and battle 2
+  remain untouched. S8 stays `[ ]`.
+- **Notes:** implementation `258e7ad`, dense trace `df718a9`, RNG ownership
+  correction `f32bddb`. The latter keeps VBlank RNG live through battle
+  setup, applies the RAM/source-relative opponent-generation draws, and
+  freezes only at `CB2_InitBattleInternal` rather than the speech edge. Fresh
+  23792-23796 input sweep proves 23796 is the first accepted edge; fresh RAM
+  rerun exactly matches the committed RNG dump hash and sharpens bookkeeping
+  writes to +79/+137. All timing is dismiss-relative; no forbidden baked
+  frame, lookup table, trace/absolute-tick branch, fitting, exclusion, or
+  thinning.
+
+---
 ## 298 — Supervisor-accepted S7 completion: **GREEN — Battle 1 win endpoint exact**
 
 - **State:** canonical `23229--23601` is gaplessly **373/373 exact** in two
@@ -47,27 +73,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fitted color/coordinate, excluded capture, or thinning. Supervisor
   independently reverified both dense windows, predecessor, turn-17
   verifier, full Tier-1 suite, and production build; ROADMAP status accepted.
-
----
-## 296 — Bounded worker (S7 turn 17 rung 6): **GREEN — faint hold/dismiss latency exact**
-
-- **State:** canonical `22531--22826` is gaplessly **296/296 exact** in
-  adjacent dense traces (**255/255 + 41/41**). Rung 5 remains **113/113**,
-  `verify-turn17.ts` passes **245/245**, Tier-1 is **1061/1061**, and build
-  passes (**5.460 MB**).
-- **Did:** added confirmation-relative faint input readiness, dropped early
-  edges/indefinite idle, stored the real dismiss A, froze its cursor phase,
-  modeled the dismiss+17 WIN write and dismiss+26 first-render boundary, and
-  suppressed the impossible post-KO residual-burn flame. Committed both
-  fully dense adjacent traces.
-- **Next:** resume at **22827**, the first visible `"Player defeated..."`
-  typing frame. Its typing/hold, second dismiss, trainer transition/loss
-  quote, and #38 remain untouched; S7 stays `[~]`.
-- **Notes:** implementation commit `ed2b46a`. Source chain:
-  `BattleScript_HandleFaintedMon` → `Cmd_checkteamslost` →
-  `HandleEndTurn_BattleWon`/frontier win script; RAM pins outcome 0→1 at
-  22818 with frozen pixels through 22826. No forbidden absolute tick,
-  framebuffer/per-frame table, fitted geometry/color, trace branch,
-  excluded capture, or thinning. Supervisor independently reverified both
-  dense windows, predecessor, turn-17 verifier, full Tier-1 suite, and
-  production build; ROADMAP status accepted.

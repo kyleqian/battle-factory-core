@@ -301,3 +301,83 @@ both probes once and diff before treating their exact numeric fields as
 fully load-bearing (the qualitative findings — freeze/resume tick, heal
 write tick, bookkeeping write windows — are corroborated by two independent
 signals each, RAM+pixel, so are trusted regardless).
+
+## 7. S8 engine evidence — loss-quote dismiss through heal-message readiness (2026-07-23)
+
+This bounded engine increment closes canonical **23602-23800** inclusively.
+`tools/compare/traces/battle1-postwin-heal.json` retains all **146 button
+segments verbatim** from this dossier's banked
+`traces-groundtruth/battle1-postwin-dense.json`; only `captureFrames` is
+focused to every tick in the implemented window. Fresh compare is
+**199/199 exact**. The predecessor `turn17-rung8b.json` remains **118/118
+exact**.
+
+### Exact relative visual/state schedule
+
+The accepted DESTIN quote A is relative age 0. Fresh every-tick oracle
+capture and source inspection pin:
+
+| relative age | ownership |
+|---:|---|
+| 0-6 | frozen final battle quote; no visible response yet |
+| 7-36 | `BeginFastPaletteFade(FAST_FADE_OUT_TO_BLACK)` over the live battle scene |
+| 37-56 | black; `gMain.inBattle` clears and RNG resumes at +43 |
+| 57-80 | settled Battle Factory battle room fades in, then holds |
+| 81-95 | that same room fades back out |
+| 96-114 | second black hold |
+| 115-129 | prebattle counter room fades in |
+| 130-138 | settled counter room with attendant/player |
+| 139 | empty `MSGBOX_DEFAULT` appears |
+| 140-191 | `"Thank you for competing!"` / `"Let us restore your POKéMON!"`, one character per tick |
+| 192-193 | fully rendered but input still rejected |
+| 194 onward | fully rendered and input-ready |
+
+The +194 input boundary is behavioral, not inferred from pixels. Fresh
+independent traces pressed A at canonical 23792-23796. Edges through 23795
+were dropped and left the message held indefinitely; 23796 was accepted,
+with the already-banked uninterruptible heal routine producing its first
+visible clear 166 ticks later. Tick 23800 is therefore both visually settled
+and genuinely input-ready.
+
+### Source and fresh RAM anchors
+
+- `BattleScript_FrontierTrainerBattleWon_End` ends via `end2`;
+  `HandleEndTurn_FinishBattle` calls `BeginFastPaletteFade(3)` and
+  `FreeResetData_ReturnToOvOrDoEvolutions` waits for it before
+  `ReturnFromBattleToOverworld`.
+- `ReturnFromBattleToOverworld` clears `gMain.inBattle` and restores the
+  saved field callback. The fresh rerun of
+  `postwin-rng-watch.json` is byte-identical to the committed 6007-row dump
+  (SHA-256 `03eb8a983757df6241d23f920615e82327a57ef4b1d961d7586f1c3b8ff67f50`):
+  clear and first resumed RNG occur together at dismiss+43. The already
+  banked teardown bursts are state-modeled at +43/+45/+46 and +105/+106.
+- The corresponding entry-side ownership is also state-relative rather
+  than attached to an input edge. `FillFactoryFrontierTrainerParty`'s
+  RAM-pinned rejection loops add 56/32/190 calls at battle-room transition
+  ages 0/11/18, and `GetSpecialBattleTransition` adds one at age 26, while
+  the ordinary VBlank call continues. `rngMode` changes to
+  `frontierBattle` only at battle-scene age 5, matching
+  `CB2_InitBattleInternal`/`gMain.inBattle`; Tier-1 rejects the former
+  speech-dismiss freeze.
+- A new every-tick `rentalMons` audit sharpens §4's old coarse windows:
+  `curChallengeBattleNum` changes 0→1 at **dismiss+79** (canonical 23681),
+  and `rentalMons[3..5].monId` changes to `[188,184,135]` at
+  **dismiss+137** (canonical 23739).
+- `BattleFrontier_BattleFactoryPreBattleRoom_EventScript_ReturnToRoomFromBattle`
+  calls `factory_setopponentmons`, `factory_resethelditems`, then the exact
+  two-line `MSGBOX_DEFAULT` used here. Heal-message dismiss and
+  `HealPlayerParty` remain deliberately outside this increment.
+
+Implementation is purely edge-relative (`src/engine/postwin.ts`) and reuses
+the live battle composition, source fast-palette arithmetic, existing
+battle-room/prebattle-room renderers, attendant/player sprites, field
+message box, and font pipeline. No screenshot/framebuffer asset, per-frame
+lookup table, excluded capture, trace branch, canonical-tick branch,
+coordinate/RGB fitting, or capture thinning was introduced.
+
+The engine's raw `gRngValue` is not claimed byte-exact over the full
+anchor-to-battle span: older battle slices intentionally model battle
+outcomes visually/statefully without replaying every explicit in-battle
+`Random()` call. This increment pins ownership changes and their local call
+counts from arbitrary seeds; it does not hide that broader pre-existing
+state gap by assigning the canonical seed.

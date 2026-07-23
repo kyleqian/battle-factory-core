@@ -531,6 +531,24 @@ now renders through the live glyph pipeline (ISSUES #20 closed —
 `core.ts` still feeds it battle-1's fixed moveset; wiring the per-battle
 moveset from battle-setup state through `EngineState` into that render
 call is an S8 engine slice prerequisite for battle-2 menu parity.
+**First postwin engine increment (2026-07-23, bounded worker):**
+canonical ticks **23602-23800** (DESTIN loss-quote dismiss through the
+settled/input-ready heal message) are implemented and committed at
+**199/199 exact**, every tick captured in `battle1-postwin-heal.json`.
+The slice includes the no-cursor quote gate/stored edge, source
+`BeginFastPaletteFade` battle fade and teardown, `gMain.inBattle` clear +
+VBlank-RNG resume at dismiss+43, the Battle Factory battle-room flash,
+second black hold, prebattle-counter fade-in, attendant/player composition,
+and both heal-message lines. Tier-1 pins delayed-edge shift, phase
+ownership, the +43 RNG transition/bursts, challenge number +79, opponent
+rental IDs +137, and the distinct last-glyph (+191) / true input-ready
+(+194) boundaries. The same state layer also corrects the pre-existing
+battle-entry ownership edge: VBlank RNG remains active through the
+source/RAM-relative opponent-generation draws and freezes only at
+`CB2_InitBattleInternal`, not when the attendant speech is dismissed.
+This is **partial S8 progress only**: heal dismiss,
+party heal write, continuation menu, swap paths, battles 2-7, and round
+completion remain open, so S8 stays `[ ]`.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
