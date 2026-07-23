@@ -27,41 +27,6 @@ delay-specific, or baked-frame patch. Reopen only if the engine gains a
 general cycle/register-queue model; this extra delayed-control frame does not
 block the roadmap's canonical S7 acceptance.
 
-## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
-  own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
-  (240/240)
-
-Opened 2026-07-21 wind-down (supervisor), consolidating `battle-turn-notes.md`
-§50's two named residuals so they don't live only in a dossier. Part (b)
-(the settled-menu bounce subset after the switch-in reset) was root-caused
-and wired 2026-07-21/22 (`docs/turn13-bounce-notes.md` §§3-9) — see #34 for
-the SEPARATE, related finding that fix surfaced in turn 14's own downstream
-reuse. Part (a) (this entry) is now trimmed to its own tiny remainder below
-— the frame-selection bug itself is CLOSED.
-
-**Closed 2026-07-22** (wiring step): a direct VRAM dump
-(`docs/turn13-notes.md`'s dated append, `verify-turn13-frame2.ts` 11/11
-PASS) refuted the "wrong asset" theory outright — both `tileset` and
-`frame2` are byte-exact against hardware whenever each is genuinely live.
-The real bug was `turn13MurkrowFrame`'s own open-ended step function
-(`t < 17034 ? 0 : 1`), instead of the real closed window `frame2` is live
-in (`[TURN13_MURKROW_STRETCH_TICK, TURN13_MURKROW_FRAME_FLIP_TICK]`
-inclusive). Wired verbatim; restored 49 of the 51 excluded ticks
-(17019-17069) to 0-diff.
-
-**Remaining** (a much smaller, separate residual than the one this entry
-used to describe): renders **17019 and 17034 only** — the exact two ticks
-the probe's own dossier flagged in advance as a coincidental artifact of
-the OLD code — still show a small shape residual (418px/828px, both
-bboxes confined to Murkrow's own silhouette). The frame CHOICE at both
-ticks is already the one the RAM-confirmed window calls for, so this is
-NOT a frame-selection bug — something else differs at exactly the
-window's two boundary ticks (one tick before it opens, and its own
-closing tick). Likely candidates, untested: the wobble table's index math
-or the tint coefficient right at those two specific ticks. **Next step**:
-a fresh probe (RAM/VRAM, same two-independent-methods bar) pointed at
-just those two ticks — do not re-guess a fix without it.
-
 ## #34 — Turn 14's `17781-17787` (7 ticks) and `17822-17845` (24 ticks,
   kerning-class) windows still excluded from `turn14-fly-miss.json`;
   the `17722-17768` reopen family (43 ticks) is now FULLY CLOSED
