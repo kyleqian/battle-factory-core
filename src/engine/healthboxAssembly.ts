@@ -148,7 +148,7 @@ const HP_BAR_RED_BASE = 9;
 
 export type HpBarBand = "green" | "yellow" | "red";
 
-/** `CalcBarFilledPixels` (battle_interface.c:2413-2456), specialized to the settled (non-mid-animation) case where `currValue` has already converged to `newValue` and `maxValue >= totalPixels` (true for every real Pokemon's max HP vs. this bar's 48px) - so `pixels = floor(hpFraction * totalPixels)` stands in for the source's `currValue * totalPixels / maxValue` integer division. Floating-point `hpFraction` (vs. the source's exact integer ratio) can differ by 1px right at a truncation boundary for some HP pairs - accepted per the ISSUES #16 ground-truth caveat (no oracle pixels to pin this against yet). The `filledPixels==0 && hp>0 -> force 1px` rule (source lines 2436-2440) is the "never show a fully-empty bar for a Pokemon that isn't fainted" sliver case. */
+/** `CalcBarFilledPixels` (battle_interface.c:2413-2456), specialized to `maxValue >= totalPixels` (true for every real Pokemon's max HP vs. this bar's 48px). `hpFraction` models the controller's current value and `hpTargetFraction` models `newValue`, which may already be zero during a lethal drain. Floating-point fractions (vs. the source's exact integer ratio) can differ by 1px right at a truncation boundary for some HP pairs. The `filledPixels==0 && newValue>0 -> force 1px` rule (source lines 2436-2440) is the "never show a fully-empty bar when the destination is nonzero" sliver case. */
 export function calcBarFilledPixels(
   hpFraction: number,
   hpTargetFraction: number = hpFraction,

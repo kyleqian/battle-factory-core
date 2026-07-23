@@ -432,7 +432,7 @@ FIRE_PUNCH-animation-owned displayed state. The animation body and later
 resolution remain open. The dense window, predecessor rung, turn-17
 verifier, Tier-1 suite, and production build were independently reverified.
 This does not propose ticking S7 complete.
-**Turn-17 rung 4 worker proposal (2026-07-23; awaiting supervisor review):**
+**Turn-17 rung 4 accepted by the supervisor (2026-07-23):**
 `turn17-rung4.json` is **200/200 exact** for every canonical tick
 `22218-22417`, reusing the shared FIRE_PUNCH reducers/compositor from shared
 age 27 through red blend, spiral/impact/spread effects, generic hit response,
@@ -440,9 +440,9 @@ and MURKROW's lethal visible `58→0` drain with BRN retained. A fresh
 two-frame boundary check matches 22417 and intentionally diverges at 22418;
 the verifier/RAM dossier independently places the atomic HP write at 22418,
 which remains untouched. Turn-17 rung 3 and Turn-16 rung 3 remain exact,
-the Turn-17 verifier passes, and Tier-1/build are green. This worker proposes
-recording the slice while leaving S7 `[~]`; atomic HP/status/faint/victory
-flow remains open.
+the Turn-17 verifier passes, and Tier-1/build are green; the supervisor
+independently reverified each of those claims. S7 remains `[~]`; atomic
+HP/status/faint/victory flow remains open.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

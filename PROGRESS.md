@@ -22,7 +22,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   matched 22417 and intentionally diverged at 22418, independently confirming
   the RAM/verifier write boundary. No forbidden framebuffer, absolute tick,
   per-frame table, trace branch, fitted coordinate/color, excluded capture,
-  or thinned trace.
+  or thinned trace. Supervisor independently reverified the dense window,
+  both reuse regressions, turn-17 verifier, full Tier-1 suite, and production
+  build; ROADMAP status accepted.
 
 ---
 ## 293 — Bounded worker (S7 turn 17 rung 3): **GREEN — FAINT_ATTACK resolution exact**
