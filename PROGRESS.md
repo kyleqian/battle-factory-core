@@ -20,7 +20,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** implementation commit `de79bdf`. Fresh RAM replays confirmed
   HP age 227, secondary +5, sink S=KO+73/n=7, teardown +90, text +92, and
   gate +112. No forbidden framebuffer/absolute-tick/per-frame/trace branch,
-  fitted coordinate/color, excluded capture, or thinned trace.
+  fitted coordinate/color, excluded capture, or thinned trace. Supervisor
+  independently reverified the dense window, both reuse regressions,
+  turn-17 verifier, full Tier-1 suite, and production build; ROADMAP status
+  accepted.
 
 ---
 ## 294 — Bounded worker (S7 turn 17 rung 4): **GREEN — lethal FIRE_PUNCH pre-write exact**
