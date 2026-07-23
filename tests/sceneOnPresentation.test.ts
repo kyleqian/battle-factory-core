@@ -28,7 +28,7 @@ describe("relative Battle Scene ON move presentation", () => {
     expect(advanced.config).toBe(initial.config);
     expect(advanced.config.attacker.geometry).toEqual({
       side: "player",
-      spriteCorner: { x: 40, y: 56 },
+      spriteCorner: { x: 40, y: 48 },
       animationCenter: { x: 72, y: 88 },
     });
     expect(advanced.config.target.geometry.animationCenter).toEqual({ x: 176, y: 51 });
@@ -81,9 +81,9 @@ describe("relative Battle Scene ON move presentation", () => {
 
   it("consumes the supplied resolution profile without calculating battle outcome", () => {
     const stage = createPortableStage();
-    expect(sceneOnFirePunchView({ ...stage, age: 198 }).resolution.battleHp).toBe(143);
-    expect(sceneOnFirePunchView({ ...stage, age: 199 }).resolution.battleHp).toBe(112);
-    const afterSecondary = sceneOnFirePunchView({ ...stage, age: 204 });
+    expect(sceneOnFirePunchView({ ...stage, age: 199 }).resolution.battleHp).toBe(143);
+    expect(sceneOnFirePunchView({ ...stage, age: 200 }).resolution.battleHp).toBe(112);
+    const afterSecondary = sceneOnFirePunchView({ ...stage, age: 205 });
     expect(afterSecondary.resolution.secondaryRollConsumed).toBe(true);
     expect(afterSecondary.resolution.secondaryRollSucceeded).toBe(false);
     expect(afterSecondary.resolution.status).toBe("none");

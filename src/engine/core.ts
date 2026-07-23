@@ -98,6 +98,7 @@ import {
   DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
+  renderSceneOnMovePresentation,
   renderSceneOffTurnView,
   sendOutHandoffTick,
   sendOutPressEligible,
@@ -121,6 +122,10 @@ import {
   turn17OutcomeDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
+import {
+  advanceSceneOnMovePresentation,
+  type SceneOnMovePresentationState,
+} from "./sceneOnPresentation.ts";
 import {
   actionMenuInputReady,
   battle2PreTurnRngCalls,
@@ -234,6 +239,8 @@ export interface EngineState {
   roundController: RoundControllerState | null;
   /** Dev-probe staged battle port; null on the canonical production path. */
   stagedBattleTurn: StagedBattleTurnState | null;
+  /** Dev-probe relative Battle Scene ON move presentation. */
+  sceneOnPresentation: SceneOnMovePresentationState | null;
   /** Live Factory swap-YES controller + presentation adapter. */
   factorySwap: FactorySwapPresentationState | null;
 }
@@ -272,6 +279,7 @@ export function createInitialState(
       ? createRoundController(options.battleScenario)
       : null,
     stagedBattleTurn: null,
+    sceneOnPresentation: null,
     factorySwap: null,
   };
 }
@@ -304,6 +312,18 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
   let battle2Turn1 = state.battle2Turn1 ?? null;
   let factorySwap = state.factorySwap ?? null;
+
+  if (state.sceneOnPresentation) {
+    return {
+      ...state,
+      frame: state.frame + 1,
+      keyRepeat,
+      sceneOnPresentation: advanceSceneOnMovePresentation(
+        state.sceneOnPresentation,
+      ),
+      rngMode: "frontierBattle",
+    };
+  }
 
   if (state.stagedBattleTurn) {
     const stagedBattleTurn = advanceStagedBattleTurn(
@@ -1740,6 +1760,11 @@ export function render(state: EngineState): Uint8Array {
     });
   }
   if (state.postwin) return renderPostwinState(state);
+  if (state.sceneOnPresentation) {
+    const fb = createFramebuffer();
+    renderSceneOnMovePresentation(fb, state.sceneOnPresentation);
+    return fb;
+  }
   if (state.stagedBattleTurn) {
     const fb = createFramebuffer();
     const staged = state.stagedBattleTurn;

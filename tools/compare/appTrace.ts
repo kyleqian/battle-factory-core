@@ -13,6 +13,11 @@ import {
   BATTLE2_OFF_TURN1_SCENARIO,
 } from "../../src/engine/battle2OffScenario.ts";
 import { stageBattleTurn } from "../../src/engine/stagedBattleTurn.ts";
+import {
+  createSceneOnMovePresentation,
+  ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+  ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
+} from "../../src/engine/sceneOnPresentation.ts";
 
 export interface AppCapture {
   frame: number;
@@ -40,6 +45,16 @@ const APP_STAGES: Readonly<Record<string, AppStage>> = {
       // opponent text/effect/stat message through +400, turn/menu gate +405.
       BATTLE2_OFF_TURN1_COMMAND_DURATIONS,
     ),
+  }),
+  "fire-punch-onix-grovyle-animation-owned": (state) => ({
+    ...state,
+    stagedBattleTurn: null,
+    sceneOnPresentation: createSceneOnMovePresentation({
+      move: "FIRE_PUNCH",
+      ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+      resolutionProfile: ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
+    }),
+    rngMode: "frontierBattle",
   }),
 };
 

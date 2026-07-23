@@ -113,7 +113,7 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY = {
     species: "ONIX",
     geometry: {
       side: "player",
-      spriteCorner: { x: 40, y: 56 },
+      spriteCorner: { x: 40, y: 48 },
       animationCenter: { x: 72, y: 88 },
     },
   },
@@ -121,7 +121,7 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY = {
     species: "GROVYLE",
     geometry: {
       side: "opponent",
-      spriteCorner: { x: 144, y: 16 },
+      spriteCorner: { x: 144, y: 12 },
       animationCenter: { x: 176, y: 51 },
     },
   },
@@ -131,8 +131,8 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE: FirePunchResolutionProfile = {
   startHp: 143,
   endHp: 112,
   initialStatus: "none",
-  hpCommitAge: 199,
-  secondaryRollAge: 204,
+  hpCommitAge: 200,
+  secondaryRollAge: 205,
   secondaryRollSucceeded: false,
   currentMoveResetAge: Number.POSITIVE_INFINITY,
 };
