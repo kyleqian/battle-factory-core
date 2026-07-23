@@ -5,6 +5,28 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
+## #38 — [PARKED 2026-07-22, supervisor decision] Turn 16 FAINT_ATTACK
+  delayed-control tick 21006 exposes `BLDALPHA` one VBlank early
+
+The canonical animation window is committed at **221/221 exact**
+(`turn16-rung2a.json`, 20826-21046). A +30-frame pre-SEND-OUT delay is
+**220/221**: delayed tick 21006 alone shows the next attacker-alpha
+coefficient one frame early.
+
+Direct task/RAM probes show identical active callbacks and task data at the
+relative boundary (`data[1]=0x0d03`, `data[2]=0`), while the hardware register
+differs: canonical `BLDALPHA=0x0e02`, delayed `0x0d03`. A fresh delay sweep
+over `+0..+8,+15,+16,+30,+31,+32` reproduces the early exposure only at
+`+30`; adjacent delays return to the normal cadence. This is therefore a
+sub-tick `SetGpuReg`/VBlank visibility race below the engine's tick-state
+abstraction, analogous in mechanism to the already-settled cycle-timing
+family in #5, not a move-task reducer defect.
+
+The delayed trace is not committed red. Do not add an absolute-tick,
+delay-specific, or baked-frame patch. Reopen only if the engine gains a
+general cycle/register-queue model; this extra delayed-control frame does not
+block the roadmap's canonical S7 acceptance.
+
 ## #33 — Turn 13 post-switch-in residual: Murkrow frame-selection window's
   own two boundary ticks (17019, 17034), excluded from `turn13-switchin.json`
   (240/240)

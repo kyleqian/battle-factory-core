@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 286 — Bounded worker (S7 turn 16 rung 2a): **CANONICAL GREEN; +30 BLOCKED AT ONE REGISTER-RACE FRAME**
+## 286 — Supervisor wind-down (S7 turn 16 rung 2a): **CANONICAL GREEN; +30 REGISTER-RACE FRAME PARKED AS #38**
 
 - **State:** canonical `20826--21046` is **221/221 exact**. The requested
   delayed twin is **220/221**: only delayed tick **21006** differs. Rung 1
@@ -18,15 +18,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   direct RAM/register probes falsified relative identity at age 150:
   animation task state is identical, but canonical hardware `BLDALPHA` is
   `0x0e02` while delayed is `0x0d03`.
-- **Next:** first unresolved boundary is delayed **21006 only**. Resolve the
-  sub-tick hardware-register visibility race without an absolute tick,
-  delay/trace branch, or baked frame; otherwise explicitly park/waive this
-  one-frame emulator-cycle exception. Do not reopen canonical rung 2a or
-  enter canonical 21047+/delayed 21077+.
+- **Next:** resume S7 at canonical **21047** with FAINT_ATTACK's HP-drain/
+  move-handoff tail. Do not reopen exact canonical rung 2a; #38 parks the
+  extra delayed-control frame unless a general cycle/register-queue model is
+  introduced.
 - **Notes:** implementation/evidence commit `d74ab10`; the delay sweep
   `+0..+8,+15,+16,+30,+31,+32` reproduced the early register exposure only
   at +30. No framebuffer assets, per-frame tables, RGB/coordinate fitting,
   absolute-tick lookup, trace branch, or red delayed trace was committed.
+  Supervisor independently reverified every number above; the worker then
+  hit an account usage limit, so the session wound down without relaunching.
 
 ---
 ## 285 — Bounded worker (S7 turn 16 rung 1): **GREEN — cross-layer handoff**
