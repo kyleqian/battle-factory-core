@@ -1,0 +1,26 @@
+{
+  "oracleProfile": "battle-scene-off",
+  "sourceTrace": "../traces-groundtruth/battle2-off-turn1.json",
+  "appStage": {
+    "id": "battle2-off-turn1-before-confirm",
+    "frame": 33070
+  },
+  "captureFrames": [
+    33084,
+    33109,
+    33145,
+    33210,
+    33235,
+    33300,
+    33350,
+    33375,
+    33400,
+    33425,
+    33450,
+    33460,
+    33470,
+    33476,
+    33478,
+    33485
+  ]
+}

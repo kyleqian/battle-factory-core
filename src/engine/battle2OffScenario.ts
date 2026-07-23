@@ -44,3 +44,10 @@ export const BATTLE2_OFF_TURN1_SCENARIO: BattleTurnScenario = {
   turnEndRngGroups: [1, 2, 5],
 };
 
+/**
+ * Relative OFF command durations from the confirm edge. They sum to the
+ * source/RAM-pinned +405 next-controller readiness boundary.
+ */
+export const BATTLE2_OFF_TURN1_COMMAND_DURATIONS = [
+  145, 1, 14, 100, 1, 50, 89, 4, 1,
+] as const;

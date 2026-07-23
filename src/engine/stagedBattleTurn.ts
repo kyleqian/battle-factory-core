@@ -15,14 +15,23 @@ export interface StagedBattleTurnState {
   readonly phase: "awaitingConfirm" | "presenting" | "inputReady";
   readonly presentation: BattleTurnPresentationState | null;
   readonly adapter: SceneOffAdapterState | null;
+  readonly commandDurations: readonly number[] | null;
+  readonly inputReadyElapsed: number;
+  readonly nextInputAccepted: boolean;
 }
 
-export function stageBattleTurn(scenario: BattleTurnScenario): StagedBattleTurnState {
+export function stageBattleTurn(
+  scenario: BattleTurnScenario,
+  commandDurations: readonly number[] | null = null,
+): StagedBattleTurnState {
   return {
     scenario,
     phase: "awaitingConfirm",
     presentation: null,
     adapter: null,
+    commandDurations,
+    inputReadyElapsed: 0,
+    nextInputAccepted: false,
   };
 }
 
@@ -34,7 +43,13 @@ export function advanceStagedBattleTurn(
   state: StagedBattleTurnState,
   confirm: boolean,
 ): StagedBattleTurnState {
-  if (state.phase === "inputReady") return state;
+  if (state.phase === "inputReady") {
+    return {
+      ...state,
+      inputReadyElapsed: state.inputReadyElapsed + 1,
+      nextInputAccepted: state.nextInputAccepted || confirm,
+    };
+  }
   if (state.phase === "awaitingConfirm") {
     if (!confirm) return state;
     return {
@@ -50,7 +65,11 @@ export function advanceStagedBattleTurn(
   if (command === null) {
     return { ...state, phase: "inputReady" };
   }
-  const advanced = advanceSceneOffAdapter(state.adapter!, command);
+  const duration = state.commandDurations?.[presentation.commandIndex];
+  const timedCommand = duration === undefined
+    ? command
+    : { ...command, minimumFrames: duration };
+  const advanced = advanceSceneOffAdapter(state.adapter!, timedCommand);
   if (advanced.completion === null) {
     return { ...state, adapter: advanced.adapter };
   }
@@ -65,4 +84,3 @@ export function advanceStagedBattleTurn(
     adapter: acknowledged.inputReady ? null : createSceneOffAdapter(),
   };
 }
-

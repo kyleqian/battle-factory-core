@@ -95,14 +95,9 @@ function eventCommands(
       }];
     case "statChanged": {
       const target = event.target === "opponent"
-        ? `Foe ${resolved.state.opponent.name}'s`
-        : `${resolved.state.player.name}'s`;
+        ? `Foe ${resolved.state.opponent.name}’s`
+        : `${resolved.state.player.name}’s`;
       return [
-        {
-          ...base("text"),
-          type: "text",
-          lines: [target, `${event.stat.toUpperCase()} fell!`],
-        },
         {
           ...base("stat"),
           type: "stat",
@@ -110,6 +105,11 @@ function eventCommands(
           stat: event.stat,
           from: event.from,
           to: event.to,
+        },
+        {
+          ...base("text"),
+          type: "text",
+          lines: [`${target} ${event.stat}`, "fell!"],
         },
       ];
     }

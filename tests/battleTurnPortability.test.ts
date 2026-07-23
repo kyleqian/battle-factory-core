@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { BATTLE2_OFF_TURN1_SCENARIO } from "../src/engine/battle2OffScenario.ts";
+import {
+  BATTLE2_OFF_TURN1_COMMAND_DURATIONS,
+  BATTLE2_OFF_TURN1_SCENARIO,
+} from "../src/engine/battle2OffScenario.ts";
 import { resolveBattleTurn } from "../src/engine/battleTurn.ts";
 import {
   acknowledgeSceneOffCommand,
@@ -99,5 +102,26 @@ describe("Battle Scene OFF staged turn portability", () => {
       state = advanceStagedBattleTurn(state, false);
     }
     expect(state.phase).toBe("inputReady");
+  });
+
+  it("reaches readiness at confirm+405 and accepts the probed next edge at +407", () => {
+    let state = stageBattleTurn(
+      BATTLE2_OFF_TURN1_SCENARIO,
+      BATTLE2_OFF_TURN1_COMMAND_DURATIONS,
+    );
+    state = advanceStagedBattleTurn(state, true);
+    for (let elapsed = 1; elapsed < 405; elapsed += 1) {
+      state = advanceStagedBattleTurn(state, false);
+      expect(state.phase).toBe("presenting");
+      expect(state.nextInputAccepted).toBe(false);
+    }
+    state = advanceStagedBattleTurn(state, false);
+    expect(state.phase).toBe("inputReady");
+    expect(state.nextInputAccepted).toBe(false);
+    state = advanceStagedBattleTurn(state, false);
+    expect(state.nextInputAccepted).toBe(false);
+    state = advanceStagedBattleTurn(state, true);
+    expect(state.inputReadyElapsed).toBe(2);
+    expect(state.nextInputAccepted).toBe(true);
   });
 });

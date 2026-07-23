@@ -96,6 +96,7 @@ import {
   DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
+  renderSceneOffTurnView,
   sendOutHandoffTick,
   sendOutPressEligible,
   TICK0 as SCENE_TICK0,
@@ -1659,6 +1660,70 @@ function renderPostwinState(state: EngineState): Uint8Array {
 
 export function render(state: EngineState): Uint8Array {
   if (state.postwin) return renderPostwinState(state);
+  if (state.stagedBattleTurn) {
+    const fb = createFramebuffer();
+    const staged = state.stagedBattleTurn;
+    if (staged.phase === "awaitingConfirm") {
+      renderSceneOffTurnView(fb, {
+        opponentHp: 91,
+        messageLines: null,
+        messageChars: 0,
+        statEffectAge: null,
+        bottom: "fight",
+        playerY2: 1,
+      });
+      return fb;
+    }
+    const presentation = staged.presentation!;
+    const command = presentation.commands[presentation.commandIndex] ?? null;
+    const elapsed = staged.adapter?.elapsed ?? 0;
+    const playerMoveDone =
+      presentation.commandIndex >= 1 ||
+      (presentation.commandIndex === 0 && elapsed >= 139);
+    const opponentMoveStarted = presentation.commandIndex >= 3;
+    const statStarted = presentation.commandIndex >= 5;
+    const statTextStarted = presentation.commandIndex >= 6;
+    const inputVisible = staged.phase === "inputReady" && staged.inputReadyElapsed >= 6;
+    const lines = command?.type === "text"
+      ? command.lines
+      : statTextStarted
+        ? ["ONIX’s accuracy", "fell!"]
+        : opponentMoveStarted
+          ? ["Foe KABUTO used", "SAND-ATTACK!"]
+          : ["ONIX used", "ROCK SLIDE!"];
+    renderSceneOffTurnView(fb, {
+      opponentHp: playerMoveDone ? 63 : 91,
+      messageLines: lines,
+      messageChars:
+        command?.type === "text"
+          ? Math.min(
+              lines.join("").length,
+              Math.max(
+                0,
+                elapsed -
+                  (presentation.commandIndex === 0
+                    ? 12
+                    : presentation.commandIndex === 6
+                      ? -2
+                      : 0),
+              ),
+            )
+          : lines.join("").length,
+      statEffectAge: statStarted && !statTextStarted
+        ? elapsed * 2 + 94
+        : null,
+      bottom: inputVisible
+        ? "action"
+        : staged.phase === "inputReady"
+          ? "blank"
+          : presentation.commandIndex === 0 && elapsed < 13
+            ? "fight"
+            : "message",
+      playerY2:
+        presentation.commandIndex === 0 && elapsed < 13 ? 1 : 0,
+    });
+    return fb;
+  }
   if (state.battleScene) {
     const fb = createFramebuffer();
     renderBattleScene(fb, state.battleScene);

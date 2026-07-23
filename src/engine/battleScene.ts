@@ -501,7 +501,7 @@ import {
   GBA_SINE_TABLE_256,
 } from "./battleMenu.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
-import type { ActiveMonMoveset } from "./battleSetup.ts";
+import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
 import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder, type FeatherRenderSprite } from "./featherDance.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
@@ -13621,4 +13621,61 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     return;
   }
   drawSendOutHandoff(fb, t, handoffTick, state.encounter);
+}
+
+export interface SceneOffTurnView {
+  readonly opponentHp: number;
+  readonly messageLines: readonly string[] | null;
+  readonly messageChars: number;
+  readonly statEffectAge: number | null;
+  readonly bottom: "fight" | "message" | "blank" | "action";
+  readonly playerY2?: number;
+}
+
+/**
+ * Reusable animation-OFF battlefield compositor for the currently extracted
+ * ONIX/KABUTO encounter. It consumes relative presentation view state only;
+ * no battle number, turn number, or canonical trace tick participates.
+ */
+export function renderSceneOffTurnView(
+  fb: Uint8Array,
+  view: SceneOffTurnView,
+): void {
+  drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+  drawSpriteSheet(
+    fb,
+    kabutoFrontSprite.tileset,
+    kabutoFrontSprite.palette,
+    KABUTO_CORNER.x,
+    KABUTO_CORNER.y,
+  );
+  drawSpriteSheet(
+    fb,
+    onixBackSprite.tileset,
+    onixBackSprite.palette,
+    ONIX_MATERIALIZE_CORNER.x,
+    ONIX_MATERIALIZE_CORNER.y + (view.playerY2 ?? 0),
+  );
+  drawSendOutHealthbox(fb, 0, kabutoHealthboxContentForHp(view.opponentHp));
+  drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+
+  if (view.statEffectAge !== null) {
+    const eva = turn13SandAttackAccEva(view.statEffectAge, 0);
+    if (eva !== null) {
+      drawTurn13SandAttackAccBanner(fb, view.statEffectAge, 0, eva);
+    }
+  }
+  if (view.bottom === "fight") {
+    drawFightSubmenuChrome(fb, 0, false, false, rentalMoveset("ONIX"));
+  } else if (view.bottom === "action") {
+    drawTurn5SitrusSettledMenuChrome(fb);
+  } else if (view.bottom === "message" && view.messageLines) {
+    drawMessageTextLines(
+      fb,
+      view.messageLines[0] ?? "",
+      view.messageLines[1] ?? "",
+      view.messageChars,
+    );
+  }
 }

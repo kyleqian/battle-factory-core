@@ -4,24 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 320 — S8 OFF turn portability seam: **GREEN — logic/staging checkpoint**
+## 320 — S8 OFF turn portability proof: **GREEN — 16/16 exact**
 
-- **State:** the staged Battle-2 turn now resolves through a reusable logical
-  event → relative Scene-OFF command → completion-ack queue. Tier-1 is
-  **1156/1156** and build passes (**5.535 MB**). Pixel acceptance is not yet
-  claimed.
+- **State:** the staged Battle-2 turn resolves through a reusable logical
+  event → relative Scene-OFF command → completion-ack queue, and
+  `battle2-off-turn1-staged.json` is **16/16 exact**. Tier-1 is
+  **1157/1157** and build passes (**5.537 MB**).
 - **Did:** added a data-driven two-action turn resolver, explicit RNG ledger,
   typed text/PP/HP/stat/turn-end/menu commands, paced OFF adapter, and staged
   next-input gate. Added dev-only named `appStage` compare metadata (stripped
-  before oracle replay) and injected the source/RAM-pinned ONIX/KABUTO state
-  immediately before confirm.
-- **Next:** add the staged OFF renderer/timing profile, commit a short explicit
-  OFF app trace only once every selected capture is exact, and verify
-  confirm+407 input readiness. Do not extend the canonical ON tick ladder.
+  before oracle replay), compact trace inheritance, and a live primitive-based
+  ONIX/KABUTO OFF compositor. The trace spans confirmation text, HP drain,
+  both move texts, accuracy effect/message, turn-end, and the visible menu.
+- **Next:** supervisor can accept this portability gate and continue only with
+  S8's unique swap-YES/loss/round-summary UI or separately scoped generation
+  work. Do not extend the canonical ON tick ladder.
 - **Notes:** logical result is PP **10→9 / 15→14**, KABUTO **91→63**, ONIX
   accuracy **6→5**, HP/status otherwise unchanged, with all 12 RNG values and
   final **3121225034** pinned. Early/out-of-order completion is rejected;
-  1×/4× presentation pacing produces identical rules/RNG.
+  1×/4× presentation pacing produces identical rules/RNG. The next controller
+  is ready at confirm+405 and the staged +407 A edge is accepted.
 
 ---
 ## 319 — S8 Factory trainer schedule/RNG port: **GREEN — source selection live**

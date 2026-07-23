@@ -10,7 +10,7 @@
 // fools you.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { PNG } from "pngjs";
 import { diffPngs } from "./diff.ts";
 import { computeSSIM } from "./ssim.ts";
@@ -30,7 +30,20 @@ if (!tracePath) {
   console.error("usage: npm run compare -- <trace.json> [outDir]");
   process.exit(2);
 }
-const trace = JSON.parse(readFileSync(tracePath, "utf8")) as Trace;
+interface CompareTraceFile extends Partial<Trace> {
+  readonly sourceTrace?: string;
+}
+
+const traceFile = JSON.parse(readFileSync(tracePath, "utf8")) as CompareTraceFile;
+let trace: Trace;
+if (traceFile.sourceTrace) {
+  const sourcePath = resolve(dirname(tracePath), traceFile.sourceTrace);
+  const source = JSON.parse(readFileSync(sourcePath, "utf8")) as Trace;
+  const { sourceTrace: _sourceTrace, ...overrides } = traceFile;
+  trace = { ...source, ...overrides };
+} else {
+  trace = traceFile as Trace;
+}
 const oracleProfile: OracleProfile = trace.oracleProfile ?? "battle-scene-on";
 mkdirSync(outDir, { recursive: true });
 

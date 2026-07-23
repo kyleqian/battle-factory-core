@@ -8,7 +8,10 @@ import type { Trace } from "./oracleClient.ts";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
 import { normalizeButtons } from "../../src/input.ts";
 import type { EngineState } from "../../src/engine/core.ts";
-import { BATTLE2_OFF_TURN1_SCENARIO } from "../../src/engine/battle2OffScenario.ts";
+import {
+  BATTLE2_OFF_TURN1_COMMAND_DURATIONS,
+  BATTLE2_OFF_TURN1_SCENARIO,
+} from "../../src/engine/battle2OffScenario.ts";
 import { stageBattleTurn } from "../../src/engine/stagedBattleTurn.ts";
 
 export interface AppCapture {
@@ -31,7 +34,12 @@ const APP_STAGES: Readonly<Record<string, AppStage>> = {
     rngValue: BATTLE2_OFF_TURN1_SCENARIO.initial.rngValue,
     battleControllerExecFlags: 1,
     battle2Turn1: null,
-    stagedBattleTurn: stageBattleTurn(BATTLE2_OFF_TURN1_SCENARIO),
+    stagedBattleTurn: stageBattleTurn(
+      BATTLE2_OFF_TURN1_SCENARIO,
+      // Confirm-relative OFF ledger: player resolution through +160,
+      // opponent text/effect/stat message through +400, turn/menu gate +405.
+      BATTLE2_OFF_TURN1_COMMAND_DURATIONS,
+    ),
   }),
 };
 
