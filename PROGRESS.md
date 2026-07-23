@@ -4,9 +4,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 273 — Bounded worker (ISSUES #37 rung 1): **GREEN EVIDENCE CHECKPOINT — live OBJ transfer not yet safely wired**
+## 273 — Supervisor accepted (ISSUES #37 rung 1): **GREEN EVIDENCE CHECKPOINT — live OBJ transfer not yet safely wired**
 
-- **State:** restored accepted baseline: canonical/delayed party traces **193/200**; only
+- **State:** independently verified accepted baseline: canonical/delayed party traces **193/200**; only
   5px at 20248/50/58/60/62 and 273px at 20253/54 (delayed +30). The exact
   20302/20332 raw field boundary remains untouched.
 - **Did:** fresh direct PPU probe confirms exit OAM stays static: status OBJ entries 1/2
@@ -17,8 +17,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** split raw exit OBJ composition at actual OAM priority/order (balls before
   MAGBY/BAYLEEF icons; status after), then use indexed tile/palette state only. Preserve
   the existing press-relative fade and do not change 20302.
-- **Notes:** Tier-1 **1008/1008**, build green, SEND OUT verifier **17/17** and
-  party compositor **5/5**; direct mGBA probe still writes valid JSON.
+- **Notes:** supervisor reran Tier-1 **1008/1008**, build, and both dense
+  traces; direct hardware OAM independently confirms balls 6--9 behind
+  icons 3--5 and status 1--2 in front. The failed compositor was fully
+  reverted; verifier **17/17** and party compositor **5/5** remain green.
 
 ---
 ## 272 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED FIELD BOUNDARY — GREEN**
@@ -56,22 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   it only at the party send-out battle-fade boundary, then compare both traces.
 - **Notes:** Tier-1 PPU test and build green. The direct probe can validly
   write JSON despite its expected mGBA teardown SIGSEGV.
-
----
-## 269 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — raw field asset still required**
-
-- **State:** restored and committed-green at the existing rung-1 checkpoint:
-  canonical **192/200** (5px 20248/50/58/60/62; 273px 20253/54; 38400px
-  20302). The palette-only experiment did not reduce this set safely.
-- **Did:** re-ran the direct probe (valid 1.5 MB JSON despite expected exit
-  139) and traced the five pixels to the top MAGBY/status overlap and the
-  273px family to party-menu ball bank1/index15. A direct blue substitution
-  merely shifted that family to 20252/53; swapping the screenshot overlays
-  expanded it into 13--204px sprite diffs. Both were reverted.
-- **Next — SUPERVISOR DECISION:** the authorized worker stopped before the
-  central field task, so split it out: extract/compose BG char/map/palette +
-  field OAM for 20302 only and improve both traces **192→193/200**. Party-
-  menu OAM/palette residuals are a later increment. Do not use screenshot,
-  overlay/mask, or RGB-candidate fitting.
-- **Notes:** no production changes shipped. PAPERCUT: valid mGBA probe ends
-  SIGSEGV 139, ~3 min.

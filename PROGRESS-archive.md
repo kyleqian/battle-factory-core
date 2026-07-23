@@ -1,3 +1,23 @@
+## 269 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — raw field asset still required**
+
+- **State:** restored and committed-green at the existing rung-1 checkpoint:
+  canonical **192/200** (5px 20248/50/58/60/62; 273px 20253/54; 38400px
+  20302). The palette-only experiment did not reduce this set safely.
+- **Did:** re-ran the direct probe (valid 1.5 MB JSON despite expected exit
+  139) and traced the five pixels to the top MAGBY/status overlap and the
+  273px family to party-menu ball bank1/index15. A direct blue substitution
+  merely shifted that family to 20252/53; swapping the screenshot overlays
+  expanded it into 13--204px sprite diffs. Both were reverted.
+- **Next — SUPERVISOR DECISION:** the authorized worker stopped before the
+  central field task, so split it out: extract/compose BG char/map/palette +
+  field OAM for 20302 only and improve both traces **192→193/200**. Party-
+  menu OAM/palette residuals are a later increment. Do not use screenshot,
+  overlay/mask, or RGB-candidate fitting.
+- **Notes:** no production changes shipped. PAPERCUT: valid mGBA probe ends
+  SIGSEGV 139, ~3 min.
+
+---
+
 ## 268 — Bounded worker (ISSUES #37 rung 1): **GREEN PROBE CHECKPOINT — exact palette/field blocker**
 
 - **State:** baseline green: Tier-1 **1005/1005**, build **5.32 MB**;
