@@ -5,6 +5,8 @@ Recurring tooling/workflow annoyances (NOT game bugs — those go to
 than being wrong *in* the game?" Bump `Hits:` instead of duplicating an
 entry. In the supervised flow only the supervisor writes this file; workers
 report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
+Delete an entry when its underlying friction is fixed; git preserves its
+history.
 
 Per entry:
 - **What:** the friction.
