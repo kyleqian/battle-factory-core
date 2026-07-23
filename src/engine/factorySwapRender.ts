@@ -7,7 +7,9 @@ import {
   factorySwapActionFadeY,
   factorySwapCancelButtonX,
   factorySwapPlayerMonPicVisual,
-  factorySwapPlayerOptionBallTile,
+  factorySwapPlayerReturnActionFadeY,
+  factorySwapPlayerReturnCancelButtonX,
+  factorySwapPlayerReturnMonPicVisual,
 } from "./factorySwapPresentation.ts";
 import { blendComponentToward } from "./paletteFade.ts";
 import type { FactorySwapState } from "./factorySwap.ts";
@@ -75,6 +77,8 @@ export interface FactorySwapRenderView {
   readonly bgFadeY?: number;
   readonly objFadeY?: number;
   readonly phaseElapsed?: number;
+  readonly selectedBallIndex?: 0 | 1 | 2 | null;
+  readonly selectedBallTile?: 0 | 16 | 32 | null;
 }
 
 function drawActionPiece(
@@ -151,15 +155,27 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
   const objFade = view.objFadeY ?? 0;
   const party = enemy ? state.enemyParty : state.playerParty;
   const selected = party[state.cursor];
+  const infoSelected = party[state.infoCursor];
   const displaySelected = party[state.displayCursor];
   const renderedBallTiles = [...view.ballTiles] as [number, number, number];
   let actionFadeY = 0;
   let cancelButtonX = 192;
+  if (
+    view.selectedBallIndex !== undefined &&
+    view.selectedBallIndex !== null &&
+    view.selectedBallTile !== undefined &&
+    view.selectedBallTile !== null
+  ) {
+    renderedBallTiles[view.selectedBallIndex] = view.selectedBallTile;
+  }
   if (state.phase === "playerOptions") {
     const phaseElapsed = view.phaseElapsed ?? 0;
-    renderedBallTiles[state.cursor] = factorySwapPlayerOptionBallTile(phaseElapsed);
     actionFadeY = factorySwapActionFadeY(phaseElapsed);
     cancelButtonX = factorySwapCancelButtonX(phaseElapsed);
+  } else if (state.phase === "playerPickerReturn") {
+    const phaseElapsed = view.phaseElapsed ?? 0;
+    actionFadeY = factorySwapPlayerReturnActionFadeY(phaseElapsed);
+    cancelButtonX = factorySwapPlayerReturnCancelButtonX(phaseElapsed);
   }
 
   if (bgFade === 0) drawTileBg(fb, menuBg);
@@ -176,7 +192,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     DEFAULT_TEXT_COLORS,
     bgFade,
   );
-  const categoryText = `${CATEGORY_BY_SPECIES[selected.species] ?? ""} POKéMON`;
+  const categoryText = `${CATEGORY_BY_SPECIES[infoSelected.species] ?? ""} POKéMON`;
   drawTextFaded(
     fb,
     font,
@@ -240,20 +256,23 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
   );
   drawCancelButton(fb, bgFade, objFade, actionFadeY, cancelButtonX);
 
-  if (state.phase === "playerOptions") {
+  if (state.phase === "playerOptions" || state.phase === "playerPickerReturn") {
+    const returning = state.phase === "playerPickerReturn";
     const ballVisuals: BallVisual[] = renderedBallTiles.map((firstTile, index) => ({
       palette: pokeball.selectedPalette,
       firstTileRow: firstTile / 4,
       centerX: 48 * index + 72,
     }));
+    const monPic = returning
+      ? factorySwapPlayerReturnMonPicVisual(view.phaseElapsed ?? 0)
+      : factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0);
     drawMonPic(
       fb,
-      factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0),
+      monPic,
       selected.species,
       48 * state.displayCursor + 72,
       ballVisuals,
     );
-    const monPic = factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0);
     if (monPic.menuHighlightVisible) {
       const highlightY = PLAYER_OPTIONS_ORIGIN.y +
         state.playerOptionDisplayCursor * 16 + 8;

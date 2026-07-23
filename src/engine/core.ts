@@ -202,6 +202,7 @@ import {
   advanceFactorySwapPresentation,
   createCanonicalFactorySwapPresentation,
   factorySwapBallTile,
+  factorySwapPlayerOptionBallTile,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
 } from "./factorySwapPresentation.ts";
@@ -1753,10 +1754,15 @@ export function render(state: EngineState): Uint8Array {
     return renderFactorySwapPicker({
       state: swap.controller,
       ballTiles: [tile, tile, tile],
-      speciesRenderCoeff: 0,
+      speciesRenderCoeff: swap.speciesNameFade.renderCoeff,
       bgFadeY: bgFadeY(fadeLocal, FADE_IN),
       objFadeY: objFadeY(fadeLocal, FADE_IN),
       phaseElapsed: swap.phaseElapsed,
+      selectedBallIndex: swap.selectedBallIndex,
+      selectedBallTile:
+        swap.selectedBallClock === null
+          ? null
+          : factorySwapPlayerOptionBallTile(swap.selectedBallClock),
     });
   }
   if (state.postwin) return renderPostwinState(state);

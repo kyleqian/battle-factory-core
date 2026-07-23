@@ -46,7 +46,11 @@ export interface FactorySwapState {
   readonly enemyParty: FactorySwapParty;
   readonly rentalMons: FactoryRentalRoster;
   readonly cursor: 0 | 1 | 2;
+  /** Window-copy-visible category cursor, one VBlank behind `cursor`. */
+  readonly infoCursor: 0 | 1 | 2;
+  /** OAM/species-window-visible cursor, one further VBlank behind. */
   readonly displayCursor: 0 | 1 | 2;
+  readonly cursorCopyPending: boolean;
   readonly playerOptionCursor: 0 | 1 | 2;
   /** OAM-visible option cursor, copied one VBlank after the logical cursor. */
   readonly playerOptionDisplayCursor: 0 | 1 | 2;
@@ -90,7 +94,9 @@ export function createFactorySwapState(
     enemyParty: enemyParty.map((mon) => ({ ...mon })) as unknown as FactorySwapParty,
     rentalMons: rentalMons.map((mon) => ({ ...mon })) as unknown as FactoryRentalRoster,
     cursor: 0,
+    infoCursor: 0,
     displayCursor: 0,
+    cursorCopyPending: false,
     playerOptionCursor: 0,
     playerOptionDisplayCursor: 0,
     playerOptionCursorCopyPending: false,
@@ -113,22 +119,31 @@ export function acknowledgeFactorySwapPresentation(
 export function copyFactorySwapCursor(
   state: FactorySwapState,
 ): FactorySwapState {
+  const infoCursor =
+    state.infoCursor === state.cursor ? state.infoCursor : state.cursor;
   const displayCursor =
-    state.displayCursor === state.cursor ? state.displayCursor : state.cursor;
+    state.cursorCopyPending || state.displayCursor === state.cursor
+      ? state.displayCursor
+      : state.cursor;
   const playerOptionDisplayCursor =
     state.playerOptionCursorCopyPending ||
     state.playerOptionDisplayCursor === state.playerOptionCursor
       ? state.playerOptionDisplayCursor
       : state.playerOptionCursor;
+  const cursorCopyPending = false;
   const playerOptionCursorCopyPending = false;
   if (
+    infoCursor === state.infoCursor &&
     displayCursor === state.displayCursor &&
+    cursorCopyPending === state.cursorCopyPending &&
     playerOptionDisplayCursor === state.playerOptionDisplayCursor &&
     playerOptionCursorCopyPending === state.playerOptionCursorCopyPending
   ) return state;
   return {
     ...state,
+    infoCursor,
     displayCursor,
+    cursorCopyPending,
     playerOptionDisplayCursor,
     playerOptionCursorCopyPending,
   };
@@ -190,7 +205,7 @@ export function handleFactorySwapInput(
     case "enemyPicker": {
       if (input === "LEFT" || input === "RIGHT") {
         const cursor = move3(state.cursor, input === "LEFT" ? -1 : 1);
-        return { ...state, cursor };
+        return { ...state, cursor, cursorCopyPending: true };
       }
       if (input === "B") {
         return {
@@ -246,7 +261,9 @@ export function handleFactorySwapInput(
         phase: "enemySwitch",
         playerMonId: state.cursor,
         cursor: 0,
+        infoCursor: 0,
         displayCursor: 0,
+        cursorCopyPending: false,
         inputReady: false,
       };
     }

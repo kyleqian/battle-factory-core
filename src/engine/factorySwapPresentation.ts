@@ -12,7 +12,16 @@ import {
   type FactorySwapPhase,
   type FactorySwapState,
 } from "./factorySwap.ts";
-import { getMonPicVisual, type MonPicVisual } from "./monPic.ts";
+import {
+  getMonPicVisual,
+  type MonPicVisual,
+} from "./monPic.ts";
+import {
+  activateSpeciesNameFade,
+  advanceSpeciesNameFade,
+  deactivateSpeciesNameFade,
+  type SpeciesNameFadeState,
+} from "./speciesNameFade.ts";
 
 export interface FactorySwapPresentationState {
   readonly controller: FactorySwapState;
@@ -20,6 +29,18 @@ export interface FactorySwapPresentationState {
   readonly elapsed: number;
   /** Relative to the input edge which entered controller.phase. */
   readonly phaseElapsed: number;
+  /**
+   * Sprite-owned animation age created by the selected player's OpenMonPic.
+   * It survives the B close and restored picker instead of being re-anchored
+   * to either controller phase.
+   */
+  readonly selectedBallClock: number | null;
+  readonly selectedBallIndex: 0 | 1 | 2 | null;
+  /**
+   * The single Swap_Task_FadeSpeciesName task. Popup entry only pauses its
+   * RUN body; neither entry nor return reconstructs its internal cadence.
+   */
+  readonly speciesNameFade: SpeciesNameFadeState;
 }
 
 const anchor = anchorState as {
@@ -81,10 +102,23 @@ export const CANONICAL_SWAP_ENEMY_PARTY: FactorySwapParty = [
 ];
 
 export const FACTORY_SWAP_ENTRY_READY_DELAY = 99;
+export const FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED = 59;
+const INITIAL_FACTORY_SWAP_SPECIES_FADE: SpeciesNameFadeState = {
+  active: false,
+  tState: "run",
+  coeffDelay: 0,
+  coeff: 0,
+  fadeOut: true,
+  delay: 0,
+  renderCoeff: 0,
+};
 export const FACTORY_SWAP_PHASE_READY_DELAYS: Readonly<
   Partial<Record<FactorySwapPhase, number>>
 > = {
-  playerOptions: 56,
+  // +57 performs STATE_MENU_SHOW_OPTIONS -> STATE_MENU_HANDLE_INPUT. Since
+  // JOY_NEW was already sampled by that task invocation, +58 is the first
+  // physical edge that can be consumed.
+  playerOptions: 58,
   enemyPicker: 199,
   acceptPrompt: 99,
   quitPrompt: 99,
@@ -100,11 +134,19 @@ export function createCanonicalFactorySwapPresentation(): FactorySwapPresentatio
     ),
     elapsed: 0,
     phaseElapsed: 0,
+    selectedBallClock: null,
+    selectedBallIndex: null,
+    speciesNameFade: INITIAL_FACTORY_SWAP_SPECIES_FADE,
   };
 }
 
 function readyDelay(state: FactorySwapPresentationState): number | null {
-  if (state.controller.phase === "complete") return null;
+  if (
+    state.controller.phase === "complete" ||
+    state.controller.phase === "summaryFade" ||
+    state.controller.phase === "playerPickerReturn" ||
+    state.controller.phase === "enemySwitch"
+  ) return null;
   if (state.controller.phase === "playerPicker" && state.elapsed === state.phaseElapsed) {
     return FACTORY_SWAP_ENTRY_READY_DELAY;
   }
@@ -116,13 +158,46 @@ export function advanceFactorySwapPresentation(
 ): FactorySwapPresentationState {
   const elapsed = state.elapsed + 1;
   const phaseElapsed = state.phaseElapsed + 1;
+  const selectedBallClock =
+    state.selectedBallClock === null ? null : state.selectedBallClock + 1;
+  let speciesNameFade = advanceSpeciesNameFade(state.speciesNameFade);
+  if (elapsed === FACTORY_SWAP_SPECIES_FADE_ACTIVATE_ELAPSED) {
+    speciesNameFade = activateSpeciesNameFade(speciesNameFade);
+  }
   let controller = copyFactorySwapCursor(state.controller);
-  const advanced = { controller, elapsed, phaseElapsed };
+  if (controller.phase === "playerPickerReturn" && phaseElapsed >= 55) {
+    controller = {
+      ...controller,
+      phase: "playerPicker",
+      inputReady: false,
+    };
+    return {
+      controller,
+      elapsed,
+      phaseElapsed: 0,
+      selectedBallClock,
+      selectedBallIndex: state.selectedBallIndex,
+      speciesNameFade,
+    };
+  }
+  // Swap_Task_ScreenInfoTransitionIn state 8 re-enables the existing task
+  // one frame before its HandleChooseMons handoff.
+  if (controller.phase === "playerPickerReturn" && phaseElapsed === 54) {
+    speciesNameFade = activateSpeciesNameFade(speciesNameFade);
+  }
+  const advanced = {
+    controller,
+    elapsed,
+    phaseElapsed,
+    selectedBallClock,
+    selectedBallIndex: state.selectedBallIndex,
+    speciesNameFade,
+  };
   const delay = readyDelay(advanced);
   if (delay !== null && phaseElapsed >= delay) {
     controller = acknowledgeFactorySwapPresentation(controller);
   }
-  return { controller, elapsed, phaseElapsed };
+  return { ...advanced, controller };
 }
 
 export function handleFactorySwapPresentationInput(
@@ -131,11 +206,21 @@ export function handleFactorySwapPresentationInput(
 ): FactorySwapPresentationState {
   const controller = handleFactorySwapInput(state.controller, input);
   if (controller === state.controller) return state;
+  const enteredPlayerOptions =
+    controller.phase === "playerOptions" &&
+    state.controller.phase === "playerPicker";
+  const pausedSpeciesName =
+    enteredPlayerOptions ? deactivateSpeciesNameFade(state.speciesNameFade) : state.speciesNameFade;
   return {
     ...state,
     controller,
     phaseElapsed:
       controller.phase === state.controller.phase ? state.phaseElapsed : 0,
+    selectedBallClock: enteredPlayerOptions ? 0 : state.selectedBallClock,
+    selectedBallIndex: enteredPlayerOptions
+      ? state.controller.cursor
+      : state.selectedBallIndex,
+    speciesNameFade: pausedSpeciesName,
   };
 }
 
@@ -161,15 +246,10 @@ export function factorySwapBallTile(elapsed: number): 0 | 16 | 32 {
     [32, 8],
     [0, 8],
   ] as const;
-  // The one-shot lead-in finishes before the source animation jumps back to
-  // its four-command rocking loop.
-  let age = local <= 128 ? local : (local - 129) % 16;
-  if (local > 128) {
-    if (age < 4) return 16;
-    if (age < 8) return 0;
-    if (age < 12) return 32;
-    return 0;
-  }
+  // SpriteCB_Pokeball restarts the complete source animation after animEnded,
+  // including its long still command; it does not loop only the first four
+  // rocking commands.
+  let age = local <= 128 ? local : local - 129;
   for (const [tile, duration] of commands) {
     if (age < duration) return tile;
     age -= duration;
@@ -201,10 +281,29 @@ export function factorySwapPlayerOptionBallTile(
   // This sprite owns a separately restarted animation clock after OpenMonPic.
   // Its loop begins three task ticks after the one-shot table completes.
   if (local < 66) return 0;
-  const loopAge = (local - 66) % 16;
-  if (loopAge < 4) return 16;
-  if (loopAge < 8) return 0;
-  if (loopAge < 12) return 32;
+  const restartedCommands = [
+    [16, 4],
+    [0, 4],
+    [32, 4],
+    [0, 4],
+    [16, 4],
+    [0, 4],
+    [32, 4],
+    [0, 36],
+    [16, 8],
+    [0, 8],
+    [32, 8],
+    [0, 8],
+    [16, 8],
+    [0, 8],
+    [32, 8],
+    [0, 8],
+  ] as const;
+  let loopAge = local - 66;
+  for (const [tile, duration] of restartedCommands) {
+    if (loopAge < duration) return tile;
+    loopAge -= duration;
+  }
   return 0;
 }
 
@@ -240,4 +339,64 @@ export function factorySwapPlayerMonPicVisual(phaseElapsed: number): MonPicVisua
     return getMonPicVisual({ phase: "closed", elapsed: 0, variant: "B", blended: false });
   }
   return getMonPicVisual({ phase: "opening", elapsed, variant: "B", blended: false });
+}
+
+export type FactorySwapPlayerReturnMechanism =
+  | "Task_CloseMonPic"
+  | "SpriteCB_CloseMonPic"
+  | "Swap_Task_ScreenInfoTransitionIn"
+  | "Swap_Task_HandleChooseMons";
+
+/** Source callback owning each phase-relative part of the evidence-pinned B return. */
+export function factorySwapPlayerReturnMechanism(
+  phaseElapsed: number,
+): FactorySwapPlayerReturnMechanism {
+  if (phaseElapsed <= 7) return "Task_CloseMonPic";
+  if (phaseElapsed <= 18) return "SpriteCB_CloseMonPic";
+  if (phaseElapsed <= 54) return "Swap_Task_ScreenInfoTransitionIn";
+  return "Swap_Task_HandleChooseMons";
+}
+
+/** CloseMonPic(..., TRUE), indexed from the accepted B edge. */
+export function factorySwapPlayerReturnMonPicVisual(
+  phaseElapsed: number,
+): MonPicVisual {
+  if (phaseElapsed >= 20) {
+    return getMonPicVisual({
+      phase: "closed",
+      elapsed: 0,
+      variant: "B",
+      blended: true,
+    });
+  }
+  const visual = getMonPicVisual({
+    phase: "closing",
+    elapsed: phaseElapsed,
+    variant: "B",
+    blended: true,
+  });
+  // Swap_ErasePopupMenu hides the cursor sprite on the accepted edge while
+  // the popup text/window copy and front sprite remain visible until +1.
+  return phaseElapsed === 0
+    ? { ...visual, menuHighlightVisible: false }
+    : visual;
+}
+
+/** CANCEL's source six-pixel slide back from x=240 after monPicAnimating clears. */
+export function factorySwapPlayerReturnCancelButtonX(
+  phaseElapsed: number,
+): number {
+  if (phaseElapsed < 21) return 240;
+  return Math.max(192, 240 - (phaseElapsed - 20) * 6);
+}
+
+/**
+ * PALNUM_FADE_TEXT's reverse transition. The child slide completes at +27;
+ * the palette task then walks 16 -> 0 in the shared alternating cadence.
+ */
+export function factorySwapPlayerReturnActionFadeY(
+  phaseElapsed: number,
+): number {
+  if (phaseElapsed < 31) return 16;
+  return Math.max(0, 16 - (Math.floor((phaseElapsed - 31) / 2) + 1) * 2);
 }

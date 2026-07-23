@@ -42,6 +42,10 @@ try {
 const { tracePath, outDir, summary, captureRange } = cli;
 interface CompareTraceFile extends Partial<Trace> {
   readonly sourceTrace?: string;
+  /** Reuse an exact committed prefix without copying a long canonical script. */
+  readonly sourceSegmentCount?: number;
+  /** Phase-specific controls appended after sourceSegmentCount. */
+  readonly appendSegments?: Trace["segments"];
 }
 
 const traceFile = JSON.parse(readFileSync(tracePath, "utf8")) as CompareTraceFile;
@@ -49,8 +53,21 @@ let trace: Trace;
 if (traceFile.sourceTrace) {
   const sourcePath = resolve(dirname(tracePath), traceFile.sourceTrace);
   const source = JSON.parse(readFileSync(sourcePath, "utf8")) as Trace;
-  const { sourceTrace: _sourceTrace, ...overrides } = traceFile;
-  trace = { ...source, ...overrides };
+  const {
+    sourceTrace: _sourceTrace,
+    sourceSegmentCount,
+    appendSegments,
+    ...overrides
+  } = traceFile;
+  const sourceSegments =
+    sourceSegmentCount === undefined
+      ? source.segments
+      : source.segments.slice(0, sourceSegmentCount);
+  trace = {
+    ...source,
+    ...overrides,
+    segments: [...sourceSegments, ...(appendSegments ?? [])],
+  };
 } else {
   trace = traceFile as Trace;
 }

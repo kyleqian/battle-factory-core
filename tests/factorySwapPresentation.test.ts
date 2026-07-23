@@ -9,10 +9,18 @@ import {
   factorySwapCancelButtonX,
   factorySwapPlayerMonPicVisual,
   factorySwapPlayerOptionBallTile,
+  factorySwapPlayerReturnActionFadeY,
+  factorySwapPlayerReturnCancelButtonX,
+  factorySwapPlayerReturnMechanism,
+  factorySwapPlayerReturnMonPicVisual,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
 } from "../src/engine/factorySwapPresentation.ts";
 import { INITIAL_POSTWIN_STATE } from "../src/engine/postwin.ts";
+import {
+  activateSpeciesNameFade,
+  advanceSpeciesNameFade,
+} from "../src/engine/speciesNameFade.ts";
 
 function advance(
   state: FactorySwapPresentationState,
@@ -72,7 +80,7 @@ describe("live Factory swap presentation adapter", () => {
       phaseElapsed: 0,
       controller: { phase: "playerOptions", inputReady: false },
     });
-    state = advance(state, 55);
+    state = advance(state, 57);
     expect(state.controller.inputReady).toBe(false);
     expect(handleFactorySwapPresentationInput(state, "B")).toBe(state);
     state = advance(state, 1);
@@ -99,6 +107,92 @@ describe("live Factory swap presentation adapter", () => {
     });
   });
 
+  it("accepts the first sampled B at playerOptions +58 and returns through the source callbacks to an input-ready picker", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 57);
+
+    expect(state).toMatchObject({
+      phaseElapsed: 57,
+      controller: { phase: "playerOptions", inputReady: false },
+      selectedBallClock: 57,
+    });
+    expect(handleFactorySwapPresentationInput(state, "B")).toBe(state);
+
+    state = advance(state, 1);
+    state = handleFactorySwapPresentationInput(state, "B");
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: { phase: "playerPickerReturn", inputReady: false },
+      selectedBallClock: 58,
+    });
+    expect(factorySwapPlayerReturnMechanism(state.phaseElapsed))
+      .toBe("Task_CloseMonPic");
+
+    state = advance(state, 8);
+    expect(factorySwapPlayerReturnMechanism(state.phaseElapsed))
+      .toBe("SpriteCB_CloseMonPic");
+    state = advance(state, 11);
+    expect(state.phaseElapsed).toBe(19);
+    expect(factorySwapPlayerReturnMechanism(state.phaseElapsed))
+      .toBe("Swap_Task_ScreenInfoTransitionIn");
+
+    state = advance(state, 35);
+    expect(state).toMatchObject({
+      phaseElapsed: 54,
+      controller: { phase: "playerPickerReturn", inputReady: false },
+      selectedBallClock: 112,
+      speciesNameFade: { active: true },
+    });
+    state = advance(state, 1);
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "playerPicker",
+        inputReady: false,
+        cursor: 0,
+      },
+      selectedBallClock: 113,
+    });
+    expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
+
+    state = advance(state, 1);
+    expect(state.controller.inputReady).toBe(true);
+    state = handleFactorySwapPresentationInput(state, "RIGHT");
+    expect(state.controller).toMatchObject({
+      cursor: 1,
+      infoCursor: 0,
+      displayCursor: 0,
+    });
+    state = advance(state, 1);
+    expect(state.controller).toMatchObject({
+      cursor: 1,
+      infoCursor: 1,
+      displayCursor: 0,
+    });
+  });
+
+  it("keeps the selected-ball and species-breathe task clocks alive across B instead of restarting either epoch", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 58);
+    const beforeB = state;
+    state = handleFactorySwapPresentationInput(state, "B");
+    expect(state.selectedBallClock).toBe(beforeB.selectedBallClock);
+    expect(state.speciesNameFade).toBe(beforeB.speciesNameFade);
+
+    let expectedBreathe = beforeB.speciesNameFade;
+    for (let age = 1; age <= 55; age += 1) {
+      expectedBreathe = advanceSpeciesNameFade(expectedBreathe);
+      if (age === 54) expectedBreathe = activateSpeciesNameFade(expectedBreathe);
+    }
+    state = advance(state, 55);
+    expect(state.selectedBallClock).toBe(113);
+    expect(state.speciesNameFade).toEqual(expectedBreathe);
+  });
+
   it("pins the source moving-ball table to the relative entry epoch", () => {
     expect(factorySwapBallTile(42)).toBe(0);
     expect(factorySwapBallTile(43)).toBe(16);
@@ -107,6 +201,13 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapBallTile(59)).toBe(16);
     expect(factorySwapBallTile(67)).toBe(32);
     expect(factorySwapBallTile(75)).toBe(0);
+    expect(factorySwapBallTile(190)).toBe(16);
+    expect(factorySwapBallTile(196)).toBe(32);
+    expect(factorySwapBallTile(203)).toBe(0);
+    // The restarted source command stream is in its long still command here;
+    // this used to incorrectly repeat the first four rocking commands.
+    expect(factorySwapBallTile(204)).toBe(0);
+    expect(factorySwapBallTile(212)).toBe(0);
     expect(factorySwapPlayerOptionBallTile(0)).toBe(0);
     expect(factorySwapPlayerOptionBallTile(6)).toBe(0);
     expect(factorySwapPlayerOptionBallTile(7)).toBe(16);
@@ -115,6 +216,10 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapPlayerOptionBallTile(23)).toBe(32);
     expect(factorySwapPlayerOptionBallTile(72)).toBe(0);
     expect(factorySwapPlayerOptionBallTile(73)).toBe(16);
+    expect(factorySwapPlayerOptionBallTile(89)).toBe(16);
+    expect(factorySwapPlayerOptionBallTile(99)).toBe(32);
+    expect(factorySwapPlayerOptionBallTile(105)).toBe(0);
+    expect(factorySwapPlayerOptionBallTile(113)).toBe(0);
   });
 
   it("pins the action-palette fade and six-pixel CANCEL slide to the player-options edge", () => {
@@ -153,5 +258,43 @@ describe("live Factory swap presentation adapter", () => {
       menuTextVisible: true,
       menuHighlightVisible: true,
     });
+  });
+
+  it("pins the CloseMonPic contraction, background handoff, CANCEL slide, and reverse text fade phase-relatively", () => {
+    expect(factorySwapPlayerReturnMonPicVisual(0)).toMatchObject({
+      window: { top: 32, bottom: 96 },
+      spriteVisible: true,
+      menuTextVisible: true,
+      menuHighlightVisible: false,
+    });
+    expect(factorySwapPlayerReturnMonPicVisual(1)).toMatchObject({
+      window: { top: 36, bottom: 92 },
+      spriteVisible: true,
+      menuTextVisible: false,
+      menuHighlightVisible: true,
+    });
+    expect(factorySwapPlayerReturnMonPicVisual(2)).toMatchObject({
+      window: { top: 40, bottom: 88 },
+      spriteVisible: false,
+      menuHighlightVisible: false,
+    });
+    expect(factorySwapPlayerReturnMonPicVisual(7).window)
+      .toEqual({ top: 60, bottom: 68 });
+    expect(factorySwapPlayerReturnMonPicVisual(8).window)
+      .toEqual({ top: 64, bottom: 65 });
+    expect(factorySwapPlayerReturnMonPicVisual(9).window).toBeNull();
+    expect(factorySwapPlayerReturnMonPicVisual(19).flashWidth).toBe(1);
+    expect(factorySwapPlayerReturnMonPicVisual(20).flashWidth).toBe(0);
+
+    expect(factorySwapPlayerReturnCancelButtonX(19)).toBe(240);
+    expect(factorySwapPlayerReturnCancelButtonX(20)).toBe(240);
+    expect(factorySwapPlayerReturnCancelButtonX(21)).toBe(234);
+    expect(factorySwapPlayerReturnCancelButtonX(27)).toBe(198);
+    expect(factorySwapPlayerReturnCancelButtonX(28)).toBe(192);
+
+    expect(factorySwapPlayerReturnActionFadeY(30)).toBe(16);
+    expect(factorySwapPlayerReturnActionFadeY(31)).toBe(14);
+    expect(factorySwapPlayerReturnActionFadeY(32)).toBe(14);
+    expect(factorySwapPlayerReturnActionFadeY(45)).toBe(0);
   });
 });

@@ -67,6 +67,9 @@ describe("Factory swap state/input contract", () => {
     expect(state.cursor).toBe(2);
     expect(state.displayCursor).toBe(0);
     state = copyFactorySwapCursor(state);
+    expect(state.infoCursor).toBe(2);
+    expect(state.displayCursor).toBe(0);
+    state = copyFactorySwapCursor(state);
     expect(state.displayCursor).toBe(2);
     state = handleFactorySwapInput(state, "A");
     state = ready(state);
