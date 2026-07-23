@@ -1,0 +1,26 @@
+{
+  "_comment": "Battle Scene OFF portability proof. Replay tools/compare/traces-groundtruth/battle2-off-turn1.json from the canonical anchor; all action boundaries in docs/battle2-off-portability-notes.md are confirm-edge-relative (confirm is canonical tick 33071).",
+  "oracleProfile": "battle-scene-off",
+  "trace": "../../compare/traces-groundtruth/battle2-off-turn1.json",
+  "startTick": 33030,
+  "watch": [
+    { "name": "rng", "addr": "gRngValue", "size": 4 },
+    { "name": "hpOnix", "addr": "gBattleMons+0x28", "size": 2 },
+    { "name": "hpKabuto", "addr": "gBattleMons+0x80", "size": 2 },
+    { "name": "onixRockSlidePp", "addr": "gBattleMons+0x24", "size": 1 },
+    { "name": "kabutoSandAttackPp", "addr": "gBattleMons+0x7e", "size": 1 },
+    { "name": "onixAccuracyStage", "addr": "gBattleMons+0x1e", "size": 1 },
+    { "name": "onixStatus1", "addr": "gBattleMons+0x4c", "size": 4 },
+    { "name": "kabutoStatus1", "addr": "gBattleMons+0xa4", "size": 4 },
+    { "name": "mainFunc", "addr": "gBattleMainFunc", "size": 4 },
+    { "name": "execFlags", "addr": "gBattleControllerExecFlags", "size": 4 },
+    { "name": "turnOrder0", "addr": "gBattlerByTurnOrder+0", "size": 1 },
+    { "name": "turnOrder1", "addr": "gBattlerByTurnOrder+1", "size": 1 },
+    { "name": "currentMove", "addr": "gCurrentMove", "size": 2 },
+    { "name": "attacker", "addr": "gBattlerAttacker", "size": 1 },
+    { "name": "target", "addr": "gBattlerTarget", "size": 1 },
+    { "name": "critMultiplier", "addr": "gCritMultiplier", "size": 1 },
+    { "name": "moveDamage", "addr": "gBattleMoveDamage", "size": 4 },
+    { "name": "hitMarker", "addr": "gHitMarker", "size": 4 }
+  ]
+}
