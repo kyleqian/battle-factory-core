@@ -421,15 +421,17 @@ final animation-owned displayed VBlank; post-hit resolution from 22075 is
 still open. The dense window, predecessor rung, turn-17 verifier, Tier-1
 suite, and production build were independently reverified. This does not
 propose ticking S7 complete.
-**Proposed Turn-17 rung 3 status (2026-07-23, awaiting supervisor
-acceptance):** `turn17-rung3.json` is **143/143 exact** for every canonical
+**Turn-17 rung 3 accepted by the supervisor (2026-07-23):**
+`turn17-rung3.json` is **143/143 exact** for every canonical
 tick `22075-22217`, covering post-hit wobble/blink, MAGBY's `79→27`
 display drain and atomic HP write, chance-0 secondary RNG, battler/target/
 currentMove handoff, FIRE_PUNCH accuracy/text/PP/crit/damage lead-in, and
 the controller handoff. Fresh buffer/RAM/source evidence corrects the
 initial endpoint estimate: **22218**, not ~22198, is the first
 FIRE_PUNCH-animation-owned displayed state. The animation body and later
-resolution remain open. This does not propose ticking S7 complete.
+resolution remain open. The dense window, predecessor rung, turn-17
+verifier, Tier-1 suite, and production build were independently reverified.
+This does not propose ticking S7 complete.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

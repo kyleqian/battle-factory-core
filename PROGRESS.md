@@ -23,7 +23,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   endpoint: PRINTSTRING still owns that lead-in; MOVEANIMATION queues at
   22216 and `gAnimScriptActive` first displays at 22218. No forbidden
   framebuffer/absolute-tick/per-frame/trace-fitting mechanism or excluded
-  capture. ROADMAP status is proposed, not accepted; S7 remains `[~]`.
+  capture. Supervisor independently reverified the dense window, predecessor
+  rung, turn-17 verifier, full Tier-1 suite, and production build; ROADMAP
+  status accepted. S7 remains `[~]`.
 
 ---
 ## 292 — Bounded worker (S7 turn 17 rung 2): **GREEN — repeated FAINT_ATTACK body exact**

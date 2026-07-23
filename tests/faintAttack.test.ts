@@ -181,7 +181,7 @@ describe("FAINT_ATTACK pure animation reducers", () => {
     expect(faintAttackResolutionState(342).message).toBe("FIRE_PUNCH");
   });
 
-  it("pins turn 17's state/RNG handoffs while retaining the age-344 animation boundary", () => {
+  it("pins turn 17's state/RNG handoffs through its derived animation-ownership boundary", () => {
     const hp = { startHp: 79, endHp: 27 };
     expect(faintAttackResolutionState(318, hp).rngCallsConsumed).toBe(0);
     expect(faintAttackResolutionState(319, hp).rngCallsConsumed).toBe(1);
