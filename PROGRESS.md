@@ -22,7 +22,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** implementation commit `210ace5`; all scheduling derives from
   the stored turn-16/17 confirmation and redraw ages. No absolute battle
   tick, framebuffer/screenshot asset, per-frame table, trace branch,
-  coordinate/RGB fitting, or excluded capture.
+  coordinate/RGB fitting, or excluded capture. Supervisor independently
+  reverified the dense window, both oracle verifiers, full Tier-1 suite, and
+  build; ROADMAP status accepted. The dossier's old burn-halving inference
+  is corrected: DARK is special in Gen 3, so the exact 52 is variance.
 
 ---
 ## 290 — Bounded worker (S7 turn 16 rung 5): **GREEN — turn complete**

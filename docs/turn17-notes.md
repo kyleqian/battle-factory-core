@@ -5,9 +5,10 @@ tick and byte, extending `turn16-notes.md` (which left the battle settled at
 "What will MAGBY do?" for turn 17, tick 21773) through the WIN. **MURKROW
 acts first again** (`gBattlerAttacker`→1 at tick 21807, same 97-vs-89 speed
 order turn16 already pinned) with **FAINT_ATTACK** — still always-hits/zero
-accuracy roll — for **52** (burn's physical-damage halving now RAM-exact,
-not just suggestive: turn16's unburned FAINT_ATTACK hit 59, this turn's
-burned one hits 52), MAGBY **79→27** at tick 22168. **MAGBY answers with
+accuracy roll — for **52**. This is the RAM-pinned damage-variance result,
+not burn halving: DARK is special in Gen 3, so FAINT_ATTACK does not use
+Murkrow's burned Attack stat. MAGBY reaches **79→27** at tick 22168 and
+answers with
 FIRE_PUNCH** for **78** (capped on write since MURKROW only had 58 HP left),
 MURKROW **58→0** at tick **22418** — the kill. **FIRE_PUNCH's own 10%
 secondary burn roll still fires at tick 22423** (5 ticks after the HP write,
@@ -200,14 +201,13 @@ per-move roll-shape and dispatch-constant timing** vs. turn16 (§2) — the
 first time this dossier has reconfirmed the *exact same tick offsets*
 (+36, +3) for a repeated move rather than just the same roll-count shape.
 
-**(c) Burn's physical-damage halving.** **Independently reconfirmed**, no
-longer merely suggestive: turn16's own §16 open item #2 ("suggestive from 2
-data points, not independently re-derived") is closed by this turn's own
-data point (52 vs. turn16's 59, same move, same attacker/target, only
-difference is Murkrow's burn) — still not re-derived against
-`damageCalc.ts`'s own formula with controlled inputs (that requires an
-engine-side unit test, out of this session's oracle-only scope), but the
-RAM evidence itself is no longer just "suggestive."
+**(c) Burn's physical-damage halving.** **Not exercised by this move.**
+The earlier comparison of turn16's 59 to turn17's 52 was incorrect:
+FAINT_ATTACK is DARK and therefore special in Gen 3, so burn cannot halve
+it. Rung 1 closes the engine-side gap separately with a source-accurate
+Tier-1 regression proving that burn halves physical damage before the final
+`+2` unless the attacker has GUTS; the exact 52 here is independently pinned
+as FAINT_ATTACK's variance result.
 
 **(d) FIRE_PUNCH's own secondary-effect roll, fired at an already-resolved
 target.** **NEW finding, this session's own headline.** Turn16 proved the
@@ -426,7 +426,7 @@ open for a future session with RAM/task-callback access.
 |---|---|
 | FIGHT submenu (turn 17) | **pure wiring reuse**, verbatim (§5a) |
 | FAINT_ATTACK / FIRE_PUNCH dispatch, crit/damage rolls | **pure wiring reuse**, verbatim per-move roll-shape AND exact dispatch-constant timing vs. turn16 (§5b) |
-| Burn's physical-damage halving | **pure wiring reuse**, now independently reconfirmed (not just suggestive) (§5c) |
+| Burn's physical-damage halving | **not exercised by FAINT_ATTACK** because DARK is special in Gen 3; source-accurate engine behavior is Tier-1-pinned separately (§5c) |
 | FIRE_PUNCH's secondary-effect roll at an already-fainted target | **new-to-this-dossier finding, pure wiring** — the roll is unconditional per source and must be replicated even when its outcome is a guaranteed no-op (§5d) |
 | Burn's end-of-turn residual, correctly absent | **new-to-this-dossier finding, pure wiring** — needs the `hp != 0` liveness gate explicitly (§5e) |
 | Faint sink (sprite sink + healthbox/badge teardown) | **pure wiring reuse, now formula-exact** — `SpriteCB_FaintOpponentMon`/`AnimFaintOpponent`, RAM-confirmed bit-exact to the same closed form turn13 pinned (§6b, upgraded from §5f's "same-shape") |

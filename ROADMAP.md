@@ -406,7 +406,7 @@ Turn 16 is complete through its turn-17 menu handoff:
 message clear, and the freshly-bouncing `What will MAGBY do?` redraw.
 All turn-16 rungs 1-5 and verifier regressions remain exact; see
 `docs/turn16-notes.md` §6.8. This does not propose ticking S7 complete.
-**Turn-17 rung 1 factual status proposal (2026-07-23 bounded worker):**
+**Turn-17 rung 1 accepted by the supervisor (2026-07-23):**
 `turn17-rung1.json` is **118/118 exact** for every canonical tick
 `21736-21853`, covering the settled menu, turn-17 FIGHT reopen with
 FIRE_PUNCH `14/15`, confirmation, MURKROW-first/currentMove dispatch, and
