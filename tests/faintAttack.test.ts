@@ -4,12 +4,20 @@ import {
   faintAttackAttackerOffset,
   faintAttackBgState,
   faintAttackHitsplatVisible,
+  faintAttackOwnsAnimationRender,
   faintAttackResolutionState,
   faintAttackTargetShakeX2,
 } from "../src/engine/faintAttack.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
 
 describe("FAINT_ATTACK pure animation reducers", () => {
+  it("pins the source-script ownership interval including its final displayed VBlank", () => {
+    expect(faintAttackOwnsAnimationRender(-1)).toBe(false);
+    expect(faintAttackOwnsAnimationRender(0)).toBe(true);
+    expect(faintAttackOwnsAnimationRender(220)).toBe(true);
+    expect(faintAttackOwnsAnimationRender(221)).toBe(false);
+  });
+
   it("pins both Task_FadeToBg halves at every swap/settle boundary", () => {
     expect(faintAttackBgState(4)).toEqual({ background: "default", bldy: 0 });
     expect(faintAttackBgState(5)).toEqual({ background: "default", bldy: 1 });
@@ -89,6 +97,10 @@ describe("FAINT_ATTACK pure animation reducers", () => {
     expect(faintAttackResolutionState(262, { startHp: 10, endHp: 8 })).toMatchObject({
       displayedHp: 8,
       battleHp: 10,
+    });
+    expect(faintAttackResolutionState(220, { startHp: 79, endHp: 27 })).toMatchObject({
+      displayedHp: 79,
+      battleHp: 79,
     });
   });
 

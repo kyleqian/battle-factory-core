@@ -552,8 +552,10 @@ import {
   faintAttackAttackerOffset,
   faintAttackBgState,
   faintAttackHitsplatVisible,
+  faintAttackOwnsAnimationRender,
   faintAttackResolutionState,
   faintAttackTargetShakeX2,
+  type FaintAttackResolutionHp,
 } from "./faintAttack.ts";
 import {
   FIRE_PUNCH_BURN_MESSAGE_AGE,
@@ -12174,6 +12176,8 @@ function drawTurn16PostSwitchField(
   partyElapsed: number,
   bounceTick: number,
   faintAttackAge: number | null = null,
+  faintAttackTargetHp: FaintAttackResolutionHp = { startHp: 138, endHp: 79 },
+  explicitOpponent: { hp: number; status: "none" | "burn" } | null = null,
 ): void {
   const releaseTick = partySendOutReleaseLogicalTick(partyElapsed);
   const bounce = menuIdleBounce(bounceTick);
@@ -12197,7 +12201,9 @@ function drawTurn16PostSwitchField(
       ? sourcePpu.oam
       : ownsFirePunch
         ? sourcePpu.oam.slice(3, -1)
-        : sourcePpu.oam.slice(0, -1),
+        : explicitOpponent === null
+          ? sourcePpu.oam.slice(0, -1)
+          : sourcePpu.oam.slice(3, -1),
     paletteBgr555: releasedPalette,
   });
   if (ownsFirePunch) {
@@ -12260,9 +12266,19 @@ function drawTurn16PostSwitchField(
       }
     }
   }
+  if (faintAttackAge !== null && !ownsFirePunch && explicitOpponent !== null) {
+    drawOpponentHealthboxWobble(
+      fb,
+      0,
+      murkrowHealthboxContentForHp(explicitOpponent.hp, explicitOpponent.status),
+    );
+  }
   drawTurn15ForcedSwitchBall(fb, partyElapsed);
   const targetX2 = faintAttackAge === null ? 0 : faintAttackTargetShakeX2(faintAttackAge);
-  const resolution = faintAttackAge === null ? null : faintAttackResolutionState(faintAttackAge);
+  const resolution =
+    faintAttackAge === null
+      ? null
+      : faintAttackResolutionState(faintAttackAge, faintAttackTargetHp);
   if (releaseTick !== null && !resolution?.targetInvisible) {
     drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2, targetX2);
   }
@@ -12326,7 +12342,22 @@ function drawTurn16FightSubmenuWindow(
       freezeTick !== null && t >= freezeTick
         ? 1748 + freezeTick - redrawTick + 1
         : settledBounceTick - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-    drawTurn16PostSwitchField(fb, partyElapsed, bounceTick, TURN16_SETTLED_OWNED_AGE);
+    const animationAge =
+      confirmTick === null
+        ? null
+        : t - (confirmTick + TURN16_FAINT_ATTACK_ANIM_DELAY);
+    const ownedAnimationAge =
+      animationAge !== null && faintAttackOwnsAnimationRender(animationAge)
+        ? animationAge
+        : null;
+    drawTurn16PostSwitchField(
+      fb,
+      partyElapsed,
+      bounceTick,
+      ownedAnimationAge ?? TURN16_SETTLED_OWNED_AGE,
+      ownedAnimationAge === null ? undefined : { startHp: 79, endHp: 27 },
+      ownedAnimationAge === null ? null : { hp: 58, status: "burn" },
+    );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 
     if (confirmTick !== null && t >= confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY) {

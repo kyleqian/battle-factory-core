@@ -19,6 +19,12 @@ export const FAINT_ATTACK_RESTORE_FADE_FIRST_VISIBLE_AGE = 184;
 export const FAINT_ATTACK_RESTORE_BLACK_AGE = 199;
 export const FAINT_ATTACK_DEFAULT_BG_SWAP_AGE = 204;
 export const FAINT_ATTACK_DONE_AGE = 219;
+/**
+ * `end` releases the script after the final restore write, but that write
+ * remains the animation controller's displayed field for one more VBlank.
+ * Both canonical occurrences therefore own ages 0..220 inclusive.
+ */
+export const FAINT_ATTACK_LAST_ANIMATION_OWNED_AGE = FAINT_ATTACK_DONE_AGE + 1;
 export const FAINT_ATTACK_HIT_HEALTHBOX_WOBBLE_AGE = 226;
 export const FAINT_ATTACK_HIT_TARGET_BLINK_AGE = 227;
 export const FAINT_ATTACK_HP_DRAIN_AGE = 260;
@@ -60,6 +66,10 @@ const TURN16_MAGBY_HP: FaintAttackResolutionHp = { startHp: 138, endHp: 79 };
 export interface FaintAttackBgState {
   background: "default" | "dark";
   bldy: number;
+}
+
+export function faintAttackOwnsAnimationRender(age: number): boolean {
+  return age >= 0 && age <= FAINT_ATTACK_LAST_ANIMATION_OWNED_AGE;
 }
 
 /** Hardware `Task_FadeToBg`: BG3-only darken, source bg swap at full black. */
