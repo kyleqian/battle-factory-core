@@ -69,7 +69,9 @@ import {
 import {
   drawMessageBox,
   drawMessageBoxFrame,
+  drawMessageBoxFrameFaded,
   drawMessageBoxText,
+  drawMessageBoxTextFaded,
   drawStandardWindowFrame,
   drawStandardWindowText,
   renderPrebattleRoomScene,
@@ -1534,6 +1536,25 @@ const POSTWIN_ROOM_FADE_OUT = {
   targetY: 16,
 } as const;
 
+const SWAP_ENTRY_FADE_OUT = {
+  startDelay: 3,
+  startY: 0,
+  targetY: 16,
+} as const;
+
+function renderFactorySwapEntryFade(state: EngineState): Uint8Array {
+  const swap = state.factorySwap!;
+  const fb = createFramebuffer();
+  const bgY = bgFadeY(swap.elapsed, SWAP_ENTRY_FADE_OUT);
+  const objY = objFadeY(swap.elapsed, SWAP_ENTRY_FADE_OUT);
+  renderPrebattleRoomScene(fb, bgY, objY);
+  drawMessageBoxFrameFaded(fb, bgY);
+  const lines = POSTWIN_SCOUTING_LINES[3];
+  drawMessageBoxTextFaded(fb, lines[0], 16, 121, bgY);
+  drawMessageBoxTextFaded(fb, lines[1], 16, 137, bgY);
+  return fb;
+}
+
 function renderPostwinState(state: EngineState): Uint8Array {
   const postwin = state.postwin!;
   if (postwin.rightThisWayDismissElapsed !== null) {
@@ -1705,6 +1726,7 @@ export function render(state: EngineState): Uint8Array {
   if (state.factorySwap) {
     const swap = state.factorySwap;
     if (swap.elapsed === 0) return renderPostwinState(state);
+    if (swap.elapsed < 19) return renderFactorySwapEntryFade(state);
     if (swap.elapsed < 44) return blackFrame();
     const tile = factorySwapBallTile(swap.elapsed);
     const fadeLocal = swap.elapsed - 44;

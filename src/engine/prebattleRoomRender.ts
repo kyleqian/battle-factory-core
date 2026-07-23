@@ -43,7 +43,7 @@
 
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
-import { fadeColor } from "./fadeRender.ts";
+import { drawTextFaded, fadeColor } from "./fadeRender.ts";
 import { drawText, type FontData } from "./font.ts";
 
 import layout from "../data/gen/prebattle-room-layout.json" with { type: "json" };
@@ -249,14 +249,21 @@ function interiorTileForCol(bx: number): number {
 }
 
 /** One 8x8 message-box tile; transparent (index 0) pixels are skipped so the already-drawn room scene shows through the border art's own notched corners, exactly like the real hardware's BG compositing. */
-function drawMsgboxTile(fb: Uint8Array, tileId: number, screenX: number, screenY: number, vFlip: boolean): void {
+function drawMsgboxTile(
+  fb: Uint8Array,
+  tileId: number,
+  screenX: number,
+  screenY: number,
+  vFlip: boolean,
+  fadeY = 0,
+): void {
   const tile = msgboxTiles[tileId]!;
   for (let py = 0; py < 8; py += 1) {
     const sy = vFlip ? 7 - py : py;
     for (let px = 0; px < 8; px += 1) {
       const colorIndex = tile[sy * 8 + px]!;
       if (colorIndex === 0) continue;
-      const color = msgboxPalette[colorIndex]!;
+      const color = fadeColor(msgboxPalette[colorIndex]!, fadeY);
       setPixel(fb, screenX + px, screenY + py, color.r, color.g, color.b);
     }
   }
@@ -273,17 +280,24 @@ function drawMsgboxTile(fb: Uint8Array, tileId: number, screenX: number, screenY
  * module doc).
  */
 export function drawMessageBoxFrame(fb: Uint8Array): void {
+  drawMessageBoxFrameFaded(fb, 0);
+}
+
+export function drawMessageBoxFrameFaded(
+  fb: Uint8Array,
+  fadeY: number,
+): void {
   for (let bx = 0; bx < BOX_COLS; bx += 1) {
-    drawMsgboxTile(fb, borderTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y, false);
+    drawMsgboxTile(fb, borderTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y, false, fadeY);
   }
   for (let by = 1; by <= BOX_HEIGHT_TILES; by += 1) {
     for (let bx = 0; bx < BOX_COLS; bx += 1) {
-      drawMsgboxTile(fb, interiorTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y + by * 8, false);
+      drawMsgboxTile(fb, interiorTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y + by * 8, false, fadeY);
     }
   }
   const bottomRow = BOX_ROWS - 1;
   for (let bx = 0; bx < BOX_COLS; bx += 1) {
-    drawMsgboxTile(fb, borderTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y + bottomRow * 8, true);
+    drawMsgboxTile(fb, borderTileForCol(bx), BOX_ORIGIN.x + bx * 8, BOX_ORIGIN.y + bottomRow * 8, true, fadeY);
   }
 }
 
@@ -296,6 +310,26 @@ const MESSAGE_TEXT_COLORS = { fg: 1, bg: 0, shadow: 2 };
 /** Draws `text` at the given screen position using the message box's own fg/shadow palette (msgboxPalette indices 2/3) - shared with battleRoomRender.ts's opponent-speech box, which reuses this literal same box asset (docs/battle-room-notes.md §8.1). */
 export function drawMessageBoxText(fb: Uint8Array, text: string, x: number, y: number): void {
   drawText(fb, font, charmap, text, x, y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+}
+
+export function drawMessageBoxTextFaded(
+  fb: Uint8Array,
+  text: string,
+  x: number,
+  y: number,
+  fadeY: number,
+): void {
+  drawTextFaded(
+    fb,
+    font,
+    charmap,
+    text,
+    x,
+    y,
+    MESSAGE_PALETTE,
+    MESSAGE_TEXT_COLORS,
+    fadeY,
+  );
 }
 
 /**
