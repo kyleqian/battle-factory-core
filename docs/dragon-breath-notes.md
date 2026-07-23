@@ -1085,3 +1085,29 @@ scope); ISSUES #22 (untouched). With this tail closed, `turn2-
 dragonbreath.json` has no more un-investigated span between `3121` and
 `3846` — everything left in that range is one of these three precisely
 named, deliberately-excluded single ticks.
+
+## Isolation-probe correction (2026-07-23, fresh Battle Scene ON oracle)
+
+`verify-dragonbreath-spawn7-isolation.ts`'s first magnified case was invalid:
+RAM 3222 has four live fire sprites (slots 4, 5, 7, and 9), not one. An
+exhaustive RAM scan across 3168-3234 found the only sole-live magnified
+windows at RAM **3231-3234**, all the eighth spawn in reused sprite slot 9
+(render ticks 3232-3235 under the established one-frame RAM/render lag).
+The repaired verifier uses render 3232/RAM 3231 and prints the full candidate
+set so the premise remains directly checkable.
+
+Fresh ON results, using oracle-minus-contemporaneous-app as the isolated
+sprite mask and rejecting any mask pixel outside the live sprite's 64x64
+affine-double box:
+
+| regime | render/RAM | oracle mask | shared sampler |
+|---|---:|---:|---:|
+| compressed, slot 3, matrix `(-549,-13,13,-549)` | 3177/3176 | 10px, 0 outside box | TP 10, FP 34, FN 0 |
+| magnified, slot 9, matrix `(-207,-5,5,-207)` | 3232/3231 | 128px, 0 outside box | **TP 128, FP 0, FN 0** |
+
+This falsifies the earlier claimed magnified missing-blob defect: once the
+oracle frame is genuinely sole-live, the existing shared affine sampler is
+pixel-exact in the magnified regime. The compressed result remains a bounded
+34px overdraw (no missing pixels), consistent with the already-recorded
+compressed-edge residual. No renderer change follows from this evidence;
+ISSUES #23 remains narrowed to compressed rendering/data decomposition.

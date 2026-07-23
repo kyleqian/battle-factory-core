@@ -8,9 +8,11 @@
 //   node --experimental-strip-types tools/probe/verify-dragonbreath-spawn7-isolation.ts
 //
 // It deliberately uses one compressed and one magnified *single-live-sprite*
-// render.  In particular, the earlier whole-scene note that frame 3220 had
-// only spawn 7 is false: RAM has four live embers then.  Render 3223 consumes
-// RAM 3222, where the last (zero-based spawn 7) is the sole live projectile.
+// render.  The earlier whole-scene note that frame 3220 had only spawn 7 is
+// false: RAM 3219 has four live embers.  So is the first version of this
+// instrument's render 3223/RAM 3222 claim: that RAM tick also has four.
+// Exhaustive RAM scanning found that only RAM 3231-3234 has a sole live,
+// magnified ember (the eighth spawn, in reused sprite slot 9).
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -22,9 +24,11 @@ import { drawSpriteSheetAffineRotate } from "../../src/engine/battleScene.ts";
 const TRACE_PATH = "tools/compare/scratch/dragonbreath-projectile-window.json";
 const SCREEN_W = 240;
 const SCREEN_H = 160;
+const SCAN_START_RAM = 3168;
+const SCAN_END_RAM = 3234;
 const CASES = [
   { render: 3177, ram: 3176, regime: "compressed", expectedSlot: 3 },
-  { render: 3223, ram: 3222, regime: "magnified", expectedSlot: 4 },
+  { render: 3232, ram: 3231, regime: "magnified", expectedSlot: 9 },
 ] as const;
 
 type Sprite = {
@@ -51,7 +55,10 @@ function runRamProbe(output: string): void {
   const python = pythonCandidates.find(existsSync);
   if (!python) throw new Error(`mGBA Python not found (${pythonCandidates.join(", ")})`);
   try {
-    execFileSync(python, ["tools/probe/dump-dragonbreath-anim.py", TRACE_PATH, output, "3176", "3222"], { stdio: "ignore" });
+    execFileSync(python, [
+      "tools/probe/dump-dragonbreath-anim.py", TRACE_PATH, output,
+      String(SCAN_START_RAM), String(SCAN_END_RAM),
+    ], { stdio: "ignore" });
   } catch (error: unknown) {
     // libmGBA can fault during teardown after flushing a complete probe.
     if (!existsSync(output)) throw error;
@@ -124,6 +131,10 @@ try {
   const appByFrame = new Map(app.map((capture) => [capture.frame, capture.rgba]));
   const asset = JSON.parse(readFileSync("src/assets/gen/battle-anim-small-ember.json", "utf8")) as { tileset: Tileset; palette: Color[] };
 
+  const soleMagnified = [...rows.values()].filter((row) =>
+    row.fireSprites.length === 1 && Math.abs(row.fireSprites[0]!.matrixA) < 256
+  );
+  console.log(`exhaustive RAM ${SCAN_START_RAM}-${SCAN_END_RAM}: sole-live magnified candidates ${soleMagnified.map((row) => `${row.tick}(slot ${row.fireSprites[0]!.slot}, render ${row.tick + 1})`).join(", ") || "none"}`);
   console.log("fresh ON oracle minus contemporaneous app baseline (which has no DRAGON_BREATH projectile draw)");
   console.log("the baseline is accepted only when every differing oracle pixel stays inside the sole live sprite's 64x64 affine-double box");
   for (const c of CASES) {
