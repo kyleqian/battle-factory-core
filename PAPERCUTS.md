@@ -12,6 +12,15 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## compare CLI rejects trace-name shorthand (2026-07-22)
+
+- **What:** `npm run compare` requires the repository-relative trace path;
+  passing only the trace filename fails even when it uniquely names a file in
+  `tools/compare/traces/`.
+- **Hits:** 1.
+- **Cost each:** <1 min.
+- **Workaround:** pass `tools/compare/traces/<name>.json`.
+
 ## run-subagent.sh cap failed to terminate a Codex worker (2026-07-22)
 
 - **What:** a main-lane Codex worker launched with `--cap-minutes 38` was
