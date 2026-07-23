@@ -1,3 +1,31 @@
+## 320 — S8 OFF turn portability proof: **GREEN — 16/16 exact**
+
+- **State:** the staged Battle-2 turn resolves through a reusable logical
+  event → relative Scene-OFF command → completion-ack queue, and
+  `battle2-off-turn1-staged.json` is **16/16 exact**. Tier-1 is
+  **1157/1157** and build passes (**5.537 MB**).
+- **Did:** added a data-driven two-action turn resolver, explicit RNG ledger,
+  typed text/PP/HP/stat/turn-end/menu commands, paced OFF adapter, and staged
+  next-input gate. Added dev-only named `appStage` compare metadata (stripped
+  before oracle replay), compact trace inheritance, and a live primitive-based
+  ONIX/KABUTO OFF compositor.
+- **Next:** continue only with S8's unique swap-YES/loss/round-summary UI or
+  separately scoped generation work. Do not extend the canonical ON ladder.
+- **Notes:** PP **10→9 / 15→14**, KABUTO **91→63**, ONIX accuracy **6→5**,
+  final RNG **3121225034**; early/out-of-order completion is rejected.
+
+---
+## 319 — S8 Factory trainer schedule/RNG port: **GREEN — source selection live**
+
+- **State:** the generic controller has source-exact Factory trainer selection
+  for battle indexes **0–6**. Tier-1 is **1152/1152** and build passes.
+- **Did:** ported the scaled trainer ranges, retry/history loop, explicit RNG
+  ledger, and deterministic seven-trainer schedule while preserving fixtures.
+- **Next:** stage one representative Battle 2 turn through the generic OFF
+  presentation seam; unique swap/end UI remains open.
+- **Notes:** commits `14e9f39`, `13652f5`; no renderer or Battle-2 march.
+
+---
 ## 318 — S8 generic round/presentation core: **GREEN — architecture foundation landed**
 
 - **State:** a pure scenario-driven controller now covers battle indexes
