@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 308 — S8 Battle 2 JENSON send-out printer: **GREEN — 32531-32569 exact**
+## 308 — Supervisor-accepted S8 Battle 2 send-out text: **GREEN — 32531-32569 exact**
 
 - **State:** canonical **32531-32569 = 39/39 exact**, stopping one frame
   before the 32570 visual handoff; Battle 2 intro remains **251/251 exact**.
@@ -17,7 +17,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** begin at **32570** with trainer exit/ball/KABUTO materialize and
   healthbox only in a separately scoped increment. S8 stays `[ ]`.
 - **Notes:** no trainer exit, ball, species, healthbox, particles, absolute
-  tick lookup, framebuffer harvest, fitting, or trace thinning.
+  tick lookup, framebuffer harvest, fitting, or trace thinning. Supervisor
+  independently reviewed the press-relative encounter parameterization and
+  reverified both traces, all 1099 Tier-1 tests, and build.
 
 ---
 ## 307 — Supervisor-accepted S8 Battle 2 opening probe: **GREEN evidence checkpoint**
@@ -63,25 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   harvest, fitting, excluded capture, or thinning. Supervisor independently
   reviewed identity preservation and shared renderer selection, then
   reverified all three traces, all 1098 Tier-1 tests, and build.
-
----
-## 305 — Supervisor-accepted S8 Battle 2 transition: **GREEN — 32031-32279 exact**
-
-- **State:** canonical **32031-32279** is **249/249 exact**, every frame
-  captured from JENSON's held quote through the final black frame.
-  `battle2-room-b.json` remains **131/131** and Battle 1 `transition.json`
-  remains **206/206**. Tier-1 is **1095/1095**; build passes (**5.487 MB**).
-- **Did:** encounter-parameterized the shared Frontier circle transition,
-  implemented source-exact sequential asymmetric-spiral geometry/timing,
-  dynamic signed-Y OAM overlap order, center blend/hold, and exit fade.
-  Added dense `battle2-transition.json` and six Tier-1 pins.
-- **Next:** start at **32280**, the first visible Battle 2 framebuffer;
-  implement Fisherman/KABUTO intro, KABUTO and ONIX send-outs, then the
-  composed Battle 2 menu. S8 stays `[ ]`.
-- **Notes:** settled age 0 is 32036; gray 25-72; circle render starts
-  76/92/108; final settle/blend start 140; full blend 156; fade 190; black
-  201. Fresh RAM callback probe: task 7, sprite slots 10/11/12; signed-Y
-  stable tie at 32162. Frame 32280 is excluded by scope. No framebuffer
-  harvest, absolute-tick branch/table, fitting, or capture thinning.
-  Supervisor independently reviewed the live geometry/OAM/compositor path
-  and reverified all three traces, all 1095 Tier-1 tests, and build.

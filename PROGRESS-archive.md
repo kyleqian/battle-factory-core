@@ -12312,3 +12312,25 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   and reverified both predecessor traces, all 1089 Tier-1 tests, and build.
 
 ---
+## 305 — Supervisor-accepted S8 Battle 2 transition: **GREEN — 32031-32279 exact**
+
+- **State:** canonical **32031-32279** is **249/249 exact**, every frame
+  captured from JENSON's held quote through the final black frame.
+  `battle2-room-b.json` remains **131/131** and Battle 1 `transition.json`
+  remains **206/206**. Tier-1 is **1095/1095**; build passes (**5.487 MB**).
+- **Did:** encounter-parameterized the shared Frontier circle transition,
+  implemented source-exact sequential asymmetric-spiral geometry/timing,
+  dynamic signed-Y OAM overlap order, center blend/hold, and exit fade.
+  Added dense `battle2-transition.json` and six Tier-1 pins.
+- **Next:** start at **32280**, the first visible Battle 2 framebuffer;
+  implement Fisherman/KABUTO intro, KABUTO and ONIX send-outs, then the
+  composed Battle 2 menu. S8 stays `[ ]`.
+- **Notes:** settled age 0 is 32036; gray 25-72; circle render starts
+  76/92/108; final settle/blend start 140; full blend 156; fade 190; black
+  201. Fresh RAM callback probe: task 7, sprite slots 10/11/12; signed-Y
+  stable tie at 32162. Frame 32280 is excluded by scope. No framebuffer
+  harvest, absolute-tick branch/table, fitting, or capture thinning.
+  Supervisor independently reviewed the live geometry/OAM/compositor path
+  and reverified all three traces, all 1095 Tier-1 tests, and build.
+
+---

@@ -676,7 +676,7 @@ Sparse app diagnostics rank only live-render gaps (max 11,210 px at 32831),
 not an acceptance claim.  S8 remains `[ ]`.
 The supervisor independently reviewed the source/RAM boundary ledger and
 reverified all 1098 Tier-1 tests and production build.
-**Ninth postwin increment (2026-07-23, bounded worker):** canonical
+**Ninth postwin increment (2026-07-23, supervisor-accepted):** canonical
 **32531-32569** is **39/39 exact** in
 `battle2-jenson-sendout-text.json`: delayed A dismissal, the shared
 five-frame registration hold, encounter-parameterized 32-glyph
@@ -684,6 +684,9 @@ five-frame registration hold, encounter-parameterized 32-glyph
 hold. `battle2-intro-dense.json` remains **251/251 exact**. Frame 32570's
 trainer exit/ball/species handoff and everything later remain open, so S8
 stays `[ ]`. Tier-1 is **1099/1099** and the production build passes.
+The supervisor independently reviewed the encounter-relative send-out
+printer and reverified the 39/39 new trace, 251/251 predecessor, all 1099
+Tier-1 tests, and build.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
