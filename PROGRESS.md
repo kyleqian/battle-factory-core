@@ -4,6 +4,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 281 — Uninterrupted supervisor policy: **GREEN**
+
+- **State:** game code and accepted rung-3 renderer are unchanged. The latest
+  full verification remains Tier-1 **1011/1011**, build (**5.400 MB**), and
+  deadline-helper tests **5/5** green.
+- **Did:** made both Claude and Codex supervisors autonomous through the full
+  cap: they exercise best judgment instead of asking mid-session, record only
+  genuinely unsafe-to-guess decisions in `DEFERRED.md`, continue independent
+  safe work, and summarize deferred questions at wind-down. An open deferred
+  entry now blocks the next supervisor launch for both providers.
+- **Next:** resume #37 rung 4a under the existing Codex tier policy; do not
+  interrupt the session for judgment calls.
+- **Notes:** `ISSUES.md` remains the confirmed bug/debt backlog.
+  `DEFERRED.md` is currently empty.
+
+---
 ## 280 — Codex supervised-run hardening: **GREEN**
 
 - **State:** game code and accepted rung-3 renderer are unchanged. Tier-1
@@ -39,17 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   in the next supervised session.
 - **Notes:** no uncommitted worker edits existed when stopped. Worker logs:
   `/tmp/warm-bison-sendout-rung4a.jsonl` and `...-repair.jsonl`.
-
----
-## 278 — Supervisor accepted (ISSUES #37 rung 4a): **GREEN EVIDENCE CHECKPOINT**
-
-- **State:** renderer remains at accepted rung-3 baseline; independent Tier-1
-  **1011/1011** and build (**5.400 MB**) are green. Worker also reconfirmed all
-  six frozen traces exact, verifier **17/17**, and compositor **5/5**.
-- **Did:** accepted the direct boundary and rejected the non-exact prototype:
-  MAGBY allocates at 20389, first owns pixels at **20391**, and the healthbox
-  first owns pixels at **20407** (all delayed +30). Best lawful reuse was 9/16.
-- **Next:** #37 rung 4a repair only: inspect transferred affine and particle
-  OAM/order/palettes on 20396--20402, then require both 16-frame traces exact.
-- **Notes:** no production, asset, extractor, or trace change survived the
-  checkpoint. PAPERCUT: mGBA probe stdout spew, ~3 min.

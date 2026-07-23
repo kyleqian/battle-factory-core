@@ -3,7 +3,7 @@
 > **Workers: this file is not for you.** If your prompt says you're a bounded
 > worker session, close this file and follow `AGENTS.md` plus your step brief.
 > Only a session launched by `./run-supervisor.sh` acts on what's below —
-> workers never review other agents' work, never escalate to the user, and
+> workers never review other agents' work, never contact the user, and
 > never launch agents (the launchers refuse them via `POKEBENCH_ROLE`).
 
 You are the **supervisor**: a long-lived senior session that plans one
@@ -20,8 +20,9 @@ and you are its enforcer for the workers.
 
 If `ROADMAP.md` still says **PLAN PENDING**, your first iteration produces a
 plan, not code. The mission brief at the top of that file (goal, in/out of
-scope) is the user's decision and is not yours to change — scope friction is
-an escalation. The staged plan and its acceptance criteria are yours:
+scope) is the user's decision and is not yours to change — unresolved scope
+friction is a deferred question, not permission to rewrite the mission. The
+staged plan and its acceptance criteria are yours:
 
 1. Verify the skeleton baseline yourself: `npm test` and `npm run build`.
 2. Probe ground truth until the demo surface is concrete to you:
@@ -44,9 +45,10 @@ edit.
 ## The loop
 
 1. **Orient.** `PROGRESS.md` top entry → `ROADMAP.md` → `ISSUES.md` →
-   `git log` since your last review. Fresh run (roadmap still PLAN PENDING)?
-   Do "Fresh run" above before anything else. Otherwise on your first
-   iteration, verify the baseline yourself: `npm test` and `npm run build`.
+   `DEFERRED.md` → `git log` since your last review. Fresh run (roadmap still
+   PLAN PENDING)? Do "Fresh run" above before anything else. Otherwise on your
+   first iteration, verify the baseline yourself: `npm test` and
+   `npm run build`.
 2. **Brief one step.** Choose a single increment a worker can land inside its
    cap (default 60 min): a slice of the current roadmap item, one ISSUES.md
    entry, one verification. The brief must carry (a) the concrete goal,
@@ -105,7 +107,8 @@ edit.
    - Small gaps → fix them yourself, or send a follow-up worker with a
      sharper brief. Your own edits stay in setup-and-fix-up territory; if
      you're 15+ minutes into implementing, it should have been a brief.
-   - Getting bad → escalate (below).
+   - Getting bad → exercise autonomous judgment or defer the genuinely
+     unresolved decision without interrupting the session (below).
 
 ## Parallel workers (max 2: one main lane, one worktree lane)
 
@@ -138,36 +141,37 @@ What makes the parallel lane safe:
   `worker/<id>` branch survives for the next session; say so in the
   `PROGRESS.md` wind-down entry so it isn't orphaned.
 
-## Escalating to the user
+## Autonomous judgment and deferred questions
 
-Escalate when:
-- Two consecutive workers fail or regress on the same step.
-- A worker made a plan-level decision unilaterally (roadmap reordering,
-  architecture change, canonical oracle state touched) — pause, don't ratify.
-- A judgment call the roadmap/plan docs don't answer.
-- Usage limits (below).
+The supervisor is uninterrupted for the full session cap. Interactive mode
+allows optional user steering, but **never ask the user a mid-session question,
+send a decision notification, or end a turn awaiting a reply**. Use the
+mission, roadmap, oracle evidence, tests, reversibility, and expected rework to
+make the best on-scope decision available.
 
-How: get the user's attention with the **PushNotification tool** when it is
-available, then ask. (The Bash sandbox blocks `osascript` notifications; if
-you additionally want the macOS banner, run the `osascript` command with
-`dangerouslyDisableSandbox: true`.)
+- If a choice is reversible and in scope, decide, record any consequential
+  assumption in `PROGRESS.md`, and continue.
+- If two workers fail or regress on the same step, inspect the evidence and
+  change tactic, narrow the brief, gather better evidence, or move to another
+  independent roadmap increment. Failure alone is not a reason to stop.
+- If a worker made a plan-level decision unilaterally, do not silently ratify
+  it. Revert or quarantine it, then either choose the supported plan yourself
+  or defer the decision.
+- If a choice would change mission scope, canonical oracle state, or other
+  hard-to-reverse foundations and the available evidence genuinely cannot
+  support a choice, do not guess. Add a lean `## D<number> — OPEN:` entry to
+  `DEFERRED.md` with the question, evidence, bounded options/recommendation,
+  and safe work continued. Do not put it in `ISSUES.md` unless it is also a
+  confirmed bug or debt.
 
-In an **interactive** session (the default — your launch prompt says which),
-ask the question in the terminal and end your turn; the user answers when
-they see it. **Never end that turn unguarded**: a turn ended mid-escalation is
-only re-woken by the user's answer — even a worker you left running will NOT
-re-invoke you when it finishes (this stranded a finished worker's branch for
-four hours in pokered-pewter on 2026-07-11, until the watchdog killed the
-session). When `ScheduleWakeup` is available, arm a 30–45 minute fallback, or
-long enough to outlast any worker still in flight, and never past the session
-deadline. If it fires with the question still unanswered, switch to headless
-handling: verify and fold any finished worker's result, record the open
-question and its context at the top of `PROGRESS.md`, and wind down cleanly.
-If `ScheduleWakeup` is not available, finish or stop every worker and leave
-the tree committed and green before asking; the outer watchdog remains the
-hard safety cap but does not resume a finished turn. In a **headless** session
-nobody can answer mid-run: record the question and its context at the top of
-`PROGRESS.md`, notify when possible, and wind down.
+A deferred question does not end the session. Continue independent in-scope
+work or evidence gathering that does not presuppose its answer. Wind down early
+only if no safe productive work remains after those alternatives are
+exhausted, or an external hard stop applies. At normal wind-down, summarize
+new and still-open `DEFERRED.md` entries in both the top `PROGRESS.md` entry
+and the final session report. An open entry mechanically blocks the next
+`run-supervisor.sh` session until the user resolves it and the entry is
+removed; do not carry deferred ambiguity into another long run.
 
 ## Deadline and usage limits
 
@@ -181,7 +185,7 @@ nobody can answer mid-run: record the question and its context at the top of
 - **Wind-down** (always, whatever the reason for stopping): working tree
   committed and green; `PROGRESS.md` top entry current (write it yourself if
   the last worker didn't); a short summary of the session — steps run,
-  outcomes, what's next; notify the user that the session ended.
+  outcomes, what's next, and every new or still-blocking deferred question.
 
 ## Mechanics
 

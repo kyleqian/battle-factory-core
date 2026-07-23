@@ -1,3 +1,17 @@
+## 278 — Supervisor accepted (ISSUES #37 rung 4a): **GREEN EVIDENCE CHECKPOINT**
+
+- **State:** renderer remains at accepted rung-3 baseline; independent Tier-1
+  **1011/1011** and build (**5.400 MB**) are green. Worker also reconfirmed all
+  six frozen traces exact, verifier **17/17**, and compositor **5/5**.
+- **Did:** accepted the direct boundary and rejected the non-exact prototype:
+  MAGBY allocates at 20389, first owns pixels at **20391**, and the healthbox
+  first owns pixels at **20407** (all delayed +30). Best lawful reuse was 9/16.
+- **Next:** #37 rung 4a repair only: inspect transferred affine and particle
+  OAM/order/palettes on 20396--20402, then require both 16-frame traces exact.
+- **Notes:** no production, asset, extractor, or trace change survived the
+  checkpoint. PAPERCUT: mGBA probe stdout spew, ~3 min.
+
+---
 ## 277 — Bounded worker (ISSUES #37 rung 4a): **CHARACTERIZED, NOT LANDED**
 
 - **State:** no renderer change committed. Direct canonical OAM/VRAM probe

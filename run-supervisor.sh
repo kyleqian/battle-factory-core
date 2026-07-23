@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 # Supervised work session for THIS run: a long-lived supervisor plans one
 # increment at a time, delegates it to a capped disposable worker, verifies
-# the result, and continues, fixes, or escalates — per SUPERVISOR.md. The
+# the result, and continues, fixes, or defers — per SUPERVISOR.md. The
 # default remains the original Claude flow (claude-fable-5 supervisor,
 # claude-sonnet-5 workers). Pass --provider codex for the Codex profile
 # (gpt-5.6-sol/high supervisor; Codex-only worker routing defaults to
 # gpt-5.6-sol/medium and may choose Terra/high for bounded probes or Sol/high
 # for architecture-heavy/repair work).
 #
-# By default the supervisor runs in the interactive CLI: it works mostly
-# autonomously, but when it needs a decision it asks in the
-# terminal. A watchdog still hard-caps the session (default 6h) as the safety
-# net — SUPERVISOR.md tells it to wind down cleanly before the deadline.
+# By default the supervisor runs in the interactive CLI, autonomously through
+# the full session cap. The terminal remains available for optional user
+# steering, but the supervisor does not stop to solicit mid-session decisions.
+# A watchdog still hard-caps the session (default 6h) as the safety net —
+# SUPERVISOR.md tells it to wind down cleanly before the deadline.
 # Interactive Claude sessions start with Remote Control on, so you can follow
 # and steer them from claude.ai/code or the Claude mobile app. Codex sessions
 # use the Codex interactive CLI; --headless mode has no remote bridge.
@@ -48,6 +49,8 @@ Usage: ./run-supervisor.sh [options]
   -h, --help            show this help
 Environment overrides: SUPERVISOR_PROVIDER, SUPERVISOR_MODEL,
 SUPERVISOR_REASONING_EFFORT. Legacy MODEL remains supported.
+Exit 6 means DEFERRED.md has an unresolved question that must be resolved
+before another supervisor session can start.
 EOF
 }
 
@@ -85,6 +88,13 @@ fi
 if [[ ! "$PROVIDER" =~ ^(claude|codex)$ ]]; then
   echo "run-supervisor: unsupported provider '$PROVIDER' (expected claude or codex)" >&2
   exit 2
+fi
+if [[ "$PRINT_CONFIG" != "1" && -f DEFERRED.md ]] \
+    && grep -qE '^## D[0-9]+ .*OPEN:' DEFERRED.md; then
+  echo "run-supervisor: refusing to start — DEFERRED.md has unresolved user-level decisions:" >&2
+  grep -E '^## D[0-9]+ .*OPEN:' DEFERRED.md >&2
+  echo "Resolve and remove those entries before launching another long supervisor session." >&2
+  exit 6
 fi
 case "$PROVIDER" in
   claude)
@@ -166,22 +176,14 @@ DEADLINE_EPOCH=$(( $(date +%s) + CAP_SECONDS ))
 DEADLINE_HUMAN="$(date -r "$DEADLINE_EPOCH" '+%Y-%m-%d %H:%M' 2>/dev/null \
   || date -d "@$DEADLINE_EPOCH" '+%Y-%m-%d %H:%M')"
 
-if [[ "$HEADLESS" == "1" && "$PROVIDER" == "claude" ]]; then
-  MODE_NOTE="This session is HEADLESS: nobody can answer mid-run — escalation means notify, record the question in PROGRESS.md, and wind down."
-elif [[ "$HEADLESS" == "1" ]]; then
-  MODE_NOTE="This session is HEADLESS: nobody can answer mid-run — escalation means record the question in PROGRESS.md and wind down."
-elif [[ "$PROVIDER" == "claude" ]]; then
-  MODE_NOTE="This session is INTERACTIVE: when you escalate, ask in this terminal and end your turn; the user will answer when they see the notification."
-else
-  MODE_NOTE="This session is INTERACTIVE: before escalating, leave the tree resumable and record the question in PROGRESS.md; then ask in this terminal."
-fi
+CONTINUITY_NOTE="Run autonomously through the full session cap while useful in-scope work remains. Do not ask the user questions mid-session, send decision notifications, or end a turn awaiting a reply. Exercise your best evidence-backed judgment for reversible on-scope choices. If a material choice genuinely cannot be made safely, record it in DEFERRED.md, continue independent safe work, and summarize it only at wind-down."
 
 if [[ "$PROVIDER" == "codex" ]]; then
   DELEGATION_NOTE="For Codex workers, choose the worker tier by task: Terra/high only for bounded probes, extraction, or mechanical docs; Sol/medium for normal implementation; Sol/high for cross-layer architecture or the first evidence-driven repair after a failed worker. Invoke ./tools/run-subagent.sh directly in the execution tool without shell backgrounding, '&', or nohup. The execution tool yields a managed cell/session while the launcher runs; retain that handle and wait on it. Never relaunch merely because the first call yielded."
 else
   DELEGATION_NOTE="Launch ./tools/run-subagent.sh in the background — foreground Bash times out long before a worker finishes."
 fi
-PROMPT="You are the supervisor for this run. Read SUPERVISOR.md and follow it exactly: plan one increment at a time, delegate it to a worker via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or escalate. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${MODE_NOTE}"
+PROMPT="You are the supervisor for this run. Read SUPERVISOR.md and follow it exactly: plan one increment at a time, delegate it to a worker via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or defer a genuinely unresolved decision without interrupting the session. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${CONTINUITY_NOTE}"
 
 if [[ "$HEADLESS" == "1" ]]; then
   mkdir -p "$(dirname "$SUPERVISOR_LOG")"
