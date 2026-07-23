@@ -256,23 +256,25 @@ if [[ "$IS_WORKTREE" == "1" ]]; then
   fi
 fi
 
-# The harness exposes two canonical snapshots: Battle Scene OFF for main/side
-# work and Battle Scene ON for the isolated animation lane. Each service is
-# stateless per request and serializes its own trace requests.
+# The supervisor owns the shared oracle services. Workers only validate their
+# selected lane profile, so worker process-group teardown cannot affect oracle
+# lifecycle.
 source tools/resolve-harness-root.sh
 source tools/oracle-profiles.sh
 HARNESS_ROOT="$(pokebench_resolve_harness_root)"
 export POKEBENCH_HARNESS_ROOT="$HARNESS_ROOT"
 MAIN_ORACLE_URL="${POKEBENCH_MAIN_ORACLE_URL:-http://127.0.0.1:8014}"
 ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"
-pokebench_ensure_oracle_profile "$HARNESS_ROOT" battle-scene-off "$MAIN_ORACLE_URL" /tmp/emerald-factory-oracle-off.log
-pokebench_ensure_oracle_profile "$HARNESS_ROOT" battle-scene-on "$ANIMATION_ORACLE_URL" /tmp/emerald-factory-oracle-on.log
 if [[ "$LANE" == "animation" ]]; then
   ORACLE_URL="$ANIMATION_ORACLE_URL"
   ORACLE_PROFILE="battle-scene-on"
 else
   ORACLE_URL="$MAIN_ORACLE_URL"
   ORACLE_PROFILE="battle-scene-off"
+fi
+if ! pokebench_require_oracle_profile "$ORACLE_PROFILE" "$ORACLE_URL"; then
+  echo "run-subagent: the supervisor/harness must start the selected oracle before launching workers" >&2
+  exit 1
 fi
 
 # Claude Code auto-memory is shared by repo path. Preserve the original worker

@@ -7,6 +7,23 @@ pokebench_oracle_profile() {
     | python3 -c 'import json,sys; print(json.load(sys.stdin).get("profile",""))' 2>/dev/null
 }
 
+pokebench_require_oracle_profile() {
+  local profile="$1"
+  local url="$2"
+  local actual=""
+
+  actual="$(pokebench_oracle_profile "$url" || true)"
+  if [[ "$actual" == "$profile" ]]; then
+    return 0
+  fi
+  if curl -sf "$url/health" >/dev/null 2>&1; then
+    echo "oracle profile mismatch at $url: expected '$profile', got '${actual:-unreported}'" >&2
+  else
+    echo "required $profile oracle is unavailable at $url" >&2
+  fi
+  return 1
+}
+
 pokebench_ensure_oracle_profile() {
   local harness_root="$1"
   local profile="$2"
@@ -27,15 +44,7 @@ pokebench_ensure_oracle_profile() {
   echo "Starting $profile oracle at $url ..."
   local port="${url##*:}"
   port="${port%%/*}"
-  local tools_dir
-  tools_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  local oracle_pid
-  if ! oracle_pid="$(python3 "$tools_dir/start-oracle-service.py" \
-      "$harness_root" "$profile" "$port" "$log_file")"; then
-    echo "$profile oracle failed to launch; see $log_file" >&2
-    return 1
-  fi
-  echo "Started $profile oracle as lifecycle-independent pid $oracle_pid"
+  PORT="$port" "$harness_root/run-oracle.sh" --profile "$profile" >"$log_file" 2>&1 &
   for _ in $(seq 1 90); do
     actual="$(pokebench_oracle_profile "$url" || true)"
     [[ "$actual" == "$profile" ]] && return 0

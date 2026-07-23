@@ -44,6 +44,8 @@ This is the stable ownership contract; current state remains in `PROGRESS.md`.
 
 - Main defines shared interfaces before another lane depends on them.
 - Scene mode may change presentation timing, never logical outcomes or RNG.
+- The supervisor/solo launcher owns oracle lifecycle; workers only validate
+  their selected profile and never start or stop a shared oracle.
 - Side and animation use separate worktrees and do not edit `PROGRESS.md` or
   `ISSUES.md`; the supervisor verifies and merges them one at a time.
 - Parallel capacity is optional: launch only bounded, independent work.

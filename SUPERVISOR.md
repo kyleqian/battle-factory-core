@@ -128,7 +128,9 @@ The launcher exposes:
 
 The launcher enforces one worker per lane and three total. Side and animation
 each get a fresh `git worktree` under `.worktrees/`, their own branch and npm
-install. Each oracle is stateless per request and serializes its trace calls.
+install. The supervisor launcher starts both shared oracles; workers only
+validate their selected profile. Each oracle is stateless per request and
+serializes its trace calls.
 
 Parallelize only genuinely disjoint steps: different files and fixtures,
 neither depending on the other's unmerged interface work. The natural split
