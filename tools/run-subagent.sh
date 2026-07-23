@@ -445,11 +445,33 @@ if [[ -f "$AGENT_LOG" ]]; then
         | grep -qiE 'usage limit|rate.?limit'; then
       USAGE_STOPPED=1
     fi
-  elif tail -n 10 "$AGENT_LOG" "$CODEX_STDERR_LOG" 2>/dev/null \
-      | grep -v '"type":"rate_limit_event".*"status":"allowed"' \
-      | sed -E 's/--no-rate-limit//g' \
-      | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
-    USAGE_STOPPED=1
+  else
+    # Codex JSON events can embed arbitrary command output and project docs.
+    # Inspect only provider failure fields (plus explicit denied rate-limit
+    # events), then scan the separate unstructured stderr stream.
+    if tail -n 50 "$AGENT_LOG" 2>/dev/null \
+        | jq -Re '
+            fromjson?
+            |
+            select(
+              (
+                (.type == "error" or .type == "turn.failed")
+                and ((.message // .error.message // .error // "") | tostring
+                  | test("usage limit|rate.?limit|quota exceeded"; "i"))
+              )
+              or (
+                .type == "rate_limit_event"
+                and (.status // "") != "allowed"
+                and (.rate_limit.status // "") != "allowed"
+              )
+            )
+          ' >/dev/null 2>&1; then
+      USAGE_STOPPED=1
+    elif tail -n 20 "$CODEX_STDERR_LOG" 2>/dev/null \
+        | sed -E 's/--no-rate-limit//g' \
+        | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
+      USAGE_STOPPED=1
+    fi
   fi
 fi
 if [[ "$USAGE_STOPPED" == "1" ]]; then

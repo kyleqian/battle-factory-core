@@ -20,7 +20,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** implementation commit `a24b857`; first FIRE_PUNCH text pixels
   are `M`/`MA` at 21168/21169, while the cast animation begins at 21170.
   No absolute-tick lookup, framebuffer asset, per-frame table, RGB/coordinate
-  fitting, trace branch, or excluded capture.
+  fitting, trace branch, or excluded capture. Supervisor independently
+  reverified every number above. A second false usage-limit digest matched
+  project text inside a successful structured command event; detection now
+  parses only provider failure events, with both positive and negative logs
+  checked.
 
 ---
 ## 286 — Supervisor wind-down (S7 turn 16 rung 2a): **CANONICAL GREEN; +30 REGISTER-RACE FRAME PARKED AS #38**

@@ -17,11 +17,24 @@ rl.on('line', (line) => {
   try {
     ev = JSON.parse(line);
   } catch {
+    // Only unstructured provider output is safe to scan wholesale. Structured
+    // events often contain command output or project docs that merely discuss
+    // usage-limit handling.
     if (/usage limit|rate.?limit|quota exceeded/i.test(line)) sawUsageLimit = true;
     return;
   }
 
-  if (/usage limit|rate.?limit|quota exceeded/i.test(JSON.stringify(ev))) {
+  const providerFailure =
+    ev.type === 'error' || ev.type === 'turn.failed'
+      ? String(ev.error?.message ?? ev.message ?? ev.error ?? '')
+      : '';
+  if (/usage limit|rate.?limit|quota exceeded/i.test(providerFailure)) {
+    sawUsageLimit = true;
+  } else if (
+    ev.type === 'rate_limit_event'
+    && ev.status !== 'allowed'
+    && ev.rate_limit?.status !== 'allowed'
+  ) {
     sawUsageLimit = true;
   }
   if (ev.type === 'item.completed') {
