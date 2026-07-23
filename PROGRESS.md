@@ -4,9 +4,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 274 — Bounded worker (ISSUES #37 rung 1): **CLOSED — raw split exit OBJ composition**
+## 274 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED — raw split exit OBJ composition**
 
-- **State:** canonical and delayed dense party traces are both **200/200 exact**;
+- **State:** independently accepted: canonical and delayed dense party traces are both **200/200 exact**;
   the 20302/20332 raw field boundary remains exact. Tier-1 **1009/1009**,
   build green, SEND OUT verifier **17/17**, party compositor **5/5**.
 - **Did:** extracted 33 indexed OBJ tiles, raw BGR555 palette and transferred OAM
@@ -15,8 +15,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   transparency too, fixing the five status-backing pixels and ball palette family.
 - **Next:** #37 rung 2 only: battle fade + `Go! MAGBY!` text, after fresh dense
   ground truth. Do not reopen rung 1.
-- **Notes:** Tier-1 pins lower-index-wins OBJ ordering. PAPERCUT: direct mGBA
-  probe emits megabytes of diagnostics, ~2 min.
+- **Notes:** supervisor reran both dense traces, Tier-1 **1009/1009**, build
+  (**5.398 MB**), verifier **17/17**, and compositor **5/5**. Asset audit
+  confirms only indexed OBJ/OAM/palette state. Tier-1 pins lower-index-wins
+  ordering. PAPERCUT: direct mGBA probe emits megabytes of diagnostics, ~2 min.
 
 ---
 ## 273 — Supervisor accepted (ISSUES #37 rung 1): **GREEN EVIDENCE CHECKPOINT — live OBJ transfer not yet safely wired**
