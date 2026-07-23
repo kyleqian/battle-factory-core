@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 275 — Bounded worker (ISSUES #37 rung 2): **GREEN — field fade + complete MAGBY text only**
+
+- **State:** fresh canonical/delayed dense rung-2 traces are both **43/43
+  exact** through their honest text-only endpoint; frozen party traces remain
+  **200/200**. Tier-1 **1010/1010**, build green.
+- **Did:** reused the 20302 indexed PPU field asset and real BLDY 15→0 ramp,
+  then rendered the blank message box's `Go! MAGBY!` with the existing font,
+  all relative to `sendOutElapsed`. Fresh oracle+OAM evidence puts the first
+  visible closed-ball pixels at 20345 (not RAM's 20343), so traces end 20344
+  (+30 delayed).
+- **Next:** #37 rung 3 only begins at visible Brendan/ball ownership; do not
+  extend this text-only renderer into trainer, ball, MAGBY, or healthbox work.
+- **Notes:** full Tier-1/build green; verifier **17/17**, party compositor
+  **5/5**. PAPERCUT: direct dense oracle inspection needs a custom in-memory
+  trace override because the frozen ground-truth trace is capture-capped, ~2 min.
+
+---
 ## 274 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED — raw split exit OBJ composition**
 
 - **State:** independently accepted: canonical and delayed dense party traces are both **200/200 exact**;
@@ -40,26 +57,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   reverted; verifier **17/17** and party compositor **5/5** remain green.
 
 ---
-## 272 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED FIELD BOUNDARY — GREEN**
-
-- **State:** independently accepted: canonical and delayed party traces are **193/200**; 20302 and
-  delayed 20332 are byte-exact. The only red frames are party residuals:
-  5px at 20248/50/58/60/62 and 273px at 20253/54 (delayed +30). Tier-1 is
-  **1008/1008**; build is **5.393 MB** (<6 MB); verifier **17/17** and
-  party compositor **5/5**.
-- **Did:** regenerated the 73KB raw indexed 20302 asset from direct PPU
-  state (BG size-1 maps are 0x1000); wired it only at SEND OUT's
-  press-relative battle-fade boundary; removed the stale faint-frame/
-  `fadeTurn15BattleFirstFrame` approximation. Captured OAM affine matrices
-  from transferred OAM, added affine compositing, and corrected mGBA's
-  packed-RGB darken transfer.
-- **Next:** #37 rung 1 has only the seven named party residuals left; do not
-  reopen the exact 20302 field boundary. Later SEND OUT animation rungs stay
-  separately scoped.
-- **Notes:** supervisor reran both dense compares, Tier-1 **1008/1008**, build,
-  verifier **17/17**, and compositor **5/5**; asset audit confirms indexed
-  PPU inputs only. Direct probe exits 139 after valid JSON. Initial raw integration
-  exposed a 1551px MURKROW shift (bbox 123,0–196,71); transferred affine
-  geometry resolved it to 0px without a coordinate patch.
 
 ---

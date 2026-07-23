@@ -35,6 +35,24 @@ Use a new *ground-truth-only* capture list with those ranges (split each
 range under 256 captures) before wiring each rung. Do not add a red app
 trace: the existing canonical and delayed party traces stay 143/143.
 
+### Rung-2 closure (2026-07-22)
+
+A fresh oracle-only every-frame run over canonical **20302--20345** confirms
+the field's BLDY sequence is 15 through 0 at 20302--17, followed by an
+unchanged blank message box through 20329. `Go! MAGBY!` changes at 20330,
+charges its silent space as a FAST-speed character, and is complete at 20339.
+The direct OAM probe calls the new slot live at 20343--44, but fresh
+framebuffer deltas are zero there. At **20345** it becomes a visible affine
+closed ball (111px, bbox 18,62--29,73; tile 405/palette 6, first x2/y2
+translation). The honest text-only compare endpoint is therefore 20344, not
+the RAM boundary; this is rung 3's ball/trainer handoff, not text work.
+
+`turn15-sendout-rung2.json` and its 30-frame delayed counterpart each capture
+43 frames through that endpoint and both compare **43/43 exact**. The engine
+uses no global trace tick: `PartySelectState.sendOutElapsed` selects the
+transferred field's BLDY coefficient and the existing font primitives type
+the text. Brendan, ball, materialization, and healthbox remain rung 3+.
+
 ## RAM/OAM/VRAM facts
 
 - The confirmation leaves party ownership after 20267; no live party-list

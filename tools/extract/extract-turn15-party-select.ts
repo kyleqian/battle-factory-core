@@ -1,7 +1,5 @@
-// Dev-time trace builder for the live forced-switch party-menu slice.
-// It intentionally writes traces only: full-frame oracle captures are never
-// production assets. The selected checkpoints are the currently verified
-// settled states; see ISSUES #37 for the transition/icon-animation remainder.
+// Dev-time trace builder for the #37 rung-2 text-only window. It intentionally
+// writes traces only: full-frame oracle captures are never production assets.
 import { readFileSync, writeFileSync } from "node:fs";
 
 type Segment = { frames: number; buttons?: string[] };
@@ -9,23 +7,6 @@ type Trace = { segments: Segment[]; captureFrames: number[] };
 
 const source = JSON.parse(readFileSync("tools/compare/traces/turn15-fly-strike.json", "utf8")) as Trace;
 const DISMISS_TICK = 19991;
-
-// 0-diff checkpoints from the live state renderer, relative to the A edge.
-// This is deliberately sparse rather than a false claim that the unresolved
-// fades/OAM animation are exact.
-const SETTLED_OFFSETS = [
-  80, 81, 82, 83, 84,
-  124, 125, 126, 127, 128, 129, 138, 139, 140, 141, 142, 143, 144,
-  153, 185, 186, 187, 188, 189, 198, 199, 213, 214, 222, 223, 224,
-  225, 226, 227, 228, 237, 238, 239, 240, 241, 242, 243, 244,
-  252, 253, 254,
-  // RAM-derived OAM proof windows: ONIX selected at its +1/frame-1 hop
-  // plateau, then MAGBY selected at its own +1/frame-1 plateau.  These are
-  // press-relative, so the 30-frame delayed-dismiss trace exercises exactly
-  // the same compositor schedule rather than an absolute trace-tick table.
-  160, 161, 162, 163, 164, 165, 166, 167,
-  205, 206, 207, 208, 209, 210, 211, 212,
-];
 
 function delayedSegments(delay: number): Segment[] {
   const segments = source.segments.map((s) => ({ ...s, buttons: s.buttons ? [...s.buttons] : undefined }));
@@ -40,18 +21,20 @@ function delayedSegments(delay: number): Segment[] {
   throw new Error("could not locate the pre-dismiss idle segment");
 }
 
-function writeTrace(path: string, delay = 0): void {
-  const pressTick = DISMISS_TICK + delay;
+// Rung 2 deliberately ends one VBlank before Brendan owns visible pixels.
+// The RAM slot exists earlier, but a fresh dense oracle run establishes that
+// the first trainer pixel is 20345 (canonical), so 20302..20344 is the
+// complete text-only window.  Delaying the faint-message dismissal shifts
+// the entire sequence by the same amount without a trace-name branch.
+function writeRung2Trace(path: string, delay = 0): void {
+  const first = 20302 + delay;
   const trace: Trace = {
     segments: delayedSegments(delay),
-    // Oracle captures are keyed by frame but the app-side trace helper streams
-    // them in chronological order; keep the proof windows sorted after adding
-    // the off-sample OAM plateaus above.
-    captureFrames: SETTLED_OFFSETS.map((offset) => pressTick + offset).sort((a, b) => a - b),
+    captureFrames: Array.from({ length: 43 }, (_, i) => first + i),
   };
   writeFileSync(path, `${JSON.stringify(trace, null, 2)}\n`);
 }
 
-writeTrace("tools/compare/traces/turn15-party-select.json");
-writeTrace("tools/compare/traces/turn15-party-select-delayed.json", 30);
-console.log("wrote live party-select settled traces (canonical + 30-frame delayed dismiss)");
+writeRung2Trace("tools/compare/traces/turn15-sendout-rung2.json");
+writeRung2Trace("tools/compare/traces/turn15-sendout-rung2-delayed.json", 30);
+console.log("wrote SEND OUT rung-2 traces (canonical + 30-frame delayed dismiss)");

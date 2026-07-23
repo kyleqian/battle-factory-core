@@ -7,6 +7,16 @@ symptom, what's confirmed from the reference/oracle, and any leads.
 
 ## #37 — Turn-15 forced party menu: post-confirm SEND OUT remains
 
+**Rung 2 CLOSED 2026-07-22:** the confirmation-relative field compositor now
+uses the 20302 indexed PPU transfer with its directly observed BLDY sequence
+15→0, retains its blank message box, and types `Go! MAGBY!` at FAST speed.
+Fresh every-frame oracle capture plus direct OAM state establishes that the
+new slot at 20343--44 owns no pixels; its first visible 111px are the affine
+closed ball at 20345. Both canonical and delayed rung-2 traces stop at the
+preceding complete-text-only frame (43/43 exact). Rung 3 begins at that
+visible ball/trainer handoff; it must not assume RAM existence is visual
+ownership.
+
 **Rung 1 CLOSED 2026-07-22:** direct indexed exit OBJ composition now draws
 balls (OAM 6--9) before the live icons (3--5), then status (1--2), preserving
 same-priority lower-index wins and the existing press-relative OBJ fade. Both

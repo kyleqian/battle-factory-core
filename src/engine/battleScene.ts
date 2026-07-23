@@ -536,7 +536,7 @@ import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
 import partyExitObjAsset from "../assets/gen/turn15-party-exit-obj.json" with { type: "json" };
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
-import { partyMenuLayers, partySelectEntryPhase, partySendOutPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
@@ -11764,11 +11764,11 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
       return true;
     }
     if (phase === "black") return true;
-    // First visible field VBlank: compose the exact PPU transfer captured at
-    // the press-relative boundary, including its indexed BG/OBJ ownership,
-    // BGR555 palette RAM and mGBA BLDY transfer.  No screenshot or global
-    // tick is involved; subsequent send-out animation frames are later rungs.
-    drawMode0Ppu(fb, turn15FieldPpuAsset);
+    // The extracted mode-0 state supplies field/message-box ownership and
+    // unfaded palette RAM.  Only its real BLDY coefficient changes through
+    // this rung; both fade and text clocks are confirmation-relative.
+    drawMode0Ppu(fb, { ...turn15FieldPpuAsset, bldy: partySendOutBattleFadeBldy(party.sendOutElapsed) });
+    drawMessageTextLines(fb, PARTY_SENDOUT_GO_TEXT, "", partySendOutGoTextVisibleChars(party.sendOutElapsed));
     return true;
   }
   const phase = partySelectEntryPhase(party.elapsed);

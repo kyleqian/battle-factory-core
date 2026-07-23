@@ -77,6 +77,24 @@ export const PARTY_SENDOUT_BLACK_FRAMES = 39;
 export const PARTY_SENDOUT_FADE_OUT_START = PARTY_SENDOUT_SUBMENU_HOLD_FRAMES;
 export const PARTY_SENDOUT_BLACK_START = PARTY_SENDOUT_FADE_OUT_START + PARTY_SENDOUT_FADE_OUT_FRAMES;
 export const PARTY_SENDOUT_BATTLE_FADE_IN_START = PARTY_SENDOUT_BLACK_START + PARTY_SENDOUT_BLACK_FRAMES;
+/** First `Go! MAGBY!` glyph, after the field's palette has settled. */
+export const PARTY_SENDOUT_GO_TEXT_START = PARTY_SENDOUT_BATTLE_FADE_IN_START + 28;
+export const PARTY_SENDOUT_GO_TEXT = "Go! MAGBY!";
+
+/**
+ * The battle field begins at BLDY=15 and brightens one coefficient per
+ * rendered VBlank.  This is deliberately separate from the party fade:
+ * it is anchored to SEND OUT's confirmation edge and uses the transferred
+ * field PPU state as its palette source.
+ */
+export function partySendOutBattleFadeBldy(elapsed: number): number {
+  return Math.max(0, 15 - Math.max(0, elapsed - PARTY_SENDOUT_BATTLE_FADE_IN_START));
+}
+
+/** FAST text speed: one charged character per VBlank, including the space. */
+export function partySendOutGoTextVisibleChars(elapsed: number): number {
+  return Math.max(0, Math.min(PARTY_SENDOUT_GO_TEXT.length, elapsed - PARTY_SENDOUT_GO_TEXT_START + 1));
+}
 
 export function partySendOutPhase(elapsed: number): PartySendOutPhase {
   if (elapsed < PARTY_SENDOUT_FADE_OUT_START) return "submenuHold";
