@@ -1,3 +1,21 @@
+## 277 — Bounded worker (ISSUES #37 rung 4a): **CHARACTERIZED, NOT LANDED**
+
+- **State:** no renderer change committed. Direct canonical OAM/VRAM probe
+  confirms MAGBY's affine allocation at 20389 but first framebuffer ownership
+  at **20391**; the clean particle callback is already staggered there. The
+  forbidden player-healthbox boundary remains **20407** (delayed +30).
+- **Did:** tested a `sendOutElapsed`-anchored reuse of MAGBY's battle-back,
+  emerge/tint, BG ramp and clean particles. It reached 9/16 exact at best;
+  20396--20402 retain small, uncharacterized affine/particle residuals, so
+  the prototype and its traces were removed rather than curve-fit.
+- **Next:** rerun the direct probe narrowly over 20396--20402 with transferred
+  affine OAM plus particle OAM ordering/palette evidence before another rung-4a
+  implementation. Do not enter healthbox, clear, or menu work.
+- **Notes:** baseline restored clean before final verification. PAPERCUT:
+  direct OAM probing emits multi-megabyte mGBA diagnostics for a 4.8MB JSON,
+  ~3 min.
+
+---
 ## 276 — Supervisor accepted (ISSUES #37 rung 3): **GREEN — forced-switch player ball**
 
 - **State:** canonical/delayed rung-3 traces 46/46 exact; party 200/200 and

@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 280 — Codex supervised-run hardening: **GREEN**
+
+- **State:** game code and accepted rung-3 renderer are unchanged. Tier-1
+  **1011/1011**, build (**5.400 MB**), and deadline-helper tests **5/5** are
+  green.
+- **Did:** made Codex workers default to Sol/medium, added supervisor-directed
+  Sol/high escalation for cross-layer or failed repairs, enforced Codex caps
+  over the full process group, separated JSONL from stderr, fixed managed
+  launch instructions, and added clean-start/commit/clean-finish checks plus
+  Codex-only anti-overfit acceptance guardrails. Claude defaults and launch
+  behavior remain unchanged.
+- **Next:** resume #37 rung 4a under a Sol/high Codex supervisor. The authorized
+  repair qualifies for a Sol/high worker; ordinary later implementation should
+  return to Sol/medium.
+- **Notes:** keep the supervisor at Sol/high by default. Use xhigh only when a
+  new supervisor session itself starts on a repeatedly unresolved architectural
+  blocker, not as the standing default.
+
+---
 ## 279 — Supervisor wind-down (ISSUES #37 rung 4a): **GREEN, RETRY AUTHORIZED**
 
 - **State:** accepted rung-3 renderer is unchanged and the tree is clean.
@@ -34,21 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   OAM/order/palettes on 20396--20402, then require both 16-frame traces exact.
 - **Notes:** no production, asset, extractor, or trace change survived the
   checkpoint. PAPERCUT: mGBA probe stdout spew, ~3 min.
-
----
-## 277 — Bounded worker (ISSUES #37 rung 4a): **CHARACTERIZED, NOT LANDED**
-
-- **State:** no renderer change committed. Direct canonical OAM/VRAM probe
-  confirms MAGBY's affine allocation at 20389 but first framebuffer ownership
-  at **20391**; the clean particle callback is already staggered there. The
-  forbidden player-healthbox boundary remains **20407** (delayed +30).
-- **Did:** tested a `sendOutElapsed`-anchored reuse of MAGBY's battle-back,
-  emerge/tint, BG ramp and clean particles. It reached 9/16 exact at best;
-  20396--20402 retain small, uncharacterized affine/particle residuals, so
-  the prototype and its traces were removed rather than curve-fit.
-- **Next:** rerun the direct probe narrowly over 20396--20402 with transferred
-  affine OAM plus particle OAM ordering/palette evidence before another rung-4a
-  implementation. Do not enter healthbox, clear, or menu work.
-- **Notes:** baseline restored clean before final verification. PAPERCUT:
-  direct OAM probing emits multi-megabyte mGBA diagnostics for a 4.8MB JSON,
-  ~3 min.

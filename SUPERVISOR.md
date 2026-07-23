@@ -57,12 +57,32 @@ edit.
    before launching the worker** (AGENTS.md's commit discipline applies to
    you too; any session can be killed at any moment, and the next one resumes
    from git alone).
-3. **Delegate.** Launch the worker **in the background** — a foreground Bash
-   call times out at 10 minutes; workers run up to 60:
-   `./tools/run-subagent.sh "<brief>"` (`--help` lists configuration flags).
+   **Codex provider only — choose the worker tier explicitly:**
+   - `gpt-5.6-terra` / `high`: bounded read-heavy probes, deterministic
+     extraction, or mechanical documentation with little architecture
+     judgment.
+   - `gpt-5.6-sol` / `medium` (launcher default): normal implementation and
+     verification work.
+   - `gpt-5.6-sol` / `high`: cross-layer architecture, ambiguous ownership/
+     timing evidence, or the first sharply scoped repair after a failed
+     worker.
+   Keep the Codex supervisor itself at Sol/high by default. Start a future
+   supervisor at xhigh only when the session begins on a repeatedly stuck,
+   architecture-level problem; do not spend xhigh throughout an ordinary
+   long session. This routing does not apply to Claude—the established Claude
+   model and launch flow stay unchanged.
+3. **Delegate.** `./tools/run-subagent.sh "<brief>"` (`--help` lists
+   configuration flags). Provider-specific launch mechanics are load-bearing:
+   - **Claude supervisor:** launch it in the background; a foreground Bash
+     call times out long before a worker finishes.
+   - **Codex supervisor:** invoke it directly in the execution tool with no
+     shell `&`, `nohup`, or detached wrapper. The tool yields a managed
+     cell/session while the launcher runs; retain that handle and wait on it.
+     A yielded first call means the worker is running, not that launch failed.
    The launcher starts a fresh, bounded worker with unattended full-workspace
    permissions and the run's selected configuration. Its stdout is a compact
-   digest; the full event stream is in the log it names.
+   digest; the full event stream is in the log it names. Codex event JSONL and
+   CLI stderr are separate sibling logs so the JSONL remains machine-parseable.
    Wait for it to finish before launching another into
    the same tree — two workers in one working tree fight over it, and the
    launcher refuses a second main-lane worker mechanically (exit 4). If —
@@ -167,8 +187,9 @@ nobody can answer mid-run: record the question and its context at the top of
 
 - Workers start with **fresh context** every time. All they inherit is git
   history and `PROGRESS.md` — your brief plus those must be self-sufficient.
-- Worker transcripts: each run prints its JSONL log path. `grep`/`tail` that
-  log during review instead of guessing what happened.
+- Worker transcripts: each run prints its JSONL log path. Codex also prints a
+  sibling stderr-log path. `grep`/`tail` those during review instead of
+  guessing what happened.
 - The launcher owns execution, authentication, permissions, and session
   isolation. Treat every worker as disposable: durable project
   state belongs in git and `PROGRESS.md`, with the raw JSONL log retained for

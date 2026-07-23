@@ -4,7 +4,9 @@
 # the result, and continues, fixes, or escalates — per SUPERVISOR.md. The
 # default remains the original Claude flow (claude-fable-5 supervisor,
 # claude-sonnet-5 workers). Pass --provider codex for the Codex profile
-# (gpt-5.6-sol/high supervisor, gpt-5.6-terra/high workers).
+# (gpt-5.6-sol/high supervisor; Codex-only worker routing defaults to
+# gpt-5.6-sol/medium and may choose Terra/high for bounded probes or Sol/high
+# for architecture-heavy/repair work).
 #
 # By default the supervisor runs in the interactive CLI: it works mostly
 # autonomously, but when it needs a decision it asks in the
@@ -19,7 +21,7 @@
 #   ./run-supervisor.sh               # interactive supervisor, 6h hard cap
 #   ./run-supervisor.sh -c 4          # different cap          (--cap-hours 4)
 #   ./run-supervisor.sh --headless    # unattended, stream view like run-agent.sh
-#   ./run-supervisor.sh --provider codex  # Sol/high supervisor + Terra/high workers
+#   ./run-supervisor.sh --provider codex  # Sol/high supervisor + tiered Codex workers
 #   ./run-supervisor.sh -m NAME       # override the selected profile's model
 #   ./run-supervisor.sh -e EFFORT     # Codex reasoning effort override
 #   ./run-supervisor.sh -h            # help
@@ -170,7 +172,12 @@ else
   MODE_NOTE="This session is INTERACTIVE: before escalating, leave the tree resumable and record the question in PROGRESS.md; then ask in this terminal."
 fi
 
-PROMPT="You are the supervisor for this run. Read SUPERVISOR.md and follow it exactly: plan one increment at a time, delegate it to a worker via ./tools/run-subagent.sh (launched in the background — foreground Bash times out long before a worker finishes), verify each result yourself, and continue, fix, or escalate. Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${MODE_NOTE}"
+if [[ "$PROVIDER" == "codex" ]]; then
+  DELEGATION_NOTE="For Codex workers, choose the worker tier by task: Terra/high only for bounded probes, extraction, or mechanical docs; Sol/medium for normal implementation; Sol/high for cross-layer architecture or the first evidence-driven repair after a failed worker. Invoke ./tools/run-subagent.sh directly in the execution tool without shell backgrounding, '&', or nohup. The execution tool yields a managed cell/session while the launcher runs; retain that handle and wait on it. Never relaunch merely because the first call yielded."
+else
+  DELEGATION_NOTE="Launch ./tools/run-subagent.sh in the background — foreground Bash times out long before a worker finishes."
+fi
+PROMPT="You are the supervisor for this run. Read SUPERVISOR.md and follow it exactly: plan one increment at a time, delegate it to a worker via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or escalate. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${MODE_NOTE}"
 
 if [[ "$HEADLESS" == "1" ]]; then
   mkdir -p "$(dirname "$SUPERVISOR_LOG")"

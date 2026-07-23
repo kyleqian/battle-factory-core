@@ -3,7 +3,7 @@
 #
 # Launches one fresh headless worker. The default remains the original Claude
 # worker (claude-sonnet-5); a Codex supervisor automatically selects the Codex
-# worker profile (gpt-5.6-terra at high effort). The transcript is summarized
+# worker profile (gpt-5.6-sol at medium effort). The transcript is summarized
 # to a fixed-size handoff and retained in the log file named below.
 # Killing a worker at any point is safe —
 # workers follow AGENTS.md's commit-often discipline, so the next step resumes
@@ -14,7 +14,7 @@
 #     -c, --cap-minutes N   hard cap in minutes (default 60)
 #     -p, --provider NAME   claude (default) or codex
 #     -m, --model NAME      worker model (provider default)
-#     -e, --effort EFFORT   Codex reasoning effort (default high)
+#     -e, --effort EFFORT   Codex reasoning effort (default medium)
 #     -w, --worktree        run the worker in a fresh git worktree on its own
 #                           branch (the parallel lane; see SUPERVISOR.md)
 #         --log FILE        provider event log path
@@ -54,7 +54,7 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -c, --cap-minutes N   hard cap in minutes (default 60)
   -p, --provider NAME   claude (default) or codex
   -m, --model NAME      worker model (provider default)
-  -e, --effort EFFORT   Codex reasoning effort (default high)
+  -e, --effort EFFORT   Codex reasoning effort (default medium)
   -w, --worktree        run in a fresh git worktree on its own branch (parallel
                         lane: own npm install + dedicated oracle port; worker
                         must not touch shared docs; supervisor merges after
@@ -68,6 +68,7 @@ Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the other).
 Exit 4 means the requested lane already has a live worker (max 2 concurrent:
 one main-tree, one worktree).
+Exit 5 means a Codex worker violated the clean/committed postflight contract.
 EOF
 }
 
@@ -127,8 +128,8 @@ case "$PROVIDER" in
     command -v claude >/dev/null 2>&1 || { echo "run-subagent: claude CLI not found on PATH" >&2; exit 127; }
     ;;
   codex)
-    MODEL="${MODEL:-gpt-5.6-terra}"
-    REASONING_EFFORT="${REASONING_EFFORT:-high}"
+    MODEL="${MODEL:-gpt-5.6-sol}"
+    REASONING_EFFORT="${REASONING_EFFORT:-medium}"
     if [[ ! "$REASONING_EFFORT" =~ ^(none|low|medium|high|xhigh|max|ultra)$ ]]; then
       echo "run-subagent: unsupported reasoning effort '$REASONING_EFFORT'" >&2
       exit 2
@@ -147,6 +148,14 @@ if [[ -z "$AGENT_LOG" ]]; then
   else
     CODEX_LOG_ROOT="${POKEBENCH_CODEX_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
     AGENT_LOG="$CODEX_LOG_ROOT/workers/worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
+  fi
+fi
+CODEX_STDERR_LOG=""
+if [[ "$PROVIDER" == "codex" ]]; then
+  if [[ "$AGENT_LOG" == *.jsonl ]]; then
+    CODEX_STDERR_LOG="${AGENT_LOG%.jsonl}.stderr.log"
+  else
+    CODEX_STDERR_LOG="${AGENT_LOG}.stderr.log"
   fi
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
@@ -192,6 +201,18 @@ trap cleanup EXIT
 WT_PATH=""
 WT_BRANCH=""
 WT_BASE=""
+CODEX_ACCEPTANCE_GUARDRAILS=""
+if [[ "$PROVIDER" == "codex" ]]; then
+  CODEX_ACCEPTANCE_GUARDRAILS="
+
+Codex-specific acceptance guardrails: never satisfy dynamic pixel acceptance
+with per-tick oracle screenshots, absolute-tick framebuffer lookup, baked
+interactive sprites disguised as chrome, coordinate/RGB fitting, or by thinning
+an existing trace to matching captures. If exact live behavior cannot fit,
+commit only a clean evidence checkpoint or honest partial and record the
+precisely bounded remainder."
+fi
+
 if [[ "$WORKTREE" == "1" ]]; then
   WT_ID="wt-$(date +%Y%m%d-%H%M%S)"
   WT_BRANCH="worker/$WT_ID"
@@ -261,6 +282,7 @@ You are in a git worktree on branch ${WT_BRANCH}; a sibling worker may be active
 
 Your assigned step (from the supervisor):
 ${BRIEF}
+${CODEX_ACCEPTANCE_GUARDRAILS}
 
 Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message instead of improvising a different plan. Before finishing: npm test and npm run build green, work committed on ${WT_BRANCH}.
 
@@ -270,6 +292,7 @@ else
 
 Your assigned step (from the supervisor):
 ${BRIEF}
+${CODEX_ACCEPTANCE_GUARDRAILS}
 
 Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message and in PROGRESS.md instead of improvising a different plan. Before finishing: npm test and npm run build green, work committed, PROGRESS.md updated.
 
@@ -280,13 +303,20 @@ CAP_SECONDS=$(( CAP_MINUTES * 60 ))
 if [[ "$PROVIDER" == "claude" ]]; then
   echo "worker: $MODEL · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
 else
-  echo "worker: $MODEL/$REASONING_EFFORT · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
+  echo "worker: $MODEL/$REASONING_EFFORT · cap ${CAP_MINUTES}min · raw JSONL: $AGENT_LOG · stderr: $CODEX_STDERR_LOG"
 fi
 
 WORK_DIR="$(pwd)"
 if [[ "$WORKTREE" == "1" ]]; then WORK_DIR="$WT_PATH"; fi
 
 if [[ "$PROVIDER" == "codex" ]]; then
+  CODEX_START_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
+  CODEX_START_DIRTY="$(git -C "$WORK_DIR" status --porcelain=v1)"
+  if [[ -n "$CODEX_START_DIRTY" ]]; then
+    echo "run-subagent: refusing to launch Codex worker from a dirty $LANE lane:" >&2
+    echo "$CODEX_START_DIRTY" >&2
+    exit 5
+  fi
   # Attribute commits in either lane without changing persistent git config.
   source tools/codex-git-attribution.sh
   codex_git_attribution_enable "$WORK_DIR" "$MODEL"
@@ -308,11 +338,14 @@ else
   (
     cd "$WORK_DIR"
     export POKEBENCH_ROLE=worker POKEBENCH_ORACLE_URL="$ORACLE_URL"
-    exec codex exec --json \
-      --model "$MODEL" \
-      -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
-      --dangerously-bypass-approvals-and-sandbox "$PROMPT" </dev/null
-  ) >> "$AGENT_LOG" 2>&1 &
+    exec python3 tools/run-codex-worker-with-deadline.py \
+      "$CAP_SECONDS" \
+      "run-subagent: ${CAP_MINUTES}min cap reached — stopping Codex worker process group" -- \
+      codex exec --json \
+        --model "$MODEL" \
+        -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
+        --dangerously-bypass-approvals-and-sandbox "$PROMPT" </dev/null
+  ) >> "$AGENT_LOG" 2>> "$CODEX_STDERR_LOG" &
 fi
 agent_pid=$!
 echo "$$ $agent_pid" > "$LANE_FILE"
@@ -320,20 +353,38 @@ echo "$$ $agent_pid" > "$LANE_FILE"
 # be orphaned when the worker finishes early and keep the launcher's
 # stdout/stderr pipes open for the rest of the cap (a reader waiting for EOF
 # blocks that whole time).
-( trap 'kill "${wd_sleep:-}" 2>/dev/null; exit 0' TERM
-  sleep "$CAP_SECONDS" & wd_sleep=$!
-  wait "$wd_sleep" || exit 0
-  echo "run-subagent: ${CAP_MINUTES}min cap reached — stopping worker"
-  kill -TERM "$agent_pid" 2>/dev/null
-  sleep 15 & wd_sleep=$!
-  wait "$wd_sleep" || exit 0
-  kill -KILL "$agent_pid" 2>/dev/null ) &
-watchdog_pid=$!
+watchdog_pid=""
+if [[ "$PROVIDER" == "claude" ]]; then
+  ( trap 'kill "${wd_sleep:-}" 2>/dev/null; exit 0' TERM
+    sleep "$CAP_SECONDS" & wd_sleep=$!
+    wait "$wd_sleep" || exit 0
+    echo "run-subagent: ${CAP_MINUTES}min cap reached — stopping worker"
+    kill -TERM "$agent_pid" 2>/dev/null
+    sleep 15 & wd_sleep=$!
+    wait "$wd_sleep" || exit 0
+    kill -KILL "$agent_pid" 2>/dev/null ) &
+  watchdog_pid=$!
+fi
 
 status=0
 wait "$agent_pid" || status=$?
-kill "$watchdog_pid" 2>/dev/null || true
-wait "$watchdog_pid" 2>/dev/null || true
+if [[ -n "$watchdog_pid" ]]; then
+  kill "$watchdog_pid" 2>/dev/null || true
+  wait "$watchdog_pid" 2>/dev/null || true
+fi
+if [[ "$PROVIDER" == "codex" ]]; then
+  CODEX_END_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
+  CODEX_END_DIRTY="$(git -C "$WORK_DIR" status --porcelain=v1)"
+  if [[ "$CODEX_END_HEAD" == "$CODEX_START_HEAD" ]]; then
+    echo "run-subagent: Codex worker produced no commit" >&2
+    if [[ "$status" -eq 0 ]]; then status=5; fi
+  fi
+  if [[ -n "$CODEX_END_DIRTY" ]]; then
+    echo "run-subagent: Codex worker left uncommitted changes:" >&2
+    echo "$CODEX_END_DIRTY" >&2
+    if [[ "$status" -eq 0 ]]; then status=5; fi
+  fi
+fi
 # Digest the transcript for the supervisor (streamed live before the
 # no-process-substitution change; post-hoc works the same for callers).
 if [[ -f "$AGENT_LOG" ]]; then
@@ -341,6 +392,9 @@ if [[ -f "$AGENT_LOG" ]]; then
     node tools/stream-summary.mjs < "$AGENT_LOG" || true
   else
     node tools/codex-stream-summary.mjs < "$AGENT_LOG" || true
+    if [[ -s "$CODEX_STDERR_LOG" ]]; then
+      echo "Codex stderr log: $CODEX_STDERR_LOG"
+    fi
   fi
 fi
 
@@ -387,7 +441,8 @@ if [[ -f "$AGENT_LOG" ]]; then
         | grep -qiE 'usage limit|rate.?limit'; then
       USAGE_STOPPED=1
     fi
-  elif tail -n 10 "$AGENT_LOG" | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
+  elif tail -n 10 "$AGENT_LOG" "$CODEX_STDERR_LOG" 2>/dev/null \
+      | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
     USAGE_STOPPED=1
   fi
 fi
@@ -416,7 +471,9 @@ if [[ "$marker_epoch" =~ ^[0-9]+$ ]] && (( marker_epoch >= LAUNCH_EPOCH )); then
   exit 42
 fi
 # Turn authentication failures into a pointed hint instead of a mystery exit 1.
-if [[ "$status" -ne 0 && -f "$AGENT_LOG" ]] && grep -qiE 'not logged in|authentication required|unauthorized|401' "$AGENT_LOG"; then
+if [[ "$status" -ne 0 && -f "$AGENT_LOG" ]] \
+    && grep -qiE 'not logged in|authentication required|unauthorized|401' \
+      "$AGENT_LOG" ${CODEX_STDERR_LOG:+"$CODEX_STDERR_LOG"}; then
   if [[ "$PROVIDER" == "claude" ]]; then
     echo "run-subagent: worker exited unauthenticated — this launch was probably sandboxed. Relaunch with the Bash tool's dangerouslyDisableSandbox: true (see the header comment)." >&2
   else

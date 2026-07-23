@@ -19,9 +19,10 @@ Per entry:
   Deadline wind-down required the supervisor to interrupt the PTY manually.
 - **Hits:** 1.
 - **Cost each:** ~24 min of unattended session budget.
-- **Workaround:** monitor launcher elapsed time independently and interrupt
-  the PTY/process group when it exceeds the declared cap; investigate why
-  the deadline wrapper did not reap this worker.
+- **Fixed 2026-07-22:** Codex workers now run under a dedicated headless
+  deadline wrapper in a fresh process group. Timeout or cancellation sends
+  TERM, waits 15 seconds, then KILLs the whole group. Claude's established
+  launcher path is unchanged.
 
 ## Dense oracle boundary inspection needs an ad hoc capture override (2026-07-22)
 
