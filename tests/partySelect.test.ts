@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
+import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_ACTION_MENU_START, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_BLANK_MESSAGE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
 import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 
 describe("forced turn-15 party select", () => {
@@ -88,6 +88,20 @@ describe("forced turn-15 party select", () => {
     expect(partySendOutHealthboxDx(183)).toBe(5);
     expect(partySendOutHealthboxDx(184)).toBe(0);
     expect(partySendOutHealthboxDx(240)).toBe(0);
+  });
+
+  it("hands the completed send-out through a six-frame blank into a freshly anchored action menu", () => {
+    expect(PARTY_SENDOUT_BLANK_MESSAGE_START).toBe(305);
+    expect(PARTY_SENDOUT_ACTION_MENU_START).toBe(311);
+    expect(partySendOutPhase(304)).toBe("battleFadeIn");
+    expect(partySendOutPhase(305)).toBe("blankMessage");
+    expect(partySendOutPhase(310)).toBe("blankMessage");
+    expect(partySendOutPhase(311)).toBe("actionMenu");
+    expect(partySendOutMenuBounceTick(311)).toBe(1748);
+    expect(partySendOutMenuBounceTick(312)).toBe(1749);
+    // Delaying the confirmation moves the absolute boundary, never this clock.
+    expect(20246 + PARTY_SENDOUT_BLANK_MESSAGE_START + 30).toBe(20581);
+    expect(20246 + PARTY_SENDOUT_ACTION_MENU_START + 30).toBe(20587);
   });
 
   it("uses the RAM-derived 30/31 ONIX hop and 7/8 full-icon frame cadence", () => {

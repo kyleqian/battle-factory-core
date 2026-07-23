@@ -67,7 +67,7 @@ export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
  * then holds generated black until the battle palette's first fade-in step.
  * Every boundary is relative to the confirming A edge (not battle time).
  */
-export type PartySendOutPhase = "submenuHold" | "fadingOut" | "black" | "battleFadeIn";
+export type PartySendOutPhase = "submenuHold" | "fadingOut" | "black" | "battleFadeIn" | "blankMessage" | "actionMenu";
 // The A edge is observed on the following rendered VBlank: elapsed 0 is
 // canonical frame 20246 (the last held submenu frame), so the fade itself
 // begins at elapsed 1 / canonical 20247.
@@ -98,6 +98,18 @@ export const PARTY_SENDOUT_HEALTHBOX_SLIDE_START = PARTY_SENDOUT_HEALTHBOX_VISIB
 export const PARTY_SENDOUT_HEALTHBOX_SLIDE_SPAN = 22;
 export const PARTY_SENDOUT_HEALTHBOX_START_DX = 110;
 export const PARTY_SENDOUT_HEALTHBOX_STEP = 5;
+/**
+ * The completed send-out clears its text for six rendered VBlanks, then
+ * atomically hands control to the normal action menu.  Both boundaries are
+ * measured from the SEND OUT confirmation edge: canonical elapsed 305 is
+ * frame 20551 and delayed-confirm elapsed 305 is frame 20581.
+ */
+export const PARTY_SENDOUT_BLANK_MESSAGE_START = 305;
+export const PARTY_SENDOUT_ACTION_MENU_START = PARTY_SENDOUT_BLANK_MESSAGE_START + 6;
+/** Re-anchor the freshly-created action-menu bounce task onto its original generator. */
+export function partySendOutMenuBounceTick(elapsed: number): number {
+  return elapsed - PARTY_SENDOUT_ACTION_MENU_START + 1748;
+}
 
 export type PartySendOutBallPhase = "none" | "closed" | "spin" | "landed";
 
@@ -148,7 +160,9 @@ export function partySendOutPhase(elapsed: number): PartySendOutPhase {
   if (elapsed < PARTY_SENDOUT_FADE_OUT_START) return "submenuHold";
   if (elapsed < PARTY_SENDOUT_BLACK_START) return "fadingOut";
   if (elapsed < PARTY_SENDOUT_BATTLE_FADE_IN_START) return "black";
-  return "battleFadeIn";
+  if (elapsed < PARTY_SENDOUT_BLANK_MESSAGE_START) return "battleFadeIn";
+  if (elapsed < PARTY_SENDOUT_ACTION_MENU_START) return "blankMessage";
+  return "actionMenu";
 }
 
 /** The list is usable only after its press-relative fade-in has settled. */

@@ -537,7 +537,7 @@ import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
 import partyExitObjAsset from "../assets/gen/turn15-party-exit-obj.json" with { type: "json" };
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
-import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
@@ -7254,6 +7254,35 @@ function drawTurn5SitrusSettledMenuChrome(fb: Uint8Array): void {
 }
 
 /**
+ * The action-menu chrome is shared across battlers, but its left-hand prompt
+ * is formatted from the active battler's name.  Reuse the accepted chrome
+ * and the accepted blank-window backing, replacing the complete second text
+ * row (window tile row 17) before drawing MAGBY's prompt with the normal
+ * battle font.  This is window-template composition, not a captured frame
+ * lookup: the same semantic 14-tile text row is valid for every player name.
+ */
+function drawTurn15MagbySettledMenuChrome(fb: Uint8Array): void {
+  drawTurn5SitrusSettledMenuChrome(fb);
+  const TEXT_ROW_X = 8;
+  const TEXT_ROW_Y = 136;
+  const TEXT_ROW_WIDTH = 14 * 8;
+  const TEXT_ROW_HEIGHT = 2 * 8;
+  for (let py = 0; py < TEXT_ROW_HEIGHT; py += 1) {
+    for (let px = 0; px < TEXT_ROW_WIDTH; px += 1) {
+      const x = TEXT_ROW_X + px;
+      const y = TEXT_ROW_Y + py;
+      const i = (y * menuIdleBlank.width + x) * 3;
+      setPixel(fb, x, y, {
+        r: menuIdleBlank.pixels[i]!,
+        g: menuIdleBlank.pixels[i + 1]!,
+        b: menuIdleBlank.pixels[i + 2]!,
+      });
+    }
+  }
+  drawText(fb, font, charmap, "MAGBY do?", TEXT_ROW_X + 1, LINE2_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+}
+
+/**
  * S7 slice N (docs/turn6-notes.md §5): the earliest tick turn 6's own FIGHT
  * submenu reopen A-press can register, past `fightSubmenu.confirmElapsed`
  * (turn 5's own real confirm, 5959) - same "past this resolution's own
@@ -11881,7 +11910,7 @@ function turn15ReleaseFieldPalette(logicalTick: number): number[][] {
   ));
 }
 
-function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number): void {
+function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, y2Extra: number = 0): void {
   if (logicalTick <= 16) {
     drawPlayerSideAffineMaterialize(fb, magbyBackSprite.tileset, FORCED_SWITCH_MAGBY_CORNER, logicalTick, 1, PLAYER_BALL_OPEN_VISIBLE_BOTTOM);
   } else {
@@ -11896,7 +11925,7 @@ function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number): voi
       256,
       tintColor,
       animation.tint.coeff,
-      0,
+      y2Extra,
       animation.x2,
       PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
     );
@@ -11912,12 +11941,12 @@ function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number): voi
   );
 }
 
-function drawTurn15MagbyHealthbox(fb: Uint8Array, dx: number): void {
+function drawTurn15MagbyHealthbox(fb: Uint8Array, dx: number, dy: number = 0): void {
   const { width, height, pixels } = magbyPlayerHealthboxContent;
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
       const color = pixels[py * width + px];
-      if (color) setPixel(fb, PLAYER_HEALTHBOX_FRAME_ORIGIN.x + dx + px, PLAYER_HEALTHBOX_FRAME_ORIGIN.y + py, color);
+      if (color) setPixel(fb, PLAYER_HEALTHBOX_FRAME_ORIGIN.x + dx + px, PLAYER_HEALTHBOX_FRAME_ORIGIN.y + dy + py, color);
     }
   }
 }
@@ -11949,16 +11978,23 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
     // unfaded palette RAM.  Fade, text, and release clocks all remain
     // confirmation-relative.
     const releaseTick = partySendOutReleaseLogicalTick(party.sendOutElapsed);
+    const bounce = phase === "actionMenu"
+      ? menuIdleBounce(partySendOutMenuBounceTick(party.sendOutElapsed))
+      : { onixY2: 0, healthboxY2: 0 };
     drawMode0Ppu(fb, {
       ...turn15FieldPpuAsset,
       bldy: partySendOutBattleFadeBldy(party.sendOutElapsed),
       paletteBgr555: releaseTick === null ? turn15FieldPpuAsset.paletteBgr555 : turn15ReleaseFieldPalette(releaseTick),
     });
     drawTurn15ForcedSwitchBall(fb, party.sendOutElapsed);
-    if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick);
+    if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2);
     const healthboxDx = partySendOutHealthboxDx(party.sendOutElapsed);
-    if (healthboxDx !== null) drawTurn15MagbyHealthbox(fb, healthboxDx);
-    drawMessageTextLines(fb, PARTY_SENDOUT_GO_TEXT, "", partySendOutGoTextVisibleChars(party.sendOutElapsed));
+    if (healthboxDx !== null) drawTurn15MagbyHealthbox(fb, healthboxDx, bounce.healthboxY2);
+    if (phase === "actionMenu") {
+      drawTurn15MagbySettledMenuChrome(fb);
+    } else if (phase !== "blankMessage") {
+      drawMessageTextLines(fb, PARTY_SENDOUT_GO_TEXT, "", partySendOutGoTextVisibleChars(party.sendOutElapsed));
+    }
     return true;
   }
   const phase = partySelectEntryPhase(party.elapsed);
