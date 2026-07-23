@@ -78,6 +78,7 @@ import {
   entryStep,
   INITIAL_BATTLE_ROOM_STATE,
   msgboxVisual,
+  opponentSetupExtraRngSteps,
   SETTLED_SCENE_ELAPSED,
   WARP_FADE_TO_ROOM_ELAPSED,
   type BattleRoomState,
@@ -166,6 +167,12 @@ export interface EngineState {
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
 const BATTLE_SCENE_HANDOFF_ELAPSED = SCENE_TICK0 - 843;
+/**
+ * CB2_InitBattleInternal sets gMain.inBattle after the field transition has
+ * handed off to battleScene. RAM pins the final per-VBlank call to scene age
+ * 5; subsequent frontier-battle frames advance RNG only on explicit calls.
+ */
+export const BATTLE_IN_BATTLE_FIRST_ELAPSED = 5;
 
 export function createInitialState(): EngineState {
   return {
@@ -769,6 +776,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn17MenuRedrawElapsed,
     };
     battleScene = advanceBattleScene(battleScene);
+    if (
+      rngMode === "vblank" &&
+      battleScene.elapsed >= BATTLE_IN_BATTLE_FIRST_ELAPSED
+    ) {
+      rngMode = "frontierBattle";
+    }
     return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, postwin, rngMode, rngValue };
   }
 
@@ -781,9 +794,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // battleRoom.ts's §8.3 doc for the close-latency derivation.
     if (battleRoom.phase === "msgboxIdle" && newKeys.has("A")) {
       battleRoom = { phase: "msgboxClosing", elapsed: 0 };
-      rngMode = "frontierBattle";
     } else {
       battleRoom = advanceBattleRoom(battleRoom);
+      for (let i = 0; i < opponentSetupExtraRngSteps(battleRoom); i += 1) {
+        rngValue = advanceRngValue(rngValue);
+      }
       // S6 scene-assembly handoff (battleScene.ts doc): the CIRCLES_MEET
       // transition's own post-fade black hold ("settled" phase) is
       // indefinite on its own - this is the fixed elapsed count matching

@@ -79,6 +79,34 @@ export interface BattleRoomState {
 export const INITIAL_BATTLE_ROOM_STATE: BattleRoomState = { phase: "entering", elapsed: 0 };
 
 /**
+ * Extra, non-VBlank Random() calls made while the opponent party and battle
+ * transition are prepared. `settled.elapsed === 0` is the frame the first
+ * rejection loop completes; the later ages are source/RAM-relative to that
+ * state edge, not global trace ticks. The ordinary one-call-per-VBlank
+ * cadence is owned by core.ts and is deliberately excluded here.
+ *
+ * FillFactoryFrontierTrainerParty uses Random32() twice per rejected
+ * personality candidate, hence 28*2, 16*2, and 95*2 calls for this trace's
+ * three source-derived nature loops. GetSpecialBattleTransition contributes
+ * the final single call. See docs/battle-bringup-notes.md §3.1.
+ */
+export function opponentSetupExtraRngSteps(state: BattleRoomState): number {
+  if (state.phase !== "settled") return 0;
+  switch (state.elapsed) {
+    case 0:
+      return 28 * 2;
+    case 11:
+      return 16 * 2;
+    case 18:
+      return 95 * 2;
+    case 26:
+      return 1;
+    default:
+      return 0;
+  }
+}
+
+/**
  * prebattleRoom.ts's "warpFade" phase elapsed count at which core.ts hands
  * off to this module: WALK_TICKS (80) ticks of walking + this many ticks of
  * warpFade puts the render at trace tick 483+37 = 520, the ground-truth

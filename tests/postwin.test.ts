@@ -4,8 +4,14 @@ import {
   TURN17_LOSS_INPUT_READY_DELAY,
   turn17LossDismissEligible,
 } from "../src/engine/battleScene.ts";
-import { createInitialState, tick } from "../src/engine/core.ts";
+import {
+  BATTLE_IN_BATTLE_FIRST_ELAPSED,
+  createInitialState,
+  tick,
+  type EngineState,
+} from "../src/engine/core.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
+import { opponentSetupExtraRngSteps } from "../src/engine/battleRoom.ts";
 import {
   advancePostwin,
   INITIAL_POSTWIN_STATE,
@@ -116,6 +122,33 @@ describe("S8 Battle-1 postwin transition", () => {
     expect(postwinRngSteps(46)).toBe(3);
     expect(postwinRngSteps(105)).toBe(3);
     expect(postwinRngSteps(106)).toBe(4);
+  });
+
+  it("keeps VBlank ownership through battle setup, adds source-relative opponent draws, then freezes at CB2_InitBattleInternal", () => {
+    expect(opponentSetupExtraRngSteps({ phase: "settled", elapsed: 0 })).toBe(56);
+    expect(opponentSetupExtraRngSteps({ phase: "settled", elapsed: 11 })).toBe(32);
+    expect(opponentSetupExtraRngSteps({ phase: "settled", elapsed: 18 })).toBe(190);
+    expect(opponentSetupExtraRngSteps({ phase: "settled", elapsed: 26 })).toBe(1);
+    expect(opponentSetupExtraRngSteps({ phase: "settled", elapsed: 27 })).toBe(0);
+
+    const seed = 0x12345678;
+    let state: EngineState = {
+      ...createInitialState(),
+      battleScene: {
+        ...INITIAL_BATTLE_SCENE_STATE,
+        elapsed: BATTLE_IN_BATTLE_FIRST_ELAPSED - 2,
+      },
+    };
+    state = tick(state, new Set());
+    expect(state.battleScene!.elapsed).toBe(BATTLE_IN_BATTLE_FIRST_ELAPSED - 1);
+    expect(state.rngMode).toBe("vblank");
+    state = { ...state, rngValue: seed };
+    state = tick(state, new Set());
+    expect(state.battleScene!.elapsed).toBe(BATTLE_IN_BATTLE_FIRST_ELAPSED);
+    expect(state.rngValue).toBe(advanceRngValue(seed));
+    expect(state.rngMode).toBe("frontierBattle");
+    state = tick(state, new Set());
+    expect(state.rngValue).toBe(advanceRngValue(seed));
   });
 
   it("applies the RAM-pinned challenge/opponent bookkeeping at relative ages", () => {
