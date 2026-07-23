@@ -17,14 +17,22 @@ preceding complete-text-only frame (43/43 exact). Rung 3 begins at that
 visible ball/trainer handoff; it must not assume RAM existence is visual
 ownership.
 
+**Rung 3 CLOSED 2026-07-22:** fresh direct OAM/callback/VRAM evidence
+corrects the inherited label: slot 6/tile 405/palette 6 is the player Poké
+Ball, not Brendan; no Brendan sprite exists in this forced replacement.
+Its visible, confirmation-relative closed/spin path is exact in committed
+46-frame canonical (`20345--20390`) and delayed (`20375--20420`) traces.
+The first rendered MAGBY pixels are already at 20391 (not the dossier's old
+20400 label), so the traces stop before that ownership boundary. Rung 4 now
+starts with MAGBY/materialization/particles only.
+
 **Rung 1 CLOSED 2026-07-22:** direct indexed exit OBJ composition now draws
 balls (OAM 6--9) before the live icons (3--5), then status (1--2), preserving
 same-priority lower-index wins and the existing press-relative OBJ fade. Both
 canonical/delayed dense party traces are **200/200 exact**, including
 20302/20332. The screenshot-derived status backing is no longer allowed to
 claim transparent pixels during the fade. Do not reopen this raw field/menu
-transfer. The remaining post-SEND-OUT path continues at rung (3): Brendan
-throw/closed ball, (4) clean open-particles +
+transfer. The remaining post-SEND-OUT path continues at rung (4): clean open-particles +
 MAGBY materialize/tint, (5) create/populate/slide the 138/138 player
 healthbox, and (6) blank hold + re-anchored MAGBY action-menu bounce.
 

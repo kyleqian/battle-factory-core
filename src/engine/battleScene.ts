@@ -414,6 +414,7 @@ import {
   brendanThrowDx,
   playerThrowBallTopLeft,
   playerThrowBallSpin,
+  PLAYER_THROW_BALL_SPIN_START_TICK,
   playerSummaryFadeEva,
   playerSummaryIconExitDx,
   playerSummaryBarExitDx,
@@ -536,7 +537,7 @@ import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
 import partyExitObjAsset from "../assets/gen/turn15-party-exit-obj.json" with { type: "json" };
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
-import { partyMenuLayers, partySelectEntryPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
@@ -11741,6 +11742,74 @@ function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySele
   drawPartyMenuSourceMask(mask, PARTY_MENU_HELD_ITEM_MASK, 8, 8, 108, 52);
 }
 
+// PlayerHandleIntroTrainerBallThrow is not involved in the forced replacement:
+// the direct OAM/VRAM probe identifies tile 405/palette 6 as the Poké Ball.
+// This is the same SpriteCB_PlayerMonSendOut_1/_2 state machine used by the
+// initial ONIX send-out, re-anchored to SEND OUT and given this battler's
+// source-derived Y target.  The OAM transfer is one VBlank behind gSprites,
+// hence elapsed 100 displays callback-state zero.
+function forcedSwitchBallCenter(elapsed: number): { x: number; y: number } {
+  const local = elapsed - PARTY_SENDOUT_BALL_VISIBLE_START;
+  let remaining = 25;
+  let stepX = 490;
+  let stepY = 562;
+  let accumX = 0;
+  let accumY = 0;
+  let arc = 0;
+  let affineParam = 0;
+  let x2 = 0;
+  let y2 = 0;
+  // `gSineTable[0..255]` from src/trig.c.  The source table is intentionally
+  // not a runtime floating-point sine (two rows in this throw differ by a
+  // displayed pixel), so preserve the ROM's Q8.8 values before applying the
+  // source's arithmetic right shift.
+  const sine = [0,6,12,18,25,31,37,43,49,56,62,68,74,80,86,92,97,103,109,115,120,126,131,136,142,147,152,157,162,167,171,176,181,185,189,193,197,201,205,209,212,216,219,222,225,228,231,234,236,238,241,243,244,246,248,249,251,252,253,254,254,255,255,255,256,255,255,255,254,254,253,252,251,249,248,246,244,243,241,238,236,234,231,228,225,222,219,216,212,209,205,201,197,193,189,185,181,176,171,167,162,157,152,147,142,136,131,126,120,115,109,103,97,92,86,80,74,68,62,56,49,43,37,31,25,18,12,6,0,-6,-12,-18,-25,-31,-37,-43,-49,-56,-62,-68,-74,-80,-86,-92,-97,-103,-109,-115,-120,-126,-131,-136,-142,-147,-152,-157,-162,-167,-171,-176,-181,-185,-189,-193,-197,-201,-205,-209,-212,-216,-219,-222,-225,-228,-231,-234,-236,-238,-241,-243,-244,-246,-248,-249,-251,-252,-253,-254,-254,-255,-255,-255,-256,-255,-255,-255,-254,-254,-253,-252,-251,-249,-248,-246,-244,-243,-241,-238,-236,-234,-231,-228,-225,-222,-219,-216,-212,-209,-205,-201,-197,-193,-189,-185,-181,-176,-171,-167,-162,-157,-152,-147,-142,-136,-131,-126,-120,-115,-109,-103,-97,-92,-86,-80,-74,-68,-62,-56,-49,-43,-37,-31,-25,-18,-12,-6] as const;
+  const sin = (index: number): number => Math.floor((-30 * sine[index & 255]!) / 256);
+  for (let n = 1; n <= local; n += 1) {
+    const hi = (arc >> 8) & 255;
+    if (hi >= 35 && hi < 80) {
+      if ((affineParam & 0xff00) === 0) {
+        stepX = (Math.trunc(stepX / 3) & ~1);
+        stepY = (Math.trunc(stepY / 3) & ~1);
+      }
+      accumX += stepX;
+      accumY += stepY;
+      x2 = accumX >> 8;
+      y2 = (accumY >> 8);
+      arc += Math.trunc(1310 / 3);
+      y2 += sin(arc >> 8);
+      affineParam += 0x100;
+      if (((affineParam >> 8) % 3) === 0) remaining -= 1;
+      if (((arc >> 8) & 255) >= 80) {
+        stepX = (stepX * 3) & ~1;
+        stepY = (stepY * 3) & ~1;
+      }
+    } else if (remaining > 0) {
+      accumX += stepX;
+      accumY += stepY;
+      x2 = accumX >> 8;
+      y2 = (accumY >> 8);
+      remaining -= 1;
+      arc += 1310;
+      y2 += sin(arc >> 8);
+    }
+  }
+  return { x: 24 + x2, y: 68 + y2 };
+}
+
+/** Rung 3's last owned pixels are the closed, spinning player ball. */
+function drawTurn15ForcedSwitchBall(fb: Uint8Array, elapsed: number): void {
+  const phase = partySendOutBallPhase(elapsed);
+  if (phase !== "closed" && phase !== "spin") return;
+  const center = forcedSwitchBallCenter(elapsed);
+  if (phase === "closed") {
+    drawSpriteSheetAffineRotate(fb, BALL_CLOSED_TILESET, summaryBall.palette, center.x, center.y, 256, 0, 0, 256, 112);
+    return;
+  }
+  const spin = playerThrowBallSpin(PLAYER_THROW_BALL_SPIN_START_TICK + elapsed - PARTY_SENDOUT_BALL_SPIN_START);
+  if (spin) drawSpriteSheetAffineRotate(fb, BALL_CLOSED_TILESET, summaryBall.palette, center.x, center.y, spin.pa, spin.pb, spin.pc, spin.pd, 112);
+}
+
 const PARTY_ENTRY_FADE_OUT: FadeTiming = { startDelay: 0, startY: 0, targetY: 16 };
 const PARTY_ENTRY_FADE_IN: FadeTiming = { startDelay: 0, startY: 16, targetY: 0 };
 // SEND OUT clears its submenu one VBlank before UpdateNormalPaletteFade's
@@ -11768,6 +11837,7 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
     // unfaded palette RAM.  Only its real BLDY coefficient changes through
     // this rung; both fade and text clocks are confirmation-relative.
     drawMode0Ppu(fb, { ...turn15FieldPpuAsset, bldy: partySendOutBattleFadeBldy(party.sendOutElapsed) });
+    drawTurn15ForcedSwitchBall(fb, party.sendOutElapsed);
     drawMessageTextLines(fb, PARTY_SENDOUT_GO_TEXT, "", partySendOutGoTextVisibleChars(party.sendOutElapsed));
     return true;
   }

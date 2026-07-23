@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 276 — Bounded worker (ISSUES #37 rung 3): **GREEN — visible forced-switch player ball only**
+
+- **State:** canonical `turn15-sendout-rung3.json` is **46/46 exact**
+  (20345--20390); delayed counterpart is **46/46 exact** (20375--20420).
+  The frozen party traces remain 200/200 and rung-2 traces 43/43.
+- **Did:** corrected the dossier's owner conflict from fresh OAM/callback/
+  VRAM evidence: slot 6 tile 405/palette 6 is the player Poké Ball, not
+  Brendan (no Brendan sprite is live). Re-anchored the source ball callback
+  state machine to `sendOutElapsed`, including the ROM Q8.8 sine table; no
+  absolute trace branch, asset frame replay, or MAGBY/particle/healthbox pixel.
+- **Next:** #37 rung 4 only: MAGBY/materialization/particles. Rendered
+  MAGBY pixels already begin at 20391 (delayed 20421), so do not reopen this
+  ball-only endpoint or rely on the dossier's old 20400 label.
+- **Notes:** Tier-1 **1011/1011**, build (**5.400 MB**), verifier **17/17**,
+  compositor **5/5**, frozen party **200/200** each, and frozen rung-2
+  **43/43** each are all green. PAPERCUT: the direct OAM probe emits
+  multi-megabyte mGBA diagnostics despite producing valid JSON, ~2 min.
+
+---
 ## 275 — Supervisor accepted (ISSUES #37 rung 2): **GREEN — field fade + complete MAGBY text only**
 
 - **State:** independently accepted: canonical/delayed dense rung-2 traces are both **43/43
@@ -37,25 +56,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (**5.398 MB**), verifier **17/17**, and compositor **5/5**. Asset audit
   confirms only indexed OBJ/OAM/palette state. Tier-1 pins lower-index-wins
   ordering. PAPERCUT: direct mGBA probe emits megabytes of diagnostics, ~2 min.
-
----
-## 273 — Supervisor accepted (ISSUES #37 rung 1): **GREEN EVIDENCE CHECKPOINT — live OBJ transfer not yet safely wired**
-
-- **State:** independently verified accepted baseline: canonical/delayed party traces **193/200**; only
-  5px at 20248/50/58/60/62 and 273px at 20253/54 (delayed +30). The exact
-  20302/20332 raw field boundary remains untouched.
-- **Did:** fresh direct PPU probe confirms exit OAM stays static: status OBJ entries 1/2
-  (bank 0, tile 0) and party-ball entries 6--9 (bank 1, tiles 2--33). A raw
-  layer wiring experiment was reverted after it regressed 16 frames (451--642px):
-  OAM order proves balls sit behind the icon OAM while status sits in front,
-  so a single post-icon OBJ pass is structurally wrong.
-- **Next:** split raw exit OBJ composition at actual OAM priority/order (balls before
-  MAGBY/BAYLEEF icons; status after), then use indexed tile/palette state only. Preserve
-  the existing press-relative fade and do not change 20302.
-- **Notes:** supervisor reran Tier-1 **1008/1008**, build, and both dense
-  traces; direct hardware OAM independently confirms balls 6--9 behind
-  icons 3--5 and status 1--2 in front. The failed compositor was fully
-  reverted; verifier **17/17** and party compositor **5/5** remain green.
 
 ---
 

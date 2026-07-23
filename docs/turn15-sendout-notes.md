@@ -26,7 +26,7 @@ components, controller flags, active tasks, species/HP/PP and menu cursor.
 | --- | --- | --- |
 | 1 — leave party UI | confirm transient **20245-46**; party fade changes 20247-62; pure black **20263-20301** | `20245-20302` stride 1 |
 | 2 — battle field + text | first battle fade-in **20302** (`4da3117d37db`); fade advances through 20317; `Go! MAGBY!` handoff first changes at **20330** | `20302-20345` stride 1 |
-| 3 — Brendan + ball | trainer slot 6 appears RAM 20343 and throws 20344-88; player ball slot 6 is created **20389**, changes open pose at 20394, and reaches its release/open boundary 20400-01 | `20342-20406` stride 1 |
+| 3 — visible player ball | the player ball's slot 6 is allocated at 20343, but its first visible texel is **20345**; every ball-only frame ends **20390** and MAGBY already owns pixels at 20391 | `20345-20390` stride 1 (delayed +30) |
 | 4 — open/materialize | burst begins **20402**; growing/tinted MAGBY pixels start **20400**, continuous through 20430; materialize settles in visible pixels **20534-50** (`4f63d4696c93`) | `20400-20550` stride 1 |
 | 5 — healthbox | all three player components become visible at **20407**, slide x=268→158 by **-5 px/tick**, settle **20429**; populated full HP throughout | `20404-20431` stride 1 |
 | 6 — clear/menu | blank message **20551-56**, no flavor quip; first settled action-menu frame **20557** (`5950e7b3d8ba`), then bounce `5950 → 083f → 5950` at 20557-59 | `20534-20560` stride 1 |
@@ -63,9 +63,14 @@ the text. Brendan, ball, materialization, and healthbox remain rung 3+.
   `[15,20,10,20]` (FIRE_PUNCH/SMOKESCREEN/CONFUSE_RAY/SMOG); move cursor is
   **0** at settle. MURKROW remains 142/142. The two known AI bookkeeping
   steps remain 20550/20556; there is no send-out-animation RNG.
-- Brendan is slot 6, OBJ tile 405/palette 6, callback `0x8076205` during
-  the throw. Its live sheet hash is `aefecfa10ef3`. Its path starts
-  `(24,68)` and reaches `(72,126)` at 20387 before the ball handoff.
+- **Correction (fresh direct OAM/callback/VRAM + PNG evidence):** slot 6,
+  tile 405/palette 6, callback `0x8076205`, sheet `aefecfa10ef3`, and path
+  `(24,68)→(72,126)` are the **player Poké Ball**, not Brendan. No Brendan
+  sprite is instantiated in this forced-switch handoff. Software allocation
+  at 20343--44 owns no framebuffer texel; ball pixels begin 20345. The
+  player-mon slot and particle slots are already live earlier than their
+  visible ownership: the first rendered MAGBY pixels are 20391, so 20390 is
+  the honest ball-only endpoint (delayed: 20420).
 - The player mon lives in slot 5 (tile 341/palette 0; sheet
   `7ccf3b994cb4`). It begins with affine matrix 1 at scale 1638 on 20389,
   contracts to identity `(256,0,0,256)` by 20402, then changes into the

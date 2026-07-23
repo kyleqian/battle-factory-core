@@ -82,6 +82,26 @@ export const PARTY_SENDOUT_GO_TEXT_START = PARTY_SENDOUT_BATTLE_FADE_IN_START + 
 export const PARTY_SENDOUT_GO_TEXT = "Go! MAGBY!";
 
 /**
+ * The forced-switch ball is a player Poké Ball, not a Brendan sprite.  Its
+ * software slot is allocated two VBlanks before it first owns a displayed
+ * texel; these boundaries are deliberately confirmation-relative so the
+ * delayed SEND OUT trace reuses the same schedule.
+ */
+export const PARTY_SENDOUT_BALL_VISIBLE_START = PARTY_SENDOUT_BATTLE_FADE_IN_START + 43;
+export const PARTY_SENDOUT_BALL_SPIN_START = PARTY_SENDOUT_BALL_VISIBLE_START + 8;
+export const PARTY_SENDOUT_BALL_LAST_VISIBLE = PARTY_SENDOUT_BALL_VISIBLE_START + 43;
+
+export type PartySendOutBallPhase = "none" | "closed" | "spin" | "landed";
+
+/** Visible-only ownership; MAGBY and the particle system start after this rung. */
+export function partySendOutBallPhase(elapsed: number): PartySendOutBallPhase {
+  if (elapsed < PARTY_SENDOUT_BALL_VISIBLE_START) return "none";
+  if (elapsed < PARTY_SENDOUT_BALL_SPIN_START) return "closed";
+  if (elapsed <= PARTY_SENDOUT_BALL_LAST_VISIBLE) return "spin";
+  return "landed";
+}
+
+/**
  * The battle field begins at BLDY=15 and brightens one coefficient per
  * rendered VBlank.  This is deliberately separate from the party fade:
  * it is anchored to SEND OUT's confirmation edge and uses the transferred

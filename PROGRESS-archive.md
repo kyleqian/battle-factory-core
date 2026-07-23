@@ -1,3 +1,11 @@
+## 273 — Supervisor accepted (ISSUES #37 rung 1): **GREEN EVIDENCE CHECKPOINT**
+
+Archived from `PROGRESS.md`; direct OAM established balls 6--9 behind icons
+3--5 and status 1--2 in front. The later accepted 274 entry records its
+full raw-compositor closure.
+
+---
+
 ## 272 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED FIELD BOUNDARY — GREEN**
 
 - **State:** independently accepted: canonical and delayed party traces are **193/200**; 20302 and

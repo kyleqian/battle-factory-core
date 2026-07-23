@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
+import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
 import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 
 describe("forced turn-15 party select", () => {
@@ -60,6 +60,16 @@ describe("forced turn-15 party select", () => {
     expect(PARTY_SENDOUT_GO_TEXT_START).toBe(PARTY_SENDOUT_BATTLE_FADE_IN_START + 28);
     expect([partySendOutBattleFadeBldy(56), partySendOutBattleFadeBldy(57), partySendOutBattleFadeBldy(71), partySendOutBattleFadeBldy(72)]).toEqual([15, 14, 0, 0]);
     expect([partySendOutGoTextVisibleChars(83), partySendOutGoTextVisibleChars(84), partySendOutGoTextVisibleChars(93), partySendOutGoTextVisibleChars(94)]).toEqual([0, 1, 10, 10]);
+  });
+
+  it("keeps the forced-switch Poké Ball schedule confirmation-relative", () => {
+    expect(PARTY_SENDOUT_BALL_VISIBLE_START).toBe(99);
+    expect(PARTY_SENDOUT_BALL_SPIN_START).toBe(107);
+    expect(PARTY_SENDOUT_BALL_LAST_VISIBLE).toBe(142);
+    expect([partySendOutBallPhase(98), partySendOutBallPhase(99), partySendOutBallPhase(106), partySendOutBallPhase(107), partySendOutBallPhase(142), partySendOutBallPhase(143)]).toEqual(["none", "closed", "closed", "spin", "spin", "landed"]);
+    // A delayed A edge moves every visual boundary by the same 30 frames.
+    expect(20246 + PARTY_SENDOUT_BALL_VISIBLE_START + 30).toBe(20375);
+    expect(20246 + PARTY_SENDOUT_BALL_LAST_VISIBLE + 30).toBe(20418);
   });
 
   it("uses the RAM-derived 30/31 ONIX hop and 7/8 full-icon frame cadence", () => {
