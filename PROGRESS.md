@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 327 — S8 player-options popup handoff: **GREEN evidence checkpoint**
+
+- **State:** the next OFF mechanism is source/oracle pinned without runtime
+  changes. The popup first draws at options edge **+58** / tick **29760**
+  with `SUMMARY / SWAP / RECHOOSE` and default `SUMMARY`; the controller
+  input gate opens at **+56**.
+- **Did:** dense edge probes prove +55 B rejected, +56 A/B accepted, DOWN at
+  +79 with visible cursor response at +80, and SWAP A at +99. Documented the
+  exact `Swap_Task_HandleMenu`, summary, B-close, cursor, and enemy-screen
+  dispatch paths in `docs/factory-swap-player-options-popup-probe.md`.
+- **Next:** implement this single popup seam phase-relatively, preserving
+  `battle1-swap-player-options.json` **58/58** and the picker **101/101**.
+  Stop at the next distinct summary/B-close/enemy-screen presentation path.
+- **Notes:** supervisor corrected one evidence-table tick typo (`29782`, not
+  `29802`) against the probe's stated +80 offset. No deferred decision; S8
+  unique-UI gate 2 remains the only reset gate open.
+
+---
 ## 326 — S8 swap player mon-picture reveal: **GREEN — 58/58 exact**
 
 - **State:** `battle1-swap-player-options.json` is now **58/58 exact** from
@@ -41,21 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   loss and seventh-win endings. Do not resume the canonical Battle-2 march.
 - **Notes:** no deferred decision. S8 remains `[~]` with only unique-UI gate 2
   open. Keep all clocks phase-relative and preserve the two exact swap prefixes.
-
----
-## 324 — S8 swap action fade/slide: **GREEN — 36/36 exact**
-
-- **State:** `battle1-swap-player-options.json` now captures every frame from
-  the selected-player A edge through the completed CANCEL offscreen slide at
-  **36/36 exact**. Tier-1 is **1177/1177** and build passes (**5.546 MB**);
-  the prior player-picker trace remains **101/101 exact**.
-- **Did:** implemented the distinct BG2 action-text fade using exact GBA
-  5-bit arbitrary-target palette math, the source `tXIncrement=6` CANCEL OBJ
-  slide/window clear, and the selected ball's intervening 8-frame source
-  commands. All clocks are relative to the player-options phase edge.
-- **Next:** continue at edge **+36** (oracle tick **29738**), where the
-  mon-picture window begins as a 1-pixel aperture, then expands before the
-  settled player options popup. Preserve the 36/36 prefix.
-- **Notes:** first excluded frame 29738 differs by exactly 1 pixel in the new
-  mon-picture aperture. No screenshot assets, absolute ticks, battle/turn
-  render branches, trace thinning, controller changes, or Battle-2 work.

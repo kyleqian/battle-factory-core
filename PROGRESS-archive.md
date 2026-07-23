@@ -1,3 +1,21 @@
+## 324 — S8 swap action fade/slide: **GREEN — 36/36 exact**
+
+- **State:** `battle1-swap-player-options.json` now captures every frame from
+  the selected-player A edge through the completed CANCEL offscreen slide at
+  **36/36 exact**. Tier-1 is **1177/1177** and build passes (**5.546 MB**);
+  the prior player-picker trace remains **101/101 exact**.
+- **Did:** implemented the distinct BG2 action-text fade using exact GBA
+  5-bit arbitrary-target palette math, the source `tXIncrement=6` CANCEL OBJ
+  slide/window clear, and the selected ball's intervening 8-frame source
+  commands. All clocks are relative to the player-options phase edge.
+- **Next:** continue at edge **+36** (oracle tick **29738**), where the
+  mon-picture window begins as a 1-pixel aperture, then expands before the
+  settled player options popup. Preserve the 36/36 prefix.
+- **Notes:** first excluded frame 29738 differs by exactly 1 pixel in the new
+  mon-picture aperture. No screenshot assets, absolute ticks, battle/turn
+  render branches, trace thinning, controller changes, or Battle-2 work.
+
+---
 ## 323 — S8 swap player-options opening edge: **GREEN — 6/6 exact**
 
 - **State:** the live relative adapter now carries the player-options phase

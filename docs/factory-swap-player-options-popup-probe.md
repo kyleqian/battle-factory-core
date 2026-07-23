@@ -27,7 +27,7 @@ creates no acceptance trace or oracle-derived runtime asset.
 | 29757 | +55 | B is rejected: the dense baseline remains unchanged through the popup draw; source says the same `monPicAnimating` guard rejects A/DOWN here. |
 | 29758 | +56 | first input-ready edge. A is accepted (default `SUMMARY`); first changed presentation frame is 29764. B is accepted; its first changed presentation frame is 29759. |
 | 29760 | +58 | first visible popup draw: `SUMMARY`, `SWAP`, `RECHOOSE`; default cursor is `SUMMARY`. The immediately following frame, 29761, is the settled composed popup. A at this exact edge is also accepted, with the first response at 29766. |
-| 29781 | +79 | committed-prefix DOWN edge is accepted; its menu-cursor response first displays at 29802 (+80), selecting `SWAP`. |
+| 29781 | +79 | committed-prefix DOWN edge is accepted; its menu-cursor response first displays at 29782 (+80), selecting `SWAP`. |
 | 29801 | +99 | committed-prefix A edge is accepted on `SWAP`; 29802 is the first close/switch presentation frame. |
 
 The fixed output-window hashes that distinguish the initial draw are
