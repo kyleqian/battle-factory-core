@@ -144,7 +144,7 @@ esac
 if [[ "$PROVIDER" != "codex" ]]; then
   # A mixed-provider worker may inherit these from a Codex supervisor; ensure
   # attribution follows the worker that actually creates the commit.
-  unset POKEBENCH_COMMIT_GENERATOR POKEBENCH_COMMIT_MODEL
+  unset POKEBENCH_COMMIT_GENERATOR POKEBENCH_COMMIT_MODEL POKEBENCH_COMMIT_EFFORT
 fi
 if [[ -z "$AGENT_LOG" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
@@ -323,7 +323,7 @@ if [[ "$PROVIDER" == "codex" ]]; then
   fi
   # Attribute commits in either lane without changing persistent git config.
   source tools/codex-git-attribution.sh
-  codex_git_attribution_enable "$WORK_DIR" "$MODEL"
+  codex_git_attribution_enable "$WORK_DIR" "$MODEL" "$REASONING_EFFORT"
 fi
 
 # No process substitution here: sandboxed supervisor sessions can't open

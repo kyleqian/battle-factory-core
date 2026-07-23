@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 309 — Codex launcher attribution: **GREEN — mechanical and model-authoritative**
+
+- **State:** Codex supervisor/worker launchers now pass their resolved model
+  and effort to a Codex-only commit-message hook. Hook regression tests are
+  **3/3** in both this run and the factory template; Tier-1 remains
+  **1099/1099** and build passes (**5.497 MB**).
+- **Did:** made launcher metadata replace any guessed/manual attribution,
+  added the mechanical `Agent-effort` trailer, retained `unknown` fallbacks,
+  and removed attribution instructions from agent-facing Markdown. Claude
+  launches do not enable the hook and retain their provider-owned attribution.
+- **Next:** resume S8 at **32570** with trainer exit/ball/KABUTO materialize
+  and healthbox only; do not reopen exact Battle 2 send-out text.
+- **Notes:** `tools/test-codex-git-attribution.sh` proves exact replacement,
+  unknown fallback, and an untouched Claude commit. Shell syntax, resolved
+  launcher configs, Codex deadline tests (**3/3**), Tier-1, and build pass.
+
+---
 ## 308 — Supervisor-accepted S8 Battle 2 send-out text: **GREEN — 32531-32569 exact**
 
 - **State:** canonical **32531-32569 = 39/39 exact**, stopping one frame
@@ -41,27 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   changes, screenshot lookup, tick fitting, or dynamic thinning. Supervisor
   independently reviewed the source/RAM boundary ledger and reverified all
   1098 Tier-1 tests and build.
-
----
-## 306 — Supervisor-accepted S8 Battle 2 trainer intro: **GREEN — 32280-32530 exact**
-
-- **State:** canonical **32280-32530** is **251/251 exact**, every frame
-  captured from the first visible Battle 2 framebuffer through the held,
-  input-ready FISHERMAN JENSON intro before A at 32531. Battle 2 transition
-  remains **249/249** and Battle 1 scene assembly remains **256/256**.
-  Tier-1 is **1098/1098**; build passes (**5.496 MB**).
-- **Did:** preserved encounter identity across battle-scene advances and
-  parameterized the shared BattleIntroSlide3/reveal/settled trainer/text/
-  cursor renderer for Fisherman Jenson. Added `battle2-intro-dense.json`
-  with all 251 captures and three encounter-selection Tier-1 pins.
-- **Next:** resume at canonical A **32531**; reuse the shared send-out path
-  for JENSON/KABUTO, then ONIX and the composed Battle 2 action menu. S8
-  stays `[ ]`.
-- **Notes:** scene elapsed zero remains 32245, so the shared local visual
-  clock maps first visible 1075→32280. Text starts at local 1234 for both
-  encounters; JENSON's 37 characters create the visible cursor at 1272,
-  while its controller first accepts input at 1274. Cursor X remains
-  width-derived 123. No absolute trace-time branch/table, framebuffer
-  harvest, fitting, excluded capture, or thinning. Supervisor independently
-  reviewed identity preservation and shared renderer selection, then
-  reverified all three traces, all 1098 Tier-1 tests, and build.

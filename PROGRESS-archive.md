@@ -1,3 +1,27 @@
+## 306 — Supervisor-accepted S8 Battle 2 trainer intro: **GREEN — 32280-32530 exact**
+
+- **State:** canonical **32280-32530** is **251/251 exact**, every frame
+  captured from the first visible Battle 2 framebuffer through the held,
+  input-ready FISHERMAN JENSON intro before A at 32531. Battle 2 transition
+  remains **249/249** and Battle 1 scene assembly remains **256/256**.
+  Tier-1 is **1098/1098**; build passes (**5.496 MB**).
+- **Did:** preserved encounter identity across battle-scene advances and
+  parameterized the shared BattleIntroSlide3/reveal/settled trainer/text/
+  cursor renderer for Fisherman Jenson. Added `battle2-intro-dense.json`
+  with all 251 captures and three encounter-selection Tier-1 pins.
+- **Next:** resume at canonical A **32531**; reuse the shared send-out path
+  for JENSON/KABUTO, then ONIX and the composed Battle 2 action menu. S8
+  stays `[ ]`.
+- **Notes:** scene elapsed zero remains 32245, so the shared local visual
+  clock maps first visible 1075→32280. Text starts at local 1234 for both
+  encounters; JENSON's 37 characters create the visible cursor at 1272,
+  while its controller first accepts input at 1274. Cursor X remains
+  width-derived 123. No absolute trace-time branch/table, framebuffer
+  harvest, fitting, excluded capture, or thinning. Supervisor independently
+  reviewed identity preservation and shared renderer selection, then
+  reverified all three traces, all 1098 Tier-1 tests, and build.
+
+---
 ## 302 — Supervisor-accepted S8 postwin increment: **GREEN — NO through held guide message**
 
 - **State:** canonical **29601-30031** now reaches the settled/input-ready

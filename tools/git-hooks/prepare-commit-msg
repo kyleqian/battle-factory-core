@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Append machine-readable attribution to commits made inside a launched Codex
-# process. Human and other-provider commits do not enable this hook.
+# Mechanically normalize attribution for commits made inside a launched Codex
+# process. Human and other-provider launches do not enable this hook.
 set -euo pipefail
 
 message_file="${1:?commit message file is required}"
 [[ "${POKEBENCH_COMMIT_GENERATOR:-}" == "Codex" ]] || exit 0
 
 model="${POKEBENCH_COMMIT_MODEL:-unknown}"
-trailers=()
-if ! grep -qiE '^Generated-by:[[:space:]]*Codex[[:space:]]*$' "$message_file"; then
-  trailers+=(--trailer "Generated-by: Codex")
-fi
-if ! grep -qiE '^Agent-model:[[:space:]]*' "$message_file"; then
-  trailers+=(--trailer "Agent-model: $model")
-fi
+effort="${POKEBENCH_COMMIT_EFFORT:-unknown}"
 
-if (( ${#trailers[@]} )); then
-  git interpret-trailers --in-place "${trailers[@]}" "$message_file"
-fi
+# Launcher metadata is authoritative. Replace guessed/manual values instead of
+# preserving them, so the model never needs to reason about its own identity.
+git interpret-trailers --in-place \
+  --if-exists replace \
+  --if-missing add \
+  --trailer "Generated-by: Codex" \
+  --trailer "Agent-model: $model" \
+  --trailer "Agent-effort: $effort" \
+  "$message_file"
