@@ -1,9 +1,14 @@
 import { createFramebuffer } from "./framebuffer.ts";
 import { drawTileBg, type RgbColor, type TileBg } from "./bg.ts";
-import { measureText, rightAlignXOffset, type FontData } from "./font.ts";
+import { drawText, measureText, rightAlignXOffset, type FontData } from "./font.ts";
 import { speciesNameColor } from "./speciesNameFade.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts";
-import { factorySwapPlayerOptionBallTile } from "./factorySwapPresentation.ts";
+import {
+  factorySwapActionFadeY,
+  factorySwapCancelButtonX,
+  factorySwapPlayerOptionBallTile,
+} from "./factorySwapPresentation.ts";
+import { blendComponentToward } from "./paletteFade.ts";
 import type { FactorySwapState } from "./factorySwap.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
@@ -82,11 +87,38 @@ function drawActionPiece(
   );
 }
 
-function drawCancelButton(fb: Uint8Array, bgFadeY: number, objFadeY: number): void {
-  drawActionPiece(fb, actionBox.left, 192, 144, objFadeY);
-  drawActionPiece(fb, actionBox.right, 208, 144, objFadeY);
+function drawCancelButton(
+  fb: Uint8Array,
+  bgFadeY: number,
+  objFadeY: number,
+  actionFadeY: number,
+  buttonX: number,
+): void {
+  drawActionPiece(fb, actionBox.left, buttonX, 144, objFadeY);
+  drawActionPiece(fb, actionBox.right, buttonX + 16, 144, objFadeY);
+  // The BG2 fade window is cleared when the child slide task is created.
+  if (buttonX > 192) return;
   const label = "CANCEL";
   const x = 168 + rightAlignXOffset(fontSmall, charmap, label, 70);
+  if (actionFadeY > 0) {
+    const target = actionBox.palette[3]!;
+    const palette = textPalette.map((color) => ({
+      r: blendComponentToward(color.r, target.r, actionFadeY),
+      g: blendComponentToward(color.g, target.g, actionFadeY),
+      b: blendComponentToward(color.b, target.b, actionFadeY),
+    }));
+    drawText(
+      fb,
+      fontSmall,
+      charmap,
+      label,
+      x,
+      144,
+      palette,
+      MENU_TEXT_COLORS,
+    );
+    return;
+  }
   drawTextFaded(
     fb,
     fontSmall,
@@ -111,8 +143,13 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
   const selected = party[state.cursor];
   const displaySelected = party[state.displayCursor];
   const renderedBallTiles = [...view.ballTiles] as [number, number, number];
+  let actionFadeY = 0;
+  let cancelButtonX = 192;
   if (state.phase === "playerOptions") {
-    renderedBallTiles[state.cursor] = factorySwapPlayerOptionBallTile(view.phaseElapsed ?? 0);
+    const phaseElapsed = view.phaseElapsed ?? 0;
+    renderedBallTiles[state.cursor] = factorySwapPlayerOptionBallTile(phaseElapsed);
+    actionFadeY = factorySwapActionFadeY(phaseElapsed);
+    cancelButtonX = factorySwapCancelButtonX(phaseElapsed);
   }
 
   if (bgFade === 0) drawTileBg(fb, menuBg);
@@ -191,7 +228,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     0,
     objFade,
   );
-  drawCancelButton(fb, bgFade, objFade);
+  drawCancelButton(fb, bgFade, objFade, actionFadeY, cancelButtonX);
 
   // Keep the small-font metric live in production and make accidental
   // fallback to FONT_NORMAL observable in Tier-1.

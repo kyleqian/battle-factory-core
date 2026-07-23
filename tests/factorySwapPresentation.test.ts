@@ -5,7 +5,9 @@ import {
   FACTORY_SWAP_PHASE_READY_DELAYS,
   advanceFactorySwapPresentation,
   createCanonicalFactorySwapPresentation,
+  factorySwapActionFadeY,
   factorySwapBallTile,
+  factorySwapCancelButtonX,
   factorySwapPlayerOptionBallTile,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
@@ -107,7 +109,23 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapBallTile(67)).toBe(32);
     expect(factorySwapBallTile(75)).toBe(0);
     expect(factorySwapPlayerOptionBallTile(0)).toBe(0);
-    expect(factorySwapPlayerOptionBallTile(7)).toBe(0);
-    expect(factorySwapPlayerOptionBallTile(8)).toBe(16);
+    expect(factorySwapPlayerOptionBallTile(6)).toBe(0);
+    expect(factorySwapPlayerOptionBallTile(7)).toBe(16);
+    expect(factorySwapPlayerOptionBallTile(14)).toBe(16);
+    expect(factorySwapPlayerOptionBallTile(15)).toBe(0);
+    expect(factorySwapPlayerOptionBallTile(23)).toBe(32);
+  });
+
+  it("pins the action-palette fade and six-pixel CANCEL slide to the player-options edge", () => {
+    expect(factorySwapActionFadeY(5)).toBe(0);
+    expect(factorySwapActionFadeY(6)).toBe(2);
+    expect(factorySwapActionFadeY(7)).toBe(2);
+    expect(factorySwapActionFadeY(20)).toBe(16);
+    expect(factorySwapActionFadeY(40)).toBe(16);
+
+    expect(factorySwapCancelButtonX(26)).toBe(192);
+    expect(factorySwapCancelButtonX(27)).toBe(198);
+    expect(factorySwapCancelButtonX(33)).toBe(234);
+    expect(factorySwapCancelButtonX(34)).toBe(240);
   });
 });

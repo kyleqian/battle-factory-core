@@ -170,5 +170,42 @@ export function factorySwapBallTile(elapsed: number): 0 | 16 | 32 {
 
 /** Selected-player ball epoch after A, before the option popup reveal. */
 export function factorySwapPlayerOptionBallTile(phaseElapsed: number): 0 | 16 | 32 {
-  return phaseElapsed < 12 ? factorySwapBallTile(phaseElapsed + 35) : 0;
+  const local = phaseElapsed - 7;
+  if (local < 0) return 0;
+  const commands = [
+    [16, 8],
+    [0, 8],
+    [32, 8],
+    [0, 8],
+    [16, 8],
+    [0, 8],
+    [32, 8],
+    [0, 8],
+  ] as const;
+  let age = local;
+  for (const [tile, duration] of commands) {
+    if (age < duration) return tile;
+    age -= duration;
+  }
+  return 0;
+}
+
+/**
+ * `Swap_Task_ScreenInfoTransitionOut`'s PALNUM_FADE_TEXT fade, relative to
+ * the accepted player-ball A edge. The delay and alternating two-frame
+ * coefficients are pinned by the dense OFF trace; the coefficient values
+ * are the source `BeginNormalPaletteFade(..., 0, 0, 16, target)` sequence.
+ */
+export function factorySwapActionFadeY(phaseElapsed: number): number {
+  if (phaseElapsed < 6) return 0;
+  return Math.min(16, (Math.floor((phaseElapsed - 6) / 2) + 1) * 2);
+}
+
+/**
+ * CANCEL's source `tXIncrement=6` slide. The transition task creates the
+ * child after the fade completes; its first visible movement is edge +27.
+ */
+export function factorySwapCancelButtonX(phaseElapsed: number): number {
+  const steps = Math.max(0, Math.min(8, phaseElapsed - 26));
+  return 192 + steps * 6;
 }

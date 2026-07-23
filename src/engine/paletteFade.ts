@@ -100,6 +100,18 @@ export function blendComponentToWhite(component8: number, y: number): number {
   return (faded5 << 3) | (faded5 >> 2);
 }
 
+/** General `BlendPalette` channel math for a non-black/non-white target. */
+export function blendComponentToward(
+  component8: number,
+  target8: number,
+  y: number,
+): number {
+  const c5 = component8 >> 3;
+  const target5 = target8 >> 3;
+  const faded5 = c5 + (((target5 - c5) * y) >> 4);
+  return (faded5 << 3) | (faded5 >> 2);
+}
+
 /** The BG layer's fade coefficient `ticks` after the tick that triggered the transition (see FadeTiming.startDelay). Holds `startY` through the dead frames, then steps by 2 every 2 ticks toward `targetY`. */
 export function bgFadeY(ticks: number, timing: FadeTiming): number {
   const delta = ticks - timing.startDelay;

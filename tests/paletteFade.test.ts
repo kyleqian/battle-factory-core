@@ -6,6 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  blendComponentToward,
   bgFadeY,
   blendComponentToBlack,
   ENTRY_BLACK_HOLD_TICKS,
@@ -45,6 +46,17 @@ describe("blendComponentToBlack: 5-bit BlendPalette math, oracle-verified agains
     expect(blendComponentToBlack(255, 10)).toBe(90);
     expect(blendComponentToBlack(255, 12)).toBe(57);
     expect(blendComponentToBlack(255, 14)).toBe(24);
+  });
+});
+
+describe("blendComponentToward: arbitrary-target GBA palette math", () => {
+  it("matches the swap CANCEL white-to-interface-purple trace", () => {
+    expect(blendComponentToward(255, 165, 2)).toBe(239);
+    expect(blendComponentToward(255, 115, 2)).toBe(231);
+    expect(blendComponentToward(255, 247, 2)).toBe(247);
+    expect(blendComponentToward(255, 165, 16)).toBe(165);
+    expect(blendComponentToward(255, 115, 16)).toBe(115);
+    expect(blendComponentToward(255, 247, 16)).toBe(247);
   });
 });
 
