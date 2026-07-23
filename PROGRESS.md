@@ -21,7 +21,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   final glyph/state at 22860, controller hold through the A, script handoff,
   and trainer controller ownership; fresh early-A oracle sweeps pin true
   readiness. No forbidden screenshot/table, absolute-tick/trace branch,
-  fitted color/coordinate, excluded capture, or thinning.
+  fitted color/coordinate, excluded capture, or thinning. Supervisor
+  independently reverified both dense windows, predecessor, turn-17
+  verifier, full Tier-1 suite, and production build; ROADMAP status accepted.
 
 ---
 ## 296 — Bounded worker (S7 turn 17 rung 6): **GREEN — faint hold/dismiss latency exact**
