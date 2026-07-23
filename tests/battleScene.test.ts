@@ -98,6 +98,9 @@ import {
   turn12RockSlideResettledBounceTick,
   TURN13_SANDATTACK_LINE1,
   TURN13_SANDATTACK_LINE2,
+  TURN13_MURKROW_FRAME_FLIP_TICK,
+  TURN13_MURKROW_STRETCH_TICK,
+  turn13MurkrowFrame,
   turn13SandAttackTextStartTick,
   turn13SandAttackTextVisibleChars,
   turn13SandAttackAccEva,
@@ -118,6 +121,16 @@ import {
   type BattleSceneState,
 } from "../src/engine/battleScene.ts";
 import { blendComponentToWhite } from "../src/engine/paletteFade.ts";
+
+describe("turn13MurkrowFrame boundary transfer timing", () => {
+  it("leads the affine window by one render at both image-transfer edges", () => {
+    expect(turn13MurkrowFrame(TURN13_MURKROW_STRETCH_TICK - 2)).toBe(0);
+    expect(turn13MurkrowFrame(TURN13_MURKROW_STRETCH_TICK - 1)).toBe(1);
+    expect(turn13MurkrowFrame(TURN13_MURKROW_STRETCH_TICK)).toBe(1);
+    expect(turn13MurkrowFrame(TURN13_MURKROW_FRAME_FLIP_TICK - 1)).toBe(1);
+    expect(turn13MurkrowFrame(TURN13_MURKROW_FRAME_FLIP_TICK)).toBe(0);
+  });
+});
 import {
   CLOSED_FIGHT_SUBMENU_STATE,
   confirmFightMove,

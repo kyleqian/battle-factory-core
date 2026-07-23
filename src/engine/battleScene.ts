@@ -7603,16 +7603,15 @@ const TURN13_MURKROW_WOBBLE_TABLE: readonly { xScale: number; yScale: number; y2
   { xScale: 256, yScale: 256, y2: 0 },
 ];
 /**
- * Front-sprite frame selection: `frame2` is live only for the closed window
- * [TURN13_MURKROW_STRETCH_TICK, TURN13_MURKROW_FRAME_FLIP_TICK] inclusive
- * (direct VRAM dump, docs/turn13-notes.md's newest append) - `tileset`
- * everywhere else in the whole materialize+wobble+settle span. Unlike
- * Pidgeotto's reused 5-breakpoint cycle (`turn5PidgeottoFrame`), which does
- * not transfer here.
+ * Front-sprite frame selection has a one-render lead over the affine/OAM
+ * state: direct VRAM reads swap at RAM 17019/17034 while the table/matrix is
+ * visible one render later. Thus `frame2` is rendered in the closed interval
+ * [STRETCH_TICK - 1, FRAME_FLIP_TICK - 1]. This is an asset-transfer timing
+ * rule, not an absolute-tick exception; see docs/turn13-murkrow-boundaries.md.
  */
-const TURN13_MURKROW_FRAME_FLIP_TICK = 17034;
-function turn13MurkrowFrame(t: number): 0 | 1 {
-  return t >= TURN13_MURKROW_STRETCH_TICK && t <= TURN13_MURKROW_FRAME_FLIP_TICK ? 1 : 0;
+export const TURN13_MURKROW_FRAME_FLIP_TICK = 17034;
+export function turn13MurkrowFrame(t: number): 0 | 1 {
+  return t >= TURN13_MURKROW_STRETCH_TICK - 1 && t < TURN13_MURKROW_FRAME_FLIP_TICK ? 1 : 0;
 }
 function drawTurn13MurkrowMaterialize(fb: Uint8Array, t: number): void {
   if (t < TURN13_MURKROW_MATERIALIZE_START || t >= TURN13_MURKROW_SETTLE_TICK) return;
