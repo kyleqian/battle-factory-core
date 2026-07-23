@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 287 — Bounded worker (S7 turn 16 rung 2b): **GREEN — FAINT_ATTACK resolution tail**
+
+- **State:** canonical `21047--21169` is **123/123 exact**. Rung 2a remains
+  **221/221**, rung 1 canonical/delayed remain **81/81** each, turn-16
+  verifier **233/233**, Tier-1 **1028/1028**, and build (**5.432 MB**) pass.
+- **Did:** added confirmation-relative post-hit wobble/blink reducers,
+  parameterized 1-HP/tick MAGBY drain `138→79`, atomic battle-HP and
+  zero-chance secondary-roll state, then the target/current-move/attacker
+  handoff and FIRE_PUNCH accuracy/text boundary. Committed the dense
+  prefix-exact `turn16-rung2b.json`.
+- **Next:** resume S7 at canonical **21170**, the first FIRE_PUNCH
+  animation-owned frame. Do not reopen exact turn-16 rungs 1, 2a, or 2b;
+  #38 remains parked.
+- **Notes:** implementation commit `a24b857`; first FIRE_PUNCH text pixels
+  are `M`/`MA` at 21168/21169, while the cast animation begins at 21170.
+  No absolute-tick lookup, framebuffer asset, per-frame table, RGB/coordinate
+  fitting, trace branch, or excluded capture.
+
+---
 ## 286 — Supervisor wind-down (S7 turn 16 rung 2a): **CANONICAL GREEN; +30 REGISTER-RACE FRAME PARKED AS #38**
 
 - **State:** canonical `20826--21046` is **221/221 exact**. The requested
@@ -49,18 +68,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   122-segment prefixes verbatim and the oracle-relative SHA streams are
   **0/81 mismatched**. No framebuffer assets, absolute-tick lookup, RGB
   fitting, trace branch, or excluded capture.
-
----
-## 284 — Bounded worker (ISSUES #37 rung 6): **GREEN — issue closed**
-
-- **State:** canonical `20551--20745` and delayed `20581--20775` are both
-  **195/195 exact**. Rung 5 remains **144/144** each, rung 4a **16/16** each,
-  verifier **17/17**, Tier-1 **1018/1018**, and build (**5.414 MB**) pass.
-- **Did:** added the confirmation-relative six-frame blank-message phase,
-  honest action-menu phase, fresh `menuIdleBounce` re-anchor, and dynamic
-  standard-font `MAGBY do?` prompt; committed both contiguous 195-frame traces.
-- **Next:** supervisor chooses the next open roadmap/issue increment; #37 has
-  no remainder through its scoped frame 20745/20775 endpoint.
-- **Notes:** implementation commit `61b4a5e`; unmodified A/B was **0/195**
-  each. No screenshots, absolute ticks, per-frame tables, coordinate/RGB
-  fitting, trace branches, or excluded captures.

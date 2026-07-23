@@ -1,3 +1,18 @@
+## 284 — Bounded worker (ISSUES #37 rung 6): **GREEN — issue closed**
+
+- **State:** canonical `20551--20745` and delayed `20581--20775` are both
+  **195/195 exact**. Rung 5 remains **144/144** each, rung 4a **16/16** each,
+  verifier **17/17**, Tier-1 **1018/1018**, and build (**5.414 MB**) pass.
+- **Did:** added the confirmation-relative six-frame blank-message phase,
+  honest action-menu phase, fresh `menuIdleBounce` re-anchor, and dynamic
+  standard-font `MAGBY do?` prompt; committed both contiguous 195-frame traces.
+- **Next:** supervisor chooses the next open roadmap/issue increment; #37 has
+  no remainder through its scoped frame 20745/20775 endpoint.
+- **Notes:** implementation commit `61b4a5e`; unmodified A/B was **0/195**
+  each. No screenshots, absolute ticks, per-frame tables, coordinate/RGB
+  fitting, trace branches, or excluded captures.
+
+---
 ## 283 — Bounded worker (ISSUES #37 rung 5): **GREEN — MAGBY healthbox/send-out**
 
 - **State:** canonical `20407--20550` and delayed `20437--20580` are both

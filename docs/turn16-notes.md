@@ -491,3 +491,37 @@ frame would make the acceptance number green but violate the run's
 guardrails, so none is committed. The delayed 221-capture app trace is
 also not committed red. Canonical `turn16-rung2a.json` remains a dense,
 prefix-verbatim 221-capture acceptance trace.
+
+### 6.5 Rung 2b implementation: FAINT_ATTACK resolution tail through the
+    FIRE_PUNCH cast boundary
+
+Canonical renders **21047-21169** are implemented and committed in
+`turn16-rung2b.json` at **123/123 exact**, every tick captured. Its flattened
+button stream has **0 differences** from `turn16-rung2a.json` across all
+21,046 prefix ticks; the new trace appends 123 input-free frames rather than
+altering the accepted prefix.
+
+The implementation extends the existing animation-kickoff age reducer rather
+than consulting battle ticks: target-healthbox `+1/-1` wobble begins at age
+226 for 20 frames; MAGBY's four-cycle hit blink begins at age 227; its visible
+HP drains one unit per frame from age 261 (`137/138`) through age 319
+(`79/138`). Battle HP commits atomically at age 321. The silent
+`Cmd_seteffectwithchance` roll lands at age 326 and advances
+`2744256313→846647736` despite FAINT_ATTACK's 0% chance.
+
+A fresh per-tick RAM probe pinned the handoff sequence that the older dossier
+only bracketed: target becomes MURKROW at age 333 (tick 21159),
+`gCurrentMove` clears at age 334, then attacker/current move become
+MAGBY/FIRE_PUNCH at age 335. FIRE_PUNCH's 100%-accuracy check still consumes
+one RNG step at age 340 (`846647736→2630728651`). Text ownership changes at
+age 342: ticks 21168/21169 show `M`/`MA`; **21170 is the first
+FIRE_PUNCH-animation-owned frame**, so the assigned endpoint is a clean
+pre-animation boundary.
+
+Pure Tier-1 tests pin the wobble/blink limits, parameterized HP drain versus
+atomic battle HP, both RNG steps, target/current-move/attacker ownership, and
+the text handoff. Regression verdict: rung 2a **221/221**, rung 1 canonical
+and delayed **81/81** each, `verify-turn16.ts` **233/233**, Tier-1
+**1028/1028**, build **5.432 MB**. No framebuffer assets, absolute-tick
+lookups, per-frame pixel tables, trace branches, coordinate/RGB fitting, or
+excluded captures were used.
