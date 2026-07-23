@@ -78,6 +78,44 @@ traces are `battle2-intro-dense.json` (251/251),
 `battle2-action-menu-dense.json` (183/183). The latter captures every frame
 32848-33030; no dynamic span is thinned.
 
+## Battle 2 turn 1 — 33030-prefix ground truth (S8 bounded probe, 2026-07-23)
+
+This is evidence only: no engine, test, accepted-trace, or framebuffer-fit
+change accompanies it. `tools/compare/traces-groundtruth/battle2-turn1.json`
+now takes the byte-for-byte button-state prefix of
+`battle2-action-menu-dense.json` through **33030** (the 498-frame last idle
+segment ends there), rather than inheriting its later DOWN/B round trip. It
+then sends exactly two one-frame A edges: **33031** to open FIGHT and
+**33071** to confirm the already-selected **ROCK SLIDE**; no navigation or
+subsequent input is sent. Two fresh `bin/oracle run` manifests were identical
+(169 captures; final 33671 sha
+`bdc7530b28a2aa85d7d245b77030330b9dad07f21ec75d7f3853d9c2c3638fb0`).
+Dense windows are 33030-33040, 33070-33089, 33104-33114, 33315-33344, and
+33594-33671; the long attack-animation hold is sampled every 20 frames. No
+uncaptured interval below is claimed pixel-exact.
+
+| frame(s) | oracle/RAM boundary |
+| --- | --- |
+| 33030 | held action menu is safe: ONIX 117/117, KABUTO 91/91, both status words 0; `gRngValue=3530724670`, `gBattleControllerExecFlags=1`, `gCurrentMove=0`. |
+| 33031; 33036-33037 | first accepted A; FIGHT clears then its ROCK SLIDE-default submenu is visibly revealed. The task table has no active task; battler sprite slots 3/4 keep their normal callbacks. |
+| 33071; 33074-33077 | second A confirms ROCK SLIDE without navigation. `gBattleMainFunc` changes at 33074/75/76; turn order resolves ONIX first (speed 76 vs KABUTO 61), `gBattlerAttacker=0` and `gCurrentMove=157` at 33077. |
+| 33082; 33107-33109 | ROCK SLIDE accuracy consumes one RNG call at 33082. PP is committed 10→9 by 33107; `gBattleMoveDamage` is 19 then STAB-adjusted to 28 at 33108. KABUTO's BATTLE ARMOR keeps `gCritMultiplier=1` and source `Cmd_critcalc` short-circuits before `Random()`. |
+| 33109; 33110 | spread roll advances RNG to 2508258776; RAM damage stays 28. This is the only damage-spread call; the 33110/33323 step is ROCK SLIDE's non-proc flinch secondary (KABUTO still acts). |
+| 33288-33317; 33318 | KABUTO healthbar sentinel is -32768 at 33288, drains 90→63 at one HP/frame, reaches zero at 33317, then stable `gBattleMons[1].hp` commits 91→63 at **33318**. |
+| 33332; 33337 | ONIX cleanup hands `gCurrentMove=28`, `gBattlerAttacker=1` to KABUTO. Its AI-selected move is **SAND ATTACK** (PP 15→14); its 100%-accuracy check still consumes one RNG call at 33337. |
+| 33604-33614 | SAND ATTACK has no HP damage/status: ONIX remains 117/117 and status 0, but accuracy stage becomes 6→5 by 33606. Turn-end RNG is `+1` at 33606 (`3011990093`), `+2` at 33611 (`1648070399`), and `+5` at 33613 (`3121225034`): `BattleTurnPassed`, switch/item consideration, then `BattleAI_SetupAIData`'s four simulated rolls plus `ChooseMoveOrAction_Singles` tie break. Sprite slots 3/4 restore their normal callbacks at 33614. |
+| 33614-33671 | the next action menu atomically reveals at 33614 and remains input-ready through the trace end; both battlers retain the stable values above and exec flags are 1. |
+
+The direct RAM replay used `dump-battler-full.py`, `dump-battle-bars.py`,
+`dump-ai-and-hitmarker.py`, and `dump-task-and-sprite-callbacks.py` on this
+exact trace. Relevant source anchors are `Cmd_critcalc` (BATTLE_ARMOR gate),
+`ApplyRandomDmgMultiplier`, `BattleTurnPassed` in `battle_script_commands.c`
+and `battle_main.c`, plus `BattleAI_SetupAIData` / `ChooseMoveOrAction_Singles`
+in `battle_ai_script_commands.c`. The 12 calls are: accuracy, spread,
+secondary, SAND ATTACK accuracy, then the 1+2+5 turn-end cluster. The
+result is ROCK SLIDE hit for 28 (91→63), no flinch; SAND ATTACK hit,
+accuracy -1, no damage or status.
+
 ## Fisherman trainer intro
 
 `battle2-intro-dense.json` captures every frame **32280-32530** and is
