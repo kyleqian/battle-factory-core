@@ -516,6 +516,13 @@ text). Caveat pinned in §16: outside battle, per-VBlank RNG advance
 resumes, so battle 2's opponent identity is timing-sensitive — extend
 the chain only by reusing the committed segments verbatim. Open: the
 swap-YES branch (factory swap screen UI) and battle 2 itself.
+**Battle 2 opponent send-out increment (2026-07-23):** canonical
+32531-32681 is committed at **151/151 exact** in
+`battle2-kabuto-sendout-dense.json`. Shared send-out mechanisms are
+encounter-parameterized for FISHERMAN JENSON/KABUTO, including KABUTO's
+live 101-callback H-slide-wobble and Lv50 91/91 healthbox. S8 remains open;
+canonical 32682 onward (player throw/ONIX/menu), swap YES, and battles 3-7
+are untouched.
 **Frame cap raised (user decision #2, 2026-07-19 ~17:00):** §15's scout
 proved the WIN unreachable under the 20000-frame cap for ANY plausible
 line (best verified line: Onix faints at 19147 with Murkrow untouched at

@@ -12358,3 +12358,24 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   and reverified all three traces, all 1095 Tier-1 tests, and build.
 
 ---
+## 307 — Supervisor-accepted S8 Battle 2 opening probe: **GREEN evidence checkpoint**
+
+- **State:** exact renderer endpoint remains **32280--32530 = 251/251**;
+  canonical 33030 is documented only, not claimed pixel-exact. Tier-1 is
+  **1098/1098** and build passes (**5.496 MB**).
+- **Did:** replayed canonical segments 154--155 unchanged and added the
+  source/RAM/OAM-ready 32531--33030 ledger in `docs/battle2-opening-notes.md`:
+  JENSON handoff 32570; KABUTO ball/healthbox/species H-slide; ONIX throw,
+  materialize, and menu blank/draw 32850--32856; 33030 full-HP FIGHT menu.
+  Sparse app samples are exact at 32531/32533 then rank the remaining live
+  gap (peak 11,210 px at 32831), without an acceptance claim or harvest.
+- **Next:** implement only the ledgered live Battle-2 send-outs/menu in a
+  later scoped increment; S8 stays `[ ]`.
+- **Notes:** fresh RAM has `gMain.inBattle=2` throughout; no ordinary VBlank
+  RNG. On-demand RNG is flat to 32893 then +1/+2/+5 at 32894/32898/32900
+  (pre-turn/AI); 33030 is 3530724670 with execFlags=1. No trace/assets/runtime
+  changes, screenshot lookup, tick fitting, or dynamic thinning. Supervisor
+  independently reviewed the source/RAM boundary ledger and reverified all
+  1098 Tier-1 tests and build.
+
+---
