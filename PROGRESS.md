@@ -4,6 +4,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 319 — S8 Factory trainer schedule/RNG port: **GREEN — source selection live**
+
+- **State:** the generic controller now has a source-exact, policy-driven
+  Factory trainer selection strategy for battle indexes **0–6**. Tier-1 is
+  **1152/1152** and build passes (**5.531 MB**); canonical pixels remain
+  unchanged and intentionally unwired.
+- **Did:** ported `GetRandomScaledFrontierTrainerId` plus
+  `GenerateOpponentMons`' trainer retry/history loop using
+  `factory-round-policy.json`: streak/7 challenge rows, battle-6 hard range,
+  >7 clamp, one Gen-3 `Random()` per attempt, all-prior duplicate rejection,
+  and the omitted final save-history write. Added an explicit RNG port and
+  per-draw ledger, deterministic seven-trainer schedule/final-RNG tests, and
+  live scenario/controller selection while preserving fixture injection.
+- **Next:** stage one representative Battle 2 turn through the generic
+  OFF-profile presentation seam. Unique swap-YES/loss/round-summary UI and
+  later opponent-mon/rental rejection generation remain open; do not resume
+  tick 33332/SAND ATTACK.
+- **Notes:** commits `14e9f39`, `13652f5`; forced retries pin draw count/final
+  RNG, source history stays six entries after the seventh selection, and
+  presentation acknowledgements do not consume selection RNG. No oracle,
+  renderer, `BUGFIX` IV-branch, or opponent-party generation work was done.
+
+---
 ## 318 — S8 generic round/presentation core: **GREEN — architecture foundation landed**
 
 - **State:** a pure scenario-driven controller now covers battle indexes
@@ -53,20 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   names its profile. Both profiles pass harness smoke; `turn1-cloneanim.json`
   confirms their battle presentation diverges while the anchor SHA is shared.
   `WORKSTREAMS.md` owns lane/file boundaries.
-
----
-## 316 — S8 Battle 2 turn 1 ROCK SLIDE: **GREEN — through 33331**
-
-- **State:** `battle2-turn1-rockslide.json` is **191/191 exact** through the
-  last ONIX-owned frame 33331. Tier-1 is **1126/1126**; build passes
-  (**5.522 MB**). S8 remains `[ ]`.
-- **Did:** stored A 33071, resolved ONIX first, committed PP 10→9 and the
-  three-call accuracy/spread/non-flinch RNG stream, rendered the full shared
-  ROCK SLIDE animation on live ONIX/KABUTO, and drained/committed KABUTO
-  91→63. Pure tests pin 19→28 noncrit damage and the 33331/33332 boundary.
-- **Next:** resume exactly at **33332**, where KABUTO becomes attacker with
-  current move SAND ATTACK. That handoff and everything later are unclaimed.
-- **Notes:** captures include every frame 33115-33181 and 33270-33331 plus
-  sparse mid-animation anchors. Battle-2 action/menu/send-outs/intro/
-  transition/rooms remain exact; Battle-1 send-out remains **255/256**
-  (#18 only). No framebuffer lookup, harvest, fitting, or thinning.

@@ -1,3 +1,20 @@
+## 316 — S8 Battle 2 turn 1 ROCK SLIDE: **GREEN — through 33331**
+
+- **State:** `battle2-turn1-rockslide.json` is **191/191 exact** through the
+  last ONIX-owned frame 33331. Tier-1 is **1126/1126**; build passes
+  (**5.522 MB**). S8 remains `[ ]`.
+- **Did:** stored A 33071, resolved ONIX first, committed PP 10→9 and the
+  three-call accuracy/spread/non-flinch RNG stream, rendered the full shared
+  ROCK SLIDE animation on live ONIX/KABUTO, and drained/committed KABUTO
+  91→63. Pure tests pin 19→28 noncrit damage and the 33331/33332 boundary.
+- **Next:** resume exactly at **33332**, where KABUTO becomes attacker with
+  current move SAND ATTACK. That handoff and everything later are unclaimed.
+- **Notes:** captures include every frame 33115-33181 and 33270-33331 plus
+  sparse mid-animation anchors. Battle-2 action/menu/send-outs/intro/
+  transition/rooms remain exact; Battle-1 send-out remains **255/256**
+  (#18 only). No framebuffer lookup, harvest, fitting, or thinning.
+
+---
 ## 315 — S8 Battle 2 turn 1 33030-prefix probe: **GREEN — evidence only**
 
 - **State:** oracle-only Battle 2 first-turn evidence is committed; no
