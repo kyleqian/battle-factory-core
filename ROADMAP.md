@@ -600,6 +600,20 @@ ownership; a fresh 434-row RAM audit finds one LCG call on every tick through
 2, battles 3-7, and round completion remain open, so S8 stays `[ ]`.
 The supervisor independently reviewed the cursor/message state path and
 reverified the new trace, predecessor, full Tier-1 suite, and build.
+**Fifth postwin engine increment (2026-07-23, bounded worker):**
+the canonical NO path now extends through A at **30032**, the shared
+attendant/player walk, field warp, Battle Factory battle-room entry, and
+FISHERMAN JENSON's settled/input-ready opening quote at **32031**, stopping
+before dismissal. Prefix-identical `battle2-room-a.json` and
+`battle2-room-b.json` are **225/225 + 131/131 exact**, capturing every
+dynamic frame 30031-30382 plus proven-static hold anchors through 32031;
+`battle1-postwin-decline.json` remains **73/73**. Fresh input/RAM/source
+evidence pins the frame-29660 ready gate, canonical stored edge, returning
+attendant animation alternation, room/object boundaries, Fisherman gfx and
+JENSON Easy Chat quote, and relative +109/+110 map-load RNG bursts. This is
+still **partial S8**: the quote dismissal, Battle 2 trainer-intro/transition
+and battle, battles 3-7, swap-YES path, and round completion remain open, so
+S8 stays `[ ]`.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by

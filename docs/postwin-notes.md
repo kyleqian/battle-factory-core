@@ -525,3 +525,50 @@ no decline-specific draw or ownership handoff. `gSpecialVar_Result` changes
 
 No framebuffer asset, per-frame table, absolute-tick/trace branch,
 coordinate/RGB fitting, exclusion, or dynamic capture thinning was added.
+
+## 11. S8 engine evidence — guide dismiss through Battle 2 opening quote (2026-07-23)
+
+The canonical NO branch now runs from the held guide message at **30031**
+through canonical A's stored edge at **30032**, the shared field walk/warp,
+and the Battle Factory battle-room entry to FISHERMAN JENSON's settled
+`"MY POKéMON WILL\nMAKE YOU DOWNCAST"` quote at **32031**. The quote itself
+finishes and becomes input-ready at **30381**; this increment intentionally
+does not dismiss it.
+
+`battle2-room-a.json` is **225/225 exact** (every frame 30031-30255) and
+`battle2-room-b.json` is **131/131 exact** (every frame 30255-30382 plus
+static-hold anchors 30431/31000/32031). Their 152 segments are identical,
+their first 150 segments are byte-identical to
+`battle1-postwin-decline.json`, and together they capture every genuinely
+dynamic frame without exclusions. The predecessor remains **73/73** and the
+original first-entry `walk-warpout.json` remains **125/125**.
+
+Fresh adjacent input replays resolve the guide gate in framebuffer
+coordinates: a pulse beginning on frame 29659 (stored/result frame 29660)
+is rejected; a pulse beginning on the already-input-ready frame **29660**
+is accepted and stores its edge at **29661**. The canonical pulse begins at
+30031 and stores **30032**. Its first visible close/walk frame is 30034.
+All later state derives from that stored edge.
+
+The original prebattle movement, warp fade, battle-room camera, scientists,
+opponent walk, message window, and font state machines are reused. A fresh
+sprite RAM sweep found one source-state variant: the returning attendant's
+standard walk-animation alternation bit is inverted, selecting the other
+leg frame for each movement action's leading eight ticks. The player,
+positions, camera, and face frames are unchanged. The encounter state
+selects the source-resolved Fisherman overworld sheet
+(`FACILITY_CLASS_FISHERMAN -> OBJ_EVENT_GFX_FISHERMAN`) and JENSON's six
+Easy Chat words; it does not introduce a second renderer.
+
+The compact evidence file `battle2-room-entry-dump.json` records the gates,
+meaningful scene boundaries, representative `animNum`/`animCmdIndex` rows,
+and RNG ledger. `gMain.inBattle` remains clear. Every transition consumes
+one ordinary VBlank LCG call except 30140→30141 (**3 total**) and
+30141→30142 (**4 total**), the same +2/+3 map-load pair independently seen
+on the swap-YES traversal. Tier-1 pins those bursts at stored-edge +109/+110,
+early/delayed input, close/walk/warp handoffs, encounter quote length, and
+the held/input-ready endpoint.
+
+No framebuffer asset, screenshot lookup, per-tick pixel table,
+absolute-canonical-tick/trace branch, fitting, exclusion, or dynamic
+capture thinning was added.

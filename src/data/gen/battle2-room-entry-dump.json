@@ -1,0 +1,54 @@
+{
+  "description": "S8 compact oracle/RAM evidence for canonical NO-path guide dismissal through JENSON's settled opening quote. Values were freshly replayed from battle1-winline-b-swap.json's verbatim prefix on 2026-07-23.",
+  "inputGate": {
+    "messageFinalFrame": 29658,
+    "inputReadyFrame": 29660,
+    "earlyPressStartFrame": 29659,
+    "earlyPressAccepted": false,
+    "firstAcceptedPressStartFrame": 29660,
+    "acceptedStoredEdgeFrame": 29661,
+    "canonicalPressStartFrame": 30031,
+    "canonicalStoredEdgeFrame": 30032
+  },
+  "boundaries": {
+    "firstVisualChange": 30034,
+    "walkFinalPoseFirst": 30113,
+    "warpFadeFirst": 30117,
+    "blackFirst": 30132,
+    "battleRoomFirst": 30151,
+    "cameraPanFirst": 30174,
+    "cameraSettled": 30253,
+    "decoySettled": 30254,
+    "scientistsTurnFirst": 30257,
+    "opponentFirstVisible": 30263,
+    "opponentSettled": 30343,
+    "messageBoxAppears": 30349,
+    "quoteFirstGlyph": 30350,
+    "quoteFinalGlyphAndInputReady": 30381,
+    "heldEndpoint": 32031
+  },
+  "walkSpriteSamples": [
+    { "frame": 30034, "playerAnim": 5, "playerCmd": 0, "attendantAnim": 6, "attendantCmd": 2 },
+    { "frame": 30041, "playerAnim": 5, "playerCmd": 1, "attendantAnim": 6, "attendantCmd": 3 },
+    { "frame": 30042, "playerAnim": 5, "playerCmd": 1, "attendantAnim": 6, "attendantCmd": 3 },
+    { "frame": 30049, "playerAnim": 6, "playerCmd": 2, "attendantAnim": 6, "attendantCmd": 0 },
+    { "frame": 30065, "playerAnim": 6, "playerCmd": 0, "attendantAnim": 5, "attendantCmd": 2 },
+    { "frame": 30081, "playerAnim": 5, "playerCmd": 2, "attendantAnim": 5, "attendantCmd": 0 },
+    { "frame": 30101, "playerAnim": 5, "playerCmd": 0, "attendantAnim": 5, "attendantCmd": 1 }
+  ],
+  "rng": {
+    "mainInBattle": 0,
+    "ordinaryStepsPerFrame": 1,
+    "nonBaselineTransitions": [
+      { "fromFrame": 30140, "toFrame": 30141, "totalLcgSteps": 3 },
+      { "fromFrame": 30141, "toFrame": 30142, "totalLcgSteps": 4 }
+    ],
+    "allOtherTransitionsThroughQuote": "one ordinary outside-battle VBlank LCG step"
+  },
+  "source": {
+    "movement": "BattleFrontier_BattleFactoryPreBattleRoom EventScript_WalkToBattleRoomLv50; standard object-event GoNorth/GoWest animations",
+    "opponentGfx": "SetOpponentGfxVar -> SetBattleFacilityTrainerGfxId; FACILITY_CLASS_FISHERMAN -> OBJ_EVENT_GFX_FISHERMAN",
+    "quote": "FRONTIER_TRAINER_JENSON speechBefore Easy Chat words: MY / POKEMON / WILL / MAKE / YOU / DOWNCAST",
+    "room": "BattleFrontier_BattleFactoryBattleRoom EventScript_EnterRoom and EventScript_BattleOpponent"
+  }
+}
