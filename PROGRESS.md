@@ -17,7 +17,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** resume #37 rung 4a under the existing Codex tier policy; do not
   interrupt the session for judgment calls.
 - **Notes:** `ISSUES.md` remains the confirmed bug/debt backlog.
-  `DEFERRED.md` is currently empty.
+  `DEFERRED.md` is currently empty. Direct sessions without injected model
+  metadata use `Agent-model: unknown` rather than guessing.
 
 ---
 ## 280 — Codex supervised-run hardening: **GREEN**

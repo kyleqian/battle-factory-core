@@ -55,7 +55,9 @@ top entry of `PROGRESS.md` — uncommitted work is lost work.
   verified it.
 - Preserve agent attribution. If the runtime does not add its own attribution,
   append `Generated-by: <agent>` and `Agent-model: <model>` trailers to every
-  agent-authored commit.
+  agent-authored commit. If the exact model identifier is not injected or
+  otherwise exposed by the runtime, use `Agent-model: unknown`; never guess it
+  from the product surface, model family, or apparent capabilities.
 - **Keep `PROGRESS.md` current:** update its top entry whenever you finish a
   meaningful chunk, and *always* before you stop — State / Did / Next / Notes, with
   oracle-diff numbers — so a fresh agent can resume from that entry alone. Tick
