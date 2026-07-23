@@ -32,4 +32,17 @@ describe("mode-0 raw tile compositor", () => {
     expect(mgbaDarkenColor(mgbaColorFromBgr555(0x4210), 15)).toBe(0x080809); // RGB = 9,8,8
     expect(mgbaDarkenColor(mgbaColorFromBgr555(0x4210), 0)).toBe(0x848484);
   });
+
+  it("uses captured affine OAM matrix parameters rather than an identity approximation", () => {
+    const base = stateFor([], {});
+    const tile = new Uint8Array(32); tile[4] = 0x10; // source texel (1,1)
+    base.paletteBgr555[16] = [0, 31];
+    base.objTileIds = [0]; base.objTilesB64 = b64(tile);
+    // A 180-degree captured matrix makes the source's top-left texel land
+    // at the bottom-right of this 8x8 affine object.
+    base.oam = [{ a0: 0x0100, a1: 0, a2: 0, matrix: [-256, 0, 0, -256] }];
+    const fb = createFramebuffer(); drawMode0Ppu(fb, base);
+    expect(pixel(fb, 7, 7)).toEqual([255, 0, 0]);
+    expect(pixel(fb, 0, 0)).toEqual([0, 0, 0]);
+  });
 });

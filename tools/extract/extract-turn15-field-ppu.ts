@@ -38,7 +38,7 @@ function onScreen(a0: number, a1: number): boolean {
 
 const display = row.display as { dispcnt: string; bldcnt: string; bldy: string; bg: Array<Record<string, unknown>> };
 const obj = Buffer.from(row.objVramB64, "base64");
-const oam = (row.hardwareOam as Array<{ a0: string; a1: string; a2: string }>).filter((entry) => onScreen(n(entry.a0), n(entry.a1)));
+const oam = (row.hardwareOam as Array<{ a0: string; a1: string; a2: string; matrix: number[] | null }>).filter((entry) => onScreen(n(entry.a0), n(entry.a1)));
 const tileIds = new Set<number>();
 for (const entry of oam) {
   const a0 = n(entry.a0), a1 = n(entry.a1), a2 = n(entry.a2);
@@ -63,7 +63,10 @@ const asset = {
   // Palette RAM is the actual PPU source; the game-side palette buffers are
   // also present in the probe for fade attribution, but can lag the DMA.
   paletteBgr555: row.palette.hardware,
-  oam: oam.map((entry) => ({ a0: n(entry.a0), a1: n(entry.a1), a2: n(entry.a2) })),
+  // Matrices come from the PPU OAM transfer's interleaved attribute-3
+  // words; keeping them alongside the referencing entry preserves affine
+  // geometry without inventing a transform from pixels.
+  oam: oam.map((entry) => ({ a0: n(entry.a0), a1: n(entry.a1), a2: n(entry.a2), matrix: entry.matrix })),
   objTileIds: ids,
   objTilesB64: objTiles.toString("base64"),
 };

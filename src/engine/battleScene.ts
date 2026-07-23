@@ -534,10 +534,12 @@ import partyMenuChromeAsset from "../assets/gen/party-menu-chrome.json" with { t
 import partyMonIconsAsset from "../assets/gen/party-mon-icons.json" with { type: "json" };
 import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay.json" with { type: "json" };
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
+import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
+import { drawMode0Ppu } from "./gbaPpu.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
 import battle1Turn2RamDumpAsset from "../data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
 import battle1GrovyleFaintRamDumpAsset from "../data/gen/battle1-grovyle-faint-ram-dump.json" with { type: "json" };
@@ -11659,33 +11661,6 @@ function fadeTurn15PartyFramebuffer(fb: Uint8Array, bgY: number, objMask: Uint8A
   }
 }
 
-/** The field's first fade-in VBlank rounds its 5-bit palette ramp upward
- * (`BlendPalette`'s signed fade-in path), unlike the menu's fade-out floor.
- * At coefficient 15 this leaves palette value 2 visible from white (16 in
- * mGBA RGB), while all OBJ banks are still at black. */
-function fadeTurn15BattleFirstFrame(fb: Uint8Array, objMask: Uint8Array): void {
-  const source = fb.slice();
-  for (let p = 0; p < 240 * 160; p += 1) {
-    const o = p * 4;
-    if (objMask[o + 3] !== 0) { fb[o] = 0; fb[o + 1] = 0; fb[o + 2] = 0; fb[o + 3] = 255; continue; }
-    for (let c = 0; c < 3; c += 1) {
-      const component = source[o + c]! >> 3;
-      const faded5 = Math.ceil(component / 16);
-      fb[o + c] = (faded5 << 3) | (faded5 >> 2);
-    }
-    fb[o + 3] = 255;
-  }
-}
-
-/** Live OBJ ownership for the frozen "ONIX fainted!" battle frame. */
-function drawTurn15FaintFrameObjMask(mask: Uint8Array): void {
-  // `drawTurn15FlyStrikeWindow`'s frozen frame has only these three OBJ
-  // producers: MURKROW, its opponent healthbox, and the wait-arrow.  ONIX,
-  // its healthbox, and the party-status bar have already been removed.
-  drawTurn13MurkrowSettled(mask);
-  drawSendOutHealthbox(mask, 0, murkrowHealthboxContent);
-}
-
 // Source-extracted 4bpp transparency masks for party_menu's 32x32 menu
 // Poké Ball (closed/open frames) and interface/status_icons' 32x8 FNT
 // frame.  These are masks, not captured pixels: their placements come from
@@ -11750,17 +11725,11 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
       return true;
     }
     if (phase === "black") return true;
-    // Rung 1 ends at this first visible battle palette step.  Reuse the live
-    // faint-frame field compositor, clear its old message text with the live
-    // battle window tilemap, then apply the same alternating BG/OBJ palette
-    // fade machinery as the party menu.
-    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    drawTurn13MurkrowSettled(fb);
-    drawSendOutHealthbox(fb, 0, murkrowHealthboxContent);
-    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-    const mask = new Uint8Array(fb.length);
-    drawTurn15FaintFrameObjMask(mask);
-    fadeTurn15BattleFirstFrame(fb, mask);
+    // First visible field VBlank: compose the exact PPU transfer captured at
+    // the press-relative boundary, including its indexed BG/OBJ ownership,
+    // BGR555 palette RAM and mGBA BLDY transfer.  No screenshot or global
+    // tick is involved; subsequent send-out animation frames are later rungs.
+    drawMode0Ppu(fb, turn15FieldPpuAsset);
     return true;
   }
   const phase = partySelectEntryPhase(party.elapsed);
@@ -11778,7 +11747,8 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
     drawTurn15FlyStrikeWindow(fb, entryTick, pressTick);
     const local = party.elapsed - PARTY_ENTRY_FADE_OUT_START;
     const mask = new Uint8Array(fb.length);
-    drawTurn15FaintFrameObjMask(mask);
+    drawTurn13MurkrowSettled(mask);
+    drawSendOutHealthbox(mask, 0, murkrowHealthboxContent);
     fadeTurn15PartyFramebuffer(fb, bgFadeY(local, PARTY_ENTRY_FADE_OUT), mask, objFadeY(local, PARTY_ENTRY_FADE_OUT));
     return true;
   }

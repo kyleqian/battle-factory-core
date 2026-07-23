@@ -1,3 +1,13 @@
+## 268 — Bounded worker (ISSUES #37 rung 1): **GREEN PROBE CHECKPOINT — exact palette/field blocker**
+
+- **State:** baseline green: Tier-1 **1005/1005**, build **5.32 MB**;
+  party traces **192/200** (five 5px frames, two 273px frames, 20302 red).
+- **Did:** captured direct palette/OAM/BG/VRAM state and documented that
+  20302 is `DISPCNT=1f40`, with BG3 charbase 2/screenbase 26.
+- **Next:** compose the raw register-derived field without timing changes or
+  screenshot/color fitting.
+
+---
 ## 267 — Bounded worker (ISSUES #37 rung 1): **GREEN CHECKPOINT — palette source blocker**
 
 - **State:** Tier-1 **1005/1005**, build **5.32 MB**, verifier **17/17**,

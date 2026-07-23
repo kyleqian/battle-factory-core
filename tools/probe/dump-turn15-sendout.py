@@ -99,9 +99,17 @@ def main() -> None:
             a0, a1, a2 = u16(OAM + index * 8), u16(OAM + index * 8 + 2), u16(OAM + index * 8 + 4)
             if a0 & 0x0200:  # disabled affine-off sprite
                 continue
+            matrix = (a1 >> 9) & 31
+            # Affine parameters are physically interleaved through OAM's
+            # fourth attribute word, one word in each of four consecutive
+            # objects.  Read the transferred PPU values, not gSprites'
+            # future software model, so an extracted state stays raw-source
+            # reproducible even at a VBlank boundary.
+            matrix_values = [s16(OAM + matrix * 0x20 + 6 + off) for off in (0, 8, 16, 24)] if a0 & 0x0100 else None
             rows.append({"index": index, "a0": hex(a0), "a1": hex(a1), "a2": hex(a2),
                          "x": a1 & 0x1ff, "y": a0 & 0xff, "tile": a2 & 0x3ff,
-                         "palette": a2 >> 12, "priority": (a2 >> 10) & 3})
+                         "palette": a2 >> 12, "priority": (a2 >> 10) & 3,
+                         "matrix": matrix_values})
         return rows
     def sprite(slot: int) -> dict:
         base = gs + slot * SPRITE_SIZE

@@ -5,7 +5,7 @@
 import { fillFramebuffer, setPixel } from "./framebuffer.ts";
 
 export interface Mode0Bg { control: number; hofs: number; vofs: number; mapB64: string; }
-export interface Mode0Oam { a0: number; a1: number; a2: number; }
+export interface Mode0Oam { a0: number; a1: number; a2: number; matrix?: number[] | null; }
 export interface Mode0State {
   bldcnt: number; bldy: number;
   bg: Mode0Bg[];
@@ -78,11 +78,17 @@ function drawObj(fb: Uint8Array, state: Mode0State, entry: Mode0Oam, tiles: Map<
   const [w, h] = objDimensions(entry.a0, entry.a1);
   const affine = ((entry.a0 >>> 8) & 3) !== 0;
   let ox = entry.a1 & 0x1ff, oy = entry.a0 & 0xff;
-  if (affine) { ox -= w / 2; oy -= h / 2; }
   const hFlip = !affine && (entry.a1 & 0x1000) !== 0, vFlip = !affine && (entry.a1 & 0x2000) !== 0;
   const baseTile = entry.a2 & 0x3ff, palette = 16 + (entry.a2 >>> 12);
   for (let y = 0; y < h; y += 1) for (let x = 0; x < w; x += 1) {
-    const sx = hFlip ? w - 1 - x : x, sy = vFlip ? h - 1 - y : y;
+    let sx = hFlip ? w - 1 - x : x, sy = vFlip ? h - 1 - y : y;
+    if (affine) {
+      const [pa = 256, pb = 0, pc = 0, pd = 256] = entry.matrix ?? [];
+      const dx = x - w / 2, dy = y - h / 2;
+      sx = Math.floor((pa * dx + pb * dy) / 256 + w / 2);
+      sy = Math.floor((pc * dx + pd * dy) / 256 + h / 2);
+      if (sx < 0 || sx >= w || sy < 0 || sy >= h) continue;
+    }
     const tile = tiles.get(baseTile + (sy >>> 3) * (w >>> 3) + (sx >>> 3));
     const packed = tile?.[(sy & 7) * 4 + ((sx & 7) >>> 1)] ?? 0;
     const index = (sx & 1) ? packed >>> 4 : packed & 15;

@@ -118,19 +118,23 @@ is intentionally direct state, not a screenshot-color fit.
   compose this register/VRAM-derived battle field and then use the real
   per-bank fade; `fadeTurn15BattleFirstFrame` is only an approximation.
 
-### Rung-1 raw compositor attempt (2026-07-22)
+### Rung-1 raw compositor closure (2026-07-22)
 
-`dump-turn15-sendout.py` now also saves selected BG character/map blocks,
-palette RAM, window registers, and 1D OBJ VRAM.  The new dev-time extractor
-`extract-turn15-field-ppu.ts` retains only OAM-referenced indexed OBJ tiles;
-`src/engine/gbaPpu.ts` composes mode-0 text BG priority/flips/transparency,
-OAM priority/order, and BLDY decrease, with Tier-1 coverage.
+`dump-turn15-sendout.py` now saves selected BG character/map blocks, palette
+RAM, window registers, 1D OBJ VRAM, and transferred affine OAM matrices. The
+extractor retains only OAM-referenced indexed OBJ tiles. `src/engine/gbaPpu.ts`
+composes text-BG priority/flips/transparency, OAM priority/order and matrices,
+then mGBA's source-pinned expanded packed-RGB `_darken` transfer. This is not
+the misleading 5-bit BLDY calculation: white at BLDY 15 becomes RGB
+`16,15,15`; BGR555 `0x4210` becomes `9,8,8`.
 
-The 20302 integration was deliberately not shipped: its direct indexed
-composition differed at all pixels, while the seven party residuals stayed
-unchanged.  The direct state proves zero-sized windows and normal BG/OAM
-selection; the remaining blocker is the exact mGBA display-color/blend
-transfer from BGR555 palette RAM at this frame (the raw white BG entry is
-`0x7fff`, whereas the oracle output is channel-asymmetric after BLDY=15).
-Resolve that transfer from emulator/PPU behavior before reconnecting this
-generic helper; do not screenshot-fit a color table.
+The regenerated asset has BG size-1 maps at 0x1000 bytes (BG3 is size 1), raw
+BGR555 palette RAM, six visible OAM entries and 137 referenced OBJ tiles. Its
+one affine entry carries the transferred identity matrix `[256,0,0,256]`.
+The first composition exposed a 1551px MURKROW displacement (bbox
+`123,0–196,71`); honoring the transferred affine geometry fixed it without a
+coordinate patch. The asset is wired only to SEND OUT's press-relative first
+battle-fade boundary, replacing `fadeTurn15BattleFirstFrame`; no screenshot,
+fullscreen RGBA pixels, per-frame replay, trace-name branch or global tick is
+stored. Both party compares are now 193/200 with 20302/20332 exact; the seven
+remaining red frames are the menu-owned residuals recorded above.

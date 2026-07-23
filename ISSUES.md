@@ -7,10 +7,12 @@ symptom, what's confirmed from the reference/oracle, and any leads.
 
 ## #37 — Turn-15 forced party menu: post-confirm SEND OUT remains
 
-The press-relative entry fades and live icon compositor are now exact:
-canonical and delayed party-select traces are both 143/143. Remaining scope is
-only the post-SEND-OUT path. `docs/turn15-sendout-notes.md` now splits it
-into implementation rungs: (1) submenu exit/fade/black, (2) battle fade +
+The press-relative entry fades and live icon compositor are now exact. Rung 1's
+first battle-field boundary is also exact: canonical/delayed traces are both
+**193/200**, including 20302/20332. The only rung-1 remainder is seven existing
+party residuals: 5px at 20248/50/58/60/62 and 273px at 20253/54 (delayed +30).
+Do not reopen the raw field transfer for those menu-owned pixels. The later
+post-SEND-OUT path remains split into rungs: (2) battle fade +
 Go! MAGBY text, (3) Brendan throw/closed ball, (4) clean open-particles +
 MAGBY materialize/tint, (5) create/populate/slide the 138/138 player
 healthbox, and (6) blank hold + re-anchored MAGBY action-menu bounce.

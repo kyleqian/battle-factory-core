@@ -4,6 +4,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 272 — Bounded worker (ISSUES #37 rung 1): **CLOSED FIELD BOUNDARY — GREEN**
+
+- **State:** canonical and delayed party traces are **193/200**; 20302 and
+  delayed 20332 are byte-exact. The only red frames are party residuals:
+  5px at 20248/50/58/60/62 and 273px at 20253/54 (delayed +30). Tier-1 is
+  **1008/1008**; build is **5.393 MB** (<6 MB); verifier **17/17** and
+  party compositor **5/5**.
+- **Did:** regenerated the 73KB raw indexed 20302 asset from direct PPU
+  state (BG size-1 maps are 0x1000); wired it only at SEND OUT's
+  press-relative battle-fade boundary; removed the stale faint-frame/
+  `fadeTurn15BattleFirstFrame` approximation. Captured OAM affine matrices
+  from transferred OAM, added affine compositing, and corrected mGBA's
+  packed-RGB darken transfer.
+- **Next:** #37 rung 1 has only the seven named party residuals left; do not
+  reopen the exact 20302 field boundary. Later SEND OUT animation rungs stay
+  separately scoped.
+- **Notes:** direct probe exits 139 after valid JSON. Initial raw integration
+  exposed a 1551px MURKROW shift (bbox 123,0–196,71); transferred affine
+  geometry resolved it to 0px without a coordinate patch. Final commands:
+  canonical/delayed compares 193/200 each; one full test/build pass green.
+
+---
 ## 271 — Bounded worker (ISSUES #37 rung 1): **GREEN TRANSFER CHECKPOINT — raw field asset next**
 
 - **State:** safe baseline retained: canonical/delayed **192/200**; the same
@@ -35,28 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   overlay/mask, or RGB-candidate fitting.
 - **Notes:** no production changes shipped. PAPERCUT: valid mGBA probe ends
   SIGSEGV 139, ~3 min.
-
----
-## 268 — Bounded worker (ISSUES #37 rung 1): **GREEN PROBE CHECKPOINT — exact palette/field blocker**
-
-- **State:** baseline green: Tier-1 **1005/1005**, build **5.32 MB**.
-  Rung 1 remains **192/200** in both party traces (delayed exactly +30):
-  5px at 20248/50/58/60/62, 273px at 20253/54, full frame at 20302.
-- **Did:** extended `dump-turn15-sendout.py` with all 32 unfaded/faded
-  palette banks, actual PPU OAM, BG controls/scrolls and VRAM hashes; wrote
-  the direct-state reproduction and attribution in
-  `docs/turn15-sendout-notes.md`. The 273px pair is OBJ bank1/index15
-  (`74,74,99 -> 41,41,57`), while the 5px is MAGBY icon bank4 entries 4/5.
-  20302 proves the field compositor has switched to `DISPCNT=1f40`, BG3
-  charbase 2/screenbase 26, not the frozen faint frame.
-- **Next — USER DECISION 2026-07-22:** use supervisor judgment; authorized
-  the recommended further bounded, probe-guided worker. Fix the RAM-proven
-  party palette entries and extract/compose the real register-derived 20302
-  field, then require both traces **200/200**. The field is also prerequisite
-  to rung 2. Do not alter phase timing or ship color/mask fitting.
-- **Notes:** production untouched; probe tool and docs are committed green.
-  Supervisor independently reproduced the register/palette dump, Tier-1, and
-  build. PAPERCUT: mGBA diagnostics + teardown SIGSEGV, ~3 min.
-
-
----
