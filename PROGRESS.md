@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 314 — S8 Battle 2 FIGHT submenu round-trip: **GREEN — 32848-33056 exact**
+
+- **State:** extended `battle2-action-menu-dense.json` is **209/209 exact**
+  through the resettled Battle-2 action menu. Intro remains **251/251**,
+  KABUTO **151/151**, player send-out **170/170**, and Battle-1 send-out
+  **255/256** (#18 only). Tier-1 is **1118/1118**; build passes
+  (**5.519 MB**).
+- **Did:** reused generic FIGHT state/chrome/text with menu-relative clocks
+  on the live JENSON field; canonical A opens ONIX's full-PP moves, DOWN
+  transitions ROCK SLIDE→DRAGONBREATH, and B closes without confirming.
+  Added Tier-1 pins for the 32901 A gate, moves/PP, display lag, and close.
+- **Next:** S8 stays `[ ]`; continue only with a separately assigned
+  Battle-2 turn, swap-YES, or later round-loop increment.
+- **Notes:** canonical interaction edges: A 33031, submenu blank 33036,
+  reveal 33037, DOWN 33040/display 33042, B 33044, action-menu return
+  33051. Commits `33bd561`, `94f6c31`; no harvest, fitting, thinning,
+  confirm, or absolute-tick framebuffer cases.
+
+---
 ## 313 — S8 Battle 2 first action menu: **GREEN — 32848-33030 exact**
 
 - **State:** `battle2-action-menu-dense.json` is **183/183 exact** across
@@ -51,25 +70,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   32820→1667 (healthbox first visible); summary eva's sole phase boundary is
   canonical 32741 / callback age 14. No harvest, absolute-tick lookup,
   fitting, thinning, or work at 32850+.
-
----
-## 311 — S8 Battle 2 player send-out: **PARTIAL — 32680-32726 exact**
-
-- **State:** new every-frame `battle2-player-sendout-dense.json` is
-  **47/170 exact** across canonical 32680-32849: the exact prefix now reaches
-  32726, immediately before Brendan's first inherited visible pose at 32727.
-  Predecessors remain KABUTO **151/151**, intro **251/251**, and Battle 1
-  send-out **255/256** (#18 only). Tier-1 is **1109/1109**; build passes
-  (**5.517 MB**).
-- **Did:** reanchored the Battle-1 player ball/materialize/healthbox clock to
-  the encounter handoff, retained KABUTO after its H-slide-wobble callback,
-  pinned Battle 2's separate inherited trainer/summary clock and exact
-  one-glyph-per-tick `Go! ONIX!` boundary, and added three Tier-1 tests.
-- **Next:** resume exactly at **32727**. Derive Brendan's inherited
-  entrance/throw pose + translation and its live OAM overlap with the ball;
-  then close 32727-32849 without changing the accepted clocks or entering
-  the 32850 blank-menu handoff. S8 remains `[ ]`.
-- **Notes:** first visible trainer callback is handoff+157, while ball spin,
-  open, materialize, and permanent settle remain handoff+153/+190/+191/+240.
-  The dense remainder is intentionally unthinned and not claimed exact. No
-  harvest, canonical-tick lookup, RGB/coordinate fitting, or menu work.

@@ -527,13 +527,16 @@ opponent-handoff-relative, while Brendan, player summary, ball/open/
 particles, ONIX materialize/back animation, and the Lv50 117/117 healthbox
 reuse Battle 1 through one inherited visual delay.
 `battle2-action-menu-dense.json` now captures every canonical frame
-32848-33030 at **183/183 exact**, with a live KABUTO 91/91 vs. healed ONIX
-117/117 field and held FIGHT menu. Exact replay corrected the earlier
+32848-33056 at **209/209 exact**, with a live KABUTO 91/91 vs. healed ONIX
+117/117 field. Exact replay corrected the earlier
 boundary ledger: ONIX's inherited shake finishes 32850-32854, `Go! ONIX!`
 holds through 32894, the six clear frames are 32895-32900, and the atomic
 input-ready menu begins 32901. The endpoint RNG is 3530724670 with
-controller exec flags 1. S8 remains open for Battle 2 actions/turns, swap
-YES, and battles 3-7.
+controller exec flags 1. The bounded interaction presses A at 33031,
+reveals ONIX's full-PP FIGHT submenu at 33037, navigates DOWN from ROCK
+SLIDE to DRAGONBREATH, and B-closes to the resettled action menu at 33051
+without confirming a move. S8 remains open for Battle 2 turns, swap YES,
+and battles 3-7.
 **Frame cap raised (user decision #2, 2026-07-19 ~17:00):** §15's scout
 proved the WIN unreachable under the 20000-frame cap for ANY plausible
 line (best verified line: Onix faints at 19147 with Murkrow untouched at

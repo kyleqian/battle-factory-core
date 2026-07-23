@@ -1,3 +1,25 @@
+## 311 — S8 Battle 2 player send-out: **PARTIAL — 32680-32726 exact**
+
+- **State:** new every-frame `battle2-player-sendout-dense.json` is
+  **47/170 exact** across canonical 32680-32849: the exact prefix now reaches
+  32726, immediately before Brendan's first inherited visible pose at 32727.
+  Predecessors remain KABUTO **151/151**, intro **251/251**, and Battle 1
+  send-out **255/256** (#18 only). Tier-1 is **1109/1109**; build passes
+  (**5.517 MB**).
+- **Did:** reanchored the Battle-1 player ball/materialize/healthbox clock to
+  the encounter handoff, retained KABUTO after its H-slide-wobble callback,
+  pinned Battle 2's separate inherited trainer/summary clock and exact
+  one-glyph-per-tick `Go! ONIX!` boundary, and added three Tier-1 tests.
+- **Next:** resume exactly at **32727**. Derive Brendan's inherited
+  entrance/throw pose + translation and its live OAM overlap with the ball;
+  then close 32727-32849 without changing the accepted clocks or entering
+  the 32850 blank-menu handoff. S8 remains `[ ]`.
+- **Notes:** first visible trainer callback is handoff+157, while ball spin,
+  open, materialize, and permanent settle remain handoff+153/+190/+191/+240.
+  The dense remainder is intentionally unthinned and not claimed exact. No
+  harvest, canonical-tick lookup, RGB/coordinate fitting, or menu work.
+
+---
 ## 310 — S8 Battle 2 KABUTO opponent send-out: **GREEN — 32570-32681 exact**
 
 - **State:** `battle2-kabuto-sendout-dense.json` is **151/151 exact**
