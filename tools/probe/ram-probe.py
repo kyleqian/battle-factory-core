@@ -14,6 +14,7 @@ Run with the harness's mGBA-enabled interpreter (NOT system python3):
 <spec.json> shape:
 {
   "segments": [{"buttons": ["A"], "frames": 2}, {"buttons": [], "frames": 28}, ...],
+  "trace": "../../compare/traces-groundtruth/example.json", // optional alternative to segments
   "watch": [
     {"name": "cursorPos", "addr": "sFactorySelectScreen+3", "size": 1},
     {"name": "coeff", "addr": "sFactorySelectScreen+0x2A8", "size": 1, "deref": true},
@@ -29,6 +30,7 @@ Run with the harness's mGBA-enabled interpreter (NOT system python3):
     ], "size": 2}
   ],
   "startTick": 0   // optional, record only from this tick onward (default 0)
+  "oracleProfile": "battle-scene-off" // optional; defaults to battle-scene-on
 }
 "addr" is either "<hexOrDecimal>" (absolute), or "<symbolOrPointerLabel>+<offset>"
 where the base before "+" is either a linker symbol (resolved via
@@ -90,7 +92,10 @@ from emerald_core import EmeraldOracle  # noqa: E402
 REFERENCE_POKEEMERALD = (WORKTREE_ROOT / "reference" / "pokeemerald").resolve()
 ROM_PATH = REFERENCE_POKEEMERALD / "pokeemerald.gba"
 MAP_PATH = REFERENCE_POKEEMERALD / "pokeemerald.map"
-BOOTSTRAP_PATH = ORACLE_DIR / "bootstrap" / "factory.json"
+BOOTSTRAPS = {
+    "battle-scene-on": ORACLE_DIR / "bootstrap" / "factory.json",
+    "battle-scene-off": ORACLE_DIR / "bootstrap" / "factory-battle-scene-off.json",
+}
 
 # Pinned file-static pointer labels not in the linker map (nm'd from the
 # pinned reference build's ELF once; see tools/extract/inspect-anchor.py).
@@ -161,8 +166,17 @@ def read_sized(oracle: EmeraldOracle, addr: int, size: int) -> int:
 
 def main() -> None:
     spec = json.loads(SPEC_PATH.read_text())
-    oracle = EmeraldOracle(ROM_PATH, MAP_PATH, BOOTSTRAP_PATH)
+    profile = spec.get("oracleProfile", "battle-scene-on")
+    if profile not in BOOTSTRAPS:
+        raise ValueError(f"unknown oracleProfile {profile!r}; expected one of {tuple(BOOTSTRAPS)}")
+    oracle = EmeraldOracle(ROM_PATH, MAP_PATH, BOOTSTRAPS[profile])
     oracle.new_session()
+
+    if "trace" in spec:
+        trace_path = (SPEC_PATH.parent / spec["trace"]).resolve()
+        segments = json.loads(trace_path.read_text())["segments"]
+    else:
+        segments = spec["segments"]
 
     watches = spec["watch"]
     start_tick = int(spec.get("startTick", 0))
@@ -179,7 +193,7 @@ def main() -> None:
     if tick >= start_tick:
         record()
 
-    for segment in spec["segments"]:
+    for segment in segments:
         buttons = segment.get("buttons", [])
         for _ in range(int(segment["frames"])):
             oracle.advance(buttons)
