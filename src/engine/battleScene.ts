@@ -558,6 +558,7 @@ import {
 import {
   FIRE_PUNCH_BURN_MESSAGE_AGE,
   FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE,
+  FIRE_PUNCH_TURN17_MENU_REDRAW_AGE,
   firePunchFistVisible,
   firePunchBurnFlames,
   firePunchHitsplatVisible,
@@ -1206,6 +1207,19 @@ export interface BattleSceneState {
    * brief's own instruction).
    */
   turn14Resolved: boolean;
+  /**
+   * True once turn 16's FIRE_PUNCH/burn tail has redrawn the action menu
+   * and the player opens FIGHT for turn 17. Optional only so older direct
+   * render fixtures remain source-compatible; live engine state always
+   * carries it explicitly.
+   */
+  turn16Resolved?: boolean;
+  /**
+   * Turn-16-confirm-relative action-menu redraw anchor retained across the
+   * fresh FightSubmenuState created for turn 17. This keeps the underlying
+   * bounce continuous without an absolute battle tick.
+   */
+  turn17MenuRedrawElapsed?: number | null;
   /** Forced player-switch menu, created only by the real turn-15 faint-text A press. */
   turn15PartySelect?: import("./partySelect.ts").PartySelectState | null;
 }
@@ -1230,6 +1244,8 @@ export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   turn13KoDismissElapsed: null,
   turn13Resolved: false,
   turn14Resolved: false,
+  turn16Resolved: false,
+  turn17MenuRedrawElapsed: null,
 };
 
 export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
@@ -1253,6 +1269,8 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     turn13KoDismissElapsed: state.turn13KoDismissElapsed,
     turn13Resolved: state.turn13Resolved,
     turn14Resolved: state.turn14Resolved,
+    turn16Resolved: state.turn16Resolved ?? false,
+    turn17MenuRedrawElapsed: state.turn17MenuRedrawElapsed ?? null,
     turn15PartySelect: state.turn15PartySelect,
   };
 }
@@ -4429,11 +4447,12 @@ function drawFightSubmenuChrome(
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
   turn14Resolved: boolean = false,
+  turn16Resolved: boolean = false,
 ): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, turn14Resolved);
+  const currentPP = currentPPForActiveMon(moveset, turn1Resolved, turn2Resolved, turn3Resolved, turn4Resolved, turn5Resolved, turn6Resolved, turn7Resolved, turn8Resolved, turn9Resolved, turn10Resolved, turn11Resolved, turn12Resolved, turn13Resolved, turn14Resolved, turn16Resolved);
   drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, buildFightMoveset(moveset.moveIds, currentPP), displayCursor);
 }
 
@@ -12040,7 +12059,6 @@ const TURN16_FAINT_ATTACK_ANIM_DELAY = 52;
 const TURN16_FIRE_PUNCH_LINE1 = "MAGBY used";
 const TURN16_FIRE_PUNCH_LINE2 = "FIRE PUNCH!";
 const TURN16_FIRE_PUNCH_TEXT_TOTAL = TURN16_FIRE_PUNCH_LINE1.length + TURN16_FIRE_PUNCH_LINE2.length;
-
 type FaintAttackDarkBgAsset = {
   charBlock2B64: string;
   screenBlock26B64: string;
@@ -12080,6 +12098,13 @@ function turn16PartyElapsedAtTick(partyElapsed: number, t: number, anchorTick: n
 
 /** FIRE_PUNCH's first owned frame is faint-attack kickoff age 344. */
 const TURN16_FIRE_PUNCH_FIRST_OWNED_AGE = 344;
+/** Turn-16 confirm to its fresh turn-17 action-menu redraw. */
+export const TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY =
+  TURN16_FAINT_ATTACK_ANIM_DELAY
+  + TURN16_FIRE_PUNCH_FIRST_OWNED_AGE
+  + FIRE_PUNCH_TURN17_MENU_REDRAW_AGE;
+const TURN16_SETTLED_OWNED_AGE =
+  TURN16_FIRE_PUNCH_FIRST_OWNED_AGE + FIRE_PUNCH_TURN17_MENU_REDRAW_AGE;
 const FIRE_PUNCH_RED: RgbColor = { r: 248, g: 0, b: 0 };
 
 function firePunchTargetShakeY2(age: number): number {
@@ -12278,11 +12303,65 @@ function drawTurn16FightSubmenuWindow(
   t: number,
   sm: FightSubmenuState,
   partyElapsed: number,
+  turn16Resolved: boolean,
+  turn17MenuRedrawElapsed: number | null,
 ): void {
   if (sm.openElapsed === null) return;
   const openTick = TICK0 + sm.openElapsed;
   const revealTick = openTick + TURN16_FIGHT_SUBMENU_REVEAL_DELAY;
   const openPartyElapsed = turn16PartyElapsedAtTick(partyElapsed, t, openTick);
+
+  if (turn16Resolved && turn17MenuRedrawElapsed !== null) {
+    const redrawTick = TICK0 + turn17MenuRedrawElapsed;
+    const settledBounceTick = 1748 + t - redrawTick;
+    if (t < revealTick) {
+      drawTurn16PostSwitchField(fb, partyElapsed, settledBounceTick, TURN16_SETTLED_OWNED_AGE);
+      drawTurn15MagbySettledMenuChrome(fb);
+      return;
+    }
+
+    const confirmTick = sm.confirmElapsed === null ? null : TICK0 + sm.confirmElapsed;
+    const freezeTick = confirmTick === null ? null : confirmTick + TURN16_BOUNCE_FREEZE_DELAY;
+    const bounceTick =
+      freezeTick !== null && t >= freezeTick
+        ? 1748 + freezeTick - redrawTick + 1
+        : settledBounceTick - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+    drawTurn16PostSwitchField(fb, partyElapsed, bounceTick, TURN16_SETTLED_OWNED_AGE);
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+
+    if (confirmTick !== null && t >= confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY) {
+      drawMessageTextLines(
+        fb,
+        TURN16_FAINT_ATTACK_LINE1,
+        TURN16_FAINT_ATTACK_LINE2,
+        turn15SimpleVisibleChars(t, confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY, TURN16_FAINT_ATTACK_TEXT_TOTAL),
+      );
+      return;
+    }
+
+    drawTurn5SitrusSettledMenuChrome(fb);
+    drawFightSubmenuChrome(
+      fb,
+      sm.displayCursor,
+      false,
+      false,
+      sm.activeMonMoveset,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+    );
+    return;
+  }
 
   if (t < revealTick) {
     drawTurn16PostSwitchField(fb, partyElapsed, partySendOutMenuBounceTick(openPartyElapsed));
@@ -12392,7 +12471,14 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
     }
     if (phase === "black") return true;
     if (phase === "actionMenu" && state.fightSubmenu.openElapsed !== null) {
-      drawTurn16FightSubmenuWindow(fb, TICK0 + state.elapsed, state.fightSubmenu, party.sendOutElapsed);
+      drawTurn16FightSubmenuWindow(
+        fb,
+        TICK0 + state.elapsed,
+        state.fightSubmenu,
+        party.sendOutElapsed,
+        state.turn16Resolved ?? false,
+        state.turn17MenuRedrawElapsed ?? null,
+      );
       return true;
     }
     // The extracted mode-0 state supplies field/message-box ownership and

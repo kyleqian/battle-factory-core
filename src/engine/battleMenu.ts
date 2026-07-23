@@ -2219,6 +2219,7 @@ export function currentPPForActiveMon(
   turn12Resolved: boolean = false,
   turn13Resolved: boolean = false,
   turn14Resolved: boolean = false,
+  turn16Resolved: boolean = false,
 ): readonly [number, number, number, number] {
   const [a, b, c, d] = moveset.maxPP;
   // S7 slice N (docs/turn6-notes.md §4): turn 5's own ROCK_SLIDE (Onix's
@@ -2273,7 +2274,10 @@ export function currentPPForActiveMon(
   // decrements PP" rule) is a 3rd use (turns 2, 13, 14; PP 20->17), matching
   // docs/turn15-notes.md's own "PP shows 17/20" ledger exactly.
   const slot2Uses = (turn2Resolved ? 1 : 0) + (turn13Resolved ? 1 : 0) + (turn14Resolved ? 1 : 0);
-  return [a - slot0Uses, turn8Resolved ? b - 1 : b, c - slot2Uses, d];
+  // MAGBY becomes active only after turn 15's forced switch. Its slot-0
+  // FIRE_PUNCH is used once on turn 16 before the turn-17 reopen.
+  const activeSlot0Uses = moveset.moveIds[0] === 7 && turn16Resolved ? 1 : slot0Uses;
+  return [a - activeSlot0Uses, turn8Resolved ? b - 1 : b, c - slot2Uses, d];
 }
 
 export function getCurrentPPToMaxPPState(currentPP: number, maxPP: number): 0 | 1 | 2 | 3 {

@@ -28,6 +28,7 @@ import {
   INITIAL_BATTLE_SCENE_STATE,
   TICK0 as SCENE_TICK0,
   TURN5_SITRUS_MENU_REOPEN_GATE_DELAY,
+  TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
   TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET,
   TURN6_FEATHERDANCE_LINE1,
   TURN6_FEATHERDANCE_LINE2,
@@ -179,6 +180,59 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       confirmElapsed: null,
       activeMonMoveset: rentalMoveset("MAGBY"),
     });
+  });
+
+  it("turn 17's canonical A edges create a fresh epoch, preserve the confirmation-relative redraw anchor, and confirm FIRE_PUNCH", () => {
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn17-rung1.json", import.meta.url), "utf8")) as {
+      segments: { frames: number; buttons?: GbaButton[] }[];
+    };
+    let state = createInitialState();
+    let frame = 0;
+    let atOpen: EngineState | null = null;
+    let atConfirm: EngineState | null = null;
+    for (const seg of trace.segments) {
+      for (let i = 0; i < seg.frames; i += 1) {
+        state = press(state, seg.buttons ?? []);
+        if (frame === 21773) atOpen = state;
+        if (frame === 21801) atConfirm = state;
+        frame += 1;
+      }
+    }
+    expect(atOpen!.battleScene).toMatchObject({
+      turn16Resolved: true,
+      turn17MenuRedrawElapsed: 21725 - SCENE_TICK0,
+      fightSubmenu: {
+        openElapsed: 21774 - SCENE_TICK0,
+        confirmElapsed: null,
+        cursor: 0,
+      },
+    });
+    expect(atConfirm!.battleScene!.fightSubmenu.confirmElapsed).toBe(21802 - SCENE_TICK0);
+    expect(atOpen!.battleScene!.turn17MenuRedrawElapsed).toBe(
+      20774 - SCENE_TICK0 + TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
+    );
+  });
+
+  it("turn 17's FIRE_PUNCH-default submenu shows the one prior use: 14/15 PP", () => {
+    const magby = rentalMoveset("MAGBY");
+    expect(currentPPForActiveMon(
+      magby,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+    )[0]).toBe(14);
   });
 
   it("A on the settled action menu opens the submenu at the exact next tick, JOY_NEW only (a held A the following tick doesn't re-open/no-op differently)", () => {

@@ -3,7 +3,7 @@
 // reference/pokeemerald/src/battle_script_commands.c (Cmd_critcalc :1253,
 // Cmd_typecalc :1355, Cmd_accuracycheck :1099, ApplyRandomDmgMultiplier
 // :1639). Scope: the branches battle 1's turn 1 exercises (level-50
-// singles, no weather/screens/burn/double-battle) are fully exercised by
+// singles, no weather/screens/double-battle) are fully exercised by
 // Tier-1 tests; the surrounding modifier chain (held items, abilities,
 // Reflect/Light Screen, double-battle target-split) is ported structurally
 // so later S7 slices can enable those paths, but is untested this step —
@@ -100,7 +100,7 @@ export interface DamageBattler {
   level: number;
   types: readonly [string, string];
   statStages: StatStages;
-  /** STATUS1_BURN set (pokemon.c:3263) - structurally present, false for all of battle 1. */
+  /** STATUS1_BURN set (pokemon.c:3263); halves physical damage unless GUTS. */
   isBurned?: boolean;
   /** ABILITY_* id, structurally present - see the modifier-chain notes above for what's wired. */
   ability?: string | null;

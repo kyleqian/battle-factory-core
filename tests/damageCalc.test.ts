@@ -51,6 +51,26 @@ const GROVYLE = {
   types: typesOf("SPECIES_GROVYLE"),
   statStages: { ...NEUTRAL_STAT_STAGES },
 };
+const MURKROW = {
+  attack: 91,
+  defense: 69,
+  spAttack: 91,
+  spDefense: 69,
+  level: 50,
+  types: typesOf("SPECIES_MURKROW"),
+  statStages: { ...NEUTRAL_STAT_STAGES },
+  isBurned: true,
+  ability: "ABILITY_INSOMNIA",
+};
+const MAGBY = {
+  attack: 81,
+  defense: 43,
+  spAttack: 108,
+  spDefense: 61,
+  level: 50,
+  types: typesOf("SPECIES_MAGBY"),
+  statStages: { ...NEUTRAL_STAT_STAGES },
+};
 
 describe("calculateBaseDamage - RAM-pinned regression cases (turn-resolution-notes.md §6 item 1)", () => {
   it("Rock Slide: atk51/def56/pow75/lvl50/no-crit/STAB/neutral - base (pre-STAB) locks to 32", () => {
@@ -125,6 +145,38 @@ describe("calculateBaseDamage - RAM-pinned regression cases (turn-resolution-not
       expect(applyRandomDamageMultiplier(4, rand16)).toBe(3);
     }
     expect(applyRandomDamageMultiplier(4, 0)).toBe(4);
+  });
+});
+
+describe("calculateBaseDamage - burn and turn 17's RAM-pinned FAINT_ATTACK roll", () => {
+  it("halves physical damage before the unconditional +2, unless the attacker has GUTS", () => {
+    const input = {
+      attacker: MURKROW,
+      defender: MAGBY,
+      movePower: 60,
+      moveType: "TYPE_FLYING",
+      isCriticalHit: false,
+    } as const;
+    expect(calculateBaseDamage({ ...input, attacker: { ...MURKROW, isBurned: false } })).toBe(57);
+    expect(calculateBaseDamage(input)).toBe(29);
+    expect(calculateBaseDamage({ ...input, attacker: { ...MURKROW, ability: "ABILITY_GUTS" } })).toBe(57);
+  });
+
+  it("turn 17 FAINT_ATTACK is DARK/special in gen 3, so burn does not halve it; the RAM RNG roll resolves 61 -> 52", () => {
+    const base = calculateBaseDamage({
+      attacker: MURKROW,
+      defender: MAGBY,
+      movePower: 60,
+      moveType: "TYPE_DARK",
+      isCriticalHit: false,
+    });
+    expect(base).toBe(41);
+    const stabbed = applyStab(base, MURKROW.types, "TYPE_DARK");
+    expect(stabbed).toBe(61);
+    const rng = new GbaRng(1936653909);
+    const roll = rng.next();
+    expect(rng.rngValue).toBe(1115590820);
+    expect(applyRandomDamageMultiplier(stabbed, roll)).toBe(52);
   });
 });
 

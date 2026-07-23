@@ -58,6 +58,14 @@ describe("getWhoStrikesFirst - battle 1 turn 9 (RAM-pinned, docs/turn9-notes.md 
   });
 });
 
+describe("getWhoStrikesFirst - battle 1 turn 17 (RAM-pinned)", () => {
+  it("burned MURKROW (97) still acts before MAGBY (89); burn does not modify speed", () => {
+    const magby: TurnOrderBattler = { speed: 89, speedStage: DEFAULT_STAT_STAGE, movePriority: 0 };
+    const murkrow: TurnOrderBattler = { speed: 97, speedStage: DEFAULT_STAT_STAGE, movePriority: 0 };
+    expect(sortBattlersByTurnOrder([0, 1], new Map([[0, magby], [1, murkrow]]))).toEqual([1, 0]);
+  });
+});
+
 describe("getWhoStrikesFirst - speed-tie Random()&1 tie-break (synthetic, unreachable in battle 1)", () => {
   // docs/turn-resolution-notes.md §6 risk 4: none of battle 1's 9 possible
   // active pairings tie on speed, so this branch needs a direct synthetic
