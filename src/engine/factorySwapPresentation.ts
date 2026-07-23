@@ -12,6 +12,7 @@ import {
   type FactorySwapPhase,
   type FactorySwapState,
 } from "./factorySwap.ts";
+import { getMonPicVisual, type MonPicVisual } from "./monPic.ts";
 
 export interface FactorySwapPresentationState {
   readonly controller: FactorySwapState;
@@ -208,4 +209,18 @@ export function factorySwapActionFadeY(phaseElapsed: number): number {
 export function factorySwapCancelButtonX(phaseElapsed: number): number {
   const steps = Math.max(0, Math.min(8, phaseElapsed - 26));
   return 192 + steps * 6;
+}
+
+/**
+ * Swap_Task_HandleMenu's shared OpenMonPic reveal. The transition-out child
+ * completes at edge +33; its source affine flash becomes visible three ticks
+ * later. This is the swap screen's first mon-picture open, so the affine
+ * flash is still flat even though its task cadence matches variant B.
+ */
+export function factorySwapPlayerMonPicVisual(phaseElapsed: number): MonPicVisual {
+  const elapsed = phaseElapsed - 33;
+  if (elapsed < 0) {
+    return getMonPicVisual({ phase: "closed", elapsed: 0, variant: "B", blended: false });
+  }
+  return getMonPicVisual({ phase: "opening", elapsed, variant: "B", blended: false });
 }

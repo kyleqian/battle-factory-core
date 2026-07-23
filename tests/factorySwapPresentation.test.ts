@@ -8,6 +8,7 @@ import {
   factorySwapActionFadeY,
   factorySwapBallTile,
   factorySwapCancelButtonX,
+  factorySwapPlayerMonPicVisual,
   factorySwapPlayerOptionBallTile,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
@@ -127,5 +128,19 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapCancelButtonX(27)).toBe(198);
     expect(factorySwapCancelButtonX(33)).toBe(234);
     expect(factorySwapCancelButtonX(34)).toBe(240);
+  });
+
+  it("pins the shared mon-picture reveal to the transition-relative epoch", () => {
+    expect(factorySwapPlayerMonPicVisual(35).flashWidth).toBe(0);
+    expect(factorySwapPlayerMonPicVisual(36)).toMatchObject({
+      flashWidth: 1,
+      flashBlended: false,
+      window: null,
+    });
+    expect(factorySwapPlayerMonPicVisual(47).flashWidth).toBe(64);
+    expect(factorySwapPlayerMonPicVisual(48).window).toEqual({ top: 64, bottom: 65 });
+    expect(factorySwapPlayerMonPicVisual(49).window).toEqual({ top: 60, bottom: 69 });
+    expect(factorySwapPlayerMonPicVisual(57).window).toEqual({ top: 32, bottom: 96 });
+    expect(factorySwapPlayerMonPicVisual(57).spriteVisible).toBe(false);
   });
 });

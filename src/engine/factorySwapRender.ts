@@ -6,10 +6,12 @@ import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts
 import {
   factorySwapActionFadeY,
   factorySwapCancelButtonX,
+  factorySwapPlayerMonPicVisual,
   factorySwapPlayerOptionBallTile,
 } from "./factorySwapPresentation.ts";
 import { blendComponentToward } from "./paletteFade.ts";
 import type { FactorySwapState } from "./factorySwap.ts";
+import { drawMonPic, type BallVisual } from "./monPicRender.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
@@ -229,6 +231,21 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     objFade,
   );
   drawCancelButton(fb, bgFade, objFade, actionFadeY, cancelButtonX);
+
+  if (state.phase === "playerOptions") {
+    const ballVisuals: BallVisual[] = renderedBallTiles.map((firstTile, index) => ({
+      palette: pokeball.selectedPalette,
+      firstTileRow: firstTile / 4,
+      centerX: 48 * index + 72,
+    }));
+    drawMonPic(
+      fb,
+      factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0),
+      selected.species,
+      48 * state.displayCursor + 72,
+      ballVisuals,
+    );
+  }
 
   // Keep the small-font metric live in production and make accidental
   // fallback to FONT_NORMAL observable in Tier-1.

@@ -130,6 +130,8 @@ function bg1Color(x: number, y: number): RgbColor | null {
 export interface BallVisual {
   palette: RgbColor[];
   firstTileRow: number;
+  /** Optional source sprite center for screens whose ball layout differs from the six-slot draft. */
+  centerX?: number;
 }
 
 const GRAY_BALL_VISUAL: BallVisual = { palette: pokeball.grayPalette, firstTileRow: 0 };
@@ -137,8 +139,9 @@ const GRAY_BALL_VISUAL: BallVisual = { palette: pokeball.grayPalette, firstTileR
 // The 6 rental balls (CreateSprite(..., 35*i + 32, 64, 1)), 32x32, drawn
 // center-anchored - see factoryDraftScreen.ts's identical layout constants.
 function ballColor(x: number, y: number, balls: readonly BallVisual[]): RgbColor | null {
-  for (let i = 0; i < 6; i += 1) {
-    const ox = 35 * i + 32 - 16;
+  const count = balls.some((ball) => ball.centerX !== undefined) ? balls.length : 6;
+  for (let i = 0; i < count; i += 1) {
+    const ox = (balls[i]?.centerX ?? (35 * i + 32)) - 16;
     const oy = 64 - 16;
     if (x < ox || x >= ox + 32 || y < oy || y >= oy + 32) continue;
     const lx = x - ox;
