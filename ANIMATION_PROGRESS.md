@@ -35,26 +35,25 @@ remainder.
 
 ## Current handoff
 
-- **State:** 12 Level 50 moves have strong canonical evidence but remain
-  `partial` under the new portability definition; none is yet claimed generic
-  `exact`.
-- **Did:** the relative Scene-ON adapter's existing player-side FIRE_PUNCH
-  stage remains **225/225 exact** for **ONIX (back) → GROVYLE (front)**
-  (frames 2313–2537 / ages 0–224). The new opponent route in
-  `stage-fire-punch-portable-on.py` stages only GROVYLE's stock AI-selected
-  slot 3 (`DOUBLE_TEAM→FIRE_PUNCH`) at tick 1886; two fresh Scene-ON probes
-  were byte-identical. It pins **GROVYLE (front) → ONIX (back)** geometry
-  (corners `(144,12)/(40,48)`, animation centers `(176,44)/(72,88)`), epoch
-  frame 2081, and its stock-controller outcome: PP 15→14 at 2080, ONIX
-  117→96 at 2130, burn status1 0→16 at 2223, controller release 2358. The
-  dense 2081–2357 fixture is committed; RGB remains temporary-only.
-- **Next:** wire that committed GROVYLE→ONIX fixture through the existing
-  generic relative adapter and run its complete dense comparison. Do not claim
-  FIRE_PUNCH `exact` unless it is green; its large ONIX target geometry and
-  target-side compositing are a real evidence variant.
-- **Boundary:** FIRE_PUNCH remains `partial`: the player-back portable
-  comparison is complete, but the opposite-side **app** comparison is not yet
-  run. Canonical controls remain turn16-rung3 **227/236** (known
-  21397–21405 residual) and turn17-rung4 **200/200**. This probe does not
-  alter runtime/compositor, battle logic, RNG, damage, turn order, or facility
-  state.
+- **State:** FIRE_PUNCH now has complete dense portable evidence on both
+  singles orientations, but remains honestly `partial` because its canonical
+  turn16 control retains a known nine-frame remainder. Overall Level 50
+  coverage is still 0 exact / 12 partial / 264 unsupported.
+- **Did:** **GROVYLE (front) → ONIX (back)** is **277/277 exact** for the full
+  committed Scene-ON frames 2081–2357 / ages 0–276; the existing
+  **ONIX (back) → GROVYLE (front)** case remains **225/225 exact**. The shared
+  seam now consumes explicit side geometry, immutable 117→96/burn timing,
+  player healthbox ownership, hit blink/wobble, not-very-effective/burn
+  printers, and source-derived status animation geometry. The reusable
+  right-to-left flame path uses `InitAnimLinearTranslation`'s direction bit
+  (`614 | 1 = 615`) and the player BATTLER_COORD base `(72,80)`, distinct
+  from its move-animation center `(72,88)`. Battler-0 BRN uses source tile
+  `0x1A` / dynamic palette slot 12. Temporary RGB remains outside production.
+- **Next:** close or explicitly settle only the canonical turn16 FIRE_PUNCH
+  remainder before promoting this move to `exact`: frames 21397–21405 each
+  differ by 183 pixels. Do not redo the two portable orientation audits.
+- **Boundary:** canonical controls are unchanged: turn16-rung3 **227/236**
+  (only 21397–21405, 183px each) and turn17-rung4 **200/200**. Presentation
+  consumes outcome/RNG/turn state as immutable inputs; no battle logic,
+  facility state, absolute-tick rule, screenshot lookup, or per-frame pixel
+  table was added.

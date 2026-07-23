@@ -74,9 +74,9 @@
     {
       "move": "MOVE_FIRE_PUNCH",
       "status": "partial",
-      "covered": ["player-back MAGBY to opponent-front MURKROW", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense ages 0-224 (225/225) through the shared Scene-ON adapter", "staged synthetic opponent-front GROVYLE to player-back ONIX, dense oracle frames 2081-2357 with source-pinned geometry and burn outcome (app comparison not yet run)"],
+      "covered": ["player-back MAGBY to opponent-front MURKROW", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense ages 0-224 (225/225) through the shared Scene-ON adapter", "portable synthetic opponent-front GROVYLE to player-back ONIX, complete dense ages 0-276 / oracle frames 2081-2357 (277/277) through the shared Scene-ON adapter with immutable 117→96 burn outcome"],
       "evidence": ["tools/compare/traces/turn16-rung3.json", "tools/compare/traces/turn17-rung4.json", "tools/compare/fixtures/fire-punch-onix-grovyle.json", "tools/compare/fixtures/fire-punch-grovyle-onix.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/fire-punch-portable-staging-probe.md"],
-      "remaining": "Run the dense GROVYLE→ONIX fixture through the existing relative Scene-ON adapter and make it green before any exact claim; player-back ONIX→GROVYLE itself is complete at 225/225."
+      "remaining": "Both required portable orientations are complete (225/225 and 277/277), but exact remains blocked by canonical turn16-rung3 frames 21397-21405 (183px each; 227/236 overall). Turn17-rung4 remains 200/200."
     },
     {
       "move": "MOVE_FAINT_ATTACK",
