@@ -122,6 +122,11 @@ import {
   actionMenuInputReady,
   battle2PreTurnRngCalls,
 } from "./battle2ActionMenu.ts";
+import {
+  battle2Turn1RngCalls,
+  battle2Turn1State,
+  type Battle2Turn1State,
+} from "./battle2Turn1.ts";
 import { advancePartySelect, INITIAL_PARTY_SELECT_STATE, partySendOutBattleMenuReady } from "./partySelect.ts";
 import {
   advanceFightSubmenuDisplay,
@@ -200,6 +205,8 @@ export interface EngineState {
   rngValue: number;
   /** gBattleControllerExecFlags, modeled through Battle 2 choose-action. */
   battleControllerExecFlags: number;
+  /** Confirm-relative hidden state for Battle 2's bounded first ROCK SLIDE. */
+  battle2Turn1: Battle2Turn1State | null;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -225,6 +232,7 @@ export function createInitialState(): EngineState {
     rngMode: "vblank",
     rngValue: ANCHOR_RNG_VALUE,
     battleControllerExecFlags: 0,
+    battle2Turn1: null,
   };
 }
 
@@ -254,6 +262,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let postwin: PostwinState | null = state.postwin;
   let battleSetup: BattleSetupState | null = state.battleSetup;
   let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
+  let battle2Turn1 = state.battle2Turn1 ?? null;
 
   if (postwin) {
     let nextPostwin = advancePostwin(postwin);
@@ -932,6 +941,20 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     }
     if (
       battle2HandoffTick !== null &&
+      battleScene.encounter === "jenson" &&
+      battleScene.fightSubmenu.confirmElapsed !== null
+    ) {
+      const confirmTick =
+        SCENE_TICK0 + battleScene.fightSubmenu.confirmElapsed;
+      const previousTurnCalls = battle2Turn1RngCalls(sceneT - 1, confirmTick);
+      const nextTurnCalls = battle2Turn1RngCalls(sceneT, confirmTick);
+      for (let i = previousTurnCalls; i < nextTurnCalls; i += 1) {
+        rngValue = advanceRngValue(rngValue);
+      }
+      battle2Turn1 = battle2Turn1State(sceneT, confirmTick);
+    }
+    if (
+      battle2HandoffTick !== null &&
       actionMenuInputReady(sceneT, battle2HandoffTick)
     ) {
       battleControllerExecFlags = 1;
@@ -956,6 +979,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       rngMode,
       rngValue,
       battleControllerExecFlags,
+      battle2Turn1,
     };
   }
 

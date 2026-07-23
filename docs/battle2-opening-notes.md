@@ -116,6 +116,24 @@ secondary, SAND ATTACK accuracy, then the 1+2+5 turn-end cluster. The
 result is ROCK SLIDE hit for 28 (91→63), no flinch; SAND ATTACK hit,
 accuracy -1, no damage or status.
 
+### Accepted engine checkpoint
+
+The bounded implementation now stops at frame **33331**, immediately before
+the 33332 opponent handoff. `tools/compare/traces/
+battle2-turn1-rockslide.json` preserves the exact 33030 prefix and the two
+accepted A edges, then captures 191 frames through 33331 at **191/191
+exact**. It is dense over 33030-33040, 33070-33089, 33104-33181, and
+33270-33331, with sparse anchors in the remaining animation span; no
+uncaptured span is claimed.
+
+The renderer reuses the Battle-1 ROCK SLIDE rock, shake, hit-flash, and
+health-drain clocks through a confirm-relative `-380` mechanism rebase. Only
+the live target sprite/healthbox and encounter field are parameterized for
+KABUTO; there is no absolute-tick framebuffer path. The core consumes only
+the accepted accuracy/spread/secondary calls and retains ONIX/ROCK SLIDE
+ownership through the endpoint. KABUTO/SAND ATTACK begins at 33332 and is
+not implemented by this checkpoint.
+
 ## Fisherman trainer intro
 
 `battle2-intro-dense.json` captures every frame **32280-32530** and is

@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { advanceRngValue } from "../src/engine/rng.ts";
 import {
+  INITIAL_BATTLE_SCENE_STATE,
+  TICK0,
+  sendOutHandoffTick,
+} from "../src/engine/battleScene.ts";
+import { ANCHOR_DRAFT_SCREEN_STATE } from "../src/engine/factoryDraftScreen.ts";
+import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
+import {
   BATTLE2_ROCK_SLIDE_DAMAGE,
   BATTLE2_TURN1_LAST_ONIX_FRAME_DELAY,
   BATTLE2_TURN1_OPPONENT_HANDOFF_DELAY,
@@ -77,5 +84,53 @@ describe("Battle 2 turn 1: ONIX ROCK SLIDE through the opponent handoff", () => 
       battle2Turn1State(CONFIRM + BATTLE2_TURN1_OPPONENT_HANDOFF_DELAY, CONFIRM)
         .opponentHandoffReady,
     ).toBe(true);
+  });
+
+  it("registers the live second A edge and advances core RNG/state through 33331-equivalent", () => {
+    const sendOutPress = 1326;
+    const handoff = sendOutHandoffTick(sendOutPress, "jenson");
+    const openTick = handoff + 461;
+    const confirmTick = openTick + 40;
+    let state: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      rngValue: 3530724670,
+      draftScreen: {
+        ...ANCHOR_DRAFT_SCREEN_STATE,
+        selectedIds: [1, 2, 3, 0, 0, 0],
+      },
+      battleScene: {
+        ...INITIAL_BATTLE_SCENE_STATE,
+        encounter: "jenson",
+        elapsed: openTick - TICK0 - 1,
+        sendOutPressElapsed: sendOutPress - TICK0,
+      },
+    };
+
+    state = tick(state, new Set(["A"]));
+    for (let i = 0; i < 39; i += 1) state = tick(state, new Set());
+    state = tick(state, new Set(["A"]));
+    expect(TICK0 + state.battleScene!.fightSubmenu.confirmElapsed!).toBe(confirmTick);
+    expect(state.battle2Turn1).toMatchObject({
+      age: 0,
+      currentMove: 0,
+      onixRockSlidePp: 10,
+      rngCalls: 0,
+    });
+
+    for (let i = 0; i < 260; i += 1) state = tick(state, new Set());
+    expect(state.rngValue).toBe(575948139);
+    expect(state.battle2Turn1).toMatchObject({
+      age: 260,
+      attacker: 0,
+      currentMove: 157,
+      onixRockSlidePp: 9,
+      moveDamage: 28,
+      kabutoDisplayHp: 63,
+      kabutoHp: 63,
+      secondaryChecked: true,
+      flinched: false,
+      opponentHandoffReady: false,
+    });
   });
 });

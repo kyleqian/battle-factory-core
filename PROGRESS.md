@@ -4,19 +4,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 316 — S8 Battle 2 turn 1 reducer: **GREEN — implementation in progress**
+## 316 — S8 Battle 2 turn 1 ROCK SLIDE: **GREEN — through 33331**
 
-- **State:** pure confirm-relative Battle-2 turn state is pinned; live core
-  and renderer wiring plus accepted trace remain open. Targeted Tier-1 is
-  **15/15** and build passes.
-- **Did:** added ONIX-first order, PP 10→9, the accuracy/spread/secondary
-  three-call RNG sequence, 19→28 noncrit damage, no-flinch result, KABUTO
-  display/stable HP timing, and the 33331/33332 ownership boundary.
-- **Next:** wire the reducer into core, then parameterize the proven Battle-1
-  ROCK SLIDE renderer for the live ONIX/KABUTO field through 33331.
-- **Notes:** animation mechanisms rebase through the accepted confirm edge,
-  never an absolute trace tick; no framebuffer lookup, harvest, fitting, or
-  trace thinning. S8 remains `[ ]`.
+- **State:** `battle2-turn1-rockslide.json` is **191/191 exact** through the
+  last ONIX-owned frame 33331. Tier-1 is **1126/1126**; build passes
+  (**5.522 MB**). S8 remains `[ ]`.
+- **Did:** stored A 33071, resolved ONIX first, committed PP 10→9 and the
+  three-call accuracy/spread/non-flinch RNG stream, rendered the full shared
+  ROCK SLIDE animation on live ONIX/KABUTO, and drained/committed KABUTO
+  91→63. Pure tests pin 19→28 noncrit damage and the 33331/33332 boundary.
+- **Next:** resume exactly at **33332**, where KABUTO becomes attacker with
+  current move SAND ATTACK. That handoff and everything later are unclaimed.
+- **Notes:** captures include every frame 33115-33181 and 33270-33331 plus
+  sparse mid-animation anchors. Battle-2 action/menu/send-outs/intro/
+  transition/rooms remain exact; Battle-1 send-out remains **255/256**
+  (#18 only). No framebuffer lookup, harvest, fitting, or thinning.
 
 ---
 ## 315 — S8 Battle 2 turn 1 33030-prefix probe: **GREEN — evidence only**
@@ -54,26 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   reveal 33037, DOWN 33040/display 33042, B 33044, action-menu return
   33051. Commits `33bd561`, `94f6c31`; no harvest, fitting, thinning,
   confirm, or absolute-tick framebuffer cases.
-
----
-## 313 — S8 Battle 2 first action menu: **GREEN — 32848-33030 exact**
-
-- **State:** `battle2-action-menu-dense.json` is **183/183 exact** across
-  canonical 32848-33030, including two predecessor-overlap frames. KABUTO
-  remains **151/151**, player send-out **170/170**, intro **251/251**, and
-  Battle 1 send-out **255/256** (#18 only). Tier-1 is **1115/1115** and
-  build passes (**5.519 MB**).
-- **Did:** composed the Battle 2 field live from KABUTO/ONIX sprites and
-  91/91 + 117/117 healthboxes, reusing only shared action-window chrome;
-  added encounter menu state, input boundary, and on-demand RNG/exec-state
-  reducers/tests. No Grovyle full-frame base or canonical-tick lookup.
-- **Correction:** exact canonical replay disproves the old 32850/32856
-  ledger: ONIX's inherited shake finishes 32850-32854, `Go! ONIX!` holds
-  through 32894, the six clear frames are **32895-32900**, and the atomic
-  input-ready menu reveal is **32901**.
-- **Next:** S8 stays `[ ]`; continue only with a separately assigned Battle
-  2 action/turn or swap-YES/round-loop increment. This worker stops at the
-  held FIGHT menu and does not consume input.
-- **Notes:** RNG is flat through 32893, then +1 at 32894, +2 at 32898, +5
-  at 32900; endpoint is 3530724670 with execFlags=1. Commits `2f7b284`,
-  `1d3d295`; no harvest, fitting, thinning, or absolute tick cases.

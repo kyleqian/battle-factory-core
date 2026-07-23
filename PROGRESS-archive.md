@@ -1,3 +1,26 @@
+## 313 — S8 Battle 2 first action menu: **GREEN — 32848-33030 exact**
+
+- **State:** `battle2-action-menu-dense.json` is **183/183 exact** across
+  canonical 32848-33030, including two predecessor-overlap frames. KABUTO
+  remains **151/151**, player send-out **170/170**, intro **251/251**, and
+  Battle 1 send-out **255/256** (#18 only). Tier-1 is **1115/1115** and
+  build passes (**5.519 MB**).
+- **Did:** composed the Battle 2 field live from KABUTO/ONIX sprites and
+  91/91 + 117/117 healthboxes, reusing only shared action-window chrome;
+  added encounter menu state, input boundary, and on-demand RNG/exec-state
+  reducers/tests. No Grovyle full-frame base or canonical-tick lookup.
+- **Correction:** exact canonical replay disproves the old 32850/32856
+  ledger: ONIX's inherited shake finishes 32850-32854, `Go! ONIX!` holds
+  through 32894, the six clear frames are **32895-32900**, and the atomic
+  input-ready menu reveal is **32901**.
+- **Next:** S8 stays `[ ]`; continue only with a separately assigned Battle
+  2 action/turn or swap-YES/round-loop increment. This worker stops at the
+  held FIGHT menu and does not consume input.
+- **Notes:** RNG is flat through 32893, then +1 at 32894, +2 at 32898, +5
+  at 32900; endpoint is 3530724670 with execFlags=1. Commits `2f7b284`,
+  `1d3d295`; no harvest, fitting, thinning, or absolute tick cases.
+
+---
 ## 312 — S8 Battle 2 player send-out: **GREEN — 32680-32849 exact**
 
 - **State:** `battle2-player-sendout-dense.json` is **170/170 exact**

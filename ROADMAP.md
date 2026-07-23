@@ -537,6 +537,17 @@ reveals ONIX's full-PP FIGHT submenu at 33037, navigates DOWN from ROCK
 SLIDE to DRAGONBREATH, and B-closes to the resettled action menu at 33051
 without confirming a move. S8 remains open for Battle 2 turns, swap YES,
 and battles 3-7.
+**Battle 2 turn-1 ROCK SLIDE increment (2026-07-23):** canonical A at 33071
+confirms ONIX's default ROCK SLIDE and the engine is exact through **33331**,
+one frame before KABUTO takes attacker/current-move ownership.
+`battle2-turn1-rockslide.json` is **191/191 exact**, with dense capture
+windows across confirmation/text, animation, and the complete KABUTO
+healthbox drain/settle. The Battle-1 ROCK SLIDE clocks/render mechanisms are
+reused confirm-relatively on the live ONIX/KABUTO field; Tier-1 pins ONIX-
+first order, PP 10→9, the accuracy/spread/non-flinch RNG calls, damage 28
+noncrit, KABUTO 91→63, and the 33331/33332 boundary. Frame 33332+, SAND
+ATTACK, later turns, swap YES, battles 3-7, and round completion remain
+open, so S8 stays `[ ]`.
 **Frame cap raised (user decision #2, 2026-07-19 ~17:00):** §15's scout
 proved the WIN unreachable under the 20000-frame cap for ANY plausible
 line (best verified line: Onix faints at 19147 with Murkrow untouched at

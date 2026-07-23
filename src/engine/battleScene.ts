@@ -437,6 +437,7 @@ import {
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
   FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT,
   FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT,
+  FIGHT_CONFIRM_TEXT_DELAY,
   FIGHT_SUBMENU_SLOT_NAMES,
   CLOSED_FIGHT_SUBMENU_STATE,
   type FightSubmenuState,
@@ -556,6 +557,10 @@ import {
   actionMenuAge,
   actionMenuBounceTick,
 } from "./battle2ActionMenu.ts";
+import {
+  battle2RockSlideMechanismPressTick,
+  battle2Turn1State,
+} from "./battle2Turn1.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
@@ -852,6 +857,26 @@ const kabutoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets,
   hpFraction: KABUTO_SENDOUT_BATTLER.hp / KABUTO_SENDOUT_BATTLER.maxHP,
   status: "none",
 });
+const kabutoHealthboxContentByHp = new Map<
+  number,
+  ReturnType<typeof composeOpponentHealthbox>
+>([[KABUTO_SENDOUT_BATTLER.hp, kabutoHealthboxContent]]);
+function kabutoHealthboxContentForHp(
+  hp: number,
+): ReturnType<typeof composeOpponentHealthbox> {
+  let cached = kabutoHealthboxContentByHp.get(hp);
+  if (!cached) {
+    cached = composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: KABUTO_SENDOUT_BATTLER.name,
+      level: KABUTO_SENDOUT_BATTLER.level,
+      gender: KABUTO_SENDOUT_BATTLER.gender,
+      hpFraction: hp / KABUTO_SENDOUT_BATTLER.maxHP,
+      status: "none",
+    });
+    kabutoHealthboxContentByHp.set(hp, cached);
+  }
+  return cached;
+}
 export const ONIX_MENU_BATTLER = BATTLE2_ACTION_MENU_MODEL.player;
 const playerHealthboxAssets = {
   frame: (battleHealthboxAsset as { singlesPlayer: HealthboxAssets["frame"] }).singlesPlayer,
@@ -4257,13 +4282,14 @@ function drawBattle2ActionMenuWindow(
   t: number,
   handoffTick: number,
   bounceShift = 0,
+  bounceOverride?: { onixY2: number; healthboxY2: number },
 ): void {
   const age = actionMenuAge(t, handoffTick);
   const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
   const revealed = age > ACTION_MENU_BLANK_END_OFFSET;
-  const bounce = revealed
+  const bounce = bounceOverride ?? (revealed
     ? menuIdleBounce(actionMenuBounceTick(t, handoffTick) - bounceShift)
-    : { onixY2: 0, healthboxY2: 0 };
+    : { onixY2: 0, healthboxY2: 0 });
 
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   drawKabutoHSlideWobble(fb, t, handoffTick);
@@ -4304,6 +4330,16 @@ function drawBattle2FightSubmenuWindow(
     drawBattle2ActionMenuWindow(fb, t, handoffTick);
     return;
   }
+  if (sm.confirmElapsed !== null) {
+    drawBattle2RockSlideTurn1Window(
+      fb,
+      t,
+      handoffTick,
+      TICK0 + sm.confirmElapsed,
+      sm,
+    );
+    return;
+  }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (t < revealTick) {
     drawBattle2ActionMenuWindow(fb, t, handoffTick);
@@ -4319,6 +4355,107 @@ function drawBattle2FightSubmenuWindow(
 
   drawBattle2ActionMenuWindow(fb, t, handoffTick, FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
   drawFightSubmenuChrome(fb, sm.displayCursor, false, false, sm.activeMonMoveset);
+}
+
+function battle2Turn1BounceTick(
+  t: number,
+  handoffTick: number,
+): number {
+  return actionMenuBounceTick(t, handoffTick) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+}
+
+function drawBattle2RockSlideAttack(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  confirmTick: number,
+): void {
+  const mechanismPress = battle2RockSlideMechanismPressTick(confirmTick);
+  const shiftY = rockSlideBg3Y(t, mechanismPress);
+  const bounce =
+    t < confirmTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
+      ? menuIdleBounce(battle2Turn1BounceTick(t, handoffTick))
+      : { onixY2: 0, healthboxY2: 0 };
+  const turn = battle2Turn1State(t, confirmTick);
+  const kabutoContent = kabutoHealthboxContentForHp(turn.kabutoDisplayHp);
+
+  drawStaticBgShiftedY(fb, shiftY);
+  if (!rockSlideMonBlinkInvisible(t, mechanismPress)) {
+    drawSpriteSheet(
+      fb,
+      kabutoFrontSprite.tileset,
+      kabutoFrontSprite.palette,
+      KABUTO_CORNER.x,
+      KABUTO_CORNER.y + rockSlideMonShakeY2(t, mechanismPress),
+    );
+  }
+  drawSpriteSheet(
+    fb,
+    onixBackSprite.tileset,
+    onixBackSprite.palette,
+    ONIX_MATERIALIZE_CORNER.x,
+    ONIX_MATERIALIZE_CORNER.y + bounce.onixY2,
+  );
+  drawSendOutHealthbox(fb, 0, kabutoContent);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, mechanismPress);
+  if (healthboxY2 !== 0) {
+    drawOpponentHealthboxWobble(fb, healthboxY2, kabutoContent);
+  }
+  drawComposedPlayerHealthbox(
+    fb,
+    onixPlayerHealthboxContent,
+    0,
+    bounce.healthboxY2,
+  );
+  for (const i of rockSlideDrawOrder(t, mechanismPress)) {
+    const rock = rockSlideRockState(i, t, mechanismPress);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+}
+
+function drawBattle2RockSlideTurn1Window(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  confirmTick: number,
+  sm: FightSubmenuState,
+): void {
+  const textStart = confirmTick + FIGHT_CONFIRM_TEXT_DELAY + 3;
+  if (t < textStart) {
+    const frozen =
+      t >= confirmTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
+        ? { onixY2: 0, healthboxY2: 0 }
+        : undefined;
+    drawBattle2ActionMenuWindow(
+      fb,
+      t,
+      handoffTick,
+      FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozen,
+    );
+    drawFightSubmenuChrome(
+      fb,
+      sm.displayCursor,
+      false,
+      false,
+      sm.activeMonMoveset,
+    );
+    return;
+  }
+
+  drawBattle2RockSlideAttack(fb, t, handoffTick, confirmTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const chars = Math.min(
+    ROCK_SLIDE_LINE1.length + ROCK_SLIDE_LINE2.length,
+    t - textStart + 1,
+  );
+  drawMessageTextLines(
+    fb,
+    ROCK_SLIDE_LINE1,
+    ROCK_SLIDE_LINE2,
+    chars,
+  );
 }
 
 /** Opaque flat-RGB rectangle blit, no transparency/masking (every pixel in the harvest is real content - see `tools/extract/extract-menu-idle-window.ts`'s own doc for why this window's harvests don't need `getHealthboxContentMask`'s bleed handling: none of these ticks are mid-fade, so there's no stale-background risk). */
