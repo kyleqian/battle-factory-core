@@ -398,6 +398,14 @@ burned-message typing/hold, the reusable BRN healthbox compositor at 21542,
 `gCurrentMove` reset, and the first four residual-message handoff ticks.
 ISSUES #16 is closed; burn damage and tick 21561 onward remain untouched.
 See `docs/turn16-notes.md` §6.7.
+**Worker factual status proposal for supervisor review (2026-07-23):**
+Turn 16 is complete through its turn-17 menu handoff:
+`turn16-rung5.json` is **175/175 exact** for every canonical tick
+`21561-21735`, covering the second Status_Burn animation,
+`floor(142/8)=17`, MURKROW `75→58`, atomic HP and both AI/RNG boundaries,
+message clear, and the freshly-bouncing `What will MAGBY do?` redraw.
+All turn-16 rungs 1-5 and verifier regressions remain exact; see
+`docs/turn16-notes.md` §6.8. This does not propose ticking S7 complete.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

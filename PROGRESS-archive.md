@@ -1,3 +1,26 @@
+## 287 — Bounded worker (S7 turn 16 rung 2b): **GREEN — FAINT_ATTACK resolution tail**
+
+- **State:** canonical `21047--21169` is **123/123 exact**. Rung 2a remains
+  **221/221**, rung 1 canonical/delayed remain **81/81** each, turn-16
+  verifier **233/233**, Tier-1 **1028/1028**, and build (**5.432 MB**) pass.
+- **Did:** added confirmation-relative post-hit wobble/blink reducers,
+  parameterized 1-HP/tick MAGBY drain `138→79`, atomic battle-HP and
+  zero-chance secondary-roll state, then the target/current-move/attacker
+  handoff and FIRE_PUNCH accuracy/text boundary. Committed the dense
+  prefix-exact `turn16-rung2b.json`.
+- **Next:** resume S7 at canonical **21170**, the first FIRE_PUNCH
+  animation-owned frame. Do not reopen exact turn-16 rungs 1, 2a, or 2b;
+  #38 remains parked.
+- **Notes:** implementation commit `a24b857`; first FIRE_PUNCH text pixels
+  are `M`/`MA` at 21168/21169, while the cast animation begins at 21170.
+  No absolute-tick lookup, framebuffer asset, per-frame table, RGB/coordinate
+  fitting, trace branch, or excluded capture. Supervisor independently
+  reverified every number above. A second false usage-limit digest matched
+  project text inside a successful structured command event; detection now
+  parses only provider failure events, with both positive and negative logs
+  checked.
+
+---
 ## 286 — Supervisor wind-down (S7 turn 16 rung 2a): **CANONICAL GREEN; +30 REGISTER-RACE FRAME PARKED AS #38**
 
 - **State:** canonical `20826--21046` is **221/221 exact**. The requested

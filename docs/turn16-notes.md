@@ -597,3 +597,32 @@ canonical/delayed **81/81** each, `verify-turn16.ts` **233/233**, Tier-1
 **1037/1037**, and build **5.455 MB**. No framebuffer asset, absolute-tick
 condition, trace branch, per-frame table, coordinate/RGB fitting, or excluded
 capture is used.
+
+### 6.8 Rung 5 implementation: burn residual through the turn-17 action menu
+
+Canonical renders **21561-21735** are committed in `turn16-rung5.json` at
+**175/175 exact**, every tick captured. The implementation continues the
+same confirmation-relative FIRE_PUNCH age used by rungs 3-4:
+
+- the fully typed `Foe MURKROW is hurt / by its burn!` message holds while
+  `BattleScript_BurnTurnDmg` invokes the already-generalized Status_Burn
+  flames a second time (ages 489-522, canonical 21659-21692);
+- `DoBattlerEndTurnEffects` computes
+  `max(1, floor(maxHP/8)) = floor(142/8) = 17`; the status-turn health-bar
+  controller visibly drains `75→58`, retaining BRN, and the BattleMon HP
+  write remains atomic at age 544 / canonical 21714;
+- RAM-confirmed attacker/target/move-damage ownership changes at age 385,
+  then the two AI bookkeeping events at ages 549/554 reproduce
+  `gRngValue` `2012156700→3427142495→1239728170`. The second event follows
+  the source AI shape: four simulated-RNG seeds plus one best-move choice;
+- age 550 clears the message for five VBlanks; age 555 atomically redraws
+  `What will MAGBY do?` and resets the established `menuIdleBounce`
+  generator at its normal draw phase. The settled turn-17 menu is exact
+  through the assigned endpoint.
+
+Regression verdict: rung 4 **155/155**, rung 3 **236/236**, rung 2b
+**123/123**, rung 2a **221/221**, rung 1 canonical/delayed **81/81** each,
+`verify-turn16.ts` **233/233**, Tier-1 **1040/1040**, and build
+**5.456 MB**. Tick 21736 onward and turn-17 move selection/resolution remain
+out of scope. No excluded captures or forbidden pixel/trace mechanism was
+used.

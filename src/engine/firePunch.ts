@@ -180,7 +180,7 @@ export interface FirePunchResolutionState {
   rngValue: number | null;
 }
 
-/** `HandleTurnActionSelectionState`'s source formula, with its 1-HP floor. */
+/** `DoBattlerEndTurnEffects`'s source formula, with its 1-HP floor. */
 export function burnResidualDamage(maxHp: number): number {
   return Math.max(1, Math.floor(maxHp / 8));
 }
