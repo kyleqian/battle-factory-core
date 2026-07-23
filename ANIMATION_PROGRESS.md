@@ -35,25 +35,23 @@ remainder.
 
 ## Current handoff
 
-- **State:** FIRE_PUNCH now has complete dense portable evidence on both
-  singles orientations, but remains honestly `partial` because its canonical
-  turn16 control retains a known nine-frame remainder. Overall Level 50
-  coverage is still 0 exact / 12 partial / 264 unsupported.
-- **Did:** **GROVYLE (front) → ONIX (back)** is **277/277 exact** for the full
-  committed Scene-ON frames 2081–2357 / ages 0–276; the existing
-  **ONIX (back) → GROVYLE (front)** case remains **225/225 exact**. The shared
-  seam now consumes explicit side geometry, immutable 117→96/burn timing,
-  player healthbox ownership, hit blink/wobble, not-very-effective/burn
-  printers, and source-derived status animation geometry. The reusable
-  right-to-left flame path uses `InitAnimLinearTranslation`'s direction bit
-  (`614 | 1 = 615`) and the player BATTLER_COORD base `(72,80)`, distinct
-  from its move-animation center `(72,88)`. Battler-0 BRN uses source tile
-  `0x1A` / dynamic palette slot 12. Temporary RGB remains outside production.
-- **Next:** close or explicitly settle only the canonical turn16 FIRE_PUNCH
-  remainder before promoting this move to `exact`: frames 21397–21405 each
-  differ by 183 pixels. Do not redo the two portable orientation audits.
-- **Boundary:** canonical controls are unchanged: turn16-rung3 **227/236**
-  (only 21397–21405, 183px each) and turn17-rung4 **200/200**. Presentation
-  consumes outcome/RNG/turn state as immutable inputs; no battle logic,
-  facility state, absolute-tick rule, screenshot lookup, or per-frame pixel
-  table was added.
+- **State:** FIRE_PUNCH is the first Level 50 move promoted to `exact`.
+  Coverage is now **1 exact / 11 partial / 264 unsupported**; FAINT ATTACK is
+  first in the remaining queue.
+- **Did:** closed canonical turn16 frames **21397–21405** by removing an
+  implicit lethal-profile default from the shared faint projection. Those
+  nine frames begin at FIRE_PUNCH age 227, where the default had leaked Turn
+  17's already-burned faint state into Turn 16 and prematurely replaced the
+  opponent healthbox's fixed 32×8 HP slot with BRN (**183 px**, bbox
+  `x=20..51,y=30..37`). Faint rendering now consumes the same explicit
+  immutable resolution profile as the cast; the nonlethal profile has no
+  faint projection.
+- **Evidence:** turn16 rungs 3–5 are **236/236**, **155/155**, **175/175**;
+  turn17 rungs 4–5 are **200/200**, **113/113**; portable ONIX→GROVYLE is
+  **225/225** and GROVYLE→ONIX is **277/277**. All are complete dense
+  Scene-ON windows through the shared seam with both singles orientations,
+  non-burn, burn, already-burned, nonlethal, and lethal outcomes represented.
+- **Next:** work FAINT ATTACK's canonical-clock extraction and opposite-side
+  portability without reopening parked register-visibility ISSUE #38.
+  No outcome/RNG/facility state, absolute tick, framebuffer lookup, captured
+  oracle asset, or per-frame table was added.

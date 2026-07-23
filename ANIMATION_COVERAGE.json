@@ -73,10 +73,9 @@
     },
     {
       "move": "MOVE_FIRE_PUNCH",
-      "status": "partial",
-      "covered": ["player-back MAGBY to opponent-front MURKROW", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense ages 0-224 (225/225) through the shared Scene-ON adapter", "portable synthetic opponent-front GROVYLE to player-back ONIX, complete dense ages 0-276 / oracle frames 2081-2357 (277/277) through the shared Scene-ON adapter with immutable 117→96 burn outcome"],
-      "evidence": ["tools/compare/traces/turn16-rung3.json", "tools/compare/traces/turn17-rung4.json", "tools/compare/fixtures/fire-punch-onix-grovyle.json", "tools/compare/fixtures/fire-punch-grovyle-onix.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/fire-punch-portable-staging-probe.md"],
-      "remaining": "Both required portable orientations are complete (225/225 and 277/277), but exact remains blocked by canonical turn16-rung3 frames 21397-21405 (183px each; 227/236 overall). Turn17-rung4 remains 200/200."
+      "status": "exact",
+      "covered": ["canonical player-back MAGBY to opponent-front MURKROW, complete dense cast/burn/residual ages through the next action menu (turn16 rungs 3-5: 236/236, 155/155, 175/175)", "canonical repeated lethal player-back MAGBY to already-burned opponent-front MURKROW through cast and faint handoff (turn17 rungs 4-5: 200/200, 113/113)", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense ages 0-224 (225/225) through the shared Scene-ON adapter", "portable synthetic opponent-front GROVYLE to player-back ONIX, complete dense ages 0-276 / oracle frames 2081-2357 (277/277) through the shared Scene-ON adapter with immutable 117→96 burn outcome"],
+      "evidence": ["tools/compare/traces/turn16-rung3.json", "tools/compare/traces/turn16-rung4.json", "tools/compare/traces/turn16-rung5.json", "tools/compare/traces/turn17-rung4.json", "tools/compare/traces/turn17-rung5.json", "tools/compare/fixtures/fire-punch-onix-grovyle.json", "tools/compare/fixtures/fire-punch-grovyle-onix.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/fire-punch-portable-staging-probe.md"]
     },
     {
       "move": "MOVE_FAINT_ATTACK",
@@ -87,7 +86,6 @@
     }
   ],
   "queue": [
-    "MOVE_FIRE_PUNCH",
     "MOVE_FAINT_ATTACK",
     "MOVE_ROCK_SLIDE",
     "MOVE_DOUBLE_TEAM",
