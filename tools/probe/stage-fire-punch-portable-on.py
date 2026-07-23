@@ -71,7 +71,9 @@ PLAYER_BATTLER = 0
 # safe frame to alter the move list that BtlController_EmitChooseMove copies.
 STAGE_TICK = 1886
 CAPTURE_TICKS = {1886, 1887, 1888, 1918, 1919, 1920, 1921, 1922}
-CAPTURE_TICKS.update(range(2080, 2601, 8))
+# Dense hashes make the move-owned boundary and complete portable window
+# independently bisectable without committing or consulting screenshots.
+CAPTURE_TICKS.update(range(2080, 2701))
 
 
 def u16(oracle: EmeraldOracle, addr: int) -> int:
@@ -91,6 +93,10 @@ def battle_mon(oracle: EmeraldOracle, battler: int) -> dict[str, object]:
         "pp": [oracle.read_u8(base + BATTLE_MON_PP + slot) for slot in range(4)],
         "hp": u16(oracle, base + 0x28),
         "maxHp": u16(oracle, base + 0x2C),
+        "status1": oracle.read_u8(base + 0x4C)
+        | (oracle.read_u8(base + 0x4D) << 8)
+        | (oracle.read_u8(base + 0x4E) << 16)
+        | (oracle.read_u8(base + 0x4F) << 24),
     }
 
 
