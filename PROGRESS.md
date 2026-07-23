@@ -23,7 +23,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `HandleEndTurn_BattleWon`/frontier win script; RAM pins outcome 0→1 at
   22818 with frozen pixels through 22826. No forbidden absolute tick,
   framebuffer/per-frame table, fitted geometry/color, trace branch,
-  excluded capture, or thinning.
+  excluded capture, or thinning. Supervisor independently reverified both
+  dense windows, predecessor, turn-17 verifier, full Tier-1 suite, and
+  production build; ROADMAP status accepted.
 
 ---
 ## 295 — Bounded worker (S7 turn 17 rung 5): **GREEN — lethal faint through typed gate exact**
