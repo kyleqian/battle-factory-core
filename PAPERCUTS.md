@@ -12,6 +12,17 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## run-subagent.sh cap failed to terminate a Codex worker (2026-07-22)
+
+- **What:** a main-lane Codex worker launched with `--cap-minutes 38` was
+  still alive after 46 minutes, with its event log stale for ~24 minutes.
+  Deadline wind-down required the supervisor to interrupt the PTY manually.
+- **Hits:** 1.
+- **Cost each:** ~24 min of unattended session budget.
+- **Workaround:** monitor launcher elapsed time independently and interrupt
+  the PTY/process group when it exceeds the declared cap; investigate why
+  the deadline wrapper did not reap this worker.
+
 ## Dense oracle boundary inspection needs an ad hoc capture override (2026-07-22)
 
 - **What:** the committed ground-truth trace is intentionally capture-capped,

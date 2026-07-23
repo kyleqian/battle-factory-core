@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 279 — Supervisor wind-down (ISSUES #37 rung 4a): **GREEN, ESCALATION REQUIRED**
+
+- **State:** accepted rung-3 renderer is unchanged and the tree is clean.
+  Supervisor Tier-1 **1011/1011** and build (**5.400 MB**) remain green; the
+  six frozen traces were exact at the preceding checkpoint.
+- **Did:** a second consecutive worker did not land rung 4a. It confirmed the
+  particle ownership as OAM slots 5--16, palette 7, tiles 417--419 around
+  (68,117), but its 38-minute cap failed to stop it and it produced no commit;
+  supervisor interrupted it during deadline wind-down.
+- **Next:** after user direction, resume with one narrow worker deriving the
+  stagger/identity reducer from those transferred OAM rows, still requiring
+  canonical/delayed 20391--20406 to be 16/16 exact before healthbox work.
+- **Question:** two workers have now failed this same step. May the next
+  session make one more OAM-derived rung-4a repair attempt as recommended?
+- **Notes:** no uncommitted worker edits existed when stopped. Worker logs:
+  `/tmp/warm-bison-sendout-rung4a.jsonl` and `...-repair.jsonl`.
+
+---
 ## 278 — Supervisor accepted (ISSUES #37 rung 4a): **GREEN EVIDENCE CHECKPOINT**
 
 - **State:** renderer remains at accepted rung-3 baseline; independent Tier-1
@@ -34,22 +52,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** baseline restored clean before final verification. PAPERCUT:
   direct OAM probing emits multi-megabyte mGBA diagnostics for a 4.8MB JSON,
   ~3 min.
-
----
-## 276 — Supervisor accepted (ISSUES #37 rung 3): **GREEN — visible forced-switch player ball only**
-
-- **State:** independently accepted: canonical `turn15-sendout-rung3.json` is **46/46 exact**
-  (20345--20390); delayed counterpart is **46/46 exact** (20375--20420).
-  The frozen party traces remain 200/200 and rung-2 traces 43/43.
-- **Did:** corrected the dossier's owner conflict from fresh OAM/callback/
-  VRAM evidence: slot 6 tile 405/palette 6 is the player Poké Ball, not
-  Brendan (no Brendan sprite is live). Re-anchored the source ball callback
-  state machine to `sendOutElapsed`, including the ROM Q8.8 sine table; no
-  absolute trace branch, asset frame replay, or MAGBY/particle/healthbox pixel.
-- **Next:** #37 rung 4 only: MAGBY/materialization/particles. Rendered
-  MAGBY pixels already begin at 20391 (delayed 20421), so do not reopen this
-  ball-only endpoint or rely on the dossier's old 20400 label.
-- **Notes:** supervisor reran Tier-1 **1011/1011**, build (**5.400 MB**), verifier **17/17**,
-  compositor **5/5**, frozen party **200/200** each, and frozen rung-2
-  **43/43** each are all green. PAPERCUT: the direct OAM probe emits
-  multi-megabyte mGBA diagnostics despite producing valid JSON, ~2 min.

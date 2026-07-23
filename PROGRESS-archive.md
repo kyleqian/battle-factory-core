@@ -1,3 +1,12 @@
+## 276 — Supervisor accepted (ISSUES #37 rung 3): **GREEN — forced-switch player ball**
+
+- **State:** canonical/delayed rung-3 traces 46/46 exact; party 200/200 and
+  rung-2 43/43 frozen traces exact. Tier-1 1011/1011 and build green.
+- **Did:** direct evidence identified slot 6 as the player Poké Ball and
+  landed its confirmation-relative closed/spin path through 20390.
+
+---
+
 ## 275 — Supervisor accepted (ISSUES #37 rung 2): **GREEN — field fade + complete MAGBY text only**
 
 - **State:** canonical/delayed rung-2 traces 43/43 exact; frozen party traces
