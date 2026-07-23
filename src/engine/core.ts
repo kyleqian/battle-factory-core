@@ -150,15 +150,19 @@ import {
   POSTWIN_DIALOGUE_BLANK_DELAY,
   POSTWIN_SCOUTING_LINES,
   POSTWIN_SWAP_MENU_VISIBLE_DELAY,
+  POSTWIN_RIGHT_THIS_WAY,
   POSTWIN_IN_BATTLE_CLEAR_AGE,
+  acceptPostwinSwapDecline,
   postwinDialogueDelay,
   postwinDialogueInputReady,
   postwinDialogueVisibleChars,
   postwinHealVisibleChars,
   movePostwinContinuationCursor,
+  movePostwinSwapCursor,
   postwinContinuationInputReady,
   postwinNextVisibleChars,
   postwinPhase,
+  postwinRightThisWayVisibleChars,
   postwinRngSteps,
   type PostwinState,
 } from "./postwin.ts";
@@ -257,6 +261,19 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       newKeys.has("A")
     ) {
       nextPostwin = acceptPostwinDialoguePage(nextPostwin);
+    }
+    if (
+      nextPostwin.dialoguePage === 4 &&
+      nextPostwin.swapDeclineElapsed === null &&
+      postwinDialogueInputReady(nextPostwin)
+    ) {
+      if (newAndRepeatedKeys.has("DOWN")) {
+        nextPostwin = movePostwinSwapCursor(nextPostwin, 1);
+      } else if (newAndRepeatedKeys.has("UP")) {
+        nextPostwin = movePostwinSwapCursor(nextPostwin, -1);
+      } else if (newKeys.has("A")) {
+        nextPostwin = acceptPostwinSwapDecline(nextPostwin);
+      }
     }
     // The generic VBlank call above already supplied one step after the
     // mode has resumed. Before the clear tick it supplied none.
@@ -1351,6 +1368,22 @@ function renderPostwinState(state: EngineState): Uint8Array {
         POSTWIN_NEXT_LINE2,
         postwinNextVisibleChars(postwin),
       );
+    } else if (postwin.swapDeclineElapsed !== null) {
+      const declineDelay = age - postwin.swapDeclineElapsed;
+      if (declineDelay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
+        const previous = POSTWIN_SCOUTING_LINES[3];
+        drawLines(
+          previous[0],
+          previous[1],
+          previous[0].length + previous[1].length,
+        );
+      } else if (declineDelay !== POSTWIN_DIALOGUE_BLANK_DELAY) {
+        drawLines(
+          POSTWIN_RIGHT_THIS_WAY,
+          "",
+          postwinRightThisWayVisibleChars(postwin),
+        );
+      }
     } else {
       const delay = postwinDialogueDelay(postwin)!;
       if (delay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
@@ -1402,7 +1435,11 @@ function renderPostwinState(state: EngineState): Uint8Array {
     if (
       postwin.dialoguePage === 4 &&
       dialogueDelay !== null &&
-      dialogueDelay >= POSTWIN_SWAP_MENU_VISIBLE_DELAY
+      dialogueDelay >= POSTWIN_SWAP_MENU_VISIBLE_DELAY &&
+      (
+        postwin.swapDeclineElapsed === null ||
+        age === postwin.swapDeclineElapsed
+      )
     ) {
       drawStandardWindowFrame(fb, 160, 64, 5, 4);
       drawStandardWindowText(fb, "YES", 176, 73);
@@ -1411,7 +1448,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
         fb,
         "▶",
         168,
-        73 + (postwin.swapCursorPos ?? 0) * 16,
+        73 + (postwin.swapCursorDisplayPos ?? 0) * 16,
       );
     }
   }

@@ -17,6 +17,7 @@ import {
   acceptPostwinContinuation,
   acceptPostwinDialoguePage,
   acceptPostwinHealDismiss,
+  acceptPostwinSwapDecline,
   INITIAL_POSTWIN_STATE,
   POSTWIN_BATTLE_BLACK_AGE,
   POSTWIN_BATTLE_FADE_FIRST_AGE,
@@ -39,6 +40,10 @@ import {
   POSTWIN_SCOUTING_INPUT_READY_DELAYS,
   POSTWIN_SWAP_INPUT_READY_DELAY,
   POSTWIN_SWAP_MENU_VISIBLE_DELAY,
+  POSTWIN_RIGHT_THIS_WAY,
+  POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY,
+  POSTWIN_RIGHT_THIS_WAY_TEXT_FIRST_DELAY,
+  POSTWIN_RIGHT_THIS_WAY_TEXT_SETTLED_DELAY,
   POSTWIN_SECOND_BLACK_AGE,
   postwinHealInputReady,
   postwinHealVisibleChars,
@@ -47,7 +52,10 @@ import {
   postwinDialogueVisibleChars,
   postwinNextVisibleChars,
   postwinPhase,
+  postwinRightThisWayInputReady,
+  postwinRightThisWayVisibleChars,
   postwinRngSteps,
+  movePostwinSwapCursor,
 } from "../src/engine/postwin.ts";
 
 describe("S8 Battle-1 postwin transition", () => {
@@ -357,6 +365,105 @@ describe("S8 Battle-1 postwin transition", () => {
       .toBe(true);
     const visible = advancePostwin(at(POSTWIN_SWAP_MENU_VISIBLE_DELAY - 1));
     expect(visible.swapCursorPos).toBe(0);
+    expect(visible.swapCursorDisplayPos).toBe(0);
+  });
+
+  it("rejects early swap DOWN/A, accepts delayed NO, and copies its cursor one VBlank later", () => {
+    const edge = 20_000;
+    const at = (delay: number) => ({
+      ...INITIAL_POSTWIN_STATE,
+      elapsed: edge + delay,
+      continuationConfirmElapsed: edge - 1_000,
+      dialoguePage: 4 as const,
+      dialoguePageEdgeElapsed: edge,
+      swapCursorPos: 0 as const,
+      swapCursorDisplayPos: 0 as const,
+    });
+    const early = at(POSTWIN_SWAP_INPUT_READY_DELAY - 1);
+    expect(movePostwinSwapCursor(early, 1)).toBe(early);
+    expect(acceptPostwinSwapDecline({ ...early, swapCursorPos: 1 })).toEqual({
+      ...early,
+      swapCursorPos: 1,
+    });
+
+    const delayedAge = edge + POSTWIN_SWAP_INPUT_READY_DELAY + 500;
+    const delayed = {
+      ...at(POSTWIN_SWAP_INPUT_READY_DELAY),
+      elapsed: delayedAge,
+    };
+    const moved = movePostwinSwapCursor(delayed, 1);
+    expect(moved.swapCursorPos).toBe(1);
+    expect(moved.swapCursorDisplayPos).toBe(0);
+    expect(moved.swapCursorMoveElapsed).toBe(delayedAge);
+    const copied = advancePostwin(moved);
+    expect(copied.swapCursorDisplayPos).toBe(1);
+
+    const declined = acceptPostwinSwapDecline({
+      ...copied,
+      elapsed: delayedAge + 30,
+    });
+    expect(declined.swapDeclineElapsed).toBe(delayedAge + 30);
+    expect(acceptPostwinSwapDecline({
+      ...declined,
+      elapsed: delayedAge + 31,
+    }).swapDeclineElapsed).toBe(delayedAge + 30);
+  });
+
+  it("pins the decline message's final glyph and true held input boundary to the stored NO edge", () => {
+    const declineEdge = 30_000;
+    const at = (delay: number) => ({
+      ...INITIAL_POSTWIN_STATE,
+      elapsed: declineEdge + delay,
+      dialoguePage: 4 as const,
+      dialoguePageEdgeElapsed: declineEdge - 1_000,
+      swapCursorPos: 1 as const,
+      swapCursorDisplayPos: 1 as const,
+      swapDeclineElapsed: declineEdge,
+    });
+    expect(POSTWIN_RIGHT_THIS_WAY_TEXT_FIRST_DELAY).toBe(4);
+    expect(POSTWIN_RIGHT_THIS_WAY_TEXT_SETTLED_DELAY).toBe(26);
+    expect(POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY).toBe(28);
+    expect(postwinRightThisWayVisibleChars(at(3))).toBe(0);
+    expect(postwinRightThisWayVisibleChars(at(4))).toBe(1);
+    expect(postwinRightThisWayVisibleChars(
+      at(POSTWIN_RIGHT_THIS_WAY_TEXT_SETTLED_DELAY),
+    )).toBe(POSTWIN_RIGHT_THIS_WAY.length);
+    expect(postwinRightThisWayInputReady(
+      at(POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY - 1),
+    )).toBe(false);
+    expect(postwinRightThisWayInputReady(
+      at(POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY),
+    )).toBe(true);
+  });
+
+  it("keeps ordinary VBlank RNG ownership and healed party state across NO and the held message", () => {
+    const seed = 0xa1b2c3d4;
+    const state = {
+      ...createInitialState(),
+      rngMode: "vblank" as const,
+      rngValue: seed,
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: 6_029,
+        playerPartyHp: POSTWIN_HEALED_PARTY_HP,
+        dialoguePage: 4 as const,
+        dialoguePageEdgeElapsed: 5_600,
+        swapCursorPos: 1 as const,
+        swapCursorDisplayPos: 1 as const,
+      },
+    };
+    const declined = tick(state, new Set(["A"]));
+    expect(declined.postwin!.swapDeclineElapsed).toBe(6_030);
+    expect(declined.postwin!.playerPartyHp).toEqual(POSTWIN_HEALED_PARTY_HP);
+    expect(declined.rngMode).toBe("vblank");
+    expect(declined.rngValue).toBe(advanceRngValue(seed));
+    expect(postwinRngSteps(6_030)).toBe(1);
+
+    const held = tick(declined, new Set());
+    expect(held.postwin!.swapDeclineElapsed).toBe(6_030);
+    expect(held.postwin!.playerPartyHp).toEqual(POSTWIN_HEALED_PARTY_HP);
+    expect(held.rngValue).toBe(advanceRngValue(advanceRngValue(seed)));
+    expect(postwinRngSteps(held.postwin!.elapsed)).toBe(1);
   });
 
   it("keeps VBlank ownership and applies the GO ON source burst relative to the accepted edge", () => {

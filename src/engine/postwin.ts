@@ -31,6 +31,12 @@ export interface PostwinState {
   dialoguePageEdgeElapsed: number | null;
   /** MSGBOX_YESNO cursor; null until the swap menu is visibly created. */
   swapCursorPos: 0 | 1 | null;
+  /** Cursor copied to the field window one VBlank after the logical move. */
+  swapCursorDisplayPos: 0 | 1 | null;
+  /** Accepted swap-cursor edge, used for the one-VBlank display handoff. */
+  swapCursorMoveElapsed: number | null;
+  /** Accepted NO edge; the following field-message clock is edge-relative. */
+  swapDeclineElapsed: number | null;
 }
 
 export const INITIAL_POSTWIN_STATE: PostwinState = {
@@ -44,6 +50,9 @@ export const INITIAL_POSTWIN_STATE: PostwinState = {
   dialoguePage: 0,
   dialoguePageEdgeElapsed: null,
   swapCursorPos: null,
+  swapCursorDisplayPos: null,
+  swapCursorMoveElapsed: null,
+  swapDeclineElapsed: null,
 };
 
 /** gMain.inBattle clears and outside-battle VBlank RNG resumes at dismiss+43. */
@@ -108,6 +117,14 @@ export const POSTWIN_SCOUTING_INPUT_READY_DELAYS = [72, 74, 72] as const;
 /** MSGBOX_YESNO: text settles at +63, menu copies at +66, accepts at +70. */
 export const POSTWIN_SWAP_MENU_VISIBLE_DELAY = 66;
 export const POSTWIN_SWAP_INPUT_READY_DELAY = 70;
+export const POSTWIN_RIGHT_THIS_WAY = "Right this way, please!";
+export const POSTWIN_RIGHT_THIS_WAY_TEXT_FIRST_DELAY = 4;
+export const POSTWIN_RIGHT_THIS_WAY_TEXT_SETTLED_DELAY =
+  POSTWIN_RIGHT_THIS_WAY_TEXT_FIRST_DELAY +
+  POSTWIN_RIGHT_THIS_WAY.length - 1;
+/** MSGBOX_DEFAULT accepts A two ticks after the final glyph. */
+export const POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY =
+  POSTWIN_RIGHT_THIS_WAY_TEXT_SETTLED_DELAY + 2;
 
 // Exact write ages are filled by the dense RAM audit accompanying this
 // slice. They remain relative state boundaries, never canonical ticks.
@@ -190,6 +207,15 @@ export function advancePostwin(state: PostwinState): PostwinState {
       swapMenuVisible && state.swapCursorPos === null
         ? 0
         : state.swapCursorPos,
+    swapCursorDisplayPos:
+      swapMenuVisible && state.swapCursorDisplayPos === null
+        ? 0
+        : state.swapCursorMoveElapsed !== null &&
+            elapsed > state.swapCursorMoveElapsed
+          ? state.swapCursorPos
+          : state.swapCursorDisplayPos,
+    swapCursorMoveElapsed: state.swapCursorMoveElapsed,
+    swapDeclineElapsed: state.swapDeclineElapsed,
   };
 }
 
@@ -285,5 +311,49 @@ export function acceptPostwinDialoguePage(state: PostwinState): PostwinState {
     dialoguePage: (state.dialoguePage + 1) as 2 | 3 | 4,
     dialoguePageEdgeElapsed: state.elapsed,
     swapCursorPos: null,
+    swapCursorDisplayPos: null,
+    swapCursorMoveElapsed: null,
+    swapDeclineElapsed: null,
   };
+}
+
+export function movePostwinSwapCursor(
+  state: PostwinState,
+  direction: 1 | -1,
+): PostwinState {
+  if (
+    state.swapDeclineElapsed !== null ||
+    !postwinDialogueInputReady(state) ||
+    state.swapCursorPos === null
+  ) return state;
+  return {
+    ...state,
+    swapCursorPos: direction === 1 ? 1 : 0,
+    swapCursorMoveElapsed: state.elapsed,
+  };
+}
+
+export function acceptPostwinSwapDecline(state: PostwinState): PostwinState {
+  if (
+    state.swapDeclineElapsed !== null ||
+    state.swapCursorPos !== 1 ||
+    !postwinDialogueInputReady(state)
+  ) return state;
+  return { ...state, swapDeclineElapsed: state.elapsed };
+}
+
+export function postwinRightThisWayVisibleChars(state: PostwinState): number {
+  if (state.swapDeclineElapsed === null) return 0;
+  const delay = state.elapsed - state.swapDeclineElapsed;
+  if (delay < POSTWIN_RIGHT_THIS_WAY_TEXT_FIRST_DELAY) return 0;
+  return Math.min(
+    POSTWIN_RIGHT_THIS_WAY.length,
+    delay - POSTWIN_RIGHT_THIS_WAY_TEXT_FIRST_DELAY + 1,
+  );
+}
+
+export function postwinRightThisWayInputReady(state: PostwinState): boolean {
+  return state.swapDeclineElapsed !== null &&
+    state.elapsed >=
+      state.swapDeclineElapsed + POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY;
 }
