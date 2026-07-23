@@ -545,10 +545,12 @@ import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbo
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
+  FIRE_PUNCH_TEXT_AGE,
   faintAttackAttackerEva,
   faintAttackAttackerOffset,
   faintAttackBgState,
   faintAttackHitsplatVisible,
+  faintAttackResolutionState,
   faintAttackTargetShakeX2,
 } from "./faintAttack.ts";
 import battle1TurnRamDumpAsset from "../data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
@@ -929,6 +931,27 @@ const magbyPlayerHealthboxContent = composePlayerHealthbox(
   },
   { name: "MAGBY", level: 50, gender: "female", hpFraction: 1, status: "none", currentHp: 138, maxHp: 138 },
 );
+const magbyPlayerHealthboxContentByHp = new Map<number, typeof magbyPlayerHealthboxContent>([
+  [138, magbyPlayerHealthboxContent],
+]);
+
+function magbyPlayerHealthboxContentForHp(hp: number): typeof magbyPlayerHealthboxContent {
+  let cached = magbyPlayerHealthboxContentByHp.get(hp);
+  if (!cached) {
+    cached = composePlayerHealthbox(
+      {
+        frame: (battleHealthboxAsset as { singlesPlayer: HealthboxAssets["frame"] }).singlesPlayer,
+        hpbar: healthboxAssemblyAssets.hpbar,
+        hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
+        expbar: (battleHealthboxAsset as { expbar: HealthboxAssets["hpbar"] }).expbar,
+        textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
+      },
+      { name: "MAGBY", level: 50, gender: "female", hpFraction: hp / 138, status: "none", currentHp: hp, maxHp: 138 },
+    );
+    magbyPlayerHealthboxContentByHp.set(hp, cached);
+  }
+  return cached;
+}
 
 /** Same memoization shape as `opponentHealthboxContentByHp` - only the 17 distinct integer HPs `endeavorOnixHp` ever produces (117 down to 101) are ever requested. */
 const playerHealthboxHpOverlayByHp = new Map<number, ReturnType<typeof composePlayerHealthboxHpOverlay>>();
@@ -11953,8 +11976,8 @@ function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number, y2Ex
   );
 }
 
-function drawTurn15MagbyHealthbox(fb: Uint8Array, dx: number, dy: number = 0): void {
-  const { width, height, pixels } = magbyPlayerHealthboxContent;
+function drawTurn15MagbyHealthbox(fb: Uint8Array, dx: number, dy: number = 0, hp: number = 138): void {
+  const { width, height, pixels } = magbyPlayerHealthboxContentForHp(hp);
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
       const color = pixels[py * width + px];
@@ -11975,8 +11998,9 @@ const TURN16_FAINT_ATTACK_LINE2 = "FAINT ATTACK!";
 const TURN16_FAINT_ATTACK_TEXT_TOTAL = TURN16_FAINT_ATTACK_LINE1.length + TURN16_FAINT_ATTACK_LINE2.length;
 /** First Move_FAINT_ATTACK script-owned render, relative to stored confirm. */
 const TURN16_FAINT_ATTACK_ANIM_DELAY = 52;
-/** Bounded rung 2a owns kickoff ages 0..220 (canonical 20826..21046). */
-const TURN16_FAINT_ATTACK_RUNG2A_LAST_AGE = 220;
+const TURN16_FIRE_PUNCH_LINE1 = "MAGBY used";
+const TURN16_FIRE_PUNCH_LINE2 = "FIRE PUNCH!";
+const TURN16_FIRE_PUNCH_TEXT_TOTAL = TURN16_FIRE_PUNCH_LINE1.length + TURN16_FIRE_PUNCH_LINE2.length;
 
 type FaintAttackDarkBgAsset = {
   charBlock2B64: string;
@@ -12061,9 +12085,19 @@ function drawTurn16PostSwitchField(
   }
   drawTurn15ForcedSwitchBall(fb, partyElapsed);
   const targetX2 = faintAttackAge === null ? 0 : faintAttackTargetShakeX2(faintAttackAge);
-  if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2, targetX2);
+  const resolution = faintAttackAge === null ? null : faintAttackResolutionState(faintAttackAge);
+  if (releaseTick !== null && !resolution?.targetInvisible) {
+    drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2, targetX2);
+  }
   const healthboxDx = partySendOutHealthboxDx(partyElapsed);
-  if (healthboxDx !== null) drawTurn15MagbyHealthbox(fb, healthboxDx, bounce.healthboxY2);
+  if (healthboxDx !== null) {
+    drawTurn15MagbyHealthbox(
+      fb,
+      healthboxDx,
+      bounce.healthboxY2 + (resolution?.targetHealthboxY2 ?? 0),
+      resolution?.displayedHp ?? 138,
+    );
+  }
   if (faintAttackAge !== null && faintAttackHitsplatVisible(faintAttackAge)) {
     drawSpriteSheetAffineStretchBlendedOverFb(
       fb,
@@ -12115,16 +12149,28 @@ function drawTurn16FightSubmenuWindow(
       ? turn16PartyElapsedAtTick(partyElapsed, t, freezeTick) + 1
       : partyElapsed - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   const animationAge = confirmTick === null ? null : t - (confirmTick + TURN16_FAINT_ATTACK_ANIM_DELAY);
-  const ownedAnimationAge =
-    animationAge !== null && animationAge >= 0 && animationAge <= TURN16_FAINT_ATTACK_RUNG2A_LAST_AGE
-      ? animationAge
-      : null;
+  const ownedAnimationAge = animationAge !== null && animationAge >= 0 ? animationAge : null;
   drawTurn16PostSwitchField(
     fb,
     partyElapsed,
     partySendOutMenuBounceTick(bouncePartyElapsed),
     ownedAnimationAge,
   );
+
+  if (ownedAnimationAge !== null && faintAttackResolutionState(ownedAnimationAge).message === "FIRE_PUNCH") {
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      TURN16_FIRE_PUNCH_LINE1,
+      TURN16_FIRE_PUNCH_LINE2,
+      turn15SimpleVisibleChars(
+        t,
+        confirmTick! + TURN16_FAINT_ATTACK_ANIM_DELAY + FIRE_PUNCH_TEXT_AGE,
+        TURN16_FIRE_PUNCH_TEXT_TOTAL,
+      ),
+    );
+    return;
+  }
 
   if (confirmTick !== null && t >= confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY) {
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);

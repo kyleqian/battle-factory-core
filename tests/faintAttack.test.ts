@@ -4,8 +4,10 @@ import {
   faintAttackAttackerOffset,
   faintAttackBgState,
   faintAttackHitsplatVisible,
+  faintAttackResolutionState,
   faintAttackTargetShakeX2,
 } from "../src/engine/faintAttack.ts";
+import { advanceRngValue } from "../src/engine/rng.ts";
 
 describe("FAINT_ATTACK pure animation reducers", () => {
   it("pins both Task_FadeToBg halves at every swap/settle boundary", () => {
@@ -60,5 +62,84 @@ describe("FAINT_ATTACK pure animation reducers", () => {
     expect(faintAttackHitsplatVisible(87)).toBe(true);
     expect(faintAttackHitsplatVisible(96)).toBe(true);
     expect(faintAttackHitsplatVisible(97)).toBe(false);
+  });
+
+  it("pins the reusable post-hit healthbox wobble and four-cycle target blink", () => {
+    expect(faintAttackResolutionState(225).targetHealthboxY2).toBe(0);
+    expect(faintAttackResolutionState(226).targetHealthboxY2).toBe(1);
+    expect(faintAttackResolutionState(227).targetHealthboxY2).toBe(-1);
+    expect(faintAttackResolutionState(245).targetHealthboxY2).toBe(-1);
+    expect(faintAttackResolutionState(246).targetHealthboxY2).toBe(0);
+
+    expect(faintAttackResolutionState(226).targetInvisible).toBe(false);
+    expect(faintAttackResolutionState(227).targetInvisible).toBe(true);
+    expect(faintAttackResolutionState(230).targetInvisible).toBe(true);
+    expect(faintAttackResolutionState(231).targetInvisible).toBe(false);
+    expect(faintAttackResolutionState(254).targetInvisible).toBe(true);
+    expect(faintAttackResolutionState(255).targetInvisible).toBe(false);
+  });
+
+  it("drains the displayed MAGBY bar one HP per frame before the atomic battle-HP write", () => {
+    expect(faintAttackResolutionState(260)).toMatchObject({ displayedHp: 138, battleHp: 138 });
+    expect(faintAttackResolutionState(261)).toMatchObject({ displayedHp: 137, battleHp: 138 });
+    expect(faintAttackResolutionState(318)).toMatchObject({ displayedHp: 80, battleHp: 138 });
+    expect(faintAttackResolutionState(319)).toMatchObject({ displayedHp: 79, battleHp: 138 });
+    expect(faintAttackResolutionState(320)).toMatchObject({ displayedHp: 79, battleHp: 138 });
+    expect(faintAttackResolutionState(321)).toMatchObject({ displayedHp: 79, battleHp: 79 });
+    expect(faintAttackResolutionState(262, { startHp: 10, endHp: 8 })).toMatchObject({
+      displayedHp: 8,
+      battleHp: 10,
+    });
+  });
+
+  it("pins the silent chance-0 secondary roll and FIRE_PUNCH accuracy roll to the RAM RNG stream", () => {
+    const beforeSecondary = 2744256313;
+    const afterSecondary = advanceRngValue(beforeSecondary);
+    const afterAccuracy = advanceRngValue(afterSecondary);
+    expect(afterSecondary).toBe(846647736);
+    expect(afterAccuracy).toBe(2630728651);
+
+    expect(faintAttackResolutionState(325)).toMatchObject({
+      faintAttackSecondaryRollConsumed: false,
+      firePunchAccuracyRollConsumed: false,
+      rngCallsConsumed: 0,
+    });
+    expect(faintAttackResolutionState(326)).toMatchObject({
+      faintAttackSecondaryRollConsumed: true,
+      firePunchAccuracyRollConsumed: false,
+      rngCallsConsumed: 1,
+    });
+    expect(faintAttackResolutionState(340)).toMatchObject({
+      faintAttackSecondaryRollConsumed: true,
+      firePunchAccuracyRollConsumed: true,
+      rngCallsConsumed: 2,
+    });
+  });
+
+  it("pins the target, current-move, attacker, and FIRE_PUNCH text handoff boundaries", () => {
+    expect(faintAttackResolutionState(332)).toMatchObject({
+      attacker: "MURKROW",
+      target: "MAGBY",
+      currentMove: "FAINT_ATTACK",
+      message: "FAINT_ATTACK",
+    });
+    expect(faintAttackResolutionState(333)).toMatchObject({
+      attacker: "MURKROW",
+      target: "MURKROW",
+      currentMove: "FAINT_ATTACK",
+    });
+    expect(faintAttackResolutionState(334)).toMatchObject({
+      attacker: "MURKROW",
+      target: "MURKROW",
+      currentMove: null,
+    });
+    expect(faintAttackResolutionState(335)).toMatchObject({
+      attacker: "MAGBY",
+      target: "MURKROW",
+      currentMove: "FIRE_PUNCH",
+      message: "FAINT_ATTACK",
+    });
+    expect(faintAttackResolutionState(341).message).toBe("FAINT_ATTACK");
+    expect(faintAttackResolutionState(342).message).toBe("FIRE_PUNCH");
   });
 });
