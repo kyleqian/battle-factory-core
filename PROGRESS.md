@@ -4,6 +4,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 311 — S8 Battle 2 player send-out: **PARTIAL — 32680-32726 exact**
+
+- **State:** new every-frame `battle2-player-sendout-dense.json` is
+  **47/170 exact** across canonical 32680-32849: the exact prefix now reaches
+  32726, immediately before Brendan's first inherited visible pose at 32727.
+  Predecessors remain KABUTO **151/151**, intro **251/251**, and Battle 1
+  send-out **255/256** (#18 only). Tier-1 is **1109/1109**; build passes
+  (**5.517 MB**).
+- **Did:** reanchored the Battle-1 player ball/materialize/healthbox clock to
+  the encounter handoff, retained KABUTO after its H-slide-wobble callback,
+  pinned Battle 2's separate inherited trainer/summary clock and exact
+  one-glyph-per-tick `Go! ONIX!` boundary, and added three Tier-1 tests.
+- **Next:** resume exactly at **32727**. Derive Brendan's inherited
+  entrance/throw pose + translation and its live OAM overlap with the ball;
+  then close 32727-32849 without changing the accepted clocks or entering
+  the 32850 blank-menu handoff. S8 remains `[ ]`.
+- **Notes:** first visible trainer callback is handoff+157, while ball spin,
+  open, materialize, and permanent settle remain handoff+153/+190/+191/+240.
+  The dense remainder is intentionally unthinned and not claimed exact. No
+  harvest, canonical-tick lookup, RGB/coordinate fitting, or menu work.
+
+---
 ## 310 — S8 Battle 2 KABUTO opponent send-out: **GREEN — 32570-32681 exact**
 
 - **State:** `battle2-kabuto-sendout-dense.json` is **151/151 exact**
@@ -39,21 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** `tools/test-codex-git-attribution.sh` proves exact replacement,
   unknown fallback, and an untouched Claude commit. Shell syntax, resolved
   launcher configs, Codex deadline tests (**3/3**), Tier-1, and build pass.
-
----
-## 308 — Supervisor-accepted S8 Battle 2 send-out text: **GREEN — 32531-32569 exact**
-
-- **State:** canonical **32531-32569 = 39/39 exact**, stopping one frame
-  before the 32570 visual handoff; Battle 2 intro remains **251/251 exact**.
-  Tier-1 is **1099/1099** and build passes (**5.497 MB**).
-- **Did:** reused the stored delayed-A/send-out clock and registration lag,
-  parameterized the shared printer from encounter identity as `FISHERMAN
-  JENSON sent / out KABUTO!` (32 glyphs), and retained the Fisherman scene
-  through both final post-text hold frames. Added the dense trace and Tier-1
-  pins while preserving DESTIN/GROVYLE defaults.
-- **Next:** begin at **32570** with trainer exit/ball/KABUTO materialize and
-  healthbox only in a separately scoped increment. S8 stays `[ ]`.
-- **Notes:** no trainer exit, ball, species, healthbox, particles, absolute
-  tick lookup, framebuffer harvest, fitting, or trace thinning. Supervisor
-  independently reviewed the press-relative encounter parameterization and
-  reverified both traces, all 1099 Tier-1 tests, and build.

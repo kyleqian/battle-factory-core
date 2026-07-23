@@ -141,3 +141,21 @@ is flat at 812598902 through 32893, then advances on demand at 32894 (+1),
 (`battle_main.c:3841-4168`), not per-VBlank advancement.  Endpoint 33030
 therefore has RNG 3530724670, `gBattleControllerExecFlags = 1`, and the same
 full-HP battlers.  This preserves the earlier 32020--32250 setup ledger.
+
+## Player send-out dense checkpoint
+
+`battle2-player-sendout-dense.json` captures every frame 32680--32849. The
+current implementation is **47/170 exact**, with one continuous exact prefix
+32680--32726. It proves that the reusable ball/materialize/healthbox clock is
+opponent-handoff-relative, while the already-created Battle 2 Brendan sprite
+and player party summary retain a distinct inherited callback clock: their
+last settled frame is 32726 and first changed pose is 32727. `Go! ONIX!`
+clears the old message at 32715 and prints one glyph per frame from 32716,
+fully visible at 32723.
+
+The next bounded task starts at 32727: derive the inherited Brendan pose/
+translation and its live overlap with the already-running ball, then verify
+the ONIX materialize/back-animation and 117/117 healthbox through 32849.
+Nothing at 32850 or later is part of this checkpoint. The dense mismatching
+tail is retained verbatim; no capture thinning, framebuffer harvest, absolute
+canonical-tick lookup, or coordinate/RGB fitting is used.
