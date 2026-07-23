@@ -46,6 +46,8 @@ export interface HealthboxAssets {
   hpbar: SheetAsset;
   /** `battle-healthbox.json`'s `hpbarAnim` - the HP-bar yellow/red-band fill tileset (green lives in `hpbar`, see `HP_BAR_GREEN_BASE`). */
   hpbarAnim: SheetAsset;
+  /** `HEALTHBOX_GFX_65`, copied over the normal "P" caption tile whenever an opponent has a status. */
+  frameEnd: SheetAsset;
   /** `battle-healthbox.json`'s `status2` - GetStatusIconForBattlerId's BATTLER1 sheet, the one the opponent (battler 1 in singles) actually uses. */
   statusIcons: SheetAsset;
 }
@@ -180,14 +182,22 @@ export function pickHpBarBand(filledPixels: number): HpBarBand {
  * fill columns, sourced from `hpbar` (green) or `hpbarAnim` (yellow/red) per
  * the selected band.
  */
-function hpBarLocalTiles(assets: Pick<HealthboxAssets, "hpbar" | "hpbarAnim">, hpFraction: number): { sheet: SheetAsset; tileIndex: number }[] {
+function hpBarLocalTiles(
+  assets: Pick<HealthboxAssets, "hpbar" | "hpbarAnim"> & Partial<Pick<HealthboxAssets, "frameEnd">>,
+  hpFraction: number,
+  hasStatus: boolean = false,
+): { sheet: SheetAsset; tileIndex: number }[] {
   const { filledPixels, columns } = calcBarFilledPixels(hpFraction);
   const band = pickHpBarBand(filledPixels);
   const fillSheet = band === "green" ? assets.hpbar : assets.hpbarAnim;
   const fillBase = band === "green" ? HP_BAR_GREEN_BASE : band === "yellow" ? HP_BAR_YELLOW_BASE : HP_BAR_RED_BASE;
   return [
-    { sheet: assets.hpbar, tileIndex: 1 },
-    { sheet: assets.hpbar, tileIndex: 2 },
+    hasStatus
+      ? { sheet: assets.hpbar, tileIndex: 0 }
+      : { sheet: assets.hpbar, tileIndex: 1 },
+    hasStatus
+      ? { sheet: assets.frameEnd!, tileIndex: 0 }
+      : { sheet: assets.hpbar, tileIndex: 2 },
     ...columns.map((px) => ({ sheet: fillSheet, tileIndex: fillBase + px })),
   ];
 }
@@ -447,7 +457,7 @@ export function composeOpponentHealthbox(assets: HealthboxAssets, params: Health
   // are opaque it wins over the frame beneath - confirmed by direct pixel
   // diff against the harvested block; this corrects round 1's speculative
   // OAM-index z-order guess, which had it backwards for this pair).
-  const hpBarTiles = hpBarLocalTiles(assets, params.hpFraction);
+  const hpBarTiles = hpBarLocalTiles(assets, params.hpFraction, params.status !== "none");
   for (let i = 0; i < HP_BAR_SUBSPRITE_CORNERS.length; i += 1) {
     const { cornerX, cornerY } = HP_BAR_SUBSPRITE_CORNERS[i]!;
     drawHpBarSubsprite(canvas, width, height, hpBarTiles.slice(i * 4, i * 4 + 4), cornerX, cornerY);

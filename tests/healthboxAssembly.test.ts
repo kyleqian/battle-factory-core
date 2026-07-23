@@ -20,6 +20,7 @@ const assets = {
   frame: battleHealthbox.singlesOpponent,
   hpbar: battleHealthbox.hpbar,
   hpbarAnim: battleHealthbox.hpbarAnim,
+  frameEnd: battleHealthbox.frameEnd,
   statusIcons: battleHealthbox.status2,
 };
 
@@ -163,7 +164,7 @@ describe("calcBarFilledPixels (ISSUES #16 round 3)", () => {
   });
 });
 
-describe("composeOpponentHealthbox partial HP + status (ISSUES #16 round 3, no oracle pixels yet - see the doc)", () => {
+describe("composeOpponentHealthbox partial HP + status (ISSUES #16, oracle-validated by turn16-rung4)", () => {
   it("half HP (yellow band) lands the exact hpbarAnim tile bytes at each of the 6 subsprite-correct fill columns", () => {
     const result = composeOpponentHealthbox(assets, { name: "GROVYLE", level: 50, gender: "male", hpFraction: 0.5, status: "none" });
     const { filledPixels, columns } = calcBarFilledPixels(0.5);
@@ -215,14 +216,13 @@ describe("composeOpponentHealthbox partial HP + status (ISSUES #16 round 3, no o
     }
 
     // Tile 2 (canvas x=24..31) shares its footprint with the HP bar's own
-    // "H" caption tile, which is unconditional (drawn regardless of status)
-    // and, per the established round-2 z-order rule, wins wherever it's
-    // opaque - so this tile is only the status icon's own color where the
-    // "H" tile is transparent.
+    // first tile. UpdateStatusIconInHealthbox replaces the normal "H"
+    // caption with HEALTHBOX_GFX_0 while statused; that cap wins wherever
+    // opaque, leaving the icon visible through its transparent cells.
     for (let x = 0; x < 8; x += 1) {
       for (let y = 0; y < 8; y += 1) {
-        const hPixel = tilePixel(battleHealthbox.hpbar, battleHealthbox.hpbar.palette, 1, x, y);
-        const expected = hPixel ?? tilePixel(battleHealthbox.status2, palette, 2, x, y);
+        const capPixel = tilePixel(battleHealthbox.hpbar, battleHealthbox.hpbar.palette, 0, x, y);
+        const expected = capPixel ?? tilePixel(battleHealthbox.status2, palette, 2, x, y);
         if (expected) expect(result.pixels[(16 + y) * result.width + (24 + x)], `tile 2 px (${x},${y})`).toEqual(expected);
       }
     }
@@ -238,6 +238,39 @@ describe("composeOpponentHealthbox partial HP + status (ISSUES #16 round 3, no o
       if (JSON.stringify(a) !== JSON.stringify(b)) differs = true;
     }
     expect(differs).toBe(true);
+  });
+
+  it("composes MURKROW's live 75/142 BRN variant with the runtime burn color and status bar end-caps", () => {
+    const result = composeOpponentHealthbox(assets, {
+      name: "MURKROW",
+      level: 50,
+      gender: "male",
+      hpFraction: 75 / 142,
+      status: "burn",
+    });
+    const palette = battleHealthbox.status2.palette.map((c) => ({ ...c }));
+    palette[13] = { r: 231, g: 115, b: 82 };
+
+    // BRN is row 4 of status2. The first two tiles do not overlap the bar.
+    for (let tile = 0; tile < 2; tile += 1) {
+      for (let x = 0; x < 8; x += 1) {
+        for (let y = 0; y < 8; y += 1) {
+          expect(result.pixels[(16 + y) * result.width + (8 + tile * 8 + x)])
+            .toEqual(tilePixel(battleHealthbox.status2, palette, 12 + tile, x, y));
+        }
+      }
+    }
+
+    // The status path source-blits HEALTHBOX_GFX_0/65 over the two normal
+    // HP-caption tiles. Assert their opaque pixels at x=24 and x=32.
+    for (let x = 0; x < 8; x += 1) {
+      for (let y = 0; y < 8; y += 1) {
+        const cap = tilePixel(battleHealthbox.hpbar, battleHealthbox.hpbar.palette, 0, x, y);
+        if (cap) expect(result.pixels[(16 + y) * result.width + (24 + x)]).toEqual(cap);
+        const end = tilePixel(battleHealthbox.frameEnd, battleHealthbox.frameEnd.palette, 0, x, y);
+        if (end) expect(result.pixels[(16 + y) * result.width + (32 + x)]).toEqual(end);
+      }
+    }
   });
 });
 

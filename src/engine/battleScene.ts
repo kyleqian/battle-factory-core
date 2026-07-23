@@ -556,7 +556,10 @@ import {
   faintAttackTargetShakeX2,
 } from "./faintAttack.ts";
 import {
+  FIRE_PUNCH_BURN_MESSAGE_AGE,
+  FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE,
   firePunchFistVisible,
+  firePunchBurnFlames,
   firePunchHitsplatVisible,
   firePunchParticlesInDrawOrder,
   firePunchResolutionState,
@@ -790,6 +793,7 @@ const healthboxAssemblyAssets: HealthboxAssets = {
   frame: (battleHealthboxAsset as { singlesOpponent: HealthboxAssets["frame"] }).singlesOpponent,
   hpbar: (battleHealthboxAsset as { hpbar: HealthboxAssets["hpbar"] }).hpbar,
   hpbarAnim: (battleHealthboxAsset as { hpbarAnim: HealthboxAssets["hpbarAnim"] }).hpbarAnim,
+  frameEnd: (battleHealthboxAsset as { frameEnd: HealthboxAssets["frameEnd"] }).frameEnd,
   statusIcons: (battleHealthboxAsset as { status2: HealthboxAssets["statusIcons"] }).status2,
 };
 
@@ -7149,20 +7153,24 @@ const murkrowHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets
   hpFraction: 1,
   status: "none",
 });
-const murkrowHealthboxContentByHp = new Map<number, ReturnType<typeof composeOpponentHealthbox>>();
-function murkrowHealthboxContentForHp(hp: number): ReturnType<typeof composeOpponentHealthbox> {
-  let cached = murkrowHealthboxContentByHp.get(hp);
+const murkrowHealthboxContentByHp = new Map<string, ReturnType<typeof composeOpponentHealthbox>>();
+function murkrowHealthboxContentForHp(
+  hp: number,
+  status: "none" | "burn" = "none",
+): ReturnType<typeof composeOpponentHealthbox> {
+  const key = `${hp}:${status}`;
+  let cached = murkrowHealthboxContentByHp.get(key);
   if (!cached) {
-    cached = hp === 142
+    cached = hp === 142 && status === "none"
       ? murkrowHealthboxContent
       : composeOpponentHealthbox(healthboxAssemblyAssets, {
           name: "MURKROW",
           level: MURKROW_LEVEL,
           gender: "male",
           hpFraction: hp / 142,
-          status: "none",
+          status,
         });
-    murkrowHealthboxContentByHp.set(hp, cached);
+    murkrowHealthboxContentByHp.set(key, cached);
   }
   return cached;
 }
@@ -12078,12 +12086,24 @@ function firePunchTargetShakeY2(age: number): number {
   return Math.floor(n / 2) % 2 === 1 ? 3 : 0;
 }
 
-function firePunchEmberTileset(frame: 1 | 2 | 3): Tileset {
+function firePunchEmberTileset(frame: 0 | 1 | 2 | 3 | 4): Tileset {
   return subTileset(battleAnimSmallEmber.tileset, frame * 4, 4);
 }
 
 function drawFirePunchEmbers(fb: Uint8Array, age: number): void {
   for (const particle of firePunchParticlesInDrawOrder(age)) {
+    drawSpriteSheet(
+      fb,
+      firePunchEmberTileset(particle.frame),
+      battleAnimSmallEmber.palette,
+      particle.x - 16,
+      particle.y - 16,
+    );
+  }
+}
+
+function drawFirePunchBurnFlames(fb: Uint8Array, age: number): void {
+  for (const particle of firePunchBurnFlames(age)) {
     drawSpriteSheet(
       fb,
       firePunchEmberTileset(particle.frame),
@@ -12171,6 +12191,7 @@ function drawTurn16PostSwitchField(
     }
     const beforeEffects = fb.slice();
     drawFirePunchEmbers(fb, firePunchAge);
+    drawFirePunchBurnFlames(fb, firePunchAge);
     const frontEffects = beforeEffects.slice();
     const frontCoverage = new Uint8Array(240 * 160);
     drawFirePunchImpact(frontEffects, firePunchAge, frontCoverage);
@@ -12188,7 +12209,7 @@ function drawTurn16PostSwitchField(
     drawOpponentHealthboxWobble(
       fb,
       resolution.healthboxY2,
-      murkrowHealthboxContentForHp(resolution.displayedHp),
+      murkrowHealthboxContentForHp(resolution.displayedHp, resolution.healthboxStatus),
     );
   } else if (faintAttackAge !== null) {
     const eva = faintAttackAttackerEva(faintAttackAge);
@@ -12284,17 +12305,38 @@ function drawTurn16FightSubmenuWindow(
   );
 
   if (ownedAnimationAge !== null && faintAttackResolutionState(ownedAnimationAge).message === "FIRE_PUNCH") {
+    const firePunchAge = ownedAnimationAge - TURN16_FIRE_PUNCH_FIRST_OWNED_AGE;
+    const resolution = firePunchResolutionState(firePunchAge);
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-    drawMessageTextLines(
-      fb,
-      TURN16_FIRE_PUNCH_LINE1,
-      TURN16_FIRE_PUNCH_LINE2,
-      turn15SimpleVisibleChars(
-        t,
-        confirmTick! + TURN16_FAINT_ATTACK_ANIM_DELAY + FIRE_PUNCH_TEXT_AGE,
-        TURN16_FIRE_PUNCH_TEXT_TOTAL,
-      ),
-    );
+    if (resolution.message === "FIRE_PUNCH") {
+      drawMessageTextLines(
+        fb,
+        TURN16_FIRE_PUNCH_LINE1,
+        TURN16_FIRE_PUNCH_LINE2,
+        turn15SimpleVisibleChars(
+          t,
+          confirmTick! + TURN16_FAINT_ATTACK_ANIM_DELAY + FIRE_PUNCH_TEXT_AGE,
+          TURN16_FIRE_PUNCH_TEXT_TOTAL,
+        ),
+      );
+    } else if (resolution.message === "BURNED") {
+      const line = "Foe MURKROW was burned!";
+      drawMessageTextLines(
+        fb,
+        line,
+        "",
+        Math.min(line.length, firePunchAge - FIRE_PUNCH_BURN_MESSAGE_AGE + 1),
+      );
+    } else {
+      const line1 = "Foe MURKROW is hurt";
+      const line2 = "by its burn!";
+      drawMessageTextLines(
+        fb,
+        line1,
+        line2,
+        firePunchAge - FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE + 1,
+      );
+    }
     return;
   }
 

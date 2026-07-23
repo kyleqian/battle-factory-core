@@ -103,6 +103,9 @@ writeJson(join(ASSETS_GEN, "battle-healthbox.json"), {
   // offsets 47/56 - hpbar.png only covers the green band, enum 0-11; ISSUES
   // #16 round 3, docs/healthbox-assembly-notes.md).
   hpbarAnim: { tileset: loadTileset(join(BATTLE_INTERFACE, "hpbar_anim.png")), palette: ballDisplayPalette },
+  // HEALTHBOX_GFX_65: status-icon updates replace the normal "P" caption
+  // tile with this fixed bar end-cap on opponent healthboxes.
+  frameEnd: { tileset: loadTileset(join(BATTLE_INTERFACE, "misc_frameend.png")), palette: ballDisplayPalette },
   expbar: { tileset: loadTileset(join(BATTLE_INTERFACE, "expbar.png")), palette: ballDisplayPalette },
   status: { tileset: loadTileset(join(BATTLE_INTERFACE, "status.png")), palette: ballStatusBar.palette },
   // status2.png = GetStatusIconForBattlerId's BATTLER1 variant - the sheet

@@ -13,6 +13,14 @@ export const FIRE_PUNCH_HIT_WOBBLE_FIRST_AGE = 133;
 export const FIRE_PUNCH_HIT_WOBBLE_TICKS = 20;
 export const FIRE_PUNCH_HIT_BLINK_FIRST_AGE = 134;
 export const FIRE_PUNCH_HP_DRAIN_FIRST_AGE = 168;
+export const FIRE_PUNCH_HP_COMMIT_AGE = 236;
+export const FIRE_PUNCH_SECONDARY_ROLL_AGE = 241;
+export const FIRE_PUNCH_BURN_FLAME_FIRST_AGE = 247;
+export const FIRE_PUNCH_TEXT_CLEAR_AGE = 283;
+export const FIRE_PUNCH_BURN_MESSAGE_AGE = 283;
+export const FIRE_PUNCH_BURN_BADGE_AGE = 372;
+export const FIRE_PUNCH_CURRENT_MOVE_RESET_AGE = 383;
+export const FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE = 387;
 
 const SPIRAL_PHASES = [0, 64, 128, 196] as const;
 const SPREAD_VELOCITIES = [
@@ -137,12 +145,26 @@ export interface FirePunchResolutionState {
   targetInvisible: boolean;
   healthboxY2: number;
   displayedHp: number;
+  battleHp: number;
+  secondaryRollConsumed: boolean;
+  secondaryRollSucceeded: boolean;
+  status: "none" | "burn";
+  healthboxStatus: "none" | "burn";
+  currentMove: "FIRE_PUNCH" | null;
+  message: "FIRE_PUNCH" | "BURNED" | "BURN_RESIDUAL";
 }
 
 /** Generic hit blink/wobble followed by the 142→75 display drain. */
 export function firePunchResolutionState(age: number): FirePunchResolutionState {
   const wobble = age - FIRE_PUNCH_HIT_WOBBLE_FIRST_AGE;
   const blink = age - FIRE_PUNCH_HIT_BLINK_FIRST_AGE;
+  const burned = age >= FIRE_PUNCH_SECONDARY_ROLL_AGE;
+  const message: FirePunchResolutionState["message"] =
+    age < FIRE_PUNCH_TEXT_CLEAR_AGE
+      ? "FIRE_PUNCH"
+      : age < FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE
+          ? "BURNED"
+          : "BURN_RESIDUAL";
   return {
     healthboxY2: wobble >= 0 && wobble < FIRE_PUNCH_HIT_WOBBLE_TICKS
       ? (wobble % 2 === 0 ? 1 : -1)
@@ -151,5 +173,48 @@ export function firePunchResolutionState(age: number): FirePunchResolutionState 
     displayedHp: age < FIRE_PUNCH_HP_DRAIN_FIRST_AGE
       ? 142
       : Math.max(75, 142 - (age - FIRE_PUNCH_HP_DRAIN_FIRST_AGE + 1)),
+    battleHp: age >= FIRE_PUNCH_HP_COMMIT_AGE ? 75 : 142,
+    secondaryRollConsumed: burned,
+    secondaryRollSucceeded: burned,
+    status: burned ? "burn" : "none",
+    healthboxStatus: age >= FIRE_PUNCH_BURN_BADGE_AGE ? "burn" : "none",
+    currentMove: age >= FIRE_PUNCH_CURRENT_MOVE_RESET_AGE ? null : "FIRE_PUNCH",
+    message,
   };
+}
+
+export interface BurnFlameParticle {
+  x: number;
+  y: number;
+  frame: 0 | 1 | 2 | 3 | 4;
+}
+
+const BURN_FLAME_START_AGES = [
+  FIRE_PUNCH_BURN_FLAME_FIRST_AGE,
+  FIRE_PUNCH_BURN_FLAME_FIRST_AGE + 6,
+  FIRE_PUNCH_BURN_FLAME_FIRST_AGE + 12,
+] as const;
+const BURN_FLAME_VISIBLE_TICKS = 22;
+// StartAnimLinearTranslation stores an 8.8 delta:
+// ((200 - 152) << 8) / 20 = 614 after integer truncation.
+const BURN_FLAME_X_DELTA_FIXED8 = 614;
+
+/**
+ * Status_Burn's three `gBurnFlameSpriteTemplate` sprites. The source script
+ * calls BurnFlame three times; its four-tick script delays become six
+ * displayed VBlanks apart. Returned in back-to-front software draw order:
+ * later sprite slots lose equal-subpriority OAM ties to the first flame.
+ */
+export function firePunchBurnFlames(age: number): BurnFlameParticle[] {
+  const particles: BurnFlameParticle[] = [];
+  for (let i = BURN_FLAME_START_AGES.length - 1; i >= 0; i -= 1) {
+    const n = age - BURN_FLAME_START_AGES[i]!;
+    if (n < 0 || n >= BURN_FLAME_VISIBLE_TICKS) continue;
+    particles.push({
+      x: 152 + ((BURN_FLAME_X_DELTA_FIXED8 * Math.min(n, 20)) >> 8),
+      y: 64,
+      frame: (Math.floor((n + 1) / 4) % 5) as 0 | 1 | 2 | 3 | 4,
+    });
+  }
+  return particles;
 }

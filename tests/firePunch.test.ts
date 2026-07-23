@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   firePunchFistVisible,
+  firePunchBurnFlames,
   firePunchParticlesInDrawOrder,
   firePunchResolutionState,
   firePunchSpiralParticles,
@@ -9,6 +10,7 @@ import {
 } from "../src/engine/firePunch.ts";
 import ember from "../src/assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import hands from "../src/assets/gen/battle-anim-hands-and-feet.json" with { type: "json" };
+import { advanceRngValue } from "../src/engine/rng.ts";
 
 describe("FIRE_PUNCH source-derived reducers", () => {
   it("pins the delay-2 red ramp and delay-0 restore", () => {
@@ -47,6 +49,58 @@ describe("FIRE_PUNCH source-derived reducers", () => {
     expect(firePunchResolutionState(168).displayedHp).toBe(141);
     expect(firePunchResolutionState(234).displayedHp).toBe(75);
     expect(firePunchResolutionState(235).displayedHp).toBe(75);
+  });
+
+  it("pins the atomic HP write, successful secondary roll/status, badge, message, and move reset", () => {
+    const beforeBurnRoll = 2840502189;
+    const afterBurnRoll = advanceRngValue(beforeBurnRoll);
+    expect(afterBurnRoll).toBe(2012156700);
+    expect((afterBurnRoll >>> 16) % 100).toBeLessThan(10);
+
+    expect(firePunchResolutionState(235)).toMatchObject({
+      battleHp: 142,
+      secondaryRollConsumed: false,
+      status: "none",
+      message: "FIRE_PUNCH",
+    });
+    expect(firePunchResolutionState(236).battleHp).toBe(75);
+    expect(firePunchResolutionState(240)).toMatchObject({
+      secondaryRollConsumed: false,
+      secondaryRollSucceeded: false,
+      status: "none",
+    });
+    expect(firePunchResolutionState(241)).toMatchObject({
+      secondaryRollConsumed: true,
+      secondaryRollSucceeded: true,
+      status: "burn",
+      healthboxStatus: "none",
+    });
+    expect(firePunchResolutionState(282).message).toBe("FIRE_PUNCH");
+    expect(firePunchResolutionState(283).message).toBe("BURNED");
+    expect(firePunchResolutionState(371).healthboxStatus).toBe("none");
+    expect(firePunchResolutionState(372).healthboxStatus).toBe("burn");
+    expect(firePunchResolutionState(382).currentMove).toBe("FIRE_PUNCH");
+    expect(firePunchResolutionState(383).currentMove).toBeNull();
+    expect(firePunchResolutionState(386).message).toBe("BURNED");
+    expect(firePunchResolutionState(387).message).toBe("BURN_RESIDUAL");
+  });
+
+  it("pins Status_Burn's three fixed-point flame translations and lifetimes", () => {
+    expect(firePunchBurnFlames(246)).toEqual([]);
+    expect(firePunchBurnFlames(247)).toEqual([{ x: 152, y: 64, frame: 0 }]);
+    expect(firePunchBurnFlames(250)).toEqual([{ x: 159, y: 64, frame: 1 }]);
+    expect(firePunchBurnFlames(253)).toEqual([
+      { x: 152, y: 64, frame: 0 },
+      { x: 166, y: 64, frame: 1 },
+    ]);
+    expect(firePunchBurnFlames(259)).toHaveLength(3);
+    expect(firePunchBurnFlames(268)).toEqual([
+      { x: 173, y: 64, frame: 2 },
+      { x: 187, y: 64, frame: 4 },
+      { x: 199, y: 64, frame: 0 },
+    ]);
+    expect(firePunchBurnFlames(280)).toEqual([{ x: 199, y: 64, frame: 0 }]);
+    expect(firePunchBurnFlames(281)).toEqual([]);
   });
 });
 
