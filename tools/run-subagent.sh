@@ -231,7 +231,10 @@ with per-tick oracle screenshots, absolute-tick framebuffer lookup, baked
 interactive sprites disguised as chrome, coordinate/RGB fitting, or by thinning
 an existing trace to matching captures. If exact live behavior cannot fit,
 commit only a clean evidence checkpoint or honest partial and record the
-precisely bounded remainder."
+precisely bounded remainder. For scratch work, allocate a fresh directory with
+mktemp -d; Codex command safety rejects rm-style cleanup and directory reuse.
+Run mGBA-backed Python probes through tools/run-mgba-probe.py so their output is
+validated and known teardown crashes do not masquerade as probe failures."
 fi
 
 if [[ "$IS_WORKTREE" == "1" ]]; then

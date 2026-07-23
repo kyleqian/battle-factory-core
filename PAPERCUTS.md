@@ -268,19 +268,6 @@ compare run exposed the staleness.
   numeric pixel probes (which is what actually worked) over visual
   sheets entirely.
 
-## mGBA probe log spew goes to STDOUT, not stderr (2026-07-20)
-
-- **What:** probe-script docstrings suggest redirecting stderr silences the
-  mGBA BIOS/DMA trace spew; it actually lands on stdout, so `2>log` still
-  buries results under megabytes of log lines. The latest
-  `dump-turn15-sendout.py` run also exited 139 after writing valid JSON.
-- **Hits:** 15 sessions (the first hit twice within its session).
-- **Cost each:** ~2-5 min.
-- **Workaround:** `>out 2>&1` and read the results FILE the probe
-  writes (never parse stdout) — consistent with the ROADMAP recipe's
-  existing "write JSON results to a file" rule; fixing the docstring
-  would be a one-line follow-up.
-
 ## Uncommitted work wiped by a scratch-loop `git checkout` (2026-07-20)
 
 - **What:** a grid-search scratch loop that used `git checkout` to reset
@@ -332,17 +319,3 @@ compare run exposed the staleness.
   `run-subagent.sh -c N "$(cat brief.txt)"`, avoiding `!(`/history-
   expansion-sensitive characters in inline briefs; a launcher flag that
   reads the brief from a file (`--brief-file`) would remove the class.
-
-## RAM-probe python scripts segfault on interpreter teardown after writing valid output (2026-07-21)
-
-- **What:** `dump-quickattack-anim.py`, `dump-endeavor-tail.py`,
-  `dump-battle-bars.py` (the mGBA-core RAM probes) exit 139 (SIGSEGV
-  during Python interpreter teardown) AFTER their JSON output is fully
-  and correctly written. Two workers in one session each spent ~2 min
-  re-validating output they nearly discarded as a failed run.
-- **Hits:** 9 sessions (multiple probe processes in some).
-- **Cost each:** ~2 min + the risk of discarding good data.
-- **Workaround:** check the output file's validity (json.load) instead
-  of trusting the exit code; a docstring line in each script saying
-  "exit 139 on teardown is expected, validate the JSON" — or a
-  wrapper that exits 0 when the output parses — would remove the class.

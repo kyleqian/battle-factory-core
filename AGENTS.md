@@ -127,6 +127,11 @@ the oracle captures *only the final frame* unless your trace's `captureFrames`
 lists the frames you want — request every frame you intend to compare, or
 you'll fool yourself by fitting a single endpoint.
 
+Run mGBA-backed Python probes through
+`python3 tools/run-mgba-probe.py <fresh-output.json> -- <probe command>`.
+It captures emulator log spew and accepts the known teardown SIGSEGV only when
+the newly written output parses as JSON.
+
 New compare traces set `"oracleProfile": "battle-scene-off"` or
 `"battle-scene-on"` explicitly. Historical traces without that field remain
 ON-profile traces so their established frame contract does not silently
