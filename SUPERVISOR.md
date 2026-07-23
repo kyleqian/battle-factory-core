@@ -66,11 +66,11 @@ edit.
    - `gpt-5.6-sol` / `high`: cross-layer architecture, ambiguous ownership/
      timing evidence, or the first sharply scoped repair after a failed
      worker.
-   Keep the Codex supervisor itself at Sol/high by default. Start a future
-   supervisor at xhigh only when the session begins on a repeatedly stuck,
-   architecture-level problem; do not spend xhigh throughout an ordinary
-   long session. This routing does not apply to Claude—the established Claude
-   model and launch flow stay unchanged.
+   Keep the Codex supervisor itself at Sol/high. Sol is mechanically capped at
+   high. Terra/xhigh is available only as an explicit override—the narrow
+   Terra tier still defaults to high. Max and ultra are refused globally. This
+   routing does not apply to Claude—the established Claude model and launch
+   flow stay unchanged.
 3. **Delegate.** `./tools/run-subagent.sh "<brief>"` (`--help` lists
    configuration flags). Provider-specific launch mechanics are load-bearing:
    - **Claude supervisor:** launch it in the background; a foreground Bash

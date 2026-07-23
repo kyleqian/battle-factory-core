@@ -98,8 +98,12 @@ case "$PROVIDER" in
   codex)
     MODEL="${MODEL:-gpt-5.6-sol}"
     REASONING_EFFORT="${REASONING_EFFORT:-high}"
-    if [[ ! "$REASONING_EFFORT" =~ ^(none|low|medium|high|xhigh|max|ultra)$ ]]; then
-      echo "run-supervisor: unsupported reasoning effort '$REASONING_EFFORT'" >&2
+    if [[ ! "$REASONING_EFFORT" =~ ^(none|low|medium|high|xhigh)$ ]]; then
+      echo "run-supervisor: unsupported reasoning effort '$REASONING_EFFORT' (maximum allowed: xhigh)" >&2
+      exit 2
+    fi
+    if [[ "$MODEL" == *sol* && "$REASONING_EFFORT" == "xhigh" ]]; then
+      echo "run-supervisor: Sol reasoning effort is capped at high (got '$REASONING_EFFORT')" >&2
       exit 2
     fi
     command -v codex >/dev/null 2>&1 || { echo "run-supervisor: codex CLI not found on PATH" >&2; exit 127; }

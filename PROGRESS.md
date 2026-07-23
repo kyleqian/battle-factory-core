@@ -18,9 +18,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** resume #37 rung 4a under a Sol/high Codex supervisor. The authorized
   repair qualifies for a Sol/high worker; ordinary later implementation should
   return to Sol/medium.
-- **Notes:** keep the supervisor at Sol/high by default. Use xhigh only when a
-  new supervisor session itself starts on a repeatedly unresolved architectural
-  blocker, not as the standing default.
+- **Notes:** keep the supervisor at Sol/high. Both Codex launchers cap Sol at
+  high; Terra/xhigh remains available only as an explicit override; max and
+  ultra are refused.
 
 ---
 ## 279 — Supervisor wind-down (ISSUES #37 rung 4a): **GREEN, RETRY AUTHORIZED**
