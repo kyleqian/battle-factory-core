@@ -1498,6 +1498,7 @@ function blendChannel(tgt1: number, tgt2: number, eva: number, evb: number): num
 const LINE1 = "BUG CATCHER DESTIN";
 const LINE2 = "would like to battle!";
 export interface BattleIntroEncounterParams {
+  readonly trainer: "bugCatcher" | "fisherman";
   readonly line1: string;
   readonly line2: string;
   readonly textStartTick: number;
@@ -1511,6 +1512,7 @@ export function battleIntroEncounterParams(
 ): BattleIntroEncounterParams {
   const line1 = encounter === "jenson" ? "FISHERMAN JENSON" : LINE1;
   return {
+    trainer: encounter === "jenson" ? "fisherman" : "bugCatcher",
     line1,
     line2: LINE2,
     textStartTick: TEXT_START_TICK,
@@ -10960,7 +10962,9 @@ function drawRockSprite(fb: Uint8Array, animNum: 0 | 1 | 2, centerX: number, cen
 
 /** The settled (post-tick-1227) composite: static bg + both trainer pics + the window frame - byte-exact against the oracle (see module doc point 1). */
 function introTrainer(encounter: BattleSceneState["encounter"]): TrainerPicAsset {
-  return encounter === "jenson" ? fisherman : bugCatcher;
+  return battleIntroEncounterParams(encounter).trainer === "fisherman"
+    ? fisherman
+    : bugCatcher;
 }
 
 function drawSettledScene(fb: Uint8Array, encounter: BattleSceneState["encounter"] = "destin"): void {

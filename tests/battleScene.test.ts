@@ -317,6 +317,7 @@ describe("battleScene: per-scanline shift (RAM-confirmed: gTasks[0].data[2], doc
 describe("battleScene: intro text cadence (docs/battle-scene-notes.md §3.2, 1 tick/char incl. spaces)", () => {
   it("selects JENSON's source-backed trainer line and two-tick-earlier cursor without changing DESTIN defaults", () => {
     expect(battleIntroEncounterParams("destin")).toEqual({
+      trainer: "bugCatcher",
       line1: "BUG CATCHER DESTIN",
       line2: "would like to battle!",
       textStartTick: 1234,
@@ -324,6 +325,7 @@ describe("battleScene: intro text cadence (docs/battle-scene-notes.md §3.2, 1 t
       cursorX: 123,
     });
     expect(battleIntroEncounterParams("jenson")).toEqual({
+      trainer: "fisherman",
       line1: "FISHERMAN JENSON",
       line2: "would like to battle!",
       textStartTick: 1234,
