@@ -12,6 +12,17 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Dense oracle boundary inspection needs an ad hoc capture override (2026-07-22)
+
+- **What:** the committed ground-truth trace is intentionally capture-capped,
+  but there is no reusable CLI flag to replace its capture list with a dense
+  range for boundary inspection; workers must write a one-off TypeScript call
+  to `runOracleTrace`, including its in-memory RGBA handling.
+- **Hits:** 1.
+- **Cost each:** ~2 min.
+- **Workaround:** load the trace, replace `captureFrames` in memory, call
+  `runOracleTrace`, and compare the returned `rgba` buffers.
+
 ## Dense compare output obscures the failure summary (2026-07-22)
 
 - **What:** `npm run compare` prints one line per captured frame, so a

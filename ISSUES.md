@@ -23,15 +23,15 @@ same-priority lower-index wins and the existing press-relative OBJ fade. Both
 canonical/delayed dense party traces are **200/200 exact**, including
 20302/20332. The screenshot-derived status backing is no longer allowed to
 claim transparent pixels during the fade. Do not reopen this raw field/menu
-transfer. The remaining post-SEND-OUT path begins at rung (2): battle fade +
-Go! MAGBY text, (3) Brendan throw/closed ball, (4) clean open-particles +
+transfer. The remaining post-SEND-OUT path continues at rung (3): Brendan
+throw/closed ball, (4) clean open-particles +
 MAGBY materialize/tint, (5) create/populate/slide the 138/138 player
 healthbox, and (6) blank hold + re-anchored MAGBY action-menu bounce.
 
 Reuse is explicit: parameterize the initial ONIX player-sendout helpers and
 turn-5's clean switch-in primitives; do **not** copy turn-13 Murkrow's
 species-specific wobble table. New data is only MAGBY's front asset/frame
-identity and any MAGBY-only wobble table. Start with rung 2 and verify the
+identity and any MAGBY-only wobble table. Start with rung 3 and verify the
 documented dense range before each subsequent rung. Do not use per-frame
 assets, absolute tick tables, or coordinate patches.
 

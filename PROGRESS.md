@@ -4,9 +4,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 275 — Bounded worker (ISSUES #37 rung 2): **GREEN — field fade + complete MAGBY text only**
+## 275 — Supervisor accepted (ISSUES #37 rung 2): **GREEN — field fade + complete MAGBY text only**
 
-- **State:** fresh canonical/delayed dense rung-2 traces are both **43/43
+- **State:** independently accepted: canonical/delayed dense rung-2 traces are both **43/43
   exact** through their honest text-only endpoint; frozen party traces remain
   **200/200**. Tier-1 **1010/1010**, build green.
 - **Did:** reused the 20302 indexed PPU field asset and real BLDY 15→0 ramp,
@@ -16,9 +16,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (+30 delayed).
 - **Next:** #37 rung 3 only begins at visible Brendan/ball ownership; do not
   extend this text-only renderer into trainer, ball, MAGBY, or healthbox work.
-- **Notes:** full Tier-1/build green; verifier **17/17**, party compositor
-  **5/5**. PAPERCUT: direct dense oracle inspection needs a custom in-memory
-  trace override because the frozen ground-truth trace is capture-capped, ~2 min.
+- **Notes:** supervisor reran Tier-1 **1010/1010**, build (**5.398 MB**),
+  frozen party traces **200/200** each, both rung-2 traces **43/43**, verifier
+  **17/17**, and compositor **5/5**. PAPERCUT: direct dense oracle inspection
+  needs a custom in-memory trace override because the frozen trace is capped, ~2 min.
 
 ---
 ## 274 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED — raw split exit OBJ composition**
