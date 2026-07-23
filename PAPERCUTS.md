@@ -33,18 +33,6 @@ Per entry:
   a trace captures every frame across the handoff; correct the ledger in the
   same commit that lands the dense trace.
 
-## Usage-limit detector matched worker-owned text (2026-07-22)
-
-- **What:** the Codex post-run detector searched whole structured events with
-  broad text regexes. It first matched `--no-rate-limit` in a worker's late
-  `ps` output, then matched the prior false-positive note when the next worker
-  printed `PROGRESS.md`; both workers had completed normally.
-- **Hits:** 2.
-- **Cost each:** ~3 min plus a premature supervisor wind-down.
-- **Fixed 2026-07-23:** parse Codex JSONL structurally and inspect only
-  provider `error`/`turn.failed` messages or explicitly denied
-  `rate_limit_event` records; unstructured stderr retains the fallback regex.
-
 ## compare CLI rejects trace-name shorthand (2026-07-22)
 
 - **What:** `npm run compare` requires the repository-relative trace path;
@@ -53,40 +41,6 @@ Per entry:
 - **Hits:** 1.
 - **Cost each:** <1 min.
 - **Workaround:** pass `tools/compare/traces/<name>.json`.
-
-## run-subagent.sh cap failed to terminate a Codex worker (2026-07-22)
-
-- **What:** a main-lane Codex worker launched with `--cap-minutes 38` was
-  still alive after 46 minutes, with its event log stale for ~24 minutes.
-  Deadline wind-down required the supervisor to interrupt the PTY manually.
-- **Hits:** 1.
-- **Cost each:** ~24 min of unattended session budget.
-- **Fixed 2026-07-22:** Codex workers now run under a dedicated headless
-  deadline wrapper in a fresh process group. Timeout or cancellation sends
-  TERM, waits 15 seconds, then KILLs the whole group. Claude's established
-  launcher path is unchanged.
-
-## Dense oracle boundary inspection needs an ad hoc capture override (2026-07-22)
-
-- **What:** the committed ground-truth trace is intentionally capture-capped,
-  but there is no reusable CLI flag to replace its capture list with a dense
-  range for boundary inspection; workers must write a one-off TypeScript call
-  to `runOracleTrace`, including its in-memory RGBA handling.
-- **Hits:** 1.
-- **Cost each:** ~2 min.
-- **Workaround:** load the trace, replace `captureFrames` in memory, call
-  `runOracleTrace`, and compare the returned `rgba` buffers.
-
-## Dense compare output obscures the failure summary (2026-07-22)
-
-- **What:** `npm run compare` prints one line per captured frame, so a
-  200-frame dense trace buries the final mismatch summary; piping through
-  `tail` then masks the compare's nonzero exit status unless `pipefail` is set.
-- **Hits:** 1.
-- **Cost each:** ~2 min.
-- **Workaround:** run the command unpiped for acceptance and query
-  `tools/compare/out/latest/manifest.json` with `jq` for a compact residual
-  list.
 
 ## dump-battler-full.py struct offsets live only in the script body (2026-07-20)
 

@@ -1,6 +1,7 @@
 // App-vs-oracle comparison aid (a discrepancy finder, not a grader).
 //
 // Usage: npm run compare -- tools/compare/traces/example.json [outDir]
+//          [--capture-range START:END] [--summary]
 //
 // Replays one trace against both the oracle service and the app engine
 // (tools/compare/appTrace.ts), writes oracle-NNNNN.png / app-NNNNN.png /
@@ -16,6 +17,11 @@ import { diffPngs } from "./diff.ts";
 import { computeSSIM } from "./ssim.ts";
 import { renderAppTrace } from "./appTrace.ts";
 import {
+  COMPARE_USAGE,
+  parseCompareCliArgs,
+  withCaptureRange,
+} from "./cli.ts";
+import {
   oracleUrlForProfile,
   runOracleTrace,
   type OracleProfile,
@@ -25,11 +31,15 @@ import {
 const WIDTH = 240;
 const HEIGHT = 160;
 
-const [tracePath, outDir = "tools/compare/out/latest"] = process.argv.slice(2);
-if (!tracePath) {
-  console.error("usage: npm run compare -- <trace.json> [outDir]");
+let cli;
+try {
+  cli = parseCompareCliArgs(process.argv.slice(2));
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  console.error(COMPARE_USAGE);
   process.exit(2);
 }
+const { tracePath, outDir, summary, captureRange } = cli;
 interface CompareTraceFile extends Partial<Trace> {
   readonly sourceTrace?: string;
 }
@@ -44,6 +54,7 @@ if (traceFile.sourceTrace) {
 } else {
   trace = traceFile as Trace;
 }
+trace = withCaptureRange(trace, captureRange);
 const oracleProfile: OracleProfile = trace.oracleProfile ?? "battle-scene-on";
 mkdirSync(outDir, { recursive: true });
 
@@ -77,10 +88,12 @@ for (const oracleCapture of oracleResult.captures) {
   const diff = diffPngs(oracleCapture.png, appPng);
   const ssim = computeSSIM(oracleCapture.png, appPng);
   const pct = ((100 * diff.diffPixels) / diff.totalPixels).toFixed(2);
-  console.log(
-    `frame ${oracleCapture.frame}: ${diff.diffPixels === 0 ? "match" : `DIFF ${diff.diffPixels}px (${pct}%)`} ` +
-      `ssimMean=${ssim.meanSSIM.toFixed(4)} ssimMin=${ssim.minSSIM.toFixed(4)}`,
-  );
+  if (!summary || diff.diffPixels > 0) {
+    console.log(
+      `frame ${oracleCapture.frame}: ${diff.diffPixels === 0 ? "match" : `DIFF ${diff.diffPixels}px (${pct}%)`} ` +
+        `ssimMean=${ssim.meanSSIM.toFixed(4)} ssimMin=${ssim.minSSIM.toFixed(4)}`,
+    );
+  }
   if (diff.diffPixels > 0) {
     mismatched += 1;
     writeFileSync(join(outDir, `diff-${pad(oracleCapture.frame)}.png`), diff.diffPng);
@@ -94,6 +107,7 @@ writeFileSync(
     trace: tracePath,
     oracleProfile,
     oracleUrl: oracleUrlForProfile(oracleProfile),
+    captureRange,
     frames: manifest,
   }, null, 2),
 );

@@ -125,7 +125,9 @@ NPC movement, dialogue, and exact pixels. Compare its PNGs against your app via
 to your engine. Compare whole windows, not just endpoint frames. **Gotcha:**
 the oracle captures *only the final frame* unless your trace's `captureFrames`
 lists the frames you want — request every frame you intend to compare, or
-you'll fool yourself by fitting a single endpoint.
+you'll fool yourself by fitting a single endpoint. For investigation, add
+`--capture-range START:END` to replace the trace's capture list and `--summary`
+to print only mismatches plus the final result.
 
 Run mGBA-backed Python probes through
 `python3 tools/run-mgba-probe.py <fresh-output.json> -- <probe command>`.
