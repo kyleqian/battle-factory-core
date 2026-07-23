@@ -17,12 +17,21 @@ export interface PostwinState {
   challengeBattleNum: 0 | 1;
   /** SaveBlock2.frontier.rentalMons[3..5].monId. */
   opponentRentalMonIds: readonly [number, number, number];
+  /** Accepted heal-message A edge, in this state's relative elapsed clock. */
+  healDismissElapsed: number | null;
+  /** gPlayerParty[0..2] HP: ONIX / MAGBY / BAYLEEF. */
+  playerPartyHp: readonly [number, number, number];
+  /** MULTI_GO_ON_RECORD_REST_RETIRE cursor; null until the menu exists. */
+  continuationCursorPos: 0 | 1 | 2 | 3 | null;
 }
 
 export const INITIAL_POSTWIN_STATE: PostwinState = {
   elapsed: 0,
   challengeBattleNum: 0,
   opponentRentalMonIds: [153, 179, 181],
+  healDismissElapsed: null,
+  playerPartyHp: [0, 27, 153],
+  continuationCursorPos: null,
 };
 
 /** gMain.inBattle clears and outside-battle VBlank RNG resumes at dismiss+43. */
@@ -47,6 +56,19 @@ export const POSTWIN_HEAL_TEXT_SETTLED_AGE =
   POSTWIN_HEAL_TEXT_FIRST_AGE + POSTWIN_HEAL_TEXT_TOTAL - 1;
 /** Earliest A accepted by MSGBOX_DEFAULT: 23796, dismiss+194. */
 export const POSTWIN_HEAL_INPUT_READY_AGE = 194;
+
+/** Script-relative schedule after the accepted heal-message A edge. */
+export const POSTWIN_PARTY_HEAL_DELAY = 163;
+export const POSTWIN_NEXT_BOX_CLEAR_DELAY = 166;
+export const POSTWIN_NEXT_TEXT_FIRST_DELAY = 167;
+export const POSTWIN_NEXT_TEXT_SETTLED_DELAY = 202;
+export const POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY = 206;
+export const POSTWIN_CONTINUATION_INPUT_READY_DELAY = 207;
+export const POSTWIN_HEALED_PARTY_HP = [117, 138, 153] as const;
+export const POSTWIN_NEXT_LINE1 = "The 2nd match is next!";
+export const POSTWIN_NEXT_LINE2 = "Are you ready?";
+export const POSTWIN_NEXT_TEXT_TOTAL =
+  POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length;
 
 // Exact write ages are filled by the dense RAM audit accompanying this
 // slice. They remain relative state boundaries, never canonical ticks.
@@ -89,6 +111,12 @@ export function postwinHealInputReady(age: number): boolean {
 
 export function advancePostwin(state: PostwinState): PostwinState {
   const elapsed = state.elapsed + 1;
+  const healed =
+    state.healDismissElapsed !== null &&
+    elapsed >= state.healDismissElapsed + POSTWIN_PARTY_HEAL_DELAY;
+  const menuVisible =
+    state.healDismissElapsed !== null &&
+    elapsed >= state.healDismissElapsed + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY;
   return {
     elapsed,
     challengeBattleNum:
@@ -97,5 +125,48 @@ export function advancePostwin(state: PostwinState): PostwinState {
       elapsed >= POSTWIN_OPPONENT_RENTALS_WRITE_AGE
         ? POSTWIN_OPPONENT_RENTAL_IDS
         : state.opponentRentalMonIds,
+    healDismissElapsed: state.healDismissElapsed,
+    playerPartyHp: healed ? POSTWIN_HEALED_PARTY_HP : state.playerPartyHp,
+    continuationCursorPos:
+      menuVisible && state.continuationCursorPos === null
+        ? 0
+        : state.continuationCursorPos,
+  };
+}
+
+export function acceptPostwinHealDismiss(state: PostwinState): PostwinState {
+  if (state.healDismissElapsed !== null || !postwinHealInputReady(state.elapsed)) {
+    return state;
+  }
+  return { ...state, healDismissElapsed: state.elapsed };
+}
+
+export function postwinNextVisibleChars(state: PostwinState): number {
+  if (state.healDismissElapsed === null) return 0;
+  const delay = state.elapsed - state.healDismissElapsed;
+  if (delay < POSTWIN_NEXT_TEXT_FIRST_DELAY) return 0;
+  return Math.min(
+    POSTWIN_NEXT_TEXT_TOTAL,
+    delay - POSTWIN_NEXT_TEXT_FIRST_DELAY + 1,
+  );
+}
+
+export function postwinContinuationInputReady(state: PostwinState): boolean {
+  return state.healDismissElapsed !== null &&
+    state.elapsed >=
+      state.healDismissElapsed + POSTWIN_CONTINUATION_INPUT_READY_DELAY;
+}
+
+export function movePostwinContinuationCursor(
+  state: PostwinState,
+  direction: 1 | -1,
+): PostwinState {
+  if (!postwinContinuationInputReady(state) || state.continuationCursorPos === null) {
+    return state;
+  }
+  return {
+    ...state,
+    continuationCursorPos:
+      ((state.continuationCursorPos + direction + 4) % 4) as 0 | 1 | 2 | 3,
   };
 }

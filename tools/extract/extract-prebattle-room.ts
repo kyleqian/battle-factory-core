@@ -215,3 +215,17 @@ function writeJson(path: string, data: unknown): void {
     palette: msgBoxImg.palette,
   });
 }
+
+// --- Standard field choice-menu window frame -------------------------------
+// The canonical save uses optionsWindowFrameType 0, i.e. text_window/1.png.
+// DrawMultichoiceMenu loads its 3x3 tiles through LoadUserWindowBorderGfx and
+// WindowFunc_DrawStandardFrame. Keep the source art as indexed tiles rather
+// than harvesting the interactive menu from an oracle framebuffer.
+{
+  const frameImg = decodeIndexedPng(join(REF, "graphics", "text_window", "1.png"));
+  const sliced = sliceTiles(frameImg);
+  writeJson(join(ASSETS_GEN, "prebattle-room-std-window.json"), {
+    tileset: { columns: sliced.columns, rows: sliced.rows, tiles: sliced.tiles.map((t) => [...t.pixels]) },
+    palette: frameImg.palette,
+  });
+}

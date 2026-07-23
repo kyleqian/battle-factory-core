@@ -14,6 +14,7 @@ import { advanceRngValue } from "../src/engine/rng.ts";
 import { opponentSetupExtraRngSteps } from "../src/engine/battleRoom.ts";
 import {
   advancePostwin,
+  acceptPostwinHealDismiss,
   INITIAL_POSTWIN_STATE,
   POSTWIN_BATTLE_BLACK_AGE,
   POSTWIN_BATTLE_FADE_FIRST_AGE,
@@ -22,13 +23,22 @@ import {
   POSTWIN_CHALLENGE_BATTLE_WRITE_AGE,
   POSTWIN_COUNTER_ROOM_FIRST_AGE,
   POSTWIN_HEAL_INPUT_READY_AGE,
+  POSTWIN_HEALED_PARTY_HP,
   POSTWIN_HEAL_TEXT_SETTLED_AGE,
   POSTWIN_IN_BATTLE_CLEAR_AGE,
   POSTWIN_OPPONENT_RENTALS_WRITE_AGE,
   POSTWIN_OPPONENT_RENTAL_IDS,
+  POSTWIN_PARTY_HEAL_DELAY,
+  POSTWIN_NEXT_BOX_CLEAR_DELAY,
+  POSTWIN_NEXT_TEXT_FIRST_DELAY,
+  POSTWIN_NEXT_TEXT_SETTLED_DELAY,
+  POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
+  POSTWIN_CONTINUATION_INPUT_READY_DELAY,
   POSTWIN_SECOND_BLACK_AGE,
   postwinHealInputReady,
   postwinHealVisibleChars,
+  postwinContinuationInputReady,
+  postwinNextVisibleChars,
   postwinPhase,
   postwinRngSteps,
 } from "../src/engine/postwin.ts";
@@ -177,5 +187,89 @@ describe("S8 Battle-1 postwin transition", () => {
     expect(postwinHealInputReady(POSTWIN_HEAL_INPUT_READY_AGE - 1)).toBe(false);
     expect(postwinHealInputReady(POSTWIN_HEAL_INPUT_READY_AGE)).toBe(true);
     expect(POSTWIN_HEAL_INPUT_READY_AGE).toBe(194);
+  });
+
+  it("treats the long heal hold as a genuine one-shot input gate and stores any accepted edge", () => {
+    const earlyBase = {
+      ...createInitialState(),
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: POSTWIN_HEAL_INPUT_READY_AGE - 2,
+      },
+    };
+    const early = tick(earlyBase, new Set(["A"]));
+    expect(early.postwin!.elapsed).toBe(POSTWIN_HEAL_INPUT_READY_AGE - 1);
+    expect(early.postwin!.healDismissElapsed).toBeNull();
+
+    const firstReady = tick(early, new Set());
+    const firstAccepted = tick(firstReady, new Set(["A"]));
+    expect(firstAccepted.postwin!.healDismissElapsed)
+      .toBe(POSTWIN_HEAL_INPUT_READY_AGE + 1);
+
+    const delayedAge = 2_000;
+    const delayed = tick({
+      ...createInitialState(),
+      postwin: {
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: delayedAge - 1,
+      },
+    }, new Set(["A"]));
+    expect(delayed.postwin!.healDismissElapsed).toBe(delayedAge);
+    const heldAgain = tick(delayed, new Set(["A"]));
+    expect(heldAgain.postwin!.healDismissElapsed).toBe(delayedAge);
+  });
+
+  it("heals the party at dismiss+163 while preserving VBlank RNG ownership", () => {
+    const dismissAge = 500;
+    const before = {
+      ...INITIAL_POSTWIN_STATE,
+      elapsed: dismissAge + POSTWIN_PARTY_HEAL_DELAY - 1,
+      healDismissElapsed: dismissAge,
+    };
+    expect(before.playerPartyHp).toEqual([0, 27, 153]);
+    const healed = advancePostwin(before);
+    expect(healed.elapsed).toBe(dismissAge + POSTWIN_PARTY_HEAL_DELAY);
+    expect(healed.playerPartyHp).toEqual(POSTWIN_HEALED_PARTY_HP);
+
+    const seed = 0x10203040;
+    const engine = tick({
+      ...createInitialState(),
+      rngMode: "vblank",
+      rngValue: seed,
+      postwin: before,
+    }, new Set());
+    expect(engine.rngMode).toBe("vblank");
+    expect(engine.rngValue).toBe(advanceRngValue(seed));
+    expect(postwinRngSteps(engine.postwin!.elapsed)).toBe(1);
+  });
+
+  it("keeps box clear, prompt typing, menu visibility, and input readiness relative to the stored heal edge", () => {
+    const dismissAge = 2_000;
+    const at = (delay: number) => ({
+      ...acceptPostwinHealDismiss({
+        ...INITIAL_POSTWIN_STATE,
+        elapsed: dismissAge,
+      }),
+      elapsed: dismissAge + delay,
+    });
+
+    expect(POSTWIN_NEXT_BOX_CLEAR_DELAY).toBe(166);
+    expect(postwinNextVisibleChars(at(POSTWIN_NEXT_BOX_CLEAR_DELAY))).toBe(0);
+    expect(postwinNextVisibleChars(at(POSTWIN_NEXT_TEXT_FIRST_DELAY))).toBe(1);
+    expect(postwinNextVisibleChars(at(POSTWIN_NEXT_TEXT_SETTLED_DELAY))).toBe(36);
+    expect(at(POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY - 1).continuationCursorPos)
+      .toBeNull();
+    expect(postwinContinuationInputReady(
+      at(POSTWIN_CONTINUATION_INPUT_READY_DELAY - 1),
+    )).toBe(false);
+    expect(postwinContinuationInputReady(
+      at(POSTWIN_CONTINUATION_INPUT_READY_DELAY),
+    )).toBe(true);
+
+    const menuShown = advancePostwin({
+      ...at(POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY - 1),
+      continuationCursorPos: null,
+    });
+    expect(menuShown.continuationCursorPos).toBe(0);
   });
 });

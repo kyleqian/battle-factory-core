@@ -50,6 +50,7 @@ import layout from "../data/gen/prebattle-room-layout.json" with { type: "json" 
 import tileset from "../assets/gen/prebattle-room-tileset.json" with { type: "json" };
 import npcs from "../assets/gen/prebattle-room-npcs.json" with { type: "json" };
 import msgbox from "../assets/gen/prebattle-room-msgbox.json" with { type: "json" };
+import stdWindow from "../assets/gen/prebattle-room-std-window.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import { MESSAGE_TEXT } from "./prebattleRoom.ts";
@@ -208,6 +209,7 @@ interface MsgboxAsset {
 const msgboxAsset = msgbox as MsgboxAsset;
 const msgboxTiles = msgboxAsset.tileset.tiles;
 const msgboxPalette = msgboxAsset.palette;
+const stdWindowAsset = stdWindow as MsgboxAsset;
 
 /** Screen origin of the box's top-left border tile (bottom-of-screen field message box). */
 const BOX_ORIGIN = { x: 0, y: 112 };
@@ -293,6 +295,50 @@ const MESSAGE_TEXT_COLORS = { fg: 1, bg: 0, shadow: 2 };
 
 /** Draws `text` at the given screen position using the message box's own fg/shadow palette (msgboxPalette indices 2/3) - shared with battleRoomRender.ts's opponent-speech box, which reuses this literal same box asset (docs/battle-room-notes.md §8.1). */
 export function drawMessageBoxText(fb: Uint8Array, text: string, x: number, y: number): void {
+  drawText(fb, font, charmap, text, x, y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+}
+
+/**
+ * Draws the source-backed 3x3 user-window frame used by field multichoice
+ * menus. `x`/`y` are the outer border origin; width/height are the inner
+ * window dimensions in tiles, matching WindowFunc_DrawStandardFrame.
+ */
+export function drawStandardWindowFrame(
+  fb: Uint8Array,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
+  const tiles = stdWindowAsset.tileset.tiles;
+  const palette = stdWindowAsset.palette;
+  for (let by = 0; by < height + 2; by += 1) {
+    for (let bx = 0; bx < width + 2; bx += 1) {
+      const borderRow = by === 0 ? 0 : by === height + 1 ? 2 : 1;
+      const borderCol = bx === 0 ? 0 : bx === width + 1 ? 2 : 1;
+      const tile = tiles[borderRow * 3 + borderCol]!;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          const colorIndex = tile[py * 8 + px]!;
+          if (colorIndex === 0) continue;
+          const color = palette[colorIndex]!;
+          setPixel(fb, x + bx * 8 + px, y + by * 8 + py, color.r, color.g, color.b);
+        }
+      }
+    }
+  }
+
+  // FillWindowPixelBuffer(windowId, PIXEL_FILL(1)): palette 15 index 1 is
+  // white in text_pal1.pal, the same mGBA-expanded white as the msgbox.
+  for (let py = 0; py < height * 8; py += 1) {
+    for (let px = 0; px < width * 8; px += 1) {
+      setPixel(fb, x + 8 + px, y + 8 + py, 255, 255, 255);
+    }
+  }
+}
+
+/** Field choice menus use the same normal-font foreground/shadow colors. */
+export function drawStandardWindowText(fb: Uint8Array, text: string, x: number, y: number): void {
   drawText(fb, font, charmap, text, x, y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
 }
 

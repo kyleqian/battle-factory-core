@@ -70,6 +70,8 @@ import {
   drawMessageBox,
   drawMessageBoxFrame,
   drawMessageBoxText,
+  drawStandardWindowFrame,
+  drawStandardWindowText,
   renderPrebattleRoomScene,
   renderPrebattleRoomWalkScene,
 } from "./prebattleRoomRender.ts";
@@ -130,6 +132,7 @@ import {
 import { activeMonMoveset, rentalMoveset } from "./battleSetup.ts";
 import {
   advancePostwin,
+  acceptPostwinHealDismiss,
   INITIAL_POSTWIN_STATE,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
   POSTWIN_BATTLE_ROOM_FIRST_AGE,
@@ -137,8 +140,15 @@ import {
   POSTWIN_HEAL_BOX_AGE,
   POSTWIN_HEAL_LINE1,
   POSTWIN_HEAL_LINE2,
+  POSTWIN_NEXT_BOX_CLEAR_DELAY,
+  POSTWIN_NEXT_LINE1,
+  POSTWIN_NEXT_LINE2,
+  POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
   POSTWIN_IN_BATTLE_CLEAR_AGE,
   postwinHealVisibleChars,
+  movePostwinContinuationCursor,
+  postwinContinuationInputReady,
+  postwinNextVisibleChars,
   postwinPhase,
   postwinRngSteps,
   type PostwinState,
@@ -215,7 +225,20 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let postwin: PostwinState | null = state.postwin;
 
   if (postwin) {
-    const nextPostwin = advancePostwin(postwin);
+    let nextPostwin = advancePostwin(postwin);
+    if (
+      nextPostwin.healDismissElapsed === null &&
+      newKeys.has("A")
+    ) {
+      nextPostwin = acceptPostwinHealDismiss(nextPostwin);
+    }
+    if (postwinContinuationInputReady(nextPostwin)) {
+      if (newAndRepeatedKeys.has("DOWN")) {
+        nextPostwin = movePostwinContinuationCursor(nextPostwin, 1);
+      } else if (newAndRepeatedKeys.has("UP")) {
+        nextPostwin = movePostwinContinuationCursor(nextPostwin, -1);
+      }
+    }
     // The generic VBlank call above already supplied one step after the
     // mode has resumed. Before the clear tick it supplied none.
     const totalSteps = postwinRngSteps(nextPostwin.elapsed);
@@ -1272,22 +1295,46 @@ function renderPostwinState(state: EngineState): Uint8Array {
   );
   if (age >= POSTWIN_HEAL_BOX_AGE) {
     drawMessageBoxFrame(fb);
-    const chars = postwinHealVisibleChars(age);
+    const healDismiss = postwin.healDismissElapsed;
+    const showingHeal =
+      healDismiss === null ||
+      age < healDismiss + POSTWIN_NEXT_BOX_CLEAR_DELAY;
+    const chars = showingHeal
+      ? postwinHealVisibleChars(age)
+      : postwinNextVisibleChars(postwin);
     if (chars > 0) {
+      const line1 = showingHeal ? POSTWIN_HEAL_LINE1 : POSTWIN_NEXT_LINE1;
+      const line2 = showingHeal ? POSTWIN_HEAL_LINE2 : POSTWIN_NEXT_LINE2;
       drawMessageBoxText(
         fb,
-        POSTWIN_HEAL_LINE1.slice(0, Math.min(chars, POSTWIN_HEAL_LINE1.length)),
+        line1.slice(0, Math.min(chars, line1.length)),
         16,
         121,
       );
-      if (chars > POSTWIN_HEAL_LINE1.length) {
+      if (chars > line1.length) {
         drawMessageBoxText(
           fb,
-          POSTWIN_HEAL_LINE2.slice(0, chars - POSTWIN_HEAL_LINE1.length),
+          line2.slice(0, chars - line1.length),
           16,
           137,
         );
       }
+    }
+    if (
+      healDismiss !== null &&
+      age >= healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY
+    ) {
+      drawStandardWindowFrame(fb, 152, 32, 6, 8);
+      const choices = ["GO ON", "RECORD", "REST", "RETIRE"];
+      for (let i = 0; i < choices.length; i += 1) {
+        drawStandardWindowText(fb, choices[i]!, 168, 41 + i * 16);
+      }
+      drawStandardWindowText(
+        fb,
+        "▶",
+        160,
+        41 + (postwin.continuationCursorPos ?? 0) * 16,
+      );
     }
   }
   return fb;
