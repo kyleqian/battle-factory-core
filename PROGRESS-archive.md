@@ -1,3 +1,30 @@
+## 299 — Supervisor-accepted S8 first postwin increment: **GREEN — loss dismiss through heal prompt exact**
+
+- **State:** canonical `23602--23800` is **199/199 exact**, every tick
+  captured in `battle1-postwin-heal.json`; `turn17-rung8b.json` remains
+  **118/118**. Tier-1 is **1073/1073** and build passes (**5.465 MB**).
+- **Did:** added the real no-cursor DESTIN quote gate/stored edge,
+  source-relative fast fade, battle teardown and +43 `inBattle`/RNG-mode
+  handoff, battle-room flash, second black hold, counter-room fade/attendant
+  composition, and both heal-message lines through the true +194 input
+  boundary. State pins challenge battle 0→1 at +79 and opponent rental IDs
+  `[188,184,135]` at +137.
+- **Next:** resume at **23801** only if extending the held prompt, or at the
+  explicitly out-of-scope heal dismiss **25802** for the next S8 slice;
+  delayed party heal write 25965, continuation menu, swap flow, and battle 2
+  remain untouched. S8 stays `[ ]`.
+- **Notes:** implementation `258e7ad`, dense trace `df718a9`, RNG ownership
+  correction `f32bddb`. The latter keeps VBlank RNG live through battle
+  setup, applies the RAM/source-relative opponent-generation draws, and
+  freezes only at `CB2_InitBattleInternal`, not the speech edge. Fresh
+  23792-23796 input sweeps prove 23796 first accepts; a fresh RAM rerun
+  exactly matches the committed RNG dump. All timing is dismiss-relative;
+  no forbidden baked frame/table, absolute-tick/trace branch, fitting,
+  exclusion, or thinning. Supervisor independently reverified the dense
+  window, predecessor, verifier, full Tier-1 suite, and production build.
+
+---
+
 ## 293 — Bounded worker (S7 turn 17 rung 3): **GREEN — FAINT_ATTACK resolution exact**
 
 - **State:** canonical `22075--22217` is **143/143 exact**, every tick

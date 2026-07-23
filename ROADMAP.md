@@ -584,6 +584,20 @@ Battle 2, battles 3-7, and round completion remain open; S8 stays `[ ]`
 after supervisor review. The supervisor independently reviewed the
 stored-edge state/RNG/render paths and reverified both new traces, their
 predecessor, full Tier-1 suite, and production build.
+**Fourth postwin engine increment (2026-07-23, bounded worker checkpoint):**
+the canonical NO branch now extends the modeled endpoint through **30031**,
+the held/input-ready `"Right this way, please!"` field message, stopping
+before its dismissal or the walk/warp. `battle1-postwin-decline.json`
+reuses the accepted 146-segment prefix verbatim and is **73/73 exact**,
+capturing every tick 29601-29660 plus sparse anchors over the settled hold;
+`battle1-postwin-scout-b.json` remains **164/164 exact**. Fresh sweeps pin
+DOWN acceptance at 29272 with a one-VBlank cursor-copy lag, canonical stored
+edges DOWN 29602 / NO 29632, guide text final at 29658, and true first
+dismiss input at 29660. Tier-1 pins early/delayed cursor and A behavior,
+stored-edge-relative clocks, healed party state, and ordinary VBlank RNG
+ownership; a fresh 434-row RAM audit finds one LCG call on every tick through
+30031. This remains **partial S8**: the message dismissal, walk/warp, Battle
+2, battles 3-7, and round completion remain open, so S8 stays `[ ]`.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by

@@ -487,3 +487,41 @@ adjacent ticks.
 No screenshot/framebuffer asset, per-frame lookup table, absolute canonical
 tick or trace branch, fitted coordinate/color, excluded dynamic frame, or
 capture thinning was introduced.
+
+## 10. S8 engine evidence — swap declined through held guide message (2026-07-23)
+
+The canonical decline tail extends the accepted endpoint from **29601** to
+**30031** without dismissing `"Right this way, please!"` or starting the
+walk/warp. `battle1-postwin-decline.json` has 150 segments / 30031 ticks and
+its first 146 segments are byte-identical to the accepted scouting prefix.
+It is **73/73 exact**: every tick 29601-29660 covers the live cursor,
+selection, old-message/blank-box, and 23-glyph transitions; five later
+anchors cover the genuinely static held message through 30031.
+`battle1-postwin-scout-b.json` was independently rechecked at **164/164**.
+
+Fresh oracle input sweeps pin the adjacent gates. DOWN at 29271 is rejected;
+DOWN at **29272** is accepted, with the BG/window cursor copy visible one
+VBlank later at 29273. The canonical stored DOWN edge is 29602 and its
+visible copy is 29603. Canonical A at **29632** stores NO (`VAR_RESULT=0`);
+the old swap prompt remains through edge+2, the box is blank at +3, and the
+first guide-message glyph prints at +4. The final glyph settles at
+**29658** (edge+26). A at 29659 is rejected and **29660** (edge+28) is the
+true first accepted dismiss edge; the committed trace intentionally holds
+past it without pressing a button.
+
+The live renderer continues to use the source-backed prebattle-room scene,
+message window, normal font/charmap, and standard YES/NO window. State stores
+the logical cursor edge, its one-VBlank display handoff, and the decline edge;
+all later clocks derive from those values. Tier-1 rejects early DOWN/A,
+accepts arbitrary delayed edges, pins the final-glyph/input-ready split, and
+keeps healed party HP `[117,138,153]`.
+
+The fresh 434-row RAM probe is compacted in
+`battle1-postwin-decline-dump.json`. Across every tick 29598-30031,
+`gMain.inBattle` stays clear, party HP stays unchanged, and every adjacent
+`gRngValue` pair is exactly one Gen-3 LCG call (0/433 mismatches); there is
+no decline-specific draw or ownership handoff. `gSpecialVar_Result` changes
+255→0 on the stored 29632 NO edge.
+
+No framebuffer asset, per-frame table, absolute-tick/trace branch,
+coordinate/RGB fitting, exclusion, or dynamic capture thinning was added.

@@ -1,0 +1,22 @@
+{
+  "source": {
+    "trace": "tools/compare/traces-groundtruth/battle1-winline-b-swap.json segments[0:150]",
+    "probeRange": [29598, 30031],
+    "probeRows": 434,
+    "lcg": "next = (1103515245 * value + 24691) mod 2^32",
+    "continuousOneCallMismatches": 0
+  },
+  "rows": [
+    {"tick": 29598, "rng": 3200075544, "mainFlags": 0, "specialVarResult": 255, "partyHp": [117, 138, 153]},
+    {"tick": 29601, "rng": 3845266573, "mainFlags": 0, "specialVarResult": 255, "partyHp": [117, 138, 153]},
+    {"tick": 29602, "rng": 3172433532, "mainFlags": 0, "specialVarResult": 255, "partyHp": [117, 138, 153]},
+    {"tick": 29603, "rng": 4218618687, "mainFlags": 0, "specialVarResult": 255, "partyHp": [117, 138, 153]},
+    {"tick": 29631, "rng": 3445675339, "mainFlags": 0, "specialVarResult": 255, "partyHp": [117, 138, 153]},
+    {"tick": 29632, "rng": 4130999138, "mainFlags": 0, "specialVarResult": 0, "partyHp": [117, 138, 153]},
+    {"tick": 29633, "rng": 905647405, "mainFlags": 0, "specialVarResult": 0, "partyHp": [117, 138, 153]},
+    {"tick": 29658, "rng": 2885582388, "mainFlags": 0, "specialVarResult": 0, "partyHp": [117, 138, 153]},
+    {"tick": 29659, "rng": 2517103767, "mainFlags": 0, "specialVarResult": 0, "partyHp": [117, 138, 153]},
+    {"tick": 29660, "rng": 3518203582, "mainFlags": 0, "specialVarResult": 0, "partyHp": [117, 138, 153]},
+    {"tick": 30031, "rng": 2263752347, "mainFlags": 0, "specialVarResult": 0, "partyHp": [117, 138, 153]}
+  ]
+}
