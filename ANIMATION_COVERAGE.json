@@ -74,9 +74,9 @@
     {
       "move": "MOVE_FIRE_PUNCH",
       "status": "partial",
-      "covered": ["player-back MAGBY to opponent-front MURKROW"],
-      "evidence": ["tools/compare/traces/turn16-rung3.json", "tools/compare/traces/turn17-rung4.json"],
-      "remaining": "Extract the shared timeline from canonical turn clocks and exercise the opposite attacker side."
+      "covered": ["player-back MAGBY to opponent-front MURKROW", "synthetic player-back ONIX to opponent-front GROVYLE ON-oracle stage"],
+      "evidence": ["tools/compare/traces/turn16-rung3.json", "tools/compare/traces/turn17-rung4.json", "tools/probe/stage-fire-punch-portable-on.py", "docs/fire-punch-portable-staging-probe.md"],
+      "remaining": "The ONIX→GROVYLE probe is oracle-only: add a source-derived relative Scene-ON presentation stage and green a complete dense portable app window; then audit opposite-attacker geometry."
     },
     {
       "move": "MOVE_FAINT_ATTACK",
