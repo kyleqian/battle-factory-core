@@ -12,6 +12,18 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Sparse boundary ledger survived after dense replay contradicted it (2026-07-23)
+
+- **What:** the Battle-2 opening ledger labeled the action-menu clear/reveal
+  at 32850/32856 from a sparse endpoint probe. The first dense continuation
+  replay proved the true boundaries are 32895/32901, after implementation
+  work had already started against the stale labels.
+- **Hits:** 1.
+- **Cost each:** ~8 min.
+- **Workaround:** treat source-relative boundary ledgers as provisional until
+  a trace captures every frame across the handoff; correct the ledger in the
+  same commit that lands the dense trace.
+
 ## Usage-limit detector matched worker-owned text (2026-07-22)
 
 - **What:** the Codex post-run detector searched whole structured events with

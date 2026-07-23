@@ -38,7 +38,6 @@ describe("Battle 2 first action-menu controller boundaries", () => {
     expect(actionMenuBounceTick(32902, canonicalHandoff)).toBe(1749);
   });
 });
-
 describe("Battle 2 encounter-driven menu model", () => {
   it("composes JENSON's KABUTO against the healed rental ONIX", () => {
     expect(BATTLE2_ACTION_MENU_MODEL).toEqual({
@@ -115,4 +114,3 @@ describe("Battle 2 pre-first-turn RNG and exec state", () => {
     expect(state.battleScene?.fightSubmenu).toEqual(CLOSED_FIGHT_SUBMENU_STATE);
   });
 });
-
