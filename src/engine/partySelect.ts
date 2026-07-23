@@ -106,6 +106,10 @@ export const PARTY_SENDOUT_HEALTHBOX_STEP = 5;
  */
 export const PARTY_SENDOUT_BLANK_MESSAGE_START = 305;
 export const PARTY_SENDOUT_ACTION_MENU_START = PARTY_SENDOUT_BLANK_MESSAGE_START + 6;
+/** True once the ordinary battle action controller owns input again. */
+export function partySendOutBattleMenuReady(elapsed: number): boolean {
+  return elapsed >= PARTY_SENDOUT_ACTION_MENU_START;
+}
 /** Re-anchor the freshly-created action-menu bounce task onto its original generator. */
 export function partySendOutMenuBounceTick(elapsed: number): number {
   return elapsed - PARTY_SENDOUT_ACTION_MENU_START + 1748;

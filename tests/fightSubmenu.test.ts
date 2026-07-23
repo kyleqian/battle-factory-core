@@ -25,6 +25,7 @@ import {
   type FightSubmenuState,
 } from "../src/engine/battleMenu.ts";
 import {
+  INITIAL_BATTLE_SCENE_STATE,
   TICK0 as SCENE_TICK0,
   TURN5_SITRUS_MENU_REOPEN_GATE_DELAY,
   TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET,
@@ -143,6 +144,43 @@ function press(state: EngineState, buttons: GbaButton[]): EngineState {
 }
 
 describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gating, 1-tick lag, B-close resume)", () => {
+  it("completed forced SEND OUT resets the stale turn-15 choice and the next A opens ordinary FIGHT with MAGBY's real moveset", () => {
+    const initial = createInitialState();
+    const staleTurn15Choice = confirmFightMove(openFightSubmenu(19000, ONIX_MOVESET, 2), 19030);
+    let state: EngineState = {
+      ...initial,
+      battleScene: {
+        ...INITIAL_BATTLE_SCENE_STATE,
+        elapsed: 20000,
+        sendOutPressElapsed: 380,
+        fightSubmenu: staleTurn15Choice,
+        turn14Resolved: true,
+        turn15PartySelect: {
+          elapsed: 500,
+          cursor: "magby",
+          submenuOpen: true,
+          sendOutElapsed: 310,
+        },
+      },
+    };
+
+    state = press(state, []);
+    expect(state.battleScene!.turn15PartySelect!.sendOutElapsed).toBe(311);
+    expect(state.battleScene!.fightSubmenu).toMatchObject({
+      openElapsed: null,
+      confirmElapsed: null,
+      activeMonMoveset: rentalMoveset("MAGBY"),
+    });
+
+    state = press(state, ["A"]);
+    expect(state.battleScene!.fightSubmenu).toMatchObject({
+      openElapsed: 20002,
+      cursor: 0,
+      confirmElapsed: null,
+      activeMonMoveset: rentalMoveset("MAGBY"),
+    });
+  });
+
   it("A on the settled action menu opens the submenu at the exact next tick, JOY_NEW only (a held A the following tick doesn't re-open/no-op differently)", () => {
     let state = stateAtTick(1887);
     state = press(state, ["A"]);

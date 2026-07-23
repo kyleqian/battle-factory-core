@@ -11953,6 +11953,90 @@ function drawTurn15MagbyHealthbox(fb: Uint8Array, dx: number, dy: number = 0): v
   }
 }
 
+// FightSubmenuState stores the post-increment battle elapsed, one rendered
+// VBlank after the actual edge. The visible hardware delays below are
+// therefore encoded one lower than the edge-to-pixel counts (6 and 12).
+const TURN16_FIGHT_SUBMENU_REVEAL_DELAY = 5;
+const TURN16_FAINT_ATTACK_TEXT_DELAY = 11;
+/** The bounce controller runs four VBlanks past the confirm edge, then stops. */
+const TURN16_BOUNCE_FREEZE_DELAY = 3;
+const TURN16_FAINT_ATTACK_LINE1 = "Foe MURKROW used";
+const TURN16_FAINT_ATTACK_LINE2 = "FAINT ATTACK!";
+const TURN16_FAINT_ATTACK_TEXT_TOTAL = TURN16_FAINT_ATTACK_LINE1.length + TURN16_FAINT_ATTACK_LINE2.length;
+
+function turn16PartyElapsedAtTick(partyElapsed: number, t: number, anchorTick: number): number {
+  return partyElapsed - (t - anchorTick);
+}
+
+function drawTurn16PostSwitchField(
+  fb: Uint8Array,
+  partyElapsed: number,
+  bounceTick: number,
+): void {
+  const releaseTick = partySendOutReleaseLogicalTick(partyElapsed);
+  const bounce = menuIdleBounce(bounceTick);
+  drawMode0Ppu(fb, {
+    ...turn15FieldPpuAsset,
+    bldy: partySendOutBattleFadeBldy(partyElapsed),
+    paletteBgr555: releaseTick === null ? turn15FieldPpuAsset.paletteBgr555 : turn15ReleaseFieldPalette(releaseTick),
+  });
+  drawTurn15ForcedSwitchBall(fb, partyElapsed);
+  if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, bounce.onixY2);
+  const healthboxDx = partySendOutHealthboxDx(partyElapsed);
+  if (healthboxDx !== null) drawTurn15MagbyHealthbox(fb, healthboxDx, bounce.healthboxY2);
+}
+
+/**
+ * Turn 16 re-enters the ordinary FIGHT controller after the forced switch.
+ * Field ownership stays with the live SEND OUT composition, while submenu
+ * state/timing comes from FightSubmenuState. Every visual anchor is derived
+ * from the open/confirm edges plus the still-relative SEND OUT clock.
+ */
+function drawTurn16FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  partyElapsed: number,
+): void {
+  if (sm.openElapsed === null) return;
+  const openTick = TICK0 + sm.openElapsed;
+  const revealTick = openTick + TURN16_FIGHT_SUBMENU_REVEAL_DELAY;
+  const openPartyElapsed = turn16PartyElapsedAtTick(partyElapsed, t, openTick);
+
+  if (t < revealTick) {
+    drawTurn16PostSwitchField(fb, partyElapsed, partySendOutMenuBounceTick(openPartyElapsed));
+    drawTurn15MagbySettledMenuChrome(fb);
+    return;
+  }
+
+  const confirmTick = sm.confirmElapsed === null ? null : TICK0 + sm.confirmElapsed;
+  const freezeTick = confirmTick === null ? null : confirmTick + TURN16_BOUNCE_FREEZE_DELAY;
+  const bouncePartyElapsed =
+    freezeTick !== null && t >= freezeTick
+      // Confirmation leaves the DMA-visible `t-2` submenu phase and freezes
+      // the underlying bounce task itself. The dense window distinguishes
+      // these clocks at the healthbox's 1->0 edge (confirm+4 rendered);
+      // the callback's just-written pose is displayed on that VBlank.
+      ? turn16PartyElapsedAtTick(partyElapsed, t, freezeTick) + 1
+      : partyElapsed - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  drawTurn16PostSwitchField(fb, partyElapsed, partySendOutMenuBounceTick(bouncePartyElapsed));
+
+  if (confirmTick !== null && t >= confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY) {
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      TURN16_FAINT_ATTACK_LINE1,
+      TURN16_FAINT_ATTACK_LINE2,
+      turn15SimpleVisibleChars(t, confirmTick + TURN16_FAINT_ATTACK_TEXT_DELAY, TURN16_FAINT_ATTACK_TEXT_TOTAL),
+    );
+    return;
+  }
+
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChrome(fb, sm.displayCursor, false, false, sm.activeMonMoveset);
+}
+
 const PARTY_ENTRY_FADE_OUT: FadeTiming = { startDelay: 0, startY: 0, targetY: 16 };
 const PARTY_ENTRY_FADE_IN: FadeTiming = { startDelay: 0, startY: 16, targetY: 0 };
 // SEND OUT clears its submenu one VBlank before UpdateNormalPaletteFade's
@@ -11976,6 +12060,10 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
       return true;
     }
     if (phase === "black") return true;
+    if (phase === "actionMenu" && state.fightSubmenu.openElapsed !== null) {
+      drawTurn16FightSubmenuWindow(fb, TICK0 + state.elapsed, state.fightSubmenu, party.sendOutElapsed);
+      return true;
+    }
     // The extracted mode-0 state supplies field/message-box ownership and
     // unfaded palette RAM.  Fade, text, and release clocks all remain
     // confirmation-relative.

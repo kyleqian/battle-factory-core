@@ -100,10 +100,11 @@ import {
   turn15KoDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
-import { advancePartySelect, INITIAL_PARTY_SELECT_STATE } from "./partySelect.ts";
+import { advancePartySelect, INITIAL_PARTY_SELECT_STATE, partySendOutBattleMenuReady } from "./partySelect.ts";
 import {
   advanceFightSubmenuDisplay,
   closeFightSubmenu,
+  CLOSED_FIGHT_SUBMENU_STATE,
   confirmFightMove,
   FIGHT_SUBMENU_CLOSE_DELAY,
   FIGHT_SUBMENU_OPEN_DELAY,
@@ -114,7 +115,7 @@ import {
   TURN6_ROCKSLIDE_REOPEN_GATE_DELAY,
   TURN7_ROCKSLIDE_REOPEN_GATE_DELAY,
 } from "./battleMenu.ts";
-import { activeMonMoveset } from "./battleSetup.ts";
+import { activeMonMoveset, rentalMoveset } from "./battleSetup.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -221,9 +222,24 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     ) {
       battleScene = { ...battleScene, turn15PartySelect: INITIAL_PARTY_SELECT_STATE };
     } else if (battleScene.turn15PartySelect) {
+      const previousParty = battleScene.turn15PartySelect;
+      const nextParty = advancePartySelect(previousParty, newKeys);
+      // The completed SEND OUT creates a fresh PlayerHandleChooseAction
+      // controller. Reset the stale, already-confirmed turn-15 submenu at
+      // that relative boundary and carry MAGBY's real moveset into the
+      // ordinary FIGHT reducer. This is keyed only to the SEND OUT clock:
+      // delaying confirmation moves the handoff with it.
+      const fightSubmenu =
+        previousParty.sendOutElapsed !== null &&
+        nextParty.sendOutElapsed !== null &&
+        !partySendOutBattleMenuReady(previousParty.sendOutElapsed) &&
+        partySendOutBattleMenuReady(nextParty.sendOutElapsed)
+          ? { ...CLOSED_FIGHT_SUBMENU_STATE, activeMonMoveset: rentalMoveset("MAGBY") }
+          : battleScene.fightSubmenu;
       battleScene = {
         ...battleScene,
-        turn15PartySelect: advancePartySelect(battleScene.turn15PartySelect, newKeys),
+        fightSubmenu,
+        turn15PartySelect: nextParty,
       };
     }
     // S7 FIGHT-submenu slice (docs/battle-turn-notes.md §11): the settled
@@ -247,6 +263,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // off by one (found empirically this session: the app opened/closed
     // exactly 1 tick early against the oracle until this was corrected).
     const sceneT = SCENE_TICK0 + battleScene.elapsed + 1;
+    const partySendOutElapsed = battleScene.turn15PartySelect?.sendOutElapsed;
+    const currentActiveMoveset = () =>
+      partySendOutElapsed !== null &&
+      partySendOutElapsed !== undefined &&
+      partySendOutBattleMenuReady(partySendOutElapsed)
+        ? fightSubmenu.activeMonMoveset
+        : activeMonMoveset(draftScreen);
     let turn1Resolved = battleScene.turn1Resolved;
     let turn2Resolved = battleScene.turn2Resolved;
     let turn3Resolved = battleScene.turn3Resolved;
@@ -268,7 +291,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         // confirmed rental picks (`draftScreen` is untouched by this branch,
         // so this is stable/idempotent across the whole battle) instead of
         // a battle-1-fixed literal.
-        fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, activeMonMoveset(draftScreen));
+        fightSubmenu = openFightSubmenu(battleScene.elapsed + 1, currentActiveMoveset());
       }
     } else if (
       fightSubmenu.closeElapsed === null &&
@@ -340,7 +363,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // second reveal-delay constant) delays both consumers of `openElapsed`
       // - the render's `revealTick` and the nav-input gate above - in
       // lockstep, matching what the oracle actually shows for both.
-      fightSubmenu = openFightSubmenu(battleScene.elapsed + 2, activeMonMoveset(draftScreen), fightSubmenu.cursor, true);
+      fightSubmenu = openFightSubmenu(battleScene.elapsed + 2, currentActiveMoveset(), fightSubmenu.cursor, true);
     } else if (
       !turn1Resolved &&
       fightSubmenu.confirmElapsed !== null &&
