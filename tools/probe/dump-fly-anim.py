@@ -19,6 +19,7 @@ Run with the harness's mGBA-enabled interpreter (NOT system python3):
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 from pathlib import Path
 
@@ -58,6 +59,9 @@ SLOTS = list(range(10))
 GBATTLERSPRITEIDS = 0x020241E4
 GOAMMATRICES = 0x02021BC0
 OAMMATRIX_SIZE = 0x8
+OBJ_VRAM0 = 0x06010000
+OBJ_PLTT = 0x05000200
+TILE_BYTES = 32
 GSTATUSES3 = 0x020242AC
 GBATTLEMONS = 0x02024084
 BATTLEMON_STRIDE = 0x58
@@ -95,6 +99,33 @@ def main() -> None:
             "d": read_s16(base + 6),
         }
 
+    def sha256_bytes(values: list[int]) -> str:
+        return hashlib.sha256(bytes(values)).hexdigest()
+
+    def sha256_words(values: list[int]) -> str:
+        raw = []
+        for value in values:
+            raw.extend((value & 0xFF, value >> 8))
+        return sha256_bytes(raw)
+
+    def sprite_obj_transfer(attr2: int) -> dict:
+        # The Fly ball is a 32x32 4bpp OBJ (16 tiles).  Capturing the
+        # hardware-visible transfer separately from its affine matrix makes
+        # a phase/table defect distinguishable from a graphics/palette DMA
+        # defect without preserving emulator pixels.
+        tile_num = attr2 & 0x3FF
+        palette_num = (attr2 >> 12) & 0xF
+        vram = [
+            oracle.read_u8(OBJ_VRAM0 + tile_num * TILE_BYTES + i)
+            for i in range(16 * TILE_BYTES)
+        ]
+        palette = [read_u16(OBJ_PLTT + palette_num * 32 + 2 * i) for i in range(16)]
+        return {
+            "vramSha256": sha256_bytes(vram),
+            "paletteSha256": sha256_words(palette),
+            "paletteBgr555": palette,
+        }
+
     def record(tick: int) -> dict:
         b0 = oracle.read_u8(GBATTLERSPRITEIDS + 0)
         b1 = oracle.read_u8(GBATTLERSPRITEIDS + 1)
@@ -128,6 +159,11 @@ def main() -> None:
             }
             if in_use and (attr0 >> 8) & 0x1:  # affine (normal or double)
                 entry["matrix"] = read_matrix(matrix_num)
+            # Slot 3 is dynamically the Fly ball throughout this probe's
+            # bounded window (the only affine double-size 32x32 OBJ).  Keep
+            # its real OBJ-VRAM and palette evidence next to the OAM fields.
+            if slot == 3 and in_use:
+                entry["objTransfer"] = sprite_obj_transfer(attr2)
             row[f"s{slot}"] = entry
         return row
 
