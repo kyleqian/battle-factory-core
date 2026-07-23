@@ -96,6 +96,7 @@ import {
   DRAGONBREATH_MENU_REDRAW_DELAY,
   INITIAL_BATTLE_SCENE_STATE,
   renderBattleScene,
+  sendOutHandoffTick,
   sendOutPressEligible,
   TICK0 as SCENE_TICK0,
   TURN3_ROCKSLIDE_REOPEN_GATE_DELAY,
@@ -117,6 +118,10 @@ import {
   turn17OutcomeDismissEligible,
   type BattleSceneState,
 } from "./battleScene.ts";
+import {
+  actionMenuInputReady,
+  battle2PreTurnRngCalls,
+} from "./battle2ActionMenu.ts";
 import { advancePartySelect, INITIAL_PARTY_SELECT_STATE, partySendOutBattleMenuReady } from "./partySelect.ts";
 import {
   advanceFightSubmenuDisplay,
@@ -193,6 +198,8 @@ export interface EngineState {
   rngMode: "vblank" | "frontierBattle";
   /** gRngValue (src/random.c). */
   rngValue: number;
+  /** gBattleControllerExecFlags, modeled through Battle 2 choose-action. */
+  battleControllerExecFlags: number;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -217,6 +224,7 @@ export function createInitialState(): EngineState {
     battleSetup: null,
     rngMode: "vblank",
     rngValue: ANCHOR_RNG_VALUE,
+    battleControllerExecFlags: 0,
   };
 }
 
@@ -245,6 +253,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let battleScene: BattleSceneState | null = state.battleScene;
   let postwin: PostwinState | null = state.postwin;
   let battleSetup: BattleSetupState | null = state.battleSetup;
+  let battleControllerExecFlags = state.battleControllerExecFlags ?? 0;
 
   if (postwin) {
     let nextPostwin = advancePostwin(postwin);
@@ -529,6 +538,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // off by one (found empirically this session: the app opened/closed
     // exactly 1 tick early against the oracle until this was corrected).
     const sceneT = SCENE_TICK0 + battleScene.elapsed + 1;
+    const battle2HandoffTick =
+      battleScene.encounter === "jenson" && battleScene.sendOutPressElapsed !== null
+        ? sendOutHandoffTick(
+            SCENE_TICK0 + battleScene.sendOutPressElapsed,
+            battleScene.encounter,
+          )
+        : null;
     const partySendOutElapsed = battleScene.turn15PartySelect?.sendOutElapsed;
     const currentActiveMoveset = () =>
       partySendOutElapsed !== null &&
@@ -553,7 +569,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     let turn16Resolved = battleScene.turn16Resolved ?? false;
     let turn17MenuRedrawElapsed = battleScene.turn17MenuRedrawElapsed ?? null;
     if (fightSubmenu.openElapsed === null) {
-      if (newKeys.has("A") && sceneT >= MENU_DRAW_TICK) {
+      const actionReady = battle2HandoffTick === null
+        ? sceneT >= MENU_DRAW_TICK
+        : actionMenuInputReady(sceneT, battle2HandoffTick);
+      if (newKeys.has("A") && actionReady) {
         // S8 engine dependency (docs/battle-menu-notes.md §13c): the FIGHT
         // submenu's moveset is derived fresh from the draft screen's own
         // confirmed rental picks (`draftScreen` is untouched by this branch,
@@ -902,6 +921,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       turn16Resolved,
       turn17MenuRedrawElapsed,
     };
+    const previousBattle2RngCalls = battle2HandoffTick === null
+      ? 0
+      : battle2PreTurnRngCalls(sceneT - 1, battle2HandoffTick);
+    const nextBattle2RngCalls = battle2HandoffTick === null
+      ? 0
+      : battle2PreTurnRngCalls(sceneT, battle2HandoffTick);
+    for (let i = previousBattle2RngCalls; i < nextBattle2RngCalls; i += 1) {
+      rngValue = advanceRngValue(rngValue);
+    }
+    if (
+      battle2HandoffTick !== null &&
+      actionMenuInputReady(sceneT, battle2HandoffTick)
+    ) {
+      battleControllerExecFlags = 1;
+    }
     battleScene = advanceBattleScene(battleScene);
     if (
       rngMode === "vblank" &&
@@ -909,7 +943,20 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     ) {
       rngMode = "frontierBattle";
     }
-    return { ...state, frame: state.frame + 1, draftScreen, keyRepeat, summaryScreen, prebattleRoom, battleRoom, battleScene, postwin, rngMode, rngValue };
+    return {
+      ...state,
+      frame: state.frame + 1,
+      draftScreen,
+      keyRepeat,
+      summaryScreen,
+      prebattleRoom,
+      battleRoom,
+      battleScene,
+      postwin,
+      rngMode,
+      rngValue,
+      battleControllerExecFlags,
+    };
   }
 
   if (battleRoom) {

@@ -549,6 +549,13 @@ import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET, KABUTO_FRONT_ANIM_START_OFFSET } from "./kabutoSendOut.ts";
+import {
+  ACTION_MENU_BLANK_START_OFFSET,
+  ACTION_MENU_BLANK_END_OFFSET,
+  BATTLE2_ACTION_MENU_MODEL,
+  actionMenuAge,
+  actionMenuBounceTick,
+} from "./battle2ActionMenu.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
@@ -837,20 +844,30 @@ const opponentHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAsset
   hpFraction: anchorOpponentBattler.hp / anchorOpponentBattler.maxHP,
   status: "none",
 });
-export const KABUTO_SENDOUT_BATTLER = {
-  species: 140,
-  name: "KABUTO",
-  level: 50,
-  hp: 91,
-  maxHP: 91,
-  gender: "male" as const,
-};
+export const KABUTO_SENDOUT_BATTLER = BATTLE2_ACTION_MENU_MODEL.opponent;
 const kabutoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
   name: KABUTO_SENDOUT_BATTLER.name,
   level: KABUTO_SENDOUT_BATTLER.level,
   gender: KABUTO_SENDOUT_BATTLER.gender,
   hpFraction: KABUTO_SENDOUT_BATTLER.hp / KABUTO_SENDOUT_BATTLER.maxHP,
   status: "none",
+});
+export const ONIX_MENU_BATTLER = BATTLE2_ACTION_MENU_MODEL.player;
+const playerHealthboxAssets = {
+  frame: (battleHealthboxAsset as { singlesPlayer: HealthboxAssets["frame"] }).singlesPlayer,
+  hpbar: healthboxAssemblyAssets.hpbar,
+  hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
+  expbar: (battleHealthboxAsset as { expbar: HealthboxAssets["hpbar"] }).expbar,
+  textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
+};
+const onixPlayerHealthboxContent = composePlayerHealthbox(playerHealthboxAssets, {
+  name: ONIX_MENU_BATTLER.name,
+  level: ONIX_MENU_BATTLER.level,
+  gender: ONIX_MENU_BATTLER.gender,
+  hpFraction: 1,
+  status: "none",
+  currentHp: ONIX_MENU_BATTLER.hp,
+  maxHp: ONIX_MENU_BATTLER.maxHP,
 });
 
 /**
@@ -4212,6 +4229,61 @@ function drawMenuHealthboxPlayer(fb: Uint8Array, dx: number, dy: number = 0): vo
       setPixel(fb, x + dx + px, y + dy + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
     }
   }
+}
+
+function drawComposedPlayerHealthbox(
+  fb: Uint8Array,
+  content: ReturnType<typeof composePlayerHealthbox>,
+  dx = 0,
+  dy = 0,
+): void {
+  const { width, height, pixels } = content;
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const color = pixels[py * width + px];
+      if (!color) continue;
+      setPixel(
+        fb,
+        PLAYER_HEALTHBOX_FRAME_ORIGIN.x + dx + px,
+        PLAYER_HEALTHBOX_FRAME_ORIGIN.y + dy + py,
+        color,
+      );
+    }
+  }
+}
+
+function drawBattle2ActionMenuWindow(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+): void {
+  const age = actionMenuAge(t, handoffTick);
+  const playerVisualT = playerTrainerSendOutClock(t, handoffTick, "jenson");
+  const revealed = age > ACTION_MENU_BLANK_END_OFFSET;
+  const bounce = revealed
+    ? menuIdleBounce(actionMenuBounceTick(t, handoffTick))
+    : { onixY2: 0, healthboxY2: 0 };
+
+  drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+  drawKabutoHSlideWobble(fb, t, handoffTick);
+  if (revealed) {
+    drawSpriteSheet(
+      fb,
+      onixBackSprite.tileset,
+      onixBackSprite.palette,
+      ONIX_MATERIALIZE_CORNER.x,
+      ONIX_MATERIALIZE_CORNER.y + bounce.onixY2,
+    );
+  } else {
+    drawPlayerMaterializeSettle(fb, playerVisualT);
+  }
+  drawSendOutHealthbox(fb, 0, kabutoHealthboxContent);
+  drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent, 0, bounce.healthboxY2);
+  // Reuse only the accepted shared y>=112 action-window chrome. The
+  // encounter field, mons, and both healthboxes above it are all composed
+  // live; no Grovyle/full-frame Battle-1 base participates.
+  if (revealed) drawTurn5SitrusSettledMenuChrome(fb);
+  else drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 }
 
 /** Opaque flat-RGB rectangle blit, no transparency/masking (every pixel in the harvest is real content - see `tools/extract/extract-menu-idle-window.ts`'s own doc for why this window's harvests don't need `getHealthboxContentMask`'s bleed handling: none of these ticks are mid-fade, so there's no stale-background risk). */
@@ -13333,6 +13405,13 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       params.line2,
       sendOutTextVisibleChars(t, pressTick, state.encounter),
     );
+    return;
+  }
+  if (
+    state.encounter === "jenson" &&
+    actionMenuAge(t, handoffTick) >= ACTION_MENU_BLANK_START_OFFSET
+  ) {
+    drawBattle2ActionMenuWindow(fb, t, handoffTick);
     return;
   }
   if (t >= MENU_IDLE_BLANK_START_TICK) {
