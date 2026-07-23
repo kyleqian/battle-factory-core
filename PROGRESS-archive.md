@@ -1,3 +1,13 @@
+## 274 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED — raw split exit OBJ composition**
+
+- **State:** canonical/delayed dense party traces 200/200 exact; 20302/20332
+  raw field boundary exact. Tier-1 1009/1009, build, verifier 17/17,
+  compositor 5/5 green.
+- **Did:** raw BGR555/OAM exit compositor with balls → icons → status and
+  transparent ownership fixed.
+
+---
+
 ## 273 — Supervisor accepted (ISSUES #37 rung 1): **GREEN EVIDENCE CHECKPOINT**
 
 Archived from `PROGRESS.md`; direct OAM established balls 6--9 behind icons

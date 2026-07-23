@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 277 — Bounded worker (ISSUES #37 rung 4a): **CHARACTERIZED, NOT LANDED**
+
+- **State:** no renderer change committed. Direct canonical OAM/VRAM probe
+  confirms MAGBY's affine allocation at 20389 but first framebuffer ownership
+  at **20391**; the clean particle callback is already staggered there. The
+  forbidden player-healthbox boundary remains **20407** (delayed +30).
+- **Did:** tested a `sendOutElapsed`-anchored reuse of MAGBY's battle-back,
+  emerge/tint, BG ramp and clean particles. It reached 9/16 exact at best;
+  20396--20402 retain small, uncharacterized affine/particle residuals, so
+  the prototype and its traces were removed rather than curve-fit.
+- **Next:** rerun the direct probe narrowly over 20396--20402 with transferred
+  affine OAM plus particle OAM ordering/palette evidence before another rung-4a
+  implementation. Do not enter healthbox, clear, or menu work.
+- **Notes:** baseline restored clean before final verification. PAPERCUT:
+  direct OAM probing emits multi-megabyte mGBA diagnostics for a 4.8MB JSON,
+  ~3 min.
+
+---
 ## 276 — Supervisor accepted (ISSUES #37 rung 3): **GREEN — visible forced-switch player ball only**
 
 - **State:** independently accepted: canonical `turn15-sendout-rung3.json` is **46/46 exact**
@@ -39,24 +57,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   frozen party traces **200/200** each, both rung-2 traces **43/43**, verifier
   **17/17**, and compositor **5/5**. PAPERCUT: direct dense oracle inspection
   needs a custom in-memory trace override because the frozen trace is capped, ~2 min.
-
----
-## 274 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED — raw split exit OBJ composition**
-
-- **State:** independently accepted: canonical and delayed dense party traces are both **200/200 exact**;
-  the 20302/20332 raw field boundary remains exact. Tier-1 **1009/1009**,
-  build green, SEND OUT verifier **17/17**, party compositor **5/5**.
-- **Did:** extracted 33 indexed OBJ tiles, raw BGR555 palette and transferred OAM
-  for exit status 1--2 / balls 6--9; erased those ownership pixels from only
-  exit chrome. Composed balls → live icons → status; the fade mask uses raw
-  transparency too, fixing the five status-backing pixels and ball palette family.
-- **Next:** #37 rung 2 only: battle fade + `Go! MAGBY!` text, after fresh dense
-  ground truth. Do not reopen rung 1.
-- **Notes:** supervisor reran both dense traces, Tier-1 **1009/1009**, build
-  (**5.398 MB**), verifier **17/17**, and compositor **5/5**. Asset audit
-  confirms only indexed OBJ/OAM/palette state. Tier-1 pins lower-index-wins
-  ordering. PAPERCUT: direct mGBA probe emits megabytes of diagnostics, ~2 min.
-
----
 
 ---
