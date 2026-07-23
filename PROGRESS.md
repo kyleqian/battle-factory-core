@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 297 — Bounded worker (S7 turn 17 rung 7): **GREEN — outcome message through frozen second dismiss**
+
+- **State:** canonical `22827--23228` is gaplessly **402/402 exact** in two
+  adjacent dense traces (**255/255 + 147/147**). Rung 6b remains **41/41**,
+  `verify-turn17.ts` passes **245/245**, Tier-1 is **1065/1065**, and build
+  passes (**5.461 MB**).
+- **Did:** added faint-dismiss-relative 34-glyph outcome typing, separated
+  the true +59 input gate from the +61 visible cursor, stored the real
+  second A once, froze its live pose, and pinned the old framebuffer through
+  second-dismiss +27 / first trainer render at +28.
+- **Next:** resume at **23229**, the first trainer-transition frame. The
+  trainer slide, DESTIN loss-quote typing/hold, post-battle swap/round flow,
+  and #38 remain untouched; S7 stays `[~]`.
+- **Notes:** implementation commit `c431bb3`. Fresh RAM pins the printer's
+  final glyph/state at 22860, controller hold through the A, script handoff,
+  and trainer controller ownership; fresh early-A oracle sweeps pin true
+  readiness. No forbidden screenshot/table, absolute-tick/trace branch,
+  fitted color/coordinate, excluded capture, or thinning.
+
+---
 ## 296 — Bounded worker (S7 turn 17 rung 6): **GREEN — faint hold/dismiss latency exact**
 
 - **State:** canonical `22531--22826` is gaplessly **296/296 exact** in
@@ -48,26 +68,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   independently reverified the dense window, both reuse regressions,
   turn-17 verifier, full Tier-1 suite, and production build; ROADMAP status
   accepted.
-
----
-## 294 — Bounded worker (S7 turn 17 rung 4): **GREEN — lethal FIRE_PUNCH pre-write exact**
-
-- **State:** canonical `22218--22417` is **200/200 exact**, every tick
-  captured. Turn-17 rung 3 remains **143/143**, Turn-16 rung 3 remains
-  **236/236**, `verify-turn17.ts` passes all **245** checks, Tier-1 is
-  **1054/1054**, and build passes (**5.458 MB**).
-- **Did:** reused the shared FIRE_PUNCH cast at confirmation-relative reducer
-  age 27, parameterized MURKROW's `58→0 BRN` resolution profile, and modeled
-  source `CalcBarFilledPixels` lethal-target behavior so the final positive
-  controller values do not force a 1px sliver. Committed dense
-  `turn17-rung4.json`.
-- **Next:** resume at **22418**, the atomic `gBattleMons[1].hp 58→0` write.
-  Secondary roll/no-op, faint sink/text, victory flow, and later ticks remain
-  untouched; #38 stays parked.
-- **Notes:** implementation commit `aad02b4`. Fresh two-frame comparison
-  matched 22417 and intentionally diverged at 22418, independently confirming
-  the RAM/verifier write boundary. No forbidden framebuffer, absolute tick,
-  per-frame table, trace branch, fitted coordinate/color, excluded capture,
-  or thinned trace. Supervisor independently reverified the dense window,
-  both reuse regressions, turn-17 verifier, full Tier-1 suite, and production
-  build; ROADMAP status accepted.

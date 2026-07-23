@@ -679,3 +679,62 @@ Regression verdict: rung 6a **255/255**, rung 6b **41/41**, rung 5
 production build (**5.460 MB**) all pass. Tick 22827 and all visible
 `"Player defeated..."` typing/hold, its later dismiss, trainer transition,
 and loss quote remain deliberately out of scope. S7 remains in progress.
+
+## 12. Engine rung 7: visible outcome typing, second gate, and frozen handoff (2026-07-23)
+
+This rung implements exactly canonical ticks **22827-23228**, stopping one
+frame before trainer-slide pixels begin. Two adjacent committed traces stay
+under the 256-capture cap and cover every tick without exclusions:
+`turn17-rung7a.json` is **255/255 exact** (`22827-23081`) and
+`turn17-rung7b.json` is **147/147 exact** (`23082-23228`).
+
+### Source and fresh RAM evidence
+
+The frontier-win script is explicit:
+`HandleEndTurn_BattleWon` selects `BattleScript_FrontierTrainerBattleWon`,
+whose single-trainer branch runs
+`printstring STRINGID_PLAYERDEFEATEDTRAINER1`, then
+`trainerslidein BS_ATTACKER`, `waitstate`, and the trainer loss text
+(`battle_main.c:4960-4990`, `data/battle_scripts_1.s:3027-3048`).
+`Cmd_printstring` blocks on `gBattleControllerExecFlags`;
+`PlayerHandlePrintString` installs `CompleteOnInactiveTextPrinter2`; and the
+`\p` terminator reaches `TextPrinterWaitWithDownArrow`, which checks
+`JOY_NEW(A_BUTTON | B_BUTTON)` (`battle_script_commands.c:2137-2160`,
+`battle_controller_player.c:2543-2554`, `text.c:865-882`).
+
+A fresh `ram-probe.py` replay watched `gBattleControllerExecFlags`,
+`gBattlescriptCurrInstr`, and window-0's file-static `sTextPrinters`
+(`nm`: `0x020201b0`, 0x21-byte `struct TextPrinter`):
+
+| tick | RAM/controller result |
+|---:|---|
+| 22826 | printer becomes active; `currentChar=0x02022e2d`, `state=0`, controller flags=1 |
+| 22827-22859 | `currentChar` advances one printable character per tick; at 22859 it is `0x02022e4f` |
+| 22860 | final glyph consumed: `currentChar=0x02022e50`, `currentX=106`, `currentY=17`, `state=2` (`RENDER_STATE_CLEAR`) |
+| 22860-23201 | controller flags remain 1 and script PC remains `0x082daaa6`, proving the indefinite input-gated hold |
+| 23202-23203 | the real segment-132 A has released/cleared the printer; flags are still winding down |
+| 23204-23205 | flags=0; script advances through `0x082daaae` |
+| 23206-23228 | trainer-slide controller owns flags=2 at script PC `0x082daab0`, while the old framebuffer remains frozen |
+
+The input edge is intentionally distinct from cursor visibility. Fresh
+alternate oracle replays pressing A at 22860, 22861, and 22862 all advance
+to the trainer transition; the matching 22859 replay is rejected and
+continues the ordinary cursor cycle. Thus input becomes ready with the final glyph at
+faint-dismiss **+59** (canonical 22860), while the down arrow's first
+DMA-visible frame is **+61** (22862). The arrow then uses the existing
+four-phase, nine-tick-per-phase cycle indefinitely.
+
+### Relative engine contract and boundary
+
+`turn17OutcomeMessageState` derives typing, input readiness, and display
+phase solely from the stored first-faint dismiss. The second A is registered
+once in `turn17OutcomeDismissElapsed`; delaying either stored edge shifts all
+downstream epochs. Once the second edge exists, `displayAge` is clamped to
+that live pose. Fresh dense oracle output is unchanged across canonical
+23201-23228, then changes first at **23229**, so
+`TURN17_FIRST_TRAINER_RENDER_DELAY=28`. Trainer rendering itself remains
+outside this rung.
+
+Regression verdict: rung 7a **255/255**, rung 7b **147/147**, rung 6b
+**41/41**, `verify-turn17.ts` **245/245**, Tier-1 **1065/1065**, and the
+production build (**5.461 MB**) all pass. S7 remains in progress.

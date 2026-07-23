@@ -464,6 +464,17 @@ retains the old faint framebuffer through dismiss+25. Rung 5 stays
 green, all independently reverified by the supervisor. See
 `docs/turn17-notes.md` §11. S7 remains `[~]`; tick 22827 onward and the
 visible victory/trainer flow remain open.
+**Turn-17 rung 7 proposed for supervisor acceptance (2026-07-23):**
+`turn17-rung7a.json` and `turn17-rung7b.json` gaplessly cover every
+canonical tick `22827-23228` at **255/255** and **147/147 exact**. The
+first-dismiss-relative outcome printer types all 34 glyphs, exposes its true
+input gate at +59 and its first visible cursor at +61, holds indefinitely,
+stores the real second A once, and freezes that live outcome pose through
+second-dismiss +27; the first trainer-transition render is pinned at +28
+but remains outside this slice. Rung 6b stays **41/41**, the Turn-17
+verifier passes **245/245**, and Tier-1/build are green. See
+`docs/turn17-notes.md` §12. S7 remains `[~]`; tick 23229 onward, the trainer
+transition/loss quote, and post-battle flow remain open.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin

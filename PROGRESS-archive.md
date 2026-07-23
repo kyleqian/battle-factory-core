@@ -12070,3 +12070,15 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   absolute-tick mechanism.
 
 ---
+## 294 — Bounded worker (S7 turn 17 rung 4): **GREEN — lethal FIRE_PUNCH pre-write exact**
+
+- **State:** canonical `22218--22417` was **200/200 exact**, every tick
+  captured; Turn-17 rung 3 and Turn-16 rung 3 remained exact, with verifier,
+  Tier-1, and build green.
+- **Did:** reused the shared FIRE_PUNCH cast, parameterized MURKROW's
+  `58→0 BRN` profile, and modeled lethal `CalcBarFilledPixels` behavior.
+- **Next at archive time:** canonical **22418**, the atomic HP write.
+- **Notes:** implementation commit `aad02b4`; no forbidden pixel or
+  absolute-tick mechanism.
+
+---
