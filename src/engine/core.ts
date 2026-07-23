@@ -1736,6 +1736,7 @@ export function render(state: EngineState): Uint8Array {
       speciesRenderCoeff: 0,
       bgFadeY: bgFadeY(fadeLocal, FADE_IN),
       objFadeY: objFadeY(fadeLocal, FADE_IN),
+      phaseElapsed: swap.phaseElapsed,
     });
   }
   if (state.postwin) return renderPostwinState(state);

@@ -1,0 +1,7 @@
+{
+  "sourceTrace": "../traces-groundtruth/battle1-swapyes-a.json",
+  "oracleProfile": "battle-scene-off",
+  "captureFrames": [
+    29702, 29703, 29704, 29705, 29706, 29707
+  ]
+}

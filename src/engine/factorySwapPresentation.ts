@@ -167,3 +167,8 @@ export function factorySwapBallTile(elapsed: number): 0 | 16 | 32 {
   }
   return 0;
 }
+
+/** Selected-player ball epoch after A, before the option popup reveal. */
+export function factorySwapPlayerOptionBallTile(phaseElapsed: number): 0 | 16 | 32 {
+  return phaseElapsed < 12 ? factorySwapBallTile(phaseElapsed + 35) : 0;
+}

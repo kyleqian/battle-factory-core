@@ -3,6 +3,7 @@ import { drawTileBg, type RgbColor, type TileBg } from "./bg.ts";
 import { measureText, rightAlignXOffset, type FontData } from "./font.ts";
 import { speciesNameColor } from "./speciesNameFade.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts";
+import { factorySwapPlayerOptionBallTile } from "./factorySwapPresentation.ts";
 import type { FactorySwapState } from "./factorySwap.ts";
 
 import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
@@ -58,6 +59,7 @@ export interface FactorySwapRenderView {
   readonly speciesRenderCoeff: number;
   readonly bgFadeY?: number;
   readonly objFadeY?: number;
+  readonly phaseElapsed?: number;
 }
 
 function drawActionPiece(
@@ -108,6 +110,10 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
   const party = enemy ? state.enemyParty : state.playerParty;
   const selected = party[state.cursor];
   const displaySelected = party[state.displayCursor];
+  const renderedBallTiles = [...view.ballTiles] as [number, number, number];
+  if (state.phase === "playerOptions") {
+    renderedBallTiles[state.cursor] = factorySwapPlayerOptionBallTile(view.phaseElapsed ?? 0);
+  }
 
   if (bgFade === 0) drawTileBg(fb, menuBg);
   else drawTileBgFaded(fb, menuBg, bgFade);
@@ -170,7 +176,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
       64,
       4,
       4,
-      view.ballTiles[i]! / 4,
+      renderedBallTiles[i]! / 4,
       objFade,
     );
   }

@@ -6,6 +6,7 @@ import {
   advanceFactorySwapPresentation,
   createCanonicalFactorySwapPresentation,
   factorySwapBallTile,
+  factorySwapPlayerOptionBallTile,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
 } from "../src/engine/factorySwapPresentation.ts";
@@ -105,5 +106,8 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapBallTile(59)).toBe(16);
     expect(factorySwapBallTile(67)).toBe(32);
     expect(factorySwapBallTile(75)).toBe(0);
+    expect(factorySwapPlayerOptionBallTile(0)).toBe(0);
+    expect(factorySwapPlayerOptionBallTile(7)).toBe(0);
+    expect(factorySwapPlayerOptionBallTile(8)).toBe(16);
   });
 });
