@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 299 — Bounded worker (S8 first postwin increment): **GREEN — loss dismiss through heal prompt exact**
+## 299 — Supervisor-accepted S8 first postwin increment: **GREEN — loss dismiss through heal prompt exact**
 
 - **State:** canonical `23602--23800` is **199/199 exact**, every tick
   captured in `battle1-postwin-heal.json`; `turn17-rung8b.json` remains
@@ -27,7 +27,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   rerun exactly matches the committed RNG dump hash and sharpens bookkeeping
   writes to +79/+137. All timing is dismiss-relative; no forbidden baked
   frame, lookup table, trace/absolute-tick branch, fitting, exclusion, or
-  thinning.
+  thinning. Supervisor independently reverified the 199/199 dense window,
+  the 118/118 predecessor, the 245-tick Turn-17 verifier, all 1073 Tier-1
+  tests, and the production build.
 
 ---
 ## 298 — Supervisor-accepted S7 completion: **GREEN — Battle 1 win endpoint exact**

@@ -531,7 +531,7 @@ now renders through the live glyph pipeline (ISSUES #20 closed —
 `core.ts` still feeds it battle-1's fixed moveset; wiring the per-battle
 moveset from battle-setup state through `EngineState` into that render
 call is an S8 engine slice prerequisite for battle-2 menu parity.
-**First postwin engine increment (2026-07-23, bounded worker):**
+**First postwin engine increment (2026-07-23, supervisor-accepted):**
 canonical ticks **23602-23800** (DESTIN loss-quote dismiss through the
 settled/input-ready heal message) are implemented and committed at
 **199/199 exact**, every tick captured in `battle1-postwin-heal.json`.
@@ -548,7 +548,9 @@ source/RAM-relative opponent-generation draws and freezes only at
 `CB2_InitBattleInternal`, not when the attendant speech is dismissed.
 This is **partial S8 progress only**: heal dismiss,
 party heal write, continuation menu, swap paths, battles 2-7, and round
-completion remain open, so S8 stays `[ ]`.
+completion remain open, so S8 stays `[ ]`. The supervisor independently
+reverified the dense window, its predecessor, the Turn-17 verifier, full
+Tier-1 suite, and production build before accepting the increment.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
