@@ -4,6 +4,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 308 — S8 Battle 2 JENSON send-out printer: **GREEN — 32531-32569 exact**
+
+- **State:** canonical **32531-32569 = 39/39 exact**, stopping one frame
+  before the 32570 visual handoff; Battle 2 intro remains **251/251 exact**.
+  Tier-1 is **1099/1099** and build passes (**5.497 MB**).
+- **Did:** reused the stored delayed-A/send-out clock and registration lag,
+  parameterized the shared printer from encounter identity as `FISHERMAN
+  JENSON sent / out KABUTO!` (32 glyphs), and retained the Fisherman scene
+  through both final post-text hold frames. Added the dense trace and Tier-1
+  pins while preserving DESTIN/GROVYLE defaults.
+- **Next:** begin at **32570** with trainer exit/ball/KABUTO materialize and
+  healthbox only in a separately scoped increment. S8 stays `[ ]`.
+- **Notes:** no trainer exit, ball, species, healthbox, particles, absolute
+  tick lookup, framebuffer harvest, fitting, or trace thinning.
+
+---
 ## 307 — Supervisor-accepted S8 Battle 2 opening probe: **GREEN evidence checkpoint**
 
 - **State:** exact renderer endpoint remains **32280--32530 = 251/251**;

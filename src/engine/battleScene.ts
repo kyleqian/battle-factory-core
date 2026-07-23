@@ -1733,6 +1733,22 @@ export function ballStatusBarPositions(t: number): { opponent: { x: number; visi
 /** §7.2: registration lag from A-press to first visible effect (message-box clear + char 0 the same tick) - matches press #2's own lag, not press #1's (open question, not re-derived here, see dossier). */
 const SENDOUT_TEXT_LAG = 5;
 /** §7.3: "BUG CATCHER DESTIN sent" (23 printable chars, 3 spaces) / "out GROVYLE!" (12 printable chars, 1 space) - sText_Trainer1SentOutPkmn, battle_message.c:388. */
+export interface BattleSendOutEncounterParams {
+  readonly line1: string;
+  readonly line2: string;
+  readonly textTotal: number;
+}
+
+/** BattleSetup-backed encounter identity expressed for the shared send-out printer. */
+export function battleSendOutEncounterParams(
+  encounter: BattleSceneState["encounter"] = "destin",
+): BattleSendOutEncounterParams {
+  const line1 = encounter === "jenson"
+    ? "FISHERMAN JENSON sent"
+    : "BUG CATCHER DESTIN sent";
+  const line2 = encounter === "jenson" ? "out KABUTO!" : "out GROVYLE!";
+  return { line1, line2, textTotal: line1.length + line2.length };
+}
 const SENDOUT_LINE1 = "BUG CATCHER DESTIN sent";
 const SENDOUT_LINE2 = "out GROVYLE!";
 const SENDOUT_TEXT_TOTAL = SENDOUT_LINE1.length + SENDOUT_LINE2.length;
@@ -1742,15 +1758,24 @@ const SENDOUT_HANDOFF_LAG = 3;
 function sendOutTextStartTick(pressTick: number): number {
   return pressTick + SENDOUT_TEXT_LAG;
 }
-function sendOutHandoffTick(pressTick: number): number {
-  return sendOutTextStartTick(pressTick) + SENDOUT_TEXT_TOTAL - 1 + SENDOUT_HANDOFF_LAG;
+function sendOutHandoffTick(
+  pressTick: number,
+  encounter: BattleSceneState["encounter"] = "destin",
+): number {
+  return sendOutTextStartTick(pressTick)
+    + battleSendOutEncounterParams(encounter).textTotal - 1
+    + SENDOUT_HANDOFF_LAG;
 }
 
 /** Visible character count (0..35) of the "sent\nout GROVYLE!" message at trace tick `t`, given the press tick. Same 1-tick/char mechanism as `textVisibleChars` (§3.2/§7.3). */
-export function sendOutTextVisibleChars(t: number, pressTick: number): number {
+export function sendOutTextVisibleChars(
+  t: number,
+  pressTick: number,
+  encounter: BattleSceneState["encounter"] = "destin",
+): number {
   const start = sendOutTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(SENDOUT_TEXT_TOTAL, t - start + 1);
+  return Math.min(battleSendOutEncounterParams(encounter).textTotal, t - start + 1);
 }
 
 /**
@@ -13129,13 +13154,19 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     if (cursor.visible) drawCursor(fb, cursor.yOffset, params.cursorX);
     return;
   }
-  const handoffTick = sendOutHandoffTick(pressTick);
+  const handoffTick = sendOutHandoffTick(pressTick, state.encounter);
   if (t < handoffTick) {
     // §7.3: message box cleared, "BUG CATCHER DESTIN sent\nout GROVYLE!"
     // printing - ball icons still at their settled position, no cursor.
-    drawSettledScene(fb);
+    const params = battleSendOutEncounterParams(state.encounter);
+    drawSettledScene(fb, state.encounter);
     drawBallIcons(fb, t);
-    drawMessageTextLines(fb, SENDOUT_LINE1, SENDOUT_LINE2, sendOutTextVisibleChars(t, pressTick));
+    drawMessageTextLines(
+      fb,
+      params.line1,
+      params.line2,
+      sendOutTextVisibleChars(t, pressTick, state.encounter),
+    );
     return;
   }
   if (t >= MENU_IDLE_BLANK_START_TICK) {

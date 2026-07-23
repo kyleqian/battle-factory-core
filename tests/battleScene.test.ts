@@ -5,6 +5,7 @@ import {
   ballIcons,
   ballStatusBarPositions,
   battleIntroEncounterParams,
+  battleSendOutEncounterParams,
   cursorState,
   CURSOR_START_TICK,
   DRAGON_BREATH_MOVE_POWER,
@@ -451,6 +452,21 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("35 total printable chars ('BUG CATCHER DESTIN sent' + 'out GROVYLE!'), 1 tick/char, last change at pressTick+39", () => {
     expect(sendOutTextVisibleChars(1459, 1420)).toBe(35);
     expect(sendOutTextVisibleChars(1460, 1420)).toBe(35);
+  });
+
+  it("parameterizes JENSON/KABUTO at 32 printable chars without changing DESTIN defaults", () => {
+    expect(battleSendOutEncounterParams("jenson")).toEqual({
+      line1: "FISHERMAN JENSON sent",
+      line2: "out KABUTO!",
+      textTotal: 32,
+    });
+    expect(battleSendOutEncounterParams("destin")).toEqual({
+      line1: "BUG CATCHER DESTIN sent",
+      line2: "out GROVYLE!",
+      textTotal: 35,
+    });
+    expect(sendOutTextVisibleChars(1362, 1326, "jenson")).toBe(32);
+    expect(sendOutTextVisibleChars(1363, 1326, "jenson")).toBe(32);
   });
 
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
