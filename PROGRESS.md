@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 321 — S8 swap-YES controller prefix: **GREEN — state/mutation only**
+
+- **State:** source-driven swap interaction and mutation are implemented as a
+  pure presentation-acknowledged controller. Tier-1 is **1168/1168** and build
+  passes (**5.537 MB**). Canonical pixels remain exact only through the
+  already accepted swap-offer endpoint **29601**.
+- **Did:** modeled player picker → option popup → enemy picker → accept YES/NO,
+  cursor wrapping/display-copy separation, RECHOOSE, quit confirmation,
+  accept-NO return, and non-replaced-party duplicate-species rejection.
+  ONIX slot 0 → GROVYLE slot 0 matches the tick-30681 RAM rental mutation;
+  copied friendship is zero, and rental metadata uses the source-exact split.
+- **Next:** build the live swap compositor/transition adapter from extracted
+  assets and wire offer-YES into this controller. Then generalize Battle-2
+  setup/render identity beyond its hard-coded ONIX lead so accepted GROVYLE
+  can continue honestly; add dense explicit-OFF traces only when green.
+- **Notes:** commits `09fa56a`, `f266d1f`. No runtime wiring, new compare
+  trace, screenshot chrome, tick branch, or animation-lane change was made.
+
+---
 ## 320 — S8 OFF turn portability proof: **GREEN — 16/16 exact**
 
 - **State:** the staged Battle-2 turn resolves through a reusable logical
@@ -53,33 +72,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   KABUTO 91→63, ONIX accuracy 6→5, and 12 RNG calls. No renderer, `BUGFIX`
   IV-branch, or opponent-party generation work was done. The ON animation
   probe also isolated ISSUES #34's seven FLY-up frames to the affine sampler.
-
----
-## 318 — S8 generic round/presentation core: **GREEN — architecture foundation landed**
-
-- **State:** a pure scenario-driven controller now covers battle indexes
-  **0–6**; the source-exact Factory round policy is also mechanically
-  extracted. Tier-1 is **1146/1146** and build passes (**5.525 MB**).
-  Canonical pixel behavior remains unchanged and intentionally unwired.
-- **Did:** added deterministic no-repeat opponent selection, party HP/status
-  healing, win/loss/swap transitions, seventh-win completion, and typed
-  presentation commands with idempotent completion acknowledgements that
-  cannot mutate rules/RNG. `createInitialState({ battleScenario })` exposes
-  opt-in fixtures while its default remains `null`. Added reproducible
-  `factory-round-policy.json` plus a cited source dossier covering trainer/
-  rental rejection rules, healing, swap mutation, and terminal counters.
-  Independently, the ON animation lane closed ISSUES #33 by modeling the
-  one-render OBJ-VRAM lead at Murkrow's two frame-transfer boundaries.
-- **Next:** wire the extracted trainer ranges/retry policy and an explicit RNG
-  port into scenario generation, then stage one OFF-profile Battle 2 turn
-  through the seam. Unique swap-YES/loss/round-summary UI remains open. Do not
-  resume the canonical tick-33332 march.
-- **Notes:** commits `3aee24e`, `bae76ea`; tests cover seven sequential wins,
-  accepted/declined swaps, inter-battle healing, deterministic no-repeat
-  inputs, loss at every index, invalid transitions, and presentation
-  completion/RNG isolation. Source policy extraction is `2f10f68` (merged);
-  it deliberately leaves retry-draw counts and the pinned `BUGFIX` IV branch
-  as explicit implementation inputs. ON regressions are `turn13-switchin.json`
-  **242/242** and `turn14-fly-miss.json` **185/185**; the direct seven-frame
-  RAM/VRAM verifier is also 0 diff. No OFF oracle trace or renderer work was
-  performed.

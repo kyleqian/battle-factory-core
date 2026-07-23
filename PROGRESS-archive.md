@@ -1,3 +1,33 @@
+## 318 — S8 generic round/presentation core: **GREEN — architecture foundation landed**
+
+- **State:** a pure scenario-driven controller now covers battle indexes
+  **0–6**; the source-exact Factory round policy is also mechanically
+  extracted. Tier-1 is **1146/1146** and build passes (**5.525 MB**).
+  Canonical pixel behavior remains unchanged and intentionally unwired.
+- **Did:** added deterministic no-repeat opponent selection, party HP/status
+  healing, win/loss/swap transitions, seventh-win completion, and typed
+  presentation commands with idempotent completion acknowledgements that
+  cannot mutate rules/RNG. `createInitialState({ battleScenario })` exposes
+  opt-in fixtures while its default remains `null`. Added reproducible
+  `factory-round-policy.json` plus a cited source dossier covering trainer/
+  rental rejection rules, healing, swap mutation, and terminal counters.
+  Independently, the ON animation lane closed ISSUES #33 by modeling the
+  one-render OBJ-VRAM lead at Murkrow's two frame-transfer boundaries.
+- **Next:** wire the extracted trainer ranges/retry policy and an explicit RNG
+  port into scenario generation, then stage one OFF-profile Battle 2 turn
+  through the seam. Unique swap-YES/loss/round-summary UI remains open. Do not
+  resume the canonical tick-33332 march.
+- **Notes:** commits `3aee24e`, `bae76ea`; tests cover seven sequential wins,
+  accepted/declined swaps, inter-battle healing, deterministic no-repeat
+  inputs, loss at every index, invalid transitions, and presentation
+  completion/RNG isolation. Source policy extraction is `2f10f68` (merged);
+  it deliberately leaves retry-draw counts and the pinned `BUGFIX` IV branch
+  as explicit implementation inputs. ON regressions are `turn13-switchin.json`
+  **242/242** and `turn14-fly-miss.json` **185/185**; the direct seven-frame
+  RAM/VRAM verifier is also 0 diff. No OFF oracle trace or renderer work was
+  performed.
+
+---
 ## 317 — User-directed Stage 8 reset: **READY — finite, staged completion**
 
 - **State:** canonical Battle 2 remains exact through tick **33331** at
