@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
+import { advancePartySelect, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, partySelectEntryPhase } from "../src/engine/partySelect.ts";
 import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 
 describe("forced turn-15 party select", () => {
@@ -70,6 +70,15 @@ describe("forced turn-15 party select", () => {
     // A delayed A edge moves every visual boundary by the same 30 frames.
     expect(20246 + PARTY_SENDOUT_BALL_VISIBLE_START + 30).toBe(20375);
     expect(20246 + PARTY_SENDOUT_BALL_LAST_VISIBLE + 30).toBe(20418);
+  });
+
+  it("derives MAGBY release from SEND OUT confirmation rather than battle time", () => {
+    expect(PARTY_SENDOUT_RELEASE_VISIBLE_START).toBe(145);
+    expect(partySendOutReleaseLogicalTick(144)).toBeNull();
+    expect(partySendOutReleaseLogicalTick(145)).toBe(0);
+    expect(partySendOutReleaseLogicalTick(160)).toBe(15);
+    expect(20246 + PARTY_SENDOUT_RELEASE_VISIBLE_START).toBe(20391);
+    expect(20276 + PARTY_SENDOUT_RELEASE_VISIBLE_START).toBe(20421);
   });
 
   it("uses the RAM-derived 30/31 ONIX hop and 7/8 full-icon frame cadence", () => {

@@ -537,7 +537,7 @@ import partyMenuStatusOverlayAsset from "../assets/gen/party-menu-status-overlay
 import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-overlay-magby.json" with { type: "json" };
 import partyExitObjAsset from "../assets/gen/turn15-party-exit-obj.json" with { type: "json" };
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
-import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
@@ -956,6 +956,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
@@ -1828,13 +1829,14 @@ function drawSpriteSheet(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], 
  * sufficient. `y2` (§7.21) is `sprite->y2` added to the destination row -
  * see `MATERIALIZE_Y2_TABLE` below for why this exists.
  */
-function drawSpriteSheetAffineTinted(fb: Uint8Array, tileset: Tileset, ox: number, oy: number, accumulator: number, tintColor: RgbColor, y2 = 0): void {
+function drawSpriteSheetAffineTinted(fb: Uint8Array, tileset: Tileset, ox: number, oy: number, accumulator: number, tintColor: RgbColor, y2 = 0, clipBottom?: number): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
   const halfW = w / 2;
   const halfH = h / 2;
   const matrixParam = Math.trunc(0x10000 / accumulator);
   for (let dy = 0; dy < h; dy += 1) {
+    if (clipBottom !== undefined && oy + dy + y2 >= clipBottom) continue;
     const ry = dy - halfH;
     const sy = ((ry * matrixParam) >> 8) + halfH;
     if (sy < 0 || sy >= h) continue;
@@ -2345,12 +2347,24 @@ const PLAYER_MATERIALIZE_START_TICK = 1653;
 const PLAYER_MATERIALIZE_END_TICK = 1663;
 const PLAYER_MATERIALIZE_ACCUMULATOR_LEAD = 2;
 
+/** Species-independent player-side ReleaseMonFromBall affine collapse. */
+function drawPlayerSideAffineMaterialize(
+  fb: Uint8Array,
+  tileset: Tileset,
+  corner: { x: number; y: number },
+  logicalTick: number,
+  accumulatorLead: number,
+  clipBottom?: number,
+): void {
+  const accumulator = affineEmergeAccumulator(logicalTick + accumulatorLead);
+  const y2 = MATERIALIZE_Y2_TABLE[logicalTick] ?? 0;
+  drawSpriteSheetAffineTinted(fb, tileset, corner.x, corner.y, accumulator, MATERIALIZE_TINT_COLOR, y2, clipBottom);
+}
+
 function drawPlayerMaterialize(fb: Uint8Array, t: number): void {
   if (t < PLAYER_MATERIALIZE_START_TICK || t > PLAYER_MATERIALIZE_END_TICK) return;
   const local = t - PLAYER_MATERIALIZE_START_TICK;
-  const accumulator = affineEmergeAccumulator(local + PLAYER_MATERIALIZE_ACCUMULATOR_LEAD);
-  const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
-  drawSpriteSheetAffineTinted(fb, onixBackSprite.tileset, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, y2);
+  drawPlayerSideAffineMaterialize(fb, onixBackSprite.tileset, ONIX_MATERIALIZE_CORNER, local, PLAYER_MATERIALIZE_ACCUMULATOR_LEAD);
 }
 
 /**
@@ -5959,8 +5973,11 @@ const TURN5_BG_FADE_START_TICK = 6746;
 const TURN5_BG_FADE_Y: readonly number[] = [
   2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16, 16, 16, 16, 16, 16, 16, 16, 14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, 2, 2,
 ];
+function cleanSwitchinBgFadeY(logicalTick: number): number {
+  return TURN5_BG_FADE_Y[logicalTick] ?? 0;
+}
 function turn5BgFadeY(t: number): number {
-  return TURN5_BG_FADE_Y[t - TURN5_BG_FADE_START_TICK] ?? 0;
+  return cleanSwitchinBgFadeY(t - TURN5_BG_FADE_START_TICK);
 }
 
 /**
@@ -6868,8 +6885,12 @@ function drawTurn5PidgeottoSettled(fb: Uint8Array, x2: number = 0, sink: { keptR
  * `PARTICLE_MAX_AGE`, `sortAliveParticlesByScreenY`) - species/window-
  * independent per §8d.
  */
-function drawTurn5SwitchinParticles(fb: Uint8Array, t: number, handoffTick: number = TURN5_BALL_HANDOFF_TICK): void {
-  const logicalT = t - handoffTick - BALL_OPEN_START_OFFSET - 1;
+function drawCleanSwitchinParticles(
+  fb: Uint8Array,
+  logicalT: number,
+  origin: { x: number; y: number },
+  clipBottom?: number,
+): void {
   if (logicalT < 0) return;
   const anim = battleAnimParticles.regularBallAnim;
   const alive: AliveParticle[] = [];
@@ -6882,8 +6903,12 @@ function drawTurn5SwitchinParticles(fb: Uint8Array, t: number, handoffTick: numb
   }
   for (const p of sortAliveParticlesByScreenY(alive)) {
     const frame = anim[p.age % anim.length]!;
-    drawParticleTile(fb, frame.tile, frame.hFlip, PARTICLE_ORIGIN.x + p.dx, PARTICLE_ORIGIN.y + p.dy);
+    drawParticleTile(fb, frame.tile, frame.hFlip, origin.x + p.dx, origin.y + p.dy, clipBottom);
   }
+}
+
+function drawTurn5SwitchinParticles(fb: Uint8Array, t: number, handoffTick: number = TURN5_BALL_HANDOFF_TICK): void {
+  drawCleanSwitchinParticles(fb, t - handoffTick - BALL_OPEN_START_OFFSET - 1, PARTICLE_ORIGIN);
 }
 
 /** Ball prop (`drawSendOutBall`, reused verbatim, S6's own species-independent mechanism) + the switch-in's own particle burst plus Pidgeotto's own materialize/settle - a no-op before `TURN5_BALL_HANDOFF_TICK`. `pidgeottoX2`/`sink` - see `drawTurn5PidgeottoSettled`'s own doc. */
@@ -11810,6 +11835,33 @@ function drawTurn15ForcedSwitchBall(fb: Uint8Array, elapsed: number): void {
   if (spin) drawSpriteSheetAffineRotate(fb, BALL_CLOSED_TILESET, summaryBall.palette, center.x, center.y, spin.pa, spin.pb, spin.pc, spin.pd, 112);
 }
 
+const FORCED_SWITCH_MAGBY_CORNER = { x: 40, y: 59 };
+const FORCED_SWITCH_PARTICLE_ORIGIN = { x: 68, y: 117 };
+
+/** `BlendPalette`'s source-exact 5-bit channel blend toward RGB(31,31,31). */
+function blendBgr555TowardWhite(color: number, coeff: number): number {
+  const blend = (channel: number): number => channel + (((31 - channel) * coeff) >> 4);
+  return blend(color & 31) | (blend((color >>> 5) & 31) << 5) | (blend((color >>> 10) & 31) << 10);
+}
+
+/**
+ * `BeginNormalPaletteFade` owns the field's three BG palette banks during
+ * release.  OBJ palettes stay untouched: MAGBY and the particle task carry
+ * their own palettes and are composed below in OAM priority order.
+ */
+function turn15ReleaseFieldPalette(logicalTick: number): number[][] {
+  const coeff = cleanSwitchinBgFadeY(logicalTick);
+  if (coeff === 0) return turn15FieldPpuAsset.paletteBgr555;
+  return turn15FieldPpuAsset.paletteBgr555.map((bank, index) => (
+    index >= 1 && index <= 3 ? bank.map((color) => blendBgr555TowardWhite(color, coeff)) : bank
+  ));
+}
+
+function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: number): void {
+  drawPlayerSideAffineMaterialize(fb, magbyBackSprite.tileset, FORCED_SWITCH_MAGBY_CORNER, logicalTick, 1, PLAYER_BALL_OPEN_VISIBLE_BOTTOM);
+  drawCleanSwitchinParticles(fb, logicalTick, FORCED_SWITCH_PARTICLE_ORIGIN, PLAYER_BALL_OPEN_VISIBLE_BOTTOM);
+}
+
 const PARTY_ENTRY_FADE_OUT: FadeTiming = { startDelay: 0, startY: 0, targetY: 16 };
 const PARTY_ENTRY_FADE_IN: FadeTiming = { startDelay: 0, startY: 16, targetY: 0 };
 // SEND OUT clears its submenu one VBlank before UpdateNormalPaletteFade's
@@ -11834,10 +11886,16 @@ function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, pa
     }
     if (phase === "black") return true;
     // The extracted mode-0 state supplies field/message-box ownership and
-    // unfaded palette RAM.  Only its real BLDY coefficient changes through
-    // this rung; both fade and text clocks are confirmation-relative.
-    drawMode0Ppu(fb, { ...turn15FieldPpuAsset, bldy: partySendOutBattleFadeBldy(party.sendOutElapsed) });
+    // unfaded palette RAM.  Fade, text, and release clocks all remain
+    // confirmation-relative.
+    const releaseTick = partySendOutReleaseLogicalTick(party.sendOutElapsed);
+    drawMode0Ppu(fb, {
+      ...turn15FieldPpuAsset,
+      bldy: partySendOutBattleFadeBldy(party.sendOutElapsed),
+      paletteBgr555: releaseTick === null ? turn15FieldPpuAsset.paletteBgr555 : turn15ReleaseFieldPalette(releaseTick),
+    });
     drawTurn15ForcedSwitchBall(fb, party.sendOutElapsed);
+    if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick);
     drawMessageTextLines(fb, PARTY_SENDOUT_GO_TEXT, "", partySendOutGoTextVisibleChars(party.sendOutElapsed));
     return true;
   }

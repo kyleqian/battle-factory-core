@@ -90,6 +90,8 @@ export const PARTY_SENDOUT_GO_TEXT = "Go! MAGBY!";
 export const PARTY_SENDOUT_BALL_VISIBLE_START = PARTY_SENDOUT_BATTLE_FADE_IN_START + 43;
 export const PARTY_SENDOUT_BALL_SPIN_START = PARTY_SENDOUT_BALL_VISIBLE_START + 8;
 export const PARTY_SENDOUT_BALL_LAST_VISIBLE = PARTY_SENDOUT_BALL_VISIBLE_START + 43;
+/** First displayed VBlank owned by MAGBY's release task and particles. */
+export const PARTY_SENDOUT_RELEASE_VISIBLE_START = PARTY_SENDOUT_BALL_LAST_VISIBLE + 3;
 
 export type PartySendOutBallPhase = "none" | "closed" | "spin" | "landed";
 
@@ -99,6 +101,16 @@ export function partySendOutBallPhase(elapsed: number): PartySendOutBallPhase {
   if (elapsed < PARTY_SENDOUT_BALL_SPIN_START) return "closed";
   if (elapsed <= PARTY_SENDOUT_BALL_LAST_VISIBLE) return "spin";
   return "landed";
+}
+
+/**
+ * Relative clock shared by the released battler, its clean open-particle
+ * burst, and the normal-palette fade.  Keeping this downstream of
+ * `sendOutElapsed` makes delayed confirmation replay the same mechanism.
+ */
+export function partySendOutReleaseLogicalTick(elapsed: number): number | null {
+  if (elapsed < PARTY_SENDOUT_RELEASE_VISIBLE_START) return null;
+  return elapsed - PARTY_SENDOUT_RELEASE_VISIBLE_START;
 }
 
 /**
