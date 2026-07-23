@@ -40,9 +40,23 @@ unknown_message="$(git -C "$test_repo" log -1 --format=%B)"
 grep -qx 'Agent-model: unknown' <<<"$unknown_message"
 grep -qx 'Agent-effort: unknown' <<<"$unknown_message"
 
-git -C "$test_repo" "${commit_args[@]}" \
-  -m "Claude attribution remains provider-owned" \
-  -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+(
+  source "$run_root/tools/codex-git-attribution.sh"
+  export GIT_CONFIG_COUNT=1
+  export GIT_CONFIG_KEY_0=color.ui
+  export GIT_CONFIG_VALUE_0=never
+  codex_git_attribution_enable "$run_root" "gpt-5.6-sol" "high"
+  [[ "$GIT_CONFIG_COUNT" == "2" ]]
+  codex_git_attribution_enable "$run_root" "gpt-5.6-terra" "xhigh"
+  [[ "$GIT_CONFIG_COUNT" == "2" ]]
+  codex_git_attribution_disable
+  [[ "$GIT_CONFIG_COUNT" == "1" ]]
+  [[ "$(git -C "$test_repo" config --get color.ui)" == "never" ]]
+  [[ -z "$(git -C "$test_repo" config --get core.hooksPath || true)" ]]
+  git -C "$test_repo" "${commit_args[@]}" \
+    -m "Claude attribution remains provider-owned" \
+    -m "Co-Authored-By: Claude <noreply@anthropic.com>"
+)
 
 claude_message="$(git -C "$test_repo" log -1 --format=%B)"
 grep -qx 'Co-Authored-By: Claude <noreply@anthropic.com>' <<<"$claude_message"

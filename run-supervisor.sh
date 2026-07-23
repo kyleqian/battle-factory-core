@@ -129,8 +129,9 @@ if [[ -z "$SUPERVISOR_LOG" ]]; then
   fi
 fi
 
+source tools/codex-git-attribution.sh
 if [[ "$PROVIDER" != "codex" ]]; then
-  unset POKEBENCH_COMMIT_GENERATOR POKEBENCH_COMMIT_MODEL POKEBENCH_COMMIT_EFFORT
+  codex_git_attribution_disable
 fi
 
 # Workers inherit the selected provider unless WORKER_PROVIDER explicitly
@@ -147,7 +148,6 @@ fi
 if [[ "$PROVIDER" == "codex" ]]; then
   # Git subprocesses created by this supervisor automatically record Codex and
   # the resolved model in their commit trailers.
-  source tools/codex-git-attribution.sh
   codex_git_attribution_enable "$(pwd)" "$MODEL" "$REASONING_EFFORT"
 fi
 

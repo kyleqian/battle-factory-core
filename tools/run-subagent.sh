@@ -141,10 +141,11 @@ case "$PROVIDER" in
     command -v codex >/dev/null 2>&1 || { echo "run-subagent: codex CLI not found on PATH" >&2; exit 127; }
     ;;
 esac
+source tools/codex-git-attribution.sh
 if [[ "$PROVIDER" != "codex" ]]; then
-  # A mixed-provider worker may inherit these from a Codex supervisor; ensure
-  # attribution follows the worker that actually creates the commit.
-  unset POKEBENCH_COMMIT_GENERATOR POKEBENCH_COMMIT_MODEL POKEBENCH_COMMIT_EFFORT
+  # A mixed-provider worker may inherit the temporary hook config from a Codex
+  # supervisor. Remove it entirely; Claude owns its own attribution.
+  codex_git_attribution_disable
 fi
 if [[ -z "$AGENT_LOG" ]]; then
   if [[ "$PROVIDER" == "claude" ]]; then
@@ -322,7 +323,6 @@ if [[ "$PROVIDER" == "codex" ]]; then
     exit 5
   fi
   # Attribute commits in either lane without changing persistent git config.
-  source tools/codex-git-attribution.sh
   codex_git_attribution_enable "$WORK_DIR" "$MODEL" "$REASONING_EFFORT"
 fi
 
