@@ -120,6 +120,30 @@ describe("Factory swap state/input contract", () => {
     expect(state.rentalMons).toEqual(rentals);
   });
 
+  it("copies rental identity/IVs from the offered record but personality/ability from the enemy party", () => {
+    const deliberatelyDifferent = [
+      rentals[0],
+      rentals[1],
+      rentals[2],
+      { ...rentals[3], personality: 1, abilityNum: 1 },
+      rentals[4],
+      rentals[5],
+    ] as FactoryRentalRoster;
+    const state = applyFactorySwapMutation({
+      ...createFactorySwapState(player, enemy, deliberatelyDifferent),
+      phase: "acceptPrompt",
+      playerMonId: 0,
+      enemyMonId: 0,
+      inputReady: true,
+    });
+    expect(state.rentalMons[0]).toEqual({
+      monId: rentals[3].monId,
+      ivs: rentals[3].ivs,
+      personality: enemy[0].personality,
+      abilityNum: enemy[0].abilityNum,
+    });
+  });
+
   it("rejects an enemy species already held in either non-replaced player slot", () => {
     const duplicateEnemy: FactorySwapParty = [
       mon("other-magby", "MAGBY"),
@@ -164,5 +188,32 @@ describe("Factory swap state/input contract", () => {
     expect(quit).toMatchObject({ phase: "complete", result: "keptParty" });
     expect(quit.playerParty).toEqual(player);
     expect(() => applyFactorySwapMutation(state)).toThrow(/both selected/);
+  });
+
+  it("B or NO in the quit prompt returns to the originating picker", () => {
+    let state = ready(createFactorySwapState(player, enemy, rentals));
+    state = handleFactorySwapInput(state, "B");
+    state = handleFactorySwapInput(ready(state), "B");
+    expect(state).toMatchObject({
+      phase: "playerPicker",
+      inputReady: false,
+      result: null,
+    });
+
+    state = ready({
+      ...state,
+      phase: "enemyPicker",
+      playerMonId: 0,
+    });
+    state = handleFactorySwapInput(state, "B");
+    state = handleFactorySwapInput(
+      handleFactorySwapInput(ready(state), "DOWN"),
+      "A",
+    );
+    expect(state).toMatchObject({
+      phase: "enemyPicker",
+      inputReady: false,
+      result: null,
+    });
   });
 });
