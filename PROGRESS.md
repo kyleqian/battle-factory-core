@@ -4,6 +4,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 278 — Supervisor accepted (ISSUES #37 rung 4a): **GREEN EVIDENCE CHECKPOINT**
+
+- **State:** renderer remains at accepted rung-3 baseline; independent Tier-1
+  **1011/1011** and build (**5.400 MB**) are green. Worker also reconfirmed all
+  six frozen traces exact, verifier **17/17**, and compositor **5/5**.
+- **Did:** accepted the direct boundary and rejected the non-exact prototype:
+  MAGBY allocates at 20389, first owns pixels at **20391**, and the healthbox
+  first owns pixels at **20407** (all delayed +30). Best lawful reuse was 9/16.
+- **Next:** #37 rung 4a repair only: inspect transferred affine and particle
+  OAM/order/palettes on 20396--20402, then require both 16-frame traces exact.
+- **Notes:** no production, asset, extractor, or trace change survived the
+  checkpoint. PAPERCUT: mGBA probe stdout spew, ~3 min.
+
+---
 ## 277 — Bounded worker (ISSUES #37 rung 4a): **CHARACTERIZED, NOT LANDED**
 
 - **State:** no renderer change committed. Direct canonical OAM/VRAM probe
@@ -39,23 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   compositor **5/5**, frozen party **200/200** each, and frozen rung-2
   **43/43** each are all green. PAPERCUT: the direct OAM probe emits
   multi-megabyte mGBA diagnostics despite producing valid JSON, ~2 min.
-
----
-## 275 — Supervisor accepted (ISSUES #37 rung 2): **GREEN — field fade + complete MAGBY text only**
-
-- **State:** independently accepted: canonical/delayed dense rung-2 traces are both **43/43
-  exact** through their honest text-only endpoint; frozen party traces remain
-  **200/200**. Tier-1 **1010/1010**, build green.
-- **Did:** reused the 20302 indexed PPU field asset and real BLDY 15→0 ramp,
-  then rendered the blank message box's `Go! MAGBY!` with the existing font,
-  all relative to `sendOutElapsed`. Fresh oracle+OAM evidence puts the first
-  visible closed-ball pixels at 20345 (not RAM's 20343), so traces end 20344
-  (+30 delayed).
-- **Next:** #37 rung 3 only begins at visible Brendan/ball ownership; do not
-  extend this text-only renderer into trainer, ball, MAGBY, or healthbox work.
-- **Notes:** supervisor reran Tier-1 **1010/1010**, build (**5.398 MB**),
-  frozen party traces **200/200** each, both rung-2 traces **43/43**, verifier
-  **17/17**, and compositor **5/5**. PAPERCUT: direct dense oracle inspection
-  needs a custom in-memory trace override because the frozen trace is capped, ~2 min.
-
----

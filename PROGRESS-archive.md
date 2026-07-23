@@ -1,3 +1,12 @@
+## 275 — Supervisor accepted (ISSUES #37 rung 2): **GREEN — field fade + complete MAGBY text only**
+
+- **State:** canonical/delayed rung-2 traces 43/43 exact; frozen party traces
+  200/200. Tier-1 1010/1010 and build green.
+- **Did:** confirmation-relative 20302 indexed field fade and `Go! MAGBY!`
+  text; first visible ball ownership established at 20345.
+
+---
+
 ## 274 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED — raw split exit OBJ composition**
 
 - **State:** canonical/delayed dense party traces 200/200 exact; 20302/20332
