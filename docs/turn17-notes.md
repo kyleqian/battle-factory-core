@@ -789,11 +789,17 @@ map to the canonical oracle as follows:
 | +53..+55 | 23254-23256 | settled trainer; old outcome text and its frozen arrow remain |
 | +56 | 23257 | loss printer clears the old text and writes `P` |
 | +57..+78 | 23258-23279 | one source character per tick, including pixel-flat spaces |
-| +78 onward | 23279-23601 | fully typed, real input wait, no cursor; framebuffer stable |
+| +78 | 23279 | fully typed and pixel-settled; printer remains in HANDLE_CHAR |
+| +79 onward | 23280-23601 | `PAUSE_UNTIL_PRESS` WAIT is live, no cursor; framebuffer unchanged |
 
 Fresh oracle diffing showed the slide's changed-pixel bbox advancing exactly
 2px left per tick and isolated the +56 transition entirely to the message
-window. The pre-existing Turn-17 verifier independently confirms all 25
+window. A fresh RAM watch of window 0's `sTextPrinters` pins the hidden
+boundary: tick 23279 has the final glyph visible with `state=0`
+(`RENDER_STATE_HANDLE_CHAR`), while tick 23280 advances past the appended
+control code to `state=1` (`RENDER_STATE_WAIT`); both frames have the same
+SHA and neither draws a cursor. The pre-existing Turn-17 verifier
+independently confirms all 25
 dynamic phase-1 SHAs, the 23254-23256 flat pause, the three initial quote
 frames at 23257-23259, `"PLEA"` at 23260, settle at 23279, and the final
 23601 SHA. Tier-1 tests pin both sides of every phase, quote typing and

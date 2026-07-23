@@ -12172,6 +12172,8 @@ export const TURN17_LOSS_LINE1 = "PLEASE I NEED";
 export const TURN17_LOSS_LINE2 = "SOME WATER";
 export const TURN17_LOSS_TEXT_TOTAL =
   TURN17_LOSS_LINE1.length + TURN17_LOSS_LINE2.length;
+/** Final glyph is visible at +78; PAUSE_UNTIL_PRESS enters WAIT one callback later. */
+export const TURN17_LOSS_INPUT_READY_DELAY = 79;
 
 export interface Turn17PostDismissState {
   age: number;
@@ -12282,7 +12284,7 @@ export function turn17TrainerLossState(
     trainerX:
       176 + 2 * (TURN17_TRAINER_SLIDE_SETTLE_DELAY - slideAge),
     visibleChars,
-    inputReady: visibleChars === TURN17_LOSS_TEXT_TOTAL,
+    inputReady: age >= TURN17_LOSS_INPUT_READY_DELAY,
     cursorVisible: false,
   };
 }

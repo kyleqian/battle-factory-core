@@ -17,10 +17,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** supervisor review of the S7 completion proposal. If accepted,
   S8 begins only after tick 23601 with the loss-quote dismiss and post-battle
   swap/round flow. Parked/unrelated issues, including #38, are untouched.
-- **Notes:** implementation commit `366234e`. All timing is relative to the
-  stored second outcome-dismiss edge and shifts under delayed-edge Tier-1
-  coverage. No framebuffer/screenshot asset, absolute-tick/trace branch,
-  per-frame table, fitted geometry/color, excluded capture, or thinning.
+- **Notes:** implementation begins at `366234e`; a final fresh printer-RAM
+  audit distinguishes glyph settle at 23279 from the real WAIT gate at
+  23280. All timing is relative to the stored second outcome-dismiss edge
+  and shifts under delayed-edge Tier-1 coverage. No framebuffer/screenshot
+  asset, absolute-tick/trace branch, per-frame table, fitted geometry/color,
+  excluded capture, or thinning.
 
 ---
 ## 297 — Bounded worker (S7 turn 17 rung 7): **GREEN — outcome message through frozen second dismiss**

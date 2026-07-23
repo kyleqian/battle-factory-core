@@ -14,6 +14,7 @@ import {
   TURN17_FIRST_TRAINER_RENDER_DELAY,
   TURN17_LOSS_TEXT_START_DELAY,
   TURN17_LOSS_TEXT_TOTAL,
+  TURN17_LOSS_INPUT_READY_DELAY,
   TURN17_OUTCOME_CURSOR_START_DELAY,
   TURN17_OUTCOME_INPUT_READY_DELAY,
   TURN17_OUTCOME_TEXT_TOTAL,
@@ -265,15 +266,18 @@ describe("turn 17 faint hold and outcome latency", () => {
     expect(turn17TrainerLossState(edge + 56 + TURN17_LOSS_TEXT_TOTAL - 1, edge))
       .toMatchObject({
         visibleChars: TURN17_LOSS_TEXT_TOTAL,
-        inputReady: true,
+        inputReady: false,
         cursorVisible: false,
       });
+    expect(TURN17_LOSS_INPUT_READY_DELAY).toBe(79);
+    expect(turn17TrainerLossState(edge + TURN17_LOSS_INPUT_READY_DELAY, edge))
+      .toMatchObject({ inputReady: true, cursorVisible: false });
   });
 
   it("shifts every trainer/quote edge with the real stored dismiss and holds without a cursor", () => {
     const edge = 700;
     const shift = 11;
-    for (const age of [27, 28, 53, 54, 55, 56, 78, 400]) {
+    for (const age of [27, 28, 53, 54, 55, 56, 78, 79, 400]) {
       expect(turn17TrainerLossState(edge + age, edge))
         .toEqual(turn17TrainerLossState(edge + shift + age, edge + shift));
     }
@@ -281,7 +285,7 @@ describe("turn 17 faint hold and outcome latency", () => {
       inputReady: false,
       cursorVisible: false,
     });
-    const settled = turn17TrainerLossState(edge + 78, edge);
+    const settled = turn17TrainerLossState(edge + 79, edge);
     expect(settled).toMatchObject({
       visibleChars: TURN17_LOSS_TEXT_TOTAL,
       inputReady: true,
