@@ -66,6 +66,9 @@ GSTATUSES3 = 0x020242AC
 GBATTLEMONS = 0x02024084
 BATTLEMON_STRIDE = 0x58
 STATUS2_OFFSET = 0x50
+OAM_ENTRY_SIZE = 8
+OAM_ENTRIES = 128
+GMAIN_OAM_OFFSET = 0x38  # struct Main.oamBuffer, include/main.h
 
 
 def main() -> None:
@@ -108,22 +111,57 @@ def main() -> None:
             raw.extend((value & 0xFF, value >> 8))
         return sha256_bytes(raw)
 
-    def sprite_obj_transfer(attr2: int) -> dict:
-        # The Fly ball is a 32x32 4bpp OBJ (16 tiles).  Capturing the
-        # hardware-visible transfer separately from its affine matrix makes
-        # a phase/table defect distinguishable from a graphics/palette DMA
-        # defect without preserving emulator pixels.
+    def decode_oam(attr0: int, attr1: int, attr2: int) -> dict:
+        return {
+            "attr0": attr0,
+            "attr1": attr1,
+            "attr2": attr2,
+            "x": attr1 & 0x1FF,
+            "y": attr0 & 0xFF,
+            "affineMode": (attr0 >> 8) & 0x3,
+            "objMode": (attr0 >> 10) & 0x3,
+            "shape": (attr0 >> 14) & 0x3,
+            "matrixNum": (attr1 >> 9) & 0x1F,
+            "size": (attr1 >> 14) & 0x3,
+            "tileNum": attr2 & 0x3FF,
+            "priority": (attr2 >> 10) & 0x3,
+            "paletteNum": (attr2 >> 12) & 0xF,
+        }
+
+    def obj_dimensions(shape: int, size: int) -> tuple[int, int]:
+        dimensions = {
+            0: ((8, 8), (16, 16), (32, 32), (64, 64)),
+            1: ((16, 8), (32, 8), (32, 16), (64, 32)),
+            2: ((8, 16), (8, 32), (16, 32), (32, 64)),
+        }
+        return dimensions[shape][size]
+
+    def sprite_obj_transfer(attr0: int, attr1: int, attr2: int) -> dict:
+        # Read exactly the native OBJ footprint in live VRAM.  The original
+        # dossier called this ball 32x32, but the final OAM and the source
+        # template both prove that it is the 64x64 ROUND_SHADOW asset (0x800
+        # bytes, 64 tiles) in affine-double mode.  A 32x32 subset cannot
+        # reconstruct its lower/right texels and would make the sampler test
+        # circular.
         tile_num = attr2 & 0x3FF
         palette_num = (attr2 >> 12) & 0xF
+        width, height = obj_dimensions((attr0 >> 14) & 0x3, (attr1 >> 14) & 0x3)
+        tile_count = width * height // 64
         vram = [
             oracle.read_u8(OBJ_VRAM0 + tile_num * TILE_BYTES + i)
-            for i in range(16 * TILE_BYTES)
+            for i in range(tile_count * TILE_BYTES)
         ]
         palette = [read_u16(OBJ_PLTT + palette_num * 32 + 2 * i) for i in range(16)]
         return {
             "vramSha256": sha256_bytes(vram),
             "paletteSha256": sha256_words(palette),
             "paletteBgr555": palette,
+            # This is dev-time diagnostic input only.  It lets the blank-frame
+            # sampler reconstruct the *live* transfer rather than assuming
+            # an extracted asset is in the same DMA phase.
+            "vram4bpp": vram,
+            "width": width,
+            "height": height,
         }
 
     def record(tick: int) -> dict:
@@ -160,10 +198,33 @@ def main() -> None:
             if in_use and (attr0 >> 8) & 0x1:  # affine (normal or double)
                 entry["matrix"] = read_matrix(matrix_num)
             # Slot 3 is dynamically the Fly ball throughout this probe's
-            # bounded window (the only affine double-size 32x32 OBJ).  Keep
+            # bounded window (the affine-double 64x64 ROUND_SHADOW OBJ). Keep
             # its real OBJ-VRAM and palette evidence next to the OAM fields.
             if slot == 3 and in_use:
-                entry["objTransfer"] = sprite_obj_transfer(attr2)
+                entry["objTransfer"] = sprite_obj_transfer(attr0, attr1, attr2)
+                # `gSprites[3].oam` is pre-DMA.  The final entry in gMain's
+                # buffer is the coordinate/shape the PPU actually sees after
+                # affine-double origin adjustment, so preserve the uniquely
+                # matching hardware entry rather than inferring it.
+                expected = decode_oam(attr0, attr1, attr2)
+                matches = []
+                g_main = oracle.symbols["gMain"]
+                for index in range(OAM_ENTRIES):
+                    base_oam = g_main + GMAIN_OAM_OFFSET + index * OAM_ENTRY_SIZE
+                    candidate = decode_oam(
+                        read_u16(base_oam), read_u16(base_oam + 2), read_u16(base_oam + 4)
+                    )
+                    if (
+                        candidate["affineMode"] == expected["affineMode"]
+                        and candidate["matrixNum"] == expected["matrixNum"]
+                        and candidate["tileNum"] == expected["tileNum"]
+                        and candidate["paletteNum"] == expected["paletteNum"]
+                        and candidate["shape"] == expected["shape"]
+                        and candidate["size"] == expected["size"]
+                    ):
+                        candidate["index"] = index
+                        matches.append(candidate)
+                entry["finalOamMatches"] = matches
             row[f"s{slot}"] = entry
         return row
 
