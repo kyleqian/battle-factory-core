@@ -1,3 +1,21 @@
+## 326 — S8 swap player mon-picture reveal: **GREEN — 58/58 exact**
+
+- **State:** `battle1-swap-player-options.json` is now **58/58 exact** from
+  the selected-player A edge through the complete mon-picture aperture/reveal.
+  Supervisor verification is **1178/1178**, build **5.546 MB**, the player
+  picker remains **101/101**, and shared draft mon-picture regression is
+  **38/38**.
+- **Did:** reused the source-relative `OpenMonPic` task cadence with the swap
+  screen's first-open flat flash, one-pixel WIN0 aperture, vertical reveal,
+  and screen-local three-ball centers. The shared renderer keeps its existing
+  six-ball defaults.
+- **Next:** continue at tick **29760** / options edge **+58**, where the
+  distinct settled options popup first appears. Then cover option input,
+  enemy picker, accept/exit/message, and post-swap identity.
+- **Notes:** S8 gates 1 and 3 remain complete; unique-UI gate 2 remains open.
+  Preserve both exact swap prefixes and keep presentation clocks phase-relative.
+
+---
 ## 325 — S8 reset gates 1/3 complete; swap UI advancing: **GREEN**
 
 - **State:** the generic seven-battle core and staged OFF portability proof

@@ -14,6 +14,26 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Popup evidence used “input gate” for a state handoff, not a sampled key edge
+
+- **What:** the first popup probe called +56 the controller input gate, but
+  source/RAM later showed it was the show-options task handoff; the next frame
+  is the first injectable `JOY_NEW` edge.
+- **Hits:** 1.
+- **Cost each:** ~5 min.
+- **Workaround:** label state handoff and first sampled input separately in
+  boundary ledgers, and confirm both with an early/accepted edge pair.
+
+## Oracle and compare `--summary` ownership is ambiguous in the guide
+
+- **What:** the guide's nearby oracle and compare examples made `--summary`
+  look like a `bin/oracle run` flag; that CLI rejects it because the flag
+  belongs to `npm run compare`.
+- **Hits:** 1.
+- **Cost each:** ~2 min.
+- **Workaround:** use `npm run compare -- <trace> --summary`; do not pass the
+  flag to `bin/oracle run`.
+
 ## Temporary compare traces resolve `sourceTrace` relative to themselves (2026-07-23)
 
 - **What:** moving an ad hoc trace to `/tmp` broke its relative `sourceTrace`

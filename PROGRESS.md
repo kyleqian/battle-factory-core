@@ -15,13 +15,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   task callbacks, WIN0V/DISPCNT, and proved a delayed RIGHT changes the
   restored picker cursor. Documented the separate selected-ball and
   species-breathe task ownership in
-  `docs/factory-swap-player-options-b-close-probe.md`.
+  `docs/factory-swap-player-options-b-close-probe.md`. Parallel evidence
+  pins the enemy picker at mode +84, input +133, and accept-ready +197;
+  the Scene-ON lane added a generic geometry/profile adapter and a portable
+  ONIX→GROVYLE FIRE PUNCH case at **225/225 exact**.
 - **Next:** implement only this generic phase-relative close/return seam;
   then leave the next player-picker-A/options boundary distinct. Preserve
   popup **44/44**, options **58/58**, and picker **101/101** regressions.
-- **Notes:** B at the previous presentation-labelled +56 is not a sampled
-  `JOY_NEW`; source/RAM show it is the final show-options update. No
-  acceptance trace, runtime change, or absolute-tick rule was added.
+- **Notes:** supervisor verification is Tier-1 **1193/1193**, build
+  **5.549 MB**; canonical FIRE PUNCH controls remain **227/236** (known
+  residual) and **200/200**. No deferred decision or absolute-tick rule.
 
 ---
 ## 328 — S8 player-options popup: **GREEN — 44/44 exact**
@@ -60,21 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** supervisor corrected one evidence-table tick typo (`29782`, not
   `29802`) against the probe's stated +80 offset. No deferred decision; S8
   unique-UI gate 2 remains the only reset gate open.
-
----
-## 326 — S8 swap player mon-picture reveal: **GREEN — 58/58 exact**
-
-- **State:** `battle1-swap-player-options.json` is now **58/58 exact** from
-  the selected-player A edge through the complete mon-picture aperture/reveal.
-  Supervisor verification is **1178/1178**, build **5.546 MB**, the player
-  picker remains **101/101**, and shared draft mon-picture regression is
-  **38/38**.
-- **Did:** reused the source-relative `OpenMonPic` task cadence with the swap
-  screen's first-open flat flash, one-pixel WIN0 aperture, vertical reveal,
-  and screen-local three-ball centers. The shared renderer keeps its existing
-  six-ball defaults.
-- **Next:** continue at tick **29760** / options edge **+58**, where the
-  distinct settled options popup first appears. Then cover option input,
-  enemy picker, accept/exit/message, and post-swap identity.
-- **Notes:** S8 gates 1 and 3 remain complete; unique-UI gate 2 remains open.
-  Preserve both exact swap prefixes and keep presentation clocks phase-relative.

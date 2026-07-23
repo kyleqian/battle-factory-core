@@ -538,13 +538,18 @@ banked, while the live swap-YES presentation is exact through its input-ready
 player picker (**101/101**) and the complete action fade/slide (**36/36**).
 The source-relative mon-picture open extends the options trace to **58/58**,
 and the settled options popup/cursor is now **44/44 exact** with a generic
-edge +56 input gate, +58 draw, default `SUMMARY`, and phase-relative B/DOWN/A
-dispatch. Screen-ball and selected-ball animation epochs remain independent.
+state handoff at +57, first sampled input at +58, default `SUMMARY`, and
+phase-relative B/DOWN/A dispatch. Screen-ball and selected-ball animation
+epochs remain independent. Source/RAM evidence now pins B-close back to the
+player picker at +113 (next sampled input +114), and SWAP into the enemy
+picker at canonical tick 29886 / input 29935 / accept-ready 29999.
 Source extraction now also pins the terminal field-message gates and the
 seventh-win `MSGBOX_GETPOINTS` fanfare/wait path, but no ending pixels are
 claimed. Summary/B-close/enemy selection presentation, accept/exit, loss
-ending, and seventh-win ending still need dense OFF-profile UI proofs. S8
-therefore remains `[~]`.
+ending, and seventh-win ending still need dense OFF-profile UI proofs. The
+parallel Scene-ON adapter has a portable ONIX→GROVYLE FIRE PUNCH case at
+**225/225**, while the move remains `partial` pending the opposite attacker
+side. S8 therefore remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
 Historical traces below remain Battle Scene ON regression evidence. The
