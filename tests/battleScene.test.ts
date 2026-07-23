@@ -4,6 +4,7 @@ import {
   BALL_OAM_PRIORITY,
   ballIcons,
   ballStatusBarPositions,
+  battleIntroEncounterParams,
   cursorState,
   CURSOR_START_TICK,
   DRAGON_BREATH_MOVE_POWER,
@@ -314,6 +315,33 @@ describe("battleScene: per-scanline shift (RAM-confirmed: gTasks[0].data[2], doc
 });
 
 describe("battleScene: intro text cadence (docs/battle-scene-notes.md §3.2, 1 tick/char incl. spaces)", () => {
+  it("selects JENSON's source-backed trainer line and two-tick-earlier cursor without changing DESTIN defaults", () => {
+    expect(battleIntroEncounterParams("destin")).toEqual({
+      line1: "BUG CATCHER DESTIN",
+      line2: "would like to battle!",
+      textStartTick: 1234,
+      cursorStartTick: 1274,
+      cursorX: 123,
+    });
+    expect(battleIntroEncounterParams("jenson")).toEqual({
+      line1: "FISHERMAN JENSON",
+      line2: "would like to battle!",
+      textStartTick: 1234,
+      cursorStartTick: 1272,
+      cursorX: 123,
+    });
+  });
+
+  it("uses the encounter-selected printable count while preserving DESTIN's 39-character cadence", () => {
+    expect(textVisibleChars(1270, "jenson")).toBe(37);
+    expect(textVisibleChars(1270, "destin")).toBe(37);
+    expect(textVisibleChars(1272, "destin")).toBe(39);
+  });
+
+  it("preserves encounter identity across scene advances", () => {
+    expect(advanceBattleScene({ ...INITIAL_BATTLE_SCENE_STATE, encounter: "jenson" }).encounter).toBe("jenson");
+  });
+
   it("has 39 total printable characters across both lines", () => {
     expect(TEXT_TOTAL_CHARS).toBe(39);
   });

@@ -508,6 +508,7 @@ import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
 import statAnimBannerAsset from "../assets/gen/stat-anim-banner.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
 import bugCatcherAsset from "../assets/gen/trainer-pic-bug-catcher.json" with { type: "json" };
+import fishermanAsset from "../assets/gen/trainer-pic-fisherman.json" with { type: "json" };
 import brendanAsset from "../assets/gen/trainer-pic-brendan-back.json" with { type: "json" };
 import ballDisplayAsset from "../assets/gen/battle-interface-ball-display.json" with { type: "json" };
 import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { type: "json" };
@@ -753,6 +754,7 @@ const battleBg = battleBgAsset as BattleBgAsset;
 const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
 const bugCatcher = bugCatcherAsset as TrainerPicAsset;
+const fisherman = fishermanAsset as TrainerPicAsset;
 const brendan = brendanAsset as BrendanAsset;
 const ballDisplay = ballDisplayAsset as BallDisplayAsset;
 const downArrow = downArrowAsset as DownArrowAsset;
@@ -1297,6 +1299,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
   );
   return {
     elapsed,
+    ...(state.encounter === undefined ? {} : { encounter: state.encounter }),
     sendOutPressElapsed: state.sendOutPressElapsed,
     fightSubmenu: state.fightSubmenu,
     turn1Resolved: state.turn1Resolved,
@@ -1494,15 +1497,41 @@ function blendChannel(tgt1: number, tgt2: number, eva: number, evb: number): num
 
 const LINE1 = "BUG CATCHER DESTIN";
 const LINE2 = "would like to battle!";
+export interface BattleIntroEncounterParams {
+  readonly line1: string;
+  readonly line2: string;
+  readonly textStartTick: number;
+  readonly cursorStartTick: number;
+  readonly cursorX: number;
+}
+
+/** Encounter-selected inputs to the shared BattleIntroSlide3/text/cursor renderer. */
+export function battleIntroEncounterParams(
+  encounter: BattleSceneState["encounter"] = "destin",
+): BattleIntroEncounterParams {
+  const line1 = encounter === "jenson" ? "FISHERMAN JENSON" : LINE1;
+  return {
+    line1,
+    line2: LINE2,
+    textStartTick: TEXT_START_TICK,
+    // JENSON's two-character-shorter class/name line completes two ticks
+    // earlier, so PAUSE_UNTIL_PRESS creates its visible cursor at 1272.
+    // Controller input readiness still begins at 1274.
+    cursorStartTick: encounter === "jenson" ? CURSOR_START_TICK - 2 : CURSOR_START_TICK,
+    cursorX: LINE2_ORIGIN.x + measureText(font, charmap, LINE2),
+  };
+}
 /** Total printable characters across both lines (docs/battle-scene-notes.md §3.2 - 1 tick/char including space ticks, `\n` free). */
 export const TEXT_TOTAL_CHARS = LINE1.length + LINE2.length;
 /** First trace tick the first glyph ("B") is drawn (docs/battle-scene-notes.md §1/§3.2). */
 export const TEXT_START_TICK = 1234;
 
 /** Visible character count (0..TEXT_TOTAL_CHARS) across both lines combined at trace tick `t`. */
-export function textVisibleChars(t: number): number {
-  if (t < TEXT_START_TICK) return 0;
-  return Math.min(TEXT_TOTAL_CHARS, t - TEXT_START_TICK + 1);
+export function textVisibleChars(t: number, encounter: BattleSceneState["encounter"] = "destin"): number {
+  const params = battleIntroEncounterParams(encounter);
+  const total = params.line1.length + params.line2.length;
+  if (t < params.textStartTick) return 0;
+  return Math.min(total, t - params.textStartTick + 1);
 }
 
 // --- §3.3: wait-cursor bob / 36-tick idle cycle ------------------------
@@ -2144,8 +2173,9 @@ function drawMessageTextLines(fb: Uint8Array, line1: string, line2: string, char
   }
 }
 
-function drawMessageText(fb: Uint8Array, chars: number): void {
-  drawMessageTextLines(fb, LINE1, LINE2, chars);
+function drawMessageText(fb: Uint8Array, chars: number, encounter: BattleSceneState["encounter"] = "destin"): void {
+  const params = battleIntroEncounterParams(encounter);
+  drawMessageTextLines(fb, params.line1, params.line2, chars);
 }
 
 function drawCursor(fb: Uint8Array, yOffset: number, x: number = CURSOR_DEST_X): void {
@@ -10929,9 +10959,14 @@ function drawRockSprite(fb: Uint8Array, animNum: 0 | 1 | 2, centerX: number, cen
 }
 
 /** The settled (post-tick-1227) composite: static bg + both trainer pics + the window frame - byte-exact against the oracle (see module doc point 1). */
-function drawSettledScene(fb: Uint8Array): void {
+function introTrainer(encounter: BattleSceneState["encounter"]): TrainerPicAsset {
+  return encounter === "jenson" ? fisherman : bugCatcher;
+}
+
+function drawSettledScene(fb: Uint8Array, encounter: BattleSceneState["encounter"] = "destin"): void {
+  const trainer = introTrainer(encounter);
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-  drawSpriteSheet(fb, bugCatcher.tileset, bugCatcher.palette, OPPONENT_CORNER.x, OPPONENT_CORNER.y);
+  drawSpriteSheet(fb, trainer.tileset, trainer.palette, OPPONENT_CORNER.x, OPPONENT_CORNER.y);
   drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
 }
@@ -11079,7 +11114,13 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number): voi
  * window frame (BG0) is not a blend target, so it draws at full
  * brightness, unshifted, on top of everything.
  */
-function drawSlideScene(fb: Uint8Array, t: number, win: { top: number; bottom: number }): void {
+function drawSlideScene(
+  fb: Uint8Array,
+  t: number,
+  win: { top: number; bottom: number },
+  encounter: BattleSceneState["encounter"] = "destin",
+): void {
+  const trainer = introTrainer(encounter);
   const { eva, evb } = evaEvb(t);
   const bg1Shift = bg1X(t);
   const objShift = scanlineShiftMagnitude(t);
@@ -11095,7 +11136,7 @@ function drawSlideScene(fb: Uint8Array, t: number, win: { top: number; bottom: n
       if (c) setPixel(tgt2, x, y, c);
     }
   }
-  drawSpriteSheetWindowed(tgt2, bugCatcher.tileset, bugCatcher.palette, OPPONENT_CORNER.x - objShift, OPPONENT_CORNER.y, win);
+  drawSpriteSheetWindowed(tgt2, trainer.tileset, trainer.palette, OPPONENT_CORNER.x - objShift, OPPONENT_CORNER.y, win);
   drawSpriteSheetWindowed(tgt2, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x + objShift, PLAYER_CORNER.y, win);
 
   // TGT1: BG1 (`entrySlide`), uniformly shifted. Blend where opaque, else raw TGT2.
@@ -13068,7 +13109,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
   const win = windowRange(t);
   if (!win) return; // solid black
   if (t < SLIDE_END_TICK) {
-    drawSlideScene(fb, t, win);
+    drawSlideScene(fb, t, win, state.encounter);
     return;
   }
   const pressTick = state.sendOutPressElapsed === null ? null : TICK0 + state.sendOutPressElapsed;
@@ -13076,11 +13117,12 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
     // Idle "would like to battle!♥" hold - unaffected by the press until its
     // own registration lag elapses (§7.2: screen stays frozen on whatever
     // the idle cycle shows through pressTick+4, oracle-confirmed unbroken).
-    drawSettledScene(fb);
+    const params = battleIntroEncounterParams(state.encounter);
+    drawSettledScene(fb, state.encounter);
     drawBallIcons(fb, t);
-    drawMessageText(fb, textVisibleChars(t));
-    const cursor = cursorState(t);
-    if (cursor.visible) drawCursor(fb, cursor.yOffset);
+    drawMessageText(fb, textVisibleChars(t, state.encounter), state.encounter);
+    const cursor = cursorState(t, params.cursorStartTick);
+    if (cursor.visible) drawCursor(fb, cursor.yOffset, params.cursorX);
     return;
   }
   const handoffTick = sendOutHandoffTick(pressTick);
