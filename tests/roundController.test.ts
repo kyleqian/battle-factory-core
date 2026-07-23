@@ -14,6 +14,7 @@ import {
   RoundTransitionError,
   type RoundControllerState,
 } from "../src/engine/roundController.ts";
+import { createInitialState } from "../src/engine/core.ts";
 
 function mon(id: string, hp = 100, status: BattleMon["status"] = "none"): BattleMon {
   return { id, species: id.toUpperCase(), maxHp: 100, hp, status };
@@ -74,6 +75,13 @@ function declineAndStartNextBattle(state: RoundControllerState): RoundController
 }
 
 describe("BattleScenario opponent selection", () => {
+  it("is optionally injectable through EngineState without changing the canonical default", () => {
+    expect(createInitialState().roundController).toBeNull();
+    const injected = createInitialState({ battleScenario: scenario() });
+    expect(injected.roundController?.scenarioId).toBe("seven-battle-fixture");
+    expect(injected.roundController?.presentation?.command.type).toBe("battleStart");
+  });
+
   it("turns deterministic inputs into a seven-opponent schedule without repeats", () => {
     const first = createRoundController(scenario([8, 8, 8, 8, 8, 8, 8]));
     const second = createRoundController(scenario([8, 8, 8, 8, 8, 8, 8]));

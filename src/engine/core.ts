@@ -181,6 +181,11 @@ import {
   postwinRngSteps,
   type PostwinState,
 } from "./postwin.ts";
+import type { BattleScenario } from "./battleScenario.ts";
+import {
+  createRoundController,
+  type RoundControllerState,
+} from "./roundController.ts";
 
 export { SCREEN_WIDTH, SCREEN_HEIGHT } from "./framebuffer.ts";
 
@@ -207,6 +212,11 @@ export interface EngineState {
   battleControllerExecFlags: number;
   /** Confirm-relative hidden state for Battle 2's bounded first ROCK SLIDE. */
   battle2Turn1: Battle2Turn1State | null;
+  /**
+   * Pure generic round rules, opt-in through createInitialState's scenario
+   * injection. The canonical pixel path remains unwired and therefore null.
+   */
+  roundController: RoundControllerState | null;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -218,7 +228,13 @@ const BATTLE_SCENE_HANDOFF_ELAPSED = SCENE_TICK0 - 843;
  */
 export const BATTLE_IN_BATTLE_FIRST_ELAPSED = 5;
 
-export function createInitialState(): EngineState {
+export interface InitialEngineStateOptions {
+  readonly battleScenario?: BattleScenario;
+}
+
+export function createInitialState(
+  options: InitialEngineStateOptions = {},
+): EngineState {
   return {
     frame: 0,
     draftScreen: ANCHOR_DRAFT_SCREEN_STATE,
@@ -233,6 +249,9 @@ export function createInitialState(): EngineState {
     rngValue: ANCHOR_RNG_VALUE,
     battleControllerExecFlags: 0,
     battle2Turn1: null,
+    roundController: options.battleScenario
+      ? createRoundController(options.battleScenario)
+      : null,
   };
 }
 
