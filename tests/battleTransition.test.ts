@@ -5,7 +5,14 @@
 // state, not pixels - see that module's doc for the oracle-derivation of
 // every constant asserted here.
 import { describe, expect, it } from "vitest";
-import { centerLogoEva, circleCenter, exitFadeY, grayFlickerY } from "../src/engine/battleTransition.ts";
+import {
+  asymmetricSpiralCircleCenter,
+  centerLogoEva,
+  circleCenter,
+  exitFadeY,
+  grayFlickerY,
+  sequentialCirclePainterOrder,
+} from "../src/engine/battleTransition.ts";
 
 describe("grayFlickerY (TransitionIntro_FadeToGray/_FadeFromGray, te = settled.elapsed)", () => {
   it("is 0 through the static hold (te 0-27, trace ticks 843-870)", () => {
@@ -91,5 +98,55 @@ describe("exitFadeY (CirclesMeet_End's BeginNormalPaletteFade, starts trace tick
 
   it("holds at 16 (solid black) indefinitely past the fade", () => {
     for (const te of [FADE_START_TE + 20, FADE_START_TE + 100]) expect(exitFadeY(te)).toBe(16);
+  });
+});
+
+describe("B_TRANSITION_FRONTIER_CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ", () => {
+  const KIND = "asymmetricSpiralInSeq" as const;
+
+  it("shifts the shared three-cycle gray intro to selection-relative ages 25-72", () => {
+    expect(grayFlickerY(24, KIND)).toBe(0);
+    expect(grayFlickerY(25, KIND)).toBe(2);
+    expect(grayFlickerY(32, KIND)).toBe(16);
+    expect(grayFlickerY(72, KIND)).toBe(0);
+    expect(grayFlickerY(73, KIND)).toBe(0);
+  });
+
+  it("creates top/left/right at task-timer stagger ages 76/92/108 and follows the source spiral", () => {
+    expect(asymmetricSpiralCircleCenter("top", 75)).toBeNull();
+    expect(asymmetricSpiralCircleCenter("top", 76)).toEqual({ x: 146, y: 170 });
+    expect(asymmetricSpiralCircleCenter("left", 91)).toBeNull();
+    expect(asymmetricSpiralCircleCenter("left", 92)).toEqual({ x: -33, y: 57 });
+    expect(asymmetricSpiralCircleCenter("right", 107)).toBeNull();
+    expect(asymmetricSpiralCircleCenter("right", 108)).toEqual({ x: 246, y: 11 });
+  });
+
+  it("settles each circle after 32 callbacks and holds its distinct target", () => {
+    expect(asymmetricSpiralCircleCenter("top", 108)).toEqual({ x: 120, y: 45 });
+    expect(asymmetricSpiralCircleCenter("left", 124)).toEqual({ x: 89, y: 97 });
+    expect(asymmetricSpiralCircleCenter("right", 140)).toEqual({ x: 151, y: 97 });
+    expect(asymmetricSpiralCircleCenter("right", 200)).toEqual({ x: 151, y: 97 });
+  });
+
+  it("uses SortSprites' y ordering and preserves the inherited order on the one top/right tie", () => {
+    expect(sequentialCirclePainterOrder(125)).toEqual(["right", "top", "left"]);
+    expect(sequentialCirclePainterOrder(126)).toEqual(["right", "top", "left"]);
+    expect(sequentialCirclePainterOrder(127)).toEqual(["top", "right", "left"]);
+  });
+
+  it("starts the center blend after the final circle and preserves the 31-tick full-logo hold", () => {
+    expect(centerLogoEva(140, KIND)).toBe(0);
+    expect(centerLogoEva(141, KIND)).toBe(1);
+    expect(centerLogoEva(156, KIND)).toBe(16);
+    expect(exitFadeY(189, KIND)).toBe(0);
+    expect(exitFadeY(190, KIND)).toBe(3);
+    expect(exitFadeY(200, KIND)).toBe(16);
+  });
+
+  it("leaves the existing circles-meet defaults unchanged", () => {
+    expect(grayFlickerY(28)).toBe(2);
+    expect(circleCenter("top", 78)).toEqual({ x: 120, y: -51 });
+    expect(centerLogoEva(128)).toBe(1);
+    expect(exitFadeY(177)).toBe(3);
   });
 });

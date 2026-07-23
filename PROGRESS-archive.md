@@ -1,3 +1,29 @@
+## 302 — Supervisor-accepted S8 postwin increment: **GREEN — NO through held guide message**
+
+- **State:** canonical **29601-30031** now reaches the settled/input-ready
+  `"Right this way, please!"` message without dismissing it. The committed
+  trace is **73/73 exact**, predecessor `-scout-b` is **164/164**, Tier-1 is
+  **1083/1083**, and build passes (**5.472 MB**).
+- **Did:** stored logical/display swap cursor edges, reproduced the real
+  one-VBlank cursor copy, accepted canonical NO at 29632, and printed the
+  source guide string through the live field window/font path. Fresh sweeps
+  pin early/delayed DOWN/A; a 434-row RAM audit pins unchanged healed state
+  and one VBlank LCG call on every tick.
+- **Next:** resume from held canonical **30031**; first eligible dismiss is
+  29660, but this worker intentionally did not consume it. Dismissal,
+  attendant/player walk, warp, Battle 2, battles 3-7, and round completion
+  remain open; S8 stays `[ ]`.
+- **Notes:** implementation/trace `7c0ebe8`; evidence/docs commit follows.
+  True edges: swap input 29272; canonical DOWN 29602 (visible 29603); NO
+  29632; text final 29658; message input-ready 29660. Prefix `[0:146]` is
+  byte-identical. No forbidden asset/table, tick/trace branch, fitting,
+  exclusion, or dynamic thinning. Supervisor independently reviewed the
+  logical/display cursor handoff and edge-relative message path, then
+  reverified the 73/73 trace, 164/164 predecessor, all 1083 Tier-1 tests,
+  and production build.
+
+---
+
 ## 301 — Supervisor-accepted S8 postwin increment: **GREEN — GO ON through swap prompt ready**
 
 - **State:** canonical **26009-29601** is extended through the held,

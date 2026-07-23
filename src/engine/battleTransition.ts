@@ -1,12 +1,14 @@
-// S6 transition-engine slice: the CIRCLES_MEET battle transition (ticks
-// 843-1040 of tools/compare/traces-groundtruth/battle1-intro.json - see
+// Frontier circle battle transitions: Battle 1's CIRCLES_MEET (ticks
+// 843-1040 of tools/compare/traces-groundtruth/battle1-intro.json) and
+// Battle 2's CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ (canonical 32036-32244 - see
+// docs/battle2-opening-notes.md). See
 // docs/battle-bringup-notes.md "Slice-0 ground truth" §5 for the pixel/RAM
 // groundwork this builds on, and its own flagged follow-ups). Renders as a
 // pure post-process overlay on top of battleRoom.ts's already-settled scene
 // (battleRoomRender.ts's renderBattleRoomEntryScene), keyed entirely by
-// `te` - battleRoom.ts's "settled" phase's own `elapsed` counter, which
-// already starts at 0 on trace tick 843 (msgboxClosing's handoff). No new
-// BattleRoomPhase is needed: every stage below is a pure function of `te`.
+// `te` - battleRoom.ts's encounter-relative "settled" elapsed counter. No
+// new BattleRoomPhase is needed: every stage below is a pure function of
+// `te` plus the selected transition kind.
 //
 // Source: reference/pokeemerald/src/battle_transition.c
 // (Task_BattleTransition_Intro / CreateIntroTask(0,0,3,2,2) /
@@ -110,6 +112,8 @@ const circles = circlesAsset as CirclesAsset;
 const circlePalette = circles.circleSprites.palette;
 const centerBg = circles.centerBg;
 
+export type FrontierCircleTransition = "circlesMeet" | "asymmetricSpiralInSeq";
+
 /** te (settled-phase elapsed) at which the corresponding trace tick (843+te) begins - named per the phase they gate. */
 const FLICKER_START_TE = 28; // trace tick 871
 const FLICKER_END_TE = 76; // trace tick 919 (exclusive) - 3x16-tick cycles
@@ -117,6 +121,10 @@ const CIRCLE_ANCHOR_TE = 921 - 843; // trace tick 921 (see module doc point 2)
 const CIRCLE_SLIDE_TICKS = 48;
 const BLEND_START_TE = 970 - 843; // trace tick 970 - tBlend leaves 0
 const EXIT_FADE_START_TE = 1020 - 843; // trace tick 1020 - first faded frame
+const ASYMMETRIC_SEQ_FLICKER_START_TE = 25;
+const ASYMMETRIC_SEQ_FLICKER_END_TE = 73;
+const ASYMMETRIC_SEQ_BLEND_START_TE = 140;
+const ASYMMETRIC_SEQ_EXIT_FADE_START_TE = 190;
 
 /** TransitionIntro_FadeToGray/_FadeFromGray's shared gray target, RGB(11,11,11) (battle_transition.c:1121 CreateIntroTask(0,0,3,2,2)). */
 const GRAY_TARGET5 = 11;
@@ -134,9 +142,15 @@ function blendComponentToGray(component8: number, y: number): number {
  * window. `tFadeToGrayIncrement`/`tFadeFromGrayIncrement` are both 2
  * (CreateIntroTask(0,0,3,2,2)), `tDelayTimer`=0 so every tick steps once.
  */
-export function grayFlickerY(te: number): number {
-  if (te < FLICKER_START_TE || te >= FLICKER_END_TE) return 0;
-  const ft = te - FLICKER_START_TE;
+export function grayFlickerY(te: number, transition: FrontierCircleTransition = "circlesMeet"): number {
+  const start = transition === "asymmetricSpiralInSeq"
+    ? ASYMMETRIC_SEQ_FLICKER_START_TE
+    : FLICKER_START_TE;
+  const end = transition === "asymmetricSpiralInSeq"
+    ? ASYMMETRIC_SEQ_FLICKER_END_TE
+    : FLICKER_END_TE;
+  if (te < start || te >= end) return 0;
+  const ft = te - start;
   const k = ft % 16;
   return k <= 7 ? 2 * (k + 1) : 2 * (15 - k);
 }
@@ -160,14 +174,63 @@ export function circleCenter(name: "top" | "left" | "right", te: number): { x: n
   return { x: spec.init[0] + spec.speed[0] * k, y: spec.init[1] + spec.speed[1] * k };
 }
 
+interface SpiralSpec {
+  center: readonly [number, number];
+  angle: number;
+  visibleTe: number;
+}
+
+/** CirclesAsymmetricSpiralInSeq_CreateSprites: task timers 0/16/32. */
+const ASYMMETRIC_SEQ_SPECS: Record<"top" | "left" | "right", SpiralSpec> = {
+  top: { center: [120, 45], angle: 12, visibleTe: 76 },
+  left: { center: [89, 97], angle: 252, visibleTe: 92 },
+  right: { center: [151, 97], angle: 132, visibleTe: 108 },
+};
+
+/**
+ * `gSineDegreeTable` is rounded Q4.12 sine except for four source-table
+ * entries that are one unit lower (trig.c:326-508). Keeping those literal
+ * source exceptions makes Sin2/Cos2 exact without carrying a lookup table.
+ */
+function sineDegreeQ12(angle: number): number {
+  const normalized = ((angle % 360) + 360) % 360;
+  const tableAngle = normalized % 180;
+  let magnitude = Math.round(Math.sin((tableAngle * Math.PI) / 180) * 4096);
+  if (tableAngle === 84 || tableAngle === 88 || tableAngle === 92 || tableAngle === 96) {
+    magnitude -= 1;
+  }
+  return normalized >= 180 ? -magnitude : magnitude;
+}
+
+/** Source-exact SpriteCB_LogoCircleSpiral center for a visible sequential sprite. */
+export function asymmetricSpiralCircleCenter(
+  name: "top" | "left" | "right",
+  te: number,
+): { x: number; y: number } | null {
+  const spec = ASYMMETRIC_SEQ_SPECS[name];
+  if (te < spec.visibleTe) return null;
+  const age = Math.min(te - spec.visibleTe, 32);
+  const radius = 128 - age * 4;
+  const angle = spec.angle + age * 4;
+  const x2 = Math.floor((sineDegreeQ12(angle) * radius) / 4096);
+  const y2 = Math.floor((sineDegreeQ12(angle + 90) * radius) / 4096);
+  return { x: spec.center[0] + x2, y: spec.center[1] + y2 };
+}
+
 /** FadeInCenterLogoCircle's BLDALPHA target-1 (BG0) weight, 0-16 (module doc). */
-export function centerLogoEva(te: number): number {
-  return Math.max(0, Math.min(te - BLEND_START_TE, 16));
+export function centerLogoEva(te: number, transition: FrontierCircleTransition = "circlesMeet"): number {
+  const start = transition === "asymmetricSpiralInSeq"
+    ? ASYMMETRIC_SEQ_BLEND_START_TE
+    : BLEND_START_TE;
+  return Math.max(0, Math.min(te - start, 16));
 }
 
 /** CirclesMeet_End's exit-to-black fade coefficient, 0-16 (module doc: 3-per-2-ticks, no BG/OBJ lag). */
-export function exitFadeY(te: number): number {
-  const d = te - EXIT_FADE_START_TE;
+export function exitFadeY(te: number, transition: FrontierCircleTransition = "circlesMeet"): number {
+  const start = transition === "asymmetricSpiralInSeq"
+    ? ASYMMETRIC_SEQ_EXIT_FADE_START_TE
+    : EXIT_FADE_START_TE;
+  const d = te - start;
   if (d < 0) return 0;
   const step = Math.floor(d / 2) + 1;
   return Math.min(16, 3 * step);
@@ -179,9 +242,17 @@ export function exitFadeY(te: number): number {
  * general BG/OBJ lag convention - `objFadeY(t) = bgFadeY(t-1)`, re-confirmed
  * for this call site by pixel diff).
  */
-function drawCircleSprite(fb: Uint8Array, name: "top" | "left" | "right", te: number): void {
-  const center = circleCenter(name, te);
-  const fadeY = exitFadeY(te - 1);
+function drawCircleSprite(
+  fb: Uint8Array,
+  name: "top" | "left" | "right",
+  te: number,
+  transition: FrontierCircleTransition,
+): void {
+  const center = transition === "asymmetricSpiralInSeq"
+    ? asymmetricSpiralCircleCenter(name, te)
+    : circleCenter(name, te);
+  if (!center) return;
+  const fadeY = exitFadeY(te - 1, transition);
   const originX = center.x - 32;
   const originY = center.y - 32;
   const tileset = circles.circleSprites[name];
@@ -207,6 +278,25 @@ function drawCircleSprite(fb: Uint8Array, name: "top" | "left" | "right", te: nu
       }
     }
   }
+}
+
+export function sequentialCirclePainterOrder(te: number): Array<"top" | "left" | "right"> {
+  const names: Array<"top" | "left" | "right"> = ["top", "left", "right"];
+  return names
+    .filter((name) => asymmetricSpiralCircleCenter(name, te) !== null)
+    .sort((a, b) => {
+      const ay = asymmetricSpiralCircleCenter(a, te)!.y - 32;
+      const by = asymmetricSpiralCircleCenter(b, te)!.y - 32;
+      // SortSprites orders equal-priority sprites by descending signed OAM
+      // y into front-to-back hardware order. Canvas painting is the
+      // opposite, so draw ascending y (back-to-front).
+      if (ay !== by) return ay - by;
+      // SortSprites is stable on equal y. Both equalities in this source
+      // path are approached with the later-created sprite behind the
+      // earlier-created one, so the reverse painter order remains
+      // right->left->top on the tie tick.
+      return names.indexOf(b) - names.indexOf(a);
+    });
 }
 
 /**
@@ -279,8 +369,12 @@ function applyCenterLogoBlend(fb: Uint8Array, eva: number, exitY: number): void 
  * own bgFadeY/objFadeY params, reusing that function's existing per-layer
  * fade support instead of a redundant post-process pass here.
  */
-export function applyBattleTransitionOverlay(fb: Uint8Array, te: number): void {
-  const grayY = grayFlickerY(te);
+export function applyBattleTransitionOverlay(
+  fb: Uint8Array,
+  te: number,
+  transition: FrontierCircleTransition = "circlesMeet",
+): void {
+  const grayY = grayFlickerY(te, transition);
   if (grayY > 0) {
     for (let i = 0; i < fb.length; i += 4) {
       fb[i] = blendComponentToGray(fb[i]!, grayY);
@@ -288,8 +382,15 @@ export function applyBattleTransitionOverlay(fb: Uint8Array, te: number): void {
       fb[i + 2] = blendComponentToGray(fb[i + 2]!, grayY);
     }
   }
-  drawCircleSprite(fb, "top", te);
-  drawCircleSprite(fb, "left", te);
-  drawCircleSprite(fb, "right", te);
-  applyCenterLogoBlend(fb, centerLogoEva(te), exitFadeY(te));
+  if (transition === "asymmetricSpiralInSeq") {
+    for (const name of sequentialCirclePainterOrder(te)) {
+      drawCircleSprite(fb, name, te, transition);
+    }
+  } else {
+    // Preserve the already oracle-pinned CIRCLES_MEET compositor verbatim.
+    drawCircleSprite(fb, "top", te, transition);
+    drawCircleSprite(fb, "left", te, transition);
+    drawCircleSprite(fb, "right", te, transition);
+  }
+  applyCenterLogoBlend(fb, centerLogoEva(te, transition), exitFadeY(te, transition));
 }

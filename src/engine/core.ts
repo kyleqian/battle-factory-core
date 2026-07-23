@@ -183,7 +183,7 @@ export interface EngineState {
   prebattleRoom: PrebattleRoomState | null;
   /** null until prebattleRoom's "warpFade" phase hands off (S6 slice 2a); see battleRoom.ts. Once set, no input is processed and this owns rendering exclusively. */
   battleRoom: BattleRoomState | null;
-  /** null until battleRoom's "settled" phase (the CIRCLES_MEET transition's own indefinite post-fade black hold) reaches BATTLE_SCENE_HANDOFF_ELAPSED (S6 scene-assembly slice); see battleScene.ts. Once set, no input is processed and this owns rendering exclusively. */
+  /** null until battleRoom's encounter-selected Frontier transition reaches its post-fade black handoff; see battleScene.ts/battleRoom.ts. Once set, no input is processed and this owns rendering exclusively. */
   battleScene: BattleSceneState | null;
   /** Non-null from the accepted Battle-1 loss quote through the counter flow. */
   postwin: PostwinState | null;
@@ -1274,25 +1274,29 @@ function blackFrame(): Uint8Array {
  */
 function renderBattleRoomState(state: EngineState): Uint8Array {
   const b = state.battleRoom!;
+  const transition = b.encounter === "jenson"
+    ? "asymmetricSpiralInSeq"
+    : "circlesMeet";
   const sceneElapsed = b.phase === "entering" ? b.elapsed : SETTLED_SCENE_ELAPSED;
   const step = entryStep(sceneElapsed);
   let bgY = bgFadeY(sceneElapsed, FADE_IN);
   let objY = objFadeY(sceneElapsed, FADE_IN);
   // S6 transition slice: "settled" holds the static no-box scene (tick 843)
-  // then, still keyed by the SAME elapsed counter, plays the CIRCLES_MEET
-  // transition (battleTransition.ts). The room scene's own share of that
+  // then, still keyed by the SAME elapsed counter, plays the encounter's
+  // selected Frontier circle transition (battleTransition.ts). The room
+  // scene's own share of that
   // transition's exit-to-black fade (room tiles + NPCs) reuses
   // renderBattleRoomEntryScene's existing bgFadeY/objFadeY params (see
   // battleTransition.ts's exitFadeY doc for the BG/OBJ 1-tick-lag split);
   // everything else (gray flicker, circle sprites, center-logo blend) is a
   // post-process overlay, no new phase needed.
   if (b.phase === "settled") {
-    bgY = exitFadeY(b.elapsed);
-    objY = exitFadeY(b.elapsed - 1);
+    bgY = exitFadeY(b.elapsed, transition);
+    objY = exitFadeY(b.elapsed - 1, transition);
   }
   const fb = createFramebuffer();
   renderBattleRoomEntryScene(fb, step, sceneElapsed, bgY, objY, msgboxVisual(b), b);
-  if (b.phase === "settled") applyBattleTransitionOverlay(fb, b.elapsed);
+  if (b.phase === "settled") applyBattleTransitionOverlay(fb, b.elapsed, transition);
   return fb;
 }
 

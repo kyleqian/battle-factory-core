@@ -636,6 +636,18 @@ The supervisor independently reviewed the encounter-relative state/RNG/setup
 handoff and reverified the 131/131 + 73/73 predecessor traces, all 1089
 Tier-1 tests, and production build; no new endpoint pixel acceptance is
 implied.
+**Seventh postwin increment (2026-07-23, bounded worker):**
+canonical **32031-32279** is now **249/249 exact** in
+`battle2-transition.json`, capturing every frame from JENSON's held quote
+through delayed-A close/setup, the shared gray intro, the live three-circle
+sequential asymmetric spiral, center-logo blend/hold, room fade, and final
+black handoff. Source-relative transition selection ages parameterize the
+shared renderer; `Sin2`/`Cos2` geometry, 16-tick creation staggering, and
+`SortSprites` signed-Y overlap ordering are Tier-1 pinned. The predecessor
+`battle2-room-b.json` remains **131/131**, Battle 1's `transition.json`
+remains **206/206**, Tier-1 is **1095/1095**, and build passes. Frame 32280
+and all visible Battle 2 battle-scene rendering remain open, as do battles
+3-7, swap YES, and round completion; S8 stays `[ ]`.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by
