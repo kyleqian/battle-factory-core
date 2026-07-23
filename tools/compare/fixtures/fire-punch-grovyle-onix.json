@@ -1,0 +1,45 @@
+{
+  "schema": "scene-on-portable-compare/v1",
+  "oracleProfile": "battle-scene-on",
+  "probe": "tools/probe/stage-fire-punch-portable-on.py",
+  "probeArguments": ["opponent"],
+  "pair": "GROVYLE (opponent-front) -> ONIX (player-back)",
+  "move": "FIRE_PUNCH",
+  "appStage": {
+    "id": "fire-punch-grovyle-onix-animation-owned",
+    "oracleFrame": 2081,
+    "presentationAge": 0
+  },
+  "geometry": {
+    "attacker": {
+      "species": "GROVYLE",
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 12 },
+      "animationCenter": { "x": 176, "y": 44 }
+    },
+    "target": {
+      "species": "ONIX",
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 }
+    }
+  },
+  "denseWindow": {
+    "startFrame": 2081,
+    "endFrame": 2357
+  },
+  "profile": {
+    "startHp": 117,
+    "endHp": 96,
+    "hpCommitAge": 49,
+    "secondaryRollAge": 142,
+    "secondaryRollSucceeded": true,
+    "status": "burn",
+    "currentMoveResetAge": 277
+  },
+  "statusOutcome": {
+    "status1": 16,
+    "setAge": 142,
+    "messageSettledAge": 200
+  }
+}
