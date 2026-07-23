@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 307 — S8 Battle 2 opening probe: **GREEN evidence checkpoint; no runtime change**
+## 307 — Supervisor-accepted S8 Battle 2 opening probe: **GREEN evidence checkpoint**
 
 - **State:** exact renderer endpoint remains **32280--32530 = 251/251**;
   canonical 33030 is documented only, not claimed pixel-exact. Tier-1 is
@@ -16,11 +16,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Sparse app samples are exact at 32531/32533 then rank the remaining live
   gap (peak 11,210 px at 32831), without an acceptance claim or harvest.
 - **Next:** implement only the ledgered live Battle-2 send-outs/menu in a
-  later scoped increment; S8 stays `[ ].`
+  later scoped increment; S8 stays `[ ]`.
 - **Notes:** fresh RAM has `gMain.inBattle=2` throughout; no ordinary VBlank
   RNG. On-demand RNG is flat to 32893 then +1/+2/+5 at 32894/32898/32900
   (pre-turn/AI); 33030 is 3530724670 with execFlags=1. No trace/assets/runtime
-  changes, screenshot lookup, tick fitting, or dynamic thinning.
+  changes, screenshot lookup, tick fitting, or dynamic thinning. Supervisor
+  independently reviewed the source/RAM boundary ledger and reverified all
+  1098 Tier-1 tests and build.
 
 ---
 ## 306 — Supervisor-accepted S8 Battle 2 trainer intro: **GREEN — 32280-32530 exact**
@@ -67,31 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   harvest, absolute-tick branch/table, fitting, or capture thinning.
   Supervisor independently reviewed the live geometry/OAM/compositor path
   and reverified all three traces, all 1095 Tier-1 tests, and build.
-
----
-## 304 — Supervisor-accepted S8 Battle 2 opening: **GREEN setup; pixels incomplete**
-
-- **State:** the assigned 33030/33031 pixel endpoint is **not complete**.
-  The last committed exact endpoint remains JENSON's held quote at 32031
-  (**131/131**); predecessor decline remains **73/73**. Battle 2 identity,
-  party, moves, room-to-scene RNG ownership, and input gates are now modeled
-  and Tier-1 pinned. Full Tier-1 is **1089/1089** and build passes
-  (**5.485 MB**).
-- **Did:** freshly bisected quote and trainer-intro A gates; RAM-audited
-  32020-33031 RNG/inBattle ownership; source-selected the sequential
-  asymmetric-spiral transition; extracted Fisherman/KABUTO sprites; carried
-  JENSON/KABUTO, healed `[117,138,153]`, and ONIX moves
-  `[157,20,225,201]` through `EngineState`. Commits `012161f` and `d2d905f`.
-- **Next:** implement the live three-circle sequential spiral, then
-  encounter-parameterize Fisherman/KABUTO intro and both send-outs; compose
-  the Battle 2 menu without Battle 1's harvested Grovyle base. Dense-capture
-  all dynamic frames through 33030/33031 in ≤256-frame trace pieces. Stop
-  before menu input. S8 stays `[ ]`.
-- **Notes:** first accepted room-quote A starts at 30383 (30382 rejects);
-  first accepted intro A starts at 32479 (32478 rejects). Canonical
-  32031/32531 edges are delayed-valid. Setup RNG extras are
-  `+50/+22/+4/+1`, selecting Frontier transition index 10; battle-scene
-  elapsed zero is 32245 and in-battle freeze is 32250. No new pixel trace is
-  claimed exact; no screenshot/tick lookup, fitting, or disguised chrome.
-  Supervisor independently reviewed the encounter-relative setup/core path
-  and reverified both predecessor traces, all 1089 Tier-1 tests, and build.
