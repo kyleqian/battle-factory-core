@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 298 — Bounded worker (S7 turn 17 rung 8): **GREEN — DESTIN loss quote endpoint exact**
+
+- **State:** canonical `23229--23601` is gaplessly **373/373 exact** in two
+  adjacent dense traces (**255/255 + 118/118**). Rung 7b remains **147/147**,
+  `verify-turn17.ts` passes **245/245**, Tier-1 is **1067/1067**, and build
+  passes (**5.462 MB**).
+- **Did:** ported the source `-2px/callback` DESTIN trainer slide, retained
+  the frozen outcome text/arrow through the three-frame settled pause, then
+  switched to source-expanded Easy Chat loss text with exact glyph cadence,
+  real `PAUSE_UNTIL_PRESS` gate, no cursor, and stable hold through 23601.
+- **Next:** supervisor review of the S7 completion proposal. If accepted,
+  S8 begins only after tick 23601 with the loss-quote dismiss and post-battle
+  swap/round flow. Parked/unrelated issues, including #38, are untouched.
+- **Notes:** implementation commit `366234e`. All timing is relative to the
+  stored second outcome-dismiss edge and shifts under delayed-edge Tier-1
+  coverage. No framebuffer/screenshot asset, absolute-tick/trace branch,
+  per-frame table, fitted geometry/color, excluded capture, or thinning.
+
+---
 ## 297 — Bounded worker (S7 turn 17 rung 7): **GREEN — outcome message through frozen second dismiss**
 
 - **State:** canonical `22827--23228` is gaplessly **402/402 exact** in two
@@ -48,25 +67,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   excluded capture, or thinning. Supervisor independently reverified both
   dense windows, predecessor, turn-17 verifier, full Tier-1 suite, and
   production build; ROADMAP status accepted.
-
----
-## 295 — Bounded worker (S7 turn 17 rung 5): **GREEN — lethal faint through typed gate exact**
-
-- **State:** canonical `22418--22530` is **113/113 exact**, every tick
-  captured. Turn-17 rung 4 remains **200/200**, `turn5-faint.json` remains
-  **110/110**, `verify-turn17.ts` passes all **245** checks, Tier-1 is
-  **1056/1056**, and build passes (**5.460 MB**).
-- **Did:** parameterized the shared FIRE_PUNCH profile for the atomic
-  `58→0` write, lethal secondary RNG/no-op, seven-step opponent sink,
-  healthbox+BRN teardown/status clear, faint glyph cadence, settle, and
-  fully typed wait-cursor/input gate. Committed dense `turn17-rung5.json`.
-- **Next:** resume at **22531**. The long button-gated faint-text hold,
-  dismiss A at 22801, battle outcome/victory/trainer transition, and #38
-  remain untouched; S7 stays `[~]`.
-- **Notes:** implementation commit `de79bdf`. Fresh RAM replays confirmed
-  HP age 227, secondary +5, sink S=KO+73/n=7, teardown +90, text +92, and
-  gate +112. No forbidden framebuffer/absolute-tick/per-frame/trace branch,
-  fitted coordinate/color, excluded capture, or thinned trace. Supervisor
-  independently reverified the dense window, both reuse regressions,
-  turn-17 verifier, full Tier-1 suite, and production build; ROADMAP status
-  accepted.

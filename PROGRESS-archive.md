@@ -12082,3 +12082,17 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
   absolute-tick mechanism.
 
 ---
+## 295 — Bounded worker (S7 turn 17 rung 5): **GREEN — lethal faint through typed gate exact**
+
+- **State:** canonical `22418--22530` was **113/113 exact**, every tick
+  captured. Turn-17 rung 4 remained **200/200**, `turn5-faint.json` remained
+  **110/110**, the Turn-17 verifier passed, and Tier-1/build were green.
+- **Did:** parameterized the shared FIRE_PUNCH profile for the atomic
+  `58→0` write, lethal secondary RNG/no-op, seven-step opponent sink,
+  healthbox+BRN teardown/status clear, faint glyph cadence, settle, and
+  fully typed wait-cursor/input gate.
+- **Next at archive time:** canonical **22531**, the long faint hold.
+- **Notes:** implementation commit `de79bdf`; no forbidden pixel or
+  absolute-tick mechanism.
+
+---

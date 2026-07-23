@@ -738,3 +738,72 @@ outside this rung.
 Regression verdict: rung 7a **255/255**, rung 7b **147/147**, rung 6b
 **41/41**, `verify-turn17.ts` **245/245**, Tier-1 **1065/1065**, and the
 production build (**5.461 MB**) all pass. S7 remains in progress.
+
+## 13. Engine rung 8: DESTIN slide, loss quote, and stable held endpoint (2026-07-23)
+
+Canonical ticks **23229-23601** are implemented gaplessly in two adjacent
+dense traces:
+
+| trace | captures | result |
+|---|---:|---:|
+| `turn17-rung8a.json` | 23229-23483, every tick (255) | **255/255 exact** |
+| `turn17-rung8b.json` | 23484-23601, every tick (118) | **118/118 exact** |
+
+There is no gap, overlap, excluded capture, or thinning. The predecessor
+`turn17-rung7b.json` remains **147/147 exact**, and the final trace stops on
+the committed Turn-17 endpoint without supplying any later input.
+
+### Source/controller derivation
+
+`BattleScript_FrontierTrainerBattleWon` sequences `trainerslidein
+BS_ATTACKER`, `waitstate`, and `printstring STRINGID_TRAINER1LOSETEXT`
+(`data/battle_scripts_1.s:3027-3048`). For a single frontier opponent,
+`OpponentHandleTrainerSlide` creates DESTIN's existing Bug Catcher trainer
+sprite at base x=208 with `x2=96` and `sSpeedX=-2`; the shared
+`SpriteCB_TrainerSlideIn` subtracts 2 per callback until x2 reaches zero
+(`battle_controller_opponent.c:1325-1395`,
+`battle_gfx_sfx_util.c:396-410`). With the 64px sprite's top-left convention,
+the first on-screen pose is relative age +28 at x=226 and the settled pose is
++53 at x=176. This is the source callback itself, not a per-frame table.
+
+DESTIN's source entry is `FRONTIER_TRAINER_DESTIN` with
+`speechLose={PLEASE,I,NEED,SOME,WATER}` (`battle_frontier_trainers.h:403-410`).
+`CopyFrontierTrainerText(FRONTIER_PLAYER_WON_TEXT, ...)` expands that Easy
+Chat data, and `BufferStringBattle` appends
+`EXT_CTRL_CODE_PAUSE_UNTIL_PRESS` to trainer lose text
+(`frontier_util.c:1739-1751`, `battle_message.c:2598-2615,2741-2748`).
+That control enters `RENDER_STATE_WAIT`, whose handler is `TextPrinterWait`:
+there is a real A/B input gate, but unlike `RENDER_STATE_CLEAR` it never
+calls `TextPrinterWaitWithDownArrow`, so there is deliberately **no cursor**
+(`text.c:1018-1023,1167-1173,865-900`).
+
+### Oracle/RAM-visible timing and render ownership
+
+The stored second outcome-dismiss edge remains the only epoch. Relative ages
+map to the canonical oracle as follows:
+
+| outcome-dismiss age | canonical tick | visible result |
+|---:|---:|---|
+| +28 | 23229 | first trainer pixel, top-left x=226 |
+| +28..+53 | 23229-23254 | source slide advances 2px/tick to x=176 |
+| +53..+55 | 23254-23256 | settled trainer; old outcome text and its frozen arrow remain |
+| +56 | 23257 | loss printer clears the old text and writes `P` |
+| +57..+78 | 23258-23279 | one source character per tick, including pixel-flat spaces |
+| +78 onward | 23279-23601 | fully typed, real input wait, no cursor; framebuffer stable |
+
+Fresh oracle diffing showed the slide's changed-pixel bbox advancing exactly
+2px left per tick and isolated the +56 transition entirely to the message
+window. The pre-existing Turn-17 verifier independently confirms all 25
+dynamic phase-1 SHAs, the 23254-23256 flat pause, the three initial quote
+frames at 23257-23259, `"PLEA"` at 23260, settle at 23279, and the final
+23601 SHA. Tier-1 tests pin both sides of every phase, quote typing and
+settle, long held input-ready/no-cursor state, and an +11 delayed-edge replay
+with identical relative states.
+
+Regression verdict: rung 8a **255/255**, rung 8b **118/118**, rung 7b
+**147/147**, `verify-turn17.ts` **245/245**, Tier-1 **1067/1067**, and
+production build (**5.462 MB**) all pass. This worker proposes S7 completion
+because the scripted Battle-1 turn/win chain now reaches its committed loss-
+quote endpoint and S7's stated trace/Tier-1 acceptance is met. The roadmap
+marker remains `[~]` for supervisor review; input after 23601 and all
+post-battle swap/round flow remain S8.
