@@ -567,7 +567,7 @@ menu hold/GO ON at 28002, scouting pages, swap decision/UI, Battle 2, and
 the rest of the round remain open; S8 stays `[ ]`. The supervisor
 independently reviewed the timing-relative implementation and reverified
 the new trace, predecessor, full Tier-1 suite, and production build.
-**Third postwin engine increment (2026-07-23, bounded worker checkpoint):**
+**Third postwin engine increment (2026-07-23, supervisor-accepted):**
 the canonical continuation-menu hold, GO ON at 28002, all three opponent
 scouting pages, and the swap offer now extend the modeled endpoint through
 **29601**, the held/input-ready YES/NO prompt before a choice. Adjacent
@@ -581,7 +581,9 @@ edges, shifts under delayed GO ON, and pins the edge-relative 28003-equivalent
 five-call RNG burst while retaining outside-battle VBlank ownership. This is
 still **partial S8**: neither YES nor NO is selected, and swap UI/decline,
 Battle 2, battles 3-7, and round completion remain open; S8 stays `[ ]`
-pending supervisor review.
+after supervisor review. The supervisor independently reviewed the
+stored-edge state/RNG/render paths and reverified both new traces, their
+predecessor, full Tier-1 suite, and production build.
 
 ### [ ] S9 — Breadth & robustness: arbitrary traces from the anchor
 Full Lv-50 opponent/rental data breadth (sprites, moves, animations used by

@@ -4,7 +4,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 301 — Bounded S8 postwin increment: **GREEN — GO ON through swap prompt ready**
+## 301 — Supervisor-accepted S8 postwin increment: **GREEN — GO ON through swap prompt ready**
 
 - **State:** canonical **26009-29601** is extended through the held,
   input-ready swap-offer YES/NO prompt. Adjacent traces are **171/171 +
@@ -25,6 +25,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   28074/28476/28874, swap 29272 (text final 29265, menu visible 29268).
   Ground-truth segments `[0:146]` are byte-identical. No forbidden frame
   asset/table, canonical-tick branch, fitting, exclusion, or thinning.
+  Supervisor independently reviewed the stored-edge state/RNG/render paths
+  and reverified the 171/171 + 164/164 traces, 216/216 predecessor, all
+  1080 Tier-1 tests, and production build.
 
 ---
 ## 300 — Supervisor-accepted S8 postwin increment: **GREEN — heal dismiss through next-match input ready**
