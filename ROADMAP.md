@@ -536,13 +536,15 @@ and is **16/16 exact** through the next accepted input. Gate 2 remains open:
 the pure swap controller and source-extracted loss/seventh-win policies are
 banked, while the live swap-YES presentation is exact through its input-ready
 player picker (**101/101**) and the complete action fade/slide (**36/36**).
-The source-relative mon-picture open is now exact as well, extending the
-options trace to **58/58** through tick 29759. The next distinct mechanism is
-the settled options popup: source/oracle evidence pins its controller input
-gate at edge +56, first draw at +58/tick 29760, default `SUMMARY`, and
-phase-relative B/DOWN/A dispatch. Enemy selection, accept/exit, loss ending,
-and seventh-win ending still need dense OFF-profile UI proofs. S8 therefore
-remains `[~]`.
+The source-relative mon-picture open extends the options trace to **58/58**,
+and the settled options popup/cursor is now **44/44 exact** with a generic
+edge +56 input gate, +58 draw, default `SUMMARY`, and phase-relative B/DOWN/A
+dispatch. Screen-ball and selected-ball animation epochs remain independent.
+Source extraction now also pins the terminal field-message gates and the
+seventh-win `MSGBOX_GETPOINTS` fanfare/wait path, but no ending pixels are
+claimed. Summary/B-close/enemy selection presentation, accept/exit, loss
+ending, and seventh-win ending still need dense OFF-profile UI proofs. S8
+therefore remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
 Historical traces below remain Battle Scene ON regression evidence. The

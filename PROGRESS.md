@@ -14,11 +14,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   for popup text at `+58` and highlight settle at `+59`, added the one-VBlank
   logical/display cursor handoff, and dispatched A/B to `summaryFade`,
   `playerPickerReturn`, or `enemySwitch`. Screen-ball and selected-ball loops
-  remain separate phase-relative clocks.
+  remain separate phase-relative clocks. Merged source-extracted terminal
+  message/fanfare gates and a deterministic ONIX→GROVYLE Scene-ON FIRE PUNCH
+  staging probe; the latter remains `partial`, not a pixel-acceptance claim.
 - **Next:** implement exactly one next distinct path: summary fade/screen,
   popup B-close/player-picker return, or enemy-screen switch presentation.
-- **Notes:** Tier-1 **1189/1189**, build **5.547 MB**. No absolute tick,
-  battle-number, screenshot, or captured-frame branch.
+- **Notes:** supervisor merged/verified all three lanes: Tier-1 **1189/1189**,
+  build **5.547 MB**; FIRE PUNCH canonical regressions **227/236** (known
+  residual) and **200/200**. No deferred decision or absolute-tick branch.
 
 ---
 ## 327 — S8 player-options popup handoff: **GREEN evidence checkpoint**
