@@ -4,6 +4,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 316 — S8 Battle 2 turn 1 reducer: **GREEN — implementation in progress**
+
+- **State:** pure confirm-relative Battle-2 turn state is pinned; live core
+  and renderer wiring plus accepted trace remain open. Targeted Tier-1 is
+  **15/15** and build passes.
+- **Did:** added ONIX-first order, PP 10→9, the accuracy/spread/secondary
+  three-call RNG sequence, 19→28 noncrit damage, no-flinch result, KABUTO
+  display/stable HP timing, and the 33331/33332 ownership boundary.
+- **Next:** wire the reducer into core, then parameterize the proven Battle-1
+  ROCK SLIDE renderer for the live ONIX/KABUTO field through 33331.
+- **Notes:** animation mechanisms rebase through the accepted confirm edge,
+  never an absolute trace tick; no framebuffer lookup, harvest, fitting, or
+  trace thinning. S8 remains `[ ]`.
+
+---
 ## 315 — S8 Battle 2 turn 1 33030-prefix probe: **GREEN — evidence only**
 
 - **State:** oracle-only Battle 2 first-turn evidence is committed; no
@@ -62,29 +77,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** RNG is flat through 32893, then +1 at 32894, +2 at 32898, +5
   at 32900; endpoint is 3530724670 with execFlags=1. Commits `2f7b284`,
   `1d3d295`; no harvest, fitting, thinning, or absolute tick cases.
-
----
-## 312 — S8 Battle 2 player send-out: **GREEN — 32680-32849 exact**
-
-- **State:** `battle2-player-sendout-dense.json` is **170/170 exact**
-  across canonical 32680-32849. Predecessors remain KABUTO **151/151** and
-  intro **251/251**; Battle 1 send-out remains accepted at **255/256**
-  (frame 1496, 3px, #18 only). Tier-1 is **1110/1110** and build passes
-  (**5.517 MB**).
-- **Did:** separated the handoff-relative `Go! ONIX!` printer from Battle
-  2's inherited player-controller visual clock. Brendan, party summary,
-  thrown-ball arc/spin/open/hide, ONIX materialize/back animation, particles,
-  and the 117/117 healthbox all reuse the Battle-1 mechanisms at visual
-  delay +45; callback-age 14 advances only the summary eva coefficient.
-- **Audit:** independent live RAM/IO replay now proves that sole exception:
-  32741 has the shared task/sprite state but immediate `BLDALPHA=0x0808`;
-  mapped Battle-1 1588 has its `0x0808` write buffered behind live `0x0709`,
-  reconverging at the next callback. See `battle2-opening-notes.md`.
-- **Next:** resume at **32850**, the first six-tick blank action-menu frame,
-  then compose the Battle 2 ONIX/KABUTO action menu. Do not reopen the exact
-  send-out span. S8 remains `[ ]`.
-- **Notes:** visual mappings are 32727→1574 (throw starts), 32760→1607
-  (ball first visible), 32768→1615 (spin), 32805→1652 (open), and
-  32820→1667 (healthbox first visible); summary eva's sole phase boundary is
-  canonical 32741 / callback age 14. No harvest, absolute-tick lookup,
-  fitting, thinning, or work at 32850+.

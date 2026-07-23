@@ -1,3 +1,29 @@
+## 312 — S8 Battle 2 player send-out: **GREEN — 32680-32849 exact**
+
+- **State:** `battle2-player-sendout-dense.json` is **170/170 exact**
+  across canonical 32680-32849. Predecessors remain KABUTO **151/151** and
+  intro **251/251**; Battle 1 send-out remains accepted at **255/256**
+  (frame 1496, 3px, #18 only). Tier-1 is **1110/1110** and build passes
+  (**5.517 MB**).
+- **Did:** separated the handoff-relative `Go! ONIX!` printer from Battle
+  2's inherited player-controller visual clock. Brendan, party summary,
+  thrown-ball arc/spin/open/hide, ONIX materialize/back animation, particles,
+  and the 117/117 healthbox all reuse the Battle-1 mechanisms at visual
+  delay +45; callback-age 14 advances only the summary eva coefficient.
+- **Audit:** independent live RAM/IO replay now proves that sole exception:
+  32741 has the shared task/sprite state but immediate `BLDALPHA=0x0808`;
+  mapped Battle-1 1588 has its `0x0808` write buffered behind live `0x0709`,
+  reconverging at the next callback. See `battle2-opening-notes.md`.
+- **Next:** resume at **32850**, the first six-tick blank action-menu frame,
+  then compose the Battle 2 ONIX/KABUTO action menu. Do not reopen the exact
+  send-out span. S8 remains `[ ]`.
+- **Notes:** visual mappings are 32727→1574 (throw starts), 32760→1607
+  (ball first visible), 32768→1615 (spin), 32805→1652 (open), and
+  32820→1667 (healthbox first visible); summary eva's sole phase boundary is
+  canonical 32741 / callback age 14. No harvest, absolute-tick lookup,
+  fitting, thinning, or work at 32850+.
+
+---
 ## 311 — S8 Battle 2 player send-out: **PARTIAL — 32680-32726 exact**
 
 - **State:** new every-frame `battle2-player-sendout-dense.json` is
