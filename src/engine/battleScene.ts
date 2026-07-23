@@ -1789,10 +1789,30 @@ export function playerSendOutClock(t: number, handoffTick: number): number {
   return t + (1462 - handoffTick);
 }
 
-/** Battle 2's inherited trainer/summary callback becomes visible 45 ticks later. */
+/** Battle 2's inherited player-controller visual chain becomes visible 45 ticks later. */
+export const SUBSEQUENT_BATTLE_PLAYER_VISUAL_DELAY = 45;
+
 export function playerTrainerSendOutClock(t: number, handoffTick: number, encounter: BattleSceneState["encounter"]): number {
   const playerT = playerSendOutClock(t, handoffTick);
-  return encounter === "jenson" ? playerT - 45 : playerT;
+  return encounter === "jenson" ? playerT - SUBSEQUENT_BATTLE_PLAYER_VISUAL_DELAY : playerT;
+}
+
+/**
+ * The subsequent-battle player summary's alternating alpha task advances
+ * its eva step one callback early at age 14, while the bar/icon sprite
+ * translations keep their ordinary age. The next callback reconverges with
+ * the shared Battle-1 sequence, so this is a coefficient-only boundary.
+ */
+export const SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE = 14;
+
+export function playerSummaryEvaOffset(
+  playerVisualT: number,
+  encounter: BattleSceneState["encounter"],
+): number {
+  return encounter === "jenson"
+    && playerVisualT - BRENDAN_THROW_START_TICK === SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE
+    ? -1
+    : 0;
 }
 
 /** Visible character count (0..35) of the "sent\nout GROVYLE!" message at trace tick `t`, given the press tick. Same 1-tick/char mechanism as `textVisibleChars` (§3.2/§7.3). */
@@ -2312,9 +2332,12 @@ function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolea
   }
 }
 
-function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; player: boolean } = { opponent: true, player: true }): void {
+function drawBallIcons(fb: Uint8Array, t: number, sides: { opponent: boolean; player: boolean; playerEvaOffset?: number } = { opponent: true, player: true }): void {
   const bars = ballStatusBarPositions(t);
-  const playerEva = playerSummaryFadeEva(t);
+  const basePlayerEva = playerSummaryFadeEva(t);
+  const playerEva = basePlayerEva === null
+    ? null
+    : Math.max(0, Math.min(16, basePlayerEva + (sides.playerEvaOffset ?? 0)));
   const barExitDx = playerSummaryBarExitDx(t);
   // `Task_HidePartyStatusSummary_BattleStart_2`'s own `tBlend==-1` case
   // (battle_interface.c:1746) destroys the player bar+icon sprites outright
@@ -11143,7 +11166,14 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, enco
   // BG-to-white materialize dither `sendOutBgFadeY` models for the
   // opponent's own send-out - the two windows never overlap, so only one of
   // the two is ever nonzero at a given tick.
-  const bgFadeY = sendOutBgFadeY(t, handoffTick) || playerMaterializeBgFadeY(playerT);
+  //
+  // Battle 2 retains the already-created trainer controller's 45-tick
+  // callback delay for the whole visual throw chain (trainer, ball,
+  // materialize, particles, and healthbox).  Only the independently queued
+  // "Go! ONIX!" printer uses `playerT`.  This is observable before any
+  // overlap: canonical 32727..32759 maps byte-for-byte to Battle 1's visual
+  // ticks 1574..1606, with no ball yet present.
+  const bgFadeY = sendOutBgFadeY(t, handoffTick) || playerMaterializeBgFadeY(playerTrainerT);
   drawTileBgFaded(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette, bgFadeY);
   // battleMenu.ts: Brendan's throw pose-swap + exit translation start at
   // BRENDAN_THROW_START_TICK - before that he's still the settled slide-in
@@ -11179,15 +11209,11 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, enco
     if (t < GROVYLE_MATERIALIZE_TICK) drawGrovyleStretch(fb, t, handoffTick);
   }
   drawSendOutBall(fb, t, handoffTick);
-  const playerBallTopLeft = !isJenson || playerTrainerT >= BRENDAN_THROW_START_TICK
-    ? playerThrowBallTopLeft(playerT)
-    : null;
+  const playerBallTopLeft = playerThrowBallTopLeft(playerTrainerT);
   if (playerBallTopLeft !== null) {
     drawSpriteSheet(fb, BALL_CLOSED_TILESET, summaryBall.palette, playerBallTopLeft.x, playerBallTopLeft.y);
   }
-  const playerBallSpin = !isJenson || playerTrainerT >= BRENDAN_THROW_START_TICK
-    ? playerThrowBallSpin(playerT)
-    : null;
+  const playerBallSpin = playerThrowBallSpin(playerTrainerT);
   if (playerBallSpin !== null) {
     drawSpriteSheetAffineRotate(
       fb,
@@ -11202,23 +11228,27 @@ function drawSendOutHandoff(fb: Uint8Array, t: number, handoffTick: number, enco
     );
   }
   drawBallOpenParticles(fb, t, handoffTick, encounter);
-  drawPlayerMaterialize(fb, playerT);
-  drawPlayerMaterializeSettle(fb, playerT);
-  drawPlayerBallOpen(fb, playerT);
-  drawPlayerBallOpenParticles(fb, playerT);
+  drawPlayerMaterialize(fb, playerTrainerT);
+  drawPlayerMaterializeSettle(fb, playerTrainerT);
+  drawPlayerBallOpen(fb, playerTrainerT);
+  drawPlayerBallOpenParticles(fb, playerTrainerT);
   if (!isJenson && t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
   // §7.19: `drawOpponentSummaryExit` only draws from elapsed=t-handoffTick-1
   // >= 0 (render handoffTick+1 on) - at handoffTick itself (elapsed=-1) the
   // real game still shows the opponent's settled (un-faded, un-slid) bar+
   // icons for exactly one tick before the exit fade/slide takes over, so
   // fall back to the same settled render the pre-handoff branch uses.
-  drawBallIcons(fb, playerTrainerT, { opponent: t === handoffTick, player: true });
+  drawBallIcons(fb, playerTrainerT, {
+    opponent: t === handoffTick,
+    player: true,
+    playerEvaOffset: playerSummaryEvaOffset(playerTrainerT, encounter),
+  });
   drawOpponentSummaryExit(fb, t, handoffTick, encounter);
   const healthboxDx = isJenson
     ? healthboxSlideDx(t, handoffTick + 32, -110, true)
     : healthboxSlideDx(t, handoffTick + 33);
   if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx, isJenson ? kabutoHealthboxContent : opponentHealthboxContent);
-  const playerHealthboxDx = playerHealthboxSlideDx(playerT);
+  const playerHealthboxDx = playerHealthboxSlideDx(playerTrainerT);
   if (playerHealthboxDx !== null) drawMenuHealthboxPlayer(fb, playerHealthboxDx);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   // battleMenu.ts §1/§2: the box clears (no blank-box frame - a bare

@@ -10,10 +10,14 @@ import {
   KABUTO_SENDOUT_BATTLER,
   healthboxSlideDx,
   playerSendOutClock,
+  playerSummaryEvaOffset,
   playerTrainerSendOutClock,
   sendOutHandoffTick,
+  SUBSEQUENT_BATTLE_PLAYER_VISUAL_DELAY,
+  SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE,
 } from "../src/engine/battleScene.ts";
 import {
+  BRENDAN_THROW_START_TICK,
   PLAYER_BALL_OPEN_START_TICK,
   PLAYER_HEALTHBOX_SLIDE_START_TICK,
   PLAYER_HEALTHBOX_SLIDE_SETTLE_TICK,
@@ -85,7 +89,7 @@ describe("Battle 2 KABUTO send-out", () => {
     expect(kabutoHSlideWobble(KABUTO_FRONT_ANIM_START_OFFSET + 13).rotation).not.toBe(0);
   });
 
-  it("reanchors the proven player ball/materialize clock from Battle 2's handoff", () => {
+  it("reanchors Battle 2's independently queued player text clock from the opponent handoff", () => {
     const handoff = 1365;
     expect(playerSendOutClock(handoff, handoff)).toBe(1462);
     expect(playerSendOutClock(handoff + 153, handoff)).toBe(PLAYER_THROW_BALL_SPIN_START_TICK);
@@ -93,10 +97,22 @@ describe("Battle 2 KABUTO send-out", () => {
     expect(playerSendOutClock(handoff + 240, handoff)).toBe(PLAYER_MATERIALIZE_SETTLE_TICK);
   });
 
-  it("keeps Battle 2's inherited trainer callback separate from the ball clock", () => {
+  it("keeps Battle 2's whole inherited visual callback chain 45 ticks behind the text clock", () => {
     const handoff = 1365;
+    expect(SUBSEQUENT_BATTLE_PLAYER_VISUAL_DELAY).toBe(45);
     expect(playerTrainerSendOutClock(handoff + 157, handoff, "jenson")).toBe(1574);
+    expect(playerTrainerSendOutClock(handoff + 198, handoff, "jenson")).toBe(PLAYER_THROW_BALL_SPIN_START_TICK);
+    expect(playerTrainerSendOutClock(handoff + 235, handoff, "jenson")).toBe(PLAYER_BALL_OPEN_START_TICK);
+    expect(playerTrainerSendOutClock(handoff + 285, handoff, "jenson")).toBe(PLAYER_MATERIALIZE_SETTLE_TICK);
     expect(playerTrainerSendOutClock(1574, 1462, "destin")).toBe(1574);
+  });
+
+  it("advances only the subsequent-battle summary eva coefficient at callback age 14", () => {
+    const boundary = BRENDAN_THROW_START_TICK + SUBSEQUENT_BATTLE_SUMMARY_EVA_PHASE_AGE;
+    expect(playerSummaryEvaOffset(boundary - 1, "jenson")).toBe(0);
+    expect(playerSummaryEvaOffset(boundary, "jenson")).toBe(-1);
+    expect(playerSummaryEvaOffset(boundary + 1, "jenson")).toBe(0);
+    expect(playerSummaryEvaOffset(boundary, "destin")).toBe(0);
   });
 
   it("pins ONIX's full-health slide boundaries", () => {
