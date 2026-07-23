@@ -215,6 +215,11 @@ export interface FirePunchResolutionProfile {
   secondaryRollSucceeded?: boolean;
   currentMoveResetAge?: number;
   rngBeforeSecondary?: number;
+  /** Optional post-damage effectiveness printer, relative to this cast. */
+  effectivenessMessage?: {
+    readonly kind: "superEffective";
+    readonly textStartAge: number;
+  };
   faint?: FirePunchFaintProfile;
 }
 

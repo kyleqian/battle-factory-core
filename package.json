@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run --no-watch --pool=forks --testTimeout=20000",
     "compare": "node --experimental-strip-types tools/compare/run.ts",
-    "animation:coverage": "node --experimental-strip-types tools/animation/report.ts"
+    "animation:coverage": "node --experimental-strip-types tools/animation/report.ts",
+    "compare:fire-punch-portable": "node --experimental-strip-types tools/compare/firePunchPortable.ts"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

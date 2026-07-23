@@ -13686,6 +13686,7 @@ export function renderSceneOnMovePresentation(
     );
   }
 
+  const beforeEffects = fb.slice();
   drawFirePunchEmbers(fb, view.age, target.geometry.animationCenter);
   drawFirePunchBurnFlames(
     fb,
@@ -13694,20 +13695,20 @@ export function renderSceneOnMovePresentation(
     false,
     target.geometry.animationCenter,
   );
-  const beforeImpact = fb.slice();
+  const frontEffects = beforeEffects.slice();
   const impactCoverage = new Uint8Array(240 * 160);
   drawFirePunchImpact(
-    beforeImpact,
+    frontEffects,
     view.age,
     impactCoverage,
     target.geometry.animationCenter,
   );
   for (let i = 0; i < fb.length; i += 4) {
     if (!impactCoverage[i / 4]) continue;
-    fb[i] = beforeImpact[i]!;
-    fb[i + 1] = beforeImpact[i + 1]!;
-    fb[i + 2] = beforeImpact[i + 2]!;
-    fb[i + 3] = beforeImpact[i + 3]!;
+    fb[i] = frontEffects[i]!;
+    fb[i + 1] = frontEffects[i + 1]!;
+    fb[i + 2] = frontEffects[i + 2]!;
+    fb[i + 3] = frontEffects[i + 3]!;
   }
 
   drawOpponentHealthboxWobble(
@@ -13717,12 +13718,23 @@ export function renderSceneOnMovePresentation(
   );
   drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(
-    fb,
-    "ONIX used",
-    "FIRE PUNCH!",
-    Math.min("ONIX usedFIRE PUNCH!".length, view.age + 2),
-  );
+  const effectiveness = state.config.resolutionProfile.effectivenessMessage;
+  if (effectiveness && view.age >= effectiveness.textStartAge) {
+    const line = "It’s super effective!";
+    drawMessageTextLines(
+      fb,
+      line,
+      "",
+      Math.min(line.length, view.age - effectiveness.textStartAge + 1),
+    );
+  } else {
+    drawMessageTextLines(
+      fb,
+      "ONIX used",
+      "FIRE PUNCH!",
+      Math.min("ONIX usedFIRE PUNCH!".length, view.age + 2),
+    );
+  }
 }
 
 export interface SceneOffTurnView {

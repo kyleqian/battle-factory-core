@@ -122,7 +122,9 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY = {
     geometry: {
       side: "opponent",
       spriteCorner: { x: 144, y: 12 },
-      animationCenter: { x: 176, y: 51 },
+      // GetBattlerSpriteFinal_Y: singles opponent base 40 + Grovyle's
+      // source-extracted front y_offset 4 (elevation 0).
+      animationCenter: { x: 176, y: 44 },
     },
   },
 } as const satisfies Pick<SceneOnFirePunchConfig, "attacker" | "target">;
@@ -135,4 +137,8 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE: FirePunchResolutionProfile = {
   secondaryRollAge: 205,
   secondaryRollSucceeded: false,
   currentMoveResetAge: Number.POSITIVE_INFINITY,
+  effectivenessMessage: {
+    kind: "superEffective",
+    textStartAge: 204,
+  },
 };

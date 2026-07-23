@@ -31,7 +31,7 @@ describe("relative Battle Scene ON move presentation", () => {
       spriteCorner: { x: 40, y: 48 },
       animationCenter: { x: 72, y: 88 },
     });
-    expect(advanced.config.target.geometry.animationCenter).toEqual({ x: 176, y: 51 });
+    expect(advanced.config.target.geometry.animationCenter).toEqual({ x: 176, y: 44 });
   });
 
   it("translates the shared spiral and spread primitives with target geometry", () => {
@@ -42,7 +42,7 @@ describe("relative Battle Scene ON move presentation", () => {
         ...base.config.target,
         geometry: {
           ...base.config.target.geometry,
-          animationCenter: { x: 154, y: 73 },
+          animationCenter: { x: 154, y: 66 },
         },
       },
     });
@@ -88,6 +88,7 @@ describe("relative Battle Scene ON move presentation", () => {
     expect(afterSecondary.resolution.secondaryRollSucceeded).toBe(false);
     expect(afterSecondary.resolution.status).toBe("none");
     expect(afterSecondary.burnFlames).toEqual([]);
+    expect(afterSecondary.target.species).toBe("GROVYLE");
   });
 
   it("rejects invalid side, geometry, and HP-profile inputs", () => {
@@ -105,7 +106,7 @@ describe("relative Battle Scene ON move presentation", () => {
         ...valid.target,
         geometry: {
           ...valid.target.geometry,
-          animationCenter: { x: 176.5, y: 51 },
+          animationCenter: { x: 176.5, y: 44 },
         },
       },
     })).toThrow(/integer screen coordinates/);
