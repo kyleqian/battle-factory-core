@@ -21,7 +21,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   faint/WIN flow, and later ticks remain untouched; #38 stays parked.
 - **Notes:** implementation commit `4dcdcaf`; no absolute battle tick,
   framebuffer/screenshot asset, per-frame table, trace branch,
-  coordinate/RGB fitting, or excluded capture.
+  coordinate/RGB fitting, or excluded capture. Supervisor independently
+  reverified the dense window, predecessor rung, turn-17 verifier, full
+  Tier-1 suite, and production build; ROADMAP status accepted.
 
 ---
 ## 291 — Bounded worker (S7 turn 17 rung 1): **GREEN — dispatch prefix exact**

@@ -413,12 +413,14 @@ FIRE_PUNCH `14/15`, confirmation, MURKROW-first/currentMove dispatch, and
 the no-crit/RAM-pinned `52` damage roll. Source/RAM confirms **21854** is
 the first FAINT_ATTACK animation-owned render and therefore the next
 boundary. This does not propose ticking S7 complete.
-**Turn-17 rung 2 worker status proposal (2026-07-23):**
+**Turn-17 rung 2 accepted by the supervisor (2026-07-23):**
 `turn17-rung2.json` is **221/221 exact** for every canonical tick
 `21854-22074`, reusing the source-derived FAINT_ATTACK body with the live
 MAGBY `79/138` and MURKROW `58/142 BRN` composition. Tick **22074** is the
 final animation-owned displayed VBlank; post-hit resolution from 22075 is
-still open. This does not propose ticking S7 complete.
+still open. The dense window, predecessor rung, turn-17 verifier, Tier-1
+suite, and production build were independently reverified. This does not
+propose ticking S7 complete.
 **Acceptance:** committed traces playing scripted turns of battle 1 pass
 compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin
