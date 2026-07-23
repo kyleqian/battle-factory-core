@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 286 — Bounded worker (S7 turn 16 rung 2a): **CANONICAL GREEN; +30 BLOCKED AT ONE REGISTER-RACE FRAME**
+
+- **State:** canonical `20826--21046` is **221/221 exact**. The requested
+  delayed twin is **220/221**: only delayed tick **21006** differs. Rung 1
+  remains **81/81** each, frozen send-out rung 6 **195/195** each,
+  turn-16 verifier **233/233**, Tier-1 **1024/1024**, and build
+  (**5.430 MB**) pass.
+- **Did:** implemented source-extracted `BG_DARK`, BG3 darken/restore,
+  Murkrow's source sine ellipse and alpha handoffs, Magby shake, and the
+  generic hitsplat; added pure boundary reducers/tests and a dense,
+  prefix-verbatim canonical trace. A fresh two-oracle SHA comparison and
+  direct RAM/register probes falsified relative identity at age 150:
+  animation task state is identical, but canonical hardware `BLDALPHA` is
+  `0x0e02` while delayed is `0x0d03`.
+- **Next:** first unresolved boundary is delayed **21006 only**. Resolve the
+  sub-tick hardware-register visibility race without an absolute tick,
+  delay/trace branch, or baked frame; otherwise explicitly park/waive this
+  one-frame emulator-cycle exception. Do not reopen canonical rung 2a or
+  enter canonical 21047+/delayed 21077+.
+- **Notes:** implementation/evidence commit `d74ab10`; the delay sweep
+  `+0..+8,+15,+16,+30,+31,+32` reproduced the early register exposure only
+  at +30. No framebuffer assets, per-frame tables, RGB/coordinate fitting,
+  absolute-tick lookup, trace branch, or red delayed trace was committed.
+
+---
 ## 285 — Bounded worker (S7 turn 16 rung 1): **GREEN — cross-layer handoff**
 
 - **State:** canonical `20745--20825` and delayed `20775--20855` are both
@@ -36,19 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** implementation commit `61b4a5e`; unmodified A/B was **0/195**
   each. No screenshots, absolute ticks, per-frame tables, coordinate/RGB
   fitting, trace branches, or excluded captures.
-
----
-## 283 — Bounded worker (ISSUES #37 rung 5): **GREEN — MAGBY healthbox/send-out**
-
-- **State:** canonical `20407--20550` and delayed `20437--20580` are both
-  **144/144 exact**. Rung 4a remains **16/16** each, verifier **17/17**,
-  Tier-1 **1017/1017**, and build (**5.413 MB**) pass.
-- **Did:** added a data-driven player-healthbox compositor (MAGBY, Lv50,
-  female, 138/138), confirmation-relative create/populate/110→0 slide, and
-  source `BACK_ANIM_SHAKE_GLOW_RED` reducer. Preserved the release particle
-  stall/order and added task-data probing plus dense canonical/delayed traces.
-- **Next:** #37 rung 6 starts at blank-box ownership: canonical **20551**,
-  delayed **20581**. Build the blank hold and re-anchored action-menu bounce;
-  do not reopen exact rungs 1--5.
-- **Notes:** unmodified A/B was **0/144** each; no screenshots, per-frame RGB,
-  absolute battle-tick tables, coordinate patches, or trace branches.

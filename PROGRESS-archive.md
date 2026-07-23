@@ -1,3 +1,19 @@
+## 283 — Bounded worker (ISSUES #37 rung 5): **GREEN — MAGBY healthbox/send-out**
+
+- **State:** canonical `20407--20550` and delayed `20437--20580` are both
+  **144/144 exact**. Rung 4a remains **16/16** each, verifier **17/17**,
+  Tier-1 **1017/1017**, and build (**5.413 MB**) pass.
+- **Did:** added a data-driven player-healthbox compositor (MAGBY, Lv50,
+  female, 138/138), confirmation-relative create/populate/110→0 slide, and
+  source `BACK_ANIM_SHAKE_GLOW_RED` reducer. Preserved the release particle
+  stall/order and added task-data probing plus dense canonical/delayed traces.
+- **Next:** #37 rung 6 starts at blank-box ownership: canonical **20551**,
+  delayed **20581**. Build the blank hold and re-anchored action-menu bounce;
+  do not reopen exact rungs 1--5.
+- **Notes:** unmodified A/B was **0/144** each; no screenshots, per-frame RGB,
+  absolute battle-tick tables, coordinate patches, or trace branches.
+
+---
 ## 282 — Bounded worker (ISSUES #37 rung 4a): **GREEN — MAGBY release**
 
 - **State:** canonical `20391--20406` and delayed `20421--20436` are both
