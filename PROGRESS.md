@@ -26,8 +26,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `+0..+8,+15,+16,+30,+31,+32` reproduced the early register exposure only
   at +30. No framebuffer assets, per-frame tables, RGB/coordinate fitting,
   absolute-tick lookup, trace branch, or red delayed trace was committed.
-  Supervisor independently reverified every number above; the worker then
-  hit an account usage limit, so the session wound down without relaunching.
+  Supervisor independently reverified every number above. The launcher's
+  first post-run verdict was a false usage-limit positive: its broad regex
+  matched `--no-rate-limit` inside a late `ps` listing; no provider limit
+  occurred, and the detector is now hardened.
 
 ---
 ## 285 — Bounded worker (S7 turn 16 rung 1): **GREEN — cross-layer handoff**

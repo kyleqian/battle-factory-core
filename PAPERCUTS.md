@@ -12,6 +12,17 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Usage-limit detector matched `--no-rate-limit` (2026-07-22)
+
+- **What:** the Codex post-run detector searched recent logs with a broad
+  `rate.?limit` regex. A worker's late `ps` listing contained several
+  crashpad processes with `--no-rate-limit`, causing a false exit-42-style
+  verdict after the worker had completed normally.
+- **Hits:** 1.
+- **Cost each:** ~3 min plus a premature supervisor wind-down.
+- **Fixed 2026-07-22:** strip `--no-rate-limit` and ignore allowed
+  `rate_limit_event` records before applying the real limit-error regex.
+
 ## compare CLI rejects trace-name shorthand (2026-07-22)
 
 - **What:** `npm run compare` requires the repository-relative trace path;

@@ -446,6 +446,8 @@ if [[ -f "$AGENT_LOG" ]]; then
       USAGE_STOPPED=1
     fi
   elif tail -n 10 "$AGENT_LOG" "$CODEX_STDERR_LOG" 2>/dev/null \
+      | grep -v '"type":"rate_limit_event".*"status":"allowed"' \
+      | sed -E 's/--no-rate-limit//g' \
       | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
     USAGE_STOPPED=1
   fi
