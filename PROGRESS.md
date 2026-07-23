@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 273 — Bounded worker (ISSUES #37 rung 1): **GREEN EVIDENCE CHECKPOINT — live OBJ transfer not yet safely wired**
+
+- **State:** restored accepted baseline: canonical/delayed party traces **193/200**; only
+  5px at 20248/50/58/60/62 and 273px at 20253/54 (delayed +30). The exact
+  20302/20332 raw field boundary remains untouched.
+- **Did:** fresh direct PPU probe confirms exit OAM stays static: status OBJ entries 1/2
+  (bank 0, tile 0) and party-ball entries 6--9 (bank 1, tiles 2--33). A raw
+  layer wiring experiment was reverted after it regressed 16 frames (451--642px):
+  OAM order proves balls sit behind the icon OAM while status sits in front,
+  so a single post-icon OBJ pass is structurally wrong.
+- **Next:** split raw exit OBJ composition at actual OAM priority/order (balls before
+  MAGBY/BAYLEEF icons; status after), then use indexed tile/palette state only. Preserve
+  the existing press-relative fade and do not change 20302.
+- **Notes:** Tier-1 **1008/1008**, build green, SEND OUT verifier **17/17** and
+  party compositor **5/5**; direct mGBA probe still writes valid JSON.
+
+---
 ## 272 — Supervisor accepted (ISSUES #37 rung 1): **CLOSED FIELD BOUNDARY — GREEN**
 
 - **State:** independently accepted: canonical and delayed party traces are **193/200**; 20302 and
