@@ -1,7 +1,8 @@
 # FIRE PUNCH portable staging probe (Battle Scene ON)
 
-This is a bounded oracle-construction checkpoint, not a runtime feature and
-not a claim of exact portable rendering.
+This is a synthetic presentation-seam construction, not a Factory-legality
+claim. It now has an exact app/oracle dense window through the relative
+Battle Scene ON adapter.
 
 ## Construction
 
@@ -53,13 +54,19 @@ The canonical ON regressions remain the app parity evidence:
   (21397–21405 each had a 183px residual; this probe made no runtime changes).
 - `turn17-rung4.json` was **200/200**.
 
-## Exact next boundary
+## Relative app comparison
 
-There is no Battle Scene ON staged presentation adapter: `appTrace.ts` only
-stages the Scene-OFF `stageBattleTurn` seam. Consequently this new oracle
-case has no valid app compare yet and remains **partial**. The next animation
-implementation increment is to introduce a source-derived, relative
-Battle-Scene-ON move-presentation stage that takes an explicit attacker/target
-geometry and FIRE_PUNCH resolution profile, then run this ONIX→GROVYLE probe
-through it with a complete dense window. Do not attach that mechanism to
-absolute battle ticks or this RAM patch.
+`src/engine/sceneOnPresentation.ts` accepts explicit attacker/target side,
+sprite-corner and source-derived animation-center geometry plus an immutable
+FIRE_PUNCH resolution profile. The probe's reducer epoch is frame 2313:
+spiral age 41 is frame 2354, the 31-HP commit is age 200/frame 2513, and the
+no-burn secondary path enters the super-effective printer at age 204.
+
+`npm run compare:fire-punch-portable` regenerates the mGBA evidence in a fresh
+temporary directory and compares live app RGB for every frame 2313–2537. It is
+**225/225 exact**, 0 aggregate differing pixels, through the completed
+super-effective line. Raw oracle RGB is temp-only; no screenshots or oracle
+pixels are committed or available to production.
+
+FIRE_PUNCH remains **partial**, not `exact`: the opposite-attacker-side
+geometry is still an evidence-required variant and has not yet been staged.
