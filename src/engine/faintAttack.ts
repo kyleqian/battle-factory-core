@@ -48,6 +48,52 @@ const HIT_HEALTHBOX_WOBBLE_TICKS = 20;
 const HIT_TARGET_BLINK_PERIOD = 8;
 const HIT_TARGET_BLINK_CYCLES = 4;
 
+export type FaintAttackAttackerSide = "player" | "opponent";
+
+/**
+ * Immutable, move-relative inputs for `Move_FAINT_ATTACK`'s visual script.
+ * These values come from the source commands and displayed task boundaries;
+ * none is a canonical battle tick or an outcome/controller decision.
+ */
+export interface FaintAttackAnimationProfile {
+  readonly bgFadeOutFirstVisibleAge: number;
+  readonly bgSwapAge: number;
+  readonly bgSettledAge: number;
+  readonly lungeFirstVisibleAge: number;
+  readonly lungeLastVisibleAge: number;
+  readonly hitsplatFirstVisibleAge: number;
+  readonly hitsplatTicks: number;
+  readonly shakeLastVisibleAge: number;
+  readonly fadeInFirstVisibleAge: number;
+  readonly attackerFullyVisibleAge: number;
+  readonly restoreFadeFirstVisibleAge: number;
+  readonly defaultBgSwapAge: number;
+  readonly doneAge: number;
+  readonly ellipseWidth: number;
+  readonly ellipseHeight: number;
+  readonly ellipseAngleStep: number;
+}
+
+export const FAINT_ATTACK_ANIMATION_PROFILE: Readonly<FaintAttackAnimationProfile> =
+  Object.freeze({
+    bgFadeOutFirstVisibleAge: FAINT_ATTACK_BG_FADE_OUT_FIRST_VISIBLE_AGE,
+    bgSwapAge: FAINT_ATTACK_BG_SWAP_AGE,
+    bgSettledAge: FAINT_ATTACK_BG_SETTLED_AGE,
+    lungeFirstVisibleAge: FAINT_ATTACK_LUNGE_FIRST_VISIBLE_AGE,
+    lungeLastVisibleAge: FAINT_ATTACK_LUNGE_LAST_VISIBLE_AGE,
+    hitsplatFirstVisibleAge: FAINT_ATTACK_HITSPLAT_FIRST_VISIBLE_AGE,
+    hitsplatTicks: FAINT_ATTACK_HITSPLAT_TICKS,
+    shakeLastVisibleAge: FAINT_ATTACK_SHAKE_LAST_VISIBLE_AGE,
+    fadeInFirstVisibleAge: FAINT_ATTACK_FADE_IN_FIRST_VISIBLE_AGE,
+    attackerFullyVisibleAge: FAINT_ATTACK_ATTACKER_FULLY_VISIBLE_AGE,
+    restoreFadeFirstVisibleAge: FAINT_ATTACK_RESTORE_FADE_FIRST_VISIBLE_AGE,
+    defaultBgSwapAge: FAINT_ATTACK_DEFAULT_BG_SWAP_AGE,
+    doneAge: FAINT_ATTACK_DONE_AGE,
+    ellipseWidth: 18,
+    ellipseHeight: 6,
+    ellipseAngleStep: 8,
+  });
+
 export interface FaintAttackResolutionState {
   /** The healthbox display controller drains independently of battle HP RAM. */
   displayedHp: number;
@@ -122,26 +168,41 @@ export interface FaintAttackBgState {
   bldy: number;
 }
 
-export function faintAttackOwnsAnimationRender(age: number): boolean {
-  return age >= 0 && age <= FAINT_ATTACK_LAST_ANIMATION_OWNED_AGE;
+export function faintAttackOwnsAnimationRender(
+  age: number,
+  profile: Readonly<FaintAttackAnimationProfile> = FAINT_ATTACK_ANIMATION_PROFILE,
+): boolean {
+  return age >= 0 && age <= profile.doneAge + 1;
 }
 
 /** Hardware `Task_FadeToBg`: BG3-only darken, source bg swap at full black. */
-export function faintAttackBgState(age: number): FaintAttackBgState {
-  if (age < FAINT_ATTACK_BG_FADE_OUT_FIRST_VISIBLE_AGE) return { background: "default", bldy: 0 };
-  if (age < FAINT_ATTACK_BG_SWAP_AGE) {
-    return { background: "default", bldy: Math.min(16, age - FAINT_ATTACK_BG_FADE_OUT_FIRST_VISIBLE_AGE + 1) };
+export function faintAttackBgState(
+  age: number,
+  profile: Readonly<FaintAttackAnimationProfile> = FAINT_ATTACK_ANIMATION_PROFILE,
+): FaintAttackBgState {
+  if (age < profile.bgFadeOutFirstVisibleAge) return { background: "default", bldy: 0 };
+  if (age < profile.bgSwapAge) {
+    return {
+      background: "default",
+      bldy: Math.min(16, age - profile.bgFadeOutFirstVisibleAge + 1),
+    };
   }
-  if (age < FAINT_ATTACK_BG_SETTLED_AGE) {
-    return { background: "dark", bldy: Math.max(0, 15 - (age - FAINT_ATTACK_BG_SWAP_AGE)) };
+  if (age < profile.bgSettledAge) {
+    return {
+      background: "dark",
+      bldy: Math.max(0, 15 - (age - profile.bgSwapAge)),
+    };
   }
-  if (age < FAINT_ATTACK_RESTORE_FADE_FIRST_VISIBLE_AGE) return { background: "dark", bldy: 0 };
-  if (age < FAINT_ATTACK_DEFAULT_BG_SWAP_AGE) {
-    return { background: "dark", bldy: Math.min(16, age - FAINT_ATTACK_RESTORE_FADE_FIRST_VISIBLE_AGE + 1) };
+  if (age < profile.restoreFadeFirstVisibleAge) return { background: "dark", bldy: 0 };
+  if (age < profile.defaultBgSwapAge) {
+    return {
+      background: "dark",
+      bldy: Math.min(16, age - profile.restoreFadeFirstVisibleAge + 1),
+    };
   }
   return {
     background: "default",
-    bldy: Math.max(0, 15 - (age - FAINT_ATTACK_DEFAULT_BG_SWAP_AGE)),
+    bldy: Math.max(0, 15 - (age - profile.defaultBgSwapAge)),
   };
 }
 
@@ -151,39 +212,64 @@ function sin(index: number, amplitude: number): number {
 }
 
 /** `AnimTask_TranslateMonEllipticalRespectSide(ANIM_ATTACKER,18,6,1,3)`. */
-export function faintAttackAttackerOffset(age: number): { x2: number; y2: number } {
-  if (age < FAINT_ATTACK_LUNGE_FIRST_VISIBLE_AGE || age > FAINT_ATTACK_LUNGE_LAST_VISIBLE_AGE) {
+export function faintAttackAttackerOffset(
+  age: number,
+  attackerSide: FaintAttackAttackerSide = "opponent",
+  profile: Readonly<FaintAttackAnimationProfile> = FAINT_ATTACK_ANIMATION_PROFILE,
+): { x2: number; y2: number } {
+  if (age < profile.lungeFirstVisibleAge || age > profile.lungeLastVisibleAge) {
     return { x2: 0, y2: 0 };
   }
-  if (age === FAINT_ATTACK_LUNGE_LAST_VISIBLE_AGE) return { x2: 0, y2: 0 };
+  if (age === profile.lungeLastVisibleAge) return { x2: 0, y2: 0 };
   // The displayed first task step has angle 8: creation's immediate angle-0
   // write remains behind the VBlank transfer.
-  const angle = 8 * (age - FAINT_ATTACK_LUNGE_FIRST_VISIBLE_AGE + 1);
-  return { x2: sin(angle, -18), y2: -sin(angle + 64, 6) + 6 };
+  const angle =
+    profile.ellipseAngleStep * (age - profile.lungeFirstVisibleAge + 1);
+  const width =
+    attackerSide === "player" ? profile.ellipseWidth : -profile.ellipseWidth;
+  return {
+    x2: sin(angle, width),
+    y2: -sin(angle + 64, profile.ellipseHeight) + profile.ellipseHeight,
+  };
 }
 
 /** Attacker BG-copy alpha (`BLDALPHA`), including invisible hold. */
-export function faintAttackAttackerEva(age: number): number {
-  if (age < FAINT_ATTACK_LUNGE_FIRST_VISIBLE_AGE) return 16;
-  if (age <= FAINT_ATTACK_LUNGE_LAST_VISIBLE_AGE + 1) {
-    return Math.max(0, 16 - Math.ceil((age - FAINT_ATTACK_LUNGE_FIRST_VISIBLE_AGE) / 2));
+export function faintAttackAttackerEva(
+  age: number,
+  profile: Readonly<FaintAttackAnimationProfile> = FAINT_ATTACK_ANIMATION_PROFILE,
+): number {
+  if (age < profile.lungeFirstVisibleAge) return 16;
+  if (age <= profile.lungeLastVisibleAge + 1) {
+    return Math.max(
+      0,
+      16 - Math.ceil((age - profile.lungeFirstVisibleAge) / 2),
+    );
   }
-  if (age < FAINT_ATTACK_FADE_IN_FIRST_VISIBLE_AGE) return 0;
-  if (age < FAINT_ATTACK_ATTACKER_FULLY_VISIBLE_AGE) {
-    return Math.min(15, 1 + Math.floor((age - FAINT_ATTACK_FADE_IN_FIRST_VISIBLE_AGE) / 2));
+  if (age < profile.fadeInFirstVisibleAge) return 0;
+  if (age < profile.attackerFullyVisibleAge) {
+    return Math.min(
+      15,
+      1 + Math.floor((age - profile.fadeInFirstVisibleAge) / 2),
+    );
   }
   return 16;
 }
 
 /** `AnimTask_ShakeMon2(ANIM_TARGET,2,0,9,1)`, displayed RAM+1. */
-export function faintAttackTargetShakeX2(age: number): number {
-  if (age < FAINT_ATTACK_HITSPLAT_FIRST_VISIBLE_AGE || age > FAINT_ATTACK_SHAKE_LAST_VISIBLE_AGE) return 0;
-  return Math.floor((age - FAINT_ATTACK_HITSPLAT_FIRST_VISIBLE_AGE) / 2) % 2 === 0 ? -2 : 2;
+export function faintAttackTargetShakeX2(
+  age: number,
+  profile: Readonly<FaintAttackAnimationProfile> = FAINT_ATTACK_ANIMATION_PROFILE,
+): number {
+  if (age < profile.hitsplatFirstVisibleAge || age > profile.shakeLastVisibleAge) return 0;
+  return Math.floor((age - profile.hitsplatFirstVisibleAge) / 2) % 2 === 0 ? -2 : 2;
 }
 
-export function faintAttackHitsplatVisible(age: number): boolean {
-  return age >= FAINT_ATTACK_HITSPLAT_FIRST_VISIBLE_AGE
-    && age < FAINT_ATTACK_HITSPLAT_FIRST_VISIBLE_AGE + FAINT_ATTACK_HITSPLAT_TICKS;
+export function faintAttackHitsplatVisible(
+  age: number,
+  profile: Readonly<FaintAttackAnimationProfile> = FAINT_ATTACK_ANIMATION_PROFILE,
+): boolean {
+  return age >= profile.hitsplatFirstVisibleAge
+    && age < profile.hitsplatFirstVisibleAge + profile.hitsplatTicks;
 }
 
 /**
