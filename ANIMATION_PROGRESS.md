@@ -44,19 +44,19 @@ remainder.
 
 ## Current handoff
 
-- **State:** **12 exact / 2 partial / 262 unsupported**. BIND remains partial;
-  its legal Scene-ON actual-hit evidence is now staged without conflating it
-  with the old player-back ONIX miss.
-- **Did:** committed zero-PP-Up ONIX→MURKROW Mechanics Lab BIND plus a relative
-  fixture. Wrapper-validated dense RAM evidence identifies the source-owned
-  body at frames **382–426** (first sway pixel at 385), generic hit handoff at
-  429, HP 142→137 at 471, trapped state `0xc000` at 476, and independent
-  residual trap activity only after `MOVE_NONE` from 590/610.
-- **Evidence:** `Move_BIND` is source sway + two target scale calls; the tendril
-  sprites are `General_TurnTrap`/`Status_BindWrap`, so neither generic tails nor
-  residual wrapping belongs in BIND move-body acceptance. The scenario and
-  fixture are portable, relative, and unthinned; no engine code was added.
-- **Next:** implement and densely compare this 45-frame source body through the
-  shared seam, then determine whether source-side geometry needs the opposite
-  orientation. Keep hit/HP/result/controller and residual lifecycle in their
-  independent tracks.
+- **State:** **12 exact / 2 partial / 262 unsupported**. BIND remains honestly
+  partial: its complete player-back ONIX→opponent-front MURKROW move-owned body
+  is exact, but source proves the opposite orientation is required.
+- **Did:** implemented reusable, parameterized `AnimTask_SwayMon` and
+  `AnimTask_ScaleMonAndRestore` reducers. The legal zero-PP-Up frames
+  **382–426** / relative ages **0–44** match dense task state **45/45** and live
+  framebuffer **45/45** through the shared Scene-ON seam, including the two
+  squeeze calls at ages 3 and 21 and the two-frame task→OAM display lag.
+- **Evidence:** `tools/compare/bindPortable.ts` reruns the v5 Mechanics Lab
+  probe and compares unthinned RAM matrices/x2 plus RGB. Tier-1 pins source
+  parameters, the whole sway timeline, scale/restore timeline, side sign, and
+  input immutability. Generic hit from 429, damage/trap commit, and residual
+  tendrils remain excluded as independently owned presentation.
+- **Next:** stage opponent-front attacker→player-back target and densely prove
+  the source's opponent-attacker amplitude negation plus back-sprite affine
+  geometry. Only then promote BIND to exact.
