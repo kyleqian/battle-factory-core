@@ -88,6 +88,11 @@ import {
   type DragonBreathFireSprite,
   type DragonBreathTargetEffect,
 } from "./dragonBreath.ts";
+import {
+  bindAnimationAtAge,
+  type BindAnimationProfile,
+  type BindAnimationState,
+} from "./bind.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -184,6 +189,14 @@ export interface SceneOnDragonBreathConfig {
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   /** Relative script clock; damage, status, RNG, PP, and controller stay external. */
   readonly animationAgeOffset?: number;
+}
+
+export interface SceneOnBindConfig {
+  readonly move: "BIND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<BindAnimationProfile>;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
 }
 
 export interface SceneOnFeatherDanceConfig {
@@ -418,7 +431,8 @@ export type SceneOnMoveConfig =
   | SceneOnSandAttackConfig
   | SceneOnBounceConfig
   | SceneOnFlyConfig
-  | SceneOnDragonBreathConfig;
+  | SceneOnDragonBreathConfig
+  | SceneOnBindConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -609,6 +623,12 @@ export interface SceneOnDragonBreathView {
   readonly targetEffect: DragonBreathTargetEffect;
 }
 
+export interface SceneOnBindView extends BindAnimationState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
 export const FEATHER_DANCE_STAT_MESSAGE_LINE2 = "harshly fell!";
 export const FEATHER_DANCE_STAT_MESSAGE_LENGTH =
@@ -761,6 +781,24 @@ export function sceneOnDragonBreathView(
       state.config.animationProfile,
     ),
     targetEffect: dragonBreathTargetEffectAtAge(animationAge),
+  };
+}
+
+export function sceneOnBindView(
+  state: SceneOnMovePresentationState,
+): SceneOnBindView {
+  if (state.config.move !== "BIND") {
+    throw new Error(`expected BIND presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...bindAnimationAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.animationProfile,
+    ),
   };
 }
 

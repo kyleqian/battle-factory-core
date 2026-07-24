@@ -8,22 +8,45 @@
   "orientation": "player-to-opponent",
   "appStage": {"oracleFrame": 382, "presentationAge": 0},
   "denseWindow": {"startFrame": 382, "endFrame": 426},
+  "attacker": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 48},
+      "animationCenter": {"x": 72, "y": 88},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "target": {
+    "species": "MURKROW",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 19},
+      "animationCenter": {"x": 176, "y": 51},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
   "fieldProfile": {
     "playerHp": 117,
-    "opponentHpBefore": 142,
+    "opponentHp": 142,
     "opponentHpAfter": 137,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male",
     "playerPpBefore": 20,
     "playerPpAfter": 19,
     "ppUps": [0, 0, 0, 0]
   },
   "animationProfile": {
-    "moveBody": "AnimTask_SwayMon(attacker, 0, 6, 3328, 4), then two target ScaleMonAndRestore(10, -5, 5) calls",
+    "sway": {"direction": 0, "amplitude": 6, "period": 3328, "sways": 4},
+    "squeeze": {"xDelta": 10, "yDelta": -5, "duration": 5},
+    "squeezeStarts": [3, 21],
     "firstVisibleSwayFrame": 385,
     "moveOwnedEndFrame": 426,
     "genericHitHandoffFrame": 429
   },
   "acceptance": {
-    "status": "staged",
-    "result": "45-frame unthinned ROM capture interval is portable evidence only; no app BIND component is implemented yet."
+    "status": "partial",
+    "result": "45/45 dense source task states and 45/45 live framebuffers match through the shared Scene-ON seam; source-side amplitude inversion requires an opposite-side variant before exact promotion."
   }
 }

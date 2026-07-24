@@ -573,6 +573,7 @@ import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import {
   sceneOnDoubleTeamView,
+  sceneOnBindView,
   sceneOnDragonBreathView,
   sceneOnAerialAceView,
   sceneOnEndeavorView,
@@ -14087,6 +14088,70 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "BIND") {
+    // RunTasks mutates battler x2/affine state after this frame's OAM buffer
+    // has already been built; the live framebuffer therefore trails the
+    // task/component state by two captured advances.
+    const view = sceneOnBindView({ ...state, age: state.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "opponent";
+    if (!playerToOpponent) {
+      throw new Error(
+        `unsupported staged BIND pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      murkrowFrontSprite.tileset,
+      murkrowFrontSprite.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+      view.targetAffine.xScale,
+      view.targetAffine.yScale,
+      0,
+      { r: 0, g: 0, b: 0 },
+      0,
+      view.targetAffine.active,
+    );
+    drawSpriteSheet(
+      fb,
+      onixBackSprite.tileset,
+      onixBackSprite.palette,
+      view.attacker.geometry.spriteCorner.x + view.attackerX2,
+      view.attacker.geometry.spriteCorner.y + view.attackerY2,
+    );
+    drawSendOutHealthbox(
+      fb,
+      0,
+      murkrowHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      onixPlayerHealthboxContentForState(
+        state.config.fieldProfile.playerHp,
+        state.config.fieldProfile.playerStatus,
+        state.config.fieldProfile.playerGender ?? "female",
+      ),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(fb, "ONIX used", "BIND!", 99);
+    return;
+  }
+
   if (state.config.move === "DRAGON_BREATH") {
     // The portable reducer intentionally exposes the callback/OAM state read
     // after each emulated advance. The framebuffer captured by that same

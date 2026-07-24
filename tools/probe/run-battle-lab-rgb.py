@@ -124,6 +124,10 @@ def main() -> None:
     def battler_sprite_record(battler: int) -> dict:
         slot = oracle.read_u8(battler_sprite_ids + battler)
         base = sprites + slot * 0x44
+        attr0 = u16(base)
+        attr1 = u16(base + 2)
+        matrix_num = (attr1 >> 9) & 0x1F
+        matrix_base = oam_matrices + matrix_num * 8
         palette_num = (oracle.read_u8(base + 5) >> 4) & 0xF
         return {
             "slot": slot,
@@ -138,6 +142,14 @@ def main() -> None:
             "y": s16(base + 0x22),
             "x2": s16(base + 0x24),
             "y2": s16(base + 0x26),
+            "affineMode": (attr0 >> 8) & 0x3,
+            "matrixNum": matrix_num,
+            "matrix": {
+                "a": s16(matrix_base),
+                "b": s16(matrix_base + 2),
+                "c": s16(matrix_base + 4),
+                "d": s16(matrix_base + 6),
+            },
             "paletteUnfaded": [
                 u16(pltt_unfaded + (0x100 + palette_num * 16 + index) * 2)
                 for index in range(16)
