@@ -38,18 +38,21 @@ remainder.
 
 ## Current handoff
 
-- **State:** **6 exact / 7 partial / 263 unsupported**. FEATHER DANCE is exact
-  in both source-required target-side orientations.
-- **Did:** staged legal Level-50 player-back PIDGEOTTO→opponent-front ONIX
-  through mechanicLab and generalized the relative Scene-ON feather,
-  battler, healthbox, banner, and printer seam. Source plus dense RAM pins
-  the +104/−40 target anchor, −1 opponent-target priority, target depth
-  cutoff, front/back offsets, and four-frame player-kickoff head start;
-  Tier-1 pins both geometries and immutable 6→4 controller outcomes.
-- **Evidence:** `feather-dance-player-pidgeotto-onix.json` is **400/400
-  exact** at oracle frames 46-445 / ages 7-406, alongside the original
-  `feather-dance-pidgeotto-onix.json` **400/400**. ICE PUNCH remains
-  **1294/1294 + 462/462** and FIRE PUNCH **225/225**.
-- **Next:** supervisor choose the next Level-50 partial/unsupported move.
-  MIST BALL only shares the loaded white-feather asset; its distinct
-  projectile remains independently unsupported.
+- **State:** **6 exact / 7 partial / 263 unsupported**. QUICK ATTACK now has
+  a portable complete move-body/controller-command prefix in its established
+  opponent-front orientation; it remains partial.
+- **Did:** staged legal Level-50 opponent-front PIDGEOTTO→player-back ONIX
+  through mechanicLab using `ppUps:[0,0,0,0]`, then generalized
+  source-relative elliptical travel, four blended afterimages, impact, and
+  shake behind the Scene-ON seam. Tier-1 pins relative clocks, explicit
+  geometry, side-respecting travel, and immutable 117→110 controller inputs.
+- **Evidence:** `quick-attack-pidgeotto-onix.json` is **71/71 exact** at
+  oracle frames 46-116 / ages 7-77, covering the kickoff printer through
+  body teardown and opponent animation-controller command release.
+  Canonical QUICK ATTACK remains **169/169** and sibling AERIAL ACE
+  **93/93**.
+- **Next:** extend the portable QUICK ATTACK case past frame 116 through
+  generic hit/HP/result/current-move-clear and the next stable controller
+  boundary; independently prove player-back attacker geometry before exact.
+  Existing FEATHER DANCE, ICE PUNCH, and FIRE PUNCH exact evidence must stay
+  green.

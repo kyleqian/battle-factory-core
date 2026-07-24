@@ -51,6 +51,11 @@ import {
   featherDanceSpritesAtAge,
   type FeatherRenderSprite,
 } from "./featherDance.ts";
+import {
+  quickAttackAnimationAtAge,
+  type QuickAttackAfterimage,
+  type QuickAttackOffset,
+} from "./quickAttack.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -85,6 +90,19 @@ export interface SceneOnFeatherDanceConfig {
    * line omits "Foe " and releases FEATHER DANCE four frames earlier.
    */
   readonly animationAgeOffset?: number;
+}
+
+export interface SceneOnQuickAttackConfig {
+  readonly move: "QUICK_ATTACK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Damage and HP endpoints are already resolved by the stock controller. */
+  readonly controllerProfile: Readonly<{
+    readonly targetHpBefore: number;
+    readonly targetHpAfter: number;
+  }>;
+  readonly moveTextStartAge: number;
 }
 
 export interface SceneOnFirePunchConfig {
@@ -231,7 +249,8 @@ export type SceneOnMoveConfig =
   | SceneOnRockSlideConfig
   | SceneOnDoubleTeamConfig
   | SceneOnEndeavorConfig
-  | SceneOnFeatherDanceConfig;
+  | SceneOnFeatherDanceConfig
+  | SceneOnQuickAttackConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -323,6 +342,17 @@ export interface SceneOnFeatherDanceView {
   readonly moveText: Readonly<{ line1: string; line2: string }>;
   readonly statMessage: Readonly<{ line1: string; line2: string }>;
   readonly controllerDisplay: StatStageDropDisplayState;
+}
+
+export interface SceneOnQuickAttackView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerOffset: QuickAttackOffset;
+  readonly afterimages: readonly QuickAttackAfterimage[];
+  readonly targetShakeX2: number;
+  readonly impactVisible: boolean;
+  readonly moveText: Readonly<{ line1: string; line2: string }>;
 }
 
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
@@ -435,6 +465,18 @@ export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>
     )
   ) {
     throw new Error("ENDEAVOR profile requires targetStartHp >= targetEndHp >= 0");
+  }
+  if (
+    config.move === "QUICK_ATTACK"
+    && (
+      config.controllerProfile.targetHpBefore
+        < config.controllerProfile.targetHpAfter
+      || config.controllerProfile.targetHpAfter < 0
+    )
+  ) {
+    throw new Error(
+      "QUICK_ATTACK controller profile requires targetHpBefore >= targetHpAfter >= 0",
+    );
   }
   return { age: 0, config };
 }
@@ -698,6 +740,27 @@ export function sceneOnFeatherDanceView(
   };
 }
 
+export function sceneOnQuickAttackView(
+  state: SceneOnMovePresentationState,
+): SceneOnQuickAttackView {
+  if (state.config.move !== "QUICK_ATTACK") {
+    throw new Error(`expected QUICK_ATTACK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...quickAttackAnimationAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+    ),
+    moveText: {
+      line1: `${battlerNameWithPrefix(state.config.attacker)} used`,
+      line2: "QUICK ATTACK!",
+    },
+  };
+}
+
 export const PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION = {
   attacker: {
     species: "PIDGEOTTO",
@@ -718,6 +781,10 @@ export const PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION = {
     },
   },
 } as const satisfies Pick<SceneOnFeatherDanceConfig, "attacker" | "target">;
+
+export const PIDGEOTTO_TO_ONIX_QUICK_ATTACK_PRESENTATION = {
+  ...PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION,
+} as const satisfies Pick<SceneOnQuickAttackConfig, "attacker" | "target">;
 
 /**
  * Source-derived singles geometry for the required opposite-side variant:
