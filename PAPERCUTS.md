@@ -14,6 +14,16 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Staged trace generator can request frames beyond its own trace
+
+- **What:** the SUMMARY-return generator emitted capture frames after the
+  generated segment stream ended, so the first dense oracle invocation failed
+  before comparison.
+- **Hits:** 1.
+- **Cost each:** ~2 min.
+- **Workaround:** derive the final trace length from `segments` and clamp or
+  regenerate `captureFrames` before invoking the oracle.
+
 ## Terminal staged compare omitted the accepted endpoint frame
 
 - **What:** the seventh-win continuation probe stopped its raw-RGB capture at

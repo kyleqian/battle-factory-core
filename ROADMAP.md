@@ -599,7 +599,10 @@ the returned default-SUMMARY popup, and accepted fresh DOWN/display copy.
 Tier-1 pins the rejected/accepted gates, `SUMMARY_MODE_NORMAL`, current/max
 indexes, callback ownership, four-action popup semantics, fresh ball clocks,
 and immutable parties/rentals/result. Enemy-origin quit chrome and duplicate
-rejection still require live presentation, not further Battle-2 turns.
+rejection still require live presentation, not further Battle-2 turns. A
+compact enemy-quit fixture now pins both B and CANCEL origins, staggered
+`PKMN FOR SWAP`/CANCEL teardown and reconstruction, shared YES exit and NO/B
+returns, install-frame rejection, fresh enemy input, and immutable identities.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it
@@ -609,13 +612,15 @@ its canonical residual windows (**236/236** and **200/200**), making it
 sides (**141/141**) and canonical (**237/237**) and is `exact`; FAINT ATTACK
 is portable and canonical (**221/221**) but remains `partial` for its
 separately parked residual. ICE PUNCH is now `partial` with its source-composed
-opening, inward spiral, and complete seven-spawn `IceCrystalEffectShort` burst
-plus move-script teardown **187/187 exact**, including the generic
+opening, inward spiral, complete seven-spawn `IceCrystalEffectShort` burst,
+move-script teardown, and generic hit reaction **222/222 exact**, including
+the generic
 semi-transparent OBJ-over-BG rule,
 affine growth/flicker lifetimes, OAM ordering, and target-palette restoration.
 The reusable teardown pins BG palette restoration, `clearmonbg`/`blendoff`,
-and sound-gated `end` through frame 2525; generic hit/damage resolution from
-2526 and evidence-required geometry/orientation variants remain.
+and sound-gated `end` through frame 2525; shared healthbox wobble and target
+blink are exact through 2560. HP drain/message resolution from 2561 and
+evidence-required geometry/orientation variants remain.
 Level 50 animation coverage is therefore **4 exact / 9 partial / 263
 unsupported**. S8 remains `[~]`.
 

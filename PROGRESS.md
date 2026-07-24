@@ -8,17 +8,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** player popup `SUMMARY` now round-trips through the shared normal
   summary and `CB2_InitSwapScreen` to the same selected options popup. All 15
-  swap windows and four terminal windows are exact.
+  swap windows and four terminal windows are exact. A disjoint OFF fixture
+  now pins enemy-origin quit chrome; ICE PUNCH is exact through hit reaction.
 - **Did:** generalized summary mode/return ownership, wired source-relative
   open/input/close gates and callback reconstruction, and rebuilt the popup
   with fresh ball clocks, default SUMMARY, four actions, and accepted DOWN.
   Tier-1 pins rejected edges, mode/index/max, callbacks, cursors, and no
   party/rental/result mutation.
-- **Next:** implement enemy-origin quit chrome, then duplicate-species
-  rejection from their staged OFF fixtures. Do not extend Battle 2.
+- **Next:** implement enemy-origin quit chrome from its staged fixture, then
+  duplicate-species rejection. Animation continues ICE at HP drain frame 2561.
 - **Notes:** new SUMMARY **147/147**; prior 14 swap windows unchanged; terminal
   **210/210 + 414/414 + 2513/2513 + 1911/1911**; Tier-1 **1258/1258**,
-  build **5.675 MB**. No absolute tick/frame lookup or framebuffer asset.
+  build **5.675 MB**. Integrated Tier-1 **1259/1259**, build **5.675 MB**;
+  ICE **222/222**, FIRE PUNCH **225/225**. No absolute tick/frame lookup or
+  framebuffer asset.
 
 ---
 ## 342 — S8 OFF enemy PKMN FOR SWAP return: **GREEN — 115/115 exact**
