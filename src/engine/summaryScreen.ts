@@ -22,10 +22,26 @@ import {
 
 export type SummaryPhase = "fadingOut" | "black" | "fadingIn";
 
-/** SUMMARY_MODE_LOCK_MOVES's reachable pages (pokemon_summary_screen.c:1121); only "info" renders this slice. */
+/** SUMMARY_MODE_LOCK_MOVES's reachable pages (pokemon_summary_screen.c:1121). */
 export type SummaryPage = "info" | "skills" | "battleMoves" | "contestMoves";
 export type SummaryMode = "SUMMARY_MODE_LOCK_MOVES" | "SUMMARY_MODE_NORMAL";
 export type SummaryReturnTarget = "draft" | "factorySwap";
+export type SummaryPageDirection = "left" | "right";
+
+export interface SummaryPageTransition {
+  readonly fromPage: SummaryPage;
+  readonly toPage: SummaryPage;
+  readonly direction: SummaryPageDirection;
+  /** Source-relative clock: 0 is the accepted input tick, 11 is settled. */
+  readonly elapsed: number;
+}
+
+/**
+ * Task_HandleInput -> ChangePage -> PssScroll{Right,Left} observed clock.
+ * The task handoff/window clear becomes visible at +4; seven 32px scroll
+ * steps follow and the destination owns input at +11.
+ */
+export const SUMMARY_PAGE_TRANSITION_TICKS = 11;
 
 export interface SummaryTransition {
   direction: "toSummary" | "toDraft";
@@ -37,8 +53,12 @@ export interface SummaryTransition {
 export interface SummaryScreenState {
   /** null once settled on the draft screen (factoryDraftScreen.ts owns rendering); a transition is in flight otherwise. */
   transition: SummaryTransition | null;
+  /** True whenever the summary callback owns the screen, including non-Info pages. */
+  isOpen: boolean;
   /** True once the entry transition has fully settled on the static Info page. */
   onInfoPage: boolean;
+  /** Non-null while ChangePage's input handler is replaced by a scroll task. */
+  pageTransition: SummaryPageTransition | null;
   /** SELECTABLE_MONS_COUNT - 1 = 5 max; the draft cursor slot the summary opened on / is currently viewing. */
   selectedSlot: number;
   page: SummaryPage;
@@ -50,7 +70,9 @@ export interface SummaryScreenState {
 
 export const CLOSED_SUMMARY_SCREEN_STATE: SummaryScreenState = {
   transition: null,
+  isOpen: false,
   onInfoPage: false,
+  pageTransition: null,
   selectedSlot: 0,
   page: "info",
   mode: "SUMMARY_MODE_LOCK_MOVES",
@@ -75,7 +97,9 @@ export function openSummaryScreen(
 ): SummaryScreenState {
   return {
     transition: { direction: "toSummary", phase: "fadingOut", elapsed: 0 },
+    isOpen: false,
     onInfoPage: false,
+    pageTransition: null,
     selectedSlot: cursorPos,
     page: "info",
     mode: options.mode ?? "SUMMARY_MODE_LOCK_MOVES",
@@ -85,12 +109,57 @@ export function openSummaryScreen(
 
 /** pokemon_summary_screen.c's close path, triggered by B on the (unlocked, per SUMMARY_MODE_LOCK_MOVES) Info page. */
 export function requestSummaryScreenExit(state: SummaryScreenState): SummaryScreenState {
-  if (!state.onInfoPage) return state;
-  return { ...state, transition: { direction: "toDraft", phase: "fadingOut", elapsed: 0 }, onInfoPage: false };
+  if (!state.isOpen || state.pageTransition) return state;
+  return {
+    ...state,
+    transition: { direction: "toDraft", phase: "fadingOut", elapsed: 0 },
+    isOpen: false,
+    onInfoPage: false,
+  };
 }
 
-/** Advance the transition state machine by one tick; no-op once settled (transition === null). Call every engine tick. */
+const PAGE_ORDER: readonly SummaryPage[] = ["info", "skills", "battleMoves", "contestMoves"];
+
+/** ChangePage: accepts a fresh LEFT/RIGHT only while Task_HandleInput owns a settled page. */
+export function requestSummaryPageChange(
+  state: SummaryScreenState,
+  direction: SummaryPageDirection,
+): SummaryScreenState {
+  if (!state.isOpen || state.transition || state.pageTransition) return state;
+  const fromIndex = PAGE_ORDER.indexOf(state.page);
+  const delta = direction === "right" ? 1 : -1;
+  const toPage = PAGE_ORDER[fromIndex + delta];
+  if (!toPage) return state;
+  return {
+    ...state,
+    page: toPage,
+    onInfoPage: toPage === "info",
+    pageTransition: {
+      fromPage: state.page,
+      toPage,
+      direction,
+      elapsed: 0,
+    },
+  };
+}
+
+/** Advance entry/exit and page-scroll state machines by one tick. Call every engine tick. */
 export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenState {
+  if (state.pageTransition) {
+    const elapsed = state.pageTransition.elapsed + 1;
+    if (elapsed >= SUMMARY_PAGE_TRANSITION_TICKS) {
+      return {
+        ...state,
+        pageTransition: null,
+        isOpen: true,
+        onInfoPage: state.page === "info",
+      };
+    }
+    return {
+      ...state,
+      pageTransition: { ...state.pageTransition, elapsed },
+    };
+  }
   const t = state.transition;
   if (!t) return state;
   const elapsed = t.elapsed + 1;
@@ -118,7 +187,13 @@ export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenSt
 
   // fadingIn
   if (elapsed >= FADE_IN_TICKS) {
-    return { ...state, transition: null, onInfoPage: t.direction === "toSummary" };
+    const isOpen = t.direction === "toSummary";
+    return {
+      ...state,
+      transition: null,
+      isOpen,
+      onInfoPage: isOpen && state.page === "info",
+    };
   }
   return { ...state, transition: { ...t, elapsed } };
 }

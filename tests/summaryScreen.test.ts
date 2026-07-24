@@ -10,6 +10,8 @@ import {
   CLOSED_SUMMARY_SCREEN_STATE,
   openSummaryScreen,
   requestSummaryScreenExit,
+  requestSummaryPageChange,
+  SUMMARY_PAGE_TRANSITION_TICKS,
   type SummaryScreenState,
 } from "../src/engine/summaryScreen.ts";
 
@@ -22,6 +24,7 @@ describe("summaryScreen: closed state", () => {
   it("starts fully on the draft screen", () => {
     expect(CLOSED_SUMMARY_SCREEN_STATE.transition).toBeNull();
     expect(CLOSED_SUMMARY_SCREEN_STATE.onInfoPage).toBe(false);
+    expect(CLOSED_SUMMARY_SCREEN_STATE.isOpen).toBe(false);
   });
 
   it("never changes on its own", () => {
@@ -35,6 +38,7 @@ describe("summaryScreen: entry (A on SUMMARY)", () => {
     expect(state.transition).toEqual({ direction: "toSummary", phase: "fadingOut", elapsed: 0 });
     expect(state.selectedSlot).toBe(3);
     expect(state.onInfoPage).toBe(false);
+    expect(state.isOpen).toBe(false);
     expect(state.page).toBe("info");
   });
 
@@ -69,6 +73,7 @@ describe("summaryScreen: entry (A on SUMMARY)", () => {
     state = advanceSummaryScreen(state); // tick 44+15=59: settled
     expect(state.transition).toBeNull();
     expect(state.onInfoPage).toBe(true);
+    expect(state.isOpen).toBe(true);
   });
 
   it("settles in exactly 59 ticks total from the A press, matching the oracle's press-tick+59", () => {
@@ -76,6 +81,82 @@ describe("summaryScreen: entry (A on SUMMARY)", () => {
     expect(state.transition).toBeNull();
     expect(state.onInfoPage).toBe(true);
     expect(state.selectedSlot).toBe(1);
+  });
+});
+
+describe("summaryScreen: generic page navigation", () => {
+  function settled(slot = 0): SummaryScreenState {
+    return run(openSummaryScreen(slot), 59);
+  }
+
+  it("RIGHT immediately transfers page ownership while preserving the selected slot", () => {
+    const state = requestSummaryPageChange(settled(4), "right");
+    expect(state.page).toBe("skills");
+    expect(state.selectedSlot).toBe(4);
+    expect(state.isOpen).toBe(true);
+    expect(state.onInfoPage).toBe(false);
+    expect(state.pageTransition).toEqual({
+      fromPage: "info",
+      toPage: "skills",
+      direction: "right",
+      elapsed: 0,
+    });
+  });
+
+  it("settles RIGHT and LEFT on the same source-relative 11-tick scroll clock", () => {
+    const right = requestSummaryPageChange(settled(2), "right");
+    expect(run(right, SUMMARY_PAGE_TRANSITION_TICKS - 1).pageTransition).toMatchObject({
+      direction: "right",
+      elapsed: 10,
+    });
+    const skills = run(right, SUMMARY_PAGE_TRANSITION_TICKS);
+    expect(skills.pageTransition).toBeNull();
+    expect(skills.page).toBe("skills");
+
+    const left = requestSummaryPageChange(skills, "left");
+    expect(left.pageTransition).toMatchObject({
+      fromPage: "skills",
+      toPage: "info",
+      direction: "left",
+      elapsed: 0,
+    });
+    const info = run(left, SUMMARY_PAGE_TRANSITION_TICKS);
+    expect(info.pageTransition).toBeNull();
+    expect(info.page).toBe("info");
+    expect(info.onInfoPage).toBe(true);
+    expect(info.selectedSlot).toBe(2);
+  });
+
+  it("rejects LEFT at the first page and RIGHT at the final page", () => {
+    const info = settled();
+    expect(requestSummaryPageChange(info, "left")).toBe(info);
+    const contest = { ...info, page: "contestMoves" as const, onInfoPage: false };
+    expect(requestSummaryPageChange(contest, "right")).toBe(contest);
+  });
+
+  it("rejects page changes and B during entry or an active scroll", () => {
+    const entry = run(openSummaryScreen(1), 10);
+    expect(requestSummaryPageChange(entry, "right")).toBe(entry);
+    expect(requestSummaryScreenExit(entry)).toBe(entry);
+
+    const scrolling = requestSummaryPageChange(settled(1), "right");
+    expect(requestSummaryPageChange(scrolling, "left")).toBe(scrolling);
+    expect(requestSummaryScreenExit(scrolling)).toBe(scrolling);
+  });
+
+  it("allows B from a settled Skills page", () => {
+    const skills = run(
+      requestSummaryPageChange(settled(3), "right"),
+      SUMMARY_PAGE_TRANSITION_TICKS,
+    );
+    const exiting = requestSummaryScreenExit(skills);
+    expect(exiting.transition).toEqual({
+      direction: "toDraft",
+      phase: "fadingOut",
+      elapsed: 0,
+    });
+    expect(exiting.selectedSlot).toBe(3);
+    expect(exiting.isOpen).toBe(false);
   });
 });
 

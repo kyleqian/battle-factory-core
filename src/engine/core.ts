@@ -52,6 +52,7 @@ import {
   advanceSummaryScreen,
   openSummaryScreen,
   requestSummaryScreenExit,
+  requestSummaryPageChange,
   type SummaryScreenState,
 } from "./summaryScreen.ts";
 import { renderSummaryInfoPage, renderSummaryInfoPageFaded } from "./summaryInfoPage.ts";
@@ -1261,11 +1262,15 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // symmetric close path) own the screen exclusively while a fade is in
     // flight - the draft screen's own tasks are torn down/frozen, so no
     // input is processed and none of its per-tick redraw state advances.
-  } else if (summaryScreen.onInfoPage) {
-    // pokemon_summary_screen.c's Task_HandleInput on the (lockMovesFlag-gated
-    // reachable-but-inert) Info page: only B (Cancel) is wired this slice -
-    // mon-switching/page-change/move-select are out of scope (see module doc).
-    if (newKeys.has("B")) summaryScreen = requestSummaryScreenExit(summaryScreen);
+  } else if (summaryScreen.pageTransition) {
+    // ChangePage replaces Task_HandleInput with the scroll task, so all fresh
+    // input (including B and the opposite direction) is rejected in flight.
+  } else if (summaryScreen.isOpen) {
+    // Task_HandleInput priority: LEFT, RIGHT, then B. UP/DOWN and A on later
+    // pages remain in S9's explicitly deferred routes.
+    if (newKeys.has("LEFT")) summaryScreen = requestSummaryPageChange(summaryScreen, "left");
+    else if (newKeys.has("RIGHT")) summaryScreen = requestSummaryPageChange(summaryScreen, "right");
+    else if (newKeys.has("B")) summaryScreen = requestSummaryScreenExit(summaryScreen);
   } else {
     let monPic = advanceMonPic(draftScreen.monPic);
     let cursorRedraw = advanceCursorRedraw(draftScreen.cursorRedraw);
@@ -2025,7 +2030,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   const summary = state.summaryScreen;
   const t = summary.transition;
   if (!t) {
-    return summary.onInfoPage ? renderSummaryInfoPage(summary.selectedSlot) : renderFactoryDraftScreen(state.draftScreen);
+    return summary.isOpen ? renderSummaryInfoPage(summary.selectedSlot) : renderFactoryDraftScreen(state.draftScreen);
   }
   const isEntry = t.direction === "toSummary";
   if (t.phase === "black") {
