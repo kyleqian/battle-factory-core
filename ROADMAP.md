@@ -593,8 +593,11 @@ input, with immutable parties/rentals. That source-relative action is now live
 and **115/115 exact**, including the 5→4 action switch, independent ball
 callbacks, install-frame rejection, and first fresh RIGHT without party,
 rental, decision, or selection-RNG mutation. SUMMARY return, enemy quit chrome,
-and duplicate rejection still require their own short staged OFF windows, not
-further Battle-2 turns.
+and duplicate rejection still require live presentation, not further Battle-2
+turns. A compact SUMMARY fixture now pins accepted/rejected open and close
+edges, `SUMMARY_MODE_NORMAL`, callback reconstruction of the same selected
+player options popup, preserved party/rentals/cursors, and its first fresh
+returned-popup input.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it
@@ -605,10 +608,12 @@ sides (**141/141**) and canonical (**237/237**) and is `exact`; FAINT ATTACK
 is portable and canonical (**221/221**) but remains `partial` for its
 separately parked residual. ICE PUNCH is now `partial` with its source-composed
 opening, inward spiral, and complete seven-spawn `IceCrystalEffectShort` burst
-**164/164 exact**, including the generic semi-transparent OBJ-over-BG rule,
+plus move-script teardown **187/187 exact**, including the generic
+semi-transparent OBJ-over-BG rule,
 affine growth/flicker lifetimes, OAM ordering, and target-palette restoration.
-Its bounded remainder is BG palette restoration, `clearmonbg`/`blendoff`, and
-script teardown at frames 2503-2525 before generic resolution.
+The reusable teardown pins BG palette restoration, `clearmonbg`/`blendoff`,
+and sound-gated `end` through frame 2525; generic hit/damage resolution from
+2526 and evidence-required geometry/orientation variants remain.
 Level 50 animation coverage is therefore **4 exact / 9 partial / 263
 unsupported**. S8 remains `[~]`.
 
