@@ -51,6 +51,7 @@ export const BATTLE_SCRIPT_ATTACK_CANCELER_PHASES = Object.freeze({
   CANCELER_IN_LOVE: 11,
   CANCELER_BIDE: 12,
   CANCELER_THAW: 13,
+  CANCELER_END: 14,
 } as const);
 
 export const BATTLE_SCRIPT_MOVE_NONE = 0;

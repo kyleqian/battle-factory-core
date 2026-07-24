@@ -175,6 +175,7 @@ export type BattleScriptAttackCancelerMultistringEffect =
       | "B_MSG_WOKE_UP"
       | "B_MSG_WOKE_UP_UPROAR"
       | "B_MSG_DEFROSTED"
+      | "B_MSG_DEFROSTED_BY_MOVE"
       | "FALSE"
       | "TRUE";
     value: 0 | 1;
@@ -1022,6 +1023,99 @@ export type BattleScriptAttackCancelerBideDecision =
       sourcePhase: "CANCELER_BIDE";
       tracker: Readonly<{ before: number; after: number }>;
       rng: Readonly<{ kind: "preserve"; value: number; callsConsumed: 0 }>;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerThawReason =
+  | "not-frozen"
+  | "frozen-status-sync"
+  | "defrosted-by-move";
+
+export type BattleScriptAttackCancelerThawControllerSync =
+  | Readonly<{
+    kind: "none";
+    reason: "effect-zero";
+  }>
+  | Readonly<{
+    kind: "frozen-status1-sync";
+    /**
+     * The source assigns gActiveBattler immediately after the canceler loop.
+     * It is a controller-routing global, not durable battle rules state.
+     */
+    activeBattler: Readonly<{
+      sourceGlobal: "gActiveBattler";
+      after: BattleScriptBattlerId;
+    }>;
+    emit: Readonly<{
+      sourceFunction: "BtlController_EmitSetMonData";
+      sourceRequest: "REQUEST_STATUS_BATTLE";
+      offset: 0;
+      size: 4;
+      value: number;
+    }>;
+    mark: Readonly<{
+      sourceFunction: "MarkBattlerForControllerExec";
+      battler: BattleScriptBattlerId;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerThawReceipt = Readonly<{
+  sourcePhase: "CANCELER_THAW";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerThawReason;
+  freezePredicate: Readonly<{
+    sourceMask: "STATUS1_FREEZE";
+    mask: typeof BATTLE_SCRIPT_STATUS1_FREEZE;
+    status1: number;
+    matches: boolean;
+  }>;
+  moveEffect: Readonly<{
+    currentMove: number;
+    sourceField: "gBattleMoves[gCurrentMove].effect";
+    value: number;
+    sourceConstant: "EFFECT_THAW_HIT";
+    thawHitValue: typeof BATTLE_SCRIPT_EFFECT_THAW_HIT;
+    matches: boolean;
+  }>;
+  status1: BattleScriptBitFieldEffect;
+  effect: 0 | 2;
+  script: BattleScriptAttackCancelerScriptEffect;
+  cursor: BattleScriptAttackCancelerCursorEffect;
+  multistringChooser: BattleScriptAttackCancelerMultistringEffect;
+  controllerSync: BattleScriptAttackCancelerThawControllerSync;
+  rng: Readonly<{
+    kind: "preserve";
+    value: number;
+    callsConsumed: 0;
+  }>;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_THAW";
+    sourcePhaseAfter: "CANCELER_END";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerThawDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerThawReason;
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: BattleScriptAttackCancelerThawReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_THAW";
+      tracker: Readonly<{ before: number; after: number }>;
+      rng: Readonly<{
+        kind: "preserve";
+        value: number;
+        callsConsumed: 0;
+      }>;
     }>;
   }>;
 
@@ -3321,6 +3415,191 @@ export function advanceBattleScriptAttackCancelerBide(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_BIDE",
         sourcePhaseAfter: "CANCELER_THAW",
+      }),
+    }),
+  });
+}
+
+/**
+ * Immutable source phase for battle_util.c:2250-2264 plus the effect==2
+ * controller synchronization at lines 2270-2275.
+ *
+ * The source quirk is intentional: any frozen attacker returns effect 2 and
+ * synchronizes status1 after the canceler loop. Only EFFECT_THAW_HIT clears
+ * STATUS1_FREEZE or changes the script/cursor/chooser. This seam records the
+ * controller work semantically; it does not execute a controller or own
+ * status-icon presentation.
+ */
+export function advanceBattleScriptAttackCancelerThaw(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+  rngValue: number,
+): BattleScriptAttackCancelerThawDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const sourceRng = requireRngValue(rngValue);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_THAW
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      rngValue: sourceRng,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_THAW",
+        tracker: Object.freeze({
+          before: trackerBefore,
+          after: trackerBefore,
+        }),
+        rng: Object.freeze({
+          kind: "preserve",
+          value: sourceRng,
+          callsConsumed: 0 as const,
+        }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler thaw phase requires an attacker role",
+    );
+  }
+  if (attacker > 1) {
+    throw new Error(
+      `CANCELER_THAW Level-50 singles attacker must be battler 0 or 1, got ${attacker}`,
+    );
+  }
+
+  const sourceBattler = rulesContext.battlers[attacker];
+  const isFrozen = (
+    sourceBattler.status1
+    & BATTLE_SCRIPT_STATUS1_FREEZE
+  ) !== 0;
+  const isThawHit = (
+    rulesContext.currentMoveEffect
+    === BATTLE_SCRIPT_EFFECT_THAW_HIT
+  );
+  const defrostedByMove = isFrozen && isThawHit;
+  const nextStatus1 = defrostedByMove
+    ? (
+      sourceBattler.status1
+      & ~BATTLE_SCRIPT_STATUS1_FREEZE
+    ) >>> 0
+    : sourceBattler.status1;
+  const nextBattler = nextStatus1 === sourceBattler.status1
+    ? sourceBattler
+    : Object.freeze({ ...sourceBattler, status1: nextStatus1 });
+  const nextBattlers = nextBattler === sourceBattler
+    ? rulesContext.battlers
+    : Object.freeze(rulesContext.battlers.map((candidate, index) =>
+      index === attacker ? nextBattler : candidate
+    )) as unknown as BattleScriptRulesContext["battlers"];
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_END;
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battlers: nextBattlers,
+    atkCancelerTracker: trackerAfter,
+    multistringChooser: defrostedByMove
+      ? 1
+      : rulesContext.multistringChooser,
+  });
+  const reason: BattleScriptAttackCancelerThawReason = !isFrozen
+    ? "not-frozen"
+    : defrostedByMove
+      ? "defrosted-by-move"
+      : "frozen-status-sync";
+  const effect = isFrozen ? 2 as const : 0 as const;
+  const script: BattleScriptAttackCancelerScriptEffect = defrostedByMove
+    ? Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_MoveUsedUnfroze",
+    })
+    : Object.freeze({
+      kind: "preserve",
+      sourceProgramCounter: sourcePc,
+    });
+  const cursor: BattleScriptAttackCancelerCursorEffect = defrostedByMove
+    ? Object.freeze({
+      kind: "push",
+      sourceProgramCounter: sourcePc,
+    })
+    : Object.freeze({ kind: "preserve" });
+  const multistringChooser: BattleScriptAttackCancelerMultistringEffect =
+    defrostedByMove
+      ? Object.freeze({
+        kind: "set",
+        sourceConstant: "B_MSG_DEFROSTED_BY_MOVE",
+        value: 1,
+      })
+      : Object.freeze({ kind: "preserve" });
+  const controllerSync: BattleScriptAttackCancelerThawControllerSync =
+    isFrozen
+      ? Object.freeze({
+        kind: "frozen-status1-sync",
+        activeBattler: Object.freeze({
+          sourceGlobal: "gActiveBattler",
+          after: attacker,
+        }),
+        emit: Object.freeze({
+          sourceFunction: "BtlController_EmitSetMonData",
+          sourceRequest: "REQUEST_STATUS_BATTLE",
+          offset: 0,
+          size: 4,
+          value: nextStatus1,
+        }),
+        mark: Object.freeze({
+          sourceFunction: "MarkBattlerForControllerExec",
+          battler: attacker,
+        }),
+      })
+      : Object.freeze({
+        kind: "none",
+        reason: "effect-zero",
+      });
+
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    rngValue: sourceRng,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_THAW",
+      attacker,
+      reason,
+      freezePredicate: Object.freeze({
+        sourceMask: "STATUS1_FREEZE",
+        mask: BATTLE_SCRIPT_STATUS1_FREEZE,
+        status1: sourceBattler.status1,
+        matches: isFrozen,
+      }),
+      moveEffect: Object.freeze({
+        currentMove: rulesContext.currentMove,
+        sourceField: "gBattleMoves[gCurrentMove].effect",
+        value: rulesContext.currentMoveEffect,
+        sourceConstant: "EFFECT_THAW_HIT",
+        thawHitValue: BATTLE_SCRIPT_EFFECT_THAW_HIT,
+        matches: isThawHit,
+      }),
+      status1: bitFieldEffect(sourceBattler.status1, nextStatus1),
+      effect,
+      script,
+      cursor,
+      multistringChooser,
+      controllerSync,
+      rng: Object.freeze({
+        kind: "preserve",
+        value: sourceRng,
+        callsConsumed: 0 as const,
+      }),
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_THAW",
+        sourcePhaseAfter: "CANCELER_END",
       }),
     }),
   });
