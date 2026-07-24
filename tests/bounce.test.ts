@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   BOUNCE_CHARGE_BALL,
-  bounceParalysisElectricityAtAge,
-  bounceParalysisShakeX2AtAge,
   bouncePresentationAtAge,
   bounceStrikeBallAtAge,
 } from "../src/engine/bounce.ts";
@@ -191,29 +189,6 @@ describe("source-relative BOUNCE presentation", () => {
     });
   });
 
-  it("decodes Status_Paralysis shake and ElectricityEffect by relative age", () => {
-    expect(bounceParalysisShakeX2AtAge(185, 186)).toBe(0);
-    expect([
-      186, 187, 188, 189, 190, 191, 192,
-    ].map((age) => bounceParalysisShakeX2AtAge(age, 186)))
-      .toEqual([1, -1, -1, 1, 1, -1, -1]);
-    expect(bounceParalysisShakeX2AtAge(206, 186)).toBe(1);
-    expect(bounceParalysisShakeX2AtAge(207, 186)).toBe(0);
-
-    const center = { x: 72, y: 88 };
-    expect(bounceParalysisElectricityAtAge(187, 188, center)).toEqual([]);
-    expect(bounceParalysisElectricityAtAge(188, 188, center)).toEqual([{
-      x: 69,
-      y: 80,
-      frame: 0,
-      hFlip: false,
-      vFlip: false,
-    }]);
-    expect(bounceParalysisElectricityAtAge(192, 188, center)).toHaveLength(2);
-    expect(bounceParalysisElectricityAtAge(215, 188, center)).toHaveLength(1);
-    expect(bounceParalysisElectricityAtAge(222, 188, center)).toEqual([]);
-  });
-
   it("consumes the successful-paralysis display profile without resolving it", () => {
     const state = createSceneOnMovePresentation({
       move: "BOUNCE",
@@ -247,10 +222,14 @@ describe("source-relative BOUNCE presentation", () => {
     expect(sceneOnBounceView({ ...state, age: 181 }).targetStatus).toBe("none");
     expect(sceneOnBounceView({ ...state, age: 182 }).targetStatus)
       .toBe("paralysis");
-    expect(sceneOnBounceView({ ...state, age: 187 }).statusShakeX2).toBe(0);
-    expect(sceneOnBounceView({ ...state, age: 188 }).statusShakeX2).toBe(1);
-    expect(sceneOnBounceView({ ...state, age: 206 }).statusShakeX2).toBe(-1);
-    expect(sceneOnBounceView({ ...state, age: 207 }).statusShakeX2).toBe(0);
+    expect(sceneOnBounceView({ ...state, age: 187 }).statusAnimation)
+      .toMatchObject({ battlerOffset: { x: 0, y: 0 }, sprites: [] });
+    expect(sceneOnBounceView({ ...state, age: 188 }).statusAnimation)
+      .toMatchObject({ battlerOffset: { x: 1, y: 0 } });
+    expect(sceneOnBounceView({ ...state, age: 206 }).statusAnimation)
+      .toMatchObject({ battlerOffset: { x: -1, y: 0 } });
+    expect(sceneOnBounceView({ ...state, age: 207 }).statusAnimation)
+      .toMatchObject({ battlerOffset: { x: 0, y: 0 } });
     expect(sceneOnBounceView({ ...state, age: 224 }).message).toMatchObject({
       line1: "ONIX is paralyzed!",
       line2: "It may be unable to move!",

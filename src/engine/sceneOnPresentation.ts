@@ -73,13 +73,14 @@ import {
   type FlyTurn,
 } from "./fly.ts";
 import {
-  bounceParalysisElectricityAtAge,
-  bounceParalysisShakeX2AtAge,
   bouncePresentationAtAge,
-  type BounceElectricitySprite,
   type BouncePresentationState,
   type BounceTurn,
 } from "./bounce.ts";
+import {
+  statusAnimationAtSourceAge,
+  type StatusAnimationVisual,
+} from "./statusAnimation.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -575,8 +576,7 @@ export interface SceneOnBounceView extends BouncePresentationState {
   readonly actionMenu: ActionMenuDisplayTransition;
   readonly targetStatus: "none" | "paralysis";
   readonly healthboxStatus: "none" | "paralysis";
-  readonly statusShakeX2: number;
-  readonly electricity: readonly BounceElectricitySprite[];
+  readonly statusAnimation: StatusAnimationVisual | null;
   readonly currentMove: "BOUNCE" | null;
 }
 
@@ -827,6 +827,16 @@ export function sceneOnBounceView(
         state.age,
         controllerProfile.actionMenuRevealAge,
       );
+  const statusAnimation =
+    controllerProfile.statusOutcome === "paralysis"
+    && controllerProfile.statusShakeFirstAge !== undefined
+      ? statusAnimationAtSourceAge({
+          kind: "paralysis",
+          sourceAge:
+            state.age - controllerProfile.statusShakeFirstAge,
+          targetGeometry: state.config.target.geometry,
+        })
+      : null;
   return {
     age: state.age,
     animationAge,
@@ -866,26 +876,7 @@ export function sceneOnBounceView(
         ?? Number.POSITIVE_INFINITY)
         ? "paralysis"
         : "none",
-    statusShakeX2:
-      state.age >= (controllerProfile.statusElectricityFirstAge
-        ?? Number.POSITIVE_INFINITY)
-      && state.age < (controllerProfile.statusElectricityFirstAge
-        ?? Number.POSITIVE_INFINITY) + 19
-        // The immutable framebuffer/OAM receipt is one phase behind the
-        // probed post-callback task state during the visible electricity
-        // window; the pre-sprite setup poses never reach the framebuffer.
-        ? -bounceParalysisShakeX2AtAge(
-            state.age,
-            controllerProfile.statusShakeFirstAge
-              ?? Number.POSITIVE_INFINITY,
-          )
-        : 0,
-    electricity: bounceParalysisElectricityAtAge(
-      state.age,
-      controllerProfile.statusElectricityFirstAge
-        ?? Number.POSITIVE_INFINITY,
-      state.config.target.geometry.battlePositionCenter,
-    ),
+    statusAnimation,
     currentMove:
       state.age >= controllerProfile.currentMoveResetAge ? null : "BOUNCE",
     ...bouncePresentationAtAge(
