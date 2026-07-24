@@ -887,6 +887,83 @@ traces; ≥10 deterministic scenario/fuzz cases cover varied draft orders,
 menu detours, opponents, swaps, wins, and losses at the state layer; selected
 unique UI windows pass compare; `npm test`/`npm run build` are green.
 
+### [ ] S10 — Parameterized battle laboratory + complete Level-50 singles engine
+
+**User scope decision (2026-07-23):** S8's finite controller gates prove the
+round/presentation architecture but do not complete the mission's arbitrary
+single-battle rules breadth. S9 remains the bounded deferred interface stage.
+S10 explicitly owns the source-derived battle system, trainer/opponent corpus,
+and the parameterized oracle needed to develop them. Checking S9 must not be
+interpreted as claiming these mechanics complete.
+
+Build the rules engine from the pinned source's actual structure: generated
+tables plus a typed Battle Script IR/interpreter and source-mapped item,
+ability, end-turn, AI, and switching hooks. Do not grow a collection of
+move-name, battle-number, turn-number, or canonical-tick branches. Battle
+logic/RNG emits semantic events; Scene-OFF and Scene-ON presentation consume
+those events without owning outcomes.
+
+S10 has six ordered completion gates:
+
+1. [ ] **Complete Factory corpus:** mechanically extract and validate all 300
+   Frontier trainers (name, facility class, all three Easy Chat speeches,
+   eligible mon sets, and AI flags), all 882 Frontier mon sets with the 850
+   Level-50-eligible boundary preserved, all relevant species base
+   stats/types/abilities, held items, moves, trainer classes, and presentation
+   lookup tables. Generated-data tests enumerate every trainer and legal set;
+   no runtime dependency on `reference/`, the ROM, or the oracle is added.
+2. [ ] **Parameterized battle oracle:** extend the existing deterministic
+   stock-ROM mGBA service additively (the canonical `/v1/run` contract and its
+   ON/OFF anchors remain unchanged) with a semantic battle-lab scenario
+   contract. A request selects trainer ID, player/opponent Frontier set IDs,
+   level, seed, and scene profile; the oracle restores a clean pre-battle
+   checkpoint, lets the real source initialize both parties and battle
+   controllers, and returns the resolved roster plus pixel and semantic
+   state/RNG captures. A separate explicit `mechanicLab` mode may apply
+   allowlisted post-init HP/PP/move-slot/status/stat-stage/volatile/
+   side-condition/weather/item/ability overrides and force only action
+   selection, so the unmodified ROM still executes the move and all
+   consequences. `factoryLegal` mode rejects impossible Factory compositions.
+   Raw addresses are an implementation detail, not trace ABI.
+3. [ ] **General battle kernel:** replace preset-damage/action fixtures as the
+   production rules path with source-derived action selection, priority/speed
+   ordering, accuracy, critical hits, damage, targeting, PP, move-script
+   execution, end-turn ordering, fainting, victory/loss, and deterministic RNG
+   accounting. Every Gen-3 move has supported Level-50 single-battle semantics,
+   including correct failure behavior for moves whose required context is
+   absent; shared effect scripts are the implementation unit.
+4. [ ] **Persistent mechanics:** implement all battle statuses and volatile
+   effects, every stat stage, weather and side conditions, multi-turn effects,
+   held-item hooks, ability hooks/immunities, and their switch/faint/end-turn
+   lifecycles. This explicitly includes confusion, Leech Seed, Perish Song,
+   sleep/poison/toxic/burn/freeze/paralysis, screens, trapping, recharge,
+   recoil/drain, berries, Leftovers, Quick Claw, Choice Band, White Herb,
+   Wonder Guard/Levitate/Intimidate/Pressure/contact abilities, and the other
+   source-reachable Level-50 singles cases rather than only this named sample.
+5. [ ] **Facility integration:** generate initial rentals and all seven real
+   opponent parties through the source-exact range/retry/personality/IV/
+   ability/item rules; run the native Factory AI; compute the attendant's
+   favorite-type/style commentary from the generated party; render arbitrary
+   trainer classes/names/speeches and arbitrary legal parties; support
+   voluntary and forced switching. The round controller consumes real battle
+   outcomes rather than injected results.
+6. [ ] **Breadth acceptance:** a committed mechanics coverage manifest has no
+   unsupported move/effect, status, volatile-effect, held-item, ability,
+   trainer, or Level-50 Frontier-set entries. Every distinct effect/hook family
+   has at least one deterministic parameterized-oracle semantic trace; table
+   siblings are batch-checked, and interaction-focused pairwise/property tests
+   cover weather, status, item, ability, stat-stage, switching, and immunity
+   boundaries without attempting the infeasible Cartesian product of every
+   team. Multiple seeded legal Factory rounds run end-to-end, selected unique
+   UI windows pass pixel compare under the appropriate scene profile, and
+   `npm test`/`npm run build` are green.
+
+The finite catalogs are exhaustively enumerable; their Cartesian product is
+not. Acceptance therefore enumerates every trainer/set/move/hook and proves
+each shared semantic family plus interaction boundaries, rather than claiming
+quality from brute-forcing every possible three-mon team against every other
+team.
+
 Stages ship in order for the main functional lane. The animation lane may run
 in parallel behind the presentation seam, and later scenario/data groundwork
 may begin early when it is file-disjoint and does not redefine an unfinished
