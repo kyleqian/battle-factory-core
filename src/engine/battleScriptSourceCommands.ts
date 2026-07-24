@@ -21,6 +21,7 @@ import type {
   BattleScriptOperand,
   BattleScriptProgram,
 } from "./battleScriptProgram.ts";
+import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 
 export type BattleScriptMessagePayload = Extract<
   BattleScriptSemanticEventPayload,
@@ -638,18 +639,13 @@ function emitTrainerSlideControllerEvent<RulesContext extends object>(
   );
 }
 
-const STATUS_ANIMATION_U32_CONSTANTS: Readonly<Record<string, number>> = Object.freeze({
-  STATUS2_CONFUSION: 0x0000_0007,
-  STATUS2_INFATUATION: 0x000f_0000,
-  STATUS2_NIGHTMARE: 0x0800_0000,
-  STATUS2_CURSED: 0x1000_0000,
-});
-
 function decodeStatusAnimationInteger(
   expression: string,
   maximum: number,
 ): number | null {
-  const constant = STATUS_ANIMATION_U32_CONSTANTS[expression];
+  const constant = BATTLE_SCRIPT_STATUS2_MASKS[
+    expression as keyof typeof BATTLE_SCRIPT_STATUS2_MASKS
+  ];
   if (constant !== undefined && constant <= maximum) return constant;
   if (!/^(?:0[xX][0-9a-fA-F]+|[0-9]+)$/.test(expression)) return null;
   const value = Number(expression);

@@ -1,0 +1,25 @@
+{
+  "oracleProfile": "battle-scene-off",
+  "toxic": {
+    "fixture": "tools/battle-lab/mechanic-toxic-statusanimation-off.json",
+    "fixtureSha256": "fe0887afcc0b9dbb1f16d982e6292e5c259431dcebf4c8edbf9ef948bb4ecdb5",
+    "freshManifestSha256": "a11285ba13136bfb628de6c1d27e4e94c773a8d8d78a7563752954523bfe34f7",
+    "moveId": 92,
+    "initialPp": 10,
+    "finalPp": 9,
+    "initialStatus1": 0,
+    "finalStatus1": 128
+  },
+  "confuseRay": {
+    "fixture": "tools/battle-lab/mechanic-confuse-ray-status2animation-off.json",
+    "fixtureSha256": "ebc9b0d780a38af64b20aa92958e6c479092541be8d4149250420069c52a71c3",
+    "freshManifestSha256": "871decd46fef2148633955baed69fcb36dda1a824e66255ee8a921c693cfdefc",
+    "moveId": 109,
+    "initialPp": 10,
+    "finalPp": 9,
+    "initialStatus2": 0,
+    "finalStatus2": 4,
+    "initialConfusionTurns": 0,
+    "finalConfusionTurns": 4
+  }
+}

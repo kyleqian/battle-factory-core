@@ -1,0 +1,434 @@
+import { describe, expect, it } from "vitest";
+import confuseRayFixture from "../tools/battle-lab/mechanic-confuse-ray-status2animation-off.json" with { type: "json" };
+import toxicFixture from "../tools/battle-lab/mechanic-toxic-statusanimation-off.json" with { type: "json" };
+import mechanicLabEvidence from "./fixtures/status-animation-mechanic-lab-evidence.json" with { type: "json" };
+import type { BattleScriptBattlerId } from "../src/engine/battleScriptEvents.ts";
+import {
+  createBattleScriptSchedulerState,
+  stepBattleScriptMachine,
+  type BattleScriptOpcodeHandlerContext,
+} from "../src/engine/battleScriptMachine.ts";
+import {
+  acknowledgeBattleScriptStatusRulesController,
+  createBattleScriptRulesContext,
+  createBattleScriptStatusRulesExecution,
+  createBattleScriptStatusRulesHandlers,
+  prepareRulesStatusAnimation,
+  resolveRulesBattlerForBattleScript,
+  type BattleScriptRulesContext,
+  type BattleScriptRulesContextInput,
+  type BattleScriptStatusRulesExternalPorts,
+} from "../src/engine/battleScriptRulesContext.ts";
+import {
+  BATTLE_SCRIPT_BATTLER_SELECTORS,
+  BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+  BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
+} from "../src/engine/battleScriptSourceConstants.ts";
+import {
+  loadBattleScriptProgram,
+  type BattleScriptInstruction,
+  type BattleScriptOperand,
+} from "../src/engine/battleScriptProgram.ts";
+
+const program = loadBattleScriptProgram();
+const primaryInstruction = program.instructions[804]!;
+const maskedInstruction = program.instructions[2760]!;
+const explicitInstruction = program.instructions[2754]!;
+
+function battler(
+  status1 = 0,
+  status2 = 0,
+  status3 = 0,
+  substituteHP = 0,
+) {
+  return Object.freeze({ status1, status2, status3, substituteHP });
+}
+
+function input(
+  changes: Partial<BattleScriptRulesContextInput> = {},
+): BattleScriptRulesContextInput {
+  return {
+    battlers: changes.battlers ?? [
+      battler(0x80, 0x0005_0004),
+      battler(0x40, 0x1000_0003),
+      battler(0x20, 0x0800_0002),
+      battler(0x08, 0x000f_0001),
+    ],
+    selectorRoles: changes.selectorRoles ?? { attacker: 3, effectBattler: 1 },
+    hitMarker: changes.hitMarker ?? 0,
+    multiHitCounter: changes.multiHitCounter ?? 0,
+  };
+}
+
+function rules(
+  changes: Partial<BattleScriptRulesContextInput> = {},
+): BattleScriptRulesContext {
+  return createBattleScriptRulesContext(input(changes));
+}
+
+function externalPorts(
+  idle = true,
+): BattleScriptStatusRulesExternalPorts {
+  return Object.freeze({
+    isControllerIdle: () => idle,
+    prepareMessage: () => null,
+    prepareSelectionMessage: () => null,
+    prepareSelectionMessageFromTable: () => null,
+    resolveAttackerBattler: () => null,
+    resolveBattlerAtPosition: () => null,
+    resolveHalfwordOperand: () => null,
+    resolveByteOperand: () => null,
+  });
+}
+
+function stateAt(
+  instruction: BattleScriptInstruction,
+  sourceRules = rules(),
+) {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    instruction.source.label,
+    sourceRules,
+    0x1234_5678,
+    externalPorts(),
+  );
+  return {
+    ...execution,
+    state: Object.freeze({
+      ...execution.state,
+      programCounter: instruction.programCounter,
+    }),
+  };
+}
+
+function contextAt(
+  instruction: BattleScriptInstruction,
+  sourceRules = rules(),
+): BattleScriptOpcodeHandlerContext<BattleScriptRulesContext> {
+  const execution = stateAt(instruction, sourceRules);
+  return Object.freeze({ program, instruction, state: execution.state });
+}
+
+function selector(expression: string): BattleScriptOperand {
+  return Object.freeze({
+    widthBytes: 1,
+    expression,
+    sourceMacro: "test-selector",
+    sourceMacroLine: 0,
+    wrapperPath: Object.freeze([]),
+  });
+}
+
+describe("source-shaped Battle Script rules context", () => {
+  it("creates exactly four deeply frozen battlers and the proven non-presentation fields", () => {
+    const source = input();
+    const created = createBattleScriptRulesContext(source);
+    expect(Object.keys(created).sort()).toEqual([
+      "battlers",
+      "hitMarker",
+      "multiHitCounter",
+      "selectorRoles",
+    ]);
+    expect(created.battlers).toHaveLength(4);
+    expect(Object.isFrozen(created)).toBe(true);
+    expect(Object.isFrozen(created.battlers)).toBe(true);
+    expect(Object.isFrozen(created.selectorRoles)).toBe(true);
+    expect(created.battlers.every(Object.isFrozen)).toBe(true);
+    expect(created.battlers[0]).not.toBe(source.battlers[0]);
+  });
+
+  it("rejects malformed battler arrays, source widths, counters, and invalid roles", () => {
+    const invalidInputs = [
+      { battlers: input().battlers.slice(0, 3) },
+      { battlers: [battler(-1), ...input().battlers.slice(1)] },
+      { battlers: [battler(0, 0, 0, 256), ...input().battlers.slice(1)] },
+      { hitMarker: -1 },
+      { multiHitCounter: 256 },
+      { selectorRoles: { attacker: 4 as BattleScriptBattlerId, effectBattler: 0 } },
+      { selectorRoles: { attacker: 0, effectBattler: -1 as BattleScriptBattlerId } },
+    ];
+    for (const invalid of invalidInputs) {
+      expect(() => createBattleScriptRulesContext(input(invalid as never))).toThrow();
+    }
+  });
+
+  it("maps the supported named and numeric GetBattlerForBattleScript selectors", () => {
+    const context = contextAt(primaryInstruction);
+    expect(BATTLE_SCRIPT_BATTLER_SELECTORS).toEqual({
+      BS_ATTACKER: 1,
+      BS_EFFECT_BATTLER: 2,
+    });
+    expect(resolveRulesBattlerForBattleScript(context, selector("BS_ATTACKER"))).toBe(3);
+    expect(resolveRulesBattlerForBattleScript(context, selector("1"))).toBe(3);
+    expect(resolveRulesBattlerForBattleScript(context, selector("0x1"))).toBe(3);
+    expect(resolveRulesBattlerForBattleScript(context, selector("BS_EFFECT_BATTLER"))).toBe(1);
+    expect(resolveRulesBattlerForBattleScript(context, selector("2"))).toBe(1);
+  });
+
+  it("returns unavailable for missing supported roles and every unsupported/invalid selector", () => {
+    const missing = contextAt(primaryInstruction, rules({ selectorRoles: {} }));
+    expect(resolveRulesBattlerForBattleScript(missing, selector("BS_ATTACKER"))).toBeNull();
+    expect(resolveRulesBattlerForBattleScript(missing, selector("BS_EFFECT_BATTLER"))).toBeNull();
+    for (const expression of ["BS_TARGET", "0", "7", "255", "-1", "bogus"]) {
+      expect(resolveRulesBattlerForBattleScript(missing, selector(expression))).toBeNull();
+    }
+  });
+
+  it("prepares live status1, actual masked status2, and raw explicit receipts", () => {
+    const context = contextAt(primaryInstruction);
+    expect(prepareRulesStatusAnimation(
+      context,
+      1,
+      Object.freeze({ kind: "live-status1" }),
+    )).toEqual({
+      kind: "emit",
+      receipt: { kind: "status-animation", battler: 1, isStatus2: 0, status: 0x40 },
+    });
+    expect(prepareRulesStatusAnimation(
+      context,
+      0,
+      Object.freeze({
+        kind: "masked-live-status2",
+        wantedMask: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION,
+      }),
+    )).toEqual({
+      kind: "emit",
+      receipt: {
+        kind: "status-animation",
+        battler: 0,
+        isStatus2: 1,
+        status: 0x0005_0000,
+      },
+    });
+    expect(prepareRulesStatusAnimation(
+      context,
+      1,
+      Object.freeze({ kind: "explicit-status", isStatus2: 0x7e, status: 0x7856_3412 }),
+    )).toEqual({
+      kind: "emit",
+      receipt: {
+        kind: "status-animation",
+        battler: 1,
+        isStatus2: 0x7e,
+        status: 0x7856_3412,
+      },
+    });
+  });
+
+  it("retains live confusion turn bits instead of forwarding the whole mask", () => {
+    for (const confusionTurns of [1, 2, 3, 4, 5, 6, 7]) {
+      const sourceRules = rules({
+        battlers: [
+          battler(0, 0x1000_0000 | confusionTurns),
+          battler(),
+          battler(),
+          battler(),
+        ],
+      });
+      const prepared = prepareRulesStatusAnimation(
+        contextAt(maskedInstruction, sourceRules),
+        0,
+        Object.freeze({
+          kind: "masked-live-status2",
+          wantedMask: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION,
+        }),
+      );
+      expect(prepared).toMatchObject({
+        kind: "emit",
+        receipt: { isStatus2: 1, status: confusionTurns },
+      });
+    }
+  });
+
+  it("suppresses for each source predicate and all non-empty combinations", () => {
+    for (let predicates = 1; predicates < 8; predicates += 1) {
+      const sourceRules = rules({
+        battlers: [
+          battler(
+            0x80,
+            4,
+            predicates & 1 ? BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE : 0,
+            predicates & 2 ? 1 : 0,
+          ),
+          battler(),
+          battler(),
+          battler(),
+        ],
+        hitMarker: predicates & 4 ? BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS : 0,
+      });
+      for (const request of [
+        Object.freeze({ kind: "live-status1" as const }),
+        Object.freeze({ kind: "masked-live-status2" as const, wantedMask: 7 }),
+        Object.freeze({ kind: "explicit-status" as const, isStatus2: 1, status: 7 }),
+      ]) {
+        const prepared = prepareRulesStatusAnimation(
+          contextAt(primaryInstruction, sourceRules),
+          0,
+          request,
+        );
+        expect(prepared).toEqual({ kind: "suppress" });
+        expect(Object.isFrozen(prepared)).toBe(true);
+      }
+    }
+  });
+
+  it("suppresses for each constituent semi-invulnerable status3 bit", () => {
+    for (const status3 of [1 << 6, 1 << 7, 1 << 18]) {
+      const sourceRules = rules({
+        battlers: [battler(0x80, 4, status3), battler(), battler(), battler()],
+      });
+      expect(prepareRulesStatusAnimation(
+        contextAt(primaryInstruction, sourceRules),
+        0,
+        Object.freeze({ kind: "live-status1" }),
+      )).toEqual({ kind: "suppress" });
+    }
+  });
+
+  it("returns frozen deterministic receipts without mutating any source input", () => {
+    const originalInput = input();
+    const sourceRules = createBattleScriptRulesContext(originalInput);
+    const context = contextAt(maskedInstruction, sourceRules);
+    const request = Object.freeze({
+      kind: "masked-live-status2" as const,
+      wantedMask: 0xffff_ffff,
+    });
+    const first = prepareRulesStatusAnimation(context, 2, request);
+    const second = prepareRulesStatusAnimation(context, 2, request);
+    expect(second).toEqual(first);
+    expect(Object.isFrozen(first)).toBe(true);
+    expect(first?.kind).toBe("emit");
+    if (first?.kind === "emit") expect(Object.isFrozen(first.receipt)).toBe(true);
+    expect(sourceRules).toEqual(createBattleScriptRulesContext(originalInput));
+    expect(sourceRules.battlers[2].status2).toBe(0x0800_0002);
+  });
+});
+
+describe("production status rules handler and execution seam", () => {
+  it("composes the existing controls, source handlers, and multi-hit rules once", () => {
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
+    expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
+      10, 16, 17, 18, 20, 38, 39, 40, 57, 58, 60, 61,
+      62, 65, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 141, 248,
+    ]);
+  });
+
+  it("executes all three requests through live rules, preserves rules/RNG, and acknowledges", () => {
+    const cases = [
+      [primaryInstruction, 0, 0x08],
+      [maskedInstruction, 1, 1],
+      [explicitInstruction, 1, 7],
+    ] as const;
+    for (const [instruction, expectedIsStatus2, expectedStatus] of cases) {
+      const execution = stateAt(instruction);
+      const result = stepBattleScriptMachine(program, execution.state, execution.handlers);
+      expect(result.kind).toBe("advanced");
+      expect(result.state.rulesContext).toBe(execution.state.rulesContext);
+      expect(result.state.rng).toBe(execution.state.rng);
+      expect(result.state.rng).toMatchObject({ value: 0x1234_5678, calls: 0, ledger: [] });
+      expect(result.state.events.at(-1)).toMatchObject({
+        kind: "status-animation",
+        battler: 3,
+        isStatus2: expectedIsStatus2,
+        status: expectedStatus,
+      });
+      expect(result.state.scheduler.pendingControllerBattlers).toEqual([3]);
+      const acknowledged = acknowledgeBattleScriptStatusRulesController(
+        result.state.scheduler,
+        3,
+      );
+      expect(acknowledged.pendingControllerBattlers).toEqual([]);
+      expect(result.state.scheduler.pendingControllerBattlers).toEqual([3]);
+    }
+  });
+
+  it("identity-blocks missing bindings and advances suppressed execution without events", () => {
+    const missingExecution = stateAt(
+      primaryInstruction,
+      rules({ selectorRoles: { attacker: null, effectBattler: null } }),
+    );
+    const missing = stepBattleScriptMachine(
+      program,
+      missingExecution.state,
+      missingExecution.handlers,
+    );
+    expect(missing.kind).toBe("blocked");
+    expect(missing.state).toBe(missingExecution.state);
+
+    const suppressedExecution = stateAt(
+      primaryInstruction,
+      rules({ hitMarker: BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS }),
+    );
+    const suppressed = stepBattleScriptMachine(
+      program,
+      suppressedExecution.state,
+      suppressedExecution.handlers,
+    );
+    expect(suppressed.kind).toBe("advanced");
+    expect(suppressed.state.events).toBe(suppressedExecution.state.events);
+    expect(suppressed.state.rulesContext).toBe(suppressedExecution.state.rulesContext);
+    expect(suppressed.state.rng).toBe(suppressedExecution.state.rng);
+    expect(suppressed.state.scheduler).toMatchObject({
+      activeBattler: 3,
+      pendingControllerBattlers: [],
+    });
+  });
+
+  it("keeps controller-busy execution identity-blocked before live rules reads", () => {
+    const sourceRules = rules();
+    const execution = createBattleScriptStatusRulesExecution(
+      program,
+      primaryInstruction.source.label,
+      sourceRules,
+      7,
+      externalPorts(false),
+      createBattleScriptSchedulerState(),
+    );
+    const state = Object.freeze({
+      ...execution.state,
+      programCounter: primaryInstruction.programCounter,
+    });
+    const result = stepBattleScriptMachine(program, state, execution.handlers);
+    expect(result.kind).toBe("blocked");
+    expect(result.state).toBe(state);
+  });
+});
+
+describe("committed OFF Mechanics Lab status facts", () => {
+  it("pins zero PP Ups and the stock-created Toxic status1 0x80 fact", () => {
+    expect(toxicFixture.profile).toBe("battle-scene-off");
+    expect(toxicFixture.overrides.battlers.player.moves[0]).toBe(
+      mechanicLabEvidence.toxic.moveId,
+    );
+    expect(toxicFixture.overrides.battlers.player.ppUps).toEqual([0, 0, 0, 0]);
+    expect(toxicFixture.overrides.battlers.opponent.ppUps).toEqual([0, 0, 0, 0]);
+    expect(mechanicLabEvidence.toxic).toMatchObject({
+      initialPp: 10,
+      finalPp: 9,
+      initialStatus1: 0,
+      finalStatus1: 0x80,
+    });
+  });
+
+  it("pins zero PP Ups and live confusion status2/turn bits equal to 4", () => {
+    expect(confuseRayFixture.profile).toBe("battle-scene-off");
+    expect(confuseRayFixture.overrides.battlers.player.moves[0]).toBe(
+      mechanicLabEvidence.confuseRay.moveId,
+    );
+    expect(confuseRayFixture.overrides.battlers.player.ppUps).toEqual([0, 0, 0, 0]);
+    expect(confuseRayFixture.overrides.battlers.opponent.ppUps).toEqual([0, 0, 0, 0]);
+    expect(mechanicLabEvidence.confuseRay).toMatchObject({
+      initialPp: 10,
+      finalPp: 9,
+      initialStatus2: 0,
+      finalStatus2: 4,
+      initialConfusionTurns: 0,
+      finalConfusionTurns: 4,
+    });
+    expect(
+      mechanicLabEvidence.confuseRay.finalStatus2
+      & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION,
+    ).toBe(4);
+  });
+});

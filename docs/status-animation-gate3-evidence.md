@@ -102,3 +102,38 @@ ordering, selector null/invalid handling, emitted and suppressed results,
 unavailable/malformed preparation, pending/ack, deterministic replay,
 receipt identity, immutable rules/RNG ownership, malformed encodings, and
 exact handler composition.
+
+## Production rules-context follow-up
+
+The abstract preparation boundary is now backed by the first durable
+`BattleScriptRulesContext` slice. It contains exactly four indexed battlers
+with `status1/status2/status3/substituteHP`, explicit attacker/effect-battler
+role bindings, global `hitMarker`, and the already-landed
+`multiHitCounter`. Construction validates source widths and deep-freezes the
+context. No PP, damage, RNG, turn, controller-timing, or presentation field is
+present.
+
+The production selector port implements only the two
+`GetBattlerForBattleScript` cases observed across opcodes 100--102:
+`BS_ATTACKER == 1` and `BS_EFFECT_BATTLER == 2`. Missing bindings and all
+other selector values remain unavailable. The source function has thirteen
+other cases, but their required roles/position mapping are deliberately
+deferred until an opcode family proves which surrounding context owns them;
+this slice does not invent doubles or faint/scripting state.
+
+The production preparation port reads live primary status, computes live
+`status2 & wantedMask` (including the low confusion-turn bits), or forwards
+the explicit raw mode/status. It returns frozen emission/suppression values
+and shares the exact semi-invulnerable/substitute/no-animations predicates.
+`createBattleScriptStatusRulesHandlers` composes it with the existing generic
+control, source-command, and multi-hit factories;
+`createBattleScriptStatusRulesExecution` and the named acknowledgement export
+provide the production execution boundary without replacing any injected
+unit-test port.
+
+Fresh OFF runs of both committed zero-PP-Up fixtures are pinned test-only in
+`tests/fixtures/status-animation-mechanic-lab-evidence.json`: Toxic consumes
+PP **10→9** and creates opponent `status1 == 0x80`; Confuse Ray consumes PP
+**10→9** and creates opponent `status2 == 4` / confusion turns **4**.
+The evidence stays outside the production bundle; the runtime has no oracle
+or fixture dependency.
