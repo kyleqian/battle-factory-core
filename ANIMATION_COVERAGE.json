@@ -80,9 +80,9 @@
     {
       "move": "MOVE_FAINT_ATTACK",
       "status": "partial",
-      "covered": ["opponent-front MURKROW to player-back MAGBY"],
-      "evidence": ["tools/compare/traces/turn17-rung2.json"],
-      "remaining": "Extract the shared timeline from canonical turn clocks and audit the opposite attacker side; retain ISSUES #38."
+      "covered": ["canonical opponent-front MURKROW to player-back MAGBY, complete dense body in turn16 and repeated turn17 occurrences (221/221 each)", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense relative ages 0-220 / oracle frames 2344-2564 (221/221) through the shared Scene-ON adapter"],
+      "evidence": ["tools/compare/traces/turn16-rung2a.json", "tools/compare/traces/turn17-rung2.json", "tools/compare/fixtures/faint-attack-onix-grovyle.json", "tools/compare/faintAttackPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/faint-attack-portable-staging-probe.md"],
+      "remaining": "Retain parked ISSUES #38's single +30 delayed-control BLDALPHA register-visibility race; do not promote to exact without a general cycle/register-queue model."
     }
   ],
   "queue": [
