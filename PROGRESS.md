@@ -4,22 +4,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 346 — S8 OFF duplicate-species dense staging: **GREEN EVIDENCE CHECKPOINT**
+## 346 — S8 OFF duplicate-species loaded-display repair: **GREEN PARTIAL**
 
-- **State:** a deterministic dev-only app/oracle seam now replays the committed
-  duplicate branch through the live renderer. Gate 2 remains open: the first
-  dense audit is **0/52 exact**, **99,464** aggregate differing pixels.
-- **Did:** added a named roster-only app stage, temporary raw-RGB probe output,
-  fixture, and `npm run compare:factory-swap-duplicate-species`. The verifier
-  covers staged picker through fresh returned RIGHT; no runtime oracle/ROM,
-  framebuffer assets, absolute-tick render branch, or logic/RNG mutation.
-- **Next:** model the source's already-loaded GROVYLE picker display separately
-  from staged logical MAGBY, then align duplicate OpenMonPic/message/close
-  composition; rerun all 52 frames. Do not alter party/RNG ownership.
-- **Notes:** residual per frame is printed by the command (+0 **381 px**,
-  peak +27 **5,010 px**, +51 **2,029 px**). Tier-1 **1267/1267**, build
-  **5.677 MB**. Integrated ICE PUNCH **363/363** and FIRE PUNCH **225/225**
-  remain exact; ICE's next uncovered ON-profile transition starts at 2702.
+- **State:** presentation preserves the source's already-loaded GROVYLE display
+  while the staged logical enemy is MAGBY. Gate 2 remains open: dense audit
+  improves strictly to **1/52 exact**, **97,450** aggregate differing pixels.
+- **Did:** added a presentation-owned loaded-species seam and propagated it
+  phase-relatively through duplicate open/close/return for name/category/pic.
+- **Next:** align the bounded duplicate OpenMonPic/message/close composition
+  using task/window evidence; do not alter identity or RNG ownership.
+- **Notes:** improved **2,014 px**; +2 exact, +0 **243 px**, peak +27
+  **4,982 px**, +51 **2,001 px**. Tier-1/build green; no framebuffer assets,
+  RGB fitting, absolute ticks, runtime oracle/ROM, or logic mutation.
 
 ---
 ## 345 — S8 OFF duplicate-species rejection: **GREEN LOGIC CHECKPOINT**

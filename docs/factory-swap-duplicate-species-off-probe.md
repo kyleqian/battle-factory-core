@@ -59,9 +59,10 @@ from this fixture's task path.
 `npm run compare:factory-swap-duplicate-species` reruns this probe through
 `tools/run-mgba-probe.py`, writes raw RGB frames only to a fresh temporary
 directory, and compares all 52 staged picker/error/return frames against the
-normal engine renderer. The initial checkpoint is 0/52 exact with 99,464
-aggregate differing pixels (+0 381px, peak +27 5,010px, +51 2,029px).
-The +0 residual exposes the source-owned loaded-display distinction: changing
-the logical enemy species does not replace the already-created GROVYLE picker
-chrome. Later residuals bound the still-open OpenMonPic/message/close
-composition. No framebuffer output is committed or consumed by production.
+normal engine renderer. The current checkpoint is 1/52 exact with 97,450
+aggregate differing pixels (+0 243px, +2 exact, peak +27 4,982px, +51
+2,001px). Presentation now owns the source's loaded-display distinction:
+changing logical enemy species does not replace the already-created GROVYLE
+name/category/picture. The remaining residual bounds the still-open
+OpenMonPic/message/close composition. No framebuffer output is committed or
+consumed by production.

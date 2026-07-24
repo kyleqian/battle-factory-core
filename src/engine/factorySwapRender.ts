@@ -121,6 +121,7 @@ export interface FactorySwapRenderView {
   readonly phaseElapsed?: number;
   readonly selectedBallIndex?: 0 | 1 | 2 | null;
   readonly selectedBallTile?: 0 | 16 | 32 | null;
+  readonly loadedDisplaySpecies?: string | null;
 }
 
 function drawActionPiece(
@@ -351,6 +352,8 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     !(playerSwitch && phaseElapsed < 110)
       ? party[displayIndex]
       : null;
+  const displayedSpecies =
+    view.loadedDisplaySpecies ?? displaySelected?.species ?? "";
   const speciesCoeff = enemySwitch
     ? factorySwapEnemySpeciesRenderCoeff(phaseElapsed)
     : playerSwitch && phaseElapsed < 71
@@ -482,7 +485,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     bgFade,
   );
   const categoryText = infoSelected
-    ? `${CATEGORY_BY_SPECIES[infoSelected.species] ?? ""} POKéMON`
+    ? `${CATEGORY_BY_SPECIES[view.loadedDisplaySpecies ?? infoSelected.species] ?? ""} POKéMON`
     : "";
   drawTextFaded(
     fb,
@@ -499,8 +502,8 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     fb,
     font,
     charmap,
-    displaySelected?.species ?? "",
-    152 + rightAlignXOffset(font, charmap, displaySelected?.species ?? "", 86),
+    displayedSpecies,
+    152 + rightAlignXOffset(font, charmap, displayedSpecies, 86),
     17,
     [
       ...textPalette.slice(0, 4),
@@ -701,7 +704,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     drawMonPicFaded(
       fb,
       adjustedMonPic,
-      selected.species,
+      view.loadedDisplaySpecies ?? selected.species,
       48 * state.displayCursor + 72,
       bgFade,
       objFade,

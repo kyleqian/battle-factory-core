@@ -613,10 +613,11 @@ install-frame rejection, and first fresh enemy input are Tier-1 pinned with
 all identities/result/round ownership preserved. Dense staged framebuffer
 verification is now reproducible with
 `npm run compare:factory-swap-duplicate-species`: its first every-frame
-picker→error→return audit is **0/52 exact** with **99,464** aggregate differing
-pixels (+0 381px, peak +27 5,010px, +51 2,029px). The bounded remainder is the
-source's already-loaded GROVYLE picker chrome after logical MAGBY staging plus
-the duplicate OpenMonPic/message/close composition. This is an evidence
+picker→error→return audit is **1/52 exact** with **97,450** aggregate differing
+pixels (+0 243px, +2 exact, peak +27 4,982px, +51 2,001px). Presentation now
+preserves the already-loaded GROVYLE name/category/pic separately from logical
+staged MAGBY; the bounded remainder is the duplicate OpenMonPic/message/close
+composition. This is an evidence
 checkpoint, not acceptance; Gate 2 and S8 remain open.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and

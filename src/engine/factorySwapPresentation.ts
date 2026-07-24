@@ -61,6 +61,12 @@ export interface FactorySwapPresentationState {
   readonly returnedFromSummary: boolean;
   /** The duplicate-error task rebuilt the enemy picker on the prior frame. */
   readonly returnedFromDuplicate?: boolean;
+  /**
+   * Species whose graphics/window text were already loaded before a staged
+   * logical roster change. Real picker tasks own this separately from party
+   * data until a cursor-copy task replaces it.
+   */
+  readonly loadedDisplaySpecies?: string | null;
   /** Age since accepted summary B; rebuilt ball callbacks start at +41. */
   readonly summaryReturnClock?: number | null;
 }
@@ -177,6 +183,7 @@ export function createCanonicalFactorySwapPresentation(): FactorySwapPresentatio
     summaryMaxMonIndex: null,
     returnedFromSummary: false,
     returnedFromDuplicate: false,
+    loadedDisplaySpecies: null,
     summaryReturnClock: null,
   };
 }
@@ -223,6 +230,10 @@ export function advanceFactorySwapPresentation(
     speciesNameFade = activateSpeciesNameFade(speciesNameFade);
   }
   let controller = copyFactorySwapCursor(state.controller);
+  const loadedDisplaySpecies =
+    controller.displayCursor !== state.controller.displayCursor
+      ? null
+      : state.loadedDisplaySpecies;
   let fieldHandoff = state.fieldHandoff;
   let summaryCallback = state.summaryCallback;
   let summaryMode = state.summaryMode;
@@ -270,6 +281,7 @@ export function advanceFactorySwapPresentation(
         summaryMaxMonIndex,
         returnedFromSummary,
         summaryReturnClock,
+        loadedDisplaySpecies,
       };
     }
   }
@@ -310,6 +322,7 @@ export function advanceFactorySwapPresentation(
       summaryCurMonIndex,
       summaryMaxMonIndex,
       returnedFromSummary,
+      loadedDisplaySpecies,
     };
   }
   if (controller.phase === "acceptExit" && phaseElapsed === 20) {
@@ -344,6 +357,7 @@ export function advanceFactorySwapPresentation(
       summaryCurMonIndex,
       summaryMaxMonIndex,
       returnedFromSummary,
+      loadedDisplaySpecies,
     };
   }
   // Swap_TaskCantHaveSameMons states 2..4: wait for CloseMonPic, restore the
@@ -370,6 +384,7 @@ export function advanceFactorySwapPresentation(
       returnedFromSummary,
       returnedFromDuplicate,
       summaryReturnClock,
+      loadedDisplaySpecies,
     };
   }
   if (controller.phase === "enemySwitch" && phaseElapsed === 84) {
@@ -416,6 +431,7 @@ export function advanceFactorySwapPresentation(
       summaryCurMonIndex,
       summaryMaxMonIndex,
       returnedFromSummary,
+      loadedDisplaySpecies,
     };
   }
   if (controller.phase === "playerSwitch" && phaseElapsed === 71) {
@@ -465,6 +481,7 @@ export function advanceFactorySwapPresentation(
       summaryCurMonIndex,
       summaryMaxMonIndex,
       returnedFromSummary,
+      loadedDisplaySpecies,
     };
   }
   if (controller.phase === "playerPickerReturn" && phaseElapsed >= 55) {
@@ -486,6 +503,7 @@ export function advanceFactorySwapPresentation(
       summaryCurMonIndex,
       summaryMaxMonIndex,
       returnedFromSummary,
+      loadedDisplaySpecies,
     };
   }
   // Swap_Task_ScreenInfoTransitionIn state 8 re-enables the existing task
@@ -508,6 +526,7 @@ export function advanceFactorySwapPresentation(
     returnedFromSummary,
     returnedFromDuplicate,
     summaryReturnClock,
+    loadedDisplaySpecies,
   };
   const delay = readyDelay(advanced);
   const effectiveDelay =

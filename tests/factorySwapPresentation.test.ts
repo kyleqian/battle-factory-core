@@ -838,6 +838,7 @@ describe("live Factory swap presentation adapter", () => {
     state = advance(state, 133);
     state = {
       ...state,
+      loadedDisplaySpecies: state.controller.enemyParty[0].species,
       controller: {
         ...state.controller,
         enemyParty: [
@@ -849,6 +850,7 @@ describe("live Factory swap presentation adapter", () => {
     };
     const before = structuredClone(state.controller);
     state = handleFactorySwapPresentationInput(state, "A");
+    expect(state.loadedDisplaySpecies).toBe("GROVYLE");
     expect(state.controller).toMatchObject({
       phase: "duplicateSpecies",
       inputReady: false,
@@ -859,6 +861,7 @@ describe("live Factory swap presentation adapter", () => {
     });
     expect(factorySwapDuplicateMonPicVisual(23).spriteVisible).toBe(true);
     state = advance(state, 23);
+    expect(state.loadedDisplaySpecies).toBe("GROVYLE");
     expect(handleFactorySwapPresentationInput(state, "B")).toBe(state);
     state = advance(state, 1);
     state = handleFactorySwapPresentationInput(state, "B");
@@ -866,6 +869,7 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapDuplicateReturnMonPicVisual(1).window).not.toBeNull();
     expect(factorySwapDuplicateReturnMonPicVisual(21).window).toBeNull();
     state = advance(state, 22);
+    expect(state.loadedDisplaySpecies).toBe("GROVYLE");
     expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
     state = advance(state, 1);
     expect(state.controller).toMatchObject({ phase: "enemyPicker", inputReady: false, cursor: 0 });

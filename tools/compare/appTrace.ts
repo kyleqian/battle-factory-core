@@ -45,6 +45,10 @@ const APP_STAGES: Readonly<Record<string, AppStage>> = {
       ...state,
       factorySwap: {
         ...state.factorySwap,
+        loadedDisplaySpecies:
+          state.factorySwap.controller.enemyParty[
+            state.factorySwap.controller.displayCursor as 0 | 1 | 2
+          ]?.species ?? null,
         controller: {
           ...state.factorySwap.controller,
           enemyParty: [
