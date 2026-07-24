@@ -37,7 +37,8 @@ from pathlib import Path
 if len(sys.argv) not in (2, 3, 4, 5):
     raise SystemExit(
         f"usage: {sys.argv[0]} <fresh-output.json> [fresh-rgb-dir] "
-        "[player|opponent] [fire-punch|faint-attack|rock-slide|double-team]"
+        "[player|opponent] "
+        "[fire-punch|faint-attack|rock-slide|double-team|endeavor]"
     )
 
 OUTPUT_PATH = Path(sys.argv[1])
@@ -51,6 +52,7 @@ MOVE_IDS = {
     "faint-attack": 185,
     "rock-slide": 157,
     "double-team": 104,
+    "endeavor": 283,
 }
 if MOVE_NAME not in MOVE_IDS:
     raise SystemExit(f"unsupported staged move {MOVE_NAME!r}")
@@ -96,6 +98,8 @@ SPRITE_CALLBACK_OFFSET = 0x1C
 SPRITE_X2_OFFSET = 0x24
 SPRITE_DATA_OFFSET = 0x2E
 ROCK_TEMPLATE = 0x08596B04
+HITSPLAT_TEMPLATE = 0x08597358
+SWEAT_DROP_TEMPLATE = 0x085CE76C
 SPRITE_ORDER = 0x020217F4
 # Static symbol from `arm-none-eabi-nm -n --defined-only pokeemerald.elf`;
 # Thumb bit included. See dump-doubleteam-sprites.py for the canonical probe.
@@ -159,17 +163,28 @@ def battle_mon(oracle: EmeraldOracle, battler: int) -> dict[str, object]:
     }
 
 
-def battler_sprite(oracle: EmeraldOracle, battler: int) -> dict[str, int]:
-    sprite_id = oracle.read_u8(oracle.symbols["gBattlerSpriteIds"] + battler)
+def sprite_record(oracle: EmeraldOracle, sprite_id: int) -> dict[str, int]:
     # struct Sprite: x/y at +0x20, x2/y2 at +0x24, sizeof 0x44.
     base = oracle.symbols["gSprites"] + sprite_id * 0x44
+    attr1 = u16(oracle, base + 0x02)
+    matrix_num = (attr1 >> 9) & 0x1F
+    matrix_base = oracle.symbols["gOamMatrices"] + matrix_num * 8
     return {
         "id": sprite_id,
         "x": s16(oracle, base + 0x20),
         "y": s16(oracle, base + 0x22),
         "x2": s16(oracle, base + 0x24),
         "y2": s16(oracle, base + 0x26),
+        "invisible": (oracle.read_u8(base + SPRITE_FLAGS_OFFSET) >> 2) & 1,
+        "matrixNum": matrix_num,
+        "matrixA": s16(oracle, matrix_base),
+        "matrixD": s16(oracle, matrix_base + 6),
     }
+
+
+def battler_sprite(oracle: EmeraldOracle, battler: int) -> dict[str, int]:
+    sprite_id = oracle.read_u8(oracle.symbols["gBattlerSpriteIds"] + battler)
+    return sprite_record(oracle, sprite_id)
 
 
 def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
@@ -177,13 +192,36 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
     if RGB_DIR is not None:
         (RGB_DIR / f"{tick:05d}.rgb").write_bytes(rgb)
     rocks = []
+    endeavor_effects = []
     double_team_clones = []
     for slot in range(64):
         base = oracle.symbols["gSprites"] + slot * SPRITE_SIZE
         if not oracle.read_u8(base + SPRITE_FLAGS_OFFSET) & 1:
             continue
-        if oracle.read_u32(base + SPRITE_TEMPLATE_OFFSET) == ROCK_TEMPLATE:
+        template = oracle.read_u32(base + SPRITE_TEMPLATE_OFFSET)
+        if template == ROCK_TEMPLATE:
             rocks.append(slot)
+        if template in (HITSPLAT_TEMPLATE, SWEAT_DROP_TEMPLATE):
+            attr1 = u16(oracle, base + 0x02)
+            matrix_num = (attr1 >> 9) & 0x1F
+            matrix_base = oracle.symbols["gOamMatrices"] + matrix_num * 8
+            endeavor_effects.append(
+                {
+                    "kind": (
+                        "hitsplat"
+                        if template == HITSPLAT_TEMPLATE
+                        else "sweatDrop"
+                    ),
+                    "slot": slot,
+                    "x": s16(oracle, base + 0x20),
+                    "y": s16(oracle, base + 0x22),
+                    "x2": s16(oracle, base + 0x24),
+                    "y2": s16(oracle, base + 0x26),
+                    "matrixNum": matrix_num,
+                    "matrixA": s16(oracle, matrix_base),
+                    "matrixD": s16(oracle, matrix_base + 6),
+                }
+            )
         if oracle.read_u32(base + SPRITE_CALLBACK_OFFSET) == ANIM_DOUBLE_TEAM_CALLBACK:
             double_team_clones.append(
                 {
@@ -210,7 +248,19 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
             "player": battler_sprite(oracle, PLAYER_BATTLER),
             "opponent": battler_sprite(oracle, OPPONENT_BATTLER),
         },
+        "healthboxes": {
+            "player": sprite_record(
+                oracle,
+                oracle.read_u8(oracle.symbols["gHealthboxSpriteIds"]),
+            ),
+            "opponent": sprite_record(
+                oracle,
+                oracle.read_u8(oracle.symbols["gHealthboxSpriteIds"] + 1),
+            ),
+        },
+        "animMovePower": u16(oracle, oracle.symbols["gAnimMovePower"]),
         "rockSlots": rocks,
+        "endeavorEffects": endeavor_effects,
         "doubleTeamClones": double_team_clones,
         "spriteOrder": [oracle.read_u8(SPRITE_ORDER + slot) for slot in range(64)],
     }
@@ -250,6 +300,7 @@ def main() -> None:
         "faint-attack": 20,
         "rock-slide": 10,
         "double-team": 15,
+        "endeavor": 5,
     }[MOVE_NAME]
     write_u16(oracle, battler_base + BATTLE_MON_MOVES + staged_slot * 2, STAGED_MOVE)
     oracle.write_u8(battler_base + BATTLE_MON_PP + staged_slot, staged_pp)

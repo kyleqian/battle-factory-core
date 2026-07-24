@@ -564,6 +564,7 @@ import {
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
   sceneOnDoubleTeamView,
+  sceneOnEndeavorView,
   sceneOnFaintAttackView,
   sceneOnFirePunchView,
   sceneOnRockSlideView,
@@ -5310,6 +5311,7 @@ function endeavorDropletCenter(
   dropletIndex: 0 | 1 | 2 | 3,
   t: number,
   pressTick: number,
+  base: Readonly<{ x: number; y: number }> = ENDEAVOR_DROPLET_BASE,
 ): { x: number; y: number } | null {
   const spawnRamTick = pressTick + ENDEAVOR_DROPLET_SPAWN_DELAY + cycle * ENDEAVOR_DROPLET_CYCLE_STRIDE + batchIndex * ENDEAVOR_DROPLET_BATCH_STRIDE;
   const ramTick = t - ENDEAVOR_DROPLET_RENDER_LAG;
@@ -5317,8 +5319,8 @@ function endeavorDropletCenter(
   if (n < 1 || n >= ENDEAVOR_DROPLET_LIFETIME_TICKS) return null;
   const batch = ENDEAVOR_DROPLET_BATCH_OFFSETS[batchIndex]!;
   const tmpl = ENDEAVOR_DROPLET_TEMPLATE[dropletIndex]!;
-  const spawnX = ENDEAVOR_DROPLET_BASE.x + tmpl.dxSign * (batch.xOffset + tmpl.dxExtra);
-  const spawnY = ENDEAVOR_DROPLET_BASE.y + batch.yOffset + tmpl.rowIndex * 6;
+  const spawnX = base.x + tmpl.dxSign * (batch.xOffset + tmpl.dxExtra);
+  const spawnY = base.y + batch.yOffset + tmpl.rowIndex * 6;
   return { x: spawnX + n * tmpl.velocX, y: spawnY - n };
 }
 
@@ -5334,14 +5336,26 @@ function endeavorDropletCenter(
  * docs/battle-menu-notes.md §11's own precedent), so this is called AFTER
  * `drawSpriteSheetAffineStretch` draws the squished attacker.
  */
-function drawEndeavorDroplets(fb: Uint8Array, t: number, pressTick: number): void {
+function drawEndeavorDroplets(
+  fb: Uint8Array,
+  t: number,
+  pressTick: number,
+  base: Readonly<{ x: number; y: number }> = ENDEAVOR_DROPLET_BASE,
+): void {
   const cycles: readonly (0 | 1)[] = [0, 1];
   const batches: readonly (0 | 1)[] = [0, 1];
   const droplets: readonly (0 | 1 | 2 | 3)[] = [0, 1, 2, 3];
   for (const cycle of cycles) {
     for (const batchIndex of batches) {
       for (const dropletIndex of droplets) {
-        const center = endeavorDropletCenter(cycle, batchIndex, dropletIndex, t, pressTick);
+        const center = endeavorDropletCenter(
+          cycle,
+          batchIndex,
+          dropletIndex,
+          t,
+          pressTick,
+          base,
+        );
         if (!center) continue;
         drawSpriteSheet(fb, battleAnimSweatDrop.tileset, battleAnimSweatDrop.palette, center.x - 4, center.y - 4);
       }
@@ -13728,6 +13742,137 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "ENDEAVOR") {
+    const view = sceneOnEndeavorView(state);
+    const { attacker, target, animationProfile } = view;
+    if (
+      attacker.species !== "ONIX"
+      || attacker.geometry.side !== "player"
+      || target.species !== "GROVYLE"
+      || target.geometry.side !== "opponent"
+    ) {
+      throw new Error(
+        `unsupported staged ENDEAVOR pair ${attacker.species}->${target.species}`,
+      );
+    }
+
+    // The canonical reducers are press-relative. Mapping body age zero to
+    // press+55 preserves their independently probed register/OAM lags while
+    // keeping this staged path free of the canonical battle clock.
+    const relativeTick = view.age + ENDEAVOR_SQUISH_START_DELAY;
+    const entry = ENDEAVOR_SQUISH_TABLE[view.age];
+    const targetShakeX2 = endeavorShakeX2(
+      relativeTick,
+      0,
+      animationProfile.staleMovePower,
+    );
+    const targetInvisible = endeavorOnixInvisible(relativeTick, 0);
+    const healthboxY2 = endeavorHealthboxBounceY2(relativeTick, 0);
+
+    drawStaticBgShiftedY(fb, 0);
+    if (!targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        grovyleFrontSprite.tileset,
+        grovyleFrontSprite.palette,
+        target.geometry.spriteCorner.x + targetShakeX2,
+        target.geometry.spriteCorner.y,
+      );
+    }
+
+    const ramTick = relativeTick - ENDEAVOR_HITSPLAT_RENDER_LAG;
+    const hitOffsets = [
+      { x: 12, y: -12, ramOffset: 62 },
+      { x: -12, y: 12, ramOffset: 88 },
+    ] as const;
+    for (const hit of hitOffsets) {
+      const n = ramTick - hit.ramOffset;
+      if (n < 0 || n >= ENDEAVOR_HITSPLAT_VISIBLE_TICKS) continue;
+      drawSpriteSheetAffineStretch(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        target.geometry.animationCenter.x + hit.x - 16,
+        target.geometry.animationCenter.y + hit.y - 16,
+        ENDEAVOR_HITSPLAT_MATRIX,
+        ENDEAVOR_HITSPLAT_MATRIX,
+        0,
+        ENDEAVOR_BLEND_COLOR,
+        0,
+        true,
+      );
+    }
+
+    if (entry) {
+      const height = 64 - animationProfile.attackerYOffset * 2;
+      const scaledHeight = Math.min(
+        128,
+        Math.floor((height * 256) / entry.yScale),
+      );
+      const y2 = Math.trunc((height - scaledHeight) / 2);
+      drawSpriteSheetAffineStretch(
+        fb,
+        onixBackSprite.tileset,
+        onixBackSprite.palette,
+        attacker.geometry.spriteCorner.x,
+        attacker.geometry.spriteCorner.y,
+        entry.xScale,
+        entry.yScale,
+        y2,
+        ENDEAVOR_BLEND_COLOR,
+        entry.coeff,
+        true,
+      );
+      drawEndeavorDroplets(
+        fb,
+        relativeTick,
+        0,
+        attacker.geometry.battlePositionCenter,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        onixBackSprite.tileset,
+        onixBackSprite.palette,
+        attacker.geometry.spriteCorner.x,
+        attacker.geometry.spriteCorner.y,
+      );
+    }
+
+    // Healthboxes have a lower OAM priority number than battlers. This is
+    // observable when ONIX's vertically stretched back sprite reaches the
+    // opponent box; the box wins that overlap on hardware.
+    drawOpponentHealthboxWobble(
+      fb,
+      healthboxY2,
+      opponentHealthboxContentForHp(view.displayedTargetHp),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      onixPlayerHealthboxContentForState(
+        state.config.fieldProfile.playerHp,
+        state.config.fieldProfile.playerStatus,
+      ),
+    );
+
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    const line1 = `${attacker.species} used`;
+    const line2 = "ENDEAVOR!";
+    const textStartAge = state.config.moveTextStartAge ?? -1;
+    drawMessageTextLines(
+      fb,
+      line1,
+      line2,
+      Math.min(line1.length + line2.length, view.age - textStartAge + 1),
+    );
+    return;
+  }
+
   if (state.config.move === "DOUBLE_TEAM") {
     const view = sceneOnDoubleTeamView(state);
     const { attacker, target } = view;

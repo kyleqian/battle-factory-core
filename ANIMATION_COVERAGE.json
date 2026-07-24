@@ -15,10 +15,9 @@
     },
     {
       "move": "MOVE_ENDEAVOR",
-      "status": "partial",
-      "covered": ["opponent-front GROVYLE to player-back ONIX"],
-      "evidence": ["tools/compare/traces/turn2-endeavor-drain.json"],
-      "remaining": "Prove a portable staged case and audit geometry-sensitive attacker/target variants."
+      "status": "exact",
+      "covered": ["canonical opponent-front GROVYLE to player-back ONIX, complete dense kickoff/body/generic-hit/HP-drain window at oracle frames 2894-3130 (237/237)", "portable synthetic player-back ONIX to opponent-front GROVYLE, complete move body plus generic-hit and immutable 143->117 HP-drain handoff at relative ages -2..138 / oracle frames 2345-2485 (141/141), including translated droplets/hitsplats, stale-power shake, front/back y-offset geometry, and opponent-healthbox OAM priority"],
+      "evidence": ["tools/compare/traces/turn2-endeavor-drain.json", "tools/compare/fixtures/endeavor-onix-grovyle.json", "tools/compare/endeavorPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/endeavor-portable-staging-probe.md"]
     },
     {
       "move": "MOVE_DRAGON_BREATH",
@@ -85,7 +84,6 @@
   ],
   "queue": [
     "MOVE_FAINT_ATTACK",
-    "MOVE_ENDEAVOR",
     "MOVE_FEATHER_DANCE",
     "MOVE_QUICK_ATTACK",
     "MOVE_AERIAL_ACE",
