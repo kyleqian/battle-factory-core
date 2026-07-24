@@ -167,6 +167,7 @@ describe("source-shaped Battle Script rules context", () => {
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
       "atkCancelerTracker",
+      "battleMoveDamage",
       "battleOutcome",
       "battlers",
       "critMultiplier",
@@ -180,6 +181,7 @@ describe("source-shaped Battle Script rules context", () => {
       "moveEffectByte",
       "moveResultFlags",
       "multiHitCounter",
+      "multistringChooser",
       "scriptingBattler",
       "selectorRoles",
     ]);

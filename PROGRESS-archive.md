@@ -1,3 +1,30 @@
+## 399 — S10 battle-kernel and trainer-AI architecture checkpoint queued
+
+- **State:** the run is clean and green at **137 files / 1751 tests** with
+  S10 Gate 3 still at **27** source-safe executable opcodes. The script machine
+  is immutable and unit-testable, but no complete battle-level
+  state/decision/result boundary or independently executable trainer AI exists.
+- **Did:** recorded the user's S10 acceptance decision: RNG lives in immutable
+  battle state after initialization; one submitted requested decision returns
+  state, semantic events, and the next decision/outcome; forced switches are
+  decision boundaries; presentation acknowledgements cannot own rules/RNG.
+  Emerald AI is an injected pure policy over a source-faithful view, legal
+  decisions, Factory policy, and explicit RNG.
+- **Next:** before `CANCELER_IMPRISONED` or wider opcode breadth, brief one
+  bounded Sol/high main-lane architecture step to publish and Tier-1 pin the
+  battle-level decision-boundary ABI around the existing script machine. Keep
+  production `core.ts` integration, AI implementation, further opcodes, and
+  presentation migration out of that first step. A disjoint side audit may
+  map native AI view/history/RNG/switch-item dependencies; animation may
+  continue BIND's opposite orientation independently.
+- **Notes:** unit-test builders may construct validated transient states; the
+  Oracle still may not inject them. Current smells to contain rather than
+  extend are the 16k-line `battleScene.ts`, legacy `turnNResolved`/absolute-tick
+  production path, 1.9k-line canceler module, growing monolithic rules context,
+  and move-specific Scene-ON dispatch. No code, tooling, or oracle lifecycle
+  changed in this handoff; no deferred user decision is open.
+
+---
 ## 398 — Gate-3 attack-canceler TAUNTED source phase integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable

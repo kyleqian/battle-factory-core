@@ -291,14 +291,15 @@ export function createBattleScriptRulesContext(
       1,
       `battlers[${index}].usedImprisonedMove`,
     ) as 0 | 1,
-    confusionSelfDmg: requireUnsigned(
-      battler.confusionSelfDmg ?? 0,
-      1,
-      `battlers[${index}].confusionSelfDmg`,
-    ) as 0 | 1,
-    confusionDamage: battler.confusionDamage === undefined
-      ? undefined
-      : Object.freeze({
+    ...(battler.confusionSelfDmg === undefined ? {} : {
+      confusionSelfDmg: requireUnsigned(
+        battler.confusionSelfDmg,
+        1,
+        `battlers[${index}].confusionSelfDmg`,
+      ) as 0 | 1,
+    }),
+    ...(battler.confusionDamage === undefined ? {} : {
+      confusionDamage: Object.freeze({
         level: requireUnsigned(
           battler.confusionDamage.level,
           0xff,
@@ -327,6 +328,7 @@ export function createBattleScriptRulesContext(
         isBurned: Boolean(battler.confusionDamage.isBurned),
         hasGuts: Boolean(battler.confusionDamage.hasGuts),
       }),
+    }),
   })) as unknown as BattleScriptRulesBattlers;
   const selectorRoles = Object.freeze({
     attacker: requireRole(input.selectorRoles?.attacker, "selectorRoles.attacker"),

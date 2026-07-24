@@ -4,6 +4,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 402 — Gate-3 attack-canceler CONFUSED source phase integrated
+
+- **State:** the run is clean and green at **140 files / 1777 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through CONFUSED
+  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** ported `CANCELER_CONFUSED` from battle_util.c:2156-2187 with the
+  source-ordered counter decrement and conditional `Random() & 1` LCG receipt.
+  Added explicit chooser/cursor, target, battle-damage, protect flag,
+  unable-marker, effect, and script ownership. The self-hit calculation records
+  `MOVE_POUND`, side status 0, power override 40, type override 0, and same
+  attacker/defender; `BattleScript_DoSelfConfusionDmg` retains the later
+  `cancelmultiturnmoves` ownership from battle_scripts_1.s:3801-3803.
+- **Next:** begin `CANCELER_PARALYZED` only after its status predicate,
+  conditional `Random()%4`, protect flag, script/marker/effect, and receipts
+  are explicit. Do not loop phases or register opcode 0.
+- **Notes:** not-confused, snap at counter 1, continuing odd draw, even self-hit,
+  source-reachable counters **0..5** and rejected **6/7**, missing/invalid
+  damage context, exact LCG ownership, all four attackers/both sides, target
+  replacement, preset chooser/damage/protect/marker, deferred multi-turn
+  cancellation, exactly one tracker advance, input immutability, deterministic
+  replay, and deep freezing are pinned. Focused **5 files / 49 tests**;
+  integrated Tier-1 **140 files / 1777 tests**, build, OFF v5 info
+  (`9c89c741…`), and diff check green. Code commit `9fdfba3`; pixel diff N/A.
+
+---
 ## 401 — Gate-3 attack-canceler IMPRISONED source phase integrated
 
 - **State:** the run is clean and green at **139 files / 1771 tests**. S10
@@ -57,30 +83,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   forced switches, event order, boundary exclusivity, and rejection of
   presentation acknowledgements before rules/RNG execution. BIND's existing
   orientation also remains **45/45 + 45/45** exact; merge `86f1beb`.
-
----
-## 399 — S10 battle-kernel and trainer-AI architecture checkpoint queued
-
-- **State:** the run is clean and green at **137 files / 1751 tests** with
-  S10 Gate 3 still at **27** source-safe executable opcodes. The script machine
-  is immutable and unit-testable, but no complete battle-level
-  state/decision/result boundary or independently executable trainer AI exists.
-- **Did:** recorded the user's S10 acceptance decision: RNG lives in immutable
-  battle state after initialization; one submitted requested decision returns
-  state, semantic events, and the next decision/outcome; forced switches are
-  decision boundaries; presentation acknowledgements cannot own rules/RNG.
-  Emerald AI is an injected pure policy over a source-faithful view, legal
-  decisions, Factory policy, and explicit RNG.
-- **Next:** before `CANCELER_IMPRISONED` or wider opcode breadth, brief one
-  bounded Sol/high main-lane architecture step to publish and Tier-1 pin the
-  battle-level decision-boundary ABI around the existing script machine. Keep
-  production `core.ts` integration, AI implementation, further opcodes, and
-  presentation migration out of that first step. A disjoint side audit may
-  map native AI view/history/RNG/switch-item dependencies; animation may
-  continue BIND's opposite orientation independently.
-- **Notes:** unit-test builders may construct validated transient states; the
-  Oracle still may not inject them. Current smells to contain rather than
-  extend are the 16k-line `battleScene.ts`, legacy `turnNResolved`/absolute-tick
-  production path, 1.9k-line canceler module, growing monolithic rules context,
-  and move-specific Scene-ON dispatch. No code, tooling, or oracle lifecycle
-  changed in this handoff; no deferred user decision is open.

@@ -89,6 +89,7 @@ describe("source-shaped attack-canceler flags phase", () => {
       CANCELER_TAUNTED: 7,
       CANCELER_IMPRISONED: 8,
       CANCELER_CONFUSED: 9,
+      CANCELER_PARALYZED: 10,
     });
     expect(BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND).toBe(1 << 25);
     expect(BATTLE_SCRIPT_STATUS3_GRUDGE).toBe(1 << 14);
