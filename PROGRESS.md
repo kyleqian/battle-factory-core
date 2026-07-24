@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 383 — Gate-3 status-animation family integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe opcodes and one
+  generic, rules-owned, read-only status-animation preparation seam.
+- **Did:** refactored opcode 100 onto frozen `live-status1` requests and added
+  `STATUS2ANIMATION`/`CHOSENSTATUSANIMATION` (**101/102**): exact idle/operand/
+  selector gates, masked-live versus explicit/raw-u8 requests, validated
+  receipts, fixed suppression/advance, and pending/ack bookkeeping.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep live status/suppression reads in rules; keep
+  status mutation, PP policy, RNG/effects, controller bytes, visuals/timing,
+  Scene ON, and pixels out.
+- **Notes:** exact supported IDs are
+  **10/16/17/18/20/37/38/39/40/57/58/60/61/62/65/83/84/85/86/98/100/101/102/111/131/141/248**.
+  All **13+5+2** starts/widths are pinned. Fresh OFF Confuse Ray lab evidence
+  proves zero PP Ups, PP **10→9**, and stock-created status2/confusion **0→4**.
+  Focused **141/141**; Tier-1 **123 files / 1640 tests**, build, oracle info,
+  lab manifest check, and diff check green. Pixel diff N/A.
+
+---
 ## 382 — Gate-3 STATUSANIMATION receipt/suppression integrated
 
 - **State:** S10 Gate 3 remains open with **25** source-safe opcodes and a
@@ -40,24 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   All **92** generated starts have zero operand widths and are pinned.
   Focused **118/118**; Tier-1 **121 files / 1615 tests**, build, and Scene-OFF
   oracle contract green. Pixel/oracle diff is N/A for this logical barrier.
-
----
-## 380 — Gate-3 trainer-slide controller receipts integrated
-
-- **State:** S10 Gate 3 remains open with **23** source-safe opcodes and an
-  unwired immutable controller/scheduler/rules/RNG/source-context seam.
-- **Did:** added only `TRAINERSLIDEIN`/`TRAINERSLIDEOUT` (opcodes **83/248**):
-  each validates one u8 position, resolves it through a dedicated typed
-  `GetBattlerAtPosition` port, activates/marks the battler pending, emits one
-  frozen direction-specific receipt, and advances one instruction/two source
-  bytes without an idle guard.
-- **Next:** choose another bounded source family only when its complete rules
-  context is explicit. Keep trainer sprites/resources, coordinates,
-  callbacks/tasks, controller-family completion, waitstate, presentation,
-  rules/RNG/PP, animation, and pixels out.
-- **Notes:** exact supported IDs are
-  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/83/84/85/86/98/111/131/141/248**.
-  Focused **112/112**; Tier-1 **120 files / 1608 tests**, build, and Scene-OFF
-  oracle contract green. All **10+5** committed starts are pinned; the Wally
-  `battle_scripts_2` start is outside this program. Ack means receipt/work
-  initiation only; pixel/oracle diff is N/A for this semantic seam.
