@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  createSceneOnMovePresentation,
+  PIDGEOTTO_TO_ONIX_AERIAL_ACE_PRESENTATION,
+  PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_AERIAL_ACE_PRESENTATION,
+  sceneOnAerialAceView,
+} from "../src/engine/sceneOnPresentation.ts";
+import {
   AERIAL_ACE_LAST_BODY_AGE,
   AERIAL_ACE_PALETTE_FIRST_AGE,
   AERIAL_ACE_SHAKE_FIRST_AGE,
@@ -78,5 +84,75 @@ describe("portable AERIAL ACE source components", () => {
         (age) => aerialAceAnimationAtAge(age, "player").targetShakeY2,
       ),
     ).toEqual([0, 3, 3, 0, 0, 3, 0, 0]);
+  });
+
+  it("consumes the opponent-front 117→108 result immutably through cleanup", () => {
+    const controllerProfile = Object.freeze({
+      targetHpBefore: 117,
+      targetHpAfter: 108,
+      hpDrainFirstAge: 131,
+      resultTextFirstAge: 146,
+      currentMoveResetAge: 242,
+    });
+    const stage = createSceneOnMovePresentation({
+      move: "AERIAL_ACE",
+      ...PIDGEOTTO_TO_ONIX_AERIAL_ACE_PRESENTATION,
+      fieldProfile: Object.freeze({
+        playerHp: 117,
+        opponentHp: 156,
+        playerStatus: "none" as const,
+        playerGender: "female" as const,
+      }),
+      controllerProfile,
+      moveTextStartAge: 5,
+    });
+    const before = structuredClone(stage.config);
+    expect(sceneOnAerialAceView({ ...stage, age: 130 }).displayedTargetHp)
+      .toBe(117);
+    expect(sceneOnAerialAceView({ ...stage, age: 131 }).displayedTargetHp)
+      .toBe(116);
+    expect(sceneOnAerialAceView({ ...stage, age: 139 }).displayedTargetHp)
+      .toBe(108);
+    expect(sceneOnAerialAceView({ ...stage, age: 146 }).resultText)
+      .toEqual({ line: "It’s not very effective…", visibleChars: 1 });
+    expect(sceneOnAerialAceView({ ...stage, age: 241 }).currentMove)
+      .toBe("AERIAL_ACE");
+    expect(sceneOnAerialAceView({ ...stage, age: 242 }).currentMove)
+      .toBeNull();
+    expect(stage.config).toEqual(before);
+    expect(stage.config.controllerProfile).toBe(controllerProfile);
+  });
+
+  it("pins the four-frame player printer offset and independent cleanup", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "AERIAL_ACE",
+      ...PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_AERIAL_ACE_PRESENTATION,
+      fieldProfile: Object.freeze({
+        playerHp: 156,
+        opponentHp: 117,
+        playerStatus: "none" as const,
+        playerGender: "female" as const,
+        opponentGender: "male" as const,
+      }),
+      controllerProfile: Object.freeze({
+        targetHpBefore: 117,
+        targetHpAfter: 108,
+        hpDrainFirstAge: 127,
+        resultTextFirstAge: 142,
+        currentMoveResetAge: 238,
+      }),
+      moveTextStartAge: 5,
+    });
+    expect(sceneOnAerialAceView({ ...stage, age: 47 })).toMatchObject({
+      animationAge: 51,
+      attackerOffset: { x2: 16, y2: 2 },
+      displayedTargetHp: 117,
+    });
+    expect(sceneOnAerialAceView({ ...stage, age: 127 }).displayedTargetHp)
+      .toBe(116);
+    expect(sceneOnAerialAceView({ ...stage, age: 135 }).displayedTargetHp)
+      .toBe(108);
+    expect(sceneOnAerialAceView({ ...stage, age: 238 }).currentMove)
+      .toBeNull();
   });
 });
