@@ -31,6 +31,11 @@ ROM constructs the parties and runs normal battle initialization.
 the baseline species and stats. Its interim v1 contract permits only active
 loadout choices—move slots/PP Ups, item, ability, types, and friendship—so a
 worker can isolate a mechanic before supplying ordinary controller input.
+These substitutions happen after the initial send-out sequence. Persistent
+checks consulted during later move execution work (for example Own Tempo and
+Choice Band), but an overridden Drought or Intimidate does not retroactively
+replay its missed switch-in hook. S10's pre-battle builder is required for
+entry-hook and switching coverage.
 
 Override IDs are source-bounded: moves `0..354`, items `0..376`, abilities
 `0..77`, and types `0..17`. The setup arrays contain raw catalog records;
