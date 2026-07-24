@@ -34,6 +34,8 @@ function battler(
     status2: changes.status2 ?? 0,
     status3: changes.status3 ?? 0,
     substituteHP: changes.substituteHP ?? 0,
+    rolloutTimer: changes.rolloutTimer ?? 0,
+    furyCutterCounter: changes.furyCutterCounter ?? 0,
   });
 }
 

@@ -47,8 +47,19 @@ function battler(
   substituteHP = 0,
   hp = 100,
   pp: readonly [number, number, number, number] = [10, 20, 30, 40],
+  rolloutTimer = 0,
+  furyCutterCounter = 0,
 ) {
-  return Object.freeze({ hp, pp, status1, status2, status3, substituteHP });
+  return Object.freeze({
+    hp,
+    pp,
+    status1,
+    status2,
+    status3,
+    substituteHP,
+    rolloutTimer,
+    furyCutterCounter,
+  });
 }
 
 function input(
