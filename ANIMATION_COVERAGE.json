@@ -83,7 +83,6 @@
     }
   ],
   "queue": [
-    "MOVE_FAINT_ATTACK",
     "MOVE_FEATHER_DANCE",
     "MOVE_QUICK_ATTACK",
     "MOVE_AERIAL_ACE",
@@ -91,6 +90,48 @@
     "MOVE_FLY",
     "MOVE_DRAGON_BREATH",
     "MOVE_BIND"
+  ],
+  "componentTracks": [
+    {
+      "id": "elemental-punch",
+      "components": [
+        "asset:ANIM_TAG_HANDS_AND_FEET",
+        "asset:ANIM_TAG_IMPACT",
+        "visualCommand:create_fist_sprite",
+        "visualCommand:create_basic_hitsplat_sprite",
+        "task:AnimTask_ShakeMon"
+      ],
+      "representatives": [
+        "MOVE_FIRE_PUNCH",
+        "MOVE_ICE_PUNCH",
+        "MOVE_THUNDER_PUNCH"
+      ],
+      "goal": "Reuse FIRE PUNCH's exact punch chassis, then isolate ICE and THUNDER overlays; the track is non-exclusive and each move retains independent dense acceptance."
+    },
+    {
+      "id": "white-feather",
+      "components": [
+        "asset:ANIM_TAG_WHITE_FEATHER",
+        "sprite:gFallingFeatherSpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_FEATHER_DANCE",
+        "MOVE_MIST_BALL"
+      ],
+      "goal": "Share the source-derived feather asset/geometry while keeping FEATHERDANCE's field and MIST BALL's projectile choreography distinct."
+    },
+    {
+      "id": "fast-contact",
+      "components": [
+        "asset:ANIM_TAG_IMPACT",
+        "task:AnimTask_ShakeMon"
+      ],
+      "representatives": [
+        "MOVE_QUICK_ATTACK",
+        "MOVE_AERIAL_ACE"
+      ],
+      "goal": "Generalize the already-partial translated impact/shake seam before closing each move's orientation-specific travel choreography."
+    }
   ],
   "variantAudits": {
     "openLevelSpecies": []

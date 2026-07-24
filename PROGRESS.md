@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 337 — Animation dependency/composition pivot: **GREEN — 354 moves mapped**
+
+- **State:** move acceptance remains **4 exact / 8 partial / 264 unsupported**,
+  but implementation work is now source-ranked by **935** reusable components
+  and **3,190** move/component edges across all **354** Emerald moves.
+- **Did:** generated the animation-script call/dependency graph, added
+  component leverage and related-move reporting, and introduced overlapping
+  component tracks. The first track treats FIRE PUNCH as an exact punch
+  chassis for ICE/THUNDER overlays without excluding those moves from other
+  elemental tracks. Also fixed and pruned eight compare/probe/launcher
+  papercuts.
+- **Next:** animation: work the `elemental-punch` track and independently
+  accept ICE/THUNDER windows. Main: implement the later LOSS record menu or
+  seventh-win summary; do not resume Battle 2.
+- **Notes:** graph regeneration and coverage validation are byte-for-byte
+  tested. Tier-1 is **1229/1229** and build remains **5.651 MB** because the
+  graph is dev-only; no gameplay/RNG/facility behavior changed.
+
+---
 ## 336 — S8 OFF terminal LOSS opening: **GREEN — 210/210 exact**
 
 - **State:** the source-relative Factory Lobby LOSS path is exact from its
@@ -45,24 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   enemy picker, B-close, popup, options, and player picker remain **43/43**,
   **66/66**, **130/130**, **59/59**, **44/44**, **58/58**, and **101/101**.
   No mutation, script handoff, absolute tick/frame lookup, or screenshot path.
-
----
-## 334 — S8 OFF default-YES accept/exit: **GREEN — 43/43 exact**
-
-- **State:** default YES is exact from the first sampled prompt edge through
-  `CB2_ReturnToFieldContinueScript` at response +41 / canonical 30041. Dense
-  OFF trace `battle1-swap-enemy-accept-exit.json` is **43/43 exact**; the
-  input-ready accept prompt remains **66/66**.
-- **Did:** added source-owned accept-response/mon-picture-close/exit phases,
-  `gSpecialVar_Result=FALSE` at +20, selected-record ONIX→GROVYLE commit at
-  +21, all-palette fade, and an explicit field-script handoff. Tier-1 rejects
-  the +63 A, proves no early mutation, pins rental monId 188 / PID 1094072807
-  / IV 3 / ability 0 / friendship 0, and opens the round decision seam only
-  after the atomic commit.
-- **Next:** implement one distinct remaining S8 gate-2 edge: accept NO/B
-  return to enemy input at 30087, or a source-pinned loss/seventh-win ending.
-  Do not extend the retired Battle-2 march.
-- **Notes:** Tier-1 **1215/1215**, build **5.568 MB**. Enemy picker, B-close,
-  popup, options, and player picker remain **130/130**, **59/59**, **44/44**,
-  **58/58**, and **101/101**. No absolute tick/frame lookup, screenshot asset,
-  canonical-party replacement branch, NO/B response, or post-handoff path.

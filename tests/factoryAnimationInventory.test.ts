@@ -5,9 +5,12 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import inventory from "../src/data/gen/factory-animation-inventory.json" with { type: "json" };
 import {
+  animationComponentLeverage,
   animationCoverageSummary,
   openLevelVariantAudit,
+  queuedAnimationComponentTracks,
   queuedAnimationMoves,
+  relatedAnimationMoves,
   validateAnimationCoverage,
 } from "../tools/animation/coverage.ts";
 
@@ -91,8 +94,8 @@ describe("animation coverage ledger", () => {
 
   it("keeps the explicit queue inside Level 50 coverage", () => {
     const queue = queuedAnimationMoves();
-    expect(queue).toHaveLength(8);
-    expect(queue[0]).toMatchObject({ move: "MOVE_FAINT_ATTACK", status: "partial" });
+    expect(queue).toHaveLength(7);
+    expect(queue[0]).toMatchObject({ move: "MOVE_FEATHER_DANCE", status: "partial" });
     expect(queue.at(-1)).toMatchObject({ move: "MOVE_BIND", status: "partial" });
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
@@ -100,5 +103,28 @@ describe("animation coverage ledger", () => {
       auditedSpecies: 0,
       overlappingMoves: 37,
     });
+  });
+
+  it("uses the source dependency graph for non-exclusive work grouping", () => {
+    expect(queuedAnimationComponentTracks()[0]).toMatchObject({
+      id: "elemental-punch",
+      representatives: [
+        "MOVE_FIRE_PUNCH",
+        "MOVE_ICE_PUNCH",
+        "MOVE_THUNDER_PUNCH",
+      ],
+    });
+    const punchNeighbors = relatedAnimationMoves("MOVE_FIRE_PUNCH", 12).map(
+      (move) => move.move,
+    );
+    expect(punchNeighbors).toContain("MOVE_ICE_PUNCH");
+    expect(punchNeighbors).toContain("MOVE_THUNDER_PUNCH");
+
+    const leverage = animationComponentLeverage();
+    expect(leverage.proven.some((item) =>
+      item.provenBy.includes("MOVE_FIRE_PUNCH") &&
+      item.remainingMoves.includes("MOVE_ICE_PUNCH")
+    )).toBe(true);
+    expect(leverage.unproven.length).toBeGreaterThan(0);
   });
 });

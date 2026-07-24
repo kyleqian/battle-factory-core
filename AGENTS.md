@@ -44,12 +44,16 @@ This is the stable ownership contract; current state remains in `PROGRESS.md`.
 
 - Main defines shared interfaces before another lane depends on them.
 - Scene mode may change presentation timing, never logical outcomes or RNG.
-- Animation works the queue in `ANIMATION_COVERAGE.json`; its concise handoff
-  is `ANIMATION_PROGRESS.md`. Level 50 moves come first, then Open-only, then
-  the rest. Report coverage with `npm run animation:coverage`.
-- Track coverage by move, but implement shared script/effect primitives. Start
-  with one representative matchup; add side/species variants only when source
-  or oracle evidence shows a dependency.
+- Animation's handoff is `ANIMATION_PROGRESS.md`; coverage and non-exclusive
+  component tracks live in `ANIMATION_COVERAGE.json`. Level 50 moves come
+  first, then Open-only, then the rest.
+- A move is the acceptance unit; a source component is the implementation
+  unit. `npm run animation:coverage` ranks dependencies from
+  `battle-animation-components.json`. Pick a bounded component track, prove
+  one representative, then batch-check its siblings. Shared components do not
+  waive each move's dense oracle acceptance.
+- Add side/species variants only when source or oracle evidence shows a
+  dependency.
 - The supervisor/solo launcher owns oracle lifecycle; workers only validate
   their selected profile and never start or stop a shared oracle.
 - Side and animation use separate worktrees and do not edit `PROGRESS.md` or

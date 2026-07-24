@@ -140,14 +140,13 @@ seam. The animation lane is encouraged when a bounded module is ready, but do
 not invent filler work just to occupy it. There is still one supervisor and
 one integration plan—not independent supervisors racing branches.
 
-For animation, read `ANIMATION_PROGRESS.md`, run `npm run
-animation:coverage`, and select a bounded item from `ANIMATION_COVERAGE.json`.
-Keep that lane replenished while independent main work remains. A good step
-stages one short ON-profile scenario or advances one reusable animation
-family—not “implement the next N moves.” Require the worker to update the
-animation ledgers with its evidence. `exact` means a complete dense window
-through the shared seam with every evidence-required variant covered; a
-canonical battle window alone remains `partial`.
+For animation, read `ANIMATION_PROGRESS.md` and run `npm run
+animation:coverage`. Brief one bounded, non-exclusive component track from
+`ANIMATION_COVERAGE.json`: name the components, one representative, and the
+sibling moves to batch-check. A move is still the acceptance unit, so shared
+code never promotes siblings without their own dense evidence. Keep the lane
+replenished while independent main work remains. Require both animation
+ledgers to be updated; a canonical window alone remains `partial`.
 
 What makes the worktree lanes safe:
 

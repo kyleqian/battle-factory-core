@@ -319,7 +319,7 @@ fi
 # and the supervisor folds docs into the merge.
 if [[ "$IS_WORKTREE" == "1" ]]; then
   if [[ "$LANE" == "animation" ]]; then
-    LANE_CONTRACT="This is the animation/presentation lane. Read ANIMATION_PROGRESS.md and run npm run animation:coverage before changing code. Work the assigned Level 50 coverage case through reusable animation primitives behind the battle presentation seam; do not take ownership of facility progression or shared battle-state architecture. Use the Battle Scene ON oracle for animation evidence. You own ANIMATION_PROGRESS.md and ANIMATION_COVERAGE.json: keep their handoff, status, evidence, and queue current before finishing. A canonical battle window alone is partial; exact requires a complete dense window through the shared seam and every evidence-required variant."
+    LANE_CONTRACT="This is the animation/presentation lane. Read ANIMATION_PROGRESS.md and run npm run animation:coverage before changing code. Work the assigned non-exclusive component track behind the battle presentation seam: prove one representative, reuse the source-derived components, and batch-check the named siblings. Moves remain independent acceptance units; shared code alone never promotes coverage. Do not own facility progression or shared battle state. Use the Battle Scene ON oracle. You own ANIMATION_PROGRESS.md and ANIMATION_COVERAGE.json. A canonical window alone is partial; exact requires a complete dense window through the shared seam and every evidence-required variant."
   else
     LANE_CONTRACT="This is the side implementation lane. Prefer source extraction, deterministic scenario staging, data breadth, or another file-disjoint task assigned by the supervisor. Use the Battle Scene OFF oracle."
   fi
