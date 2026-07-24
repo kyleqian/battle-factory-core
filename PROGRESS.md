@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 385 — Gate-3 MOVEVALUESCLEANUP production context integrated
+
+- **State:** S10 Gate 3 remains open with all **27** source-safe opcodes now
+  executable through the single durable production rules context.
+- **Did:** extended that context with exactly opcode 37's five source `u8`
+  move-value fields, centralized its hit-marker constants, and composed the
+  existing generic cleanup handler. Construction/deep freeze, exact resets,
+  unrelated nested identity, deterministic repetition, and status behavior
+  before/after cleanup are production-context pinned.
+- **Next:** extend this one context only for the next completely evidenced
+  rules family. Keep attack cancellation, accuracy, damage, PP, status
+  application, moves, turn/round state, presentation, and core wiring out.
+- **Notes:** cleanup preserves every field except its exact five resets and
+  hit-marker bits **6/14**; multi-hit/status behavior is unchanged. Focused
+  **25/25**; Tier-1 **126 files / 1665 tests**, build, OFF info, fresh Toxic
+  and Confuse Ray zero-PP-Up assertions, and diff check green. Commit
+  `5e4a18b`; pixel diff N/A.
+
+---
 ## 384 — Gate-3 status-animation production rules context integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe opcodes; opcodes
@@ -45,23 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   proves zero PP Ups, PP **10→9**, and stock-created status2/confusion **0→4**.
   Focused **141/141**; Tier-1 **123 files / 1640 tests**, build, oracle info,
   lab manifest check, and diff check green. Pixel diff N/A.
-
----
-## 382 — Gate-3 STATUSANIMATION receipt/suppression integrated
-
-- **State:** S10 Gate 3 remains open with **25** source-safe opcodes and a
-  typed but production-unwired status-preparation/rules port.
-- **Did:** added only `STATUSANIMATION` (opcode **100 / 0x64**): idle resolves
-  one u8 selector, then the rules port returns the exact frozen primary-status
-  receipt or suppression; emission marks pending, suppression emits nothing,
-  and both advance two source bytes. Busy identity-blocks.
-- **Next:** choose another bounded source family only when its complete rules
-  context is explicit. Keep status application, substitute/semi-invulnerable/
-  hit-marker ownership, RNG/damage/turn logic, controller bytes, visual
-  animation/timing, Scene ON, PP policy, and other opcodes out.
-- **Notes:** exact supported IDs are
-  **10/16/17/18/20/37/38/39/40/57/58/60/61/62/65/83/84/85/86/98/100/111/131/141/248**.
-  All **13** starts/widths are pinned. OFF mechanicLab: Toxic miss/no-status
-  **151 captures**; successful Toxic→`0x80` with command-27 suppression
-  **102/102 semantic captures**. Focused **103/103**; Tier-1 **122 files /
-  1627 tests**, build, and Scene-OFF oracle contract green. Pixel diff N/A.
