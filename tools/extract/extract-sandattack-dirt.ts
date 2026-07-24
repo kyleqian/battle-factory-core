@@ -12,9 +12,10 @@
 // raw 4bpp 8x8 tiles, uncompressed - `INCGFX_U32(..., ".lz")` LZ-compresses
 // it at BUILD time, but the checked-in source file itself is the raw
 // pre-compression 4bpp planar data) and `mud_sand.pal` (JASC-PAL, 16 colors).
-// Only tile 0 is needed (AnimDirtScatter's own sprite always shows the
-// template's default frame). Decoded directly here (GBA 4bpp tile: 8 rows of
-// 4 bytes, each byte 2 pixels, low nibble first/left).
+// SAND ATTACK uses tile 0 as one 8x8 sprite. MUD SLAP's distinct animation
+// selects frame 1 on a 16x16 sprite, so it uses tiles 1-4 in 1D OBJ order.
+// Decoded directly here (GBA 4bpp tile: 8 rows of 4 bytes, each byte 2 pixels,
+// low nibble first/left).
 //
 // Run with:
 //   node --experimental-strip-types tools/extract/extract-sandattack-dirt.ts
@@ -57,10 +58,14 @@ if (gfxBytes.length % 32 !== 0) {
   throw new Error(`mud_sand.4bpp: expected a multiple of 32 bytes (8x8 4bpp tiles), got ${gfxBytes.length}`);
 }
 const tile0 = decode4bppTile(gfxBytes, 0);
+const mudSlapTiles = [1, 2, 3, 4].map((tile) =>
+  decode4bppTile(gfxBytes, tile * 32)
+);
 const palette = loadJascPal(join(spritesDir, "mud_sand.pal"));
 if (palette.length !== 16) throw new Error(`mud_sand.pal: expected 16 colors, got ${palette.length}`);
 
 writeJson(join(ASSETS_GEN, "battle-anim-mud-sand.json"), {
   tileset: { columns: 1, rows: 1, tiles: [tile0] },
+  mudSlapTileset: { columns: 2, rows: 2, tiles: mudSlapTiles },
   palette,
 });

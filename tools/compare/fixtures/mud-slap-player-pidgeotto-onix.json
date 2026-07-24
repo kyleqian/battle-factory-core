@@ -1,0 +1,40 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-mud-slap-player-pidgeotto-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "PIDGEOTTO (player-back) -> ONIX (opponent-front)",
+  "move": "MUD_SLAP",
+  "orientation": "player-to-opponent",
+  "appStage": {"oracleFrame": 80, "presentationAge": 41},
+  "denseWindow": {"startFrame": 80, "endFrame": 130},
+  "fieldProfile": {
+    "playerHp": 156,
+    "opponentHp": 117,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "animationProfile": {
+    "spriteOrderSeed": [
+      62, 60, 0, 63, 1, 61, 6, 8, 2, 3, 4, 21, 20, 5, 19, 18,
+      17, 16, 15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59,
+      23, 22, 48, 49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30,
+      31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
+      46, 47
+    ],
+    "mud": [
+      {"slot":4,"xStep":960,"yStep":781},{"slot":5,"xStep":960,"yStep":921},{"slot":7,"xStep":1176,"yStep":1089},{"slot":9,"xStep":1292,"yStep":1011},{"slot":10,"xStep":1024,"yStep":1101},
+      {"slot":3,"xStep":1152,"yStep":961},{"slot":11,"xStep":946,"yStep":1037},{"slot":12,"xStep":972,"yStep":729},{"slot":13,"xStep":1112,"yStep":1063},{"slot":14,"xStep":1152,"yStep":1089},
+      {"slot":15,"xStep":1330,"yStep":909},{"slot":16,"xStep":998,"yStep":1089},{"slot":17,"xStep":1112,"yStep":961},{"slot":18,"xStep":1126,"yStep":833},{"slot":19,"xStep":1280,"yStep":769},
+      {"slot":20,"xStep":960,"yStep":921},{"slot":21,"xStep":1318,"yStep":781},{"slot":22,"xStep":1152,"yStep":781},{"slot":23,"xStep":1304,"yStep":793},{"slot":24,"xStep":1074,"yStep":897},
+      {"slot":25,"xStep":1344,"yStep":871},{"slot":26,"xStep":1010,"yStep":961},{"slot":27,"xStep":1240,"yStep":883},{"slot":28,"xStep":946,"yStep":793},{"slot":29,"xStep":1202,"yStep":999},
+      {"slot":30,"xStep":1176,"yStep":769},{"slot":31,"xStep":1010,"yStep":1113},{"slot":32,"xStep":1254,"yStep":897},{"slot":33,"xStep":1138,"yStep":793},{"slot":34,"xStep":1176,"yStep":897}
+    ]
+  },
+  "moveTextStartAge": 7,
+  "acceptance": {
+    "status": "exact",
+    "result": "51/51 source OAM frames and 51/51 dense RGB frames exact for the complete opposite-side move-owned body before generic hit/controller ownership."
+  }
+}

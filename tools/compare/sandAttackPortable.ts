@@ -9,22 +9,30 @@ import {
 } from "../../src/engine/core.ts";
 import {
   createSceneOnMovePresentation,
+  PIDGEOTTO_TO_ONIX_MUD_SLAP_PRESENTATION,
   PIDGEOTTO_TO_ONIX_SAND_ATTACK_PRESENTATION,
+  PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_MUD_SLAP_PRESENTATION,
   PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_SAND_ATTACK_PRESENTATION,
+  sceneOnMudSlapView,
   type SceneOnFaintAttackFieldProfile,
 } from "../../src/engine/sceneOnPresentation.ts";
 import type {
   SandAttackAnimationProfile,
 } from "../../src/engine/sandAttack.ts";
+import {
+  mudSlapSourceMudAtAge,
+  type MudSlapAnimationProfile,
+} from "../../src/engine/mudSlap.ts";
 
 interface Fixture {
+  readonly move: "SAND_ATTACK" | "MUD_SLAP";
   readonly scenario: string;
   readonly probe: string;
   readonly appStage: { readonly presentationAge: number };
   readonly denseWindow: { readonly startFrame: number; readonly endFrame: number };
   readonly fieldProfile: SceneOnFaintAttackFieldProfile;
-  readonly animationProfile: SandAttackAnimationProfile;
-  readonly controllerProfile: {
+  readonly animationProfile: SandAttackAnimationProfile | MudSlapAnimationProfile;
+  readonly controllerProfile?: {
     readonly accuracyStageBefore: number;
     readonly accuracyStageAfter: number;
     readonly resultTextFirstAge: number;
@@ -60,20 +68,41 @@ const run = spawnSync(
 if (run.stdout) process.stdout.write(run.stdout);
 if (run.stderr) process.stderr.write(run.stderr);
 if (run.status !== 0) process.exit(run.status ?? 1);
+const probe = JSON.parse(readFileSync(probeOutput, "utf8")) as {
+  readonly frames: readonly {
+    readonly frame: number;
+    readonly mudSlapMudOam: readonly {
+      readonly index: number;
+      readonly x: number;
+      readonly y: number;
+    }[];
+  }[];
+};
+const probeFrames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
 
 let state: EngineState = {
   ...createInitialState(),
   rngMode: "frontierBattle",
-  sceneOnPresentation: createSceneOnMovePresentation({
-    move: "SAND_ATTACK",
-    ...(fixture.orientation === "player-to-opponent"
-      ? PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_SAND_ATTACK_PRESENTATION
-      : PIDGEOTTO_TO_ONIX_SAND_ATTACK_PRESENTATION),
-    fieldProfile: fixture.fieldProfile,
-    animationProfile: fixture.animationProfile,
-    controllerProfile: fixture.controllerProfile,
-    moveTextStartAge: fixture.moveTextStartAge,
-  }),
+  sceneOnPresentation: fixture.move === "MUD_SLAP"
+    ? createSceneOnMovePresentation({
+        move: "MUD_SLAP",
+        ...(fixture.orientation === "player-to-opponent"
+          ? PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_MUD_SLAP_PRESENTATION
+          : PIDGEOTTO_TO_ONIX_MUD_SLAP_PRESENTATION),
+        fieldProfile: fixture.fieldProfile,
+        animationProfile: fixture.animationProfile as MudSlapAnimationProfile,
+        moveTextStartAge: fixture.moveTextStartAge,
+      })
+    : createSceneOnMovePresentation({
+        move: "SAND_ATTACK",
+        ...(fixture.orientation === "player-to-opponent"
+          ? PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_SAND_ATTACK_PRESENTATION
+          : PIDGEOTTO_TO_ONIX_SAND_ATTACK_PRESENTATION),
+        fieldProfile: fixture.fieldProfile,
+        animationProfile: fixture.animationProfile as SandAttackAnimationProfile,
+        controllerProfile: fixture.controllerProfile!,
+        moveTextStartAge: fixture.moveTextStartAge,
+      }),
 };
 state = {
   ...state,
@@ -84,6 +113,7 @@ state = {
 };
 
 let matching = 0;
+let componentMatching = 0;
 let diffPixels = 0;
 const mismatches: Array<{
   frame: number;
@@ -99,6 +129,30 @@ for (
   const oracle = readFileSync(
     join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`),
   );
+  if (fixture.move === "MUD_SLAP") {
+    const view = sceneOnMudSlapView(state.sceneOnPresentation!);
+    const sourceMud = mudSlapSourceMudAtAge(
+      view.animationAge,
+      view.attacker.geometry.animationCenter,
+      view.attacker.geometry.side,
+      fixture.animationProfile as MudSlapAnimationProfile,
+    );
+    const actual = sourceMud.map(({ x, y }) => ({
+      x: (x - 8) & 0x1ff,
+      y: (y - 8) & 0xff,
+    }));
+    const expected = [...probeFrames.get(frame)!.mudSlapMudOam]
+      .reverse()
+      .map(({ x, y }) => ({ x, y }));
+    if (JSON.stringify(actual) === JSON.stringify(expected)) {
+      componentMatching += 1;
+    } else {
+      console.log(
+        `component mismatch ${frame}: `
+        + `${JSON.stringify(expected)}/${JSON.stringify(actual)}`,
+      );
+    }
+  }
   const rgba = render(state);
   let frameDiff = 0;
   let minX = 240;
@@ -153,10 +207,18 @@ const total =
 console.log(
   `${matching}/${total} frames matched; ${diffPixels} aggregate differing pixels`,
 );
+if (fixture.move === "MUD_SLAP") {
+  console.log(`${componentMatching}/${total} source OAM frames matched`);
+}
 if (mismatches.length) {
   const format = ({ frame, pixels, box, sample }: typeof mismatches[number]) =>
     `${frame}:${pixels}@${box}[${sample}]`;
   console.log(`first mismatches: ${mismatches.slice(0, 16).map(format).join(", ")}`);
   console.log(`last mismatches: ${mismatches.slice(-16).map(format).join(", ")}`);
 }
-process.exit(matching === total ? 0 : 1);
+process.exit(
+  matching === total
+  && (fixture.move !== "MUD_SLAP" || componentMatching === total)
+    ? 0
+    : 1,
+);
