@@ -11,7 +11,7 @@
   },
   "denseWindow": {
     "startFrame": 46,
-    "endFrame": 116
+    "endFrame": 264
   },
   "fieldProfile": {
     "playerHp": 117,
@@ -21,7 +21,12 @@
   },
   "controllerProfile": {
     "targetHpBefore": 117,
-    "targetHpAfter": 110
+    "targetHpAfter": 110,
+    "hitReactionFirstAge": 81,
+    "hpDrainFirstAge": 116,
+    "resultTextFirstAge": 128,
+    "resultKind": "notVeryEffective",
+    "currentMoveResetAge": 225
   },
   "moveTextStartAge": 5
 }

@@ -114,6 +114,11 @@ describe("portable QUICK ATTACK presentation", () => {
     const controllerProfile = Object.freeze({
       targetHpBefore: 117,
       targetHpAfter: 110,
+      hitReactionFirstAge: 81,
+      hpDrainFirstAge: 116,
+      resultTextFirstAge: 128,
+      resultKind: "notVeryEffective" as const,
+      currentMoveResetAge: 225,
     });
     const stage = createSceneOnMovePresentation({
       move: "QUICK_ATTACK",
@@ -137,6 +142,56 @@ describe("portable QUICK ATTACK presentation", () => {
     expect(stage.config.controllerProfile).toBe(controllerProfile);
   });
 
+  it("presents generic hit, HP drain, result, and current-move cleanup from controller clocks", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "QUICK_ATTACK",
+      ...PIDGEOTTO_TO_ONIX_QUICK_ATTACK_PRESENTATION,
+      fieldProfile: {
+        playerHp: 117,
+        opponentHp: 156,
+        playerStatus: "none",
+      },
+      controllerProfile: {
+        targetHpBefore: 117,
+        targetHpAfter: 110,
+        hitReactionFirstAge: 81,
+        hpDrainFirstAge: 116,
+        resultTextFirstAge: 128,
+        resultKind: "notVeryEffective",
+        currentMoveResetAge: 225,
+      },
+      moveTextStartAge: 5,
+    });
+
+    expect(sceneOnQuickAttackView({ ...stage, age: 80 })).toMatchObject({
+      healthboxY2: 0,
+      targetInvisible: false,
+      displayedTargetHp: 117,
+      resultText: null,
+      currentMove: "QUICK_ATTACK",
+    });
+    expect(sceneOnQuickAttackView({ ...stage, age: 81 })).toMatchObject({
+      healthboxY2: 1,
+      targetInvisible: false,
+    });
+    expect(sceneOnQuickAttackView({ ...stage, age: 82 })).toMatchObject({
+      healthboxY2: -1,
+      targetInvisible: true,
+    });
+    expect(sceneOnQuickAttackView({ ...stage, age: 116 }).displayedTargetHp)
+      .toBe(116);
+    expect(sceneOnQuickAttackView({ ...stage, age: 122 }).displayedTargetHp)
+      .toBe(110);
+    expect(sceneOnQuickAttackView({ ...stage, age: 128 }).resultText)
+      .toEqual({ line: "It’s not very effective…", visibleChars: 1 });
+    expect(sceneOnQuickAttackView({ ...stage, age: 151 }).resultText)
+      .toEqual({ line: "It’s not very effective…", visibleChars: 24 });
+    expect(sceneOnQuickAttackView({ ...stage, age: 224 }).currentMove)
+      .toBe("QUICK_ATTACK");
+    expect(sceneOnQuickAttackView({ ...stage, age: 225 }).currentMove)
+      .toBeNull();
+  });
+
   it("rejects an outcome profile that would calculate healing here", () => {
     expect(() => createSceneOnMovePresentation({
       move: "QUICK_ATTACK",
@@ -149,6 +204,11 @@ describe("portable QUICK ATTACK presentation", () => {
       controllerProfile: {
         targetHpBefore: 110,
         targetHpAfter: 117,
+        hitReactionFirstAge: 81,
+        hpDrainFirstAge: 116,
+        resultTextFirstAge: 128,
+        resultKind: "notVeryEffective",
+        currentMoveResetAge: 225,
       },
       moveTextStartAge: 5,
     })).toThrow(/targetHpBefore >= targetHpAfter/);
