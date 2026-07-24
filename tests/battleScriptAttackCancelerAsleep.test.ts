@@ -136,6 +136,7 @@ describe("source-shaped attack-canceler asleep phase", () => {
       CANCELER_IN_LOVE: 11,
       CANCELER_BIDE: 12,
       CANCELER_THAW: 13,
+      CANCELER_END: 14,
     });
   });
 
