@@ -139,15 +139,22 @@ function readRef(...parts: string[]): string {
   writeJson(join(DATA_GEN, "natures.json"), { natures });
 }
 
-// --- Species base stats + abilities, scoped to the anchor's 6 rentals ------
-// (src/data/pokemon/species_info.h is huge - NUM_SPECIES entries - and
-// nothing downstream of S3 needs the full dex yet; extend ANCHOR_SPECIES if
-// a later stage needs more.)
+// --- Species base stats + abilities: every real Emerald species ------------
+//
+// `species_info.h` has a real entry for ids 1..411, except for the 25 legacy
+// old-Unown save-compatibility slots. Those use a C macro shorthand rather
+// than repeating an initializer, so resolve the shorthand's initializer just
+// as we would a direct block. Keep the historical field names below intact:
+// anchor-rental stat derivation consumes them directly.
 {
-  const ANCHOR_SPECIES = ["SPECIES_ONIX", "SPECIES_MAGBY", "SPECIES_BAYLEEF", "SPECIES_BUTTERFREE", "SPECIES_HAUNTER", "SPECIES_QUILAVA"];
+  const speciesConstants = parseIntDefines(readRef("include", "constants", "species.h"), "SPECIES_");
+  const realSpecies = [...speciesConstants.entries()]
+    .filter(([, id]) => id >= 1 && id <= 411)
+    .sort(([, a], [, b]) => a - b);
   const speciesInfo = readRef("src", "data", "pokemon", "species_info.h");
 
   const species: Array<{
+    id: number;
     name: string;
     baseHp: number;
     baseAttack: number;
@@ -158,11 +165,27 @@ function readRef(...parts: string[]): string {
     abilities: string[];
   }> = [];
 
-  for (const name of ANCHOR_SPECIES) {
-    const blockRe = new RegExp(`\\[${name}\\]\\s*=\\s*\\{([\\s\\S]*?)\\n    \\},`);
+  function macroBody(macroName: string): string {
+    const macroRe = new RegExp(`#define\\s+${macroName}\\b([\\s\\S]*?)\\n\\s*\\n`, "m");
+    const macroMatch = macroRe.exec(speciesInfo);
+    if (!macroMatch) throw new Error(`could not find species_info.h macro ${macroName}`);
+    return macroMatch[1]!;
+  }
+
+  function entryBody(name: string): string {
+    const blockRe = new RegExp(`\\[${name}\\]\\s*=\\s*\\{([\\s\\S]*?)\\n    \\},?`);
     const blockMatch = blockRe.exec(speciesInfo);
-    if (!blockMatch) throw new Error(`could not find species_info.h block for ${name}`);
-    const body = blockMatch[1]!;
+    if (blockMatch) return blockMatch[1]!;
+
+    const shorthandRe = new RegExp(`\\[${name}\\]\\s*=\\s*([A-Z][A-Z0-9_]*)\\s*,`);
+    const shorthandMatch = shorthandRe.exec(speciesInfo);
+    if (shorthandMatch) return macroBody(shorthandMatch[1]!);
+
+    throw new Error(`could not find species_info.h entry for ${name}`);
+  }
+
+  for (const [name, id] of realSpecies) {
+    const body = entryBody(name);
 
     const field = (fieldName: string): number => {
       const m = new RegExp(`\\.${fieldName}\\s*=\\s*(\\d+)`).exec(body);
@@ -175,8 +198,12 @@ function readRef(...parts: string[]): string {
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
+    if (abilities.length !== 2 || abilities.some((ability) => !/^ABILITY_[A-Z0-9_]+$/.test(ability))) {
+      throw new Error(`expected two ABILITY_* slots for ${name}, got ${abilities.join(", ")}`);
+    }
 
     species.push({
+      id,
       name,
       baseHp: field("baseHP"),
       baseAttack: field("baseAttack"),
@@ -187,6 +214,8 @@ function readRef(...parts: string[]): string {
       abilities,
     });
   }
+
+  if (species.length !== 411) throw new Error(`expected 411 real species, extracted ${species.length}`);
 
   writeJson(join(DATA_GEN, "species-stats.json"), { species });
 }
