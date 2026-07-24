@@ -20,7 +20,7 @@
     "playerHp": 142,
     "opponentHp": 117,
     "playerStatus": "none",
-    "playerGender": "male",
+    "playerGender": "female",
     "opponentGender": "male"
   },
   "controllerProfile": {
@@ -35,6 +35,6 @@
   },
   "acceptance": {
     "status": "partial",
-    "remaining": "Portable player-side strike is exact through its move-owned lead-in except the 24-pixel opponent-priority artifact; the target monbg/controller tail remains unresolved from oracle frame 441."
+    "scope": "Complete practical strike/controller-cleanup window through the last FLY-owned frame; MOVE_FLY remains partial under ISSUES #34."
   }
 }

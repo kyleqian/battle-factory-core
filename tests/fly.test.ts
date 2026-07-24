@@ -58,19 +58,40 @@ describe("portable two-turn FLY presentation", () => {
       .toMatchObject({ x: -22, y: -29, pa: 86, pb: -241, pc: 241 });
     expect(flyStrikeBallAtAge(19, "player", { x: 176, y: 42 }))
       .toMatchObject({ x: 175, y: 41 });
+    // The positive Q8.8 Y delta is coerced from odd 947 to even 946 because
+    // source reserves bit 0 as the direction flag.
+    expect(flyStrikeBallAtAge(22, "player", { x: 176, y: 42 }))
+      .toMatchObject({ x: 207, y: 52 });
+    expect(flyStrikeBallAtAge(29, "player", { x: 176, y: 42 })).toBeNull();
   });
 
   it("reappears the attacker after flight and reuses impact/shake timing", () => {
+    expect(flyPresentationAtAge("strike", 21, "player", { x: 72, y: 97 }, { x: 176, y: 42 }))
+      .toMatchObject({ targetTaskOwnsX2: false, targetShakeX2: 0 });
     expect(flyPresentationAtAge("strike", 22, "opponent", { x: 176, y: 51 }, { x: 72, y: 88 }))
-      .toMatchObject({ impactVisible: true, attackerInvisible: true });
+      .toMatchObject({
+        impactVisible: true,
+        attackerInvisible: true,
+        targetTaskOwnsX2: true,
+        impactWinsBallOamTie: false,
+      });
+    expect(flyPresentationAtAge("strike", 22, "player", { x: 72, y: 97 }, { x: 176, y: 42 }))
+      .toMatchObject({ impactVisible: true, impactWinsBallOamTie: true });
+    expect(flyPresentationAtAge("strike", 23, "player", { x: 72, y: 97 }, { x: 176, y: 42 }))
+      .toMatchObject({ impactWinsBallOamTie: false });
     expect(flyPresentationAtAge("strike", 24, "opponent", { x: 176, y: 51 }, { x: 72, y: 88 }))
-      .toMatchObject({ targetShakeX2: 6 });
+      .toMatchObject({ targetTaskOwnsX2: true, targetShakeX2: 6 });
     expect(flyPresentationAtAge("strike", 30, "opponent", { x: 176, y: 51 }, { x: 72, y: 88 }))
       .toMatchObject({
         attackerInvisible: false,
         strikeBall: null,
+        targetTaskOwnsX2: true,
         impactVisible: true,
       });
+    expect(flyPresentationAtAge("strike", 28, "player", { x: 72, y: 97 }, { x: 176, y: 42 }))
+      .toMatchObject({ attackerInvisible: true });
+    expect(flyPresentationAtAge("strike", 29, "player", { x: 72, y: 97 }, { x: 176, y: 42 }))
+      .toMatchObject({ attackerInvisible: false, strikeBall: null });
   });
 
   it("exposes both legal orientations through the shared seam", () => {

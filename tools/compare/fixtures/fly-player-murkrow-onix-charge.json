@@ -21,7 +21,7 @@
     "playerHp": 142,
     "opponentHp": 117,
     "playerStatus": "none",
-    "playerGender": "male",
+    "playerGender": "female",
     "opponentGender": "male"
   },
   "controllerProfile": {
@@ -36,6 +36,6 @@
   },
   "acceptance": {
     "status": "partial",
-    "remaining": "Oracle frames 59-65 retain ISSUES #34's generic affine-sampler exclusion; the portable player-side field retains a 24-pixel opponent-priority artifact at x177-181/y79-86."
+    "remaining": "Oracle frames 59-65 retain ISSUES #34's generic affine-sampler exclusion."
   }
 }
