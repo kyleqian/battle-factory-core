@@ -14,6 +14,7 @@
 //   src/data/text/move_names.h     - gMoveNames
 //   src/data/text/move_descriptions.h - gMoveDescriptionPointers text
 //   src/data/contest_moves.h       - gContestMoves + gContestEffects
+//   src/battle_util.c              - sSoundMovesTable
 // Run with:
 //   node --experimental-strip-types tools/extract/extract-moves.ts
 //
@@ -40,6 +41,7 @@ const moveDescriptionsC = readFileSync(join(REF, "src", "data", "text", "move_de
 const contestMovesC = readFileSync(join(REF, "src", "data", "contest_moves.h"), "utf8");
 const contestTextTablesC = readFileSync(join(REF, "src", "data", "contest_text_tables.h"), "utf8");
 const contestStringsC = readFileSync(join(REF, "data", "text", "contest_strings.inc"), "utf8");
+const battleUtilC = readFileSync(join(REF, "src", "battle_util.c"), "utf8");
 
 // C string literal -> JS string: this codebase's move/ability description
 // text uses only the "\n" line-break escape (verified: no other backslash
@@ -258,10 +260,36 @@ const moves = orderedMoveNames.map((name) => {
   };
 });
 
+const soundMovesTable = /static const u16 sSoundMovesTable\[\]\s*=\s*\{([\s\S]*?)\};/.exec(
+  battleUtilC,
+);
+if (!soundMovesTable) throw new Error("sSoundMovesTable not found in battle_util.c");
+const soundMoveSymbols = [
+  ...soundMovesTable[1]!.matchAll(/\bMOVE_[A-Z0-9_]+\b/g),
+].map((match) => match[0]!);
+if (soundMoveSymbols.length !== 10 || new Set(soundMoveSymbols).size !== 10) {
+  throw new Error(
+    `expected ten unique sSoundMovesTable move selectors, found ${soundMoveSymbols.length}`,
+  );
+}
+const soundMoves = soundMoveSymbols.map((move) => {
+  const extracted = moves.find((candidate) => candidate.move === move);
+  if (!extracted) throw new Error(`sSoundMovesTable references unknown ${move}`);
+  return { move, id: extracted.id };
+});
+
 for (const move of moves) {
   if (move.move !== "MOVE_NONE" && !move.description) throw new Error(`missing description for ${move.move}`);
   if (move.move !== "MOVE_NONE" && !move.contest) throw new Error(`missing contest data for ${move.move}`);
 }
 
-writeFileSync(join(DATA_GEN, "moves.json"), `${JSON.stringify({ moves }, null, 0)}\n`);
+writeFileSync(
+  join(DATA_GEN, "moves.json"),
+  `${JSON.stringify({
+    moves,
+    sourceTables: {
+      soundMoves,
+    },
+  }, null, 0)}\n`,
+);
 console.log(`wrote ${join(DATA_GEN, "moves.json")} (${moves.length} moves)`);

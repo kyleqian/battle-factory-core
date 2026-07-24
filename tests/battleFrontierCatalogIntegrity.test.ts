@@ -26,6 +26,10 @@ type Move = { move: string; id: number; name: string; type: string; power: numbe
 
 const mons = frontierMonsData.entries as FrontierMon[];
 const moves = movesData.moves as Move[];
+const sourceSoundMoves = movesData.sourceTables.soundMoves as Array<{
+  move: string;
+  id: number;
+}>;
 const speciesStats = new Map((speciesStatsData.species as Array<{ name: string }>).map((entry) => [entry.name, entry]));
 const speciesTypes = new Map((speciesTypesData.species as Array<{ name: string }>).map((entry) => [entry.name, entry]));
 const speciesNames = new Map((speciesNamesData.species as Array<{ species: string }>).map((entry) => [entry.species, entry]));
@@ -148,6 +152,25 @@ describe("Battle Factory generated-catalog integrity", () => {
         expect(move.description.length).toBeGreaterThan(0);
         expect(move.contest).not.toBeNull();
       }
+    }
+  });
+
+  it("extracts the complete sSoundMovesTable in exact source order", () => {
+    expect(sourceSoundMoves).toEqual([
+      { move: "MOVE_GROWL", id: 45 },
+      { move: "MOVE_ROAR", id: 46 },
+      { move: "MOVE_SING", id: 47 },
+      { move: "MOVE_SUPERSONIC", id: 48 },
+      { move: "MOVE_SCREECH", id: 103 },
+      { move: "MOVE_SNORE", id: 173 },
+      { move: "MOVE_UPROAR", id: 253 },
+      { move: "MOVE_METAL_SOUND", id: 319 },
+      { move: "MOVE_GRASS_WHISTLE", id: 320 },
+      { move: "MOVE_HYPER_VOICE", id: 304 },
+    ]);
+    expect(new Set(sourceSoundMoves.map(({ id }) => id)).size).toBe(10);
+    for (const selector of sourceSoundMoves) {
+      expect(moves[selector.id]).toMatchObject(selector);
     }
   });
 });
