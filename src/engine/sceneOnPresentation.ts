@@ -74,12 +74,22 @@ export interface SceneOnIcePunchConfig {
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   readonly hpDrainProfile: Readonly<HpDrainPresentationProfile> & {
     readonly effectivenessTextStartAge?: number;
+    readonly effectivenessKind?: "superEffective" | "notVeryEffective";
     /** Controller-owned age at which the completed result line is cleared. */
     readonly effectivenessTextEndAge?: number;
   };
   /** Immutable controller display timing; no action selection is owned here. */
   readonly controllerDisplayProfile?: Readonly<{
-    readonly actionMenuRevealAge: number;
+    readonly actionMenuRevealAge?: number;
+    /** Already-resolved status supplied by the battle controller. */
+    readonly statusOutcome?: "none" | "freeze";
+    readonly statusAppliedAge?: number;
+    readonly healthboxStatusAge?: number;
+    readonly statusAnimationFirstAge?: number;
+    readonly statusMessageFirstAge?: number;
+    readonly currentMoveResetAge?: number;
+    readonly nextControllerTextFirstAge?: number;
+    readonly nextControllerAnimationFirstAge?: number;
   }>;
   /** Relative first printer age; negative means text predates this seam. */
   readonly moveTextStartAge?: number;
@@ -202,6 +212,11 @@ export interface SceneOnIcePunchView {
   readonly targetInvisible: boolean;
   readonly displayedTargetHp: number;
   readonly actionMenu: ActionMenuDisplayTransition;
+  readonly resolution: Readonly<{
+    status: "none" | "freeze";
+    healthboxStatus: "none" | "freeze";
+    currentMove: "ICE_PUNCH" | null;
+  }>;
 }
 
 export interface SceneOnFaintAttackView {
@@ -353,6 +368,14 @@ export function sceneOnIcePunchView(
   // Like the move-owned crystal sprites above, the generic hit sprites are
   // copied to OAM from the preceding callback pass.
   const hitReaction = genericHitReactionAtAge(state.age - 1, 187);
+  const displayProfile = state.config.controllerDisplayProfile;
+  const statusOutcome = displayProfile?.statusOutcome ?? "none";
+  const statusAppliedAge = displayProfile?.statusAppliedAge
+    ?? Number.POSITIVE_INFINITY;
+  const healthboxStatusAge = displayProfile?.healthboxStatusAge
+    ?? Number.POSITIVE_INFINITY;
+  const currentMoveResetAge = displayProfile?.currentMoveResetAge
+    ?? Number.POSITIVE_INFINITY;
   return {
     age: state.age,
     attacker: state.config.attacker,
@@ -374,12 +397,18 @@ export function sceneOnIcePunchView(
       state.config.hpDrainProfile,
     ),
     actionMenu:
-      state.config.controllerDisplayProfile === undefined
+      displayProfile?.actionMenuRevealAge === undefined
         ? { visible: false, battlerY2: 0, healthboxY2: 0 }
         : actionMenuDisplayAtAge(
             state.age,
-            state.config.controllerDisplayProfile.actionMenuRevealAge,
+            displayProfile.actionMenuRevealAge,
           ),
+    resolution: {
+      status: state.age >= statusAppliedAge ? statusOutcome : "none",
+      healthboxStatus:
+        state.age >= healthboxStatusAge ? statusOutcome : "none",
+      currentMove: state.age >= currentMoveResetAge ? null : "ICE_PUNCH",
+    },
     ...hitReaction,
   };
 }

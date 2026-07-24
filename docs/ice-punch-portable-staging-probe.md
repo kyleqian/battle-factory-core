@@ -114,6 +114,26 @@ Therefore ICE PUNCH remains `partial`. The accepted dense window is now
 controller-display window is covered; exact promotion still requires an
 evidence-backed opposite-side/geometry audit.
 
+## Opposite-side successful-freeze continuation
+
+The GROVYLE→ONIX fixture now extends from **314/314** to **410/410 exact**
+(oracle frames **1966–2375**, relative ages **0–409**). Ages 314 onward
+prove the complete controller effectiveness printer. The oracle line is
+“It’s super effective!”—Ice is super-effective against ONIX’s Ground type;
+the earlier handoff’s “not very effective” label was not the staged output.
+
+The staged controller supplies a successful immutable freeze outcome:
+`status1` becomes `STATUS1_FREEZE` at frame 2366 / age 400. The adapter
+exposes that supplied boundary, plus the later healthbox-status,
+current-move-reset, and next-controller clocks, without rolling RNG or
+mutating battle state. Dense pixel acceptance continues through frame 2375,
+the final frame before FrozenIceCube becomes visible. The exact remaining
+boundary is **frame 2376 / age 410**: implement the source 96×96 ice-cube
+subsprite composition and both status-animation lifecycles, then the
+“ONIX was frozen solid!” / FRZ / teardown / “ONIX is frozen solid!” skipped
+move handoff. ICE PUNCH remains partial until that complete remainder is
+dense-exact.
+
 ## THUNDER PUNCH sibling check
 
 The same normal-controller stage successfully dispatches move id 9 for the

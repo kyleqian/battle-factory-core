@@ -34,10 +34,19 @@ interface PortableFixture {
     readonly endHp: number;
     readonly firstDisplayedAge: number;
     readonly effectivenessTextStartAge?: number;
+    readonly effectivenessKind?: "superEffective" | "notVeryEffective";
     readonly effectivenessTextEndAge?: number;
   };
   readonly controllerDisplayProfile?: {
-    readonly actionMenuRevealAge: number;
+    readonly actionMenuRevealAge?: number;
+    readonly statusOutcome?: "none" | "freeze";
+    readonly statusAppliedAge?: number;
+    readonly healthboxStatusAge?: number;
+    readonly statusAnimationFirstAge?: number;
+    readonly statusMessageFirstAge?: number;
+    readonly currentMoveResetAge?: number;
+    readonly nextControllerTextFirstAge?: number;
+    readonly nextControllerAnimationFirstAge?: number;
   };
   readonly appStage: {
     readonly oracleFrame: number;

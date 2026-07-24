@@ -31,7 +31,7 @@
   },
   "denseWindow": {
     "startFrame": 1966,
-    "endFrame": 2279
+    "endFrame": 2375
   },
   "fieldProfile": {
     "playerHp": 117,
@@ -41,6 +41,19 @@
   "hpDrainProfile": {
     "startHp": 117,
     "endHp": 31,
-    "firstDisplayedAge": 223
+    "firstDisplayedAge": 223,
+    "effectivenessTextStartAge": 314,
+    "effectivenessKind": "superEffective",
+    "effectivenessTextEndAge": 520
+  },
+  "controllerDisplayProfile": {
+    "statusOutcome": "freeze",
+    "statusAppliedAge": 400,
+    "statusAnimationFirstAge": 405,
+    "statusMessageFirstAge": 520,
+    "healthboxStatusAge": 607,
+    "currentMoveResetAge": 618,
+    "nextControllerTextFirstAge": 625,
+    "nextControllerAnimationFirstAge": 710
   }
 }
