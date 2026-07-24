@@ -1,0 +1,51 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-bind-opponent-onix-player-murkrow.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "ONIX (opponent-front) -> MURKROW (player-back)",
+  "move": "BIND",
+  "orientation": "opponent-to-player",
+  "appStage": {"oracleFrame": 436, "presentationAge": 0},
+  "denseWindow": {"startFrame": 436, "endFrame": 480},
+  "attacker": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 10},
+      "animationCenter": {"x": 176, "y": 42},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "target": {
+    "species": "MURKROW",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 57},
+      "animationCenter": {"x": 72, "y": 97},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "opponentHp": 69,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male",
+    "opponentPpBefore": 20,
+    "opponentPpAfter": 19,
+    "ppUps": [0, 0, 0, 0]
+  },
+  "animationProfile": {
+    "sway": {"direction": 0, "amplitude": 6, "period": 3328, "sways": 4},
+    "squeeze": {"xDelta": 10, "yDelta": -5, "duration": 5},
+    "squeezeStarts": [3, 21],
+    "firstVisibleSwayFrame": 439,
+    "moveOwnedEndFrame": 480,
+    "genericHitHandoffFrame": 483
+  },
+  "acceptance": {
+    "status": "exact",
+    "result": "45/45 dense source task states and 45/45 live framebuffers match through the shared Scene-ON seam, including opponent-side amplitude negation and player-back affine geometry."
+  }
+}

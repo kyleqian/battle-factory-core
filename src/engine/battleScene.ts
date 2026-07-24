@@ -14098,11 +14098,18 @@ export function renderSceneOnMovePresentation(
       && view.attacker.geometry.side === "player"
       && view.target.species === "MURKROW"
       && view.target.geometry.side === "opponent";
-    if (!playerToOpponent) {
+    const opponentToPlayer =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
         `unsupported staged BIND pair ${view.attacker.species}->${view.target.species}`,
       );
     }
+    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -14111,8 +14118,8 @@ export function renderSceneOnMovePresentation(
     );
     drawSpriteSheetAffineStretch(
       fb,
-      murkrowFrontSprite.tileset,
-      murkrowFrontSprite.palette,
+      targetSprite.tileset,
+      targetSprite.palette,
       view.target.geometry.spriteCorner.x,
       view.target.geometry.spriteCorner.y,
       view.targetAffine.xScale,
@@ -14124,31 +14131,55 @@ export function renderSceneOnMovePresentation(
     );
     drawSpriteSheet(
       fb,
-      onixBackSprite.tileset,
-      onixBackSprite.palette,
+      attackerSprite.tileset,
+      attackerSprite.palette,
       view.attacker.geometry.spriteCorner.x + view.attackerX2,
       view.attacker.geometry.spriteCorner.y + view.attackerY2,
     );
-    drawSendOutHealthbox(
-      fb,
-      0,
-      murkrowHealthboxContentForHp(state.config.fieldProfile.opponentHp),
-    );
-    drawComposedPlayerHealthbox(
-      fb,
-      onixPlayerHealthboxContentForState(
-        state.config.fieldProfile.playerHp,
-        state.config.fieldProfile.playerStatus,
-        state.config.fieldProfile.playerGender ?? "female",
-      ),
-    );
+    if (playerToOpponent) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        murkrowHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "female",
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "male",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        flyMurkrowPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
     drawTileBg(
       fb,
       battleWindow.tileset,
       battleWindow.tilemap,
       battleWindow.palette,
     );
-    drawMessageTextLines(fb, "ONIX used", "BIND!", 99);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ONIX used" : "Foe ONIX used",
+      "BIND!",
+      99,
+    );
     return;
   }
 

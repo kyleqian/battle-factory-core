@@ -70,8 +70,8 @@ describe("animation coverage ledger", () => {
         total: 276,
         unsupported: 262,
         staged: 0,
-        partial: 2,
-        exact: 12,
+        partial: 1,
+        exact: 13,
       },
       {
         tier: "openOnly",
@@ -99,7 +99,7 @@ describe("animation coverage ledger", () => {
       move: "MOVE_DRAGON_BREATH",
       status: "exact",
     });
-    expect(queue.at(-1)).toMatchObject({ move: "MOVE_BIND", status: "partial" });
+    expect(queue.at(-1)).toMatchObject({ move: "MOVE_BIND", status: "exact" });
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
       species: 8,
