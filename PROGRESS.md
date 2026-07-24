@@ -25,7 +25,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   zero SETBYTE RNG/controllers/events, player zero-call RNG, and trainer AI
   `0x79e39ac4 / 5 calls` are pinned. Focused **5 files / 53 tests**;
   integrated **162/1942**, production build, OFF v5 info (`9c89c741…`), and
-  diff checks pass; pixel diff N/A.
+  diff checks pass. Code commit `1545235`; pixel diff N/A.
 
 ---
 ## 416 — Factory AI reaches the production script machine
