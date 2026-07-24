@@ -95,6 +95,19 @@ export interface SceneOnFlyConfig {
   readonly turn: FlyTurn;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  /** Immutable field/controller inputs from the legal stock-ROM stage. */
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  readonly controllerProfile: Readonly<{
+    readonly targetHpBefore: number;
+    readonly targetHpAfter: number;
+    /** First +1 generic healthbox pose after the move-owned strike body. */
+    readonly hitReactionFirstAge: number;
+    readonly hpDrainFirstAge: number;
+    readonly chargeMessageFirstAge: number;
+    readonly strikeMoveTextFirstAge: number;
+    readonly resultTextFirstAge: number;
+    readonly currentMoveResetAge: number;
+  }>;
   /**
    * First displayed callback age for this half of `choosetwoturnanim`.
    * Selection, damage, semi-invulnerability, and turn advancement remain
@@ -484,6 +497,15 @@ export interface SceneOnFlyView extends FlyPresentationState {
   readonly animationAge: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly healthboxY2: number;
+  readonly targetInvisible: boolean;
+  readonly displayedTargetHp: number;
+  readonly message: Readonly<{
+    readonly line1: string;
+    readonly line2: string;
+    readonly visibleChars: number;
+  }> | null;
+  readonly currentMove: "FLY" | null;
 }
 
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
@@ -623,18 +645,69 @@ export function sceneOnFlyView(
   }
   const animationAge =
     state.age + (state.config.animationAgeOffset ?? 0);
+  const fly = flyPresentationAtAge(
+    state.config.turn,
+    animationAge,
+    state.config.attacker.geometry.side,
+    state.config.attacker.geometry.animationCenter,
+    state.config.target.geometry.animationCenter,
+  );
+  const hit = state.config.turn === "strike"
+    ? genericHitReactionAtAge(
+        state.age,
+        state.config.controllerProfile.hitReactionFirstAge,
+      )
+    : { healthboxY2: 0, targetInvisible: false };
+  const attackerName = battlerNameWithPrefix(state.config.attacker);
+  const message =
+    state.config.turn === "charge"
+      ? {
+          line1: `${attackerName} flew`,
+          line2: "up high!",
+          firstAge: state.config.controllerProfile.chargeMessageFirstAge,
+        }
+      : state.age >= state.config.controllerProfile.resultTextFirstAge
+        ? {
+            line1: "It’s not very effective…",
+            line2: "",
+            firstAge: state.config.controllerProfile.resultTextFirstAge,
+          }
+        : {
+            line1: `${attackerName} used`,
+            line2: "FLY!",
+            firstAge: state.config.controllerProfile.strikeMoveTextFirstAge,
+          };
+  const messageLength = message.line1.length + message.line2.length;
   return {
     age: state.age,
     animationAge,
     attacker: state.config.attacker,
     target: state.config.target,
-    ...flyPresentationAtAge(
-      state.config.turn,
-      animationAge,
-      state.config.attacker.geometry.side,
-      state.config.attacker.geometry.animationCenter,
-      state.config.target.geometry.animationCenter,
+    ...fly,
+    healthboxY2: hit.healthboxY2,
+    targetInvisible: hit.targetInvisible,
+    displayedTargetHp: displayedHpAfterDamage(
+      state.age,
+      {
+        startHp: state.config.controllerProfile.targetHpBefore,
+        endHp: state.config.controllerProfile.targetHpAfter,
+        firstDisplayedAge: state.config.controllerProfile.hpDrainFirstAge,
+      },
     ),
+    message: state.age < message.firstAge
+      ? null
+      : {
+          line1: message.line1,
+          line2: message.line2,
+          visibleChars: Math.min(
+            messageLength,
+            state.age - message.firstAge + 1,
+          ),
+        },
+    currentMove:
+      state.age >= state.config.controllerProfile.currentMoveResetAge
+        ? null
+        : "FLY",
   };
 }
 

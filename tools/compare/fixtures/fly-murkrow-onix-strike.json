@@ -1,0 +1,40 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-fly-murkrow-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "MURKROW (opponent-front) -> ONIX (player-back)",
+  "move": "FLY",
+  "turn": "strike",
+  "orientation": "opponent-to-player",
+  "appStage": {
+    "oracleFrame": 485,
+    "presentationAge": 12,
+    "animationAgeOffset": -51
+  },
+  "denseWindow": {
+    "startFrame": 485,
+    "endFrame": 732
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 142,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "controllerProfile": {
+    "targetHpBefore": 117,
+    "targetHpAfter": 106,
+    "hitReactionFirstAge": 112,
+    "hpDrainFirstAge": 147,
+    "chargeMessageFirstAge": 999,
+    "strikeMoveTextFirstAge": 12,
+    "resultTextFirstAge": 163,
+    "currentMoveResetAge": 260
+  },
+  "acceptance": {
+    "status": "partial",
+    "scope": "Complete practical strike/controller-cleanup window through the last FLY-owned frame; MOVE_FLY remains partial under ISSUES #34."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-fly-murkrow-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "MURKROW (opponent-front) -> ONIX (player-back)",
+  "move": "FLY",
+  "turn": "charge",
+  "orientation": "opponent-to-player",
+  "appStage": {
+    "oracleFrame": 47,
+    "presentationAge": 8,
+    "animationAgeOffset": -20
+  },
+  "denseWindow": {
+    "startFrame": 47,
+    "endFrame": 197,
+    "excludedFrames": [59, 60, 61, 62, 63, 64, 65]
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 142,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "controllerProfile": {
+    "targetHpBefore": 117,
+    "targetHpAfter": 117,
+    "hitReactionFirstAge": 999,
+    "hpDrainFirstAge": 999,
+    "chargeMessageFirstAge": 62,
+    "strikeMoveTextFirstAge": 999,
+    "resultTextFirstAge": 999,
+    "currentMoveResetAge": 159
+  },
+  "acceptance": {
+    "status": "partial",
+    "remaining": "Oracle frames 59-65 retain ISSUES #34's generic affine-sampler exclusion."
+  }
+}

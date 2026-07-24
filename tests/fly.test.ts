@@ -12,6 +12,21 @@ import {
 } from "../src/engine/sceneOnPresentation.ts";
 
 describe("portable two-turn FLY presentation", () => {
+  const fieldProfile = {
+    playerHp: 117,
+    opponentHp: 142,
+    playerStatus: "none",
+  } as const;
+  const controllerProfile = {
+    targetHpBefore: 117,
+    targetHpAfter: 106,
+    hitReactionFirstAge: 112,
+    hpDrainFirstAge: 147,
+    chargeMessageFirstAge: 62,
+    strikeMoveTextFirstAge: 12,
+    resultTextFirstAge: 163,
+    currentMoveResetAge: 160,
+  } as const;
   it("preserves the source charge affine program and disappearance", () => {
     expect(FLY_CHARGE_BALL).toHaveLength(26);
     expect(flyPresentationAtAge("charge", -1, "opponent", { x: 176, y: 51 }, { x: 72, y: 88 }))
@@ -63,21 +78,46 @@ describe("portable two-turn FLY presentation", () => {
       move: "FLY",
       turn: "charge",
       ...MURKROW_TO_ONIX_FLY_PRESENTATION,
+      fieldProfile,
+      controllerProfile,
     });
     expect(sceneOnFlyView(opponent)).toMatchObject({
       animationAge: 0,
       attackerInvisible: true,
       attacker: { species: "MURKROW", geometry: { side: "opponent" } },
     });
+    expect(sceneOnFlyView({ ...opponent, age: 62 })).toMatchObject({
+      message: {
+        line1: "Foe MURKROW flew",
+        line2: "up high!",
+        visibleChars: 1,
+      },
+    });
     const player = createSceneOnMovePresentation({
       move: "FLY",
       turn: "strike",
       ...PLAYER_MURKROW_TO_OPPONENT_ONIX_FLY_PRESENTATION,
+      fieldProfile: {
+        playerHp: 142,
+        opponentHp: 117,
+        playerStatus: "none",
+      },
+      controllerProfile,
     });
     expect(sceneOnFlyView({ ...player, age: 19 })).toMatchObject({
       attacker: { geometry: { side: "player" } },
       target: { geometry: { side: "opponent" } },
       strikeBall: { x: 175, y: 41 },
+      message: { line1: "MURKROW used", line2: "FLY!" },
+    });
+    expect(sceneOnFlyView({ ...player, age: 147 })).toMatchObject({
+      displayedTargetHp: 116,
+      message: { line1: "MURKROW used" },
+    });
+    expect(sceneOnFlyView({ ...player, age: 163 })).toMatchObject({
+      displayedTargetHp: 106,
+      message: { line1: "It’s not very effective…", visibleChars: 1 },
+      currentMove: null,
     });
   });
 });

@@ -572,6 +572,7 @@ import {
   sceneOnFeatherDanceView,
   sceneOnFaintAttackView,
   sceneOnFirePunchView,
+  sceneOnFlyView,
   sceneOnIcePunchView,
   sceneOnQuickAttackView,
   sceneOnRockSlideView,
@@ -838,6 +839,7 @@ const battleAnimIceCube = battleAnimIceCubeAsset as {
   }[];
 };
 const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
+const murkrowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MURKROW!;
 const battleAnimIceCrystalLarge: Tileset = {
   columns: 1,
   rows: 2,
@@ -1019,6 +1021,32 @@ function featherDancePidgeottoPlayerHealthbox(
       maxHp: 156,
     });
     featherDancePidgeottoPlayerHealthboxes.set(key, cached);
+  }
+  return cached;
+}
+
+const flyMurkrowPlayerHealthboxes = new Map<
+  string,
+  ReturnType<typeof composePlayerHealthbox>
+>();
+function flyMurkrowPlayerHealthbox(
+  hp: number,
+  status: "none" | "burn",
+  gender: "male" | "female",
+): ReturnType<typeof composePlayerHealthbox> {
+  const key = `${hp}:${status}:${gender}`;
+  let cached = flyMurkrowPlayerHealthboxes.get(key);
+  if (!cached) {
+    cached = composePlayerHealthbox(playerHealthboxAssets, {
+      name: "MURKROW",
+      level: 50,
+      gender,
+      hpFraction: hp / 142,
+      status,
+      currentHp: hp,
+      maxHp: 142,
+    });
+    flyMurkrowPlayerHealthboxes.set(key, cached);
   }
   return cached;
 }
@@ -15308,9 +15336,150 @@ export function renderSceneOnMovePresentation(
   }
 
   if (state.config.move === "FLY") {
-    throw new Error(
-      "portable FLY state is staged through sceneOnFlyView; framebuffer adapter remains partial",
+    const view = sceneOnFlyView(state);
+    const { attacker, target } = view;
+    const originalOrientation =
+      attacker.species === "MURKROW"
+      && attacker.geometry.side === "opponent"
+      && target.species === "ONIX"
+      && target.geometry.side === "player";
+    const oppositeOrientation =
+      attacker.species === "MURKROW"
+      && attacker.geometry.side === "player"
+      && target.species === "ONIX"
+      && target.geometry.side === "opponent";
+    if (!originalOrientation && !oppositeOrientation) {
+      throw new Error(
+        `unsupported staged FLY pair ${attacker.species}->${target.species}`,
+      );
+    }
+    const attackerSprite = originalOrientation
+      ? murkrowFrontSprite
+      : murkrowBackSprite;
+    const targetSprite = originalOrientation
+      ? onixBackSprite
+      : onixFrontSprite;
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
     );
+    if (!view.attackerInvisible) {
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        attacker.geometry.spriteCorner.x,
+        attacker.geometry.spriteCorner.y,
+      );
+    }
+    if (!view.targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        target.geometry.spriteCorner.x + view.targetShakeX2,
+        target.geometry.spriteCorner.y,
+      );
+    }
+    if (view.impactVisible) {
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        target.geometry.animationCenter.x - 16,
+        target.geometry.animationCenter.y - 16,
+        12,
+        8,
+      );
+    }
+    if (view.chargeBall) {
+      drawSpriteSheetAffineStretch(
+        fb,
+        battleAnimFlyBall.tileset,
+        battleAnimFlyBall.palette,
+        attacker.geometry.animationCenter.x - 32,
+        attacker.geometry.animationCenter.y - 32,
+        view.chargeBall.a,
+        view.chargeBall.d,
+        view.chargeBall.y2,
+        { r: 0, g: 0, b: 0 },
+        0,
+        true,
+      );
+    }
+    if (view.strikeBall) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        battleAnimFlyBall.tileset,
+        battleAnimFlyBall.palette,
+        view.strikeBall.x,
+        view.strikeBall.y,
+        view.strikeBall.pa,
+        view.strikeBall.pb,
+        view.strikeBall.pc,
+        view.strikeBall.pd,
+        undefined,
+        false,
+      );
+    }
+    if (originalOrientation) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        murkrowHealthboxContentForHp(
+          state.config.fieldProfile.opponentHp,
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          view.displayedTargetHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender,
+        ),
+        0,
+        view.healthboxY2,
+      );
+    } else {
+      const opponentContent = featherDanceOnixOpponentHealthbox(
+        view.displayedTargetHp,
+        state.config.fieldProfile.opponentGender ?? "male",
+      );
+      drawSendOutHealthbox(fb, 0, opponentContent);
+      if (view.healthboxY2 !== 0) {
+        drawOpponentHealthboxWobble(
+          fb,
+          view.healthboxY2,
+          opponentContent,
+        );
+      }
+      drawComposedPlayerHealthbox(
+        fb,
+        flyMurkrowPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    if (view.message) {
+      drawMessageTextLines(
+        fb,
+        view.message.line1,
+        view.message.line2,
+        view.message.visibleChars,
+      );
+    }
+    return;
   }
 
   const view = sceneOnFirePunchView(state);

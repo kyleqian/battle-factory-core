@@ -30,7 +30,8 @@
     "compare:quick-attack-opposite": "node --experimental-strip-types tools/compare/quickAttackPortable.ts tools/compare/fixtures/quick-attack-player-pidgeotto-onix.json",
     "compare:quick-attack-opposite-controller": "node --experimental-strip-types tools/compare/quickAttackPortable.ts tools/compare/fixtures/quick-attack-player-pidgeotto-onix-controller.json",
     "compare:aerial-ace-portable": "node --experimental-strip-types tools/compare/aerialAcePortable.ts",
-    "compare:aerial-ace-opposite": "node --experimental-strip-types tools/compare/aerialAcePortable.ts tools/compare/fixtures/aerial-ace-player-pidgeotto-onix.json"
+    "compare:aerial-ace-opposite": "node --experimental-strip-types tools/compare/aerialAcePortable.ts tools/compare/fixtures/aerial-ace-player-pidgeotto-onix.json",
+    "compare:fly-portable": "node --experimental-strip-types tools/compare/flyPortable.ts"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

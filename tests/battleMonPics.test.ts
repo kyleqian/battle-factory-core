@@ -15,8 +15,8 @@ import coords from "../src/data/gen/mon-pic-coords.json" with { type: "json" };
 // row (an occlusion, not a decode bug).
 
 describe("battle-back-sprites.json", () => {
-  it("has ONIX/MAGBY/BAYLEEF, each a 64x64 (8x8 tile) sprite with a 16-color palette", () => {
-    for (const species of ["ONIX", "MAGBY", "BAYLEEF"]) {
+  it("has every source-required player species as 64x64 art with a 16-color palette", () => {
+    for (const species of ["ONIX", "MAGBY", "BAYLEEF", "PIDGEOTTO", "MURKROW"]) {
       const sprite = (backSprites as Record<string, any>)[species];
       expect(sprite.tileset.columns).toBe(8);
       expect(sprite.tileset.rows).toBe(8);
@@ -31,6 +31,13 @@ describe("battle-back-sprites.json", () => {
 
   it("pins a MAGBY palette entry (white outline)", () => {
     expect(backSprites.MAGBY.palette[1]).toEqual({ r: 255, g: 255, b: 255 });
+  });
+
+  it("pins MURKROW's source back-picture geometry and first opaque tile", () => {
+    expect(coords.back.MURKROW).toEqual({ width: 48, height: 48, yOffset: 9 });
+    expect(backSprites.MURKROW.tileset.tiles.findIndex((tile) =>
+      tile.some((pixel) => pixel !== 0)
+    )).toBe(9);
   });
 });
 
