@@ -1,3 +1,27 @@
+## 407 — Gate-3 attack-canceler THAW source phase integrated
+
+- **State:** the run is clean and green at **148 files / 1850 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through THAW/END
+  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** ported battle_util.c:2250-2264 plus the common effect-2 controller
+  sync at 2270-2275. `EFFECT_THAW_HIT` alone clears `STATUS1_FREEZE`, pushes
+  the cursor, selects `BattleScript_MoveUsedUnfroze`, and sets
+  `B_MSG_DEFROSTED_BY_MOVE`; every frozen path returns effect 2 and records the
+  exact active-battler/status-write/controller-mark ownership semantically.
+- **Next:** keep THAW unlooped and opcode 0 unregistered until the supervisor
+  selects the next explicit Gate-3 boundary; do not integrate the decision
+  boundary or claim live controller/presentation ownership.
+- **Notes:** battlers **0/1**, both sides, generated Flame Wheel/Sacred Fire
+  thaw effects and Tackle control, non-frozen effect 0, frozen non-thaw effect
+  2 with unchanged status/script, other status bits, preset chooser/rules
+  state, missing/invalid context, exact zero-call RNG, one advance to
+  `CANCELER_END`, immutability/determinism, and deep freezing are pinned.
+  Focused **3 files / 33 tests**; integrated Tier-1 **148/1850**, build, OFF
+  v5 info (`9c89c741…`), and diff check green. Code commits `faabbf0` +
+  `aaf3f64`; pixel diff N/A.
+
+---
 ## 406 — Gate-3 attack-canceler BIDE source phase integrated
 
 - **State:** the run is clean and green at **146 files / 1840 tests**. S10

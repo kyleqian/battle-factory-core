@@ -4,6 +4,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 410 — Gate-3 selected-slot PP admission composed
+
+- **State:** the run is clean and green at **154 files / 1887 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes. The pure
+  attack-canceler composition now reaches the selected-slot PP admission and
+  its success-only `HITMARKER_ALLOW_NO_PP` clear; opcode 0 remains unregistered
+  and no machine, controller, decision-boundary, core, round, or presentation
+  integration was added.
+- **Did:** added an immutable source-order join from a supplied
+  canceler+moves-block result into the existing typed PP preflight. Canceler
+  effects 1/2 and Soundproof blocks bypass PP; a continuing result delegates
+  the exact five-part no-PP predicate, `BattleScript_NoPPForMove`/missed
+  handoff, or continuation clear without duplicating PP mechanics. The joined
+  receipt exposes prior receipts, branch ownership, source PC, and zero added
+  RNG while preserving cumulative rules/RNG/call state.
+- **Next:** keep opcode 0 unregistered. The next exact source boundary is
+  obedience after successful PP admission; do not add Magic Coat, Snatch,
+  Lightning Rod, Protect, a machine adapter, or controller integration until
+  separately assigned.
+- **Notes:** both singles orientations; no-PP, Struggle, allow-no-PP,
+  no-attack-string, multi-turn, sufficient-PP, canceler effects **1/2**, and
+  Soundproof are pinned with exact marker/result/PC receipts. Invalid
+  composition/PC inputs, deterministic replay, input immutability, recursive
+  freezing, and zero additional RNG are covered. Focused **3 files / 30
+  tests**; integrated **154/1887**, production build, OFF v5 info
+  (`9c89c741…`), and diff check green. Code commit `5474ea2`; pixel diff N/A.
+
+---
 ## 409 — Gate-3 Soundproof moves-block gate integrated
 
 - **State:** the run is clean and green at **152 files / 1876 tests**. S10
@@ -63,27 +91,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pinned. Focused **15 files / 106 tests**; integrated **149/1859**, production
   build, OFF v5 info (`9c89c741…`), and diff check green. Code commit
   `392a8af`; pixel diff N/A.
-
----
-## 407 — Gate-3 attack-canceler THAW source phase integrated
-
-- **State:** the run is clean and green at **148 files / 1850 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes;
-  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through THAW/END
-  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
-- **Did:** ported battle_util.c:2250-2264 plus the common effect-2 controller
-  sync at 2270-2275. `EFFECT_THAW_HIT` alone clears `STATUS1_FREEZE`, pushes
-  the cursor, selects `BattleScript_MoveUsedUnfroze`, and sets
-  `B_MSG_DEFROSTED_BY_MOVE`; every frozen path returns effect 2 and records the
-  exact active-battler/status-write/controller-mark ownership semantically.
-- **Next:** keep THAW unlooped and opcode 0 unregistered until the supervisor
-  selects the next explicit Gate-3 boundary; do not integrate the decision
-  boundary or claim live controller/presentation ownership.
-- **Notes:** battlers **0/1**, both sides, generated Flame Wheel/Sacred Fire
-  thaw effects and Tackle control, non-frozen effect 0, frozen non-thaw effect
-  2 with unchanged status/script, other status bits, preset chooser/rules
-  state, missing/invalid context, exact zero-call RNG, one advance to
-  `CANCELER_END`, immutability/determinism, and deep freezing are pinned.
-  Focused **3 files / 33 tests**; integrated Tier-1 **148/1850**, build, OFF
-  v5 info (`9c89c741…`), and diff check green. Code commits `faabbf0` +
-  `aaf3f64`; pixel diff N/A.
