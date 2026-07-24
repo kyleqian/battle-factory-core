@@ -65,6 +65,10 @@ export type BattleScriptSemanticEventPayload =
     battler: BattleScriptBattlerId;
   }>
   | Readonly<{
+    kind: "hide-party-status-summary";
+    battler: BattleScriptBattlerId;
+  }>
+  | Readonly<{
     kind: "set-battler-sprite-visibility";
     battler: BattleScriptBattlerId;
     invisible: false;
