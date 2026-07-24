@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 357 — S9 OFF Moves-page rental switching: **PARTIAL — 76/80 exact**
+
+- **State:** generic UP/DOWN now switches rentals on Battle/Contest Moves;
+  the dense Battle DOWN→UP→B route is exact except four BG0 copy transients.
+- **Did:** removed the Info-only controller gate, preserved page/mode/selector
+  ownership, generalized page-specific replacement composition and Moves-page
+  exit fading, and Tier-1 pinned both Moves pages, clocks, and input gates.
+- **Next:** reproduce `CopyWindowToVram`'s two partial move-name/PP tile-memory
+  transfers at frames **162–163 and 195–196**, then prove the shared Contest
+  route; do not fit coordinates or thin the dense trace.
+- **Notes:** `summary-battle-moves-mon-down-up.json` **76/80**; residuals are
+  **536/889/431/1235 px**, confined to x120–235 move-name/PP window rows.
+  Info switch **87/87**; Battle/Contest selectors **93/93 + 93/93**; page
+  routes **36/36 + 16/16**. Tier-1 **1329/1329** and build green. No reorder,
+  battle/controller, Scene-ON, absolute ticks, framebuffer assets, runtime
+  oracle/ROM, ROADMAP, or ISSUES edits.
+
+---
 ## 356 — S9 OFF Contest Moves LOCK_MOVES selector: **GREEN — 93/93 exact**
 
 - **State:** A on input-ready ONIX Contest Moves enters the shared inert
@@ -39,21 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Skills→Info **56/56**. Tier-1 **1312/1312** and build green. No move
   reordering, Contest move-select, mon switching, battle/controller, absolute
   ticks, framebuffer assets, runtime oracle/ROM, ROADMAP, or ISSUES edits.
-
----
-## 354 — S9 OFF Battle→Contest Moves layered wipe: **GREEN — 16/16 exact**
-
-- **State:** settled ONIX Battle Moves now advances RIGHT through the generic
-  eight-step BG1/BG2 wipe to input-ready Contest Moves at +10.
-- **Did:** composed Contest tilemap closure, category icons, shared move/PP
-  rows, title/pagination/A-INFO ownership, and persistent portrait sprites.
-  Tier-1 pins Battle→Contest order/layers, selected rental, in-flight gates,
-  endpoint behavior, +10 readiness, and deterministic per-rental rendering.
-- **Next:** supervisor verify this route and choose the next bounded S9
-  increment; move-select/highlight/reorder, reverse LEFT beyond the accepted
-  readiness tick, and Moves-page mon switching remain untouched.
-- **Notes:** `summary-battle-to-contest-moves.json` **16/16**; Skills→Battle
-  **36/36**; DOWN→UP **87/87**; DOWN **54/54**; Info **122/122 + 132/132**;
-  install **3/3**; Info→Skills **25/25**; Skills→Info **56/56**. Tier-1
-  **1305/1305** and build green. No absolute ticks, framebuffer assets,
-  runtime oracle/ROM, battle/controller, ROADMAP, or ISSUES edits.

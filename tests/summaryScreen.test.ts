@@ -195,7 +195,11 @@ describe("summaryScreen: generic page navigation", () => {
       direction: "right",
       elapsed: 0,
     });
-    expect(requestSummaryMonChange(ready, "down")).toBe(ready);
+    expect(requestSummaryMonChange(ready, "down").monTransition).toMatchObject({
+      fromSlot: 3,
+      toSlot: 4,
+      direction: "down",
+    });
   });
 
   it("orders Battle Moves -> Contest Moves with generic layers and restores only endpoint input", () => {
@@ -256,7 +260,11 @@ describe("summaryScreen: generic page navigation", () => {
       direction: "left",
       elapsed: 0,
     });
-    expect(requestSummaryMonChange(ready, "up")).toBe(ready);
+    expect(requestSummaryMonChange(ready, "up").monTransition).toMatchObject({
+      fromSlot: 5,
+      toSlot: 4,
+      direction: "up",
+    });
   });
 
   it("places the moving 256px BG block in generic 32px steps over an immutable selected slot", () => {
@@ -692,7 +700,7 @@ describe("summaryScreen: slot-relative Info-page mon switching", () => {
     expect(requestSummaryMonChange(last, "down")).toBe(last);
   });
 
-  it("does not steal ownership during entry, page scrolling, or a non-Info page", () => {
+  it("does not steal ownership during entry or page scrolling", () => {
     const entry = run(openSummaryScreen(2), 10);
     expect(requestSummaryMonChange(entry, "down")).toBe(entry);
 
@@ -700,7 +708,45 @@ describe("summaryScreen: slot-relative Info-page mon switching", () => {
     expect(requestSummaryMonChange(scrolling, "down")).toBe(scrolling);
 
     const skills = run(scrolling, SUMMARY_PAGE_TRANSITION_TICKS);
-    expect(requestSummaryMonChange(skills, "down")).toBe(skills);
+    expect(requestSummaryMonChange(skills, "down").monTransition).toMatchObject({
+      fromSlot: 2,
+      toSlot: 3,
+      direction: "down",
+    });
+  });
+
+  it.each(["battleMoves", "contestMoves"] as const)(
+    "switches generically on %s while preserving page, mode, and move order",
+    (page) => {
+      const base = { ...settled(0), page, onInfoPage: false } as SummaryScreenState;
+      const switching = requestSummaryMonChange(base, "down");
+      expect(switching).toMatchObject({
+        selectedSlot: 1,
+        page,
+        mode: "SUMMARY_MODE_LOCK_MOVES",
+        moveSelect: null,
+        monTransition: { fromSlot: 0, toSlot: 1, elapsed: 0 },
+      });
+      const ready = run(switching, SUMMARY_MON_TRANSITION_TICKS + 2);
+      expect(ready).toMatchObject({
+        selectedSlot: 1,
+        page,
+        onInfoPage: false,
+        monTransition: null,
+        monAnimClock: 1,
+      });
+      expect(requestSummaryMonChange(ready, "up")).toMatchObject({
+        selectedSlot: 0,
+        page,
+        monTransition: { fromSlot: 1, toSlot: 0, direction: "up" },
+      });
+    },
+  );
+
+  it("keeps Moves-page switching locked out while the move selector owns input", () => {
+    const battle = { ...settled(0), page: "battleMoves", onInfoPage: false } as SummaryScreenState;
+    const selecting = requestSummaryMoveSelect(battle);
+    expect(requestSummaryMonChange(selecting, "down")).toBe(selecting);
   });
 });
 

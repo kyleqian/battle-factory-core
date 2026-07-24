@@ -359,6 +359,11 @@ function compose(
     readonly monInfoSlot?: number;
     readonly abilitySlot?: number;
     readonly memoSlot?: number;
+    /** Slot owned by PrintPageSpecificText (moves/stats), one task state after PrintMonInfo. */
+    readonly pageTextSlot?: number;
+    /** Slot owned by SetTypeIcons, one task state before PrintMonInfo. */
+    readonly pageIconSlot?: number;
+    readonly movesRowLimit?: number;
     readonly abilityDescriptionCharLimit?: number;
     readonly showMon?: boolean;
     readonly showBall?: boolean;
@@ -425,6 +430,8 @@ function compose(
   const monInfoSlot = monReplacement.monInfoSlot ?? selectedSlot;
   const abilitySlot = monReplacement.abilitySlot ?? selectedSlot;
   const memoSlot = monReplacement.memoSlot ?? selectedSlot;
+  const pageTextSlot = monReplacement.pageTextSlot ?? selectedSlot;
+  const pageIconSlot = monReplacement.pageIconSlot ?? selectedSlot;
   const pool = draftPool[monInfoSlot]!;
   const rental = rentals[monInfoSlot]!;
   const info = speciesInfoBySpecies.get(rental.species)!;
@@ -702,8 +709,13 @@ function compose(
     destinationChromeInstalled &&
     !clearPageWindows
   ) {
+    const pageRental = rentals[pageTextSlot]!;
+    const iconRental = rentals[pageIconSlot]!;
     const frontierMon = frontierMons.find(
-      (entry) => entry.index === (rental as { frontierMonIndex?: number }).frontierMonIndex,
+      (entry) => entry.index === (pageRental as { frontierMonIndex?: number }).frontierMonIndex,
+    )!;
+    const iconFrontierMon = frontierMons.find(
+      (entry) => entry.index === (iconRental as { frontierMonIndex?: number }).frontierMonIndex,
     )!;
     const ppPalette = [
       summaryBg.subpalettes[0]![0]!,
@@ -717,29 +729,35 @@ function compose(
     for (let i = 0; i < 4; i += 1) {
       const move = moves.get(frontierMon.moves[i]!)!;
       const y = i * 16 + 1;
-      text(move.name, WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + y, COLOR_1, PAL6);
-      const currentPp = (rental as unknown as { pp: number[] }).pp[i]!;
-      const ppCodes = [
-        GLYPH_CODE_PP,
-        ...String(currentPp).padStart(2, " ").split("").map((char) =>
-          char === " " ? CHAR_SPACER : charmap.get(char)!),
-        charmap.get("/")!,
-        ...String(move.pp).padStart(2, " ").split("").map((char) =>
-          char === " " ? CHAR_SPACER : charmap.get(char)!),
-      ];
-      drawGlyphCodes(
-        fb,
-        font,
-        ppCodes,
-        WIN_MOVES_PP.x + 44 - codeWidth(ppCodes),
-        WIN_MOVES_PP.y + y,
-        ppPalette,
-        { bg: 0, fg: 7, shadow: 8 },
-      );
+      if (i < (monReplacement.movesRowLimit ?? 4)) {
+        text(move.name, WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + y, COLOR_1, PAL6);
+        const currentPp = (pageRental as unknown as { pp: number[] }).pp[i]!;
+        const ppCodes = [
+          GLYPH_CODE_PP,
+          ...String(currentPp).padStart(2, " ").split("").map((char) =>
+            char === " " ? CHAR_SPACER : charmap.get(char)!),
+          charmap.get("/")!,
+          ...String(move.pp).padStart(2, " ").split("").map((char) =>
+            char === " " ? CHAR_SPACER : charmap.get(char)!),
+        ];
+        drawGlyphCodes(
+          fb,
+          font,
+          ppCodes,
+          WIN_MOVES_PP.x + 44 - codeWidth(ppCodes),
+          WIN_MOVES_PP.y + y,
+          ppPalette,
+          { bg: 0, fg: 7, shadow: 8 },
+        );
+      }
       const icon =
         page === "contestMoves"
-          ? typeIcons.contestCategories[move.contest.category.replace("CONTEST_CATEGORY_", "")]!
-          : typeIcons.types[move.type.replace("TYPE_", "")]!;
+          ? typeIcons.contestCategories[
+              moves.get(iconFrontierMon.moves[i]!)!.contest.category.replace("CONTEST_CATEGORY_", "")
+            ]!
+          : typeIcons.types[
+              moves.get(iconFrontierMon.moves[i]!)!.type.replace("TYPE_", "")
+            ]!;
       sprite({ tileset: icon.tileset }, icon.palette, 101, 40 + i * 16, 4, 2, 0);
     }
 
@@ -923,6 +941,21 @@ export function renderSummaryContestMovesPage(
   return fb;
 }
 
+export function renderSummaryPageFaded(
+  selectedSlot: number,
+  page: SummaryPage,
+  bgY: number,
+  objY: number,
+  monAnimClock = 0,
+  animateSwitchedMon = false,
+): Uint8Array {
+  const fb = createFramebuffer();
+  compose(fb, selectedSlot, bgY, objY, page, monAnimClock, false, 0, page !== "info", {
+    animateSwitchedMon,
+  });
+  return fb;
+}
+
 export function renderSummaryPageCleared(
   selectedSlot: number,
   monAnimClock: number,
@@ -939,7 +972,7 @@ export function renderSummaryPageCleared(
     monAnimClock,
     true,
     0,
-    false,
+    page !== "info",
     { animateSwitchedMon },
     page === "info" ? undefined : page,
   );
@@ -955,6 +988,7 @@ export function renderSummaryMonTransition(
   transition: SummaryMonTransition,
   oldMonAnimClock: number,
   sourceIsReplacement = false,
+  page: SummaryPage = "info",
 ): Uint8Array {
   const elapsed = transition.elapsed;
   const spriteIsNew = elapsed >= 16;
@@ -964,23 +998,34 @@ export function renderSummaryMonTransition(
     transition.fromSlot,
     0,
     0,
-    "info",
+    page,
     spriteIsNew ? 0 : oldMonAnimClock + (sourceIsReplacement ? elapsed : 0),
     false,
     0,
-    false,
+    page !== "info",
     {
       spriteSlot: spriteIsNew ? transition.toSlot : transition.fromSlot,
       typeSlot: elapsed >= 17 ? transition.toSlot : transition.fromSlot,
       monInfoSlot: elapsed >= 18 ? transition.toSlot : transition.fromSlot,
       abilitySlot: elapsed >= 19 ? transition.toSlot : transition.fromSlot,
       memoSlot: elapsed >= 20 ? transition.toSlot : transition.fromSlot,
+      pageTextSlot: elapsed >= 19 ? transition.toSlot : transition.fromSlot,
+      pageIconSlot: elapsed >= 17 ? transition.toSlot : transition.fromSlot,
+      movesRowLimit:
+        page === "battleMoves" || page === "contestMoves"
+          ? elapsed === 19
+            ? 1
+            : elapsed === 20
+              ? 2
+              : 4
+          : undefined,
       // The first replacement after page construction inherits the initial
       // window-copy queue: AddTextPrinter's speed-0 callback exposes 21
       // printable characters here and the remainder lands next VBlank.
       // Subsequent replacements start from an already installed rental
       // window and complete this field within the same callback.
-      abilityDescriptionCharLimit: elapsed === 19 && !sourceIsReplacement ? 21 : undefined,
+      abilityDescriptionCharLimit:
+        page === "info" && elapsed === 19 && !sourceIsReplacement ? 21 : undefined,
       showMon: elapsed < 3 || spriteIsNew,
       showBall: elapsed < 4 || elapsed >= 12,
       animateSwitchedMon: !spriteIsNew && sourceIsReplacement,

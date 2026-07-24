@@ -68,6 +68,7 @@ import {
   renderSummaryInfoPageFaded,
   renderSummaryMonTransition,
   renderSummaryPageCleared,
+  renderSummaryPageFaded,
   renderSummaryPageTransition,
   renderSummarySkillsPage,
 } from "./summaryInfoPage.ts";
@@ -1915,6 +1916,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
             summary.monTransition,
             summaryMonAnimClock,
             animateSwitchedMon,
+            summary.page,
           );
         }
         return summary.onInfoPage
@@ -2086,6 +2088,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         summary.monTransition,
         summaryMonAnimClock,
         animateSwitchedMon,
+        summary.page,
       );
     }
     if (summary.pageTransition) {
@@ -2166,8 +2169,9 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   const showingDraft = isEntry === (t.phase === "fadingOut");
   return showingDraft
     ? renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY)
-    : renderSummaryInfoPageFaded(
+    : renderSummaryPageFaded(
         summary.selectedSlot,
+        summary.page,
         bgY,
         objY,
         summaryMonAnimClock,

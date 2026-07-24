@@ -244,8 +244,8 @@ export function requestSummaryPageChange(
 /**
  * Task_HandleInput -> ChangeSummaryPokemon -> AdvanceMonIndex.
  *
- * The six-rental party is a normal (non-box, non-multi) mon list. Emerald's
- * Info page clamps at both ends: UP on slot 0 and DOWN on slot 5 are rejected,
+ * The six-rental party is a normal (non-box, non-multi) mon list. Every
+ * unlocked page clamps at both ends: UP on slot 0 and DOWN on slot 5 are rejected,
  * with no wrap. Ownership transfers to the destination slot immediately when
  * the replacement task is installed.
  */
@@ -258,8 +258,7 @@ export function requestSummaryMonChange(
     state.transition ||
     state.pageTransition ||
     state.monTransition ||
-    state.moveSelect ||
-    state.page !== "info"
+    state.moveSelect
   ) {
     return state;
   }
@@ -393,14 +392,21 @@ export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenSt
   }
   if (state.monTransition) {
     const elapsed = state.monTransition.elapsed + 1;
-    if (elapsed >= SUMMARY_MON_TRANSITION_TICKS) {
+    // Moves pages briefly expose the source window-copy queue after
+    // PrintPageSpecificText: row 1, then rows 1-2, before the full window.
+    const transitionTicks =
+      state.page === "battleMoves" || state.page === "contestMoves"
+        ? SUMMARY_MON_TRANSITION_TICKS + 2
+        : SUMMARY_MON_TRANSITION_TICKS;
+    if (elapsed >= transitionTicks) {
       return {
         ...state,
         monTransition: null,
         isOpen: true,
-        onInfoPage: true,
+        onInfoPage: state.page === "info",
         openElapsed: state.openElapsed + 1,
-        monAnimClock: 0,
+        monAnimClock:
+          state.page === "battleMoves" || state.page === "contestMoves" ? 1 : 0,
       };
     }
     return {
