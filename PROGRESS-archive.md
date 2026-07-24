@@ -1,3 +1,21 @@
+## 356 — S9 OFF Contest Moves LOCK_MOVES selector: **GREEN — 93/93 exact**
+
+- **State:** A on input-ready ONIX Contest Moves enters the shared inert
+  selector, DOWN owns BIND details, and B restores ordinary Contest Moves.
+- **Did:** reused the generic selector reducer/cursor lifecycle and added
+  Contest-owned effect panel, appeal/jam hearts, effect descriptions, palette,
+  and source display gates. Tier-1 pins shared indices/clocks/readiness,
+  rental/page/mode/move-order preservation, and locked close restoration.
+- **Next:** supervisor verify this bounded route and choose the next S9
+  summary increment; actual reorder and Moves-page mon switching remain open.
+- **Notes:** Contest selector **93/93**; Battle selector **93/93**; page
+  routes **16/16 + 36/36**; switches **87/87 + 54/54**; Info
+  **122/122 + 132/132**; Info/Skills **25/25 + 56/56**; install **3/3**.
+  Tier-1 **1320/1320** and build green. No reorder, mon switching,
+  battle/controller, Scene-ON, absolute ticks, framebuffer assets, runtime
+  oracle/ROM, ROADMAP, or ISSUES edits.
+
+---
 ## 355 — S9 OFF Battle Moves LOCK_MOVES selector: **GREEN — 93/93 exact**
 
 - **State:** A on input-ready ONIX Battle Moves enters the inert LOCK_MOVES

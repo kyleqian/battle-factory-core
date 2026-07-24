@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 359 — S4/S9 closed; S10 corpus + Scene-ON breadth advancing
+
+- **State:** S4/S9 are supervisor-verified complete; QUICK ATTACK is exact in
+  both orientations. S10 Gate 1 now has the complete 300-trainer corpus.
+- **Did:** accepted all 14 summary traces, the 12-case generic round matrix,
+  and the source-driven front-animation/Contest transfer seam; merged signed
+  fixed-point QUICK travel and extracted every Frontier trainer's class,
+  speeches, eligible sets, and source-declared AI shape.
+- **Next:** finish full species stats/ability extraction and the remaining
+  Gate-1 lookup catalogs; keep AERIAL ACE portability moving independently.
+- **Notes:** summary **80/80 + 80/80 + 201/201**, QUICK **219/219 + 214/214**,
+  animation **7 exact / 6 partial / 263 unsupported**. Trainer extraction
+  covers **300/300**, cross-validates **882** sets and the **0–849** Level-50
+  boundary. PP-builder work remains independently in flight; new mechanicLab
+  fixtures use `ppUps:[0,0,0,0]`.
+
+---
 ## 358 — S4/S9 OFF summary front animation + Contest switch: **GREEN**
 
 - **State:** source-driven front animation is live for the six named rental
@@ -40,21 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **122/122 + 132/132**. Tier-1 **1336/1336** and build green. No reorder,
   PP policy, battle/controller, Scene-ON, idle-animation, absolute ticks,
   framebuffer assets, runtime oracle/ROM, ROADMAP, or ISSUES edits.
-
----
-## 356 — S9 OFF Contest Moves LOCK_MOVES selector: **GREEN — 93/93 exact**
-
-- **State:** A on input-ready ONIX Contest Moves enters the shared inert
-  selector, DOWN owns BIND details, and B restores ordinary Contest Moves.
-- **Did:** reused the generic selector reducer/cursor lifecycle and added
-  Contest-owned effect panel, appeal/jam hearts, effect descriptions, palette,
-  and source display gates. Tier-1 pins shared indices/clocks/readiness,
-  rental/page/mode/move-order preservation, and locked close restoration.
-- **Next:** supervisor verify this bounded route and choose the next S9
-  summary increment; actual reorder and Moves-page mon switching remain open.
-- **Notes:** Contest selector **93/93**; Battle selector **93/93**; page
-  routes **16/16 + 36/36**; switches **87/87 + 54/54**; Info
-  **122/122 + 132/132**; Info/Skills **25/25 + 56/56**; install **3/3**.
-  Tier-1 **1320/1320** and build green. No reorder, mon switching,
-  battle/controller, Scene-ON, absolute ticks, framebuffer assets, runtime
-  oracle/ROM, ROADMAP, or ISSUES edits.
