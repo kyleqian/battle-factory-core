@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 344 — S8 OFF enemy-origin swap quit: **GREEN — 356/356 exact**
+
+- **State:** enemy picker B and enemy CANCEL now share the existing quit
+  prompt/response reducer while using the source's enemy-only two-button
+  teardown/reconstruction. Only duplicate-species rejection remains in the
+  finite swap-YES UI audit; S8 stays open.
+- **Did:** wired staggered PKMN FOR SWAP/CANCEL slide-out, default-YES
+  no-mutation exit, NO/B reverse transition, install-frame rejection, and
+  first fresh enemy input. Tier-1 pins source-relative gates, five actions,
+  TRUE result/field handoff, immutable parties/rentals, and no round decision.
+- **Next:** implement the bounded duplicate-species rejection fixture. Do not
+  resume the retired canonical Battle-2 march.
+- **Notes:** new B YES **65/65**, B NO **113/113**, B return **113/113**,
+  CANCEL YES **65/65**; Tier-1 **1262/1262**, build **5.675 MB**. Existing
+  player quit **68/68** and sampled swap regressions **69/69 + 43/43 +
+  69/69 + 66/66 + 130/130 + 115/115** unchanged. No absolute tick lookup,
+  framebuffer asset, mutation, or selection RNG.
+
+---
 ## 343 — S8 OFF swap SUMMARY return: **GREEN — 147/147 exact**
 
 - **State:** player popup `SUMMARY` now round-trips through the shared normal
@@ -44,26 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   build **5.670 MB**. Integrated Tier-1 **1255/1255**, build **5.671 MB**;
   ICE **187/187**, FIRE PUNCH **225/225**. No absolute tick/frame lookup,
   framebuffer asset, party/rental mutation, or selection RNG roll.
-
----
-## 341 — S8 OFF player-origin swap quit: **GREEN — 233/233 exact**
-
-- **State:** one reusable phase-relative quit interaction now covers player
-  picker B and CANCEL, prompt opening/input, default-YES keep-party exit, and
-  NO/B transition-in return. Four dense OFF windows are zero diff. A disjoint
-  OFF fixture now pins enemy `PKMN FOR SWAP` through the input-ready player
-  picker, and ICE PUNCH is exact through its complete short-crystal burst.
-- **Did:** exposed the source's four player actions, wired CANCEL to the same
-  quit callback as B, and added transition-out, prompt, no-picture exit/return,
-  field handoff, and fresh picker input gates. Tier-1 pins rejected/accepted
-  edges, TRUE result semantics, no party/rental mutation, and both returns.
-  The enemy-return probe pins its accepted edge, two-button chrome teardown,
-  four-action player reconstruction, immutable identities, and fresh input.
-- **Next:** implement enemy `PKMN FOR SWAP` from its staged OFF fixture, then
-  SUMMARY return, enemy-origin quit chrome, and duplicate-species rejection.
-  Animation continues ICE PUNCH at frame 2503 through teardown.
-- **Notes:** quit YES **31/31**, NO **67/67**, B **67/67**, CANCEL+YES
-  **68/68**; Tier-1 **1250/1250**, build **5.667 MB**. Gate 2 and S8 remain
-  open. Integrated Tier-1 **1251/1251**, build **5.668 MB**; ICE PUNCH
-  **164/164**, FIRE PUNCH **225/225**. No absolute tick lookup, framebuffer
-  asset, or Battle-2 continuation.

@@ -598,11 +598,15 @@ popup through summary open/input/close, `CB2_InitSwapScreen` reconstruction,
 the returned default-SUMMARY popup, and accepted fresh DOWN/display copy.
 Tier-1 pins the rejected/accepted gates, `SUMMARY_MODE_NORMAL`, current/max
 indexes, callback ownership, four-action popup semantics, fresh ball clocks,
-and immutable parties/rentals/result. Enemy-origin quit chrome and duplicate
-rejection still require live presentation, not further Battle-2 turns. A
-compact enemy-quit fixture now pins both B and CANCEL origins, staggered
+and immutable parties/rentals/result. A compact enemy-quit fixture pins both
+B and CANCEL origins, staggered
 `PKMN FOR SWAP`/CANCEL teardown and reconstruction, shared YES exit and NO/B
 returns, install-frame rejection, fresh enemy input, and immutable identities.
+That reusable enemy-origin presentation is now live and exact across every
+dynamic frame: B default-YES **65/65**, B NO **113/113**, B return **113/113**,
+and CANCEL default-YES **65/65**. It reuses the player prompt/response reducer,
+owns no party/rental/result or selection-RNG mutation, and leaves only
+duplicate-species rejection in the finite swap-YES UI audit.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it

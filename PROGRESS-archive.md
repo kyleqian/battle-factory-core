@@ -1,3 +1,20 @@
+## 341 — S8 OFF player-origin swap quit: **GREEN — 233/233 exact**
+
+- **State:** one reusable phase-relative quit interaction covers player
+  picker B and CANCEL, prompt opening/input, default-YES keep-party exit, and
+  NO/B transition-in return. Four dense OFF windows are zero diff.
+- **Did:** exposed the source's four player actions, wired CANCEL to the same
+  quit callback as B, and added transition-out, prompt, no-picture exit/return,
+  field handoff, and fresh picker input gates. Tier-1 pins rejected/accepted
+  edges, TRUE result semantics, and no party/rental mutation.
+- **Next:** implement enemy `PKMN FOR SWAP`, SUMMARY return, enemy-origin quit
+  chrome, and duplicate-species rejection.
+- **Notes:** quit YES **31/31**, NO **67/67**, B **67/67**, CANCEL+YES
+  **68/68**; Tier-1 **1250/1250**, build **5.667 MB**. No absolute tick lookup,
+  framebuffer asset, or Battle-2 continuation.
+
+---
+
 ## 340 — S8 OFF seventh-win terminal continuation: **GREEN — 4424/4424 exact**
 
 - **State:** the staged seventh-win route is gaplessly exact through exchange,
