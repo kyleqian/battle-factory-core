@@ -1,3 +1,24 @@
+## 357 — S9 OFF Moves-page rental switching: **BATTLE GREEN — 80/80 exact**
+
+- **State:** generic UP/DOWN now switches rentals on Battle/Contest Moves;
+  the dense Battle DOWN→UP→B route is fully exact. A full Contest round trip
+  is not yet a safe acceptance route under this step's idle-animation ban.
+- **Did:** modeled the live tile-buffer `CopyWindowToVram` queue, initial
+  clear handoff, and mid-`GLYPH_COPY` PP raster boundary; Tier-1 pins initial
+  versus already-installed windows and the final input-ready transfer. All
+  12 accepted summary traces were rerun exact.
+- **Next:** supervisor choose a separately scoped Contest switch increment:
+  the uncommitted dense scout was **63/80**, with page-specific copy frames
+  173–175/207 plus switched-MAGBY idle-animation frames 177–189; do not thin
+  that route or change idle animation under this completed repair.
+- **Notes:** `summary-battle-moves-mon-down-up.json` **80/80** (four residual
+  frames closed); selectors **93/93 + 93/93**; page routes **3/3 + 25/25 +
+  56/56 + 36/36 + 16/16**; Info switches **54/54 + 87/87**; Info pages
+  **122/122 + 132/132**. Tier-1 **1336/1336** and build green. No reorder,
+  PP policy, battle/controller, Scene-ON, idle-animation, absolute ticks,
+  framebuffer assets, runtime oracle/ROM, ROADMAP, or ISSUES edits.
+
+---
 ## 356 — S9 OFF Contest Moves LOCK_MOVES selector: **GREEN — 93/93 exact**
 
 - **State:** A on input-ready ONIX Contest Moves enters the shared inert

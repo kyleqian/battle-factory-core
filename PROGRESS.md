@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 360 — S10 Gate 1 complete; AERIAL ACE compositor in flight
+
+- **State:** S10's complete Factory corpus gate is supervisor-verified and
+  closed. Scene-ON remains **7 exact / 6 partial / 263 unsupported** while the
+  AERIAL ACE portable compositor is independently in flight.
+- **Did:** extracted and exhaustively joined 300 trainers, 882 sets, 411
+  species, 63 held items, 355 moves, 82 Facility Classes, 25 natures, and the
+  contextual Factory AI policy; isolated regeneration pins every core
+  artifact and all 882 EV masks. Accepted zero-PP-Up AERIAL fixtures and
+  source-relative state as an honest non-pixel staging checkpoint.
+- **Next:** keep AERIAL's unthinned 236/232-frame ON windows moving; leave the
+  in-flight PP builder untouched. While Gate 2 converges, bank only
+  file-disjoint source data that does not redefine its battle-lab interface.
+- **Notes:** all catalogs regenerate byte-for-byte; Level 50 is **0–849**
+  (850 sets) and Open-only **850–881** (32). Integrated baseline is **97
+  files / 1383 tests** plus green build. Canonical AERIAL remains **93/93**;
+  QUICK remains **219/219 + 214/214**.
+
+---
 ## 359 — S4/S9 closed; S10 corpus + Scene-ON breadth advancing
 
 - **State:** S4/S9 are supervisor-verified complete; QUICK ATTACK is exact in
@@ -36,24 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **80/80** (from 63/80); Battle switch **80/80**; all 14 accepted summary
   traces exact. Tier-1 **1351/1351** and build green. No Scene-ON, battle
   logic, PP/reorder, runtime oracle/ROM, ROADMAP, or ISSUES edits.
-
----
-## 357 — S9 OFF Moves-page rental switching: **BATTLE GREEN — 80/80 exact**
-
-- **State:** generic UP/DOWN now switches rentals on Battle/Contest Moves;
-  the dense Battle DOWN→UP→B route is fully exact. A full Contest round trip
-  is not yet a safe acceptance route under this step's idle-animation ban.
-- **Did:** modeled the live tile-buffer `CopyWindowToVram` queue, initial
-  clear handoff, and mid-`GLYPH_COPY` PP raster boundary; Tier-1 pins initial
-  versus already-installed windows and the final input-ready transfer. All
-  12 accepted summary traces were rerun exact.
-- **Next:** supervisor choose a separately scoped Contest switch increment:
-  the uncommitted dense scout was **63/80**, with page-specific copy frames
-  173–175/207 plus switched-MAGBY idle-animation frames 177–189; do not thin
-  that route or change idle animation under this completed repair.
-- **Notes:** `summary-battle-moves-mon-down-up.json` **80/80** (four residual
-  frames closed); selectors **93/93 + 93/93**; page routes **3/3 + 25/25 +
-  56/56 + 36/36 + 16/16**; Info switches **54/54 + 87/87**; Info pages
-  **122/122 + 132/132**. Tier-1 **1336/1336** and build green. No reorder,
-  PP policy, battle/controller, Scene-ON, idle-animation, absolute ticks,
-  framebuffer assets, runtime oracle/ROM, ROADMAP, or ISSUES edits.

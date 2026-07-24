@@ -925,13 +925,33 @@ those events without owning outcomes.
 
 S10 has six ordered completion gates:
 
-1. [ ] **Complete Factory corpus:** mechanically extract and validate all 300
+1. [x] **Complete Factory corpus:** mechanically extract and validate all 300
    Frontier trainers (name, facility class, all three Easy Chat speeches,
    eligible mon sets, and AI flags), all 882 Frontier mon sets with the 850
    Level-50-eligible boundary preserved, all relevant species base
    stats/types/abilities, held items, moves, trainer classes, and presentation
    lookup tables. Generated-data tests enumerate every trainer and legal set;
    no runtime dependency on `reference/`, the ROM, or the oracle is added.
+
+   **Completion (2026-07-24, supervisor-verified):** deterministic generated
+   catalogs enumerate all **300** ordinary Frontier trainers, **882** mon sets
+   (Level-50 indexes **0–849**, Open-only **850–881**), **411** real species,
+   **63** Frontier held-item rows, **355** moves, **82** Facility Class
+   presentation rows, and **25** natures. Every trainer joins to its three
+   six-word speeches, expanded eligible-set list, class, trainer picture,
+   front-picture coordinates, and display class; every set joins to source
+   species stats/types/two ability slots, nature, held-item indirection, four
+   move records, and the exact six-bit EV-spread constants. The source
+   `BattleFrontierTrainer` record has no per-trainer AI field: the separate
+   generated Factory AI policy preserves all 13 named masks and all five
+   challenge/level/Frontier-Brain branches of
+   `GetAiScriptsInBattleFactory`, rather than fabricating flags on trainer
+   rows. Noland is not one of `gBattleFrontierTrainers`' 300 ordinary rows and
+   remains explicit Gate-2/Gate-5 work. Isolated extractor tests reproduce
+   each core artifact byte-for-byte; production has no `reference/`, ROM, or
+   oracle dependency. Supervisor reran the focused joins/regeneration tests,
+   the full **97-file / 1383-test** suite, and the production build.
+
 2. [ ] **Parameterized battle oracle:** extend the existing deterministic
    stock-ROM mGBA service additively (the canonical `/v1/run` contract and its
    ON/OFF anchors remain unchanged) with a semantic battle-lab scenario
