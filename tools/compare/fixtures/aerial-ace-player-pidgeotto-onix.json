@@ -32,7 +32,7 @@
   },
   "moveTextStartAge": 5,
   "acceptance": {
-    "status": "staged-not-compared",
-    "remaining": "Install the source-relative AERIAL_ACE compositor and prove all 232 dense frames."
+    "status": "exact",
+    "result": "232/232 dense frames exact with zero differing pixels."
   }
 }

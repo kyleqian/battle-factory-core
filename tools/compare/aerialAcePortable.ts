@@ -87,7 +87,13 @@ state = {
 
 let matching = 0;
 let diffPixels = 0;
-const mismatches: Array<{ frame: number; pixels: number; box: string }> = [];
+const mismatches: Array<{
+  frame: number;
+  pixels: number;
+  box: string;
+  sample: string;
+}> = [];
+let firstPixelDetail = "";
 for (
   let frame = fixture.denseWindow.startFrame;
   frame <= fixture.denseWindow.endFrame;
@@ -102,6 +108,7 @@ for (
   let minY = 160;
   let maxX = -1;
   let maxY = -1;
+  let sample = "";
   for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
     const oi = pixel * 3;
     const ai = pixel * 4;
@@ -110,6 +117,17 @@ for (
       || oracle[oi + 1] !== rgba[ai + 1]
       || oracle[oi + 2] !== rgba[ai + 2]
     ) {
+      if (!firstPixelDetail) {
+        firstPixelDetail =
+          `${frame}@${pixel % 240},${Math.floor(pixel / 240)} `
+          + `oracle=${oracle[oi]},${oracle[oi + 1]},${oracle[oi + 2]} `
+          + `app=${rgba[ai]},${rgba[ai + 1]},${rgba[ai + 2]}`;
+      }
+      if (!sample) {
+        sample =
+          `${pixel % 240},${Math.floor(pixel / 240)}:`
+          + `${oracle[oi]}/${rgba[ai]}`;
+      }
       frameDiff += 1;
       const x = pixel % 240;
       const y = Math.floor(pixel / 240);
@@ -125,6 +143,7 @@ for (
       frame,
       pixels: frameDiff,
       box: `${minX},${minY}-${maxX},${maxY}`,
+      sample,
     });
   }
   diffPixels += frameDiff;
@@ -149,8 +168,14 @@ console.log(
 if (mismatches.length) {
   console.log(
     `first mismatches: ${mismatches.slice(0, 16).map(
-      ({ frame, pixels, box }) => `${frame}:${pixels}@${box}`,
+      ({ frame, pixels, box, sample }) => `${frame}:${pixels}@${box}[${sample}]`,
     ).join(", ")}`,
   );
+  console.log(
+    `last mismatches: ${mismatches.slice(-16).map(
+      ({ frame, pixels, box, sample }) => `${frame}:${pixels}@${box}[${sample}]`,
+    ).join(", ")}`,
+  );
+  console.log(`first pixel: ${firstPixelDetail}`);
 }
 process.exit(matching === total ? 0 : 1);

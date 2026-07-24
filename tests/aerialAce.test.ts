@@ -16,6 +16,8 @@ import {
   AERIAL_ACE_SLICE_FIRST_AGE,
   AERIAL_ACE_TRAVEL_FIRST_AGE,
   aerialAceAnimationAtAge,
+  aerialAceSliceBase,
+  aerialAceTargetSpriteXAtAge,
   aerialAceSliceAtAge,
   aerialAceTracesAtAge,
   aerialAceTravelAtAge,
@@ -41,7 +43,7 @@ describe("portable AERIAL ACE source components", () => {
       endFrame: 277,
     });
     expect(opponentFixture.acceptance.status).toBe("exact");
-    expect(playerFixture.acceptance.status).toBe("staged-not-compared");
+    expect(playerFixture.acceptance.status).toBe("exact");
   });
 
   it("pins the independent source-relative component clocks", () => {
@@ -97,6 +99,14 @@ describe("portable AERIAL ACE source components", () => {
   });
 
   it("pins the independent cutting slice and complex palette pulse", () => {
+    expect(aerialAceSliceBase({ x: 72, y: 80 }, "player"))
+      .toEqual({ x: 112, y: 56 });
+    expect(aerialAceSliceBase({ x: 176, y: 40 }, "opponent"))
+      .toEqual({ x: 216, y: 8 });
+    expect(aerialAceTargetSpriteXAtAge(56, "opponent", 145)).toBe(145);
+    expect(aerialAceTargetSpriteXAtAge(57, "opponent", 145)).toBe(144);
+    expect(aerialAceTargetSpriteXAtAge(238, "opponent", 145)).toBe(144);
+    expect(aerialAceTargetSpriteXAtAge(57, "player", 40)).toBe(40);
     expect(aerialAceSliceAtAge(49)).toBeNull();
     expect(aerialAceSliceAtAge(50)).toEqual({ x2: -4, y2: 4, frame: 0 });
     expect(aerialAceSliceAtAge(59)).toEqual({ x2: -36, y2: 35, frame: 2 });

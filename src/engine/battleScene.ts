@@ -588,6 +588,10 @@ import {
   sitrusTintCoeffAtAge,
 } from "./heldItemHeal.ts";
 import {
+  aerialAceSliceBase,
+  aerialAceTargetSpriteXAtAge,
+} from "./aerialAce.ts";
+import {
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
   TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
   FIRE_PUNCH_TEXT_AGE,
@@ -14997,12 +15001,22 @@ export function renderSceneOnMovePresentation(
     );
 
     if (!view.targetInvisible) {
+      // The settled opponent-front Onix carries its front-animation OAM
+      // x2=+1 in the staged corner. Once monbg owns ANIM_TARGET, the BG copy
+      // uses the source base X and the eventual OBJ restore keeps that reset.
+      const targetX = aerialAceTargetSpriteXAtAge(
+        view.animationAge,
+        target.geometry.side,
+        target.geometry.spriteCorner.x,
+      );
+      const targetY =
+        target.geometry.spriteCorner.y + view.targetShakeY2;
       drawSpriteSheet(
         fb,
         targetSprite.tileset,
         targetPalette,
-        target.geometry.spriteCorner.x,
-        target.geometry.spriteCorner.y + view.targetShakeY2,
+        targetX,
+        targetY,
       );
     }
 
@@ -15063,12 +15077,16 @@ export function renderSceneOnMovePresentation(
 
     if (view.slice) {
       const frameTileset = cuttingSliceFrameTileset(view.slice.frame);
+      const sliceBase = aerialAceSliceBase(
+        target.geometry.battlePositionCenter,
+        target.geometry.side,
+      );
       drawSpriteSheetBlendedOverFb(
         fb,
         frameTileset,
         battleAnimCuttingSlice.palette,
-        TURN10_SLICE_BASE.x + view.slice.x2 - 16,
-        TURN10_SLICE_BASE.y + view.slice.y2 - 16,
+        sliceBase.x + view.slice.x2 - 16,
+        sliceBase.y + view.slice.y2 - 16,
         12,
         8,
       );
