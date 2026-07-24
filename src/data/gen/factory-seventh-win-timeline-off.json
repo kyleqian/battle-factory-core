@@ -1,0 +1,58 @@
+{
+  "schema": "factory-seventh-win-timeline-off/v1",
+  "oracleProfile": "battle-scene-off",
+  "relativeTo": "staged Factory Lobby CB2_LoadMap success handoff after the canonical prefix tick 29601",
+  "stage": {
+    "challengeStatus": 3,
+    "battleNumber": 7,
+    "factorySinglesLevel50Streak": 7,
+    "battlePointsBeforeAward": 0,
+    "writesOnly": ["terminal Frontier save fields", "Factory Lobby warp provenance", "gMain callback2/state -> CB2_LoadMap/0"],
+    "notWritten": ["field script", "text printers/tasks/windows", "party", "sound/fanfare", "record result", "renderer/framebuffer"]
+  },
+  "source": {
+    "lobbyScript": "BattleFactoryLobby/scripts.inc:40-62 WonChallenge -> GiveBattlePoints -> AskRecordBattle",
+    "award": "frontier_util.c:1853-1910: Factory singles level-50 first completed challenge awards 3 BP",
+    "getPoints": "std_msgbox.inc MSGBOX_GETPOINTS: message, MUS_OBTAIN_B_POINTS fanfare, waitfanfare, waitmessage",
+    "menu": "script_menu.c:706-715 starts a two-frame input delay; MULTI_YESNO defaultChoice=1 is NO"
+  },
+  "deliberateReleaseSchedule": [
+    {"tick": 300, "button": "A", "gate": "congratulations DEFAULT wait"},
+    {"tick": 1100, "button": "A", "gate": "award \\l scroll wait"},
+    {"tick": 2200, "button": "A", "gate": "award DEFAULT wait; next frame grants BP"},
+    {"tick": 3500, "button": "A", "gate": "exchange \\p clear wait"},
+    {"tick": 4400, "button": "A", "gate": "record-question \\l scroll wait"}
+  ],
+  "printer": {
+    "congratulations": {"print": [38, 101], "defaultWaitStarts": 102},
+    "award": {"print": [303, 368], "scrollWait": [369, 1099], "scrollTransition": [1100, 1104], "secondPagePrint": [1105, 1140], "defaultWaitStarts": 1141},
+    "getPoints": {"print": [2201, 2236], "fanfareCounter": {"start": 2201, "initial": 312, "lastNonzero": 2512, "firstZero": 2513}, "nextMessageFirstPrint": 2518},
+    "exchange": {"print": [2518, 2570], "clearWait": [2571, 3499], "secondPagePrint": [3500, 3546]},
+    "recordQuestion": {"print": [3716, 3779], "scrollWait": [3780, 4399], "scrollTransition": [4400, 4404], "secondPagePrint": [4405, 4419]}
+  },
+  "mutations": {
+    "battlePoints": {"tick": 2201, "from": 0, "to": 3},
+    "partyRestore": {"tick": 3549, "playerPartyEqualsSavedParty": true},
+    "challengeStatusClear": {"tick": 3549, "from": 3, "to": 0}
+  },
+  "recordMenu": {
+    "draw": 4422,
+    "delayZeroBoundary": 4423,
+    "firstAcceptedInput": 4424,
+    "defaultChoice": "NO",
+    "drawFrameA": {"rejected": true, "nextFrameMenuAlive": true, "result": 255},
+    "firstAcceptedA": {"nextFrameMenuAlive": false, "result": 1}
+  },
+  "rng": {
+    "ownership": "field/VBlank after battle; all observed deltas are Gen-3 LCG calls",
+    "callsPerFrame": [{"frames": [1, 2], "calls": 1}, {"frames": [3, 3], "calls": 3}, {"frames": [4, 4], "calls": 4}, {"frames": [5, 33], "calls": 1}, {"frames": [34, 34], "calls": 3}, {"frames": [35, 4423], "calls": 1}],
+    "note": "Map-loader setup owns the only observed bursts; do not transfer a constant-RNG assumption into the terminal scenario."
+  },
+  "staticFramebufferHolds": [
+    {"frames": [102, 304], "sha256": "8846aad5e1b1e8d0568ff03acc93f5c0bb15b37d66216247197636b355ccf7be"},
+    {"frames": [1141, 2202], "sha256": "2d2d1f26fbfa8ffc7b26111502c3d9e8515f77cf92dde3c0c472d10c6d781781"},
+    {"frames": [2237, 2519], "sha256": "c54823df628d7e92f1d2f34381943fb74f49d27dd8e4abe941e3dc4060b5b94d"},
+    {"frames": [3547, 3717], "sha256": "38c0b3354833b0f1629205cd1559f10220cfb9206a26746ac279537127dd784c"}
+  ],
+  "limits": {"noPngOrRgbAssets": true, "noProductionRendererUse": true, "framebufferEvidence": "raw RGB888 SHA-256 only"}
+}
