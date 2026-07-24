@@ -1,0 +1,122 @@
+{
+  "_comment": "S4/S9 OFF evidence: follows the dense MAGBY Info trace from immediately before SpriteCB_Pokemon fires through the complete source callback and stable aftermath. sMonSummaryScreen is file-static at 0x0203cf1c in the pinned ELF; spriteIds[MON] is offset 0x40d3 (see pokemon_summary_screen.c's annotated struct).",
+  "oracleProfile": "battle-scene-off",
+  "trace": "../../compare/traces/summary-info-magby-front-animation.json",
+  "startTick": 100,
+  "watch": [
+    {
+      "name": "monSpriteId",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }
+      ],
+      "size": 1
+    },
+    {
+      "name": "oamAttr0",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }
+      ],
+      "size": 2
+    },
+    {
+      "name": "oamAttr1",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 2 }
+      ],
+      "size": 2
+    },
+    {
+      "name": "oamAttr2",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 4 }
+      ],
+      "size": 2
+    },
+    {
+      "name": "spriteX",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 32 }
+      ],
+      "size": 2
+    },
+    {
+      "name": "spriteY",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 34 }
+      ],
+      "size": 2
+    },
+    {
+      "name": "spriteX2",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 36 }
+      ],
+      "size": 2
+    },
+    {
+      "name": "spriteY2",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 38 }
+      ],
+      "size": 2
+    },
+    {
+      "name": "animNum",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 42 }
+      ],
+      "size": 1
+    },
+    {
+      "name": "animCmdIndex",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 43 }
+      ],
+      "size": 1
+    },
+    {
+      "name": "animDelayFlags",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 44 }
+      ],
+      "size": 1
+    },
+    {
+      "name": "data0Duration",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 46 }
+      ],
+      "size": 2
+    },
+    {
+      "name": "data2Elapsed",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 50 }
+      ],
+      "size": 2
+    },
+    {
+      "name": "data3BouncePhase",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 52 }
+      ],
+      "size": 2
+    },
+    {
+      "name": "data4ScalePhase",
+      "path": [
+        { "symbol": "0x0203cf1c" }, { "derefU32": true }, { "add": 16595 }, { "derefU8Scaled": 68 }, { "addSymbol": "gSprites" }, { "add": 54 }
+      ],
+      "size": 2
+    },
+    { "name": "cryPlayerPtr", "addr": "gMPlay_PokemonCry", "size": 4 },
+    {
+      "name": "cryPlayerStatus",
+      "path": [
+        { "symbol": "gMPlay_PokemonCry" }, { "derefU32": true }, { "add": 4 }
+      ],
+      "size": 4
+    },
+    { "name": "cryBgmDuckCounter", "addr": "gPokemonCryBGMDuckingCounter", "size": 1 }
+  ]
+}
