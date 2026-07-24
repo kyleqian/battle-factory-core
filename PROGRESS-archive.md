@@ -1,3 +1,20 @@
+## 372 — Gate-3 source-exact move-values cleanup integrated
+
+- **State:** S10 Gate 3 remains open with **14** source-safe opcodes and an
+  unwired immutable control/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `MOVEVALUESCLEANUP` (opcode 37) through a typed,
+  immutable move-values slice: resets result/effect/miss fields and both
+  multipliers, clears only hit-marker bits 6/14, then advances once. Pinned
+  the helper/Cmd/macro/table and all six starts (**116/292/911/1262/1352/1843**).
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Do not add damage, accuracy, loops, PP, message
+  buffers, production controller/rendering, animation, pixels, or other opcodes.
+- **Notes:** exact supported IDs are
+  **16/18/37/38/39/40/57/58/60/61/62/65/131/141**. Focused **49/49**;
+  Tier-1 **112 files / 1511 tests**, build, and Scene-OFF oracle contract
+  green; no RNG/scheduler/event/controller/presentation or pixel change.
+
+---
 ## 371 — Gate-3 source-exact random multi-hit counter integrated
 
 - **State:** S10 Gate 3 remains open with **13** source-safe opcodes and an
