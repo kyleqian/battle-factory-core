@@ -47,6 +47,9 @@ function battler(
     targetNotAffected: changes.targetNotAffected ?? 0,
     flag2Unknown: changes.flag2Unknown ?? 0,
     chargingTurn: changes.chargingTurn ?? 0,
+    protected: changes.protected ?? 0,
+    ppNotAffectedByPressure: changes.ppNotAffectedByPressure ?? 0,
+    types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
   });
 }
 

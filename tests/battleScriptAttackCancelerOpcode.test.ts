@@ -52,6 +52,9 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     bounceMove: changes.bounceMove,
     stealMove: changes.stealMove,
     lightningRodRedirected: changes.lightningRodRedirected,
+    protected: changes.protected,
+    ppNotAffectedByPressure: changes.ppNotAffectedByPressure,
+    types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
   });
 }
 
@@ -237,14 +240,14 @@ describe("production opcode 0 (Cmd_attackcanceler) dispatch", () => {
   it("proves the fifteenth (flags) phase always runs first with zero effect of its own", () => {
     // CANCELER_FLAGS never intercepts by itself (it only clears Destiny
     // Bond/Grudge), so an otherwise clean attacker reaches CANCELER_END and
-    // the join chain proceeds all the way to the (currently barriered) tail
-    // instead of halting on a flags-phase effect.
+    // the join chain proceeds all the way through the tail's
+    // DEFENDER_IS_PROTECTED check (false: target.protected defaults to 0) to
+    // a plain advance into the next hit-chain opcode.
     const result = stepOpcodeZero(withSinglesAttacker(0, {}));
-    expect(result.kind).toBe("halted");
-    expect(result.state.haltReason).toMatchObject({
-      kind: "unsupported-branch",
-      sourceLine: 992,
-    });
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    const next = program.instructions[result.state.programCounter];
+    expect(next?.opcodeName).toBe("B_SCR_OP_ACCURACYCHECK");
   });
 
   describe("(b) unsupported-branch barriers", () => {
@@ -311,14 +314,25 @@ describe("production opcode 0 (Cmd_attackcanceler) dispatch", () => {
       });
     });
 
-    it("halts on the final DEFENDER_IS_PROTECTED check once nothing else intercepts", () => {
-      const result = stepOpcodeZero(withSinglesAttacker(0, {}));
-      expect(result.kind).toBe("halted");
-      expect(result.state.haltReason).toMatchObject({
-        kind: "unsupported-branch",
-        sourceFile: "battle_script_commands.c",
-        sourceLine: 992,
-      });
+    it("applies the real DEFENDER_IS_PROTECTED effect and advances (Protect success)", () => {
+      const result = stepOpcodeZero(
+        withSinglesAttacker(0, {}, {}, { protected: 1 }),
+      );
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      const next = program.instructions[result.state.programCounter];
+      expect(next?.opcodeName).toBe("B_SCR_OP_ACCURACYCHECK");
+      expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
+      expect(result.state.rulesContext.missType).toBe(1); // B_MSG_PROTECTED
+    });
+
+    it("does not trigger Protect for a move without FLAG_PROTECT_AFFECTED", () => {
+      const result = stepOpcodeZero(
+        withSinglesAttacker(0, {}, { currentMove: SWORDS_DANCE }, { protected: 1 }),
+      );
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.moveResultFlags & 1).toBe(0);
     });
   });
 });

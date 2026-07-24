@@ -237,6 +237,9 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     targetNotAffected: 0,
     flag2Unknown: 0,
     chargingTurn: 0,
+    protected: 0,
+    ppNotAffectedByPressure: 0,
+    types: Object.freeze(["TYPE_NORMAL", "TYPE_NORMAL"] as const),
   });
 }
 

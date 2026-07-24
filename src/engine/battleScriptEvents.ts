@@ -80,6 +80,13 @@ export type BattleScriptSemanticEventPayload =
     status1: number;
   }>
   | Readonly<{
+    kind: "set-battler-pp-data";
+    battler: BattleScriptBattlerId;
+    /** gCurrMovePos slot, and the raw post-deduction u8 EmitSetMonData(REQUEST_PPMOVE1_BATTLE + slot) sends. */
+    movePosition: number;
+    pp: number;
+  }>
+  | Readonly<{
     kind: "trainer-slide-in";
     battler: BattleScriptBattlerId;
   }>

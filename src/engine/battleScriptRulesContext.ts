@@ -18,6 +18,7 @@ import {
   type BattleScriptSetByteRulesContext,
 } from "./battleScriptSetByte.ts";
 import { createBattleScriptAttackCancelerOpcodeHandlers } from "./battleScriptAttackCancelerOpcode.ts";
+import { createBattleScriptHitChainOpcodeHandlers } from "./battleScriptHitChainOpcode.ts";
 import {
   createBattleScriptRuleCommandHandlers,
   type BattleScriptByteResolverPort,
@@ -138,6 +139,12 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   /** Remaining durable ProtectStruct bits required by WasUnableToUseMove. */
   targetNotAffected: 0 | 1;
   flag2Unknown: 0 | 1;
+  /** ProtectStruct::protected (this battler used Protect/Detect this turn). */
+  protected: 0 | 1;
+  /** SpecialStatus::ppNotAffectedByPressure. */
+  ppNotAffectedByPressure: 0 | 1;
+  /** Source gBattleMons[battler].types[2], the hit-chain's defending/Ghost-immunity types. */
+  types: readonly [string, string];
 }>;
 
 /**
@@ -160,6 +167,9 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   /** ProtectStruct bits read by WasUnableToUseMove but not by admission yet. */
   targetNotAffected?: 0 | 1;
   flag2Unknown?: 0 | 1;
+  protected?: 0 | 1;
+  ppNotAffectedByPressure?: 0 | 1;
+  types?: readonly [string, string];
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -1280,6 +1290,29 @@ export function createBattleScriptRulesContext(
       1,
       `battlers[${index}].chargingTurn`,
     ) as 0 | 1,
+    protected: requireUnsigned(
+      battler.protected ?? 0,
+      1,
+      `battlers[${index}].protected`,
+    ) as 0 | 1,
+    ppNotAffectedByPressure: requireUnsigned(
+      battler.ppNotAffectedByPressure ?? 0,
+      1,
+      `battlers[${index}].ppNotAffectedByPressure`,
+    ) as 0 | 1,
+    types: Object.freeze(
+      (() => {
+        const types = battler.types ?? ["TYPE_NORMAL", "TYPE_NORMAL"];
+        if (
+          !Array.isArray(types)
+          || types.length !== 2
+          || types.some((type) => typeof type !== "string")
+        ) {
+          throw new Error(`battlers[${index}].types must contain exactly two type name strings`);
+        }
+        return [...types];
+      })(),
+    ) as unknown as readonly [string, string],
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(
@@ -1554,6 +1587,10 @@ export function createBattleScriptStatusRulesHandlers(
       program,
     ),
     ...createBattleScriptAttackCancelerOpcodeHandlers(program),
+    ...createBattleScriptHitChainOpcodeHandlers(program, {
+      isControllerIdle: sourceExternalPorts.isControllerIdle,
+      prepareMessage: sourceExternalPorts.prepareMessage,
+    }),
   });
 }
 

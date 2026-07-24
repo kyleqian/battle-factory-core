@@ -411,10 +411,10 @@ describe("source-shaped Battle Script rules context", () => {
 });
 
 describe("production status rules handler and execution seam", () => {
-  it("composes all 29 source-safe controls, source, multi-hit, cleanup, SETBYTE, and attackcanceler handlers once", () => {
+  it("composes all 32 source-safe controls, source, multi-hit, cleanup, SETBYTE, attackcanceler, and hit-chain handlers once", () => {
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
     expect(Object.keys(handlers).map(Number).sort((a, b) => a - b)).toEqual([
-      0, 10, 16, 17, 18, 20, 37, 38, 39, 40, 46, 57, 58, 60, 61,
+      0, 1, 2, 3, 10, 16, 17, 18, 20, 37, 38, 39, 40, 46, 57, 58, 60, 61,
       62, 65, 83, 84, 85, 86, 98, 100, 101, 102, 111, 131, 141, 248,
     ]);
   });

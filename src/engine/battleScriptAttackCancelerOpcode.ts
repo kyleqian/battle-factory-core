@@ -21,17 +21,59 @@ import {
   type BattleScriptRngState,
 } from "./battleScriptMachine.ts";
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
-import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import type {
+  BattleScriptRulesBattlerState,
+  BattleScriptRulesBattlers,
+  BattleScriptRulesContext,
+} from "./battleScriptRulesContext.ts";
+import { isDefenderProtected } from "./battleScriptHitChainOpcode.ts";
+import {
+  BATTLE_SCRIPT_MOVE_RESULT_MISSED,
+  BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
+} from "./battleScriptSourceConstants.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 
-type MoveFlagsRow = Readonly<{ id: number; flags: readonly string[] }>;
+type MoveFlagsRow = Readonly<{ id: number; flags: readonly string[]; effect: string }>;
 
 const GENERATED_MOVE_FLAGS = new Map<number, readonly string[]>(
   (movesData.moves as readonly MoveFlagsRow[]).map(({ id, flags }) => [id, flags]),
 );
 
+const GENERATED_MOVE_EFFECT_NAMES = new Map<number, string>(
+  (movesData.moves as readonly MoveFlagsRow[]).map(({ id, effect }) => [id, effect]),
+);
+
 function moveHasFlag(move: number, flag: string): boolean {
   return (GENERATED_MOVE_FLAGS.get(move) ?? []).includes(flag);
+}
+
+const BATTLE_SCRIPT_MOVE_CURSE = 174;
+
+/** IsTwoTurnsMove (battle_script_commands.c:8196-8206). */
+function isTwoTurnsMove(move: number): boolean {
+  const effect = GENERATED_MOVE_EFFECT_NAMES.get(move);
+  return effect === "EFFECT_SKULL_BASH"
+    || effect === "EFFECT_RAZOR_WIND"
+    || effect === "EFFECT_SKY_ATTACK"
+    || effect === "EFFECT_SOLAR_BEAM"
+    || effect === "EFFECT_SEMI_INVULNERABLE"
+    || effect === "EFFECT_BIDE";
+}
+
+/** CancelMultiTurnMoves (battle_util.c:877-888). */
+function cancelMultiTurnMoves(battler: BattleScriptRulesBattlerState): BattleScriptRulesBattlerState {
+  return Object.freeze({
+    ...battler,
+    status2: (battler.status2
+      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_LOCK_CONFUSE
+      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR
+      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_BIDE) >>> 0,
+    status3: (battler.status3 & ~BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE) >>> 0,
+    rolloutTimer: 0,
+    furyCutterCounter: 0,
+  });
 }
 
 function requireLabelProgramCounter(program: BattleScriptProgram, label: string): number {
@@ -169,7 +211,6 @@ function resolveTailBranches(
   rulesContext: BattleScriptRulesContext,
   rng: BattleScriptRngState,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
-  void rng;
   const { battlersCount } = rulesContext.battleTopology;
   if (moveHasFlag(rulesContext.currentMove, "FLAG_SNATCH_AFFECTED")) {
     for (let battler = 0; battler < battlersCount; battler += 1) {
@@ -200,13 +241,41 @@ function resolveTailBranches(
     );
   }
 
-  return unsupportedBranch(
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error("Battle Script attack canceler tail branches require an attacker role");
+  }
+  const attackerBattler = rulesContext.battlers[attacker];
+  const move = rulesContext.currentMove;
+  const protectTriggers = isDefenderProtected(rulesContext.battlers[target], move)
+    && (move !== BATTLE_SCRIPT_MOVE_CURSE || attackerBattler.types.includes("TYPE_GHOST"))
+    && (!isTwoTurnsMove(move)
+      || (attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) !== 0);
+
+  if (!protectTriggers) {
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext, rng });
+  }
+
+  const battlers = rulesContext.battlers.map((candidate, index) =>
+    index === attacker ? cancelMultiTurnMoves(candidate) : candidate
+  ) as unknown as BattleScriptRulesBattlers;
+  const clearAt = (halfwords: readonly number[]) =>
+    Object.freeze(halfwords.map((value, index) => (index === target ? 0 : value)));
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battlers: Object.freeze(battlers),
+    moveResultFlags: (rulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0,
+    missType: 1, // B_MSG_PROTECTED (include/constants/battle_string_ids.h:410)
+    moveHistory: Object.freeze({
+      ...rulesContext.moveHistory,
+      lastLandedMoves: clearAt(rulesContext.moveHistory.lastLandedMoves),
+      lastHitByType: clearAt(rulesContext.moveHistory.lastHitByType),
+    }),
+  }) as unknown as BattleScriptRulesContext;
+  return transitionBattleScriptCommand(
     context,
-    "DEFENDER_IS_PROTECTED final check (Protect/Detect fallthrough, the "
-      + "MOVE_CURSE/Ghost-type exception, and IsTwoTurnsMove gating) requires "
-      + "battler type and two-turn-move data this engine does not model yet",
-    "battle_script_commands.c",
-    992,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: nextRulesContext, rng },
   );
 }
 

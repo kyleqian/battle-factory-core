@@ -605,6 +605,7 @@ function freezeEventPayload(
     case "hide-party-status-summary":
     case "set-battler-sprite-visibility":
     case "set-battler-status-data":
+    case "set-battler-pp-data":
     case "trainer-slide-in":
     case "trainer-slide-out":
     case "status-animation":
