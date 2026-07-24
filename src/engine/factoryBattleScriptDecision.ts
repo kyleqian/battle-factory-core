@@ -1,0 +1,557 @@
+import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type: "json" };
+import movesData from "../data/gen/moves.json" with { type: "json" };
+import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
+import {
+  createBattleState,
+  submitBattleDecision,
+  type BattleDecisionReducer,
+  type BattleDecisionSubmission,
+  type BattleDecisionTransitionResult,
+  type BattleJsonObject,
+  type BattleState,
+} from "./battleDecisionBoundary.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  stepBattleScriptMachine,
+  type BattleScriptMachineState,
+} from "./battleScriptMachine.ts";
+import {
+  loadBattleScriptProgram,
+  resolveBattleScriptLabel,
+} from "./battleScriptProgram.ts";
+import {
+  createBattleScriptRulesContext,
+  createBattleScriptStatusRulesExecution,
+  type BattleScriptRulesBattler,
+  type BattleScriptRulesContext,
+} from "./battleScriptRulesContext.ts";
+import { advanceBattleScriptAttackCancelerUnableToUseMove } from "./battleScriptAttackCanceler.ts";
+
+const ADAPTER = "factory-asleep-move/v1";
+const ENTRY_LABEL = "BattleScript_MoveUsedIsAsleep";
+const PLAYER_SET_ID = 15;
+const TRAINER_SET_ID = 291;
+const PLAYER_ABILITY = 62; // ABILITY_GUTS
+const TRAINER_ABILITY = 57; // ABILITY_PLUS
+const B_WAIT_TIME_LONG = 64;
+const LEVEL_50_SET_MAX = 849;
+
+type FrontierMonRow = Readonly<{
+  index: number;
+  label: string;
+  species: string;
+  moves: readonly string[];
+}>;
+
+type MoveRow = Readonly<{
+  move: string;
+  id: number;
+  pp: number;
+}>;
+
+type TopologyMoveRow = Readonly<{
+  id: number;
+  entryScript: string;
+}>;
+
+const FRONTIER_MONS = (frontierMonsData.entries as readonly FrontierMonRow[]);
+const MOVES_BY_SYMBOL = new Map(
+  (movesData.moves as readonly MoveRow[]).map((move) => [move.move, move]),
+);
+const TOPOLOGY_BY_MOVE = new Map(
+  (topologyData.moves as readonly TopologyMoveRow[]).map((move) => [move.id, move]),
+);
+const PROGRAM = loadBattleScriptProgram();
+
+export type FactoryAsleepMoveConfig = Readonly<{
+  playerSetId: number;
+  trainerSetId: number;
+  playerHp: number;
+  trainerHp: number;
+  sleepTurns: number;
+  rngSeed: number;
+  requestId: number;
+}>;
+
+export type FactoryBattleScriptDecisionRules = BattleJsonObject & Readonly<{
+  adapter: typeof ADAPTER;
+  phase: "awaiting-command" | "move-end-barrier";
+  factory: Readonly<{
+    level: 50;
+    playerSetId: number;
+    trainerSetId: number;
+    playerSpecies: string;
+    trainerSpecies: string;
+  }>;
+  selectedMove: null | Readonly<{
+    slot: number;
+    moveId: number;
+    entryScript: string;
+  }>;
+  rulesContext: BattleScriptRulesContext;
+}>;
+
+function requireRecord(value: unknown, label: string): Record<string, unknown> {
+  if (
+    value === null
+    || typeof value !== "object"
+    || Array.isArray(value)
+  ) {
+    throw new Error(`${label} must be a plain object`);
+  }
+  return value as Record<string, unknown>;
+}
+
+function requireExactKeys(
+  value: Record<string, unknown>,
+  keys: readonly string[],
+  label: string,
+): void {
+  const actual = Object.keys(value).sort();
+  const expected = [...keys].sort();
+  if (
+    actual.length !== expected.length
+    || actual.some((key, index) => key !== expected[index])
+  ) {
+    throw new Error(`${label} must have exactly keys ${expected.join(", ")}`);
+  }
+}
+
+function requireInteger(
+  value: unknown,
+  minimum: number,
+  maximum: number,
+  label: string,
+): number {
+  if (
+    !Number.isSafeInteger(value)
+    || Number(value) < minimum
+    || Number(value) > maximum
+  ) {
+    throw new Error(`${label} must be an integer in ${minimum}..${maximum}`);
+  }
+  return Number(value);
+}
+
+function frontierSet(setId: number, label: string): FrontierMonRow {
+  const row = FRONTIER_MONS[setId];
+  if (
+    setId > LEVEL_50_SET_MAX
+    || !row
+    || row.index !== setId
+    || row.moves.length !== 4
+  ) {
+    throw new Error(`${label} must identify a complete Level-50 Factory set`);
+  }
+  return row;
+}
+
+function sourceMoves(row: FrontierMonRow): readonly MoveRow[] {
+  return Object.freeze(row.moves.map((symbol) => {
+    const move = MOVES_BY_SYMBOL.get(symbol);
+    if (!move) throw new Error(`${row.label} references unknown move ${symbol}`);
+    return move;
+  }));
+}
+
+function emptyBattler(side: 0 | 1): BattleScriptRulesBattler {
+  return Object.freeze({
+    side,
+    ability: 0,
+    hp: 0,
+    moves: Object.freeze([0, 0, 0, 0] as const),
+    pp: Object.freeze([0, 0, 0, 0] as const),
+    status1: 0,
+    status2: 0,
+    status3: 0,
+    substituteHP: 0,
+    rolloutTimer: 0,
+    furyCutterCounter: 0,
+    truantCounter: 0,
+    rechargeTimer: 0,
+    flinchImmobility: 0,
+    disabledMove: 0,
+    usedDisabledMove: 0,
+    tauntTimer: 0,
+    usedTauntedMove: 0,
+    usedImprisonedMove: 0,
+  });
+}
+
+function activeBattler(
+  side: 0 | 1,
+  ability: number,
+  hp: number,
+  moves: readonly MoveRow[],
+  status1: number,
+): BattleScriptRulesBattler {
+  return Object.freeze({
+    ...emptyBattler(side),
+    ability,
+    hp,
+    moves: Object.freeze(moves.map(({ id }) => id)) as unknown as
+      readonly [number, number, number, number],
+    pp: Object.freeze(moves.map(({ pp }) => pp)) as unknown as
+      readonly [number, number, number, number],
+    status1,
+  });
+}
+
+function createInitialRules(config: FactoryAsleepMoveConfig): FactoryBattleScriptDecisionRules {
+  const player = frontierSet(config.playerSetId, "playerSetId");
+  const trainer = frontierSet(config.trainerSetId, "trainerSetId");
+  if (
+    player.index !== PLAYER_SET_ID
+    || player.label !== "FRONTIER_MON_TYROGUE"
+    || trainer.index !== TRAINER_SET_ID
+    || trainer.label !== "FRONTIER_MON_PLUSLE_2"
+  ) {
+    throw new Error(
+      "factory asleep adapter currently supports TYROGUE versus PLUSLE_2 only",
+    );
+  }
+  const playerMoves = sourceMoves(player);
+  const trainerMoves = sourceMoves(trainer);
+  const rulesContext = createBattleScriptRulesContext({
+    battlers: [
+      activeBattler(0, PLAYER_ABILITY, config.playerHp, playerMoves, config.sleepTurns),
+      activeBattler(1, TRAINER_ABILITY, config.trainerHp, trainerMoves, 0),
+      emptyBattler(0),
+      emptyBattler(1),
+    ],
+    selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+    scriptingBattler: 0,
+    atkCancelerTracker: 0,
+    battleOutcome: 0,
+    currentMove: 0,
+    currentMovePosition: 0,
+    moveResultFlags: 0,
+    dmgMultiplier: 1,
+    critMultiplier: 1,
+    moveEffectByte: 0,
+    missType: 0,
+    hitMarker: 0,
+    multiHitCounter: 0,
+    absentBattlerFlags: 0b1100,
+  });
+  return Object.freeze({
+    adapter: ADAPTER,
+    phase: "awaiting-command",
+    factory: Object.freeze({
+      level: 50,
+      playerSetId: player.index,
+      trainerSetId: trainer.index,
+      playerSpecies: player.species,
+      trainerSpecies: trainer.species,
+    }),
+    selectedMove: null,
+    rulesContext,
+  }) as FactoryBattleScriptDecisionRules;
+}
+
+function configAt(input: FactoryAsleepMoveConfig): FactoryAsleepMoveConfig {
+  const config = requireRecord(input, "Factory asleep move config");
+  requireExactKeys(
+    config,
+    [
+      "playerSetId",
+      "trainerSetId",
+      "playerHp",
+      "trainerHp",
+      "sleepTurns",
+      "rngSeed",
+      "requestId",
+    ],
+    "Factory asleep move config",
+  );
+  return Object.freeze({
+    playerSetId: requireInteger(config.playerSetId, 0, LEVEL_50_SET_MAX, "playerSetId"),
+    trainerSetId: requireInteger(config.trainerSetId, 0, LEVEL_50_SET_MAX, "trainerSetId"),
+    playerHp: requireInteger(config.playerHp, 1, 0xffff, "playerHp"),
+    trainerHp: requireInteger(config.trainerHp, 1, 0xffff, "trainerHp"),
+    sleepTurns: requireInteger(config.sleepTurns, 2, 7, "sleepTurns"),
+    rngSeed: requireInteger(config.rngSeed, 0, 0xffff_ffff, "rngSeed"),
+    requestId: requireInteger(config.requestId, 0, 0xffff_ffff, "requestId"),
+  });
+}
+
+export function createFactoryAsleepMoveBattleState(
+  input: FactoryAsleepMoveConfig,
+): BattleState<FactoryBattleScriptDecisionRules> {
+  const config = configAt(input);
+  const rules = createInitialRules(config);
+  return createBattleState({
+    rules,
+    rngSeed: config.rngSeed,
+    request: {
+      kind: "command",
+      requestId: config.requestId,
+      side: "player",
+      battler: 0,
+      legalDecisions: rules.rulesContext.battlers[0].moves.map(
+        (_move, moveSlot) => ({
+          kind: "use-move" as const,
+          moveSlot: moveSlot as 0 | 1 | 2 | 3,
+          targetBattler: 1 as const,
+        }),
+      ),
+    },
+  }) as BattleState<FactoryBattleScriptDecisionRules>;
+}
+
+function rulesAt(input: FactoryBattleScriptDecisionRules): FactoryBattleScriptDecisionRules {
+  const rules = requireRecord(input, "Factory asleep move rules");
+  requireExactKeys(
+    rules,
+    ["adapter", "phase", "factory", "selectedMove", "rulesContext"],
+    "Factory asleep move rules",
+  );
+  if (rules.adapter !== ADAPTER) throw new Error(`unsupported battle adapter ${String(rules.adapter)}`);
+  if (rules.phase !== "awaiting-command") {
+    throw new Error(`factory asleep move decision requires awaiting-command phase`);
+  }
+  if (rules.selectedMove !== null) {
+    throw new Error("awaiting-command phase must not already own a selected move");
+  }
+  const factory = requireRecord(rules.factory, "Factory asleep move rules.factory");
+  requireExactKeys(
+    factory,
+    [
+      "level",
+      "playerSetId",
+      "trainerSetId",
+      "playerSpecies",
+      "trainerSpecies",
+    ],
+    "Factory asleep move rules.factory",
+  );
+  if (
+    factory.level !== 50
+    || factory.playerSetId !== PLAYER_SET_ID
+    || factory.trainerSetId !== TRAINER_SET_ID
+    || factory.playerSpecies !== "SPECIES_TYROGUE"
+    || factory.trainerSpecies !== "SPECIES_PLUSLE"
+  ) {
+    throw new Error("Factory asleep move rules do not match the committed staged singles matchup");
+  }
+  const context = createBattleScriptRulesContext(
+    requireRecord(rules.rulesContext, "Factory asleep move rules.rulesContext") as never,
+  );
+  const expectedPlayerMoves = sourceMoves(frontierSet(PLAYER_SET_ID, "playerSetId"));
+  const expectedTrainerMoves = sourceMoves(frontierSet(TRAINER_SET_ID, "trainerSetId"));
+  if (
+    context.selectorRoles.attacker !== 0
+    || context.selectorRoles.target !== 1
+    || context.absentBattlerFlags !== 0b1100
+    || context.atkCancelerTracker !== 0
+    || context.currentMove !== 0
+    || context.battlers[0].side !== 0
+    || context.battlers[1].side !== 1
+    || context.battlers[0].ability !== PLAYER_ABILITY
+    || context.battlers[1].ability !== TRAINER_ABILITY
+    || context.battlers[0].moves.some((move, index) => move !== expectedPlayerMoves[index]!.id)
+    || context.battlers[1].moves.some((move, index) => move !== expectedTrainerMoves[index]!.id)
+    || (context.battlers[0].status1 & 7) < 2
+  ) {
+    throw new Error("Factory asleep move rules contain an invalid staged singles phase");
+  }
+  return Object.freeze({
+    adapter: ADAPTER,
+    phase: "awaiting-command",
+    factory: Object.freeze({
+      level: 50,
+      playerSetId: PLAYER_SET_ID,
+      trainerSetId: TRAINER_SET_ID,
+      playerSpecies: "SPECIES_TYROGUE",
+      trainerSpecies: "SPECIES_PLUSLE",
+    }),
+    selectedMove: null,
+    rulesContext: context,
+  }) as FactoryBattleScriptDecisionRules;
+}
+
+function acknowledgePendingControllers(
+  state: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  let next = state;
+  for (const battler of state.scheduler.pendingControllerBattlers) {
+    const before = next;
+    next = acknowledgeBattleScriptMachineController(next, battler);
+    if (
+      next.rulesContext !== before.rulesContext
+      || next.rng !== before.rng
+      || next.events !== before.events
+      || next.programCounter !== before.programCounter
+      || next.callStack !== before.callStack
+    ) {
+      throw new Error("controller acknowledgement changed Battle Script rules execution");
+    }
+  }
+  return next;
+}
+
+function eventPayloads(state: BattleScriptMachineState<BattleScriptRulesContext>) {
+  return Object.freeze(state.events.map((event) => {
+    const { sequence: _sequence, provenance: _provenance, ...payload } = event;
+    return Object.freeze(payload);
+  }));
+}
+
+const reduceFactoryAsleepMove: BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
+  boundary,
+) => {
+  const rules = rulesAt(boundary.rules);
+  if (
+    boundary.request.kind !== "command"
+    || boundary.request.side !== "player"
+    || boundary.request.battler !== 0
+    || boundary.decision.kind !== "use-move"
+  ) {
+    throw new Error("factory asleep move adapter requires a player use-move command");
+  }
+  const moveSlot = boundary.decision.moveSlot;
+  const moveId = rules.rulesContext.battlers[0].moves[moveSlot];
+  if (moveId === 0 || rules.rulesContext.battlers[0].pp[moveSlot] === 0) {
+    throw new Error(`Factory move slot ${moveSlot} is not usable`);
+  }
+  const topology = TOPOLOGY_BY_MOVE.get(moveId);
+  if (!topology) throw new Error(`move ${moveId} has no source Battle Script entry`);
+  const moveEntry = resolveBattleScriptLabel(PROGRAM, topology.entryScript);
+  const attackCanceler = moveEntry
+    ? PROGRAM.instructions[moveEntry.programCounter]
+    : undefined;
+  if (!moveEntry || attackCanceler?.opcodeId !== 0) {
+    throw new Error(`${topology.entryScript} does not start with source opcode 0`);
+  }
+
+  const selectedContext = createBattleScriptRulesContext({
+    ...rules.rulesContext,
+    currentMove: moveId,
+    currentMovePosition: moveSlot,
+  });
+  const rngBefore = boundary.rng.snapshot();
+  const admission = advanceBattleScriptAttackCancelerUnableToUseMove({
+    rulesContext: selectedContext,
+    rngValue: rngBefore.value,
+    rngCallsConsumed: rngBefore.calls,
+  }, attackCanceler.programCounter);
+  if (
+    admission.kind !== "effect"
+    || admission.effect !== 2
+    || admission.receipt.programCounter.kind !== "handoff"
+    || admission.receipt.programCounter.targetLabel !== ENTRY_LABEL
+    || admission.receipt.controllerSync.kind !== "request-status1-write"
+    || admission.receipt.rng.callsConsumed !== 0
+    || admission.rngValue !== rngBefore.value
+    || admission.rngCallsConsumed !== rngBefore.calls
+  ) {
+    throw new Error("selected Factory move did not reach the source asleep handoff");
+  }
+
+  const ports = Object.freeze({
+    isControllerIdle: (
+      context: Readonly<{ state: BattleScriptMachineState<BattleScriptRulesContext> }>,
+    ) => context.state.scheduler.pendingControllerBattlers.length === 0,
+    prepareMessage: (
+      _context: unknown,
+      operand: Readonly<{ expression: string }>,
+    ) => operand.expression === "STRINGID_PKMNFASTASLEEP"
+      ? Object.freeze({
+        kind: "message" as const,
+        messageId: "STRINGID_PKMNFASTASLEEP",
+        substitutions: Object.freeze(["TYROGUE"]),
+      })
+      : null,
+    prepareSelectionMessage: () => null,
+    prepareSelectionMessageFromTable: () => null,
+    resolveAttackerBattler: () => 0 as const,
+    resolveBattlerAtPosition: () => null,
+    resolveHalfwordOperand: (
+      _context: unknown,
+      operand: Readonly<{ expression: string }>,
+    ) => operand.expression === "B_WAIT_TIME_LONG" ? B_WAIT_TIME_LONG : null,
+    resolveByteOperand: () => null,
+  });
+  const execution = createBattleScriptStatusRulesExecution(
+    PROGRAM,
+    ENTRY_LABEL,
+    admission.rulesContext,
+    rngBefore.value,
+    ports,
+  );
+  let machine = execution.state;
+  let barrierInstruction = PROGRAM.instructions[machine.programCounter];
+  for (let budget = 0; budget < 256; budget += 1) {
+    barrierInstruction = PROGRAM.instructions[machine.programCounter];
+    if (!barrierInstruction) {
+      throw new Error(`Battle Script left the committed program at ${machine.programCounter}`);
+    }
+    if (!execution.handlers[barrierInstruction.opcodeId]) break;
+    const stepped = stepBattleScriptMachine(PROGRAM, machine, execution.handlers);
+    if (stepped.kind === "blocked") {
+      const acknowledged = acknowledgePendingControllers(machine);
+      if (acknowledged === machine) {
+        throw new Error(`Battle Script blocked without a safe controller acknowledgement`);
+      }
+      machine = acknowledged;
+      continue;
+    }
+    if (stepped.kind === "halted" || stepped.kind === "unsupported") {
+      throw new Error(`Battle Script stopped before its explicit adapter barrier`);
+    }
+    machine = acknowledgePendingControllers(stepped.state);
+  }
+  barrierInstruction = PROGRAM.instructions[machine.programCounter];
+  if (
+    !barrierInstruction
+    || execution.handlers[barrierInstruction.opcodeId]
+    || barrierInstruction.opcodeId !== 46
+    || barrierInstruction.opcodeName !== "B_SCR_OP_SETBYTE"
+    || barrierInstruction.source.label !== "BattleScript_MoveEnd"
+  ) {
+    throw new Error("Battle Script did not stop at the source move-end barrier");
+  }
+  if (
+    machine.rng.calls !== 0
+    || machine.rng.value !== rngBefore.value
+    || boundary.rng.snapshot().value !== rngBefore.value
+    || boundary.rng.snapshot().calls !== rngBefore.calls
+    || machine.scheduler.pendingControllerBattlers.length !== 0
+  ) {
+    throw new Error("Battle Script adapter changed RNG or left a controller unacknowledged");
+  }
+
+  return Object.freeze({
+    rules: Object.freeze({
+      adapter: ADAPTER,
+      phase: "move-end-barrier",
+      factory: rules.factory,
+      selectedMove: Object.freeze({
+        slot: moveSlot,
+        moveId,
+        entryScript: topology.entryScript,
+      }),
+      rulesContext: machine.rulesContext,
+    }) as FactoryBattleScriptDecisionRules,
+    events: eventPayloads(machine),
+    boundary: Object.freeze({
+      kind: "machine-barrier",
+      barrier: Object.freeze({
+        kind: "battle-script",
+        entryLabel: ENTRY_LABEL,
+        programCounter: barrierInstruction.programCounter,
+        opcodeId: barrierInstruction.opcodeId,
+        opcodeName: barrierInstruction.opcodeName,
+        dispatcher: barrierInstruction.dispatcher,
+        instructionsExecuted: machine.instructionsExecuted,
+      }),
+    }),
+  });
+};
+
+export function submitFactoryAsleepMoveDecision(
+  state: BattleState<FactoryBattleScriptDecisionRules>,
+  submission: BattleDecisionSubmission,
+): BattleDecisionTransitionResult<FactoryBattleScriptDecisionRules> {
+  return submitBattleDecision(state, submission, reduceFactoryAsleepMove);
+}

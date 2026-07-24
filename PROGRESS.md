@@ -4,21 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 413 — Battle machine barrier published
+## 413 — Factory asleep decision reaches real script barrier
 
-- **State:** the run is green at **159 files / 1910 tests**. S10 Gate 3 still
-  has **27** source-safe executable opcodes; opcode 0 remains unregistered.
-- **Did:** extended the published immutable decision boundary with an explicit
-  serializable Battle Script machine barrier and a read-only transition-local
-  RNG snapshot. Decision submission now returns and preserves that barrier,
-  and rejects further rules decisions while stopped there.
-- **Next:** compose the assigned legal Factory asleep-move decision through
-  the completed asleep canceler handoff and the real
-  `BattleScript_MoveUsedIsAsleep` machine path, auto-acknowledging only safe
-  controller waits and stopping before unsupported move-end opcode 46.
-- **Notes:** focused **1 file / 13 tests**, production build, and diff check
-  pass. The barrier contract adds no handlers, mechanics, presentation, or
-  ambient RNG. Pixel diff N/A.
+- **State:** the assigned S10 vertical composition is implemented and focused
+  green. Gate 3 still has **27** source-safe executable opcodes; opcode 0
+  remains unregistered.
+- **Did:** published a serializable machine barrier and read-only boundary RNG
+  snapshot, then added one compact production adapter. A validated Level-50
+  set-15 TYROGUE asleep state requests its four real Factory moves; submitting
+  PROTECT slot 1 maps its real `BattleScript_EffectProtect` opcode-0 entry
+  through the completed asleep admission helper into
+  `BattleScript_MoveUsedIsAsleep`, executes source opcodes **16→18→100→40**,
+  safely acknowledges controller presentation, and stops before unsupported
+  move-end opcode **46**.
+- **Next:** run the full Tier-1 suite, production build, OFF oracle info, and
+  diff check; then trim the ledger, commit the verified docs, and hand off the
+  minimal injected Factory-AI policy on this same boundary.
+- **Notes:** ordered events are `STRINGID_PKMNFASTASLEEP` then status animation
+  for TYROGUE; sleep **4→3**, PP **[30,10,15,20]** unchanged, explicit RNG
+  **0xf4c96838 / 0 calls** unchanged, and barrier execution count **67**.
+  Focused **3 files / 29 tests** and production build pass. Pixel diff N/A.
 
 ---
 ## 412 — Gate-3 Magic Coat intercept composed

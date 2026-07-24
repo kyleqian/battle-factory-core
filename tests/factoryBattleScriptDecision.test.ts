@@ -1,0 +1,352 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it, vi } from "vitest";
+import {
+  createBattleState,
+  parseBattleState,
+  serializeBattleState,
+  type BattleState,
+} from "../src/engine/battleDecisionBoundary.ts";
+import {
+  createFactoryAsleepMoveBattleState,
+  submitFactoryAsleepMoveDecision,
+  type FactoryAsleepMoveConfig,
+  type FactoryBattleScriptDecisionRules,
+} from "../src/engine/factoryBattleScriptDecision.ts";
+import {
+  acknowledgeBattleScriptMachineController,
+  createBattleScriptMachine,
+  createBattleScriptSchedulerState,
+} from "../src/engine/battleScriptMachine.ts";
+import {
+  loadBattleScriptProgram,
+  resolveBattleScriptLabel,
+} from "../src/engine/battleScriptProgram.ts";
+import {
+  BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
+} from "../src/engine/battleScriptSourceConstants.ts";
+
+const program = loadBattleScriptProgram();
+const config: FactoryAsleepMoveConfig = {
+  playerSetId: 15,
+  trainerSetId: 291,
+  playerHp: 110,
+  trainerHp: 135,
+  sleepTurns: 4,
+  rngSeed: 0xf4c9_6838,
+  requestId: 41,
+};
+const submission = {
+  requestId: 41,
+  side: "player",
+  decision: { kind: "use-move", moveSlot: 1, targetBattler: 1 },
+} as const;
+
+function initial() {
+  return createFactoryAsleepMoveBattleState(config);
+}
+
+function assertDeepFrozen(value: unknown, seen = new Set<object>()): void {
+  if (value === null || typeof value !== "object" || seen.has(value)) return;
+  seen.add(value);
+  expect(Object.isFrozen(value)).toBe(true);
+  for (const child of Object.values(value)) assertDeepFrozen(child, seen);
+}
+
+describe("Factory asleep move decision-to-machine vertical slice", () => {
+  it("constructs the validated immutable Level-50 singles request from real Factory sets", () => {
+    const mutable = { ...config };
+    const state = createFactoryAsleepMoveBattleState(mutable);
+    mutable.playerHp = 1;
+    mutable.sleepTurns = 7;
+
+    expect(state).toMatchObject({
+      schemaVersion: 1,
+      revision: 0,
+      rng: { value: 0xf4c9_6838, calls: 0 },
+      boundary: {
+        kind: "decision-required",
+        request: {
+          kind: "command",
+          requestId: 41,
+          side: "player",
+          battler: 0,
+          legalDecisions: [
+            { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+            { kind: "use-move", moveSlot: 1, targetBattler: 1 },
+            { kind: "use-move", moveSlot: 2, targetBattler: 1 },
+            { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+          ],
+        },
+      },
+      rules: {
+        adapter: "factory-asleep-move/v1",
+        phase: "awaiting-command",
+        factory: {
+          level: 50,
+          playerSetId: 15,
+          trainerSetId: 291,
+          playerSpecies: "SPECIES_TYROGUE",
+          trainerSpecies: "SPECIES_PLUSLE",
+        },
+        selectedMove: null,
+        rulesContext: {
+          currentMove: 0,
+          atkCancelerTracker: 0,
+          absentBattlerFlags: 12,
+        },
+      },
+    });
+    assertDeepFrozen(state);
+    expect(state.rules.rulesContext.battlers[0]).toMatchObject({
+      ability: 62,
+      hp: 110,
+      moves: [183, 182, 104, 263],
+      pp: [30, 10, 15, 20],
+      status1: 4,
+    });
+    expect(state.rules.rulesContext.battlers[1]).toMatchObject({
+      ability: 57,
+      hp: 135,
+      moves: [85, 86, 69, 273],
+      pp: [15, 20, 20, 10],
+    });
+  });
+
+  it("pins the real source labels and executed opcode path without registering opcode 0", () => {
+    const entry = resolveBattleScriptLabel(program, "BattleScript_MoveUsedIsAsleep")!;
+    const moveEnd = resolveBattleScriptLabel(program, "BattleScript_MoveEnd")!;
+    expect(entry.sourceLine).toBe(3717);
+    expect(program.instructions.slice(entry.programCounter, entry.programCounter + 4).map(
+      ({ opcodeId, opcodeName, source }) => [
+        opcodeId,
+        opcodeName,
+        source.statementLine,
+      ],
+    )).toEqual([
+      [16, "B_SCR_OP_PRINTSTRING", 3718],
+      [18, "B_SCR_OP_WAITMESSAGE", 3719],
+      [100, "B_SCR_OP_STATUSANIMATION", 3720],
+      [40, "B_SCR_OP_GOTO", 3721],
+    ]);
+    expect(program.instructions[moveEnd.programCounter]).toMatchObject({
+      opcodeId: 46,
+      opcodeName: "B_SCR_OP_SETBYTE",
+      dispatcher: "Cmd_setbyte",
+      source: { label: "BattleScript_MoveEnd", statementLine: 268 },
+    });
+    const protect = resolveBattleScriptLabel(
+      program,
+      "BattleScript_EffectProtect",
+    )!;
+    expect(program.instructions[protect.programCounter]).toMatchObject({
+      opcodeId: 0,
+      opcodeName: "B_SCR_OP_ATTACKCANCELER",
+    });
+  });
+
+  it("submits one legal PROTECT choice, executes message then status animation, and stops honestly", () => {
+    const ambient = vi.spyOn(Math, "random").mockImplementation(() => {
+      throw new Error("ambient randomness is forbidden");
+    });
+    try {
+      const state = initial();
+      const result = submitFactoryAsleepMoveDecision(state, submission);
+      expect(ambient).not.toHaveBeenCalled();
+      expect(result).toMatchObject({
+        kind: "machine-barrier",
+        barrier: {
+          kind: "battle-script",
+          entryLabel: "BattleScript_MoveUsedIsAsleep",
+          opcodeId: 46,
+          opcodeName: "B_SCR_OP_SETBYTE",
+          dispatcher: "Cmd_setbyte",
+          instructionsExecuted: 67,
+        },
+        events: [
+          {
+            sequence: 0,
+            payload: {
+              kind: "message",
+              messageId: "STRINGID_PKMNFASTASLEEP",
+              substitutions: ["TYROGUE"],
+            },
+          },
+          {
+            sequence: 1,
+            payload: {
+              kind: "status-animation",
+              battler: 0,
+              isStatus2: 0,
+              status: 3,
+            },
+          },
+        ],
+      });
+      expect(result.state).toMatchObject({
+        revision: 1,
+        nextEventSequence: 2,
+        rng: { value: 0xf4c9_6838, calls: 0 },
+        rules: {
+          phase: "move-end-barrier",
+          selectedMove: {
+            slot: 1,
+            moveId: 182,
+            entryScript: "BattleScript_EffectProtect",
+          },
+          rulesContext: {
+            currentMove: 182,
+            currentMovePosition: 1,
+            atkCancelerTracker: 2,
+            hitMarker: BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
+          },
+        },
+      });
+      expect(result.state.rules.rulesContext.battlers[0]).toMatchObject({
+        status1: 3,
+        pp: [30, 10, 15, 20],
+      });
+      expect(state.rules.rulesContext.battlers[0].status1).toBe(4);
+      expect(state.rules.rulesContext.currentMove).toBe(0);
+      expect(state.rng).toEqual({ value: 0xf4c9_6838, calls: 0 });
+      assertDeepFrozen(result);
+    } finally {
+      ambient.mockRestore();
+    }
+  });
+
+  it("canonical parse/serialize replay reproduces the identical transition", () => {
+    const state = initial();
+    const restored = parseBattleState(
+      serializeBattleState(state),
+    ) as BattleState<FactoryBattleScriptDecisionRules>;
+    const first = submitFactoryAsleepMoveDecision(state, submission);
+    const replay = submitFactoryAsleepMoveDecision(restored, submission);
+
+    expect(replay).toEqual(first);
+    expect(serializeBattleState(replay.state)).toBe(
+      serializeBattleState(first.state),
+    );
+    expect(parseBattleState(serializeBattleState(first.state))).toEqual(first.state);
+  });
+
+  it("rejects invalid config, decision, request phase, and staged rules", () => {
+    for (const invalid of [
+      { ...config, playerSetId: 273 },
+      { ...config, trainerSetId: 290 },
+      { ...config, playerHp: 0 },
+      { ...config, trainerHp: 0 },
+      { ...config, sleepTurns: 1 },
+      { ...config, sleepTurns: 8 },
+      { ...config, rngSeed: -1 },
+      { ...config, requestId: 0x1_0000_0000 },
+      { ...config, extra: true },
+    ]) {
+      expect(() =>
+        createFactoryAsleepMoveBattleState(
+          invalid as unknown as FactoryAsleepMoveConfig,
+        )).toThrow();
+    }
+    expect(() =>
+      submitFactoryAsleepMoveDecision(initial(), {
+        ...submission,
+        decision: { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+      })).toThrow();
+    expect(() =>
+      submitFactoryAsleepMoveDecision(initial(), {
+        ...submission,
+        decision: { kind: "switch", partyIndex: 1 },
+      })).toThrow();
+
+    const source = initial();
+    const badPhase = createBattleState({
+      rules: {
+        ...source.rules,
+        phase: "move-end-barrier",
+      } as FactoryBattleScriptDecisionRules,
+      rngSeed: source.rng.value,
+      request: source.boundary.kind === "decision-required"
+        ? source.boundary.request
+        : (() => {
+          throw new Error("expected request");
+        })(),
+    });
+    expect(() =>
+      submitFactoryAsleepMoveDecision(
+        badPhase as BattleState<FactoryBattleScriptDecisionRules>,
+        submission,
+      )).toThrow(/awaiting-command phase/);
+
+    const badRules = createBattleState({
+      rules: {
+        ...source.rules,
+        rulesContext: {
+          ...source.rules.rulesContext,
+          currentMove: 182,
+        },
+      } as FactoryBattleScriptDecisionRules,
+      rngSeed: source.rng.value,
+      request: source.boundary.kind === "decision-required"
+        ? source.boundary.request
+        : (() => {
+          throw new Error("expected request");
+        })(),
+    });
+    expect(() =>
+      submitFactoryAsleepMoveDecision(
+        badRules as BattleState<FactoryBattleScriptDecisionRules>,
+        submission,
+      )).toThrow(/invalid staged singles phase/);
+  });
+
+  it("acknowledges only scheduler ownership while preserving machine rules, RNG, events, and cursor", () => {
+    const rules = Object.freeze({ marker: "immutable-rules" });
+    const state = createBattleScriptMachine(
+      program,
+      "BattleScript_MoveUsedIsAsleep",
+      rules,
+      0x1234_5678,
+      createBattleScriptSchedulerState({
+        messageDisplayActive: true,
+        pauseCounterBattle: 7,
+        activeBattler: 0,
+        pendingControllerBattlers: [0],
+      }),
+    );
+    const acknowledged = acknowledgeBattleScriptMachineController(state, 0);
+
+    expect(acknowledged).not.toBe(state);
+    expect(acknowledged.scheduler.pendingControllerBattlers).toEqual([]);
+    expect(acknowledged.programCounter).toBe(state.programCounter);
+    expect(acknowledged.callStack).toBe(state.callStack);
+    expect(acknowledged.rulesContext).toBe(state.rulesContext);
+    expect(acknowledged.rng).toBe(state.rng);
+    expect(acknowledged.events).toBe(state.events);
+    expect(acknowledgeBattleScriptMachineController(acknowledged, 0)).toBe(
+      acknowledged,
+    );
+    assertDeepFrozen(acknowledged);
+  });
+
+  it("keeps the production adapter outside presentation, browser, oracle, and emulator layers", () => {
+    const source = readFileSync(
+      new URL("../src/engine/factoryBattleScriptDecision.ts", import.meta.url),
+      "utf8",
+    );
+    for (const forbidden of [
+      "./core.ts",
+      "./battleScene.ts",
+      "Render",
+      "document.",
+      "window.",
+      "Date.",
+      "setTimeout",
+      "Math.random",
+      "oracle",
+      "mgba",
+      "emulator",
+    ]) {
+      expect(source).not.toContain(forbidden);
+    }
+    expect(source).not.toMatch(/handlers\\s*\\[\\s*0\\s*\\]/);
+  });
+});

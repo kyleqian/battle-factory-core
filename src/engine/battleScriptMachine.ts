@@ -295,6 +295,22 @@ export function acknowledgeBattleScriptController(
   });
 }
 
+/**
+ * Applies one presentation/controller acknowledgement to a complete machine
+ * state. Only scheduler state may change; rules, RNG, events, stacks, and the
+ * current instruction remain identity-preserved.
+ */
+export function acknowledgeBattleScriptMachineController<
+  RulesContext extends object,
+>(
+  state: BattleScriptMachineState<RulesContext>,
+  battler: BattleScriptBattlerId,
+): BattleScriptMachineState<RulesContext> {
+  const scheduler = acknowledgeBattleScriptController(state.scheduler, battler);
+  if (scheduler === state.scheduler) return state;
+  return Object.freeze({ ...state, scheduler });
+}
+
 export function drawBattleScriptRng(
   rng: BattleScriptRngState,
   instruction: BattleScriptInstruction,
