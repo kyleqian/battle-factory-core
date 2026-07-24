@@ -164,14 +164,23 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
     expect(chosen.choicedMove).toEqual([92, 0xabcd, 0, 0]);
     expect(chosen.battlers).toBe(choice.battlers);
 
+    const successfulBatonPass = createBattleScriptRulesContext(contextInput({
+      chosenMove: 226,
+      hitMarker: BATTLE_SCRIPT_HITMARKER_OBEYS,
+      choicedMove: [BATTLE_SCRIPT_MOVE_UNAVAILABLE, 0, 0, 0],
+    }));
+    expect(applyBattleScriptMoveEndChoiceOwnership(successfulBatonPass))
+      .toBe(successfulBatonPass);
+    expect(successfulBatonPass.choicedMove[0]).toBe(BATTLE_SCRIPT_MOVE_UNAVAILABLE);
+
     const failedBatonPass = createBattleScriptRulesContext(contextInput({
       chosenMove: 226,
       hitMarker: BATTLE_SCRIPT_HITMARKER_OBEYS,
       moveResultFlags: BATTLE_SCRIPT_MOVE_RESULT_FAILED,
       choicedMove: [BATTLE_SCRIPT_MOVE_UNAVAILABLE, 0, 0, 0],
     }));
-    expect(applyBattleScriptMoveEndChoiceOwnership(failedBatonPass))
-      .toBe(failedBatonPass);
+    expect(applyBattleScriptMoveEndChoiceOwnership(failedBatonPass).choicedMove[0])
+      .toBe(226);
 
     const stale = createBattleScriptRulesContext(contextInput({
       choicedMove: [0xabcd, 0, 0, 0],

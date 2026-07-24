@@ -484,7 +484,7 @@ export function applyBattleScriptMoveEndChoiceOwnership(
     // Source breaks out of the case before its stale-choice cleanup.
     if (
       context.chosenMove === BATTLE_SCRIPT_MOVE_BATON_PASS
-      && (context.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_FAILED) !== 0
+      && (context.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_FAILED) === 0
     ) {
       return context;
     }
