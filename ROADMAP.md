@@ -916,38 +916,48 @@ S10 has six ordered completion gates:
    stock-ROM mGBA service additively (the canonical `/v1/run` contract and its
    ON/OFF anchors remain unchanged) with a semantic battle-lab scenario
    contract. A request selects trainer ID, player/opponent Frontier set IDs,
-   level, seed, and scene profile; the oracle restores a clean pre-battle
-   checkpoint, lets the real source initialize both parties and battle
-   controllers, and returns the resolved roster plus pixel and semantic
-   state/RNG captures. A separate explicit `mechanicLab` mode may apply
-   allowlisted post-init HP/PP/move-slot/status/stat-stage/volatile/
-   side-condition/weather/item/ability overrides and force only action
-   selection, so the unmodified ROM still executes the move and all
-   consequences. `factoryLegal` mode rejects impossible Factory compositions.
-   Raw addresses are an implementation detail, not trace ABI.
+   rental-swap count, level, seed, and scene profile; the oracle restores a
+   clean pre-battle checkpoint, lets the real source initialize both parties
+   and battle controllers, and returns the resolved roster plus pixel and
+   semantic state/RNG captures. `factoryLegal` rejects impossible Factory
+   compositions and follows the source's rental-rank candidate bands.
+
+   A separate explicit `mechanicLab` mode must provide a complete **pre-battle
+   Pokémon builder**, not a live battle-state editor. Per party Pokémon it can
+   select species, level, nature, six IVs, six EVs (including legal per-stat
+   and total bounds), moves, PP Ups/current PP where applicable, held item,
+   species-valid ability slot, friendship, and mechanic-relevant personality
+   properties such as gender or shininess. The stock ROM's Pokémon
+   construction path must derive types, ability, stats, max HP, gender, PP,
+   and the battle-ready structures before normal battle initialization.
+   Action plans/controller input may then select moves, items, or switches.
+
+   Neither mode may inject transient battle state: HP damage, permanent
+   status, volatile effects, stat stages, weather/timers, side conditions,
+   delayed effects, faint state, or outcomes must arise from actual
+   ROM-executed moves, items, abilities, switching, and end-turn processing.
+   Captures still expose those values read-only so tests can assert the
+   consequences. Raw addresses and structure flags are implementation details,
+   never trace ABI.
 
    **Battle-lab v1 groundwork landed (2026-07-23, umbrella harness
-   `56c21c5`, hardened in `868a352` and `262e758`):** additive
+   `56c21c5`, hardened through `4e634cb`):** additive
    `/v1/battle-lab/run` now stages arbitrary legal
    Level-50 trainer/set combinations through the real rental constructor and
    `FillFactoryFrontierTrainerParty`, captures typed battle state/RNG beside
-   pixels, and supports named active-battler HP/PP/move/status/stat-stage/
-   volatile/item/ability/type, weather, and side-condition overrides. Its live
-   smoke test proves a staged Leech Seed is selected by normal controller
-   input, consumes PP, applies `STATUS3_LEECHSEED`, and drains through the stock
-   ROM while canonical `/v1/run` hashes remain unchanged. A varied matrix now
-   covers all eight Level-50 challenge bands and separately proves Confuse Ray,
-   Toxic, Perish Song, Sunny Day, Swords Dance, Recover, and Reflect through
-   normal ROM execution. That sweep also pinned all eight source stat-stage
-   slots and made frame zero wait for variable entrance/ability hooks and a
-   stable player action menu. Follow-up fuzzing covered 40 varied legal
-   initializations, exact deterministic replays, both Scene profiles, all four
-   move slots, 28 malformed override shapes, and live ability/item/timer hooks.
-   It now rejects Boolean numeric aliases, out-of-range item/ability IDs,
-   inconsistent HP/max-HP state, and malformed weather with structured errors,
-   while exposing named timed conditions in captures. Gate 2 remains open: v1
-   explicitly defers Noland, bench overrides, forced opponent choices, and an
-   earlier checkpoint that regenerates scouting commentary.
+   pixels, accepts source-accurate past-rental ranks and nontrivial candidate
+   selection order, and keeps canonical `/v1/run` hashes unchanged. Its current
+   interim `mechanicLab` can alter active loadout fields (moves/PP/item/
+   ability/types/friendship), but the former HP/status/stage/volatile/weather/
+   side-condition injector was explicitly retired by user decision on
+   2026-07-24. Live Scene-OFF and Scene-ON smoke traces now create Leech Seed,
+   Swords Dance, Own Tempo immunity, Rain Dance weather, and Perish Song
+   counters only through real controller-selected ROM moves, with transient
+   state observed read-only. Validation also rejects Boolean numeric aliases,
+   invalid source IDs, forbidden state fields, and malformed symbol limits
+   with structured errors. Gate 2 remains open for the full pre-init Pokémon
+   builder above, Noland, bench construction, controlled opponent actions, and
+   an earlier checkpoint that regenerates scouting commentary.
 3. [ ] **General battle kernel:** replace preset-damage/action fixtures as the
    production rules path with source-derived action selection, priority/speed
    ordering, accuracy, critical hits, damage, targeting, PP, move-script
