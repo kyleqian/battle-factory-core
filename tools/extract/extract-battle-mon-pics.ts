@@ -87,6 +87,8 @@ const BACK_SPECIES: Record<string, string> = {
   // MURKROW as the player's active battler. Keep this source art in the
   // same species-indexed bundle as every other live battle back sprite.
   MURKROW: "murkrow",
+  // MOVE_BOUNCE's opposite-side acceptance case uses legal Level-50 set 121.
+  SPOINK: "spoink",
 };
 const FRONT_SPECIES: Record<string, string> = {
   GROVYLE: "grovyle",

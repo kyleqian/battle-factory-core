@@ -842,6 +842,7 @@ const battleAnimIceCube = battleAnimIceCubeAsset as {
 };
 const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
 const murkrowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MURKROW!;
+const spoinkBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SPOINK!;
 const battleAnimIceCrystalLarge: Tileset = {
   columns: 1,
   rows: 2,
@@ -1072,6 +1073,31 @@ function bounceSpoinkOpponentHealthbox(
       status: "none",
     });
     bounceSpoinkOpponentHealthboxes.set(key, cached);
+  }
+  return cached;
+}
+
+const bounceSpoinkPlayerHealthboxes = new Map<
+  string,
+  ReturnType<typeof composePlayerHealthbox>
+>();
+function bounceSpoinkPlayerHealthbox(
+  hp: number,
+  gender: "male" | "female",
+): ReturnType<typeof composePlayerHealthbox> {
+  const key = `${hp}:${gender}`;
+  let cached = bounceSpoinkPlayerHealthboxes.get(key);
+  if (!cached) {
+    cached = composePlayerHealthbox(playerHealthboxAssets, {
+      name: "SPOINK",
+      level: 50,
+      gender,
+      hpFraction: hp / 153,
+      status: "none",
+      currentHp: hp,
+      maxHp: 153,
+    });
+    bounceSpoinkPlayerHealthboxes.set(key, cached);
   }
   return cached;
 }
@@ -15592,9 +15618,8 @@ export function renderSceneOnMovePresentation(
     const { attacker, target } = view;
     const supported =
       attacker.species === "SPOINK"
-      && attacker.geometry.side === "opponent"
       && target.species === "ONIX"
-      && target.geometry.side === "player";
+      && attacker.geometry.side !== target.geometry.side;
     if (!supported) {
       throw new Error(
         `unsupported staged BOUNCE pair ${attacker.species}->${target.species}`,
@@ -15608,19 +15633,26 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     if (!view.attackerInvisible) {
+      const attackerSprite = attacker.geometry.side === "player"
+        ? spoinkBackSprite
+        : spoinkFrontSprite;
       drawSpriteSheet(
         fb,
-        spoinkFrontSprite.tileset,
-        spoinkFrontSprite.palette,
+        attackerSprite.tileset,
+        attackerSprite.palette,
         attacker.geometry.spriteCorner.x,
         attacker.geometry.spriteCorner.y,
       );
     }
+    const targetSprite = target.geometry.side === "player"
+      ? onixBackSprite
+      : onixFrontSprite;
     drawSpriteSheet(
       fb,
-      onixBackSprite.tileset,
-      onixBackSprite.palette,
-      target.geometry.spriteCorner.x,
+      targetSprite.tileset,
+      targetSprite.palette,
+      target.geometry.spriteCorner.x
+        - (target.geometry.side === "opponent" && view.targetTaskOwnsY2 ? 1 : 0),
       target.geometry.spriteCorner.y + view.targetShakeY2,
     );
     const bounceEffectBackdrop = fb.slice();
@@ -15659,22 +15691,40 @@ export function renderSceneOnMovePresentation(
         true,
       );
     }
-    drawSendOutHealthbox(
-      fb,
-      0,
-      bounceSpoinkOpponentHealthbox(
-        state.config.fieldProfile.opponentHp,
-        state.config.fieldProfile.opponentGender ?? "female",
-      ),
-    );
-    drawComposedPlayerHealthbox(
-      fb,
-      onixPlayerHealthboxContentForState(
-        state.config.fieldProfile.playerHp,
-        state.config.fieldProfile.playerStatus,
-        state.config.fieldProfile.playerGender,
-      ),
-    );
+    if (attacker.geometry.side === "opponent") {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        bounceSpoinkOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "female",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender,
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "female",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        bounceSpoinkPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
     drawTileBg(
       fb,
       battleWindow.tileset,

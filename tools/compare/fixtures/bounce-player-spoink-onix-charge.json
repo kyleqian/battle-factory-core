@@ -1,0 +1,33 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-bounce-player-spoink-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "SPOINK (player-back) -> ONIX (opponent-front)",
+  "move": "BOUNCE",
+  "turn": "charge",
+  "orientation": "player-to-opponent",
+  "appStage": {
+    "oracleFrame": 261,
+    "presentationAge": 0,
+    "animationAgeOffset": -1
+  },
+  "denseWindow": {
+    "startFrame": 261,
+    "endFrame": 284
+  },
+  "fieldProfile": {
+    "playerHp": 141,
+    "opponentHp": 117,
+    "playerStatus": "none",
+    "playerGender": "male",
+    "opponentGender": "female"
+  },
+  "controllerProfile": {
+    "moveTextFirstAge": 999
+  },
+  "acceptance": {
+    "status": "partial",
+    "remaining": "Player-side strike and the controller resolution tail are not yet accepted."
+  }
+}

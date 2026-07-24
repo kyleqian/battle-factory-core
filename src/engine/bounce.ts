@@ -71,6 +71,8 @@ export function bounceStrikeBallAtAge(age: number): BounceBall | null {
 export function bouncePresentationAtAge(
   turn: BounceTurn,
   age: number,
+  strikeEffectDelay = 0,
+  strikeAttackerRestoreAge = Number.POSITIVE_INFINITY,
 ): BouncePresentationState {
   if (turn === "charge") {
     return {
@@ -83,13 +85,17 @@ export function bouncePresentationAtAge(
     };
   }
   const ball = bounceStrikeBallAtAge(age);
+  const effectAge = age - strikeEffectDelay;
   return {
     turn,
-    attackerInvisible: age < 0 || ball !== null,
+    attackerInvisible:
+      age < 0
+      || (ball !== null && age < strikeAttackerRestoreAge),
     ball,
     impactVisible:
-      age >= BOUNCE_IMPACT_FIRST_AGE && age <= BOUNCE_IMPACT_LAST_AGE,
-    targetTaskOwnsY2: age >= BOUNCE_IMPACT_FIRST_AGE,
-    targetShakeY2: BOUNCE_SHAKE_AGES.has(age) ? 5 : 0,
+      effectAge >= BOUNCE_IMPACT_FIRST_AGE
+      && effectAge <= BOUNCE_IMPACT_LAST_AGE,
+    targetTaskOwnsY2: effectAge >= BOUNCE_IMPACT_FIRST_AGE,
+    targetShakeY2: BOUNCE_SHAKE_AGES.has(effectAge) ? 5 : 0,
   };
 }
