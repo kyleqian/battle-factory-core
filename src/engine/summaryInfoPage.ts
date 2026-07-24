@@ -23,7 +23,6 @@ import {
 } from "./font.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded, drawTilePatchFaded, fadeColor } from "./fadeRender.ts";
 import { getMonGender } from "./monGender.ts";
-import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { drawSpriteSheetAffineRotate } from "./battleScene.ts";
 import type {
   SummaryMonTransition,
@@ -38,6 +37,7 @@ import {
   movesWindowTransferAt,
   type MovesWindowTransfer,
 } from "./summaryWindowTransfer.ts";
+import { summaryFrontSpritePresentation } from "./summaryFrontAnimation.ts";
 
 import summaryBgData from "../assets/gen/summary-bg.json" with { type: "json" };
 import summaryTypeIconsData from "../assets/gen/summary-type-icons.json" with { type: "json" };
@@ -479,63 +479,29 @@ function compose(
   // always TRUE here (unlike the draft screen's unflipped ball-open pic).
   const spritePool = draftPool[spriteSlot]!;
   const frontSprite = frontSprites[spritePool.species]!;
-  let monTileset = frontSprite.tileset;
-  let monX = 40;
-  let monY = 64;
-  // ONIX: no species delay. Initial page construction reaches
-  // StartSpriteAnim(1) at open+6; ChangeSummaryPokemon's destination callback
-  // reaches it on replacement-local clock 1. ANIM_RAPID_H_HOPS advances from
-  // data[2]=0 one callback later in either route.
-  const onixAnimStart = monReplacement.animateSwitchedMon === true ? 1 : 6;
-  if (spritePool.species === "ONIX" && monAnimClock >= onixAnimStart) {
-    // sAnim_Onix_1 holds frame 1 for 50+30 callbacks, then restores frame 0.
-    if (monAnimClock < onixAnimStart + 80) monTileset = frontSprite.animationFrame1;
-    const onixMotionStart = monReplacement.animateSwitchedMon === true ? 2 : 7;
-    // Anim_RapidHorizontalHops switches to WaitAnimEnd once data[2] exceeds
-    // 2048; its last rendered callback used 2040 and remains parked there.
-    const data = Math.min(2040, Math.max(0, monAnimClock - onixMotionStart) * 24);
-    const phase = Math.floor(data / 512) % 4;
-    const within = data % 512;
-    // Anim_RapidHorizontalHops wraps its calculation in TryFlipX twice.
-    // Summary sprites have sDontFlip=FALSE, so the computed X is negated.
-    let computedX = 0;
-    if (phase === 0) computedX = Math.trunc((-within * 16) / 512);
-    else if (phase === 1) computedX = Math.trunc(within / 32) - 16;
-    else if (phase === 2) computedX = Math.trunc(within / 32);
-    else computedX = Math.trunc((-within * 16) / 512) + 16;
-    monX -= computedX;
-    const sine = GBA_SINE_TABLE_256[within % 128]!;
-    monY -= Math.floor((sine * 4) / 256);
-  }
+  const frontPresentation = summaryFrontSpritePresentation(
+    spritePool.species,
+    monAnimClock,
+    monReplacement.animateSwitchedMon === true,
+  );
+  const monTileset =
+    frontPresentation.frame === 1 ? frontSprite.animationFrame1 : frontSprite.tileset;
+  const monX = 40 + frontPresentation.x2;
+  const monY = 64 + frontPresentation.y2;
   if (
     monReplacement.showMon !== false &&
-    spritePool.species === "MAGBY" &&
-    monReplacement.animateSwitchedMon === true &&
-    monAnimClock >= 2
+    frontPresentation.affine
   ) {
-    // ANIM_V_SQUISH_AND_BOUNCE (duration=16): the summary sprite is
-    // horizontally flipped and AFFINE_DOUBLE. PokemonSummaryDoMonAnimation
-    // starts on replacement-local clock 1; the resulting OAM matrix becomes
-    // visible one render later.
-    const n = Math.min(49, monAnimClock - 2);
-    const data4 = (n * 8) & 0xff;
-    const data3 = Math.max(0, Math.min(15, n - 16)) * 8;
-    const sin = (angle: number, amplitude: number) =>
-      (GBA_SINE_TABLE_256[angle & 0xff]! * amplitude) >> 8;
-    const yScale = sin(data4, 32) + 256;
-    const xScale = 256 - sin(data4, 32);
-    const posY = yScale > 256 ? Math.trunc((256 - yScale) / 8) : 0;
-    const y2 = -sin(data3, 10) - posY;
     drawSpriteSheetAffineRotate(
       fb,
       monTileset,
       frontSprite.palette.map((color) => fadeColor(color, objY)),
       monX,
-      monY + y2,
-      -xScale,
+      monY,
+      -frontPresentation.affine.xScale,
       0,
       0,
-      yScale,
+      frontPresentation.affine.yScale,
       undefined,
       true,
     );

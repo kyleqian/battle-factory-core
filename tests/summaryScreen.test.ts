@@ -748,6 +748,55 @@ describe("summaryScreen: slot-relative Info-page mon switching", () => {
     const selecting = requestSummaryMoveSelect(battle);
     expect(requestSummaryMonChange(selecting, "down")).toBe(selecting);
   });
+
+  it("does not let a live front-animation clock steal page, mon, selector, or close input", () => {
+    const animatedInfo = {
+      ...settled(1),
+      openElapsed: 20,
+      monAnimClock: 14,
+    };
+    expect(requestSummaryPageChange(animatedInfo, "right")).toMatchObject({
+      page: "skills",
+      monAnimClock: 14,
+      pageTransition: { direction: "right" },
+    });
+    expect(requestSummaryMonChange(animatedInfo, "down")).toMatchObject({
+      selectedSlot: 2,
+      monAnimClock: 14,
+      monTransition: { fromSlot: 1, toSlot: 2 },
+    });
+    const exiting = requestSummaryScreenExit(animatedInfo);
+    expect(exiting.transition).toMatchObject({ direction: "toDraft" });
+    expect(advanceSummaryScreen(exiting).monAnimClock).toBe(14);
+
+    const contest = {
+      ...animatedInfo,
+      page: "contestMoves" as const,
+      onInfoPage: false,
+    };
+    expect(requestSummaryMoveSelect(contest)).toMatchObject({
+      selectedSlot: 1,
+      page: "contestMoves",
+      monAnimClock: 14,
+      moveSelect: { phase: "open" },
+    });
+    expect(requestSummaryScreenExit(contest).transition).toMatchObject({
+      direction: "toDraft",
+    });
+  });
+
+  it("destroys the old animation during replacement and installs a fresh destination clock", () => {
+    const replacing = requestSummaryMonChange(
+      { ...settled(0), monAnimClock: 40 },
+      "down",
+    );
+    expect(replacing.monAnimClock).toBe(40);
+    expect(run(replacing, SUMMARY_MON_TRANSITION_TICKS)).toMatchObject({
+      selectedSlot: 1,
+      monTransition: null,
+      monAnimClock: 0,
+    });
+  });
 });
 
 describe("summaryScreen: exit (B on the settled Info page)", () => {
