@@ -551,13 +551,19 @@ script-result semantics, and a committed dense OFF trace at **43/43 exact**
 through the 30041 field-script handoff. Its input-ready prompt remains
 **66/66 exact**; NO/B response/return remains a separate unimplemented edge.
 Source extraction now also pins the terminal field-message gates and the
-seventh-win `MSGBOX_GETPOINTS` fanfare/wait path, but no ending pixels are
+seventh-win `MSGBOX_GETPOINTS` fanfare/wait path. Fresh OFF probes also pin
+the regular Level 50 seventh-win BP award at +2201, party/status restoration
+at +3549, and the distinct loss cleanup; source-generated lobby map, border,
+NPC, message, menu, and font data are banked, but no ending pixels are
 claimed. Summary presentation, NO/B return, loss ending, and seventh-win
-ending still need dense OFF-profile UI proofs. The
-parallel Scene-ON adapter has a portable ONIX→GROVYLE FIRE PUNCH case at
-**225/225**. The opposite GROVYLE→ONIX orientation is now deterministically
-staged with source geometry and outcome, but still lacks an app comparison,
-so the move remains `partial`. S8 therefore remains `[~]`.
+ending still need dense OFF-profile UI proofs. The parallel Scene-ON adapter
+now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
+its canonical residual windows (**236/236** and **200/200**), making it
+`exact`. ROCK SLIDE is likewise portable (**175/175**) and canonical
+(**256/256**) and is `exact`; FAINT ATTACK is portable and canonical
+(**221/221**) but remains `partial` for its separately parked residual.
+Level 50 animation coverage is therefore **2 exact / 10 partial / 264
+unsupported**. S8 remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
 Historical traces below remain Battle Scene ON regression evidence. The

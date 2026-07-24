@@ -14,6 +14,24 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Parallel compare calls can return an unresolved execution session
+
+- **What:** launching several oracle-backed compare commands concurrently can
+  leave one call reported as still running after its siblings complete.
+- **Hits:** 1.
+- **Cost each:** ~1 min.
+- **Workaround:** serialize compare calls, or retain and poll the returned
+  execution-session handle.
+
+## mGBA debug logs overwhelm terminal-boundary probes
+
+- **What:** a terminal-boundary RAM probe emitted roughly 34 MB of emulator
+  debug logging per run, slowing diagnosis and obscuring the useful tail.
+- **Hits:** 1.
+- **Cost each:** ~5 min.
+- **Workaround:** keep probe output redirected through `run-mgba-probe.py` and
+  inspect only targeted searches or the log tail.
+
 ## `bin/oracle run` always prints the full capture manifest
 
 - **What:** targeted oracle probes with dense captures flood the terminal with
