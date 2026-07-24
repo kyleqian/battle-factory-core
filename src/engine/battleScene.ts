@@ -528,6 +528,7 @@ import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice
 import battleAnimFlyBallAsset from "../assets/gen/battle-anim-fly-ball.json" with { type: "json" };
 import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import battleAnimHandsAndFeetAsset from "../assets/gen/battle-anim-hands-and-feet.json" with { type: "json" };
+import battleAnimIceCrystalsAsset from "../assets/gen/battle-anim-ice-crystals.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -587,6 +588,7 @@ import {
 import {
   FIRE_PUNCH_BURN_MESSAGE_AGE,
   FIRE_PUNCH_BURN_MESSAGE_CLEAR_AGE,
+  FIRE_PUNCH_IMPACT_FIRST_AGE,
   FIRE_PUNCH_TURN17_MENU_REDRAW_AGE,
   TURN16_FIRE_PUNCH_RESOLUTION,
   TURN17_FIRE_PUNCH_ENTRY_AGE,
@@ -805,6 +807,17 @@ const battleAnimMudSand = battleAnimMudSandAsset as { tileset: Tileset; palette:
 const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimSmallEmber = battleAnimSmallEmberAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimHandsAndFeet = battleAnimHandsAndFeetAsset as { tileset: Tileset; palette: RgbColor[] };
+const battleAnimIceCrystals = battleAnimIceCrystalsAsset as { tileset: Tileset; palette: RgbColor[] };
+const battleAnimIceCrystalLarge: Tileset = {
+  columns: 1,
+  rows: 2,
+  tiles: battleAnimIceCrystals.tileset.tiles.slice(4, 6),
+};
+const battleAnimIceCrystalSmall: Tileset = {
+  columns: 1,
+  rows: 1,
+  tiles: battleAnimIceCrystals.tileset.tiles.slice(6, 7),
+};
 
 /**
  * ISSUES #16: the anchor battle's real opponent battler (GROVYLE), sourced
@@ -3227,6 +3240,53 @@ export function drawSpriteSheetAffineRotate(
           }
         : c;
       setPixel(fb, centerX + dx, centerY + dy, color);
+    }
+  }
+}
+
+/** Generic OBJ-window affine sampler with hardware alpha blending. */
+function drawSpriteSheetAffineRotateBlendedOverFb(
+  fb: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  centerX: number,
+  centerY: number,
+  pa: number,
+  pb: number,
+  pc: number,
+  pd: number,
+  eva: number,
+  evb: number,
+  doubleSizeBox: boolean,
+): void {
+  const w = tileset.columns * 8;
+  const h = tileset.rows * 8;
+  const halfW = w / 2;
+  const halfH = h / 2;
+  const dyStart = doubleSizeBox ? -h : -halfH;
+  const dyEnd = doubleSizeBox ? h : halfH;
+  const dxStart = doubleSizeBox ? -w : -halfW;
+  const dxEnd = doubleSizeBox ? w : halfW;
+  for (let dy = dyStart; dy < dyEnd; dy += 1) {
+    for (let dx = dxStart; dx < dxEnd; dx += 1) {
+      const sx = ((dx * pa + dy * pb) >> 8) + halfW;
+      const sy = ((dx * pc + dy * pd) >> 8) + halfH;
+      if (sx < 0 || sx >= w || sy < 0 || sy >= h) continue;
+      const tile = tileset.tiles[
+        Math.floor(sy / 8) * tileset.columns + Math.floor(sx / 8)
+      ];
+      if (!tile) continue;
+      const index = tile[(sy % 8) * 8 + (sx % 8)]!;
+      if (index === 0) continue;
+      const color = palette[index];
+      const x = centerX + dx;
+      const y = centerY + dy;
+      if (!color || x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+      const offset = (y * 240 + x) * 4;
+      fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
+      fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, eva, evb);
+      fb[offset + 3] = 255;
     }
   }
 }
@@ -13790,8 +13850,49 @@ export function renderSceneOnMovePresentation(
       grovyleFrontSprite.tileset,
       targetPalette,
       target.geometry.spriteCorner.x,
-      target.geometry.spriteCorner.y,
+      target.geometry.spriteCorner.y
+        + (view.age === 68 || view.age === 69 ? 5 : 0),
     );
+    const beforeEffects = fb.slice();
+    for (const crystal of view.crystals) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        crystal.kind === "large"
+          ? battleAnimIceCrystalLarge
+          : battleAnimIceCrystalSmall,
+        battleAnimIceCrystals.palette,
+        crystal.centerX,
+        crystal.centerY,
+        crystal.pa,
+        crystal.pb,
+        crystal.pc,
+        crystal.pd,
+        12,
+        8,
+        crystal.kind === "large",
+      );
+    }
+    if (view.age >= 62 && view.age <= 71) {
+      const impactCoverage = new Uint8Array(240 * 160);
+      const frontEffects = beforeEffects.slice();
+      drawFirePunchImpact(
+        frontEffects,
+        view.age + (FIRE_PUNCH_IMPACT_FIRST_AGE - 62),
+        impactCoverage,
+        {
+          x: target.geometry.animationCenter.x,
+          y: target.geometry.animationCenter.y - 10,
+        },
+      );
+      for (let index = 0; index < impactCoverage.length; index += 1) {
+        if (!impactCoverage[index]) continue;
+        const offset = index * 4;
+        fb[offset] = frontEffects[offset]!;
+        fb[offset + 1] = frontEffects[offset + 1]!;
+        fb[offset + 2] = frontEffects[offset + 2]!;
+        fb[offset + 3] = frontEffects[offset + 3]!;
+      }
+    }
     drawSendOutHealthbox(
       fb,
       0,

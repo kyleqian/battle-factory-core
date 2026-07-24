@@ -105,6 +105,7 @@ SPRITE_X2_OFFSET = 0x24
 SPRITE_DATA_OFFSET = 0x2E
 ROCK_TEMPLATE = 0x08596B04
 HITSPLAT_TEMPLATE = 0x08597358
+FIST_TEMPLATE = 0x08595E98
 SWEAT_DROP_TEMPLATE = 0x085CE76C
 ICE_TEMPLATES = {
     0x08595AD0: "spiralLarge",
@@ -214,7 +215,7 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
         template = oracle.read_u32(base + SPRITE_TEMPLATE_OFFSET)
         if template == ROCK_TEMPLATE:
             rocks.append(slot)
-        if template in (HITSPLAT_TEMPLATE, SWEAT_DROP_TEMPLATE):
+        if template in (HITSPLAT_TEMPLATE, SWEAT_DROP_TEMPLATE, FIST_TEMPLATE):
             attr1 = u16(oracle, base + 0x02)
             matrix_num = (attr1 >> 9) & 0x1F
             matrix_base = oracle.symbols["gOamMatrices"] + matrix_num * 8
@@ -223,9 +224,10 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
                     "kind": (
                         "hitsplat"
                         if template == HITSPLAT_TEMPLATE
-                        else "sweatDrop"
+                        else ("fist" if template == FIST_TEMPLATE else "sweatDrop")
                     ),
                     "slot": slot,
+                    "subpriority": oracle.read_u8(base + 0x43),
                     "x": s16(oracle, base + 0x20),
                     "y": s16(oracle, base + 0x22),
                     "x2": s16(oracle, base + 0x24),
@@ -239,6 +241,7 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
             double_team_clones.append(
                 {
                     "slot": slot,
+                    "subpriority": oracle.read_u8(base + 0x43),
                     "x2": s16(oracle, base + SPRITE_X2_OFFSET),
                     "phase": s16(oracle, base + SPRITE_DATA_OFFSET + 2),
                     "life": s16(oracle, base + SPRITE_DATA_OFFSET),
@@ -254,6 +257,7 @@ def frame_record(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
                 {
                     "kind": ICE_TEMPLATES[template],
                     "slot": slot,
+                    "subpriority": oracle.read_u8(base + 0x43),
                     "x": s16(oracle, base + 0x20),
                     "y": s16(oracle, base + 0x22),
                     "x2": s16(oracle, base + 0x24),
