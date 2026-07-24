@@ -1,0 +1,37 @@
+{
+  "schema": "factory-disobedience-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "scenario": "tools/battle-lab/factory-disobedience-off.json",
+  "probe": "tools/probe/audit-factory-disobedience-off.py",
+  "source": {
+    "factoryFlags": "reference/pokeemerald/src/battle_tower.c:2092-2099",
+    "frontierMask": "reference/pokeemerald/include/constants/battle.h:60-92",
+    "partyConstruction": "reference/pokeemerald/src/battle_factory.c:403-467",
+    "playerOtConstruction": "reference/pokeemerald/src/pokemon.c:2188-2248",
+    "battleCopy": "reference/pokeemerald/src/pokemon.c:4647-4712",
+    "disobedience": "reference/pokeemerald/src/battle_util.c:3913-4053",
+    "attackCancelerOrder": "reference/pokeemerald/src/battle_script_commands.c:915-1007"
+  },
+  "scenarioSha256": "1a1ffd7602dd5be8697d3d842badd05c640d132b47c9ddb84e09b3f57cd4b461",
+  "freshManifestSha256": "e50c58230be9189e784bcfd2e4c9623e6808850bb0877b519aa144d3f3c769e2",
+  "observation": {
+    "battleTypeFlags": 524300,
+    "hasTrainer": true,
+    "hasFactory": true,
+    "hasFrontier": true,
+    "hasDouble": false,
+    "level": 50,
+    "playerOtMatchesSaveTrainerId": true,
+    "opponentOtMatchesSaveTrainerId": true,
+    "rngValueAfterConstruction": 529292524
+  },
+  "verdict": {
+    "factoryLegalLevel50Singles": {
+      "DISOBEDIENCE_OBEDIENT": "always",
+      "DISOBEDIENCE_OTHER": "unreachable",
+      "DISOBEDIENCE_IGNORED": "unreachable"
+    },
+    "why": "Every legal Factory catalog entry is neither Mew nor Deoxys, so IsBattlerModernFatefulEncounter is true for a player rental. The Factory bit is included in BATTLE_TYPE_FRONTIER, whose return-obedient branch precedes ownership, badges, level comparisons, and Random()."
+  },
+  "ordinaryStoryBattleBoundary": "This does not generalize to non-Frontier story battles: a traded non-Mew/non-Deoxys player mon above the badge obedience limit reaches the RNG-driven OTHER and IGNORED branches."
+}
