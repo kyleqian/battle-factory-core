@@ -28,7 +28,9 @@
     "compare:feather-dance-opposite": "node --experimental-strip-types tools/compare/featherDancePortable.ts tools/compare/fixtures/feather-dance-player-pidgeotto-onix.json",
     "compare:quick-attack-portable": "node --experimental-strip-types tools/compare/quickAttackPortable.ts",
     "compare:quick-attack-opposite": "node --experimental-strip-types tools/compare/quickAttackPortable.ts tools/compare/fixtures/quick-attack-player-pidgeotto-onix.json",
-    "compare:quick-attack-opposite-controller": "node --experimental-strip-types tools/compare/quickAttackPortable.ts tools/compare/fixtures/quick-attack-player-pidgeotto-onix-controller.json"
+    "compare:quick-attack-opposite-controller": "node --experimental-strip-types tools/compare/quickAttackPortable.ts tools/compare/fixtures/quick-attack-player-pidgeotto-onix-controller.json",
+    "compare:aerial-ace-portable": "node --experimental-strip-types tools/compare/aerialAcePortable.ts",
+    "compare:aerial-ace-opposite": "node --experimental-strip-types tools/compare/aerialAcePortable.ts tools/compare/fixtures/aerial-ace-player-pidgeotto-onix.json"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

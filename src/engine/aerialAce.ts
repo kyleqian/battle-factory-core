@@ -23,6 +23,37 @@ export interface AerialAceAnimationState {
 }
 
 /**
+ * `AnimCuttingSlice` ignores the createsprite battler argument after
+ * subpriority selection and anchors to `gBattleAnimTarget` instead. Its
+ * fixed script args are `(40, -32, 0)`; player-side targets receive the
+ * callback's additional +8 Y adjustment.
+ */
+export function aerialAceSliceBase(
+  targetPosition: Readonly<{ x: number; y: number }>,
+  targetSide: AerialAceSide,
+): Readonly<{ x: number; y: number }> {
+  return {
+    x: targetPosition.x + 40,
+    y: targetPosition.y - 32 + (targetSide === "player" ? 8 : 0),
+  };
+}
+
+/**
+ * The staged opponent-front corner includes the settled front-animation
+ * OAM x2=+1. AERIAL ACE's monbg target copy starts from the source base
+ * coordinate and the restored OBJ keeps that reset after teardown.
+ */
+export function aerialAceTargetSpriteXAtAge(
+  animationAge: number,
+  targetSide: AerialAceSide,
+  stagedCornerX: number,
+): number {
+  return stagedCornerX - (
+    targetSide === "opponent" && animationAge >= 57 ? 1 : 0
+  );
+}
+
+/**
  * Ages are relative to gCurrentMove installation, with the optional
  * player-side printer offset applied by the presentation seam. They are
  * derived from Move_AERIAL_ACE's independent choreography, not QUICK
@@ -93,7 +124,7 @@ export function aerialAceTracesAtAge(
   if (age >= 62 && age <= 69) {
     traces.push({ slot: 4, x2: 0, y2: 0, winsOamTie: false });
   }
-  if (age >= 57 && age <= 64) {
+  if (age >= 57 && age <= 62) {
     traces.push({
       slot: 7,
       ...sideOffset(

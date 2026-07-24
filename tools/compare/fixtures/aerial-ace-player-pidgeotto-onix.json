@@ -24,13 +24,15 @@
   "controllerProfile": {
     "targetHpBefore": 117,
     "targetHpAfter": 108,
+    "hitReactionFirstAge": 92,
     "hpDrainFirstAge": 127,
-    "resultTextFirstAge": 142,
+    "moveTextClearAge": 141,
+    "resultTextFirstAge": 141,
     "currentMoveResetAge": 238
   },
   "moveTextStartAge": 5,
   "acceptance": {
-    "status": "staged-not-compared",
-    "remaining": "Install the source-relative AERIAL_ACE compositor and prove all 232 dense frames."
+    "status": "exact",
+    "result": "232/232 dense frames exact with zero differing pixels."
   }
 }
