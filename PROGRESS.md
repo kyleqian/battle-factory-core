@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 387 — Gate-3 action-admission preflight slice integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. The first action-admission rules slice is durable; ATTACKCANCELER
+  opcode 0 remains deliberately unregistered and incomplete.
+- **Did:** extended the single rules context only with source `u16` HP,
+  four-slot `u8` PP, `u8` outcome/selected slot, and `u16` current move.
+  Two frozen pure checkpoints now own outcome-finished/fainted entry and the
+  later selected-PP gate, returning exact PC/action/result/hit-marker receipts
+  without skipping the intervening canceler or move-block phases.
+- **Next:** add another cancellation family only after its complete tracker,
+  state, mutation, controller, and RNG ownership is explicit. Keep opcode 0
+  unregistered; defer Protect/intercepts/accuracy, PP deduction, damage,
+  status application, round/controller behavior, and presentation.
+- **Notes:** exhaustive predicates pin Struggle, allow-no-PP,
+  no-attack-string, multi-turn, ordinary PP, priority, determinism, freezing,
+  and nested identity. Fresh OFF Mechanics Lab uses legal Magneton and zero
+  PP Ups: Toxic naturally reaches **10→0**, then the 11th ordinary selection
+  is refused by `CONTROLLER_PRINTSTRINGPLAYERONLY`; this does not claim the
+  attack-time no-PP branch executed. Focused **28/28**; Tier-1 **127 files /
+  1675 tests**, build, OFF info, manifest/hash audit, and diff check green.
+  Commit `e88cc08`; pixel diff N/A.
+
+---
 ## 386 — FLY terrain occlusion closes the last excluded charge frames
 
 - **State:** S10 remains open; animation coverage is now **11 exact / 3
@@ -41,26 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **25/25**; Tier-1 **126 files / 1665 tests**, build, OFF info, fresh Toxic
   and Confuse Ray zero-PP-Up assertions, and diff check green. Commit
   `5e4a18b`; pixel diff N/A.
-
----
-## 384 — Gate-3 status-animation production rules context integrated
-
-- **State:** S10 Gate 3 remains open with **27** source-safe opcodes; opcodes
-  100–102 now have the first durable source-shaped production rules/port
-  bundle instead of test-only live-status fixtures.
-- **Did:** added a deeply frozen four-battler context with only
-  `status1/2/3`, substitute HP, attacker/effect role bindings, global hit
-  marker, and multi-hit counter; centralized source constants; implemented
-  exact supported selector resolution and live/masked/explicit preparation;
-  composed named handler/execution/ack seams without replacing generic ports.
-- **Next:** extend this one context only for the next completely evidenced
-  rules family. Defer the other `GetBattlerForBattleScript` cases until their
-  roles/positions are explicit; keep status application, move-value cleanup
-  fields, PP/damage/RNG/turn state, controller timing, and presentation out.
-- **Notes:** production composition covers the **26** controls/source/multi-hit
-  IDs whose context is now honest; generic opcode 37 remains reusable but
-  intentionally uncomposed until its additional fields land. Fresh OFF labs
-  prove Toxic `status1 0→0x80` and Confuse Ray status2/confusion `0→4`, both
-  PP **10→9**, all PP Ups zero. Focused **80/80**; Tier-1 **125 files / 1658
-  tests**, build, oracle info, both manifests, and diff check green. Commit
-  `a937987`; pixel diff N/A.
