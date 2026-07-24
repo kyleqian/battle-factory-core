@@ -14002,7 +14002,10 @@ export function renderSceneOnMovePresentation(
         || view.age < state.config.hpDrainProfile.effectivenessTextEndAge
       )
     ) {
-      const line = "It’s super effective!";
+      const line =
+        state.config.hpDrainProfile.effectivenessKind === "notVeryEffective"
+          ? "It’s not very effective…"
+          : "It’s super effective!";
       drawMessageTextLines(
         fb,
         line,

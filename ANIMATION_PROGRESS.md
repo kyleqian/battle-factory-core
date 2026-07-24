@@ -39,18 +39,22 @@ remainder.
 ## Current handoff
 
 - **State:** **4 exact / 9 partial / 263 unsupported**. ICE PUNCH remains
-  partial: opposite-side geometry is proved, but its controller resolution
-  variant is not yet complete.
-- **Did:** made ICE PUNCH field composition side-parametric and source-derived.
-  Battler palettes, blink/shake, HP boxes, and used-move text now select by
-  side; the seven short hit crystals mirror their source X offsets for a
-  player-side target while the inward spiral remains target-relative.
-- **Evidence:** new `ice-punch-grovyle-onix.json` is **314/314 exact** at
-  Scene-ON oracle frames 1966-2279 / ages 0-313: the complete opposite-side
-  move-script body, generic hit/blink/wobble, immutable 117→31 HP drain, and
-  five-frame settled hold. Existing ICE PUNCH player-side **462/462** and FIRE
-  PUNCH **225/225** remain exact.
-- **Next:** densely match the staged opposite-side not-very-effective text,
-  successful freeze/status controller path, command teardown, and
-  next-controller handoff before exact promotion. Do not claim THUNDER PUNCH
-  without its own dense evidence.
+  partial: the opposite-side controller continuation is exact through its
+  successful freeze write/setup, but the visible status animation and later
+  controller handoff remain.
+- **Did:** parameterized ICE PUNCH effectiveness kind and immutable
+  controller-supplied status/healthbox/teardown clocks. No damage, status
+  roll, status mutation, action selection, or turn state is owned by the
+  presentation adapter.
+- **Evidence:** `ice-punch-grovyle-onix.json` is now **410/410 exact** at
+  Scene-ON oracle frames 1966-2375 / ages 0-409. The +96 continuation covers
+  the complete super-effective printer (the staged oracle is super-effective,
+  despite the earlier handoff wording), the successful freeze status1 write
+  at age 400, and the status-animation setup through the final framebuffer
+  before the ice cube becomes visible. Existing ICE PUNCH player-side
+  **462/462** and FIRE PUNCH **225/225** remain exact.
+- **Next:** resume at oracle frame **2376 / age 410**, the first visible
+  FrozenIceCube pixel. Densely match both source status-animation lifecycles,
+  “ONIX was/is frozen solid!” printers, FRZ healthbox update, current-move
+  teardown, and the skipped-move controller handoff before exact promotion.
+  Do not claim THUNDER PUNCH without its own dense evidence.

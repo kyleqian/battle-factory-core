@@ -142,6 +142,61 @@ describe("ICE_PUNCH source-composed presentation components", () => {
     expect(stage.config).toEqual(before);
   });
 
+  it("reads controller-supplied freeze and teardown clocks without rolling or mutating the outcome", () => {
+    const controllerDisplayProfile = Object.freeze({
+      statusOutcome: "freeze" as const,
+      statusAppliedAge: 400,
+      statusAnimationFirstAge: 405,
+      statusMessageFirstAge: 520,
+      healthboxStatusAge: 607,
+      currentMoveResetAge: 618,
+      nextControllerTextFirstAge: 625,
+      nextControllerAnimationFirstAge: 710,
+    });
+    const stage = createSceneOnMovePresentation({
+      move: "ICE_PUNCH",
+      ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+      fieldProfile: Object.freeze({
+        playerHp: 117,
+        opponentHp: 143,
+        playerStatus: "none",
+      }),
+      hpDrainProfile: Object.freeze({
+        startHp: 117,
+        endHp: 31,
+        firstDisplayedAge: 223,
+        effectivenessTextStartAge: 314,
+        effectivenessKind: "superEffective" as const,
+        effectivenessTextEndAge: 520,
+      }),
+      controllerDisplayProfile,
+    });
+    const before = structuredClone(stage.config);
+
+    expect(sceneOnIcePunchView({ ...stage, age: 399 }).resolution).toEqual({
+      status: "none",
+      healthboxStatus: "none",
+      currentMove: "ICE_PUNCH",
+    });
+    expect(sceneOnIcePunchView({ ...stage, age: 400 }).resolution).toEqual({
+      status: "freeze",
+      healthboxStatus: "none",
+      currentMove: "ICE_PUNCH",
+    });
+    expect(sceneOnIcePunchView({ ...stage, age: 607 }).resolution).toEqual({
+      status: "freeze",
+      healthboxStatus: "freeze",
+      currentMove: "ICE_PUNCH",
+    });
+    expect(sceneOnIcePunchView({ ...stage, age: 618 }).resolution).toEqual({
+      status: "freeze",
+      healthboxStatus: "freeze",
+      currentMove: null,
+    });
+    expect(stage.config).toEqual(before);
+    expect(stage.config.controllerDisplayProfile).toBe(controllerDisplayProfile);
+  });
+
   it("extracts the source-concatenated large and small crystal frames", () => {
     expect(crystals.tileset.tiles).toHaveLength(14);
     expect(crystals.palette).toHaveLength(16);
