@@ -366,3 +366,26 @@ worker (PROGRESS entry 13).
   data (`gPlttBufferFaded` probes — the switch-in tint precedent) instead
   of screenshot sampling; if sampling anyway, pick swatch pixels with
   near-255 channel values first.
+
+## Battle-lab has no busy/idle signal for button registration
+
+- **What:** during the ~2000-frame post-KO switch-in dance, fixed-frame
+  button waits are silently dropped (input is not buffered), and the API
+  offers no way to ask whether a press will register; staging multi-turn
+  KO scenarios needed trial-and-error until a continuous low-duty-cycle
+  A-spam pattern was found (documented in `docs/hit-chain-ground-truth.md`).
+- **Hits:** 1.
+- **Cost each:** ~15 min.
+- **Workaround:** stage post-KO continuations with low-duty-cycle A-spam
+  that self-times, instead of computing exact wait durations.
+
+## Oracle comparator round-trips make calibration sweeps slow
+
+- **What:** each portable-comparator or probe run costs ~10-20s of mGBA
+  boot + replay; calibration checks that sweep a one-tick alignment (e.g.
+  the FLY `AnimTask_ShakeMon` divergence) need several round-trips per
+  hypothesis, dominating small-step wall time.
+- **Hits:** 1.
+- **Cost each:** ~10 min.
+- **Workaround:** none cheap yet; a cached local probe-replay mode (reuse
+  committed RAM dumps) would make alignment sweeps near-instant.

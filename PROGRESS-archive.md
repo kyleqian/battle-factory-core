@@ -1,3 +1,47 @@
+## 427 — opcode 0 (Cmd_attackcanceler) registered in the production machine
+
+- **State:** S10 step (i) is complete. Opcode 0 is registered in
+  `createBattleScriptStatusRulesHandlers` (`battleScriptAttackCancelerOpcode.ts`),
+  composing the entry preflight, the 14-phase `AtkCanceler_UnableToUseMove`
+  loop, the ability-moves-block/selected-PP/Factory-obedience join chain, and
+  Magic Coat's bounce check into one real dispatcher. Six branches halt
+  explicitly via a new `unsupported-branch` `BattleScriptHaltReason` instead
+  of falling through: `gBattleOutcome`'s `B_ACTION_FINISHED` round-controller
+  handoff (out of scope), `CANCELER_IN_LOVE`'s immobilized-by-love
+  `BattleScriptPush(explicit label)` (the machine's call stack only models
+  resume-at-this-PC, not an arbitrary return address), Magic Coat's
+  unimplemented `PressurePPLose`, the Snatch loop, Lightning Rod redirection,
+  and the final `DEFENDER_IS_PROTECTED` check (needs unmodeled battler-type/
+  two-turn-move data). Suite is **173 files / 2016 tests**, build green.
+- **Did:** wired the fifteen existing phase reducers (flags through thaw, plus
+  PP) and `battleScriptAttackCanceler.ts`'s loop/`battleScriptMagicCoat.ts`
+  into opcode 0 (`d74df11`). Added Tier-1 coverage driving the *registered
+  opcode*, not the standalone reducers, through all 15 phase transfers and
+  all 6 barriers (`f4e726e`) — Snatch/Lightning Rod barriers are
+  Tier-1-constructed per the S10 testability decision, since real Factory
+  data never sets `stealMove`/`lightningRodRedirected` (evidence already
+  pinned in `attackCancelerMagicCoatSnatchAudit.test.ts` /
+  `attackCancelerLightningRodProtectAudit.test.ts`). Rewired the staged
+  asleep-move adapter to start its machine at the move's own entry (real
+  opcode 0) instead of hand-calling the canceler loop; pins gained the
+  post-loop `REQUEST_STATUS_BATTLE` controller-sync event
+  (`set-battler-status-data`, battle_util.c:2270-2274) the manual adapter
+  never modeled (`4809f06`). Updated the stale "28 registered opcodes" pin
+  to 29.
+- **Next:** S10 step (ii) — register the sixteen-opcode standard hit chain
+  (`accuracycheck` through `tryfaintmon`) plus `orbyte` on the miss branch.
+  A concurrent side-lane commit (`0b3fe0c`, landed mid-session, not mine)
+  already corrected ROADMAP's count to **eighteen** registrations for a
+  complete damaging move and cites `tools/probe/verify-hit-chain-ground-truth.ts`
+  — read that before starting.
+- **Notes:** enumerated remainder from this step: Snatch/Lightning Rod/Protect/
+  `PressurePPLose`/the round-controller handoff are (b) barriers, not (a)
+  ports — completing any of them is new-mechanics work (battler type data,
+  two-turn-move gating, real PP-loss execution with a controller emission,
+  `B_ACTION_FINISHED` consumption) explicitly out of this step's scope. No
+  presentation/render files touched.
+
+---
 ## 426 — [USER-DIRECTED RE-SCOPE, between sessions] executable-frontier reset
 
 **Read this before ROADMAP.md — it changes the next action.** No code changed;
