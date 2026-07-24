@@ -30,6 +30,8 @@ import {
 } from "./battleScriptSourceConstants.ts";
 
 export type BattleScriptRulesBattler = Readonly<{
+  hp: number;
+  pp: readonly [number, number, number, number];
   status1: number;
   status2: number;
   status3: number;
@@ -61,6 +63,9 @@ export type BattleScriptRulesContext = Readonly<
   BattleScriptMoveValuesRulesContext & {
     battlers: BattleScriptRulesBattlers;
     selectorRoles: BattleScriptSelectorRoleBindings;
+    battleOutcome: number;
+    currentMove: number;
+    currentMovePosition: number;
     multiHitCounter: number;
   }
 >;
@@ -71,6 +76,9 @@ export type BattleScriptRulesContextInput = Readonly<{
     attacker?: BattleScriptBattlerId | null;
     effectBattler?: BattleScriptBattlerId | null;
   }>;
+  battleOutcome: number;
+  currentMove: number;
+  currentMovePosition: number;
   moveResultFlags: number;
   dmgMultiplier: number;
   critMultiplier: number;
@@ -105,6 +113,19 @@ export function createBattleScriptRulesContext(
     throw new Error("Battle Script rules context must contain exactly four indexed battlers");
   }
   const battlers = input.battlers.map((battler, index) => Object.freeze({
+    hp: requireUnsigned(battler.hp, 0xffff, `battlers[${index}].hp`),
+    pp: Object.freeze(
+      (() => {
+        if (!Array.isArray(battler.pp) || battler.pp.length !== 4) {
+          throw new Error(`battlers[${index}].pp must contain exactly four move-slot values`);
+        }
+        return (battler.pp as readonly number[]).map((pp, movePosition) => requireUnsigned(
+          pp,
+          0xff,
+          `battlers[${index}].pp[${movePosition}]`,
+        ));
+      })(),
+    ) as unknown as readonly [number, number, number, number],
     status1: requireUnsigned(battler.status1, 0xffff_ffff, `battlers[${index}].status1`) >>> 0,
     status2: requireUnsigned(battler.status2, 0xffff_ffff, `battlers[${index}].status2`) >>> 0,
     status3: requireUnsigned(battler.status3, 0xffff_ffff, `battlers[${index}].status3`) >>> 0,
@@ -124,6 +145,13 @@ export function createBattleScriptRulesContext(
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
+    battleOutcome: requireUnsigned(input.battleOutcome, 0xff, "battleOutcome"),
+    currentMove: requireUnsigned(input.currentMove, 0xffff, "currentMove"),
+    currentMovePosition: requireUnsigned(
+      input.currentMovePosition,
+      3,
+      "currentMovePosition",
+    ),
     moveResultFlags: requireUnsigned(input.moveResultFlags, 0xff, "moveResultFlags"),
     dmgMultiplier: requireUnsigned(input.dmgMultiplier, 0xff, "dmgMultiplier"),
     critMultiplier: requireUnsigned(input.critMultiplier, 0xff, "critMultiplier"),

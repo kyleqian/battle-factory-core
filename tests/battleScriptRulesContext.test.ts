@@ -45,8 +45,10 @@ function battler(
   status2 = 0,
   status3 = 0,
   substituteHP = 0,
+  hp = 100,
+  pp: readonly [number, number, number, number] = [10, 20, 30, 40],
 ) {
-  return Object.freeze({ status1, status2, status3, substituteHP });
+  return Object.freeze({ hp, pp, status1, status2, status3, substituteHP });
 }
 
 function input(
@@ -60,6 +62,9 @@ function input(
       battler(0x08, 0x000f_0001),
     ],
     selectorRoles: changes.selectorRoles ?? { attacker: 3, effectBattler: 1 },
+    battleOutcome: changes.battleOutcome ?? 0,
+    currentMove: changes.currentMove ?? 92,
+    currentMovePosition: changes.currentMovePosition ?? 0,
     moveResultFlags: changes.moveResultFlags ?? 0xf3,
     dmgMultiplier: changes.dmgMultiplier ?? 7,
     critMultiplier: changes.critMultiplier ?? 9,
@@ -134,8 +139,11 @@ describe("source-shaped Battle Script rules context", () => {
     const source = input();
     const created = createBattleScriptRulesContext(source);
     expect(Object.keys(created).sort()).toEqual([
+      "battleOutcome",
       "battlers",
       "critMultiplier",
+      "currentMove",
+      "currentMovePosition",
       "dmgMultiplier",
       "hitMarker",
       "missType",
@@ -149,6 +157,7 @@ describe("source-shaped Battle Script rules context", () => {
     expect(Object.isFrozen(created.battlers)).toBe(true);
     expect(Object.isFrozen(created.selectorRoles)).toBe(true);
     expect(created.battlers.every(Object.isFrozen)).toBe(true);
+    expect(created.battlers.every((value) => Object.isFrozen(value.pp))).toBe(true);
     expect(created.battlers[0]).not.toBe(source.battlers[0]);
   });
 
@@ -157,6 +166,11 @@ describe("source-shaped Battle Script rules context", () => {
       { battlers: input().battlers.slice(0, 3) },
       { battlers: [battler(-1), ...input().battlers.slice(1)] },
       { battlers: [battler(0, 0, 0, 256), ...input().battlers.slice(1)] },
+      { battlers: [battler(0, 0, 0, 0, -1), ...input().battlers.slice(1)] },
+      { battlers: [battler(0, 0, 0, 0, 1, [0, 0, 0, 256]), ...input().battlers.slice(1)] },
+      { battleOutcome: 256 },
+      { currentMove: 0x1_0000 },
+      { currentMovePosition: 4 },
       { moveResultFlags: 256 },
       { dmgMultiplier: -1 },
       { critMultiplier: 256 },

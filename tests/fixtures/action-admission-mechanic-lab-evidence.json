@@ -1,0 +1,23 @@
+{
+  "oracleProfile": "battle-scene-off",
+  "fixture": "tools/battle-lab/attack-spine-no-pp-off.json",
+  "fixtureSha256": "3cd4adeb087adfaf6635ee72abb2f6d1ff0c07eeb051570c7cd6b4277370f609",
+  "freshManifestSha256": "38b8cef37d1165defa88bf96a3c28a84d2eb1bbee8d625fd5970f39b28b87226",
+  "moveId": 92,
+  "moveName": "TOXIC",
+  "opponentSetId": 349,
+  "opponentSpecies": 82,
+  "opponentTypes": [13, 8],
+  "ppUps": [0, 0, 0, 0],
+  "initialPp": 10,
+  "ppAfterTenOrdinarySelections": 0,
+  "ppAfterEleventhSelectionAttempt": 0,
+  "finalFrame": 8074,
+  "finalFrameSha256": "4e93b4527c10344e7beb863b85ebe625f8e7bd8a03e3305a03821d376275b85b",
+  "finalPlayerControllerCommand": 17,
+  "finalPlayerControllerCommandName": "CONTROLLER_PRINTSTRINGPLAYERONLY",
+  "finalControllerExecFlags": 1,
+  "playerHp": 136,
+  "opponentHp": 146,
+  "battleOutcome": 0
+}
