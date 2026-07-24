@@ -55,6 +55,8 @@ export type BattleScriptRulesBattler = Readonly<{
   confusionSelfDmg?: 0 | 1;
   /** ProtectStruct::prlzImmobility; absent legacy inputs normalize to zero. */
   prlzImmobility?: 0 | 1;
+  /** ProtectStruct::loveImmobility; absent legacy inputs normalize to zero. */
+  loveImmobility?: 0 | 1;
   /**
    * The already source-modified physical operands consumed by
    * CalculateBaseDamage's MOVE_POUND/powerOverride=40 confusion call.
@@ -305,6 +307,13 @@ export function createBattleScriptRulesContext(
         battler.prlzImmobility,
         1,
         `battlers[${index}].prlzImmobility`,
+      ) as 0 | 1,
+    }),
+    ...(battler.loveImmobility === undefined ? {} : {
+      loveImmobility: requireUnsigned(
+        battler.loveImmobility,
+        1,
+        `battlers[${index}].loveImmobility`,
       ) as 0 | 1,
     }),
     ...(battler.confusionDamage === undefined ? {} : {

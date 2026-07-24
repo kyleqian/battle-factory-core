@@ -148,7 +148,8 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedIsImprisoned"
       | "BattleScript_MoveUsedIsConfused"
       | "BattleScript_MoveUsedIsConfusedNoMore"
-      | "BattleScript_MoveUsedIsParalyzed";
+      | "BattleScript_MoveUsedIsParalyzed"
+      | "BattleScript_MoveUsedIsInLove";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -807,6 +808,106 @@ export type BattleScriptAttackCancelerParalyzedDecision =
     rngValue: number;
     receipt: Readonly<{
       sourcePhase: "CANCELER_PARALYZED";
+      tracker: Readonly<{ before: number; after: number }>;
+      rng: Readonly<{ kind: "preserve"; value: number; callsConsumed: 0 }>;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerInLoveReason =
+  | "not-infatuated"
+  | "love-check-passed"
+  | "immobilized-by-love";
+
+export type BattleScriptAttackCancelerInLoveRngEffect =
+  | Readonly<{
+    kind: "preserve";
+    value: number;
+    callsConsumed: 0;
+    reason: "not-infatuated";
+  }>
+  | Readonly<{
+    kind: "draw";
+    name: "CANCELER_IN_LOVE_IMMOBILITY_CHECK";
+    sourceCall: "Random";
+    sourceOperation: "Random() & 1";
+    before: number;
+    after: number;
+    randomValue: number;
+    lowBit: 0 | 1;
+    callsConsumed: 1;
+  }>;
+
+export type BattleScriptAttackCancelerInLoveStackEffect =
+  | Readonly<{ kind: "preserve" }>
+  | Readonly<{
+    kind: "push-cursor";
+    sourceFunction: "BattleScriptPushCursor";
+    sourceProgramCounter: number;
+  }>
+  | Readonly<{
+    kind: "push-script";
+    sourceFunction: "BattleScriptPush";
+    targetLabel: "BattleScript_MoveUsedIsInLoveCantAttack";
+  }>;
+
+export type BattleScriptAttackCancelerInLoveReceipt = Readonly<{
+  sourcePhase: "CANCELER_IN_LOVE";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerInLoveReason;
+  infatuation: Readonly<{
+    status2: number;
+    sourceMask: "STATUS2_INFATUATION";
+    mask: typeof BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION;
+    encodedBits: number;
+    sourceBattler: BattleScriptBattlerId | null;
+  }>;
+  scriptingBattler:
+    | Readonly<{
+      kind: "preserve";
+      before: BattleScriptBattlerId;
+      after: BattleScriptBattlerId;
+    }>
+    | Readonly<{
+      kind: "derive";
+      before: BattleScriptBattlerId;
+      after: BattleScriptBattlerId;
+      sourceFunction: "CountTrailingZeroBits";
+    }>;
+  rng: BattleScriptAttackCancelerInLoveRngEffect;
+  loveImmobility: Readonly<{ before: 0 | 1; after: 0 | 1 }>;
+  multiTurnCancellation:
+    | Readonly<{ kind: "not-requested" }>
+    | Readonly<{
+      kind: "immediate";
+      sourceFunction: "CancelMultiTurnMoves";
+      receipt: BattleScriptCancelMultiTurnMovesReceipt;
+    }>;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  scriptStack: BattleScriptAttackCancelerInLoveStackEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_IN_LOVE";
+    sourcePhaseAfter: "CANCELER_BIDE";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerInLoveDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerInLoveReason;
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: BattleScriptAttackCancelerInLoveReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_IN_LOVE";
       tracker: Readonly<{ before: number; after: number }>;
       rng: Readonly<{ kind: "preserve"; value: number; callsConsumed: 0 }>;
     }>;
@@ -2627,6 +2728,213 @@ export function advanceBattleScriptAttackCancelerParalyzed(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_PARALYZED",
         sourcePhaseAfter: "CANCELER_IN_LOVE",
+      }),
+    }),
+  });
+}
+
+/**
+ * Immutable source phase for battle_util.c:2200-2219.
+ *
+ * The four-bit infatuation field contains one source battler bit. Its
+ * CountTrailingZeroBits owner is selected before the conditional Random call.
+ * Odd draws push the current cursor; even draws push the unable script and
+ * execute CancelMultiTurnMoves immediately. Both taken branches then hand off
+ * to BattleScript_MoveUsedIsInLove and advance exactly once to CANCELER_BIDE.
+ */
+export function advanceBattleScriptAttackCancelerInLove(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+  rngValue: number,
+): BattleScriptAttackCancelerInLoveDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const sourceRng = requireRngValue(rngValue);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_IN_LOVE
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      rngValue: sourceRng,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_IN_LOVE",
+        tracker: Object.freeze({ before: trackerBefore, after: trackerBefore }),
+        rng: Object.freeze({
+          kind: "preserve",
+          value: sourceRng,
+          callsConsumed: 0 as const,
+        }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler in-love phase requires an attacker role",
+    );
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const infatuationMask = BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION;
+  const encodedBits = (
+    (sourceBattler.status2 & infatuationMask) >>> 16
+  ) & 0xf;
+  if (encodedBits !== 0 && (encodedBits & (encodedBits - 1)) !== 0) {
+    throw new Error(
+      "STATUS2_INFATUATION must encode exactly one source battler bit when nonzero",
+    );
+  }
+  const sourceBattlerId = encodedBits === 0
+    ? null
+    : 31 - Math.clz32(encodedBits & -encodedBits);
+  const infatuationSource = sourceBattlerId as BattleScriptBattlerId | null;
+
+  let nextRng = sourceRng;
+  let rng: BattleScriptAttackCancelerInLoveRngEffect = Object.freeze({
+    kind: "preserve",
+    value: sourceRng,
+    callsConsumed: 0,
+    reason: "not-infatuated",
+  });
+  let lowBit: 0 | 1 | null = null;
+  if (infatuationSource !== null) {
+    nextRng = advanceRngValue(sourceRng);
+    const randomValue = (nextRng >>> 16) & 0xffff;
+    lowBit = (randomValue & 1) as 0 | 1;
+    rng = Object.freeze({
+      kind: "draw",
+      name: "CANCELER_IN_LOVE_IMMOBILITY_CHECK",
+      sourceCall: "Random",
+      sourceOperation: "Random() & 1",
+      before: sourceRng,
+      after: nextRng,
+      randomValue,
+      lowBit,
+      callsConsumed: 1,
+    });
+  }
+
+  const immobilized = lowBit === 0;
+  const loveBefore = sourceBattler.loveImmobility ?? 0;
+  const loveAfter = immobilized ? 1 : loveBefore;
+  let workingContext = rulesContext;
+  if (infatuationSource !== null) {
+    const nextBattler = loveAfter === loveBefore
+      ? sourceBattler
+      : Object.freeze({ ...sourceBattler, loveImmobility: loveAfter });
+    const nextBattlers = nextBattler === sourceBattler
+      ? rulesContext.battlers
+      : Object.freeze(rulesContext.battlers.map((candidate, index) =>
+        index === attacker ? nextBattler : candidate
+      )) as unknown as BattleScriptRulesContext["battlers"];
+    workingContext = Object.freeze({
+      ...rulesContext,
+      battlers: nextBattlers,
+      scriptingBattler: infatuationSource,
+    });
+  }
+
+  let multiTurnCancellation:
+    BattleScriptAttackCancelerInLoveReceipt["multiTurnCancellation"] =
+      Object.freeze({ kind: "not-requested" });
+  if (immobilized) {
+    const cancellation = cancelBattleScriptMultiTurnMoves(
+      workingContext,
+      attacker,
+    );
+    workingContext = cancellation.rulesContext;
+    multiTurnCancellation = Object.freeze({
+      kind: "immediate",
+      sourceFunction: "CancelMultiTurnMoves",
+      receipt: cancellation.receipt,
+    });
+  }
+
+  const nextHitMarker = immobilized
+    ? (
+      workingContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+    ) >>> 0
+    : workingContext.hitMarker;
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_BIDE;
+  const nextRulesContext = Object.freeze({
+    ...workingContext,
+    hitMarker: nextHitMarker,
+    atkCancelerTracker: trackerAfter,
+  });
+  const reason: BattleScriptAttackCancelerInLoveReason =
+    infatuationSource === null
+      ? "not-infatuated"
+      : immobilized
+        ? "immobilized-by-love"
+        : "love-check-passed";
+  const script: BattleScriptAttackCancelerScriptEffect =
+    infatuationSource === null
+      ? Object.freeze({ kind: "preserve", sourceProgramCounter: sourcePc })
+      : Object.freeze({
+        kind: "handoff",
+        sourceProgramCounter: sourcePc,
+        targetLabel: "BattleScript_MoveUsedIsInLove",
+      });
+  const scriptStack: BattleScriptAttackCancelerInLoveStackEffect =
+    infatuationSource === null
+      ? Object.freeze({ kind: "preserve" })
+      : immobilized
+        ? Object.freeze({
+          kind: "push-script",
+          sourceFunction: "BattleScriptPush",
+          targetLabel: "BattleScript_MoveUsedIsInLoveCantAttack",
+        })
+        : Object.freeze({
+          kind: "push-cursor",
+          sourceFunction: "BattleScriptPushCursor",
+          sourceProgramCounter: sourcePc,
+        });
+
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    rngValue: nextRng,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_IN_LOVE",
+      attacker,
+      reason,
+      infatuation: Object.freeze({
+        status2: sourceBattler.status2,
+        sourceMask: "STATUS2_INFATUATION",
+        mask: infatuationMask,
+        encodedBits,
+        sourceBattler: infatuationSource,
+      }),
+      scriptingBattler: infatuationSource === null
+        ? Object.freeze({
+          kind: "preserve",
+          before: rulesContext.scriptingBattler,
+          after: rulesContext.scriptingBattler,
+        })
+        : Object.freeze({
+          kind: "derive",
+          before: rulesContext.scriptingBattler,
+          after: infatuationSource,
+          sourceFunction: "CountTrailingZeroBits",
+        }),
+      rng,
+      loveImmobility: Object.freeze({
+        before: loveBefore,
+        after: loveAfter,
+      }),
+      multiTurnCancellation,
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect: infatuationSource === null ? 0 : 1,
+      script,
+      scriptStack,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_IN_LOVE",
+        sourcePhaseAfter: "CANCELER_BIDE",
       }),
     }),
   });
