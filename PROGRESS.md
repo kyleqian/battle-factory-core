@@ -4,6 +4,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 409 — Gate-3 Soundproof moves-block gate integrated
+
+- **State:** the run is clean and green at **152 files / 1876 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes. The complete pure
+  attack-canceler loop now composes through the post-canceler
+  `ABILITYEFFECT_MOVES_BLOCK` decision only; opcode 0 remains unregistered and
+  no machine, decision-boundary, core, round, or presentation integration was
+  added.
+- **Did:** extracted all **10** `sSoundMovesTable` selectors in source order
+  into generated move data, added typed `gLastUsedAbility` ownership, and
+  ported the zero-argument dispatcher semantics: resolve the target ability
+  and current move, scan only for Soundproof, conditionally add
+  `HITMARKER_NO_PPDEDUCT` for an already multi-turn attacker, and hand off to
+  `BattleScript_SoundproofProtected`. A pure join calls the gate only after a
+  supplied canceler effect 0 and bypasses it for effects 1/2.
+- **Next:** keep opcode 0 unregistered. The next exact source-order composition
+  seam is the already-typed selected-slot PP admission after a continuing
+  moves-block result; obedience and every later intercept remain separately
+  unowned. Do not add the machine adapter or any controller integration until
+  the supervisor assigns a bounded remainder.
+- **Notes:** both singles orientations; all **10** sound selectors and six
+  non-sound controls; Soundproof/non-Soundproof; multi-turn/no-multi-turn;
+  canceler effects **0/1/2**; exact target/ability/move/table/status/marker/
+  script receipts; invalid roles/context; deterministic replay, input
+  immutability, recursive freezing, and zero-call RNG preservation are pinned.
+  Focused **5 files / 56 tests**; integrated **152/1876**, production build,
+  OFF v5 info (`9c89c741…`), and diff check green. Code commits `e5e8bae` +
+  `12960b9`; pixel diff N/A.
+
+---
 ## 408 — Complete attack-canceler source loop composed
 
 - **State:** the run is clean and green at **149 files / 1859 tests**. S10
@@ -57,30 +87,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Focused **3 files / 33 tests**; integrated Tier-1 **148/1850**, build, OFF
   v5 info (`9c89c741…`), and diff check green. Code commits `faabbf0` +
   `aaf3f64`; pixel diff N/A.
-
----
-## 406 — Gate-3 attack-canceler BIDE source phase integrated
-
-- **State:** the run is clean and green at **146 files / 1840 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes;
-  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through BIDE source
-  decisions only. Opcode 0 remains unregistered and no phase loop exists.
-- **Did:** ported battle_util.c:2220-2247 with source-ordered
-  `STATUS2_BIDE_TURN(1)` subtraction, storage/no-energy/attack script handoffs,
-  `MOVE_BIDE`, signed-s32 doubled scripting damage, and saved-target ownership.
-  Published frozen `gBideDmg`/`gBideTarget`/scripting-damage/absent-bit state
-  plus explicit receipts; Bide itself preserves `STATUS2_MULTIPLETURNS`.
-- **Next:** begin `CANCELER_THAW` only after its freeze/effect predicate,
-  status clear, cursor, chooser, status-controller write, effect, script, and
-  tracker receipts are explicit. Do not loop phases or register opcode 0.
-- **Notes:** singles battlers **0/1**, both sides/saved opposing slots, no-Bide,
-  reachable counters **2→1→0** and rejected **3**, zero/positive releases,
-  positive-s32 doubling through wrap boundaries, target replacement/
-  preservation, status-bit and multi-turn preservation, invalid context, exact
-  zero-call RNG ownership, immutability/determinism, and deep freezing are
-  pinned. The absent-target fallback is explicitly unsupported because
-  `gAbsentBattlerFlags` starts zero, singles `HasNoMonsToSwitch` returns FALSE,
-  and switch-in clears the reused active slot; doubles-only `GetMoveTarget`
-  RNG/Follow Me/Lightning Rod was not imported. Focused **4 files / 49 tests**;
-  integrated Tier-1 **146/1840**, build, OFF v5 info (`9c89c741…`), and diff
-  check green. Code commit `7b20bb8`; pixel diff N/A.
