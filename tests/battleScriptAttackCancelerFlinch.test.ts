@@ -21,11 +21,18 @@ function battler(
     side: changes.side ?? 0,
     ability: changes.ability ?? 0,
     hp: changes.hp ?? 100,
+    item: changes.item ?? 0,
     moves: changes.moves ?? Object.freeze([0, 0, 0, 0]),
     pp: changes.pp ?? Object.freeze([35, 0, 0, 0]),
+    statStages: changes.statStages ?? Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]),
     status1: changes.status1 ?? 0,
     status2: changes.status2 ?? 0,
     status3: changes.status3 ?? 0,
+    specialStatus: changes.specialStatus ?? Object.freeze({
+      restoredBattlerSprite: 0,
+      physicalDmg: 0,
+      specialDmg: 0,
+    }),
     substituteHP: changes.substituteHP ?? 0,
     rolloutTimer: changes.rolloutTimer ?? 0,
     furyCutterCounter: changes.furyCutterCounter ?? 0,
@@ -37,6 +44,7 @@ function battler(
     tauntTimer: changes.tauntTimer ?? 0,
     usedTauntedMove: changes.usedTauntedMove ?? 0,
     usedImprisonedMove: changes.usedImprisonedMove ?? 0,
+    chargingTurn: changes.chargingTurn ?? 0,
   });
 }
 

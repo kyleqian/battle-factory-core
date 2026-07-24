@@ -125,15 +125,19 @@ describe("Factory asleep move decision-to-machine vertical slice", () => {
     expect(state.rules.rulesContext.battlers[0]).toMatchObject({
       ability: 62,
       hp: 110,
+      item: 196,
       moves: [183, 182, 104, 263],
       pp: [30, 10, 15, 20],
+      statStages: [6, 6, 6, 6, 6, 6, 6, 6],
       status1: 4,
     });
     expect(state.rules.rulesContext.battlers[1]).toMatchObject({
       ability: 57,
       hp: 135,
+      item: 171,
       moves: [85, 86, 69, 273],
       pp: [15, 20, 20, 10],
+      statStages: [6, 6, 6, 6, 6, 6, 6, 6],
     });
   });
 

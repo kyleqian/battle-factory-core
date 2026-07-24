@@ -35,7 +35,26 @@ import {
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
 import movesData from "../data/gen/moves.json" with { type: "json" };
 
-export type BattleScriptRulesBattler = Readonly<{
+export const BATTLE_SCRIPT_NUM_BATTLE_STATS = 8;
+
+export type BattleScriptStatStages = readonly [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+];
+
+export type BattleScriptSpecialStatus = Readonly<{
+  restoredBattlerSprite: 0 | 1;
+  physicalDmg: number;
+  specialDmg: number;
+}>;
+
+type BattleScriptRulesBattlerBase = Readonly<{
   side: 0 | 1;
   ability: number;
   hp: number;
@@ -79,11 +98,44 @@ export type BattleScriptRulesBattler = Readonly<{
   }>;
 }>;
 
+type BattleScriptMoveEndBattlerMetadata = Readonly<{
+  /** Source u16 gBattleMons[battler].item. */
+  item: number;
+  /** Source s8 gBattleMons[battler].statStages[NUM_BATTLE_STATS]. */
+  statStages: BattleScriptStatStages;
+  /** Source gSpecialStatuses[battler] fields required by Cmd_moveend. */
+  specialStatus: BattleScriptSpecialStatus;
+  /** ProtectStruct::chargingTurn. */
+  chargingTurn: 0 | 1;
+}>;
+
+/**
+ * Construction input. Legacy focused fixtures may omit only the newly added
+ * move-end metadata; createBattleScriptRulesContext materializes it once.
+ */
+export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
+  /**
+   * Older focused fixtures normalize absent move-end metadata at this single
+   * construction boundary. Production constructors supply source values.
+   */
+  item?: number;
+  statStages?: readonly number[];
+  specialStatus?: Readonly<{
+    restoredBattlerSprite?: 0 | 1;
+    physicalDmg?: number;
+    specialDmg?: number;
+  }>;
+  chargingTurn?: 0 | 1;
+}>;
+
+export type BattleScriptRulesBattlerState =
+  BattleScriptRulesBattlerBase & BattleScriptMoveEndBattlerMetadata;
+
 export type BattleScriptRulesBattlers = readonly [
-  BattleScriptRulesBattler,
-  BattleScriptRulesBattler,
-  BattleScriptRulesBattler,
-  BattleScriptRulesBattler,
+  BattleScriptRulesBattlerState,
+  BattleScriptRulesBattlerState,
+  BattleScriptRulesBattlerState,
+  BattleScriptRulesBattlerState,
 ];
 
 export type BattleScriptSelectorRoleBindings = Readonly<{
@@ -201,6 +253,44 @@ function requireSigned32(value: number, field: string): number {
   return value | 0;
 }
 
+function requireSigned8(value: number, field: string): number {
+  if (!Number.isSafeInteger(value) || value < -0x80 || value > 0x7f) {
+    throw new Error(`${field} must be a signed 8-bit integer, got ${value}`);
+  }
+  return value;
+}
+
+function createBattleScriptSpecialStatus(
+  value: BattleScriptRulesBattler["specialStatus"],
+  battler: number,
+): BattleScriptSpecialStatus {
+  if (
+    value !== undefined
+    && (
+      value === null
+      || typeof value !== "object"
+      || Array.isArray(value)
+    )
+  ) {
+    throw new Error(`battlers[${battler}].specialStatus must be a plain object`);
+  }
+  return Object.freeze({
+    restoredBattlerSprite: requireUnsigned(
+      value?.restoredBattlerSprite ?? 0,
+      1,
+      `battlers[${battler}].specialStatus.restoredBattlerSprite`,
+    ) as 0 | 1,
+    physicalDmg: requireSigned32(
+      value?.physicalDmg ?? 0,
+      `battlers[${battler}].specialStatus.physicalDmg`,
+    ),
+    specialDmg: requireSigned32(
+      value?.specialDmg ?? 0,
+      `battlers[${battler}].specialStatus.specialDmg`,
+    ),
+  });
+}
+
 type GeneratedMoveEffectRow = Readonly<{
   id: number;
   effectId: number;
@@ -270,6 +360,7 @@ export function createBattleScriptRulesContext(
     side: requireUnsigned(battler.side, 1, `battlers[${index}].side`) as 0 | 1,
     ability: requireUnsigned(battler.ability, 0xff, `battlers[${index}].ability`),
     hp: requireUnsigned(battler.hp, 0xffff, `battlers[${index}].hp`),
+    item: requireUnsigned(battler.item ?? 0, 0xffff, `battlers[${index}].item`),
     moves: Object.freeze(
       (() => {
         if (!Array.isArray(battler.moves) || battler.moves.length !== 4) {
@@ -296,9 +387,27 @@ export function createBattleScriptRulesContext(
         ));
       })(),
     ) as unknown as readonly [number, number, number, number],
+    statStages: Object.freeze(
+      (() => {
+        const statStages = battler.statStages
+          ?? new Array<number>(BATTLE_SCRIPT_NUM_BATTLE_STATS).fill(0);
+        if (
+          !Array.isArray(statStages)
+          || statStages.length !== BATTLE_SCRIPT_NUM_BATTLE_STATS
+        ) {
+          throw new Error(
+            `battlers[${index}].statStages must contain exactly ${BATTLE_SCRIPT_NUM_BATTLE_STATS} signed stage values`,
+          );
+        }
+        return statStages.map((stage, stat) =>
+          requireSigned8(stage, `battlers[${index}].statStages[${stat}]`)
+        );
+      })(),
+    ) as unknown as BattleScriptStatStages,
     status1: requireUnsigned(battler.status1, 0xffff_ffff, `battlers[${index}].status1`) >>> 0,
     status2: requireUnsigned(battler.status2, 0xffff_ffff, `battlers[${index}].status2`) >>> 0,
     status3: requireUnsigned(battler.status3, 0xffff_ffff, `battlers[${index}].status3`) >>> 0,
+    specialStatus: createBattleScriptSpecialStatus(battler.specialStatus, index),
     substituteHP: requireUnsigned(
       battler.substituteHP,
       0xff,
@@ -382,6 +491,11 @@ export function createBattleScriptRulesContext(
         `battlers[${index}].loveImmobility`,
       ) as 0 | 1,
     }),
+    chargingTurn: requireUnsigned(
+      battler.chargingTurn ?? 0,
+      1,
+      `battlers[${index}].chargingTurn`,
+    ) as 0 | 1,
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(

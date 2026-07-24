@@ -1,4 +1,5 @@
 import frontierMonsData from "../data/gen/battle-frontier-mons.json" with { type: "json" };
+import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
 import {
@@ -24,7 +25,7 @@ import {
 import {
   createBattleScriptRulesContext,
   createBattleScriptStatusRulesExecution,
-  type BattleScriptRulesBattler,
+  type BattleScriptRulesBattlerState,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import { advanceBattleScriptAttackCancelerUnableToUseMove } from "./battleScriptAttackCanceler.ts";
@@ -43,6 +44,12 @@ type FrontierMonRow = Readonly<{
   label: string;
   species: string;
   moves: readonly string[];
+  itemTableId: number;
+}>;
+
+type FrontierHeldItemRow = Readonly<{
+  itemTableId: number;
+  itemId: number;
 }>;
 
 type MoveRow = Readonly<{
@@ -58,6 +65,11 @@ type TopologyMoveRow = Readonly<{
 }>;
 
 const FRONTIER_MONS = (frontierMonsData.entries as readonly FrontierMonRow[]);
+const FRONTIER_HELD_ITEMS_BY_TABLE_ID = new Map(
+  (frontierHeldItemsData.entries as readonly FrontierHeldItemRow[]).map(
+    (item) => [item.itemTableId, item],
+  ),
+);
 const MOVES_BY_SYMBOL = new Map(
   (movesData.moves as readonly MoveRow[]).map((move) => [move.move, move]),
 );
@@ -65,6 +77,8 @@ const TOPOLOGY_BY_MOVE = new Map(
   (topologyData.moves as readonly TopologyMoveRow[]).map((move) => [move.id, move]),
 );
 const PROGRAM = loadBattleScriptProgram();
+const NEUTRAL_STAT_STAGES = Object.freeze([6, 6, 6, 6, 6, 6, 6, 6] as const);
+const ZERO_STAT_STAGES = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0] as const);
 
 export type FactoryAsleepMoveConfig = Readonly<{
   playerSetId: number;
@@ -158,6 +172,14 @@ function sourceMoves(row: FrontierMonRow): readonly MoveRow[] {
   }));
 }
 
+function sourceHeldItem(row: FrontierMonRow): number {
+  const heldItem = FRONTIER_HELD_ITEMS_BY_TABLE_ID.get(row.itemTableId);
+  if (!heldItem) {
+    throw new Error(`${row.label} references unknown held-item table row ${row.itemTableId}`);
+  }
+  return heldItem.itemId;
+}
+
 function battlerForSide(side: BattleDecisionSide): BattleSinglesBattler {
   return side === "player" ? 0 : 1;
 }
@@ -184,16 +206,23 @@ function sourceMoveTarget(
   );
 }
 
-function emptyBattler(side: 0 | 1): BattleScriptRulesBattler {
+function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
   return Object.freeze({
     side,
     ability: 0,
     hp: 0,
+    item: 0,
     moves: Object.freeze([0, 0, 0, 0] as const),
     pp: Object.freeze([0, 0, 0, 0] as const),
+    statStages: ZERO_STAT_STAGES,
     status1: 0,
     status2: 0,
     status3: 0,
+    specialStatus: Object.freeze({
+      restoredBattlerSprite: 0,
+      physicalDmg: 0,
+      specialDmg: 0,
+    }),
     substituteHP: 0,
     rolloutTimer: 0,
     furyCutterCounter: 0,
@@ -205,6 +234,7 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattler {
     tauntTimer: 0,
     usedTauntedMove: 0,
     usedImprisonedMove: 0,
+    chargingTurn: 0,
   });
 }
 
@@ -214,15 +244,18 @@ function activeBattler(
   hp: number,
   moves: readonly MoveRow[],
   status1: number,
-): BattleScriptRulesBattler {
+  item: number,
+): BattleScriptRulesBattlerState {
   return Object.freeze({
     ...emptyBattler(side),
     ability,
     hp,
+    item,
     moves: Object.freeze(moves.map(({ id }) => id)) as unknown as
       readonly [number, number, number, number],
     pp: Object.freeze(moves.map(({ pp }) => pp)) as unknown as
       readonly [number, number, number, number],
+    statStages: NEUTRAL_STAT_STAGES,
     status1,
   });
 }
@@ -252,6 +285,7 @@ function createInitialRules(config: FactoryAsleepMoveConfig): FactoryBattleScrip
         config.playerHp,
         playerMoves,
         attacker === 0 ? config.sleepTurns : 0,
+        sourceHeldItem(player),
       ),
       activeBattler(
         1,
@@ -259,6 +293,7 @@ function createInitialRules(config: FactoryAsleepMoveConfig): FactoryBattleScrip
         config.trainerHp,
         trainerMoves,
         attacker === 1 ? config.sleepTurns : 0,
+        sourceHeldItem(trainer),
       ),
       emptyBattler(0),
       emptyBattler(1),
