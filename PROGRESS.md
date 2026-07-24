@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 427 — opcode 0 (Cmd_attackcanceler) registered in the production machine
+
+- **State:** S10 step (i) is complete. Opcode 0 is registered in
+  `createBattleScriptStatusRulesHandlers` (`battleScriptAttackCancelerOpcode.ts`),
+  composing the entry preflight, the 14-phase `AtkCanceler_UnableToUseMove`
+  loop, the ability-moves-block/selected-PP/Factory-obedience join chain, and
+  Magic Coat's bounce check into one real dispatcher. Six branches halt
+  explicitly via a new `unsupported-branch` `BattleScriptHaltReason` instead
+  of falling through: `gBattleOutcome`'s `B_ACTION_FINISHED` round-controller
+  handoff (out of scope), `CANCELER_IN_LOVE`'s immobilized-by-love
+  `BattleScriptPush(explicit label)` (the machine's call stack only models
+  resume-at-this-PC, not an arbitrary return address), Magic Coat's
+  unimplemented `PressurePPLose`, the Snatch loop, Lightning Rod redirection,
+  and the final `DEFENDER_IS_PROTECTED` check (needs unmodeled battler-type/
+  two-turn-move data). Suite is **173 files / 2016 tests**, build green.
+- **Did:** wired the fifteen existing phase reducers (flags through thaw, plus
+  PP) and `battleScriptAttackCanceler.ts`'s loop/`battleScriptMagicCoat.ts`
+  into opcode 0 (`d74df11`). Added Tier-1 coverage driving the *registered
+  opcode*, not the standalone reducers, through all 15 phase transfers and
+  all 6 barriers (`f4e726e`) — Snatch/Lightning Rod barriers are
+  Tier-1-constructed per the S10 testability decision, since real Factory
+  data never sets `stealMove`/`lightningRodRedirected` (evidence already
+  pinned in `attackCancelerMagicCoatSnatchAudit.test.ts` /
+  `attackCancelerLightningRodProtectAudit.test.ts`). Rewired the staged
+  asleep-move adapter to start its machine at the move's own entry (real
+  opcode 0) instead of hand-calling the canceler loop; pins gained the
+  post-loop `REQUEST_STATUS_BATTLE` controller-sync event
+  (`set-battler-status-data`, battle_util.c:2270-2274) the manual adapter
+  never modeled (`4809f06`). Updated the stale "28 registered opcodes" pin
+  to 29.
+- **Next:** S10 step (ii) — register the sixteen-opcode standard hit chain
+  (`accuracycheck` through `tryfaintmon`) plus `orbyte` on the miss branch.
+  A concurrent side-lane commit (`0b3fe0c`, landed mid-session, not mine)
+  already corrected ROADMAP's count to **eighteen** registrations for a
+  complete damaging move and cites `tools/probe/verify-hit-chain-ground-truth.ts`
+  — read that before starting.
+- **Notes:** enumerated remainder from this step: Snatch/Lightning Rod/Protect/
+  `PressurePPLose`/the round-controller handoff are (b) barriers, not (a)
+  ports — completing any of them is new-mechanics work (battler type data,
+  two-turn-move gating, real PP-loss execution with a controller emission,
+  `B_ACTION_FINISHED` consumption) explicitly out of this step's scope. No
+  presentation/render files touched.
+
+---
 ## 426 — [USER-DIRECTED RE-SCOPE, between sessions] executable-frontier reset
 
 **Read this before ROADMAP.md — it changes the next action.** No code changed;
@@ -64,25 +108,4 @@ suite **172 files / 1994 tests** and the production build are green at
   controller tests, receipt regeneration, and both Thunder Punch dense
   comparators pass. Fire/Ice Punch, Blaze Kick, Flamethrower, and Dragon Breath
   controls remain exact.
-
----
-## 423 — move-end topology corrected and pure state prerequisites landed
-
-- **State:** dependency step 3 is corrected and green at **170 files / 1986
-  tests**. Opcodes **73** and **0** remain unregistered; no controller,
-  script-transfer, cleanup, delegate, loop/end-mode, core, render, or oracle
-  behavior was added.
-- **Did:** narrowed active `gBattlersCount` to the exact `2 | 4` type and
-  runtime set, requiring `BATTLE_TYPE_DOUBLE` iff count is 4; illegal counts
-  and flag/count mismatches are rejected. The changed-item bound test now uses
-  legal singles while preserving inactive-slot identity/data assertions.
-  Position/partner lookup, nine-bit `WasUnableToUseMove`, and states 13/16
-  were rechecked source-faithfully without expansion.
-- **Next:** dependency step 4 only: add status-data and both visibility
-  controller requests/resumption. Keep move cleanup, effect-script transfer,
-  delegates, loop/end modes, and opcode registration behind their later gates.
-- **Notes:** assignment audit: `battle_controllers.c:149-581` assigns active
-  counts only `2` or `MAX_BATTLERS_COUNT` (4); `battle_main.c:157`'s zero is
-  pre-init only. State 16 still stops before cleanup/script transfer.
-  Suite/build and OFF v5 (`9c89c741…`) pass; pixel diff N/A.
 
