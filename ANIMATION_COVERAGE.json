@@ -10,10 +10,9 @@
     },
     {
       "move": "MOVE_ROCK_SLIDE",
-      "status": "partial",
-      "covered": ["player-back ONIX to opponent-front targets"],
-      "evidence": ["tools/compare/traces/turn1-rockslide.json", "tools/compare/traces/battle2-turn1-rockslide.json"],
-      "remaining": "Remove canonical-battle coupling and exercise the opposite attacker side."
+      "status": "exact",
+      "covered": ["canonical player-back ONIX to opponent-front GROVYLE, complete Scene-ON move/resolution window (256/256)", "staged Battle-2 OFF player-back ONIX to opponent-front KABUTO portability control (191/191)", "portable synthetic opponent-front GROVYLE to player-back ONIX, complete unique Move_ROCK_SLIDE body and generic hit handoff at relative ages 0-174 / oracle frames 1967-2141 (175/175) through the shared Scene-ON adapter"],
+      "evidence": ["tools/compare/traces/turn1-rockslide.json", "tools/compare/traces/battle2-turn1-rockslide.json", "tools/compare/fixtures/rock-slide-grovyle-onix.json", "tools/compare/rockSlidePortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/rock-slide-portable-staging-probe.md"]
     },
     {
       "move": "MOVE_ENDEAVOR",
@@ -87,7 +86,6 @@
   ],
   "queue": [
     "MOVE_FAINT_ATTACK",
-    "MOVE_ROCK_SLIDE",
     "MOVE_DOUBLE_TEAM",
     "MOVE_ENDEAVOR",
     "MOVE_FEATHER_DANCE",
