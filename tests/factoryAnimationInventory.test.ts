@@ -70,8 +70,8 @@ describe("animation coverage ledger", () => {
         total: 276,
         unsupported: 263,
         staged: 0,
-        partial: 5,
-        exact: 8,
+        partial: 4,
+        exact: 9,
       },
       {
         tier: "openOnly",
@@ -94,8 +94,8 @@ describe("animation coverage ledger", () => {
 
   it("keeps the explicit queue inside Level 50 coverage", () => {
     const queue = queuedAnimationMoves();
-    expect(queue).toHaveLength(4);
-    expect(queue[0]).toMatchObject({ move: "MOVE_SAND_ATTACK", status: "partial" });
+    expect(queue).toHaveLength(3);
+    expect(queue[0]).toMatchObject({ move: "MOVE_FLY", status: "partial" });
     expect(queue.at(-1)).toMatchObject({ move: "MOVE_BIND", status: "partial" });
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,

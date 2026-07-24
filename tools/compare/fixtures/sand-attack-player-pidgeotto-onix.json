@@ -1,0 +1,76 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-sand-attack-player-pidgeotto-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "PIDGEOTTO (player-back) -> ONIX (opponent-front)",
+  "move": "SAND_ATTACK",
+  "orientation": "player-to-opponent",
+  "appStage": {
+    "oracleFrame": 46,
+    "presentationAge": 7
+  },
+  "denseWindow": {
+    "startFrame": 46,
+    "endFrame": 314
+  },
+  "fieldProfile": {
+    "playerHp": 156,
+    "opponentHp": 117,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "animationProfile": {
+    "spriteOrderSeed": [
+      62, 60, 0, 63, 1, 61, 6, 8, 2, 4, 3, 21, 20, 5, 19, 18,
+      17, 16, 15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59,
+      23, 22, 48, 49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30,
+      31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
+      46, 47
+    ],
+    "dirt": [
+      {"slot": 4, "xStep": 1152, "yStep": 897},
+      {"slot": 5, "xStep": 984, "yStep": 781},
+      {"slot": 7, "xStep": 1062, "yStep": 1049},
+      {"slot": 9, "xStep": 972, "yStep": 947},
+      {"slot": 10, "xStep": 1010, "yStep": 897},
+      {"slot": 3, "xStep": 1036, "yStep": 1101},
+      {"slot": 11, "xStep": 1344, "yStep": 961},
+      {"slot": 12, "xStep": 1010, "yStep": 921},
+      {"slot": 13, "xStep": 984, "yStep": 883},
+      {"slot": 14, "xStep": 1202, "yStep": 1063},
+      {"slot": 15, "xStep": 984, "yStep": 961},
+      {"slot": 16, "xStep": 1112, "yStep": 947},
+      {"slot": 17, "xStep": 1240, "yStep": 793},
+      {"slot": 18, "xStep": 1304, "yStep": 973},
+      {"slot": 19, "xStep": 984, "yStep": 871},
+      {"slot": 20, "xStep": 1292, "yStep": 921},
+      {"slot": 21, "xStep": 1292, "yStep": 769},
+      {"slot": 22, "xStep": 1280, "yStep": 999},
+      {"slot": 23, "xStep": 1176, "yStep": 973},
+      {"slot": 24, "xStep": 1062, "yStep": 729},
+      {"slot": 25, "xStep": 1112, "yStep": 833},
+      {"slot": 26, "xStep": 1190, "yStep": 1127},
+      {"slot": 27, "xStep": 1280, "yStep": 871},
+      {"slot": 28, "xStep": 1074, "yStep": 845},
+      {"slot": 29, "xStep": 1024, "yStep": 743},
+      {"slot": 30, "xStep": 960, "yStep": 819},
+      {"slot": 31, "xStep": 1176, "yStep": 935},
+      {"slot": 32, "xStep": 1280, "yStep": 897},
+      {"slot": 33, "xStep": 1176, "yStep": 743},
+      {"slot": 34, "xStep": 1152, "yStep": 897}
+    ]
+  },
+  "controllerProfile": {
+    "accuracyStageBefore": 6,
+    "accuracyStageAfter": 5,
+    "resultTextFirstAge": 179,
+    "currentMoveResetAge": 275
+  },
+  "moveTextStartAge": 7,
+  "acceptance": {
+    "status": "exact",
+    "result": "269/269 dense frames exact with zero differing pixels."
+  }
+}

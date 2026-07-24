@@ -53,10 +53,9 @@
     },
     {
       "move": "MOVE_SAND_ATTACK",
-      "status": "partial",
-      "covered": ["opponent-front PIDGEOTTO to player-back ONIX"],
-      "evidence": ["tools/compare/traces/turn13-sandattack.json"],
-      "remaining": "Prove a portable staged case and audit the opposite attacker side."
+      "status": "exact",
+      "covered": ["canonical opponent-front PIDGEOTTO to player-back ONIX (190/190)", "portable legal zero-PP-Up opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-275 / oracle frames 46-314 (269/269): complete kickoff, signed attacker slide, six RNG-resolved five-dirt waves with live stable SortSprites ordering, generic accuracy-decrease banner, fully typed result, controller command release, and MOVE_NONE cleanup", "portable legal zero-PP-Up player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-275 / oracle frames 46-314 (269/269): complete opposite-side window through the shared seam, including source-signed player slide rounding, signed X/Y dirt velocity words, four-frame body head start, generic Foe-prefixed accuracy result, command release, and MOVE_NONE cleanup"],
+      "evidence": ["tools/compare/traces/turn13-sandattack.json", "tools/battle-lab/mechanic-sand-attack-pidgeotto-onix.json", "tools/battle-lab/mechanic-sand-attack-player-pidgeotto-onix.json", "tools/compare/fixtures/sand-attack-pidgeotto-onix.json", "tools/compare/fixtures/sand-attack-player-pidgeotto-onix.json", "tools/compare/sandAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py"]
     },
     {
       "move": "MOVE_FLY",
@@ -86,7 +85,6 @@
     }
   ],
   "queue": [
-    "MOVE_SAND_ATTACK",
     "MOVE_FLY",
     "MOVE_DRAGON_BREATH",
     "MOVE_BIND"
@@ -131,6 +129,19 @@
         "MOVE_AERIAL_ACE"
       ],
       "goal": "QUICK ATTACK exactly proves complete opposite-side Scene-ON windows at 219/219 and 214/214. AERIAL ACE independently proves its complete 236/236 and 232/232 windows, including target-anchored cutting-slice geometry, signed monbg ellipse travel, independent TraceMon OBJ order, palette/shake choreography, opponent-front monbg corner ownership, immutable controller results, and MOVE_NONE cleanup."
+    },
+    {
+      "id": "mud-sand-scatter",
+      "components": [
+        "asset:ANIM_TAG_MUD_SAND",
+        "sprite:gSlideMonToOffsetSpriteTemplate",
+        "sprite:gSlideMonToOriginalPosSpriteTemplate"
+      ],
+      "representatives": [
+        "MOVE_SAND_ATTACK",
+        "MOVE_MUD_SLAP"
+      ],
+      "goal": "SAND ATTACK exactly proves the shared signed slide and mud-sand asset plus its own gSandAttackDirtSpriteTemplate body in both orientations at 269/269 each. Source-neighbor MUD SLAP shares the slide and asset but uses a distinct 16x16 gMudSlapMudSpriteTemplate and remains unsupported without independent dense move evidence."
     }
   ],
   "variantAudits": {

@@ -575,6 +575,7 @@ import {
   sceneOnIcePunchView,
   sceneOnQuickAttackView,
   sceneOnRockSlideView,
+  sceneOnSandAttackView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
 import {
@@ -4203,10 +4204,27 @@ function drawStatDecreaseBannerForBattler(
   eva: number,
   bg1Y: number,
 ): void {
+  drawStatDecreaseBannerForBattlerPalette(
+    fb,
+    tileset,
+    corner,
+    eva,
+    bg1Y,
+    statAnimBanner.palettes.attack,
+  );
+}
+
+function drawStatDecreaseBannerForBattlerPalette(
+  fb: Uint8Array,
+  tileset: Tileset,
+  corner: Readonly<{ x: number; y: number }>,
+  eva: number,
+  bg1Y: number,
+  bgPalette: RgbColor[],
+): void {
   const evb = 16 - eva;
   const bgTileset = statAnimBanner.tileset;
   const bgTilemap = statAnimBanner.tilemaps.decrease;
-  const bgPalette = statAnimBanner.palettes.attack;
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
       const tile = tileset.tiles[ty * tileset.columns + tx];
@@ -14956,6 +14974,134 @@ export function renderSceneOnMovePresentation(
       line2,
       Math.min(line1.length + line2.length, view.age - textStartAge + 1),
     );
+    return;
+  }
+
+  if (state.config.move === "SAND_ATTACK") {
+    const view = sceneOnSandAttackView(state);
+    const { attacker, target } = view;
+    const originalOrientation =
+      attacker.species === "PIDGEOTTO"
+      && attacker.geometry.side === "opponent"
+      && target.species === "ONIX"
+      && target.geometry.side === "player";
+    const oppositeOrientation =
+      attacker.species === "PIDGEOTTO"
+      && attacker.geometry.side === "player"
+      && target.species === "ONIX"
+      && target.geometry.side === "opponent";
+    if (!originalOrientation && !oppositeOrientation) {
+      throw new Error(
+        `unsupported staged SAND_ATTACK pair ${attacker.species}->${target.species}`,
+      );
+    }
+    const attackerSprite = originalOrientation
+      ? pidgeottoFrontSprite
+      : pidgeottoBackSprite;
+    const targetSprite = originalOrientation
+      ? onixBackSprite
+      : onixFrontSprite;
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const attackerCorner = attacker.geometry.spriteCorner;
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      attackerCorner.x + view.attackerX2,
+      attackerCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      target.geometry.spriteCorner.x,
+      target.geometry.spriteCorner.y,
+    );
+    for (const dirt of view.dirt) {
+      drawSpriteSheet(
+        fb,
+        battleAnimMudSand.tileset,
+        battleAnimMudSand.palette,
+        dirt.x - 4,
+        dirt.y - 4,
+      );
+    }
+
+    if (originalOrientation) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender,
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "female",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        featherDancePidgeottoPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
+    if (view.accuracyBanner) {
+      drawStatDecreaseBannerForBattlerPalette(
+        fb,
+        targetSprite.tileset,
+        target.geometry.spriteCorner,
+        view.accuracyBanner.eva,
+        view.accuracyBanner.bg1Y,
+        statAnimBanner.palettes.accuracy,
+      );
+    }
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    if (view.resultText) {
+      drawMessageTextLines(
+        fb,
+        view.resultText.line1,
+        view.resultText.line2,
+        view.resultText.visibleChars,
+      );
+    } else {
+      drawMessageTextLines(
+        fb,
+        view.moveText.line1,
+        view.moveText.line2,
+        Math.max(
+          0,
+          Math.min(
+            view.moveText.line1.length + view.moveText.line2.length,
+            view.age - state.config.moveTextStartAge + 1,
+          ),
+        ),
+      );
+    }
     return;
   }
 
