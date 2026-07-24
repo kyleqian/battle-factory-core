@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 378 — Gate-3 HIDEPARTYSTATUSSUMMARY controller command integrated
+
+- **State:** S10 Gate 3 remains open with **21** source-safe opcodes and an
+  unwired immutable controller/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `HIDEPARTYSTATUSSUMMARY` (opcode **98 / 0x62**):
+  resolves its required u8 selector through the typed
+  `GetBattlerForBattleScript` port, activates/marks that battler pending,
+  emits one frozen `hide-party-status-summary` event, and advances one
+  instruction/two source bytes without an idle guard.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep tray sprite allocation/destruction, blend/task
+  timing, shown state, presentation/pixels, waitstate, raw controller bytes,
+  rules/RNG/PP, and other opcodes out.
+- **Notes:** exact supported IDs are
+  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/84/85/86/98/111/131/141**.
+  Focused **87/87**; Tier-1 **119 files / 1597 tests**, build, and Scene-OFF
+  oracle contract green. All four starts and both selector forms are pinned;
+  acknowledgement represents receipt/task kickoff, not tray completion.
+
+---
 ## 377 — Gate-3 MAKEVISIBLE controller command integrated
 
 - **State:** S10 Gate 3 remains open with **20** source-safe opcodes and an
@@ -38,21 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **16/17/18/20/37/38/39/40/57/58/60/61/62/65/84/85/86/131/141**. Focused
   **78/78**; Tier-1 **117 files / 1572 tests**, build, and Scene-OFF oracle
   contract green; all six starts and four selector forms are source-pinned.
-
----
-## 375 — Gate-3 PLAYSE/FANFARE controller family integrated
-
-- **State:** S10 Gate 3 remains open with **18** source-safe opcodes and an
-  unwired immutable controller/scheduler/rules/RNG/source-context seam.
-- **Did:** added only `PLAYSE`/`FANFARE` (opcodes **84/85**): each resolves one
-  u16 song plus attacker, selects/marks that battler pending, emits one
-  distinct frozen semantic event, and advances without a local idle or
-  playback-duration gate. Existing acknowledgement clears command receipt.
-- **Next:** choose another bounded source family only when its complete rules
-  context is explicit. Keep playback, pan/duration/BGM, presentation, PP,
-  rules/RNG, generic pointers, and unrelated opcodes out of this seam.
-- **Notes:** exact supported IDs are
-  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/84/85/131/141**. Focused
-  **67/67**; Tier-1 **116 files / 1561 tests**, build, and Scene-OFF oracle
-  contract green; all seven catalogued starts and controller acknowledgement
-  are pinned with no audio or pixel claim.

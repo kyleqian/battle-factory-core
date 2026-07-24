@@ -1,3 +1,21 @@
+## 375 — Gate-3 PLAYSE/FANFARE controller family integrated
+
+- **State:** S10 Gate 3 remains open with **18** source-safe opcodes and an
+  unwired immutable controller/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `PLAYSE`/`FANFARE` (opcodes **84/85**): each resolves one
+  u16 song plus attacker, selects/marks that battler pending, emits one
+  distinct frozen semantic event, and advances without a local idle or
+  playback-duration gate. Existing acknowledgement clears command receipt.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep playback, pan/duration/BGM, presentation, PP,
+  rules/RNG, generic pointers, and unrelated opcodes out of this seam.
+- **Notes:** exact supported IDs are
+  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/84/85/131/141**. Focused
+  **67/67**; Tier-1 **116 files / 1561 tests**, build, and Scene-OFF oracle
+  contract green; all seven catalogued starts and controller acknowledgement
+  are pinned with no audio or pixel claim.
+
+---
 ## 374 — Gate-3 table-selected selection message integrated
 
 - **State:** S10 Gate 3 remains open with **16** source-safe opcodes and an
