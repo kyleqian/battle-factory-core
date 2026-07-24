@@ -39,6 +39,15 @@ export type BattleScriptHaltReason =
     expression: string;
   }>
   | Readonly<{
+    kind: "invalid-source-operand";
+    programCounter: number;
+    opcodeId: number;
+    opcodeName: string;
+    operandExpression: string;
+    expected: "u16";
+    received: string;
+  }>
+  | Readonly<{
     kind: "return-stack-underflow";
     programCounter: number;
   }>;
@@ -58,11 +67,17 @@ export type BattleScriptRngState = Readonly<{
   ledger: readonly BattleScriptRngLedgerEntry[];
 }>;
 
+export type BattleScriptSchedulerState = Readonly<{
+  messageDisplayActive: boolean;
+  pauseCounterBattle: number;
+}>;
+
 export type BattleScriptMachineState<RulesContext extends object> = Readonly<{
   programCounter: number;
   callStack: readonly number[];
   instructionsExecuted: number;
   haltReason: BattleScriptHaltReason | null;
+  scheduler: BattleScriptSchedulerState;
   rulesContext: RulesContext;
   rng: BattleScriptRngState;
   events: readonly BattleScriptSemanticEvent[];
@@ -73,6 +88,7 @@ export type BattleScriptControlDirective =
   | Readonly<{ kind: "jump"; programCounter: number }>
   | Readonly<{ kind: "call"; programCounter: number }>
   | Readonly<{ kind: "return" }>
+  | Readonly<{ kind: "scheduler-progress" }>
   | Readonly<{ kind: "block"; reason: BattleScriptBlockReason }>
   | Readonly<{ kind: "halt"; reason: BattleScriptHaltReason }>;
 
@@ -88,7 +104,7 @@ export type BattleScriptBlockReason =
     programCounter: number;
     opcodeId: number;
     opcodeName: string;
-    port: "prepare-message";
+    port: "prepare-message" | "resolve-halfword";
     operandExpression: string;
   }>;
 
@@ -100,6 +116,7 @@ export type BattleScriptOpcodeHandlerContext<RulesContext extends object> = Read
 
 export type BattleScriptCommandTransition<RulesContext extends object> = Readonly<{
   control: BattleScriptControlDirective;
+  scheduler: BattleScriptSchedulerState;
   rulesContext: RulesContext;
   rng: BattleScriptRngState;
   events: readonly BattleScriptSemanticEventPayload[];
@@ -115,6 +132,7 @@ export type BattleScriptOpcodeHandlers<RulesContext extends object> = Readonly<
 
 export type BattleScriptStepResult<RulesContext extends object> =
   | Readonly<{ kind: "advanced"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction }>
+  | Readonly<{ kind: "scheduler-progressed"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction }>
   | Readonly<{ kind: "blocked"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction; reason: BattleScriptBlockReason }>
   | Readonly<{ kind: "halted"; state: BattleScriptMachineState<RulesContext>; instruction?: BattleScriptInstruction }>
   | Readonly<{ kind: "unsupported"; state: BattleScriptMachineState<RulesContext>; instruction: BattleScriptInstruction }>;
@@ -132,6 +150,7 @@ export type BattleScriptMachineInspection = Readonly<{
   haltReason: BattleScriptHaltReason | null;
   currentInstruction: BattleScriptInstruction | null;
   labels: readonly string[];
+  scheduler: BattleScriptSchedulerState;
   rngCalls: number;
   eventCount: number;
 }>;
@@ -161,6 +180,29 @@ export function createBattleScriptRngState(seed: number): BattleScriptRngState {
     calls: 0,
     ledger: Object.freeze([]),
   });
+}
+
+export function createBattleScriptSchedulerState(
+  initial: Readonly<{
+    messageDisplayActive?: boolean;
+    pauseCounterBattle?: number;
+  }> = {},
+): BattleScriptSchedulerState {
+  const messageDisplayActive = initial.messageDisplayActive ?? false;
+  const pauseCounterBattle = initial.pauseCounterBattle ?? 0;
+  if (typeof messageDisplayActive !== "boolean") {
+    throw new Error("Battle Script MSG_DISPLAY state must be boolean");
+  }
+  if (
+    !Number.isSafeInteger(pauseCounterBattle)
+    || pauseCounterBattle < 0
+    || pauseCounterBattle > 0xffff
+  ) {
+    throw new Error(
+      `Battle Script gPauseCounterBattle must be a u16, got ${pauseCounterBattle}`,
+    );
+  }
+  return Object.freeze({ messageDisplayActive, pauseCounterBattle });
 }
 
 export function drawBattleScriptRng(
@@ -207,15 +249,29 @@ function assertFrozenRulesContext(rulesContext: object): void {
   }
 }
 
+function assertFrozenSchedulerState(scheduler: BattleScriptSchedulerState): void {
+  if (
+    !Object.isFrozen(scheduler)
+    || typeof scheduler.messageDisplayActive !== "boolean"
+    || !Number.isSafeInteger(scheduler.pauseCounterBattle)
+    || scheduler.pauseCounterBattle < 0
+    || scheduler.pauseCounterBattle > 0xffff
+  ) {
+    throw new Error("Battle Script scheduler state must be frozen with a u16 pause counter");
+  }
+}
+
 function freezeState<RulesContext extends object>(
   programCounter: number,
   callStack: readonly number[],
   instructionsExecuted: number,
   haltReason: BattleScriptHaltReason | null,
+  scheduler: BattleScriptSchedulerState,
   rulesContext: RulesContext,
   rng: BattleScriptRngState,
   events: readonly BattleScriptSemanticEvent[],
 ): BattleScriptMachineState<RulesContext> {
+  assertFrozenSchedulerState(scheduler);
   assertFrozenRulesContext(rulesContext);
   assertFrozenRngState(rng);
   if (!Object.isFrozen(events)) {
@@ -226,6 +282,7 @@ function freezeState<RulesContext extends object>(
     callStack: Object.freeze([...callStack]),
     instructionsExecuted,
     haltReason,
+    scheduler,
     rulesContext,
     rng,
     events,
@@ -242,6 +299,7 @@ function haltState<RulesContext extends object>(
     state.callStack,
     state.instructionsExecuted + (instructionWasExecuted ? 1 : 0),
     Object.freeze(reason),
+    state.scheduler,
     state.rulesContext,
     state.rng,
     state.events,
@@ -253,6 +311,7 @@ export function createBattleScriptMachine<RulesContext extends object>(
   entryLabel: string,
   rulesContext: RulesContext,
   rngSeed: number,
+  scheduler: BattleScriptSchedulerState = createBattleScriptSchedulerState(),
 ): BattleScriptMachineState<RulesContext> {
   const entry = resolveBattleScriptLabel(program, entryLabel);
   if (!entry) throw new Error(`unknown Battle Script entry label ${entryLabel}`);
@@ -262,6 +321,7 @@ export function createBattleScriptMachine<RulesContext extends object>(
     [],
     0,
     null,
+    scheduler,
     rulesContext,
     createBattleScriptRngState(rngSeed),
     Object.freeze([]),
@@ -315,15 +375,19 @@ export function transitionBattleScriptCommand<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   control: BattleScriptControlDirective,
   changes: Readonly<{
+    scheduler?: BattleScriptSchedulerState;
     rulesContext?: RulesContext;
     rng?: BattleScriptRngState;
     events?: readonly BattleScriptSemanticEventPayload[];
   }> = {},
 ): BattleScriptCommandTransition<RulesContext> {
   const rulesContext = changes.rulesContext ?? context.state.rulesContext;
+  const scheduler = changes.scheduler ?? context.state.scheduler;
+  assertFrozenSchedulerState(scheduler);
   assertFrozenRulesContext(rulesContext);
   return Object.freeze({
     control,
+    scheduler,
     rulesContext,
     rng: changes.rng ?? context.state.rng,
     events: Object.freeze([...(changes.events ?? [])]),
@@ -463,11 +527,13 @@ export function stepBattleScriptMachine<RulesContext extends object>(
   }
 
   const transition = handler(Object.freeze({ program, instruction, state }));
+  assertFrozenSchedulerState(transition.scheduler);
   assertFrozenRulesContext(transition.rulesContext);
   assertRngTransition(state.rng, transition.rng);
   if (transition.control.kind === "block") {
     if (
       transition.rulesContext !== state.rulesContext
+      || transition.scheduler !== state.scheduler
       || transition.rng !== state.rng
       || transition.events.length !== 0
     ) {
@@ -478,6 +544,33 @@ export function stepBattleScriptMachine<RulesContext extends object>(
       state,
       instruction,
       reason: Object.freeze(transition.control.reason),
+    });
+  }
+  if (transition.control.kind === "scheduler-progress") {
+    if (
+      transition.scheduler === state.scheduler
+      || transition.rulesContext !== state.rulesContext
+      || transition.rng !== state.rng
+      || transition.events.length !== 0
+    ) {
+      throw new Error(
+        "scheduler-progress Battle Script transition may update only scheduler state",
+      );
+    }
+    const next = freezeState(
+      state.programCounter,
+      state.callStack,
+      state.instructionsExecuted + 1,
+      null,
+      transition.scheduler,
+      state.rulesContext,
+      state.rng,
+      state.events,
+    );
+    return Object.freeze({
+      kind: "scheduler-progressed",
+      state: next,
+      instruction,
     });
   }
   const events = appendEvents(
@@ -495,6 +588,7 @@ export function stepBattleScriptMachine<RulesContext extends object>(
         state.callStack,
         state.instructionsExecuted + 1,
         null,
+        transition.scheduler,
         transition.rulesContext,
         transition.rng,
         events,
@@ -506,6 +600,7 @@ export function stepBattleScriptMachine<RulesContext extends object>(
         state.callStack,
         state.instructionsExecuted + 1,
         null,
+        transition.scheduler,
         transition.rulesContext,
         transition.rng,
         events,
@@ -517,6 +612,7 @@ export function stepBattleScriptMachine<RulesContext extends object>(
         [...state.callStack, state.programCounter + 1],
         state.instructionsExecuted + 1,
         null,
+        transition.scheduler,
         transition.rulesContext,
         transition.rng,
         events,
@@ -533,6 +629,7 @@ export function stepBattleScriptMachine<RulesContext extends object>(
             kind: "return-stack-underflow",
             programCounter: state.programCounter,
           }),
+          transition.scheduler,
           transition.rulesContext,
           transition.rng,
           events,
@@ -542,6 +639,7 @@ export function stepBattleScriptMachine<RulesContext extends object>(
           state.callStack.slice(0, -1),
           state.instructionsExecuted + 1,
           null,
+          transition.scheduler,
           transition.rulesContext,
           transition.rng,
           events,
@@ -554,6 +652,7 @@ export function stepBattleScriptMachine<RulesContext extends object>(
         state.callStack,
         state.instructionsExecuted + 1,
         Object.freeze(transition.control.reason),
+        transition.scheduler,
         transition.rulesContext,
         transition.rng,
         events,
@@ -616,6 +715,7 @@ export function inspectBattleScriptMachine<RulesContext extends object>(
     haltReason: state.haltReason,
     currentInstruction: program.instructions[state.programCounter] ?? null,
     labels: program.labelsAtProgramCounter[state.programCounter] ?? Object.freeze([]),
+    scheduler: Object.freeze({ ...state.scheduler }),
     rngCalls: state.rng.calls,
     eventCount: state.events.length,
   });

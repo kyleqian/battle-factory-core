@@ -3,8 +3,11 @@ import type {
 } from "./battleScriptEvents.ts";
 import {
   advanceBattleScriptInstruction,
+  createBattleScriptSchedulerState,
   transitionBattleScriptCommand,
   type BattleScriptBlockReason,
+  type BattleScriptCommandTransition,
+  type BattleScriptHaltReason,
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlerContext,
   type BattleScriptOpcodeHandlers,
@@ -28,9 +31,15 @@ export type BattleScriptMessagePreparationPort<RulesContext extends object> = (
   stringIdOperand: BattleScriptOperand,
 ) => BattleScriptMessagePayload | null;
 
+export type BattleScriptHalfwordResolverPort<RulesContext extends object> = (
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  operand: BattleScriptOperand,
+) => number | null;
+
 export type BattleScriptSourceCommandPorts<RulesContext extends object> = Readonly<{
   isControllerIdle: BattleScriptControllerIdlePort<RulesContext>;
   prepareMessage: BattleScriptMessagePreparationPort<RulesContext>;
+  resolveHalfwordOperand: BattleScriptHalfwordResolverPort<RulesContext>;
 }>;
 
 function installHandler<RulesContext extends object>(
@@ -69,6 +78,36 @@ function unavailableMessageReason<RulesContext extends object>(
   });
 }
 
+function unavailableHalfwordReason<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  operand: BattleScriptOperand,
+): BattleScriptBlockReason {
+  return Object.freeze({
+    kind: "source-context-unavailable",
+    programCounter: context.state.programCounter,
+    opcodeId: context.instruction.opcodeId,
+    opcodeName: context.instruction.opcodeName,
+    port: "resolve-halfword",
+    operandExpression: operand.expression,
+  });
+}
+
+function invalidSourceOperandReason<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  operandExpression: string,
+  received: string,
+): BattleScriptHaltReason {
+  return Object.freeze({
+    kind: "invalid-source-operand",
+    programCounter: context.state.programCounter,
+    opcodeId: context.instruction.opcodeId,
+    opcodeName: context.instruction.opcodeName,
+    operandExpression,
+    expected: "u16",
+    received,
+  });
+}
+
 function blockBattleScriptCommand<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   reason: BattleScriptBlockReason,
@@ -79,25 +118,103 @@ function blockBattleScriptCommand<RulesContext extends object>(
   );
 }
 
+function haltForInvalidOperand<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  operandExpression: string,
+  received: string,
+): BattleScriptCommandTransition<RulesContext> {
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({
+      kind: "halt",
+      reason: invalidSourceOperandReason(context, operandExpression, received),
+    }),
+  );
+}
+
+type HalfwordOperandResult<RulesContext extends object> =
+  | Readonly<{ kind: "operand"; operand: BattleScriptOperand }>
+  | Readonly<{ kind: "transition"; transition: BattleScriptCommandTransition<RulesContext> }>;
+
 function requireSingleHalfwordOperand<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
-): BattleScriptOperand {
+): HalfwordOperandResult<RulesContext> {
   const [operand] = context.instruction.operands;
   if (!operand || operand.widthBytes !== 2 || context.instruction.operands.length !== 1) {
-    throw new Error(
-      `${context.instruction.opcodeName} requires exactly one 2-byte source operand`,
-    );
+    return Object.freeze({
+      kind: "transition",
+      transition: haltForInvalidOperand(
+        context,
+        operand?.expression ?? "<missing>",
+        `${context.instruction.operands.length} operands; width ${operand?.widthBytes ?? "<missing>"}`,
+      ),
+    });
   }
-  return operand;
+  return Object.freeze({ kind: "operand", operand });
+}
+
+type ResolvedHalfwordResult<RulesContext extends object> =
+  | Readonly<{ kind: "resolved"; value: number }>
+  | Readonly<{ kind: "transition"; transition: BattleScriptCommandTransition<RulesContext> }>;
+
+function resolveHalfwordOperand<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  ports: BattleScriptSourceCommandPorts<RulesContext>,
+): ResolvedHalfwordResult<RulesContext> {
+  const required = requireSingleHalfwordOperand(context);
+  if (required.kind === "transition") return required;
+  const value = ports.resolveHalfwordOperand(context, required.operand);
+  if (value === null) {
+    return Object.freeze({
+      kind: "transition",
+      transition: blockBattleScriptCommand(
+        context,
+        unavailableHalfwordReason(context, required.operand),
+      ),
+    });
+  }
+  if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff) {
+    return Object.freeze({
+      kind: "transition",
+      transition: haltForInvalidOperand(
+        context,
+        required.operand.expression,
+        String(value),
+      ),
+    });
+  }
+  return Object.freeze({ kind: "resolved", value });
+}
+
+function incrementPauseCounter<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+): number {
+  return (context.state.scheduler.pauseCounterBattle + 1) & 0xffff;
+}
+
+function schedulerWith<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  changes: Readonly<{
+    messageDisplayActive?: boolean;
+    pauseCounterBattle?: number;
+  }>,
+) {
+  return createBattleScriptSchedulerState({
+    messageDisplayActive:
+      changes.messageDisplayActive ?? context.state.scheduler.messageDisplayActive,
+    pauseCounterBattle:
+      changes.pauseCounterBattle ?? context.state.scheduler.pauseCounterBattle,
+  });
 }
 
 /**
  * First source-mapped scheduler family:
- * Cmd_nop, Cmd_waitstate, and Cmd_printstring.
+ * Cmd_nop, Cmd_waitstate, Cmd_printstring, Cmd_waitmessage, and Cmd_pause.
  *
- * Controller readiness and source-context string preparation are injected
- * logical ports. This layer emits a typed message event but does not own
- * controller/presentation state or message substitution.
+ * Controller readiness, source-context string preparation, and exact u16
+ * operand resolution are injected logical ports. MSG_DISPLAY and the shared
+ * gPauseCounterBattle are immutable scheduler state; they never live in
+ * presentation or rules state.
  */
 export function createBattleScriptSourceCommandHandlers<RulesContext extends object>(
   program: BattleScriptProgram,
@@ -117,14 +234,73 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
     if (!ports.isControllerIdle(context)) {
       return blockBattleScriptCommand(context, controllerBusyReason(context));
     }
-    const operand = requireSingleHalfwordOperand(context);
-    const message = ports.prepareMessage(context, operand);
+    const required = requireSingleHalfwordOperand(context);
+    if (required.kind === "transition") return required.transition;
+    const message = ports.prepareMessage(context, required.operand);
     return message === null
-      ? blockBattleScriptCommand(context, unavailableMessageReason(context, operand))
+      ? blockBattleScriptCommand(
+        context,
+        unavailableMessageReason(context, required.operand),
+      )
       : transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "advance" }),
-        { events: Object.freeze([message]) },
+        {
+          scheduler: schedulerWith(context, { messageDisplayActive: true }),
+          events: Object.freeze([message]),
+        },
+      );
+  });
+  installHandler(program, handlers, "B_SCR_OP_WAITMESSAGE", (context) => {
+    if (!ports.isControllerIdle(context)) {
+      return blockBattleScriptCommand(context, controllerBusyReason(context));
+    }
+    if (!context.state.scheduler.messageDisplayActive) {
+      return advanceBattleScriptInstruction(context);
+    }
+    const resolved = resolveHalfwordOperand(context, ports);
+    if (resolved.kind === "transition") return resolved.transition;
+    const pauseCounterBattle = incrementPauseCounter(context);
+    return pauseCounterBattle >= resolved.value
+      ? transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        {
+          scheduler: schedulerWith(context, {
+            messageDisplayActive: false,
+            pauseCounterBattle: 0,
+          }),
+        },
+      )
+      : transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "scheduler-progress" }),
+        {
+          scheduler: schedulerWith(context, { pauseCounterBattle }),
+        },
+      );
+  });
+  installHandler(program, handlers, "B_SCR_OP_PAUSE", (context) => {
+    if (!ports.isControllerIdle(context)) {
+      return blockBattleScriptCommand(context, controllerBusyReason(context));
+    }
+    const resolved = resolveHalfwordOperand(context, ports);
+    if (resolved.kind === "transition") return resolved.transition;
+    const pauseCounterBattle = incrementPauseCounter(context);
+    return pauseCounterBattle >= resolved.value
+      ? transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "advance" }),
+        {
+          scheduler: schedulerWith(context, { pauseCounterBattle: 0 }),
+        },
+      )
+      : transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "scheduler-progress" }),
+        {
+          scheduler: schedulerWith(context, { pauseCounterBattle }),
+        },
       );
   });
 

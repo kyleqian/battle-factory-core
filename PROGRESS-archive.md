@@ -1,3 +1,21 @@
+## 364 — S10 Gate-3 immutable rules/event execution seam
+
+- **State:** S10 Gate 3 remains open; the typed interpreter now has a pure,
+  unwired cross-layer contract, but still supports only the five source-safe
+  control opcodes.
+- **Did:** made each handler transition atomically return control, one frozen
+  rules context, audited Gen-3 RNG state/ledger, and immutable sequenced
+  semantic events (message, HP/status/stage, animation, switch, outcome).
+  Added an events-only presentation replay boundary with no rules/RNG input.
+- **Next:** add source-mapped mutating opcode families behind this seam,
+  preserving structured unsupported behavior; do not wire production
+  controllers or presentation until their shared rules context is proven.
+- **Notes:** synthetic architecture tests pin immutable/deterministic
+  transitions, RNG provenance, neutral controls, replay isolation, budgets,
+  unsupported exits, and the existing **3306**-instruction IR. Tier-1 **105
+  files / 1428 tests** and build green; no opcode semantics or pixel claim.
+
+---
 ## 363 — SAND ATTACK exact; Gate-3 source/control foundation integrated
 
 - **State:** S10 Gate 1 remains closed and Gate 3 remains open. Scene-ON is

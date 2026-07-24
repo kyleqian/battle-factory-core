@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 367 — Gate-3 immutable scheduler state + wait commands
+
+- **State:** S10 Gate 3 remains open with ten source-safe opcodes and an
+  unwired immutable scheduler/controller/source-context seam.
+- **Did:** modeled logical `MSG_DISPLAY` and shared `gPauseCounterBattle`
+  state, plus budget-consuming same-PC scheduler progress distinct from
+  identity-preserving external block. Added source-exact `WAITMESSAGE` and
+  `PAUSE` with injected u16 operand resolution; `PRINTSTRING` now owns the
+  display-active lifecycle while rules, RNG, and presentation stay isolated.
+- **Next:** add another bounded source-mapped semantic family only when its
+  complete battle context is explicit; do not wire production controllers or
+  renderers and do not add message pixels/substitution here.
+- **Notes:** exact supported IDs are
+  **16/18/40/57/58/60/61/62/65/131**; committed IR remains **3306**.
+  Tier-1 **109 files / 1455 tests** and build green; no new oracle/pixel claim.
+
+---
 ## 366 — Gate-3 scheduler yield + first source command family
 
 - **State:** S10 Gate 3 remains open with eight source-safe opcodes and an
@@ -40,21 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** canonical FLY charge **206/206**, strike **256/256**, and SAND
   **190/190** remain exact. Integrated Tier-1 **107 files / 1438 tests**,
   build, and coverage green; both FLY fixtures use `ppUps:[0,0,0,0]`.
-
----
-## 364 — S10 Gate-3 immutable rules/event execution seam
-
-- **State:** S10 Gate 3 remains open; the typed interpreter now has a pure,
-  unwired cross-layer contract, but still supports only the five source-safe
-  control opcodes.
-- **Did:** made each handler transition atomically return control, one frozen
-  rules context, audited Gen-3 RNG state/ledger, and immutable sequenced
-  semantic events (message, HP/status/stage, animation, switch, outcome).
-  Added an events-only presentation replay boundary with no rules/RNG input.
-- **Next:** add source-mapped mutating opcode families behind this seam,
-  preserving structured unsupported behavior; do not wire production
-  controllers or presentation until their shared rules context is proven.
-- **Notes:** synthetic architecture tests pin immutable/deterministic
-  transitions, RNG provenance, neutral controls, replay isolation, budgets,
-  unsupported exits, and the existing **3306**-instruction IR. Tier-1 **105
-  files / 1428 tests** and build green; no opcode semantics or pixel claim.
