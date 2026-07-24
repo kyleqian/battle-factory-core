@@ -576,7 +576,7 @@ inputs. A gapless second staged OFF fixture proves every +2514..+4424 frame
 +3549, save-SE wait, shared record-menu creation at +4422, and first accepted
 default-NO input at +4424. LOSS and round-won use the same generic record
 question/menu reducer and renderer with source-relative clocks. Gate 2
-remains open because the source-to-trace audit identifies four unique swap-YES
+remains open because the source-to-trace audit identified four unique swap-YES
 remainders outside the accepted ONIX→GROVYLE route: SUMMARY return, quit
 prompt/exit/returns, enemy `PKMN FOR SWAP` return, and duplicate-species
 rejection. A committed staged OFF fixture now pins player-B quit acceptance,
@@ -592,12 +592,14 @@ teardown, four-action player-picker reconstruction, and the first fresh player
 input, with immutable parties/rentals. That source-relative action is now live
 and **115/115 exact**, including the 5→4 action switch, independent ball
 callbacks, install-frame rejection, and first fresh RIGHT without party,
-rental, decision, or selection-RNG mutation. SUMMARY return, enemy quit chrome,
-and duplicate rejection still require live presentation, not further Battle-2
-turns. A compact SUMMARY fixture now pins accepted/rejected open and close
-edges, `SUMMARY_MODE_NORMAL`, callback reconstruction of the same selected
-player options popup, preserved party/rentals/cursors, and its first fresh
-returned-popup input.
+rental, decision, or selection-RNG mutation. The normal SUMMARY round trip is
+now live and **147/147 exact** across every frame from the selected player
+popup through summary open/input/close, `CB2_InitSwapScreen` reconstruction,
+the returned default-SUMMARY popup, and accepted fresh DOWN/display copy.
+Tier-1 pins the rejected/accepted gates, `SUMMARY_MODE_NORMAL`, current/max
+indexes, callback ownership, four-action popup semantics, fresh ball clocks,
+and immutable parties/rentals/result. Enemy-origin quit chrome and duplicate
+rejection still require live presentation, not further Battle-2 turns.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it

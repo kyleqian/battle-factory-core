@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 343 — S8 OFF swap SUMMARY return: **GREEN — 147/147 exact**
+
+- **State:** player popup `SUMMARY` now round-trips through the shared normal
+  summary and `CB2_InitSwapScreen` to the same selected options popup. All 15
+  swap windows and four terminal windows are exact.
+- **Did:** generalized summary mode/return ownership, wired source-relative
+  open/input/close gates and callback reconstruction, and rebuilt the popup
+  with fresh ball clocks, default SUMMARY, four actions, and accepted DOWN.
+  Tier-1 pins rejected edges, mode/index/max, callbacks, cursors, and no
+  party/rental/result mutation.
+- **Next:** implement enemy-origin quit chrome, then duplicate-species
+  rejection from their staged OFF fixtures. Do not extend Battle 2.
+- **Notes:** new SUMMARY **147/147**; prior 14 swap windows unchanged; terminal
+  **210/210 + 414/414 + 2513/2513 + 1911/1911**; Tier-1 **1258/1258**,
+  build **5.675 MB**. No absolute tick/frame lookup or framebuffer asset.
+
+---
 ## 342 — S8 OFF enemy PKMN FOR SWAP return: **GREEN — 115/115 exact**
 
 - **State:** enemy action 3 now returns through reusable transition-out,
@@ -47,25 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   open. Integrated Tier-1 **1251/1251**, build **5.668 MB**; ICE PUNCH
   **164/164**, FIRE PUNCH **225/225**. No absolute tick lookup, framebuffer
   asset, or Battle-2 continuation.
-
----
-## 340 — S8 OFF seventh-win terminal continuation: **GREEN — 4424/4424 exact**
-
-- **State:** the staged seventh-win route is gaplessly exact through exchange,
-  party/status restore at +3549, save-SE wait, record menu creation at +4422,
-  and first accepted default-NO input at +4424. Player-origin swap quit
-  evidence now pins its prompt/YES/NO/B boundaries without a Battle-2 replay.
-- **Did:** added the phase-relative exchange/restore continuation and reused one
-  shared record prompt/menu reducer and renderer for LOSS and round-won.
-  Tier-1 pins early-gate rejection, restore/clear, menu creation/visibility/
-  input, and immutable round rules, RNG, battle index, parties, and schedule.
-  ICE PUNCH's complete inward spiral is now **73/73 exact**.
-- **Next:** implement the reusable player-origin quit presentation from the
-  staged OFF fixture (prompt, YES exit, NO/B return). Gate 2 also retains
-  SUMMARY return, enemy `PKMN FOR SWAP`, enemy quit chrome, and
-  duplicate-species rejection. Animation continues at ICE frame 2412.
-- **Notes:** seventh-win **2513/2513 + 1911/1911**, LOSS **210/210 + 414/414**.
-  Merged Tier-1 **1245/1245**, build **5.665 MB**; ICE **73/73**, FIRE PUNCH
-  **225/225**. No deferred questions. No absolute tick, framebuffer/screenshot
-  asset, Battles 2–7 replay, YES recording/save branch, repeat challenge, or
-  Stage 8 completion claim.
