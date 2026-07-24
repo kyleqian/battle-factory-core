@@ -141,4 +141,3 @@ rg -n 'SCENE_TICK0|turn[0-9]+Resolved|ROCK_SLIDE|DRAGON_BREATH|BIND' src/engine/
 rg -n 'kind: "(hp-change|status-change|stat-stage-change|switch|outcome|animation)"' src/engine --glob '*.ts'
 rg -n 'resolveRoundBattle\(' src/engine tests --glob '*.ts'
 ```
-
