@@ -12,16 +12,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Did:** added source-derived `gBattleMoves[gCurrentMove].effect` to the
   rules context, then ported FROZEN's conditional named `Random() % 5` draw,
   ordinary frozen cancellation/no-attack-string handoff, thaw-hit continuation,
-  successful thaw/status clear/cursor/message handoff, and exact effect-2
-  status-controller request. Every path stops at `CANCELER_TRUANT`.
+  and successful thaw/internal-status clear/cursor/message handoff. Corrected
+  every FROZEN receipt to record no status-controller request: this source
+  phase never emits one, and `BattleScript_MoveUsedUnfroze` later owns
+  `updatestatusicon`. Every path stops at `CANCELER_TRUANT`.
 - **Next:** implement `CANCELER_TRUANT` only after its exact ability/counter,
   multi-turn cancellation, result flag, script/message, and receipt ownership
   is explicit. Do not loop phases or register opcode 0.
 - **Notes:** every RNG remainder, ordinary vs both `EFFECT_THAW_HIT` moves,
-  zero-PP-Up base PP, status/marker preservation, controller writes, source
-  cursor semantics, identity, validation, determinism, and deep freezing are
-  pinned. Focused **51/51**; Tier-1 **131 files / 1723 tests**, build, OFF info
-  (`9c89c741…`), and diff check green. Code commit `883b6e7`; pixel diff N/A.
+  zero-PP-Up base PP, status/marker preservation, status-controller absence
+  across every outcome, source cursor semantics, identity, validation,
+  determinism, and deep freezing are pinned. Exact-phase source audit found no
+  further discrepancy. Repair-focused **17/17**; Tier-1 **131 files / 1723
+  tests**, build, OFF info (`9c89c741…`), and diff check green. Code commits
+  `883b6e7` + `4aa41ce`; pixel diff N/A.
 
 ---
 ## 392 — CANCELER_ASLEEP Uproar ownership repair audited
