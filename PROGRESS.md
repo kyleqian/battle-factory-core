@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 332 — S8 OFF enemy accept prompt: **PARTIAL — 51/66 exact**
+
+- **State:** eligible GROVYLE A now runs phase-relatively from the input-ready
+  five-action picker through `Swap_AskAcceptMon`, the blended mon-picture
+  opening, and the first input-ready `Swap_Task_HandleYesNo` boundary at
+  +64. The dense OFF trace `battle1-swap-enemy-accept-prompt.json` is
+  **51/66 exact**; no YES, NO, or B choice is processed.
+- **Did:** added the two-button transition-out, accept text handoff at +41,
+  enemy front-sprite lookup, GROVYLE aperture/sprite, YES/NO popup, and
+  prompt gating. Tier-1 rejects enemy A at switch +132, accepts it at +133,
+  and rejects prompt A at +63 before readiness at +64.
+- **Next:** close exactly #39's 15-frame render remainder: tick 29936's
+  selected-species window-copy edge, the blended-flash/gray-ball overlap at
+  29978--29990, and tick 30000's first YES/NO copy/OAM transient. Then stop
+  again before any prompt choice.
+- **Notes:** Tier-1 **1204/1204**, build **5.562 MB**. Enemy picker, B-close,
+  popup, options, and player picker remain **130/130**, **59/59**, **44/44**,
+  **58/58**, and **101/101**. This is an honest partial, not S8 acceptance;
+  no tick/frame lookup, screenshot, runtime oracle asset, or terminal path.
+
+---
 ## 331 — S8 OFF enemy-screen switch/picker: **GREEN — 130/130 exact**
 
 - **State:** SWAP now reaches the input-ready five-action enemy picker and
@@ -44,26 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** supervisor verification is Tier-1 **1196/1196**, build
   **5.551 MB**, B-close **59/59**, portable FIRE PUNCH **225/225**. The
   opposite-side move remains evidence-only/`partial`; no deferred decision.
-
----
-## 329 — S8 OFF popup B-close: **GREEN evidence checkpoint**
-
-- **State:** the source-relative B-close → restored player-picker boundary is
-  pinned without runtime changes. The true menu-state handoff is +57, with
-  the first injectable B on the next frame (+58 / tick 29760); the generic
-  return reaches `HandleChooseMons` at +113 / tick 29815.
-- **Did:** captured every frame 29759--29981 from the committed prefix,
-  inspected `Task_CloseMonPic`, `Swap_Task_ScreenInfoTransitionIn`, live
-  task callbacks, WIN0V/DISPCNT, and proved a delayed RIGHT changes the
-  restored picker cursor. Documented the separate selected-ball and
-  species-breathe task ownership in
-  `docs/factory-swap-player-options-b-close-probe.md`. Parallel evidence
-  pins the enemy picker at mode +84, input +133, and accept-ready +197;
-  the Scene-ON lane added a generic geometry/profile adapter and a portable
-  ONIX→GROVYLE FIRE PUNCH case at **225/225 exact**.
-- **Next:** implement only this generic phase-relative close/return seam;
-  then leave the next player-picker-A/options boundary distinct. Preserve
-  popup **44/44**, options **58/58**, and picker **101/101** regressions.
-- **Notes:** supervisor verification is Tier-1 **1193/1193**, build
-  **5.549 MB**; canonical FIRE PUNCH controls remain **227/236** (known
-  residual) and **200/200**. No deferred decision or absolute-tick rule.

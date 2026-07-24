@@ -1,3 +1,26 @@
+## 329 — S8 OFF popup B-close: **GREEN evidence checkpoint**
+
+- **State:** the source-relative B-close → restored player-picker boundary is
+  pinned without runtime changes. The true menu-state handoff is +57, with
+  the first injectable B on the next frame (+58 / tick 29760); the generic
+  return reaches `HandleChooseMons` at +113 / tick 29815.
+- **Did:** captured every frame 29759--29981 from the committed prefix,
+  inspected `Task_CloseMonPic`, `Swap_Task_ScreenInfoTransitionIn`, live
+  task callbacks, WIN0V/DISPCNT, and proved a delayed RIGHT changes the
+  restored picker cursor. Documented the separate selected-ball and
+  species-breathe task ownership in
+  `docs/factory-swap-player-options-b-close-probe.md`. Parallel evidence
+  pins the enemy picker at mode +84, input +133, and accept-ready +197;
+  the Scene-ON lane added a generic geometry/profile adapter and a portable
+  ONIX→GROVYLE FIRE PUNCH case at **225/225 exact**.
+- **Next:** implement only this generic phase-relative close/return seam;
+  then leave the next player-picker-A/options boundary distinct. Preserve
+  popup **44/44**, options **58/58**, and picker **101/101** regressions.
+- **Notes:** supervisor verification is Tier-1 **1193/1193**, build
+  **5.549 MB**; canonical FIRE PUNCH controls remain **227/236** (known
+  residual) and **200/200**. No deferred decision or absolute-tick rule.
+
+---
 ## 328 — S8 player-options popup: **GREEN — 44/44 exact**
 
 - **State:** the source-relative player-options seam is complete through the

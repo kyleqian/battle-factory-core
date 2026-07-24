@@ -5,6 +5,9 @@ import {
   advanceFactorySwapPresentation,
   createCanonicalFactorySwapPresentation,
   factorySwapActionFadeY,
+  factorySwapAcceptCancelButtonX,
+  factorySwapAcceptMonPicVisual,
+  factorySwapAcceptPkmnButtonX,
   factorySwapBallTile,
   factorySwapCancelButtonX,
   factorySwapEnemyActionFadeY,
@@ -364,6 +367,73 @@ describe("live Factory swap presentation adapter", () => {
     state = advance(state, 1);
     expect(state.controller.displayCursor).toBe(1);
     expect(state.selectedBallClock).toBe((selectedBallClock ?? 0) + 135);
+  });
+
+  it("rejects the adjacent early enemy A, accepts the first picker A, and gates the GROVYLE prompt through HandleYesNo", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 58);
+    state = handleFactorySwapPresentationInput(state, "DOWN");
+    state = advance(state, 2);
+    state = handleFactorySwapPresentationInput(state, "A");
+
+    state = advance(state, 132);
+    expect(state).toMatchObject({
+      phaseElapsed: 132,
+      controller: { phase: "enemySwitch", inputReady: false },
+    });
+    expect(handleFactorySwapPresentationInput(state, "A")).toBe(state);
+
+    state = advance(state, 1);
+    expect(state.controller).toMatchObject({
+      phase: "enemyPicker",
+      inputReady: true,
+      cursor: 0,
+    });
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "acceptPrompt",
+        enemyMonId: 0,
+        yesNoCursor: 0,
+        inputReady: false,
+      },
+      speciesNameFade: { active: false },
+    });
+    expect(state.controller.enemyParty[0].species).toBe("GROVYLE");
+
+    state = advance(state, 63);
+    expect(state.controller.inputReady).toBe(false);
+    expect(handleFactorySwapPresentationInput(state, "A")).toBe(state);
+    state = advance(state, 1);
+    expect(state).toMatchObject({
+      phaseElapsed: 64,
+      controller: { phase: "acceptPrompt", inputReady: true },
+    });
+  });
+
+  it("pins the source transition-out slides and GROVYLE OpenMonPic boundary phase-relatively", () => {
+    expect(factorySwapAcceptPkmnButtonX(26)).toBe(160);
+    expect(factorySwapAcceptPkmnButtonX(27)).toBe(166);
+    expect(factorySwapAcceptPkmnButtonX(40)).toBe(240);
+    expect(factorySwapAcceptCancelButtonX(32)).toBe(192);
+    expect(factorySwapAcceptCancelButtonX(33)).toBe(198);
+    expect(factorySwapAcceptCancelButtonX(40)).toBe(240);
+    expect(factorySwapAcceptMonPicVisual(43).flashWidth).toBe(0);
+    expect(factorySwapAcceptMonPicVisual(44)).toMatchObject({
+      flashWidth: 1,
+      flashBlended: true,
+    });
+    expect(factorySwapAcceptMonPicVisual(55).window).toEqual({
+      top: 60,
+      bottom: 69,
+    });
+    expect(factorySwapAcceptMonPicVisual(64)).toMatchObject({
+      window: { top: 32, bottom: 96 },
+      spriteVisible: true,
+    });
   });
 
   it("pins the source-named enemy switch callbacks, independent ball cycles, and two-button transition", () => {

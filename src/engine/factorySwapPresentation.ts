@@ -125,7 +125,9 @@ export const FACTORY_SWAP_PHASE_READY_DELAYS: Readonly<
   // physical edge that can be consumed.
   playerOptions: 58,
   enemyPicker: 199,
-  acceptPrompt: 99,
+  // HandleYesNo reaches its input state at +63 after JOY_NEW was sampled;
+  // +64 is the first physical prompt edge it can consume.
+  acceptPrompt: 64,
   quitPrompt: 99,
   duplicateSpecies: 99,
 };
@@ -254,8 +256,13 @@ export function handleFactorySwapPresentationInput(
   const enteredPlayerOptions =
     controller.phase === "playerOptions" &&
     state.controller.phase === "playerPicker";
+  const leftEnemyPicker =
+    state.controller.phase === "enemyPicker" &&
+    controller.phase !== "enemyPicker";
   const pausedSpeciesName =
-    enteredPlayerOptions ? deactivateSpeciesNameFade(state.speciesNameFade) : state.speciesNameFade;
+    enteredPlayerOptions || leftEnemyPicker
+      ? deactivateSpeciesNameFade(state.speciesNameFade)
+      : state.speciesNameFade;
   return {
     ...state,
     controller,
@@ -532,6 +539,52 @@ export function factorySwapEnemyCancelButtonX(phaseElapsed: number): number {
 /** Shared PALNUM_FADE_TEXT transition after both enemy buttons settle. */
 export function factorySwapEnemyActionFadeY(phaseElapsed: number): number {
   return factorySwapPlayerReturnActionFadeY(phaseElapsed - 78);
+}
+
+/** Enemy ScreenInfoTransitionOut: PKMN FOR SWAP slides first at +27. */
+export function factorySwapAcceptPkmnButtonX(phaseElapsed: number): number {
+  return Math.min(240, 160 + Math.max(0, phaseElapsed - 26) * 6);
+}
+
+/** Enemy ScreenInfoTransitionOut: CANCEL follows after tSecondSlideDelay. */
+export function factorySwapAcceptCancelButtonX(phaseElapsed: number): number {
+  return Math.min(240, 192 + Math.max(0, phaseElapsed - 32) * 6);
+}
+
+/**
+ * OpenMonPic(..., TRUE) created by Swap_AskAcceptMon at +41. This later
+ * opening uses the already-configured blended flash. Its task run has a
+ * source/GPU-latch catch-up relative to the shared B opening: the second
+ * 64px flash and degenerate-window callbacks are both overtaken before the
+ * regular growth loop. At +64 HandleYesNo owns the open sprite and popup.
+ */
+export function factorySwapAcceptMonPicVisual(
+  phaseElapsed: number,
+): MonPicVisual {
+  const elapsed = phaseElapsed - 41;
+  if (elapsed < 0) {
+    return getMonPicVisual({
+      phase: "closed",
+      elapsed: 0,
+      variant: "B",
+      blended: true,
+    });
+  }
+  if (phaseElapsed >= 64) {
+    return getMonPicVisual({
+      phase: "open",
+      elapsed: 0,
+      variant: "B",
+      blended: true,
+    });
+  }
+  const afterFlashLatch = elapsed >= 14 ? elapsed + 2 : elapsed;
+  return getMonPicVisual({
+    phase: "opening",
+    elapsed: afterFlashLatch,
+    variant: "B",
+    blended: true,
+  });
 }
 
 /** The old player species is driven to black once the ball-cycle task starts. */

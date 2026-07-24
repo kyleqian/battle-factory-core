@@ -25,6 +25,7 @@ import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
 import arrowData from "../assets/gen/arrow.json" with { type: "json" };
 import frontSpritesData from "../assets/gen/front-sprites.json" with { type: "json" };
+import opponentFrontSpritesData from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 
 interface TileGrid {
   columns: number;
@@ -52,6 +53,11 @@ const menuBg = menuBgData as unknown as {
 const pokeball = pokeballData as unknown as { tileset: TileGrid; grayPalette: RgbColor[] };
 const arrow = arrowData as unknown as { tileset: TileGrid; palette: RgbColor[] };
 const frontSprites = frontSpritesData as unknown as Record<string, { tileset: TileGrid; palette: RgbColor[] }>;
+const opponentFrontSprites = opponentFrontSpritesData as unknown as Record<string, { tileset: TileGrid; palette: RgbColor[] }>;
+
+function frontSprite(species: string): { tileset: TileGrid; palette: RgbColor[] } | undefined {
+  return frontSprites[species] ?? opponentFrontSprites[species];
+}
 
 const WINDOW_LEFT = 88;
 const WINDOW_RIGHT = 152; // exclusive
@@ -184,7 +190,7 @@ export function blend8(c1: RgbColor, c2: RgbColor | null): RgbColor {
 
 /** Select_CreateChosenMonsSprites: a chosen mon's front-pic sprite at an arbitrary center (the reveal's 3 positions, not the single-popup's fixed x=120,y=64). */
 export function drawChosenMonPic(fb: Uint8Array, species: string, centerX: number, centerY: number): void {
-  const sprite = frontSprites[species];
+  const sprite = frontSprite(species);
   if (!sprite) return;
   drawSprite(fb, { tileset: sprite.tileset } as SpriteSheet, sprite.palette, centerX, centerY, 8, 8, 0);
 }
@@ -221,7 +227,7 @@ export function drawMonPic(
   }
 
   if (visual.spriteVisible) {
-    const sprite = frontSprites[species];
+    const sprite = frontSprite(species);
     if (sprite) {
       drawSprite(fb, { tileset: sprite.tileset } as SpriteSheet, sprite.palette, 120, 64, 8, 8, 0);
     }
@@ -272,7 +278,7 @@ export function drawMonPicFaded(
   }
 
   if (visual.spriteVisible) {
-    const sprite = frontSprites[species];
+    const sprite = frontSprite(species);
     if (sprite) {
       drawSpriteFaded(fb, { tileset: sprite.tileset } as SpriteSheet, sprite.palette, 120, 64, 8, 8, 0, objY);
     }

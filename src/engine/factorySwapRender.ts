@@ -4,6 +4,9 @@ import { drawText, measureText, rightAlignXOffset, type FontData } from "./font.
 import { speciesNameColor } from "./speciesNameFade.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts";
 import {
+  factorySwapAcceptCancelButtonX,
+  factorySwapAcceptMonPicVisual,
+  factorySwapAcceptPkmnButtonX,
   factorySwapActionFadeY,
   factorySwapCancelButtonX,
   factorySwapEnemyActionFadeY,
@@ -74,6 +77,8 @@ const SPECIES_TEXT_COLORS = { fg: 4, bg: 0, shadow: 0 };
 const MENU_TEXT_COLORS = { fg: 2, bg: 0, shadow: 0 };
 const PLAYER_OPTION_LABELS = ["SUMMARY", "SWAP", "RECHOOSE"] as const;
 const PLAYER_OPTIONS_ORIGIN = { x: 21 * 8, y: 14 * 8 } as const;
+const YES_NO_LABELS = ["YES", "NO"] as const;
+const YES_NO_ORIGIN = { x: 22 * 8, y: 14 * 8 } as const;
 
 const CATEGORY_BY_SPECIES: Readonly<Record<string, string>> = {
   ONIX: "ROCK SNAKE",
@@ -270,11 +275,11 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
   const displaySelected =
     infoIndex !== null &&
     displayIndex !== null &&
-    !(enemy && phaseElapsed === 0)
+    !(state.phase === "enemyPicker" && phaseElapsed === 0)
       ? party[displayIndex]
       : null;
   const speciesColor =
-    enemy && phaseElapsed === 1
+    state.phase === "enemyPicker" && phaseElapsed === 1
       ? { r: 8, g: 0, b: 0 }
       : speciesNameColor(
           enemySwitch
@@ -309,6 +314,10 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     cancelButtonX = factorySwapEnemyCancelButtonX(phaseElapsed);
     pkmnButtonX = factorySwapEnemyPkmnButtonX(phaseElapsed);
     actionLabelsVisible = phaseElapsed >= 107;
+  } else if (state.phase === "acceptPrompt") {
+    actionFadeY = factorySwapActionFadeY(phaseElapsed);
+    pkmnButtonX = factorySwapAcceptPkmnButtonX(phaseElapsed);
+    cancelButtonX = factorySwapAcceptCancelButtonX(phaseElapsed);
   } else if (enemy) {
     pkmnButtonX = 160;
   }
@@ -359,7 +368,11 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     fb,
     font,
     charmap,
-    enemy ? "Select POKéMON to accept." : "Select POKéMON to swap.",
+    state.phase === "acceptPrompt" && phaseElapsed >= 41
+      ? "Accept this POKéMON?"
+      : enemy
+        ? "Select POKéMON to accept."
+        : "Select POKéMON to swap.",
     2,
     125,
     textPalette,
@@ -386,7 +399,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     state.displayCursor < 3 &&
     state.arrowCursor < 3 &&
     (!enemySwitch || phaseElapsed <= 21) &&
-    (!enemy || phaseElapsed >= 1);
+    (state.phase !== "enemyPicker" || phaseElapsed >= 1);
   if (arrowVisible) {
     drawSpriteFaded(
       fb,
@@ -423,17 +436,22 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
   if (
     state.phase === "playerOptions" ||
     state.phase === "playerPickerReturn" ||
-    enemySwitch
+    enemySwitch ||
+    state.phase === "acceptPrompt"
   ) {
     const returning = state.phase === "playerPickerReturn";
     const ballVisuals: BallVisual[] = renderedBallTiles.map((firstTile, index) => ({
-      palette: pokeball.selectedPalette,
-      firstTileRow: firstTile / 4,
+      palette: state.phase === "acceptPrompt"
+        ? pokeball.grayPalette
+        : pokeball.selectedPalette,
+      firstTileRow: state.phase === "acceptPrompt" ? 0 : firstTile / 4,
       centerX: 48 * index + 72,
     }));
-    const monPic = returning || enemySwitch
-      ? factorySwapPlayerReturnMonPicVisual(phaseElapsed)
-      : factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0);
+    const monPic = state.phase === "acceptPrompt"
+      ? factorySwapAcceptMonPicVisual(phaseElapsed)
+      : returning || enemySwitch
+        ? factorySwapPlayerReturnMonPicVisual(phaseElapsed)
+        : factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0);
     const adjustedMonPic =
       enemySwitch && phaseElapsed === 0
         ? { ...monPic, menuHighlightVisible: true }
@@ -445,7 +463,10 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
       48 * state.displayCursor + 72,
       ballVisuals,
     );
-    if (adjustedMonPic.menuHighlightVisible) {
+    if (
+      adjustedMonPic.menuHighlightVisible &&
+      state.phase !== "acceptPrompt"
+    ) {
       const highlightY = PLAYER_OPTIONS_ORIGIN.y +
         state.playerOptionDisplayCursor * 16 + 8;
       drawSpriteFaded(
@@ -471,7 +492,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
         objFade,
       );
     }
-    if (adjustedMonPic.menuTextVisible) {
+    if (adjustedMonPic.menuTextVisible && state.phase !== "acceptPrompt") {
       for (let i = 0; i < PLAYER_OPTION_LABELS.length; i += 1) {
         drawTextFaded(
           fb,
@@ -480,6 +501,44 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
           PLAYER_OPTION_LABELS[i]!,
           PLAYER_OPTIONS_ORIGIN.x + 15,
           PLAYER_OPTIONS_ORIGIN.y + 1 + i * 16,
+          textPalette,
+          MENU_TEXT_COLORS,
+          bgFade,
+        );
+      }
+    }
+    if (state.phase === "acceptPrompt" && phaseElapsed >= 64) {
+      const highlightY = YES_NO_ORIGIN.y + state.yesNoCursor * 16 + 8;
+      drawSpriteFaded(
+        fb,
+        { tileset: menuHighlight.left.tileset },
+        menuHighlight.palette,
+        192,
+        highlightY,
+        4,
+        2,
+        0,
+        objFade,
+      );
+      drawSpriteFaded(
+        fb,
+        { tileset: menuHighlight.right.tileset },
+        menuHighlight.palette,
+        224,
+        highlightY,
+        4,
+        2,
+        0,
+        objFade,
+      );
+      for (let i = 0; i < YES_NO_LABELS.length; i += 1) {
+        drawTextFaded(
+          fb,
+          font,
+          charmap,
+          YES_NO_LABELS[i]!,
+          YES_NO_ORIGIN.x + 7,
+          YES_NO_ORIGIN.y + 1 + i * 16,
           textPalette,
           MENU_TEXT_COLORS,
           bgFade,
