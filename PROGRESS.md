@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 404 — PARALYZED, Factory AI policy seam, and MUD SLAP integrated
+
+- **State:** the merged run is clean and green at **144 files / 1825 tests**.
+  S10 Gate 3 remains at **27** source-safe executable opcodes and the attack
+  canceler remains deliberately unregistered/unlooped. Scene-ON Level-50
+  coverage is **14 exact / 1 partial / 261 unsupported**.
+- **Did:** independently accepted the immutable `CANCELER_PARALYZED` source
+  phase, a pure generated-policy-backed Factory AI mask selector with explicit
+  0/1/7 branch receipts, and MUD SLAP's distinct 16x16 mud program plus shared
+  side-sensitive slide choreography. The AI script catalogue now also records
+  **469** reachable labels, **1,034** control edges, and **60** native handler
+  dependencies for later interpreter work.
+- **Next:** implement `CANCELER_IN_LOVE` as one bounded source phase without
+  looping or registering opcode 0. In parallel, prove another disjoint
+  Level-50 animation/component window and stage a bounded native-AI behavior/RNG
+  probe without defining the unfinished shared scorer interface.
+- **Notes:** supervisor replayed MUD SLAP at source OAM + RGB **51/51** in both
+  orientations and retained both SAND ATTACK controls at **269/269**. The AI
+  selector's **32/32** focused tests and PARALYZED's **47** focused seam tests
+  pass. Combined Tier-1 **144/1825**, build, both v5 oracle profiles
+  (`9c89c741…`), animation coverage, and diff check are green. Merges
+  `40336a1` + `1b28a45`; pixel diff N/A outside the cited ON windows.
+
+---
 ## 403 — Gate-3 attack-canceler PARALYZED source phase integrated
 
 - **State:** the run is clean and green at **142 files / 1789 tests**. S10
@@ -52,30 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   replay, and deep freezing are pinned. Focused **5 files / 49 tests**;
   integrated Tier-1 **140 files / 1777 tests**, build, OFF v5 info
   (`9c89c741…`), and diff check green. Code commit `9fdfba3`; pixel diff N/A.
-
----
-## 401 — Gate-3 attack-canceler IMPRISONED source phase integrated
-
-- **State:** the run is clean and green at **139 files / 1771 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes;
-  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through IMPRISONED
-  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
-- **Did:** added explicit `GetBattlerSide`, four `u16` move slots,
-  `STATUS3_IMPRISONED_OTHERS`, and
-  `ProtectStruct::usedImprisonedMove:1` ownership. Ported
-  `GetImprisonedMovesCount` (battle_util.c 1142-1163) as a frozen,
-  short-circuiting scan receipt and the IMPRISONED branch (2145-2155) through
-  the multi-turn helper, imprisoned script, unable marker, effect 1, and one
-  advance to `CANCELER_CONFUSED`.
-- **Next:** begin `CANCELER_CONFUSED` only after its counter/RNG branches,
-  cursor and multistring ownership, protect flag, self-hit calculation/script,
-  marker/effect, and receipts are explicit. Do not loop phases or register
-  opcode 0.
-- **Notes:** all four battler identities, both explicit sides, ally/opponent
-  layouts, all four move slots and short-circuit order, duplicate ownership,
-  empty slots, u16 **0/65535** and invalid boundaries, both protect presets,
-  missing/invalid context, multi-turn cancellation, script/marker/effect,
-  exactly one tracker advance, deterministic deep freezing/input immutability,
-  and no ambient RNG are pinned. Focused **3 files / 29 tests**; integrated
-  Tier-1 **139 files / 1771 tests**, build, OFF v5 info (`9c89c741…`), and
-  diff check green. Code commits `cdb9f4e` + `16ec3d6`; pixel diff N/A.

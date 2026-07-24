@@ -1,3 +1,30 @@
+## 401 — Gate-3 attack-canceler IMPRISONED source phase integrated
+
+- **State:** the run is clean and green at **139 files / 1771 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through IMPRISONED
+  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** added explicit `GetBattlerSide`, four `u16` move slots,
+  `STATUS3_IMPRISONED_OTHERS`, and
+  `ProtectStruct::usedImprisonedMove:1` ownership. Ported
+  `GetImprisonedMovesCount` (battle_util.c 1142-1163) as a frozen,
+  short-circuiting scan receipt and the IMPRISONED branch (2145-2155) through
+  the multi-turn helper, imprisoned script, unable marker, effect 1, and one
+  advance to `CANCELER_CONFUSED`.
+- **Next:** begin `CANCELER_CONFUSED` only after its counter/RNG branches,
+  cursor and multistring ownership, protect flag, self-hit calculation/script,
+  marker/effect, and receipts are explicit. Do not loop phases or register
+  opcode 0.
+- **Notes:** all four battler identities, both explicit sides, ally/opponent
+  layouts, all four move slots and short-circuit order, duplicate ownership,
+  empty slots, u16 **0/65535** and invalid boundaries, both protect presets,
+  missing/invalid context, multi-turn cancellation, script/marker/effect,
+  exactly one tracker advance, deterministic deep freezing/input immutability,
+  and no ambient RNG are pinned. Focused **3 files / 29 tests**; integrated
+  Tier-1 **139 files / 1771 tests**, build, OFF v5 info (`9c89c741…`), and
+  diff check green. Code commits `cdb9f4e` + `16ec3d6`; pixel diff N/A.
+
+---
 ## 400 — S10 battle boundary published; BIND portability integrated
 
 - **State:** the run is clean and green at **138 files / 1764 tests**. S10
