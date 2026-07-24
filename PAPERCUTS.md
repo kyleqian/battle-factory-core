@@ -14,6 +14,16 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Shell command substitution mutates inline worker briefs
+
+- **What:** Markdown backticks embedded in a double-quoted
+  `run-subagent.sh` brief were evaluated by the shell as commands, stripping
+  two source paths before launch and requiring an immediate clean relaunch.
+- **Hits:** 1.
+- **Cost each:** ~1 min.
+- **Workaround:** use plain path text or a `--brief-file`; never place
+  backticks or `$()` inside a shell-interpolated brief argument.
+
 ## Explicitly read-only workers fail the commit-required postflight
 
 - **What:** a bounded supervisor audit was explicitly told to make no edits or

@@ -1,3 +1,20 @@
+## 358 — S4/S9 OFF summary front animation + Contest switch: **GREEN**
+
+- **State:** source-driven front animation is live for the six named rental
+  species; MAGBY Info and the complete Contest DOWN→UP→B route are exact.
+- **Did:** added animation-type motion reducers and extracted frame programs,
+  independent sprite/controller clocks and cancellation; extended the shared
+  summary-window seam with Contest source/destination ownership and DMA glyph
+  fragments. Tier-1 pins all mappings, clocks, lifecycle, input ownership,
+  Contest controller state, and page-specific transfers.
+- **Next:** supervisor verify this final named S4/S9 mechanism and assess the
+  remaining S9 acceptance scope; do not extend into reorder, PP, S10, or ON.
+- **Notes:** MAGBY animation **201/201** (from 132/201); new Contest switch
+  **80/80** (from 63/80); Battle switch **80/80**; all 14 accepted summary
+  traces exact. Tier-1 **1351/1351** and build green. No Scene-ON, battle
+  logic, PP/reorder, runtime oracle/ROM, ROADMAP, or ISSUES edits.
+
+---
 ## 357 — S9 OFF Moves-page rental switching: **BATTLE GREEN — 80/80 exact**
 
 - **State:** generic UP/DOWN now switches rentals on Battle/Contest Moves;
