@@ -524,6 +524,7 @@ import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { t
 import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" with { type: "json" };
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
+import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
 import battleAnimFlyBallAsset from "../assets/gen/battle-anim-fly-ball.json" with { type: "json" };
 import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
@@ -824,6 +825,10 @@ const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
 const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFeatherAsset;
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
+const battleAnimSpark2 = battleAnimSpark2Asset as {
+  frames: { columns: number; rows: number; list: number[][][] };
+  palette: RgbColor[];
+};
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
 /** S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section): `gSandAttackDirtSpriteTemplate`'s single static 8x8 tile - see `tools/extract/extract-sandattack-dirt.ts`. */
 const battleAnimMudSand = battleAnimMudSandAsset as { tileset: Tileset; palette: RgbColor[] };
@@ -959,7 +964,7 @@ const onixPlayerHealthboxContentByState = new Map<
 >([["117:none", onixPlayerHealthboxContent]]);
 function onixPlayerHealthboxContentForState(
   hp: number,
-  status: "none" | "burn" | "freeze",
+  status: "none" | "burn" | "freeze" | "paralysis",
   gender: "male" | "female" = ONIX_MENU_BATTLER.gender,
 ): ReturnType<typeof composePlayerHealthbox> {
   const key = `${hp}:${status}:${gender}`;
@@ -15658,7 +15663,8 @@ export function renderSceneOnMovePresentation(
             && view.targetBaseOffsetReset
               ? 1
               : 0
-          ),
+          )
+          + view.statusShakeX2,
         target.geometry.spriteCorner.y
           + view.targetShakeY2
           + (target.geometry.side === "player"
@@ -15702,6 +15708,37 @@ export function renderSceneOnMovePresentation(
         true,
       );
     }
+    for (const spark of view.electricity) {
+      const source = battleAnimSpark2.frames.list[spark.frame]!;
+      const tileset: Tileset = {
+        columns: battleAnimSpark2.frames.columns,
+        rows: battleAnimSpark2.frames.rows,
+        tiles: source.map((_tile, tileIndex) => {
+          const destTx = tileIndex % 2;
+          const destTy = Math.floor(tileIndex / 2);
+          const sourceTx = spark.hFlip ? 1 - destTx : destTx;
+          const sourceTy = spark.vFlip ? 1 - destTy : destTy;
+          const tile = source[sourceTy * 2 + sourceTx]!;
+          if (!spark.hFlip && !spark.vFlip) return tile;
+          const flipped = new Array<number>(64);
+          for (let y = 0; y < 8; y += 1) {
+            for (let x = 0; x < 8; x += 1) {
+              const sx = spark.hFlip ? 7 - x : x;
+              const sy = spark.vFlip ? 7 - y : y;
+              flipped[y * 8 + x] = tile[sy * 8 + sx]!;
+            }
+          }
+          return flipped;
+        }),
+      };
+      drawSpriteSheet(
+        fb,
+        tileset,
+        battleAnimSpark2.palette,
+        spark.x,
+        spark.y,
+      );
+    }
     if (attacker.geometry.side === "opponent") {
       drawSendOutHealthbox(
         fb,
@@ -15715,7 +15752,9 @@ export function renderSceneOnMovePresentation(
         fb,
         onixPlayerHealthboxContentForState(
           view.displayedTargetHp,
-          state.config.fieldProfile.playerStatus,
+          view.healthboxStatus === "paralysis"
+            ? "paralysis"
+            : state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender,
         ),
         0,

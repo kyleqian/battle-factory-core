@@ -573,4 +573,29 @@ function writeJson(path: string, data: unknown): void {
   });
 }
 
+// --- spark_2.png: Status_Paralysis / ElectricityEffect --------------------
+//
+// The 16x48 source is three stacked 16x16 frames (4 tiles each).
+// `gElectricitySpriteTemplate` selects them with `tileNum += arg3 * 4`,
+// and arg3 1/2 additionally selects the hardware H/V flip bit.
+{
+  const image = decodeIndexedPng(join(REF, "graphics", "battle_anims", "sprites", "spark_2.png"));
+  const { columns, rows, tiles } = sliceTiles(image);
+  if (columns !== 2 || rows !== 6) {
+    throw new Error(`spark_2.png: expected 2x6 tiles, got ${columns}x${rows}`);
+  }
+  writeJson(join(ASSETS_GEN, "battle-anim-spark-2.json"), {
+    source: "graphics/battle_anims/sprites/spark_2.png (src/graphics.c:54-55, ANIM_TAG_SPARK_2)",
+    frames: {
+      columns,
+      rows: 2,
+      list: [0, 1, 2].map((frame) =>
+        tiles.slice(frame * 4, frame * 4 + 4).map((tile) => [...tile.pixels])
+      ),
+    },
+    palette: image.palette,
+    oam: { shape: "16x16", size: "16x16", affine: false },
+  });
+}
+
 console.log("extraction complete");

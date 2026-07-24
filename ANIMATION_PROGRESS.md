@@ -38,26 +38,19 @@ remainder.
 
 ## Current handoff
 
-- **State:** **9 exact / 5 partial / 262 unsupported**. BOUNCE remains partial
-  only for its source-required successful-paralysis status-animation/message
-  variant; both no-status orientations now have complete controller tails.
-  FLY remains partial only for ISSUES #34's seven affine opening frames.
-- **Did:** generalized BOUNCE's immutable controller profile for hit reaction,
-  HP drain, effectiveness result, current-move/text cleanup, and optional
-  action-menu reveal. Closed source `AnimTask_ShakeMon`'s final two pulses,
-  monbg target-base reset/release, and the side-dependent four-frame controller
-  lag without changing damage, accuracy, paralysis, PP, RNG, turn order, or
-  battle state.
-- **Evidence:** opponent-front is charge **24/24** plus contiguous strike/
-  controller/menu **881-1179 = 299/299**; player-back is charge **24/24** plus
-  contiguous strike/controller handoff **777-973 = 197/197**. Zero exclusions
-  and zero differing pixels. All four FLY windows remain green
-  (**144/144 + 248/248 + 140/140 + 244/244**). Legal seed `0x27182818`
-  independently stages the open paralysis variant: status commits at frame
-  **1063**, status animation/controller command 27 runs **1064-1148**,
-  `gCurrentMove` clears at **1225**, and menu setup begins at **1230**.
-- **Next:** extract/reuse `ANIM_TAG_SPARK_2` plus `ElectricityEffect` and
-  `AnimTask_ShakeMon2`, then dense-close the legal `0x27182818` paralysis
-  tail through its message, PAR healthbox, command release, MOVE_NONE, and
-  stable menu. Preserve both no-status windows, all four FLY windows, and
-  ISSUES #34.
+- **State:** **10 exact / 4 partial / 262 unsupported**. BOUNCE is exact:
+  both no-status orientations and the successful-paralysis path exhaust its
+  source-required presentation variants. FLY remains partial only for
+  ISSUES #34's seven affine opening frames.
+- **Did:** extracted `ANIM_TAG_SPARK_2`, decoded the eight-spawn
+  `ElectricityEffect` and `AnimTask_ShakeMon2` framebuffer handoff, and
+  extended BOUNCE's immutable display profile through status commit, command
+  27, the paralysis printer, command 26/PAR installation, MOVE_NONE cleanup,
+  and the settled menu. Battle outcome and controller progression stay external.
+- **Evidence:** seed `0x27182818` strike through stable menu tail,
+  **881-1330 = 450/450** exact: commit **1063**, command 27 **1064-1148**,
+  `gCurrentMove=0` **1225**, menu setup/reveal **1230/1235**. No-status BOUNCE
+  remains **24/24 + 299/299** and **24/24 + 197/197**. FLY remains
+  **144/144 + 248/248 + 140/140 + 244/244**, with only #34's exclusions.
+- **Next:** continue the ranked Level-50 queue. DIVE still needs independent
+  dense evidence; do not weaken FLY's bounded ISSUES #34 remainder.

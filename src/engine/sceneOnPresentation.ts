@@ -73,7 +73,10 @@ import {
   type FlyTurn,
 } from "./fly.ts";
 import {
+  bounceParalysisElectricityAtAge,
+  bounceParalysisShakeX2AtAge,
   bouncePresentationAtAge,
+  type BounceElectricitySprite,
   type BouncePresentationState,
   type BounceTurn,
 } from "./bounce.ts";
@@ -118,6 +121,12 @@ export interface SceneOnBounceConfig {
     readonly resultTextFirstAge: number;
     readonly currentMoveResetAge: number;
     readonly actionMenuRevealAge?: number;
+    readonly statusOutcome?: "none" | "paralysis";
+    readonly statusAppliedAge?: number;
+    readonly statusShakeFirstAge?: number;
+    readonly statusElectricityFirstAge?: number;
+    readonly statusMessageFirstAge?: number;
+    readonly healthboxStatusAge?: number;
   }>;
   /**
    * First displayed callback age for this half of `choosetwoturnanim`.
@@ -564,6 +573,10 @@ export interface SceneOnBounceView extends BouncePresentationState {
   readonly targetInvisible: boolean;
   readonly displayedTargetHp: number;
   readonly actionMenu: ActionMenuDisplayTransition;
+  readonly targetStatus: "none" | "paralysis";
+  readonly healthboxStatus: "none" | "paralysis";
+  readonly statusShakeX2: number;
+  readonly electricity: readonly BounceElectricitySprite[];
   readonly currentMove: "BOUNCE" | null;
 }
 
@@ -782,7 +795,15 @@ export function sceneOnBounceView(
   const moveLine1 = `${battlerNameWithPrefix(state.config.attacker)} used`;
   const moveLine2 = "BOUNCE!";
   const { controllerProfile } = state.config;
-  const message = state.age >= controllerProfile.resultTextFirstAge
+  const statusMessageFirstAge =
+    controllerProfile.statusMessageFirstAge ?? Number.POSITIVE_INFINITY;
+  const message = state.age >= statusMessageFirstAge
+    ? {
+        line1: "ONIX is paralyzed!",
+        line2: "It may be unable to move!",
+        firstAge: statusMessageFirstAge,
+      }
+    : state.age >= controllerProfile.resultTextFirstAge
     ? {
         line1: "It’s not very effective…",
         line2: "",
@@ -833,6 +854,38 @@ export function sceneOnBounceView(
       },
     ),
     actionMenu,
+    targetStatus:
+      controllerProfile.statusOutcome === "paralysis"
+      && state.age >= (controllerProfile.statusAppliedAge
+        ?? Number.POSITIVE_INFINITY)
+        ? "paralysis"
+        : "none",
+    healthboxStatus:
+      controllerProfile.statusOutcome === "paralysis"
+      && state.age >= (controllerProfile.healthboxStatusAge
+        ?? Number.POSITIVE_INFINITY)
+        ? "paralysis"
+        : "none",
+    statusShakeX2:
+      state.age >= (controllerProfile.statusElectricityFirstAge
+        ?? Number.POSITIVE_INFINITY)
+      && state.age < (controllerProfile.statusElectricityFirstAge
+        ?? Number.POSITIVE_INFINITY) + 19
+        // The immutable framebuffer/OAM receipt is one phase behind the
+        // probed post-callback task state during the visible electricity
+        // window; the pre-sprite setup poses never reach the framebuffer.
+        ? -bounceParalysisShakeX2AtAge(
+            state.age,
+            controllerProfile.statusShakeFirstAge
+              ?? Number.POSITIVE_INFINITY,
+          )
+        : 0,
+    electricity: bounceParalysisElectricityAtAge(
+      state.age,
+      controllerProfile.statusElectricityFirstAge
+        ?? Number.POSITIVE_INFINITY,
+      state.config.target.geometry.battlePositionCenter,
+    ),
     currentMove:
       state.age >= controllerProfile.currentMoveResetAge ? null : "BOUNCE",
     ...bouncePresentationAtAge(
