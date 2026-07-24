@@ -9,9 +9,11 @@ import {
   advanceSummaryScreen,
   CLOSED_SUMMARY_SCREEN_STATE,
   openSummaryScreen,
+  requestSummaryMonChange,
   requestSummaryScreenExit,
   requestSummaryPageChange,
   SUMMARY_PAGE_TRANSITION_TICKS,
+  SUMMARY_MON_TRANSITION_TICKS,
   summaryPageLayerOffsets,
   type SummaryScreenState,
 } from "../src/engine/summaryScreen.ts";
@@ -248,6 +250,82 @@ describe("summaryScreen: generic page navigation", () => {
   });
 });
 
+describe("summaryScreen: slot-relative Info-page mon switching", () => {
+  function settled(slot = 0): SummaryScreenState {
+    return run(openSummaryScreen(slot), 59);
+  }
+
+  it("DOWN transfers selected-slot ownership to the relative destination and records direction", () => {
+    const switching = requestSummaryMonChange(settled(0), "down");
+    expect(switching).toMatchObject({
+      selectedSlot: 1,
+      page: "info",
+      onInfoPage: true,
+      monTransition: {
+        fromSlot: 0,
+        toSlot: 1,
+        direction: "down",
+        elapsed: 0,
+      },
+    });
+  });
+
+  it("UP owns the inverse relative slot without changing page ownership", () => {
+    const switching = requestSummaryMonChange(settled(4), "up");
+    expect(switching).toMatchObject({
+      selectedSlot: 3,
+      page: "info",
+      monTransition: {
+        fromSlot: 4,
+        toSlot: 3,
+        direction: "up",
+      },
+    });
+  });
+
+  it("rejects every input path in flight and restores readiness at DOWN+20", () => {
+    const switching = requestSummaryMonChange(settled(0), "down");
+    const inFlight = run(switching, SUMMARY_MON_TRANSITION_TICKS - 1);
+    expect(inFlight.monTransition).toMatchObject({ elapsed: 19, toSlot: 1 });
+    expect(requestSummaryMonChange(inFlight, "down")).toBe(inFlight);
+    expect(requestSummaryPageChange(inFlight, "right")).toBe(inFlight);
+    expect(requestSummaryScreenExit(inFlight)).toBe(inFlight);
+
+    const ready = advanceSummaryScreen(inFlight);
+    expect(ready).toMatchObject({
+      selectedSlot: 1,
+      monTransition: null,
+      isOpen: true,
+      onInfoPage: true,
+      monAnimClock: 0,
+    });
+    expect(requestSummaryScreenExit(ready).transition).toMatchObject({
+      direction: "toDraft",
+      phase: "fadingOut",
+      elapsed: 0,
+    });
+  });
+
+  it("clamps at both Info-page ends instead of wrapping the six-rental list", () => {
+    const first = settled(0);
+    expect(requestSummaryMonChange(first, "up")).toBe(first);
+
+    const last = settled(5);
+    expect(requestSummaryMonChange(last, "down")).toBe(last);
+  });
+
+  it("does not steal ownership during entry, page scrolling, or a non-Info page", () => {
+    const entry = run(openSummaryScreen(2), 10);
+    expect(requestSummaryMonChange(entry, "down")).toBe(entry);
+
+    const scrolling = requestSummaryPageChange(settled(2), "right");
+    expect(requestSummaryMonChange(scrolling, "down")).toBe(scrolling);
+
+    const skills = run(scrolling, SUMMARY_PAGE_TRANSITION_TICKS);
+    expect(requestSummaryMonChange(skills, "down")).toBe(skills);
+  });
+});
+
 describe("summaryScreen: exit (B on the settled Info page)", () => {
   function settledOnInfoPage(slot: number): SummaryScreenState {
     return run(openSummaryScreen(slot), 59);
@@ -262,7 +340,7 @@ describe("summaryScreen: exit (B on the settled Info page)", () => {
     const state = requestSummaryScreenExit(settledOnInfoPage(2));
     expect(state.transition).toEqual({ direction: "toDraft", phase: "fadingOut", elapsed: 0 });
     expect(state.onInfoPage).toBe(false);
-    expect(state.selectedSlot).toBe(2); // gLastViewedMonIndex restoration is out of scope this slice - no UP/DOWN yet.
+    expect(state.selectedSlot).toBe(2);
   });
 
   it("settles back on the draft screen in exactly 53 ticks total from the B press, matching the oracle's B-press-tick+53", () => {

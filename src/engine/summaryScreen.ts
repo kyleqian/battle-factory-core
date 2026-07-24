@@ -36,6 +36,24 @@ export interface SummaryPageTransition {
   readonly elapsed: number;
 }
 
+export type SummaryMonDirection = "up" | "down";
+
+export interface SummaryMonTransition {
+  readonly fromSlot: number;
+  readonly toSlot: number;
+  readonly direction: SummaryMonDirection;
+  /** Source-relative clock: 0 is the accepted input tick, 20 is input-ready. */
+  readonly elapsed: number;
+}
+
+/**
+ * Task_ChangeSummaryMon returns Task_HandleInput on DOWN+21. The visible
+ * replacement is staged before then (old portrait removal at +4, new
+ * portrait at +16, types at +17, mon info at +18, page text at +19/+20).
+ */
+export const SUMMARY_MON_TRANSITION_TICKS = 20;
+export const SUMMARY_MON_MAX_SLOT = 5;
+
 /**
  * Task_HandleInput -> ChangePage -> PssScroll{Right,Left} observed clock.
  * The task handoff/window clear becomes visible at +4; seven 32px scroll
@@ -97,8 +115,12 @@ export interface SummaryScreenState {
   onInfoPage: boolean;
   /** Non-null while ChangePage's input handler is replaced by a scroll task. */
   pageTransition: SummaryPageTransition | null;
+  /** Non-null while Task_ChangeSummaryMon owns input and replaces slot data. */
+  monTransition: SummaryMonTransition | null;
   /** Ticks since the entry fade settled; presentation-only, page changes do not reset it. */
   openElapsed: number;
+  /** Replacement-local front-sprite clock; null before the first mon switch. */
+  monAnimClock: number | null;
   /** SELECTABLE_MONS_COUNT - 1 = 5 max; the draft cursor slot the summary opened on / is currently viewing. */
   selectedSlot: number;
   page: SummaryPage;
@@ -113,7 +135,9 @@ export const CLOSED_SUMMARY_SCREEN_STATE: SummaryScreenState = {
   isOpen: false,
   onInfoPage: false,
   pageTransition: null,
+  monTransition: null,
   openElapsed: 0,
+  monAnimClock: null,
   selectedSlot: 0,
   page: "info",
   mode: "SUMMARY_MODE_LOCK_MOVES",
@@ -141,7 +165,9 @@ export function openSummaryScreen(
     isOpen: false,
     onInfoPage: false,
     pageTransition: null,
+    monTransition: null,
     openElapsed: 0,
+    monAnimClock: null,
     selectedSlot: cursorPos,
     page: "info",
     mode: options.mode ?? "SUMMARY_MODE_LOCK_MOVES",
@@ -151,7 +177,7 @@ export function openSummaryScreen(
 
 /** pokemon_summary_screen.c's close path, triggered by B on the (unlocked, per SUMMARY_MODE_LOCK_MOVES) Info page. */
 export function requestSummaryScreenExit(state: SummaryScreenState): SummaryScreenState {
-  if (!state.isOpen || state.pageTransition) return state;
+  if (!state.isOpen || state.pageTransition || state.monTransition) return state;
   return {
     ...state,
     transition: { direction: "toDraft", phase: "fadingOut", elapsed: 0 },
@@ -167,7 +193,7 @@ export function requestSummaryPageChange(
   state: SummaryScreenState,
   direction: SummaryPageDirection,
 ): SummaryScreenState {
-  if (!state.isOpen || state.transition || state.pageTransition) return state;
+  if (!state.isOpen || state.transition || state.pageTransition || state.monTransition) return state;
   const fromIndex = PAGE_ORDER.indexOf(state.page);
   const delta = direction === "right" ? 1 : -1;
   const toPage = PAGE_ORDER[fromIndex + delta];
@@ -185,8 +211,62 @@ export function requestSummaryPageChange(
   };
 }
 
+/**
+ * Task_HandleInput -> ChangeSummaryPokemon -> AdvanceMonIndex.
+ *
+ * The six-rental party is a normal (non-box, non-multi) mon list. Emerald's
+ * Info page clamps at both ends: UP on slot 0 and DOWN on slot 5 are rejected,
+ * with no wrap. Ownership transfers to the destination slot immediately when
+ * the replacement task is installed.
+ */
+export function requestSummaryMonChange(
+  state: SummaryScreenState,
+  direction: SummaryMonDirection,
+): SummaryScreenState {
+  if (
+    !state.isOpen ||
+    state.transition ||
+    state.pageTransition ||
+    state.monTransition ||
+    state.page !== "info"
+  ) {
+    return state;
+  }
+  const delta = direction === "down" ? 1 : -1;
+  const toSlot = state.selectedSlot + delta;
+  if (toSlot < 0 || toSlot > SUMMARY_MON_MAX_SLOT) return state;
+  return {
+    ...state,
+    selectedSlot: toSlot,
+    monTransition: {
+      fromSlot: state.selectedSlot,
+      toSlot,
+      direction,
+      elapsed: 0,
+    },
+  };
+}
+
 /** Advance entry/exit and page-scroll state machines by one tick. Call every engine tick. */
 export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenState {
+  if (state.monTransition) {
+    const elapsed = state.monTransition.elapsed + 1;
+    if (elapsed >= SUMMARY_MON_TRANSITION_TICKS) {
+      return {
+        ...state,
+        monTransition: null,
+        isOpen: true,
+        onInfoPage: true,
+        openElapsed: state.openElapsed + 1,
+        monAnimClock: 0,
+      };
+    }
+    return {
+      ...state,
+      monTransition: { ...state.monTransition, elapsed },
+      openElapsed: state.openElapsed + 1,
+    };
+  }
   if (state.pageTransition) {
     const elapsed = state.pageTransition.elapsed + 1;
     if (elapsed >= SUMMARY_PAGE_TRANSITION_TICKS) {
@@ -205,7 +285,15 @@ export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenSt
     };
   }
   const t = state.transition;
-  if (!t) return state.isOpen ? { ...state, openElapsed: state.openElapsed + 1 } : state;
+  if (!t) {
+    return state.isOpen
+      ? {
+          ...state,
+          openElapsed: state.openElapsed + 1,
+          monAnimClock: state.monAnimClock === null ? null : state.monAnimClock + 1,
+        }
+      : state;
+  }
   const elapsed = t.elapsed + 1;
 
   if (t.phase === "fadingOut") {

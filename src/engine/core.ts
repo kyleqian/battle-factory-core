@@ -51,6 +51,7 @@ import {
   CLOSED_SUMMARY_SCREEN_STATE,
   advanceSummaryScreen,
   openSummaryScreen,
+  requestSummaryMonChange,
   requestSummaryScreenExit,
   requestSummaryPageChange,
   summaryPageLayerOffsets,
@@ -60,6 +61,7 @@ import {
   renderSummaryInfoPage,
   renderSummaryInfoPageCleared,
   renderSummaryInfoPageFaded,
+  renderSummaryMonTransition,
   renderSummaryPageTransition,
   renderSummarySkillsPage,
 } from "./summaryInfoPage.ts";
@@ -1269,13 +1271,14 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // symmetric close path) own the screen exclusively while a fade is in
     // flight - the draft screen's own tasks are torn down/frozen, so no
     // input is processed and none of its per-tick redraw state advances.
-  } else if (summaryScreen.pageTransition) {
-    // ChangePage replaces Task_HandleInput with the scroll task, so all fresh
-    // input (including B and the opposite direction) is rejected in flight.
+  } else if (summaryScreen.pageTransition || summaryScreen.monTransition) {
+    // ChangePage and ChangeSummaryPokemon replace Task_HandleInput, so all
+    // fresh input is rejected until their task returns input ownership.
   } else if (summaryScreen.isOpen) {
-    // Task_HandleInput priority: LEFT, RIGHT, then B. UP/DOWN and A on later
-    // pages remain in S9's explicitly deferred routes.
-    if (newKeys.has("LEFT")) summaryScreen = requestSummaryPageChange(summaryScreen, "left");
+    // pokemon_summary_screen.c Task_HandleInput's exact directional priority.
+    if (newKeys.has("UP")) summaryScreen = requestSummaryMonChange(summaryScreen, "up");
+    else if (newKeys.has("DOWN")) summaryScreen = requestSummaryMonChange(summaryScreen, "down");
+    else if (newKeys.has("LEFT")) summaryScreen = requestSummaryPageChange(summaryScreen, "left");
     else if (newKeys.has("RIGHT")) summaryScreen = requestSummaryPageChange(summaryScreen, "right");
     else if (newKeys.has("B")) summaryScreen = requestSummaryScreenExit(summaryScreen);
   } else {
@@ -1889,9 +1892,14 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         });
       const summary = state.summaryScreen;
       const transition = summary.transition;
+      const summaryMonAnimClock = summary.monAnimClock ?? summary.openElapsed + 1;
+      const animateSwitchedMon = summary.monAnimClock !== null;
       if (!transition) {
+        if (summary.monTransition) {
+          return renderSummaryMonTransition(summary.monTransition, summaryMonAnimClock);
+        }
         return summary.onInfoPage
-          ? renderSummaryInfoPage(summary.selectedSlot)
+          ? renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
           : renderPopup(0, 0);
       }
       const isEntry = transition.direction === "toSummary";
@@ -1916,7 +1924,13 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       const showingPopup = isEntry === (transition.phase === "fadingOut");
       return showingPopup
         ? renderPopup(bgY, objY)
-        : renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY);
+        : renderSummaryInfoPageFaded(
+            summary.selectedSlot,
+            bgY,
+            objY,
+            summaryMonAnimClock,
+            animateSwitchedMon,
+          );
     }
     const exiting =
       swap.controller.phase === "acceptExit" ||
@@ -2036,7 +2050,12 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (state.prebattleRoom) return renderPrebattleRoomState(state);
   const summary = state.summaryScreen;
   const t = summary.transition;
+  const summaryMonAnimClock = summary.monAnimClock ?? summary.openElapsed + 1;
+  const animateSwitchedMon = summary.monAnimClock !== null;
   if (!t) {
+    if (summary.monTransition) {
+      return renderSummaryMonTransition(summary.monTransition, summaryMonAnimClock);
+    }
     if (summary.pageTransition) {
       // ChangePage's task handoff is installed immediately but its outgoing
       // window timing follows which BG layer moves. A forward wipe parks
@@ -2048,22 +2067,27 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       const layers = summaryPageLayerOffsets(pageTransition);
       if (pageTransition.elapsed === 0) {
         return pageTransition.fromPage === "skills"
-          ? renderSummarySkillsPage(summary.selectedSlot, summary.openElapsed + 1)
-          : renderSummaryInfoPage(summary.selectedSlot, summary.openElapsed + 1);
+          ? renderSummarySkillsPage(summary.selectedSlot, summary.openElapsed + 1, animateSwitchedMon)
+          : renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon);
       }
       if (layers.movingPage === pageTransition.toPage && pageTransition.elapsed <= 2) {
-        return renderSummaryInfoPageCleared(summary.selectedSlot, summary.openElapsed + 1);
+        return renderSummaryInfoPageCleared(
+          summary.selectedSlot,
+          summaryMonAnimClock,
+          animateSwitchedMon,
+        );
       }
       return renderSummaryPageTransition(
         summary.selectedSlot,
         pageTransition,
-        summary.openElapsed + 1,
+        summaryMonAnimClock,
+        animateSwitchedMon,
       );
     }
     return summary.isOpen
       ? summary.page === "skills"
-        ? renderSummarySkillsPage(summary.selectedSlot, summary.openElapsed + 1)
-        : renderSummaryInfoPage(summary.selectedSlot, summary.openElapsed + 1)
+        ? renderSummarySkillsPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+        : renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
       : renderFactoryDraftScreen(state.draftScreen);
   }
   const isEntry = t.direction === "toSummary";
@@ -2101,7 +2125,13 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   const showingDraft = isEntry === (t.phase === "fadingOut");
   return showingDraft
     ? renderFactoryDraftScreenFaded(state.draftScreen, bgY, objY)
-    : renderSummaryInfoPageFaded(summary.selectedSlot, bgY, objY);
+    : renderSummaryInfoPageFaded(
+        summary.selectedSlot,
+        bgY,
+        objY,
+        summaryMonAnimClock,
+        animateSwitchedMon,
+      );
 }
 
 export function render(state: EngineState): Uint8Array {

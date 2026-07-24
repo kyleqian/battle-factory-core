@@ -17,7 +17,8 @@ import { drawGlyphCodes, measureText, rightAlignXOffset, type FontData, type Tex
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded, drawTilePatchFaded, fadeColor } from "./fadeRender.ts";
 import { getMonGender } from "./monGender.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
-import type { SummaryPageTransition } from "./summaryScreen.ts";
+import { drawSpriteSheetAffineRotate } from "./battleScene.ts";
+import type { SummaryMonTransition, SummaryPageTransition } from "./summaryScreen.ts";
 import { summaryPageLayerOffsets } from "./summaryScreen.ts";
 
 import summaryBgData from "../assets/gen/summary-bg.json" with { type: "json" };
@@ -201,6 +202,17 @@ function compose(
   clearPageWindows = false,
   pageOffsetX = 0,
   destinationChromeInstalled = page === "skills",
+  monReplacement: {
+    readonly spriteSlot?: number;
+    readonly typeSlot?: number;
+    readonly monInfoSlot?: number;
+    readonly abilitySlot?: number;
+    readonly memoSlot?: number;
+    readonly abilityDescriptionCharLimit?: number;
+    readonly showMon?: boolean;
+    readonly showBall?: boolean;
+    readonly animateMagby?: boolean;
+  } = {},
 ): void {
   const text = (str: string, x: number, y: number, colors: TextColors, paletteNum: number) =>
     drawTextFaded(fb, font, charmap, str, x, y, summaryBg.subpalettes[paletteNum]!, colors, bgY);
@@ -236,17 +248,22 @@ function compose(
 
   drawTilePatchFaded(fb, summaryBg.tileset, summaryBg.subpalettes, STATUS_WINDOW_CLOSED_TILEMAP, 0, 18 * 8, bgY);
 
-  const pool = draftPool[selectedSlot]!;
-  const rental = rentals[selectedSlot]!;
+  const spriteSlot = monReplacement.spriteSlot ?? selectedSlot;
+  const typeSlot = monReplacement.typeSlot ?? selectedSlot;
+  const monInfoSlot = monReplacement.monInfoSlot ?? selectedSlot;
+  const abilitySlot = monReplacement.abilitySlot ?? selectedSlot;
+  const memoSlot = monReplacement.memoSlot ?? selectedSlot;
+  const pool = draftPool[monInfoSlot]!;
+  const rental = rentals[monInfoSlot]!;
   const info = speciesInfoBySpecies.get(rental.species)!;
-  const ability = abilities[rental.ability]!;
   const gender = getMonGender(info.genderRatio, rental.personality);
-  const natureName = rental.nature.replace("NATURE_", "");
 
   // Sprites, back to front (§7's composition order): type icon(s), markings,
   // caught-ball icon, mon front sprite.
   if (page === "info" && !clearPageWindows) {
-    const types = info.types.map((t) => t.replace("TYPE_", ""));
+    const typeRental = rentals[typeSlot]!;
+    const typeInfo = speciesInfoBySpecies.get(typeRental.species)!;
+    const types = typeInfo.types.map((t) => t.replace("TYPE_", ""));
     const type1 = typeIcons.types[types[0]!]!;
     sprite({ tileset: type1.tileset }, type1.palette, 136, 56, 4, 2, 0);
     if (types[1] && types[1] !== types[0]) {
@@ -261,19 +278,22 @@ function compose(
 
   // CreateCaughtBallSprite(..., 16, 136, 0): every rental is created with
   // MON_DATA_POKEBALL defaulted to ITEM_POKE_BALL (pokemon.c:2261).
-  sprite(BALL_SHEET, ball.palette, 16, 136, 2, 2, 0);
+  if (monReplacement.showBall !== false) {
+    sprite(BALL_SHEET, ball.palette, 16, 136, 2, 2, 0);
+  }
 
   // CreateMonSprite(..., 40, 64, 5): hFlip = !IsMonSpriteNotFlipped(species)
   // - all 6 anchor species have noFlip=FALSE in species_info.h, so hFlip is
   // always TRUE here (unlike the draft screen's unflipped ball-open pic).
-  const frontSprite = frontSprites[pool.species]!;
+  const spritePool = draftPool[spriteSlot]!;
+  const frontSprite = frontSprites[spritePool.species]!;
   let monTileset = frontSprite.tileset;
   let monX = 40;
   let monY = 64;
   // ONIX: no species delay; StartSpriteAnim(1) becomes visible at open+6,
   // then ANIM_RAPID_H_HOPS advances from data[2]=0 one callback later.
   // This is source-derived presentation state, not a framebuffer/tick fit.
-  if (pool.species === "ONIX" && monAnimClock >= 6) {
+  if (spritePool.species === "ONIX" && monAnimClock >= 6) {
     monTileset = frontSprite.animationFrame1;
     const data = Math.max(0, monAnimClock - 7) * 24;
     const phase = Math.floor(data / 512) % 4;
@@ -289,7 +309,41 @@ function compose(
     const sine = GBA_SINE_TABLE_256[within % 128]!;
     monY -= Math.floor((sine * 4) / 256);
   }
-  sprite({ tileset: monTileset }, frontSprite.palette, monX, monY, 8, 8, 0, true);
+  if (
+    monReplacement.showMon !== false &&
+    spritePool.species === "MAGBY" &&
+    monReplacement.animateMagby === true &&
+    monAnimClock >= 2
+  ) {
+    // ANIM_V_SQUISH_AND_BOUNCE (duration=16): the summary sprite is
+    // horizontally flipped and AFFINE_DOUBLE. PokemonSummaryDoMonAnimation
+    // starts on replacement-local clock 1; the resulting OAM matrix becomes
+    // visible one render later.
+    const n = Math.min(49, monAnimClock - 2);
+    const data4 = (n * 8) & 0xff;
+    const data3 = Math.max(0, Math.min(15, n - 16)) * 8;
+    const sin = (angle: number, amplitude: number) =>
+      (GBA_SINE_TABLE_256[angle & 0xff]! * amplitude) >> 8;
+    const yScale = sin(data4, 32) + 256;
+    const xScale = 256 - sin(data4, 32);
+    const posY = yScale > 256 ? Math.trunc((256 - yScale) / 8) : 0;
+    const y2 = -sin(data3, 10) - posY;
+    drawSpriteSheetAffineRotate(
+      fb,
+      monTileset,
+      frontSprite.palette.map((color) => fadeColor(color, objY)),
+      monX,
+      monY + y2,
+      -xScale,
+      0,
+      0,
+      yScale,
+      undefined,
+      true,
+    );
+  } else if (monReplacement.showMon !== false) {
+    sprite({ tileset: monTileset }, frontSprite.palette, monX, monY, 8, 8, 0, true);
+  }
 
   // BG0 windows, topmost.
   text(
@@ -351,8 +405,16 @@ function compose(
   else if (gender === "female") text("♀", WIN_SPECIES.x + 57, WIN_SPECIES.y + 17, COLOR_FEMALE, PAL6);
 
   if (page === "info" && !clearPageWindows) {
+    const abilityRental = rentals[abilitySlot]!;
+    const ability = abilities[abilityRental.ability]!;
+    const memoRental = rentals[memoSlot]!;
+    const natureName = memoRental.nature.replace("NATURE_", "");
     text(ability.name, WIN_ABILITY.x, WIN_ABILITY.y + 1, COLOR_1, PAL6);
-    text(ability.description, WIN_ABILITY.x, WIN_ABILITY.y + 17, COLOR_0, PAL6);
+    const abilityDescription =
+      monReplacement.abilityDescriptionCharLimit === undefined
+        ? ability.description
+        : ability.description.slice(0, monReplacement.abilityDescriptionCharLimit);
+    text(abilityDescription, WIN_ABILITY.x, WIN_ABILITY.y + 17, COLOR_0, PAL6);
 
     // gText_XNature: "{DYNAMIC 0}{nature}{DYNAMIC 1} nature" - two-tone via
     // inline {COLOR}/{SHADOW} control codes, not a single sTextColors row (§7).
@@ -420,28 +482,131 @@ function compose(
   }
 }
 
-export function renderSummaryInfoPage(selectedSlot: number, monAnimClock = 0): Uint8Array {
+export function renderSummaryInfoPage(
+  selectedSlot: number,
+  monAnimClock = 0,
+  animateSwitchedMon = false,
+): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, 0, 0, "info", monAnimClock);
+  compose(fb, selectedSlot, 0, 0, "info", monAnimClock, false, 0, false, {
+    animateMagby: animateSwitchedMon,
+  });
   return fb;
 }
 
 /** S4 entry/exit fade variant - see module doc. bgY=objY=0 reproduces renderSummaryInfoPage exactly. */
-export function renderSummaryInfoPageFaded(selectedSlot: number, bgY: number, objY: number): Uint8Array {
+export function renderSummaryInfoPageFaded(
+  selectedSlot: number,
+  bgY: number,
+  objY: number,
+  monAnimClock = 0,
+  animateSwitchedMon = false,
+): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, bgY, objY, "info", 0);
+  compose(fb, selectedSlot, bgY, objY, "info", monAnimClock, false, 0, false, {
+    animateMagby: animateSwitchedMon,
+  });
   return fb;
 }
 
-export function renderSummarySkillsPage(selectedSlot: number, monAnimClock = 0): Uint8Array {
+export function renderSummarySkillsPage(
+  selectedSlot: number,
+  monAnimClock = 0,
+  animateSwitchedMon = false,
+): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, 0, 0, "skills", monAnimClock);
+  compose(fb, selectedSlot, 0, 0, "skills", monAnimClock, false, 0, true, {
+    animateMagby: animateSwitchedMon,
+  });
   return fb;
 }
 
-export function renderSummaryInfoPageCleared(selectedSlot: number, monAnimClock: number): Uint8Array {
+export function renderSummaryInfoPageCleared(
+  selectedSlot: number,
+  monAnimClock: number,
+  animateSwitchedMon = false,
+): Uint8Array {
   const fb = createFramebuffer();
-  compose(fb, selectedSlot, 0, 0, "info", monAnimClock, true);
+  compose(fb, selectedSlot, 0, 0, "info", monAnimClock, true, 0, false, {
+    animateMagby: animateSwitchedMon,
+  });
+  return fb;
+}
+
+/**
+ * Task_ChangeSummaryMon's source-ordered Info-page replacement. Each field
+ * switches ownership only when its task state becomes visible; the old
+ * portrait is absent while graphics and sprite resources are rebuilt.
+ */
+export function renderSummaryMonTransition(
+  transition: SummaryMonTransition,
+  oldMonAnimClock: number,
+): Uint8Array {
+  const elapsed = transition.elapsed;
+  const spriteIsNew = elapsed >= 16;
+  const fb = createFramebuffer();
+  compose(
+    fb,
+    transition.fromSlot,
+    0,
+    0,
+    "info",
+    spriteIsNew ? 0 : oldMonAnimClock,
+    false,
+    0,
+    false,
+    {
+      spriteSlot: spriteIsNew ? transition.toSlot : transition.fromSlot,
+      typeSlot: elapsed >= 17 ? transition.toSlot : transition.fromSlot,
+      monInfoSlot: elapsed >= 18 ? transition.toSlot : transition.fromSlot,
+      abilitySlot: elapsed >= 19 ? transition.toSlot : transition.fromSlot,
+      memoSlot: elapsed >= 20 ? transition.toSlot : transition.fromSlot,
+      // AddTextPrinter's speed-0 callback exhausts its first 21 printable
+      // characters on this task tick; the remainder lands next VBlank.
+      abilityDescriptionCharLimit: elapsed === 19 ? 21 : undefined,
+      showMon: elapsed < 3 || spriteIsNew,
+      showBall: elapsed < 4 || elapsed >= 12,
+    },
+  );
+  if (elapsed === 19) {
+    // The speed-0 printer has reached the 22nd glyph when this render scans
+    // out, but only its first 9 cell rows have crossed COPYWIN_GFX yet.
+    // Model that window-transfer boundary from glyph metrics (not pixels).
+    const partial = createFramebuffer();
+    compose(partial, transition.fromSlot, 0, 0, "info", oldMonAnimClock, false, 0, false, {
+      spriteSlot: transition.toSlot,
+      typeSlot: transition.toSlot,
+      monInfoSlot: transition.toSlot,
+      abilitySlot: transition.toSlot,
+      memoSlot: transition.fromSlot,
+      abilityDescriptionCharLimit: 22,
+      showMon: true,
+      showBall: true,
+    });
+    const description = abilities[rentals[transition.toSlot]!.ability]!.description;
+    const prefix = description.slice(0, 21);
+    const glyphX = WIN_ABILITY.x + measureText(font, charmap, prefix);
+    const glyphWidth = measureText(font, charmap, description.slice(0, 22)) - measureText(font, charmap, prefix);
+    const glyphY = WIN_ABILITY.y + 17;
+    for (let y = glyphY; y < glyphY + 9; y += 1) {
+      for (let x = glyphX; x < glyphX + glyphWidth; x += 1) {
+        const offset = (y * 240 + x) * 4;
+        fb[offset] = partial[offset]!;
+        fb[offset + 1] = partial[offset + 1]!;
+        fb[offset + 2] = partial[offset + 2]!;
+        fb[offset + 3] = partial[offset + 3]!;
+      }
+    }
+    // COPYWIN_GFX is 4bpp: the next transferred halfword contributes four
+    // pixels of row 10 before scanout reaches this OBJ/BG composition.
+    for (let x = glyphX; x < glyphX + 4; x += 1) {
+      const offset = ((glyphY + 9) * 240 + x) * 4;
+      fb[offset] = partial[offset]!;
+      fb[offset + 1] = partial[offset + 1]!;
+      fb[offset + 2] = partial[offset + 2]!;
+      fb[offset + 3] = partial[offset + 3]!;
+    }
+  }
   return fb;
 }
 
@@ -449,6 +614,7 @@ export function renderSummaryPageTransition(
   selectedSlot: number,
   transition: SummaryPageTransition,
   monAnimClock: number,
+  animateSwitchedMon = false,
 ): Uint8Array {
   const fb = createFramebuffer();
   const layers = summaryPageLayerOffsets(transition);
@@ -466,6 +632,7 @@ export function renderSummaryPageTransition(
       true,
       layers.movingX,
       transition.fromPage === "skills",
+      { animateMagby: animateSwitchedMon },
     );
     return fb;
   }
