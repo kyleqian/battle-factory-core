@@ -24,10 +24,17 @@
     "opponentGender": "female"
   },
   "controllerProfile": {
-    "moveTextFirstAge": 999
+    "moveTextFirstAge": 999,
+    "moveTextClearAge": 999,
+    "targetHpBefore": 117,
+    "targetHpAfter": 117,
+    "hitReactionFirstAge": 999,
+    "hpDrainFirstAge": 999,
+    "resultTextFirstAge": 999,
+    "currentMoveResetAge": 999
   },
   "acceptance": {
     "status": "partial",
-    "remaining": "Strike/controller half and opposite orientation are not yet accepted."
+    "remaining": "The body is exact; move-level acceptance still requires the successful-paralysis controller variant."
   }
 }

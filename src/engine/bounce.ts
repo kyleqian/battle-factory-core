@@ -12,6 +12,7 @@ export interface BouncePresentationState {
   readonly ball: BounceBall | null;
   readonly impactVisible: boolean;
   readonly targetTaskOwnsY2: boolean;
+  readonly targetBaseOffsetReset: boolean;
   readonly targetShakeY2: number;
 }
 
@@ -51,8 +52,9 @@ const BOUNCE_STRIKE_FIRST_Y2 = -102;
 const BOUNCE_STRIKE_LAST_AGE = 23;
 const BOUNCE_IMPACT_FIRST_AGE = 9;
 const BOUNCE_IMPACT_LAST_AGE = 17;
+const BOUNCE_TARGET_TASK_LAST_AGE = 29;
 const BOUNCE_SHAKE_AGES: ReadonlySet<number> =
-  new Set([11, 12, 15, 16, 19, 20, 23]);
+  new Set([11, 12, 15, 16, 19, 20, 23, 24, 27, 28]);
 
 /**
  * Source `AnimBounceBallLand`: begin 32 px above the screen, descend 10 px
@@ -81,6 +83,7 @@ export function bouncePresentationAtAge(
       ball: BOUNCE_CHARGE_BALL[age] ?? null,
       impactVisible: false,
       targetTaskOwnsY2: false,
+      targetBaseOffsetReset: false,
       targetShakeY2: 0,
     };
   }
@@ -95,7 +98,10 @@ export function bouncePresentationAtAge(
     impactVisible:
       effectAge >= BOUNCE_IMPACT_FIRST_AGE
       && effectAge <= BOUNCE_IMPACT_LAST_AGE,
-    targetTaskOwnsY2: effectAge >= BOUNCE_IMPACT_FIRST_AGE,
+    targetTaskOwnsY2:
+      effectAge >= BOUNCE_IMPACT_FIRST_AGE
+      && effectAge <= BOUNCE_TARGET_TASK_LAST_AGE,
+    targetBaseOffsetReset: effectAge >= BOUNCE_IMPACT_FIRST_AGE,
     targetShakeY2: BOUNCE_SHAKE_AGES.has(effectAge) ? 5 : 0,
   };
 }

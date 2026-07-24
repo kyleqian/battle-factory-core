@@ -40,6 +40,7 @@ describe("source-relative BOUNCE presentation", () => {
     expect(bouncePresentationAtAge("strike", 8)).toMatchObject({
       impactVisible: false,
       targetTaskOwnsY2: false,
+      targetBaseOffsetReset: false,
       targetShakeY2: 0,
     });
     expect(bouncePresentationAtAge("strike", 9)).toMatchObject({
@@ -55,7 +56,7 @@ describe("source-relative BOUNCE presentation", () => {
       attackerInvisible: false,
       ball: null,
       targetTaskOwnsY2: true,
-      targetShakeY2: 0,
+      targetShakeY2: 5,
     });
   });
 
@@ -91,7 +92,17 @@ describe("source-relative BOUNCE presentation", () => {
         playerGender: "female",
         opponentGender: "female",
       },
-      controllerProfile: { moveTextFirstAge: -22 },
+      controllerProfile: {
+        moveTextFirstAge: -22,
+        moveTextClearAge: 192,
+        targetHpBefore: 117,
+        targetHpAfter: 114,
+        hitReactionFirstAge: 49,
+        hpDrainFirstAge: 84,
+        resultTextFirstAge: 92,
+        currentMoveResetAge: 189,
+        actionMenuRevealAge: 199,
+      },
       animationAgeOffset: -9,
     });
     expect(sceneOnBounceView({ ...state, age: 18 })).toMatchObject({
@@ -109,6 +120,50 @@ describe("source-relative BOUNCE presentation", () => {
         visibleChars: 22,
       },
     });
+  });
+
+  it("consumes immutable resolution outcomes through cleanup and menu reveal", () => {
+    const state = createSceneOnMovePresentation({
+      move: "BOUNCE",
+      turn: "strike",
+      ...SPOINK_TO_ONIX_BOUNCE_PRESENTATION,
+      fieldProfile: {
+        playerHp: 117,
+        opponentHp: 96,
+        playerStatus: "none",
+        playerGender: "female",
+        opponentGender: "female",
+      },
+      controllerProfile: {
+        moveTextFirstAge: -22,
+        moveTextClearAge: 192,
+        targetHpBefore: 117,
+        targetHpAfter: 114,
+        hitReactionFirstAge: 49,
+        hpDrainFirstAge: 84,
+        resultTextFirstAge: 92,
+        currentMoveResetAge: 189,
+        actionMenuRevealAge: 199,
+      },
+      animationAgeOffset: -1,
+    });
+    expect(sceneOnBounceView({ ...state, age: 49 })).toMatchObject({
+      healthboxY2: 1,
+      targetInvisible: false,
+      displayedTargetHp: 117,
+      currentMove: "BOUNCE",
+    });
+    expect(sceneOnBounceView({ ...state, age: 50 }).targetInvisible).toBe(true);
+    expect(sceneOnBounceView({ ...state, age: 84 }).displayedTargetHp).toBe(116);
+    expect(sceneOnBounceView({ ...state, age: 86 }).displayedTargetHp).toBe(114);
+    expect(sceneOnBounceView({ ...state, age: 189 }).currentMove).toBeNull();
+    expect(sceneOnBounceView({ ...state, age: 92 }).message).toMatchObject({
+      line1: "It’s not very effective…",
+      visibleChars: 1,
+    });
+    expect(sceneOnBounceView({ ...state, age: 192 }).message).toBeNull();
+    expect(sceneOnBounceView({ ...state, age: 198 }).actionMenu.visible).toBe(false);
+    expect(sceneOnBounceView({ ...state, age: 199 }).actionMenu.visible).toBe(true);
   });
 
   it("pins the source-derived opposite-side battler geometry", () => {

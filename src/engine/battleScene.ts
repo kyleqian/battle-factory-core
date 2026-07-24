@@ -15647,14 +15647,25 @@ export function renderSceneOnMovePresentation(
     const targetSprite = target.geometry.side === "player"
       ? onixBackSprite
       : onixFrontSprite;
-    drawSpriteSheet(
-      fb,
-      targetSprite.tileset,
-      targetSprite.palette,
-      target.geometry.spriteCorner.x
-        - (target.geometry.side === "opponent" && view.targetTaskOwnsY2 ? 1 : 0),
-      target.geometry.spriteCorner.y + view.targetShakeY2,
-    );
+    if (!view.targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        target.geometry.spriteCorner.x
+          - (
+            target.geometry.side === "opponent"
+            && view.targetBaseOffsetReset
+              ? 1
+              : 0
+          ),
+        target.geometry.spriteCorner.y
+          + view.targetShakeY2
+          + (target.geometry.side === "player"
+            ? view.actionMenu.battlerY2
+            : 0),
+      );
+    }
     const bounceEffectBackdrop = fb.slice();
     if (view.impactVisible) {
       drawSpriteSheetBlendedOverBackdrop(
@@ -15703,20 +15714,30 @@ export function renderSceneOnMovePresentation(
       drawComposedPlayerHealthbox(
         fb,
         onixPlayerHealthboxContentForState(
-          state.config.fieldProfile.playerHp,
+          view.displayedTargetHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender,
         ),
+        0,
+        view.healthboxY2 + view.actionMenu.healthboxY2,
       );
     } else {
+      const opponentContent = featherDanceOnixOpponentHealthbox(
+        view.displayedTargetHp,
+        state.config.fieldProfile.opponentGender ?? "female",
+      );
       drawSendOutHealthbox(
         fb,
         0,
-        featherDanceOnixOpponentHealthbox(
-          state.config.fieldProfile.opponentHp,
-          state.config.fieldProfile.opponentGender ?? "female",
-        ),
+        opponentContent,
       );
+      if (view.healthboxY2 !== 0) {
+        drawOpponentHealthboxWobble(
+          fb,
+          view.healthboxY2,
+          opponentContent,
+        );
+      }
       drawComposedPlayerHealthbox(
         fb,
         bounceSpoinkPlayerHealthbox(
@@ -15738,6 +15759,9 @@ export function renderSceneOnMovePresentation(
         view.message.line2,
         view.message.visibleChars,
       );
+    }
+    if (view.actionMenu.visible) {
+      drawTurn5SitrusSettledMenuChrome(fb);
     }
     return;
   }

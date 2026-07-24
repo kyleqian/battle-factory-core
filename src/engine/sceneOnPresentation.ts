@@ -107,9 +107,17 @@ export interface SceneOnBounceConfig {
   readonly target: SceneOnPresentationBattler;
   /** Immutable field values supplied by the legal stock-ROM stage. */
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
-  /** Controller-owned move-used printer boundary; no controller is advanced. */
+  /** Immutable controller outcome/display boundaries; no controller is advanced. */
   readonly controllerProfile: Readonly<{
     readonly moveTextFirstAge: number;
+    readonly moveTextClearAge: number;
+    readonly targetHpBefore: number;
+    readonly targetHpAfter: number;
+    readonly hitReactionFirstAge: number;
+    readonly hpDrainFirstAge: number;
+    readonly resultTextFirstAge: number;
+    readonly currentMoveResetAge: number;
+    readonly actionMenuRevealAge?: number;
   }>;
   /**
    * First displayed callback age for this half of `choosetwoturnanim`.
@@ -549,10 +557,14 @@ export interface SceneOnBounceView extends BouncePresentationState {
   readonly target: SceneOnPresentationBattler;
   readonly message: Readonly<{
     readonly line1: string;
-    readonly line2: "BOUNCE!";
+    readonly line2: string;
     readonly visibleChars: number;
   }> | null;
-  readonly currentMove: "BOUNCE";
+  readonly healthboxY2: number;
+  readonly targetInvisible: boolean;
+  readonly displayedTargetHp: number;
+  readonly actionMenu: ActionMenuDisplayTransition;
+  readonly currentMove: "BOUNCE" | null;
 }
 
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
@@ -767,25 +779,62 @@ export function sceneOnBounceView(
   }
   const animationAge =
     state.age + (state.config.animationAgeOffset ?? 0);
-  const line1 = `${battlerNameWithPrefix(state.config.attacker)} used`;
-  const line2 = "BOUNCE!" as const;
-  const messageLength = line1.length + line2.length;
+  const moveLine1 = `${battlerNameWithPrefix(state.config.attacker)} used`;
+  const moveLine2 = "BOUNCE!";
+  const { controllerProfile } = state.config;
+  const message = state.age >= controllerProfile.resultTextFirstAge
+    ? {
+        line1: "It’s not very effective…",
+        line2: "",
+        firstAge: controllerProfile.resultTextFirstAge,
+      }
+    : {
+        line1: moveLine1,
+        line2: moveLine2,
+        firstAge: controllerProfile.moveTextFirstAge,
+      };
+  const messageLength = message.line1.length + message.line2.length;
+  const hit = state.config.turn === "strike"
+    ? genericHitReactionAtAge(
+        state.age,
+        controllerProfile.hitReactionFirstAge,
+      )
+    : { healthboxY2: 0, targetInvisible: false };
+  const actionMenu = controllerProfile.actionMenuRevealAge === undefined
+    ? { visible: false, battlerY2: 0, healthboxY2: 0 }
+    : actionMenuDisplayAtAge(
+        state.age,
+        controllerProfile.actionMenuRevealAge,
+      );
   return {
     age: state.age,
     animationAge,
     attacker: state.config.attacker,
     target: state.config.target,
-    message: state.age < state.config.controllerProfile.moveTextFirstAge
+    message:
+      state.age < message.firstAge
+      || state.age >= controllerProfile.moveTextClearAge
       ? null
       : {
-          line1,
-          line2,
+          line1: message.line1,
+          line2: message.line2,
           visibleChars: Math.min(
             messageLength,
-            state.age - state.config.controllerProfile.moveTextFirstAge + 1,
+            state.age - message.firstAge + 1,
           ),
         },
-    currentMove: "BOUNCE",
+    ...hit,
+    displayedTargetHp: displayedHpAfterDamage(
+      state.age,
+      {
+        startHp: controllerProfile.targetHpBefore,
+        endHp: controllerProfile.targetHpAfter,
+        firstDisplayedAge: controllerProfile.hpDrainFirstAge,
+      },
+    ),
+    actionMenu,
+    currentMove:
+      state.age >= controllerProfile.currentMoveResetAge ? null : "BOUNCE",
     ...bouncePresentationAtAge(
       state.config.turn,
       animationAge,

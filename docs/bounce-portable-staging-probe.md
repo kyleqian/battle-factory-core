@@ -1,9 +1,8 @@
 # Portable BOUNCE source-evidence checkpoint
 
-`MOVE_BOUNCE` is **partial** for pixel acceptance. This checkpoint provides a
-legal Scene-ON stage, a complete source/RAM-derived reducer for both visual
-halves, and exact dense opponent-front framebuffer windows through the shared
-Scene-ON seam. Opposite orientation and the controller resolution tail remain.
+`MOVE_BOUNCE` is **partial** for pixel acceptance. Both orientations now have
+complete no-status controller tails through the shared Scene-ON seam. The sole
+remaining move-level variant is the source-required successful paralysis path.
 
 ## Legal Level-50 stage and zero-PP-Up proof
 
@@ -75,10 +74,37 @@ Committed fixtures prove every practical frame of both opponent-side bodies:
   exclusions, zero differing pixels, including hit-splat and all seven +5
   target-shake displays.
 
+## Controller-tail closeout
+
+The stock hit path is shared after
+`BattleScript_SecondTurnSemiInvulnerable`: `BattleScript_HitFromAtkString`
+drives animation, generic hit reaction, health display/data update, result
+message, secondary effect, and `BattleScript_MoveEnd`. Immutable presentation
+profiles now expose those already-resolved display boundaries without owning
+damage, accuracy, PP, RNG, paralysis, turn order, or controller progression.
+
+- Opponent-front frames **881-1179 are 299/299 exact**: all five vertical
+  shake pulses; monbg target-base reset/release; generic hit blink and
+  healthbox wobble; immutable 117→114 display drain; not-very-effective
+  printer; controller release; `gCurrentMove=0`; seven blank frames; atomic
+  action-menu reveal; and 100 menu/bounce frames.
+- Player-back frames **777-973 are 197/197 exact** with the source-observed
+  four-frame scheduling lag, immutable 117→114 opponent drain, the same
+  result/cleanup chain, and four stable `MOVE_NONE` frames before the next
+  opponent move printer.
+
+Both dense fixtures have zero exclusions. Both 24-frame charge fixtures and
+all four FLY regression fixtures remain unchanged and exact under their
+declared acceptance.
+
 ## Honest remainder
 
-BOUNCE is partial, not exact. Next work must stage the legal player-back
-SPOINK case, extract only its required back art, and dense-compare both bodies
-with opponent-front target geometry. The complete controller resolution and
-cleanup tail (generic hit/HP/result/command release/current-move boundary) is
-also still unaccepted. FLY's accepted windows are unchanged.
+BOUNCE remains partial because source sets `MOVE_EFFECT_PARALYSIS` before the
+shared hit path, and a legal successful outcome has distinct presentation.
+`mechanic-bounce-paralysis-spoink-onix.json` uses seed `0x27182818`; checked
+RAM shows status commit at frame 1063, controller command 27 and the
+`Status_Paralysis` animation (`ANIM_TAG_SPARK_2`, `ElectricityEffect`,
+`AnimTask_ShakeMon2`) through frame 1148, later command-26/message cleanup,
+`gCurrentMove=0` at frame 1225, and menu setup at 1230. That complete dense
+status-animation/message/PAR-healthbox tail must pass before exact promotion.
+FLY's accepted windows and ISSUES #34 are unchanged.

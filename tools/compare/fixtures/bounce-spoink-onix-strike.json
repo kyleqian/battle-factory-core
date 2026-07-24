@@ -14,7 +14,7 @@
   },
   "denseWindow": {
     "startFrame": 881,
-    "endFrame": 904
+    "endFrame": 1179
   },
   "fieldProfile": {
     "playerHp": 117,
@@ -24,10 +24,18 @@
     "opponentGender": "female"
   },
   "controllerProfile": {
-    "moveTextFirstAge": -22
+    "moveTextFirstAge": -22,
+    "moveTextClearAge": 192,
+    "targetHpBefore": 117,
+    "targetHpAfter": 114,
+    "hitReactionFirstAge": 49,
+    "hpDrainFirstAge": 84,
+    "resultTextFirstAge": 92,
+    "currentMoveResetAge": 189,
+    "actionMenuRevealAge": 199
   },
   "acceptance": {
     "status": "partial",
-    "remaining": "Controller resolution tail and opposite orientation are not yet accepted."
+    "remaining": "This no-status body/controller/menu window is exact; successful-paralysis status animation/message cleanup remains a move-level variant."
   }
 }
