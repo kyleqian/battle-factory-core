@@ -1,9 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import {
   DEFAULT_COMPARE_OUT_DIR,
   parseCompareCliArgs,
   withCaptureRange,
 } from "../tools/compare/cli.ts";
+import {
+  prepareCompareOutputDirectory,
+  resolveCompareTracePath,
+  resolveSourceTracePath,
+} from "../tools/compare/paths.ts";
 
 describe("compare CLI options", () => {
   it("preserves the existing positional interface", () => {
@@ -60,5 +73,44 @@ describe("compare CLI options", () => {
       ...trace,
       captureFrames: [4, 5, 6],
     });
+  });
+});
+
+describe("compare trace and output paths", () => {
+  it("resolves unique trace-name shorthand with or without .json", () => {
+    const root = mkdtempSync(join(tmpdir(), "compare-paths-"));
+    const traces = join(root, "tools", "compare", "traces");
+    mkdirSync(traces, { recursive: true });
+    const trace = join(traces, "turn.json");
+    writeFileSync(trace, "{}");
+
+    expect(resolveCompareTracePath("turn", root)).toBe(trace);
+    expect(resolveCompareTracePath("turn.json", root)).toBe(trace);
+  });
+
+  it("falls back to the catalogs for a temporary derived trace", () => {
+    const root = mkdtempSync(join(tmpdir(), "compare-source-"));
+    const traces = join(root, "tools", "compare", "traces");
+    mkdirSync(traces, { recursive: true });
+    const source = join(traces, "base.json");
+    writeFileSync(source, "{}");
+    const derived = join(root, "scratch", "derived.json");
+
+    expect(resolveSourceTracePath("base.json", derived, root)).toBe(source);
+  });
+
+  it("clears stale generated artifacts but preserves unrelated files", () => {
+    const out = mkdtempSync(join(tmpdir(), "compare-output-"));
+    writeFileSync(join(out, "oracle-00001.png"), "old");
+    writeFileSync(join(out, "diff-00001.png"), "old");
+    writeFileSync(join(out, "manifest.json"), "{}");
+    writeFileSync(join(out, "notes.txt"), "keep");
+
+    prepareCompareOutputDirectory(out);
+
+    expect(() => readFileSync(join(out, "oracle-00001.png"))).toThrow();
+    expect(() => readFileSync(join(out, "diff-00001.png"))).toThrow();
+    expect(() => readFileSync(join(out, "manifest.json"))).toThrow();
+    expect(readFileSync(join(out, "notes.txt"), "utf8")).toBe("keep");
   });
 });

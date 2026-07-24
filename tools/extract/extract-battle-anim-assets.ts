@@ -13,7 +13,7 @@
 //
 // Never imported at runtime - the production build only reads its JSON output.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decodeIndexedPng } from "./indexedPng.ts";
@@ -187,6 +187,23 @@ function writeJson(path: string, data: unknown): void {
 //       (1492-1499).
 {
   const ballPokeFadeGba5 = { r: 31, g: 22, b: 30 };
+  const frontAnimSource = readFileSync(
+    join(REF, "src", "data", "pokemon_graphics", "front_pic_anims.h"),
+    "utf8",
+  );
+  const grovyleBlock =
+    /static const union AnimCmd sAnim_Grovyle_1\[\]\s*=\s*\{([\s\S]*?)\n\};/.exec(
+      frontAnimSource,
+    )?.[1];
+  if (!grovyleBlock) {
+    throw new Error("could not extract sAnim_Grovyle_1 from front_pic_anims.h");
+  }
+  const grovyleFrontAnim = [
+    ...grovyleBlock.matchAll(/ANIMCMD_FRAME\(\s*(\d+)\s*,\s*(\d+)\s*\)/g),
+  ].map((match) => ({ frame: Number(match[1]), duration: Number(match[2]) }));
+  if (grovyleFrontAnim.length === 0) {
+    throw new Error("sAnim_Grovyle_1 contained no ANIMCMD_FRAME steps");
+  }
   writeJson(join(DATA_GEN, "battle-anim-tables.json"), {
     ballOpenFadeColor: {
       ball: "BALL_POKE",
@@ -208,6 +225,10 @@ function writeJson(path: string, data: unknown): void {
         { xScale: 0x28, yScale: 0x28, rotation: 0, duration: 0 },
         { xScale: 0x12, yScale: 0x12, rotation: 0, duration: 12 },
       ],
+    },
+    grovyleFrontAnim: {
+      source: "src/data/pokemon_graphics/front_pic_anims.h:2930-2938 (sAnim_Grovyle_1, anims[1] - the HasTwoFramesAnimation breathing loop StartSpriteAnim(sprite,1) selects)",
+      steps: grovyleFrontAnim,
     },
   });
 }

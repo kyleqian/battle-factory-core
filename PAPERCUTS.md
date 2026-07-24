@@ -23,15 +23,6 @@ Per entry:
 - **Workaround:** serialize compare calls, or retain and poll the returned
   execution-session handle.
 
-## mGBA debug logs overwhelm terminal-boundary probes
-
-- **What:** a terminal-boundary RAM probe emitted roughly 34 MB of emulator
-  debug logging per run, slowing diagnosis and obscuring the useful tail.
-- **Hits:** 1.
-- **Cost each:** ~5 min.
-- **Workaround:** keep probe output redirected through `run-mgba-probe.py` and
-  inspect only targeted searches or the log tail.
-
 ## Dense multi-session mGBA probes destabilize long worker processes
 
 - **What:** running the full terminal boundary-control matrix inside one
@@ -69,25 +60,6 @@ Per entry:
 - **Workaround:** label state handoff and first sampled input separately in
   boundary ledgers, and confirm both with an early/accepted edge pair.
 
-## Oracle and compare `--summary` ownership is ambiguous in the guide
-
-- **What:** the guide's nearby oracle and compare examples made `--summary`
-  look like a `bin/oracle run` flag; that CLI rejects it because the flag
-  belongs to `npm run compare`.
-- **Hits:** 1.
-- **Cost each:** ~2 min.
-- **Workaround:** use `npm run compare -- <trace> --summary`; do not pass the
-  flag to `bin/oracle run`.
-
-## Temporary compare traces resolve `sourceTrace` relative to themselves (2026-07-23)
-
-- **What:** moving an ad hoc trace to `/tmp` broke its relative `sourceTrace`
-  reference even though the referenced committed trace still existed.
-- **Hits:** 1.
-- **Cost each:** ~1 min.
-- **Workaround:** keep temporary derived traces beside the committed traces,
-  or rewrite `sourceTrace` to a valid path before moving them.
-
 ## Sparse boundary ledger survived after dense replay contradicted it (2026-07-23)
 
 - **What:** the Battle-2 opening ledger labeled the action-menu clear/reveal
@@ -99,27 +71,6 @@ Per entry:
 - **Workaround:** treat source-relative boundary ledgers as provisional until
   a trace captures every frame across the handoff; correct the ledger in the
   same commit that lands the dense trace.
-
-## compare CLI rejects trace-name shorthand (2026-07-22)
-
-- **What:** `npm run compare` requires the repository-relative trace path;
-  passing only the trace filename fails even when it uniquely names a file in
-  `tools/compare/traces/`.
-- **Hits:** 1.
-- **Cost each:** <1 min.
-- **Workaround:** pass `tools/compare/traces/<name>.json`.
-
-## dump-battler-full.py struct offsets live only in the script body (2026-07-20)
-
-- **What:** the per-field battler struct offsets (species +0x00, pp
-  +0x24, hp +0x28, status1 +0x4C, status2 +0x50, stride 0x58) aren't
-  documented anywhere outside the script's own source — deriving a
-  one-off address for a field not in the existing watch-spec columns
-  means reading the script body first.
-- **Hits:** 1.
-- **Cost each:** ~3-5 min.
-- **Workaround:** read the script body; or a future session adds an
-  `--offsets` help dump / a comment table at the top of the script.
 
 ## Chained-trace stitching silently inserts redundant idle frames (2026-07-20)
 
@@ -196,23 +147,6 @@ position K and which captureFrames index shows its first visible effect)
 in ROADMAP.md Domain notes or a doc both cite. Flagged by the S4 renderer
 worker (PROGRESS entry 13).
 
-## Stale `tools/compare/out/` PNGs mislead cross-session debugging (2026-07-18)
-
-The GAP-B worker (PROGRESS #64) initially reasoned from cached diff
-images under `tools/compare/out/` that no longer matched the current
-code — the directory persists between sessions and `out/latest` only
-reflects the most recent `npm run compare` invocation for *whatever
-trace* ran last. Cost: a chunk of a 24-min session until a fresh
-compare run exposed the staleness.
-- **Hits:** 1 (plus unknown silent near-misses; several sessions have
-  consulted `out/latest` this week).
-- **Workaround:** always re-run `npm run compare` before reading any
-  diff PNG; treat `out/` as scratch, never as evidence.
-- **Real fix candidate:** have the compare tool write a
-  `manifest.json` (trace name, git SHA, timestamp) next to the PNGs
-  and/or clear `out/latest` at the start of each run, so stale
-  artifacts are self-identifying.
-
 ## New-window engine slices: baseline A/B check not done first (2026-07-19)
 
 - **What:** when a slice's target window shows diffs, workers debug their
@@ -228,20 +162,6 @@ compare run exposed the staleness.
   include "A/B the unmodified baseline over the target ticks FIRST";
   workers should treat any diff shared by the baseline as out-of-scope
   evidence, not a debugging target.
-
-## `extract-battle-anim-assets.ts` re-run silently drops `grovyleFrontAnim` (2026-07-19)
-
-- **What:** `battle-anim-tables.json`'s committed `grovyleFrontAnim` field
-  is not produced by any code currently in the extractor — re-running the
-  script regenerates the file WITHOUT it, silently breaking the front-anim
-  cadence until the diff is noticed. A worktree worker caught it in
-  `git diff` before committing (§7.25).
-- **Hits:** 1.
-- **Cost each:** ~5 min (would be far more if committed unnoticed —
-  Tier-1 tests would catch the missing field, but attribution would cost).
-- **Workaround:** never re-run that extractor without diffing its output;
-  proper fix is folding the `grovyleFrontAnim` derivation into the script
-  (small, unclaimed follow-up).
 
 ## Supervisor commits to `master` while a main-lane worker is mid-run look like git corruption (2026-07-20)
 
@@ -317,16 +237,3 @@ compare run exposed the staleness.
   data (`gPlttBufferFaded` probes — the switch-in tint precedent) instead
   of screenshot sampling; if sampling anyway, pick swatch pixels with
   near-255 channel values first.
-
-## run-subagent.sh briefs die on zsh parse when they contain `!(` (2026-07-20)
-
-- **What:** a brief passed inline containing `!(turn3Resolved && ...)`
-  killed the launch instantly ("parse error near `&&`") — the background
-  command produced only the parse error and no worker ever started. Easy
-  to misread as a worker failure.
-- **Hits:** 1.
-- **Cost each:** ~5 min + one relaunch.
-- **Workaround:** write the brief to a file and launch with
-  `run-subagent.sh -c N "$(cat brief.txt)"`, avoiding `!(`/history-
-  expansion-sensitive characters in inline briefs; a launcher flag that
-  reads the brief from a file (`--brief-file`) would remove the class.

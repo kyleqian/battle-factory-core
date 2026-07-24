@@ -133,12 +133,14 @@ bin/oracle symbols gMain        # linker-map symbol addresses (RAM inspection ai
 Query it constantly with short, targeted traces to discover collision, timing,
 NPC movement, dialogue, and exact pixels. Compare its PNGs against your app via
 `npm run compare -- <trace.json>` once the roadmap's first stage wires `tools/compare/appTrace.ts`
-to your engine. Compare whole windows, not just endpoint frames. **Gotcha:**
+to your engine. A unique trace filename works as shorthand. Compare whole
+windows, not just endpoint frames. **Gotcha:**
 the oracle captures *only the final frame* unless your trace's `captureFrames`
 lists the frames you want — request every frame you intend to compare, or
-you'll fool yourself by fitting a single endpoint. For investigation, add
-`--capture-range START:END` to replace the trace's capture list and `--summary`
-to print only mismatches plus the final result.
+you'll fool yourself by fitting a single endpoint. For investigation, the
+`npm run compare` command (not `bin/oracle`) accepts `--capture-range START:END`
+to replace the trace's capture list and `--summary` to print only mismatches
+plus the final result.
 
 Run mGBA-backed Python probes through
 `python3 tools/run-mgba-probe.py <fresh-output.json> -- <probe command>`.

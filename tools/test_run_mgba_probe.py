@@ -90,6 +90,36 @@ class RunMgbaProbeTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2)
             self.assertFalse(marker.exists())
 
+    def test_bounds_debug_log_and_retains_its_tail(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "result.json"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(WRAPPER),
+                    "--max-log-bytes",
+                    "128",
+                    str(output),
+                    "--",
+                    sys.executable,
+                    "-c",
+                    "import json, pathlib, sys; "
+                    "print('x' * 1000); print('USEFUL-TAIL'); "
+                    "pathlib.Path(sys.argv[1]).write_text(json.dumps({'ok': True}))",
+                    str(output),
+                ],
+                capture_output=True,
+                check=False,
+                text=True,
+                timeout=5,
+            )
+
+            log = Path(f"{output}.log").read_text()
+            self.assertEqual(result.returncode, 0)
+            self.assertIn("omitted", log)
+            self.assertIn("USEFUL-TAIL", log)
+            self.assertLess(len(log), 256)
+
 
 if __name__ == "__main__":
     unittest.main()

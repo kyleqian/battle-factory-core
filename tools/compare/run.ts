@@ -10,8 +10,8 @@
 // intend to compare via captureFrames — comparing only an endpoint frame
 // fools you.
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { PNG } from "pngjs";
 import { diffPngs } from "./diff.ts";
 import { computeSSIM } from "./ssim.ts";
@@ -27,6 +27,11 @@ import {
   type OracleProfile,
   type Trace,
 } from "./oracleClient.ts";
+import {
+  prepareCompareOutputDirectory,
+  resolveCompareTracePath,
+  resolveSourceTracePath,
+} from "./paths.ts";
 
 const WIDTH = 240;
 const HEIGHT = 160;
@@ -39,7 +44,14 @@ try {
   console.error(COMPARE_USAGE);
   process.exit(2);
 }
-const { tracePath, outDir, summary, captureRange } = cli;
+const { outDir, summary, captureRange } = cli;
+let tracePath: string;
+try {
+  tracePath = resolveCompareTracePath(cli.tracePath);
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(2);
+}
 interface CompareTraceFile extends Partial<Trace> {
   readonly sourceTrace?: string;
   /** Reuse an exact committed prefix without copying a long canonical script. */
@@ -51,7 +63,7 @@ interface CompareTraceFile extends Partial<Trace> {
 const traceFile = JSON.parse(readFileSync(tracePath, "utf8")) as CompareTraceFile;
 let trace: Trace;
 if (traceFile.sourceTrace) {
-  const sourcePath = resolve(dirname(tracePath), traceFile.sourceTrace);
+  const sourcePath = resolveSourceTracePath(traceFile.sourceTrace, tracePath);
   const source = JSON.parse(readFileSync(sourcePath, "utf8")) as Trace;
   const {
     sourceTrace: _sourceTrace,
@@ -73,7 +85,7 @@ if (traceFile.sourceTrace) {
 }
 trace = withCaptureRange(trace, captureRange);
 const oracleProfile: OracleProfile = trace.oracleProfile ?? "battle-scene-on";
-mkdirSync(outDir, { recursive: true });
+prepareCompareOutputDirectory(outDir);
 
 function rgbaToPng(rgba: Buffer | Uint8Array): Buffer {
   const png = new PNG({ width: WIDTH, height: HEIGHT });
@@ -122,6 +134,7 @@ writeFileSync(
   join(outDir, "manifest.json"),
   JSON.stringify({
     trace: tracePath,
+    generatedAt: new Date().toISOString(),
     oracleProfile,
     oracleUrl: oracleUrlForProfile(oracleProfile),
     captureRange,

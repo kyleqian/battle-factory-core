@@ -22,8 +22,38 @@ import json
 import sys
 from pathlib import Path
 
+# struct BattlePokemon (include/pokemon.h): sizeof == 0x58.
+BATTLE_POKEMON_LAYOUT = {
+    "stride": "0x58",
+    "fields": {
+        "species": "0x00:u16",
+        "attack": "0x02:u16",
+        "defense": "0x04:u16",
+        "speed": "0x06:u16",
+        "spAttack": "0x08:u16",
+        "spDefense": "0x0A:u16",
+        "moves": "0x0C:u16[4]",
+        "statStages": "0x18:s8[8]",
+        "ability": "0x20:u8",
+        "types": "0x21:u8[2]",
+        "pp": "0x24:u8[4]",
+        "hp": "0x28:u16",
+        "level": "0x2A:u8",
+        "maxHP": "0x2C:u16",
+        "item": "0x2E:u16",
+        "status1": "0x4C:u32",
+        "status2": "0x50:u32",
+    },
+}
+
+if sys.argv[1:] == ["--offsets"]:
+    print(json.dumps(BATTLE_POKEMON_LAYOUT, indent=2))
+    raise SystemExit(0)
 if len(sys.argv) != 4:
-    raise SystemExit(f"usage: {sys.argv[0]} <trace.json> <output.json> <tick1,tick2,...>")
+    raise SystemExit(
+        f"usage: {sys.argv[0]} <trace.json> <output.json> <tick1,tick2,...>\n"
+        f"       {sys.argv[0]} --offsets"
+    )
 TRACE_PATH = Path(sys.argv[1])
 OUTPUT_PATH = Path(sys.argv[2])
 TARGET_TICKS = {int(x) for x in sys.argv[3].split(",")}
@@ -50,7 +80,6 @@ ROM_PATH = REFERENCE_POKEEMERALD / "pokeemerald.gba"
 MAP_PATH = REFERENCE_POKEEMERALD / "pokeemerald.map"
 BOOTSTRAP_PATH = ORACLE_DIR / "bootstrap" / "factory.json"
 
-# struct BattlePokemon (include/pokemon.h): sizeof == 0x58.
 STRUCT_SIZE = 0x58
 MAX_BATTLERS = 4
 MAX_MON_MOVES = 4

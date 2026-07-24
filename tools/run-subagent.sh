@@ -11,6 +11,7 @@
 #
 # Usage:
 #   tools/run-subagent.sh [options] "step brief for the worker"
+#   tools/run-subagent.sh [options] --brief-file path/to/brief.txt
 #     -c, --cap-minutes N   hard cap in minutes (default 60)
 #     -p, --provider NAME   claude (default) or codex
 #     -m, --model NAME      worker model (provider default)
@@ -20,6 +21,7 @@
 #                           alias for --lane animation
 #         --lane NAME       main, side, or animation
 #         --log FILE        provider event log path
+#         --brief-file FILE read the step brief verbatim from a file
 #     -h, --help            show this help
 #
 # Concurrency is capped at THREE workers, mechanically: main, side, and
@@ -51,6 +53,7 @@ fi
 usage() {
   cat <<'EOF'
 Usage: tools/run-subagent.sh [options] "step brief for the worker"
+       tools/run-subagent.sh [options] --brief-file path/to/brief.txt
   -c, --cap-minutes N   hard cap in minutes (default 60)
   -p, --provider NAME   claude (default) or codex
   -m, --model NAME      worker model (provider default)
@@ -61,6 +64,7 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
       --lane NAME       main, side, or animation. Side/animation use fresh
                         worktrees and must not touch shared docs.
       --log FILE        provider event log path
+      --brief-file FILE read the step brief verbatim from a file
       --print-config    print the resolved profile without launching
   -h, --help            show this help
 Environment overrides: WORKER_PROVIDER, WORKER_MODEL, WORKER_REASONING_EFFORT.
@@ -81,6 +85,7 @@ AGENT_LOG="${AGENT_LOG:-}"
 LANE="${WORKER_LANE:-main}"
 if [[ "${WORKTREE:-0}" == "1" ]]; then LANE="side"; fi
 BRIEF=""
+BRIEF_FILE=""
 PRINT_CONFIG=0
 
 while [[ $# -gt 0 ]]; do
@@ -99,6 +104,8 @@ while [[ $# -gt 0 ]]; do
     --effort=*)       REASONING_EFFORT="${1#*=}"; shift ;;
     --log)            AGENT_LOG="${2:?--log needs a path}"; shift 2 ;;
     --log=*)          AGENT_LOG="${1#*=}"; shift ;;
+    --brief-file)     BRIEF_FILE="${2:?--brief-file needs a path}"; shift 2 ;;
+    --brief-file=*)   BRIEF_FILE="${1#*=}"; shift ;;
     --print-config)   PRINT_CONFIG=1; shift ;;
     -h|--help)        usage; exit 0 ;;
     -*) echo "run-subagent: unknown option '$1' (try --help)" >&2; exit 2 ;;
@@ -111,6 +118,17 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ -n "$BRIEF" && -n "$BRIEF_FILE" ]]; then
+  echo "run-subagent: use either a positional brief or --brief-file, not both" >&2
+  exit 2
+fi
+if [[ -n "$BRIEF_FILE" ]]; then
+  if [[ ! -r "$BRIEF_FILE" ]]; then
+    echo "run-subagent: cannot read brief file '$BRIEF_FILE'" >&2
+    exit 2
+  fi
+  BRIEF="$(<"$BRIEF_FILE")"
+fi
 if [[ -z "$BRIEF" && "$PRINT_CONFIG" != "1" ]]; then
   echo "run-subagent: a step brief is required (try --help)" >&2
   exit 2
