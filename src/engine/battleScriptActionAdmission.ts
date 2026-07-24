@@ -6,6 +6,10 @@ import {
 } from "./battleScriptMultiTurnCancellation.ts";
 import { advanceRngValue } from "./rng.ts";
 import {
+  calculateBaseDamage,
+  NEUTRAL_STAT_STAGES,
+} from "./damageCalc.ts";
+import {
   BATTLE_SCRIPT_ABILITY_EARLY_BIRD,
   BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
   BATTLE_SCRIPT_ABILITY_TRUANT,
@@ -17,6 +21,7 @@ import {
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
   BATTLE_SCRIPT_MOVE_NONE,
+  BATTLE_SCRIPT_MOVE_POUND,
   BATTLE_SCRIPT_MOVE_SLEEP_TALK,
   BATTLE_SCRIPT_MOVE_SNORE,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
@@ -139,7 +144,9 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedFlinched"
       | "BattleScript_MoveUsedIsDisabled"
       | "BattleScript_MoveUsedIsTaunted"
-      | "BattleScript_MoveUsedIsImprisoned";
+      | "BattleScript_MoveUsedIsImprisoned"
+      | "BattleScript_MoveUsedIsConfused"
+      | "BattleScript_MoveUsedIsConfusedNoMore";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -156,7 +163,9 @@ export type BattleScriptAttackCancelerMultistringEffect =
     sourceConstant:
       | "B_MSG_WOKE_UP"
       | "B_MSG_WOKE_UP_UPROAR"
-      | "B_MSG_DEFROSTED";
+      | "B_MSG_DEFROSTED"
+      | "FALSE"
+      | "TRUE";
     value: 0 | 1;
   }>;
 
@@ -629,6 +638,102 @@ export type BattleScriptAttackCancelerImprisonedDecision =
     receipt: Readonly<{
       sourcePhase: "CANCELER_IMPRISONED";
       tracker: Readonly<{ before: number; after: number }>;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerConfusedReason =
+  | "not-confused"
+  | "snapped-out"
+  | "confused-continues"
+  | "confusion-self-hit";
+
+export type BattleScriptAttackCancelerConfusedRngEffect =
+  | Readonly<{
+    kind: "preserve";
+    value: number;
+    callsConsumed: 0;
+    reason: "not-confused" | "snapped-out";
+  }>
+  | Readonly<{
+    kind: "draw";
+    name: "CANCELER_CONFUSED_ACTION_CHECK";
+    sourceCall: "Random";
+    sourceOperation: "Random() & 1";
+    before: number;
+    after: number;
+    randomValue: number;
+    lowBit: 0 | 1;
+    callsConsumed: 1;
+  }>;
+
+export type BattleScriptAttackCancelerConfusedReceipt = Readonly<{
+  sourcePhase: "CANCELER_CONFUSED";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerConfusedReason;
+  confusionCounter: Readonly<{
+    before: number;
+    after: number;
+    decrement: 0 | 1;
+    sourceMask: "STATUS2_CONFUSION";
+  }>;
+  status2: BattleScriptBitFieldEffect;
+  rng: BattleScriptAttackCancelerConfusedRngEffect;
+  targetBattler: Readonly<{
+    before: BattleScriptBattlerId | null;
+    after: BattleScriptBattlerId | null;
+  }>;
+  battleMoveDamage: Readonly<{
+    before: number;
+    after: number;
+    calculation:
+      | Readonly<{ kind: "not-performed" }>
+      | Readonly<{
+        kind: "CalculateBaseDamage";
+        move: typeof BATTLE_SCRIPT_MOVE_POUND;
+        sideStatus: 0;
+        powerOverride: 40;
+        typeOverride: 0;
+        attacker: BattleScriptBattlerId;
+        defender: BattleScriptBattlerId;
+      }>;
+  }>;
+  confusionSelfDmg: Readonly<{ before: 0 | 1; after: 0 | 1 }>;
+  multiTurnCancellation:
+    | Readonly<{ kind: "not-requested" }>
+    | Readonly<{
+      kind: "deferred-to-script";
+      targetLabel: "BattleScript_DoSelfConfusionDmg";
+      sourceCommand: "cancelmultiturnmoves BS_ATTACKER";
+    }>;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  cursor: BattleScriptAttackCancelerCursorEffect;
+  multistringChooser: BattleScriptAttackCancelerMultistringEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_CONFUSED";
+    sourcePhaseAfter: "CANCELER_PARALYZED";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerConfusedDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerConfusedReason;
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: BattleScriptAttackCancelerConfusedReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_CONFUSED";
+      tracker: Readonly<{ before: number; after: number }>;
+      rng: Readonly<{ kind: "preserve"; value: number; callsConsumed: 0 }>;
     }>;
   }>;
 
@@ -2048,6 +2153,257 @@ export function advanceBattleScriptAttackCancelerImprisoned(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_IMPRISONED",
         sourcePhaseAfter: "CANCELER_CONFUSED",
+      }),
+    }),
+  });
+}
+
+/**
+ * Immutable source phase for battle_util.c:2156-2187.
+ *
+ * The counter decrement precedes the conditional RNG call.  The self-hit
+ * branch owns only the state written by this C case; its later
+ * cancelmultiturnmoves command remains explicitly owned by
+ * BattleScript_DoSelfConfusionDmg (battle_scripts_1.s:3801-3803).
+ */
+export function advanceBattleScriptAttackCancelerConfused(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+  rngValue: number,
+): BattleScriptAttackCancelerConfusedDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const sourceRng = requireRngValue(rngValue);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (trackerBefore !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_CONFUSED) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      rngValue: sourceRng,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_CONFUSED",
+        tracker: Object.freeze({ before: trackerBefore, after: trackerBefore }),
+        rng: Object.freeze({
+          kind: "preserve",
+          value: sourceRng,
+          callsConsumed: 0 as const,
+        }),
+      }),
+    });
+  }
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error("Battle Script attack canceler confused phase requires an attacker role");
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const counterBefore = sourceBattler.status2
+    & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_CONFUSION;
+  if (counterBefore > 5) {
+    throw new Error(`confusion counter must use the source-reachable encoding 0..5, got ${counterBefore}`);
+  }
+
+  let reason: BattleScriptAttackCancelerConfusedReason = "not-confused";
+  let counterAfter = counterBefore;
+  let nextStatus2 = sourceBattler.status2;
+  let nextRng = sourceRng;
+  let rng: BattleScriptAttackCancelerConfusedRngEffect = Object.freeze({
+    kind: "preserve",
+    value: sourceRng,
+    callsConsumed: 0,
+    reason: "not-confused",
+  });
+  let nextTarget = rulesContext.selectorRoles.target;
+  let nextDamage = rulesContext.battleMoveDamage;
+  let nextSelfDmg = sourceBattler.confusionSelfDmg ?? 0;
+  let nextHitMarker = rulesContext.hitMarker;
+  let effect: 0 | 1 = 0;
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+  let cursor: BattleScriptAttackCancelerCursorEffect = Object.freeze({ kind: "preserve" });
+  let chooser: BattleScriptAttackCancelerMultistringEffect =
+    Object.freeze({ kind: "preserve" });
+  let calculation: BattleScriptAttackCancelerConfusedReceipt["battleMoveDamage"]["calculation"] =
+    Object.freeze({ kind: "not-performed" });
+  let multiTurnCancellation: BattleScriptAttackCancelerConfusedReceipt["multiTurnCancellation"] =
+    Object.freeze({ kind: "not-requested" });
+
+  if (counterBefore !== 0) {
+    effect = 1;
+    counterAfter = counterBefore - 1;
+    nextStatus2 = (sourceBattler.status2 - 1) >>> 0;
+    if (counterAfter === 0) {
+      reason = "snapped-out";
+      cursor = Object.freeze({ kind: "push", sourceProgramCounter: sourcePc });
+      script = Object.freeze({
+        kind: "handoff",
+        sourceProgramCounter: sourcePc,
+        targetLabel: "BattleScript_MoveUsedIsConfusedNoMore",
+      });
+      rng = Object.freeze({
+        kind: "preserve",
+        value: sourceRng,
+        callsConsumed: 0,
+        reason: "snapped-out",
+      });
+    } else {
+      nextRng = advanceRngValue(sourceRng);
+      const randomValue = (nextRng >>> 16) & 0xffff;
+      const lowBit = (randomValue & 1) as 0 | 1;
+      rng = Object.freeze({
+        kind: "draw",
+        name: "CANCELER_CONFUSED_ACTION_CHECK",
+        sourceCall: "Random",
+        sourceOperation: "Random() & 1",
+        before: sourceRng,
+        after: nextRng,
+        randomValue,
+        lowBit,
+        callsConsumed: 1,
+      });
+      script = Object.freeze({
+        kind: "handoff",
+        sourceProgramCounter: sourcePc,
+        targetLabel: "BattleScript_MoveUsedIsConfused",
+      });
+      if (lowBit === 1) {
+        reason = "confused-continues";
+        chooser = Object.freeze({ kind: "set", sourceConstant: "FALSE", value: 0 });
+        cursor = Object.freeze({ kind: "push", sourceProgramCounter: sourcePc });
+      } else {
+        reason = "confusion-self-hit";
+        const damage = sourceBattler.confusionDamage;
+        if (damage === undefined) {
+          throw new Error("confusion self-hit requires attacker confusionDamage context");
+        }
+        if (damage.level === 0 || damage.attack === 0 || damage.defense === 0) {
+          throw new Error("confusionDamage level, attack, and defense must be nonzero");
+        }
+        nextTarget = attacker;
+        nextDamage = calculateBaseDamage({
+          attacker: {
+            level: damage.level,
+            attack: damage.attack,
+            defense: damage.defense,
+            spAttack: 1,
+            spDefense: 1,
+            types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+            statStages: {
+              ...NEUTRAL_STAT_STAGES,
+              atk: damage.attackStage,
+              def: damage.defenseStage,
+            },
+            isBurned: damage.isBurned,
+            ability: damage.hasGuts ? "ABILITY_GUTS" : null,
+          },
+          defender: {
+            level: damage.level,
+            attack: damage.attack,
+            defense: damage.defense,
+            spAttack: 1,
+            spDefense: 1,
+            types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+            statStages: {
+              ...NEUTRAL_STAT_STAGES,
+              atk: damage.attackStage,
+              def: damage.defenseStage,
+            },
+          },
+          movePower: 40,
+          moveType: "TYPE_NORMAL",
+          isCriticalHit: false,
+        });
+        nextSelfDmg = 1;
+        nextHitMarker = (
+          rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+        ) >>> 0;
+        chooser = Object.freeze({ kind: "set", sourceConstant: "TRUE", value: 1 });
+        calculation = Object.freeze({
+          kind: "CalculateBaseDamage",
+          move: BATTLE_SCRIPT_MOVE_POUND,
+          sideStatus: 0,
+          powerOverride: 40,
+          typeOverride: 0,
+          attacker,
+          defender: attacker,
+        });
+        multiTurnCancellation = Object.freeze({
+          kind: "deferred-to-script",
+          targetLabel: "BattleScript_DoSelfConfusionDmg",
+          sourceCommand: "cancelmultiturnmoves BS_ATTACKER",
+        });
+      }
+    }
+  }
+
+  const nextBattler = (
+    nextStatus2 === sourceBattler.status2
+    && nextSelfDmg === (sourceBattler.confusionSelfDmg ?? 0)
+  ) ? sourceBattler : Object.freeze({
+    ...sourceBattler,
+    status2: nextStatus2,
+    confusionSelfDmg: nextSelfDmg,
+  });
+  const nextBattlers = nextBattler === sourceBattler
+    ? rulesContext.battlers
+    : Object.freeze(rulesContext.battlers.map((candidate, index) =>
+      index === attacker ? nextBattler : candidate
+    )) as unknown as BattleScriptRulesContext["battlers"];
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_PARALYZED;
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battlers: nextBattlers,
+    selectorRoles: nextTarget === rulesContext.selectorRoles.target
+      ? rulesContext.selectorRoles
+      : Object.freeze({ ...rulesContext.selectorRoles, target: nextTarget }),
+    battleMoveDamage: nextDamage,
+    multistringChooser: chooser.kind === "set"
+      ? chooser.value
+      : rulesContext.multistringChooser,
+    hitMarker: nextHitMarker,
+    atkCancelerTracker: trackerAfter,
+  });
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    rngValue: nextRng,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_CONFUSED",
+      attacker,
+      reason,
+      confusionCounter: Object.freeze({
+        before: counterBefore,
+        after: counterAfter,
+        decrement: counterBefore === 0 ? 0 : 1,
+        sourceMask: "STATUS2_CONFUSION",
+      }),
+      status2: bitFieldEffect(sourceBattler.status2, nextStatus2),
+      rng,
+      targetBattler: Object.freeze({
+        before: rulesContext.selectorRoles.target,
+        after: nextTarget,
+      }),
+      battleMoveDamage: Object.freeze({
+        before: rulesContext.battleMoveDamage,
+        after: nextDamage,
+        calculation,
+      }),
+      confusionSelfDmg: Object.freeze({
+        before: sourceBattler.confusionSelfDmg ?? 0,
+        after: nextSelfDmg,
+      }),
+      multiTurnCancellation,
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect,
+      script,
+      cursor,
+      multistringChooser: chooser,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_CONFUSED",
+        sourcePhaseAfter: "CANCELER_PARALYZED",
       }),
     }),
   });

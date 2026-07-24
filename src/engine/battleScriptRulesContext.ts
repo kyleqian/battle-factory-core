@@ -51,6 +51,22 @@ export type BattleScriptRulesBattler = Readonly<{
   tauntTimer: number;
   usedTauntedMove: 0 | 1;
   usedImprisonedMove: 0 | 1;
+  /** ProtectStruct::confusionSelfDmg; absent legacy inputs normalize to zero. */
+  confusionSelfDmg?: 0 | 1;
+  /**
+   * The already source-modified physical operands consumed by
+   * CalculateBaseDamage's MOVE_POUND/powerOverride=40 confusion call.
+   * Optional because non-self-hit branches never read these fields.
+   */
+  confusionDamage?: Readonly<{
+    level: number;
+    attack: number;
+    defense: number;
+    attackStage: number;
+    defenseStage: number;
+    isBurned: boolean;
+    hasGuts: boolean;
+  }>;
 }>;
 
 export type BattleScriptRulesBattlers = readonly [
@@ -87,6 +103,8 @@ export type BattleScriptRulesContext = Readonly<
     currentMovePower: number;
     currentMovePosition: number;
     multiHitCounter: number;
+    multistringChooser: number;
+    battleMoveDamage: number;
   }
 >;
 
@@ -109,6 +127,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   missType: number;
   hitMarker: number;
   multiHitCounter: number;
+  multistringChooser?: number;
+  battleMoveDamage?: number;
 }>;
 
 function requireUnsigned(value: number, maximum: number, field: string): number {
@@ -271,6 +291,42 @@ export function createBattleScriptRulesContext(
       1,
       `battlers[${index}].usedImprisonedMove`,
     ) as 0 | 1,
+    confusionSelfDmg: requireUnsigned(
+      battler.confusionSelfDmg ?? 0,
+      1,
+      `battlers[${index}].confusionSelfDmg`,
+    ) as 0 | 1,
+    confusionDamage: battler.confusionDamage === undefined
+      ? undefined
+      : Object.freeze({
+        level: requireUnsigned(
+          battler.confusionDamage.level,
+          0xff,
+          `battlers[${index}].confusionDamage.level`,
+        ),
+        attack: requireUnsigned(
+          battler.confusionDamage.attack,
+          0xffff,
+          `battlers[${index}].confusionDamage.attack`,
+        ),
+        defense: requireUnsigned(
+          battler.confusionDamage.defense,
+          0xffff,
+          `battlers[${index}].confusionDamage.defense`,
+        ),
+        attackStage: requireUnsigned(
+          battler.confusionDamage.attackStage,
+          12,
+          `battlers[${index}].confusionDamage.attackStage`,
+        ),
+        defenseStage: requireUnsigned(
+          battler.confusionDamage.defenseStage,
+          12,
+          `battlers[${index}].confusionDamage.defenseStage`,
+        ),
+        isBurned: Boolean(battler.confusionDamage.isBurned),
+        hasGuts: Boolean(battler.confusionDamage.hasGuts),
+      }),
   })) as unknown as BattleScriptRulesBattlers;
   const selectorRoles = Object.freeze({
     attacker: requireRole(input.selectorRoles?.attacker, "selectorRoles.attacker"),
@@ -313,6 +369,16 @@ export function createBattleScriptRulesContext(
     missType: requireUnsigned(input.missType, 0xff, "missType"),
     hitMarker: requireUnsigned(input.hitMarker, 0xffff_ffff, "hitMarker") >>> 0,
     multiHitCounter: requireUnsigned(input.multiHitCounter, 0xff, "multiHitCounter"),
+    multistringChooser: requireUnsigned(
+      input.multistringChooser ?? 0,
+      0xff,
+      "multistringChooser",
+    ),
+    battleMoveDamage: requireUnsigned(
+      input.battleMoveDamage ?? 0,
+      0xffff_ffff,
+      "battleMoveDamage",
+    ),
   });
 }
 
