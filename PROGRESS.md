@@ -6,9 +6,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ---
 ## 413 — Factory asleep decision reaches real script barrier
 
-- **State:** the assigned S10 vertical composition is implemented and focused
-  green. Gate 3 still has **27** source-safe executable opcodes; opcode 0
-  remains unregistered.
+- **State:** the assigned S10 vertical composition is committed, clean, and
+  green at **160 files / 1917 tests**. Gate 3 still has **27** source-safe
+  executable opcodes; opcode 0 remains unregistered.
 - **Did:** published a serializable machine barrier and read-only boundary RNG
   snapshot, then added one compact production adapter. A validated Level-50
   set-15 TYROGUE asleep state requests its four real Factory moves; submitting
@@ -17,13 +17,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `BattleScript_MoveUsedIsAsleep`, executes source opcodes **16→18→100→40**,
   safely acknowledges controller presentation, and stops before unsupported
   move-end opcode **46**.
-- **Next:** run the full Tier-1 suite, production build, OFF oracle info, and
-  diff check; then trim the ledger, commit the verified docs, and hand off the
-  minimal injected Factory-AI policy on this same boundary.
+- **Next:** add the minimal injected Factory-AI seam on this same kernel
+  boundary: source-faithful view + kernel-enumerated legal decisions + explicit
+  RNG returns one legal decision, updated RNG, and inspectable trace, then
+  submits through the identical `BattleDecisionBoundary`.
 - **Notes:** ordered events are `STRINGID_PKMNFASTASLEEP` then status animation
   for TYROGUE; sleep **4→3**, PP **[30,10,15,20]** unchanged, explicit RNG
   **0xf4c96838 / 0 calls** unchanged, and barrier execution count **67**.
-  Focused **3 files / 29 tests** and production build pass. Pixel diff N/A.
+  Focused **3 files / 29 tests**, integrated **160/1917**, production build,
+  OFF v5 info (`9c89c741…`), and diff check pass. Code commits `2fa3ce0` +
+  `a71c0a9`; pixel diff N/A.
 
 ---
 ## 412 — Gate-3 Magic Coat intercept composed
@@ -87,31 +90,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   are covered. Focused **3 files / 20 tests**; integrated **156/1898**,
   production build, OFF v5 info (`9c89c741…`), and diff check green. Code
   commit `61641fa`; pixel diff N/A.
-
----
-## 410 — Gate-3 selected-slot PP admission composed
-
-- **State:** the run is clean and green at **154 files / 1887 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes. The pure
-  attack-canceler composition now reaches the selected-slot PP admission and
-  its success-only `HITMARKER_ALLOW_NO_PP` clear; opcode 0 remains unregistered
-  and no machine, controller, decision-boundary, core, round, or presentation
-  integration was added.
-- **Did:** added an immutable source-order join from a supplied
-  canceler+moves-block result into the existing typed PP preflight. Canceler
-  effects 1/2 and Soundproof blocks bypass PP; a continuing result delegates
-  the exact five-part no-PP predicate, `BattleScript_NoPPForMove`/missed
-  handoff, or continuation clear without duplicating PP mechanics. The joined
-  receipt exposes prior receipts, branch ownership, source PC, and zero added
-  RNG while preserving cumulative rules/RNG/call state.
-- **Next:** keep opcode 0 unregistered. The next exact source boundary is
-  obedience after successful PP admission; do not add Magic Coat, Snatch,
-  Lightning Rod, Protect, a machine adapter, or controller integration until
-  separately assigned.
-- **Notes:** both singles orientations; no-PP, Struggle, allow-no-PP,
-  no-attack-string, multi-turn, sufficient-PP, canceler effects **1/2**, and
-  Soundproof are pinned with exact marker/result/PC receipts. Invalid
-  composition/PC inputs, deterministic replay, input immutability, recursive
-  freezing, and zero additional RNG are covered. Focused **3 files / 30
-  tests**; integrated **154/1887**, production build, OFF v5 info
-  (`9c89c741…`), and diff check green. Code commit `5474ea2`; pixel diff N/A.

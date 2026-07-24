@@ -952,6 +952,20 @@ the next request, barrier, or outcome. Canonical serialization must replay the
 same transition. This slice must not import `core.ts`, `battleScene.ts`,
 rendering, wall clock, oracle, or emulator code.
 
+**Immediate vertical-composition checkpoint (2026-07-24):** the first unit is
+implemented through a legal Level-50 Factory command, without registering
+opcode 0. A validated asleep set-15 TYROGUE requests its four source moves;
+submitting PROTECT slot 1 maps the real `BattleScript_EffectProtect` opcode-0
+entry through the already-complete asleep admission helper into
+`BattleScript_MoveUsedIsAsleep`. The production machine executes source
+opcodes **16, 18, 100, 40** (print, wait, status animation, goto), safely
+acknowledges presentation/controller ownership, and returns an explicit
+machine barrier before unsupported `BattleScript_MoveEnd` opcode **46**.
+Ordered message/status events, sleep **4→3**, unchanged PP, zero-call explicit
+RNG preservation, deep freezing, and canonical replay are Tier-1 pinned. This
+proves the composition contract only; move-end, later action resolution, and
+the general kernel remain Gate-3 work.
+
 Opcode 0 remains unregistered until all of `Cmd_attackcanceler` is executable,
 including its delegated controller/Pressure-PP/resume effects and the ordered
 Snatch, Lightning Rod, Protect, and fallthrough branches. Current source
