@@ -44,6 +44,8 @@ function battler(
     tauntTimer: changes.tauntTimer ?? 0,
     usedTauntedMove: changes.usedTauntedMove ?? 0,
     usedImprisonedMove: changes.usedImprisonedMove ?? 0,
+    targetNotAffected: changes.targetNotAffected ?? 0,
+    flag2Unknown: changes.flag2Unknown ?? 0,
     chargingTurn: changes.chargingTurn ?? 0,
   });
 }

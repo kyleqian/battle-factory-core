@@ -179,6 +179,7 @@ describe("Cmd_moveend battler metadata dependency", () => {
     expect(written?.choicedMove).toBe(source.choicedMove);
     expect(written?.changedItems).toBe(source.changedItems);
     expect(written?.enigmaBerryHoldEffects).toBe(source.enigmaBerryHoldEffects);
+    expect(written?.battleTopology).toBe(source.battleTopology);
     expect(written?.moveendState).toBe(7);
   });
 
@@ -209,6 +210,11 @@ describe("Cmd_moveend battler metadata dependency", () => {
       battleStructAbsentBattlerFlags: 0b1100,
       dynamicMoveType: 0,
       enigmaBerryHoldEffects: [0, 0, 0, 0],
+      battleTopology: {
+        battlersCount: 2,
+        battleTypeFlags: 0x0008_0008,
+        battlerPositions: [0, 1, 0xff, 0xff],
+      },
     });
     expect(Object.isFrozen(restored.rules.rulesContext.choicedMove)).toBe(true);
     expect(Object.isFrozen(restored.rules.rulesContext.changedItems)).toBe(true);
@@ -242,6 +248,8 @@ describe("Cmd_moveend battler metadata dependency", () => {
       .toEqual(player.rules.rulesContext.changedItems);
     expect(playerResult.state.rules.rulesContext.enigmaBerryHoldEffects)
       .toEqual(player.rules.rulesContext.enigmaBerryHoldEffects);
+    expect(playerResult.state.rules.rulesContext.battleTopology)
+      .toEqual(player.rules.rulesContext.battleTopology);
     const replayedPlayerResult = parseBattleState(
       serializeBattleState(playerResult.state),
     ) as BattleState<FactoryBattleScriptDecisionRules>;
@@ -274,6 +282,8 @@ describe("Cmd_moveend battler metadata dependency", () => {
       .toEqual(trainer.rules.rulesContext.changedItems);
     expect(trainerResult.transition.state.rules.rulesContext.enigmaBerryHoldEffects)
       .toEqual(trainer.rules.rulesContext.enigmaBerryHoldEffects);
+    expect(trainerResult.transition.state.rules.rulesContext.battleTopology)
+      .toEqual(trainer.rules.rulesContext.battleTopology);
     expect(trainerResult.transition.state.rng).toEqual({
       value: 0x79e3_9ac4,
       calls: 5,

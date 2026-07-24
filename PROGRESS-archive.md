@@ -1,3 +1,23 @@
+## 420 — move-end battler metadata owner landed
+
+- **State:** dependency step 1 is committed and green at **166 files / 1960
+  tests**. Opcodes **73** and **0** remain unregistered; no move-end case,
+  delegate, controller, core, render, animation, or oracle behavior was added.
+- **Did:** extended each existing frozen rules battler with source `u16 item`,
+  all **8** `s8 statStages`, SpecialStatus `restoredBattlerSprite` plus signed
+  `physicalDmg/specialDmg`, and ProtectStruct `chargingTurn`. The constructor
+  validates widths/cardinality and freezes nested owners; immutable SETBYTE
+  updates preserve battler/metadata identity. The Factory vertical derives
+  real item IDs **196/171** and source-neutral stages for TYROGUE/PLUSLE.
+- **Next:** follow dependency step 2 in the ownership map: add separately
+  tested choice/change-item and move-history owners, both absent masks, and
+  dynamic/Enigma move-data resolution. Keep opcode 73 unsupported.
+- **Notes:** focused **4 files / 23 tests**; integrated **166/1960**, production
+  build, OFF v5 info (`9c89c741…`), and diff checks pass. Canonical JSON and
+  both player/AI replays preserve the metadata. Code commit `c7dab21`; pixel
+  diff N/A.
+
+---
 ## 419 — executable decision vertical proven; honest MOVEEND boundary mapped
 
 - **State:** the integrated tree is green at **165 files / 1956 tests**. Both

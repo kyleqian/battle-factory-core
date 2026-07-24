@@ -23,6 +23,8 @@ import {
   resolveBattleScriptLabel,
 } from "./battleScriptProgram.ts";
 import {
+  BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
+  BATTLE_SCRIPT_BATTLE_TYPE_TRAINER,
   createBattleScriptRulesContext,
   createBattleScriptStatusRulesExecution,
   type BattleScriptRulesBattlerState,
@@ -234,6 +236,8 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     tauntTimer: 0,
     usedTauntedMove: 0,
     usedImprisonedMove: 0,
+    targetNotAffected: 0,
+    flag2Unknown: 0,
     chargingTurn: 0,
   });
 }
@@ -320,6 +324,13 @@ function createInitialRules(config: FactoryAsleepMoveConfig): FactoryBattleScrip
     battleStructAbsentBattlerFlags: 0b1100,
     dynamicMoveType: 0,
     enigmaBerryHoldEffects: [0, 0, 0, 0],
+    battleTopology: {
+      battlersCount: 2,
+      battleTypeFlags:
+        BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY,
+      // InitBattleControllers leaves unused singles slots at the source 0xFF.
+      battlerPositions: [0, 1, 0xff, 0xff],
+    },
   });
   return Object.freeze({
     adapter: ADAPTER,

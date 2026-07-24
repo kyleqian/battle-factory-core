@@ -194,8 +194,13 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
 
     const changed = createBattleScriptRulesContext(contextInput({
       changedItems: [0xbeef, 0xffff, 0xabcd, 0x1234],
+      battleTopology: {
+        battlersCount: 3,
+        battleTypeFlags: 0,
+        battlerPositions: [0, 1, 2, 0xff],
+      },
     }));
-    const transferred = applyBattleScriptMoveEndChangedItemOwnership(changed, 3);
+    const transferred = applyBattleScriptMoveEndChangedItemOwnership(changed);
     expect(transferred.battlers.map(({ item }) => item))
       .toEqual([0xbeef, 0xffff, 0xabcd, 0]);
     expect(transferred.changedItems).toEqual([0, 0, 0, 0x1234]);
@@ -208,7 +213,7 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
     expect(Object.isFrozen(context.changedItems)).toBe(true);
     expect(Object.isFrozen(context.enigmaBerryHoldEffects)).toBe(true);
     expect(applyBattleScriptMoveEndChoiceOwnership(context)).toBe(context);
-    expect(applyBattleScriptMoveEndChangedItemOwnership(context, 2)).toBe(context);
+    expect(applyBattleScriptMoveEndChangedItemOwnership(context)).toBe(context);
   });
 
   it("freezes-six-independent-history-arrays-and-exact-source-byte-buffers", () => {

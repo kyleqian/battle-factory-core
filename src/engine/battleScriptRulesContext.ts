@@ -51,6 +51,13 @@ export const BATTLE_SCRIPT_MOVE_RESULT_FAILED = 1 << 5;
 export const BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT = (1 << 0) | (1 << 3) | (1 << 5);
 export const BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED = 1 << 4;
 export const BATTLE_SCRIPT_EFFECT_BATON_PASS = 127;
+export const BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE = 1 << 0;
+export const BATTLE_SCRIPT_BATTLE_TYPE_TRAINER = 1 << 3;
+export const BATTLE_SCRIPT_BATTLE_TYPE_FACTORY = 1 << 19;
+export const BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING = 1 << 9;
+export const BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE = 1 << 19;
+export const BATTLE_SCRIPT_MOVE_TARGET_BOTH = 1 << 3;
+export const BATTLE_SCRIPT_STATUS2_SUBSTITUTE = 1 << 24;
 const BATTLE_SCRIPT_ITEMS_COUNT = itemHoldEffectsData.itemsCount;
 
 export type BattleScriptStatStages = readonly [
@@ -123,6 +130,9 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   specialStatus: BattleScriptSpecialStatus;
   /** ProtectStruct::chargingTurn. */
   chargingTurn: 0 | 1;
+  /** Remaining durable ProtectStruct bits required by WasUnableToUseMove. */
+  targetNotAffected: 0 | 1;
+  flag2Unknown: 0 | 1;
 }>;
 
 /**
@@ -142,6 +152,9 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
     specialDmg?: number;
   }>;
   chargingTurn?: 0 | 1;
+  /** ProtectStruct bits read by WasUnableToUseMove but not by admission yet. */
+  targetNotAffected?: 0 | 1;
+  flag2Unknown?: 0 | 1;
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -201,6 +214,20 @@ export type BattleScriptMoveHistory = Readonly<{
   lastTakenMoveFrom: readonly number[];
 }>;
 
+export type BattleScriptBattlerPositions = readonly [
+  number,
+  number,
+  number,
+  number,
+];
+
+/** Exact immutable globals used by source battler-position helpers. */
+export type BattleScriptBattleTopology = Readonly<{
+  battlersCount: number;
+  battleTypeFlags: number;
+  battlerPositions: BattleScriptBattlerPositions;
+}>;
+
 /**
  * First durable source-shaped Battle Script rules slice.
  *
@@ -248,6 +275,8 @@ export type BattleScriptRulesContext = Readonly<
     enigmaBerryHoldEffects: BattleScriptMoveEndBytes;
     /** Source-shaped move histories used only by move-end states 14 and 15. */
     moveHistory: BattleScriptMoveHistory;
+    /** Source gBattlersCount, gBattleTypeFlags, and gBattlerPositions[4]. */
+    battleTopology: BattleScriptBattleTopology;
   }
 >;
 
@@ -292,6 +321,11 @@ export type BattleScriptRulesContextInput = Readonly<{
     lastHitBy?: readonly number[];
     lastTakenMove?: readonly number[];
     lastTakenMoveFrom?: readonly number[];
+  }>;
+  battleTopology?: Readonly<{
+    battlersCount: number;
+    battleTypeFlags: number;
+    battlerPositions: readonly number[];
   }>;
   battleCommunication0?: number;
   battleCommunication1?: number;
@@ -378,6 +412,7 @@ type GeneratedMoveTypeRow = Readonly<{
   id: number;
   type: string;
   flags: readonly string[];
+  target: readonly string[];
 }>;
 
 type GeneratedItemHoldEffectRow = Readonly<{
@@ -433,6 +468,30 @@ const GENERATED_MOVE_FLAGS = new Map<number, number>(
     flags.includes("FLAG_MIRROR_MOVE_AFFECTED")
       ? BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED
       : 0,
+  ]),
+);
+
+const BATTLE_SCRIPT_MOVE_TARGET_IDS = new Map<string, number>([
+  ["MOVE_TARGET_SELECTED", 0],
+  ["MOVE_TARGET_DEPENDS", 1 << 0],
+  ["MOVE_TARGET_USER_OR_SELECTED", 1 << 1],
+  ["MOVE_TARGET_RANDOM", 1 << 2],
+  ["MOVE_TARGET_BOTH", BATTLE_SCRIPT_MOVE_TARGET_BOTH],
+  ["MOVE_TARGET_USER", 1 << 4],
+  ["MOVE_TARGET_FOES_AND_ALLY", 1 << 5],
+  ["MOVE_TARGET_OPPONENTS_FIELD", 1 << 6],
+]);
+
+const GENERATED_MOVE_TARGETS = new Map<number, number>(
+  (movesData.moves as readonly GeneratedMoveTypeRow[]).map(({ id, target }) => [
+    id,
+    target.reduce((mask, name) => {
+      const value = BATTLE_SCRIPT_MOVE_TARGET_IDS.get(name);
+      if (value === undefined) {
+        throw new Error(`gBattleMoves[${id}] has unknown target ${name}`);
+      }
+      return mask | value;
+    }, 0),
   ]),
 );
 
@@ -493,6 +552,151 @@ export function resolveBattleScriptMoveFlags(move: number): number {
     throw new Error(`move ${move} has no source-derived gBattleMoves flags`);
   }
   return flags;
+}
+
+/** Resolves the source u8 gBattleMoves[move].target field. */
+export function resolveBattleScriptMoveTarget(move: number): number {
+  const target = GENERATED_MOVE_TARGETS.get(move);
+  if (target === undefined) {
+    throw new Error(`move ${move} has no source-derived gBattleMoves target`);
+  }
+  return target;
+}
+
+/** Source GetBattlerPosition: direct indexing into gBattlerPositions. */
+export function resolveBattleScriptBattlerPosition(
+  topology: BattleScriptBattleTopology,
+  battler: BattleScriptBattlerId,
+): number {
+  return topology.battlerPositions[battler];
+}
+
+/**
+ * Source GetBattlerAtPosition: scan only i < gBattlersCount and return the
+ * count sentinel when no active battler occupies the requested position.
+ */
+export function resolveBattleScriptBattlerAtPosition(
+  topology: BattleScriptBattleTopology,
+  position: number,
+): number {
+  requireUnsigned(position, 0xff, "position");
+  for (let battler = 0; battler < topology.battlersCount; battler += 1) {
+    if (topology.battlerPositions[battler] === position) return battler;
+  }
+  return topology.battlersCount;
+}
+
+/** Exact BATTLE_PARTNER(GetBattlerPosition(battler)) source composition. */
+export function resolveBattleScriptBattlerPartner(
+  topology: BattleScriptBattleTopology,
+  battler: BattleScriptBattlerId,
+): number {
+  return resolveBattleScriptBattlerAtPosition(
+    topology,
+    resolveBattleScriptBattlerPosition(topology, battler) ^ 2,
+  );
+}
+
+/** Exact battle_util.c:890-905 WasUnableToUseMove predicate. */
+export function wasBattleScriptBattlerUnableToUseMove(
+  context: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+): boolean {
+  const protect = context.battlers[battler];
+  return (protect.prlzImmobility ?? 0) !== 0
+    || protect.targetNotAffected !== 0
+    || protect.usedImprisonedMove !== 0
+    || (protect.loveImmobility ?? 0) !== 0
+    || protect.usedDisabledMove !== 0
+    || protect.usedTauntedMove !== 0
+    || protect.flag2Unknown !== 0
+    || protect.flinchImmobility !== 0
+    || (protect.confusionSelfDmg ?? 0) !== 0;
+}
+
+/**
+ * Pure durable portion of MOVEEND_SUBSTITUTE. It deliberately neither
+ * advances moveendState nor participates in the opcode's loop.
+ */
+export function applyBattleScriptMoveEndSubstituteOwnership(
+  context: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  let changed = false;
+  const battlers = context.battlers.map((battler, index) => {
+    if (
+      index >= context.battleTopology.battlersCount
+      || battler.substituteHP !== 0
+      || (battler.status2 & BATTLE_SCRIPT_STATUS2_SUBSTITUTE) === 0
+    ) {
+      return battler;
+    }
+    changed = true;
+    return Object.freeze({
+      ...battler,
+      status2: (battler.status2 & ~BATTLE_SCRIPT_STATUS2_SUBSTITUTE) >>> 0,
+    });
+  }) as unknown as BattleScriptRulesBattlers;
+  return changed
+    ? Object.freeze({ ...context, battlers: Object.freeze(battlers) })
+    : context;
+}
+
+export type BattleScriptMoveEndNextTargetResolution =
+  | Readonly<{
+    kind: "advance";
+    hitMarker: number;
+    reason: "not-both-target-replay" | "partner-fainted";
+  }>
+  | Readonly<{
+    kind: "replay-partner";
+    targetBattler: BattleScriptBattlerId;
+    hitMarker: number;
+    /** The later opcode implementation must perform cleanup and script transfer. */
+    transferRemainder: "cleanup-move-values-and-transfer-effect-script";
+  }>;
+
+/**
+ * Pure prerequisites and topology resolution for MOVEEND_NEXT_TARGET.
+ * Controller-free script stack/PC transfer and MoveValuesCleanUp stay out.
+ */
+export function resolveBattleScriptMoveEndNextTarget(
+  context: BattleScriptRulesContext,
+): BattleScriptMoveEndNextTargetResolution {
+  const attacker = context.selectorRoles.attacker;
+  const target = context.selectorRoles.target;
+  if (attacker === null || target === null) {
+    throw new Error("next-target resolution requires attacker and target battlers");
+  }
+  const canReplay =
+    (context.hitMarker & BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE) === 0
+    && (context.battleTopology.battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE) !== 0
+    && context.battlers[attacker].chargingTurn === 0
+    && resolveBattleScriptMoveTarget(context.currentMove) === BATTLE_SCRIPT_MOVE_TARGET_BOTH
+    && (context.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING) === 0;
+  if (!canReplay) {
+    return Object.freeze({
+      kind: "advance",
+      hitMarker: context.hitMarker,
+      reason: "not-both-target-replay",
+    });
+  }
+
+  const partner = resolveBattleScriptBattlerPartner(context.battleTopology, target);
+  if (!isBattleScriptBattlerId(partner)) {
+    throw new Error(`target partner position resolved to source sentinel ${partner}`);
+  }
+  const hitMarker = (
+    context.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING
+  ) >>> 0;
+  if (context.battlers[partner].hp === 0) {
+    return Object.freeze({ kind: "advance", hitMarker, reason: "partner-fainted" });
+  }
+  return Object.freeze({
+    kind: "replay-partner",
+    targetBattler: partner,
+    hitMarker,
+    transferRemainder: "cleanup-move-values-and-transfer-effect-script",
+  });
 }
 
 function replaceMoveEndArrayValue(
@@ -729,14 +933,13 @@ export function applyBattleScriptMoveEndChoiceOwnership(
 
 /**
  * Pure durable-state portion of MOVEEND_CHANGED_ITEMS
- * (battle_script_commands.c:4318-4329). battlersCount remains a future
- * topology owner and is therefore an explicit validated dependency here.
+ * (battle_script_commands.c:4318-4329). Cardinality comes from the exact
+ * immutable gBattlersCount topology owner.
  */
 export function applyBattleScriptMoveEndChangedItemOwnership(
   context: BattleScriptRulesContext,
-  battlersCount: number,
 ): BattleScriptRulesContext {
-  requireUnsigned(battlersCount, 4, "battlersCount");
+  const { battlersCount } = context.battleTopology;
   let changed = false;
   const battlers = context.battlers.map((battler, index) => {
     const item = index < battlersCount ? context.changedItems[index] : BATTLE_SCRIPT_MOVE_NONE;
@@ -836,6 +1039,50 @@ function createBattleScriptMoveHistory(
       32,
       "moveHistory.lastTakenMoveFrom",
     ),
+  });
+}
+
+function createBattleScriptBattleTopology(
+  input: BattleScriptRulesContextInput["battleTopology"],
+): BattleScriptBattleTopology {
+  const battlersCount = requireUnsigned(
+    input?.battlersCount ?? 2,
+    4,
+    "battleTopology.battlersCount",
+  );
+  const battleTypeFlags = requireUnsigned(
+    input?.battleTypeFlags ?? 0,
+    0xffff_ffff,
+    "battleTopology.battleTypeFlags",
+  ) >>> 0;
+  const positions = input?.battlerPositions ?? [0, 1, 0xff, 0xff];
+  if (!Array.isArray(positions) || positions.length !== 4) {
+    throw new Error("battleTopology.battlerPositions must contain exactly four positions");
+  }
+  const battlerPositions = positions.map((position, battler) =>
+    requireUnsigned(position, 0xff, `battleTopology.battlerPositions[${battler}]`)
+  );
+  const activePositions = battlerPositions.slice(0, battlersCount);
+  if (activePositions.some((position) => position > 3)) {
+    throw new Error("active battleTopology battler positions must be in range 0..3");
+  }
+  if (new Set(activePositions).size !== activePositions.length) {
+    throw new Error("active battleTopology battler positions must be unique");
+  }
+  const isDouble = (battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE) !== 0;
+  if (isDouble && battlersCount !== 4) {
+    throw new Error(
+      "battleTopology BATTLE_TYPE_DOUBLE requires four battlers",
+    );
+  }
+  if (input !== undefined && Object.isFrozen(input) && Object.isFrozen(positions)) {
+    return input as BattleScriptBattleTopology;
+  }
+  return Object.freeze({
+    battlersCount,
+    battleTypeFlags,
+    battlerPositions: Object.freeze(battlerPositions) as unknown as
+      BattleScriptBattlerPositions,
   });
 }
 
@@ -991,6 +1238,16 @@ export function createBattleScriptRulesContext(
         `battlers[${index}].loveImmobility`,
       ) as 0 | 1,
     }),
+    targetNotAffected: requireUnsigned(
+      battler.targetNotAffected ?? 0,
+      1,
+      `battlers[${index}].targetNotAffected`,
+    ) as 0 | 1,
+    flag2Unknown: requireUnsigned(
+      battler.flag2Unknown ?? 0,
+      1,
+      `battlers[${index}].flag2Unknown`,
+    ) as 0 | 1,
     chargingTurn: requireUnsigned(
       battler.chargingTurn ?? 0,
       1,
@@ -1078,6 +1335,7 @@ export function createBattleScriptRulesContext(
     "enigmaBerryHoldEffects",
   ) as BattleScriptMoveEndBytes;
   const moveHistory = createBattleScriptMoveHistory(input.moveHistory);
+  const battleTopology = createBattleScriptBattleTopology(input.battleTopology);
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
@@ -1139,6 +1397,7 @@ export function createBattleScriptRulesContext(
     dynamicMoveType: requireUnsigned(input.dynamicMoveType ?? 0, 0xff, "dynamicMoveType"),
     enigmaBerryHoldEffects,
     moveHistory,
+    battleTopology,
     battleCommunication0: requireUnsigned(
       input.battleCommunication0 ?? 0,
       0xff,

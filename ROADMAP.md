@@ -1082,6 +1082,21 @@ freezing, identity, canonical replay, and existing player/AI verticals are
 Tier-1 pinned. Topology, controllers, delegates, loop/end-mode dispatch, and
 opcode registration remain absent; opcodes **73** and **0** are unregistered.
 
+**MOVEEND topology dependency checkpoint (2026-07-24):** dependency step 3 is
+complete. The frozen rules context now owns exact `gBattlersCount`,
+`gBattleTypeFlags`, and all four source `gBattlerPositions`, including the
+singles inactive-slot `0xFF` values. Active positions are range/uniqueness
+validated; source-shaped position lookup scans only `i < gBattlersCount`,
+returns the count sentinel, and composes `BATTLE_PARTNER` by position rather
+than battler-id parity. The exact nine-ProtectStruct-bit
+`WasUnableToUseMove` predicate adds only `targetNotAffected` and
+`flag2Unknown`; state 13 is cardinality-pinned, and state 16 returns a typed
+partner replay/advance result after all exact gates and HP lookup. The replay
+result deliberately leaves `MoveValuesCleanUp`, effect-script push, and the
+`BattleScript_FlushMessageBox` jump for the later transfer step. Production
+Factory player/AI states explicitly carry legal Level-50 singles topology.
+Controllers, delegates, loop/end modes, and opcodes **73/0** remain absent.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300

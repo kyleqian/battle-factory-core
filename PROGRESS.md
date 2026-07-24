@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 423 — move-end topology and pure state prerequisites landed
+
+- **State:** dependency step 3 is complete and green at **169 files / 1983
+  tests**. Opcodes **73** and **0** remain unregistered; no controller,
+  script-transfer, cleanup, delegate, loop/end-mode, core, render, or oracle
+  behavior was added.
+- **Did:** added frozen source `gBattlersCount`, `gBattleTypeFlags`, and four
+  `gBattlerPositions` with active range/uniqueness validation and exact
+  `GetBattlerAtPosition` count-sentinel/position-partner resolution. Added the
+  exact nine-bit `WasUnableToUseMove`, state-13 cardinality reducer, generated
+  move-target lookup, and typed state-16 replay/advance resolution. Factory
+  player/AI states explicitly own legal Level-50 singles flags/positions.
+- **Next:** dependency step 4 only: add status-data and both visibility
+  controller requests/resumption. Keep move cleanup, effect-script transfer,
+  delegates, loop/end modes, and opcode registration behind their later gates.
+- **Notes:** state 16 stops before `MoveValuesCleanUp`, effect-script push, and
+  `BattleScript_FlushMessageBox` jump; that exact transfer remainder is typed.
+  Integrated suite/build and OFF v5 (`9c89c741…`) pass; pixel diff N/A.
+
+---
 ## 422 — move-end history ownership and state reducers landed
 
 - **State:** dependency step 2 is complete and green at **168 files / 1974
@@ -49,23 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Adjacent choice/change/type/item branches match source review. Integrated
   suite/build and OFF v5 (`9c89c741…`) pass. Code commits `7a6c741`,
   repair `d9b3575`; pixel diff N/A.
-
----
-## 420 — move-end battler metadata owner landed
-
-- **State:** dependency step 1 is committed and green at **166 files / 1960
-  tests**. Opcodes **73** and **0** remain unregistered; no move-end case,
-  delegate, controller, core, render, animation, or oracle behavior was added.
-- **Did:** extended each existing frozen rules battler with source `u16 item`,
-  all **8** `s8 statStages`, SpecialStatus `restoredBattlerSprite` plus signed
-  `physicalDmg/specialDmg`, and ProtectStruct `chargingTurn`. The constructor
-  validates widths/cardinality and freezes nested owners; immutable SETBYTE
-  updates preserve battler/metadata identity. The Factory vertical derives
-  real item IDs **196/171** and source-neutral stages for TYROGUE/PLUSLE.
-- **Next:** follow dependency step 2 in the ownership map: add separately
-  tested choice/change-item and move-history owners, both absent masks, and
-  dynamic/Enigma move-data resolution. Keep opcode 73 unsupported.
-- **Notes:** focused **4 files / 23 tests**; integrated **166/1960**, production
-  build, OFF v5 info (`9c89c741…`), and diff checks pass. Canonical JSON and
-  both player/AI replays preserve the metadata. Code commit `c7dab21`; pixel
-  diff N/A.

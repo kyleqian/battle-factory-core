@@ -176,6 +176,7 @@ describe("source-shaped Battle Script rules context", () => {
       "battleMoveDamage",
       "battleOutcome",
       "battleStructAbsentBattlerFlags",
+      "battleTopology",
       "battlers",
       "bideDmg",
       "bideTarget",
@@ -220,6 +221,8 @@ describe("source-shaped Battle Script rules context", () => {
     expect(Object.isFrozen(created.changedItems)).toBe(true);
     expect(Object.isFrozen(created.enigmaBerryHoldEffects)).toBe(true);
     expect(Object.isFrozen(created.moveHistory)).toBe(true);
+    expect(Object.isFrozen(created.battleTopology)).toBe(true);
+    expect(Object.isFrozen(created.battleTopology.battlerPositions)).toBe(true);
     expect(Object.isFrozen(created.selectorRoles)).toBe(true);
     expect(created.battlers.every(Object.isFrozen)).toBe(true);
     expect(created.battlers.every((value) => Object.isFrozen(value.pp))).toBe(true);
