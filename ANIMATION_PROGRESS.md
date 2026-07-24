@@ -38,24 +38,26 @@ remainder.
 
 ## Current handoff
 
-- **State:** **9 exact / 5 partial / 262 unsupported**. FLY remains partial:
-  all four portable practical windows are exact, but ISSUES #34's seven
-  affine opening frames remain explicitly excluded. BOUNCE is now partial:
-  both complete charge/strike bodies are exact in both orientations, while
-  the complete controller resolution/cleanup tail remains open.
-- **Did:** staged legal player-back set-121 SPOINK with seed `0x12345678`,
-  extracted only its source back art, and generalized the existing BOUNCE
-  compositor for side geometry. The shared reducer now carries the
-  source-observed player-target hit-task lag and attacker restoration boundary,
-  without changing damage, PP, status, turn order, or controller progression.
-- **Evidence:** opponent-front fixtures remain charge **345-368 = 24/24** and
-  strike **881-904 = 24/24**. New player-back fixtures match charge
-  **261-284 = 24/24** and strike **777-800 = 24/24**. All four have zero
-  exclusions and zero differing pixels. All four FLY portable windows remain
-  green (**144/144 + 248/248 + 140/140 + 244/244**, with only ISSUES #34's
-  declared seven charge exclusions). The player stage proves
-  `ppUps:[0,0,0,0]`, PP `[5,5,5,5]→[4,5,5,5]`, and stock HP
-  **SPOINK 153→141 / ONIX 117→114**.
-- **Next:** prove BOUNCE's complete controller resolution and cleanup tail
-  through the same Scene-ON seam before exact promotion. Preserve both
-  orientations, all four FLY windows, and ISSUES #34.
+- **State:** **9 exact / 5 partial / 262 unsupported**. BOUNCE remains partial
+  only for its source-required successful-paralysis status-animation/message
+  variant; both no-status orientations now have complete controller tails.
+  FLY remains partial only for ISSUES #34's seven affine opening frames.
+- **Did:** generalized BOUNCE's immutable controller profile for hit reaction,
+  HP drain, effectiveness result, current-move/text cleanup, and optional
+  action-menu reveal. Closed source `AnimTask_ShakeMon`'s final two pulses,
+  monbg target-base reset/release, and the side-dependent four-frame controller
+  lag without changing damage, accuracy, paralysis, PP, RNG, turn order, or
+  battle state.
+- **Evidence:** opponent-front is charge **24/24** plus contiguous strike/
+  controller/menu **881-1179 = 299/299**; player-back is charge **24/24** plus
+  contiguous strike/controller handoff **777-973 = 197/197**. Zero exclusions
+  and zero differing pixels. All four FLY windows remain green
+  (**144/144 + 248/248 + 140/140 + 244/244**). Legal seed `0x27182818`
+  independently stages the open paralysis variant: status commits at frame
+  **1063**, status animation/controller command 27 runs **1064-1148**,
+  `gCurrentMove` clears at **1225**, and menu setup begins at **1230**.
+- **Next:** extract/reuse `ANIM_TAG_SPARK_2` plus `ElectricityEffect` and
+  `AnimTask_ShakeMon2`, then dense-close the legal `0x27182818` paralysis
+  tail through its message, PAR healthbox, command release, MOVE_NONE, and
+  stable menu. Preserve both no-status windows, all four FLY windows, and
+  ISSUES #34.

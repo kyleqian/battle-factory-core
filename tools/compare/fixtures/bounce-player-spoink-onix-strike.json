@@ -14,7 +14,7 @@
   },
   "denseWindow": {
     "startFrame": 777,
-    "endFrame": 800
+    "endFrame": 973
   },
   "fieldProfile": {
     "playerHp": 141,
@@ -24,10 +24,17 @@
     "opponentGender": "female"
   },
   "controllerProfile": {
-    "moveTextFirstAge": -18
+    "moveTextFirstAge": -18,
+    "moveTextClearAge": 999,
+    "targetHpBefore": 117,
+    "targetHpAfter": 114,
+    "hitReactionFirstAge": 53,
+    "hpDrainFirstAge": 88,
+    "resultTextFirstAge": 96,
+    "currentMoveResetAge": 193
   },
   "acceptance": {
     "status": "partial",
-    "remaining": "Controller resolution tail remains outside this bounded acceptance step."
+    "remaining": "This no-status body/controller handoff is exact; successful-paralysis status animation/message cleanup remains a move-level variant."
   }
 }
