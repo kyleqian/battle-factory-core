@@ -24,8 +24,10 @@
   "controllerProfile": {
     "targetHpBefore": 117,
     "targetHpAfter": 108,
+    "hitReactionFirstAge": 92,
     "hpDrainFirstAge": 127,
-    "resultTextFirstAge": 142,
+    "moveTextClearAge": 141,
+    "resultTextFirstAge": 141,
     "currentMoveResetAge": 238
   },
   "moveTextStartAge": 5,

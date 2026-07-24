@@ -133,7 +133,9 @@ export interface SceneOnAerialAceConfig {
   readonly controllerProfile: Readonly<{
     readonly targetHpBefore: number;
     readonly targetHpAfter: number;
+    readonly hitReactionFirstAge: number;
     readonly hpDrainFirstAge: number;
+    readonly moveTextClearAge: number;
     readonly resultTextFirstAge: number;
     readonly currentMoveResetAge: number;
   }>;
@@ -406,11 +408,14 @@ export interface SceneOnAerialAceView extends AerialAceAnimationState {
   readonly animationAge: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly healthboxY2: number;
+  readonly targetInvisible: boolean;
   readonly displayedTargetHp: number;
   readonly resultText: Readonly<{
     readonly line: "It’s not very effective…";
     readonly visibleChars: number;
   }> | null;
+  readonly moveTextVisible: boolean;
   readonly currentMove: "AERIAL_ACE" | null;
   readonly moveText: Readonly<{ line1: string; line2: "AERIAL ACE!" }>;
 }
@@ -858,6 +863,10 @@ export function sceneOnAerialAceView(
   const { controllerProfile } = state.config;
   const animationAge =
     state.age + (state.config.animationAgeOffset ?? 0);
+  const hitReaction = genericHitReactionAtAge(
+    state.age,
+    controllerProfile.hitReactionFirstAge,
+  );
   const resultLine = "It’s not very effective…" as const;
   return {
     age: state.age,
@@ -868,6 +877,7 @@ export function sceneOnAerialAceView(
       animationAge,
       state.config.attacker.geometry.side,
     ),
+    ...hitReaction,
     displayedTargetHp: displayedHpAfterDamage(state.age, {
       startHp: controllerProfile.targetHpBefore,
       endHp: controllerProfile.targetHpAfter,
@@ -883,6 +893,7 @@ export function sceneOnAerialAceView(
             ),
           }
         : null,
+    moveTextVisible: state.age < controllerProfile.moveTextClearAge,
     currentMove:
       state.age >= controllerProfile.currentMoveResetAge
         ? null

@@ -93,7 +93,7 @@ export function aerialAceTracesAtAge(
   if (age >= 62 && age <= 69) {
     traces.push({ slot: 4, x2: 0, y2: 0, winsOamTie: false });
   }
-  if (age >= 57 && age <= 64) {
+  if (age >= 57 && age <= 62) {
     traces.push({
       slot: 7,
       ...sideOffset(

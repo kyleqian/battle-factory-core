@@ -567,6 +567,7 @@ import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import {
   sceneOnDoubleTeamView,
+  sceneOnAerialAceView,
   sceneOnEndeavorView,
   sceneOnFeatherDanceView,
   sceneOnFaintAttackView,
@@ -14955,9 +14956,191 @@ export function renderSceneOnMovePresentation(
   }
 
   if (state.config.move === "AERIAL_ACE") {
-    throw new Error(
-      "portable AERIAL_ACE compositor is not yet installed; source-relative state only",
+    const view = sceneOnAerialAceView(state);
+    const { attacker, target } = view;
+    const originalOrientation =
+      attacker.species === "PIDGEOTTO"
+      && attacker.geometry.side === "opponent"
+      && target.species === "ONIX"
+      && target.geometry.side === "player";
+    const oppositeOrientation =
+      attacker.species === "PIDGEOTTO"
+      && attacker.geometry.side === "player"
+      && target.species === "ONIX"
+      && target.geometry.side === "opponent";
+    if (!originalOrientation && !oppositeOrientation) {
+      throw new Error(
+        `unsupported staged AERIAL_ACE pair ${attacker.species}->${target.species}`,
+      );
+    }
+
+    const attackerSprite = originalOrientation
+      ? pidgeottoFrontSprite
+      : pidgeottoBackSprite;
+    const targetSprite = originalOrientation
+      ? onixBackSprite
+      : onixFrontSprite;
+    const darken = view.paletteBlendCoeff === 10;
+    const backgroundPalette = darken ? turn10BgDarkPalette() : battleBg.palette;
+    const attackerPalette = darken
+      ? darkenPaletteToward10(attackerSprite.palette)
+      : attackerSprite.palette;
+    const targetPalette = darken
+      ? darkenPaletteToward10(targetSprite.palette)
+      : targetSprite.palette;
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      backgroundPalette,
     );
+
+    if (!view.targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetPalette,
+        target.geometry.spriteCorner.x,
+        target.geometry.spriteCorner.y + view.targetShakeY2,
+      );
+    }
+
+    const attackerCorner = attacker.geometry.spriteCorner;
+    const attackerClipY =
+      attacker.geometry.side === "opponent"
+        ? attackerCorner.y + 55
+        : 160;
+    const hasTranslatedAttacker =
+      view.attackerOffset.x2 !== 0
+      || view.attackerOffset.y2 !== 0
+      || view.traces.length > 0;
+    if (!hasTranslatedAttacker) {
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerPalette,
+        attackerCorner.x,
+        attackerCorner.y,
+      );
+    } else {
+      for (const trace of view.traces) {
+        if (trace.winsOamTie) continue;
+        drawSpriteSheetBlendedOverFb(
+          fb,
+          attackerSprite.tileset,
+          attackerPalette,
+          attackerCorner.x + trace.x2,
+          attackerCorner.y + trace.y2,
+          12,
+          8,
+          attackerClipY,
+        );
+      }
+      drawSpriteSheetClippedBelow(
+        fb,
+        attackerSprite.tileset,
+        attackerPalette,
+        attackerCorner.x + view.attackerOffset.x2,
+        attackerCorner.y + view.attackerOffset.y2,
+        attackerClipY,
+      );
+      for (const trace of view.traces) {
+        if (!trace.winsOamTie) continue;
+        drawTurn10AerialAceCloneWinsOverField(
+          fb,
+          attackerSprite.tileset,
+          attackerPalette,
+          attackerCorner.x + trace.x2,
+          attackerCorner.y + trace.y2,
+          12,
+          8,
+          attackerClipY,
+          darken ? turn10BgDarkPalette() : undefined,
+        );
+      }
+    }
+
+    if (view.slice) {
+      const frameTileset = cuttingSliceFrameTileset(view.slice.frame);
+      drawSpriteSheetBlendedOverFb(
+        fb,
+        frameTileset,
+        battleAnimCuttingSlice.palette,
+        TURN10_SLICE_BASE.x + view.slice.x2 - 16,
+        TURN10_SLICE_BASE.y + view.slice.y2 - 16,
+        12,
+        8,
+      );
+    }
+
+    if (originalOrientation) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          view.displayedTargetHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender,
+        ),
+        0,
+        view.healthboxY2,
+      );
+    } else {
+      const opponentContent = featherDanceOnixOpponentHealthbox(
+        view.displayedTargetHp,
+        state.config.fieldProfile.opponentGender ?? "female",
+      );
+      drawSendOutHealthbox(fb, 0, opponentContent);
+      if (view.healthboxY2 !== 0) {
+        drawOpponentHealthboxWobble(
+          fb,
+          view.healthboxY2,
+          opponentContent,
+        );
+      }
+      drawComposedPlayerHealthbox(
+        fb,
+        featherDancePidgeottoPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
+
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    if (view.resultText) {
+      drawMessageTextLines(
+        fb,
+        view.resultText.line,
+        "",
+        view.resultText.visibleChars,
+      );
+    } else if (view.moveTextVisible) {
+      drawMessageTextLines(
+        fb,
+        view.moveText.line1,
+        view.moveText.line2,
+        Math.max(
+          0,
+          Math.min(
+            view.moveText.line1.length + view.moveText.line2.length,
+            view.age - state.config.moveTextStartAge + 1,
+          ),
+        ),
+      );
+    }
+    return;
   }
 
   const view = sceneOnFirePunchView(state);

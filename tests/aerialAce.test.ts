@@ -40,7 +40,7 @@ describe("portable AERIAL ACE source components", () => {
       startFrame: 46,
       endFrame: 277,
     });
-    expect(opponentFixture.acceptance.status).toBe("staged-not-compared");
+    expect(opponentFixture.acceptance.status).toBe("exact");
     expect(playerFixture.acceptance.status).toBe("staged-not-compared");
   });
 
@@ -91,6 +91,9 @@ describe("portable AERIAL ACE source components", () => {
       { slot: 4, x2: 0, y2: 0, winsOamTie: false },
       { slot: 7, x2: -24, y2: 6, winsOamTie: true },
     ]);
+    expect(aerialAceTracesAtAge(63, "player")).toEqual([
+      { slot: 4, x2: 0, y2: 0, winsOamTie: false },
+    ]);
   });
 
   it("pins the independent cutting slice and complex palette pulse", () => {
@@ -116,8 +119,10 @@ describe("portable AERIAL ACE source components", () => {
     const controllerProfile = Object.freeze({
       targetHpBefore: 117,
       targetHpAfter: 108,
+      hitReactionFirstAge: 96,
       hpDrainFirstAge: 131,
-      resultTextFirstAge: 146,
+      moveTextClearAge: 145,
+      resultTextFirstAge: 145,
       currentMoveResetAge: 242,
     });
     const stage = createSceneOnMovePresentation({
@@ -135,11 +140,21 @@ describe("portable AERIAL ACE source components", () => {
     const before = structuredClone(stage.config);
     expect(sceneOnAerialAceView({ ...stage, age: 130 }).displayedTargetHp)
       .toBe(117);
+    expect(sceneOnAerialAceView({ ...stage, age: 96 })).toMatchObject({
+      healthboxY2: 1,
+      targetInvisible: false,
+    });
+    expect(sceneOnAerialAceView({ ...stage, age: 97 })).toMatchObject({
+      healthboxY2: -1,
+      targetInvisible: true,
+    });
     expect(sceneOnAerialAceView({ ...stage, age: 131 }).displayedTargetHp)
       .toBe(116);
     expect(sceneOnAerialAceView({ ...stage, age: 139 }).displayedTargetHp)
       .toBe(108);
-    expect(sceneOnAerialAceView({ ...stage, age: 146 }).resultText)
+    expect(sceneOnAerialAceView({ ...stage, age: 145 }).moveTextVisible)
+      .toBe(false);
+    expect(sceneOnAerialAceView({ ...stage, age: 145 }).resultText)
       .toEqual({ line: "It’s not very effective…", visibleChars: 1 });
     expect(sceneOnAerialAceView({ ...stage, age: 241 }).currentMove)
       .toBe("AERIAL_ACE");
@@ -163,8 +178,10 @@ describe("portable AERIAL ACE source components", () => {
       controllerProfile: Object.freeze({
         targetHpBefore: 117,
         targetHpAfter: 108,
+        hitReactionFirstAge: 92,
         hpDrainFirstAge: 127,
-        resultTextFirstAge: 142,
+        moveTextClearAge: 141,
+        resultTextFirstAge: 141,
         currentMoveResetAge: 238,
       }),
       moveTextStartAge: 5,
