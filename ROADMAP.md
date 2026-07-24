@@ -586,9 +586,12 @@ prompt/input, YES keep-party exit, and NO/B transition-in return across four
 committed every-frame windows: **31/31 + 67/67 + 67/67 + 68/68**. TRUE script
 result, field handoff, fresh returned-picker input, and immutable party/rental
 state are Tier-1 pinned. Enemy-origin quit chrome remains bounded and is not
-claimed by this player proof. SUMMARY return, enemy `PKMN FOR SWAP`, enemy quit
-chrome, and duplicate rejection still require short staged OFF windows, not
-further Battle-2 turns.
+claimed by this player proof. A separate compact OFF fixture now pins enemy
+`PKMN FOR SWAP` from its accepted action edge through two-button enemy-chrome
+teardown, four-action player-picker reconstruction, and the first fresh player
+input, with immutable parties/rentals; live presentation remains to be
+implemented. SUMMARY return, enemy quit chrome, and duplicate rejection still
+require their own short staged OFF windows, not further Battle-2 turns.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it
@@ -598,9 +601,11 @@ its canonical residual windows (**236/236** and **200/200**), making it
 sides (**141/141**) and canonical (**237/237**) and is `exact`; FAINT ATTACK
 is portable and canonical (**221/221**) but remains `partial` for its
 separately parked residual. ICE PUNCH is now `partial` with its source-composed
-opening and complete inward crystal spiral **73/73 exact**, including the
-generic semi-transparent OBJ-over-BG composition rule and final OAM state;
-the later `IceCrystalEffectShort` body remains explicitly bounded.
+opening, inward spiral, and complete seven-spawn `IceCrystalEffectShort` burst
+**164/164 exact**, including the generic semi-transparent OBJ-over-BG rule,
+affine growth/flicker lifetimes, OAM ordering, and target-palette restoration.
+Its bounded remainder is BG palette restoration, `clearmonbg`/`blendoff`, and
+script teardown at frames 2503-2525 before generic resolution.
 Level 50 animation coverage is therefore **4 exact / 9 partial / 263
 unsupported**. S8 remains `[~]`.
 
