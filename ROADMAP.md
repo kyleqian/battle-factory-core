@@ -633,9 +633,11 @@ the generic
 semi-transparent OBJ-over-BG rule,
 affine growth/flicker lifetimes, OAM ordering, and target-palette restoration.
 The reusable teardown pins BG palette restoration, `clearmonbg`/`blendoff`,
-and sound-gated `end` through frame 2525; shared healthbox wobble and target
-blink are exact through 2560. HP drain/message resolution from 2561 and
-evidence-required geometry/orientation variants remain.
+and sound-gated `end` through frame 2525; shared healthbox wobble, target
+blink, immutable HP drain, super-effective text, no-freeze secondary path,
+`gCurrentMove` clear, and the seven-frame blank message-box hold are exact
+through frame 2701 (**363/363**). The next controller display transition at
+2702 and evidence-required geometry/orientation variants remain.
 Level 50 animation coverage is therefore **4 exact / 9 partial / 263
 unsupported**. S8 remains `[~]`.
 

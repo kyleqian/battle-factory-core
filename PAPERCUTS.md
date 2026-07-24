@@ -44,14 +44,15 @@ Per entry:
 - **Workaround:** invoke both `tools/run-mgba-probe.py` and its nested probe
   with `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python3`.
 
-## Parallel compare calls can return an unresolved execution session
+## Serialized oracle compares can strand or terminate multi-trace batches
 
-- **What:** launching several oracle-backed compare commands concurrently can
-  leave one call reported as still running after its siblings complete.
-- **Hits:** 1.
-- **Cost each:** ~1 min.
-- **Workaround:** serialize compare calls, or retain and poll the returned
-  execution-session handle.
+- **What:** launching several oracle-backed compares concurrently can leave a
+  call unresolved, while long serialized shell batches can terminate
+  mid-command even though their individual traces are healthy.
+- **Hits:** 2.
+- **Cost each:** ~1-3 min.
+- **Workaround:** run short bounded batches, retain and poll every execution
+  handle, and resume from the first unverified trace after an interruption.
 
 ## Dense multi-session mGBA probes destabilize long worker processes
 
