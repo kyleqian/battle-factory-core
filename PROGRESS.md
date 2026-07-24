@@ -4,28 +4,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 400 — S10 immutable battle decision-boundary ABI published
+## 400 — S10 battle boundary published; BIND portability integrated
 
-- **State:** the run is clean and green at **138 files / 1763 tests**. S10
+- **State:** the run is clean and green at **138 files / 1764 tests**. S10
   Gate 3 remains at **27** source-safe executable opcodes; the new headless
   battle-level ABI is published but deliberately not integrated into
   `core.ts`, `battleScene.ts`, or the incomplete Battle Script machine.
+  Scene-ON coverage is **13 exact / 1 partial / 262 unsupported**.
 - **Did:** added a versioned, canonical-JSON `BattleState` whose returned
   immutable state alone persists Emerald LCG value/call count. One matching
   player/trainer command or explicit forced-switch submission runs an injected
   pure rules reducer and returns ordered frozen semantic events plus exactly
-  one next request or terminal outcome. Builders validate the honest current
-  Level-50 singles shapes: move, voluntary switch, and forced switch.
-- **Next:** supervisor-verify commit `48a7408`. Any production script-machine
-  adapter, native trainer AI, broader decision kinds, or facility integration
-  must be a separately bounded S10 increment; do not imply those exist from
-  this architecture checkpoint or resume the canonical Battle-2 march.
+  one next request or terminal outcome. BIND's opposite ONIX→MURKROW
+  orientation is exact at task/OAM **45/45** and RGB **45/45**, promoting the
+  move to exact without owning hit/result/residual logic.
+- **Next:** resume the bounded `CANCELER_IMPRISONED` source phase without a
+  phase loop or opcode-0 registration. In parallel, audit native Factory AI
+  view/history/RNG/switch-item dependencies and prove MUD SLAP as the next
+  bounded Level-50 animation unit with SAND ATTACK kept green.
 - **Notes:** focused **1 file / 12 tests**, integrated Tier-1 **138 files /
-  1763 tests**, build, OFF v5 info (`9c89c741…`), and diff check green. Tests
+  1764 tests**, build, both v5 oracle profiles (`9c89c741…`), and diff check
+  are supervisor-green. Tests
   pin caller immutability/deep freezing, canonical serialization and replay,
   request mismatch rejection, state-owned/no-ambient RNG, both sides and
   forced switches, event order, boundary exclusivity, and rejection of
-  presentation acknowledgements before rules/RNG execution. Pixel diff N/A.
+  presentation acknowledgements before rules/RNG execution. BIND's existing
+  orientation also remains **45/45 + 45/45** exact; merge `86f1beb`.
 
 ---
 ## 399 — S10 battle-kernel and trainer-AI architecture checkpoint queued
