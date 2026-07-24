@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 391 — Gate-3 attack-canceler ASLEEP source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS and ASLEEP
+  decisions only; ATTACKCANCELER opcode 0 remains unregistered and no phase
+  loop exists.
+- **Did:** extended each rules battler only with source `u8` ability, then
+  implemented complete `CANCELER_ASLEEP` predicates/effects through a frozen
+  receipt: sleep decrement, four-battler Uproar/Soundproof scan, Early Bird,
+  Snore/Sleep Talk, Nightmare/wake scripts and chooser, unable marker, effect
+  2 status-write request, cursor push, and tracker advance to FROZEN.
+- **Next:** implement `CANCELER_FROZEN` only after its exact move-effect, RNG,
+  status, controller, script, cursor, and receipt ownership is explicit. Do
+  not loop phases or register opcode 0.
+- **Notes:** all sleep counters × ordinary/Early Bird × ordinary/Snore/Sleep
+  Talk, every Uproar position/order, Soundproof, underflow guard, identity,
+  preservation, determinism/freezing, and invalid roles/widths are pinned.
+  Fresh zero-PP-Up OFF lab proves Sleep Powder creates counter **4**, canceled
+  Tackle decrements it **4→3**, PP/HP stay **35/136**, and RNG stays
+  **4106679800** across admission. Focused **55/55**; Tier-1 **130 files /
+  1708 tests**, build, OFF info, manifest/hash audit, and diff check green.
+  Commit `b1cd7d3`; pixel diff N/A.
+
+---
 ## 390 — Shared CancelMultiTurnMoves helper integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable
@@ -47,24 +71,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Focused animation **279/279**; lane full suite/build/coverage green.
   Parameter manifest regeneration, **6/6** focused, full suite/build, and OFF
   info green. Commits `5706c53` and `519accf`.
-
----
-## 388 — Gate-3 attack-canceler FLAGS source phase integrated
-
-- **State:** S10 Gate 3 remains open with **27** source-safe executable
-  opcodes. `AtkCanceler_UnableToUseMove` now has only its first pure source
-  phase; ATTACKCANCELER opcode 0 remains deliberately unregistered.
-- **Did:** added the exact `u8` attack-canceler tracker to the shared rules
-  context and a frozen typed `CANCELER_FLAGS` decision/receipt. At tracker
-  **0**, it clears only attacker `STATUS2_DESTINY_BOND` (bit 25) and
-  `STATUS3_GRUDGE` (bit 14), advances once to `CANCELER_ASLEEP` (**1**), and
-  replaces nested battler state only when a mask changes.
-- **Next:** implement `CANCELER_ASLEEP` only after its complete sleep/Uproar,
-  Early Bird, Nightmare, move, script-stack, controller, and effect ownership
-  is explicit. Do not loop phases or register opcode 0.
-- **Notes:** non-FLAGS trackers are exact identity gates; missing attacker,
-  absent-bit identity, unrelated battlers/admission fields, determinism, and
-  deep freezing are pinned. No RNG, controller/presentation events, status
-  messages/application, PP/damage/Protect/ability/accuracy, or oracle fixture
-  was added. Focused **34/34**; Tier-1 **127 files / 1681 tests**, build, OFF
-  info, and diff check green. Commit `d72ed7f`; pixel diff N/A.

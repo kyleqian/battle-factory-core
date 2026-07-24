@@ -1,3 +1,24 @@
+## 388 — Gate-3 attack-canceler FLAGS source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has only its first pure source
+  phase; ATTACKCANCELER opcode 0 remains deliberately unregistered.
+- **Did:** added the exact `u8` attack-canceler tracker to the shared rules
+  context and a frozen typed `CANCELER_FLAGS` decision/receipt. At tracker
+  **0**, it clears only attacker `STATUS2_DESTINY_BOND` (bit 25) and
+  `STATUS3_GRUDGE` (bit 14), advances once to `CANCELER_ASLEEP` (**1**), and
+  replaces nested battler state only when a mask changes.
+- **Next:** implement `CANCELER_ASLEEP` only after its complete sleep/Uproar,
+  Early Bird, Nightmare, move, script-stack, controller, and effect ownership
+  is explicit. Do not loop phases or register opcode 0.
+- **Notes:** non-FLAGS trackers are exact identity gates; missing attacker,
+  absent-bit identity, unrelated battlers/admission fields, determinism, and
+  deep freezing are pinned. No RNG, controller/presentation events, status
+  messages/application, PP/damage/Protect/ability/accuracy, or oracle fixture
+  was added. Focused **34/34**; Tier-1 **127 files / 1681 tests**, build, OFF
+  info, and diff check green. Commit `d72ed7f`; pixel diff N/A.
+
+---
 ## 387 — Gate-3 action-admission preflight slice integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable
