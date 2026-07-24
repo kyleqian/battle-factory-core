@@ -263,25 +263,92 @@ past its one DRAGON_BREATH instance; (4) give the interpreter real
 subsystems (`AnimComplexPaletteBlend`, `AnimTask_MistBallFog`'s BG
 pipeline) — each its own bounded step. MIST_BALL stays unsupported.
 
+## FLY `AnimTask_ShakeMon` calibration: RESOLVED, landed on the port (2026-07-24)
+
+**Verdict: outcome (1) from the step brief — a per-call-site creation-
+offset parameter reconciles the port with 248/248 + 244/244. `fly.ts` now
+calls through `shakeMonOffsetAtTick` directly; `FLY_SHAKE_AGES` is deleted.**
+
+**Root mechanism, pinned by RAM evidence, not a curve fit.** Wrote
+`tools/probe/dump-fly-shakemon-tasks.py` (stages via the same
+`battle_lab.BattleLab` mechanicLab request the committed strike fixtures
+use, so the window is reached in ~1k frames) and dumped `gTasks` (all 16
+slots, full struct) plus every in-use sprite's x2/y2 across FlyUnleash's
+`create_basic_hitsplat_sprite`/`createvisualtask AnimTask_ShakeMon` window,
+for both strike comparators (opponent- and player-attacker).
+
+`RunAnimScriptCommand` is a `do...while (sAnimFramesToWait == 0 &&
+gAnimScriptActive)` loop (`battle_anim.c`): `createsprite`,
+`createvisualtask`, and `playsewithpan` never set `sAnimFramesToWait`, so
+FlyUnleash's hitsplat creation, `AnimTask_ShakeMon` creation, the razor-wind
+`playsewithpan`, and `waitforvisualfinish` all execute inside **one** call,
+i.e. one RAM tick — confirmed directly (both probes: the hitsplat's new
+sprite slot and the ShakeMon task appear in the same tick). But the
+ShakeMon task's OWN first-observable RAM state is not a fresh creation: its
+`data[1]` (numTimes) already reads one less than `AnimTask_ShakeMon` sets,
+and the target sprite's x2 is already 0, not `xOffset`. `CreateTask`
+inserts the new task into `gTasks`'s priority-ordered linked list
+(`task.c`'s `InsertTask`), and `RunTasks` walks that list via `.next` from
+wherever its traversal currently sits. FlyUnleash's call uses task priority
+**5**; QUICK_ATTACK's uses priority **2**. Priority 5 lands the freshly
+inserted task where `RunTasks`'s *own, already-in-progress* traversal for
+that frame reaches it again, so it gets stepped a **second** time before
+that frame ever renders — collapsing the port's tick 0 (the creation-time
+synchronous self-call, x2 still holds `xOffset`) and tick 1 (the first
+regular toggle, back to zero) into one displayed tick. QUICK_ATTACK's
+priority 2 does not trigger this (confirmed by its own comparator: tick 0
+is directly visible, no reconciliation needed). Every later FLY tick is a
+normal 1:1 step (traced through self-destroy in both probes).
+
+The task's own RAM creation tick converts to display age 22
+(`FLY_IMPACT_FIRST_AGE`, matching the hitsplat's own first-visible age —
+both are created in the same batch and share the codebase's uniform 1-tick
+RAM-write-to-displayed-pixel lag) in **both** probes independently. Querying
+`shakeMonOffsetAtTick(6, 0, 8, 1, age - FLY_SHAKE_CREATION_AGE + 1)`
+(the `+1` skips the collapsed tick 0) reproduces `{24,25,28,29,32,33}` —
+the previous hand-fit `FLY_SHAKE_AGES` — exactly.
+
+**Landed:** `src/engine/fly.ts` — `FLY_SHAKE_AGES` deleted, `targetShakeX2`
+now calls `shakeMonOffsetAtTick` through the documented
+`FLY_SHAKE_CREATION_AGE` constant (guarded so ages before creation stay
+zero, since the port's own tick 0 is nonzero and must not leak backward
+through the `+1` shift). `tests/shakeMon.test.ts`'s FLY test rewritten from
+"documents a divergence" to pin the real mechanism and the exact
+reconciliation. New probe `tools/probe/dump-fly-shakemon-tasks.py` (dev-time
+only, not shipped).
+
+**Evidence.** `npm test` 2045/2045, `npm run build` green.
+`fly-murkrow-onix-strike.json` **248/248**,
+`fly-player-murkrow-onix-strike.json` **244/244** (both through the port,
+zero mismatched pixels — previously 247/248 when the port was swapped in
+naively without this mechanism). Charge-turn fixtures unaffected but
+re-run as a sanity check: `fly-murkrow-onix-charge.json` **151/151**,
+`fly-player-murkrow-onix-charge.json` **147/147**. QUICK_ATTACK re-run since
+its own test in the shared file changed: `quick-attack-pidgeotto-onix.json`
+**219/219**, `quick-attack-player-pidgeotto-onix.json` **214/214**.
+
+RUNG B (MIST_BALL rung 3, wiring `AnimThrowMistBall`) was not attempted
+this step — RUNG A's RAM-probe investigation and verification used the full
+session; no safe margin remained to start a second bounded oracle-facing
+change.
+
 ## Current handoff
 
 - **State:** **18 exact / 1 partial / 257 unsupported** (unchanged — no move
-  acceptance changed this step; both rungs are internal implementation
-  substitutions behind already-`exact` moves, proven by rerunning their
-  existing dense comparators at unchanged counts).
-- **Did:** ported `AnimTask_ShakeMon` and the linear-translation Q8.8
-  accumulator generically (see the rungs section above), re-drove
-  QUICK_ATTACK and FIRE_PUNCH's hand-fits through them, deleted the
-  superseded hand-fit constants in those two files, and left FLY's
-  `AnimTask_ShakeMon` instance and `linearDeltaQ8` helper untouched pending
-  the documented follow-ups (a real divergence and an unverified-but-
-  plausible-safe consolidation, respectively).
-- **Evidence:** `npm test` 2025/2025, `npm run build` green. QUICK_ATTACK
-  219/219 + 214/214, FIRE_PUNCH 225/225 + 277/277, FLY 248/248 + 244/244 —
-  all re-run this step at their previously-recorded counts.
-- **Next:** pick up the remainder above in cost order, starting with the
-  FLY `AnimTask_ShakeMon` alignment (cheapest — the primitive already
-  works, this is calibration) or MIST_BALL rung 3 (wire
-  `AnimThrowMistBall`); or resume the next ranked Level-50 component track
-  (`mud-sand-scatter`/`dragon-fire-projectile`) if a bounded win elsewhere
-  is preferred. THUNDER PUNCH has no known move-owned remainder.
+  acceptance changed this step; the FLY calibration is an internal
+  implementation substitution behind an already-`exact` move, proven by
+  rerunning its existing dense comparators at unchanged counts).
+- **Did:** resolved the FLY `AnimTask_ShakeMon` alignment (see the section
+  above): pinned the real same-frame-double-step mechanism with RAM
+  evidence from both strike comparators, landed FLY through the generic
+  `shakeMonOffsetAtTick` port, and deleted `FLY_SHAKE_AGES`.
+- **Evidence:** `npm test` 2045/2045, `npm run build` green. QUICK_ATTACK
+  219/219 + 214/214, FLY strike 248/248 + 244/244, FLY charge 151/151 +
+  147/147 — all re-run this step.
+- **Next:** MIST_BALL rung 3 (wire `AnimThrowMistBall` through the
+  now-ported linear-translation primitive + the interpreter's
+  `createsprite` path, RAM-probe-validated — see "MIST_BALL remainder,
+  rungs 1-2" above for the full remainder list); or resume the next ranked
+  Level-50 component track (`mud-sand-scatter`/`dragon-fire-projectile`) if
+  a bounded win elsewhere is preferred. THUNDER PUNCH has no known
+  move-owned remainder.
