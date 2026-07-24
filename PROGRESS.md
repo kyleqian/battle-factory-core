@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 377 — Gate-3 MAKEVISIBLE controller command integrated
+
+- **State:** S10 Gate 3 remains open with **20** source-safe opcodes and an
+  unwired immutable controller/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `MAKEVISIBLE` (opcode **111 / 0x6f**): resolves its
+  required u8 selector through the typed `GetBattlerForBattleScript` port,
+  activates/marks that battler pending, emits one frozen
+  `set-battler-sprite-visibility` event with `invisible: false`, and advances
+  one instruction/two source bytes.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep `RETURNTOBALL`, sprite presence/allocation,
+  persistent visibility, teardown, presentation timing, rules/RNG/PP,
+  animation, pixels, and other opcodes out.
+- **Notes:** exact supported IDs are
+  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/84/85/86/111/131/141**.
+  Focused **90/90**; Tier-1 **118 files / 1584 tests**, build, and Scene-OFF
+  oracle contract green. All five evidence starts are pinned; only the three
+  MAKEVISIBLE starts execute, while both RETURNTOBALL starts remain excluded.
+
+---
 ## 376 — Gate-3 PLAYFAINTCRY controller command integrated
 
 - **State:** S10 Gate 3 remains open with **19** source-safe opcodes and an
@@ -36,22 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **67/67**; Tier-1 **116 files / 1561 tests**, build, and Scene-OFF oracle
   contract green; all seven catalogued starts and controller acknowledgement
   are pinned with no audio or pixel claim.
-
----
-## 374 — Gate-3 table-selected selection message integrated
-
-- **State:** S10 Gate 3 remains open with **16** source-safe opcodes and an
-  unwired immutable controller/scheduler/rules/RNG/source-context seam.
-- **Did:** added only `PRINTSELECTIONSTRINGFROMTABLE` (opcode 20): locally
-  idle-gates, then resolves its 4-byte `u16` table pointer plus
-  `MULTISTRING_CHOOSER` through a typed port and reuses opcode 17's validated,
-  frozen player-only event/pending-controller transition.
-- **Next:** choose another bounded source family only when its complete rules
-  context is explicit. Keep generic pointers/table commands, escape mechanics,
-  selection completion, PP, production controllers, rendering/audio,
-  damage/accuracy, animation, and pixels out of this seam.
-- **Notes:** exact supported IDs are
-  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/131/141**. Focused **52/52**;
-  Tier-1 **115 files / 1546 tests**, build, and Scene-OFF oracle contract
-  green; sole start **2230** (`BattleScript_PrintCantEscapeFromBattle`,
-  `gNoEscapeStringIds`) and opcode-17 distinction are pinned.

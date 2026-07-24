@@ -1,3 +1,22 @@
+## 374 — Gate-3 table-selected selection message integrated
+
+- **State:** S10 Gate 3 remains open with **16** source-safe opcodes and an
+  unwired immutable controller/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `PRINTSELECTIONSTRINGFROMTABLE` (opcode 20): locally
+  idle-gates, then resolves its 4-byte `u16` table pointer plus
+  `MULTISTRING_CHOOSER` through a typed port and reuses opcode 17's validated,
+  frozen player-only event/pending-controller transition.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep generic pointers/table commands, escape mechanics,
+  selection completion, PP, production controllers, rendering/audio,
+  damage/accuracy, animation, and pixels out of this seam.
+- **Notes:** exact supported IDs are
+  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/131/141**. Focused **52/52**;
+  Tier-1 **115 files / 1546 tests**, build, and Scene-OFF oracle contract
+  green; sole start **2230** (`BattleScript_PrintCantEscapeFromBattle`,
+  `gNoEscapeStringIds`) and opcode-17 distinction are pinned.
+
+---
 ## 373 — Gate-3 source-exact selection message integrated
 
 - **State:** S10 Gate 3 remains open with **15** source-safe opcodes and an
