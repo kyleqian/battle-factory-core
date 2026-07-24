@@ -927,7 +927,8 @@ S10 has six ordered completion gates:
    Raw addresses are an implementation detail, not trace ABI.
 
    **Battle-lab v1 groundwork landed (2026-07-23, umbrella harness
-   `56c21c5`, hardened in `868a352`):** additive `/v1/battle-lab/run` now stages arbitrary legal
+   `56c21c5`, hardened in `868a352` and `262e758`):** additive
+   `/v1/battle-lab/run` now stages arbitrary legal
    Level-50 trainer/set combinations through the real rental constructor and
    `FillFactoryFrontierTrainerParty`, captures typed battle state/RNG beside
    pixels, and supports named active-battler HP/PP/move/status/stat-stage/
@@ -939,9 +940,14 @@ S10 has six ordered completion gates:
    Toxic, Perish Song, Sunny Day, Swords Dance, Recover, and Reflect through
    normal ROM execution. That sweep also pinned all eight source stat-stage
    slots and made frame zero wait for variable entrance/ability hooks and a
-   stable player action menu. Gate 2 remains open: v1 explicitly defers Noland,
-   bench overrides, forced opponent choices, and an earlier checkpoint that
-   regenerates scouting commentary.
+   stable player action menu. Follow-up fuzzing covered 40 varied legal
+   initializations, exact deterministic replays, both Scene profiles, all four
+   move slots, 28 malformed override shapes, and live ability/item/timer hooks.
+   It now rejects Boolean numeric aliases, out-of-range item/ability IDs,
+   inconsistent HP/max-HP state, and malformed weather with structured errors,
+   while exposing named timed conditions in captures. Gate 2 remains open: v1
+   explicitly defers Noland, bench overrides, forced opponent choices, and an
+   earlier checkpoint that regenerates scouting commentary.
 3. [ ] **General battle kernel:** replace preset-damage/action fixtures as the
    production rules path with source-derived action selection, priority/speed
    ordering, accuracy, critical hits, damage, targeting, PP, move-script

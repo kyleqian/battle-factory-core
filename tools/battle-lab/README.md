@@ -14,7 +14,9 @@ bin/oracle lab tools/battle-lab/mechanic-perish-song.json -o /tmp/perish-song
 The output directory contains framebuffer PNGs and `manifest.json`. Each
 capture in the manifest also contains semantic battle state: both active
 battlers, stats, moves, PP, abilities, types, items, permanent/volatile
-statuses, weather, side conditions, RNG, and controller state.
+statuses, weather, side conditions, RNG, and controller state. Timed state is
+named explicitly, including weather duration, confusion, Leech Seed, Perish
+Song, Reflect, Light Screen, Mist, Safeguard, and Spikes.
 
 ## The two modes
 
@@ -30,6 +32,12 @@ small, named overrides to the active player and opponent or the field so a
 worker can isolate a mechanic. Overrides can cover HP, move slots/PP, stat
 stages, item, ability, types, friendship, permanent status, confusion, Leech
 Seed, Perish Song, weather, and side conditions.
+
+Override IDs are source-bounded: moves `0..354`, items `0..376`, abilities
+`0..77`, and types `0..17`. HP must remain between zero and max HP. The setup
+arrays contain raw catalog records; captured battler state is authoritative
+after construction, including Emerald's intentional replacement of Return
+with Frustration for zero-friendship rentals.
 
 Neither mode injects a hit, damage value, status outcome, winner, or opponent
 choice. After staging, the nested `trace` is ordinary controller input and
