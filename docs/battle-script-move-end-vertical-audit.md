@@ -113,10 +113,11 @@ only then, with `effect == FALSE`, it advances PC by three to the `end` at
 
 For the committed singles no-damage asleep state, the immediate facts rule
 out the damage-dependent Rage and defrost predicates, the doubles-only next
-target loop, semi-invulnerability presentation, Choice Band (TYROGUE has a
-Focus Band; PLUSLE a Petaya Berry), and the staged Guts/Plus ability pair has
-no matching Synchronize/on-damage/immunity callback.  The concrete path is
-therefore a no-effect sweep through cases 0..16, including its state hygiene:
+target loop, Choice Band (TYROGUE has a Focus Band; PLUSLE a Petaya Berry),
+and the staged Guts/Plus ability pair has no matching
+Synchronize/on-damage/immunity callback.  The concrete path is therefore an
+`effect == FALSE` sweep through cases 0..16, interrupted by two required
+controller returns, and includes this state hygiene:
 
 1. Rage, defrost, target Synchronize, on-damage abilities, immunity abilities,
    attacker Synchronize (0..5): call/check the source predicates; no script
@@ -127,10 +128,17 @@ therefore a no-effect sweep through cases 0..16, including its state hygiene:
 3. Item effects and King's Rock/Shell Bell (11..12): call `ItemBattleEffects`.
    These are source-required general branches and may push scripts and consume
    RNG in their implementations; their absence is only a staged-state fact.
-4. Attacker invisible/visible and target visible (8..10): possibly emit
-   sprite-invisibility controller commands and return without moving PC.  The
-   committed no-semi-invulnerable state takes their increment paths, but the
-   general handler needs controller barriers and acknowledgement.
+4. Attacker invisible/visible and target visible (8..10): case 8 takes its
+   increment-only path because the attacker is not semi-invulnerable. Case 9
+   then **does emit** attacker `SpriteInvisibility(FALSE)`, because both
+   `!STATUS3_SEMI_INVULNERABLE` and `WasUnableToUseMove(attacker)` satisfy its
+   source predicate; it marks the controller, clears the status bit, sets
+   `restoredBattlerSprite`, increments, and returns at the same PC. After
+   acknowledgement and resumption, case 10 **does emit** the same visibility
+   command for the untouched, in-range, non-semi-invulnerable target, clears
+   its bit, increments, and returns. A second acknowledgement resumes case
+   13. These two barriers are required even though neither sprite was hidden
+   in the staged state.
 5. Substitute cleanup (13), last-move bookkeeping (14), and mirror-move
    history (15): mutate the battle/disable/special/history fields subject to
    flags and absent/faint tests.  The no-damage asleep path sets last landed
@@ -142,18 +150,19 @@ therefore a no-effect sweep through cases 0..16, including its state hygiene:
 
 The only direct controller barriers inside this handler are defrost
 (`BtlController_EmitSetMonData`, lines 4265-4269) and the three sprite
-visibility cases (4341-4379); delegated ability/item calls can add more.
+visibility cases (4341-4379); the exact staged path takes the attacker-visible
+and target-visible barriers. Delegated ability/item calls can add more.
 `Cmd_moveend` itself has no `Random()` call in its source span.  That does not
 prove a zero-RNG move-end implementation: delegated ability/item/effect
 scripts and the general action continuation still require their own source
 RNG accounting.
 
-At the end of this particular no-effect singles sweep, PC advances to
-`end`; `Cmd_end` is the next required continuation, not a new decision
-request.  The source-wide action scheduler/turn-finalization after that end
-is outside the currently staged adapter.  Therefore the current barrier is
-honest: it stops before both the write primitive and the 289-line move-end
-state machine.
+After both controller resumptions and the rest of this particular
+`effect == FALSE` singles sweep, PC advances to `end`; `Cmd_end` is the next
+required continuation, not a new decision request. The source-wide action
+scheduler/turn-finalization after that end is outside the currently staged
+adapter. Therefore the current barrier is honest: it stops before both the
+write primitive and the 289-line move-end state machine.
 
 ## 4. Recommended next executable unit
 
