@@ -563,6 +563,7 @@ import {
 } from "./battle2Turn1.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
+  sceneOnFaintAttackView,
   sceneOnFirePunchView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
@@ -13372,7 +13373,17 @@ function drawTurn16FightSubmenuWindow(
         }
         return;
       }
-      if (faintAttackResolutionState(resolutionAge, targetHp).message !== "FIRE_PUNCH") return;
+      if (faintAttackResolutionState(resolutionAge, targetHp).message !== "FIRE_PUNCH") {
+        // The repeated FAINT ATTACK animation body retains its already-
+        // completed move printer while the relative visual profile runs.
+        drawMessageTextLines(
+          fb,
+          TURN16_FAINT_ATTACK_LINE1,
+          TURN16_FAINT_ATTACK_LINE2,
+          TURN16_FAINT_ATTACK_TEXT_TOTAL,
+        );
+        return;
+      }
       drawMessageTextLines(
         fb,
         TURN16_FIRE_PUNCH_LINE1,
@@ -13687,6 +13698,112 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "FAINT_ATTACK") {
+    const view = sceneOnFaintAttackView(state);
+    const { attacker, target } = view;
+    const player = attacker.geometry.side === "player" ? attacker : target;
+    const opponent = attacker.geometry.side === "opponent" ? attacker : target;
+    if (
+      player.species !== "ONIX"
+      || opponent.species !== "GROVYLE"
+      || attacker.geometry.side !== "player"
+    ) {
+      throw new Error(
+        `unsupported staged FAINT_ATTACK pair ${attacker.species}->${target.species}`,
+      );
+    }
+
+    const sourcePpu =
+      view.background.background === "dark"
+        ? turn16DarkFieldPpu
+        : turn15FieldPpuAsset;
+    drawMode0Ppu(fb, {
+      ...sourcePpu,
+      // `Task_FadeToBg` darkens BG3 only. Battler sprites, healthboxes, and
+      // the printer are assembled below and therefore remain unaffected.
+      bldcnt: view.background.bldy > 0 ? 0x00e8 : sourcePpu.bldcnt,
+      bldy: view.background.bldy,
+      oam: [],
+    });
+
+    drawSpriteSheet(
+      fb,
+      grovyleFrontSprite.tileset,
+      grovyleFrontSprite.palette,
+      opponent.geometry.spriteCorner.x + view.targetShakeX2,
+      opponent.geometry.spriteCorner.y,
+    );
+    if (view.attackerEva > 0) {
+      const x = player.geometry.spriteCorner.x + view.attackerOffset.x2;
+      const y = player.geometry.spriteCorner.y + view.attackerOffset.y2;
+      if (view.attackerEva === 16) {
+        drawSpriteSheet(
+          fb,
+          onixBackSprite.tileset,
+          onixBackSprite.palette,
+          x,
+          y,
+        );
+      } else {
+        drawSpriteSheetBlendedOverFb(
+          fb,
+          onixBackSprite.tileset,
+          onixBackSprite.palette,
+          x,
+          y,
+          view.attackerEva,
+          16 - view.attackerEva,
+        );
+      }
+    }
+    if (view.hitsplatVisible) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        target.geometry.animationCenter.x - 16,
+        target.geometry.animationCenter.y - 16,
+        TURN9_HITSPLAT_MATRIX,
+        TURN9_HITSPLAT_MATRIX,
+        12,
+        8,
+        true,
+        "live",
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      opponentHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      onixPlayerHealthboxContentForState(
+        state.config.fieldProfile.playerHp,
+        state.config.fieldProfile.playerStatus,
+      ),
+      0,
+      0,
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    const line1 = `${attacker.species} used`;
+    const line2 = "FAINT ATTACK!";
+    const textStartAge = state.config.moveTextStartAge ?? -1;
+    drawMessageTextLines(
+      fb,
+      line1,
+      line2,
+      Math.min(line1.length + line2.length, view.age - textStartAge + 1),
+    );
+    return;
+  }
+
   const view = sceneOnFirePunchView(state);
   const { attacker, target, resolution } = view;
   const player = attacker.geometry.side === "player" ? attacker : target;

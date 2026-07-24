@@ -8,6 +8,16 @@ import {
   type FirePunchResolutionProfile,
   type FirePunchResolutionState,
 } from "./firePunch.ts";
+import {
+  FAINT_ATTACK_ANIMATION_PROFILE,
+  faintAttackAttackerEva,
+  faintAttackAttackerOffset,
+  faintAttackBgState,
+  faintAttackHitsplatVisible,
+  faintAttackTargetShakeX2,
+  type FaintAttackAnimationProfile,
+  type FaintAttackBgState,
+} from "./faintAttack.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -40,9 +50,35 @@ export interface SceneOnFirePunchConfig {
   readonly moveTextStartAge?: number;
 }
 
-export interface SceneOnMovePresentationState {
+export interface SceneOnFaintAttackFieldProfile {
+  readonly playerHp: number;
+  readonly opponentHp: number;
+  readonly playerStatus: "none" | "burn";
+}
+
+export interface SceneOnFaintAttackConfig {
+  readonly move: "FAINT_ATTACK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<FaintAttackAnimationProfile>;
+  /**
+   * Immutable field presentation at animation kickoff. Damage and all later
+   * resolution stay outside the move-owned body.
+   */
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Relative first printer age; negative means text predates this seam. */
+  readonly moveTextStartAge?: number;
+}
+
+export type SceneOnMoveConfig =
+  | SceneOnFirePunchConfig
+  | SceneOnFaintAttackConfig;
+
+export interface SceneOnMovePresentationState<
+  TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
+> {
   readonly age: number;
-  readonly config: SceneOnFirePunchConfig;
+  readonly config: TConfig;
 }
 
 export interface SceneOnFirePunchView {
@@ -53,6 +89,17 @@ export interface SceneOnFirePunchView {
   readonly resolution: FirePunchResolutionState;
   readonly particles: readonly FirePunchParticle[];
   readonly burnFlames: ReturnType<typeof firePunchBurnFlames>;
+}
+
+export interface SceneOnFaintAttackView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly background: FaintAttackBgState;
+  readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
+  readonly attackerEva: number;
+  readonly targetShakeX2: number;
+  readonly hitsplatVisible: boolean;
 }
 
 function assertIntegerPoint(
@@ -69,9 +116,9 @@ function assertIntegerPoint(
  * geometry only: damage, RNG, move legality, turn order, and round state are
  * supplied as immutable inputs and never resolved or mutated here.
  */
-export function createSceneOnMovePresentation(
-  config: SceneOnFirePunchConfig,
-): SceneOnMovePresentationState {
+export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>(
+  config: TConfig,
+): SceneOnMovePresentationState<TConfig> {
   if (config.attacker.geometry.side === config.target.geometry.side) {
     throw new Error("attacker and target must occupy opposite battle sides");
   }
@@ -81,24 +128,34 @@ export function createSceneOnMovePresentation(
   assertIntegerPoint("target spriteCorner", config.target.geometry.spriteCorner);
   assertIntegerPoint("target animationCenter", config.target.geometry.animationCenter);
   assertIntegerPoint("target battlePositionCenter", config.target.geometry.battlePositionCenter);
-  if (
-    config.resolutionProfile.startHp < config.resolutionProfile.endHp
-    || config.resolutionProfile.endHp < 0
+  if (config.move === "FIRE_PUNCH") {
+    if (
+      config.resolutionProfile.startHp < config.resolutionProfile.endHp
+      || config.resolutionProfile.endHp < 0
+    ) {
+      throw new Error("FIRE_PUNCH resolution profile requires startHp >= endHp >= 0");
+    }
+  } else if (
+    config.fieldProfile.playerHp < 0
+    || config.fieldProfile.opponentHp < 0
   ) {
-    throw new Error("FIRE_PUNCH resolution profile requires startHp >= endHp >= 0");
+    throw new Error("FAINT_ATTACK field profile requires nonnegative HP");
   }
   return { age: 0, config };
 }
 
-export function advanceSceneOnMovePresentation(
-  state: SceneOnMovePresentationState,
-): SceneOnMovePresentationState {
+export function advanceSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>(
+  state: SceneOnMovePresentationState<TConfig>,
+): SceneOnMovePresentationState<TConfig> {
   return { ...state, age: state.age + 1 };
 }
 
 export function sceneOnFirePunchView(
   state: SceneOnMovePresentationState,
 ): SceneOnFirePunchView {
+  if (state.config.move !== "FIRE_PUNCH") {
+    throw new Error(`expected FIRE_PUNCH presentation, got ${state.config.move}`);
+  }
   const geometry = { center: state.config.target.geometry.animationCenter };
   const burnGeometry = {
     ...geometry,
@@ -133,6 +190,29 @@ export function sceneOnFirePunchView(
         ? firePunchResidualBurnFlames(state.age, geometry)
         : []),
     ],
+  };
+}
+
+export function sceneOnFaintAttackView(
+  state: SceneOnMovePresentationState,
+): SceneOnFaintAttackView {
+  if (state.config.move !== "FAINT_ATTACK") {
+    throw new Error(`expected FAINT_ATTACK presentation, got ${state.config.move}`);
+  }
+  const { animationProfile, attacker, target } = state.config;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    background: faintAttackBgState(state.age, animationProfile),
+    attackerOffset: faintAttackAttackerOffset(
+      state.age,
+      attacker.geometry.side,
+      animationProfile,
+    ),
+    attackerEva: faintAttackAttackerEva(state.age, animationProfile),
+    targetShakeX2: faintAttackTargetShakeX2(state.age, animationProfile),
+    hitsplatVisible: faintAttackHitsplatVisible(state.age, animationProfile),
   };
 }
 
@@ -172,6 +252,20 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE: FirePunchResolutionProfile = {
     textStartAge: 204,
   },
 };
+
+export const ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE = {
+  animationProfile: FAINT_ATTACK_ANIMATION_PROFILE,
+  fieldProfile: Object.freeze({
+    playerHp: 117,
+    opponentHp: 143,
+    playerStatus: "none",
+  }),
+  // The stock move printer has completed before the animation-script epoch.
+  moveTextStartAge: -24,
+} as const satisfies Pick<
+  SceneOnFaintAttackConfig,
+  "animationProfile" | "fieldProfile" | "moveTextStartAge"
+>;
 
 export const GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY = {
   attacker: {
