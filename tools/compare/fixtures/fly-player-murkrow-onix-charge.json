@@ -14,8 +14,7 @@
   },
   "denseWindow": {
     "startFrame": 47,
-    "endFrame": 193,
-    "excludedFrames": [59, 60, 61, 62, 63, 64, 65]
+    "endFrame": 193
   },
   "fieldProfile": {
     "playerHp": 142,
@@ -35,7 +34,7 @@
     "currentMoveResetAge": 155
   },
   "acceptance": {
-    "status": "partial",
-    "remaining": "Oracle frames 59-65 retain ISSUES #34's generic affine-sampler exclusion."
+    "status": "exact",
+    "scope": "Complete opposite-side charge, affine-double lifetime, disappearance, message, and controller-cleanup window with no exclusions."
   }
 }

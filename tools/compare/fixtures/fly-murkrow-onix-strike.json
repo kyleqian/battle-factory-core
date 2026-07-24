@@ -34,7 +34,7 @@
     "currentMoveResetAge": 260
   },
   "acceptance": {
-    "status": "partial",
-    "scope": "Complete practical strike/controller-cleanup window through the last FLY-owned frame; MOVE_FLY remains partial under ISSUES #34."
+    "status": "exact",
+    "scope": "Complete practical strike/controller-cleanup window through the last FLY-owned frame."
   }
 }

@@ -38,21 +38,22 @@ remainder.
 
 ## Current handoff
 
-- **State:** **10 exact / 4 partial / 262 unsupported**. BOUNCE is exact:
-  both no-status orientations and the successful-paralysis path exhaust its
-  source-required presentation variants. FLY remains partial only for
-  ISSUES #34's seven affine opening frames.
-- **Did:** moved the source-relative `Status_Paralysis` visual into generic
-  `statusAnimation.ts`: status kind + battler target geometry drive the
-  `ANIM_TAG_SPARK_2` asset, eight-spawn `ElectricityEffect`, and parameterized
-  `AnimTask_ShakeMon2` framebuffer handoff. BOUNCE now only composes that
-  visual from its already-resolved display profile; outcome, messages,
-  healthbox status, PP, rules/RNG, and controller progression stay external.
-- **Evidence:** seed `0x27182818` strike through stable menu tail,
-  **881-1330 = 450/450** exact: commit **1063**, command 27 **1064-1148**,
-  `gCurrentMove=0` **1225**, menu setup/reveal **1230/1235**. No-status BOUNCE
-  remains **24/24 + 299/299** and **24/24 + 197/197**, all reverified after
-  extraction. FLY remains
-  **144/144 + 248/248 + 140/140 + 244/244**, with only #34's exclusions.
-- **Next:** continue the ranked Level-50 queue. DIVE still needs independent
-  dense evidence; do not weaken FLY's bounded ISSUES #34 remainder.
+- **State:** **11 exact / 3 partial / 262 unsupported**. FLY and BOUNCE are
+  exact across both legal orientations; DIVE still needs independent evidence.
+- **Did:** closed FLY's seven-frame canonical charge opening without changing
+  its source affine table. Fresh pixel samples show the oracle preserves the
+  established opponent terrain layer at `y>=74`; the prior sampler attribution
+  was false. `drawSpriteSheetAffineStretch` now accepts the same generic
+  optional bottom clip already used by the QUICK_ATTACK/AERIAL_ACE component
+  family, and only the canonical layered path supplies it.
+- **Evidence:** canonical charge/miss is **213/213** with frames 17781-17787
+  restored (**7/7**); portable opponent charge/strike is **151/151 + 248/248**
+  and player charge/strike is **147/147 + 244/244**, all with zero exclusions.
+  Focused FLY/battle-scene/presentation/BOUNCE/status tests are **304/304**;
+  the full suite is **1643/1643**, and build/coverage are green. Fresh BOUNCE
+  charge/player-strike controls remain **24/24 + 24/24 + 197/197**; the local
+  no-status/paralysis seed probes no longer reproduce their committed semantic
+  outcomes (no opponent strike / 117→114 without paralysis), so their existing
+  pixel evidence was not weakened or restaged from animation code.
+- **Next:** continue the ranked Level-50 queue. DIVE remains unsupported; do
+  not alter Battle Lab seed/outcome/PP staging from the animation lane.

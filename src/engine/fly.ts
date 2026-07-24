@@ -42,8 +42,8 @@ export interface FlyPresentationState {
 /**
  * Source `sAffineAnim_FlyBallUp`, followed by the acceleration in
  * `AnimFlyBallUp_Step`. Age zero is the first displayed callback result.
- * The first seven entries deliberately remain subject to ISSUES #34's
- * generic affine-sampler exclusion; this is source state, not a sampler fix.
+ * Layer/terrain occlusion is intentionally presentation-owned rather than
+ * baked into this source-state table.
  */
 export const FLY_CHARGE_BALL: readonly FlyChargeBall[] = Object.freeze([
   { a: 1170, d: 256, y2: 0 },
