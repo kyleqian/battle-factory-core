@@ -587,6 +587,23 @@ describe("source-mapped Battle Script scheduler commands", () => {
     });
   });
 
+  it("wraps the source u16 pause counter before comparing the threshold", () => {
+    const pause = instruction("B_SCR_OP_PAUSE");
+    const initial = stateAt(pause, { pauseCounterBattle: 0xffff });
+    const result = stepBattleScriptMachine(
+      program,
+      initial,
+      composedHandlers(true, undefined, () => 1),
+    );
+    expect(result.kind).toBe("scheduler-progressed");
+    expect(result.state.programCounter).toBe(pause.programCounter);
+    expect(result.state.scheduler).toEqual({
+      messageDisplayActive: false,
+      pauseCounterBattle: 0,
+    });
+    expect(initial.scheduler.pauseCounterBattle).toBe(0xffff);
+  });
+
   it("distinguishes valid zero, invalid values, and unavailable halfword source operands", () => {
     const pause = instruction("B_SCR_OP_PAUSE");
     const zeroInitial = stateAt(pause);
