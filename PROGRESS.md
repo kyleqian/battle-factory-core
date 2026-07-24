@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 407 — Gate-3 attack-canceler THAW source phase integrated
+
+- **State:** the run is clean and green at **148 files / 1850 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through THAW/END
+  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** ported battle_util.c:2250-2264 plus the common effect-2 controller
+  sync at 2270-2275. `EFFECT_THAW_HIT` alone clears `STATUS1_FREEZE`, pushes
+  the cursor, selects `BattleScript_MoveUsedUnfroze`, and sets
+  `B_MSG_DEFROSTED_BY_MOVE`; every frozen path returns effect 2 and records the
+  exact active-battler/status-write/controller-mark ownership semantically.
+- **Next:** keep THAW unlooped and opcode 0 unregistered until the supervisor
+  selects the next explicit Gate-3 boundary; do not integrate the decision
+  boundary or claim live controller/presentation ownership.
+- **Notes:** battlers **0/1**, both sides, generated Flame Wheel/Sacred Fire
+  thaw effects and Tackle control, non-frozen effect 0, frozen non-thaw effect
+  2 with unchanged status/script, other status bits, preset chooser/rules
+  state, missing/invalid context, exact zero-call RNG, one advance to
+  `CANCELER_END`, immutability/determinism, and deep freezing are pinned.
+  Focused **3 files / 33 tests**; integrated Tier-1 **148/1850**, build, OFF
+  v5 info (`9c89c741…`), and diff check green. Code commits `faabbf0` +
+  `aaf3f64`; pixel diff N/A.
+
+---
 ## 406 — Gate-3 attack-canceler BIDE source phase integrated
 
 - **State:** the run is clean and green at **146 files / 1840 tests**. S10
@@ -54,27 +78,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   context, immutability, determinism, and deep freezing are pinned. Focused
   **3 files / 26 tests**; integrated Tier-1 **145/1832**, build, OFF v5 info
   (`9c89c741…`), and diff check green. Code commit `1690b58`; pixel diff N/A.
-
----
-## 404 — PARALYZED, Factory AI policy seam, and MUD SLAP integrated
-
-- **State:** the merged run is clean and green at **144 files / 1825 tests**.
-  S10 Gate 3 remains at **27** source-safe executable opcodes and the attack
-  canceler remains deliberately unregistered/unlooped. Scene-ON Level-50
-  coverage is **14 exact / 1 partial / 261 unsupported**.
-- **Did:** independently accepted the immutable `CANCELER_PARALYZED` source
-  phase, a pure generated-policy-backed Factory AI mask selector with explicit
-  0/1/7 branch receipts, and MUD SLAP's distinct 16x16 mud program plus shared
-  side-sensitive slide choreography. The AI script catalogue now also records
-  **469** reachable labels, **1,034** control edges, and **60** native handler
-  dependencies for later interpreter work.
-- **Next:** implement `CANCELER_IN_LOVE` as one bounded source phase without
-  looping or registering opcode 0. In parallel, prove another disjoint
-  Level-50 animation/component window and stage a bounded native-AI behavior/RNG
-  probe without defining the unfinished shared scorer interface.
-- **Notes:** supervisor replayed MUD SLAP at source OAM + RGB **51/51** in both
-  orientations and retained both SAND ATTACK controls at **269/269**. The AI
-  selector's **32/32** focused tests and PARALYZED's **47** focused seam tests
-  pass. Combined Tier-1 **144/1825**, build, both v5 oracle profiles
-  (`9c89c741…`), animation coverage, and diff check are green. Merges
-  `40336a1` + `1b28a45`; pixel diff N/A outside the cited ON windows.
