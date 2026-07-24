@@ -1,0 +1,123 @@
+{
+  "schema": "bide-off-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "probe": "tools/probe/stage-bide-off.py",
+  "source": {
+    "setBide": "reference/pokeemerald/src/battle_script_commands.c:7121-7129",
+    "damageAccumulator": "reference/pokeemerald/src/battle_script_commands.c:1905-1929",
+    "canceler": "reference/pokeemerald/src/battle_util.c:2220-2249",
+    "statusBits": "reference/pokeemerald/include/constants/battle.h:135-140",
+    "scripts": "reference/pokeemerald/data/battle_scripts_1.s:3287-3319"
+  },
+  "cases": [
+    {
+      "id": "positive-tackle-damage-release",
+      "scenario": "tools/battle-lab/mechanic-bide-positive-off.json",
+      "ticks": {
+        "setBide": {
+          "tick": 237,
+          "bideTurns": [2, 0],
+          "status2": [4608, 0],
+          "multipleTurns": [true, false],
+          "bideDmg": [0, 0],
+          "bideTarget": [1, 0],
+          "currentMove": 117,
+          "hp": [111, 129],
+          "pp": [[9, 35, 35, 35], [35, 34, 35, 35]]
+        },
+        "opponentDamage": {
+          "tick": 387,
+          "bideTurns": [2, 0],
+          "bideDmg": [20, 0],
+          "bideTarget": [1, 0],
+          "hp": [91, 129],
+          "pp": [[9, 35, 35, 35], [35, 34, 34, 35]]
+        },
+        "storing": {
+          "tick": 402,
+          "bideTurns": [1, 0],
+          "status2": [4352, 0],
+          "multipleTurns": [true, false],
+          "bideDmg": [20, 0],
+          "script": "BattleScript_BideStoringEnergy"
+        },
+        "release": {
+          "tick": 518,
+          "bideTurns": [0, 0],
+          "status2": [4096, 0],
+          "multipleTurns": [true, false],
+          "bideDmg": [20, 0],
+          "bideTarget": [1, 0],
+          "scriptingBideDmg": 40,
+          "currentMove": 117,
+          "battlerAttacker": 0,
+          "battlerTarget": 1,
+          "script": "BattleScript_BideAttack"
+        },
+        "releaseScriptClearsMultiTurn": {
+          "tick": 521,
+          "status2": [0, 0],
+          "multipleTurns": [false, false],
+          "script": "BattleScript_BideAttack"
+        },
+        "damageApplied": {
+          "tick": 732,
+          "bideDmg": [20, 40],
+          "scriptingBideDmg": 40,
+          "currentMove": 117,
+          "hp": [91, 89],
+          "script": "BattleScript_BideAttack"
+        }
+      }
+    },
+    {
+      "id": "zero-energy-splash-release",
+      "scenario": "tools/battle-lab/mechanic-bide-zero-off.json",
+      "ticks": {
+        "setBide": {
+          "tick": 256,
+          "bideTurns": [2, 0],
+          "status2": [4608, 0],
+          "multipleTurns": [true, false],
+          "bideDmg": [0, 0],
+          "currentMove": 117,
+          "hp": [129, 129],
+          "pp": [[9, 35, 35, 35], [40, 39, 40, 40]]
+        },
+        "storing": {
+          "tick": 277,
+          "bideTurns": [1, 0],
+          "status2": [4352, 0],
+          "multipleTurns": [true, false],
+          "bideDmg": [0, 0],
+          "script": "BattleScript_BideStoringEnergy"
+        },
+        "release": {
+          "tick": 706,
+          "bideTurns": [0, 0],
+          "status2": [4096, 0],
+          "multipleTurns": [true, false],
+          "bideDmg": [0, 0],
+          "bideTarget": [0, 0],
+          "scriptingBideDmg": 0,
+          "currentMove": 117,
+          "battlerAttacker": 0,
+          "battlerTarget": 0,
+          "hp": [129, 129],
+          "pp": [[9, 35, 35, 35], [40, 37, 40, 40]],
+          "script": "BattleScript_BideNoEnergyToAttack"
+        },
+        "releaseScriptClearsMultiTurn": {
+          "tick": 709,
+          "status2": [0, 0],
+          "multipleTurns": [false, false],
+          "bideDmg": [0, 0],
+          "scriptingBideDmg": 0,
+          "hp": [129, 129],
+          "script": "BattleScript_BideNoEnergyToAttack"
+        }
+      }
+    }
+  ],
+  "boundary": "The probe observes only read-only ROM state after legal construction and controller input. It records no per-call RNG attribution, and singles evidence does not exercise the source's doubles-only absent-target fallback."
+}
