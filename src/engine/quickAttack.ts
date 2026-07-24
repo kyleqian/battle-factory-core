@@ -27,24 +27,36 @@ export const QUICK_ATTACK_LAST_BODY_AGE = 69;
 export const QUICK_ATTACK_IMPACT_FIRST_AGE = 58;
 export const QUICK_ATTACK_IMPACT_LAST_AGE = 67;
 
-const TRAVEL: readonly QuickAttackOffset[] = Object.freeze([
-  Object.freeze({ x2: 17, y2: 2 }),
+/**
+ * `Sin(angle, amplitude)` multiplies signed values and then performs an
+ * arithmetic `>> 8`. The +24 player amplitude therefore produces 16 on the
+ * positive half-wave but -17 on the negative half-wave; the opponent's -24
+ * amplitude has the opposite asymmetry. These are not mirrorable tables.
+ */
+const PLAYER_TRAVEL: readonly QuickAttackOffset[] = Object.freeze([
+  Object.freeze({ x2: 16, y2: 2 }),
   Object.freeze({ x2: 24, y2: 6 }),
-  Object.freeze({ x2: 17, y2: 11 }),
+  Object.freeze({ x2: 16, y2: 11 }),
   Object.freeze({ x2: 0, y2: 12 }),
-  Object.freeze({ x2: -16, y2: 11 }),
+  Object.freeze({ x2: -17, y2: 11 }),
   Object.freeze({ x2: -24, y2: 6 }),
 ]);
 
-function horizontalForSide(
-  offset: QuickAttackOffset,
+const OPPONENT_TRAVEL: readonly QuickAttackOffset[] = Object.freeze([
+  Object.freeze({ x2: -17, y2: 2 }),
+  Object.freeze({ x2: -24, y2: 6 }),
+  Object.freeze({ x2: -17, y2: 11 }),
+  Object.freeze({ x2: 0, y2: 12 }),
+  Object.freeze({ x2: 16, y2: 11 }),
+  Object.freeze({ x2: 24, y2: 6 }),
+]);
+
+function afterimageOffsetForSide(
+  playerOffset: QuickAttackOffset,
+  opponentOffset: QuickAttackOffset,
   attackerSide: "player" | "opponent",
 ): QuickAttackOffset {
-  const x2 = attackerSide === "player" ? offset.x2 : -offset.x2;
-  return {
-    x2: Object.is(x2, -0) ? 0 : x2,
-    y2: offset.y2,
-  };
+  return attackerSide === "player" ? playerOffset : opponentOffset;
 }
 
 /** Source `AnimTask_TranslateMonEllipticalRespectSide(...,24,6,1,5)`. */
@@ -52,9 +64,11 @@ export function quickAttackTravelAtAge(
   age: number,
   attackerSide: "player" | "opponent",
 ): QuickAttackOffset {
-  const entry = TRAVEL[age - QUICK_ATTACK_FIRST_TRAVEL_AGE];
+  const entry = (
+    attackerSide === "player" ? PLAYER_TRAVEL : OPPONENT_TRAVEL
+  )[age - QUICK_ATTACK_FIRST_TRAVEL_AGE];
   return entry
-    ? horizontalForSide(entry, attackerSide)
+    ? entry
     : { x2: 0, y2: 0 };
 }
 
@@ -72,19 +86,31 @@ export function quickAttackAfterimagesAtAge(
   if (age >= 53 && age <= 59) {
     images.push({
       slot: 3,
-      ...horizontalForSide({ x2: 17, y2: 2 }, attackerSide),
+      ...afterimageOffsetForSide(
+        { x2: 16, y2: 2 },
+        { x2: -17, y2: 2 },
+        attackerSide,
+      ),
     });
   }
   if (age >= 63 && age <= 69) {
     images.push({
       slot: 3,
-      ...horizontalForSide({ x2: 0, y2: 0 }, attackerSide),
+      ...afterimageOffsetForSide(
+        { x2: 0, y2: 0 },
+        { x2: 0, y2: 0 },
+        attackerSide,
+      ),
     });
   }
   if (age >= 58 && age <= 64) {
     images.push({
       slot: 4,
-      ...horizontalForSide({ x2: -24, y2: 6 }, attackerSide),
+      ...afterimageOffsetForSide(
+        { x2: -24, y2: 6 },
+        { x2: 24, y2: 6 },
+        attackerSide,
+      ),
     });
   }
   return images;
