@@ -931,7 +931,17 @@ S10 has six ordered completion gates:
    execution, end-turn ordering, fainting, victory/loss, and deterministic RNG
    accounting. Every Gen-3 move has supported Level-50 single-battle semantics,
    including correct failure behavior for moves whose required context is
-   absent; shared effect scripts are the implementation unit.
+   absent; shared effect scripts are the implementation unit. Mechanically
+   translate the source Battle Script command stream and referenced tables into
+   a typed, inspectable IR executed by one generic interpreter. Moves select
+   scripts/data; they do not each define a bespoke control path. Source-mapped
+   item, ability, status, weather, targeting, switching, faint, and end-turn
+   hooks read and mutate one explicit battle context, schedule further effects,
+   and emit typed semantic events for messages, HP/status/stage changes,
+   animations, switches, and outcomes. Tier-1 architecture tests prove that
+   sibling moves sharing a source effect execute the same handler sequence,
+   that event replay cannot alter rules state or RNG, and that no presentation
+   consumer owns a logical side effect.
 4. [ ] **Persistent mechanics:** implement all battle statuses and volatile
    effects, every stat stage, weather and side conditions, multi-turn effects,
    held-item hooks, ability hooks/immunities, and their switch/faint/end-turn
