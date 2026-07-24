@@ -303,10 +303,12 @@ export function chooseFactoryAiMaskZeroDecision(input: Readonly<{
 
   const legalMoves = request.legalDecisions as readonly BattleMoveDecision[];
   const legalBySlot = new Map<BattleMoveSlot, BattleMoveDecision>();
+  // Native AI selects only a slot. Target resolution belongs to the opponent
+  // controller, so preserve the kernel's one authoritative decision per slot.
   for (const decision of legalMoves) {
-    if (decision.targetBattler !== view.active.targetBattler) {
+    if (legalBySlot.has(decision.moveSlot)) {
       throw new Error(
-        `Factory AI legal move slot ${decision.moveSlot} targets the wrong singles battler`,
+        `Factory AI legal move slot ${decision.moveSlot} has ambiguous duplicate decisions`,
       );
     }
     if (view.moves[decision.moveSlot] === 0) {

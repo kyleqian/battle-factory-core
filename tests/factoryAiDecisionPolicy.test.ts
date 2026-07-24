@@ -20,9 +20,10 @@ const request = createBattleCommandRequest({
   requestId: 73,
   side: "trainer",
   battler: 1,
+  // FRONTIER_MON_PLUSLE_2: Wish is MOVE_TARGET_USER, unlike slot 1.
   legalDecisions: [
     { kind: "use-move", moveSlot: 1, targetBattler: 0 },
-    { kind: "use-move", moveSlot: 3, targetBattler: 0 },
+    { kind: "use-move", moveSlot: 3, targetBattler: 1 },
   ],
 });
 
@@ -196,7 +197,7 @@ describe("source-faithful minimal Factory AI mask-0 decision policy", () => {
       side: "trainer",
       battler: 1,
       legalDecisions: [
-        { kind: "use-move", moveSlot: 3, targetBattler: 0 },
+        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
       ],
     });
     const result = choose({ request: onlySlotThree as typeof request });
@@ -214,7 +215,7 @@ describe("source-faithful minimal Factory AI mask-0 decision policy", () => {
       chosenDecision: {
         kind: "use-move",
         moveSlot: 3,
-        targetBattler: 0,
+        targetBattler: 1,
       },
     });
     expect(result.trace.draws).toHaveLength(5);
@@ -237,7 +238,7 @@ describe("source-faithful minimal Factory AI mask-0 decision policy", () => {
     const reorderedRequest = JSON.parse(JSON.stringify({
       legalDecisions: [
         { targetBattler: 0, moveSlot: 1, kind: "use-move" },
-        { targetBattler: 0, moveSlot: 3, kind: "use-move" },
+        { targetBattler: 1, moveSlot: 3, kind: "use-move" },
       ],
       battler: 1,
       side: "trainer",
@@ -387,6 +388,21 @@ describe("source-faithful minimal Factory AI mask-0 decision policy", () => {
         request: forced as never,
         rng: { value: 0, calls: 0 },
       })).toThrow(/command requests/);
+
+    const duplicateSlotRequest = createBattleCommandRequest({
+      kind: "command",
+      requestId: 79,
+      side: "trainer",
+      battler: 1,
+      legalDecisions: [
+        { kind: "use-move", moveSlot: 3, targetBattler: 0 },
+        { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+      ],
+    });
+    expect(() =>
+      choose({
+        request: duplicateSlotRequest as typeof request,
+      })).toThrow(/ambiguous duplicate decisions/);
   });
 });
 
@@ -395,6 +411,53 @@ type FixtureRules = BattleJsonObject & Readonly<{
 }>;
 
 describe("Factory AI composition through BattleDecisionBoundary", () => {
+  it("selects a real Factory self-targeting Wish slot and preserves its kernel target through submission", () => {
+    const state = createBattleState({
+      rules: { acceptedMoveSlot: null },
+      rngSeed: 1,
+      request,
+    }) as BattleState<FixtureRules>;
+    const reducer: BattleDecisionReducer<FixtureRules> = (context) => {
+      expect(context.decision).toEqual({
+        kind: "use-move",
+        moveSlot: 3,
+        targetBattler: 1,
+      });
+      expect(context.rng.snapshot()).toEqual({
+        value: 0x79e3_9ac4,
+        calls: 5,
+      });
+      return {
+        rules: { acceptedMoveSlot: 3 },
+        events: [],
+        boundary: { kind: "terminal", outcome: "player-win" },
+      };
+    };
+
+    const composed = submitFactoryAiMaskZeroDecision(state, view, reducer);
+
+    expect(composed.trace.bestMoveSlots).toEqual([1, 3]);
+    expect(composed.trace.tie).toMatchObject({
+      modulus: 2,
+      index: 1,
+      chosenDecision: {
+        kind: "use-move",
+        moveSlot: 3,
+        targetBattler: 1,
+      },
+    });
+    expect(composed.submission).toEqual({
+      requestId: 73,
+      side: "trainer",
+      decision: { kind: "use-move", moveSlot: 3, targetBattler: 1 },
+    });
+    expect(composed.transition.state.rng).toEqual({
+      value: 0x79e3_9ac4,
+      calls: 5,
+    });
+    assertDeepFrozen(composed);
+  });
+
   it("submits the AI decision through the published boundary, synchronizes all draws, and reaches the next request", () => {
     const state = createBattleState({
       rules: { acceptedMoveSlot: null },

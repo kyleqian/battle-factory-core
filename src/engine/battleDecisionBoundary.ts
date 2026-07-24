@@ -317,24 +317,19 @@ function rulesAt(value: unknown, path: string): BattleJsonObject {
 
 function commandDecisionAt(
   value: unknown,
-  side: BattleDecisionSide,
   path: string,
 ): BattleCommandDecision {
   const decision = recordAt(value, path);
   if (decision.kind === "use-move") {
     exactKeys(decision, ["kind", "moveSlot", "targetBattler"], path);
+    // The kernel supplies the target after move-target resolution. Singles
+    // moves may therefore target either the opponent or their own user.
     const targetBattler = integerAt(
       decision.targetBattler,
       0,
       1,
       `${path}.targetBattler`,
     ) as BattleSinglesBattler;
-    const expectedTarget = side === "player" ? 1 : 0;
-    if (targetBattler !== expectedTarget) {
-      throw new Error(
-        `${path}.targetBattler must be the opposing singles battler ${expectedTarget}, got ${targetBattler}`,
-      );
-    }
     return Object.freeze({
       kind: "use-move",
       moveSlot: integerAt(decision.moveSlot, 0, 3, `${path}.moveSlot`) as BattleMoveSlot,
@@ -370,7 +365,7 @@ function requestAt(value: unknown, path: string): BattleDecisionRequest {
       return fail(`${path}.legalDecisions`, "a non-empty array", request.legalDecisions);
     }
     const legalDecisions = request.legalDecisions.map((decision, index) =>
-      commandDecisionAt(decision, side, `${path}.legalDecisions[${index}]`));
+      commandDecisionAt(decision, `${path}.legalDecisions[${index}]`));
     const keys = legalDecisions.map(decisionKey);
     if (new Set(keys).size !== keys.length) {
       throw new Error(`${path}.legalDecisions must not contain duplicates`);
@@ -656,7 +651,6 @@ function submissionAt(
   }
   const decision = commandDecisionAt(
     submission.decision,
-    side,
     "Battle decision submission.decision",
   );
   if (request.kind === "command") {
