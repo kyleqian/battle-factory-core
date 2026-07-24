@@ -58,9 +58,10 @@ Per entry:
 ## Serialized oracle compares can strand or terminate multi-trace batches
 
 - **What:** launching several oracle-backed compares concurrently can leave a
-  call unresolved, while long serialized shell batches can terminate
-  mid-command even though their individual traces are healthy.
-- **Hits:** 2.
+  call unresolved or race on the shared `tools/compare/out/latest`, while long
+  serialized shell batches can terminate mid-command even though their
+  individual traces are healthy.
+- **Hits:** 3.
 - **Cost each:** ~1-3 min.
 - **Workaround:** run short bounded batches, retain and poll every execution
   handle, and resume from the first unverified trace after an interruption.
