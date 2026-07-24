@@ -367,6 +367,7 @@ export function sceneOnIcePunchView(
     hitCrystals: icePunchHitCrystals(
       state.age - 1,
       state.config.target.geometry.animationCenter,
+      state.config.target.geometry.side === "player" ? -1 : 1,
     ),
     displayedTargetHp: displayedHpAfterDamage(
       state.age,

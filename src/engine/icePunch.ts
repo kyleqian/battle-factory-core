@@ -225,6 +225,7 @@ export function icePunchSpiralCrystals(
 export function icePunchHitCrystals(
   age: number,
   targetCenter: Readonly<{ x: number; y: number }>,
+  horizontalDirection: -1 | 1 = 1,
 ): readonly IcePunchHitCrystal[] {
   return HIT_CRYSTALS.flatMap((definition, index) => {
     const localAge =
@@ -234,7 +235,7 @@ export function icePunchHitCrystals(
     const matrix = Math.floor(0x10000 / (211 + affineStep * 5));
     return [{
       kind: definition.kind,
-      centerX: targetCenter.x + definition.x,
+      centerX: targetCenter.x + definition.x * horizontalDirection,
       centerY: targetCenter.y + definition.y,
       pa: matrix,
       pb: 0,
