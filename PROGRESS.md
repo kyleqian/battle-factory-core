@@ -4,6 +4,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 388 — Gate-3 attack-canceler FLAGS source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has only its first pure source
+  phase; ATTACKCANCELER opcode 0 remains deliberately unregistered.
+- **Did:** added the exact `u8` attack-canceler tracker to the shared rules
+  context and a frozen typed `CANCELER_FLAGS` decision/receipt. At tracker
+  **0**, it clears only attacker `STATUS2_DESTINY_BOND` (bit 25) and
+  `STATUS3_GRUDGE` (bit 14), advances once to `CANCELER_ASLEEP` (**1**), and
+  replaces nested battler state only when a mask changes.
+- **Next:** implement `CANCELER_ASLEEP` only after its complete sleep/Uproar,
+  Early Bird, Nightmare, move, script-stack, controller, and effect ownership
+  is explicit. Do not loop phases or register opcode 0.
+- **Notes:** non-FLAGS trackers are exact identity gates; missing attacker,
+  absent-bit identity, unrelated battlers/admission fields, determinism, and
+  deep freezing are pinned. No RNG, controller/presentation events, status
+  messages/application, PP/damage/Protect/ability/accuracy, or oracle fixture
+  was added. Focused **34/34**; Tier-1 **127 files / 1681 tests**, build, OFF
+  info, and diff check green. Commit `d72ed7f`; pixel diff N/A.
+
+---
 ## 387 — Gate-3 action-admission preflight slice integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable
@@ -46,22 +67,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the lane. Fresh Bounce outcome probes changed on the refreshed Mechanics
   Lab even on the untouched base, so no animation claim or policy change was
   made from those outcomes. Commit `4b9cd44`.
-
----
-## 385 — Gate-3 MOVEVALUESCLEANUP production context integrated
-
-- **State:** S10 Gate 3 remains open with all **27** source-safe opcodes now
-  executable through the single durable production rules context.
-- **Did:** extended that context with exactly opcode 37's five source `u8`
-  move-value fields, centralized its hit-marker constants, and composed the
-  existing generic cleanup handler. Construction/deep freeze, exact resets,
-  unrelated nested identity, deterministic repetition, and status behavior
-  before/after cleanup are production-context pinned.
-- **Next:** extend this one context only for the next completely evidenced
-  rules family. Keep attack cancellation, accuracy, damage, PP, status
-  application, moves, turn/round state, presentation, and core wiring out.
-- **Notes:** cleanup preserves every field except its exact five resets and
-  hit-marker bits **6/14**; multi-hit/status behavior is unchanged. Focused
-  **25/25**; Tier-1 **126 files / 1665 tests**, build, OFF info, fresh Toxic
-  and Confuse Ray zero-PP-Up assertions, and diff check green. Commit
-  `5e4a18b`; pixel diff N/A.

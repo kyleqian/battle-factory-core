@@ -1,3 +1,22 @@
+## 385 — Gate-3 MOVEVALUESCLEANUP production context integrated
+
+- **State:** S10 Gate 3 remains open with all **27** source-safe opcodes now
+  executable through the single durable production rules context.
+- **Did:** extended that context with exactly opcode 37's five source `u8`
+  move-value fields, centralized its hit-marker constants, and composed the
+  existing generic cleanup handler. Construction/deep freeze, exact resets,
+  unrelated nested identity, deterministic repetition, and status behavior
+  before/after cleanup are production-context pinned.
+- **Next:** extend this one context only for the next completely evidenced
+  rules family. Keep attack cancellation, accuracy, damage, PP, status
+  application, moves, turn/round state, presentation, and core wiring out.
+- **Notes:** cleanup preserves every field except its exact five resets and
+  hit-marker bits **6/14**; multi-hit/status behavior is unchanged. Focused
+  **25/25**; Tier-1 **126 files / 1665 tests**, build, OFF info, fresh Toxic
+  and Confuse Ray zero-PP-Up assertions, and diff check green. Commit
+  `5e4a18b`; pixel diff N/A.
+
+---
 ## 384 — Gate-3 status-animation production rules context integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe opcodes; opcodes
