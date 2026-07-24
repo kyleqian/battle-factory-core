@@ -132,7 +132,9 @@ export const FACTORY_SWAP_PHASE_READY_DELAYS: Readonly<
   // HandleYesNo reaches its input state at +63 after JOY_NEW was sampled;
   // +64 is the first physical prompt edge it can consume.
   acceptPrompt: 64,
-  quitPrompt: 99,
+  // +35 installs HandleYesNo input state after JOY_NEW was sampled; +36 is
+  // the first physical prompt edge the task can consume.
+  quitPrompt: 36,
   duplicateSpecies: 99,
 };
 
@@ -157,6 +159,8 @@ function readyDelay(state: FactorySwapPresentationState): number | null {
     state.controller.phase === "complete" ||
     state.controller.phase === "acceptExit" ||
     state.controller.phase === "acceptReturn" ||
+    state.controller.phase === "quitExit" ||
+    state.controller.phase === "quitReturn" ||
     state.controller.phase === "summaryFade" ||
     state.controller.phase === "playerPickerReturn" ||
     state.controller.phase === "enemySwitch"
@@ -180,6 +184,38 @@ export function advanceFactorySwapPresentation(
   }
   let controller = copyFactorySwapCursor(state.controller);
   let fieldHandoff = state.fieldHandoff;
+  if (controller.phase === "quitExit" && phaseElapsed === 1) {
+    controller = {
+      ...controller,
+      scriptResult: true,
+      result: "keptParty",
+    };
+  }
+  if (controller.phase === "quitExit" && phaseElapsed >= 22) {
+    controller = {
+      ...controller,
+      phase: "complete",
+      quitReturnPhase: null,
+    };
+    fieldHandoff = "CB2_ReturnToFieldContinueScript";
+  }
+  if (controller.phase === "quitReturn" && phaseElapsed >= 38) {
+    const returnPhase = controller.quitReturnPhase ?? "playerPicker";
+    controller = acknowledgeFactorySwapPresentation({
+      ...controller,
+      phase: returnPhase,
+      quitReturnPhase: null,
+    });
+    return {
+      controller,
+      elapsed,
+      phaseElapsed: 2,
+      selectedBallClock,
+      selectedBallIndex: state.selectedBallIndex,
+      speciesNameFade: activateSpeciesNameFade(speciesNameFade),
+      fieldHandoff,
+    };
+  }
   if (controller.phase === "acceptExit" && phaseElapsed === 20) {
     // Swap_Task_Exit state 0: FALSE means the player did swap.
     controller = { ...controller, scriptResult: false };
@@ -296,11 +332,14 @@ export function handleFactorySwapPresentationInput(
   const enteredPlayerOptions =
     controller.phase === "playerOptions" &&
     state.controller.phase === "playerPicker";
-  const leftEnemyPicker =
-    state.controller.phase === "enemyPicker" &&
-    controller.phase !== "enemyPicker";
+  const leftPicker =
+    (
+      state.controller.phase === "playerPicker" ||
+      state.controller.phase === "enemyPicker"
+    ) &&
+    controller.phase !== state.controller.phase;
   const pausedSpeciesName =
-    enteredPlayerOptions || leftEnemyPicker
+    enteredPlayerOptions || leftPicker
       ? deactivateSpeciesNameFade(state.speciesNameFade)
       : state.speciesNameFade;
   return {
@@ -417,6 +456,49 @@ export function factorySwapActionFadeY(phaseElapsed: number): number {
 export function factorySwapCancelButtonX(phaseElapsed: number): number {
   const steps = Math.max(0, Math.min(8, phaseElapsed - 26));
   return 192 + steps * 6;
+}
+
+/** Player-origin quit transition-out uses the same one-button source task. */
+export const factorySwapQuitCancelButtonX = factorySwapCancelButtonX;
+export const factorySwapQuitActionFadeY = factorySwapActionFadeY;
+
+export function factorySwapQuitYesNoVisual(
+  phaseElapsed: number,
+): { textVisible: boolean; highlightVisible: boolean } {
+  return {
+    textVisible: phaseElapsed >= 36,
+    highlightVisible: phaseElapsed >= 37,
+  };
+}
+
+/** Quit has no mon picture, so transition-in starts on response +1. */
+export function factorySwapQuitReturnCancelButtonX(
+  phaseElapsed: number,
+): number {
+  return factorySwapPlayerReturnCancelButtonX(phaseElapsed + 17);
+}
+
+export function factorySwapQuitReturnActionFadeY(
+  phaseElapsed: number,
+): number {
+  const base = factorySwapPlayerReturnActionFadeY(phaseElapsed + 18);
+  return phaseElapsed >= 13 && phaseElapsed <= 27 && phaseElapsed % 2 === 1
+    ? Math.min(16, base + 2)
+    : base;
+}
+
+const FACTORY_SWAP_QUIT_EXIT_FADE = {
+  startDelay: 6,
+  startY: 0,
+  targetY: 16,
+} as const;
+
+export function factorySwapQuitExitBgFadeY(phaseElapsed: number): number {
+  return bgFadeY(phaseElapsed, FACTORY_SWAP_QUIT_EXIT_FADE);
+}
+
+export function factorySwapQuitExitObjFadeY(phaseElapsed: number): number {
+  return objFadeY(phaseElapsed, FACTORY_SWAP_QUIT_EXIT_FADE);
 }
 
 /**

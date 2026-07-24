@@ -25,6 +25,11 @@ import {
   factorySwapPlayerReturnActionFadeY,
   factorySwapPlayerReturnCancelButtonX,
   factorySwapPlayerReturnMonPicVisual,
+  factorySwapQuitActionFadeY,
+  factorySwapQuitCancelButtonX,
+  factorySwapQuitReturnActionFadeY,
+  factorySwapQuitReturnCancelButtonX,
+  factorySwapQuitYesNoVisual,
 } from "./factorySwapPresentation.ts";
 import { blendComponentToward } from "./paletteFade.ts";
 import type { FactorySwapState } from "./factorySwap.ts";
@@ -267,7 +272,14 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     state.phase === "acceptReturn" ||
     state.phase === "acceptExit" ||
     state.phase === "duplicateSpecies" ||
-    (state.phase === "quitPrompt" && state.quitReturnPhase === "enemyPicker");
+    (
+      (
+        state.phase === "quitPrompt" ||
+        state.phase === "quitReturn" ||
+        state.phase === "quitExit"
+      ) &&
+      state.quitReturnPhase === "enemyPicker"
+    );
   const enemySwitch = state.phase === "enemySwitch";
   const phaseElapsed = view.phaseElapsed ?? 0;
   const bgFade = view.bgFadeY ?? 0;
@@ -341,6 +353,15 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     pkmnButtonX = factorySwapAcceptReturnPkmnButtonX(phaseElapsed);
     cancelButtonX = factorySwapAcceptReturnCancelButtonX(phaseElapsed);
     actionLabelsVisible = phaseElapsed >= 43;
+  } else if (state.phase === "quitPrompt") {
+    actionFadeY = factorySwapQuitActionFadeY(phaseElapsed);
+    cancelButtonX = factorySwapQuitCancelButtonX(phaseElapsed);
+  } else if (state.phase === "quitExit") {
+    pkmnButtonX = 240;
+    cancelButtonX = 240;
+  } else if (state.phase === "quitReturn") {
+    actionFadeY = factorySwapQuitReturnActionFadeY(phaseElapsed);
+    cancelButtonX = factorySwapQuitReturnCancelButtonX(phaseElapsed);
   } else if (enemy) {
     pkmnButtonX = 160;
   }
@@ -391,9 +412,13 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     fb,
     font,
     charmap,
-    (state.phase === "acceptPrompt" && phaseElapsed >= 41) ||
-      state.phase === "acceptExit" ||
-      state.phase === "acceptReturn"
+    (state.phase === "quitPrompt" && phaseElapsed >= 35) ||
+      state.phase === "quitExit" ||
+      (state.phase === "quitReturn" && phaseElapsed < 37)
+      ? "Quit swapping?"
+      : (state.phase === "acceptPrompt" && phaseElapsed >= 41) ||
+          state.phase === "acceptExit" ||
+          state.phase === "acceptReturn"
       ? "Accept this POKéMON?"
       : enemy
         ? "Select POKéMON to accept."
@@ -455,8 +480,66 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     actionFadeY,
     cancelButtonX,
     actionLabelsVisible,
-    enemy && state.displayCursor === 4,
+    enemy ? state.displayCursor === 4 : state.displayCursor === 3,
   );
+
+  const quitYesNoVisual = factorySwapQuitYesNoVisual(phaseElapsed);
+  if (
+    (state.phase === "quitPrompt" && quitYesNoVisual.textVisible) ||
+    state.phase === "quitExit" ||
+    (state.phase === "quitReturn" && phaseElapsed <= 1)
+  ) {
+    if (
+      quitYesNoVisual.highlightVisible ||
+      (state.phase === "quitExit" && phaseElapsed >= 1) ||
+      state.phase === "quitReturn"
+    ) {
+      const visibleYesNoCursor =
+        state.phase === "quitPrompt" &&
+        phaseElapsed === 37 &&
+        state.yesNoCursor === 1
+          ? 0
+          : state.yesNoCursor;
+      const highlightY = YES_NO_ORIGIN.y + visibleYesNoCursor * 16 + 8;
+      drawSpriteFaded(
+        fb,
+        { tileset: menuHighlight.left.tileset },
+        menuHighlight.palette,
+        192,
+        highlightY,
+        4,
+        2,
+        0,
+        objFade,
+      );
+      drawSpriteFaded(
+        fb,
+        { tileset: menuHighlight.right.tileset },
+        menuHighlight.palette,
+        224,
+        highlightY,
+        4,
+        2,
+        0,
+        objFade,
+      );
+    }
+    if (!(state.phase === "quitReturn" && phaseElapsed === 1)) {
+      for (let i = 0; i < YES_NO_LABELS.length; i += 1) {
+        drawTextFaded(
+          fb,
+          font,
+          charmap,
+          YES_NO_LABELS[i]!,
+          YES_NO_ORIGIN.x + 7,
+          YES_NO_ORIGIN.y + 1 + i * 16,
+          textPalette,
+          MENU_TEXT_COLORS,
+          bgFade,
+        );
+      }
+    }
+  }
 
   if (
     state.phase === "playerOptions" ||

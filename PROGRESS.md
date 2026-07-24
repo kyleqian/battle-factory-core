@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 341 — S8 OFF player-origin swap quit: **GREEN — 233/233 exact**
+
+- **State:** one reusable phase-relative quit interaction now covers player
+  picker B and CANCEL, prompt opening/input, default-YES keep-party exit, and
+  NO/B transition-in return. Four dense OFF windows are zero diff.
+- **Did:** exposed the source's four player actions, wired CANCEL to the same
+  quit callback as B, and added transition-out, prompt, no-picture exit/return,
+  field handoff, and fresh picker input gates. Tier-1 pins rejected/accepted
+  edges, TRUE result semantics, no party/rental mutation, and both returns.
+- **Next:** implement the remaining unique swap UI with short staged windows:
+  SUMMARY return, enemy `PKMN FOR SWAP`, enemy-origin quit chrome, then
+  duplicate-species rejection. Do not claim enemy quit from this player proof.
+- **Notes:** quit YES **31/31**, NO **67/67**, B **67/67**, CANCEL+YES
+  **68/68**; Tier-1 **1250/1250**, build **5.667 MB**. Gate 2 and S8 remain
+  open; no absolute tick lookup, framebuffer asset, or Battle-2 continuation.
+
+---
 ## 340 — S8 OFF seventh-win terminal continuation: **GREEN — 4424/4424 exact**
 
 - **State:** the staged seventh-win route is gaplessly exact through exchange,
@@ -46,24 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   merged **1242/1242**, build **5.663 MB**; ICE **63/63**, FIRE PUNCH
   **225/225**. No deferred questions. No absolute tick, framebuffer asset,
   screenshot lookup, canonical Battle-2 extension, or premature UI claim.
-
----
-## 338 — S8 OFF terminal LOSS record menu: **GREEN — 414/414 exact**
-
-- **State:** the LOSS route is exact from its prior +210 completion through
-  the shared record question's default-NO menu at +622 and first sampled input
-  at +624. Seventh-win OFF evidence now pins the complete source-driven
-  +1..+4424 timeline; Scene-ON coverage is **4 exact / 9 partial / 263
-  unsupported** after the first ICE PUNCH component.
-- **Did:** added a phase-relative reusable record-question transition with
-  live `\l` fast-scroll, standard-window/menu chrome, stored-edge readiness,
-  default NO, early-input rejection, and YES/NO/B result state. A disjoint
-  fixture pins 3 BP at +2201, fanfare end +2513, restore +3549, and shared
-  menu +4422/+4424. ICE PUNCH's opening palette overlay is **35/35 exact**.
-- **Next:** implement the seventh-win/round-summary presentation from the
-  staged fixture through the shared record menu; do not replay Battles 2–7.
-  Animation continues ICE PUNCH at age 35 with the crystal spiral.
-- **Notes:** LOSS continuation **414/414** and opening **210/210** exact;
-  merged Tier-1 **1235/1235**, build **5.655 MB**; ICE opening **35/35**.
-  No deferred questions. No absolute clock, screenshot/framebuffer harvest,
-  terminal outcome mutation, or canonical Battle-2 extension.

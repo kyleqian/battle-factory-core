@@ -39,6 +39,8 @@ export type FactorySwapPhase =
   | "acceptReturn"
   | "acceptExit"
   | "quitPrompt"
+  | "quitReturn"
+  | "quitExit"
   | "duplicateSpecies"
   | "complete";
 
@@ -57,8 +59,8 @@ export interface FactorySwapState {
   /** Final OAM-visible arrow/action highlight, one VBlank behind the species window. */
   readonly arrowCursor: FactorySwapCursor;
   readonly cursorCopyPending: boolean;
-  /** Swap_InitActions' live action span: three player balls, then five enemy actions. */
-  readonly actionsCount: 3 | 5;
+  /** Swap_InitActions' live action span: three player balls + CANCEL, or five enemy actions. */
+  readonly actionsCount: 4 | 5;
   readonly playerOptionCursor: 0 | 1 | 2;
   /** OAM-visible option cursor, copied one VBlank after the logical cursor. */
   readonly playerOptionDisplayCursor: 0 | 1 | 2;
@@ -98,7 +100,7 @@ function move3(value: 0 | 1 | 2, delta: -1 | 1): 0 | 1 | 2 {
 function moveAction(
   value: FactorySwapCursor,
   delta: -1 | 1,
-  actionsCount: 3 | 5,
+  actionsCount: 4 | 5,
 ): FactorySwapCursor {
   return ((value + delta + actionsCount) % actionsCount) as FactorySwapCursor;
 }
@@ -118,7 +120,7 @@ export function createFactorySwapState(
     displayCursor: 0,
     arrowCursor: 0,
     cursorCopyPending: false,
-    actionsCount: 3,
+    actionsCount: 4,
     playerOptionCursor: 0,
     playerOptionDisplayCursor: 0,
     playerOptionCursorCopyPending: false,
@@ -267,10 +269,15 @@ export function handleFactorySwapInput(
   switch (state.phase) {
     case "playerPicker":
     case "enemyPicker": {
-      if (input === "LEFT" || input === "RIGHT") {
+      if (
+        input === "LEFT" ||
+        input === "RIGHT" ||
+        input === "UP" ||
+        input === "DOWN"
+      ) {
         const cursor = moveAction(
           state.cursor,
-          input === "LEFT" ? -1 : 1,
+          input === "LEFT" || input === "UP" ? -1 : 1,
           state.actionsCount,
         );
         return { ...state, cursor, cursorCopyPending: true };
@@ -285,6 +292,18 @@ export function handleFactorySwapInput(
         };
       }
       if (input !== "A") return state;
+      if (
+        (state.phase === "playerPicker" && state.cursor === 3) ||
+        (state.phase === "enemyPicker" && state.cursor === 4)
+      ) {
+        return {
+          ...state,
+          phase: "quitPrompt",
+          inputReady: false,
+          yesNoCursor: 0,
+          quitReturnPhase: state.phase,
+        };
+      }
       if (state.cursor >= 3) return state;
       if (state.phase === "playerPicker") {
         return {
@@ -342,6 +361,8 @@ export function handleFactorySwapInput(
     case "enemySwitch":
     case "acceptReturn":
     case "acceptExit":
+    case "quitReturn":
+    case "quitExit":
       return state;
     case "acceptPrompt": {
       if (input === "UP" || input === "DOWN") {
@@ -365,18 +386,15 @@ export function handleFactorySwapInput(
       if (input === "A" && state.yesNoCursor === 0) {
         return {
           ...state,
-          phase: "complete",
+          phase: "quitExit",
           inputReady: false,
-          scriptResult: true,
-          result: "keptParty",
         };
       }
       if (input === "A" || input === "B") {
         return {
           ...state,
-          phase: state.quitReturnPhase ?? "playerPicker",
+          phase: "quitReturn",
           inputReady: false,
-          quitReturnPhase: null,
         };
       }
       return state;

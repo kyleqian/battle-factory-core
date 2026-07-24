@@ -580,10 +580,15 @@ remains open because the source-to-trace audit identifies four unique swap-YES
 remainders outside the accepted ONIX→GROVYLE route: SUMMARY return, quit
 prompt/exit/returns, enemy `PKMN FOR SWAP` return, and duplicate-species
 rejection. A committed staged OFF fixture now pins player-B quit acceptance,
-prompt readiness, default-YES no-mutation exit, and NO/B return; its live
-presentation is still unimplemented, and enemy-only button-slide timing
-remains bounded. These require short staged OFF windows, not further Battle-2
-turns.
+prompt readiness, default-YES no-mutation exit, and NO/B return. The reusable
+player-origin live presentation is now exact for B and CANCEL transition-out,
+prompt/input, YES keep-party exit, and NO/B transition-in return across four
+committed every-frame windows: **31/31 + 67/67 + 67/67 + 68/68**. TRUE script
+result, field handoff, fresh returned-picker input, and immutable party/rental
+state are Tier-1 pinned. Enemy-origin quit chrome remains bounded and is not
+claimed by this player proof. SUMMARY return, enemy `PKMN FOR SWAP`, enemy quit
+chrome, and duplicate rejection still require short staged OFF windows, not
+further Battle-2 turns.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it

@@ -205,6 +205,8 @@ import {
   factorySwapBallTile,
   factorySwapAcceptExitBgFadeY,
   factorySwapAcceptExitObjFadeY,
+  factorySwapQuitExitBgFadeY,
+  factorySwapQuitExitObjFadeY,
   factorySwapPlayerOptionBallTile,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
@@ -1806,19 +1808,32 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     const fadeLocal = swap.elapsed - 44;
     const exiting =
       swap.controller.phase === "acceptExit" ||
+      swap.controller.phase === "quitExit" ||
       (
         swap.controller.phase === "complete" &&
         swap.fieldHandoff === "CB2_ReturnToFieldContinueScript"
       );
     return renderFactorySwapPicker({
       state: swap.controller,
-      ballTiles: [tile, tile, tile],
+      ballTiles: [
+        swap.controller.phase === "quitReturn" && swap.phaseElapsed >= 8
+          ? factorySwapBallTile(swap.elapsed - 1)
+          : tile,
+        tile,
+        tile,
+      ],
       speciesRenderCoeff: swap.speciesNameFade.renderCoeff,
       bgFadeY: exiting
-        ? factorySwapAcceptExitBgFadeY(swap.phaseElapsed)
+        ? swap.controller.phase === "quitExit" ||
+            swap.controller.result === "keptParty"
+          ? factorySwapQuitExitBgFadeY(swap.phaseElapsed)
+          : factorySwapAcceptExitBgFadeY(swap.phaseElapsed)
         : bgFadeY(fadeLocal, FADE_IN),
       objFadeY: exiting
-        ? factorySwapAcceptExitObjFadeY(swap.phaseElapsed)
+        ? swap.controller.phase === "quitExit" ||
+            swap.controller.result === "keptParty"
+          ? factorySwapQuitExitObjFadeY(swap.phaseElapsed)
+          : factorySwapAcceptExitObjFadeY(swap.phaseElapsed)
         : objFadeY(fadeLocal, FADE_IN),
       phaseElapsed: swap.phaseElapsed,
       selectedBallIndex: swap.selectedBallIndex,

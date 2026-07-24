@@ -64,6 +64,13 @@ function canonicalAcceptPromptReady(): FactorySwapPresentationState {
   return advance(state, 64);
 }
 
+function canonicalQuitPromptReady(): FactorySwapPresentationState {
+  let state = createCanonicalFactorySwapPresentation();
+  state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+  state = handleFactorySwapPresentationInput(state, "B");
+  return advance(state, 36);
+}
+
 function offerState(cursor: 0 | 1) {
   const edge = 20_000;
   return {
@@ -341,7 +348,7 @@ describe("live Factory swap presentation adapter", () => {
       phaseElapsed: 0,
       controller: {
         phase: "enemySwitch",
-        actionsCount: 3,
+        actionsCount: 4,
         playerMonId: 0,
         inputReady: false,
       },
@@ -354,7 +361,7 @@ describe("live Factory swap presentation adapter", () => {
     const selectedBallClock = state.selectedBallClock;
 
     state = advance(state, 83);
-    expect(state.controller.actionsCount).toBe(3);
+    expect(state.controller.actionsCount).toBe(4);
     state = advance(state, 1);
     expect(state.controller).toMatchObject({
       phase: "enemySwitch",
@@ -391,6 +398,129 @@ describe("live Factory swap presentation adapter", () => {
     expect(state.controller.displayCursor).toBe(1);
     expect(state.selectedBallClock).toBe((selectedBallClock ?? 0) + 135);
   });
+
+  it("gates player B/CANCEL and the quit prompt on their first source-accepted edges", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY - 1);
+    expect(handleFactorySwapPresentationInput(state, "B")).toBe(state);
+    state = advance(state, 1);
+    state = handleFactorySwapPresentationInput(state, "B");
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "quitPrompt",
+        quitReturnPhase: "playerPicker",
+        inputReady: false,
+      },
+    });
+    state = advance(state, 35);
+    expect(handleFactorySwapPresentationInput(state, "A")).toBe(state);
+    state = advance(state, 1);
+    expect(state.controller.inputReady).toBe(true);
+
+    let cancel = createCanonicalFactorySwapPresentation();
+    cancel = advance(cancel, FACTORY_SWAP_ENTRY_READY_DELAY);
+    cancel = handleFactorySwapPresentationInput(cancel, "LEFT");
+    cancel = advance(cancel, 3);
+    expect(cancel.controller).toMatchObject({
+      cursor: 3,
+      infoCursor: 3,
+      displayCursor: 3,
+      arrowCursor: 3,
+    });
+    cancel = handleFactorySwapPresentationInput(cancel, "A");
+    expect(cancel.controller).toMatchObject({
+      phase: "quitPrompt",
+      quitReturnPhase: "playerPicker",
+    });
+  });
+
+  it("keeps party/rentals immutable through default-YES quit and hands off with TRUE", () => {
+    let state = canonicalQuitPromptReady();
+    const partyBefore = structuredClone(state.controller.playerParty);
+    const rentalsBefore = structuredClone(state.controller.rentalMons);
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "quitExit",
+        scriptResult: null,
+        mutationCommitted: false,
+        result: null,
+      },
+      fieldHandoff: null,
+    });
+    expect(state.controller.playerParty).toEqual(partyBefore);
+    expect(state.controller.rentalMons).toEqual(rentalsBefore);
+    expect(factorySwapRoundDecision(state.controller)).toBeNull();
+
+    state = advance(state, 1);
+    expect(state.controller).toMatchObject({
+      phase: "quitExit",
+      scriptResult: true,
+      mutationCommitted: false,
+      result: "keptParty",
+    });
+    state = advance(state, 20);
+    expect(state.fieldHandoff).toBeNull();
+    state = advance(state, 1);
+    expect(state).toMatchObject({
+      phaseElapsed: 22,
+      controller: {
+        phase: "complete",
+        scriptResult: true,
+        mutationCommitted: false,
+        result: "keptParty",
+      },
+      fieldHandoff: "CB2_ReturnToFieldContinueScript",
+    });
+    expect(state.controller.playerParty).toEqual(partyBefore);
+    expect(state.controller.rentalMons).toEqual(rentalsBefore);
+    expect(factorySwapRoundDecision(state.controller)).toBeNull();
+  });
+
+  it.each([
+    ["A on NO", "NO"],
+    ["B", "B"],
+  ] as const)(
+    "quit %s returns without mutation and requires a fresh picker edge",
+    (_label, branch) => {
+      let state = canonicalQuitPromptReady();
+      const partyBefore = structuredClone(state.controller.playerParty);
+      const rentalsBefore = structuredClone(state.controller.rentalMons);
+      if (branch === "NO") {
+        state = handleFactorySwapPresentationInput(state, "DOWN");
+        state = advance(state, 19);
+        state = handleFactorySwapPresentationInput(state, "A");
+      } else {
+        state = advance(state, 20);
+        state = handleFactorySwapPresentationInput(state, "B");
+      }
+      expect(state.controller).toMatchObject({
+        phase: "quitReturn",
+        inputReady: false,
+        mutationCommitted: false,
+        result: null,
+      });
+      expect(state.controller.playerParty).toEqual(partyBefore);
+      expect(state.controller.rentalMons).toEqual(rentalsBefore);
+
+      state = advance(state, 37);
+      expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
+      state = advance(state, 1);
+      expect(state.controller).toMatchObject({
+        phase: "playerPicker",
+        inputReady: true,
+        quitReturnPhase: null,
+        mutationCommitted: false,
+        result: null,
+      });
+      expect(state.controller.playerParty).toEqual(partyBefore);
+      expect(state.controller.rentalMons).toEqual(rentalsBefore);
+      state = handleFactorySwapPresentationInput(state, "RIGHT");
+      expect(state.controller.cursor).toBe(1);
+    },
+  );
 
   it("rejects the adjacent early enemy A, accepts the first picker A, and gates the GROVYLE prompt through HandleYesNo", () => {
     let state = createCanonicalFactorySwapPresentation();

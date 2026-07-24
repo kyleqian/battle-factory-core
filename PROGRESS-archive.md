@@ -1,3 +1,25 @@
+## 338 — S8 OFF terminal LOSS record menu: **GREEN — 414/414 exact**
+
+- **State:** the LOSS route is exact from its prior +210 completion through
+  the shared record question's default-NO menu at +622 and first sampled input
+  at +624. Seventh-win OFF evidence now pins the complete source-driven
+  +1..+4424 timeline; Scene-ON coverage is **4 exact / 9 partial / 263
+  unsupported** after the first ICE PUNCH component.
+- **Did:** added a phase-relative reusable record-question transition with
+  live `\l` fast-scroll, standard-window/menu chrome, stored-edge readiness,
+  default NO, early-input rejection, and YES/NO/B result state. A disjoint
+  fixture pins 3 BP at +2201, fanfare end +2513, restore +3549, and shared
+  menu +4422/+4424. ICE PUNCH's opening palette overlay is **35/35 exact**.
+- **Next:** implement the seventh-win/round-summary presentation from the
+  staged fixture through the shared record menu; do not replay Battles 2–7.
+  Animation continues ICE PUNCH at age 35 with the crystal spiral.
+- **Notes:** LOSS continuation **414/414** and opening **210/210** exact;
+  merged Tier-1 **1235/1235**, build **5.655 MB**; ICE opening **35/35**.
+  No deferred questions. No absolute clock, screenshot/framebuffer harvest,
+  terminal outcome mutation, or canonical Battle-2 extension.
+
+---
+
 ## 337 — Animation dependency/composition pivot: **GREEN — 354 moves mapped**
 
 - **State:** move acceptance remains **4 exact / 8 partial / 264 unsupported**,
@@ -12960,5 +12982,3 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
 - **Notes:** `tools/test-codex-git-attribution.sh` proves exact replacement,
   unknown fallback, and an untouched Claude commit. Shell syntax, resolved
   launcher configs, Codex deadline tests (**3/3**), Tier-1, and build pass.
-
----

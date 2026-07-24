@@ -30,6 +30,7 @@ const defaults = {
   'player-b-yes': [29730, 29920],
   'player-b-no': [29730, 29920],
   'player-b-return-b': [29730, 29920],
+  'player-cancel-yes': [29698, 29765],
 };
 
 if (!(scenario in defaults)) {
@@ -52,6 +53,13 @@ if (captureEnd - captureStart + 1 > 256) {
 // pair without conflating held input with a later JOY_NEW sample.
 const playerPickerPrefix = base.segments.slice(0, 147);
 const readyB = [...playerPickerPrefix, { buttons: [], frames: 99 }, { buttons: ['B'], frames: 1 }];
+const readyCancel = [
+  ...playerPickerPrefix,
+  { buttons: [], frames: 99 },
+  { buttons: ['LEFT'], frames: 1 },
+  { buttons: [], frames: 4 },
+  { buttons: ['A'], frames: 1 },
+];
 
 let segments;
 switch (scenario) {
@@ -81,11 +89,14 @@ switch (scenario) {
   case 'player-b-return-b':
     segments = [...readyB, { buttons: [], frames: 55 }, { buttons: ['B'], frames: 1 }, { buttons: [], frames: 600 }];
     break;
+  case 'player-cancel-yes':
+    segments = [...readyCancel, { buttons: [], frames: 35 }, { buttons: ['A'], frames: 1 }, { buttons: [], frames: 600 }];
+    break;
 }
 
 process.stdout.write(`${JSON.stringify({
   oracleProfile: 'battle-scene-off',
-  _comment: `derived from ${basePath} (${scenario}); evidence only, not an app acceptance trace`,
+  _comment: `derived from ${basePath} (${scenario}); short player-origin quit acceptance window`,
   segments,
   captureFrames: Array.from({ length: captureEnd - captureStart + 1 }, (_, i) => captureStart + i),
 }, null, 2)}\n`);

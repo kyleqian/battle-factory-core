@@ -65,13 +65,14 @@ describe("Factory swap state/input contract", () => {
   it("wraps picker/menu cursors and separates logical from displayed picker position", () => {
     let state = ready(createFactorySwapState(player, enemy, rentals));
     state = handleFactorySwapInput(state, "LEFT");
-    expect(state.cursor).toBe(2);
+    expect(state.cursor).toBe(3);
     expect(state.displayCursor).toBe(0);
     state = copyFactorySwapCursor(state);
-    expect(state.infoCursor).toBe(2);
+    expect(state.infoCursor).toBe(3);
     expect(state.displayCursor).toBe(0);
     state = copyFactorySwapCursor(state);
-    expect(state.displayCursor).toBe(2);
+    expect(state.displayCursor).toBe(3);
+    state = ready(createFactorySwapState(player, enemy, rentals));
     state = handleFactorySwapInput(state, "A");
     state = ready(state);
     state = handleFactorySwapInput(state, "UP");
@@ -198,7 +199,7 @@ describe("Factory swap state/input contract", () => {
     const quitPrompt = handleFactorySwapInput(state, "B");
     expect(quitPrompt).toMatchObject({ phase: "quitPrompt", result: null });
     const quit = handleFactorySwapInput(ready(quitPrompt), "A");
-    expect(quit).toMatchObject({ phase: "complete", result: "keptParty" });
+    expect(quit).toMatchObject({ phase: "quitExit", result: null });
     expect(quit.playerParty).toEqual(player);
     expect(() => applyFactorySwapMutation(state)).toThrow(/both selected/);
   });
@@ -208,15 +209,16 @@ describe("Factory swap state/input contract", () => {
     state = handleFactorySwapInput(state, "B");
     state = handleFactorySwapInput(ready(state), "B");
     expect(state).toMatchObject({
-      phase: "playerPicker",
+      phase: "quitReturn",
       inputReady: false,
       result: null,
     });
 
     state = ready({
-      ...state,
+      ...createFactorySwapState(player, enemy, rentals),
       phase: "enemyPicker",
       playerMonId: 0,
+      actionsCount: 5,
     });
     state = handleFactorySwapInput(state, "B");
     state = handleFactorySwapInput(
@@ -224,9 +226,21 @@ describe("Factory swap state/input contract", () => {
       "A",
     );
     expect(state).toMatchObject({
-      phase: "enemyPicker",
+      phase: "quitReturn",
       inputReady: false,
       result: null,
+    });
+  });
+
+  it("dispatches the player CANCEL action through the same source quit prompt", () => {
+    let state = ready(createFactorySwapState(player, enemy, rentals));
+    state = handleFactorySwapInput(state, "LEFT");
+    expect(state).toMatchObject({ cursor: 3, actionsCount: 4 });
+    state = handleFactorySwapInput(state, "A");
+    expect(state).toMatchObject({
+      phase: "quitPrompt",
+      quitReturnPhase: "playerPicker",
+      inputReady: false,
     });
   });
 
