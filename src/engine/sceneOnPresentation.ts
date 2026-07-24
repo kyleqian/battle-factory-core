@@ -103,6 +103,7 @@ import {
   extremeSpeedAttackerVisibleAtAge,
   extremeSpeedBackgroundAtAge,
   extremeSpeedDustAtAge,
+  extremeSpeedHitsplatsAtAge,
   extremeSpeedImpactAtAge,
   type ExtremeSpeedBackgroundState,
 } from "./extremeSpeed.ts";
@@ -591,6 +592,7 @@ export interface SceneOnExtremeSpeedView {
   readonly attackerAffine: ReturnType<typeof extremeSpeedAttackerAffineAtAge>;
   readonly attackerVisible: boolean;
   readonly dust: ReturnType<typeof extremeSpeedDustAtAge>;
+  readonly hitsplats: ReturnType<typeof extremeSpeedHitsplatsAtAge>;
   readonly impact: ReturnType<typeof extremeSpeedImpactAtAge>;
 }
 
@@ -1367,6 +1369,10 @@ export function sceneOnExtremeSpeedView(
     ),
     attackerVisible: extremeSpeedAttackerVisibleAtAge(animationAge),
     dust: extremeSpeedDustAtAge(animationAge),
+    hitsplats: extremeSpeedHitsplatsAtAge(
+      animationAge,
+      state.config.target.geometry.side,
+    ),
     impact: extremeSpeedImpactAtAge(
       animationAge,
       state.config.target.geometry.side,

@@ -14256,7 +14256,24 @@ export function renderSceneOnMovePresentation(
         59,
       );
     }
-    const attackerCenter = view.attacker.geometry.animationCenter;
+    for (const hitsplat of view.hitsplats) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        view.target.geometry.animationCenter.x + hitsplat.targetX2 - 16,
+        view.target.geometry.animationCenter.y + hitsplat.y2 - 16,
+        hitsplat.matrixScale,
+        hitsplat.matrixScale,
+        12,
+        8,
+        false,
+        "live",
+      );
+    }
+    // AnimTask_SpeedDust reads BATTLER_COORD_X/Y, the battle-position
+    // center, rather than the animation-center Y used by most particles.
+    const attackerCenter = view.attacker.geometry.battlePositionCenter;
     for (const dust of view.dust) {
       drawSpriteSheet(
         fb,
