@@ -83,6 +83,10 @@ const BACK_SPECIES: Record<string, string> = {
   MAGBY: "magby",
   BAYLEEF: "bayleef",
   PIDGEOTTO: "pidgeotto",
+  // MOVE_FLY's required opposite-side portable case uses the legal set-184
+  // MURKROW as the player's active battler. Keep this source art in the
+  // same species-indexed bundle as every other live battle back sprite.
+  MURKROW: "murkrow",
 };
 const FRONT_SPECIES: Record<string, string> = {
   GROVYLE: "grovyle",
