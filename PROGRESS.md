@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 405 — Gate-3 attack-canceler IN_LOVE source phase integrated
+
+- **State:** the run is clean and green at **145 files / 1832 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through IN_LOVE source
+  decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** ported battle_util.c:2200-2219 with the exact four-bit
+  `STATUS2_INFATUATION` encoding, `CountTrailingZeroBits` scripting-battler
+  ownership, conditional `Random() & 1`, odd cursor push, and even
+  `BattleScriptPush(BattleScript_MoveUsedIsInLoveCantAttack)`. The even branch
+  sets `loveImmobility` and the unable marker and executes
+  `CancelMultiTurnMoves` immediately before the common in-love handoff.
+- **Next:** begin `CANCELER_BIDE` only after its counter, stored-damage,
+  target, move-damage, multi-turn, marker/effect, and script paths have explicit
+  source receipts. Do not loop phases or register opcode 0.
+- **Notes:** all four source bits and attackers/both sides, zero/no-draw,
+  rejected nonzero multi-bit source-unreachable encodings, both RNG branches,
+  u16 **0/1/65534/65535**, exact one-call LCG ownership, cursor-push vs
+  script-push, scripting replacement, preset protect/marker/helper state,
+  immediate helper mutation, exactly one advance to BIDE, missing/invalid
+  context, immutability, determinism, and deep freezing are pinned. Focused
+  **3 files / 26 tests**; integrated Tier-1 **145/1832**, build, OFF v5 info
+  (`9c89c741…`), and diff check green. Code commit `1690b58`; pixel diff N/A.
+
+---
 ## 404 — PARALYZED, Factory AI policy seam, and MUD SLAP integrated
 
 - **State:** the merged run is clean and green at **144 files / 1825 tests**.
@@ -50,29 +75,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pinned. Focused **4 files / 39 tests**; integrated Tier-1 **142 files / 1789
   tests**, build, OFF v5 info (`9c89c741…`), and diff check green. Code commit
   `e6a9b8e`; pixel diff N/A.
-
----
-## 402 — Gate-3 attack-canceler CONFUSED source phase integrated
-
-- **State:** the run is clean and green at **140 files / 1777 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes;
-  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through CONFUSED
-  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
-- **Did:** ported `CANCELER_CONFUSED` from battle_util.c:2156-2187 with the
-  source-ordered counter decrement and conditional `Random() & 1` LCG receipt.
-  Added explicit chooser/cursor, target, battle-damage, protect flag,
-  unable-marker, effect, and script ownership. The self-hit calculation records
-  `MOVE_POUND`, side status 0, power override 40, type override 0, and same
-  attacker/defender; `BattleScript_DoSelfConfusionDmg` retains the later
-  `cancelmultiturnmoves` ownership from battle_scripts_1.s:3801-3803.
-- **Next:** begin `CANCELER_PARALYZED` only after its status predicate,
-  conditional `Random()%4`, protect flag, script/marker/effect, and receipts
-  are explicit. Do not loop phases or register opcode 0.
-- **Notes:** not-confused, snap at counter 1, continuing odd draw, even self-hit,
-  source-reachable counters **0..5** and rejected **6/7**, missing/invalid
-  damage context, exact LCG ownership, all four attackers/both sides, target
-  replacement, preset chooser/damage/protect/marker, deferred multi-turn
-  cancellation, exactly one tracker advance, input immutability, deterministic
-  replay, and deep freezing are pinned. Focused **5 files / 49 tests**;
-  integrated Tier-1 **140 files / 1777 tests**, build, OFF v5 info
-  (`9c89c741…`), and diff check green. Code commit `9fdfba3`; pixel diff N/A.
