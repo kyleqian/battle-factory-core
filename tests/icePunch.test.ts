@@ -113,6 +113,11 @@ describe("ICE_PUNCH source-composed presentation components", () => {
         opponentHp: 143,
         playerStatus: "none",
       }),
+      hpDrainProfile: Object.freeze({
+        startHp: 143,
+        endHp: 112,
+        firstDisplayedAge: 223,
+      }),
       moveTextStartAge: -25,
     });
     const before = structuredClone(stage.config);

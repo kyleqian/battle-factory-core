@@ -41,15 +41,15 @@ remainder.
 - **State:** **4 exact / 9 partial / 263 unsupported**. The source graph covers
   all **354** moves through **935** reusable components and **3,190**
   dependency edges.
-- **Did:** extended ICE PUNCH through the complete generic hit reaction by
-  reusing one phase-relative `SpriteCB_HitAnimHealthoxEffect` /
-  `DoHitAnimBlinkSpriteEffect` reducer. It pins the 20-display +1/-1
-  healthbox wobble, four-frame target blink blocks, and preceding-pass OAM
-  latch without changing HP or battle state.
-- **Evidence:** `ice-punch-onix-grovyle.json` is **222/222 exact** at oracle
-  frames 2339-2560 / ages 0-221, contiguous through the full generic hit
-  reaction and stable handoff. FIRE PUNCH portable **225/225** remains exact.
-- **Next:** continue ICE PUNCH only at generic HP-drain/message resolution
-  from 2561 and audit any evidence-required geometry/orientation variant
-  before exact promotion. Do not claim THUNDER PUNCH without its own dense
-  evidence.
+- **Did:** extended ICE PUNCH through its immutable 143→112 HP-bar drain and
+  immediate super-effective result-message handoff. The relative reducer
+  consumes already-determined start/end HP only; it neither calculates nor
+  commits damage, and the shared message renderer owns the printer handoff.
+- **Evidence:** `ice-punch-onix-grovyle.json` is **282/282 exact** at oracle
+  frames 2339-2620 / ages 0-281, contiguous through the full generic hit
+  reaction, HP drain, atomic controller write boundary, and fully typed plus
+  stable result message. FIRE PUNCH portable **225/225** remains exact.
+- **Next:** continue ICE PUNCH only from frame 2621 through its
+  secondary-effect/controller tail, then audit any evidence-required
+  geometry/orientation variant before exact promotion. Do not claim THUNDER
+  PUNCH without its own dense evidence.

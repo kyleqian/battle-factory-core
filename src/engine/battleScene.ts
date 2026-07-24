@@ -13934,7 +13934,7 @@ export function renderSceneOnMovePresentation(
     drawOpponentHealthboxWobble(
       fb,
       view.healthboxY2,
-      opponentHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      opponentHealthboxContentForHp(view.displayedTargetHp),
     );
     drawComposedPlayerHealthbox(
       fb,
@@ -13952,12 +13952,24 @@ export function renderSceneOnMovePresentation(
     const line1 = `${attacker.species} used`;
     const line2 = "ICE PUNCH!";
     const textStartAge = state.config.moveTextStartAge ?? -1;
-    drawMessageTextLines(
-      fb,
-      line1,
-      line2,
-      Math.min(line1.length + line2.length, view.age - textStartAge + 1),
-    );
+    const effectivenessStart =
+      state.config.hpDrainProfile.effectivenessTextStartAge;
+    if (effectivenessStart !== undefined && view.age >= effectivenessStart) {
+      const line = "It’s super effective!";
+      drawMessageTextLines(
+        fb,
+        line,
+        "",
+        Math.min(line.length, view.age - effectivenessStart + 1),
+      );
+    } else {
+      drawMessageTextLines(
+        fb,
+        line1,
+        line2,
+        Math.min(line1.length + line2.length, view.age - textStartAge + 1),
+      );
+    }
     return;
   }
 
