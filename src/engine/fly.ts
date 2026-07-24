@@ -125,7 +125,11 @@ export function flyPresentationAtAge(
   const strikeBall = flyStrikeBallAtAge(age, attackerSide, targetCenter);
   return {
     turn,
-    attackerInvisible: strikeBall !== null,
+    // FlyUnleash begins while the first-turn STATUS3_ON_AIR hide is still
+    // active. AnimFlyBallAttack clears that hide only when its translated
+    // ball leaves the screen, so the attacker stays absent during the
+    // pre-spawn script lead-in as well as the ball's visible lifetime.
+    attackerInvisible: age < 30,
     chargeBall: null,
     strikeBall,
     targetShakeX2: FLY_SHAKE_AGES.has(age) ? 6 : 0,

@@ -1,0 +1,40 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-fly-player-murkrow-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "MURKROW (player-back) -> ONIX (opponent-front)",
+  "move": "FLY",
+  "turn": "strike",
+  "orientation": "player-to-opponent",
+  "appStage": {
+    "oracleFrame": 384,
+    "presentationAge": 12,
+    "animationAgeOffset": -47
+  },
+  "denseWindow": {
+    "startFrame": 384,
+    "endFrame": 627
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "opponentHp": 117,
+    "playerStatus": "none",
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "controllerProfile": {
+    "targetHpBefore": 117,
+    "targetHpAfter": 106,
+    "hitReactionFirstAge": 108,
+    "hpDrainFirstAge": 143,
+    "chargeMessageFirstAge": 999,
+    "strikeMoveTextFirstAge": 12,
+    "resultTextFirstAge": 159,
+    "currentMoveResetAge": 256
+  },
+  "acceptance": {
+    "status": "partial",
+    "remaining": "Portable player-side strike is exact through its move-owned lead-in except the 24-pixel opponent-priority artifact; the target monbg/controller tail remains unresolved from oracle frame 441."
+  }
+}
