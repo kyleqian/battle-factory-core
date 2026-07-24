@@ -537,6 +537,7 @@ import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.jso
 import battleAnimHandsAndFeetAsset from "../assets/gen/battle-anim-hands-and-feet.json" with { type: "json" };
 import battleAnimIceCrystalsAsset from "../assets/gen/battle-anim-ice-crystals.json" with { type: "json" };
 import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" with { type: "json" };
+import battleAnimLightningAsset from "../assets/gen/battle-anim-lightning.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -588,6 +589,7 @@ import {
   sceneOnFlyView,
   sceneOnBounceView,
   sceneOnIcePunchView,
+  sceneOnThunderPunchView,
   sceneOnQuickAttackView,
   sceneOnExtremeSpeedView,
   sceneOnRockSlideView,
@@ -864,6 +866,10 @@ const battleAnimIceCube = battleAnimIceCubeAsset as {
     y: number;
     tileset: Tileset;
   }[];
+};
+const battleAnimLightning = battleAnimLightningAsset as {
+  tileset: Tileset;
+  palette: RgbColor[];
 };
 const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
 const murkrowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MURKROW!;
@@ -14618,6 +14624,151 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ONIX used" : "Foe ONIX used",
       "BLAZE KICK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "THUNDER_PUNCH") {
+    const view = sceneOnThunderPunchView(state);
+    const displayedView = sceneOnThunderPunchView({
+      ...state,
+      age: state.age - 1,
+    });
+    const displayedPalette = sceneOnThunderPunchView({
+      ...state,
+      age: state.age - 1,
+    }).palette;
+    const playerToOpponent =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged THUNDER_PUNCH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const black = { r: 0, g: 0, b: 0 };
+    const invertPalette = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => displayedPalette.inverted
+        ? { r: 255 - color.r, g: 255 - color.g, b: 255 - color.b }
+        : color);
+    const fieldPalette = blendPaletteBanksToward(
+      battleBg.palette,
+      black,
+      displayedPalette.backgroundBlackCoeff,
+    ).map(invertPalette);
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      fieldPalette,
+    );
+    const drawLightning = (
+      bolt: (typeof displayedView.lightning)[number],
+    ): void => {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimLightning.tileset, bolt.frame * 4, 4),
+        battleAnimLightning.palette,
+        bolt.centerX - 16,
+        bolt.centerY - 16,
+      );
+    };
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      invertPalette(targetSprite.palette),
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y + displayedView.targetY2,
+    );
+    const effectBackdrop = fb.slice();
+    const drawHitsplat = (matrix: number): void => {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+        matrix,
+        matrix,
+        12,
+        8,
+        false,
+        effectBackdrop,
+      );
+    };
+    if (displayedView.firstHitsplatVisible) drawHitsplat(303);
+    const drawFist = (): void => {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 0, 4),
+        battleAnimHandsAndFeet.palette,
+        view.target.geometry.animationCenter.x - 16,
+        view.target.geometry.animationCenter.y - 16,
+      );
+    };
+    if (displayedView.fistVisible) drawFist();
+    for (const bolt of displayedView.lightning) {
+      drawLightning(bolt);
+    }
+    // The reverse orientation's second-bolt allocation inherits an OAM slot
+    // behind the still-live first hitsplat for one display. The next sort
+    // moves the bolt in front, matching the ordinary ordering thereafter.
+    if (opponentToPlayer && state.age === 52) drawHitsplat(303);
+    if (displayedView.secondHitsplatVisible) drawHitsplat(372);
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      invertPalette(attackerSprite.palette),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (playerToOpponent) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        murkrowHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "female",
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "male",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        flyMurkrowPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "female",
+        ),
+      );
+    }
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ONIX used" : "Foe ONIX used",
+      "THUNDERPUNCH!",
       99,
     );
     return;
