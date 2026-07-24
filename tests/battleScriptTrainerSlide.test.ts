@@ -312,14 +312,14 @@ describe("source-exact TRAINERSLIDEIN / TRAINERSLIDEOUT controller receipts", ()
     }
   });
 
-  it("replays immutably with rules/RNG identity and composes to exactly twenty-three handlers", () => {
+  it("replays immutably with rules/RNG identity and composes to exactly twenty-four handlers", () => {
     const instruction = program.instructions.find((candidate) => candidate.opcodeId === 83)!;
     const makeResult = () => stepBattleScriptMachine(program, stateAt(instruction), handlers(() => 2));
     expect(makeResult()).toEqual(makeResult());
 
     const sourceHandlers = handlers(() => 0);
     expect(Object.keys(sourceHandlers).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 111, 131, 248,
+      10, 16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 111, 131, 248,
     ]);
     const composed = Object.freeze({
       ...createBattleScriptControlHandlers<FixtureRules>(program),
@@ -331,7 +331,7 @@ describe("source-exact TRAINERSLIDEIN / TRAINERSLIDEOUT controller receipts", ()
       ...createBattleScriptMoveValuesCommandHandlers<FixtureRules>(program),
     });
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 111, 131, 141, 248,
+      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 111, 131, 141, 248,
     ]);
   });
 });

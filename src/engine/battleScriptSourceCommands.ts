@@ -222,7 +222,7 @@ function unavailableSelectionMessageFromTableReason<RulesContext extends object>
 function invalidSourceOperandReason<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operandExpression: string,
-  expected: "u8" | "u16" | "u16-table-pointer",
+  expected: "none" | "u8" | "u16" | "u16-table-pointer",
   received: string,
 ): BattleScriptHaltReason {
   return Object.freeze({
@@ -250,7 +250,7 @@ function haltForInvalidOperand<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operandExpression: string,
   received: string,
-  expected: "u8" | "u16" | "u16-table-pointer" = "u16",
+  expected: "none" | "u8" | "u16" | "u16-table-pointer" = "u16",
 ): BattleScriptCommandTransition<RulesContext> {
   return transitionBattleScriptCommand(
     context,
@@ -258,6 +258,18 @@ function haltForInvalidOperand<RulesContext extends object>(
       kind: "halt",
       reason: invalidSourceOperandReason(context, operandExpression, expected, received),
     }),
+  );
+}
+
+function requireNoOperands<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+): BattleScriptCommandTransition<RulesContext> | null {
+  if (context.instruction.operands.length === 0) return null;
+  return haltForInvalidOperand(
+    context,
+    context.instruction.operands[0]?.expression ?? "<none>",
+    `${context.instruction.operands.length} operands`,
+    "none",
   );
 }
 
@@ -580,7 +592,7 @@ function emitTrainerSlideControllerEvent<RulesContext extends object>(
 
 /**
  * First source-mapped scheduler family:
- * Cmd_nop, Cmd_waitstate, Cmd_printstring, Cmd_printselectionstring,
+ * Cmd_nop, Cmd_waitanimation, Cmd_waitstate, Cmd_printstring, Cmd_printselectionstring,
  * Cmd_printselectionstringfromtable, Cmd_waitmessage, Cmd_pause, Cmd_playse,
  * Cmd_fanfare, Cmd_playfaintcry, Cmd_hidepartystatussummary, and
  * Cmd_makevisible, Cmd_trainerslidein, and Cmd_trainerslideout.
@@ -600,6 +612,13 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
   >;
 
   installHandler(program, handlers, "B_SCR_OP_NOP", advanceBattleScriptInstruction);
+  installHandler(program, handlers, "B_SCR_OP_WAITANIMATION", (context) => {
+    const malformed = requireNoOperands(context);
+    if (malformed) return malformed;
+    return ports.isControllerIdle(context)
+      ? advanceBattleScriptInstruction(context)
+      : blockBattleScriptCommand(context, controllerBusyReason(context));
+  });
   installHandler(program, handlers, "B_SCR_OP_WAITSTATE", (context) =>
     ports.isControllerIdle(context)
       ? advanceBattleScriptInstruction(context)

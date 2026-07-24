@@ -344,7 +344,7 @@ describe("source-exact Battle Script MAKEVISIBLE controller command", () => {
     expect(acknowledgeBattleScriptController(acknowledged, 2)).toBe(acknowledged);
   });
 
-  it("replays deterministically and composes to exactly twenty-three supported IDs", () => {
+  it("replays deterministically and composes to exactly twenty-four supported IDs", () => {
     const makeResult = () => stepBattleScriptMachine(
       program,
       stateAt(makeVisible),
@@ -354,7 +354,7 @@ describe("source-exact Battle Script MAKEVISIBLE controller command", () => {
 
     const sourceHandlers = handlers(() => 0);
     expect(Object.keys(sourceHandlers).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 111, 131, 248,
+      10, 16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 111, 131, 248,
     ]);
     expect(sourceHandlers[88]).toBeUndefined();
     const composed = Object.freeze({
@@ -367,7 +367,7 @@ describe("source-exact Battle Script MAKEVISIBLE controller command", () => {
       ...createBattleScriptMoveValuesCommandHandlers<FixtureRules>(program),
     });
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 111, 131, 141, 248,
+      10, 16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 111, 131, 141, 248,
     ]);
   });
 });
