@@ -45,6 +45,12 @@ export type BattleScriptAttackerResolverPort<RulesContext extends object> = (
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
 ) => BattleScriptBattlerId | null;
 
+/** Typed boundary for Emerald's GetBattlerForBattleScript(u8 selector). */
+export type BattleScriptBattlerSelectorResolverPort<RulesContext extends object> = (
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  selectorOperand: BattleScriptOperand,
+) => BattleScriptBattlerId | null;
+
 export type BattleScriptSelectionMessagePreparation = Readonly<{
   attacker: BattleScriptBattlerId;
   stringId: number;
@@ -68,6 +74,7 @@ export type BattleScriptSourceCommandPorts<RulesContext extends object> = Readon
   prepareSelectionMessage: BattleScriptSelectionMessagePreparationPort<RulesContext>;
   prepareSelectionMessageFromTable: BattleScriptSelectionMessageFromTablePreparationPort<RulesContext>;
   resolveAttackerBattler: BattleScriptAttackerResolverPort<RulesContext>;
+  resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<RulesContext>;
   resolveHalfwordOperand: BattleScriptHalfwordResolverPort<RulesContext>;
 }>;
 
@@ -134,6 +141,20 @@ function unavailableAttackerReason<RulesContext extends object>(
   });
 }
 
+function unavailableBattlerSelectorReason<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  operand: BattleScriptOperand,
+): BattleScriptBlockReason {
+  return Object.freeze({
+    kind: "source-context-unavailable",
+    programCounter: context.state.programCounter,
+    opcodeId: context.instruction.opcodeId,
+    opcodeName: context.instruction.opcodeName,
+    port: "resolve-battler-for-battle-script",
+    operandExpression: operand.expression,
+  });
+}
+
 function unavailableSelectionMessageReason<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operand: BattleScriptOperand,
@@ -165,7 +186,7 @@ function unavailableSelectionMessageFromTableReason<RulesContext extends object>
 function invalidSourceOperandReason<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operandExpression: string,
-  expected: "u16" | "u16-table-pointer",
+  expected: "u8" | "u16" | "u16-table-pointer",
   received: string,
 ): BattleScriptHaltReason {
   return Object.freeze({
@@ -193,7 +214,7 @@ function haltForInvalidOperand<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operandExpression: string,
   received: string,
-  expected: "u16" | "u16-table-pointer" = "u16",
+  expected: "u8" | "u16" | "u16-table-pointer" = "u16",
 ): BattleScriptCommandTransition<RulesContext> {
   return transitionBattleScriptCommand(
     context,
@@ -246,6 +267,10 @@ type HalfwordOperandResult<RulesContext extends object> =
   | Readonly<{ kind: "operand"; operand: BattleScriptOperand }>
   | Readonly<{ kind: "transition"; transition: BattleScriptCommandTransition<RulesContext> }>;
 
+type ByteOperandResult<RulesContext extends object> =
+  | Readonly<{ kind: "operand"; operand: BattleScriptOperand }>
+  | Readonly<{ kind: "transition"; transition: BattleScriptCommandTransition<RulesContext> }>;
+
 type PointerOperandResult<RulesContext extends object> =
   | Readonly<{ kind: "operand"; operand: BattleScriptOperand }>
   | Readonly<{ kind: "transition"; transition: BattleScriptCommandTransition<RulesContext> }>;
@@ -279,6 +304,24 @@ function requireSingleHalfwordOperand<RulesContext extends object>(
         context,
         operand?.expression ?? "<missing>",
         `${context.instruction.operands.length} operands; width ${operand?.widthBytes ?? "<missing>"}`,
+      ),
+    });
+  }
+  return Object.freeze({ kind: "operand", operand });
+}
+
+function requireSingleByteOperand<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+): ByteOperandResult<RulesContext> {
+  const [operand] = context.instruction.operands;
+  if (!operand || operand.widthBytes !== 1 || context.instruction.operands.length !== 1) {
+    return Object.freeze({
+      kind: "transition",
+      transition: haltForInvalidOperand(
+        context,
+        operand?.expression ?? "<missing>",
+        `${context.instruction.operands.length} operands; width ${operand?.widthBytes ?? "<missing>"}`,
+        "u8",
       ),
     });
   }
@@ -429,11 +472,43 @@ function emitAudioControllerEvent<RulesContext extends object>(
   );
 }
 
+function emitFaintCryControllerEvent<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  ports: BattleScriptSourceCommandPorts<RulesContext>,
+): BattleScriptCommandTransition<RulesContext> {
+  const required = requireSingleByteOperand(context);
+  if (required.kind === "transition") return required.transition;
+  const battler = ports.resolveBattlerForBattleScript(context, required.operand);
+  if (battler === null) {
+    return blockBattleScriptCommand(
+      context,
+      unavailableBattlerSelectorReason(context, required.operand),
+    );
+  }
+  if (!isBattleScriptBattlerId(battler)) {
+    return haltForInvalidBattler(context, battler);
+  }
+  const scheduler = markBattleScriptControllerPending(
+    schedulerWith(context, { activeBattler: battler }),
+    battler,
+  );
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    {
+      scheduler,
+      events: Object.freeze([
+        Object.freeze({ kind: "play-faint-cry", battler }),
+      ]),
+    },
+  );
+}
+
 /**
  * First source-mapped scheduler family:
  * Cmd_nop, Cmd_waitstate, Cmd_printstring, Cmd_printselectionstring,
  * Cmd_printselectionstringfromtable, Cmd_waitmessage, Cmd_pause, Cmd_playse,
- * and Cmd_fanfare.
+ * Cmd_fanfare, and Cmd_playfaintcry.
  *
  * Controller readiness, source-context string preparation, and exact u16
  * operand resolution are injected logical ports. MSG_DISPLAY and the shared
@@ -509,6 +584,8 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
     emitAudioControllerEvent(context, ports, "play-se"));
   installHandler(program, handlers, "B_SCR_OP_FANFARE", (context) =>
     emitAudioControllerEvent(context, ports, "play-fanfare"));
+  installHandler(program, handlers, "B_SCR_OP_PLAYFAINTCRY", (context) =>
+    emitFaintCryControllerEvent(context, ports));
   installHandler(program, handlers, "B_SCR_OP_WAITMESSAGE", (context) => {
     if (!ports.isControllerIdle(context)) {
       return blockBattleScriptCommand(context, controllerBusyReason(context));

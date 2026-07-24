@@ -70,6 +70,7 @@ function handlers(
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler,
+    resolveBattlerForBattleScript: () => null,
     resolveHalfwordOperand,
   }));
 }
@@ -408,7 +409,7 @@ describe("source-exact Battle Script PLAYSE/FANFARE controller family", () => {
 
     const sourceHandlers = handlers(() => 1);
     expect(Object.keys(sourceHandlers).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 17, 18, 20, 57, 58, 84, 85, 131,
+      16, 17, 18, 20, 57, 58, 84, 85, 86, 131,
     ]);
     const composed = Object.freeze({
       ...createBattleScriptControlHandlers<FixtureRules>(program),
@@ -420,7 +421,7 @@ describe("source-exact Battle Script PLAYSE/FANFARE controller family", () => {
       ...createBattleScriptMoveValuesCommandHandlers<FixtureRules>(program),
     });
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 84, 85, 131, 141,
+      16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 84, 85, 86, 131, 141,
     ]);
   });
 });

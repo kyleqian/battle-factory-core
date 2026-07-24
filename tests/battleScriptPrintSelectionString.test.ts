@@ -67,6 +67,7 @@ function handlers(
     prepareSelectionMessage,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
+    resolveBattlerForBattleScript: () => null,
     resolveHalfwordOperand: () => null,
   }));
 }
@@ -380,7 +381,7 @@ describe("source-exact B_SCR_OP_PRINTSELECTIONSTRING", () => {
     expect(makeResult()).toEqual(makeResult());
     const sourceHandlers = handlers(() => null);
     expect(Object.keys(sourceHandlers).map(Number).sort((a, b) => a - b)).toEqual([
-      16, 17, 18, 20, 57, 58, 84, 85, 131,
+      16, 17, 18, 20, 57, 58, 84, 85, 86, 131,
     ]);
     expect(sourceHandlers[17]).toBeDefined();
   });

@@ -127,6 +127,7 @@ export type BattleScriptBlockReason =
       | "prepare-selection-message"
       | "prepare-selection-message-from-table"
       | "resolve-attacker"
+      | "resolve-battler-for-battle-script"
       | "resolve-byte"
       | "resolve-halfword";
     operandExpression: string;
@@ -568,6 +569,7 @@ function freezeEventPayload(
       });
     case "play-se":
     case "play-fanfare":
+    case "play-faint-cry":
       return Object.freeze({ ...payload });
     case "animation":
       return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });

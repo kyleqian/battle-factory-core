@@ -61,6 +61,10 @@ export type BattleScriptSemanticEventPayload =
     songId: number;
   }>
   | Readonly<{
+    kind: "play-faint-cry";
+    battler: BattleScriptBattlerId;
+  }>
+  | Readonly<{
     kind: "hp-change";
     battler: number;
     from: number;
