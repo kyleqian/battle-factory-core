@@ -572,9 +572,12 @@ staged `CB2_LoadMap` handoff through congratulations, the source-relative
 award gates, 0→3 BP mutation at +2201, and the complete 312-frame
 `MSGBOX_GETPOINTS` fanfare wait through +2513 (**2513/2513**). It preserves
 the immutable round controller, RNG, battle index, parties, and opponent
-inputs. Gate 2 remains open only for the explicitly bounded +2514 continuation:
+inputs. Gate 2 remains open for the explicitly bounded +2514 continuation:
 exchange/restore through +3549 and the shared record-question/menu path
-through +4424.
+through +4424. The source-to-trace audit also identifies four unique swap-YES
+remainders outside the accepted ONIX→GROVYLE route: SUMMARY return, quit
+prompt/exit/returns, enemy `PKMN FOR SWAP` return, and duplicate-species
+rejection. These require short staged OFF windows, not further Battle-2 turns.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it
@@ -584,8 +587,9 @@ its canonical residual windows (**236/236** and **200/200**), making it
 sides (**141/141**) and canonical (**237/237**) and is `exact`; FAINT ATTACK
 is portable and canonical (**221/221**) but remains `partial` for its
 separately parked residual. ICE PUNCH is now `partial` with its source-composed
-opening palette overlay **35/35 exact** and crystal/impact body explicitly
-bounded. Level 50 animation coverage is therefore **4 exact / 9 partial / 263
+opening and inward crystal spiral **63/63 exact**; the semi-transparent
+crystal/fist/hitsplat overlap and later body remain explicitly bounded.
+Level 50 animation coverage is therefore **4 exact / 9 partial / 263
 unsupported**. S8 remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.

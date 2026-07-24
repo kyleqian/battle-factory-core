@@ -8,18 +8,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** the staged seventh-win route is exact from its `CB2_LoadMap`
   handoff through congratulations, the BP award, `MSGBOX_GETPOINTS`, and the
-  complete points-fanfare wait at +2513.
+  complete points-fanfare wait at +2513. A source audit confirms four
+  swap-YES interaction families remain beyond the accepted canonical route.
 - **Did:** connected generic `roundCompleted` to a phase-relative `roundWon`
   terminal adapter and live lobby renderer. Stored gates are +300/+1100/+2200;
   displayed BP changes 0→3 at +2201 and the 312-frame fanfare reaches zero at
   +2513 without controller, RNG, battle-index, party, or opponent mutation.
+  ICE PUNCH now extends through its inward crystal spiral at **63/63 exact**.
 - **Next:** continue only the source-relative seventh-win remainder at +2514:
   exchange message through party/status restore +3549, then reuse the shared
-  record-question/menu machinery through +4424. Do not replay Battles 2–7.
+  record-question/menu machinery through +4424. Swap still needs SUMMARY
+  return, quit flows, enemy `PKMN FOR SWAP`, and duplicate-species rejection;
+  use staged short windows, not a Battle-2 replay.
 - **Notes:** seventh-win **2513/2513**, LOSS **210/210 + 414/414**, Tier-1
-  **1239/1239**, build **5.659 MB**. No absolute tick, framebuffer asset,
-  screenshot lookup, canonical Battle-2 extension, or premature restore/menu
-  claim.
+  merged **1242/1242**, build **5.663 MB**; ICE **63/63**, FIRE PUNCH
+  **225/225**. No deferred questions. No absolute tick, framebuffer asset,
+  screenshot lookup, canonical Battle-2 extension, or premature UI claim.
 
 ---
 ## 338 — S8 OFF terminal LOSS record menu: **GREEN — 414/414 exact**
