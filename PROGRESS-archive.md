@@ -1,3 +1,27 @@
+## 393 — Gate-3 attack-canceler FROZEN source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP, and
+  FROZEN decisions only; opcode 0 remains unregistered and no phase loop exists.
+- **Did:** added source-derived `gBattleMoves[gCurrentMove].effect` to the
+  rules context, then ported FROZEN's conditional named `Random() % 5` draw,
+  ordinary frozen cancellation/no-attack-string handoff, thaw-hit continuation,
+  and successful thaw/internal-status clear/cursor/message handoff. Corrected
+  every FROZEN receipt to record no status-controller request: this source
+  phase never emits one, and `BattleScript_MoveUsedUnfroze` later owns
+  `updatestatusicon`. Every path stops at `CANCELER_TRUANT`.
+- **Next:** implement `CANCELER_TRUANT` only after its exact ability/counter,
+  multi-turn cancellation, result flag, script/message, and receipt ownership
+  is explicit. Do not loop phases or register opcode 0.
+- **Notes:** every RNG remainder, ordinary vs both `EFFECT_THAW_HIT` moves,
+  zero-PP-Up base PP, status/marker preservation, status-controller absence
+  across every outcome, source cursor semantics, identity, validation,
+  determinism, and deep freezing are pinned. Exact-phase source audit found no
+  further discrepancy. Repair-focused **17/17**; Tier-1 **131 files / 1723
+  tests**, build, OFF info (`9c89c741…`), and diff check green. Code commits
+  `883b6e7` + `4aa41ce`; pixel diff N/A.
+
+---
 ## 391 — Gate-3 attack-canceler ASLEEP source phase integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable

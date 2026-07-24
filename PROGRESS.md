@@ -4,6 +4,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 396 — Gate-3 attack-canceler FLINCH source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP,
+  FROZEN, TRUANT, RECHARGE, and FLINCH decisions only; opcode 0 remains
+  unregistered and no phase loop exists.
+- **Did:** modeled `ProtectStruct::u32 flinchImmobility:1` as validated `0 | 1`
+  and ported the exact `STATUS2_FLINCHED` branch: clear only flinch, set the
+  protect flag, then invoke `CancelMultiTurnMoves`, hand off
+  `BattleScript_MoveUsedFlinched`, OR unable-to-use, and return effect 1.
+  The untaken branch preserves all owned fields with effect 0; every path
+  advances once to `CANCELER_DISABLED`.
+- **Next:** implement `CANCELER_DISABLED` only after its disabled-move,
+  protect/scripting-battler, multi-turn cancellation, script, marker, effect,
+  and receipt ownership is explicit. Do not loop phases or register opcode 0.
+- **Notes:** both one-bit values across all four attacker ids, pre-set helper
+  fields, unrelated status/admission fields, already-set marker/protect
+  identities, missing roles, invalid one-bit/PC widths, determinism, deep
+  freezing, and absence of message/RNG/controller/animation/opcode effects are
+  pinned. Source lines 2110-2121 match the brief and own no message chooser.
+  Focused **4 files / 38 tests**; Tier-1 **134 files / 1739 tests**, build, OFF
+  info (`9c89c741…`), and diff check green. Code commit `050fd88`; pixel diff
+  N/A.
+
+---
 ## 395 — Gate-3 attack-canceler RECHARGE source phase integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable
@@ -51,27 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   helper behavior/receipts are unchanged. Focused **2 files / 23 tests**;
   Tier-1 **132 files / 1730 tests**, build, OFF info (`9c89c741…`), and diff
   check green. Code commits `abc915f` + repair `50e2332`; pixel diff N/A.
-
----
-## 393 — Gate-3 attack-canceler FROZEN source phase integrated
-
-- **State:** S10 Gate 3 remains open with **27** source-safe executable
-  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP, and
-  FROZEN decisions only; opcode 0 remains unregistered and no phase loop exists.
-- **Did:** added source-derived `gBattleMoves[gCurrentMove].effect` to the
-  rules context, then ported FROZEN's conditional named `Random() % 5` draw,
-  ordinary frozen cancellation/no-attack-string handoff, thaw-hit continuation,
-  and successful thaw/internal-status clear/cursor/message handoff. Corrected
-  every FROZEN receipt to record no status-controller request: this source
-  phase never emits one, and `BattleScript_MoveUsedUnfroze` later owns
-  `updatestatusicon`. Every path stops at `CANCELER_TRUANT`.
-- **Next:** implement `CANCELER_TRUANT` only after its exact ability/counter,
-  multi-turn cancellation, result flag, script/message, and receipt ownership
-  is explicit. Do not loop phases or register opcode 0.
-- **Notes:** every RNG remainder, ordinary vs both `EFFECT_THAW_HIT` moves,
-  zero-PP-Up base PP, status/marker preservation, status-controller absence
-  across every outcome, source cursor semantics, identity, validation,
-  determinism, and deep freezing are pinned. Exact-phase source audit found no
-  further discrepancy. Repair-focused **17/17**; Tier-1 **131 files / 1723
-  tests**, build, OFF info (`9c89c741…`), and diff check green. Code commits
-  `883b6e7` + `4aa41ce`; pixel diff N/A.
