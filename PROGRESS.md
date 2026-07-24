@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 413 — Battle machine barrier published
+
+- **State:** the run is green at **159 files / 1910 tests**. S10 Gate 3 still
+  has **27** source-safe executable opcodes; opcode 0 remains unregistered.
+- **Did:** extended the published immutable decision boundary with an explicit
+  serializable Battle Script machine barrier and a read-only transition-local
+  RNG snapshot. Decision submission now returns and preserves that barrier,
+  and rejects further rules decisions while stopped there.
+- **Next:** compose the assigned legal Factory asleep-move decision through
+  the completed asleep canceler handoff and the real
+  `BattleScript_MoveUsedIsAsleep` machine path, auto-acknowledging only safe
+  controller waits and stopping before unsupported move-end opcode 46.
+- **Notes:** focused **1 file / 13 tests**, production build, and diff check
+  pass. The barrier contract adds no handlers, mechanics, presentation, or
+  ambient RNG. Pixel diff N/A.
+
+---
 ## 412 — Gate-3 Magic Coat intercept composed
 
 - **State:** the run is clean and green at **158 files / 1906 tests**. S10

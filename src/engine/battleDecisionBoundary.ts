@@ -77,7 +77,25 @@ export type BattleTerminalBoundary = Readonly<{
   outcome: BattleOutcome;
 }>;
 
-export type BattleBoundary = BattleDecisionBoundary | BattleTerminalBoundary;
+export type BattleMachineBarrier = Readonly<{
+  kind: "battle-script";
+  entryLabel: string;
+  programCounter: number;
+  opcodeId: number;
+  opcodeName: string;
+  dispatcher: string;
+  instructionsExecuted: number;
+}>;
+
+export type BattleMachineBarrierBoundary = Readonly<{
+  kind: "machine-barrier";
+  barrier: BattleMachineBarrier;
+}>;
+
+export type BattleBoundary =
+  | BattleDecisionBoundary
+  | BattleMachineBarrierBoundary
+  | BattleTerminalBoundary;
 
 export type BattleRngState = Readonly<{
   value: number;
@@ -107,6 +125,8 @@ export type BattleDecisionRng = Readonly<{
    * persists its value and call count.
    */
   draw(reason: string): number;
+  /** Read-only transition-local cursor; inspecting it never consumes RNG. */
+  snapshot(): BattleRngState;
 }>;
 
 export type BattleDecisionReducerContext<
@@ -140,6 +160,12 @@ export type BattleDecisionTransitionResult<
     state: BattleState<RulesState>;
     events: readonly BattleKernelSemanticEvent[];
     nextRequest: BattleDecisionRequest;
+  }>
+  | Readonly<{
+    kind: "machine-barrier";
+    state: BattleState<RulesState>;
+    events: readonly BattleKernelSemanticEvent[];
+    barrier: BattleMachineBarrier;
   }>
   | Readonly<{
     kind: "terminal";
@@ -417,6 +443,52 @@ function outcomeAt(value: unknown, path: string): BattleOutcome {
   return value;
 }
 
+function nonEmptyStringAt(value: unknown, path: string): string {
+  if (typeof value !== "string" || value.length === 0) {
+    return fail(path, "a non-empty string", value);
+  }
+  return value;
+}
+
+function machineBarrierAt(value: unknown, path: string): BattleMachineBarrier {
+  const barrier = recordAt(value, path);
+  exactKeys(
+    barrier,
+    [
+      "kind",
+      "entryLabel",
+      "programCounter",
+      "opcodeId",
+      "opcodeName",
+      "dispatcher",
+      "instructionsExecuted",
+    ],
+    path,
+  );
+  if (barrier.kind !== "battle-script") {
+    return fail(`${path}.kind`, "battle-script", barrier.kind);
+  }
+  return Object.freeze({
+    kind: "battle-script",
+    entryLabel: nonEmptyStringAt(barrier.entryLabel, `${path}.entryLabel`),
+    programCounter: integerAt(
+      barrier.programCounter,
+      0,
+      U32_MAX,
+      `${path}.programCounter`,
+    ),
+    opcodeId: integerAt(barrier.opcodeId, 0, 0xff, `${path}.opcodeId`),
+    opcodeName: nonEmptyStringAt(barrier.opcodeName, `${path}.opcodeName`),
+    dispatcher: nonEmptyStringAt(barrier.dispatcher, `${path}.dispatcher`),
+    instructionsExecuted: integerAt(
+      barrier.instructionsExecuted,
+      0,
+      Number.MAX_SAFE_INTEGER,
+      `${path}.instructionsExecuted`,
+    ),
+  });
+}
+
 function boundaryAt(value: unknown, path: string): BattleBoundary {
   const boundary = recordAt(value, path);
   if (boundary.kind === "decision-required") {
@@ -433,7 +505,18 @@ function boundaryAt(value: unknown, path: string): BattleBoundary {
       outcome: outcomeAt(boundary.outcome, `${path}.outcome`),
     });
   }
-  return fail(`${path}.kind`, "decision-required or terminal", boundary.kind);
+  if (boundary.kind === "machine-barrier") {
+    exactKeys(boundary, ["kind", "barrier"], path);
+    return Object.freeze({
+      kind: "machine-barrier",
+      barrier: machineBarrierAt(boundary.barrier, `${path}.barrier`),
+    });
+  }
+  return fail(
+    `${path}.kind`,
+    "decision-required, machine-barrier, or terminal",
+    boundary.kind,
+  );
 }
 
 function stateAt<RulesState extends BattleJsonObject>(
@@ -623,6 +706,11 @@ export function submitBattleDecision<
       `Battle is already terminal with outcome ${state.boundary.outcome}`,
     );
   }
+  if (state.boundary.kind === "machine-barrier") {
+    throw new Error(
+      `Battle is stopped at machine barrier ${state.boundary.barrier.opcodeName}`,
+    );
+  }
   if (typeof reducer !== "function") {
     return fail("Battle decision reducer", "a function", reducer);
   }
@@ -642,6 +730,9 @@ export function submitBattleDecision<
       rngValue = advanceRngValue(rngValue);
       rngCalls += 1;
       return (rngValue >>> 16) & 0xffff;
+    },
+    snapshot(): BattleRngState {
+      return Object.freeze({ value: rngValue, calls: rngCalls });
     },
   });
 
@@ -694,17 +785,26 @@ export function submitBattleDecision<
     boundary,
   }, "Battle state");
 
-  return boundary.kind === "decision-required"
-    ? Object.freeze({
+  if (boundary.kind === "decision-required") {
+    return Object.freeze({
       kind: "decision-required",
       state: nextState,
       events,
       nextRequest: boundary.request,
-    })
-    : Object.freeze({
+    });
+  }
+  if (boundary.kind === "machine-barrier") {
+    return Object.freeze({
+      kind: "machine-barrier",
+      state: nextState,
+      events,
+      barrier: boundary.barrier,
+    });
+  }
+  return Object.freeze({
       kind: "terminal",
       state: nextState,
       events,
       outcome: boundary.outcome,
-    });
+  });
 }

@@ -229,7 +229,15 @@ describe("battle-level decision boundary ABI", () => {
     });
     try {
       const reducer: BattleDecisionReducer<FixtureRules> = (context) => {
+        expect(context.rng.snapshot()).toEqual({
+          value: 0x1234_5678,
+          calls: 0,
+        });
         const accuracy = context.rng.draw("accuracy");
+        expect(context.rng.snapshot()).toEqual({
+          value: advanceRngValue(0x1234_5678),
+          calls: 1,
+        });
         const damage = context.rng.draw("damage");
         return {
           rules: {
@@ -257,6 +265,56 @@ describe("battle-level decision boundary ABI", () => {
     } finally {
       ambient.mockRestore();
     }
+  });
+
+  it("returns, serializes, and refuses decision submission at an explicit machine barrier", () => {
+    const barrierReducer: BattleDecisionReducer<FixtureRules> = (context) => ({
+      rules: context.rules,
+      events: [],
+      boundary: {
+        kind: "machine-barrier",
+        barrier: {
+          kind: "battle-script",
+          entryLabel: "BattleScript_MoveUsedIsAsleep",
+          programCounter: 116,
+          opcodeId: 46,
+          opcodeName: "B_SCR_OP_SETBYTE",
+          dispatcher: "Cmd_setbyte",
+          instructionsExecuted: 67,
+        },
+      },
+    });
+    const result = submitBattleDecision(fixtureState(), {
+      requestId: 7,
+      side: "player",
+      decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+    }, barrierReducer);
+
+    expect(result).toMatchObject({
+      kind: "machine-barrier",
+      barrier: {
+        kind: "battle-script",
+        opcodeId: 46,
+        opcodeName: "B_SCR_OP_SETBYTE",
+      },
+    });
+    expect(Object.isFrozen(result.state.boundary)).toBe(true);
+    if (result.state.boundary.kind !== "machine-barrier") {
+      throw new Error("expected machine barrier");
+    }
+    expect(Object.isFrozen(result.state.boundary.barrier)).toBe(true);
+    const restored = parseBattleState(serializeBattleState(result.state));
+    expect(restored).toEqual(result.state);
+    expect(() =>
+      submitBattleDecision(
+        restored as BattleState<FixtureRules>,
+        {
+          requestId: 7,
+          side: "player",
+          decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+        },
+        barrierReducer,
+      )).toThrow(/machine barrier/);
   });
 
   it("publishes legal player, trainer, voluntary-switch, and forced-switch shapes", () => {
