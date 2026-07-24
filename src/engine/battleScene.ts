@@ -14195,20 +14195,53 @@ export function renderSceneOnMovePresentation(
         },
       );
     }
-    drawSpriteSheet(
-      fb,
-      playerToOpponent ? dugtrioFrontSprite.tileset : arcanineFrontSprite.tileset,
-      playerToOpponent ? dugtrioFrontSprite.palette : arcanineFrontSprite.palette,
-      144,
-      playerToOpponent ? 21 : 10,
-    );
-    drawSpriteSheet(
-      fb,
-      playerToOpponent ? arcanineBackSprite.tileset : dugtrioBackSprite.tileset,
-      playerToOpponent ? arcanineBackSprite.palette : dugtrioBackSprite.palette,
-      40,
-      playerToOpponent ? 54 : 59,
-    );
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb,
+        dugtrioFrontSprite.tileset,
+        dugtrioFrontSprite.palette,
+        144,
+        21,
+      );
+      if (!view.attackerAffine.invisible) {
+        drawSpriteSheetAffineStretch(
+          fb,
+          arcanineBackSprite.tileset,
+          arcanineBackSprite.palette,
+          40,
+          54,
+          view.attackerAffine.xScale,
+          view.attackerAffine.yScale,
+          view.attackerAffine.y2,
+          { r: 0, g: 0, b: 0 },
+          0,
+          view.attackerAffine.xScale !== 256 || view.attackerAffine.yScale !== 256,
+        );
+      }
+    } else {
+      if (!view.attackerAffine.invisible) {
+        drawSpriteSheetAffineStretch(
+          fb,
+          arcanineFrontSprite.tileset,
+          arcanineFrontSprite.palette,
+          144,
+          10,
+          view.attackerAffine.xScale,
+          view.attackerAffine.yScale,
+          view.attackerAffine.y2,
+          { r: 0, g: 0, b: 0 },
+          0,
+          view.attackerAffine.xScale !== 256 || view.attackerAffine.yScale !== 256,
+        );
+      }
+      drawSpriteSheet(
+        fb,
+        dugtrioBackSprite.tileset,
+        dugtrioBackSprite.palette,
+        40,
+        59,
+      );
+    }
     if (playerToOpponent) {
       drawSendOutHealthbox(
         fb,

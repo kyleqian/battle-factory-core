@@ -80,14 +80,30 @@ describe("Extreme Speed source reducers", () => {
 
   it("keeps the attacker affine program pure and immutable", () => {
     const before = extremeSpeedAttackerAffineAtAge(87);
-    expect(before).toEqual({ xScale: 256, yScale: 256, invisible: false });
-    expect(extremeSpeedAttackerAffineAtAge(88)).toEqual({
+    expect(before).toEqual({ xScale: 256, yScale: 256, y2: 0, invisible: false });
+    expect(extremeSpeedAttackerAffineAtAge(90, 2)).toEqual({
       xScale: 352, yScale: 243, invisible: false,
+      y2: -1,
     });
-    expect(extremeSpeedAttackerAffineAtAge(95)).toEqual({
-      xScale: 1024, yScale: 152, invisible: false,
+    expect(extremeSpeedAttackerAffineAtAge(91, 2)).toEqual({
+      xScale: 448, yScale: 230, invisible: false,
+      y2: -3,
     });
-    expect(extremeSpeedAttackerAffineAtAge(96).invisible).toBe(true);
+    expect(extremeSpeedAttackerAffineAtAge(95, 2)).toEqual({
+      xScale: 832, yScale: 178, invisible: false,
+      y2: -13,
+    });
+    expect(extremeSpeedAttackerAffineAtAge(95, 6)).toEqual({
+      xScale: 832, yScale: 178, invisible: false,
+      y2: -11,
+    });
+    expect(extremeSpeedAttackerAffineAtAge(96, 2)).toEqual({
+      xScale: 928, yScale: 165, invisible: false, y2: -16,
+    });
+    expect(extremeSpeedAttackerAffineAtAge(97, 6)).toEqual({
+      xScale: 1024, yScale: 152, invisible: false, y2: -17,
+    });
+    expect(extremeSpeedAttackerAffineAtAge(98).invisible).toBe(true);
     expect(extremeSpeedAttackerAffineAtAge(87)).toEqual(before);
   });
 
