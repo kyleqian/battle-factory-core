@@ -10,7 +10,9 @@ import {
   GROVYLE_TO_ONIX_FIRE_PUNCH_PRESENTATION,
   GROVYLE_TO_ONIX_FIRE_PUNCH_PROFILE,
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+  ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE,
   ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
+  sceneOnFaintAttackView,
   sceneOnFirePunchView,
 } from "../src/engine/sceneOnPresentation.ts";
 
@@ -129,6 +131,30 @@ describe("relative Battle Scene ON move presentation", () => {
     expect(sceneOnFirePunchView({ ...stage, age: 148 }).burnFlames.length).toBeGreaterThan(0);
     expect(stage.config.resolutionProfile).toEqual(profileBefore);
     expect(stage.config.resolutionProfile).toBe(GROVYLE_TO_ONIX_FIRE_PUNCH_PROFILE);
+  });
+
+  it("applies FAINT ATTACK's immutable profile to player-side geometry", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "FAINT_ATTACK",
+      ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+      ...ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE,
+    });
+    const profileBefore = structuredClone(stage.config);
+    const firstLunge = sceneOnFaintAttackView({ ...stage, age: 44 });
+    expect(firstLunge.attacker.species).toBe("ONIX");
+    expect(firstLunge.target.species).toBe("GROVYLE");
+    expect(firstLunge.attackerOffset).toEqual({ x2: 3, y2: 1 });
+    expect(firstLunge.attackerEva).toBe(16);
+    expect(sceneOnFaintAttackView({ ...stage, age: 45 }).attackerEva).toBe(15);
+    expect(sceneOnFaintAttackView({ ...stage, age: 87 })).toMatchObject({
+      targetShakeX2: -2,
+      hitsplatVisible: true,
+    });
+    expect(sceneOnFaintAttackView({ ...stage, age: 184 }).background).toEqual({
+      background: "dark",
+      bldy: 1,
+    });
+    expect(stage.config).toEqual(profileBefore);
   });
 
   it("rejects invalid side, geometry, and HP-profile inputs", () => {

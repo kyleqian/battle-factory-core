@@ -35,23 +35,24 @@ remainder.
 
 ## Current handoff
 
-- **State:** FIRE_PUNCH is the first Level 50 move promoted to `exact`.
-  Coverage is now **1 exact / 11 partial / 264 unsupported**; FAINT ATTACK is
-  first in the remaining queue.
-- **Did:** closed canonical turn16 frames **21397–21405** by removing an
-  implicit lethal-profile default from the shared faint projection. Those
-  nine frames begin at FIRE_PUNCH age 227, where the default had leaked Turn
-  17's already-burned faint state into Turn 16 and prematurely replaced the
-  opponent healthbox's fixed 32×8 HP slot with BRN (**183 px**, bbox
-  `x=20..51,y=30..37`). Faint rendering now consumes the same explicit
-  immutable resolution profile as the cast; the nonlethal profile has no
-  faint projection.
-- **Evidence:** turn16 rungs 3–5 are **236/236**, **155/155**, **175/175**;
-  turn17 rungs 4–5 are **200/200**, **113/113**; portable ONIX→GROVYLE is
-  **225/225** and GROVYLE→ONIX is **277/277**. All are complete dense
-  Scene-ON windows through the shared seam with both singles orientations,
-  non-burn, burn, already-burned, nonlethal, and lethal outcomes represented.
-- **Next:** work FAINT ATTACK's canonical-clock extraction and opposite-side
-  portability without reopening parked register-visibility ISSUE #38.
-  No outcome/RNG/facility state, absolute tick, framebuffer lookup, captured
-  oracle asset, or per-frame table was added.
+- **State:** FAINT ATTACK's reusable body and both singles orientations are
+  green, but it remains `partial` solely because parked register-visibility
+  ISSUE #38 is still open. Coverage stays **1 exact / 11 partial / 264
+  unsupported**.
+- **Did:** extracted the source/task timings into an explicit immutable
+  relative profile and extended the shared Scene-ON seam for BG_DARK, the
+  side-respecting `(18,6,1,3)` ellipse, both alpha tasks, animation-1
+  hitsplat, and `ShakeMon2`. A synthetic stock-controller stage changes only
+  ONIX's loaded move/PP slot and exercises player-back ONIX → opponent-front
+  GROVYLE across complete ages **0–220**.
+- **Evidence:** portable oracle frames **2344–2564** are **221/221** exact.
+  Canonical turn16 rung2a and turn17 rung2 remain **221/221** each; FIRE PUNCH
+  portable controls remain **225/225** and **277/277**. Raw oracle RGB stays
+  temp-only. The staged stock outcome is 143→129 after the owned body and is
+  not calculated or mutated by the presentation seam.
+- **Next:** do not reopen or patch ISSUE #38; FAINT ATTACK can become `exact`
+  only if a general cycle/register-queue model resolves its single +30
+  delayed-control frame. The next independently actionable queue mechanism is
+  ROCK SLIDE portability/opposite-side geometry. No absolute tick,
+  framebuffer lookup, captured asset, per-frame table, outcome/RNG/turn, or
+  facility mutation was added.

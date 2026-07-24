@@ -1,0 +1,41 @@
+{
+  "schema": "scene-on-portable-compare/v1",
+  "oracleProfile": "battle-scene-on",
+  "probe": "tools/probe/stage-fire-punch-portable-on.py",
+  "probeArguments": ["player", "faint-attack"],
+  "pair": "ONIX (player-back) -> GROVYLE (opponent-front)",
+  "move": "FAINT_ATTACK",
+  "appStage": {
+    "id": "faint-attack-onix-grovyle-animation-owned",
+    "oracleFrame": 2344,
+    "presentationAge": 0
+  },
+  "geometry": {
+    "attacker": {
+      "species": "ONIX",
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    },
+    "target": {
+      "species": "GROVYLE",
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 12 },
+      "animationCenter": { "x": 176, "y": 44 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "presentation": {
+    "moveTextStartAge": -24
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 143,
+    "playerStatus": "none"
+  },
+  "denseWindow": {
+    "startFrame": 2344,
+    "endFrame": 2564
+  }
+}

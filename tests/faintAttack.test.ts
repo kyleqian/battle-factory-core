@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  FAINT_ATTACK_ANIMATION_PROFILE,
   FIRE_PUNCH_REDUCER_EPOCH_AGE,
   TURN17_FIRE_PUNCH_FIRST_ANIMATION_OWNED_AGE,
   faintAttackAttackerEva,
@@ -43,6 +44,17 @@ describe("FAINT_ATTACK pure animation reducers", () => {
     expect(faintAttackAttackerOffset(73)).toEqual({ x2: 6, y2: 1 });
     expect(faintAttackAttackerOffset(74)).toEqual({ x2: 0, y2: 0 });
     expect(faintAttackAttackerOffset(75)).toEqual({ x2: 0, y2: 0 });
+  });
+
+  it("keeps the timeline immutable and mirrors only the side-respecting ellipse", () => {
+    expect(Object.isFrozen(FAINT_ATTACK_ANIMATION_PROFILE)).toBe(true);
+    expect(faintAttackAttackerOffset(44, "player")).toEqual({ x2: 3, y2: 1 });
+    expect(faintAttackAttackerOffset(73, "player")).toEqual({ x2: -7, y2: 1 });
+    expect(faintAttackAttackerOffset(74, "player")).toEqual({ x2: 0, y2: 0 });
+    expect(faintAttackBgState(184, FAINT_ATTACK_ANIMATION_PROFILE)).toEqual({
+      background: "dark",
+      bldy: 1,
+    });
   });
 
   it("pins fade-to/from-invisible coefficients and the invisible hold", () => {
