@@ -4,6 +4,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 376 — Gate-3 PLAYFAINTCRY controller command integrated
+
+- **State:** S10 Gate 3 remains open with **19** source-safe opcodes and an
+  unwired immutable controller/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `PLAYFAINTCRY` (opcode **86**): resolves its required u8
+  selector through a typed `GetBattlerForBattleScript` port, activates/marks
+  that battler pending, emits one frozen faint-cry event, and advances once.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep waitcry, faint animation, playback/pan/duration,
+  species audio, rendering, PP, rules/RNG, and other opcodes out.
+- **Notes:** exact supported IDs are
+  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/84/85/86/131/141**. Focused
+  **78/78**; Tier-1 **117 files / 1572 tests**, build, and Scene-OFF oracle
+  contract green; all six starts and four selector forms are source-pinned.
+
+---
 ## 375 — Gate-3 PLAYSE/FANFARE controller family integrated
 
 - **State:** S10 Gate 3 remains open with **18** source-safe opcodes and an
@@ -39,22 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Tier-1 **115 files / 1546 tests**, build, and Scene-OFF oracle contract
   green; sole start **2230** (`BattleScript_PrintCantEscapeFromBattle`,
   `gNoEscapeStringIds`) and opcode-17 distinction are pinned.
-
----
-## 373 — Gate-3 source-exact selection message integrated
-
-- **State:** S10 Gate 3 remains open with **15** source-safe opcodes and an
-  unwired immutable controller/scheduler/rules/RNG/source-context seam.
-- **Did:** added only `PRINTSELECTIONSTRING` (opcode 17): resolves attacker,
-  u16 string ID, and named `BattleMsgData` snapshot through an injected port;
-  unconditionally activates/marks the battler pending, emits one frozen
-  player-only event, advances, and sets `MSG_DISPLAY`. Added explicit
-  idempotent controller acknowledgement without wait/latch side effects.
-- **Next:** choose another bounded source family only when its complete rules
-  context is explicit. Keep opcode 20, selection input/completion, rendering,
-  damage, accuracy, PP, production controllers, animation, pixels, and audio
-  out of this seam.
-- **Notes:** exact supported IDs are
-  **16/17/18/37/38/39/40/57/58/60/61/62/65/131/141**. Focused **36/36**;
-  Tier-1 **113 files / 1526 tests**, build, and Scene-OFF oracle contract
-  green; no RNG/rules/presentation or pixel change.
