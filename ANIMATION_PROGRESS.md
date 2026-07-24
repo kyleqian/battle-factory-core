@@ -44,28 +44,19 @@ remainder.
 
 ## Current handoff
 
-- **State:** **11 exact / 3 partial / 262 unsupported**. DRAGON_BREATH stays
-  partial. Its complete source move-body component is now portable in both
-  Level-50 orientations, and a shared-seam framebuffer compositor exists, but
-  neither portable move-body framebuffer window is exact.
-- **Did:** extended the eleven-spawn reducer with source-relative
-  `AnimTask_BlendBattleAnimPal` 0→9→0 palette state, paired-hold
-  `AnimTask_ShakeMon2`, and monbg acquisition/release. The dense comparator
-  now independently checks faded target palette RAM, x2, invisibility/BG
-  ownership, projectiles, and the live framebuffer. Added a presentation-only
-  ONIX→MURKROW compositor using explicit geometry/field inputs; no PP, damage,
-  paralysis, RNG, controller, turn, or facility state changed.
+- **State:** **12 exact / 2 partial / 262 unsupported**. DRAGON_BREATH is exact
+  across its complete move body in both Level-50 orientations through the
+  relative shared Scene-ON seam.
+- **Did:** repaired the shared framebuffer compositor with two source-relative
+  display latches (callback/OAM age -1, `BlendPalette` age -2), side-parametric
+  target-relative ember/attacker ordering, and the source back-pic anchor.
+  Corrected the staged Murkrow personality-derived gender input. The comparator
+  now requires both component and framebuffer exactness to pass.
 - **Evidence:** fresh wrapper-validated ON probes match **85/85** dense
-  projectile/palette/shake/monbg states in each orientation (ages -2..82).
-  The attempted framebuffer composition is honestly incomplete:
-  player-back ONIX→opponent-front MURKROW **7/85** (exact frames 395-399 and
-  460-461; first residual frame 400 is 8 pixels), opponent-front
-  ONIX→player-back MURKROW **0/85** (first residual frame 449 is 1506 pixels).
-  Focused tests and build are green.
-- **Next:** fix the portable affine ember rasterization/translated clipping
-  beginning at player frame 400, then the opposite-side base composition
-  (terrain cutoff/front-back sprite and healthbox ordering) already visible at
-  frame 449. Retain partial until both move-body framebuffer windows are
-  complete. Generic hit, HP drain, paralysis/result printers, command release,
-  cleanup, and menu handoff belong to independent presentation tracks and are
-  explicitly outside this move's acceptance. DIVE remains unsupported.
+  projectile/palette/shake/monbg states **and 85/85 live framebuffers** in each
+  orientation: player-back ONIX→opponent-front MURKROW frames 395-479 and
+  opponent-front ONIX→player-back MURKROW frames 449-533. Focused **20/20**,
+  full Tier-1, build, coverage, ON info, and diff check are green.
+- **Next:** keep generic hit, HP drain, paralysis/result printers, command
+  release, cleanup, and menu handoff in their independent presentation tracks.
+  DIVE and BIND remain unsupported/partial respectively.

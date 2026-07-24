@@ -503,7 +503,12 @@ import {
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
 import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder, type FeatherRenderSprite } from "./featherDance.ts";
-import { dragonBreathFireSprites } from "./dragonBreath.ts";
+import {
+  dragonBreathEmbersInFrontOfAttacker,
+  dragonBreathFireSprites,
+  DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG,
+  DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
+} from "./dragonBreath.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -14083,7 +14088,21 @@ export function renderSceneOnMovePresentation(
   state: SceneOnMovePresentationState,
 ): void {
   if (state.config.move === "DRAGON_BREATH") {
-    const view = sceneOnDragonBreathView(state);
+    // The portable reducer intentionally exposes the callback/OAM state read
+    // after each emulated advance. The framebuffer captured by that same
+    // advance still contains the preceding display state, so composition
+    // consumes one relative age earlier while component evidence remains on
+    // the current age.
+    const view = sceneOnDragonBreathView({
+      ...state,
+      age: state.age - DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG,
+    });
+    // BlendPalette writes after the sprite callback/OAM update and therefore
+    // reaches the captured framebuffer one additional display later.
+    const paletteBlendCoeff = sceneOnDragonBreathView({
+      ...state,
+      age: state.age - DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
+    }).targetEffect.blendCoeff;
     const playerToOpponent =
       view.attacker.species === "ONIX"
       && view.attacker.geometry.side === "player"
@@ -14117,23 +14136,32 @@ export function renderSceneOnMovePresentation(
       256,
       0,
       DRAGON_BREATH_BLEND_COLOR,
-      view.targetEffect.blendCoeff,
+      paletteBlendCoeff,
       false,
       view.targetEffect.shakeX2,
     );
-    for (const sprite of view.fireSprites) {
-      drawSpriteSheetAffineRotate(
-        fb,
-        subTileset(battleAnimSmallEmber.tileset, sprite.sheetFrame * 4, 4),
-        battleAnimSmallEmber.palette,
-        sprite.centerX,
-        sprite.centerY,
-        sprite.pa,
-        sprite.pb,
-        sprite.pc,
-        sprite.pd,
-      );
-    }
+    const drawFireSprites = () => {
+      for (const sprite of view.fireSprites) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          subTileset(battleAnimSmallEmber.tileset, sprite.sheetFrame * 4, 4),
+          battleAnimSmallEmber.palette,
+          sprite.centerX,
+          sprite.centerY,
+          sprite.pa,
+          sprite.pb,
+          sprite.pc,
+          sprite.pd,
+        );
+      }
+    };
+    // Target-relative subpriority puts opponent-origin embers in front of
+    // the opponent battler; player-origin embers remain behind their player
+    // battler. Both orders come from the same side-parametric source rule.
+    const embersInFrontOfAttacker = dragonBreathEmbersInFrontOfAttacker(
+      view.attacker.geometry.side,
+    );
+    if (!embersInFrontOfAttacker) drawFireSprites();
     drawSpriteSheet(
       fb,
       attackerSprite.tileset,
@@ -14141,6 +14169,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
+    if (embersInFrontOfAttacker) drawFireSprites();
     if (playerToOpponent) {
       drawSendOutHealthbox(
         fb,

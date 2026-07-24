@@ -20,7 +20,7 @@
     "species": "MURKROW",
     "geometry": {
       "side": "player",
-      "spriteCorner": {"x": 40, "y": 49},
+      "spriteCorner": {"x": 40, "y": 57},
       "animationCenter": {"x": 72, "y": 97},
       "battlePositionCenter": {"x": 72, "y": 80}
     }
@@ -39,11 +39,11 @@
     "playerHp": 142,
     "opponentHp": 69,
     "playerStatus": "none",
-    "playerGender": "male",
+    "playerGender": "female",
     "opponentGender": "male"
   },
   "acceptance": {
-    "status": "component-exact",
-    "result": "85/85 dense projectile/palette/shake/monbg component states; framebuffer checkpoint 0/85 exact, not accepted."
+    "status": "exact",
+    "result": "85/85 dense projectile/palette/shake/monbg component states and 85/85 dense framebuffers."
   }
 }

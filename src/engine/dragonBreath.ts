@@ -47,6 +47,10 @@ export const DRAGON_BREATH_FIRE_SPAWN_INTERVAL = 4;
 export const DRAGON_BREATH_FIRE_RENDER_LAG = 1;
 export const DRAGON_BREATH_FIRE_DURATION = 20;
 export const DRAGON_BREATH_FIRE_LIFETIME = MATRIX_A.length;
+/** Callback/OAM RAM is observed one age ahead of the displayed framebuffer. */
+export const DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG = 1;
+/** BlendPalette writes reach the framebuffer one age after the OAM latch. */
+export const DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG = 2;
 /** First displayed `AnimTask_ShakeMon2` state, relative to the first ember at age 1. */
 export const DRAGON_BREATH_SHAKE_FIRST_AGE = 13;
 export const DRAGON_BREATH_SHAKE_END_AGE = 53;
@@ -61,6 +65,17 @@ export type DragonBreathTargetEffect = Readonly<{
   blendCoeff: number;
   onMonBg: boolean;
 }>;
+
+/**
+ * `create_dragon_breath_fire_sprite ANIM_TARGET, 2` is target-relative.
+ * In singles this puts opponent-origin embers in front of their attacker,
+ * while player-origin embers remain behind their attacker.
+ */
+export function dragonBreathEmbersInFrontOfAttacker(
+  attackerSide: "player" | "opponent",
+): boolean {
+  return attackerSide === "opponent";
+}
 
 /**
  * Source-shaped target presentation shared by both battle orientations.
