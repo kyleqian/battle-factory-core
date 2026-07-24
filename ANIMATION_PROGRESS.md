@@ -44,22 +44,19 @@ remainder.
 
 ## Current handoff
 
-- **State:** **15 exact / 1 partial / 260 unsupported**. EXTREME SPEED is exact
-  in both source-selected attacker orientations through its complete retained
-  move-owned source window.
-- **Did:** implemented all three animation-3 mon-edge hitsplats with frozen
-  source geometry, reciprocal affine matrix, live 12:8 alpha, and OAM ordering;
-  corrected opponent-target `monbg` displacement by preserving pret's unsigned
-  +6/-6 pulses; aligned BATTLER_COORD dust geometry, final-frame destruction,
-  both blink/hold epochs, fourteen-toggle reappearance, and restore display
-  latches. All clocks remain component-relative.
-- **Evidence:** opponent-front ARCANINE → player-back DUGTRIO is **303/303 RGB**
-  (frames 91–393, animation ages 52–354); player-back ARCANINE →
-  opponent-front DUGTRIO is **303/303 RGB** (frames 87–389, animation ages
-  52–354 after the four-frame printer offset). QUICK ATTACK remains
-  **219/219 + 214/214** and AERIAL ACE **236/236 + 232/232**. Focused tests pin
-  the shared reducer/display epochs; comparator diagnostics now retain the
-  first mismatch images and bounds when a regression occurs.
-- **Next:** return to the supervisor; EXTREME SPEED has no known move-owned
-  remainder. Generic hit/HP/result/status/controller tails remain independently
-  owned and were not promoted by this move evidence.
+- **State:** **15 exact / 2 partial / 259 unsupported**. FLAMETHROWER has a
+  complete source-relative body in both orientations but remains honestly
+  partial for equal-priority flame overlap ordering.
+- **Did:** implemented the 22-spawn `gFlamethrowerFlameSpriteTemplate` sine
+  beam, shared timer phase, 30-step fixed translation, three-frame sheet loop,
+  both `AnimTask_ShakeMon` programs, alpha/monbg epochs, and teardown through
+  the relative Scene-ON seam. DRAGON BREATH's reducer/compositor is unchanged.
+- **Evidence:** both orientations match every RAM/OAM component frame
+  (**126/126 + 126/126**). Complete dense RGB windows are **115/126**
+  player-back ONIX → opponent-front MURKROW and **117/126** opponent-front
+  ONIX → player-back MURKROW. The 20 residual frames contain only **1–25 px**
+  where same-priority flame sprites overlap; all other pixels and epochs match.
+- **Next:** derive persistent `sSpriteOrder` slot history for the overlapping
+  equal-priority flame OBJs. Do not promote exact from the stateless
+  center-y/spawn-index order; generic hit/HP/result/controller tails remain
+  independently owned.

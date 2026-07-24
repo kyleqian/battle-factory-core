@@ -94,6 +94,13 @@ import {
   type DragonBreathTargetEffect,
 } from "./dragonBreath.ts";
 import {
+  flamethrowerBattlerEffectAtAge,
+  flamethrowerFlamesAtAge,
+  type FlamethrowerBattlerEffect,
+  type FlamethrowerFlame,
+  type FlamethrowerGeometry,
+} from "./flamethrower.ts";
+import {
   bindAnimationAtAge,
   type BindAnimationProfile,
   type BindAnimationState,
@@ -204,6 +211,15 @@ export interface SceneOnDragonBreathConfig {
   /** Immutable staged field values; this seam never calculates damage. */
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   /** Relative script clock; damage, status, RNG, PP, and controller stay external. */
+  readonly animationAgeOffset?: number;
+}
+
+export interface SceneOnFlamethrowerConfig {
+  readonly move: "FLAMETHROWER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<FlamethrowerGeometry>;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   readonly animationAgeOffset?: number;
 }
 
@@ -469,6 +485,7 @@ export type SceneOnMoveConfig =
   | SceneOnBounceConfig
   | SceneOnFlyConfig
   | SceneOnDragonBreathConfig
+  | SceneOnFlamethrowerConfig
   | SceneOnBindConfig;
 
 export interface SceneOnMovePresentationState<
@@ -682,6 +699,15 @@ export interface SceneOnDragonBreathView {
   readonly targetEffect: DragonBreathTargetEffect;
 }
 
+export interface SceneOnFlamethrowerView {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly flames: readonly FlamethrowerFlame[];
+  readonly battlerEffect: FlamethrowerBattlerEffect;
+}
+
 export interface SceneOnBindView extends BindAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -840,6 +866,23 @@ export function sceneOnDragonBreathView(
       state.config.animationProfile,
     ),
     targetEffect: dragonBreathTargetEffectAtAge(animationAge),
+  };
+}
+
+export function sceneOnFlamethrowerView(
+  state: SceneOnMovePresentationState,
+): SceneOnFlamethrowerView {
+  if (state.config.move !== "FLAMETHROWER") {
+    throw new Error(`expected FLAMETHROWER presentation, got ${state.config.move}`);
+  }
+  const animationAge = state.age + (state.config.animationAgeOffset ?? 0);
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    flames: flamethrowerFlamesAtAge(animationAge, state.config.animationProfile),
+    battlerEffect: flamethrowerBattlerEffectAtAge(animationAge),
   };
 }
 

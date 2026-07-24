@@ -1,0 +1,41 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-flamethrower-player-onix-opponent-murkrow.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "ONIX (player-back) -> MURKROW (opponent-front)",
+  "move": "FLAMETHROWER",
+  "denseWindow": {"startFrame": 395, "endFrame": 520},
+  "appStage": {"firstFramePresentationAge": -11},
+  "attacker": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 48},
+      "animationCenter": {"x": 72, "y": 88},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "target": {
+    "species": "MURKROW",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 19},
+      "animationCenter": {"x": 176, "y": 51},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "animationProfile": {
+    "attackerCenter": {"x": 72, "y": 88},
+    "targetCenter": {"x": 176, "y": 51},
+    "attackerSide": "player",
+    "flameSubpriority": 27
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 142,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  }
+}
