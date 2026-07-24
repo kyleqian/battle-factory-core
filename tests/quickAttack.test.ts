@@ -32,7 +32,9 @@ describe("portable QUICK ATTACK presentation", () => {
       { x2: 16, y2: 11 },
       { x2: 24, y2: 6 },
     ]);
-    expect(quickAttackTravelAtAge(52, "player")).toEqual({ x2: 17, y2: 2 });
+    expect(quickAttackTravelAtAge(52, "player")).toEqual({ x2: 16, y2: 2 });
+    expect(quickAttackTravelAtAge(54, "player")).toEqual({ x2: 16, y2: 11 });
+    expect(quickAttackTravelAtAge(56, "player")).toEqual({ x2: -17, y2: 11 });
     expect(quickAttackTravelAtAge(57, "player")).toEqual({ x2: -24, y2: 6 });
     expect(quickAttackTravelAtAge(58, "opponent")).toEqual({ x2: 0, y2: 0 });
   });
@@ -57,6 +59,29 @@ describe("portable QUICK ATTACK presentation", () => {
       { slot: 3, x2: 0, y2: 0 },
     ]);
     expect(quickAttackAfterimagesAtAge(70, "opponent")).toEqual([]);
+    expect(quickAttackAfterimagesAtAge(53, "player")).toEqual([
+      { slot: 3, x2: 16, y2: 2 },
+    ]);
+  });
+
+  it("pins the opposite monbg/TraceMon/target/impact ordering boundary", () => {
+    expect(quickAttackAnimationAtAge(52, "player")).toEqual({
+      attackerOffset: { x2: 16, y2: 2 },
+      afterimages: [],
+      targetShakeX2: 0,
+      targetBaseX2: 0,
+      impactVisible: false,
+    });
+    expect(quickAttackAnimationAtAge(58, "player")).toEqual({
+      attackerOffset: { x2: 0, y2: 0 },
+      afterimages: [
+        { slot: 3, x2: 16, y2: 2 },
+        { slot: 4, x2: -24, y2: 6 },
+      ],
+      targetShakeX2: 5,
+      targetBaseX2: -1,
+      impactVisible: true,
+    });
   });
 
   it("pins the shared impact lifetime and source shake display latch", () => {

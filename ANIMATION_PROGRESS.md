@@ -38,20 +38,21 @@ remainder.
 
 ## Current handoff
 
-- **State:** **6 exact / 7 partial / 263 unsupported**. QUICK ATTACK's required
-  player-back orientation is staged and controller-complete, but a bounded
-  opposite-side BG/OBJ body overlap keeps the move partial.
-- **Did:** staged legal Level-50 player-back PIDGEOTTO→opponent-front ONIX
-  through mechanicLab with `ppUps:[0,0,0,0]`; generalized side geometry,
-  back/front assets, healthbox orientation, immutable 117→111 display drain,
-  result, release, and `gCurrentMove` cleanup. Tier-1 pins geometry, side
-  travel, controller-relative clocks, and immutable inputs.
-- **Evidence:** opposite prefix frames **46-86 / ages 7-47 are 41/41 exact**;
-  the post-body/controller window frames **102-259 / ages 63-220 is 158/158
-  exact**, through `MOVE_NONE` at frame 259. The attempted contiguous 46-259
-  window is **200/214**; all 14 diffs are frames 87-99 and 101, confined to
-  the player `monbg` real sprite, blended trace OBJs, impact/target ordering,
-  with frame 100 exact. Established opponent-front QUICK remains **219/219**.
-- **Next:** reproduce frames **87-101** from `monbg` BG1 scroll plus
-  `AnimTask_TraceMonBlended` player-back OBJ priority/lives, then rerun the
-  contiguous 214-frame window before promoting QUICK ATTACK to exact.
+- **State:** **7 exact / 6 partial / 263 unsupported**. QUICK ATTACK is exact
+  in both required attacker-side orientations through the shared Scene-ON
+  seam; AERIAL ACE remains the next fast-contact acceptance unit.
+- **Did:** replaced the invalid mirrored player travel with the source's
+  signed fixed-point ellipse values: `Sin(angle,+24)>>8` yields
+  `16/24/16/0/-17/-24`, while the opponent's `-24` amplitude retains
+  `-17/-24/-17/0/16/24`. The corrected player offsets also drive the
+  TraceMon clone captured at the first travel position. Tier-1 pins both
+  asymmetric tables and the monbg→TraceMon→target/impact ordering boundary.
+- **Evidence:** contiguous player-back PIDGEOTTO→opponent-front ONIX frames
+  **46-259 / ages 7-220 are 214/214 exact**, preserving the independent
+  kickoff **41/41** and controller suffix **158/158**, `ppUps:[0,0,0,0]`,
+  immutable 117→111 outcome, exact command release, and `MOVE_NONE` cleanup.
+  Opponent-front QUICK remains **219/219**. Canonical AERIAL **93/93**;
+  FEATHER **400/400 + 400/400**; FIRE **225/225 + 277/277**; ICE
+  **462/462 + 1294/1294** all regress exact.
+- **Next:** stage AERIAL ACE portability/opposite attacker side without
+  assuming QUICK ATTACK's independent cutting-slice/palette choreography.
