@@ -13846,7 +13846,7 @@ export function renderSceneOnMovePresentation(
       onixBackSprite.tileset,
       onixBackSprite.palette,
       attacker.geometry.spriteCorner.x,
-      attacker.geometry.spriteCorner.y,
+      attacker.geometry.spriteCorner.y + view.actionMenu.battlerY2,
     );
     const ice = { r: 99, g: 214, b: 255 };
     const targetPalette = overlay.targetIceCoeff === 0
@@ -13942,6 +13942,8 @@ export function renderSceneOnMovePresentation(
         state.config.fieldProfile.playerHp,
         state.config.fieldProfile.playerStatus,
       ),
+      0,
+      view.actionMenu.healthboxY2,
     );
     drawTileBg(
       fb,
@@ -13979,6 +13981,9 @@ export function renderSceneOnMovePresentation(
         line2,
         Math.min(line1.length + line2.length, view.age - textStartAge + 1),
       );
+    }
+    if (view.actionMenu.visible) {
+      drawTurn5SitrusSettledMenuChrome(fb);
     }
     return;
   }

@@ -783,6 +783,34 @@ export function menuIdleBounce(t: number): { onixY2: number; healthboxY2: number
   };
 }
 
+export interface ActionMenuDisplayTransition {
+  readonly visible: boolean;
+  readonly battlerY2: number;
+  readonly healthboxY2: number;
+}
+
+/**
+ * Generic controller-owned action-menu reveal on a presentation-relative
+ * clock. `PlayerHandleChooseAction` draws both windows atomically, and the
+ * following `HandleInputChooseAction` calls restart the two standard bounce
+ * effects. Re-anchor the already source/RAM-proved first-menu reducer rather
+ * than coupling a staged move to an absolute battle tick.
+ */
+export function actionMenuDisplayAtAge(
+  age: number,
+  revealAge: number,
+): ActionMenuDisplayTransition {
+  if (age < revealAge) {
+    return { visible: false, battlerY2: 0, healthboxY2: 0 };
+  }
+  const bounce = menuIdleBounce(MENU_DRAW_TICK + age - revealAge);
+  return {
+    visible: true,
+    battlerY2: bounce.onixY2,
+    healthboxY2: bounce.healthboxY2,
+  };
+}
+
 // --- Slice 6: the FIGHT (move-select) submenu window (docs/battle-turn-
 // notes.md §11, the twice-run 0-mismatch groundtruth traces
 // battle1-fight-submenu-nav.json/-idle.json). Extends the settled

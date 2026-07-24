@@ -19,9 +19,11 @@ import {
   type FaintAttackBgState,
 } from "./faintAttack.ts";
 import {
+  actionMenuDisplayAtAge,
   doubleTeamAnimationAtAge,
   genericHitReactionAtAge,
   rockSlideAnimationAtAge,
+  type ActionMenuDisplayTransition,
   type DoubleTeamAnimationProfile,
   type RockSlideAnimationProfile,
 } from "./battleMenu.ts";
@@ -75,6 +77,10 @@ export interface SceneOnIcePunchConfig {
     /** Controller-owned age at which the completed result line is cleared. */
     readonly effectivenessTextEndAge?: number;
   };
+  /** Immutable controller display timing; no action selection is owned here. */
+  readonly controllerDisplayProfile?: Readonly<{
+    readonly actionMenuRevealAge: number;
+  }>;
   /** Relative first printer age; negative means text predates this seam. */
   readonly moveTextStartAge?: number;
 }
@@ -195,6 +201,7 @@ export interface SceneOnIcePunchView {
   readonly healthboxY2: number;
   readonly targetInvisible: boolean;
   readonly displayedTargetHp: number;
+  readonly actionMenu: ActionMenuDisplayTransition;
 }
 
 export interface SceneOnFaintAttackView {
@@ -365,6 +372,13 @@ export function sceneOnIcePunchView(
       state.age,
       state.config.hpDrainProfile,
     ),
+    actionMenu:
+      state.config.controllerDisplayProfile === undefined
+        ? { visible: false, battlerY2: 0, healthboxY2: 0 }
+        : actionMenuDisplayAtAge(
+            state.age,
+            state.config.controllerDisplayProfile.actionMenuRevealAge,
+          ),
     ...hitReaction,
   };
 }

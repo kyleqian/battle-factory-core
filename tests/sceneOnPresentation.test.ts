@@ -25,6 +25,7 @@ import {
   sceneOnFirePunchView,
   sceneOnRockSlideView,
 } from "../src/engine/sceneOnPresentation.ts";
+import { actionMenuDisplayAtAge } from "../src/engine/battleMenu.ts";
 
 function createPortableStage() {
   return createSceneOnMovePresentation({
@@ -35,6 +36,34 @@ function createPortableStage() {
 }
 
 describe("relative Battle Scene ON move presentation", () => {
+  it("restarts the generic action-menu bounce from a relative reveal age", () => {
+    expect(actionMenuDisplayAtAge(362, 363)).toEqual({
+      visible: false,
+      battlerY2: 0,
+      healthboxY2: 0,
+    });
+    expect(actionMenuDisplayAtAge(363, 363)).toEqual({
+      visible: true,
+      battlerY2: 0,
+      healthboxY2: 0,
+    });
+    expect(actionMenuDisplayAtAge(364, 363)).toEqual({
+      visible: true,
+      battlerY2: 0,
+      healthboxY2: 1,
+    });
+    expect(actionMenuDisplayAtAge(374, 363)).toEqual({
+      visible: true,
+      battlerY2: 1,
+      healthboxY2: 0,
+    });
+    expect(actionMenuDisplayAtAge(428, 363)).toEqual({
+      visible: true,
+      battlerY2: 1,
+      healthboxY2: 2,
+    });
+  });
+
   it("drains only immutable, controller-supplied ICE PUNCH HP", () => {
     const profile = { startHp: 143, endHp: 112, firstDisplayedAge: 223 };
     expect(displayedHpAfterDamage(222, profile)).toBe(143);

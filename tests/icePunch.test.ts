@@ -120,6 +120,9 @@ describe("ICE_PUNCH source-composed presentation components", () => {
         effectivenessTextStartAge: 259,
         effectivenessTextEndAge: 356,
       }),
+      controllerDisplayProfile: Object.freeze({
+        actionMenuRevealAge: 363,
+      }),
       moveTextStartAge: -25,
     });
     const before = structuredClone(stage.config);
@@ -132,6 +135,10 @@ describe("ICE_PUNCH source-composed presentation components", () => {
     expect(sceneOnIcePunchView({ ...stage, age: 35 }).crystals).toHaveLength(0);
     expect(sceneOnIcePunchView({ ...stage, age: 36 }).crystals).toHaveLength(4);
     expect(stage.config.hpDrainProfile.effectivenessTextEndAge).toBe(356);
+    expect(sceneOnIcePunchView({ ...stage, age: 362 }).actionMenu.visible)
+      .toBe(false);
+    expect(sceneOnIcePunchView({ ...stage, age: 363 }).actionMenu.visible)
+      .toBe(true);
     expect(stage.config).toEqual(before);
   });
 

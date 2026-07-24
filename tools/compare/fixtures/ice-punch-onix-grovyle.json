@@ -31,7 +31,7 @@
   },
   "denseWindow": {
     "startFrame": 2339,
-    "endFrame": 2701
+    "endFrame": 2800
   },
   "fieldProfile": {
     "playerHp": 117,
@@ -44,5 +44,8 @@
     "firstDisplayedAge": 223,
     "effectivenessTextStartAge": 259,
     "effectivenessTextEndAge": 356
+  },
+  "controllerDisplayProfile": {
+    "actionMenuRevealAge": 363
   }
 }

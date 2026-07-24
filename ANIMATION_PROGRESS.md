@@ -38,19 +38,17 @@ remainder.
 
 ## Current handoff
 
-- **State:** **4 exact / 9 partial / 263 unsupported**. The source graph covers
-  all **354** moves through **935** reusable components and **3,190**
-  dependency edges.
-- **Did:** extended ICE PUNCH through the controller's source-relative result-
-  text clear and seven-frame blank message-box hold. The staged outcome stays
-  status-free; animation neither rolls nor applies it. `gCurrentMove` clears
-  at frame 2692 and the result line clears at frame 2695 without field mutation.
-- **Evidence:** `ice-punch-onix-grovyle.json` is **363/363 exact** at oracle
-  frames 2339-2701 / ages 0-362, contiguous through the full generic hit
-  reaction, HP drain, atomic controller write, result message, no-freeze
-  secondary path, move-command clear, and blank result-window transition.
-  FIRE PUNCH portable **225/225** remains exact.
-- **Next:** continue ICE PUNCH only from frame 2702 through the next
-  controller display transition, then audit any evidence-required
-  geometry/orientation variant before exact promotion. Do not claim THUNDER
-  PUNCH without its own dense evidence.
+- **State:** **4 exact / 9 partial / 263 unsupported**. ICE PUNCH remains
+  partial pending an evidence-backed opposite-side/geometry audit.
+- **Did:** added a generic presentation-relative controller display profile.
+  At age 363 it atomically reveals the action menu, then re-anchors the shared
+  source/RAM-proved `DoBounceEffect` sine reducer; HP, status, outcome, RNG,
+  action selection, and turn state remain immutable external inputs.
+- **Evidence:** `ice-punch-onix-grovyle.json` is **462/462 exact** at oracle
+  frames 2339-2800 / ages 0-461, contiguous through the complete player-back
+  move/resolution window, blank hold, action-menu reveal, and a 99-frame
+  settled bounce window including healthbox `y2=2`. FIRE PUNCH portable **225/225**
+  remains exact.
+- **Next:** audit ICE PUNCH's opposite attacker side/geometry with its own
+  dense Scene-ON evidence before exact promotion. Do not claim THUNDER PUNCH
+  without its own dense evidence.

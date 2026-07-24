@@ -90,20 +90,29 @@ The same generic one-HP display reducer and message renderer already used by
 the presentation seam are driven only by immutable staged inputs.
 
 The controller tail is now dense-exact through the completed no-freeze
-secondary-effect path. The staged outcome keeps `status1 = 0`; the
-presentation does not roll or apply that outcome. The fully printed
-super-effective message remains stable while the battle script completes,
-and `gCurrentMove` clears at oracle frame 2692. Frames 2693–2694 prove the
-settled post-command boundary. At frame 2695 / age 356 the controller clears
-the result line, leaving the standard message box blank for seven displayed
-frames. A reusable profile-relative text-clear age owns that transition; it
-does not mutate move or field state. The first uncovered frame, 2702,
-introduces the next controller-owned display transition.
+secondary-effect path and the next action-menu display transition. The staged
+outcome keeps `status1 = 0`; the presentation does not roll or apply that
+outcome. The fully printed super-effective message remains stable while the
+battle script completes, and `gCurrentMove` clears at oracle frame 2692.
+Frames 2693–2694 prove the settled post-command boundary. At frame 2695 /
+age 356 the controller clears the result line, leaving the standard message
+box blank for seven displayed frames.
+
+Frame 2702 / age 363 atomically reveals the normal action windows ("What will
+ONIX do?" and FIGHT/BAG/POKéMON/RUN), matching
+`PlayerHandleChooseAction`'s two off-screen `BattlePutTextOnWindow` calls and
+the following `HandleChooseActionAfterDma3` reveal. The next controller pass
+restarts `DoBounceEffect` for the active battler and healthbox. The portable
+adapter re-anchors the existing source/RAM-proved generic sine reducer to the
+profile's reveal age; it does not use the oracle frame number. The dense
+continuation through frame 2800 covers a 99-frame settled bounce window,
+including the rare healthbox `y2=2` state, while keeping the supplied
+117/117 player HP and already-resolved 112 target HP immutable.
 
 Therefore ICE PUNCH remains `partial`. The accepted dense window is now
-**2339–2701, 363/363 exact**. The precisely uncovered contiguous remainder
-begins at frame **2702**, plus any geometry/orientation variant required by
-source or comparison evidence.
+**2339–2800, 462/462 exact**. Its complete staged player-back move and
+controller-display window is covered; exact promotion still requires an
+evidence-backed opposite-side/geometry audit.
 
 ## THUNDER PUNCH sibling check
 

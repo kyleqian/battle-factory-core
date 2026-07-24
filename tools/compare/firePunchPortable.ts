@@ -36,6 +36,9 @@ interface PortableFixture {
     readonly effectivenessTextStartAge?: number;
     readonly effectivenessTextEndAge?: number;
   };
+  readonly controllerDisplayProfile?: {
+    readonly actionMenuRevealAge: number;
+  };
   readonly appStage: {
     readonly oracleFrame: number;
     readonly presentationAge: number;
@@ -104,6 +107,7 @@ const presentation = fixture.move === "ICE_PUNCH"
       target: presentationBattler(fixture.geometry.target),
       fieldProfile: fixture.fieldProfile!,
       hpDrainProfile: fixture.hpDrainProfile!,
+      controllerDisplayProfile: fixture.controllerDisplayProfile,
       ...fixture.presentation,
     })
   : createSceneOnMovePresentation({
