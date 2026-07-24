@@ -131,6 +131,7 @@ bin/oracle info                 # main Battle Scene OFF contract
 bin/oracle --profile battle-scene-on info
 bin/oracle example > t.json     # example trace
 bin/oracle run t.json -o ref/   # run a trace; writes PNG captures + manifest
+bin/oracle lab tools/battle-lab/factory-varied.json -o ref-lab/
 bin/oracle symbols gMain        # linker-map symbol addresses (RAM inspection aid)
 ```
 
@@ -145,6 +146,14 @@ you'll fool yourself by fitting a single endpoint. For investigation, the
 `npm run compare` command (not `bin/oracle`) accepts `--capture-range START:END`
 to replace the trace's capture list and `--summary` to print only mismatches
 plus the final result.
+
+For battle mechanics, use the semantic battle lab documented in
+`tools/battle-lab/README.md`. `factoryLegal` accepts legal trainer/set IDs and
+lets the ROM build a real Factory matchup. `mechanicLab` still starts from two
+legal three-Pokémon parties, then allowlists granular active-battler and field
+overrides so a worker can isolate a move, status, ability, item, weather, stat
+stage, or side condition. In both modes, the nested trace is normal controller
+input and the stock ROM—not the staging API—calculates every outcome.
 
 Run mGBA-backed Python probes through
 `python3 tools/run-mgba-probe.py <fresh-output.json> -- <probe command>`.
