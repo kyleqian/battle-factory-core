@@ -37,7 +37,8 @@ from pathlib import Path
 if len(sys.argv) not in (2, 3, 4, 5):
     raise SystemExit(
         f"usage: {sys.argv[0]} <fresh-output.json> [fresh-rgb-dir] "
-        "[player|opponent] [fire-punch|faint-attack|rock-slide|double-team]"
+        "[player|opponent] "
+        "[fire-punch|faint-attack|rock-slide|double-team|endeavor]"
     )
 
 OUTPUT_PATH = Path(sys.argv[1])
@@ -51,6 +52,7 @@ MOVE_IDS = {
     "faint-attack": 185,
     "rock-slide": 157,
     "double-team": 104,
+    "endeavor": 283,
 }
 if MOVE_NAME not in MOVE_IDS:
     raise SystemExit(f"unsupported staged move {MOVE_NAME!r}")
@@ -250,6 +252,7 @@ def main() -> None:
         "faint-attack": 20,
         "rock-slide": 10,
         "double-team": 15,
+        "endeavor": 5,
     }[MOVE_NAME]
     write_u16(oracle, battler_base + BATTLE_MON_MOVES + staged_slot * 2, STAGED_MOVE)
     oracle.write_u8(battler_base + BATTLE_MON_PP + staged_slot, staged_pp)
