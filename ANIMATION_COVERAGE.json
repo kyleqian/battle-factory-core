@@ -60,9 +60,9 @@
     {
       "move": "MOVE_FLY",
       "status": "partial",
-      "covered": ["opponent-front MURKROW charge and strike"],
-      "evidence": ["tools/compare/traces/turn14-fly-miss.json", "tools/compare/traces/turn15-fly-strike.json"],
-      "remaining": "Prove portability, audit player-back geometry, and retain ISSUES #34's bounded affine exclusion."
+      "covered": ["canonical opponent-front MURKROW charge (206/206 with ISSUES #34's opening exclusion) and strike (256/256)", "legal zero-PP-Up Level-50 mechanicLab two-turn staging in both orientations", "source-relative shared-seam reducer for charge disappearance/lifetime and side-parametric strike origin, Q8.8 target travel, affine matrix, impact/shake schedule, and attacker reappearance"],
+      "evidence": ["tools/compare/traces/turn14-fly-miss.json", "tools/compare/traces/turn15-fly-strike.json", "tools/battle-lab/mechanic-fly-murkrow-onix.json", "tools/battle-lab/mechanic-fly-player-murkrow-onix.json", "src/engine/fly.ts", "tools/probe/run-battle-lab-rgb.py", "docs/fly-portable-staging-probe.md"],
+      "remaining": "Install and dense-check the portable framebuffer/healthbox/controller adapter in both orientations; retain ISSUES #34's bounded seven-frame affine exclusion and do not promote to exact."
     },
     {
       "move": "MOVE_FIRE_PUNCH",
@@ -142,6 +142,24 @@
         "MOVE_MUD_SLAP"
       ],
       "goal": "SAND ATTACK exactly proves the shared signed slide and mud-sand asset plus its own gSandAttackDirtSpriteTemplate body in both orientations at 269/269 each. Source-neighbor MUD SLAP shares the slide and asset but uses a distinct 16x16 gMudSlapMudSpriteTemplate and remains unsupported without independent dense move evidence."
+    },
+    {
+      "id": "two-turn-semi-invulnerable",
+      "components": [
+        "asset:ANIM_TAG_ROUND_SHADOW",
+        "subroutine:FlySetUp",
+        "subroutine:FlyUnleash",
+        "sprite:gFlyBallUpSpriteTemplate",
+        "sprite:gFlyBallAttackSpriteTemplate",
+        "visualCommand:create_basic_hitsplat_sprite",
+        "task:AnimTask_ShakeMon"
+      ],
+      "representatives": [
+        "MOVE_FLY",
+        "MOVE_BOUNCE",
+        "MOVE_DIVE"
+      ],
+      "goal": "FLY partially proves a phase-relative, side-parameterized two-turn charge/strike reducer and legal stock-ROM staging in both orientations. Portable framebuffer evidence, the player-back MURKROW asset/controller composition, and ISSUES #34's seven affine opening frames remain open; BOUNCE and DIVE remain unsupported without independent dense evidence."
     }
   ],
   "variantAudits": {
