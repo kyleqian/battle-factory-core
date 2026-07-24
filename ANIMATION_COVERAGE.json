@@ -22,9 +22,9 @@
     {
       "move": "MOVE_DRAGON_BREATH",
       "status": "partial",
-      "covered": ["player-back ONIX hit and airborne-target miss"],
-      "evidence": ["tools/compare/traces/turn2-dragonbreath.json", "tools/compare/traces/turn14-fly-miss.json"],
-      "remaining": "Close or explicitly accept ISSUES #23's compressed projectile remainder, then prove portability."
+      "covered": ["player-back ONIX hit and airborne-target miss", "canonical player-back ONIX to opponent-front GROVYLE fire-projectile component at every render 3175-3235 (61/61): all eleven source spawns, shared fixed-point translation/affine/frame program, live-sprite OAM order, target monbg composition, and attacker-over-ember subpriority occlusion"],
+      "evidence": ["tools/compare/traces/turn2-dragonbreath.json", "tools/compare/traces/turn2-dragonbreath-projectiles.json", "tools/compare/traces/turn14-fly-miss.json", "src/engine/dragonBreath.ts", "tools/probe/dump-dragonbreath-anim.py", "tools/probe/verify-dragonbreath-spawn7-isolation.ts", "docs/dragon-breath-notes.md"],
+      "remaining": "Prove portability in both evidence-required orientations and close or explicitly accept the three pre-existing canonical action-menu bounce exclusions; ISSUES #23's compressed projectile remainder is closed."
     },
     {
       "move": "MOVE_FEATHER_DANCE",
@@ -146,6 +146,25 @@
         "MOVE_MUD_SLAP"
       ],
       "goal": "SAND ATTACK exactly proves the shared signed slide and mud-sand asset plus its own gSandAttackDirtSpriteTemplate body in both orientations at 269/269 each. Source-neighbor MUD SLAP shares the slide and asset but uses a distinct 16x16 gMudSlapMudSpriteTemplate and remains unsupported without independent dense move evidence."
+    },
+    {
+      "id": "dragon-fire-projectile",
+      "components": [
+        "asset:ANIM_TAG_SMALL_EMBER",
+        "visualCommand:create_dragon_breath_fire_sprite",
+        "visualCommand:monbg",
+        "visualCommand:splitbgprio"
+      ],
+      "representatives": [
+        "MOVE_DRAGON_BREATH",
+        "MOVE_DRAGON_RAGE",
+        "MOVE_FLAMETHROWER",
+        "MOVE_BLAZE_KICK",
+        "MOVE_FIRE_BLAST",
+        "MOVE_EMBER",
+        "MOVE_FIRE_SPIN"
+      ],
+      "goal": "DRAGON BREATH proves its eleven-spawn gDragonBreathFireSpriteTemplate component and priority-correct canonical scene at 61/61. Source batch audit finds the named fire neighbors share the extracted small-ember sheet and selected generic tasks only: FLAMETHROWER, BLAZE KICK, FIRE BLAST, EMBER, and FIRE SPIN use distinct sprite templates; DRAGON RAGE reuses the translation callback family but has a distinct template, affine program, duration, and geometry. All siblings remain unsupported without independent dense move evidence."
     },
     {
       "id": "two-turn-semi-invulnerable",

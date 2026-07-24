@@ -39,21 +39,29 @@ remainder.
 ## Current handoff
 
 - **State:** **11 exact / 3 partial / 262 unsupported**. FLY and BOUNCE are
-  exact across both legal orientations; DIVE still needs independent evidence.
-- **Did:** closed FLY's seven-frame canonical charge opening without changing
-  its source affine table. Fresh pixel samples show the oracle preserves the
-  established opponent terrain layer at `y>=74`; the prior sampler attribution
-  was false. `drawSpriteSheetAffineStretch` now accepts the same generic
-  optional bottom clip already used by the QUICK_ATTACK/AERIAL_ACE component
-  family, and only the canonical layered path supplies it.
-- **Evidence:** canonical charge/miss is **213/213** with frames 17781-17787
-  restored (**7/7**); portable opponent charge/strike is **151/151 + 248/248**
-  and player charge/strike is **147/147 + 244/244**, all with zero exclusions.
-  Focused FLY/battle-scene/presentation/BOUNCE/status tests are **304/304**;
-  the full suite is **1643/1643**, and build/coverage are green. Fresh BOUNCE
-  charge/player-strike controls remain **24/24 + 24/24 + 197/197**; the local
-  no-status/paralysis seed probes no longer reproduce their committed semantic
-  outcomes (no opponent strike / 117→114 without paralysis), so their existing
-  pixel evidence was not weakened or restaged from animation code.
-- **Next:** continue the ranked Level-50 queue. DIVE remains unsupported; do
-  not alter Battle Lab seed/outcome/PP staging from the animation lane.
+  exact across both legal orientations. DRAGON_BREATH remains partial only
+  because portability and its three pre-existing action-menu bounce exclusions
+  are still open; ISSUES #23's compressed fire-projectile remainder is closed.
+- **Did:** replaced the false eight-spawn premise with the source's eleven
+  `create_dragon_breath_fire_sprite` commands and fresh RAM's 3174-3214
+  every-four-tick stream. `dragonBreath.ts` parameterizes the shared
+  translation/affine/frame program. Scene composition now follows
+  `monbg ANIM_DEF_PARTNER` plus OAM subpriorities: embers win over the target
+  BG, while player-back Onix (30) wins over ember sprites (38). The generic
+  affine sampler is unchanged.
+- **Evidence:** the new committed ON trace is **61/61** over every render
+  3175-3235; the existing complete evidence trace remains **237/237**. A fresh
+  wrapper-validated RAM dump finds 11 spawns, max 6 live, and the repaired
+  sole-live verifier is 0px at compressed render 3177 and magnified render
+  3232. Focused Dragon Breath/battle-scene tests are **279/279**; the full
+  suite is **1668/1668**, and build/coverage are green. FLY charge/strike
+  remain **213/213 + 256/256**, BOUNCE's fresh control is **24/24**, and the
+  adjacent ENDEAVOR window remains **237/237**. Source batch audit:
+  FLAMETHROWER, BLAZE_KICK, FIRE_BLAST, EMBER, and FIRE_SPIN share the
+  small-ember asset and selected generic tasks only, but each uses distinct
+  sprite templates; DRAGON_RAGE shares the translation callback family with
+  different affine/geometry inputs. None is promoted.
+- **Next:** prove DRAGON_BREATH portability in both required orientations
+  through the shared seam, without changing Battle Lab outcomes/PP. Its three
+  pre-existing action-menu bounce exclusions remain separate from the now
+  exact projectile component. DIVE remains unsupported.

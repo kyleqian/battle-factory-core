@@ -503,6 +503,7 @@ import {
 import { buildFightMoveset, drawFightSubmenuText } from "./fightSubmenuText.ts";
 import { rentalMoveset, type ActiveMonMoveset } from "./battleSetup.ts";
 import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder, type FeatherRenderSprite } from "./featherDance.ts";
+import { dragonBreathFireSprites } from "./dragonBreath.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -6008,17 +6009,11 @@ function dragonBreathBlendCoeff(t: number, pressTick: number): number {
  * this window - `Task_LoopAndPlaySE`'s `SE_M_FLAME_WHEEL` loop is audio
  * only) and Grovyle drawn via `drawSpriteSheetAffineStretch` at neutral
  * scale (256/256, no squish) with the shake's `x2` and the blend's tint
- * coeff layered on. The 8 fire-projectile sprites and the target hit-flash
- * (docs/dragon-breath-notes.md's remaining priorities) are NOT drawn here -
- * a fire-projectile render attempt this session (position/cadence/frame-
- * cycle all RAM-verified exact) got close but not pixel-exact using the
- * direct-scale convention `Anim_VerticalStretch`/`ENDEAVOR_SQUISH_TABLE`
- * established for ROTATION=0 affine anims - this one's `AFFINEANIMCMD`
- * rotation is ~178.6 degrees, not 0, and a real shear term (pb/pc) was
- * never probed, so it was pulled rather than ship close-but-wrong pixels;
- * see that doc's "Engine slice E2a-2" section for the exact banked
- * RAM data (position table, spawn cadence, frame formula) ready for a
- * resuming worker to wire once the true rotated-affine sampling is solved.
+ * coeff layered on. The eleven source-spawned fire projectiles are reduced
+ * in `dragonBreath.ts` from their shared RAM-read translation/affine
+ * program. Composition follows the source's `monbg ANIM_DEF_PARTNER` plus
+ * OAM subpriorities: embers paint over the target BG, then Onix's lower
+ * subpriority OBJ paints over compressed embers near their origin.
  */
 /**
  * S7 slice E2b (docs/dragon-breath-notes.md "Engine slice E2b"): Grovyle's
@@ -6059,15 +6054,12 @@ const DRAGONBREATH_HIT_FLASH_OFFSET = DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY - HIT_
 
 function drawDragonBreathScene(fb: Uint8Array, t: number, pressTick: number): void {
   drawStaticBgShiftedY(fb, 0);
-  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   const grovyleHp = dragonBreathGrovyleHp(t, pressTick, anchorOpponentAfterTurnHp, anchorOpponentAfterTurn2Hp);
   const grovyleContent = opponentHealthboxContentForHp(grovyleHp);
-  drawSendOutHealthbox(fb, 0, grovyleContent);
-  drawMenuHealthboxPlayer(fb, 0, 0);
-  drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick));
   const hitFlashPressTick = pressTick + DRAGONBREATH_HIT_FLASH_OFFSET;
-  const healthboxY2 = rockSlideHealthboxWobbleY2(t, hitFlashPressTick);
-  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, grovyleContent);
+
+  // `monbg ANIM_DEF_PARTNER` moves the target to BG1. The normal-priority
+  // ember OBJs therefore win over Grovyle at equal priority.
   if (!rockSlideMonBlinkInvisible(t, hitFlashPressTick)) {
     drawSpriteSheetAffineStretch(
       fb,
@@ -6084,6 +6076,31 @@ function drawDragonBreathScene(fb: Uint8Array, t: number, pressTick: number): vo
       dragonBreathShakeX2(t, pressTick),
     );
   }
+
+  for (const sprite of dragonBreathFireSprites(t, pressTick)) {
+    const tileset = subTileset(battleAnimSmallEmber.tileset, sprite.sheetFrame * 4, 4);
+    drawSpriteSheetAffineRotate(
+      fb,
+      tileset,
+      battleAnimSmallEmber.palette,
+      sprite.centerX,
+      sprite.centerY,
+      sprite.pa,
+      sprite.pb,
+      sprite.pc,
+      sprite.pd,
+    );
+  }
+
+  // The ember subpriority is 38 (target 40 minus the script's offset 2);
+  // Onix is subpriority 30. `SortSprites` puts Onix at the winning lower OAM
+  // index, so its opaque pixels cover compressed embers near the origin.
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  drawSendOutHealthbox(fb, 0, grovyleContent);
+  drawMenuHealthboxPlayer(fb, 0, 0);
+  drawMenuIdleBounceOverlay(fb, turn2KickoffBounceTick(t, pressTick));
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, hitFlashPressTick);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, grovyleContent);
 }
 
 /**
