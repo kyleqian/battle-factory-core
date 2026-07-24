@@ -312,6 +312,14 @@ function createInitialRules(config: FactoryAsleepMoveConfig): FactoryBattleScrip
     hitMarker: 0,
     multiHitCounter: 0,
     absentBattlerFlags: 0b1100,
+    // Source-explicit neutral move-end ownership. These are intentionally not
+    // inferred by opcode 73, which remains unregistered.
+    chosenMove: 0,
+    choicedMove: [0, 0, 0, 0],
+    changedItems: [0, 0, 0, 0],
+    battleStructAbsentBattlerFlags: 0b1100,
+    dynamicMoveType: 0,
+    enigmaBerryHoldEffects: [0, 0, 0, 0],
   });
   return Object.freeze({
     adapter: ADAPTER,
@@ -532,6 +540,7 @@ BattleDecisionReducer<FactoryBattleScriptDecisionRules> = (
     scriptingBattler: attacker,
     currentMove: moveId,
     currentMovePosition: moveSlot,
+    chosenMove: moveId,
   });
   const rngBefore = boundary.rng.snapshot();
   const admission = advanceBattleScriptAttackCancelerUnableToUseMove({

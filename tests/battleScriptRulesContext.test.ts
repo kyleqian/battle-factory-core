@@ -175,15 +175,21 @@ describe("source-shaped Battle Script rules context", () => {
       "battleCommunication1",
       "battleMoveDamage",
       "battleOutcome",
+      "battleStructAbsentBattlerFlags",
       "battlers",
       "bideDmg",
       "bideTarget",
+      "changedItems",
+      "choicedMove",
+      "chosenMove",
       "critMultiplier",
       "currentMove",
       "currentMoveEffect",
       "currentMovePosition",
       "currentMovePower",
       "dmgMultiplier",
+      "dynamicMoveType",
+      "enigmaBerryHoldEffects",
       "giveExpState",
       "hitMarker",
       "lastUsedAbility",
@@ -209,6 +215,9 @@ describe("source-shaped Battle Script rules context", () => {
     expect(Object.isFrozen(created.battlers)).toBe(true);
     expect(Object.isFrozen(created.bideDmg)).toBe(true);
     expect(Object.isFrozen(created.bideTarget)).toBe(true);
+    expect(Object.isFrozen(created.choicedMove)).toBe(true);
+    expect(Object.isFrozen(created.changedItems)).toBe(true);
+    expect(Object.isFrozen(created.enigmaBerryHoldEffects)).toBe(true);
     expect(Object.isFrozen(created.selectorRoles)).toBe(true);
     expect(created.battlers.every(Object.isFrozen)).toBe(true);
     expect(created.battlers.every((value) => Object.isFrozen(value.pp))).toBe(true);

@@ -33,9 +33,20 @@ import {
   BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
 } from "./battleScriptSourceConstants.ts";
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
+import itemHoldEffectsData from "../data/gen/item-hold-effects.json" with { type: "json" };
 import movesData from "../data/gen/moves.json" with { type: "json" };
 
 export const BATTLE_SCRIPT_NUM_BATTLE_STATS = 8;
+export const BATTLE_SCRIPT_ITEM_ENIGMA_BERRY = 175;
+export const BATTLE_SCRIPT_DYNAMIC_TYPE_MASK = 0x3f;
+export const BATTLE_SCRIPT_HOLD_EFFECT_CHOICE_BAND = 29;
+export const BATTLE_SCRIPT_MOVE_NONE = 0;
+export const BATTLE_SCRIPT_MOVE_STRUGGLE = 165;
+export const BATTLE_SCRIPT_MOVE_BATON_PASS = 226;
+export const BATTLE_SCRIPT_MOVE_UNAVAILABLE = 0xffff;
+export const BATTLE_SCRIPT_HITMARKER_OBEYS = 1 << 25;
+export const BATTLE_SCRIPT_MOVE_RESULT_FAILED = 1 << 5;
+const BATTLE_SCRIPT_ITEMS_COUNT = itemHoldEffectsData.itemsCount;
 
 export type BattleScriptStatStages = readonly [
   number,
@@ -158,6 +169,20 @@ export type BattleScriptBideTargetByBattler = readonly [
   BattleScriptBattlerId,
 ];
 
+export type BattleScriptMoveEndHalfwords = readonly [
+  number,
+  number,
+  number,
+  number,
+];
+
+export type BattleScriptMoveEndBytes = readonly [
+  number,
+  number,
+  number,
+  number,
+];
+
 /**
  * First durable source-shaped Battle Script rules slice.
  *
@@ -191,6 +216,18 @@ export type BattleScriptRulesContext = Readonly<
     scriptingBideDmg: number;
     /** Source u8 gAbsentBattlerFlags, limited to the four battler bits. */
     absentBattlerFlags: number;
+    /** Source u16 gChosenMove, distinct from gCurrentMove. */
+    chosenMove: number;
+    /** Source u16 gBattleStruct->choicedMove[MAX_BATTLERS_COUNT]. */
+    choicedMove: BattleScriptMoveEndHalfwords;
+    /** Source u16 gBattleStruct->changedItems[MAX_BATTLERS_COUNT]. */
+    changedItems: BattleScriptMoveEndHalfwords;
+    /** Source u8 gBattleStruct->absentBattlerFlags, separate from the global mask. */
+    battleStructAbsentBattlerFlags: number;
+    /** Source u8 gBattleStruct->dynamicMoveType. */
+    dynamicMoveType: number;
+    /** Source u8 gEnigmaBerries[MAX_BATTLERS_COUNT].holdEffect values. */
+    enigmaBerryHoldEffects: BattleScriptMoveEndBytes;
   }
 >;
 
@@ -220,6 +257,12 @@ export type BattleScriptRulesContextInput = Readonly<{
   bideTarget?: readonly BattleScriptBattlerId[];
   scriptingBideDmg?: number;
   absentBattlerFlags?: number;
+  chosenMove?: number;
+  choicedMove?: readonly number[];
+  changedItems?: readonly number[];
+  battleStructAbsentBattlerFlags?: number;
+  dynamicMoveType?: number;
+  enigmaBerryHoldEffects?: readonly number[];
   battleCommunication0?: number;
   battleCommunication1?: number;
   animTargetsHit?: number;
@@ -301,6 +344,38 @@ type GeneratedMovePowerRow = Readonly<{
   power: number;
 }>;
 
+type GeneratedMoveTypeRow = Readonly<{
+  id: number;
+  type: string;
+}>;
+
+type GeneratedItemHoldEffectRow = Readonly<{
+  itemId: number;
+  holdEffectId: number;
+}>;
+
+// include/constants/pokemon.h:6-23. The order is the numeric TYPE_* ABI.
+const BATTLE_SCRIPT_MOVE_TYPE_IDS = new Map<string, number>([
+  "TYPE_NORMAL",
+  "TYPE_FIGHTING",
+  "TYPE_FLYING",
+  "TYPE_POISON",
+  "TYPE_GROUND",
+  "TYPE_ROCK",
+  "TYPE_BUG",
+  "TYPE_GHOST",
+  "TYPE_STEEL",
+  "TYPE_MYSTERY",
+  "TYPE_FIRE",
+  "TYPE_WATER",
+  "TYPE_GRASS",
+  "TYPE_ELECTRIC",
+  "TYPE_PSYCHIC",
+  "TYPE_ICE",
+  "TYPE_DRAGON",
+  "TYPE_DARK",
+].map((name, id) => [name, id]));
+
 const GENERATED_MOVE_EFFECTS = new Map<number, number>(
   (topologyData.moves as readonly GeneratedMoveEffectRow[]).map(
     ({ id, effectId }) => [id, effectId],
@@ -310,6 +385,20 @@ const GENERATED_MOVE_EFFECTS = new Map<number, number>(
 const GENERATED_MOVE_POWERS = new Map<number, number>(
   (movesData.moves as readonly GeneratedMovePowerRow[]).map(
     ({ id, power }) => [id, requireUnsigned(power, 0xff, `gBattleMoves[${id}].power`)],
+  ),
+);
+
+const GENERATED_MOVE_TYPES = new Map<number, number>(
+  (movesData.moves as readonly GeneratedMoveTypeRow[]).map(({ id, type }) => {
+    const typeId = BATTLE_SCRIPT_MOVE_TYPE_IDS.get(type);
+    if (typeId === undefined) throw new Error(`gBattleMoves[${id}] has unknown type ${type}`);
+    return [id, typeId];
+  }),
+);
+
+const GENERATED_ITEM_HOLD_EFFECTS = new Map<number, number>(
+  (itemHoldEffectsData.items as readonly GeneratedItemHoldEffectRow[]).map(
+    ({ itemId, holdEffectId }) => [itemId, holdEffectId],
   ),
 );
 
@@ -337,6 +426,130 @@ export function resolveBattleScriptCurrentMovePower(currentMove: number): number
     );
   }
   return power;
+}
+
+/**
+ * Exact GET_MOVE_TYPE expansion from include/battle.h:458-464.
+ * A nonzero dynamic byte wins and is masked to its low six bits, including
+ * F_DYNAMIC_TYPE_SET's representation of a dynamic Normal type.
+ */
+export function resolveBattleScriptMoveType(
+  currentMove: number,
+  dynamicMoveType: number,
+): number {
+  requireUnsigned(dynamicMoveType, 0xff, "dynamicMoveType");
+  if (dynamicMoveType !== 0) return dynamicMoveType & BATTLE_SCRIPT_DYNAMIC_TYPE_MASK;
+  const type = GENERATED_MOVE_TYPES.get(currentMove);
+  if (type === undefined) {
+    throw new Error(`currentMove ${currentMove} has no source-derived gBattleMoves type`);
+  }
+  return type;
+}
+
+/**
+ * Cmd_moveend's source lookup at battle_script_commands.c:4228-4231.
+ * Items without an explicit source holdEffect have the C initializer's zero.
+ */
+export function resolveBattleScriptBattlerHoldEffect(
+  context: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+): number {
+  const item = context.battlers[battler].item;
+  if (item >= BATTLE_SCRIPT_ITEMS_COUNT) {
+    throw new Error(`item ${item} is outside the source gItems corpus`);
+  }
+  return item === BATTLE_SCRIPT_ITEM_ENIGMA_BERRY
+    ? context.enigmaBerryHoldEffects[battler]
+    : (GENERATED_ITEM_HOLD_EFFECTS.get(item) ?? 0);
+}
+
+/**
+ * Pure durable-state portion of MOVEEND_CHOICE_MOVE
+ * (battle_script_commands.c:4296-4317). It intentionally owns no move-end
+ * cursor, opcode dispatch, controller, item-effect, or history behavior.
+ */
+export function applyBattleScriptMoveEndChoiceOwnership(
+  context: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  const attacker = context.selectorRoles.attacker;
+  if (attacker === null) throw new Error("choice ownership requires an attacker battler");
+  let choice = context.choicedMove[attacker];
+  if (
+    (context.hitMarker & BATTLE_SCRIPT_HITMARKER_OBEYS) !== 0
+    && resolveBattleScriptBattlerHoldEffect(context, attacker)
+      === BATTLE_SCRIPT_HOLD_EFFECT_CHOICE_BAND
+    && context.chosenMove !== BATTLE_SCRIPT_MOVE_STRUGGLE
+    && (choice === BATTLE_SCRIPT_MOVE_NONE || choice === BATTLE_SCRIPT_MOVE_UNAVAILABLE)
+  ) {
+    // Source breaks out of the case before its stale-choice cleanup.
+    if (
+      context.chosenMove === BATTLE_SCRIPT_MOVE_BATON_PASS
+      && (context.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_FAILED) !== 0
+    ) {
+      return context;
+    }
+    choice = context.chosenMove;
+  }
+  if (!context.battlers[attacker].moves.includes(choice)) {
+    choice = BATTLE_SCRIPT_MOVE_NONE;
+  }
+  if (choice === context.choicedMove[attacker]) return context;
+  const choicedMove = Object.freeze(
+    context.choicedMove.map((move, battler) => battler === attacker ? choice : move),
+  ) as unknown as BattleScriptMoveEndHalfwords;
+  return Object.freeze({ ...context, choicedMove });
+}
+
+/**
+ * Pure durable-state portion of MOVEEND_CHANGED_ITEMS
+ * (battle_script_commands.c:4318-4329). battlersCount remains a future
+ * topology owner and is therefore an explicit validated dependency here.
+ */
+export function applyBattleScriptMoveEndChangedItemOwnership(
+  context: BattleScriptRulesContext,
+  battlersCount: number,
+): BattleScriptRulesContext {
+  requireUnsigned(battlersCount, 4, "battlersCount");
+  let changed = false;
+  const battlers = context.battlers.map((battler, index) => {
+    const item = index < battlersCount ? context.changedItems[index] : BATTLE_SCRIPT_MOVE_NONE;
+    if (item === BATTLE_SCRIPT_MOVE_NONE) return battler;
+    changed = true;
+    return Object.freeze({ ...battler, item });
+  }) as unknown as BattleScriptRulesBattlers;
+  if (!changed) return context;
+  const changedItems = Object.freeze(
+    context.changedItems.map((item, index) =>
+      index < battlersCount && item !== BATTLE_SCRIPT_MOVE_NONE
+        ? BATTLE_SCRIPT_MOVE_NONE
+        : item
+    ),
+  ) as unknown as BattleScriptMoveEndHalfwords;
+  return Object.freeze({
+    ...context,
+    battlers: Object.freeze(battlers),
+    changedItems,
+  });
+}
+
+function createMoveEndArray(
+  input: readonly number[] | undefined,
+  maximum: number,
+  field: string,
+): BattleScriptMoveEndHalfwords | BattleScriptMoveEndBytes {
+  const values = input ?? [0, 0, 0, 0];
+  if (!Array.isArray(values) || values.length !== 4) {
+    throw new Error(`${field} must contain exactly four values`);
+  }
+  values.forEach((value, index) =>
+    requireUnsigned(value, maximum, `${field}[${index}]`)
+  );
+  if (Object.isFrozen(values)) {
+    return values as unknown as
+      BattleScriptMoveEndHalfwords | BattleScriptMoveEndBytes;
+  }
+  return Object.freeze([...values]) as
+    BattleScriptMoveEndHalfwords | BattleScriptMoveEndBytes;
 }
 
 function requireRole(
@@ -562,6 +775,21 @@ export function createBattleScriptRulesContext(
     }
     return target;
   })) as unknown as BattleScriptBideTargetByBattler;
+  const choicedMove = createMoveEndArray(
+    input.choicedMove,
+    0xffff,
+    "choicedMove",
+  ) as BattleScriptMoveEndHalfwords;
+  const changedItems = createMoveEndArray(
+    input.changedItems,
+    0xffff,
+    "changedItems",
+  ) as BattleScriptMoveEndHalfwords;
+  const enigmaBerryHoldEffects = createMoveEndArray(
+    input.enigmaBerryHoldEffects,
+    0xff,
+    "enigmaBerryHoldEffects",
+  ) as BattleScriptMoveEndBytes;
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
@@ -612,6 +840,16 @@ export function createBattleScriptRulesContext(
       0x0f,
       "absentBattlerFlags",
     ),
+    chosenMove: requireUnsigned(input.chosenMove ?? 0, 0xffff, "chosenMove"),
+    choicedMove,
+    changedItems,
+    battleStructAbsentBattlerFlags: requireUnsigned(
+      input.battleStructAbsentBattlerFlags ?? 0,
+      0x0f,
+      "battleStructAbsentBattlerFlags",
+    ),
+    dynamicMoveType: requireUnsigned(input.dynamicMoveType ?? 0, 0xff, "dynamicMoveType"),
+    enigmaBerryHoldEffects,
     battleCommunication0: requireUnsigned(
       input.battleCommunication0 ?? 0,
       0xff,

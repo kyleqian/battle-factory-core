@@ -28,7 +28,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseItemSourceRecords } from "./item-source.ts";
+import { parseIntDefines } from "./defines.ts";
+import { parseItemSourceRecords, parseItemsCount } from "./item-source.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RUN_ROOT = join(HERE, "..", "..");
@@ -38,10 +39,25 @@ const DATA_GEN = join(RUN_ROOT, "src", "data", "gen");
 mkdirSync(DATA_GEN, { recursive: true });
 
 const holdEffectsH = readFileSync(join(REF, "include", "constants", "hold_effects.h"), "utf8");
+const itemsConstantsH = readFileSync(join(REF, "include", "constants", "items.h"), "utf8");
 const itemsC = readFileSync(join(REF, "src", "data", "items.h"), "utf8");
-const entries = [...parseItemSourceRecords(itemsC, holdEffectsH).values()]
+const itemIds = parseIntDefines(itemsConstantsH, "ITEM_");
+const holdEffectIds = parseIntDefines(holdEffectsH, "HOLD_EFFECT_");
+const itemRecords = parseItemSourceRecords(itemsC, holdEffectsH);
+const itemsCount = parseItemsCount(itemsConstantsH);
+if (itemRecords.size !== itemsCount) {
+  throw new Error(`expected ${itemsCount} source item records, got ${itemRecords.size}`);
+}
+const entries = [...itemRecords.values()]
   .filter((record) => record.hasExplicitHoldEffect)
-  .map(({ item, holdEffect, holdEffectParam }) => ({ item, holdEffect, holdEffectParam }));
+  .map(({ item, holdEffect, holdEffectParam }) => {
+    const itemId = itemIds.get(item);
+    const holdEffectId = holdEffectIds.get(holdEffect);
+    if (itemId === undefined || holdEffectId === undefined) {
+      throw new Error(`${item}: missing numeric item or hold-effect constant`);
+    }
+    return { item, itemId, holdEffect, holdEffectId, holdEffectParam };
+  });
 
 // Spot-check the three items this extraction was scoped for.
 const bySymbol = new Map(entries.map((e) => [e.item, e]));
@@ -59,7 +75,14 @@ for (const [item, want] of Object.entries(expected)) {
 
 entries.sort((a, b) => (a.item < b.item ? -1 : a.item > b.item ? 1 : 0));
 
-writeFileSync(join(DATA_GEN, "item-hold-effects.json"), `${JSON.stringify({ items: entries }, null, 0)}\n`);
+writeFileSync(
+  join(DATA_GEN, "item-hold-effects.json"),
+  `${JSON.stringify({
+    schema: "item-hold-effects/v2",
+    itemsCount,
+    items: entries,
+  }, null, 0)}\n`,
+);
 console.log(
   `wrote ${join(DATA_GEN, "item-hold-effects.json")} (${entries.length} items with an explicit hold effect)`,
 );

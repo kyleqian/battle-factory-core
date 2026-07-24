@@ -176,6 +176,9 @@ describe("Cmd_moveend battler metadata dependency", () => {
     expect(written?.battlers[0]).toBe(source.battlers[0]);
     expect(written?.battlers[0].statStages).toBe(source.battlers[0].statStages);
     expect(written?.battlers[0].specialStatus).toBe(source.battlers[0].specialStatus);
+    expect(written?.choicedMove).toBe(source.choicedMove);
+    expect(written?.changedItems).toBe(source.changedItems);
+    expect(written?.enigmaBerryHoldEffects).toBe(source.enigmaBerryHoldEffects);
     expect(written?.moveendState).toBe(7);
   });
 
@@ -198,6 +201,18 @@ describe("Cmd_moveend battler metadata dependency", () => {
     });
     expect(Object.isFrozen(restored.rules.rulesContext.battlers[0].statStages)).toBe(true);
     expect(Object.isFrozen(restored.rules.rulesContext.battlers[0].specialStatus)).toBe(true);
+    expect(restored.rules.rulesContext).toMatchObject({
+      chosenMove: 0,
+      choicedMove: [0, 0, 0, 0],
+      changedItems: [0, 0, 0, 0],
+      absentBattlerFlags: 0b1100,
+      battleStructAbsentBattlerFlags: 0b1100,
+      dynamicMoveType: 0,
+      enigmaBerryHoldEffects: [0, 0, 0, 0],
+    });
+    expect(Object.isFrozen(restored.rules.rulesContext.choicedMove)).toBe(true);
+    expect(Object.isFrozen(restored.rules.rulesContext.changedItems)).toBe(true);
+    expect(Object.isFrozen(restored.rules.rulesContext.enigmaBerryHoldEffects)).toBe(true);
   });
 
   it("preserves-metadata-through-existing-player-and-ai-vertical-replay-regression", () => {
@@ -212,6 +227,26 @@ describe("Cmd_moveend battler metadata dependency", () => {
       .toEqual([196, 171, 0, 0]);
     expect(playerResult.state.rules.rulesContext.battlers[0].statStages)
       .toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
+    expect(playerResult.state.rules.rulesContext).toMatchObject({
+      chosenMove: 182,
+      choicedMove: [0, 0, 0, 0],
+      changedItems: [0, 0, 0, 0],
+      absentBattlerFlags: 0b1100,
+      battleStructAbsentBattlerFlags: 0b1100,
+      dynamicMoveType: 0,
+      enigmaBerryHoldEffects: [0, 0, 0, 0],
+    });
+    expect(playerResult.state.rules.rulesContext.choicedMove)
+      .toEqual(player.rules.rulesContext.choicedMove);
+    expect(playerResult.state.rules.rulesContext.changedItems)
+      .toEqual(player.rules.rulesContext.changedItems);
+    expect(playerResult.state.rules.rulesContext.enigmaBerryHoldEffects)
+      .toEqual(player.rules.rulesContext.enigmaBerryHoldEffects);
+    const replayedPlayerResult = parseBattleState(
+      serializeBattleState(playerResult.state),
+    ) as BattleState<FactoryBattleScriptDecisionRules>;
+    expect(replayedPlayerResult).toEqual(playerResult.state);
+    expect(Object.isFrozen(replayedPlayerResult.rules.rulesContext.choicedMove)).toBe(true);
 
     const trainer = createFactoryAsleepMoveBattleState(trainerConfig);
     const trainerResult = submitFactoryAiMaskZeroDecision(
@@ -224,6 +259,21 @@ describe("Cmd_moveend battler metadata dependency", () => {
       .toEqual([196, 171, 0, 0]);
     expect(trainerResult.transition.state.rules.rulesContext.battlers[1].statStages)
       .toEqual([6, 6, 6, 6, 6, 6, 6, 6]);
+    expect(trainerResult.transition.state.rules.rulesContext).toMatchObject({
+      chosenMove: 273,
+      choicedMove: [0, 0, 0, 0],
+      changedItems: [0, 0, 0, 0],
+      absentBattlerFlags: 0b1100,
+      battleStructAbsentBattlerFlags: 0b1100,
+      dynamicMoveType: 0,
+      enigmaBerryHoldEffects: [0, 0, 0, 0],
+    });
+    expect(trainerResult.transition.state.rules.rulesContext.choicedMove)
+      .toEqual(trainer.rules.rulesContext.choicedMove);
+    expect(trainerResult.transition.state.rules.rulesContext.changedItems)
+      .toEqual(trainer.rules.rulesContext.changedItems);
+    expect(trainerResult.transition.state.rules.rulesContext.enigmaBerryHoldEffects)
+      .toEqual(trainer.rules.rulesContext.enigmaBerryHoldEffects);
     expect(trainerResult.transition.state.rng).toEqual({
       value: 0x79e3_9ac4,
       calls: 5,
