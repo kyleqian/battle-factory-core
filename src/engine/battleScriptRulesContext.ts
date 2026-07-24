@@ -45,7 +45,12 @@ export const BATTLE_SCRIPT_MOVE_STRUGGLE = 165;
 export const BATTLE_SCRIPT_MOVE_BATON_PASS = 226;
 export const BATTLE_SCRIPT_MOVE_UNAVAILABLE = 0xffff;
 export const BATTLE_SCRIPT_HITMARKER_OBEYS = 1 << 25;
+export const BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED = 1 << 10;
+export const BATTLE_SCRIPT_HITMARKER_SWAP_ATTACKER_TARGET = 1 << 12;
 export const BATTLE_SCRIPT_MOVE_RESULT_FAILED = 1 << 5;
+export const BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT = (1 << 0) | (1 << 3) | (1 << 5);
+export const BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED = 1 << 4;
+export const BATTLE_SCRIPT_EFFECT_BATON_PASS = 127;
 const BATTLE_SCRIPT_ITEMS_COUNT = itemHoldEffectsData.itemsCount;
 
 export type BattleScriptStatStages = readonly [
@@ -183,6 +188,19 @@ export type BattleScriptMoveEndBytes = readonly [
   number,
 ];
 
+export type BattleScriptMoveHistory = Readonly<{
+  /** Six independent source globals; none is an alias of another. */
+  lastPrintedMoves: BattleScriptMoveEndHalfwords;
+  lastMoves: BattleScriptMoveEndHalfwords;
+  lastResultingMoves: BattleScriptMoveEndHalfwords;
+  lastLandedMoves: BattleScriptMoveEndHalfwords;
+  lastHitByType: BattleScriptMoveEndHalfwords;
+  lastHitBy: BattleScriptMoveEndBytes;
+  /** Exact source byte buffers from BattleStruct. */
+  lastTakenMove: readonly number[];
+  lastTakenMoveFrom: readonly number[];
+}>;
+
 /**
  * First durable source-shaped Battle Script rules slice.
  *
@@ -228,6 +246,8 @@ export type BattleScriptRulesContext = Readonly<
     dynamicMoveType: number;
     /** Source u8 gEnigmaBerries[MAX_BATTLERS_COUNT].holdEffect values. */
     enigmaBerryHoldEffects: BattleScriptMoveEndBytes;
+    /** Source-shaped move histories used only by move-end states 14 and 15. */
+    moveHistory: BattleScriptMoveHistory;
   }
 >;
 
@@ -263,6 +283,16 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleStructAbsentBattlerFlags?: number;
   dynamicMoveType?: number;
   enigmaBerryHoldEffects?: readonly number[];
+  moveHistory?: Readonly<{
+    lastPrintedMoves?: readonly number[];
+    lastMoves?: readonly number[];
+    lastResultingMoves?: readonly number[];
+    lastLandedMoves?: readonly number[];
+    lastHitByType?: readonly number[];
+    lastHitBy?: readonly number[];
+    lastTakenMove?: readonly number[];
+    lastTakenMoveFrom?: readonly number[];
+  }>;
   battleCommunication0?: number;
   battleCommunication1?: number;
   animTargetsHit?: number;
@@ -347,6 +377,7 @@ type GeneratedMovePowerRow = Readonly<{
 type GeneratedMoveTypeRow = Readonly<{
   id: number;
   type: string;
+  flags: readonly string[];
 }>;
 
 type GeneratedItemHoldEffectRow = Readonly<{
@@ -394,6 +425,15 @@ const GENERATED_MOVE_TYPES = new Map<number, number>(
     if (typeId === undefined) throw new Error(`gBattleMoves[${id}] has unknown type ${type}`);
     return [id, typeId];
   }),
+);
+
+const GENERATED_MOVE_FLAGS = new Map<number, number>(
+  (movesData.moves as readonly GeneratedMoveTypeRow[]).map(({ id, flags }) => [
+    id,
+    flags.includes("FLAG_MIRROR_MOVE_AFFECTED")
+      ? BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED
+      : 0,
+  ]),
 );
 
 const GENERATED_ITEM_HOLD_EFFECTS = new Map<number, number>(
@@ -444,6 +484,193 @@ export function resolveBattleScriptMoveType(
     throw new Error(`currentMove ${currentMove} has no source-derived gBattleMoves type`);
   }
   return type;
+}
+
+/** Resolves the source gBattleMoves[move].flags bits needed by state 15. */
+export function resolveBattleScriptMoveFlags(move: number): number {
+  const flags = GENERATED_MOVE_FLAGS.get(move);
+  if (flags === undefined) {
+    throw new Error(`move ${move} has no source-derived gBattleMoves flags`);
+  }
+  return flags;
+}
+
+function replaceMoveEndArrayValue(
+  values: BattleScriptMoveEndHalfwords | BattleScriptMoveEndBytes,
+  index: BattleScriptBattlerId,
+  value: number,
+): BattleScriptMoveEndHalfwords | BattleScriptMoveEndBytes {
+  if (values[index] === value) return values;
+  return Object.freeze(values.map((entry, entryIndex) =>
+    entryIndex === index ? value : entry
+  )) as BattleScriptMoveEndHalfwords | BattleScriptMoveEndBytes;
+}
+
+function normalizedOriginallyUsedMove(chosenMove: number): number {
+  return chosenMove === BATTLE_SCRIPT_MOVE_UNAVAILABLE
+    ? BATTLE_SCRIPT_MOVE_NONE
+    : chosenMove;
+}
+
+/**
+ * Pure durable reducer for MOVEEND_UPDATE_LAST_MOVES. It performs the source
+ * swap before all indexed writes and advances only the already-owned state.
+ */
+export function applyBattleScriptMoveEndUpdateLastMovesOwnership(
+  context: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  let attacker = context.selectorRoles.attacker;
+  let target = context.selectorRoles.target;
+  if (attacker === null || target === null) {
+    throw new Error("update-last-moves ownership requires attacker and target battlers");
+  }
+  let hitMarker = context.hitMarker;
+  let selectorRoles = context.selectorRoles;
+  if ((hitMarker & BATTLE_SCRIPT_HITMARKER_SWAP_ATTACKER_TARGET) !== 0) {
+    [attacker, target] = [target, attacker];
+    selectorRoles = Object.freeze({ ...selectorRoles, attacker, target });
+    hitMarker = (hitMarker & ~BATTLE_SCRIPT_HITMARKER_SWAP_ATTACKER_TARGET) >>> 0;
+  }
+
+  let {
+    lastPrintedMoves,
+    lastMoves,
+    lastResultingMoves,
+    lastLandedMoves,
+    lastHitByType,
+    lastHitBy,
+  } = context.moveHistory;
+  if ((hitMarker & BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED) !== 0) {
+    lastPrintedMoves = replaceMoveEndArrayValue(
+      lastPrintedMoves,
+      attacker,
+      context.chosenMove,
+    ) as BattleScriptMoveEndHalfwords;
+  }
+
+  const attackerBit = 1 << attacker;
+  const originallyUsedMove = normalizedOriginallyUsedMove(context.chosenMove);
+  if (
+    (context.absentBattlerFlags & attackerBit) === 0
+    && (context.battleStructAbsentBattlerFlags & attackerBit) === 0
+    && resolveBattleScriptCurrentMoveEffect(originallyUsedMove)
+      !== BATTLE_SCRIPT_EFFECT_BATON_PASS
+  ) {
+    const obeys = (hitMarker & BATTLE_SCRIPT_HITMARKER_OBEYS) !== 0;
+    lastMoves = replaceMoveEndArrayValue(
+      lastMoves,
+      attacker,
+      obeys ? context.chosenMove : BATTLE_SCRIPT_MOVE_UNAVAILABLE,
+    ) as BattleScriptMoveEndHalfwords;
+    lastResultingMoves = replaceMoveEndArrayValue(
+      lastResultingMoves,
+      attacker,
+      obeys ? context.currentMove : BATTLE_SCRIPT_MOVE_UNAVAILABLE,
+    ) as BattleScriptMoveEndHalfwords;
+
+    const targetFaintedMask = ((1 << target) << 28) >>> 0;
+    if ((hitMarker & targetFaintedMask) === 0) {
+      lastHitBy = replaceMoveEndArrayValue(
+        lastHitBy,
+        target,
+        attacker,
+      ) as BattleScriptMoveEndBytes;
+    }
+
+    if (obeys && (context.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) === 0) {
+      lastLandedMoves = replaceMoveEndArrayValue(
+        lastLandedMoves,
+        target,
+        context.chosenMove === BATTLE_SCRIPT_MOVE_UNAVAILABLE
+          ? context.chosenMove
+          : context.currentMove,
+      ) as BattleScriptMoveEndHalfwords;
+      if (context.chosenMove !== BATTLE_SCRIPT_MOVE_UNAVAILABLE) {
+        lastHitByType = replaceMoveEndArrayValue(
+          lastHitByType,
+          target,
+          resolveBattleScriptMoveType(context.currentMove, context.dynamicMoveType),
+        ) as BattleScriptMoveEndHalfwords;
+      }
+    } else {
+      lastLandedMoves = replaceMoveEndArrayValue(
+        lastLandedMoves,
+        target,
+        BATTLE_SCRIPT_MOVE_UNAVAILABLE,
+      ) as BattleScriptMoveEndHalfwords;
+    }
+  }
+
+  const historyChanged =
+    lastPrintedMoves !== context.moveHistory.lastPrintedMoves
+    || lastMoves !== context.moveHistory.lastMoves
+    || lastResultingMoves !== context.moveHistory.lastResultingMoves
+    || lastLandedMoves !== context.moveHistory.lastLandedMoves
+    || lastHitByType !== context.moveHistory.lastHitByType
+    || lastHitBy !== context.moveHistory.lastHitBy;
+  return Object.freeze({
+    ...context,
+    selectorRoles,
+    hitMarker,
+    moveendState: context.moveendState + 1,
+    moveHistory: historyChanged
+      ? Object.freeze({
+        ...context.moveHistory,
+        lastPrintedMoves,
+        lastMoves,
+        lastResultingMoves,
+        lastLandedMoves,
+        lastHitByType,
+        lastHitBy,
+      })
+      : context.moveHistory,
+  });
+}
+
+/**
+ * Pure durable reducer for MOVEEND_MIRROR_MOVE. The packed buffers retain the
+ * source's little-endian target and [target][attacker] byte addressing.
+ */
+export function applyBattleScriptMoveEndMirrorMoveOwnership(
+  context: BattleScriptRulesContext,
+): BattleScriptRulesContext {
+  const attacker = context.selectorRoles.attacker;
+  const target = context.selectorRoles.target;
+  if (attacker === null || target === null) {
+    throw new Error("mirror-move ownership requires attacker and target battlers");
+  }
+  const originallyUsedMove = normalizedOriginallyUsedMove(context.chosenMove);
+  const targetFaintedMask = ((1 << target) << 28) >>> 0;
+  const applies = (context.absentBattlerFlags & (1 << attacker)) === 0
+    && (context.battleStructAbsentBattlerFlags & (1 << attacker)) === 0
+    && (
+      resolveBattleScriptMoveFlags(originallyUsedMove)
+      & BATTLE_SCRIPT_MOVE_FLAG_MIRROR_MOVE_AFFECTED
+    ) !== 0
+    && (context.hitMarker & BATTLE_SCRIPT_HITMARKER_OBEYS) !== 0
+    && attacker !== target
+    && (context.hitMarker & targetFaintedMask) === 0
+    && (context.moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) === 0;
+
+  if (!applies) {
+    return Object.freeze({ ...context, moveendState: context.moveendState + 1 });
+  }
+  const lastTakenMove = [...context.moveHistory.lastTakenMove];
+  lastTakenMove[target * 2] = context.chosenMove & 0xff;
+  lastTakenMove[target * 2 + 1] = context.chosenMove >>> 8;
+  const lastTakenMoveFrom = [...context.moveHistory.lastTakenMoveFrom];
+  const fromOffset = target * 8 + attacker * 2;
+  lastTakenMoveFrom[fromOffset] = context.chosenMove & 0xff;
+  lastTakenMoveFrom[fromOffset + 1] = context.chosenMove >>> 8;
+  return Object.freeze({
+    ...context,
+    moveendState: context.moveendState + 1,
+    moveHistory: Object.freeze({
+      ...context.moveHistory,
+      lastTakenMove: Object.freeze(lastTakenMove),
+      lastTakenMoveFrom: Object.freeze(lastTakenMoveFrom),
+    }),
+  });
 }
 
 /**
@@ -550,6 +777,66 @@ function createMoveEndArray(
   }
   return Object.freeze([...values]) as
     BattleScriptMoveEndHalfwords | BattleScriptMoveEndBytes;
+}
+
+function createMoveEndByteBuffer(
+  input: readonly number[] | undefined,
+  length: number,
+  field: string,
+): readonly number[] {
+  const values = input ?? new Array<number>(length).fill(0);
+  if (!Array.isArray(values) || values.length !== length) {
+    throw new Error(`${field} must contain exactly ${length} bytes`);
+  }
+  values.forEach((value, index) => requireUnsigned(value, 0xff, `${field}[${index}]`));
+  return Object.isFrozen(values) ? values : Object.freeze([...values]);
+}
+
+function createBattleScriptMoveHistory(
+  input: BattleScriptRulesContextInput["moveHistory"],
+): BattleScriptMoveHistory {
+  return Object.freeze({
+    lastPrintedMoves: createMoveEndArray(
+      input?.lastPrintedMoves,
+      0xffff,
+      "moveHistory.lastPrintedMoves",
+    ) as BattleScriptMoveEndHalfwords,
+    lastMoves: createMoveEndArray(
+      input?.lastMoves,
+      0xffff,
+      "moveHistory.lastMoves",
+    ) as BattleScriptMoveEndHalfwords,
+    lastResultingMoves: createMoveEndArray(
+      input?.lastResultingMoves,
+      0xffff,
+      "moveHistory.lastResultingMoves",
+    ) as BattleScriptMoveEndHalfwords,
+    lastLandedMoves: createMoveEndArray(
+      input?.lastLandedMoves,
+      0xffff,
+      "moveHistory.lastLandedMoves",
+    ) as BattleScriptMoveEndHalfwords,
+    lastHitByType: createMoveEndArray(
+      input?.lastHitByType,
+      0xffff,
+      "moveHistory.lastHitByType",
+    ) as BattleScriptMoveEndHalfwords,
+    lastHitBy: createMoveEndArray(
+      input?.lastHitBy,
+      0xff,
+      "moveHistory.lastHitBy",
+    ) as BattleScriptMoveEndBytes,
+    lastTakenMove: createMoveEndByteBuffer(
+      input?.lastTakenMove,
+      16,
+      "moveHistory.lastTakenMove",
+    ),
+    lastTakenMoveFrom: createMoveEndByteBuffer(
+      input?.lastTakenMoveFrom,
+      32,
+      "moveHistory.lastTakenMoveFrom",
+    ),
+  });
 }
 
 function requireRole(
@@ -790,6 +1077,7 @@ export function createBattleScriptRulesContext(
     0xff,
     "enigmaBerryHoldEffects",
   ) as BattleScriptMoveEndBytes;
+  const moveHistory = createBattleScriptMoveHistory(input.moveHistory);
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
@@ -850,6 +1138,7 @@ export function createBattleScriptRulesContext(
     ),
     dynamicMoveType: requireUnsigned(input.dynamicMoveType ?? 0, 0xff, "dynamicMoveType"),
     enigmaBerryHoldEffects,
+    moveHistory,
     battleCommunication0: requireUnsigned(
       input.battleCommunication0 ?? 0,
       0xff,

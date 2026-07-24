@@ -1070,6 +1070,18 @@ freezing, SETBYTE identity, canonical replay, and both existing player/AI
 verticals are Tier-1 pinned. Move history/topology/controllers/delegates remain
 absent, and opcodes **73** and **0** remain unregistered.
 
+**MOVEEND history dependency checkpoint (2026-07-24):** dependency step 2 is
+complete. The same frozen rules context now owns six independent four-battler
+history arrays and BattleStruct's exact 16-byte `lastTakenMove` plus 32-byte
+`lastTakenMoveFrom` buffers. Pure state-14/state-15 reducers normalize
+`MOVE_UNAVAILABLE`, perform the source attacker/target swap before indexed
+writes, apply both absent masks and the exact hit/result/effect gates, resolve
+dynamic resulting types and generated Mirror Move flags, and serialize packed
+history in source little-endian `[target][attacker][byte]` order. Widths,
+freezing, identity, canonical replay, and existing player/AI verticals are
+Tier-1 pinned. Topology, controllers, delegates, loop/end-mode dispatch, and
+opcode registration remain absent; opcodes **73** and **0** are unregistered.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300

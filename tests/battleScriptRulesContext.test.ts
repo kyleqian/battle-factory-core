@@ -197,6 +197,7 @@ describe("source-shaped Battle Script rules context", () => {
       "lvlBoxState",
       "missType",
       "moveEffectByte",
+      "moveHistory",
       "moveResultFlags",
       "moveendState",
       "multiHitCounter",
@@ -218,6 +219,7 @@ describe("source-shaped Battle Script rules context", () => {
     expect(Object.isFrozen(created.choicedMove)).toBe(true);
     expect(Object.isFrozen(created.changedItems)).toBe(true);
     expect(Object.isFrozen(created.enigmaBerryHoldEffects)).toBe(true);
+    expect(Object.isFrozen(created.moveHistory)).toBe(true);
     expect(Object.isFrozen(created.selectorRoles)).toBe(true);
     expect(created.battlers.every(Object.isFrozen)).toBe(true);
     expect(created.battlers.every((value) => Object.isFrozen(value.pp))).toBe(true);

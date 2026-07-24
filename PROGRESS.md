@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 422 — move-end history ownership and state reducers landed
+
+- **State:** dependency step 2 is complete and green at **168 files / 1974
+  tests**. Opcodes **73** and **0** remain unregistered; no topology,
+  controller, delegate, loop/end-mode, wrapper, receipt, core, render, or
+  oracle behavior was added.
+- **Did:** added six independent frozen four-battler history arrays plus exact
+  source `u8[16]`/`u8[32]` packed histories. Pure state-14/state-15 reducers
+  normalize unavailable chosen moves, swap roles before indexed writes, pin
+  both absent masks and hit/result/effect gates, resolve dynamic move type and
+  generated Mirror Move flags, and write little-endian target/attacker bytes.
+- **Next:** dependency step 3 only: add topology (`gBattlersCount`, battle type,
+  positions) and a source-shaped `WasUnableToUseMove` predicate. Then
+  controllers, complete ability/item delegates, all-case loop/end modes, and
+  only finally opcode-73 registration.
+- **Notes:** recursive freezing, source widths/cardinality, independent-owner
+  identity, JSON replay, packed byte layout, and existing player/AI verticals
+  pass. Integrated suite/build and OFF v5 (`9c89c741…`) pass; pixel diff N/A.
+
+---
 ## 421 — move-end choice/change ownership landed and Baton Pass repaired
 
 - **State:** dependency step 2a plus its evidence-driven Baton Pass repair are
@@ -49,31 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   build, OFF v5 info (`9c89c741…`), and diff checks pass. Canonical JSON and
   both player/AI replays preserve the metadata. Code commit `c7dab21`; pixel
   diff N/A.
-
----
-## 419 — executable decision vertical proven; honest MOVEEND boundary mapped
-
-- **State:** the integrated tree is green at **165 files / 1956 tests**. Both
-  player and Factory-AI decisions traverse the published boundary and real
-  Battle Script machine through source-complete SETBYTE, then stop honestly at
-  unregistered opcode **73**; opcode **0** also remains unregistered.
-- **Did:** proved frozen validated state, explicit/synchronized RNG, ordered
-  semantic events, controller barriers, next unsupported-command barrier, and
-  canonical serialized replay for player TYROGUE/Protect and trainer
-  PLUSLE/Wish. The minimal source mask-0 AI uses the same legal-decision
-  boundary. A generated MOVEEND receipt plus
-  `docs/battle-script-move-end-state-ownership.md` now maps all **17** cases,
-  **24** sites, modes, durable owners, delegates, and the safe dependency
-  order without registering staged semantics. Independently, Scene ON reached
-  **16 exact / 1 partial / 259 unsupported** after exact two-orientation
-  Extreme Speed and Flamethrower checkpoints.
-- **Next:** keep opcode 73 unsupported. Add the small immutable move-end
-  battler metadata owner first (item, signed stat stages, special status,
-  charging bit), then the separately tested choice/history, topology,
-  controller, and source-complete ability/item delegate owners documented in
-  the ownership map. Register only after the final all-cases/end-modes gate.
-- **Notes:** full `Cmd_moveend` was rejected on the current rules shape rather
-  than supplied no-effect delegates. Current exact Flamethrower evidence is
-  **126/126 RGB+component frames in both orientations**; the reusable
-  persistent sprite-order seam models allocation, destruction/reuse,
-  wrapped-Y insertion sorting, and stable ties without frame lookup.

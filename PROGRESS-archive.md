@@ -1,3 +1,31 @@
+## 419 — executable decision vertical proven; honest MOVEEND boundary mapped
+
+- **State:** the integrated tree is green at **165 files / 1956 tests**. Both
+  player and Factory-AI decisions traverse the published boundary and real
+  Battle Script machine through source-complete SETBYTE, then stop honestly at
+  unregistered opcode **73**; opcode **0** also remains unregistered.
+- **Did:** proved frozen validated state, explicit/synchronized RNG, ordered
+  semantic events, controller barriers, next unsupported-command barrier, and
+  canonical serialized replay for player TYROGUE/Protect and trainer
+  PLUSLE/Wish. The minimal source mask-0 AI uses the same legal-decision
+  boundary. A generated MOVEEND receipt plus
+  `docs/battle-script-move-end-state-ownership.md` now maps all **17** cases,
+  **24** sites, modes, durable owners, delegates, and the safe dependency
+  order without registering staged semantics. Independently, Scene ON reached
+  **16 exact / 1 partial / 259 unsupported** after exact two-orientation
+  Extreme Speed and Flamethrower checkpoints.
+- **Next:** keep opcode 73 unsupported. Add the small immutable move-end
+  battler metadata owner first (item, signed stat stages, special status,
+  charging bit), then the separately tested choice/history, topology,
+  controller, and source-complete ability/item delegate owners documented in
+  the ownership map. Register only after the final all-cases/end-modes gate.
+- **Notes:** full `Cmd_moveend` was rejected on the current rules shape rather
+  than supplied no-effect delegates. Current exact Flamethrower evidence is
+  **126/126 RGB+component frames in both orientations**; the reusable
+  persistent sprite-order seam models allocation, destruction/reuse,
+  wrapped-Y insertion sorting, and stable ties without frame lookup.
+
+---
 ## 418 — MOVEEND remains honest behind a complete source boundary
 
 - **State:** the bounded opcode-73 decision checkpoint is green at **163 files /

@@ -2,8 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   applyBattleScriptMoveEndChangedItemOwnership,
   applyBattleScriptMoveEndChoiceOwnership,
+  applyBattleScriptMoveEndMirrorMoveOwnership,
+  applyBattleScriptMoveEndUpdateLastMovesOwnership,
+  BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED,
   BATTLE_SCRIPT_HITMARKER_OBEYS,
+  BATTLE_SCRIPT_HITMARKER_SWAP_ATTACKER_TARGET,
   BATTLE_SCRIPT_MOVE_RESULT_FAILED,
+  BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
   BATTLE_SCRIPT_MOVE_UNAVAILABLE,
   createBattleScriptRulesContext,
   resolveBattleScriptBattlerHoldEffect,
@@ -204,5 +209,189 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
     expect(Object.isFrozen(context.enigmaBerryHoldEffects)).toBe(true);
     expect(applyBattleScriptMoveEndChoiceOwnership(context)).toBe(context);
     expect(applyBattleScriptMoveEndChangedItemOwnership(context, 2)).toBe(context);
+  });
+
+  it("freezes-six-independent-history-arrays-and-exact-source-byte-buffers", () => {
+    const context = createBattleScriptRulesContext(contextInput({
+      moveHistory: {
+        lastPrintedMoves: [1, 2, 3, 4],
+        lastMoves: [5, 6, 7, 8],
+        lastResultingMoves: [9, 10, 11, 12],
+        lastLandedMoves: [13, 14, 15, 16],
+        lastHitByType: [17, 18, 19, 20],
+        lastHitBy: [0, 1, 2, 3],
+        lastTakenMove: Array.from({ length: 16 }, (_, index) => index),
+        lastTakenMoveFrom: Array.from({ length: 32 }, (_, index) => 0xff - index),
+      },
+    }));
+    const history = context.moveHistory;
+    expect(new Set([
+      history.lastPrintedMoves,
+      history.lastMoves,
+      history.lastResultingMoves,
+      history.lastLandedMoves,
+      history.lastHitByType,
+      history.lastHitBy,
+    ]).size).toBe(6);
+    for (const owner of Object.values(history)) expect(Object.isFrozen(owner)).toBe(true);
+    expect(history.lastTakenMove).toHaveLength(16);
+    expect(history.lastTakenMoveFrom).toHaveLength(32);
+    expect(Object.isFrozen(history)).toBe(true);
+
+    const replay = createBattleScriptRulesContext(
+      JSON.parse(JSON.stringify(context)) as BattleScriptRulesContextInput,
+    );
+    expect(replay).toEqual(context);
+    expect(replay.moveHistory.lastMoves).not.toBe(context.moveHistory.lastMoves);
+
+    for (const invalid of [
+      { lastPrintedMoves: [0, 0, 0] },
+      { lastHitBy: [0, 0, 0, 0x100] },
+      { lastTakenMove: new Array(15).fill(0) },
+      { lastTakenMoveFrom: [...new Array(31).fill(0), -1] },
+    ]) {
+      expect(() => createBattleScriptRulesContext(contextInput({
+        moveHistory: invalid,
+      }))).toThrow();
+    }
+  });
+
+  it("update-last-moves-swaps-before-indexed-history-writes-and-resolves-type", () => {
+    const context = createBattleScriptRulesContext(contextInput({
+      selectorRoles: { attacker: 0, target: 1, effectBattler: 1 },
+      currentMove: 92,
+      chosenMove: 92,
+      dynamicMoveType: 0xca,
+      moveendState: 14,
+      hitMarker: BATTLE_SCRIPT_HITMARKER_SWAP_ATTACKER_TARGET
+        | BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED
+        | BATTLE_SCRIPT_HITMARKER_OBEYS,
+      moveHistory: {
+        lastPrintedMoves: [0x1000, 0x1001, 0x1002, 0x1003],
+        lastMoves: [0x2000, 0x2001, 0x2002, 0x2003],
+        lastResultingMoves: [0x3000, 0x3001, 0x3002, 0x3003],
+        lastLandedMoves: [0x4000, 0x4001, 0x4002, 0x4003],
+        lastHitByType: [0x5000, 0x5001, 0x5002, 0x5003],
+        lastHitBy: [0, 1, 2, 3],
+      },
+    }));
+    const next = applyBattleScriptMoveEndUpdateLastMovesOwnership(context);
+    expect(next.selectorRoles).toEqual({ attacker: 1, target: 0, effectBattler: 1 });
+    expect(next.hitMarker & BATTLE_SCRIPT_HITMARKER_SWAP_ATTACKER_TARGET).toBe(0);
+    expect(next.moveendState).toBe(15);
+    expect(next.moveHistory).toMatchObject({
+      lastPrintedMoves: [0x1000, 92, 0x1002, 0x1003],
+      lastMoves: [0x2000, 92, 0x2002, 0x2003],
+      lastResultingMoves: [0x3000, 92, 0x3002, 0x3003],
+      lastLandedMoves: [92, 0x4001, 0x4002, 0x4003],
+      lastHitByType: [10, 0x5001, 0x5002, 0x5003],
+      lastHitBy: [1, 1, 2, 3],
+    });
+    expect(next.moveHistory.lastTakenMove).toBe(context.moveHistory.lastTakenMove);
+    expect(next.moveHistory.lastTakenMoveFrom)
+      .toBe(context.moveHistory.lastTakenMoveFrom);
+  });
+
+  it("update-last-moves-pins-both-absent-masks-and-hit-result-effect-gates", () => {
+    const base = contextInput({
+      chosenMove: 92,
+      currentMove: 92,
+      moveendState: 14,
+      hitMarker: BATTLE_SCRIPT_HITMARKER_OBEYS,
+      moveHistory: { lastMoves: [0xaaaa, 0, 0, 0] },
+    });
+    for (const absent of [
+      { absentBattlerFlags: 1 },
+      { battleStructAbsentBattlerFlags: 1 },
+    ]) {
+      const source = createBattleScriptRulesContext({ ...base, ...absent });
+      const next = applyBattleScriptMoveEndUpdateLastMovesOwnership(source);
+      expect(next.moveHistory).toBe(source.moveHistory);
+      expect(next.moveendState).toBe(15);
+    }
+
+    const baton = createBattleScriptRulesContext({ ...base, chosenMove: 226 });
+    expect(applyBattleScriptMoveEndUpdateLastMovesOwnership(baton).moveHistory)
+      .toBe(baton.moveHistory);
+
+    const failed = createBattleScriptRulesContext({
+      ...base,
+      moveResultFlags: BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
+    });
+    expect(applyBattleScriptMoveEndUpdateLastMovesOwnership(failed).moveHistory)
+      .toMatchObject({ lastLandedMoves: [0, 0xffff, 0, 0] });
+
+    const disobeyed = createBattleScriptRulesContext({ ...base, hitMarker: 0 });
+    expect(applyBattleScriptMoveEndUpdateLastMovesOwnership(disobeyed).moveHistory)
+      .toMatchObject({
+        lastMoves: [0xffff, 0, 0, 0],
+        lastResultingMoves: [0xffff, 0, 0, 0],
+        lastLandedMoves: [0, 0xffff, 0, 0],
+      });
+
+    const fainted = createBattleScriptRulesContext({
+      ...base,
+      hitMarker: BATTLE_SCRIPT_HITMARKER_OBEYS | (1 << 29),
+      moveHistory: { lastHitBy: [0, 3, 0, 0] },
+    });
+    expect(
+      applyBattleScriptMoveEndUpdateLastMovesOwnership(fainted).moveHistory.lastHitBy,
+    ).toEqual([0, 3, 0, 0]);
+  });
+
+  it("normalizes-unavailable-original-move-without-resolving-an-invalid-id", () => {
+    const context = createBattleScriptRulesContext(contextInput({
+      chosenMove: BATTLE_SCRIPT_MOVE_UNAVAILABLE,
+      currentMove: 92,
+      moveendState: 14,
+      hitMarker: BATTLE_SCRIPT_HITMARKER_OBEYS,
+    }));
+    const next = applyBattleScriptMoveEndUpdateLastMovesOwnership(context);
+    expect(next.moveHistory.lastMoves[0]).toBe(BATTLE_SCRIPT_MOVE_UNAVAILABLE);
+    expect(next.moveHistory.lastLandedMoves[1]).toBe(BATTLE_SCRIPT_MOVE_UNAVAILABLE);
+  });
+
+  it("mirror-history-serializes-source-target-attacker-order", () => {
+    const context = createBattleScriptRulesContext(contextInput({
+      selectorRoles: { attacker: 2, target: 3, effectBattler: 3 },
+      chosenMove: 92,
+      moveendState: 15,
+      hitMarker: BATTLE_SCRIPT_HITMARKER_OBEYS,
+      moveHistory: {
+        lastTakenMove: new Array(16).fill(0xaa),
+        lastTakenMoveFrom: new Array(32).fill(0xbb),
+      },
+    }));
+    const next = applyBattleScriptMoveEndMirrorMoveOwnership(context);
+    expect(next.moveendState).toBe(16);
+    expect(next.moveHistory.lastTakenMove.slice(6, 8)).toEqual([0x5c, 0x00]);
+    expect(next.moveHistory.lastTakenMoveFrom.slice(28, 30)).toEqual([0x5c, 0x00]);
+    expect(next.moveHistory.lastTakenMove[4]).toBe(0xaa);
+    expect(next.moveHistory.lastTakenMoveFrom[22]).toBe(0xbb);
+    expect(next.moveHistory.lastMoves).toBe(context.moveHistory.lastMoves);
+  });
+
+  it("mirror-history-pins-both-absent-hit-result-effect-and-identity-gates", () => {
+    const base = contextInput({
+      chosenMove: 92,
+      moveendState: 15,
+      hitMarker: BATTLE_SCRIPT_HITMARKER_OBEYS,
+    });
+    const blocked = [
+      { absentBattlerFlags: 1 },
+      { battleStructAbsentBattlerFlags: 1 },
+      { hitMarker: 0 },
+      { hitMarker: BATTLE_SCRIPT_HITMARKER_OBEYS | (1 << 29) },
+      { moveResultFlags: BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT },
+      { chosenMove: 226 },
+      { selectorRoles: { attacker: 0 as const, target: 0 as const, effectBattler: 0 as const } },
+      { chosenMove: BATTLE_SCRIPT_MOVE_UNAVAILABLE },
+    ];
+    for (const gate of blocked) {
+      const source = createBattleScriptRulesContext({ ...base, ...gate });
+      const next = applyBattleScriptMoveEndMirrorMoveOwnership(source);
+      expect(next.moveHistory).toBe(source.moveHistory);
+      expect(next.moveendState).toBe(16);
+    }
   });
 });
