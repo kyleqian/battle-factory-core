@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 403 — Gate-3 attack-canceler PARALYZED source phase integrated
+
+- **State:** the run is clean and green at **142 files / 1789 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through PARALYZED
+  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** ported battle_util.c:2188-2199 with the exact
+  `status1 & STATUS1_PARALYSIS` predicate and conditional `Random() % 4`
+  ownership. Modulo zero sets `ProtectStruct::prlzImmobility`, the unable
+  marker, effect 1, and hands off to `BattleScript_MoveUsedIsParalyzed`;
+  its later `cancelmultiturnmoves BS_ATTACKER` remains explicitly script-owned.
+- **Next:** begin `CANCELER_IN_LOVE` only after its infatuation source,
+  battler selection, conditional RNG/cursor/script branches, protect flag,
+  helper ownership, marker/effect, and receipts are explicit. Do not loop
+  phases or register opcode 0.
+- **Notes:** all four battlers/both sides, non-paralyzed no-draw, all four
+  modulo outcomes and boundaries **0/3/4/65535**, preset protect/marker,
+  missing/invalid context, exact one-call LCG ownership, exactly one tracker
+  advance, input immutability, deterministic replay, and deep freezing are
+  pinned. Focused **4 files / 39 tests**; integrated Tier-1 **142 files / 1789
+  tests**, build, OFF v5 info (`9c89c741…`), and diff check green. Code commit
+  `e6a9b8e`; pixel diff N/A.
+
+---
 ## 402 — Gate-3 attack-canceler CONFUSED source phase integrated
 
 - **State:** the run is clean and green at **140 files / 1777 tests**. S10
@@ -55,31 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and no ambient RNG are pinned. Focused **3 files / 29 tests**; integrated
   Tier-1 **139 files / 1771 tests**, build, OFF v5 info (`9c89c741…`), and
   diff check green. Code commits `cdb9f4e` + `16ec3d6`; pixel diff N/A.
-
----
-## 400 — S10 battle boundary published; BIND portability integrated
-
-- **State:** the run is clean and green at **138 files / 1764 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes; the new headless
-  battle-level ABI is published but deliberately not integrated into
-  `core.ts`, `battleScene.ts`, or the incomplete Battle Script machine.
-  Scene-ON coverage is **13 exact / 1 partial / 262 unsupported**.
-- **Did:** added a versioned, canonical-JSON `BattleState` whose returned
-  immutable state alone persists Emerald LCG value/call count. One matching
-  player/trainer command or explicit forced-switch submission runs an injected
-  pure rules reducer and returns ordered frozen semantic events plus exactly
-  one next request or terminal outcome. BIND's opposite ONIX→MURKROW
-  orientation is exact at task/OAM **45/45** and RGB **45/45**, promoting the
-  move to exact without owning hit/result/residual logic.
-- **Next:** resume the bounded `CANCELER_IMPRISONED` source phase without a
-  phase loop or opcode-0 registration. In parallel, audit native Factory AI
-  view/history/RNG/switch-item dependencies and prove MUD SLAP as the next
-  bounded Level-50 animation unit with SAND ATTACK kept green.
-- **Notes:** focused **1 file / 12 tests**, integrated Tier-1 **138 files /
-  1764 tests**, build, both v5 oracle profiles (`9c89c741…`), and diff check
-  are supervisor-green. Tests
-  pin caller immutability/deep freezing, canonical serialization and replay,
-  request mismatch rejection, state-owned/no-ambient RNG, both sides and
-  forced switches, event order, boundary exclusivity, and rejection of
-  presentation acknowledgements before rules/RNG execution. BIND's existing
-  orientation also remains **45/45 + 45/45** exact; merge `86f1beb`.
