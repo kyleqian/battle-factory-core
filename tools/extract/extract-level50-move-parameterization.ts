@@ -1,10 +1,10 @@
 // Dev-time S10 coverage join for the Level-50 Factory move corpus.  This is
 // deliberately a catalog join, not a mechanics classifier: it preserves the
 // source-derived move table, Battle Script labels, roster usage, animation
-// dependency IDs, and only those item/ability hook families whose source
-// selectors are finite and mechanical. A category means a move *could* reach
-// that dispatcher when the relevant battler owns the item or ability; it never
-// says that a Frontier set's active battler does own one.
+// dependency IDs, plus a deliberately partial catalog of source dispatcher
+// families. It does not currently classify individual moves into those hook
+// families: doing that honestly requires complete Battle Script control-flow
+// reachability, including implicit assembly fallthrough and branch guards.
 //
 // Run with:
 //   node --experimental-strip-types tools/extract/extract-level50-move-parameterization.ts
@@ -47,15 +47,7 @@ type Topology = {
   level50FactoryReachableEffects: Array<{ id: number; effect: string; moves: Array<{ id: number; move: string }> }>;
 };
 type Graph = { labels: Array<{ name: string }> };
-type Program = {
-  blocks: Array<{
-    label: string;
-    statements: Array<{
-      actualOperands?: string[];
-      emittedStatements?: Array<{ opcodeReferences?: Array<{ opcodeId: number }> }>;
-    }>;
-  }>;
-};
+type Program = { blocks: Array<{ label: string }> };
 type Inventory = { tiers: { level50: { moves: Array<{ id: number; move: string; animationScript: string }> } } };
 type AnimationComponents = { moves: Array<{ id: number; move: string; rootScript: string; componentIds: string[] }> };
 type HeldItems = { count: number; entries: Array<{ itemTableId: number; holdEffect: string; holdEffectParam: number }> };
@@ -85,37 +77,6 @@ const graphLabels = new Set(graph.labels.map((label) => label.name));
 const programLabels = new Set(program.blocks.map((block) => block.label));
 const executionInventoryByMove = new Map(inventory.tiers.level50.moves.map((move) => [move.move, move]));
 const animationByMove = new Map(animationComponents.moves.map((move) => [move.move, move]));
-const programByLabel = new Map(program.blocks.map((block) => [block.label, block]));
-
-// These opcode IDs are the pinned B_SCR_OP_* dispatch slots. Reachability is
-// deliberately conservative: it follows all named program operands, so a
-// category is potential source-script reach rather than a claim that a branch
-// will execute in a particular battle.
-const B_SCR_OP_ATTACKCANCELER = 0;
-const B_SCR_OP_ACCURACYCHECK = 1;
-const B_SCR_OP_MOVEEND = 73;
-function blockOpcodeIds(block: Program["blocks"][number]): number[] {
-  return block.statements.flatMap((statement) => statement.emittedStatements ?? [])
-    .flatMap((statement) => statement.opcodeReferences ?? [])
-    .map((reference) => reference.opcodeId);
-}
-function reachableOpcodeIds(entryLabel: string): Set<number> {
-  const pending = [entryLabel];
-  const visited = new Set<string>();
-  const result = new Set<number>();
-  while (pending.length > 0) {
-    const label = pending.pop()!;
-    const block = programByLabel.get(label);
-    if (!block || visited.has(label)) continue;
-    visited.add(label);
-    for (const opcodeId of blockOpcodeIds(block)) result.add(opcodeId);
-    for (const operand of block.statements.flatMap((statement) => statement.actualOperands ?? [])) {
-      if (programByLabel.has(operand)) pending.push(operand);
-    }
-  }
-  return result;
-}
-
 const soundMovesMatch = /static const u16 sSoundMovesTable\[\]\s*=\s*\{([\s\S]*?)\};/.exec(battleUtilSource);
 if (!soundMovesMatch) throw new Error("unable to locate sSoundMovesTable in battle_util.c");
 const soundMoves = new Set(
@@ -123,9 +84,6 @@ const soundMoves = new Set(
 );
 if (soundMoves.size !== 10) throw new Error(`expected ten source Soundproof move selectors, got ${soundMoves.size}`);
 
-const physicalTypes = new Set([
-  "TYPE_NORMAL", "TYPE_FIGHTING", "TYPE_FLYING", "TYPE_POISON", "TYPE_GROUND", "TYPE_ROCK", "TYPE_BUG", "TYPE_GHOST", "TYPE_STEEL",
-]);
 type HookCategory = { id: string; dispatcher: string; selector: string; ownership: string };
 const ITEM_HOOK_CATALOG: HookCategory[] = [
   { id: "selection-choice-band", dispatcher: "TrySetCantSelectMoveBattleScript / CheckMoveLimitations", selector: "HOLD_EFFECT_CHOICE_BAND; any selected move slot", ownership: "attacker held item and prior choicedMove" },
@@ -171,25 +129,6 @@ const records = rosterMoveSymbols.map((symbol) => {
   if (animationInventory && (!animation || animation.rootScript !== animationInventory.animationScript)) {
     throw new Error(`${symbol} animation inventory/component graph disagreement`);
   }
-  const reachableOpcodes = reachableOpcodeIds(script.entryScript);
-  const attackCancelerReachable = reachableOpcodes.has(B_SCR_OP_ATTACKCANCELER);
-  const accuracyReachable = reachableOpcodes.has(B_SCR_OP_ACCURACYCHECK);
-  const moveEndReachable = reachableOpcodes.has(B_SCR_OP_MOVEEND);
-  const itemCategories = [
-    "selection-choice-band",
-    ...(accuracyReachable ? ["accuracy-target-evasion-item"] : []),
-    ...(moveEndReachable && move.flags.includes("FLAG_KINGS_ROCK_AFFECTED") ? ["moveend-kings-rock"] : []),
-  ];
-  const abilityCategories = [
-    ...(attackCancelerReachable && soundMoves.has(symbol) ? ["moves-block-soundproof"] : []),
-    ...(accuracyReachable && move.type === "TYPE_ELECTRIC" && move.power !== 0 ? ["absorbing-volt-absorb"] : []),
-    ...(accuracyReachable && move.type === "TYPE_WATER" && move.power !== 0 ? ["absorbing-water-absorb"] : []),
-    ...(accuracyReachable && move.type === "TYPE_FIRE" ? ["absorbing-flash-fire"] : []),
-    ...(moveEndReachable && move.flags.includes("FLAG_MAKES_CONTACT") ? ["moveend-contact-on-damage"] : []),
-    ...(moveEndReachable && move.power !== 0 ? ["moveend-color-change"] : []),
-    ...(accuracyReachable ? ["accuracy-compound-eyes", "accuracy-sand-veil"] : []),
-    ...(accuracyReachable && physicalTypes.has(move.type) ? ["accuracy-hustle-physical"] : []),
-  ];
   return {
     id: move.id,
     move: move.move,
@@ -219,16 +158,16 @@ const records = rosterMoveSymbols.map((symbol) => {
     } : { script: null, componentIds: [] },
     hooks: {
       item: {
-        potentialCategories: itemCategories,
-        status: "source-derived-partial",
+        potentialCategories: null,
+        status: "unsupported",
         unsupportedCategories: null,
-        reason: "Potential only: active held-item ownership, branch conditions, and non-cataloged item dispatcher families are intentionally not inferred.",
+        reason: "Per-move item categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
       },
       ability: {
-        potentialCategories: abilityCategories,
-        status: "source-derived-partial",
+        potentialCategories: null,
+        status: "unsupported",
         unsupportedCategories: null,
-        reason: "Potential only: active ability ownership, battle state, and non-cataloged ability dispatcher families are intentionally not inferred.",
+        reason: "Per-move ability categories require complete Battle Script control flow, including implicit fallthrough and source branch guards; the partial dispatcher catalog is not joined to moves.",
       },
     },
   };
@@ -256,7 +195,7 @@ const output = {
       "reference/pokeemerald/include/battle.h",
       "reference/pokeemerald/include/constants/pokemon.h",
     ],
-    note: "Catalog join plus finite source dispatcher selectors. Hook categories are potential and preserve item/ability ownership as a runtime condition; unsupported dispatcher families remain null rather than inferred from Frontier co-occurrence.",
+    note: "Catalog join plus an intentionally partial source dispatcher inventory. Per-move item/ability categories are unsupported/null until complete Battle Script control flow includes implicit fallthrough and source branch guards.",
   },
   coverage: {
     level50Roster: {
@@ -274,8 +213,8 @@ const output = {
       battleScriptGraphLabels: records.filter((record) => record.battleScript.graphLabel !== null).length,
       battleScriptProgramLabels: records.filter((record) => record.battleScript.programLabel !== null).length,
       animationScripts: records.filter((record) => record.animation.script !== null).length,
-      itemHookCategories: new Set(records.flatMap((record) => record.hooks.item.potentialCategories)).size,
-      abilityHookCategories: new Set(records.flatMap((record) => record.hooks.ability.potentialCategories)).size,
+      itemHookCategories: 0,
+      abilityHookCategories: 0,
       itemHookUnsupportedCategories: null,
       abilityHookUnsupportedCategories: null,
     },
@@ -284,14 +223,20 @@ const output = {
         frontierHeldItemRows: heldItems.count,
         explicitHoldEffectRows: holdEffects.items.length,
         moveToHookDispatchers: ITEM_HOOK_CATALOG,
+        catalogedDispatcherCategories: ITEM_HOOK_CATALOG.length,
+        completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "Only Choice Band selection, target Evasion-up accuracy, and King's Rock flag selectors are cataloged. Other held-item dispatchers remain null.",
+        reason: "Only Choice Band selection, target Evasion-up accuracy, and King's Rock flag selectors are inventoried. Per-move joins and all other held-item dispatchers remain unsupported/null.",
       },
       ability: {
         displayRows: Object.keys(abilityDisplay.abilities).length,
         moveToHookDispatchers: ABILITY_HOOK_CATALOG,
+        catalogedDispatcherCategories: ABILITY_HOOK_CATALOG.length,
+        soundproofSourceSelectorRows: soundMoves.size,
+        soundproofLevel50RosterSelectorRows: records.filter((record) => soundMoves.has(record.move)).length,
+        completeness: "intentionally-partial",
         unsupportedCategories: null,
-        reason: "Only finite Soundproof, absorber/type, contact/on-damage, and accuracy selectors are cataloged. Other ability dispatchers remain null.",
+        reason: "Only Soundproof, absorber/type, contact/on-damage, and accuracy dispatcher selectors are inventoried. Per-move joins and all other ability dispatchers remain unsupported/null.",
       },
     },
   },

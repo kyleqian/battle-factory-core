@@ -16,8 +16,8 @@ type Record = {
   battleScript: { effectId: number; entryScript: string; graphLabel: string | null; programLabel: string | null; executionInventory: string };
   animation: { script: string | null; componentIds: string[] };
   hooks: {
-    item: { potentialCategories: string[]; status: string; unsupportedCategories: null; reason: string };
-    ability: { potentialCategories: string[]; status: string; unsupportedCategories: null; reason: string };
+    item: { potentialCategories: null; status: string; unsupportedCategories: null; reason: string };
+    ability: { potentialCategories: null; status: string; unsupportedCategories: null; reason: string };
   };
 };
 type SourceMove = {
@@ -34,7 +34,7 @@ type SourceMove = {
   priority: number;
   flags: string[];
 };
-const manifest = data as { schema: string; coverage: { level50Roster: { frontierSetIds: { first: number; last: number; count: number }; moveCount: number; moveTableEffectFamilyCount: number }; level50Executable: { moveCount: number; battleScriptEffectFamilyCount: number; rosterOnlyMoveCount: number; rosterOnlyMoveTableEffectFamilyCount: number }; joins: { battleScriptGraphLabels: number; battleScriptProgramLabels: number; animationScripts: number; itemHookCategories: number; abilityHookCategories: number; itemHookUnsupportedCategories: null; abilityHookUnsupportedCategories: null }; hookCatalogs: { item: { frontierHeldItemRows: number; explicitHoldEffectRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; unsupportedCategories: null }; ability: { displayRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; unsupportedCategories: null } } }; moves: Record[] };
+const manifest = data as { schema: string; coverage: { level50Roster: { frontierSetIds: { first: number; last: number; count: number }; moveCount: number; moveTableEffectFamilyCount: number }; level50Executable: { moveCount: number; battleScriptEffectFamilyCount: number; rosterOnlyMoveCount: number; rosterOnlyMoveTableEffectFamilyCount: number }; joins: { battleScriptGraphLabels: number; battleScriptProgramLabels: number; animationScripts: number; itemHookCategories: number; abilityHookCategories: number; itemHookUnsupportedCategories: null; abilityHookUnsupportedCategories: null }; hookCatalogs: { item: { frontierHeldItemRows: number; explicitHoldEffectRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; completeness: string; unsupportedCategories: null }; ability: { displayRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; catalogedDispatcherCategories: number; soundproofSourceSelectorRows: number; soundproofLevel50RosterSelectorRows: number; completeness: string; unsupportedCategories: null } } }; moves: Record[] };
 const sourceMoves = new Map((movesData.moves as SourceMove[]).map((move) => [move.move, move]));
 
 describe("Level-50 move parameterization manifest", () => {
@@ -69,12 +69,18 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 3, abilityHookCategories: 8,
+      itemHookCategories: 0, abilityHookCategories: 0,
       itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
-      item: { frontierHeldItemRows: 63, explicitHoldEffectRows: 70, unsupportedCategories: null },
-      ability: { displayRows: 8, unsupportedCategories: null },
+      item: {
+        frontierHeldItemRows: 63, explicitHoldEffectRows: 70, catalogedDispatcherCategories: 3,
+        completeness: "intentionally-partial", unsupportedCategories: null,
+      },
+      ability: {
+        displayRows: 8, catalogedDispatcherCategories: 9, soundproofSourceSelectorRows: 10,
+        soundproofLevel50RosterSelectorRows: 9, completeness: "intentionally-partial", unsupportedCategories: null,
+      },
     });
     expect(manifest.coverage.hookCatalogs.item.moveToHookDispatchers.map((hook) => hook.id)).toEqual([
       "selection-choice-band", "accuracy-target-evasion-item", "moveend-kings-rock",
@@ -85,7 +91,37 @@ describe("Level-50 move parameterization manifest", () => {
     ]);
   });
 
-  it("preserves move-table values and records only potential source-dispatch hook categories", () => {
+  it("pins every partial dispatcher row to its named source selector", () => {
+    const source = [
+      readFileSync("reference/pokeemerald/src/battle_util.c", "utf8"),
+      readFileSync("reference/pokeemerald/src/battle_script_commands.c", "utf8"),
+    ].join("\n");
+    const requiredTokensByCategory: { [category: string]: string[] } = {
+      "selection-choice-band": ["HOLD_EFFECT_CHOICE_BAND", "CheckMoveLimitations"],
+      "accuracy-target-evasion-item": ["HOLD_EFFECT_EVASION_UP", "Cmd_accuracycheck"],
+      "moveend-kings-rock": ["ITEMEFFECT_KINGSROCK_SHELLBELL", "FLAG_KINGS_ROCK_AFFECTED"],
+      "moves-block-soundproof": ["ABILITYEFFECT_MOVES_BLOCK", "sSoundMovesTable", "ABILITY_SOUNDPROOF"],
+      "absorbing-volt-absorb": ["ABILITYEFFECT_ABSORBING", "ABILITY_VOLT_ABSORB", "TYPE_ELECTRIC"],
+      "absorbing-water-absorb": ["ABILITYEFFECT_ABSORBING", "ABILITY_WATER_ABSORB", "TYPE_WATER"],
+      "absorbing-flash-fire": ["ABILITYEFFECT_ABSORBING", "ABILITY_FLASH_FIRE", "TYPE_FIRE"],
+      "moveend-contact-on-damage": ["ABILITYEFFECT_ON_DAMAGE", "FLAG_MAKES_CONTACT", "ABILITY_ROUGH_SKIN"],
+      "moveend-color-change": ["ABILITYEFFECT_ON_DAMAGE", "ABILITY_COLOR_CHANGE"],
+      "accuracy-compound-eyes": ["Cmd_accuracycheck", "ABILITY_COMPOUND_EYES"],
+      "accuracy-sand-veil": ["Cmd_accuracycheck", "ABILITY_SAND_VEIL", "B_WEATHER_SANDSTORM"],
+      "accuracy-hustle-physical": ["Cmd_accuracycheck", "ABILITY_HUSTLE", "IS_TYPE_PHYSICAL(type)"],
+    };
+    const rows = [
+      ...manifest.coverage.hookCatalogs.item.moveToHookDispatchers,
+      ...manifest.coverage.hookCatalogs.ability.moveToHookDispatchers,
+    ];
+    expect(Object.keys(requiredTokensByCategory)).toHaveLength(rows.length);
+    for (const row of rows) {
+      expect(requiredTokensByCategory[row.id], `missing source pin for ${row.id}`).toBeDefined();
+      for (const token of requiredTokensByCategory[row.id]!) expect(source, `${row.id}: ${token}`).toContain(token);
+    }
+  });
+
+  it("preserves move-table values while leaving every per-move hook join explicitly unsupported", () => {
     for (const record of manifest.moves) {
       const source = sourceMoves.get(record.move)!;
       expect(record.id).toBe(source.id);
@@ -99,22 +135,25 @@ describe("Level-50 move parameterization manifest", () => {
       if (record.animation.script === null) expect(record.animation.componentIds).toEqual([]);
       else expect(record.animation.componentIds.length).toBeGreaterThan(0);
       for (const hook of [record.hooks.item, record.hooks.ability]) {
-        expect(hook.status).toBe("source-derived-partial");
+        expect(hook.status).toBe("unsupported");
+        expect(hook.potentialCategories).toBeNull();
         expect(hook.unsupportedCategories).toBeNull();
-        expect(new Set(hook.potentialCategories).size).toBe(hook.potentialCategories.length);
+        expect(hook.reason).toContain("implicit fallthrough");
         expect(hook.reason.length).toBeGreaterThan(0);
       }
     }
+  });
+
+  it("does not underclassify source-obvious guard moves through an incomplete named-operand walk", () => {
     const move = (symbol: string) => manifest.moves.find((record) => record.move === symbol)!;
-    expect(move("MOVE_ROAR").hooks).toMatchObject({
-      item: { potentialCategories: ["selection-choice-band", "accuracy-target-evasion-item"] },
-      ability: { potentialCategories: ["moves-block-soundproof", "accuracy-compound-eyes", "accuracy-sand-veil", "accuracy-hustle-physical"] },
-    });
-    expect(move("MOVE_DIVE").hooks).toMatchObject({
-      item: { potentialCategories: ["selection-choice-band", "accuracy-target-evasion-item", "moveend-kings-rock"] },
-      ability: { potentialCategories: ["absorbing-water-absorb", "moveend-contact-on-damage", "moveend-color-change", "accuracy-compound-eyes", "accuracy-sand-veil"] },
-    });
-    expect(move("MOVE_WILL_O_WISP").hooks.ability.potentialCategories).toEqual(["absorbing-flash-fire", "accuracy-compound-eyes", "accuracy-sand-veil"]);
-    expect(move("MOVE_SWORDS_DANCE").hooks.item.potentialCategories).toEqual(["selection-choice-band"]);
+    for (const symbol of [
+      "MOVE_THUNDER", "MOVE_SURF", "MOVE_FIRE_PUNCH", "MOVE_TACKLE",
+      "MOVE_WILL_O_WISP", "MOVE_ROAR", "MOVE_PROTECT",
+    ]) {
+      expect(move(symbol).hooks).toMatchObject({
+        item: { potentialCategories: null, status: "unsupported" },
+        ability: { potentialCategories: null, status: "unsupported" },
+      });
+    }
   });
 });

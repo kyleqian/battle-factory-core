@@ -1,38 +1,36 @@
 # Level-50 move item/ability hook catalog
 
-Audit date: 2026-07-24. This is a generated, source-selector catalog for the
-300-move Level-50 roster. It is not a battler-state catalog: every category is
-only a potential hook and requires the stated active battler to own the item or
-ability at runtime. No category is inferred from a Frontier set's species,
-item, or co-occurrence.
+Audit date: 2026-07-24. This is an intentionally partial inventory of selected
+source dispatchers beside the 300-move Level-50 roster. It does **not** classify
+individual moves into item or ability hooks. Every move's two
+`potentialCategories` fields are explicitly `null` with status `unsupported`.
 
-## Included finite selectors
+The rejected first version walked only named operands in assembled Battle
+Script blocks. Assembly labels also fall through implicitly to the next
+instruction, so that walk underclassified ordinary paths: notably THUNDER and
+SURF lost their accuracy/absorber hooks. Following more named operands cannot
+make that algorithm conservative or exact. A future per-move join needs a
+complete control-flow graph with fallthrough plus the source branch guards
+that can short-circuit before a hook.
 
-`level50-move-parameterization/v2` follows script labels conservatively through
-all named operands. Thus `ATTACKCANCELER`, `ACCURACYCHECK`, and `MOVEEND`
-reach mean possible source-script reach, not an assertion a branch executes.
+## Included dispatcher inventory
 
-| Ownership | Categories | Level-50 record counts | Source selector |
+| Ownership | Cataloged categories | Count | Source selector |
 | --- | --- | ---: | --- |
-| Attacker item | Choice Band selection | 300 | `TrySetCantSelectMoveBattleScript` / `CheckMoveLimitations`: `HOLD_EFFECT_CHOICE_BAND` applies to any selected slot after a prior chosen move. |
-| Target item | Evasion-up accuracy | 106 | `Cmd_accuracycheck`: target `HOLD_EFFECT_EVASION_UP` after a reachable `ACCURACYCHECK`. |
-| Attacker item | King's Rock flinch | 19 | `Cmd_moveend`: `HOLD_EFFECT_FLINCH` and `FLAG_KINGS_ROCK_AFFECTED` after reachable `MOVEEND`. |
-| Target ability | Soundproof | 9 | `ABILITYEFFECT_MOVES_BLOCK`: exact `sSoundMovesTable` membership after reachable `ATTACKCANCELER`. |
-| Target ability | Volt/Water Absorb, Flash Fire | 0 / 1 / 1 | `ABILITYEFFECT_ABSORBING`: electric/water with nonzero power; fire regardless of power, after reachable `ACCURACYCHECK`. No Level-50 move reaches the Volt Absorb selector. |
-| Target ability | Contact on-damage | 13 | `ABILITYEFFECT_ON_DAMAGE`: `FLAG_MAKES_CONTACT` for Rough Skin, Effect Spore, Poison Point, Static, Flame Body, and Cute Charm after reachable `MOVEEND`. |
-| Target ability | Color Change | 30 | `ABILITYEFFECT_ON_DAMAGE`: nonzero power after reachable `MOVEEND`. |
-| Attacker/target ability | Compound Eyes / Sand Veil / Hustle | 106 / 106 / 74 | `Cmd_accuracycheck`; Hustle additionally uses `IS_TYPE_PHYSICAL(type)`. |
+| Item | Choice Band selection; target evasion-up accuracy; King's Rock flinch | 3 | `TrySetCantSelectMoveBattleScript` / `CheckMoveLimitations`, `Cmd_accuracycheck`, and `Cmd_moveend` |
+| Ability | Soundproof; three absorbers; contact on-damage; Color Change; three accuracy modifiers | 9 | `AbilityBattleEffects` and `Cmd_accuracycheck` |
+| Soundproof selector rows | Exact `sSoundMovesTable` entries excluding `MOVE_NONE` | 10 | `battle_util.c`; 9 of the 10 occur in the Level-50 roster |
 
-The manifest exposes all nine cataloged ability families even though only eight
-occur in the Level-50 records; counts in `coverage.joins` count represented
-categories. `unsupportedCategories: null` is deliberate. It names the honest
-boundary: all other item and ability dispatch families, ownership, state
-predicates, and branch outcomes are not claimed by this join.
+These are dispatcher inventory counts, not move counts. The inventory preserves
+the runtime owner (attacker item, target item, attacker ability, or target
+ability) in every row. It makes no claim that a move reaches the dispatcher,
+that the active battler owns the hook, or that state and earlier source guards
+permit the hook to run. Other dispatchers are not enumerated.
 
 ## Provenance
 
-The extractor reads `moves.json` flags/type/power plus the assembled script
-program and these pinned source selectors:
+The extractor reads the generated roster/program joins and these pinned source
+selectors:
 
 - `src/battle_util.c` SHA-256 `2ba9ee4efe913effa119c8342281745f481910ca1b20cd76b470673062a45fd5`
 - `src/battle_script_commands.c` SHA-256 `e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c`
