@@ -111,6 +111,10 @@ type BattleScriptRulesBattlerBase = Readonly<{
   stealMove?: 0 | 1;
   /** SpecialStatus::lightningRodRedirected; absent legacy inputs normalize to zero. */
   lightningRodRedirected?: 0 | 1;
+  /** ProtectStruct::endured (Cmd_adjustnormaldamage's HP-clamp gate); absent legacy inputs normalize to zero. */
+  endured?: 0 | 1;
+  /** ProtectStruct::helpingHand (Cmd_damagecalc's 1.5x); absent legacy inputs normalize to zero. */
+  helpingHand?: 0 | 1;
   /**
    * The already source-modified physical operands consumed by
    * CalculateBaseDamage's MOVE_POUND/powerOverride=40 confusion call.
@@ -145,6 +149,14 @@ type BattleScriptMoveEndBattlerMetadata = Readonly<{
   ppNotAffectedByPressure: 0 | 1;
   /** Source gBattleMons[battler].types[2], the hit-chain's defending/Ghost-immunity types. */
   types: readonly [string, string];
+  /** Source gBattleMons[battler].species - Lucky Punch/Stick's species-gated crit stage boost. */
+  species: number;
+  /** Source gBattleMons[battler].{attack,defense,spAttack,spDefense,level} - CalculateBaseDamage's raw stat inputs. */
+  attack: number;
+  defense: number;
+  spAttack: number;
+  spDefense: number;
+  level: number;
 }>;
 
 /**
@@ -170,6 +182,12 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
   protected?: 0 | 1;
   ppNotAffectedByPressure?: 0 | 1;
   types?: readonly [string, string];
+  species?: number;
+  attack?: number;
+  defense?: number;
+  spAttack?: number;
+  spDefense?: number;
+  level?: number;
 }>;
 
 export type BattleScriptRulesBattlerState =
@@ -1275,6 +1293,12 @@ export function createBattleScriptRulesContext(
         `battlers[${index}].lightningRodRedirected`,
       ) as 0 | 1,
     }),
+    ...(battler.endured === undefined ? {} : {
+      endured: requireUnsigned(battler.endured, 1, `battlers[${index}].endured`) as 0 | 1,
+    }),
+    ...(battler.helpingHand === undefined ? {} : {
+      helpingHand: requireUnsigned(battler.helpingHand, 1, `battlers[${index}].helpingHand`) as 0 | 1,
+    }),
     targetNotAffected: requireUnsigned(
       battler.targetNotAffected ?? 0,
       1,
@@ -1313,6 +1337,12 @@ export function createBattleScriptRulesContext(
         return [...types];
       })(),
     ) as unknown as readonly [string, string],
+    species: requireUnsigned(battler.species ?? 0, 0xffff, `battlers[${index}].species`),
+    attack: requireUnsigned(battler.attack ?? 0, 0xffff, `battlers[${index}].attack`),
+    defense: requireUnsigned(battler.defense ?? 0, 0xffff, `battlers[${index}].defense`),
+    spAttack: requireUnsigned(battler.spAttack ?? 0, 0xffff, `battlers[${index}].spAttack`),
+    spDefense: requireUnsigned(battler.spDefense ?? 0, 0xffff, `battlers[${index}].spDefense`),
+    level: requireUnsigned(battler.level ?? 0, 0xff, `battlers[${index}].level`),
     ...(battler.confusionDamage === undefined ? {} : {
       confusionDamage: Object.freeze({
         level: requireUnsigned(

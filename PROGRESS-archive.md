@@ -1,3 +1,31 @@
+## 428 — [SUPERVISOR] round-1 merges: hit-chain ground truth + anim interpreter
+
+- **State:** merged tree green at **174 files / 2020 tests**, build green.
+  Round 1 of the 2026-07-24 supervised session landed all three lanes:
+  opcode 0 registered (entry 427), hit-chain ground truth banked, and the
+  user-directed anim-script interpreter spike **succeeded** on FEATHER_DANCE.
+- **Did (merges + docs):** folded `worker/side-20260724-150930` —
+  `tools/probe/verify-hit-chain-ground-truth.ts` + `docs/hit-chain-ground-truth.md`
+  (supervisor-rerun: exit 0, all PASS; hit = exactly 4 attributed `Random()`
+  rolls, miss = 1; ROM damage matches `damageCalc.ts` exactly) — and
+  `worker/animation-20260724-150928` — FEATHER_DANCE now runs a minimal
+  script interpreter + 1:1 `AnimFallingFeather` port instead of replaying
+  recorded probes (973/973 RAM fields per turn; comparators 235/235, 145/145,
+  162/162 at recorded counts, feather self-destroy ticks 7557/8591/9637
+  reproduced with zero per-turn constants). Deleted ISSUES #40 (retired).
+  ROADMAP step (ii) corrected: no `orbyte` on the EffectHit miss path
+  (supervisor source-verified, `battle_scripts_1.s:244`); eighteen total
+  registrations.
+- **Next:** round 2 — main: register the sixteen hit-chain opcodes as ordered
+  rungs against the banked verify script; side: KO/faint + crit edge ground
+  truth via `overrides.parties` (OFF oracle restarted to pick up harness
+  `b30c5d8`); animation: interpreter generalization on MOVE_MIST_BALL
+  (white-feather track).
+- **Notes:** both stale oracle services (started 08:26, predating today's
+  14:10 `overrides.parties` harness commit) restarted by the supervisor while
+  all lanes were idle.
+
+---
 ## 427 — opcode 0 (Cmd_attackcanceler) registered in the production machine
 
 - **State:** S10 step (i) is complete. Opcode 0 is registered in

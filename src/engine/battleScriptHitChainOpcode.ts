@@ -30,8 +30,10 @@ import {
   BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED,
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
   BATTLE_SCRIPT_ITEM_ENIGMA_BERRY,
+  BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
   BATTLE_SCRIPT_MOVE_TARGET_BOTH,
+  BATTLE_SCRIPT_STATUS2_SUBSTITUTE,
   resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptMoveTarget,
   resolveBattleScriptMoveType,
@@ -42,24 +44,36 @@ import {
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import {
+  BATTLE_SCRIPT_BATTLE_TYPE_FIRST_BATTLE,
+  BATTLE_SCRIPT_BATTLE_TYPE_WALLY_TUTORIAL,
   BATTLE_SCRIPT_HITMARKER_GRUDGE,
   BATTLE_SCRIPT_HITMARKER_IGNORE_ON_AIR,
   BATTLE_SCRIPT_HITMARKER_IGNORE_UNDERGROUND,
   BATTLE_SCRIPT_HITMARKER_IGNORE_UNDERWATER,
   BATTLE_SCRIPT_HITMARKER_NO_PPDEDUCT,
   BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE,
+  BATTLE_SCRIPT_MOVE_RESULT_FOE_ENDURED,
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
+  BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE,
+  BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE,
+  BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY,
   BATTLE_SCRIPT_STATUS2_FORESIGHT,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS2_TRANSFORMED,
   BATTLE_SCRIPT_STATUS3_ALWAYS_HITS,
+  BATTLE_SCRIPT_STATUS3_CANT_SCORE_A_CRIT,
   BATTLE_SCRIPT_STATUS3_ON_AIR,
   BATTLE_SCRIPT_STATUS3_UNDERGROUND,
   BATTLE_SCRIPT_STATUS3_UNDERWATER,
 } from "./battleScriptSourceConstants.ts";
 import {
+  applyRandomDamageMultiplier,
+  applyStab,
   calculateAccuracy,
+  calculateBaseDamage,
+  CRITICAL_HIT_CHANCE_ONE_IN,
   rollAccuracyHits,
+  rollIsCriticalHit,
   type TypeEffectivenessEntry,
 } from "./damageCalc.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
@@ -99,17 +113,36 @@ function resolveMoveTypeName(rulesContext: BattleScriptRulesContext, move: numbe
   return name;
 }
 
+const ABILITY_BATTLE_ARMOR = 4;
 const ABILITY_LEVITATE = 26;
+const ABILITY_WONDER_GUARD = 25;
 const ABILITY_PRESSURE = 46;
+const ABILITY_SHELL_ARMOR = 75;
 const ABILITY_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
   8: "ABILITY_SAND_VEIL",
   14: "ABILITY_COMPOUND_EYES",
   55: "ABILITY_HUSTLE",
+  62: "ABILITY_GUTS",
 });
+
+const SPECIES_FARFETCHD = 83;
+const SPECIES_CHANSEY = 113;
+
+/** hold_effects.h ids (item-hold-effects.json's `holdEffectId`). */
+const HOLD_EFFECT_ID_FOCUS_BAND = 39;
+const HOLD_EFFECT_ID_SCOPE_LENS = 41;
+const HOLD_EFFECT_ID_LUCKY_PUNCH = 63;
+const HOLD_EFFECT_ID_STICK = 66;
+
+/** STATUS3_CHARGED_UP (include/constants/battle.h:166) - Charge's next-hit Electric ×2. */
+const STATUS3_CHARGED_UP = 1 << 9;
+/** STATUS1_BURN (include/constants/battle.h:118). */
+const STATUS1_BURN = 1 << 4;
 
 const B_MSG_MISSED = 0;
 const B_MSG_PROTECTED = 1;
 const B_MSG_AVOIDED_ATK = 2;
+const B_MSG_AVOIDED_DMG = 3;
 const B_MSG_GROUND_MISS = 4;
 
 type HoldEffectRow = Readonly<{ itemId: number; holdEffect: string; holdEffectParam: number }>;
@@ -614,6 +647,298 @@ export const ppreduceOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
   );
 };
 
+/**
+ * Cmd_critcalc (battle_script_commands.c:1253-1286): the critChance stage
+ * (sCriticalHitChance, :606) plus the roll that sets gCritMultiplier for
+ * damagecalc to consume. Battle Armor/Shell Armor/STATUS3_CANT_SCORE_A_CRIT/
+ * tutorial-battle immunity short-circuits the source's `&&` chain *before*
+ * Random() runs -- immunity consumes zero RNG here, it does not waste a roll.
+ */
+export const critcalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const attackerBattler = rulesContext.battlers[attacker];
+  const targetBattler = rulesContext.battlers[target];
+  const moveRow = requireMoveRow(rulesContext.currentMove);
+
+  const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, attacker);
+  let critChance = 0;
+  if ((attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY) !== 0) critChance += 2;
+  if (moveRow.effect === "EFFECT_HIGH_CRITICAL") critChance += 1;
+  if (moveRow.effect === "EFFECT_SKY_ATTACK") critChance += 1;
+  if (moveRow.effect === "EFFECT_BLAZE_KICK") critChance += 1;
+  if (moveRow.effect === "EFFECT_POISON_TAIL") critChance += 1;
+  if (holdEffectId === HOLD_EFFECT_ID_SCOPE_LENS) critChance += 1;
+  if (holdEffectId === HOLD_EFFECT_ID_LUCKY_PUNCH && attackerBattler.species === SPECIES_CHANSEY) critChance += 2;
+  if (holdEffectId === HOLD_EFFECT_ID_STICK && attackerBattler.species === SPECIES_FARFETCHD) critChance += 2;
+  if (critChance >= CRITICAL_HIT_CHANCE_ONE_IN.length) critChance = CRITICAL_HIT_CHANCE_ONE_IN.length - 1;
+
+  const immune = targetBattler.ability === ABILITY_BATTLE_ARMOR
+    || targetBattler.ability === ABILITY_SHELL_ARMOR
+    || (attackerBattler.status3 & BATTLE_SCRIPT_STATUS3_CANT_SCORE_A_CRIT) !== 0
+    || (rulesContext.battleTopology.battleTypeFlags
+      & (BATTLE_SCRIPT_BATTLE_TYPE_WALLY_TUTORIAL | BATTLE_SCRIPT_BATTLE_TYPE_FIRST_BATTLE)) !== 0;
+
+  let isCrit = false;
+  let rng = context.state.rng;
+  if (!immune) {
+    const drawn = drawBattleScriptRng(context.state.rng, context.instruction, "critcalc");
+    rng = drawn.rng;
+    isCrit = rollIsCriticalHit(critChance, drawn.randomValue);
+  }
+
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: Object.freeze({ ...rulesContext, critMultiplier: isCrit ? 2 : 1 }), rng },
+  );
+};
+
+function toDamageCalcStatStages(battler: BattleScriptRulesBattlerState) {
+  return {
+    atk: battler.statStages[1]!,
+    def: battler.statStages[2]!,
+    spAtk: battler.statStages[4]!,
+    spDef: battler.statStages[5]!,
+  };
+}
+
+/**
+ * Cmd_damagecalc (battle_script_commands.c:1288-1301): CalculateBaseDamage
+ * (consumed via damageCalc.ts's pinned calculateBaseDamage) times
+ * gCritMultiplier (set by critcalc above) times gBattleScripting.dmgMultiplier
+ * -- the x2 crit step lives HERE, before Cmd_typecalc's STAB/type scaling, not
+ * inside calculateBaseDamage itself (docs/hit-chain-ground-truth.md's crit
+ * scenario). gDynamicBasePower (Low Kick/Flail-style power overrides) is 0 for
+ * every EFFECT_HIT move so movePower is always gBattleMoves[move].power; side
+ * Reflect/Light Screen and double-battle spread scaling are not modeled
+ * anywhere in this engine yet (consistent with damageCalc.ts's own documented
+ * scope) -- both are structurally always their C default (0/false) since no
+ * side-condition or doubles subsystem exists to set them.
+ */
+export const damagecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => {
+  const rulesContext = context.state.rulesContext;
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const attackerBattler = rulesContext.battlers[attacker];
+  const targetBattler = rulesContext.battlers[target];
+  const move = rulesContext.currentMove;
+  const moveRow = requireMoveRow(move);
+  const moveType = resolveMoveTypeName(rulesContext, move);
+  const isCriticalHit = rulesContext.critMultiplier === 2;
+
+  let damage = calculateBaseDamage({
+    attacker: {
+      attack: attackerBattler.attack,
+      defense: attackerBattler.defense,
+      spAttack: attackerBattler.spAttack,
+      spDefense: attackerBattler.spDefense,
+      level: attackerBattler.level,
+      types: attackerBattler.types,
+      statStages: toDamageCalcStatStages(attackerBattler),
+      isBurned: (attackerBattler.status1 & STATUS1_BURN) !== 0,
+      ability: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
+    },
+    defender: {
+      attack: targetBattler.attack,
+      defense: targetBattler.defense,
+      spAttack: targetBattler.spAttack,
+      spDefense: targetBattler.spDefense,
+      level: targetBattler.level,
+      types: targetBattler.types,
+      statStages: toDamageCalcStatStages(targetBattler),
+    },
+    movePower: moveRow.power,
+    moveType,
+    isCriticalHit,
+  });
+
+  damage = damage * rulesContext.critMultiplier * rulesContext.dmgMultiplier;
+  if ((attackerBattler.status3 & STATUS3_CHARGED_UP) !== 0 && moveType === "TYPE_ELECTRIC") {
+    damage *= 2;
+  }
+  if (attackerBattler.helpingHand === 1) {
+    damage = Math.trunc((damage * 15) / 10);
+  }
+
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage }) },
+  );
+};
+
+/**
+ * Cmd_typecalc (battle_script_commands.c:1355-1420): STAB, the Levitate/Ground
+ * short-circuit (skips the whole type loop when it fires, distinct from
+ * CheckWonderGuardAndLevitate's own copy consumed by RUNG 1's accuracycheck --
+ * this is typecalc's independent branch, kept structurally consistent with
+ * it), the type-effectiveness loop (ModulateDmgByType's TYPE_MUL_* result-flag
+ * toggling), the Foresight-vs-Ghost immunity skip (the source table's single
+ * TYPE_FORESIGHT sentinel row, positioned immediately before the Normal/
+ * Fighting-vs-Ghost immunity entries at the very end of gTypeEffectiveness --
+ * breaking there only ever skips those two entries, nothing earlier in the
+ * table), and Wonder Guard's own miss branch. AttacksThisTurn(attacker, move)
+ * is always 2 for BattleScript_EffectHit's own typecalc call (HITMARKER_CHARGING
+ * is only set during a two-turn move's charging turn, which never reaches this
+ * script), so the Wonder Guard branch's `== 2` guard is structurally always
+ * true here and is not modeled as a separate condition.
+ */
+export const typecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => {
+  const rulesContext = context.state.rulesContext;
+  const move = rulesContext.currentMove;
+
+  if (move === BATTLE_SCRIPT_MOVE_STRUGGLE) {
+    return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+  }
+
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const attackerBattler = rulesContext.battlers[attacker];
+  const targetBattler = rulesContext.battlers[target];
+  const moveRow = requireMoveRow(move);
+  const moveType = resolveMoveTypeName(rulesContext, move);
+
+  let damage = applyStab(rulesContext.battleMoveDamage, attackerBattler.types, moveType);
+  let moveResultFlags = rulesContext.moveResultFlags;
+  let missType = rulesContext.missType;
+  let lastUsedAbility = rulesContext.lastUsedAbility;
+  let moveHistory = rulesContext.moveHistory;
+
+  if (targetBattler.ability === ABILITY_LEVITATE && moveType === "TYPE_GROUND") {
+    lastUsedAbility = ABILITY_LEVITATE;
+    moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED | BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) >>> 0;
+    moveHistory = withClearedLandedMove(moveHistory, target);
+    missType = B_MSG_GROUND_MISS;
+  } else {
+    const hasForesight = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0;
+    const distinctTypes = targetBattler.types[0] === targetBattler.types[1]
+      ? [targetBattler.types[0]]
+      : targetBattler.types;
+    for (const defType of distinctTypes) {
+      if (hasForesight && defType === "TYPE_GHOST" && (moveType === "TYPE_NORMAL" || moveType === "TYPE_FIGHTING")) {
+        continue;
+      }
+      const entry = TYPE_EFFECTIVENESS.find(
+        (candidate) => candidate.attackingType === moveType && candidate.defendingType === defType,
+      );
+      if (!entry) continue;
+      damage = Math.trunc((damage * entry.multiplierTenths) / 10);
+      if (damage === 0 && entry.multiplierTenths !== 0) damage = 1;
+      if (entry.multiplierTenths === 0) {
+        moveResultFlags = (moveResultFlags
+          | BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE)
+          & ~BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE
+          & ~BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE;
+        moveResultFlags = moveResultFlags >>> 0;
+      } else if (entry.multiplierTenths === 5) {
+        if (moveRow.power !== 0 && (moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) === 0) {
+          if ((moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE) !== 0) {
+            moveResultFlags = (moveResultFlags & ~BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE) >>> 0;
+          } else {
+            moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE) >>> 0;
+          }
+        }
+      } else if (entry.multiplierTenths === 20) {
+        if (moveRow.power !== 0 && (moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT) === 0) {
+          if ((moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE) !== 0) {
+            moveResultFlags = (moveResultFlags & ~BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE) >>> 0;
+          } else {
+            moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE) >>> 0;
+          }
+        }
+      }
+    }
+  }
+
+  if (
+    targetBattler.ability === ABILITY_WONDER_GUARD
+    && moveRow.power !== 0
+    && (
+      (moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE) === 0
+      || (moveResultFlags & (BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE | BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE))
+        === (BATTLE_SCRIPT_MOVE_RESULT_SUPER_EFFECTIVE | BATTLE_SCRIPT_MOVE_RESULT_NOT_VERY_EFFECTIVE)
+    )
+  ) {
+    lastUsedAbility = ABILITY_WONDER_GUARD;
+    moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED) >>> 0;
+    moveHistory = withClearedLandedMove(moveHistory, target);
+    missType = B_MSG_AVOIDED_DMG;
+  }
+
+  let nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battleMoveDamage: damage,
+    moveResultFlags,
+    missType,
+    lastUsedAbility,
+    moveHistory,
+  });
+  if ((moveResultFlags & BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) !== 0) {
+    nextRulesContext = withBattler(nextRulesContext, attacker, { targetNotAffected: 1 });
+  }
+
+  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }), { rulesContext: nextRulesContext });
+};
+
+/**
+ * Cmd_adjustnormaldamage (battle_script_commands.c:1658-1698): the always-run
+ * ApplyRandomDmgMultiplier roll, then the False Swipe/Endure/Focus-Band HP
+ * clamp. Focus Band's own roll (`Random() % 100 < param`, gated on the target
+ * actually holding it) needs gSpecialStatuses[target].focusBanded, which this
+ * engine does not model -- barriered, but ONLY when the target's resolved
+ * holdEffect is actually Focus Band, never on the plain (no-item or
+ * different-item) path, which is fully implemented per source.
+ */
+export const adjustnormaldamageOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
+  context,
+) => {
+  const rulesContext = context.state.rulesContext;
+  const target = requireBattlerRole(rulesContext, "target");
+  const targetBattler = rulesContext.battlers[target];
+
+  const { rng, randomValue } = drawBattleScriptRng(context.state.rng, context.instruction, "adjustnormaldamage");
+  let damage = applyRandomDamageMultiplier(rulesContext.battleMoveDamage, randomValue);
+
+  const holdEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
+  if (holdEffectId === HOLD_EFFECT_ID_FOCUS_BAND) {
+    return unsupportedBranch(
+      context,
+      "Cmd_adjustnormaldamage's HOLD_EFFECT_FOCUS_BAND roll needs gSpecialStatuses[target].focusBanded, "
+        + "which this engine does not model yet",
+      "battle_script_commands.c",
+      1677,
+    );
+  }
+
+  const moveRow = requireMoveRow(rulesContext.currentMove);
+  const hasSubstitute = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_SUBSTITUTE) !== 0;
+  const shouldClamp = !hasSubstitute
+    && (moveRow.effect === "EFFECT_FALSE_SWIPE" || targetBattler.endured === 1)
+    && targetBattler.hp <= damage;
+
+  let moveResultFlags = rulesContext.moveResultFlags;
+  if (shouldClamp) {
+    damage = targetBattler.hp - 1;
+    if (targetBattler.endured === 1) {
+      moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_ENDURED) >>> 0;
+    }
+  }
+
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: Object.freeze({ ...rulesContext, battleMoveDamage: damage, moveResultFlags }), rng },
+  );
+};
+
 export type BattleScriptHitChainPorts = Readonly<{
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>;
   prepareMessage: BattleScriptMessagePreparationPort<BattleScriptRulesContext>;
@@ -635,5 +960,9 @@ export function createBattleScriptHitChainOpcodeHandlers(
   install("B_SCR_OP_ACCURACYCHECK", accuracycheckOpcodeHandler);
   install("B_SCR_OP_ATTACKSTRING", createAttackstringOpcodeHandler(ports.prepareMessage, ports.isControllerIdle));
   install("B_SCR_OP_PPREDUCE", ppreduceOpcodeHandler);
+  install("B_SCR_OP_CRITCALC", critcalcOpcodeHandler);
+  install("B_SCR_OP_DAMAGECALC", damagecalcOpcodeHandler);
+  install("B_SCR_OP_TYPECALC", typecalcOpcodeHandler);
+  install("B_SCR_OP_ADJUSTNORMALDAMAGE", adjustnormaldamageOpcodeHandler);
   return Object.freeze(handlers);
 }

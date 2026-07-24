@@ -43,7 +43,32 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     protected: changes.protected,
     ppNotAffectedByPressure: changes.ppNotAffectedByPressure,
     types: changes.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
+    species: changes.species ?? 0,
+    attack: changes.attack ?? 0,
+    defense: changes.defense ?? 0,
+    spAttack: changes.spAttack ?? 0,
+    spDefense: changes.spDefense ?? 0,
+    level: changes.level ?? 50,
+    endured: changes.endured,
+    helpingHand: changes.helpingHand,
   });
+}
+
+/** Modular inverse of ISO_RANDOMIZE1's multiplier (1103515245) mod 2**32. */
+const RNG_MULTIPLIER_INVERSE = 4005161829n;
+const RNG_MOD = 1n << 32n;
+
+/**
+ * Finds an RNG state whose *next* drawBattleScriptRng call yields exactly
+ * targetU16 -- ISO_RANDOMIZE1 is a bijection mod 2**32 (odd multiplier), so
+ * this inverts it exactly rather than searching. Lets focused tests
+ * reproduce docs/hit-chain-ground-truth.md's pinned u16 rolls precisely
+ * without needing the real ROM's frame-0 seed for every scenario.
+ */
+function rngValueBeforeU16(targetU16: number): number {
+  const after = BigInt(targetU16) * 65536n;
+  const before = (((after - 24691n) % RNG_MOD + RNG_MOD) % RNG_MOD * RNG_MULTIPLIER_INVERSE) % RNG_MOD;
+  return Number(before);
 }
 
 function context(
@@ -108,6 +133,54 @@ function labelPc(label: string): number {
 function stepFrom(entryLabel: string, rulesContext: BattleScriptRulesContext, rngSeed = 1, ports = externalPorts()) {
   const execution = createBattleScriptStatusRulesExecution(program, entryLabel, rulesContext, rngSeed, ports);
   return { execution, result: stepBattleScriptMachine(program, execution.state, execution.handlers) };
+}
+
+/** Steps `count` opcodes from `entryLabel`, returning the final step result. */
+function stepManyFrom(
+  entryLabel: string,
+  rulesContext: BattleScriptRulesContext,
+  count: number,
+  rngSeed = 1,
+  ports = externalPorts(),
+) {
+  const execution = createBattleScriptStatusRulesExecution(program, entryLabel, rulesContext, rngSeed, ports);
+  let result = stepBattleScriptMachine(program, execution.state, execution.handlers);
+  for (let i = 1; i < count; i++) {
+    if (result.kind !== "advanced") throw new Error(`step ${i} did not advance: ${result.kind}`);
+    result = stepBattleScriptMachine(program, result.state, execution.handlers);
+  }
+  return { execution, result };
+}
+
+/**
+ * Jumps straight to the named opcode under BattleScript_HitFromCritCalc,
+ * skipping the opcodes before it (critcalc/damagecalc/typecalc all
+ * recompute battleMoveDamage from the battlers' raw stats, which a focused
+ * single-opcode test does not want to also have to set up realistically).
+ * Mirrors the manual programCounter patch already used by RUNG 1's own
+ * unsupported-branch tests.
+ */
+function stepAtOpcode(
+  opcodeName: string,
+  rulesContext: BattleScriptRulesContext,
+  rngSeed = 1,
+  ports = externalPorts(),
+) {
+  const execution = createBattleScriptStatusRulesExecution(
+    program,
+    "BattleScript_HitFromCritCalc",
+    rulesContext,
+    rngSeed,
+    ports,
+  );
+  const startPc = labelPc("BattleScript_HitFromCritCalc");
+  const found = program.instructions.find(
+    (instruction, index) => index >= startPc && instruction.opcodeName === opcodeName,
+  );
+  if (!found) throw new Error(`no ${opcodeName} found at/after BattleScript_HitFromCritCalc`);
+  const patched = Object.freeze({ ...execution.state, programCounter: found.programCounter });
+  const result = stepBattleScriptMachine(program, patched, execution.handlers);
+  return { execution, result };
 }
 
 describe("production accuracycheck (Cmd_accuracycheck) dispatch", () => {
@@ -277,8 +350,278 @@ describe("production ppreduce (Cmd_ppreduce) dispatch", () => {
   });
 });
 
-describe("RUNG 1 integration: opcode 0 -> accuracycheck -> attackstring -> ppreduce", () => {
-  it("hit turn (Tackle, seed 1): 1 RNG call at accuracycheck, PP-1, halts at the RUNG-2 boundary (critcalc)", () => {
+const STRENGTH = 70; // EFFECT_HIT, power 80, accuracy 100, TYPE_NORMAL
+const FALSE_SWIPE = 206; // EFFECT_FALSE_SWIPE, power 40, accuracy 100, TYPE_NORMAL
+const ABILITY_BATTLE_ARMOR = 4;
+const ABILITY_LEVITATE = 26;
+const ABILITY_WONDER_GUARD = 25;
+const HOLD_EFFECT_ITEM_FOCUS_BAND = 196; // ITEM_FOCUS_BAND
+const HOLD_EFFECT_ITEM_LEFTOVERS = 200; // ITEM_LEFTOVERS -- a real held item, not Focus Band
+
+describe("production critcalc (Cmd_critcalc) dispatch", () => {
+  it("registers B_SCR_OP_CRITCALC", () => {
+    const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_CRITCALC")!;
+    expect(instruction).toBeDefined();
+  });
+
+  it("crits at 1-in-16 (docs/hit-chain-ground-truth.md crit scenario, u16=3760): critMultiplier=2, 1 roll", () => {
+    const rc = context(0);
+    const seed = rngValueBeforeU16(3760);
+    const { result } = stepFrom("BattleScript_HitFromCritCalc", rc, seed);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rng.calls).toBe(1);
+    expect(result.state.rng.ledger[0]!.randomValue).toBe(3760);
+    expect(result.state.rulesContext.critMultiplier).toBe(2);
+  });
+
+  it("does not crit when the roll misses 1-in-16 (u16=29103, the crit scenario's opponent roll)", () => {
+    const rc = context(0);
+    const seed = rngValueBeforeU16(29103);
+    const { result } = stepFrom("BattleScript_HitFromCritCalc", rc, seed);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.critMultiplier).toBe(1);
+  });
+
+  it("Battle Armor: immune, consumes zero RNG (the C && chain short-circuits before Random())", () => {
+    const rc = context(0, {}, {}, { ability: ABILITY_BATTLE_ARMOR });
+    const seed = rngValueBeforeU16(3760); // would crit if rolled
+    const { result } = stepFrom("BattleScript_HitFromCritCalc", rc, seed);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rng.calls).toBe(0);
+    expect(result.state.rulesContext.critMultiplier).toBe(1);
+  });
+});
+
+describe("production damagecalc (Cmd_damagecalc) dispatch", () => {
+  it("registers B_SCR_OP_DAMAGECALC", () => {
+    const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_DAMAGECALC")!;
+    expect(instruction).toBeDefined();
+  });
+
+  it("a fresh crit (roll 3760) doubles the crit scenario's base damage (39 Atk -> 104 Def, Tackle: 7 -> 14)", () => {
+    const rc = context(
+      0,
+      { attack: 39, level: 50, types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] },
+      {},
+      { defense: 104, types: ["TYPE_ELECTRIC", "TYPE_STEEL"] },
+    );
+    const { result } = stepManyFrom("BattleScript_HitFromCritCalc", rc, 2, rngValueBeforeU16(3760));
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.critMultiplier).toBe(2);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(14);
+  });
+
+  it("scenario 2's opponent Tackle base (69 Atk -> 71 Def, Tackle: 16), no crit", () => {
+    const rc = context(
+      0,
+      { attack: 69, level: 50, types: ["TYPE_ELECTRIC", "TYPE_STEEL"] },
+      { critMultiplier: 1, dmgMultiplier: 1 },
+      { defense: 71, types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] },
+    );
+    const { result } = stepManyFrom("BattleScript_HitFromCritCalc", rc, 2, rngValueBeforeU16(29103) /* no crit */);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(16);
+  });
+
+  it("KO scenario's killing-hit base (200 Atk -> 50 Def, Strength: 142), no crit", () => {
+    const rc = context(
+      0,
+      { attack: 200, level: 50, types: ["TYPE_NORMAL", "TYPE_NORMAL"] },
+      { currentMove: STRENGTH, critMultiplier: 1, dmgMultiplier: 1 },
+      { defense: 50, types: ["TYPE_GRASS", "TYPE_GRASS"] },
+    );
+    const { result } = stepManyFrom("BattleScript_HitFromCritCalc", rc, 2, rngValueBeforeU16(29103));
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(142);
+  });
+});
+
+describe("production typecalc (Cmd_typecalc) dispatch", () => {
+  it("registers B_SCR_OP_TYPECALC", () => {
+    const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_TYPECALC")!;
+    expect(instruction).toBeDefined();
+  });
+
+  it("crit scenario's full critcalc->damagecalc->typecalc chain (7 -> 14 -> no STAB -> 0.5x NORMAL-vs-STEEL -> 7)", () => {
+    const rc = context(
+      0,
+      { attack: 39, level: 50, types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"] },
+      {},
+      { defense: 104, types: ["TYPE_ELECTRIC", "TYPE_STEEL"] },
+    );
+    const { result } = stepManyFrom("BattleScript_HitFromCritCalc", rc, 3, rngValueBeforeU16(3760));
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(7);
+  });
+
+  it("applies STAB (attacker shares the move's type)", () => {
+    const rc = context(
+      0,
+      { types: ["TYPE_NORMAL", "TYPE_NORMAL"] },
+      { battleMoveDamage: 10 },
+      { types: ["TYPE_NORMAL", "TYPE_NORMAL"] },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_TYPECALC", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(15); // trunc(10*15/10)
+  });
+
+  it("Levitate vs a Ground move: misses, skips the type loop, clears landed-move history", () => {
+    const rc = context(0, {}, { currentMove: 89 /* MOVE_EARTHQUAKE, TYPE_GROUND */, battleMoveDamage: 50 }, {
+      ability: ABILITY_LEVITATE,
+    });
+    const { result } = stepAtOpcode("B_SCR_OP_TYPECALC", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
+    expect(result.state.rulesContext.moveResultFlags & (1 << 3)).toBe(1 << 3); // DOESNT_AFFECT_FOE
+    expect(result.state.rulesContext.missType).toBe(4); // B_MSG_GROUND_MISS
+    expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_LEVITATE);
+  });
+
+  it("Foresight lets Normal hit a Ghost target (skips only the immunity table row)", () => {
+    const rc = context(
+      0,
+      { types: ["TYPE_WATER", "TYPE_WATER"] }, // avoid STAB muddying the pinned 10
+      { battleMoveDamage: 10 },
+      { types: ["TYPE_GHOST", "TYPE_GHOST"], status2: 1 << 29 },
+    );
+    const { result } = stepAtOpcode("B_SCR_OP_TYPECALC", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(10); // neutral: immunity entry skipped
+    expect(result.state.rulesContext.moveResultFlags & (1 << 3)).toBe(0); // not DOESNT_AFFECT_FOE
+  });
+
+  it("Ghost immune to Normal without Foresight (real type-chart immunity)", () => {
+    const rc = context(0, {}, { battleMoveDamage: 10 }, { types: ["TYPE_GHOST", "TYPE_GHOST"] });
+    const { result } = stepAtOpcode("B_SCR_OP_TYPECALC", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(0);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 3)).toBe(1 << 3); // DOESNT_AFFECT_FOE
+  });
+
+  it("Wonder Guard blocks a merely-neutral hit (not just literal immunity)", () => {
+    const rc = context(0, {}, { battleMoveDamage: 10 }, { ability: ABILITY_WONDER_GUARD });
+    const { result } = stepAtOpcode("B_SCR_OP_TYPECALC", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(1); // MOVE_RESULT_MISSED
+    expect(result.state.rulesContext.lastUsedAbility).toBe(ABILITY_WONDER_GUARD);
+  });
+
+  it("Wonder Guard lets a super-effective hit through", () => {
+    const rc = context(0, {}, { currentMove: 52 /* MOVE_EMBER, TYPE_FIRE */, battleMoveDamage: 10 }, {
+      ability: ABILITY_WONDER_GUARD,
+      types: ["TYPE_GRASS", "TYPE_GRASS"],
+    });
+    const { result } = stepAtOpcode("B_SCR_OP_TYPECALC", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.moveResultFlags & 1).toBe(0);
+    expect(result.state.rulesContext.battleMoveDamage).toBe(20); // trunc(10*20/10), super effective
+  });
+
+  it("MOVE_STRUGGLE short-circuits: no STAB/type step at all", () => {
+    const rc = context(0, {}, { currentMove: 165 /* MOVE_STRUGGLE */, battleMoveDamage: 10 });
+    const { result } = stepAtOpcode("B_SCR_OP_TYPECALC", rc);
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(10);
+  });
+});
+
+describe("production adjustnormaldamage (Cmd_adjustnormaldamage) dispatch", () => {
+  it("registers B_SCR_OP_ADJUSTNORMALDAMAGE", () => {
+    const instruction = program.instructions.find((i) => i.opcodeName === "B_SCR_OP_ADJUSTNORMALDAMAGE")!;
+    expect(instruction).toBeDefined();
+  });
+
+  it("scenario 2's opponent Tackle rand roll (16 -> 97% -> 15, u16=52995)", () => {
+    const rc = context(0, {}, { battleMoveDamage: 16 }, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(52995));
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(15);
+    expect(result.state.rng.calls).toBe(1);
+  });
+
+  it("crit scenario's final rand roll (7 -> 90% -> 6, u16=40906)", () => {
+    const rc = context(0, {}, { battleMoveDamage: 7 }, { hp: 100 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(40906));
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(6);
+  });
+
+  it("KO scenario's final rand roll (213 -> 96% -> 204, u16=52212)", () => {
+    const rc = context(0, {}, { battleMoveDamage: 213 }, { hp: 90 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(204);
+  });
+
+  it("False Swipe clamps lethal damage to hp-1", () => {
+    const rc = context(0, {}, { currentMove: FALSE_SWIPE, battleMoveDamage: 999 }, { hp: 10 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(0); // not MOVE_RESULT_FOE_ENDURED
+  });
+
+  it("Endure clamps lethal damage to hp-1 and sets MOVE_RESULT_FOE_ENDURED", () => {
+    const rc = context(0, {}, { battleMoveDamage: 999 }, { hp: 10, endured: 1 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(9);
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(1 << 6); // MOVE_RESULT_FOE_ENDURED
+  });
+
+  it("does not clamp a non-lethal hit even with Endure set", () => {
+    const rc = context(0, {}, { battleMoveDamage: 5 }, { hp: 100, endured: 1 });
+    const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(52212));
+    expect(result.kind).toBe("advanced");
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    expect(result.state.rulesContext.battleMoveDamage).toBe(4); // trunc(5*96/100), not clamped (100 > 4)
+    expect(result.state.rulesContext.moveResultFlags & (1 << 6)).toBe(0);
+  });
+
+  describe("(b) unsupported-branch barrier: Focus Band, only when actually held", () => {
+    it("halts when the target holds Focus Band (its roll is unmodeled)", () => {
+      const rc = context(0, {}, { battleMoveDamage: 999 }, { hp: 10, item: HOLD_EFFECT_ITEM_FOCUS_BAND });
+      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(52212));
+      expect(result.kind).toBe("halted");
+      expect(result.state.haltReason).toMatchObject({
+        kind: "unsupported-branch",
+        sourceFile: "battle_script_commands.c",
+        sourceLine: 1677,
+      });
+    });
+
+    it("does not barrier a different held item on the same lethal-hit shape", () => {
+      const rc = context(0, {}, { battleMoveDamage: 999 }, { hp: 10, endured: 1, item: HOLD_EFFECT_ITEM_LEFTOVERS });
+      const { result } = stepAtOpcode("B_SCR_OP_ADJUSTNORMALDAMAGE", rc, rngValueBeforeU16(52212));
+      expect(result.kind).toBe("advanced");
+      if (result.kind !== "advanced") throw new Error("expected advance");
+      expect(result.state.rulesContext.battleMoveDamage).toBe(9); // hp - 1, clamped via Endure, item ignored
+    });
+  });
+});
+
+describe("RUNG 2 integration: opcode 0 -> ... -> adjustnormaldamage -> attackanimation boundary", () => {
+  it("RUNG 1 hit turn (Tackle, seed 1): still halts one opcode later now that critcalc is registered", () => {
     const rc = context(0);
     const execution = createBattleScriptStatusRulesExecution(
       program,
@@ -299,9 +642,62 @@ describe("RUNG 1 integration: opcode 0 -> accuracycheck -> attackstring -> ppred
     if (result.kind !== "advanced") throw new Error(`ppreduce did not advance: ${result.kind}`);
     expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(34);
     expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromCritCalc"));
-    const halted = stepBattleScriptMachine(program, result.state, handlers); // critcalc: not yet registered
+    result = stepBattleScriptMachine(program, result.state, handlers); // critcalc (now registered)
+    if (result.kind !== "advanced") throw new Error(`critcalc did not advance: ${result.kind}`);
+    result = stepBattleScriptMachine(program, result.state, handlers); // damagecalc
+    if (result.kind !== "advanced") throw new Error(`damagecalc did not advance: ${result.kind}`);
+    result = stepBattleScriptMachine(program, result.state, handlers); // typecalc
+    if (result.kind !== "advanced") throw new Error(`typecalc did not advance: ${result.kind}`);
+    result = stepBattleScriptMachine(program, result.state, handlers); // adjustnormaldamage
+    if (result.kind !== "advanced") throw new Error(`adjustnormaldamage did not advance: ${result.kind}`);
+    expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
+    const halted = stepBattleScriptMachine(program, result.state, handlers); // attackanimation: not yet registered
     expect(halted.kind).toBe("unsupported");
   });
+
+  it(
+    "full staged hit turn on the KO scenario's real ROM seed (919694434): reproduces the pinned "
+      + "142 -> 213 -> 213 -> 204 damage chain and the exact 3-roll ledger (accuracycheck, critcalc, "
+      + "adjustnormaldamage), then hands off cleanly at attackanimation",
+    () => {
+      const rc = context(
+        0,
+        { attack: 200, level: 50, types: ["TYPE_NORMAL", "TYPE_NORMAL"] },
+        { currentMove: STRENGTH },
+        { defense: 50, types: ["TYPE_GRASS", "TYPE_GRASS"], hp: 90 },
+      );
+      const execution = createBattleScriptStatusRulesExecution(
+        program,
+        "BattleScript_HitFromAtkCanceler",
+        rc,
+        919694434, // the KO scenario's actual frame-0 gRngValue (docs/hit-chain-ground-truth.md)
+        externalPorts(),
+      );
+      const handlers = execution.handlers;
+      let result = stepBattleScriptMachine(program, execution.state, handlers); // opcode 0
+      for (const label of ["accuracycheck", "attackstring", "ppreduce", "critcalc", "damagecalc", "typecalc", "adjustnormaldamage"]) {
+        if (result.kind !== "advanced") throw new Error(`${label} did not advance: ${result.kind}`);
+        result = stepBattleScriptMachine(program, result.state, handlers);
+      }
+      if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+
+      expect(result.state.rng.calls).toBe(3);
+      expect(result.state.rng.ledger.map((entry) => entry.reason)).toEqual([
+        "accuracycheck",
+        "critcalc",
+        "adjustnormaldamage",
+      ]);
+      expect(result.state.rng.ledger[0]!.randomValue).toBe(56317);
+      expect(result.state.rng.ledger[1]!.randomValue).toBe(15002); // 15002 % 16 = 10, no crit
+      expect(result.state.rng.ledger[2]!.randomValue).toBe(52212);
+      expect(result.state.rulesContext.critMultiplier).toBe(1);
+      expect(result.state.rulesContext.battleMoveDamage).toBe(204); // 142 -> STAB 213 -> neutral type -> 96% -> 204
+      expect(result.state.programCounter).toBe(labelPc("BattleScript_HitFromAtkAnimation"));
+
+      const halted = stepBattleScriptMachine(program, result.state, handlers); // attackanimation: RUNG-3 boundary
+      expect(halted.kind).toBe("unsupported");
+    },
+  );
 
   it("miss turn (Slam, seed 2): 1 RNG call at accuracycheck, PP-1, hands off cleanly to the already-registered pause opcode", () => {
     const rc = context(0, {}, { currentMove: SLAM });

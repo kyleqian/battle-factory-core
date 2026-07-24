@@ -240,6 +240,12 @@ function emptyBattler(side: 0 | 1): BattleScriptRulesBattlerState {
     protected: 0,
     ppNotAffectedByPressure: 0,
     types: Object.freeze(["TYPE_NORMAL", "TYPE_NORMAL"] as const),
+    species: 0,
+    attack: 0,
+    defense: 0,
+    spAttack: 0,
+    spDefense: 0,
+    level: 0,
   });
 }
 
