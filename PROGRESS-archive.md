@@ -1,3 +1,27 @@
+## 397 — Gate-3 attack-canceler DISABLED source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP,
+  FROZEN, TRUANT, RECHARGE, FLINCH, and DISABLED decisions only; opcode 0
+  remains unregistered and no phase loop exists.
+- **Did:** modeled `DisableStruct::u16 disabledMove`,
+  `ProtectStruct::usedDisabledMove:1`, and persistent typed
+  `gBattleScripting.battler` ownership in the rules context. Ported the exact
+  two-clause predicate and taken order through immutable
+  `CancelMultiTurnMoves`, `BattleScript_MoveUsedIsDisabled`, unable marker,
+  effect 1, and one advance to `CANCELER_TAUNTED`.
+- **Next:** implement `CANCELER_TAUNTED` only after its timer, move-power,
+  protect flag, multi-turn cancellation, script, marker, effect, and receipt
+  ownership is explicit. Do not loop phases or register opcode 0.
+- **Notes:** full u16 boundaries **0/1/255/256/65535**, both predicate clauses,
+  both one-bit values across all four attacker ids, all scripting battler ids,
+  pre-set helper/marker/flag states, identities, missing attacker/persistent
+  selector, invalid widths, determinism, and deep freezing are pinned.
+  Focused **4 files / 39 tests**; integrated Tier-1 **136 files / 1747
+  tests**, build, OFF/ON v5 info (`9c89c741…`), and diff check green. Code
+  commits `4113388` + receipt lock `741bf77`; pixel diff N/A.
+
+---
 ## 396 — Gate-3 attack-canceler FLINCH source phase integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable

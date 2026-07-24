@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 400 — S10 immutable battle decision-boundary ABI published
+
+- **State:** the run is clean and green at **138 files / 1763 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes; the new headless
+  battle-level ABI is published but deliberately not integrated into
+  `core.ts`, `battleScene.ts`, or the incomplete Battle Script machine.
+- **Did:** added a versioned, canonical-JSON `BattleState` whose returned
+  immutable state alone persists Emerald LCG value/call count. One matching
+  player/trainer command or explicit forced-switch submission runs an injected
+  pure rules reducer and returns ordered frozen semantic events plus exactly
+  one next request or terminal outcome. Builders validate the honest current
+  Level-50 singles shapes: move, voluntary switch, and forced switch.
+- **Next:** supervisor-verify commit `48a7408`. Any production script-machine
+  adapter, native trainer AI, broader decision kinds, or facility integration
+  must be a separately bounded S10 increment; do not imply those exist from
+  this architecture checkpoint or resume the canonical Battle-2 march.
+- **Notes:** focused **1 file / 12 tests**, integrated Tier-1 **138 files /
+  1763 tests**, build, OFF v5 info (`9c89c741…`), and diff check green. Tests
+  pin caller immutability/deep freezing, canonical serialization and replay,
+  request mismatch rejection, state-owned/no-ambient RNG, both sides and
+  forced switches, event order, boundary exclusivity, and rejection of
+  presentation acknowledgements before rules/RNG execution. Pixel diff N/A.
+
+---
 ## 399 — S10 battle-kernel and trainer-AI architecture checkpoint queued
 
 - **State:** the run is clean and green at **137 files / 1751 tests** with
@@ -49,27 +73,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pinned. Focused **4 files / 39 tests**; integrated Tier-1 **137 files / 1751
   tests**, build, and OFF v5 info (`9c89c741…`) green. Code commit `26d9a8b`;
   pixel diff N/A.
-
----
-## 397 — Gate-3 attack-canceler DISABLED source phase integrated
-
-- **State:** S10 Gate 3 remains open with **27** source-safe executable
-  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP,
-  FROZEN, TRUANT, RECHARGE, FLINCH, and DISABLED decisions only; opcode 0
-  remains unregistered and no phase loop exists.
-- **Did:** modeled `DisableStruct::u16 disabledMove`,
-  `ProtectStruct::usedDisabledMove:1`, and persistent typed
-  `gBattleScripting.battler` ownership in the rules context. Ported the exact
-  two-clause predicate and taken order through immutable
-  `CancelMultiTurnMoves`, `BattleScript_MoveUsedIsDisabled`, unable marker,
-  effect 1, and one advance to `CANCELER_TAUNTED`.
-- **Next:** implement `CANCELER_TAUNTED` only after its timer, move-power,
-  protect flag, multi-turn cancellation, script, marker, effect, and receipt
-  ownership is explicit. Do not loop phases or register opcode 0.
-- **Notes:** full u16 boundaries **0/1/255/256/65535**, both predicate clauses,
-  both one-bit values across all four attacker ids, all scripting battler ids,
-  pre-set helper/marker/flag states, identities, missing attacker/persistent
-  selector, invalid widths, determinism, and deep freezing are pinned.
-  Focused **4 files / 39 tests**; integrated Tier-1 **136 files / 1747
-  tests**, build, OFF/ON v5 info (`9c89c741…`), and diff check green. Code
-  commits `4113388` + receipt lock `741bf77`; pixel diff N/A.
