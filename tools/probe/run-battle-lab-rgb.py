@@ -74,6 +74,8 @@ def main() -> None:
     basic_hitsplat_template = oracle.symbols["gBasicHitSplatSpriteTemplate"]
     dragon_breath_fire_template = oracle.symbols["gDragonBreathFireSpriteTemplate"]
     flamethrower_flame_template = oracle.symbols["gFlamethrowerFlameSpriteTemplate"]
+    spinning_hand_or_foot_template = oracle.symbols["gSpinningHandOrFootSpriteTemplate"]
+    fire_spread_template = oracle.symbols["gFireSpreadSpriteTemplate"]
     speed_dust_template = oracle.symbols["gSpeedDustSpriteTemplate"]
     battle_mons = oracle.symbols["gBattleMons"]
     battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
@@ -175,6 +177,8 @@ def main() -> None:
         basic_hitsplat_sprites = []
         dragon_breath_fire_sprites = []
         flamethrower_flame_sprites = []
+        spinning_hand_or_foot_sprites = []
+        fire_spread_sprites = []
         speed_dust_sprites = []
         for slot in range(64):
             base = sprites + slot * 0x44
@@ -211,6 +215,10 @@ def main() -> None:
                 dragon_breath_fire_sprites.append(feather_record(slot))
             elif template == flamethrower_flame_template:
                 flamethrower_flame_sprites.append(feather_record(slot))
+            elif template == spinning_hand_or_foot_template:
+                spinning_hand_or_foot_sprites.append(feather_record(slot))
+            elif template == fire_spread_template:
+                fire_spread_sprites.append(feather_record(slot))
             elif template == speed_dust_template:
                 speed_dust_sprites.append(feather_record(slot))
         sand_attack_dirt_oam = []
@@ -271,6 +279,8 @@ def main() -> None:
                 "basicHitsplatSprites": basic_hitsplat_sprites,
                 "dragonBreathFireSprites": dragon_breath_fire_sprites,
                 "flamethrowerFlameSprites": flamethrower_flame_sprites,
+                "spinningHandOrFootSprites": spinning_hand_or_foot_sprites,
+                "fireSpreadSprites": fire_spread_sprites,
                 "speedDustSprites": speed_dust_sprites,
                 "bg3X": s16(oracle.symbols["gBattle_BG3_X"]),
                 "bg3Y": s16(oracle.symbols["gBattle_BG3_Y"]),

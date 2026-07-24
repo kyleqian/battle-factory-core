@@ -44,19 +44,22 @@ remainder.
 
 ## Current handoff
 
-- **State:** **16 exact / 1 partial / 259 unsupported**. FLAMETHROWER is exact
-  across its complete move-owned body in both source-required orientations.
-- **Did:** added a pure reduced model of Emerald's persistent scene-wide
-  `sSpriteOrder`: lowest-free `CreateSprite`, dummy reset on destruction,
-  slot reuse, wrapped-y stable insertion passes, and inherited exact-tie
-  order. FLAMETHROWER consumes one live pre-allocation order seed per staged
-  scene; no frame tables or absolute clocks were added. Existing DRAGON
-  BREATH/EXTREME SPEED/QUICK ATTACK/AERIAL ACE reducers are unchanged.
-- **Evidence:** player-back ONIX → opponent-front MURKROW and the opposite
-  orientation each match **126/126** RAM/OAM/order component frames and
-  **126/126** complete dense RGB frames at source-relative ages **-11..114**.
-  Tier 1 pins creation, destruction, lowest-slot reuse, dummy-state movement,
-  y wrap, stable ties, and probed FLAMETHROWER slot permutations.
-- **Next:** return to the supervisor. Generic hit/HP/result/controller tails
-  remain independently owned; other dragon/fire siblings still need their own
-  complete dense move evidence.
+- **State:** **16 exact / 2 partial / 258 unsupported**. BLAZE KICK has a
+  source-derived, two-orientation component checkpoint; it is not exact and
+  has no framebuffer acceptance yet.
+- **Did:** staged legal zero-PP-Up ONIX → MURKROW BLAZE KICK in both
+  orientations and modeled its target-relative 78-frame source body without
+  battle-frame branches: monbg/setalpha, ShakeMon2, hitsplat and spinning-foot
+  lifetimes, plus all seven shared FireSpread fixed-point translations and
+  sheet epochs. The reusable dense probe now identifies the distinct foot and
+  FireSpread templates.
+- **Evidence:** player frames **399..476** and opponent frames **453..530**
+  each match **78/78** component frames at relative ages **0..77**. Full
+  framebuffer acceptance is **0/78 both** because no BLAZE KICK compositor is
+  wired. Existing FLAMETHROWER remains **126/126 RGB+component both** and
+  DRAGON BREATH remains **85/85 RGB+component both**.
+- **Next:** connect BLAZE KICK through the shared Scene-ON seam by deriving its
+  distinct spinning-foot affine/OAM program, both target white palette ramps,
+  whole-field complex black blend, and persistent ordering/composition across
+  foot, hitsplat, target monbg copy, and seven FireSpread sprites. Promote
+  only after all 78 framebuffer frames match in both orientations.
