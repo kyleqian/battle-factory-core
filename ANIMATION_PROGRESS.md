@@ -192,31 +192,96 @@ oracle window was attempted this step (staging happens after there's something
 real to render); MIST_BALL stays unsupported (no `ANIMATION_COVERAGE.json`
 entry) rather than `partial`, since zero dense window is green.
 
+## MIST_BALL remainder, rungs 1-2: ShakeMon ported, linear translation ported (2026-07-24)
+
+**Rung 1 — `AnimTask_ShakeMon` (`battle_anim_mon_movement.c:87-141`).** Ported
+1:1 as `src/engine/shakeMon.ts` (`shakeMonSequence`/`shakeMonOffsetAtTick`,
+parametric `xOffset,yOffset,numTimes,frameDelay`). `quickAttack.ts`'s
+`TARGET_SHAKE_AGES` hand-fit set is deleted and replaced by a call through
+the port (`quickAttackTargetShakeX2`); both QUICK_ATTACK comparators re-run
+at their recorded counts: `quick-attack-pidgeotto-onix.json` **219/219**,
+`quick-attack-player-pidgeotto-onix.json` **214/214**.
+
+`fly.ts`'s own `AnimTask_ShakeMon(ANIM_TARGET,6,0,8,1)` instance
+(`FlyUnleash`, `battle_anim_scripts.s:6418`) was **not** ported — a genuine
+divergence, not fudged. The literal port's own state machine predicts an
+isolated leading nonzero tick before settling into 2-tick pairs (any
+even `numTimes` with `frameDelay=1` shakes this way: creation tick alone,
+then pairs); `fly.ts`'s committed `FLY_SHAKE_AGES = {24,25,28,29,32,33}` is
+exactly that pattern's three pairs with the leading isolated tick omitted,
+at the best-fit creation-tick alignment (one tick before
+`FLY_IMPACT_FIRST_AGE`, i.e. age 21). Swapping the port in at that alignment
+was tested directly against the oracle this session and **regresses**
+`fly-murkrow-onix-strike.json` from the recorded **248/248** to **247/248**
+(one mismatched frame at the extra age-21 tick) — the hand-fit's omission is
+correct, the port's naive alignment is not. Reverted; `fly.ts` is
+byte-identical to its prior commit. `FLY_SHAKE_AGES` and the divergence
+itself are pinned in `tests/shakeMon.test.ts` so the gap is visible without
+re-spending the oracle round-trip. Re-confirmed unchanged after revert:
+`fly-murkrow-onix-strike.json` **248/248**,
+`fly-player-murkrow-onix-strike.json` **244/244**.
+
+`AnimTask_ShakeMon2` (the coverage report's 64-remaining-move leverage item)
+is a **different** source task (positive/negative alternation, not on/off
+toggling) — this port's helpers do not cover its surface; only the general
+"parametric task-state-machine, driven tick-by-tick" shape is reusable as a
+template for a future `ShakeMon2` port, not any code from this rung.
+
+**Rung 2 — linear-translation Q8.8 accumulator**
+(`InitAnimLinearTranslation`/`AnimTranslateLinear`,
+`battle_anim_mons.c:1065-1139`). Ported as
+`src/engine/animLinearTranslation.ts` (`linearTranslationDeltaQ8` +
+`linearTranslationOffsetAfterCallbacks`), including the direction-in-low-bit
+forcing and the freeze-at-`durationTicks` behavior. `firePunch.ts`'s
+hardcoded `BURN_FLAME_X_DELTA_FIXED8`/`_LEFT_FIXED8` (614/615) are deleted
+and replaced by a call through the port fed the same distance (48px) and
+duration (20 ticks) the burn flames' real `AnimBurnFlame` ->
+`AnimTravelDiagonally` call site uses. Both FIRE PUNCH portable comparators
+re-run at their recorded counts: `fire-punch-onix-grovyle.json` **225/225**,
+`fire-punch-grovyle-onix.json` **277/277**.
+
+`fly.ts`'s own private `linearDeltaQ8`/`truncDiv` helpers (the strike ball's
+travel) compute the identical formula — cross-checked in
+`tests/animLinearTranslation.test.ts` — but were **not** consolidated into
+the shared module this step: `fly.ts`'s version never caps accumulated
+callbacks at `durationTicks`, and checking whether that matters needs a
+fresh oracle round-trip this step's time budget didn't allow. Left as a
+documented follow-up rather than risking FLY's `exact` status unverified.
+
+**Rung 3 (stretch — wiring `AnimThrowMistBall` through the new primitive,
+RAM-probe trajectory validation) was not attempted; no time remained.**
+
+**Remainder, recomputed in cost order:** (1) resolve the `FLY`
+`AnimTask_ShakeMon` alignment — the primitive itself is now proven correct
+(one clean representative, QUICK_ATTACK); this is a bounded calibration
+task (find the true per-call-site creation-to-display lag), not a
+re-derivation; (2) wire `AnimThrowMistBall` through the now-ported
+linear-translation primitive + the interpreter's `createsprite` path, RAM-
+probe-validated (rung 3 above); (3) generalize `AnimTask_BlendBattleAnimPal`
+past its one DRAGON_BREATH instance; (4) give the interpreter real
+`waitforvisualfinish` semantics (sprite-lifetime tracking); (5) the two new
+subsystems (`AnimComplexPaletteBlend`, `AnimTask_MistBallFog`'s BG
+pipeline) — each its own bounded step. MIST_BALL stays unsupported.
+
 ## Current handoff
 
-- **State:** **18 exact / 1 partial / 257 unsupported** (unchanged — MIST_BALL
-  stays unsupported; this step was command-surface enumeration + script
-  decode, not new move coverage). THUNDER PUNCH is exact for its complete
-  move-owned body in both source-required orientations.
-- **Did:** enumerated MOVE_MIST_BALL's full anim-script command surface
-  against its real C callbacks (see the STOP-AND-SPLIT section above),
-  extended the extractor to decode the script into
-  `battle-move-anim-scripts.json`'s new `MIST_BALL` entry (script only, no
-  callback port), and recorded the generalization verdict: the minimal
-  `delay`/`createsprite` interpreter does NOT cheaply generalize past
-  FEATHER_DANCE — MIST_BALL needs a new linear-translation primitive, real
-  `waitforvisualfinish` semantics, and two new subsystems (whole-palette
-  blend, whole-BG fog/fade pipeline).
-- **Evidence:** `npm test` 2020/2020, `npm run build` green. Feather
-  comparators re-run unchanged: `turn6-feathers.json` 235/235,
-  `turn7-feathers.json` 145/145, `turn8-feathers.json` 162/162. Extractor
-  re-run confirmed idempotent on every output except the one new JSON entry
-  (`git status` after a full re-run touched only
-  `battle-move-anim-scripts.json`).
-- **Next:** run `npm run animation:coverage` and either (a) pick up MIST_BALL's
-  remainder in cost order (`AnimTask_ShakeMon` port first — cheapest, evidence
-  already exists elsewhere via `quickAttack.ts`/`fly.ts`), or (b) resume the
-  next ranked Level-50 component track (`elemental-punch`/`fast-contact`/
-  `mud-sand-scatter`/`dragon-fire-projectile`/`two-turn-semi-invulnerable`) if
-  a bounded win elsewhere is preferred over MIST_BALL's now-enumerated but
-  larger remaining lift. THUNDER PUNCH has no known move-owned remainder.
+- **State:** **18 exact / 1 partial / 257 unsupported** (unchanged — no move
+  acceptance changed this step; both rungs are internal implementation
+  substitutions behind already-`exact` moves, proven by rerunning their
+  existing dense comparators at unchanged counts).
+- **Did:** ported `AnimTask_ShakeMon` and the linear-translation Q8.8
+  accumulator generically (see the rungs section above), re-drove
+  QUICK_ATTACK and FIRE_PUNCH's hand-fits through them, deleted the
+  superseded hand-fit constants in those two files, and left FLY's
+  `AnimTask_ShakeMon` instance and `linearDeltaQ8` helper untouched pending
+  the documented follow-ups (a real divergence and an unverified-but-
+  plausible-safe consolidation, respectively).
+- **Evidence:** `npm test` 2025/2025, `npm run build` green. QUICK_ATTACK
+  219/219 + 214/214, FIRE_PUNCH 225/225 + 277/277, FLY 248/248 + 244/244 —
+  all re-run this step at their previously-recorded counts.
+- **Next:** pick up the remainder above in cost order, starting with the
+  FLY `AnimTask_ShakeMon` alignment (cheapest — the primitive already
+  works, this is calibration) or MIST_BALL rung 3 (wire
+  `AnimThrowMistBall`); or resume the next ranked Level-50 component track
+  (`mud-sand-scatter`/`dragon-fire-projectile`) if a bounded win elsewhere
+  is preferred. THUNDER PUNCH has no known move-owned remainder.
