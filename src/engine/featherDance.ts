@@ -229,6 +229,35 @@ export const turn7FeatherSprites = makeFeatherSpriteLookup(turn7FeatherProbe as 
 /** Same mechanism, turn 8's own real ticks (docs/battle-turn-notes.md §34) - identical +1 lag re-verified against the oracle, last real-feather RAM tick 9637 (slot 12's own despawn). */
 export const turn8FeatherSprites = makeFeatherSpriteLookup(turn8FeatherProbe as { ticks: FeatherProbeRecord[] }, 9637);
 
+/** First rendered feather in the source script, relative to animation command
+ * ownership. The stock controller creates the first sprite at age 53 and the
+ * ordinary OBJ callback-to-OAM lag makes it visible at age 54. */
+export const FEATHER_DANCE_FIRST_VISIBLE_AGE = 54;
+const TURN6_FIRST_VISIBLE_TICK = 7405;
+const ONIX_TARGET_POSITION_CENTER = { x: 72, y: 80 } as const;
+
+/**
+ * Portable presentation-seam view of the source-proved falling-feather
+ * component. The committed table supplies callback/OAM state, while geometry
+ * is translated from the explicit target position and callers see only a
+ * move-relative clock.
+ */
+export function featherDanceSpritesAtAge(
+  age: number,
+  targetPositionCenter: Readonly<{ x: number; y: number }>,
+): FeatherRenderSprite[] {
+  if (age < FEATHER_DANCE_FIRST_VISIBLE_AGE) return [];
+  const sourceTick =
+    TURN6_FIRST_VISIBLE_TICK + age - FEATHER_DANCE_FIRST_VISIBLE_AGE;
+  const dx = targetPositionCenter.x - ONIX_TARGET_POSITION_CENTER.x;
+  const dy = targetPositionCenter.y - ONIX_TARGET_POSITION_CENTER.y;
+  return turn6FeatherSprites(sourceTick).map((sprite) => ({
+    ...sprite,
+    centerX: sprite.centerX + dx,
+    centerY: sprite.centerY + dy,
+  }));
+}
+
 /**
  * Draw-order tiebreak for same-priority feathers (ISSUES #30, "candidate A"
  * adoption - docs/feather-order-notes.md's 2026-07-21 "candidate A wins"

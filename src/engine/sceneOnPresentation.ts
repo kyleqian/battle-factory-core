@@ -44,6 +44,10 @@ import {
   SITRUS_ITEM_ACTION_MENU_REVEAL_AGE,
   sitrusDisplayedHpAtAge,
 } from "./heldItemHeal.ts";
+import {
+  featherDanceSpritesAtAge,
+  type FeatherRenderSprite,
+} from "./featherDance.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -58,8 +62,21 @@ export interface SceneOnBattlerGeometry {
 }
 
 export interface SceneOnPresentationBattler {
-  readonly species: "ONIX" | "GROVYLE";
+  readonly species: "ONIX" | "GROVYLE" | "PIDGEOTTO";
   readonly geometry: SceneOnBattlerGeometry;
+}
+
+export interface SceneOnFeatherDanceConfig {
+  readonly move: "FEATHER_DANCE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Already-resolved stat stages owned by the stock battle controller. */
+  readonly controllerProfile: Readonly<{
+    readonly attackStageBefore: number;
+    readonly attackStageAfter: number;
+  }>;
+  readonly moveTextStartAge: number;
 }
 
 export interface SceneOnFirePunchConfig {
@@ -120,6 +137,7 @@ export interface SceneOnFaintAttackFieldProfile {
   readonly playerHp: number;
   readonly opponentHp: number;
   readonly playerStatus: "none" | "burn";
+  readonly playerGender?: "male" | "female";
 }
 
 export interface SceneOnFaintAttackConfig {
@@ -203,7 +221,8 @@ export type SceneOnMoveConfig =
   | SceneOnFaintAttackConfig
   | SceneOnRockSlideConfig
   | SceneOnDoubleTeamConfig
-  | SceneOnEndeavorConfig;
+  | SceneOnEndeavorConfig
+  | SceneOnFeatherDanceConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -285,6 +304,13 @@ export interface SceneOnEndeavorView {
   readonly target: SceneOnPresentationBattler;
   readonly animationProfile: Readonly<EndeavorAnimationProfile>;
   readonly displayedTargetHp: number;
+}
+
+export interface SceneOnFeatherDanceView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly feathers: readonly FeatherRenderSprite[];
 }
 
 function assertIntegerPoint(
@@ -560,6 +586,44 @@ export function sceneOnEndeavorView(
     ),
   };
 }
+
+export function sceneOnFeatherDanceView(
+  state: SceneOnMovePresentationState,
+): SceneOnFeatherDanceView {
+  if (state.config.move !== "FEATHER_DANCE") {
+    throw new Error(`expected FEATHER_DANCE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    feathers: featherDanceSpritesAtAge(
+      state.age,
+      state.config.target.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+export const PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION = {
+  attacker: {
+    species: "PIDGEOTTO",
+    geometry: {
+      side: "opponent",
+      spriteCorner: { x: 144, y: 19 },
+      animationCenter: { x: 176, y: 51 },
+      battlePositionCenter: { x: 176, y: 40 },
+    },
+  },
+  target: {
+    species: "ONIX",
+    geometry: {
+      side: "player",
+      spriteCorner: { x: 40, y: 48 },
+      animationCenter: { x: 72, y: 88 },
+      battlePositionCenter: { x: 72, y: 80 },
+    },
+  },
+} as const satisfies Pick<SceneOnFeatherDanceConfig, "attacker" | "target">;
 
 export const ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY = {
   attacker: {
