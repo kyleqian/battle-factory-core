@@ -1357,7 +1357,10 @@ export function sceneOnExtremeSpeedView(
       animationAge,
       state.config.attacker.geometry.side,
     ),
-    attackerAffine: extremeSpeedAttackerAffineAtAge(animationAge),
+    attackerAffine: extremeSpeedAttackerAffineAtAge(
+      animationAge,
+      state.config.attacker.geometry.side === "player" ? 6 : 2,
+    ),
     impact: extremeSpeedImpactAtAge(
       animationAge,
       state.config.target.geometry.side,

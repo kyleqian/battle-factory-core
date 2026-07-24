@@ -15,8 +15,8 @@ export const EXTREME_SPEED_FADE_FIRST_AGE = 52;
 export const EXTREME_SPEED_BG_SWAP_AGE = 68;
 export const EXTREME_SPEED_SCROLL_FIRST_AGE = 69;
 export const EXTREME_SPEED_BG_SETTLED_AGE = 86;
-export const EXTREME_SPEED_STRETCH_FIRST_AGE = 88;
-export const EXTREME_SPEED_ATTACKER_HIDDEN_AGE = 96;
+export const EXTREME_SPEED_STRETCH_FIRST_AGE = 90;
+export const EXTREME_SPEED_ATTACKER_HIDDEN_AGE = 97;
 export const EXTREME_SPEED_IMPACT_FIRST_AGE = 123;
 export const EXTREME_SPEED_IMPACT_LAST_AGE = 182;
 export const EXTREME_SPEED_DUST_FIRST_AGE = 183;
@@ -86,22 +86,37 @@ export function extremeSpeedBackgroundAtAge(
   };
 }
 
-/** Source affine command (96,-13,0,8), displayed after the task/OAM latch. */
-export function extremeSpeedAttackerAffineAtAge(age: number): Readonly<{
+/**
+ * Source affine command (96,-13,0,8), displayed after the task/OAM epochs.
+ * `spriteYOffset` is the species/side coordinate-table y_offset consumed by
+ * pret's `SetBattlerSpriteYOffsetFromYScale`.
+ */
+export function extremeSpeedAttackerAffineAtAge(
+  age: number,
+  spriteYOffset = 0,
+): Readonly<{
   xScale: number;
   yScale: number;
+  y2: number;
   invisible: boolean;
 }> {
   if (age < EXTREME_SPEED_STRETCH_FIRST_AGE) {
-    return { xScale: 256, yScale: 256, invisible: false };
+    return { xScale: 256, yScale: 256, y2: 0, invisible: false };
   }
   if (age >= EXTREME_SPEED_ATTACKER_HIDDEN_AGE) {
-    return { xScale: 256, yScale: 256, invisible: true };
+    return { xScale: 256, yScale: 256, y2: 0, invisible: true };
   }
   const step = age - EXTREME_SPEED_STRETCH_FIRST_AGE + 1;
+  const yScale = 256 - 13 * step;
+  const anchoredHeight = 64 - spriteYOffset * 2;
+  const scaledHeight = Math.min(
+    128,
+    Math.trunc((anchoredHeight * 256) / yScale),
+  );
   return {
     xScale: 256 + 96 * step,
-    yScale: 256 - 13 * step,
+    yScale,
+    y2: Math.trunc((anchoredHeight - scaledHeight) / 2),
     invisible: false,
   };
 }
