@@ -39,20 +39,24 @@ remainder.
 ## Current handoff
 
 - **State:** **6 exact / 7 partial / 263 unsupported**. QUICK ATTACK now has
-  a portable complete move-body/controller-command prefix in its established
-  opponent-front orientation; it remains partial.
+  a portable complete move/controller window in its established opponent-front
+  orientation through the stable pre-next-move boundary; it remains partial.
 - **Did:** staged legal Level-50 opponent-front PIDGEOTTO→player-back ONIX
-  through mechanicLab using `ppUps:[0,0,0,0]`, then generalized
-  source-relative elliptical travel, four blended afterimages, impact, and
-  shake behind the Scene-ON seam. Tier-1 pins relative clocks, explicit
-  geometry, side-respecting travel, and immutable 117→110 controller inputs.
+  through mechanicLab using `ppUps:[0,0,0,0]`; extended the shared Scene-ON
+  seam from body teardown through generic healthbox wobble/target blink,
+  source-relative 117→110 HP display drain, the fully typed and held
+  not-very-effective result, command release, and `gCurrentMove` cleanup.
+  Tier-1 pins relative clocks and immutable controller inputs.
 - **Evidence:** `quick-attack-pidgeotto-onix.json` is **71/71 exact** at
-  oracle frames 46-116 / ages 7-77, covering the kickoff printer through
-  body teardown and opponent animation-controller command release.
+  oracle frames 46-116 / ages 7-77 for the original body prefix and now
+  **219/219 exact** at frames 46-264 / ages 7-225 for the contiguous complete
+  opponent-front window. Frame 264 is the `MOVE_NONE` cleanup boundary;
+  frame 265 installs the player's next move and is outside this acceptance
+  unit.
   Canonical QUICK ATTACK remains **169/169** and sibling AERIAL ACE
-  **93/93**.
-- **Next:** extend the portable QUICK ATTACK case past frame 116 through
-  generic hit/HP/result/current-move-clear and the next stable controller
-  boundary; independently prove player-back attacker geometry before exact.
-  Existing FEATHER DANCE, ICE PUNCH, and FIRE PUNCH exact evidence must stay
-  green.
+  **93/93**. Exact regressions remain green: FEATHER DANCE **400/400 +
+  400/400**, ICE PUNCH **462/462 + 1294/1294**, FIRE PUNCH **225/225 +
+  277/277**.
+- **Next:** independently stage and densely prove player-back PIDGEOTTO →
+  opponent-front ONIX through the same complete age-225 boundary before
+  promoting QUICK ATTACK to exact.

@@ -13973,13 +13973,15 @@ export function renderSceneOnMovePresentation(
       }
     }
 
-    drawSpriteSheet(
-      fb,
-      onixBackSprite.tileset,
-      onixBackSprite.palette,
-      target.geometry.spriteCorner.x + view.targetShakeX2,
-      target.geometry.spriteCorner.y,
-    );
+    if (!view.targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        onixBackSprite.tileset,
+        onixBackSprite.palette,
+        target.geometry.spriteCorner.x + view.targetShakeX2,
+        target.geometry.spriteCorner.y,
+      );
+    }
     if (view.impactVisible) {
       drawSpriteSheetAffineStretchBlendedOverFb(
         fb,
@@ -14003,10 +14005,12 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       onixPlayerHealthboxContentForState(
-        state.config.fieldProfile.playerHp,
+        view.displayedTargetHp,
         state.config.fieldProfile.playerStatus,
         state.config.fieldProfile.playerGender,
       ),
+      0,
+      view.healthboxY2,
     );
     drawTileBg(
       fb,
@@ -14014,18 +14018,27 @@ export function renderSceneOnMovePresentation(
       battleWindow.tilemap,
       battleWindow.palette,
     );
-    drawMessageTextLines(
-      fb,
-      view.moveText.line1,
-      view.moveText.line2,
-      Math.max(
-        0,
-        Math.min(
-          view.moveText.line1.length + view.moveText.line2.length,
-          view.age - state.config.moveTextStartAge + 1,
+    if (view.resultText) {
+      drawMessageTextLines(
+        fb,
+        view.resultText.line,
+        "",
+        view.resultText.visibleChars,
+      );
+    } else {
+      drawMessageTextLines(
+        fb,
+        view.moveText.line1,
+        view.moveText.line2,
+        Math.max(
+          0,
+          Math.min(
+            view.moveText.line1.length + view.moveText.line2.length,
+            view.age - state.config.moveTextStartAge + 1,
+          ),
         ),
-      ),
-    );
+      );
+    }
     return;
   }
 

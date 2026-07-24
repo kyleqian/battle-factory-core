@@ -19,6 +19,11 @@ interface Fixture {
   readonly controllerProfile: {
     readonly targetHpBefore: number;
     readonly targetHpAfter: number;
+    readonly hitReactionFirstAge: number;
+    readonly hpDrainFirstAge: number;
+    readonly resultTextFirstAge: number;
+    readonly resultKind: "notVeryEffective" | "superEffective";
+    readonly currentMoveResetAge: number;
   };
   readonly moveTextStartAge: number;
 }

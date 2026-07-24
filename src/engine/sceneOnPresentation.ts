@@ -101,6 +101,15 @@ export interface SceneOnQuickAttackConfig {
   readonly controllerProfile: Readonly<{
     readonly targetHpBefore: number;
     readonly targetHpAfter: number;
+    /** First displayed generic hit healthbox wobble. */
+    readonly hitReactionFirstAge: number;
+    /** First displayed one-HP decrement from the resolved damage endpoint. */
+    readonly hpDrainFirstAge: number;
+    /** First glyph of the controller-owned effectiveness result. */
+    readonly resultTextFirstAge: number;
+    readonly resultKind: "notVeryEffective" | "superEffective";
+    /** Controller cleanup boundary where gCurrentMove becomes MOVE_NONE. */
+    readonly currentMoveResetAge: number;
   }>;
   readonly moveTextStartAge: number;
 }
@@ -352,6 +361,14 @@ export interface SceneOnQuickAttackView {
   readonly afterimages: readonly QuickAttackAfterimage[];
   readonly targetShakeX2: number;
   readonly impactVisible: boolean;
+  readonly healthboxY2: number;
+  readonly targetInvisible: boolean;
+  readonly displayedTargetHp: number;
+  readonly resultText: Readonly<{
+    readonly line: string;
+    readonly visibleChars: number;
+  }> | null;
+  readonly currentMove: "QUICK_ATTACK" | null;
   readonly moveText: Readonly<{ line1: string; line2: string }>;
 }
 
@@ -746,6 +763,14 @@ export function sceneOnQuickAttackView(
   if (state.config.move !== "QUICK_ATTACK") {
     throw new Error(`expected QUICK_ATTACK presentation, got ${state.config.move}`);
   }
+  const { controllerProfile } = state.config;
+  const hitReaction = genericHitReactionAtAge(
+    state.age,
+    controllerProfile.hitReactionFirstAge,
+  );
+  const resultLine = controllerProfile.resultKind === "notVeryEffective"
+    ? "It’s not very effective…"
+    : "It’s super effective!";
   return {
     age: state.age,
     attacker: state.config.attacker,
@@ -754,6 +779,26 @@ export function sceneOnQuickAttackView(
       state.age,
       state.config.attacker.geometry.side,
     ),
+    ...hitReaction,
+    displayedTargetHp: displayedHpAfterDamage(state.age, {
+      startHp: controllerProfile.targetHpBefore,
+      endHp: controllerProfile.targetHpAfter,
+      firstDisplayedAge: controllerProfile.hpDrainFirstAge,
+    }),
+    resultText:
+      state.age >= controllerProfile.resultTextFirstAge
+        ? {
+            line: resultLine,
+            visibleChars: Math.min(
+              resultLine.length,
+              state.age - controllerProfile.resultTextFirstAge + 1,
+            ),
+          }
+        : null,
+    currentMove:
+      state.age >= controllerProfile.currentMoveResetAge
+        ? null
+        : "QUICK_ATTACK",
     moveText: {
       line1: `${battlerNameWithPrefix(state.config.attacker)} used`,
       line2: "QUICK ATTACK!",
