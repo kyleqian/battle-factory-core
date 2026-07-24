@@ -70,6 +70,7 @@ function handlers(
     prepareSelectionMessage: () => null,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler,
+    resolveBattlerAtPosition: () => null,
     resolveBattlerForBattleScript: () => null,
     resolveHalfwordOperand,
   }));
@@ -399,7 +400,7 @@ describe("source-exact Battle Script PLAYSE/FANFARE controller family", () => {
     expect(result.state.scheduler.pendingControllerBattlers).toEqual([0, 2]);
   });
 
-  it("replays deterministically and composes to exactly twenty-one supported IDs", () => {
+  it("replays deterministically and composes to exactly twenty-three supported IDs", () => {
     const makeResult = () => stepBattleScriptMachine(
       program,
       stateAt(fanfare),
@@ -409,7 +410,7 @@ describe("source-exact Battle Script PLAYSE/FANFARE controller family", () => {
 
     const sourceHandlers = handlers(() => 1);
     expect(Object.keys(sourceHandlers).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 17, 18, 20, 57, 58, 84, 85, 86, 98, 111, 131,
+      16, 17, 18, 20, 57, 58, 83, 84, 85, 86, 98, 111, 131, 248,
     ]);
     const composed = Object.freeze({
       ...createBattleScriptControlHandlers<FixtureRules>(program),
@@ -421,7 +422,7 @@ describe("source-exact Battle Script PLAYSE/FANFARE controller family", () => {
       ...createBattleScriptMoveValuesCommandHandlers<FixtureRules>(program),
     });
     expect(Object.keys(composed).map(Number).sort((left, right) => left - right)).toEqual([
-      16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 84, 85, 86, 98, 111, 131, 141,
+      16, 17, 18, 20, 37, 38, 39, 40, 57, 58, 60, 61, 62, 65, 83, 84, 85, 86, 98, 111, 131, 141, 248,
     ]);
   });
 });

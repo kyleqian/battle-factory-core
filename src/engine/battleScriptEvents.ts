@@ -74,6 +74,14 @@ export type BattleScriptSemanticEventPayload =
     invisible: false;
   }>
   | Readonly<{
+    kind: "trainer-slide-in";
+    battler: BattleScriptBattlerId;
+  }>
+  | Readonly<{
+    kind: "trainer-slide-out";
+    battler: BattleScriptBattlerId;
+  }>
+  | Readonly<{
     kind: "hp-change";
     battler: number;
     from: number;

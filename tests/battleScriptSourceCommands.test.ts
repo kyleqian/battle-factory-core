@@ -125,6 +125,7 @@ function sourceHandlers(
     prepareSelectionMessage,
     prepareSelectionMessageFromTable: () => null,
     resolveAttackerBattler: () => null,
+    resolveBattlerAtPosition: () => null,
     resolveBattlerForBattleScript: () => null,
     resolveHalfwordOperand,
   }));
@@ -337,7 +338,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
     }));
   });
 
-  it("composes exactly the twelve source commands with the five existing controls", () => {
+  it("composes exactly the fourteen source commands with the five existing controls", () => {
     expect(Object.keys(sourceHandlers(true)).map(Number).sort((left, right) => left - right)).toEqual([
       16,
       17,
@@ -345,12 +346,14 @@ describe("source-mapped Battle Script scheduler commands", () => {
       20,
       57,
       58,
+      83,
       84,
       85,
       86,
       98,
       111,
       131,
+      248,
     ]);
     expect(Object.keys(composedHandlers(true)).map(Number).sort((left, right) => left - right)).toEqual([
       16,
@@ -364,12 +367,14 @@ describe("source-mapped Battle Script scheduler commands", () => {
       61,
       62,
       65,
+      83,
       84,
       85,
       86,
       98,
       111,
       131,
+      248,
     ]);
   });
 

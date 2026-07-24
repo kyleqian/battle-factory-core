@@ -127,6 +127,7 @@ export type BattleScriptBlockReason =
       | "prepare-selection-message"
       | "prepare-selection-message-from-table"
       | "resolve-attacker"
+      | "resolve-battler-at-position"
       | "resolve-battler-for-battle-script"
       | "resolve-byte"
       | "resolve-halfword";
@@ -572,6 +573,8 @@ function freezeEventPayload(
     case "play-faint-cry":
     case "hide-party-status-summary":
     case "set-battler-sprite-visibility":
+    case "trainer-slide-in":
+    case "trainer-slide-out":
       return Object.freeze({ ...payload });
     case "animation":
       return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });

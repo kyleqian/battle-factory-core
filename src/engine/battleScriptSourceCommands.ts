@@ -37,6 +37,11 @@ type BattleScriptSelectedBattlerControllerEventPayload = Extract<
   }>
 >;
 
+type BattleScriptTrainerSlideEventPayload = Extract<
+  BattleScriptSemanticEventPayload,
+  Readonly<{ kind: "trainer-slide-in" | "trainer-slide-out" }>
+>;
+
 export type BattleScriptControllerIdlePort<RulesContext extends object> = (
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
 ) => boolean;
@@ -59,6 +64,12 @@ export type BattleScriptAttackerResolverPort<RulesContext extends object> = (
 export type BattleScriptBattlerSelectorResolverPort<RulesContext extends object> = (
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   selectorOperand: BattleScriptOperand,
+) => BattleScriptBattlerId | null;
+
+/** Typed boundary for Emerald's GetBattlerAtPosition(u8 position). */
+export type BattleScriptBattlerPositionResolverPort<RulesContext extends object> = (
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  positionOperand: BattleScriptOperand,
 ) => BattleScriptBattlerId | null;
 
 export type BattleScriptSelectionMessagePreparation = Readonly<{
@@ -84,6 +95,7 @@ export type BattleScriptSourceCommandPorts<RulesContext extends object> = Readon
   prepareSelectionMessage: BattleScriptSelectionMessagePreparationPort<RulesContext>;
   prepareSelectionMessageFromTable: BattleScriptSelectionMessageFromTablePreparationPort<RulesContext>;
   resolveAttackerBattler: BattleScriptAttackerResolverPort<RulesContext>;
+  resolveBattlerAtPosition: BattleScriptBattlerPositionResolverPort<RulesContext>;
   resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<RulesContext>;
   resolveHalfwordOperand: BattleScriptHalfwordResolverPort<RulesContext>;
 }>;
@@ -161,6 +173,20 @@ function unavailableBattlerSelectorReason<RulesContext extends object>(
     opcodeId: context.instruction.opcodeId,
     opcodeName: context.instruction.opcodeName,
     port: "resolve-battler-for-battle-script",
+    operandExpression: operand.expression,
+  });
+}
+
+function unavailableBattlerPositionReason<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  operand: BattleScriptOperand,
+): BattleScriptBlockReason {
+  return Object.freeze({
+    kind: "source-context-unavailable",
+    programCounter: context.state.programCounter,
+    opcodeId: context.instruction.opcodeId,
+    opcodeName: context.instruction.opcodeName,
+    port: "resolve-battler-at-position",
     operandExpression: operand.expression,
   });
 }
@@ -517,12 +543,47 @@ function emitSelectedBattlerControllerEvent<RulesContext extends object>(
   );
 }
 
+function emitTrainerSlideControllerEvent<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  ports: BattleScriptSourceCommandPorts<RulesContext>,
+  kind: "trainer-slide-in" | "trainer-slide-out",
+): BattleScriptCommandTransition<RulesContext> {
+  const required = requireSingleByteOperand(context);
+  if (required.kind === "transition") return required.transition;
+  const battler = ports.resolveBattlerAtPosition(context, required.operand);
+  if (battler === null) {
+    return blockBattleScriptCommand(
+      context,
+      unavailableBattlerPositionReason(context, required.operand),
+    );
+  }
+  if (!isBattleScriptBattlerId(battler)) {
+    return haltForInvalidBattler(context, battler);
+  }
+  const scheduler = markBattleScriptControllerPending(
+    schedulerWith(context, { activeBattler: battler }),
+    battler,
+  );
+  const event: BattleScriptTrainerSlideEventPayload = Object.freeze({
+    kind,
+    battler,
+  });
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    {
+      scheduler,
+      events: Object.freeze([event]),
+    },
+  );
+}
+
 /**
  * First source-mapped scheduler family:
  * Cmd_nop, Cmd_waitstate, Cmd_printstring, Cmd_printselectionstring,
  * Cmd_printselectionstringfromtable, Cmd_waitmessage, Cmd_pause, Cmd_playse,
  * Cmd_fanfare, Cmd_playfaintcry, Cmd_hidepartystatussummary, and
- * Cmd_makevisible.
+ * Cmd_makevisible, Cmd_trainerslidein, and Cmd_trainerslideout.
  *
  * Controller readiness, source-context string preparation, and exact u16
  * operand resolution are injected logical ports. MSG_DISPLAY and the shared
@@ -620,6 +681,10 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
         invisible: false,
       }),
     ));
+  installHandler(program, handlers, "B_SCR_OP_TRAINERSLIDEIN", (context) =>
+    emitTrainerSlideControllerEvent(context, ports, "trainer-slide-in"));
+  installHandler(program, handlers, "B_SCR_OP_TRAINERSLIDEOUT", (context) =>
+    emitTrainerSlideControllerEvent(context, ports, "trainer-slide-out"));
   installHandler(program, handlers, "B_SCR_OP_WAITMESSAGE", (context) => {
     if (!ports.isControllerIdle(context)) {
       return blockBattleScriptCommand(context, controllerBusyReason(context));
