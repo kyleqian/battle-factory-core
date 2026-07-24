@@ -120,6 +120,8 @@ export type BattleScriptRulesContext = Readonly<
     currentMoveEffect: number;
     currentMovePower: number;
     currentMovePosition: number;
+    /** Source u8 gLastUsedAbility. */
+    lastUsedAbility: number;
     multiHitCounter: number;
     multistringChooser: number;
     battleMoveDamage: number;
@@ -146,6 +148,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   battleOutcome: number;
   currentMove: number;
   currentMovePosition: number;
+  lastUsedAbility?: number;
   moveResultFlags: number;
   dmgMultiplier: number;
   critMultiplier: number;
@@ -436,6 +439,11 @@ export function createBattleScriptRulesContext(
       input.currentMovePosition,
       3,
       "currentMovePosition",
+    ),
+    lastUsedAbility: requireUnsigned(
+      input.lastUsedAbility ?? 0,
+      0xff,
+      "lastUsedAbility",
     ),
     moveResultFlags: requireUnsigned(input.moveResultFlags, 0xff, "moveResultFlags"),
     dmgMultiplier: requireUnsigned(input.dmgMultiplier, 0xff, "dmgMultiplier"),
