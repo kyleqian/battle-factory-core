@@ -1,3 +1,20 @@
+## 359 — S4/S9 closed; S10 corpus + Scene-ON breadth advancing
+
+- **State:** S4/S9 are supervisor-verified complete; QUICK ATTACK is exact in
+  both orientations. S10 Gate 1 now has the complete 300-trainer corpus.
+- **Did:** accepted all 14 summary traces, the 12-case generic round matrix,
+  and the source-driven front-animation/Contest transfer seam; merged signed
+  fixed-point QUICK travel and extracted every Frontier trainer's class,
+  speeches, eligible sets, and source-declared AI shape.
+- **Next:** finish full species stats/ability extraction and the remaining
+  Gate-1 lookup catalogs; keep AERIAL ACE portability moving independently.
+- **Notes:** summary **80/80 + 80/80 + 201/201**, QUICK **219/219 + 214/214**,
+  animation **7 exact / 6 partial / 263 unsupported**. Trainer extraction
+  covers **300/300**, cross-validates **882** sets and the **0–849** Level-50
+  boundary. PP-builder work remains independently in flight; new mechanicLab
+  fixtures use `ppUps:[0,0,0,0]`.
+
+---
 ## 358 — S4/S9 OFF summary front animation + Contest switch: **GREEN**
 
 - **State:** source-driven front animation is live for the six named rental

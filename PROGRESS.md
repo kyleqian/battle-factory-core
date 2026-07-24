@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 362 — S10 Gate-3 typed Battle Script control slice
+
+- **State:** S10 Gate 3 remains open; its first typed, inspectable program and
+  pure control-machine foundation is green but is not wired to production.
+- **Did:** compiled all **619 labels / 3275 source invocations / 6948
+  emissions / 3306 opcode starts** from the four committed catalogs into
+  immutable width-tagged IR, preserving source/wrapper provenance and honest
+  empty-label aliases. Added a generic PC/call-stack/budget machine with
+  injected handlers and source-safe `GOTO`, `RETURN`, `END`, `END2`, `CALL`.
+- **Next:** extend the generic interpreter with source-mapped battle-context
+  and semantic-event contracts before adding battle opcodes; keep unsupported
+  commands structured and do not wire the controller until the rules seam is
+  proven.
+- **Notes:** `END3` remains deliberately unsupported because it owns the
+  external callback stack; all other battle mutation, RNG, presentation, and
+  **244/249** opcodes remain out of scope. Tier-1 **102 files / 1413 tests**
+  and build green; no oracle/pixel claim.
+
+---
 ## 361 — AERIAL ACE exact; Battle Script topology banked
 
 - **State:** S10 Gate 1 remains closed; Scene-ON is now **8 exact / 5 partial
@@ -38,20 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (850 sets) and Open-only **850–881** (32). Integrated baseline is **97
   files / 1383 tests** plus green build. Canonical AERIAL remains **93/93**;
   QUICK remains **219/219 + 214/214**.
-
----
-## 359 — S4/S9 closed; S10 corpus + Scene-ON breadth advancing
-
-- **State:** S4/S9 are supervisor-verified complete; QUICK ATTACK is exact in
-  both orientations. S10 Gate 1 now has the complete 300-trainer corpus.
-- **Did:** accepted all 14 summary traces, the 12-case generic round matrix,
-  and the source-driven front-animation/Contest transfer seam; merged signed
-  fixed-point QUICK travel and extracted every Frontier trainer's class,
-  speeches, eligible sets, and source-declared AI shape.
-- **Next:** finish full species stats/ability extraction and the remaining
-  Gate-1 lookup catalogs; keep AERIAL ACE portability moving independently.
-- **Notes:** summary **80/80 + 80/80 + 201/201**, QUICK **219/219 + 214/214**,
-  animation **7 exact / 6 partial / 263 unsupported**. Trainer extraction
-  covers **300/300**, cross-validates **882** sets and the **0–849** Level-50
-  boundary. PP-builder work remains independently in flight; new mechanicLab
-  fixtures use `ppUps:[0,0,0,0]`.
