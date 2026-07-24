@@ -5,6 +5,9 @@ import {
   BLAZE_KICK_MOVE_BODY_LAST_AGE,
   blazeKickAnimationAtAge,
   blazeKickFireSpreadAtAge,
+  blazeKickPaletteAtAge,
+  blazeKickSpinningFootMatrixAtAge,
+  blazeKickSpritesAtAge,
 } from "../src/engine/blazeKick.ts";
 
 describe("source-relative Blaze Kick presentation checkpoint", () => {
@@ -55,5 +58,77 @@ describe("source-relative Blaze Kick presentation checkpoint", () => {
       centerY: 134,
       sheetFrame: 2,
     });
+  });
+
+  it("derives the double-affine spinning-foot OAM matrix and palette epochs", () => {
+    expect(blazeKickSpinningFootMatrixAtAge(2)).toBeNull();
+    expect(blazeKickSpinningFootMatrixAtAge(3)).toEqual({
+      pa: 232,
+      pb: -124,
+      pc: 124,
+      pd: 232,
+    });
+    expect(blazeKickSpinningFootMatrixAtAge(33)).toEqual({
+      pa: -7224,
+      pb: -3861,
+      pc: 3861,
+      pd: -7224,
+    });
+    expect(blazeKickSpinningFootMatrixAtAge(34)).toEqual({
+      pa: 256,
+      pb: 0,
+      pc: 0,
+      pd: 256,
+    });
+    expect(blazeKickSpinningFootMatrixAtAge(56)).toBeNull();
+
+    expect(blazeKickPaletteAtAge(6).targetTint).toBeNull();
+    expect(blazeKickPaletteAtAge(7).targetTint).toEqual({
+      color: "white",
+      coeff: 1,
+    });
+    expect(blazeKickPaletteAtAge(25).targetTint).toEqual({
+      color: "white",
+      coeff: 7,
+    });
+    expect(blazeKickPaletteAtAge(35)).toEqual({
+      targetTint: { color: "black", coeff: 8 },
+      attackerBlackCoeff: 8,
+      backgroundBlackCoeff: 8,
+    });
+    expect(blazeKickPaletteAtAge(36)).toEqual({
+      targetTint: null,
+      attackerBlackCoeff: 8,
+      backgroundBlackCoeff: 8,
+    });
+    expect(blazeKickPaletteAtAge(38)).toEqual({
+      targetTint: null,
+      attackerBlackCoeff: 0,
+      backgroundBlackCoeff: 0,
+    });
+  });
+
+  it("preserves the source allocation and full component painter order", () => {
+    const geometry = {
+      targetCenter: target,
+      targetSubpriority: 40,
+      attackerSide: "player",
+      spriteSlots: [3, 4, 5, 7, 9, 10, 11, 12, 13, 14],
+      spriteOrderSeed: [3, 10, 9, 7, 5, 4, 14, 13, 12, 11],
+    } as const;
+    expect(blazeKickSpritesAtAge(3, geometry)).toMatchObject([
+      { kind: "foot", slot: 3 },
+    ]);
+    expect(blazeKickSpritesAtAge(35, geometry).map((sprite) => sprite.slot))
+      .toEqual([11, 13, 14, 10, 12, 7, 9, 4, 3]);
+    expect(blazeKickSpritesAtAge(36, geometry).map((sprite) => sprite.slot))
+      .toEqual([10, 11, 13, 14, 12, 7, 9, 4, 3]);
+    expect(blazeKickSpritesAtAge(43, geometry).map((sprite) => sprite.slot))
+      .toEqual([10, 14, 11, 13, 12, 7, 9, 4, 3]);
+    expect(blazeKickSpritesAtAge(44, geometry).map((sprite) => sprite.slot))
+      .toEqual([10, 14, 11, 13, 12, 7, 9, 3]);
+    expect(blazeKickSpritesAtAge(56, geometry).map((sprite) => sprite.slot))
+      .toEqual([10, 14, 11, 13, 12, 7, 9]);
+    expect(blazeKickSpritesAtAge(76, geometry)).toEqual([]);
   });
 });

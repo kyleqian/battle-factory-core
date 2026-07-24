@@ -6,10 +6,9 @@
  * Every `BuildOamBuffer` then performs one stable insertion-sort pass using
  * packed `(oam.priority << 8) | subpriority`, followed by wrapped OAM y.
  *
- * This reduced seam currently models ordinary, non-double-affine component
- * sprites. Source `SortSprites` has one additional y-wrap rule for
- * double-affine size-3 square/vertical sprites; add those key fields before
- * reusing this helper for such a component.
+ * Source `SortSprites` has one additional y-wrap rule for double-affine
+ * size-3 square/vertical sprites. The optional OAM geometry below models that
+ * rule; ordinary sprites use the source defaults.
  *
  * A presentation reducer only needs the slots its component can allocate:
  * restricting a stable sort to those slots preserves their relative order.
@@ -28,6 +27,9 @@ export interface SpriteOrderKey {
   readonly subpriority: number;
   /** Source `sprite->oam.y`, before `SortSprites`' 160..255 wrap. */
   readonly oamY: number;
+  readonly affineMode?: "off" | "normal" | "double";
+  readonly oamSize?: 0 | 1 | 2 | 3;
+  readonly oamShape?: "square" | "horizontal" | "vertical";
 }
 
 export interface SpriteOrderOccupant extends SpriteOrderKey {
@@ -120,9 +122,18 @@ export function destroyOrderedSprite(
   return { ...state, occupants };
 }
 
-function wrappedY(oamY: number): number {
-  const byteY = oamY & 0xff;
-  return byteY >= DISPLAY_HEIGHT ? byteY - 256 : byteY;
+function wrappedY(key: Readonly<SpriteOrderKey>): number {
+  const byteY = key.oamY & 0xff;
+  let y = byteY >= DISPLAY_HEIGHT ? byteY - 256 : byteY;
+  if (
+    key.affineMode === "double"
+    && key.oamSize === 3
+    && (key.oamShape === "square" || key.oamShape === "vertical")
+    && y > 128
+  ) {
+    y -= 256;
+  }
+  return y;
 }
 
 function packedPriority(key: Readonly<SpriteOrderKey>): number {
@@ -156,7 +167,7 @@ export function sortSpriteOrder(
         packedPriority(prior) > packedPriority(next)
         || (
           packedPriority(prior) === packedPriority(next)
-          && wrappedY(prior.oamY) < wrappedY(next.oamY)
+          && wrappedY(prior) < wrappedY(next)
         )
       ) {
         const temp = order[cursor]!;

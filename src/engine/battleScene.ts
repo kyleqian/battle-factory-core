@@ -579,6 +579,7 @@ import {
   sceneOnBindView,
   sceneOnDragonBreathView,
   sceneOnFlamethrowerView,
+  sceneOnBlazeKickView,
   sceneOnAerialAceView,
   sceneOnEndeavorView,
   sceneOnFeatherDanceView,
@@ -3173,6 +3174,27 @@ function blendComponentToward(component8: number, target8: number, coeff: number
   const b5 = c5 + (((t5 - c5) * coeff) >> 4);
   return (b5 << 3) | (b5 >> 2);
 }
+
+function blendPaletteToward(
+  palette: readonly RgbColor[],
+  target: RgbColor,
+  coeff: number,
+): RgbColor[] {
+  if (coeff === 0) return palette.slice();
+  return palette.map((color) => ({
+    r: blendComponentToward(color.r, target.r, coeff),
+    g: blendComponentToward(color.g, target.g, coeff),
+    b: blendComponentToward(color.b, target.b, coeff),
+  }));
+}
+
+function blendPaletteBanksToward(
+  palettes: readonly (readonly RgbColor[])[],
+  target: RgbColor,
+  coeff: number,
+): RgbColor[][] {
+  return palettes.map((palette) => blendPaletteToward(palette, target, coeff));
+}
 /**
  * Same nearest-neighbor affine sampling as `drawSpriteSheetAffineTinted`, but with INDEPENDENT x/y scale (a true stretch, not uniform), a vertical pixel offset, and the sprite's OWN palette (optionally blended toward `tintColor` at `tintCoeff`) instead of a flat tint.
  *
@@ -3294,7 +3316,7 @@ function drawSpriteSheetAffineStretch(
  * false in practice today, but the doubled-footprint math is kept general
  * since nothing here is doubled-specific.
  */
-function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, xScale: number, yScale: number, eva: number, evb: number, doubled = false, target: "static" | "live" = "static", coverageMask?: Uint8Array): void {
+function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, xScale: number, yScale: number, eva: number, evb: number, doubled = false, target: "static" | "live" | Uint8Array = "static", coverageMask?: Uint8Array): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
   const halfW = w / 2;
@@ -3324,9 +3346,12 @@ function drawSpriteSheetAffineStretchBlendedOverFb(fb: Uint8Array, tileset: Tile
       if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
       const o = (y * 240 + x) * 4;
       if (coverageMask) coverageMask[y * 240 + x] = 1;
-      const field = target === "live"
-        ? { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! }
-        : staticBgPixel(x, y);
+      const field =
+        target === "live"
+          ? { r: fb[o]!, g: fb[o + 1]!, b: fb[o + 2]! }
+          : target === "static"
+            ? staticBgPixel(x, y)
+            : { r: target[o]!, g: target[o + 1]!, b: target[o + 2]! };
       if (!field) continue;
       fb[o] = blendChannel(c.r, field.r, eva, evb);
       fb[o + 1] = blendChannel(c.g, field.g, eva, evb);
@@ -14418,6 +14443,181 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ONIX used" : "Foe ONIX used",
       "BIND!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "BLAZE_KICK") {
+    // Sprite callback/affine state reaches the displayed OAM one frame after
+    // the probe-visible reducer state. Palette writes have one additional
+    // VBlank transfer before they color the captured framebuffer.
+    const view = sceneOnBlazeKickView({ ...state, age: state.age - 1 });
+    const displayedTargetPalette = sceneOnBlazeKickView({
+      ...state,
+      age: state.age - 2,
+    }).palette;
+    const displayedFieldPalette = sceneOnBlazeKickView({
+      ...state,
+      age: state.age - 1,
+    }).palette;
+    const framebufferAnimationAge = sceneOnBlazeKickView(state).animationAge;
+    const playerToOpponent =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BLAZE_KICK pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    const black = { r: 0, g: 0, b: 0 };
+    const white = { r: 255, g: 255, b: 255 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        black,
+        displayedFieldPalette.backgroundBlackCoeff,
+      ),
+    );
+    const targetTint =
+      framebufferAnimationAge >= 36 && framebufferAnimationAge <= 37
+        ? { color: "black" as const, coeff: 8 }
+        : framebufferAnimationAge >= 38
+          ? null
+          : displayedTargetPalette.targetTint;
+    drawSpriteSheetAffineStretch(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+      256,
+      256,
+      0,
+      targetTint?.color === "white" ? white : black,
+      targetTint?.coeff ?? 0,
+      false,
+      view.animation.targetX2,
+    );
+    // Same-priority OBJ pixels do not become each other's target-2 layer.
+    // Preserve the already-composited BG target copy plus field as the
+    // semi-transparent hitsplat's actual backdrop.
+    const hitsplatBackdrop = fb.slice();
+    const drawAttacker = () => {
+      drawSpriteSheetAffineStretch(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+        256,
+        256,
+        0,
+        black,
+        displayedFieldPalette.attackerBlackCoeff,
+      );
+    };
+    const drawEffects = () => {
+      for (const sprite of view.sprites) {
+        if (sprite.kind === "fireSpread") {
+          drawSpriteSheet(
+            fb,
+            subTileset(
+              battleAnimSmallEmber.tileset,
+              sprite.sprite.sheetFrame * 4,
+              4,
+            ),
+            battleAnimSmallEmber.palette,
+            sprite.sprite.centerX - 16,
+            sprite.sprite.centerY - 16,
+          );
+        } else if (sprite.kind === "hitsplat") {
+          drawSpriteSheetAffineStretchBlendedOverFb(
+            fb,
+            battleAnimHitsplat.tileset,
+            battleAnimHitsplat.palette,
+            sprite.centerX - 16,
+            sprite.centerY - 16,
+            256,
+            256,
+            12,
+            8,
+            false,
+            hitsplatBackdrop,
+          );
+        } else {
+          drawSpriteSheetAffineRotate(
+            fb,
+            subTileset(battleAnimHandsAndFeet.tileset, 4, 4),
+            battleAnimHandsAndFeet.palette,
+            sprite.centerX,
+            sprite.centerY,
+            sprite.matrix.pa,
+            sprite.matrix.pb,
+            sprite.matrix.pc,
+            sprite.matrix.pd,
+            undefined,
+            true,
+          );
+        }
+      }
+    };
+    if (playerToOpponent) {
+      drawEffects();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawEffects();
+    }
+    if (playerToOpponent) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        murkrowHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "female",
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "male",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        flyMurkrowPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ONIX used" : "Foe ONIX used",
+      "BLAZE KICK!",
       99,
     );
     return;

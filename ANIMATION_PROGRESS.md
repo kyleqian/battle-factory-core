@@ -44,22 +44,20 @@ remainder.
 
 ## Current handoff
 
-- **State:** **16 exact / 2 partial / 258 unsupported**. BLAZE KICK has a
-  source-derived, two-orientation component checkpoint; it is not exact and
-  has no framebuffer acceptance yet.
-- **Did:** staged legal zero-PP-Up ONIX → MURKROW BLAZE KICK in both
-  orientations and modeled its target-relative 78-frame source body without
-  battle-frame branches: monbg/setalpha, ShakeMon2, hitsplat and spinning-foot
-  lifetimes, plus all seven shared FireSpread fixed-point translations and
-  sheet epochs. The reusable dense probe now identifies the distinct foot and
-  FireSpread templates.
+- **State:** **17 exact / 1 partial / 258 unsupported**. BLAZE KICK is exact
+  for its complete source-owned body in both required orientations.
+- **Did:** connected the existing target-relative reducer through the shared
+  Scene-ON seam with the source `AFFINE_DOUBLE` spinning-foot program, both
+  target-white ramps, the complex whole-field black blend/restore, and one
+  persistent source allocation/order lifetime across foot, hitsplat,
+  invisible palette owner, and seven FireSpread sprites. The semi-transparent
+  hitsplat now samples the actual target-monbg/field target-2 backdrop rather
+  than another same-priority OBJ.
 - **Evidence:** player frames **399..476** and opponent frames **453..530**
-  each match **78/78** component frames at relative ages **0..77**. Full
-  framebuffer acceptance is **0/78 both** because no BLAZE KICK compositor is
-  wired. Existing FLAMETHROWER remains **126/126 RGB+component both** and
-  DRAGON BREATH remains **85/85 RGB+component both**.
-- **Next:** connect BLAZE KICK through the shared Scene-ON seam by deriving its
-  distinct spinning-foot affine/OAM program, both target white palette ramps,
-  whole-field complex black blend, and persistent ordering/composition across
-  foot, hitsplat, target monbg copy, and seven FireSpread sprites. Promote
-  only after all 78 framebuffer frames match in both orientations.
+  each match **78/78 component/OAM-order and 78/78 framebuffer frames** at
+  relative ages **0..77**, with zero exclusions. FLAMETHROWER remains
+  **126/126 RGB+component both** and DRAGON BREATH remains **85/85
+  RGB+component both** after fresh dense control runs.
+- **Next:** retain FIRE BLAST, EMBER, FIRE SPIN, and DRAGON RAGE as unsupported
+  distinct-template siblings until each has independent dense move evidence;
+  select the next bounded Level-50 acceptance unit from coverage.
