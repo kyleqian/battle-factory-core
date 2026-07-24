@@ -1,3 +1,27 @@
+## 425 — vertical move-end dependencies and exact Thunder Punch integrated
+
+- **State:** the vertical player/AI machine slice and move-end dependency steps
+  1--4 are green at **172 files / 1994 tests**. Opcodes **73** and **0** remain
+  unregistered; no delegate semantics, 17-state/end-mode loop, cleanup, or
+  Factory continuation was added. Scene-ON coverage is **18 exact / 1 partial
+  / 257 unsupported**.
+- **Did:** landed same-PC controller return/call-current ownership and
+  source-complete move-end states 1/8--10. Added a mechanical receipt for
+  exactly four ability and two item delegate modes: **7** `Random()` sites,
+  **2** controller emissions/marks, **42** script-transfer candidates, and
+  **4** loops. Independently, THUNDER PUNCH is exact in both legal orientations
+  at **104/104 component and 104/104 RGB frames** each, with source-relative
+  palette, inversion, sprite, shake, monbg, and teardown behavior.
+- **Next:** implement dependency step 5 from the committed delegate receipt:
+  source-complete ability/item ports sharing the machine RNG ledger and
+  exposing controller/script results. Keep the all-case loop,
+  cleanup/next-target transfer, opcode registration, and Factory continuation
+  behind their later gates.
+- **Notes:** full suite/build, both oracle profiles, coverage, focused
+  controller tests, receipt regeneration, and both Thunder Punch dense
+  comparators pass. Fire/Ice Punch, Blaze Kick, Flamethrower, and Dragon Breath
+  controls remain exact.
+
 ## 423 — move-end topology corrected and pure state prerequisites landed
 
 - **State:** dependency step 3 is corrected and green at **170 files / 1986

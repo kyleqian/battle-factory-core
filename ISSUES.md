@@ -16,35 +16,14 @@ playthrough.
   `battle1-turn2-ram-dump.json`, `battle1-grovyle-faint-ram-dump.json` and
   reads battler HP/maxHP out of them (`:916-1267`).
 - `factorySwapPresentation.ts:2` imports `battle1-swap-rentalmons-dump.json`.
-- `featherDance.ts:29-31` imports turn-6/7/8 sprite probes (see #40).
 - 57 of the 114 files in `src/data/gen/` are `*-dump`/`*-probe`/`*-watch`/
-  `*-boundaries` recordings.
+  `*-boundaries` recordings. (`featherDance.ts`'s probe imports were retired
+  2026-07-24 by the anim-script interpreter, ex-#40.)
 
 **Leads:** the HP reads are the cheapest to retire — they become kernel
 semantic events once ROADMAP S10 step (ii) lands `datahpupdate`. Retire each
 import as its owning mechanism gains a real source, and keep the dump files
 for Tier-1 assertions and extractors. ROADMAP S10 §4 forbids new ones.
-
-## #40 — `featherDance.ts` replays a recorded per-tick sprite table
-
-**Symptom:** FEATHER DANCE is marked `exact` in `ANIMATION_COVERAGE.json`, but
-`makeFeatherSpriteLookup` (`featherDance.ts:186-230`) is a lookup over recorded
-RAM probes keyed to absolute canonical ticks (last real ticks 7557 / 8591 /
-9637 for turns 6/7/8), with a coordinate translation layered on top. It
-reproduces recorded feather trajectories, not the mechanism that generates
-them.
-
-**Confirmed:** the source it stands in for,
-`reference/pokeemerald/src/battle_anim_flying.c`'s `AnimFallingFeather` /
-`AnimFallingFeather_Step` (declared `:20-21`, template `gFallingFeatherSprite
-Template` `:171`), is fully deterministic — `gBattleAnimArgs`, battler sprite
-coords, and sine tables, **no `Random()`**. So a direct port is possible and
-would generalize to any battler geometry; the recording cannot.
-
-**Leads:** port the two callbacks (~50 source lines) and check the port
-against the three committed feather traces before deleting the probe imports.
-Good first proof for the anim-script interpreter spike in
-`ANIMATION_PROGRESS.md`.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 

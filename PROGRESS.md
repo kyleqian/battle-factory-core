@@ -4,6 +4,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 428 — [SUPERVISOR] round-1 merges: hit-chain ground truth + anim interpreter
+
+- **State:** merged tree green at **174 files / 2020 tests**, build green.
+  Round 1 of the 2026-07-24 supervised session landed all three lanes:
+  opcode 0 registered (entry 427), hit-chain ground truth banked, and the
+  user-directed anim-script interpreter spike **succeeded** on FEATHER_DANCE.
+- **Did (merges + docs):** folded `worker/side-20260724-150930` —
+  `tools/probe/verify-hit-chain-ground-truth.ts` + `docs/hit-chain-ground-truth.md`
+  (supervisor-rerun: exit 0, all PASS; hit = exactly 4 attributed `Random()`
+  rolls, miss = 1; ROM damage matches `damageCalc.ts` exactly) — and
+  `worker/animation-20260724-150928` — FEATHER_DANCE now runs a minimal
+  script interpreter + 1:1 `AnimFallingFeather` port instead of replaying
+  recorded probes (973/973 RAM fields per turn; comparators 235/235, 145/145,
+  162/162 at recorded counts, feather self-destroy ticks 7557/8591/9637
+  reproduced with zero per-turn constants). Deleted ISSUES #40 (retired).
+  ROADMAP step (ii) corrected: no `orbyte` on the EffectHit miss path
+  (supervisor source-verified, `battle_scripts_1.s:244`); eighteen total
+  registrations.
+- **Next:** round 2 — main: register the sixteen hit-chain opcodes as ordered
+  rungs against the banked verify script; side: KO/faint + crit edge ground
+  truth via `overrides.parties` (OFF oracle restarted to pick up harness
+  `b30c5d8`); animation: interpreter generalization on MOVE_MIST_BALL
+  (white-feather track).
+- **Notes:** both stale oracle services (started 08:26, predating today's
+  14:10 `overrides.parties` harness commit) restarted by the supervisor while
+  all lanes were idle.
+
+---
 ## 427 — opcode 0 (Cmd_attackcanceler) registered in the production machine
 
 - **State:** S10 step (i) is complete. Opcode 0 is registered in
@@ -85,27 +113,3 @@ suite **172 files / 1994 tests** and the production build are green at
   and still used. No DEFERRED entries are open.
 
 ---
-## 425 — vertical move-end dependencies and exact Thunder Punch integrated
-
-- **State:** the vertical player/AI machine slice and move-end dependency steps
-  1--4 are green at **172 files / 1994 tests**. Opcodes **73** and **0** remain
-  unregistered; no delegate semantics, 17-state/end-mode loop, cleanup, or
-  Factory continuation was added. Scene-ON coverage is **18 exact / 1 partial
-  / 257 unsupported**.
-- **Did:** landed same-PC controller return/call-current ownership and
-  source-complete move-end states 1/8--10. Added a mechanical receipt for
-  exactly four ability and two item delegate modes: **7** `Random()` sites,
-  **2** controller emissions/marks, **42** script-transfer candidates, and
-  **4** loops. Independently, THUNDER PUNCH is exact in both legal orientations
-  at **104/104 component and 104/104 RGB frames** each, with source-relative
-  palette, inversion, sprite, shake, monbg, and teardown behavior.
-- **Next:** implement dependency step 5 from the committed delegate receipt:
-  source-complete ability/item ports sharing the machine RNG ledger and
-  exposing controller/script results. Keep the all-case loop,
-  cleanup/next-target transfer, opcode registration, and Factory continuation
-  behind their later gates.
-- **Notes:** full suite/build, both oracle profiles, coverage, focused
-  controller tests, receipt regeneration, and both Thunder Punch dense
-  comparators pass. Fire/Ice Punch, Blaze Kick, Flamethrower, and Dragon Breath
-  controls remain exact.
-
