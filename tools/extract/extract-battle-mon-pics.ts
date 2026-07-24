@@ -89,6 +89,8 @@ const BACK_SPECIES: Record<string, string> = {
   MURKROW: "murkrow",
   // MOVE_BOUNCE's opposite-side acceptance case uses legal Level-50 set 121.
   SPOINK: "spoink",
+  ARCANINE: "arcanine",
+  DUGTRIO: "dugtrio",
 };
 const FRONT_SPECIES: Record<string, string> = {
   GROVYLE: "grovyle",
@@ -100,6 +102,8 @@ const FRONT_SPECIES: Record<string, string> = {
   // the opponent-side attacker. Its front pic is consumed by the shared
   // presentation compositor before the charge ball hides the battler.
   SPOINK: "spoink",
+  ARCANINE: "arcanine",
+  DUGTRIO: "dugtrio",
 };
 
 const backSprites: Record<string, Sprite> = {};
