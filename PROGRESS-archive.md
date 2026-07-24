@@ -1,3 +1,23 @@
+## 398 — Gate-3 attack-canceler TAUNTED source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS through
+  TAUNTED decisions only; opcode 0 remains unregistered and no phase loop exists.
+- **Did:** added source-derived u8 `gBattleMoves[gCurrentMove].power`,
+  `DisableStruct::tauntTimer:u8:4`, and `ProtectStruct::usedTauntedMove:1`.
+  Ported battle_util.c 2134-2145 exactly through the immutable multi-turn
+  helper, taunted script handoff, unable marker, effect 1, and one advance.
+- **Next:** begin `CANCELER_IMPRISONED` only after its imprisoned-move
+  predicate, protect flag, helper, script, marker, effect, and receipts are
+  explicit. Do not loop phases or register opcode 0.
+- **Notes:** zero PP Ups; timer **0/15** and invalid **16+**, generated
+  zero/nonzero power, both flag values, all four battlers, presets/identities,
+  missing role, u32 PC, deterministic deep freezing, and receipt ownership are
+  pinned. Focused **4 files / 39 tests**; integrated Tier-1 **137 files / 1751
+  tests**, build, and OFF v5 info (`9c89c741…`) green. Code commit `26d9a8b`;
+  pixel diff N/A.
+
+---
 ## 397 — Gate-3 attack-canceler DISABLED source phase integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable

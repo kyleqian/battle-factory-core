@@ -4,6 +4,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 401 — Gate-3 attack-canceler IMPRISONED source phase integrated
+
+- **State:** the run is clean and green at **139 files / 1771 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through IMPRISONED
+  source decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** added explicit `GetBattlerSide`, four `u16` move slots,
+  `STATUS3_IMPRISONED_OTHERS`, and
+  `ProtectStruct::usedImprisonedMove:1` ownership. Ported
+  `GetImprisonedMovesCount` (battle_util.c 1142-1163) as a frozen,
+  short-circuiting scan receipt and the IMPRISONED branch (2145-2155) through
+  the multi-turn helper, imprisoned script, unable marker, effect 1, and one
+  advance to `CANCELER_CONFUSED`.
+- **Next:** begin `CANCELER_CONFUSED` only after its counter/RNG branches,
+  cursor and multistring ownership, protect flag, self-hit calculation/script,
+  marker/effect, and receipts are explicit. Do not loop phases or register
+  opcode 0.
+- **Notes:** all four battler identities, both explicit sides, ally/opponent
+  layouts, all four move slots and short-circuit order, duplicate ownership,
+  empty slots, u16 **0/65535** and invalid boundaries, both protect presets,
+  missing/invalid context, multi-turn cancellation, script/marker/effect,
+  exactly one tracker advance, deterministic deep freezing/input immutability,
+  and no ambient RNG are pinned. Focused **3 files / 29 tests**; integrated
+  Tier-1 **139 files / 1771 tests**, build, OFF v5 info (`9c89c741…`), and
+  diff check green. Code commits `cdb9f4e` + `16ec3d6`; pixel diff N/A.
+
+---
 ## 400 — S10 battle boundary published; BIND portability integrated
 
 - **State:** the run is clean and green at **138 files / 1764 tests**. S10
@@ -57,23 +84,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   production path, 1.9k-line canceler module, growing monolithic rules context,
   and move-specific Scene-ON dispatch. No code, tooling, or oracle lifecycle
   changed in this handoff; no deferred user decision is open.
-
----
-## 398 — Gate-3 attack-canceler TAUNTED source phase integrated
-
-- **State:** S10 Gate 3 remains open with **27** source-safe executable
-  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS through
-  TAUNTED decisions only; opcode 0 remains unregistered and no phase loop exists.
-- **Did:** added source-derived u8 `gBattleMoves[gCurrentMove].power`,
-  `DisableStruct::tauntTimer:u8:4`, and `ProtectStruct::usedTauntedMove:1`.
-  Ported battle_util.c 2134-2145 exactly through the immutable multi-turn
-  helper, taunted script handoff, unable marker, effect 1, and one advance.
-- **Next:** begin `CANCELER_IMPRISONED` only after its imprisoned-move
-  predicate, protect flag, helper, script, marker, effect, and receipts are
-  explicit. Do not loop phases or register opcode 0.
-- **Notes:** zero PP Ups; timer **0/15** and invalid **16+**, generated
-  zero/nonzero power, both flag values, all four battlers, presets/identities,
-  missing role, u32 PC, deterministic deep freezing, and receipt ownership are
-  pinned. Focused **4 files / 39 tests**; integrated Tier-1 **137 files / 1751
-  tests**, build, and OFF v5 info (`9c89c741…`) green. Code commit `26d9a8b`;
-  pixel diff N/A.
