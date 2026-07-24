@@ -41,14 +41,14 @@ remainder.
 - **State:** **4 exact / 9 partial / 263 unsupported**. The source graph covers
   all **354** moves through **935** reusable components and **3,190**
   dependency edges.
-- **Did:** closed ICE PUNCH's complete seven-spawn
-  `IceCrystalEffectShort` component after the inward spiral. The relative
-  reducer pins the source's six-callback spawn cadence, target-relative
-  geometry, affine grow/hold, 20-callback flicker lifetime, one-frame OBJ
-  latch, top-Y OAM ordering, and target-palette restoration.
-- **Evidence:** `ice-punch-onix-grovyle.json` is **164/164 exact** at oracle
-  frames 2339-2502 / ages 0-163, including the post-spiral gap and complete
-  short-crystal burst. FIRE PUNCH portable **225/225** remains exact.
-- **Next:** continue ICE PUNCH at 2503 with BG palette restoration,
-  `clearmonbg`/`blendoff`, script teardown through 2525, then generic
-  resolution. Do not claim THUNDER PUNCH without its own dense evidence.
+- **Did:** closed ICE PUNCH's complete move-script body through its reusable
+  source-composed teardown. The profile-driven reducer pins
+  `BeginNormalPaletteFade`'s alternating BG/OBJ callbacks (7→5→3→1→0),
+  `clearmonbg`/`blendoff`, restored target OBJ visibility, and the sound-gated
+  `end`; Tier-1 retains the prior spiral and complete short-crystal clocks.
+- **Evidence:** `ice-punch-onix-grovyle.json` is **187/187 exact** at oracle
+  frames 2339-2525 / ages 0-186, including all 23 previously open teardown
+  frames. FIRE PUNCH portable **225/225** remains exact.
+- **Next:** continue ICE PUNCH only at generic hit/damage presentation from
+  2526 and audit any evidence-required geometry/orientation variant before
+  exact promotion. Do not claim THUNDER PUNCH without its own dense evidence.

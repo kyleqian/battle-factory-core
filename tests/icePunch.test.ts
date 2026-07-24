@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   ICE_PUNCH_OVERLAY_FIRST_AGE,
+  ICE_PUNCH_BG_RESTORE_FIRST_AGE,
   ICE_PUNCH_LARGE_SPIRAL_FIRST_AGE,
   ICE_PUNCH_HIT_FIRST_AGE,
   ICE_PUNCH_HIT_LIFETIME,
@@ -8,6 +9,8 @@ import {
   ICE_PUNCH_OBJ_LAYERS_BACK_TO_FRONT,
   ICE_PUNCH_SMALL_SPIRAL_FIRST_AGE,
   ICE_PUNCH_SPIRAL_TICKS,
+  ICE_PUNCH_MON_BG_CLEAR_AGE,
+  ICE_PUNCH_SCRIPT_END_AGE,
   ICE_PUNCH_TARGET_RESTORE_FIRST_AGE,
   icePunchOverlayState,
   icePunchHitCrystals,
@@ -26,22 +29,22 @@ describe("ICE_PUNCH source-composed presentation components", () => {
     expect([
       15, 16, 18, 19, 21, 22, 24, 25, 27, 28, 34,
     ].map(icePunchOverlayState)).toEqual([
-      { backgroundBlackCoeff: 0, targetIceCoeff: 0 },
-      { backgroundBlackCoeff: 2, targetIceCoeff: 0 },
-      { backgroundBlackCoeff: 2, targetIceCoeff: 0 },
-      { backgroundBlackCoeff: 4, targetIceCoeff: 1 },
-      { backgroundBlackCoeff: 4, targetIceCoeff: 1 },
-      { backgroundBlackCoeff: 6, targetIceCoeff: 2 },
-      { backgroundBlackCoeff: 6, targetIceCoeff: 2 },
-      { backgroundBlackCoeff: 7, targetIceCoeff: 3 },
-      { backgroundBlackCoeff: 7, targetIceCoeff: 3 },
-      { backgroundBlackCoeff: 7, targetIceCoeff: 4 },
-      { backgroundBlackCoeff: 7, targetIceCoeff: 6 },
+      { backgroundBlackCoeff: 0, targetIceCoeff: 0, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 2, targetIceCoeff: 0, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 2, targetIceCoeff: 0, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 4, targetIceCoeff: 1, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 4, targetIceCoeff: 1, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 6, targetIceCoeff: 2, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 6, targetIceCoeff: 2, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 7, targetIceCoeff: 3, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 7, targetIceCoeff: 3, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 7, targetIceCoeff: 4, teardown: expect.any(Object) },
+      { backgroundBlackCoeff: 7, targetIceCoeff: 6, teardown: expect.any(Object) },
     ]);
     expect(ICE_PUNCH_SMALL_SPIRAL_FIRST_AGE).toBe(35);
     expect(ICE_PUNCH_TARGET_RESTORE_FIRST_AGE).toBe(139);
     expect([138, 139, 141, 142, 144, 145, 162, 163].map(icePunchOverlayState))
-      .toEqual([
+      .toMatchObject([
         { backgroundBlackCoeff: 7, targetIceCoeff: 9 },
         { backgroundBlackCoeff: 7, targetIceCoeff: 8 },
         { backgroundBlackCoeff: 7, targetIceCoeff: 8 },
@@ -51,6 +54,34 @@ describe("ICE_PUNCH source-composed presentation components", () => {
         { backgroundBlackCoeff: 7, targetIceCoeff: 1 },
         { backgroundBlackCoeff: 7, targetIceCoeff: 0 },
       ]);
+  });
+
+  it("pins the source-relative BG restore, clearmonbg/blendoff, and end stages", () => {
+    expect({
+      restoreFirstAge: ICE_PUNCH_BG_RESTORE_FIRST_AGE,
+      monBgClearAge: ICE_PUNCH_MON_BG_CLEAR_AGE,
+      scriptEndAge: ICE_PUNCH_SCRIPT_END_AGE,
+    }).toEqual({
+      restoreFirstAge: 166,
+      monBgClearAge: 179,
+      scriptEndAge: 183,
+    });
+    expect(
+      [165, 166, 167, 168, 169, 170, 171, 172]
+        .map((age) => icePunchOverlayState(age).backgroundBlackCoeff),
+    ).toEqual([7, 5, 5, 3, 3, 1, 1, 0]);
+    expect(icePunchOverlayState(178).teardown).toMatchObject({
+      monBgActive: true,
+      alphaBlendEnabled: true,
+      scriptActive: true,
+    });
+    expect(icePunchOverlayState(179).teardown).toMatchObject({
+      monBgActive: false,
+      alphaBlendEnabled: false,
+      scriptActive: true,
+    });
+    expect(icePunchOverlayState(182).teardown.scriptActive).toBe(true);
+    expect(icePunchOverlayState(183).teardown.scriptActive).toBe(false);
   });
 
   it("composes the overlay from immutable field and geometry inputs", () => {

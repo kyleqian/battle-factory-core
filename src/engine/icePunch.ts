@@ -2,6 +2,10 @@
 // first displayed `Move_ICE_PUNCH` script frame, never a battle tick.
 
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
+import {
+  battleAnimTeardownState,
+  type BattleAnimTeardownState,
+} from "./battleAnimTeardown.ts";
 
 export const ICE_PUNCH_OVERLAY_FIRST_AGE = 16;
 export const ICE_PUNCH_SMALL_SPIRAL_FIRST_AGE = 35;
@@ -11,6 +15,19 @@ export const ICE_PUNCH_HIT_FIRST_AGE = 90;
 export const ICE_PUNCH_HIT_SPAWN_CADENCE = 6;
 export const ICE_PUNCH_HIT_LIFETIME = 37;
 export const ICE_PUNCH_TARGET_RESTORE_FIRST_AGE = 139;
+export const ICE_PUNCH_BG_RESTORE_FIRST_AGE = 166;
+export const ICE_PUNCH_MON_BG_CLEAR_AGE = 179;
+export const ICE_PUNCH_SCRIPT_END_AGE = 183;
+
+export const ICE_PUNCH_TEARDOWN_PROFILE = Object.freeze({
+  paletteRestoreFirstAge: ICE_PUNCH_BG_RESTORE_FIRST_AGE,
+  paletteInitialCoeff: 7,
+  paletteTargetCoeff: 0,
+  paletteDelta: 2,
+  paletteCallbacksPerStep: 2,
+  monBgClearAge: ICE_PUNCH_MON_BG_CLEAR_AGE,
+  scriptEndAge: ICE_PUNCH_SCRIPT_END_AGE,
+});
 
 const SMALL_PHASES = [0, 64, 128, 192] as const;
 const LARGE_PHASES = [32, 96, 160, 224] as const;
@@ -53,8 +70,9 @@ export interface IcePunchHitCrystal extends IcePunchCrystal {
 }
 
 export interface IcePunchOverlayState {
-  readonly backgroundBlackCoeff: 0 | 2 | 4 | 6 | 7;
+  readonly backgroundBlackCoeff: number;
   readonly targetIceCoeff: number;
+  readonly teardown: BattleAnimTeardownState;
 }
 
 /**
@@ -63,18 +81,21 @@ export interface IcePunchOverlayState {
  * `AnimTask_BlendBattleAnimPal` advances the target ramp by one.
  */
 export function icePunchOverlayState(age: number): IcePunchOverlayState {
+  const teardown = battleAnimTeardownState(age, ICE_PUNCH_TEARDOWN_PROFILE);
   if (age < ICE_PUNCH_OVERLAY_FIRST_AGE) {
-    return { backgroundBlackCoeff: 0, targetIceCoeff: 0 };
+    return { backgroundBlackCoeff: 0, targetIceCoeff: 0, teardown };
   }
   if (age < ICE_PUNCH_OVERLAY_FIRST_AGE + 3) {
-    return { backgroundBlackCoeff: 2, targetIceCoeff: 0 };
+    return { backgroundBlackCoeff: 2, targetIceCoeff: 0, teardown };
   }
   if (age < ICE_PUNCH_OVERLAY_FIRST_AGE + 6) {
-    return { backgroundBlackCoeff: 4, targetIceCoeff: 1 };
+    return { backgroundBlackCoeff: 4, targetIceCoeff: 1, teardown };
   }
   return {
     backgroundBlackCoeff:
-      age < ICE_PUNCH_OVERLAY_FIRST_AGE + 9 ? 6 : 7,
+      age < ICE_PUNCH_OVERLAY_FIRST_AGE + 9
+        ? 6
+        : teardown.backgroundPaletteCoeff,
     targetIceCoeff:
       age < ICE_PUNCH_TARGET_RESTORE_FIRST_AGE
         ? Math.min(
@@ -85,6 +106,7 @@ export function icePunchOverlayState(age: number): IcePunchOverlayState {
             0,
             8 - Math.floor((age - ICE_PUNCH_TARGET_RESTORE_FIRST_AGE) / 3),
           ),
+    teardown,
   };
 }
 
