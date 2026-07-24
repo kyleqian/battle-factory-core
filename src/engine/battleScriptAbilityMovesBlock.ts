@@ -12,6 +12,7 @@ import {
 import {
   BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
   BATTLE_SCRIPT_HITMARKER_NO_PPDEDUCT,
+  BATTLE_SCRIPT_HITMARKER_OBEYS,
   BATTLE_SCRIPT_STATUS2_MASKS,
 } from "./battleScriptSourceConstants.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
@@ -212,6 +213,113 @@ export type BattleScriptAttackCancelerSelectedMovePpJoinResult =
     receipt: BattleScriptAttackCancelerSelectedMovePpJoinReceipt;
   }>;
 
+/**
+ * Narrow battle-type proof required by the Factory-only obedience seam.
+ *
+ * BATTLE_TYPE_FACTORY is one constituent of BATTLE_TYPE_FRONTIER in Emerald.
+ * Keeping both source identities explicit prevents the no-RNG Factory result
+ * from being reused as story-battle obedience behavior.
+ */
+export type BattleScriptFactoryFrontierScope = Readonly<{
+  facility: "BATTLE_FACTORY";
+  sourceBattleTypeFlag: "BATTLE_TYPE_FACTORY";
+  sourceFrontierMask: "BATTLE_TYPE_FRONTIER";
+}>;
+
+export const BATTLE_SCRIPT_FACTORY_FRONTIER_SCOPE:
+  BattleScriptFactoryFrontierScope = Object.freeze({
+    facility: "BATTLE_FACTORY",
+    sourceBattleTypeFlag: "BATTLE_TYPE_FACTORY",
+    sourceFrontierMask: "BATTLE_TYPE_FRONTIER",
+  });
+
+export type BattleScriptFactoryObedienceReceipt = Readonly<{
+  sourceFunction: "Cmd_attackcanceler";
+  selectedMovePp: BattleScriptAttackCancelerSelectedMovePpJoinReceipt;
+  sourceCondition: "selected-slot PP admission continued";
+  scope: BattleScriptFactoryFrontierScope;
+  attacker: Readonly<{
+    battler: BattleScriptBattlerId;
+    side: 0 | 1;
+  }>;
+  gate: Readonly<{
+    obeysAlreadySet: boolean;
+    multiTurn: boolean;
+    helper:
+      | Readonly<{
+        kind: "not-called";
+        reason: "HITMARKER_OBEYS-already-set" | "STATUS2_MULTIPLETURNS";
+      }>
+      | Readonly<{
+        kind: "called";
+        sourceFunction: "IsMonDisobedient";
+        result: "DISOBEDIENCE_OBEDIENT";
+        sourceEarlyReturn:
+          | "opponent-side-before-factory-check"
+          | "BATTLE_TYPE_FRONTIER-before-ownership-badges-level-rng";
+      }>;
+  }>;
+  hitMarker: Readonly<{
+    before: number;
+    after: number;
+    addedMask: number;
+    clearedMask: 0;
+    sourceMask: "HITMARKER_OBEYS";
+    mask: typeof BATTLE_SCRIPT_HITMARKER_OBEYS;
+  }>;
+  programCounter: Readonly<{
+    kind: "preserve";
+    sourceProgramCounter: number;
+    continuation: "after-obedience-before-Magic-Coat";
+  }>;
+  rng: Readonly<{
+    kind: "preserve";
+    before: number;
+    after: number;
+    callsBefore: number;
+    callsAfter: number;
+    callsConsumed: 0;
+  }>;
+}>;
+
+export type BattleScriptFactoryObedienceBypassReceipt = Readonly<{
+  sourceFunction: "Cmd_attackcanceler";
+  selectedMovePp: BattleScriptAttackCancelerSelectedMovePpJoinReceipt;
+  sourceCondition:
+    | "AtkCanceler_UnableToUseMove() != 0"
+    | "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0) != 0"
+    | "selected-slot PP admission stopped";
+  obedience: Readonly<{
+    kind: "not-called";
+    reason:
+      | "canceler-effect-nonzero"
+      | "moves-block-effect-nonzero"
+      | "selected-move-has-no-pp";
+  }>;
+  rng: Readonly<{
+    kind: "preserve";
+    before: number;
+    after: number;
+    callsBefore: number;
+    callsAfter: number;
+    callsConsumed: 0;
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerFactoryObedienceResult =
+  BattleScriptMovesBlockState & (
+    | Readonly<{
+      kind: "canceler-effect" | "moves-block" | "selected-move-no-pp";
+      effect: 0 | 1 | 2;
+      receipt: BattleScriptFactoryObedienceBypassReceipt;
+    }>
+    | Readonly<{
+      kind: "continue";
+      effect: 0;
+      receipt: BattleScriptFactoryObedienceReceipt;
+    }>
+  );
+
 function requireU32(value: number, field: string): number {
   if (
     !Number.isSafeInteger(value)
@@ -280,6 +388,23 @@ function preserveRngReceipt(state: BattleScriptMovesBlockState) {
     callsAfter: state.rngCallsConsumed,
     callsConsumed: 0 as const,
   });
+}
+
+function requireFactoryFrontierScope(
+  scope: BattleScriptFactoryFrontierScope,
+): BattleScriptFactoryFrontierScope {
+  if (
+    scope === null
+    || typeof scope !== "object"
+    || scope.facility !== "BATTLE_FACTORY"
+    || scope.sourceBattleTypeFlag !== "BATTLE_TYPE_FACTORY"
+    || scope.sourceFrontierMask !== "BATTLE_TYPE_FRONTIER"
+  ) {
+    throw new Error(
+      "Battle Script obedience seam requires explicit Battle Factory/Frontier scope",
+    );
+  }
+  return BATTLE_SCRIPT_FACTORY_FRONTIER_SCOPE;
 }
 
 /**
@@ -609,6 +734,178 @@ export function joinBattleScriptAttackCancelerSelectedMovePp(
       sourceCondition:
         "AtkCanceler_UnableToUseMove() == 0 && AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0) == 0",
       selectedMovePp: selectedMovePp.receipt,
+      rng: preserveRngReceipt(state),
+    }),
+  });
+}
+
+/**
+ * Factory-only source-order join after selected-slot PP admission.
+ *
+ * Legal Factory battles can only receive DISOBEDIENCE_OBEDIENT: opponent-side
+ * battlers return before battle-type inspection, while player-side battlers
+ * return at BATTLE_TYPE_FRONTIER before ownership, badges, level, or Random().
+ * Story disobedience branches are deliberately outside this typed scope.
+ */
+export function joinBattleScriptAttackCancelerFactoryObedience(
+  selectedMovePpResult: BattleScriptAttackCancelerSelectedMovePpJoinResult,
+  scope: BattleScriptFactoryFrontierScope,
+  sourceProgramCounter: number,
+): BattleScriptAttackCancelerFactoryObedienceResult {
+  if (
+    selectedMovePpResult === null
+    || typeof selectedMovePpResult !== "object"
+  ) {
+    throw new Error(
+      "Battle Script Factory obedience join requires a selected-move PP result",
+    );
+  }
+  const factoryScope = requireFactoryFrontierScope(scope);
+  const sourcePc = requireU32(
+    sourceProgramCounter,
+    "Battle Script source program counter",
+  );
+  const state = requireState(selectedMovePpResult);
+  const validKindAndEffect = (
+    (
+      selectedMovePpResult.kind === "canceler-effect"
+      && (
+        selectedMovePpResult.effect === 1
+        || selectedMovePpResult.effect === 2
+      )
+    )
+    || (
+      selectedMovePpResult.kind === "moves-block"
+      && selectedMovePpResult.effect === 1
+    )
+    || (
+      (
+        selectedMovePpResult.kind === "selected-move-no-pp"
+        || selectedMovePpResult.kind === "continue"
+      )
+      && selectedMovePpResult.effect === 0
+    )
+  );
+  if (
+    !validKindAndEffect
+    || selectedMovePpResult.receipt === null
+    || typeof selectedMovePpResult.receipt !== "object"
+    || selectedMovePpResult.receipt.sourceFunction !== "Cmd_attackcanceler"
+  ) {
+    throw new Error(
+      "Battle Script Factory obedience join requires a consistent selected-move PP result",
+    );
+  }
+
+  if (selectedMovePpResult.kind !== "continue") {
+    const bypass = selectedMovePpResult.kind === "canceler-effect"
+      ? Object.freeze({
+        sourceCondition: "AtkCanceler_UnableToUseMove() != 0" as const,
+        reason: "canceler-effect-nonzero" as const,
+      })
+      : selectedMovePpResult.kind === "moves-block"
+      ? Object.freeze({
+        sourceCondition:
+          "AbilityBattleEffects(ABILITYEFFECT_MOVES_BLOCK, gBattlerTarget, 0, 0, 0) != 0" as const,
+        reason: "moves-block-effect-nonzero" as const,
+      })
+      : Object.freeze({
+        sourceCondition: "selected-slot PP admission stopped" as const,
+        reason: "selected-move-has-no-pp" as const,
+      });
+    return Object.freeze({
+      kind: selectedMovePpResult.kind,
+      effect: selectedMovePpResult.effect,
+      ...state,
+      receipt: Object.freeze({
+        sourceFunction: "Cmd_attackcanceler",
+        selectedMovePp: selectedMovePpResult.receipt,
+        sourceCondition: bypass.sourceCondition,
+        obedience: Object.freeze({
+          kind: "not-called",
+          reason: bypass.reason,
+        }),
+        rng: preserveRngReceipt(state),
+      }),
+    });
+  }
+
+  const attacker = state.rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script Factory obedience join requires an attacker role",
+    );
+  }
+  const sourceBattler = state.rulesContext.battlers[attacker];
+  const obeysAlreadySet = (
+    state.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_OBEYS
+  ) !== 0;
+  const multiTurn = (
+    sourceBattler.status2
+    & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+  ) !== 0;
+  const helper: BattleScriptFactoryObedienceReceipt["gate"]["helper"] =
+    obeysAlreadySet
+      ? Object.freeze({
+        kind: "not-called",
+        reason: "HITMARKER_OBEYS-already-set",
+      })
+      : multiTurn
+      ? Object.freeze({
+        kind: "not-called",
+        reason: "STATUS2_MULTIPLETURNS",
+      })
+      : Object.freeze({
+        kind: "called",
+        sourceFunction: "IsMonDisobedient",
+        result: "DISOBEDIENCE_OBEDIENT",
+        sourceEarlyReturn: sourceBattler.side === 1
+          ? "opponent-side-before-factory-check"
+          : "BATTLE_TYPE_FRONTIER-before-ownership-badges-level-rng",
+      });
+  const nextHitMarker = (
+    state.rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_OBEYS
+  ) >>> 0;
+  const nextRules = nextHitMarker === state.rulesContext.hitMarker
+    ? state.rulesContext
+    : Object.freeze({
+      ...state.rulesContext,
+      hitMarker: nextHitMarker,
+    });
+
+  return Object.freeze({
+    kind: "continue",
+    effect: 0 as const,
+    rulesContext: nextRules,
+    rngValue: state.rngValue,
+    rngCallsConsumed: state.rngCallsConsumed,
+    receipt: Object.freeze({
+      sourceFunction: "Cmd_attackcanceler",
+      selectedMovePp: selectedMovePpResult.receipt,
+      sourceCondition: "selected-slot PP admission continued",
+      scope: factoryScope,
+      attacker: Object.freeze({
+        battler: attacker,
+        side: sourceBattler.side,
+      }),
+      gate: Object.freeze({
+        obeysAlreadySet,
+        multiTurn,
+        helper,
+      }),
+      hitMarker: Object.freeze({
+        before: state.rulesContext.hitMarker,
+        after: nextHitMarker,
+        addedMask: (nextHitMarker & ~state.rulesContext.hitMarker) >>> 0,
+        clearedMask: 0 as const,
+        sourceMask: "HITMARKER_OBEYS",
+        mask: BATTLE_SCRIPT_HITMARKER_OBEYS,
+      }),
+      programCounter: Object.freeze({
+        kind: "preserve",
+        sourceProgramCounter: sourcePc,
+        continuation: "after-obedience-before-Magic-Coat",
+      }),
       rng: preserveRngReceipt(state),
     }),
   });
