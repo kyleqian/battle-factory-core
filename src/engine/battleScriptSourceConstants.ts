@@ -42,7 +42,10 @@ export const BATTLE_SCRIPT_ATTACK_CANCELER_PHASES = Object.freeze({
   CANCELER_RECHARGE: 4,
   CANCELER_FLINCH: 5,
   CANCELER_DISABLED: 6,
+  CANCELER_TAUNTED: 7,
 } as const);
+
+export const BATTLE_SCRIPT_MOVE_NONE = 0;
 
 export const BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE =
   (1 << 6 | 1 << 7 | 1 << 18) >>> 0;

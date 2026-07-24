@@ -39,6 +39,8 @@ function battler(
     truantCounter: changes.truantCounter ?? 0,
     rechargeTimer: changes.rechargeTimer ?? 0,
     flinchImmobility: changes.flinchImmobility ?? 0,
+    disabledMove: changes.disabledMove ?? 0,
+    usedDisabledMove: changes.usedDisabledMove ?? 0,
   });
 }
 
@@ -52,6 +54,7 @@ function input(
       target: 1,
       effectBattler: 1,
     },
+    scriptingBattler: changes.scriptingBattler ?? 0,
     atkCancelerTracker: changes.atkCancelerTracker
       ?? BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_ASLEEP,
     battleOutcome: changes.battleOutcome ?? 0,
@@ -121,6 +124,7 @@ describe("source-shaped attack-canceler asleep phase", () => {
       CANCELER_RECHARGE: 4,
       CANCELER_FLINCH: 5,
       CANCELER_DISABLED: 6,
+      CANCELER_TAUNTED: 7,
     });
   });
 

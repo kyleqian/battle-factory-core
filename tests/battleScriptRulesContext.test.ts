@@ -66,6 +66,8 @@ function battler(
     truantCounter,
     rechargeTimer,
     flinchImmobility,
+    disabledMove: 0,
+    usedDisabledMove: 0,
   });
 }
 
@@ -80,6 +82,7 @@ function input(
       battler(0x08, 0x000f_0001),
     ],
     selectorRoles: changes.selectorRoles ?? { attacker: 3, effectBattler: 1 },
+    scriptingBattler: changes.scriptingBattler ?? 0,
     atkCancelerTracker: changes.atkCancelerTracker ?? 0,
     battleOutcome: changes.battleOutcome ?? 0,
     currentMove: changes.currentMove ?? 92,
@@ -171,6 +174,7 @@ describe("source-shaped Battle Script rules context", () => {
       "moveEffectByte",
       "moveResultFlags",
       "multiHitCounter",
+      "scriptingBattler",
       "selectorRoles",
     ]);
     expect(created.battlers).toHaveLength(4);

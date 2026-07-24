@@ -16,6 +16,7 @@ import {
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
+  BATTLE_SCRIPT_MOVE_NONE,
   BATTLE_SCRIPT_MOVE_SLEEP_TALK,
   BATTLE_SCRIPT_MOVE_SNORE,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
@@ -134,7 +135,8 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedUnfroze"
       | "BattleScript_MoveUsedLoafingAround"
       | "BattleScript_MoveUsedMustRecharge"
-      | "BattleScript_MoveUsedFlinched";
+      | "BattleScript_MoveUsedFlinched"
+      | "BattleScript_MoveUsedIsDisabled";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -458,6 +460,58 @@ export type BattleScriptAttackCancelerFlinchDecision =
     rulesContext: BattleScriptRulesContext;
     receipt: Readonly<{
       sourcePhase: "CANCELER_FLINCH";
+      tracker: Readonly<{ before: number; after: number }>;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerDisabledReason =
+  | "move-not-disabled"
+  | "disabled-move";
+
+export type BattleScriptAttackCancelerDisabledReceipt = Readonly<{
+  sourcePhase: "CANCELER_DISABLED";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerDisabledReason;
+  disabledMove: Readonly<{
+    value: number;
+    currentMove: number;
+    matchesCurrentMove: boolean;
+    isMoveNone: boolean;
+  }>;
+  usedDisabledMove: Readonly<{ before: 0 | 1; after: 0 | 1 }>;
+  scriptingBattler: Readonly<{
+    before: BattleScriptBattlerId;
+    after: BattleScriptBattlerId;
+  }>;
+  cancelMultiTurnMoves:
+    | Readonly<{ kind: "not-invoked" }>
+    | Readonly<{
+      kind: "invoked";
+      receipt: BattleScriptCancelMultiTurnMovesReceipt;
+    }>;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_DISABLED";
+    sourcePhaseAfter: "CANCELER_TAUNTED";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerDisabledDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerDisabledReason;
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerDisabledReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_DISABLED";
       tracker: Readonly<{ before: number; after: number }>;
     }>;
   }>;
@@ -1450,6 +1504,128 @@ export function advanceBattleScriptAttackCancelerFlinch(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_FLINCH",
         sourcePhaseAfter: "CANCELER_DISABLED",
+      }),
+    }),
+  });
+}
+
+/**
+ * The source-shaped CANCELER_DISABLED phase of AtkCanceler_UnableToUseMove.
+ *
+ * This ports battle_util.c's disabled-move case only, including persistent
+ * gBattleScripting.battler ownership, then advances exactly once to
+ * CANCELER_TAUNTED without implementing it or looping phases.
+ */
+export function advanceBattleScriptAttackCancelerDisabled(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+): BattleScriptAttackCancelerDisabledDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_DISABLED
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_DISABLED",
+        tracker: Object.freeze({ before: trackerBefore, after: trackerBefore }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler disabled phase requires an attacker role",
+    );
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const matchesCurrentMove = sourceBattler.disabledMove === rulesContext.currentMove;
+  const isMoveNone = sourceBattler.disabledMove === BATTLE_SCRIPT_MOVE_NONE;
+  const isDisabled = matchesCurrentMove && !isMoveNone;
+  let nextRulesContext = rulesContext;
+  let helperResult: ReturnType<typeof cancelBattleScriptMultiTurnMoves> | null =
+    null;
+  let nextHitMarker = rulesContext.hitMarker;
+  let effect: 0 | 1 = 0;
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+
+  if (isDisabled) {
+    const flaggedBattler = Object.freeze({
+      ...sourceBattler,
+      usedDisabledMove: 1 as const,
+    });
+    const flaggedBattlers = Object.freeze(
+      rulesContext.battlers.map((candidate, index) => (
+        index === attacker ? flaggedBattler : candidate
+      )),
+    ) as unknown as BattleScriptRulesContext["battlers"];
+    const scriptedRulesContext = Object.freeze({
+      ...rulesContext,
+      battlers: flaggedBattlers,
+      scriptingBattler: attacker,
+    });
+    helperResult = cancelBattleScriptMultiTurnMoves(
+      scriptedRulesContext,
+      attacker,
+    );
+    nextRulesContext = helperResult.rulesContext;
+    nextHitMarker = (
+      rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+    ) >>> 0;
+    effect = 1;
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_MoveUsedIsDisabled",
+    });
+  }
+
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_TAUNTED;
+  nextRulesContext = Object.freeze({
+    ...nextRulesContext,
+    atkCancelerTracker: trackerAfter,
+    hitMarker: nextHitMarker,
+  });
+  return Object.freeze({
+    kind: "advance",
+    reason: isDisabled ? "disabled-move" : "move-not-disabled",
+    rulesContext: nextRulesContext,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_DISABLED",
+      attacker,
+      reason: isDisabled ? "disabled-move" : "move-not-disabled",
+      disabledMove: Object.freeze({
+        value: sourceBattler.disabledMove,
+        currentMove: rulesContext.currentMove,
+        matchesCurrentMove,
+        isMoveNone,
+      }),
+      usedDisabledMove: Object.freeze({
+        before: sourceBattler.usedDisabledMove,
+        after: isDisabled ? 1 : sourceBattler.usedDisabledMove,
+      }),
+      scriptingBattler: Object.freeze({
+        before: rulesContext.scriptingBattler,
+        after: isDisabled ? attacker : rulesContext.scriptingBattler,
+      }),
+      cancelMultiTurnMoves: helperResult === null
+        ? Object.freeze({ kind: "not-invoked" })
+        : Object.freeze({ kind: "invoked", receipt: helperResult.receipt }),
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect,
+      script,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_DISABLED",
+        sourcePhaseAfter: "CANCELER_TAUNTED",
       }),
     }),
   });

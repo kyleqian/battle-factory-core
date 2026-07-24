@@ -40,6 +40,8 @@ function battler(
     truantCounter: changes.truantCounter ?? 0,
     rechargeTimer: changes.rechargeTimer ?? 0,
     flinchImmobility: changes.flinchImmobility ?? 0,
+    disabledMove: changes.disabledMove ?? 0,
+    usedDisabledMove: changes.usedDisabledMove ?? 0,
   });
 }
 
@@ -54,6 +56,7 @@ function contextInput(
       battler(),
     ],
     selectorRoles: changes.selectorRoles ?? { attacker: 0, effectBattler: 1 },
+    scriptingBattler: changes.scriptingBattler ?? 0,
     atkCancelerTracker: changes.atkCancelerTracker ?? 0,
     battleOutcome: changes.battleOutcome ?? 0,
     currentMove: changes.currentMove ?? 92,
@@ -78,6 +81,7 @@ describe("source-shaped attack-canceler flags phase", () => {
       CANCELER_RECHARGE: 4,
       CANCELER_FLINCH: 5,
       CANCELER_DISABLED: 6,
+      CANCELER_TAUNTED: 7,
     });
     expect(BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND).toBe(1 << 25);
     expect(BATTLE_SCRIPT_STATUS3_GRUDGE).toBe(1 << 14);

@@ -29,6 +29,8 @@ function battler(
     truantCounter: changes.truantCounter ?? 0,
     rechargeTimer: changes.rechargeTimer ?? 0,
     flinchImmobility: changes.flinchImmobility ?? 0,
+    disabledMove: changes.disabledMove ?? 0,
+    usedDisabledMove: changes.usedDisabledMove ?? 0,
   });
 }
 
@@ -38,6 +40,7 @@ function contextInput(
   return {
     battlers: changes.battlers ?? [battler(), battler(), battler(), battler()],
     selectorRoles: changes.selectorRoles ?? { attacker: 0, effectBattler: 1 },
+    scriptingBattler: changes.scriptingBattler ?? 0,
     atkCancelerTracker: changes.atkCancelerTracker ?? 0,
     battleOutcome: changes.battleOutcome ?? 0,
     currentMove: changes.currentMove ?? 92,

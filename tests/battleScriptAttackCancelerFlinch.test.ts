@@ -30,6 +30,8 @@ function battler(
     truantCounter: changes.truantCounter ?? 0,
     rechargeTimer: changes.rechargeTimer ?? 0,
     flinchImmobility: changes.flinchImmobility ?? 0,
+    disabledMove: changes.disabledMove ?? 0,
+    usedDisabledMove: changes.usedDisabledMove ?? 0,
   });
 }
 
@@ -41,6 +43,7 @@ function rules(changes: Partial<BattleScriptRulesContextInput> = {}) {
       target: 1,
       effectBattler: 1,
     },
+    scriptingBattler: changes.scriptingBattler ?? 0,
     atkCancelerTracker: changes.atkCancelerTracker
       ?? BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_FLINCH,
     battleOutcome: changes.battleOutcome ?? 0,

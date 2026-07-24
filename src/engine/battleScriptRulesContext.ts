@@ -43,6 +43,8 @@ export type BattleScriptRulesBattler = Readonly<{
   truantCounter: 0 | 1;
   rechargeTimer: number;
   flinchImmobility: 0 | 1;
+  disabledMove: number;
+  usedDisabledMove: 0 | 1;
 }>;
 
 export type BattleScriptRulesBattlers = readonly [
@@ -71,6 +73,7 @@ export type BattleScriptRulesContext = Readonly<
   BattleScriptMoveValuesRulesContext & {
     battlers: BattleScriptRulesBattlers;
     selectorRoles: BattleScriptSelectorRoleBindings;
+    scriptingBattler: BattleScriptBattlerId;
     atkCancelerTracker: number;
     battleOutcome: number;
     currentMove: number;
@@ -87,6 +90,7 @@ export type BattleScriptRulesContextInput = Readonly<{
     target?: BattleScriptBattlerId | null;
     effectBattler?: BattleScriptBattlerId | null;
   }>;
+  scriptingBattler: BattleScriptBattlerId;
   atkCancelerTracker: number;
   battleOutcome: number;
   currentMove: number;
@@ -198,6 +202,16 @@ export function createBattleScriptRulesContext(
       1,
       `battlers[${index}].flinchImmobility`,
     ) as 0 | 1,
+    disabledMove: requireUnsigned(
+      battler.disabledMove,
+      0xffff,
+      `battlers[${index}].disabledMove`,
+    ),
+    usedDisabledMove: requireUnsigned(
+      battler.usedDisabledMove,
+      1,
+      `battlers[${index}].usedDisabledMove`,
+    ) as 0 | 1,
   })) as unknown as BattleScriptRulesBattlers;
   const selectorRoles = Object.freeze({
     attacker: requireRole(input.selectorRoles?.attacker, "selectorRoles.attacker"),
@@ -210,10 +224,15 @@ export function createBattleScriptRulesContext(
       "selectorRoles.effectBattler",
     ),
   });
+  const scriptingBattler = requireRole(input.scriptingBattler, "scriptingBattler");
+  if (scriptingBattler === null) {
+    throw new Error("scriptingBattler must be a battler id 0..3");
+  }
   const currentMove = requireUnsigned(input.currentMove, 0xffff, "currentMove");
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
+    scriptingBattler,
     atkCancelerTracker: requireUnsigned(
       input.atkCancelerTracker,
       0xff,
