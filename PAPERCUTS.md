@@ -14,6 +14,17 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Concurrent shared-tree edits fail otherwise-clean worker postflight
+
+- **What:** unrelated S10 edits appeared in the main worktree while a bounded
+  S9 worker was running, so the launcher returned exit 5 despite every
+  worker-owned file being committed and clean.
+- **Hits:** 1.
+- **Cost each:** ~2 min.
+- **Workaround:** audit the worker commits by path, preserve unrelated changes
+  untouched, and use a disjoint worktree lane when concurrent ownership is
+  known before launch.
+
 ## Post-tick staging can exercise the pre-mutation controller branch
 
 - **What:** the duplicate-species verifier changed the staged enemy identity
