@@ -20,6 +20,7 @@ import {
 } from "./faintAttack.ts";
 import {
   doubleTeamAnimationAtAge,
+  genericHitReactionAtAge,
   rockSlideAnimationAtAge,
   type DoubleTeamAnimationProfile,
   type RockSlideAnimationProfile,
@@ -168,6 +169,8 @@ export interface SceneOnIcePunchView {
   readonly overlay: IcePunchOverlayState;
   readonly crystals: readonly IcePunchCrystal[];
   readonly hitCrystals: readonly IcePunchHitCrystal[];
+  readonly healthboxY2: number;
+  readonly targetInvisible: boolean;
 }
 
 export interface SceneOnFaintAttackView {
@@ -316,6 +319,9 @@ export function sceneOnIcePunchView(
   if (state.config.move !== "ICE_PUNCH") {
     throw new Error(`expected ICE_PUNCH presentation, got ${state.config.move}`);
   }
+  // Like the move-owned crystal sprites above, the generic hit sprites are
+  // copied to OAM from the preceding callback pass.
+  const hitReaction = genericHitReactionAtAge(state.age - 1, 187);
   return {
     age: state.age,
     attacker: state.config.attacker,
@@ -331,6 +337,7 @@ export function sceneOnIcePunchView(
       state.age - 1,
       state.config.target.geometry.animationCenter,
     ),
+    ...hitReaction,
   };
 }
 

@@ -10,7 +10,7 @@ damage, RNG, and controller state remain game-owned oracle inputs.
 - Case: player-back ONIX → opponent-front GROVYLE, Battle Scene ON.
 - Move dispatch: oracle frame 2305; PP write: 2332.
 - First `Move_ICE_PUNCH` script-owned display: **2339** (presentation age 0).
-- Dense accepted window: **2339–2525, 187/187 exact**.
+- Dense accepted window: **2339–2560, 222/222 exact**.
 - The window covers the stable handoff and the complete source-composed
   `simple_palette_blend(F_PAL_BG, 0→7, delay 1)` plus
   `AnimTask_BlendBattleAnimPal(F_PAL_TARGET, 0→9, delay 2)` opening ramp.
@@ -72,10 +72,17 @@ the same-pass `clearmonbg`/`blendoff` commands at age 179; `gAnimScriptActive`
 clears at age 183 after `Cmd_end`'s sound wait. Ages 183–186 remain the
 pixel-stable controller handoff before generic hit animation begins at 2526.
 
+The accepted continuation reuses the generic source hit reaction after script
+teardown. Frame 2526 / age 187 is the first displayed +1 healthbox pose; the
+20-display +1/-1 wobble and four-frame target blink blocks use the same
+phase-relative reducer as ROCK SLIDE, with the generic preceding-pass OAM
+latch. The reaction is complete and the field is stable again through frame
+2560 / age 221. HP remains the immutable staged value throughout this bounded
+window.
+
 Therefore ICE PUNCH is `partial`. The precisely uncovered contiguous
-remainder is generic hit/damage presentation beginning at **2526**, plus any
-geometry/orientation variant required by source or comparison evidence. The
-complete move-script body itself is accepted through 2525.
+remainder is generic HP-drain/message resolution beginning at **2561**, plus
+any geometry/orientation variant required by source or comparison evidence.
 
 ## THUNDER PUNCH sibling check
 

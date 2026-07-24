@@ -41,14 +41,15 @@ remainder.
 - **State:** **4 exact / 9 partial / 263 unsupported**. The source graph covers
   all **354** moves through **935** reusable components and **3,190**
   dependency edges.
-- **Did:** closed ICE PUNCH's complete move-script body through its reusable
-  source-composed teardown. The profile-driven reducer pins
-  `BeginNormalPaletteFade`'s alternating BG/OBJ callbacks (7→5→3→1→0),
-  `clearmonbg`/`blendoff`, restored target OBJ visibility, and the sound-gated
-  `end`; Tier-1 retains the prior spiral and complete short-crystal clocks.
-- **Evidence:** `ice-punch-onix-grovyle.json` is **187/187 exact** at oracle
-  frames 2339-2525 / ages 0-186, including all 23 previously open teardown
-  frames. FIRE PUNCH portable **225/225** remains exact.
-- **Next:** continue ICE PUNCH only at generic hit/damage presentation from
-  2526 and audit any evidence-required geometry/orientation variant before
-  exact promotion. Do not claim THUNDER PUNCH without its own dense evidence.
+- **Did:** extended ICE PUNCH through the complete generic hit reaction by
+  reusing one phase-relative `SpriteCB_HitAnimHealthoxEffect` /
+  `DoHitAnimBlinkSpriteEffect` reducer. It pins the 20-display +1/-1
+  healthbox wobble, four-frame target blink blocks, and preceding-pass OAM
+  latch without changing HP or battle state.
+- **Evidence:** `ice-punch-onix-grovyle.json` is **222/222 exact** at oracle
+  frames 2339-2560 / ages 0-221, contiguous through the full generic hit
+  reaction and stable handoff. FIRE PUNCH portable **225/225** remains exact.
+- **Next:** continue ICE PUNCH only at generic HP-drain/message resolution
+  from 2561 and audit any evidence-required geometry/orientation variant
+  before exact promotion. Do not claim THUNDER PUNCH without its own dense
+  evidence.

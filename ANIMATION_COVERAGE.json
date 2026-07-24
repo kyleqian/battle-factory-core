@@ -77,9 +77,9 @@
     {
       "move": "MOVE_ICE_PUNCH",
       "status": "partial",
-      "covered": ["portable synthetic player-back ONIX to opponent-front GROVYLE, complete dense move-script body at relative ages 0-186 / oracle frames 2339-2525 (187/187) through the shared Scene-ON adapter: script handoff, BG-black/target-ice opening palette overlay, source-derived small+large inward crystal spiral through the shared fist/hitsplat/shake overlap, seven-spawn IceCrystalEffectShort burst, target-palette restoration, BG 7→5→3→1→0 restoration, clearmonbg/blendoff, target OBJ restoration, and sound-gated script end; generic selected-OBJ composition, callback/OAM final-state handoff, six-callback spawn cadence, target-relative geometry, affine grow/hold, flicker lifetime, top-Y OAM ordering, and source-relative teardown stages are Tier-1 pinned"],
+      "covered": ["portable synthetic player-back ONIX to opponent-front GROVYLE, contiguous dense move-script body plus complete generic hit reaction at relative ages 0-221 / oracle frames 2339-2560 (222/222) through the shared Scene-ON adapter: script handoff, BG-black/target-ice opening palette overlay, source-derived small+large inward crystal spiral through the shared fist/hitsplat/shake overlap, seven-spawn IceCrystalEffectShort burst, target-palette restoration, BG 7→5→3→1→0 restoration, clearmonbg/blendoff, target OBJ restoration, sound-gated script end, 20-display generic healthbox wobble, four-frame target blink blocks, and stable handoff; generic selected-OBJ composition, callback/OAM final-state handoff, six-callback spawn cadence, target-relative geometry, affine grow/hold, flicker lifetime, top-Y OAM ordering, source-relative teardown stages, and preceding-pass generic-hit OAM latch are Tier-1 pinned"],
       "evidence": ["tools/compare/fixtures/ice-punch-onix-grovyle.json", "tools/compare/firePunchPortable.ts", "tools/probe/stage-fire-punch-portable-on.py", "docs/ice-punch-portable-staging-probe.md"],
-      "remaining": "Generic hit/damage presentation beginning at oracle frame 2526, then any evidence-required geometry/orientation variant before exact promotion."
+      "remaining": "Generic HP-drain/message resolution beginning at oracle frame 2561, then any evidence-required geometry/orientation variant before exact promotion."
     },
     {
       "move": "MOVE_FAINT_ATTACK",
@@ -113,7 +113,7 @@
         "MOVE_ICE_PUNCH",
         "MOVE_THUNDER_PUNCH"
       ],
-      "goal": "FIRE PUNCH remains the exact chassis; ICE PUNCH independently proves its complete move-script body through the opening, inward-crystal component, seven-spawn IceCrystalEffectShort burst, and reusable teardown at 187/187, with generic hit/damage resolution still open from frame 2526; THUNDER PUNCH is source/staging batch-checked but remains unsupported without dense move evidence."
+      "goal": "FIRE PUNCH remains the exact chassis; ICE PUNCH independently proves its complete move-script body and full reusable generic hit reaction through age 221 at 222/222, with HP-drain/message resolution still open from frame 2561; THUNDER PUNCH is source/staging batch-checked but remains unsupported without dense move evidence."
     },
     {
       "id": "white-feather",

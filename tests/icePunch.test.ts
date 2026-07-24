@@ -21,9 +21,29 @@ import {
   createSceneOnMovePresentation,
   sceneOnIcePunchView,
 } from "../src/engine/sceneOnPresentation.ts";
+import { genericHitReactionAtAge } from "../src/engine/battleMenu.ts";
 import crystals from "../src/assets/gen/battle-anim-ice-crystals.json" with { type: "json" };
 
 describe("ICE_PUNCH source-composed presentation components", () => {
+  it("reuses the generic hit reaction on a phase-relative clock", () => {
+    expect(genericHitReactionAtAge(186, 187)).toEqual({
+      healthboxY2: 0,
+      targetInvisible: false,
+    });
+    expect(genericHitReactionAtAge(187, 187)).toEqual({
+      healthboxY2: 1,
+      targetInvisible: false,
+    });
+    expect(genericHitReactionAtAge(188, 187)).toEqual({
+      healthboxY2: -1,
+      targetInvisible: true,
+    });
+    expect(genericHitReactionAtAge(206, 187).healthboxY2).toBe(-1);
+    expect(genericHitReactionAtAge(207, 187).healthboxY2).toBe(0);
+    expect(genericHitReactionAtAge(215, 187).targetInvisible).toBe(true);
+    expect(genericHitReactionAtAge(216, 187).targetInvisible).toBe(false);
+  });
+
   it("pins the independent BG and target palette task clocks", () => {
     expect(ICE_PUNCH_OVERLAY_FIRST_AGE).toBe(16);
     expect([

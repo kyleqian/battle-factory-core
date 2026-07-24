@@ -2011,6 +2011,30 @@ export function rockSlideMonBlinkInvisible(
   return Math.floor((d - 1) / 4) % 2 === 0;
 }
 
+export interface GenericHitReaction {
+  readonly healthboxY2: number;
+  readonly targetInvisible: boolean;
+}
+
+/**
+ * Source `SpriteCB_HitAnimHealthoxEffect` + `DoHitAnimBlinkSpriteEffect`
+ * expressed on a presentation-relative clock. `firstDisplayedAge` is the
+ * first +1 healthbox pose; target blinking begins on the following display.
+ */
+export function genericHitReactionAtAge(
+  age: number,
+  firstDisplayedAge: number,
+): GenericHitReaction {
+  const d = age - firstDisplayedAge;
+  return {
+    healthboxY2: d >= 0 && d < 20 ? (d % 2 === 0 ? 1 : -1) : 0,
+    targetInvisible:
+      d >= 1
+      && d <= 32
+      && Math.floor((d - 1) / 4) % 2 === 0,
+  };
+}
+
 /**
  * Relative presentation-seam view of the source Move_ROCK_SLIDE body.
  * Canonical battle callers retain their press-relative wrappers above;
