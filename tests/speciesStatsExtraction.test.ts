@@ -1,5 +1,7 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import speciesNamesData from "../src/data/gen/species-names.json" with { type: "json" };
@@ -26,8 +28,11 @@ const namesBySpecies = new Map((speciesNamesData.species as Array<{ species: str
 describe("species-stats.json (complete Emerald base-stat and ability corpus)", () => {
   it("reproduces the committed artifact byte-for-byte", () => {
     const before = readFileSync("src/data/gen/species-stats.json", "utf8");
-    execFileSync("node", ["--experimental-strip-types", "tools/extract/extract-battle-frontier-data.ts"], { stdio: "pipe" });
-    expect(readFileSync("src/data/gen/species-stats.json", "utf8")).toBe(before);
+    const outputDirectory = mkdtempSync(join(tmpdir(), "pokeemerald-factory-species-stats-"));
+    execFileSync("node", ["--experimental-strip-types", "tools/extract/extract-battle-frontier-data.ts", "--out-dir", outputDirectory], {
+      stdio: "pipe",
+    });
+    expect(readFileSync(join(outputDirectory, "species-stats.json"), "utf8")).toBe(before);
   });
 
   it("covers the 411 real source species in numeric order with exactly two ability slots", () => {
