@@ -104,9 +104,9 @@ describe("source-shaped attack-canceler Truant phase", () => {
     expect(result.rulesContext.battlers).toBe(source.battlers);
   });
 
-  it("exhaustively loafs for every attacker id and representative nonzero u8 counter", () => {
+  it("exhaustively applies the one-bit counter domain for every attacker id", () => {
     for (const attacker of [0, 1, 2, 3] as const) {
-      for (const truantCounter of [1, 255]) {
+      for (const truantCounter of [0, 1] as const) {
         const battlers = [battler(), battler(), battler(), battler()];
         battlers[attacker] = battler({
           ability: BATTLE_SCRIPT_ABILITY_TRUANT,
@@ -125,7 +125,21 @@ describe("source-shaped attack-canceler Truant phase", () => {
         const result = advanceBattleScriptAttackCancelerTruant(source, SOURCE_PC);
         expect(result.kind).toBe("advance");
         if (result.kind !== "advance") throw new Error("expected Truant phase");
-        expect(result.reason).toBe("truant-active");
+        expect(result.reason).toBe(
+          truantCounter === 1 ? "truant-active" : "truant-idle-turn",
+        );
+        if (truantCounter === 0) {
+          expect(result.rulesContext.battlers).toBe(source.battlers);
+          expect(result.rulesContext.hitMarker).toBe(source.hitMarker);
+          expect(result.rulesContext.moveResultFlags).toBe(source.moveResultFlags);
+          expect(result.receipt).toMatchObject({
+            effect: 0,
+            script: { kind: "preserve", sourceProgramCounter: SOURCE_PC },
+            multistringChooser: { kind: "preserve" },
+            cancelMultiTurnMoves: { kind: "not-invoked" },
+          });
+          continue;
+        }
         expect(result.rulesContext.battlers[attacker]).toMatchObject({
           ability: BATTLE_SCRIPT_ABILITY_TRUANT,
           truantCounter,
@@ -171,7 +185,7 @@ describe("source-shaped attack-canceler Truant phase", () => {
       battlers: [
         battler({
           ability: BATTLE_SCRIPT_ABILITY_TRUANT,
-          truantCounter: 7,
+          truantCounter: 1,
         }),
         battler(),
         battler(),
@@ -212,15 +226,15 @@ describe("source-shaped attack-canceler Truant phase", () => {
       rules({ selectorRoles: {} }),
       SOURCE_PC,
     )).toThrow(/truant phase requires an attacker role/);
-    for (const truantCounter of [-1, 256, 1.5, Number.NaN]) {
+    for (const truantCounter of [-1, 2, 7, 255, 1.5, Number.NaN]) {
       expect(() => rules({
         battlers: [
-          battler({ truantCounter }),
+          battler({ truantCounter: truantCounter as 0 | 1 }),
           battler(),
           battler(),
           battler(),
         ],
-      })).toThrow(/truantCounter must be an unsigned integer <= 255/);
+      })).toThrow(/truantCounter must be an unsigned integer <= 1/);
     }
     for (const sourcePc of [-1, 1.5, 0x1_0000_0000]) {
       expect(() => advanceBattleScriptAttackCancelerTruant(
