@@ -32,8 +32,10 @@ import topologyData from "../data/gen/battle-script-topology.json" with { type: 
 import movesData from "../data/gen/moves.json" with { type: "json" };
 
 export type BattleScriptRulesBattler = Readonly<{
+  side: 0 | 1;
   ability: number;
   hp: number;
+  moves: readonly [number, number, number, number];
   pp: readonly [number, number, number, number];
   status1: number;
   status2: number;
@@ -48,6 +50,7 @@ export type BattleScriptRulesBattler = Readonly<{
   usedDisabledMove: 0 | 1;
   tauntTimer: number;
   usedTauntedMove: 0 | 1;
+  usedImprisonedMove: 0 | 1;
 }>;
 
 export type BattleScriptRulesBattlers = readonly [
@@ -181,8 +184,23 @@ export function createBattleScriptRulesContext(
     throw new Error("Battle Script rules context must contain exactly four indexed battlers");
   }
   const battlers = input.battlers.map((battler, index) => Object.freeze({
+    side: requireUnsigned(battler.side, 1, `battlers[${index}].side`) as 0 | 1,
     ability: requireUnsigned(battler.ability, 0xff, `battlers[${index}].ability`),
     hp: requireUnsigned(battler.hp, 0xffff, `battlers[${index}].hp`),
+    moves: Object.freeze(
+      (() => {
+        if (!Array.isArray(battler.moves) || battler.moves.length !== 4) {
+          throw new Error(`battlers[${index}].moves must contain exactly four move-slot values`);
+        }
+        return (battler.moves as readonly number[]).map((move, movePosition) =>
+          requireUnsigned(
+            move,
+            0xffff,
+            `battlers[${index}].moves[${movePosition}]`,
+          )
+        );
+      })(),
+    ) as unknown as readonly [number, number, number, number],
     pp: Object.freeze(
       (() => {
         if (!Array.isArray(battler.pp) || battler.pp.length !== 4) {
@@ -247,6 +265,11 @@ export function createBattleScriptRulesContext(
       battler.usedTauntedMove,
       1,
       `battlers[${index}].usedTauntedMove`,
+    ) as 0 | 1,
+    usedImprisonedMove: requireUnsigned(
+      battler.usedImprisonedMove,
+      1,
+      `battlers[${index}].usedImprisonedMove`,
     ) as 0 | 1,
   })) as unknown as BattleScriptRulesBattlers;
   const selectorRoles = Object.freeze({

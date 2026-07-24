@@ -28,8 +28,10 @@ function battler(
   changes: Partial<BattleScriptRulesBattler> = {},
 ): BattleScriptRulesBattler {
   return Object.freeze({
+    side: changes.side ?? 0,
     ability: changes.ability ?? 0,
     hp: changes.hp ?? 100,
+    moves: changes.moves ?? Object.freeze([0, 0, 0, 0]),
     pp: changes.pp ?? Object.freeze([10, 20, 30, 40]),
     status1: changes.status1 ?? 0,
     status2: changes.status2 ?? 0,
@@ -44,6 +46,7 @@ function battler(
     usedDisabledMove: changes.usedDisabledMove ?? 0,
     tauntTimer: changes.tauntTimer ?? 0,
     usedTauntedMove: changes.usedTauntedMove ?? 0,
+    usedImprisonedMove: changes.usedImprisonedMove ?? 0,
   });
 }
 

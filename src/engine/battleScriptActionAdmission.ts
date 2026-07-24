@@ -23,6 +23,7 @@ import {
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_FREEZE,
   BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS3_IMPRISONED_OTHERS,
   BATTLE_SCRIPT_STATUS3_GRUDGE,
 } from "./battleScriptSourceConstants.ts";
 
@@ -137,7 +138,8 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedMustRecharge"
       | "BattleScript_MoveUsedFlinched"
       | "BattleScript_MoveUsedIsDisabled"
-      | "BattleScript_MoveUsedIsTaunted";
+      | "BattleScript_MoveUsedIsTaunted"
+      | "BattleScript_MoveUsedIsImprisoned";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -562,6 +564,70 @@ export type BattleScriptAttackCancelerTauntedDecision =
     rulesContext: BattleScriptRulesContext;
     receipt: Readonly<{
       sourcePhase: "CANCELER_TAUNTED";
+      tracker: Readonly<{ before: number; after: number }>;
+    }>;
+  }>;
+
+export type BattleScriptImprisonedMovesScanBattler = Readonly<{
+  battler: BattleScriptBattlerId;
+  side: 0 | 1;
+  isOpposing: boolean;
+  status3: number;
+  hasImprisonedOthers: boolean;
+  moves: readonly [number, number, number, number];
+  checkedMoveSlots: readonly number[];
+  matchingMoveSlot: number | null;
+  contributes: boolean;
+}>;
+
+export type BattleScriptImprisonedMovesScan = Readonly<{
+  attacker: BattleScriptBattlerId;
+  attackerSide: 0 | 1;
+  move: number;
+  checkedBattlers: readonly BattleScriptImprisonedMovesScanBattler[];
+  imprisonedMovesCount: number;
+  isImprisoned: boolean;
+}>;
+
+export type BattleScriptAttackCancelerImprisonedReason =
+  | "move-not-imprisoned"
+  | "imprisoned-move";
+
+export type BattleScriptAttackCancelerImprisonedReceipt = Readonly<{
+  sourcePhase: "CANCELER_IMPRISONED";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerImprisonedReason;
+  imprisonedMoves: BattleScriptImprisonedMovesScan;
+  usedImprisonedMove: Readonly<{ before: 0 | 1; after: 0 | 1 }>;
+  cancelMultiTurnMoves:
+    | Readonly<{ kind: "not-invoked" }>
+    | Readonly<{
+      kind: "invoked";
+      receipt: BattleScriptCancelMultiTurnMovesReceipt;
+    }>;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_IMPRISONED";
+    sourcePhaseAfter: "CANCELER_CONFUSED";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerImprisonedDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerImprisonedReason;
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerImprisonedReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_IMPRISONED";
       tracker: Readonly<{ before: number; after: number }>;
     }>;
   }>;
@@ -1785,6 +1851,203 @@ export function advanceBattleScriptAttackCancelerTaunted(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_TAUNTED",
         sourcePhaseAfter: "CANCELER_IMPRISONED",
+      }),
+    }),
+  });
+}
+
+/**
+ * Immutable port of GetImprisonedMovesCount (battle_util.c:1142-1163).
+ *
+ * Each battler owns the result of GetBattlerSide explicitly; the scan neither
+ * assumes battler-id parity nor consults presentation positions.
+ */
+export function scanBattleScriptImprisonedMoves(
+  rulesContext: BattleScriptRulesContext,
+  attacker: BattleScriptBattlerId,
+  move: number,
+): BattleScriptImprisonedMovesScan {
+  if (
+    !Number.isSafeInteger(attacker)
+    || attacker < 0
+    || attacker > 3
+  ) {
+    throw new Error(`imprisoned-move attacker must be a battler id 0..3, got ${attacker}`);
+  }
+  if (!Number.isSafeInteger(move) || move < 0 || move > 0xffff) {
+    throw new Error(`imprisoned-move move must be a u16, got ${move}`);
+  }
+  if (
+    !rulesContext
+    || !Array.isArray(rulesContext.battlers)
+    || rulesContext.battlers.length !== 4
+  ) {
+    throw new Error("imprisoned-move scan requires exactly four indexed battlers");
+  }
+  const attackerSide = rulesContext.battlers[attacker].side;
+  if (attackerSide !== 0 && attackerSide !== 1) {
+    throw new Error(`imprisoned-move attacker side must be 0 or 1, got ${attackerSide}`);
+  }
+
+  let imprisonedMovesCount = 0;
+  const checkedBattlers = rulesContext.battlers.map((battler, index) => {
+    if (battler.side !== 0 && battler.side !== 1) {
+      throw new Error(`imprisoned-move battler ${index} side must be 0 or 1, got ${battler.side}`);
+    }
+    if (!Array.isArray(battler.moves) || battler.moves.length !== 4) {
+      throw new Error(`imprisoned-move battler ${index} must have exactly four move slots`);
+    }
+    const isOpposing = battler.side !== attackerSide;
+    const hasImprisonedOthers = (
+      battler.status3 & BATTLE_SCRIPT_STATUS3_IMPRISONED_OTHERS
+    ) !== 0;
+    const checkedMoveSlots: number[] = [];
+    let matchingMoveSlot: number | null = null;
+    if (isOpposing && hasImprisonedOthers) {
+      for (let moveSlot = 0; moveSlot < 4; moveSlot++) {
+        const candidate = battler.moves[moveSlot];
+        if (!Number.isSafeInteger(candidate) || candidate < 0 || candidate > 0xffff) {
+          throw new Error(
+            `imprisoned-move battler ${index} move slot ${moveSlot} must be a u16, got ${candidate}`,
+          );
+        }
+        checkedMoveSlots.push(moveSlot);
+        if (candidate === move) {
+          matchingMoveSlot = moveSlot;
+          break;
+        }
+      }
+    }
+    const contributes = (
+      isOpposing
+      && hasImprisonedOthers
+      && matchingMoveSlot !== null
+    );
+    if (contributes) imprisonedMovesCount++;
+    return Object.freeze({
+      battler: index as BattleScriptBattlerId,
+      side: battler.side,
+      isOpposing,
+      status3: battler.status3,
+      hasImprisonedOthers,
+      moves: battler.moves,
+      checkedMoveSlots: Object.freeze(checkedMoveSlots),
+      matchingMoveSlot,
+      contributes,
+    });
+  });
+  return Object.freeze({
+    attacker,
+    attackerSide,
+    move,
+    checkedBattlers: Object.freeze(checkedBattlers),
+    imprisonedMovesCount,
+    isImprisoned: imprisonedMovesCount !== 0,
+  });
+}
+
+/**
+ * The source-shaped CANCELER_IMPRISONED phase of
+ * AtkCanceler_UnableToUseMove. Ports battle_util.c:2145-2155 and advances
+ * exactly once to CANCELER_CONFUSED without executing that later phase.
+ */
+export function advanceBattleScriptAttackCancelerImprisoned(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+): BattleScriptAttackCancelerImprisonedDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_IMPRISONED
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_IMPRISONED",
+        tracker: Object.freeze({ before: trackerBefore, after: trackerBefore }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler imprisoned phase requires an attacker role",
+    );
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const imprisonedMoves = scanBattleScriptImprisonedMoves(
+    rulesContext,
+    attacker,
+    rulesContext.currentMove,
+  );
+  const taken = imprisonedMoves.isImprisoned;
+  let nextRulesContext = rulesContext;
+  let helperResult: ReturnType<typeof cancelBattleScriptMultiTurnMoves> | null = null;
+  let nextHitMarker = rulesContext.hitMarker;
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+
+  if (taken) {
+    const flaggedBattler = Object.freeze({
+      ...sourceBattler,
+      usedImprisonedMove: 1 as const,
+    });
+    const flaggedBattlers = Object.freeze(
+      rulesContext.battlers.map((candidate, index) => (
+        index === attacker ? flaggedBattler : candidate
+      )),
+    ) as unknown as BattleScriptRulesContext["battlers"];
+    helperResult = cancelBattleScriptMultiTurnMoves(
+      Object.freeze({ ...rulesContext, battlers: flaggedBattlers }),
+      attacker,
+    );
+    nextRulesContext = helperResult.rulesContext;
+    nextHitMarker = (
+      rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+    ) >>> 0;
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_MoveUsedIsImprisoned",
+    });
+  }
+
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_CONFUSED;
+  nextRulesContext = Object.freeze({
+    ...nextRulesContext,
+    atkCancelerTracker: trackerAfter,
+    hitMarker: nextHitMarker,
+  });
+  const reason = taken ? "imprisoned-move" : "move-not-imprisoned";
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_IMPRISONED",
+      attacker,
+      reason,
+      imprisonedMoves,
+      usedImprisonedMove: Object.freeze({
+        before: sourceBattler.usedImprisonedMove,
+        after: taken ? 1 : sourceBattler.usedImprisonedMove,
+      }),
+      cancelMultiTurnMoves: helperResult === null
+        ? Object.freeze({ kind: "not-invoked" })
+        : Object.freeze({ kind: "invoked", receipt: helperResult.receipt }),
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect: taken ? 1 : 0,
+      script,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_IMPRISONED",
+        sourcePhaseAfter: "CANCELER_CONFUSED",
       }),
     }),
   });

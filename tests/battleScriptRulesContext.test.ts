@@ -54,8 +54,10 @@ function battler(
   flinchImmobility: 0 | 1 = 0,
 ) {
   return Object.freeze({
+    side: 0 as const,
     ability: 0,
     hp,
+    moves: Object.freeze([0, 0, 0, 0] as const),
     pp,
     status1,
     status2,
@@ -70,6 +72,7 @@ function battler(
     usedDisabledMove: 0,
     tauntTimer: 0,
     usedTauntedMove: 0,
+    usedImprisonedMove: 0,
   });
 }
 
