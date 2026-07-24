@@ -1,0 +1,70 @@
+{
+  "schema": "factory-terminal-boundaries-off/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceTrace": "tools/compare/traces-groundtruth/battle1-postwin-dense.json",
+  "relativeTo": "the staged source-owned Factory Lobby CB2_LoadMap handoff after canonical prefix tick 29601",
+  "mapAndDialogue": {
+    "mapLoaderFrames": [1, 10],
+    "textPrinterFirstObserved": 38,
+    "dialogueFrameFirstDraw": 39,
+    "source": "field_message_box.c Task_DrawFieldMessage states 0 LoadMessageBoxAndBorderGfx, 1 DrawDialogueFrame, 2 printer completion"
+  },
+  "seventhWin": {
+    "inputs": {
+      "congratsDefault": 300,
+      "awardPageScroll": 1100,
+      "awardDefault": 2200,
+      "exchangePageClear": 3500,
+      "recordQuestionScroll": 4400
+    },
+    "printerStateSpans": {
+      "congratsPrint": [38, 101],
+      "awardPrint": [303, 368],
+      "awardScrollWait": [369, 1099],
+      "awardDefaultReady": 1141,
+      "getPointsPrint": [2201, 2236],
+      "exchangePrint": [2518, 2570],
+      "exchangeClearWait": [2571, 3499],
+      "recordQuestionPrint": [3716, 3779],
+      "recordQuestionScrollWait": [3780, 4399]
+    },
+    "getPoints": {
+      "battlePointMutation": {"tick": 2201, "from": 0, "to": 3},
+      "requiresSyntheticButton": false,
+      "messageComplete": 2237
+    },
+    "restoreAndSave": {"challengeStatusClear": 3549},
+    "recordMultichoice": {
+      "draw": 4422,
+      "firstReadyBoundary": 4423,
+      "firstRejectedA": {"tick": 4422, "delay": 1, "result": 255, "taskAliveNextFrame": true},
+      "firstAcceptedA": {"tick": 4424, "delay": 0, "result": 1, "choice": "NO", "taskAliveNextFrame": false},
+      "contentWindow": {"id": 1, "bg": 0, "left": 21, "top": 9, "width": 4, "height": 4, "palette": 15, "baseBlock": 100}
+    }
+  },
+  "loss": {
+    "inputs": {"returnPageClear1": 80, "returnPageClear2": 160, "recordQuestionScroll": 600},
+    "printerStateSpans": {
+      "returnPrint1": [38, 67],
+      "returnClearWait1": [68, 79],
+      "returnPrint2": [80, 141],
+      "returnClearWait2": [142, 159],
+      "returnPrint3": [160, 207],
+      "recordQuestionPrint": [380, 443],
+      "recordQuestionScrollWait": [444, 599]
+    },
+    "restoreAndSave": {"challengeStatusClear": 210, "battlePointMutation": null},
+    "recordMultichoice": {
+      "draw": 622,
+      "firstReadyBoundary": 623,
+      "firstRejectedA": {"tick": 622, "delay": 1, "result": 255, "taskAliveNextFrame": true},
+      "firstAcceptedA": {"tick": 624, "delay": 0, "result": 1, "choice": "NO", "taskAliveNextFrame": false},
+      "contentWindow": {"id": 1, "bg": 0, "left": 21, "top": 9, "width": 4, "height": 4, "palette": 15, "baseBlock": 100}
+    }
+  },
+  "limits": {
+    "noPngOrRgbAssets": true,
+    "noProductionRendererUse": true,
+    "staticRamSymbolsNotExportedByOracle": ["sTextPrinters", "sFieldMessageBoxMode", "sProcessInputDelay", "sGlobalScriptContext", "Task_DrawFieldMessage", "Task_HandleMultichoiceInput"]
+  }
+}
