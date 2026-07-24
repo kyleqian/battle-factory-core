@@ -32,6 +32,16 @@ Per entry:
 - **Workaround:** keep probe output redirected through `run-mgba-probe.py` and
   inspect only targeted searches or the log tail.
 
+## Dense multi-session mGBA probes destabilize long worker processes
+
+- **What:** running the full terminal boundary-control matrix inside one
+  long-lived process repeatedly hit teardown/resource instability before
+  emitting valid JSON.
+- **Hits:** 1.
+- **Cost each:** ~8 min.
+- **Workaround:** split each outcome/control into a fresh
+  `run-mgba-probe.py` wrapper invocation and merge only the concise evidence.
+
 ## `bin/oracle run` always prints the full capture manifest
 
 - **What:** targeted oracle probes with dense captures flood the terminal with

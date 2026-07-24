@@ -555,10 +555,12 @@ at 30087, with party/rental identity unchanged and no round decision emitted.
 Source extraction now also pins the terminal field-message gates and the
 seventh-win `MSGBOX_GETPOINTS` fanfare/wait path. Fresh OFF probes also pin
 the regular Level 50 seventh-win BP award at +2201, party/status restoration
-at +3549, and the distinct loss cleanup; source-generated lobby map, border,
-NPC, message, menu, and font data are banked, but no ending pixels are
-claimed. Summary presentation, NO/B return, loss ending, and seventh-win
-ending still need dense OFF-profile UI proofs. The parallel Scene-ON adapter
+at +3549, and its default-NO record menu draw/accepted input at +4422/+4424.
+The distinct loss path clears status at +210 and draws/accepts the same menu
+at +622/+624. Source-generated lobby map, border, NPC, message, menu, and
+font data are banked, but no ending pixels are claimed. Summary presentation,
+loss ending, and seventh-win ending still need dense OFF-profile UI proofs.
+The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it
 `exact`. ROCK SLIDE is likewise portable (**175/175**) and canonical
