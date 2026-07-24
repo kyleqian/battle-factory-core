@@ -39,21 +39,20 @@ remainder.
 ## Current handoff
 
 - **State:** **9 exact / 4 partial / 263 unsupported**. FLY remains partial:
-  the reusable framebuffer/controller adapter is installed, but ISSUES #34's
-  seven affine opening frames and two player-side priority/monbg residuals
-  remain open.
-- **Did:** added source-derived player-back MURKROW art and a shared,
-  side/geometry/phase-relative FLY compositor for charge/strike balls,
-  visibility, hitsplat/shake, both healthbox orientations, immutable HP
-  display, move/result printers, and controller cleanup. No mechanics changed.
+  all four portable practical windows are exact, but ISSUES #34's seven
+  affine opening frames remain explicitly excluded.
+- **Did:** repaired opposite-side FLY with source Q8.8 direction-bit parity,
+  `AnimTask_ShakeMon`/`Task_UpdateMonBg` ownership of target `x2`, persistent
+  equal-priority OAM ordering, and semitransparent OBJ blending against the
+  next eligible BG/backdrop layer. Corrected the staged MURKROW gender from
+  its oracle personality; no mechanics or controller outcomes changed.
 - **Evidence:** portable opponent charge oracle **47-197** is **144/144**
   excluding only frames **59-65** under ISSUES #34; opponent strike
-  **485-732** is **248/248**. Player charge **47-193** has the same seven-frame
-  exclusion plus a stable **24-pixel** opponent-priority residual at
-  `x177-181/y79-86`; player strike **384-440** has only that residual, then
-  retains an unresolved target monbg/controller composition from frame **441**
-  through **627**. Canonical charge/strike remain **206/206 + 256/256**;
+  **485-732** is **248/248**. Player charge **47-193** is **140/140** after
+  the same seven-frame exclusion; the complete player strike/controller
+  window **384-627** is **244/244**. Canonical charge/strike remain
+  **206/206 + 256/256**;
   SAND ATTACK and AERIAL ACE regress **190/190 + 93/93**.
-- **Next:** derive the player-target `monbg ANIM_DEF_PARTNER` BG/OBJ priority
-  composition and the 24-pixel opponent field-priority exposure generally,
-  then rerun both player dense windows. Preserve ISSUES #34 and partial status.
+- **Next:** preserve FLY partial until ISSUES #34's generic seven-frame affine
+  sampler remainder is solved; BOUNCE and DIVE still require independent dense
+  move evidence.

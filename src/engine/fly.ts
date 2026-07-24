@@ -21,8 +21,22 @@ export interface FlyPresentationState {
   readonly attackerInvisible: boolean;
   readonly chargeBall: FlyChargeBall | null;
   readonly strikeBall: FlyStrikeBall | null;
+  /**
+   * `AnimTask_ShakeMon` has begun writing the target sprite's `x2`.
+   * While `monbg` owns the target, `Task_UpdateMonBg` mirrors that live
+   * offset into BG scroll; after `clearmonbg`, the restored OBJ retains the
+   * task's final zero rather than an older idle-animation offset.
+   */
+  readonly targetTaskOwnsX2: boolean;
   readonly targetShakeX2: number;
   readonly impactVisible: boolean;
+  /**
+   * Source `SortSprites` keeps a persistent order and insertion-sorts equal
+   * priority sprites using the prior final-OAM Y. In the player trajectory,
+   * the newly-created hitsplat precedes the still-live ball on their first
+   * displayed overlap; the opponent trajectory retains ball precedence.
+   */
+  readonly impactWinsBallOamTie: boolean;
 }
 
 /**
@@ -71,6 +85,21 @@ function truncDiv(numerator: number, denominator: number): number {
 }
 
 /**
+ * `InitAnimLinearTranslation` stores magnitude in Q8.8 and reserves bit 0
+ * as the direction flag: positive deltas clear it, negative deltas set it.
+ * That parity coercion is observable when an otherwise-odd positive step
+ * crosses an integer boundary.
+ */
+function linearDeltaQ8(start: number, end: number): number {
+  const distance = end - start;
+  const magnitude = truncDiv(
+    Math.abs(distance) * 256,
+    FLY_STRIKE_DURATION,
+  );
+  return distance < 0 ? -(magnitude | 1) : magnitude & ~1;
+}
+
+/**
  * Source `InitAnimLinearTranslation` / `AnimTranslateLinear`. The ball begins
  * just outside the top-left or top-right screen edge, crosses the target's
  * source animation center in 20 callbacks, and keeps the same Q8.8 velocity
@@ -84,14 +113,8 @@ export function flyStrikeBallAtAge(
   if (age < 0) return null;
   const startX = attackerSide === "player" ? -32 : 272;
   const startY = -32;
-  const xStep = truncDiv(
-    (targetCenter.x - startX) * 256,
-    FLY_STRIKE_DURATION,
-  );
-  const yStep = truncDiv(
-    (targetCenter.y - startY) * 256,
-    FLY_STRIKE_DURATION,
-  );
+  const xStep = linearDeltaQ8(startX, targetCenter.x);
+  const yStep = linearDeltaQ8(startY, targetCenter.y);
   const callbacks = age + 1;
   const x = startX + truncDiv(xStep * callbacks, 256);
   const y = startY + truncDiv(yStep * callbacks, 256);
@@ -118,8 +141,10 @@ export function flyPresentationAtAge(
           ? chargeBall
           : null,
       strikeBall: null,
+      targetTaskOwnsX2: false,
       targetShakeX2: 0,
       impactVisible: false,
+      impactWinsBallOamTie: false,
     };
   }
   const strikeBall = flyStrikeBallAtAge(age, attackerSide, targetCenter);
@@ -129,11 +154,14 @@ export function flyPresentationAtAge(
     // active. AnimFlyBallAttack clears that hide only when its translated
     // ball leaves the screen, so the attacker stays absent during the
     // pre-spawn script lead-in as well as the ball's visible lifetime.
-    attackerInvisible: age < 30,
+    attackerInvisible: age < 0 || strikeBall !== null,
     chargeBall: null,
     strikeBall,
+    targetTaskOwnsX2: age >= FLY_IMPACT_FIRST_AGE,
     targetShakeX2: FLY_SHAKE_AGES.has(age) ? 6 : 0,
     impactVisible:
       age >= FLY_IMPACT_FIRST_AGE && age <= FLY_IMPACT_LAST_AGE,
+    impactWinsBallOamTie:
+      attackerSide === "player" && age === FLY_IMPACT_FIRST_AGE,
   };
 }

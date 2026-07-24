@@ -9196,6 +9196,57 @@ function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette:
 }
 
 /**
+ * GBA semitransparent-OBJ composition after OAM selection. Competing OBJ
+ * pixels are resolved to one winning OBJ layer before blending, so a
+ * winning semitransparent OBJ must sample target 2 from the next eligible
+ * BG/backdrop pixel, not from a losing OBJ that a sequential painter may
+ * already have written into `fb`.
+ */
+function drawSpriteSheetBlendedOverBackdrop(
+  fb: Uint8Array,
+  backdrop: Uint8Array,
+  tileset: Tileset,
+  palette: RgbColor[],
+  ox: number,
+  oy: number,
+  eva: number,
+  evb: number,
+): void {
+  for (let ty = 0; ty < tileset.rows; ty += 1) {
+    for (let tx = 0; tx < tileset.columns; tx += 1) {
+      const tile = tileset.tiles[ty * tileset.columns + tx];
+      if (!tile) continue;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          const idx = tile[py * 8 + px]!;
+          if (idx === 0) continue;
+          const color = palette[idx];
+          if (!color) continue;
+          const x = ox + tx * 8 + px;
+          const y = oy + ty * 8 + py;
+          if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
+          const offset = (y * 240 + x) * 4;
+          fb[offset] = blendChannel(color.r, backdrop[offset]!, eva, evb);
+          fb[offset + 1] = blendChannel(
+            color.g,
+            backdrop[offset + 1]!,
+            eva,
+            evb,
+          );
+          fb[offset + 2] = blendChannel(
+            color.b,
+            backdrop[offset + 2]!,
+            eva,
+            evb,
+          );
+          fb[offset + 3] = 255;
+        }
+      }
+    }
+  }
+}
+
+/**
  * ISSUES #32 fix (docs/turn9-shake-notes.md's 2026-07-22 PROBE, "Model F",
  * verified pixel-exact across the whole animated window): the only render
  * ticks where slot 3's second life and slot 4 are simultaneously active,
@@ -15376,24 +15427,68 @@ export function renderSceneOnMovePresentation(
       );
     }
     if (!view.targetInvisible) {
+      // `MoveBattlerSpriteToBG` initially preserves the target's current
+      // OBJ offset. Once FlyUnleash's `AnimTask_ShakeMon` begins, that task
+      // owns x2 and `Task_UpdateMonBg` mirrors it into BG scroll. Derive the
+      // decoded 64x64 base corner from the source animation center instead
+      // of retaining a stale settled-idle x2 in `spriteCorner`.
+      const targetX = view.targetTaskOwnsX2
+        ? target.geometry.animationCenter.x - 32
+        : target.geometry.spriteCorner.x;
       drawSpriteSheet(
         fb,
         targetSprite.tileset,
         targetSprite.palette,
-        target.geometry.spriteCorner.x + view.targetShakeX2,
+        targetX + view.targetShakeX2,
         target.geometry.spriteCorner.y,
       );
     }
-    if (view.impactVisible) {
-      drawSpriteSheetBlendedOverFb(
-        fb,
+    const flyEffectBackdrop = fb.slice();
+    const drawFlyImpact = (): void => {
+      if (!view.impactVisible) return;
+      const args = [
         battleAnimHitsplat.tileset,
         battleAnimHitsplat.palette,
         target.geometry.animationCenter.x - 16,
         target.geometry.animationCenter.y - 16,
         12,
         8,
+      ] as const;
+      if (view.impactWinsBallOamTie) {
+        drawSpriteSheetBlendedOverBackdrop(
+          fb,
+          flyEffectBackdrop,
+          ...args,
+        );
+      } else {
+        drawSpriteSheetBlendedOverFb(fb, ...args);
+      }
+    };
+    const drawFlyStrikeBall = (): void => {
+      if (!view.strikeBall) return;
+      drawSpriteSheetAffineRotate(
+        fb,
+        battleAnimFlyBall.tileset,
+        battleAnimFlyBall.palette,
+        view.strikeBall.x,
+        view.strikeBall.y,
+        view.strikeBall.pa,
+        view.strikeBall.pb,
+        view.strikeBall.pc,
+        view.strikeBall.pd,
+        undefined,
+        false,
       );
+    };
+    // Equal-priority OBJ overlap follows the source's live sSpriteOrder,
+    // not spawn index. The reducer exposes the one creation-boundary order
+    // change established from final OAM in the two legal orientations.
+    if (view.impactWinsBallOamTie) {
+      drawFlyStrikeBall();
+      drawFlyImpact();
+    } else {
+      drawFlyImpact();
+      drawFlyStrikeBall();
     }
     if (view.chargeBall) {
       drawSpriteSheetAffineStretch(
@@ -15408,21 +15503,6 @@ export function renderSceneOnMovePresentation(
         { r: 0, g: 0, b: 0 },
         0,
         true,
-      );
-    }
-    if (view.strikeBall) {
-      drawSpriteSheetAffineRotate(
-        fb,
-        battleAnimFlyBall.tileset,
-        battleAnimFlyBall.palette,
-        view.strikeBall.x,
-        view.strikeBall.y,
-        view.strikeBall.pa,
-        view.strikeBall.pb,
-        view.strikeBall.pc,
-        view.strikeBall.pd,
-        undefined,
-        false,
       );
     }
     if (originalOrientation) {

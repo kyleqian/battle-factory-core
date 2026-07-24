@@ -68,6 +68,7 @@ def main() -> None:
     sand_attack_dirt_template = oracle.symbols["gSandAttackDirtSpriteTemplate"]
     fly_ball_up_template = oracle.symbols["gFlyBallUpSpriteTemplate"]
     fly_ball_attack_template = oracle.symbols["gFlyBallAttackSpriteTemplate"]
+    basic_hitsplat_template = oracle.symbols["gBasicHitSplatSpriteTemplate"]
     battle_mons = oracle.symbols["gBattleMons"]
     battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
     oam_buffer = oracle.symbols["gMain"] + 0x38
@@ -86,6 +87,9 @@ def main() -> None:
         matrix_base = oam_matrices + matrix_num * 8
         return {
             "slot": slot,
+            "oamX": u16(base + 2) & 0x1FF,
+            "oamY": u16(base) & 0xFF,
+            "subpriority": oracle.read_u8(base + 0x43),
             "tileNum": oracle.read_u8(base + 4)
             | ((oracle.read_u8(base + 5) & 0x3) << 8),
             "paletteNum": (oracle.read_u8(base + 5) >> 4) & 0xF,
@@ -136,6 +140,7 @@ def main() -> None:
         feather_sprites = []
         sand_attack_dirt_sprites = []
         fly_sprites = []
+        basic_hitsplat_sprites = []
         for slot in range(64):
             base = sprites + slot * 0x44
             if not (oracle.read_u8(base + 0x3E) & 1):
@@ -154,6 +159,8 @@ def main() -> None:
                         else "strike"
                     ),
                 })
+            elif template == basic_hitsplat_template:
+                basic_hitsplat_sprites.append(feather_record(slot))
         sand_attack_dirt_oam = []
         if sand_attack_dirt_sprites:
             dirt_base = sprites + sand_attack_dirt_sprites[0]["slot"] * 0x44
@@ -189,6 +196,7 @@ def main() -> None:
                 "sandAttackDirtSprites": sand_attack_dirt_sprites,
                 "sandAttackDirtOam": sand_attack_dirt_oam,
                 "flySprites": fly_sprites,
+                "basicHitsplatSprites": basic_hitsplat_sprites,
                 "bldalpha": oracle.read_u8(0x04000052)
                 | (oracle.read_u8(0x04000053) << 8),
                 "spriteOrder": [
