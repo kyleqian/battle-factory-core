@@ -15,7 +15,10 @@ type Record = {
   frontierSets: { ids: number[]; count: number };
   battleScript: { effectId: number; entryScript: string; graphLabel: string | null; programLabel: string | null; executionInventory: string };
   animation: { script: string | null; componentIds: string[] };
-  hooks: { item: { category: null; status: string; reason: string }; ability: { category: null; status: string; reason: string } };
+  hooks: {
+    item: { potentialCategories: string[]; status: string; unsupportedCategories: null; reason: string };
+    ability: { potentialCategories: string[]; status: string; unsupportedCategories: null; reason: string };
+  };
 };
 type SourceMove = {
   id: number;
@@ -31,7 +34,7 @@ type SourceMove = {
   priority: number;
   flags: string[];
 };
-const manifest = data as { schema: string; coverage: { level50Roster: { frontierSetIds: { first: number; last: number; count: number }; moveCount: number; moveTableEffectFamilyCount: number }; level50Executable: { moveCount: number; battleScriptEffectFamilyCount: number; rosterOnlyMoveCount: number; rosterOnlyMoveTableEffectFamilyCount: number }; joins: { battleScriptGraphLabels: number; battleScriptProgramLabels: number; animationScripts: number; itemHookCategories: number; abilityHookCategories: number }; hookCatalogs: { item: { frontierHeldItemRows: number; explicitHoldEffectRows: number; moveToHookDispatcher: null }; ability: { displayRows: number; moveToHookDispatcher: null } } }; moves: Record[] };
+const manifest = data as { schema: string; coverage: { level50Roster: { frontierSetIds: { first: number; last: number; count: number }; moveCount: number; moveTableEffectFamilyCount: number }; level50Executable: { moveCount: number; battleScriptEffectFamilyCount: number; rosterOnlyMoveCount: number; rosterOnlyMoveTableEffectFamilyCount: number }; joins: { battleScriptGraphLabels: number; battleScriptProgramLabels: number; animationScripts: number; itemHookCategories: number; abilityHookCategories: number; itemHookUnsupportedCategories: null; abilityHookUnsupportedCategories: null }; hookCatalogs: { item: { frontierHeldItemRows: number; explicitHoldEffectRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; unsupportedCategories: null }; ability: { displayRows: number; moveToHookDispatchers: Array<{ id: string; dispatcher: string; selector: string; ownership: string }>; unsupportedCategories: null } } }; moves: Record[] };
 const sourceMoves = new Map((movesData.moves as SourceMove[]).map((move) => [move.move, move]));
 
 describe("Level-50 move parameterization manifest", () => {
@@ -44,7 +47,7 @@ describe("Level-50 move parameterization manifest", () => {
   });
 
   it("enumerates every non-NONE move used by the exact 0..849 Level-50 roster boundary", () => {
-    expect(manifest.schema).toBe("level50-move-parameterization/v1");
+    expect(manifest.schema).toBe("level50-move-parameterization/v2");
     expect(manifest.coverage.level50Roster).toEqual({
       frontierSetIds: { first: 0, last: 849, count: 850 }, moveCount: 300, moveTableEffectFamilyCount: 176,
     });
@@ -66,15 +69,23 @@ describe("Level-50 move parameterization manifest", () => {
     });
     expect(manifest.coverage.joins).toMatchObject({
       battleScriptGraphLabels: 300, battleScriptProgramLabels: 300, animationScripts: 300,
-      itemHookCategories: 0, abilityHookCategories: 0,
+      itemHookCategories: 3, abilityHookCategories: 8,
+      itemHookUnsupportedCategories: null, abilityHookUnsupportedCategories: null,
     });
     expect(manifest.coverage.hookCatalogs).toMatchObject({
-      item: { frontierHeldItemRows: 63, explicitHoldEffectRows: 70, moveToHookDispatcher: null },
-      ability: { displayRows: 8, moveToHookDispatcher: null },
+      item: { frontierHeldItemRows: 63, explicitHoldEffectRows: 70, unsupportedCategories: null },
+      ability: { displayRows: 8, unsupportedCategories: null },
     });
+    expect(manifest.coverage.hookCatalogs.item.moveToHookDispatchers.map((hook) => hook.id)).toEqual([
+      "selection-choice-band", "accuracy-target-evasion-item", "moveend-kings-rock",
+    ]);
+    expect(manifest.coverage.hookCatalogs.ability.moveToHookDispatchers.map((hook) => hook.id)).toEqual([
+      "moves-block-soundproof", "absorbing-volt-absorb", "absorbing-water-absorb", "absorbing-flash-fire",
+      "moveend-contact-on-damage", "moveend-color-change", "accuracy-compound-eyes", "accuracy-sand-veil", "accuracy-hustle-physical",
+    ]);
   });
 
-  it("preserves move-table values and complete exact source joins without inventing item or ability hook categories", () => {
+  it("preserves move-table values and records only potential source-dispatch hook categories", () => {
     for (const record of manifest.moves) {
       const source = sourceMoves.get(record.move)!;
       expect(record.id).toBe(source.id);
@@ -88,10 +99,22 @@ describe("Level-50 move parameterization manifest", () => {
       if (record.animation.script === null) expect(record.animation.componentIds).toEqual([]);
       else expect(record.animation.componentIds.length).toBeGreaterThan(0);
       for (const hook of [record.hooks.item, record.hooks.ability]) {
-        expect(hook.category).toBeNull();
-        expect(hook.status).toBe("not-yet-extracted");
+        expect(hook.status).toBe("source-derived-partial");
+        expect(hook.unsupportedCategories).toBeNull();
+        expect(new Set(hook.potentialCategories).size).toBe(hook.potentialCategories.length);
         expect(hook.reason.length).toBeGreaterThan(0);
       }
     }
+    const move = (symbol: string) => manifest.moves.find((record) => record.move === symbol)!;
+    expect(move("MOVE_ROAR").hooks).toMatchObject({
+      item: { potentialCategories: ["selection-choice-band", "accuracy-target-evasion-item"] },
+      ability: { potentialCategories: ["moves-block-soundproof", "accuracy-compound-eyes", "accuracy-sand-veil", "accuracy-hustle-physical"] },
+    });
+    expect(move("MOVE_DIVE").hooks).toMatchObject({
+      item: { potentialCategories: ["selection-choice-band", "accuracy-target-evasion-item", "moveend-kings-rock"] },
+      ability: { potentialCategories: ["absorbing-water-absorb", "moveend-contact-on-damage", "moveend-color-change", "accuracy-compound-eyes", "accuracy-sand-veil"] },
+    });
+    expect(move("MOVE_WILL_O_WISP").hooks.ability.potentialCategories).toEqual(["absorbing-flash-fire", "accuracy-compound-eyes", "accuracy-sand-veil"]);
+    expect(move("MOVE_SWORDS_DANCE").hooks.item.potentialCategories).toEqual(["selection-choice-band"]);
   });
 });
