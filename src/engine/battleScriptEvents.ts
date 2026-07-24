@@ -71,7 +71,13 @@ export type BattleScriptSemanticEventPayload =
   | Readonly<{
     kind: "set-battler-sprite-visibility";
     battler: BattleScriptBattlerId;
-    invisible: false;
+    invisible: boolean;
+  }>
+  | Readonly<{
+    kind: "set-battler-status-data";
+    battler: BattleScriptBattlerId;
+    /** Raw u32 sent by EmitSetMonData(REQUEST_STATUS_BATTLE). */
+    status1: number;
   }>
   | Readonly<{
     kind: "trainer-slide-in";

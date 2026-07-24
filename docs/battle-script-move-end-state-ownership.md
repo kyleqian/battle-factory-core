@@ -31,13 +31,14 @@ controller acknowledgement in the existing machine.
 | `gBattleScripting.moveendState` (`u8`) | `rules.moveendState`, written by the completed generic SETBYTE resolver | every state and postlude |
 | action-local `gBattleMoveDamage` etc. reset by `MoveValuesCleanUp` | `BattleScriptMoveValuesRulesContext` and `cleanUpBattleScriptMoveValues` | 16 only |
 | script PC / pushed return PC | `BattleScriptMachineState.programCounter` and immutable `callStack` | 0, 1, 16, postlude |
-| `gActiveBattler` plus controller-exec flag | `BattleScriptSchedulerState.activeBattler` and `pendingControllerBattlers`; acknowledgement already preserves rules/RNG/PC | 1, 8--10 |
+| `gActiveBattler` plus controller-exec flag | `BattleScriptSchedulerState.activeBattler` and `pendingControllerBattlers`; `controller-return` preserves the current PC/stack and acknowledgement changes scheduler only | 1, 8--10 |
 
-`BattleScriptSemanticEventPayload` already has the source-shaped
-`set-battler-sprite-visibility` event, but it currently restricts
-`invisible: false`; state 8 needs the same controller event with `true`.
-That is a narrow event-union extension, not presentation ownership of the
-rule bit.
+`BattleScriptSemanticEventPayload` now carries both boolean values on the
+source-shaped `set-battler-sprite-visibility` event. State 1 uses the narrow
+`set-battler-status-data` event to preserve the raw post-clear `u32` sent by
+`EmitSetMonData(REQUEST_STATUS_BATTLE)`. Neither event owns the durable rule
+bit. `call-current` separately models `BattleScriptPushCursor()` by pushing
+opcode 73's current PC before the defrost script transfer.
 
 ## Missing durable owner slices
 
@@ -125,7 +126,7 @@ substitute for the new unit tests.
    `tests/battleScriptMoveEndTopology.test.ts` cases
    `substitute-loops-only-through-gBattlersCount` and
    `next-target-resolves-partner-by-position-not-battler-parity`.
-4. Add explicit **controller request/resumption** support for status-data and
+4. [x] Add explicit **controller request/resumption** support for status-data and
    both visibility values, using existing scheduler acknowledgement.  Unlock
    `tests/battleScriptMoveEndControllers.test.ts` cases
    `defrost-blocks-with-pc-and-rng-preserved` and

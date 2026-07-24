@@ -1,3 +1,30 @@
+## 421 — move-end choice/change ownership landed and Baton Pass repaired
+
+- **State:** dependency step 2a plus its evidence-driven Baton Pass repair are
+  committed and green at **168 files / 1968 tests**. Opcodes **73** and **0**
+  remain unregistered; no move-history, topology, controller, ability/item
+  delegate, script-transfer, or presentation behavior was added.
+- **Did:** extended the existing frozen rules record with source `u16`
+  `chosenMove`, `choicedMove[4]`, and `changedItems[4]`; the independent
+  BattleStruct absent `u8` mask; `dynamicMoveType`; and four Enigma held-effect
+  bytes. Pure ownership reducers pin Choice Band/Baton Pass/stale-choice order
+  and changed-item copy+clear behavior. Successful Baton Pass now preserves an
+  unavailable choice by taking the source break; failed Baton Pass assigns the
+  chosen move and runs membership cleanup. Generated numeric item effects and
+  exact `GET_MOVE_TYPE`/Enigma resolvers cover normal, dynamic-Normal, masked,
+  implicit-none, and invalid-corpus cases.
+- **Next:** finish dependency step 2 with the six independent move-history
+  arrays plus packed mirror-history owners and source-order reducers. Then add
+  topology (`gBattlersCount`, type flags, positions), `WasUnableToUseMove`,
+  controller requests, complete ability/item delegates, cleanup/next-target
+  transfer, and loop/end-mode control before registering opcode 73.
+- **Notes:** pinned `battle_script_commands.c:4302-4315`: only successful
+  Baton Pass increments/breaks before assignment and stale-choice cleanup.
+  Adjacent choice/change/type/item branches match source review. Integrated
+  suite/build and OFF v5 (`9c89c741…`) pass. Code commits `7a6c741`,
+  repair `d9b3575`; pixel diff N/A.
+
+---
 ## 420 — move-end battler metadata owner landed
 
 - **State:** dependency step 1 is committed and green at **166 files / 1960

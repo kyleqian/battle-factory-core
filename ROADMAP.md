@@ -1102,6 +1102,21 @@ result deliberately leaves `MoveValuesCleanUp`, effect-script push, and the
 Factory player/AI states explicitly carry legal Level-50 singles topology.
 Controllers, delegates, loop/end modes, and opcodes **73/0** remain absent.
 
+**MOVEEND controller dependency checkpoint (2026-07-24):** dependency step 4
+is complete without registering opcode 73. A generic `controller-return`
+machine directive atomically commits one frozen rules mutation, one
+battler-scoped semantic controller event, and exactly one active pending
+battler while preserving the current instruction PC and call stack.
+Acknowledgement remains scheduler-only, and a pre-existing controller flag
+identity-blocks before rules reads. The source-shaped status-data event carries
+the raw post-clear `u32 STATUS1`; sprite visibility now carries both boolean
+values. Single-case ownership for states 1 and 8--10 pins every source gate,
+state/status/status3/special-status write, active battler, event order, zero
+local RNG, and replay. State 1's separate `call-current` control pushes opcode
+73's current PC before transferring to `BattleScript_DefrostedViaFireMove`, so
+the script's return resumes the same instruction. The 17-state/end-mode loop,
+delegates, cleanup, Factory continuation, and opcodes **73/0** remain absent.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300

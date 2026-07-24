@@ -105,7 +105,9 @@ export type BattleScriptControlDirective =
   | Readonly<{ kind: "advance" }>
   | Readonly<{ kind: "jump"; programCounter: number }>
   | Readonly<{ kind: "call"; programCounter: number }>
+  | Readonly<{ kind: "call-current"; programCounter: number }>
   | Readonly<{ kind: "return" }>
+  | Readonly<{ kind: "controller-return" }>
   | Readonly<{ kind: "scheduler-progress" }>
   | Readonly<{ kind: "block"; reason: BattleScriptBlockReason }>
   | Readonly<{ kind: "halt"; reason: BattleScriptHaltReason }>;
@@ -394,7 +396,9 @@ function freezeState<RulesContext extends object>(
   }
   return Object.freeze({
     programCounter,
-    callStack: Object.freeze([...callStack]),
+    callStack: Object.isFrozen(callStack)
+      ? callStack
+      : Object.freeze([...callStack]),
     instructionsExecuted,
     haltReason,
     scheduler,
@@ -590,6 +594,7 @@ function freezeEventPayload(
     case "play-faint-cry":
     case "hide-party-status-summary":
     case "set-battler-sprite-visibility":
+    case "set-battler-status-data":
     case "trainer-slide-in":
     case "trainer-slide-out":
     case "status-animation":
@@ -752,6 +757,45 @@ export function stepBattleScriptMachine<RulesContext extends object>(
       instruction,
     });
   }
+  if (transition.control.kind === "controller-return") {
+    const activeBattler = transition.scheduler.activeBattler;
+    if (
+      state.scheduler.pendingControllerBattlers.length !== 0
+      || transition.scheduler.messageDisplayActive !== state.scheduler.messageDisplayActive
+      || transition.scheduler.pauseCounterBattle !== state.scheduler.pauseCounterBattle
+      || activeBattler === null
+      || transition.scheduler.pendingControllerBattlers.length !== 1
+      || transition.scheduler.pendingControllerBattlers[0] !== activeBattler
+      || transition.events.length !== 1
+      || !("battler" in transition.events[0]!)
+      || transition.events[0].battler !== activeBattler
+    ) {
+      throw new Error(
+        "controller-return Battle Script transition must emit one active-battler event and mark exactly that idle battler pending",
+      );
+    }
+    const events = appendEvents(
+      state.events,
+      transition.events,
+      instruction,
+      state.instructionsExecuted + 1,
+    );
+    const next = freezeState(
+      state.programCounter,
+      state.callStack,
+      state.instructionsExecuted + 1,
+      null,
+      transition.scheduler,
+      transition.rulesContext,
+      transition.rng,
+      events,
+    );
+    return Object.freeze({
+      kind: "advanced",
+      state: next,
+      instruction,
+    });
+  }
   const events = appendEvents(
     state.events,
     transition.events,
@@ -789,6 +833,18 @@ export function stepBattleScriptMachine<RulesContext extends object>(
       next = freezeState(
         transition.control.programCounter,
         [...state.callStack, state.programCounter + 1],
+        state.instructionsExecuted + 1,
+        null,
+        transition.scheduler,
+        transition.rulesContext,
+        transition.rng,
+        events,
+      );
+      break;
+    case "call-current":
+      next = freezeState(
+        transition.control.programCounter,
+        [...state.callStack, state.programCounter],
         state.instructionsExecuted + 1,
         null,
         transition.scheduler,
