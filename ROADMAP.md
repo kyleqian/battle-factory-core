@@ -557,17 +557,23 @@ seventh-win `MSGBOX_GETPOINTS` fanfare/wait path. Fresh OFF probes also pin
 the regular Level 50 seventh-win BP award at +2201, party/status restoration
 at +3549, and its default-NO record menu draw/accepted input at +4422/+4424.
 The distinct loss path clears status at +210 and draws/accepts the same menu
-at +622/+624. Source-generated lobby map, border, NPC, message, menu, and
-font data are banked, but no ending pixels are claimed. Summary presentation,
-loss ending, and seventh-win ending still need dense OFF-profile UI proofs.
+at +622/+624. The LOSS opening is now implemented through that +210
+party/status-clear boundary with a source-extracted circular lobby
+map/NPC/message/down-arrow renderer and a committed dense OFF comparison at
+**210/210 exact**. The terminal text artifact fully resolves the canonical
+player name `MEMORY`, the Level-50 award of 3 BP, control bytes, and default
+NO record choice. The later LOSS record question/menu and the complete
+seventh-win/round-summary ending still need dense OFF-profile UI proofs.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it
 `exact`. ROCK SLIDE is likewise portable (**175/175**) and canonical
 (**256/256**) and is `exact`; DOUBLE TEAM is portable and canonical
-(**230/230** each) and is `exact`; FAINT ATTACK is portable and canonical
-(**221/221**) but remains `partial` for its separately parked residual.
-Level 50 animation coverage is therefore **3 exact / 9 partial / 264
+(**230/230** each) and is `exact`; ENDEAVOR is portable across both attacker
+sides (**141/141**) and canonical (**237/237**) and is `exact`; FAINT ATTACK
+is portable and canonical (**221/221**) but remains `partial` for its
+separately parked residual. Level 50 animation coverage is therefore **4
+exact / 8 partial / 264
 unsupported**. S8 remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.

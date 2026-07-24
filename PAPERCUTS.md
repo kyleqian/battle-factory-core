@@ -55,7 +55,7 @@ Per entry:
 
 - **What:** an animation probe expected ImageMagick for converting raw RGB
   frames, but it is not installed in the run environment.
-- **Hits:** 1.
+- **Hits:** 2.
 - **Cost each:** ~1 min.
 - **Workaround:** use the available `ffmpeg` rawvideo conversion path.
 
