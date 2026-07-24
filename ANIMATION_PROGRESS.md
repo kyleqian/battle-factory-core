@@ -44,20 +44,22 @@ remainder.
 
 ## Current handoff
 
-- **State:** **14 exact / 2 partial / 260 unsupported**. EXTREME SPEED is an
-  honest two-orientation partial; its earlier complete-affine windows remain
-  exact, while complete-window evidence is now retained and failing.
-- **Did:** corrected the source impact reducer to accumulate all three
-  displacement pulses before its 24-step edge return, and added pure
-  source-relative reducers/composition for the 24 speed-dust spawns and
-  fourteen-toggle attacker reappearance. Extended both fixtures through
-  restore/script cleanup age 354; no absolute battle clock was added.
-- **Evidence:** the preserved prefixes remain **46/46 + 46/46 RGB**. Complete
-  move-owned attempts are opponent-front **156/303** (frames 91–393) and
-  player-back **150/303** (frames 87–389), honestly non-exact. Focused EXTREME
-  SPEED, QUICK ATTACK, AERIAL ACE, and shared-seam tests pin the reducer clocks
-  and preserve both exact controls.
-- **Next:** implement the three animation-3 edge hitsplats with their live
-  alpha/OAM ordering, solve opponent-target `monbg` priority (first opposite
-  side mismatch is frame 161), then align dust blink/spawn display epochs and
-  reappearance OAM before rerunning both retained 303-frame windows.
+- **State:** **15 exact / 1 partial / 260 unsupported**. EXTREME SPEED is exact
+  in both source-selected attacker orientations through its complete retained
+  move-owned source window.
+- **Did:** implemented all three animation-3 mon-edge hitsplats with frozen
+  source geometry, reciprocal affine matrix, live 12:8 alpha, and OAM ordering;
+  corrected opponent-target `monbg` displacement by preserving pret's unsigned
+  +6/-6 pulses; aligned BATTLER_COORD dust geometry, final-frame destruction,
+  both blink/hold epochs, fourteen-toggle reappearance, and restore display
+  latches. All clocks remain component-relative.
+- **Evidence:** opponent-front ARCANINE → player-back DUGTRIO is **303/303 RGB**
+  (frames 91–393, animation ages 52–354); player-back ARCANINE →
+  opponent-front DUGTRIO is **303/303 RGB** (frames 87–389, animation ages
+  52–354 after the four-frame printer offset). QUICK ATTACK remains
+  **219/219 + 214/214** and AERIAL ACE **236/236 + 232/232**. Focused tests pin
+  the shared reducer/display epochs; comparator diagnostics now retain the
+  first mismatch images and bounds when a regression occurs.
+- **Next:** return to the supervisor; EXTREME SPEED has no known move-owned
+  remainder. Generic hit/HP/result/status/controller tails remain independently
+  owned and were not promoted by this move evidence.

@@ -8,6 +8,7 @@ import {
   extremeSpeedBackgroundAtAge,
   extremeSpeedBackgroundVariant,
   extremeSpeedDustAtAge,
+  extremeSpeedHitsplatsAtAge,
   extremeSpeedImpactAtAge,
 } from "../src/engine/extremeSpeed.ts";
 import {
@@ -75,6 +76,18 @@ describe("Extreme Speed source reducers", () => {
     expect(extremeSpeedBackgroundAtAge(335, "opponent")).toEqual({
       background: "default", bldy: 16, scrollX: 0,
     });
+    expect(extremeSpeedBackgroundAtAge(337, "player")).toEqual({
+      background: "default", bldy: 16, scrollX: 0,
+    });
+    expect(extremeSpeedBackgroundAtAge(338, "player")).toEqual({
+      background: "default", bldy: 15, scrollX: 0,
+    });
+    expect(extremeSpeedBackgroundAtAge(352, "player")).toEqual({
+      background: "default", bldy: 1, scrollX: 0,
+    });
+    expect(extremeSpeedBackgroundAtAge(353, "player")).toEqual({
+      background: "default", bldy: 0, scrollX: 0,
+    });
     expect(extremeSpeedBackgroundAtAge(354, "player")).toEqual({
       background: "default", bldy: 0, scrollX: 0,
     });
@@ -114,10 +127,10 @@ describe("Extreme Speed source reducers", () => {
       targetX2: 0, hitsplatIndex: null,
     });
     expect(extremeSpeedImpactAtAge(123, "player")).toEqual({
-      targetX2: 8, hitsplatIndex: 0,
+      targetX2: 8, hitsplatIndex: null,
     });
     expect(extremeSpeedImpactAtAge(123, "opponent")).toEqual({
-      targetX2: -8, hitsplatIndex: 0,
+      targetX2: -8, hitsplatIndex: null,
     });
     expect(extremeSpeedImpactAtAge(135, "player").targetX2).toBe(16);
     expect(extremeSpeedImpactAtAge(147, "player").targetX2).toBe(24);
@@ -125,6 +138,30 @@ describe("Extreme Speed source reducers", () => {
     expect(extremeSpeedImpactAtAge(183, "player")).toEqual({
       targetX2: 0, hitsplatIndex: null,
     });
+    expect(extremeSpeedImpactAtAge(125, "opponent").targetX2).toBe(-2);
+    expect(extremeSpeedImpactAtAge(125, "player").targetX2).toBe(14);
+  });
+
+  it("freezes all three animation-3 mon-edge hitsplats at creation geometry", () => {
+    expect(extremeSpeedHitsplatsAtAge(127, "player")).toEqual([]);
+    expect(extremeSpeedHitsplatsAtAge(128, "player")).toEqual([{
+      targetX2: 14,
+      y2: -12,
+      matrixScale: 512,
+    }]);
+    expect(extremeSpeedHitsplatsAtAge(137, "player")).toHaveLength(1);
+    expect(extremeSpeedHitsplatsAtAge(138, "player")).toEqual([]);
+    expect(extremeSpeedHitsplatsAtAge(140, "player")).toEqual([{
+      targetX2: 22,
+      y2: 12,
+      matrixScale: 512,
+    }]);
+    expect(extremeSpeedHitsplatsAtAge(152, "opponent")).toEqual([{
+      targetX2: -18,
+      y2: 0,
+      matrixScale: 512,
+    }]);
+    expect(extremeSpeedHitsplatsAtAge(162, "opponent")).toEqual([]);
   });
 
   it("pins all 24 dust spawns and the fourteen-toggle attacker reappearance", () => {
@@ -132,6 +169,14 @@ describe("Extreme Speed source reducers", () => {
     expect(extremeSpeedDustAtAge(185)).toEqual([
       { x2: 30, y2: 28, frame: 0 },
     ]);
+    expect(extremeSpeedDustAtAge(200)).toContainEqual({
+      x2: 30, y2: 28, frame: 0,
+    });
+    expect(extremeSpeedDustAtAge(226)).toEqual([]);
+    expect(extremeSpeedDustAtAge(227)).not.toEqual([]);
+    expect(extremeSpeedDustAtAge(248)).toEqual([]);
+    expect(extremeSpeedDustAtAge(250)).not.toEqual([]);
+    expect(extremeSpeedDustAtAge(290)).toEqual([]);
     const allSpawnIndices = new Set<number>();
     for (let age = 183; age <= 318; age += 1) {
       for (const dust of extremeSpeedDustAtAge(age)) {
@@ -139,9 +184,10 @@ describe("Extreme Speed source reducers", () => {
       }
     }
     expect(allSpawnIndices.size).toBe(4);
-    expect(extremeSpeedAttackerVisibleAtAge(195)).toBe(false);
-    expect(extremeSpeedAttackerVisibleAtAge(196)).toBe(true);
-    expect(extremeSpeedAttackerVisibleAtAge(198)).toBe(false);
+    expect(extremeSpeedAttackerVisibleAtAge(197)).toBe(false);
+    expect(extremeSpeedAttackerVisibleAtAge(198)).toBe(true);
+    expect(extremeSpeedAttackerVisibleAtAge(200)).toBe(false);
+    expect(extremeSpeedAttackerVisibleAtAge(222)).toBe(true);
     expect(extremeSpeedAttackerVisibleAtAge(224)).toBe(true);
   });
 

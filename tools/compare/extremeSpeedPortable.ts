@@ -1,7 +1,8 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
+import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { PNG } from "pngjs";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createSceneOnMovePresentation } from "../../src/engine/sceneOnPresentation.ts";
 
@@ -90,17 +91,63 @@ state = {
 let matching = 0;
 let diffPixels = 0;
 const mismatches: string[] = [];
+let wroteDiagnostics = false;
 for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.endFrame; frame += 1) {
   const oracle = readFileSync(join(rgbDir, `${String(frame).padStart(5, "0")}.rgb`));
   const rgba = render(state);
   let frameDiff = 0;
+  let minX = 240;
+  let minY = 160;
+  let maxX = -1;
+  let maxY = -1;
   for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
     const oi = pixel * 3;
     const ai = pixel * 4;
-    if (oracle[oi] !== rgba[ai] || oracle[oi + 1] !== rgba[ai + 1] || oracle[oi + 2] !== rgba[ai + 2]) frameDiff += 1;
+    if (oracle[oi] !== rgba[ai] || oracle[oi + 1] !== rgba[ai + 1] || oracle[oi + 2] !== rgba[ai + 2]) {
+      frameDiff += 1;
+      const x = pixel % 240;
+      const y = Math.floor(pixel / 240);
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
   }
   if (frameDiff === 0) matching += 1;
-  else if (mismatches.length < 16) mismatches.push(`${frame}:${frameDiff}`);
+  else {
+    if (mismatches.length < 16) {
+      mismatches.push(`${frame}:${frameDiff}@${minX},${minY}-${maxX},${maxY}`);
+    }
+    if (!wroteDiagnostics) {
+      const oraclePng = new PNG({ width: 240, height: 160 });
+      const appPng = new PNG({ width: 240, height: 160 });
+      const diffPng = new PNG({ width: 240, height: 160 });
+      for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+        const oi = pixel * 3;
+        const ai = pixel * 4;
+        oraclePng.data[ai] = oracle[oi]!;
+        oraclePng.data[ai + 1] = oracle[oi + 1]!;
+        oraclePng.data[ai + 2] = oracle[oi + 2]!;
+        oraclePng.data[ai + 3] = 255;
+        appPng.data[ai] = rgba[ai]!;
+        appPng.data[ai + 1] = rgba[ai + 1]!;
+        appPng.data[ai + 2] = rgba[ai + 2]!;
+        appPng.data[ai + 3] = 255;
+        const differs =
+          oracle[oi] !== rgba[ai]
+          || oracle[oi + 1] !== rgba[ai + 1]
+          || oracle[oi + 2] !== rgba[ai + 2];
+        diffPng.data[ai] = differs ? 255 : 0;
+        diffPng.data[ai + 1] = 0;
+        diffPng.data[ai + 2] = 0;
+        diffPng.data[ai + 3] = differs ? 255 : 0;
+      }
+      writeFileSync(join(scratch, `oracle-${frame}.png`), PNG.sync.write(oraclePng));
+      writeFileSync(join(scratch, `app-${frame}.png`), PNG.sync.write(appPng));
+      writeFileSync(join(scratch, `diff-${frame}.png`), PNG.sync.write(diffPng));
+      wroteDiagnostics = true;
+    }
+  }
   diffPixels += frameDiff;
   state = {
     ...state,
@@ -113,4 +160,5 @@ for (let frame = fixture.denseWindow.startFrame; frame <= fixture.denseWindow.en
 const total = fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
 console.log(`${matching}/${total} frames matched; ${diffPixels} aggregate differing pixels`);
 if (mismatches.length) console.log(`first mismatches: ${mismatches.join(", ")}`);
+if (wroteDiagnostics) console.log(`first mismatch PNGs: ${scratch}`);
 process.exit(matching === total ? 0 : 1);

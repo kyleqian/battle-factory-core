@@ -9,7 +9,7 @@
   "appStage": {"oracleFrame": 87, "presentationAge": 48},
   "denseWindow": {"startFrame": 87, "endFrame": 389},
   "acceptance": {
-    "status": "partial",
+    "status": "exact",
     "scope": "complete opposite-side move-owned source window through animation age 354: fade/background, attacker affine disappearance, contact, dust, reappearance, restore, and cleanup"
   }
 }
