@@ -27,6 +27,7 @@ import {
   BATTLE_SCRIPT_MOVE_STRUGGLE,
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_FREEZE,
+  BATTLE_SCRIPT_STATUS1_PARALYSIS,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_IMPRISONED_OTHERS,
   BATTLE_SCRIPT_STATUS3_GRUDGE,
@@ -146,7 +147,8 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedIsTaunted"
       | "BattleScript_MoveUsedIsImprisoned"
       | "BattleScript_MoveUsedIsConfused"
-      | "BattleScript_MoveUsedIsConfusedNoMore";
+      | "BattleScript_MoveUsedIsConfusedNoMore"
+      | "BattleScript_MoveUsedIsParalyzed";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -732,6 +734,79 @@ export type BattleScriptAttackCancelerConfusedDecision =
     rngValue: number;
     receipt: Readonly<{
       sourcePhase: "CANCELER_CONFUSED";
+      tracker: Readonly<{ before: number; after: number }>;
+      rng: Readonly<{ kind: "preserve"; value: number; callsConsumed: 0 }>;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerParalyzedReason =
+  | "not-paralyzed"
+  | "paralysis-check-passed"
+  | "fully-paralyzed";
+
+export type BattleScriptAttackCancelerParalyzedRngEffect =
+  | Readonly<{
+    kind: "preserve";
+    value: number;
+    callsConsumed: 0;
+    reason: "not-paralyzed";
+  }>
+  | Readonly<{
+    kind: "draw";
+    name: "CANCELER_PARALYZED_IMMOBILITY_CHECK";
+    sourceCall: "Random";
+    sourceOperation: "Random() % 4";
+    before: number;
+    after: number;
+    randomValue: number;
+    modulo: 0 | 1 | 2 | 3;
+    callsConsumed: 1;
+  }>;
+
+export type BattleScriptAttackCancelerParalyzedReceipt = Readonly<{
+  sourcePhase: "CANCELER_PARALYZED";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerParalyzedReason;
+  statusPredicate: Readonly<{
+    status1: number;
+    sourceMask: "STATUS1_PARALYSIS";
+    mask: typeof BATTLE_SCRIPT_STATUS1_PARALYSIS;
+    matches: boolean;
+  }>;
+  rng: BattleScriptAttackCancelerParalyzedRngEffect;
+  prlzImmobility: Readonly<{ before: 0 | 1; after: 0 | 1 }>;
+  multiTurnCancellation:
+    | Readonly<{ kind: "not-requested" }>
+    | Readonly<{
+      kind: "deferred-to-script";
+      targetLabel: "BattleScript_MoveUsedIsParalyzed";
+      sourceCommand: "cancelmultiturnmoves BS_ATTACKER";
+    }>;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_PARALYZED";
+    sourcePhaseAfter: "CANCELER_IN_LOVE";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerParalyzedDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerParalyzedReason;
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: BattleScriptAttackCancelerParalyzedReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_PARALYZED";
       tracker: Readonly<{ before: number; after: number }>;
       rng: Readonly<{ kind: "preserve"; value: number; callsConsumed: 0 }>;
     }>;
@@ -2404,6 +2479,154 @@ export function advanceBattleScriptAttackCancelerConfused(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_CONFUSED",
         sourcePhaseAfter: "CANCELER_PARALYZED",
+      }),
+    }),
+  });
+}
+
+/**
+ * Immutable source phase for battle_util.c:2188-2199.
+ *
+ * Random is owned only after the paralysis predicate succeeds. The taken
+ * branch records the later script-owned multi-turn cancellation without
+ * executing that command, then advances exactly once to CANCELER_IN_LOVE.
+ */
+export function advanceBattleScriptAttackCancelerParalyzed(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+  rngValue: number,
+): BattleScriptAttackCancelerParalyzedDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const sourceRng = requireRngValue(rngValue);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_PARALYZED
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      rngValue: sourceRng,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_PARALYZED",
+        tracker: Object.freeze({ before: trackerBefore, after: trackerBefore }),
+        rng: Object.freeze({
+          kind: "preserve",
+          value: sourceRng,
+          callsConsumed: 0 as const,
+        }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler paralyzed phase requires an attacker role",
+    );
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const isParalyzed = (
+    sourceBattler.status1 & BATTLE_SCRIPT_STATUS1_PARALYSIS
+  ) !== 0;
+  let nextRng = sourceRng;
+  let modulo: 0 | 1 | 2 | 3 | null = null;
+  let rng: BattleScriptAttackCancelerParalyzedRngEffect = Object.freeze({
+    kind: "preserve",
+    value: sourceRng,
+    callsConsumed: 0,
+    reason: "not-paralyzed",
+  });
+  if (isParalyzed) {
+    nextRng = advanceRngValue(sourceRng);
+    const randomValue = (nextRng >>> 16) & 0xffff;
+    modulo = (randomValue % 4) as 0 | 1 | 2 | 3;
+    rng = Object.freeze({
+      kind: "draw",
+      name: "CANCELER_PARALYZED_IMMOBILITY_CHECK",
+      sourceCall: "Random",
+      sourceOperation: "Random() % 4",
+      before: sourceRng,
+      after: nextRng,
+      randomValue,
+      modulo,
+      callsConsumed: 1,
+    });
+  }
+  const isFullyParalyzed = modulo === 0;
+  const prlzBefore = sourceBattler.prlzImmobility ?? 0;
+  const prlzAfter = isFullyParalyzed ? 1 : prlzBefore;
+  const nextHitMarker = isFullyParalyzed
+    ? (
+      rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+    ) >>> 0
+    : rulesContext.hitMarker;
+  const nextBattler = prlzAfter === prlzBefore
+    ? sourceBattler
+    : Object.freeze({ ...sourceBattler, prlzImmobility: prlzAfter });
+  const nextBattlers = nextBattler === sourceBattler
+    ? rulesContext.battlers
+    : Object.freeze(rulesContext.battlers.map((candidate, index) =>
+      index === attacker ? nextBattler : candidate
+    )) as unknown as BattleScriptRulesContext["battlers"];
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_IN_LOVE;
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battlers: nextBattlers,
+    hitMarker: nextHitMarker,
+    atkCancelerTracker: trackerAfter,
+  });
+  const reason: BattleScriptAttackCancelerParalyzedReason = !isParalyzed
+    ? "not-paralyzed"
+    : isFullyParalyzed
+      ? "fully-paralyzed"
+      : "paralysis-check-passed";
+  const script: BattleScriptAttackCancelerScriptEffect = isFullyParalyzed
+    ? Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_MoveUsedIsParalyzed",
+    })
+    : Object.freeze({ kind: "preserve", sourceProgramCounter: sourcePc });
+  const multiTurnCancellation:
+    BattleScriptAttackCancelerParalyzedReceipt["multiTurnCancellation"] =
+      isFullyParalyzed
+        ? Object.freeze({
+          kind: "deferred-to-script",
+          targetLabel: "BattleScript_MoveUsedIsParalyzed",
+          sourceCommand: "cancelmultiturnmoves BS_ATTACKER",
+        })
+        : Object.freeze({ kind: "not-requested" });
+
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    rngValue: nextRng,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_PARALYZED",
+      attacker,
+      reason,
+      statusPredicate: Object.freeze({
+        status1: sourceBattler.status1,
+        sourceMask: "STATUS1_PARALYSIS",
+        mask: BATTLE_SCRIPT_STATUS1_PARALYSIS,
+        matches: isParalyzed,
+      }),
+      rng,
+      prlzImmobility: Object.freeze({
+        before: prlzBefore,
+        after: prlzAfter,
+      }),
+      multiTurnCancellation,
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect: isFullyParalyzed ? 1 : 0,
+      script,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_PARALYZED",
+        sourcePhaseAfter: "CANCELER_IN_LOVE",
       }),
     }),
   });
