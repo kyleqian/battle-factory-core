@@ -42,15 +42,17 @@ remainder.
   both no-status orientations and the successful-paralysis path exhaust its
   source-required presentation variants. FLY remains partial only for
   ISSUES #34's seven affine opening frames.
-- **Did:** extracted `ANIM_TAG_SPARK_2`, decoded the eight-spawn
-  `ElectricityEffect` and `AnimTask_ShakeMon2` framebuffer handoff, and
-  extended BOUNCE's immutable display profile through status commit, command
-  27, the paralysis printer, command 26/PAR installation, MOVE_NONE cleanup,
-  and the settled menu. Battle outcome and controller progression stay external.
+- **Did:** moved the source-relative `Status_Paralysis` visual into generic
+  `statusAnimation.ts`: status kind + battler target geometry drive the
+  `ANIM_TAG_SPARK_2` asset, eight-spawn `ElectricityEffect`, and parameterized
+  `AnimTask_ShakeMon2` framebuffer handoff. BOUNCE now only composes that
+  visual from its already-resolved display profile; outcome, messages,
+  healthbox status, PP, rules/RNG, and controller progression stay external.
 - **Evidence:** seed `0x27182818` strike through stable menu tail,
   **881-1330 = 450/450** exact: commit **1063**, command 27 **1064-1148**,
   `gCurrentMove=0` **1225**, menu setup/reveal **1230/1235**. No-status BOUNCE
-  remains **24/24 + 299/299** and **24/24 + 197/197**. FLY remains
+  remains **24/24 + 299/299** and **24/24 + 197/197**, all reverified after
+  extraction. FLY remains
   **144/144 + 248/248 + 140/140 + 244/244**, with only #34's exclusions.
 - **Next:** continue the ranked Level-50 queue. DIVE still needs independent
   dense evidence; do not weaken FLY's bounded ISSUES #34 remainder.

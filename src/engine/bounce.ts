@@ -16,60 +16,6 @@ export interface BouncePresentationState {
   readonly targetShakeY2: number;
 }
 
-export interface BounceElectricitySprite {
-  readonly x: number;
-  readonly y: number;
-  readonly frame: 0 | 1 | 2;
-  readonly hFlip: boolean;
-  readonly vFlip: boolean;
-}
-
-const ELECTRICITY_SPAWNS = [
-  { x: 5, y: 0, frame: 0 },
-  { x: -5, y: 10, frame: 1 },
-  { x: 15, y: 20, frame: 2 },
-  { x: -15, y: -10, frame: 0 },
-  { x: 25, y: 0, frame: 1 },
-  { x: -8, y: 8, frame: 2 },
-  { x: 2, y: -8, frame: 0 },
-  { x: -20, y: 15, frame: 1 },
-] as const;
-
-/**
- * Source `ElectricityEffect`: eight 16x16 sprites, delayed two animation
- * script ticks apart. The controller's animation-script scheduler exposes
- * those as four video frames here; `WaitAnimForDuration(5)` contributes six
- * displayed OAM frames.
- */
-export function bounceParalysisElectricityAtAge(
-  age: number,
-  firstDisplayedAge: number,
-  targetCenter: Readonly<{ x: number; y: number }>,
-): readonly BounceElectricitySprite[] {
-  return ELECTRICITY_SPAWNS.flatMap((spawn, index) => {
-    const localAge = age - firstDisplayedAge - index * 4;
-    if (localAge < 0 || localAge > 5) return [];
-    return [{
-      x: targetCenter.x + spawn.x - 8,
-      y: targetCenter.y + spawn.y - 8,
-      frame: spawn.frame,
-      hFlip: spawn.frame === 1,
-      vFlip: spawn.frame === 2,
-    }];
-  });
-}
-
-/** Displayed `AnimTask_ShakeMon2(ANIM_ATTACKER,1,0,10,1)` x2. */
-export function bounceParalysisShakeX2AtAge(
-  age: number,
-  firstDisplayedAge: number,
-): number {
-  const localAge = age - firstDisplayedAge;
-  if (localAge < 0 || localAge >= 21) return 0;
-  if (localAge === 0) return 1;
-  return Math.floor((localAge + 1) / 2) % 2 === 1 ? -1 : 1;
-}
-
 /**
  * Source `sAffineAnim_BounceBallShrink`, sampled after the first displayed
  * callback. The table is independently pinned by final sprite/OAM state from
