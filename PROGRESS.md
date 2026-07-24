@@ -4,6 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 421 — move-end choice/change ownership landed
+
+- **State:** dependency step 2a is committed and green at **168 files / 1968
+  tests**. Opcodes **73** and **0** remain unregistered; no move-history,
+  topology, controller, ability/item delegate, script-transfer, or presentation
+  behavior was added.
+- **Did:** extended the existing frozen rules record with source `u16`
+  `chosenMove`, `choicedMove[4]`, and `changedItems[4]`; the independent
+  BattleStruct absent `u8` mask; `dynamicMoveType`; and four Enigma held-effect
+  bytes. Pure ownership reducers pin Choice Band/Baton Pass/stale-choice order
+  and changed-item copy+clear behavior. Generated numeric item effects and
+  exact `GET_MOVE_TYPE`/Enigma resolvers cover normal, dynamic-Normal, masked,
+  implicit-none, and invalid-corpus cases.
+- **Next:** finish dependency step 2 with the six independent move-history
+  arrays plus packed mirror-history owners and source-order reducers. Then add
+  topology (`gBattlersCount`, type flags, positions), `WasUnableToUseMove`,
+  controller requests, complete ability/item delegates, cleanup/next-target
+  transfer, and loop/end-mode control before registering opcode 73.
+- **Notes:** source widths, both absent masks, recursive freezing, SETBYTE
+  identity, canonical JSON, and player PROTECT/trainer-AI Wish verticals are
+  pinned. Integrated suite/build and OFF v5 (`9c89c741…`) pass. Code commit
+  `7a6c741`; pixel diff N/A.
+
+---
 ## 420 — move-end battler metadata owner landed
 
 - **State:** dependency step 1 is committed and green at **166 files / 1960
@@ -50,24 +74,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **126/126 RGB+component frames in both orientations**; the reusable
   persistent sprite-order seam models allocation, destruction/reuse,
   wrapped-Y insertion sorting, and stable ties without frame lookup.
-
----
-## 418 — MOVEEND remains honest behind a complete source boundary
-
-- **State:** the bounded opcode-73 decision checkpoint is green at **163 files /
-  1948 tests**. `Cmd_moveend` is not implemented or registered; both asleep
-  verticals still stop at the existing honest barrier.
-- **Did:** added a regenerable pinned-source receipt covering all **17**
-  executable move-end states plus sentinel, all **24** assembled opcode sites,
-  fixed `[1,1]` operands, end modes **0/1/2 = 6/4/14**, five wrapper families,
-  and every case's verbatim body plus lexical call/global/mutation/controller/
-  return/script-transfer boundary.
-- **Next:** define durable item/stat-stage, special/protect, choice/change-item,
-  battle-position/doubles, and move-history owners; then implement explicit
-  ability/item/cleanup/controller/script-transfer delegates. Register opcode
-  73 only when every receipt case and end mode is source-complete.
-- **Notes:** a staged no-effect delegate suite was rejected as unsound. The
-  receipt pins source-layout item cases 11–12 before visibility cases 8–10
-  while preserving numeric dispatch. Focused **1 file / 5 tests**; integrated
-  **163/1948**, production build, OFF v5 info (`9c89c741…`), and diff checks
-  pass. Pixel diff N/A.

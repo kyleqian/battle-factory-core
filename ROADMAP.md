@@ -1057,6 +1057,19 @@ Factory sets derive held items and neutral stages, and canonical player/AI
 replays preserve them. Opcode **73** remains unregistered and no move-end case
 or delegate is implemented.
 
+**MOVEEND choice/change dependency checkpoint (2026-07-24):** dependency step
+2a extends that same immutable rules owner with `gChosenMove`, four `u16`
+choice/change-item cells, the separate BattleStruct absent mask,
+`dynamicMoveType`, and four Enigma hold-effect bytes. Source-shaped pure
+reducers pin Choice Band assignment, failed Baton Pass's early exit,
+stale-choice clearing, and changed-item copy+clear through an explicit future
+topology count dependency. Generated numeric item data resolves normal,
+implicit-none, and Enigma effects; the exact `GET_MOVE_TYPE` expansion covers
+generated types and masked dynamic Normal. Widths, both absent masks, recursive
+freezing, SETBYTE identity, canonical replay, and both existing player/AI
+verticals are Tier-1 pinned. Move history/topology/controllers/delegates remain
+absent, and opcodes **73** and **0** remain unregistered.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300
