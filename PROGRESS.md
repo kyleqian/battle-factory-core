@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 338 — S8 OFF terminal LOSS record menu: **GREEN — 414/414 exact**
+
+- **State:** the LOSS route is exact from its prior +210 completion through
+  the shared record question's default-NO menu at +622 and first sampled input
+  at +624. The new dense OFF fixture covers every +211..+624 frame.
+- **Did:** added a phase-relative reusable record-question transition with
+  live `\l` fast-scroll, standard-window/menu chrome, stored-edge readiness,
+  default NO, early-input rejection, and YES/NO/B result state. Round outcome,
+  rules, party, RNG, and completion acknowledgement stay immutable.
+- **Next:** finish S8 gate 2 with the distinct seventh-win/round-summary ending
+  (and any still-open swap-YES unique interaction); reuse this record menu
+  rather than duplicating it. Do not resume Battle 2.
+- **Notes:** LOSS continuation **414/414** and opening **210/210** exact;
+  Tier-1 **1231/1231**, build **5.653 MB**. No absolute clock, screenshot,
+  framebuffer harvest, outcome/BP/save mutation, or seventh-win unique UI.
+
+---
 ## 337 — Animation dependency/composition pivot: **GREEN — 354 moves mapped**
 
 - **State:** move acceptance remains **4 exact / 8 partial / 264 unsupported**,
@@ -44,23 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   canonical **237/237**; Level-50 animation coverage is **4 exact / 8 partial
   / 264 unsupported**. No screenshot/framebuffer asset, absolute tick branch,
   outcome mutation, BP change, record menu, or seventh-win flow.
-
----
-## 335 — S8 OFF accept NO/B return: **GREEN — 69/69 + 69/69 exact**
-
-- **State:** A-on-NO and B share the source response/close/transition path and
-  restore the input-ready enemy picker at response +67 / canonical 30087.
-  Dense OFF traces `battle1-swap-enemy-accept-no-return.json` and
-  `battle1-swap-enemy-accept-b-return.json` are both **69/69 exact**.
-- **Did:** added a distinct `acceptReturn` phase with the popup BG/OAM erase
-  lag, variant-B mon-picture close, staggered enemy action-button return,
-  palette restore, and `Swap_Task_HandleChooseMons` gate. Tier-1 covers both
-  controls, rejects response +66, accepts +67, preserves selected identities
-  and byte-for-byte party/rentals, and keeps the round decision seam null.
-- **Next:** implement one source-pinned S8 gate-2 terminal UI edge: loss or
-  seventh-win/round-summary. Do not traverse later field/battle flow or resume
-  the retired Battle-2 march.
-- **Notes:** Tier-1 **1219/1219**, build **5.571 MB**. YES exit, prompt,
-  enemy picker, B-close, popup, options, and player picker remain **43/43**,
-  **66/66**, **130/130**, **59/59**, **44/44**, **58/58**, and **101/101**.
-  No mutation, script handoff, absolute tick/frame lookup, or screenshot path.

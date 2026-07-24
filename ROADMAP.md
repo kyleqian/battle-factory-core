@@ -562,8 +562,10 @@ party/status-clear boundary with a source-extracted circular lobby
 map/NPC/message/down-arrow renderer and a committed dense OFF comparison at
 **210/210 exact**. The terminal text artifact fully resolves the canonical
 player name `MEMORY`, the Level-50 award of 3 BP, control bytes, and default
-NO record choice. The later LOSS record question/menu and the complete
-seventh-win/round-summary ending still need dense OFF-profile UI proofs.
+NO record choice. The later LOSS record question/menu is now exact across
+every +211..+624 frame (**414/414**), including the shared `\l` fast-scroll,
+default-NO draw at +622, and first sampled input at +624. The complete
+seventh-win/round-summary ending still needs its dense OFF-profile UI proof.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it

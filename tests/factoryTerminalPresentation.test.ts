@@ -16,6 +16,8 @@ import {
   createFactoryTerminalLossPresentation,
   FACTORY_LOSS_TERMINAL_PROFILE,
   factoryTerminalCompletion,
+  factoryTerminalRecordMenuInputReady,
+  factoryTerminalRecordMenuVisible,
   factoryTerminalVisibleChars,
 } from "../src/engine/factoryTerminalPresentation.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
@@ -60,7 +62,7 @@ function advanceTo(
   age: number,
 ) {
   while (state.age < age) {
-    state = advanceFactoryTerminalPresentation(state, false);
+    state = advanceFactoryTerminalPresentation(state, {});
   }
   return state;
 }
@@ -89,19 +91,19 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
     const command = lossController().presentation!.command;
     if (command.type !== "roundLost") throw new Error("expected roundLost");
     let terminal = advanceTo(createFactoryTerminalLossPresentation(command), 66);
-    terminal = advanceFactoryTerminalPresentation(terminal, true);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
     expect(terminal.age).toBe(67);
     expect(terminal.firstPageReleaseAge).toBeNull();
-    terminal = advanceFactoryTerminalPresentation(terminal, true);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
     expect(terminal.firstPageReleaseAge).toBe(68);
     expect(factoryTerminalVisibleChars(terminal)).toBe(28);
 
     terminal = advanceTo(terminal, 129);
-    terminal = advanceFactoryTerminalPresentation(terminal, true);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
     expect(terminal.secondPageReleaseAge).toBe(130);
     terminal = advanceTo(terminal, 179);
     expect(factoryTerminalCompletion(terminal)).toBeNull();
-    terminal = advanceFactoryTerminalPresentation(terminal, false);
+    terminal = advanceFactoryTerminalPresentation(terminal, {});
     expect(terminal).toMatchObject({
       age: 180,
       challengeStatus: "clear",
@@ -139,6 +141,65 @@ describe("Factory Scene-OFF loss terminal adapter", () => {
       completed: true,
     });
     expect(engine.roundController!.presentation!.completed).toBe(true);
+    expect(engine.roundController!.rules).toBe(rules);
+    expect(engine.roundController!.rules.phase).toBe("roundLost");
+    expect(engine.roundController!.rules.rngValue).toBe(0x89abcdef);
+  });
+
+  it("draws the shared default-NO record menu at release +23 and samples input at +25", () => {
+    const command = lossController().presentation!.command;
+    if (command.type !== "roundLost") throw new Error("expected roundLost");
+    let terminal = createFactoryTerminalLossPresentation(command);
+    terminal = advanceTo(terminal, 79);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    terminal = advanceTo(terminal, 159);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    terminal = advanceTo(terminal, 598);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedB: true });
+    expect(terminal.recordPromptReleaseAge).toBe(599);
+    expect(terminal.recordMenuCursor).toBe(1);
+
+    terminal = advanceTo(terminal, 621);
+    expect(factoryTerminalRecordMenuVisible(terminal)).toBe(false);
+    terminal = advanceFactoryTerminalPresentation(terminal, {});
+    expect(terminal.age).toBe(622);
+    expect(factoryTerminalRecordMenuVisible(terminal)).toBe(true);
+    expect(factoryTerminalRecordMenuInputReady(terminal)).toBe(false);
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    expect(terminal.age).toBe(623);
+    expect(terminal.recordChoice).toBeNull();
+    terminal = advanceFactoryTerminalPresentation(terminal, { pressedA: true });
+    expect(terminal.age).toBe(624);
+    expect(factoryTerminalRecordMenuInputReady(terminal)).toBe(true);
+    expect(terminal.recordChoice).toBe("no");
+  });
+
+  it("uses stored key edges: a held prompt-release key cannot also choose a menu item", () => {
+    const roundController = lossController();
+    const command = roundController.presentation!.command;
+    if (command.type !== "roundLost") throw new Error("expected roundLost");
+    const rules = roundController.rules;
+    let engine: EngineState = {
+      ...createInitialState(),
+      roundController,
+      factoryTerminal: createFactoryTerminalLossPresentation(command),
+      rngMode: "vblank",
+    };
+    for (let age = 1; age <= 626; age += 1) {
+      const buttons = age === 80 || age === 160
+        ? new Set(["A"] as const)
+        : age >= 599 && age <= 624
+        ? new Set(["B"] as const)
+        : age === 626
+        ? new Set(["A"] as const)
+        : new Set<never>();
+      engine = tick(engine, buttons);
+    }
+    expect(engine.factoryTerminal).toMatchObject({
+      recordPromptReleaseAge: 599,
+      recordMenuCursor: 1,
+      recordChoice: "no",
+    });
     expect(engine.roundController!.rules).toBe(rules);
     expect(engine.roundController!.rules.phase).toBe("roundLost");
     expect(engine.roundController!.rules.rngValue).toBe(0x89abcdef);

@@ -14,6 +14,14 @@ export interface FactoryTerminalLossProfile {
   readonly nextPageVisualDelay: number;
   readonly printerHandoffDelay: number;
   readonly statusClearDelayFromSecondRelease: number;
+  /** Shared AskRecordBattle message begins after the save-SE wait. */
+  readonly recordPromptFirstAge: number;
+  readonly recordPromptTextFirstAge: number;
+  readonly recordPromptInputReadyAge: number;
+  readonly recordScrollTicks: number;
+  readonly recordThirdLineDelay: number;
+  readonly recordMenuDrawDelay: number;
+  readonly recordMenuInputDelay: number;
   readonly pages: readonly [
     readonly [string, string],
     readonly [string, string],
@@ -34,6 +42,13 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
     nextPageVisualDelay: 2,
     printerHandoffDelay: 2,
     statusClearDelayFromSecondRelease: 50,
+    recordPromptFirstAge: 382,
+    recordPromptTextFirstAge: 383,
+    recordPromptInputReadyAge: 445,
+    recordScrollTicks: 4,
+    recordThirdLineDelay: 7,
+    recordMenuDrawDelay: 23,
+    recordMenuInputDelay: 25,
     pages: Object.freeze([
       Object.freeze(["Thank you for participating!", ""] as const),
       Object.freeze([
@@ -58,6 +73,9 @@ export interface FactoryTerminalPresentationState {
   readonly partyRestored: boolean;
   readonly challengeStatus: "lost" | "clear";
   readonly completed: boolean;
+  readonly recordPromptReleaseAge: number | null;
+  readonly recordMenuCursor: 0 | 1;
+  readonly recordChoice: "yes" | "no" | "cancel" | null;
 }
 
 export function createFactoryTerminalLossPresentation(
@@ -76,6 +94,9 @@ export function createFactoryTerminalLossPresentation(
     partyRestored: false,
     challengeStatus: "lost",
     completed: false,
+    recordPromptReleaseAge: null,
+    recordMenuCursor: 1,
+    recordChoice: null,
   };
 }
 
@@ -129,13 +150,18 @@ export function factoryTerminalPageInputReady(
 
 export function advanceFactoryTerminalPresentation(
   state: FactoryTerminalPresentationState,
-  pressedA: boolean,
+  input: {
+    readonly pressedA?: boolean;
+    readonly pressedB?: boolean;
+    readonly pressedUp?: boolean;
+    readonly pressedDown?: boolean;
+  },
 ): FactoryTerminalPresentationState {
   const age = state.age + 1;
   let firstPageReleaseAge = state.firstPageReleaseAge;
   let secondPageReleaseAge = state.secondPageReleaseAge;
   const atNextAge = { ...state, age };
-  if (pressedA && factoryTerminalPageInputReady(atNextAge)) {
+  if (input.pressedA && factoryTerminalPageInputReady(atNextAge)) {
     if (firstPageReleaseAge === null) firstPageReleaseAge = age;
     else if (secondPageReleaseAge === null) secondPageReleaseAge = age;
   }
@@ -144,6 +170,27 @@ export function advanceFactoryTerminalPresentation(
       ? Number.POSITIVE_INFINITY
       : secondPageReleaseAge + state.profile.statusClearDelayFromSecondRelease;
   const completed = age >= clearAge;
+  let recordPromptReleaseAge = state.recordPromptReleaseAge;
+  let recordMenuCursor = state.recordMenuCursor;
+  let recordChoice = state.recordChoice;
+  if (
+    recordPromptReleaseAge === null &&
+    age >= state.profile.recordPromptInputReadyAge &&
+    (input.pressedA || input.pressedB)
+  ) {
+    recordPromptReleaseAge = age;
+  } else if (
+    recordPromptReleaseAge !== null &&
+    recordChoice === null &&
+    age >= recordPromptReleaseAge + state.profile.recordMenuInputDelay
+  ) {
+    if (input.pressedUp) recordMenuCursor = 0;
+    else if (input.pressedDown) recordMenuCursor = 1;
+    else if (input.pressedB) recordChoice = "cancel";
+    else if (input.pressedA) {
+      recordChoice = recordMenuCursor === 0 ? "yes" : "no";
+    }
+  }
   return {
     ...state,
     age,
@@ -152,7 +199,26 @@ export function advanceFactoryTerminalPresentation(
     partyRestored: completed,
     challengeStatus: completed ? "clear" : "lost",
     completed,
+    recordPromptReleaseAge,
+    recordMenuCursor,
+    recordChoice,
   };
+}
+
+export function factoryTerminalRecordMenuVisible(
+  state: FactoryTerminalPresentationState,
+): boolean {
+  return state.recordPromptReleaseAge !== null &&
+    state.age >=
+      state.recordPromptReleaseAge + state.profile.recordMenuDrawDelay;
+}
+
+export function factoryTerminalRecordMenuInputReady(
+  state: FactoryTerminalPresentationState,
+): boolean {
+  return state.recordPromptReleaseAge !== null &&
+    state.age >=
+      state.recordPromptReleaseAge + state.profile.recordMenuInputDelay;
 }
 
 export function factoryTerminalCompletion(

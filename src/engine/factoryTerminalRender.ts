@@ -5,10 +5,13 @@ import { bgFadeY, FADE_IN, objFadeY } from "./paletteFade.ts";
 import {
   drawMessageBoxFrame,
   drawMessageBoxText,
+  drawStandardWindowFrame,
+  drawStandardWindowText,
 } from "./prebattleRoomRender.ts";
 import {
   factoryTerminalActivePage,
   factoryTerminalPageTextFirstAge,
+  factoryTerminalRecordMenuVisible,
   factoryTerminalVisibleChars,
   type FactoryTerminalPresentationState,
 } from "./factoryTerminalPresentation.ts";
@@ -266,6 +269,98 @@ function drawPageCursor(
   }
 }
 
+const RECORD_LINES = [
+  "Would you like to record your last",
+  "BATTLE FACTORY match on your",
+  "FRONTIER PASS?",
+] as const;
+
+function drawClippedMessageText(
+  fb: Uint8Array,
+  text: string,
+  x: number,
+  y: number,
+): void {
+  const layer = createFramebuffer();
+  drawMessageBoxText(layer, text, x, y);
+  for (let py = 120; py < 152; py += 1) {
+    for (let px = 8; px < 232; px += 1) {
+      const i = (py * 240 + px) * 4;
+      if (layer[i + 3] === 0) continue;
+      fb[i] = layer[i]!;
+      fb[i + 1] = layer[i + 1]!;
+      fb[i + 2] = layer[i + 2]!;
+      fb[i + 3] = 255;
+    }
+  }
+}
+
+function drawRecordPrompt(
+  fb: Uint8Array,
+  state: FactoryTerminalPresentationState,
+): void {
+  const release = state.recordPromptReleaseAge;
+  if (release === null || state.age === release) {
+    const chars = Math.max(
+      0,
+      Math.min(
+        RECORD_LINES[0].length + RECORD_LINES[1].length,
+        state.age - state.profile.recordPromptTextFirstAge + 1,
+      ),
+    );
+    drawPageText(fb, [RECORD_LINES[0], RECORD_LINES[1]], chars);
+    if (state.age > state.profile.recordPromptInputReadyAge) {
+      const phase = Math.floor(
+        (state.age - state.profile.recordPromptInputReadyAge - 1) / 9,
+      ) % 4;
+      const x = MESSAGE_ORIGIN.x + measureText(font, charmap, RECORD_LINES[1]);
+      const y = 137 - CURSOR_Y_OFFSETS[phase]!;
+      for (let py = 0; py < downArrow.blitHeight; py += 1) {
+        for (let px = 0; px < downArrow.blitWidth; px += 1) {
+          const index = downArrow.indices[py]?.[px] ?? 0;
+          const color = messageBoxPalette[index];
+          if (index !== 0 && color) {
+            setPixel(fb, x + px, y + py, color.r, color.g, color.b);
+          }
+        }
+      }
+    }
+    return;
+  }
+
+  const elapsed = Math.max(0, state.age - release - 1);
+  // OPTIONS_TEXT_SPEED_FAST selects the source table's 4 px/tick entry.
+  const scroll = Math.min(state.profile.recordScrollTicks, elapsed) * 4;
+  if (elapsed < state.profile.recordScrollTicks) {
+    drawClippedMessageText(fb, RECORD_LINES[0], MESSAGE_ORIGIN.x, 121 - scroll);
+  }
+  drawClippedMessageText(fb, RECORD_LINES[1], MESSAGE_ORIGIN.x, 137 - scroll);
+  const thirdChars = Math.max(
+    0,
+    Math.min(
+      RECORD_LINES[2].length,
+      state.age - (release + state.profile.recordThirdLineDelay) + 1,
+    ),
+  );
+  drawClippedMessageText(
+    fb,
+    RECORD_LINES[2].slice(0, thirdChars),
+    MESSAGE_ORIGIN.x,
+    137,
+  );
+  if (factoryTerminalRecordMenuVisible(state)) {
+    drawStandardWindowFrame(fb, 160, 64, 4, 4);
+    drawStandardWindowText(fb, "YES", 176, 73);
+    drawStandardWindowText(fb, "NO", 176, 89);
+    drawStandardWindowText(
+      fb,
+      "▶",
+      168,
+      73 + state.recordMenuCursor * 16,
+    );
+  }
+}
+
 export function renderFactoryTerminalPresentation(
   state: FactoryTerminalPresentationState,
   priorPresentation: () => Uint8Array,
@@ -282,6 +377,10 @@ export function renderFactoryTerminalPresentation(
   const fb = renderFactoryTerminalField(bgY, objY);
   if (state.age < state.profile.messageFrameAge) return fb;
   drawMessageBoxFrame(fb);
+  if (state.age >= state.profile.recordPromptFirstAge) {
+    drawRecordPrompt(fb, state);
+    return fb;
+  }
   const page = factoryTerminalActivePage(state);
   drawPageText(
     fb,

@@ -329,7 +329,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   if (state.factoryTerminal) {
     const factoryTerminal = advanceFactoryTerminalPresentation(
       state.factoryTerminal,
-      newKeys.has("A"),
+      {
+        pressedA: newKeys.has("A"),
+        pressedB: newKeys.has("B"),
+        pressedUp: newKeys.has("UP"),
+        pressedDown: newKeys.has("DOWN"),
+      },
     );
     const completion = factoryTerminalCompletion(factoryTerminal);
     const roundController =

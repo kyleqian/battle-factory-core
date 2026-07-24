@@ -71,7 +71,7 @@ DENSE_FRAMES = 720
 # message/menu state is supplied.  The final idle tail leaves the record
 # prompt visible for later app-comparison input experiments.
 IDLE_INPUTS = {80: ["A"], 160: ["A"]}
-RECORD_B_INPUTS = {**IDLE_INPUTS, 600: ["B"]}
+RECORD_B_INPUTS = {**IDLE_INPUTS, 599: ["B"]}
 SAVE_BLOCK1_LOCATION = 0x04  # struct SaveBlock1.location
 # The offsets below are the absolute SaveBlock2 layout offsets printed in
 # struct BattleFrontier's source comments (for example challengeStatus 0xCA8),
@@ -118,11 +118,11 @@ def save1_base(oracle: EmeraldOracle) -> int:
     return u32(oracle, oracle.symbols["gSaveBlock1Ptr"])
 
 
-def frame(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
+def frame(oracle: EmeraldOracle, tick: int, capture_rgb: bool = False) -> dict[str, object]:
     save1 = save1_base(oracle)
     frontier = frontier_base(oracle)
     rgb = oracle.screen_rgb()
-    if RGB_DIR is not None and 1 <= tick <= 210:
+    if RGB_DIR is not None and capture_rgb and 1 <= tick <= DENSE_FRAMES:
         RGB_DIR.mkdir(parents=True, exist_ok=True)
         (RGB_DIR / f"{tick:03d}.rgb").write_bytes(rgb)
     return {
@@ -149,7 +149,13 @@ def frame(oracle: EmeraldOracle, tick: int) -> dict[str, object]:
     }
 
 
-def run_case(oracle: EmeraldOracle, trace: dict, inputs: dict[int, list[str]]) -> dict[str, object]:
+def run_case(
+    oracle: EmeraldOracle,
+    trace: dict,
+    inputs: dict[int, list[str]],
+    *,
+    capture_rgb: bool = False,
+) -> dict[str, object]:
     oracle.new_session()
     tick = 0
     for segment in trace["segments"]:
@@ -183,7 +189,7 @@ def run_case(oracle: EmeraldOracle, trace: dict, inputs: dict[int, list[str]]) -
     for relative in range(1, DENSE_FRAMES + 1):
         buttons = inputs.get(relative, [])
         oracle.advance(buttons)
-        capture = frame(oracle, relative)
+        capture = frame(oracle, relative, capture_rgb)
         if buttons:
             capture["buttons"] = buttons
         captures.append(capture)
@@ -199,8 +205,19 @@ def run_case(oracle: EmeraldOracle, trace: dict, inputs: dict[int, list[str]]) -
 def main() -> None:
     trace = json.loads(PREFIX_PATH.read_text())
     oracle = EmeraldOracle(ROM_PATH, MAP_PATH, BOOTSTRAP_PATH)
-    idle = run_case(oracle, trace, IDLE_INPUTS)
-    record_b = run_case(oracle, trace, RECORD_B_INPUTS)
+    rgb_case = os.environ.get("FACTORY_LOSS_RGB_CASE", "recordPromptB")
+    idle = run_case(
+        oracle,
+        trace,
+        IDLE_INPUTS,
+        capture_rgb=rgb_case == "idleToRecordPrompt",
+    )
+    record_b = run_case(
+        oracle,
+        trace,
+        RECORD_B_INPUTS,
+        capture_rgb=rgb_case == "recordPromptB",
+    )
     idle_at_210 = idle["captures"][209]
     if idle_at_210["challengeStatus"] != 0 or idle_at_210["activeFlags"] != 0:
         raise AssertionError(f"loss source flow did not save/clear active state at +210: {idle_at_210}")
@@ -208,7 +225,7 @@ def main() -> None:
         raise AssertionError(f"loss path mutated a non-loss counter: staged={idle['staged']} endpoint={idle_at_210}")
     if not any(
         idle_capture["sha256"] != b_capture["sha256"]
-        for idle_capture, b_capture in zip(idle["captures"][600:], record_b["captures"][600:])
+        for idle_capture, b_capture in zip(idle["captures"][599:], record_b["captures"][599:])
     ):
         raise AssertionError("record-prompt B control did not change the normal source-owned endpoint")
     output = {
