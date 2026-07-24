@@ -141,16 +141,24 @@ export function drawGlyphCodeRows(
   palette: RgbColor[],
   colors: TextColors,
   rasterRows: number,
-  lastRowColumns?: number,
+  lastRowColumns?: number | readonly number[],
 ): void {
   const bitmap = font.glyphs[code];
   const glyphWidth = font.widths[code] ?? font.cellSize;
   if (!bitmap) return;
   for (let gy = 0; gy < Math.min(font.glyphHeight, rasterRows); gy += 1) {
+    const visibleRows = Math.min(font.glyphHeight, rasterRows);
+    const trailingColumns =
+      Array.isArray(lastRowColumns) &&
+      gy >= visibleRows - lastRowColumns.length
+        ? lastRowColumns[gy - (visibleRows - lastRowColumns.length)]
+        : undefined;
     const rowWidth =
-      lastRowColumns !== undefined && gy === Math.min(font.glyphHeight, rasterRows) - 1
-        ? Math.min(glyphWidth, lastRowColumns)
-        : glyphWidth;
+      trailingColumns !== undefined
+        ? Math.min(glyphWidth, trailingColumns)
+        : typeof lastRowColumns === "number" && gy === visibleRows - 1
+          ? Math.min(glyphWidth, lastRowColumns)
+          : glyphWidth;
     for (let gx = 0; gx < rowWidth; gx += 1) {
       const raw = bitmap[gy * font.cellSize + gx]!;
       const role = raw === 3 ? 0 : raw;

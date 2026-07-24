@@ -52,7 +52,7 @@ const sourceAnimations = new Map(
 );
 
 export const SUMMARY_INITIAL_MON_ANIMATION_START = 5;
-export const SUMMARY_REPLACEMENT_MON_ANIMATION_START = 1;
+export const SUMMARY_REPLACEMENT_MON_ANIMATION_START = 0;
 
 export function summaryFrontAnimationForSpecies(species: string): SourceAnimation {
   const animation = sourceAnimations.get(species);
@@ -78,8 +78,10 @@ function sin(angle: number, amplitude: number): number {
 }
 
 function rapidHorizontalHops(elapsed: number): Pick<SummaryFrontSpritePresentation, "x2" | "y2" | "motionFinished"> {
-  const data = elapsed < 1 ? 0 : Math.min(2064, (elapsed - 1) * 24);
-  if (data > 2048) return { x2: 0, y2: 0, motionFinished: true };
+  const rawData = elapsed < 2 ? 0 : (elapsed - 2) * 24;
+  // WaitAnimEnd does not restore x2/y2 for this source callback; it parks
+  // the final 2040 transform after detecting the following >2048 step.
+  const data = Math.min(2040, rawData);
   const phase = Math.floor(data / 512) % 4;
   const within = data % 512;
   let x2 = 0;
@@ -88,7 +90,11 @@ function rapidHorizontalHops(elapsed: number): Pick<SummaryFrontSpritePresentati
   else if (phase === 2) x2 = Math.trunc(within / 32);
   else x2 = Math.trunc((-within * 16) / 512) + 16;
   // Summary front sprites are flipped, so TryFlipX negates the source x2.
-  return { x2: -x2, y2: -sin(within % 128, 4), motionFinished: false };
+  return {
+    x2: -x2,
+    y2: -sin(within % 128, 4),
+    motionFinished: rawData > 2048,
+  };
 }
 
 function verticalSquishBounce(

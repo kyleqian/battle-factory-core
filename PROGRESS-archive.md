@@ -1,3 +1,22 @@
+## 355 — S9 OFF Battle Moves LOCK_MOVES selector: **GREEN — 93/93 exact**
+
+- **State:** A on input-ready ONIX Battle Moves enters the inert LOCK_MOVES
+  selector, DOWN owns BIND details, and B restores the ordinary page at +4.
+- **Did:** added reusable selector ownership, logical/presented indices,
+  source-relative BG/OAM gates and clocks, extracted cursor/effect composition,
+  power/accuracy/description details, CANCEL row, and locked A/B close behavior.
+  Tier-1 pins setup/close gates, rental/page/mode preservation, immutable move
+  order, staggered navigation, cursor clock reset, and no reorder state.
+- **Next:** supervisor verify this bounded route and choose the next S9 summary
+  increment; Contest move-select and Moves-page mon switching remain untouched.
+- **Notes:** `summary-battle-move-select.json` **93/93** dense OFF exact;
+  Contest **16/16**; Battle **36/36**; DOWN→UP **87/87**; DOWN **54/54**;
+  Info **122/122 + 132/132**; install **3/3**; Info→Skills **25/25**;
+  Skills→Info **56/56**. Tier-1 **1312/1312** and build green. No move
+  reordering, Contest move-select, mon switching, battle/controller, absolute
+  ticks, framebuffer assets, runtime oracle/ROM, ROADMAP, or ISSUES edits.
+
+---
 ## 354 — S9 OFF Battle→Contest Moves layered wipe: **GREEN — 16/16 exact**
 
 - **State:** settled ONIX Battle Moves now advances RIGHT through the generic

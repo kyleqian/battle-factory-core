@@ -17,6 +17,8 @@ export interface TextWindowTransfer {
     readonly partialGlyphRows: number;
     /** Columns copied on the final partial glyph row; omitted means full. */
     readonly partialGlyphLastRowColumns?: number;
+    /** Optional widths for multiple trailing DMA-fragment rows. */
+    readonly partialGlyphTrailingRowColumns?: readonly number[];
   };
   /**
    * Region still exposing the cleared BG handoff while the initial live
@@ -34,6 +36,8 @@ export interface TextWindowTransfer {
 export interface MovesWindowTransfer {
   readonly names: TextWindowTransfer;
   readonly pp: TextWindowTransfer;
+  /** Which rental's live text buffers are currently installed in BG0. */
+  readonly textOwner?: "source" | "destination";
 }
 
 const FULL_MOVES_WINDOW: MovesWindowTransfer = {
@@ -49,7 +53,44 @@ const FULL_MOVES_WINDOW: MovesWindowTransfer = {
 export function movesWindowTransferAt(
   elapsed: number,
   sourceIsReplacement: boolean,
+  page: "battleMoves" | "contestMoves" = "battleMoves",
 ): MovesWindowTransfer {
+  if (page === "contestMoves") {
+    if (!sourceIsReplacement && elapsed === 19) {
+      return {
+        ...FULL_MOVES_WINDOW,
+        textOwner: "source",
+      };
+    }
+    if (!sourceIsReplacement && elapsed === 20) {
+      return {
+        names: { completeRows: 2 },
+        pp: {
+          completeRows: 1,
+          partialRow: {
+            row: 1,
+            completeGlyphs: 1,
+            partialGlyphRows: 13,
+          },
+        },
+        textOwner: "destination",
+      };
+    }
+    if (!sourceIsReplacement && elapsed === 21) {
+      return {
+        names: { completeRows: 4 },
+        pp: {
+          completeRows: 3,
+          partialRow: {
+            row: 3,
+            completeGlyphs: 4,
+            partialGlyphRows: 0,
+          },
+        },
+        textOwner: "destination",
+      };
+    }
+  }
   if (elapsed < 19) {
     // No destination print has started; VRAM still owns the complete source
     // rental windows selected by pageTextSlot.
@@ -73,6 +114,21 @@ export function movesWindowTransferAt(
     };
   }
   if (elapsed === 20) {
+    if (page === "contestMoves" && sourceIsReplacement) {
+      return {
+        names: { completeRows: 4 },
+        pp: {
+          completeRows: 3,
+          partialRow: {
+            row: 3,
+            completeGlyphs: 0,
+            partialGlyphRows: 7,
+            partialGlyphTrailingRowColumns: [8, 7],
+          },
+        },
+        textOwner: "destination",
+      };
+    }
     return {
       names: { completeRows: 4 },
       pp: {
@@ -113,5 +169,16 @@ export function glyphLastRowColumnsForTransfer(
   const partial = transfer.partialRow;
   return partial && row === partial.row && glyphIndex === partial.completeGlyphs
     ? partial.partialGlyphLastRowColumns
+    : undefined;
+}
+
+export function glyphTrailingRowColumnsForTransfer(
+  transfer: TextWindowTransfer,
+  row: number,
+  glyphIndex: number,
+): readonly number[] | undefined {
+  const partial = transfer.partialRow;
+  return partial && row === partial.row && glyphIndex === partial.completeGlyphs
+    ? partial.partialGlyphTrailingRowColumns
     : undefined;
 }

@@ -90,13 +90,17 @@ describe("summary front-animation presentation", () => {
     }
   });
 
-  it("keeps each motion finite and restores the ordinary sprite transform", () => {
+  it("keeps each source motion finite and releases every affine matrix", () => {
     for (const species of ["ONIX", "MAGBY", "VOLBEAT", "ELECTRIKE", "SPINDA", "SWABLU"]) {
+      expect(summaryFrontSpritePresentation(species, 500, false)).toMatchObject({
+        affine: null,
+        motionFinished: true,
+      });
+    }
+    for (const species of ["MAGBY", "VOLBEAT", "ELECTRIKE", "SPINDA", "SWABLU"]) {
       expect(summaryFrontSpritePresentation(species, 500, false)).toMatchObject({
         x2: 0,
         y2: 0,
-        affine: null,
-        motionFinished: true,
       });
     }
   });

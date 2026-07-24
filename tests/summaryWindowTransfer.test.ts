@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   glyphLastRowColumnsForTransfer,
   glyphRasterRowsForTransfer,
+  glyphTrailingRowColumnsForTransfer,
   movesWindowTransferAt,
 } from "../src/engine/summaryWindowTransfer.ts";
 
@@ -60,5 +61,32 @@ describe("summary move-window CopyWindowToVram transfer model", () => {
     expect(movesWindowTransferAt(21, true)).toEqual(
       movesWindowTransferAt(21, false),
     );
+  });
+
+  it("preserves Contest's source window, then exposes its page-specific copy fragments", () => {
+    expect(movesWindowTransferAt(19, false, "contestMoves")).toMatchObject({
+      textOwner: "source",
+      names: { completeRows: 4 },
+      pp: { completeRows: 4 },
+    });
+    expect(movesWindowTransferAt(20, false, "contestMoves")).toMatchObject({
+      textOwner: "destination",
+      names: { completeRows: 2 },
+      pp: {
+        completeRows: 1,
+        partialRow: { row: 1, completeGlyphs: 1, partialGlyphRows: 13 },
+      },
+    });
+    expect(movesWindowTransferAt(21, false, "contestMoves").pp).toMatchObject({
+      completeRows: 3,
+      partialRow: { row: 3, completeGlyphs: 4, partialGlyphRows: 0 },
+    });
+  });
+
+  it("models Contest's installed-window DMA fragment as trailing row widths", () => {
+    const transfer = movesWindowTransferAt(20, true, "contestMoves").pp;
+    expect(glyphRasterRowsForTransfer(transfer, 3, 0, 15)).toBe(7);
+    expect(glyphTrailingRowColumnsForTransfer(transfer, 3, 0)).toEqual([8, 7]);
+    expect(glyphRasterRowsForTransfer(transfer, 3, 1, 15)).toBe(0);
   });
 });

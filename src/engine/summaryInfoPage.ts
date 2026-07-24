@@ -34,10 +34,14 @@ import { summaryPageLayerOffsets } from "./summaryScreen.ts";
 import {
   glyphLastRowColumnsForTransfer,
   glyphRasterRowsForTransfer,
+  glyphTrailingRowColumnsForTransfer,
   movesWindowTransferAt,
   type MovesWindowTransfer,
 } from "./summaryWindowTransfer.ts";
-import { summaryFrontSpritePresentation } from "./summaryFrontAnimation.ts";
+import {
+  summaryFrontAnimationForSpecies,
+  summaryFrontSpritePresentation,
+} from "./summaryFrontAnimation.ts";
 
 import summaryBgData from "../assets/gen/summary-bg.json" with { type: "json" };
 import summaryTypeIconsData from "../assets/gen/summary-type-icons.json" with { type: "json" };
@@ -381,6 +385,8 @@ function compose(
     readonly showMon?: boolean;
     readonly showBall?: boolean;
     readonly animateSwitchedMon?: boolean;
+    /** Page-owned source callbacks may defer the replacement sprite by ticks. */
+    readonly replacementAnimationDelay?: number;
   } = {},
   underlyingPage?: SummaryPage,
   moveSelect?: SummaryMoveSelectState,
@@ -479,9 +485,17 @@ function compose(
   // always TRUE here (unlike the draft screen's unflipped ball-open pic).
   const spritePool = draftPool[spriteSlot]!;
   const frontSprite = frontSprites[spritePool.species]!;
+  let presentationClock = monAnimClock;
+  if (monReplacement.replacementAnimationDelay) {
+    const motionType = summaryFrontAnimationForSpecies(spritePool.species).motion.type;
+    presentationClock =
+      motionType === "ANIM_RAPID_H_HOPS"
+        ? monAnimClock
+        : monAnimClock - monReplacement.replacementAnimationDelay;
+  }
   const frontPresentation = summaryFrontSpritePresentation(
     spritePool.species,
-    monAnimClock,
+    presentationClock,
     monReplacement.animateSwitchedMon === true,
   );
   const monTileset =
@@ -752,7 +766,8 @@ function compose(
             ppPalette,
             { bg: 0, fg: 7, shadow: 8 },
             rasterRows,
-            glyphLastRowColumnsForTransfer(ppTransfer, i, glyphIndex),
+            glyphTrailingRowColumnsForTransfer(ppTransfer, i, glyphIndex) ??
+              glyphLastRowColumnsForTransfer(ppTransfer, i, glyphIndex),
           );
           glyphX += font.widths[code] ?? font.cellSize;
         }
@@ -944,6 +959,9 @@ export function renderSummaryContestMovesPage(
   const fb = createFramebuffer();
   compose(fb, selectedSlot, 0, 0, "contestMoves", monAnimClock, false, 0, true, {
     animateSwitchedMon,
+    // Contest's longer page-specific text copy defers the replacement sprite
+    // callback by one presentation tick without delaying controller input.
+    replacementAnimationDelay: animateSwitchedMon ? 1 : 0,
   });
   return fb;
 }
@@ -999,6 +1017,11 @@ export function renderSummaryMonTransition(
 ): Uint8Array {
   const elapsed = transition.elapsed;
   const spriteIsNew = elapsed >= 16;
+  const movesWindowTransfer =
+    page === "battleMoves" || page === "contestMoves"
+      ? movesWindowTransferAt(elapsed, sourceIsReplacement, page)
+      : undefined;
+  const pageTextUsesSource = movesWindowTransfer?.textOwner === "source";
   const fb = createFramebuffer();
   compose(
     fb,
@@ -1016,12 +1039,12 @@ export function renderSummaryMonTransition(
       monInfoSlot: elapsed >= 18 ? transition.toSlot : transition.fromSlot,
       abilitySlot: elapsed >= 19 ? transition.toSlot : transition.fromSlot,
       memoSlot: elapsed >= 20 ? transition.toSlot : transition.fromSlot,
-      pageTextSlot: elapsed >= 19 ? transition.toSlot : transition.fromSlot,
+      pageTextSlot:
+        elapsed >= 19 && !pageTextUsesSource
+          ? transition.toSlot
+          : transition.fromSlot,
       pageIconSlot: elapsed >= 17 ? transition.toSlot : transition.fromSlot,
-      movesWindowTransfer:
-        page === "battleMoves" || page === "contestMoves"
-          ? movesWindowTransferAt(elapsed, sourceIsReplacement)
-          : undefined,
+      movesWindowTransfer,
       // The first replacement after page construction inherits the initial
       // window-copy queue: AddTextPrinter's speed-0 callback exposes 21
       // printable characters here and the remainder lands next VBlank.
@@ -1032,11 +1055,17 @@ export function renderSummaryMonTransition(
       showMon: elapsed < 3 || spriteIsNew,
       showBall: elapsed < 4 || elapsed >= 12,
       animateSwitchedMon: !spriteIsNew && sourceIsReplacement,
+      replacementAnimationDelay:
+        page === "contestMoves" && sourceIsReplacement ? 1 : 0,
     },
   );
   if (elapsed === 19 && !sourceIsReplacement) {
     if (page === "battleMoves" || page === "contestMoves") {
-      const handoff = movesWindowTransferAt(elapsed, sourceIsReplacement).pp.clearHandoff;
+      const handoff = movesWindowTransferAt(
+        elapsed,
+        sourceIsReplacement,
+        page,
+      ).pp.clearHandoff;
       if (handoff) {
         const cleared = renderSummaryPageCleared(transition.toSlot, 0, page);
         // PP layout is always the 10px PP glyph plus five 6px cells,
