@@ -1,3 +1,5 @@
+import { shakeMonOffsetAtTick } from "./shakeMon.ts";
+
 export interface QuickAttackOffset {
   readonly x2: number;
   readonly y2: number;
@@ -117,11 +119,20 @@ export function quickAttackAfterimagesAtAge(
 }
 
 /**
- * Source `AnimTask_ShakeMon(ANIM_TARGET,5,0,6,1)`, including the task's
- * creation/display latch. These five display ages are dense-oracle pinned.
+ * Source `AnimTask_ShakeMon(ANIM_TARGET,5,0,6,1)`, created the same age
+ * impact becomes visible — ported generically via `shakeMonOffsetAtTick`
+ * (`src/engine/shakeMon.ts`), including the task's creation/display latch.
+ * Dense-oracle pinned at ages 58/61/62/65/66.
  */
-const TARGET_SHAKE_AGES: ReadonlySet<number> =
-  new Set([58, 61, 62, 65, 66]);
+function quickAttackTargetShakeX2(age: number): number {
+  return shakeMonOffsetAtTick(
+    5,
+    0,
+    6,
+    1,
+    age - QUICK_ATTACK_IMPACT_FIRST_AGE,
+  ).x2;
+}
 
 export function quickAttackAnimationAtAge(
   age: number,
@@ -130,7 +141,7 @@ export function quickAttackAnimationAtAge(
   return {
     attackerOffset: quickAttackTravelAtAge(age, attackerSide),
     afterimages: quickAttackAfterimagesAtAge(age, attackerSide),
-    targetShakeX2: TARGET_SHAKE_AGES.has(age) ? 5 : 0,
+    targetShakeX2: quickAttackTargetShakeX2(age),
     targetBaseX2:
       attackerSide === "player" && age >= QUICK_ATTACK_IMPACT_FIRST_AGE
         ? -1
