@@ -51,6 +51,8 @@ export type BattleScriptRulesBattler = Readonly<{
   tauntTimer: number;
   usedTauntedMove: 0 | 1;
   usedImprisonedMove: 0 | 1;
+  /** ProtectStruct::bounceMove; absent legacy inputs normalize to zero at read sites. */
+  bounceMove?: 0 | 1;
   /** ProtectStruct::confusionSelfDmg; absent legacy inputs normalize to zero. */
   confusionSelfDmg?: 0 | 1;
   /** ProtectStruct::prlzImmobility; absent legacy inputs normalize to zero. */
@@ -335,6 +337,13 @@ export function createBattleScriptRulesContext(
       1,
       `battlers[${index}].usedImprisonedMove`,
     ) as 0 | 1,
+    ...(battler.bounceMove === undefined ? {} : {
+      bounceMove: requireUnsigned(
+        battler.bounceMove,
+        1,
+        `battlers[${index}].bounceMove`,
+      ) as 0 | 1,
+    }),
     ...(battler.confusionSelfDmg === undefined ? {} : {
       confusionSelfDmg: requireUnsigned(
         battler.confusionSelfDmg,
