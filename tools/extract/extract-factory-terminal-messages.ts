@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..");
 const REF = join(ROOT, "reference", "pokeemerald");
+const HARNESS_ROOT = resolve(ROOT, "..", "..", "..", "..");
 const outIndex = process.argv.indexOf("--out-dir");
 if (outIndex !== -1 && !process.argv[outIndex + 1]) throw new Error("--out-dir needs a directory");
 const OUT_DIR = outIndex === -1 ? join(ROOT, "src", "data", "gen") : resolve(process.argv[outIndex + 1]!);
@@ -39,6 +40,72 @@ function required(text: string, fragment: string): void {
   if (!text.includes(fragment)) throw new Error(`source contract changed: ${fragment}`);
 }
 
+type CharmapEntry = [string, number];
+
+function canonicalAnchorPlayer(): { text: string; encodedBytes: number[]; storageBytes: number[] } {
+  // The bootstrap save is the source-owned canonical state that the OFF
+  // profile extends. Read its newest SaveBlock2 sector, never a live emulator
+  // or production asset. SaveSector layout is pinned by include/save.h.
+  const save = readFileSync(join(HARNESS_ROOT, "oracle", "bootstrap", "factory.sav"));
+  const sectors = [] as { counter: number; storageBytes: number[] }[];
+  for (let offset = 0; offset + 0x1000 <= save.length; offset += 0x1000) {
+    const id = save.readUInt16LE(offset + 0xff4);
+    const signature = save.readUInt32LE(offset + 0xff8);
+    if (id === 0 && signature === 0x08012025) {
+      sectors.push({ counter: save.readUInt32LE(offset + 0xffc), storageBytes: [...save.subarray(offset, offset + 8)] });
+    }
+  }
+  if (sectors.length === 0) throw new Error("canonical bootstrap has no valid SaveBlock2 sector");
+  sectors.sort((a, b) => b.counter - a.counter);
+  const storageBytes = sectors[0]!.storageBytes;
+  const eos = storageBytes.indexOf(0xff);
+  if (eos < 1) throw new Error("canonical player name lacks EOS");
+
+  const charmap = JSON.parse(readFileSync(join(ROOT, "src", "data", "gen", "charmap.json"), "utf8")) as { entries: CharmapEntry[] };
+  const decode = new Map<number, string>();
+  for (const [char, code] of charmap.entries) if (!decode.has(code)) decode.set(code, char);
+  const text = storageBytes.slice(0, eos).map((code) => decode.get(code)).join("");
+  if (!text || text.includes("undefined")) throw new Error("canonical player name has unknown charmap byte");
+  return { text, encodedBytes: storageBytes.slice(0, eos), storageBytes };
+}
+
+const CONTROL_BYTES = {
+  "\\l": { byte: 0xfa, name: "promptScroll" },
+  "\\p": { byte: 0xfb, name: "promptClear" },
+  "\\n": { byte: 0xfe, name: "newline" },
+  "$": { byte: 0xff, name: "eos" },
+} as const;
+
+function expand(template: string, substitutions: Record<string, string>): string {
+  return template.replace(/\{([^}]+)\}/g, (_, name: string) => substitutions[name] ?? `{${name}}`);
+}
+
+function encodeExpandedText(text: string): { encodedBytes: number[]; controlTokens: { source: string; byte: string; name: string }[] } {
+  const charmap = JSON.parse(readFileSync(join(ROOT, "src", "data", "gen", "charmap.json"), "utf8")) as { entries: CharmapEntry[] };
+  const encode = new Map<string, number>();
+  for (const [char, code] of charmap.entries) if (!encode.has(char)) encode.set(char, code);
+  const encodedBytes: number[] = [];
+  const controlTokens: { source: string; byte: string; name: string }[] = [];
+  for (let index = 0; index < text.length; index++) {
+    const source = text[index] === "\\" ? text.slice(index, index + 2) : text[index]!;
+    const control = CONTROL_BYTES[source as keyof typeof CONTROL_BYTES];
+    if (control) {
+      encodedBytes.push(control.byte);
+      controlTokens.push({ source, byte: `0x${control.byte.toString(16).toUpperCase()}`, name: control.name });
+      if (source.length === 2) index++;
+      continue;
+    }
+    // charmap.txt spells ASCII apostrophe as an escaped literal (`'\\'' = B4`),
+    // which the existing generated JSON charmap intentionally normalizes to
+    // the typographic apostrophe. The assembler still emits B4 for source '.
+    const encoded = source === "'" ? 0xb4 : encode.get(source);
+    if (encoded === undefined) throw new Error(`unencodable terminal character ${JSON.stringify(source)}`);
+    encodedBytes.push(encoded);
+  }
+  if (encodedBytes.at(-1) !== 0xff) throw new Error(`terminal text lacks EOS: ${text}`);
+  return { encodedBytes, controlTokens };
+}
+
 const lobby = source("data", "maps", "BattleFrontier_BattleFactoryLobby", "scripts.inc");
 const towerLobby = source("data", "maps", "BattleFrontier_BattleTowerLobby", "scripts.inc");
 const stdMsgbox = source("data", "scripts", "std_msgbox.inc");
@@ -47,6 +114,9 @@ const menu = source("src", "menu.c");
 const fieldMessageBox = source("src", "field_message_box.c");
 const scriptMenuData = source("src", "data", "script_menu.h");
 const strings = source("src", "strings.c");
+const frontierUtil = source("src", "frontier_util.c");
+const characters = source("include", "constants", "characters.h");
+const saveHeader = source("include", "save.h");
 
 // Contracts intentionally point at source mechanisms, not observed frames.
 required(lobby, "msgbox BattleFrontier_BattleFactoryLobby_Text_CongratsSevenWins, MSGBOX_DEFAULT");
@@ -64,6 +134,14 @@ required(scriptMenuData, "{gText_Yes}");
 required(scriptMenuData, "{gText_No4}");
 required(menu, "#define STD_WINDOW_PALETTE_NUM 14");
 required(menu, "#define STD_WINDOW_BASE_TILE_NUM 0x214");
+required(frontierUtil, "{1, 2, 3, 3}, {1, 1}, {4, 5}, {1}, {3, 4}, {1}, {5}");
+required(frontierUtil, "points = sBattlePointAwards[challengeNum][facility][battleMode];");
+required(characters, "#define CHAR_PROMPT_SCROLL     0xFA");
+required(characters, "#define CHAR_PROMPT_CLEAR      0xFB");
+required(characters, "#define CHAR_NEWLINE           0xFE");
+required(characters, "#define EOS                    0xFF");
+required(saveHeader, "#define SECTOR_ID_SAVEBLOCK2          0");
+required(saveHeader, "#define SECTOR_SIGNATURE 0x8012025");
 
 const yes = cStringAt(strings, "gText_Yes");
 const no = cStringAt(strings, "gText_No4");
@@ -80,6 +158,20 @@ const messages = {
   recordPrompt: stringAt(lobby, "BattleFrontier_BattleFactoryLobby_Text_RecordLastMatch"),
 };
 
+const player = canonicalAnchorPlayer();
+if (player.text !== "MEMORY" || JSON.stringify(player.storageBytes) !== JSON.stringify([199, 191, 199, 201, 204, 211, 255, 255])) {
+  throw new Error(`unexpected canonical player name ${player.text} (${player.storageBytes.join(",")})`);
+}
+const regularSubstitutions = { PLAYER: player.text, STR_VAR_1: "3" };
+const resolvedMessages = Object.fromEntries(
+  Object.entries(messages)
+    .filter(([key]) => key !== "factoryHeadCongrats")
+    .map(([key, template]) => {
+      const expanded = expand(template, regularSubstitutions);
+      return [key, { expanded, ...encodeExpandedText(expanded) }];
+    }),
+);
+
 const artifact = {
   schema: "factory-terminal-messages/v1",
   source: {
@@ -92,6 +184,11 @@ const artifact = {
       "src/data/script_menu.h",
       "src/menu.c",
       "src/strings.c",
+      "src/frontier_util.c",
+      "include/constants/battle_frontier.h",
+      "include/constants/characters.h",
+      "include/save.h",
+      "../../../../oracle/bootstrap/factory.sav",
     ],
     anchors: {
       terminalRoutes: "data/maps/BattleFrontier_BattleFactoryLobby/scripts.inc:40-94",
@@ -102,6 +199,9 @@ const artifact = {
       multichoice: "src/script_menu.c:92-123,726-770",
       yesNoList: "src/data/script_menu.h:608-611",
       menuPrintAndCursor: "src/menu.c:927-961,1581-1593",
+      battlePointAward: "src/frontier_util.c:500-553,1853-1910; include/constants/battle_frontier.h:13,23",
+      textControls: "charmap.txt:1087-1089; include/constants/characters.h:175-180",
+      bootstrapPlayerName: "oracle/bootstrap/factory.sav newest valid SaveBlock2 sector, bytes 0x0-0x7; include/save.h:6-25,71-79",
     },
   },
   reuse: {
@@ -127,6 +227,20 @@ const artifact = {
     exchangeAndSave: { template: messages.exchangeAndSave, operations: ["message", "waitmessage", "frontier_checkairshow", "LoadPlayerParty", "factory_save 0", "playse SE_SAVE", "waitse", "AskRecordBattle"] },
     recordPrompt: { template: messages.recordPrompt, operations: ["message", "waitmessage", "multichoicedefault 20, 8, MULTI_YESNO, 1, FALSE"] },
   },
+  regularLevel50: {
+    // This is a fully expanded renderer input for the first regular (not
+    // Factory Head), singles Level-50 seventh win and its loss sibling.
+    // Strings retain the source's \n/\p/\l spelling and also provide the
+    // exact encoded control bytes so a consumer need not infer page behavior.
+    anchorPlayer: { text: player.text, encodedBytes: player.encodedBytes, storageBytes: player.storageBytes, eos: "0xFF", maxCharacters: 7 },
+    firstRoundBattlePointAward: {
+      substitution: "3",
+      numericAward: 3,
+      tableLookup: { postWinStreak: 7, stagesPerChallenge: 7, challengeIndex: 0, facility: "FRONTIER_FACILITY_FACTORY=4", battleMode: "FRONTIER_MODE_SINGLES=0", tableEntry: 3, factoryHeadBonus: 0 },
+    },
+    substitutions: regularSubstitutions,
+    expandedMessages: resolvedMessages,
+  },
   recordPromptMenu: {
     multichoiceId: 94,
     requestedOriginTiles: { x: 20, y: 8 },
@@ -149,6 +263,7 @@ const artifact = {
     text: { font: "FONT_NORMAL", colors: { fg: 2, bg: 1, shadow: 3 } },
     cursor: { glyph: selector, xPx: 0, yPxByChoice: [1, 17], widthPx: 8, heightPx: 15 },
   },
+  standardDefaultNoMenu: { choices: [yes, no], defaultChoice: 1, selectedLabel: no, choiceResults: [0, 1], bResult: "MULTI_B_PRESSED" },
 };
 
 mkdirSync(OUT_DIR, { recursive: true });

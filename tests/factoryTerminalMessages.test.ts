@@ -22,6 +22,53 @@ describe("Factory terminal field-message extraction", () => {
     expect(terminal.messages.exchangeAndSave.template).toContain("Let me exchange your POKéMON");
     expect(terminal.messages.recordPrompt.template).toBe("Would you like to record your last\\nBATTLE FACTORY match on your\\lFRONTIER PASS?$");
     expect(terminal.messages.getPoints.operations).toEqual(["msgbox MSGBOX_GETPOINTS", "message", "playfanfare MUS_OBTAIN_B_POINTS", "waitfanfare", "waitmessage"]);
+    expect(terminal.regularLevel50.anchorPlayer).toEqual({
+      text: "MEMORY",
+      encodedBytes: [0xc7, 0xbf, 0xc7, 0xc9, 0xcc, 0xd3],
+      storageBytes: [0xc7, 0xbf, 0xc7, 0xc9, 0xcc, 0xd3, 0xff, 0xff],
+      eos: "0xFF",
+      maxCharacters: 7,
+    });
+    expect(terminal.regularLevel50.firstRoundBattlePointAward).toMatchObject({
+      substitution: "3",
+      numericAward: 3,
+      tableLookup: {
+        postWinStreak: 7,
+        stagesPerChallenge: 7,
+        challengeIndex: 0,
+        facility: "FRONTIER_FACILITY_FACTORY=4",
+        battleMode: "FRONTIER_MODE_SINGLES=0",
+        tableEntry: 3,
+        factoryHeadBonus: 0,
+      },
+    });
+    const expanded = terminal.regularLevel50.expandedMessages;
+    expect(expanded.lossReturnAndSave.expanded).toBe("Thank you for participating!\\pI will return your POKéMON in exchange\\nfor our rental POKéMON.\\pI must also save the event results.\\nPlease wait.$");
+    expect(expanded.regularCongrats.expanded).toBe("Congratulations! You've won seven\\nstraight Battle Swap matches!$");
+    expect(expanded.award.expanded).toBe("In recognition of your wealth of\\nknowledge and keen intelligence,\\lwe award you these Battle Point(s).$");
+    expect(expanded.getPoints.expanded).toBe("MEMORY obtained 3 Battle Point(s).$");
+    expect(expanded.exchangeAndSave.expanded).toBe("Let me exchange your POKéMON\\nfor our rental POKéMON.\\pI need to save the battle data,\\nso please wait.$");
+    expect(expanded.recordPrompt.expanded).toBe("Would you like to record your last\\nBATTLE FACTORY match on your\\lFRONTIER PASS?$");
+    expect(expanded.lossReturnAndSave.controlTokens).toEqual([
+      { source: "\\p", byte: "0xFB", name: "promptClear" },
+      { source: "\\n", byte: "0xFE", name: "newline" },
+      { source: "\\p", byte: "0xFB", name: "promptClear" },
+      { source: "\\n", byte: "0xFE", name: "newline" },
+      { source: "$", byte: "0xFF", name: "eos" },
+    ]);
+    expect(expanded.award.controlTokens).toEqual([
+      { source: "\\n", byte: "0xFE", name: "newline" },
+      { source: "\\l", byte: "0xFA", name: "promptScroll" },
+      { source: "$", byte: "0xFF", name: "eos" },
+    ]);
+    for (const value of Object.values(expanded)) expect(value.encodedBytes.at(-1)).toBe(0xff);
+    expect(terminal.standardDefaultNoMenu).toEqual({
+      choices: ["YES", "NO"],
+      defaultChoice: 1,
+      selectedLabel: "NO",
+      choiceResults: [0, 1],
+      bResult: "MULTI_B_PRESSED",
+    });
     expect(terminal.recordPromptMenu).toMatchObject({
       multichoiceId: 94,
       requestedOriginTiles: { x: 20, y: 8 },
