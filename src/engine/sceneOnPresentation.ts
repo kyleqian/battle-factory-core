@@ -24,6 +24,10 @@ import {
   type DoubleTeamAnimationProfile,
   type RockSlideAnimationProfile,
 } from "./battleMenu.ts";
+import {
+  icePunchOverlayState,
+  type IcePunchOverlayState,
+} from "./icePunch.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -52,6 +56,15 @@ export interface SceneOnFirePunchConfig {
    * printers can hand ownership over at different script phases by side.
    */
   readonly animationAgeOffset?: number;
+  /** Relative first printer age; negative means text predates this seam. */
+  readonly moveTextStartAge?: number;
+}
+
+export interface SceneOnIcePunchConfig {
+  readonly move: "ICE_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   /** Relative first printer age; negative means text predates this seam. */
   readonly moveTextStartAge?: number;
 }
@@ -121,6 +134,7 @@ export interface SceneOnEndeavorConfig {
 
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
+  | SceneOnIcePunchConfig
   | SceneOnFaintAttackConfig
   | SceneOnRockSlideConfig
   | SceneOnDoubleTeamConfig
@@ -141,6 +155,13 @@ export interface SceneOnFirePunchView {
   readonly resolution: FirePunchResolutionState;
   readonly particles: readonly FirePunchParticle[];
   readonly burnFlames: ReturnType<typeof firePunchBurnFlames>;
+}
+
+export interface SceneOnIcePunchView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly overlay: IcePunchOverlayState;
 }
 
 export interface SceneOnFaintAttackView {
@@ -280,6 +301,20 @@ export function sceneOnFirePunchView(
         ? firePunchResidualBurnFlames(state.age, geometry)
         : []),
     ],
+  };
+}
+
+export function sceneOnIcePunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnIcePunchView {
+  if (state.config.move !== "ICE_PUNCH") {
+    throw new Error(`expected ICE_PUNCH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    overlay: icePunchOverlayState(state.age),
   };
 }
 

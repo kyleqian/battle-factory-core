@@ -12,6 +12,7 @@
     "animation:coverage": "node --experimental-strip-types tools/animation/report.ts",
     "animation:components": "node --experimental-strip-types tools/extract/extract-battle-animation-components.ts",
     "compare:fire-punch-portable": "node --experimental-strip-types tools/compare/firePunchPortable.ts",
+    "compare:ice-punch-portable": "node --experimental-strip-types tools/compare/firePunchPortable.ts tools/compare/fixtures/ice-punch-onix-grovyle.json",
     "compare:faint-attack-portable": "node --experimental-strip-types tools/compare/faintAttackPortable.ts",
     "compare:double-team-portable": "node --experimental-strip-types tools/compare/doubleTeamPortable.ts",
     "compare:factory-terminal-loss": "node --experimental-strip-types tools/compare/factoryTerminalLoss.ts",

@@ -12,9 +12,11 @@ import { createInitialState, render, type EngineState } from "../../src/engine/c
 import {
   createSceneOnMovePresentation,
   type SceneOnFirePunchConfig,
+  type SceneOnFaintAttackFieldProfile,
 } from "../../src/engine/sceneOnPresentation.ts";
 
 interface PortableFixture {
+  readonly move?: "FIRE_PUNCH" | "ICE_PUNCH";
   readonly probe: string;
   readonly probeArguments?: readonly string[];
   readonly geometry: {
@@ -25,7 +27,8 @@ interface PortableFixture {
     readonly animationAgeOffset?: number;
     readonly moveTextStartAge?: number;
   };
-  readonly profile: SceneOnFirePunchConfig["resolutionProfile"];
+  readonly profile?: SceneOnFirePunchConfig["resolutionProfile"];
+  readonly fieldProfile?: SceneOnFaintAttackFieldProfile;
   readonly appStage: {
     readonly oracleFrame: number;
     readonly presentationAge: number;
@@ -87,16 +90,25 @@ if (run.stdout) process.stdout.write(run.stdout);
 if (run.stderr) process.stderr.write(run.stderr);
 if (run.status !== 0) process.exit(run.status ?? 1);
 
+const presentation = fixture.move === "ICE_PUNCH"
+  ? createSceneOnMovePresentation({
+      move: "ICE_PUNCH",
+      attacker: presentationBattler(fixture.geometry.attacker),
+      target: presentationBattler(fixture.geometry.target),
+      fieldProfile: fixture.fieldProfile!,
+      ...fixture.presentation,
+    })
+  : createSceneOnMovePresentation({
+      move: "FIRE_PUNCH",
+      attacker: presentationBattler(fixture.geometry.attacker),
+      target: presentationBattler(fixture.geometry.target),
+      resolutionProfile: fixture.profile!,
+      ...fixture.presentation,
+    });
 let state: EngineState = {
   ...createInitialState(),
   rngMode: "frontierBattle",
-  sceneOnPresentation: createSceneOnMovePresentation({
-    move: "FIRE_PUNCH",
-    attacker: presentationBattler(fixture.geometry.attacker),
-    target: presentationBattler(fixture.geometry.target),
-    resolutionProfile: fixture.profile,
-    ...fixture.presentation,
-  }),
+  sceneOnPresentation: presentation,
 };
 for (let age = 0; age < fixture.appStage.presentationAge; age += 1) {
   state = {

@@ -567,6 +567,7 @@ import {
   sceneOnEndeavorView,
   sceneOnFaintAttackView,
   sceneOnFirePunchView,
+  sceneOnIcePunchView,
   sceneOnRockSlideView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
@@ -13742,6 +13743,85 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "ICE_PUNCH") {
+    const view = sceneOnIcePunchView(state);
+    const { attacker, target, overlay } = view;
+    if (
+      attacker.species !== "ONIX"
+      || attacker.geometry.side !== "player"
+      || target.species !== "GROVYLE"
+      || target.geometry.side !== "opponent"
+    ) {
+      throw new Error(
+        `unsupported staged ICE_PUNCH pair ${attacker.species}->${target.species}`,
+      );
+    }
+    const darken = (palette: RgbColor[]): RgbColor[] =>
+      overlay.backgroundBlackCoeff === 0
+        ? palette
+        : palette.map((color) => ({
+            r: blendComponentToward(color.r, 0, overlay.backgroundBlackCoeff),
+            g: blendComponentToward(color.g, 0, overlay.backgroundBlackCoeff),
+            b: blendComponentToward(color.b, 0, overlay.backgroundBlackCoeff),
+          }));
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette.map(darken),
+    );
+    drawSpriteSheet(
+      fb,
+      onixBackSprite.tileset,
+      onixBackSprite.palette,
+      attacker.geometry.spriteCorner.x,
+      attacker.geometry.spriteCorner.y,
+    );
+    const ice = { r: 99, g: 214, b: 255 };
+    const targetPalette = overlay.targetIceCoeff === 0
+      ? grovyleFrontSprite.palette
+      : grovyleFrontSprite.palette.map((color) => ({
+          r: blendComponentToward(color.r, ice.r, overlay.targetIceCoeff),
+          g: blendComponentToward(color.g, ice.g, overlay.targetIceCoeff),
+          b: blendComponentToward(color.b, ice.b, overlay.targetIceCoeff),
+        }));
+    drawSpriteSheet(
+      fb,
+      grovyleFrontSprite.tileset,
+      targetPalette,
+      target.geometry.spriteCorner.x,
+      target.geometry.spriteCorner.y,
+    );
+    drawSendOutHealthbox(
+      fb,
+      0,
+      opponentHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      onixPlayerHealthboxContentForState(
+        state.config.fieldProfile.playerHp,
+        state.config.fieldProfile.playerStatus,
+      ),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    const line1 = `${attacker.species} used`;
+    const line2 = "ICE PUNCH!";
+    const textStartAge = state.config.moveTextStartAge ?? -1;
+    drawMessageTextLines(
+      fb,
+      line1,
+      line2,
+      Math.min(line1.length + line2.length, view.age - textStartAge + 1),
+    );
+    return;
+  }
+
   if (state.config.move === "ENDEAVOR") {
     const view = sceneOnEndeavorView(state);
     const { attacker, target, animationProfile } = view;

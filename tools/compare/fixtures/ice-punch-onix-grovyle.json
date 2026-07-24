@@ -1,0 +1,41 @@
+{
+  "schema": "scene-on-portable-compare/v1",
+  "oracleProfile": "battle-scene-on",
+  "probe": "tools/probe/stage-fire-punch-portable-on.py",
+  "probeArguments": ["player", "ice-punch"],
+  "pair": "ONIX (player-back) -> GROVYLE (opponent-front)",
+  "move": "ICE_PUNCH",
+  "appStage": {
+    "id": "ice-punch-onix-grovyle-animation-owned",
+    "oracleFrame": 2339,
+    "presentationAge": 0
+  },
+  "geometry": {
+    "attacker": {
+      "species": "ONIX",
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    },
+    "target": {
+      "species": "GROVYLE",
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 12 },
+      "animationCenter": { "x": 176, "y": 44 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "presentation": {
+    "moveTextStartAge": -25
+  },
+  "denseWindow": {
+    "startFrame": 2339,
+    "endFrame": 2373
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 143,
+    "playerStatus": "none"
+  }
+}
