@@ -15307,6 +15307,12 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "FLY") {
+    throw new Error(
+      "portable FLY state is staged through sceneOnFlyView; framebuffer adapter remains partial",
+    );
+  }
+
   const view = sceneOnFirePunchView(state);
   const { attacker, target, resolution } = view;
   const player = attacker.geometry.side === "player" ? attacker : target;

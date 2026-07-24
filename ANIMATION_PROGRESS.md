@@ -38,20 +38,23 @@ remainder.
 
 ## Current handoff
 
-- **State:** **9 exact / 4 partial / 263 unsupported**. SAND ATTACK is exact
-  in both source-required orientations through the shared Scene-ON seam.
-- **Did:** installed its source-relative signed attacker slide, six
-  five-sprite dirt waves with RNG-resolved Q8.8 velocity profiles, stable
-  `SortSprites` insertion ordering from one pre-allocation seed, generic
-  accuracy-decrease banner/result printer, immutable 6→5 controller result,
-  command release, and MOVE_NONE cleanup. The opposite-side audit pins the
-  player slide's asymmetric −4/−7/−10 rounding, signed X/Y dirt words,
-  player-back/opponent-front geometry, and four-frame animation head start.
-- **Evidence:** opponent-front frames **46-314 = 269/269** exact;
-  player-back frames **46-314 = 269/269** exact; canonical turn 13 remains
-  **190/190**. Both mechanicLab inputs remain exactly
-  `ppUps:[0,0,0,0]`. Regressions: AERIAL **236/236 + 232/232**, QUICK
-  **219/219 + 214/214**, FEATHER **400/400 + 400/400**, FIRE **225/225 +
-  277/277**, ICE **462/462 + 1294/1294**.
-- **Next:** supervisor may select the next acceptance unit; FLY is now the
-  first partial move in the ranked queue.
+- **State:** **9 exact / 4 partial / 263 unsupported**. FLY remains partial:
+  legal two-turn portability and source-relative state are proven, but the
+  portable framebuffer adapter and ISSUES #34's seven affine opening frames
+  remain open.
+- **Did:** staged zero-PP-Up Level-50 MURKROW→ONIX in both orientations and
+  installed a phase-relative, side-parameterized charge/strike reducer behind
+  the shared Scene-ON seam. It derives charge lifetime from attacker center,
+  strike travel/reappearance from source Q8.8 geometry, and exposes shared
+  hitsplat/shake timing without owning mechanics or controller outcomes.
+- **Evidence:** opponent FLY halves **39-197 + 473-732**; player FLY halves
+  **39-193 + 372-627**. RAM/OAM pins opponent charge `(176,51), y2=-81`,
+  player charge `(72,97), y2=-113`, opponent strike matrix
+  `{142,212,-212,142}`, and player strike `{86,-241,241,86}`. Canonical
+  pixel evidence remains charge **206/206** (with issue #34 exclusion) and
+  strike **256/256**; SAND ATTACK regresses **190/190**. No new portable
+  pixel claim.
+- **Next:** extract player-back MURKROW presentation art, install the
+  orientation-parametric framebuffer/healthbox/controller adapter, and dense
+  compare both complete practical windows. Keep FLY partial and preserve
+  ISSUES #34 until a general PPU coverage rule closes it.

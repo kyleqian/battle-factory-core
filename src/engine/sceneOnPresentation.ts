@@ -67,6 +67,11 @@ import {
   type SandAttackAnimationState,
   type SandAttackAccuracyBanner,
 } from "./sandAttack.ts";
+import {
+  flyPresentationAtAge,
+  type FlyPresentationState,
+  type FlyTurn,
+} from "./fly.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -81,8 +86,21 @@ export interface SceneOnBattlerGeometry {
 }
 
 export interface SceneOnPresentationBattler {
-  readonly species: "ONIX" | "GROVYLE" | "PIDGEOTTO";
+  readonly species: "ONIX" | "GROVYLE" | "PIDGEOTTO" | "MURKROW";
   readonly geometry: SceneOnBattlerGeometry;
+}
+
+export interface SceneOnFlyConfig {
+  readonly move: "FLY";
+  readonly turn: FlyTurn;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  /**
+   * First displayed callback age for this half of `choosetwoturnanim`.
+   * Selection, damage, semi-invulnerability, and turn advancement remain
+   * controller-owned and are not represented here.
+   */
+  readonly animationAgeOffset?: number;
 }
 
 export interface SceneOnFeatherDanceConfig {
@@ -314,7 +332,8 @@ export type SceneOnMoveConfig =
   | SceneOnFeatherDanceConfig
   | SceneOnQuickAttackConfig
   | SceneOnAerialAceConfig
-  | SceneOnSandAttackConfig;
+  | SceneOnSandAttackConfig
+  | SceneOnFlyConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -460,6 +479,13 @@ export interface SceneOnSandAttackView extends SandAttackAnimationState {
   readonly moveText: Readonly<{ line1: string; line2: "SAND-ATTACK!" }>;
 }
 
+export interface SceneOnFlyView extends FlyPresentationState {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
 export const FEATHER_DANCE_STAT_MESSAGE_LINE2 = "harshly fell!";
 export const FEATHER_DANCE_STAT_MESSAGE_LENGTH =
@@ -556,8 +582,11 @@ export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>
       throw new Error("FIRE_PUNCH resolution profile requires startHp >= endHp >= 0");
     }
   } else if (
-    config.fieldProfile.playerHp < 0
-    || config.fieldProfile.opponentHp < 0
+    config.move !== "FLY"
+    && (
+      config.fieldProfile.playerHp < 0
+      || config.fieldProfile.opponentHp < 0
+    )
   ) {
     throw new Error(`${config.move} field profile requires nonnegative HP`);
   }
@@ -584,6 +613,29 @@ export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>
     );
   }
   return { age: 0, config };
+}
+
+export function sceneOnFlyView(
+  state: SceneOnMovePresentationState,
+): SceneOnFlyView {
+  if (state.config.move !== "FLY") {
+    throw new Error(`expected FLY presentation, got ${state.config.move}`);
+  }
+  const animationAge =
+    state.age + (state.config.animationAgeOffset ?? 0);
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...flyPresentationAtAge(
+      state.config.turn,
+      animationAge,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
 }
 
 export function advanceSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>(
@@ -1123,6 +1175,48 @@ export const ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE: FirePunchResolutionProfile = {
     textStartAge: 204,
   },
 };
+
+export const MURKROW_TO_ONIX_FLY_PRESENTATION = {
+  attacker: {
+    species: "MURKROW",
+    geometry: {
+      side: "opponent",
+      spriteCorner: { x: 144, y: 19 },
+      animationCenter: { x: 176, y: 51 },
+      battlePositionCenter: { x: 176, y: 40 },
+    },
+  },
+  target: {
+    species: "ONIX",
+    geometry: {
+      side: "player",
+      spriteCorner: { x: 40, y: 48 },
+      animationCenter: { x: 72, y: 88 },
+      battlePositionCenter: { x: 72, y: 80 },
+    },
+  },
+} as const satisfies Pick<SceneOnFlyConfig, "attacker" | "target">;
+
+export const PLAYER_MURKROW_TO_OPPONENT_ONIX_FLY_PRESENTATION = {
+  attacker: {
+    species: "MURKROW",
+    geometry: {
+      side: "player",
+      spriteCorner: { x: 40, y: 57 },
+      animationCenter: { x: 72, y: 97 },
+      battlePositionCenter: { x: 72, y: 80 },
+    },
+  },
+  target: {
+    species: "ONIX",
+    geometry: {
+      side: "opponent",
+      spriteCorner: { x: 145, y: 10 },
+      animationCenter: { x: 176, y: 42 },
+      battlePositionCenter: { x: 176, y: 40 },
+    },
+  },
+} as const satisfies Pick<SceneOnFlyConfig, "attacker" | "target">;
 
 export const ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE = {
   animationProfile: FAINT_ATTACK_ANIMATION_PROFILE,
