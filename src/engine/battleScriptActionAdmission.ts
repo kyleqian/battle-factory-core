@@ -132,7 +132,8 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedWokeUp"
       | "BattleScript_MoveUsedIsFrozen"
       | "BattleScript_MoveUsedUnfroze"
-      | "BattleScript_MoveUsedLoafingAround";
+      | "BattleScript_MoveUsedLoafingAround"
+      | "BattleScript_MoveUsedMustRecharge";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -363,6 +364,56 @@ export type BattleScriptAttackCancelerTruantDecision =
     rulesContext: BattleScriptRulesContext;
     receipt: Readonly<{
       sourcePhase: "CANCELER_TRUANT";
+      tracker: Readonly<{ before: number; after: number }>;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerRechargeReason =
+  | "not-recharging"
+  | "must-recharge";
+
+export type BattleScriptAttackCancelerRechargeReceipt = Readonly<{
+  sourcePhase: "CANCELER_RECHARGE";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerRechargeReason;
+  status2: BattleScriptBitFieldEffect;
+  rechargeTimer: Readonly<{ before: number; after: number }>;
+  cancelMultiTurnMoves:
+    | Readonly<{ kind: "not-invoked" }>
+    | Readonly<{
+      kind: "invoked";
+      receipt: BattleScriptCancelMultiTurnMovesReceipt;
+    }>;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  message:
+    | Readonly<{ kind: "preserve" }>
+    | Readonly<{
+      kind: "script-owned";
+      sourceConstant: "STRINGID_PKMNMUSTRECHARGE";
+      value: 130;
+    }>;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_RECHARGE";
+    sourcePhaseAfter: "CANCELER_FLINCH";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerRechargeDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerRechargeReason;
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerRechargeReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_RECHARGE";
       tracker: Readonly<{ before: number; after: number }>;
     }>;
   }>;
@@ -1097,6 +1148,138 @@ export function advanceBattleScriptAttackCancelerTruant(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_TRUANT",
         sourcePhaseAfter: "CANCELER_RECHARGE",
+      }),
+    }),
+  });
+}
+
+/**
+ * The source-shaped CANCELER_RECHARGE phase of AtkCanceler_UnableToUseMove.
+ *
+ * The taken branch clears recharge state before invoking
+ * CancelMultiTurnMoves, then advances exactly once to CANCELER_FLINCH.
+ */
+export function advanceBattleScriptAttackCancelerRecharge(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+): BattleScriptAttackCancelerRechargeDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_RECHARGE
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_RECHARGE",
+        tracker: Object.freeze({
+          before: trackerBefore,
+          after: trackerBefore,
+        }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler recharge phase requires an attacker role",
+    );
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const isRecharging = (
+    sourceBattler.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+  ) !== 0;
+  const nextStatus2 = isRecharging
+    ? (
+      sourceBattler.status2
+      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+    ) >>> 0
+    : sourceBattler.status2;
+  let nextRulesContext = rulesContext;
+  let helperResult: ReturnType<typeof cancelBattleScriptMultiTurnMoves> | null =
+    null;
+  let nextHitMarker = rulesContext.hitMarker;
+  let effect: 0 | 1 = 0;
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+  let message: BattleScriptAttackCancelerRechargeReceipt["message"] =
+    Object.freeze({ kind: "preserve" });
+
+  if (isRecharging) {
+    const clearedBattler = Object.freeze({
+      ...sourceBattler,
+      status2: nextStatus2,
+      rechargeTimer: 0,
+    });
+    const clearedBattlers = Object.freeze(
+      rulesContext.battlers.map((candidate, index) => (
+        index === attacker ? clearedBattler : candidate
+      )),
+    ) as unknown as BattleScriptRulesContext["battlers"];
+    const clearedRulesContext = Object.freeze({
+      ...rulesContext,
+      battlers: clearedBattlers,
+    });
+    helperResult = cancelBattleScriptMultiTurnMoves(
+      clearedRulesContext,
+      attacker,
+    );
+    nextRulesContext = helperResult.rulesContext;
+    nextHitMarker = (
+      rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+    ) >>> 0;
+    effect = 1;
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_MoveUsedMustRecharge",
+    });
+    message = Object.freeze({
+      kind: "script-owned",
+      sourceConstant: "STRINGID_PKMNMUSTRECHARGE",
+      value: 130,
+    });
+  }
+
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_FLINCH;
+  nextRulesContext = Object.freeze({
+    ...nextRulesContext,
+    atkCancelerTracker: trackerAfter,
+    hitMarker: nextHitMarker,
+  });
+  return Object.freeze({
+    kind: "advance",
+    reason: isRecharging ? "must-recharge" : "not-recharging",
+    rulesContext: nextRulesContext,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_RECHARGE",
+      attacker,
+      reason: isRecharging ? "must-recharge" : "not-recharging",
+      status2: bitFieldEffect(sourceBattler.status2, nextStatus2),
+      rechargeTimer: Object.freeze({
+        before: sourceBattler.rechargeTimer,
+        after: isRecharging ? 0 : sourceBattler.rechargeTimer,
+      }),
+      cancelMultiTurnMoves: helperResult === null
+        ? Object.freeze({ kind: "not-invoked" })
+        : Object.freeze({
+          kind: "invoked",
+          receipt: helperResult.receipt,
+        }),
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect,
+      script,
+      message,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_RECHARGE",
+        sourcePhaseAfter: "CANCELER_FLINCH",
       }),
     }),
   });
