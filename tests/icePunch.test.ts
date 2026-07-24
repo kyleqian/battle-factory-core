@@ -29,6 +29,20 @@ import {
   frozenIceCubeAnchor,
   frozenIceCubeState,
 } from "../src/engine/frozenIceCube.ts";
+import {
+  SITRUS_ITEM_ACTION_MENU_REVEAL_AGE,
+  SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
+  SITRUS_ITEM_HP_CLIMB_FIRST_AGE,
+  SITRUS_ITEM_RING_FIRST_AGE,
+  SITRUS_ITEM_STAR_FIRST_VISIBLE_AGE,
+  SITRUS_ITEM_TEXT_CLEAR_AGE,
+  sitrusDisplayedHpAtAge,
+  sitrusHealTextVisibleCharsAtAge,
+  sitrusRingMatrixAtAge,
+  sitrusRotationAtAge,
+  sitrusStarPlacementAtAge,
+  sitrusTintCoeffAtAge,
+} from "../src/engine/heldItemHeal.ts";
 
 describe("ICE_PUNCH source-composed presentation components", () => {
   it("reuses the generic hit reaction on a phase-relative clock", () => {
@@ -160,6 +174,12 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       nextControllerTextFirstAge: 625,
       nextControllerAnimationFirstAge: 710,
       nextControllerIceCubeTaskFirstAge: 717,
+      heldItemHeal: Object.freeze({
+        animationIdentityAge: 847,
+        item: "SITRUS_BERRY" as const,
+        startHp: 31,
+        endHp: 61,
+      }),
     });
     const stage = createSceneOnMovePresentation({
       move: "ICE_PUNCH",
@@ -214,8 +234,67 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       },
     ]);
     expect(sceneOnIcePunchView({ ...stage, age: 823 }).iceCubes).toEqual([]);
+    expect(sceneOnIcePunchView({ ...stage, age: 847 })).toMatchObject({
+      displayedTargetHp: 31,
+      heldItemHeal: { timelineAge: 0, item: "SITRUS_BERRY" },
+      actionMenu: { visible: false },
+    });
+    expect(sceneOnIcePunchView({ ...stage, age: 1152 }).displayedTargetHp)
+      .toBe(31);
+    expect(sceneOnIcePunchView({ ...stage, age: 1153 }).displayedTargetHp)
+      .toBe(32);
+    expect(sceneOnIcePunchView({ ...stage, age: 1182 }).displayedTargetHp)
+      .toBe(61);
+    expect(sceneOnIcePunchView({ ...stage, age: 1194 }).actionMenu.visible)
+      .toBe(false);
+    expect(sceneOnIcePunchView({ ...stage, age: 1195 }).actionMenu.visible)
+      .toBe(true);
     expect(stage.config).toEqual(before);
     expect(stage.config.controllerDisplayProfile).toBe(controllerDisplayProfile);
+  });
+
+  it("pins the reused Sitrus controller display to one relative epoch", () => {
+    expect({
+      star: SITRUS_ITEM_STAR_FIRST_VISIBLE_AGE,
+      ring: SITRUS_ITEM_RING_FIRST_AGE,
+      text: SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
+      hp: SITRUS_ITEM_HP_CLIMB_FIRST_AGE,
+      clear: SITRUS_ITEM_TEXT_CLEAR_AGE,
+      menu: SITRUS_ITEM_ACTION_MENU_REVEAL_AGE,
+    }).toEqual({
+      star: 96,
+      ring: 167,
+      text: 204,
+      hp: 306,
+      clear: 342,
+      menu: 348,
+    });
+    expect(sitrusRotationAtAge(0)).toBeNull();
+    expect(sitrusRotationAtAge(1)).toEqual({
+      pa: 255,
+      pb: 6,
+      pc: -6,
+      pd: 255,
+      y2: 0,
+    });
+    expect(sitrusRotationAtAge(95)).toMatchObject({ pb: 6, pc: -6 });
+    expect(sitrusRotationAtAge(96)).toBeNull();
+    expect(
+      sitrusStarPlacementAtAge(96, 0, { x: 72, y: 88 }),
+    ).toEqual({ frameIndex: 0, cx: 41, cy: 72 });
+    expect(sitrusTintCoeffAtAge(167)).toBe(0);
+    expect(sitrusTintCoeffAtAge(168)).toBe(7);
+    expect(sitrusRingMatrixAtAge(167)).toEqual({
+      pa: 4096,
+      pb: 0,
+      pc: 0,
+      pd: 4096,
+    });
+    expect(sitrusHealTextVisibleCharsAtAge(203)).toBe(0);
+    expect(sitrusHealTextVisibleCharsAtAge(204)).toBe(1);
+    expect(sitrusDisplayedHpAtAge(305, 31, 61)).toBe(31);
+    expect(sitrusDisplayedHpAtAge(306, 31, 61)).toBe(32);
+    expect(sitrusDisplayedHpAtAge(999, 31, 61)).toBe(61);
   });
 
   it("extracts the source-concatenated large and small crystal frames", () => {

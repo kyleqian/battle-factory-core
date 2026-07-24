@@ -70,8 +70,8 @@ describe("animation coverage ledger", () => {
         total: 276,
         unsupported: 263,
         staged: 0,
-        partial: 9,
-        exact: 4,
+        partial: 8,
+        exact: 5,
       },
       {
         tier: "openOnly",
@@ -123,7 +123,7 @@ describe("animation coverage ledger", () => {
     const leverage = animationComponentLeverage();
     expect(leverage.proven.some((item) =>
       item.provenBy.includes("MOVE_FIRE_PUNCH") &&
-      item.remainingMoves.includes("MOVE_ICE_PUNCH")
+      item.provenBy.includes("MOVE_ICE_PUNCH")
     )).toBe(true);
     expect(leverage.unproven.length).toBeGreaterThan(0);
   });

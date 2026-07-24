@@ -31,7 +31,7 @@
   },
   "denseWindow": {
     "startFrame": 1966,
-    "endFrame": 2813
+    "endFrame": 3259
   },
   "fieldProfile": {
     "playerHp": 117,
@@ -56,6 +56,12 @@
     "currentMoveResetAge": 618,
     "nextControllerTextFirstAge": 625,
     "nextControllerAnimationFirstAge": 710,
-    "nextControllerIceCubeTaskFirstAge": 717
+    "nextControllerIceCubeTaskFirstAge": 717,
+    "heldItemHeal": {
+      "animationIdentityAge": 847,
+      "item": "SITRUS_BERRY",
+      "startHp": 31,
+      "endHp": 61
+    }
   }
 }

@@ -38,22 +38,18 @@ remainder.
 
 ## Current handoff
 
-- **State:** **4 exact / 9 partial / 263 unsupported**. ICE PUNCH remains
-  partial: both opposite-side frozen-cube lifecycles and their intervening
-  controller displays are exact, but the later controller handoff remains.
-- **Did:** added the source-extracted four-subsprite FrozenIceCube compositor
-  and its side-parametric callback reducer: 1→9 alpha fade, two independently
-  delayed 13/14/15 palette-rotation cycles, 8→0 fade, sprite destruction, and
-  blend teardown. The same component drives the status-applied and
-  frozen-solid-skip spawns from controller-supplied relative clocks.
-- **Evidence:** `ice-punch-grovyle-onix.json` is now **848/848 exact** at
-  Scene-ON oracle frames 1966-2813 / ages 0-847. The +438 continuation covers
-  both complete cube tasks, “ONIX was frozen solid!” and “ONIX is frozen
-  solid!”, FRZ healthbox installation, `gCurrentMove` clear, and the settled
-  frozen-text tail. Existing ICE PUNCH player-side **462/462** and FIRE PUNCH
-  **225/225** remain exact. Tier-1 pins source geometry, alpha/palette clocks,
-  both spawn clocks, destruction, and immutable controller inputs.
-- **Next:** resume at oracle frame **2814 / age 848**, where the frozen-solid
-  hold clears and the next controller presentation begins. Complete that
-  skipped-move handoff before exact promotion. Do not claim THUNDER PUNCH
-  without its own dense evidence.
+- **State:** **5 exact / 8 partial / 263 unsupported**. ICE PUNCH is exact:
+  both attacker sides now cover complete dense move/controller windows through
+  a stable next action menu.
+- **Did:** reused the existing source-proved Sitrus presentation as a relative
+  component behind the Scene-ON seam: three rotation cycles, granting stars,
+  tint/ring, heal printer, controller-supplied HP display climb, blank hold,
+  and generic action-menu bounce. Battle outcome, item result, HP endpoints,
+  status, current move, RNG, and action selection remain fixture inputs.
+- **Evidence:** `ice-punch-grovyle-onix.json` is **1294/1294 exact** at
+  oracle frames 1966-3259 / ages 0-1293. The +446 continuation covers the
+  full skipped-move handoff, immutable 31→61 display, menu redraw at age 1195,
+  and 99-frame settled bounce. Opposite ICE PUNCH **462/462** and FIRE PUNCH
+  **225/225** remain exact. Tier-1 pins relative clocks and input immutability.
+- **Next:** supervisor choose another bounded Level-50 move/component track.
+  THUNDER PUNCH remains unsupported without its own dense evidence.
