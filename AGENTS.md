@@ -148,12 +148,22 @@ to replace the trace's capture list and `--summary` to print only mismatches
 plus the final result.
 
 For battle mechanics, use the semantic battle lab documented in
-`tools/battle-lab/README.md`. `factoryLegal` accepts legal trainer/set IDs and
-lets the ROM build a real Factory matchup. `mechanicLab` still starts from two
-legal three-Pokémon parties, then allowlists granular active-battler and field
-overrides so a worker can isolate a move, status, ability, item, weather, stat
-stage, or side condition. In both modes, the nested trace is normal controller
-input and the stock ROM—not the staging API—calculates every outcome.
+`tools/battle-lab/README.md` and `../../oracle/BATTLE_LAB.md`. `factoryLegal`
+accepts legal trainer/set IDs and lets the ROM build a real Factory matchup.
+`mechanicLab`'s preferred contract is `overrides.parties`: build **three
+complete legal Pokémon per side** (species, level, nature, six IVs, six EVs,
+moves, PP Ups, item, `abilitySlot`, friendship, gender, shiny, optional exact
+personality) before `CB2_InitBattle`, so the stock ROM derives types, ability,
+stats, HP, and PP and runs entry hooks (Intimidate, Drought, Trace…) at their
+real time. Benched records survive, so switching and switch-in hooks are
+testable; giving all four opponent slots the same move constrains the Factory
+AI to one legal choice without injecting a decision. The legacy
+`overrides.battlers` active-loadout form is for old traces only, is mutually
+exclusive with `overrides.parties`, and does **not** replay missed entry hooks.
+Neither mode may inject transient battle state (HP, status, stages, weather,
+side conditions, outcomes) — stage those as real moves. In both modes, the
+nested trace is normal controller input and the stock ROM—not the staging
+API—calculates every outcome.
 
 Run mGBA-backed Python probes through
 `python3 tools/run-mgba-probe.py <fresh-output.json> -- <probe command>`.

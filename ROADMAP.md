@@ -1191,10 +1191,9 @@ S10 has six ordered completion gates:
    Level-50 trainer/set combinations through the real rental constructor and
    `FillFactoryFrontierTrainerParty`, captures typed battle state/RNG beside
    pixels, accepts source-accurate past-rental ranks and nontrivial candidate
-   selection order, and keeps canonical `/v1/run` hashes unchanged. Its current
-   interim `mechanicLab` can alter active loadout fields (moves/PP Ups/item/
-   ability/types/friendship), but the former HP/status/stage/volatile/weather/
-   side-condition injector was explicitly retired by user decision on
+   selection order, and keeps canonical `/v1/run` hashes unchanged. The former
+   HP/status/stage/volatile/weather/side-condition injector was explicitly
+   retired by user decision on
    2026-07-24. Live Scene-OFF and Scene-ON smoke traces now create Leech Seed,
    Swords Dance, confusion plus Own Tempo immunity, Choice Band-amplified
    damage, Rain Dance weather, and Perish Song counters only through real
@@ -1204,10 +1203,53 @@ S10 has six ordered completion gates:
    Validation also
    rejects Boolean numeric aliases, invalid source IDs, forbidden state
    fields, malformed symbol limits, and negative HTTP body lengths with
-   structured errors. Gate 2 remains open for the full pre-init Pokémon
-   builder above, Noland, bench construction, switch-in hooks, controlled
-   opponent actions, and an earlier checkpoint that regenerates scouting
-   commentary.
+   structured errors.
+
+   **Pre-battle Pokémon builder SHIPPED (harness `b30c5d8`, edge coverage
+   `d3a0cbb`, 2026-07-24 14:10--14:18 — after this run's previous ROADMAP
+   revision, so earlier entries describing it as missing are stale):**
+   `overrides.parties` is now the preferred `mechanicLab` contract and
+   satisfies this gate's builder requirement in full. It constructs **three
+   complete Pokémon on each side** — species, level, nature, six IVs, six EVs
+   (per-stat `0..255`, total `<= 510`), four moves, PP Ups, held item,
+   species-valid `abilitySlot`, friendship, `gender`, `shiny`, and an optional
+   exact `personality` — writing valid encrypted, checksummed Gen-3
+   `struct Pokemon` records after the normal Factory constructors and **before
+   `CB2_InitBattle`**, so the stock ROM derives types, ability, experience,
+   stats, max/current HP, and current PP from the pinned tables. Consequences
+   for this run, each previously listed as an open Gate-2 remainder and now
+   **closed**:
+   - **switch-in hooks are real** — Drought, Sand Stream, Intimidate, and Trace
+     run at their true time rather than being retro-applied;
+   - **bench construction is real** — all three persistent records per side
+     survive, `state.parties.player`/`.opponent` expose IVs/EVs/PP/HP/status/
+     personality/derived types/ability/`checksumValid`, active battlers carry
+     `partyIndex`, and an ordinary party-menu switch reconstructs from the
+     custom party;
+   - **controlled opponent actions are available without injecting an AI
+     result** — give all four opponent slots the same move and the Factory AI
+     still executes normally against a single legal choice.
+   The legacy `overrides.battlers` active-loadout form remains only for old
+   traces and is mutually exclusive with `overrides.parties`; it does **not**
+   replay missed entry hooks and reconstructs switches from the unmodified
+   party, so new mechanic work uses `overrides.parties`. Also landed:
+   `bin/oracle lab` CLI exposure (`a23f01c`), loadout staging before either
+   side's first action choice (`96603ae`), type/friendship hook proofs
+   (`becf6ba`), a padded-`SideTimer` decode fix (`e24c3ea`), and live Factory
+   trainer-AI decision coverage (`6f62bcd`).
+
+   **Gate 2 remainder (exactly two items):** Noland's challenge-2/challenge-5
+   final battles are explicitly rejected until the schema can represent
+   Frontier Brains without pretending they are ordinary trainer IDs; and the
+   lab's first checkpoint sits *after* the scouting dialogue, so trainer/set
+   staging controls the battle but cannot yet regenerate the attendant's
+   favorite-type/style commentary (needs an earlier semantic checkpoint).
+   Version 1 is otherwise bounded to Level-50 singles, challenge indices 0--7,
+   and one fixed Battle Scene profile per running service. **No other Gate-2
+   capability blocks Gates 3--6:** abilities, switching, entry hooks, held
+   items, statuses, and trainer-AI decisions are all directly verifiable
+   against the stock ROM today. Contract and examples:
+   `../../oracle/BATTLE_LAB.md`; scenarios in `tools/battle-lab/`.
 3. [ ] **General battle kernel:** replace preset-damage/action fixtures as the
    production rules path with source-derived action selection, priority/speed
    ordering, accuracy, critical hits, damage, targeting, PP, move-script

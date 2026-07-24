@@ -27,15 +27,31 @@ the source ranges or with illegal species/item duplication. Past rentals
 unlock higher-band candidate positions at the source's real thresholds. The
 ROM constructs the parties and runs normal battle initialization.
 
-`mechanicLab` still requires those two legal three-Pokémon parties. They are
-the baseline species and stats. Its interim v1 contract permits only active
-loadout choices—move slots/PP Ups, item, ability, types, and friendship—so a
-worker can isolate a mechanic before supplying ordinary controller input.
-These substitutions happen after the initial send-out sequence. Persistent
-checks consulted during later move execution work (for example Own Tempo and
-Choice Band), but an overridden Drought or Intimidate does not retroactively
-replay its missed switch-in hook. S10's pre-battle builder is required for
-entry-hook and switching coverage.
+`mechanicLab` still routes through a legal Factory base battle, then takes one
+of two forms.
+
+**`overrides.parties` (preferred, shipped 2026-07-24 — harness `b30c5d8`).**
+The complete pre-battle builder. Supply exactly three Pokémon per side; each
+takes `species` and four `moves` plus optional `level`, `nature`, six `ivs`
+(`0..31`), six `evs` (`0..255` each, total `<= 510`), `ppUps`, `item`,
+`abilitySlot` (must exist on the species), `friendship`, `gender`, `shiny`, and
+an exact `personality`. Records are written encrypted and checksummed after the
+Factory constructors but **before `CB2_InitBattle`**, so Emerald derives types,
+ability, experience, stats, max/current HP, and PP itself. Entry hooks
+(Intimidate, Drought, Sand Stream, Trace) therefore fire at their real time,
+all three bench records survive for switching tests, and `state.parties.*`
+exposes every persistent record with `checksumValid`; active battlers carry
+`partyIndex`. To constrain the opponent without injecting an AI result, give
+all four of its slots the same move — the Factory AI still runs normally.
+
+**`overrides.battlers` (legacy).** Active-battler loadout only—move slots/PP
+Ups, item, ability, types, friendship—applied after the initial send-out and
+before either side's first action choice. Mutually exclusive with
+`overrides.parties`. Persistent checks consulted during later move execution
+work (Own Tempo, Choice Band), but a substituted Drought or Intimidate does
+**not** replay its missed switch-in hook, and switching reconstructs from the
+unmodified party. Keep it for existing traces; use `overrides.parties` for new
+mechanic, entry-hook, and switching work.
 
 Override IDs are source-bounded: moves `0..354`, items `0..376`, abilities
 `0..77`, and types `0..17`. The setup arrays contain raw catalog records;
@@ -50,12 +66,8 @@ moves, items, abilities, switching, and end-turn processing. The nested
 `trace` is ordinary controller input; semantic captures expose the resulting
 state read-only.
 
-S10 owns a future full Mechanics Lab builder that constructs each Pokémon
-before battle initialization: species, level, nature, IVs, EVs, moves,
-PP Ups, held item, species-valid ability slot, friendship, and
-relevant personality properties. Emerald must derive its types, stats, max
-HP, ability, gender, maximum/current PP, and clean starting battle state. The
-interim live loadout substitutions are groundwork, not that completed builder.
+That builder is no longer future work — see `overrides.parties` above and
+`../../../../oracle/BATTLE_LAB.md` for the authoritative contract.
 
 Version 1 is Level-50 singles. It stages regular trainers rather than Noland,
 and applies interim loadout choices only to active battlers rather than
