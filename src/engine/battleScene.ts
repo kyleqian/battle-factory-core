@@ -572,6 +572,7 @@ import {
   sceneOnFaintAttackView,
   sceneOnFirePunchView,
   sceneOnIcePunchView,
+  sceneOnQuickAttackView,
   sceneOnRockSlideView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
@@ -8951,8 +8952,13 @@ export function turn9QuickAttackLungeOffset(t: number, pressTick: number): { x2:
  * opponent-side Pidgeotto sprite/corner (both sit in the same opponent-side
  * screen region, `GROVYLE_CORNER`/`PIDGEOTTO_CORNER` both `x=144`).
  */
-function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity, bgPaletteOverride?: RgbColor[][]): void {
-  const { tileset } = pidgeottoFrontSprite;
+function eraseSpriteFootprint(
+  fb: Uint8Array,
+  tileset: Tileset,
+  corner: Readonly<{ x: number; y: number }>,
+  maxY: number = Infinity,
+  bgPaletteOverride?: RgbColor[][],
+): void {
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
       const tile = tileset.tiles[ty * tileset.columns + tx];
@@ -8960,8 +8966,8 @@ function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity, bgPale
       for (let py = 0; py < 8; py += 1) {
         for (let px = 0; px < 8; px += 1) {
           if (tile[py * 8 + px] === 0) continue;
-          const x = PIDGEOTTO_CORNER.x + tx * 8 + px;
-          const y = PIDGEOTTO_CORNER.y + ty * 8 + py;
+          const x = corner.x + tx * 8 + px;
+          const y = corner.y + ty * 8 + py;
           if (y >= maxY) continue;
           const bg = healthboxBackgroundColorAt(x, y, bgPaletteOverride);
           if (bg) setPixel(fb, x, y, bg);
@@ -8969,6 +8975,16 @@ function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity, bgPale
       }
     }
   }
+}
+
+function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity, bgPaletteOverride?: RgbColor[][]): void {
+  eraseSpriteFootprint(
+    fb,
+    pidgeottoFrontSprite.tileset,
+    PIDGEOTTO_CORNER,
+    maxY,
+    bgPaletteOverride,
+  );
 }
 
 /** Same tile-grid iteration as `drawSpriteSheet`, but skipping any pixel at screen `y >= maxY` - see `TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y`'s own doc comment for why the lunge needs this. */
@@ -13871,6 +13887,148 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "QUICK_ATTACK") {
+    const view = sceneOnQuickAttackView(state);
+    const { attacker, target } = view;
+    if (
+      attacker.species !== "PIDGEOTTO"
+      || attacker.geometry.side !== "opponent"
+      || target.species !== "ONIX"
+      || target.geometry.side !== "player"
+    ) {
+      throw new Error(
+        `unsupported staged QUICK_ATTACK pair ${attacker.species}->${target.species}`,
+      );
+    }
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const attackerCorner = attacker.geometry.spriteCorner;
+    const attackerClipY = attackerCorner.y + 55;
+    drawSpriteSheet(
+      fb,
+      pidgeottoFrontSprite.tileset,
+      pidgeottoFrontSprite.palette,
+      attackerCorner.x,
+      attackerCorner.y,
+    );
+    if (
+      view.attackerOffset.x2 !== 0
+      || view.attackerOffset.y2 !== 0
+      || view.afterimages.length > 0
+    ) {
+      eraseSpriteFootprint(
+        fb,
+        pidgeottoFrontSprite.tileset,
+        attackerCorner,
+        attackerClipY,
+      );
+      drawSpriteSheetClippedBelow(
+        fb,
+        pidgeottoFrontSprite.tileset,
+        pidgeottoFrontSprite.palette,
+        attackerCorner.x + view.attackerOffset.x2,
+        attackerCorner.y + view.attackerOffset.y2,
+        attackerClipY,
+      );
+      const slot4 = view.afterimages.find(({ slot }) => slot === 4);
+      for (const image of view.afterimages) {
+        const skipMask =
+          image.slot === 3 && slot4
+            ? turn9QuickAttackOpaqueMask(
+                pidgeottoFrontSprite.tileset,
+                attackerCorner.x + slot4.x2,
+                attackerCorner.y + slot4.y2,
+                attackerClipY,
+              )
+            : null;
+        if (skipMask) {
+          drawSpriteSheetBlendedOverFbSkipping(
+            fb,
+            pidgeottoFrontSprite.tileset,
+            pidgeottoFrontSprite.palette,
+            attackerCorner.x + image.x2,
+            attackerCorner.y + image.y2,
+            12,
+            8,
+            attackerClipY,
+            skipMask,
+          );
+        } else {
+          drawSpriteSheetBlendedOverFb(
+            fb,
+            pidgeottoFrontSprite.tileset,
+            pidgeottoFrontSprite.palette,
+            attackerCorner.x + image.x2,
+            attackerCorner.y + image.y2,
+            12,
+            8,
+            attackerClipY,
+          );
+        }
+      }
+    }
+
+    drawSpriteSheet(
+      fb,
+      onixBackSprite.tileset,
+      onixBackSprite.palette,
+      target.geometry.spriteCorner.x + view.targetShakeX2,
+      target.geometry.spriteCorner.y,
+    );
+    if (view.impactVisible) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        target.geometry.animationCenter.x - 16,
+        target.geometry.animationCenter.y - 16,
+        TURN9_HITSPLAT_MATRIX,
+        TURN9_HITSPLAT_MATRIX,
+        12,
+        8,
+        true,
+        "static",
+      );
+    }
+    drawSendOutHealthbox(
+      fb,
+      0,
+      pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      onixPlayerHealthboxContentForState(
+        state.config.fieldProfile.playerHp,
+        state.config.fieldProfile.playerStatus,
+        state.config.fieldProfile.playerGender,
+      ),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      view.moveText.line1,
+      view.moveText.line2,
+      Math.max(
+        0,
+        Math.min(
+          view.moveText.line1.length + view.moveText.line2.length,
+          view.age - state.config.moveTextStartAge + 1,
+        ),
+      ),
+    );
+    return;
+  }
+
   if (state.config.move === "FEATHER_DANCE") {
     const view = sceneOnFeatherDanceView(state);
     const { attacker, target } = view;

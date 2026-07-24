@@ -42,9 +42,9 @@
     {
       "move": "MOVE_QUICK_ATTACK",
       "status": "partial",
-      "covered": ["opponent-front PIDGEOTTO to player-back ONIX"],
-      "evidence": ["tools/compare/traces/turn9-quickattack.json"],
-      "remaining": "Prove portability and the player-back attacker orientation."
+      "covered": ["opponent-front PIDGEOTTO to player-back ONIX", "portable mechanicLab opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-77 / oracle frames 46-116 (71/71): complete kickoff printer, source-relative elliptical travel, all four blended afterimages, impact, six-cycle target-shake display latch, move-script teardown, and opponent animation-controller command release through the shared Scene-ON adapter; immutable 117→110 HP endpoints and explicit geometry are Tier-1 pinned"],
+      "evidence": ["tools/compare/traces/turn9-quickattack.json", "tools/battle-lab/mechanic-quick-attack-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-pidgeotto-onix.json", "tools/compare/quickAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py"],
+      "remaining": "Extend the portable case past frame 116 through generic hit/HP drain/result/current-move clear and the next stable controller boundary, then independently prove the source-required player-back attacker orientation before exact promotion."
     },
     {
       "move": "MOVE_AERIAL_ACE",
@@ -134,7 +134,7 @@
         "MOVE_QUICK_ATTACK",
         "MOVE_AERIAL_ACE"
       ],
-      "goal": "Generalize the already-partial translated impact/shake seam before closing each move's orientation-specific travel choreography."
+      "goal": "QUICK ATTACK now proves the relative travel/afterimage/impact/shake chassis in a portable opponent-front case at 71/71 through animation-controller release; its later generic resolution and player-back attacker orientation remain. AERIAL ACE is batch-checked at 93/93 canonical but retains its independent cutting-slice/palette choreography and portability remainder."
     }
   ],
   "variantAudits": {
