@@ -65,14 +65,15 @@ export interface SummaryPageLayerOffsets {
 export function summaryPageLayerOffsets(
   transition: SummaryPageTransition,
 ): SummaryPageLayerOffsets {
-  const steps = Math.min(SUMMARY_PAGE_SCROLL_STEPS, transition.elapsed);
   if (transition.direction === "right") {
+    const steps = Math.min(SUMMARY_PAGE_SCROLL_STEPS, transition.elapsed);
     return {
       movingPage: transition.toPage,
       movingX: 256 - steps * SUMMARY_PAGE_SCROLL_STEP_PX,
       fixedPage: transition.fromPage,
     };
   }
+  const steps = Math.min(SUMMARY_PAGE_SCROLL_STEPS, transition.elapsed);
   return {
     movingPage: transition.fromPage,
     movingX: steps * SUMMARY_PAGE_SCROLL_STEP_PX,

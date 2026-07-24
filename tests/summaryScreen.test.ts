@@ -151,13 +151,68 @@ describe("summaryScreen: generic page navigation", () => {
 
     const skills = run(right, SUMMARY_PAGE_TRANSITION_TICKS);
     const left = requestSummaryPageChange(skills, "left");
+    expect(summaryPageLayerOffsets(left.pageTransition!)).toEqual({
+      movingPage: "skills",
+      movingX: 0,
+      fixedPage: "info",
+    });
+    const left1 = run(left, 1);
+    expect(summaryPageLayerOffsets(left1.pageTransition!)).toEqual({
+      movingPage: "skills",
+      movingX: 32,
+      fixedPage: "info",
+    });
+    const left2 = run(left, 2);
+    expect(summaryPageLayerOffsets(left2.pageTransition!)).toEqual({
+      movingPage: "skills",
+      movingX: 64,
+      fixedPage: "info",
+    });
     const left4 = run(left, 4);
     expect(summaryPageLayerOffsets(left4.pageTransition!)).toEqual({
       movingPage: "skills",
       movingX: 128,
       fixedPage: "info",
     });
+    const left9 = run(left, 9);
+    expect(summaryPageLayerOffsets(left9.pageTransition!)).toEqual({
+      movingPage: "skills",
+      movingX: 256,
+      fixedPage: "info",
+    });
     expect(left4.selectedSlot).toBe(5);
+  });
+
+  it("preserves slot ownership and rejects input through the reverse wipe, then restores Info input readiness", () => {
+    const skills = run(
+      requestSummaryPageChange(settled(4), "right"),
+      SUMMARY_PAGE_TRANSITION_TICKS,
+    );
+    const left = requestSummaryPageChange(skills, "left");
+    const inFlight = run(left, SUMMARY_PAGE_TRANSITION_TICKS - 1);
+    expect(inFlight).toMatchObject({
+      selectedSlot: 4,
+      page: "info",
+      onInfoPage: true,
+      pageTransition: { fromPage: "skills", toPage: "info", direction: "left", elapsed: 9 },
+    });
+    expect(requestSummaryPageChange(inFlight, "right")).toBe(inFlight);
+    expect(requestSummaryScreenExit(inFlight)).toBe(inFlight);
+
+    const ready = advanceSummaryScreen(inFlight);
+    expect(ready).toMatchObject({
+      selectedSlot: 4,
+      page: "info",
+      onInfoPage: true,
+      pageTransition: null,
+      isOpen: true,
+    });
+    expect(requestSummaryPageChange(ready, "right").pageTransition).toMatchObject({
+      fromPage: "info",
+      toPage: "skills",
+      direction: "right",
+      elapsed: 0,
+    });
   });
 
   it("rejects LEFT at the first page and RIGHT at the final page", () => {

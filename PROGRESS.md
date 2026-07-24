@@ -4,6 +4,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 350 — S9 OFF Skills→Info reverse layered wipe: **GREEN — 56/56 exact**
+
+- **State:** LEFT now returns settled ONIX Skills to an input-ready Info page
+  through the generic eight-step BG1/BG2 wipe; the full round trip is zero diff.
+- **Did:** reused source-relative layer offsets for the outgoing page, kept
+  fixed BG3/OBJ, cleared moving-page windows, and deferred source title/
+  pagination replacement until install. Tier-1 pins reverse offsets, gates,
+  readiness, and immutable selected-slot ownership.
+- **Next:** supervisor verify this LEFT checkpoint and choose the next bounded
+  S9 route; mon switching, Moves pages, and move-select remain unclaimed.
+- **Notes:** round trip **56/56** (RIGHT **25/25** preserved); install **3/3**;
+  Info ONIX **122/122** + MAGBY **132/132**. Tier-1 **1289/1289**, build
+  green. No absolute ticks, framebuffer assets, runtime oracle/ROM, or
+  ROADMAP/ISSUES edits.
+
+---
 ## 349 — S9 OFF Info→Skills layered summary wipe: **GREEN — 25/25 exact**
 
 - **State:** RIGHT now carries Skills through the source's eight 32px BG1/BG2
@@ -38,21 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** Info regressions **122/122 + 132/132 exact**. Tier-1
   **1273/1273** and build green. No absolute ticks, framebuffer assets,
   runtime oracle/ROM, battle/controller edits, or ROADMAP/ISSUES changes.
-
----
-## 347 — S8 OFF duplicate-species composition: **GREEN — 52/52 exact**
-
-- **State:** the final enumerated swap-YES UI remainder is exact across the
-  staged duplicate picker, OpenMonPic, source error, close, reconstruction,
-  and first fresh input. All finite Gate-2 UI fixtures are now green; ROADMAP
-  remains untouched for supervisor verification.
-- **Did:** corrected the dev-only stage to exercise the live duplicate branch,
-  then added phase-relative direct-open window/OAM timing, PKMN error chrome,
-  gray target-2 ball composition, logical-vs-loaded species-window ownership,
-  popup suppression, and returned-picker copy transients.
-- **Next:** supervisor verify the finite S8 gates and record stage disposition;
-  do not resume canonical Battle 2 after tick 33331.
-- **Notes:** duplicate **52/52**, from **1/52 / 97,450 px** to zero diff.
-  Regressions: **130/130 + 66/66 + 69/69 + 44/44 + 59/59 + 113/113**.
-  Tier-1 **1268/1268**, build **5.679 MB**. No logic/RNG/identity mutation,
-  absolute ticks, framebuffer assets, runtime oracle/ROM, or ROADMAP edits.

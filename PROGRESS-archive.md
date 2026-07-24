@@ -1,3 +1,21 @@
+## 347 — S8 OFF duplicate-species composition: **GREEN — 52/52 exact**
+
+- **State:** the final enumerated swap-YES UI remainder is exact across the
+  staged duplicate picker, OpenMonPic, source error, close, reconstruction,
+  and first fresh input. All finite Gate-2 UI fixtures are now green; ROADMAP
+  remains untouched for supervisor verification.
+- **Did:** corrected the dev-only stage to exercise the live duplicate branch,
+  then added phase-relative direct-open window/OAM timing, PKMN error chrome,
+  gray target-2 ball composition, logical-vs-loaded species-window ownership,
+  popup suppression, and returned-picker copy transients.
+- **Next:** supervisor verify the finite S8 gates and record stage disposition;
+  do not resume canonical Battle 2 after tick 33331.
+- **Notes:** duplicate **52/52**, from **1/52 / 97,450 px** to zero diff.
+  Regressions: **130/130 + 66/66 + 69/69 + 44/44 + 59/59 + 113/113**.
+  Tier-1 **1268/1268**, build **5.679 MB**. No logic/RNG/identity mutation,
+  absolute ticks, framebuffer assets, runtime oracle/ROM, or ROADMAP edits.
+
+---
 ## 346 — S8 OFF duplicate-species loaded-display repair: **GREEN PARTIAL**
 
 - **State:** presentation preserves the source's already-loaded GROVYLE display

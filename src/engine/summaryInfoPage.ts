@@ -359,7 +359,7 @@ function compose(
     text(natureName, WIN_MEMO.x, WIN_MEMO.y + 1, MEMO_NATURE_COLOR, PAL6);
     const natureCursorX = WIN_MEMO.x + measureText(font, charmap, natureName) + font.letterSpacing;
     text(" nature", natureCursorX, WIN_MEMO.y + 1, MEMO_MISC_COLOR, PAL6);
-  } else if (page === "skills" && destinationChromeInstalled) {
+  } else if (page === "skills" && destinationChromeInstalled && !clearPageWindows) {
     const center = (value: string, width: number, inset: number) =>
       inset + Math.max(0, Math.floor((width - measureText(font, charmap, value)) / 2));
     const digitCodes = (value: number, width: number): number[] => {
@@ -453,9 +453,8 @@ export function renderSummaryPageTransition(
   const fb = createFramebuffer();
   const layers = summaryPageLayerOffsets(transition);
   if (
-    transition.fromPage === "info" &&
-    transition.toPage === "skills" &&
-    transition.direction === "right"
+    layers.movingPage === "skills" &&
+    layers.fixedPage === "info"
   ) {
     compose(
       fb,
@@ -466,7 +465,7 @@ export function renderSummaryPageTransition(
       monAnimClock,
       true,
       layers.movingX,
-      false,
+      transition.fromPage === "skills",
     );
     return fb;
   }

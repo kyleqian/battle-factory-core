@@ -53,6 +53,7 @@ import {
   openSummaryScreen,
   requestSummaryScreenExit,
   requestSummaryPageChange,
+  summaryPageLayerOffsets,
   type SummaryScreenState,
 } from "./summaryScreen.ts";
 import {
@@ -2038,17 +2039,26 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (!t) {
     if (summary.pageTransition) {
       // ChangePage's task handoff is installed immediately but its outgoing
-      // window clear is not visible until elapsed=3. The persistent mon
-      // callback does continue through this install/rejection window.
-      return summary.pageTransition.elapsed === 0
-        ? renderSummaryInfoPage(summary.selectedSlot, summary.openElapsed + 1)
-        : summary.pageTransition.elapsed <= 2
-          ? renderSummaryInfoPageCleared(summary.selectedSlot, summary.openElapsed + 1)
-          : renderSummaryPageTransition(
-              summary.selectedSlot,
-              summary.pageTransition,
-              summary.openElapsed + 1,
-            );
+      // window timing follows which BG layer moves. A forward wipe parks
+      // the destination off-screen while Info clears for two callbacks; a
+      // reverse wipe leaves the outgoing Skills layer fully settled for one
+      // callback, then clears its BG0 windows as that source layer moves.
+      // The persistent mon callback continues through both handoffs.
+      const pageTransition = summary.pageTransition;
+      const layers = summaryPageLayerOffsets(pageTransition);
+      if (pageTransition.elapsed === 0) {
+        return pageTransition.fromPage === "skills"
+          ? renderSummarySkillsPage(summary.selectedSlot, summary.openElapsed + 1)
+          : renderSummaryInfoPage(summary.selectedSlot, summary.openElapsed + 1);
+      }
+      if (layers.movingPage === pageTransition.toPage && pageTransition.elapsed <= 2) {
+        return renderSummaryInfoPageCleared(summary.selectedSlot, summary.openElapsed + 1);
+      }
+      return renderSummaryPageTransition(
+        summary.selectedSlot,
+        pageTransition,
+        summary.openElapsed + 1,
+      );
     }
     return summary.isOpen
       ? summary.page === "skills"
