@@ -8,11 +8,47 @@ export type BattleScriptEventProvenance = Readonly<{
   instructionExecution: number;
 }>;
 
+export type BattleScriptBattlerId = 0 | 1 | 2 | 3;
+
+/**
+ * Semantic contents of one of Emerald's three battle-text substitution
+ * buffers. Tokens are resolved by the injected source-context boundary; this
+ * deliberately does not expose the controller's encoded byte transport.
+ */
+export type BattleScriptTextBufferSnapshot = readonly string[];
+
+export type BattleScriptSelectionMessageSnapshot = Readonly<{
+  currentMove: number;
+  originallyUsedMove: number;
+  lastItem: number;
+  lastAbility: number;
+  scriptingBattler: BattleScriptBattlerId;
+  scriptPartyIndex: number;
+  battlerAbilities: readonly [
+    number,
+    number,
+    number,
+    number,
+  ];
+  textBuffers: readonly [
+    BattleScriptTextBufferSnapshot,
+    BattleScriptTextBufferSnapshot,
+    BattleScriptTextBufferSnapshot,
+  ];
+}>;
+
 export type BattleScriptSemanticEventPayload =
   | Readonly<{
     kind: "message";
     messageId: string;
     substitutions: readonly string[];
+  }>
+  | Readonly<{
+    kind: "selection-message";
+    audience: "player-only";
+    battler: BattleScriptBattlerId;
+    stringId: number;
+    snapshot: BattleScriptSelectionMessageSnapshot;
   }>
   | Readonly<{
     kind: "hp-change";

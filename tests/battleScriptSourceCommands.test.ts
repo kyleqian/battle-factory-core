@@ -15,6 +15,7 @@ import {
   createBattleScriptSourceCommandHandlers,
   type BattleScriptHalfwordResolverPort,
   type BattleScriptMessagePreparationPort,
+  type BattleScriptSelectionMessagePreparationPort,
 } from "../src/engine/battleScriptSourceCommands.ts";
 import {
   loadBattleScriptProgram,
@@ -56,6 +57,21 @@ const rules: FixtureRules = Object.freeze({
   marker: "source-command-neutral",
 });
 
+const selectionSnapshot = Object.freeze({
+  currentMove: 89,
+  originallyUsedMove: 89,
+  lastItem: 1,
+  lastAbility: 9,
+  scriptingBattler: 0 as const,
+  scriptPartyIndex: 2,
+  battlerAbilities: Object.freeze([9, 22, 65, 0]) as readonly [number, number, number, number],
+  textBuffers: Object.freeze([
+    Object.freeze(["attacker"]),
+    Object.freeze(["move"]),
+    Object.freeze(["item"]),
+  ]) as readonly [readonly string[], readonly string[], readonly string[]],
+});
+
 function instruction(opcodeName: string, occurrence = 0): BattleScriptInstruction {
   const matches = program.instructions.filter((candidate) => candidate.opcodeName === opcodeName);
   const found = matches[occurrence];
@@ -94,10 +110,19 @@ function sourceHandlers(
     substitutions: Object.freeze([context.state.rulesContext.attacker]),
   }),
   resolveHalfwordOperand: BattleScriptHalfwordResolverPort<FixtureRules> = () => 3,
+  prepareSelectionMessage: BattleScriptSelectionMessagePreparationPort<FixtureRules> = (
+    _context,
+    operand,
+  ) => Object.freeze({
+    attacker: 0,
+    stringId: operand.expression.length,
+    snapshot: selectionSnapshot,
+  }),
 ) {
   return createBattleScriptSourceCommandHandlers(program, Object.freeze({
     isControllerIdle: () => idle,
     prepareMessage,
+    prepareSelectionMessage,
     resolveHalfwordOperand,
   }));
 }
@@ -106,10 +131,11 @@ function composedHandlers(
   idle: boolean,
   prepareMessage?: BattleScriptMessagePreparationPort<FixtureRules>,
   resolveHalfwordOperand?: BattleScriptHalfwordResolverPort<FixtureRules>,
+  prepareSelectionMessage?: BattleScriptSelectionMessagePreparationPort<FixtureRules>,
 ): BattleScriptOpcodeHandlers<FixtureRules> {
   return Object.freeze({
     ...createBattleScriptControlHandlers<FixtureRules>(program),
-    ...sourceHandlers(idle, prepareMessage, resolveHalfwordOperand),
+    ...sourceHandlers(idle, prepareMessage, resolveHalfwordOperand, prepareSelectionMessage),
   });
 }
 
@@ -308,9 +334,10 @@ describe("source-mapped Battle Script scheduler commands", () => {
     }));
   });
 
-  it("composes exactly the five scheduler commands with the five existing controls", () => {
+  it("composes exactly the six scheduler commands with the five existing controls", () => {
     expect(Object.keys(sourceHandlers(true)).map(Number).sort((left, right) => left - right)).toEqual([
       16,
+      17,
       18,
       57,
       58,
@@ -318,6 +345,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
     ]);
     expect(Object.keys(composedHandlers(true)).map(Number).sort((left, right) => left - right)).toEqual([
       16,
+      17,
       18,
       40,
       57,
@@ -424,12 +452,12 @@ describe("source-mapped Battle Script scheduler commands", () => {
     expect(receivedOperand).toBe(target.operands[0]);
     expect(first.state.programCounter).toBe(target.programCounter + 1);
     expect(first.state.instructionsExecuted).toBe(1);
-    expect(first.state.scheduler).toEqual({
+    expect(first.state.scheduler).toMatchObject({
       messageDisplayActive: true,
       pauseCounterBattle: 0,
     });
     expect(Object.isFrozen(first.state.scheduler)).toBe(true);
-    expect(initial.scheduler).toEqual({
+    expect(initial.scheduler).toMatchObject({
       messageDisplayActive: false,
       pauseCounterBattle: 0,
     });
@@ -490,7 +518,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
     const printed = stepBattleScriptMachine(program, initial, handlers);
     expect(printed.kind).toBe("advanced");
     expect(printed.state.programCounter).toBe(wait.programCounter);
-    expect(printed.state.scheduler).toEqual({
+    expect(printed.state.scheduler).toMatchObject({
       messageDisplayActive: true,
       pauseCounterBattle: 0,
     });
@@ -499,7 +527,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
     expect(firstWait.kind).toBe("scheduler-progressed");
     expect(firstWait.state.programCounter).toBe(wait.programCounter);
     expect(firstWait.state.instructionsExecuted).toBe(2);
-    expect(firstWait.state.scheduler).toEqual({
+    expect(firstWait.state.scheduler).toMatchObject({
       messageDisplayActive: true,
       pauseCounterBattle: 1,
     });
@@ -511,14 +539,14 @@ describe("source-mapped Battle Script scheduler commands", () => {
     expect(completed.kind).toBe("advanced");
     expect(completed.state.programCounter).toBe(wait.programCounter + 1);
     expect(completed.state.instructionsExecuted).toBe(3);
-    expect(completed.state.scheduler).toEqual({
+    expect(completed.state.scheduler).toMatchObject({
       messageDisplayActive: false,
       pauseCounterBattle: 0,
     });
     expect(completed.state.rulesContext).toBe(printed.state.rulesContext);
     expect(completed.state.rng).toBe(printed.state.rng);
     expect(completed.state.events).toBe(printed.state.events);
-    expect(initial.scheduler).toEqual({
+    expect(initial.scheduler).toMatchObject({
       messageDisplayActive: false,
       pauseCounterBattle: 0,
     });
@@ -558,13 +586,13 @@ describe("source-mapped Battle Script scheduler commands", () => {
     const pauseBelow = stepBattleScriptMachine(program, pauseInitial, handlers);
     expect(pauseBelow.kind).toBe("scheduler-progressed");
     expect(pauseBelow.state.programCounter).toBe(pause.programCounter);
-    expect(pauseBelow.state.scheduler).toEqual({
+    expect(pauseBelow.state.scheduler).toMatchObject({
       messageDisplayActive: false,
       pauseCounterBattle: 2,
     });
     const pauseAt = stepBattleScriptMachine(program, pauseBelow.state, handlers);
     expect(pauseAt.kind).toBe("advanced");
-    expect(pauseAt.state.scheduler).toEqual({
+    expect(pauseAt.state.scheduler).toMatchObject({
       messageDisplayActive: false,
       pauseCounterBattle: 0,
     });
@@ -576,12 +604,12 @@ describe("source-mapped Battle Script scheduler commands", () => {
     const waitAt = stepBattleScriptMachine(program, waitInitial, handlers);
     expect(waitAt.kind).toBe("advanced");
     expect(waitAt.state.programCounter).toBe(wait.programCounter + 1);
-    expect(waitAt.state.scheduler).toEqual({
+    expect(waitAt.state.scheduler).toMatchObject({
       messageDisplayActive: false,
       pauseCounterBattle: 0,
     });
     expect(pauseInitial.scheduler.pauseCounterBattle).toBe(1);
-    expect(waitInitial.scheduler).toEqual({
+    expect(waitInitial.scheduler).toMatchObject({
       messageDisplayActive: true,
       pauseCounterBattle: 2,
     });
@@ -597,7 +625,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
     );
     expect(result.kind).toBe("scheduler-progressed");
     expect(result.state.programCounter).toBe(pause.programCounter);
-    expect(result.state.scheduler).toEqual({
+    expect(result.state.scheduler).toMatchObject({
       messageDisplayActive: false,
       pauseCounterBattle: 0,
     });
@@ -682,7 +710,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
       programCounter: pause.programCounter,
       budget: 4,
     });
-    expect(result.state.scheduler).toEqual({
+    expect(result.state.scheduler).toMatchObject({
       messageDisplayActive: false,
       pauseCounterBattle: 4,
     });

@@ -1,9 +1,14 @@
 import type {
+  BattleScriptBattlerId,
+  BattleScriptSelectionMessageSnapshot,
   BattleScriptSemanticEventPayload,
 } from "./battleScriptEvents.ts";
 import {
   advanceBattleScriptInstruction,
+  createBattleScriptSelectionMessageSnapshot,
   createBattleScriptSchedulerState,
+  isBattleScriptBattlerId,
+  markBattleScriptControllerPending,
   transitionBattleScriptCommand,
   type BattleScriptBlockReason,
   type BattleScriptCommandTransition,
@@ -36,9 +41,21 @@ export type BattleScriptHalfwordResolverPort<RulesContext extends object> = (
   operand: BattleScriptOperand,
 ) => number | null;
 
+export type BattleScriptSelectionMessagePreparation = Readonly<{
+  attacker: BattleScriptBattlerId;
+  stringId: number;
+  snapshot: BattleScriptSelectionMessageSnapshot;
+}>;
+
+export type BattleScriptSelectionMessagePreparationPort<RulesContext extends object> = (
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  stringIdOperand: BattleScriptOperand,
+) => BattleScriptSelectionMessagePreparation | null;
+
 export type BattleScriptSourceCommandPorts<RulesContext extends object> = Readonly<{
   isControllerIdle: BattleScriptControllerIdlePort<RulesContext>;
   prepareMessage: BattleScriptMessagePreparationPort<RulesContext>;
+  prepareSelectionMessage: BattleScriptSelectionMessagePreparationPort<RulesContext>;
   resolveHalfwordOperand: BattleScriptHalfwordResolverPort<RulesContext>;
 }>;
 
@@ -92,6 +109,20 @@ function unavailableHalfwordReason<RulesContext extends object>(
   });
 }
 
+function unavailableSelectionMessageReason<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  operand: BattleScriptOperand,
+): BattleScriptBlockReason {
+  return Object.freeze({
+    kind: "source-context-unavailable",
+    programCounter: context.state.programCounter,
+    opcodeId: context.instruction.opcodeId,
+    opcodeName: context.instruction.opcodeName,
+    port: "prepare-selection-message",
+    operandExpression: operand.expression,
+  });
+}
+
 function invalidSourceOperandReason<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operandExpression: string,
@@ -128,6 +159,44 @@ function haltForInvalidOperand<RulesContext extends object>(
     Object.freeze({
       kind: "halt",
       reason: invalidSourceOperandReason(context, operandExpression, received),
+    }),
+  );
+}
+
+function haltForInvalidBattler<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  received: unknown,
+): BattleScriptCommandTransition<RulesContext> {
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({
+      kind: "halt",
+      reason: Object.freeze({
+        kind: "invalid-source-battler",
+        programCounter: context.state.programCounter,
+        opcodeId: context.instruction.opcodeId,
+        opcodeName: context.instruction.opcodeName,
+        received: String(received),
+      }),
+    }),
+  );
+}
+
+function haltForInvalidSnapshot<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  error: unknown,
+): BattleScriptCommandTransition<RulesContext> {
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({
+      kind: "halt",
+      reason: Object.freeze({
+        kind: "invalid-source-snapshot",
+        programCounter: context.state.programCounter,
+        opcodeId: context.instruction.opcodeId,
+        opcodeName: context.instruction.opcodeName,
+        received: error instanceof Error ? error.message : String(error),
+      }),
     }),
   );
 }
@@ -197,6 +266,8 @@ function schedulerWith<RulesContext extends object>(
   changes: Readonly<{
     messageDisplayActive?: boolean;
     pauseCounterBattle?: number;
+    activeBattler?: BattleScriptBattlerId | null;
+    pendingControllerBattlers?: readonly BattleScriptBattlerId[];
   }>,
 ) {
   return createBattleScriptSchedulerState({
@@ -204,12 +275,20 @@ function schedulerWith<RulesContext extends object>(
       changes.messageDisplayActive ?? context.state.scheduler.messageDisplayActive,
     pauseCounterBattle:
       changes.pauseCounterBattle ?? context.state.scheduler.pauseCounterBattle,
+    activeBattler:
+      changes.activeBattler === undefined
+        ? context.state.scheduler.activeBattler
+        : changes.activeBattler,
+    pendingControllerBattlers:
+      changes.pendingControllerBattlers
+      ?? context.state.scheduler.pendingControllerBattlers,
   });
 }
 
 /**
  * First source-mapped scheduler family:
- * Cmd_nop, Cmd_waitstate, Cmd_printstring, Cmd_waitmessage, and Cmd_pause.
+ * Cmd_nop, Cmd_waitstate, Cmd_printstring, Cmd_printselectionstring,
+ * Cmd_waitmessage, and Cmd_pause.
  *
  * Controller readiness, source-context string preparation, and exact u16
  * operand resolution are injected logical ports. MSG_DISPLAY and the shared
@@ -250,6 +329,61 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
           events: Object.freeze([message]),
         },
       );
+  });
+  installHandler(program, handlers, "B_SCR_OP_PRINTSELECTIONSTRING", (context) => {
+    const required = requireSingleHalfwordOperand(context);
+    if (required.kind === "transition") return required.transition;
+    const preparation = ports.prepareSelectionMessage(context, required.operand);
+    if (preparation === null) {
+      return blockBattleScriptCommand(
+        context,
+        unavailableSelectionMessageReason(context, required.operand),
+      );
+    }
+    if (
+      !Number.isSafeInteger(preparation.stringId)
+      || preparation.stringId < 0
+      || preparation.stringId > 0xffff
+    ) {
+      return haltForInvalidOperand(
+        context,
+        required.operand.expression,
+        String(preparation.stringId),
+      );
+    }
+    if (!isBattleScriptBattlerId(preparation.attacker)) {
+      return haltForInvalidBattler(context, preparation.attacker);
+    }
+
+    let snapshot: BattleScriptSelectionMessageSnapshot;
+    try {
+      snapshot = createBattleScriptSelectionMessageSnapshot(preparation.snapshot);
+    } catch (error) {
+      return haltForInvalidSnapshot(context, error);
+    }
+    const scheduler = markBattleScriptControllerPending(
+      schedulerWith(context, {
+        messageDisplayActive: true,
+        activeBattler: preparation.attacker,
+      }),
+      preparation.attacker,
+    );
+    return transitionBattleScriptCommand(
+      context,
+      Object.freeze({ kind: "advance" }),
+      {
+        scheduler,
+        events: Object.freeze([
+          Object.freeze({
+            kind: "selection-message",
+            audience: "player-only",
+            battler: preparation.attacker,
+            stringId: preparation.stringId,
+            snapshot,
+          }),
+        ]),
+      },
+    );
   });
   installHandler(program, handlers, "B_SCR_OP_WAITMESSAGE", (context) => {
     if (!ports.isControllerIdle(context)) {

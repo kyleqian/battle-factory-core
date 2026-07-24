@@ -1,6 +1,8 @@
 import { advanceRngValue } from "./rng.ts";
 import type {
+  BattleScriptBattlerId,
   BattleScriptEventProvenance,
+  BattleScriptSelectionMessageSnapshot,
   BattleScriptSemanticEvent,
   BattleScriptSemanticEventPayload,
 } from "./battleScriptEvents.ts";
@@ -48,6 +50,20 @@ export type BattleScriptHaltReason =
     received: string;
   }>
   | Readonly<{
+    kind: "invalid-source-battler";
+    programCounter: number;
+    opcodeId: number;
+    opcodeName: string;
+    received: string;
+  }>
+  | Readonly<{
+    kind: "invalid-source-snapshot";
+    programCounter: number;
+    opcodeId: number;
+    opcodeName: string;
+    received: string;
+  }>
+  | Readonly<{
     kind: "return-stack-underflow";
     programCounter: number;
   }>;
@@ -70,6 +86,8 @@ export type BattleScriptRngState = Readonly<{
 export type BattleScriptSchedulerState = Readonly<{
   messageDisplayActive: boolean;
   pauseCounterBattle: number;
+  activeBattler: BattleScriptBattlerId | null;
+  pendingControllerBattlers: readonly BattleScriptBattlerId[];
 }>;
 
 export type BattleScriptMachineState<RulesContext extends object> = Readonly<{
@@ -104,7 +122,11 @@ export type BattleScriptBlockReason =
     programCounter: number;
     opcodeId: number;
     opcodeName: string;
-    port: "prepare-message" | "resolve-byte" | "resolve-halfword";
+    port:
+      | "prepare-message"
+      | "prepare-selection-message"
+      | "resolve-byte"
+      | "resolve-halfword";
     operandExpression: string;
   }>;
 
@@ -186,10 +208,14 @@ export function createBattleScriptSchedulerState(
   initial: Readonly<{
     messageDisplayActive?: boolean;
     pauseCounterBattle?: number;
+    activeBattler?: BattleScriptBattlerId | null;
+    pendingControllerBattlers?: readonly BattleScriptBattlerId[];
   }> = {},
 ): BattleScriptSchedulerState {
   const messageDisplayActive = initial.messageDisplayActive ?? false;
   const pauseCounterBattle = initial.pauseCounterBattle ?? 0;
+  const activeBattler = initial.activeBattler ?? null;
+  const pendingControllerBattlers = initial.pendingControllerBattlers ?? [];
   if (typeof messageDisplayActive !== "boolean") {
     throw new Error("Battle Script MSG_DISPLAY state must be boolean");
   }
@@ -202,7 +228,66 @@ export function createBattleScriptSchedulerState(
       `Battle Script gPauseCounterBattle must be a u16, got ${pauseCounterBattle}`,
     );
   }
-  return Object.freeze({ messageDisplayActive, pauseCounterBattle });
+  if (activeBattler !== null && !isBattleScriptBattlerId(activeBattler)) {
+    throw new Error(`Battle Script active battler must be 0..3 or null, got ${activeBattler}`);
+  }
+  const seen = new Set<number>();
+  for (const battler of pendingControllerBattlers) {
+    if (!isBattleScriptBattlerId(battler)) {
+      throw new Error(`Battle Script pending controller battler must be 0..3, got ${battler}`);
+    }
+    if (seen.has(battler)) {
+      throw new Error(`Battle Script pending controller battlers must be unique, got ${battler} twice`);
+    }
+    seen.add(battler);
+  }
+  return Object.freeze({
+    messageDisplayActive,
+    pauseCounterBattle,
+    activeBattler,
+    pendingControllerBattlers: Object.freeze([...pendingControllerBattlers]),
+  });
+}
+
+export function isBattleScriptBattlerId(value: unknown): value is BattleScriptBattlerId {
+  return Number.isSafeInteger(value) && Number(value) >= 0 && Number(value) < 4;
+}
+
+export function markBattleScriptControllerPending(
+  scheduler: BattleScriptSchedulerState,
+  battler: BattleScriptBattlerId,
+): BattleScriptSchedulerState {
+  assertFrozenSchedulerState(scheduler);
+  if (!isBattleScriptBattlerId(battler)) {
+    throw new Error(`Battle Script controller battler must be 0..3, got ${battler}`);
+  }
+  if (scheduler.pendingControllerBattlers.includes(battler)) return scheduler;
+  return createBattleScriptSchedulerState({
+    ...scheduler,
+    pendingControllerBattlers: [...scheduler.pendingControllerBattlers, battler],
+  });
+}
+
+/**
+ * Explicit controller completion boundary. Acknowledgement never advances a
+ * script instruction and never clears MSG_DISPLAY; WAITSTATE/WAITMESSAGE keep
+ * ownership of those source behaviors.
+ */
+export function acknowledgeBattleScriptController(
+  scheduler: BattleScriptSchedulerState,
+  battler: BattleScriptBattlerId,
+): BattleScriptSchedulerState {
+  assertFrozenSchedulerState(scheduler);
+  if (!isBattleScriptBattlerId(battler)) {
+    throw new Error(`Battle Script controller battler must be 0..3, got ${battler}`);
+  }
+  if (!scheduler.pendingControllerBattlers.includes(battler)) return scheduler;
+  return createBattleScriptSchedulerState({
+    ...scheduler,
+    pendingControllerBattlers: scheduler.pendingControllerBattlers.filter(
+      (candidate) => candidate !== battler,
+    ),
+  });
 }
 
 export function drawBattleScriptRng(
@@ -252,12 +337,21 @@ function assertFrozenRulesContext(rulesContext: object): void {
 function assertFrozenSchedulerState(scheduler: BattleScriptSchedulerState): void {
   if (
     !Object.isFrozen(scheduler)
+    || !Object.isFrozen(scheduler.pendingControllerBattlers)
     || typeof scheduler.messageDisplayActive !== "boolean"
     || !Number.isSafeInteger(scheduler.pauseCounterBattle)
     || scheduler.pauseCounterBattle < 0
     || scheduler.pauseCounterBattle > 0xffff
+    || (scheduler.activeBattler !== null && !isBattleScriptBattlerId(scheduler.activeBattler))
+    || scheduler.pendingControllerBattlers.some(
+      (battler, index) =>
+        !isBattleScriptBattlerId(battler)
+        || scheduler.pendingControllerBattlers.indexOf(battler) !== index,
+    )
   ) {
-    throw new Error("Battle Script scheduler state must be frozen with a u16 pause counter");
+    throw new Error(
+      "Battle Script scheduler state must be frozen with valid controller state and a u16 pause counter",
+    );
   }
 }
 
@@ -465,6 +559,11 @@ function freezeEventPayload(
   switch (payload.kind) {
     case "message":
       return Object.freeze({ ...payload, substitutions: Object.freeze([...payload.substitutions]) });
+    case "selection-message":
+      return Object.freeze({
+        ...payload,
+        snapshot: createBattleScriptSelectionMessageSnapshot(payload.snapshot),
+      });
     case "animation":
       return Object.freeze({ ...payload, arguments: Object.freeze([...payload.arguments]) });
     case "hp-change":
@@ -474,6 +573,56 @@ function freezeEventPayload(
     case "outcome":
       return Object.freeze({ ...payload });
   }
+}
+
+function assertIntegerInRange(
+  value: number,
+  maximum: number,
+  field: string,
+): void {
+  if (!Number.isSafeInteger(value) || value < 0 || value > maximum) {
+    throw new Error(`${field} must be an unsigned integer <= ${maximum}, got ${value}`);
+  }
+}
+
+export function createBattleScriptSelectionMessageSnapshot(
+  snapshot: BattleScriptSelectionMessageSnapshot,
+): BattleScriptSelectionMessageSnapshot {
+  assertIntegerInRange(snapshot.currentMove, 0xffff, "selection currentMove");
+  assertIntegerInRange(snapshot.originallyUsedMove, 0xffff, "selection originallyUsedMove");
+  assertIntegerInRange(snapshot.lastItem, 0xffff, "selection lastItem");
+  assertIntegerInRange(snapshot.lastAbility, 0xff, "selection lastAbility");
+  if (!isBattleScriptBattlerId(snapshot.scriptingBattler)) {
+    throw new Error(`selection scriptingBattler must be 0..3, got ${snapshot.scriptingBattler}`);
+  }
+  assertIntegerInRange(snapshot.scriptPartyIndex, 0xff, "selection scriptPartyIndex");
+  if (!Array.isArray(snapshot.battlerAbilities) || snapshot.battlerAbilities.length !== 4) {
+    throw new Error("selection battlerAbilities must contain exactly four entries");
+  }
+  for (const ability of snapshot.battlerAbilities) {
+    assertIntegerInRange(ability, 0xff, "selection battler ability");
+  }
+  if (!Array.isArray(snapshot.textBuffers) || snapshot.textBuffers.length !== 3) {
+    throw new Error("selection textBuffers must contain exactly three buffers");
+  }
+  const textBuffers = snapshot.textBuffers.map((buffer) => {
+    if (!Array.isArray(buffer) || buffer.some((token) => typeof token !== "string")) {
+      throw new Error("selection text buffers must contain semantic string tokens");
+    }
+    return Object.freeze([...buffer]);
+  }) as unknown as BattleScriptSelectionMessageSnapshot["textBuffers"];
+  return Object.freeze({
+    currentMove: snapshot.currentMove,
+    originallyUsedMove: snapshot.originallyUsedMove,
+    lastItem: snapshot.lastItem,
+    lastAbility: snapshot.lastAbility,
+    scriptingBattler: snapshot.scriptingBattler,
+    scriptPartyIndex: snapshot.scriptPartyIndex,
+    battlerAbilities: Object.freeze(
+      [...snapshot.battlerAbilities],
+    ) as unknown as BattleScriptSelectionMessageSnapshot["battlerAbilities"],
+    textBuffers: Object.freeze(textBuffers),
+  });
 }
 
 function appendEvents(
