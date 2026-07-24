@@ -195,6 +195,7 @@ describe("source-shaped Battle Script rules context", () => {
       { hitMarker: -1 },
       { multiHitCounter: 256 },
       { selectorRoles: { attacker: 4 as BattleScriptBattlerId, effectBattler: 0 } },
+      { selectorRoles: { attacker: 0, target: 4 as BattleScriptBattlerId } },
       { selectorRoles: { attacker: 0, effectBattler: -1 as BattleScriptBattlerId } },
     ];
     for (const invalid of invalidInputs) {

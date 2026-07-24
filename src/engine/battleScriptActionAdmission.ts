@@ -166,6 +166,30 @@ export type BattleScriptAttackCancelerAsleepReceipt = Readonly<{
     scriptingBattler:
       | Readonly<{ kind: "preserve" }>
       | Readonly<{ kind: "set"; battler: BattleScriptBattlerId }>;
+    targetBattler: Readonly<{
+      kind: "preserve";
+      battler: BattleScriptBattlerId;
+      sourceSentinelWrite: "unreachable-at-attack-canceler-entry";
+    }>;
+    /**
+     * UproarWakeUpCheck's chooser write is call-local here: when the target is
+     * already a battler it selects one of these relation messages, then
+     * CANCELER_ASLEEP overwrites it with B_MSG_WOKE_UP_UPROAR before returning
+     * to the script interpreter. No controller or script handoff can observe
+     * the intermediate value.
+     */
+    helperMultistringChooser:
+      | Readonly<{
+        kind: "not-written";
+        reason: "no-uproar-source";
+      }>
+      | Readonly<{
+        kind: "written-then-overwritten";
+        targetRelation: "same-as-uproar-source" | "different-from-uproar-source";
+        sourceConstant: "B_MSG_CANT_SLEEP_UPROAR" | "B_MSG_UPROAR_KEPT_AWAKE";
+        value: 0 | 1;
+        overwrittenBeforeHandoffBy: "B_MSG_WOKE_UP_UPROAR";
+      }>;
   }>;
   status1: BattleScriptBitFieldEffect;
   status2: BattleScriptBitFieldEffect;
@@ -361,6 +385,11 @@ export function advanceBattleScriptAttackCancelerFlags(
  * It returns the script/cursor/controller handoff as typed effects and stops
  * after advancing the tracker to CANCELER_FROZEN. It does not apply those
  * external effects, loop into freeze, or execute ATTACKCANCELER opcode 0.
+ *
+ * HandleAction_UseMove selects gBattlerTarget before it installs the move
+ * effect script containing attackcanceler. Therefore UproarWakeUpCheck's
+ * generic `gBattlerTarget == 0xFF` repair branch is unreachable at this call;
+ * a missing target is rejected rather than modeled as a legal phase state.
  */
 export function advanceBattleScriptAttackCancelerAsleep(
   rulesContext: BattleScriptRulesContext,
@@ -393,6 +422,12 @@ export function advanceBattleScriptAttackCancelerAsleep(
   }
 
   const sourceBattler = rulesContext.battlers[attacker];
+  const targetBefore = rulesContext.selectorRoles.target;
+  if (targetBefore === null) {
+    throw new Error(
+      "Battle Script attack canceler asleep phase requires the target selected by HandleAction_UseMove",
+    );
+  }
   const sleepBefore = sourceBattler.status1 & BATTLE_SCRIPT_STATUS1_SLEEP;
   const checkedBattlers: BattleScriptBattlerId[] = [];
   let uproarSource: BattleScriptBattlerId | null = null;
@@ -562,6 +597,31 @@ export function advanceBattleScriptAttackCancelerAsleep(
         scriptingBattler: uproarSource === null
           ? Object.freeze({ kind: "preserve" })
           : Object.freeze({ kind: "set", battler: uproarSource }),
+        targetBattler: Object.freeze({
+          kind: "preserve",
+          battler: targetBefore,
+          sourceSentinelWrite: "unreachable-at-attack-canceler-entry",
+        }),
+        helperMultistringChooser: uproarSource === null
+          ? Object.freeze({
+            kind: "not-written",
+            reason: "no-uproar-source",
+          })
+          : targetBefore === uproarSource
+              ? Object.freeze({
+                kind: "written-then-overwritten",
+                targetRelation: "same-as-uproar-source",
+                sourceConstant: "B_MSG_CANT_SLEEP_UPROAR",
+                value: 0,
+                overwrittenBeforeHandoffBy: "B_MSG_WOKE_UP_UPROAR",
+              })
+              : Object.freeze({
+                kind: "written-then-overwritten",
+                targetRelation: "different-from-uproar-source",
+                sourceConstant: "B_MSG_UPROAR_KEPT_AWAKE",
+                value: 1,
+                overwrittenBeforeHandoffBy: "B_MSG_WOKE_UP_UPROAR",
+              }),
       }),
       status1: bitFieldEffect(sourceBattler.status1, nextStatus1),
       status2: bitFieldEffect(sourceBattler.status2, nextStatus2),

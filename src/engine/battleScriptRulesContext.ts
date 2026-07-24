@@ -50,6 +50,7 @@ export type BattleScriptRulesBattlers = readonly [
 
 export type BattleScriptSelectorRoleBindings = Readonly<{
   attacker: BattleScriptBattlerId | null;
+  target: BattleScriptBattlerId | null;
   effectBattler: BattleScriptBattlerId | null;
 }>;
 
@@ -78,6 +79,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   battlers: readonly BattleScriptRulesBattler[];
   selectorRoles?: Readonly<{
     attacker?: BattleScriptBattlerId | null;
+    target?: BattleScriptBattlerId | null;
     effectBattler?: BattleScriptBattlerId | null;
   }>;
   atkCancelerTracker: number;
@@ -153,6 +155,10 @@ export function createBattleScriptRulesContext(
   })) as unknown as BattleScriptRulesBattlers;
   const selectorRoles = Object.freeze({
     attacker: requireRole(input.selectorRoles?.attacker, "selectorRoles.attacker"),
+    // For this source role only, null also preserves gBattlerTarget's explicit
+    // BATTLER_NONE (0xFF) sentinel. UproarWakeUpCheck can replace that sentinel
+    // with the first battler it finds using Uproar.
+    target: requireRole(input.selectorRoles?.target, "selectorRoles.target"),
     effectBattler: requireRole(
       input.selectorRoles?.effectBattler,
       "selectorRoles.effectBattler",

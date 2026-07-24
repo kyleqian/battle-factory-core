@@ -44,7 +44,11 @@ function input(
 ): BattleScriptRulesContextInput {
   return {
     battlers: changes.battlers ?? [battler(), battler(), battler(), battler()],
-    selectorRoles: changes.selectorRoles ?? { attacker: 0, effectBattler: 1 },
+    selectorRoles: changes.selectorRoles ?? {
+      attacker: 0,
+      target: 1,
+      effectBattler: 1,
+    },
     atkCancelerTracker: changes.atkCancelerTracker
       ?? BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_ASLEEP,
     battleOutcome: changes.battleOutcome ?? 0,
@@ -136,6 +140,15 @@ describe("source-shaped attack-canceler asleep phase", () => {
           sourceBattler: null,
           blockedBySoundproof: false,
           scriptingBattler: { kind: "preserve" },
+          targetBattler: {
+            kind: "preserve",
+            battler: 1,
+            sourceSentinelWrite: "unreachable-at-attack-canceler-entry",
+          },
+          helperMultistringChooser: {
+            kind: "not-written",
+            reason: "no-uproar-source",
+          },
         },
         effect: 0,
         script: { kind: "preserve", sourceProgramCounter: SOURCE_PC },
@@ -154,71 +167,94 @@ describe("source-shaped attack-canceler asleep phase", () => {
     expect(result.rulesContext.hitMarker).toBe(source.hitMarker);
   });
 
-  it("finds the first Uproar owner at every battler index and short-circuits in order", () => {
+  it("exhaustively owns every reachable Uproar source/target relation and transient chooser write", () => {
     for (const uproarOwner of [0, 1, 2, 3] as const) {
-      const sourceBattlers = [battler(), battler(), battler(), battler()];
-      sourceBattlers[2] = battler({
-        ability: BATTLE_SCRIPT_ABILITY_EARLY_BIRD,
-        status1: OTHER_STATUS1 | 7,
-        status2: OTHER_STATUS2 | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE,
-      });
-      sourceBattlers[uproarOwner] = battler({
-        ...sourceBattlers[uproarOwner],
-        status2: (
-          sourceBattlers[uproarOwner]!.status2
-          | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR
-        ) >>> 0,
-      });
-      const source = rules({
-        battlers: sourceBattlers,
-        selectorRoles: { attacker: 2, effectBattler: 0 },
-        currentMove: BATTLE_SCRIPT_MOVE_SLEEP_TALK,
-      });
-      const result = advanceBattleScriptAttackCancelerAsleep(source, SOURCE_PC);
-      expect(result.kind).toBe("advance");
-      if (result.kind !== "advance") throw new Error("expected asleep phase");
-      expect(result.reason).toBe("uproar-woke");
-      expect(result.receipt.uproarScan).toEqual({
-        performed: true,
-        checkedBattlers: [0, 1, 2, 3].slice(0, uproarOwner + 1),
-        sourceBattler: uproarOwner,
-        blockedBySoundproof: false,
-        scriptingBattler: { kind: "set", battler: uproarOwner },
-      });
-      expect(result.receipt.sleepCounter).toEqual({
-        before: 7,
-        after: 0,
-        decrement: 0,
-      });
-      expect(result.rulesContext.battlers[2].status1).toBe(OTHER_STATUS1);
-      expect(
-        result.rulesContext.battlers[2].status2
-        & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
-      ).toBe(0);
-      expect(result.receipt.effect).toBe(2);
-      expect(result.receipt.script).toEqual({
-        kind: "handoff",
-        sourceProgramCounter: SOURCE_PC,
-        targetLabel: "BattleScript_MoveUsedWokeUp",
-      });
-      expect(result.receipt.cursor).toEqual({
-        kind: "push",
-        sourceProgramCounter: SOURCE_PC,
-      });
-      expect(result.receipt.multistringChooser).toEqual({
-        kind: "set",
-        sourceConstant: "B_MSG_WOKE_UP_UPROAR",
-        value: 1,
-      });
-      expect(result.receipt.statusController).toEqual({
-        kind: "request-status1-write",
-        battler: 2,
-        sourceRequest: "REQUEST_STATUS_BATTLE",
-        offset: 0,
-        size: 4,
-        value: OTHER_STATUS1,
-        markForControllerExecution: true,
-      });
+      for (const initialTarget of [0, 1, 2, 3] as const) {
+        const sourceBattlers = [battler(), battler(), battler(), battler()];
+        sourceBattlers[2] = battler({
+          ability: BATTLE_SCRIPT_ABILITY_EARLY_BIRD,
+          status1: OTHER_STATUS1 | 7,
+          status2: OTHER_STATUS2 | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE,
+        });
+        sourceBattlers[uproarOwner] = battler({
+          ...sourceBattlers[uproarOwner],
+          status2: (
+            sourceBattlers[uproarOwner]!.status2
+            | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR
+          ) >>> 0,
+        });
+        const source = rules({
+          battlers: sourceBattlers,
+          selectorRoles: { attacker: 2, target: initialTarget, effectBattler: 0 },
+          currentMove: BATTLE_SCRIPT_MOVE_SLEEP_TALK,
+        });
+        const result = advanceBattleScriptAttackCancelerAsleep(source, SOURCE_PC);
+        expect(result.kind).toBe("advance");
+        if (result.kind !== "advance") throw new Error("expected asleep phase");
+        expect(result.reason).toBe("uproar-woke");
+        expect(result.receipt.uproarScan).toEqual({
+          performed: true,
+          checkedBattlers: [0, 1, 2, 3].slice(0, uproarOwner + 1),
+          sourceBattler: uproarOwner,
+          blockedBySoundproof: false,
+          scriptingBattler: { kind: "set", battler: uproarOwner },
+          targetBattler: {
+            kind: "preserve",
+            battler: initialTarget,
+            sourceSentinelWrite: "unreachable-at-attack-canceler-entry",
+          },
+          helperMultistringChooser: initialTarget === uproarOwner
+              ? {
+                kind: "written-then-overwritten",
+                targetRelation: "same-as-uproar-source",
+                sourceConstant: "B_MSG_CANT_SLEEP_UPROAR",
+                value: 0,
+                overwrittenBeforeHandoffBy: "B_MSG_WOKE_UP_UPROAR",
+              }
+              : {
+                kind: "written-then-overwritten",
+                targetRelation: "different-from-uproar-source",
+                sourceConstant: "B_MSG_UPROAR_KEPT_AWAKE",
+                value: 1,
+                overwrittenBeforeHandoffBy: "B_MSG_WOKE_UP_UPROAR",
+              },
+        });
+        expect(result.rulesContext.selectorRoles).toBe(source.selectorRoles);
+        expect(result.receipt.sleepCounter).toEqual({
+          before: 7,
+          after: 0,
+          decrement: 0,
+        });
+        expect(result.rulesContext.battlers[2].status1).toBe(OTHER_STATUS1);
+        expect(
+          result.rulesContext.battlers[2].status2
+          & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
+        ).toBe(0);
+        expect(result.receipt.effect).toBe(2);
+        expect(result.receipt.script).toEqual({
+          kind: "handoff",
+          sourceProgramCounter: SOURCE_PC,
+          targetLabel: "BattleScript_MoveUsedWokeUp",
+        });
+        expect(result.receipt.cursor).toEqual({
+          kind: "push",
+          sourceProgramCounter: SOURCE_PC,
+        });
+        expect(result.receipt.multistringChooser).toEqual({
+          kind: "set",
+          sourceConstant: "B_MSG_WOKE_UP_UPROAR",
+          value: 1,
+        });
+        expect(result.receipt.statusController).toEqual({
+          kind: "request-status1-write",
+          battler: 2,
+          sourceRequest: "REQUEST_STATUS_BATTLE",
+          offset: 0,
+          size: 4,
+          value: OTHER_STATUS1,
+          markForControllerExecution: true,
+        });
+      }
     }
   });
 
@@ -234,7 +270,7 @@ describe("source-shaped attack-canceler asleep phase", () => {
         }),
         battler({ status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR }),
       ],
-      selectorRoles: { attacker: 2, effectBattler: 0 },
+      selectorRoles: { attacker: 2, target: 1, effectBattler: 0 },
     });
     const result = advanceBattleScriptAttackCancelerAsleep(source, SOURCE_PC);
     expect(result.kind).toBe("advance");
@@ -246,6 +282,15 @@ describe("source-shaped attack-canceler asleep phase", () => {
       sourceBattler: null,
       blockedBySoundproof: true,
       scriptingBattler: { kind: "preserve" },
+      targetBattler: {
+        kind: "preserve",
+        battler: 1,
+        sourceSentinelWrite: "unreachable-at-attack-canceler-entry",
+      },
+      helperMultistringChooser: {
+        kind: "not-written",
+        reason: "no-uproar-source",
+      },
     });
     expect(result.receipt.sleepCounter).toEqual({ before: 3, after: 2, decrement: 1 });
     expect(
@@ -410,6 +455,10 @@ describe("source-shaped attack-canceler asleep phase", () => {
       rules({ selectorRoles: {} }),
       SOURCE_PC,
     )).toThrow(/asleep phase requires an attacker role/);
+    expect(() => advanceBattleScriptAttackCancelerAsleep(
+      rules({ selectorRoles: { attacker: 0, target: null, effectBattler: 1 } }),
+      SOURCE_PC,
+    )).toThrow(/requires the target selected by HandleAction_UseMove/);
     for (const invalidPc of [-1, 1.5, 0x1_0000_0000]) {
       expect(() => advanceBattleScriptAttackCancelerAsleep(
         rules(),
@@ -436,7 +485,7 @@ describe("source-shaped attack-canceler asleep phase", () => {
         battler(),
         battler(),
       ],
-      selectorRoles: { attacker: 1, effectBattler: 3 },
+      selectorRoles: { attacker: 1, target: 2, effectBattler: 3 },
     });
     const source = createBattleScriptRulesContext(sourceInput);
     const first = advanceBattleScriptAttackCancelerAsleep(source, SOURCE_PC);
@@ -468,6 +517,8 @@ describe("source-shaped attack-canceler asleep phase", () => {
     expect(Object.isFrozen(first.receipt.uproarScan)).toBe(true);
     expect(Object.isFrozen(first.receipt.uproarScan.checkedBattlers)).toBe(true);
     expect(Object.isFrozen(first.receipt.uproarScan.scriptingBattler)).toBe(true);
+    expect(Object.isFrozen(first.receipt.uproarScan.targetBattler)).toBe(true);
+    expect(Object.isFrozen(first.receipt.uproarScan.helperMultistringChooser)).toBe(true);
     expect(Object.isFrozen(first.receipt.status1)).toBe(true);
     expect(Object.isFrozen(first.receipt.status2)).toBe(true);
     expect(Object.isFrozen(first.receipt.hitMarker)).toBe(true);
