@@ -35,20 +35,20 @@ remainder.
 
 ## Current handoff
 
-- **State:** DOUBLE TEAM is `exact`; coverage is now **3 exact / 9 partial /
-  264 unsupported**. Its complete clone plus evasion-banner body is portable
-  across both singles attacker sides.
-- **Did:** generalized the decoded clone reducer and stat-increase banner
-  behind the relative Scene-ON seam. The portable stock-controller stage
-  changes only ONIX's loaded move/PP slot and exercises player-back ONIX with
-  its own sheet, darkened palette, geometry, and live clone ordering. The
-  presentation seam consumes immutable field values and never resolves the
-  self-target stat outcome.
-- **Evidence:** portable oracle frames **2337–2566** are **230/230** exact,
-  including clone A winning the live slots-3/4 tie (canonical GROVYLE has
-  clone B in front). Canonical Scene-ON DOUBLE TEAM remains **230/230**.
+- **State:** ENDEAVOR is `exact`; coverage is now **4 exact / 8 partial /
+  264 unsupported**. Its complete body, generic-hit, and HP-drain handoff are
+  portable across both singles attacker sides and healthbox orientations.
+- **Did:** generalized the existing source-timed squish/blend, translated
+  droplets/hitsplats, stale-power shake, pic-coordinate y-offset, and live
+  healthbox OAM priority behind the relative Scene-ON seam. The portable stock
+  controller changes only ONIX's loaded move/PP slot; immutable 143→117 HP is
+  presentation input, never a damage or battle-state mutation.
+- **Evidence:** portable oracle frames **2345–2485** are **141/141** exact;
+  canonical Scene-ON frames **2894–3130** are densely **237/237** exact.
+  DOUBLE TEAM, FIRE PUNCH, ROCK SLIDE, FAINT ATTACK, and Battle-2 OFF controls
+  remain **230/230**, **225/225**, **175/175**, **221/221**, and **191/191**.
   Raw RGB and the fresh probe JSON are temp-only.
 - **Next:** do not reopen FAINT ATTACK ISSUE #38. The next independently
-  actionable queue mechanism is ENDEAVOR portability/opposite-side geometry.
-  No absolute tick, framebuffer lookup, captured asset, per-frame pixel table,
-  damage/RNG/turn, or facility mutation was added.
+  actionable queue mechanism is FEATHERDANCE portability/opposite-side
+  geometry. No absolute tick, framebuffer lookup, captured asset, per-frame
+  pixel table, damage/RNG/turn, or facility mutation was added.
