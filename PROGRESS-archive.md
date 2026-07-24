@@ -1,3 +1,20 @@
+## 371 — Gate-3 source-exact random multi-hit counter integrated
+
+- **State:** S10 Gate 3 remains open with **13** source-safe opcodes and an
+  unwired immutable control/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `SETMULTIHITCOUNTER` (opcode 141): nonzero u8 operands
+  replace frozen `multiHitCounter` with no draw; zero follows the exact
+  one/two-draw `Random() & 3` branch through the audited RNG ledger. Pinned
+  `Cmd_setmultihitcounter`, its two-byte macro, and all real values (**0/2/2**).
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Do not add damage, attack loops, PP, production
+  controller/rendering, animation, pixels, or other opcodes.
+- **Notes:** exact supported IDs are
+  **16/18/38/39/40/57/58/60/61/62/65/131/141**. Tier-1 **111 files / 1504
+  tests**, focused **42/42**, build, and Scene-OFF oracle contract green;
+  exact u32 RNG advancement/reasons/provenance are pinned with no pixel claim.
+
+---
 ## 370 — Gate-3 conditional multi-hit decrement integrated
 
 - **State:** S10 Gate 3 remains open with **12** source-safe opcodes and an

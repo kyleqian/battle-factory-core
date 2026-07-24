@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 374 — Gate-3 table-selected selection message integrated
+
+- **State:** S10 Gate 3 remains open with **16** source-safe opcodes and an
+  unwired immutable controller/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `PRINTSELECTIONSTRINGFROMTABLE` (opcode 20): locally
+  idle-gates, then resolves its 4-byte `u16` table pointer plus
+  `MULTISTRING_CHOOSER` through a typed port and reuses opcode 17's validated,
+  frozen player-only event/pending-controller transition.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep generic pointers/table commands, escape mechanics,
+  selection completion, PP, production controllers, rendering/audio,
+  damage/accuracy, animation, and pixels out of this seam.
+- **Notes:** exact supported IDs are
+  **16/17/18/20/37/38/39/40/57/58/60/61/62/65/131/141**. Focused **52/52**;
+  Tier-1 **115 files / 1546 tests**, build, and Scene-OFF oracle contract
+  green; sole start **2230** (`BattleScript_PrintCantEscapeFromBattle`,
+  `gNoEscapeStringIds`) and opcode-17 distinction are pinned.
+
+---
 ## 373 — Gate-3 source-exact selection message integrated
 
 - **State:** S10 Gate 3 remains open with **15** source-safe opcodes and an
@@ -38,20 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **16/18/37/38/39/40/57/58/60/61/62/65/131/141**. Focused **49/49**;
   Tier-1 **112 files / 1511 tests**, build, and Scene-OFF oracle contract
   green; no RNG/scheduler/event/controller/presentation or pixel change.
-
----
-## 371 — Gate-3 source-exact random multi-hit counter integrated
-
-- **State:** S10 Gate 3 remains open with **13** source-safe opcodes and an
-  unwired immutable control/scheduler/rules/RNG/source-context seam.
-- **Did:** added only `SETMULTIHITCOUNTER` (opcode 141): nonzero u8 operands
-  replace frozen `multiHitCounter` with no draw; zero follows the exact
-  one/two-draw `Random() & 3` branch through the audited RNG ledger. Pinned
-  `Cmd_setmultihitcounter`, its two-byte macro, and all real values (**0/2/2**).
-- **Next:** choose another bounded source family only when its complete rules
-  context is explicit. Do not add damage, attack loops, PP, production
-  controller/rendering, animation, pixels, or other opcodes.
-- **Notes:** exact supported IDs are
-  **16/18/38/39/40/57/58/60/61/62/65/131/141**. Tier-1 **111 files / 1504
-  tests**, focused **42/42**, build, and Scene-OFF oracle contract green;
-  exact u32 RNG advancement/reasons/provenance are pinned with no pixel claim.
