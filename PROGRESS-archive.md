@@ -1,3 +1,25 @@
+## 390 — Shared CancelMultiTurnMoves helper integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. The source helper is durable but deliberately uncalled;
+  ATTACKCANCELER opcode 0 remains unregistered and no canceler loop exists.
+- **Did:** extended each of the four rules battlers with only source-width
+  `rolloutTimer` (4-bit) and `furyCutterCounter` (`u8`), then added a pure
+  immutable helper that clears status2 mask **0x1f70**, only semi-invulnerable
+  status3 mask **0x000400c0**, and both selected-battler counters. Its typed
+  frozen receipt records every before/after value.
+- **Next:** implement `CANCELER_ASLEEP` only after its complete sleep/Uproar,
+  Early Bird, Nightmare, move, script-stack, controller, and effect ownership
+  is explicit. Do not call this helper from FLAGS, loop phases, or register
+  opcode 0.
+- **Notes:** all individual masks, all **15** non-empty status2 combinations,
+  each status3 constituent, four-battler selection, identity/replacement,
+  unrelated HP/PP/status/admission preservation, determinism/freezing, and
+  invalid ids/widths are pinned. Focused **46/46**; Tier-1 **129 files / 1698
+  tests**, build, OFF info, and diff check green. Commit `5efca53`; pixel diff
+  N/A and no oracle fixture added.
+
+---
 ## 389 — DRAGON_BREATH projectile gap and hook-catalog overclaim closed
 
 - **State:** S10 remains open. Animation coverage stays **11 exact / 3

@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 393 — Gate-3 attack-canceler FROZEN source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP, and
+  FROZEN decisions only; opcode 0 remains unregistered and no phase loop exists.
+- **Did:** added source-derived `gBattleMoves[gCurrentMove].effect` to the
+  rules context, then ported FROZEN's conditional named `Random() % 5` draw,
+  ordinary frozen cancellation/no-attack-string handoff, thaw-hit continuation,
+  successful thaw/status clear/cursor/message handoff, and exact effect-2
+  status-controller request. Every path stops at `CANCELER_TRUANT`.
+- **Next:** implement `CANCELER_TRUANT` only after its exact ability/counter,
+  multi-turn cancellation, result flag, script/message, and receipt ownership
+  is explicit. Do not loop phases or register opcode 0.
+- **Notes:** every RNG remainder, ordinary vs both `EFFECT_THAW_HIT` moves,
+  zero-PP-Up base PP, status/marker preservation, controller writes, source
+  cursor semantics, identity, validation, determinism, and deep freezing are
+  pinned. Focused **51/51**; Tier-1 **131 files / 1723 tests**, build, OFF info
+  (`9c89c741…`), and diff check green. Code commit `883b6e7`; pixel diff N/A.
+
+---
 ## 392 — CANCELER_ASLEEP Uproar ownership repair audited
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable
@@ -48,25 +68,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **4106679800** across admission. Focused **55/55**; Tier-1 **130 files /
   1708 tests**, build, OFF info, manifest/hash audit, and diff check green.
   Commit `b1cd7d3`; pixel diff N/A.
-
----
-## 390 — Shared CancelMultiTurnMoves helper integrated
-
-- **State:** S10 Gate 3 remains open with **27** source-safe executable
-  opcodes. The source helper is durable but deliberately uncalled;
-  ATTACKCANCELER opcode 0 remains unregistered and no canceler loop exists.
-- **Did:** extended each of the four rules battlers with only source-width
-  `rolloutTimer` (4-bit) and `furyCutterCounter` (`u8`), then added a pure
-  immutable helper that clears status2 mask **0x1f70**, only semi-invulnerable
-  status3 mask **0x000400c0**, and both selected-battler counters. Its typed
-  frozen receipt records every before/after value.
-- **Next:** implement `CANCELER_ASLEEP` only after its complete sleep/Uproar,
-  Early Bird, Nightmare, move, script-stack, controller, and effect ownership
-  is explicit. Do not call this helper from FLAGS, loop phases, or register
-  opcode 0.
-- **Notes:** all individual masks, all **15** non-empty status2 combinations,
-  each status3 constituent, four-battler selection, identity/replacement,
-  unrelated HP/PP/status/admission preservation, determinism/freezing, and
-  invalid ids/widths are pinned. Focused **46/46**; Tier-1 **129 files / 1698
-  tests**, build, OFF info, and diff check green. Commit `5efca53`; pixel diff
-  N/A and no oracle fixture added.
