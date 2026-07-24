@@ -101,6 +101,15 @@ import {
   type FlamethrowerGeometry,
 } from "./flamethrower.ts";
 import {
+  blazeKickAnimationAtAge,
+  blazeKickPaletteAtAge,
+  blazeKickSpritesAtAge,
+  type BlazeKickAnimationState,
+  type BlazeKickGeometry,
+  type BlazeKickOrderedSprite,
+  type BlazeKickPaletteState,
+} from "./blazeKick.ts";
+import {
   bindAnimationAtAge,
   type BindAnimationProfile,
   type BindAnimationState,
@@ -219,6 +228,15 @@ export interface SceneOnFlamethrowerConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly animationProfile: Readonly<FlamethrowerGeometry>;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  readonly animationAgeOffset?: number;
+}
+
+export interface SceneOnBlazeKickConfig {
+  readonly move: "BLAZE_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<BlazeKickGeometry>;
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   readonly animationAgeOffset?: number;
 }
@@ -486,6 +504,7 @@ export type SceneOnMoveConfig =
   | SceneOnFlyConfig
   | SceneOnDragonBreathConfig
   | SceneOnFlamethrowerConfig
+  | SceneOnBlazeKickConfig
   | SceneOnBindConfig;
 
 export interface SceneOnMovePresentationState<
@@ -708,6 +727,16 @@ export interface SceneOnFlamethrowerView {
   readonly battlerEffect: FlamethrowerBattlerEffect;
 }
 
+export interface SceneOnBlazeKickView {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly animation: BlazeKickAnimationState;
+  readonly sprites: readonly BlazeKickOrderedSprite[];
+  readonly palette: BlazeKickPaletteState;
+}
+
 export interface SceneOnBindView extends BindAnimationState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -883,6 +912,30 @@ export function sceneOnFlamethrowerView(
     target: state.config.target,
     flames: flamethrowerFlamesAtAge(animationAge, state.config.animationProfile),
     battlerEffect: flamethrowerBattlerEffectAtAge(animationAge),
+  };
+}
+
+export function sceneOnBlazeKickView(
+  state: SceneOnMovePresentationState,
+): SceneOnBlazeKickView {
+  if (state.config.move !== "BLAZE_KICK") {
+    throw new Error(`expected BLAZE_KICK presentation, got ${state.config.move}`);
+  }
+  const animationAge = state.age + (state.config.animationAgeOffset ?? 0);
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    animation: blazeKickAnimationAtAge(
+      animationAge,
+      state.config.animationProfile.targetCenter,
+    ),
+    sprites: blazeKickSpritesAtAge(
+      animationAge,
+      state.config.animationProfile,
+    ),
+    palette: blazeKickPaletteAtAge(animationAge),
   };
 }
 
