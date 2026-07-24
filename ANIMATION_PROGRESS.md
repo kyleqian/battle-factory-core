@@ -41,18 +41,21 @@ remainder.
 - **State:** **9 exact / 5 partial / 262 unsupported**. FLY remains partial:
   all four portable practical windows are exact, but ISSUES #34's seven
   affine opening frames remain explicitly excluded. BOUNCE is now partial:
-  its complete opponent-front charge and strike bodies are exact, while the
-  opposite orientation and controller resolution/cleanup tail remain open.
-- **Did:** extracted SPOINK's source front art and installed BOUNCE's shared
-  Scene-ON framebuffer path: source-relative affine balls, attacker visibility,
-  monbg-owned target y2, ball/hitsplat OAM order, semitransparent backdrop,
-  source-composed healthboxes, and controller-owned move-used text.
-- **Evidence:** committed legal zero-PP-Up SPOINK→ONIX dense fixtures match
-  charge **345-368 = 24/24** and strike **881-904 = 24/24**, with zero
+  both complete charge/strike bodies are exact in both orientations, while
+  the complete controller resolution/cleanup tail remains open.
+- **Did:** staged legal player-back set-121 SPOINK with seed `0x12345678`,
+  extracted only its source back art, and generalized the existing BOUNCE
+  compositor for side geometry. The shared reducer now carries the
+  source-observed player-target hit-task lag and attacker restoration boundary,
+  without changing damage, PP, status, turn order, or controller progression.
+- **Evidence:** opponent-front fixtures remain charge **345-368 = 24/24** and
+  strike **881-904 = 24/24**. New player-back fixtures match charge
+  **261-284 = 24/24** and strike **777-800 = 24/24**. All four have zero
   exclusions and zero differing pixels. All four FLY portable windows remain
   green (**144/144 + 248/248 + 140/140 + 244/244**, with only ISSUES #34's
-  already-declared seven charge exclusions). PP remains `[5,5,5,5]→
-  [5,5,5,4]` with `ppUps:[0,0,0,0]`; stock HP remains **117→114**.
-- **Next:** stage the legal opposite-side SPOINK case, extract only its required
-  back art, and prove both bodies plus the complete controller resolution and
-  cleanup tail before exact promotion. Preserve all FLY windows and ISSUES #34.
+  declared seven charge exclusions). The player stage proves
+  `ppUps:[0,0,0,0]`, PP `[5,5,5,5]→[4,5,5,5]`, and stock HP
+  **SPOINK 153→141 / ONIX 117→114**.
+- **Next:** prove BOUNCE's complete controller resolution and cleanup tail
+  through the same Scene-ON seam before exact promotion. Preserve both
+  orientations, all four FLY windows, and ISSUES #34.
