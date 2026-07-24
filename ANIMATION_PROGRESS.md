@@ -41,15 +41,14 @@ remainder.
 - **State:** **4 exact / 9 partial / 263 unsupported**. The source graph covers
   all **354** moves through **935** reusable components and **3,190**
   dependency edges.
-- **Did:** closed ICE PUNCH's small+large inward-crystal component through
-  the final large state with a generic selected-OBJ compositor: an OBJ-mode-1
-  pixel always samples the pre-OBJ BG/backdrop target 2, never a lower OAM
-  object. Source/RAM order remains crystal 28 → hitsplat 27 → fist 26.
-  The reducer also retains the final step-29 translation while independently
-  advancing the large affine matrix, matching the callback/OAM handoff.
-- **Evidence:** `ice-punch-onix-grovyle.json` is **73/73 exact** at oracle
-  frames 2339-2411 / ages 0-72, closing the former 153-pixel overlap and the
-  final small/large OAM states. FIRE PUNCH portable **225/225** remains exact.
-- **Next:** continue ICE PUNCH at 2412 with the post-spiral gap, seven-spawn
-  `IceCrystalEffectShort` burst, palette restore, teardown, and generic
+- **Did:** closed ICE PUNCH's complete seven-spawn
+  `IceCrystalEffectShort` component after the inward spiral. The relative
+  reducer pins the source's six-callback spawn cadence, target-relative
+  geometry, affine grow/hold, 20-callback flicker lifetime, one-frame OBJ
+  latch, top-Y OAM ordering, and target-palette restoration.
+- **Evidence:** `ice-punch-onix-grovyle.json` is **164/164 exact** at oracle
+  frames 2339-2502 / ages 0-163, including the post-spiral gap and complete
+  short-crystal burst. FIRE PUNCH portable **225/225** remains exact.
+- **Next:** continue ICE PUNCH at 2503 with BG palette restoration,
+  `clearmonbg`/`blendoff`, script teardown through 2525, then generic
   resolution. Do not claim THUNDER PUNCH without its own dense evidence.

@@ -2,10 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   ICE_PUNCH_OVERLAY_FIRST_AGE,
   ICE_PUNCH_LARGE_SPIRAL_FIRST_AGE,
+  ICE_PUNCH_HIT_FIRST_AGE,
+  ICE_PUNCH_HIT_LIFETIME,
+  ICE_PUNCH_HIT_SPAWN_CADENCE,
   ICE_PUNCH_OBJ_LAYERS_BACK_TO_FRONT,
   ICE_PUNCH_SMALL_SPIRAL_FIRST_AGE,
   ICE_PUNCH_SPIRAL_TICKS,
+  ICE_PUNCH_TARGET_RESTORE_FIRST_AGE,
   icePunchOverlayState,
+  icePunchHitCrystals,
   icePunchSpiralCrystals,
 } from "../src/engine/icePunch.ts";
 import {
@@ -34,6 +39,18 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       { backgroundBlackCoeff: 7, targetIceCoeff: 6 },
     ]);
     expect(ICE_PUNCH_SMALL_SPIRAL_FIRST_AGE).toBe(35);
+    expect(ICE_PUNCH_TARGET_RESTORE_FIRST_AGE).toBe(139);
+    expect([138, 139, 141, 142, 144, 145, 162, 163].map(icePunchOverlayState))
+      .toEqual([
+        { backgroundBlackCoeff: 7, targetIceCoeff: 9 },
+        { backgroundBlackCoeff: 7, targetIceCoeff: 8 },
+        { backgroundBlackCoeff: 7, targetIceCoeff: 8 },
+        { backgroundBlackCoeff: 7, targetIceCoeff: 7 },
+        { backgroundBlackCoeff: 7, targetIceCoeff: 7 },
+        { backgroundBlackCoeff: 7, targetIceCoeff: 6 },
+        { backgroundBlackCoeff: 7, targetIceCoeff: 1 },
+        { backgroundBlackCoeff: 7, targetIceCoeff: 0 },
+      ]);
   });
 
   it("composes the overlay from immutable field and geometry inputs", () => {
@@ -154,5 +171,41 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       icePunchSpiralCrystals(42, { x: 176, y: 44 })
         .map(({ sourceSlot }) => sourceSlot),
     ).toEqual([10, 4, 11, 3, 5, 9, 12, 7]);
+  });
+
+  it("pins the seven-spawn short-crystal cadence, geometry, and lifetime", () => {
+    const center = { x: 176, y: 44 };
+    expect({
+      firstAge: ICE_PUNCH_HIT_FIRST_AGE,
+      cadence: ICE_PUNCH_HIT_SPAWN_CADENCE,
+      lifetime: ICE_PUNCH_HIT_LIFETIME,
+    }).toEqual({ firstAge: 90, cadence: 6, lifetime: 37 });
+    expect(icePunchHitCrystals(89, center)).toEqual([]);
+    expect(icePunchHitCrystals(90, center)).toMatchObject([
+      {
+        kind: "large",
+        centerX: 166,
+        centerY: 34,
+        pa: 310,
+        pd: 310,
+        sourceSlot: 3,
+        visible: true,
+      },
+    ]);
+    expect(icePunchHitCrystals(126, center).map(({ sourceSlot }) => sourceSlot))
+      .toEqual([3, 7, 11, 10, 5, 9, 4]);
+    expect(icePunchHitCrystals(126, center).find(({ sourceSlot }) => sourceSlot === 11))
+      .toMatchObject({ kind: "large", centerX: 196, centerY: 46, pa: 310 });
+    expect(icePunchHitCrystals(127, center).find(({ sourceSlot }) => sourceSlot === 11))
+      .toMatchObject({ pa: 303, pd: 303 });
+    expect(icePunchHitCrystals(135, center).find(({ sourceSlot }) => sourceSlot === 11))
+      .toMatchObject({ pa: 256, pd: 256 });
+    expect(icePunchHitCrystals(144, center).find(({ sourceSlot }) => sourceSlot === 11))
+      .toMatchObject({ visible: false });
+    expect(icePunchHitCrystals(145, center).find(({ sourceSlot }) => sourceSlot === 11))
+      .toMatchObject({ visible: true });
+    expect(icePunchHitCrystals(162, center).find(({ sourceSlot }) => sourceSlot === 11))
+      .toMatchObject({ visible: false });
+    expect(icePunchHitCrystals(163, center)).toEqual([]);
   });
 });

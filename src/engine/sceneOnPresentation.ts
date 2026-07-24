@@ -25,9 +25,11 @@ import {
   type RockSlideAnimationProfile,
 } from "./battleMenu.ts";
 import {
+  icePunchHitCrystals,
   icePunchSpiralCrystals,
   icePunchOverlayState,
   type IcePunchCrystal,
+  type IcePunchHitCrystal,
   type IcePunchOverlayState,
 } from "./icePunch.ts";
 
@@ -165,6 +167,7 @@ export interface SceneOnIcePunchView {
   readonly target: SceneOnPresentationBattler;
   readonly overlay: IcePunchOverlayState;
   readonly crystals: readonly IcePunchCrystal[];
+  readonly hitCrystals: readonly IcePunchHitCrystal[];
 }
 
 export interface SceneOnFaintAttackView {
@@ -321,6 +324,10 @@ export function sceneOnIcePunchView(
     crystals: icePunchSpiralCrystals(
       // BuildOamBuffer displays the sprite state from the preceding callback
       // pass; palette tasks above are not subject to this OBJ-only lag.
+      state.age - 1,
+      state.config.target.geometry.animationCenter,
+    ),
+    hitCrystals: icePunchHitCrystals(
       state.age - 1,
       state.config.target.geometry.animationCenter,
     ),
