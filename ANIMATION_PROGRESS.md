@@ -45,21 +45,19 @@ remainder.
 ## Current handoff
 
 - **State:** **14 exact / 2 partial / 260 unsupported**. EXTREME SPEED is an
-  honest two-orientation partial through its fully settled high-speed
-  background at animation age 86; QUICK ATTACK and AERIAL ACE remain exact.
-- **Did:** completed EXTREME SPEED's side-parametric high-speed background
-  compositor through settled animation age 86: generic 256px text-BG wrapping,
-  source attacked-side tilemap selection, and the visible one-VBlank BG3 scroll
-  latch now sit behind the shared Scene-ON seam. Refreshed QUICK ATTACK's
-  opponent evidence after the harness control-order change.
-- **Evidence:** EXTREME SPEED opponent-front frames **91–125** and player-back
-  frames **87–121** are dense and exact at **35/35 + 35/35 RGB**. RAM pins
-  `BLDCNT=0xE8`, the 16→0 `BLDY` ramp, signed ±9 px task scroll, displayed
-  `BG3HOFS` one update behind, and the source `BG_HIGHSPEED_*` attacked-side
-  selection. Both complete QUICK ATTACK controls are **219/219 + 214/214** with
-  immutable 117→111 endpoints; the opponent fixture records harness `96603ae`
-  (2026-07-24 06:08), superseding the pre-change 117→110 evidence.
-- **Next:** after EXTREME SPEED age 86, prove the affine disappearance, three
+  honest two-orientation partial through terminal attacker affine age 96;
+  QUICK ATTACK and AERIAL ACE remain exact.
+- **Did:** extended EXTREME SPEED through its source affine-double attacker
+  stretch behind the shared Scene-ON seam. The pure reducer uses command
+  `(96,-13,0,8)` and pret's `SetBattlerSpriteYOffsetFromYScale` formula with
+  source Arcanine front/back y-offsets **2/6**, not a fitted geometry table.
+- **Evidence:** opponent-front frames **91–135** and player-back frames
+  **87–131** are dense and exact at **45/45 + 45/45 RGB**, covering the
+  background phases and every visible affine frame through age 96. Both full
+  QUICK ATTACK controls remain **219/219 + 214/214** with immutable 117→111
+  endpoints. Tier-1 pins affine epochs, matrices, front/back y2, terminal
+  visibility, side selection, and immutability.
+- **Next:** after EXTREME SPEED age 96, prove the hidden-attacker hold, three
   edge impacts, 24 dust spawns, blink reappearance, restore fade, and script
   cleanup in both complete move-owned windows at 0 RGB diff. Generic hit,
   HP/result/status, and controller tails remain separately owned.
