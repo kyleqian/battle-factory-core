@@ -45,6 +45,7 @@ GSAVEBLOCK2PTR, GRNGVALUE = 0x03005D90, 0x03005D80
 GSPECIALVAR_RESULT = 0x020375F0
 PARTY_MON_SIZE, RENTALS_OFFSET = 0x64, 0xE70
 HANDLE_CHOOSE, CANT_HAVE_SAME = 0x0819CE40, 0x0819F488
+CHECKPOINTS = {29935, 29937, 29938, 29961, 29962, 29982, 29983, 29984, 29986}
 SUBSTRUCT_ORDERS = (
     (0, 1, 2, 3), (0, 1, 3, 2), (0, 2, 1, 3), (0, 3, 1, 2), (0, 2, 3, 1), (0, 3, 2, 1),
     (1, 0, 2, 3), (1, 0, 3, 2), (2, 0, 1, 3), (3, 0, 1, 2), (2, 0, 3, 1), (3, 0, 2, 1),
@@ -155,10 +156,14 @@ def main() -> None:
     assert [party_species(oracle, GENEMYPARTY, i) for i in range(3)] == [240, 198, 17]
 
     rows = [snapshot(oracle, tick)]
+
+    def record_if_checkpoint() -> None:
+        if tick in CHECKPOINTS:
+            rows.append(snapshot(oracle, tick))
     # Release the deliberately rejected install-frame A, then take the first
     # fresh picker edge through Swap_ActionMon's duplicate branch.
-    oracle.advance([]); tick += 1; rows.append(snapshot(oracle, tick))
-    oracle.advance(["A"]); tick += 1; rows.append(snapshot(oracle, tick))
+    oracle.advance([]); tick += 1; record_if_checkpoint()
+    oracle.advance(["A"]); tick += 1; record_if_checkpoint()
     assert active_swap_task(oracle) is not None and active_swap_task(oracle)["func"] == CANT_HAVE_SAME
 
     sent_early_b = sent_close_b = sent_install_right = released_install_right = sent_fresh_right = False
@@ -175,7 +180,7 @@ def main() -> None:
             released_install_right = True
         elif task and task["func"] == HANDLE_CHOOSE and task["state"] == 1 and released_install_right and not sent_fresh_right:
             buttons = ["RIGHT"]; sent_fresh_right = True
-        oracle.advance(buttons); tick += 1; rows.append(snapshot(oracle, tick))
+        oracle.advance(buttons); tick += 1; record_if_checkpoint()
         if tick > 30150:
             raise RuntimeError("duplicate rejection did not return to picker")
 
