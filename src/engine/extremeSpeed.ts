@@ -11,6 +11,12 @@ export interface ExtremeSpeedImpactState {
   readonly hitsplatIndex: 0 | 1 | 2 | null;
 }
 
+export interface ExtremeSpeedDustSpriteState {
+  readonly x2: number;
+  readonly y2: number;
+  readonly frame: 0 | 1 | 2;
+}
+
 export const EXTREME_SPEED_FADE_FIRST_AGE = 52;
 export const EXTREME_SPEED_BG_SWAP_AGE = 68;
 export const EXTREME_SPEED_SCROLL_FIRST_AGE = 69;
@@ -20,6 +26,7 @@ export const EXTREME_SPEED_ATTACKER_HIDDEN_AGE = 98;
 export const EXTREME_SPEED_IMPACT_FIRST_AGE = 123;
 export const EXTREME_SPEED_IMPACT_LAST_AGE = 182;
 export const EXTREME_SPEED_DUST_FIRST_AGE = 183;
+export const EXTREME_SPEED_REAPPEAR_FIRST_AGE = 193;
 export const EXTREME_SPEED_RESTORE_FADE_FIRST_AGE = 318;
 export const EXTREME_SPEED_DEFAULT_BG_SWAP_AGE = 335;
 export const EXTREME_SPEED_DONE_AGE = 354;
@@ -132,16 +139,91 @@ export function extremeSpeedImpactAtAge(
   if (age < EXTREME_SPEED_IMPACT_FIRST_AGE || age > EXTREME_SPEED_IMPACT_LAST_AGE) {
     return { targetX2: 0, hitsplatIndex: null };
   }
-  const local = age - EXTREME_SPEED_IMPACT_FIRST_AGE;
-  const pulse = Math.min(2, Math.floor(local / 20));
-  const within = local - pulse * 20;
   const direction = targetSide === "player" ? 1 : -1;
-  let magnitude: number;
-  if (within < 2) magnitude = 8;
-  else if (within < 12) magnitude = 8 + (Math.floor(within / 2) % 2 ? 6 : 0);
-  else magnitude = Math.max(0, 20 - within);
+  let x2 = 0;
+  let phase = 0;
+  let delay = 0;
+  let alternations = 0;
+  let pulsesLeft = 3;
+  for (
+    let callbackAge = EXTREME_SPEED_IMPACT_FIRST_AGE;
+    callbackAge <= age;
+    callbackAge += 1
+  ) {
+    if (phase === 0) {
+      x2 += direction * 8;
+      delay = 0;
+      alternations = 0;
+      phase = 1;
+    } else if (phase === 1) {
+      delay += 1;
+      if (delay > 1) {
+        delay = 0;
+        alternations += 1;
+        x2 += direction * (alternations % 2 ? 6 : -6);
+        if (alternations > 4) {
+          if (alternations % 2) x2 -= direction * 6;
+          phase = 2;
+        }
+      }
+    } else if (phase === 2) {
+      pulsesLeft -= 1;
+      phase = pulsesLeft === 0 ? 3 : 0;
+    } else {
+      x2 -= direction;
+    }
+  }
   return {
-    targetX2: direction * magnitude,
-    hitsplatIndex: pulse as 0 | 1 | 2,
+    targetX2: x2,
+    hitsplatIndex: Math.min(
+      2,
+      Math.floor((age - EXTREME_SPEED_IMPACT_FIRST_AGE) / 12),
+    ) as 0 | 1 | 2,
   };
+}
+
+/** OAM-visible attacker state for `AnimTask_ExtremeSpeedMonReappear`. */
+export function extremeSpeedAttackerVisibleAtAge(age: number): boolean {
+  if (age < EXTREME_SPEED_ATTACKER_HIDDEN_AGE) return true;
+  // The task toggles after each pair of callbacks, fourteen times. OAM is
+  // built before RunTasks, so the framebuffer observes the toggle one age
+  // later than task state.
+  const local = age - (EXTREME_SPEED_REAPPEAR_FIRST_AGE + 3);
+  if (local < 0) return false;
+  if (local >= 28) return true;
+  return Math.floor(local / 2) % 2 === 0;
+}
+
+/**
+ * The 24 source dust spawns (four offsets, six rounds), including their
+ * five-frame sheet program and the task-wide blink gate.
+ */
+export function extremeSpeedDustAtAge(
+  age: number,
+): readonly ExtremeSpeedDustSpriteState[] {
+  const displayedTaskAge = age - 1;
+  const taskLocal = displayedTaskAge - EXTREME_SPEED_DUST_FIRST_AGE;
+  if (taskLocal < 1) return [];
+  const blinkStep = Math.floor(taskLocal / 2);
+  const firstBlink = blinkStep <= 20
+    ? blinkStep % 2
+    : taskLocal <= 62
+      ? 0
+      : Math.floor((taskLocal - 63) / 2) % 2;
+  if (firstBlink !== 0) return [];
+  const offsets = [[30, 28], [-20, 24], [16, 26], [-10, 28]] as const;
+  const frames = [0, 1, 2, 1, 0] as const;
+  const sprites: ExtremeSpeedDustSpriteState[] = [];
+  for (let spawn = 0; spawn < 24; spawn += 1) {
+    const spawnTaskAge = 1 + spawn * 5;
+    const spriteAge = taskLocal - spawnTaskAge;
+    if (spriteAge < 0 || spriteAge >= 15) continue;
+    const [x2, y2] = offsets[spawn % offsets.length]!;
+    sprites.push({
+      x2,
+      y2,
+      frame: frames[Math.floor(spriteAge / 3)]!,
+    });
+  }
+  return sprites;
 }
