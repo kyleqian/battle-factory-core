@@ -6,6 +6,7 @@
  * - include/battle.h:26-42,649-692
  * - include/constants/battle.h:129-178,184-210
  * - include/constants/moves.h:169
+ * - include/constants/abilities.h:47-52
  *
  * Keep these source identities centralized. Command handlers and rules ports
  * consume numeric source data; they do not dispatch on move names.
@@ -27,11 +28,13 @@ export const BATTLE_SCRIPT_STATUS2_MASKS = Object.freeze({
   STATUS2_CURSED: 0x1000_0000,
 } as const);
 
+export const BATTLE_SCRIPT_STATUS1_SLEEP = 0x0000_0007;
 export const BATTLE_SCRIPT_STATUS3_GRUDGE = 1 << 14;
 
 export const BATTLE_SCRIPT_ATTACK_CANCELER_PHASES = Object.freeze({
   CANCELER_FLAGS: 0,
   CANCELER_ASLEEP: 1,
+  CANCELER_FROZEN: 2,
 } as const);
 
 export const BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE =
@@ -50,4 +53,8 @@ export const BATTLE_SCRIPT_MOVE_VALUES_CLEANUP_HITMARKER_MASK =
 
 export const BATTLE_SCRIPT_MOVE_RESULT_MISSED = 1 << 0;
 export const BATTLE_SCRIPT_MOVE_STRUGGLE = 165;
+export const BATTLE_SCRIPT_MOVE_SNORE = 173;
+export const BATTLE_SCRIPT_MOVE_SLEEP_TALK = 214;
+export const BATTLE_SCRIPT_ABILITY_SOUNDPROOF = 43;
+export const BATTLE_SCRIPT_ABILITY_EARLY_BIRD = 48;
 export const BATTLE_SCRIPT_ACTION_FINISHED = 12;

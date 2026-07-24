@@ -1,13 +1,18 @@
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import {
+  BATTLE_SCRIPT_ABILITY_EARLY_BIRD,
+  BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
   BATTLE_SCRIPT_ACTION_FINISHED,
   BATTLE_SCRIPT_ATTACK_CANCELER_PHASES,
   BATTLE_SCRIPT_HITMARKER_ALLOW_NO_PP,
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
   BATTLE_SCRIPT_MOVE_RESULT_MISSED,
+  BATTLE_SCRIPT_MOVE_SLEEP_TALK,
+  BATTLE_SCRIPT_MOVE_SNORE,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
+  BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_GRUDGE,
 } from "./battleScriptSourceConstants.ts";
@@ -97,6 +102,103 @@ export type BattleScriptAttackCancelerFlagsDecision =
     kind: "not-at-source-phase";
     rulesContext: BattleScriptRulesContext;
     receipt: BattleScriptAttackCancelerFlagsGateReceipt;
+  }>;
+
+export type BattleScriptAttackCancelerSleepReason =
+  | "not-asleep"
+  | "sleep-move-allowed"
+  | "asleep"
+  | "woke-up"
+  | "uproar-woke";
+
+export type BattleScriptAttackCancelerScriptEffect =
+  | Readonly<{
+    kind: "preserve";
+    sourceProgramCounter: number;
+  }>
+  | Readonly<{
+    kind: "handoff";
+    sourceProgramCounter: number;
+    targetLabel: "BattleScript_MoveUsedIsAsleep" | "BattleScript_MoveUsedWokeUp";
+  }>;
+
+export type BattleScriptAttackCancelerCursorEffect =
+  | Readonly<{ kind: "preserve" }>
+  | Readonly<{
+    kind: "push";
+    sourceProgramCounter: number;
+  }>;
+
+export type BattleScriptAttackCancelerMultistringEffect =
+  | Readonly<{ kind: "preserve" }>
+  | Readonly<{
+    kind: "set";
+    sourceConstant: "B_MSG_WOKE_UP" | "B_MSG_WOKE_UP_UPROAR";
+    value: 0 | 1;
+  }>;
+
+export type BattleScriptAttackCancelerStatusControllerEffect =
+  | Readonly<{ kind: "none" }>
+  | Readonly<{
+    kind: "request-status1-write";
+    battler: BattleScriptBattlerId;
+    sourceRequest: "REQUEST_STATUS_BATTLE";
+    offset: 0;
+    size: 4;
+    value: number;
+    markForControllerExecution: true;
+  }>;
+
+export type BattleScriptAttackCancelerAsleepReceipt = Readonly<{
+  sourcePhase: "CANCELER_ASLEEP";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerSleepReason;
+  sleepCounter: Readonly<{
+    before: number;
+    after: number;
+    decrement: 0 | 1 | 2;
+  }>;
+  uproarScan: Readonly<{
+    performed: boolean;
+    checkedBattlers: readonly BattleScriptBattlerId[];
+    sourceBattler: BattleScriptBattlerId | null;
+    blockedBySoundproof: boolean;
+    scriptingBattler:
+      | Readonly<{ kind: "preserve" }>
+      | Readonly<{ kind: "set"; battler: BattleScriptBattlerId }>;
+  }>;
+  status1: BattleScriptBitFieldEffect;
+  status2: BattleScriptBitFieldEffect;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 2;
+  script: BattleScriptAttackCancelerScriptEffect;
+  cursor: BattleScriptAttackCancelerCursorEffect;
+  multistringChooser: BattleScriptAttackCancelerMultistringEffect;
+  statusController: BattleScriptAttackCancelerStatusControllerEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_ASLEEP";
+    sourcePhaseAfter: "CANCELER_FROZEN";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerAsleepGateReceipt = Readonly<{
+  sourcePhase: "CANCELER_ASLEEP";
+  tracker: Readonly<{ before: number; after: number }>;
+}>;
+
+export type BattleScriptAttackCancelerAsleepDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerSleepReason;
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerAsleepReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerAsleepGateReceipt;
   }>;
 
 function requireSourceProgramCounter(sourceProgramCounter: number): number {
@@ -248,6 +350,232 @@ export function advanceBattleScriptAttackCancelerFlags(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_FLAGS",
         sourcePhaseAfter: "CANCELER_ASLEEP",
+      }),
+    }),
+  });
+}
+
+/**
+ * The source-shaped CANCELER_ASLEEP phase of AtkCanceler_UnableToUseMove.
+ *
+ * It returns the script/cursor/controller handoff as typed effects and stops
+ * after advancing the tracker to CANCELER_FROZEN. It does not apply those
+ * external effects, loop into freeze, or execute ATTACKCANCELER opcode 0.
+ */
+export function advanceBattleScriptAttackCancelerAsleep(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+): BattleScriptAttackCancelerAsleepDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_ASLEEP
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_ASLEEP",
+        tracker: Object.freeze({
+          before: trackerBefore,
+          after: trackerBefore,
+        }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler asleep phase requires an attacker role",
+    );
+  }
+
+  const sourceBattler = rulesContext.battlers[attacker];
+  const sleepBefore = sourceBattler.status1 & BATTLE_SCRIPT_STATUS1_SLEEP;
+  const checkedBattlers: BattleScriptBattlerId[] = [];
+  let uproarSource: BattleScriptBattlerId | null = null;
+  const blockedBySoundproof = (
+    sleepBefore !== 0
+    && sourceBattler.ability === BATTLE_SCRIPT_ABILITY_SOUNDPROOF
+  );
+  if (sleepBefore !== 0) {
+    for (let battler = 0; battler < rulesContext.battlers.length; battler += 1) {
+      const battlerId = battler as BattleScriptBattlerId;
+      checkedBattlers.push(battlerId);
+      if (
+        !blockedBySoundproof
+        && (
+          rulesContext.battlers[battlerId].status2
+          & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_UPROAR
+        ) !== 0
+      ) {
+        uproarSource = battlerId;
+        break;
+      }
+    }
+  }
+
+  let reason: BattleScriptAttackCancelerSleepReason = "not-asleep";
+  let sleepDecrement: 0 | 1 | 2 = 0;
+  let nextStatus1 = sourceBattler.status1;
+  let nextStatus2 = sourceBattler.status2;
+  let nextHitMarker = rulesContext.hitMarker;
+  let effect: 0 | 2 = 0;
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+  let cursor: BattleScriptAttackCancelerCursorEffect = Object.freeze({
+    kind: "preserve",
+  });
+  let multistringChooser: BattleScriptAttackCancelerMultistringEffect =
+    Object.freeze({ kind: "preserve" });
+
+  if (sleepBefore !== 0 && uproarSource !== null) {
+    reason = "uproar-woke";
+    nextStatus1 = (
+      sourceBattler.status1
+      & ~BATTLE_SCRIPT_STATUS1_SLEEP
+    ) >>> 0;
+    nextStatus2 = (
+      sourceBattler.status2
+      & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
+    ) >>> 0;
+    effect = 2;
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_MoveUsedWokeUp",
+    });
+    cursor = Object.freeze({ kind: "push", sourceProgramCounter: sourcePc });
+    multistringChooser = Object.freeze({
+      kind: "set",
+      sourceConstant: "B_MSG_WOKE_UP_UPROAR",
+      value: 1,
+    });
+  } else if (sleepBefore !== 0) {
+    sleepDecrement = sourceBattler.ability === BATTLE_SCRIPT_ABILITY_EARLY_BIRD
+      ? 2
+      : 1;
+    nextStatus1 = sleepBefore < sleepDecrement
+      ? (sourceBattler.status1 & ~BATTLE_SCRIPT_STATUS1_SLEEP) >>> 0
+      : (sourceBattler.status1 - sleepDecrement) >>> 0;
+    const sleepAfterDecrement = nextStatus1 & BATTLE_SCRIPT_STATUS1_SLEEP;
+    if (sleepAfterDecrement !== 0) {
+      if (
+        rulesContext.currentMove === BATTLE_SCRIPT_MOVE_SNORE
+        || rulesContext.currentMove === BATTLE_SCRIPT_MOVE_SLEEP_TALK
+      ) {
+        reason = "sleep-move-allowed";
+      } else {
+        reason = "asleep";
+        effect = 2;
+        nextHitMarker = (
+          rulesContext.hitMarker
+          | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+        ) >>> 0;
+        script = Object.freeze({
+          kind: "handoff",
+          sourceProgramCounter: sourcePc,
+          targetLabel: "BattleScript_MoveUsedIsAsleep",
+        });
+      }
+    } else {
+      reason = "woke-up";
+      nextStatus2 = (
+        sourceBattler.status2
+        & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_NIGHTMARE
+      ) >>> 0;
+      effect = 2;
+      script = Object.freeze({
+        kind: "handoff",
+        sourceProgramCounter: sourcePc,
+        targetLabel: "BattleScript_MoveUsedWokeUp",
+      });
+      cursor = Object.freeze({ kind: "push", sourceProgramCounter: sourcePc });
+      multistringChooser = Object.freeze({
+        kind: "set",
+        sourceConstant: "B_MSG_WOKE_UP",
+        value: 0,
+      });
+    }
+  }
+
+  const battlerChanged = (
+    nextStatus1 !== sourceBattler.status1
+    || nextStatus2 !== sourceBattler.status2
+  );
+  const nextBattler = battlerChanged
+    ? Object.freeze({
+      ...sourceBattler,
+      status1: nextStatus1,
+      status2: nextStatus2,
+    })
+    : sourceBattler;
+  const nextBattlers = battlerChanged
+    ? Object.freeze(
+      rulesContext.battlers.map((candidate, index) => (
+        index === attacker ? nextBattler : candidate
+      )),
+    ) as unknown as BattleScriptRulesContext["battlers"]
+    : rulesContext.battlers;
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_FROZEN;
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battlers: nextBattlers,
+    atkCancelerTracker: trackerAfter,
+    hitMarker: nextHitMarker,
+  });
+  const statusController: BattleScriptAttackCancelerStatusControllerEffect =
+    effect === 2
+      ? Object.freeze({
+        kind: "request-status1-write",
+        battler: attacker,
+        sourceRequest: "REQUEST_STATUS_BATTLE",
+        offset: 0,
+        size: 4,
+        value: nextStatus1,
+        markForControllerExecution: true,
+      })
+      : Object.freeze({ kind: "none" });
+
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_ASLEEP",
+      attacker,
+      reason,
+      sleepCounter: Object.freeze({
+        before: sleepBefore,
+        after: nextStatus1 & BATTLE_SCRIPT_STATUS1_SLEEP,
+        decrement: sleepDecrement,
+      }),
+      uproarScan: Object.freeze({
+        performed: sleepBefore !== 0,
+        checkedBattlers: Object.freeze(checkedBattlers),
+        sourceBattler: uproarSource,
+        blockedBySoundproof,
+        scriptingBattler: uproarSource === null
+          ? Object.freeze({ kind: "preserve" })
+          : Object.freeze({ kind: "set", battler: uproarSource }),
+      }),
+      status1: bitFieldEffect(sourceBattler.status1, nextStatus1),
+      status2: bitFieldEffect(sourceBattler.status2, nextStatus2),
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect,
+      script,
+      cursor,
+      multistringChooser,
+      statusController,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_ASLEEP",
+        sourcePhaseAfter: "CANCELER_FROZEN",
       }),
     }),
   });

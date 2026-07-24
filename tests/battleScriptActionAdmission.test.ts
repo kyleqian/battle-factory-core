@@ -28,6 +28,7 @@ function battler(
   changes: Partial<BattleScriptRulesBattler> = {},
 ): BattleScriptRulesBattler {
   return Object.freeze({
+    ability: changes.ability ?? 0,
     hp: changes.hp ?? 100,
     pp: changes.pp ?? Object.freeze([10, 20, 30, 40]),
     status1: changes.status1 ?? 0,
@@ -69,6 +70,7 @@ describe("source-shaped attack-canceler flags phase", () => {
     expect(BATTLE_SCRIPT_ATTACK_CANCELER_PHASES).toEqual({
       CANCELER_FLAGS: 0,
       CANCELER_ASLEEP: 1,
+      CANCELER_FROZEN: 2,
     });
     expect(BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND).toBe(1 << 25);
     expect(BATTLE_SCRIPT_STATUS3_GRUDGE).toBe(1 << 14);

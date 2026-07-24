@@ -17,6 +17,7 @@ function battler(
   changes: Partial<BattleScriptRulesBattler> = {},
 ): BattleScriptRulesBattler {
   return Object.freeze({
+    ability: changes.ability ?? 0,
     hp: changes.hp ?? 100,
     pp: changes.pp ?? Object.freeze([10, 20, 30, 40]),
     status1: changes.status1 ?? 0,

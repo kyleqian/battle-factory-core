@@ -51,6 +51,7 @@ function battler(
   furyCutterCounter = 0,
 ) {
   return Object.freeze({
+    ability: 0,
     hp,
     pp,
     status1,
@@ -177,6 +178,7 @@ describe("source-shaped Battle Script rules context", () => {
   it("rejects malformed battler arrays, source widths, counters, and invalid roles", () => {
     const invalidInputs = [
       { battlers: input().battlers.slice(0, 3) },
+      { battlers: [{ ...battler(), ability: 256 }, ...input().battlers.slice(1)] },
       { battlers: [battler(-1), ...input().battlers.slice(1)] },
       { battlers: [battler(0, 0, 0, 256), ...input().battlers.slice(1)] },
       { battlers: [battler(0, 0, 0, 0, -1), ...input().battlers.slice(1)] },

@@ -30,6 +30,7 @@ import {
 } from "./battleScriptSourceConstants.ts";
 
 export type BattleScriptRulesBattler = Readonly<{
+  ability: number;
   hp: number;
   pp: readonly [number, number, number, number];
   status1: number;
@@ -117,6 +118,7 @@ export function createBattleScriptRulesContext(
     throw new Error("Battle Script rules context must contain exactly four indexed battlers");
   }
   const battlers = input.battlers.map((battler, index) => Object.freeze({
+    ability: requireUnsigned(battler.ability, 0xff, `battlers[${index}].ability`),
     hp: requireUnsigned(battler.hp, 0xffff, `battlers[${index}].hp`),
     pp: Object.freeze(
       (() => {
