@@ -112,7 +112,7 @@ describe("Factory swap state/input contract", () => {
     expect(state.rentalMons.slice(3)).toEqual(rentals.slice(3));
   });
 
-  it("accept-NO returns to the enemy picker without mutation", () => {
+  it("accept-NO enters the no-mutation return seam", () => {
     let state: FactorySwapState = {
       ...createFactorySwapState(player, enemy, rentals),
       phase: "acceptPrompt" as const,
@@ -124,10 +124,13 @@ describe("Factory swap state/input contract", () => {
       handleFactorySwapInput(state, "DOWN"),
       "A",
     );
-    expect(state.phase).toBe("enemyPicker");
+    expect(state.phase).toBe("acceptReturn");
+    expect(state.inputReady).toBe(false);
+    expect(state.enemyMonId).toBe(0);
     expect(state.result).toBeNull();
     expect(state.playerParty).toEqual(player);
     expect(state.rentalMons).toEqual(rentals);
+    expect(factorySwapRoundDecision(state)).toBeNull();
   });
 
   it("copies rental identity/IVs from the offered record but personality/ability from the enemy party", () => {

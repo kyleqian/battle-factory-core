@@ -156,6 +156,7 @@ function readyDelay(state: FactorySwapPresentationState): number | null {
   if (
     state.controller.phase === "complete" ||
     state.controller.phase === "acceptExit" ||
+    state.controller.phase === "acceptReturn" ||
     state.controller.phase === "summaryFade" ||
     state.controller.phase === "playerPickerReturn" ||
     state.controller.phase === "enemySwitch"
@@ -189,6 +190,24 @@ export function advanceFactorySwapPresentation(
   if (controller.phase === "acceptExit" && phaseElapsed >= 41) {
     controller = { ...controller, phase: "complete" };
     fieldHandoff = "CB2_ReturnToFieldContinueScript";
+  }
+  if (controller.phase === "acceptReturn" && phaseElapsed >= 67) {
+    controller = acknowledgeFactorySwapPresentation({
+      ...controller,
+      phase: "enemyPicker",
+    });
+    return {
+      controller,
+      elapsed,
+      // Unlike the enemy-screen switch, this handoff has already restored
+      // the cursor/species windows in transition state 7/8. Render it as the
+      // settled picker while still accepting the same physical edge.
+      phaseElapsed: 2,
+      selectedBallClock,
+      selectedBallIndex: state.selectedBallIndex,
+      speciesNameFade,
+      fieldHandoff,
+    };
   }
   if (controller.phase === "enemySwitch" && phaseElapsed === 84) {
     controller = {
@@ -691,6 +710,47 @@ export function factorySwapAcceptExitMechanism(
   if (phaseElapsed === 0) return "Swap_HandleAcceptMonResponse";
   if (phaseElapsed < 41) return "Swap_Task_Exit";
   return "CB2_ReturnToFieldContinueScript";
+}
+
+export type FactorySwapAcceptReturnMechanism =
+  | "Swap_HandleAcceptMonResponse"
+  | "Task_CloseMonPic"
+  | "SpriteCB_CloseMonPic"
+  | "Swap_Task_ScreenInfoTransitionIn"
+  | "Swap_Task_HandleChooseMons";
+
+/** Source callback ownership relative to accepted A-on-NO or B. */
+export function factorySwapAcceptReturnMechanism(
+  phaseElapsed: number,
+): FactorySwapAcceptReturnMechanism {
+  if (phaseElapsed === 0) return "Swap_HandleAcceptMonResponse";
+  if (phaseElapsed <= 8) return "Task_CloseMonPic";
+  if (phaseElapsed <= 20) return "SpriteCB_CloseMonPic";
+  if (phaseElapsed <= 66) return "Swap_Task_ScreenInfoTransitionIn";
+  return "Swap_Task_HandleChooseMons";
+}
+
+/** The response callback uses the same CloseMonPic(..., TRUE) child as YES. */
+export const factorySwapAcceptReturnMonPicVisual =
+  factorySwapAcceptExitMonPicVisual;
+
+/** Both enemy action buttons return through the generic transition-in task. */
+export function factorySwapAcceptReturnPkmnButtonX(
+  phaseElapsed: number,
+): number {
+  return factorySwapEnemyPkmnButtonX(phaseElapsed + 66);
+}
+
+export function factorySwapAcceptReturnCancelButtonX(
+  phaseElapsed: number,
+): number {
+  return factorySwapEnemyCancelButtonX(phaseElapsed + 66);
+}
+
+export function factorySwapAcceptReturnActionFadeY(
+  phaseElapsed: number,
+): number {
+  return factorySwapEnemyActionFadeY(phaseElapsed + 66);
 }
 
 /** The old player species is driven to black once the ball-cycle task starts. */

@@ -11,6 +11,10 @@ import {
   factorySwapAcceptExitMonPicVisual,
   factorySwapAcceptExitObjFadeY,
   factorySwapAcceptMonPicVisual,
+  factorySwapAcceptReturnActionFadeY,
+  factorySwapAcceptReturnCancelButtonX,
+  factorySwapAcceptReturnMechanism,
+  factorySwapAcceptReturnPkmnButtonX,
   factorySwapAcceptPkmnButtonX,
   factorySwapAcceptSpeciesRenderCoeff,
   factorySwapAcceptYesNoVisual,
@@ -46,6 +50,18 @@ function advance(
     next = advanceFactorySwapPresentation(next);
   }
   return next;
+}
+
+function canonicalAcceptPromptReady(): FactorySwapPresentationState {
+  let state = createCanonicalFactorySwapPresentation();
+  state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+  state = handleFactorySwapPresentationInput(state, "A");
+  state = advance(state, 58);
+  state = handleFactorySwapPresentationInput(state, "DOWN");
+  state = handleFactorySwapPresentationInput(state, "A");
+  state = advance(state, 133);
+  state = handleFactorySwapPresentationInput(state, "A");
+  return advance(state, 64);
 }
 
 function offerState(cursor: 0 | 1) {
@@ -550,6 +566,84 @@ describe("live Factory swap presentation adapter", () => {
     });
     expect(factorySwapAcceptExitMechanism(41))
       .toBe("CB2_ReturnToFieldContinueScript");
+  });
+
+  it.each([
+    ["A on NO", "NO"],
+    ["B", "B"],
+  ] as const)(
+    "%s returns at response +67 with identity preserved and a fresh input gate",
+    (_label, branch) => {
+      let state = canonicalAcceptPromptReady();
+      const playerBefore = structuredClone(state.controller.playerParty);
+      const rentalsBefore = structuredClone(state.controller.rentalMons);
+      if (branch === "NO") {
+        state = handleFactorySwapPresentationInput(state, "DOWN");
+        state = advance(state, 19);
+        state = handleFactorySwapPresentationInput(state, "A");
+      } else {
+        state = advance(state, 20);
+        state = handleFactorySwapPresentationInput(state, "B");
+      }
+      expect(state).toMatchObject({
+        phaseElapsed: 0,
+        controller: {
+          phase: "acceptReturn",
+          inputReady: false,
+          playerMonId: 0,
+          enemyMonId: 0,
+          mutationCommitted: false,
+          result: null,
+        },
+        fieldHandoff: null,
+      });
+      expect(state.controller.playerParty).toEqual(playerBefore);
+      expect(state.controller.rentalMons).toEqual(rentalsBefore);
+      expect(factorySwapRoundDecision(state.controller)).toBeNull();
+
+      state = advance(state, 66);
+      expect(state.controller.phase).toBe("acceptReturn");
+      expect(state.controller.inputReady).toBe(false);
+      expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
+      expect(factorySwapAcceptReturnMechanism(66))
+        .toBe("Swap_Task_ScreenInfoTransitionIn");
+
+      state = advance(state, 1);
+      expect(state).toMatchObject({
+        controller: {
+          phase: "enemyPicker",
+          inputReady: true,
+          cursor: 0,
+          playerMonId: 0,
+          enemyMonId: 0,
+          mutationCommitted: false,
+          result: null,
+        },
+        fieldHandoff: null,
+      });
+      expect(state.controller.playerParty).toEqual(playerBefore);
+      expect(state.controller.rentalMons).toEqual(rentalsBefore);
+      expect(factorySwapRoundDecision(state.controller)).toBeNull();
+      const moved = handleFactorySwapPresentationInput(state, "RIGHT");
+      expect(moved.controller.cursor).toBe(1);
+    },
+  );
+
+  it("pins the NO/B close and two-button transition clocks to the response edge", () => {
+    expect(factorySwapAcceptReturnMechanism(0))
+      .toBe("Swap_HandleAcceptMonResponse");
+    expect(factorySwapAcceptReturnMechanism(1)).toBe("Task_CloseMonPic");
+    expect(factorySwapAcceptReturnMechanism(20)).toBe("SpriteCB_CloseMonPic");
+    expect(factorySwapAcceptReturnMechanism(21))
+      .toBe("Swap_Task_ScreenInfoTransitionIn");
+    expect(factorySwapAcceptReturnMechanism(67))
+      .toBe("Swap_Task_HandleChooseMons");
+    expect(factorySwapAcceptReturnPkmnButtonX(21)).toBe(240);
+    expect(factorySwapAcceptReturnPkmnButtonX(22)).toBe(234);
+    expect(factorySwapAcceptReturnCancelButtonX(32)).toBe(240);
+    expect(factorySwapAcceptReturnCancelButtonX(33)).toBe(234);
+    expect(factorySwapAcceptReturnActionFadeY(42)).toBe(16);
+    expect(factorySwapAcceptReturnActionFadeY(43)).toBe(14);
   });
 
   it("pins the accepted mon-picture close and exit fade to the response edge", () => {

@@ -36,6 +36,7 @@ export type FactorySwapPhase =
   | "enemySwitch"
   | "enemyPicker"
   | "acceptPrompt"
+  | "acceptReturn"
   | "acceptExit"
   | "quitPrompt"
   | "duplicateSpecies"
@@ -339,6 +340,7 @@ export function handleFactorySwapInput(
     case "summaryFade":
     case "playerPickerReturn":
     case "enemySwitch":
+    case "acceptReturn":
     case "acceptExit":
       return state;
     case "acceptPrompt": {
@@ -348,8 +350,7 @@ export function handleFactorySwapInput(
       if (input === "B" || (input === "A" && state.yesNoCursor === 1)) {
         return {
           ...state,
-          phase: "enemyPicker",
-          enemyMonId: null,
+          phase: "acceptReturn",
           inputReady: false,
         };
       }
