@@ -31,6 +31,8 @@ function battler(
     flinchImmobility: changes.flinchImmobility ?? 0,
     disabledMove: changes.disabledMove ?? 0,
     usedDisabledMove: changes.usedDisabledMove ?? 0,
+    tauntTimer: changes.tauntTimer ?? 0,
+    usedTauntedMove: changes.usedTauntedMove ?? 0,
   });
 }
 

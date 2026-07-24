@@ -41,6 +41,8 @@ function battler(
     flinchImmobility: changes.flinchImmobility ?? 0,
     disabledMove: changes.disabledMove ?? 0,
     usedDisabledMove: changes.usedDisabledMove ?? 0,
+    tauntTimer: changes.tauntTimer ?? 0,
+    usedTauntedMove: changes.usedTauntedMove ?? 0,
   });
 }
 
@@ -125,6 +127,7 @@ describe("source-shaped attack-canceler asleep phase", () => {
       CANCELER_FLINCH: 5,
       CANCELER_DISABLED: 6,
       CANCELER_TAUNTED: 7,
+      CANCELER_IMPRISONED: 8,
     });
   });
 

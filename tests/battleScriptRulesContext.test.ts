@@ -68,6 +68,8 @@ function battler(
     flinchImmobility,
     disabledMove: 0,
     usedDisabledMove: 0,
+    tauntTimer: 0,
+    usedTauntedMove: 0,
   });
 }
 
@@ -168,6 +170,7 @@ describe("source-shaped Battle Script rules context", () => {
       "currentMove",
       "currentMoveEffect",
       "currentMovePosition",
+      "currentMovePower",
       "dmgMultiplier",
       "hitMarker",
       "missType",

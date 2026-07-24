@@ -136,7 +136,8 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedLoafingAround"
       | "BattleScript_MoveUsedMustRecharge"
       | "BattleScript_MoveUsedFlinched"
-      | "BattleScript_MoveUsedIsDisabled";
+      | "BattleScript_MoveUsedIsDisabled"
+      | "BattleScript_MoveUsedIsTaunted";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -512,6 +513,55 @@ export type BattleScriptAttackCancelerDisabledDecision =
     rulesContext: BattleScriptRulesContext;
     receipt: Readonly<{
       sourcePhase: "CANCELER_DISABLED";
+      tracker: Readonly<{ before: number; after: number }>;
+    }>;
+  }>;
+
+export type BattleScriptAttackCancelerTauntedReason =
+  | "move-not-taunted"
+  | "taunted-status-move";
+
+export type BattleScriptAttackCancelerTauntedReceipt = Readonly<{
+  sourcePhase: "CANCELER_TAUNTED";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerTauntedReason;
+  tauntTimer: Readonly<{ value: number; isNonzero: boolean }>;
+  movePower: Readonly<{
+    currentMove: number;
+    sourceField: "gBattleMoves[gCurrentMove].power";
+    value: number;
+    isZero: boolean;
+  }>;
+  usedTauntedMove: Readonly<{ before: 0 | 1; after: 0 | 1 }>;
+  cancelMultiTurnMoves:
+    | Readonly<{ kind: "not-invoked" }>
+    | Readonly<{
+      kind: "invoked";
+      receipt: BattleScriptCancelMultiTurnMovesReceipt;
+    }>;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_TAUNTED";
+    sourcePhaseAfter: "CANCELER_IMPRISONED";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerTauntedDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerTauntedReason;
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerTauntedReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_TAUNTED";
       tracker: Readonly<{ before: number; after: number }>;
     }>;
   }>;
@@ -1626,6 +1676,115 @@ export function advanceBattleScriptAttackCancelerDisabled(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_DISABLED",
         sourcePhaseAfter: "CANCELER_TAUNTED",
+      }),
+    }),
+  });
+}
+
+/**
+ * The source-shaped CANCELER_TAUNTED phase of AtkCanceler_UnableToUseMove.
+ * Ports battle_util.c lines 2134-2145 and stops at CANCELER_IMPRISONED.
+ */
+export function advanceBattleScriptAttackCancelerTaunted(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+): BattleScriptAttackCancelerTauntedDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (trackerBefore !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_TAUNTED) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_TAUNTED",
+        tracker: Object.freeze({ before: trackerBefore, after: trackerBefore }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler taunted phase requires an attacker role",
+    );
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const isTaunted = sourceBattler.tauntTimer !== 0;
+  const isStatusMove = rulesContext.currentMovePower === 0;
+  const taken = isTaunted && isStatusMove;
+  let nextRulesContext = rulesContext;
+  let helperResult: ReturnType<typeof cancelBattleScriptMultiTurnMoves> | null = null;
+  let nextHitMarker = rulesContext.hitMarker;
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+
+  if (taken) {
+    const flaggedBattler = Object.freeze({
+      ...sourceBattler,
+      usedTauntedMove: 1 as const,
+    });
+    const flaggedBattlers = Object.freeze(
+      rulesContext.battlers.map((candidate, index) => (
+        index === attacker ? flaggedBattler : candidate
+      )),
+    ) as unknown as BattleScriptRulesContext["battlers"];
+    helperResult = cancelBattleScriptMultiTurnMoves(
+      Object.freeze({ ...rulesContext, battlers: flaggedBattlers }),
+      attacker,
+    );
+    nextRulesContext = helperResult.rulesContext;
+    nextHitMarker = (
+      rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+    ) >>> 0;
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_MoveUsedIsTaunted",
+    });
+  }
+
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_IMPRISONED;
+  nextRulesContext = Object.freeze({
+    ...nextRulesContext,
+    atkCancelerTracker: trackerAfter,
+    hitMarker: nextHitMarker,
+  });
+  const reason = taken ? "taunted-status-move" : "move-not-taunted";
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_TAUNTED",
+      attacker,
+      reason,
+      tauntTimer: Object.freeze({
+        value: sourceBattler.tauntTimer,
+        isNonzero: isTaunted,
+      }),
+      movePower: Object.freeze({
+        currentMove: rulesContext.currentMove,
+        sourceField: "gBattleMoves[gCurrentMove].power",
+        value: rulesContext.currentMovePower,
+        isZero: isStatusMove,
+      }),
+      usedTauntedMove: Object.freeze({
+        before: sourceBattler.usedTauntedMove,
+        after: taken ? 1 : sourceBattler.usedTauntedMove,
+      }),
+      cancelMultiTurnMoves: helperResult === null
+        ? Object.freeze({ kind: "not-invoked" })
+        : Object.freeze({ kind: "invoked", receipt: helperResult.receipt }),
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect: taken ? 1 : 0,
+      script,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_TAUNTED",
+        sourcePhaseAfter: "CANCELER_IMPRISONED",
       }),
     }),
   });

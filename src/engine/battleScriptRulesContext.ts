@@ -29,6 +29,7 @@ import {
   BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
 } from "./battleScriptSourceConstants.ts";
 import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
+import movesData from "../data/gen/moves.json" with { type: "json" };
 
 export type BattleScriptRulesBattler = Readonly<{
   ability: number;
@@ -45,6 +46,8 @@ export type BattleScriptRulesBattler = Readonly<{
   flinchImmobility: 0 | 1;
   disabledMove: number;
   usedDisabledMove: 0 | 1;
+  tauntTimer: number;
+  usedTauntedMove: 0 | 1;
 }>;
 
 export type BattleScriptRulesBattlers = readonly [
@@ -78,6 +81,7 @@ export type BattleScriptRulesContext = Readonly<
     battleOutcome: number;
     currentMove: number;
     currentMoveEffect: number;
+    currentMovePower: number;
     currentMovePosition: number;
     multiHitCounter: number;
   }
@@ -116,9 +120,20 @@ type GeneratedMoveEffectRow = Readonly<{
   effectId: number;
 }>;
 
+type GeneratedMovePowerRow = Readonly<{
+  id: number;
+  power: number;
+}>;
+
 const GENERATED_MOVE_EFFECTS = new Map<number, number>(
   (topologyData.moves as readonly GeneratedMoveEffectRow[]).map(
     ({ id, effectId }) => [id, effectId],
+  ),
+);
+
+const GENERATED_MOVE_POWERS = new Map<number, number>(
+  (movesData.moves as readonly GeneratedMovePowerRow[]).map(
+    ({ id, power }) => [id, requireUnsigned(power, 0xff, `gBattleMoves[${id}].power`)],
   ),
 );
 
@@ -135,6 +150,17 @@ export function resolveBattleScriptCurrentMoveEffect(currentMove: number): numbe
     );
   }
   return effect;
+}
+
+/** Resolves the source u8 gBattleMoves[move].power field. */
+export function resolveBattleScriptCurrentMovePower(currentMove: number): number {
+  const power = GENERATED_MOVE_POWERS.get(currentMove);
+  if (power === undefined) {
+    throw new Error(
+      `currentMove ${currentMove} has no source-derived gBattleMoves power`,
+    );
+  }
+  return power;
 }
 
 function requireRole(
@@ -212,6 +238,16 @@ export function createBattleScriptRulesContext(
       1,
       `battlers[${index}].usedDisabledMove`,
     ) as 0 | 1,
+    tauntTimer: requireUnsigned(
+      battler.tauntTimer,
+      0x0f,
+      `battlers[${index}].tauntTimer`,
+    ),
+    usedTauntedMove: requireUnsigned(
+      battler.usedTauntedMove,
+      1,
+      `battlers[${index}].usedTauntedMove`,
+    ) as 0 | 1,
   })) as unknown as BattleScriptRulesBattlers;
   const selectorRoles = Object.freeze({
     attacker: requireRole(input.selectorRoles?.attacker, "selectorRoles.attacker"),
@@ -241,6 +277,7 @@ export function createBattleScriptRulesContext(
     battleOutcome: requireUnsigned(input.battleOutcome, 0xff, "battleOutcome"),
     currentMove,
     currentMoveEffect: resolveBattleScriptCurrentMoveEffect(currentMove),
+    currentMovePower: resolveBattleScriptCurrentMovePower(currentMove),
     currentMovePosition: requireUnsigned(
       input.currentMovePosition,
       3,

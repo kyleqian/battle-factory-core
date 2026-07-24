@@ -42,6 +42,8 @@ function battler(
     flinchImmobility: changes.flinchImmobility ?? 0,
     disabledMove: changes.disabledMove ?? 0,
     usedDisabledMove: changes.usedDisabledMove ?? 0,
+    tauntTimer: changes.tauntTimer ?? 0,
+    usedTauntedMove: changes.usedTauntedMove ?? 0,
   });
 }
 
@@ -82,6 +84,7 @@ describe("source-shaped attack-canceler flags phase", () => {
       CANCELER_FLINCH: 5,
       CANCELER_DISABLED: 6,
       CANCELER_TAUNTED: 7,
+      CANCELER_IMPRISONED: 8,
     });
     expect(BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND).toBe(1 << 25);
     expect(BATTLE_SCRIPT_STATUS3_GRUDGE).toBe(1 << 14);
