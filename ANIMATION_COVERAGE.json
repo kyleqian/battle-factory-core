@@ -66,10 +66,9 @@
     },
     {
       "move": "MOVE_BOUNCE",
-      "status": "partial",
-      "covered": ["legal zero-PP-Up Level-50 mechanicLab SPOINK to ONIX in both orientations", "complete opponent-front dense charge body at oracle frames 345-368 (24/24): source-relative shrink affine program, attacker visibility handoff, round-shadow sprite, species geometry, healthboxes, and blank controller window through the shared Scene-ON seam", "complete opponent-front strike plus no-status controller tail at oracle frames 881-1179 (299/299): land/rebound body, all five source shake pulses, monbg target-base reset and release, generic hit blink/healthbox wobble, immutable 117→114 HP drain, not-very-effective result printer, controller release, gCurrentMove clear, seven-frame blank hold, atomic action-menu reveal, and 100 menu/bounce frames", "complete player-back charge body at frames 261-284 (24/24) and strike plus no-status controller handoff at frames 777-973 (197/197): source-extracted SPOINK back art, side-relative ball origins, opponent-front monbg geometry and persistent base-offset reset, four-frame hit/controller scheduling lag, immutable 117→114 HP drain, result printer, command release, and four stable MOVE_NONE frames before the next move printer"],
-      "evidence": ["tools/battle-lab/mechanic-bounce-spoink-onix.json", "tools/battle-lab/mechanic-bounce-player-spoink-onix.json", "tools/battle-lab/mechanic-bounce-paralysis-spoink-onix.json", "tools/compare/fixtures/bounce-spoink-onix-charge.json", "tools/compare/fixtures/bounce-spoink-onix-strike.json", "tools/compare/fixtures/bounce-player-spoink-onix-charge.json", "tools/compare/fixtures/bounce-player-spoink-onix-strike.json", "tools/compare/bouncePortable.ts", "src/engine/bounce.ts", "tools/probe/run-battle-lab-rgb.py", "docs/bounce-portable-staging-probe.md"],
-      "remaining": "Source BattleScript_SecondTurnSemiInvulnerable sets MOVE_EFFECT_PARALYSIS before the shared hit tail. The legal seed 0x27182818 proves a successful variant: player status commits at frame 1063, controller command 27/status animation spans 1064-1148, command 26/message cleanup follows, gCurrentMove clears at 1225, and the next menu begins at 1230. Stage that complete dense variant through the shared seam before exact promotion."
+      "status": "exact",
+      "covered": ["legal zero-PP-Up Level-50 mechanicLab SPOINK to ONIX in both orientations", "complete opponent-front dense charge body at oracle frames 345-368 (24/24): source-relative shrink affine program, attacker visibility handoff, round-shadow sprite, species geometry, healthboxes, and blank controller window through the shared Scene-ON seam", "complete opponent-front strike plus no-status controller tail at oracle frames 881-1179 (299/299): land/rebound body, all five source shake pulses, monbg target-base reset and release, generic hit blink/healthbox wobble, immutable 117→114 HP drain, not-very-effective result printer, controller release, gCurrentMove clear, seven-frame blank hold, atomic action-menu reveal, and 100 menu/bounce frames", "complete player-back charge body at frames 261-284 (24/24) and strike plus no-status controller handoff at frames 777-973 (197/197): source-extracted SPOINK back art, side-relative ball origins, opponent-front monbg geometry and persistent base-offset reset, four-frame hit/controller scheduling lag, immutable 117→114 HP drain, result printer, command release, and four stable MOVE_NONE frames before the next move printer", "complete successful-paralysis opponent-front strike/controller/menu window at frames 881-1330 (450/450): immutable 117→113 outcome, status commit frame 1063, source-extracted ANIM_TAG_SPARK_2, eight-spawn ElectricityEffect, AnimTask_ShakeMon2 framebuffer handoff, command-27 lifetime, complete paralysis printer, PAR healthbox, command-26 cleanup, gCurrentMove clear at 1225, menu setup/reveal at 1230/1235, and stable tail"],
+      "evidence": ["tools/battle-lab/mechanic-bounce-spoink-onix.json", "tools/battle-lab/mechanic-bounce-player-spoink-onix.json", "tools/battle-lab/mechanic-bounce-paralysis-spoink-onix.json", "tools/compare/fixtures/bounce-spoink-onix-charge.json", "tools/compare/fixtures/bounce-spoink-onix-strike.json", "tools/compare/fixtures/bounce-player-spoink-onix-charge.json", "tools/compare/fixtures/bounce-player-spoink-onix-strike.json", "tools/compare/fixtures/bounce-paralysis-spoink-onix-strike.json", "tools/compare/bouncePortable.ts", "src/engine/bounce.ts", "tools/probe/run-battle-lab-rgb.py", "docs/bounce-portable-staging-probe.md"]
     },
     {
       "move": "MOVE_FIRE_PUNCH",
@@ -93,7 +92,6 @@
   ],
   "queue": [
     "MOVE_FLY",
-    "MOVE_BOUNCE",
     "MOVE_DRAGON_BREATH",
     "MOVE_BIND"
   ],
@@ -162,14 +160,17 @@
         "sprite:gBounceBallShrinkSpriteTemplate",
         "sprite:gBounceBallLandSpriteTemplate",
         "visualCommand:create_basic_hitsplat_sprite",
-        "task:AnimTask_ShakeMon"
+        "task:AnimTask_ShakeMon",
+        "asset:ANIM_TAG_SPARK_2",
+        "subroutine:ElectricityEffect",
+        "task:AnimTask_ShakeMon2"
       ],
       "representatives": [
         "MOVE_FLY",
         "MOVE_BOUNCE",
         "MOVE_DIVE"
       ],
-      "goal": "FLY partially proves a phase-relative, side-parameterized two-turn charge/strike reducer, source-derived player-back MURKROW art, and a reusable framebuffer/healthbox/controller adapter in both legal orientations. Opponent practical windows are 144/144 (seven ISSUES #34 frames excluded) and 248/248; player practical windows are 140/140 (the same seven frames excluded) and 244/244. FLY remains partial only for ISSUES #34. BOUNCE independently proves both charge bodies at 24/24 and complete no-status strike/controller windows at 299/299 opponent-front and 197/197 player-back; it remains partial only for the source-required successful-paralysis status-animation/message variant staged at seed 0x27182818. DIVE remains unsupported without independent dense move evidence."
+      "goal": "FLY partially proves a phase-relative, side-parameterized two-turn charge/strike reducer, source-derived player-back MURKROW art, and a reusable framebuffer/healthbox/controller adapter in both legal orientations. Opponent practical windows are 144/144 (seven ISSUES #34 frames excluded) and 248/248; player practical windows are 140/140 (the same seven frames excluded) and 244/244. FLY remains partial only for ISSUES #34. BOUNCE exactly proves both charge bodies at 24/24, no-status strike/controller windows at 299/299 opponent-front and 197/197 player-back, and the successful-paralysis strike/controller/menu variant at 450/450. DIVE remains unsupported without independent dense move evidence."
     }
   ],
   "variantAudits": {

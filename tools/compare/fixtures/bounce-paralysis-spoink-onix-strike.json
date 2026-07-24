@@ -1,0 +1,47 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-bounce-paralysis-spoink-onix.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "SPOINK (opponent-front) -> ONIX (player-back)",
+  "move": "BOUNCE",
+  "turn": "strike",
+  "orientation": "opponent-to-player",
+  "appStage": {
+    "oracleFrame": 881,
+    "presentationAge": 0,
+    "animationAgeOffset": -1
+  },
+  "denseWindow": {
+    "startFrame": 881,
+    "endFrame": 1330
+  },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 99,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "controllerProfile": {
+    "moveTextFirstAge": -22,
+    "moveTextClearAge": 347,
+    "targetHpBefore": 117,
+    "targetHpAfter": 113,
+    "hitReactionFirstAge": 49,
+    "hpDrainFirstAge": 84,
+    "resultTextFirstAge": 93,
+    "statusOutcome": "paralysis",
+    "statusAppliedAge": 182,
+    "statusShakeFirstAge": 186,
+    "statusElectricityFirstAge": 188,
+    "statusMessageFirstAge": 224,
+    "healthboxStatusAge": 333,
+    "currentMoveResetAge": 344,
+    "actionMenuRevealAge": 354
+  },
+  "acceptance": {
+    "status": "candidate",
+    "note": "Dense successful-paralysis strike, command-27 animation, command-26/PAR/message cleanup, MOVE_NONE, and stable menu tail."
+  }
+}
