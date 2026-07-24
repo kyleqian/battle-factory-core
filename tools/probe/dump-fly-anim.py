@@ -173,6 +173,12 @@ def main() -> None:
             "battler1slot": b1,
             "status3_1": read_u32(GSTATUSES3 + 4 * 1),
             "status2_1": read_u32(GBATTLEMONS + 1 * BATTLEMON_STRIDE + STATUS2_OFFSET),
+            "ppu": {
+                "dispcnt": read_u16(0x04000000),
+                "bgcnt": [read_u16(0x04000008 + i * 2) for i in range(4)],
+                "bldcnt": read_u16(0x04000050),
+                "bldalpha": read_u16(0x04000052),
+            },
         }
         for slot in SLOTS:
             base = GSPRITES + slot * SPRITE_SIZE

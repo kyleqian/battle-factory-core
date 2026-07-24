@@ -7,13 +7,19 @@ frame is consulted at runtime or by the verifier.
 
 ## Result
 
-These are not a PP, menu redraw, or bounce-rule window. They are the first
-seven *visible* frames of the existing FLY ball's extreme affine stretch.
-There is no unambiguous new relative rule to add safely: the current live
-renderer already uses the hardware's exact ball lifetime, OBJ transfer,
-palette, position, affine-double mode, matrix number, and per-frame matrix.
-The residual is confined to the ball bounds and therefore points at the
-high-compression/high-stretch affine sampler, not a timeline/state rule.
+These are not a PP, menu redraw, bounce-rule, or affine-sampler window. They
+are the first seven visible frames of the existing FLY ball, and the source
+matrix/transfer/sampler were already correct. Fresh RGB samples show every
+oracle pixel in the former residual retains the underlying opponent terrain
+color at screen `y>=74`; the app had painted the ball over that foreground
+layer. The same cutoff was already independently established for the
+opponent-side QUICK_ATTACK/AERIAL_ACE component family.
+
+The generic affine-stretch blitter now accepts an optional bottom terrain
+clip, and the canonical layered FLY path supplies the existing opponent
+cutoff. No FLY age, matrix, species, coordinate fit, or baked frame was added.
+The formerly excluded frames are **7/7**, and the strengthened canonical
+trace is **213/213** with frames 17781-17787 restored.
 
 ## Independent fresh evidence
 
@@ -137,15 +143,12 @@ The winning convention is the existing generic sampler's convention; the
 other source-/hardware-plausible rounding and pixel-center variants are all
 worse. It therefore does **not** supply a new general affine sampler rule.
 
-### Verdict and safe recommendation
+### Superseded verdict and final correction
 
-Do not modify the renderer from this evidence. Keep the existing
-floor/64/32 affine-double sampler and do not add a FLY/tick/matrix exception:
-it is already exact for all later captured FLY-up frames (`17788..17821`) and
-the full established regression set remains green: `turn14-fly-miss.json`
-**185/185** and `turn13-switchin.json` **242/242** fresh ON-oracle frames.
-The bounded remainder is a hardware coverage behavior outside this sweep
-(not source center, destination center, rounding, iteration box, final OAM,
-VRAM, palette, or timeline). Reopen only with an independently justified PPU
-coverage rule that is first evaluated against this seven-frame mask table and
-then against both named regression traces.
+The sampler verdict remains correct: keep floor/64/32, because changing it
+would regress later FLY and other affine users. The earlier conclusion that
+the residual must therefore be an unknown PPU coverage rule was incomplete:
+the mask experiment ignored scene-layer priority. Direct failed-pixel RGB
+samples (`oracle terrain / app ball`) identify the missing component as
+foreground-terrain composition, not raster coverage. Reusing that existing
+layer rule closes the window without touching the sampler equation.

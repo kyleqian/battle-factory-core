@@ -46,6 +46,27 @@ for (const capture of oracle.captures) {
   const diff = diffPngs(capture.png, actual);
   const verdict = diff.diffPixels === 0 ? "PASS" : "FAIL";
   console.log(`${verdict} ${capture.frame}: ${diff.diffPixels}px ${diffBounds(PNG.sync.read(capture.png).data, PNG.sync.read(actual).data)}`);
+  if (diff.diffPixels !== 0) {
+    const oracleRgba = PNG.sync.read(capture.png).data;
+    const appRgba = PNG.sync.read(actual).data;
+    const samples: string[] = [];
+    for (let y = 0; y < 160 && samples.length < 8; y += 1) {
+      for (let x = 0; x < 240 && samples.length < 8; x += 1) {
+        const i = (y * 240 + x) * 4;
+        if (
+          oracleRgba[i] === appRgba[i]
+          && oracleRgba[i + 1] === appRgba[i + 1]
+          && oracleRgba[i + 2] === appRgba[i + 2]
+        ) continue;
+        samples.push(
+          `${x},${y}:`
+          + `${oracleRgba[i]},${oracleRgba[i + 1]},${oracleRgba[i + 2]}/`
+          + `${appRgba[i]},${appRgba[i + 1]},${appRgba[i + 2]}`,
+        );
+      }
+    }
+    console.log(`  samples ${samples.join(" ")}`);
+  }
   if (diff.diffPixels !== 0) failures += 1;
 }
 console.log(`${oracle.captures.length - failures}/${frames.length} opening FLY-up frames exact`);

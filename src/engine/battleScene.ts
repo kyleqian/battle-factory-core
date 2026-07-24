@@ -3156,6 +3156,7 @@ function drawSpriteSheetAffineStretch(
   tintCoeff: number,
   doubled = false,
   x2 = 0,
+  clipBottom?: number,
 ): void {
   const w = tileset.columns * 8;
   const h = tileset.rows * 8;
@@ -3168,6 +3169,8 @@ function drawSpriteSheetAffineStretch(
   const dxStart = doubled ? -halfW : 0;
   const dxEnd = doubled ? w + halfW : w;
   for (let dy = dyStart; dy < dyEnd; dy += 1) {
+    const screenY = oy + dy + y2;
+    if (clipBottom !== undefined && screenY >= clipBottom) continue;
     const ry = dy - halfH;
     const sy = ((ry * my) >> 8) + halfH;
     if (sy < 0 || sy >= h) continue;
@@ -3186,7 +3189,7 @@ function drawSpriteSheetAffineStretch(
       const color = tintCoeff > 0
         ? { r: blendComponentToward(c.r, tintColor.r, tintCoeff), g: blendComponentToward(c.g, tintColor.g, tintCoeff), b: blendComponentToward(c.b, tintColor.b, tintCoeff) }
         : c;
-      setPixel(fb, ox + dx + x2, oy + dy + y2, color);
+      setPixel(fb, ox + dx + x2, screenY, color);
     }
   }
 }
@@ -9037,7 +9040,14 @@ const TURN9_QUICKATTACK_LUNGE_TABLE: readonly { x2: number; y2: number }[] = [
  * grounded while the body/wings lift for the dash). Absolute screen `y`, not
  * sprite-local - doesn't line up with a tile-row boundary (`74-19=55`).
  */
-const TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y = 74;
+/**
+ * The foreground battle terrain preserves the settled field at and below
+ * this scanline when an opponent-side sprite is redrawn through the
+ * canonical layered scene. QUICK_ATTACK/AERIAL_ACE established the same
+ * source-relative cutoff first; FLY's affine-double replacement sprite is
+ * subject to that layer too.
+ */
+const OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM = 74;
 
 /** The real Pidgeotto sprite's own lunge offset at trace tick `t`, or `null` outside the window (the caller should draw nothing extra - the normal, already-drawn settled sprite is already correct there). */
 export function turn9QuickAttackLungeOffset(t: number, pressTick: number): { x2: number; y2: number } | null {
@@ -9089,7 +9099,7 @@ function erasePidgeottoFootprint(fb: Uint8Array, maxY: number = Infinity, bgPale
   );
 }
 
-/** Same tile-grid iteration as `drawSpriteSheet`, but skipping any pixel at screen `y >= maxY` - see `TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y`'s own doc comment for why the lunge needs this. */
+/** Same tile-grid iteration as `drawSpriteSheet`, but skipping any pixel at screen `y >= maxY` - see `OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM`'s own doc comment for why the lunge needs this. */
 function drawSpriteSheetClippedBelow(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, maxY: number): void {
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
@@ -9383,19 +9393,19 @@ function drawTurn9QuickAttackAnimation(fb: Uint8Array, t: number, pressTick: num
   const slot3 = turn9QuickAttackSlot3Offset(t, pressTick);
   const slot4 = turn9QuickAttackSlot4Offset(t, pressTick);
   if (!lunge && !slot3 && !slot4) return false;
-  erasePidgeottoFootprint(fb, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  erasePidgeottoFootprint(fb, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
   const { tileset, palette } = pidgeottoFrontSprite;
   const real = lunge ?? { x2: 0, y2: 0 };
-  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
   if (slot3) {
-    const slot4Mask = slot4 ? turn9QuickAttackOpaqueMask(tileset, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y) : null;
+    const slot4Mask = slot4 ? turn9QuickAttackOpaqueMask(tileset, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM) : null;
     if (slot4Mask) {
-      drawSpriteSheetBlendedOverFbSkipping(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y, slot4Mask);
+      drawSpriteSheetBlendedOverFbSkipping(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, slot4Mask);
     } else {
-      drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+      drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot3.x2, PIDGEOTTO_CORNER.y + slot3.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
     }
   }
-  if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  if (slot4) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
   return true;
 }
 
@@ -10027,7 +10037,7 @@ function drawTurn10AerialAceLungeAndClones(fb: Uint8Array, t: number, pressTick:
   const slot4 = turn10AerialAceSlot4Offset(t, pressTick);
   const slot7 = turn10AerialAceSlot7Offset(t, pressTick);
   if (!lunge && !slot4 && !slot7) return;
-  erasePidgeottoFootprint(fb, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y, darken ? turn10BgDarkPalette() : undefined);
+  erasePidgeottoFootprint(fb, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, darken ? turn10BgDarkPalette() : undefined);
   const { tileset } = pidgeottoFrontSprite;
   const palette = darken ? turn10PidgeottoDarkPalette() : pidgeottoFrontSprite.palette;
   const bgPaletteOverride = darken ? turn10BgDarkPalette() : undefined;
@@ -10041,8 +10051,8 @@ function drawTurn10AerialAceLungeAndClones(fb: Uint8Array, t: number, pressTick:
   // very last tick of its life, render 12368, where it flips to winning (see
   // `turn10AerialAceSlot4WinsAtLifeEnd`'s own doc comment).
   const slot4WinsNow = slot4 !== null && turn10AerialAceSlot4WinsAtLifeEnd(t, pressTick);
-  if (slot4 && !slot4WinsNow) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
-  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y);
+  if (slot4 && !slot4WinsNow) drawSpriteSheetBlendedOverFb(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4.x2, PIDGEOTTO_CORNER.y + slot4.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
+  drawSpriteSheetClippedBelow(fb, tileset, palette, PIDGEOTTO_CORNER.x + real.x2, PIDGEOTTO_CORNER.y + real.y2, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM);
   // OVERLAP RULE (docs/aerial-ace-notes.md's Mission A2 + rule-transfer PROBE
   // sessions): slot 7 wins its own OAM tie against the real sprite
   // UNCONDITIONALLY, for its whole life (RAM-proven stably lower
@@ -10051,8 +10061,8 @@ function drawTurn10AerialAceLungeAndClones(fb: Uint8Array, t: number, pressTick:
   // against the field alone (never the live `fb`, which already has the
   // real sprite's own redraw painted into it here). Slot 4 joins it here
   // ONLY at its own life-end tick (`slot4WinsNow`, above).
-  if (slot4WinsNow) drawTurn10AerialAceCloneWinsOverField(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4!.x2, PIDGEOTTO_CORNER.y + slot4!.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y, bgPaletteOverride);
-  if (slot7) drawTurn10AerialAceCloneWinsOverField(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot7.x2, PIDGEOTTO_CORNER.y + slot7.y2, 12, 8, TURN9_QUICKATTACK_LUNGE_GROUND_CLIP_Y, bgPaletteOverride);
+  if (slot4WinsNow) drawTurn10AerialAceCloneWinsOverField(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot4!.x2, PIDGEOTTO_CORNER.y + slot4!.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, bgPaletteOverride);
+  if (slot7) drawTurn10AerialAceCloneWinsOverField(fb, tileset, palette, PIDGEOTTO_CORNER.x + slot7.x2, PIDGEOTTO_CORNER.y + slot7.y2, 12, 8, OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM, bgPaletteOverride);
 }
 
 /**
@@ -12042,7 +12052,21 @@ function drawTurn14FlyBall(fb: Uint8Array, t: number): void {
   const ramTick = t - 1;
   const entry = TURN14_FLY_BALL_TABLE[ramTick - TURN14_FLY_BALL_RAM_START];
   if (!entry) return;
-  drawSpriteSheetAffineStretch(fb, battleAnimFlyBall.tileset, battleAnimFlyBall.palette, MURKROW_CORNER.x, MURKROW_CORNER.y, entry.a, entry.d, entry.y2, { r: 0, g: 0, b: 0 }, 0, true);
+  drawSpriteSheetAffineStretch(
+    fb,
+    battleAnimFlyBall.tileset,
+    battleAnimFlyBall.palette,
+    MURKROW_CORNER.x,
+    MURKROW_CORNER.y,
+    entry.a,
+    entry.d,
+    entry.y2,
+    { r: 0, g: 0, b: 0 },
+    0,
+    true,
+    0,
+    OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM,
+  );
 }
 /** Murkrow's own mon sprite goes invisible the SAME tick the ball spawns (`AnimFlyBallUp`'s own two-line body) and stays that way PERSISTENTLY (this turn's own charge half never un-hides it; `STATUS3_ON_AIR`'s later set at 17913 keeps it hidden into the settled turn-15 menu for an independent, cross-boundary reason - docs/turn14-notes.md's own §5(c)). */
 function turn14MurkrowInvisible(t: number): boolean {

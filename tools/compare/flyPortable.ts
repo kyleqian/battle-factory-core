@@ -82,7 +82,10 @@ state = {
   },
 };
 
-const exclusions = new Set(fixture.denseWindow.excludedFrames ?? []);
+const includeExcluded = process.argv.includes("--include-excluded");
+const exclusions = new Set(
+  includeExcluded ? [] : fixture.denseWindow.excludedFrames ?? [],
+);
 let matching = 0;
 let compared = 0;
 let diffPixels = 0;
