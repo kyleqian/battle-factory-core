@@ -211,7 +211,7 @@ function compose(
     readonly abilityDescriptionCharLimit?: number;
     readonly showMon?: boolean;
     readonly showBall?: boolean;
-    readonly animateMagby?: boolean;
+    readonly animateSwitchedMon?: boolean;
   } = {},
 ): void {
   const text = (str: string, x: number, y: number, colors: TextColors, paletteNum: number) =>
@@ -290,12 +290,15 @@ function compose(
   let monTileset = frontSprite.tileset;
   let monX = 40;
   let monY = 64;
-  // ONIX: no species delay; StartSpriteAnim(1) becomes visible at open+6,
-  // then ANIM_RAPID_H_HOPS advances from data[2]=0 one callback later.
-  // This is source-derived presentation state, not a framebuffer/tick fit.
-  if (spritePool.species === "ONIX" && monAnimClock >= 6) {
+  // ONIX: no species delay. Initial page construction reaches
+  // StartSpriteAnim(1) at open+6; ChangeSummaryPokemon's destination callback
+  // reaches it on replacement-local clock 1. ANIM_RAPID_H_HOPS advances from
+  // data[2]=0 one callback later in either route.
+  const onixAnimStart = monReplacement.animateSwitchedMon === true ? 1 : 6;
+  if (spritePool.species === "ONIX" && monAnimClock >= onixAnimStart) {
     monTileset = frontSprite.animationFrame1;
-    const data = Math.max(0, monAnimClock - 7) * 24;
+    const onixMotionStart = monReplacement.animateSwitchedMon === true ? 2 : 7;
+    const data = Math.max(0, monAnimClock - onixMotionStart) * 24;
     const phase = Math.floor(data / 512) % 4;
     const within = data % 512;
     // Anim_RapidHorizontalHops wraps its calculation in TryFlipX twice.
@@ -312,7 +315,7 @@ function compose(
   if (
     monReplacement.showMon !== false &&
     spritePool.species === "MAGBY" &&
-    monReplacement.animateMagby === true &&
+    monReplacement.animateSwitchedMon === true &&
     monAnimClock >= 2
   ) {
     // ANIM_V_SQUISH_AND_BOUNCE (duration=16): the summary sprite is
@@ -489,7 +492,7 @@ export function renderSummaryInfoPage(
 ): Uint8Array {
   const fb = createFramebuffer();
   compose(fb, selectedSlot, 0, 0, "info", monAnimClock, false, 0, false, {
-    animateMagby: animateSwitchedMon,
+    animateSwitchedMon,
   });
   return fb;
 }
@@ -504,7 +507,7 @@ export function renderSummaryInfoPageFaded(
 ): Uint8Array {
   const fb = createFramebuffer();
   compose(fb, selectedSlot, bgY, objY, "info", monAnimClock, false, 0, false, {
-    animateMagby: animateSwitchedMon,
+    animateSwitchedMon,
   });
   return fb;
 }
@@ -516,7 +519,7 @@ export function renderSummarySkillsPage(
 ): Uint8Array {
   const fb = createFramebuffer();
   compose(fb, selectedSlot, 0, 0, "skills", monAnimClock, false, 0, true, {
-    animateMagby: animateSwitchedMon,
+    animateSwitchedMon,
   });
   return fb;
 }
@@ -528,7 +531,7 @@ export function renderSummaryInfoPageCleared(
 ): Uint8Array {
   const fb = createFramebuffer();
   compose(fb, selectedSlot, 0, 0, "info", monAnimClock, true, 0, false, {
-    animateMagby: animateSwitchedMon,
+    animateSwitchedMon,
   });
   return fb;
 }
@@ -541,6 +544,7 @@ export function renderSummaryInfoPageCleared(
 export function renderSummaryMonTransition(
   transition: SummaryMonTransition,
   oldMonAnimClock: number,
+  sourceIsReplacement = false,
 ): Uint8Array {
   const elapsed = transition.elapsed;
   const spriteIsNew = elapsed >= 16;
@@ -551,7 +555,7 @@ export function renderSummaryMonTransition(
     0,
     0,
     "info",
-    spriteIsNew ? 0 : oldMonAnimClock,
+    spriteIsNew ? 0 : oldMonAnimClock + (sourceIsReplacement ? elapsed : 0),
     false,
     0,
     false,
@@ -561,14 +565,24 @@ export function renderSummaryMonTransition(
       monInfoSlot: elapsed >= 18 ? transition.toSlot : transition.fromSlot,
       abilitySlot: elapsed >= 19 ? transition.toSlot : transition.fromSlot,
       memoSlot: elapsed >= 20 ? transition.toSlot : transition.fromSlot,
-      // AddTextPrinter's speed-0 callback exhausts its first 21 printable
-      // characters on this task tick; the remainder lands next VBlank.
-      abilityDescriptionCharLimit: elapsed === 19 ? 21 : undefined,
+      // The first replacement after page construction inherits the initial
+      // window-copy queue: AddTextPrinter's speed-0 callback exposes 21
+      // printable characters here and the remainder lands next VBlank.
+      // Subsequent replacements start from an already installed rental
+      // window and complete this field within the same callback.
+      abilityDescriptionCharLimit: elapsed === 19 && !sourceIsReplacement ? 21 : undefined,
       showMon: elapsed < 3 || spriteIsNew,
       showBall: elapsed < 4 || elapsed >= 12,
+      animateSwitchedMon: !spriteIsNew && sourceIsReplacement,
     },
   );
-  if (elapsed === 19) {
+  if (elapsed === 19 && !sourceIsReplacement) {
+    const description = abilities[rentals[transition.toSlot]!.ability]!.description;
+    const prefix = description.slice(0, 21);
+    const glyphX = WIN_ABILITY.x + measureText(font, charmap, prefix);
+    const glyphWidth = measureText(font, charmap, description.slice(0, 22)) - measureText(font, charmap, prefix);
+    const glyphY = WIN_ABILITY.y + 17;
+
     // The speed-0 printer has reached the 22nd glyph when this render scans
     // out, but only its first 9 cell rows have crossed COPYWIN_GFX yet.
     // Model that window-transfer boundary from glyph metrics (not pixels).
@@ -582,12 +596,8 @@ export function renderSummaryMonTransition(
       abilityDescriptionCharLimit: 22,
       showMon: true,
       showBall: true,
+      animateSwitchedMon: false,
     });
-    const description = abilities[rentals[transition.toSlot]!.ability]!.description;
-    const prefix = description.slice(0, 21);
-    const glyphX = WIN_ABILITY.x + measureText(font, charmap, prefix);
-    const glyphWidth = measureText(font, charmap, description.slice(0, 22)) - measureText(font, charmap, prefix);
-    const glyphY = WIN_ABILITY.y + 17;
     for (let y = glyphY; y < glyphY + 9; y += 1) {
       for (let x = glyphX; x < glyphX + glyphWidth; x += 1) {
         const offset = (y * 240 + x) * 4;
@@ -632,7 +642,7 @@ export function renderSummaryPageTransition(
       true,
       layers.movingX,
       transition.fromPage === "skills",
-      { animateMagby: animateSwitchedMon },
+      { animateSwitchedMon },
     );
     return fb;
   }

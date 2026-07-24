@@ -1896,7 +1896,11 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       const animateSwitchedMon = summary.monAnimClock !== null;
       if (!transition) {
         if (summary.monTransition) {
-          return renderSummaryMonTransition(summary.monTransition, summaryMonAnimClock);
+          return renderSummaryMonTransition(
+            summary.monTransition,
+            summaryMonAnimClock,
+            animateSwitchedMon,
+          );
         }
         return summary.onInfoPage
           ? renderSummaryInfoPage(summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
@@ -2054,7 +2058,11 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   const animateSwitchedMon = summary.monAnimClock !== null;
   if (!t) {
     if (summary.monTransition) {
-      return renderSummaryMonTransition(summary.monTransition, summaryMonAnimClock);
+      return renderSummaryMonTransition(
+        summary.monTransition,
+        summaryMonAnimClock,
+        animateSwitchedMon,
+      );
     }
     if (summary.pageTransition) {
       // ChangePage's task handoff is installed immediately but its outgoing

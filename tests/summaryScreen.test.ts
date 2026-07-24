@@ -283,6 +283,49 @@ describe("summaryScreen: slot-relative Info-page mon switching", () => {
     });
   });
 
+  it("round-trips DOWN then UP with destination-local clocks and restores Info ownership", () => {
+    const down = requestSummaryMonChange(settled(0), "down");
+    const magby = run(down, SUMMARY_MON_TRANSITION_TICKS);
+    expect(magby).toMatchObject({
+      selectedSlot: 1,
+      page: "info",
+      onInfoPage: true,
+      monTransition: null,
+      monAnimClock: 0,
+    });
+
+    const up = requestSummaryMonChange(run(magby, 12), "up");
+    expect(up).toMatchObject({
+      selectedSlot: 0,
+      page: "info",
+      onInfoPage: true,
+      monAnimClock: 12,
+      monTransition: {
+        fromSlot: 1,
+        toSlot: 0,
+        direction: "up",
+        elapsed: 0,
+      },
+    });
+    const inFlight = run(up, SUMMARY_MON_TRANSITION_TICKS - 1);
+    expect(requestSummaryMonChange(inFlight, "down")).toBe(inFlight);
+    expect(requestSummaryPageChange(inFlight, "right")).toBe(inFlight);
+
+    const onix = advanceSummaryScreen(inFlight);
+    expect(onix).toMatchObject({
+      selectedSlot: 0,
+      page: "info",
+      onInfoPage: true,
+      monTransition: null,
+      monAnimClock: 0,
+    });
+    expect(requestSummaryScreenExit(onix).transition).toMatchObject({
+      direction: "toDraft",
+      phase: "fadingOut",
+      elapsed: 0,
+    });
+  });
+
   it("rejects every input path in flight and restores readiness at DOWN+20", () => {
     const switching = requestSummaryMonChange(settled(0), "down");
     const inFlight = run(switching, SUMMARY_MON_TRANSITION_TICKS - 1);

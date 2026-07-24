@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 352 — S9 OFF Info rental DOWN→UP round trip: **GREEN — 87/87 exact**
+
+- **State:** settled ONIX switches DOWN to input-ready MAGBY, then UP returns
+  through the same slot-relative task to input-ready ONIX with zero pixel diff.
+- **Did:** generalized replacement history so the outgoing sprite callback
+  advances through teardown, the destination owns a fresh local animation
+  clock, and the already-installed text window follows its subsequent-copy
+  timing. Tier-1 pins the reverse destination, direction, in-flight gates,
+  endpoint clamps, and Info/slot ownership.
+- **Next:** supervisor verify this checkpoint and choose the next bounded S9
+  route; Moves/Battle Moves/Contest Moves and move-select remain untouched.
+- **Notes:** `summary-info-mon-down-up.json` **87/87**; DOWN **54/54**; Info
+  ONIX **122/122** + MAGBY **132/132**; install **3/3**; RIGHT **25/25**;
+  LEFT **56/56**. Tier-1 **1298/1298** and build green. No absolute ticks,
+  framebuffer assets, runtime oracle/ROM, battle/controller, or ROADMAP/
+  ISSUES edits.
+
+---
 ## 351 — S9 OFF Info-page rental DOWN switch: **GREEN — 54/54 exact**
 
 - **State:** settled ONIX Info now switches DOWN to MAGBY through the generic
@@ -36,21 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Info ONIX **122/122** + MAGBY **132/132**. Tier-1 **1289/1289**, build
   green. No absolute ticks, framebuffer assets, runtime oracle/ROM, or
   ROADMAP/ISSUES edits.
-
----
-## 349 — S9 OFF Info→Skills layered summary wipe: **GREEN — 25/25 exact**
-
-- **State:** RIGHT now carries Skills through the source's eight 32px BG1/BG2
-  steps over fixed BG3/OBJ, then installs the destination windows at +10.
-  The complete transition and settled ONIX Skills hold are zero diff.
-- **Did:** added generic page-layer offsets, clipped screen-block composition,
-  Skills pagination/EXP/stat strings from source data, and the exact flipped
-  ONIX horizontal-hop callback. Tier-1 pins both directions' layer geometry,
-  shared clocks, and immutable selected-slot ownership.
-- **Next:** supervisor verify this RIGHT/Skills checkpoint and choose the next
-  bounded S9 summary route; LEFT, mon switching, Moves pages, and move-select
-  remain intentionally unclaimed.
-- **Notes:** `summary-info-to-skills.json` **25/25**; install **3/3**; Info
-  ONIX **122/122** + MAGBY **132/132**. Tier-1 **1287/1287**, build green.
-  No absolute ticks, framebuffer assets, runtime oracle/ROM, or ROADMAP/ISSUES
-  edits.
