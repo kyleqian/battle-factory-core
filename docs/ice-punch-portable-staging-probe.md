@@ -10,7 +10,7 @@ damage, RNG, and controller state remain game-owned oracle inputs.
 - Case: player-back ONIX → opponent-front GROVYLE, Battle Scene ON.
 - Move dispatch: oracle frame 2305; PP write: 2332.
 - First `Move_ICE_PUNCH` script-owned display: **2339** (presentation age 0).
-- Dense accepted window: **2339–2401, 63/63 exact**.
+- Dense accepted window: **2339–2411, 73/73 exact**.
 - The window covers the stable handoff and the complete source-composed
   `simple_palette_blend(F_PAL_BG, 0→7, delay 1)` plus
   `AnimTask_BlendBattleAnimPal(F_PAL_TARGET, 0→9, delay 2)` opening ramp.
@@ -20,8 +20,9 @@ damage, RNG, and controller state remain game-owned oracle inputs.
   displayed OBJ state has the source engine's one-frame OAM lag, so 2374 is
   pixel-identical to 2373 and the first visible small crystals are at 2375.
   Large spiral sprites join RAM at 2381 and become visible at 2382. The exact
-  window now covers both source batches through their inward translation at
-  displayed age 62, including the first exact shared fist/hitsplat frame.
+  window now covers both source batches through their complete inward
+  translation, the shared fist/hitsplat/shake overlap, and the final
+  large-crystal state at displayed age 72.
   `IceCrystalEffectShort` begins at 2429; the last observed hit crystal is
   2501. The animation script remains active through 2525 and hands to generic
   hit resolution at 2526.
@@ -32,20 +33,29 @@ states), the large crystal's +40 affine rotation, target-center translation,
 and stable `SortSprites` OAM-Y ordering. RAM additionally pins the overlapping
 sprites' subpriorities: fist 26, hitsplat 27, both crystal batches 28.
 
-An attempted dense extension through 2410 leaves **153 pixels across 7/9
-frames** in 2402–2410 (per-frame residuals 2, 7, 21, 0, 0, 10, 18, 45, 50).
-They are confined to the tightly clustered crystal/fist/hitsplat overlap and
-require a generic pixel-level semi-transparent OBJ-over-OBJ compositor; the
-source geometry, matrices, and whole-sprite OAM ordering are already pinned.
-No coordinate/RGB fit was retained.
+The former **153-pixel** overlap residual across 2402–2410 was the GBA's
+selected-OBJ rule, not geometry or palette error. The PPU retains only the
+frontmost opaque OBJ texel at a screen pixel. If that texel is OBJ mode 1,
+BLDALPHA target 2 comes from an eligible BG/backdrop layer; a lower OAM OBJ
+texel is no longer available. The portable compositor now keeps one pre-OBJ
+target-2 buffer while visiting the source-ordered objects back-to-front.
+Tier-1 separately pins this generic rule and the RAM-derived crystal 28 →
+hitsplat 27 → fist 26 draw order.
+
+Fresh `gMain.oamBuffer` evidence at 2399–2405 plus the dense sprite/matrix
+records through 2411 resolve the callback boundary without a frame special
+case. `TranslateSpriteInGrowingCircle`'s radius-zero callback state is
+destroyed before reaching hardware, so the 30th displayed state retains step
+29's translation. The large affine animation continues independently for
+that display: at 2411 the position remains `(x2,y2)=(1,1)` while matrix A/D
+advance from -97 to 142. The same general reducer rule closes the small
+boundary at 2404 and the large boundary at 2411.
 
 Therefore ICE PUNCH is `partial`. The precisely uncovered contiguous
-move-body remainder is **2402–2525**: the last three displayed small-crystal
-states and last ten large-crystal states where they overlap the reused
-fist/hitsplat/shake chassis, the unverified post-spiral gap, seven-spawn
-crystal burst, palette restoration, and script teardown. Generic hit/damage
-presentation after 2525 and any variant dependency found while closing that
-body also remain unaccepted.
+move-body remainder is **2412–2525**: the post-spiral gap, seven-spawn
+`IceCrystalEffectShort` burst, palette restoration, and script teardown.
+Generic hit/damage presentation after 2525 and any variant dependency found
+while closing that body also remain unaccepted.
 
 ## THUNDER PUNCH sibling check
 

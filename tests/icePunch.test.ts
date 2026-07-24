@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   ICE_PUNCH_OVERLAY_FIRST_AGE,
   ICE_PUNCH_LARGE_SPIRAL_FIRST_AGE,
+  ICE_PUNCH_OBJ_LAYERS_BACK_TO_FRONT,
   ICE_PUNCH_SMALL_SPIRAL_FIRST_AGE,
   ICE_PUNCH_SPIRAL_TICKS,
   icePunchOverlayState,
@@ -117,9 +118,38 @@ describe("ICE_PUNCH source-composed presentation components", () => {
       dy: translated.centerY - firstLarge.centerY,
       matrix: [translated.pa, translated.pb, translated.pc, translated.pd],
     }).toEqual({ dx: -104, dy: 44, matrix: [-97, -236, 236, -97] });
+
+    const smallStep29 = icePunchSpiralCrystals(63, center)
+      .find(({ sourceSlot }) => sourceSlot === 3)!;
+    const smallFinalHold = icePunchSpiralCrystals(64, center)
+      .find(({ sourceSlot }) => sourceSlot === 3)!;
+    const largeStep29 = icePunchSpiralCrystals(70, center)
+      .find(({ sourceSlot }) => sourceSlot === 9)!;
+    const largeFinalHold = icePunchSpiralCrystals(71, center)
+      .find(({ sourceSlot }) => sourceSlot === 9)!;
+    expect(smallFinalHold).toEqual(smallStep29);
+    expect({
+      centerX: largeFinalHold.centerX,
+      centerY: largeFinalHold.centerY,
+      matrix: [
+        largeFinalHold.pa,
+        largeFinalHold.pb,
+        largeFinalHold.pc,
+        largeFinalHold.pd,
+      ],
+    }).toEqual({
+      centerX: largeStep29.centerX,
+      centerY: largeStep29.centerY,
+      matrix: [142, 212, -212, 142],
+    });
   });
 
   it("pins stable source OAM ordering where small and large batches overlap", () => {
+    expect(ICE_PUNCH_OBJ_LAYERS_BACK_TO_FRONT).toEqual([
+      { kind: "crystal", subpriority: 28 },
+      { kind: "hitsplat", subpriority: 27 },
+      { kind: "fist", subpriority: 26 },
+    ]);
     expect(
       icePunchSpiralCrystals(42, { x: 176, y: 44 })
         .map(({ sourceSlot }) => sourceSlot),

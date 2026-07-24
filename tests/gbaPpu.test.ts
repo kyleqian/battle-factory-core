@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import { mgbaColorFromBgr555, mgbaDarkenColor, drawMode0Objects, drawMode0Ppu, type Mode0State } from "../src/engine/gbaPpu.ts";
+import { compositeSemiTransparentObjPixel } from "../src/engine/sprites.ts";
 
 function b64(bytes: Uint8Array): string { return btoa(String.fromCharCode(...bytes)); }
 function stateFor(entries: number[], tilePixels: Record<number, number[]>): Mode0State {
@@ -58,5 +59,25 @@ describe("mode-0 raw tile compositor", () => {
       objTileIds: [0, 1], objTilesB64: b64(tiles),
     });
     expect(pixel(fb, 0, 0)).toEqual([255, 0, 0]);
+  });
+
+  it("blends the frontmost semi-transparent OBJ with BG, never an obscured OBJ", () => {
+    const target2 = createFramebuffer();
+    const output = createFramebuffer();
+    // Blue is the eligible BG target 2. Green stands in for an already
+    // painted, lower OAM OBJ and must not participate in the second blend.
+    target2.set([10, 20, 200, 255]);
+    output.set([0, 200, 0, 255]);
+    compositeSemiTransparentObjPixel(
+      output,
+      target2,
+      0,
+      0,
+      { r: 200, g: 20, b: 10 },
+      12,
+      8,
+    );
+    expect(pixel(output, 0, 0)).toEqual([155, 25, 107]);
+    expect(pixel(output, 0, 0)).not.toEqual([150, 115, 7]);
   });
 });
