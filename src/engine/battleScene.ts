@@ -13856,14 +13856,16 @@ export function renderSceneOnMovePresentation(
           g: blendComponentToward(color.g, ice.g, overlay.targetIceCoeff),
           b: blendComponentToward(color.b, ice.b, overlay.targetIceCoeff),
         }));
-    drawSpriteSheet(
-      fb,
-      grovyleFrontSprite.tileset,
-      targetPalette,
-      target.geometry.spriteCorner.x,
-      target.geometry.spriteCorner.y
-        + (view.age === 68 || view.age === 69 ? 5 : 0),
-    );
+    if (!view.targetInvisible) {
+      drawSpriteSheet(
+        fb,
+        grovyleFrontSprite.tileset,
+        targetPalette,
+        target.geometry.spriteCorner.x,
+        target.geometry.spriteCorner.y
+          + (view.age === 68 || view.age === 69 ? 5 : 0),
+      );
+    }
     const beforeEffects = fb.slice();
     // Source/RAM subpriorities are crystal 28, hitsplat 27, fist 26:
     // crystals are visited back-to-front here, then the reused impact stack
@@ -13929,9 +13931,9 @@ export function renderSceneOnMovePresentation(
         fb[offset + 3] = frontEffects[offset + 3]!;
       }
     }
-    drawSendOutHealthbox(
+    drawOpponentHealthboxWobble(
       fb,
-      0,
+      view.healthboxY2,
       opponentHealthboxContentForHp(state.config.fieldProfile.opponentHp),
     );
     drawComposedPlayerHealthbox(
