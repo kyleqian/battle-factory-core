@@ -5,6 +5,7 @@ import { speciesNameColor } from "./speciesNameFade.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts";
 import {
   factorySwapAcceptCancelButtonX,
+  factorySwapAcceptExitMonPicVisual,
   factorySwapAcceptMonPicVisual,
   factorySwapAcceptPkmnButtonX,
   factorySwapAcceptSpeciesRenderCoeff,
@@ -259,6 +260,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
   const enemy =
     state.phase === "enemyPicker" ||
     state.phase === "acceptPrompt" ||
+    state.phase === "acceptExit" ||
     state.phase === "duplicateSpecies" ||
     (state.phase === "quitPrompt" && state.quitReturnPhase === "enemyPicker");
   const enemySwitch = state.phase === "enemySwitch";
@@ -324,6 +326,11 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     actionFadeY = factorySwapActionFadeY(phaseElapsed);
     pkmnButtonX = factorySwapAcceptPkmnButtonX(phaseElapsed);
     cancelButtonX = factorySwapAcceptCancelButtonX(phaseElapsed);
+  } else if (state.phase === "acceptExit") {
+    // ScreenInfoTransitionOut already parked both action buttons offscreen
+    // before the accept prompt was installed.
+    pkmnButtonX = 240;
+    cancelButtonX = 240;
   } else if (enemy) {
     pkmnButtonX = 160;
   }
@@ -374,7 +381,8 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     fb,
     font,
     charmap,
-    state.phase === "acceptPrompt" && phaseElapsed >= 41
+    (state.phase === "acceptPrompt" && phaseElapsed >= 41) ||
+      state.phase === "acceptExit"
       ? "Accept this POKéMON?"
       : enemy
         ? "Select POKéMON to accept."
@@ -443,18 +451,23 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     state.phase === "playerOptions" ||
     state.phase === "playerPickerReturn" ||
     enemySwitch ||
-    state.phase === "acceptPrompt"
+    state.phase === "acceptPrompt" || state.phase === "acceptExit"
   ) {
     const returning = state.phase === "playerPickerReturn";
     const ballVisuals: BallVisual[] = renderedBallTiles.map((firstTile, index) => ({
-      palette: state.phase === "acceptPrompt"
+      palette: state.phase === "acceptPrompt" || state.phase === "acceptExit"
         ? pokeball.grayPalette
         : pokeball.selectedPalette,
-      firstTileRow: state.phase === "acceptPrompt" ? 0 : firstTile / 4,
+      firstTileRow:
+        state.phase === "acceptPrompt" || state.phase === "acceptExit"
+          ? 0
+          : firstTile / 4,
       centerX: 48 * index + 72,
     }));
     const monPic = state.phase === "acceptPrompt"
       ? factorySwapAcceptMonPicVisual(phaseElapsed)
+      : state.phase === "acceptExit"
+        ? factorySwapAcceptExitMonPicVisual(phaseElapsed)
       : returning || enemySwitch
         ? factorySwapPlayerReturnMonPicVisual(phaseElapsed)
         : factorySwapPlayerMonPicVisual(view.phaseElapsed ?? 0);
@@ -471,7 +484,8 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     );
     if (
       adjustedMonPic.menuHighlightVisible &&
-      state.phase !== "acceptPrompt"
+      state.phase !== "acceptPrompt" &&
+      state.phase !== "acceptExit"
     ) {
       const highlightY = PLAYER_OPTIONS_ORIGIN.y +
         state.playerOptionDisplayCursor * 16 + 8;
@@ -498,7 +512,11 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
         objFade,
       );
     }
-    if (adjustedMonPic.menuTextVisible && state.phase !== "acceptPrompt") {
+    if (
+      adjustedMonPic.menuTextVisible &&
+      state.phase !== "acceptPrompt" &&
+      state.phase !== "acceptExit"
+    ) {
       for (let i = 0; i < PLAYER_OPTION_LABELS.length; i += 1) {
         drawTextFaded(
           fb,
@@ -514,8 +532,14 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
       }
     }
     const yesNoVisual = factorySwapAcceptYesNoVisual(phaseElapsed);
-    if (state.phase === "acceptPrompt" && yesNoVisual.textVisible) {
-      if (yesNoVisual.highlightVisible) {
+    if (
+      (state.phase === "acceptPrompt" && yesNoVisual.textVisible) ||
+      state.phase === "acceptExit"
+    ) {
+      if (
+        yesNoVisual.highlightVisible ||
+        (state.phase === "acceptExit" && phaseElapsed >= 1)
+      ) {
         const highlightY = YES_NO_ORIGIN.y + state.yesNoCursor * 16 + 8;
         drawSpriteFaded(
           fb,

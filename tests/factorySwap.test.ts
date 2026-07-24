@@ -6,6 +6,7 @@ import {
   applyFactorySwapMutation,
   copyFactorySwapCursor,
   createFactorySwapState,
+  factorySwapRoundDecision,
   factorySwapAlreadyHasSpecies,
   handleFactorySwapInput,
   type FactoryRentalRoster,
@@ -91,6 +92,12 @@ describe("Factory swap state/input contract", () => {
     state = ready(state);
     state = handleFactorySwapInput(state, "A");
 
+    expect(state.phase).toBe("acceptExit");
+    expect(state.result).toBeNull();
+    expect(state.mutationCommitted).toBe(false);
+    expect(state.playerParty).toEqual(player);
+    expect(factorySwapRoundDecision(state)).toBeNull();
+    state = applyFactorySwapMutation(state);
     const accepted = fixture.yesBranch.ticks["30681"]!.rentalMons;
     expect(state.phase).toBe("complete");
     expect(state.result).toBe("accepted");

@@ -2,6 +2,7 @@ import anchorState from "../data/gen/anchor-state.json" with { type: "json" };
 import rentalFixture from "../data/gen/battle1-swap-rentalmons-dump.json" with { type: "json" };
 import {
   acknowledgeFactorySwapPresentation,
+  commitFactorySwapMutation,
   copyFactorySwapCursor,
   createFactorySwapState,
   handleFactorySwapInput,
@@ -22,6 +23,7 @@ import {
   deactivateSpeciesNameFade,
   type SpeciesNameFadeState,
 } from "./speciesNameFade.ts";
+import { bgFadeY, objFadeY } from "./paletteFade.ts";
 
 export interface FactorySwapPresentationState {
   readonly controller: FactorySwapState;
@@ -41,6 +43,8 @@ export interface FactorySwapPresentationState {
    * RUN body; neither entry nor return reconstructs its internal cadence.
    */
   readonly speciesNameFade: SpeciesNameFadeState;
+  /** Source callback reached after the exit fade has fully completed. */
+  readonly fieldHandoff: "CB2_ReturnToFieldContinueScript" | null;
 }
 
 export interface FactorySwapBallCycleVisual {
@@ -144,12 +148,14 @@ export function createCanonicalFactorySwapPresentation(): FactorySwapPresentatio
     selectedBallClock: null,
     selectedBallIndex: null,
     speciesNameFade: INITIAL_FACTORY_SWAP_SPECIES_FADE,
+    fieldHandoff: null,
   };
 }
 
 function readyDelay(state: FactorySwapPresentationState): number | null {
   if (
     state.controller.phase === "complete" ||
+    state.controller.phase === "acceptExit" ||
     state.controller.phase === "summaryFade" ||
     state.controller.phase === "playerPickerReturn" ||
     state.controller.phase === "enemySwitch"
@@ -172,6 +178,18 @@ export function advanceFactorySwapPresentation(
     speciesNameFade = activateSpeciesNameFade(speciesNameFade);
   }
   let controller = copyFactorySwapCursor(state.controller);
+  let fieldHandoff = state.fieldHandoff;
+  if (controller.phase === "acceptExit" && phaseElapsed === 20) {
+    // Swap_Task_Exit state 0: FALSE means the player did swap.
+    controller = { ...controller, scriptResult: false };
+  }
+  if (controller.phase === "acceptExit" && phaseElapsed === 21) {
+    controller = commitFactorySwapMutation(controller);
+  }
+  if (controller.phase === "acceptExit" && phaseElapsed >= 41) {
+    controller = { ...controller, phase: "complete" };
+    fieldHandoff = "CB2_ReturnToFieldContinueScript";
+  }
   if (controller.phase === "enemySwitch" && phaseElapsed === 84) {
     controller = {
       ...controller,
@@ -210,6 +228,7 @@ export function advanceFactorySwapPresentation(
         ...speciesNameFade,
         active: true,
       },
+      fieldHandoff,
     };
   }
   if (controller.phase === "playerPickerReturn" && phaseElapsed >= 55) {
@@ -225,6 +244,7 @@ export function advanceFactorySwapPresentation(
       selectedBallClock,
       selectedBallIndex: state.selectedBallIndex,
       speciesNameFade,
+      fieldHandoff,
     };
   }
   // Swap_Task_ScreenInfoTransitionIn state 8 re-enables the existing task
@@ -239,6 +259,7 @@ export function advanceFactorySwapPresentation(
     selectedBallClock,
     selectedBallIndex: state.selectedBallIndex,
     speciesNameFade,
+    fieldHandoff,
   };
   const delay = readyDelay(advanced);
   if (delay !== null && phaseElapsed >= delay) {
@@ -611,6 +632,65 @@ export function factorySwapAcceptMonPicVisual(
     variant: "B",
     blended: true,
   });
+}
+
+/**
+ * Swap_HandleAcceptMonResponse runs one task tick after the accepted YES
+ * edge, then CloseMonPic(..., TRUE) follows the clean variant-B close.
+ */
+export function factorySwapAcceptExitMonPicVisual(
+  phaseElapsed: number,
+): MonPicVisual {
+  if (phaseElapsed === 0) {
+    return getMonPicVisual({
+      phase: "open",
+      elapsed: 0,
+      variant: "B",
+      blended: true,
+    });
+  }
+  if (phaseElapsed >= 21) {
+    return getMonPicVisual({
+      phase: "closed",
+      elapsed: 0,
+      variant: "B",
+      blended: true,
+    });
+  }
+  return getMonPicVisual({
+    phase: "closing",
+    elapsed: phaseElapsed - 1,
+    variant: "B",
+    blended: true,
+  });
+}
+
+/** Swap_Task_Exit's all-palette fade, relative to accepted YES. */
+const FACTORY_SWAP_ACCEPT_EXIT_FADE = {
+  startDelay: 25,
+  startY: 0,
+  targetY: 16,
+} as const;
+
+export function factorySwapAcceptExitBgFadeY(phaseElapsed: number): number {
+  return bgFadeY(phaseElapsed, FACTORY_SWAP_ACCEPT_EXIT_FADE);
+}
+
+export function factorySwapAcceptExitObjFadeY(phaseElapsed: number): number {
+  return objFadeY(phaseElapsed, FACTORY_SWAP_ACCEPT_EXIT_FADE);
+}
+
+export type FactorySwapAcceptExitMechanism =
+  | "Swap_HandleAcceptMonResponse"
+  | "Swap_Task_Exit"
+  | "CB2_ReturnToFieldContinueScript";
+
+export function factorySwapAcceptExitMechanism(
+  phaseElapsed: number,
+): FactorySwapAcceptExitMechanism {
+  if (phaseElapsed === 0) return "Swap_HandleAcceptMonResponse";
+  if (phaseElapsed < 41) return "Swap_Task_Exit";
+  return "CB2_ReturnToFieldContinueScript";
 }
 
 /** The old player species is driven to black once the ball-cycle task starts. */

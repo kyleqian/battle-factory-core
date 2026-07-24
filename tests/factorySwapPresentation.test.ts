@@ -6,6 +6,10 @@ import {
   createCanonicalFactorySwapPresentation,
   factorySwapActionFadeY,
   factorySwapAcceptCancelButtonX,
+  factorySwapAcceptExitBgFadeY,
+  factorySwapAcceptExitMechanism,
+  factorySwapAcceptExitMonPicVisual,
+  factorySwapAcceptExitObjFadeY,
   factorySwapAcceptMonPicVisual,
   factorySwapAcceptPkmnButtonX,
   factorySwapAcceptSpeciesRenderCoeff,
@@ -26,6 +30,7 @@ import {
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
 } from "../src/engine/factorySwapPresentation.ts";
+import { factorySwapRoundDecision } from "../src/engine/factorySwap.ts";
 import { INITIAL_POSTWIN_STATE } from "../src/engine/postwin.ts";
 import {
   activateSpeciesNameFade,
@@ -451,6 +456,122 @@ describe("live Factory swap presentation adapter", () => {
       textVisible: true,
       highlightVisible: true,
     });
+  });
+
+  it("runs default YES through the source-owned accept/exit boundaries without early mutation", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 58);
+    state = handleFactorySwapPresentationInput(state, "DOWN");
+    state = advance(state, 2);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 133);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 63);
+
+    const early = handleFactorySwapPresentationInput(state, "A");
+    expect(early).toBe(state);
+    expect(state.controller.playerParty[0].species).toBe("ONIX");
+
+    state = advance(state, 1);
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state).toMatchObject({
+      phaseElapsed: 0,
+      controller: {
+        phase: "acceptExit",
+        playerMonId: 0,
+        enemyMonId: 0,
+        scriptResult: null,
+        mutationCommitted: false,
+        result: null,
+      },
+      fieldHandoff: null,
+    });
+    expect(factorySwapAcceptExitMechanism(0))
+      .toBe("Swap_HandleAcceptMonResponse");
+    expect(state.controller.playerParty[0].species).toBe("ONIX");
+    expect(factorySwapRoundDecision(state.controller)).toBeNull();
+
+    state = advance(state, 19);
+    expect(state.controller).toMatchObject({
+      scriptResult: null,
+      mutationCommitted: false,
+      result: null,
+    });
+    expect(state.controller.playerParty[0].species).toBe("ONIX");
+
+    state = advance(state, 1);
+    expect(state.phaseElapsed).toBe(20);
+    expect(state.controller).toMatchObject({
+      scriptResult: false,
+      mutationCommitted: false,
+      result: null,
+    });
+    expect(state.controller.playerParty[0].species).toBe("ONIX");
+
+    state = advance(state, 1);
+    expect(state.phaseElapsed).toBe(21);
+    expect(state.controller).toMatchObject({
+      phase: "acceptExit",
+      scriptResult: false,
+      mutationCommitted: true,
+      result: "accepted",
+    });
+    expect(state.controller.playerParty[0]).toMatchObject({
+      id: "grovyle",
+      species: "GROVYLE",
+      personality: 1094072807,
+      friendship: 0,
+    });
+    expect(state.controller.rentalMons[0]).toMatchObject({
+      monId: 188,
+      personality: 1094072807,
+      ivs: 3,
+      abilityNum: 0,
+    });
+    expect(factorySwapRoundDecision(state.controller)).toEqual({
+      type: "accept",
+      playerPartyIndex: 0,
+      opponentPartyIndex: 0,
+    });
+
+    state = advance(state, 19);
+    expect(state).toMatchObject({
+      phaseElapsed: 40,
+      controller: { phase: "acceptExit" },
+      fieldHandoff: null,
+    });
+    state = advance(state, 1);
+    expect(state).toMatchObject({
+      phaseElapsed: 41,
+      controller: { phase: "complete", result: "accepted" },
+      fieldHandoff: "CB2_ReturnToFieldContinueScript",
+    });
+    expect(factorySwapAcceptExitMechanism(41))
+      .toBe("CB2_ReturnToFieldContinueScript");
+  });
+
+  it("pins the accepted mon-picture close and exit fade to the response edge", () => {
+    expect(factorySwapAcceptExitMonPicVisual(0)).toMatchObject({
+      window: { top: 32, bottom: 96 },
+      spriteVisible: true,
+    });
+    expect(factorySwapAcceptExitMonPicVisual(1)).toMatchObject({
+      window: { top: 32, bottom: 96 },
+      spriteVisible: true,
+    });
+    expect(factorySwapAcceptExitMonPicVisual(2).window)
+      .toEqual({ top: 36, bottom: 92 });
+    expect(factorySwapAcceptExitMonPicVisual(20).flashWidth).toBe(1);
+    expect(factorySwapAcceptExitMonPicVisual(21).flashWidth).toBe(0);
+    expect(factorySwapAcceptExitMechanism(1)).toBe("Swap_Task_Exit");
+    expect(factorySwapAcceptExitMechanism(40)).toBe("Swap_Task_Exit");
+    expect(factorySwapAcceptExitBgFadeY(24)).toBe(0);
+    expect(factorySwapAcceptExitObjFadeY(25)).toBe(0);
+    expect(factorySwapAcceptExitBgFadeY(25)).toBe(2);
+    expect(factorySwapAcceptExitBgFadeY(39)).toBe(16);
+    expect(factorySwapAcceptExitObjFadeY(40)).toBe(16);
   });
 
   it("pins the source-named enemy switch callbacks, independent ball cycles, and two-button transition", () => {

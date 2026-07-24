@@ -202,6 +202,8 @@ import {
   advanceFactorySwapPresentation,
   createCanonicalFactorySwapPresentation,
   factorySwapBallTile,
+  factorySwapAcceptExitBgFadeY,
+  factorySwapAcceptExitObjFadeY,
   factorySwapPlayerOptionBallTile,
   handleFactorySwapPresentationInput,
   type FactorySwapPresentationState,
@@ -1751,12 +1753,22 @@ export function render(state: EngineState): Uint8Array {
     if (swap.elapsed < 44) return blackFrame();
     const tile = factorySwapBallTile(swap.elapsed);
     const fadeLocal = swap.elapsed - 44;
+    const exiting =
+      swap.controller.phase === "acceptExit" ||
+      (
+        swap.controller.phase === "complete" &&
+        swap.fieldHandoff === "CB2_ReturnToFieldContinueScript"
+      );
     return renderFactorySwapPicker({
       state: swap.controller,
       ballTiles: [tile, tile, tile],
       speciesRenderCoeff: swap.speciesNameFade.renderCoeff,
-      bgFadeY: bgFadeY(fadeLocal, FADE_IN),
-      objFadeY: objFadeY(fadeLocal, FADE_IN),
+      bgFadeY: exiting
+        ? factorySwapAcceptExitBgFadeY(swap.phaseElapsed)
+        : bgFadeY(fadeLocal, FADE_IN),
+      objFadeY: exiting
+        ? factorySwapAcceptExitObjFadeY(swap.phaseElapsed)
+        : objFadeY(fadeLocal, FADE_IN),
       phaseElapsed: swap.phaseElapsed,
       selectedBallIndex: swap.selectedBallIndex,
       selectedBallTile:

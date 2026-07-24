@@ -36,6 +36,7 @@ export type FactorySwapPhase =
   | "enemySwitch"
   | "enemyPicker"
   | "acceptPrompt"
+  | "acceptExit"
   | "quitPrompt"
   | "duplicateSpecies"
   | "complete";
@@ -70,6 +71,10 @@ export interface FactorySwapState {
    * transition/animation has completed. Inputs never age themselves ready.
    */
   readonly inputReady: boolean;
+  /** Script-facing `gSpecialVar_Result`; FALSE means a swap was accepted. */
+  readonly scriptResult: boolean | null;
+  /** True only after Swap_Task_Exit state 1 has copied the selected records. */
+  readonly mutationCommitted: boolean;
   readonly result: "accepted" | "keptParty" | null;
 }
 
@@ -121,6 +126,8 @@ export function createFactorySwapState(
     enemyMonId: null,
     quitReturnPhase: null,
     inputReady: false,
+    scriptResult: null,
+    mutationCommitted: false,
     result: null,
   };
 }
@@ -212,7 +219,41 @@ export function applyFactorySwapMutation(state: FactorySwapState): FactorySwapSt
     playerParty,
     rentalMons: rentalMons as unknown as FactoryRentalRoster,
     inputReady: false,
+    mutationCommitted: true,
     result: "accepted",
+  };
+}
+
+/**
+ * Swap_Task_Exit state 1's atomic CopySwappedMonData boundary. Unlike the
+ * public direct helper above, this keeps the live exit phase active while
+ * its palette fade and callback handoff finish.
+ */
+export function commitFactorySwapMutation(
+  state: FactorySwapState,
+): FactorySwapState {
+  const committed = applyFactorySwapMutation(state);
+  return { ...committed, phase: "acceptExit" };
+}
+
+/** Presentation-to-round seam; unavailable until the source copy commits. */
+export function factorySwapRoundDecision(
+  state: FactorySwapState,
+): {
+  readonly type: "accept";
+  readonly playerPartyIndex: 0 | 1 | 2;
+  readonly opponentPartyIndex: 0 | 1 | 2;
+} | null {
+  if (
+    !state.mutationCommitted ||
+    state.result !== "accepted" ||
+    state.playerMonId === null ||
+    state.enemyMonId === null
+  ) return null;
+  return {
+    type: "accept",
+    playerPartyIndex: state.playerMonId,
+    opponentPartyIndex: state.enemyMonId,
   };
 }
 
@@ -298,6 +339,7 @@ export function handleFactorySwapInput(
     case "summaryFade":
     case "playerPickerReturn":
     case "enemySwitch":
+    case "acceptExit":
       return state;
     case "acceptPrompt": {
       if (input === "UP" || input === "DOWN") {
@@ -311,7 +353,9 @@ export function handleFactorySwapInput(
           inputReady: false,
         };
       }
-      return input === "A" ? applyFactorySwapMutation(state) : state;
+      return input === "A"
+        ? { ...state, phase: "acceptExit", inputReady: false }
+        : state;
     }
     case "quitPrompt": {
       if (input === "UP" || input === "DOWN") {
@@ -322,6 +366,7 @@ export function handleFactorySwapInput(
           ...state,
           phase: "complete",
           inputReady: false,
+          scriptResult: true,
           result: "keptParty",
         };
       }

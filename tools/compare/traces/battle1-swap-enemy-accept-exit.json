@@ -1,0 +1,20 @@
+{
+  "sourceTrace": "../traces-groundtruth/battle1-swapyes-b.json",
+  "sourceSegmentCount": 153,
+  "appendSegments": [
+    { "frames": 133, "buttons": [] },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 63, "buttons": [] },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 41, "buttons": [] }
+  ],
+  "oracleProfile": "battle-scene-off",
+  "captureFrames": [
+    29999, 30000, 30001, 30002, 30003, 30004, 30005, 30006,
+    30007, 30008, 30009, 30010, 30011, 30012, 30013, 30014,
+    30015, 30016, 30017, 30018, 30019, 30020, 30021, 30022,
+    30023, 30024, 30025, 30026, 30027, 30028, 30029, 30030,
+    30031, 30032, 30033, 30034, 30035, 30036, 30037, 30038,
+    30039, 30040, 30041
+  ]
+}
