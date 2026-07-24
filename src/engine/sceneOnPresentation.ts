@@ -72,6 +72,11 @@ import {
   type FlyPresentationState,
   type FlyTurn,
 } from "./fly.ts";
+import {
+  bouncePresentationAtAge,
+  type BouncePresentationState,
+  type BounceTurn,
+} from "./bounce.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -86,8 +91,26 @@ export interface SceneOnBattlerGeometry {
 }
 
 export interface SceneOnPresentationBattler {
-  readonly species: "ONIX" | "GROVYLE" | "PIDGEOTTO" | "MURKROW";
+  readonly species:
+    | "ONIX"
+    | "GROVYLE"
+    | "PIDGEOTTO"
+    | "MURKROW"
+    | "SPOINK";
   readonly geometry: SceneOnBattlerGeometry;
+}
+
+export interface SceneOnBounceConfig {
+  readonly move: "BOUNCE";
+  readonly turn: BounceTurn;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  /**
+   * First displayed callback age for this half of `choosetwoturnanim`.
+   * Accuracy, damage, PP, semi-invulnerability, paralysis, and controller
+   * progression remain external immutable inputs.
+   */
+  readonly animationAgeOffset?: number;
 }
 
 export interface SceneOnFlyConfig {
@@ -346,6 +369,7 @@ export type SceneOnMoveConfig =
   | SceneOnQuickAttackConfig
   | SceneOnAerialAceConfig
   | SceneOnSandAttackConfig
+  | SceneOnBounceConfig
   | SceneOnFlyConfig;
 
 export interface SceneOnMovePresentationState<
@@ -508,6 +532,14 @@ export interface SceneOnFlyView extends FlyPresentationState {
   readonly currentMove: "FLY" | null;
 }
 
+export interface SceneOnBounceView extends BouncePresentationState {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly currentMove: "BOUNCE";
+}
+
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
 export const FEATHER_DANCE_STAT_MESSAGE_LINE2 = "harshly fell!";
 export const FEATHER_DANCE_STAT_MESSAGE_LENGTH =
@@ -605,6 +637,7 @@ export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>
     }
   } else if (
     config.move !== "FLY"
+    && config.move !== "BOUNCE"
     && (
       config.fieldProfile.playerHp < 0
       || config.fieldProfile.opponentHp < 0
@@ -708,6 +741,24 @@ export function sceneOnFlyView(
       state.age >= state.config.controllerProfile.currentMoveResetAge
         ? null
         : "FLY",
+  };
+}
+
+export function sceneOnBounceView(
+  state: SceneOnMovePresentationState,
+): SceneOnBounceView {
+  if (state.config.move !== "BOUNCE") {
+    throw new Error(`expected BOUNCE presentation, got ${state.config.move}`);
+  }
+  const animationAge =
+    state.age + (state.config.animationAgeOffset ?? 0);
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    currentMove: "BOUNCE",
+    ...bouncePresentationAtAge(state.config.turn, animationAge),
   };
 }
 
@@ -1269,6 +1320,27 @@ export const MURKROW_TO_ONIX_FLY_PRESENTATION = {
     },
   },
 } as const satisfies Pick<SceneOnFlyConfig, "attacker" | "target">;
+
+export const SPOINK_TO_ONIX_BOUNCE_PRESENTATION = {
+  attacker: {
+    species: "SPOINK",
+    geometry: {
+      side: "opponent",
+      spriteCorner: { x: 144, y: 17 },
+      animationCenter: { x: 176, y: 49 },
+      battlePositionCenter: { x: 176, y: 40 },
+    },
+  },
+  target: {
+    species: "ONIX",
+    geometry: {
+      side: "player",
+      spriteCorner: { x: 40, y: 48 },
+      animationCenter: { x: 72, y: 88 },
+      battlePositionCenter: { x: 72, y: 80 },
+    },
+  },
+} as const satisfies Pick<SceneOnBounceConfig, "attacker" | "target">;
 
 export const PLAYER_MURKROW_TO_OPPONENT_ONIX_FLY_PRESENTATION = {
   attacker: {

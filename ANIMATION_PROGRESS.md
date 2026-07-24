@@ -40,19 +40,19 @@ remainder.
 
 - **State:** **9 exact / 4 partial / 263 unsupported**. FLY remains partial:
   all four portable practical windows are exact, but ISSUES #34's seven
-  affine opening frames remain explicitly excluded.
-- **Did:** repaired opposite-side FLY with source Q8.8 direction-bit parity,
-  `AnimTask_ShakeMon`/`Task_UpdateMonBg` ownership of target `x2`, persistent
-  equal-priority OAM ordering, and semitransparent OBJ blending against the
-  next eligible BG/backdrop layer. Corrected the staged MURKROW gender from
-  its oracle personality; no mechanics or controller outcomes changed.
-- **Evidence:** portable opponent charge oracle **47-197** is **144/144**
-  excluding only frames **59-65** under ISSUES #34; opponent strike
-  **485-732** is **248/248**. Player charge **47-193** is **140/140** after
-  the same seven-frame exclusion; the complete player strike/controller
-  window **384-627** is **244/244**. Canonical charge/strike remain
-  **206/206 + 256/256**;
-  SAND ATTACK and AERIAL ACE regress **190/190 + 93/93**.
-- **Next:** preserve FLY partial until ISSUES #34's generic seven-frame affine
-  sampler remainder is solved; BOUNCE and DIVE still require independent dense
-  move evidence.
+  affine opening frames remain explicitly excluded. BOUNCE remains unsupported
+  because it has source/RAM evidence but no green pixel window.
+- **Did:** staged legal Level-50 SPOINK→ONIX BOUNCE with explicit zero PP Ups;
+  added dense probe support for its two sprite templates; and installed a
+  source-relative charge/strike reducer behind the shared Scene-ON state seam.
+  The framebuffer path rejects BOUNCE explicitly until its compositor exists.
+- **Evidence:** dense RAM/OAM pins charge frames **345-368** (24 affine
+  states), strike frames **881-904** (24 vertical states), hit-splat
+  **890-898**, and vertical shake poses **892-893/896-897/900-901/904**.
+  PP is `[5,5,5,5]` before selection and `[5,5,5,4]` after one use with
+  `ppUps:[0,0,0,0]`; stock HP resolves **117→114**. FLY focused regressions,
+  Tier-1, and build remain green.
+- **Next:** extract SPOINK front/back presentation assets and healthboxes,
+  implement BOUNCE's monbg/alpha/backdrop/OAM composition in both orientations,
+  then dense-compare complete charge/strike/controller windows before assigning
+  any move status. Preserve all FLY windows and ISSUES #34 exclusions.
