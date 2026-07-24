@@ -192,6 +192,14 @@ function readyDelay(state: FactorySwapPresentationState): number | null {
   if (state.controller.phase === "playerPicker" && state.elapsed === state.phaseElapsed) {
     return FACTORY_SWAP_ENTRY_READY_DELAY;
   }
+  if (
+    state.controller.phase === "quitPrompt" &&
+    state.controller.quitReturnPhase === "enemyPicker"
+  ) {
+    // The enemy screen staggers PKMN FOR SWAP and CANCEL by five task
+    // frames. HandleYesNo is installed at +41, so +42 is its first edge.
+    return 42;
+  }
   return FACTORY_SWAP_PHASE_READY_DELAYS[state.controller.phase] ?? 0;
 }
 
@@ -273,7 +281,9 @@ export function advanceFactorySwapPresentation(
     };
     fieldHandoff = "CB2_ReturnToFieldContinueScript";
   }
-  if (controller.phase === "quitReturn" && phaseElapsed >= 38) {
+  const quitReturnReady =
+    controller.quitReturnPhase === "enemyPicker" ? 49 : 38;
+  if (controller.phase === "quitReturn" && phaseElapsed >= quitReturnReady) {
     const returnPhase = controller.quitReturnPhase ?? "playerPicker";
     controller = acknowledgeFactorySwapPresentation({
       ...controller,
@@ -670,12 +680,19 @@ export function factorySwapCancelButtonX(phaseElapsed: number): number {
 export const factorySwapQuitCancelButtonX = factorySwapCancelButtonX;
 export const factorySwapQuitActionFadeY = factorySwapActionFadeY;
 
+/** Enemy-origin quit uses ScreenInfoTransitionOut's two-button branch. */
+export const factorySwapEnemyQuitPkmnButtonX = factorySwapAcceptPkmnButtonX;
+export const factorySwapEnemyQuitCancelButtonX = factorySwapAcceptCancelButtonX;
+
 export function factorySwapQuitYesNoVisual(
   phaseElapsed: number,
+  enemyOrigin = false,
 ): { textVisible: boolean; highlightVisible: boolean } {
+  const textStagger = enemyOrigin ? 6 : 0;
+  const highlightStagger = enemyOrigin ? 6 : 0;
   return {
-    textVisible: phaseElapsed >= 36,
-    highlightVisible: phaseElapsed >= 37,
+    textVisible: phaseElapsed >= 36 + textStagger,
+    highlightVisible: phaseElapsed >= 37 + highlightStagger,
   };
 }
 
@@ -693,6 +710,29 @@ export function factorySwapQuitReturnActionFadeY(
   return phaseElapsed >= 13 && phaseElapsed <= 27 && phaseElapsed % 2 === 1
     ? Math.min(16, base + 2)
     : base;
+}
+
+/**
+ * Enemy-origin quit has no mon picture to close. Its response enters the
+ * existing two-button ScreenInfoTransitionIn immediately: PKMN FOR SWAP is
+ * created at +1 and CANCEL after the source's ten-frame stagger.
+ */
+export function factorySwapEnemyQuitReturnPkmnButtonX(
+  phaseElapsed: number,
+): number {
+  return factorySwapEnemyPkmnButtonX(phaseElapsed + 84);
+}
+
+export function factorySwapEnemyQuitReturnCancelButtonX(
+  phaseElapsed: number,
+): number {
+  return factorySwapEnemyCancelButtonX(phaseElapsed + 84);
+}
+
+export function factorySwapEnemyQuitReturnActionFadeY(
+  phaseElapsed: number,
+): number {
+  return factorySwapEnemyActionFadeY(phaseElapsed + 84);
 }
 
 const FACTORY_SWAP_QUIT_EXIT_FADE = {

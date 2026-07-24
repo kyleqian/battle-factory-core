@@ -24,6 +24,11 @@ import {
   factorySwapEnemyActionFadeY,
   factorySwapEnemyBallCycleVisuals,
   factorySwapEnemyCancelButtonX,
+  factorySwapEnemyQuitCancelButtonX,
+  factorySwapEnemyQuitPkmnButtonX,
+  factorySwapEnemyQuitReturnActionFadeY,
+  factorySwapEnemyQuitReturnCancelButtonX,
+  factorySwapEnemyQuitReturnPkmnButtonX,
   factorySwapEnemyPkmnButtonX,
   factorySwapEnemySwitchMechanism,
   factorySwapPlayerMonPicVisual,
@@ -87,6 +92,12 @@ function canonicalEnemyPickerReady(): FactorySwapPresentationState {
   state = advance(state, 2);
   state = handleFactorySwapPresentationInput(state, "A");
   return advance(state, 133);
+}
+
+function canonicalEnemyQuitPromptReady(): FactorySwapPresentationState {
+  let state = canonicalEnemyPickerReady();
+  state = handleFactorySwapPresentationInput(state, "B");
+  return advance(state, 42);
 }
 
 function offerState(cursor: 0 | 1) {
@@ -545,6 +556,105 @@ describe("live Factory swap presentation adapter", () => {
       phase: "quitPrompt",
       quitReturnPhase: "playerPicker",
     });
+  });
+
+  it("gates enemy B/CANCEL through the shared prompt with the source five-frame two-button stagger", () => {
+    let state = canonicalEnemyPickerReady();
+    const before = structuredClone(state.controller);
+    state = handleFactorySwapPresentationInput(state, "B");
+    expect(state.controller).toMatchObject({
+      phase: "quitPrompt",
+      quitReturnPhase: "enemyPicker",
+      inputReady: false,
+    });
+    expect(factorySwapEnemyQuitPkmnButtonX(26)).toBe(160);
+    expect(factorySwapEnemyQuitPkmnButtonX(27)).toBe(166);
+    expect(factorySwapEnemyQuitCancelButtonX(32)).toBe(192);
+    expect(factorySwapEnemyQuitCancelButtonX(33)).toBe(198);
+    state = advance(state, 41);
+    expect(handleFactorySwapPresentationInput(state, "A")).toBe(state);
+    state = advance(state, 1);
+    expect(state.controller.inputReady).toBe(true);
+
+    let cancel = canonicalEnemyPickerReady();
+    cancel = handleFactorySwapPresentationInput(cancel, "DOWN");
+    cancel = advance(cancel, 2);
+    cancel = handleFactorySwapPresentationInput(cancel, "DOWN");
+    cancel = advance(cancel, 2);
+    expect(cancel.controller.cursor).toBe(4);
+    cancel = handleFactorySwapPresentationInput(cancel, "A");
+    expect(cancel.controller).toMatchObject({
+      phase: "quitPrompt",
+      quitReturnPhase: "enemyPicker",
+    });
+    expect(cancel.controller.playerParty).toEqual(before.playerParty);
+    expect(cancel.controller.enemyParty).toEqual(before.enemyParty);
+    expect(cancel.controller.rentalMons).toEqual(before.rentalMons);
+  });
+
+  it("returns enemy quit NO/B through two-button reconstruction and rejects the install frame", () => {
+    for (const branch of ["NO", "B"] as const) {
+      let state = canonicalEnemyQuitPromptReady();
+      const before = structuredClone(state.controller);
+      if (branch === "NO") {
+        state = handleFactorySwapPresentationInput(state, "DOWN");
+        state = advance(state, 19);
+        state = handleFactorySwapPresentationInput(state, "A");
+      } else {
+        state = advance(state, 20);
+        state = handleFactorySwapPresentationInput(state, "B");
+      }
+      expect(state.controller).toMatchObject({
+        phase: "quitReturn",
+        quitReturnPhase: "enemyPicker",
+        inputReady: false,
+      });
+      expect(factorySwapEnemyQuitReturnPkmnButtonX(1)).toBe(240);
+      expect(factorySwapEnemyQuitReturnPkmnButtonX(3)).toBe(240);
+      expect(factorySwapEnemyQuitReturnPkmnButtonX(4)).toBe(234);
+      expect(factorySwapEnemyQuitReturnCancelButtonX(14)).toBe(240);
+      expect(factorySwapEnemyQuitReturnCancelButtonX(15)).toBe(234);
+      expect(factorySwapEnemyQuitReturnActionFadeY(24)).toBe(16);
+
+      state = advance(state, 48);
+      expect(handleFactorySwapPresentationInput(state, "RIGHT")).toBe(state);
+      state = advance(state, 1);
+      expect(state.controller).toMatchObject({
+        phase: "enemyPicker",
+        inputReady: true,
+        cursor: 0,
+        actionsCount: 5,
+        result: null,
+        mutationCommitted: false,
+      });
+      state = handleFactorySwapPresentationInput(state, "RIGHT");
+      expect(state.controller.cursor).toBe(1);
+      expect(state.controller.playerParty).toEqual(before.playerParty);
+      expect(state.controller.enemyParty).toEqual(before.enemyParty);
+      expect(state.controller.rentalMons).toEqual(before.rentalMons);
+      expect(factorySwapRoundDecision(state.controller)).toBeNull();
+    }
+  });
+
+  it("enemy default-YES quit preserves identities and returns TRUE at the shared field handoff", () => {
+    let state = canonicalEnemyQuitPromptReady();
+    const before = structuredClone(state.controller);
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state.controller.phase).toBe("quitExit");
+    state = advance(state, 22);
+    expect(state).toMatchObject({
+      fieldHandoff: "CB2_ReturnToFieldContinueScript",
+      controller: {
+        phase: "complete",
+        scriptResult: true,
+        result: "keptParty",
+        mutationCommitted: false,
+      },
+    });
+    expect(state.controller.playerParty).toEqual(before.playerParty);
+    expect(state.controller.enemyParty).toEqual(before.enemyParty);
+    expect(state.controller.rentalMons).toEqual(before.rentalMons);
+    expect(factorySwapRoundDecision(state.controller)).toBeNull();
   });
 
   it("keeps party/rentals immutable through default-YES quit and hands off with TRUE", () => {

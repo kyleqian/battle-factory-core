@@ -19,6 +19,11 @@ import {
   factorySwapEnemyActionFadeY,
   factorySwapEnemyBallCycleVisuals,
   factorySwapEnemyCancelButtonX,
+  factorySwapEnemyQuitCancelButtonX,
+  factorySwapEnemyQuitPkmnButtonX,
+  factorySwapEnemyQuitReturnActionFadeY,
+  factorySwapEnemyQuitReturnCancelButtonX,
+  factorySwapEnemyQuitReturnPkmnButtonX,
   factorySwapEnemyPkmnButtonX,
   factorySwapEnemySpeciesRenderCoeff,
   factorySwapPlayerMonPicVisual,
@@ -352,6 +357,12 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
           phaseElapsed,
           view.speciesRenderCoeff,
         )
+      : state.phase === "quitPrompt" &&
+          state.quitReturnPhase === "enemyPicker"
+        ? factorySwapAcceptSpeciesRenderCoeff(
+            phaseElapsed,
+            view.speciesRenderCoeff,
+          )
       : state.phase === "playerPicker" &&
           phaseElapsed === 1 &&
           returnedPlayerPicker
@@ -428,14 +439,27 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     cancelButtonX = factorySwapAcceptReturnCancelButtonX(phaseElapsed);
     actionLabelsVisible = phaseElapsed >= 43;
   } else if (state.phase === "quitPrompt") {
-    actionFadeY = factorySwapQuitActionFadeY(phaseElapsed);
-    cancelButtonX = factorySwapQuitCancelButtonX(phaseElapsed);
+    if (state.quitReturnPhase === "enemyPicker") {
+      actionFadeY = factorySwapQuitActionFadeY(phaseElapsed);
+      pkmnButtonX = factorySwapEnemyQuitPkmnButtonX(phaseElapsed);
+      cancelButtonX = factorySwapEnemyQuitCancelButtonX(phaseElapsed);
+    } else {
+      actionFadeY = factorySwapQuitActionFadeY(phaseElapsed);
+      cancelButtonX = factorySwapQuitCancelButtonX(phaseElapsed);
+    }
   } else if (state.phase === "quitExit") {
     pkmnButtonX = 240;
     cancelButtonX = 240;
   } else if (state.phase === "quitReturn") {
-    actionFadeY = factorySwapQuitReturnActionFadeY(phaseElapsed);
-    cancelButtonX = factorySwapQuitReturnCancelButtonX(phaseElapsed);
+    if (state.quitReturnPhase === "enemyPicker") {
+      actionFadeY = factorySwapEnemyQuitReturnActionFadeY(phaseElapsed);
+      pkmnButtonX = factorySwapEnemyQuitReturnPkmnButtonX(phaseElapsed);
+      cancelButtonX = factorySwapEnemyQuitReturnCancelButtonX(phaseElapsed);
+      actionLabelsVisible = phaseElapsed >= 25;
+    } else {
+      actionFadeY = factorySwapQuitReturnActionFadeY(phaseElapsed);
+      cancelButtonX = factorySwapQuitReturnCancelButtonX(phaseElapsed);
+    }
   } else if (enemy) {
     pkmnButtonX = 160;
   }
@@ -486,9 +510,12 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     fb,
     font,
     charmap,
-    (state.phase === "quitPrompt" && phaseElapsed >= 35) ||
+    (state.phase === "quitPrompt" &&
+      phaseElapsed >= (state.quitReturnPhase === "enemyPicker" ? 41 : 35)) ||
       state.phase === "quitExit" ||
-      (state.phase === "quitReturn" && phaseElapsed < 37)
+      (state.phase === "quitReturn" &&
+        phaseElapsed <
+          (state.quitReturnPhase === "enemyPicker" ? 49 : 37))
       ? "Quit swapping?"
       : (state.phase === "acceptPrompt" && phaseElapsed >= 41) ||
           state.phase === "acceptExit" ||
@@ -564,7 +591,10 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     enemy ? state.displayCursor === 4 : state.displayCursor === 3,
   );
 
-  const quitYesNoVisual = factorySwapQuitYesNoVisual(phaseElapsed);
+  const quitYesNoVisual = factorySwapQuitYesNoVisual(
+    phaseElapsed,
+    state.quitReturnPhase === "enemyPicker",
+  );
   if (
     (state.phase === "quitPrompt" && quitYesNoVisual.textVisible) ||
     state.phase === "quitExit" ||
@@ -577,7 +607,8 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     ) {
       const visibleYesNoCursor =
         state.phase === "quitPrompt" &&
-        phaseElapsed === 37 &&
+        phaseElapsed ===
+          (state.quitReturnPhase === "enemyPicker" ? 43 : 37) &&
         state.yesNoCursor === 1
           ? 0
           : state.yesNoCursor;
