@@ -1,3 +1,5 @@
+import { shakeMonOffsetAtTick } from "./shakeMon.ts";
+
 export type FlySide = "player" | "opponent";
 export type FlyTurn = "charge" | "strike";
 
@@ -77,8 +79,29 @@ export const FLY_CHARGE_BALL: readonly FlyChargeBall[] = Object.freeze([
 const FLY_STRIKE_DURATION = 20;
 const FLY_IMPACT_FIRST_AGE = 22;
 const FLY_IMPACT_LAST_AGE = 30;
-const FLY_SHAKE_AGES: ReadonlySet<number> =
-  new Set([24, 25, 28, 29, 32, 33]);
+
+/**
+ * `AnimTask_ShakeMon(ANIM_TARGET,6,0,8,1)` (`FlyUnleash`,
+ * `battle_anim_scripts.s:6418`) is created in the SAME script-command batch
+ * as the hitsplat (zero `delay` between `create_basic_hitsplat_sprite` and
+ * the `createvisualtask`, both executed inside one `RunAnimScriptCommand`
+ * do-while pass per `battle_anim.c`), so its creation display age is
+ * `FLY_IMPACT_FIRST_AGE`, same as the hitsplat's own first-visible age.
+ *
+ * RAM-probe evidence (both strike comparators,
+ * `dump-fly-shakemon-tasks.py`): at the task's OWN first observable RAM
+ * tick, `data[1]` (numTimes) already reads one less than the source's
+ * `AnimTask_ShakeMon`, this call site's task priority (5, vs QUICK_ATTACK's
+ * 2) causes `InsertTask` to place it AFTER the calling controller task's
+ * current position in `RunTasks`'s same-frame traversal, so `RunTasks`
+ * revisits and steps it a second time before that frame ever renders,
+ * collapsing the port's tick 0 (the creation-time synchronous self-call,
+ * x2 still holds `xOffset`) and tick 1 (the first regular toggle, back to
+ * zero) into one displayed tick. Every later tick is a normal 1:1 step.
+ * QUICK_ATTACK's priority-2 call site does not trigger this: its own
+ * tick 0 is directly visible (`tests/shakeMon.test.ts`).
+ */
+const FLY_SHAKE_CREATION_AGE = FLY_IMPACT_FIRST_AGE;
 
 function truncDiv(numerator: number, denominator: number): number {
   return Math.trunc(numerator / denominator);
@@ -158,7 +181,13 @@ export function flyPresentationAtAge(
     chargeBall: null,
     strikeBall,
     targetTaskOwnsX2: age >= FLY_IMPACT_FIRST_AGE,
-    targetShakeX2: FLY_SHAKE_AGES.has(age) ? 6 : 0,
+    // +1: skip the port's tick 0, collapsed into the creation tick itself
+    // by the same-frame double-step documented on FLY_SHAKE_CREATION_AGE.
+    // Guard age < creationAge explicitly: shakeMonOffsetAtTick's own
+    // tick-0 (nonzero) would otherwise leak into the +1 shift's tick -1.
+    targetShakeX2: age < FLY_SHAKE_CREATION_AGE
+      ? 0
+      : shakeMonOffsetAtTick(6, 0, 8, 1, age - FLY_SHAKE_CREATION_AGE + 1).x2,
     impactVisible:
       age >= FLY_IMPACT_FIRST_AGE && age <= FLY_IMPACT_LAST_AGE,
     impactWinsBallOamTie:
