@@ -105,6 +105,12 @@ export interface SceneOnBounceConfig {
   readonly turn: BounceTurn;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  /** Immutable field values supplied by the legal stock-ROM stage. */
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Controller-owned move-used printer boundary; no controller is advanced. */
+  readonly controllerProfile: Readonly<{
+    readonly moveTextFirstAge: number;
+  }>;
   /**
    * First displayed callback age for this half of `choosetwoturnanim`.
    * Accuracy, damage, PP, semi-invulnerability, paralysis, and controller
@@ -537,6 +543,11 @@ export interface SceneOnBounceView extends BouncePresentationState {
   readonly animationAge: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly message: Readonly<{
+    readonly line1: string;
+    readonly line2: "BOUNCE!";
+    readonly visibleChars: number;
+  }> | null;
   readonly currentMove: "BOUNCE";
 }
 
@@ -752,11 +763,24 @@ export function sceneOnBounceView(
   }
   const animationAge =
     state.age + (state.config.animationAgeOffset ?? 0);
+  const line1 = `${battlerNameWithPrefix(state.config.attacker)} used`;
+  const line2 = "BOUNCE!" as const;
+  const messageLength = line1.length + line2.length;
   return {
     age: state.age,
     animationAge,
     attacker: state.config.attacker,
     target: state.config.target,
+    message: state.age < state.config.controllerProfile.moveTextFirstAge
+      ? null
+      : {
+          line1,
+          line2,
+          visibleChars: Math.min(
+            messageLength,
+            state.age - state.config.controllerProfile.moveTextFirstAge + 1,
+          ),
+        },
     currentMove: "BOUNCE",
     ...bouncePresentationAtAge(state.config.turn, animationAge),
   };

@@ -1,9 +1,9 @@
 # Portable BOUNCE source-evidence checkpoint
 
-`MOVE_BOUNCE` remains **unsupported** for pixel acceptance. This checkpoint
-provides a legal Scene-ON stage, a complete source/RAM-derived reducer for
-both visual halves, and a shared-seam state adapter. It deliberately does not
-claim a green framebuffer window.
+`MOVE_BOUNCE` is **partial** for pixel acceptance. This checkpoint provides a
+legal Scene-ON stage, a complete source/RAM-derived reducer for both visual
+halves, and exact dense opponent-front framebuffer windows through the shared
+Scene-ON seam. Opposite orientation and the controller resolution tail remain.
 
 ## Legal Level-50 stage and zero-PP-Up proof
 
@@ -60,15 +60,25 @@ The corresponding source is
 ball affine state, attacker visibility, hit-splat visibility, and vertical
 shake ownership. `SceneOnBounceConfig` / `sceneOnBounceView` expose that
 reducer through the same relative Scene-ON seam used by FLY. The framebuffer
-dispatcher fails explicitly for BOUNCE rather than silently falling through
-to another move.
+compositor installs source-extracted SPOINK front art, generic source-composed
+healthboxes/name/gender geometry, the shared round-shadow affine sampler,
+monbg-owned target y2, ball-before-hitsplat OAM order, the proven
+semitransparent OBJ-to-backdrop rule, and controller-owned move-used text.
+
+Committed fixtures prove every practical frame of both opponent-side bodies:
+
+- `bounce-spoink-onix-charge.json`: frames **345-368**, **24/24**, no
+  exclusions, zero differing pixels. The fixture's relative animation offset
+  is `-1` because the displayed framebuffer precedes the same frame's probed
+  post-callback OAM state; it is not an absolute-tick branch.
+- `bounce-spoink-onix-strike.json`: frames **881-904**, **24/24**, no
+  exclusions, zero differing pixels, including hit-splat and all seven +5
+  target-shake displays.
 
 ## Honest remainder
 
-No portable pixel comparison is green yet, so BOUNCE has no coverage entry
-and is not `staged` or `partial`. Next work must extract/install SPOINK
-front/back presentation assets and healthbox geometry, implement the
-source-relative monbg/alpha/OAM compositor for both charge and strike, and
-dense-compare complete controller windows. Opposite orientation remains
-required because attacker/target front/back geometry changes both centers and
-the strike's target BG composition. FLY's accepted windows are unchanged.
+BOUNCE is partial, not exact. Next work must stage the legal player-back
+SPOINK case, extract only its required back art, and dense-compare both bodies
+with opponent-front target geometry. The complete controller resolution and
+cleanup tail (generic hit/HP/result/command release/current-move boundary) is
+also still unaccepted. FLY's accepted windows are unchanged.
