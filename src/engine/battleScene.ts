@@ -566,8 +566,6 @@ import {
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import {
-  FEATHER_DANCE_STAT_MESSAGE_LINE1,
-  FEATHER_DANCE_STAT_MESSAGE_LINE2,
   sceneOnDoubleTeamView,
   sceneOnEndeavorView,
   sceneOnFeatherDanceView,
@@ -806,6 +804,7 @@ const kabutoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentF
 const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
+const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
 const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
 const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
@@ -831,6 +830,7 @@ const battleAnimIceCube = battleAnimIceCubeAsset as {
     tileset: Tileset;
   }[];
 };
+const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
 const battleAnimIceCrystalLarge: Tileset = {
   columns: 1,
   rows: 2,
@@ -963,6 +963,55 @@ function onixPlayerHealthboxContentForState(
       maxHp: ONIX_MENU_BATTLER.maxHP,
     });
     onixPlayerHealthboxContentByState.set(key, cached);
+  }
+  return cached;
+}
+
+const featherDanceOnixOpponentHealthboxes = new Map<
+  string,
+  ReturnType<typeof composeOpponentHealthbox>
+>();
+function featherDanceOnixOpponentHealthbox(
+  hp: number,
+  gender: "male" | "female",
+): ReturnType<typeof composeOpponentHealthbox> {
+  const key = `${hp}:${gender}`;
+  let cached = featherDanceOnixOpponentHealthboxes.get(key);
+  if (!cached) {
+    cached = composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: "ONIX",
+      level: 50,
+      gender,
+      hpFraction: hp / 117,
+      status: "none",
+    });
+    featherDanceOnixOpponentHealthboxes.set(key, cached);
+  }
+  return cached;
+}
+
+const featherDancePidgeottoPlayerHealthboxes = new Map<
+  string,
+  ReturnType<typeof composePlayerHealthbox>
+>();
+function featherDancePidgeottoPlayerHealthbox(
+  hp: number,
+  status: "none" | "burn",
+  gender: "male" | "female",
+): ReturnType<typeof composePlayerHealthbox> {
+  const key = `${hp}:${status}:${gender}`;
+  let cached = featherDancePidgeottoPlayerHealthboxes.get(key);
+  if (!cached) {
+    cached = composePlayerHealthbox(playerHealthboxAssets, {
+      name: "PIDGEOTTO",
+      level: 50,
+      gender,
+      hpFraction: hp / 156,
+      status,
+      currentHp: hp,
+      maxHp: 156,
+    });
+    featherDancePidgeottoPlayerHealthboxes.set(key, cached);
   }
   return cached;
 }
@@ -8151,9 +8200,10 @@ function drawFeatherSpriteList(
   fb: Uint8Array,
   source: readonly FeatherRenderSprite[],
   wantBehindOnix: boolean,
+  behindTargetPriorityCutoff = FEATHER_BASE_PRIORITY_CUTOFF,
 ): void {
   const sprites = source
-    .filter((s) => (s.priority >= FEATHER_BASE_PRIORITY_CUTOFF) === wantBehindOnix)
+    .filter((s) => (s.priority >= behindTargetPriorityCutoff) === wantBehindOnix)
     .sort(compareFeatherDrawOrder);
   for (const s of sprites) {
     const tileset = s.animNum === 1 ? battleAnimWhiteFeather.frame2 : battleAnimWhiteFeather.tileset;
@@ -13824,16 +13874,30 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "FEATHER_DANCE") {
     const view = sceneOnFeatherDanceView(state);
     const { attacker, target } = view;
-    if (
+    const originalOrientation =
       attacker.species !== "PIDGEOTTO"
-      || attacker.geometry.side !== "opponent"
-      || target.species !== "ONIX"
-      || target.geometry.side !== "player"
-    ) {
+      ? false
+      : attacker.geometry.side === "opponent"
+        && target.species === "ONIX"
+        && target.geometry.side === "player";
+    const oppositeOrientation =
+      attacker.species === "PIDGEOTTO"
+      && attacker.geometry.side === "player"
+      && target.species === "ONIX"
+      && target.geometry.side === "opponent";
+    if (!originalOrientation && !oppositeOrientation) {
       throw new Error(
         `unsupported staged FEATHER_DANCE pair ${attacker.species}->${target.species}`,
       );
     }
+    const attackerSprite = originalOrientation
+      ? pidgeottoFrontSprite
+      : pidgeottoBackSprite;
+    const targetSprite = originalOrientation
+      ? onixBackSprite
+      : onixFrontSprite;
+    const behindTargetPriorityCutoff =
+      target.geometry.side === "player" ? 3 : 2;
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -13842,61 +13906,88 @@ export function renderSceneOnMovePresentation(
     );
     drawSpriteSheet(
       fb,
-      pidgeottoFrontSprite.tileset,
-      pidgeottoFrontSprite.palette,
+      attackerSprite.tileset,
+      attackerSprite.palette,
       attacker.geometry.spriteCorner.x,
       attacker.geometry.spriteCorner.y,
     );
-    drawFeatherSpriteList(fb, view.feathers, true);
+    drawFeatherSpriteList(
+      fb,
+      view.feathers,
+      true,
+      behindTargetPriorityCutoff,
+    );
     drawSpriteSheet(
       fb,
-      onixBackSprite.tileset,
-      onixBackSprite.palette,
+      targetSprite.tileset,
+      targetSprite.palette,
       target.geometry.spriteCorner.x,
       target.geometry.spriteCorner.y,
     );
-    drawFeatherSpriteList(fb, view.feathers, false);
-    drawSendOutHealthbox(
+    drawFeatherSpriteList(
       fb,
-      0,
-      pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      view.feathers,
+      false,
+      behindTargetPriorityCutoff,
     );
-    drawComposedPlayerHealthbox(
-      fb,
-      onixPlayerHealthboxContentForState(
-        state.config.fieldProfile.playerHp,
-        state.config.fieldProfile.playerStatus,
-        state.config.fieldProfile.playerGender,
-      ),
-    );
+    if (originalOrientation) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender,
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "female",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        featherDancePidgeottoPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
     if (view.controllerDisplay.banner) {
       drawStatDecreaseBannerForBattler(
         fb,
-        onixBackSprite.tileset,
+        targetSprite.tileset,
         target.geometry.spriteCorner,
         view.controllerDisplay.banner.eva,
         view.controllerDisplay.banner.bg1Y,
       );
     }
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-    const line1 = `Foe ${attacker.species} used`;
-    const line2 = "FEATHERDANCE!";
     if (view.controllerDisplay.messageVisibleChars > 0) {
       drawMessageTextLines(
         fb,
-        FEATHER_DANCE_STAT_MESSAGE_LINE1,
-        FEATHER_DANCE_STAT_MESSAGE_LINE2,
+        view.statMessage.line1,
+        view.statMessage.line2,
         view.controllerDisplay.messageVisibleChars,
       );
     } else {
       drawMessageTextLines(
         fb,
-        line1,
-        line2,
+        view.moveText.line1,
+        view.moveText.line2,
         Math.max(
           0,
           Math.min(
-            line1.length + line2.length,
+            view.moveText.line1.length + view.moveText.line2.length,
             view.age - state.config.moveTextStartAge + 1,
           ),
         ),

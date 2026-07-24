@@ -28,10 +28,9 @@
     },
     {
       "move": "MOVE_FEATHER_DANCE",
-      "status": "partial",
-      "covered": ["opponent-front PIDGEOTTO to player-back ONIX", "portable mechanicLab opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-406 / oracle frames 46-445 (400/400): complete kickoff printer, source-spawned eight-feather body, every affine/lifetime frame, script teardown, generic ATK-decrease banner, fully typed and held sharply-fell message, and stable next-controller boundary with gCurrentMove cleared through the shared Scene-ON adapter; relative controller phases and immutable 6→4 stat-stage inputs are Tier-1 pinned"],
-      "evidence": ["tools/compare/traces/turn6-featherdance.json", "tools/battle-lab/mechanic-feather-dance-pidgeotto-onix.json", "tools/compare/fixtures/feather-dance-pidgeotto-onix.json", "tools/compare/featherDancePortable.ts", "tools/probe/run-battle-lab-rgb.py"],
-      "remaining": "Source audit requires the opposite player-attacker/opponent-target geometry because AnimFallingFeather anchors to gBattleAnimTarget and branches on GetBattlerSide(target); retain partial until that dense variant is exact."
+      "status": "exact",
+      "covered": ["opponent-front PIDGEOTTO to player-back ONIX", "portable mechanicLab opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-406 / oracle frames 46-445 (400/400): complete kickoff printer, source-spawned eight-feather body, every affine/lifetime frame, script teardown, generic ATK-decrease banner, fully typed and held sharply-fell message, and stable next-controller boundary with gCurrentMove cleared through the shared Scene-ON adapter", "portable mechanicLab player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-406 / oracle frames 46-445 (400/400): complete opposite-side kickoff/body/banner/result/controller window; source and dense RAM evidence pin +104/-40 target-anchor translation, -1 GetBattlerSpriteBGPriority shift, front-target depth cutoff, player/opponent sprite offsets and healthbox genders/orientation, and the source-derived four-frame animation/banner/message head start whose longer Foe-prefixed result preserves the shared age-406 controller boundary; immutable 6→4 stat-stage inputs and both side-parametric geometries are Tier-1 pinned"],
+      "evidence": ["tools/compare/traces/turn6-featherdance.json", "tools/battle-lab/mechanic-feather-dance-pidgeotto-onix.json", "tools/battle-lab/mechanic-feather-dance-player-pidgeotto-onix.json", "tools/compare/fixtures/feather-dance-pidgeotto-onix.json", "tools/compare/fixtures/feather-dance-player-pidgeotto-onix.json", "tools/compare/featherDancePortable.ts", "tools/probe/run-battle-lab-rgb.py"]
     },
     {
       "move": "MOVE_BIND",
@@ -89,7 +88,6 @@
     }
   ],
   "queue": [
-    "MOVE_FEATHER_DANCE",
     "MOVE_QUICK_ATTACK",
     "MOVE_AERIAL_ACE",
     "MOVE_SAND_ATTACK",
@@ -124,7 +122,7 @@
         "MOVE_FEATHER_DANCE",
         "MOVE_MIST_BALL"
       ],
-      "goal": "FEATHER DANCE proves the shared white-feather/falling-feather body plus complete stat-drop controller continuation portably at 400/400, but remains partial pending its source-required opposite target-side variant. MIST BALL only loads ANIM_TAG_WHITE_FEATHER; source shows its projectile is gMistBallSpriteTemplate using ANIM_TAG_SMALL_BUBBLES, so it does not reuse gFallingFeatherSpriteTemplate and remains unsupported without independent evidence."
+      "goal": "FEATHER DANCE exactly proves the shared white-feather/falling-feather body plus complete stat-drop controller continuation in both source-required target-side orientations at 400/400 each. MIST BALL only loads ANIM_TAG_WHITE_FEATHER; source shows its projectile is gMistBallSpriteTemplate using ANIM_TAG_SMALL_BUBBLES, so it does not reuse gFallingFeatherSpriteTemplate and remains unsupported without independent evidence."
     },
     {
       "id": "fast-contact",

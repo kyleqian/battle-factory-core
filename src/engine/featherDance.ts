@@ -245,16 +245,25 @@ const ONIX_TARGET_POSITION_CENTER = { x: 72, y: 80 } as const;
 export function featherDanceSpritesAtAge(
   age: number,
   targetPositionCenter: Readonly<{ x: number; y: number }>,
+  targetSide: "player" | "opponent" = "player",
+  animationAgeOffset = 0,
 ): FeatherRenderSprite[] {
-  if (age < FEATHER_DANCE_FIRST_VISIBLE_AGE) return [];
+  const animationAge = age + animationAgeOffset;
+  if (animationAge < FEATHER_DANCE_FIRST_VISIBLE_AGE) return [];
   const sourceTick =
-    TURN6_FIRST_VISIBLE_TICK + age - FEATHER_DANCE_FIRST_VISIBLE_AGE;
+    TURN6_FIRST_VISIBLE_TICK + animationAge - FEATHER_DANCE_FIRST_VISIBLE_AGE;
   const dx = targetPositionCenter.x - ONIX_TARGET_POSITION_CENTER.x;
   const dy = targetPositionCenter.y - ONIX_TARGET_POSITION_CENTER.y;
+  // AnimFallingFeather takes its base priority from
+  // GetBattlerSpriteBGPriority(target), toggling between that priority and
+  // +1 as each feather crosses the target. In singles the opponent target's
+  // base is exactly one layer nearer the front than the player's.
+  const priorityDelta = targetSide === "opponent" ? -1 : 0;
   return turn6FeatherSprites(sourceTick).map((sprite) => ({
     ...sprite,
     centerX: sprite.centerX + dx,
     centerY: sprite.centerY + dy,
+    priority: sprite.priority + priorityDelta,
   }));
 }
 

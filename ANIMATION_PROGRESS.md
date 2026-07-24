@@ -38,18 +38,18 @@ remainder.
 
 ## Current handoff
 
-- **State:** **5 exact / 8 partial / 263 unsupported**. FEATHER DANCE remains
-  honest partial solely pending the source-required opposite target side.
-- **Did:** staged real Level-50 PIDGEOTTO→ONIX through mechanicLab and wired
-  `ANIM_TAG_WHITE_FEATHER`/`gFallingFeatherSpriteTemplate` behind the relative
-  Scene-ON seam, then reused the generic stat-decrease BG1/OBJ-window banner
-  and message printer through a relative `nextControllerReady` boundary.
-  Tier-1 pins banner/message phases and immutable 6→4 controller inputs.
-- **Evidence:** `feather-dance-pidgeotto-onix.json` is **400/400 exact** at
-  oracle frames 46-445 / ages 7-406: kickoff, all eight feathers, complete
-  ATK-drop banner, fully typed/held result message, and `gCurrentMove` clear.
-  ICE PUNCH **1294/1294 + 462/462** and FIRE PUNCH **225/225** remain exact.
-- **Next:** stage the opposite player-attacker/opponent-target geometry
-  required by source (`GetBattlerSide` on `gBattleAnimTarget`) before exact
-  promotion. MIST BALL only shares the loaded white-feather asset; its
-  distinct projectile remains independently unsupported.
+- **State:** **6 exact / 7 partial / 263 unsupported**. FEATHER DANCE is exact
+  in both source-required target-side orientations.
+- **Did:** staged legal Level-50 player-back PIDGEOTTO→opponent-front ONIX
+  through mechanicLab and generalized the relative Scene-ON feather,
+  battler, healthbox, banner, and printer seam. Source plus dense RAM pins
+  the +104/−40 target anchor, −1 opponent-target priority, target depth
+  cutoff, front/back offsets, and four-frame player-kickoff head start;
+  Tier-1 pins both geometries and immutable 6→4 controller outcomes.
+- **Evidence:** `feather-dance-player-pidgeotto-onix.json` is **400/400
+  exact** at oracle frames 46-445 / ages 7-406, alongside the original
+  `feather-dance-pidgeotto-onix.json` **400/400**. ICE PUNCH remains
+  **1294/1294 + 462/462** and FIRE PUNCH **225/225**.
+- **Next:** supervisor choose the next Level-50 partial/unsupported move.
+  MIST BALL only shares the loaded white-feather asset; its distinct
+  projectile remains independently unsupported.
