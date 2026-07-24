@@ -10,7 +10,7 @@ damage, RNG, and controller state remain game-owned oracle inputs.
 - Case: player-back ONIX → opponent-front GROVYLE, Battle Scene ON.
 - Move dispatch: oracle frame 2305; PP write: 2332.
 - First `Move_ICE_PUNCH` script-owned display: **2339** (presentation age 0).
-- Dense accepted window: **2339–2411, 73/73 exact**.
+- Dense accepted window: **2339–2502, 164/164 exact**.
 - The window covers the stable handoff and the complete source-composed
   `simple_palette_blend(F_PAL_BG, 0→7, delay 1)` plus
   `AnimTask_BlendBattleAnimPal(F_PAL_TARGET, 0→9, delay 2)` opening ramp.
@@ -42,6 +42,17 @@ target-2 buffer while visiting the source-ordered objects back-to-front.
 Tier-1 separately pins this generic rule and the RAM-derived crystal 28 →
 hitsplat 27 → fist 26 draw order.
 
+The accepted continuation also covers the complete source
+`IceCrystalEffectShort` call. Its seven target-relative sprites enter RAM at
+ages 90/96/102/108/114/120/126 (oracle frames
+2429/2435/2441/2447/2453/2459/2465) and become visible through the shared
+one-frame OBJ latch. Their affine matrices grow from 310 to identity over ten
+callbacks, hold through the six-frame affine tail, then flicker for 20
+callbacks before destruction. All seven use subpriority 38; the compositor
+replays `SortSprites`' descending top-Y OAM order back-to-front. The same
+window pins the target palette's source-driven 9→0 restoration beginning at
+age 139.
+
 Fresh `gMain.oamBuffer` evidence at 2399–2405 plus the dense sprite/matrix
 records through 2411 resolve the callback boundary without a frame special
 case. `TranslateSpriteInGrowingCircle`'s radius-zero callback state is
@@ -52,8 +63,8 @@ advance from -97 to 142. The same general reducer rule closes the small
 boundary at 2404 and the large boundary at 2411.
 
 Therefore ICE PUNCH is `partial`. The precisely uncovered contiguous
-move-body remainder is **2412–2525**: the post-spiral gap, seven-spawn
-`IceCrystalEffectShort` burst, palette restoration, and script teardown.
+move-body remainder is **2503–2525**: BG palette restoration,
+`clearmonbg`/`blendoff`, and script teardown.
 Generic hit/damage presentation after 2525 and any variant dependency found
 while closing that body also remain unaccepted.
 

@@ -13888,6 +13888,26 @@ export function renderSceneOnMovePresentation(
         crystal.kind === "large",
       );
     }
+    for (const crystal of view.hitCrystals) {
+      if (!crystal.visible) continue;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        beforeEffects,
+        crystal.kind === "large"
+          ? battleAnimIceCrystalLarge
+          : battleAnimIceCrystalSmall,
+        battleAnimIceCrystals.palette,
+        crystal.centerX,
+        crystal.centerY,
+        crystal.pa,
+        crystal.pb,
+        crystal.pc,
+        crystal.pd,
+        12,
+        8,
+        false,
+      );
+    }
     if (view.age >= 62 && view.age <= 71) {
       const impactCoverage = new Uint8Array(240 * 160);
       const frontEffects = beforeEffects.slice();
