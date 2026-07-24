@@ -41,17 +41,16 @@ remainder.
 - **State:** **4 exact / 9 partial / 263 unsupported**. The source graph covers
   all **354** moves through **935** reusable components and **3,190**
   dependency edges.
-- **Did:** extended ICE PUNCH through the completed no-freeze secondary-effect
-  path and controller command teardown. The already-determined staged outcome
-  remains status-free; animation neither rolls nor applies it. `gCurrentMove`
-  clears at frame 2692 and the exact window includes the settled 2693-2694
-  boundary.
-- **Evidence:** `ice-punch-onix-grovyle.json` is **356/356 exact** at oracle
-  frames 2339-2694 / ages 0-355, contiguous through the full generic hit
+- **Did:** extended ICE PUNCH through the controller's source-relative result-
+  text clear and seven-frame blank message-box hold. The staged outcome stays
+  status-free; animation neither rolls nor applies it. `gCurrentMove` clears
+  at frame 2692 and the result line clears at frame 2695 without field mutation.
+- **Evidence:** `ice-punch-onix-grovyle.json` is **363/363 exact** at oracle
+  frames 2339-2701 / ages 0-362, contiguous through the full generic hit
   reaction, HP drain, atomic controller write, result message, no-freeze
-  secondary path, and move-command clear. FIRE PUNCH portable **225/225**
-  remains exact.
-- **Next:** continue ICE PUNCH only from frame 2695 through the next
+  secondary path, move-command clear, and blank result-window transition.
+  FIRE PUNCH portable **225/225** remains exact.
+- **Next:** continue ICE PUNCH only from frame 2702 through the next
   controller display transition, then audit any evidence-required
   geometry/orientation variant before exact promotion. Do not claim THUNDER
   PUNCH without its own dense evidence.

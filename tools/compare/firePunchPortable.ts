@@ -34,6 +34,7 @@ interface PortableFixture {
     readonly endHp: number;
     readonly firstDisplayedAge: number;
     readonly effectivenessTextStartAge?: number;
+    readonly effectivenessTextEndAge?: number;
   };
   readonly appStage: {
     readonly oracleFrame: number;

@@ -13954,7 +13954,14 @@ export function renderSceneOnMovePresentation(
     const textStartAge = state.config.moveTextStartAge ?? -1;
     const effectivenessStart =
       state.config.hpDrainProfile.effectivenessTextStartAge;
-    if (effectivenessStart !== undefined && view.age >= effectivenessStart) {
+    if (
+      effectivenessStart !== undefined
+      && view.age >= effectivenessStart
+      && (
+        state.config.hpDrainProfile.effectivenessTextEndAge === undefined
+        || view.age < state.config.hpDrainProfile.effectivenessTextEndAge
+      )
+    ) {
       const line = "It’s super effective!";
       drawMessageTextLines(
         fb,
@@ -13962,7 +13969,10 @@ export function renderSceneOnMovePresentation(
         "",
         Math.min(line.length, view.age - effectivenessStart + 1),
       );
-    } else {
+    } else if (
+      state.config.hpDrainProfile.effectivenessTextEndAge === undefined
+      || view.age < state.config.hpDrainProfile.effectivenessTextEndAge
+    ) {
       drawMessageTextLines(
         fb,
         line1,

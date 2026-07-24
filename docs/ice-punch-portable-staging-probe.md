@@ -94,13 +94,15 @@ secondary-effect path. The staged outcome keeps `status1 = 0`; the
 presentation does not roll or apply that outcome. The fully printed
 super-effective message remains stable while the battle script completes,
 and `gCurrentMove` clears at oracle frame 2692. Frames 2693–2694 prove the
-settled post-command boundary. The first uncovered frame, 2695, introduces
-the next controller-owned display transition and is deliberately outside
-this animation increment.
+settled post-command boundary. At frame 2695 / age 356 the controller clears
+the result line, leaving the standard message box blank for seven displayed
+frames. A reusable profile-relative text-clear age owns that transition; it
+does not mutate move or field state. The first uncovered frame, 2702,
+introduces the next controller-owned display transition.
 
 Therefore ICE PUNCH remains `partial`. The accepted dense window is now
-**2339–2694, 356/356 exact**. The precisely uncovered contiguous remainder
-begins at frame **2695**, plus any geometry/orientation variant required by
+**2339–2701, 363/363 exact**. The precisely uncovered contiguous remainder
+begins at frame **2702**, plus any geometry/orientation variant required by
 source or comparison evidence.
 
 ## THUNDER PUNCH sibling check

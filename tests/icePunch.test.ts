@@ -117,6 +117,8 @@ describe("ICE_PUNCH source-composed presentation components", () => {
         startHp: 143,
         endHp: 112,
         firstDisplayedAge: 223,
+        effectivenessTextStartAge: 259,
+        effectivenessTextEndAge: 356,
       }),
       moveTextStartAge: -25,
     });
@@ -129,6 +131,7 @@ describe("ICE_PUNCH source-composed presentation components", () => {
     });
     expect(sceneOnIcePunchView({ ...stage, age: 35 }).crystals).toHaveLength(0);
     expect(sceneOnIcePunchView({ ...stage, age: 36 }).crystals).toHaveLength(4);
+    expect(stage.config.hpDrainProfile.effectivenessTextEndAge).toBe(356);
     expect(stage.config).toEqual(before);
   });
 
