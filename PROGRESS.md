@@ -4,6 +4,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 412 — Gate-3 Magic Coat intercept composed
+
+- **State:** the run is clean and green at **157 files / 1904 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes. The pure
+  attack-canceler chain now reaches Magic Coat immediately after continuing
+  Factory obedience; opcode 0 remains unregistered and no Snatch, later
+  intercept, machine, controller, decision, core, round, or presentation
+  behavior was added.
+- **Did:** added typed immutable per-battler `ProtectStruct::bounceMove`
+  ownership and a post-obedience join driven by all **355** generated
+  `gBattleMoves[].flags` rows. The taken branch delegates the exact
+  `PressurePPLose(attacker,target,MOVE_MAGIC_COAT)` request, clears only the
+  target bit, pushes the unchanged canceler PC onto an explicit resumable
+  `BattleScriptsStack`, and hands off to `BattleScript_MagicCoatBounce`;
+  not-taken continues before Snatch without mutation.
+- **Next:** keep opcode 0 unregistered. The next exact source boundary is the
+  Snatch intercept after a continuing Magic Coat result; Lightning Rod,
+  Protect, Pressure PP mutation, resume-script role swapping, and every
+  integration layer remain separately unowned.
+- **Notes:** both singles sides, all **3** legal Level-50 Magic Coat sets,
+  all generated affected/unaffected move membership, armed/unarmed target,
+  exact clear, prior bits/markers, canceler effects **1/2**, Soundproof, no
+  PP, invalid roles/protect/PC/stack/composition, deterministic replay,
+  immutability, recursive freezing, full upstream receipt preservation, and
+  zero RNG are pinned. Focused **3 files / 14 tests**; integrated **157/1904**,
+  production build, OFF v5 info (`9c89c741…`), validated **684-frame** probe
+  (arm **41**, PP **66/240**, clear **214**, bounce/resume **390–393**), and
+  diff check green. Code commit `57969b5`; pixel diff N/A.
+
+---
 ## 411 — Factory-scoped obedience composed
 
 - **State:** the run is clean and green at **156 files / 1898 tests**. S10
@@ -55,33 +85,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   freezing, and zero additional RNG are covered. Focused **3 files / 30
   tests**; integrated **154/1887**, production build, OFF v5 info
   (`9c89c741…`), and diff check green. Code commit `5474ea2`; pixel diff N/A.
-
----
-## 409 — Gate-3 Soundproof moves-block gate integrated
-
-- **State:** the run is clean and green at **152 files / 1876 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes. The complete pure
-  attack-canceler loop now composes through the post-canceler
-  `ABILITYEFFECT_MOVES_BLOCK` decision only; opcode 0 remains unregistered and
-  no machine, decision-boundary, core, round, or presentation integration was
-  added.
-- **Did:** extracted all **10** `sSoundMovesTable` selectors in source order
-  into generated move data, added typed `gLastUsedAbility` ownership, and
-  ported the zero-argument dispatcher semantics: resolve the target ability
-  and current move, scan only for Soundproof, conditionally add
-  `HITMARKER_NO_PPDEDUCT` for an already multi-turn attacker, and hand off to
-  `BattleScript_SoundproofProtected`. A pure join calls the gate only after a
-  supplied canceler effect 0 and bypasses it for effects 1/2.
-- **Next:** keep opcode 0 unregistered. The next exact source-order composition
-  seam is the already-typed selected-slot PP admission after a continuing
-  moves-block result; obedience and every later intercept remain separately
-  unowned. Do not add the machine adapter or any controller integration until
-  the supervisor assigns a bounded remainder.
-- **Notes:** both singles orientations; all **10** sound selectors and six
-  non-sound controls; Soundproof/non-Soundproof; multi-turn/no-multi-turn;
-  canceler effects **0/1/2**; exact target/ability/move/table/status/marker/
-  script receipts; invalid roles/context; deterministic replay, input
-  immutability, recursive freezing, and zero-call RNG preservation are pinned.
-  Focused **5 files / 56 tests**; integrated **152/1876**, production build,
-  OFF v5 info (`9c89c741…`), and diff check green. Code commits `e5e8bae` +
-  `12960b9`; pixel diff N/A.

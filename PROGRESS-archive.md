@@ -1,3 +1,33 @@
+## 409 — Gate-3 Soundproof moves-block gate integrated
+
+- **State:** the run is clean and green at **152 files / 1876 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes. The complete pure
+  attack-canceler loop now composes through the post-canceler
+  `ABILITYEFFECT_MOVES_BLOCK` decision only; opcode 0 remains unregistered and
+  no machine, decision-boundary, core, round, or presentation integration was
+  added.
+- **Did:** extracted all **10** `sSoundMovesTable` selectors in source order
+  into generated move data, added typed `gLastUsedAbility` ownership, and
+  ported the zero-argument dispatcher semantics: resolve the target ability
+  and current move, scan only for Soundproof, conditionally add
+  `HITMARKER_NO_PPDEDUCT` for an already multi-turn attacker, and hand off to
+  `BattleScript_SoundproofProtected`. A pure join calls the gate only after a
+  supplied canceler effect 0 and bypasses it for effects 1/2.
+- **Next:** keep opcode 0 unregistered. The next exact source-order composition
+  seam is the already-typed selected-slot PP admission after a continuing
+  moves-block result; obedience and every later intercept remain separately
+  unowned. Do not add the machine adapter or any controller integration until
+  the supervisor assigns a bounded remainder.
+- **Notes:** both singles orientations; all **10** sound selectors and six
+  non-sound controls; Soundproof/non-Soundproof; multi-turn/no-multi-turn;
+  canceler effects **0/1/2**; exact target/ability/move/table/status/marker/
+  script receipts; invalid roles/context; deterministic replay, input
+  immutability, recursive freezing, and zero-call RNG preservation are pinned.
+  Focused **5 files / 56 tests**; integrated **152/1876**, production build,
+  OFF v5 info (`9c89c741…`), and diff check green. Code commits `e5e8bae` +
+  `12960b9`; pixel diff N/A.
+
+---
 ## 408 — Complete attack-canceler source loop composed
 
 - **State:** the run is clean and green at **149 files / 1859 tests**. S10
