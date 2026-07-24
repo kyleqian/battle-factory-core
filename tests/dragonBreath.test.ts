@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   DRAGON_BREATH_FIRE_LIFETIME,
   DRAGON_BREATH_FIRE_SPAWN_COUNT,
+  DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG,
+  DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG,
   CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
+  dragonBreathEmbersInFrontOfAttacker,
   dragonBreathFireSprites,
   dragonBreathTargetEffectAtAge,
 } from "../src/engine/dragonBreath.ts";
@@ -136,5 +139,12 @@ describe("DRAGON_BREATH fire-projectile reducer", () => {
         (age) => dragonBreathTargetEffectAtAge(age).shakeX2,
       ),
     ).toEqual([0, -2, -2, 2, 2, 2, 2, 0]);
+  });
+
+  it("pins the source-relative framebuffer latches and side ordering", () => {
+    expect(DRAGON_BREATH_FRAMEBUFFER_OAM_AGE_LAG).toBe(1);
+    expect(DRAGON_BREATH_FRAMEBUFFER_PALETTE_AGE_LAG).toBe(2);
+    expect(dragonBreathEmbersInFrontOfAttacker("player")).toBe(false);
+    expect(dragonBreathEmbersInFrontOfAttacker("opponent")).toBe(true);
   });
 });

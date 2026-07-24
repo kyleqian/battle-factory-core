@@ -70,8 +70,8 @@ describe("animation coverage ledger", () => {
         total: 276,
         unsupported: 262,
         staged: 0,
-        partial: 3,
-        exact: 11,
+        partial: 2,
+        exact: 12,
       },
       {
         tier: "openOnly",
@@ -97,7 +97,7 @@ describe("animation coverage ledger", () => {
     expect(queue).toHaveLength(2);
     expect(queue[0]).toMatchObject({
       move: "MOVE_DRAGON_BREATH",
-      status: "partial",
+      status: "exact",
     });
     expect(queue.at(-1)).toMatchObject({ move: "MOVE_BIND", status: "partial" });
     expect(openLevelVariantAudit()).toEqual({

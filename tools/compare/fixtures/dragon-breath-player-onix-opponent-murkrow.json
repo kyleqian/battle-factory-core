@@ -43,7 +43,7 @@
     "opponentGender": "male"
   },
   "acceptance": {
-    "status": "component-exact",
-    "result": "85/85 dense projectile/palette/shake/monbg component states; framebuffer checkpoint 7/85 exact, not accepted."
+    "status": "exact",
+    "result": "85/85 dense projectile/palette/shake/monbg component states and 85/85 dense framebuffers."
   }
 }

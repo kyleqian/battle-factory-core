@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync } from "node:fs";
+import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import {
@@ -9,6 +9,7 @@ import {
 } from "../../src/engine/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import type { DragonBreathFireGeometry } from "../../src/engine/dragonBreath.ts";
+import { PNG } from "pngjs";
 
 interface Fixture {
   readonly scenario: string;
@@ -132,6 +133,9 @@ let framebufferMatching = 0;
 const framebufferExactFrames: number[] = [];
 const framebufferMismatches: string[] = [];
 const mismatches: string[] = [];
+const diagnosticFrame = process.env.POKEBENCH_DIAGNOSTIC_FRAME === undefined
+  ? null
+  : Number(process.env.POKEBENCH_DIAGNOSTIC_FRAME);
 for (
   let frame = fixture.denseWindow.startFrame;
   frame <= fixture.denseWindow.endFrame;
@@ -176,8 +180,38 @@ for (
     join(scratch, "rgb", `${String(frame).padStart(5, "0")}.rgb`),
   );
   const rgba = render(engine);
+  if (frame === diagnosticFrame) {
+    const oraclePng = new PNG({ width: 240, height: 160 });
+    const appPng = new PNG({ width: 240, height: 160 });
+    const diffPng = new PNG({ width: 240, height: 160 });
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      const oracleOffset = pixel * 3;
+      const rgbaOffset = pixel * 4;
+      const differs =
+        oracleRgb[oracleOffset] !== rgba[rgbaOffset]
+        || oracleRgb[oracleOffset + 1] !== rgba[rgbaOffset + 1]
+        || oracleRgb[oracleOffset + 2] !== rgba[rgbaOffset + 2];
+      oraclePng.data.set([
+        oracleRgb[oracleOffset]!,
+        oracleRgb[oracleOffset + 1]!,
+        oracleRgb[oracleOffset + 2]!,
+        255,
+      ], rgbaOffset);
+      appPng.data.set(rgba.subarray(rgbaOffset, rgbaOffset + 4), rgbaOffset);
+      diffPng.data.set(differs ? [255, 0, 255, 255] : [0, 0, 0, 255], rgbaOffset);
+    }
+    writeFileSync(join(scratch, `oracle-${frame}.png`), PNG.sync.write(oraclePng));
+    writeFileSync(join(scratch, `app-${frame}.png`), PNG.sync.write(appPng));
+    writeFileSync(join(scratch, `diff-${frame}.png`), PNG.sync.write(diffPng));
+    console.log(`diagnostic PNGs: ${scratch}`);
+  }
   let framebufferExact = true;
   let framebufferDiff = 0;
+  let minDiffX = 240;
+  let minDiffY = 160;
+  let maxDiffX = -1;
+  let maxDiffY = -1;
+  const diffSamples: string[] = [];
   for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
     if (
       oracleRgb[pixel * 3] !== rgba[pixel * 4]
@@ -186,13 +220,29 @@ for (
     ) {
       framebufferExact = false;
       framebufferDiff += 1;
+      const x = pixel % 240;
+      const y = Math.floor(pixel / 240);
+      minDiffX = Math.min(minDiffX, x);
+      minDiffY = Math.min(minDiffY, y);
+      maxDiffX = Math.max(maxDiffX, x);
+      maxDiffY = Math.max(maxDiffY, y);
+      if (diffSamples.length < 4) {
+        diffSamples.push(
+          `${x},${y}:`
+          + `${oracleRgb[pixel * 3]}/${oracleRgb[pixel * 3 + 1]}/${oracleRgb[pixel * 3 + 2]}`
+          + `!=${rgba[pixel * 4]}/${rgba[pixel * 4 + 1]}/${rgba[pixel * 4 + 2]}`,
+        );
+      }
     }
   }
   if (framebufferExact) {
     framebufferMatching += 1;
     framebufferExactFrames.push(frame);
   } else if (framebufferMismatches.length < 12) {
-    framebufferMismatches.push(`${frame}:${framebufferDiff}px`);
+    framebufferMismatches.push(
+      `${frame}:${framebufferDiff}px@${minDiffX},${minDiffY}-${maxDiffX},${maxDiffY}`
+      + `[${diffSamples.join(";")}]`,
+    );
   }
   engine = {
     ...engine,
@@ -214,4 +264,6 @@ if (framebufferMismatches.length) {
   console.log(`first framebuffer mismatches: ${framebufferMismatches.join(", ")}`);
 }
 if (mismatches.length) console.log(mismatches.join("\n"));
-process.exit(matching === total ? 0 : 1);
+process.exit(
+  matching === total && framebufferMatching === total ? 0 : 1,
+);
