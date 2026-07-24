@@ -995,6 +995,13 @@ before rules execution. Canonical replay and next-request/terminal returns are
 Tier-1 pinned. Masks 1/7, switching, forced switching, Tent/Open/doubles, and
 their path-dependent mechanics/RNG remain explicitly unsupported.
 
+**Source-fidelity correction (2026-07-24):** native singles AI selects only a
+move slot; `OpponentHandleChooseMove` then redirects user-targeting moves to
+the trainer battler. Kernel-provided legal decisions are therefore
+target-authoritative: the policy returns the selected slot's exact decision,
+including battler **1** for `FRONTIER_MON_PLUSLE_2`'s Wish, and rejects
+ambiguous multiple decisions for one slot.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300

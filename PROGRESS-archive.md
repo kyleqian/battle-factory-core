@@ -1,3 +1,41 @@
+## 412 — Gate-3 Magic Coat intercept composed
+
+- **State:** the run is clean and green at **158 files / 1906 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes. The pure
+  attack-canceler chain now reaches Magic Coat immediately after continuing
+  Factory obedience; opcode 0 remains unregistered and no Snatch, later
+  intercept, machine, controller, decision, core, round, or presentation
+  behavior was added.
+- **Did:** added typed immutable per-battler `ProtectStruct::bounceMove`
+  ownership and a post-obedience join driven by all **355** generated
+  `gBattleMoves[].flags` rows. The taken branch delegates the exact
+  `PressurePPLose(attacker,target,MOVE_MAGIC_COAT)` request, clears only the
+  target bit, pushes the unchanged canceler PC onto an explicit resumable
+  `BattleScriptsStack`, and hands off to `BattleScript_MagicCoatBounce`;
+  not-taken continues before Snatch without mutation.
+- **Next:** pause further isolated rule breadth. Prove one headless executable
+  vertical slice from a currently requested legal move through the published
+  `BattleDecisionBoundary` and a real source-complete Battle Script machine
+  path, returning frozen next state/events/RNG and the next request, barrier,
+  or outcome with canonical replay. Keep opcode 0 unregistered unless its full
+  command is completed; otherwise use the smallest already-complete opcode
+  sequence. Then add the minimal injected Factory-AI policy on the same kernel
+  boundary.
+- **Notes:** both singles sides, all **3** legal Level-50 Magic Coat sets,
+  all generated affected/unaffected move membership, armed/unarmed target,
+  exact clear, prior bits/markers, canceler effects **1/2**, Soundproof, no
+  PP, invalid roles/protect/PC/stack/composition, deterministic replay,
+  immutability, recursive freezing, full upstream receipt preservation, and
+  zero RNG are pinned. Focused **3 files / 14 tests**; integrated **158/1906**,
+  production build, OFF v5 info (`9c89c741…`), validated **684-frame** probe
+  (arm **41**, PP **66/240**, clear **214**, bounce/resume **390–393**), and
+  diff check green. Opcode 0's explicit remaining source work is executable
+  Snatch, singles-unreachable-but-required Lightning Rod, Protect/fallthrough,
+  delegated Pressure PP/resume/controller/history effects, and the complete
+  machine adapter over the already-ported prefix. Code commit `57969b5`; pixel
+  diff N/A.
+
+---
 ## 411 — Factory-scoped obedience composed
 
 - **State:** the run is clean and green at **156 files / 1898 tests**. S10
