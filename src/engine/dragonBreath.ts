@@ -47,6 +47,65 @@ export const DRAGON_BREATH_FIRE_SPAWN_INTERVAL = 4;
 export const DRAGON_BREATH_FIRE_RENDER_LAG = 1;
 export const DRAGON_BREATH_FIRE_DURATION = 20;
 export const DRAGON_BREATH_FIRE_LIFETIME = MATRIX_A.length;
+/** First displayed `AnimTask_ShakeMon2` state, relative to the first ember at age 1. */
+export const DRAGON_BREATH_SHAKE_FIRST_AGE = 13;
+export const DRAGON_BREATH_SHAKE_END_AGE = 53;
+/** The target is transferred to BG1 three displays before the first ember. */
+export const DRAGON_BREATH_MONBG_FIRST_AGE = -2;
+/** BG ownership and the second palette task both release at this age. */
+export const DRAGON_BREATH_MONBG_END_AGE = 82;
+export const DRAGON_BREATH_BLEND_MAX_COEFF = 9;
+
+export type DragonBreathTargetEffect = Readonly<{
+  shakeX2: number;
+  blendCoeff: number;
+  onMonBg: boolean;
+}>;
+
+/**
+ * Source-shaped target presentation shared by both battle orientations.
+ *
+ * Ages are displayed callback ages from the same seam as
+ * `dragonBreathFireSprites`: age 1 is the first ember. The two palette tasks
+ * are `0→9` and `9→0` `AnimTask_BlendBattleAnimPal` programs; the shake is
+ * the paired-hold `AnimTask_ShakeMon2` program. No status or controller state
+ * is read or changed here.
+ */
+export function dragonBreathTargetEffectAtAge(
+  animationAge: number,
+): DragonBreathTargetEffect {
+  const shakeX2 =
+    animationAge < DRAGON_BREATH_SHAKE_FIRST_AGE
+      || animationAge >= DRAGON_BREATH_SHAKE_END_AGE
+      ? 0
+      : Math.floor(
+          (animationAge - DRAGON_BREATH_SHAKE_FIRST_AGE) / 2,
+        ) % 2 === 0
+        ? -2
+        : 2;
+
+  let blendCoeff = 0;
+  if (animationAge >= 11 && animationAge < 65) {
+    blendCoeff = Math.min(
+      DRAGON_BREATH_BLEND_MAX_COEFF,
+      Math.floor((animationAge - 9) / 2),
+    );
+  } else if (animationAge >= 65) {
+    blendCoeff = Math.max(
+      0,
+      DRAGON_BREATH_BLEND_MAX_COEFF
+        - Math.floor((animationAge - 63) / 2),
+    );
+  }
+
+  return {
+    shakeX2,
+    blendCoeff,
+    onMonBg:
+      animationAge >= DRAGON_BREATH_MONBG_FIRST_AGE
+      && animationAge < DRAGON_BREATH_MONBG_END_AGE,
+  };
+}
 
 export type DragonBreathFireGeometry = Readonly<{
   attackerCenter: Readonly<{ x: number; y: number }>;

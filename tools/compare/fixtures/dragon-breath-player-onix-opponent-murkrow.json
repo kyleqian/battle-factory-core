@@ -5,8 +5,8 @@
   "probe": "tools/probe/run-battle-lab-rgb.py",
   "pair": "ONIX (player-back) -> MURKROW (opponent-front)",
   "move": "DRAGON_BREATH",
-  "denseWindow": {"startFrame": 398, "endFrame": 458},
-  "appStage": {"firstFramePresentationAge": 1},
+  "denseWindow": {"startFrame": 395, "endFrame": 479},
+  "appStage": {"firstFramePresentationAge": -2},
   "attacker": {
     "species": "ONIX",
     "geometry": {
@@ -35,8 +35,15 @@
     "spawnCount": 11,
     "spawnInterval": 4
   },
+  "fieldProfile": {
+    "playerHp": 117,
+    "opponentHp": 142,
+    "playerStatus": "none",
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
   "acceptance": {
     "status": "component-exact",
-    "result": "61/61 dense OAM/component frames; full framebuffer not yet claimed."
+    "result": "85/85 dense projectile/palette/shake/monbg component states; framebuffer checkpoint 7/85 exact, not accepted."
   }
 }

@@ -83,8 +83,10 @@ import {
 } from "./statusAnimation.ts";
 import {
   dragonBreathFireSprites,
+  dragonBreathTargetEffectAtAge,
   type DragonBreathFireGeometry,
   type DragonBreathFireSprite,
+  type DragonBreathTargetEffect,
 } from "./dragonBreath.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
@@ -178,6 +180,8 @@ export interface SceneOnDragonBreathConfig {
   readonly target: SceneOnPresentationBattler;
   /** Source-shaped asset/affine/translation/OAM inputs only. */
   readonly animationProfile: Readonly<DragonBreathFireGeometry>;
+  /** Immutable staged field values; this seam never calculates damage. */
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   /** Relative script clock; damage, status, RNG, PP, and controller stay external. */
   readonly animationAgeOffset?: number;
 }
@@ -602,6 +606,7 @@ export interface SceneOnDragonBreathView {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fireSprites: readonly DragonBreathFireSprite[];
+  readonly targetEffect: DragonBreathTargetEffect;
 }
 
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
@@ -755,6 +760,7 @@ export function sceneOnDragonBreathView(
       -229,
       state.config.animationProfile,
     ),
+    targetEffect: dragonBreathTargetEffectAtAge(animationAge),
   };
 }
 

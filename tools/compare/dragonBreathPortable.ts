@@ -7,6 +7,7 @@ import {
   sceneOnDragonBreathView,
   type SceneOnPresentationBattler,
 } from "../../src/engine/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import type { DragonBreathFireGeometry } from "../../src/engine/dragonBreath.ts";
 
 interface Fixture {
@@ -17,6 +18,13 @@ interface Fixture {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly animationProfile: DragonBreathFireGeometry;
+  readonly fieldProfile: {
+    readonly playerHp: number;
+    readonly opponentHp: number;
+    readonly playerStatus: "none" | "burn";
+    readonly playerGender?: "male" | "female";
+    readonly opponentGender?: "male" | "female";
+  };
 }
 
 interface ProbeSprite {
@@ -36,6 +44,15 @@ interface ProbeSprite {
 interface ProbeFrame {
   readonly frame: number;
   readonly dragonBreathFireSprites: readonly ProbeSprite[];
+  readonly playerSprite: ProbeBattlerSprite;
+  readonly opponentSprite: ProbeBattlerSprite;
+}
+
+interface ProbeBattlerSprite {
+  readonly x2: number;
+  readonly invisible: boolean;
+  readonly paletteUnfaded: readonly number[];
+  readonly paletteFaded: readonly number[];
 }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
@@ -72,7 +89,16 @@ const stage = createSceneOnMovePresentation({
   attacker: fixture.attacker,
   target: fixture.target,
   animationProfile: fixture.animationProfile,
+  fieldProfile: fixture.fieldProfile,
 });
+let engine: EngineState = {
+  ...createInitialState(),
+  rngMode: "frontierBattle",
+  sceneOnPresentation: {
+    ...stage,
+    age: fixture.appStage.firstFramePresentationAge,
+  },
+};
 
 function normalizedOracle(sprites: readonly ProbeSprite[]): string[] {
   return sprites.map((sprite) => JSON.stringify({
@@ -90,7 +116,21 @@ function normalizedOracle(sprites: readonly ProbeSprite[]): string[] {
   })).sort();
 }
 
+function blendTowardRed(color: number, coeff: number): number {
+  const r = color & 0x1f;
+  const g = (color >> 5) & 0x1f;
+  const b = (color >> 10) & 0x1f;
+  return (
+    (r + (((31 - r) * coeff) >> 4))
+    | (g + (((0 - g) * coeff) >> 4)) << 5
+    | (b + (((0 - b) * coeff) >> 4)) << 10
+  );
+}
+
 let matching = 0;
+let framebufferMatching = 0;
+const framebufferExactFrames: number[] = [];
+const framebufferMismatches: string[] = [];
 const mismatches: string[] = [];
 for (
   let frame = fixture.denseWindow.startFrame;
@@ -108,16 +148,70 @@ for (
     )
     .sort();
   const oracle = normalizedOracle(record.dragonBreathFireSprites);
-  if (JSON.stringify(app) === JSON.stringify(oracle)) matching += 1;
+  const view = sceneOnDragonBreathView({ ...stage, age });
+  const target =
+    fixture.target.geometry.side === "player"
+      ? record.playerSprite
+      : record.opponentSprite;
+  const expectedPalette = target.paletteUnfaded.map((color) =>
+    blendTowardRed(color, view.targetEffect.blendCoeff)
+  );
+  const componentMatches =
+    target.x2 === view.targetEffect.shakeX2
+    && target.invisible === view.targetEffect.onMonBg
+    && JSON.stringify(target.paletteFaded) === JSON.stringify(expectedPalette);
+  if (
+    JSON.stringify(app) === JSON.stringify(oracle)
+    && componentMatches
+  ) matching += 1;
   else if (mismatches.length < 8) {
-    mismatches.push(`${frame}: oracle=${oracle.join("|")} app=${app.join("|")}`);
+    mismatches.push(
+      `${frame}: oracle=${oracle.join("|")} app=${app.join("|")} `
+      + `target=${target.x2}/${target.invisible} `
+      + `expected=${view.targetEffect.shakeX2}/${view.targetEffect.onMonBg}`
+      + `/blend${view.targetEffect.blendCoeff}`,
+    );
   }
+  const oracleRgb = readFileSync(
+    join(scratch, "rgb", `${String(frame).padStart(5, "0")}.rgb`),
+  );
+  const rgba = render(engine);
+  let framebufferExact = true;
+  let framebufferDiff = 0;
+  for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+    if (
+      oracleRgb[pixel * 3] !== rgba[pixel * 4]
+      || oracleRgb[pixel * 3 + 1] !== rgba[pixel * 4 + 1]
+      || oracleRgb[pixel * 3 + 2] !== rgba[pixel * 4 + 2]
+    ) {
+      framebufferExact = false;
+      framebufferDiff += 1;
+    }
+  }
+  if (framebufferExact) {
+    framebufferMatching += 1;
+    framebufferExactFrames.push(frame);
+  } else if (framebufferMismatches.length < 12) {
+    framebufferMismatches.push(`${frame}:${framebufferDiff}px`);
+  }
+  engine = {
+    ...engine,
+    sceneOnPresentation: {
+      ...engine.sceneOnPresentation!,
+      age: engine.sceneOnPresentation!.age + 1,
+    },
+  };
 }
 
 const total =
   fixture.denseWindow.endFrame - fixture.denseWindow.startFrame + 1;
 console.log(
-  `${matching}/${total} dense DRAGON_BREATH OAM/component frames matched`,
+  `${matching}/${total} dense DRAGON_BREATH projectile/palette/shake/monbg component frames matched`,
 );
+console.log(`${framebufferMatching}/${total} dense DRAGON_BREATH framebuffer frames matched`);
+console.log(`exact framebuffer frames: ${framebufferExactFrames.join(",") || "none"}`);
+if (framebufferMismatches.length) {
+  console.log(`first framebuffer mismatches: ${framebufferMismatches.join(", ")}`);
+}
 if (mismatches.length) console.log(mismatches.join("\n"));
 process.exit(matching === total ? 0 : 1);

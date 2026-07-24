@@ -45,6 +45,7 @@ describe("relative Battle Scene ON move presentation", () => {
       move: "DRAGON_BREATH",
       ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
       animationProfile: CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
+      fieldProfile: ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE.fieldProfile,
     });
     expect(sceneOnDragonBreathView({ ...playerStage, age: 1 }).fireSprites[0])
       .toMatchObject({
@@ -65,6 +66,7 @@ describe("relative Battle Scene ON move presentation", () => {
         attackerSide: "opponent",
         targetSubpriority: 30,
       },
+      fieldProfile: ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE.fieldProfile,
     });
     expect(sceneOnDragonBreathView({ ...opponentStage, age: 1 }).fireSprites[0])
       .toMatchObject({
@@ -75,6 +77,10 @@ describe("relative Battle Scene ON move presentation", () => {
         subpriority: 28,
         pa: 704,
       });
+    expect(sceneOnDragonBreathView({ ...playerStage, age: 13 }).targetEffect)
+      .toEqual({ shakeX2: -2, blendCoeff: 2, onMonBg: true });
+    expect(sceneOnDragonBreathView({ ...opponentStage, age: 82 }).targetEffect)
+      .toEqual({ shakeX2: 0, blendCoeff: 0, onMonBg: false });
   });
 
   it("restarts the generic action-menu bounce from a relative reveal age", () => {

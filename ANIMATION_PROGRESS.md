@@ -22,6 +22,12 @@ tracks; FIRE PUNCH can belong to both punch and fire work. Prove a component
 with one representative, batch-check siblings, and keep separate move-level
 oracle evidence. Do not build one absolute-tick timeline per move.
 
+Move acceptance covers the move-owned animation body and its evidence-required
+geometry variants. Generic hit reactions, HP/result presentation, statuses,
+held-item use, and controller/menu handoffs are reusable presentation
+components with independent coverage; they neither block nor promote a move
+animation. A status caused by a move is not part of that move's animation.
+
 - `staged`: a deterministic matching ON-oracle/app case exists.
 - `partial`: a meaningful dense window is green, but portability or a required
   variant remains.
@@ -39,22 +45,27 @@ remainder.
 ## Current handoff
 
 - **State:** **11 exact / 3 partial / 262 unsupported**. DRAGON_BREATH stays
-  partial: its projectile/OAM component is now portable in both legal
-  orientations, but complete portable framebuffer/controller windows and the
-  three pre-existing canonical action-menu bounce exclusions remain open.
-- **Did:** replaced canonical displacement with source-shaped attacker/target
-  coordinates, fixed-point duration, eleven-spawn cadence, target-relative
-  subpriority/monbg metadata, and attacker-side sprite/affine selection. Added
-  two zero-PP-Up Level-50 Mechanics Lab stages plus a relative Scene-ON
-  component adapter and dense comparator. No PP, outcome, damage, status, RNG,
-  controller, turn, or facility policy changed.
-- **Evidence:** fresh wrapper-validated ON probes and the shared seam match
-  **61/61** dense projectile/OAM states for player-back ONIX→opponent-front
-  MURKROW and **61/61** for opponent-front ONIX→player-back MURKROW. Canonical
-  projectile/full windows remain **61/61 + 237/237**; FLY controls remain
-  **213/213 + 256/256**. Focused tests/build are green.
-- **Next:** build the portable full-scene DRAGON_BREATH compositor (target
-  blend/shake, battler/healthbox/text/controller handoff) and densely compare
-  both complete Mechanics Lab windows. Retain partial until those and the
-  three menu-bounce exclusions are closed or explicitly accepted. DIVE
-  remains unsupported.
+  partial. Its complete source move-body component is now portable in both
+  Level-50 orientations, and a shared-seam framebuffer compositor exists, but
+  neither portable move-body framebuffer window is exact.
+- **Did:** extended the eleven-spawn reducer with source-relative
+  `AnimTask_BlendBattleAnimPal` 0→9→0 palette state, paired-hold
+  `AnimTask_ShakeMon2`, and monbg acquisition/release. The dense comparator
+  now independently checks faded target palette RAM, x2, invisibility/BG
+  ownership, projectiles, and the live framebuffer. Added a presentation-only
+  ONIX→MURKROW compositor using explicit geometry/field inputs; no PP, damage,
+  paralysis, RNG, controller, turn, or facility state changed.
+- **Evidence:** fresh wrapper-validated ON probes match **85/85** dense
+  projectile/palette/shake/monbg states in each orientation (ages -2..82).
+  The attempted framebuffer composition is honestly incomplete:
+  player-back ONIX→opponent-front MURKROW **7/85** (exact frames 395-399 and
+  460-461; first residual frame 400 is 8 pixels), opponent-front
+  ONIX→player-back MURKROW **0/85** (first residual frame 449 is 1506 pixels).
+  Focused tests and build are green.
+- **Next:** fix the portable affine ember rasterization/translated clipping
+  beginning at player frame 400, then the opposite-side base composition
+  (terrain cutoff/front-back sprite and healthbox ordering) already visible at
+  frame 449. Retain partial until both move-body framebuffer windows are
+  complete. Generic hit, HP drain, paralysis/result printers, command release,
+  cleanup, and menu handoff belong to independent presentation tracks and are
+  explicitly outside this move's acceptance. DIVE remains unsupported.

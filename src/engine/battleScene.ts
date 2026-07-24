@@ -568,6 +568,7 @@ import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import {
   sceneOnDoubleTeamView,
+  sceneOnDragonBreathView,
   sceneOnAerialAceView,
   sceneOnEndeavorView,
   sceneOnFeatherDanceView,
@@ -14081,6 +14082,112 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "DRAGON_BREATH") {
+    const view = sceneOnDragonBreathView(state);
+    const playerToOpponent =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ONIX"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "MURKROW"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DRAGON_BREATH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? onixBackSprite : onixFrontSprite;
+    const targetSprite = playerToOpponent ? murkrowFrontSprite : murkrowBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheetAffineStretch(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+      256,
+      256,
+      0,
+      DRAGON_BREATH_BLEND_COLOR,
+      view.targetEffect.blendCoeff,
+      false,
+      view.targetEffect.shakeX2,
+    );
+    for (const sprite of view.fireSprites) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        subTileset(battleAnimSmallEmber.tileset, sprite.sheetFrame * 4, 4),
+        battleAnimSmallEmber.palette,
+        sprite.centerX,
+        sprite.centerY,
+        sprite.pa,
+        sprite.pb,
+        sprite.pc,
+        sprite.pd,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (playerToOpponent) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        murkrowHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "female",
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "male",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        flyMurkrowPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ONIX used" : "Foe ONIX used",
+      "DRAGONBREATH!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "QUICK_ATTACK") {
     const view = sceneOnQuickAttackView(state);
     const { attacker, target } = view;
@@ -15820,12 +15927,6 @@ export function renderSceneOnMovePresentation(
       drawTurn5SitrusSettledMenuChrome(fb);
     }
     return;
-  }
-
-  if (state.config.move === "DRAGON_BREATH") {
-    throw new Error(
-      "DRAGON_BREATH portable component is staged, but its full shared-seam compositor is not yet accepted",
-    );
   }
 
   const view = sceneOnFirePunchView(state);
