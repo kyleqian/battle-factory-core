@@ -195,15 +195,16 @@ describe("Cmd_moveend choice/change ownership dependency", () => {
     const changed = createBattleScriptRulesContext(contextInput({
       changedItems: [0xbeef, 0xffff, 0xabcd, 0x1234],
       battleTopology: {
-        battlersCount: 3,
+        battlersCount: 2,
         battleTypeFlags: 0,
-        battlerPositions: [0, 1, 2, 0xff],
+        battlerPositions: [0, 1, 0xff, 0xff],
       },
     }));
     const transferred = applyBattleScriptMoveEndChangedItemOwnership(changed);
     expect(transferred.battlers.map(({ item }) => item))
-      .toEqual([0xbeef, 0xffff, 0xabcd, 0]);
-    expect(transferred.changedItems).toEqual([0, 0, 0, 0x1234]);
+      .toEqual([0xbeef, 0xffff, 0, 0]);
+    expect(transferred.changedItems).toEqual([0, 0, 0xabcd, 0x1234]);
+    expect(transferred.battlers[2]).toBe(changed.battlers[2]);
     expect(transferred.battlers[3]).toBe(changed.battlers[3]);
   });
 

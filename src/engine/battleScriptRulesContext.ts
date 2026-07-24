@@ -221,9 +221,11 @@ export type BattleScriptBattlerPositions = readonly [
   number,
 ];
 
+export type BattleScriptBattlersCount = 2 | 4;
+
 /** Exact immutable globals used by source battler-position helpers. */
 export type BattleScriptBattleTopology = Readonly<{
-  battlersCount: number;
+  battlersCount: BattleScriptBattlersCount;
   battleTypeFlags: number;
   battlerPositions: BattleScriptBattlerPositions;
 }>;
@@ -323,7 +325,7 @@ export type BattleScriptRulesContextInput = Readonly<{
     lastTakenMoveFrom?: readonly number[];
   }>;
   battleTopology?: Readonly<{
-    battlersCount: number;
+    battlersCount: BattleScriptBattlersCount;
     battleTypeFlags: number;
     battlerPositions: readonly number[];
   }>;
@@ -1045,11 +1047,17 @@ function createBattleScriptMoveHistory(
 function createBattleScriptBattleTopology(
   input: BattleScriptRulesContextInput["battleTopology"],
 ): BattleScriptBattleTopology {
-  const battlersCount = requireUnsigned(
+  const battlersCountValue = requireUnsigned(
     input?.battlersCount ?? 2,
     4,
     "battleTopology.battlersCount",
   );
+  if (battlersCountValue !== 2 && battlersCountValue !== 4) {
+    throw new Error(
+      `battleTopology.battlersCount must be exactly 2 or 4, got ${battlersCountValue}`,
+    );
+  }
+  const battlersCount: BattleScriptBattlersCount = battlersCountValue;
   const battleTypeFlags = requireUnsigned(
     input?.battleTypeFlags ?? 0,
     0xffff_ffff,
@@ -1070,9 +1078,9 @@ function createBattleScriptBattleTopology(
     throw new Error("active battleTopology battler positions must be unique");
   }
   const isDouble = (battleTypeFlags & BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE) !== 0;
-  if (isDouble && battlersCount !== 4) {
+  if (isDouble !== (battlersCount === 4)) {
     throw new Error(
-      "battleTopology BATTLE_TYPE_DOUBLE requires four battlers",
+      "battleTopology BATTLE_TYPE_DOUBLE must be set if and only if battlersCount is 4",
     );
   }
   if (input !== undefined && Object.isFrozen(input) && Object.isFrozen(positions)) {

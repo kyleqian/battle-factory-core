@@ -1085,10 +1085,15 @@ opcode registration remain absent; opcodes **73** and **0** are unregistered.
 **MOVEEND topology dependency checkpoint (2026-07-24):** dependency step 3 is
 complete. The frozen rules context now owns exact `gBattlersCount`,
 `gBattleTypeFlags`, and all four source `gBattlerPositions`, including the
-singles inactive-slot `0xFF` values. Active positions are range/uniqueness
-validated; source-shaped position lookup scans only `i < gBattlersCount`,
-returns the count sentinel, and composes `BATTLE_PARTNER` by position rather
-than battler-id parity. The exact nine-ProtectStruct-bit
+singles inactive-slot `0xFF` values. An assignment audit of
+`battle_controllers.c:149-581` found every active count assignment is exactly
+`2` or `MAX_BATTLERS_COUNT` (4), while `battle_main.c:157`'s zero is only the
+pre-init value; the immutable count is therefore typed and runtime-validated
+as `2 | 4`, and `BATTLE_TYPE_DOUBLE` is required iff the count is 4. Active
+positions are range/uniqueness validated; source-shaped position lookup scans
+only `i < gBattlersCount`, returns the count sentinel, and composes
+`BATTLE_PARTNER` by position rather than battler-id parity. The exact
+nine-ProtectStruct-bit
 `WasUnableToUseMove` predicate adds only `targetNotAffected` and
 `flag2Unknown`; state 13 is cardinality-pinned, and state 16 returns a typed
 partner replay/advance result after all exact gates and HP lookup. The replay

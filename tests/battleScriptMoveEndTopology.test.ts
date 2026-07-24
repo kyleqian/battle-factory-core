@@ -101,16 +101,22 @@ describe("Cmd_moveend topology and pure state prerequisites", () => {
     expect(Object.isFrozen(context.battleTopology)).toBe(true);
     expect(Object.isFrozen(context.battleTopology.battlerPositions)).toBe(true);
 
-    const invalid = [
+    const invalid: readonly unknown[] = [
       { battlersCount: -1, battleTypeFlags: 0, battlerPositions: [0, 1, 2, 3] },
+      { battlersCount: 0, battleTypeFlags: 0, battlerPositions: [0, 1, 2, 3] },
+      { battlersCount: 1, battleTypeFlags: 0, battlerPositions: [0, 1, 2, 3] },
+      { battlersCount: 3, battleTypeFlags: 0, battlerPositions: [0, 1, 2, 3] },
       { battlersCount: 5, battleTypeFlags: 1, battlerPositions: [0, 1, 2, 3] },
       { battlersCount: 2, battleTypeFlags: 1, battlerPositions: [0, 1, 2, 3] },
+      { battlersCount: 4, battleTypeFlags: 0, battlerPositions: [0, 1, 2, 3] },
       { battlersCount: 2, battleTypeFlags: 0, battlerPositions: [0, 1, 2] },
       { battlersCount: 2, battleTypeFlags: 0, battlerPositions: [0, 4, 2, 3] },
       { battlersCount: 2, battleTypeFlags: 0, battlerPositions: [0, 0, 2, 3] },
     ];
     for (const battleTopology of invalid) {
-      expect(() => createBattleScriptRulesContext(contextInput({ battleTopology })))
+      expect(() => createBattleScriptRulesContext(contextInput({
+        battleTopology: battleTopology as BattleScriptRulesContextInput["battleTopology"],
+      })))
         .toThrow();
     }
   });
