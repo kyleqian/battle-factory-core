@@ -98,6 +98,12 @@ import {
   type BindAnimationProfile,
   type BindAnimationState,
 } from "./bind.ts";
+import {
+  extremeSpeedAttackerAffineAtAge,
+  extremeSpeedBackgroundAtAge,
+  extremeSpeedImpactAtAge,
+  type ExtremeSpeedBackgroundState,
+} from "./extremeSpeed.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -117,7 +123,9 @@ export interface SceneOnPresentationBattler {
     | "GROVYLE"
     | "PIDGEOTTO"
     | "MURKROW"
-    | "SPOINK";
+    | "SPOINK"
+    | "ARCANINE"
+    | "DUGTRIO";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -247,6 +255,15 @@ export interface SceneOnQuickAttackConfig {
    * player-side move-used line omits "Foe " and releases the body four
    * frames earlier than the opponent-side printer.
    */
+  readonly animationAgeOffset?: number;
+}
+
+export interface SceneOnExtremeSpeedConfig {
+  readonly move: "EXTREME_SPEED";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Player-side move-used text releases the source body four frames sooner. */
   readonly animationAgeOffset?: number;
 }
 
@@ -442,6 +459,7 @@ export type SceneOnMoveConfig =
   | SceneOnEndeavorConfig
   | SceneOnFeatherDanceConfig
   | SceneOnQuickAttackConfig
+  | SceneOnExtremeSpeedConfig
   | SceneOnAerialAceConfig
   | SceneOnSandAttackConfig
   | SceneOnMudSlapConfig
@@ -560,6 +578,16 @@ export interface SceneOnQuickAttackView {
   }> | null;
   readonly currentMove: "QUICK_ATTACK" | null;
   readonly moveText: Readonly<{ line1: string; line2: string }>;
+}
+
+export interface SceneOnExtremeSpeedView {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly background: ExtremeSpeedBackgroundState;
+  readonly attackerAffine: ReturnType<typeof extremeSpeedAttackerAffineAtAge>;
+  readonly impact: ReturnType<typeof extremeSpeedImpactAtAge>;
 }
 
 export interface SceneOnAerialAceView extends AerialAceAnimationState {
@@ -1310,6 +1338,30 @@ export function sceneOnQuickAttackView(
       line1: `${battlerNameWithPrefix(state.config.attacker)} used`,
       line2: "QUICK ATTACK!",
     },
+  };
+}
+
+export function sceneOnExtremeSpeedView(
+  state: SceneOnMovePresentationState,
+): SceneOnExtremeSpeedView {
+  if (state.config.move !== "EXTREME_SPEED") {
+    throw new Error(`expected EXTREME_SPEED presentation, got ${state.config.move}`);
+  }
+  const animationAge = state.age + (state.config.animationAgeOffset ?? 0);
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    background: extremeSpeedBackgroundAtAge(
+      animationAge,
+      state.config.attacker.geometry.side,
+    ),
+    attackerAffine: extremeSpeedAttackerAffineAtAge(animationAge),
+    impact: extremeSpeedImpactAtAge(
+      animationAge,
+      state.config.target.geometry.side,
+    ),
   };
 }
 

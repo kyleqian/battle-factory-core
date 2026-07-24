@@ -1,0 +1,15 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-extreme-speed-player-arcanine-dugtrio.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "ARCANINE (player-back) -> DUGTRIO (opponent-front)",
+  "move": "EXTREME_SPEED",
+  "orientation": "player-to-opponent",
+  "appStage": {"oracleFrame": 87, "presentationAge": 48},
+  "denseWindow": {"startFrame": 87, "endFrame": 105},
+  "acceptance": {
+    "status": "partial",
+    "scope": "dense opposite-side fade-out prefix through the black high-speed-background handoff; high-speed fade-in, affine/contact/dust/reappearance, and restore remain"
+  }
+}

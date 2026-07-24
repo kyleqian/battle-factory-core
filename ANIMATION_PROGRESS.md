@@ -44,18 +44,22 @@ remainder.
 
 ## Current handoff
 
-- **State:** **14 exact / 1 partial / 261 unsupported**. MUD SLAP is exact for
-  its complete move-owned body in both source-required battle orientations;
-  SAND ATTACK remains exact.
-- **Did:** added the shared side-parameterized mud/sand slide choreography and
-  MUD SLAP's independent 16x16 `gMudSlapMudSpriteTemplate` program. Legal
-  zero-PP-Up PIDGEOTTO→ONIX probes cover opponent-front frames **84–134** and
-  player-back frames **80–130**, both relative animation ages **45–95**.
-- **Evidence:** source callback/OAM **51/51 + 51/51** and live RGB
-  **51/51 + 51/51** are exact. Evidence pins the one-frame callback/display
-  latch, six five-sprite waves, signed Q8.8 geometry, frame-1 art, lifetime,
-  stable OAM ordering, and side-dependent attacker/mud/target depth. Both SAND
-  ATTACK dense controls remain **269/269**.
-- **Next:** select the next bounded Level-50 component track. Generic hit,
-  damage/HP, accuracy result, and controller tails remain separate ownership
-  and do not reopen MUD SLAP.
+- **State:** **14 exact / 2 partial / 260 unsupported**. EXTREME SPEED is an
+  honest two-orientation partial for its default-background fade-out prefix;
+  QUICK ATTACK and AERIAL ACE remain exact.
+- **Did:** staged legal zero-PP-Up Level-50 ARCANINE→DUGTRIO Mechanics Lab
+  cases in both source-selected attacker orientations. Extracted both
+  `BG_HIGHSPEED` tilemaps plus `ANIM_TAG_SPEED_DUST`, added side-parametric
+  background/affine/impact reducers behind the shared Scene-ON seam, and pinned
+  source assets, orientation, timing, and immutability in Tier-1.
+- **Evidence:** opponent-front oracle frames **91–109** and player-back frames
+  **87–105** are dense and exact at **19/19 + 19/19 RGB**, through black at the
+  high-speed handoff. The opposite-side QUICK ATTACK control remains
+  **214/214**; the current opponent control resolves a different immutable
+  damage endpoint (117→111 rather than its committed 117→110 fixture) but
+  preserves all **115** pre-damage frames exactly.
+- **Next:** resolve the high-speed BG fade-in/composition beginning at opponent
+  frame **110** / player frame **106**, then prove the affine disappearance,
+  three edge impacts, 24 dust spawns, blink reappearance, restore fade, and
+  script cleanup in both complete move-owned windows at 0 RGB diff. Generic
+  hit, HP/result/status, and controller tails remain separately owned.
