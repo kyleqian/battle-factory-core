@@ -4,6 +4,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 408 — Complete attack-canceler source loop composed (focused green)
+
+- **State:** the pure `AtkCanceler_UnableToUseMove` do/while composition is
+  implemented and focused-green at **1 file / 9 tests** plus `tsc -b`. Opcode
+  0 remains unregistered; no decision-boundary, controller, round, or
+  presentation integration was added. Full regression/build verification is
+  the remaining closeout.
+- **Did:** added one typed immutable dispatcher over the existing FLAGS→THAW
+  phase helpers. It starts at the state tracker, stops at END or the first
+  nonzero effect, returns the advanced resumable rules/RNG state, ordered
+  phase decisions, final script handoff, cumulative RNG value/call receipt,
+  and the source-common effect-2 status-controller synchronization.
+- **Next:** run the complete canceler-focused set, full `npm test`, production
+  build, OFF oracle info, and final diff audit; then record exact totals and
+  the next opcode-registration boundary.
+- **Notes:** both singles sides, full all-clear traversal, asleep/Truant/Bide
+  source-order stops, exact FROZEN→PARALYZED→IN_LOVE and FROZEN→CONFUSED RNG
+  chains, skipped-later-phase zero consumption, effect-2 sleep/freeze/thaw
+  sync, effect-1/effect-2 resumptions through END, invalid state/tracker/PC/RNG
+  accounting, determinism, immutability, and recursive deep freezing are
+  pinned. Pixel diff N/A.
+
+---
 ## 407 — Gate-3 attack-canceler THAW source phase integrated
 
 - **State:** the run is clean and green at **148 files / 1850 tests**. S10
@@ -53,28 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   RNG/Follow Me/Lightning Rod was not imported. Focused **4 files / 49 tests**;
   integrated Tier-1 **146/1840**, build, OFF v5 info (`9c89c741…`), and diff
   check green. Code commit `7b20bb8`; pixel diff N/A.
-
----
-## 405 — Gate-3 attack-canceler IN_LOVE source phase integrated
-
-- **State:** the run is clean and green at **145 files / 1832 tests**. S10
-  Gate 3 remains at **27** source-safe executable opcodes;
-  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through IN_LOVE source
-  decisions only. Opcode 0 remains unregistered and no phase loop exists.
-- **Did:** ported battle_util.c:2200-2219 with the exact four-bit
-  `STATUS2_INFATUATION` encoding, `CountTrailingZeroBits` scripting-battler
-  ownership, conditional `Random() & 1`, odd cursor push, and even
-  `BattleScriptPush(BattleScript_MoveUsedIsInLoveCantAttack)`. The even branch
-  sets `loveImmobility` and the unable marker and executes
-  `CancelMultiTurnMoves` immediately before the common in-love handoff.
-- **Next:** begin `CANCELER_BIDE` only after its counter, stored-damage,
-  target, move-damage, multi-turn, marker/effect, and script paths have explicit
-  source receipts. Do not loop phases or register opcode 0.
-- **Notes:** all four source bits and attackers/both sides, zero/no-draw,
-  rejected nonzero multi-bit source-unreachable encodings, both RNG branches,
-  u16 **0/1/65534/65535**, exact one-call LCG ownership, cursor-push vs
-  script-push, scripting replacement, preset protect/marker/helper state,
-  immediate helper mutation, exactly one advance to BIDE, missing/invalid
-  context, immutability, determinism, and deep freezing are pinned. Focused
-  **3 files / 26 tests**; integrated Tier-1 **145/1832**, build, OFF v5 info
-  (`9c89c741…`), and diff check green. Code commit `1690b58`; pixel diff N/A.

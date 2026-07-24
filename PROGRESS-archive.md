@@ -1,3 +1,28 @@
+## 405 — Gate-3 attack-canceler IN_LOVE source phase integrated
+
+- **State:** the run is clean and green at **145 files / 1832 tests**. S10
+  Gate 3 remains at **27** source-safe executable opcodes;
+  `AtkCanceler_UnableToUseMove` now has immutable FLAGS through IN_LOVE source
+  decisions only. Opcode 0 remains unregistered and no phase loop exists.
+- **Did:** ported battle_util.c:2200-2219 with the exact four-bit
+  `STATUS2_INFATUATION` encoding, `CountTrailingZeroBits` scripting-battler
+  ownership, conditional `Random() & 1`, odd cursor push, and even
+  `BattleScriptPush(BattleScript_MoveUsedIsInLoveCantAttack)`. The even branch
+  sets `loveImmobility` and the unable marker and executes
+  `CancelMultiTurnMoves` immediately before the common in-love handoff.
+- **Next:** begin `CANCELER_BIDE` only after its counter, stored-damage,
+  target, move-damage, multi-turn, marker/effect, and script paths have explicit
+  source receipts. Do not loop phases or register opcode 0.
+- **Notes:** all four source bits and attackers/both sides, zero/no-draw,
+  rejected nonzero multi-bit source-unreachable encodings, both RNG branches,
+  u16 **0/1/65534/65535**, exact one-call LCG ownership, cursor-push vs
+  script-push, scripting replacement, preset protect/marker/helper state,
+  immediate helper mutation, exactly one advance to BIDE, missing/invalid
+  context, immutability, determinism, and deep freezing are pinned. Focused
+  **3 files / 26 tests**; integrated Tier-1 **145/1832**, build, OFF v5 info
+  (`9c89c741…`), and diff check green. Code commit `1690b58`; pixel diff N/A.
+
+---
 ## 404 — PARALYZED, Factory AI policy seam, and MUD SLAP integrated
 
 - **State:** the merged run is clean and green at **144 files / 1825 tests**.
