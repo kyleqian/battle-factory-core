@@ -1117,6 +1117,16 @@ local RNG, and replay. State 1's separate `call-current` control pushes opcode
 the script's return resumes the same instruction. The 17-state/end-mode loop,
 delegates, cleanup, Factory continuation, and opcodes **73/0** remain absent.
 
+**MOVEEND delegate extraction checkpoint (2026-07-24):** dependency step 5 is
+not implemented, but its source surface is now mechanically pinned before API
+design. The committed receipt covers exactly the four requested
+`AbilityBattleEffects` modes and two requested `ItemBattleEffects` modes,
+recording **7** `Random()` sites, **2** controller emissions/pending marks,
+**42** script-transfer candidates, and **4** loop sites with source ranges and
+text hashes. Mutation facts remain explicitly lexical candidates rather than
+alias-analysis claims. No delegate semantics, RNG draw, controller request,
+script transfer, production handler, or opcode registration was added.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300

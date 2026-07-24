@@ -4,26 +4,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 424 — move-end controller return and cases 1/8–10 landed
+## 425 — vertical move-end dependencies and exact Thunder Punch integrated
 
-- **State:** dependency step 4 is complete and green at **171 files / 1990
-  tests**. Opcodes **73** and **0** remain unregistered; no delegate,
-  17-state/end-mode loop, cleanup, Factory continuation, core, render, or
-  oracle behavior was added.
-- **Did:** added generic same-PC `controller-return` and source
-  `BattleScriptPushCursor`/`call-current` controls; raw STATUS1 data plus
-  boolean visibility events; and source-complete single-case ownership for
-  DEFROST and attacker/target visibility. Busy execution identity-blocks
-  before rules reads; acknowledgement changes scheduler only; defrost returns
-  from its effect script to the same opcode-73 instruction.
-- **Next:** dependency step 5 only: add source-complete ability/item delegate
-  ports with the same machine RNG ledger and explicit controller/script
-  results. Keep the all-case loop, cleanup/next-target transfer, opcode
-  registration, and Factory continuation behind their later gates.
-- **Notes:** all gates, writes, active battlers, event order, both visibility
-  values, pending identity, replay, unrelated frozen owners, and zero local
-  RNG are pinned. Integrated suite/build and OFF v5 (`9c89c741…`) pass; pixel
-  diff N/A.
+- **State:** the vertical player/AI machine slice and move-end dependency steps
+  1--4 are green at **172 files / 1994 tests**. Opcodes **73** and **0** remain
+  unregistered; no delegate semantics, 17-state/end-mode loop, cleanup, or
+  Factory continuation was added. Scene-ON coverage is **18 exact / 1 partial
+  / 257 unsupported**.
+- **Did:** landed same-PC controller return/call-current ownership and
+  source-complete move-end states 1/8--10. Added a mechanical receipt for
+  exactly four ability and two item delegate modes: **7** `Random()` sites,
+  **2** controller emissions/marks, **42** script-transfer candidates, and
+  **4** loops. Independently, THUNDER PUNCH is exact in both legal orientations
+  at **104/104 component and 104/104 RGB frames** each, with source-relative
+  palette, inversion, sprite, shake, monbg, and teardown behavior.
+- **Next:** implement dependency step 5 from the committed delegate receipt:
+  source-complete ability/item ports sharing the machine RNG ledger and
+  exposing controller/script results. Keep the all-case loop,
+  cleanup/next-target transfer, opcode registration, and Factory continuation
+  behind their later gates.
+- **Notes:** full suite/build, both oracle profiles, coverage, focused
+  controller tests, receipt regeneration, and both Thunder Punch dense
+  comparators pass. Fire/Ice Punch, Blaze Kick, Flamethrower, and Dragon Breath
+  controls remain exact.
 
 ---
 ## 423 — move-end topology corrected and pure state prerequisites landed
