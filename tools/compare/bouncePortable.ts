@@ -9,6 +9,7 @@ import {
 } from "../../src/engine/core.ts";
 import {
   createSceneOnMovePresentation,
+  PLAYER_SPOINK_TO_OPPONENT_ONIX_BOUNCE_PRESENTATION,
   SPOINK_TO_ONIX_BOUNCE_PRESENTATION,
   type SceneOnBounceConfig,
   type SceneOnFaintAttackFieldProfile,
@@ -17,6 +18,7 @@ import {
 interface Fixture {
   readonly scenario: string;
   readonly probe: string;
+  readonly orientation: "opponent-to-player" | "player-to-opponent";
   readonly turn: SceneOnBounceConfig["turn"];
   readonly appStage: {
     readonly presentationAge: number;
@@ -36,6 +38,9 @@ const fixturePath = process.argv[2]
   ? resolve(process.argv[2])
   : join(root, "tools/compare/fixtures/bounce-spoink-onix-charge.json");
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as Fixture;
+const geometry = fixture.orientation === "player-to-opponent"
+  ? PLAYER_SPOINK_TO_OPPONENT_ONIX_BOUNCE_PRESENTATION
+  : SPOINK_TO_ONIX_BOUNCE_PRESENTATION;
 const scratch = mkdtempSync(join(tmpdir(), "pokebench-bounce-compare-"));
 const rgbDir = join(scratch, "rgb");
 const probeOutput = join(scratch, "probe.json");
@@ -64,10 +69,14 @@ let state: EngineState = {
   sceneOnPresentation: createSceneOnMovePresentation({
     move: "BOUNCE",
     turn: fixture.turn,
-    ...SPOINK_TO_ONIX_BOUNCE_PRESENTATION,
+    ...geometry,
     fieldProfile: fixture.fieldProfile,
     controllerProfile: fixture.controllerProfile,
     animationAgeOffset: fixture.appStage.animationAgeOffset,
+    strikeEffectDelay:
+      fixture.orientation === "player-to-opponent" ? 4 : 0,
+    strikeAttackerRestoreAge:
+      fixture.orientation === "player-to-opponent" ? 20 : undefined,
   }),
 };
 state = {

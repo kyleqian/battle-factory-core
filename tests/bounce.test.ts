@@ -59,6 +59,26 @@ describe("source-relative BOUNCE presentation", () => {
     });
   });
 
+  it("keeps the ball clock fixed while applying the observed opposite-side hit-task lag", () => {
+    expect(bouncePresentationAtAge("strike", 12, 4)).toMatchObject({
+      ball: { y2: -2 },
+      impactVisible: false,
+      targetTaskOwnsY2: false,
+      targetShakeY2: 0,
+    });
+    expect(bouncePresentationAtAge("strike", 13, 4)).toMatchObject({
+      ball: { y2: -12 },
+      impactVisible: true,
+      targetTaskOwnsY2: true,
+      targetShakeY2: 0,
+    });
+    expect(bouncePresentationAtAge("strike", 15, 4).targetShakeY2).toBe(5);
+    expect(bouncePresentationAtAge("strike", 19, 4, 20).attackerInvisible)
+      .toBe(true);
+    expect(bouncePresentationAtAge("strike", 20, 4, 20).attackerInvisible)
+      .toBe(false);
+  });
+
   it("is driven through the shared Scene-ON seam by relative phase age", () => {
     const state = createSceneOnMovePresentation({
       move: "BOUNCE",

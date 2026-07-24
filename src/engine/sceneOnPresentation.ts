@@ -117,6 +117,10 @@ export interface SceneOnBounceConfig {
    * progression remain external immutable inputs.
    */
   readonly animationAgeOffset?: number;
+  /** Source-observed player-to-opponent scheduling lag for the parallel hit tasks. */
+  readonly strikeEffectDelay?: number;
+  /** Source-observed restoration boundary; independent of offscreen ball lifetime. */
+  readonly strikeAttackerRestoreAge?: number;
 }
 
 export interface SceneOnFlyConfig {
@@ -782,7 +786,12 @@ export function sceneOnBounceView(
           ),
         },
     currentMove: "BOUNCE",
-    ...bouncePresentationAtAge(state.config.turn, animationAge),
+    ...bouncePresentationAtAge(
+      state.config.turn,
+      animationAge,
+      state.config.strikeEffectDelay ?? 0,
+      state.config.strikeAttackerRestoreAge ?? Number.POSITIVE_INFINITY,
+    ),
   };
 }
 
