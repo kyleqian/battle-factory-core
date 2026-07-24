@@ -1,3 +1,20 @@
+## 369 — Gate-3 first immutable rules mutation integrated
+
+- **State:** S10 Gate 3 remains open with **11** source-safe opcodes and an
+  unwired immutable control/scheduler/rules/source-context seam.
+- **Did:** added only `SETMULTIHIT` (opcode 38) behind the generic interpreter:
+  its injected byte resolver immutably replaces frozen `multiHitCounter`, null
+  identity-blocks, and malformed/non-u8 values structured-halt. Pinned
+  `Cmd_setmultihit`, its macro, and all three real values (**3/1/2**).
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Do not add decrement/multihitloop, damage, move
+  selection, PP, production controller/rendering, animation, or other opcodes.
+- **Notes:** exact supported IDs are
+  **16/18/38/40/57/58/60/61/62/65/131**. Tier-1 **111 files / 1474 tests**,
+  build, and Scene-OFF oracle contract green; no RNG/event/scheduler or pixel
+  claim.
+
+---
 ## 368 — Gate-3 scheduler family + mechanical command audit integrated
 
 - **State:** S10 Gate 3 remains open with ten source-safe opcodes and an
