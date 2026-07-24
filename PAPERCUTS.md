@@ -14,6 +14,16 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Default Python lacks the mGBA probe dependencies
+
+- **What:** invoking a fresh mGBA probe with the shell's default `python3`
+  fails at import time because it lacks `cffi`, even though the repository's
+  wrapper and probe are otherwise valid.
+- **Hits:** 1.
+- **Cost each:** ~3 min.
+- **Workaround:** invoke both `tools/run-mgba-probe.py` and its nested probe
+  with `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python3`.
+
 ## Parallel compare calls can return an unresolved execution session
 
 - **What:** launching several oracle-backed compare commands concurrently can

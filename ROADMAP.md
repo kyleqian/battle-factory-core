@@ -553,9 +553,10 @@ through the 30041 field-script handoff. Its input-ready prompt remains
 committed **69/69 exact** dense trace through the restored enemy-picker input
 at 30087, with party/rental identity unchanged and no round decision emitted.
 Source extraction now also pins the terminal field-message gates and the
-seventh-win `MSGBOX_GETPOINTS` fanfare/wait path. Fresh OFF probes also pin
-the regular Level 50 seventh-win BP award at +2201, party/status restoration
-at +3549, and its default-NO record menu draw/accepted input at +4422/+4424.
+seventh-win `MSGBOX_GETPOINTS` fanfare/wait path. The committed staged OFF
+fixture pins the regular Level 50 seventh-win BP award at +2201, fanfare end
+at +2513, party/status restoration at +3549, and its default-NO record menu
+draw/accepted input at +4422/+4424 without replaying Battles 2–7.
 The distinct loss path clears status at +210 and draws/accepts the same menu
 at +622/+624. The LOSS opening is now implemented through that +210
 party/status-clear boundary with a source-extracted circular lobby
@@ -574,8 +575,9 @@ its canonical residual windows (**236/236** and **200/200**), making it
 (**230/230** each) and is `exact`; ENDEAVOR is portable across both attacker
 sides (**141/141**) and canonical (**237/237**) and is `exact`; FAINT ATTACK
 is portable and canonical (**221/221**) but remains `partial` for its
-separately parked residual. Level 50 animation coverage is therefore **4
-exact / 8 partial / 264
+separately parked residual. ICE PUNCH is now `partial` with its source-composed
+opening palette overlay **35/35 exact** and crystal/impact body explicitly
+bounded. Level 50 animation coverage is therefore **4 exact / 9 partial / 263
 unsupported**. S8 remains `[~]`.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.

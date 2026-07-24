@@ -8,17 +8,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** the LOSS route is exact from its prior +210 completion through
   the shared record question's default-NO menu at +622 and first sampled input
-  at +624. The new dense OFF fixture covers every +211..+624 frame.
+  at +624. Seventh-win OFF evidence now pins the complete source-driven
+  +1..+4424 timeline; Scene-ON coverage is **4 exact / 9 partial / 263
+  unsupported** after the first ICE PUNCH component.
 - **Did:** added a phase-relative reusable record-question transition with
   live `\l` fast-scroll, standard-window/menu chrome, stored-edge readiness,
-  default NO, early-input rejection, and YES/NO/B result state. Round outcome,
-  rules, party, RNG, and completion acknowledgement stay immutable.
-- **Next:** finish S8 gate 2 with the distinct seventh-win/round-summary ending
-  (and any still-open swap-YES unique interaction); reuse this record menu
-  rather than duplicating it. Do not resume Battle 2.
+  default NO, early-input rejection, and YES/NO/B result state. A disjoint
+  fixture pins 3 BP at +2201, fanfare end +2513, restore +3549, and shared
+  menu +4422/+4424. ICE PUNCH's opening palette overlay is **35/35 exact**.
+- **Next:** implement the seventh-win/round-summary presentation from the
+  staged fixture through the shared record menu; do not replay Battles 2–7.
+  Animation continues ICE PUNCH at age 35 with the crystal spiral.
 - **Notes:** LOSS continuation **414/414** and opening **210/210** exact;
-  Tier-1 **1231/1231**, build **5.653 MB**. No absolute clock, screenshot,
-  framebuffer harvest, outcome/BP/save mutation, or seventh-win unique UI.
+  merged Tier-1 **1235/1235**, build **5.655 MB**; ICE opening **35/35**.
+  No deferred questions. No absolute clock, screenshot/framebuffer harvest,
+  terminal outcome mutation, or canonical Battle-2 extension.
 
 ---
 ## 337 — Animation dependency/composition pivot: **GREEN — 354 moves mapped**
