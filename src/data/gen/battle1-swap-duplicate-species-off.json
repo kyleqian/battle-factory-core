@@ -1,0 +1,1509 @@
+{
+  "profile": "battle-scene-off",
+  "canonicalPrefix": "tools/compare/traces-groundtruth/battle1-swapyes-b.json",
+  "staging": {
+    "tick": 29935,
+    "enemySlot": 0,
+    "fromSpecies": 278,
+    "toSpecies": 240,
+    "duplicatePlayerSlot": 1,
+    "mutation": {
+      "address": 33703816,
+      "beforeStoredWord": 1497977195,
+      "afterStoredWord": 1497976973,
+      "checksumAddress": 33703776,
+      "checksum": 52457
+    },
+    "changedEnemyBytes": [
+      28,
+      29,
+      68,
+      69
+    ]
+  },
+  "edges": {
+    "pickerA": {
+      "rejected": 29935,
+      "acceptedFresh": 29937
+    },
+    "duplicateMessageB": {
+      "rejected": 29938,
+      "accepted": 29961
+    },
+    "returnPickerRight": {
+      "rejected": 29983,
+      "acceptedFresh": 29986
+    }
+  },
+  "timeline": {
+    "duplicateTask": 29937,
+    "messageInputReady": 29961,
+    "closeMonPic": 29962,
+    "selectAcceptRestored": 29982,
+    "pickerInstalled": 29984
+  },
+  "rows": [
+    {
+      "tick": 29935,
+      "framebufferSha256": "0bae4c8b483a93ec014e1ce891b22f19d7cd5334e67587b76ba4c4110eb0aa5a",
+      "rng": "0xdf2973cc",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135908928,
+        "state": 1,
+        "name": "Swap_Task_HandleChooseMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29936,
+      "framebufferSha256": "d2020967e5b626b62454232db16ff418c764e6d3e0cce4752952a1780dc3aa9b",
+      "rng": "0x01b6d64f",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135908928,
+        "state": 1,
+        "name": "Swap_Task_HandleChooseMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29937,
+      "framebufferSha256": "bebcf3feeba7d1a04dd653ca90a53e72534168856ba97b18c61c6f897bc0b2dd",
+      "rng": "0x403fb216",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29938,
+      "framebufferSha256": "6865366f6deb9ad963f43e8fd7841f62713ff9381b266ee2074980c3a44b40fa",
+      "rng": "0x1665e7d1",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29939,
+      "framebufferSha256": "81ed736b3fa4dc2701a8e753540da45c10daee3a97563ac5f382a81b033b638b",
+      "rng": "0xf2abc270",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29940,
+      "framebufferSha256": "81ed736b3fa4dc2701a8e753540da45c10daee3a97563ac5f382a81b033b638b",
+      "rng": "0x7b004a23",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29941,
+      "framebufferSha256": "8b9141765cefbf77d2e60b89e62dab818ec9d4e4d481e44c12bf7339f00b6e74",
+      "rng": "0xafc89b5a",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29942,
+      "framebufferSha256": "8b9141765cefbf77d2e60b89e62dab818ec9d4e4d481e44c12bf7339f00b6e74",
+      "rng": "0xf95bf1c5",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29943,
+      "framebufferSha256": "03eb5d2ccfd5909127175d1bf974c1dcdc3ae9ca5b0f06785aac7f73ec59f3f7",
+      "rng": "0x332e5754",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29944,
+      "framebufferSha256": "03eb5d2ccfd5909127175d1bf974c1dcdc3ae9ca5b0f06785aac7f73ec59f3f7",
+      "rng": "0xc84f2737",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29945,
+      "framebufferSha256": "e8e8bc9ed33b098b65911f6fa4be0a695e212d95cb9a1900046f7c2f3a953986",
+      "rng": "0xb330d4de",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29946,
+      "framebufferSha256": "e8e8bc9ed33b098b65911f6fa4be0a695e212d95cb9a1900046f7c2f3a953986",
+      "rng": "0x2e5aa6f9",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29947,
+      "framebufferSha256": "db82090cca0fa493523b17eb74363df9b5a814f403a4af5b1703df24c803b50c",
+      "rng": "0xb90f5678",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29948,
+      "framebufferSha256": "db82090cca0fa493523b17eb74363df9b5a814f403a4af5b1703df24c803b50c",
+      "rng": "0xd0b0c18b",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29949,
+      "framebufferSha256": "ea6be7e0a2bec2209abeaeee5fb185c4e770b162c51b4840f12aaceb28c7ea5a",
+      "rng": "0xb2bd22a2",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29950,
+      "framebufferSha256": "ea6be7e0a2bec2209abeaeee5fb185c4e770b162c51b4840f12aaceb28c7ea5a",
+      "rng": "0xa6617b6d",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29951,
+      "framebufferSha256": "a1c507aa8622bcb0ea860aa781d43d86b5066eed02627d457165f5e064684e54",
+      "rng": "0xae6b23dc",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29952,
+      "framebufferSha256": "d2559929c588bacaa6c647f88aeee541909dd29fbc99c851337e47bf6a29bd91",
+      "rng": "0x80b3ad1f",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29953,
+      "framebufferSha256": "376252f7b9b0d63d3fa60edbab28ecbd62eeb09614d92df0c41201b53b7f4bdf",
+      "rng": "0x503a88a6",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29954,
+      "framebufferSha256": "7021350efbd9abaca83e323cd8905fa834bf7bc0ed7f95f95ca8f9ea45202d97",
+      "rng": "0xd4f32321",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29955,
+      "framebufferSha256": "089966509479e37397490a285b6151b3f6d50bb6637405204455a2a500f01db5",
+      "rng": "0x4cc06380",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29956,
+      "framebufferSha256": "20a390d051a26b2bcdd4c9c8ed0a9505d66d66d07889181affadd270be3aa787",
+      "rng": "0xc13bbdf3",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29957,
+      "framebufferSha256": "20a390d051a26b2bcdd4c9c8ed0a9505d66d66d07889181affadd270be3aa787",
+      "rng": "0x17424aea",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29958,
+      "framebufferSha256": "835a060e2028522fe21c69a1159e231d725656afddb6791ee310b694931ca18e",
+      "rng": "0x75099215",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29959,
+      "framebufferSha256": "835a060e2028522fe21c69a1159e231d725656afddb6791ee310b694931ca18e",
+      "rng": "0x10d3f964",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29960,
+      "framebufferSha256": "835a060e2028522fe21c69a1159e231d725656afddb6791ee310b694931ca18e",
+      "rng": "0x07960807",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 0,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29961,
+      "framebufferSha256": "866574cebe3ccc9f48ff119e1648861c4060a9e6fdba7de076d1960aa714488c",
+      "rng": "0xedbded6e",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 1,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29962,
+      "framebufferSha256": "86f058a85e3c1a6e08a078caa147477dc49703d8285ec8c9ddbacf6f9bd79cbd",
+      "rng": "0xa949fc49",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29963,
+      "framebufferSha256": "330c8073327efd915c7505eb25edb51a2d6908f9c0a6ee822a07c7e75bc1b3b7",
+      "rng": "0x48d50988",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29964,
+      "framebufferSha256": "78d5ca571aa2c4302d91f6fe8298b9854407549b4e48104758716fa55ff98c97",
+      "rng": "0xd2ccdf5b",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29965,
+      "framebufferSha256": "9aa8df80a279730148e2ec2a901d05a1ebe0a3efdb6fb0ed29cfa1787f450c38",
+      "rng": "0x08ab3432",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29966,
+      "framebufferSha256": "12fc3db60fc3a7eeddd8d045462d62a53b29fb8613681bad69fd1c12352011f1",
+      "rng": "0xeb78d5bd",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29967,
+      "framebufferSha256": "cf19b46e29abbc9112e66d97e238cbc68aecba64f692a23e1fe0eae7d85a1cb7",
+      "rng": "0x60c0f7ec",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29968,
+      "framebufferSha256": "38b05e19ce771735ae2ea599ddc441278f14d2c7122248aeeb8dde52bf3a067a",
+      "rng": "0xaa3bd7ef",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29969,
+      "framebufferSha256": "5986a3bdcd35146959185ad822283a13341f2c52ed6c8102ff2a3a78b97f2ba5",
+      "rng": "0x69202336",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29970,
+      "framebufferSha256": "1d82fd2919f718e4c11b075500546063e02f859cd83d3f5bed9356334bc8e1ac",
+      "rng": "0x7f2dd271",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29971,
+      "framebufferSha256": "59f8637e8181cb88fdb914c62c6a2596c172065f3c98faa23cca9fd38d300bb9",
+      "rng": "0x91076890",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29972,
+      "framebufferSha256": "c83269673bf4466dd736ec59c56dec55ba9575cd37ba04d9ce969e2dcc983508",
+      "rng": "0x7163c5c3",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29973,
+      "framebufferSha256": "c83269673bf4466dd736ec59c56dec55ba9575cd37ba04d9ce969e2dcc983508",
+      "rng": "0x258efe7a",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29974,
+      "framebufferSha256": "06c3f528cabdbc599e0bf03576aa2fcc83968ddd3f6a072047bba9203d1ad893",
+      "rng": "0x5bc7e665",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29975,
+      "framebufferSha256": "06c3f528cabdbc599e0bf03576aa2fcc83968ddd3f6a072047bba9203d1ad893",
+      "rng": "0xd36e3f74",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29976,
+      "framebufferSha256": "e197c67a555b585ab64f367628d6638589ea256a14bfd390417393c753ae40d2",
+      "rng": "0x24febcd7",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29977,
+      "framebufferSha256": "e197c67a555b585ab64f367628d6638589ea256a14bfd390417393c753ae40d2",
+      "rng": "0x034a49fe",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29978,
+      "framebufferSha256": "6300b9735b50ade17f3d2e7c5444d6a46a73f3dafbf3298021982d4cedceb5d5",
+      "rng": "0xc1a14599",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29979,
+      "framebufferSha256": "6300b9735b50ade17f3d2e7c5444d6a46a73f3dafbf3298021982d4cedceb5d5",
+      "rng": "0x4235a098",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29980,
+      "framebufferSha256": "056f2150755427485c06e93ee4dd6e71ea9dd11e296b7bbd04472795edbabd95",
+      "rng": "0x5554112b",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 2,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29981,
+      "framebufferSha256": "056f2150755427485c06e93ee4dd6e71ea9dd11e296b7bbd04472795edbabd95",
+      "rng": "0x2448c9c2",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 3,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29982,
+      "framebufferSha256": "59f8637e8181cb88fdb914c62c6a2596c172065f3c98faa23cca9fd38d300bb9",
+      "rng": "0xee83640d",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 3,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29983,
+      "framebufferSha256": "59f8637e8181cb88fdb914c62c6a2596c172065f3c98faa23cca9fd38d300bb9",
+      "rng": "0x457beffc",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135918728,
+        "state": 4,
+        "name": "Swap_TaskCantHaveSameMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29984,
+      "framebufferSha256": "6865366f6deb9ad963f43e8fd7841f62713ff9381b266ee2074980c3a44b40fa",
+      "rng": "0xf1cc56bf",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135908928,
+        "state": 1,
+        "name": "Swap_Task_HandleChooseMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29985,
+      "framebufferSha256": "6865366f6deb9ad963f43e8fd7841f62713ff9381b266ee2074980c3a44b40fa",
+      "rng": "0xcd2981c6",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135908928,
+        "state": 1,
+        "name": "Swap_Task_HandleChooseMons"
+      },
+      "swapScreen": {
+        "cursorPos": 0,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    },
+    {
+      "tick": 29986,
+      "framebufferSha256": "6865366f6deb9ad963f43e8fd7841f62713ff9381b266ee2074980c3a44b40fa",
+      "rng": "0xa55af5c1",
+      "specialVarResult": 1,
+      "task": {
+        "id": 1,
+        "func": 135908928,
+        "state": 1,
+        "name": "Swap_Task_HandleChooseMons"
+      },
+      "swapScreen": {
+        "cursorPos": 1,
+        "playerMonId": 0,
+        "inEnemyScreen": 1,
+        "monSwapped": 0
+      },
+      "playerSpecies": [
+        95,
+        240,
+        153
+      ],
+      "enemySpecies": [
+        240,
+        198,
+        17
+      ]
+    }
+  ],
+  "invariants": {
+    "playerPartyPreserved": true,
+    "rentalRecordsPreserved": true,
+    "enemyPartyPreservedAfterStaging": true,
+    "copySwappedMonDataNotReached": true
+  }
+}
