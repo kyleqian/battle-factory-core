@@ -4,8 +4,10 @@ import { drawTileBg } from "../src/engine/bg.ts";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import {
   extremeSpeedAttackerAffineAtAge,
+  extremeSpeedAttackerVisibleAtAge,
   extremeSpeedBackgroundAtAge,
   extremeSpeedBackgroundVariant,
+  extremeSpeedDustAtAge,
   extremeSpeedImpactAtAge,
 } from "../src/engine/extremeSpeed.ts";
 import {
@@ -117,9 +119,30 @@ describe("Extreme Speed source reducers", () => {
     expect(extremeSpeedImpactAtAge(123, "opponent")).toEqual({
       targetX2: -8, hitsplatIndex: 0,
     });
+    expect(extremeSpeedImpactAtAge(135, "player").targetX2).toBe(16);
+    expect(extremeSpeedImpactAtAge(147, "player").targetX2).toBe(24);
+    expect(extremeSpeedImpactAtAge(182, "player").targetX2).toBe(0);
     expect(extremeSpeedImpactAtAge(183, "player")).toEqual({
       targetX2: 0, hitsplatIndex: null,
     });
+  });
+
+  it("pins all 24 dust spawns and the fourteen-toggle attacker reappearance", () => {
+    expect(extremeSpeedDustAtAge(183)).toEqual([]);
+    expect(extremeSpeedDustAtAge(185)).toEqual([
+      { x2: 30, y2: 28, frame: 0 },
+    ]);
+    const allSpawnIndices = new Set<number>();
+    for (let age = 183; age <= 318; age += 1) {
+      for (const dust of extremeSpeedDustAtAge(age)) {
+        allSpawnIndices.add(dust.x2 * 100 + dust.y2);
+      }
+    }
+    expect(allSpawnIndices.size).toBe(4);
+    expect(extremeSpeedAttackerVisibleAtAge(195)).toBe(false);
+    expect(extremeSpeedAttackerVisibleAtAge(196)).toBe(true);
+    expect(extremeSpeedAttackerVisibleAtAge(198)).toBe(false);
+    expect(extremeSpeedAttackerVisibleAtAge(224)).toBe(true);
   });
 
   it("extracts both source-selected backgrounds and the shared dust sheet", () => {

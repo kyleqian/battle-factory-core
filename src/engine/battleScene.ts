@@ -592,7 +592,10 @@ import {
   sceneOnMudSlapView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
-import { extremeSpeedBackgroundVariant } from "./extremeSpeed.ts";
+import {
+  extremeSpeedBackgroundVariant,
+  extremeSpeedImpactAtAge,
+} from "./extremeSpeed.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
   SITRUS_ITEM_TEXT_CLEAR_AGE,
@@ -872,6 +875,9 @@ const extremeSpeedBg = (extremeSpeedAsset as {
     playerTilemap: Tilemap;
   };
 }).background;
+const extremeSpeedDust = (extremeSpeedAsset as {
+  dust: { tileset: Tileset; palette: RgbColor[] };
+}).dust;
 const battleAnimIceCrystalLarge: Tileset = {
   columns: 1,
   rows: 2,
@@ -14143,6 +14149,14 @@ export function renderSceneOnMovePresentation(
 ): void {
   if (state.config.move === "EXTREME_SPEED") {
     const view = sceneOnExtremeSpeedView(state);
+    // Battler task mutations miss the OAM buffer already built for this
+    // frame. Keep that display epoch local to this move-owned component.
+    const displayedImpact = extremeSpeedImpactAtAge(
+      view.animationAge - 1,
+      view.target.geometry.side,
+    );
+    const attackerReappeared =
+      view.attackerAffine.invisible && view.attackerVisible;
     const playerToOpponent =
       view.attacker.species === "ARCANINE"
       && view.attacker.geometry.side === "player"
@@ -14200,35 +14214,35 @@ export function renderSceneOnMovePresentation(
         fb,
         dugtrioFrontSprite.tileset,
         dugtrioFrontSprite.palette,
-        144,
+        144 + displayedImpact.targetX2,
         21,
       );
-      if (!view.attackerAffine.invisible) {
+      if (!view.attackerAffine.invisible || view.attackerVisible) {
         drawSpriteSheetAffineStretch(
           fb,
           arcanineBackSprite.tileset,
           arcanineBackSprite.palette,
           40,
           54,
-          view.attackerAffine.xScale,
-          view.attackerAffine.yScale,
-          view.attackerAffine.y2,
+          attackerReappeared ? 256 : view.attackerAffine.xScale,
+          attackerReappeared ? 256 : view.attackerAffine.yScale,
+          attackerReappeared ? 0 : view.attackerAffine.y2,
           { r: 0, g: 0, b: 0 },
           0,
           view.attackerAffine.xScale !== 256 || view.attackerAffine.yScale !== 256,
         );
       }
     } else {
-      if (!view.attackerAffine.invisible) {
+      if (!view.attackerAffine.invisible || view.attackerVisible) {
         drawSpriteSheetAffineStretch(
           fb,
           arcanineFrontSprite.tileset,
           arcanineFrontSprite.palette,
           144,
           10,
-          view.attackerAffine.xScale,
-          view.attackerAffine.yScale,
-          view.attackerAffine.y2,
+          attackerReappeared ? 256 : view.attackerAffine.xScale,
+          attackerReappeared ? 256 : view.attackerAffine.yScale,
+          attackerReappeared ? 0 : view.attackerAffine.y2,
           { r: 0, g: 0, b: 0 },
           0,
           view.attackerAffine.xScale !== 256 || view.attackerAffine.yScale !== 256,
@@ -14238,8 +14252,25 @@ export function renderSceneOnMovePresentation(
         fb,
         dugtrioBackSprite.tileset,
         dugtrioBackSprite.palette,
-        40,
+        40 + displayedImpact.targetX2,
         59,
+      );
+    }
+    const attackerCenter = view.attacker.geometry.animationCenter;
+    for (const dust of view.dust) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 2,
+          rows: 2,
+          tiles: extremeSpeedDust.tileset.tiles.slice(
+            dust.frame * 4,
+            dust.frame * 4 + 4,
+          ),
+        },
+        extremeSpeedDust.palette,
+        attackerCenter.x + dust.x2 - 8,
+        attackerCenter.y + dust.y2 - 8,
       );
     }
     if (playerToOpponent) {

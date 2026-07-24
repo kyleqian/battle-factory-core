@@ -100,7 +100,9 @@ import {
 } from "./bind.ts";
 import {
   extremeSpeedAttackerAffineAtAge,
+  extremeSpeedAttackerVisibleAtAge,
   extremeSpeedBackgroundAtAge,
+  extremeSpeedDustAtAge,
   extremeSpeedImpactAtAge,
   type ExtremeSpeedBackgroundState,
 } from "./extremeSpeed.ts";
@@ -587,6 +589,8 @@ export interface SceneOnExtremeSpeedView {
   readonly target: SceneOnPresentationBattler;
   readonly background: ExtremeSpeedBackgroundState;
   readonly attackerAffine: ReturnType<typeof extremeSpeedAttackerAffineAtAge>;
+  readonly attackerVisible: boolean;
+  readonly dust: ReturnType<typeof extremeSpeedDustAtAge>;
   readonly impact: ReturnType<typeof extremeSpeedImpactAtAge>;
 }
 
@@ -1361,6 +1365,8 @@ export function sceneOnExtremeSpeedView(
       animationAge,
       state.config.attacker.geometry.side === "player" ? 6 : 2,
     ),
+    attackerVisible: extremeSpeedAttackerVisibleAtAge(animationAge),
+    dust: extremeSpeedDustAtAge(animationAge),
     impact: extremeSpeedImpactAtAge(
       animationAge,
       state.config.target.geometry.side,
