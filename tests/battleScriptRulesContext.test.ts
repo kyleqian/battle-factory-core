@@ -49,6 +49,7 @@ function battler(
   pp: readonly [number, number, number, number] = [10, 20, 30, 40],
   rolloutTimer = 0,
   furyCutterCounter = 0,
+  truantCounter = 0,
 ) {
   return Object.freeze({
     ability: 0,
@@ -60,6 +61,7 @@ function battler(
     substituteHP,
     rolloutTimer,
     furyCutterCounter,
+    truantCounter,
   });
 }
 

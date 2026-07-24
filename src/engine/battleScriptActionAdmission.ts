@@ -1,9 +1,14 @@
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import {
+  cancelBattleScriptMultiTurnMoves,
+  type BattleScriptCancelMultiTurnMovesReceipt,
+} from "./battleScriptMultiTurnCancellation.ts";
 import { advanceRngValue } from "./rng.ts";
 import {
   BATTLE_SCRIPT_ABILITY_EARLY_BIRD,
   BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
+  BATTLE_SCRIPT_ABILITY_TRUANT,
   BATTLE_SCRIPT_ACTION_FINISHED,
   BATTLE_SCRIPT_ATTACK_CANCELER_PHASES,
   BATTLE_SCRIPT_EFFECT_THAW_HIT,
@@ -126,7 +131,8 @@ export type BattleScriptAttackCancelerScriptEffect =
       | "BattleScript_MoveUsedIsAsleep"
       | "BattleScript_MoveUsedWokeUp"
       | "BattleScript_MoveUsedIsFrozen"
-      | "BattleScript_MoveUsedUnfroze";
+      | "BattleScript_MoveUsedUnfroze"
+      | "BattleScript_MoveUsedLoafingAround";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -303,6 +309,62 @@ export type BattleScriptAttackCancelerFrozenDecision =
     rulesContext: BattleScriptRulesContext;
     rngValue: number;
     receipt: BattleScriptAttackCancelerFrozenGateReceipt;
+  }>;
+
+export type BattleScriptAttackCancelerTruantReason =
+  | "not-truant"
+  | "truant-active"
+  | "truant-idle-turn";
+
+export type BattleScriptAttackCancelerTruantReceipt = Readonly<{
+  sourcePhase: "CANCELER_TRUANT";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerTruantReason;
+  ability: Readonly<{
+    value: number;
+    sourceConstant: "ABILITY_TRUANT";
+    matches: boolean;
+  }>;
+  truantCounter: Readonly<{ value: number; isNonzero: boolean }>;
+  cancelMultiTurnMoves:
+    | Readonly<{ kind: "not-invoked" }>
+    | Readonly<{
+      kind: "invoked";
+      receipt: BattleScriptCancelMultiTurnMovesReceipt;
+    }>;
+  hitMarker: BattleScriptBitFieldEffect;
+  moveResultFlags: BattleScriptBitFieldEffect;
+  effect: 0 | 1;
+  script: BattleScriptAttackCancelerScriptEffect;
+  multistringChooser:
+    | Readonly<{ kind: "preserve" }>
+    | Readonly<{
+      kind: "set";
+      sourceConstant: "B_MSG_LOAFING";
+      value: 0;
+    }>;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_TRUANT";
+    sourcePhaseAfter: "CANCELER_RECHARGE";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerTruantDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerTruantReason;
+    rulesContext: BattleScriptRulesContext;
+    receipt: BattleScriptAttackCancelerTruantReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    receipt: Readonly<{
+      sourcePhase: "CANCELER_TRUANT";
+      tracker: Readonly<{ before: number; after: number }>;
+    }>;
   }>;
 
 function requireSourceProgramCounter(sourceProgramCounter: number): number {
@@ -905,6 +967,136 @@ export function advanceBattleScriptAttackCancelerFrozen(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_FROZEN",
         sourcePhaseAfter: "CANCELER_TRUANT",
+      }),
+    }),
+  });
+}
+
+/**
+ * The source-shaped CANCELER_TRUANT phase of AtkCanceler_UnableToUseMove.
+ *
+ * CancelMultiTurnMoves is owned by the taken Truant branch. This advances
+ * exactly once to CANCELER_RECHARGE and does not loop or execute opcode 0.
+ */
+export function advanceBattleScriptAttackCancelerTruant(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+): BattleScriptAttackCancelerTruantDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_TRUANT
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_TRUANT",
+        tracker: Object.freeze({
+          before: trackerBefore,
+          after: trackerBefore,
+        }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler truant phase requires an attacker role",
+    );
+  }
+  const sourceBattler = rulesContext.battlers[attacker];
+  const abilityMatches = sourceBattler.ability === BATTLE_SCRIPT_ABILITY_TRUANT;
+  const counterIsNonzero = sourceBattler.truantCounter !== 0;
+  const isLoafing = abilityMatches && counterIsNonzero;
+  const reason: BattleScriptAttackCancelerTruantReason = !abilityMatches
+    ? "not-truant"
+    : counterIsNonzero
+      ? "truant-active"
+      : "truant-idle-turn";
+
+  let helperResult: ReturnType<typeof cancelBattleScriptMultiTurnMoves> | null =
+    null;
+  let nextRulesContext = rulesContext;
+  let nextHitMarker = rulesContext.hitMarker;
+  let nextMoveResultFlags = rulesContext.moveResultFlags;
+  let effect: 0 | 1 = 0;
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+  let multistringChooser:
+    BattleScriptAttackCancelerTruantReceipt["multistringChooser"] =
+      Object.freeze({ kind: "preserve" });
+
+  if (isLoafing) {
+    helperResult = cancelBattleScriptMultiTurnMoves(rulesContext, attacker);
+    nextRulesContext = helperResult.rulesContext;
+    nextHitMarker = (
+      rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+    ) >>> 0;
+    nextMoveResultFlags = (
+      rulesContext.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_MISSED
+    ) >>> 0;
+    effect = 1;
+    script = Object.freeze({
+      kind: "handoff",
+      sourceProgramCounter: sourcePc,
+      targetLabel: "BattleScript_MoveUsedLoafingAround",
+    });
+    multistringChooser = Object.freeze({
+      kind: "set",
+      sourceConstant: "B_MSG_LOAFING",
+      value: 0,
+    });
+  }
+
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_RECHARGE;
+  nextRulesContext = Object.freeze({
+    ...nextRulesContext,
+    atkCancelerTracker: trackerAfter,
+    hitMarker: nextHitMarker,
+    moveResultFlags: nextMoveResultFlags,
+  });
+
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_TRUANT",
+      attacker,
+      reason,
+      ability: Object.freeze({
+        value: sourceBattler.ability,
+        sourceConstant: "ABILITY_TRUANT",
+        matches: abilityMatches,
+      }),
+      truantCounter: Object.freeze({
+        value: sourceBattler.truantCounter,
+        isNonzero: counterIsNonzero,
+      }),
+      cancelMultiTurnMoves: helperResult === null
+        ? Object.freeze({ kind: "not-invoked" })
+        : Object.freeze({
+          kind: "invoked",
+          receipt: helperResult.receipt,
+        }),
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      moveResultFlags: bitFieldEffect(
+        rulesContext.moveResultFlags,
+        nextMoveResultFlags,
+      ),
+      effect,
+      script,
+      multistringChooser,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_TRUANT",
+        sourcePhaseAfter: "CANCELER_RECHARGE",
       }),
     }),
   });

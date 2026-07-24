@@ -40,6 +40,7 @@ export type BattleScriptRulesBattler = Readonly<{
   substituteHP: number;
   rolloutTimer: number;
   furyCutterCounter: number;
+  truantCounter: number;
 }>;
 
 export type BattleScriptRulesBattlers = readonly [
@@ -179,6 +180,11 @@ export function createBattleScriptRulesContext(
       battler.furyCutterCounter,
       0xff,
       `battlers[${index}].furyCutterCounter`,
+    ),
+    truantCounter: requireUnsigned(
+      battler.truantCounter,
+      0xff,
+      `battlers[${index}].truantCounter`,
     ),
   })) as unknown as BattleScriptRulesBattlers;
   const selectorRoles = Object.freeze({

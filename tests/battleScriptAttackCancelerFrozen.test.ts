@@ -33,6 +33,7 @@ function battler(
     substituteHP: changes.substituteHP ?? 0,
     rolloutTimer: changes.rolloutTimer ?? 0,
     furyCutterCounter: changes.furyCutterCounter ?? 0,
+    truantCounter: changes.truantCounter ?? 0,
   });
 }
 
