@@ -157,6 +157,7 @@ describe("source-shaped Battle Script rules context", () => {
       "battlers",
       "critMultiplier",
       "currentMove",
+      "currentMoveEffect",
       "currentMovePosition",
       "dmgMultiplier",
       "hitMarker",

@@ -28,6 +28,7 @@ import {
   BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
   BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
 } from "./battleScriptSourceConstants.ts";
+import topologyData from "../data/gen/battle-script-topology.json" with { type: "json" };
 
 export type BattleScriptRulesBattler = Readonly<{
   ability: number;
@@ -70,6 +71,7 @@ export type BattleScriptRulesContext = Readonly<
     atkCancelerTracker: number;
     battleOutcome: number;
     currentMove: number;
+    currentMoveEffect: number;
     currentMovePosition: number;
     multiHitCounter: number;
   }
@@ -100,6 +102,32 @@ function requireUnsigned(value: number, maximum: number, field: string): number 
     throw new Error(`${field} must be an unsigned integer <= ${maximum}, got ${value}`);
   }
   return value;
+}
+
+type GeneratedMoveEffectRow = Readonly<{
+  id: number;
+  effectId: number;
+}>;
+
+const GENERATED_MOVE_EFFECTS = new Map<number, number>(
+  (topologyData.moves as readonly GeneratedMoveEffectRow[]).map(
+    ({ id, effectId }) => [id, effectId],
+  ),
+);
+
+/**
+ * Resolves gBattleMoves[move].effect from the pinned generated source table.
+ * Rules phases consume this typed context field rather than dispatching on a
+ * move name, battle number, turn number, or presentation tick.
+ */
+export function resolveBattleScriptCurrentMoveEffect(currentMove: number): number {
+  const effect = GENERATED_MOVE_EFFECTS.get(currentMove);
+  if (effect === undefined) {
+    throw new Error(
+      `currentMove ${currentMove} has no source-derived gBattleMoves effect`,
+    );
+  }
+  return effect;
 }
 
 function requireRole(
@@ -164,6 +192,7 @@ export function createBattleScriptRulesContext(
       "selectorRoles.effectBattler",
     ),
   });
+  const currentMove = requireUnsigned(input.currentMove, 0xffff, "currentMove");
   return Object.freeze({
     battlers: Object.freeze(battlers),
     selectorRoles,
@@ -173,7 +202,8 @@ export function createBattleScriptRulesContext(
       "atkCancelerTracker",
     ),
     battleOutcome: requireUnsigned(input.battleOutcome, 0xff, "battleOutcome"),
-    currentMove: requireUnsigned(input.currentMove, 0xffff, "currentMove"),
+    currentMove,
+    currentMoveEffect: resolveBattleScriptCurrentMoveEffect(currentMove),
     currentMovePosition: requireUnsigned(
       input.currentMovePosition,
       3,

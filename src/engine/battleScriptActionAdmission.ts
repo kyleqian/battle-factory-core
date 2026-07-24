@@ -1,10 +1,12 @@
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { advanceRngValue } from "./rng.ts";
 import {
   BATTLE_SCRIPT_ABILITY_EARLY_BIRD,
   BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
   BATTLE_SCRIPT_ACTION_FINISHED,
   BATTLE_SCRIPT_ATTACK_CANCELER_PHASES,
+  BATTLE_SCRIPT_EFFECT_THAW_HIT,
   BATTLE_SCRIPT_HITMARKER_ALLOW_NO_PP,
   BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING,
   BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE,
@@ -13,6 +15,7 @@ import {
   BATTLE_SCRIPT_MOVE_SNORE,
   BATTLE_SCRIPT_MOVE_STRUGGLE,
   BATTLE_SCRIPT_STATUS1_SLEEP,
+  BATTLE_SCRIPT_STATUS1_FREEZE,
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS3_GRUDGE,
 } from "./battleScriptSourceConstants.ts";
@@ -119,7 +122,11 @@ export type BattleScriptAttackCancelerScriptEffect =
   | Readonly<{
     kind: "handoff";
     sourceProgramCounter: number;
-    targetLabel: "BattleScript_MoveUsedIsAsleep" | "BattleScript_MoveUsedWokeUp";
+    targetLabel:
+      | "BattleScript_MoveUsedIsAsleep"
+      | "BattleScript_MoveUsedWokeUp"
+      | "BattleScript_MoveUsedIsFrozen"
+      | "BattleScript_MoveUsedUnfroze";
   }>;
 
 export type BattleScriptAttackCancelerCursorEffect =
@@ -133,7 +140,10 @@ export type BattleScriptAttackCancelerMultistringEffect =
   | Readonly<{ kind: "preserve" }>
   | Readonly<{
     kind: "set";
-    sourceConstant: "B_MSG_WOKE_UP" | "B_MSG_WOKE_UP_UPROAR";
+    sourceConstant:
+      | "B_MSG_WOKE_UP"
+      | "B_MSG_WOKE_UP_UPROAR"
+      | "B_MSG_DEFROSTED";
     value: 0 | 1;
   }>;
 
@@ -225,6 +235,76 @@ export type BattleScriptAttackCancelerAsleepDecision =
     receipt: BattleScriptAttackCancelerAsleepGateReceipt;
   }>;
 
+export type BattleScriptAttackCancelerFrozenReason =
+  | "not-frozen"
+  | "frozen"
+  | "thaw-hit-allowed"
+  | "thawed";
+
+export type BattleScriptAttackCancelerFrozenRngEffect =
+  | Readonly<{
+    kind: "preserve";
+    value: number;
+    reason: "attacker-not-frozen";
+  }>
+  | Readonly<{
+    kind: "draw";
+    name: "CANCELER_FROZEN_THAW_CHECK";
+    sourceCall: "Random";
+    modulo: 5;
+    before: number;
+    after: number;
+    randomValue: number;
+    remainder: 0 | 1 | 2 | 3 | 4;
+  }>;
+
+export type BattleScriptAttackCancelerFrozenReceipt = Readonly<{
+  sourcePhase: "CANCELER_FROZEN";
+  attacker: BattleScriptBattlerId;
+  reason: BattleScriptAttackCancelerFrozenReason;
+  moveEffect: Readonly<{
+    currentMove: number;
+    sourceField: "gBattleMoves[gCurrentMove].effect";
+    value: number;
+    isThawHit: boolean;
+  }>;
+  rng: BattleScriptAttackCancelerFrozenRngEffect;
+  status1: BattleScriptBitFieldEffect;
+  hitMarker: BattleScriptBitFieldEffect;
+  effect: 0 | 2;
+  script: BattleScriptAttackCancelerScriptEffect;
+  cursor: BattleScriptAttackCancelerCursorEffect;
+  multistringChooser: BattleScriptAttackCancelerMultistringEffect;
+  statusController: BattleScriptAttackCancelerStatusControllerEffect;
+  tracker: Readonly<{
+    before: number;
+    after: number;
+    sourcePhaseBefore: "CANCELER_FROZEN";
+    sourcePhaseAfter: "CANCELER_TRUANT";
+  }>;
+}>;
+
+export type BattleScriptAttackCancelerFrozenGateReceipt = Readonly<{
+  sourcePhase: "CANCELER_FROZEN";
+  tracker: Readonly<{ before: number; after: number }>;
+  rng: Readonly<{ kind: "preserve"; value: number }>;
+}>;
+
+export type BattleScriptAttackCancelerFrozenDecision =
+  | Readonly<{
+    kind: "advance";
+    reason: BattleScriptAttackCancelerFrozenReason;
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: BattleScriptAttackCancelerFrozenReceipt;
+  }>
+  | Readonly<{
+    kind: "not-at-source-phase";
+    rulesContext: BattleScriptRulesContext;
+    rngValue: number;
+    receipt: BattleScriptAttackCancelerFrozenGateReceipt;
+  }>;
+
 function requireSourceProgramCounter(sourceProgramCounter: number): number {
   if (
     !Number.isSafeInteger(sourceProgramCounter)
@@ -236,6 +316,17 @@ function requireSourceProgramCounter(sourceProgramCounter: number): number {
     );
   }
   return sourceProgramCounter;
+}
+
+function requireRngValue(rngValue: number): number {
+  if (
+    !Number.isSafeInteger(rngValue)
+    || rngValue < 0
+    || rngValue > 0xffff_ffff
+  ) {
+    throw new Error(`Battle Script RNG value must be a u32, got ${rngValue}`);
+  }
+  return rngValue >>> 0;
 }
 
 function bitFieldEffect(before: number, after: number): BattleScriptBitFieldEffect {
@@ -636,6 +727,191 @@ export function advanceBattleScriptAttackCancelerAsleep(
         after: trackerAfter,
         sourcePhaseBefore: "CANCELER_ASLEEP",
         sourcePhaseAfter: "CANCELER_FROZEN",
+      }),
+    }),
+  });
+}
+
+/**
+ * The source-shaped CANCELER_FROZEN phase of AtkCanceler_UnableToUseMove.
+ *
+ * This consumes exactly the source's one conditional Random() draw, records
+ * every script/controller side effect as an immutable receipt, and stops at
+ * CANCELER_TRUANT. It neither loops the attack canceler nor executes opcode 0.
+ */
+export function advanceBattleScriptAttackCancelerFrozen(
+  rulesContext: BattleScriptRulesContext,
+  sourceProgramCounter: number,
+  rngValue: number,
+): BattleScriptAttackCancelerFrozenDecision {
+  const sourcePc = requireSourceProgramCounter(sourceProgramCounter);
+  const sourceRng = requireRngValue(rngValue);
+  const trackerBefore = rulesContext.atkCancelerTracker;
+  if (
+    trackerBefore
+    !== BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_FROZEN
+  ) {
+    return Object.freeze({
+      kind: "not-at-source-phase",
+      rulesContext,
+      rngValue: sourceRng,
+      receipt: Object.freeze({
+        sourcePhase: "CANCELER_FROZEN",
+        tracker: Object.freeze({
+          before: trackerBefore,
+          after: trackerBefore,
+        }),
+        rng: Object.freeze({ kind: "preserve", value: sourceRng }),
+      }),
+    });
+  }
+
+  const attacker = rulesContext.selectorRoles.attacker;
+  if (attacker === null) {
+    throw new Error(
+      "Battle Script attack canceler frozen phase requires an attacker role",
+    );
+  }
+
+  const sourceBattler = rulesContext.battlers[attacker];
+  const isFrozen = (
+    sourceBattler.status1
+    & BATTLE_SCRIPT_STATUS1_FREEZE
+  ) !== 0;
+  const isThawHit = (
+    rulesContext.currentMoveEffect
+    === BATTLE_SCRIPT_EFFECT_THAW_HIT
+  );
+  let reason: BattleScriptAttackCancelerFrozenReason = "not-frozen";
+  let nextRng = sourceRng;
+  let rng: BattleScriptAttackCancelerFrozenRngEffect = Object.freeze({
+    kind: "preserve",
+    value: sourceRng,
+    reason: "attacker-not-frozen",
+  });
+  let nextStatus1 = sourceBattler.status1;
+  let nextHitMarker = rulesContext.hitMarker;
+  let effect: 0 | 2 = 0;
+  let script: BattleScriptAttackCancelerScriptEffect = Object.freeze({
+    kind: "preserve",
+    sourceProgramCounter: sourcePc,
+  });
+  let cursor: BattleScriptAttackCancelerCursorEffect = Object.freeze({
+    kind: "preserve",
+  });
+  let multistringChooser: BattleScriptAttackCancelerMultistringEffect =
+    Object.freeze({ kind: "preserve" });
+
+  if (isFrozen) {
+    nextRng = advanceRngValue(sourceRng);
+    const randomValue = (nextRng >>> 16) & 0xffff;
+    const remainder = (randomValue % 5) as 0 | 1 | 2 | 3 | 4;
+    rng = Object.freeze({
+      kind: "draw",
+      name: "CANCELER_FROZEN_THAW_CHECK",
+      sourceCall: "Random",
+      modulo: 5,
+      before: sourceRng,
+      after: nextRng,
+      randomValue,
+      remainder,
+    });
+    if (remainder !== 0) {
+      if (isThawHit) {
+        reason = "thaw-hit-allowed";
+      } else {
+        reason = "frozen";
+        effect = 2;
+        nextHitMarker = (
+          rulesContext.hitMarker
+          | BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING
+        ) >>> 0;
+        script = Object.freeze({
+          kind: "handoff",
+          sourceProgramCounter: sourcePc,
+          targetLabel: "BattleScript_MoveUsedIsFrozen",
+        });
+      }
+    } else {
+      reason = "thawed";
+      effect = 2;
+      nextStatus1 = (
+        sourceBattler.status1
+        & ~BATTLE_SCRIPT_STATUS1_FREEZE
+      ) >>> 0;
+      script = Object.freeze({
+        kind: "handoff",
+        sourceProgramCounter: sourcePc,
+        targetLabel: "BattleScript_MoveUsedUnfroze",
+      });
+      cursor = Object.freeze({ kind: "push", sourceProgramCounter: sourcePc });
+      multistringChooser = Object.freeze({
+        kind: "set",
+        sourceConstant: "B_MSG_DEFROSTED",
+        value: 0,
+      });
+    }
+  }
+
+  const battlerChanged = nextStatus1 !== sourceBattler.status1;
+  const nextBattler = battlerChanged
+    ? Object.freeze({ ...sourceBattler, status1: nextStatus1 })
+    : sourceBattler;
+  const nextBattlers = battlerChanged
+    ? Object.freeze(
+      rulesContext.battlers.map((candidate, index) => (
+        index === attacker ? nextBattler : candidate
+      )),
+    ) as unknown as BattleScriptRulesContext["battlers"]
+    : rulesContext.battlers;
+  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_TRUANT;
+  const nextRulesContext = Object.freeze({
+    ...rulesContext,
+    battlers: nextBattlers,
+    atkCancelerTracker: trackerAfter,
+    hitMarker: nextHitMarker,
+  });
+  const statusController: BattleScriptAttackCancelerStatusControllerEffect =
+    effect === 2
+      ? Object.freeze({
+        kind: "request-status1-write",
+        battler: attacker,
+        sourceRequest: "REQUEST_STATUS_BATTLE",
+        offset: 0,
+        size: 4,
+        value: nextStatus1,
+        markForControllerExecution: true,
+      })
+      : Object.freeze({ kind: "none" });
+
+  return Object.freeze({
+    kind: "advance",
+    reason,
+    rulesContext: nextRulesContext,
+    rngValue: nextRng,
+    receipt: Object.freeze({
+      sourcePhase: "CANCELER_FROZEN",
+      attacker,
+      reason,
+      moveEffect: Object.freeze({
+        currentMove: rulesContext.currentMove,
+        sourceField: "gBattleMoves[gCurrentMove].effect",
+        value: rulesContext.currentMoveEffect,
+        isThawHit,
+      }),
+      rng,
+      status1: bitFieldEffect(sourceBattler.status1, nextStatus1),
+      hitMarker: bitFieldEffect(rulesContext.hitMarker, nextHitMarker),
+      effect,
+      script,
+      cursor,
+      multistringChooser,
+      statusController,
+      tracker: Object.freeze({
+        before: trackerBefore,
+        after: trackerAfter,
+        sourcePhaseBefore: "CANCELER_FROZEN",
+        sourcePhaseAfter: "CANCELER_TRUANT",
       }),
     }),
   });

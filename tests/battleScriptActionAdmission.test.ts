@@ -71,6 +71,7 @@ describe("source-shaped attack-canceler flags phase", () => {
       CANCELER_FLAGS: 0,
       CANCELER_ASLEEP: 1,
       CANCELER_FROZEN: 2,
+      CANCELER_TRUANT: 3,
     });
     expect(BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_DESTINY_BOND).toBe(1 << 25);
     expect(BATTLE_SCRIPT_STATUS3_GRUDGE).toBe(1 << 14);
@@ -211,7 +212,7 @@ describe("source-shaped attack-canceler flags phase", () => {
         battler(),
       ],
       battleOutcome: 4,
-      currentMove: 355,
+      currentMove: 354,
       currentMovePosition: 2,
       moveResultFlags: 0xe1,
       hitMarker: 0xfeed_beef,
