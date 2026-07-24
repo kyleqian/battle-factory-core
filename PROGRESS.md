@@ -4,26 +4,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
-## 394 — Gate-3 attack-canceler TRUANT source phase integrated
+## 394 — Gate-3 attack-canceler TRUANT source phase integrated and repaired
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable
   opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP,
   FROZEN, and TRUANT decisions only; opcode 0 remains unregistered and no
   phase loop exists.
-- **Did:** added only source `u8 truantCounter`, then ported TRUANT's exact
-  ability/counter predicate. The taken branch immutably nests
-  `CancelMultiTurnMoves`, ORs unable/missed, records `B_MSG_LOAFING`, hands
-  off `BattleScript_MoveUsedLoafingAround`, and returns effect 1; all other
-  combinations preserve those fields with effect 0. Every path advances once.
+- **Did:** modeled the exact source bitfield
+  `DisableStruct::u8 truantCounter:1` as `0 | 1`, rejecting values outside
+  that domain, then ported TRUANT's exact ability/counter predicate. The taken
+  branch immutably nests `CancelMultiTurnMoves`, ORs unable/missed, records
+  `B_MSG_LOAFING`, hands off `BattleScript_MoveUsedLoafingAround`, and returns
+  effect 1; all other combinations preserve those fields with effect 0. Every
+  path advances once.
 - **Next:** implement `CANCELER_RECHARGE` only after its exact recharge status,
   timer, multi-turn cancellation, script, marker, effect, and receipt ownership
   is explicit. Do not loop phases or register opcode 0.
-- **Notes:** all four attacker ids, ordinary/Truant abilities, zero and
-  representative nonzero `u8` counters, masks already set/unset, helper field
-  clearing, identities, determinism/deep freezing, missing roles, and invalid
-  widths are pinned. Focused **24/24**; Tier-1 **132 files / 1730 tests**,
-  build, OFF info (`9c89c741…`), and diff check green. Code commit `abc915f`;
-  pixel diff N/A.
+- **Notes:** all four attacker ids × the exhaustive one-bit domain **0/1**,
+  ordinary/Truant abilities, masks already set/unset, helper field clearing,
+  identities, determinism/deep freezing, missing roles, and invalid widths are
+  pinned; **2, 7, and 255** are explicitly rejected. A bounded comparison with
+  `battle_util.c` and `battle.h` found no other TRUANT-phase source discrepancy;
+  helper behavior/receipts are unchanged. Focused **2 files / 23 tests**;
+  Tier-1 **132 files / 1730 tests**, build, OFF info (`9c89c741…`), and diff
+  check green. Code commits `abc915f` + repair `50e2332`; pixel diff N/A.
 
 ---
 ## 393 — Gate-3 attack-canceler FROZEN source phase integrated
