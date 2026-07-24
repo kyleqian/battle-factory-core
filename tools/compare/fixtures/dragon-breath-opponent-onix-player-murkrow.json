@@ -1,0 +1,42 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-dragon-breath-opponent-onix-player-murkrow.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "ONIX (opponent-front) -> MURKROW (player-back)",
+  "move": "DRAGON_BREATH",
+  "denseWindow": {"startFrame": 452, "endFrame": 512},
+  "appStage": {"firstFramePresentationAge": 1},
+  "attacker": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": {"x": 144, "y": 10},
+      "animationCenter": {"x": 176, "y": 42},
+      "battlePositionCenter": {"x": 176, "y": 40}
+    }
+  },
+  "target": {
+    "species": "MURKROW",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": {"x": 40, "y": 49},
+      "animationCenter": {"x": 72, "y": 97},
+      "battlePositionCenter": {"x": 72, "y": 80}
+    }
+  },
+  "animationProfile": {
+    "attackerCenter": {"x": 176, "y": 42},
+    "targetCenter": {"x": 72, "y": 97},
+    "attackerSide": "opponent",
+    "duration": 20,
+    "targetSubpriority": 30,
+    "subpriorityOffset": 2,
+    "spawnCount": 11,
+    "spawnInterval": 4
+  },
+  "acceptance": {
+    "status": "component-exact",
+    "result": "61/61 dense OAM/component frames; full framebuffer not yet claimed."
+  }
+}

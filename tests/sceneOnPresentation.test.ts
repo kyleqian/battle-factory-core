@@ -22,9 +22,13 @@ import {
   sceneOnFaintAttackView,
   sceneOnDoubleTeamView,
   sceneOnEndeavorView,
+  sceneOnDragonBreathView,
   sceneOnFirePunchView,
   sceneOnRockSlideView,
 } from "../src/engine/sceneOnPresentation.ts";
+import {
+  CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
+} from "../src/engine/dragonBreath.ts";
 import { actionMenuDisplayAtAge } from "../src/engine/battleMenu.ts";
 
 function createPortableStage() {
@@ -36,6 +40,43 @@ function createPortableStage() {
 }
 
 describe("relative Battle Scene ON move presentation", () => {
+  it("threads DRAGON_BREATH geometry through the shared seam in both orientations", () => {
+    const playerStage = createSceneOnMovePresentation({
+      move: "DRAGON_BREATH",
+      ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+      animationProfile: CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
+    });
+    expect(sceneOnDragonBreathView({ ...playerStage, age: 1 }).fireSprites[0])
+      .toMatchObject({
+        centerX: 77,
+        centerY: 86,
+        hFlip: true,
+        vFlip: true,
+        subpriority: 38,
+      });
+
+    const opponentStage = createSceneOnMovePresentation({
+      move: "DRAGON_BREATH",
+      ...GROVYLE_TO_ONIX_FIRE_PUNCH_GEOMETRY,
+      animationProfile: {
+        ...CANONICAL_DRAGON_BREATH_FIRE_GEOMETRY,
+        attackerCenter: { x: 176, y: 44 },
+        targetCenter: { x: 72, y: 88 },
+        attackerSide: "opponent",
+        targetSubpriority: 30,
+      },
+    });
+    expect(sceneOnDragonBreathView({ ...opponentStage, age: 1 }).fireSprites[0])
+      .toMatchObject({
+        centerX: 171,
+        centerY: 46,
+        hFlip: false,
+        vFlip: false,
+        subpriority: 28,
+        pa: 704,
+      });
+  });
+
   it("restarts the generic action-menu bounce from a relative reveal age", () => {
     expect(actionMenuDisplayAtAge(362, 363)).toEqual({
       visible: false,
