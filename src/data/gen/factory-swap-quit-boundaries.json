@@ -1,0 +1,69 @@
+{
+  "profile": "battle-scene-off",
+  "canonicalTrace": "tools/compare/traces-groundtruth/battle1-swapyes-a.json",
+  "generator": "tools/probe/derive-swap-quit-trace.mjs",
+  "ramProbe": "tools/probe/dump-swap-quit.py",
+  "scope": "player-picker B quit; source-proven shared CANCEL/enemy variants",
+  "precondition": {
+    "playerPicker": { "inEnemyScreen": false, "cursorPos": 0, "actionsCount": 4 },
+    "playerParty0": { "species": "ONIX", "speciesId": 95, "personality": 1205102525, "friendship": 0 }
+  },
+  "edgePairs": {
+    "pickerB": {
+      "rejected": { "tick": 29650, "buttons": ["B"], "reason": "offer-YES entry fade still owns input" },
+      "accepted": { "tick": 29702, "buttons": ["B"], "result": "Swap_Task_ScreenInfoTransitionOut state 0" }
+    },
+    "quitPromptA": {
+      "rejected": { "tick": 29737, "buttons": ["A"], "reason": "state-5 readiness is installed after that frame" },
+      "accepted": { "tick": 29738, "buttons": ["A"], "result": "default YES -> Swap_HandleQuitSwappingResponse" }
+    }
+  },
+  "timeline": {
+    "transitionOut": 29702,
+    "firstTransitionFramebufferChange": { "tick": 29716, "sha256": "3021c0ceb1e2522dbed0fd78c31291524ea07b9da46064cfb6c7685d4ebae142" },
+    "quitPrinter": { "tick": 29735, "sha256": "9da2316f5725ae4c78414d614eee787c5dd21b6807ae5ebeb65062157d6e0408" },
+    "yesNoDraw": { "tick": 29736, "taskState": 4, "sha256": "7b78031d6f061c3f7609cb201bad71a2e911315e4d234a0e9535a45ae000cd64" },
+    "yesNoInputReady": { "tick": 29737, "taskState": 5, "cursor": "YES", "sha256": "4e16acf986f25e29513ffbea0f3c077fe76b2d76dfc8a8bd7e22054cfb069cae" }
+  },
+  "branches": {
+    "yes": {
+      "input": { "tick": 29738, "buttons": ["A"], "default": "YES" },
+      "response": 29738,
+      "exit": 29739,
+      "fieldCallback": 29760,
+      "specialVarResult": true,
+      "partyMutation": false,
+      "playerParty0": { "species": "ONIX", "speciesId": 95, "personality": 1205102525, "friendship": 0 }
+    },
+    "no": {
+      "input": [{ "tick": 29738, "buttons": ["DOWN"] }, { "tick": 29758, "buttons": ["A"] }],
+      "transitionIn": 29759,
+      "pickerInputReady": 29796,
+      "specialVarResult": true,
+      "partyMutation": false
+    },
+    "b": {
+      "input": { "tick": 29758, "buttons": ["B"] },
+      "transitionIn": 29759,
+      "pickerInputReady": 29796,
+      "specialVarResult": true,
+      "partyMutation": false
+    }
+  },
+  "rng": {
+    "ownership": "VBlank/sprite activity continues; quit owns no extra party/selection RNG operation",
+    "acceptedPickerB": { "tick": 29702, "value": "0xfe6d3280" },
+    "promptReady": { "tick": 29737, "value": "0x79a7c9b5" },
+    "returnPicker": { "tick": 29796, "value": "0x989e3bd3" }
+  },
+  "sourceSharedVariants": {
+    "playerCancel": "Swap_ActionCancel installs the same Swap_AskQuitSwapping follow-up behind Swap_Task_ScreenInfoTransitionOut.",
+    "enemyB": "Swap_Task_HandleChooseMons has one B branch regardless of inEnemyScreen.",
+    "enemyCancel": "The enemy CANCEL action is also Swap_ActionCancel; its only presentation difference is the two-button transition-out/in chrome."
+  },
+  "limits": {
+    "noPngOrRgbAssets": true,
+    "noProductionRendererUse": true,
+    "framebufferEvidence": "raw RGB888 SHA-256 only"
+  }
+}
