@@ -1,3 +1,26 @@
+## 395 — Gate-3 attack-canceler RECHARGE source phase integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe executable
+  opcodes. `AtkCanceler_UnableToUseMove` now has immutable FLAGS, ASLEEP,
+  FROZEN, TRUANT, and RECHARGE decisions only; opcode 0 remains unregistered
+  and no phase loop exists.
+- **Did:** audited `DisableStruct::u8 rechargeTimer` and ported the exact
+  `STATUS2_RECHARGE` branch: clear only recharge, zero its timer, invoke
+  `CancelMultiTurnMoves`, OR unable-to-use, and hand off
+  `BattleScript_MoveUsedMustRecharge` with effect 1. The untaken branch
+  preserves those fields with effect 0. Every path advances once.
+- **Next:** implement `CANCELER_FLINCH` only after its exact status,
+  multi-turn cancellation, script/message, marker, effect, and receipt
+  ownership is explicit. Do not loop phases or register opcode 0.
+- **Notes:** all four attacker ids, set/unset recharge, timer boundaries
+  **0/255**, unrelated status bits, already-zero/helper identities, marker,
+  script-owned `STRINGID_PKMNMUSTRECHARGE`, missing roles, invalid u8/PC
+  widths, determinism, and deep freezing are pinned. The source has no
+  `B_MSG_MUST_RECHARGE` chooser write. Focused **4 files / 39 tests**;
+  Tier-1 **133 files / 1734 tests**, build, OFF info (`9c89c741…`), and diff
+  check green. Code commits `d3a42c6` + repair `6b98729`; pixel diff N/A.
+
+---
 ## 393 — Gate-3 attack-canceler FROZEN source phase integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe executable
