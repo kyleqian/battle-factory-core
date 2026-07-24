@@ -925,11 +925,12 @@ S10 has six ordered completion gates:
    A separate explicit `mechanicLab` mode must provide a complete **pre-battle
    Pokémon builder**, not a live battle-state editor. Per party Pokémon it can
    select species, level, nature, six IVs, six EVs (including legal per-stat
-   and total bounds), moves, PP Ups/current PP where applicable, held item,
+   and total bounds), moves, PP Ups, held item,
    species-valid ability slot, friendship, and mechanic-relevant personality
    properties such as gender or shininess. The stock ROM's Pokémon
-   construction path must derive types, ability, stats, max HP, gender, PP,
-   and the battle-ready structures before normal battle initialization.
+   construction path must derive types, ability, stats, max HP, gender,
+   maximum/current PP, and the battle-ready structures before normal battle
+   initialization.
    Action plans/controller input may then select moves, items, or switches.
 
    Neither mode may inject transient battle state: HP damage, permanent
@@ -941,13 +942,13 @@ S10 has six ordered completion gates:
    never trace ABI.
 
    **Battle-lab v1 groundwork landed (2026-07-23, umbrella harness
-   `56c21c5`, hardened through `4e634cb`):** additive
+   `56c21c5`, hardened through `5e158b2`):** additive
    `/v1/battle-lab/run` now stages arbitrary legal
    Level-50 trainer/set combinations through the real rental constructor and
    `FillFactoryFrontierTrainerParty`, captures typed battle state/RNG beside
    pixels, accepts source-accurate past-rental ranks and nontrivial candidate
    selection order, and keeps canonical `/v1/run` hashes unchanged. Its current
-   interim `mechanicLab` can alter active loadout fields (moves/PP/item/
+   interim `mechanicLab` can alter active loadout fields (moves/PP Ups/item/
    ability/types/friendship), but the former HP/status/stage/volatile/weather/
    side-condition injector was explicitly retired by user decision on
    2026-07-24. Live Scene-OFF and Scene-ON smoke traces now create Leech Seed,
