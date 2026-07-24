@@ -11,10 +11,13 @@ import {
   GROVYLE_TO_ONIX_FIRE_PUNCH_PROFILE,
   GROVYLE_TO_ONIX_ROCK_SLIDE_PRESENTATION,
   GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,
+  ONIX_TO_GROVYLE_DOUBLE_TEAM_PRESENTATION,
+  ONIX_TO_GROVYLE_DOUBLE_TEAM_PROFILE,
   ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
   ONIX_TO_GROVYLE_FAINT_ATTACK_PROFILE,
   ONIX_TO_GROVYLE_FIRE_PUNCH_PROFILE,
   sceneOnFaintAttackView,
+  sceneOnDoubleTeamView,
   sceneOnFirePunchView,
   sceneOnRockSlideView,
 } from "../src/engine/sceneOnPresentation.ts";
@@ -186,6 +189,44 @@ describe("relative Battle Scene ON move presentation", () => {
     expect(stage.config.animationProfile).toEqual(profileBefore);
     expect(stage.config.animationProfile).toBe(
       GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,
+    );
+  });
+
+  it("ports DOUBLE TEAM's clone and stat-banner reducers to player-back ONIX", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "DOUBLE_TEAM",
+      ...ONIX_TO_GROVYLE_FIRE_PUNCH_GEOMETRY,
+      ...ONIX_TO_GROVYLE_DOUBLE_TEAM_PRESENTATION,
+    });
+    const profileBefore = structuredClone(stage.config.animationProfile);
+
+    expect(sceneOnDoubleTeamView({ ...stage, age: 1 }).clones).toBeNull();
+    expect(sceneOnDoubleTeamView({ ...stage, age: 2 }).clones).toEqual({
+      a: 0,
+      b: 0,
+    });
+    expect(sceneOnDoubleTeamView({ ...stage, age: 129 }).clones).toEqual({
+      a: 19,
+      b: -20,
+    });
+    expect(sceneOnDoubleTeamView({ ...stage, age: 130 }).clones).toBeNull();
+    expect(sceneOnDoubleTeamView({ ...stage, age: 163 }).statsBanner).toEqual({
+      eva: 0,
+      bg1Y: 0,
+    });
+    expect(sceneOnDoubleTeamView({ ...stage, age: 186 }).statsBanner).toEqual({
+      eva: 10,
+      bg1Y: 60,
+    });
+    expect(sceneOnDoubleTeamView({ ...stage, age: 229 }).statsBanner).toEqual({
+      eva: 0,
+      bg1Y: 180,
+    });
+    expect(sceneOnDoubleTeamView({ ...stage, age: 230 }).statsBanner).toBeNull();
+    expect(sceneOnDoubleTeamView(stage).frontClone).toBe("a");
+    expect(stage.config.animationProfile).toEqual(profileBefore);
+    expect(stage.config.animationProfile).toBe(
+      ONIX_TO_GROVYLE_DOUBLE_TEAM_PROFILE,
     );
   });
 

@@ -19,7 +19,9 @@ import {
   type FaintAttackBgState,
 } from "./faintAttack.ts";
 import {
+  doubleTeamAnimationAtAge,
   rockSlideAnimationAtAge,
+  type DoubleTeamAnimationProfile,
   type RockSlideAnimationProfile,
 } from "./battleMenu.ts";
 
@@ -85,10 +87,22 @@ export interface SceneOnRockSlideConfig {
   readonly moveTextStartAge?: number;
 }
 
+export interface SceneOnDoubleTeamConfig {
+  readonly move: "DOUBLE_TEAM";
+  readonly attacker: SceneOnPresentationBattler;
+  /** Opposing field battler; DOUBLE TEAM's actual effect battler is attacker. */
+  readonly target: SceneOnPresentationBattler;
+  readonly animationProfile: Readonly<DoubleTeamAnimationProfile>;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Relative first printer age; negative means text predates this seam. */
+  readonly moveTextStartAge?: number;
+}
+
 export type SceneOnMoveConfig =
   | SceneOnFirePunchConfig
   | SceneOnFaintAttackConfig
-  | SceneOnRockSlideConfig;
+  | SceneOnRockSlideConfig
+  | SceneOnDoubleTeamConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -127,6 +141,15 @@ export interface SceneOnRockSlideView {
   readonly targetInvisible: boolean;
   readonly healthboxY2: number;
   readonly rocks: ReturnType<typeof rockSlideAnimationAtAge>["rocks"];
+}
+
+export interface SceneOnDoubleTeamView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly clones: Readonly<{ a: number; b: number }> | null;
+  readonly statsBanner: Readonly<{ eva: number; bg1Y: number }> | null;
+  readonly frontClone: "a" | "b";
 }
 
 function assertIntegerPoint(
@@ -265,6 +288,22 @@ export function sceneOnRockSlideView(
     attacker,
     target,
     ...animation,
+  };
+}
+
+export function sceneOnDoubleTeamView(
+  state: SceneOnMovePresentationState,
+): SceneOnDoubleTeamView {
+  if (state.config.move !== "DOUBLE_TEAM") {
+    throw new Error(`expected DOUBLE_TEAM presentation, got ${state.config.move}`);
+  }
+  const { attacker, target, animationProfile } = state.config;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...doubleTeamAnimationAtAge(state.age, animationProfile),
+    frontClone: animationProfile.frontClone,
   };
 }
 
@@ -410,5 +449,34 @@ export const GROVYLE_TO_ONIX_ROCK_SLIDE_PRESENTATION = {
   moveTextStartAge: -30,
 } as const satisfies Pick<
   SceneOnRockSlideConfig,
+  "animationProfile" | "fieldProfile" | "moveTextStartAge"
+>;
+
+/**
+ * Stock-controller profile for player-back ONIX's staged DOUBLE TEAM.
+ * Age zero is oracle frame 2337, the first clone-task RAM frame. The live
+ * `sSpriteOrder` places clone A (slot 3) in front of clone B (slot 4).
+ */
+export const ONIX_TO_GROVYLE_DOUBLE_TEAM_PROFILE:
+  Readonly<DoubleTeamAnimationProfile> = Object.freeze({
+    cloneAnchorAge: 0,
+    cloneVisibleStartAge: 2,
+    cloneVisibleEndAge: 129,
+    statsBannerStartAge: 163,
+    statsBannerEndAge: 229,
+    statsBannerBg1YAnchorAge: 166,
+    frontClone: "a",
+  });
+
+export const ONIX_TO_GROVYLE_DOUBLE_TEAM_PRESENTATION = {
+  animationProfile: ONIX_TO_GROVYLE_DOUBLE_TEAM_PROFILE,
+  fieldProfile: Object.freeze({
+    playerHp: 117,
+    opponentHp: 143,
+    playerStatus: "none",
+  }),
+  moveTextStartAge: -28,
+} as const satisfies Pick<
+  SceneOnDoubleTeamConfig,
   "animationProfile" | "fieldProfile" | "moveTextStartAge"
 >;

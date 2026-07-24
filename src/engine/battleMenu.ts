@@ -1292,6 +1292,67 @@ export function statsBannerBg1Y(t: number, pressTick: number): number {
   return Math.max(0, Math.min(180, 3 * d));
 }
 
+export interface DoubleTeamAnimationProfile {
+  readonly cloneAnchorAge: number;
+  readonly cloneVisibleStartAge: number;
+  readonly cloneVisibleEndAge: number;
+  readonly statsBannerStartAge: number;
+  readonly statsBannerEndAge: number;
+  readonly statsBannerBg1YAnchorAge: number;
+  readonly frontClone: "a" | "b";
+}
+
+export interface DoubleTeamAnimationState {
+  readonly clones: Readonly<{ a: number; b: number }> | null;
+  readonly statsBanner: Readonly<{ eva: number; bg1Y: number }> | null;
+}
+
+/**
+ * Source-timed DOUBLE TEAM body at a presentation-relative age. The clone
+ * reducer is the decoded `AnimDoubleTeam` loop; the stat banner is the
+ * shared `General_StatsChange` increase profile. Profiles only select local
+ * epochs and the live `sSpriteOrder` tie winner.
+ */
+export function doubleTeamAnimationAtAge(
+  age: number,
+  profile: Readonly<DoubleTeamAnimationProfile>,
+): DoubleTeamAnimationState {
+  let clones: DoubleTeamAnimationState["clones"] = null;
+  if (
+    age >= profile.cloneVisibleStartAge
+    && age <= profile.cloneVisibleEndAge
+  ) {
+    const n = age - profile.cloneAnchorAge;
+    clones = {
+      a: DOUBLE_TEAM_CLONE_OFFSETS_A[n] ?? 0,
+      b: DOUBLE_TEAM_CLONE_OFFSETS_B[n] ?? 0,
+    };
+  }
+
+  let statsBanner: DoubleTeamAnimationState["statsBanner"] = null;
+  if (
+    age >= profile.statsBannerStartAge
+    && age <= profile.statsBannerEndAge
+  ) {
+    const d = age - profile.statsBannerStartAge;
+    const eva = d <= 4
+      ? 0
+      : d <= 22
+        ? Math.min(10, Math.floor((d - 5) / 2) + 1)
+        : d <= 44
+          ? 10
+          : Math.max(0, 10 - (Math.floor((d - 45) / 2) + 1));
+    statsBanner = {
+      eva,
+      bg1Y: Math.max(
+        0,
+        Math.min(180, 3 * (age - profile.statsBannerBg1YAnchorAge)),
+      ),
+    };
+  }
+  return { clones, statsBanner };
+}
+
 /**
  * S7 slice N-4 rung (a) (docs/turn6-notes.md §6, docs/battle-turn-notes.md
  * §29's "OTHER thing found"): the SAME generic `StatsChangeAnimation_Step1-3`

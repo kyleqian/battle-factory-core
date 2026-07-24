@@ -563,6 +563,7 @@ import {
 } from "./battle2Turn1.ts";
 import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import {
+  sceneOnDoubleTeamView,
   sceneOnFaintAttackView,
   sceneOnFirePunchView,
   sceneOnRockSlideView,
@@ -3751,6 +3752,19 @@ function getDoubleTeamClonePalette(): RgbColor[] {
   return doubleTeamClonePaletteCache;
 }
 
+let onixDoubleTeamClonePaletteCache: RgbColor[] | null = null;
+function getOnixDoubleTeamClonePalette(): RgbColor[] {
+  if (onixDoubleTeamClonePaletteCache) return onixDoubleTeamClonePaletteCache;
+  onixDoubleTeamClonePaletteCache = onixBackSprite.palette.map((c) =>
+    c ? {
+      r: blendComponentToward(c.r, 0, 11),
+      g: blendComponentToward(c.g, 0, 11),
+      b: blendComponentToward(c.b, 0, 11),
+    } : c,
+  );
+  return onixDoubleTeamClonePaletteCache;
+}
+
 /** S7 slice R rung (b) mechanism 4 (docs/aerial-ace-notes.md's own continuation section): `BlendPalette` toward RGB_BLACK at coefficient 10 - the exact RAM-read coefficient for the palette-pulse's own darkened plateau (`turn10AerialAcePaletteDarkenCoeff`), same shape as `getDoubleTeamClonePalette`. */
 function darkenPaletteToward10(palette: readonly (RgbColor | undefined)[]): RgbColor[] {
   return palette.map((c) => (c ? { r: blendComponentToward(c.r, 0, 10), g: blendComponentToward(c.g, 0, 10), b: blendComponentToward(c.b, 0, 10) } : (c as unknown as RgbColor)));
@@ -3987,9 +4001,25 @@ function statAnimBg1PixelAt(tilemap: Tilemap, tileset: Tileset, palette: RgbColo
 function drawStatsBanner(fb: Uint8Array, t: number, pressTick: number): boolean {
   const eva = statsBannerEva(t, pressTick);
   if (eva === null) return false;
-  const evb = 16 - eva;
   const bg1Y = statsBannerBg1Y(t, pressTick);
-  const { tileset } = grovyleFrontSprite;
+  drawStatIncreaseBannerForBattler(
+    fb,
+    grovyleFrontSprite.tileset,
+    GROVYLE_CORNER,
+    eva,
+    bg1Y,
+  );
+  return true;
+}
+
+function drawStatIncreaseBannerForBattler(
+  fb: Uint8Array,
+  tileset: Tileset,
+  corner: Readonly<{ x: number; y: number }>,
+  eva: number,
+  bg1Y: number,
+): void {
+  const evb = 16 - eva;
   const bgTileset = statAnimBanner.tileset;
   const bgTilemap = statAnimBanner.tilemaps.increase;
   const bgPalette = statAnimBanner.palettes.evasion;
@@ -4000,8 +4030,8 @@ function drawStatsBanner(fb: Uint8Array, t: number, pressTick: number): boolean 
       for (let py = 0; py < 8; py += 1) {
         for (let px = 0; px < 8; px += 1) {
           if (tile[py * 8 + px] === 0) continue;
-          const x = GROVYLE_CORNER.x + tx * 8 + px;
-          const y = GROVYLE_CORNER.y + ty * 8 + py;
+          const x = corner.x + tx * 8 + px;
+          const y = corner.y + ty * 8 + py;
           if (x < 0 || x >= 240 || y < 0 || y >= 160) continue;
           const bg1c = statAnimBg1PixelAt(bgTilemap, bgTileset, bgPalette, x, y + bg1Y);
           if (!bg1c) continue;
@@ -4013,7 +4043,6 @@ function drawStatsBanner(fb: Uint8Array, t: number, pressTick: number): boolean 
       }
     }
   }
-  return true;
 }
 
 const OPP_SUMMARY_ICON_BASE = { x: 26, y: 32 };
@@ -13699,6 +13728,100 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "DOUBLE_TEAM") {
+    const view = sceneOnDoubleTeamView(state);
+    const { attacker, target } = view;
+    if (
+      attacker.species !== "ONIX"
+      || attacker.geometry.side !== "player"
+      || target.species !== "GROVYLE"
+      || target.geometry.side !== "opponent"
+    ) {
+      throw new Error(
+        `unsupported staged DOUBLE_TEAM pair ${attacker.species}->${target.species}`,
+      );
+    }
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      grovyleFrontSprite.tileset,
+      grovyleFrontSprite.palette,
+      target.geometry.spriteCorner.x,
+      target.geometry.spriteCorner.y,
+    );
+    if (view.clones) {
+      const palette = getOnixDoubleTeamClonePalette();
+      const drawClone = (offset: number) => drawSpriteSheetBlended(
+        fb,
+        onixBackSprite.tileset,
+        palette,
+        attacker.geometry.spriteCorner.x + offset,
+        attacker.geometry.spriteCorner.y,
+        12,
+        8,
+      );
+      if (view.frontClone === "a") {
+        drawClone(view.clones.b);
+        drawClone(view.clones.a);
+      } else {
+        drawClone(view.clones.a);
+        drawClone(view.clones.b);
+      }
+    } else {
+      drawSpriteSheet(
+        fb,
+        onixBackSprite.tileset,
+        onixBackSprite.palette,
+        attacker.geometry.spriteCorner.x,
+        attacker.geometry.spriteCorner.y,
+      );
+    }
+    if (view.statsBanner) {
+      drawStatIncreaseBannerForBattler(
+        fb,
+        onixBackSprite.tileset,
+        attacker.geometry.spriteCorner,
+        view.statsBanner.eva,
+        view.statsBanner.bg1Y,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      opponentHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      onixPlayerHealthboxContentForState(
+        state.config.fieldProfile.playerHp,
+        state.config.fieldProfile.playerStatus,
+      ),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    const line1 = `${attacker.species} used`;
+    const line2 = "DOUBLE TEAM!";
+    const textStartAge = state.config.moveTextStartAge ?? -1;
+    drawMessageTextLines(
+      fb,
+      line1,
+      line2,
+      Math.min(line1.length + line2.length, view.age - textStartAge + 1),
+    );
+    return;
+  }
+
   if (state.config.move === "ROCK_SLIDE") {
     const view = sceneOnRockSlideView(state);
     const { attacker, target } = view;
