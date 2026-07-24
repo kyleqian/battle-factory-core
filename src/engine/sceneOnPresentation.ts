@@ -112,6 +112,12 @@ export interface SceneOnQuickAttackConfig {
     readonly currentMoveResetAge: number;
   }>;
   readonly moveTextStartAge: number;
+  /**
+   * Move-animation script age displayed at presentation age zero. The
+   * player-side move-used line omits "Foe " and releases the body four
+   * frames earlier than the opponent-side printer.
+   */
+  readonly animationAgeOffset?: number;
 }
 
 export interface SceneOnFirePunchConfig {
@@ -360,6 +366,7 @@ export interface SceneOnQuickAttackView {
   readonly attackerOffset: QuickAttackOffset;
   readonly afterimages: readonly QuickAttackAfterimage[];
   readonly targetShakeX2: number;
+  readonly targetBaseX2: number;
   readonly impactVisible: boolean;
   readonly healthboxY2: number;
   readonly targetInvisible: boolean;
@@ -776,7 +783,7 @@ export function sceneOnQuickAttackView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...quickAttackAnimationAtAge(
-      state.age,
+      state.age + (state.config.animationAgeOffset ?? 0),
       state.config.attacker.geometry.side,
     ),
     ...hitReaction,
@@ -860,6 +867,17 @@ export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION = {
   animationAgeOffset: 4,
 } as const satisfies Pick<
   SceneOnFeatherDanceConfig,
+  "attacker" | "target" | "animationAgeOffset"
+>;
+
+export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_QUICK_ATTACK_PRESENTATION = {
+  attacker:
+    PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.attacker,
+  target:
+    PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.target,
+  animationAgeOffset: 4,
+} as const satisfies Pick<
+  SceneOnQuickAttackConfig,
   "attacker" | "target" | "animationAgeOffset"
 >;
 

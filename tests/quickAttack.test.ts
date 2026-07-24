@@ -10,6 +10,7 @@ import {
 } from "../src/engine/quickAttack.ts";
 import {
   createSceneOnMovePresentation,
+  PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_QUICK_ATTACK_PRESENTATION,
   PIDGEOTTO_TO_ONIX_QUICK_ATTACK_PRESENTATION,
   sceneOnQuickAttackView,
 } from "../src/engine/sceneOnPresentation.ts";
@@ -102,6 +103,79 @@ describe("portable QUICK ATTACK presentation", () => {
         },
       },
     });
+  });
+
+  it("pins source-derived player-back Pidgeotto and opponent-front Onix geometry", () => {
+    expect(PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_QUICK_ATTACK_PRESENTATION)
+      .toEqual({
+        attacker: {
+          species: "PIDGEOTTO",
+          geometry: {
+            side: "player",
+            spriteCorner: { x: 40, y: 60 },
+            animationCenter: { x: 72, y: 100 },
+            battlePositionCenter: { x: 72, y: 80 },
+          },
+        },
+        target: {
+          species: "ONIX",
+          geometry: {
+            side: "opponent",
+            spriteCorner: { x: 145, y: 10 },
+            animationCenter: { x: 176, y: 42 },
+            battlePositionCenter: { x: 176, y: 40 },
+          },
+        },
+        animationAgeOffset: 4,
+      });
+  });
+
+  it("pins the opposite controller clocks without calculating its 117→111 outcome", () => {
+    const controllerProfile = Object.freeze({
+      targetHpBefore: 117,
+      targetHpAfter: 111,
+      hitReactionFirstAge: 77,
+      hpDrainFirstAge: 112,
+      resultTextFirstAge: 123,
+      resultKind: "notVeryEffective" as const,
+      currentMoveResetAge: 220,
+    });
+    const stage = createSceneOnMovePresentation({
+      move: "QUICK_ATTACK",
+      ...PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_QUICK_ATTACK_PRESENTATION,
+      fieldProfile: Object.freeze({
+        playerHp: 156,
+        opponentHp: 117,
+        playerStatus: "none" as const,
+        playerGender: "female" as const,
+        opponentGender: "male" as const,
+      }),
+      controllerProfile,
+      moveTextStartAge: 5,
+    });
+    const before = structuredClone(stage.config);
+
+    expect(sceneOnQuickAttackView({ ...stage, age: 76 })).toMatchObject({
+      healthboxY2: 0,
+      targetInvisible: false,
+      displayedTargetHp: 117,
+    });
+    expect(sceneOnQuickAttackView({ ...stage, age: 77 })).toMatchObject({
+      healthboxY2: 1,
+      targetInvisible: false,
+    });
+    expect(sceneOnQuickAttackView({ ...stage, age: 112 }).displayedTargetHp)
+      .toBe(116);
+    expect(sceneOnQuickAttackView({ ...stage, age: 117 }).displayedTargetHp)
+      .toBe(111);
+    expect(sceneOnQuickAttackView({ ...stage, age: 123 }).resultText)
+      .toEqual({ line: "It’s not very effective…", visibleChars: 1 });
+    expect(sceneOnQuickAttackView({ ...stage, age: 219 }).currentMove)
+      .toBe("QUICK_ATTACK");
+    expect(sceneOnQuickAttackView({ ...stage, age: 220 }).currentMove)
+      .toBeNull();
+    expect(stage.config).toEqual(before);
+    expect(stage.config.controllerProfile).toBe(controllerProfile);
   });
 
   it("reads the controller-owned 117→110 outcome without mutating it", () => {

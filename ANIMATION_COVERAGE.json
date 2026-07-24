@@ -42,9 +42,9 @@
     {
       "move": "MOVE_QUICK_ATTACK",
       "status": "partial",
-      "covered": ["opponent-front PIDGEOTTO to player-back ONIX", "portable mechanicLab opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-225 / oracle frames 46-264 (219/219): complete kickoff printer, source-relative elliptical travel, all four blended afterimages, impact, six-cycle target-shake display latch, move-script teardown, generic hit healthbox wobble and target blink, immutable 117→110 HP drain, fully typed and held not-very-effective result, animation/controller command release, and gCurrentMove cleanup to MOVE_NONE at the stable pre-next-move boundary through the shared Scene-ON adapter; controller-relative clocks, immutable HP endpoints, and explicit geometry are Tier-1 pinned"],
-      "evidence": ["tools/compare/traces/turn9-quickattack.json", "tools/battle-lab/mechanic-quick-attack-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-pidgeotto-onix.json", "tools/compare/quickAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py"],
-      "remaining": "Independently prove the source-required player-back attacker orientation through the same complete dense move/controller boundary before exact promotion."
+      "covered": ["opponent-front PIDGEOTTO to player-back ONIX", "portable mechanicLab opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-225 / oracle frames 46-264 (219/219): complete kickoff printer, source-relative elliptical travel, all four blended afterimages, impact, six-cycle target-shake display latch, move-script teardown, generic hit healthbox wobble and target blink, immutable 117→110 HP drain, fully typed and held not-very-effective result, animation/controller command release, and gCurrentMove cleanup to MOVE_NONE at the stable pre-next-move boundary through the shared Scene-ON adapter; controller-relative clocks, immutable HP endpoints, and explicit geometry are Tier-1 pinned", "portable mechanicLab player-back PIDGEOTTO to opponent-front ONIX: exact kickoff/orientation prefix at relative ages 7-47 / oracle frames 46-86 (41/41), plus exact post-body generic hit, immutable 117→111 HP drain, result, command release, and MOVE_NONE cleanup at relative ages 63-220 / oracle frames 102-259 (158/158); the contiguous window is 200/214 and remains partial"],
+      "evidence": ["tools/compare/traces/turn9-quickattack.json", "tools/battle-lab/mechanic-quick-attack-pidgeotto-onix.json", "tools/battle-lab/mechanic-quick-attack-player-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-player-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-player-pidgeotto-onix-controller.json", "tools/compare/quickAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py"],
+      "remaining": "Close the player-back monbg BG1-scroll / blended-trace OBJ overlap at oracle frames 87-101 (14 mismatches; frame 100 already exact), then prove the contiguous 46-259 window before exact promotion."
     },
     {
       "move": "MOVE_AERIAL_ACE",
@@ -134,7 +134,7 @@
         "MOVE_QUICK_ATTACK",
         "MOVE_AERIAL_ACE"
       ],
-      "goal": "QUICK ATTACK now proves the relative travel/afterimage/impact/shake chassis plus complete generic hit/HP/result/current-move cleanup in a portable opponent-front case at 219/219 through the stable pre-next-move boundary; its player-back attacker orientation remains. AERIAL ACE is batch-checked at 93/93 canonical but retains its independent cutting-slice/palette choreography and portability remainder."
+      "goal": "QUICK ATTACK proves the complete opponent-front case at 219/219 and the required player-back kickoff plus complete controller suffix at 41/41 + 158/158; the player-back monbg/trace overlap at frames 87-101 remains before exact promotion. AERIAL ACE is batch-checked at 93/93 canonical but retains its independent cutting-slice/palette choreography and portability remainder."
     }
   ],
   "variantAudits": {

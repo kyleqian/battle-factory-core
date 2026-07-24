@@ -38,25 +38,20 @@ remainder.
 
 ## Current handoff
 
-- **State:** **6 exact / 7 partial / 263 unsupported**. QUICK ATTACK now has
-  a portable complete move/controller window in its established opponent-front
-  orientation through the stable pre-next-move boundary; it remains partial.
-- **Did:** staged legal Level-50 opponent-front PIDGEOTTO→player-back ONIX
-  through mechanicLab using `ppUps:[0,0,0,0]`; extended the shared Scene-ON
-  seam from body teardown through generic healthbox wobble/target blink,
-  source-relative 117→110 HP display drain, the fully typed and held
-  not-very-effective result, command release, and `gCurrentMove` cleanup.
-  Tier-1 pins relative clocks and immutable controller inputs.
-- **Evidence:** `quick-attack-pidgeotto-onix.json` is **71/71 exact** at
-  oracle frames 46-116 / ages 7-77 for the original body prefix and now
-  **219/219 exact** at frames 46-264 / ages 7-225 for the contiguous complete
-  opponent-front window. Frame 264 is the `MOVE_NONE` cleanup boundary;
-  frame 265 installs the player's next move and is outside this acceptance
-  unit.
-  Canonical QUICK ATTACK remains **169/169** and sibling AERIAL ACE
-  **93/93**. Exact regressions remain green: FEATHER DANCE **400/400 +
-  400/400**, ICE PUNCH **462/462 + 1294/1294**, FIRE PUNCH **225/225 +
-  277/277**.
-- **Next:** independently stage and densely prove player-back PIDGEOTTO →
-  opponent-front ONIX through the same complete age-225 boundary before
-  promoting QUICK ATTACK to exact.
+- **State:** **6 exact / 7 partial / 263 unsupported**. QUICK ATTACK's required
+  player-back orientation is staged and controller-complete, but a bounded
+  opposite-side BG/OBJ body overlap keeps the move partial.
+- **Did:** staged legal Level-50 player-back PIDGEOTTO→opponent-front ONIX
+  through mechanicLab with `ppUps:[0,0,0,0]`; generalized side geometry,
+  back/front assets, healthbox orientation, immutable 117→111 display drain,
+  result, release, and `gCurrentMove` cleanup. Tier-1 pins geometry, side
+  travel, controller-relative clocks, and immutable inputs.
+- **Evidence:** opposite prefix frames **46-86 / ages 7-47 are 41/41 exact**;
+  the post-body/controller window frames **102-259 / ages 63-220 is 158/158
+  exact**, through `MOVE_NONE` at frame 259. The attempted contiguous 46-259
+  window is **200/214**; all 14 diffs are frames 87-99 and 101, confined to
+  the player `monbg` real sprite, blended trace OBJs, impact/target ordering,
+  with frame 100 exact. Established opponent-front QUICK remains **219/219**.
+- **Next:** reproduce frames **87-101** from `monbg` BG1 scroll plus
+  `AnimTask_TraceMonBlended` player-back OBJ priority/lives, then rerun the
+  contiguous 214-frame window before promoting QUICK ATTACK to exact.

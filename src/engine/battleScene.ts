@@ -13890,16 +13890,27 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "QUICK_ATTACK") {
     const view = sceneOnQuickAttackView(state);
     const { attacker, target } = view;
-    if (
-      attacker.species !== "PIDGEOTTO"
-      || attacker.geometry.side !== "opponent"
-      || target.species !== "ONIX"
-      || target.geometry.side !== "player"
-    ) {
+    const originalOrientation =
+      attacker.species === "PIDGEOTTO"
+      && attacker.geometry.side === "opponent"
+      && target.species === "ONIX"
+      && target.geometry.side === "player";
+    const oppositeOrientation =
+      attacker.species === "PIDGEOTTO"
+      && attacker.geometry.side === "player"
+      && target.species === "ONIX"
+      && target.geometry.side === "opponent";
+    if (!originalOrientation && !oppositeOrientation) {
       throw new Error(
         `unsupported staged QUICK_ATTACK pair ${attacker.species}->${target.species}`,
       );
     }
+    const attackerSprite = originalOrientation
+      ? pidgeottoFrontSprite
+      : pidgeottoBackSprite;
+    const targetSprite = originalOrientation
+      ? onixBackSprite
+      : onixFrontSprite;
 
     drawTileBg(
       fb,
@@ -13908,11 +13919,14 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     const attackerCorner = attacker.geometry.spriteCorner;
-    const attackerClipY = attackerCorner.y + 55;
+    const attackerClipY =
+      attacker.geometry.side === "opponent"
+        ? attackerCorner.y + 55
+        : 160;
     drawSpriteSheet(
       fb,
-      pidgeottoFrontSprite.tileset,
-      pidgeottoFrontSprite.palette,
+      attackerSprite.tileset,
+      attackerSprite.palette,
       attackerCorner.x,
       attackerCorner.y,
     );
@@ -13923,14 +13937,14 @@ export function renderSceneOnMovePresentation(
     ) {
       eraseSpriteFootprint(
         fb,
-        pidgeottoFrontSprite.tileset,
+        attackerSprite.tileset,
         attackerCorner,
         attackerClipY,
       );
       drawSpriteSheetClippedBelow(
         fb,
-        pidgeottoFrontSprite.tileset,
-        pidgeottoFrontSprite.palette,
+        attackerSprite.tileset,
+        attackerSprite.palette,
         attackerCorner.x + view.attackerOffset.x2,
         attackerCorner.y + view.attackerOffset.y2,
         attackerClipY,
@@ -13939,8 +13953,8 @@ export function renderSceneOnMovePresentation(
       for (const image of view.afterimages) {
         const skipMask =
           image.slot === 3 && slot4
-            ? turn9QuickAttackOpaqueMask(
-                pidgeottoFrontSprite.tileset,
+              ? turn9QuickAttackOpaqueMask(
+                attackerSprite.tileset,
                 attackerCorner.x + slot4.x2,
                 attackerCorner.y + slot4.y2,
                 attackerClipY,
@@ -13949,8 +13963,8 @@ export function renderSceneOnMovePresentation(
         if (skipMask) {
           drawSpriteSheetBlendedOverFbSkipping(
             fb,
-            pidgeottoFrontSprite.tileset,
-            pidgeottoFrontSprite.palette,
+            attackerSprite.tileset,
+            attackerSprite.palette,
             attackerCorner.x + image.x2,
             attackerCorner.y + image.y2,
             12,
@@ -13961,8 +13975,8 @@ export function renderSceneOnMovePresentation(
         } else {
           drawSpriteSheetBlendedOverFb(
             fb,
-            pidgeottoFrontSprite.tileset,
-            pidgeottoFrontSprite.palette,
+            attackerSprite.tileset,
+            attackerSprite.palette,
             attackerCorner.x + image.x2,
             attackerCorner.y + image.y2,
             12,
@@ -13976,9 +13990,11 @@ export function renderSceneOnMovePresentation(
     if (!view.targetInvisible) {
       drawSpriteSheet(
         fb,
-        onixBackSprite.tileset,
-        onixBackSprite.palette,
-        target.geometry.spriteCorner.x + view.targetShakeX2,
+        targetSprite.tileset,
+        targetSprite.palette,
+        target.geometry.spriteCorner.x
+          + view.targetBaseX2
+          + view.targetShakeX2,
         target.geometry.spriteCorner.y,
       );
     }
@@ -13997,21 +14013,44 @@ export function renderSceneOnMovePresentation(
         "static",
       );
     }
-    drawSendOutHealthbox(
-      fb,
-      0,
-      pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
-    );
-    drawComposedPlayerHealthbox(
-      fb,
-      onixPlayerHealthboxContentForState(
+    if (originalOrientation) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          view.displayedTargetHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender,
+        ),
+        0,
+        view.healthboxY2,
+      );
+    } else {
+      const opponentContent = featherDanceOnixOpponentHealthbox(
         view.displayedTargetHp,
-        state.config.fieldProfile.playerStatus,
-        state.config.fieldProfile.playerGender,
-      ),
-      0,
-      view.healthboxY2,
-    );
+        state.config.fieldProfile.opponentGender ?? "female",
+      );
+      drawSendOutHealthbox(fb, 0, opponentContent);
+      if (view.healthboxY2 !== 0) {
+        drawOpponentHealthboxWobble(
+          fb,
+          view.healthboxY2,
+          opponentContent,
+        );
+      }
+      drawComposedPlayerHealthbox(
+        fb,
+        featherDancePidgeottoPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
     drawTileBg(
       fb,
       battleWindow.tileset,
