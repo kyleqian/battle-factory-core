@@ -592,6 +592,7 @@ import {
   sceneOnMudSlapView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
+import { extremeSpeedBackgroundVariant } from "./extremeSpeed.ts";
 import {
   SITRUS_ITEM_HEAL_TEXT_FIRST_AGE,
   SITRUS_ITEM_TEXT_CLEAR_AGE,
@@ -14176,9 +14177,10 @@ export function renderSceneOnMovePresentation(
         fb,
         {
           tileset: extremeSpeedBg.tileset,
-          tilemap: playerToOpponent
-            ? extremeSpeedBg.playerTilemap
-            : extremeSpeedBg.opponentTilemap,
+          tilemap:
+            extremeSpeedBackgroundVariant(view.attacker.geometry.side) === "player"
+              ? extremeSpeedBg.playerTilemap
+              : extremeSpeedBg.opponentTilemap,
           subpalettes: [gpuDarken(extremeSpeedBg.palette)],
         },
         scrollX,

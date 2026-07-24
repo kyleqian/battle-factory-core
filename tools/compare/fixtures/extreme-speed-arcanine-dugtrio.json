@@ -7,9 +7,9 @@
   "move": "EXTREME_SPEED",
   "orientation": "opponent-to-player",
   "appStage": {"oracleFrame": 91, "presentationAge": 52},
-  "denseWindow": {"startFrame": 91, "endFrame": 109},
+  "denseWindow": {"startFrame": 91, "endFrame": 125},
   "acceptance": {
     "status": "partial",
-    "scope": "dense fade-out prefix through the black high-speed-background handoff; high-speed fade-in, affine/contact/dust/reappearance, and restore remain"
+    "scope": "dense fade-out and high-speed-background fade-in through settled animation age 86; affine/contact/dust/reappearance, and restore remain"
   }
 }

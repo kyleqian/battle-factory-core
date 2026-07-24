@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import extremeSpeedAsset from "../src/assets/gen/battle-anim-extreme-speed.json";
+import { drawTileBg } from "../src/engine/bg.ts";
+import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import {
   extremeSpeedAttackerAffineAtAge,
   extremeSpeedBackgroundAtAge,
+  extremeSpeedBackgroundVariant,
   extremeSpeedImpactAtAge,
 } from "../src/engine/extremeSpeed.ts";
 import {
@@ -11,16 +14,60 @@ import {
 } from "../src/engine/sceneOnPresentation.ts";
 
 describe("Extreme Speed source reducers", () => {
+  it("wraps its 256px text background for both signed BG3 scroll directions", () => {
+    const renderAt = (scrollX: number) => {
+      const fb = createFramebuffer();
+      drawTileBg(
+        fb,
+        {
+          tileset: {
+            columns: 2,
+            rows: 1,
+            tiles: [
+              new Array(64).fill(1),
+              new Array(64).fill(2),
+            ],
+          },
+          tilemap: {
+            width: 2,
+            height: 1,
+            entries: [
+              { tile: 0, hFlip: false, vFlip: false, palette: 0 },
+              { tile: 1, hFlip: false, vFlip: false, palette: 0 },
+            ],
+          },
+          subpalettes: [[
+            { r: 0, g: 0, b: 0 },
+            { r: 8, g: 16, b: 24 },
+            { r: 32, g: 40, b: 48 },
+          ]],
+        },
+        scrollX,
+      );
+      return fb;
+    };
+    const positive = renderAt(9);
+    const negative = renderAt(-9);
+    expect([...positive.slice(0, 3)]).toEqual([32, 40, 48]);
+    expect([...positive.slice(7 * 4, 7 * 4 + 3)]).toEqual([8, 16, 24]);
+    expect([...negative.slice(0, 3)]).toEqual([8, 16, 24]);
+    expect([...negative.slice(8 * 4, 8 * 4 + 3)]).toEqual([32, 40, 48]);
+  });
+
   it("selects and scrolls the high-speed background by attacker side", () => {
+    expect(extremeSpeedBackgroundVariant("opponent")).toBe("player");
+    expect(extremeSpeedBackgroundVariant("player")).toBe("opponent");
     expect(extremeSpeedBackgroundAtAge(51, "opponent")).toEqual({
       background: "default", bldy: 0, scrollX: 0,
     });
     expect(extremeSpeedBackgroundAtAge(52, "opponent").bldy).toBe(1);
     expect(extremeSpeedBackgroundAtAge(67, "opponent").bldy).toBe(16);
-    expect(extremeSpeedBackgroundAtAge(69, "opponent").scrollX).toBe(9);
-    expect(extremeSpeedBackgroundAtAge(69, "player").scrollX).toBe(-9);
+    expect(extremeSpeedBackgroundAtAge(69, "opponent").scrollX).toBe(0);
+    expect(extremeSpeedBackgroundAtAge(69, "player").scrollX).toBe(0);
+    expect(extremeSpeedBackgroundAtAge(70, "opponent").scrollX).toBe(9);
+    expect(extremeSpeedBackgroundAtAge(70, "player").scrollX).toBe(-9);
     expect(extremeSpeedBackgroundAtAge(86, "opponent")).toEqual({
-      background: "highspeed", bldy: 0, scrollX: 162,
+      background: "highspeed", bldy: 0, scrollX: 153,
     });
     expect(extremeSpeedBackgroundAtAge(318, "opponent").bldy).toBe(1);
     expect(extremeSpeedBackgroundAtAge(335, "opponent")).toEqual({
@@ -118,7 +165,7 @@ describe("Extreme Speed source reducers", () => {
       animationAge: 69,
       attacker: { geometry: { side: "opponent" } },
       target: { geometry: { side: "player" } },
-      background: { background: "highspeed", scrollX: 9 },
+      background: { background: "highspeed", scrollX: 0 },
     });
     expect(opponent).toEqual(opponentBefore);
 
@@ -155,7 +202,7 @@ describe("Extreme Speed source reducers", () => {
       animationAge: 69,
       attacker: { geometry: { side: "player" } },
       target: { geometry: { side: "opponent" } },
-      background: { background: "highspeed", scrollX: -9 },
+      background: { background: "highspeed", scrollX: 0 },
     });
   });
 });

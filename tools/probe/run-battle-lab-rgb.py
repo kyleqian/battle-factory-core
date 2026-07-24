@@ -269,6 +269,13 @@ def main() -> None:
                 "speedDustSprites": speed_dust_sprites,
                 "bg3X": s16(oracle.symbols["gBattle_BG3_X"]),
                 "bg3Y": s16(oracle.symbols["gBattle_BG3_Y"]),
+                "bg3cnt": u16(0x0400000E),
+                "bg3hofs": u16(0x0400001C),
+                "bg3vofs": u16(0x0400001E),
+                "bgPalette2Faded": [
+                    u16(pltt_faded + (2 * 16 + index) * 2)
+                    for index in range(16)
+                ],
                 "bldcnt": oracle.read_u8(0x04000050)
                 | (oracle.read_u8(0x04000051) << 8),
                 "bldalpha": oracle.read_u8(0x04000052)

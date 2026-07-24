@@ -45,21 +45,21 @@ remainder.
 ## Current handoff
 
 - **State:** **14 exact / 2 partial / 260 unsupported**. EXTREME SPEED is an
-  honest two-orientation partial for its default-background fade-out prefix;
-  QUICK ATTACK and AERIAL ACE remain exact.
-- **Did:** staged legal zero-PP-Up Level-50 ARCANINE→DUGTRIO Mechanics Lab
-  cases in both source-selected attacker orientations. Extracted both
-  `BG_HIGHSPEED` tilemaps plus `ANIM_TAG_SPEED_DUST`, added side-parametric
-  background/affine/impact reducers behind the shared Scene-ON seam, and pinned
-  source assets, orientation, timing, and immutability in Tier-1.
-- **Evidence:** opponent-front oracle frames **91–109** and player-back frames
-  **87–105** are dense and exact at **19/19 + 19/19 RGB**, through black at the
-  high-speed handoff. The opposite-side QUICK ATTACK control remains
-  **214/214**; the current opponent control resolves a different immutable
-  damage endpoint (117→111 rather than its committed 117→110 fixture) but
-  preserves all **115** pre-damage frames exactly.
-- **Next:** resolve the high-speed BG fade-in/composition beginning at opponent
-  frame **110** / player frame **106**, then prove the affine disappearance,
-  three edge impacts, 24 dust spawns, blink reappearance, restore fade, and
-  script cleanup in both complete move-owned windows at 0 RGB diff. Generic
-  hit, HP/result/status, and controller tails remain separately owned.
+  honest two-orientation partial through its fully settled high-speed
+  background at animation age 86; QUICK ATTACK and AERIAL ACE remain exact.
+- **Did:** completed EXTREME SPEED's side-parametric high-speed background
+  compositor through settled animation age 86: generic 256px text-BG wrapping,
+  source attacked-side tilemap selection, and the visible one-VBlank BG3 scroll
+  latch now sit behind the shared Scene-ON seam. Refreshed QUICK ATTACK's
+  opponent evidence after the harness control-order change.
+- **Evidence:** EXTREME SPEED opponent-front frames **91–125** and player-back
+  frames **87–121** are dense and exact at **35/35 + 35/35 RGB**. RAM pins
+  `BLDCNT=0xE8`, the 16→0 `BLDY` ramp, signed ±9 px task scroll, displayed
+  `BG3HOFS` one update behind, and the source `BG_HIGHSPEED_*` attacked-side
+  selection. Both complete QUICK ATTACK controls are **219/219 + 214/214** with
+  immutable 117→111 endpoints; the opponent fixture records harness `96603ae`
+  (2026-07-24 06:08), superseding the pre-change 117→110 evidence.
+- **Next:** after EXTREME SPEED age 86, prove the affine disappearance, three
+  edge impacts, 24 dust spawns, blink reappearance, restore fade, and script
+  cleanup in both complete move-owned windows at 0 RGB diff. Generic hit,
+  HP/result/status, and controller tails remain separately owned.

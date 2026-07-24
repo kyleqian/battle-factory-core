@@ -22,12 +22,14 @@ export interface TileBg {
 
 export function drawTileBg(fb: Uint8Array, bg: TileBg, scrollX = 0, scrollY = 0): void {
   const tilesPerRow = bg.tilemap.width;
+  const mapWidth = bg.tilemap.width * 8;
+  const mapHeight = bg.tilemap.height * 8;
   for (let screenY = 0; screenY < SCREEN_HEIGHT; screenY += 1) {
-    const mapY = screenY + scrollY;
+    const mapY = ((screenY + scrollY) % mapHeight + mapHeight) % mapHeight;
     const tileRow = Math.floor(mapY / 8);
     const inTileY = mapY % 8;
     for (let screenX = 0; screenX < SCREEN_WIDTH; screenX += 1) {
-      const mapX = screenX + scrollX;
+      const mapX = ((screenX + scrollX) % mapWidth + mapWidth) % mapWidth;
       const tileCol = Math.floor(mapX / 8);
       const inTileX = mapX % 8;
       const entry = bg.tilemap.entries[tileRow * tilesPerRow + tileCol];

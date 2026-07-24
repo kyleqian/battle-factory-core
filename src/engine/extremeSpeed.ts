@@ -24,16 +24,27 @@ export const EXTREME_SPEED_RESTORE_FADE_FIRST_AGE = 318;
 export const EXTREME_SPEED_DEFAULT_BG_SWAP_AGE = 335;
 export const EXTREME_SPEED_DONE_AGE = 354;
 
+/** `BG_HIGHSPEED_*` names the side being attacked, not the attacker side. */
+export function extremeSpeedBackgroundVariant(
+  attackerSide: ExtremeSpeedSide,
+): ExtremeSpeedSide {
+  return attackerSide === "player" ? "opponent" : "player";
+}
+
 /**
  * Move-relative Task_FadeToBg/restorebg plus
- * AnimTask_StartSlidingBg(-2304,0,TRUE,-1). Player-side attackers negate
- * the Q8.8 velocity; no battle/turn/absolute clock participates.
+ * AnimTask_StartSlidingBg(-2304,0,TRUE,-1). Opponent-side attackers negate
+ * the supplied Q8.8 velocity; no battle/turn/absolute clock participates.
  */
 export function extremeSpeedBackgroundAtAge(
   age: number,
   attackerSide: ExtremeSpeedSide,
 ): ExtremeSpeedBackgroundState {
   const sign = attackerSide === "player" ? -1 : 1;
+  const scrollAtAge = (scrollAge: number) => {
+    const displayedSteps = scrollAge - EXTREME_SPEED_SCROLL_FIRST_AGE;
+    return displayedSteps <= 0 ? 0 : sign * 9 * displayedSteps;
+  };
   if (age < EXTREME_SPEED_FADE_FIRST_AGE) {
     return { background: "default", bldy: 0, scrollX: 0 };
   }
@@ -48,24 +59,21 @@ export function extremeSpeedBackgroundAtAge(
     return {
       background: "highspeed",
       bldy: age < 70 ? 16 : Math.max(0, 16 - (age - 70)),
-      scrollX:
-        age < EXTREME_SPEED_SCROLL_FIRST_AGE
-          ? 0
-          : sign * 9 * (age - EXTREME_SPEED_SCROLL_FIRST_AGE + 1),
+      scrollX: scrollAtAge(age),
     };
   }
   if (age < EXTREME_SPEED_RESTORE_FADE_FIRST_AGE) {
     return {
       background: "highspeed",
       bldy: 0,
-      scrollX: sign * 9 * (age - EXTREME_SPEED_SCROLL_FIRST_AGE + 1),
+      scrollX: scrollAtAge(age),
     };
   }
   if (age < EXTREME_SPEED_DEFAULT_BG_SWAP_AGE) {
     return {
       background: "highspeed",
       bldy: Math.min(16, age - EXTREME_SPEED_RESTORE_FADE_FIRST_AGE + 1),
-      scrollX: sign * 9 * (age - EXTREME_SPEED_SCROLL_FIRST_AGE + 1),
+      scrollX: scrollAtAge(age),
     };
   }
   return {
