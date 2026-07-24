@@ -4,6 +4,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 384 — Gate-3 status-animation production rules context integrated
+
+- **State:** S10 Gate 3 remains open with **27** source-safe opcodes; opcodes
+  100–102 now have the first durable source-shaped production rules/port
+  bundle instead of test-only live-status fixtures.
+- **Did:** added a deeply frozen four-battler context with only
+  `status1/2/3`, substitute HP, attacker/effect role bindings, global hit
+  marker, and multi-hit counter; centralized source constants; implemented
+  exact supported selector resolution and live/masked/explicit preparation;
+  composed named handler/execution/ack seams without replacing generic ports.
+- **Next:** extend this one context only for the next completely evidenced
+  rules family. Defer the other `GetBattlerForBattleScript` cases until their
+  roles/positions are explicit; keep status application, move-value cleanup
+  fields, PP/damage/RNG/turn state, controller timing, and presentation out.
+- **Notes:** production composition covers the **26** controls/source/multi-hit
+  IDs whose context is now honest; generic opcode 37 remains reusable but
+  intentionally uncomposed until its additional fields land. Fresh OFF labs
+  prove Toxic `status1 0→0x80` and Confuse Ray status2/confusion `0→4`, both
+  PP **10→9**, all PP Ups zero. Focused **80/80**; Tier-1 **125 files / 1658
+  tests**, build, oracle info, both manifests, and diff check green. Commit
+  `a937987`; pixel diff N/A.
+
+---
 ## 383 — Gate-3 status-animation family integrated
 
 - **State:** S10 Gate 3 remains open with **27** source-safe opcodes and one
@@ -42,21 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **151 captures**; successful Toxic→`0x80` with command-27 suppression
   **102/102 semantic captures**. Focused **103/103**; Tier-1 **122 files /
   1627 tests**, build, and Scene-OFF oracle contract green. Pixel diff N/A.
-
----
-## 381 — Gate-3 WAITANIMATION controller barrier integrated
-
-- **State:** S10 Gate 3 remains open with **24** source-safe opcodes and an
-  unwired immutable controller/scheduler/rules/RNG/source-context seam.
-- **Did:** added only `WAITANIMATION` (opcode **10 / 0x0a**) as the exact
-  zero-operand `gBattleControllerExecFlags` barrier: idle advances one
-  instruction/one source byte; busy identity-blocks and retries at the same
-  instruction. It owns no animation or presentation state.
-- **Next:** choose another bounded source family only when its complete rules
-  context is explicit. Keep move timelines, callbacks, sprites, rendering,
-  raw controller bytes, Scene-ON state, rules/RNG/PP, and other opcodes out.
-- **Notes:** exact supported IDs are
-  **10/16/17/18/20/37/38/39/40/57/58/60/61/62/65/83/84/85/86/98/111/131/141/248**.
-  All **92** generated starts have zero operand widths and are pinned.
-  Focused **118/118**; Tier-1 **121 files / 1615 tests**, build, and Scene-OFF
-  oracle contract green. Pixel/oracle diff is N/A for this logical barrier.

@@ -1,3 +1,21 @@
+## 381 — Gate-3 WAITANIMATION controller barrier integrated
+
+- **State:** S10 Gate 3 remains open with **24** source-safe opcodes and an
+  unwired immutable controller/scheduler/rules/RNG/source-context seam.
+- **Did:** added only `WAITANIMATION` (opcode **10 / 0x0a**) as the exact
+  zero-operand `gBattleControllerExecFlags` barrier: idle advances one
+  instruction/one source byte; busy identity-blocks and retries at the same
+  instruction. It owns no animation or presentation state.
+- **Next:** choose another bounded source family only when its complete rules
+  context is explicit. Keep move timelines, callbacks, sprites, rendering,
+  raw controller bytes, Scene-ON state, rules/RNG/PP, and other opcodes out.
+- **Notes:** exact supported IDs are
+  **10/16/17/18/20/37/38/39/40/57/58/60/61/62/65/83/84/85/86/98/111/131/141/248**.
+  All **92** generated starts have zero operand widths and are pinned.
+  Focused **118/118**; Tier-1 **121 files / 1615 tests**, build, and Scene-OFF
+  oracle contract green. Pixel/oracle diff is N/A for this logical barrier.
+
+---
 ## 380 — Gate-3 trainer-slide controller receipts integrated
 
 - **State:** S10 Gate 3 remains open with **23** source-safe opcodes and an
