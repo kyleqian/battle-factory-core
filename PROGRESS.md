@@ -23,9 +23,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   both one-bit values across all four attacker ids, all scripting battler ids,
   pre-set helper/marker/flag states, identities, missing attacker/persistent
   selector, invalid widths, determinism, and deep freezing are pinned.
-  Focused **4 files / 39 tests**; Tier-1 **135 files / 1744 tests**, build,
-  OFF info (`9c89c741…`), and diff check green. Code commit `4113388`;
-  pixel diff N/A.
+  Focused **4 files / 39 tests**; integrated Tier-1 **136 files / 1747
+  tests**, build, OFF/ON v5 info (`9c89c741…`), and diff check green. Code
+  commits `4113388` + receipt lock `741bf77`; pixel diff N/A.
 
 ---
 ## 396 — Gate-3 attack-canceler FLINCH source phase integrated
