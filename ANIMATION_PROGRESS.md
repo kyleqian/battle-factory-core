@@ -54,10 +54,13 @@ remainder.
 - **Evidence:** the player-back ONIX → opponent-front GROVYLE stock-ROM stage
   pins lightning displays at frames **2400..2433**: births **2400/2403/2406**,
   centers **(176,-4)/(176,28)/(176,60)**, five source tile frames, and
-  independent **28-frame** OAM lifetimes. The opposite GROVYLE → ONIX stage
+  independent **28-frame** OAM lifetimes; reducer vs live component state is
+  **34/34 frames, 0 component mismatches**. The opposite GROVYLE → ONIX stage
   correctly produces no meaningful animation body because Electric is
   ineffective against Ground; therefore dense component/RGB acceptance is
-  **0/0**, not claimed. Focused Fire/Ice/Thunder controls are **32/32** green.
+  **0/0**, not claimed. RGB mismatch count is **N/A (0 frames compared)**
+  because THUNDER PUNCH is not wired into the framebuffer seam. Focused
+  Fire/Ice/Thunder controls are **32/32** green.
 - **Next:** stage a genuinely legal non-Ground Level-50 opponent for the
   player-side target (with extracted front/back art), then connect this reducer
   plus source black-palette ramp, two whole-screen inversions, shared
