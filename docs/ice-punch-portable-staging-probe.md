@@ -80,7 +80,7 @@ latch. The reaction is complete and the field is stable again through frame
 2560 / age 221. HP remains the immutable staged value throughout this bounded
 window.
 
-The contiguous continuation now includes the controller-owned 143→112 HP
+The contiguous continuation includes the controller-owned 143→112 HP
 drain and immediate super-effective message handoff. The bar begins its first
 displayed decrement at frame 2562 / age 223, reaches 112 without the
 presentation calculating or committing damage, and the source-script atomic
@@ -89,10 +89,19 @@ age 259 and is fully typed plus stably held through frame 2620 / age 281.
 The same generic one-HP display reducer and message renderer already used by
 the presentation seam are driven only by immutable staged inputs.
 
+The controller tail is now dense-exact through the completed no-freeze
+secondary-effect path. The staged outcome keeps `status1 = 0`; the
+presentation does not roll or apply that outcome. The fully printed
+super-effective message remains stable while the battle script completes,
+and `gCurrentMove` clears at oracle frame 2692. Frames 2693–2694 prove the
+settled post-command boundary. The first uncovered frame, 2695, introduces
+the next controller-owned display transition and is deliberately outside
+this animation increment.
+
 Therefore ICE PUNCH remains `partial`. The accepted dense window is now
-**2339–2620, 282/282 exact**. The precisely uncovered contiguous remainder
-begins at frame **2621**, including the secondary-effect/controller tail, plus
-any geometry/orientation variant required by source or comparison evidence.
+**2339–2694, 356/356 exact**. The precisely uncovered contiguous remainder
+begins at frame **2695**, plus any geometry/orientation variant required by
+source or comparison evidence.
 
 ## THUNDER PUNCH sibling check
 
