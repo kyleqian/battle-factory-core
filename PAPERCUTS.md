@@ -83,10 +83,32 @@ Per entry:
 - **What:** invoking a fresh mGBA probe with the shell's default `python3`
   fails at import time because it lacks `cffi`, even though the repository's
   wrapper and probe are otherwise valid.
-- **Hits:** 1.
+- **Hits:** 2.
 - **Cost each:** ~3 min.
 - **Workaround:** invoke both `tools/run-mgba-probe.py` and its nested probe
   with `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python3`.
+
+## Supervisor launcher option names are easy to misaddress
+
+- **What:** supervisor briefs used the conceptual lane names
+  `side-worktree`/`animation-worktree` and common-looking `--reasoning` and
+  `--brief` options, while `run-subagent.sh` accepts `--lane side|animation`,
+  `--effort`, and a positional brief or `--brief-file`. Each mismatch required
+  a failed launch and help lookup before the bounded worker could start.
+- **Hits:** 3.
+- **Cost each:** ~1 min.
+- **Workaround:** run `tools/run-subagent.sh --help` before the first launch of
+  a supervised session and use the launcher’s exact option spellings.
+
+## Broad source search descends into generated minified bundles
+
+- **What:** an Uproar ownership audit searched broadly enough to enter a
+  generated minified index, producing noisy output and obscuring the relevant
+  source call sites.
+- **Hits:** 1.
+- **Cost each:** ~1 min.
+- **Workaround:** scope `rg` to `src/`, `tests/`, and the exact reference
+  source directories, or add generated/bundle globs to the exclusion list.
 
 ## Serialized oracle compares can strand or terminate multi-trace batches
 
