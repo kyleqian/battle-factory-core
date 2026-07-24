@@ -1,0 +1,11 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-blaze-kick-opponent-onix-player-murkrow.json",
+  "probe": "tools/probe/run-battle-lab-rgb.py",
+  "pair": "ONIX (opponent-front) -> MURKROW (player-back)",
+  "move": "BLAZE_KICK",
+  "denseWindow": {"startFrame": 453, "endFrame": 530},
+  "appStage": {"firstFramePresentationAge": 0},
+  "targetCenter": {"x": 72, "y": 97}
+}
