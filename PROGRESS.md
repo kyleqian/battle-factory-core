@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 363 — SAND ATTACK exact; Gate-3 source/control foundation integrated
+
+- **State:** S10 Gate 1 remains closed and Gate 3 remains open. Scene-ON is
+  now **9 exact / 4 partial / 263 unsupported**; FLY portability is moving
+  independently while the production interpreter remains unwired.
+- **Did:** accepted SAND ATTACK through complete legal zero-PP-Up portable
+  windows in both orientations and the canonical regression. Linked all
+  **249/249** Battle Script dispatch slots to exact enum/table rows and C
+  handler-definition spans with no missing, duplicate, or aliased handlers.
+- **Next:** extend the generic interpreter with an explicit rules-context and
+  semantic-event seam before battle-mutating opcodes. Keep FLY source-relative
+  and retain issue #34's seven-frame affine exclusion without a special case.
+- **Notes:** SAND **269/269 + 269/269 + 190/190**; integrated Tier-1 **104
+  files / 1422 tests** and build green. Both new mechanic fixtures use
+  `ppUps:[0,0,0,0]`; the independent Gate-2 PP builder remains untouched.
+
+---
 ## 362 — S10 Gate-3 typed Battle Script control slice
 
 - **State:** S10 Gate 3 remains open; its first typed, inspectable program and
@@ -38,22 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   214/214**, FEATHER **400/400 + 400/400**, FIRE **225/225 + 277/277**, ICE
   **462/462 + 1294/1294**. Integrated **98 files / 1389 tests** and build
   green; all new mechanic fixtures retain `ppUps:[0,0,0,0]`.
-
----
-## 360 — S10 Gate 1 complete; AERIAL ACE compositor in flight
-
-- **State:** S10's complete Factory corpus gate is supervisor-verified and
-  closed. Scene-ON remains **7 exact / 6 partial / 263 unsupported** while the
-  AERIAL ACE portable compositor is independently in flight.
-- **Did:** extracted and exhaustively joined 300 trainers, 882 sets, 411
-  species, 63 held items, 355 moves, 82 Facility Classes, 25 natures, and the
-  contextual Factory AI policy; isolated regeneration pins every core
-  artifact and all 882 EV masks. Accepted zero-PP-Up AERIAL fixtures and
-  source-relative state as an honest non-pixel staging checkpoint.
-- **Next:** keep AERIAL's unthinned 236/232-frame ON windows moving; leave the
-  in-flight PP builder untouched. While Gate 2 converges, bank only
-  file-disjoint source data that does not redefine its battle-lab interface.
-- **Notes:** all catalogs regenerate byte-for-byte; Level 50 is **0–849**
-  (850 sets) and Open-only **850–881** (32). Integrated baseline is **97
-  files / 1383 tests** plus green build. Canonical AERIAL remains **93/93**;
-  QUICK remains **219/219 + 214/214**.

@@ -104,7 +104,7 @@ Per entry:
 - **What:** the Scene-ON service answers canonical oracle requests but returns
   404 for the battle-lab route, so two animation workers had to discover and
   switch to the local mGBA battle-lab probe path.
-- **Hits:** 2.
+- **Hits:** 3.
 - **Cost each:** ~2-5 min.
 - **Workaround:** use the committed local mGBA probe/comparator for Scene-ON
   mechanicLab fixtures until the service exposes the additive route.

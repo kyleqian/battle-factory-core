@@ -1,3 +1,22 @@
+## 360 — S10 Gate 1 complete; AERIAL ACE compositor in flight
+
+- **State:** S10's complete Factory corpus gate is supervisor-verified and
+  closed. Scene-ON remains **7 exact / 6 partial / 263 unsupported** while the
+  AERIAL ACE portable compositor is independently in flight.
+- **Did:** extracted and exhaustively joined 300 trainers, 882 sets, 411
+  species, 63 held items, 355 moves, 82 Facility Classes, 25 natures, and the
+  contextual Factory AI policy; isolated regeneration pins every core
+  artifact and all 882 EV masks. Accepted zero-PP-Up AERIAL fixtures and
+  source-relative state as an honest non-pixel staging checkpoint.
+- **Next:** keep AERIAL's unthinned 236/232-frame ON windows moving; leave the
+  in-flight PP builder untouched. While Gate 2 converges, bank only
+  file-disjoint source data that does not redefine its battle-lab interface.
+- **Notes:** all catalogs regenerate byte-for-byte; Level 50 is **0–849**
+  (850 sets) and Open-only **850–881** (32). Integrated baseline is **97
+  files / 1383 tests** plus green build. Canonical AERIAL remains **93/93**;
+  QUICK remains **219/219 + 214/214**.
+
+---
 ## 359 — S4/S9 closed; S10 corpus + Scene-ON breadth advancing
 
 - **State:** S4/S9 are supervisor-verified complete; QUICK ATTACK is exact in
