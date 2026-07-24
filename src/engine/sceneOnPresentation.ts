@@ -72,6 +72,8 @@ export interface SceneOnIcePunchConfig {
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   readonly hpDrainProfile: Readonly<HpDrainPresentationProfile> & {
     readonly effectivenessTextStartAge?: number;
+    /** Controller-owned age at which the completed result line is cleared. */
+    readonly effectivenessTextEndAge?: number;
   };
   /** Relative first printer age; negative means text predates this seam. */
   readonly moveTextStartAge?: number;
