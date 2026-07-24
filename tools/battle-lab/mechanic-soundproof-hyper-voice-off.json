@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 3,
+  "battleNum": 0,
+  "trainerId": 120,
+  "playerSetIds": [372, 373, 381],
+  "opponentSetIds": [380, 400, 464],
+  "seed": 1,
+  "overrides": {
+    "battlers": {
+      "player": {
+        "moves": [304, 33, 33, 33],
+        "ppUps": [0, 0, 0, 0],
+        "ability": 0
+      },
+      "opponent": {
+        "moves": [150, 150, 150, 150],
+        "ppUps": [0, 0, 0, 0],
+        "ability": 43
+      }
+    }
+  },
+  "trace": {
+    "segments": [
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 30, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 700, "buttons": []}
+    ],
+    "captureFrames": [0, 734]
+  }
+}
