@@ -446,6 +446,53 @@ function writeJson(path: string, data: unknown): void {
     { op: "end", source: "battle_anim_scripts.s:2803" },
   ];
 
+  // Move_FEATHER_DANCE (battle_anim_scripts.s:3975-3995). Every createsprite
+  // shares the same 8 gBattleAnimArgs EXCEPT arg2 (the initial angle byte,
+  // one of 8 evenly-spaced octants of the 256-unit circle) - decoded from
+  // AnimFallingFeather (src/battle_anim_flying.c:572-644): arg0=xOffset(0),
+  // arg1=yOffset(-16), arg2=initialAngle, arg3=deltaAngle(2, no 0x8000 sign
+  // bit -> angle always increases), arg4=yVelocity(104, Q8.8/tick),
+  // arg5=ampPacked(11304 = 0x2C28 -> two u8 amplitudes 40/44, selected by
+  // AnimFallingFeather_Step's data->unk0_0b), arg6=yThresholdOffset(32, the
+  // destroy-on-fall-past-this-y offset), arg7=1 (nonzero low byte, only bit
+  // 0x100 is meaningful to AnimFallingFeather and it's unset here -> targets
+  // gBattleAnimTarget, not the attacker). No RNG anywhere in this script or
+  // its callback - every downstream sprite is a pure function of spawn tick
+  // + these 8 args (ISSUES #40 / ANIMATION_PROGRESS.md's 2026-07-24
+  // anim-script interpreter spike).
+  const featherDanceMainSteps = [
+    { op: "loadspritegfx", args: { tag: "ANIM_TAG_WHITE_FEATHER" }, source: "battle_anim_scripts.s:3976" },
+    { op: "monbg", args: { battler: "ANIM_DEF_PARTNER" }, blocksTicks: 1, note: "no-op in a single battle - GetBattlerAtPosition(ANIM_DEF_PARTNER) has no live sprite for Pidgeotto-vs-Onix", source: "battle_anim_scripts.s:3977" },
+    { op: "splitbgprio_all", source: "battle_anim_scripts.s:3978" },
+    { op: "playsewithpan", args: { se: "SE_M_PETAL_DANCE", pan: "SOUND_PAN_TARGET" }, source: "battle_anim_scripts.s:3979" },
+    { op: "delay", frames: 0, source: "battle_anim_scripts.s:3980" },
+    { op: "createsprite", template: "gFallingFeatherSpriteTemplate", battler: "ANIM_TARGET", subpriority: 0, args: [0, -16, 64, 2, 104, 11304, 32, 1], source: "battle_anim_scripts.s:3981" },
+    { op: "delay", frames: 6, source: "battle_anim_scripts.s:3982" },
+    { op: "createsprite", template: "gFallingFeatherSpriteTemplate", battler: "ANIM_TARGET", subpriority: 0, args: [0, -16, 32, 2, 104, 11304, 32, 1], source: "battle_anim_scripts.s:3983" },
+    { op: "createsprite", template: "gFallingFeatherSpriteTemplate", battler: "ANIM_TARGET", subpriority: 0, args: [0, -16, 0, 2, 104, 11304, 32, 1], source: "battle_anim_scripts.s:3984" },
+    { op: "delay", frames: 6, source: "battle_anim_scripts.s:3985" },
+    { op: "createsprite", template: "gFallingFeatherSpriteTemplate", battler: "ANIM_TARGET", subpriority: 0, args: [0, -16, 224, 2, 104, 11304, 32, 1], source: "battle_anim_scripts.s:3986" },
+    { op: "createsprite", template: "gFallingFeatherSpriteTemplate", battler: "ANIM_TARGET", subpriority: 0, args: [0, -16, 128, 2, 104, 11304, 32, 1], source: "battle_anim_scripts.s:3987" },
+    { op: "delay", frames: 6, source: "battle_anim_scripts.s:3988" },
+    { op: "createsprite", template: "gFallingFeatherSpriteTemplate", battler: "ANIM_TARGET", subpriority: 0, args: [0, -16, 192, 2, 104, 11304, 32, 1], source: "battle_anim_scripts.s:3989" },
+    { op: "createsprite", template: "gFallingFeatherSpriteTemplate", battler: "ANIM_TARGET", subpriority: 0, args: [0, -16, 160, 2, 104, 11304, 32, 1], source: "battle_anim_scripts.s:3990" },
+    { op: "delay", frames: 6, source: "battle_anim_scripts.s:3991" },
+    { op: "createsprite", template: "gFallingFeatherSpriteTemplate", battler: "ANIM_TARGET", subpriority: 0, args: [0, -16, 96, 2, 104, 11304, 32, 1], source: "battle_anim_scripts.s:3992" },
+    { op: "waitforvisualfinish", source: "battle_anim_scripts.s:3993" },
+    { op: "clearmonbg", args: { battler: "ANIM_DEF_PARTNER" }, source: "battle_anim_scripts.s:3994" },
+    { op: "end", source: "battle_anim_scripts.s:3995" },
+  ];
+  const featherDanceArgvMapping = [
+    "xOffset",
+    "yOffset",
+    "initialAngle",
+    "deltaAngle",
+    "yVelocityQ8_8",
+    "ampPacked",
+    "yThresholdOffset",
+    "targetFlag",
+  ];
+
   writeJson(join(DATA_GEN, "battle-move-anim-scripts.json"), {
     ROCK_SLIDE: {
       source: "reference/pokeemerald/data/battle_anim_scripts.s:2119-2168 (Move_ROCK_SLIDE + RockSlideRocks)",
@@ -457,6 +504,13 @@ function writeJson(path: string, data: unknown): void {
     DOUBLE_TEAM: {
       source: "reference/pokeemerald/data/battle_anim_scripts.s:2778-2803 (Move_DOUBLE_TEAM)",
       main: doubleTeamSteps,
+    },
+    FEATHER_DANCE: {
+      source: "reference/pokeemerald/data/battle_anim_scripts.s:3975-3995 (Move_FEATHER_DANCE)",
+      main: featherDanceMainSteps,
+      createspriteArgvMapping: featherDanceArgvMapping,
+      totalFeatherSprites: 8,
+      callback: "AnimFallingFeather / AnimFallingFeather_Step (src/battle_anim_flying.c:572-893), ported directly in src/engine/featherDance.ts - see ANIMATION_PROGRESS.md's 2026-07-24 anim-script interpreter spike",
     },
   });
 }
