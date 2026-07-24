@@ -7,6 +7,8 @@ import {
   factorySwapAcceptCancelButtonX,
   factorySwapAcceptMonPicVisual,
   factorySwapAcceptPkmnButtonX,
+  factorySwapAcceptSpeciesRenderCoeff,
+  factorySwapAcceptYesNoVisual,
   factorySwapActionFadeY,
   factorySwapCancelButtonX,
   factorySwapEnemyActionFadeY,
@@ -278,14 +280,18 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     !(state.phase === "enemyPicker" && phaseElapsed === 0)
       ? party[displayIndex]
       : null;
+  const speciesCoeff = enemySwitch
+    ? factorySwapEnemySpeciesRenderCoeff(phaseElapsed)
+    : state.phase === "acceptPrompt"
+      ? factorySwapAcceptSpeciesRenderCoeff(
+          phaseElapsed,
+          view.speciesRenderCoeff,
+        )
+      : view.speciesRenderCoeff;
   const speciesColor =
     state.phase === "enemyPicker" && phaseElapsed === 1
       ? { r: 8, g: 0, b: 0 }
-      : speciesNameColor(
-          enemySwitch
-            ? factorySwapEnemySpeciesRenderCoeff(phaseElapsed)
-            : view.speciesRenderCoeff,
-        );
+      : speciesNameColor(speciesCoeff);
   const renderedBallTiles = [...view.ballTiles] as [number, number, number];
   const ballCycle = enemySwitch
     ? factorySwapEnemyBallCycleVisuals(phaseElapsed)
@@ -507,30 +513,33 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
         );
       }
     }
-    if (state.phase === "acceptPrompt" && phaseElapsed >= 64) {
-      const highlightY = YES_NO_ORIGIN.y + state.yesNoCursor * 16 + 8;
-      drawSpriteFaded(
-        fb,
-        { tileset: menuHighlight.left.tileset },
-        menuHighlight.palette,
-        192,
-        highlightY,
-        4,
-        2,
-        0,
-        objFade,
-      );
-      drawSpriteFaded(
-        fb,
-        { tileset: menuHighlight.right.tileset },
-        menuHighlight.palette,
-        224,
-        highlightY,
-        4,
-        2,
-        0,
-        objFade,
-      );
+    const yesNoVisual = factorySwapAcceptYesNoVisual(phaseElapsed);
+    if (state.phase === "acceptPrompt" && yesNoVisual.textVisible) {
+      if (yesNoVisual.highlightVisible) {
+        const highlightY = YES_NO_ORIGIN.y + state.yesNoCursor * 16 + 8;
+        drawSpriteFaded(
+          fb,
+          { tileset: menuHighlight.left.tileset },
+          menuHighlight.palette,
+          192,
+          highlightY,
+          4,
+          2,
+          0,
+          objFade,
+        );
+        drawSpriteFaded(
+          fb,
+          { tileset: menuHighlight.right.tileset },
+          menuHighlight.palette,
+          224,
+          highlightY,
+          4,
+          2,
+          0,
+          objFade,
+        );
+      }
       for (let i = 0; i < YES_NO_LABELS.length; i += 1) {
         drawTextFaded(
           fb,

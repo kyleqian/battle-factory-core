@@ -5,19 +5,6 @@ one, **delete the entry** in the same docs commit that records the fix in
 `PROGRESS.md` — git keeps the forensic history. Group by area; per entry:
 symptom, what's confirmed from the reference/oracle, and any leads.
 
-## #39 — S8 OFF GROVYLE accept opening has 15 bounded render residuals
-
-`battle1-swap-enemy-accept-prompt.json` is **51/66 exact** through the
-input-ready YES/NO boundary. Controller timing and the settled compositions
-are source-relative; the remainder is exactly tick 29936's selected-species
-window-copy color, 29978--29990's blended affine-flash overlap with the gray
-center ball, and tick 30000's first YES/NO window-copy/OAM transient. The
-neighboring transition, aperture-growth, full GROVYLE sprite, and settled
-prompt frames match. Do not replace these residuals with framebuffer/tick
-lookups or thin the dense trace. Next work should probe the generic VBlank
-copy/OAM ownership at those three mechanism boundaries and stop before any
-YES, NO, or B response.
-
 ## #38 — [PARKED 2026-07-22, supervisor decision] Turn 16 FAINT_ATTACK
   delayed-control tick 21006 exposes `BLDALPHA` one VBlank early
 

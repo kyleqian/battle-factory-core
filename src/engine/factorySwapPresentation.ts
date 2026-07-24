@@ -552,11 +552,38 @@ export function factorySwapAcceptCancelButtonX(phaseElapsed: number): number {
 }
 
 /**
+ * Swap_PrintMonSpeciesForTransition queues the selected species window on
+ * the accepted picker edge. Its BG copy becomes visible against the prior
+ * PALNUM_FADE_TEXT hardware palette for one VBlank before the copied
+ * transition palette reaches hardware.
+ */
+export function factorySwapAcceptSpeciesRenderCoeff(
+  phaseElapsed: number,
+  settledCoeff: number,
+): number {
+  return phaseElapsed === 0 ? 15 : settledCoeff;
+}
+
+/**
+ * Swap_ShowYesNoOptions writes the BG window/text in STATE_YESNO_SHOW.
+ * The existing highlight sprites are made visible in the same task call,
+ * but BuildOamBuffer has already run, so their first visible OAM is next tick.
+ */
+export function factorySwapAcceptYesNoVisual(
+  phaseElapsed: number,
+): { textVisible: boolean; highlightVisible: boolean } {
+  return {
+    textVisible: phaseElapsed >= 64,
+    highlightVisible: phaseElapsed >= 65,
+  };
+}
+
+/**
  * OpenMonPic(..., TRUE) created by Swap_AskAcceptMon at +41. This later
- * opening uses the already-configured blended flash. Its task run has a
- * source/GPU-latch catch-up relative to the shared B opening: the second
- * 64px flash and degenerate-window callbacks are both overtaken before the
- * regular growth loop. At +64 HandleYesNo owns the open sprite and popup.
+ * opening uses the already-configured blended flash. CreateSprite happens
+ * after the screen's task/OAM epochs are already established, so its affine
+ * opening is two presentation ticks ahead of the shared input-edge table.
+ * At +64 HandleYesNo owns the open sprite and popup.
  */
 export function factorySwapAcceptMonPicVisual(
   phaseElapsed: number,
@@ -578,10 +605,9 @@ export function factorySwapAcceptMonPicVisual(
       blended: true,
     });
   }
-  const afterFlashLatch = elapsed >= 14 ? elapsed + 2 : elapsed;
   return getMonPicVisual({
     phase: "opening",
-    elapsed: afterFlashLatch,
+    elapsed: elapsed + 2,
     variant: "B",
     blended: true,
   });

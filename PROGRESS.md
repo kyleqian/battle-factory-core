@@ -4,6 +4,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 333 — S8 OFF enemy accept prompt opening: **GREEN — 66/66 exact**
+
+- **State:** the eligible GROVYLE branch is exact from the input-ready enemy
+  picker through the input-ready YES/NO prompt at phase +64. Dense OFF trace
+  `battle1-swap-enemy-accept-prompt.json` is **66/66 exact** without capture
+  thinning; no YES, NO, or B response is processed.
+- **Did:** modeled the selected-species copy against the prior hardware
+  palette for one VBlank, corrected the later `OpenMonPic` affine/task epoch
+  by two relative ticks so its full flash hands off to the gray-ball-aware
+  degenerate WIN0 window, and separated immediate YES/NO BG copy from the
+  next-OAM highlight. Tier-1 pins all three phase-relative boundaries.
+- **Next:** implement one distinct accept response/exit seam (YES commit or
+  NO/B return) with dense OFF evidence; retain the +64 input-ready boundary.
+  S8 unique-UI gate 2 also still needs loss and seventh-win ending pixels.
+- **Notes:** Tier-1 **1210/1210**, build **5.565 MB**. Enemy picker, B-close,
+  popup, options, and player picker remain **130/130**, **59/59**, **44/44**,
+  **58/58**, and **101/101**. #39 is fixed and pruned; no absolute tick,
+  frame table, screenshot asset, response handling, or Battle-2 march.
+
+---
 ## 332 — S8 OFF enemy accept prompt: **PARTIAL — 51/66 exact**
 
 - **State:** eligible GROVYLE A now runs phase-relatively from the input-ready
@@ -43,25 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** Tier-1 **1199/1199**, build **5.556 MB**. B-close, popup,
   options, and picker remain **59/59**, **44/44**, **58/58**, **101/101**.
   No absolute-tick, battle-number, screenshot, or captured-asset path.
-
----
-## 330 — S8 OFF popup B-close/player-picker return: **GREEN — 59/59 exact**
-
-- **State:** the evidence-pinned B path is complete from the `playerOptions`
-  ready edge through restored `HandleChooseMons` input. The dense OFF trace
-  `battle1-swap-player-options-b-close.json` is **59/59 exact**; popup,
-  options, and picker regressions remain **44/44**, **58/58**, and **101/101**.
-- **Did:** reject B through +57, accept at +58, run source-named
-  `Task_CloseMonPic` → `SpriteCB_CloseMonPic` →
-  `Swap_Task_ScreenInfoTransitionIn`, and restore `playerPicker` at +113
-  with RIGHT accepted at +114. The selected-ball and species-breathe tasks
-  retain their own clocks; the ball callbacks now continue through the full
-  source animation command stream, and generic category/species/OAM cursor
-  copies retain their observed VBlank ordering. Parallel source/RAM probes pin
-  the enemy accept YES commit at tick 30021 and NO/B return at 30087, and stage
-  the opposite-side GROVYLE→ONIX FIRE PUNCH geometry/outcome.
-- **Next:** implement the distinct SWAP transition into the input-ready enemy
-  picker through canonical tick 29935; stop before accept-prompt rendering.
-- **Notes:** supervisor verification is Tier-1 **1196/1196**, build
-  **5.551 MB**, B-close **59/59**, portable FIRE PUNCH **225/225**. The
-  opposite-side move remains evidence-only/`partial`; no deferred decision.

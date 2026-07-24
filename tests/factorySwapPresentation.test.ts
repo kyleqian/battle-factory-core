@@ -8,6 +8,8 @@ import {
   factorySwapAcceptCancelButtonX,
   factorySwapAcceptMonPicVisual,
   factorySwapAcceptPkmnButtonX,
+  factorySwapAcceptSpeciesRenderCoeff,
+  factorySwapAcceptYesNoVisual,
   factorySwapBallTile,
   factorySwapCancelButtonX,
   factorySwapEnemyActionFadeY,
@@ -421,11 +423,12 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapAcceptCancelButtonX(32)).toBe(192);
     expect(factorySwapAcceptCancelButtonX(33)).toBe(198);
     expect(factorySwapAcceptCancelButtonX(40)).toBe(240);
-    expect(factorySwapAcceptMonPicVisual(43).flashWidth).toBe(0);
-    expect(factorySwapAcceptMonPicVisual(44)).toMatchObject({
+    expect(factorySwapAcceptMonPicVisual(41).flashWidth).toBe(0);
+    expect(factorySwapAcceptMonPicVisual(42)).toMatchObject({
       flashWidth: 1,
       flashBlended: true,
     });
+    expect(factorySwapAcceptMonPicVisual(44).flashWidth).toBe(4);
     expect(factorySwapAcceptMonPicVisual(55).window).toEqual({
       top: 60,
       bottom: 69,
@@ -433,6 +436,20 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapAcceptMonPicVisual(64)).toMatchObject({
       window: { top: 32, bottom: 96 },
       spriteVisible: true,
+    });
+    expect(factorySwapAcceptSpeciesRenderCoeff(0, 6)).toBe(15);
+    expect(factorySwapAcceptSpeciesRenderCoeff(1, 6)).toBe(6);
+    expect(factorySwapAcceptYesNoVisual(63)).toEqual({
+      textVisible: false,
+      highlightVisible: false,
+    });
+    expect(factorySwapAcceptYesNoVisual(64)).toEqual({
+      textVisible: true,
+      highlightVisible: false,
+    });
+    expect(factorySwapAcceptYesNoVisual(65)).toEqual({
+      textVisible: true,
+      highlightVisible: true,
     });
   });
 

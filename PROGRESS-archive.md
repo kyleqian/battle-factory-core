@@ -1,3 +1,25 @@
+## 330 — S8 OFF popup B-close/player-picker return: **GREEN — 59/59 exact**
+
+- **State:** the evidence-pinned B path is complete from the `playerOptions`
+  ready edge through restored `HandleChooseMons` input. The dense OFF trace
+  `battle1-swap-player-options-b-close.json` is **59/59 exact**; popup,
+  options, and picker regressions remain **44/44**, **58/58**, and **101/101**.
+- **Did:** reject B through +57, accept at +58, run source-named
+  `Task_CloseMonPic` → `SpriteCB_CloseMonPic` →
+  `Swap_Task_ScreenInfoTransitionIn`, and restore `playerPicker` at +113
+  with RIGHT accepted at +114. The selected-ball and species-breathe tasks
+  retain their own clocks; the ball callbacks now continue through the full
+  source animation command stream, and generic category/species/OAM cursor
+  copies retain their observed VBlank ordering. Parallel source/RAM probes pin
+  the enemy accept YES commit at tick 30021 and NO/B return at 30087, and stage
+  the opposite-side GROVYLE→ONIX FIRE PUNCH geometry/outcome.
+- **Next:** implement the distinct SWAP transition into the input-ready enemy
+  picker through canonical tick 29935; stop before accept-prompt rendering.
+- **Notes:** supervisor verification is Tier-1 **1196/1196**, build
+  **5.551 MB**, B-close **59/59**, portable FIRE PUNCH **225/225**. The
+  opposite-side move remains evidence-only/`partial`; no deferred decision.
+
+---
 ## 329 — S8 OFF popup B-close: **GREEN evidence checkpoint**
 
 - **State:** the source-relative B-close → restored player-picker boundary is
