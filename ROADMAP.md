@@ -942,7 +942,7 @@ S10 has six ordered completion gates:
    never trace ABI.
 
    **Battle-lab v1 groundwork landed (2026-07-23, umbrella harness
-   `56c21c5`, hardened through `d303d8f`):** additive
+   `56c21c5`, hardened through `19eeb4b`):** additive
    `/v1/battle-lab/run` now stages arbitrary legal
    Level-50 trainer/set combinations through the real rental constructor and
    `FillFactoryFrontierTrainerParty`, captures typed battle state/RNG beside
@@ -952,11 +952,12 @@ S10 has six ordered completion gates:
    ability/types/friendship), but the former HP/status/stage/volatile/weather/
    side-condition injector was explicitly retired by user decision on
    2026-07-24. Live Scene-OFF and Scene-ON smoke traces now create Leech Seed,
-   Swords Dance, Own Tempo immunity, Choice Band-amplified damage, Rain Dance
-   weather, and Perish Song counters only through real controller-selected ROM
-   actions, with transient state observed read-only. A separate live sweep
-   reached the action menu at both trainer-range boundaries across all eight
-   challenge bands (28 regular/final-battle combinations). Validation also
+   Swords Dance, confusion plus Own Tempo immunity, Choice Band-amplified
+   damage, Rain Dance weather, and Perish Song counters only through real
+   controller-selected ROM actions, with transient state observed read-only. A
+   separate live sweep reached the action menu at both trainer-range boundaries
+   across all eight challenge bands (28 regular/final-battle combinations).
+   Validation also
    rejects Boolean numeric aliases, invalid source IDs, forbidden state
    fields, malformed symbol limits, and negative HTTP body lengths with
    structured errors. Gate 2 remains open for the full pre-init Pokémon
