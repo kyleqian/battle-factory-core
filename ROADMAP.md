@@ -496,7 +496,7 @@ compare with 0 diff first at text/menu/HP checkpoints, then on full windows
 as animations land (both trace sets stay committed); Tier-1 tests pin
 damage/order/RNG-consumption values against a RAM dump of the same turns.
 
-### [~] S8 — Post-battle swap + the 7-battle round loop
+### [x] S8 — Post-battle swap + the 7-battle round loop
 Victory flow, the swap offer + factory swap screen, chaining into battles
 2–7, round completion and loss endings (BP beyond the single round stays out
 of scope).
@@ -519,7 +519,7 @@ Stage 8 has three finite completion gates:
    from every index, and seventh-win completion. Tier-1 scenario tests cover
    all seven wins plus representative losses/swaps without battle-number,
    turn-number, or absolute-tick rendering branches.
-2. [ ] **Unique remaining UI:** the swap-YES screen and interactions, loss ending,
+2. [x] **Unique remaining UI:** the swap-YES screen and interactions, loss ending,
    and seventh-win/round-summary ending are implemented and proven with
    committed dense OFF-profile traces over their unique dynamic windows.
    Repeated inter-battle NO traversal may reuse the generic controller and
@@ -611,18 +611,15 @@ dynamic frame: B default-YES **65/65**, B NO **113/113**, B return **113/113**,
 and CANCEL default-YES **65/65**. It reuses the player prompt/response reducer,
 owns no party/rental/result or selection-RNG mutation, and leaves only
 duplicate-species rejection in the finite swap-YES UI audit.
-The duplicate reducer/presentation seam is now implemented as a green logic
-checkpoint: source-relative +24 error readiness, +23 close/reconstruction,
-install-frame rejection, and first fresh enemy input are Tier-1 pinned with
-all identities/result/round ownership preserved. Dense staged framebuffer
-verification is now reproducible with
-`npm run compare:factory-swap-duplicate-species`: its first every-frame
-picker→error→return audit is **1/52 exact** with **97,450** aggregate differing
-pixels (+0 243px, +2 exact, peak +27 4,982px, +51 2,001px). Presentation now
-preserves the already-loaded GROVYLE name/category/pic separately from logical
-staged MAGBY; the bounded remainder is the duplicate OpenMonPic/message/close
-composition. This is an evidence
-checkpoint, not acceptance; Gate 2 and S8 remain open.
+The duplicate reducer/presentation seam is exact across its complete
+picker→OpenMonPic→error→close→reconstruction audit (**52/52**), including
+source-relative task/window/OAM timing, already-loaded versus logical species
+ownership, and first fresh enemy input. Supervisor re-verification on
+2026-07-23 also reconfirmed the loss ending (**210/210 + 414/414**), seventh-win
+ending (**2513/2513 + 1911/1911**), representative swap routes, all Tier-1
+tests, and the production build. The three finite reset gates are therefore
+complete; S8 is closed without extending the canonical Battle-2 march beyond
+tick 33331.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it
@@ -644,7 +641,7 @@ blink, immutable HP drain, super-effective text, no-freeze secondary path,
 through frame 2701 (**363/363**). The next controller display transition at
 2702 and evidence-required geometry/orientation variants remain.
 Level 50 animation coverage is therefore **4 exact / 9 partial / 263
-unsupported**. S8 remains `[~]`.
+unsupported**. This parallel Scene-ON breadth does not block completed S8.
 
 New Stage 8 traces set `"oracleProfile": "battle-scene-off"` explicitly.
 Historical traces below remain Battle Scene ON regression evidence. The
