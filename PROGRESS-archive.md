@@ -1,3 +1,22 @@
+## 362 — S10 Gate-3 typed Battle Script control slice
+
+- **State:** S10 Gate 3 remains open; its first typed, inspectable program and
+  pure control-machine foundation is green but is not wired to production.
+- **Did:** compiled all **619 labels / 3275 source invocations / 6948
+  emissions / 3306 opcode starts** from the four committed catalogs into
+  immutable width-tagged IR, preserving source/wrapper provenance and honest
+  empty-label aliases. Added a generic PC/call-stack/budget machine with
+  injected handlers and source-safe `GOTO`, `RETURN`, `END`, `END2`, `CALL`.
+- **Next:** extend the generic interpreter with source-mapped battle-context
+  and semantic-event contracts before adding battle opcodes; keep unsupported
+  commands structured and do not wire the controller until the rules seam is
+  proven.
+- **Notes:** `END3` remains deliberately unsupported because it owns the
+  external callback stack; all other battle mutation, RNG, presentation, and
+  **244/249** opcodes remain out of scope. Tier-1 **102 files / 1413 tests**
+  and build green; no oracle/pixel claim.
+
+---
 ## 361 — AERIAL ACE exact; Battle Script topology banked
 
 - **State:** S10 Gate 1 remains closed; Scene-ON is now **8 exact / 5 partial

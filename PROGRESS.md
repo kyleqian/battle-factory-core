@@ -4,6 +4,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 365 — Gate-3 event seam + portable FLY state integrated
+
+- **State:** S10 Gate 3 remains open with five source-safe control opcodes and
+  an unwired immutable rules/RNG/event seam. Scene-ON remains **9 exact / 4
+  partial / 263 unsupported**; FLY is a stronger honest partial.
+- **Did:** extracted raw lexical facts for all **249** command handlers,
+  preserving **718** script-pointer references and **93** `T1_READ_*` calls
+  while retaining **549** unparsed line forms explicitly. Staged legal
+  zero-PP-Up FLY in both orientations and added its source-relative charge /
+  strike reducer, OAM evidence, and shared component track.
+- **Next:** add the first source-safe scheduler/semantic handler family behind
+  the generic event seam without fabricating battle context. In animation,
+  install player-back MURKROW art and the portable FLY framebuffer/controller
+  adapter; retain issue #34's seven-frame exclusion.
+- **Notes:** canonical FLY charge **206/206**, strike **256/256**, and SAND
+  **190/190** remain exact. Integrated Tier-1 **107 files / 1438 tests**,
+  build, and coverage green; both FLY fixtures use `ppUps:[0,0,0,0]`.
+
+---
 ## 364 — S10 Gate-3 immutable rules/event execution seam
 
 - **State:** S10 Gate 3 remains open; the typed interpreter now has a pure,
@@ -37,22 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** SAND **269/269 + 269/269 + 190/190**; integrated Tier-1 **104
   files / 1422 tests** and build green. Both new mechanic fixtures use
   `ppUps:[0,0,0,0]`; the independent Gate-2 PP builder remains untouched.
-
----
-## 362 — S10 Gate-3 typed Battle Script control slice
-
-- **State:** S10 Gate 3 remains open; its first typed, inspectable program and
-  pure control-machine foundation is green but is not wired to production.
-- **Did:** compiled all **619 labels / 3275 source invocations / 6948
-  emissions / 3306 opcode starts** from the four committed catalogs into
-  immutable width-tagged IR, preserving source/wrapper provenance and honest
-  empty-label aliases. Added a generic PC/call-stack/budget machine with
-  injected handlers and source-safe `GOTO`, `RETURN`, `END`, `END2`, `CALL`.
-- **Next:** extend the generic interpreter with source-mapped battle-context
-  and semantic-event contracts before adding battle opcodes; keep unsupported
-  commands structured and do not wire the controller until the rules seam is
-  proven.
-- **Notes:** `END3` remains deliberately unsupported because it owns the
-  external callback stack; all other battle mutation, RNG, presentation, and
-  **244/249** opcodes remain out of scope. Tier-1 **102 files / 1413 tests**
-  and build green; no oracle/pixel claim.
