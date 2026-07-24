@@ -586,6 +586,7 @@ import {
   sceneOnQuickAttackView,
   sceneOnRockSlideView,
   sceneOnSandAttackView,
+  sceneOnMudSlapView,
   type SceneOnMovePresentationState,
 } from "./sceneOnPresentation.ts";
 import {
@@ -834,7 +835,11 @@ const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset
 const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
 /** S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section): `gSandAttackDirtSpriteTemplate`'s single static 8x8 tile - see `tools/extract/extract-sandattack-dirt.ts`. */
-const battleAnimMudSand = battleAnimMudSandAsset as { tileset: Tileset; palette: RgbColor[] };
+const battleAnimMudSand = battleAnimMudSandAsset as {
+  tileset: Tileset;
+  mudSlapTileset: Tileset;
+  palette: RgbColor[];
+};
 /** S7/S8 turn 14 (docs/turn14-notes.md's worktree-lane addendum): `gFlyBallUpSpriteTemplate`'s "round shadow" ball sprite (`ANIM_TAG_ROUND_SHADOW`, `round_shadow.png`, 64x64) - see `tools/extract/extract-fly-ball.ts`. */
 const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimSmallEmber = battleAnimSmallEmberAsset as { tileset: Tileset; palette: RgbColor[] };
@@ -15376,6 +15381,139 @@ export function renderSceneOnMovePresentation(
       line1,
       line2,
       Math.min(line1.length + line2.length, view.age - textStartAge + 1),
+    );
+    return;
+  }
+
+  if (state.config.move === "MUD_SLAP") {
+    const view = sceneOnMudSlapView(state);
+    const { attacker, target } = view;
+    const originalOrientation =
+      attacker.species === "PIDGEOTTO"
+      && attacker.geometry.side === "opponent"
+      && target.species === "ONIX"
+      && target.geometry.side === "player";
+    const oppositeOrientation =
+      attacker.species === "PIDGEOTTO"
+      && attacker.geometry.side === "player"
+      && target.species === "ONIX"
+      && target.geometry.side === "opponent";
+    if (!originalOrientation && !oppositeOrientation) {
+      throw new Error(
+        `unsupported staged MUD_SLAP pair ${attacker.species}->${target.species}`,
+      );
+    }
+    const attackerSprite = originalOrientation
+      ? pidgeottoFrontSprite
+      : pidgeottoBackSprite;
+    const targetSprite = originalOrientation
+      ? onixBackSprite
+      : onixFrontSprite;
+
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    if (oppositeOrientation) {
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        target.geometry.spriteCorner.x,
+        target.geometry.spriteCorner.y,
+      );
+      for (const mud of view.mud) {
+        drawSpriteSheet(
+          fb,
+          battleAnimMudSand.mudSlapTileset,
+          battleAnimMudSand.palette,
+          mud.x - 8,
+          mud.y - 8,
+        );
+      }
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        attacker.geometry.spriteCorner.x + view.attackerX2,
+        attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        attacker.geometry.spriteCorner.x + view.attackerX2,
+        attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        target.geometry.spriteCorner.x,
+        target.geometry.spriteCorner.y,
+      );
+      for (const mud of view.mud) {
+        drawSpriteSheet(
+          fb,
+          battleAnimMudSand.mudSlapTileset,
+          battleAnimMudSand.palette,
+          mud.x - 8,
+          mud.y - 8,
+        );
+      }
+    }
+    if (originalOrientation) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        onixPlayerHealthboxContentForState(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender,
+        ),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        featherDanceOnixOpponentHealthbox(
+          state.config.fieldProfile.opponentHp,
+          state.config.fieldProfile.opponentGender ?? "female",
+        ),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        featherDancePidgeottoPlayerHealthbox(
+          state.config.fieldProfile.playerHp,
+          state.config.fieldProfile.playerStatus,
+          state.config.fieldProfile.playerGender ?? "male",
+        ),
+      );
+    }
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      view.moveText.line1,
+      view.moveText.line2,
+      Math.max(
+        0,
+        Math.min(
+          view.moveText.line1.length + view.moveText.line2.length,
+          view.age - state.config.moveTextStartAge + 1,
+        ),
+      ),
     );
     return;
   }

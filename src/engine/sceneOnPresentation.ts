@@ -68,6 +68,11 @@ import {
   type SandAttackAccuracyBanner,
 } from "./sandAttack.ts";
 import {
+  mudSlapAnimationAtAge,
+  type MudSlapAnimationProfile,
+  type MudSlapAnimationState,
+} from "./mudSlap.ts";
+import {
   flyPresentationAtAge,
   type FlyPresentationState,
   type FlyTurn,
@@ -281,6 +286,16 @@ export interface SceneOnSandAttackConfig {
   readonly animationAgeOffset?: number;
 }
 
+export interface SceneOnMudSlapConfig {
+  readonly move: "MUD_SLAP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  readonly animationProfile: Readonly<MudSlapAnimationProfile>;
+  readonly moveTextStartAge: number;
+  readonly animationAgeOffset?: number;
+}
+
 export interface SceneOnFirePunchConfig {
   readonly move: "FIRE_PUNCH";
   readonly attacker: SceneOnPresentationBattler;
@@ -429,6 +444,7 @@ export type SceneOnMoveConfig =
   | SceneOnQuickAttackConfig
   | SceneOnAerialAceConfig
   | SceneOnSandAttackConfig
+  | SceneOnMudSlapConfig
   | SceneOnBounceConfig
   | SceneOnFlyConfig
   | SceneOnDragonBreathConfig
@@ -576,6 +592,15 @@ export interface SceneOnSandAttackView extends SandAttackAnimationState {
   }> | null;
   readonly currentMove: "SAND_ATTACK" | null;
   readonly moveText: Readonly<{ line1: string; line2: "SAND-ATTACK!" }>;
+}
+
+export interface SceneOnMudSlapView extends MudSlapAnimationState {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly currentMove: "MUD_SLAP";
+  readonly moveText: Readonly<{ line1: string; line2: "MUD-SLAP!" }>;
 }
 
 export interface SceneOnFlyView extends FlyPresentationState {
@@ -1383,6 +1408,33 @@ export function sceneOnSandAttackView(
   };
 }
 
+export function sceneOnMudSlapView(
+  state: SceneOnMovePresentationState,
+): SceneOnMudSlapView {
+  if (state.config.move !== "MUD_SLAP") {
+    throw new Error(`expected MUD_SLAP presentation, got ${state.config.move}`);
+  }
+  const animationAge =
+    state.age + (state.config.animationAgeOffset ?? 0);
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...mudSlapAnimationAtAge(
+      animationAge,
+      state.config.attacker.geometry.animationCenter,
+      state.config.attacker.geometry.side,
+      state.config.animationProfile,
+    ),
+    currentMove: "MUD_SLAP",
+    moveText: {
+      line1: `${battlerNameWithPrefix(state.config.attacker)} used`,
+      line2: "MUD-SLAP!",
+    },
+  };
+}
+
 export const PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION = {
   attacker: {
     species: "PIDGEOTTO",
@@ -1459,6 +1511,10 @@ export const PIDGEOTTO_TO_ONIX_SAND_ATTACK_PRESENTATION = {
   ...PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION,
 } as const satisfies Pick<SceneOnSandAttackConfig, "attacker" | "target">;
 
+export const PIDGEOTTO_TO_ONIX_MUD_SLAP_PRESENTATION = {
+  ...PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION,
+} as const satisfies Pick<SceneOnMudSlapConfig, "attacker" | "target">;
+
 export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_AERIAL_ACE_PRESENTATION = {
   attacker:
     PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.attacker,
@@ -1478,6 +1534,17 @@ export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_SAND_ATTACK_PRESENTATION = {
   animationAgeOffset: 4,
 } as const satisfies Pick<
   SceneOnSandAttackConfig,
+  "attacker" | "target" | "animationAgeOffset"
+>;
+
+export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_MUD_SLAP_PRESENTATION = {
+  attacker:
+    PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.attacker,
+  target:
+    PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.target,
+  animationAgeOffset: 4,
+} as const satisfies Pick<
+  SceneOnMudSlapConfig,
   "attacker" | "target" | "animationAgeOffset"
 >;
 

@@ -56,6 +56,12 @@
       "evidence": ["tools/compare/traces/turn13-sandattack.json", "tools/battle-lab/mechanic-sand-attack-pidgeotto-onix.json", "tools/battle-lab/mechanic-sand-attack-player-pidgeotto-onix.json", "tools/compare/fixtures/sand-attack-pidgeotto-onix.json", "tools/compare/fixtures/sand-attack-player-pidgeotto-onix.json", "tools/compare/sandAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py"]
     },
     {
+      "move": "MOVE_MUD_SLAP",
+      "status": "exact",
+      "covered": ["legal zero-PP-Up Level-50 Mechanics Lab PIDGEOTTO to ONIX in both orientations", "complete opponent-front move-owned body at relative animation ages 45-95 / oracle frames 84-134: shared signed slide choreography, six independently modeled five-mud waves, 16x16 frame-1 geometry, source callback-to-display latch, live OAM ordering, and RGB exact at 51/51 each", "complete player-back opposite-side body at relative animation ages 45-95 / oracle frames 80-130: signed fixed-point translation, player-attacker-over-mud-over-opponent-target OAM depth, source OAM and RGB exact at 51/51 each", "generic hit, HP damage, accuracy result, and controller tails remain separately owned and do not form part of the source move-animation script body"],
+      "evidence": ["tools/battle-lab/mechanic-mud-slap-pidgeotto-onix.json", "tools/battle-lab/mechanic-mud-slap-player-pidgeotto-onix.json", "tools/compare/fixtures/mud-slap-pidgeotto-onix.json", "tools/compare/fixtures/mud-slap-player-pidgeotto-onix.json", "tools/compare/sandAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py", "src/engine/mudSandSlide.ts", "src/engine/mudSlap.ts", "tests/mudSlap.test.ts"]
+    },
+    {
       "move": "MOVE_FLY",
       "status": "exact",
       "covered": ["canonical opponent-front MURKROW charge/miss window (213/213 with the seven formerly excluded opening frames restored) and strike (256/256)", "legal zero-PP-Up Level-50 mechanicLab two-turn staging in both orientations", "source-derived player-back MURKROW art plus a source-relative shared-seam framebuffer/controller adapter for both orientations: charge disappearance/lifetime, side-parametric strike origin, source Q8.8 direction-bit parity, affine matrix, AnimTask_ShakeMon/Task_UpdateMonBg target-x2 ownership, persistent equal-priority OAM ordering, semitransparent OBJ-to-next-eligible-backdrop composition, impact/shake, attacker reappearance, healthboxes, immutable HP display, move/result printers, and current-move cleanup", "portable opponent-front MURKROW to player-back ONIX complete charge at oracle frames 47-197 (151/151, zero exclusions) and complete strike/controller cleanup at frames 485-732 (248/248)", "portable player-back MURKROW to opponent-front ONIX complete charge at oracle frames 47-193 (147/147, zero exclusions) and complete strike/controller cleanup at frames 384-627 (244/244); the prior 24-pixel residual was a staged-gender mismatch against the oracle personality, while the frame-441 overlap is resolved by the reusable OAM selection and semitransparent backdrop rule", "the first seven canonical charge frames reuse the already-proven opponent terrain cutoff at screen y=74 through the generic affine-stretch clip parameter; fresh pixel samples show the oracle retains terrain colors there, so the prior affine-sampler attribution was false"],
@@ -143,7 +149,7 @@
         "MOVE_SAND_ATTACK",
         "MOVE_MUD_SLAP"
       ],
-      "goal": "SAND ATTACK exactly proves the shared signed slide and mud-sand asset plus its own gSandAttackDirtSpriteTemplate body in both orientations at 269/269 each. Source-neighbor MUD SLAP shares the slide and asset but uses a distinct 16x16 gMudSlapMudSpriteTemplate and remains unsupported without independent dense move evidence."
+      "goal": "SAND ATTACK remains exact in both orientations at 269/269 each. MUD SLAP independently proves its distinct 16x16 gMudSlapMudSpriteTemplate complete move-owned body in both source-required orientations at 51/51 source OAM plus 51/51 RGB each, reusing the shared signed slide choreography without conflating the two projectile programs."
     },
     {
       "id": "dragon-fire-projectile",

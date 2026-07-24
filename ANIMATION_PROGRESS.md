@@ -44,18 +44,18 @@ remainder.
 
 ## Current handoff
 
-- **State:** **13 exact / 1 partial / 262 unsupported**. BIND is exact for its
-  complete move-owned body in both source-required battle orientations.
-- **Did:** generalized the live BIND compositor across player-back and
-  opponent-front attackers without changing its relative reducer. The new
-  legal zero-PP-Up opponent-front ONIX→player-back MURKROW frames **436–480**
-  / relative ages **0–44** match source task/OAM state **45/45** and live RGB
-  **45/45**. The existing player-back orientation remains **45/45 + 45/45**.
-- **Evidence:** `tools/compare/bindPortable.ts` now selects attacker/target RAM
-  records by side and reruns both unthinned v5 Mechanics Lab probes. Tier-1
-  pins the full signed-rounding-asymmetric opponent sway, back-target geometry
-  and affine peak, plus input immutability. Source inspection finds no further
-  BIND side/species branch after the explicit attacker amplitude negation.
-- **Next:** select the next bounded Level-50 move/component track. Generic hit,
-  HP/result/status/controller tails and `General_TurnTrap` residual tendrils
-  remain separate presentation ownership and do not reopen BIND.
+- **State:** **14 exact / 1 partial / 261 unsupported**. MUD SLAP is exact for
+  its complete move-owned body in both source-required battle orientations;
+  SAND ATTACK remains exact.
+- **Did:** added the shared side-parameterized mud/sand slide choreography and
+  MUD SLAP's independent 16x16 `gMudSlapMudSpriteTemplate` program. Legal
+  zero-PP-Up PIDGEOTTO→ONIX probes cover opponent-front frames **84–134** and
+  player-back frames **80–130**, both relative animation ages **45–95**.
+- **Evidence:** source callback/OAM **51/51 + 51/51** and live RGB
+  **51/51 + 51/51** are exact. Evidence pins the one-frame callback/display
+  latch, six five-sprite waves, signed Q8.8 geometry, frame-1 art, lifetime,
+  stable OAM ordering, and side-dependent attacker/mud/target depth. Both SAND
+  ATTACK dense controls remain **269/269**.
+- **Next:** select the next bounded Level-50 component track. Generic hit,
+  damage/HP, accuracy result, and controller tails remain separate ownership
+  and do not reopen MUD SLAP.

@@ -66,6 +66,7 @@ def main() -> None:
     oam_matrices = oracle.symbols["gOamMatrices"]
     feather_template = oracle.symbols["gFallingFeatherSpriteTemplate"]
     sand_attack_dirt_template = oracle.symbols["gSandAttackDirtSpriteTemplate"]
+    mud_slap_mud_template = oracle.symbols["gMudSlapMudSpriteTemplate"]
     fly_ball_up_template = oracle.symbols["gFlyBallUpSpriteTemplate"]
     fly_ball_attack_template = oracle.symbols["gFlyBallAttackSpriteTemplate"]
     bounce_ball_shrink_template = oracle.symbols["gBounceBallShrinkSpriteTemplate"]
@@ -166,6 +167,7 @@ def main() -> None:
         snapshot = lab.snapshot()
         feather_sprites = []
         sand_attack_dirt_sprites = []
+        mud_slap_mud_sprites = []
         fly_sprites = []
         bounce_sprites = []
         basic_hitsplat_sprites = []
@@ -179,6 +181,8 @@ def main() -> None:
                 feather_sprites.append(feather_record(slot))
             elif template == sand_attack_dirt_template:
                 sand_attack_dirt_sprites.append(sand_attack_dirt_record(slot))
+            elif template == mud_slap_mud_template:
+                mud_slap_mud_sprites.append(sand_attack_dirt_record(slot))
             elif template in (fly_ball_up_template, fly_ball_attack_template):
                 fly_sprites.append({
                     **feather_record(slot),
@@ -218,6 +222,23 @@ def main() -> None:
                     "x": a1 & 0x1FF,
                     "y": a0 & 0xFF,
                 })
+        mud_slap_mud_oam = []
+        if mud_slap_mud_sprites:
+            mud_base = sprites + mud_slap_mud_sprites[0]["slot"] * 0x44
+            mud_tile = u16(mud_base + 4) & 0x3FF
+            mud_palette = (u16(mud_base + 4) >> 12) & 0xF
+            for index in range(128):
+                base = oam_buffer + index * 8
+                a0 = u16(base)
+                a1 = u16(base + 2)
+                a2 = u16(base + 4)
+                if (a2 & 0x3FF) != mud_tile or ((a2 >> 12) & 0xF) != mud_palette:
+                    continue
+                mud_slap_mud_oam.append({
+                    "index": index,
+                    "x": a1 & 0x1FF,
+                    "y": a0 & 0xFF,
+                })
         records.append(
             {
                 "frame": frame,
@@ -235,6 +256,8 @@ def main() -> None:
                 "featherSprites": feather_sprites,
                 "sandAttackDirtSprites": sand_attack_dirt_sprites,
                 "sandAttackDirtOam": sand_attack_dirt_oam,
+                "mudSlapMudSprites": mud_slap_mud_sprites,
+                "mudSlapMudOam": mud_slap_mud_oam,
                 "flySprites": fly_sprites,
                 "bounceSprites": bounce_sprites,
                 "basicHitsplatSprites": basic_hitsplat_sprites,

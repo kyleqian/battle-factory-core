@@ -29,9 +29,6 @@ export const SAND_ATTACK_DIRT_FIRST_DISPLAY_AGE = 56;
 export const SAND_ATTACK_DIRT_WAVE_STRIDE = 4;
 export const SAND_ATTACK_DIRT_LIFETIME = 21;
 
-const OPPONENT_SLIDE_MAGNITUDES: readonly number[] = [3, 6, 9, 9, 9, 4, 0];
-const PLAYER_SLIDE_MAGNITUDES: readonly number[] = [4, 7, 10, 10, 10, 5, 0];
-
 /**
  * Source `SlideMonToOffset` / `SlideMonToOriginalPos`. The script requests
  * x=-10; `InitSpritePosToAnimAttacker(..., TRUE)` mirrors it for an
@@ -41,13 +38,11 @@ export function sandAttackAttackerX2AtAge(
   age: number,
   attackerSide: SandAttackSide,
 ): number {
-  const magnitudes = attackerSide === "opponent"
-    ? OPPONENT_SLIDE_MAGNITUDES
-    : PLAYER_SLIDE_MAGNITUDES;
-  const magnitude =
-    magnitudes[age - SAND_ATTACK_SLIDE_FIRST_DISPLAY_AGE] ?? 0;
-  if (magnitude === 0) return 0;
-  return attackerSide === "opponent" ? magnitude : -magnitude;
+  return mudSandAttackerX2AtAge(
+    age,
+    attackerSide,
+    SAND_ATTACK_SLIDE_FIRST_DISPLAY_AGE,
+  );
 }
 
 /**
@@ -156,3 +151,4 @@ export function sandAttackAccuracyBannerAtAge(
     bg1Y: Math.max(-180, -3 * Math.max(0, age - 110)),
   };
 }
+import { mudSandAttackerX2AtAge } from "./mudSandSlide.ts";
