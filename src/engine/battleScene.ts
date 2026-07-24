@@ -14954,6 +14954,12 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "AERIAL_ACE") {
+    throw new Error(
+      "portable AERIAL_ACE compositor is not yet installed; source-relative state only",
+    );
+  }
+
   const view = sceneOnFirePunchView(state);
   const { attacker, target, resolution } = view;
   const player = attacker.geometry.side === "player" ? attacker : target;

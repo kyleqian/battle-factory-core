@@ -56,6 +56,10 @@ import {
   type QuickAttackAfterimage,
   type QuickAttackOffset,
 } from "./quickAttack.ts";
+import {
+  aerialAceAnimationAtAge,
+  type AerialAceAnimationState,
+} from "./aerialAce.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -117,6 +121,23 @@ export interface SceneOnQuickAttackConfig {
    * player-side move-used line omits "Foe " and releases the body four
    * frames earlier than the opponent-side printer.
    */
+  readonly animationAgeOffset?: number;
+}
+
+export interface SceneOnAerialAceConfig {
+  readonly move: "AERIAL_ACE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  /** Immutable damage/controller result; presentation never calculates it. */
+  readonly controllerProfile: Readonly<{
+    readonly targetHpBefore: number;
+    readonly targetHpAfter: number;
+    readonly hpDrainFirstAge: number;
+    readonly resultTextFirstAge: number;
+    readonly currentMoveResetAge: number;
+  }>;
+  readonly moveTextStartAge: number;
   readonly animationAgeOffset?: number;
 }
 
@@ -265,7 +286,8 @@ export type SceneOnMoveConfig =
   | SceneOnDoubleTeamConfig
   | SceneOnEndeavorConfig
   | SceneOnFeatherDanceConfig
-  | SceneOnQuickAttackConfig;
+  | SceneOnQuickAttackConfig
+  | SceneOnAerialAceConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig = SceneOnMoveConfig,
@@ -377,6 +399,20 @@ export interface SceneOnQuickAttackView {
   }> | null;
   readonly currentMove: "QUICK_ATTACK" | null;
   readonly moveText: Readonly<{ line1: string; line2: string }>;
+}
+
+export interface SceneOnAerialAceView extends AerialAceAnimationState {
+  readonly age: number;
+  readonly animationAge: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly displayedTargetHp: number;
+  readonly resultText: Readonly<{
+    readonly line: "It’s not very effective…";
+    readonly visibleChars: number;
+  }> | null;
+  readonly currentMove: "AERIAL_ACE" | null;
+  readonly moveText: Readonly<{ line1: string; line2: "AERIAL ACE!" }>;
 }
 
 export const FEATHER_DANCE_STAT_MESSAGE_LINE1 = "ONIX’s ATTACK";
@@ -491,7 +527,7 @@ export function createSceneOnMovePresentation<TConfig extends SceneOnMoveConfig>
     throw new Error("ENDEAVOR profile requires targetStartHp >= targetEndHp >= 0");
   }
   if (
-    config.move === "QUICK_ATTACK"
+    (config.move === "QUICK_ATTACK" || config.move === "AERIAL_ACE")
     && (
       config.controllerProfile.targetHpBefore
         < config.controllerProfile.targetHpAfter
@@ -813,6 +849,51 @@ export function sceneOnQuickAttackView(
   };
 }
 
+export function sceneOnAerialAceView(
+  state: SceneOnMovePresentationState,
+): SceneOnAerialAceView {
+  if (state.config.move !== "AERIAL_ACE") {
+    throw new Error(`expected AERIAL_ACE presentation, got ${state.config.move}`);
+  }
+  const { controllerProfile } = state.config;
+  const animationAge =
+    state.age + (state.config.animationAgeOffset ?? 0);
+  const resultLine = "It’s not very effective…" as const;
+  return {
+    age: state.age,
+    animationAge,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...aerialAceAnimationAtAge(
+      animationAge,
+      state.config.attacker.geometry.side,
+    ),
+    displayedTargetHp: displayedHpAfterDamage(state.age, {
+      startHp: controllerProfile.targetHpBefore,
+      endHp: controllerProfile.targetHpAfter,
+      firstDisplayedAge: controllerProfile.hpDrainFirstAge,
+    }),
+    resultText:
+      state.age >= controllerProfile.resultTextFirstAge
+        ? {
+            line: resultLine,
+            visibleChars: Math.min(
+              resultLine.length,
+              state.age - controllerProfile.resultTextFirstAge + 1,
+            ),
+          }
+        : null,
+    currentMove:
+      state.age >= controllerProfile.currentMoveResetAge
+        ? null
+        : "AERIAL_ACE",
+    moveText: {
+      line1: `${battlerNameWithPrefix(state.config.attacker)} used`,
+      line2: "AERIAL ACE!",
+    },
+  };
+}
+
 export const PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION = {
   attacker: {
     species: "PIDGEOTTO",
@@ -878,6 +959,21 @@ export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_QUICK_ATTACK_PRESENTATION = {
   animationAgeOffset: 4,
 } as const satisfies Pick<
   SceneOnQuickAttackConfig,
+  "attacker" | "target" | "animationAgeOffset"
+>;
+
+export const PIDGEOTTO_TO_ONIX_AERIAL_ACE_PRESENTATION = {
+  ...PIDGEOTTO_TO_ONIX_FEATHER_DANCE_PRESENTATION,
+} as const satisfies Pick<SceneOnAerialAceConfig, "attacker" | "target">;
+
+export const PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_AERIAL_ACE_PRESENTATION = {
+  attacker:
+    PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.attacker,
+  target:
+    PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_FEATHER_DANCE_PRESENTATION.target,
+  animationAgeOffset: 4,
+} as const satisfies Pick<
+  SceneOnAerialAceConfig,
   "attacker" | "target" | "animationAgeOffset"
 >;
 
