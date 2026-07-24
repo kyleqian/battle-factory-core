@@ -73,6 +73,7 @@ def main() -> None:
     bounce_ball_land_template = oracle.symbols["gBounceBallLandSpriteTemplate"]
     basic_hitsplat_template = oracle.symbols["gBasicHitSplatSpriteTemplate"]
     dragon_breath_fire_template = oracle.symbols["gDragonBreathFireSpriteTemplate"]
+    speed_dust_template = oracle.symbols["gSpeedDustSpriteTemplate"]
     battle_mons = oracle.symbols["gBattleMons"]
     battler_sprite_ids = oracle.symbols["gBattlerSpriteIds"]
     pltt_unfaded = oracle.symbols["gPlttBufferUnfaded"]
@@ -172,6 +173,7 @@ def main() -> None:
         bounce_sprites = []
         basic_hitsplat_sprites = []
         dragon_breath_fire_sprites = []
+        speed_dust_sprites = []
         for slot in range(64):
             base = sprites + slot * 0x44
             if not (oracle.read_u8(base + 0x3E) & 1):
@@ -205,6 +207,8 @@ def main() -> None:
                 basic_hitsplat_sprites.append(feather_record(slot))
             elif template == dragon_breath_fire_template:
                 dragon_breath_fire_sprites.append(feather_record(slot))
+            elif template == speed_dust_template:
+                speed_dust_sprites.append(feather_record(slot))
         sand_attack_dirt_oam = []
         if sand_attack_dirt_sprites:
             dirt_base = sprites + sand_attack_dirt_sprites[0]["slot"] * 0x44
@@ -262,8 +266,15 @@ def main() -> None:
                 "bounceSprites": bounce_sprites,
                 "basicHitsplatSprites": basic_hitsplat_sprites,
                 "dragonBreathFireSprites": dragon_breath_fire_sprites,
+                "speedDustSprites": speed_dust_sprites,
+                "bg3X": s16(oracle.symbols["gBattle_BG3_X"]),
+                "bg3Y": s16(oracle.symbols["gBattle_BG3_Y"]),
+                "bldcnt": oracle.read_u8(0x04000050)
+                | (oracle.read_u8(0x04000051) << 8),
                 "bldalpha": oracle.read_u8(0x04000052)
                 | (oracle.read_u8(0x04000053) << 8),
+                "bldy": oracle.read_u8(0x04000054)
+                | (oracle.read_u8(0x04000055) << 8),
                 "spriteOrder": [
                     oracle.read_u8(sprite_order + index) for index in range(64)
                 ],

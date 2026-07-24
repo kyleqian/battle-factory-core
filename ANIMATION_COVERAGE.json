@@ -44,6 +44,13 @@
       "evidence": ["tools/compare/traces/turn9-quickattack.json", "tools/battle-lab/mechanic-quick-attack-pidgeotto-onix.json", "tools/battle-lab/mechanic-quick-attack-player-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-player-pidgeotto-onix.json", "tools/compare/fixtures/quick-attack-player-pidgeotto-onix-controller.json", "tools/compare/quickAttackPortable.ts", "tools/probe/run-battle-lab-rgb.py"]
     },
     {
+      "move": "MOVE_EXTREME_SPEED",
+      "status": "partial",
+      "covered": ["legal zero-PP-Up Level-50 Mechanics Lab ARCANINE to DUGTRIO in both source-selected attacker orientations", "opponent-front ARCANINE to player-back DUGTRIO dense default-background fade-out prefix through the black high-speed handoff at animation ages 52-70 / oracle frames 91-109 (19/19 RGB)", "player-back ARCANINE to opponent-front DUGTRIO opposite-side prefix at animation ages 52-70 / oracle frames 87-105 (19/19 RGB), including the four-frame move-printer offset", "pinned source reducers and extracted assets define the side-selected BG_HIGHSPEED tilemaps, signed -2304 Q8.8 scroll, attacker stretch/disappearance, target-side impact displacement, three edge hitsplats, ANIM_TAG_SPEED_DUST sheet/cadence/spawn offsets, restore fade, orientation, and immutability without owning generic hit/HP/result/controller tails"],
+      "evidence": ["tools/battle-lab/mechanic-extreme-speed-arcanine-dugtrio.json", "tools/battle-lab/mechanic-extreme-speed-player-arcanine-dugtrio.json", "tools/compare/fixtures/extreme-speed-arcanine-dugtrio.json", "tools/compare/fixtures/extreme-speed-player-arcanine-dugtrio.json", "tools/compare/extremeSpeedPortable.ts", "tools/probe/run-battle-lab-rgb.py", "src/engine/extremeSpeed.ts", "src/assets/gen/battle-anim-extreme-speed.json", "tests/extremeSpeed.test.ts"],
+      "remaining": "The high-speed background fade-in/composition from opponent frame 110 / player frame 106 onward remains non-exact, followed by the attacker affine disappearance, three impact pulses and edge hitsplats, 24 speed-dust spawns, blink reappearance, restore fade, and script cleanup. Exact requires both complete move-owned orientation windows at 0 RGB diff; generic hit, HP/result/status, and controller tails remain separately owned."
+    },
+    {
       "move": "MOVE_AERIAL_ACE",
       "status": "exact",
       "covered": ["canonical opponent-front PIDGEOTTO to player-back ONIX (93/93)", "portable legal zero-PP-Up opponent-front PIDGEOTTO to player-back ONIX at relative ages 7-242 / oracle frames 46-281 (236/236): complete kickoff, independent cutting-slice/ellipse/TraceMon/palette/shake body, generic hit, immutable 117->108 HP drain, result printer, command release, and MOVE_NONE cleanup", "portable legal zero-PP-Up player-back PIDGEOTTO to opponent-front ONIX at relative ages 7-238 / oracle frames 46-277 (232/232): complete opposite-side window through the shared seam, including source target-anchored slice geometry, signed ellipse, independent clone OAM order, opponent-front monbg base-corner handoff, immutable 117->108 result, and MOVE_NONE cleanup"],
@@ -130,13 +137,17 @@
       "id": "fast-contact",
       "components": [
         "asset:ANIM_TAG_IMPACT",
-        "task:AnimTask_ShakeMon"
+        "asset:ANIM_TAG_SPEED_DUST",
+        "task:AnimTask_ShakeMon",
+        "visualCommand:fadetobg",
+        "visualCommand:restorebg"
       ],
       "representatives": [
         "MOVE_QUICK_ATTACK",
+        "MOVE_EXTREME_SPEED",
         "MOVE_AERIAL_ACE"
       ],
-      "goal": "QUICK ATTACK exactly proves complete opposite-side Scene-ON windows at 219/219 and 214/214. AERIAL ACE independently proves its complete 236/236 and 232/232 windows, including target-anchored cutting-slice geometry, signed monbg ellipse travel, independent TraceMon OBJ order, palette/shake choreography, opponent-front monbg corner ownership, immutable controller results, and MOVE_NONE cleanup."
+      "goal": "QUICK ATTACK exactly proves complete opposite-side Scene-ON windows at 219/219 and 214/214. AERIAL ACE independently proves its complete 236/236 and 232/232 windows. EXTREME SPEED partially proves source-selected fadetobg orientation prefixes at 19/19 each and pins its extracted high-speed/dust component data; its high-speed fade-in, affine/contact/dust/reappearance/restore body remains independently unsupported by exact RGB evidence."
     },
     {
       "id": "mud-sand-scatter",

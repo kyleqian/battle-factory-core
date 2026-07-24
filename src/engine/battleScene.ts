@@ -552,9 +552,11 @@ import partyMenuStatusOverlayMagbyAsset from "../assets/gen/party-menu-status-ov
 import partyExitObjAsset from "../assets/gen/turn15-party-exit-obj.json" with { type: "json" };
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
 import faintAttackDarkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
+import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, type PartyMenuIconLayer } from "./partySelect.ts";
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
+import { drawTileBg as drawExtractedTileBg } from "./bg.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET, KABUTO_FRONT_ANIM_START_OFFSET } from "./kabutoSendOut.ts";
@@ -569,7 +571,7 @@ import {
   battle2RockSlideMechanismPressTick,
   battle2Turn1State,
 } from "./battle2Turn1.ts";
-import { drawMode0Objects, drawMode0Ppu, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
+import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import {
   sceneOnDoubleTeamView,
@@ -584,6 +586,7 @@ import {
   sceneOnBounceView,
   sceneOnIcePunchView,
   sceneOnQuickAttackView,
+  sceneOnExtremeSpeedView,
   sceneOnRockSlideView,
   sceneOnSandAttackView,
   sceneOnMudSlapView,
@@ -827,6 +830,8 @@ const PIDGEOTTO_CORNER = { x: 144, y: 19 };
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6/§7): MURKROW's own `yOffset` (11, `mon-pic-coords.json`) is bit-identical to Pidgeotto's, so the same `(144, 8+yOffset)` formula lands on the identical corner - not a coincidence, both front pics share the same 48px-wide/11px-yOffset box. */
 const murkrowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MURKROW!;
 const spoinkFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SPOINK!;
+const arcanineFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARCANINE!;
+const dugtrioFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DUGTRIO!;
 const MURKROW_CORNER = { x: 144, y: 19 };
 const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
@@ -856,6 +861,16 @@ const battleAnimIceCube = battleAnimIceCubeAsset as {
 const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
 const murkrowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MURKROW!;
 const spoinkBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SPOINK!;
+const arcanineBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARCANINE!;
+const dugtrioBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DUGTRIO!;
+const extremeSpeedBg = (extremeSpeedAsset as {
+  background: {
+    tileset: Tileset;
+    palette: RgbColor[];
+    opponentTilemap: Tilemap;
+    playerTilemap: Tilemap;
+  };
+}).background;
 const battleAnimIceCrystalLarge: Tileset = {
   columns: 1,
   rows: 2,
@@ -1039,6 +1054,38 @@ function featherDancePidgeottoPlayerHealthbox(
     featherDancePidgeottoPlayerHealthboxes.set(key, cached);
   }
   return cached;
+}
+
+function extremeSpeedOpponentHealthbox(
+  name: "ARCANINE" | "DUGTRIO",
+  hp: number,
+  maxHp: number,
+  gender: "male" | "female",
+): ReturnType<typeof composeOpponentHealthbox> {
+  return composeOpponentHealthbox(healthboxAssemblyAssets, {
+    name,
+    level: 50,
+    gender,
+    hpFraction: hp / maxHp,
+    status: "none",
+  });
+}
+
+function extremeSpeedPlayerHealthbox(
+  name: "ARCANINE" | "DUGTRIO",
+  hp: number,
+  maxHp: number,
+  gender: "male" | "female",
+): ReturnType<typeof composePlayerHealthbox> {
+  return composePlayerHealthbox(playerHealthboxAssets, {
+    name,
+    level: 50,
+    gender,
+    hpFraction: hp / maxHp,
+    status: "none",
+    currentHp: hp,
+    maxHp,
+  });
 }
 
 const flyMurkrowPlayerHealthboxes = new Map<
@@ -14093,6 +14140,109 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "EXTREME_SPEED") {
+    const view = sceneOnExtremeSpeedView(state);
+    const playerToOpponent =
+      view.attacker.species === "ARCANINE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "DUGTRIO"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ARCANINE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "DUGTRIO"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged EXTREME_SPEED pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const scrollX =
+      ((view.background.scrollX % 256) + 256) % 256;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.background.bldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.background.background === "highspeed") {
+      drawExtractedTileBg(
+        fb,
+        {
+          tileset: extremeSpeedBg.tileset,
+          tilemap: playerToOpponent
+            ? extremeSpeedBg.playerTilemap
+            : extremeSpeedBg.opponentTilemap,
+          subpalettes: [gpuDarken(extremeSpeedBg.palette)],
+        },
+        scrollX,
+      );
+    } else {
+      drawExtractedTileBg(
+        fb,
+        {
+          tileset: battleBg.static.tileset,
+          tilemap: battleBg.static.tilemap,
+          subpalettes: battleBg.palette.map(gpuDarken),
+        },
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      playerToOpponent ? dugtrioFrontSprite.tileset : arcanineFrontSprite.tileset,
+      playerToOpponent ? dugtrioFrontSprite.palette : arcanineFrontSprite.palette,
+      144,
+      playerToOpponent ? 21 : 10,
+    );
+    drawSpriteSheet(
+      fb,
+      playerToOpponent ? arcanineBackSprite.tileset : dugtrioBackSprite.tileset,
+      playerToOpponent ? arcanineBackSprite.palette : dugtrioBackSprite.palette,
+      40,
+      playerToOpponent ? 54 : 59,
+    );
+    if (playerToOpponent) {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        extremeSpeedOpponentHealthbox("DUGTRIO", 101, 101, "female"),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        extremeSpeedPlayerHealthbox("ARCANINE", 156, 156, "male"),
+      );
+    } else {
+      drawSendOutHealthbox(
+        fb,
+        0,
+        extremeSpeedOpponentHealthbox("ARCANINE", 156, 156, "male"),
+      );
+      drawComposedPlayerHealthbox(
+        fb,
+        extremeSpeedPlayerHealthbox("DUGTRIO", 101, 101, "male"),
+      );
+    }
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ARCANINE used" : "Foe ARCANINE used",
+      "EXTREMESPEED!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "BIND") {
     // RunTasks mutates battler x2/affine state after this frame's OAM buffer
     // has already been built; the live framebuffer therefore trails the
