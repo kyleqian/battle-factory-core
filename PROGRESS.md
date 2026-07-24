@@ -4,6 +4,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 368 — Gate-3 scheduler family + mechanical command audit integrated
+
+- **State:** S10 Gate 3 remains open with ten source-safe opcodes and an
+  unwired immutable scheduler/controller/source-context seam.
+- **Did:** accepted source-exact `PRINTSTRING`/`WAITMESSAGE`/`PAUSE`, including
+  controller block, shared-u16 counter progress/wrap, and display-latch
+  lifecycle. Added a lossless mechanical audit joining all **249** handlers
+  to all **3306** concrete starts; its deliberately narrow lexical rule finds
+  **22** fixed-literal-advance candidates without claiming runtime safety.
+- **Next:** use the audit to choose one bounded source family whose complete
+  battle context is explicit. Keep unsupported commands structured; do not
+  wire production controllers/renderers or touch the independent PP work.
+- **Notes:** exact supported IDs remain
+  **16/18/40/57/58/60/61/62/65/131**. Tier-1 **110 files / 1461 tests** and
+  build green; no new oracle/pixel claim.
+
+---
 ## 367 — Gate-3 immutable scheduler state + wait commands
 
 - **State:** S10 Gate 3 remains open with ten source-safe opcodes and an
@@ -38,22 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   committed IR remains **3306** instructions. Tier-1 **108 files / 1446
   tests** and build green; Scene-OFF oracle contract answered, with no new
   oracle/pixel claim.
-
----
-## 365 — Gate-3 event seam + portable FLY state integrated
-
-- **State:** S10 Gate 3 remains open with five source-safe control opcodes and
-  an unwired immutable rules/RNG/event seam. Scene-ON remains **9 exact / 4
-  partial / 263 unsupported**; FLY is a stronger honest partial.
-- **Did:** extracted raw lexical facts for all **249** command handlers,
-  preserving **718** script-pointer references and **93** `T1_READ_*` calls
-  while retaining **549** unparsed line forms explicitly. Staged legal
-  zero-PP-Up FLY in both orientations and added its source-relative charge /
-  strike reducer, OAM evidence, and shared component track.
-- **Next:** add the first source-safe scheduler/semantic handler family behind
-  the generic event seam without fabricating battle context. In animation,
-  install player-back MURKROW art and the portable FLY framebuffer/controller
-  adapter; retain issue #34's seven-frame exclusion.
-- **Notes:** canonical FLY charge **206/206**, strike **256/256**, and SAND
-  **190/190** remain exact. Integrated Tier-1 **107 files / 1438 tests**,
-  build, and coverage green; both FLY fixtures use `ppUps:[0,0,0,0]`.
