@@ -94,6 +94,10 @@ const FRONT_SPECIES: Record<string, string> = {
   PIDGEOTTO: "pidgeotto",
   KABUTO: "kabuto",
   ONIX: "onix",
+  // MOVE_BOUNCE's legal portable Scene-ON stage uses set 121 SPOINK as
+  // the opponent-side attacker. Its front pic is consumed by the shared
+  // presentation compositor before the charge ball hides the battler.
+  SPOINK: "spoink",
 };
 
 const backSprites: Record<string, Sprite> = {};
