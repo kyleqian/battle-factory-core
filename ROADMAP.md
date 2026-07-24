@@ -942,6 +942,31 @@ future stronger policy. Tier-1 tests may construct arbitrary validated
 transient battle states for focused mechanics coverage; this does not relax
 Gate 2's prohibition on injecting transient state into the stock-ROM oracle.
 
+**Immediate vertical-composition reset (2026-07-24, user-directed):** pause
+large isolated mechanic expansion. The next Gate-3 acceptance unit is one
+headless executable slice: construct a validated immutable `BattleState` with
+explicit RNG, submit one currently requested legal move through
+`BattleDecisionBoundary`, run a real source-complete Battle Script machine
+path, and return frozen rules state, ordered semantic events, updated RNG, and
+the next request, barrier, or outcome. Canonical serialization must replay the
+same transition. This slice must not import `core.ts`, `battleScene.ts`,
+rendering, wall clock, oracle, or emulator code.
+
+Opcode 0 remains unregistered until all of `Cmd_attackcanceler` is executable,
+including its delegated controller/Pressure-PP/resume effects and the ordered
+Snatch, Lightning Rod, Protect, and fallthrough branches. Current source
+evidence proves Snatch absent from all Factory sets and Lightning Rod
+redirection unreachable in singles, but both remain source-required command
+semantics. If completing that command is not one bounded slice, use the
+smallest already-source-complete opcode sequence among the existing handlers
+to prove the adapter and enumerate this remainder explicitly; never partially
+register opcode 0.
+
+Immediately after the kernel composition is proven, add the minimal injected
+Factory-AI policy boundary: source-faithful view plus kernel-provided legal
+decisions plus explicit RNG returns one legal decision, updated RNG, and an
+inspectable trace, then submits through the same kernel boundary as a player.
+
 S10 has six ordered completion gates:
 
 1. [x] **Complete Factory corpus:** mechanically extract and validate all 300

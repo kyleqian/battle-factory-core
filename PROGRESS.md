@@ -19,10 +19,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   target bit, pushes the unchanged canceler PC onto an explicit resumable
   `BattleScriptsStack`, and hands off to `BattleScript_MagicCoatBounce`;
   not-taken continues before Snatch without mutation.
-- **Next:** keep opcode 0 unregistered. The next exact source boundary is the
-  Snatch intercept after a continuing Magic Coat result; Lightning Rod,
-  Protect, Pressure PP mutation, resume-script role swapping, and every
-  integration layer remain separately unowned.
+- **Next:** pause further isolated rule breadth. Prove one headless executable
+  vertical slice from a currently requested legal move through the published
+  `BattleDecisionBoundary` and a real source-complete Battle Script machine
+  path, returning frozen next state/events/RNG and the next request, barrier,
+  or outcome with canonical replay. Keep opcode 0 unregistered unless its full
+  command is completed; otherwise use the smallest already-complete opcode
+  sequence. Then add the minimal injected Factory-AI policy on the same kernel
+  boundary.
 - **Notes:** both singles sides, all **3** legal Level-50 Magic Coat sets,
   all generated affected/unaffected move membership, armed/unarmed target,
   exact clear, prior bits/markers, canceler effects **1/2**, Soundproof, no
@@ -31,7 +35,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   zero RNG are pinned. Focused **3 files / 14 tests**; integrated **158/1906**,
   production build, OFF v5 info (`9c89c741…`), validated **684-frame** probe
   (arm **41**, PP **66/240**, clear **214**, bounce/resume **390–393**), and
-  diff check green. Code commit `57969b5`; pixel diff N/A.
+  diff check green. Opcode 0's explicit remaining source work is executable
+  Snatch, singles-unreachable-but-required Lightning Rod, Protect/fallthrough,
+  delegated Pressure PP/resume/controller/history effects, and the complete
+  machine adapter over the already-ported prefix. Code commit `57969b5`; pixel
+  diff N/A.
 
 ---
 ## 411 — Factory-scoped obedience composed
