@@ -45,12 +45,26 @@ const APP_STAGES: Readonly<Record<string, AppStage>> = {
       ...state,
       factorySwap: {
         ...state.factorySwap,
+        // The stage is applied after frame 29935's deliberately rejected
+        // install-edge A has already passed through tick().  Reconstruct the
+        // source's now-settled HandleChooseMons callback before applying the
+        // staged roster identity; otherwise the canonical GROVYLE route has
+        // already entered acceptPrompt and this fixture never exercises the
+        // live duplicate-species reducer at all.
+        phaseElapsed: 0,
+        speciesNameFade: {
+          ...state.factorySwap.speciesNameFade,
+          active: true,
+        },
         loadedDisplaySpecies:
           state.factorySwap.controller.enemyParty[
             state.factorySwap.controller.displayCursor as 0 | 1 | 2
           ]?.species ?? null,
         controller: {
           ...state.factorySwap.controller,
+          phase: "enemyPicker",
+          inputReady: true,
+          enemyMonId: null,
           enemyParty: [
             {
               ...state.factorySwap.controller.enemyParty[0],

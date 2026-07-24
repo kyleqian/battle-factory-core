@@ -122,6 +122,8 @@ export interface FactorySwapRenderView {
   readonly selectedBallIndex?: 0 | 1 | 2 | null;
   readonly selectedBallTile?: 0 | 16 | 32 | null;
   readonly loadedDisplaySpecies?: string | null;
+  /** The duplicate task has copied the logical species into its fade window. */
+  readonly duplicateDisplayCopied?: boolean;
 }
 
 function drawActionPiece(
@@ -347,13 +349,30 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
   const displaySelected =
     infoIndex !== null &&
     displayIndex !== null &&
-    !(state.phase === "enemyPicker" && phaseElapsed === 0) &&
+    !(
+      state.phase === "enemyPicker" &&
+      phaseElapsed === 0 &&
+      !view.duplicateDisplayCopied
+    ) &&
     !(returnedPlayerPicker && phaseElapsed === 0) &&
     !(playerSwitch && phaseElapsed < 110)
       ? party[displayIndex]
       : null;
+  const duplicate =
+    state.phase === "duplicateSpecies" || state.phase === "duplicateReturn";
+  const duplicateDisplayCopied =
+    state.phase === "duplicateReturn" ||
+    (state.phase === "duplicateSpecies" && phaseElapsed >= 1) ||
+    view.duplicateDisplayCopied;
   const displayedSpecies =
-    view.loadedDisplaySpecies ?? displaySelected?.species ?? "";
+    state.phase === "enemyPicker" &&
+      phaseElapsed === 0 &&
+      view.loadedDisplaySpecies &&
+      !view.duplicateDisplayCopied
+      ? ""
+      : duplicateDisplayCopied
+      ? displaySelected?.species ?? ""
+      : view.loadedDisplaySpecies ?? displaySelected?.species ?? "";
   const speciesCoeff = enemySwitch
     ? factorySwapEnemySpeciesRenderCoeff(phaseElapsed)
     : playerSwitch && phaseElapsed < 71
@@ -379,7 +398,9 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
       // FadeOutSpeciesName recursively left PALNUM_TEXT red at 5-bit 7;
       // the reset coeff 6 is still applied when transition species appears.
       ? { r: blendComponentToward(57, 0, 6), g: 0, b: 0 }
-    : state.phase === "enemyPicker" && phaseElapsed === 1
+    : state.phase === "enemyPicker" &&
+        phaseElapsed === 1 &&
+        !view.duplicateDisplayCopied
       ? { r: 8, g: 0, b: 0 }
       : speciesNameColor(speciesCoeff);
   const renderedBallTiles = [
@@ -527,9 +548,11 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
           state.phase === "acceptExit" ||
           state.phase === "acceptReturn"
       ? "Accept this POKéMON?"
-      : state.phase === "duplicateSpecies" ||
-          (state.phase === "duplicateReturn" && phaseElapsed < 21)
-        ? "Same POKéMON in party already."
+      : (state.phase === "duplicateSpecies" && phaseElapsed >= 25) ||
+          (state.phase === "duplicateReturn" &&
+            phaseElapsed >= 1 &&
+            phaseElapsed < 23)
+        ? "Same \uE053\uE054 in party already."
       : playerSwitch && phaseElapsed < 108
         ? "Select POKéMON to accept."
       : enemy
@@ -563,7 +586,11 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     state.displayCursor < 3 &&
     state.arrowCursor < 3 &&
     (!enemySwitch || phaseElapsed <= 21) &&
-    (state.phase !== "enemyPicker" || phaseElapsed >= 1) &&
+    (
+      state.phase !== "enemyPicker" ||
+      phaseElapsed >= 1 ||
+      view.duplicateDisplayCopied
+    ) &&
     (!returnedPlayerPicker || phaseElapsed >= 1) &&
     (!playerSwitch || phaseElapsed >= 110);
   if (arrowVisible) {
@@ -674,12 +701,12 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     const returning = state.phase === "playerPickerReturn";
     const ballVisuals: BallVisual[] = renderedBallTiles.map((firstTile, index) => ({
       palette: state.phase === "acceptPrompt" || state.phase === "acceptExit" ||
-        state.phase === "acceptReturn"
+        state.phase === "acceptReturn" || duplicate
         ? pokeball.grayPalette
         : pokeball.selectedPalette,
       firstTileRow:
         state.phase === "acceptPrompt" || state.phase === "acceptExit" ||
-          state.phase === "acceptReturn"
+          state.phase === "acceptReturn" || duplicate
           ? 0
           : firstTile / 4,
       centerX: 48 * index + 72,
@@ -704,7 +731,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
     drawMonPicFaded(
       fb,
       adjustedMonPic,
-      view.loadedDisplaySpecies ?? selected.species,
+      duplicate ? selected.species : view.loadedDisplaySpecies ?? selected.species,
       48 * state.displayCursor + 72,
       bgFade,
       objFade,

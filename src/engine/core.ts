@@ -1942,6 +1942,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
           ? null
           : factorySwapPlayerOptionBallTile(swap.selectedBallClock),
       loadedDisplaySpecies: swap.loadedDisplaySpecies,
+      duplicateDisplayCopied: swap.returnedFromDuplicate ?? false,
     });
   }
   if (state.postwin) return renderPostwinState(state);

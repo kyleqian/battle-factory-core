@@ -545,33 +545,72 @@ export function advanceFactorySwapPresentation(
 export function factorySwapDuplicateMonPicVisual(
   phaseElapsed: number,
 ): MonPicVisual {
-  if (phaseElapsed >= 23) {
-    return getMonPicVisual({ phase: "open", elapsed: 0, variant: "B", blended: true });
+  const hidden: MonPicVisual = {
+    flashWidth: 0,
+    flashBlended: true,
+    window: null,
+    spriteVisible: false,
+    menuTextVisible: false,
+    menuHighlightVisible: false,
+  };
+  if (phaseElapsed < 2) return hidden;
+  if (phaseElapsed < 14) {
+    const flashWidths = [1, 1, 4, 4, 8, 8, 16, 16, 32, 32, 64, 64] as const;
+    return {
+      ...hidden,
+      flashWidth: flashWidths[phaseElapsed - 2]!,
+    };
   }
-  return getMonPicVisual({
-    phase: "opening",
-    elapsed: phaseElapsed + 2,
-    variant: "B",
-    blended: true,
-  });
+  const windows = [
+    { top: 64, bottom: 65 },
+    { top: 60, bottom: 69 },
+    { top: 56, bottom: 73 },
+    { top: 52, bottom: 77 },
+    { top: 44, bottom: 85 },
+    { top: 40, bottom: 89 },
+    { top: 40, bottom: 89 },
+  ] as const;
+  if (phaseElapsed < 21) {
+    return { ...hidden, window: windows[phaseElapsed - 14]! };
+  }
+  return {
+    ...hidden,
+    window: { top: 32, bottom: 96 },
+    // Swap_CreateMonSprite's new OAM entry first reaches the framebuffer
+    // three frames after the full window. If B is taken at the first ready
+    // edge, this is the same frame CloseMonPic destroys the logical sprite,
+    // so its one buffered OAM frame is still visible during return +0.
+    spriteVisible: phaseElapsed >= 24,
+  };
 }
 
 /** Error-response close owned entirely by Swap_TaskCantHaveSameMons. */
 export function factorySwapDuplicateReturnMonPicVisual(
   phaseElapsed: number,
 ): MonPicVisual {
+  const withoutPopup = (visual: MonPicVisual): MonPicVisual => ({
+    ...visual,
+    menuTextVisible: false,
+    menuHighlightVisible: false,
+  });
   if (phaseElapsed === 0) {
-    return getMonPicVisual({ phase: "open", elapsed: 0, variant: "B", blended: true });
+    return withoutPopup(
+      getMonPicVisual({ phase: "open", elapsed: 0, variant: "B", blended: true }),
+    );
   }
   if (phaseElapsed >= 21) {
-    return getMonPicVisual({ phase: "closed", elapsed: 0, variant: "B", blended: true });
+    return withoutPopup(
+      getMonPicVisual({ phase: "closed", elapsed: 0, variant: "B", blended: true }),
+    );
   }
-  return getMonPicVisual({
-    phase: "closing",
-    elapsed: phaseElapsed - 1,
-    variant: "B",
-    blended: true,
-  });
+  return withoutPopup(
+    getMonPicVisual({
+      phase: "closing",
+      elapsed: phaseElapsed - 1,
+      variant: "B",
+      blended: true,
+    }),
+  );
 }
 
 /** Accepted normal-summary B: CloseSummaryScreen will call CB2_InitSwapScreen. */

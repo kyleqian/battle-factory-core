@@ -1,3 +1,22 @@
+## 344 — S8 OFF enemy-origin swap quit: **GREEN — 356/356 exact**
+
+- **State:** enemy picker B and enemy CANCEL now share the existing quit
+  prompt/response reducer while using the source's enemy-only two-button
+  teardown/reconstruction. Only duplicate-species rejection remains in the
+  finite swap-YES UI audit; S8 stays open.
+- **Did:** wired staggered PKMN FOR SWAP/CANCEL slide-out, default-YES
+  no-mutation exit, NO/B reverse transition, install-frame rejection, and
+  first fresh enemy input. Tier-1 pins source-relative gates, five actions,
+  TRUE result/field handoff, immutable parties/rentals, and no round decision.
+- **Next:** implement the bounded duplicate-species rejection fixture. Do not
+  resume the retired canonical Battle-2 march.
+- **Notes:** new B YES **65/65**, B NO **113/113**, B return **113/113**,
+  CANCEL YES **65/65**; Tier-1 **1262/1262**, build **5.675 MB**. Existing
+  player quit **68/68** and sampled swap regressions **69/69 + 43/43 +
+  69/69 + 66/66 + 130/130 + 115/115** unchanged. No absolute tick lookup,
+  framebuffer asset, mutation, or selection RNG.
+
+---
 ## 343 — S8 OFF swap SUMMARY return: **GREEN — 147/147 exact**
 
 - **State:** player popup `SUMMARY` now round-trips through the shared normal

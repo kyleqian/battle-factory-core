@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 347 — S8 OFF duplicate-species composition: **GREEN — 52/52 exact**
+
+- **State:** the final enumerated swap-YES UI remainder is exact across the
+  staged duplicate picker, OpenMonPic, source error, close, reconstruction,
+  and first fresh input. All finite Gate-2 UI fixtures are now green; ROADMAP
+  remains untouched for supervisor verification.
+- **Did:** corrected the dev-only stage to exercise the live duplicate branch,
+  then added phase-relative direct-open window/OAM timing, PKMN error chrome,
+  gray target-2 ball composition, logical-vs-loaded species-window ownership,
+  popup suppression, and returned-picker copy transients.
+- **Next:** supervisor verify the finite S8 gates and record stage disposition;
+  do not resume canonical Battle 2 after tick 33331.
+- **Notes:** duplicate **52/52**, from **1/52 / 97,450 px** to zero diff.
+  Regressions: **130/130 + 66/66 + 69/69 + 44/44 + 59/59 + 113/113**.
+  Tier-1 **1268/1268**, build **5.679 MB**. No logic/RNG/identity mutation,
+  absolute ticks, framebuffer assets, runtime oracle/ROM, or ROADMAP edits.
+
+---
 ## 346 — S8 OFF duplicate-species loaded-display repair: **GREEN PARTIAL**
 
 - **State:** presentation preserves the source's already-loaded GROVYLE display
@@ -35,22 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** Tier-1 **1267/1267**, build **5.677 MB**; existing enemy accept
   prompt **66/66 exact**. No absolute ticks, framebuffer assets, mutation,
   round ownership, or selection RNG.
-
----
-## 344 — S8 OFF enemy-origin swap quit: **GREEN — 356/356 exact**
-
-- **State:** enemy picker B and enemy CANCEL now share the existing quit
-  prompt/response reducer while using the source's enemy-only two-button
-  teardown/reconstruction. Only duplicate-species rejection remains in the
-  finite swap-YES UI audit; S8 stays open.
-- **Did:** wired staggered PKMN FOR SWAP/CANCEL slide-out, default-YES
-  no-mutation exit, NO/B reverse transition, install-frame rejection, and
-  first fresh enemy input. Tier-1 pins source-relative gates, five actions,
-  TRUE result/field handoff, immutable parties/rentals, and no round decision.
-- **Next:** implement the bounded duplicate-species rejection fixture. Do not
-  resume the retired canonical Battle-2 march.
-- **Notes:** new B YES **65/65**, B NO **113/113**, B return **113/113**,
-  CANCEL YES **65/65**; Tier-1 **1262/1262**, build **5.675 MB**. Existing
-  player quit **68/68** and sampled swap regressions **69/69 + 43/43 +
-  69/69 + 66/66 + 130/130 + 115/115** unchanged. No absolute tick lookup,
-  framebuffer asset, mutation, or selection RNG.

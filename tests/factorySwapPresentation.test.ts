@@ -859,14 +859,46 @@ describe("live Factory swap presentation adapter", () => {
       mutationCommitted: false,
       result: null,
     });
-    expect(factorySwapDuplicateMonPicVisual(23).spriteVisible).toBe(true);
+    expect(
+      Array.from(
+        { length: 12 },
+        (_, index) => factorySwapDuplicateMonPicVisual(index + 2).flashWidth,
+      ),
+    ).toEqual([1, 1, 4, 4, 8, 8, 16, 16, 32, 32, 64, 64]);
+    expect(
+      Array.from(
+        { length: 8 },
+        (_, index) => factorySwapDuplicateMonPicVisual(index + 14).window,
+      ),
+    ).toEqual([
+      { top: 64, bottom: 65 },
+      { top: 60, bottom: 69 },
+      { top: 56, bottom: 73 },
+      { top: 52, bottom: 77 },
+      { top: 44, bottom: 85 },
+      { top: 40, bottom: 89 },
+      { top: 40, bottom: 89 },
+      { top: 32, bottom: 96 },
+    ]);
+    expect(factorySwapDuplicateMonPicVisual(23)).toMatchObject({
+      window: { top: 32, bottom: 96 },
+      spriteVisible: false,
+      menuTextVisible: false,
+      menuHighlightVisible: false,
+    });
+    expect(factorySwapDuplicateMonPicVisual(24).spriteVisible).toBe(true);
     state = advance(state, 23);
     expect(state.loadedDisplaySpecies).toBe("GROVYLE");
     expect(handleFactorySwapPresentationInput(state, "B")).toBe(state);
     state = advance(state, 1);
     state = handleFactorySwapPresentationInput(state, "B");
     expect(state.controller.phase).toBe("duplicateReturn");
-    expect(factorySwapDuplicateReturnMonPicVisual(1).window).not.toBeNull();
+    expect(factorySwapDuplicateReturnMonPicVisual(1)).toMatchObject({
+      window: { top: 32, bottom: 96 },
+      spriteVisible: true,
+      menuTextVisible: false,
+      menuHighlightVisible: false,
+    });
     expect(factorySwapDuplicateReturnMonPicVisual(21).window).toBeNull();
     state = advance(state, 22);
     expect(state.loadedDisplaySpecies).toBe("GROVYLE");
