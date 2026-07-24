@@ -8,18 +8,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** the staged seventh-win route is gaplessly exact through exchange,
   party/status restore at +3549, save-SE wait, record menu creation at +4422,
-  and first accepted default-NO input at +4424.
+  and first accepted default-NO input at +4424. Player-origin swap quit
+  evidence now pins its prompt/YES/NO/B boundaries without a Battle-2 replay.
 - **Did:** added the phase-relative exchange/restore continuation and reused one
   shared record prompt/menu reducer and renderer for LOSS and round-won.
   Tier-1 pins early-gate rejection, restore/clear, menu creation/visibility/
   input, and immutable round rules, RNG, battle index, parties, and schedule.
-- **Next:** keep Gate 2 open only for the four audited swap-YES remainders:
-  SUMMARY return, quit flows, enemy `PKMN FOR SWAP` return, and
-  duplicate-species rejection. Use staged short OFF windows.
+  ICE PUNCH's complete inward spiral is now **73/73 exact**.
+- **Next:** implement the reusable player-origin quit presentation from the
+  staged OFF fixture (prompt, YES exit, NO/B return). Gate 2 also retains
+  SUMMARY return, enemy `PKMN FOR SWAP`, enemy quit chrome, and
+  duplicate-species rejection. Animation continues at ICE frame 2412.
 - **Notes:** seventh-win **2513/2513 + 1911/1911**, LOSS **210/210 + 414/414**.
-  Tier-1 **1244/1244**, build **5.665 MB**. No absolute tick,
-  framebuffer/screenshot asset, Battles 2–7 replay, YES recording/save branch,
-  repeat challenge, or Stage 8 completion claim.
+  Merged Tier-1 **1245/1245**, build **5.665 MB**; ICE **73/73**, FIRE PUNCH
+  **225/225**. No deferred questions. No absolute tick, framebuffer/screenshot
+  asset, Battles 2–7 replay, YES recording/save branch, repeat challenge, or
+  Stage 8 completion claim.
 
 ---
 ## 339 — S8 OFF seventh-win roundWon through fanfare: **GREEN — 2513/2513 exact**

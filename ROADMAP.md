@@ -579,7 +579,11 @@ question/menu reducer and renderer with source-relative clocks. Gate 2
 remains open because the source-to-trace audit identifies four unique swap-YES
 remainders outside the accepted ONIX→GROVYLE route: SUMMARY return, quit
 prompt/exit/returns, enemy `PKMN FOR SWAP` return, and duplicate-species
-rejection. These require short staged OFF windows, not further Battle-2 turns.
+rejection. A committed staged OFF fixture now pins player-B quit acceptance,
+prompt readiness, default-YES no-mutation exit, and NO/B return; its live
+presentation is still unimplemented, and enemy-only button-slide timing
+remains bounded. These require short staged OFF windows, not further Battle-2
+turns.
 The parallel Scene-ON adapter
 now proves FIRE PUNCH in both orientations (**225/225** and **277/277**) and
 its canonical residual windows (**236/236** and **200/200**), making it
@@ -589,8 +593,9 @@ its canonical residual windows (**236/236** and **200/200**), making it
 sides (**141/141**) and canonical (**237/237**) and is `exact`; FAINT ATTACK
 is portable and canonical (**221/221**) but remains `partial` for its
 separately parked residual. ICE PUNCH is now `partial` with its source-composed
-opening and inward crystal spiral **63/63 exact**; the semi-transparent
-crystal/fist/hitsplat overlap and later body remain explicitly bounded.
+opening and complete inward crystal spiral **73/73 exact**, including the
+generic semi-transparent OBJ-over-BG composition rule and final OAM state;
+the later `IceCrystalEffectShort` body remains explicitly bounded.
 Level 50 animation coverage is therefore **4 exact / 9 partial / 263
 unsupported**. S8 remains `[~]`.
 

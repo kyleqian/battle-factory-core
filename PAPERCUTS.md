@@ -14,6 +14,16 @@ Per entry:
 - **Cost each:** rough minutes lost per hit.
 - **Workaround:** the current dodge, if any.
 
+## Terminal staged compare omitted the accepted endpoint frame
+
+- **What:** the seventh-win continuation probe stopped its raw-RGB capture at
+  +4423 while the fixture requested +4424, then the comparator reran the
+  expensive mGBA probe during each renderer iteration.
+- **Hits:** 1.
+- **Cost each:** ~3 min.
+- **Workaround:** include the accepted endpoint in the staged capture range
+  and reuse one fresh probe artifact while iterating on app-side rendering.
+
 ## Default Python lacks the mGBA probe dependencies
 
 - **What:** invoking a fresh mGBA probe with the shell's default `python3`
