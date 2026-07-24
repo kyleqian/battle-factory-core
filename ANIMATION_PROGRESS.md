@@ -38,18 +38,19 @@ remainder.
 
 ## Current handoff
 
-- **State:** **5 exact / 8 partial / 263 unsupported**. ICE PUNCH is exact:
-  both attacker sides now cover complete dense move/controller windows through
-  a stable next action menu.
-- **Did:** reused the existing source-proved Sitrus presentation as a relative
-  component behind the Scene-ON seam: three rotation cycles, granting stars,
-  tint/ring, heal printer, controller-supplied HP display climb, blank hold,
-  and generic action-menu bounce. Battle outcome, item result, HP endpoints,
-  status, current move, RNG, and action selection remain fixture inputs.
-- **Evidence:** `ice-punch-grovyle-onix.json` is **1294/1294 exact** at
-  oracle frames 1966-3259 / ages 0-1293. The +446 continuation covers the
-  full skipped-move handoff, immutable 31→61 display, menu redraw at age 1195,
-  and 99-frame settled bounce. Opposite ICE PUNCH **462/462** and FIRE PUNCH
-  **225/225** remain exact. Tier-1 pins relative clocks and input immutability.
-- **Next:** supervisor choose another bounded Level-50 move/component track.
-  THUNDER PUNCH remains unsupported without its own dense evidence.
+- **State:** **5 exact / 8 partial / 263 unsupported**. FEATHER DANCE remains
+  honest partial, now with a portable staged move-script body.
+- **Did:** staged real Level-50 PIDGEOTTO→ONIX through mechanicLab and wired
+  `ANIM_TAG_WHITE_FEATHER`/`gFallingFeatherSpriteTemplate` behind the relative
+  Scene-ON seam. Tier-1 pins spawn cadence, affine/lifetime clocks, explicit
+  target geometry, and immutable 6→4 controller stat-stage inputs.
+- **Evidence:** `feather-dance-pidgeotto-onix.json` is **209/209 exact** at
+  oracle frames 46-254 / ages 7-215: complete kickoff printer, all eight
+  feathers through teardown, and two controller-handoff hold frames. ICE
+  PUNCH **1294/1294 + 462/462** and FIRE PUNCH **225/225** remain exact.
+- **Next:** first remainder is oracle frame **255** / age **216**, the
+  stat-drop controller/banner/message continuation through a stable menu.
+  Opposite target-side geometry is required by source (`GetBattlerSide` on
+  `gBattleAnimTarget`). MIST BALL only loads the white-feather asset; its
+  projectile uses `gMistBallSpriteTemplate`/`ANIM_TAG_SMALL_BUBBLES`, so it
+  remains an independent unsupported move.

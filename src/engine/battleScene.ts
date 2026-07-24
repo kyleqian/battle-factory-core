@@ -568,6 +568,7 @@ import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnEndeavorView,
+  sceneOnFeatherDanceView,
   sceneOnFaintAttackView,
   sceneOnFirePunchView,
   sceneOnIcePunchView,
@@ -945,14 +946,15 @@ const onixPlayerHealthboxContentByState = new Map<
 function onixPlayerHealthboxContentForState(
   hp: number,
   status: "none" | "burn" | "freeze",
+  gender: "male" | "female" = ONIX_MENU_BATTLER.gender,
 ): ReturnType<typeof composePlayerHealthbox> {
-  const key = `${hp}:${status}`;
+  const key = `${hp}:${status}:${gender}`;
   let cached = onixPlayerHealthboxContentByState.get(key);
   if (!cached) {
     cached = composePlayerHealthbox(playerHealthboxAssets, {
       name: ONIX_MENU_BATTLER.name,
       level: ONIX_MENU_BATTLER.level,
-      gender: ONIX_MENU_BATTLER.gender,
+      gender,
       hpFraction: hp / ONIX_MENU_BATTLER.maxHP,
       status,
       currentHp: hp,
@@ -8101,7 +8103,15 @@ export function turn6FeatherDanceTextVisibleChars(t: number, pressTick: number):
  * this leaves open).
  */
 function drawTurn6FeatherSprites(fb: Uint8Array, t: number, wantBehindOnix: boolean, lookup: (t: number) => FeatherRenderSprite[] = turn6FeatherSprites): void {
-  const sprites = lookup(t)
+  drawFeatherSpriteList(fb, lookup(t), wantBehindOnix);
+}
+
+function drawFeatherSpriteList(
+  fb: Uint8Array,
+  source: readonly FeatherRenderSprite[],
+  wantBehindOnix: boolean,
+): void {
+  const sprites = source
     .filter((s) => (s.priority >= FEATHER_BASE_PRIORITY_CUTOFF) === wantBehindOnix)
     .sort(compareFeatherDrawOrder);
   for (const s of sprites) {
@@ -13789,6 +13799,72 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "FEATHER_DANCE") {
+    const view = sceneOnFeatherDanceView(state);
+    const { attacker, target } = view;
+    if (
+      attacker.species !== "PIDGEOTTO"
+      || attacker.geometry.side !== "opponent"
+      || target.species !== "ONIX"
+      || target.geometry.side !== "player"
+    ) {
+      throw new Error(
+        `unsupported staged FEATHER_DANCE pair ${attacker.species}->${target.species}`,
+      );
+    }
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      pidgeottoFrontSprite.tileset,
+      pidgeottoFrontSprite.palette,
+      attacker.geometry.spriteCorner.x,
+      attacker.geometry.spriteCorner.y,
+    );
+    drawFeatherSpriteList(fb, view.feathers, true);
+    drawSpriteSheet(
+      fb,
+      onixBackSprite.tileset,
+      onixBackSprite.palette,
+      target.geometry.spriteCorner.x,
+      target.geometry.spriteCorner.y,
+    );
+    drawFeatherSpriteList(fb, view.feathers, false);
+    drawSendOutHealthbox(
+      fb,
+      0,
+      pidgeottoHealthboxContentForHp(state.config.fieldProfile.opponentHp),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      onixPlayerHealthboxContentForState(
+        state.config.fieldProfile.playerHp,
+        state.config.fieldProfile.playerStatus,
+        state.config.fieldProfile.playerGender,
+      ),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    const line1 = `Foe ${attacker.species} used`;
+    const line2 = "FEATHERDANCE!";
+    drawMessageTextLines(
+      fb,
+      line1,
+      line2,
+      Math.max(
+        0,
+        Math.min(
+          line1.length + line2.length,
+          view.age - state.config.moveTextStartAge + 1,
+        ),
+      ),
+    );
+    return;
+  }
+
   if (state.config.move === "ICE_PUNCH") {
     const view = sceneOnIcePunchView(state);
     const { attacker, target, overlay } = view;
