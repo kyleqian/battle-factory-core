@@ -11,6 +11,7 @@
     "compare": "node --experimental-strip-types tools/compare/run.ts",
     "animation:coverage": "node --experimental-strip-types tools/animation/report.ts",
     "animation:components": "node --experimental-strip-types tools/extract/extract-battle-animation-components.ts",
+    "extract:level50-move-parameterization": "node --experimental-strip-types tools/extract/extract-level50-move-parameterization.ts",
     "extract:frontier-trainers": "node --experimental-strip-types tools/extract/extract-battle-frontier-trainers.ts",
     "extract:facility-class-lookups": "node --experimental-strip-types tools/extract/extract-facility-class-lookups.ts",
     "compare:fire-punch-portable": "node --experimental-strip-types tools/compare/firePunchPortable.ts",
