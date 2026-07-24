@@ -65,6 +65,7 @@ function handlers(
     isControllerIdle: onIdle,
     prepareMessage: () => null,
     prepareSelectionMessage,
+    prepareSelectionMessageFromTable: () => null,
     resolveHalfwordOperand: () => null,
   }));
 }
@@ -365,7 +366,7 @@ describe("source-exact B_SCR_OP_PRINTSELECTIONSTRING", () => {
     expect(preparationCalls).toBe(0);
   });
 
-  it("replays deterministically with scheduler/rules/RNG isolation and leaves opcode 20 unsupported", () => {
+  it("replays deterministically with scheduler/rules/RNG isolation while preserving opcode 17 semantics", () => {
     const makeResult = () => stepBattleScriptMachine(
       program,
       stateAt(),
@@ -378,9 +379,9 @@ describe("source-exact B_SCR_OP_PRINTSELECTIONSTRING", () => {
     expect(makeResult()).toEqual(makeResult());
     const sourceHandlers = handlers(() => null);
     expect(Object.keys(sourceHandlers).map(Number).sort((a, b) => a - b)).toEqual([
-      16, 17, 18, 57, 58, 131,
+      16, 17, 18, 20, 57, 58, 131,
     ]);
-    expect(sourceHandlers[20]).toBeUndefined();
+    expect(sourceHandlers[17]).toBeDefined();
   });
 
   it("acknowledges only the named pending battler, idempotently, without clearing MSG_DISPLAY", () => {

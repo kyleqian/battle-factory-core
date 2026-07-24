@@ -46,7 +46,7 @@ export type BattleScriptHaltReason =
     opcodeId: number;
     opcodeName: string;
     operandExpression: string;
-    expected: "none" | "u8" | "u16";
+    expected: "none" | "u8" | "u16" | "u16-table-pointer";
     received: string;
   }>
   | Readonly<{
@@ -125,6 +125,7 @@ export type BattleScriptBlockReason =
     port:
       | "prepare-message"
       | "prepare-selection-message"
+      | "prepare-selection-message-from-table"
       | "resolve-byte"
       | "resolve-halfword";
     operandExpression: string;

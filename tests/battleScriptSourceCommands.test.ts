@@ -123,6 +123,7 @@ function sourceHandlers(
     isControllerIdle: () => idle,
     prepareMessage,
     prepareSelectionMessage,
+    prepareSelectionMessageFromTable: () => null,
     resolveHalfwordOperand,
   }));
 }
@@ -334,11 +335,12 @@ describe("source-mapped Battle Script scheduler commands", () => {
     }));
   });
 
-  it("composes exactly the six scheduler commands with the five existing controls", () => {
+  it("composes exactly the seven scheduler commands with the five existing controls", () => {
     expect(Object.keys(sourceHandlers(true)).map(Number).sort((left, right) => left - right)).toEqual([
       16,
       17,
       18,
+      20,
       57,
       58,
       131,
@@ -347,6 +349,7 @@ describe("source-mapped Battle Script scheduler commands", () => {
       16,
       17,
       18,
+      20,
       40,
       57,
       58,

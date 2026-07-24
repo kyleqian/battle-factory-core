@@ -52,10 +52,17 @@ export type BattleScriptSelectionMessagePreparationPort<RulesContext extends obj
   stringIdOperand: BattleScriptOperand,
 ) => BattleScriptSelectionMessagePreparation | null;
 
+/** Resolves a source u16-table pointer plus MULTISTRING_CHOOSER. */
+export type BattleScriptSelectionMessageFromTablePreparationPort<RulesContext extends object> = (
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  stringTablePointerOperand: BattleScriptOperand,
+) => BattleScriptSelectionMessagePreparation | null;
+
 export type BattleScriptSourceCommandPorts<RulesContext extends object> = Readonly<{
   isControllerIdle: BattleScriptControllerIdlePort<RulesContext>;
   prepareMessage: BattleScriptMessagePreparationPort<RulesContext>;
   prepareSelectionMessage: BattleScriptSelectionMessagePreparationPort<RulesContext>;
+  prepareSelectionMessageFromTable: BattleScriptSelectionMessageFromTablePreparationPort<RulesContext>;
   resolveHalfwordOperand: BattleScriptHalfwordResolverPort<RulesContext>;
 }>;
 
@@ -123,9 +130,24 @@ function unavailableSelectionMessageReason<RulesContext extends object>(
   });
 }
 
+function unavailableSelectionMessageFromTableReason<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  operand: BattleScriptOperand,
+): BattleScriptBlockReason {
+  return Object.freeze({
+    kind: "source-context-unavailable",
+    programCounter: context.state.programCounter,
+    opcodeId: context.instruction.opcodeId,
+    opcodeName: context.instruction.opcodeName,
+    port: "prepare-selection-message-from-table",
+    operandExpression: operand.expression,
+  });
+}
+
 function invalidSourceOperandReason<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operandExpression: string,
+  expected: "u16" | "u16-table-pointer",
   received: string,
 ): BattleScriptHaltReason {
   return Object.freeze({
@@ -134,7 +156,7 @@ function invalidSourceOperandReason<RulesContext extends object>(
     opcodeId: context.instruction.opcodeId,
     opcodeName: context.instruction.opcodeName,
     operandExpression,
-    expected: "u16",
+    expected,
     received,
   });
 }
@@ -153,12 +175,13 @@ function haltForInvalidOperand<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
   operandExpression: string,
   received: string,
+  expected: "u16" | "u16-table-pointer" = "u16",
 ): BattleScriptCommandTransition<RulesContext> {
   return transitionBattleScriptCommand(
     context,
     Object.freeze({
       kind: "halt",
-      reason: invalidSourceOperandReason(context, operandExpression, received),
+      reason: invalidSourceOperandReason(context, operandExpression, expected, received),
     }),
   );
 }
@@ -204,6 +227,28 @@ function haltForInvalidSnapshot<RulesContext extends object>(
 type HalfwordOperandResult<RulesContext extends object> =
   | Readonly<{ kind: "operand"; operand: BattleScriptOperand }>
   | Readonly<{ kind: "transition"; transition: BattleScriptCommandTransition<RulesContext> }>;
+
+type PointerOperandResult<RulesContext extends object> =
+  | Readonly<{ kind: "operand"; operand: BattleScriptOperand }>
+  | Readonly<{ kind: "transition"; transition: BattleScriptCommandTransition<RulesContext> }>;
+
+function requireSingleU16TablePointerOperand<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+): PointerOperandResult<RulesContext> {
+  const [operand] = context.instruction.operands;
+  if (!operand || operand.widthBytes !== 4 || context.instruction.operands.length !== 1) {
+    return Object.freeze({
+      kind: "transition",
+      transition: haltForInvalidOperand(
+        context,
+        operand?.expression ?? "<missing>",
+        `${context.instruction.operands.length} operands; width ${operand?.widthBytes ?? "<missing>"}`,
+        "u16-table-pointer",
+      ),
+    });
+  }
+  return Object.freeze({ kind: "operand", operand });
+}
 
 function requireSingleHalfwordOperand<RulesContext extends object>(
   context: BattleScriptOpcodeHandlerContext<RulesContext>,
@@ -285,10 +330,61 @@ function schedulerWith<RulesContext extends object>(
   });
 }
 
+function emitPreparedSelectionMessage<RulesContext extends object>(
+  context: BattleScriptOpcodeHandlerContext<RulesContext>,
+  sourceOperand: BattleScriptOperand,
+  preparation: BattleScriptSelectionMessagePreparation,
+): BattleScriptCommandTransition<RulesContext> {
+  if (
+    !Number.isSafeInteger(preparation.stringId)
+    || preparation.stringId < 0
+    || preparation.stringId > 0xffff
+  ) {
+    return haltForInvalidOperand(
+      context,
+      sourceOperand.expression,
+      String(preparation.stringId),
+    );
+  }
+  if (!isBattleScriptBattlerId(preparation.attacker)) {
+    return haltForInvalidBattler(context, preparation.attacker);
+  }
+
+  let snapshot: BattleScriptSelectionMessageSnapshot;
+  try {
+    snapshot = createBattleScriptSelectionMessageSnapshot(preparation.snapshot);
+  } catch (error) {
+    return haltForInvalidSnapshot(context, error);
+  }
+  const scheduler = markBattleScriptControllerPending(
+    schedulerWith(context, {
+      messageDisplayActive: true,
+      activeBattler: preparation.attacker,
+    }),
+    preparation.attacker,
+  );
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    {
+      scheduler,
+      events: Object.freeze([
+        Object.freeze({
+          kind: "selection-message",
+          audience: "player-only",
+          battler: preparation.attacker,
+          stringId: preparation.stringId,
+          snapshot,
+        }),
+      ]),
+    },
+  );
+}
+
 /**
  * First source-mapped scheduler family:
  * Cmd_nop, Cmd_waitstate, Cmd_printstring, Cmd_printselectionstring,
- * Cmd_waitmessage, and Cmd_pause.
+ * Cmd_printselectionstringfromtable, Cmd_waitmessage, and Cmd_pause.
  *
  * Controller readiness, source-context string preparation, and exact u16
  * operand resolution are injected logical ports. MSG_DISPLAY and the shared
@@ -340,50 +436,25 @@ export function createBattleScriptSourceCommandHandlers<RulesContext extends obj
         unavailableSelectionMessageReason(context, required.operand),
       );
     }
-    if (
-      !Number.isSafeInteger(preparation.stringId)
-      || preparation.stringId < 0
-      || preparation.stringId > 0xffff
-    ) {
-      return haltForInvalidOperand(
+    return emitPreparedSelectionMessage(context, required.operand, preparation);
+  });
+  installHandler(program, handlers, "B_SCR_OP_PRINTSELECTIONSTRINGFROMTABLE", (context) => {
+    if (!ports.isControllerIdle(context)) {
+      return blockBattleScriptCommand(context, controllerBusyReason(context));
+    }
+    const required = requireSingleU16TablePointerOperand(context);
+    if (required.kind === "transition") return required.transition;
+    const preparation = ports.prepareSelectionMessageFromTable(
+      context,
+      required.operand,
+    );
+    if (preparation === null) {
+      return blockBattleScriptCommand(
         context,
-        required.operand.expression,
-        String(preparation.stringId),
+        unavailableSelectionMessageFromTableReason(context, required.operand),
       );
     }
-    if (!isBattleScriptBattlerId(preparation.attacker)) {
-      return haltForInvalidBattler(context, preparation.attacker);
-    }
-
-    let snapshot: BattleScriptSelectionMessageSnapshot;
-    try {
-      snapshot = createBattleScriptSelectionMessageSnapshot(preparation.snapshot);
-    } catch (error) {
-      return haltForInvalidSnapshot(context, error);
-    }
-    const scheduler = markBattleScriptControllerPending(
-      schedulerWith(context, {
-        messageDisplayActive: true,
-        activeBattler: preparation.attacker,
-      }),
-      preparation.attacker,
-    );
-    return transitionBattleScriptCommand(
-      context,
-      Object.freeze({ kind: "advance" }),
-      {
-        scheduler,
-        events: Object.freeze([
-          Object.freeze({
-            kind: "selection-message",
-            audience: "player-only",
-            battler: preparation.attacker,
-            stringId: preparation.stringId,
-            snapshot,
-          }),
-        ]),
-      },
-    );
+    return emitPreparedSelectionMessage(context, required.operand, preparation);
   });
   installHandler(program, handlers, "B_SCR_OP_WAITMESSAGE", (context) => {
     if (!ports.isControllerIdle(context)) {
