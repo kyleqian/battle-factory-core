@@ -4,6 +4,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 348 — S9 OFF summary page-navigation install: **GREEN CHECKPOINT — 3/3 exact**
+
+- **State:** the generic Info↔Skills page reducer owns direction, destination,
+  source-relative scroll clock, slot preservation, and in-flight input
+  rejection. Full Skills/wipe pixel acceptance remains open.
+- **Did:** added the 10-tick page-transition state, RIGHT/LEFT/B gates, page
+  ownership, a source-data Skills compositor, and source-extracted second
+  front-pic frames. `summary-page-transition-install.json` pins accepted
+  RIGHT plus rejected in-flight B at **3/3 exact**.
+- **Next:** compose elapsed +3..+9 as scrolling BG1/BG2 over fixed BG3/OBJ,
+  then align pagination, EXP bar, Skills text geometry, and ONIX animation;
+  current settled frame 116 is **3,662 px** different. Add dense full
+  RIGHT→Skills→LEFT acceptance only when all frames are exact.
+- **Notes:** Info regressions **122/122 + 132/132 exact**. Tier-1
+  **1273/1273** and build green. No absolute ticks, framebuffer assets,
+  runtime oracle/ROM, battle/controller edits, or ROADMAP/ISSUES changes.
+
+---
 ## 347 — S8 OFF duplicate-species composition: **GREEN — 52/52 exact**
 
 - **State:** the final enumerated swap-YES UI remainder is exact across the
@@ -35,21 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **4,982 px**, +51 **2,001 px**. Integrated Tier-1 **1267/1267**, build
   **5.677 MB**; ICE PUNCH **363/363**, FIRE PUNCH **225/225**. No framebuffer
   assets, RGB fitting, absolute ticks, runtime oracle/ROM, or logic mutation.
-
----
-## 345 — S8 OFF duplicate-species rejection: **GREEN LOGIC CHECKPOINT**
-
-- **State:** the live generic swap seam now takes the source duplicate-species
-  branch, owns its exact fixture-relative input gates, closes the error, and
-  reconstructs an input-gated enemy picker. S8 stays open pending dense pixel
-  verification of this staged-only branch.
-- **Did:** added direct OpenMonPic/error/close/restore phases, +24 message
-  A/B readiness, +23 picker reconstruction, install-frame rejection, and
-  first fresh input. Tier-1 pins immutable player/enemy/rentals/result,
-  absent copy/round semantics, and source-relative picture ownership.
-- **Next:** compare the live rendered +0..+49 staged window against the
-  fixture/probe framebuffer hashes, correct any presentation offsets, and
-  commit the dense deterministic verifier/trace before closing S8.
-- **Notes:** Tier-1 **1267/1267**, build **5.677 MB**; existing enemy accept
-  prompt **66/66 exact**. No absolute ticks, framebuffer assets, mutation,
-  round ownership, or selection RNG.

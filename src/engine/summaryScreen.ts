@@ -32,16 +32,16 @@ export interface SummaryPageTransition {
   readonly fromPage: SummaryPage;
   readonly toPage: SummaryPage;
   readonly direction: SummaryPageDirection;
-  /** Source-relative clock: 0 is the accepted input tick, 11 is settled. */
+  /** Source-relative clock: 0 is the accepted input tick, 10 is settled. */
   readonly elapsed: number;
 }
 
 /**
  * Task_HandleInput -> ChangePage -> PssScroll{Right,Left} observed clock.
  * The task handoff/window clear becomes visible at +4; seven 32px scroll
- * steps follow and the destination owns input at +11.
+ * steps follow and the destination owns input at +10.
  */
-export const SUMMARY_PAGE_TRANSITION_TICKS = 11;
+export const SUMMARY_PAGE_TRANSITION_TICKS = 10;
 
 export interface SummaryTransition {
   direction: "toSummary" | "toDraft";
@@ -59,6 +59,8 @@ export interface SummaryScreenState {
   onInfoPage: boolean;
   /** Non-null while ChangePage's input handler is replaced by a scroll task. */
   pageTransition: SummaryPageTransition | null;
+  /** Ticks since the entry fade settled; presentation-only, page changes do not reset it. */
+  openElapsed: number;
   /** SELECTABLE_MONS_COUNT - 1 = 5 max; the draft cursor slot the summary opened on / is currently viewing. */
   selectedSlot: number;
   page: SummaryPage;
@@ -73,6 +75,7 @@ export const CLOSED_SUMMARY_SCREEN_STATE: SummaryScreenState = {
   isOpen: false,
   onInfoPage: false,
   pageTransition: null,
+  openElapsed: 0,
   selectedSlot: 0,
   page: "info",
   mode: "SUMMARY_MODE_LOCK_MOVES",
@@ -100,6 +103,7 @@ export function openSummaryScreen(
     isOpen: false,
     onInfoPage: false,
     pageTransition: null,
+    openElapsed: 0,
     selectedSlot: cursorPos,
     page: "info",
     mode: options.mode ?? "SUMMARY_MODE_LOCK_MOVES",
@@ -153,15 +157,17 @@ export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenSt
         pageTransition: null,
         isOpen: true,
         onInfoPage: state.page === "info",
+        openElapsed: state.openElapsed + 1,
       };
     }
     return {
       ...state,
       pageTransition: { ...state.pageTransition, elapsed },
+      openElapsed: state.openElapsed + 1,
     };
   }
   const t = state.transition;
-  if (!t) return state;
+  if (!t) return state.isOpen ? { ...state, openElapsed: state.openElapsed + 1 } : state;
   const elapsed = t.elapsed + 1;
 
   if (t.phase === "fadingOut") {

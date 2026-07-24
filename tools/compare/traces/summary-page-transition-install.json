@@ -1,0 +1,12 @@
+{
+  "oracleProfile": "battle-scene-off",
+  "segments": [
+    { "frames": 2, "buttons": ["A"] },
+    { "frames": 40, "buttons": [] },
+    { "frames": 2, "buttons": ["A"] },
+    { "frames": 61, "buttons": [] },
+    { "frames": 1, "buttons": ["RIGHT"] },
+    { "frames": 2, "buttons": ["B"] }
+  ],
+  "captureFrames": [106, 107, 108]
+}

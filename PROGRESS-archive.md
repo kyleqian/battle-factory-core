@@ -13106,3 +13106,24 @@ in git history immediately before corrective commits `d5ac217` and `9942a8d`.
 - **Notes:** `tools/test-codex-git-attribution.sh` proves exact replacement,
   unknown fallback, and an untouched Claude commit. Shell syntax, resolved
   launcher configs, Codex deadline tests (**3/3**), Tier-1, and build pass.
+
+---
+
+## 345 — S8 OFF duplicate-species rejection: **GREEN LOGIC CHECKPOINT**
+
+- **State:** the live generic swap seam now takes the source duplicate-species
+  branch, owns its exact fixture-relative input gates, closes the error, and
+  reconstructs an input-gated enemy picker. S8 stays open pending dense pixel
+  verification of this staged-only branch.
+- **Did:** added direct OpenMonPic/error/close/restore phases, +24 message
+  A/B readiness, +23 picker reconstruction, install-frame rejection, and
+  first fresh input. Tier-1 pins immutable player/enemy/rentals/result,
+  absent copy/round semantics, and source-relative picture ownership.
+- **Next:** compare the live rendered +0..+49 staged window against the
+  fixture/probe framebuffer hashes, correct any presentation offsets, and
+  commit the dense deterministic verifier/trace before closing S8.
+- **Notes:** Tier-1 **1267/1267**, build **5.677 MB**; existing enemy accept
+  prompt **66/66 exact**. No absolute ticks, framebuffer assets, mutation,
+  round ownership, or selection RNG.
+
+---

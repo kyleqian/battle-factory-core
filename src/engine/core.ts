@@ -55,7 +55,12 @@ import {
   requestSummaryPageChange,
   type SummaryScreenState,
 } from "./summaryScreen.ts";
-import { renderSummaryInfoPage, renderSummaryInfoPageFaded } from "./summaryInfoPage.ts";
+import {
+  renderSummaryInfoPage,
+  renderSummaryInfoPageCleared,
+  renderSummaryInfoPageFaded,
+  renderSummarySkillsPage,
+} from "./summaryInfoPage.ts";
 import {
   advancePrebattleRoom,
   INITIAL_PREBATTLE_ROOM_STATE,
@@ -2030,7 +2035,19 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   const summary = state.summaryScreen;
   const t = summary.transition;
   if (!t) {
-    return summary.isOpen ? renderSummaryInfoPage(summary.selectedSlot) : renderFactoryDraftScreen(state.draftScreen);
+    if (summary.pageTransition && summary.pageTransition.elapsed <= 2) {
+      // ChangePage's task handoff is installed immediately but its outgoing
+      // window clear is not visible until elapsed=3. The persistent mon
+      // callback does continue through this install/rejection window.
+      return summary.pageTransition.elapsed === 0
+        ? renderSummaryInfoPage(summary.selectedSlot, summary.openElapsed + 1)
+        : renderSummaryInfoPageCleared(summary.selectedSlot, summary.openElapsed + 1);
+    }
+    return summary.isOpen
+      ? summary.page === "skills"
+        ? renderSummarySkillsPage(summary.selectedSlot, summary.openElapsed + 1)
+        : renderSummaryInfoPage(summary.selectedSlot, summary.openElapsed + 1)
+      : renderFactoryDraftScreen(state.draftScreen);
   }
   const isEntry = t.direction === "toSummary";
   if (t.phase === "black") {

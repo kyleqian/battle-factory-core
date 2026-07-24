@@ -40,7 +40,11 @@ const ANCHOR_SPECIES: Record<string, string> = {
   QUILAVA: "quilava",
 };
 
-const sprites: Record<string, { tileset: { columns: number; rows: number; tiles: number[][] }; palette: { r: number; g: number; b: number }[] }> = {};
+const sprites: Record<string, {
+  tileset: { columns: number; rows: number; tiles: number[][] };
+  animationFrame1: { columns: number; rows: number; tiles: number[][] };
+  palette: { r: number; g: number; b: number }[];
+}> = {};
 
 for (const [species, dir] of Object.entries(ANCHOR_SPECIES)) {
   const speciesDir = join(REF, "graphics", "pokemon", dir);
@@ -49,9 +53,24 @@ for (const [species, dir] of Object.entries(ANCHOR_SPECIES)) {
     throw new Error(`${species}: expected a 64x64 front pic, got ${frontImage.width}x${frontImage.height}`);
   }
   const { columns, rows, tiles } = sliceTiles(frontImage);
+  const animationImage = decodeIndexedPng(join(speciesDir, "anim_front.png"));
+  if (animationImage.width !== 64 || animationImage.height !== 128) {
+    throw new Error(`${species}: expected a 64x128 anim front pic, got ${animationImage.width}x${animationImage.height}`);
+  }
+  const frame1Image = {
+    ...animationImage,
+    height: 64,
+    indices: animationImage.indices.slice(64 * 64),
+  };
+  const animationFrame1 = sliceTiles(frame1Image);
   const palette = loadJascPal(join(speciesDir, "normal.pal"));
   sprites[species] = {
     tileset: { columns, rows, tiles: tiles.map((t) => [...t.pixels]) },
+    animationFrame1: {
+      columns: animationFrame1.columns,
+      rows: animationFrame1.rows,
+      tiles: animationFrame1.tiles.map((t) => [...t.pixels]),
+    },
     palette,
   };
 }

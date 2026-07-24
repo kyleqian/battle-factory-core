@@ -103,11 +103,11 @@ describe("summaryScreen: generic page navigation", () => {
     });
   });
 
-  it("settles RIGHT and LEFT on the same source-relative 11-tick scroll clock", () => {
+  it("settles RIGHT and LEFT on the same source-relative 10-tick scroll clock", () => {
     const right = requestSummaryPageChange(settled(2), "right");
     expect(run(right, SUMMARY_PAGE_TRANSITION_TICKS - 1).pageTransition).toMatchObject({
       direction: "right",
-      elapsed: 10,
+      elapsed: 9,
     });
     const skills = run(right, SUMMARY_PAGE_TRANSITION_TICKS);
     expect(skills.pageTransition).toBeNull();
