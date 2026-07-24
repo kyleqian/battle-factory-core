@@ -7,9 +7,9 @@
   "move": "EXTREME_SPEED",
   "orientation": "opponent-to-player",
   "appStage": {"oracleFrame": 91, "presentationAge": 52},
-  "denseWindow": {"startFrame": 91, "endFrame": 135},
+  "denseWindow": {"startFrame": 91, "endFrame": 136},
   "acceptance": {
     "status": "partial",
-    "scope": "dense fade/background and attacker affine disappearance through animation age 96; contact/dust/reappearance, and restore remain"
+    "scope": "dense fade/background and complete attacker affine disappearance through animation age 97; contact/dust/reappearance, and restore remain"
   }
 }

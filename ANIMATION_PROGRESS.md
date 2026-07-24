@@ -45,19 +45,19 @@ remainder.
 ## Current handoff
 
 - **State:** **14 exact / 2 partial / 260 unsupported**. EXTREME SPEED is an
-  honest two-orientation partial through terminal attacker affine age 96;
+  honest two-orientation partial through complete attacker affine age 97;
   QUICK ATTACK and AERIAL ACE remain exact.
 - **Did:** extended EXTREME SPEED through its source affine-double attacker
   stretch behind the shared Scene-ON seam. The pure reducer uses command
   `(96,-13,0,8)` and pret's `SetBattlerSpriteYOffsetFromYScale` formula with
   source Arcanine front/back y-offsets **2/6**, not a fitted geometry table.
-- **Evidence:** opponent-front frames **91–135** and player-back frames
-  **87–131** are dense and exact at **45/45 + 45/45 RGB**, covering the
-  background phases and every visible affine frame through age 96. Both full
+- **Evidence:** opponent-front frames **91–136** and player-back frames
+  **87–132** are dense and exact at **46/46 + 46/46 RGB**, covering the
+  background phases and all eight visible affine steps through age 97. Both full
   QUICK ATTACK controls remain **219/219 + 214/214** with immutable 117→111
   endpoints. Tier-1 pins affine epochs, matrices, front/back y2, terminal
   visibility, side selection, and immutability.
-- **Next:** after EXTREME SPEED age 96, prove the hidden-attacker hold, three
+- **Next:** after EXTREME SPEED age 97, prove the hidden-attacker hold, three
   edge impacts, 24 dust spawns, blink reappearance, restore fade, and script
   cleanup in both complete move-owned windows at 0 RGB diff. Generic hit,
   HP/result/status, and controller tails remain separately owned.

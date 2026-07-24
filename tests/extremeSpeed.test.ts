@@ -100,7 +100,10 @@ describe("Extreme Speed source reducers", () => {
     expect(extremeSpeedAttackerAffineAtAge(96, 2)).toEqual({
       xScale: 928, yScale: 165, invisible: false, y2: -16,
     });
-    expect(extremeSpeedAttackerAffineAtAge(97).invisible).toBe(true);
+    expect(extremeSpeedAttackerAffineAtAge(97, 6)).toEqual({
+      xScale: 1024, yScale: 152, invisible: false, y2: -17,
+    });
+    expect(extremeSpeedAttackerAffineAtAge(98).invisible).toBe(true);
     expect(extremeSpeedAttackerAffineAtAge(87)).toEqual(before);
   });
 
