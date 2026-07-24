@@ -11,6 +11,8 @@ export interface QuickAttackAnimationState {
   readonly attackerOffset: QuickAttackOffset;
   readonly afterimages: readonly QuickAttackAfterimage[];
   readonly targetShakeX2: number;
+  /** Side-specific live battler x2 reset performed as the impact begins. */
+  readonly targetBaseX2: number;
   readonly impactVisible: boolean;
 }
 
@@ -59,6 +61,8 @@ export function quickAttackTravelAtAge(
 /**
  * Source `AnimTask_TraceMonBlended(0,4,7,3)`: four clones are created, but
  * the allocator reuses two slots across the two separated slot-3 lives.
+ * The accepted player-side prefix currently ends before these BG/OBJ lives;
+ * do not infer opposite-side clone acceptance from this opponent-side table.
  */
 export function quickAttackAfterimagesAtAge(
   age: number,
@@ -101,6 +105,10 @@ export function quickAttackAnimationAtAge(
     attackerOffset: quickAttackTravelAtAge(age, attackerSide),
     afterimages: quickAttackAfterimagesAtAge(age, attackerSide),
     targetShakeX2: TARGET_SHAKE_AGES.has(age) ? 5 : 0,
+    targetBaseX2:
+      attackerSide === "player" && age >= QUICK_ATTACK_IMPACT_FIRST_AGE
+        ? -1
+        : 0,
     impactVisible:
       age >= QUICK_ATTACK_IMPACT_FIRST_AGE
       && age <= QUICK_ATTACK_IMPACT_LAST_AGE,

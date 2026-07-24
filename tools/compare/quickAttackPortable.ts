@@ -6,6 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import {
   createSceneOnMovePresentation,
+  PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_QUICK_ATTACK_PRESENTATION,
   PIDGEOTTO_TO_ONIX_QUICK_ATTACK_PRESENTATION,
   type SceneOnFaintAttackFieldProfile,
 } from "../../src/engine/sceneOnPresentation.ts";
@@ -26,6 +27,7 @@ interface Fixture {
     readonly currentMoveResetAge: number;
   };
   readonly moveTextStartAge: number;
+  readonly orientation?: "opponent-to-player" | "player-to-opponent";
 }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
@@ -60,7 +62,9 @@ let state: EngineState = {
   rngMode: "frontierBattle",
   sceneOnPresentation: createSceneOnMovePresentation({
     move: "QUICK_ATTACK",
-    ...PIDGEOTTO_TO_ONIX_QUICK_ATTACK_PRESENTATION,
+    ...(fixture.orientation === "player-to-opponent"
+      ? PLAYER_PIDGEOTTO_TO_OPPONENT_ONIX_QUICK_ATTACK_PRESENTATION
+      : PIDGEOTTO_TO_ONIX_QUICK_ATTACK_PRESENTATION),
     fieldProfile: fixture.fieldProfile,
     controllerProfile: fixture.controllerProfile,
     moveTextStartAge: fixture.moveTextStartAge,

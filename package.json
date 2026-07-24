@@ -23,7 +23,10 @@
     "compare:factory-swap-duplicate-species": "node --experimental-strip-types tools/compare/factorySwapDuplicateSpecies.ts",
     "compare:endeavor-portable": "node --experimental-strip-types tools/compare/endeavorPortable.ts",
     "compare:feather-dance-portable": "node --experimental-strip-types tools/compare/featherDancePortable.ts",
-    "compare:feather-dance-opposite": "node --experimental-strip-types tools/compare/featherDancePortable.ts tools/compare/fixtures/feather-dance-player-pidgeotto-onix.json"
+    "compare:feather-dance-opposite": "node --experimental-strip-types tools/compare/featherDancePortable.ts tools/compare/fixtures/feather-dance-player-pidgeotto-onix.json",
+    "compare:quick-attack-portable": "node --experimental-strip-types tools/compare/quickAttackPortable.ts",
+    "compare:quick-attack-opposite": "node --experimental-strip-types tools/compare/quickAttackPortable.ts tools/compare/fixtures/quick-attack-player-pidgeotto-onix.json",
+    "compare:quick-attack-opposite-controller": "node --experimental-strip-types tools/compare/quickAttackPortable.ts tools/compare/fixtures/quick-attack-player-pidgeotto-onix-controller.json"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
