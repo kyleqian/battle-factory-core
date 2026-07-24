@@ -20,13 +20,16 @@
 // Never imported at runtime - the production build only reads its JSON output.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RUN_ROOT = join(HERE, "..", "..");
 const REF = join(RUN_ROOT, "reference", "pokeemerald");
-const DATA_GEN = join(RUN_ROOT, "src", "data", "gen");
+const outDirIndex = process.argv.indexOf("--out-dir");
+const outDir = outDirIndex < 0 ? undefined : process.argv[outDirIndex + 1];
+if (outDirIndex >= 0 && !outDir) throw new Error("--out-dir requires a directory");
+const DATA_GEN = outDir === undefined ? join(RUN_ROOT, "src", "data", "gen") : isAbsolute(outDir) ? outDir : join(RUN_ROOT, outDir);
 
 mkdirSync(DATA_GEN, { recursive: true });
 
